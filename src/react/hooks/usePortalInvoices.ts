@@ -6,7 +6,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { PortalInvoice, PortalInvoiceSummary } from '../features/portal/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
-import { unwrapApiData } from '../../utils/api-client';
+import { unwrapApiData, apiFetch } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
 
 const logger = createLogger('usePortalInvoices');
@@ -29,9 +29,7 @@ interface ApiResponsePayload {
   summary?: PortalInvoiceSummary;
 }
 
-export function usePortalInvoices(options: UsePortalInvoicesOptions = {}): UsePortalInvoicesReturn {
-  const { getAuthToken } = options;
-
+export function usePortalInvoices(_options: UsePortalInvoicesOptions = {}): UsePortalInvoicesReturn {
   const [invoices, setInvoices] = useState<PortalInvoice[]>([]);
   const [summary, setSummary] = useState<PortalInvoiceSummary>({
     totalOutstanding: 0,
@@ -45,19 +43,7 @@ export function usePortalInvoices(options: UsePortalInvoicesOptions = {}): UsePo
     setError(null);
 
     try {
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-      };
-
-      const token = getAuthToken?.();
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(`${API_ENDPOINTS.INVOICES}/me`, {
-        headers,
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.INVOICES}/me`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch invoices');
@@ -78,7 +64,7 @@ export function usePortalInvoices(options: UsePortalInvoicesOptions = {}): UsePo
     } finally {
       setIsLoading(false);
     }
-  }, [getAuthToken]);
+  }, []);
 
   useEffect(() => {
     fetchInvoices();

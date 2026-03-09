@@ -39,6 +39,7 @@ import { WORKFLOW_STATUS_OPTIONS } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { apiPost } from '@/utils/api-client';
 
 const logger = createLogger('WorkflowsTable');
 
@@ -145,17 +146,6 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
   const workflows = useMemo(() => data?.items ?? [], [data]);
   const stats = useMemo(() => data?.stats ?? DEFAULT_STATS, [data]);
 
-  const getHeaders = useCallback((): Record<string, string> => {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    const token = getAuthToken?.();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   const [bulkLoading, setBulkLoading] = useState(false);
 
   const {
@@ -200,12 +190,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
 
   const updateWorkflowStatus = useCallback(async (workflowId: number, newStatus: string) => {
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.WORKFLOWS_BULK_STATUS, {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify({ workflowIds: [workflowId], status: newStatus })
-      });
+      const response = await apiPost(API_ENDPOINTS.ADMIN.WORKFLOWS_BULK_STATUS, { workflowIds: [workflowId], status: newStatus });
       if (!response.ok) throw new Error('Failed to update workflow status');
       setData((prev) =>
         prev ? { ...prev, items: prev.items.map((w) =>
@@ -217,7 +202,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
       logger.error('Failed to update workflow status:', err);
       showNotification?.('Failed to update workflow status', 'error');
     }
-  }, [getHeaders, showNotification, setData]);
+  }, [showNotification, setData]);
 
   const handleBulkStatusChange = useCallback(async (newStatus: string) => {
     if (selection.selectedCount === 0) return;
@@ -225,12 +210,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
     setBulkLoading(true);
     try {
       const workflowIds = Array.from(selection.selectedIds);
-      const response = await fetch(API_ENDPOINTS.ADMIN.WORKFLOWS_BULK_STATUS, {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify({ workflowIds, status: newStatus })
-      });
+      const response = await apiPost(API_ENDPOINTS.ADMIN.WORKFLOWS_BULK_STATUS, { workflowIds, status: newStatus });
       if (!response.ok) throw new Error('Failed to update workflow statuses');
       setData((prev) =>
         prev ? { ...prev, items: prev.items.map((w) =>
@@ -247,7 +227,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
     } finally {
       setBulkLoading(false);
     }
-  }, [selection, getHeaders, showNotification, setData]);
+  }, [selection, showNotification, setData]);
 
   const handleBulkDelete = useCallback(async () => {
     if (selection.selectedCount === 0) return;
@@ -259,12 +239,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
     setBulkLoading(true);
     try {
       const workflowIds = Array.from(selection.selectedIds);
-      const response = await fetch(API_ENDPOINTS.ADMIN.WORKFLOWS_BULK_DELETE, {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify({ workflowIds })
-      });
+      const response = await apiPost(API_ENDPOINTS.ADMIN.WORKFLOWS_BULK_DELETE, { workflowIds });
       if (!response.ok) throw new Error('Failed to delete workflows');
       setData((prev) =>
         prev ? { ...prev, items: prev.items.filter((w) => !selection.selectedIds.has(w.id)) } : prev
@@ -277,7 +252,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
     } finally {
       setBulkLoading(false);
     }
-  }, [selection, getHeaders, showNotification, setData]);
+  }, [selection, showNotification, setData]);
 
   const filterSections = WORKFLOWS_FILTER_CONFIG.map((config) => ({
     key: config.key,

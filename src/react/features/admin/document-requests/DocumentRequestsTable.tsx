@@ -34,6 +34,7 @@ import { useListFetch } from '@react/factories/useDataFetch';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
+import { apiPost, apiFetch } from '@/utils/api-client';
 
 const logger = createLogger('DocumentRequestsTable');
 
@@ -153,18 +154,6 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
   const requests = useMemo(() => data?.items ?? [], [data]);
   const stats = useMemo(() => data?.stats ?? DEFAULT_DOCUMENT_REQUEST_STATS, [data]);
 
-  // Build headers helper for mutation calls
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   // Filtering and sorting
   const {
     filterValues,
@@ -207,10 +196,9 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
   // Status change handler
   const handleStatusChange = useCallback(async (requestId: number, newStatus: string) => {
     try {
-      const response = await fetch(buildEndpoint.documentRequest(requestId), {
+      const response = await apiFetch(buildEndpoint.documentRequest(requestId), {
         method: 'PATCH',
-        headers: getHeaders(),
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
 
@@ -229,7 +217,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
       logger.error('Failed to update request status:', err);
       showNotification?.('Failed to update request status', 'error');
     }
-  }, [getHeaders, showNotification]);
+  }, [showNotification]);
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
@@ -237,12 +225,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
 
     const ids = selection.selectedItems.map((r) => r.id);
     try {
-      const response = await fetch(API_ENDPOINTS.DOCUMENT_REQUESTS_BULK_DELETE, {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify({ ids })
-      });
+      const response = await apiPost(API_ENDPOINTS.DOCUMENT_REQUESTS_BULK_DELETE, { ids });
 
       if (!response.ok) throw new Error('Failed to delete requests');
 
@@ -253,7 +236,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
       logger.error('Failed to delete requests:', err);
       showNotification?.('Failed to delete requests', 'error');
     }
-  }, [selection, getHeaders, showNotification]);
+  }, [selection, showNotification]);
 
   // Status options for bulk actions
   const bulkStatusOptions = useMemo(

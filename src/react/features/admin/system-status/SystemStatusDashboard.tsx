@@ -23,7 +23,7 @@ import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { IconButton } from '@react/factories';
 import { TIMING } from '@/constants/timing';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
+import { unwrapApiData, apiFetch, apiPost } from '@/utils/api-client';
 
 interface ServiceStatus {
   id: string;
@@ -147,25 +147,11 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken, s
   });
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   const loadStatus = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.SYSTEM_STATUS, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiFetch(API_ENDPOINTS.ADMIN.SYSTEM_STATUS);
       if (!response.ok) throw new Error('Failed to load system status');
       const payload = unwrapApiData<Record<string, unknown>>(await response.json());
       setData({
@@ -180,16 +166,12 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken, s
     } finally {
       setIsLoading(false);
     }
-  }, [getHeaders]);
+  }, []);
 
   const handleClearCache = useCallback(async () => {
     setIsClearingCache(true);
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.CACHE_CLEAR, {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiPost(API_ENDPOINTS.ADMIN.CACHE_CLEAR);
       if (!response.ok) throw new Error('Failed to clear cache');
       showNotification?.('Cache cleared successfully', 'success');
     } catch (err) {
@@ -197,16 +179,12 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken, s
     } finally {
       setIsClearingCache(false);
     }
-  }, [getHeaders, showNotification]);
+  }, [showNotification]);
 
   const handleTestEmail = useCallback(async () => {
     setIsSendingTestEmail(true);
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.TEST_EMAIL, {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiPost(API_ENDPOINTS.ADMIN.TEST_EMAIL);
       if (!response.ok) throw new Error('Failed to send test email');
       const payload = unwrapApiData<{ to: string }>(await response.json());
       showNotification?.(`Test email sent to ${payload.to}`, 'success');
@@ -215,7 +193,7 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken, s
     } finally {
       setIsSendingTestEmail(false);
     }
-  }, [getHeaders, showNotification]);
+  }, [showNotification]);
 
   useEffect(() => {
     loadStatus();

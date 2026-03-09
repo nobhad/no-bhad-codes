@@ -12,7 +12,7 @@ import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { useFadeIn } from '@react/hooks/useGsap';
 import type { PortalViewProps } from '../types';
 import { createLogger } from '@/utils/logger';
-import { unwrapApiData } from '@/utils/api-client';
+import { apiFetch, unwrapApiData } from '@/utils/api-client';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 
 const logger = createLogger('PortalPreview');
@@ -43,7 +43,6 @@ const RefreshIcon = getLucideIcon('refresh');
  * Shows an iframe with the first project's preview URL, plus a toolbar for actions.
  */
 export function PortalPreview({
-  getAuthToken,
   showNotification
 }: PortalPreviewProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
@@ -53,32 +52,18 @@ export function PortalPreview({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Stable refs for callback props
-  const getAuthTokenRef = useRef(getAuthToken);
+  // Stable ref for callback prop
   const showNotificationRef = useRef(showNotification);
 
   useEffect(() => {
-    getAuthTokenRef.current = getAuthToken;
     showNotificationRef.current = showNotification;
-  }, [getAuthToken, showNotification]);
+  }, [showNotification]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       abortControllerRef.current?.abort();
     };
-  }, []);
-
-  /** Build authorization headers */
-  const buildHeaders = useCallback((): Record<string, string> => {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    const token = getAuthTokenRef.current?.();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
   }, []);
 
   /** Fetch projects and extract the first preview URL */
@@ -90,10 +75,7 @@ export function PortalPreview({
     setError(null);
 
     try {
-      const response = await fetch(API_ENDPOINTS.PORTAL.PROJECTS, {
-        method: 'GET',
-        headers: buildHeaders(),
-        credentials: 'include',
+      const response = await apiFetch(API_ENDPOINTS.PORTAL.PROJECTS, {
         signal: abortControllerRef.current.signal
       });
 
@@ -126,7 +108,7 @@ export function PortalPreview({
     } finally {
       setIsLoading(false);
     }
-  }, [buildHeaders]);
+  }, []);
 
   // Initial fetch
   useEffect(() => {

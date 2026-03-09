@@ -21,6 +21,7 @@ import { NewRequestForm } from './NewRequestForm';
 import type { AdHocRequest, NewAdHocRequestPayload } from './types';
 import type { PortalViewProps } from '../types';
 import { createLogger } from '@/utils/logger';
+import { getCsrfToken, CSRF_HEADER_NAME } from '@/utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 
 const logger = createLogger('PortalAdHocRequests');
@@ -45,7 +46,6 @@ export function PortalAdHocRequests({
     isLoading,
     error,
     refetch,
-    buildHeaders,
     portalFetch
   } = usePortalData<AdHocRequest[]>({
     getAuthToken,
@@ -106,12 +106,10 @@ export function PortalAdHocRequests({
           formData.append('attachments', file);
         });
 
-        // Don't set Content-Type for FormData - browser will set it with boundary
-        const authHeaders = buildHeaders();
+        // Raw fetch for FormData — add CSRF protection manually
+        const csrfToken = getCsrfToken();
         const requestHeaders: Record<string, string> = {};
-        if (authHeaders['Authorization']) {
-          requestHeaders['Authorization'] = authHeaders['Authorization'];
-        }
+        if (csrfToken) requestHeaders[CSRF_HEADER_NAME] = csrfToken;
 
         const response = await fetch(API_ENDPOINTS.AD_HOC_REQUESTS_MY, {
           method: 'POST',

@@ -41,6 +41,7 @@ import { useListFetch } from '@react/factories/useDataFetch';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
+import { apiPost, apiFetch } from '@/utils/api-client';
 
 const logger = createLogger('DeliverablesTable');
 
@@ -161,18 +162,6 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
   const deliverables = useMemo(() => data?.items ?? [], [data]);
   const stats = useMemo(() => data?.stats ?? DEFAULT_DELIVERABLE_STATS, [data]);
 
-  // Build headers helper for mutation calls
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   // Filtering and sorting
   const {
     filterValues,
@@ -215,10 +204,9 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
   // Status change handler
   const handleStatusChange = useCallback(async (deliverableId: number, newStatus: string) => {
     try {
-      const response = await fetch(buildEndpoint.adminDeliverable(deliverableId), {
+      const response = await apiFetch(buildEndpoint.adminDeliverable(deliverableId), {
         method: 'PATCH',
-        headers: getHeaders(),
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
 
@@ -237,7 +225,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
       logger.error('Failed to update deliverable status:', err);
       showNotification?.('Failed to update deliverable status', 'error');
     }
-  }, [getHeaders, showNotification]);
+  }, [showNotification]);
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
@@ -245,12 +233,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
 
     const ids = selection.selectedItems.map((d) => d.id);
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.DELIVERABLES_BULK_DELETE, {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify({ ids })
-      });
+      const response = await apiPost(API_ENDPOINTS.ADMIN.DELIVERABLES_BULK_DELETE, { ids });
 
       if (!response.ok) throw new Error('Failed to delete deliverables');
 
@@ -261,7 +244,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
       logger.error('Failed to delete deliverables:', err);
       showNotification?.('Failed to delete deliverables', 'error');
     }
-  }, [selection, getHeaders, showNotification]);
+  }, [selection, showNotification]);
 
   // Status options for bulk actions
   const bulkStatusOptions = useMemo(

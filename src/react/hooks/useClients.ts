@@ -43,7 +43,6 @@ interface UseClientsReturn {
  * Hook for fetching and managing clients data
  */
 export function useClients({
-  getAuthToken,
   autoFetch = true
 }: UseClientsOptions = {}): UseClientsReturn {
   const [clients, setClients] = useState<Client[]>([]);

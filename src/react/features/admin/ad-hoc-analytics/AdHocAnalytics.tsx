@@ -34,7 +34,7 @@ import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
+import { unwrapApiData, apiFetch, apiPost, apiDelete } from '@/utils/api-client';
 
 const logger = createLogger('AdHocAnalytics');
 
@@ -70,31 +70,16 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
   const [viewMode, setViewMode] = useState<'table' | 'chart'>('table');
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | 'custom'>('30d');
 
-  // Auth headers helper
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   const loadSavedQueries = useCallback(async () => {
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.AD_HOC_ANALYTICS_QUERIES, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiFetch(API_ENDPOINTS.ADMIN.AD_HOC_ANALYTICS_QUERIES);
       if (!response.ok) throw new Error('Failed to load saved queries');
       const payload = unwrapApiData<Record<string, unknown>>(await response.json());
       setSavedQueries((payload.queries as SavedQuery[]) || []);
     } catch (err) {
       logger.error('Failed to load saved queries:', err);
     }
-  }, [getHeaders]);
+  }, []);
 
   useEffect(() => {
     loadSavedQueries();
@@ -107,12 +92,7 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
     setResult(null);
 
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.AD_HOC_ANALYTICS_RUN, {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify({ query, dateRange })
-      });
+      const response = await apiPost(API_ENDPOINTS.ADMIN.AD_HOC_ANALYTICS_RUN, { query, dateRange });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -132,12 +112,7 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
     if (!query.trim() || !queryName.trim()) return;
 
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.AD_HOC_ANALYTICS_QUERIES, {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify({ name: queryName, query })
-      });
+      const response = await apiPost(API_ENDPOINTS.ADMIN.AD_HOC_ANALYTICS_QUERIES, { name: queryName, query });
 
       if (!response.ok) throw new Error('Failed to save query');
 
@@ -154,11 +129,7 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
     if (!confirm('Are you sure you want to delete this saved query?')) return;
 
     try {
-      const response = await fetch(buildEndpoint.adminAdHocQuery(queryId), {
-        method: 'DELETE',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiDelete(buildEndpoint.adminAdHocQuery(queryId));
 
       if (!response.ok) throw new Error('Failed to delete query');
 

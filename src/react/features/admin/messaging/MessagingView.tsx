@@ -20,7 +20,7 @@ import { formatTimeAgo } from '@/utils/time-utils';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { KEYS } from '@/constants/keyboard';
-import { unwrapApiData } from '@/utils/api-client';
+import { unwrapApiData, apiFetch, apiPost } from '@/utils/api-client';
 
 const logger = createLogger('MessagingView');
 
@@ -63,19 +63,6 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
   const containerRef = useFadeIn();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Build headers helper with auth token
-  const getHeaders = useCallback((contentType = true) => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {};
-    if (contentType) {
-      headers['Content-Type'] = 'application/json';
-    }
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   const [isLoading, setIsLoading] = useState(true);
   const [_error, setError] = useState<string | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -94,12 +81,7 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
     setError(null);
 
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.MESSAGES_CONVERSATIONS, {
-        method: 'GET',
-        headers: getHeaders(false),
-        credentials: 'include',
-        signal
-      });
+      const response = await apiFetch(API_ENDPOINTS.ADMIN.MESSAGES_CONVERSATIONS, { signal });
       if (!response.ok) throw new Error('Failed to load conversations');
 
       const data = unwrapApiData<Record<string, unknown>>(await response.json());
@@ -110,30 +92,20 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
     } finally {
       setIsLoading(false);
     }
-  }, [getHeaders]);
+  }, []);
 
   const loadMessages = useCallback(async (conversationId: number, signal?: AbortSignal) => {
     setMessagesLoading(true);
 
     try {
-      const response = await fetch(buildEndpoint.adminConversation(conversationId), {
-        method: 'GET',
-        headers: getHeaders(false),
-        credentials: 'include',
-        signal
-      });
+      const response = await apiFetch(buildEndpoint.adminConversation(conversationId), { signal });
       if (!response.ok) throw new Error('Failed to load messages');
 
       const data = unwrapApiData<Record<string, unknown>>(await response.json());
       setMessages((data.messages as Message[]) || []);
 
       // Mark as read
-      await fetch(buildEndpoint.adminConversationRead(conversationId), {
-        method: 'POST',
-        headers: getHeaders(false),
-        credentials: 'include',
-        signal
-      });
+      await apiPost(buildEndpoint.adminConversationRead(conversationId));
 
       setConversations((prev) =>
         prev.map((c) => (c.id === conversationId ? { ...c, unreadCount: 0 } : c))
@@ -144,7 +116,7 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
     } finally {
       setMessagesLoading(false);
     }
-  }, [getHeaders]);
+  }, []);
 
   const sendMessage = useCallback(async () => {
     if (!newMessage.trim() || !selectedConversation) return;
@@ -154,15 +126,7 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
     setNewMessage('');
 
     try {
-      const response = await fetch(
-        `/api/admin/messages/conversations/${selectedConversation.id}/messages`,
-        {
-          method: 'POST',
-          headers: getHeaders(),
-          credentials: 'include',
-          body: JSON.stringify({ content: messageContent })
-        }
-      );
+      const response = await apiPost(`/api/admin/messages/conversations/${selectedConversation.id}/messages`, { content: messageContent });
 
       if (!response.ok) throw new Error('Failed to send message');
 
@@ -185,7 +149,7 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
     } finally {
       setSending(false);
     }
-  }, [newMessage, selectedConversation, getHeaders, showNotification]);
+  }, [newMessage, selectedConversation, showNotification]);
 
   function scrollToBottom() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -193,10 +157,8 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
 
   const toggleStar = useCallback(async (conversationId: number, isStarred: boolean) => {
     try {
-      await fetch(buildEndpoint.adminConversationStar(conversationId), {
-        method: isStarred ? 'DELETE' : 'POST',
-        headers: getHeaders(false),
-        credentials: 'include'
+      await apiFetch(buildEndpoint.adminConversationStar(conversationId), {
+        method: isStarred ? 'DELETE' : 'POST'
       });
 
       setConversations((prev) =>
@@ -205,7 +167,7 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
     } catch (err) {
       logger.error('Failed to toggle star:', err);
     }
-  }, [getHeaders]);
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();

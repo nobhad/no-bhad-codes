@@ -29,7 +29,7 @@ import { cn } from '@react/lib/utils';
 import { formatTimeAgo } from '@/utils/time-utils';
 import { formatCurrency } from '@/utils/format-utils';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
+import { apiFetch, unwrapApiData } from '@/utils/api-client';
 
 interface OverviewDashboardProps {
   onNavigate?: (tab: string, entityId?: string) => void;
@@ -130,26 +130,11 @@ export function OverviewDashboard({ onNavigate, getAuthToken }: OverviewDashboar
   const [activeProjects, setActiveProjects] = useState<ProjectItem[]>([]);
   const [upcomingTasks, setUpcomingTasks] = useState<TaskItem[]>([]);
 
-  // Auth headers helper
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   const loadDashboardData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.DASHBOARD, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiFetch(API_ENDPOINTS.ADMIN.DASHBOARD);
       if (!response.ok) throw new Error('Failed to load dashboard data');
       const payload = unwrapApiData<Record<string, unknown>>(await response.json());
       setAttention((payload.attention as typeof attention) || { overdueInvoices: 0, pendingContracts: 0, unreadMessages: 0 });
@@ -162,7 +147,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken }: OverviewDashboar
     } finally {
       setIsLoading(false);
     }
-  }, [getHeaders]);
+  }, []);
 
   useEffect(() => {
     loadDashboardData();

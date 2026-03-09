@@ -41,6 +41,7 @@ import { DELETED_ITEMS_FILTER_CONFIG } from '@react/features/admin/shared/filter
 import type { SortConfig } from '@react/features/admin/types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
+import { apiPost, apiDelete } from '@/utils/api-client';
 
 const logger = createLogger('DeletedItemsTable');
 
@@ -148,18 +149,6 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
   const items = useMemo(() => data?.items ?? [], [data]);
   const stats = useMemo(() => data?.stats ?? DEFAULT_STATS, [data]);
 
-  // Build headers helper for mutation calls
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   const [bulkLoading, setBulkLoading] = useState(false);
 
   // Use centralized table filters hook
@@ -209,11 +198,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
 
   const handleRestore = useCallback(async (itemId: string) => {
     try {
-      const response = await fetch(buildEndpoint.adminDeletedItemRestore(itemId), {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiPost(buildEndpoint.adminDeletedItemRestore(itemId));
       if (!response.ok) throw new Error('Failed to restore item');
       setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => item.id !== itemId) } : prev);
       showNotification?.('Item restored', 'success');
@@ -221,7 +206,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
       logger.error('Failed to restore item:', err);
       showNotification?.('Failed to restore item', 'error');
     }
-  }, [getHeaders, showNotification, setData]);
+  }, [showNotification, setData]);
 
   const handlePermanentDelete = useCallback(async (itemId: string) => {
     if (
@@ -232,11 +217,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
       return;
     }
     try {
-      const response = await fetch(buildEndpoint.adminDeletedItem(itemId), {
-        method: 'DELETE',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiDelete(buildEndpoint.adminDeletedItem(itemId));
       if (!response.ok) throw new Error('Failed to delete item');
       setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => item.id !== itemId) } : prev);
       showNotification?.('Item permanently deleted', 'success');
@@ -244,7 +225,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
       logger.error('Failed to delete item:', err);
       showNotification?.('Failed to delete item', 'error');
     }
-  }, [getHeaders, showNotification, setData]);
+  }, [showNotification, setData]);
 
   const handleEmptyTrash = useCallback(async () => {
     if (
@@ -255,11 +236,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
       return;
     }
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.DELETED_ITEMS_EMPTY, {
-        method: 'DELETE',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiDelete(API_ENDPOINTS.ADMIN.DELETED_ITEMS_EMPTY);
       if (!response.ok) throw new Error('Failed to empty trash');
       setData((prev) => prev ? { ...prev, items: [] } : prev);
       showNotification?.('Trash emptied', 'success');
@@ -267,7 +244,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
       logger.error('Failed to empty trash:', err);
       showNotification?.('Failed to empty trash', 'error');
     }
-  }, [getHeaders, showNotification, setData]);
+  }, [showNotification, setData]);
 
   // Bulk restore
   const handleBulkRestore = useCallback(async () => {
@@ -282,12 +259,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
     setBulkLoading(true);
     try {
       const ids = Array.from(selection.selectedIds);
-      const response = await fetch(API_ENDPOINTS.ADMIN.DELETED_ITEMS_BULK_RESTORE, {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify({ ids })
-      });
+      const response = await apiPost(API_ENDPOINTS.ADMIN.DELETED_ITEMS_BULK_RESTORE, { ids });
       if (!response.ok) throw new Error('Failed to restore items');
       setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => !selection.selectedIds.has(item.id)) } : prev);
       selection.clearSelection();
@@ -298,7 +270,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
     } finally {
       setBulkLoading(false);
     }
-  }, [selection, getHeaders, showNotification, setData]);
+  }, [selection, showNotification, setData]);
 
   // Bulk permanent delete
   const handleBulkDelete = useCallback(async () => {
@@ -315,12 +287,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
     setBulkLoading(true);
     try {
       const ids = Array.from(selection.selectedIds);
-      const response = await fetch(API_ENDPOINTS.ADMIN.DELETED_ITEMS_BULK_DELETE, {
-        method: 'DELETE',
-        headers: getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify({ ids })
-      });
+      const response = await apiDelete(API_ENDPOINTS.ADMIN.DELETED_ITEMS_BULK_DELETE);
       if (!response.ok) throw new Error('Failed to delete items');
       setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => !selection.selectedIds.has(item.id)) } : prev);
       selection.clearSelection();
@@ -331,7 +298,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
     } finally {
       setBulkLoading(false);
     }
-  }, [selection, getHeaders, showNotification, setData]);
+  }, [selection, showNotification, setData]);
 
   function isExpiringSoon(expiresAt: string): boolean {
     const daysUntilExpiry = Math.ceil(

@@ -34,6 +34,7 @@ import type { PortalViewProps } from '../types';
 import { formatCardDate, formatFileSize } from '@react/utils/cardFormatters';
 import { usePortalData } from '@react/hooks/usePortalFetch';
 import { createLogger } from '@/utils/logger';
+import { getCsrfToken, CSRF_HEADER_NAME } from '@/utils/api-client';
 import { downloadFile } from '@/utils/file-download';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 
@@ -259,7 +260,6 @@ export function PortalFilesManager({
     isLoading,
     error,
     refetch: fetchFiles,
-    buildHeaders,
     portalFetch
   } = usePortalData<FilesApiResponse>({
     getAuthToken,
@@ -359,12 +359,10 @@ export function PortalFilesManager({
           formData.append('files', file);
         });
 
-        // Use buildHeaders for auth but omit Content-Type (browser sets it with boundary for FormData)
-        const authHeaders = buildHeaders();
+        // Raw fetch for FormData — add CSRF protection manually
+        const csrfToken = getCsrfToken();
         const headers: Record<string, string> = {};
-        if (authHeaders['Authorization']) {
-          headers['Authorization'] = authHeaders['Authorization'];
-        }
+        if (csrfToken) headers[CSRF_HEADER_NAME] = csrfToken;
 
         const response = await fetch(API_ENDPOINTS.FILES_MULTIPLE, {
           method: 'POST',
@@ -392,7 +390,7 @@ export function PortalFilesManager({
         setUploadProgress(0);
       }
     },
-    [fetchFiles, showNotification, buildHeaders]
+    [fetchFiles, showNotification]
   );
 
   // Handle file preview

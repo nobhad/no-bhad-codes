@@ -44,6 +44,7 @@ import { CONTRACTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
+import { apiPost, apiFetch } from '@/utils/api-client';
 
 const logger = createLogger('ContractsTable');
 
@@ -146,18 +147,6 @@ function sortContracts(a: Contract, b: Contract, sort: SortConfig): number {
 export function ContractsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: ContractsTableProps) {
   const containerRef = useFadeIn();
 
-  // Build headers helper with auth token (used by mutation calls)
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   const { data, isLoading, error, refetch, setData } = useListFetch<Contract, ContractStats>({
     endpoint: API_ENDPOINTS.CONTRACTS,
     getAuthToken,
@@ -209,10 +198,9 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
   // Status change handler
   const handleStatusChange = useCallback(async (contractId: number, newStatus: string) => {
     try {
-      const response = await fetch(buildEndpoint.contract(contractId), {
+      const response = await apiFetch(buildEndpoint.contract(contractId), {
         method: 'PATCH',
-        headers: getHeaders(),
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
 
@@ -231,15 +219,11 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
       logger.error('Failed to update contract status:', err);
       showNotification?.('Failed to update contract status', 'error');
     }
-  }, [getHeaders, showNotification, setData]);
+  }, [showNotification, setData]);
 
   const handleSendContract = useCallback(async (contractId: number) => {
     try {
-      const response = await fetch(buildEndpoint.contractSend(contractId), {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiPost(buildEndpoint.contractSend(contractId));
 
       if (!response.ok) throw new Error('Failed to send contract');
 
@@ -256,7 +240,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
       logger.error('Failed to send contract:', err);
       showNotification?.('Failed to send contract', 'error');
     }
-  }, [getHeaders, showNotification, setData]);
+  }, [showNotification, setData]);
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
@@ -264,12 +248,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
 
     const ids = selection.selectedItems.map((c) => c.id);
     try {
-      const response = await fetch(API_ENDPOINTS.CONTRACTS_BULK_DELETE, {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify({ ids })
-      });
+      const response = await apiPost(API_ENDPOINTS.CONTRACTS_BULK_DELETE, { ids });
 
       if (!response.ok) throw new Error('Failed to delete contracts');
 
@@ -283,7 +262,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
       logger.error('Failed to delete contracts:', err);
       showNotification?.('Failed to delete contracts', 'error');
     }
-  }, [selection, getHeaders, showNotification, setData]);
+  }, [selection, showNotification, setData]);
 
   // Status options for bulk actions
   const bulkStatusOptions = useMemo(

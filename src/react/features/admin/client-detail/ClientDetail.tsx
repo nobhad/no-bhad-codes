@@ -32,6 +32,7 @@ import type { ClientDetailTab, ClientStatus } from '../types';
 import { CLIENT_STATUS_CONFIG, CLIENT_TYPE_LABELS } from '../types';
 import { buildEndpoint } from '@/constants/api-endpoints';
 import { NOTIFICATIONS, statusUpdatedMessage } from '@/constants/notifications';
+import { apiDelete } from '@/utils/api-client';
 
 interface ClientDetailProps {
   /** Client ID to display */
@@ -138,19 +139,7 @@ export function ClientDetail({
   // Handle delete
   const handleDelete = useCallback(async () => {
     try {
-      const token = getAuthToken?.();
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-      };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(buildEndpoint.client(clientId), {
-        method: 'DELETE',
-        headers,
-        credentials: 'include'
-      });
+      const response = await apiDelete(buildEndpoint.client(clientId));
 
       if (response.ok) {
         showNotification?.(NOTIFICATIONS.client.DELETED, 'success');
@@ -161,7 +150,7 @@ export function ClientDetail({
     } catch {
       showNotification?.(NOTIFICATIONS.client.DELETE_FAILED, 'error');
     }
-  }, [clientId, getAuthToken, showNotification, onBack]);
+  }, [clientId, showNotification, onBack]);
 
   // Handle send invitation
   const handleSendInvitation = useCallback(async () => {

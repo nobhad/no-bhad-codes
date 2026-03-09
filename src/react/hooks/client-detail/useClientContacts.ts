@@ -6,22 +6,18 @@
 import { useState, useCallback } from 'react';
 import type { ClientContact } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData, buildAuthHeaders } from '@/utils/api-client';
+import { unwrapApiData, apiFetch, apiPost, apiPut, apiDelete } from '@/utils/api-client';
 import { createLogger } from '@/utils/logger';
 import type { ClientDetailHookOptions } from './types';
 
 const logger = createLogger('useClientContacts');
 
-export function useClientContacts({ clientId, getAuthToken }: ClientDetailHookOptions) {
+export function useClientContacts({ clientId }: ClientDetailHookOptions) {
   const [contacts, setContacts] = useState<ClientContact[]>([]);
 
   const fetchContacts = useCallback(async () => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/contacts`, {
-        method: 'GET',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/contacts`);
 
       if (!response.ok) {
         return [];
@@ -34,7 +30,7 @@ export function useClientContacts({ clientId, getAuthToken }: ClientDetailHookOp
       logger.error('[useClientContacts] Error fetching contacts:', err);
       return [];
     }
-  }, [clientId, getAuthToken]);
+  }, [clientId]);
 
   const fetchAll = useCallback(async () => {
     const result = await fetchContacts();
@@ -46,12 +42,7 @@ export function useClientContacts({ clientId, getAuthToken }: ClientDetailHookOp
       contact: Omit<ClientContact, 'id' | 'clientId' | 'createdAt' | 'updatedAt'>
     ): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/contacts`, {
-          method: 'POST',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include',
-          body: JSON.stringify(contact)
-        });
+        const response = await apiPost(`${API_ENDPOINTS.CLIENTS}/${clientId}/contacts`, contact);
 
         if (!response.ok) {
           throw new Error(`Failed to add contact: ${response.statusText}`);
@@ -66,18 +57,13 @@ export function useClientContacts({ clientId, getAuthToken }: ClientDetailHookOp
         return false;
       }
     },
-    [clientId, getAuthToken]
+    [clientId]
   );
 
   const updateContact = useCallback(
     async (id: number, updates: Partial<ClientContact>): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.CLIENT_CONTACTS}/${id}`, {
-          method: 'PUT',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include',
-          body: JSON.stringify(updates)
-        });
+        const response = await apiPut(`${API_ENDPOINTS.CLIENT_CONTACTS}/${id}`, updates);
 
         if (!response.ok) {
           throw new Error(`Failed to update contact: ${response.statusText}`);
@@ -92,17 +78,13 @@ export function useClientContacts({ clientId, getAuthToken }: ClientDetailHookOp
         return false;
       }
     },
-    [getAuthToken]
+    []
   );
 
   const deleteContact = useCallback(
     async (id: number): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.CLIENT_CONTACTS}/${id}`, {
-          method: 'DELETE',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include'
-        });
+        const response = await apiDelete(`${API_ENDPOINTS.CLIENT_CONTACTS}/${id}`);
 
         if (!response.ok) {
           throw new Error(`Failed to delete contact: ${response.statusText}`);
@@ -115,7 +97,7 @@ export function useClientContacts({ clientId, getAuthToken }: ClientDetailHookOp
         return false;
       }
     },
-    [getAuthToken]
+    []
   );
 
   return {

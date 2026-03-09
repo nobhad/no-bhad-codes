@@ -16,6 +16,7 @@ import type {
   QuestionType
 } from './types';
 import { buildEndpoint } from '@/constants/api-endpoints';
+import { apiPost } from '@/utils/api-client';
 
 // ============================================================================
 // CONSTANTS
@@ -422,7 +423,7 @@ const QUESTION_COMPONENTS: Record<QuestionType, React.ComponentType<QuestionInpu
  */
 export function QuestionnaireForm({
   response,
-  getAuthToken,
+  getAuthToken: _getAuthToken,
   showNotification,
   onSubmitSuccess,
   onBack
@@ -473,23 +474,9 @@ export function QuestionnaireForm({
     setIsSaving(true);
 
     try {
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json'
-      };
-
-      const token = getAuthToken?.();
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const saveResponse = await fetch(buildEndpoint.questionnaireResponseSave(response.id), {
-        method: 'POST',
-        credentials: 'include',
-        headers,
-        body: JSON.stringify({
-          answers,
-          progress
-        })
+      const saveResponse = await apiPost(buildEndpoint.questionnaireResponseSave(response.id), {
+        answers,
+        progress
       });
 
       if (!saveResponse.ok) {
@@ -504,7 +491,7 @@ export function QuestionnaireForm({
     } finally {
       setIsSaving(false);
     }
-  }, [answers, progress, response.id, getAuthToken, showNotification, isReadOnly]);
+  }, [answers, progress, response.id, showNotification, isReadOnly]);
 
   /**
    * Debounced auto-save on answer change
@@ -564,26 +551,12 @@ export function QuestionnaireForm({
     setIsSubmitting(true);
 
     try {
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json'
-      };
-
-      const token = getAuthToken?.();
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
       // First save latest answers
       await saveAnswers();
 
       // Then submit
-      const submitResponse = await fetch(buildEndpoint.questionnaireResponseSubmit(response.id), {
-        method: 'POST',
-        credentials: 'include',
-        headers,
-        body: JSON.stringify({
-          answers
-        })
+      const submitResponse = await apiPost(buildEndpoint.questionnaireResponseSubmit(response.id), {
+        answers
       });
 
       if (!submitResponse.ok) {

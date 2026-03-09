@@ -1882,7 +1882,7 @@
 }
 
 .data-table-row-selected {
-  background-color: var(--portal-alpha-primary-10, rgba(0, 175, 240, 0.1));
+  background-color: var(--portal-alpha-primary-10);
 }
 
 .data-table-pagination {

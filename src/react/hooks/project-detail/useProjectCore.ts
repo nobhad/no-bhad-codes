@@ -6,7 +6,7 @@
 import { useState, useCallback } from 'react';
 import type { Project } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData, buildAuthHeaders } from '@/utils/api-client';
+import { unwrapApiData, apiFetch, apiPut } from '@/utils/api-client';
 import { createLogger } from '@/utils/logger';
 import type { ProjectDetailHookOptions } from './types';
 
@@ -20,18 +20,13 @@ interface UseProjectCoreReturn {
 }
 
 export function useProjectCore({
-  projectId,
-  getAuthToken
+  projectId
 }: ProjectDetailHookOptions): UseProjectCoreReturn {
   const [project, setProject] = useState<Project | null>(null);
 
   const fetchProject = useCallback(async (): Promise<Project> => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}`, {
-        method: 'GET',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.PROJECTS}/${projectId}`);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch project: ${response.statusText}`);
@@ -48,17 +43,12 @@ export function useProjectCore({
       logger.error('Error fetching project:', err);
       throw err;
     }
-  }, [projectId, getAuthToken]);
+  }, [projectId]);
 
   const updateProject = useCallback(
     async (updates: Partial<Project>): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}`, {
-          method: 'PUT',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include',
-          body: JSON.stringify(updates)
-        });
+        const response = await apiPut(`${API_ENDPOINTS.PROJECTS}/${projectId}`, updates);
 
         if (!response.ok) {
           throw new Error(`Failed to update project: ${response.statusText}`);
@@ -73,7 +63,7 @@ export function useProjectCore({
         return false;
       }
     },
-    [projectId, getAuthToken]
+    [projectId]
   );
 
   return { project, setProject, fetchProject, updateProject };

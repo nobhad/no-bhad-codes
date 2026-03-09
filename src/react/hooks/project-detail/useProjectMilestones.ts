@@ -6,7 +6,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { ProjectMilestone } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData, buildAuthHeaders } from '@/utils/api-client';
+import { unwrapApiData, apiFetch, apiPost, apiPut, apiDelete } from '@/utils/api-client';
 import { createLogger } from '@/utils/logger';
 import type { ProjectDetailHookOptions } from './types';
 
@@ -26,8 +26,7 @@ interface UseProjectMilestonesReturn {
 }
 
 export function useProjectMilestones({
-  projectId,
-  getAuthToken
+  projectId
 }: ProjectDetailHookOptions): UseProjectMilestonesReturn {
   const [milestones, setMilestones] = useState<ProjectMilestone[]>([]);
 
@@ -39,11 +38,7 @@ export function useProjectMilestones({
 
   const fetchMilestones = useCallback(async (): Promise<ProjectMilestone[]> => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/milestones`, {
-        method: 'GET',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/milestones`);
 
       if (!response.ok) {
         return [];
@@ -56,17 +51,12 @@ export function useProjectMilestones({
       logger.error('Error fetching milestones:', err);
       return [];
     }
-  }, [projectId, getAuthToken]);
+  }, [projectId]);
 
   const addMilestone = useCallback(
     async (milestone: Omit<ProjectMilestone, 'id' | 'project_id'>): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/milestones`, {
-          method: 'POST',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include',
-          body: JSON.stringify(milestone)
-        });
+        const response = await apiPost(`${API_ENDPOINTS.PROJECTS}/${projectId}/milestones`, milestone);
 
         if (!response.ok) {
           throw new Error(`Failed to add milestone: ${response.statusText}`);
@@ -81,18 +71,13 @@ export function useProjectMilestones({
         return false;
       }
     },
-    [projectId, getAuthToken]
+    [projectId]
   );
 
   const updateMilestone = useCallback(
     async (id: number, updates: Partial<ProjectMilestone>): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/milestones/${id}`, {
-          method: 'PUT',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include',
-          body: JSON.stringify(updates)
-        });
+        const response = await apiPut(`${API_ENDPOINTS.PROJECTS}/${projectId}/milestones/${id}`, updates);
 
         if (!response.ok) {
           throw new Error(`Failed to update milestone: ${response.statusText}`);
@@ -107,17 +92,13 @@ export function useProjectMilestones({
         return false;
       }
     },
-    [projectId, getAuthToken]
+    [projectId]
   );
 
   const deleteMilestone = useCallback(
     async (id: number): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/milestones/${id}`, {
-          method: 'DELETE',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include'
-        });
+        const response = await apiDelete(`${API_ENDPOINTS.PROJECTS}/${projectId}/milestones/${id}`);
 
         if (!response.ok) {
           throw new Error(`Failed to delete milestone: ${response.statusText}`);
@@ -130,7 +111,7 @@ export function useProjectMilestones({
         return false;
       }
     },
-    [projectId, getAuthToken]
+    [projectId]
   );
 
   const toggleMilestoneComplete = useCallback(

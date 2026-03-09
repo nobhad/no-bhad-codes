@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Inbox
 } from 'lucide-react';
@@ -28,7 +28,7 @@ import { TIME_TRACKING_FILTER_CONFIG, TIME_TRACKING_DATE_RANGE_OPTIONS, TIME_TRA
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
+import { unwrapApiData, apiPost } from '@/utils/api-client';
 
 const logger = createLogger('TimeTrackingTable');
 
@@ -146,18 +146,6 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
   const entries = useMemo(() => data?.items ?? [], [data]);
   const stats = useMemo(() => data?.stats ?? DEFAULT_TIME_STATS, [data]);
 
-  // Auth headers helper (kept for mutation calls)
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   const {
     filterValues,
     setFilter,
@@ -193,12 +181,7 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
 
   async function startTimer() {
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.TIME_ENTRIES_START, {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify({ projectId })
-      });
+      const response = await apiPost(API_ENDPOINTS.ADMIN.TIME_ENTRIES_START, { projectId });
 
       if (!response.ok) throw new Error('Failed to start timer');
 
@@ -219,11 +202,7 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
     if (!activeTimer) return;
 
     try {
-      const response = await fetch(buildEndpoint.adminTimeEntryStop(activeTimer.entryId), {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiPost(buildEndpoint.adminTimeEntryStop(activeTimer.entryId));
 
       if (!response.ok) throw new Error('Failed to stop timer');
 

@@ -10,7 +10,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { unwrapApiData } from '../../utils/api-client';
+import { unwrapApiData, apiFetch } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
 
 const logger = createLogger('usePortalFetch');
@@ -87,19 +87,21 @@ export function usePortalFetch({ getAuthToken }: UsePortalFetchOptions): UsePort
   ): Promise<T> => {
     const { method = 'GET', body, headers: extraHeaders, unwrap = true } = options;
 
-    const headers = { ...buildHeaders(), ...extraHeaders };
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...extraHeaders
+    };
 
     const fetchOptions: RequestInit = {
       method,
-      headers,
-      credentials: 'include'
+      headers
     };
 
     if (body !== undefined) {
       fetchOptions.body = JSON.stringify(body);
     }
 
-    const response = await fetch(url, fetchOptions);
+    const response = await apiFetch(url, fetchOptions);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -109,7 +111,7 @@ export function usePortalFetch({ getAuthToken }: UsePortalFetchOptions): UsePort
 
     const json = await response.json();
     return (unwrap ? unwrapApiData<T>(json) : json) as T;
-  }, [buildHeaders]);
+  }, []);
 
   return { buildHeaders, portalFetch };
 }
@@ -177,14 +179,7 @@ export function usePortalData<T>({
     setError(null);
 
     try {
-      const fetchOptions: RequestInit = {
-        method: 'GET',
-        headers: buildHeaders(),
-        credentials: 'include',
-        signal
-      };
-
-      const response = await fetch(url, fetchOptions);
+      const response = await apiFetch(url, { signal });
 
       if (!response.ok) {
         throw new Error('Failed to load data');
@@ -202,7 +197,7 @@ export function usePortalData<T>({
     } finally {
       setIsLoading(false);
     }
-  }, [url, buildHeaders]);
+  }, [url]);
 
   // Fetch on mount with AbortController cleanup
   useEffect(() => {

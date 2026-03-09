@@ -43,6 +43,7 @@ import type { ProjectDetailTab, ProjectStatus } from '../types';
 import { PROJECT_STATUS_CONFIG, PROJECT_TYPE_LABELS } from '../types';
 import { buildEndpoint } from '@/constants/api-endpoints';
 import { NOTIFICATIONS, statusUpdatedMessage } from '@/constants/notifications';
+import { apiDelete } from '@/utils/api-client';
 
 interface ProjectDetailProps {
   /** Project ID to display */
@@ -156,19 +157,7 @@ export function ProjectDetail({
   // Handle delete
   const handleDelete = useCallback(async () => {
     try {
-      const token = getAuthToken?.();
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-      };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(buildEndpoint.project(projectId), {
-        method: 'DELETE',
-        headers,
-        credentials: 'include'
-      });
+      const response = await apiDelete(buildEndpoint.project(projectId));
 
       if (response.ok) {
         showNotification?.(NOTIFICATIONS.project.DELETED, 'success');
@@ -179,7 +168,7 @@ export function ProjectDetail({
     } catch {
       showNotification?.(NOTIFICATIONS.project.DELETE_FAILED, 'error');
     }
-  }, [projectId, getAuthToken, showNotification, onBack]);
+  }, [projectId, showNotification, onBack]);
 
   // Handle duplicate (placeholder - would need API support)
   const handleDuplicate = useCallback(() => {

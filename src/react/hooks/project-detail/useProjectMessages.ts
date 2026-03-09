@@ -6,7 +6,7 @@
 import { useState, useCallback } from 'react';
 import type { Message } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData, buildAuthHeaders } from '@/utils/api-client';
+import { unwrapApiData, apiFetch, apiPost } from '@/utils/api-client';
 import { createLogger } from '@/utils/logger';
 import type { ProjectDetailHookOptions } from './types';
 
@@ -21,18 +21,13 @@ interface UseProjectMessagesReturn {
 }
 
 export function useProjectMessages({
-  projectId,
-  getAuthToken
+  projectId
 }: ProjectDetailHookOptions): UseProjectMessagesReturn {
   const [messages, setMessages] = useState<Message[]>([]);
 
   const fetchMessages = useCallback(async (): Promise<Message[]> => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/messages`, {
-        method: 'GET',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/messages`);
 
       if (!response.ok) {
         return [];
@@ -45,7 +40,7 @@ export function useProjectMessages({
       logger.error('Error fetching messages:', err);
       return [];
     }
-  }, [projectId, getAuthToken]);
+  }, [projectId]);
 
   const loadMessages = useCallback(async () => {
     const fetched = await fetchMessages();
@@ -55,12 +50,7 @@ export function useProjectMessages({
   const sendMessage = useCallback(
     async (content: string): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/messages`, {
-          method: 'POST',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include',
-          body: JSON.stringify({ content })
-        });
+        const response = await apiPost(`${API_ENDPOINTS.PROJECTS}/${projectId}/messages`, { content });
 
         if (!response.ok) {
           throw new Error(`Failed to send message: ${response.statusText}`);
@@ -75,7 +65,7 @@ export function useProjectMessages({
         return false;
       }
     },
-    [projectId, getAuthToken]
+    [projectId]
   );
 
   return {
