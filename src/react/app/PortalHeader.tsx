@@ -44,11 +44,7 @@ export function PortalHeader() {
       <header className="portal-global-header">
         <div className="portal-global-header-left">
           <a href="/" className="header-branding" aria-label="Go to homepage">
-            <img
-              src="/images/avatar_small_sidebar.svg"
-              alt="No Bhad Codes logo"
-              className="header-avatar"
-            />
+            <span className="header-avatar" aria-hidden="true" />
             <span className="header-logo-text">NO BHAD CODES</span>
           </a>
 
