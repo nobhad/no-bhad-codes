@@ -27,10 +27,9 @@ import type {
   StepValidationResult
 } from './types';
 import { ONBOARDING_STEPS, DRAFT_STORAGE_KEY, DRAFT_SAVE_INTERVAL } from './types';
-import { usePortalFetch } from '@react/hooks/usePortalFetch';
 import { validateEmail } from '../../../../../shared/validation/validators';
 import { createLogger } from '@/utils/logger';
-import { unwrapApiData } from '@/utils/api-client';
+import { apiFetch, apiPost, unwrapApiData } from '@/utils/api-client';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 
 const logger = createLogger('OnboardingWizard');
@@ -108,13 +107,12 @@ function getStepIndex(step: OnboardingStep): number {
  * OnboardingWizard Component
  */
 export function OnboardingWizard({
-  getAuthToken,
+  getAuthToken: _getAuthToken,
   onComplete,
   showNotification
 }: OnboardingWizardProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const stepContainerRef = useRef<HTMLDivElement>(null);
-  const { buildHeaders } = usePortalFetch({ getAuthToken });
 
   // State
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('basic-info');
@@ -142,13 +140,7 @@ export function OnboardingWizard({
 
     try {
       // Try to load from API first
-      const headers = buildHeaders();
-
-      const response = await fetch(API_ENDPOINTS.ONBOARDING, {
-        method: 'GET',
-        headers,
-        credentials: 'include'
-      });
+      const response = await apiFetch(API_ENDPOINTS.ONBOARDING);
 
       if (response.ok) {
         const unwrapped = unwrapApiData<Record<string, unknown>>(await response.json());
@@ -191,7 +183,7 @@ export function OnboardingWizard({
     } finally {
       setIsLoading(false);
     }
-  }, [buildHeaders]);
+  }, []);
 
   /**
    * Save progress to localStorage
@@ -218,8 +210,6 @@ export function OnboardingWizard({
       }
 
       try {
-        const headers = buildHeaders();
-
         const progress: OnboardingProgress = {
           currentStep,
           completedSteps,
@@ -228,12 +218,7 @@ export function OnboardingWizard({
           isComplete: false
         };
 
-        const response = await fetch(API_ENDPOINTS.ONBOARDING_SAVE, {
-          method: 'POST',
-          headers,
-          credentials: 'include',
-          body: JSON.stringify(progress)
-        });
+        const response = await apiPost(API_ENDPOINTS.ONBOARDING_SAVE, progress);
 
         if (response.ok) {
           setLastSavedAt(new Date());
@@ -260,7 +245,7 @@ export function OnboardingWizard({
         setIsSaving(false);
       }
     },
-    [currentStep, completedSteps, formData, buildHeaders, saveDraftToLocal, showNotification]
+    [currentStep, completedSteps, formData, saveDraftToLocal, showNotification]
   );
 
   /**
@@ -278,16 +263,9 @@ export function OnboardingWizard({
     setIsSubmitting(true);
 
     try {
-      const headers = buildHeaders();
-
-      const response = await fetch(API_ENDPOINTS.ONBOARDING_COMPLETE, {
-        method: 'POST',
-        headers,
-        credentials: 'include',
-        body: JSON.stringify({
-          formData,
-          completedAt: new Date().toISOString()
-        })
+      const response = await apiPost(API_ENDPOINTS.ONBOARDING_COMPLETE, {
+        formData,
+        completedAt: new Date().toISOString()
       });
 
       if (response.ok) {
@@ -305,7 +283,7 @@ export function OnboardingWizard({
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData, buildHeaders, onComplete, showNotification]);
+  }, [formData, onComplete, showNotification]);
 
   /**
    * Update form data for a step

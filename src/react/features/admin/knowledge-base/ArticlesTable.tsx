@@ -29,6 +29,7 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { ARTICLES_FILTER_CONFIG, ARTICLE_STATUS_OPTIONS } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { apiFetch } from '@/utils/api-client';
 
 interface Article {
   id: number;
@@ -121,17 +122,6 @@ function sortArticles(a: Article, b: Article, sort: SortConfig): number {
 export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken, showNotification: _showNotification, defaultPageSize = 25, overviewMode = false }: ArticlesTableProps) {
   const containerRef = useFadeIn();
 
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
@@ -164,29 +154,20 @@ export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken, showNotif
     setError(null);
     try {
       // Load categories for filter
-      const categoriesRes = await fetch(API_ENDPOINTS.ADMIN.KB_CATEGORIES, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const categoriesRes = await apiFetch(API_ENDPOINTS.ADMIN.KB_CATEGORIES);
       if (categoriesRes.ok) {
         const catData = await categoriesRes.json();
         setCategories(catData.data?.categories || catData.categories || []);
       }
 
       // Load articles
-      const articlesRes = await fetch(API_ENDPOINTS.ADMIN.KB_ARTICLES, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const articlesRes = await apiFetch(API_ENDPOINTS.ADMIN.KB_ARTICLES);
       if (!articlesRes.ok) throw new Error('Failed to load articles');
       const artData = await articlesRes.json();
       setArticles(artData.data?.articles || artData.articles || []);
 
       // Load stats
-      const statsRes = await fetch(API_ENDPOINTS.ADMIN.KB_STATS, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const statsRes = await apiFetch(API_ENDPOINTS.ADMIN.KB_STATS);
       if (statsRes.ok) {
         const statsData = await statsRes.json();
         setStats(statsData.data || statsData || { totalArticles: 0, totalViews: 0, published: 0, draft: 0 });
@@ -196,7 +177,7 @@ export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken, showNotif
     } finally {
       setIsLoading(false);
     }
-  }, [getHeaders]);
+  }, []);
 
   useEffect(() => {
     loadData();

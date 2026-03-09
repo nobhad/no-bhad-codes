@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createLogger } from '@/utils/logger';
-import { unwrapApiData } from '@/utils/api-client';
+import { unwrapApiData, apiFetch, apiPut, apiDelete, apiPost } from '@/utils/api-client';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import {
   EMPTY_NOTIFICATION_FORM,
@@ -49,9 +49,7 @@ export function useIntegrationsData({ getAuthToken, showNotification }: UseInteg
 
   const loadIntegrations = useCallback(async () => {
     try {
-      const response = await fetch(API_ENDPOINTS.INTEGRATIONS_STATUS, {
-        headers: getHeaders(), credentials: 'include'
-      });
+      const response = await apiFetch(API_ENDPOINTS.INTEGRATIONS_STATUS);
       if (!response.ok) throw new Error('Failed to load integration status');
       const payload = unwrapApiData<IntegrationStatus[]>(await response.json());
       setIntegrations(Array.isArray(payload) ? payload : []);
@@ -62,9 +60,7 @@ export function useIntegrationsData({ getAuthToken, showNotification }: UseInteg
 
   const loadNotifications = useCallback(async () => {
     try {
-      const response = await fetch(API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS, {
-        headers: getHeaders(), credentials: 'include'
-      });
+      const response = await apiFetch(API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS);
       if (!response.ok) throw new Error('Failed to load notifications');
       const payload = unwrapApiData<NotificationConfig[]>(await response.json());
       setNotifications(Array.isArray(payload) ? payload : []);
@@ -75,9 +71,7 @@ export function useIntegrationsData({ getAuthToken, showNotification }: UseInteg
 
   const loadStripeStatus = useCallback(async () => {
     try {
-      const response = await fetch(API_ENDPOINTS.INTEGRATIONS_STRIPE_STATUS, {
-        headers: getHeaders(), credentials: 'include'
-      });
+      const response = await apiFetch(API_ENDPOINTS.INTEGRATIONS_STRIPE_STATUS);
       if (!response.ok) throw new Error('Failed to load Stripe status');
       const payload = unwrapApiData<StripeStatus>(await response.json());
       setStripeStatus(payload);
@@ -88,9 +82,7 @@ export function useIntegrationsData({ getAuthToken, showNotification }: UseInteg
 
   const loadCalendarStatus = useCallback(async () => {
     try {
-      const response = await fetch(API_ENDPOINTS.INTEGRATIONS_CALENDAR_STATUS, {
-        headers: getHeaders(), credentials: 'include'
-      });
+      const response = await apiFetch(API_ENDPOINTS.INTEGRATIONS_CALENDAR_STATUS);
       if (!response.ok) throw new Error('Failed to load calendar status');
       const payload = unwrapApiData<CalendarStatus>(await response.json());
       setCalendarStatus(payload);
@@ -133,11 +125,9 @@ export function useIntegrationsData({ getAuthToken, showNotification }: UseInteg
         ? `${API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS}/${editingNotification.id}`
         : API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS;
 
-      const response = await fetch(url, {
-        method: isEditing ? 'PUT' : 'POST',
-        headers: getHeaders(), credentials: 'include',
-        body: JSON.stringify(data)
-      });
+      const response = isEditing
+        ? await apiPut(url, data)
+        : await apiPost(url, data);
 
       if (!response.ok) throw new Error(`Failed to ${isEditing ? 'update' : 'create'} notification`);
 
@@ -157,10 +147,7 @@ export function useIntegrationsData({ getAuthToken, showNotification }: UseInteg
   const handleDeleteNotification = useCallback(async () => {
     if (deletingNotificationId === null) return;
     try {
-      const response = await fetch(
-        `${API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS}/${deletingNotificationId}`,
-        { method: 'DELETE', headers: getHeaders(), credentials: 'include' }
-      );
+      const response = await apiDelete(`${API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS}/${deletingNotificationId}`);
       if (!response.ok) throw new Error('Failed to delete notification');
       showNotification?.('Notification deleted successfully', 'success');
       await loadNotifications();
@@ -175,10 +162,7 @@ export function useIntegrationsData({ getAuthToken, showNotification }: UseInteg
   const handleTestNotification = useCallback(async (id: number) => {
     setTestingId(id);
     try {
-      const response = await fetch(
-        `${API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS}/${id}/test`,
-        { method: 'POST', headers: getHeaders(), credentials: 'include' }
-      );
+      const response = await apiPost(`${API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS}/${id}/test`);
       if (!response.ok) throw new Error('Failed to send test notification');
       showNotification?.('Test notification sent', 'success');
     } catch (err) {
@@ -200,11 +184,7 @@ export function useIntegrationsData({ getAuthToken, showNotification }: UseInteg
   const handleToggleCalendarSync = useCallback(async () => {
     if (!calendarStatus) return;
     try {
-      const response = await fetch(API_ENDPOINTS.INTEGRATIONS_CALENDAR_SETTINGS, {
-        method: 'PUT',
-        headers: getHeaders(), credentials: 'include',
-        body: JSON.stringify({ syncEnabled: !calendarStatus.syncEnabled })
-      });
+      const response = await apiPut(API_ENDPOINTS.INTEGRATIONS_CALENDAR_SETTINGS, { syncEnabled: !calendarStatus.syncEnabled });
       if (!response.ok) throw new Error('Failed to update calendar settings');
       showNotification?.(
         `Calendar sync ${calendarStatus.syncEnabled ? 'disabled' : 'enabled'}`,
