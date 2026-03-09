@@ -7,7 +7,8 @@ import type {
   ProjectMilestone,
   ProjectFile,
   Invoice,
-  Message
+  Message,
+  MessageReaction
 } from '@react/features/admin/types';
 
 /** Auth token getter function signature */
@@ -78,4 +79,10 @@ export interface UseProjectDetailReturn {
   loadMessages: () => Promise<void>;
   /** Send message */
   sendMessage: (content: string) => Promise<boolean>;
+  /** Edit message */
+  editMessage: (messageId: number, content: string) => Promise<boolean>;
+  /** Reaction groups keyed by message ID */
+  reactions: Record<number, MessageReaction[]>;
+  /** Toggle emoji reaction on a message */
+  toggleReaction: (messageId: number, emoji: string) => Promise<boolean>;
 }

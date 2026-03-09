@@ -1,21 +1,21 @@
 /**
- * Messaging View Mount
+ * Message View Mount
  * Island architecture mount using createMountWrapper factory
  */
 
 import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
-import { MessagingView } from './MessagingView';
+import { MessageView } from './MessageView';
 
-export interface MessagingMountOptions extends BaseMountOptions {
+export interface MessageViewMountOptions extends BaseMountOptions {
   /** Callback when message is clicked for detail view */
   onViewMessage?: (messageId: number) => void;
 }
 
 export const {
-  mount: mountMessagingView,
-  unmount: unmountMessagingView,
-  shouldUseReact: shouldUseReactMessagingView
-} = createMountWrapper<MessagingMountOptions>({
-  Component: MessagingView,
-  displayName: 'MessagingView'
+  mount: mountMessageView,
+  unmount: unmountMessageView,
+  shouldUseReact: shouldUseReactMessageView
+} = createMountWrapper<MessageViewMountOptions>({
+  Component: MessageView,
+  displayName: 'MessageView'
 });
