@@ -427,7 +427,7 @@ input.search-bar-input {
 .search-bar-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: var(--portal-focus-ring);
+  box-shadow: var(--focus-ring);
 }
 
 .search-bar-clear {
