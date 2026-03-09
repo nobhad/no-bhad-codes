@@ -408,10 +408,16 @@
 }
 
 .empty-state-small {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
   text-align: center;
   padding: var(--space-3) 0;
+  min-height: var(--space-12);
 }
 
 /* Uses universal empty/loading/error state from loading.css */

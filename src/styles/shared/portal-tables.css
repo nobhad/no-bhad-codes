@@ -338,6 +338,11 @@
   min-width: 0;
 }
 
+.data-table-card .empty-state,
+.data-table-container .empty-state {
+  padding: var(--space-4);
+}
+
 /* Scroll wrapper - horizontal scroll when columns don't fit */
 .table-scroll-wrapper,
 .data-table-scroll-wrapper {
