@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { FolderKanban, Clock } from 'lucide-react';
-import { IconButton } from '@react/factories';
 import { EmptyState } from '@react/components/portal/EmptyState';
 import type { ClientProject } from '../../types';
 import { PROJECT_STATUS_CONFIG } from '../../types';
@@ -38,6 +37,14 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
     );
   }
 
+  const handleCardClick = (project: ClientProject) => {
+    if (onNavigate) {
+      onNavigate('project-detail', String(project.id));
+    } else {
+      onViewProject?.(project.id);
+    }
+  };
+
   const renderProjectCard = (project: ClientProject) => {
     const progress = project.progress ?? 0;
     const statusConfig = PROJECT_STATUS_CONFIG[project.status as keyof typeof PROJECT_STATUS_CONFIG];
@@ -45,23 +52,18 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
     return (
       <div
         key={project.id}
-        className="portal-card group"
+        className="portal-card clickable"
+        onClick={() => handleCardClick(project)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleCardClick(project); }}
       >
         <div className="project-card-header">
           <div className="project-card-info">
             <div className="project-title-row">
-              {onNavigate ? (
-                <button
-                  className="heading truncate client-nav-link"
-                  onClick={() => onNavigate('project-detail', String(project.id))}
-                >
-                  {project.project_name}
-                </button>
-              ) : (
-                <h4 className="heading truncate">
-                  {project.project_name}
-                </h4>
-              )}
+              <h4 className="heading truncate">
+                {project.project_name}
+              </h4>
               <span className="badge">
                 {statusConfig?.label || project.status}
               </span>
@@ -72,8 +74,6 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
               <span>Created {formatDate(project.created_at, 'label')}</span>
             </div>
           </div>
-
-          <IconButton action="view" className="hover-reveal" onClick={() => onViewProject?.(project.id)} title="View Project" />
         </div>
 
         {/* Progress bar */}

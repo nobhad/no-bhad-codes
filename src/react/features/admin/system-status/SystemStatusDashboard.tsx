@@ -223,6 +223,13 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _
       }
       actions={
         <>
+          <label className="status-auto-refresh-label">
+            <Checkbox
+              checked={autoRefresh}
+              onCheckedChange={(checked) => setAutoRefresh(checked === true)}
+            />
+            <span className="status-auto-refresh-text">Auto-refresh</span>
+          </label>
           <IconButton
             icon="trash-2"
             onClick={handleClearCache}
@@ -237,13 +244,6 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _
             loading={isSendingTestEmail}
             disabled={isSendingTestEmail}
           />
-          <label className="status-auto-refresh-label">
-            <Checkbox
-              checked={autoRefresh}
-              onCheckedChange={(checked) => setAutoRefresh(checked === true)}
-            />
-            <span className="status-auto-refresh-text">Auto-refresh</span>
-          </label>
           <IconButton action="refresh" onClick={loadStatus} title="Refresh" loading={isLoading} />
         </>
       }

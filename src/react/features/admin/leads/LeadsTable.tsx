@@ -459,15 +459,15 @@ export function LeadsTable({
                         <span className="identity-company">
                           {lead.company_name && lead.client_id && onNavigate ? (
                             <>
-                              <button
+                              <span
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   onNavigate('client-detail', String(lead.client_id));
                                 }}
-                                className="cell-link-btn"
+                                className="table-link"
                               >
                                 {decodeHtmlEntities(lead.company_name)}
-                              </button>
+                              </span>
                               {lead.phone && ` • ${lead.phone}`}
                             </>
                           ) : (

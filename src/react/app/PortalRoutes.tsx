@@ -12,7 +12,7 @@
  */
 
 import * as React from 'react';
-import { Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { PortalLayout } from './PortalLayout';
 import { usePortalStore } from '../stores/portal-store';
 import { usePortalAuth } from '../hooks/usePortalAuth';
@@ -140,14 +140,17 @@ function ClientDetailRoute(props: Record<string, unknown>) {
 function ProjectDetailRoute(props: Record<string, unknown>) {
   const params = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const projectId = props.projectId as number | undefined
     ?? (params.projectId ? parseInt(params.projectId, 10) : 0);
+  const initialTab = (searchParams.get('tab') || undefined) as string | undefined;
 
   if (!projectId) return <Navigate to="/projects" replace />;
 
   return (
     <ProjectDetailLazy
       projectId={projectId}
+      initialTab={initialTab}
       onBack={() => navigate('/projects')}
       onNavigate={(tab: string, entityId?: string) => {
         navigate(entityId ? `/${tab}/${entityId}` : `/${tab}`);

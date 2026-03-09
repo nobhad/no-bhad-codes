@@ -333,13 +333,15 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
       <PortalTable>
         <PortalTableHeader>
           <PortalTableRow>
-            <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
-              <Checkbox
-                checked={selection.allSelected ? true : selection.someSelected ? 'indeterminate' : false}
-                onCheckedChange={selection.toggleSelectAll}
-                aria-label="Select all"
-              />
-            </PortalTableHead>
+            {!overviewMode && (
+              <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
+                <Checkbox
+                  checked={selection.allSelected ? true : selection.someSelected ? 'indeterminate' : false}
+                  onCheckedChange={selection.toggleSelectAll}
+                  aria-label="Select all"
+                />
+              </PortalTableHead>
+            )}
             <PortalTableHead
               className="name-col"
               sortable
@@ -349,26 +351,30 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
               Workflow
             </PortalTableHead>
             <PortalTableHead className="status-col">Status</PortalTableHead>
-            <PortalTableHead
-              className="date-col"
-              sortable
-              sortDirection={sort?.column === 'updatedAt' ? sort.direction : null}
-              onClick={() => toggleSort('updatedAt')}
-            >
-              Updated
-            </PortalTableHead>
-            <PortalTableHead className="col-actions">Actions</PortalTableHead>
+            {!overviewMode && (
+              <>
+                <PortalTableHead
+                  className="date-col"
+                  sortable
+                  sortDirection={sort?.column === 'updatedAt' ? sort.direction : null}
+                  onClick={() => toggleSort('updatedAt')}
+                >
+                  Updated
+                </PortalTableHead>
+                <PortalTableHead className="col-actions">Actions</PortalTableHead>
+              </>
+            )}
           </PortalTableRow>
         </PortalTableHeader>
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={5} message={error} onRetry={refetch} />
+            <PortalTableError colSpan={overviewMode ? 2 : 5} message={error} onRetry={refetch} />
           ) : isLoading ? (
-            <PortalTableLoading colSpan={5} rows={5} />
+            <PortalTableLoading colSpan={overviewMode ? 2 : 5} rows={5} />
           ) : paginatedWorkflows.length === 0 ? (
             <PortalTableEmpty
-              colSpan={5}
+              colSpan={overviewMode ? 2 : 5}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No workflows match your filters' : 'No workflows yet'}
             />
@@ -377,18 +383,20 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
               <PortalTableRow
                 key={workflow.id}
                 clickable
-                selected={selection.isSelected(workflow)}
+                selected={!overviewMode && selection.isSelected(workflow)}
               >
-                <PortalTableCell
-                  className="col-checkbox"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Checkbox
-                    checked={selection.isSelected(workflow)}
-                    onCheckedChange={() => selection.toggleSelection(workflow)}
-                    aria-label={`Select ${workflow.name}`}
-                  />
-                </PortalTableCell>
+                {!overviewMode && (
+                  <PortalTableCell
+                    className="col-checkbox"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Checkbox
+                      checked={selection.isSelected(workflow)}
+                      onCheckedChange={() => selection.toggleSelection(workflow)}
+                      aria-label={`Select ${workflow.name}`}
+                    />
+                  </PortalTableCell>
+                )}
                 <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
                     <GitBranch className="cell-icon" />
@@ -432,22 +440,26 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
                     </PortalDropdownContent>
                   </PortalDropdown>
                 </PortalTableCell>
-                <PortalTableCell className="date-cell">
-                  {formatDate(workflow.updatedAt)}
-                </PortalTableCell>
-                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                  <div className="table-actions">
-                    <IconButton
-                      action="edit"
-                      title="Configure"
-                      onClick={() => onNavigate?.('workflow-editor', String(workflow.id))}
-                    />
-                    <IconButton
-                      action="delete"
-                      title="Delete"
-                    />
-                  </div>
-                </PortalTableCell>
+                {!overviewMode && (
+                  <>
+                    <PortalTableCell className="date-cell">
+                      {formatDate(workflow.updatedAt)}
+                    </PortalTableCell>
+                    <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
+                      <div className="table-actions">
+                        <IconButton
+                          action="edit"
+                          title="Configure"
+                          onClick={() => onNavigate?.('workflow-editor', String(workflow.id))}
+                        />
+                        <IconButton
+                          action="delete"
+                          title="Delete"
+                        />
+                      </div>
+                    </PortalTableCell>
+                  </>
+                )}
               </PortalTableRow>
             ))
           )}

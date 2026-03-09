@@ -440,15 +440,15 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                       {request.projectName && (
                         <span className="cell-subtitle">
                           {request.projectId && onNavigate ? (
-                            <button
+                            <span
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onNavigate('project-detail', String(request.projectId));
                               }}
-                              className="cell-link-btn"
+                              className="table-link"
                             >
                               {request.projectName}
-                            </button>
+                            </span>
                           ) : (
                             request.projectName
                           )}
@@ -465,15 +465,15 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                 </PortalTableCell>
                 <PortalTableCell>
                   {request.clientId && onNavigate ? (
-                    <button
+                    <span
                       onClick={(e) => {
                         e.stopPropagation();
                         onNavigate('client-detail', String(request.clientId));
                       }}
-                      className="cell-link-btn"
+                      className="table-link"
                     >
                       {request.clientName}
-                    </button>
+                    </span>
                   ) : (
                     <span>{request.clientName}</span>
                   )}

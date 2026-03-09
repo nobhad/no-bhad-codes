@@ -217,28 +217,32 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
             >
               Template
             </PortalTableHead>
-            <PortalTableHead className="category-col">Category</PortalTableHead>
+            {!overviewMode && <PortalTableHead className="category-col">Category</PortalTableHead>}
             <PortalTableHead className="status-col">Status</PortalTableHead>
-            <PortalTableHead
-              className="date-col"
-              sortable
-              sortDirection={sort?.column === 'updated_at' ? sort.direction : null}
-              onClick={() => toggleSort('updated_at')}
-            >
-              Updated
-            </PortalTableHead>
-            <PortalTableHead className="col-actions">Actions</PortalTableHead>
+            {!overviewMode && (
+              <>
+                <PortalTableHead
+                  className="date-col"
+                  sortable
+                  sortDirection={sort?.column === 'updated_at' ? sort.direction : null}
+                  onClick={() => toggleSort('updated_at')}
+                >
+                  Updated
+                </PortalTableHead>
+                <PortalTableHead className="col-actions">Actions</PortalTableHead>
+              </>
+            )}
           </PortalTableRow>
         </PortalTableHeader>
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={5} message={error} onRetry={refetch} />
+            <PortalTableError colSpan={overviewMode ? 2 : 5} message={error} onRetry={refetch} />
           ) : isLoading ? (
-            <PortalTableLoading colSpan={5} rows={5} />
+            <PortalTableLoading colSpan={overviewMode ? 2 : 5} rows={5} />
           ) : paginatedTemplates.length === 0 ? (
             <PortalTableEmpty
-              colSpan={5}
+              colSpan={overviewMode ? 2 : 5}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No templates match your filters' : 'No templates yet'}
             />
@@ -260,24 +264,30 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
                     </div>
                   </div>
                 </PortalTableCell>
-                <PortalTableCell className="category-cell">
-                  <div className="cell-with-icon">
-                    <Tag className="cell-icon-sm" />
-                    <span>{template.category}</span>
-                  </div>
-                </PortalTableCell>
+                {!overviewMode && (
+                  <PortalTableCell className="category-cell">
+                    <div className="cell-with-icon">
+                      <Tag className="cell-icon-sm" />
+                      <span>{template.category}</span>
+                    </div>
+                  </PortalTableCell>
+                )}
                 <PortalTableCell className="status-cell">
                   <StatusBadge status={template.is_active ? 'completed' : 'pending'} size="sm">
                     {template.is_active ? 'Active' : 'Inactive'}
                   </StatusBadge>
                 </PortalTableCell>
-                <PortalTableCell className="date-cell">{formatDate(template.updated_at)}</PortalTableCell>
-                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                  <div className="table-actions">
-                    <IconButton action="edit" title="Edit" />
-                    <IconButton action="delete" title="Delete" />
-                  </div>
-                </PortalTableCell>
+                {!overviewMode && (
+                  <>
+                    <PortalTableCell className="date-cell">{formatDate(template.updated_at)}</PortalTableCell>
+                    <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
+                      <div className="table-actions">
+                        <IconButton action="edit" title="Edit" />
+                        <IconButton action="delete" title="Delete" />
+                      </div>
+                    </PortalTableCell>
+                  </>
+                )}
               </PortalTableRow>
             ))
           )}

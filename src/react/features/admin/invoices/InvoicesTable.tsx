@@ -541,20 +541,19 @@ export function InvoicesTable({
                       <div className="cell-with-icon">
                         <Receipt className="cell-icon" />
                         <div className="cell-content">
-                          <span className="cell-title">{invoice.invoice_number}</span>
-                          {invoice.project_name && invoice.project_id && onNavigate ? (
-                            <button
+                          {invoice.project_id && onNavigate ? (
+                            <span
+                              className="cell-title table-link"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                onNavigate('project-detail', String(invoice.project_id));
+                                onNavigate(`project-detail/${invoice.project_id}?tab=invoices`);
                               }}
-                              className="table-link cell-subtitle"
                             >
-                              {decodeHtmlEntities(invoice.project_name)}
-                            </button>
-                          ) : invoice.project_name ? (
-                            <span className="cell-subtitle">{decodeHtmlEntities(invoice.project_name)}</span>
-                          ) : null}
+                              {invoice.invoice_number}
+                            </span>
+                          ) : (
+                            <span className="cell-title">{invoice.invoice_number}</span>
+                          )}
                         </div>
                       </div>
                     </PortalTableCell>
@@ -562,7 +561,7 @@ export function InvoicesTable({
                     {/* Client */}
                     <PortalTableCell className="client-cell">
                       {invoice.client_id && onNavigate ? (
-                        <button
+                        <span
                           onClick={(e) => {
                             e.stopPropagation();
                             onNavigate('client-detail', String(invoice.client_id));
@@ -570,7 +569,7 @@ export function InvoicesTable({
                           className="table-link"
                         >
                           {decodeHtmlEntities(invoice.client_name) || 'Unknown Client'}
-                        </button>
+                        </span>
                       ) : (
                         decodeHtmlEntities(invoice.client_name) || 'Unknown Client'
                       )}

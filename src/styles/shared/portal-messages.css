@@ -291,12 +291,12 @@
   position: relative;
 }
 
-/* Reaction picker — floats beside the trigger, vertically centered with it */
+/* Reaction picker — floats above the message bubble, anchored to msgtab-bubble-group */
 .portal .reaction-picker {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  right: calc(100% + var(--space-1));
+  bottom: calc(100% + var(--space-1));
+  left: 50%;
+  transform: translateX(-50%);
   background: var(--color-bg-tertiary);
   border: var(--portal-border);
   padding: var(--space-1);
@@ -304,6 +304,7 @@
   align-items: center;
   gap: var(--space-1);
   z-index: var(--z-index-elevated);
+  white-space: nowrap;
 }
 
 .portal .reaction-picker.hidden {

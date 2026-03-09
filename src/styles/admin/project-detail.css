@@ -1408,11 +1408,12 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   height: var(--font-size-sm);
 }
 
-/* Bubble + footer stacked vertically */
+/* Bubble + footer stacked vertically — reaction picker anchors here */
 .msgtab-bubble-group {
   display: flex;
   flex-direction: column;
   gap: var(--space-0-5);
+  position: relative;
 }
 
 /* Message bubble — border and color shared by both admin and client */
@@ -1430,6 +1431,15 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 .msgtab-bubble.is-editable:hover {
   border-color: var(--color-border-secondary);
+}
+
+/* Touch devices: prevent text selection interfering with long-press reactions */
+@media (pointer: coarse) {
+  .msgtab-bubble {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
 }
 
 /* Message content text */
