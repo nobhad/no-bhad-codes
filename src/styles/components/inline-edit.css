@@ -119,8 +119,8 @@
 }
 
 .portal .inline-edit-btn svg {
-  width: var(--icon-size-xs, 14px);
-  height: var(--icon-size-xs, 14px);
+  width: 1em;
+  height: 1em;
 }
 
 .portal .inline-edit-btn-save {
@@ -258,7 +258,7 @@
 .portal .inline-edit-actions {
   display: flex;
   align-items: center;
-  gap: var(--icon-gap-xs, 4px);
+  gap: var(--action-btn-gap);
   margin-top: var(--space-0-5, 2px);
 }
 
@@ -310,15 +310,15 @@
 }
 
 .portal .inline-edit-label .inline-edit-icon {
-  width: var(--icon-size-sm, 16px);
-  height: var(--icon-size-sm, 16px);
+  width: 1em;
+  height: 1em;
   color: var(--color-text-tertiary);
   opacity: 1;
 }
 
 .portal .inline-edit-label .inline-edit-icon svg {
-  width: var(--icon-size-sm, 16px);
-  height: var(--icon-size-sm, 16px);
+  width: 1em;
+  height: 1em;
 }
 
 .portal .inline-edit-required {
@@ -362,8 +362,8 @@
 
 /* Pencil icon - shows on hover */
 .portal .inline-edit-row .inline-edit-pencil {
-  width: var(--icon-size-xs, 12px);
-  height: var(--icon-size-xs, 12px);
+  width: 1em;
+  height: 1em;
   color: var(--color-text-tertiary);
   opacity: 0;
   transition: opacity var(--transition-fast);
@@ -431,7 +431,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--space-1);
+  gap: var(--action-btn-gap);
   margin-top: var(--space-1);
 }
 
@@ -447,8 +447,8 @@
 }
 
 .portal .inline-edit-row .inline-edit-btn svg {
-  width: var(--icon-size-sm, 16px);
-  height: var(--icon-size-sm, 16px);
+  width: 1em;
+  height: 1em;
 }
 
 .portal .inline-edit-row .inline-edit-btn.save {
