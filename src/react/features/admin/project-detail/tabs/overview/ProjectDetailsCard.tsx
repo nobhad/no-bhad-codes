@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Calendar, DollarSign } from 'lucide-react';
+import { DollarSign } from 'lucide-react';
 import { InlineEdit, InlineSelect, InlineTextarea, formatCurrencyDisplay, parseCurrencyInput } from '@react/components/portal/InlineEdit';
 import type { Project } from '../../../types';
 import { PROJECT_TYPE_LABELS } from '../../../types';
@@ -53,28 +53,22 @@ export function ProjectDetailsCard({ project, onSaveField }: ProjectDetailsCardP
 
         <div className="layout-form-field">
           <span className="field-label">Start Date</span>
-          <div className="project-info-field-value">
-            <Calendar className="icon-sm" />
-            <InlineEdit
-              value={project.start_date || ''}
-              type="date"
-              placeholder="Set start date"
-              onSave={(value) => onSaveField('start_date', value)}
-            />
-          </div>
+          <InlineEdit
+            value={project.start_date || ''}
+            type="date"
+            placeholder="Set start date"
+            onSave={(value) => onSaveField('start_date', value)}
+          />
         </div>
 
         <div className="layout-form-field">
           <span className="field-label">Target End Date</span>
-          <div className="project-info-field-value">
-            <Calendar className="icon-sm" />
-            <InlineEdit
-              value={project.end_date || ''}
-              type="date"
-              placeholder="Set end date"
-              onSave={(value) => onSaveField('end_date', value)}
-            />
-          </div>
+          <InlineEdit
+            value={project.end_date || ''}
+            type="date"
+            placeholder="Set end date"
+            onSave={(value) => onSaveField('end_date', value)}
+          />
         </div>
 
         <div className="layout-form-field">

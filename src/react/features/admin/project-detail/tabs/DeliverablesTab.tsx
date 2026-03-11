@@ -8,13 +8,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { Checkbox } from '@react/components/ui/checkbox';
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem
-} from '@react/components/ui/select';
+import { FormDropdown } from '@react/components/portal/FormDropdown';
 import { IconButton, AccordionItem } from '@react/factories';
 import { EmptyState } from '@react/components/portal/EmptyState';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
@@ -354,21 +348,19 @@ export function DeliverablesTab({
                       >
                         {task.title}
                       </span>
-                      <Select onValueChange={(value) => handleAssignTask(task.id, value)}>
-                        <SelectTrigger
+                      <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                        <FormDropdown
+                          value=""
+                          onChange={(value) => handleAssignTask(task.id, value)}
+                          options={milestones.map((m) => ({
+                            value: String(m.id),
+                            label: m.title
+                          }))}
+                          placeholder="Assign to..."
                           className="deliv-assign-trigger"
-                          onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                        >
-                          <SelectValue placeholder="Assign to..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {milestones.map((m) => (
-                            <SelectItem key={m.id} value={String(m.id)}>
-                              {m.title}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                          aria-label={`Assign "${task.title}" to milestone`}
+                        />
+                      </div>
                     </li>
                   ))}
                 </ul>

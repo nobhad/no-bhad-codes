@@ -258,21 +258,24 @@ export function ContactsTab({
           </label>
           <PortalDropdown>
             <PortalDropdownTrigger asChild>
-              <button className="form-input dropdown-trigger" type="button">
-                {CONTACT_ROLE_LABELS[formData.role as keyof typeof CONTACT_ROLE_LABELS] || formData.role}
-                <ChevronDown className="dropdown-caret" />
+              <button className="form-dropdown-trigger" type="button">
+                <span className="form-dropdown-value">
+                  {CONTACT_ROLE_LABELS[formData.role as keyof typeof CONTACT_ROLE_LABELS] || formData.role}
+                </span>
+                <ChevronDown className="form-dropdown-caret" />
               </button>
             </PortalDropdownTrigger>
             <PortalDropdownContent align="start" sideOffset={0}>
-              {Object.entries(CONTACT_ROLE_LABELS).map(([value, label]) => (
-                <PortalDropdownItem
-                  key={value}
-                  className={cn(formData.role === value && 'is-active')}
-                  onSelect={() => handleFieldChange('role', value)}
-                >
-                  {label}
-                </PortalDropdownItem>
-              ))}
+              {Object.entries(CONTACT_ROLE_LABELS)
+                .filter(([value]) => value !== formData.role)
+                .map(([value, label]) => (
+                  <PortalDropdownItem
+                    key={value}
+                    onSelect={() => handleFieldChange('role', value)}
+                  >
+                    {label}
+                  </PortalDropdownItem>
+                ))}
             </PortalDropdownContent>
           </PortalDropdown>
         </div>

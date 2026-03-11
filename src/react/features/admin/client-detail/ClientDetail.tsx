@@ -9,7 +9,8 @@ import {
   MoreHorizontal,
   Pencil,
   Archive,
-  Trash2
+  Trash2,
+  ChevronDown
 } from 'lucide-react';
 import { IconButton, TabList, TabPanel } from '@react/factories';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
@@ -28,6 +29,7 @@ import { ContactsTab } from './tabs/ContactsTab';
 import { ActivityTab } from './tabs/ActivityTab';
 import { ProjectsTab } from './tabs/ProjectsTab';
 import { NotesTab } from './tabs/NotesTab';
+import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import type { ClientDetailTab, ClientStatus } from '../types';
 import { CLIENT_STATUS_CONFIG, CLIENT_TYPE_LABELS } from '../types';
 import { buildEndpoint } from '@/constants/api-endpoints';
@@ -221,10 +223,11 @@ export function ClientDetail({
               </h1>
               <PortalDropdown>
                 <PortalDropdownTrigger asChild>
-                  <button className="btn-unstyled" aria-label="Change client status">
-                    <span className="badge">
+                  <button className="status-dropdown-trigger" aria-label="Change client status">
+                    <StatusBadge status={getStatusVariant(client.status)}>
                       {CLIENT_STATUS_CONFIG[client.status]?.label || client.status}
-                    </span>
+                    </StatusBadge>
+                    <ChevronDown className="status-dropdown-caret" />
                   </button>
                 </PortalDropdownTrigger>
                 <PortalDropdownContent>
@@ -235,7 +238,9 @@ export function ClientDetail({
                         key={status}
                         onClick={() => handleStatusChange(status as ClientStatus)}
                       >
-                        <span className="badge">{config.label}</span>
+                        <StatusBadge status={getStatusVariant(status)} size="sm">
+                          {config.label}
+                        </StatusBadge>
                       </PortalDropdownItem>
                     ))}
                 </PortalDropdownContent>
