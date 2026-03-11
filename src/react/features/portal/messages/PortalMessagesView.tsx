@@ -20,6 +20,8 @@ import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { GSAP } from '@react/config/portal-constants';
 import { usePortalMessages } from './usePortalMessages';
 import { MessageThread } from './MessageThread';
+import { useEventSource } from '@react/hooks/useEventSource';
+import { TIMING } from '@/constants/timing';
 import type { PortalMessagesProps, MessageThread as MessageThreadType } from './types';
 
 // ============================================================================
@@ -191,6 +193,42 @@ export function PortalMessagesView({
     deleteMessage
   } = usePortalMessages({ getAuthToken });
 
+  // Typing indicator state
+  const [typingUser, setTypingUser] = React.useState<string | null>(null);
+  const typingTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // SSE for real-time updates
+  useEventSource({
+    onNewMessage: React.useCallback((data: { threadId: number }) => {
+      // If the message is for the currently viewed thread, refresh
+      if (selectedThread && data.threadId === selectedThread.id) {
+        refreshMessages();
+      }
+      // Always refresh thread list to update previews/unread counts
+      refreshThreads();
+    }, [selectedThread, refreshMessages, refreshThreads]),
+
+    onTyping: React.useCallback((data: { threadId: number; isTyping: boolean; senderName: string }) => {
+      // Only show typing for the active thread from the other party
+      if (!selectedThread || data.threadId !== selectedThread.id) return;
+
+      if (data.isTyping) {
+        setTypingUser(data.senderName);
+        // Auto-clear after timeout
+        if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
+        typingTimerRef.current = setTimeout(() => {
+          setTypingUser(null);
+        }, TIMING.SEARCH_DEBOUNCE * 10);
+      } else {
+        setTypingUser(null);
+        if (typingTimerRef.current) {
+          clearTimeout(typingTimerRef.current);
+          typingTimerRef.current = null;
+        }
+      }
+    }, [selectedThread])
+  });
+
   // Search filter for threads
   const [searchQuery, setSearchQuery] = React.useState('');
 
@@ -234,6 +272,7 @@ export function PortalMessagesView({
           messages={messages}
           loading={messagesLoading}
           error={messagesError}
+          typingUser={typingUser}
           onBack={handleBackToList}
           onRefresh={refreshMessages}
           onSendMessage={sendMessage}

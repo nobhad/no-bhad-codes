@@ -19,6 +19,7 @@ import { logger } from '../../services/logger.js';
 import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
 import { MESSAGE_THREAD_COLUMNS, MESSAGE_COLUMNS, upload } from './helpers.js';
 import { BUSINESS_INFO } from '../../config/business.js';
+import { sseManager } from '../../services/sse-manager.js';
 
 const router = express.Router();
 
@@ -333,6 +334,27 @@ router.post(
         metadata: { error: emailError, threadId, subject: thread.subject }
       });
       // Continue - don't fail message sending due to email issues
+    }
+
+    // Broadcast new message via SSE to relevant users
+    const sseEvent = {
+      type: 'message:new',
+      data: {
+        threadId,
+        message: newMessage,
+        senderType: req.user!.type
+      }
+    };
+
+    if (req.user!.type === 'client') {
+      // Client sent — notify admins
+      sseManager.sendToAdmins(sseEvent);
+    } else {
+      // Admin sent — notify the thread's client
+      const clientId = getNumber(thread, 'client_id');
+      if (clientId) {
+        sseManager.sendToUser(clientId, 'client', sseEvent);
+      }
     }
 
     sendCreated(res, { messageData: newMessage }, 'Message sent successfully');

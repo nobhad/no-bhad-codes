@@ -23,6 +23,7 @@ import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { UI_LIMITS, GSAP } from '@react/config/portal-constants';
 import { formatFileSize } from '@react/utils/cardFormatters';
 import { KEYS } from '@/constants/keyboard';
+import { useSendTyping } from '@react/hooks/useEventSource';
 import type { Message, MessageThread as MessageThreadType, MessageAttachment } from './types';
 
 // ============================================================================
@@ -306,9 +307,10 @@ interface MessageComposerProps {
   onSend: (content: string, attachments?: File[]) => Promise<boolean>;
   disabled?: boolean;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+  onTyping?: (isTyping: boolean) => void;
 }
 
-function MessageComposer({ onSend, disabled, showNotification }: MessageComposerProps) {
+function MessageComposer({ onSend, disabled, showNotification, onTyping }: MessageComposerProps) {
   const [content, setContent] = useState('');
   const [attachments, setAttachments] = useState<File[]>([]);
   const [isSending, setIsSending] = useState(false);
@@ -357,12 +359,13 @@ function MessageComposer({ onSend, disabled, showNotification }: MessageComposer
     if (success) {
       setContent('');
       setAttachments([]);
+      onTyping?.(false);
     } else {
       showNotification?.('Failed to send message', 'error');
     }
 
     setIsSending(false);
-  }, [content, attachments, onSend, showNotification]);
+  }, [content, attachments, onSend, showNotification, onTyping]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === KEYS.ENTER && !e.shiftKey) {
@@ -407,8 +410,12 @@ function MessageComposer({ onSend, disabled, showNotification }: MessageComposer
           <textarea
             ref={textareaRef}
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(e) => {
+              setContent(e.target.value);
+              onTyping?.(e.target.value.length > 0);
+            }}
             onKeyDown={handleKeyDown}
+            onBlur={() => onTyping?.(false)}
             placeholder="Type a message..."
             disabled={disabled || isSending}
             rows={1}
@@ -439,6 +446,7 @@ interface MessageThreadProps {
   messages: Message[];
   loading: boolean;
   error: string | null;
+  typingUser?: string | null;
   onBack: () => void;
   onRefresh: () => void;
   onSendMessage: (content: string, attachments?: File[]) => Promise<boolean>;
@@ -456,6 +464,7 @@ export function MessageThread({
   messages,
   loading,
   error,
+  typingUser,
   onBack,
   onRefresh,
   onSendMessage,
@@ -466,6 +475,7 @@ export function MessageThread({
   const containerRef = useFadeIn<HTMLDivElement>();
   const messagesRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_DEFAULT);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const sendTyping = useSendTyping();
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -521,11 +531,24 @@ export function MessageThread({
               )}
             </div>
 
+            {/* Typing indicator */}
+            {typingUser && (
+              <div className="typing-indicator">
+                <span className="typing-indicator-dots">
+                  <span className="typing-dot" />
+                  <span className="typing-dot" />
+                  <span className="typing-dot" />
+                </span>
+                <span className="typing-indicator-text">{typingUser} is typing</span>
+              </div>
+            )}
+
             {/* Composer */}
             <MessageComposer
               onSend={onSendMessage}
               disabled={loading || !!error}
               showNotification={showNotification}
+              onTyping={(isTyping) => sendTyping(thread.id, isTyping)}
             />
           </div>
         </div>

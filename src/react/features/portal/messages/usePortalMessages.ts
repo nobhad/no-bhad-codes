@@ -15,6 +15,7 @@ import { createLogger } from '@/utils/logger';
 import { apiFetch, unwrapApiData, getCsrfToken, CSRF_HEADER_NAME } from '@/utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { usePortalFetch } from '@react/hooks/usePortalFetch';
+import { TIMING } from '@/constants/timing';
 
 const logger = createLogger('usePortalMessages');
 
@@ -41,6 +42,7 @@ interface UsePortalMessagesReturn {
   sendMessage: (content: string, attachments?: File[]) => Promise<boolean>;
   editMessage: (messageId: number, content: string) => Promise<boolean>;
   deleteMessage: (messageId: number) => Promise<boolean>;
+  markThreadRead: (threadId: number) => Promise<void>;
 }
 
 /**
@@ -85,18 +87,21 @@ export function usePortalMessages({
   }, [portalFetch]);
 
   /**
-   * Fetch messages for selected thread
+   * Fetch messages for selected thread.
+   * Pass `silent: true` for background polls to avoid loading flicker.
    */
   const fetchMessages = useCallback(
-    async (threadId: number) => {
+    async (threadId: number, options?: { silent?: boolean }) => {
       // Cancel any pending request
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
       abortControllerRef.current = new AbortController();
 
-      setMessagesLoading(true);
-      setMessagesError(null);
+      if (!options?.silent) {
+        setMessagesLoading(true);
+        setMessagesError(null);
+      }
 
       try {
         const response = await apiFetch(buildEndpoint.messageThreadMessages(threadId), {
@@ -113,13 +118,39 @@ export function usePortalMessages({
         if (error instanceof Error && error.name === 'AbortError') {
           return;
         }
-        const message = error instanceof Error ? error.message : 'Failed to load messages';
-        setMessagesError(message);
+        if (!options?.silent) {
+          const message = error instanceof Error ? error.message : 'Failed to load messages';
+          setMessagesError(message);
+        }
       } finally {
-        setMessagesLoading(false);
+        if (!options?.silent) {
+          setMessagesLoading(false);
+        }
       }
     },
     []
+  );
+
+  /**
+   * Mark a thread's messages as read
+   */
+  const markThreadRead = useCallback(
+    async (threadId: number) => {
+      try {
+        await portalFetch(buildEndpoint.messageThreadRead(threadId), {
+          method: 'PUT'
+        });
+        // Update local unread count
+        setThreads((prev) =>
+          prev.map((t) =>
+            t.id === threadId ? { ...t, unread_count: 0 } : t
+          )
+        );
+      } catch {
+        // Non-critical — silently ignore
+      }
+    },
+    [portalFetch]
   );
 
   /**
@@ -130,8 +161,12 @@ export function usePortalMessages({
       setSelectedThread(thread);
       setMessages([]);
       fetchMessages(thread.id);
+      // Mark as read when opening
+      if (thread.unread_count > 0) {
+        markThreadRead(thread.id);
+      }
     },
-    [fetchMessages]
+    [fetchMessages, markThreadRead]
   );
 
   /**
@@ -279,6 +314,17 @@ export function usePortalMessages({
     fetchThreads();
   }, [fetchThreads]);
 
+  // Poll for new messages while a thread is active
+  useEffect(() => {
+    if (!selectedThread) return;
+
+    const interval = setInterval(() => {
+      fetchMessages(selectedThread.id, { silent: true });
+    }, TIMING.MESSAGE_POLL_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [selectedThread, fetchMessages]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -301,6 +347,7 @@ export function usePortalMessages({
     refreshMessages,
     sendMessage,
     editMessage,
-    deleteMessage
+    deleteMessage,
+    markThreadRead
   };
 }
