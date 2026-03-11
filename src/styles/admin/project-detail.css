@@ -1508,6 +1508,108 @@ kbd.msgtab-kbd {
   background: var(--color-bg-elevated);
 }
 
+/* --- Message Attachments --- */
+
+/* Attachment list on a message bubble */
+.msgtab-attachments {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+}
+
+.msgtab-attachment-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border: var(--portal-border);
+  padding: var(--space-1) var(--space-2);
+  transition: background var(--transition-faster);
+}
+
+.msgtab-attachment-link:hover {
+  background: var(--color-bg-hover);
+}
+
+.msgtab-attachment-thumb {
+  max-width: 200px;
+  max-height: 150px;
+  display: block;
+  object-fit: cover;
+}
+
+.msgtab-attachment-file {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+}
+
+.msgtab-attachment-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.msgtab-attachment-size {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+/* Pending file previews in compose area */
+.msgtab-pending-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  padding: 0 0 var(--space-1);
+}
+
+.msgtab-pending-file {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-0-5) var(--space-1);
+  border: var(--portal-border);
+  font-size: var(--font-size-xs);
+  max-width: 200px;
+}
+
+.msgtab-pending-file-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Compose row with attach button + textarea */
+.msgtab-compose-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+
+.msgtab-compose-row .msgtab-textarea {
+  flex: 1;
+}
+
+.msgtab-attach-btn {
+  flex-shrink: 0;
+  margin-top: var(--space-1);
+}
+
+/* Compose footer: hint left, send button right */
+.msgtab-compose-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.msgtab-compose-footer .msgtab-send-btn {
+  width: auto;
+}
+
 /* --- Notes Tab --- */
 
 /* Notes panel — no padding, border inherited from .panel (2px) */
