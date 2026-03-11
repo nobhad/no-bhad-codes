@@ -1000,12 +1000,12 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   background: var(--portal-alpha-white-05);
 }
 
-/* Category dropdown trigger — clean button style matching InlineSelect pattern */
+/* Category dropdown trigger — absolute caret, symmetric padding */
 .files-category-trigger {
   height: var(--space-4);
-  /* Use --dropdown-padding-x on left so trigger content aligns with open items */
-  padding: var(--space-1) var(--space-2);
-  padding-left: var(--dropdown-padding-x);
+  position: relative;
+  padding: var(--space-1) var(--dropdown-padding-x);
+  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
   background: transparent;
   border: var(--portal-border);
   color: var(--color-text-primary);
@@ -1081,9 +1081,9 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   width: auto;
 }
 
-/* Drag handle opacity */
+/* Drag handle */
 .tasks-drag-handle {
-  opacity: 0.5;
+  color: var(--color-text-secondary);
 }
 
 /* Progress track */

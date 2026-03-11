@@ -618,7 +618,7 @@ p.empty-state {
    inside a table, card, or widget), add a border for
    visual definition. Tables and cards provide their own frame.
    ============================================ */
-.portal .empty-state:not(td *):not(.data-table *):not(.data-table-card *):not(.card *):not(.portal-card *):not(.overview-panel *):not(.panel *) {
+.portal .empty-state:not(td *):not(.data-table *):not(.data-table-card *):not(.card *):not(.portal-card *):not(.portal-section *):not(.overview-panel *):not(.panel *) {
   border: var(--portal-border);
   padding: var(--space-3);
   min-height: 120px;

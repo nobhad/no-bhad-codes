@@ -95,39 +95,43 @@
    Styles for inline-edit based settings components
    ===================================================== */
 
-/* Form section container - vertical stack of portal-sections */
+/* Form section container - vertical stack of portal-sections.
+   Uses flex gap; neutralize portal-section margin-bottom to avoid double spacing. */
 .portal .settings-form-section {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-section-gap);
+  gap: var(--space-3);
 }
 
-/* Individual section header with icon and title */
+.portal .settings-form-section > .portal-section {
+  margin-bottom: 0;
+}
+
+/* Settings headers: icon + title left, action button right via ml-auto */
 .portal .settings-form-section .section-header {
-  display: flex;
-  align-items: center;
-  gap: var(--icon-gap-sm, 6px);
-  margin-bottom: var(--space-2);
+  justify-content: flex-start;
 }
 
-.portal .settings-form-section .section-icon {
-  width: 1em;
-  height: 1em;
-  color: var(--color-text-tertiary);
-  flex-shrink: 0;
-}
-
-/* .section-title base styles provided by shared label aliases (portal-cards.css).
-   Only override font-size (base vs sm) and reset margin here. */
+/* Section title — reset margin, inherit everything else from root */
 .portal .settings-form-section .section-title {
   margin: 0;
-  font-size: var(--font-size-base);
+}
+
+/* Tighter spacing between children inside settings portal-sections */
+.portal .settings-form-section .portal-section > * + * {
+  margin-top: var(--space-1);
 }
 
 .portal .settings-form-section .section-description {
-  margin: 0 0 var(--space-3) 0;
+  margin: 0;
   font-size: var(--font-size-sm);
   color: var(--color-text-tertiary);
+}
+
+.portal .section-description-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
 /* Notification options list */
@@ -178,7 +182,7 @@
 }
 
 /* Notification note */
-.portal .notification-note p {
+.portal .notification-note-text {
   margin: 0;
   font-size: var(--font-size-sm);
   color: var(--color-text-tertiary);
