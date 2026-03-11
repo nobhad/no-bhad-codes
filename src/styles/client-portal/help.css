@@ -81,85 +81,21 @@
 }
 
 /* ==============================================
-   ACCORDION
+   ACCORDION (uses AccordionItem component)
    ============================================== */
 
-.help-accordion-item {
-  overflow: hidden;
-  border: var(--border-width) solid var(--color-border-primary);
-  transition: border-color var(--transition-fast);
-}
-
-.help-accordion-item.expanded {
-  border-color: var(--color-accent);
-}
-
-.help-accordion-header {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: var(--space-1-5) var(--space-2);
-  background: none;
-  border: none;
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-semibold);
-  text-align: left;
-  cursor: pointer;
-}
-
-.help-accordion-header:hover {
-  background: var(--color-bg-hover);
-}
-
-.help-accordion-icon {
+.help-category-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  margin-right: var(--space-1);
   color: var(--color-accent);
-}
-
-.help-accordion-title {
-  flex: 1;
-}
-
-.help-accordion-count {
-  margin-left: var(--space-1);
-  padding: var(--space-0-5) var(--space-1);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-secondary);
-}
-
-.help-accordion-chevron {
-  flex-shrink: 0;
-  width: 1em;
-  height: 1em;
-  color: currentColor;
-  transition: transform var(--transition-fast);
-  margin-left: var(--dropdown-caret-gap, var(--space-1));
-}
-
-.help-accordion-item.expanded .help-accordion-chevron {
-  transform: rotate(180deg);
-}
-
-.help-accordion-content {
-  display: none;
-  padding: 0 var(--space-2) var(--space-2);
-}
-
-.help-accordion-item.expanded .help-accordion-content {
-  display: block;
 }
 
 .help-accordion-articles {
   display: flex;
   flex-direction: column;
   gap: var(--space-0-5);
-  padding-left: calc(32px + var(--space-1));
+  padding-left: var(--space-2);
 }
 
 .help-accordion-article {
@@ -256,8 +192,8 @@
 
 .help-contact-actions {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  flex-direction: row;
+  align-items: center;
   gap: var(--space-1);
 }
 
@@ -320,8 +256,15 @@
   border-bottom: var(--border-width) solid var(--color-border-primary);
 }
 
-.help-article-view article h1 {
-  margin: 0 0 var(--space-2);
+.help-article-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  margin-bottom: var(--space-2);
+}
+
+.help-article-title-row h1 {
+  margin: 0;
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xl);
 }

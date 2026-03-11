@@ -140,9 +140,10 @@ body[data-page="client-portal"] {
    * FOCUS STATE COLORS
    * ---------------------------------------- */
   --focus-ring-color: var(--color-accent);
-  --focus-ring-width: var(--border-width);
+  --focus-ring-width: 1px;
   --focus-ring-offset: var(--space-0);
-  --focus-ring: 0 0 0 var(--focus-ring-width) var(--portal-alpha-primary-25);
+  /* Thin 1px ring — inherits element's own border visually, no thick glow */
+  --focus-ring: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
 
   /* ----------------------------------------
    * CARD & PANEL TOKENS

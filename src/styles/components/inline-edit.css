@@ -34,7 +34,6 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'/%3E%3Cpath d='m15 5 4 4'/%3E%3C/svg%3E");
   background-size: contain;
   background-repeat: no-repeat;
-  opacity: 0.5;
 }
 
 /* Editing state */
@@ -201,30 +200,37 @@
   outline: none;
 }
 
-.portal .inline-edit-input-compact[type="date"] {
+
+/* Date input wrapper — positions the Calendar icon as a left prefix inside the input border */
+.portal .inline-edit-date-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.portal .inline-edit-date-cal {
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 13px;
+  height: 13px;
+  z-index: 1;
+  cursor: pointer;
+  pointer-events: all;
+  color: var(--color-text-secondary);
+}
+
+/* Date input — left padding makes room for the Calendar icon */
+.portal .inline-edit-input-compact--date {
+  padding-left: 24px;
   min-width: 130px;
   color-scheme: dark;
 }
 
-/* Inline select trigger — dropdown variant of inline edit */
-.portal .inline-select-trigger {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 28px;
-  min-width: 100px;
-  width: 100%;
-  padding: 0 var(--dropdown-padding-x);
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  border: var(--border-width) solid var(--color-border-primary);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: border-color var(--transition-fast);
-}
-
-.portal .inline-select-trigger[data-state="open"] {
-  border-bottom-color: transparent;
+/* Hide the browser's built-in calendar picker indicator — use our Calendar icon instead */
+.portal .inline-edit-input-compact--date::-webkit-calendar-picker-indicator {
+  display: none;
 }
 
 /* Textarea wrapper — stacks input and actions vertically */

@@ -1274,3 +1274,20 @@ body.modal-open .dashboard-content {
 [data-page="admin"] .overview-table-section .data-table-actions {
   padding-right: var(--table-cell-padding-x, 14px);
 }
+
+/* -------------------------------------------------------
+ * Inline-edit compact input override
+ * portal-forms.css (layer(pages)) sets height: var(--space-7) on all
+ * portal inputs, overriding the 24px in layer(components)/inline-edit.css.
+ * This restores compact sizing for inline-edit fields.
+ * ------------------------------------------------------- */
+.portal .inline-edit-wrapper input {
+  height: 22px;
+  min-height: 0;
+  padding: 0 4px;
+}
+
+.portal .inline-edit-wrapper .inline-edit-input-compact--date {
+  padding-left: 24px;
+  padding-right: 4px;
+}

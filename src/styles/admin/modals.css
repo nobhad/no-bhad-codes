@@ -512,7 +512,7 @@
 
 .details-panel .status-dropdown-trigger {
   background: transparent;
-  border: var(--portal-border);
+  border: var(--portal-input-border);
 }
 
 /* Radix popper wrappers must sit above the details-panel (z-index 9600) */

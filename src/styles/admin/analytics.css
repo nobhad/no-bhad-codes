@@ -32,9 +32,9 @@
   margin-bottom: var(--space-3);
 }
 
-/* Date range selector - inline dropdown trigger */
+/* Date range selector - extra right padding for absolute caret */
 .date-range-trigger {
-  padding-right: var(--dropdown-padding-x);
+  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
 }
 
 /* Remove bottom border when dropdown is open - seamless connection */
