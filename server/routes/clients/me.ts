@@ -382,12 +382,23 @@ router.get(
     const db = getDatabase();
     const clientId = req.user!.id;
 
-    // Get active projects count
-    const projectsResult = await db.get(
-      'SELECT COUNT(*) as count FROM active_projects WHERE client_id = ? AND status IN (\'pending\', \'active\', \'in-progress\', \'in-review\')',
+    // Get all projects for this client (for project selector + count)
+    const allProjects = await db.all(
+      `SELECT id, project_name as name, status, progress,
+              start_date, end_date, preview_url,
+              created_at, updated_at
+       FROM active_projects WHERE client_id = ?
+       ORDER BY
+         CASE WHEN status IN ('active', 'in-progress', 'in-review') THEN 0 ELSE 1 END,
+         updated_at DESC`,
       [clientId]
     );
-    const activeProjects = projectsResult?.count || 0;
+    const totalProjects = allProjects.length;
+
+    // Get active projects count
+    const activeProjects = allProjects.filter(
+      (p: Record<string, unknown>) => ['pending', 'active', 'in-progress', 'in-review'].includes(p.status as string)
+    ).length;
 
     // Get pending invoices count (sent, viewed, partial, overdue)
     const invoicesResult = await db.get(
@@ -522,14 +533,64 @@ router.get(
     );
     const pendingContracts = contractsResult?.count || 0;
 
+    // Get pending questionnaires count
+    const questionnairesResult = await db.get(
+      `SELECT COUNT(*) as count FROM questionnaires q
+       JOIN active_projects p ON q.project_id = p.id
+       WHERE p.client_id = ? AND q.status = 'sent' AND q.deleted_at IS NULL`,
+      [clientId]
+    );
+    const pendingQuestionnaires = questionnairesResult?.count || 0;
+
+    // Get pending approvals count
+    const approvalsResult = await db.get(
+      `SELECT COUNT(*) as count FROM approvals a
+       JOIN active_projects p ON a.project_id = p.id
+       WHERE p.client_id = ? AND a.status = 'pending' AND a.deleted_at IS NULL`,
+      [clientId]
+    );
+    const pendingApprovals = approvalsResult?.count || 0;
+
+    // Get outstanding balance
+    const balanceResult = await db.get(
+      `SELECT COALESCE(SUM(amount_total - COALESCE(amount_paid, 0)), 0) as balance
+       FROM active_invoices
+       WHERE client_id = ? AND status IN ('sent', 'viewed', 'partial', 'overdue')`,
+      [clientId]
+    );
+    const outstandingBalance = balanceResult?.balance || 0;
+
+    // Get deliverables in review count
+    const deliverablesInReviewResult = await db.get(
+      `SELECT COUNT(*) as count FROM deliverables d
+       JOIN active_projects p ON d.project_id = p.id
+       WHERE p.client_id = ? AND d.status = 'in_review' AND d.deleted_at IS NULL`,
+      [clientId]
+    );
+    const deliverablesInReview = deliverablesInReviewResult?.count || 0;
+
     sendSuccess(res, {
       stats: {
         activeProjects,
         pendingInvoices,
         unreadMessages,
         pendingDocRequests,
-        pendingContracts
+        pendingContracts,
+        pendingQuestionnaires,
+        pendingApprovals,
+        outstandingBalance,
+        deliverablesInReview
       },
+      totalProjects,
+      projects: allProjects.map((p: Record<string, unknown>) => ({
+        id: p.id,
+        name: p.name,
+        status: p.status,
+        progress: p.progress,
+        startDate: p.start_date,
+        endDate: p.end_date,
+        previewUrl: p.preview_url
+      })),
       recentActivity: recentActivity.map((item: Record<string, unknown>) => ({
         type: item.type,
         title: item.title,
