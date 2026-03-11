@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { LoadingState } from '@react/factories';
 
@@ -18,7 +19,14 @@ type WorkSubtab = 'overview' | 'projects' | 'tasks' | 'ad-hoc-requests';
 
 export function WorkDashboard({ onNavigate, getAuthToken, showNotification }: WorkDashboardProps) {
   const containerRef = useFadeIn();
-  const [activeSubtab, setActiveSubtab] = useState<WorkSubtab>('overview');
+  const location = useLocation();
+  const [activeSubtab, setActiveSubtab] = useState<WorkSubtab>(() => {
+    const state = location.state as { subtab?: WorkSubtab } | null;
+    if (state?.subtab && ['overview', 'projects', 'tasks', 'ad-hoc-requests'].includes(state.subtab)) {
+      return state.subtab;
+    }
+    return 'overview';
+  });
 
   // Listen for subtab change events from header
   useEffect(() => {

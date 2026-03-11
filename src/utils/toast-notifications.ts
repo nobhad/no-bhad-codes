@@ -42,6 +42,8 @@ export function showToast(
     container = document.createElement('div');
     container.id = 'toast-container';
     container.className = 'toast-container';
+    container.setAttribute('aria-live', 'polite');
+    container.setAttribute('role', 'status');
     document.body.appendChild(container);
   }
 

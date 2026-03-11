@@ -166,6 +166,10 @@
   color: var(--color-accent);
 }
 
+.overview-panel-action:hover .field-label {
+  color: var(--color-accent);
+}
+
 /* Panel action icons - match action link text size (1em = --font-size-xs) */
 .overview-panel-action > :is(svg, .panel-icon) {
   width: 1em;
@@ -372,15 +376,24 @@
   gap: var(--space-2);
 }
 
+/* Overview mini-kanban: add internal padding so content clears the border-left */
+.kanban-grid .kanban-column {
+  padding: var(--space-2) var(--space-2) var(--space-1);
+}
+
 .kanban-column h4 {
-  margin-bottom: var(--space-1);
-  text-align: center;
+  margin: 0 0 var(--space-2) 0;
+  padding-bottom: var(--space-1-5);
+  text-align: left;
 }
 
 .kanban-items {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+  max-height: 300px;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 .kanban-grid .kanban-card {

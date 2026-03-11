@@ -30,6 +30,7 @@ import { formatTimeAgo } from '@/utils/time-utils';
 import { formatCurrency } from '@/utils/format-utils';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { apiFetch, unwrapApiData } from '@/utils/api-client';
+import { useNavigate } from 'react-router-dom';
 
 interface OverviewDashboardProps {
   onNavigate?: (tab: string, entityId?: string) => void;
@@ -120,6 +121,7 @@ const TasksKanban = React.memo(({ tasks }: { tasks: TaskItem[] }) => {
 
 export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: OverviewDashboardProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tasksView, setTasksView] = useState<'list' | 'kanban'>('list');
@@ -255,10 +257,13 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
           {/* Upcoming Tasks */}
           <div className="overview-panel">
             <div className="overview-panel-header">
-              <div className="overview-panel-title">
+              <button
+                className="overview-panel-title overview-panel-action"
+                onClick={() => navigate('/work', { state: { subtab: 'tasks' } })}
+              >
                 <Clock className="panel-icon" />
                 <span className="field-label">Upcoming Tasks</span>
-              </div>
+              </button>
               <div className="view-toggle">
                 <button onClick={() => setTasksView('list')} className={cn('icon-btn icon-btn-outline', tasksView === 'list' && 'active')} title="List view">
                   <List />
