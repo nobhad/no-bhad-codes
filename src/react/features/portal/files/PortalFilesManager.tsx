@@ -25,8 +25,10 @@ import {
   PortalTableEmpty
 } from '@react/components/portal/PortalTable';
 import { IconButton } from '@react/factories';
+import { FormDropdown } from '@react/components/portal/FormDropdown';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
-import { SearchFilter } from '@react/components/portal/TableFilters';
+import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
+import { PORTAL_FILES_FILTER_CONFIG } from '../shared/filterConfigs';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { FileUploadDropzone } from './FileUploadDropzone';
@@ -276,9 +278,20 @@ export function PortalFilesManager({
 
   // Filters
   const [selectedFolder, setSelectedFolder] = useState('all');
-  const [selectedProject, setSelectedProject] = useState(initialProjectId || 'all');
-  const [selectedFileType, setSelectedFileType] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterValues, setFilterValues] = useState<Record<string, string[]>>({
+    project: initialProjectId ? [initialProjectId] : [],
+    fileType: []
+  });
+
+  const setFilter = useCallback((key: string, value: string) => {
+    setFilterValues((prev) => {
+      if (value === 'all') return { ...prev, [key]: [] };
+      const current = prev[key] ?? [];
+      const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
+      return { ...prev, [key]: next };
+    });
+  }, []);
 
   // Delete confirmation
   const deleteDialog = useConfirmDialog();
@@ -286,6 +299,22 @@ export function PortalFilesManager({
 
   // Compute folder categories
   const folderCategories = useMemo(() => countFilesByFolder(files), [files]);
+
+  // Build filter sections — project section only when multiple projects
+  const filterSections = useMemo(() => {
+    const sections = [...PORTAL_FILES_FILTER_CONFIG];
+    if (projects.length > 1) {
+      sections.unshift({
+        key: 'project',
+        label: 'PROJECT',
+        options: [
+          { value: 'all', label: 'All Projects' },
+          ...projects.map((p) => ({ value: String(p.id), label: p.name }))
+        ]
+      });
+    }
+    return sections;
+  }, [projects]);
 
   // Filter files based on current selections
   const filteredFiles = useMemo(() => {
@@ -308,30 +337,34 @@ export function PortalFilesManager({
     }
 
     // Filter by project
-    if (selectedProject !== 'all') {
-      result = result.filter((file) => String(file.projectId) === selectedProject);
+    const projectFilter = filterValues.project ?? [];
+    if (projectFilter.length > 0) {
+      result = result.filter((file) => projectFilter.includes(String(file.projectId)));
     }
 
     // Filter by file type
-    if (selectedFileType !== 'all') {
+    const fileTypeFilter = filterValues.fileType ?? [];
+    if (fileTypeFilter.length > 0) {
       result = result.filter((file) => {
-        if (selectedFileType === 'image') return file.mimetype.startsWith('image/');
-        if (selectedFileType === 'document') {
-          return (
-            file.mimetype.includes('pdf') ||
-            file.mimetype.includes('document') ||
-            file.mimetype.includes('text')
-          );
-        }
-        if (selectedFileType === 'archive') {
-          return file.mimetype.includes('zip') || file.mimetype.includes('rar');
-        }
-        return true;
+        return fileTypeFilter.some((selectedFileType) => {
+          if (selectedFileType === 'image') return file.mimetype.startsWith('image/');
+          if (selectedFileType === 'document') {
+            return (
+              file.mimetype.includes('pdf') ||
+              file.mimetype.includes('document') ||
+              file.mimetype.includes('text')
+            );
+          }
+          if (selectedFileType === 'archive') {
+            return file.mimetype.includes('zip') || file.mimetype.includes('rar');
+          }
+          return true;
+        });
       });
     }
 
     return result;
-  }, [files, searchQuery, selectedFolder, selectedProject, selectedFileType]);
+  }, [files, searchQuery, selectedFolder, filterValues]);
 
   // Pagination
   const pagination = usePagination({
@@ -343,7 +376,7 @@ export function PortalFilesManager({
   const paginatedFiles = pagination.paginate(filteredFiles);
 
   // Check if any filters are active
-  const hasActiveFilters = searchQuery !== '' || selectedProject !== 'all' || selectedFileType !== 'all';
+  const hasActiveFilters = searchQuery !== '' || Object.values(filterValues).some((v) => Array.isArray(v) && v.length > 0);
 
   // fetchFiles is provided by usePortalData as refetch
 
@@ -434,8 +467,7 @@ export function PortalFilesManager({
   // Clear filters
   const handleClearFilters = useCallback(() => {
     setSearchQuery('');
-    setSelectedProject('all');
-    setSelectedFileType('all');
+    setFilterValues({ project: [], fileType: [] });
   }, []);
 
   return (
@@ -460,30 +492,11 @@ export function PortalFilesManager({
         actions={
           <>
             <SearchFilter value={searchQuery} onChange={setSearchQuery} placeholder="Search files..." />
-            <select
-              className="select"
-              value={selectedProject}
-              onChange={(e) => setSelectedProject(e.target.value)}
-              aria-label="Filter by project"
-            >
-              <option value="all">All Projects</option>
-              {projects.map((project) => (
-                <option key={project.id} value={String(project.id)}>
-                  {project.name}
-                </option>
-              ))}
-            </select>
-            <select
-              className="select"
-              value={selectedFileType}
-              onChange={(e) => setSelectedFileType(e.target.value)}
-              aria-label="Filter by file type"
-            >
-              <option value="all">All Types</option>
-              <option value="image">Images</option>
-              <option value="document">Documents</option>
-              <option value="archive">Archives</option>
-            </select>
+            <FilterDropdown
+              sections={filterSections}
+              values={filterValues}
+              onChange={(key, value) => setFilter(key, value)}
+            />
             {hasActiveFilters && (
               <IconButton action="close" onClick={handleClearFilters} title="Clear filters" />
             )}
@@ -511,19 +524,18 @@ export function PortalFilesManager({
             <div className="files-content-area">
               {/* Mobile folder selector */}
               <div className="files-mobile-select">
-                <select
-                  className="select w-full"
+                <FormDropdown
                   value={selectedFolder}
-                  onChange={(e) => setSelectedFolder(e.target.value)}
+                  onChange={setSelectedFolder}
+                  options={[
+                    { value: 'all', label: `All Files (${files.length})` },
+                    ...folderCategories.map((folder) => ({
+                      value: folder.id,
+                      label: `${folder.name} (${folder.count})`
+                    }))
+                  ]}
                   aria-label="Select folder"
-                >
-                  <option value="all">All Files ({files.length})</option>
-                  {folderCategories.map((folder) => (
-                    <option key={folder.id} value={folder.id}>
-                      {folder.name} ({folder.count})
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               {/* Files Table */}

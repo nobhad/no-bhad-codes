@@ -8,6 +8,7 @@ import * as React from 'react';
 import { FolderKanban, Calendar, DollarSign, Users } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { FormDropdown } from '@react/components/portal/FormDropdown';
 import type { StepProps, ProjectOverviewData } from '../types';
 import { PROJECT_TYPES, BUDGET_RANGES } from '../types';
 
@@ -81,19 +82,17 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
           <label className="field-label" htmlFor="project-type">
             Project Type <span className="text-primary">*</span>
           </label>
-          <select
+          <FormDropdown
             id="project-type"
             value={projectOverview.projectType}
-            onChange={(e) => handleChange('projectType', e.target.value)}
-            className={cn('select w-full', getFieldError('projectType') && 'border-primary')}
-          >
-            <option value="">Select project type...</option>
-            {PROJECT_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => handleChange('projectType', val)}
+            options={[
+              { value: '', label: 'Select project type...' },
+              ...PROJECT_TYPES.map((type) => ({ value: type, label: type }))
+            ]}
+            placeholder="Select project type..."
+            className={cn(getFieldError('projectType') && 'border-primary')}
+          />
           {getFieldError('projectType') && (
             <span className="text-xs text-primary">{getFieldError('projectType')}</span>
           )}
@@ -155,22 +154,20 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
         <div className="flex flex-col gap-1">
           <label className="field-label" htmlFor="project-budget">Budget Range</label>
           <div className="relative">
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted z-10">
               <DollarSign className="icon-xs" />
             </div>
-            <select
+            <FormDropdown
               id="project-budget"
               value={projectOverview.budget}
-              onChange={(e) => handleChange('budget', e.target.value)}
-              className="select w-full pl-10"
-            >
-              <option value="">Select budget range...</option>
-              {BUDGET_RANGES.map((range) => (
-                <option key={range} value={range}>
-                  {range}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => handleChange('budget', val)}
+              options={[
+                { value: '', label: 'Select budget range...' },
+                ...BUDGET_RANGES.map((range) => ({ value: range, label: range }))
+              ]}
+              placeholder="Select budget range..."
+              className="pl-10"
+            />
           </div>
           <span className="text-xs text-muted">
             This helps us recommend the right scope

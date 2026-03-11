@@ -8,6 +8,7 @@ import * as React from 'react';
 import { User, Mail, Phone, Building2, Globe, Clock } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { FormDropdown } from '@react/components/portal/FormDropdown';
 import type { StepProps, BasicInfoData } from '../types';
 import { TIMEZONES } from '../types';
 
@@ -125,21 +126,16 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
         <div className="flex flex-col gap-1">
           <label className="field-label" htmlFor="basic-timezone">Timezone</label>
           <div className="relative">
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted z-10">
               <Clock className="icon-xs" />
             </div>
-            <select
+            <FormDropdown
               id="basic-timezone"
               value={basicInfo.timezone}
-              onChange={(e) => handleChange('timezone', e.target.value)}
-              className="select w-full pl-10"
-            >
-              {TIMEZONES.map((tz) => (
-                <option key={tz.value} value={tz.value}>
-                  {tz.label}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => handleChange('timezone', val)}
+              options={TIMEZONES.map((tz) => ({ value: tz.value, label: tz.label }))}
+              className="pl-10"
+            />
           </div>
         </div>
       </div>
