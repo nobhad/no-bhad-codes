@@ -57,6 +57,9 @@ export const TIMING = {
   /** Message send debounce */
   MESSAGE_DEBOUNCE: 300,
 
+  /** Message polling interval when a thread is active */
+  MESSAGE_POLL_INTERVAL: 7000,
+
   /** Page transition duration */
   PAGE_TRANSITION: 600,
 
