@@ -746,6 +746,13 @@
   padding: 0;
   border-radius: 0;
   box-shadow: none;
+  gap: 0; /* Override gap — messaging page has its own layout */
+}
+
+/* Inside messaging page, thread/compose wrappers don't need their own borders */
+.messaging-main-area .msgtab-thread-area,
+.messaging-main-area .msgtab-compose-area {
+  border: none;
 }
 
 /* Scroll area fills remaining space and scrolls */
