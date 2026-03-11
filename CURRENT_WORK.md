@@ -1,8 +1,8 @@
-# Current Work - March 9, 2026
+# Current Work - March 11, 2026
 
 ## Current System Status
 
-**Last Updated**: March 9, 2026
+**Last Updated**: March 11, 2026
 
 ### Server
 
@@ -94,6 +94,70 @@ Removed duplicate import.
 - `src/react/features/admin/types.ts` — `budget` type: `number` → `string`
 - `src/react/features/admin/projects/ProjectsTable.tsx` — budget sort fix
 - `src/react/features/portal/messages/usePortalMessages.ts` — removed duplicate import
+
+---
+
+## Completed - Dashboard Kanban & Navigation Fixes
+
+**Status:** COMPLETE
+
+### Issues Fixed
+
+1. **Kanban columns not scrollable** — `.kanban-items` had no `max-height` or `overflow-y`. Columns were cut off when tasks exceeded visible height.
+2. **Kanban heading styling** — Column headings had browser-default top margin and a `border-bottom` that intersected with `border-left` from `portal-kanban.css`. Heading and border visually overlapped.
+3. **"Upcoming Tasks" heading not navigating to Tasks subtab** — Clicking the heading navigated to Work overview instead of the Tasks subtab. Three approaches failed (setTimeout dispatch, sessionStorage, module-level variable) due to React Strict Mode. Fixed with `navigate('/work', { state: { subtab: 'tasks' } })` + `useLocation().state` in `WorkDashboard` `useState` initializer.
+4. **Heading hover text not turning red** — Added `.overview-panel-action:hover .field-label { color: var(--color-accent); }`.
+
+### Files Modified
+
+- `src/styles/admin/overview-layout.css` — kanban padding, h4 margin reset, `max-height`/`overflow-y` on `.kanban-items`, hover color rule
+- `src/react/features/admin/overview/OverviewDashboard.tsx` — "Upcoming Tasks" title converted to `<button>` using `navigate` with location state
+- `src/react/features/admin/work/WorkDashboard.tsx` — `useState` initializer reads `location.state.subtab` via `useLocation`
+
+---
+
+## Completed - Validation & Status Mismatch Fixes
+
+**Status:** COMPLETE
+
+### Issues Fixed
+
+1. **Task status update failing** — `validateRequest(ValidationSchemas.task)` required `title`; status-only PUTs (`{ status: 'in_progress' }`) returned 400. Removed `{ type: 'required' }` from `task.title`.
+2. **Task status values mismatch** — Server `allowedValues` had `'in-progress'` (hyphen) and `'review'`, but frontend/DB uses `'in_progress'` (underscore) and `'cancelled'`. Fixed to match frontend `TASK_STATUS_CONFIG`.
+3. **Lead status update failing** — Server `validStatuses` array was missing `'pending'`; frontend `LEAD_STATUS_CONFIG` includes it.
+4. **Project status values mismatch** — Both `projectCreate` and `projectUpdate` schemas had `'lead'` (nonexistent) and were missing `'in-progress'` and `'in-review'`. Fixed to match DB CHECK constraint.
+
+### Files Modified
+
+- `server/middleware/validation.ts` — task title required removed; task/project status `allowedValues` corrected
+- `server/routes/admin/leads.ts` — added `'pending'` to `validStatuses`
+
+---
+
+## In Progress - Universal Dropdown Unification
+
+**Status:** ACTIVE
+
+### Completed
+
+- [x] All native `<select>` elements converted to `FormDropdown` (admin + portal)
+- [x] Radix Select in DeliverablesTab converted to `FormDropdown`
+- [x] QuestionnaireForm hand-rolled select converted to `FormDropdown`
+- [x] ContactsTab role dropdown: hide-selected-option filter + `form-dropdown-trigger` classes
+- [x] ClientDetail status dropdown: `StatusBadge` + `status-dropdown-caret`
+- [x] ProjectDetail status dropdown: `status-dropdown-caret` (was `dropdown-caret`)
+- [x] Absolute caret positioning for ALL dropdown types (status, form, custom, table, modal, pagination)
+- [x] `text-transform: none` universal rule for all dropdown triggers and items
+- [x] Normalized value comparison in `FormDropdown` and `InlineSelect` (handles DB format mismatches)
+- [x] Removed orphaned CSS: `.qform-select-*`, `.inline-select-trigger`
+- [x] Design docs updated (DESIGN_SYSTEM.md, CSS_ARCHITECTURE.md)
+
+### Remaining Outliers (native `<select>` not yet converted)
+
+- [ ] `admin/help/HelpCenter.tsx` — category filter
+- [ ] `admin/data-quality/ValidationErrorsTab.tsx` — error type filter
+- [ ] `admin/webhooks/WebhookFormModal.tsx` — HTTP method + event selects
+- [ ] `admin/integrations/NotificationFormModal.tsx` — channel + event selects
 
 ---
 
