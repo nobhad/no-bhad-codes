@@ -166,16 +166,6 @@ export function DeliverablesTab({
           <IconButton action="add" onClick={() => setShowAddForm(true)} title="Add Milestone" />
         </div>
 
-        <div className="progress-field">
-          <div className="progress-field-header">
-            <span className="field-label">Progress</span>
-            <span className="text-muted">{progress}% ({completedCount}/{totalCount})</span>
-          </div>
-          <div className="progress-bar-sm">
-            <div className="progress-fill" style={{ width: `${progress}%` }} />
-          </div>
-        </div>
-
         {/* Add Milestone Form */}
         {showAddForm && (
           <MilestoneAddForm
