@@ -241,7 +241,7 @@ export function PortalAdHocRequests({
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
         title="New Ad-Hoc Request"
-        description="Describe what you need and we'll provide a quote"
+        description="Describe what you need and Noelle will provide a quote"
         size="lg"
       >
         <NewRequestForm

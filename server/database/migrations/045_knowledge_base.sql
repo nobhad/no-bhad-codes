@@ -98,7 +98,7 @@ Your client portal is your central hub for managing your project with us. Here''
 View your project status, recent activity, and quick stats at a glance.
 
 ## Messages
-Communicate directly with our team. All conversations are saved for easy reference.
+Communicate directly with Noelle. All conversations are saved for easy reference.
 
 ## Files
 Upload and download project files securely. You can organize files and track versions.

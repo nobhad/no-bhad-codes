@@ -206,7 +206,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
           id="req-additional-notes"
           value={requirements.additionalNotes}
           onChange={(e) => handleChange('additionalNotes', e.target.value)}
-          placeholder="Anything else we should know about your requirements?"
+          placeholder="Anything else Noelle should know about your requirements?"
           rows={3}
           className="textarea"
         />

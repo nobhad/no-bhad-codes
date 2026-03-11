@@ -103,8 +103,8 @@ INSERT OR IGNORE INTO email_templates (id, name, description, category, subject,
 -- Approval request
 (4, 'approval_request', 'Request for client approval on a deliverable', 'project',
  'Approval Required: {{deliverable.name}}',
- '<h1>Approval Required</h1><p>Dear {{client.name}},</p><p>We have completed <strong>{{deliverable.name}}</strong> for your project <strong>{{project.name}}</strong> and it is ready for your review.</p><p><a href="{{approval.url}}" style="background: #00aff0; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Review & Approve</a></p><p>Please review at your earliest convenience so we can proceed with the next phase.</p><p>Best regards,<br>{{company.name}}</p>',
- 'Approval Required\n\nDear {{client.name}},\n\nWe have completed {{deliverable.name}} for your project {{project.name}} and it is ready for your review.\n\nReview here: {{approval.url}}\n\nPlease review at your earliest convenience so we can proceed with the next phase.\n\nBest regards,\n{{company.name}}',
+ '<h1>Approval Required</h1><p>Dear {{client.name}},</p><p>Noelle has completed <strong>{{deliverable.name}}</strong> for your project <strong>{{project.name}}</strong> and it is ready for your review.</p><p><a href="{{approval.url}}" style="background: #00aff0; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Review & Approve</a></p><p>Please review at your earliest convenience so we can proceed with the next phase.</p><p>Best regards,<br>{{company.name}}</p>',
+ 'Approval Required\n\nDear {{client.name}},\n\nNoelle has completed {{deliverable.name}} for your project {{project.name}} and it is ready for your review.\n\nReview here: {{approval.url}}\n\nPlease review at your earliest convenience so we can proceed with the next phase.\n\nBest regards,\n{{company.name}}',
  '[{"name": "client.name", "description": "Client name"}, {"name": "project.name", "description": "Project name"}, {"name": "deliverable.name", "description": "Deliverable name"}, {"name": "approval.url", "description": "Approval URL"}, {"name": "company.name", "description": "Company name"}]',
  TRUE),
 
@@ -119,7 +119,7 @@ INSERT OR IGNORE INTO email_templates (id, name, description, category, subject,
 -- Password reset
 (6, 'password_reset', 'Password reset request', 'notification',
  'Reset Your Password',
- '<h1>Password Reset</h1><p>We received a request to reset your password.</p><p><a href="{{reset.url}}" style="background: #00aff0; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Reset Password</a></p><p>This link will expire in {{reset.expires_hours}} hours.</p><p>If you did not request this reset, please ignore this email.</p><p>Best regards,<br>{{company.name}}</p>',
- 'Password Reset\n\nWe received a request to reset your password.\n\nReset here: {{reset.url}}\n\nThis link will expire in {{reset.expires_hours}} hours.\n\nIf you did not request this reset, please ignore this email.\n\nBest regards,\n{{company.name}}',
+ '<h1>Password Reset</h1><p>A request was received to reset your password.</p><p><a href="{{reset.url}}" style="background: #00aff0; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Reset Password</a></p><p>This link will expire in {{reset.expires_hours}} hours.</p><p>If you did not request this reset, please ignore this email.</p><p>Best regards,<br>{{company.name}}</p>',
+ 'Password Reset\n\nA request was received to reset your password.\n\nReset here: {{reset.url}}\n\nThis link will expire in {{reset.expires_hours}} hours.\n\nIf you did not request this reset, please ignore this email.\n\nBest regards,\n{{company.name}}',
  '[{"name": "reset.url", "description": "Password reset URL"}, {"name": "reset.expires_hours", "description": "Hours until link expires"}, {"name": "company.name", "description": "Company name"}]',
  TRUE);
