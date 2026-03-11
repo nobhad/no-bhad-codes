@@ -6,7 +6,6 @@ import {
   Package,
   MessageSquare,
   Receipt,
-  CheckSquare,
   FileSignature,
   StickyNote,
   ClipboardList,
@@ -36,7 +35,6 @@ import { FilesTab } from './tabs/FilesTab';
 import { DeliverablesTab } from './tabs/DeliverablesTab';
 import { MessagesTab } from './tabs/MessagesTab';
 import { InvoicesTab } from './tabs/InvoicesTab';
-import { TasksTab } from './tabs/TasksTab';
 import { ContractTab } from './tabs/ContractTab';
 import { NotesTab } from './tabs/NotesTab';
 import { IntakeTab } from './tabs/IntakeTab';
@@ -71,7 +69,6 @@ const TAB_ICONS: Record<ProjectDetailTab, React.ElementType> = {
   deliverables: Package,
   messages: MessageSquare,
   invoices: Receipt,
-  tasks: CheckSquare,
   contract: FileSignature,
   notes: StickyNote,
   intake: ClipboardList
@@ -84,7 +81,6 @@ const TABS: Array<{ id: ProjectDetailTab; label: string }> = [
   { id: 'deliverables', label: 'Deliverables' },
   { id: 'messages', label: 'Messages' },
   { id: 'invoices', label: 'Invoices' },
-  { id: 'tasks', label: 'Tasks' },
   { id: 'contract', label: 'Contract' },
   { id: 'notes', label: 'Notes' },
   { id: 'intake', label: 'Intake' }
@@ -104,7 +100,7 @@ export function ProjectDetail({
   initialTab
 }: ProjectDetailProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const validTabs: ProjectDetailTab[] = ['overview', 'files', 'deliverables', 'messages', 'invoices', 'tasks', 'contract', 'notes', 'intake'];
+  const validTabs: ProjectDetailTab[] = ['overview', 'files', 'deliverables', 'messages', 'invoices', 'contract', 'notes', 'intake'];
   const resolvedInitialTab = validTabs.includes(initialTab as ProjectDetailTab) ? (initialTab as ProjectDetailTab) : 'overview';
   const [activeTab, setActiveTab] = useState<ProjectDetailTab>(resolvedInitialTab);
 
@@ -112,6 +108,7 @@ export function ProjectDetail({
   const {
     project,
     milestones,
+    tasks,
     files,
     invoices,
     messages,
@@ -126,6 +123,8 @@ export function ProjectDetail({
     updateMilestone,
     deleteMilestone,
     toggleMilestoneComplete,
+    toggleTaskComplete,
+    assignTaskToMilestone,
     uploadFile,
     deleteFile,
     toggleFileSharing,
@@ -365,7 +364,14 @@ export function ProjectDetail({
       <TabPanel tabId="deliverables" isActive={activeTab === 'deliverables'}>
         <DeliverablesTab
           milestones={milestones}
+          tasks={tasks}
           progress={progress}
+          onToggleTaskComplete={toggleTaskComplete}
+          onAssignTaskToMilestone={assignTaskToMilestone}
+          onAddMilestone={addMilestone}
+          onUpdateMilestone={updateMilestone}
+          onDeleteMilestone={deleteMilestone}
+          showNotification={showNotification}
         />
       </TabPanel>
 
@@ -390,17 +396,6 @@ export function ProjectDetail({
         />
       </TabPanel>
 
-      <TabPanel tabId="tasks" isActive={activeTab === 'tasks'}>
-        <TasksTab
-          milestones={milestones}
-          progress={progress}
-          onAddMilestone={addMilestone}
-          onUpdateMilestone={updateMilestone}
-          onDeleteMilestone={deleteMilestone}
-          onToggleMilestone={toggleMilestoneComplete}
-          showNotification={showNotification}
-        />
-      </TabPanel>
 
       <TabPanel tabId="contract" isActive={activeTab === 'contract'}>
         <ContractTab

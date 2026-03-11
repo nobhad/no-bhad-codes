@@ -8,7 +8,6 @@ export { FilesTab } from './FilesTab';
 export { DeliverablesTab } from './DeliverablesTab';
 export { MessagesTab } from './MessagesTab';
 export { InvoicesTab } from './InvoicesTab';
-export { TasksTab } from './TasksTab';
 export { ContractTab } from './ContractTab';
 export { NotesTab } from './NotesTab';
 export { IntakeTab } from './IntakeTab';

@@ -6,42 +6,47 @@ import type { ProjectMilestone, DeliverableEntry } from '../../../types';
 import { NOTIFICATIONS } from '@/constants/notifications';
 import { KEYS } from '@/constants/keyboard';
 
-interface MilestoneFormState {
+interface MilestoneEditFormState {
   title: string;
   description: string;
   dueDate: string;
   deliverables: DeliverableEntry[];
 }
 
-const INITIAL_FORM_STATE: MilestoneFormState = {
-  title: '',
-  description: '',
-  dueDate: '',
-  deliverables: []
-};
+function milestoneToFormState(milestone: ProjectMilestone): MilestoneEditFormState {
+  return {
+    title: milestone.title,
+    description: milestone.description ?? '',
+    dueDate: milestone.due_date ?? '',
+    deliverables: milestone.deliverables?.map((d) => ({ ...d })) ?? []
+  };
+}
 
-interface MilestoneAddFormProps {
-  onAdd: (milestone: Omit<ProjectMilestone, 'id' | 'project_id'>) => Promise<boolean>;
+interface MilestoneEditFormProps {
+  milestone: ProjectMilestone;
+  onSave: (id: number, updates: Partial<ProjectMilestone>) => Promise<boolean>;
   onCancel: () => void;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
 /**
- * MilestoneAddForm
- * Form for creating a new milestone with optional deliverables
+ * MilestoneEditForm
+ * Inline form for editing a milestone's title, description, due date,
+ * and managing its deliverable items (add/remove/rename).
  */
-export function MilestoneAddForm({ onAdd, onCancel, showNotification }: MilestoneAddFormProps) {
-  const [formState, setFormState] = useState<MilestoneFormState>(INITIAL_FORM_STATE);
+export function MilestoneEditForm({ milestone, onSave, onCancel, showNotification }: MilestoneEditFormProps) {
+  const [formState, setFormState] = useState<MilestoneEditFormState>(() => milestoneToFormState(milestone));
   const [newDeliverableText, setNewDeliverableText] = useState('');
-  const [isAdding, setIsAdding] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const updateField = useCallback(
-    <K extends keyof MilestoneFormState>(field: K, value: MilestoneFormState[K]) => {
+    <K extends keyof MilestoneEditFormState>(field: K, value: MilestoneEditFormState[K]) => {
       setFormState((prev) => ({ ...prev, [field]: value }));
     },
     []
   );
 
+  // Deliverable list management
   const addDeliverable = useCallback(() => {
     const text = newDeliverableText.trim();
     if (!text) return;
@@ -59,11 +64,12 @@ export function MilestoneAddForm({ onAdd, onCancel, showNotification }: Mileston
     }));
   }, []);
 
-  const resetAndClose = useCallback(() => {
-    setFormState(INITIAL_FORM_STATE);
-    setNewDeliverableText('');
-    onCancel();
-  }, [onCancel]);
+  const updateDeliverableText = useCallback((index: number, text: string) => {
+    setFormState((prev) => ({
+      ...prev,
+      deliverables: prev.deliverables.map((d, i) => (i === index ? { ...d, text } : d))
+    }));
+  }, []);
 
   const handleSubmit = useCallback(async () => {
     if (!formState.title.trim()) {
@@ -71,28 +77,27 @@ export function MilestoneAddForm({ onAdd, onCancel, showNotification }: Mileston
       return;
     }
 
-    setIsAdding(true);
-    const success = await onAdd({
+    setIsSaving(true);
+    const success = await onSave(milestone.id, {
       title: formState.title.trim(),
       description: formState.description.trim() || undefined,
       due_date: formState.dueDate || undefined,
-      is_completed: false,
-      deliverables: formState.deliverables.length > 0 ? formState.deliverables : undefined
+      deliverables: formState.deliverables
     });
-    setIsAdding(false);
+    setIsSaving(false);
 
     if (success) {
-      resetAndClose();
-      showNotification?.(NOTIFICATIONS.milestone.ADDED, 'success');
+      showNotification?.(NOTIFICATIONS.milestone.UPDATED, 'success');
+      onCancel();
     } else {
-      showNotification?.(NOTIFICATIONS.milestone.ADD_FAILED, 'error');
+      showNotification?.(NOTIFICATIONS.milestone.UPDATE_FAILED, 'error');
     }
-  }, [formState, onAdd, showNotification, resetAndClose]);
+  }, [formState, milestone.id, onSave, onCancel, showNotification]);
 
   return (
     <div className="panel">
       <h4 className="heading tasks-form-heading">
-        New Milestone
+        Edit Milestone
       </h4>
 
       <div className="layout-stack">
@@ -119,7 +124,7 @@ export function MilestoneAddForm({ onAdd, onCancel, showNotification }: Mileston
           className="tasks-date-input"
         />
 
-        {/* Deliverables */}
+        {/* Deliverables management */}
         <div className="layout-stack gap-2">
           <span className="field-label">Deliverables</span>
 
@@ -127,7 +132,12 @@ export function MilestoneAddForm({ onAdd, onCancel, showNotification }: Mileston
             <ul className="deliv-edit-list">
               {formState.deliverables.map((d, idx) => (
                 <li key={idx} className="deliv-edit-item">
-                  <span className="flex-1">{d.text}</span>
+                  <PortalInput
+                    value={d.text}
+                    onChange={(e) => updateDeliverableText(idx, e.target.value)}
+                    className="flex-1"
+                    aria-label={`Deliverable ${idx + 1}`}
+                  />
                   <button
                     type="button"
                     className="icon-btn"
@@ -166,11 +176,11 @@ export function MilestoneAddForm({ onAdd, onCancel, showNotification }: Mileston
         </div>
 
         <div className="layout-row-end pd-mt-2">
-          <PortalButton variant="ghost" onClick={resetAndClose}>
+          <PortalButton variant="ghost" onClick={onCancel}>
             Cancel
           </PortalButton>
-          <PortalButton onClick={handleSubmit} loading={isAdding}>
-            Add Milestone
+          <PortalButton onClick={handleSubmit} loading={isSaving}>
+            Save Changes
           </PortalButton>
         </div>
       </div>

@@ -20,6 +20,12 @@ export const NOTIFICATIONS = {
     TITLE_REQUIRED: 'Please enter a title'
   },
 
+  // Deliverable messages
+  deliverable: {
+    TOGGLED: 'Deliverable updated',
+    TOGGLE_FAILED: 'Failed to update deliverable'
+  },
+
   // Note messages
   note: {
     ADDED: 'Note added',

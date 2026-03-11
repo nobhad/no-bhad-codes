@@ -1178,36 +1178,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* --- Deliverables Tab --- */
 
-/* Deliverables milestone header */
-.deliv-milestone-header {
-  padding: var(--space-4);
-  border-bottom: var(--portal-border);
-}
-
-/* Milestone title row: font-size matches h4 so 1em icon = heading size */
-.deliv-milestone-title-row {
-  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
-}
-
-/* Icon sized to 1em — inherits heading size from title row context */
-.deliv-milestone-icon {
-  width: 1em;
-  height: 1em;
-  flex-shrink: 0;
-}
-
-/* Deliverables milestone description */
-.deliv-milestone-desc {
-  margin-top: var(--space-1);
-  font-size: var(--font-size-sm);
-}
-
-/* Deliverables content area */
-.deliv-content {
-  padding: var(--space-4);
-}
-
-/* Deliverables list */
+/* Deliverables checklist */
 .deliv-list {
   display: flex;
   flex-direction: column;
@@ -1224,17 +1195,49 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   gap: var(--space-3);
 }
 
-/* Deliverables legend */
-.deliv-legend {
+.deliv-edit-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
   display: flex;
-  align-items: center;
-  gap: var(--space-6);
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
-.deliv-legend-item {
+.deliv-edit-item {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+}
+
+/* Compact milestone assignment dropdown in unassigned tasks list */
+.deliv-assign-trigger {
+  flex-shrink: 0;
+  width: var(--status-dropdown-width);
+  min-width: var(--status-dropdown-width);
+  max-width: var(--status-dropdown-width);
+  height: var(--space-5);
+  padding: 0 var(--space-2);
+  font-size: var(--font-size-xs);
+  line-height: var(--space-5);
+  display: inline-flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+/* Push caret icon to right edge */
+.deliv-assign-trigger > span:first-child {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Dropdown content matches trigger width */
+.deliv-assign-trigger ~ [data-radix-popper-content-wrapper] {
+  width: var(--status-dropdown-width) !important;
+  min-width: var(--status-dropdown-width) !important;
 }
 
 /* --- Messages Tab --- */

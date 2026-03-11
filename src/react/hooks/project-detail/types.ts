@@ -10,6 +10,7 @@ import type {
   Message,
   MessageReaction
 } from '@react/features/admin/types';
+import type { ProjectTaskResponse } from '@/types/api';
 
 /** Auth token getter function signature */
 export type AuthTokenGetter = (() => string | null) | undefined;
@@ -30,6 +31,7 @@ export interface UseProjectDetailOptions extends ProjectDetailHookOptions {
 export interface ProjectDetailData {
   project: Project | null;
   milestones: ProjectMilestone[];
+  tasks: ProjectTaskResponse[];
   files: ProjectFile[];
   invoices: Invoice[];
   messages: Message[];
@@ -41,6 +43,8 @@ export interface UseProjectDetailReturn {
   project: Project | null;
   /** Project milestones */
   milestones: ProjectMilestone[];
+  /** Project tasks (linked to milestones) */
+  tasks: ProjectTaskResponse[];
   /** Project files */
   files: ProjectFile[];
   /** Project invoices */
@@ -69,6 +73,12 @@ export interface UseProjectDetailReturn {
   deleteMilestone: (id: number) => Promise<boolean>;
   /** Toggle milestone completion */
   toggleMilestoneComplete: (id: number) => Promise<boolean>;
+  /** Toggle individual deliverable completion */
+  toggleDeliverable: (milestoneId: number, deliverableIndex: number) => Promise<boolean>;
+  /** Toggle task completion status */
+  toggleTaskComplete: (taskId: number) => Promise<boolean>;
+  /** Assign a task to a milestone */
+  assignTaskToMilestone: (taskId: number, milestoneId: number) => Promise<boolean>;
   /** Upload file */
   uploadFile: (file: File, category?: string) => Promise<boolean>;
   /** Delete file */

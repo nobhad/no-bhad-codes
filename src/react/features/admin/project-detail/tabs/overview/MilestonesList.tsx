@@ -260,8 +260,8 @@ export function MilestonesList({
                         <ul className="milestone-deliverables">
                           {milestone.deliverables.map((deliverable, idx) => (
                             <li key={idx} className="milestone-description">
-                              <span>•</span>
-                              {deliverable}
+                              <span>{deliverable.completed ? '✓' : '•'}</span>
+                              {deliverable.text}
                             </li>
                           ))}
                         </ul>
