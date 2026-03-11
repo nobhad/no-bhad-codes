@@ -63,7 +63,7 @@ export function ProfileForm({ profile, onUpdate }: ProfileFormProps) {
   }, [onUpdate]);
 
   return (
-    <div className="settings-form-section">
+    <>
       {/* Contact Information Section */}
       <div className="portal-section">
         <div className="section-header">
@@ -145,6 +145,6 @@ export function ProfileForm({ profile, onUpdate }: ProfileFormProps) {
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 }

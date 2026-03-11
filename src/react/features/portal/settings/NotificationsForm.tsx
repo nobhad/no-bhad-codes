@@ -114,9 +114,15 @@ export function NotificationsForm({ preferences, onUpdate }: NotificationsFormPr
           </h3>
         </div>
 
-        <p className="section-description">
-          Choose which email notifications you would like to receive.
-        </p>
+        <div className="section-description-group">
+          <p className="section-description">
+            Choose which email notifications you would like to receive.
+          </p>
+          <p className="notification-note-text">
+            <strong>Note:</strong> Some critical notifications
+            (such as security alerts and payment confirmations) cannot be disabled and will always be sent.
+          </p>
+        </div>
 
         <div className="notification-options">
           {NOTIFICATION_OPTIONS.map((option) => {
@@ -154,13 +160,6 @@ export function NotificationsForm({ preferences, onUpdate }: NotificationsFormPr
         </div>
       </div>
 
-      {/* Info Note */}
-      <div className="notification-note">
-        <p>
-          <strong>Note:</strong> Some critical notifications
-          (such as security alerts and payment confirmations) cannot be disabled and will always be sent.
-        </p>
-      </div>
     </div>
   );
 }

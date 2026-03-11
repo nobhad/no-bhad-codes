@@ -121,8 +121,8 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
         setActiveTab(subtab);
       }
     };
-    window.addEventListener(SUBTAB_EVENT, handler);
-    return () => window.removeEventListener(SUBTAB_EVENT, handler);
+    document.addEventListener(SUBTAB_EVENT, handler);
+    return () => document.removeEventListener(SUBTAB_EVENT, handler);
   }, []);
 
   // --- Update handlers ---

@@ -85,15 +85,15 @@ export function PortalSettings({ getAuthToken, showNotification }: PortalSetting
   return (
     <div ref={containerRef} className="section">
       <TabPanel tabId="profile" isActive={activeTab === 'profile'}>
-        {profile && (
-          <ProfileForm
-            profile={profile}
-            onUpdate={handleProfileUpdate}
-          />
-        )}
+        <div className="settings-form-section">
+          {profile && (
+            <ProfileForm
+              profile={profile}
+              onUpdate={handleProfileUpdate}
+            />
+          )}
 
-        {/* Contacts sub-section under profile */}
-        <div className="mt-6 pt-6 border-t border-[var(--portal-border)]">
+          {/* Contacts sub-section under profile */}
           <ContactsSection
             portalFetch={portalFetch}
             showNotification={showNotification}
