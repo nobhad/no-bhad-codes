@@ -236,11 +236,11 @@ export function ProjectDetail({
               </h1>
               <PortalDropdown>
                 <PortalDropdownTrigger asChild>
-                  <button className="files-category-trigger dropdown-trigger" aria-label="Change project status">
+                  <button className="status-dropdown-trigger" aria-label="Change project status">
                     <StatusBadge status={getStatusVariant(project.status)}>
                       {PROJECT_STATUS_CONFIG[project.status]?.label || project.status}
                     </StatusBadge>
-                    <ChevronDown className="dropdown-caret" />
+                    <ChevronDown className="status-dropdown-caret" />
                   </button>
                 </PortalDropdownTrigger>
                 <PortalDropdownContent>

@@ -1,13 +1,11 @@
 import * as React from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Search,
   MoreHorizontal,
-  Clock,
   User,
   Users,
   Inbox,
-  Archive,
   Star
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
@@ -17,6 +15,8 @@ import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { unwrapApiData, apiFetch, apiPost, apiPut } from '@/utils/api-client';
 import { MessageThread } from '@react/factories';
+import { FilterDropdown } from '@react/components/portal/TableFilters';
+import type { FilterSection } from '@react/components/portal/TableFilters';
 
 const logger = createLogger('MessageView');
 
@@ -68,7 +68,23 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState<'all' | 'unread' | 'starred' | 'archived'>('all');
+  const [filterValues, setFilterValues] = useState<Record<string, string[]>>({});
+
+  const statusFilter = filterValues.status ?? [];
+  const filter = (statusFilter.length === 1 ? statusFilter[0] : 'all') as 'all' | 'unread' | 'starred' | 'archived';
+
+  const filterSections: FilterSection[] = useMemo(() => [
+    {
+      key: 'status',
+      label: 'STATUS',
+      options: [
+        { value: 'all', label: 'All' },
+        { value: 'unread', label: 'Unread' },
+        { value: 'starred', label: 'Starred' },
+        { value: 'archived', label: 'Archived' }
+      ]
+    }
+  ], []);
 
   const loadConversations = useCallback(async (signal?: AbortSignal) => {
     setIsLoading(true);
@@ -243,28 +259,18 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
       <div className="messaging-columns">
         {/* Conversation List */}
         <div className="messaging-sidebar">
-          {/* Filter Tabs */}
+          {/* Filter */}
           <div className="messaging-section-header">
-            <div className="tab-list messaging-filter-tabs">
-              {[
-                { id: 'all', label: 'All', icon: Inbox },
-                { id: 'unread', label: 'Unread', icon: Clock },
-                { id: 'starred', label: 'Starred', icon: Star },
-                { id: 'archived', label: 'Archived', icon: Archive }
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setFilter(tab.id as typeof filter)}
-                  className={cn(
-                    filter === tab.id ? 'tab-active' : 'tab',
-                    'messaging-filter-tab'
-                  )}
-                >
-                  <tab.icon className="messaging-filter-tab-icon" />
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+            <FilterDropdown
+              sections={filterSections}
+              values={filterValues}
+              onChange={(key, value) => setFilterValues(prev => {
+                if (value === 'all') return { ...prev, [key]: [] };
+                const current = prev[key] ?? [];
+                const next = current.includes(value) ? current.filter(v => v !== value) : [...current, value];
+                return { ...prev, [key]: next };
+              })}
+            />
           </div>
 
           {/* Conversation List */}
