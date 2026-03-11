@@ -28,7 +28,7 @@
       <%- include('../partials/sidebar', { config, portalType, icons }) %>
 
       <!-- Content Area -->
-      <div class="dashboard-content" id="dashboard-content">
+      <main class="dashboard-content" id="dashboard-content" role="main">
           <% if (config.features.subtabs && config.subtabGroups) { %>
             <!-- Header Subtabs (below unified header) -->
             <div class="portal-header-subtabs">
@@ -61,7 +61,7 @@
               </div>
             <% }) %>
           <% } %>
-      </div>
+      </main>
     </div> <!-- Close portal-body -->
   </div>
 

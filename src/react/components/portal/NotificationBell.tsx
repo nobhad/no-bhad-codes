@@ -151,7 +151,7 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="notification-dropdown">
+        <div className="notification-dropdown" role="region" aria-label="Notifications" aria-live="polite">
           <div className="notification-header">
             <h3 className="notification-dropdown-title">Notifications</h3>
             {unreadCount > 0 && (

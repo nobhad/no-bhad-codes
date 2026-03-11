@@ -460,6 +460,14 @@ export const INVOICE_STATUS_CONFIG: Record<InvoiceStatus, { label: string; varia
 // ============================================================================
 
 /**
+ * Individual deliverable within a milestone
+ */
+export interface DeliverableEntry {
+  text: string;
+  completed: boolean;
+}
+
+/**
  * Project milestone
  */
 export interface ProjectMilestone {
@@ -470,7 +478,7 @@ export interface ProjectMilestone {
   due_date?: string;
   completed_date?: string;
   is_completed: boolean;
-  deliverables?: string[];
+  deliverables?: DeliverableEntry[];
   order_index?: number;
   // Computed from tasks
   task_count?: number;
@@ -544,7 +552,6 @@ export type ProjectDetailTab =
   | 'deliverables'
   | 'messages'
   | 'invoices'
-  | 'tasks'
   | 'contract'
   | 'notes'
   | 'intake';

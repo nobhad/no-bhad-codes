@@ -744,9 +744,8 @@ td {
   color: var(--color-text-primary);
 }
 
-/* Serif display font — detail header entity names + deliverable milestone names */
-.portal .detail-name-row h1,
-.portal .deliv-milestone-header h4 {
+/* Serif display font — detail header entity names */
+.portal .detail-name-row h1 {
   font-family: var(--font-family-serif, "Cormorant Garamond", Georgia, serif);
 }
 

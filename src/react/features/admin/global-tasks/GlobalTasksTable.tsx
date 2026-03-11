@@ -483,7 +483,7 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
                   <PortalTableCell className="project-cell">
                     {task.projectName && (
                       <span
-                        onClick={() => onNavigate?.('projects', task.projectId != null ? String(task.projectId) : undefined)}
+                        onClick={() => onNavigate?.('project-detail', task.projectId != null ? String(task.projectId) : undefined)}
                         className="table-link"
                       >
                         {task.projectName}

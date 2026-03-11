@@ -50,7 +50,7 @@ export function PortalLayout() {
       <div className="portal-body">
         <PortalSidebar />
 
-        <div className="dashboard-content" id="dashboard-content">
+        <div className="dashboard-content" id="dashboard-content" role="main">
           <PortalSubtabs />
           <RouteErrorBoundary>
             <React.Suspense fallback={<TabLoadingFallback />}>
