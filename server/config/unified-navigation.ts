@@ -195,20 +195,28 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
   },
 
   // Client top-level items (no group — visible directly in sidebar)
+  // No separate Projects tab — multi-project clients use header dropdown
   {
-    id: 'projects',
-    label: 'Projects',
-    icon: 'briefcase',
+    id: 'documents',
+    label: 'Documents',
+    icon: 'fileText',
     roles: ['client'],
     order: 2,
-    badge: 'badge-projects'
+    badge: 'badge-documents'
+  },
+  {
+    id: 'deliverables',
+    label: 'Deliverables',
+    icon: 'package',
+    roles: ['client'],
+    order: 3
   },
   {
     id: 'messages',
     label: 'Messages',
     icon: 'messageSquare',
     roles: ['client'],
-    order: 3,
+    order: 4,
     badge: 'badge-messages'
   },
   {
@@ -216,33 +224,16 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     label: 'Files',
     icon: 'fileText',
     roles: ['client'],
-    order: 4,
-    badge: 'badge-documents',
+    order: 5,
+    badge: 'badge-files',
     dataTab: 'files'
   },
   {
-    id: 'invoices',
-    label: 'Invoices',
-    icon: 'receipt',
+    id: 'help',
+    label: 'Help',
+    icon: 'helpCircle',
     roles: ['client'],
-    order: 5,
-    badge: 'badge-invoices'
-  },
-  {
-    id: 'requests',
-    label: 'Requests',
-    icon: 'messageCircle',
-    roles: ['client'],
-    order: 6,
-    badge: 'badge-requests'
-  },
-  {
-    id: 'questionnaires',
-    label: 'Questionnaires',
-    icon: 'clipboardList',
-    roles: ['client'],
-    order: 7,
-    badge: 'badge-questionnaires'
+    order: 6
   },
   {
     id: 'settings',
@@ -355,50 +346,12 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     ariaLabel: 'Settings & Configuration'
   },
 
-  // ========== CLIENT-ONLY TABS ==========
-  {
-    id: 'proposals',
-    label: 'Proposals',
-    icon: 'fileText',
-    roles: ['client'],
-    order: 16
-  },
-  {
-    id: 'contracts',
-    label: 'Contracts',
-    icon: 'fileText',
-    roles: ['client'],
-    order: 17
-  },
-  {
-    id: 'deliverables',
-    label: 'Deliverables',
-    icon: 'package',
-    roles: ['client'],
-    order: 17.5
-  },
-  {
-    id: 'approvals',
-    label: 'Approvals',
-    icon: 'checkCircle',
-    roles: ['client'],
-    order: 18,
-    badge: 'badge-approvals'
-  },
-  {
-    id: 'review',
-    label: 'Review',
-    icon: 'eye',
-    roles: ['client'],
-    order: 19
-  },
-  {
-    id: 'help',
-    label: 'Help',
-    icon: 'helpCircle',
-    roles: ['client'],
-    order: 20
-  }
+  // ========== CLIENT-ONLY TABS (consolidated) ==========
+  // proposals, contracts, invoices → merged into /documents
+  // approvals → merged into /deliverables
+  // review → removed (preview links on dashboard)
+  // requests → submit from dashboard, no dedicated tab
+  // questionnaires → subtab under /files
 ];
 
 // ============================================
@@ -536,14 +489,16 @@ export const UNIFIED_TAB_TITLES: Record<string, string> = {
   'client-detail': 'Client Details',
   'project-detail': 'Project Details',
 
-  // Client-only
+  // Client-only (some now consolidated)
   proposals: 'Proposals',
   deliverables: 'Deliverables',
   approvals: 'Approvals',
   preview: 'Project Preview',
   review: 'Project Preview',
   help: 'Help',
-  'new-project': 'New Project'
+  'new-project': 'New Project',
+  // Redirects keep working via title lookup
+  'client-documents': 'Documents'
 };
 
 // ============================================
@@ -680,7 +635,16 @@ export function getTabTitle(tabId: string): string {
 /**
  * Check if a tab is accessible for a role
  */
+/** Legacy client tab IDs that redirect to new consolidated tabs */
+const LEGACY_CLIENT_TABS = new Set([
+  'invoices', 'contracts', 'proposals', 'approvals',
+  'review', 'requests', 'questionnaires', 'projects'
+]);
+
 export function canAccessTab(tabId: string, role: UserRole): boolean {
+  // Allow legacy client tabs for redirect support
+  if (role === 'client' && LEGACY_CLIENT_TABS.has(tabId)) return true;
+
   // Check top-level navigation items — use .some() not .find() because
   // UNIFIED_NAVIGATION has duplicate IDs for shared tabs (admin + client versions)
   const hasNavAccess = UNIFIED_NAVIGATION.some(

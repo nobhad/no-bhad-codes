@@ -108,8 +108,10 @@ export class ProjectsModule extends BaseModule {
     // Set up back button handler
     this.setupBackButton();
 
-    // Listen for page-changed events from PageTransitionModule
-    // This replaces direct hash change handling to avoid race conditions
+    // Pre-render content on hash change so it's ready before the page animates in
+    window.addEventListener('hashchange', this.handleHashChange.bind(this));
+
+    // Listen for page-changed events (back-navigation cleanup, title reset)
     window.addEventListener('page-changed', this.handlePageChanged.bind(this) as EventListener);
 
     // Check initial hash for project detail (on page load only)
@@ -133,21 +135,24 @@ export class ProjectsModule extends BaseModule {
   }
 
   /**
+   * Pre-render project detail content as soon as the hash changes,
+   * before PageTransitionModule animates the page in.
+   */
+  private handleHashChange(): void {
+    const hash = window.location.hash;
+    const projectMatch = hash.match(/^#\/projects\/(.+)$/);
+    if (projectMatch) {
+      this.renderProjectDetailForSlug(projectMatch[1]);
+    }
+  }
+
+  /**
    * Handle page-changed events from PageTransitionModule
    */
   private handlePageChanged(event: CustomEvent): void {
     const { to } = event.detail || {};
 
-    if (to === 'project-detail') {
-      // Extract slug from current hash and render content
-      const hash = window.location.hash;
-      const projectMatch = hash.match(/^#\/projects\/(.+)$/);
-
-      if (projectMatch) {
-        const slug = projectMatch[1];
-        this.renderProjectDetailForSlug(slug);
-      }
-    } else if (to === 'projects') {
+    if (to === 'projects') {
       // Returning to projects list - reset detail state
       this.currentProjectSlug = null;
       document.title = 'Projects - No Bhad Codes';
@@ -479,15 +484,15 @@ export class ProjectsModule extends BaseModule {
   private renderProjectDetail(project: PortfolioProject): void {
     if (!this.projectDetailSection) return;
 
-    // Update hero image
+    // Update hero image — prefer heroImage, fall back to titleCard
     const heroImg = this.projectDetailSection.querySelector<HTMLImageElement>('#project-hero-img');
     if (heroImg) {
-      if (project.heroImage) {
-        heroImg.src = project.heroImage;
+      const heroSrc = project.heroImage || project.titleCard || null;
+      if (heroSrc) {
+        heroImg.src = heroSrc;
         heroImg.alt = `${project.title} hero image`;
         heroImg.classList.remove('placeholder');
       } else {
-        // Placeholder for missing hero
         heroImg.src = '/images/project-placeholder.svg';
         heroImg.alt = `${project.title} - image coming soon`;
         heroImg.classList.add('placeholder');
@@ -785,6 +790,7 @@ export class ProjectsModule extends BaseModule {
    * Clean up module
    */
   protected async onDestroy(): Promise<void> {
+    window.removeEventListener('hashchange', this.handleHashChange.bind(this));
     this.projectsSection = null;
     this.projectsContent = null;
     this.projectDetailSection = null;
