@@ -267,7 +267,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
           Additional Resources
         </h3>
         <p className="text-muted text-sm mt-1">
-          Tell us about any other assets or content access we may need.
+          Tell Noelle about any other assets or content access needed.
         </p>
       </div>
 
@@ -278,7 +278,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
           id="assets-existing"
           value={assets.existingAssets}
           onChange={(e) => handleChange('existingAssets', e.target.value)}
-          placeholder="Do you have existing assets like photography, icons, or illustrations? Where can we access them?"
+          placeholder="Do you have existing assets like photography, icons, or illustrations? Where can Noelle access them?"
           rows={2}
           className="textarea"
         />
@@ -291,7 +291,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
           id="assets-content-access"
           value={assets.contentAccess}
           onChange={(e) => handleChange('contentAccess', e.target.value)}
-          placeholder="Any login credentials, API keys, or access details we'll need? (You can also share these securely later)"
+          placeholder="Any login credentials, API keys, or access details Noelle will need? (You can also share these securely later)"
           rows={2}
           className="textarea"
         />
