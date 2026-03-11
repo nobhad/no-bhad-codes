@@ -132,7 +132,7 @@ export interface DataTableProps<T extends { id: number }> {
   defaultPageSize?: number;
 
   /** Filter function */
-  filterFn?: (item: T, filters: Record<string, string>, search: string) => boolean;
+  filterFn?: (item: T, filters: Record<string, string[]>, search: string) => boolean;
   /** Sort function */
   sortFn?: (a: T, b: T, sort: SortConfig) => number;
 
