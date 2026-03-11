@@ -178,6 +178,13 @@ router.post(
       return errorResponse(res, 'Conversation not found', 404, ErrorCodes.NOT_FOUND);
     }
 
+    // Resolve admin display name from users table (fallback to 'Admin')
+    const adminUser = await db.get(
+      'SELECT display_name FROM users WHERE id = ?',
+      [req.user?.id]
+    );
+    const senderName = adminUser?.display_name || 'Admin';
+
     // Insert the message
     const result = await db.run(`
       INSERT INTO messages (
@@ -196,7 +203,7 @@ router.post(
       conversationId,
       thread.client_id,
       thread.project_id,
-      req.user?.email || 'Admin',
+      senderName,
       content.trim(),
       attachments ? JSON.stringify(attachments) : null
     ]);
