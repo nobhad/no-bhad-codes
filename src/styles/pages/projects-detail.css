@@ -172,7 +172,7 @@
   margin: 0;
   aspect-ratio: 12 / 7;
   overflow: hidden;
-  border-radius: var(--border-radius-xl, 16px) var(--border-radius-xl, 16px) var(--border-radius-sm, 4px) var(--border-radius-sm, 4px);
+  border-radius: 12px;
   box-shadow: var(--shadow-elevated-md);
 }
 
@@ -181,6 +181,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  border-radius: inherit;
 }
 
 /* Placeholder for missing hero images */
@@ -560,7 +561,7 @@
   /* Hero */
   .worksub-header figure {
     aspect-ratio: 2 / 1;
-    border-radius: var(--border-radius-lg, 12px);
+    border-radius: 8px;
     box-shadow: var(--shadow-elevated-sm);
   }
 
