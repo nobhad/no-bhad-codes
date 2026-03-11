@@ -1,6 +1,10 @@
 {
   "name": "No Bhad Codes",
   "short_name": "NBC",
+  "description": "Client portal and admin dashboard for No Bhad Codes",
+  "start_url": "/",
+  "scope": "/",
+  "id": "/",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",

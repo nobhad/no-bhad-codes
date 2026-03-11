@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offline - No Bhad Codes</title>
+  <style>
+    :root {
+      --offline-bg: #e0e0e0;
+      --offline-fg: #333333;
+      --offline-muted: #666666;
+      --offline-border: #cccccc;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --offline-bg: #1a1a1a;
+        --offline-fg: #f5f5f5;
+        --offline-muted: #999999;
+        --offline-border: #333333;
+      }
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: var(--offline-bg);
+      color: var(--offline-fg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .offline-container {
+      text-align: center;
+      max-width: 420px;
+    }
+
+    .offline-icon {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 24px;
+      color: var(--offline-muted);
+    }
+
+    .offline-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .offline-message {
+      font-size: 16px;
+      color: var(--offline-muted);
+      line-height: 1.5;
+      margin-bottom: 32px;
+    }
+
+    .offline-retry {
+      display: inline-block;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--offline-fg);
+      background: transparent;
+      border: 1px solid var(--offline-border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+
+    .offline-retry:hover {
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <svg class="offline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+         aria-hidden="true">
+      <line x1="1" y1="1" x2="23" y2="23" />
+      <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55" />
+      <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39" />
+      <path d="M10.71 5.05A16 16 0 0 1 22.56 9" />
+      <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88" />
+      <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+      <line x1="12" y1="20" x2="12.01" y2="20" />
+    </svg>
+    <h1 class="offline-title">You're offline</h1>
+    <p class="offline-message">
+      Check your internet connection and try again.
+      Your work is saved and will sync when you reconnect.
+    </p>
+    <button class="offline-retry" onclick="window.location.reload()">
+      Try again
+    </button>
+  </div>
+</body>
+</html>
