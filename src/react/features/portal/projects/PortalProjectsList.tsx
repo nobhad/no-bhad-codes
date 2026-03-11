@@ -111,8 +111,7 @@ const ProjectCard = React.memo(({ project, onClick, onPreviewClick }: ProjectCar
 });
 
 interface PortalProjectsListProps extends PortalViewProps {
-  /** Callback when a project is selected */
-  onSelectProject?: (projectId: string) => void;
+  onNavigate?: (tab: string, entityId?: string) => void;
 }
 
 /**
@@ -185,7 +184,7 @@ function transformProjectsResponse(raw: unknown): PortalProject[] {
 
 export function PortalProjectsList({
   getAuthToken,
-  onSelectProject,
+  onNavigate,
   showNotification: _showNotification
 }: PortalProjectsListProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
@@ -226,7 +225,7 @@ export function PortalProjectsList({
 
   // Handle project selection
   const handleProjectClick = (project: PortalProject) => {
-    onSelectProject?.(String(project.id));
+    onNavigate?.('project-detail', String(project.id));
   };
 
   // Handle preview link click

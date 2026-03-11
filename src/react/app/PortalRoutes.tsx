@@ -98,19 +98,14 @@ const ProjectDetailLazy = React.lazy(() =>
 
 // Portal / Client Modules
 const PortalDashboard = lazyNamed(() => import('../features/portal/dashboard').then(m => ({ PortalDashboard: m.PortalDashboard })));
-const PortalFilesManager = lazyNamed(() => import('../features/portal/files').then(m => ({ PortalFilesManager: m.PortalFilesManager })));
 const PortalMessagesView = lazyNamed(() => import('../features/portal/messages').then(m => ({ PortalMessagesView: m.PortalMessagesView })));
-const PortalInvoicesTable = lazyNamed(() => import('../features/portal/invoices').then(m => ({ PortalInvoicesTable: m.PortalInvoicesTable })));
 const PortalSettings = lazyNamed(() => import('../features/portal/settings').then(m => ({ PortalSettings: m.PortalSettings })));
-const PortalQuestionnairesView = lazyNamed(() => import('../features/portal/questionnaires').then(m => ({ PortalQuestionnairesView: m.PortalQuestionnairesView })));
-const PortalProjectsList = lazyNamed(() => import('../features/portal/projects').then(m => ({ PortalProjectsList: m.PortalProjectsList })));
-const PortalContracts = lazyNamed(() => import('../features/portal/contracts').then(m => ({ PortalContracts: m.PortalContracts })));
-const PortalAdHocRequests = lazyNamed(() => import('../features/portal/ad-hoc-requests').then(m => ({ PortalAdHocRequests: m.PortalAdHocRequests })));
-const PortalDeliverables = lazyNamed(() => import('../features/portal/deliverables').then(m => ({ PortalDeliverables: m.PortalDeliverables })));
-const PortalProposals = lazyNamed(() => import('../features/portal/proposals').then(m => ({ PortalProposals: m.PortalProposals })));
-const PortalApprovals = lazyNamed(() => import('../features/portal/approvals').then(m => ({ PortalApprovals: m.PortalApprovals })));
 const PortalHelp = lazyNamed(() => import('../features/portal/help').then(m => ({ PortalHelp: m.PortalHelp })));
-const PortalPreview = lazyNamed(() => import('../features/portal/preview').then(m => ({ PortalPreview: m.PortalPreview })));
+
+// New consolidated portal views
+const PortalDocuments = lazyNamed(() => import('../features/portal/documents').then(m => ({ PortalDocuments: m.PortalDocuments })));
+const PortalFilesHub = lazyNamed(() => import('../features/portal/files-hub').then(m => ({ PortalFilesHub: m.PortalFilesHub })));
+const PortalDeliverablesHub = lazyNamed(() => import('../features/portal/deliverables-hub').then(m => ({ PortalDeliverablesHub: m.PortalDeliverablesHub })));
 
 // ============================================
 // DETAIL VIEW WRAPPERS
@@ -245,24 +240,32 @@ export function PortalRoutes() {
           </LazyTabRoute>
         } />
         <Route path="/invoices" element={
-          <LazyTabRoute tabId="invoices">
-            {role === 'admin' ? <InvoicesTable /> : <PortalInvoicesTable />}
-          </LazyTabRoute>
+          role === 'admin' ? (
+            <LazyTabRoute tabId="invoices"><InvoicesTable /></LazyTabRoute>
+          ) : (
+            <Navigate to="/documents" replace />
+          )
         } />
         <Route path="/files" element={
-          <LazyTabRoute tabId="files">
-            {role === 'admin' ? <FilesManager /> : <PortalFilesManager />}
-          </LazyTabRoute>
+          role === 'admin' ? (
+            <LazyTabRoute tabId="files"><FilesManager /></LazyTabRoute>
+          ) : (
+            <LazyTabRoute tabId="files"><PortalFilesHub /></LazyTabRoute>
+          )
         } />
         <Route path="/questionnaires" element={
-          <LazyTabRoute tabId="questionnaires">
-            {role === 'admin' ? <QuestionnairesTable /> : <PortalQuestionnairesView />}
-          </LazyTabRoute>
+          role === 'admin' ? (
+            <LazyTabRoute tabId="questionnaires"><QuestionnairesTable /></LazyTabRoute>
+          ) : (
+            <Navigate to="/files" replace />
+          )
         } />
         <Route path="/projects" element={
-          <LazyTabRoute tabId="projects">
-            {role === 'admin' ? <ProjectsTable /> : <PortalProjectsList />}
-          </LazyTabRoute>
+          role === 'admin' ? (
+            <LazyTabRoute tabId="projects"><ProjectsTable /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
         } />
         <Route path="/settings" element={
           <LazyTabRoute tabId="settings">
@@ -270,9 +273,11 @@ export function PortalRoutes() {
           </LazyTabRoute>
         } />
         <Route path="/contracts" element={
-          <LazyTabRoute tabId="contracts">
-            {role === 'admin' ? <ContractsTable /> : <PortalContracts />}
-          </LazyTabRoute>
+          role === 'admin' ? (
+            <LazyTabRoute tabId="contracts"><ContractsTable /></LazyTabRoute>
+          ) : (
+            <Navigate to="/documents" replace />
+          )
         } />
 
         {/* ========== ADMIN-ONLY ROUTES ========== */}
@@ -286,20 +291,26 @@ export function PortalRoutes() {
         <Route path="/clients" element={<LazyTabRoute tabId="clients"><ClientsTable /></LazyTabRoute>} />
         <Route path="/tasks" element={<LazyTabRoute tabId="tasks"><GlobalTasksTable /></LazyTabRoute>} />
         <Route path="/requests" element={
-          <LazyTabRoute tabId="requests">
-            {role === 'admin' ? <AdHocRequestsTable /> : <PortalAdHocRequests />}
-          </LazyTabRoute>
+          role === 'admin' ? (
+            <LazyTabRoute tabId="requests"><AdHocRequestsTable /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
         } />
         <Route path="/ad-hoc-requests" element={<Navigate to="/requests" replace />} />
         <Route path="/deliverables" element={
-          <LazyTabRoute tabId="deliverables">
-            {role === 'admin' ? <DeliverablesTable /> : <PortalDeliverables />}
-          </LazyTabRoute>
+          role === 'admin' ? (
+            <LazyTabRoute tabId="deliverables"><DeliverablesTable /></LazyTabRoute>
+          ) : (
+            <LazyTabRoute tabId="deliverables"><PortalDeliverablesHub /></LazyTabRoute>
+          )
         } />
         <Route path="/proposals" element={
-          <LazyTabRoute tabId="proposals">
-            {role === 'admin' ? <ProposalsTable /> : <PortalProposals />}
-          </LazyTabRoute>
+          role === 'admin' ? (
+            <LazyTabRoute tabId="proposals"><ProposalsTable /></LazyTabRoute>
+          ) : (
+            <Navigate to="/documents" replace />
+          )
         } />
         <Route path="/document-requests" element={<LazyTabRoute tabId="document-requests"><DocumentRequestsTable /></LazyTabRoute>} />
         <Route path="/support" element={<LazyTabRoute tabId="support"><KnowledgeBase /></LazyTabRoute>} />
@@ -322,8 +333,17 @@ export function PortalRoutes() {
         <Route path="/project-detail/:projectId" element={<LazyTabRoute tabId="project-detail"><ProjectDetailRoute /></LazyTabRoute>} />
 
         {/* ========== CLIENT-ONLY ROUTES ========== */}
-        <Route path="/approvals" element={<LazyTabRoute tabId="approvals"><PortalApprovals /></LazyTabRoute>} />
-        <Route path="/review" element={<LazyTabRoute tabId="review"><PortalPreview /></LazyTabRoute>} />
+        {/* New consolidated documents view (contracts + proposals + invoices) */}
+        {role === 'client' && (
+          <Route path="/documents" element={
+            <LazyTabRoute tabId="documents"><PortalDocuments /></LazyTabRoute>
+          } />
+        )}
+        {/* Redirects for old client routes */}
+        <Route path="/approvals" element={
+          role === 'client' ? <Navigate to="/deliverables" replace /> : <Navigate to="/dashboard" replace />
+        } />
+        <Route path="/review" element={<Navigate to="/dashboard" replace />} />
         <Route path="/help" element={<LazyTabRoute tabId="help"><PortalHelp /></LazyTabRoute>} />
 
         {/* Catch-all */}
