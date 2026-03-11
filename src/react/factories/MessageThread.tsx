@@ -20,7 +20,7 @@
 
 import * as React from 'react';
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { User, MessageSquare, CheckCheck, Smile, X, Check, Paperclip, Download, File as FileIcon } from 'lucide-react';
+import { User, MessageSquare, CheckCheck, Smile, X, Check, Paperclip, Download, File as FileIcon, Send } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { LoadingState, EmptyState } from '@react/factories/StateDisplay';
@@ -339,7 +339,7 @@ export function MessageThread({
   }, [handleStartEdit, onEdit]);
 
   return (
-    <div className={cn('msgtab-container panel', className)}>
+    <div className={cn('msgtab-container', className)}>
       {/* Scroll area */}
       <div className="scroll-container msgtab-panel">
         {isLoading && messages.length === 0 ? (
@@ -353,11 +353,17 @@ export function MessageThread({
           <div className="msgtab-thread">
             {messages.map((message, index) => {
               const prevMessage = index > 0 ? messages[index - 1] : null;
+              const nextMessage = index < messages.length - 1 ? messages[index + 1] : null;
               const showDateSep = !prevMessage || !isSameDay(prevMessage.timestamp, message.timestamp);
               const isContinuation =
                 !showDateSep &&
                 prevMessage &&
                 prevMessage.isOwn === message.isOwn;
+
+              // Avatar shows on the LAST message in a group (aligned with bottom)
+              const isLastInGroup = !nextMessage ||
+                !isSameDay(message.timestamp, nextMessage.timestamp) ||
+                nextMessage.isOwn !== message.isOwn;
 
               const isEditing = editingId === message.id;
 
@@ -382,8 +388,8 @@ export function MessageThread({
                       isContinuation && 'is-continuation'
                     )}
                   >
-                    {/* Avatar or spacer */}
-                    {!isContinuation ? (
+                    {/* Avatar on last message in group, spacer otherwise */}
+                    {isLastInGroup ? (
                       <div
                         className={cn('msgtab-avatar', message.isOwn ? 'is-admin' : 'is-client')}
                         aria-hidden="true"
@@ -566,17 +572,31 @@ export function MessageThread({
           </div>
         )}
 
-        <div className="msgtab-compose-row">
-          {attachmentsEnabled && (
-            <>
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept={allowedFileTypes.join(',')}
-                onChange={handleFileSelect}
-                className="file-input-hidden"
-              />
+        {attachmentsEnabled && (
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept={allowedFileTypes.join(',')}
+            onChange={handleFileSelect}
+            className="file-input-hidden"
+          />
+        )}
+
+        <textarea
+          ref={textareaRef}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Type a message..."
+          rows={2}
+          className="textarea msgtab-textarea"
+          aria-label="Message"
+        />
+
+        <div className="msgtab-compose-footer">
+          <div className="msgtab-compose-actions">
+            {attachmentsEnabled && (
               <button
                 className="icon-btn msgtab-attach-btn"
                 onClick={() => fileInputRef.current?.click()}
@@ -585,33 +605,21 @@ export function MessageThread({
               >
                 <Paperclip className="icon-sm" />
               </button>
-            </>
-          )}
-          <textarea
-            ref={textareaRef}
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type a message..."
-            rows={2}
-            className="textarea msgtab-textarea"
-            aria-label="Message"
-          />
-        </div>
-
-        <div className="msgtab-compose-footer">
-          <div className="text-muted pd-hint">
+            )}
+            <PortalButton
+              variant="primary"
+              className="msgtab-send-btn"
+              onClick={handleSend}
+              disabled={(!draft.trim() && pendingFiles.length === 0) || isSending}
+              loading={isSending}
+            >
+              <Send className="icon-xs" />
+              Send Message
+            </PortalButton>
+          </div>
+          <div className="msgtab-compose-hint">
             Press <kbd className="badge msgtab-kbd">Cmd+Enter</kbd> to send
           </div>
-          <PortalButton
-            variant="primary"
-            className="msgtab-send-btn"
-            onClick={handleSend}
-            disabled={(!draft.trim() && pendingFiles.length === 0) || isSending}
-            loading={isSending}
-          >
-            Send Message
-          </PortalButton>
         </div>
       </div>
     </div>

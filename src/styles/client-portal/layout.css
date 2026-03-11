@@ -374,3 +374,35 @@ body[data-page="client-portal"] {
     display: none;
   }
 }
+
+/* ============================================
+   CLIENT PORTAL - MESSAGE THREAD AVATAR SWAP
+   Factory uses is-admin for "own" and is-client for "other".
+   In client portal, own = client, other = admin.
+   Swap avatar styling so admin branding shows on admin messages.
+   ============================================ */
+
+/* Own messages (client): plain bordered box with User icon instead of admin mask */
+body[data-page="client-portal"] .msgtab-avatar.is-admin {
+  mask-image: none;
+  -webkit-mask-image: none;
+  background-color: transparent;
+  border: var(--portal-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Other messages (admin): show admin branding mask */
+body[data-page="client-portal"] .msgtab-avatar.is-client {
+  background-color: var(--color-text-primary);
+  mask-image: url('/images/avatar_small_sidebar.svg');
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-image: url('/images/avatar_small_sidebar.svg');
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  border: none;
+}

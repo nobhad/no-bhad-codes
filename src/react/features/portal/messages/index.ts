@@ -5,7 +5,6 @@
 
 // Main components
 export { PortalMessagesView } from './PortalMessagesView';
-export { MessageThread } from './MessageThread';
 
 // Mount functions
 export { mountPortalMessages, unmountPortalMessages, shouldUseReactPortalMessages } from './mount';

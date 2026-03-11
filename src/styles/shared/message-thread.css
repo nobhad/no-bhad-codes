@@ -1,0 +1,379 @@
+/**
+ * ===============================================
+ * MESSAGE THREAD (FACTORY COMPONENT STYLES)
+ * ===============================================
+ * @file src/styles/shared/message-thread.css
+ *
+ * Shared styles for the MessageThread factory component.
+ * Used by both admin (project detail MessagesTab) and
+ * client portal (PortalMessagesView).
+ *
+ * All classes prefixed msgtab- to avoid conflicts.
+ */
+
+/* Messages container layout — fills available viewport, no page scroll */
+.msgtab-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - var(--portal-header-height) - var(--portal-page-top) - var(--portal-page-bottom) - 3.5rem);
+}
+
+/* Messages scrollable panel */
+.msgtab-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+  border-radius: 0;
+}
+
+/* Message thread column */
+.msgtab-thread {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Message row (avatar + bubble) */
+.msgtab-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.msgtab-row.is-admin {
+  flex-direction: row-reverse;
+}
+
+/* Message avatar */
+.msgtab-avatar {
+  width: var(--icon-size-2xl);
+  height: var(--icon-size-2xl);
+  flex-shrink: 0;
+  border-radius: 0;
+}
+
+/* Admin avatar — CSS mask matching header branding avatar */
+.msgtab-avatar.is-admin {
+  background-color: var(--color-text-primary);
+  mask-image: url('/images/avatar_small_sidebar.svg');
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-image: url('/images/avatar_small_sidebar.svg');
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+}
+
+.msgtab-avatar.is-client {
+  background-color: transparent;
+  border: var(--portal-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Date separator between messages from different days */
+.msgtab-date-sep {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-2) 0;
+}
+
+.msgtab-date-sep::before,
+.msgtab-date-sep::after {
+  content: '';
+  flex: 1;
+  height: var(--border-width-px);
+  background: var(--color-border-primary);
+}
+
+.msgtab-date-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  padding: 0 var(--space-1);
+}
+
+/* Spacer to keep bubble aligned when avatar is hidden (continuation rows) */
+.msgtab-avatar-spacer {
+  width: var(--icon-size-2xl);
+  flex-shrink: 0;
+}
+
+/* Continuation rows: tighter vertical spacing, same horizontal gap as first row */
+.msgtab-row.is-continuation {
+  margin-top: calc(-1 * var(--space-2));
+}
+
+/* Message content wrapper — outer column (sender name → bubble-row → footer) */
+.msgtab-content-wrap {
+  max-width: 70%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+}
+
+.msgtab-content-wrap.is-admin {
+  align-items: flex-end;
+}
+
+/* Sender name above bubble (client messages only) */
+.msgtab-sender {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  padding-left: var(--space-1);
+}
+
+/* Bubble row: flex row — actions + bubble side by side, no absolute positioning */
+.msgtab-bubble-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* Inline hover actions: always in-flow (visibility:hidden), bubble never shifts */
+.msgtab-inline-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--action-btn-gap);
+  visibility: hidden;
+  /* Client messages: actions sit to the RIGHT of the bubble */
+  order: 1;
+}
+
+/* Admin messages: actions sit to the LEFT of the bubble */
+.msgtab-content-wrap.is-admin .msgtab-inline-actions {
+  order: -1;
+}
+
+.msgtab-row:hover .msgtab-inline-actions {
+  visibility: visible;
+}
+
+/* Action buttons: small, scaled to thread text */
+.msgtab-inline-actions .message-action-btn {
+  width: var(--font-size-sm);
+  height: var(--font-size-sm);
+  min-width: unset;
+  padding: 0;
+}
+
+.msgtab-inline-actions .message-action-btn svg {
+  width: var(--font-size-sm);
+  height: var(--font-size-sm);
+}
+
+/* Bubble only — footer lives outside so Smile icon centers on bubble height */
+.msgtab-bubble-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Message bubble — border and color shared by both admin and client */
+.msgtab-bubble {
+  padding: var(--space-2) var(--space-4);
+  border: var(--portal-border);
+  border-radius: 0;
+}
+
+/* Editable bubble — own messages with onEdit wired up */
+.msgtab-bubble.is-editable {
+  cursor: text;
+  transition: border-color var(--transition-faster);
+}
+
+.msgtab-bubble.is-editable:hover {
+  border-color: var(--color-border-secondary);
+}
+
+/* Touch devices: prevent text selection interfering with long-press reactions */
+@media (pointer: coarse) {
+  .msgtab-bubble {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* Message content text */
+.msgtab-content {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Footer below bubble: timestamp + edited + read receipt */
+.msgtab-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  padding: 0 var(--space-1);
+}
+
+.msgtab-footer.is-admin {
+  justify-content: flex-end;
+}
+
+/* Timestamp in footer — font-size and color inherited from .msgtab-footer */
+.msgtab-time {
+  white-space: nowrap;
+}
+
+/* Read receipt icon (own messages) — color inherited from .msgtab-footer */
+.msgtab-receipt {
+  display: flex;
+  align-items: center;
+  line-height: 1;
+}
+
+/* Read receipt inherits color from .msgtab-footer — no override */
+
+/* Message input area — full-width, border-top only */
+.msgtab-input-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border-top: var(--portal-border);
+  padding: var(--space-2);
+}
+
+/* Message textarea full width */
+.msgtab-textarea {
+  width: 100%;
+  min-height: 60px;
+}
+
+/* Send button spans full width matching textarea */
+.msgtab-send-btn {
+  width: 100%;
+}
+
+/* Keyboard shortcut — reset badge bold/uppercase styles */
+kbd.msgtab-kbd {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 1px var(--space-1);
+  border-color: var(--color-border-primary);
+}
+
+/* Reacted reaction badge — highlight border with accent */
+.portal .reaction-badge.is-reacted {
+  border-color: var(--color-primary);
+  background: var(--color-bg-elevated);
+}
+
+/* --- Message Attachments --- */
+
+/* Attachment list on a message bubble */
+.msgtab-attachments {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+}
+
+.msgtab-attachment-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border: var(--portal-border);
+  padding: var(--space-1) var(--space-2);
+  transition: background var(--transition-faster);
+}
+
+.msgtab-attachment-link:hover {
+  background: var(--color-bg-hover);
+}
+
+.msgtab-attachment-thumb {
+  max-width: 200px;
+  max-height: 150px;
+  display: block;
+  object-fit: cover;
+}
+
+.msgtab-attachment-file {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+}
+
+.msgtab-attachment-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.msgtab-attachment-size {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+/* Pending file previews in compose area */
+.msgtab-pending-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  padding: 0 0 var(--space-1);
+}
+
+.msgtab-pending-file {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-0-5) var(--space-1);
+  border: var(--portal-border);
+  font-size: var(--font-size-xs);
+  max-width: 200px;
+}
+
+.msgtab-pending-file-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Compose footer: actions row + hint at bottom */
+.msgtab-compose-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* Actions row: attach + send button, right-aligned */
+.msgtab-compose-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1);
+}
+
+.msgtab-attach-btn {
+  flex-shrink: 0;
+}
+
+.msgtab-compose-footer .msgtab-send-btn {
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* Hint text at very bottom of compose area */
+.msgtab-compose-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+}
