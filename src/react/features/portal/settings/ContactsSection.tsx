@@ -8,6 +8,7 @@ import * as React from 'react';
 import { useState, useCallback, useEffect } from 'react';
 import { Users, Plus, Trash2, Edit2, Check, X } from 'lucide-react';
 import { EmptyState, LoadingState } from '@react/components/portal/EmptyState';
+import { FormDropdown } from '@react/components/portal/FormDropdown';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 
@@ -142,17 +143,19 @@ export function ContactsSection({ portalFetch, showNotification }: ContactsSecti
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="portal-section">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h3 className="heading text-base m-0">Contacts</h3>
+      <div className="section-header">
+        <Users className="section-icon" />
+        <h3 className="section-title">Contacts</h3>
         {!showAddForm && (
           <button
-            className="btn-secondary text-sm"
+            className="icon-btn section-header-action"
             onClick={() => { setShowAddForm(true); setEditingId(null); setFormData(EMPTY_FORM); }}
+            title="Add Contact"
+            aria-label="Add Contact"
           >
-            <Plus className="icon-xs" />
-            Add Contact
+            <Plus />
           </button>
         )}
       </div>
@@ -304,18 +307,18 @@ function ContactForm({
         </div>
         <div>
           <label className="label text-xs mb-1 block" htmlFor="contact-role">Role</label>
-          <select
+          <FormDropdown
             id="contact-role"
-            className="form-input w-full"
             value={formData.role}
-            onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
-          >
-            <option value="general">General</option>
-            <option value="primary">Primary</option>
-            <option value="billing">Billing</option>
-            <option value="technical">Technical</option>
-            <option value="decision_maker">Decision Maker</option>
-          </select>
+            onChange={(val) => setFormData(prev => ({ ...prev, role: val }))}
+            options={[
+              { value: 'general', label: 'General' },
+              { value: 'primary', label: 'Primary' },
+              { value: 'billing', label: 'Billing' },
+              { value: 'technical', label: 'Technical' },
+              { value: 'decision_maker', label: 'Decision Maker' }
+            ]}
+          />
         </div>
       </div>
       <div className="flex justify-end gap-2">
