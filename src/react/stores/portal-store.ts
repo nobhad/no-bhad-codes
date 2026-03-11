@@ -31,6 +31,13 @@ import {
 // TYPES
 // ============================================
 
+/** Minimal project info for the project selector */
+export interface PortalProject {
+  id: number;
+  name: string;
+  status: string;
+}
+
 export interface PortalStoreState {
   /** Current user role */
   role: UserRole;
@@ -53,6 +60,13 @@ export interface PortalStoreState {
   /** Current theme */
   theme: 'light' | 'dark';
 
+  /** Active project ID for project-scoped tabs (client portal) */
+  activeProjectId: number | null;
+  /** Total number of projects for the client */
+  projectCount: number;
+  /** List of projects for the project selector */
+  projects: PortalProject[];
+
   // Actions
   setRole: (role: UserRole) => void;
   switchTab: (tabId: string) => void;
@@ -60,6 +74,10 @@ export interface PortalStoreState {
   toggleSidebar: () => void;
   setTheme: (theme: 'light' | 'dark') => void;
   toggleTheme: () => void;
+  /** Set the active project and trigger re-renders in project-scoped tabs */
+  setActiveProject: (projectId: number) => void;
+  /** Load project list from API response */
+  setProjects: (projects: PortalProject[]) => void;
 }
 
 // ============================================
@@ -105,6 +123,10 @@ export const usePortalStore = create<PortalStoreState>()(
         pageTitle: 'Dashboard',
         sidebarCollapsed: getInitialSidebarState(),
         theme: getInitialTheme(),
+
+        activeProjectId: null,
+        projectCount: 0,
+        projects: [],
 
         setRole: (role) => {
           const navItems = getNavigationForRole(role);
@@ -164,6 +186,25 @@ export const usePortalStore = create<PortalStoreState>()(
           document.documentElement.setAttribute(THEME_ATTRIBUTE, next);
           localStorage.setItem(STORAGE_KEYS.THEME, next);
           set({ theme: next }, false, 'toggleTheme');
+        },
+
+        setActiveProject: (projectId) => {
+          set({ activeProjectId: projectId }, false, 'setActiveProject');
+        },
+
+        setProjects: (projects) => {
+          const activeProjectId = get().activeProjectId;
+          const firstProject = projects[0]?.id ?? null;
+          // If no active project set, default to first project
+          const resolvedActiveId = activeProjectId && projects.some((p) => p.id === activeProjectId)
+            ? activeProjectId
+            : firstProject;
+
+          set({
+            projects,
+            projectCount: projects.length,
+            activeProjectId: resolvedActiveId
+          }, false, 'setProjects');
         }
       };
     },
@@ -187,3 +228,8 @@ export const usePortalRole = () => usePortalStore((s) => s.role);
 export const useSwitchTab = () => usePortalStore((s) => s.switchTab);
 export const useToggleSidebar = () => usePortalStore((s) => s.toggleSidebar);
 export const useToggleTheme = () => usePortalStore((s) => s.toggleTheme);
+export const useActiveProjectId = () => usePortalStore((s) => s.activeProjectId);
+export const useProjectCount = () => usePortalStore((s) => s.projectCount);
+export const useProjects = () => usePortalStore((s) => s.projects);
+export const useSetActiveProject = () => usePortalStore((s) => s.setActiveProject);
+export const useSetProjects = () => usePortalStore((s) => s.setProjects);
