@@ -186,6 +186,20 @@
 }
 
 /* ============================================
+ * SECTION LABELS
+ * ============================================ */
+
+.command-palette-section-label {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  color: var(--color-text-secondary);
+  list-style: none;
+}
+
+/* ============================================
  * FOOTER HINTS
  * ============================================ */
 

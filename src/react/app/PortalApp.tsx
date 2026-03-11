@@ -20,6 +20,7 @@ import { PortalProviders } from './PortalProviders';
 import { PortalRoutes } from './PortalRoutes';
 import { ErrorBoundary } from '../components/portal/ErrorBoundary';
 import { CommandPalette, useCommandPalette } from '../components/portal/CommandPalette';
+import { KeyboardShortcutsOverlay, useKeyboardShortcuts } from '../components/portal/KeyboardShortcutsOverlay';
 import { usePortalStore } from '../stores/portal-store';
 import { usePortalAuth } from '../hooks/usePortalAuth';
 import type { UserRole } from '../../../server/config/unified-navigation';
@@ -88,16 +89,121 @@ function AdminKeyboardShortcuts() {
 }
 
 // ============================================
+// GLOBAL POWER-USER SHORTCUTS
+// ============================================
+
+/**
+ * Keyboard shortcuts available to all users:
+ * - / : Focus the search input on the current page
+ * - r : Refresh the current page (click the refresh button)
+ * - g+m : Go to messages
+ * - g+d : Go to dashboard
+ * - g+p : Go to projects
+ */
+function GlobalKeyboardShortcuts() {
+  const switchTab = usePortalStore((s) => s.switchTab);
+  const pendingGRef = React.useRef(false);
+  const gTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(() => {
+    function handleKeydown(e: KeyboardEvent) {
+      // Skip if user is typing in an input
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLSelectElement
+      ) {
+        return;
+      }
+
+      // Skip if modifier keys are held (let browser/OS handle)
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      const key = e.key.toLowerCase();
+
+      // "g then X" sequences for navigation
+      if (pendingGRef.current) {
+        pendingGRef.current = false;
+        if (gTimerRef.current) {
+          clearTimeout(gTimerRef.current);
+          gTimerRef.current = null;
+        }
+
+        const goToMap: Record<string, string> = {
+          d: 'dashboard',
+          m: 'messages',
+          p: 'projects',
+          i: 'invoices',
+          s: 'settings'
+        };
+
+        if (goToMap[key]) {
+          e.preventDefault();
+          switchTab(goToMap[key]);
+          window.location.hash = `/${usePortalStore.getState().currentTab}`;
+          return;
+        }
+      }
+
+      // "g" starts a navigation sequence
+      if (key === 'g') {
+        pendingGRef.current = true;
+        // Timeout to cancel if no follow-up key
+        gTimerRef.current = setTimeout(() => {
+          pendingGRef.current = false;
+        }, 500);
+        return;
+      }
+
+      // "/" focuses the first search input on the page
+      if (key === '/') {
+        const searchInput = document.querySelector<HTMLInputElement>(
+          '.search-bar-input, .search-filter-input, [data-search-input]'
+        );
+        if (searchInput) {
+          e.preventDefault();
+          searchInput.focus();
+        }
+        return;
+      }
+
+      // "r" clicks the refresh button
+      if (key === 'r') {
+        const refreshBtn = document.querySelector<HTMLButtonElement>(
+          '[title="Refresh"], [aria-label="Refresh"]'
+        );
+        if (refreshBtn) {
+          e.preventDefault();
+          refreshBtn.click();
+        }
+        return;
+      }
+    }
+
+    document.addEventListener('keydown', handleKeydown);
+    return () => {
+      document.removeEventListener('keydown', handleKeydown);
+      if (gTimerRef.current) clearTimeout(gTimerRef.current);
+    };
+  }, [switchTab]);
+
+  return null;
+}
+
+// ============================================
 // ROOT COMPONENT
 // ============================================
 
 function PortalAppInner() {
-  const { open, setOpen } = useCommandPalette();
+  const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette();
+  const { open: shortcutsOpen, setOpen: setShortcutsOpen } = useKeyboardShortcuts();
 
   return (
     <AuthInitializer>
       <AdminKeyboardShortcuts />
-      <CommandPalette open={open} onClose={() => setOpen(false)} />
+      <GlobalKeyboardShortcuts />
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <KeyboardShortcutsOverlay open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
       <PortalRoutes />
     </AuthInitializer>
   );
