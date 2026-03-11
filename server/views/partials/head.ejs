@@ -71,6 +71,14 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <meta name="theme-color" content="<%= config.themeColor %>" />
+<script>
+  // Service worker registration (production only)
+  if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function () {});
+    });
+  }
+</script>
 <% if (portalType === 'client' || portalType === 'admin') { %>
 <!--
   Server already validated the JWT cookie before rendering this page.
