@@ -96,7 +96,7 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
 // Filter function for deleted items
 function filterDeletedItem(
   item: DeletedItem,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   // Search filter
@@ -110,8 +110,9 @@ function filterDeletedItem(
   }
 
   // Type filter
-  if (filters.type && filters.type !== 'all') {
-    if (item.type !== filters.type) return false;
+  const typeFilter = filters.type;
+  if (typeFilter && typeFilter.length > 0) {
+    if (!typeFilter.includes(item.type)) return false;
   }
 
   return true;

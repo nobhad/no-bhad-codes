@@ -146,7 +146,7 @@ export function getDeliveryStatusVariant(status: string) {
 
 export function filterWebhook(
   webhook: WebhookItem,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   if (search) {
@@ -157,9 +157,10 @@ export function filterWebhook(
     if (!matchesSearch) return false;
   }
 
-  if (filters.status && filters.status !== 'all') {
-    const isActive = filters.status === 'active';
-    if (webhook.is_active !== isActive) return false;
+  const statusFilter = filters.status;
+  if (statusFilter && statusFilter.length > 0) {
+    const activeValue = webhook.is_active ? 'active' : 'inactive';
+    if (!statusFilter.includes(activeValue)) return false;
   }
 
   return true;
@@ -183,14 +184,16 @@ export function sortWebhooks(a: WebhookItem, b: WebhookItem, sort: SortConfig): 
 
 export function filterDelivery(
   delivery: WebhookDelivery,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   _search: string
 ): boolean {
-  if (filters.status && filters.status !== 'all') {
-    if (delivery.status !== filters.status) return false;
+  const statusFilter = filters.status;
+  if (statusFilter && statusFilter.length > 0) {
+    if (!statusFilter.includes(delivery.status)) return false;
   }
-  if (filters.eventType && filters.eventType !== 'all') {
-    if (delivery.eventType !== filters.eventType) return false;
+  const eventTypeFilter = filters.eventType;
+  if (eventTypeFilter && eventTypeFilter.length > 0) {
+    if (!eventTypeFilter.includes(delivery.eventType)) return false;
   }
   return true;
 }

@@ -102,7 +102,7 @@ const DELIVERABLE_STATUS_CONFIG: Record<string, { label: string }> = {
 // Filter function
 function filterDeliverable(
   deliverable: Deliverable,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   if (search) {
@@ -114,8 +114,9 @@ function filterDeliverable(
     if (!matchesSearch) return false;
   }
 
-  if (filters.status && filters.status !== 'all') {
-    if (deliverable.status !== filters.status) return false;
+  const statusFilter = filters.status;
+  if (statusFilter && statusFilter.length > 0) {
+    if (!statusFilter.includes(deliverable.status)) return false;
   }
 
   return true;

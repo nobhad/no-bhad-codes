@@ -93,7 +93,7 @@ function getStatusLabel(status: string | undefined | null): string {
 // Filter function
 function filterQuestionnaire(
   questionnaire: Questionnaire,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   if (search) {
@@ -105,8 +105,9 @@ function filterQuestionnaire(
     if (!matchesSearch) return false;
   }
 
-  if (filters.status && filters.status !== 'all') {
-    if (questionnaire.status !== filters.status) return false;
+  const statusFilter = filters.status;
+  if (statusFilter && statusFilter.length > 0) {
+    if (!statusFilter.includes(questionnaire.status)) return false;
   }
 
   return true;

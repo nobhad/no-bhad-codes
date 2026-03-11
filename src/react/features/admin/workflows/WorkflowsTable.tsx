@@ -89,7 +89,7 @@ const BULK_STATUS_OPTIONS = [
 
 function filterWorkflow(
   workflow: Workflow,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   if (search) {
@@ -101,8 +101,9 @@ function filterWorkflow(
     if (!matchesSearch) return false;
   }
 
-  if (filters.status && filters.status !== 'all') {
-    if (workflow.status !== filters.status) return false;
+  const statusFilter = filters.status;
+  if (statusFilter && statusFilter.length > 0) {
+    if (!statusFilter.includes(workflow.status)) return false;
   }
 
   return true;

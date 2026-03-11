@@ -108,7 +108,7 @@ const AD_HOC_STATUS_CONFIG: Record<string, { label: string }> = {
 // Filter function
 function filterAdHocRequest(
   request: AdHocRequest,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   if (search) {
@@ -120,12 +120,14 @@ function filterAdHocRequest(
     if (!matchesSearch) return false;
   }
 
-  if (filters.status && filters.status !== 'all') {
-    if (request.status !== filters.status) return false;
+  const statusFilter = filters.status;
+  if (statusFilter && statusFilter.length > 0) {
+    if (!statusFilter.includes(request.status)) return false;
   }
 
-  if (filters.priority && filters.priority !== 'all') {
-    if (request.priority !== filters.priority) return false;
+  const priorityFilter = filters.priority;
+  if (priorityFilter && priorityFilter.length > 0) {
+    if (!priorityFilter.includes(request.priority)) return false;
   }
 
   return true;

@@ -75,7 +75,7 @@ interface TimeTrackingTableProps {
 
 function filterTimeEntry(
   entry: TimeEntry,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   if (search) {
@@ -89,9 +89,10 @@ function filterTimeEntry(
     }
   }
 
-  if (filters.billable && filters.billable !== 'all') {
-    if (filters.billable === 'billable' && !entry.billable) return false;
-    if (filters.billable === 'non-billable' && entry.billable) return false;
+  const billableFilter = filters.billable;
+  if (billableFilter && billableFilter.length > 0) {
+    if (billableFilter.includes('billable') && !entry.billable) return false;
+    if (billableFilter.includes('non-billable') && entry.billable) return false;
   }
 
   return true;
@@ -260,7 +261,7 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
               { key: 'dateRange', label: 'DATE RANGE', options: TIME_TRACKING_DATE_RANGE_OPTIONS },
               { key: 'billable', label: 'BILLABLE', options: TIME_TRACKING_BILLABLE_OPTIONS }
             ]}
-            values={{ dateRange, billable: filterValues.billable ?? 'all' }}
+            values={{ ...filterValues, dateRange: dateRange ? [dateRange] : [] }}
             onChange={handleFilterChange}
           />
           {!activeTimer && (

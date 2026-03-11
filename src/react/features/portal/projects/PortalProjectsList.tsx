@@ -120,7 +120,7 @@ interface PortalProjectsListProps extends PortalViewProps {
  */
 function filterProject(
   project: PortalProject,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   if (search) {
@@ -131,8 +131,9 @@ function filterProject(
     if (!matchesSearch) return false;
   }
 
-  if (filters.status && filters.status !== 'all') {
-    if (project.status !== filters.status) return false;
+  const statusFilter = filters.status;
+  if (statusFilter && statusFilter.length > 0) {
+    if (!statusFilter.includes(project.status)) return false;
   }
 
   return true;

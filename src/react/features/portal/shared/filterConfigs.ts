@@ -31,8 +31,8 @@ export type { FilterOption } from '../../admin/shared/filterConfigs';
 export function createFilterFn<T>(
   searchFields: (keyof T)[],
   filterMappings: Record<string, keyof T> = { status: 'status' as keyof T }
-): (item: T, filters: Record<string, string>, search: string) => boolean {
-  return (item: T, filters: Record<string, string>, search: string): boolean => {
+): (item: T, filters: Record<string, string[]>, search: string) => boolean {
+  return (item: T, filters: Record<string, string[]>, search: string): boolean => {
     // Search filter
     if (search) {
       const s = search.toLowerCase();
@@ -43,11 +43,11 @@ export function createFilterFn<T>(
       if (!matchesSearch) return false;
     }
 
-    // Filter key matching
+    // Multi-select filter matching — empty array means "all"
     for (const [filterKey, itemField] of Object.entries(filterMappings)) {
-      const filterValue = filters[filterKey];
-      if (filterValue && filterValue !== 'all') {
-        if (String(item[itemField]) !== filterValue) return false;
+      const selected = filters[filterKey];
+      if (selected && selected.length > 0) {
+        if (!selected.includes(String(item[itemField]))) return false;
       }
     }
 

@@ -101,7 +101,7 @@ interface ProposalsTableProps {
 // Filter function
 function filterProposal(
   proposal: Proposal,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   if (search) {
@@ -112,8 +112,9 @@ function filterProposal(
     if (!matchesSearch) return false;
   }
 
-  if (filters.status && filters.status !== 'all') {
-    if (proposal.status !== filters.status) return false;
+  const statusFilter = filters.status;
+  if (statusFilter && statusFilter.length > 0) {
+    if (!statusFilter.includes(proposal.status)) return false;
   }
 
   return true;

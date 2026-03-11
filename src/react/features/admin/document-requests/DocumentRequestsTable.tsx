@@ -103,7 +103,7 @@ function getStatusLabel(status: string | undefined | null): string {
 // Filter function
 function filterDocumentRequest(
   request: DocumentRequest,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   if (search) {
@@ -115,8 +115,9 @@ function filterDocumentRequest(
     if (!matchesSearch) return false;
   }
 
-  if (filters.status && filters.status !== 'all') {
-    if (request.status !== filters.status) return false;
+  const statusFilter = filters.status;
+  if (statusFilter && statusFilter.length > 0) {
+    if (!statusFilter.includes(request.status)) return false;
   }
 
   return true;

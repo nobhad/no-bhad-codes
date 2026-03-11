@@ -78,7 +78,7 @@ interface ArticlesTableProps {
 
 function filterArticle(
   article: Article,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   if (search) {
@@ -91,13 +91,15 @@ function filterArticle(
     }
   }
 
-  if (filters.category && filters.category !== 'all') {
-    if (article.category_id !== Number(filters.category)) return false;
+  const categoryFilter = filters.category;
+  if (categoryFilter && categoryFilter.length > 0) {
+    if (!categoryFilter.includes(String(article.category_id))) return false;
   }
 
-  if (filters.status && filters.status !== 'all') {
-    if (filters.status === 'published' && !article.is_published) return false;
-    if (filters.status === 'draft' && article.is_published) return false;
+  const statusFilter = filters.status;
+  if (statusFilter && statusFilter.length > 0) {
+    const articleStatus = article.is_published ? 'published' : 'draft';
+    if (!statusFilter.includes(articleStatus)) return false;
   }
 
   return true;

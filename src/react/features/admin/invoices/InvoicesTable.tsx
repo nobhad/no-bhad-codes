@@ -75,7 +75,7 @@ function getDisplayStatus(invoice: Invoice): InvoiceStatus {
 // Filter function
 function filterInvoice(
   invoice: Invoice,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   // Search filter
@@ -90,13 +90,13 @@ function filterInvoice(
   }
 
   // Status filter
-  if (filters.status && filters.status !== 'all') {
+  const statusFilter = filters.status;
+  if (statusFilter && statusFilter.length > 0) {
     const displayStatus = getDisplayStatus(invoice);
-    if (filters.status === 'overdue') {
-      if (!isOverdue(invoice)) return false;
-    } else if (displayStatus !== filters.status) {
-      return false;
-    }
+    const matchesStatus =
+      (statusFilter.includes('overdue') && isOverdue(invoice)) ||
+      statusFilter.includes(displayStatus);
+    if (!matchesStatus) return false;
   }
 
   return true;

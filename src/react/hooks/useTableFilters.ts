@@ -19,7 +19,7 @@ interface UseTableFiltersOptions<T> {
   /** Filter configurations */
   filters: FilterConfig[];
   /** Function to filter items based on current filters */
-  filterFn: (item: T, filters: Record<string, string>, search: string) => boolean;
+  filterFn: (item: T, filters: Record<string, string[]>, search: string) => boolean;
   /** Function to sort items */
   sortFn?: (a: T, b: T, sort: SortConfig) => number;
   /** Default sort configuration */
@@ -27,9 +27,9 @@ interface UseTableFiltersOptions<T> {
 }
 
 interface UseTableFiltersReturn<T> {
-  /** Current filter values */
-  filterValues: Record<string, string>;
-  /** Set a filter value */
+  /** Current filter values — array of selected values per key (empty = no filter) */
+  filterValues: Record<string, string[]>;
+  /** Toggle a value on/off for a key; 'all' clears the key */
   setFilter: (key: string, value: string) => void;
   /** Current search query */
   search: string;
@@ -52,31 +52,40 @@ interface UseTableFiltersReturn<T> {
 }
 
 /**
- * Hook for managing table filters, search, and sorting
+ * Hook for managing table filters, search, and sorting.
+ * Supports multi-select: each filter key holds an array of selected values.
+ * Empty array means "all" (no filter applied for that key).
  */
 export function useTableFilters<T>(options: UseTableFiltersOptions<T>): UseTableFiltersReturn<T> {
   const { storageKey, filters, filterFn, sortFn, defaultSort } = options;
 
-  // Initialize filter values from storage or defaults
-  const getInitialFilters = useCallback((): Record<string, string> => {
+  const getInitialFilters = useCallback((): Record<string, string[]> => {
     if (storageKey) {
       try {
         const stored = localStorage.getItem(`${storageKey}_filters`);
         if (stored) {
-          return JSON.parse(stored);
+          const parsed = JSON.parse(stored);
+          // Migrate legacy string values to arrays
+          const migrated: Record<string, string[]> = {};
+          for (const [k, v] of Object.entries(parsed)) {
+            if (Array.isArray(v)) {
+              migrated[k] = v;
+            } else if (typeof v === 'string' && v !== 'all') {
+              migrated[k] = [v];
+            } else {
+              migrated[k] = [];
+            }
+          }
+          return migrated;
         }
       } catch {
         // Ignore storage errors
       }
     }
-
-    return filters.reduce(
-      (acc, filter) => {
-        acc[filter.key] = filter.defaultValue || 'all';
-        return acc;
-      },
-      {} as Record<string, string>
-    );
+    return filters.reduce((acc, filter) => {
+      acc[filter.key] = [];
+      return acc;
+    }, {} as Record<string, string[]>);
   }, [storageKey, filters]);
 
   const getInitialSearch = useCallback((): string => {
@@ -94,9 +103,7 @@ export function useTableFilters<T>(options: UseTableFiltersOptions<T>): UseTable
     if (storageKey) {
       try {
         const stored = localStorage.getItem(`${storageKey}_sort`);
-        if (stored) {
-          return JSON.parse(stored);
-        }
+        if (stored) return JSON.parse(stored);
       } catch {
         // Ignore storage errors
       }
@@ -104,7 +111,7 @@ export function useTableFilters<T>(options: UseTableFiltersOptions<T>): UseTable
     return defaultSort || null;
   }, [storageKey, defaultSort]);
 
-  const [filterValues, setFilterValues] = useState<Record<string, string>>(getInitialFilters);
+  const [filterValues, setFilterValues] = useState<Record<string, string[]>>(getInitialFilters);
   const [search, setSearchState] = useState<string>(getInitialSearch);
   const [sort, setSortState] = useState<SortConfig | null>(getInitialSort);
 
@@ -139,65 +146,57 @@ export function useTableFilters<T>(options: UseTableFiltersOptions<T>): UseTable
     }
   }, [storageKey, sort]);
 
-  // Set individual filter
+  // Toggle a value in/out of the filter array; 'all' clears the key
   const setFilter = useCallback((key: string, value: string) => {
-    setFilterValues((prev) => ({ ...prev, [key]: value }));
+    setFilterValues((prev) => {
+      if (value === 'all') {
+        return { ...prev, [key]: [] };
+      }
+      const current = prev[key] ?? [];
+      const next = current.includes(value)
+        ? current.filter((v) => v !== value)
+        : [...current, value];
+      return { ...prev, [key]: next };
+    });
   }, []);
 
-  // Set search
   const setSearch = useCallback((query: string) => {
     setSearchState(query);
   }, []);
 
-  // Set sort
   const setSort = useCallback((newSort: SortConfig | null) => {
     setSortState(newSort);
   }, []);
 
-  // Toggle sort for column
   const toggleSort = useCallback((column: string) => {
     setSortState((prev) => {
-      if (!prev || prev.column !== column) {
-        return { column, direction: 'asc' };
-      }
-      if (prev.direction === 'asc') {
-        return { column, direction: 'desc' };
-      }
-      return null; // Clear sort
+      if (!prev || prev.column !== column) return { column, direction: 'asc' };
+      if (prev.direction === 'asc') return { column, direction: 'desc' };
+      return null;
     });
   }, []);
 
-  // Clear all filters
   const clearFilters = useCallback(() => {
     setFilterValues(
-      filters.reduce(
-        (acc, filter) => {
-          acc[filter.key] = filter.defaultValue || 'all';
-          return acc;
-        },
-        {} as Record<string, string>
-      )
+      filters.reduce((acc, filter) => {
+        acc[filter.key] = [];
+        return acc;
+      }, {} as Record<string, string[]>)
     );
     setSearchState('');
   }, [filters]);
 
-  // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
     if (search.trim()) return true;
-    return Object.entries(filterValues).some(([, value]) => value !== 'all');
+    return Object.values(filterValues).some((arr) => arr.length > 0);
   }, [filterValues, search]);
 
-  // Apply filters to data
   const applyFilters = useCallback(
     (data: T[]): T[] => {
-      // Filter
       let result = data.filter((item) => filterFn(item, filterValues, search));
-
-      // Sort
       if (sort && sortFn) {
         result = [...result].sort((a, b) => sortFn(a, b, sort));
       }
-
       return result;
     },
     [filterFn, filterValues, search, sort, sortFn]
