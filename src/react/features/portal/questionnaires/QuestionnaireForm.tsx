@@ -5,9 +5,10 @@
 
 import * as React from 'react';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { ArrowLeft, Save, Send, Upload, X, Check, RefreshCw, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Save, Send, Upload, X, Check, RefreshCw } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { FormDropdown } from '@react/components/portal/FormDropdown';
 import type {
   QuestionnaireFormProps,
   PortalQuestion,
@@ -165,57 +166,20 @@ function TextareaInput({ question, value, onChange, disabled }: QuestionInputPro
  * Select Input Component
  */
 function SelectInput({ question, value, onChange, disabled }: QuestionInputProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const selectRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const selectedOption = question.options?.find(opt => opt.value === value);
+  const options = useMemo(
+    () => (question.options ?? []).map((opt) => ({ value: opt.value, label: opt.label })),
+    [question.options]
+  );
 
   return (
-    <div ref={selectRef} className="qform-select-container">
-      <button
-        type="button"
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        disabled={disabled}
-        className="select qform-select-btn"
-      >
-        <span className={!selectedOption ? 'text-muted' : 'text-primary'}>
-          {selectedOption?.label || question.placeholder || 'Select an option'}
-        </span>
-        <ChevronDown className={cn(
-          'icon-sm qform-chevron-icon',
-          isOpen && 'rotate-180'
-        )} />
-      </button>
-
-      {isOpen && (
-        <div className="panel qform-select-dropdown">
-          {question.options?.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => {
-                onChange(option.value);
-                setIsOpen(false);
-              }}
-              className={cn('list-item qform-select-option', option.value === value && 'table-row-selected')}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+    <FormDropdown
+      value={String(value ?? '')}
+      onChange={(val) => onChange(val || null)}
+      options={options}
+      placeholder={question.placeholder || 'Select an option'}
+      disabled={disabled}
+      aria-label={question.text}
+    />
   );
 }
 

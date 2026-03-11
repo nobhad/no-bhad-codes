@@ -7,9 +7,9 @@
 import * as React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import DOMPurify from 'dompurify';
-import { cn } from '@react/lib/utils';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { getLucideIcon } from '@react/factories';
+import { AccordionItem } from '@react/factories/createAccordion';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { GSAP } from '@react/config/portal-constants';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
@@ -26,7 +26,6 @@ const logger = createLogger('PortalHelp');
 // ============================================================================
 
 const SearchIcon = getLucideIcon('search');
-const ChevronDownIcon = getLucideIcon('chevron-down');
 const FileTextIcon = getLucideIcon('file-text');
 const ArrowLeftIcon = getLucideIcon('arrow-left');
 const XIcon = getLucideIcon('x');
@@ -142,19 +141,24 @@ function usePortalHelp(_getAuthToken?: () => string | null) {
 
   /** Toggle category expansion and load articles */
   const toggleCategory = useCallback(async (categorySlug: string) => {
-    setCategories(prev => {
-      const existing = prev.find(c => c.slug === categorySlug);
-      // If already has articles, just toggle (collapse)
-      if (existing && existing.articles.length > 0) {
-        return prev.map(c =>
+    const existing = categories.find(c => c.slug === categorySlug);
+
+    // If already expanded, collapse and return early
+    if (existing && existing.articles.length > 0) {
+      setCategories(prev =>
+        prev.map(c =>
           c.slug === categorySlug ? { ...c, articles: [], isLoading: false } : c
-        );
-      }
-      // Mark as loading
-      return prev.map(c =>
-        c.slug === categorySlug ? { ...c, isLoading: true } : c
+        )
       );
-    });
+      return;
+    }
+
+    // Mark as loading
+    setCategories(prev =>
+      prev.map(c =>
+        c.slug === categorySlug ? { ...c, isLoading: true } : c
+      )
+    );
 
     // Fetch articles for this category
     try {
@@ -178,7 +182,7 @@ function usePortalHelp(_getAuthToken?: () => string | null) {
         )
       );
     }
-  }, []);
+  }, [categories]);
 
   /** View article detail */
   const viewArticle = useCallback(async (categorySlug: string, articleSlug: string) => {
@@ -294,7 +298,7 @@ function SearchBar({ query, onChange, onClear }: SearchBarProps) {
   return (
     <div className="help-search-container">
       <div className="help-search-wrapper">
-        {SearchIcon && <SearchIcon className="help-search-icon" />}
+        {SearchIcon && <SearchIcon className="help-search-icon icon-sm" />}
         <input
           type="text"
           className="help-search-input"
@@ -335,44 +339,42 @@ function CategoriesSidebar({ categories, onToggle, onArticleClick }: CategoriesS
       <h3 className="section-title">Categories</h3>
       <div className="section">
         {categories.map((category) => {
-          const isExpanded = category.articles.length > 0;
+          const isExpanded = category.articles.length > 0 || category.isLoading;
 
           return (
-            <div key={category.id} className={cn('help-accordion-item', isExpanded && 'expanded')}>
-              <button
-                type="button"
-                className="help-accordion-header"
-                onClick={() => onToggle(category.slug)}
-              >
-                <div className="help-accordion-icon">
-                  {BookOpenIcon && <BookOpenIcon className="icon-sm" />}
+            <AccordionItem
+              key={category.id}
+              isExpanded={isExpanded}
+              onToggle={() => onToggle(category.slug)}
+              ariaLabel={`${category.name} (${category.article_count} articles)`}
+              header={
+                <>
+                  <span className="help-category-icon">
+                    {BookOpenIcon && <BookOpenIcon className="icon-sm" />}
+                  </span>
+                  <span className="flex-1">{category.name}</span>
+                  <span className="text-muted">{category.article_count}</span>
+                </>
+              }
+            >
+              {category.isLoading ? (
+                <span className="loading-spinner loading-spinner--small" />
+              ) : (
+                <div className="help-accordion-articles">
+                  {category.articles.map((article) => (
+                    <button
+                      key={article.id}
+                      type="button"
+                      className="help-accordion-article"
+                      onClick={() => onArticleClick(category.slug, article.slug)}
+                    >
+                      {FileTextIcon && <FileTextIcon className="icon-sm" />}
+                      <span>{article.title}</span>
+                    </button>
+                  ))}
                 </div>
-                <span className="help-accordion-title">{category.name}</span>
-                <span className="help-accordion-count">{category.article_count}</span>
-                {ChevronDownIcon && <ChevronDownIcon className="help-accordion-chevron" />}
-              </button>
-
-              {/* CSS controls display via .help-accordion-item.expanded .help-accordion-content */}
-              <div className="help-accordion-content">
-                {category.isLoading ? (
-                  <span className="loading-spinner loading-spinner--small" />
-                ) : (
-                  <div className="help-accordion-articles">
-                    {category.articles.map((article) => (
-                      <button
-                        key={article.id}
-                        type="button"
-                        className="help-accordion-article"
-                        onClick={() => onArticleClick(category.slug, article.slug)}
-                      >
-                        {FileTextIcon && <FileTextIcon className="icon-sm" />}
-                        <span>{article.title}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+              )}
+            </AccordionItem>
           );
         })}
       </div>
@@ -482,17 +484,19 @@ function ArticleDetail({ article, onBack }: ArticleDetailProps) {
 
   return (
     <div ref={containerRef} className="help-article-view">
-      <button
-        type="button"
-        className="btn-secondary"
-        onClick={onBack}
-      >
-        {ArrowLeftIcon && <ArrowLeftIcon className="icon-sm" />}
-        <span>Back to Help Center</span>
-      </button>
-
       <article>
-        <h1>{article.title}</h1>
+        <div className="help-article-title-row">
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={onBack}
+            title="Back to Help Center"
+            aria-label="Back to Help Center"
+          >
+            {ArrowLeftIcon && <ArrowLeftIcon className="icon-sm" />}
+          </button>
+          <h1>{article.title}</h1>
+        </div>
         {article.summary && (
           <p className="text-muted">{article.summary}</p>
         )}
@@ -577,27 +581,6 @@ export function PortalHelp({
     loadInitialData
   } = usePortalHelp(getAuthToken);
 
-  // Article detail view
-  if (viewMode === 'article' && selectedArticle) {
-    return (
-      <div ref={containerRef} className="section">
-        <div className="table-layout">
-          <div className="data-table-card">
-            <div className="data-table-header">
-              <h3>
-                <span className="title-full">HELP CENTER</span>
-              </h3>
-            </div>
-            <div className="data-table-container">
-              <ArticleDetail article={selectedArticle} onBack={goBack} />
-              <ContactSection onNavigate={onNavigate} />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div ref={containerRef} className="section">
       <div className="table-layout">
@@ -615,15 +598,15 @@ export function PortalHelp({
             </div>
           </div>
           <div className="data-table-container">
-            {isLoading ? (
+            {isLoading && viewMode === 'browse' ? (
               <LoadingState message="Loading help center..." />
             ) : error ? (
               <ErrorState message={error} onRetry={loadInitialData} />
             ) : (
               <>
-                {/* Two-column layout */}
+                {/* Two-column layout — left column always visible */}
                 <div className="help-main-grid">
-                  {/* Left: Categories accordion */}
+                  {/* Left: Categories accordion — always on screen */}
                   <div className="help-left-column">
                     <CategoriesSidebar
                       categories={categories}
@@ -632,9 +615,11 @@ export function PortalHelp({
                     />
                   </div>
 
-                  {/* Right: Featured / Search results */}
+                  {/* Right: content area swaps by view mode */}
                   <div className="help-right-column">
-                    {viewMode === 'search' ? (
+                    {viewMode === 'article' && selectedArticle ? (
+                      <ArticleDetail article={selectedArticle} onBack={goBack} />
+                    ) : viewMode === 'search' ? (
                       <SearchResults
                         results={searchResults}
                         query={searchQuery}

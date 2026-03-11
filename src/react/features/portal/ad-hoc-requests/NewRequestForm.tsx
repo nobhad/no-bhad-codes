@@ -8,6 +8,7 @@ import { useState, useRef } from 'react';
 import { Upload, X, Paperclip, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { formatFileSize } from '@react/utils/cardFormatters';
+import { FormDropdown } from '@react/components/portal/FormDropdown';
 import type { AdHocRequestPriority, NewAdHocRequestPayload } from './types';
 import { AD_HOC_REQUEST_PRIORITY_CONFIG } from './types';
 
@@ -241,20 +242,20 @@ export function NewRequestForm({
       {projects.length > 0 && (
         <div className="flex flex-col gap-1">
           <label className="field-label" htmlFor="request-project">Related Project (Optional)</label>
-          <select
+          <FormDropdown
             id="request-project"
-            value={projectId || ''}
-            onChange={(e) => setProjectId(e.target.value ? Number(e.target.value) : undefined)}
+            value={projectId ? String(projectId) : ''}
+            onChange={(val) => setProjectId(val ? Number(val) : undefined)}
+            options={[
+              { value: '', label: 'Select a project...' },
+              ...projects.map((project) => ({
+                value: String(project.id),
+                label: project.name
+              }))
+            ]}
+            placeholder="Select a project..."
             disabled={loading}
-            className="select"
-          >
-            <option value="">Select a project...</option>
-            {projects.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
-            ))}
-          </select>
+          />
         </div>
       )}
 
