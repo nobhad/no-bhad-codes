@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import { useMemo, useCallback } from 'react';
-import { FileSignature, FileText, Receipt, Inbox } from 'lucide-react';
+import { FileSignature, FileText, Receipt, Inbox, ClipboardList } from 'lucide-react';
 import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -24,7 +24,7 @@ import {
 import { useFadeIn } from '@react/hooks/useGsap';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { usePortalData } from '@react/hooks/usePortalFetch';
-import { formatCardDate, formatCurrency } from '@react/utils/cardFormatters';
+import { formatCardDate } from '@react/utils/cardFormatters';
 import { downloadInvoicePdf } from '@/utils/file-download';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { createLogger } from '@/utils/logger';
@@ -42,7 +42,16 @@ const logger = createLogger('PortalDocuments');
 // TYPES
 // ============================================================================
 
-type DocumentType = 'contract' | 'proposal' | 'invoice';
+type DocumentType = 'contract' | 'proposal' | 'invoice' | 'intake';
+
+interface IntakeFile {
+  id: number;
+  projectId: number;
+  projectName: string;
+  filename: string;
+  originalName: string;
+  uploadedAt: string;
+}
 
 interface UnifiedDocument {
   id: number;
@@ -53,13 +62,14 @@ interface UnifiedDocument {
   amount: number | null;
   date: string;
   /** Original entity for type-specific actions */
-  source: PortalContract | PortalProposal | PortalInvoice;
+  source: PortalContract | PortalProposal | PortalInvoice | IntakeFile;
 }
 
 interface DocumentsData {
   contracts: PortalContract[];
   proposals: PortalProposal[];
   invoices: PortalInvoice[];
+  intakes: IntakeFile[];
 }
 
 // ============================================================================
@@ -69,13 +79,15 @@ interface DocumentsData {
 const TYPE_ICONS: Record<DocumentType, React.ComponentType<{ className?: string }>> = {
   contract: FileSignature,
   proposal: FileText,
-  invoice: Receipt
+  invoice: Receipt,
+  intake: ClipboardList
 };
 
 const TYPE_LABELS: Record<DocumentType, string> = {
   contract: 'Contract',
   proposal: 'Proposal',
-  invoice: 'Invoice'
+  invoice: 'Invoice',
+  intake: 'Intake Form'
 };
 
 const FILTER_CONFIG = [
@@ -85,7 +97,8 @@ const FILTER_CONFIG = [
     options: [
       { value: 'contract', label: 'Contracts' },
       { value: 'proposal', label: 'Proposals' },
-      { value: 'invoice', label: 'Invoices' }
+      { value: 'invoice', label: 'Invoices' },
+      { value: 'intake', label: 'Intake Forms' }
     ]
   },
   {
@@ -117,6 +130,8 @@ function getStatusLabel(type: DocumentType, status: string): string {
     return PROPOSAL_STATUS_CONFIG[status]?.label ?? status;
   case 'invoice':
     return PORTAL_INVOICE_STATUS_CONFIG[status as keyof typeof PORTAL_INVOICE_STATUS_CONFIG]?.label ?? status;
+  case 'intake':
+    return 'Submitted';
   default:
     return status;
   }
@@ -161,6 +176,19 @@ function mergeDocuments(data: DocumentsData): UnifiedDocument[] {
       amount: invoice.amount_total,
       date: invoice.created_at,
       source: invoice
+    });
+  }
+
+  for (const intake of data.intakes) {
+    docs.push({
+      id: intake.id,
+      type: 'intake',
+      name: intake.originalName || 'Project Intake Form',
+      status: 'submitted',
+      statusLabel: 'Submitted',
+      amount: null,
+      date: intake.uploadedAt,
+      source: intake
     });
   }
 
@@ -245,23 +273,36 @@ export function PortalDocuments({ getAuthToken, showNotification }: PortalViewPr
       transform: (raw) => raw as { invoices: PortalInvoice[]; summary?: { totalOutstanding: number; totalPaid: number } }
     });
 
-  const isLoading = contractsLoading || proposalsLoading || invoicesLoading;
-  const error = contractsError || proposalsError || invoicesError;
+  // Fetch intake files (category=intake from client files endpoint)
+  const { data: intakeData, isLoading: intakeLoading, error: intakeError, refetch: refetchIntake } =
+    usePortalData<{ files: IntakeFile[] }>({
+      getAuthToken,
+      url: `${API_ENDPOINTS.FILES_CLIENT}?category=intake`,
+      transform: (raw) => {
+        const result = raw as { files: Array<{ id: number; projectId: number; projectName: string; filename: string; originalName: string; uploadedAt: string }> };
+        return { files: result.files ?? [] };
+      }
+    });
+
+  const isLoading = contractsLoading || proposalsLoading || invoicesLoading || intakeLoading;
+  const error = contractsError || proposalsError || invoicesError || intakeError;
 
   const refetchAll = useCallback(() => {
     refetchContracts();
     refetchProposals();
     refetchInvoices();
-  }, [refetchContracts, refetchProposals, refetchInvoices]);
+    refetchIntake();
+  }, [refetchContracts, refetchProposals, refetchInvoices, refetchIntake]);
 
   // Merge all documents into unified list
   const allDocuments = useMemo(() => {
     return mergeDocuments({
       contracts: contractsData?.contracts ?? [],
       proposals: proposalsData?.proposals ?? [],
-      invoices: invoicesData?.invoices ?? []
+      invoices: invoicesData?.invoices ?? [],
+      intakes: intakeData?.files ?? []
     });
-  }, [contractsData, proposalsData, invoicesData]);
+  }, [contractsData, proposalsData, invoicesData, intakeData]);
 
   // Table filters
   const {
@@ -298,6 +339,10 @@ export function PortalDocuments({ getAuthToken, showNotification }: PortalViewPr
 
   void 0; // Contract and proposal views are informational (no PDF preview yet)
 
+  const handleViewIntake = useCallback((intake: IntakeFile) => {
+    window.open(buildEndpoint.fileView(intake.id), '_blank');
+  }, []);
+
   // Render actions based on document type
   const renderActions = useCallback((doc: UnifiedDocument) => {
     switch (doc.type) {
@@ -310,26 +355,36 @@ export function PortalDocuments({ getAuthToken, showNotification }: PortalViewPr
         </div>
       );
     }
+    case 'intake': {
+      const intake = doc.source as IntakeFile;
+      return (
+        <div className="table-actions">
+          <IconButton action="view" onClick={() => handleViewIntake(intake)} title="View PDF" />
+        </div>
+      );
+    }
     case 'contract':
     case 'proposal':
       return null;
     default:
       return null;
     }
-  }, [handleViewInvoice, handleDownloadInvoice]);
+  }, [handleViewInvoice, handleDownloadInvoice, handleViewIntake]);
 
   // Stats
   const stats = useMemo(() => {
     const contracts = contractsData?.contracts?.length ?? 0;
     const proposals = proposalsData?.proposals?.length ?? 0;
     const invoices = invoicesData?.invoices?.length ?? 0;
+    const intakes = intakeData?.files?.length ?? 0;
     return [
       { value: allDocuments.length, label: 'total' },
       { value: contracts, label: 'contracts' },
       { value: proposals, label: 'proposals' },
-      { value: invoices, label: 'invoices' }
+      { value: invoices, label: 'invoices' },
+      { value: intakes, label: 'intake forms' }
     ];
-  }, [allDocuments.length, contractsData, proposalsData, invoicesData]);
+  }, [allDocuments.length, contractsData, proposalsData, invoicesData, intakeData]);
 
   return (
     <TableLayout
@@ -359,7 +414,6 @@ export function PortalDocuments({ getAuthToken, showNotification }: PortalViewPr
               <PortalTableHead className="type-col" sortable sortDirection={sort?.column === 'type' ? sort.direction : null} onClick={() => toggleSort('type')}>Type</PortalTableHead>
               <PortalTableHead className="name-col" sortable sortDirection={sort?.column === 'name' ? sort.direction : null} onClick={() => toggleSort('name')}>Name</PortalTableHead>
               <PortalTableHead className="status-col" sortable sortDirection={sort?.column === 'status' ? sort.direction : null} onClick={() => toggleSort('status')}>Status</PortalTableHead>
-              <PortalTableHead className="amount-col" sortable sortDirection={sort?.column === 'amount' ? sort.direction : null} onClick={() => toggleSort('amount')}>Amount</PortalTableHead>
               <PortalTableHead className="date-col" sortable sortDirection={sort?.column === 'date' ? sort.direction : null} onClick={() => toggleSort('date')}>Date</PortalTableHead>
               <PortalTableHead className="col-actions">Actions</PortalTableHead>
             </PortalTableRow>
@@ -367,7 +421,7 @@ export function PortalDocuments({ getAuthToken, showNotification }: PortalViewPr
           <PortalTableBody animate>
             {filteredDocuments.length === 0 ? (
               <PortalTableEmpty
-                colSpan={6}
+                colSpan={5}
                 icon={<Inbox className="icon-lg" />}
                 message={allDocuments.length === 0
                   ? 'No documents yet. Contracts, proposals, and invoices will appear here.'
@@ -392,9 +446,6 @@ export function PortalDocuments({ getAuthToken, showNotification }: PortalViewPr
                       <StatusBadge status={getStatusVariant(doc.status)}>
                         {doc.statusLabel}
                       </StatusBadge>
-                    </PortalTableCell>
-                    <PortalTableCell className="amount-cell" label="Amount">
-                      {doc.amount != null ? formatCurrency(doc.amount) : '\u2014'}
                     </PortalTableCell>
                     <PortalTableCell className="date-cell" label="Date">
                       {formatCardDate(doc.date)}

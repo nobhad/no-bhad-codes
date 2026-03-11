@@ -1,18 +1,23 @@
 {
   "submittedAt": "2025-12-02 00:27:06",
   "projectId": 1,
-  "projectName": "Arrow Test Project",
+  "projectName": "No Bhad Codes",
   "clientInfo": {
-    "name": "Arrow",
-    "email": "arrow@nobhadcodes.com",
-    "companyName": "Arrow Test Account"
+    "name": "Noelle Bhaduri",
+    "email": "nmbhaduri@gmail.com",
+    "phone": "857-201-9325",
+    "companyName": "No Bhad Codes",
+    "preferredContact": "either"
   },
   "projectDetails": {
     "type": "other",
-    "description": "A test project for Arrow",
-    "timeline": "",
+    "description": "Website build for No Bhad Codes",
+    "timeline": "April 1, 2026 launch",
     "budget": "",
     "features": []
+  },
+  "technicalInfo": {
+    "domainHosting": "Owns domain: www.nobhad.codes — Needs hosting info/recommendations — Ongoing maintenance requested"
   },
   "note": "Backfilled from project data"
 }

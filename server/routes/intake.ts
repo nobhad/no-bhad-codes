@@ -85,29 +85,32 @@ async function saveIntakeAsFile(
     .substring(0, 50);
   const dateStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
   const filename = `nobhadcodes_intake_${safeClientName}_${dateStr}.json`;
+  const pdfDisplayName = `nobhadcodes_intake_${safeClientName}_${dateStr}.pdf`;
   const filePath = join(uploadsDir, filename);
   const relativePath = getRelativePath(UPLOAD_DIRS.INTAKE, filename);
 
-  // Write file
+  // Write JSON source file (used by PDF generation endpoint)
   writeFileSync(filePath, JSON.stringify(intakeDocument, null, 2), 'utf-8');
 
   // Get file size
   const fileSize = Buffer.byteLength(JSON.stringify(intakeDocument, null, 2), 'utf-8');
 
-  // Insert into files table - use descriptive filename for downloads
+  // Insert into files table — JSON is source data, PDF is generated on-the-fly
+  // via /api/projects/:id/intake/pdf (uploads endpoint redirects for category=intake)
+  // Display as PDF to the client (original_filename + mime_type)
   await db.run(
     `INSERT INTO files (
       project_id, filename, original_filename, file_path,
-      file_size, mime_type, file_type, description, uploaded_by, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
+      file_size, mime_type, file_type, category, description, uploaded_by,
+      shared_with_client, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, 'document', 'intake', ?, ?, 1, datetime('now'))`,
     [
       projectId,
       filename,
-      filename, // Use descriptive filename for downloads
+      pdfDisplayName,
       relativePath,
       fileSize,
-      'application/json',
-      'document',
+      'application/pdf',
       'Project intake form submission',
       'system'
     ]

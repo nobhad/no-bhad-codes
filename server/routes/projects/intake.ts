@@ -1,7 +1,7 @@
 import express, { Response } from 'express';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { PDFDocument as PDFLibDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument as PDFLibDocument, PDFPage, StandardFonts, rgb } from 'pdf-lib';
 import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
@@ -28,22 +28,44 @@ interface IntakeDocument {
   clientInfo: {
     name: string;
     email: string;
+    phone?: string | null;
     projectFor?: string;
     companyName?: string | null;
+    companyWebsite?: string | null;
+    timezone?: string | null;
+    preferredContact?: string | null;
+    preferredContactMethod?: string | null;
   };
   projectDetails: {
     type: string;
     description: string;
     timeline: string;
     budget: string;
+    targetLaunchDate?: string | null;
+    targetAudience?: string | null;
     features?: string[];
     designLevel?: string | null;
+  };
+  requirements?: {
+    designStyle?: string | null;
+    colorPreferences?: string | null;
+    brandGuidelines?: boolean;
+    contentReady?: boolean;
+    features?: string[];
+    integrations?: string | null;
+    additionalNotes?: string | null;
   };
   technicalInfo?: {
     techComfort?: string | null;
     domainHosting?: string | null;
   };
+  assets?: {
+    logoProvided?: boolean;
+    existingAssets?: string | null;
+    contentAccess?: string | null;
+  };
   additionalInfo?: string | null;
+  note?: string | null;
 }
 
 /**
@@ -83,8 +105,7 @@ router.get(
     const intakeFile = await db.get(
       `SELECT ${FILE_COLUMNS} FROM files
        WHERE project_id = ? AND deleted_at IS NULL
-       AND (original_filename LIKE '%intake%' OR filename LIKE 'intake_%' OR filename LIKE 'admin_project_%' OR filename LIKE 'project_intake_%' OR filename LIKE 'nobhadcodes_intake_%')
-       AND mime_type = 'application/json'
+       AND (category = 'intake' OR filename LIKE 'intake_%' OR filename LIKE 'nobhadcodes_intake_%' OR filename LIKE 'admin_project_%')
        ORDER BY created_at DESC
        LIMIT 1`,
       [projectId]
@@ -94,7 +115,6 @@ router.get(
       return errorResponse(res, 'Intake form not found for this project', 404, ErrorCodes.FILE_NOT_FOUND);
     }
 
-    // Check cache first (use intake file's updated_at for freshness)
     const intakeFileRecord = intakeFile as Record<string, unknown>;
     const cacheKey = getPdfCacheKey(
       'intake',
@@ -132,7 +152,10 @@ router.get(
       return errorResponse(res, 'Failed to read intake file', 500, ErrorCodes.INTERNAL_ERROR);
     }
 
-    // Helper functions
+    // =========================================================
+    // FORMAT HELPERS
+    // =========================================================
+
     const formatDate = (dateStr: string | undefined): string => {
       if (!dateStr) return 'N/A';
       return new Date(dateStr).toLocaleDateString('en-US', {
@@ -145,18 +168,18 @@ router.get(
     };
 
     const formatTimeline = (timeline: string): string => {
-      const timelineMap: Record<string, string> = {
+      const map: Record<string, string> = {
         asap: 'As Soon As Possible',
         '1-month': '1 Month',
         '1-3-months': '1-3 Months',
         '3-6-months': '3-6 Months',
         flexible: 'Flexible'
       };
-      return timelineMap[timeline] || timeline;
+      return map[timeline] || timeline;
     };
 
     const formatBudget = (budget: string): string => {
-      const budgetMap: Record<string, string> = {
+      const map: Record<string, string> = {
         'under-2k': 'Under $2,000',
         '2k-5k': '$2,000 - $5,000',
         '2.5k-5k': '$2,500 - $5,000',
@@ -164,11 +187,11 @@ router.get(
         '10k-25k': '$10,000 - $25,000',
         '25k+': '$25,000+'
       };
-      return budgetMap[budget] || budget;
+      return map[budget] || budget;
     };
 
     const formatProjectType = (type: string): string => {
-      const typeMap: Record<string, string> = {
+      const map: Record<string, string> = {
         'simple-site': 'Simple Website',
         'business-site': 'Business Website',
         portfolio: 'Portfolio Website',
@@ -178,7 +201,16 @@ router.get(
         'browser-extension': 'Browser Extension',
         other: 'Custom Project'
       };
-      return typeMap[type] || type.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+      return map[type] || type.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+    };
+
+    const formatContact = (val: string): string => {
+      const map: Record<string, string> = {
+        email: 'Email',
+        phone: 'Phone',
+        either: 'Either'
+      };
+      return map[val.toLowerCase()] || val;
     };
 
     const decodeHtml = (text: string): string => {
@@ -191,59 +223,225 @@ router.get(
         .replace(/&#39;/g, '\'');
     };
 
-    // Create PDF document using pdf-lib
+    const sanitize = (text: string): string => {
+      return text.replace(/[\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+    };
+
+    const clean = (text: string): string => sanitize(decodeHtml(text));
+
+    // =========================================================
+    // PDF SETUP
+    // =========================================================
+
     const pdfDoc = await PDFLibDocument.create();
 
-    // Set PDF metadata for proper title in browser tab
     const pdfClientName = getString(p, 'company_name') || getString(p, 'client_name') || 'Client';
-    const pdfTitle = `NoBhadCodes Intake - ${pdfClientName}`;
-    pdfDoc.setTitle(pdfTitle);
+    pdfDoc.setTitle(`NoBhadCodes Intake - ${pdfClientName}`);
     pdfDoc.setAuthor(BUSINESS_INFO.name);
     pdfDoc.setSubject('Project Intake Form');
     pdfDoc.setCreator('NoBhadCodes');
 
-    const page = pdfDoc.addPage([612, 792]); // LETTER size
-    const { width, height } = page.getSize();
+    const PAGE_W = 612;
+    const PAGE_H = 792;
+    const LEFT = 54;
+    const RIGHT = PAGE_W - 54;
+    const CONTENT_W = RIGHT - LEFT;
+    const FOOTER_Y = 72;
+    const BODY_BOTTOM = FOOTER_Y + 20; // minimum y before needing a new page
 
-    // Embed fonts
     const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    // Colors
     const black = rgb(0, 0, 0);
+    const dimGray = rgb(0.3, 0.3, 0.3);
     const lightGray = rgb(0.5, 0.5, 0.5);
     const lineGray = rgb(0.8, 0.8, 0.8);
 
-    // Layout constants (matching template: 0.75 inch margins)
-    const leftMargin = 54; // 0.75 inch
-    const rightMargin = width - 54;
-    const contentWidth = rightMargin - leftMargin;
+    // =========================================================
+    // MULTI-PAGE STATE
+    // =========================================================
 
-    // pdf-lib uses bottom-left origin, so we work from top down
-    // Y position decreases as we go down the page
-    let y = height - 43; // Start ~0.6 inch from top (matching template)
+    let currentPage: PDFPage = pdfDoc.addPage([PAGE_W, PAGE_H]);
+    let y = PAGE_H - 43;
+    let pageNumber = 1;
 
-    // === HEADER - Title on left, logo and business info on right ===
+    const drawFooter = (pg: PDFPage, pgNum: number) => {
+      pg.drawLine({
+        start: { x: LEFT, y: FOOTER_Y },
+        end: { x: RIGHT, y: FOOTER_Y },
+        thickness: 0.5,
+        color: lineGray
+      });
+      const footerText = `${BUSINESS_INFO.name} • ${BUSINESS_INFO.owner} • ${BUSINESS_INFO.email} • ${BUSINESS_INFO.website}`;
+      const footerWidth = helvetica.widthOfTextAtSize(footerText, 7);
+      pg.drawText(footerText, {
+        x: (PAGE_W - footerWidth) / 2,
+        y: 46,
+        size: 7,
+        font: helvetica,
+        color: lightGray
+      });
+      const pageLabel = `Page ${pgNum}`;
+      pg.drawText(pageLabel, {
+        x: RIGHT - helvetica.widthOfTextAtSize(pageLabel, 7),
+        y: 36,
+        size: 7,
+        font: helvetica,
+        color: lightGray
+      });
+    };
+
+    const addPage = () => {
+      drawFooter(currentPage, pageNumber);
+      pageNumber += 1;
+      currentPage = pdfDoc.addPage([PAGE_W, PAGE_H]);
+      y = PAGE_H - 54;
+    };
+
+    const ensureSpace = (needed: number) => {
+      if (y - needed < BODY_BOTTOM) {
+        addPage();
+      }
+    };
+
+    // =========================================================
+    // DRAW HELPERS
+    // =========================================================
+
+    const drawSectionHeading = (title: string) => {
+      ensureSpace(30);
+      currentPage.drawText(title, {
+        x: LEFT,
+        y,
+        size: 12,
+        font: helveticaBold,
+        color: black
+      });
+      y -= 20;
+    };
+
+    const drawDivider = (gap = 18) => {
+      ensureSpace(gap + 4);
+      currentPage.drawLine({
+        start: { x: LEFT, y: y + gap / 2 },
+        end: { x: RIGHT, y: y + gap / 2 },
+        thickness: 0.5,
+        color: rgb(0.9, 0.9, 0.9)
+      });
+      y -= gap;
+    };
+
+    // Draws "Label: " bold + value normal on one line; wraps long values
+    const drawField = (label: string, value: string | null | undefined, gap = 16) => {
+      if (!value) return;
+      const cleanVal = clean(value);
+      if (!cleanVal) return;
+
+      const labelText = `${label}: `;
+      const labelW = helveticaBold.widthOfTextAtSize(labelText, 10);
+      const valueX = LEFT + labelW;
+      const valueMaxW = RIGHT - valueX;
+
+      if (helvetica.widthOfTextAtSize(cleanVal, 10) <= valueMaxW) {
+        ensureSpace(gap);
+        currentPage.drawText(labelText, { x: LEFT, y, size: 10, font: helveticaBold, color: black });
+        currentPage.drawText(cleanVal, { x: valueX, y, size: 10, font: helvetica, color: black });
+        y -= gap;
+      } else {
+        // Value too long — put label on its own line, value indented below
+        ensureSpace(gap);
+        currentPage.drawText(labelText, { x: LEFT, y, size: 10, font: helveticaBold, color: black });
+        y -= 14;
+        // Wrap the value
+        const words = cleanVal.split(' ');
+        let line = '';
+        for (const word of words) {
+          const test = line + (line ? ' ' : '') + word;
+          if (helvetica.widthOfTextAtSize(test, 10) > CONTENT_W - 8 && line) {
+            ensureSpace(14);
+            currentPage.drawText(line, { x: LEFT + 8, y, size: 10, font: helvetica, color: black });
+            y -= 14;
+            line = word;
+          } else {
+            line = test;
+          }
+        }
+        if (line) {
+          ensureSpace(14);
+          currentPage.drawText(line, { x: LEFT + 8, y, size: 10, font: helvetica, color: black });
+          y -= 14;
+        }
+        y -= 2;
+      }
+    };
+
+    // Draws wrapped body text (no label)
+    const drawWrappedText = (text: string, afterGap = 15) => {
+      const words = clean(text).split(' ');
+      let line = '';
+      for (const word of words) {
+        const test = line + (line ? ' ' : '') + word;
+        if (helvetica.widthOfTextAtSize(test, 10) > CONTENT_W && line) {
+          ensureSpace(14);
+          currentPage.drawText(line, { x: LEFT, y, size: 10, font: helvetica, color: black });
+          y -= 14;
+          line = word;
+        } else {
+          line = test;
+        }
+      }
+      if (line) {
+        ensureSpace(14);
+        currentPage.drawText(line, { x: LEFT, y, size: 10, font: helvetica, color: black });
+        y -= 14;
+      }
+      y -= afterGap;
+    };
+
+    // Draws a bullet list
+    const drawBulletList = (items: string[], afterGap = 10) => {
+      for (const item of items) {
+        const text = sanitize(`•  ${item.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}`);
+        ensureSpace(14);
+        currentPage.drawText(text, { x: LEFT, y, size: 10, font: helvetica, color: black });
+        y -= 14;
+      }
+      y -= afterGap;
+    };
+
+    // Draws a Yes/No checkbox-style indicator
+    const drawBoolField = (label: string, value: boolean | undefined) => {
+      if (value === undefined || value === null) return;
+      ensureSpace(16);
+      const indicator = value ? 'Yes' : 'No';
+      const labelText = `${label}: `;
+      const labelW = helveticaBold.widthOfTextAtSize(labelText, 10);
+      currentPage.drawText(labelText, { x: LEFT, y, size: 10, font: helveticaBold, color: black });
+      currentPage.drawText(indicator, { x: LEFT + labelW, y, size: 10, font: helvetica, color: black });
+      y -= 16;
+    };
+
+    // =========================================================
+    // PAGE 1 HEADER
+    // =========================================================
+
     const logoHeight = 100;
+    let textStartX = RIGHT - 180;
 
-    // INTAKE title on left: 28pt
-    const titleText = 'INTAKE';
-    page.drawText(titleText, {
-      x: leftMargin,
+    currentPage.drawText('INTAKE', {
+      x: LEFT,
       y: y - 20,
       size: 28,
       font: helveticaBold,
       color: rgb(0.15, 0.15, 0.15)
     });
 
-    // Logo and business info on right (logo left of text, text left-aligned)
-    let textStartX = rightMargin - 180;
     const intakeLogoBytes = getPdfLogoBytes();
     if (intakeLogoBytes) {
       const logoImage = await pdfDoc.embedPng(intakeLogoBytes);
       const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
-      const logoX = rightMargin - logoWidth - 150;
-      page.drawImage(logoImage, {
+      const logoX = RIGHT - logoWidth - 150;
+      currentPage.drawImage(logoImage, {
         x: logoX,
         y: y - logoHeight + 10,
         width: logoWidth,
@@ -252,372 +450,312 @@ router.get(
       textStartX = logoX + logoWidth + 18;
     }
 
-    // Business info (left-aligned, to right of logo)
-    page.drawText(BUSINESS_INFO.name, {
-      x: textStartX,
-      y: y - 11,
-      size: 15,
-      font: helveticaBold,
-      color: rgb(0.1, 0.1, 0.1)
+    let infoY = y - 11;
+    currentPage.drawText(BUSINESS_INFO.name, {
+      x: textStartX, y: infoY,
+      size: 15, font: helveticaBold, color: rgb(0.1, 0.1, 0.1)
     });
-    page.drawText(BUSINESS_INFO.owner, {
-      x: textStartX,
-      y: y - 34,
-      size: 10,
-      font: helvetica,
-      color: rgb(0.2, 0.2, 0.2)
-    });
-    page.drawText(BUSINESS_INFO.tagline, {
-      x: textStartX,
-      y: y - 54,
-      size: 9,
-      font: helvetica,
-      color: rgb(0.4, 0.4, 0.4)
-    });
-    page.drawText(BUSINESS_INFO.email, {
-      x: textStartX,
-      y: y - 70,
-      size: 9,
-      font: helvetica,
-      color: rgb(0.4, 0.4, 0.4)
-    });
-    page.drawText(BUSINESS_INFO.website, {
-      x: textStartX,
-      y: y - 86,
-      size: 9,
-      font: helvetica,
-      color: rgb(0.4, 0.4, 0.4)
-    });
+    infoY -= 18;
+    if (BUSINESS_INFO.owner) {
+      currentPage.drawText(BUSINESS_INFO.owner, {
+        x: textStartX, y: infoY,
+        size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2)
+      });
+      infoY -= 16;
+    }
+    if (BUSINESS_INFO.tagline) {
+      currentPage.drawText(BUSINESS_INFO.tagline, {
+        x: textStartX, y: infoY,
+        size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4)
+      });
+      infoY -= 14;
+    }
+    if (BUSINESS_INFO.email) {
+      currentPage.drawText(BUSINESS_INFO.email, {
+        x: textStartX, y: infoY,
+        size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4)
+      });
+      infoY -= 14;
+    }
+    if (BUSINESS_INFO.website) {
+      currentPage.drawText(BUSINESS_INFO.website, {
+        x: textStartX, y: infoY,
+        size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4)
+      });
+      infoY -= 14;
+    }
 
-    y -= 120; // Account for 100pt logo height
+    y = Math.min(y - 120, infoY - 20);
 
-    // === DIVIDER LINE ===
-    page.drawLine({
-      start: { x: leftMargin, y: y },
-      end: { x: rightMargin, y: y },
+    // Header divider
+    currentPage.drawLine({
+      start: { x: LEFT, y },
+      end: { x: RIGHT, y },
       thickness: 1,
       color: lineGray
     });
-    y -= 21; // 0.3 inch gap
-
-    // === PREPARED FOR (left) and DATE/PROJECT (right) ===
-    const detailsX = width / 2 + 36; // Middle + 0.5 inch
-
-    // Left side - PREPARED FOR:
-    page.drawText('PREPARED FOR:', {
-      x: leftMargin,
-      y: y,
-      size: 11,
-      font: helveticaBold,
-      color: rgb(0.2, 0.2, 0.2)
-    });
-
-    // Client name (bold)
-    page.drawText(decodeHtml(intakeData.clientInfo.name), {
-      x: leftMargin,
-      y: y - 14,
-      size: 10,
-      font: helveticaBold,
-      color: black
-    });
-
-    // Company name (if exists)
-    let clientLineY = y - 25;
-    if (intakeData.clientInfo.companyName) {
-      page.drawText(decodeHtml(intakeData.clientInfo.companyName), {
-        x: leftMargin,
-        y: clientLineY,
-        size: 10,
-        font: helvetica,
-        color: black
-      });
-      clientLineY -= 11;
-    }
-
-    // Email
-    page.drawText(intakeData.clientInfo.email, {
-      x: leftMargin,
-      y: clientLineY,
-      size: 10,
-      font: helvetica,
-      color: rgb(0.3, 0.3, 0.3)
-    });
-
-    // Right side - DATE:
-    page.drawText('DATE:', {
-      x: detailsX,
-      y: y,
-      size: 9,
-      font: helveticaBold,
-      color: rgb(0.3, 0.3, 0.3)
-    });
-    page.drawText(formatDate(intakeData.submittedAt), {
-      x: rightMargin - helvetica.widthOfTextAtSize(formatDate(intakeData.submittedAt), 9),
-      y: y,
-      size: 9,
-      font: helvetica,
-      color: black
-    });
-
-    // PROJECT #:
-    page.drawText('PROJECT #:', {
-      x: detailsX,
-      y: y - 14,
-      size: 9,
-      font: helveticaBold,
-      color: rgb(0.3, 0.3, 0.3)
-    });
-    const projectIdText = `#${intakeData.projectId}`;
-    page.drawText(projectIdText, {
-      x: rightMargin - helvetica.widthOfTextAtSize(projectIdText, 9),
-      y: y - 14,
-      size: 9,
-      font: helvetica,
-      color: black
-    });
-
-    y -= 72; // Move past client info section (1.0 inch)
-
-    // === CONTENT AREA SEPARATOR (light line) ===
-    page.drawLine({
-      start: { x: leftMargin, y: y },
-      end: { x: rightMargin, y: y },
-      thickness: 0.5,
-      color: rgb(0.9, 0.9, 0.9)
-    });
     y -= 21;
 
-    // Helper to sanitize text for PDF (remove newlines and special chars)
-    const sanitizeForPdf = (text: string): string => {
-      return text
-        .replace(/[\n\r\t]+/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-    };
+    // =========================================================
+    // PREPARED FOR + DATE/PROJECT #
+    // =========================================================
 
-    // === PROJECT DETAILS ===
-    page.drawText('Project Details', {
-      x: leftMargin,
-      y: y,
-      size: 12,
-      font: helveticaBold,
-      color: black
-    });
-    y -= 20;
+    const detailsX = PAGE_W / 2 + 36;
 
-    // Project Name
-    page.drawText('Project Name: ', {
-      x: leftMargin,
-      y: y,
-      size: 10,
-      font: helveticaBold,
-      color: black
+    currentPage.drawText('PREPARED FOR:', {
+      x: LEFT, y,
+      size: 11, font: helveticaBold, color: rgb(0.2, 0.2, 0.2)
     });
-    const nameX = leftMargin + helveticaBold.widthOfTextAtSize('Project Name: ', 10);
-    page.drawText(sanitizeForPdf(decodeHtml(intakeData.projectName)), {
-      x: nameX,
-      y: y,
-      size: 10,
-      font: helvetica,
-      color: black
-    });
-    y -= 16;
 
-    // Project Type
-    page.drawText('Project Type: ', {
-      x: leftMargin,
-      y: y,
-      size: 10,
-      font: helveticaBold,
-      color: black
+    currentPage.drawText(clean(intakeData.clientInfo.name), {
+      x: LEFT, y: y - 14,
+      size: 10, font: helveticaBold, color: black
     });
-    const typeX = leftMargin + helveticaBold.widthOfTextAtSize('Project Type: ', 10);
-    page.drawText(sanitizeForPdf(formatProjectType(intakeData.projectDetails.type)), {
-      x: typeX,
-      y: y,
-      size: 10,
-      font: helvetica,
-      color: black
-    });
-    y -= 16;
 
-    // Timeline
-    page.drawText('Timeline: ', {
-      x: leftMargin,
-      y: y,
-      size: 10,
-      font: helveticaBold,
-      color: black
-    });
-    const timelineX = leftMargin + helveticaBold.widthOfTextAtSize('Timeline: ', 10);
-    page.drawText(sanitizeForPdf(formatTimeline(intakeData.projectDetails.timeline)), {
-      x: timelineX,
-      y: y,
-      size: 10,
-      font: helvetica,
-      color: black
-    });
-    y -= 16;
+    let clientLineY = y - 25;
+    if (intakeData.clientInfo.companyName) {
+      currentPage.drawText(clean(intakeData.clientInfo.companyName), {
+        x: LEFT, y: clientLineY,
+        size: 10, font: helvetica, color: black
+      });
+      clientLineY -= 12;
+    }
 
-    // Budget
-    page.drawText('Budget: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
-    const budgetX = leftMargin + helveticaBold.widthOfTextAtSize('Budget: ', 10);
-    page.drawText(sanitizeForPdf(formatBudget(intakeData.projectDetails.budget)), {
-      x: budgetX,
-      y: y,
-      size: 10,
-      font: helvetica,
-      color: black
+    currentPage.drawText(intakeData.clientInfo.email, {
+      x: LEFT, y: clientLineY,
+      size: 10, font: helvetica, color: dimGray
     });
-    y -= 30;
+    clientLineY -= 12;
 
-    // === PROJECT DESCRIPTION ===
-    page.drawText('Project Description', {
-      x: leftMargin,
-      y: y,
-      size: 12,
-      font: helveticaBold,
-      color: black
+    if (intakeData.clientInfo.phone) {
+      currentPage.drawText(clean(intakeData.clientInfo.phone), {
+        x: LEFT, y: clientLineY,
+        size: 10, font: helvetica, color: dimGray
+      });
+      clientLineY -= 12;
+    }
+
+    const preferredContact = intakeData.clientInfo.preferredContact
+      || intakeData.clientInfo.preferredContactMethod;
+    if (preferredContact) {
+      const contactLabel = `Preferred: ${formatContact(preferredContact)}`;
+      currentPage.drawText(contactLabel, {
+        x: LEFT, y: clientLineY,
+        size: 9, font: helvetica, color: lightGray
+      });
+      clientLineY -= 12;
+    }
+
+    if (intakeData.clientInfo.companyWebsite) {
+      currentPage.drawText(clean(intakeData.clientInfo.companyWebsite), {
+        x: LEFT, y: clientLineY,
+        size: 9, font: helvetica, color: lightGray
+      });
+      clientLineY -= 12;
+    }
+
+    if (intakeData.clientInfo.timezone) {
+      currentPage.drawText(clean(intakeData.clientInfo.timezone), {
+        x: LEFT, y: clientLineY,
+        size: 9, font: helvetica, color: lightGray
+      });
+    }
+
+    // Right side — DATE + PROJECT #
+    currentPage.drawText('DATE:', {
+      x: detailsX, y,
+      size: 9, font: helveticaBold, color: dimGray
     });
-    y -= 18;
+    const dateVal = formatDate(intakeData.submittedAt);
+    currentPage.drawText(dateVal, {
+      x: RIGHT - helvetica.widthOfTextAtSize(dateVal, 9),
+      y,
+      size: 9, font: helvetica, color: black
+    });
 
-    // Word wrap description text
-    const description = sanitizeForPdf(
-      decodeHtml(intakeData.projectDetails.description || 'No description provided')
+    currentPage.drawText('PROJECT #:', {
+      x: detailsX, y: y - 14,
+      size: 9, font: helveticaBold, color: dimGray
+    });
+    const projIdText = `#${intakeData.projectId}`;
+    currentPage.drawText(projIdText, {
+      x: RIGHT - helvetica.widthOfTextAtSize(projIdText, 9),
+      y: y - 14,
+      size: 9, font: helvetica, color: black
+    });
+
+    // Advance past the tallest possible client block
+    y = Math.min(y - 72, clientLineY - 20);
+    drawDivider(18);
+
+    // =========================================================
+    // PROJECT DETAILS
+    // =========================================================
+
+    drawSectionHeading('Project Details');
+
+    drawField('Project Name', intakeData.projectName);
+    drawField('Project Type', formatProjectType(intakeData.projectDetails.type));
+
+    const timeline = intakeData.projectDetails.targetLaunchDate
+      || intakeData.projectDetails.timeline;
+    if (timeline) drawField('Timeline', formatTimeline(timeline));
+
+    const budget = intakeData.projectDetails.budget;
+    if (budget) drawField('Budget', formatBudget(budget));
+
+    if (intakeData.projectDetails.targetAudience) {
+      drawField('Target Audience', intakeData.projectDetails.targetAudience);
+    }
+
+    if (intakeData.projectDetails.designLevel) {
+      drawField('Design Level', intakeData.projectDetails.designLevel);
+    }
+
+    y -= 10;
+
+    // =========================================================
+    // PROJECT DESCRIPTION
+    // =========================================================
+
+    drawSectionHeading('Project Description');
+    drawWrappedText(
+      intakeData.projectDetails.description || 'No description provided',
+      15
     );
-    const words = description.split(' ');
-    let line = '';
-    const maxWidth = contentWidth;
-    const lineHeight = 14;
 
-    for (const word of words) {
-      const testLine = line + (line ? ' ' : '') + word;
-      const testWidth = helvetica.widthOfTextAtSize(testLine, 10);
-      if (testWidth > maxWidth && line) {
-        page.drawText(line, { x: leftMargin, y: y, size: 10, font: helvetica, color: black });
-        y -= lineHeight;
-        line = word;
-      } else {
-        line = testLine;
-      }
+    // =========================================================
+    // REQUESTED FEATURES (from projectDetails or requirements)
+    // =========================================================
+
+    const features = intakeData.requirements?.features?.length
+      ? intakeData.requirements.features
+      : intakeData.projectDetails.features;
+
+    if (features && features.length > 0) {
+      drawSectionHeading('Requested Features');
+      drawBulletList(features);
     }
-    if (line) {
-      page.drawText(line, { x: leftMargin, y: y, size: 10, font: helvetica, color: black });
-      y -= lineHeight;
+
+    // =========================================================
+    // DESIGN PREFERENCES
+    // =========================================================
+
+    const hasDesignInfo = intakeData.requirements && (
+      intakeData.requirements.designStyle ||
+      intakeData.requirements.colorPreferences ||
+      intakeData.requirements.brandGuidelines !== undefined ||
+      intakeData.requirements.contentReady !== undefined
+    );
+
+    if (hasDesignInfo) {
+      drawSectionHeading('Design Preferences');
+      drawField('Design Style', intakeData.requirements!.designStyle);
+      drawField('Color Preferences', intakeData.requirements!.colorPreferences);
+      drawBoolField('Brand Guidelines Provided', intakeData.requirements!.brandGuidelines);
+      drawBoolField('Content Ready', intakeData.requirements!.contentReady);
+      y -= 6;
     }
-    y -= 15;
 
-    // === FEATURES (if any) ===
-    if (intakeData.projectDetails.features && intakeData.projectDetails.features.length > 0) {
-      page.drawText('Requested Features', {
-        x: leftMargin,
-        y: y,
-        size: 12,
-        font: helveticaBold,
-        color: black
-      });
-      y -= 18;
+    // =========================================================
+    // TECHNICAL INFORMATION
+    // =========================================================
 
-      for (const feature of intakeData.projectDetails.features) {
-        const featureText = sanitizeForPdf(
-          decodeHtml(`•  ${feature.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}`)
-        );
-        page.drawText(featureText, {
-          x: leftMargin,
-          y: y,
-          size: 10,
-          font: helvetica,
-          color: black
+    const hasTechInfo = intakeData.technicalInfo && (
+      intakeData.technicalInfo.techComfort ||
+      intakeData.technicalInfo.domainHosting
+    );
+
+    if (hasTechInfo) {
+      drawSectionHeading('Technical Information');
+      drawField('Technical Comfort', intakeData.technicalInfo!.techComfort);
+      drawField('Domain / Hosting', intakeData.technicalInfo!.domainHosting);
+      y -= 6;
+    }
+
+    // =========================================================
+    // INTEGRATIONS & ADDITIONAL NOTES
+    // =========================================================
+
+    const hasReqExtras = intakeData.requirements && (
+      intakeData.requirements.integrations ||
+      intakeData.requirements.additionalNotes
+    );
+
+    if (hasReqExtras) {
+      drawSectionHeading('Requirements & Notes');
+      if (intakeData.requirements!.integrations) {
+        ensureSpace(16);
+        currentPage.drawText('Third-party Integrations: ', {
+          x: LEFT, y, size: 10, font: helveticaBold, color: black
         });
         y -= 14;
+        drawWrappedText(intakeData.requirements!.integrations, 10);
       }
-      y -= 10;
-    }
-
-    // === TECHNICAL INFO (if any) ===
-    if (
-      intakeData.technicalInfo &&
-      (intakeData.technicalInfo.techComfort || intakeData.technicalInfo.domainHosting)
-    ) {
-      page.drawText('Technical Information', {
-        x: leftMargin,
-        y: y,
-        size: 12,
-        font: helveticaBold,
-        color: black
-      });
-      y -= 18;
-
-      if (intakeData.technicalInfo.techComfort) {
-        page.drawText('Technical Comfort: ', {
-          x: leftMargin,
-          y: y,
-          size: 10,
-          font: helveticaBold,
-          color: black
-        });
-        const tcX = leftMargin + helveticaBold.widthOfTextAtSize('Technical Comfort: ', 10);
-        page.drawText(sanitizeForPdf(decodeHtml(intakeData.technicalInfo.techComfort)), {
-          x: tcX,
-          y: y,
-          size: 10,
-          font: helvetica,
-          color: black
+      if (intakeData.requirements!.additionalNotes) {
+        ensureSpace(16);
+        currentPage.drawText('Additional Notes: ', {
+          x: LEFT, y, size: 10, font: helveticaBold, color: black
         });
         y -= 14;
-      }
-      if (intakeData.technicalInfo.domainHosting) {
-        page.drawText('Domain/Hosting: ', {
-          x: leftMargin,
-          y: y,
-          size: 10,
-          font: helveticaBold,
-          color: black
-        });
-        const dhX = leftMargin + helveticaBold.widthOfTextAtSize('Domain/Hosting: ', 10);
-        page.drawText(sanitizeForPdf(decodeHtml(intakeData.technicalInfo.domainHosting)), {
-          x: dhX,
-          y: y,
-          size: 10,
-          font: helvetica,
-          color: black
-        });
-        y -= 14;
+        drawWrappedText(intakeData.requirements!.additionalNotes, 10);
       }
     }
 
-    // === FOOTER - always at bottom of page 1 ===
-    // Footer separator line
-    page.drawLine({
-      start: { x: leftMargin, y: 72 }, // 1 inch from bottom
-      end: { x: rightMargin, y: 72 },
-      thickness: 0.5,
-      color: rgb(0.8, 0.8, 0.8)
-    });
+    if (intakeData.additionalInfo) {
+      drawSectionHeading('Additional Information');
+      drawWrappedText(intakeData.additionalInfo);
+    }
 
-    // Footer contact info (centered with bullet separators)
-    const footerText = `${BUSINESS_INFO.name} • ${BUSINESS_INFO.owner} • ${BUSINESS_INFO.email} • ${BUSINESS_INFO.website}`;
-    const footerWidth = helvetica.widthOfTextAtSize(footerText, 7);
-    page.drawText(footerText, {
-      x: (width - footerWidth) / 2,
-      y: 36, // 0.5 inch from bottom
-      size: 7,
-      font: helvetica,
-      color: lightGray
-    });
+    // =========================================================
+    // ASSETS
+    // =========================================================
 
-    // Generate PDF bytes and send response
+    const hasAssets = intakeData.assets && (
+      intakeData.assets.logoProvided !== undefined ||
+      intakeData.assets.existingAssets ||
+      intakeData.assets.contentAccess
+    );
+
+    if (hasAssets) {
+      drawSectionHeading('Assets & Resources');
+      drawBoolField('Logo Provided', intakeData.assets!.logoProvided);
+      if (intakeData.assets!.existingAssets) {
+        ensureSpace(16);
+        currentPage.drawText('Existing Assets: ', {
+          x: LEFT, y, size: 10, font: helveticaBold, color: black
+        });
+        y -= 14;
+        drawWrappedText(intakeData.assets!.existingAssets, 10);
+      }
+      if (intakeData.assets!.contentAccess) {
+        ensureSpace(16);
+        currentPage.drawText('Content & Access Details: ', {
+          x: LEFT, y, size: 10, font: helveticaBold, color: black
+        });
+        y -= 14;
+        drawWrappedText(intakeData.assets!.contentAccess, 10);
+      }
+    }
+
+    // =========================================================
+    // FOOTER ON LAST PAGE
+    // =========================================================
+
+    drawFooter(currentPage, pageNumber);
+
+    // =========================================================
+    // GENERATE & SEND
+    // =========================================================
+
     const pdfBytes = await pdfDoc.save();
 
-    // Cache the generated PDF
     cachePdf(
       cacheKey,
       pdfBytes,
       getString(intakeFileRecord, 'updated_at') || getString(intakeFileRecord, 'created_at')
     );
 
-    // Generate descriptive PDF filename with NoBhadCodes branding
-    // Use company name if available, otherwise client name
     const clientOrCompany = getString(p, 'company_name') || getString(p, 'client_name');
     const safeClientName = clientOrCompany
       .toLowerCase()
@@ -626,6 +764,7 @@ router.get(
       .replace(/_+/g, '_')
       .replace(/^_|_$/g, '')
       .substring(0, 50);
+
     sendPdfResponse(res, pdfBytes, {
       filename: `nobhadcodes_intake_${safeClientName}.pdf`,
       disposition: 'inline',

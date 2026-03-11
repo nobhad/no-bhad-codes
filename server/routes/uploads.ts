@@ -841,6 +841,11 @@ router.get(
         return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
       }
 
+      // Intake files: redirect to PDF generation endpoint (JSON is source, client sees PDF)
+      if (getString(file, 'category') === 'intake' && file.project_id) {
+        return res.redirect(`/api/projects/${file.project_id}/intake/pdf`);
+      }
+
       // Validate path to prevent path traversal attacks
       const filePathStr = getString(file, 'file_path');
       if (!isPathSafe(filePathStr)) {
