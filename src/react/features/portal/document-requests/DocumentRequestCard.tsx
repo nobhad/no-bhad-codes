@@ -32,7 +32,7 @@ export interface DocumentRequest {
   project_id: number;
   title: string;
   description?: string;
-  status: 'pending' | 'submitted' | 'approved' | 'rejected';
+  status: 'requested' | 'viewed' | 'uploaded' | 'under_review' | 'approved' | 'rejected';
   due_date?: string;
   created_at: string;
   submitted_at?: string;
@@ -89,8 +89,8 @@ export function DocumentRequestCard({
 
   const daysUntilDue = getDaysUntilDue(request.due_date);
   const overdue = isOverdue(request.due_date);
-  const isPending = request.status === 'pending';
-  const isSubmitted = request.status === 'submitted';
+  const isPending = request.status === 'requested' || request.status === 'viewed';
+  const isSubmitted = request.status === 'uploaded' || request.status === 'under_review';
   const isApproved = request.status === 'approved';
   const isRejected = request.status === 'rejected';
 

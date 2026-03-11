@@ -108,8 +108,10 @@ export const PORTAL_PROJECTS_FILTER_CONFIG: FilterConfig[] = [
 
 export const PORTAL_DOCREQUEST_STATUS_OPTIONS = [
   STATUS_ALL_OPTION,
-  { value: 'pending', label: 'Pending' },
-  { value: 'submitted', label: 'Submitted' },
+  { value: 'requested', label: 'Requested' },
+  { value: 'viewed', label: 'Viewed' },
+  { value: 'uploaded', label: 'Uploaded' },
+  { value: 'under_review', label: 'Under Review' },
   { value: 'approved', label: 'Approved' },
   { value: 'rejected', label: 'Rejected' }
 ];
