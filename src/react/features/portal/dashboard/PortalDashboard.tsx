@@ -5,7 +5,7 @@
  */
 
 import * as React from 'react';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   FolderKanban,
   Receipt,
@@ -22,6 +22,11 @@ import { formatRelativeTime, IconButton } from '@react/factories';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePortalData } from '@react/hooks/usePortalFetch';
+import { useSetProjects, useActiveProjectId } from '@react/stores/portal-store';
+import { ProjectSnapshot } from './ProjectSnapshot';
+import { ActionItems } from './ActionItems';
+import type { ProjectInfo } from './ProjectSnapshot';
+import type { ActionItemCounts } from './ActionItems';
 import type { PortalViewProps } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { KEYS } from '@/constants/keyboard';
@@ -46,11 +51,10 @@ const ACTIVITY_TYPE_ICONS: Record<string, React.ComponentType<{ className?: stri
 };
 
 /** Navigation tab targets for stat cards */
-const NAV_TAB_PROJECTS = 'projects';
-const NAV_TAB_INVOICES = 'invoices';
+const NAV_TAB_DOCUMENTS = 'documents';
 const NAV_TAB_MESSAGES = 'messages';
-const NAV_TAB_CONTRACTS = 'contracts';
-const NAV_TAB_DOC_REQUESTS = 'files';
+const NAV_TAB_DELIVERABLES = 'deliverables';
+const NAV_TAB_FILES = 'files';
 
 // ============================================================================
 // TYPES
@@ -62,6 +66,10 @@ interface DashboardStats {
   unreadMessages: number;
   pendingDocRequests: number;
   pendingContracts: number;
+  pendingQuestionnaires: number;
+  pendingApprovals: number;
+  outstandingBalance: number;
+  deliverablesInReview: number;
 }
 
 interface ActivityItem {
@@ -72,8 +80,20 @@ interface ActivityItem {
   entityId?: string;
 }
 
+interface DashboardProject {
+  id: number;
+  name: string;
+  status: string;
+  progress: number;
+  startDate?: string;
+  endDate?: string;
+  previewUrl?: string;
+}
+
 interface DashboardData {
   stats: DashboardStats;
+  totalProjects: number;
+  projects: DashboardProject[];
   recentActivity: ActivityItem[];
 }
 
@@ -169,12 +189,59 @@ export function PortalDashboard({
     transform: (raw) => raw as DashboardData
   });
 
+  const setProjects = useSetProjects();
+  const activeProjectId = useActiveProjectId();
+
+  // Sync projects from dashboard API into the Zustand store
+  useEffect(() => {
+    if (data?.projects && data.projects.length > 0) {
+      setProjects(data.projects.map((p) => ({
+        id: p.id,
+        name: p.name,
+        status: p.status
+      })));
+    }
+  }, [data?.projects, setProjects]);
+
   const stats = data?.stats ?? null;
   const recentActivity = data?.recentActivity ?? [];
 
-  // Suppress unused variable warning — showNotification is passed via BaseMountOptions
-  // and may be used by child components in future iterations
+  // Submit Request modal
+  const [showRequestForm, setShowRequestForm] = useState(false);
+
+  // Get the active project info for the snapshot
+  const activeProject: ProjectInfo | null = React.useMemo(() => {
+    if (!data?.projects || data.projects.length === 0) return null;
+    const match = activeProjectId
+      ? data.projects.find((p) => p.id === activeProjectId)
+      : data.projects[0];
+    if (!match) return null;
+    return {
+      id: match.id,
+      name: match.name,
+      status: match.status,
+      progress: match.progress,
+      startDate: match.startDate,
+      endDate: match.endDate,
+      previewUrl: match.previewUrl
+    };
+  }, [data?.projects, activeProjectId]);
+
+  // Action item counts
+  const actionCounts: ActionItemCounts | null = React.useMemo(() => {
+    if (!stats) return null;
+    return {
+      pendingContracts: stats.pendingContracts,
+      pendingInvoices: stats.pendingInvoices,
+      pendingApprovals: stats.pendingApprovals,
+      pendingQuestionnaires: stats.pendingQuestionnaires,
+      pendingDocRequests: stats.pendingDocRequests
+    };
+  }, [stats]);
+
   void showNotification;
+  void showRequestForm;
+  void setShowRequestForm;
 
   const handleStatClick = useCallback(
     (tab: string) => {
@@ -191,18 +258,29 @@ export function PortalDashboard({
         <ErrorState message={error} onRetry={refetch} />
       ) : (
         <>
-          {/* Stats Overview - clickable navigation shortcuts */}
+          {/* Project Snapshot */}
+          {activeProject && <ProjectSnapshot project={activeProject} />}
+
+          {/* Action Items */}
+          {actionCounts && (
+            <ActionItems counts={actionCounts} onNavigate={onNavigate} />
+          )}
+
+          {/* Stats Overview */}
           <div className="dashboard-stats-grid">
             <StatCard
-              label="Active Projects"
-              value={stats?.activeProjects ?? 0}
-              onClick={() => handleStatClick(NAV_TAB_PROJECTS)}
+              label="Outstanding Balance"
+              value={stats?.outstandingBalance
+                ? `$${(stats.outstandingBalance / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+                : '$0.00'
+              }
+              variant={stats?.outstandingBalance ? 'warning' : 'default'}
+              onClick={() => handleStatClick(NAV_TAB_DOCUMENTS)}
             />
             <StatCard
-              label="Pending Invoices"
-              value={stats?.pendingInvoices ?? 0}
-              variant={stats?.pendingInvoices ? 'warning' : 'default'}
-              onClick={() => handleStatClick(NAV_TAB_INVOICES)}
+              label="Deliverables in Review"
+              value={stats?.deliverablesInReview ?? 0}
+              onClick={() => handleStatClick(NAV_TAB_DELIVERABLES)}
             />
             <StatCard
               label="Unread Messages"
@@ -210,25 +288,25 @@ export function PortalDashboard({
               variant={stats?.unreadMessages ? 'alert' : 'default'}
               onClick={() => handleStatClick(NAV_TAB_MESSAGES)}
             />
-            {(stats?.pendingContracts ?? 0) > 0 && (
-              <StatCard
-                label="Pending Contracts"
-                value={stats?.pendingContracts ?? 0}
-                variant="warning"
-                onClick={() => handleStatClick(NAV_TAB_CONTRACTS)}
-              />
-            )}
-            {(stats?.pendingDocRequests ?? 0) > 0 && (
-              <StatCard
-                label="Document Requests"
-                value={stats?.pendingDocRequests ?? 0}
-                variant="warning"
-                onClick={() => handleStatClick(NAV_TAB_DOC_REQUESTS)}
-              />
-            )}
+            <StatCard
+              label="Pending Actions"
+              value={
+                (stats?.pendingContracts ?? 0) +
+                (stats?.pendingInvoices ?? 0) +
+                (stats?.pendingApprovals ?? 0) +
+                (stats?.pendingQuestionnaires ?? 0) +
+                (stats?.pendingDocRequests ?? 0)
+              }
+              variant={
+                ((stats?.pendingContracts ?? 0) +
+                (stats?.pendingInvoices ?? 0) +
+                (stats?.pendingApprovals ?? 0)) > 0 ? 'warning' : 'default'
+              }
+              onClick={() => handleStatClick(NAV_TAB_FILES)}
+            />
           </div>
 
-          {/* Recent Activity */}
+          {/* Submit Request + Recent Activity */}
           <div className="table-layout">
             <div className="data-table-card">
               <div className="data-table-header">
