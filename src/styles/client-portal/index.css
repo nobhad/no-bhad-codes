@@ -61,3 +61,6 @@
 
 /* Command palette */
 @import "../shared/command-palette.css";
+
+/* Keyboard shortcuts overlay */
+@import "../shared/keyboard-shortcuts.css";
