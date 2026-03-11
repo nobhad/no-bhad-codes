@@ -161,6 +161,23 @@ Removed duplicate import.
 
 ---
 
+## Upcoming - PDF Deep Dive
+
+**Status:** TODO
+
+- [ ] Header layout overhaul (consistent spacing, dynamic field rendering across all PDF types)
+- [ ] Formatting review (contracts, proposals, invoices, intake, receipts, SOW)
+- [ ] Ensure all PDFs use shared header utility to avoid duplication
+
+## Upcoming - Messages View Overhaul
+
+**Status:** TODO
+
+- [ ] Sender name placement (consider under avatar instead of above bubble)
+- [ ] Overall layout and alignment review
+- [ ] Consistent styling between admin and client portal message views
+- [ ] Mobile responsiveness for message thread
+
 ## Remaining (Future Enhancements)
 
 - [ ] Increase test coverage (~15% currently, target 70%)
