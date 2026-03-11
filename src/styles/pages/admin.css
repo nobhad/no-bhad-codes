@@ -353,18 +353,6 @@ body[data-page="admin"] .project-detail-overview {
    Base table styles in shared/portal-tables.css
    ================================================ */
 
-.data-table-card:has(.table-pagination) .data-table-scroll-wrapper,
-.data-table-card:has(.table-pagination) .data-table-scroll-wrapper,
-.data-table-card:has(.table-pagination) .data-table-scroll-wrapper {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.data-table-card:not(:has(.table-pagination)) .data-table tbody tr:last-child td,
-.data-table-card:not(:has(.table-pagination)) .data-table tbody tr:last-child td {
-  padding-bottom: var(--space-1-5);
-}
-
 [data-page="admin"] .page-header h2 {
   color: var(--color-accent);
 }
@@ -483,64 +471,9 @@ body.modal-open .dashboard-content {
 }
 
 /* ================================================
-   Data Table Card - Admin overrides
+   Data Table Card - Admin-only overrides
+   Base table styles in shared/portal-tables.css
    ================================================ */
-/* Base .data-table-card styles in portal-tables.css */
-.data-table-card {
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  overflow: visible;
-  transition: background var(--transition-fast);
-  min-width: 0;
-}
-
-/* Data table header — admin overrides (base in portal-tables.css) */
-.data-table-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-1-5) var(--table-cell-padding-x, 14px);
-  border-top: none;
-  border-bottom: var(--portal-border);
-  background: transparent;
-  border-radius: 0;
-}
-
-.data-table-header > .status-badge {
-  display: none;
-}
-
-.data-table-header .data-table-actions {
-  order: 2;
-}
-
-.data-table-header h3 {
-  order: 0;
-}
-
-.data-table-header h3 .title-mobile {
-  display: none;
-}
-
-.data-table-header h3 .title-full {
-  display: inline;
-}
-
-/* Stats summary — base styles in shared/portal-tables.css */
-
-/* Data table actions — admin overrides (base in portal-tables.css) */
-.data-table-actions {
-  display: flex;
-  gap: var(--space-1);
-  align-items: center;
-  margin-left: auto;
-}
-
-.data-table-actions .admin-filter-select,
-.data-table-actions .view-toggle {
-  align-self: center;
-}
 
 [data-page="admin"] .admin-filter-select {
   min-width: 10rem;
@@ -553,17 +486,9 @@ body.modal-open .dashboard-content {
   box-sizing: border-box;
 }
 
-.data-table-actions .icon-btn {
-  flex-shrink: 0;
-}
-
 [data-page="admin"] .data-table-actions .icon-btn:hover {
   color: var(--color-danger);
   background: transparent;
-}
-
-.data-table-actions .status-badge {
-  display: none;
 }
 
 /* ================================================

@@ -94,7 +94,9 @@
 /* Input padding + height to match filter dropdown row */
 .filter-search-dropdown input.search-bar-input {
   padding-left: var(--input-icon-offset);
-  height: var(--portal-btn-icon-size, 36px);
+  padding-top: var(--space-1-5);
+  padding-bottom: var(--space-1-5);
+  min-height: var(--portal-btn-icon-size, 36px);
 }
 
 /* Filter dropdown wrapper */
@@ -151,8 +153,12 @@
   min-width: var(--table-col-lg);
   padding: var(--space-1-5);
   background: var(--color-bg-tertiary);
-  border: var(--portal-input-border);
+  border: var(--portal-border);
   box-shadow: var(--shadow-dropdown-xl);
+  /* Portal-mounted outside .portal — inherit the portal font explicitly */
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
 }
 
 /* Filter sections */

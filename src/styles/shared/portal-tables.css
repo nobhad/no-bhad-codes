@@ -238,9 +238,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-1-5) var(--portal-panel-padding-x);
+  padding: var(--space-1-5) var(--table-outer-padding);
+  border-top: none;
   border-bottom: var(--portal-border);
+  border-radius: 0;
   background: transparent;
+}
+
+.data-table-header > .status-badge {
+  display: none;
 }
 
 .data-table-header h3 {
@@ -306,6 +312,19 @@
   --portal-btn-icon-size: var(--icon-size-sm);
 }
 
+.data-table-actions .icon-btn {
+  flex-shrink: 0;
+}
+
+.data-table-actions .status-badge {
+  display: none;
+}
+
+.data-table-actions .admin-filter-select,
+.data-table-actions .view-toggle {
+  align-self: center;
+}
+
 /* ==============================================
    TABLE CONTAINERS
    ============================================== */
@@ -363,6 +382,17 @@
 /* ==============================================
    TABLE CORNERS - Brutalist: no border radius
    ============================================== */
+
+/* When pagination exists, remove bottom radius from scroll wrapper */
+.data-table-card:has(.table-pagination) .data-table-scroll-wrapper {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* When no pagination, add bottom padding to last row */
+.data-table-card:not(:has(.table-pagination)) .data-table tbody tr:last-child td {
+  padding-bottom: var(--space-1-5);
+}
 
 /* ==============================================
    TABLE PAGINATION
@@ -549,11 +579,13 @@
 }
 
 /* Type cell with icon - inline flex */
-.data-table .type-cell .cell-with-icon {
+.data-table .type-cell .cell-with-icon,
+.data-table .type-cell .document-type-badge {
   display: inline-flex;
   align-items: center;
   gap: var(--icon-gap);
 }
+
 
 /* Priority cell - center align dot with text */
 .data-table .priority-cell .cell-with-icon {
