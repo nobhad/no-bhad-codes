@@ -728,12 +728,18 @@ router.get(
       SELECT
         pr.id,
         COALESCE(p.project_name, 'Proposal #' || pr.id) as title,
-        pr.status,
+        CASE pr.status
+          WHEN 'reviewed'  THEN 'sent'
+          WHEN 'accepted'  THEN 'accepted'
+          WHEN 'rejected'  THEN 'declined'
+          WHEN 'converted' THEN 'accepted'
+          ELSE pr.status
+        END as status,
         pr.final_price as amount,
         pr.project_type as projectType,
         pr.selected_tier as selectedTier,
-        pr.sent_at as sentAt,
-        pr.valid_until as validUntil,
+        pr.reviewed_at as sentAt,
+        NULL as validUntil,
         pr.created_at as createdAt
       FROM proposal_requests pr
       LEFT JOIN projects p ON pr.project_id = p.id

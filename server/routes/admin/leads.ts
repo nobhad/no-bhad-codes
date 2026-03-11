@@ -397,6 +397,7 @@ router.put(
       // Lead pipeline statuses (must match frontend LEAD_STATUS_OPTIONS and GET /leads stats)
       const validStatuses = [
         'new',
+        'pending',
         'contacted',
         'qualified',
         'in-progress',
