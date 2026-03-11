@@ -144,43 +144,42 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     textStartX = logoX + logoWidth + 18;
   }
 
+  let infoY = ctx.y - 11;
   page().drawText(BUSINESS_INFO.name, {
-    x: textStartX,
-    y: ctx.y - 11,
-    size: 15,
-    font: helveticaBold,
-    color: rgb(0.1, 0.1, 0.1)
+    x: textStartX, y: infoY,
+    size: 15, font: helveticaBold, color: rgb(0.1, 0.1, 0.1)
   });
-  page().drawText(BUSINESS_INFO.owner, {
-    x: textStartX,
-    y: ctx.y - 34,
-    size: 10,
-    font: helvetica,
-    color: rgb(0.2, 0.2, 0.2)
-  });
-  page().drawText(BUSINESS_INFO.tagline, {
-    x: textStartX,
-    y: ctx.y - 54,
-    size: 9,
-    font: helvetica,
-    color: rgb(0.4, 0.4, 0.4)
-  });
-  page().drawText(BUSINESS_INFO.email, {
-    x: textStartX,
-    y: ctx.y - 70,
-    size: 9,
-    font: helvetica,
-    color: rgb(0.4, 0.4, 0.4)
-  });
-  page().drawText(BUSINESS_INFO.website, {
-    x: textStartX,
-    y: ctx.y - 86,
-    size: 9,
-    font: helvetica,
-    color: rgb(0.4, 0.4, 0.4)
-  });
+  infoY -= 18;
+  if (BUSINESS_INFO.owner) {
+    page().drawText(BUSINESS_INFO.owner, {
+      x: textStartX, y: infoY,
+      size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2)
+    });
+    infoY -= 16;
+  }
+  if (BUSINESS_INFO.tagline) {
+    page().drawText(BUSINESS_INFO.tagline, {
+      x: textStartX, y: infoY,
+      size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4)
+    });
+    infoY -= 14;
+  }
+  if (BUSINESS_INFO.email) {
+    page().drawText(BUSINESS_INFO.email, {
+      x: textStartX, y: infoY,
+      size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4)
+    });
+    infoY -= 14;
+  }
+  if (BUSINESS_INFO.website) {
+    page().drawText(BUSINESS_INFO.website, {
+      x: textStartX, y: infoY,
+      size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4)
+    });
+    infoY -= 14;
+  }
 
-  ctx.y -= 120;
+  ctx.y = Math.min(ctx.y - 120, infoY - 20);
 
   // Divider
   page().drawLine({
