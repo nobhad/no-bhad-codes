@@ -11,6 +11,7 @@
 import React, { useState, useCallback } from 'react';
 import { cn } from '@react/lib/utils';
 import { type LucideIcon } from 'lucide-react';
+import { FormDropdown } from '@react/components/portal/FormDropdown';
 
 // ============================================
 // TYPES
@@ -343,37 +344,20 @@ export function SelectField({
             <IconLeft aria-hidden="true" />
           </div>
         )}
-        <select
+        <FormDropdown
           id={name}
-          name={name}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={onChange}
+          options={options}
+          placeholder={placeholder}
           disabled={disabled}
-          required={required}
           className={cn(
-            'form-field-select',
             hasIconLeft && 'form-field-input--icon-left',
             error && 'form-field-input--error',
             inputClassName
           )}
-          aria-invalid={!!error}
-          aria-describedby={error ? `${name}-error` : undefined}
-        >
-          {placeholder && (
-            <option value="" disabled>
-              {placeholder}
-            </option>
-          )}
-          {options.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-              disabled={option.disabled}
-            >
-              {option.label}
-            </option>
-          ))}
-        </select>
+          aria-label={label || name}
+        />
       </div>
     </FieldWrapper>
   );

@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, X, Filter } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { KEYS } from '../../../constants/keyboard';
@@ -100,34 +101,63 @@ export interface FilterSection {
 
 export interface FilterDropdownProps {
   sections: FilterSection[];
-  values: Record<string, string>;
+  values: Record<string, string[]>;
   onChange: (key: string, value: string) => void;
 }
 
 export function FilterDropdown({ sections, values, onChange }: FilterDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
 
-  // Count active filters (non-'all' values)
-  const activeCount = Object.values(values).filter(v => v && v !== 'all').length;
+  // Count sections with at least one active filter
+  const activeCount = Object.values(values).filter(arr => Array.isArray(arr) && arr.length > 0).length;
+
+  // Position the portal menu below the trigger button
+  const updatePosition = useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    setMenuStyle({
+      position: 'fixed',
+      top: rect.bottom + 4,
+      right: window.innerWidth - rect.right,
+      zIndex: 'var(--z-index-portal-dropdown, 9700)' as unknown as number,
+    });
+  }, []);
 
   // Close on click outside
   useEffect(() => {
+    if (!isOpen) return;
     function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (
+        triggerRef.current && !triggerRef.current.contains(target) &&
+        menuRef.current && !menuRef.current.contains(target)
+      ) {
         setIsOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [isOpen]);
+
+  // Reposition on scroll/resize while open
+  useEffect(() => {
+    if (!isOpen) return;
+    updatePosition();
+    window.addEventListener('scroll', updatePosition, true);
+    window.addEventListener('resize', updatePosition);
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, [isOpen, updatePosition]);
 
   return (
-    <div
-      ref={ref}
-      className={cn('filter-dropdown-wrapper', isOpen && 'open')}
-    >
+    <div className={cn('filter-dropdown-wrapper', isOpen && 'open')}>
       <button
+        ref={triggerRef}
         type="button"
         className={cn('icon-btn filter-dropdown-trigger', activeCount > 0 && 'has-value')}
         onClick={() => setIsOpen(!isOpen)}
@@ -139,31 +169,36 @@ export function FilterDropdown({ sections, values, onChange }: FilterDropdownPro
           <span className="filter-count-badge visible">{activeCount}</span>
         )}
       </button>
-      <div className="filter-dropdown-menu">
-        {sections.map((section) => (
-          <div key={section.key} className="filter-section">
-            <div className="filter-section-label field-label">{section.label}</div>
-            <div className="filter-options">
-              {section.options.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={cn(
-                    'filter-option',
-                    (values[section.key] || 'all') === option.value && 'active'
-                  )}
-                  onClick={() => {
-                    onChange(section.key, option.value);
-                    setIsOpen(false);
-                  }}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+      {isOpen && createPortal(
+        <div ref={menuRef} className="filter-dropdown-menu portal-mounted" style={menuStyle}>
+          {sections.map((section) => {
+            const selected = values[section.key] ?? [];
+            const noneSelected = selected.length === 0;
+            return (
+              <div key={section.key} className="filter-section">
+                <div className="filter-section-label field-label">{section.label}</div>
+                <div className="filter-options">
+                  {section.options.map((option) => {
+                    const isAll = option.value === 'all';
+                    const isActive = isAll ? noneSelected : selected.includes(option.value);
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        className={cn('filter-option', isActive && 'active')}
+                        onClick={() => onChange(section.key, option.value)}
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>,
+        document.body
+      )}
     </div>
   );
 }

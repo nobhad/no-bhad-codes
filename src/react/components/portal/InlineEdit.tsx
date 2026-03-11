@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Check, X, Pencil, ChevronDown } from 'lucide-react';
+import { Check, X, Pencil, ChevronDown, Calendar } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { KEYS } from '../../../constants/keyboard';
 import {
@@ -16,6 +16,11 @@ import {
 
 /** Delay before saving on blur, allows button click events to register first */
 const BLUR_SAVE_DELAY_MS = 150;
+
+/** Normalize a value for fuzzy comparison (lowercase, hyphens → spaces) */
+function normalizeValue(val: string): string {
+  return val.toLowerCase().replace(/-/g, ' ').trim();
+}
 
 // ============================================================================
 // Shared Hook — DRY state management for all inline-edit variants
@@ -158,13 +163,21 @@ export function InlineEdit({
     return editValue;
   }, [type, editValue]);
 
-  // Focus input when entering edit mode
+  // Focus input when entering edit mode; open native date picker for date type
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
-      inputRef.current.select();
+      if (type === 'date') {
+        try {
+          (inputRef.current as HTMLInputElement & { showPicker?: () => void }).showPicker?.();
+        } catch {
+          // showPicker blocked or unsupported — fall back to native focus
+        }
+      } else {
+        inputRef.current.select();
+      }
     }
-  }, [isEditing]);
+  }, [isEditing, type]);
 
   // Handle key events
   const handleKeyDown = useCallback(
@@ -223,16 +236,40 @@ export function InlineEdit({
         className={cn('inline-edit-wrapper', className)}
         onClick={(e) => e.stopPropagation()}
       >
-        <input
-          ref={inputRef}
-          type={type === 'date' ? 'date' : 'text'}
-          value={getInputValue()}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          onBlur={handleBlur}
-          disabled={isSaving}
-          className="inline-edit-input-compact"
-        />
+        {type === 'date' ? (
+          <div className="inline-edit-date-wrapper">
+            <Calendar
+              className="inline-edit-date-cal"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                try {
+                  (inputRef.current as HTMLInputElement & { showPicker?: () => void })?.showPicker?.();
+                } catch { /* unsupported */ }
+              }}
+            />
+            <input
+              ref={inputRef}
+              type="date"
+              value={getInputValue()}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              onBlur={handleBlur}
+              disabled={isSaving}
+              className="inline-edit-input-compact inline-edit-input-compact--date"
+            />
+          </div>
+        ) : (
+          <input
+            ref={inputRef}
+            type="text"
+            value={getInputValue()}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            onBlur={handleBlur}
+            disabled={isSaving}
+            className="inline-edit-input-compact"
+          />
+        )}
         <button
           type="button"
           onMouseDown={(e) => e.preventDefault()}
@@ -270,10 +307,13 @@ export function InlineEdit({
       }}
       title={disabled ? undefined : 'Click to edit'}
     >
+      {type === 'date' && !disabled && (
+        <Calendar className="icon-sm" />
+      )}
       <span className={cn('inline-edit-value', !value && 'is-placeholder')}>
         {displayValue}
       </span>
-      {showEditIcon && !disabled && (
+      {showEditIcon && !disabled && type !== 'date' && (
         <Pencil className="inline-edit-icon" />
       )}
     </div>
@@ -401,9 +441,18 @@ export function InlineSelect({
     saveValue
   } = useInlineEditState({ value, disabled, onSave });
 
+  /** Find an option by normalized value comparison */
+  const findOption = useCallback(
+    (val: string) => {
+      const norm = normalizeValue(val);
+      return options.find((o) => normalizeValue(o.value) === norm);
+    },
+    [options]
+  );
+
   const displayValue = formatDisplay
     ? formatDisplay(value)
-    : options.find((o) => o.value === value)?.label || value || placeholder;
+    : findOption(value)?.label || value || placeholder;
 
   const handleSelect = useCallback(
     (optionValue: string) => {
@@ -413,6 +462,10 @@ export function InlineSelect({
   );
 
   if (isEditing) {
+    const matchedOption = editValue ? findOption(editValue) : null;
+    const triggerLabel = matchedOption?.label || editValue || placeholder;
+    const normalizedEdit = editValue ? normalizeValue(editValue) : '';
+
     return (
       <div
         className={cn('inline-edit-wrapper', className)}
@@ -420,21 +473,24 @@ export function InlineSelect({
       >
         <PortalDropdown defaultOpen onOpenChange={(open) => { if (!open) cancelEditing(); }}>
           <PortalDropdownTrigger asChild>
-            <button className="inline-select-trigger dropdown-trigger" disabled={isSaving}>
-              {editValue ? (options.find((o) => o.value === editValue)?.label || editValue) : placeholder}
-              <ChevronDown className="dropdown-caret" />
+            <button className="form-dropdown-trigger" disabled={isSaving}>
+              <span className="form-dropdown-value">
+                {triggerLabel}
+              </span>
+              <ChevronDown className="form-dropdown-caret" />
             </button>
           </PortalDropdownTrigger>
           <PortalDropdownContent align="start" sideOffset={0}>
-            {options.map((opt) => (
-              <PortalDropdownItem
-                key={opt.value}
-                className={cn(editValue === opt.value && 'is-active')}
-                onSelect={() => handleSelect(opt.value)}
-              >
-                {opt.label}
-              </PortalDropdownItem>
-            ))}
+            {options
+              .filter((opt) => normalizeValue(opt.value) !== normalizedEdit)
+              .map((opt) => (
+                <PortalDropdownItem
+                  key={opt.value}
+                  onSelect={() => handleSelect(opt.value)}
+                >
+                  {opt.label}
+                </PortalDropdownItem>
+              ))}
           </PortalDropdownContent>
         </PortalDropdown>
       </div>
