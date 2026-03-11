@@ -88,7 +88,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-accent);
 }
 
 .help-accordion-articles {
@@ -114,7 +113,6 @@
 
 .help-accordion-article:hover {
   background: var(--color-bg-hover);
-  color: var(--color-accent);
 }
 
 /* ==============================================
@@ -142,7 +140,6 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  color: var(--color-accent);
 }
 
 .help-featured-card-content {
@@ -221,7 +218,7 @@
 }
 
 .help-result-icon {
-  color: var(--color-accent);
+  flex-shrink: 0;
 }
 
 .help-result-content {
