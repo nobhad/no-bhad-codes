@@ -13,8 +13,6 @@ import {
   Upload,
   AlertTriangle
 } from 'lucide-react';
-import { KEYS } from '@/constants/keyboard';
-
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -64,41 +62,33 @@ export const ActionItems = React.memo(({ counts, onNavigate }: ActionItemsProps)
 
   return (
     <div className="action-items-section">
-      <h3 className="action-items-title">
+      <h3>
         <AlertTriangle className="icon-xs" />
         Needs Your Attention
       </h3>
-      <ul className="action-items-list">
+      <div className="action-items-grid">
         {activeItems.map((item) => {
           const count = counts[item.key];
           const Icon = item.icon;
 
           return (
-            <li
+            <button
               key={item.key}
-              className="action-item"
+              className="attention-card has-items"
               onClick={onNavigate ? () => onNavigate(item.navigateTo) : undefined}
-              role={onNavigate ? 'button' : undefined}
-              tabIndex={onNavigate ? 0 : undefined}
-              onKeyDown={
-                onNavigate
-                  ? (e) => {
-                    if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) {
-                      e.preventDefault();
-                      onNavigate(item.navigateTo);
-                    }
-                  }
-                  : undefined
-              }
+              type="button"
             >
-              <Icon className="icon-sm action-item-icon" />
-              <span className="action-item-text">
-                <strong>{count}</strong> {item.label}
-              </span>
-            </li>
+              <div className="attention-icon">
+                <Icon className="icon-sm" />
+              </div>
+              <div className="attention-content">
+                <span className="attention-count">{count}</span>
+                <span className="field-label">{item.label}</span>
+              </div>
+            </button>
           );
         })}
-      </ul>
+      </div>
     </div>
   );
 });
