@@ -1,110 +1,230 @@
 /**
  * PortalDeliverables
- * Main deliverables list view for client portal.
+ * Milestone + task accordion view for client portal (read-only).
+ * Mirrors admin project detail Deliverables tab layout.
  */
 
 import * as React from 'react';
-import { useMemo } from 'react';
-import { Package } from 'lucide-react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import { Inbox, CheckCircle2, Circle } from 'lucide-react';
+import { cn } from '@react/lib/utils';
+import { AccordionItem, IconButton } from '@react/factories';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
-import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
-import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
-import { useTableFilters } from '@react/hooks/useTableFilters';
-import { PORTAL_DELIVERABLES_FILTER_CONFIG, createFilterFn } from '../shared/filterConfigs';
-import { IconButton } from '@react/factories';
-import { useStaggerChildren, useFadeIn } from '@react/hooks/useGsap';
-import { GSAP } from '@react/config/portal-constants';
-import { usePortalData } from '@react/hooks/usePortalFetch';
-import { countByField } from '@react/utils/cardFormatters';
-import { DeliverableCard } from './DeliverableCard';
-import type { PortalDeliverable, PortalDeliverablesResponse } from './types';
+import { TableLayout } from '@react/components/portal/TableLayout';
+import { useFadeIn } from '@react/hooks/useGsap';
+import { usePortalFetch } from '@react/hooks/usePortalFetch';
+import { useActiveProjectId } from '@react/stores/portal-store';
+import { formatDate } from '@/utils/format-utils';
+import { buildEndpoint, API_ENDPOINTS } from '@/constants/api-endpoints';
 import type { PortalViewProps } from '../types';
-import { API_ENDPOINTS } from '@/constants/api-endpoints';
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+interface Milestone {
+  id: number;
+  title: string;
+  description?: string;
+  due_date?: string;
+  completed_date?: string;
+  is_completed: number | boolean;
+  task_count?: number;
+  completed_task_count?: number;
+  progress_percentage?: number;
+}
+
+interface Task {
+  id: number;
+  title: string;
+  status: string;
+  milestone_id?: number;
+  due_date?: string;
+}
 
 export interface PortalDeliverablesProps extends PortalViewProps {
   onNavigate?: (entityType: string, entityId: string) => void;
 }
 
-const filterDeliverable = createFilterFn<PortalDeliverable>(['title', 'type', 'project_name']);
+// ============================================================================
+// COMPONENT
+// ============================================================================
 
-export function PortalDeliverables({
-  getAuthToken,
-  onNavigate
-}: PortalDeliverablesProps) {
+export function PortalDeliverables({ getAuthToken }: PortalDeliverablesProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const listRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_DEFAULT);
+  const activeProjectId = useActiveProjectId();
+  const { portalFetch } = usePortalFetch({ getAuthToken });
 
-  const { data: deliverables, isLoading, error, refetch } = usePortalData<PortalDeliverable[]>({
-    getAuthToken,
-    url: API_ENDPOINTS.DELIVERABLES_MY,
-    transform: (raw) => (raw as PortalDeliverablesResponse).deliverables || []
-  });
-  const items = useMemo(() => deliverables ?? [], [deliverables]);
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const {
-    filterValues,
-    setFilter,
-    search,
-    setSearch,
-    applyFilters
-  } = useTableFilters<PortalDeliverable>({
-    storageKey: 'portal_deliverables',
-    filters: PORTAL_DELIVERABLES_FILTER_CONFIG,
-    filterFn: filterDeliverable
-  });
+  // Track which milestones are expanded (default: all)
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
 
-  const filteredDeliverables = useMemo(() => applyFilters(items), [applyFilters, items]);
+  const fetchData = useCallback(async () => {
+    if (!activeProjectId) {
+      setMilestones([]);
+      setTasks([]);
+      setIsLoading(false);
+      return;
+    }
 
-  const countByStatus = countByField(items);
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const [milestonesRes, tasksRes] = await Promise.all([
+        portalFetch<{ milestones: Milestone[] }>(buildEndpoint.projectMilestones(activeProjectId)),
+        portalFetch<{ tasks: Task[] }>(`${API_ENDPOINTS.PROJECTS}/${activeProjectId}/tasks`)
+      ]);
+
+      const m = milestonesRes.milestones ?? [];
+      const t = tasksRes.tasks ?? [];
+
+      setMilestones(m);
+      setTasks(t);
+
+      // Expand all milestones by default
+      setExpandedIds(new Set(m.map((ms) => ms.id)));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load deliverables');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeProjectId, portalFetch]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Group tasks by milestone_id
+  const tasksByMilestone = useMemo(() => {
+    const grouped = new Map<number | null, Task[]>();
+    for (const task of tasks) {
+      const key = task.milestone_id ?? null;
+      const existing = grouped.get(key) ?? [];
+      existing.push(task);
+      grouped.set(key, existing);
+    }
+    return grouped;
+  }, [tasks]);
+
+  // Stats
+  const { completedCount, totalCount, progress } = useMemo(() => {
+    const total = tasks.length;
+    const completed = tasks.filter((t) => t.status === 'completed').length;
+    const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+    return { completedCount: completed, totalCount: total, progress: pct };
+  }, [tasks]);
+
+  const toggleExpand = useCallback((id: number) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
 
   return (
     <TableLayout
       containerRef={containerRef}
       title="DELIVERABLES"
-      stats={
-        <TableStats
-          items={[
-            { value: items.length, label: 'total' },
-            { value: countByStatus.in_review || 0, label: 'in review', variant: 'pending' },
-            { value: countByStatus.approved || 0, label: 'approved', variant: 'completed' },
-            { value: countByStatus.revision_requested || 0, label: 'revisions', variant: 'overdue' }
-          ]}
-        />
-      }
       actions={
-        <>
-          <SearchFilter value={search} onChange={setSearch} placeholder="Search deliverables..." />
-          <FilterDropdown
-            sections={PORTAL_DELIVERABLES_FILTER_CONFIG}
-            values={filterValues}
-            onChange={(key, value) => setFilter(key, value)}
-          />
-          <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
-        </>
+        <IconButton action="refresh" onClick={fetchData} title="Refresh" loading={isLoading} />
       }
     >
+      {/* Progress */}
+      {totalCount > 0 && (
+        <div className="progress-field">
+          <div className="progress-field-header">
+            <span className="field-label">Progress</span>
+            <span className="text-muted">{progress}% ({completedCount}/{totalCount})</span>
+          </div>
+          <div className="progress-bar-sm">
+            <div className="progress-fill" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+      )}
+
+      {/* Content */}
       {isLoading ? (
         <LoadingState message="Loading deliverables..." />
       ) : error ? (
-        <ErrorState message={error} onRetry={refetch} />
-      ) : filteredDeliverables.length === 0 ? (
+        <ErrorState message={error} onRetry={fetchData} />
+      ) : milestones.length === 0 && tasks.length === 0 ? (
         <EmptyState
-          icon={<Package className="icon-lg" />}
-          message={
-            items.length === 0
-              ? 'No deliverables yet. Deliverables will appear here as your project progresses.'
-              : 'No deliverables match the current filters.'
-          }
+          icon={<Inbox className="icon-lg" />}
+          message="No deliverables yet. Deliverables will appear here as your project progresses."
         />
       ) : (
-        <div ref={listRef} className="portal-cards-list">
-          {filteredDeliverables.map((deliverable) => (
-            <DeliverableCard
-              key={deliverable.id}
-              deliverable={deliverable}
-              onNavigate={onNavigate}
-            />
-          ))}
+        <div className="milestone-list">
+          {milestones.map((milestone) => {
+            const milestoneTasks = tasksByMilestone.get(milestone.id) ?? [];
+            const completedTasks = milestoneTasks.filter((t) => t.status === 'completed').length;
+            const allCompleted = milestoneTasks.length > 0 && completedTasks === milestoneTasks.length;
+
+            const header = (
+              <div className="flex-fill milestone-content">
+                <span className={cn('milestone-title', allCompleted && 'completed')}>
+                  {milestone.title}
+                </span>
+                <span className="text-muted text-xs">
+                  {completedTasks}/{milestoneTasks.length}
+                </span>
+                {milestone.due_date && (
+                  <span className="milestone-due">{formatDate(milestone.due_date)}</span>
+                )}
+              </div>
+            );
+
+            return (
+              <AccordionItem
+                key={milestone.id}
+                header={header}
+                isExpanded={expandedIds.has(milestone.id)}
+                onToggle={() => toggleExpand(milestone.id)}
+                wrapperClassName="milestone-item-wrapper"
+                triggerClassName={cn('milestone-item', allCompleted && 'completed')}
+                contentClassName="milestone-expanded-content"
+                ariaLabel={`Milestone: ${milestone.title}`}
+              >
+                {milestone.description && (
+                  <p className="milestone-description">{milestone.description}</p>
+                )}
+
+                {milestoneTasks.length > 0 ? (
+                  <ul className="deliv-list">
+                    {milestoneTasks.map((task) => (
+                      <li key={`task-${task.id}`} className="deliv-item">
+                        {task.status === 'completed' ? (
+                          <CheckCircle2 className="icon-sm text-success" />
+                        ) : (
+                          <Circle className="icon-sm text-muted" />
+                        )}
+                        <span className={cn(task.status === 'completed' && 'text-muted pd-completed-text')}>
+                          {task.title}
+                        </span>
+                        {task.due_date && (
+                          <span className="text-muted text-xs">{formatDate(task.due_date)}</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-muted text-sm">No tasks in this milestone yet.</p>
+                )}
+
+                {allCompleted && milestone.completed_date && (
+                  <p className="text-muted text-xs">
+                    Completed on {formatDate(milestone.completed_date, 'label')}
+                  </p>
+                )}
+              </AccordionItem>
+            );
+          })}
         </div>
       )}
     </TableLayout>

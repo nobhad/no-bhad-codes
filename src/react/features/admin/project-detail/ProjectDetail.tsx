@@ -225,9 +225,6 @@ export function ProjectDetail({
       {/* Header */}
       <div className="detail-title-row">
         <div className="detail-title-group">
-          {/* Back Button */}
-          <IconButton action="back" onClick={onBack} title="Back to projects" />
-
           {/* Project Info */}
           <div className="detail-info">
             <div className="detail-name-row">
@@ -321,6 +318,17 @@ export function ProjectDetail({
               </PortalDropdownItem>
             </PortalDropdownContent>
           </PortalDropdown>
+        </div>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="progress-field">
+        <div className="progress-field-header">
+          <span className="field-label">Progress</span>
+          <span className="text-muted">{progress}%</span>
+        </div>
+        <div className="progress-bar-sm">
+          <div className="progress-fill" style={{ width: `${progress}%` }} />
         </div>
       </div>
 
