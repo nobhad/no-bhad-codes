@@ -642,12 +642,13 @@
   gap: var(--space-2);
 }
 
-/* Pagination row */
+/* Pagination row — pushed to bottom of files-content-area via margin-top:auto */
 .files-pagination {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: var(--space-3);
+  margin-top: auto;
+  padding-top: var(--space-3);
   font-size: var(--font-size-sm);
 }
 

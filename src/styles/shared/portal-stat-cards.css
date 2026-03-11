@@ -140,6 +140,7 @@
   font: inherit;
   text-align: inherit;
   appearance: none;
+  border: var(--portal-border);
 }
 
 .portal .stat-card-clickable:hover,

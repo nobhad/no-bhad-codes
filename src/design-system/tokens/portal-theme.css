@@ -219,7 +219,7 @@ body[data-page="client-portal"] {
   --table-row-height: var(--space-5);
   --table-cell-padding-x: clamp(var(--space-1), 2vw, var(--space-2));
   --table-cell-padding-y: clamp(var(--space-0-5), 1vw, var(--space-1-5));
-  --table-outer-padding: clamp(var(--space-1-5), 3vw, var(--space-3));
+  --table-outer-padding: var(--portal-panel-padding-x);
   --table-actions-gap: var(--space-1);
   --table-header-font-size: var(--font-size-sm);
   --table-cell-font-size: var(--font-size-sm);
