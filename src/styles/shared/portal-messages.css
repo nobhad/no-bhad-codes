@@ -584,10 +584,11 @@
   border-right: var(--border-width) solid var(--color-border-primary);
 }
 
-/* Section header — filter tabs only (title moved to messaging-top-bar) */
+/* Section header — filter actions right-aligned */
 .messaging-section-header {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: var(--space-1);
   padding: var(--space-1-5) var(--space-3);
   border-bottom: var(--border-width) solid var(--color-border-primary);
@@ -910,13 +911,11 @@
 .messaging-icon-lg {
   width: 2rem;
   height: 2rem;
-  opacity: 0.5;
 }
 
 .messaging-icon-xl {
   width: 3rem;
   height: 3rem;
-  opacity: 0.5;
 }
 
 .messaging-star-icon {

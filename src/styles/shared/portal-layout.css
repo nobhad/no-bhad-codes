@@ -1259,6 +1259,7 @@ html[data-theme="light"] .portal .funnel-value {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--icon-gap-sm, 6px);
   padding: var(--space-2) var(--space-3);
   border-bottom: var(--border-width) solid var(--portal-border);
 }
@@ -1276,6 +1277,10 @@ html[data-theme="light"] .portal .funnel-value {
 }
 
 /* .section-title definition consolidated to PORTAL TYPOGRAPHY section above */
+
+.section-header-action {
+  margin-left: auto;
+}
 
 .section-actions {
   display: flex;

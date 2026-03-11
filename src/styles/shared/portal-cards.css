@@ -403,29 +403,17 @@ html[data-theme="light"] .portal :is(
 }
 
 /* =====================================================
-   8-CARD GRID (Dashboard overview)
-   8 cards in single row: 4 across (all 8 visible in 2 rows)
+   STATS GRID (Dashboard overview)
+   Client portal: 3 stat cards in a single row
    ===================================================== */
 .portal .dashboard-stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   max-width: 100%;
 }
 
 .portal .dashboard-stats-grid > * {
   min-width: 0;
-}
-
-@media (--tablet-landscape) {
-  .portal .dashboard-stats-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (--tablet) {
-  .portal .dashboard-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 @media (--narrow-mobile) {
@@ -699,7 +687,7 @@ html[data-theme="light"] .portal :is(
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-1) var(--portal-panel-padding-x);
+  padding: var(--space-2) var(--portal-panel-padding-x);
   background: transparent;
   border: var(--portal-border);
   color: var(--color-text-primary);

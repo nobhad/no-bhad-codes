@@ -331,6 +331,14 @@
   min-width: 0;
 }
 
+/* List inside data-table-container — breathing room + gap between items */
+.data-table-container > ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+  padding: var(--space-2) var(--space-3);
+}
+
 .data-table-card .empty-state,
 .data-table-container .empty-state {
   padding: var(--space-4);
@@ -401,7 +409,7 @@
   height: var(--table-pagination-btn-size);
   padding: 0;
   background: transparent;
-  border: var(--portal-border);
+  border: var(--portal-input-border);
   color: inherit;
   cursor: pointer;
   box-sizing: border-box;
@@ -435,7 +443,7 @@
   height: var(--table-pagination-btn-size);
   padding: 0;
   background: transparent;
-  border: var(--portal-border);
+  border: var(--portal-input-border);
   color: inherit;
   font-size: inherit;
   box-sizing: border-box;

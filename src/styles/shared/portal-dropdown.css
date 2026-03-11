@@ -24,9 +24,9 @@
 /* MUST set font-family explicitly since Radix portals render outside .portal */
 .portal-dropdown-content {
   z-index: var(--z-index-50);
-  min-width: 8rem;
+  min-width: var(--radix-dropdown-menu-trigger-width, 8rem);
   overflow: hidden;
-  border: var(--portal-border);
+  border: var(--portal-input-border);
   background-color: var(--color-bg-primary);
   padding: 0;
   box-shadow: none;
@@ -84,37 +84,34 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
 }
 
 /* Caret icon — SINGLE source of truth for ALL dropdown carets.
-   Uses currentColor so caret inherits the same color as surrounding text/border.
-   Size, spacing, and transition are uniform across all dropdown types. */
+   Absolutely positioned on the right, same distance from the right edge
+   as content start is from the left edge (--dropdown-padding-x).
+   Size and transition are uniform across all dropdown types. */
 .dropdown-caret,
 .custom-dropdown-caret {
-  flex-shrink: 0;
+  position: absolute;
+  right: var(--dropdown-padding-x);
+  top: 50%;
+  transform: translateY(-50%);
   width: var(--dropdown-caret-size, 1em);
   height: var(--dropdown-caret-size, 1em);
   color: currentColor;
   transition: transform var(--transition-fast);
-  margin-left: var(--dropdown-caret-gap, var(--space-1));
 }
 
-/* Root alignment fix: any .dropdown-trigger overrides its base button padding-left
-   to match portal-dropdown-item padding, keeping left content edges aligned open/closed.
-   Excludes status-dropdown-trigger (already uses --dropdown-padding-x) and icon-btns.
-   The caret pushes to far right via margin-left:auto regardless of trigger padding. */
+/* All .dropdown-trigger buttons: position relative for absolute caret,
+   symmetric padding using --dropdown-padding-x, extra right padding for caret.
+   Excludes status-dropdown-trigger and icon-btns (they handle their own layout). */
 .dropdown-trigger:not(.status-dropdown-trigger):not(.icon-btn) {
+  position: relative;
   padding-left: var(--dropdown-padding-x);
-}
-
-/* Caret in button triggers - push caret to far right */
-.dropdown-trigger .dropdown-caret,
-.dropdown-trigger > svg:last-child,
-:is(.btn, .btn-secondary, .btn-primary, .btn-outline) > .dropdown-caret {
-  margin-left: auto;
+  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
 }
 
 /* Rotate caret when open */
 .dropdown-trigger[data-state="open"] .dropdown-caret,
 .dropdown-trigger[data-state="open"] > svg:last-child {
-  transform: rotate(180deg);
+  transform: translateY(-50%) rotate(180deg);
 }
 
 /* Text styling consistent open/closed - no changes to font, size, or color */
@@ -141,6 +138,14 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
   font-family: inherit;
   letter-spacing: inherit;
   text-transform: inherit;
+}
+
+/* FormDropdown triggers — inherit font but preserve text-transform: none from portal-forms.css */
+.form-dropdown-trigger {
+  font-size: inherit;
+  font-weight: inherit;
+  font-family: inherit;
+  letter-spacing: inherit;
 }
 
 /* Remove bottom border on trigger when open - seamless connection.
@@ -189,7 +194,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
   z-index: var(--z-index-50);
   min-width: 8rem;
   overflow: hidden;
-  border: var(--portal-border);
+  border: var(--portal-input-border);
   background-color: var(--color-bg-primary);
   padding: var(--space-1);
   box-shadow: none;
@@ -204,6 +209,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
 .dropdown-trigger,
 .custom-dropdown-trigger,
 .status-dropdown-trigger,
+.form-dropdown-trigger,
 .portal-dropdown-item,
 .portal-dropdown-sub-trigger {
   font-size: inherit;
@@ -456,9 +462,10 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  position: relative;
   padding: var(--space-3) var(--space-4);
-  padding-right: var(--space-2);
+  padding-right: calc(var(--space-4) + var(--dropdown-caret-size) + var(--icon-gap));
   background-color: var(--dropdown-bg);
   border: var(--dropdown-border-width) solid var(--dropdown-border-color);
   border-radius: var(--dropdown-radius);
@@ -499,11 +506,13 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   text-align: left;
 }
 
-/* Caret icon - uses root dropdown caret variables for consistency */
-/* Modal-dropdown caret — inherits size/color/transition from root .custom-dropdown-caret */
+/* Modal-dropdown caret — match trigger's left padding (--space-4) for symmetric spacing */
+.custom-dropdown[data-modal-dropdown] .custom-dropdown-caret {
+  right: var(--space-4);
+}
 
 .custom-dropdown[data-modal-dropdown].open .custom-dropdown-caret {
-  transform: rotate(180deg);
+  transform: translateY(-50%) rotate(180deg);
 }
 
 /* Dropdown menu */
@@ -609,10 +618,12 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 .portal .table-dropdown .custom-dropdown-trigger {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  position: relative;
   width: 100%;
   min-width: 0;
   padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
+  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
   box-sizing: border-box;
   text-align: left;
 }
@@ -639,7 +650,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   max-height: 300px;
   overflow-y: auto;
   background-color: var(--color-bg-primary);
-  border: var(--portal-border);
+  border: var(--portal-input-border);
   z-index: var(--z-index-portal-dropdown);
   list-style: none;
   margin: var(--space-1) 0 0 0;
@@ -709,10 +720,12 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 .portal .table-dropdown .custom-dropdown-trigger {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: var(--icon-gap);
+  position: relative;
   padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
-  border: var(--border-width) solid transparent;
+  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
+  border: var(--border-width-px) solid transparent;
   background-color: transparent;
   color: inherit;
   font-size: inherit;
@@ -747,7 +760,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   .table-dropdown.open
   .custom-dropdown-trigger:is(:hover, :focus, :focus-visible) {
   outline: none;
-  border: var(--portal-border);
+  border: var(--portal-input-border);
   border-bottom: none;
   z-index: var(--z-index-loading);
   position: relative;
@@ -797,7 +810,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   padding: 0;
   list-style: none;
   background-color: var(--color-bg-primary);
-  border: var(--portal-border);
+  border: var(--portal-input-border);
   border-top: none;
   z-index: var(--z-index-portal-dropdown, 9700);
   display: none;
@@ -834,7 +847,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   .table-dropdown.dropdown-open-up.open
   .custom-dropdown-trigger:is(:hover, :focus, :focus-visible) {
   outline: none;
-  border: var(--portal-border);
+  border: var(--portal-input-border);
   border-top: none;
   background-color: transparent;
   box-shadow: none;
@@ -845,7 +858,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   bottom: 100%;
   margin-top: 0;
   margin-bottom: -1px;
-  border-top: var(--portal-border);
+  border-top: var(--portal-input-border);
   border-bottom: none;
   background-color: var(--color-bg-primary);
 }
@@ -919,6 +932,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 
 .portal .table-dropdown.filter-dropdown-with-check .custom-dropdown-trigger {
   padding-left: calc(var(--space-3) / 2 + 1rem + var(--space-0-5) / 2);
+  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
 }
 
 /* ================================================
@@ -943,8 +957,10 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   height: var(--table-pagination-btn-size);
   min-height: var(--table-pagination-btn-size);
   max-height: var(--table-pagination-btn-size);
+  position: relative;
   padding: 0 var(--dropdown-padding-x);
-  border: var(--portal-border);
+  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
+  border: var(--portal-input-border);
   background-color: transparent;
   color: var(--color-text-secondary);
   font-size: inherit;
@@ -992,8 +1008,10 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   height: var(--table-pagination-btn-size);
   min-height: var(--table-pagination-btn-size);
   max-height: var(--table-pagination-btn-size);
+  position: relative;
   padding: 0 var(--dropdown-padding-x);
-  border: var(--portal-border);
+  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
+  border: var(--portal-input-border);
   background-color: var(--color-bg-primary);
   color: var(--color-text-secondary);
   font-size: inherit;
@@ -1014,7 +1032,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   .pagination-page-size-dropdown
   .table-dropdown.custom-dropdown.open
   .custom-dropdown-trigger {
-  border: var(--portal-border);
+  border: var(--portal-input-border);
   border-top: none;
   background-color: var(--color-bg-primary);
   position: relative;
@@ -1033,7 +1051,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   right: auto;
   min-width: 100%;
   background-color: var(--color-bg-primary);
-  border: var(--portal-border);
+  border: var(--portal-input-border);
   border-bottom: none;
   margin: 0;
   padding: 0;
@@ -1238,12 +1256,14 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 .portal-modal .modal-dropdown .custom-dropdown-trigger {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  position: relative;
   width: 100%;
   height: 48px;
   padding: 0 var(--space-4);
+  padding-right: calc(var(--space-4) + var(--dropdown-caret-size) + var(--icon-gap));
   background-color: var(--color-black);
-  border: var(--border-width) solid transparent;
+  border: var(--border-width-px) solid transparent;
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   font-family: var(--font-family-mono);
@@ -1280,11 +1300,18 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   box-shadow: none;
 }
 
+/* Modal-dropdown caret — match trigger's left padding (--space-4) */
+.portal .modal-dropdown .custom-dropdown-caret,
+.confirm-dialog .modal-dropdown .custom-dropdown-caret,
+.portal-modal .modal-dropdown .custom-dropdown-caret {
+  right: var(--space-4);
+}
+
 /* Rotate caret when open */
 .portal .modal-dropdown.open .custom-dropdown-caret,
 .confirm-dialog .modal-dropdown.open .custom-dropdown-caret,
 .portal-modal .modal-dropdown.open .custom-dropdown-caret {
-  transform: rotate(180deg);
+  transform: translateY(-50%) rotate(180deg);
 }
 
 /* Trigger when open - connect to menu */
@@ -1310,7 +1337,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   padding: 0;
   list-style: none;
   background-color: var(--color-black);
-  border: var(--border-width) solid var(--color-accent);
+  border: var(--border-width-px) solid var(--color-accent);
   border-top: none;
   border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
   max-height: 240px;
@@ -1392,7 +1419,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   padding: var(--space-1-5) var(--space-2);
   text-align: left;
   background: transparent;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--border-width-px) solid var(--color-border-primary);
   color: inherit;
   font: inherit;
   cursor: pointer;
@@ -1429,7 +1456,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   max-width: 28rem;
   margin: 0 var(--space-3);
   background: var(--color-bg-tertiary);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--border-width-px) solid var(--color-border-primary);
   max-height: 80vh;
   display: flex;
   flex-direction: column;
@@ -1440,12 +1467,12 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   align-items: center;
   justify-content: space-between;
   padding: var(--space-2);
-  border-bottom: var(--border-width) solid var(--color-border-primary);
+  border-bottom: var(--border-width-px) solid var(--color-border-primary);
 }
 
 .modal-dropdown-search-section {
   padding: var(--space-2);
-  border-bottom: var(--border-width) solid var(--color-border-primary);
+  border-bottom: var(--border-width-px) solid var(--color-border-primary);
 }
 
 .modal-dropdown-search-wrapper {
@@ -1509,7 +1536,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 .modal-dropdown-checkbox {
   width: 1.25rem;
   height: 1.25rem;
-  border: var(--border-width) solid var(--color-border-secondary);
+  border: var(--border-width-px) solid var(--color-border-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1551,7 +1578,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   justify-content: flex-end;
   gap: var(--space-2);
   padding: var(--space-2);
-  border-top: var(--border-width) solid var(--color-border-primary);
+  border-top: var(--border-width-px) solid var(--color-border-primary);
 }
 
 .text-truncate {

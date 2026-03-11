@@ -361,15 +361,19 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
 
 /* Search bar inputs: padding for icon comes from portal-forms.css (input with left icon).
    No padding override here - single source of truth in portal-forms. */
-.search-bar .search-bar-input,
+/* Specificity (0,2,1): ties the broad input[type="text"] rule — later position wins */
+.search-bar input.search-bar-input,
 input.search-bar-input {
   width: 100%;
+  padding-top: var(--space-px);
+  padding-bottom: var(--space-px);
   padding-right: var(--space-4);
   background: inherit;
   border: var(--portal-border);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
-  height: var(--space-5);
+  /* Match adjacent filter dropdown height site-wide */
+  height: var(--portal-btn-icon-size, 36px);
   box-sizing: border-box;
 }
 
@@ -490,6 +494,73 @@ input.search-bar-input {
   cursor: not-allowed;
 }
 
+/* ============================================
+ * FORM DROPDOWN TRIGGER
+ * PortalDropdown-based replacement for native <select>
+ * ============================================ */
+
+.form-dropdown-trigger {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  /* Symmetric horizontal padding — caret right = content left */
+  padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
+  /* Extra right padding for absolutely positioned caret */
+  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family-mono);
+  background-color: var(--color-bg-primary);
+  border: var(--portal-border);
+  border-radius: 0;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  outline: none;
+  box-sizing: border-box;
+  text-align: left;
+  text-transform: none;
+}
+
+.form-dropdown-trigger:focus {
+  border-color: var(--color-accent);
+  box-shadow: var(--focus-ring);
+}
+
+.form-dropdown-trigger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-dropdown-trigger[data-state="open"] {
+  border-color: var(--color-accent);
+}
+
+.form-dropdown-value {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Caret — absolutely positioned, same distance from right edge
+   as content start is from left edge (--dropdown-padding-x) */
+.form-dropdown-caret {
+  position: absolute;
+  right: var(--dropdown-padding-x);
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--dropdown-caret-size);
+  height: var(--dropdown-caret-size);
+  color: var(--color-text-muted);
+}
+
+/* Rotate caret when dropdown is open */
+.form-dropdown-trigger[data-state="open"] > .form-dropdown-caret {
+  transform: translateY(-50%) rotate(180deg);
+}
+
 /* Textarea */
 .textarea {
   width: 100%;
@@ -524,7 +595,7 @@ input.search-bar-input {
   width: var(--space-2);
   height: var(--space-2);
   background: transparent;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--border-width-px) solid var(--color-border-primary);
   border-radius: 0;
   cursor: pointer;
 }
@@ -547,7 +618,6 @@ input.search-bar-input {
 /* Shared flex row: center + space-between */
 .qform-header,
 .qform-actions,
-.qform-select-btn,
 .qform-file-selected,
 .file-upload-item-header {
   display: flex;
@@ -649,35 +719,6 @@ input.search-bar-input {
   text-align: center;
   padding: var(--space-1-5) 0;
   font-size: var(--font-size-2xs);
-}
-
-/* Select dropdown styles */
-.qform-select-container {
-  position: relative;
-}
-
-.qform-select-btn {
-  gap: var(--space-1);
-  text-align: left;
-}
-
-.qform-select-dropdown {
-  position: absolute;
-  z-index: var(--z-index-50);
-  width: 100%;
-  margin-top: var(--space-0-5);
-  max-height: var(--space-24); /* 192px = 24 * 8px */
-  overflow: auto;
-}
-
-.qform-select-option {
-  width: 100%;
-  text-align: left;
-  padding: var(--space-1) var(--space-1-5);
-}
-
-.qform-chevron-icon {
-  transition: transform var(--transition-mouse) ease;
 }
 
 /* Multi-select */
@@ -849,7 +890,7 @@ input.search-bar-input {
   width: var(--space-2);
   height: var(--space-2);
   background: transparent;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--border-width-px) solid var(--color-border-primary);
   cursor: pointer;
   accent-color: var(--color-accent);
 }
