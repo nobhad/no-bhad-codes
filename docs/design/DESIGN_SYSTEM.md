@@ -516,41 +516,88 @@ height: 48px;
 
 ### Dropdowns
 
-**Table Dropdowns (32px, for table cells):**
+#### Reference Standard: PortalDropdown Status Pattern
 
-```css
-min-width: 115px;
-height: 32px;
-border: 2px solid transparent;
-border-radius: var(--portal-radius-lg);
-/* Hover/Focus/Open: border-color: var(--color-primary) */
+The **ProjectsTable status dropdown** is the gold standard. ALL dropdowns across the portal must follow this general design unless they are an action menu (three-dot) or modal form context.
+
+**Required anatomy (trigger):**
+
+- `PortalDropdown` (Radix DropdownMenu) wrapper
+- `PortalDropdownTrigger` with `button.status-dropdown-trigger`
+- Content: status indicator (colored dot via `StatusBadge`) + label text + `ChevronDown` caret
+- Caret MUST be on the RIGHT via `className="status-dropdown-caret"`
+
+**Required anatomy (content):**
+
+- `PortalDropdownContent` with `sideOffset={0} align="start"`
+- Dropdown panel MUST match the trigger width (`min-width: var(--status-dropdown-width)`)
+- Items use the same `StatusBadge` styling for visual consistency
+
+```tsx
+{/* CORRECT: Reference pattern */}
+<PortalDropdown>
+  <PortalDropdownTrigger asChild>
+    <button className="status-dropdown-trigger">
+      <StatusBadge status={currentStatus}>{label}</StatusBadge>
+      <ChevronDown className="status-dropdown-caret" />
+    </button>
+  </PortalDropdownTrigger>
+  <PortalDropdownContent sideOffset={0} align="start">
+    {options.map((opt) => (
+      <PortalDropdownItem key={opt.value} onClick={() => onChange(opt.value)}>
+        <StatusBadge status={opt.variant}>{opt.label}</StatusBadge>
+      </PortalDropdownItem>
+    ))}
+  </PortalDropdownContent>
+</PortalDropdown>
 ```
 
-**Modal Dropdowns (48px, matches form inputs):**
+#### Dropdown Size Tiers
 
-```css
-height: 48px;
-background-color: var(--color-black);
-border: 1px solid transparent;
-border-radius: var(--portal-radius-lg);
-```
+| Context | Height | Min Width | Background | Component |
+|---------|--------|-----------|------------|-----------|
+| Table cells | 32px | `var(--status-dropdown-width)` (115px) | Transparent | `PortalDropdown` |
+| Inline selectors | 36px | `var(--status-dropdown-width)` | Transparent | `PortalDropdown` |
+| Modal form inputs | 48px | 100% | `--color-black` | `ModalDropdown` |
+| Filter controls | 36px | auto | `--portal-bg-dark` | `PortalDropdown` |
 
-**Filter Dropdowns (36px, for table filtering):**
+#### Rules
 
-```css
-.table-filter-controls {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  height: 36px;
-}
-```
+- NEVER use raw HTML `<select>` elements -- always use `PortalDropdown`
+- NEVER use Radix `Select` from `ui/select.tsx` -- use `PortalDropdown` instead
+- Caret (`ChevronDown`) MUST be on the RIGHT side of the trigger
+- Open dropdown content MUST match the trigger width
+- Status dropdowns MUST use `StatusBadge` with colored dot
+- Action menus (three-dot) are exempt from status styling but must use `PortalDropdown`
 
-| System | Height | Background | Purpose |
-|--------|--------|------------|---------|
-| Table Dropdowns | 32px | Transparent | Status in table cells |
-| Modal Dropdowns | 48px | `--color-black` | Form inputs in modals |
-| Filter Dropdowns | 36px | `--portal-bg-dark` | Table filter controls |
+#### Compliance Audit (March 2026)
+
+**COMPLIANT (22 instances):**
+
+- 11 table status dropdowns (Projects, Clients, Leads, Contacts, Proposals, Contracts, Deliverables, Tasks, Requests, Workflows, Lead Detail)
+- 5 action menus (Client Detail, Project Detail, Contacts Tab, Invoices Tab, Bulk Actions)
+- 6 filter/selector dropdowns (Analytics, Files category, Invoice filter, Contact role, Tags, InlineEdit)
+
+**OUTLIERS requiring unification (34 instances):**
+
+| ID | File | Line | Issue |
+|----|------|------|-------|
+| O1 | `portal/ad-hoc-requests/NewRequestForm.tsx` | 244 | Raw `<select>` for project picker |
+| O2-O4 | `portal/files/PortalFilesManager.tsx` | 463, 476, 514 | 3x raw `<select>` for project/type/folder filters |
+| O5-O6 | `portal/onboarding/steps/ProjectOverviewStep.tsx` | 84, 161 | 2x raw `<select>` for project type and budget |
+| O7 | `portal/onboarding/steps/BasicInfoStep.tsx` | 131 | Raw `<select>` for timezone |
+| O8 | `portal/settings/ContactsSection.tsx` | 307 | Raw `<select>` for contact role |
+| O9 | `admin/help/HelpCenter.tsx` | 120 | Raw `<select>` for category filter |
+| O10 | `admin/data-quality/ValidationErrorsTab.tsx` | 66 | Raw `<select>` for error type filter |
+| O11-O12 | `admin/webhooks/WebhookFormModal.tsx` | 111, 63 | 2x raw `<select>` for HTTP method and event |
+| O13-O14 | `admin/integrations/NotificationFormModal.tsx` | 76, 89 | 2x raw `<select>` for channel and event |
+| O15-O16 | `components/portal/DataTable/DataTable.tsx` | 300, 486 | 2x raw `<select>` for filter and page size |
+| O17 | `components/portal/InlineEditField.tsx` | 348 | Raw `<select>` for inline edit |
+| O18 | `factories/createFormField.tsx` | 346 | `SelectField` factory renders native `<select>` |
+| O19 | `admin/project-detail/tabs/DeliverablesTab.tsx` | 357 | Radix `Select` (wrong component system) |
+| O20 | `components/portal/TablePagination.tsx` | 60 | Hand-rolled custom dropdown |
+| O33 | `admin/client-detail/ClientDetail.tsx` | 222 | No caret, plain badge trigger |
+| O34 | `admin/project-detail/ProjectDetail.tsx` | 237 | Wrong CSS classes (`files-category-trigger`) |
 
 ### Modals
 
