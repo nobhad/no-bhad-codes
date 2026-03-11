@@ -269,7 +269,8 @@ export function PortalFilesManager({
     transform: transformFilesResponse
   });
 
-  const files = useMemo(() => filesData?.files ?? [], [filesData?.files]);
+  // Exclude intake files — they appear in the Documents tab instead
+  const files = useMemo(() => (filesData?.files ?? []).filter((f) => f.category !== 'intake'), [filesData?.files]);
   const projects = useMemo(() => filesData?.projects ?? [], [filesData?.projects]);
 
   // Local state for upload, filters, and delete

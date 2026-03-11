@@ -34,8 +34,8 @@ interface DocumentRequestSummary {
 function calculateSummary(requests: DocumentRequest[]): DocumentRequestSummary {
   const summary: DocumentRequestSummary = { total: requests.length, pending: 0, submitted: 0, approved: 0, rejected: 0 };
   for (const r of requests) {
-    if (r.status === 'pending') summary.pending++;
-    else if (r.status === 'submitted') summary.submitted++;
+    if (r.status === 'requested' || r.status === 'viewed') summary.pending++;
+    else if (r.status === 'uploaded' || r.status === 'under_review') summary.submitted++;
     else if (r.status === 'approved') summary.approved++;
     else if (r.status === 'rejected') summary.rejected++;
   }
@@ -111,8 +111,8 @@ export function PortalDocumentRequests({
       completed: []
     };
     for (const r of filteredRequests) {
-      if (r.status === 'pending' || r.status === 'rejected') groups.actionNeeded.push(r);
-      else if (r.status === 'submitted') groups.inReview.push(r);
+      if (r.status === 'requested' || r.status === 'viewed' || r.status === 'rejected') groups.actionNeeded.push(r);
+      else if (r.status === 'uploaded' || r.status === 'under_review') groups.inReview.push(r);
       else if (r.status === 'approved') groups.completed.push(r);
     }
     return groups;

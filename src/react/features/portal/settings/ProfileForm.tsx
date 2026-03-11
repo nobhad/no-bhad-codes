@@ -6,9 +6,8 @@
 
 import * as React from 'react';
 import { useCallback } from 'react';
-import { User, Mail, Building2, Phone, Hash, Calendar } from 'lucide-react';
+import { User, Mail, Building2, Phone } from 'lucide-react';
 import { InlineEditField } from '@react/components/portal/InlineEditField';
-import { formatCardDate } from '@react/utils/cardFormatters';
 import {
   validateEmail as sharedValidateEmail,
   validatePhone as sharedValidatePhone,
@@ -115,36 +114,6 @@ export function ProfileForm({ profile, onUpdate }: ProfileFormProps) {
         </div>
       </div>
 
-      {/* Account Information Section (Read Only) */}
-      <div className="portal-section">
-        <div className="section-header">
-          <Hash className="section-icon"  />
-          <h3 className="section-title">
-            Account Information
-          </h3>
-        </div>
-
-        <div className="settings-fields">
-          <InlineEditField
-            label="Account ID"
-            value={`#${profile.id}`}
-            onSave={async () => false}
-            readOnly
-            icon={<Hash  />}
-          />
-
-          {profile.created_at && (
-            <InlineEditField
-              label="Member Since"
-              value={profile.created_at}
-              onSave={async () => false}
-              formatDisplay={(v) => v ? formatCardDate(v) : '-'}
-              readOnly
-              icon={<Calendar  />}
-            />
-          )}
-        </div>
-      </div>
     </>
   );
 }

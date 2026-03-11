@@ -183,7 +183,7 @@ export function PortalQuestionnairesView({
         <EmptyState
           icon={<FileText className="icon-lg" />}
           message={items.length === 0
-            ? 'No questionnaires assigned yet. Questionnaires will appear here when your project team sends them.'
+            ? 'No questionnaires assigned yet. Questionnaires will appear here when Noelle sends them.'
             : 'No questionnaires match the current filters.'
           }
         />
