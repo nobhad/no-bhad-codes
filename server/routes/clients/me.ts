@@ -385,7 +385,7 @@ router.get(
     // Get all projects for this client (for project selector + count)
     const allProjects = await db.all(
       `SELECT id, project_name as name, status, progress,
-              start_date, end_date, preview_url,
+              start_date, estimated_end_date as end_date, preview_url,
               created_at, updated_at
        FROM active_projects WHERE client_id = ?
        ORDER BY
@@ -533,20 +533,20 @@ router.get(
     );
     const pendingContracts = contractsResult?.count || 0;
 
-    // Get pending questionnaires count
+    // Get pending questionnaires count (responses not yet completed)
     const questionnairesResult = await db.get(
-      `SELECT COUNT(*) as count FROM questionnaires q
-       JOIN active_projects p ON q.project_id = p.id
-       WHERE p.client_id = ? AND q.status = 'sent' AND q.deleted_at IS NULL`,
+      `SELECT COUNT(*) as count FROM questionnaire_responses qr
+       JOIN active_projects p ON qr.project_id = p.id
+       WHERE p.client_id = ? AND qr.status IN ('pending', 'in_progress')`,
       [clientId]
     );
     const pendingQuestionnaires = questionnairesResult?.count || 0;
 
-    // Get pending approvals count
+    // Get pending approvals count (deliverables awaiting client approval)
     const approvalsResult = await db.get(
-      `SELECT COUNT(*) as count FROM approvals a
-       JOIN active_projects p ON a.project_id = p.id
-       WHERE p.client_id = ? AND a.status = 'pending' AND a.deleted_at IS NULL`,
+      `SELECT COUNT(*) as count FROM deliverables d
+       JOIN active_projects p ON d.project_id = p.id
+       WHERE p.client_id = ? AND d.approval_status = 'pending' AND d.deleted_at IS NULL`,
       [clientId]
     );
     const pendingApprovals = approvalsResult?.count || 0;
@@ -568,6 +568,20 @@ router.get(
       [clientId]
     );
     const deliverablesInReview = deliverablesInReviewResult?.count || 0;
+
+    // Get current active deliverable/milestone for active projects
+    const currentDeliverable = await db.get(
+      `SELECT d.id, d.title, d.status, d.type, p.id as project_id
+       FROM deliverables d
+       JOIN active_projects p ON d.project_id = p.id
+       WHERE p.client_id = ? AND d.deleted_at IS NULL
+         AND d.status IN ('in_progress', 'in_review')
+       ORDER BY
+         CASE WHEN d.status = 'in_progress' THEN 0 ELSE 1 END,
+         d.updated_at DESC
+       LIMIT 1`,
+      [clientId]
+    );
 
     sendSuccess(res, {
       stats: {
@@ -591,6 +605,9 @@ router.get(
         endDate: p.end_date,
         previewUrl: p.preview_url
       })),
+      currentDeliverable: currentDeliverable
+        ? { id: currentDeliverable.id, title: currentDeliverable.title, status: currentDeliverable.status, type: currentDeliverable.type, projectId: currentDeliverable.project_id }
+        : null,
       recentActivity: recentActivity.map((item: Record<string, unknown>) => ({
         type: item.type,
         title: item.title,

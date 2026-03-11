@@ -1,10 +1,12 @@
 /**
  * ProjectSnapshot
- * Displays the active project header with name, status, progress, timeline.
+ * Split into two parts:
+ * - ProjectHeader: project name, status badge, preview link (no panel wrapper)
+ * - ProjectProgress: progress bar, timeline, current deliverable (for panel wrapping)
  */
 
 import * as React from 'react';
-import { Calendar, ExternalLink } from 'lucide-react';
+import { Calendar, ExternalLink, Target } from 'lucide-react';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { formatCardDate } from '@react/utils/cardFormatters';
 
@@ -22,8 +24,11 @@ export interface ProjectInfo {
   previewUrl?: string;
 }
 
-interface ProjectSnapshotProps {
-  project: ProjectInfo;
+export interface CurrentDeliverableInfo {
+  id: number;
+  title: string;
+  status: string;
+  type: string;
 }
 
 // ============================================================================
@@ -42,43 +47,68 @@ const PROJECT_STATUS_LABELS: Record<string, string> = {
   cancelled: 'Cancelled'
 };
 
+const DELIVERABLE_STATUS_LABELS: Record<string, string> = {
+  in_progress: 'In Progress',
+  in_review: 'In Review'
+};
+
 // ============================================================================
-// COMPONENT
+// SUB-COMPONENTS
 // ============================================================================
 
-export const ProjectSnapshot = React.memo(({ project }: ProjectSnapshotProps) => {
-  const progressPercent = Math.min(project.progress ?? 0, PROGRESS_MAX);
+interface ProjectHeaderProps {
+  project: ProjectInfo;
+}
+
+/** Page-level project context: name + status + preview link. No panel wrapper. */
+export const ProjectHeader = React.memo(({ project }: ProjectHeaderProps) => {
   const statusLabel = PROJECT_STATUS_LABELS[project.status] ?? project.status;
 
   return (
-    <div className="project-snapshot">
-      <div className="project-snapshot-header">
-        <div className="project-snapshot-title">
-          <h2>{project.name}</h2>
-          <StatusBadge status={getStatusVariant(project.status)}>
-            {statusLabel}
-          </StatusBadge>
-        </div>
-
-        {project.previewUrl && (
-          <a
-            href={project.previewUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-secondary btn-sm"
-            aria-label="View preview site"
-          >
-            <ExternalLink className="icon-xs" />
-            Preview Site
-          </a>
-        )}
+    <div className="project-snapshot-header">
+      <div className="project-snapshot-title">
+        <h2>{project.name}</h2>
+        <StatusBadge status={getStatusVariant(project.status)}>
+          {statusLabel}
+        </StatusBadge>
       </div>
 
+      {project.previewUrl && (
+        <a
+          href={project.previewUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-secondary btn-sm"
+          aria-label="View preview site"
+        >
+          <ExternalLink className="icon-xs" />
+          Preview Site
+        </a>
+      )}
+    </div>
+  );
+});
+
+interface ProjectProgressProps {
+  project: ProjectInfo;
+  currentDeliverable?: CurrentDeliverableInfo | null;
+}
+
+/** Progress bar, timeline, current deliverable. Intended to be wrapped in .panel. */
+export const ProjectProgress = React.memo(({ project, currentDeliverable }: ProjectProgressProps) => {
+  const progressPercent = Math.min(project.progress ?? 0, PROGRESS_MAX);
+
+  return (
+    <>
       {/* Progress bar */}
-      <div className="project-snapshot-progress">
-        <div className="progress-bar-track">
+      <div className="progress-field">
+        <div className="progress-field-header">
+          <span className="field-label">Progress</span>
+          <span className="text-primary text-sm">{progressPercent}%</span>
+        </div>
+        <div className="progress-bar-sm">
           <div
-            className="progress-bar-fill"
+            className="progress-fill"
             style={{ width: `${progressPercent}%` }}
             role="progressbar"
             aria-valuenow={progressPercent}
@@ -87,7 +117,6 @@ export const ProjectSnapshot = React.memo(({ project }: ProjectSnapshotProps) =>
             aria-label={`Project progress: ${progressPercent}%`}
           />
         </div>
-        <span className="progress-bar-label">{progressPercent}%</span>
       </div>
 
       {/* Timeline */}
@@ -101,6 +130,20 @@ export const ProjectSnapshot = React.memo(({ project }: ProjectSnapshotProps) =>
           </span>
         </div>
       )}
-    </div>
+
+      {/* Current Deliverable/Milestone */}
+      {currentDeliverable && (
+        <div className="project-snapshot-milestone">
+          <Target className="icon-xs" />
+          <span>
+            Current: {currentDeliverable.title}
+            {' \u2014 '}
+            <StatusBadge status={getStatusVariant(currentDeliverable.status)}>
+              {DELIVERABLE_STATUS_LABELS[currentDeliverable.status] ?? currentDeliverable.status}
+            </StatusBadge>
+          </span>
+        </div>
+      )}
+    </>
   );
 });

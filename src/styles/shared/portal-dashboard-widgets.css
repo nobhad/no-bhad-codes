@@ -10,6 +10,99 @@
  */
 
 /* =====================================================
+   PROJECT SNAPSHOT
+   Split into two parts:
+   - Header: title + badge + preview link (no panel)
+   - Progress: bar + timeline + deliverable (inside .panel)
+   ===================================================== */
+
+.portal .project-snapshot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.portal .project-snapshot-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.portal .project-snapshot-title .badge {
+  flex-shrink: 0;
+}
+
+.portal .project-snapshot-title h2 {
+  margin: 0;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.portal .project-snapshot-milestone {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.portal .project-snapshot-timeline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+/* =====================================================
+   PROGRESS FIELD
+   Label row + progress track. Used in dashboard panels
+   and admin project detail. Shared definition.
+   ===================================================== */
+
+.portal .progress-field {
+  padding: var(--space-2) 0;
+}
+
+.portal .progress-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+/* =====================================================
+   ACTION ITEMS GRID
+   Uses .attention-card pattern for clickable action cards.
+   ===================================================== */
+
+.portal .action-items-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.portal .action-items-section h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.portal .action-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--portal-section-gap);
+}
+
+@media (--narrow-mobile) {
+  .portal .action-items-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =====================================================
    ACTIVITY ITEMS
    Activity item with icon, content, and time
    ===================================================== */
@@ -45,6 +138,8 @@
 }
 
 .portal .activity-title {
+  flex: 1;
+  min-width: 0;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
@@ -56,6 +151,11 @@
 .portal .activity-client {
   font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
+}
+
+.portal .activity-context {
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-normal);
 }
 
 .portal :is(.activity-time, .activity-date) {
@@ -452,4 +552,47 @@
   .portal .attention-count {
     font-size: var(--font-size-lg);
   }
+}
+
+/* =====================================================
+   MILESTONE / DELIVERABLE LIST (SHARED)
+   Used by both admin project detail and client portal
+   deliverables tab. Originally in admin/project-detail.css,
+   duplicated here so the client portal can also use them.
+   ===================================================== */
+
+.portal .milestone-list,
+.portal .milestone-item-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.portal .milestone-list {
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+}
+
+.portal .milestone-item-wrapper {
+  border: var(--portal-border);
+}
+
+.portal .milestone-expanded-content {
+  padding: var(--space-2);
+  padding-left: calc(var(--icon-size-lg) + var(--space-1-5) + var(--space-2));
+}
+
+/* Deliverables checklist */
+.portal .deliv-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.portal .deliv-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 }

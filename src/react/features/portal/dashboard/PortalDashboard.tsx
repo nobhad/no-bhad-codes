@@ -23,7 +23,7 @@ import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/E
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePortalData } from '@react/hooks/usePortalFetch';
 import { useSetProjects, useActiveProjectId } from '@react/stores/portal-store';
-import { ProjectSnapshot } from './ProjectSnapshot';
+import { ProjectHeader, ProjectProgress } from './ProjectSnapshot';
 import { ActionItems } from './ActionItems';
 import type { ProjectInfo } from './ProjectSnapshot';
 import type { ActionItemCounts } from './ActionItems';
@@ -90,10 +90,19 @@ interface DashboardProject {
   previewUrl?: string;
 }
 
+interface CurrentDeliverable {
+  id: number;
+  title: string;
+  status: string;
+  type: string;
+  projectId: number;
+}
+
 interface DashboardData {
   stats: DashboardStats;
   totalProjects: number;
   projects: DashboardProject[];
+  currentDeliverable: CurrentDeliverable | null;
   recentActivity: ActivityItem[];
 }
 
@@ -156,10 +165,12 @@ const ActivityList = React.memo(({ activities, onNavigate }: ActivityListProps) 
           <span className="activity-icon">
             {React.createElement(getActivityIcon(item.type), { className: 'icon-md' })}
           </span>
-          <div className="activity-content">
-            <span className="activity-title">{item.title}</span>
-            <span className="activity-client">{item.context}</span>
-          </div>
+          <span className="activity-title">
+            {item.title}
+            {item.context && item.type !== 'message' && (
+              <span className="activity-context"> — {item.context}</span>
+            )}
+          </span>
           <span className="activity-date">
             {formatRelativeTime(item.date)}
           </span>
@@ -258,10 +269,22 @@ export function PortalDashboard({
         <ErrorState message={error} onRetry={refetch} />
       ) : (
         <>
-          {/* Project Snapshot */}
-          {activeProject && <ProjectSnapshot project={activeProject} />}
+          {/* 1. Project Header (no panel) */}
+          {activeProject && (
+            <ProjectHeader project={activeProject} />
+          )}
 
-          {/* Action Items */}
+          {/* 2. Project Progress Panel */}
+          {activeProject && (
+            <div className="panel">
+              <ProjectProgress
+                project={activeProject}
+                currentDeliverable={data?.currentDeliverable ?? null}
+              />
+            </div>
+          )}
+
+          {/* 3. Action Items (attention cards grid) */}
           {actionCounts && (
             <ActionItems counts={actionCounts} onNavigate={onNavigate} />
           )}
@@ -275,6 +298,12 @@ export function PortalDashboard({
                 : '$0.00'
               }
               variant={stats?.outstandingBalance ? 'warning' : 'default'}
+              onClick={() => handleStatClick(NAV_TAB_DOCUMENTS)}
+            />
+            <StatCard
+              label="Pending Invoices"
+              value={stats?.pendingInvoices ?? 0}
+              variant={stats?.pendingInvoices ? 'warning' : 'default'}
               onClick={() => handleStatClick(NAV_TAB_DOCUMENTS)}
             />
             <StatCard
@@ -292,14 +321,12 @@ export function PortalDashboard({
               label="Pending Actions"
               value={
                 (stats?.pendingContracts ?? 0) +
-                (stats?.pendingInvoices ?? 0) +
                 (stats?.pendingApprovals ?? 0) +
                 (stats?.pendingQuestionnaires ?? 0) +
                 (stats?.pendingDocRequests ?? 0)
               }
               variant={
                 ((stats?.pendingContracts ?? 0) +
-                (stats?.pendingInvoices ?? 0) +
                 (stats?.pendingApprovals ?? 0)) > 0 ? 'warning' : 'default'
               }
               onClick={() => handleStatClick(NAV_TAB_FILES)}
