@@ -404,16 +404,23 @@ html[data-theme="light"] .portal :is(
 
 /* =====================================================
    STATS GRID (Dashboard overview)
-   Client portal: 3 stat cards in a single row
+   Client portal: 5 stat cards in a single row
    ===================================================== */
 .portal .dashboard-stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--portal-section-gap);
   max-width: 100%;
 }
 
 .portal .dashboard-stats-grid > * {
   min-width: 0;
+}
+
+@media (--mobile) {
+  .portal .dashboard-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (--narrow-mobile) {
