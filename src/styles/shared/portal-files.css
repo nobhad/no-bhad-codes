@@ -171,6 +171,7 @@
 .portal .folder-item.active {
   background: transparent;
   color: var(--color-accent);
+  border: var(--portal-input-border);
 }
 
 .portal .folder-item svg {
@@ -263,7 +264,7 @@
   font-size: var(--font-size-sm);
   padding: var(--space-1) var(--space-1-5);
   background: transparent;
-  border: var(--portal-border);
+  border: var(--portal-input-border);
   color: var(--color-text-primary);
   height: 36px;
 }
@@ -338,7 +339,7 @@
   gap: var(--space-1-5);
   padding: var(--space-1-5);
   background: transparent;
-  border: var(--border-width) solid transparent;
+  border: var(--border-width-px) solid transparent;
   color: var(--color-text-primary);
   transition: border-color var(--transition-fast) ease;
 }
@@ -427,7 +428,7 @@
   text-decoration: none;
   font-weight: var(--font-weight-semibold);
   padding: var(--space-1) var(--space-2);
-  border: var(--border-width) solid var(--color-accent);
+  border: var(--border-width-px) solid var(--color-accent);
   transition: all var(--transition-fast);
 }
 
@@ -511,7 +512,7 @@
 
 .portal .files-list-section .file-item:hover {
   border-color: var(--color-accent);
-  border: var(--border-width) solid var(--color-accent);
+  border: var(--border-width-px) solid var(--color-accent);
 }
 
 /* =====================================================
@@ -605,12 +606,12 @@
   }
 }
 
-/* Folder list */
+/* Folder list — top padding matches files-content-area so rows align */
 .portal-files-sidebar .folder-tree {
   display: flex;
   flex-direction: column;
   gap: var(--space-0-5);
-  padding: var(--space-2);
+  padding: var(--space-3) var(--space-2);
 }
 
 /* Files content area — right side */

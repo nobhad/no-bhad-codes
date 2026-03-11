@@ -91,9 +91,10 @@
   flex-shrink: 0;
 }
 
-/* Input padding to clear the left icon */
-.filter-search-dropdown .search-bar-input {
+/* Input padding + height to match filter dropdown row */
+.filter-search-dropdown input.search-bar-input {
   padding-left: var(--input-icon-offset);
+  height: var(--portal-btn-icon-size, 36px);
 }
 
 /* Filter dropdown wrapper */
@@ -144,39 +145,23 @@
   display: inline-block;
 }
 
-/* Filter dropdown menu */
+/* Filter dropdown menu — rendered via React portal at body level */
 .filter-dropdown-menu {
-  position: absolute;
-  top: calc(100% + var(--space-0-5));
-  right: 0;
   z-index: var(--z-index-portal-dropdown, 9700);
   min-width: var(--table-col-lg);
-  padding: var(--space-3) var(--space-1-5) var(--space-1-5) var(--space-1-5);
+  padding: var(--space-1-5);
   background: var(--color-bg-tertiary);
-  border: var(--border-width) solid var(--portal-border);
+  border: var(--portal-input-border);
   box-shadow: var(--shadow-dropdown-xl);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(calc(-1 * var(--space-1)));
-  transition:
-    opacity var(--transition-fast),
-    visibility var(--transition-fast),
-    transform var(--transition-fast);
-}
-
-.filter-dropdown-wrapper.open .filter-dropdown-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
 }
 
 /* Filter sections */
 .filter-section {
-  margin-bottom: var(--space-1-5);
+  margin-bottom: var(--space-1);
 }
 
 .filter-section:last-of-type {
-  margin-bottom: var(--space-1);
+  margin-bottom: 0;
 }
 
 /* Label styling from unified rule in portal-forms.css - only layout here */
