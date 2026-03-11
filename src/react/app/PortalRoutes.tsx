@@ -285,7 +285,13 @@ export function PortalRoutes() {
         <Route path="/performance" element={<LazyTabRoute tabId="performance"><PerformanceMetrics /></LazyTabRoute>} />
         <Route path="/work" element={<LazyTabRoute tabId="work"><WorkDashboard /></LazyTabRoute>} />
         <Route path="/crm" element={<LazyTabRoute tabId="crm"><CRMDashboard /></LazyTabRoute>} />
-        <Route path="/documents" element={<LazyTabRoute tabId="documents"><DocumentsDashboard /></LazyTabRoute>} />
+        <Route path="/documents" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="documents"><DocumentsDashboard /></LazyTabRoute>
+          ) : (
+            <LazyTabRoute tabId="documents"><PortalDocuments /></LazyTabRoute>
+          )
+        } />
         <Route path="/leads" element={<LazyTabRoute tabId="leads"><LeadsTable /></LazyTabRoute>} />
         <Route path="/contacts" element={<LazyTabRoute tabId="contacts"><ContactsTable /></LazyTabRoute>} />
         <Route path="/clients" element={<LazyTabRoute tabId="clients"><ClientsTable /></LazyTabRoute>} />
@@ -332,14 +338,7 @@ export function PortalRoutes() {
         <Route path="/project-detail" element={<LazyTabRoute tabId="project-detail"><ProjectDetailRoute /></LazyTabRoute>} />
         <Route path="/project-detail/:projectId" element={<LazyTabRoute tabId="project-detail"><ProjectDetailRoute /></LazyTabRoute>} />
 
-        {/* ========== CLIENT-ONLY ROUTES ========== */}
-        {/* New consolidated documents view (contracts + proposals + invoices) */}
-        {role === 'client' && (
-          <Route path="/documents" element={
-            <LazyTabRoute tabId="documents"><PortalDocuments /></LazyTabRoute>
-          } />
-        )}
-        {/* Redirects for old client routes */}
+        {/* ========== CLIENT-ONLY REDIRECTS ========== */}
         <Route path="/approvals" element={
           role === 'client' ? <Navigate to="/deliverables" replace /> : <Navigate to="/dashboard" replace />
         } />
