@@ -20,7 +20,7 @@
 
 import * as React from 'react';
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { User, MessageSquare, CheckCheck, Smile, X, Check } from 'lucide-react';
+import { User, MessageSquare, CheckCheck, Smile, X, Check, Paperclip, Download, File as FileIcon } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { LoadingState, EmptyState } from '@react/factories/StateDisplay';
@@ -32,9 +32,26 @@ import { KEYS } from '@/constants/keyboard';
 
 const QUICK_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🙏'] as const;
 
+const DEFAULT_MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10MB
+const DEFAULT_ALLOWED_FILE_TYPES = [
+  'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'text/plain'
+];
+
 // ============================================
 // PUBLIC TYPES
 // ============================================
+
+export interface MessageAttachment {
+  id: number | string;
+  filename: string;
+  fileSize: number;
+  fileType: string;
+  downloadUrl: string;
+}
 
 export interface ThreadMessage {
   id: number;
@@ -48,16 +65,24 @@ export interface ThreadMessage {
   readReceipt?: 'sent' | 'delivered' | 'read';
   /** Emoji reactions */
   reactions?: Array<{ emoji: string; count: number; reacted: boolean }>;
+  /** File attachments on this message */
+  attachments?: MessageAttachment[];
 }
 
 export interface MessageThreadProps {
   messages: ThreadMessage[];
   isLoading: boolean;
-  onSend: (content: string) => Promise<boolean>;
+  onSend: (content: string, attachments?: File[]) => Promise<boolean>;
   onReact?: (messageId: number, emoji: string) => Promise<boolean>;
   onEdit?: (messageId: number, content: string) => Promise<boolean>;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   className?: string;
+  /** Enable file attachment in compose area */
+  attachmentsEnabled?: boolean;
+  /** Max file size in bytes (default 10MB) */
+  maxAttachmentSize?: number;
+  /** Allowed MIME types */
+  allowedFileTypes?: string[];
 }
 
 // ============================================
@@ -91,6 +116,49 @@ function formatDateSeparator(date: string): string {
 
 function isSameDay(a: string, b: string): boolean {
   return new Date(a).toDateString() === new Date(b).toDateString();
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+// ============================================
+// SUB-COMPONENTS
+// ============================================
+
+/** Renders file attachments on a message bubble */
+function AttachmentList({ attachments }: { attachments: MessageAttachment[] }) {
+  if (attachments.length === 0) return null;
+  return (
+    <div className="msgtab-attachments">
+      {attachments.map((att) => {
+        const isImage = att.fileType.startsWith('image/');
+        return (
+          <a
+            key={att.id}
+            href={att.downloadUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="msgtab-attachment-link"
+            title={`Download ${att.filename}`}
+          >
+            {isImage ? (
+              <img src={att.downloadUrl} alt={att.filename} className="msgtab-attachment-thumb" />
+            ) : (
+              <span className="msgtab-attachment-file">
+                <FileIcon className="icon-xs" />
+                <span className="msgtab-attachment-name">{att.filename}</span>
+                <span className="msgtab-attachment-size">{formatFileSize(att.fileSize)}</span>
+                <Download className="icon-xs" />
+              </span>
+            )}
+          </a>
+        );
+      })}
+    </div>
+  );
 }
 
 // ============================================
@@ -127,7 +195,10 @@ export function MessageThread({
   onReact,
   onEdit,
   showNotification,
-  className
+  className,
+  attachmentsEnabled = false,
+  maxAttachmentSize = DEFAULT_MAX_ATTACHMENT_SIZE,
+  allowedFileTypes = DEFAULT_ALLOWED_FILE_TYPES
 }: MessageThreadProps) {
   const [draft, setDraft] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -137,6 +208,9 @@ export function MessageThread({
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   const [pickerOpenId, setPickerOpenId] = useState<number | null>(null);
+
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -155,19 +229,42 @@ export function MessageThread({
     return () => document.removeEventListener('click', handleClick);
   }, [pickerOpenId]);
 
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const valid = files.filter((file) => {
+      if (file.size > maxAttachmentSize) {
+        showNotification?.(`${file.name} exceeds ${formatFileSize(maxAttachmentSize)} limit`, 'error');
+        return false;
+      }
+      if (!allowedFileTypes.includes(file.type)) {
+        showNotification?.(`${file.name} has an unsupported file type`, 'error');
+        return false;
+      }
+      return true;
+    });
+    setPendingFiles((prev) => [...prev, ...valid]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }, [maxAttachmentSize, allowedFileTypes, showNotification]);
+
+  const handleRemoveFile = useCallback((index: number) => {
+    setPendingFiles((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
   const handleSend = useCallback(async () => {
     const content = draft.trim();
-    if (!content || isSending) return;
+    if (!content && pendingFiles.length === 0) return;
+    if (isSending) return;
     setIsSending(true);
-    const success = await onSend(content);
+    const success = await onSend(content, pendingFiles.length > 0 ? pendingFiles : undefined);
     setIsSending(false);
     if (success) {
       setDraft('');
+      setPendingFiles([]);
       textareaRef.current?.focus();
     } else {
       showNotification?.('Failed to send message', 'error');
     }
-  }, [draft, isSending, onSend, showNotification]);
+  }, [draft, pendingFiles, isSending, onSend, showNotification]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -392,6 +489,9 @@ export function MessageThread({
                               aria-label={message.isOwn && onEdit ? 'Click to edit message' : undefined}
                             >
                               <p className="msgtab-content">{message.content}</p>
+                              {message.attachments && message.attachments.length > 0 && (
+                                <AttachmentList attachments={message.attachments} />
+                              )}
                             </div>
                           )}
                         </div>
@@ -447,27 +547,71 @@ export function MessageThread({
 
       {/* Compose input */}
       <div className="msgtab-input-panel">
-        <textarea
-          ref={textareaRef}
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Type a message..."
-          rows={2}
-          className="textarea msgtab-textarea"
-          aria-label="Message"
-        />
-        <PortalButton
-          variant="primary"
-          className="msgtab-send-btn"
-          onClick={handleSend}
-          disabled={!draft.trim() || isSending}
-          loading={isSending}
-        >
-          Send Message
-        </PortalButton>
-        <div className="text-muted pd-hint">
-          Press <kbd className="badge msgtab-kbd">Cmd+Enter</kbd> to send
+        {/* Pending file previews */}
+        {attachmentsEnabled && pendingFiles.length > 0 && (
+          <div className="msgtab-pending-files">
+            {pendingFiles.map((file, index) => (
+              <div key={`${file.name}-${index}`} className="msgtab-pending-file">
+                <FileIcon className="icon-xs" />
+                <span className="msgtab-pending-file-name">{file.name}</span>
+                <button
+                  className="icon-btn"
+                  onClick={() => handleRemoveFile(index)}
+                  aria-label={`Remove ${file.name}`}
+                >
+                  <X className="icon-xs" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="msgtab-compose-row">
+          {attachmentsEnabled && (
+            <>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept={allowedFileTypes.join(',')}
+                onChange={handleFileSelect}
+                className="file-input-hidden"
+              />
+              <button
+                className="icon-btn msgtab-attach-btn"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isSending}
+                aria-label="Attach file"
+              >
+                <Paperclip className="icon-sm" />
+              </button>
+            </>
+          )}
+          <textarea
+            ref={textareaRef}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Type a message..."
+            rows={2}
+            className="textarea msgtab-textarea"
+            aria-label="Message"
+          />
+        </div>
+
+        <div className="msgtab-compose-footer">
+          <div className="text-muted pd-hint">
+            Press <kbd className="badge msgtab-kbd">Cmd+Enter</kbd> to send
+          </div>
+          <PortalButton
+            variant="primary"
+            className="msgtab-send-btn"
+            onClick={handleSend}
+            disabled={(!draft.trim() && pendingFiles.length === 0) || isSending}
+            loading={isSending}
+          >
+            Send Message
+          </PortalButton>
         </div>
       </div>
     </div>
