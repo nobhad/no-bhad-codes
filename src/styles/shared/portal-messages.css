@@ -1191,3 +1191,49 @@
 .message-timestamp {
   flex-shrink: 0;
 }
+
+/* =====================================================
+   TYPING INDICATOR
+   ===================================================== */
+
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-0-5) var(--space-2);
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-tertiary);
+}
+
+.typing-indicator-dots {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.typing-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: var(--border-radius-full);
+  background: var(--color-text-tertiary);
+  animation: typing-bounce 1.4s infinite ease-in-out both;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+/* Simple CSS animation — acceptable per guidelines since
+   GSAP cannot animate pseudo-elements in continuous loops */
+@keyframes typing-bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.typing-indicator-text {
+  font-style: italic;
+}
