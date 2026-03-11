@@ -180,6 +180,13 @@ export const API_ENDPOINTS = {
   INTEGRATIONS_CALENDAR_STATUS: '/api/integrations/calendar/status',
   INTEGRATIONS_CALENDAR_SETTINGS: '/api/integrations/calendar/settings',
 
+  // SSE Events
+  EVENTS_STREAM: '/api/events/stream',
+  EVENTS_TYPING: '/api/events/typing',
+
+  // Global Search
+  SEARCH: '/api/search',
+
   // Message Threads
   MESSAGE_THREADS: '/api/messages/threads',
 

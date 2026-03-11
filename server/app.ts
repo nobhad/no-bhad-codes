@@ -62,6 +62,8 @@ import integrationsRouter from './routes/integrations.js';
 import dataQualityRouter from './routes/data-quality.js';
 import settingsRouter from './routes/settings.js';
 import receiptsRouter from './routes/receipts.js';
+import { eventsRouter } from './routes/events.js';
+import { searchRouter } from './routes/search.js';
 import healthRouter from './routes/health.js';
 import { portalRoutes } from './routes/portal.js';
 import { errorResponseWithPayload } from './utils/api-response.js';
@@ -363,7 +365,9 @@ const apiRouters = [
   { path: '/integrations', router: integrationsRouter },
   { path: '/data-quality', router: dataQualityRouter },
   { path: '/settings', router: settingsRouter },
-  { path: '/receipts', router: receiptsRouter }
+  { path: '/receipts', router: receiptsRouter },
+  { path: '/events', router: eventsRouter },
+  { path: '/search', router: searchRouter }
 ];
 
 // Mount all routers at both /api and /api/v1
