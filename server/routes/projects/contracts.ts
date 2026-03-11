@@ -214,44 +214,57 @@ router.get(
       textStartX = logoX + logoWidth + 18;
     }
 
-    // Business info (left-aligned, to right of logo)
+    // Business info (left-aligned, to right of logo) - dynamic positioning to skip empty fields
+    let infoY = y - 11;
     page.drawText(BUSINESS_INFO.name, {
       x: textStartX,
-      y: y - 11,
+      y: infoY,
       size: 15,
       font: helveticaBold,
       color: rgb(0.1, 0.1, 0.1)
     });
-    page.drawText(BUSINESS_INFO.owner, {
-      x: textStartX,
-      y: y - 34,
-      size: 10,
-      font: helvetica,
-      color: rgb(0.2, 0.2, 0.2)
-    });
-    page.drawText(BUSINESS_INFO.tagline, {
-      x: textStartX,
-      y: y - 54,
-      size: 9,
-      font: helvetica,
-      color: rgb(0.4, 0.4, 0.4)
-    });
-    page.drawText(BUSINESS_INFO.email, {
-      x: textStartX,
-      y: y - 70,
-      size: 9,
-      font: helvetica,
-      color: rgb(0.4, 0.4, 0.4)
-    });
-    page.drawText(BUSINESS_INFO.website, {
-      x: textStartX,
-      y: y - 86,
-      size: 9,
-      font: helvetica,
-      color: rgb(0.4, 0.4, 0.4)
-    });
-
-    y -= 120; // Account for 100pt logo height
+    infoY -= 18;
+    if (BUSINESS_INFO.owner) {
+      page.drawText(BUSINESS_INFO.owner, {
+        x: textStartX,
+        y: infoY,
+        size: 10,
+        font: helvetica,
+        color: rgb(0.2, 0.2, 0.2)
+      });
+      infoY -= 16;
+    }
+    if (BUSINESS_INFO.tagline) {
+      page.drawText(BUSINESS_INFO.tagline, {
+        x: textStartX,
+        y: infoY,
+        size: 9,
+        font: helvetica,
+        color: rgb(0.4, 0.4, 0.4)
+      });
+      infoY -= 14;
+    }
+    if (BUSINESS_INFO.email) {
+      page.drawText(BUSINESS_INFO.email, {
+        x: textStartX,
+        y: infoY,
+        size: 9,
+        font: helvetica,
+        color: rgb(0.4, 0.4, 0.4)
+      });
+      infoY -= 14;
+    }
+    if (BUSINESS_INFO.website) {
+      page.drawText(BUSINESS_INFO.website, {
+        x: textStartX,
+        y: infoY,
+        size: 9,
+        font: helvetica,
+        color: rgb(0.4, 0.4, 0.4)
+      });
+      infoY -= 14;
+    }
+    y = Math.min(y - 120, infoY - 20); // Account for 100pt logo height
 
     // Divider line
     page.drawLine({

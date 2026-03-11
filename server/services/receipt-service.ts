@@ -119,43 +119,57 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     textStartX = logoX + logoWidth + 18;
   }
 
+  // Business info - dynamic positioning to skip empty fields
+  let infoY = y - 11;
   page.drawText(BUSINESS_INFO.name, {
     x: textStartX,
-    y: y - 11,
+    y: infoY,
     size: PDF_TYPOGRAPHY.businessNameSize,
     font: helveticaBold,
     color: PDF_COLORS.title
   });
-  page.drawText(BUSINESS_INFO.owner, {
-    x: textStartX,
-    y: y - 34,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: helvetica,
-    color: PDF_COLORS.subtitle
-  });
-  page.drawText(BUSINESS_INFO.tagline, {
-    x: textStartX,
-    y: y - 54,
-    size: PDF_TYPOGRAPHY.smallSize,
-    font: helvetica,
-    color: PDF_COLORS.muted
-  });
-  page.drawText(BUSINESS_INFO.email, {
-    x: textStartX,
-    y: y - 70,
-    size: PDF_TYPOGRAPHY.smallSize,
-    font: helvetica,
-    color: PDF_COLORS.muted
-  });
-  page.drawText(BUSINESS_INFO.website, {
-    x: textStartX,
-    y: y - 86,
-    size: PDF_TYPOGRAPHY.smallSize,
-    font: helvetica,
-    color: PDF_COLORS.muted
-  });
-
-  y -= 120;
+  infoY -= 18;
+  if (BUSINESS_INFO.owner) {
+    page.drawText(BUSINESS_INFO.owner, {
+      x: textStartX,
+      y: infoY,
+      size: PDF_TYPOGRAPHY.bodySize,
+      font: helvetica,
+      color: PDF_COLORS.subtitle
+    });
+    infoY -= 16;
+  }
+  if (BUSINESS_INFO.tagline) {
+    page.drawText(BUSINESS_INFO.tagline, {
+      x: textStartX,
+      y: infoY,
+      size: PDF_TYPOGRAPHY.smallSize,
+      font: helvetica,
+      color: PDF_COLORS.muted
+    });
+    infoY -= 14;
+  }
+  if (BUSINESS_INFO.email) {
+    page.drawText(BUSINESS_INFO.email, {
+      x: textStartX,
+      y: infoY,
+      size: PDF_TYPOGRAPHY.smallSize,
+      font: helvetica,
+      color: PDF_COLORS.muted
+    });
+    infoY -= 14;
+  }
+  if (BUSINESS_INFO.website) {
+    page.drawText(BUSINESS_INFO.website, {
+      x: textStartX,
+      y: infoY,
+      size: PDF_TYPOGRAPHY.smallSize,
+      font: helvetica,
+      color: PDF_COLORS.muted
+    });
+    infoY -= 14;
+  }
+  y = Math.min(y - 120, infoY - 20);
 
   // Divider
   page.drawLine({
