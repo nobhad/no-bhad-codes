@@ -49,13 +49,15 @@ export function MessagesTab({
   );
 
   return (
-    <MessageThread
-      messages={threadMessages}
-      isLoading={isLoading}
-      onSend={onSendMessage}
-      onEdit={onEditMessage}
-      onReact={onToggleReaction}
-      showNotification={showNotification}
-    />
+    <div className="panel">
+      <MessageThread
+        messages={threadMessages}
+        isLoading={isLoading}
+        onSend={onSendMessage}
+        onEdit={onEditMessage}
+        onReact={onToggleReaction}
+        showNotification={showNotification}
+      />
+    </div>
   );
 }

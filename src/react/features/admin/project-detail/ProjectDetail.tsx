@@ -321,18 +321,7 @@ export function ProjectDetail({
         </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="progress-field">
-        <div className="progress-field-header">
-          <span className="field-label">Progress</span>
-          <span className="text-muted">{progress}%</span>
-        </div>
-        <div className="progress-bar-sm">
-          <div className="progress-fill" style={{ width: `${progress}%` }} />
-        </div>
-      </div>
-
-      {/* Tabs */}
+      {/* Tabs — above all content, like all other subtab nav */}
       <TabList
         tabs={TABS}
         tabIcons={TAB_ICONS}
