@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Checkbox } from '@react/components/ui/checkbox';
 import { cn } from '@react/lib/utils';
+import { FormDropdown } from '@react/components/portal/FormDropdown';
 import {
   PortalTable,
   PortalTableHeader,
@@ -39,7 +40,7 @@ import type { DataTableProps, SortConfig } from './types';
  */
 function defaultFilterFn<T>(
   item: T,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   // Search filter
@@ -52,12 +53,12 @@ function defaultFilterFn<T>(
     if (!matchesSearch) return false;
   }
 
-  // Apply all active filters
-  for (const [key, value] of Object.entries(filters)) {
-    if (value && value !== 'all') {
-      const itemValue = (item as Record<string, unknown>)[key];
-      if (itemValue !== value) return false;
-    }
+  // Apply all active filters (each value is string[]; treat single-element as equality check)
+  for (const [key, values] of Object.entries(filters)) {
+    const active = values.filter((v) => v && v !== 'all');
+    if (active.length === 0) continue;
+    const itemValue = String((item as Record<string, unknown>)[key] ?? '');
+    if (!active.includes(itemValue)) return false;
   }
 
   return true;
@@ -297,19 +298,13 @@ export function DataTable<T extends { id: number }>({
 
         {/* Filter Dropdowns */}
         {filterConfig.map((filter) => (
-          <select
+          <FormDropdown
             key={filter.key}
-            value={filterValues[filter.key] || 'all'}
-            onChange={(e) => setFilter(filter.key, e.target.value)}
-            className="form-select"
+            value={filterValues[filter.key]?.[0] || 'all'}
+            onChange={(val) => setFilter(filter.key, val)}
+            options={filter.options}
             aria-label={`Filter by ${filter.key}`}
-          >
-            {filter.options.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          />
         ))}
 
         {/* Clear Filters */}
@@ -483,18 +478,16 @@ export function DataTable<T extends { id: number }>({
             <div className="data-table-pagination-controls">
               <div className="data-table-page-size">
                 <label className="field-label" htmlFor="data-table-page-size">Show</label>
-                <select
+                <FormDropdown
                   id="data-table-page-size"
-                  value={pagination.pageSize}
-                  onChange={(e) => pagination.setPageSize(Number(e.target.value))}
-                  className="form-select form-select-sm"
-                >
-                  {pagination.pageSizeOptions.map((size) => (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  ))}
-                </select>
+                  value={String(pagination.pageSize)}
+                  onChange={(val) => pagination.setPageSize(Number(val))}
+                  options={pagination.pageSizeOptions.map((size) => ({
+                    value: String(size),
+                    label: String(size)
+                  }))}
+                  aria-label="Items per page"
+                />
               </div>
 
               <div className="data-table-page-nav">

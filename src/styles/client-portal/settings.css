@@ -146,11 +146,6 @@
   padding: var(--space-3);
   background: transparent;
   border: var(--border-width) solid var(--color-border-primary);
-  transition: border-color var(--transition-fast);
-}
-
-.portal .notification-option.is-active {
-  border-color: var(--color-text-primary);
 }
 
 .portal .notification-option-content {
@@ -163,24 +158,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--space-4, 32px);
-  height: var(--space-4, 32px);
-  border: var(--border-width) solid var(--color-border-primary);
-  background: transparent;
-  color: var(--color-text-primary);
   flex-shrink: 0;
-  transition: all var(--transition-fast);
-}
-
-/* Icon sizing inside notification options */
-.portal .notification-option-icon svg {
-  width: var(--icon-size-sm, 16px);
-  height: var(--icon-size-sm, 16px);
-}
-
-.portal .notification-option-icon.is-active {
-  background: var(--color-text-primary);
-  color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
 }
 
 .portal .notification-option-text {
@@ -190,7 +169,6 @@
 }
 
 .portal .notification-option-label {
-  font-family: var(--font-family-mono, monospace);
   font-size: var(--font-size-base);
 }
 
@@ -200,21 +178,10 @@
 }
 
 /* Notification note */
-.portal .notification-note {
-  padding: var(--space-3);
-  border: var(--border-width) solid var(--color-border-primary);
-  background: transparent;
-}
-
 .portal .notification-note p {
   margin: 0;
-  font-family: var(--font-family-mono, monospace);
   font-size: var(--font-size-sm);
   color: var(--color-text-tertiary);
-}
-
-.portal .notification-note strong {
-  color: var(--color-text-primary);
 }
 
 /* =====================================================
