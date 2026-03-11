@@ -1,24 +1,84 @@
-# New Project Request Form
+# New Project Creation
 
-**Last Updated:** February 2, 2026
+**Last Updated:** March 9, 2026
 
 ## Table of Contents
 
-1. [Overview](#overview)
-2. [Features](#features)
-3. [HTML Structure](#html-structure)
-4. [Form Fields](#form-fields)
-5. [Validation](#validation)
-6. [Form Submission](#form-submission)
-7. [Backend Integration](#backend-integration)
-8. [Styling](#styling)
-9. [File Locations](#file-locations)
+1. [Admin: Add Project Modal](#admin-add-project-modal)
+2. [Client: New Project Request Form](#client-new-project-request-form)
 
 ---
 
-## Overview
+## Admin: Add Project Modal
 
-The New Project Request form allows existing clients to submit requests for additional projects. The form collects project details, budget, timeline, and requirements.
+The admin can create projects directly from the Projects table via the **Add Project** button.
+
+**Access:** Admin > Projects > Add Project button
+
+### Implementation
+
+- **Component:** `src/react/features/admin/projects/AddProjectModal.tsx`
+- **Hook:** `useProjects` from `src/react/features/admin/projects/useProjects.ts`
+- **API:** `POST /api/admin/projects`
+
+### Form Fields
+
+The modal collects all intake fields to ensure complete project data from creation:
+
+**Core fields:**
+
+- Project Name (required)
+- Client (dropdown, required)
+- Project Type (simple-site, business-site, portfolio, e-commerce, web-app, browser-extension)
+- Status (pending, active, in-progress, etc.)
+
+**Intake fields (mirrors client intake form):**
+
+- Features / Requirements
+- Page Count
+- Integrations
+- Add-ons
+- Design Level
+- Content Status
+- Brand Assets
+- Tech Comfort
+- Hosting Preference
+- Current Site URL
+- Design Inspiration
+- Challenges
+- Additional Info
+- Referral Source
+
+### API Payload
+
+```typescript
+interface CreateProjectPayload {
+  project_name: string;
+  client_id: number;
+  project_type?: string;
+  status?: string;
+  features?: string;
+  page_count?: string;
+  integrations?: string;
+  addons?: string;
+  design_level?: string;
+  content_status?: string;
+  brand_assets?: string;
+  tech_comfort?: string;
+  hosting_preference?: string;
+  current_site?: string;
+  inspiration?: string;
+  challenges?: string;
+  additional_info?: string;
+  referral_source?: string;
+}
+```
+
+---
+
+## Client: New Project Request Form
+
+The New Project Request form allows existing clients to submit requests for additional projects.
 
 **Access:** Client Portal > + NEW PROJECT button (`tab-new-project`)
 

@@ -1,7 +1,7 @@
 # Project Management System
 
 **Status:** Complete
-**Last Updated:** February 6, 2026
+**Last Updated:** March 9, 2026
 
 ## Overview
 
@@ -9,15 +9,17 @@ The Project Management System provides enterprise-grade project management with 
 
 ## Project Status
 
-Projects have the following status values:
+Projects have the following status values (enforced by DB CHECK constraint and `ProjectStatus` TypeScript type):
 
 |Status|Description|
 |--------|-------------|
-|`planning`|Project is in planning phase, not yet started|
+|`pending`|Project submitted or created, not yet started|
+|`active`|Project is active and being managed|
 |`in-progress`|Project is actively being worked on|
-|`review`|Project is under review/awaiting approval|
+|`in-review`|Project is under review or awaiting approval|
 |`completed`|Project has been completed|
 |`on-hold`|Project is temporarily paused|
+|`cancelled`|Project has been cancelled|
 
 ## Features
 
@@ -551,6 +553,13 @@ When a project is deleted via `DELETE /api/projects/:id`:
 - `POST /api/admin/deleted-items/project/:id/restore` - Restore a project
 
 ## Change Log
+
+### March 9, 2026 - Status Values Corrected
+
+- Fixed Project Status table: replaced `planning`, `review` with actual DB values `pending`, `active`, `in-review`, `cancelled`
+- `budget` field in `Project` type corrected from `number` to `string` (maps to `budget_range TEXT` column)
+- Added column aliases to all project SELECT queries so frontend receives `budget`, `end_date`, `repo_url`, `contract_signed_date` correctly
+- Added migration 102 to restore `default_deposit_percentage` column dropped by migration 049 table rebuild
 
 ### February 6, 2026 - Soft Delete System
 
