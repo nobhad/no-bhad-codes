@@ -71,6 +71,16 @@ router.post(
     // Get client_id from project for unified table
     const projectData = await db.get('SELECT client_id FROM projects WHERE id = ?', [projectId]);
 
+    // Resolve display name: admin users → users.display_name, clients → clients.contact_name
+    let senderName = req.user!.email;
+    if (req.user!.type === 'admin') {
+      const adminUser = await db.get('SELECT display_name FROM users WHERE id = ?', [req.user!.id]);
+      senderName = adminUser?.display_name || 'Admin';
+    } else {
+      const client = await db.get('SELECT contact_name FROM clients WHERE id = ?', [req.user!.id]);
+      senderName = client?.contact_name || senderName;
+    }
+
     const result = await db.run(
       `
     INSERT INTO messages (context_type, project_id, client_id, sender_type, sender_name, message)
@@ -80,7 +90,7 @@ router.post(
         projectId,
         projectData?.client_id,
         req.user!.type,
-        req.user!.email,
+        senderName,
         content.trim()
       ]
     );
