@@ -574,36 +574,30 @@ function addDemoMessage(message: string, ctx: ClientPortalContext): void {
 
 ### Core Tables
 
-#### general_messages
+#### messages
+
+The original `general_messages` table was consolidated and renamed to `messages` (migration 085),
+with the deprecated table dropped in migration 093. All enhancement tables now reference `messages(id)`.
 
 ```sql
-CREATE TABLE general_messages (
+-- messages is the consolidated primary message table (replaces general_messages)
+-- See server/database/migrations/ for the full schema
+CREATE TABLE messages (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  client_id INTEGER NOT NULL,
+  thread_id INTEGER NOT NULL,
   sender_type TEXT NOT NULL CHECK (sender_type IN ('client', 'admin', 'system')),
-  sender_name TEXT NOT NULL,
-  subject TEXT NOT NULL,
-  message TEXT NOT NULL,
-  message_type TEXT DEFAULT 'inquiry' CHECK (message_type IN ('inquiry', 'quote_request', 'support', 'feedback', 'system')),
-  priority TEXT DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'urgent')),
-  status TEXT DEFAULT 'new' CHECK (status IN ('new', 'read', 'replied', 'closed')),
-  reply_to INTEGER DEFAULT NULL REFERENCES general_messages(id) ON DELETE SET NULL,
+  sender_name TEXT,
+  content TEXT NOT NULL,
   attachments TEXT DEFAULT NULL,
   is_read BOOLEAN DEFAULT FALSE,
-  read_at DATETIME DEFAULT NULL,
-  thread_id INTEGER DEFAULT NULL,
-  parent_message_id INTEGER REFERENCES general_messages(id),
   is_internal BOOLEAN DEFAULT FALSE,
   edited_at DATETIME,
   deleted_at DATETIME,
   deleted_by TEXT,
   reaction_count INTEGER DEFAULT 0,
-  reply_count INTEGER DEFAULT 0,
-  mention_count INTEGER DEFAULT 0,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
-  FOREIGN KEY (thread_id) REFERENCES message_threads(id) ON DELETE SET NULL
+  FOREIGN KEY (thread_id) REFERENCES message_threads(id) ON DELETE CASCADE
 );
 ```
 
@@ -644,7 +638,7 @@ CREATE TABLE IF NOT EXISTS message_mentions (
   notified BOOLEAN DEFAULT FALSE,
   notified_at DATETIME,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (message_id) REFERENCES general_messages(id) ON DELETE CASCADE
+  FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
 );
 ```
 
@@ -658,7 +652,7 @@ CREATE TABLE IF NOT EXISTS message_reactions (
   user_type TEXT NOT NULL,
   reaction TEXT NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (message_id) REFERENCES general_messages(id) ON DELETE CASCADE,
+  FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE,
   UNIQUE(message_id, user_email, reaction)
 );
 ```
@@ -691,7 +685,7 @@ CREATE TABLE IF NOT EXISTS message_read_receipts (
   user_email TEXT NOT NULL,
   user_type TEXT NOT NULL,
   read_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (message_id) REFERENCES general_messages(id) ON DELETE CASCADE,
+  FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE,
   UNIQUE(message_id, user_email)
 );
 ```
@@ -706,7 +700,7 @@ CREATE TABLE IF NOT EXISTS pinned_messages (
   pinned_by TEXT NOT NULL,
   pinned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (thread_id) REFERENCES message_threads(id) ON DELETE CASCADE,
-  FOREIGN KEY (message_id) REFERENCES general_messages(id) ON DELETE CASCADE,
+  FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE,
   UNIQUE(thread_id, message_id)
 );
 ```
@@ -815,6 +809,13 @@ await emailService.sendMessageNotification(clientEmail, {
 ---
 
 ## Change Log
+
+### March 9, 2026 - FK Fix (Migration 103)
+
+- Fixed dangling foreign keys in `message_mentions`, `message_reactions`, `message_read_receipts`, `pinned_messages`
+- All four tables previously referenced `_general_messages_deprecated_085` (dropped in migration 093)
+- Migration 103 rebuilt all four tables with FK → `messages(id)` (resolves "no such table" 500 errors)
+- Updated Database Schema section: `general_messages` → `messages`, corrected all FK references
 
 ### March 9, 2026 - React Refactor
 
