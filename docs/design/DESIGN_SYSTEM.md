@@ -1,6 +1,6 @@
 # Design System
 
-**Last Updated:** March 9, 2026
+**Last Updated:** March 11, 2026
 
 This document is the single source of truth for the project's design system, combining CSS architecture, UX guidelines, and component standards.
 
@@ -561,43 +561,76 @@ The **ProjectsTable status dropdown** is the gold standard. ALL dropdowns across
 | Modal form inputs | 48px | 100% | `--color-black` | `ModalDropdown` |
 | Filter controls | 36px | auto | `--portal-bg-dark` | `PortalDropdown` |
 
-#### Rules
+#### Universal Dropdown Rules (NO EXCEPTIONS)
 
-- NEVER use raw HTML `<select>` elements -- always use `PortalDropdown`
+These rules apply to ALL dropdowns across the entire portal -- admin AND client-facing. No dropdown is exempt.
+
+**Caret Positioning:**
+
+- Caret (`ChevronDown`) MUST be absolutely positioned on the RIGHT edge
+- Caret distance from right border MUST equal content distance from left border (symmetric `--dropdown-padding-x`)
+- CSS pattern: `position: absolute; right: var(--dropdown-padding-x); top: 50%; transform: translateY(-50%)`
+- Trigger MUST have `position: relative` and `padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap))`
+- NEVER use `margin-left: auto` or `justify-content: space-between` for caret placement
+
+**Selected Option Hiding:**
+
+- The currently selected option MUST NOT appear in the open dropdown list
+- Use `.filter()` before `.map()` to exclude the selected value
+- Use normalized comparison (`normalizeValue()`) to handle DB value format mismatches (hyphens vs spaces vs title case)
+
+**Capitalization:**
+
+- `text-transform: none` on ALL dropdown triggers and items -- labels display exactly as provided
+- NEVER inherit text-transform from parent elements (avoids uppercase labels bleeding into dropdown text)
+- The `text-transform: none` rule is set universally in `portal-dropdown.css` for all trigger/item classes
+
+**Component Rules:**
+
+- NEVER use raw HTML `<select>` elements -- always use `PortalDropdown` or `FormDropdown`
 - NEVER use Radix `Select` from `ui/select.tsx` -- use `PortalDropdown` instead
-- Caret (`ChevronDown`) MUST be on the RIGHT side of the trigger
 - Open dropdown content MUST match the trigger width
 - Status dropdowns MUST use `StatusBadge` with colored dot
 - Action menus (three-dot) are exempt from status styling but must use `PortalDropdown`
 
-#### Compliance Audit (March 2026)
+**Dropdown Trigger CSS Classes:**
 
-**COMPLIANT (22 instances):**
+| Context | Trigger Class | Caret Class |
+|---------|--------------|-------------|
+| Table status cells | `status-dropdown-trigger` | `status-dropdown-caret` |
+| Form selects / filters | `form-dropdown-trigger` | `form-dropdown-caret` |
+| Inline edit selects | `form-dropdown-trigger` | `form-dropdown-caret` |
+| Button triggers (analytics, filters) | `dropdown-trigger` | `dropdown-caret` |
+| Custom table dropdowns | `custom-dropdown-trigger` | `custom-dropdown-caret` |
+| Modal form selects | `custom-dropdown-trigger` | `custom-dropdown-caret` |
+
+#### Compliance Audit (March 11, 2026)
+
+**COMPLIANT -- Converted to PortalDropdown/FormDropdown:**
 
 - 11 table status dropdowns (Projects, Clients, Leads, Contacts, Proposals, Contracts, Deliverables, Tasks, Requests, Workflows, Lead Detail)
 - 5 action menus (Client Detail, Project Detail, Contacts Tab, Invoices Tab, Bulk Actions)
 - 6 filter/selector dropdowns (Analytics, Files category, Invoice filter, Contact role, Tags, InlineEdit)
+- O1: NewRequestForm -- converted to `FormDropdown`
+- O2-O4: PortalFilesManager -- 3x converted to `FormDropdown`
+- O5-O6: ProjectOverviewStep -- 2x converted to `FormDropdown`
+- O7: BasicInfoStep -- converted to `FormDropdown`
+- O8: ContactsSection -- converted to `FormDropdown`
+- O15-O16: DataTable -- 2x converted to `FormDropdown`
+- O18: createFormField SelectField -- now uses `FormDropdown` internally
+- O19: DeliverablesTab -- converted from Radix Select to `FormDropdown`
+- O33: ClientDetail -- fixed to use `StatusBadge` + `status-dropdown-caret`
+- O34: ProjectDetail -- fixed CSS classes to `status-dropdown-trigger` + `status-dropdown-caret`
+- QuestionnaireForm SelectInput -- converted from hand-rolled select to `FormDropdown`
 
-**OUTLIERS requiring unification (34 instances):**
+**REMAINING OUTLIERS:**
 
-| ID | File | Line | Issue |
-|----|------|------|-------|
-| O1 | `portal/ad-hoc-requests/NewRequestForm.tsx` | 244 | Raw `<select>` for project picker |
-| O2-O4 | `portal/files/PortalFilesManager.tsx` | 463, 476, 514 | 3x raw `<select>` for project/type/folder filters |
-| O5-O6 | `portal/onboarding/steps/ProjectOverviewStep.tsx` | 84, 161 | 2x raw `<select>` for project type and budget |
-| O7 | `portal/onboarding/steps/BasicInfoStep.tsx` | 131 | Raw `<select>` for timezone |
-| O8 | `portal/settings/ContactsSection.tsx` | 307 | Raw `<select>` for contact role |
-| O9 | `admin/help/HelpCenter.tsx` | 120 | Raw `<select>` for category filter |
-| O10 | `admin/data-quality/ValidationErrorsTab.tsx` | 66 | Raw `<select>` for error type filter |
-| O11-O12 | `admin/webhooks/WebhookFormModal.tsx` | 111, 63 | 2x raw `<select>` for HTTP method and event |
-| O13-O14 | `admin/integrations/NotificationFormModal.tsx` | 76, 89 | 2x raw `<select>` for channel and event |
-| O15-O16 | `components/portal/DataTable/DataTable.tsx` | 300, 486 | 2x raw `<select>` for filter and page size |
-| O17 | `components/portal/InlineEditField.tsx` | 348 | Raw `<select>` for inline edit |
-| O18 | `factories/createFormField.tsx` | 346 | `SelectField` factory renders native `<select>` |
-| O19 | `admin/project-detail/tabs/DeliverablesTab.tsx` | 357 | Radix `Select` (wrong component system) |
-| O20 | `components/portal/TablePagination.tsx` | 60 | Hand-rolled custom dropdown |
-| O33 | `admin/client-detail/ClientDetail.tsx` | 222 | No caret, plain badge trigger |
-| O34 | `admin/project-detail/ProjectDetail.tsx` | 237 | Wrong CSS classes (`files-category-trigger`) |
+| ID | File | Issue |
+|----|------|-------|
+| O9 | `admin/help/HelpCenter.tsx` | Raw `<select>` for category filter |
+| O10 | `admin/data-quality/ValidationErrorsTab.tsx` | Raw `<select>` for error type filter |
+| O11-O12 | `admin/webhooks/WebhookFormModal.tsx` | 2x raw `<select>` for HTTP method and event |
+| O13-O14 | `admin/integrations/NotificationFormModal.tsx` | 2x raw `<select>` for channel and event |
 
 ### Modals
 

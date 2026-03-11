@@ -1,6 +1,6 @@
 # Component Library Documentation
 
-**Last Updated:** March 9, 2026
+**Last Updated:** March 11, 2026
 
 ---
 
@@ -86,6 +86,81 @@ for the full catalog and naming conventions.
 .portal-card       /* Card with padding */
 .panel             /* Panel container */
 .panel-actions     /* Icon button cluster in panel header */
+```
+
+---
+
+## InlineEdit Component
+
+File: `src/react/components/portal/InlineEdit.tsx`
+
+### Variants
+
+| Export | Use case |
+|--------|----------|
+| `InlineEdit` | Text, number, currency, date |
+| `InlineSelect` | Single-value dropdown |
+| `InlineTextarea` | Multi-line text |
+
+### Props (`InlineEdit`)
+
+| Prop | Type | Default | Notes |
+|------|------|---------|-------|
+| `value` | `string` | — | Current saved value |
+| `onSave` | `(v) => Promise<boolean>\|boolean` | — | Called on save; return `false` to stay in edit mode |
+| `type` | `'text'\|'number'\|'currency'\|'date'` | `'text'` | Input type |
+| `placeholder` | `string` | `'-'` | Shown when value is empty |
+| `formatDisplay` | `(v) => string` | — | Custom display formatter |
+| `parseInput` | `(v) => string` | — | Transform raw input before saving |
+| `disabled` | `boolean` | `false` | Prevents editing |
+| `showEditIcon` | `boolean` | `true` | Show Pencil icon on hover (non-date) |
+
+### Date Field Pattern
+
+Date fields (`type="date"`) follow a specific visual pattern — **do not deviate from this**.
+
+**Display state** (not editing):
+
+```text
+[Calendar icon]  Set start date
+```
+
+The Calendar icon is always visible on the left. Clicking anywhere starts editing.
+
+**Edit state** (active):
+
+```text
+[Calendar icon | mm/dd/yyyy        ]  ✓  ✗
+```
+
+The Calendar icon is **absolutely positioned inside the input's left edge**. The date picker
+opens automatically via `showPicker()` when editing starts. Clicking the Calendar icon also
+triggers `showPicker()`.
+
+**Rules:**
+
+- Calendar icon is always on the left — never on the right, never outside the input border when editing
+- The browser's native calendar picker indicator is hidden (`-webkit-calendar-picker-indicator: none`)
+- Use `<InlineEdit type="date">` — never a raw `<input type="date">` next to a separate Calendar icon
+- Do not wrap date InlineEdit in an outer div with a Calendar icon — the icon is managed internally
+
+**CSS classes involved:**
+
+```css
+.inline-edit-date-wrapper   /* Relative wrapper for absolute icon positioning */
+.inline-edit-date-cal       /* Absolutely positioned Calendar icon (left: 6px) */
+.inline-edit-input-compact--date  /* Date input with padding-left for icon clearance */
+```
+
+**Usage:**
+
+```tsx
+<InlineEdit
+  value={project.start_date || ''}
+  type="date"
+  placeholder="Set start date"
+  onSave={(value) => onSaveField('start_date', value)}
+/>
 ```
 
 ---

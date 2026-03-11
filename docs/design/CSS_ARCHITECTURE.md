@@ -691,6 +691,35 @@ Additional granular breakpoints are available. See `src/styles/variables.css` fo
 
 ## Recent Changes
 
+### March 11, 2026 — Universal Dropdown Caret Positioning & Capitalization
+
+**Caret positioning** — ALL dropdown carets now use absolute positioning (`position: absolute; right: var(--dropdown-padding-x)`) instead of the old `margin-left: auto` flex push. This ensures the caret is always the same distance from the right border as content is from the left border.
+
+**CSS changes:**
+
+- `.dropdown-caret`, `.custom-dropdown-caret` — changed from `margin-left` to `position: absolute; right: var(--dropdown-padding-x); top: 50%; transform: translateY(-50%)`
+- `.dropdown-trigger` — added `position: relative` and `padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap))`
+- `.custom-dropdown-trigger` (table-dropdown, modal-dropdown, pagination contexts) — added `position: relative`, extra `padding-right`, changed `justify-content` from `space-between` to `flex-start`
+- `.form-dropdown-trigger` — separated from font-inherit rule to preserve `text-transform: none`
+- All open-state caret rotations updated to include `translateY(-50%)` to maintain vertical centering
+
+**Capitalization** — `text-transform: none` applied universally to all dropdown triggers and items in `portal-dropdown.css` (line ~219). Form dropdown triggers explicitly exclude `text-transform: inherit` to prevent parent uppercase labels from bleeding through.
+
+**Selected option hiding** — `FormDropdown` and `InlineSelect` now use `normalizeValue()` for fuzzy comparison (lowercase + hyphens to spaces) so DB value format mismatches don't break the hide-selected-option filter.
+
+**New component:** `FormDropdown` (`src/react/components/portal/FormDropdown.tsx`) — drop-in replacement for native `<select>` using the PortalDropdown system. Hides selected option, absolute caret, `text-transform: none`.
+
+**Files modified:**
+
+- `src/styles/shared/portal-dropdown.css` — root caret rules, trigger rules, pagination, modal, table-dropdown
+- `src/styles/shared/portal-forms.css` — removed orphaned `qform-select-*` classes
+- `src/styles/shared/portal-badges.css` — status-dropdown-trigger (unchanged, already correct)
+- `src/styles/admin/analytics.css` — date-range-trigger padding-right
+- `src/styles/admin/project-detail.css` — files-category-trigger padding
+- `src/styles/components/inline-edit.css` — removed orphaned `.inline-select-trigger`
+- `src/react/components/portal/FormDropdown.tsx` — normalized value comparison
+- `src/react/components/portal/InlineEdit.tsx` — normalized value comparison in InlineSelect
+
 ### March 9, 2026 — Action Button Gaps, Icon Sizing, Dead CSS Removal
 
 **New tokens** added to `portal-theme.css`:
