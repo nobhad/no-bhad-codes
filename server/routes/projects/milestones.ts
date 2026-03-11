@@ -15,6 +15,12 @@ const MILESTONE_COLUMNS = `
   is_completed, deliverables, created_at, updated_at
 `.replace(/\s+/g, ' ').trim();
 
+/** Individual deliverable within a milestone */
+interface DeliverableEntry {
+  text: string;
+  completed: boolean;
+}
+
 /** Milestone row from database query with task counts */
 interface MilestoneRow {
   [key: string]: unknown;  // Index signature for DatabaseRow compatibility
@@ -25,12 +31,32 @@ interface MilestoneRow {
   due_date: string | null;
   completed_date: string | null;
   is_completed: number;
-  deliverables: string | string[];
+  deliverables: string | DeliverableEntry[];
   created_at: string;
   updated_at: string;
   task_count?: number;
   completed_task_count?: number;
   progress_percentage?: number;
+}
+
+/**
+ * Normalize deliverables from legacy string[] format to DeliverableEntry[].
+ * Handles both old format (["text1", "text2"]) and new format ([{text, completed}]).
+ */
+function normalizeDeliverables(raw: unknown): DeliverableEntry[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((item: unknown) => {
+    if (typeof item === 'string') {
+      return { text: item, completed: false };
+    }
+    if (item && typeof item === 'object' && 'text' in item) {
+      return {
+        text: String((item as Record<string, unknown>).text),
+        completed: Boolean((item as Record<string, unknown>).completed)
+      };
+    }
+    return { text: String(item), completed: false };
+  });
 }
 
 const router = express.Router();
@@ -78,12 +104,12 @@ router.get(
       [projectId]
     );
 
-    // Parse deliverables JSON and calculate progress
+    // Parse deliverables JSON (normalize legacy string[] → DeliverableEntry[])
     (milestones as MilestoneRow[]).forEach((milestone) => {
       const deliverablesStr = getString(milestone, 'deliverables');
       if (deliverablesStr) {
         try {
-          milestone.deliverables = JSON.parse(deliverablesStr);
+          milestone.deliverables = normalizeDeliverables(JSON.parse(deliverablesStr));
         } catch (_e) {
           logger.debug('[Milestones] Failed to parse milestone deliverables JSON', {
             error: _e instanceof Error ? _e : undefined
@@ -94,11 +120,17 @@ router.get(
         milestone.deliverables = [];
       }
 
-      // Calculate progress percentage
-      const taskCount = milestone.task_count || 0;
-      const completedCount = milestone.completed_task_count || 0;
-      milestone.progress_percentage =
-        taskCount > 0 ? Math.round((completedCount / taskCount) * 100) : 0;
+      // Calculate progress percentage — prefer deliverable completion, fallback to tasks
+      const deliverablesList = milestone.deliverables as DeliverableEntry[];
+      if (deliverablesList.length > 0) {
+        const completedDeliverables = deliverablesList.filter((d) => d.completed).length;
+        milestone.progress_percentage = Math.round((completedDeliverables / deliverablesList.length) * 100);
+      } else {
+        const taskCount = milestone.task_count || 0;
+        const completedCount = milestone.completed_task_count || 0;
+        milestone.progress_percentage =
+          taskCount > 0 ? Math.round((completedCount / taskCount) * 100) : 0;
+      }
     });
 
     sendSuccess(res, { milestones });
@@ -155,11 +187,11 @@ router.post(
       );
     }
 
-    // Parse deliverables JSON
+    // Parse deliverables JSON (normalize to DeliverableEntry[])
     const newMilestoneDeliverablesStr = getString(newMilestone, 'deliverables');
     if (newMilestoneDeliverablesStr) {
       try {
-        newMilestone.deliverables = JSON.parse(newMilestoneDeliverablesStr);
+        newMilestone.deliverables = normalizeDeliverables(JSON.parse(newMilestoneDeliverablesStr));
       } catch (_e) {
         logger.debug('[Milestones] Failed to parse new milestone deliverables JSON', {
           error: _e instanceof Error ? _e : undefined
@@ -217,8 +249,34 @@ router.put(
     if (deliverables !== undefined) {
       updates.push('deliverables = ?');
       values.push(JSON.stringify(deliverables));
+
+      // Auto-complete milestone when all deliverables are done
+      const normalized = normalizeDeliverables(deliverables);
+      if (normalized.length > 0) {
+        const allCompleted = normalized.every((d) => d.completed);
+        const wasCompleted = Boolean(milestone.is_completed);
+
+        if (allCompleted && !wasCompleted) {
+          updates.push('is_completed = ?');
+          values.push(1);
+          updates.push('completed_date = ?');
+          values.push(new Date().toISOString());
+
+          await workflowTriggerService.emit('project.milestone_completed', {
+            entityId: milestoneId,
+            triggeredBy: 'admin',
+            projectId,
+            milestoneTitle: title || getString(milestone, 'title') || ''
+          });
+        } else if (!allCompleted && wasCompleted) {
+          updates.push('is_completed = ?');
+          values.push(0);
+          updates.push('completed_date = ?');
+          values.push(null);
+        }
+      }
     }
-    if (is_completed !== undefined) {
+    if (is_completed !== undefined && deliverables === undefined) {
       updates.push('is_completed = ?');
       values.push(is_completed);
 
@@ -274,11 +332,11 @@ router.put(
       );
     }
 
-    // Parse deliverables JSON
+    // Parse deliverables JSON (normalize to DeliverableEntry[])
     const updatedMilestoneDeliverablesStr = getString(updatedMilestone, 'deliverables');
     if (updatedMilestoneDeliverablesStr) {
       try {
-        updatedMilestone.deliverables = JSON.parse(updatedMilestoneDeliverablesStr);
+        updatedMilestone.deliverables = normalizeDeliverables(JSON.parse(updatedMilestoneDeliverablesStr));
       } catch (_e) {
         logger.debug('[Milestones] Failed to parse updated milestone deliverables JSON', {
           error: _e instanceof Error ? _e : undefined

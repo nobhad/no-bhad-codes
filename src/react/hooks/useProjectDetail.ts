@@ -4,10 +4,11 @@
  * The public interface is unchanged so existing consumers are unaffected.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { useProjectCore } from './project-detail/useProjectCore';
 import { useProjectMilestones } from './project-detail/useProjectMilestones';
+import { useProjectTasks } from './project-detail/useProjectTasks';
 import { useProjectFiles } from './project-detail/useProjectFiles';
 import { useProjectInvoices } from './project-detail/useProjectInvoices';
 import { useProjectMessages } from './project-detail/useProjectMessages';
@@ -15,6 +16,7 @@ import { useProjectMessages } from './project-detail/useProjectMessages';
 import type { UseProjectDetailOptions, UseProjectDetailReturn } from './project-detail/types';
 
 const DEFAULT_ERROR_MESSAGE = 'An error occurred';
+const PERCENTAGE_MULTIPLIER = 100;
 
 /**
  * useProjectDetail
@@ -42,13 +44,21 @@ export function useProjectDetail({
   const {
     milestones,
     setMilestones,
-    progress,
     fetchMilestones,
     addMilestone,
     updateMilestone,
     deleteMilestone,
-    toggleMilestoneComplete
+    toggleMilestoneComplete,
+    toggleDeliverable
   } = useProjectMilestones(hookOptions);
+
+  const {
+    tasks,
+    setTasks,
+    fetchTasks,
+    toggleTaskComplete,
+    assignTaskToMilestone
+  } = useProjectTasks(hookOptions);
 
   const {
     files,
@@ -77,22 +87,31 @@ export function useProjectDetail({
     toggleReaction
   } = useProjectMessages(hookOptions);
 
+  // Progress: based solely on project_tasks (single source of truth)
+  const progress = useMemo(() => {
+    if (tasks.length === 0) return 0;
+    const completed = tasks.filter((t) => t.status === 'completed').length;
+    return Math.round((completed / tasks.length) * PERCENTAGE_MULTIPLIER);
+  }, [tasks]);
+
   // Fetch all data in parallel (messages loaded on demand)
   const fetchAll = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const [fetchedProject, fetchedMilestones, fetchedFiles, fetchedInvoices] =
+      const [fetchedProject, fetchedMilestones, fetchedTasks, fetchedFiles, fetchedInvoices] =
         await Promise.all([
           fetchProject(),
           fetchMilestones(),
+          fetchTasks(),
           fetchFiles(),
           fetchInvoices()
         ]);
 
       setProject(fetchedProject);
       setMilestones(fetchedMilestones);
+      setTasks(fetchedTasks);
       setFiles(fetchedFiles);
       setInvoices(fetchedInvoices);
       setMessages([]);
@@ -105,10 +124,12 @@ export function useProjectDetail({
   }, [
     fetchProject,
     fetchMilestones,
+    fetchTasks,
     fetchFiles,
     fetchInvoices,
     setProject,
     setMilestones,
+    setTasks,
     setFiles,
     setInvoices,
     setMessages
@@ -124,6 +145,7 @@ export function useProjectDetail({
   return {
     project,
     milestones,
+    tasks,
     files,
     invoices,
     messages,
@@ -138,6 +160,9 @@ export function useProjectDetail({
     updateMilestone,
     deleteMilestone,
     toggleMilestoneComplete,
+    toggleDeliverable,
+    toggleTaskComplete,
+    assignTaskToMilestone,
     uploadFile,
     deleteFile,
     toggleFileSharing,

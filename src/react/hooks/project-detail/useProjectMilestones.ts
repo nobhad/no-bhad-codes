@@ -3,7 +3,7 @@
  * Handles CRUD operations for project milestones and progress calculation.
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import type { ProjectMilestone } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { unwrapApiData, apiFetch, apiPost, apiPut, apiDelete } from '@/utils/api-client';
@@ -12,29 +12,21 @@ import type { ProjectDetailHookOptions } from './types';
 
 const logger = createLogger('useProjectMilestones');
 
-const PERCENTAGE_MULTIPLIER = 100;
-
 interface UseProjectMilestonesReturn {
   milestones: ProjectMilestone[];
   setMilestones: React.Dispatch<React.SetStateAction<ProjectMilestone[]>>;
-  progress: number;
   fetchMilestones: () => Promise<ProjectMilestone[]>;
   addMilestone: (milestone: Omit<ProjectMilestone, 'id' | 'project_id'>) => Promise<boolean>;
   updateMilestone: (id: number, updates: Partial<ProjectMilestone>) => Promise<boolean>;
   deleteMilestone: (id: number) => Promise<boolean>;
   toggleMilestoneComplete: (id: number) => Promise<boolean>;
+  toggleDeliverable: (milestoneId: number, deliverableIndex: number) => Promise<boolean>;
 }
 
 export function useProjectMilestones({
   projectId
 }: ProjectDetailHookOptions): UseProjectMilestonesReturn {
   const [milestones, setMilestones] = useState<ProjectMilestone[]>([]);
-
-  const progress = useMemo(() => {
-    if (milestones.length === 0) return 0;
-    const completed = milestones.filter((m) => m.is_completed).length;
-    return Math.round((completed / milestones.length) * PERCENTAGE_MULTIPLIER);
-  }, [milestones]);
 
   const fetchMilestones = useCallback(async (): Promise<ProjectMilestone[]> => {
     try {
@@ -63,8 +55,8 @@ export function useProjectMilestones({
         }
 
         const json = await response.json();
-        const newMilestone = unwrapApiData<ProjectMilestone>(json);
-        setMilestones((prev) => [...prev, newMilestone]);
+        const parsed = unwrapApiData<{ milestone: ProjectMilestone }>(json);
+        setMilestones((prev) => [...prev, parsed.milestone]);
         return true;
       } catch (err) {
         logger.error('Add milestone error:', err);
@@ -84,8 +76,9 @@ export function useProjectMilestones({
         }
 
         const json = await response.json();
-        unwrapApiData<ProjectMilestone>(json);
-        setMilestones((prev) => prev.map((m) => (m.id === id ? { ...m, ...updates } : m)));
+        const updated = unwrapApiData<{ milestone: ProjectMilestone }>(json);
+        // Use server response to get auto-completion state (is_completed, completed_date)
+        setMilestones((prev) => prev.map((m) => (m.id === id ? { ...m, ...updates, ...updated.milestone } : m)));
         return true;
       } catch (err) {
         logger.error('Update milestone error:', err);
@@ -129,14 +122,28 @@ export function useProjectMilestones({
     [milestones, updateMilestone]
   );
 
+  const toggleDeliverable = useCallback(
+    async (milestoneId: number, deliverableIndex: number): Promise<boolean> => {
+      const milestone = milestones.find((m) => m.id === milestoneId);
+      if (!milestone?.deliverables || !milestone.deliverables[deliverableIndex]) return false;
+
+      const updatedDeliverables = milestone.deliverables.map((d, i) =>
+        i === deliverableIndex ? { ...d, completed: !d.completed } : d
+      );
+
+      return updateMilestone(milestoneId, { deliverables: updatedDeliverables });
+    },
+    [milestones, updateMilestone]
+  );
+
   return {
     milestones,
     setMilestones,
-    progress,
     fetchMilestones,
     addMilestone,
     updateMilestone,
     deleteMilestone,
-    toggleMilestoneComplete
+    toggleMilestoneComplete,
+    toggleDeliverable
   };
 }

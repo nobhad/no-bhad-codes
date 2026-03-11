@@ -1,205 +1,395 @@
 import * as React from 'react';
-import { useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
-  Package,
-  Check,
-  Clock,
-  Calendar,
-  Inbox
+  Pencil,
+  Trash2,
+  Inbox,
+  AlertCircle
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { Checkbox } from '@react/components/ui/checkbox';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem
+} from '@react/components/ui/select';
+import { IconButton, AccordionItem } from '@react/factories';
 import { EmptyState } from '@react/components/portal/EmptyState';
+import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import type { ProjectMilestone } from '../../types';
+import type { ProjectTaskResponse } from '@/types/api';
 import { formatDate } from '@/utils/format-utils';
+import { NOTIFICATIONS } from '@/constants/notifications';
+import { MilestoneAddForm } from './tasks/MilestoneAddForm';
+import { MilestoneEditForm } from './tasks/MilestoneEditForm';
+import { decodeHtmlEntities } from '@react/utils/decodeText';
+
+// ============================================================================
+// TYPES
+// ============================================================================
 
 interface DeliverablesTabProps {
   milestones: ProjectMilestone[];
+  tasks: ProjectTaskResponse[];
   progress: number;
+  onToggleTaskComplete: (taskId: number) => Promise<boolean>;
+  onAssignTaskToMilestone: (taskId: number, milestoneId: number) => Promise<boolean>;
+  onAddMilestone: (milestone: Omit<ProjectMilestone, 'id' | 'project_id'>) => Promise<boolean>;
+  onUpdateMilestone: (id: number, updates: Partial<ProjectMilestone>) => Promise<boolean>;
+  onDeleteMilestone: (id: number) => Promise<boolean>;
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-/**
- * Deliverable item with completion status
- */
-interface DeliverableItem {
-  text: string;
-  milestoneId: number;
-  milestoneTitle: string;
-  milestoneDueDate?: string;
-  isCompleted: boolean;
-}
+// Sentinel ID for the unassigned tasks accordion
+const UNASSIGNED_ID = -1;
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
 
 /**
  * DeliverablesTab
- * Shows all project deliverables grouped by milestone
+ * project_tasks grouped by milestone_id.
+ * Milestones complete when all their tasks are done.
  */
 export function DeliverablesTab({
   milestones,
-  progress
+  tasks,
+  progress,
+  onToggleTaskComplete,
+  onAssignTaskToMilestone,
+  onAddMilestone,
+  onUpdateMilestone,
+  onDeleteMilestone,
+  showNotification
 }: DeliverablesTabProps) {
-  // Extract all deliverables with their milestone context
-  const deliverables = useMemo<DeliverableItem[]>(() => {
-    const items: DeliverableItem[] = [];
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(
+    () => new Set(milestones.map((m) => m.id))
+  );
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingMilestoneId, setEditingMilestoneId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const deleteDialog = useConfirmDialog();
 
-    for (const milestone of milestones) {
-      if (milestone.deliverables && milestone.deliverables.length > 0) {
-        for (const deliverable of milestone.deliverables) {
-          items.push({
-            text: deliverable,
-            milestoneId: milestone.id,
-            milestoneTitle: milestone.title,
-            milestoneDueDate: milestone.due_date,
-            isCompleted: milestone.is_completed
-          });
-        }
-      }
+  // Group tasks by milestone_id
+  const tasksByMilestone = useMemo(() => {
+    const grouped = new Map<number | null, ProjectTaskResponse[]>();
+    for (const task of tasks) {
+      const key = task.milestone_id ?? null;
+      const existing = grouped.get(key) ?? [];
+      existing.push(task);
+      grouped.set(key, existing);
     }
+    return grouped;
+  }, [tasks]);
 
-    return items;
-  }, [milestones]);
+  const unassignedTasks = tasksByMilestone.get(null) ?? [];
 
-  // Group deliverables by milestone
-  const groupedDeliverables = useMemo(() => {
-    const groups: Record<number, DeliverableItem[]> = {};
+  // Stats
+  const { completedCount, totalCount } = useMemo(() => {
+    const total = tasks.length;
+    const completed = tasks.filter((t) => t.status === 'completed').length;
+    return { completedCount: completed, totalCount: total };
+  }, [tasks]);
 
-    for (const item of deliverables) {
-      if (!groups[item.milestoneId]) {
-        groups[item.milestoneId] = [];
+  // Toggle expansion
+  const toggleExpand = useCallback((id: number) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
       }
-      groups[item.milestoneId].push(item);
+      return next;
+    });
+  }, []);
+
+  // Task toggle
+  const handleToggleTask = useCallback(
+    async (taskId: number) => {
+      const success = await onToggleTaskComplete(taskId);
+      if (!success) {
+        showNotification?.(NOTIFICATIONS.deliverable.TOGGLE_FAILED, 'error');
+      }
+    },
+    [onToggleTaskComplete, showNotification]
+  );
+
+  // Assign task to milestone
+  const handleAssignTask = useCallback(
+    async (taskId: number, milestoneId: string) => {
+      const id = parseInt(milestoneId);
+      if (isNaN(id)) return;
+      const success = await onAssignTaskToMilestone(taskId, id);
+      if (success) {
+        showNotification?.('Task assigned to milestone', 'success');
+      } else {
+        showNotification?.('Failed to assign task', 'error');
+      }
+    },
+    [onAssignTaskToMilestone, showNotification]
+  );
+
+  // Edit milestone
+  const handleEdit = useCallback((milestone: ProjectMilestone) => {
+    setEditingMilestoneId(milestone.id);
+    setExpandedIds((prev) => new Set(prev).add(milestone.id));
+  }, []);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingMilestoneId(null);
+  }, []);
+
+  // Delete flow
+  const handleRequestDelete = useCallback(
+    (id: number) => {
+      setDeletingId(id);
+      deleteDialog.open();
+    },
+    [deleteDialog]
+  );
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (deletingId === null) return;
+    const success = await onDeleteMilestone(deletingId);
+    if (success) {
+      showNotification?.(NOTIFICATIONS.milestone.DELETED, 'success');
+    } else {
+      showNotification?.(NOTIFICATIONS.milestone.DELETE_FAILED, 'error');
     }
-
-    return groups;
-  }, [deliverables]);
-
-  // Count stats
-  const completedCount = deliverables.filter((d) => d.isCompleted).length;
-  const totalCount = deliverables.length;
+    setDeletingId(null);
+  }, [deletingId, onDeleteMilestone, showNotification]);
 
   return (
     <div className="section">
-      {/* Header with stats */}
-      <div className="layout-row-between">
-        <div className="layout-row gap-4">
-          <div>
-            <span className="text-muted">Overall Progress: </span>
-            <span className="pd-highlight-value">
-              {progress}%
-            </span>
+      {/* Progress header */}
+      <div className="panel">
+        <div className="layout-row-between">
+          <h3 className="section-title">Deliverables</h3>
+          <IconButton action="add" onClick={() => setShowAddForm(true)} title="Add Milestone" />
+        </div>
+
+        <div className="progress-field">
+          <div className="progress-field-header">
+            <span className="field-label">Progress</span>
+            <span className="text-muted">{progress}% ({completedCount}/{totalCount})</span>
           </div>
-          <div>
-            <span className="text-muted">Deliverables: </span>
-            <span className="pd-highlight-value">
-              {completedCount}/{totalCount}
-            </span>
+          <div className="progress-bar-sm">
+            <div className="progress-fill" style={{ width: `${progress}%` }} />
           </div>
         </div>
-      </div>
 
-      {/* Progress Bar */}
-      <div className="progress-bar-sm">
-        <div
-          className="progress-fill"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+        {/* Add Milestone Form */}
+        {showAddForm && (
+          <MilestoneAddForm
+            onAdd={onAddMilestone}
+            onCancel={() => setShowAddForm(false)}
+            showNotification={showNotification}
+          />
+        )}
 
-      {/* Deliverables List */}
-      {totalCount === 0 ? (
-        <EmptyState
-          icon={<Inbox className="icon-lg" />}
-          message="No deliverables defined yet. Add deliverables to milestones in the Tasks tab."
-        />
-      ) : (
-        <div className="layout-stack gap-4">
-          {milestones
-            .filter((m) => m.deliverables && m.deliverables.length > 0)
-            .map((milestone) => {
-              const milestoneDeliverables = groupedDeliverables[milestone.id] || [];
+        {/* Milestone Accordions */}
+        {milestones.length === 0 && tasks.length === 0 ? (
+          <EmptyState
+            icon={<Inbox className="icon-lg" />}
+            message="No milestones or tasks yet. Add milestones to track project progress."
+          />
+        ) : (
+          <div className="milestone-list">
+            {milestones.map((milestone) => {
+              const milestoneTasks = tasksByMilestone.get(milestone.id) ?? [];
+              const completedTasks = milestoneTasks.filter((t) => t.status === 'completed').length;
+              const allCompleted = milestoneTasks.length > 0 && completedTasks === milestoneTasks.length;
+
+              // Edit mode
+              if (editingMilestoneId === milestone.id) {
+                return (
+                  <MilestoneEditForm
+                    key={milestone.id}
+                    milestone={milestone}
+                    onSave={onUpdateMilestone}
+                    onCancel={handleCancelEdit}
+                    showNotification={showNotification}
+                  />
+                );
+              }
+
+              const header = (
+                <div className="flex-fill milestone-content">
+                  <span
+                    className={cn(
+                      'milestone-title',
+                      allCompleted && 'completed'
+                    )}
+                  >
+                    {decodeHtmlEntities(milestone.title)}
+                  </span>
+                  <span className="text-muted text-xs">
+                    {completedTasks}/{milestoneTasks.length}
+                  </span>
+                  {milestone.due_date && (
+                    <span className="milestone-due">{formatDate(milestone.due_date)}</span>
+                  )}
+                </div>
+              );
 
               return (
-                <div
+                <AccordionItem
                   key={milestone.id}
-                  className="panel"
+                  header={header}
+                  isExpanded={expandedIds.has(milestone.id)}
+                  onToggle={() => toggleExpand(milestone.id)}
+                  wrapperClassName="milestone-item-wrapper"
+                  triggerClassName={cn('milestone-item', allCompleted && 'completed')}
+                  contentClassName="milestone-expanded-content"
+                  ariaLabel={`Milestone: ${milestone.title}`}
                 >
-                  {/* Milestone Header */}
-                  <div className="layout-row-between deliv-milestone-header">
-                    <div>
-                      <div className="layout-row deliv-milestone-title-row">
-                        {milestone.is_completed ? (
-                          <Check className="deliv-milestone-icon" />
-                        ) : (
-                          <Package className="deliv-milestone-icon" />
-                        )}
-                        <h4
-                          className={cn(
-                            milestone.is_completed
-                              ? 'text-muted'
-                              : 'pd-highlight-value'
-                          )}
-                        >
-                          {milestone.title}
-                        </h4>
-                      </div>
-                      {milestone.description && (
-                        <p className="text-muted deliv-milestone-desc">
-                          {milestone.description}
-                        </p>
-                      )}
-                    </div>
+                  {/* Description */}
+                  {milestone.description && (
+                    <p className="milestone-description">
+                      {decodeHtmlEntities(milestone.description)}
+                    </p>
+                  )}
 
-                    {/* Due Date */}
-                    {milestone.due_date && (
-                      <span className="text-muted layout-row gap-1 text-xs">
-                        <Calendar className="icon-sm" />
-                        {formatDate(milestone.due_date, 'label')}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Deliverables */}
-                  <div className="deliv-content">
+                  {/* Tasks */}
+                  {milestoneTasks.length > 0 ? (
                     <ul className="deliv-list">
-                      {milestoneDeliverables.map((item, idx) => (
-                        <li
-                          key={idx}
-                          className="deliv-item"
-                        >
-                          {item.isCompleted ? (
-                            <Check className="icon-sm" />
-                          ) : (
-                            <Clock className="icon-sm" />
-                          )}
-
+                      {milestoneTasks.map((task) => (
+                        <li key={`task-${task.id}`} className="deliv-item">
+                          <Checkbox
+                            checked={task.status === 'completed'}
+                            onCheckedChange={() => handleToggleTask(task.id)}
+                            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                            aria-label={`Mark "${task.title}" as ${task.status === 'completed' ? 'incomplete' : 'complete'}`}
+                          />
                           <span
                             className={cn(
-                              item.isCompleted
-                                ? 'text-muted pd-completed-text'
-                                : 'pd-highlight-value'
+                              task.status === 'completed' && 'text-muted pd-completed-text'
                             )}
                           >
-                            {item.text}
+                            {task.title}
                           </span>
+                          {task.due_date && (
+                            <span className="text-muted text-xs">{formatDate(task.due_date)}</span>
+                          )}
                         </li>
                       ))}
                     </ul>
+                  ) : (
+                    <p className="text-muted text-sm">
+                      No tasks assigned to this milestone yet.
+                    </p>
+                  )}
+
+                  {/* Auto-complete indicator */}
+                  {allCompleted && milestone.completed_date && (
+                    <p className="text-muted text-xs">
+                      Milestone completed on {formatDate(milestone.completed_date, 'label')}
+                    </p>
+                  )}
+
+                  {/* Actions */}
+                  <div className="milestone-actions">
+                    <button
+                      className="icon-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(milestone);
+                      }}
+                      aria-label="Edit milestone"
+                    >
+                      <Pencil className="icon-md" />
+                    </button>
+                    <button
+                      className="icon-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRequestDelete(milestone.id);
+                      }}
+                      aria-label="Delete milestone"
+                    >
+                      <Trash2 className="icon-md" />
+                    </button>
                   </div>
-                </div>
+                </AccordionItem>
               );
             })}
-        </div>
-      )}
 
-      {/* Legend */}
-      <div className="deliv-legend text-muted">
-        <div className="deliv-legend-item">
-          <Check className="icon-sm" />
-          <span>Completed</span>
-        </div>
-        <div className="deliv-legend-item">
-          <Clock className="icon-sm" />
-          <span>In Progress</span>
-        </div>
+            {/* Unassigned tasks */}
+            {unassignedTasks.length > 0 && (
+              <AccordionItem
+                header={
+                  <div className="flex-fill milestone-content">
+                    <AlertCircle className="icon-sm text-warning" />
+                    <span className="milestone-title">Needs Assignment</span>
+                    <span className="text-muted text-xs">
+                      {unassignedTasks.length} task{unassignedTasks.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                }
+                isExpanded={expandedIds.has(UNASSIGNED_ID)}
+                onToggle={() => toggleExpand(UNASSIGNED_ID)}
+                wrapperClassName="milestone-item-wrapper"
+                triggerClassName="milestone-item"
+                contentClassName="milestone-expanded-content"
+                ariaLabel="Tasks needing milestone assignment"
+              >
+                <ul className="deliv-list">
+                  {unassignedTasks.map((task) => (
+                    <li key={`task-${task.id}`} className="deliv-item">
+                      <Checkbox
+                        checked={task.status === 'completed'}
+                        onCheckedChange={() => handleToggleTask(task.id)}
+                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                        aria-label={`Mark "${task.title}" as ${task.status === 'completed' ? 'incomplete' : 'complete'}`}
+                      />
+                      <span
+                        className={cn(
+                          'flex-fill',
+                          task.status === 'completed' && 'text-muted pd-completed-text'
+                        )}
+                      >
+                        {task.title}
+                      </span>
+                      <Select onValueChange={(value) => handleAssignTask(task.id, value)}>
+                        <SelectTrigger
+                          className="deliv-assign-trigger"
+                          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                        >
+                          <SelectValue placeholder="Assign to..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {milestones.map((m) => (
+                            <SelectItem key={m.id} value={String(m.id)}>
+                              {m.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </li>
+                  ))}
+                </ul>
+              </AccordionItem>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        open={deleteDialog.isOpen}
+        onOpenChange={deleteDialog.setIsOpen}
+        title="Delete Milestone"
+        description="This will delete the milestone and all its deliverables. This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={handleConfirmDelete}
+        variant="danger"
+        loading={deleteDialog.isLoading}
+      />
     </div>
   );
 }
