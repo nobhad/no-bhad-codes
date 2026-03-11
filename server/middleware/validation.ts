@@ -912,7 +912,7 @@ export const ValidationSchemas = {
     },
     status: {
       type: 'string' as const,
-      allowedValues: ['lead', 'pending', 'active', 'on-hold', 'completed', 'cancelled']
+      allowedValues: ['pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled']
     },
     project_type: { type: 'string' as const, maxLength: 50 },
     budget_range: { type: 'string' as const, maxLength: 50 },
@@ -932,7 +932,7 @@ export const ValidationSchemas = {
     },
     status: {
       type: 'string' as const,
-      allowedValues: ['lead', 'pending', 'active', 'on-hold', 'completed', 'cancelled']
+      allowedValues: ['pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled']
     },
     progress: { type: 'number' as const, min: 0, max: 100 }
   },
@@ -976,16 +976,13 @@ export const ValidationSchemas = {
     ]
   },
 
-  // Task creation/update
+  // Task creation/update (title required on create, optional on partial update)
   task: {
-    title: [
-      { type: 'required' as const },
-      { type: 'string' as const, minLength: 1, maxLength: 200 }
-    ],
+    title: { type: 'string' as const, minLength: 1, maxLength: 200 },
     description: { type: 'string' as const, maxLength: 5000 },
     status: {
       type: 'string' as const,
-      allowedValues: ['pending', 'in-progress', 'review', 'completed', 'blocked']
+      allowedValues: ['pending', 'in_progress', 'completed', 'blocked', 'cancelled']
     },
     priority: {
       type: 'string' as const,
