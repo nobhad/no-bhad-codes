@@ -13,6 +13,7 @@
 @import "../shared/portal-layout.css";
 @import "../shared/portal-buttons.css";
 @import "../shared/portal-messages.css";
+@import "../shared/message-thread.css";
 @import "../shared/portal-cards.css";
 @import "../shared/portal-stat-cards.css";
 @import "../shared/portal-dashboard-widgets.css";
