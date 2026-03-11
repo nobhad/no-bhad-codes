@@ -196,7 +196,7 @@ export function MessageThread({
   onEdit,
   showNotification,
   className,
-  attachmentsEnabled = false,
+  attachmentsEnabled = true,
   maxAttachmentSize = DEFAULT_MAX_ATTACHMENT_SIZE,
   allowedFileTypes = DEFAULT_ALLOWED_FILE_TYPES
 }: MessageThreadProps) {
@@ -340,18 +340,19 @@ export function MessageThread({
 
   return (
     <div className={cn('msgtab-container', className)}>
-      {/* Scroll area */}
-      <div className="scroll-container msgtab-panel">
-        {isLoading && messages.length === 0 ? (
-          <LoadingState message="Loading messages..." />
-        ) : messages.length === 0 ? (
-          <EmptyState
-            icon={<MessageSquare className="icon-lg" />}
-            message="No messages yet. Start a conversation."
-          />
-        ) : (
-          <div className="msgtab-thread">
-            {messages.map((message, index) => {
+      {/* Thread area — scrollable messages */}
+      <div className="msgtab-thread-area">
+        <div className="scroll-container msgtab-panel">
+          {isLoading && messages.length === 0 ? (
+            <LoadingState message="Loading messages..." />
+          ) : messages.length === 0 ? (
+            <EmptyState
+              icon={<MessageSquare className="icon-lg" />}
+              message="No messages yet. Start a conversation."
+            />
+          ) : (
+            <div className="msgtab-thread">
+              {messages.map((message, index) => {
               const prevMessage = index > 0 ? messages[index - 1] : null;
               const nextMessage = index < messages.length - 1 ? messages[index + 1] : null;
               const showDateSep = !prevMessage || !isSameDay(prevMessage.timestamp, message.timestamp);
@@ -546,13 +547,15 @@ export function MessageThread({
                 </React.Fragment>
               );
             })}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Compose input */}
-      <div className="msgtab-input-panel">
+      {/* Compose area — separate bordered section */}
+      <div className="msgtab-compose-area">
+        <div className="msgtab-input-panel">
         {/* Pending file previews */}
         {attachmentsEnabled && pendingFiles.length > 0 && (
           <div className="msgtab-pending-files">
@@ -619,6 +622,7 @@ export function MessageThread({
           </div>
           <div className="msgtab-compose-hint">
             Press <kbd className="badge msgtab-kbd">Cmd+Enter</kbd> to send
+          </div>
           </div>
         </div>
       </div>
