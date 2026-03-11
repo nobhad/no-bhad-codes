@@ -18,6 +18,11 @@
   height: calc(100dvh - var(--portal-header-height) - var(--portal-page-top) - var(--portal-page-bottom) - 3.5rem);
 }
 
+/* When inside a .panel wrapper, subtract the panel's vertical padding (2 × --portal-card-padding) */
+.panel > .msgtab-container {
+  height: calc(100dvh - var(--portal-header-height) - var(--portal-page-top) - var(--portal-page-bottom) - 3.5rem - 2 * var(--portal-card-padding));
+}
+
 /* Messages scrollable panel */
 .msgtab-panel {
   flex: 1;
