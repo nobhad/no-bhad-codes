@@ -73,7 +73,7 @@ interface EmailTemplatesManagerProps {
 
 function filterTemplate(
   template: EmailTemplate,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   if (search) {
@@ -86,13 +86,15 @@ function filterTemplate(
     }
   }
 
-  if (filters.category && filters.category !== 'all') {
-    if (template.category !== filters.category) return false;
+  const categoryFilter = filters.category;
+  if (categoryFilter && categoryFilter.length > 0) {
+    if (!categoryFilter.includes(template.category)) return false;
   }
 
-  if (filters.status && filters.status !== 'all') {
-    const isActive = filters.status === 'active';
-    if (template.is_active !== isActive) return false;
+  const statusFilter = filters.status;
+  if (statusFilter && statusFilter.length > 0) {
+    const activeValue = template.is_active ? 'active' : 'inactive';
+    if (!statusFilter.includes(activeValue)) return false;
   }
 
   return true;

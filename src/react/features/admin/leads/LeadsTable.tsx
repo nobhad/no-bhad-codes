@@ -56,7 +56,7 @@ interface LeadsTableProps {
 // Filter function
 function filterLead(
   lead: Lead,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   // Search filter
@@ -73,13 +73,15 @@ function filterLead(
   }
 
   // Status filter
-  if (filters.status && filters.status !== 'all') {
-    if (lead.status !== filters.status) return false;
+  const statusFilter = filters.status;
+  if (statusFilter && statusFilter.length > 0) {
+    if (!statusFilter.includes(lead.status)) return false;
   }
 
   // Source filter
-  if (filters.source && filters.source !== 'all') {
-    if (lead.source !== filters.source) return false;
+  const sourceFilter = filters.source;
+  if (sourceFilter && sourceFilter.length > 0) {
+    if (!sourceFilter.includes(lead.source ?? '')) return false;
   }
 
   return true;

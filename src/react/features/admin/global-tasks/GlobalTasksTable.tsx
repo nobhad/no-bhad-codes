@@ -104,7 +104,7 @@ interface GlobalTasksTableProps {
 // Filter function
 function filterTask(
   task: Task,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   if (search) {
@@ -116,12 +116,14 @@ function filterTask(
     if (!matchesSearch) return false;
   }
 
-  if (filters.status && filters.status !== 'all') {
-    if (task.status !== filters.status) return false;
+  const statusFilter = filters.status;
+  if (statusFilter && statusFilter.length > 0) {
+    if (!statusFilter.includes(task.status)) return false;
   }
 
-  if (filters.priority && filters.priority !== 'all') {
-    if (task.priority !== filters.priority) return false;
+  const priorityFilter = filters.priority;
+  if (priorityFilter && priorityFilter.length > 0) {
+    if (!priorityFilter.includes(task.priority)) return false;
   }
 
   return true;

@@ -52,7 +52,7 @@ interface MessagesTableProps {
 
 function filterConversation(
   conversation: Conversation,
-  _filters: Record<string, string>,
+  _filters: Record<string, string[]>,
   search: string
 ): boolean {
   // Always exclude archived

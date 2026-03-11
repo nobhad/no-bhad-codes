@@ -95,7 +95,7 @@ const CONTACT_STATUS_CONFIG: Record<string, { label: string }> = {
 // Filter function
 function filterContact(
   contact: Contact,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   if (search) {
@@ -108,8 +108,9 @@ function filterContact(
     if (!matchesSearch) return false;
   }
 
-  if (filters.status && filters.status !== 'all') {
-    if (contact.status !== filters.status) return false;
+  const statusFilter = filters.status;
+  if (statusFilter && statusFilter.length > 0) {
+    if (!statusFilter.includes(contact.status)) return false;
   }
 
   return true;

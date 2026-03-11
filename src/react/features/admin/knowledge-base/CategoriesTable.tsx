@@ -49,7 +49,7 @@ interface CategoriesTableProps {
 
 function filterCategory(
   category: Category,
-  _filters: Record<string, string>,
+  _filters: Record<string, string[]>,
   search: string
 ): boolean {
   if (search) {

@@ -87,7 +87,7 @@ interface FilesManagerProps {
 
 function filterFile(
   file: FileItem,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   if (search) {
@@ -101,17 +101,19 @@ function filterFile(
     }
   }
 
-  if (filters.type && filters.type !== 'all') {
-    const typeFilter = filters.type;
-    if (typeFilter === 'folder' && file.type !== 'folder') return false;
-    if (typeFilter === 'image' && !file.mimeType?.startsWith('image/')) return false;
-    if (typeFilter === 'document' && !(
-      file.mimeType?.includes('pdf') ||
-      file.mimeType?.includes('document') ||
-      file.mimeType?.includes('text')
-    )) return false;
-    if (typeFilter === 'video' && !file.mimeType?.startsWith('video/')) return false;
-    if (typeFilter === 'audio' && !file.mimeType?.startsWith('audio/')) return false;
+  const typeFilter = filters.type;
+  if (typeFilter && typeFilter.length > 0) {
+    const matchesType =
+      (typeFilter.includes('folder') && file.type === 'folder') ||
+      (typeFilter.includes('image') && file.mimeType?.startsWith('image/') === true) ||
+      (typeFilter.includes('document') && (
+        file.mimeType?.includes('pdf') ||
+        file.mimeType?.includes('document') ||
+        file.mimeType?.includes('text')
+      )) ||
+      (typeFilter.includes('video') && file.mimeType?.startsWith('video/') === true) ||
+      (typeFilter.includes('audio') && file.mimeType?.startsWith('audio/') === true);
+    if (!matchesType) return false;
   }
 
   return true;

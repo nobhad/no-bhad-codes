@@ -62,7 +62,7 @@ interface ClientsTableProps {
 // Filter function
 function filterClient(
   client: Client,
-  filters: Record<string, string>,
+  filters: Record<string, string[]>,
   search: string
 ): boolean {
   // Search filter
@@ -78,13 +78,15 @@ function filterClient(
   }
 
   // Status filter
-  if (filters.status && filters.status !== 'all') {
-    if (client.status !== filters.status) return false;
+  const statusFilter = filters.status;
+  if (statusFilter && statusFilter.length > 0) {
+    if (!statusFilter.includes(client.status)) return false;
   }
 
   // Type filter
-  if (filters.type && filters.type !== 'all') {
-    if (client.client_type !== filters.type) return false;
+  const typeFilter = filters.type;
+  if (typeFilter && typeFilter.length > 0) {
+    if (!typeFilter.includes(client.client_type ?? '')) return false;
   }
 
   return true;
