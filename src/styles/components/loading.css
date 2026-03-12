@@ -708,6 +708,28 @@ p.empty-state {
   animation: spin 0.8s linear infinite;
 }
 
+/* =====================================================
+   MOBILE: Ensure state containers remain readable.
+   Prevents text from wrapping per-character when parent
+   collapses inside scroll wrappers or flex contexts.
+   ===================================================== */
+@media (--mobile) {
+  .empty-state,
+  .loading-state,
+  .error-state {
+    min-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .empty-state p,
+  .loading-state p,
+  .error-state p {
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+}
+
 /* Reduced motion for new skeleton elements */
 @media (prefers-reduced-motion: reduce) {
   .skeleton-line--full {

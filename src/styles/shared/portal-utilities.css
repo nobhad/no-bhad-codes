@@ -179,7 +179,7 @@ svg.lucide {
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-1) var(--space-3);
   background: var(--color-bg-raised);
   cursor: pointer;
   transition: background-color var(--transition-fast);

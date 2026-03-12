@@ -403,13 +403,17 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 }
 
 /* Custom checkbox - wrapper div */
+.milestone-item .accordion-item-caret {
+  margin-left: var(--space-3);
+}
+
 .milestone-checkbox {
   flex-shrink: 0;
-  width: var(--icon-size-lg);
-  height: var(--icon-size-lg);
+  width: 1em;
+  height: 1em;
   cursor: pointer;
   background: transparent;
-  border: var(--portal-border);
+  border: var(--border-width-px) solid var(--color-border-primary);
   position: relative;
   display: flex;
   align-items: center;
@@ -575,6 +579,13 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 .milestone-description {
   margin: var(--space-1) 0;
+}
+
+.milestone-due {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: var(--space-3);
 }
 
 .milestone-deliverables {

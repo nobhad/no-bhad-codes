@@ -19,9 +19,51 @@
   height: calc(100dvh - var(--portal-header-height) - var(--portal-page-top) - var(--portal-page-bottom) - 3.5rem);
 }
 
-/* When inside a .panel wrapper, subtract the panel's vertical padding (2 × --portal-card-padding) */
-.panel > .msgtab-container {
-  height: calc(100dvh - var(--portal-header-height) - var(--portal-page-top) - var(--portal-page-bottom) - 3.5rem - 2 * var(--portal-card-padding));
+/* Admin project detail: flex chain from dashboard-content → section → tab-panel → card → container.
+   No fixed height calcs — each level fills its parent via flex: 1. */
+.dashboard-content:has(.portal-tab-panel .msgtab-container) {
+  display: flex;
+  flex-direction: column;
+}
+
+.section:has(.portal-tab-panel .msgtab-container) {
+  flex: 1;
+  min-height: 0;
+}
+
+.portal-tab-panel:has(.msgtab-container) {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.portal-tab-panel .data-table-card:has(.msgtab-container) {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.portal-tab-panel .msgtab-container {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
+
+/* Inside a .data-table-card, thread/compose don't need their own borders */
+.data-table-card .msgtab-thread-area {
+  border: none;
+}
+
+.data-table-card .msgtab-compose-area {
+  border: none;
+  border-top: var(--portal-border);
+}
+
+.data-table-card .msgtab-container {
+  gap: 0;
 }
 
 /* Thread area — bordered wrapper around scrollable messages */
