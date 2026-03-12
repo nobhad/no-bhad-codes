@@ -35,7 +35,7 @@
 .portal-tabs {
   display: flex;
   gap: var(--space-1);
-  margin-bottom: var(--portal-section-gap);
+  margin-bottom: 0;
   overflow: visible;
   position: relative;
   padding: 0;

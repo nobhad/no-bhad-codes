@@ -518,8 +518,6 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 
 /* Base icon-only button styles - applies to all collapsed states */
 .portal :is(.sidebar.collapsed, .sidebar.icon-only) .nav-btn {
-  width: var(--space-5);
-  height: var(--space-5);
   padding: 0;
   justify-content: center;
   margin: 0 auto;
@@ -556,11 +554,9 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   left: -9999px;
 }
 
-/* Icon sizing - SAME SIZE as open state, use --sidebar-icon-size */
+/* Icon inherits natural size from nav-btn — no override needed */
 .portal :is(.sidebar.collapsed, .sidebar.icon-only) .nav-btn .nav-icon {
   margin: 0;
-  width: var(--sidebar-icon-size);
-  height: var(--sidebar-icon-size);
 }
 
 .portal :is(.sidebar.collapsed, .sidebar.icon-only) .nav-btn:is(.active, :hover) .nav-icon svg {
@@ -568,18 +564,16 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 }
 
 /* ============================================
- * RESPONSIVE: Sidebar auto-collapses
+ * RESPONSIVE: Mobile sidebar icon-only (≤600px)
+ * Laptop/desktop: no forced collapse — user controls sidebar state.
  * ============================================ */
 
-@media (--laptop) {
-  .portal .sidebar .sidebar-buttons {
+@media (--compact-mobile) {
+  .portal .sidebar:not(.collapsed) .sidebar-buttons {
     gap: var(--space-1);
   }
 
-  /* Force icon-only appearance at this breakpoint */
-  .portal .sidebar .nav-btn {
-    width: var(--space-5);
-    height: var(--space-5);
+  .portal .sidebar:not(.collapsed) .nav-btn {
     padding: 0;
     justify-content: center;
     border: none;
@@ -589,33 +583,22 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
     overflow: visible;
   }
 
-  .portal .sidebar .nav-btn.active,
-  .portal .sidebar .nav-btn:is(:hover, :focus) {
+  .portal .sidebar:not(.collapsed) .nav-btn.active,
+  .portal .sidebar:not(.collapsed) .nav-btn:is(:hover, :focus) {
     background: transparent;
     border: none;
     box-shadow: none;
   }
 
-  .portal .sidebar .nav-btn:is(.active, :hover) .nav-icon {
+  .portal .sidebar:not(.collapsed) .nav-btn:is(.active, :hover) .nav-icon {
     color: var(--color-accent);
   }
 
-  .portal .sidebar .nav-btn .nav-label {
+  .portal .sidebar:not(.collapsed) .nav-btn .nav-label {
     display: none;
     visibility: hidden;
     position: absolute;
     left: -9999px;
-  }
-
-  /* Icon sizing - SAME SIZE regardless of sidebar state, use --sidebar-icon-size */
-  .portal .sidebar .nav-btn .nav-icon {
-    margin: 0;
-    width: var(--sidebar-icon-size);
-    height: var(--sidebar-icon-size);
-  }
-
-  .portal .sidebar .nav-btn:is(.active, :hover) .nav-icon svg {
-    filter: drop-shadow(0 1px 1px var(--portal-alpha-black-30));
   }
 }
 

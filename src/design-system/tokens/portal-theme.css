@@ -194,7 +194,7 @@ body[data-page="client-portal"] {
   /* ----------------------------------------
    * PORTAL HEADER / SIDEBAR LAYOUT TOKENS
    * ---------------------------------------- */
-  --portal-header-height: var(--space-7);        /* 56px */
+  --portal-header-height: calc(2 * var(--space-5) + var(--space-1)); /* 2 rows (40px) + gap (8px) = 88px */
   --portal-header-top: var(--space-2-5);         /* 20px */
   --portal-header-height-line: var(--space-4);   /* 32px */
   --portal-nav-gap: var(--space-6);

@@ -63,9 +63,9 @@
 
 /* Description divider within a panel card */
 .panel-description {
-  border-top: var(--portal-border);
-  margin-top: var(--space-4);
-  padding-top: var(--space-4);
+  border-top: none;
+  margin-top: 0;
+  padding-top: 0;
 }
 
 /* Inline link list + milestone list: flex column layout */
