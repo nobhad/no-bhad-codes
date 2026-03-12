@@ -85,9 +85,17 @@ interface IntakeRecord {
 }
 
 export class InvoiceService {
+  private static instance: InvoiceService;
   private paymentService: InvoicePaymentService;
   private recurringService: InvoiceRecurringService;
   private reportingService: InvoiceReportingService;
+
+  static getInstance(): InvoiceService {
+    if (!InvoiceService.instance) {
+      InvoiceService.instance = new InvoiceService();
+    }
+    return InvoiceService.instance;
+  }
 
   constructor() {
     this.paymentService = new InvoicePaymentService({
