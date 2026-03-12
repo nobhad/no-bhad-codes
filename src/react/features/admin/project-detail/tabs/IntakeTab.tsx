@@ -190,15 +190,6 @@ export function IntakeTab({
           <h3 className="section-title">Background</h3>
           <div className="grid-2col">
             <div className="layout-form-field">
-              <span className="field-label">Inspiration</span>
-              <InlineTextarea
-                value={project.inspiration || ''}
-                placeholder="No inspiration listed"
-                onSave={(value) => handleSaveField('inspiration', value)}
-              />
-            </div>
-
-            <div className="layout-form-field">
               <span className="field-label">Challenges</span>
               <InlineTextarea
                 value={project.challenges || ''}
