@@ -134,6 +134,31 @@ Removed duplicate import.
 
 ---
 
+## Completed - Portal Gap on Mobile (Root Fix)
+
+**Status:** COMPLETE
+
+### Issue
+
+Gap not properly applied on mobile in portal dashboard layout.
+
+### Root Cause
+
+`.dashboard-content` used `display: block`, so spacing between its children (subtabs, route content) relied on margins. Flex `gap` only works in flex/grid containers, so gap was never applied at the content root.
+
+### Fix (at root)
+
+1. **`portal-layout.css`** — Changed `.portal .dashboard-content` from `display: block` to `display: flex; flex-direction: column; gap: var(--portal-section-gap)`. Gap is now the single source of truth for spacing between subtabs and route content on all viewports including mobile.
+
+2. **`portal-tabs.css`** — Cancel `margin-bottom` on `.portal .dashboard-content .portal-subtabs` so the parent’s gap handles spacing (no double spacing).
+
+### Files Modified
+
+- `src/styles/shared/portal-layout.css`
+- `src/styles/shared/portal-tabs.css`
+
+---
+
 ## In Progress - Universal Dropdown Unification
 
 **Status:** ACTIVE
