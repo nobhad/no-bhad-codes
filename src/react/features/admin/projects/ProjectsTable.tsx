@@ -519,10 +519,24 @@ export function ProjectsTable({
                   <PortalTableCell className="primary-cell name-col">
                     <div className="cell-content">
                       <span className="cell-title">{decodeHtmlEntities(project.project_name) || 'Untitled Project'}</span>
-                      <span className="cell-subtitle">
-                        {decodeHtmlEntities(project.contact_name)}
-                        {project.company_name && ` - ${decodeHtmlEntities(project.company_name)}`}
-                      </span>
+                      {(() => {
+                        const contact = decodeHtmlEntities(project.contact_name || '');
+                        const company = project.company_name ? decodeHtmlEntities(project.company_name) : '';
+
+                        let subtitle = '';
+                        if (company) {
+                          // Avoid duplicating company name when contact already includes it
+                          if (contact && contact.toLowerCase() !== company.toLowerCase() && !contact.toLowerCase().includes(company.toLowerCase())) {
+                            subtitle = `${contact} \u2014 ${company}`;
+                          } else {
+                            subtitle = company;
+                          }
+                        } else {
+                          subtitle = contact;
+                        }
+
+                        return subtitle ? <span className="cell-subtitle">{subtitle}</span> : null;
+                      })()}
                       {/* Stacked content for responsive - hidden on desktop */}
                       <span className="type-stacked">
                         {PROJECT_TYPE_LABELS[project.project_type || ''] || project.project_type}

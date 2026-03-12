@@ -1,5 +1,13 @@
 # Current Work - March 11, 2026
 
+## Portal forms — single source of truth
+
+- **Portal forms (admin + client):** `src/styles/shared/portal-forms.css` is the only place for input/textarea/select border, padding, focus, and typography. Feature CSS should only add layout (grid, gap, width).
+- **Public/marketing forms:** `src/styles/components/form-fields.css` styles only `.form-container` and `.login-form`; no global `.form-input`/`.form-textarea` so portal forms are not overridden.
+- **Labels:** `src/styles/shared/field-label-spacing.css` is SoT for `.field-label`/`.meta-label`; portal-forms only adds form-context overrides (position, pointer-events).
+
+---
+
 ## Current System Status
 
 **Last Updated**: March 11, 2026

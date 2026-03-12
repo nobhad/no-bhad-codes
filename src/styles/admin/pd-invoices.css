@@ -23,16 +23,7 @@
   min-height: 80px;
 }
 
-/* Center empty/loading/error states - override higher specificity of above rule */
-[data-page="admin"]
-  #pd-tab-invoices
-  .invoices-list:has(.empty-state, .loading-state, .error-state) {
-  align-items: center;
-  justify-content: center;
-  min-height: 120px;
-}
-
-/* .empty-state styling from components/loading.css */
+/* Empty/loading/error centering: root rule in components/loading.css */
 
 /* Invoice summary cards - consolidated from project-detail.css */
 [data-page="admin"] #pd-tab-invoices .invoice-summary {
