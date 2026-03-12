@@ -145,18 +145,22 @@ export function ContactsSection({ portalFetch, showNotification }: ContactsSecti
   return (
     <div className="portal-section">
       {/* Header */}
-      <div className="section-header">
-        <Users className="section-icon" />
-        <h3 className="section-title">Contacts</h3>
+      <div className="data-table-header">
+        <h3>
+          <Users className="icon-sm" />
+          <span className="title-full">Contacts</span>
+        </h3>
         {!showAddForm && (
+          <div className="data-table-actions">
           <button
-            className="icon-btn section-header-action"
+            className="icon-btn"
             onClick={() => { setShowAddForm(true); setEditingId(null); setFormData(EMPTY_FORM); }}
             title="Add Contact"
             aria-label="Add Contact"
           >
             <Plus />
           </button>
+          </div>
         )}
       </div>
 

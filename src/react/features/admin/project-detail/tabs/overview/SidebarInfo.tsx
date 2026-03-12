@@ -28,7 +28,7 @@ export function SidebarInfo({
     <div className="layout-stack">
       {/* Client Info Card */}
       <div className="panel">
-        <h3 className="section-title">Client</h3>
+        <div className="data-table-header"><h3><span className="title-full">Client</span></h3></div>
 
         <div className="link-list">
           {project.contact_name && (
@@ -76,7 +76,7 @@ export function SidebarInfo({
 
       {/* Financial Summary Card */}
       <div className="panel">
-        <h3 className="section-title">Financials</h3>
+        <div className="data-table-header"><h3><span className="title-full">Financials</span></h3></div>
 
         <StatsRow>
           <StatCard label="Outstanding" value={formatCurrency(outstandingBalance)} />
@@ -89,7 +89,7 @@ export function SidebarInfo({
 
       {/* Quick Stats */}
       <div className="panel">
-        <h3 className="section-title">Quick Stats</h3>
+        <div className="data-table-header"><h3><span className="title-full">Quick Stats</span></h3></div>
 
         <StatsRow className="quick-stats-grid">
           <StatCard

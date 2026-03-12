@@ -194,9 +194,11 @@ export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: 
       <div className="analytics-card-grid">
         {/* Team Performance */}
         <div className="portal-card">
-          <div className="layout-row-between">
-            <h3 className="section-title">Team Performance</h3>
-            <Award className="icon-md text-muted" />
+          <div className="data-table-header">
+            <h3>
+              <Award className="icon-sm" />
+              <span className="title-full">Team Performance</span>
+            </h3>
           </div>
           {isLoading ? (
             <LoadingState message="Loading team data..." />
@@ -221,9 +223,11 @@ export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: 
 
         {/* Project Performance */}
         <div className="portal-card">
-          <div className="layout-row-between">
-            <h3 className="section-title">Project Status</h3>
-            <Briefcase className="icon-md text-muted" />
+          <div className="data-table-header">
+            <h3>
+              <Briefcase className="icon-sm" />
+              <span className="title-full">Project Status</span>
+            </h3>
           </div>
           {isLoading ? (
             <LoadingState message="Loading project data..." />

@@ -310,10 +310,11 @@ td.empty-row {
 }
 
 /* Root rule: container with direct empty/loading/error state — center state vertically.
-   Exclude td/th so table layout is not broken; table cells use vertical-align/padding in rules below. */
-.portal :has(> .empty-state):not(td):not(th),
-.portal :has(> .loading-state):not(td):not(th),
-.portal :has(> .error-state):not(td):not(th) {
+   Exclude td/th so table layout is not broken; table cells use vertical-align/padding in rules below.
+   Exclude .panel — panels already have flex column layout; centering would misalign sibling headers. */
+.portal :has(> .empty-state):not(td):not(th):not(.panel),
+.portal :has(> .loading-state):not(td):not(th):not(.panel),
+.portal :has(> .error-state):not(td):not(th):not(.panel) {
   display: flex;
   flex-direction: column;
   align-items: center;

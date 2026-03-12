@@ -323,9 +323,52 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   gap: var(--portal-section-gap);
   flex: 1;
   min-width: 0;
-  padding: 0 var(--space-3) var(--portal-page-bottom) var(--space-3);
+  padding: 0 var(--space-3);
   overflow-y: auto;
   background: inherit;
+  box-sizing: border-box;
+}
+
+/* SINGLE SOURCE OF TRUTH: bottom breathing room for the entire portal.
+   Applied as margin on the last child (not padding on the scroll container,
+   which is unreliable in flex-column overflow:auto containers). */
+.portal .dashboard-content > :last-child {
+  margin-bottom: calc(var(--portal-page-bottom) + env(safe-area-inset-bottom, 0px));
+}
+
+/* Universal wrapper used by tab/subtab views.
+   Layout only -- bottom breathing room comes from the :last-child rule above. */
+.portal .subtab-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-section-gap);
+  width: 100%;
+  min-height: 0;
+}
+
+/* Tab section — bordered panel for simple header+list tabs */
+.portal .tab-section {
+  border: var(--border-width) solid var(--color-border-primary);
+  padding: var(--space-3);
+}
+
+/* Overview table section — full width, no extra margins */
+.portal .overview-table-section {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.portal .overview-table-section .table-layout,
+.portal .overview-table-section .data-table-card {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.portal .overview-table-section .data-table,
+.portal .overview-table-section .data-table tbody {
+  min-height: auto;
 }
 
 /* Page header - no extra spacing */
@@ -392,13 +435,6 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   display: flex;
   gap: var(--space-1);
   align-items: center;
-  /* No spacing overrides — base .portal-subtabs margin-bottom provides gap below.
-     Only reset visual properties (border, bg, shadow). */
-  background: transparent;
-  border: none;
-  border-bottom: none;
-  border-radius: 0;
-  box-shadow: none;
 }
 
 /* Show header controls based on active tab */
@@ -409,42 +445,13 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   display: flex;
 }
 
-/* Header subtab groups - visual resets only (no spacing overrides) */
-.portal .portal-header-subtabs .header-subtab-group {
-  gap: var(--space-1);
-  background: transparent;
-  border: none;
-  border-bottom: none;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-/* Header subtab buttons - context resets only.
-   Base styling (font, color, padding, hover, active) comes from portal-tabs.css shared :is() rules.
-   This rule only handles header-specific overrides. */
-.portal
-  .portal-header-subtabs
-  .header-subtab-group
-  :is(> button, .portal-subtab, .view-toggle button) {
-  margin: 0;
-  box-shadow: none;
-  border-radius: 0;
-}
-
-/* View toggle in header - reset container styling */
-.portal .portal-header-subtabs .header-subtab-group .view-toggle {
-  display: flex;
-  gap: var(--space-1);
-  border-bottom: none;
-}
+/* Header subtab groups and buttons are styled by shared/portal-tabs.css.
+   Keep only show/hide + layout rules in this file. */
 
 /* .content-wrapper REMOVED from DOM — subtabs and tab-content
    are now direct children of .dashboard-content. */
 
-/* Tab content - shown when active, hidden otherwise. */
-.portal .tab-content.active {
-  display: block;
-}
+/* Tab content visibility: single source of truth in shared/portal-tabs.css */
 
 /* Sidebar and dashboard-content inherit height from .portal-body (100%).
    Do NOT set explicit height here — .portal-body is the single source of truth. */
@@ -925,13 +932,10 @@ html[data-theme="light"] .portal .funnel-value {
   background: transparent;
 }
 
-
-
-/* Empty/loading/error centering: root rule in components/loading.css (.portal :has(> .empty-state) etc.) */
-
 .panel {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: var(--space-3);
   background: var(--color-bg-primary);
   border: var(--border-width) solid var(--color-border-primary);

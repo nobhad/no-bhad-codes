@@ -193,7 +193,7 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification }
         {/* Saved Queries Sidebar */}
         <div>
           <div className="panel">
-            <h3 className="section-title analytics-section-title">Saved Queries</h3>
+            <div className="data-table-header"><h3><span className="title-full">Saved Queries</span></h3></div>
             {savedQueries.length === 0 ? (
               <p className="text-muted analytics-empty-text">No saved queries yet</p>
             ) : (
@@ -235,12 +235,12 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification }
         <div className="analytics-main">
           {/* Query Editor */}
           <div className="panel">
-            <div className="analytics-editor-header">
-              <div className="analytics-editor-title">
-                <Code className="analytics-editor-icon" />
-                <span className="section-title">Query</span>
-              </div>
-              <div className="analytics-editor-actions">
+            <div className="data-table-header">
+              <h3>
+                <Code className="icon-sm" />
+                <span className="title-full">Query</span>
+              </h3>
+              <div className="data-table-actions">
                 <input
                   type="text"
                   placeholder="Query name..."

@@ -31,6 +31,12 @@ export function mountPortalApp(container: HTMLElement): () => void {
     root.unmount();
   }
 
+  // Clear the server-rendered portal shell before mounting React.
+  // The React SPA renders its own header/sidebar/content structure; leaving the
+  // EJS DOM in place can create nested `.dashboard-content` and duplicate IDs.
+  container.innerHTML = '';
+  container.classList.add('react-portal-mount');
+
   root = createRoot(container);
 
   // Synchronous render prevents flash between clearing EJS content
@@ -52,6 +58,7 @@ export function mountPortalApp(container: HTMLElement): () => void {
       root = null;
       logger.info('Portal React SPA unmounted');
     }
+    container.classList.remove('react-portal-mount');
   };
 }
 

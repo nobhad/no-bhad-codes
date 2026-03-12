@@ -213,6 +213,7 @@ export function ClientDetail({
       <TabList
         tabs={TABS}
         tabIcons={TAB_ICONS}
+        variant="subtabs"
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         ariaLabel="Client detail tabs"

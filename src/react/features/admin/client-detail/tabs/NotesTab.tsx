@@ -245,55 +245,56 @@ export function NotesTab({
   );
 
   return (
-    <div className="section tab-section">
-      {/* Header */}
-      <div className="layout-row-between">
-        <h2 className="heading text-lg">
-          Notes ({notes.length})
-        </h2>
-        {!isFormOpen && (
-          <IconButton action="add" onClick={handleStartAdd} title="Add Note" />
-        )}
-      </div>
-
-      {/* Add/Edit Form */}
-      {isFormOpen && renderForm()}
-
-      {/* Notes List */}
-      {notes.length === 0 && !isFormOpen ? (
-        <EmptyState
-          icon={<StickyNote className="icon-lg" />}
-          message="No notes yet. Add internal notes about this client."
-        />
-      ) : (
-        <div className="detail-list--spaced">
-          {/* Pinned notes section */}
-          {pinnedNotes.length > 0 && (
-            <div>
-              <h3 className="label section-label-block">
-                Pinned
-              </h3>
-              <div className="grid-2col gap-3">
-                {pinnedNotes.map(renderNote)}
-              </div>
-            </div>
-          )}
-
-          {/* Regular notes */}
-          {unpinnedNotes.length > 0 && (
-            <div>
-              {pinnedNotes.length > 0 && (
-                <h3 className="label section-label-block">
-                  Recent
-                </h3>
-              )}
-              <div className="grid-2col gap-3">
-                {unpinnedNotes.map(renderNote)}
-              </div>
+    <div className="section">
+      <div className="panel">
+        <div className="data-table-header">
+          <h3><span className="title-full">Notes</span></h3>
+          {!isFormOpen && (
+            <div className="data-table-actions">
+              <IconButton action="add" onClick={handleStartAdd} title="Add Note" />
             </div>
           )}
         </div>
-      )}
+
+        {/* Add/Edit Form */}
+        {isFormOpen && renderForm()}
+
+        {/* Notes List */}
+        {notes.length === 0 && !isFormOpen ? (
+          <EmptyState
+            icon={<StickyNote className="icon-lg" />}
+            message="No notes yet. Add internal notes about this client."
+          />
+        ) : (
+          <div className="detail-list--spaced">
+            {/* Pinned notes section */}
+            {pinnedNotes.length > 0 && (
+              <div>
+                <h3 className="label section-label-block">
+                  Pinned
+                </h3>
+                <div className="grid-2col gap-3">
+                  {pinnedNotes.map(renderNote)}
+                </div>
+              </div>
+            )}
+
+            {/* Regular notes */}
+            {unpinnedNotes.length > 0 && (
+              <div>
+                {pinnedNotes.length > 0 && (
+                  <h3 className="label section-label-block">
+                    Recent
+                  </h3>
+                )}
+                <div className="grid-2col gap-3">
+                  {unpinnedNotes.map(renderNote)}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Delete Confirmation */}
       <ConfirmDialog

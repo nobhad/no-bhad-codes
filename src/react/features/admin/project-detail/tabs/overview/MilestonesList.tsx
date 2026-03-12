@@ -136,9 +136,11 @@ export function MilestonesList({
   return (
     <>
       <div className="panel">
-        <div className="layout-row-between">
-          <h3 className="section-title">Milestones</h3>
-          <IconButton action="add" onClick={() => setShowAddMilestone(true)} title="Add Milestone" />
+        <div className="data-table-header">
+          <h3><span className="title-full">Milestones</span></h3>
+          <div className="data-table-actions">
+            <IconButton action="add" onClick={() => setShowAddMilestone(true)} title="Add Milestone" />
+          </div>
         </div>
 
         {/* Add Milestone Form */}

@@ -128,22 +128,8 @@
   overflow: hidden;
 }
 
-.overview-panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--portal-card-padding);
-}
-
-/* Section titles - layout only, typography from .field-label
-   font-size set so child svg 1em = adjacent field-label size */
-.overview-panel-title {
-  display: flex;
-  align-items: center;
-  gap: var(--icon-gap);
-  margin: 0;
-  font-size: var(--font-size-xs);
-}
+/* overview panel header + title layout are single source of truth:
+   shared/portal-tab-components.css */
 
 /* Panel icon sizing already handled by .portal .panel-icon in portal-cards.css */
 

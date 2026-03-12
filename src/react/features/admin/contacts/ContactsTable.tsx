@@ -418,20 +418,21 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
                 </PortalTableCell>
                 <PortalTableCell className="primary-cell contact-cell">
                   <div className="cell-content">
-                    <span className="cell-title">
+                    {contact.company && (
+                      <span className="identity-company">{contact.company}</span>
+                    )}
+                    <span className="cell-title identity-name">
                       {contact.firstName} {contact.lastName}
                     </span>
-                    <span className="cell-subtitle">{contact.email}</span>
-                    {(contact.company || contact.phone) && (
-                      <span className="identity-company">
-                        {[contact.company, contact.phone].filter(Boolean).join(' • ')}
-                      </span>
+                    <span className="cell-subtitle identity-email">{contact.email}</span>
+                    {contact.phone && (
+                      <span className="cell-subtitle identity-phone">{contact.phone}</span>
                     )}
-                    {contact.role && (
+                    {contact.role && contact.role !== 'client' && (
                       <span className="cell-subtitle">{contact.role}</span>
                     )}
                     {contact.clientName && (
-                      <span className="identity-company">
+                      <span className="cell-subtitle">
                         {contact.clientId != null ? (
                           <Link
                             to={`/clients/${contact.clientId}`}

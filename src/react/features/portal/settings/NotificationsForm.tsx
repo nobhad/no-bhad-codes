@@ -107,10 +107,10 @@ export function NotificationsForm({ preferences, onUpdate }: NotificationsFormPr
     <div className="settings-form-section">
       {/* Notification Preferences Section */}
       <div className="portal-section">
-        <div className="section-header">
-          <Bell className="section-icon"  />
-          <h3 className="section-title">
-            Email Notifications
+        <div className="data-table-header">
+          <h3>
+            <Bell className="icon-sm" />
+            <span className="title-full">Email Notifications</span>
           </h3>
         </div>
 

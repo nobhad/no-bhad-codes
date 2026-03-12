@@ -14,7 +14,7 @@ interface StripeSectionProps {
 export function StripeSection({ stripeStatus }: StripeSectionProps) {
   return (
     <div className="status-section">
-      <h4 className="status-section-title">Stripe</h4>
+      <div className="data-table-header"><h3><span className="title-full">Stripe</span></h3></div>
       {stripeStatus ? (
         <div className="stats-grid">
           <div className="portal-card">

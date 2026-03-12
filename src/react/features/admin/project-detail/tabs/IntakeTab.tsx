@@ -70,7 +70,7 @@ export function IntakeTab({
       <div className="layout-stack">
         {/* Project Scope */}
         <div className="panel">
-          <h3 className="section-title">Project Scope</h3>
+          <div className="data-table-header"><h3><span className="title-full">Project Scope</span></h3></div>
           <div className="grid-2col">
             <div className="layout-form-field">
               <span className="field-label">Features</span>
@@ -113,7 +113,7 @@ export function IntakeTab({
 
         {/* Design & Content */}
         <div className="panel">
-          <h3 className="section-title">Design & Content</h3>
+          <div className="data-table-header"><h3><span className="title-full">Design & Content</span></h3></div>
           <div className="grid-2col">
             <div className="layout-form-field">
               <span className="field-label">Design Level</span>
@@ -149,7 +149,7 @@ export function IntakeTab({
 
         {/* Technical */}
         <div className="panel">
-          <h3 className="section-title">Technical</h3>
+          <div className="data-table-header"><h3><span className="title-full">Technical</span></h3></div>
           <div className="grid-2col">
             <div className="layout-form-field">
               <span className="field-label">Tech Comfort</span>
@@ -187,7 +187,7 @@ export function IntakeTab({
       {/* Right Column - Background */}
       <div className="layout-stack">
         <div className="panel">
-          <h3 className="section-title">Background</h3>
+          <div className="data-table-header"><h3><span className="title-full">Background</span></h3></div>
           <div className="grid-2col">
             <div className="layout-form-field">
               <span className="field-label">Challenges</span>

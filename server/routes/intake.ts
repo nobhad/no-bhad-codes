@@ -148,6 +148,7 @@ interface ProposalSelection {
 interface IntakeFormData {
   name: string;
   email: string;
+  phone?: string;
   projectFor?: string;
   companyName?: string;
   projectType: string;
@@ -241,11 +242,22 @@ router.post(
         let clientId: number;
         const isNewClient = !existingClient;
 
+        const intakePhone = (intakeData.phone ?? '').trim() || null;
+
         if (existingClient) {
           clientId = getNumber(existingClient as unknown as { [key: string]: unknown }, 'id');
           await logger.info(`Existing client found: ${clientId}`, { category: 'INTAKE' });
+          // Populate client from intake data so Client Detail shows intake info
+          await ctx.run(
+            `
+            UPDATE clients
+            SET contact_name = ?, company_name = ?, phone = COALESCE(?, phone), updated_at = datetime('now')
+            WHERE id = ?
+          `,
+            [intakeData.name, companyName, intakePhone, clientId]
+          );
         } else {
-          // Create new client account
+          // Create new client account with all intake data
           const clientResult = await ctx.run(
             `
           INSERT INTO clients (
@@ -253,7 +265,7 @@ router.post(
             password_hash, status, client_type, created_at, updated_at
           ) VALUES (?, ?, ?, ?, ?, 'pending', ?, datetime('now'), datetime('now'))
         `,
-            [companyName, intakeData.name, intakeData.email, '', hashedPassword, clientType]
+            [companyName, intakeData.name, intakeData.email, intakePhone ?? '', hashedPassword, clientType]
           );
 
           clientId = clientResult.lastID!;

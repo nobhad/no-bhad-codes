@@ -140,10 +140,10 @@ export function BillingForm({ billing, onUpdate }: BillingFormProps) {
     <div className="settings-form-section">
       {/* Billing Address Section */}
       <div className="portal-section">
-        <div className="section-header">
-          <MapPin className="section-icon"  />
-          <h3 className="section-title">
-            Billing Address
+        <div className="data-table-header">
+          <h3>
+            <MapPin className="icon-sm" />
+            <span className="title-full">Billing Address</span>
           </h3>
         </div>
 

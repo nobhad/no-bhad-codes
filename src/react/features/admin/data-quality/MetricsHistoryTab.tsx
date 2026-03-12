@@ -80,16 +80,18 @@ export function MetricsHistoryTab({
   return (
     <>
       <div className="portal-card">
-        <div className="layout-row-between">
-          <h3 className="section-title">Current Metrics</h3>
-          <button
-            className="btn btn-primary"
-            onClick={handleRecalculate}
-            disabled={calculating}
-          >
-            <RefreshCw size={14} />
-            {calculating ? 'Calculating...' : 'Recalculate Metrics'}
-          </button>
+        <div className="data-table-header">
+          <h3><span className="title-full">Current Metrics</span></h3>
+          <div className="data-table-actions">
+            <button
+              className="btn btn-primary"
+              onClick={handleRecalculate}
+              disabled={calculating}
+            >
+              <RefreshCw size={14} />
+              {calculating ? 'Calculating...' : 'Recalculate Metrics'}
+            </button>
+          </div>
         </div>
 
         {metrics.length === 0 ? (
@@ -115,8 +117,8 @@ export function MetricsHistoryTab({
       </div>
 
       <div className="portal-card">
-        <div className="layout-row-between">
-          <h3 className="section-title">Metric History</h3>
+        <div className="data-table-header">
+          <h3><span className="title-full">Metric History</span></h3>
         </div>
 
         {history.length === 0 ? (

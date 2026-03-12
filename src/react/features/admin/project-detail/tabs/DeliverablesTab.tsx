@@ -163,9 +163,11 @@ export function DeliverablesTab({
     <div className="section">
       {/* Progress header */}
       <div className="panel">
-        <div className="layout-row-between">
-          <h3 className="section-title">Deliverables</h3>
-          <IconButton action="add" onClick={() => setShowAddForm(true)} title="Add Milestone" />
+        <div className="data-table-header">
+          <h3><span className="title-full">Deliverables</span></h3>
+          <div className="data-table-actions">
+            <IconButton action="add" onClick={() => setShowAddForm(true)} title="Add Milestone" />
+          </div>
         </div>
 
         {/* Add Milestone Form */}

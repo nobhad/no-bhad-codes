@@ -8,9 +8,17 @@
 
 ---
 
+## Intake data → Client Detail
+
+- **Intake form:** New clients created from `POST /api/intake` now store `contact_name`, `company_name`, `email`, and `phone` (optional) so Client Detail Overview shows Contact Information and Account Details from intake.
+- **Existing client:** When an existing client (matched by email) submits intake again, their record is updated with `contact_name`, `company_name`, and `phone` from the submission so the detail page stays in sync with intake data.
+- **Validation:** Optional `phone` field added to intake submission schema (max 50 chars).
+
+---
+
 ## Current System Status
 
-**Last Updated**: March 11, 2026
+**Last Updated**: March 12, 2026
 
 ### Server
 
