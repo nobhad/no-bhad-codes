@@ -153,35 +153,33 @@ export function ActivityTab({ activities, onNavigate }: ActivityTabProps) {
 
   return (
     <div className="section">
-      {/* Header */}
-      <div className="layout-row-between">
-        <h2 className="heading text-lg">
-          Activity Log
-        </h2>
-        <span className="text-muted ">
-          {activities.length} {activities.length === 1 ? 'event' : 'events'}
-        </span>
-      </div>
+      <div className="panel">
+        <div className="data-table-header">
+          <h3><span className="title-full">Activity ({activities.length})</span></h3>
+          <span className="text-muted text-sm">
+            {activities.length === 1 ? 'event' : 'events'}
+          </span>
+        </div>
 
-      {/* Timeline */}
-      <div className="detail-list--section">
-        {groupedActivities.map((group) => (
-          <div key={group.date}>
-            {/* Date Header */}
-            <div className="activity-date-header">
-              <span className="heading">
-                {group.label}
-              </span>
-              <div className="activity-date-divider" />
-            </div>
+        {/* Timeline */}
+        <div className="detail-list--section">
+          {groupedActivities.map((group) => (
+            <div key={group.date}>
+              {/* Date Header */}
+              <div className="activity-date-header">
+                <span className="heading">
+                  {group.label}
+                </span>
+                <div className="activity-date-divider" />
+              </div>
 
-            {/* Activities for this date */}
-            <div className="activity-timeline-wrapper">
-              {/* Timeline line */}
-              <div className="activity-timeline-vert" />
+              {/* Activities for this date */}
+              <div className="activity-timeline-wrapper">
+                {/* Timeline line */}
+                <div className="activity-timeline-vert" />
 
-              <div className="detail-list--spaced">
-                {group.items.map((activity, index) => {
+                <div className="detail-list--spaced">
+                  {group.items.map((activity, index) => {
                   const Icon = getActivityIcon(activity.activityType);
                   const iconColorVar = getActivityColorVar(activity.activityType);
                   const isLast = index === group.items.length - 1;
@@ -257,11 +255,12 @@ export function ActivityTab({ activities, onNavigate }: ActivityTabProps) {
                       </div>
                     </div>
                   );
-                })}
+                  })}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -540,10 +540,15 @@ export function ClientsTable({
                     {/* Client Name & Email */}
                     <PortalTableCell className="primary-cell contact-cell">
                       <div className="cell-content">
-                        <span className="cell-title">{displayName.primary}</span>
-                        <span className="cell-subtitle">{client.email}</span>
-                        {displayName.secondary && (
-                          <span className="cell-subtitle">{displayName.secondary}</span>
+                        {client.company_name && (
+                          <span className="identity-company">{decodeHtmlEntities(client.company_name)}</span>
+                        )}
+                        <span className="cell-title identity-name">
+                          {decodeHtmlEntities(client.contact_name || '') || displayName.primary}
+                        </span>
+                        <span className="cell-subtitle identity-email">{client.email}</span>
+                        {client.phone && (
+                          <span className="cell-subtitle identity-phone">{client.phone}</span>
                         )}
                         {/* Stacked content for responsive - hidden on desktop */}
                         <span className="type-stacked">{CLIENT_TYPE_LABELS[client.client_type]}</span>

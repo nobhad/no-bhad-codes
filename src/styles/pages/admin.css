@@ -182,14 +182,10 @@ body[data-page="admin"]:not(.admin-logged-in) {
 }
 
 /* Dashboard Content Area — admin-specific overrides only.
-   Base layout (flex, height, min-width) set in shared/portal-layout.css */
+   Base layout (flex, gap, padding, overflow-y, height) in shared/portal-layout.css */
 [data-page="admin"] .dashboard-content {
-  padding: 0 clamp(var(--space-1-5), 2vw, var(--space-3)) var(--portal-page-bottom);
-  overflow-y: auto;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-  background: transparent;
 }
 
 /* ================================================
@@ -699,17 +695,10 @@ body.modal-open .dashboard-content {
     margin-bottom: 0;
   }
 
-  [data-page="admin"] .dashboard-content {
-    padding: 0 var(--space-1-5) var(--space-1-5);
-  }
+  /* .portal .dashboard-content padding is single source of truth in shared/portal-layout.css */
 }
 
 @media (--compact-mobile) {
-  body[data-page="admin"] .tab-content > *,
-  body[data-page="admin"] .dashboard-content > * {
-    margin-bottom: 0;
-  }
-
   body[data-page="admin"] .analytics-grid,
   body[data-page="admin"] .vitals-grid,
   body[data-page="admin"] .charts-grid,
@@ -722,19 +711,17 @@ body.modal-open .dashboard-content {
   body[data-page="admin"] .portal-project-card,
   body[data-page="admin"] .chart-container {
     padding: var(--space-1);
-    margin-bottom: var(--space-1);
+    /* gap on .dashboard-content is the SoT for vertical spacing */
   }
 
   body[data-page="admin"] .data-table-card {
     padding: 0;
-    margin-bottom: var(--space-1);
+    /* gap on .dashboard-content is the SoT for vertical spacing */
   }
 }
 
 @media (--small-mobile) {
   [data-page="admin"] .dashboard-content {
-    overflow-y: scroll;
-    -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
   }
 
@@ -745,13 +732,6 @@ body.modal-open .dashboard-content {
   [data-page="admin"] .upcoming-tasks {
     padding: var(--space-1-5);
     width: 100%;
-    box-sizing: border-box;
-  }
-
-  [data-page="admin"] .data-table-card {
-    padding: 0;
-    width: 100%;
-    box-sizing: border-box;
   }
 
   [data-page="admin"] #tab-system .status-item {
@@ -836,14 +816,10 @@ body.modal-open .dashboard-content {
 
   [data-page="admin"] .data-table-card {
     padding: 0;
-    max-width: 100%;
-    box-sizing: border-box;
   }
 
   [data-page="admin"] .data-table-scroll-wrapper,
-  [data-page="admin"] .data-table-container,
-  [data-page="admin"] .data-table-container,
-  [data-page="admin"] .data-table-scroll-wrapper {
+  [data-page="admin"] .data-table-container {
     padding: 0;
     max-width: 100%;
     background: transparent;
@@ -1079,7 +1055,6 @@ body.modal-open .dashboard-content {
   border-top: none;
 }
 
-[data-page="admin"] .data-table-header,
 [data-page="admin"] .data-table-header {
   border-bottom: var(--portal-border);
 }
@@ -1092,8 +1067,6 @@ body.modal-open .dashboard-content {
 /* Table transparency - using @layer utilities for proper cascade */
 @layer utilities {
   [data-page="admin"] .data-table-container,
-  [data-page="admin"] .data-table-container,
-  [data-page="admin"] .data-table-scroll-wrapper,
   [data-page="admin"] .data-table-scroll-wrapper,
   [data-page="admin"] .data-table,
   [data-page="admin"] .data-table thead,
@@ -1127,60 +1100,7 @@ body.modal-open .dashboard-content {
   }
 }
 
-/* ================================================
-   SUBTAB CONTENT WRAPPER
-   Universal wrapper for ALL subtab content (overview + individual).
-   Prevents parent flex containers from stretching/misaligning content.
-   gap applies between stacked sections in overview; harmless for single-child subtabs.
-   ================================================ */
-
-[data-page="admin"] .subtab-content-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: var(--portal-section-gap);
-  width: 100%;
-  padding: 0;
-  margin: 0;
-  min-height: 0;
-}
-
-/* Tab section border — only on tabs with a simple header+list structure */
-[data-page="admin"] .tab-section {
-  border: var(--border-width) solid var(--color-border-primary);
-  padding: var(--space-3);
-}
-
-/* Individual table section - full width, no extra margins */
-[data-page="admin"] .overview-table-section {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-/* Ensure tables in overview are full width with no margins */
-[data-page="admin"] .overview-table-section .table-layout,
-[data-page="admin"] .overview-table-section .data-table-card {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-/* Overview tables - no forced min-height, let content determine size */
-[data-page="admin"] .overview-table-section .data-table {
-  min-height: auto;
-}
-
-[data-page="admin"] .overview-table-section .data-table tbody {
-  min-height: auto;
-}
-
-/* Overview tables use the same cell padding as other tables so all columns
-   (Name, Type, Status, Date, etc.) align; no margin on cell contents. */
-
-/* Empty/loading/error state centering: root rule in components/loading.css (.portal :has(> .empty-state) etc.) */
-
-/* Overview tables use the same header padding as all other tables.
-   Mobile overrides in portal-tables.css apply uniformly. */
+/* Tab section and overview-table-section layout moved to shared/portal-layout.css */
 
 /* -------------------------------------------------------
  * Inline-edit compact input override

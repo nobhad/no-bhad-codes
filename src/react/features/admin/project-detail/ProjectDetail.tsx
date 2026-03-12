@@ -227,6 +227,7 @@ export function ProjectDetail({
       <TabList
         tabs={TABS}
         tabIcons={TAB_ICONS}
+        variant="subtabs"
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         ariaLabel="Project detail tabs"

@@ -336,7 +336,7 @@ function CategoriesSidebar({ categories, onToggle, onArticleClick }: CategoriesS
 
   return (
     <div ref={listRef} className="section">
-      <h3 className="section-title">Categories</h3>
+      <div className="data-table-header"><h3><span className="title-full">Categories</span></h3></div>
       <div className="section">
         {categories.map((category) => {
           const isExpanded = category.articles.length > 0 || category.isLoading;
@@ -395,7 +395,7 @@ function FeaturedArticles({ articles, onArticleClick }: FeaturedArticlesProps) {
 
   return (
     <div className="section">
-      <h3 className="section-title">Featured Articles</h3>
+      <div className="data-table-header"><h3><span className="title-full">Featured Articles</span></h3></div>
       <div ref={gridRef} className="section">
         {articles.map((article) => (
           <button
@@ -446,9 +446,9 @@ function SearchResults({ results, query, isSearching, onArticleClick }: SearchRe
 
   return (
     <div className="help-search-results">
-      <h3 className="section-title">
-        {results.length} result{results.length !== 1 ? 's' : ''} for &ldquo;{query}&rdquo;
-      </h3>
+      <div className="data-table-header">
+        <h3><span className="title-full">{results.length} result{results.length !== 1 ? 's' : ''} for &ldquo;{query}&rdquo;</span></h3>
+      </div>
       <div ref={listRef} className="section">
         {results.map((article) => (
           <button
@@ -521,7 +521,7 @@ function ContactSection({ onNavigate }: ContactSectionProps) {
     <div className="help-contact-section">
       <div className="help-contact-content">
         <div className="help-contact-text">
-          <h3 className="section-title">Still Need Help?</h3>
+          <div className="data-table-header"><h3><span className="title-full">Still Need Help?</span></h3></div>
           <p className="help-contact-description">
             Can&apos;t find what you&apos;re looking for? Reach out and I&apos;ll be happy to help.
           </p>

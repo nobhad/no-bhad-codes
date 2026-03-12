@@ -76,6 +76,7 @@
 
 :is(
   .portal-tabs button,
+  .portal-subtabs button,
   .portal-tab,
   .portal-subtab,
   .tab,
@@ -114,6 +115,7 @@
 
 :is(
   .portal-tabs button,
+  .portal-subtabs button,
   .portal-tab,
   .portal-subtab,
   .tab,
@@ -129,6 +131,7 @@
 
 :is(
   .portal-tabs button,
+  .portal-subtabs button,
   .portal-tab,
   .portal-subtab,
   .view-toggle button,
@@ -143,6 +146,7 @@
 /* Active hover - maintain active color */
 :is(
   .portal-tabs button,
+  .portal-subtabs button,
   .portal-tab,
   .portal-subtab,
   .view-toggle button,
@@ -150,10 +154,12 @@
 ).active:hover,
 :is(
   .portal-tabs button,
+  .portal-subtabs button,
   .portal-tab
 ).active:focus,
 :is(
   .portal-tabs button,
+  .portal-subtabs button,
   .portal-tab
 ).active:active {
   color: var(--color-accent);
@@ -162,7 +168,8 @@
 }
 
 /* Remove pseudo-element overlay on active tabs */
-.portal-tabs button.active::after {
+.portal-tabs button.active::after,
+.portal-subtabs button.active::after {
   display: none;
 }
 
@@ -191,7 +198,7 @@
    ICON SIZING IN TAB BUTTONS
    ===================================================== */
 
-:is(.portal-tabs button, .portal-tab, .portal-tab-icon) svg {
+:is(.portal-tabs button, .portal-subtabs button, .portal-tab, .portal-tab-icon) svg {
   width: 1em;
   height: 1em;
   flex-shrink: 0;

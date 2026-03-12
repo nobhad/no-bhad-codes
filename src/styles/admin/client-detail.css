@@ -120,16 +120,7 @@
 
 /* --- Shared Tab Layout --- */
 
-/* Panel header row: heading + close button */
-.panel-header-row,
-.panel-header-row--compact {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.panel-header-row { margin-bottom: var(--space-4); }
-.panel-header-row--compact { margin-bottom: var(--space-3); }
+/* Panel header row styles live in shared/portal-tab-components.css */
 
 /* Form actions row: buttons aligned right */
 .form-actions,

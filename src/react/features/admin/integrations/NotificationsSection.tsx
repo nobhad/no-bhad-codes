@@ -33,12 +33,14 @@ export function NotificationsSection({
 }: NotificationsSectionProps) {
   return (
     <div className="status-section">
-      <div className="layout-row-between">
-        <h4 className="section-title">Notification Configurations</h4>
-        <button className="btn btn-primary" onClick={onAdd}>
-          <Plus className="icon-sm" />
-          Add Notification
-        </button>
+      <div className="data-table-header">
+        <h3><span className="title-full">Notification Configurations</span></h3>
+        <div className="data-table-actions">
+          <button className="btn btn-primary" onClick={onAdd}>
+            <Plus className="icon-sm" />
+            Add Notification
+          </button>
+        </div>
       </div>
 
       {notifications.length > 0 ? (

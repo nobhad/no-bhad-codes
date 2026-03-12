@@ -799,6 +799,7 @@ export const ValidationSchemas = {
       { type: 'string' as const, minLength: 2, maxLength: 100 }
     ],
     email: [{ type: 'required' as const }, { type: 'email' as const }],
+    phone: { type: 'string' as const, maxLength: 50 },
     projectFor: {
       type: 'string' as const,
       allowedValues: ['personal', 'business']

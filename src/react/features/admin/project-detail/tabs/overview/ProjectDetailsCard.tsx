@@ -27,7 +27,9 @@ interface ProjectDetailsCardProps {
 export function ProjectDetailsCard({ project, onSaveField }: ProjectDetailsCardProps) {
   return (
     <div className="panel">
-      <h3 className="section-title">Project Details</h3>
+      <div className="data-table-header">
+        <h3><span className="title-full">Project Details</span></h3>
+      </div>
 
       <div className="grid-2col">
         <div className="layout-form-field">

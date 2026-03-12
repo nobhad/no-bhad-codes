@@ -67,12 +67,12 @@ export function NotesTab({
   return (
     <div className="section">
       <div className="panel">
-        <div className="layout-row-between">
-          <h3 className="section-title">
-            Internal Notes
+        <div className="data-table-header">
+          <h3>
+            <span className="title-full">Internal Notes</span>
             <span className="text-muted pd-hint"> (Only visible to admins)</span>
           </h3>
-          <div className="layout-row gap-2">
+          <div className="data-table-actions layout-row gap-2">
             {hasChanges && (
               <span className="text-muted pd-hint">Unsaved changes</span>
             )}

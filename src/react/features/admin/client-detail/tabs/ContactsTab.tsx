@@ -314,130 +314,129 @@ export function ContactsTab({
   );
 
   return (
-    <div className="section tab-section">
-      {/* Header */}
-      <div className="layout-row-between">
-        <h2 className="heading text-lg">
-          Contacts ({contacts.length})
-        </h2>
-        {!isFormOpen && (
-          <IconButton action="add" onClick={handleStartAdd} title="Add Contact" />
-        )}
-      </div>
+    <div className="section">
+      <div className="panel">
+        <div className="data-table-header">
+          <h3><span className="title-full">Contacts</span></h3>
+          {!isFormOpen && (
+            <div className="data-table-actions">
+              <IconButton action="add" onClick={handleStartAdd} title="Add Contact" />
+            </div>
+          )}
+        </div>
 
-      {/* Add/Edit Form */}
-      {isFormOpen && renderForm()}
+        {/* Add/Edit Form */}
+        {isFormOpen && renderForm()}
 
-      {/* Contacts List */}
-      {sortedContacts.length === 0 ? (
-        <EmptyState
-          icon={<Inbox className="icon-lg" />}
-          message="No contacts yet. Add contacts to keep track of key people."
-        />
-      ) : (
-        <div className="grid-2col">
-          {sortedContacts.map((contact) => (
-            <div
-              key={contact.id}
-              className={cn(
-                'portal-card',
-                contact.isPrimary && 'border-primary-accent'
-              )}
-            >
-              {/* Contact Header */}
-              <div className="contact-card-header">
-                <div className="contact-identity">
-                  <div className="contact-avatar">
-                    <User className="icon-lg text-muted" />
-                  </div>
-                  <div>
-                    <div className="contact-name-row">
-                      <span className="heading">
-                        {getContactDisplayName(contact)}
-                      </span>
-                      {contact.isPrimary && (
-                        <Star className="icon-xs active-primary" />
+        {/* Contacts List */}
+        {sortedContacts.length === 0 ? (
+          <EmptyState
+            icon={<Inbox className="icon-lg" />}
+            message="No contacts yet. Add contacts to keep track of key people."
+          />
+        ) : (
+          <div className="grid-2col">
+            {sortedContacts.map((contact) => (
+              <div
+                key={contact.id}
+                className={cn(
+                  'portal-card',
+                  contact.isPrimary && 'border-primary-accent'
+                )}
+              >
+                {/* Contact Header */}
+                <div className="contact-card-header">
+                  <div className="contact-identity">
+                    <div className="contact-avatar">
+                      <User className="icon-lg text-muted" />
+                    </div>
+                    <div>
+                      <div className="contact-name-row">
+                        <span className="heading">
+                          {getContactDisplayName(contact)}
+                        </span>
+                        {contact.isPrimary && (
+                          <Star className="icon-xs active-primary" />
+                        )}
+                      </div>
+                      {contact.title && (
+                        <span className="text-muted text-sm">
+                          {contact.title}
+                        </span>
                       )}
                     </div>
-                    {contact.title && (
-                      <span className="text-muted text-sm">
-                        {contact.title}
-                      </span>
-                    )}
                   </div>
-                </div>
 
-                <PortalDropdown>
-                  <PortalDropdownTrigger asChild>
-                    <button className="icon-btn" aria-label="Contact actions">
-                      <Pencil className="icon-md" />
-                    </button>
-                  </PortalDropdownTrigger>
-                  <PortalDropdownContent align="end">
-                    <PortalDropdownItem onClick={() => handleStartEdit(contact)}>
-                      <Pencil className="icon-md dropdown-item-icon" />
-                      Edit
-                    </PortalDropdownItem>
-                    {!contact.isPrimary && (
-                      <PortalDropdownItem onClick={() => handleSetPrimary(contact)}>
-                        <Star className="icon-md dropdown-item-icon" />
-                        Set as Primary
+                  <PortalDropdown>
+                    <PortalDropdownTrigger asChild>
+                      <button className="icon-btn" aria-label="Contact actions">
+                        <Pencil className="icon-md" />
+                      </button>
+                    </PortalDropdownTrigger>
+                    <PortalDropdownContent align="end">
+                      <PortalDropdownItem onClick={() => handleStartEdit(contact)}>
+                        <Pencil className="icon-md dropdown-item-icon" />
+                        Edit
                       </PortalDropdownItem>
-                    )}
-                    <PortalDropdownItem
-                      onClick={() => handleDeleteClick(contact)}
-                    >
-                      <Trash2 className="icon-md dropdown-item-icon" />
-                      Delete
-                    </PortalDropdownItem>
-                  </PortalDropdownContent>
-                </PortalDropdown>
-              </div>
-
-              {/* Contact Details */}
-              <div className="detail-list">
-                <div className="contact-detail-row">
-                  <Mail className="icon-sm text-muted" />
-                  <a
-                    href={`mailto:${contact.email}`}
-                    className="text-sm text-accent"
-                  >
-                    {contact.email}
-                  </a>
+                      {!contact.isPrimary && (
+                        <PortalDropdownItem onClick={() => handleSetPrimary(contact)}>
+                          <Star className="icon-md dropdown-item-icon" />
+                          Set as Primary
+                        </PortalDropdownItem>
+                      )}
+                      <PortalDropdownItem onClick={() => handleDeleteClick(contact)}>
+                        <Trash2 className="icon-md dropdown-item-icon" />
+                        Delete
+                      </PortalDropdownItem>
+                    </PortalDropdownContent>
+                  </PortalDropdown>
                 </div>
 
-                {contact.phone && (
+                {/* Contact Details */}
+                <div className="detail-list">
                   <div className="contact-detail-row">
-                    <Phone className="icon-sm text-muted" />
+                    <Mail className="icon-sm text-muted" />
                     <a
-                      href={`tel:${contact.phone}`}
-                      className="text-muted text-sm"
+                      href={`mailto:${contact.email}`}
+                      className="text-sm text-accent"
                     >
-                      {contact.phone}
+                      {contact.email}
                     </a>
                   </div>
-                )}
 
-                {contact.role && (
-                  <div className="contact-detail-row">
-                    <Briefcase className="icon-sm text-muted" />
-                    <span className="text-muted text-sm">
-                      {CONTACT_ROLE_LABELS[contact.role] || contact.role}
-                    </span>
-                  </div>
+                  {contact.phone && (
+                    <div className="contact-detail-row">
+                      <Phone className="icon-sm text-muted" />
+                      <a
+                        href={`tel:${contact.phone}`}
+                        className="text-muted text-sm"
+                      >
+                        {contact.phone}
+                      </a>
+                    </div>
+                  )}
+
+                  {contact.role && (
+                    <div className="contact-detail-row">
+                      <Briefcase className="icon-sm text-muted" />
+                      <span className="text-muted text-sm">
+                        {CONTACT_ROLE_LABELS[contact.role] || contact.role}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Notes */}
+                {contact.notes && (
+                  <p className="text-muted contact-notes">
+                    {contact.notes}
+                  </p>
                 )}
               </div>
-
-              {/* Notes */}
-              {contact.notes && (
-                <p className="text-muted contact-notes">
-                  {contact.notes}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Delete Confirmation */}
       <ConfirmDialog

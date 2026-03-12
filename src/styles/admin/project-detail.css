@@ -919,15 +919,8 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* --- Files Tab --- */
 
-/* File upload dropzone */
-.panel.files-dropzone {
-  border: var(--border-width) dashed var(--color-border-primary);
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-4);
-  transition: border-color var(--transition-fast), background-color var(--transition-fast);
-}
+/* File upload dropzone: base layout in shared/portal-files.css.
+   .panel base provides flex-column + padding; portal-files.css sets border-style: dashed. */
 
 .files-dropzone:hover {
   border-color: var(--color-accent);

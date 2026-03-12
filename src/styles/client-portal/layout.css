@@ -18,16 +18,13 @@ body[data-page="client-portal"] {
    NOT a layout container. .portal-body handles the flex sidebar+content layout.
    Height is determined by .portal-body (single source of truth in portal-layout.css). */
 
-/* Dashboard Content Area (right side) — client portal base.
-   Shared layout (flex, height, min-width) in portal-layout.css.
-   Only client-specific padding overrides here. */
+/* Dashboard Content Area — client portal padding overrides only.
+   Base layout (flex, gap, overflow-y, height) in shared/portal-layout.css. */
 .dashboard-content {
-  flex: 1;
-  padding: var(--portal-page-top) clamp(0.75rem, 2vw, 1.5rem) var(--portal-page-bottom);
-  overflow-y: auto;
+  padding-top: var(--portal-page-top);
+  padding-left: clamp(0.75rem, 2vw, 1.5rem);
+  padding-right: clamp(0.75rem, 2vw, 1.5rem);
   overflow-x: hidden;
-  box-sizing: border-box;
-  min-width: 0;
 }
 
 /* Reduced padding on smallest screens */
@@ -170,13 +167,6 @@ body[data-page="client-portal"] {
   .portal-main-container {
     padding: var(--space-2) var(--space-2);
   }
-}
-
-/* All direct children of tab content get consistent card structure */
-.portal .tab-content > * {
-  /* Reset any inherited margins - gap handles spacing */
-  margin-top: 0;
-  margin-bottom: 0;
 }
 
 /* ============================================

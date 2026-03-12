@@ -99,8 +99,6 @@ function sortLeads(a: Lead, b: Lead, sort: SortConfig): number {
     return multiplier * (a.company_name || '').localeCompare(b.company_name || '');
   case 'status':
     return multiplier * a.status.localeCompare(b.status);
-  case 'source':
-    return multiplier * (a.source || '').localeCompare(b.source || '');
   case 'created_at':
     return (
       multiplier *
@@ -405,14 +403,6 @@ export function LeadsTable({
                 Status
               </PortalTableHead>
               <PortalTableHead
-                className="source-col"
-                sortable
-                sortDirection={sort?.column === 'source' ? sort.direction : null}
-                onClick={() => toggleSort('source')}
-              >
-                Source
-              </PortalTableHead>
-              <PortalTableHead
                 className="date-col"
                 sortable
                 sortDirection={sort?.column === 'created_at' ? sort.direction : null}
@@ -426,12 +416,12 @@ export function LeadsTable({
 
           <PortalTableBody animate={!isLoading && !error}>
             {error ? (
-              <PortalTableError colSpan={7} message={error} onRetry={refetch} />
+              <PortalTableError colSpan={6} message={error} onRetry={refetch} />
             ) : isLoading ? (
-              <PortalTableLoading colSpan={7} rows={5} />
+              <PortalTableLoading colSpan={6} rows={5} />
             ) : paginatedLeads.length === 0 ? (
               <PortalTableEmpty
-                colSpan={7}
+                colSpan={6}
                 icon={<Inbox />}
                 message={hasActiveFilters ? 'No leads match your filters' : 'No leads yet'}
               />
@@ -455,30 +445,27 @@ export function LeadsTable({
                   {/* Contact - consolidated name, email, company, phone */}
                   <PortalTableCell className="primary-cell contact-cell">
                     <div className="cell-content">
-                      <span className="cell-title">{decodeHtmlEntities(lead.contact_name) || 'Unknown'}</span>
-                      <span className="cell-subtitle">{decodeHtmlEntities(lead.email)}</span>
-                      {(lead.company_name || lead.phone) && (
+                      {lead.company_name && (
                         <span className="identity-company">
-                          {lead.company_name && lead.client_id && onNavigate ? (
-                            <>
-                              <span
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onNavigate('client-detail', String(lead.client_id));
-                                }}
-                                className="table-link"
-                              >
-                                {decodeHtmlEntities(lead.company_name)}
-                              </span>
-                              {lead.phone && ` • ${lead.phone}`}
-                            </>
+                          {lead.client_id && onNavigate ? (
+                            <span
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onNavigate('client-detail', String(lead.client_id));
+                              }}
+                              className="table-link"
+                            >
+                              {decodeHtmlEntities(lead.company_name)}
+                            </span>
                           ) : (
-                            [
-                              lead.company_name && decodeHtmlEntities(lead.company_name),
-                              lead.phone
-                            ].filter(Boolean).join(' • ')
+                            decodeHtmlEntities(lead.company_name)
                           )}
                         </span>
+                      )}
+                      <span className="cell-title identity-name">{decodeHtmlEntities(lead.contact_name) || 'Unknown'}</span>
+                      <span className="cell-subtitle identity-email">{decodeHtmlEntities(lead.email)}</span>
+                      {lead.phone && (
+                        <span className="cell-subtitle identity-phone">{lead.phone}</span>
                       )}
                       {/* Stacked content for narrow viewports */}
                       {lead.project_type && (
@@ -525,11 +512,6 @@ export function LeadsTable({
                           ))}
                       </PortalDropdownContent>
                     </PortalDropdown>
-                  </PortalTableCell>
-
-                  {/* Source */}
-                  <PortalTableCell className="source-cell">
-                    {LEAD_SOURCE_LABELS[lead.source || ''] || lead.source}
                   </PortalTableCell>
 
                   {/* Created Date */}

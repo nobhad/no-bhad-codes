@@ -159,8 +159,8 @@ export function PortalDocumentRequests({
           {/* Action Needed Section */}
           {actionNeeded.length > 0 && (
             <div className="section">
-              <div className="portal-card-header">
-                <h3 className="section-title">Action Needed</h3>
+              <div className="data-table-header">
+                <h3><span className="title-full">Action Needed</span></h3>
                 <span className="badge">{actionNeeded.length}</span>
               </div>
               <div className="section">
@@ -180,7 +180,7 @@ export function PortalDocumentRequests({
           {/* In Review Section */}
           {inReview.length > 0 && (
             <div className="section">
-              <h3 className="section-title">In Review</h3>
+              <div className="data-table-header"><h3><span className="title-full">In Review</span></h3></div>
               <div className="section">
                 {inReview.map(request => (
                   <DocumentRequestCard
@@ -198,7 +198,7 @@ export function PortalDocumentRequests({
           {/* Completed Section */}
           {completed.length > 0 && (
             <div className="section">
-              <h3 className="section-title">Completed</h3>
+              <div className="data-table-header"><h3><span className="title-full">Completed</span></h3></div>
               <div className="section">
                 {completed.map(request => (
                   <DocumentRequestCard

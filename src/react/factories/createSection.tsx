@@ -95,14 +95,14 @@ export const Section = React.forwardRef<HTMLElement, SectionProps>(
         )}
       >
         {(title || actions) && (
-          <div className="section-header">
+          <div className="data-table-header">
             {title && (
-              <div className="section-title-group">
-                {Icon && <Icon className="section-icon" />}
-                <h3 className="section-title">{title}</h3>
-              </div>
+              <h3>
+                {Icon && <Icon className="icon-sm" />}
+                <span className="title-full">{title}</span>
+              </h3>
             )}
-            {actions && <div className="section-actions">{actions}</div>}
+            {actions && <div className="data-table-actions">{actions}</div>}
           </div>
         )}
         <div className="section-content">{children}</div>

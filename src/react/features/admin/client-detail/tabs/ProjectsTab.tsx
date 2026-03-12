@@ -94,9 +94,9 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
 
     return (
       <div>
-        <h3 className="section-title">
-          {title} ({projectList.length})
-        </h3>
+        <div className="data-table-header">
+          <h3><span className="title-full">{title} ({projectList.length})</span></h3>
+        </div>
         {projectList.length === 0 ? (
           <p className="text-muted empty-text-italic">
             {emptyMessage}
@@ -111,36 +111,33 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
   };
 
   return (
-    <div className="section tab-section">
-      {/* Header */}
-      <div className="layout-row-between">
-        <h2 className="heading text-lg">
-          Projects ({projects.length})
-        </h2>
-
-        {/* Summary stats */}
-        <div className="summary-stats-inline">
-          <div className="stat-inline">
-            <span className="stat-value text-lg">
-              {activeProjects.length}
-            </span>
-            <span className="text-muted text-sm stat-inline-label">Active</span>
-          </div>
-          <div className="stat-inline">
-            <span className="stat-value text-lg">
-              {completedProjects.length}
-            </span>
-            <span className="text-muted text-sm stat-inline-label">
-              Completed
-            </span>
+    <div className="section">
+      <div className="panel">
+        <div className="data-table-header">
+          <h3><span className="title-full">Projects ({projects.length})</span></h3>
+          <div className="summary-stats-inline">
+            <div className="stat-inline">
+              <span className="stat-value text-lg">
+                {activeProjects.length}
+              </span>
+              <span className="text-muted text-sm stat-inline-label">Active</span>
+            </div>
+            <div className="stat-inline">
+              <span className="stat-value text-lg">
+                {completedProjects.length}
+              </span>
+              <span className="text-muted text-sm stat-inline-label">
+                Completed
+              </span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Project sections */}
-      {renderSection('Active Projects', activeProjects, 'No active projects')}
-      {renderSection('Completed', completedProjects)}
-      {renderSection('Other', otherProjects)}
+        {/* Project sections */}
+        {renderSection('Active Projects', activeProjects, 'No active projects')}
+        {renderSection('Completed', completedProjects)}
+        {renderSection('Other', otherProjects)}
+      </div>
     </div>
   );
 }

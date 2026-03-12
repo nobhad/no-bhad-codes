@@ -102,16 +102,18 @@ export function DuplicateDetectionTab({
 
   return (
     <div className="portal-card">
-      <div className="layout-row-between">
-        <h3 className="section-title">Duplicate Detection</h3>
-        <button
-          className="btn btn-primary"
-          onClick={handleScan}
-          disabled={scanning}
-        >
-          <Play size={14} />
-          {scanning ? 'Scanning...' : 'Run Duplicate Scan'}
-        </button>
+      <div className="data-table-header">
+        <h3><span className="title-full">Duplicate Detection</span></h3>
+        <div className="data-table-actions">
+          <button
+            className="btn btn-primary"
+            onClick={handleScan}
+            disabled={scanning}
+          >
+            <Play size={14} />
+            {scanning ? 'Scanning...' : 'Run Duplicate Scan'}
+          </button>
+        </div>
       </div>
 
       {loading ? (

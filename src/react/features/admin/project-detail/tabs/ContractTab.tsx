@@ -153,13 +153,11 @@ export function ContractTab({
 
       {/* Contract Files */}
       <div className="panel contract-panel-no-padding">
-        <div className="section-header">
-          <div className="section-title-group">
-            <FileText className="section-icon" />
-            <span className="heading">
-              Contract Documents
-            </span>
-          </div>
+        <div className="data-table-header">
+          <h3>
+            <FileText className="icon-sm" />
+            <span className="title-full">Contract Documents</span>
+          </h3>
           <span className="text-muted pd-hint">
             {contractFiles.length} file{contractFiles.length !== 1 ? 's' : ''}
           </span>

@@ -21,7 +21,7 @@ interface CalendarSectionProps {
 export function CalendarSection({ calendarStatus, onToggleSync }: CalendarSectionProps) {
   return (
     <div className="status-section">
-      <h4 className="status-section-title">Calendar</h4>
+      <div className="data-table-header"><h3><span className="title-full">Calendar</span></h3></div>
       {calendarStatus ? (
         <div className="stats-grid">
           <div className="portal-card">

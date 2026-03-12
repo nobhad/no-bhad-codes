@@ -11,7 +11,8 @@ import {
   User,
   Tag,
   X,
-  Plus
+  Plus,
+  ArrowRight
 } from 'lucide-react';
 import { CopyEmailButton, ProgressBar } from '@react/components/portal';
 import { cn } from '@react/lib/utils';
@@ -110,13 +111,11 @@ export function OverviewTab({
         {/* Health Score Card */}
         {health && (
           <div className="panel">
-            <div className="layout-row-between">
-              <div className="stat-card-header">
-                <Heart className="icon-lg text-muted" />
-                <h3 className="heading">
-                  Health Score
-                </h3>
-              </div>
+            <div className="data-table-header">
+              <h3>
+                <Heart className="icon-sm" />
+                <span className="title-full">Health Score</span>
+              </h3>
               <div className="stat-card-header">
                 <span className="stat-value">
                   {health.score}
@@ -168,34 +167,34 @@ export function OverviewTab({
 
         {/* Tags Section */}
         <div className="panel">
-          <div className="layout-row-between">
-            <div className="stat-card-header">
-              <Tag className="icon-md text-muted" />
-              <span className="heading">
-                Tags
-              </span>
-            </div>
+          <div className="data-table-header">
+            <h3>
+              <Tag className="icon-sm" />
+              <span className="title-full">Tags</span>
+            </h3>
 
             {unassignedTags.length > 0 && (
-              <PortalDropdown>
-                <PortalDropdownTrigger asChild>
-                  <button className="icon-btn" title="Add Tag" aria-label="Add Tag">
-                    <Plus className="icon-md" />
-                  </button>
-                </PortalDropdownTrigger>
-                <PortalDropdownContent>
-                  {unassignedTags.map((tag) => (
-                    <PortalDropdownItem key={tag.id} onClick={() => handleAddTag(tag.id)}>
-                      <span
-                        className="tag-color-dot"
-                        aria-hidden="true"
-                        style={{ backgroundColor: tag.color }}
-                      />
-                      {tag.name}
-                    </PortalDropdownItem>
-                  ))}
-                </PortalDropdownContent>
-              </PortalDropdown>
+              <div className="data-table-actions">
+                <PortalDropdown>
+                  <PortalDropdownTrigger asChild>
+                    <button className="icon-btn" title="Add Tag" aria-label="Add Tag">
+                      <Plus className="icon-md" />
+                    </button>
+                  </PortalDropdownTrigger>
+                  <PortalDropdownContent>
+                    {unassignedTags.map((tag) => (
+                      <PortalDropdownItem key={tag.id} onClick={() => handleAddTag(tag.id)}>
+                        <span
+                          className="tag-color-dot"
+                          aria-hidden="true"
+                          style={{ backgroundColor: tag.color }}
+                        />
+                        {tag.name}
+                      </PortalDropdownItem>
+                    ))}
+                  </PortalDropdownContent>
+                </PortalDropdown>
+              </div>
             )}
           </div>
 
@@ -229,16 +228,14 @@ export function OverviewTab({
       <div className="layout-stack">
         {/* Contact Info */}
         <div className="panel">
-          <div className="layout-row-between">
-            <h3 className="section-title">
-              Contact Information
-            </h3>
+          <div className="data-table-header">
+            <h3><span className="title-full">Contact Information</span></h3>
             {onSwitchTab && (
               <button
-                className="client-nav-link text-sm"
+                className="overview-panel-action"
                 onClick={() => onSwitchTab('contacts')}
               >
-                View All Contacts
+                View All <ArrowRight className="panel-icon" />
               </button>
             )}
           </div>
@@ -293,9 +290,9 @@ export function OverviewTab({
 
         {/* Account Details */}
         <div className="panel">
-          <h3 className="section-title">
-            Account Details
-          </h3>
+          <div className="data-table-header">
+            <h3><span className="title-full">Account Details</span></h3>
+          </div>
 
           <div className="layout-stack">
             <div className="layout-row-between">

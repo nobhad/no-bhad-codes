@@ -82,7 +82,7 @@ export function IntegrationsManager({
       ) : (
         <div className="status-content">
           <div className="status-section">
-            <h4 className="status-section-title">Integration Overview</h4>
+            <div className="data-table-header"><h3><span className="title-full">Integration Overview</span></h3></div>
             <div className="stats-grid">
               {data.integrations.map((integration) => (
                 <IntegrationCard key={integration.name} integration={integration} />

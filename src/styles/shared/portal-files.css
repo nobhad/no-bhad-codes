@@ -520,9 +520,14 @@
    Used by React FileUploadDropzone component
    ===================================================== */
 
-/* Admin files tab dropzone: override .panel solid border with dashed */
+/* File upload dropzone — overrides .panel solid border with dashed */
 .panel.files-dropzone {
   border-style: dashed;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
 
 .dropzone {

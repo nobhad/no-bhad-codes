@@ -180,7 +180,6 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
             >
               Client
             </PortalTableHead>
-            <PortalTableHead>Project</PortalTableHead>
             <PortalTableHead>Last Message</PortalTableHead>
             <PortalTableHead
               className="text-center"
@@ -204,12 +203,12 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={6} message={error} onRetry={refetch} />
+            <PortalTableError colSpan={5} message={error} onRetry={refetch} />
           ) : isLoading ? (
-            <PortalTableLoading colSpan={6} rows={5} />
+            <PortalTableLoading colSpan={5} rows={5} />
           ) : paginatedConversations.length === 0 ? (
             <PortalTableEmpty
-              colSpan={6}
+              colSpan={5}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No conversations match your search' : 'No conversations yet'}
             />
@@ -228,19 +227,6 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
                       <span className="cell-subtitle">{conversation.clientEmail}</span>
                     </div>
                   </div>
-                </PortalTableCell>
-                <PortalTableCell>
-                  {conversation.projectName && (
-                    <span
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onNavigate?.('project-detail', conversation.projectId != null ? String(conversation.projectId) : undefined);
-                      }}
-                      className="table-link"
-                    >
-                      {conversation.projectName}
-                    </span>
-                  )}
                 </PortalTableCell>
                 <PortalTableCell className="message-preview-cell">
                   {conversation.lastMessage

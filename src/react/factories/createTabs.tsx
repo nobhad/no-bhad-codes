@@ -60,6 +60,8 @@ export interface TabListProps<T extends string = string> {
   tabs: Array<TabItem<T>>;
   /** Tab icons mapping (optional) */
   tabIcons?: TabIconMap<T>;
+  /** Visual container style */
+  variant?: 'tabs' | 'subtabs';
   /** Currently active tab ID */
   activeTab: T;
   /** Tab change handler */
@@ -92,6 +94,7 @@ export interface TabListProps<T extends string = string> {
 export function TabList<T extends string>({
   tabs,
   tabIcons,
+  variant = 'tabs',
   activeTab,
   setActiveTab,
   className,
@@ -140,7 +143,7 @@ export function TabList<T extends string>({
 
   return (
     <div
-      className={cn('portal-tabs', className)}
+      className={cn(variant === 'subtabs' ? 'portal-subtabs' : 'portal-tabs', className)}
       role="tablist"
       aria-label={ariaLabel}
     >

@@ -16,7 +16,7 @@ interface ProjectLinksCardProps {
 export function ProjectLinksCard({ project, onSaveField }: ProjectLinksCardProps) {
   return (
     <div className="panel">
-      <h3 className="section-title">Links</h3>
+      <div className="data-table-header"><h3><span className="title-full">Links</span></h3></div>
       <div className="grid-2col">
         <div className="layout-form-field">
           <div className="field-label">

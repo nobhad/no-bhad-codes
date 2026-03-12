@@ -199,25 +199,16 @@
 }
 
 .snapshot-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-3);
+  padding: var(--portal-card-padding);
   border-bottom: var(--border-width) solid var(--color-border-primary);
 }
 
 .snapshot-card-title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
   color: var(--color-text-secondary);
 }
 
-.snapshot-card-title svg {
-  width: 1em;
-  height: 1em;
-  color: var(--color-text-tertiary);
-}
+/* snapshot header/title layout + icon sizing are single source of truth:
+   shared/portal-tab-components.css */
 
 .snapshot-card-body {
   padding: var(--space-3);

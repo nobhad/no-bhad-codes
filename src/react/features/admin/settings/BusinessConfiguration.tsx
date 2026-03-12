@@ -229,10 +229,12 @@ export function BusinessConfiguration({ showNotification, overviewMode }: Busine
         ) : (
           <div className="config-overview">
             <div className="config-overview-section">
-              <h4 className="config-section-title">
-                <Building2 className="icon-sm" />
-                <span>Business Info</span>
-              </h4>
+              <div className="data-table-header">
+                <h3>
+                  <Building2 className="icon-sm" />
+                  <span className="title-full">Business Info</span>
+                </h3>
+              </div>
               <div className="config-overview-grid">
                 <OverviewItem label="Name" value={businessInfo.name} />
                 <OverviewItem label="Owner" value={businessInfo.owner} />
@@ -241,10 +243,12 @@ export function BusinessConfiguration({ showNotification, overviewMode }: Busine
               </div>
             </div>
             <div className="config-overview-section">
-              <h4 className="config-section-title">
-                <CreditCard className="icon-sm" />
-                <span>Payment Methods</span>
-              </h4>
+              <div className="data-table-header">
+                <h3>
+                  <CreditCard className="icon-sm" />
+                  <span className="title-full">Payment Methods</span>
+                </h3>
+              </div>
               <div className="config-overview-grid">
                 <OverviewItem label="Venmo" value={paymentSettings.venmoHandle} />
                 <OverviewItem label="Zelle" value={paymentSettings.zelleEmail} />

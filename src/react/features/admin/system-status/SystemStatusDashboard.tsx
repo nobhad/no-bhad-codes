@@ -257,7 +257,7 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _
           {/* Services */}
           {data.services.length > 0 && (
             <div className="status-section">
-              <h3 className="status-section-title">Services</h3>
+              <div className="data-table-header"><h3><span className="title-full">Services</span></h3></div>
               <div className="status-services-grid">
                 {data.services.map((service) => (
                   <div key={service.id} className="status-service-card">
@@ -299,7 +299,7 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _
           {/* Metrics */}
           {data.metrics.length > 0 && (
             <div className="status-section">
-              <h3 className="status-section-title">System Metrics</h3>
+              <div className="data-table-header"><h3><span className="title-full">System Metrics</span></h3></div>
               <div className="status-metrics-grid">
                 {data.metrics.map((metric) => (
                   <div key={metric.id} className="status-metric-card">
@@ -333,7 +333,7 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _
           {/* Incidents */}
           {data.incidents.length > 0 && (
             <div className="status-section">
-              <h3 className="status-section-title">Recent Incidents</h3>
+              <div className="data-table-header"><h3><span className="title-full">Recent Incidents</span></h3></div>
               <div className="status-incidents-list">
                 {data.incidents.map((incident) => (
                   <div key={incident.id} className="status-incident-card">

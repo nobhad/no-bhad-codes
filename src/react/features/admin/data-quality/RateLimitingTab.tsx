@@ -101,12 +101,14 @@ export function RateLimitingTab({
     <>
       {stats && (
         <div className="portal-card">
-          <div className="layout-row-between">
-            <h3 className="section-title">Rate Limit Overview</h3>
-            <button className="btn btn-secondary" onClick={loadStats}>
-              <RefreshCw size={14} />
-              Refresh
-            </button>
+          <div className="data-table-header">
+            <h3><span className="title-full">Rate Limit Overview</span></h3>
+            <div className="data-table-actions">
+              <button className="btn btn-secondary" onClick={loadStats}>
+                <RefreshCw size={14} />
+                Refresh
+              </button>
+            </div>
           </div>
 
           <div className="stats-grid">
@@ -126,7 +128,7 @@ export function RateLimitingTab({
 
           {stats.topOffenders.length > 0 && (
             <>
-              <h4 className="section-title mt-lg">Top Offenders</h4>
+              <div className="data-table-header mt-lg"><h3><span className="title-full">Top Offenders</span></h3></div>
               <table className="data-table">
                 <thead>
                   <tr>
@@ -157,7 +159,7 @@ export function RateLimitingTab({
       )}
 
       <div className="portal-card">
-        <h3 className="section-title">Block / Unblock IP</h3>
+        <div className="data-table-header"><h3><span className="title-full">Block / Unblock IP</span></h3></div>
 
         <div className="rate-limit-forms">
           <form onSubmit={handleBlock} className="rate-limit-form">

@@ -232,6 +232,16 @@
   text-align: right;
 }
 
+/* Star/favorite column — fixed icon width, never expands */
+.data-table :is(th, td).star-col,
+.data-table :is(th, td).star-cell {
+  width: 1%;
+  min-width: 3rem;
+  max-width: 3rem;
+  white-space: nowrap;
+  text-align: center;
+}
+
 .col-actions:not(:has(.table-actions)) {
   gap: var(--table-actions-gap);
 }
@@ -259,9 +269,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-1-5) var(--space-1);
+  padding: var(--portal-card-padding);
   border-top: none;
-  border-bottom: var(--portal-border);
+  border-bottom: none;
   border-radius: 0;
   background: transparent;
 }
@@ -272,13 +282,23 @@
 
 .data-table-header h3 {
   order: 0;
+  flex: 1 1 auto;
   margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap);
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
   white-space: nowrap;
+}
+
+.data-table-header h3 svg {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
 }
 
 .data-table-header h3 .title-mobile {
@@ -547,6 +567,7 @@
 .data-table .identity-name,
 .data-table .identity-email,
 .data-table .identity-contact,
+.data-table .identity-phone,
 .data-table .identity-company,
 .data-table .type-value,
 .data-table .date-value,
@@ -637,6 +658,7 @@
 .data-table .identity-name,
 .data-table .identity-email,
 .data-table .identity-contact,
+.data-table .identity-phone,
 .data-table .identity-company,
 .data-table .type-value,
 .data-table .date-value,
@@ -649,6 +671,13 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Identity display order (SoT): company → contact → email → phone.
+   Missing fields simply don't render; order stays consistent. */
+.data-table .cell-content > .identity-company { order: 0; }
+.data-table .cell-content > .identity-name { order: 1; }
+.data-table .cell-content > .identity-email { order: 2; }
+.data-table .cell-content > .identity-phone { order: 3; }
 
 
 /* Stacked content hidden on desktop, shown responsively */
