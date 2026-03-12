@@ -774,32 +774,40 @@ describe('isOverdue', () => {
 // getDaysUntilDue
 // ============================================
 
+/** Format date as local YYYY-MM-DD (getDaysUntilDue uses local dates, not UTC) */
+function toLocalDateString(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 describe('getDaysUntilDue', () => {
   it('returns null for undefined', () => {
     expect(getDaysUntilDue(undefined)).toBeNull();
   });
 
   it('returns 0 for today', () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = toLocalDateString(new Date());
     expect(getDaysUntilDue(today)).toBe(0);
   });
 
   it('returns a positive number for a future date', () => {
     const future = new Date();
     future.setDate(future.getDate() + 5);
-    expect(getDaysUntilDue(future.toISOString().split('T')[0])).toBe(5);
+    expect(getDaysUntilDue(toLocalDateString(future))).toBe(5);
   });
 
   it('returns a negative number for a past date', () => {
     const past = new Date();
     past.setDate(past.getDate() - 3);
-    expect(getDaysUntilDue(past.toISOString().split('T')[0])).toBe(-3);
+    expect(getDaysUntilDue(toLocalDateString(past))).toBe(-3);
   });
 
   it('returns 1 for tomorrow', () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    expect(getDaysUntilDue(tomorrow.toISOString().split('T')[0])).toBe(1);
+    expect(getDaysUntilDue(toLocalDateString(tomorrow))).toBe(1);
   });
 });
 

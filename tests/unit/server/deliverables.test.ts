@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { DeliverableService } from '../../../server/services/deliverable-service';
+import { getDatabase } from '../../../server/database/init';
+
+vi.mock('../../../server/database/init', () => ({
+  getDatabase: vi.fn()
+}));
 
 describe('Deliverable Service', () => {
   let mockDb: any;
@@ -11,7 +16,8 @@ describe('Deliverable Service', () => {
       get: vi.fn(),
       all: vi.fn()
     };
-    service = new DeliverableService(mockDb);
+    vi.mocked(getDatabase).mockReturnValue(mockDb);
+    service = new DeliverableService();
   });
 
   describe('Deliverable CRUD Operations', () => {

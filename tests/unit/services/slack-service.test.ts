@@ -32,6 +32,20 @@ vi.mock('../../../server/database/init', () => ({
   getDatabase: vi.fn(() => mockDb)
 }));
 
+vi.mock('../../../server/config/business', () => ({
+  BUSINESS_INFO: {
+    name: 'No Bhad Codes',
+    owner: 'Noelle Bhaduri',
+    contact: 'Noelle Bhaduri',
+    tagline: 'Web Development & Design',
+    email: 'nobhaduri@gmail.com',
+    website: 'nobhad.codes',
+    venmoHandle: '@nobhaduri',
+    zelleEmail: 'nobhaduri@gmail.com',
+    paypalEmail: ''
+  }
+}));
+
 vi.mock('../../../server/services/logger', () => ({
   logger: {
     info: vi.fn(),

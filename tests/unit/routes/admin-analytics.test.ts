@@ -41,7 +41,8 @@ vi.mock('../../../server/utils/api-response', () => ({
   errorResponse: (...args: unknown[]) => mockErrorResponse(...args),
   ErrorCodes: {
     INTERNAL_ERROR: 'INTERNAL_ERROR',
-    VALIDATION_ERROR: 'VALIDATION_ERROR'
+    VALIDATION_ERROR: 'VALIDATION_ERROR',
+    ANALYTICS_ERROR: 'ANALYTICS_ERROR'
   }
 }));
 

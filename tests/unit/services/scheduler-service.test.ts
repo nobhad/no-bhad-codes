@@ -52,6 +52,7 @@ const mockInvoiceService = {
 };
 
 vi.mock('../../../server/services/invoice-service', () => ({
+  invoiceService: mockInvoiceService,
   InvoiceService: {
     getInstance: () => mockInvoiceService
   }
