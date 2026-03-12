@@ -19,8 +19,8 @@
 
 /* Shared sidebar - same for both admin and client portal */
 .portal .sidebar {
-  width: clamp(var(--sidebar-width-min), 18vw, var(--sidebar-width-open));
-  min-width: var(--sidebar-collapsed-width); /* Allow collapse to icon-only at breakpoints */
+  width: var(--sidebar-width-open);
+  min-width: var(--sidebar-collapsed-width); /* Allow collapse to icon-only */
   background: var(--color-bg-primary);
   border-right: none;
   display: flex;
@@ -168,115 +168,40 @@
 }
 
 /* =====================================================
-   INTERMEDIATE BREAKPOINT AUTO-COLLAPSE
-   Auto-collapse sidebar when viewport is constrained (zoom or narrow screens)
-   1300px triggers at ~150% zoom on 1920px screens (1920/1.5 = 1280px)
-
-   IMPORTANT: Use :not(.collapsed) so manually collapsed sidebars
-   maintain consistent appearance regardless of viewport size.
+   SMALL SCREEN AUTO-COLLAPSE (≤600px)
+   Icon-only view on mobile. User toggle switches to full-hide.
+   No forced collapse at laptop/desktop — user controls that via toggle.
    ===================================================== */
-/* Sidebar auto-collapse - uses responsive layer for priority */
-@layer responsive {
-  @media (--laptop) {
-    /* Only auto-collapse sidebars that aren't manually collapsed */
-    .portal .sidebar:not(.collapsed) {
-      width: var(--sidebar-collapsed-width);
-      min-width: var(--sidebar-collapsed-width);
-      max-width: var(--sidebar-collapsed-width);
-      overflow: hidden;
-    }
+@media (--compact-mobile) {
+  /* Icon-only strip on mobile — clamp width and hide overflow */
+  .portal .sidebar:not(.collapsed) {
+    width: var(--sidebar-collapsed-width);
+    min-width: var(--sidebar-collapsed-width);
+    max-width: var(--sidebar-collapsed-width);
+    overflow: hidden;
   }
-}
 
-@media (--laptop) {
   .portal .sidebar:not(.collapsed) .sidebar-content {
-    padding: 0 var(--space-1) 0;
+    display: flex;
+    padding: 0 var(--space-1);
     gap: var(--space-1);
     align-items: center;
     overflow: hidden;
     height: 100%;
   }
 
-  /* Buttons - icon-only layout at laptop breakpoint */
-  .portal .sidebar:not(.collapsed) .sidebar-buttons {
-    width: 100%;
-    align-items: center;
-    gap: var(--space-1);
-    overflow: hidden;
-  }
-
-  
-  /* Sidebar footer - shared for both portals. Bottom padding only. */
-  .portal .sidebar:not(.collapsed) .sidebar-footer {
-    position: sticky;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    background: transparent;
-    padding: 0 0 var(--space-2);
-    margin-top: auto;
-    flex-shrink: 0;
-  }
-
-  /* Badge positioning when sidebar auto-collapses */
-  .portal .sidebar:not(.collapsed) .sidebar-badge {
-    position: absolute;
-    top: calc(-1 * var(--space-0-5));
-    right: calc(-1 * var(--space-0-5));
-    min-width: var(--icon-size-sm);
-    height: var(--icon-size-sm);
-    font-size: var(--font-size-2xs);
-    padding: 0 var(--space-0-5);
-    border-radius: var(--border-radius-full);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-  }
-
-  /* Admin sidebar now uses same .sidebar-buttons pattern as client portal */
-}
-
-/* =====================================================
-   SMALL SCREEN AUTO-COLLAPSE
-   Auto-collapse sidebar on small screens (no hamburger menu)
-
-   IMPORTANT: Use :not(.collapsed) so manually collapsed sidebars
-   maintain consistent appearance regardless of viewport size.
-   ===================================================== */
-@media (--compact-mobile) {
-  /* Only auto-collapse sidebars that aren't manually collapsed */
-  .portal .sidebar:not(.collapsed) {
-    width: var(--sidebar-collapsed-width);
-    min-width: var(--sidebar-collapsed-width);
-  }
-
-  .portal .sidebar:not(.collapsed) .sidebar-content {
-    display: flex;
-    padding: 0 var(--space-1) 0;
-    gap: var(--space-1);
-    align-items: center;
-  }
-
-  
-  /* Sidebar buttons layout - button styles in shared/portal-buttons.css */
   .portal .sidebar:not(.collapsed) .sidebar-buttons {
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    overflow: hidden;
   }
 
-  /* Footer positioning - for non-collapsed */
   .portal .sidebar:not(.collapsed) .sidebar-footer {
-    left: var(--space-1);
-    right: var(--space-1);
     display: flex;
     justify-content: center;
   }
-
 }
 
 /* Collapsed sidebar mobile - uses responsive layer for priority over auto-collapse */
@@ -510,8 +435,8 @@
   left: calc(100% + var(--space-1-5));
   top: 50%;
   transform: translateY(-50%);
-  background: var(--color-bg-secondary);
-  color: var(--color-text-primary);
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
   padding: var(--space-1) var(--space-2);
   border-radius: var(--border-radius-sm);
   font-family: var(--font-family-sans);
@@ -540,27 +465,3 @@
   display: none;
 }
 
-/* =====================================================
-   RESPONSIVE - TABLET TO LAPTOP AUTO-COLLAPSE
-   Auto-collapse sidebar between tablet and laptop widths
-   ===================================================== */
-
-@media (--tablet-to-laptop) {
-  .portal .portal-body .sidebar {
-    width: var(--sidebar-collapsed-width);
-    min-width: var(--sidebar-collapsed-width);
-    max-width: var(--sidebar-collapsed-width);
-  }
-
-  .portal .portal-body .sidebar .sidebar-buttons .nav-btn {
-    justify-content: center;
-  }
-
-  .portal .portal-body .sidebar .sidebar-buttons .nav-btn .nav-label {
-    display: none;
-  }
-
-  .portal .portal-body .sidebar .sidebar-shortcut {
-    display: none;
-  }
-}

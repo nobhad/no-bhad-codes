@@ -341,7 +341,7 @@
 }
 
 .data-table-card {
-  background: transparent;
+  background: inherit;
   border: var(--portal-border);
   overflow: visible;
   min-width: 0;
@@ -368,17 +368,32 @@
   padding: var(--space-4);
 }
 
-/* Empty/loading/error states inside tables — center vertically and horizontally */
-.data-table td[colspan]:has(.empty-state, .loading-state, .error-state) {
-  height: var(--card-min-height-sm, 200px);
-  vertical-align: middle;
-  text-align: center;
+/* Empty/loading/error states inside tables — flex fill + center */
+.data-table-card:has(.empty-state, .loading-state, .error-state) {
+  display: flex;
+  flex-direction: column;
 }
 
-.data-table td[colspan] .empty-state,
-.data-table td[colspan] .loading-state,
-.data-table td[colspan] .error-state {
-  min-height: var(--card-min-height-sm, 200px);
+.data-table-card:has(.empty-state, .loading-state, .error-state) .data-table-container,
+.data-table-card:has(.empty-state, .loading-state, .error-state) .data-table-scroll-wrapper,
+.data-table-card:has(.empty-state, .loading-state, .error-state) .data-table,
+.data-table-card:has(.empty-state, .loading-state, .error-state) .data-table tbody,
+.data-table-card:has(.empty-state, .loading-state, .error-state) .data-table tbody tr,
+.data-table-card:has(.empty-state, .loading-state, .error-state) .data-table tbody tr td[colspan] {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.data-table-card:has(.empty-state, .loading-state, .error-state) .data-table tbody tr td[colspan] {
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+/* Hide card-mode ::before label on colspan cells */
+.data-table td[colspan]::before {
+  display: none;
 }
 
 /* Scroll wrapper - horizontal scroll when columns don't fit */
@@ -420,6 +435,7 @@
   display: flex;
   align-items: center;
   padding: var(--space-1-5) var(--space-1);
+  border-top: var(--portal-border);
   color: inherit;
   font-size: inherit;
 }
@@ -1331,13 +1347,15 @@
     height: auto;
     background: transparent;
     padding: var(--space-1-5) var(--space-1-5);
-    margin-bottom: var(--table-mobile-card-gap);
-    border: var(--border-width) solid var(--color-border-primary);
-    border-radius: var(--radius-sm, 4px);
+    margin-bottom: 0;
+    border: none;
+    border-bottom: var(--portal-border);
+    border-radius: 0;
   }
 
   .data-table tbody tr:last-child {
     margin-bottom: 0;
+    border-bottom: none;
   }
 
   /* Each cell: label on left, value on right */
@@ -1408,11 +1426,9 @@
     padding-right: 0;
   }
 
-  /* Empty/loading/error states center in card mode */
-  .data-table td[colspan]:has(.empty-state, .loading-state, .error-state) {
-    align-items: center;
-    justify-content: center;
-    min-height: var(--card-min-height-sm, 200px);
+  /* Empty/loading/error states: colspan cells don't need card-mode styling */
+  .data-table td[colspan] {
+    padding: 0;
   }
 
   /* No separators between cells within a card */

@@ -184,7 +184,7 @@ body[data-page="admin"]:not(.admin-logged-in) {
 /* Dashboard Content Area — admin-specific overrides only.
    Base layout (flex, height, min-width) set in shared/portal-layout.css */
 [data-page="admin"] .dashboard-content {
-  padding: var(--portal-page-top) clamp(var(--space-1-5), 2vw, var(--space-3)) var(--portal-page-bottom);
+  padding: 0 clamp(var(--space-1-5), 2vw, var(--space-3)) var(--portal-page-bottom);
   overflow-y: auto;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;

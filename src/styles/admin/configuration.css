@@ -37,7 +37,7 @@
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
-  background: none;
+  background: inherit;
   border: var(--border-width) solid transparent;
   cursor: pointer;
   transition: color var(--transition-fast), border-color var(--transition-fast);
@@ -108,7 +108,6 @@
   justify-content: flex-end;
   gap: var(--space-3);
   padding: var(--space-3) 0 0;
-  border-top: var(--border-width) solid var(--color-border-primary);
 }
 
 .config-save-hint {
