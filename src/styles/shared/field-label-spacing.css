@@ -32,6 +32,16 @@
   display: block;
   margin-bottom: var(--portal-field-label-gap, 0.25rem);
   line-height: var(--line-height-tight);
+  /* Global rule: all field labels stay on a single line across the portal */
+  white-space: nowrap !important;
+}
+
+/* Icons inside labels should sit on the same row as the text,
+   with consistent spacing using the shared field-label gap token. */
+.field-label svg {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: var(--portal-field-label-gap, 0.25rem);
 }
 
 /* Label variants */

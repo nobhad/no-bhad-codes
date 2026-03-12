@@ -1161,14 +1161,6 @@ html[data-theme="light"] .portal .funnel-value {
   color: var(--color-text-tertiary);
 }
 
-/* Inline form field label — field-label-spacing.css is canonical; this aligns */
-.field-label {
-  font-size: var(--font-size-sm, 14px);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-secondary);
-  margin-bottom: 0.25rem;
-}
-
 /* text-muted / text-primary — base/utilities.css is canonical */
 .text-muted {
   color: var(--color-text-tertiary);

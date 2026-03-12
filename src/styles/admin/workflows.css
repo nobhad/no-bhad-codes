@@ -13,7 +13,7 @@
   color: var(--color-text-secondary);
 }
 
-.modal-body .form-group-checkbox {
+.modal-body .form-field--checkbox {
   display: flex;
   align-items: center;
   min-height: 48px;

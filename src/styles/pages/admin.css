@@ -581,7 +581,7 @@ body.modal-open .dashboard-content {
   color: var(--color-success);
 }
 
-.set-password-form .form-group {
+.set-password-form .form-field {
   margin-bottom: var(--space-4);
 }
 
@@ -715,7 +715,7 @@ body.modal-open .dashboard-content {
   body[data-page="admin"] .charts-grid,
   body[data-page="admin"] .overview-grid {
     grid-template-columns: 1fr;
-    gap: var(--space-1);
+    gap: var(--portal-section-gap);
   }
 
   body[data-page="admin"] .stat-card,
@@ -1172,6 +1172,19 @@ body.modal-open .dashboard-content {
 
 [data-page="admin"] .overview-table-section .data-table tbody {
   min-height: auto;
+}
+
+/* Ensure hover background spans full card width for overview tables.
+   Remove horizontal padding from the cells and shift it to the inner content
+   via margins instead, so the background fill reaches the card edges. */
+[data-page="admin"] .overview-table-section .data-table :is(th, td) {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+[data-page="admin"] .overview-table-section .data-table :is(th, td) > * {
+  margin-left: var(--table-cell-padding-x);
+  margin-right: var(--table-cell-padding-x);
 }
 
 /* Empty/loading states - compact height, no percentage stretch */

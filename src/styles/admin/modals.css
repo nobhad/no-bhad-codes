@@ -301,7 +301,7 @@
   overscroll-behavior: contain;
 }
 
-.portal-modal-body .form-group {
+.portal-modal-body .form-field {
   margin-bottom: 0;
 }
 
@@ -310,7 +310,7 @@
   gap: var(--space-4);
 }
 
-.portal-modal-body .form-row .form-group {
+.portal-modal-body .form-row .form-field {
   flex: 1;
 }
 

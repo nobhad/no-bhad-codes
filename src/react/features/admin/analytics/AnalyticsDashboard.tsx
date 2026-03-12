@@ -39,6 +39,7 @@ import {
   PortalDropdownContent,
   PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
+import { PortalButton } from '@react/components/portal';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { ErrorState, LoadingState } from '@react/factories';
 import { formatCurrencyCompact as formatCurrency } from '@/utils/format-utils';
@@ -294,7 +295,7 @@ const KpiCard = React.memo(({ kpi }: { kpi: KPI }) => {
     <div className="kpi-card">
       <div className="kpi-card-icon">{kpi.icon}</div>
       <span className="kpi-card-label">{kpi.label}</span>
-      <div className="kpi-card-value">{kpi.value}</div>
+      <div className="stat-value stat-value-primary">{kpi.value}</div>
       {kpi.change !== undefined && (
         <div className={cn('kpi-card-change', kpi.change >= 0 ? 'positive' : 'negative')}>
           {kpi.change >= 0 ? <TrendingUp className="icon-xs" /> : <TrendingDown className="icon-xs" />}
@@ -449,14 +450,22 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
             ))}
           </PortalDropdownContent>
         </PortalDropdown>
-        <button className="btn-secondary" onClick={() => loadAnalytics()} disabled={isLoading}>
+        <PortalButton
+          variant="icon"
+          size="icon"
+          aria-label="Refresh analytics"
+          onClick={() => loadAnalytics()}
+          disabled={isLoading}
+        >
           <RefreshCw className={cn('icon-sm', isLoading && 'animate-spin')} />
-          Refresh
-        </button>
-        <button className="btn-secondary">
+        </PortalButton>
+        <PortalButton
+          variant="icon"
+          size="icon"
+          aria-label="Export analytics"
+        >
           <Download className="icon-sm" />
-          Export
-        </button>
+        </PortalButton>
       </div>
 
       {error && (

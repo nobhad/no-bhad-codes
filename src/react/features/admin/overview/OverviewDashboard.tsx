@@ -193,7 +193,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
               {metric.icon}
               <span className="field-label">{metric.label}</span>
             </div>
-            <div className="stat-card-value">{metric.value}</div>
+            <div className="stat-value">{metric.value}</div>
           </div>
         ))}
       </div>
@@ -207,7 +207,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
                 {item.icon}
                 <span className="field-label">{item.label}</span>
               </div>
-              <div className="stat-card-value stat-value-alert">{item.count}</div>
+              <div className="stat-value stat-value-alert">{item.count}</div>
             </button>
           ))}
         </div>

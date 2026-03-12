@@ -235,6 +235,15 @@
   gap: var(--table-actions-gap);
 }
 
+/* Collapse visual padding when a row has an actions column but no visible actions.
+   This avoids an odd empty gutter on the right edge while preserving table layout. */
+.data-table td.col-actions:not(:has(.data-table-row-actions)),
+.data-table td.col-actions:has(.data-table-row-actions:empty) {
+  padding-left: 0;
+  padding-right: 0;
+  margin: 0;
+}
+
 /* Icon size is controlled via --portal-btn-icon-size scoped on .table-actions
    and .data-table-row-actions containers — the unlayered .icon-btn base rule
    reads the token via DOM inheritance, making @layer overrides unnecessary. */
@@ -985,8 +994,9 @@
   transition: background-color var(--duration-faster);
 }
 
+/* Disable background-color change on header hover — text/icon only */
 .data-table th.sortable:hover {
-  background-color: var(--color-bg-hover);
+  background-color: transparent;
 }
 
 .sort-header-btn {
