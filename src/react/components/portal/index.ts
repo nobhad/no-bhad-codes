@@ -136,6 +136,9 @@ export {
   type ExportButtonProps
 } from './TableFilters';
 
+// Progress Bar
+export { ProgressBar, type ProgressBarProps } from './ProgressBar';
+
 // Copy Email Button
 export { CopyEmailButton } from './CopyEmailButton';
 
