@@ -76,25 +76,25 @@ Combined Profile and Password management in one section.
     <h3>Account</h3>
     <form class="settings-form" id="profile-form">
         <!-- Profile Fields -->
-        <div class="form-group">
+        <div class="form-field">
             <label for="settings-name">Full Name</label>
             <input type="text" id="settings-name" class="form-input" value="Client Name">
         </div>
-        <div class="form-group">
+        <div class="form-field">
             <label for="settings-email">Email</label>
             <input type="email" id="settings-email" class="form-input" value="client@example.com">
         </div>
-        <div class="form-group">
+        <div class="form-field">
             <label for="settings-company">Company</label>
             <input type="text" id="settings-company" class="form-input" placeholder="Your company name">
         </div>
-        <div class="form-group">
+        <div class="form-field">
             <label for="settings-phone">Phone</label>
             <input type="tel" id="settings-phone" class="form-input" placeholder="(555) 555-5555">
         </div>
 
         <!-- Password Fields with Toggle -->
-        <div class="form-group">
+        <div class="form-field">
             <label for="current-password">Current Password</label>
             <div class="cp-password-wrapper">
                 <input type="password" id="current-password" class="form-input" autocomplete="current-password">
@@ -104,7 +104,7 @@ Combined Profile and Password management in one section.
                 </button>
             </div>
         </div>
-        <div class="form-group">
+        <div class="form-field">
             <label for="new-password">New Password</label>
             <div class="cp-password-wrapper">
                 <input type="password" id="new-password" class="form-input" autocomplete="new-password">
@@ -114,7 +114,7 @@ Combined Profile and Password management in one section.
                 </button>
             </div>
         </div>
-        <div class="form-group">
+        <div class="form-field">
             <label for="confirm-password">Confirm New Password</label>
             <div class="cp-password-wrapper">
                 <!-- Use autocomplete="off" for confirm field to prevent multiple save password prompts -->
@@ -206,31 +206,31 @@ Company and address information for invoicing.
 <div class="settings-section cp-shadow">
     <h3>Billing Information</h3>
     <form class="settings-form" id="billing-form">
-        <div class="form-group">
+        <div class="form-field">
             <label for="billing-company">Company Name</label>
             <input type="text" id="billing-company" class="form-input" placeholder="Your company name">
         </div>
-        <div class="form-group">
+        <div class="form-field">
             <label for="billing-address">Street Address</label>
             <input type="text" id="billing-address" class="form-input" placeholder="123 Main St">
         </div>
-        <div class="form-group">
+        <div class="form-field">
             <label for="billing-address2">Address Line 2</label>
             <input type="text" id="billing-address2" class="form-input" placeholder="Apt, Suite, etc.">
         </div>
-        <div class="form-group">
+        <div class="form-field">
             <label for="billing-city">City</label>
             <input type="text" id="billing-city" class="form-input" placeholder="City">
         </div>
-        <div class="form-group">
+        <div class="form-field">
             <label for="billing-state">State / Province</label>
             <input type="text" id="billing-state" class="form-input" placeholder="State">
         </div>
-        <div class="form-group">
+        <div class="form-field">
             <label for="billing-zip">ZIP / Postal Code</label>
             <input type="text" id="billing-zip" class="form-input" placeholder="12345">
         </div>
-        <div class="form-group">
+        <div class="form-field">
             <label for="billing-country">Country</label>
             <input type="text" id="billing-country" class="form-input" placeholder="United States">
         </div>

@@ -112,13 +112,13 @@ The New Project Request form allows existing clients to submit requests for addi
     <form class="new-project-form" id="new-project-form">
         <p class="form-intro">Ready to start something new? Fill out the form below to request a new project.</p>
 
-        <div class="form-group">
+        <div class="form-field">
             <label for="project-name">Project Name</label>
             <input type="text" id="project-name" class="form-input"
                    placeholder="e.g., Company Website Redesign" required>
         </div>
 
-        <div class="form-group">
+        <div class="form-field">
             <label for="project-type">Project Type</label>
             <select id="project-type" class="form-select" required>
                 <option value="">Select a project type</option>
@@ -131,7 +131,7 @@ The New Project Request form allows existing clients to submit requests for addi
             </select>
         </div>
 
-        <div class="form-group">
+        <div class="form-field">
             <label for="project-budget">Estimated Budget</label>
             <select id="project-budget" class="form-select" required>
                 <option value="">Select a budget range</option>
@@ -143,7 +143,7 @@ The New Project Request form allows existing clients to submit requests for addi
             </select>
         </div>
 
-        <div class="form-group">
+        <div class="form-field">
             <label for="project-timeline">Desired Timeline</label>
             <select id="project-timeline" class="form-select" required>
                 <option value="">Select a timeline</option>
@@ -154,7 +154,7 @@ The New Project Request form allows existing clients to submit requests for addi
             </select>
         </div>
 
-        <div class="form-group">
+        <div class="form-field">
             <label for="project-description">Project Description</label>
             <textarea id="project-description" class="form-textarea" rows="5"
                       placeholder="Tell me about your project goals, requirements, and any specific features you need..."
@@ -173,7 +173,7 @@ The New Project Request form allows existing clients to submit requests for addi
 ### Project Name
 
 ```html
-<div class="form-group">
+<div class="form-field">
     <label for="project-name">Project Name</label>
     <input type="text" id="project-name" class="form-input"
            placeholder="e.g., Company Website Redesign" required>
@@ -201,7 +201,7 @@ Dropdown selection for project category:
 |`other`|Other|
 
 ```html
-<div class="form-group">
+<div class="form-field">
     <label for="project-type">Project Type</label>
     <select id="project-type" class="form-select" required>
         <option value="">Select a project type</option>
@@ -228,7 +228,7 @@ Budget range selection:
 |`25k+`|$25,000+|
 
 ```html
-<div class="form-group">
+<div class="form-field">
     <label for="project-budget">Estimated Budget</label>
     <select id="project-budget" class="form-select" required>
         <option value="">Select a budget range</option>
@@ -253,7 +253,7 @@ Timeline preference selection:
 |`flexible`|Flexible|
 
 ```html
-<div class="form-group">
+<div class="form-field">
     <label for="project-timeline">Desired Timeline</label>
     <select id="project-timeline" class="form-select" required>
         <option value="">Select a timeline</option>
@@ -270,7 +270,7 @@ Timeline preference selection:
 Free-form text area for detailed requirements:
 
 ```html
-<div class="form-group">
+<div class="form-field">
     <label for="project-description">Project Description</label>
     <textarea id="project-description" class="form-textarea" rows="5"
               placeholder="Tell me about your project goals, requirements, and any specific features you need..."

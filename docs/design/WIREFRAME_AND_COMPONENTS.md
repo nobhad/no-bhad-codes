@@ -57,7 +57,7 @@ Below is what **should** be reusable components (or shared modules) but currentl
 
 ### 3. **Stat cards / Quick stats grid**
 
-- **Pattern:** `.quick-stats` grid of `.stat-card` (optional `.stat-card-clickable`) with `.stat-number` and `.stat-label`.
+- **Pattern:** `.quick-stats` grid of `.stat-card` (optional `.stat-card-clickable`) with `.stat-value` and `.stat-label`.
 - **Admin:** Used on Overview and on Leads/Projects tabs; HTML duplicated.
 - **Client:** Used on dashboard; same structure.
 - **Implemented:** `createQuickStats(items)` in `src/components/quick-stats.ts`; use when building tabs in JS.

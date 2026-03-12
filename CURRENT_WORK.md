@@ -116,6 +116,20 @@ Removed duplicate import.
 
 ---
 
+## In Progress - Portal CSS Legacy Cleanup (Form classes)
+
+**Status:** IN PROGRESS
+
+### Changes in flight
+
+- Standardized form wrapper class to **`.form-field`** (removed remaining `.form-group` selectors from portal/admin/client CSS).
+- Auth gate is now React-mounted via `server/views/partials/auth-gate.ejs` and `src/react/features/auth/mount-auth-gate.tsx`, eliminating the last auth-specific need for `.form-group`.
+- Fixed a build-time CSS selector typo in `src/styles/shared/portal-tabs.css` (disabled state selector) that previously produced an `esbuild` CSS syntax warning during `vite build`.
+
+### Follow-ups
+
+- If any legacy markup still uses `.form-group` (outside `src/styles/`), migrate it to `.form-field` as it’s encountered.
+
 ## Completed - Validation & Status Mismatch Fixes
 
 **Status:** COMPLETE
