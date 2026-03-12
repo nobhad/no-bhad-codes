@@ -142,8 +142,8 @@ select::-ms-expand {
   gap: clamp(8px, 2vw, 16px);
 }
 
-/* Form group spacing */
-.form-group,
+/* Form field spacing */
+.form-field,
 .form-row {
   margin: 0;
   display: flex;
@@ -159,7 +159,7 @@ select::-ms-expand {
    SINGLE SOURCE OF TRUTH: shared/field-label-spacing.css */
 
 /* Form labels */
-.form-group label,
+.form-field label,
 label {
   display: block;
   margin-bottom: 0;

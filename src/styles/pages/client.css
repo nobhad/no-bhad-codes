@@ -90,7 +90,7 @@ body[data-page="client-landing"] .client-login .client-content {
 /* All form styling and spacing now controlled from main.css universal system */
 
 /* Error states - specific styling only */
-.form-group input.error {
+.form-field input.error {
   border-color: var(--color-danger-dark);
 }
 
