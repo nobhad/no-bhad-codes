@@ -1,10 +1,23 @@
 <!-- Unified Portal Header - Avatar, Logo, Toggle, Page Title, Theme Toggle -->
 <header class="portal-global-header">
-  <div class="portal-global-header-left">
-    <a href="/" class="header-branding" aria-label="Go to homepage">
-      <img src="/images/avatar_small_sidebar.svg" alt="" class="header-avatar" />
-      <span class="header-logo-text">NO BHAD CODES</span>
-    </a>
+  <div class="portal-global-header-row">
+    <div class="portal-global-header-left">
+      <a href="/" class="header-branding" aria-label="Go to homepage">
+        <img src="/images/avatar_small_sidebar.svg" alt="" class="header-avatar" />
+        <span class="header-logo-text">NO BHAD CODES</span>
+      </a>
+    </div>
+    <div class="portal-global-header-right">
+      <% if (config.features.notificationBell) { %>
+        <!-- Notification Bell -->
+        <div class="notification-bell-container" id="notification-bell-container"></div>
+      <% } %>
+      <button id="header-toggle-theme" class="header-theme-toggle" aria-label="Toggle dark/light theme">
+        <%- include('icons/theme-toggle-icons') %>
+      </button>
+    </div>
+  </div>
+  <div class="portal-global-header-breadcrumbs">
     <!-- Sidebar Toggle -->
     <button class="header-sidebar-toggle" id="header-sidebar-toggle" aria-label="Toggle sidebar">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar-toggle-icon" aria-hidden="true">
@@ -19,14 +32,5 @@
         <%= config.pageTitle %>
       <% } %>
     </h1>
-  </div>
-  <div class="portal-global-header-right">
-    <% if (config.features.notificationBell) { %>
-      <!-- Notification Bell -->
-      <div class="notification-bell-container" id="notification-bell-container"></div>
-    <% } %>
-    <button id="header-toggle-theme" class="header-theme-toggle" aria-label="Toggle dark/light theme">
-      <%- include('icons/theme-toggle-icons') %>
-    </button>
   </div>
 </header>
