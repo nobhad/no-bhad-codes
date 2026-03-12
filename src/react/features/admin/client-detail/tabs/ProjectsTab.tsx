@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { FolderKanban, Clock } from 'lucide-react';
 import { EmptyState } from '@react/components/portal/EmptyState';
+import { ProgressBar } from '@react/components/portal';
 import type { ClientProject } from '../../types';
 import { PROJECT_STATUS_CONFIG } from '../../types';
 import { formatDate } from '@/utils/format-utils';
@@ -78,20 +79,7 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
 
         {/* Progress bar */}
         {(project.status === 'active' || project.status === 'in-progress') && (
-          <div className="project-card-progress">
-            <div className="progress-header">
-              <span className="field-label">Progress</span>
-              <span className="text-muted text-sm">
-                {progress}%
-              </span>
-            </div>
-            <div className="progress-bar-sm">
-              <div
-                className="progress-fill"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          </div>
+          <ProgressBar value={progress} />
         )}
       </div>
     );

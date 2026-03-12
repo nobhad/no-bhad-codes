@@ -9,14 +9,14 @@ import {
   FileSignature,
   StickyNote,
   ClipboardList,
-  MoreHorizontal,
   Pencil,
   Copy,
   Archive,
   FileText,
   Trash2,
   FolderKanban,
-  ChevronDown
+  ChevronDown,
+  MoreVertical
 } from 'lucide-react';
 import { IconButton, TabList, TabPanel } from '@react/factories';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
@@ -25,7 +25,7 @@ import {
   PortalDropdownTrigger,
   PortalDropdownContent,
   PortalDropdownItem,
-  PortalDropdownSeparator
+  PortalDropdownLabel
 } from '@react/components/portal/PortalDropdown';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import { useProjectDetail } from '@react/hooks/useProjectDetail';
@@ -39,6 +39,7 @@ import { ContractTab } from './tabs/ContractTab';
 import { NotesTab } from './tabs/NotesTab';
 import { IntakeTab } from './tabs/IntakeTab';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { ProgressBar } from '@react/components/portal';
 import type { ProjectDetailTab, ProjectStatus } from '../types';
 import { PROJECT_STATUS_CONFIG, PROJECT_TYPE_LABELS } from '../types';
 import { buildEndpoint } from '@/constants/api-endpoints';
@@ -222,6 +223,15 @@ export function ProjectDetail({
 
   return (
     <div ref={containerRef} className="section">
+      {/* Tabs — top of page, like all other subtab nav */}
+      <TabList
+        tabs={TABS}
+        tabIcons={TAB_ICONS}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        ariaLabel="Project detail tabs"
+      />
+
       {/* Header */}
       <div className="detail-title-row">
         <div className="detail-title-group">
@@ -276,22 +286,14 @@ export function ProjectDetail({
         <div className="detail-actions">
           <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
 
-          <button
-            className="icon-btn"
-            onClick={() => onEdit?.(projectId)}
-            title="Edit Project"
-            aria-label="Edit Project"
-          >
-            <Pencil className="icon-md" />
-          </button>
-
           <PortalDropdown>
             <PortalDropdownTrigger asChild>
-              <button className="icon-btn" aria-label="More actions">
-                <MoreHorizontal className="icon-lg" />
-              </button>
+              <IconButton action="more" title="More actions" />
             </PortalDropdownTrigger>
-            <PortalDropdownContent align="end">
+            <PortalDropdownContent align="end" sideOffset={-36} className="detail-actions-menu">
+              <PortalDropdownLabel className="detail-actions-menu-trigger-row">
+                <MoreVertical className="icon-sm" />
+              </PortalDropdownLabel>
               <PortalDropdownItem onClick={() => onEdit?.(projectId)}>
                 <Pencil className="icon-sm" />
                 Edit Project
@@ -308,27 +310,22 @@ export function ProjectDetail({
                 <FileText className="icon-sm" />
                 Generate Documents
               </PortalDropdownItem>
-              <PortalDropdownSeparator />
-              <PortalDropdownItem
-                onClick={deleteDialog.open}
-                className="danger"
-              >
-                <Trash2 className="icon-sm" />
-                Delete Project
-              </PortalDropdownItem>
+              {project.status === 'cancelled' && (
+                <PortalDropdownItem
+                  onClick={deleteDialog.open}
+                  className="danger"
+                >
+                  <Trash2 className="icon-sm" />
+                  Delete Project
+                </PortalDropdownItem>
+              )}
             </PortalDropdownContent>
           </PortalDropdown>
         </div>
       </div>
 
-      {/* Tabs — above all content, like all other subtab nav */}
-      <TabList
-        tabs={TABS}
-        tabIcons={TAB_ICONS}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        ariaLabel="Project detail tabs"
-      />
+      {/* Progress Bar */}
+      <ProgressBar value={progress} />
 
       {/* Tab Content */}
       <TabPanel tabId="overview" isActive={activeTab === 'overview'}>

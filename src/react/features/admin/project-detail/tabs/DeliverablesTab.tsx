@@ -4,7 +4,9 @@ import {
   Pencil,
   Trash2,
   Inbox,
-  AlertCircle
+  AlertCircle,
+  Calendar,
+  Box
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -202,22 +204,28 @@ export function DeliverablesTab({
               }
 
               const header = (
-                <div className="flex-fill milestone-content">
-                  <span
-                    className={cn(
-                      'milestone-title',
-                      allCompleted && 'completed'
+                <>
+                  <div className="flex-fill milestone-content">
+                    <Box className="icon-xs" />
+                    <span
+                      className={cn(
+                        'milestone-title',
+                        allCompleted && 'completed'
+                      )}
+                    >
+                      {decodeHtmlEntities(milestone.title)}
+                    </span>
+                    {milestone.due_date && (
+                      <span className="milestone-due">
+                        <Calendar className="icon-xs" />
+                        {formatDate(milestone.due_date)}
+                      </span>
                     )}
-                  >
-                    {decodeHtmlEntities(milestone.title)}
-                  </span>
+                  </div>
                   <span className="text-muted text-xs">
                     {completedTasks}/{milestoneTasks.length}
                   </span>
-                  {milestone.due_date && (
-                    <span className="milestone-due">{formatDate(milestone.due_date)}</span>
-                  )}
-                </div>
+                </>
               );
 
               return (

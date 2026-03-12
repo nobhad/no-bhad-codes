@@ -13,7 +13,7 @@ import {
   X,
   Plus
 } from 'lucide-react';
-import { CopyEmailButton } from '@react/components/portal';
+import { CopyEmailButton, ProgressBar } from '@react/components/portal';
 import { cn } from '@react/lib/utils';
 import {
   PortalDropdown,
@@ -132,18 +132,7 @@ export function OverviewTab({
               <div className="grid-2col">
                 {Object.entries(health.factors).map(([key, value]) => (
                   <div key={key} className="layout-form-field">
-                    <div className="health-factor-header">
-                      <span className="text-muted">
-                        {key.replace('_', ' ')}
-                      </span>
-                      <span className="text-muted">{value}%</span>
-                    </div>
-                    <div className="progress-bar-sm">
-                      <div
-                        className="progress-fill"
-                        style={{ width: `${value}%` }}
-                      />
-                    </div>
+                    <ProgressBar value={value} label={key.replace('_', ' ')} />
                   </div>
                 ))}
               </div>

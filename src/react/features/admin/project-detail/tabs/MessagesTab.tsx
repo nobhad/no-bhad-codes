@@ -49,7 +49,7 @@ export function MessagesTab({
   );
 
   return (
-    <div className="panel">
+    <div className="data-table-card">
       <MessageThread
         messages={threadMessages}
         isLoading={isLoading}
