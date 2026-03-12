@@ -170,7 +170,7 @@
    SHARED DISABLED STATE
    ===================================================== */
 
-:is(.portal-tab, .portal-subtab)--disabled {
+:is(.portal-tab--disabled, .portal-subtab--disabled, .portal-tab:disabled, .portal-subtab:disabled) {
   cursor: not-allowed;
 }
 

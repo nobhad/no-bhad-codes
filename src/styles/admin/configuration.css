@@ -37,7 +37,8 @@
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
-  background: inherit;
+  /* Match table card background so tabs align with surrounding surface */
+  background-color: var(--table-bg);
   border: var(--border-width) solid transparent;
   cursor: pointer;
   transition: color var(--transition-fast), border-color var(--transition-fast);

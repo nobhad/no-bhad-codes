@@ -547,12 +547,13 @@
 
 @media (--mobile) {
   .project-detail-section {
-    padding: var(--space-4) var(--space-6);
+    /* Base mobile padding handled in mobile/layout.css; keep a small inner offset for consistency */
+    padding: var(--space-3) var(--space-4);
   }
 
   .worksub-wrapper {
-    padding-top: var(--space-3);
-    gap: var(--space-6);
+    padding-top: var(--space-2);
+    gap: var(--space-4);
   }
 
   .worksub-divider { display: none; }
@@ -591,8 +592,9 @@
     line-height: 1.3;
     border-radius: 5px;
     letter-spacing: 0.05em;
+    /* Right-align badge while keeping it tight to the title row */
     margin-left: auto;
-    margin-right: auto;
+    margin-right: 0;
   }
 
   .worksub-intro .project-tagline {
@@ -723,7 +725,8 @@
 
 @media (--xs-mobile) {
   .project-detail-section {
-    padding: var(--space-3) var(--space-5);
+    /* Tighter horizontal padding on smallest screens */
+    padding: var(--space-2) var(--space-3);
   }
 
   .worksub-info figure img.phone-screen,

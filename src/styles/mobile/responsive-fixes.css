@@ -49,8 +49,8 @@
     color: var(--color-text-primary);
   }
 
-  /* Table row hover */
-  .portal .data-table tbody tr:hover {
+  /* Table row hover - ensure full-width cell background, not just row */
+  .portal .data-table tbody tr:hover td {
     background: var(--color-bg-hover, var(--color-state-hover));
   }
 
@@ -117,12 +117,12 @@
   /* .icon-btn:active - moved to portal-buttons.css */
 
   /* Table row - no hover background on touch */
-  .portal .data-table tbody tr:hover {
+  .portal .data-table tbody tr:hover td {
     background: transparent;
   }
 
-  /* Show active state instead */
-  .portal .data-table tbody tr:active {
+  /* Show active state instead (cell background so it reaches table edge) */
+  .portal .data-table tbody tr:active td {
     background: var(--color-bg-hover, var(--color-state-hover));
   }
 }

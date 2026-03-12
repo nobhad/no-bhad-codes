@@ -132,6 +132,8 @@
     right: 0;
     bottom: 0;
     box-sizing: border-box;
+    /* Match contact/about sections: tighter vertical padding on mobile */
+    padding: 1.5rem 1rem 3rem;
   }
 
   /* About section - SCROLLABLE SECTION
@@ -450,6 +452,20 @@
 @media (--xs-mobile) {
   main > section {
     padding: 0.5rem;
+  }
+
+  /* Extra-tight layout on the very smallest screens (e.g. iPhone SE) */
+  .project-detail-section {
+    /* Give more breathing room on XS (iPhone 12 Pro / SE) */
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  /* Match project detail edge-to-edge feel in header on XS */
+  .header .container {
+    max-width: 100%;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
   }
 
   /* Section headings on XS — tighter than small-mobile */

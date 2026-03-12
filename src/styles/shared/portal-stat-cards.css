@@ -87,11 +87,11 @@
    Stat number - the big value (unified)
    Single source of truth for all stat/kpi value styling.
    Must be smaller than page title to maintain hierarchy.
-   Aliases: .stat-value, .stat-card-value, .kpi-card-value, .kpi-value
+  Aliases have been removed; .stat-value is canonical.
    ===================================================== */
 
-/* stat-value is the canonical name; all others are legacy aliases */
-.portal :is(.stat-number, .stat-value, .stat-card-value, .kpi-card-value, .kpi-value) {
+/* stat-value is the canonical name; all others have been migrated */
+.portal .stat-value {
   display: block;
   font-family: var(--font-family-mono, monospace);
   font-size: var(--font-size-xl, 1.25rem);
@@ -148,7 +148,7 @@
   border-color: var(--color-border-primary);
 }
 
-.portal .stat-card-clickable:hover :is(.stat-number, .stat-value) {
+.portal .stat-card-clickable:hover .stat-value {
   color: var(--color-accent);
 }
 
@@ -158,8 +158,8 @@
   border-color: var(--color-accent);
 }
 
-.portal .stat-card-clickable.active :is(.stat-number, .stat-value),
-.portal .stat-card.active :is(.stat-number, .stat-value) {
+.portal .stat-card-clickable.active .stat-value,
+.portal .stat-card.active .stat-value {
   color: var(--color-accent);
 }
 
@@ -189,32 +189,25 @@
 
 /* Alert state for stat values (overdue, blocked, etc.) */
 .portal .stat-value-alert,
-.portal .stat-card--alert :is(.stat-number, .stat-value, .stat-card-value),
-.portal .stat-card--alert.has-items :is(.stat-number, .stat-value, .stat-card-value) {
+.portal .stat-card--alert .stat-value,
+.portal .stat-card--alert.has-items .stat-value {
   color: var(--status-cancelled);
 }
 
 /* Warning state for stat values */
 .portal .stat-value-warning,
-.portal
-  :is(.stat-card--warning, .tasks-stat-card--alert)
-  :is(.stat-number, .stat-value, .stat-card-value),
-.portal
-  :is(.stat-card--warning, .tasks-stat-card--alert).has-items
-  :is(.stat-number, .stat-value, .stat-card-value) {
+.portal :is(.stat-card--warning, .tasks-stat-card--alert) .stat-value,
+.portal :is(.stat-card--warning, .tasks-stat-card--alert).has-items .stat-value {
   color: var(--color-warning-500);
 }
 
 /* Success state for stat values */
 .portal .stat-value-success,
-.portal
-  :is(.stat-card--success, .stat-card-success)
-  :is(.stat-number, .stat-value, .stat-card-value) {
+.portal :is(.stat-card--success, .stat-card-success) .stat-value {
   color: var(--status-completed);
 }
 
 /* Primary color for KPI values (analytics, dashboards) */
-.portal .kpi-card :is(.kpi-card-value, .kpi-value),
 .portal .stat-value-primary {
   color: var(--color-accent);
 }
@@ -232,7 +225,7 @@
     gap: var(--space-1);
   }
 
-  .portal .stat-card :is(.stat-number, .stat-value, .stat-card-value) {
+  .portal .stat-card .stat-value {
     font-size: var(--font-size-lg);
     margin: 0;
   }

@@ -27,7 +27,7 @@
   font-size: var(--font-size-sm);
 }
 
-.portal .requests-form-body .form-group {
+.portal .requests-form-body .form-field {
   margin-bottom: var(--space-1-5);
 }
 

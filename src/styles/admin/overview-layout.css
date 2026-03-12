@@ -89,7 +89,7 @@
 }
 
 /* Value - LARGE and prominent */
-.stat-card-value {
+.overview-stats-strip .stat-value {
   font-family: var(--font-family-sans);
   font-size: var(--font-size-3xl, 30px);
   font-weight: var(--font-weight-bold);
@@ -478,7 +478,8 @@
 /* Quick actions grid - 2x2, collapses to single column on small screens */
 .ovdash-quick-actions {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /* Responsive auto-fit so buttons never get clipped by panel width */
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: var(--space-1-5);
 }
 

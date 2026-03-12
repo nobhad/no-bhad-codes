@@ -39,8 +39,8 @@
 }
 
 /* Normalize stat value size — xl (20px) is too large alongside 12px labels */
-.project-overview-grid :is(.stat-value, .stat-number, .stat-card-value),
-.contract-stats-grid :is(.stat-value, .stat-number, .stat-card-value) {
+.project-overview-grid .stat-value,
+.contract-stats-grid .stat-value {
   font-size: var(--font-size-sm);
   font-family: inherit;
 }
@@ -312,8 +312,8 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   pointer-events: auto;
 }
 
-/* Settings tab form groups - match meta-item styling */
-#pd-tab-settings .form-group {
+/* Settings tab form fields - match meta-item styling */
+#pd-tab-settings .form-field {
   display: flex;
   flex-direction: column;
   gap: var(--space-0-5);
@@ -332,7 +332,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   gap: var(--space-8);
 }
 
-#pd-tab-settings .form-row .form-group {
+#pd-tab-settings .form-row .form-field {
   gap: var(--space-1);
 }
 
@@ -614,7 +614,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   text-align: center;
 }
 
-/* .stat-number styling from unified rule in portal-cards.css */
+/* Stat value styling from unified rule in portal-stat-cards.css */
 
 /* Label styling from unified rule in portal-forms.css */
 

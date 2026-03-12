@@ -154,7 +154,7 @@ html[data-theme="light"] .portal :is(
 /* =====================================================
    MODAL FORM LABELS - Same styling as unified labels
    ===================================================== */
-.portal .modal-body .form-group > label:not(.portal-checkbox-label),
+.portal .modal-body .form-field > label:not(.portal-checkbox-label),
 .portal .modal-body label:not(.portal-checkbox-label):not([class*="checkbox"]) {
   display: block;
   margin-bottom: var(--space-1);
