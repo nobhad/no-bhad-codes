@@ -77,7 +77,8 @@ const mockInvoiceService = {
 mockInvoiceService.getInstance.mockReturnValue(mockInvoiceService);
 
 vi.mock('../../server/services/invoice-service', () => ({
-  InvoiceService: mockInvoiceService
+  InvoiceService: mockInvoiceService,
+  invoiceService: mockInvoiceService
 }));
 
 // Mock milestone generator

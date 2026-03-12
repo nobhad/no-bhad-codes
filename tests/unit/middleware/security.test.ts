@@ -22,7 +22,8 @@ import {
 vi.mock('../../../server/services/logger', () => ({
   logger: {
     logSecurity: vi.fn().mockResolvedValue(undefined),
-    error: vi.fn().mockResolvedValue(undefined)
+    error: vi.fn().mockResolvedValue(undefined),
+    debug: vi.fn()
   }
 }));
 

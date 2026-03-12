@@ -40,6 +40,20 @@ vi.mock('../../../server/services/logger', () => ({
 }));
 
 // Mock entity mapper/entities to avoid deep dependency chain
+vi.mock('../../../server/config/business', () => ({
+  BUSINESS_INFO: {
+    name: 'No Bhad Codes',
+    owner: 'Noelle Bhaduri',
+    contact: 'Noelle Bhaduri',
+    tagline: 'Web Development & Design',
+    email: 'nobhaduri@gmail.com',
+    website: 'nobhad.codes',
+    venmoHandle: '@nobhaduri',
+    zelleEmail: 'nobhaduri@gmail.com',
+    paypalEmail: ''
+  }
+}));
+
 vi.mock('../../../server/database/entities/index', () => ({
   toSystemSetting: vi.fn((row: Record<string, unknown>) => ({
     id: row['id'],

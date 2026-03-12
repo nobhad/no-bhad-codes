@@ -144,7 +144,28 @@ vi.mock('../../../server/utils/api-response', () => ({
   sendCreated: (res: any, data: any, message?: string) =>
     res.status(201).json({ success: true, data, message }),
   errorResponse: (res: any, message: string, status: number, code: string) =>
-    res.status(status).json({ success: false, error: message, code })
+    res.status(status).json({ success: false, error: message, code }),
+  ErrorCodes: {
+    INVALID_ID: 'INVALID_ID',
+    NOT_FOUND: 'NOT_FOUND',
+    RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND',
+    FORBIDDEN: 'FORBIDDEN',
+    INTERNAL_ERROR: 'INTERNAL_ERROR',
+    VALIDATION_ERROR: 'VALIDATION_ERROR',
+    UNAUTHORIZED: 'UNAUTHORIZED',
+    MISSING_FIELDS: 'MISSING_FIELDS',
+    ALREADY_SIGNED: 'ALREADY_SIGNED',
+    SIGNATURE_EXPIRED: 'SIGNATURE_EXPIRED',
+    CONTRACT_ALREADY_SIGNED: 'CONTRACT_ALREADY_SIGNED',
+    CLIENT_SIGNATURE_REQUIRED: 'CLIENT_SIGNATURE_REQUIRED',
+    CANCELLATION_FAILED: 'CANCELLATION_FAILED',
+    INVALID_STATUS: 'INVALID_STATUS',
+    PDF_GENERATION_FAILED: 'PDF_GENERATION_FAILED',
+    DELETION_FAILED: 'DELETION_FAILED',
+    CREATION_FAILED: 'CREATION_FAILED',
+    UPDATE_FAILED: 'UPDATE_FAILED',
+    RETRIEVAL_FAILED: 'RETRIEVAL_FAILED'
+  }
 }));
 
 // ============================================

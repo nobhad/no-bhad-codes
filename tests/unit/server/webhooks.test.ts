@@ -1,5 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { WebhookService } from '../../../server/services/webhook-service';
+import { getDatabase } from '../../../server/database/init';
+
+vi.mock('../../../server/database/init', () => ({
+  getDatabase: vi.fn()
+}));
+
+vi.mock('../../../server/services/logger', () => ({
+  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }
+}));
 
 describe('Webhook Service', () => {
   let mockDb: any;
@@ -11,7 +20,8 @@ describe('Webhook Service', () => {
       get: vi.fn(),
       all: vi.fn()
     };
-    service = new WebhookService(mockDb);
+    vi.mocked(getDatabase).mockReturnValue(mockDb);
+    service = new WebhookService();
   });
 
   describe('Webhook CRUD Operations', () => {

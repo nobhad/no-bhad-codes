@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { CacheService } from '../../../server/services/cache-service';
+import { cacheService } from '../../../server/services/cache-service';
 
 // Create mock Redis client factory
 const createMockRedisClient = () => {
@@ -77,14 +77,10 @@ const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
 describe('Cache Service', () => {
-  let cacheService: CacheService;
-
   beforeEach(() => {
     vi.clearAllMocks();
     // Recreate mock Redis client after clearAllMocks so connect/on implementations stay intact
     mockRedisClient = createMockRedisClient();
-
-    cacheService = CacheService.getInstance();
     (cacheService as any).client = null;
     (cacheService as any).isConnected = false;
     (cacheService as any).stats = {
@@ -103,10 +99,10 @@ describe('Cache Service', () => {
     consoleErrorSpy.mockClear();
   });
 
-  describe('getInstance', () => {
+  describe('singleton', () => {
     it('should return singleton instance', () => {
-      const instance1 = CacheService.getInstance();
-      const instance2 = CacheService.getInstance();
+      const instance1 = cacheService;
+      const instance2 = cacheService;
       expect(instance1).toBe(instance2);
     });
   });

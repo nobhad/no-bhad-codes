@@ -118,20 +118,24 @@ vi.mock('../../../server/services/logger', () => ({
 }));
 
 // Mock api-response — use real-like implementations so we can assert on res.status/json
-vi.mock('../../../server/utils/api-response', () => ({
-  sendSuccess: (res: any, data: any, message?: string) =>
-    res.status(200).json({ success: true, data, message }),
-  sendCreated: (res: any, data: any, message?: string) =>
-    res.status(201).json({ success: true, data, message }),
-  sendPaginated: vi.fn(),
-  errorResponse: (res: any, message: string, status: number, code: string) =>
-    res.status(status).json({ success: false, error: message, code }),
-  errorResponseWithPayload: (res: any, message: string, status: number, code: string, payload?: any) =>
-    res.status(status).json({ success: false, error: message, code, ...payload }),
-  sanitizeErrorMessage: (error: unknown, fallback: string) =>
-    error instanceof Error ? error.message : fallback,
-  parsePaginationQuery: () => ({ page: 1, perPage: 50, limit: 50, offset: 0 })
-}));
+vi.mock('../../../server/utils/api-response', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../server/utils/api-response')>();
+  return {
+    ...actual,
+    sendSuccess: (res: any, data: any, message?: string) =>
+      res.status(200).json({ success: true, data, message }),
+    sendCreated: (res: any, data: any, message?: string) =>
+      res.status(201).json({ success: true, data, message }),
+    sendPaginated: vi.fn(),
+    errorResponse: (res: any, message: string, status: number, code: string) =>
+      res.status(status).json({ success: false, error: message, code }),
+    errorResponseWithPayload: (res: any, message: string, status: number, code: string, payload?: any) =>
+      res.status(status).json({ success: false, error: message, code, ...payload }),
+    sanitizeErrorMessage: (error: unknown, fallback: string) =>
+      error instanceof Error ? error.message : fallback,
+    parsePaginationQuery: () => ({ page: 1, perPage: 50, limit: 50, offset: 0 })
+  };
+});
 
 // ============================================
 // HELPERS

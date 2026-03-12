@@ -244,17 +244,46 @@ async function flushPromises(): Promise<void> {
 }
 
 /**
+ * Find a route layer in an Express router by method + path.
+ * Searches recursively through sub-routers mounted via router.use().
+ * Returns the layer object (with .route property) or null.
+ */
+function findRouteLayer(router: any, method: string, path: string): any {
+  for (const l of router.stack) {
+    if (l.route && l.route.path === path && l.route.methods[method]) {
+      return l;
+    }
+    if (!l.route && l.handle && l.handle.stack) {
+      const found = findRouteLayer(l.handle, method, path);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+/**
  * Extract a route handler from an Express router by method + path.
  * Returns the last handler in the middleware chain (the actual handler).
+ * Also searches recursively through sub-routers mounted via router.use().
  */
 function getRouteHandler(router: any, method: string, path: string) {
-  const layer = router.stack.find((l: any) => {
-    if (!l.route) return false;
-    return l.route.path === path && l.route.methods[method];
-  });
-  if (!layer) throw new Error(`No route found for ${method.toUpperCase()} ${path}`);
-  const handlers = layer.route.stack;
-  return handlers[handlers.length - 1].handle;
+  // Search in the current router's stack
+  for (const l of router.stack) {
+    // Direct route layer
+    if (l.route && l.route.path === path && l.route.methods[method]) {
+      const handlers = l.route.stack;
+      return handlers[handlers.length - 1].handle;
+    }
+    // Sub-router layer (mounted via router.use())
+    if (!l.route && l.handle && l.handle.stack) {
+      try {
+        return getRouteHandler(l.handle, method, path);
+      } catch {
+        // Not found in this sub-router, continue
+      }
+    }
+  }
+  throw new Error(`No route found for ${method.toUpperCase()} ${path}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -692,9 +721,7 @@ describe('Client Portal Routes', () => {
   describe('Error Cases -- Authentication enforcement', () => {
     it('should have authenticateToken middleware on GET /me profile route', async () => {
       const { default: router } = await import('../../../server/routes/clients');
-      const layer = router.stack.find((l: any) => {
-        return l.route?.path === '/me' && l.route?.methods.get;
-      });
+      const layer = findRouteLayer(router, 'get', '/me');
 
       expect(layer).toBeTruthy();
       const middlewareNames = layer!.route.stack.map((s: any) =>
@@ -705,9 +732,7 @@ describe('Client Portal Routes', () => {
 
     it('should have authenticateToken middleware on PUT /me/password route', async () => {
       const { default: router } = await import('../../../server/routes/clients');
-      const layer = router.stack.find((l: any) => {
-        return l.route?.path === '/me/password' && l.route?.methods.put;
-      });
+      const layer = findRouteLayer(router, 'put', '/me/password');
 
       expect(layer).toBeTruthy();
       const middlewareNames = layer!.route.stack.map((s: any) =>

@@ -9,6 +9,12 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { InvoicePaymentService } from '../../../server/services/invoice/payment-service';
+import { getDatabase } from '../../../server/database/init';
+
+// Mock database - payment service uses getDatabase() internally
+vi.mock('../../../server/database/init', () => ({
+  getDatabase: vi.fn()
+}));
 
 // Mock receipt service
 vi.mock('../../../server/services/receipt-service', () => ({
@@ -52,10 +58,12 @@ describe('InvoicePaymentService', () => {
       all: vi.fn().mockResolvedValue([])
     };
 
+    vi.mocked(getDatabase).mockReturnValue(mockDb as any);
+
     mockGetInvoiceById = vi.fn();
     mockUpdateInvoiceStatus = vi.fn();
 
-    service = new InvoicePaymentService(mockDb, {
+    service = new InvoicePaymentService({
       getInvoiceById: mockGetInvoiceById,
       updateInvoiceStatus: mockUpdateInvoiceStatus
     });
