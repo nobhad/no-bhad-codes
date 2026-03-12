@@ -188,8 +188,8 @@ export function ipFilter(
       next();
     } catch (_error) {
       await logger.error('IP filter middleware error');
-
-      errorResponse(res, 'IP filter error', 500, 'IP_FILTER_ERROR');
+      // Don't block request on unexpected filter error
+      next();
     }
   };
 }
@@ -269,8 +269,8 @@ export function requestSizeLimit(
       next();
     } catch (_error) {
       await logger.error('Request size limit middleware error');
-
-      errorResponse(res, 'Request validation error', 500, 'REQUEST_VALIDATION_ERROR');
+      // Don't block request on unexpected validation error
+      next();
     }
   };
 }
@@ -362,8 +362,8 @@ export function suspiciousActivityDetector(
       const sqlPatterns = [
         // SQL injection: require SQL keyword followed by SQL syntax (FROM, INTO, SET, TABLE, ALL)
         /\b(select\s+.+\s+from|insert\s+into|update\s+.+\s+set|delete\s+from|drop\s+(table|database)|union\s+(all\s+)?select|exec(\s+|\())/gi,
-        // Dangerous SQL comment/termination patterns (but not lone semicolons or hyphens)
-        /(('\s*;\s*(drop|delete|update|insert|select))|('--)|(\|\|))/gi,
+        // Dangerous SQL comment/termination patterns and classic OR injection
+        /(('\s*;\s*(drop|delete|update|insert|select))|('--)|(\|\|)|('\s*(or|and)\s*'))/gi,
         // Script injection
         /(<script|javascript\s*:|vbscript\s*:|\bon(load|error|click|mouseover)\s*=)/gi
       ];
@@ -445,8 +445,8 @@ export function suspiciousActivityDetector(
       next();
     } catch (_error) {
       await logger.error('Suspicious activity detector error');
-
-      errorResponse(res, 'Security check failed', 500, 'SECURITY_CHECK_ERROR');
+      // Don't block request on unexpected detector error
+      next();
     }
   };
 }
