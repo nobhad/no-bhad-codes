@@ -71,11 +71,16 @@
    ============================================== */
 
 .data-table :is(th, td):first-child {
-  padding-left: var(--table-outer-padding);
+  padding-left: var(--space-1);
+}
+
+/* Checkbox is hidden on mobile — apply left padding to the next visible cell */
+.data-table .col-checkbox + :is(th, td) {
+  padding-left: var(--space-1);
 }
 
 .data-table :is(th, td):last-child {
-  padding-right: var(--table-outer-padding);
+  padding-right: var(--space-1);
 }
 
 /* ==============================================
@@ -238,7 +243,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-1-5) var(--table-outer-padding);
+  padding: var(--space-1-5) var(--space-1);
   border-top: none;
   border-bottom: var(--portal-border);
   border-radius: 0;
@@ -354,13 +359,26 @@
 .data-table-container > ul {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1-5);
-  padding: var(--space-2) var(--space-3);
+  gap: 0;
+  padding: 0;
 }
 
 .data-table-card .empty-state,
 .data-table-container .empty-state {
   padding: var(--space-4);
+}
+
+/* Empty/loading/error states inside tables — center vertically and horizontally */
+.data-table td[colspan]:has(.empty-state, .loading-state, .error-state) {
+  height: var(--card-min-height-sm, 200px);
+  vertical-align: middle;
+  text-align: center;
+}
+
+.data-table td[colspan] .empty-state,
+.data-table td[colspan] .loading-state,
+.data-table td[colspan] .error-state {
+  min-height: var(--card-min-height-sm, 200px);
 }
 
 /* Scroll wrapper - horizontal scroll when columns don't fit */
@@ -401,7 +419,7 @@
 .table-pagination {
   display: flex;
   align-items: center;
-  padding: var(--space-1-5) var(--table-cell-padding-x);
+  padding: var(--space-1-5) var(--space-1);
   color: inherit;
   font-size: inherit;
 }
@@ -499,7 +517,6 @@
 }
 
 .data-table td a:hover {
-  color: var(--color-accent);
   text-decoration: underline;
 }
 
@@ -1052,6 +1069,27 @@
 @layer responsive {
 
 @media (--mobile) {
+  /* Slightly more breathing room on mobile */
+  .data-table-header {
+    padding-inline: var(--space-1-5);
+  }
+
+  .data-table :is(th, td):first-child {
+    padding-left: var(--space-1-5);
+  }
+
+  .data-table .col-checkbox + :is(th, td) {
+    padding-left: var(--space-1-5);
+  }
+
+  .data-table :is(th, td):last-child {
+    padding-right: var(--space-1-5);
+  }
+
+  .table-pagination {
+    padding-inline: var(--space-1-5);
+  }
+
   .data-table {
     min-width: 0;
     width: 100%;
@@ -1091,7 +1129,6 @@
   .data-table-header {
     flex-wrap: wrap;
     gap: var(--space-1);
-    padding: var(--space-1-5) var(--space-2);
   }
 
   .data-table-header h3 {
@@ -1207,7 +1244,7 @@
 
 /* Hide budget, priority, invoice, amount, status columns on narrow viewports */
 @media (--tablet-landscape) {
-  .data-table :is(.budget-col, .budget-cell, .amount-col, .amount-cell, .priority-col, .priority-cell, .invoice-col, .invoice-cell, .status-col, .status-cell):not(.primary-cell) {
+  .data-table :is(.budget-col, .budget-cell, .amount-col, .amount-cell, .priority-col, .priority-cell, .invoice-col, .invoice-cell):not(.primary-cell) {
     display: none;
   }
 
@@ -1233,6 +1270,13 @@
    Those rules hide cells at 800px/1000px/1100px with high-specificity selectors,
    but in card mode ALL cells should be visible as label:value rows. */
 @media (--mid-mobile) {
+  /* Card mode: horizontal scroll is pointless — disable it so
+     empty/loading/error states fill the full available width */
+  .table-scroll-wrapper,
+  .data-table-scroll-wrapper {
+    overflow-x: visible;
+  }
+
   /* Convert table to block layout — card-per-row */
   .data-table,
   .data-table thead,
@@ -1250,6 +1294,11 @@
 
   .data-table thead {
     display: none;
+  }
+
+  /* Empty/loading/error state cells: allow text wrapping */
+  .data-table td:has(.empty-state, .loading-state, .error-state) {
+    white-space: normal;
   }
 
   /* Un-hide ALL cells that progressive column hiding set to display:none.
@@ -1281,7 +1330,7 @@
   .data-table tbody tr {
     height: auto;
     background: transparent;
-    padding: var(--table-mobile-card-padding);
+    padding: var(--space-1-5) var(--space-1-5);
     margin-bottom: var(--table-mobile-card-gap);
     border: var(--border-width) solid var(--color-border-primary);
     border-radius: var(--radius-sm, 4px);
@@ -1349,6 +1398,21 @@
     white-space: normal;
     -webkit-line-clamp: unset;
     text-align: left;
+  }
+
+  /* Card mode: reset first/last-child outer padding — card provides its own */
+  .data-table :is(th, td):first-child,
+  .data-table .col-checkbox + :is(th, td),
+  .data-table :is(th, td):last-child {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* Empty/loading/error states center in card mode */
+  .data-table td[colspan]:has(.empty-state, .loading-state, .error-state) {
+    align-items: center;
+    justify-content: center;
+    min-height: var(--card-min-height-sm, 200px);
   }
 
   /* No separators between cells within a card */

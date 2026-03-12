@@ -134,7 +134,7 @@ body[data-page="admin"]:not(.admin-logged-in) .admin-footer a {
 }
 
 body[data-page="admin"]:not(.admin-logged-in) .admin-footer a:hover {
-  color: var(--color-accent);
+  text-decoration: underline;
 }
 
 body.admin-logged-in[data-page="admin"] .admin-footer {
@@ -429,7 +429,7 @@ body.modal-open .dashboard-content {
   background: var(--color-bg-readonly);
 }
 
-[data-page="admin"] #admin-page-title {
+[data-page="admin"] .portal-global-header .breadcrumb-list {
   font-family: var(--font-family-sans);
 }
 
@@ -722,9 +722,13 @@ body.modal-open .dashboard-content {
 
   body[data-page="admin"] .stat-card,
   body[data-page="admin"] .portal-project-card,
-  body[data-page="admin"] .chart-container,
-  body[data-page="admin"] .data-table-card {
+  body[data-page="admin"] .chart-container {
     padding: var(--space-1);
+    margin-bottom: var(--space-1);
+  }
+
+  body[data-page="admin"] .data-table-card {
+    padding: 0;
     margin-bottom: var(--space-1);
   }
 }
@@ -737,12 +741,17 @@ body.modal-open .dashboard-content {
   }
 
   [data-page="admin"] .portal-project-card,
-  [data-page="admin"] .data-table-card,
   [data-page="admin"] .attention-card,
   [data-page="admin"] .overview-card,
   [data-page="admin"] .recent-activity,
   [data-page="admin"] .upcoming-tasks {
     padding: var(--space-1-5);
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  [data-page="admin"] .data-table-card {
+    padding: 0;
     width: 100%;
     box-sizing: border-box;
   }
@@ -828,7 +837,7 @@ body.modal-open .dashboard-content {
   }
 
   [data-page="admin"] .data-table-card {
-    padding: var(--table-mobile-card-padding);
+    padding: 0;
     max-width: 100%;
     box-sizing: border-box;
   }
@@ -1058,7 +1067,7 @@ body.modal-open .dashboard-content {
 }
 
 [data-page="admin"] .portal-page-header h1,
-[data-page="admin"] #admin-page-title {
+[data-page="admin"] .portal-global-header .breadcrumb-list {
   font-family: var(--font-family-sans);
   font-size: var(--font-size-xl);
   letter-spacing: var(--letter-spacing-tight, 0.01em);
@@ -1184,21 +1193,8 @@ body.modal-open .dashboard-content {
   justify-content: center;
 }
 
-/* Overview table header alignment with subtabs */
-[data-page="admin"] .overview-table-section .data-table-header {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-/* Overview table header title alignment */
-[data-page="admin"] .overview-table-section .data-table-header h3 {
-  padding-left: var(--table-cell-padding-x, 14px);
-}
-
-/* Overview table actions alignment */
-[data-page="admin"] .overview-table-section .data-table-actions {
-  padding-right: var(--table-cell-padding-x, 14px);
-}
+/* Overview tables use the same header padding as all other tables.
+   Mobile overrides in portal-tables.css apply uniformly. */
 
 /* -------------------------------------------------------
  * Inline-edit compact input override

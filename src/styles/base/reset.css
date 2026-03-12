@@ -188,6 +188,25 @@ a {
   text-decoration: inherit;
 }
 
+/* Content links: underline on hover, no color change.
+   Nav/interactive links opt out via their own text-decoration: none rules. */
+a:hover {
+  text-decoration: underline;
+}
+
+/* Navigation and interactive link contexts: no underline on hover */
+nav a:hover,
+.sidebar a:hover,
+.portal-global-header a:hover,
+.portal-tabs a:hover,
+.tab-list a:hover,
+.stat-card a:hover,
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-sm:hover {
+  text-decoration: none;
+}
+
 /* ============================================
  * ACCESSIBILITY IMPROVEMENTS
  * ============================================ */

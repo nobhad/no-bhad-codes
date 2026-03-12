@@ -323,25 +323,31 @@
    =============================================== */
 
 @media (--mobile) {
+  /* Title + actions stay on same row */
   .detail-title-row {
-    flex-direction: column;
     align-items: flex-start;
     gap: var(--space-1-5);
   }
 
   .detail-title-group {
-    width: 100%;
-    flex-wrap: wrap;
+    min-width: 0;
+    flex: 1;
   }
 
   .detail-title {
-    width: 100%;
     white-space: normal;
+    word-break: break-word;
+  }
+
+  /* Stack name + status vertically */
+  .detail-name-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
   }
 
   .detail-actions {
-    width: 100%;
-    justify-content: flex-end;
+    flex-shrink: 0;
   }
 }
 
@@ -352,12 +358,29 @@
   }
 }
 
-/* Unlayered — overrides base .icon-btn for detail action toolbar */
-.detail-actions .icon-btn {
-  width: var(--icon-size-lg);
-  height: var(--icon-size-lg);
-  min-width: var(--icon-size-lg);
-  min-height: var(--icon-size-lg);
-  max-width: var(--icon-size-lg);
-  max-height: var(--icon-size-lg);
+/* ===============================================
+   DETAIL ACTIONS DROPDOWN MENU
+   Full bordered dropdown for project/client actions
+   =============================================== */
+
+.detail-actions-menu.portal-dropdown-content {
+  border: var(--portal-border);
+  min-width: 200px;
+  width: auto;
 }
+
+/* Override the default border-top removal so all 4 sides show */
+.detail-actions-menu.portal-dropdown-content[data-side="bottom"] {
+  border-top: var(--portal-border);
+  margin-top: 0;
+}
+
+/* Ellipsis icon row — mirrors the trigger button inside the dropdown */
+.detail-actions-menu-trigger-row {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--space-1) var(--space-1-5);
+  color: var(--color-text-primary);
+}
+
+/* Detail action buttons follow universal .icon-btn sizing (--portal-btn-icon-size) */

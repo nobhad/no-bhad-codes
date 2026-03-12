@@ -404,28 +404,33 @@ html[data-theme="light"] .portal :is(
 
 /* =====================================================
    STATS GRID (Dashboard overview)
-   Client portal: 5 stat cards in a single row
+   Client portal: stat cards + attention cards in one row.
+   Flex-based so the count of items can vary.
    ===================================================== */
 .portal .dashboard-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  display: flex;
   gap: var(--portal-section-gap);
   max-width: 100%;
 }
 
 .portal .dashboard-stats-grid > * {
+  flex: 1;
   min-width: 0;
 }
 
 @media (--mobile) {
   .portal .dashboard-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    flex-wrap: wrap;
+  }
+
+  .portal .dashboard-stats-grid > * {
+    flex: 1 1 calc(50% - var(--portal-section-gap));
   }
 }
 
 @media (--narrow-mobile) {
-  .portal .dashboard-stats-grid {
-    grid-template-columns: 1fr;
+  .portal .dashboard-stats-grid > * {
+    flex: 1 1 100%;
   }
 }
 
@@ -694,12 +699,11 @@ html[data-theme="light"] .portal :is(
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-2) var(--portal-panel-padding-x);
+  padding: var(--space-0-5) var(--space-2);
   background: transparent;
-  border: var(--portal-border);
+  border: none;
   color: var(--color-text-primary);
   font-size: inherit;
-  transition: border-color var(--transition-fast);
 }
 
 .portal
@@ -711,7 +715,7 @@ html[data-theme="light"] .portal :is(
     .bundle-item,
     .history-request-item
   ):hover {
-  border-color: var(--color-border-primary);
+  background: var(--portal-alpha-white-05);
 }
 
 /* =====================================================
@@ -784,7 +788,6 @@ html[data-theme="light"] .portal :is(
   .portal
     :is(
       .portal-project-card,
-      .data-table-card,
       .overview-card,
       .recent-activity,
       .upcoming-tasks,
@@ -796,6 +799,10 @@ html[data-theme="light"] .portal :is(
       .pending-approvals-section
     ) {
     padding: var(--space-2);
+  }
+
+  .portal .data-table-card {
+    padding: 0;
   }
 
   /* Tighter gap on grids for mobile */

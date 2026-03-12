@@ -26,10 +26,11 @@
   z-index: var(--z-index-content);
 }
 
-.help-search-input {
+.portal .help-search-container .help-search-input {
   width: 100%;
-  padding: var(--space-1-5) var(--space-3) var(--space-1-5) calc(var(--space-1-5) + 24px);
+  padding: var(--space-0-5) var(--space-3) var(--space-0-5) calc(var(--space-1-5) + 24px);
   font-size: var(--font-size-base);
+  line-height: 1.2;
   color: var(--color-text-primary);
   background: transparent;
   border: var(--border-width) solid var(--color-border-primary);

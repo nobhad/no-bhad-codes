@@ -530,11 +530,10 @@
   border-width: var(--border-width);
   border-color: var(--color-border-primary);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: var(--space-1, 0.5rem);
-  padding: var(--space-2, 1rem);
-  text-align: center;
+  gap: var(--space-2);
+  padding: var(--space-1-5) var(--space-3);
   cursor: pointer;
   transition: border-color var(--transition-fast);
 }
@@ -554,19 +553,19 @@
 
 .dropzone-content {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: var(--space-1, 0.5rem);
+  gap: var(--space-2);
 }
 
 .dropzone-text {
   font-size: var(--font-size-xs, 12px);
-  text-align: center;
 }
 
 .dropzone-hint {
-  font-size: var(--font-size-2xs, 11px);
+  font-size: var(--font-size-xs, 12px);
   color: var(--color-text-tertiary);
+  margin-left: auto;
 }
 
 .dropzone-actions {
@@ -579,6 +578,46 @@
 .dropzone .progress-bar-sm {
   width: 100%;
   max-width: 16rem;
+}
+
+/* =====================================================
+   MOBILE: Replace dropzone with upload button only.
+   Drag-and-drop is not possible on touch devices.
+   ===================================================== */
+@media (--mobile) {
+  /* Strip dropzone visual chrome — no dashed border, no padding.
+     Disable click on outer container so only the button triggers upload. */
+  .dropzone {
+    border: none;
+    padding: 0;
+    gap: var(--space-1);
+    pointer-events: none;
+    cursor: default;
+  }
+
+  /* Re-enable clicks on interactive children (button, file input) */
+  .dropzone button,
+  .dropzone input {
+    pointer-events: auto;
+  }
+
+  /* Hide drag-and-drop text and upload icon */
+  .dropzone > .dropzone-content > .icon-lg,
+  .dropzone .dropzone-text,
+  .files-dropzone-content .files-upload-primary-text {
+    display: none;
+  }
+
+  /* Admin files dropzone: strip dashed border */
+  .panel.files-dropzone {
+    border-style: solid;
+  }
+
+  /* Legacy upload-dropzone: same treatment */
+  .portal .upload-dropzone {
+    border: none;
+    padding: 0;
+  }
 }
 
 /* =====================================================

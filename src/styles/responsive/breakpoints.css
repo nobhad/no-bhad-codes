@@ -158,6 +158,10 @@
     }
 
     /* Table header mobile titles */
+    .data-table-header h3 .title-full {
+      display: none;
+    }
+
     .data-table-header h3 .title-mobile {
       display: inline;
     }

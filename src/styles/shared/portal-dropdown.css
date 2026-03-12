@@ -725,7 +725,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   position: relative;
   padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
   padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
-  border: var(--border-width-px) solid transparent;
+  border: var(--portal-input-border);
   background-color: transparent;
   color: inherit;
   font-size: inherit;
@@ -741,16 +741,10 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   text-align: left;
 }
 
-/* Hover state - show border (only when closed) */
-.portal .table-dropdown:not(.open) .custom-dropdown-trigger:hover {
-  border-color: var(--color-border-primary);
-}
-
 /* Focus state - only show border when closed */
 .portal .table-dropdown:not(.open) .custom-dropdown-trigger:is(:focus, :focus-visible) {
   outline: none;
   outline-offset: 0;
-  border-color: var(--color-border-primary);
   box-shadow: none;
 }
 
@@ -796,6 +790,11 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 /* Table-dropdown caret — inherits size/color/transition from root .custom-dropdown-caret */
+
+/* Rotate caret when table-dropdown is open */
+.portal .table-dropdown.open .custom-dropdown-caret {
+  transform: translateY(-50%) rotate(180deg);
+}
 
 /* Dropdown menu - sides + bottom, no top */
 /* Explicit font settings since this may not inherit from .portal */
@@ -943,61 +942,11 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
    - No gap between trigger and menu
    ================================================ */
 
-/* Portal: Container */
+/* Container - match pagination button height */
 .portal .pagination-page-size-dropdown .table-dropdown.custom-dropdown {
   height: var(--table-pagination-btn-size);
   min-width: 60px;
-}
-
-/* Portal: Trigger */
-.portal
-  .pagination-page-size-dropdown
-  .table-dropdown.custom-dropdown
-  .custom-dropdown-trigger {
-  height: var(--table-pagination-btn-size);
-  min-height: var(--table-pagination-btn-size);
-  max-height: var(--table-pagination-btn-size);
-  position: relative;
-  padding: 0 var(--dropdown-padding-x);
-  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
-  border: var(--portal-input-border);
-  background-color: transparent;
-  color: var(--color-text-secondary);
-  font-size: inherit;
-  font-family: inherit;
-  box-sizing: border-box;
-}
-
-/* Portal: Menu items */
-.portal
-  .pagination-page-size-dropdown
-  .table-dropdown.custom-dropdown
-  .custom-dropdown-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: transparent;
-  color: var(--color-text-secondary);
-  font-size: inherit;
-  font-family: inherit;
-  height: var(--table-pagination-btn-size);
-  padding: 0 var(--dropdown-padding-x);
-  cursor: pointer;
-}
-
-/* Portal: Menu item hover */
-.portal
-  .pagination-page-size-dropdown
-  .table-dropdown.custom-dropdown
-  .custom-dropdown-item:hover {
-  background-color: var(--color-bg-hover);
-  color: var(--color-text-primary);
-}
-
-/* Admin: Container - match button height */
-.portal .pagination-page-size-dropdown .table-dropdown.custom-dropdown {
-  height: var(--table-pagination-btn-size);
-  min-width: 60px;
+  width: fit-content;
 }
 
 /* Trigger - base state */
@@ -1017,14 +966,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   font-size: inherit;
   font-family: inherit;
   box-sizing: border-box;
-}
-
-/* Trigger - hover (no color change) */
-.portal
-  .pagination-page-size-dropdown
-  .table-dropdown.custom-dropdown
-  .custom-dropdown-trigger:hover {
-  border-color: var(--color-border-primary);
+  width: 100%;
 }
 
 /* Trigger - open state (dropdown opens UPWARD) */
@@ -1076,7 +1018,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   cursor: pointer;
 }
 
-/* Menu item hover - NO blue, use subtle highlight */
+/* Menu item hover */
 .portal
   .pagination-page-size-dropdown
   .table-dropdown.custom-dropdown

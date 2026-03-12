@@ -23,10 +23,16 @@
   gap: var(--space-2);
 }
 
+.portal .project-snapshot-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
 .portal .project-snapshot-title {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-4);
   flex-wrap: wrap;
 }
 
@@ -91,15 +97,9 @@
 }
 
 .portal .action-items-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: var(--portal-section-gap);
-}
-
-@media (--narrow-mobile) {
-  .portal .action-items-grid {
-    grid-template-columns: 1fr;
-  }
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 
 /* =====================================================
@@ -116,17 +116,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
+  flex-shrink: 0;
   background: transparent;
   border: none;
   color: var(--color-text-tertiary);
 }
 
 .portal .activity-icon svg {
-  width: var(--icon-size-md);  /* 16px - activity icons */
-  height: var(--icon-size-md);
+  width: var(--icon-size-sm);  /* 14px - matches font-size-sm */
+  height: var(--icon-size-sm);
 }
 
 .portal .activity-content {
@@ -434,18 +432,16 @@
 .portal .attention-card {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
   gap: var(--space-1);
-  padding: var(--space-4);
-  min-height: 88px;
+  padding: var(--portal-card-padding);
   background: transparent;
   border: var(--portal-border);
   color: var(--color-text-primary);
   font-family: inherit;
   cursor: pointer;
   transition: border-color var(--transition-fast);
-  text-align: center;
+  text-align: left;
   box-shadow: none;
 }
 
@@ -453,14 +449,16 @@
   border-color: var(--color-border-primary);
 }
 
+.portal .attention-card.attention-card--alert {
+  border-color: var(--status-cancelled);
+}
+
 /* Attention icon container - no background, just colored icon */
 .portal .attention-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
+  flex-shrink: 0;
   background: none;
 }
 
@@ -471,23 +469,23 @@
 /* Attention content */
 .portal .attention-content {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-0-5);
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--space-1);
 }
 
 .portal .attention-count {
-  font-family: var(--font-family-sans);
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
+  display: block;
+  font-family: var(--font-family-mono, monospace);
+  font-size: var(--font-size-xl, 1.25rem);
+  font-weight: var(--font-weight-semibold);
   line-height: 1;
-  color: var(--color-accent);
-  margin-bottom: var(--space-0-5);
+  color: var(--color-text-primary);
 }
 
 /* Highlight attention cards with values > 0 */
 .portal .attention-card.has-items .attention-count {
-  color: var(--color-accent);
+  color: var(--color-text-primary);
 }
 
 /* =====================================================
@@ -546,11 +544,7 @@
   }
 
   .portal .attention-card {
-    padding: var(--space-3);
-  }
-
-  .portal .attention-count {
-    font-size: var(--font-size-lg);
+    padding: var(--space-2);
   }
 }
 
@@ -572,12 +566,42 @@
   padding: var(--space-2) var(--space-3);
 }
 
+.portal .table-layout .progress-field {
+  padding: var(--space-2) var(--space-3) 0;
+}
+
 .portal .milestone-item-wrapper {
   border: var(--portal-border);
 }
 
+.portal .milestone-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+}
+
+.portal .milestone-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
+}
+
+.portal .milestone-due {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: var(--space-3);
+}
+
+.portal .milestone-item .accordion-item-caret {
+  margin-left: var(--space-3);
+}
+
 .portal .milestone-expanded-content {
-  padding: var(--space-2);
+  padding: 0 var(--space-2) var(--space-2);
   padding-left: calc(var(--icon-size-lg) + var(--space-1-5) + var(--space-2));
 }
 

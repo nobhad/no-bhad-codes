@@ -164,7 +164,7 @@ section.business-card-section.page-hidden .intro-nav {
   }
 
   /* Virtual page sections - card centered, nav positioned absolutely */
-  /* Projects section - left aligned like about section */
+  /* Projects section - left aligned, vertically centered */
   main[data-virtual-pages] > .projects-section[data-page].page-active {
     position: absolute;
     top: 0;
@@ -174,10 +174,15 @@ section.business-card-section.page-hidden .intro-nav {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start; /* Left align like about section */
+    align-items: flex-start;
     overflow: hidden;
     box-sizing: border-box;
     padding: clamp(1rem, 4vw, 2rem);
+  }
+
+  main[data-virtual-pages] > .projects-section[data-page].page-active > .projects-content {
+    margin-block: auto;
+    width: 100%;
   }
 
   /* Project detail section - scrollable content area */
