@@ -292,13 +292,13 @@ export function DocumentRequestCard({
               className="dropzone"
               onClick={() => fileInputRef.current?.click()}
             >
-              <Upload className="icon-sm" />
-              <p className="text-muted text-sm">
+              <Upload className="icon-xs" />
+              <span className="text-muted text-xs">
                 Drop file here or <span className="text-primary">browse</span>
-              </p>
-              <p className="text-muted text-xs mt-1">
-                PDF, DOC, DOCX, TXT, JPG, PNG (max 10MB)
-              </p>
+              </span>
+              <span className="text-muted text-xs dropzone-hint">
+                PDF, DOC, JPG, PNG · max 10MB
+              </span>
             </div>
           )}
 

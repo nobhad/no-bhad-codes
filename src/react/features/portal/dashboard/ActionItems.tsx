@@ -5,14 +5,6 @@
  */
 
 import * as React from 'react';
-import {
-  FileSignature,
-  Receipt,
-  CheckCircle,
-  ClipboardList,
-  Upload,
-  AlertTriangle
-} from 'lucide-react';
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -36,18 +28,17 @@ interface ActionItemsProps {
 
 interface ActionItemConfig {
   key: keyof ActionItemCounts;
-  icon: React.ComponentType<{ className?: string }>;
   label: string;
   navigateTo: string;
-  priority: number;
+  alert?: boolean;
 }
 
 const ACTION_ITEMS: ActionItemConfig[] = [
-  { key: 'pendingContracts', icon: FileSignature, label: 'contracts to sign', navigateTo: 'documents', priority: 1 },
-  { key: 'pendingInvoices', icon: Receipt, label: 'invoices pending', navigateTo: 'documents', priority: 2 },
-  { key: 'pendingApprovals', icon: CheckCircle, label: 'approvals waiting', navigateTo: 'deliverables', priority: 3 },
-  { key: 'pendingQuestionnaires', icon: ClipboardList, label: 'questionnaires to complete', navigateTo: 'files', priority: 4 },
-  { key: 'pendingDocRequests', icon: Upload, label: 'documents requested', navigateTo: 'files', priority: 5 }
+  { key: 'pendingContracts', label: 'Contracts to Sign', navigateTo: 'documents' },
+  { key: 'pendingInvoices', label: 'Invoices Pending', navigateTo: 'documents', alert: true },
+  { key: 'pendingApprovals', label: 'Approvals Waiting', navigateTo: 'deliverables' },
+  { key: 'pendingQuestionnaires', label: 'Questionnaires', navigateTo: 'files' },
+  { key: 'pendingDocRequests', label: 'Documents Requested', navigateTo: 'files' }
 ];
 
 // ============================================================================
@@ -60,35 +51,24 @@ export const ActionItems = React.memo(({ counts, onNavigate }: ActionItemsProps)
 
   if (activeItems.length === 0) return null;
 
+  // Returns fragment of cards — intended to be placed directly inside a grid/flex row
   return (
-    <div className="action-items-section">
-      <h3>
-        <AlertTriangle className="icon-xs" />
-        Needs Your Attention
-      </h3>
-      <div className="action-items-grid">
-        {activeItems.map((item) => {
-          const count = counts[item.key];
-          const Icon = item.icon;
+    <>
+      {activeItems.map((item) => {
+        const count = counts[item.key];
 
-          return (
-            <button
-              key={item.key}
-              className="attention-card has-items"
-              onClick={onNavigate ? () => onNavigate(item.navigateTo) : undefined}
-              type="button"
-            >
-              <div className="attention-icon">
-                <Icon className="icon-sm" />
-              </div>
-              <div className="attention-content">
-                <span className="attention-count">{count}</span>
-                <span className="field-label">{item.label}</span>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </div>
+        return (
+          <button
+            key={item.key}
+            className={`attention-card has-items${item.alert ? ' attention-card--alert' : ''}`}
+            onClick={onNavigate ? () => onNavigate(item.navigateTo) : undefined}
+            type="button"
+          >
+            <span className="field-label">{item.label}</span>
+            <span className="attention-count">{count}</span>
+          </button>
+        );
+      })}
+    </>
   );
 });

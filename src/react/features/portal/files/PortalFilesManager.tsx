@@ -556,7 +556,7 @@ export function PortalFilesManager({
                       icon={<File className="icon-lg" />}
                       message={
                         files.length === 0
-                          ? 'No files uploaded yet. Drag and drop files above to upload.'
+                          ? 'No files uploaded yet. Use the upload area above to add files.'
                           : 'No files match the current filters.'
                       }
                     />

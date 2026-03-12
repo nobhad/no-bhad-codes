@@ -323,6 +323,7 @@ export function FileUploadDropzone({
           }}
           disabled={disabled}
         >
+          <Upload className="icon-sm" />
           Browse Files
         </button>
         <p className="dropzone-hint">

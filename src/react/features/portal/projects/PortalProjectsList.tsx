@@ -6,6 +6,7 @@
 import * as React from 'react';
 import { FolderOpen, ChevronRight } from 'lucide-react';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
+import { ProgressBar } from '@react/components/portal';
 import { IconButton } from '@react/factories';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -84,18 +85,7 @@ const ProjectCard = React.memo(({ project, onClick, onPreviewClick }: ProjectCar
       )}
 
       {/* Progress Bar */}
-      <div className="portal-card-progress">
-        <div className="portal-card-header">
-          <span className="field-label">Progress</span>
-          <span className="text-primary text-sm">{project.progress}%</span>
-        </div>
-        <div className="progress-bar-sm">
-          <div
-            className="progress-fill"
-            style={{ width: `${Math.min(100, Math.max(0, project.progress))}%` }}
-          />
-        </div>
-      </div>
+      <ProgressBar value={project.progress} />
 
       {/* Footer: Date and Preview */}
       <div className="layout-row-between">

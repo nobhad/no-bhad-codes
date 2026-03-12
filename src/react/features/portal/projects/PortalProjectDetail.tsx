@@ -22,6 +22,7 @@ import { cn } from '@react/lib/utils';
 import { IconButton, TabList, TabPanel, formatRelativeTime, formatCurrency } from '@react/factories';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
+import { ProgressBar } from '@react/components/portal';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { GSAP } from '@react/config/portal-constants';
 import { PORTAL_PROJECT_STATUS_CONFIG } from '../types';
@@ -333,16 +334,7 @@ export function PortalProjectDetail({
 
           {/* Progress Section */}
           <div className="panel">
-            <div className="flex items-center justify-between mb-2">
-              <span className="field-label">Overall Progress</span>
-              <span className="text-primary">{progress}%</span>
-            </div>
-            <div className="progress-bar-sm">
-              <div
-                className="progress-fill"
-                style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
-              />
-            </div>
+            <ProgressBar value={progress} label="Overall Progress" />
             <div className="flex items-center justify-between mt-2">
               <span className="text-muted text-xs">
                 {project.start_date ? `Started ${formatDate(project.start_date)}` : 'Not started'}
