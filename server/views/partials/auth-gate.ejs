@@ -1,131 +1,17 @@
-<!-- Auth Gate - Login Form -->
-<div class="auth-gate" id="auth-gate">
-  <div class="auth-gate-container">
-    <div class="auth-gate-header">
-      <img src="/images/avatar.svg" alt="<%= typeof businessName !== 'undefined' ? businessName : '' %>" class="auth-gate-logo" />
-      <h1><%= config.authTitle %></h1>
-      <p><%= config.authDescription %></p>
-    </div>
-    <% if (portalType === 'admin') { %>
-      <!-- Admin Login Form -->
-      <form class="auth-gate-form" id="admin-login-form" autocomplete="off" novalidate>
-        <!-- Hidden username field for accessibility and password managers -->
-        <input
-          type="email"
-          id="admin-username"
-          name="username"
-          value=""
-          autocomplete="username"
-          tabindex="-1"
-          aria-hidden="true"
-          class="sr-only"
-        />
-        <div class="form-group">
-          <label for="admin-password" class="sr-only">Admin Password</label>
-          <div class="password-input-wrapper">
-            <input
-              type="password"
-              id="admin-password"
-              name="password"
-              placeholder="Admin Password"
-              required
-              autocomplete="current-password"
-            />
-            <button type="button" class="password-toggle" id="password-toggle" aria-label="Toggle password visibility">
-              <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div class="auth-error" id="auth-error"></div>
-        <button type="submit" class="btn btn-auth auth-submit">
-          <span class="btn-text">Sign In</span>
-          <span class="btn-loading" style="display: none;">Signing in...</span>
-        </button>
-      </form>
-      <script type="module">
-        import { initAdminAuthForm } from '/src/features/auth/admin-auth-form.ts';
-        document.addEventListener('DOMContentLoaded', () => initAdminAuthForm());
-      </script>
-    <% } else { %>
-      <!-- Client Portal Login Form -->
-      <form class="auth-gate-form" id="portal-login-form" novalidate>
-        <div class="form-group">
-          <label for="portal-email" class="sr-only">Email Address</label>
-          <input
-            type="email"
-            id="portal-email"
-            name="email"
-            class="form-input"
-            placeholder="Email Address"
-            required
-            autocomplete="username"
-          />
-          <span id="email-error" class="error-message" style="display: none;"></span>
-        </div>
-        <div class="form-group">
-          <label for="portal-password" class="sr-only">Password</label>
-          <div class="password-input-wrapper">
-            <input
-              type="password"
-              id="portal-password"
-              name="password"
-              class="form-input"
-              placeholder="Password"
-              required
-              autocomplete="current-password"
-            />
-            <button type="button" class="password-toggle" id="portal-password-toggle" data-password-toggle="portal-password" aria-label="Toggle password visibility">
-              <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-            </button>
-          </div>
-          <span id="password-error" class="error-message" style="display: none;"></span>
-        </div>
-        <div class="auth-error" id="auth-error"></div>
-        <button type="submit" id="login-btn" class="btn btn-auth auth-submit">
-          <span class="btn-text">Sign In</span>
-          <span class="btn-loading" style="display: none;">Signing in...</span>
-        </button>
-      </form>
-      <!-- Magic Link Form (hidden by default) -->
-      <form class="auth-gate-form" id="magic-link-form" novalidate style="display: none;">
-        <div class="form-group">
-          <label for="magic-link-email" class="sr-only">Email Address</label>
-          <input
-            type="email"
-            id="magic-link-email"
-            name="email"
-            class="form-input"
-            placeholder="Email Address"
-            required
-            autocomplete="username"
-          />
-          <span id="magic-email-error" class="error-message" style="display: none;"></span>
-        </div>
-        <div class="auth-error" id="magic-link-error"></div>
-        <div class="magic-link-success" id="magic-link-success" style="display: none;">
-          <p>A secure login link has been sent to your email.</p>
-          <p class="magic-link-info">Check your inbox and click the link to sign in.</p>
-        </div>
-        <button type="submit" id="magic-link-btn" class="btn btn-auth auth-submit">
-          <span class="btn-text">Send Magic Link</span>
-          <span class="btn-loading" style="display: none;">Sending...</span>
-        </button>
-      </form>
-      <div class="auth-gate-footer">
-        <a href="/client/forgot-password.html" id="forgot-password-link" class="auth-link">Forgot password?</a>
-        <span class="auth-divider">|</span>
-        <a href="#" id="magic-link-toggle" class="auth-link">Use magic link instead</a>
-      </div>
-      <script type="module">
-        import { initPortalAuthForm } from '/src/features/auth/portal-auth-form.ts';
-        document.addEventListener('DOMContentLoaded', () => initPortalAuthForm());
-      </script>
-    <% } %>
-  </div>
-</div>
+<!-- Auth Gate - React Mount Point -->
+<div
+  class="auth-gate"
+  id="auth-gate"
+  data-portal-type="<%= portalType === 'admin' ? 'admin' : 'client' %>"
+  data-business-name="<%= typeof businessName !== 'undefined' ? businessName : '' %>"
+  data-auth-title="<%= config.authTitle %>"
+  data-auth-description="<%= config.authDescription %>"
+></div>
+
+<script type="module">
+  import { autoMountAuthGate } from '/src/react/features/auth/mount-auth-gate.tsx';
+
+  document.addEventListener('DOMContentLoaded', function () {
+    autoMountAuthGate();
+  });
+</script>

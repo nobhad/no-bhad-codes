@@ -8,7 +8,7 @@
    CANONICAL FORM CLASS SYSTEM
    ============================
    1. SEMANTIC CLASSES (EJS templates + React modals)
-      Wrapper:  .form-group  (.form-field is an alias; .form-group kept for auth-gate.ejs)
+      Wrapper:  .form-field
       Inputs:   .form-input, .form-textarea, .form-select
       Helpers:  .form-error-message, .form-helper-text, .form-required
 
@@ -93,11 +93,11 @@
   resize: vertical;
 }
 
-/* Modal form groups */
-.modal-body .form-group {
+/* Modal form fields */
+.modal-body .form-field {
   margin-bottom: var(--space-4);
 }
-.modal-body .form-group:last-child {
+.modal-body .form-field:last-child {
   margin-bottom: 0;
 }
 
@@ -127,22 +127,19 @@
   box-shadow: var(--focus-ring);
 }
 
-/* Form field wrapper - canonical container for label + input + error.
-   .form-group  = legacy name used in modals, EJS templates
-   .form-field   = factory name used by createFormField.tsx
-   Both are identical; use whichever your context already uses. */
-:is(.form-group, .form-field) {
+/* Form field wrapper - canonical container for label + input + error. */
+.form-field {
   position: relative;
   display: flex;
   flex-direction: column;
   margin-bottom: var(--space-2);
 }
-:is(.form-group, .form-field):last-child {
+.form-field:last-child {
   margin-bottom: 0;
 }
 
 /* Field label - positioned above inputs */
-:is(.form-group label.field-label, label.field-label, .field-label) {
+:is(label.field-label, .field-label) {
   position: static;
   display: block;
   margin-bottom: var(--portal-field-label-gap);
@@ -150,10 +147,10 @@
 }
 
 /* Label-inside pattern (opt-in) */
-.form-group.label-inside {
+.form-field.label-inside {
   position: relative;
 }
-.form-group.label-inside label {
+.form-field.label-inside label {
   position: absolute;
   top: var(--space-1);
   left: var(--space-2);
@@ -166,13 +163,13 @@
   pointer-events: none;
   margin: 0;
 }
-.form-group.label-inside :is(input, select, textarea) {
+.form-field.label-inside :is(input, select, textarea) {
   height: calc(var(--space-6) + var(--space-1-5));
   padding: var(--space-3) var(--space-2) var(--space-1)
     var(--space-2);
   line-height: normal;
 }
-.form-group.label-inside textarea {
+.form-field.label-inside textarea {
   height: auto;
   min-height: var(--space-12);
 }
@@ -312,7 +309,7 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   grid-template-columns: 1fr 1fr;
   gap: var(--space-2);
 }
-.form-row .form-group {
+.form-row .form-field {
   margin-bottom: 0;
 }
 @media (--sm-mobile) {
@@ -774,7 +771,7 @@ input.search-bar-input {
 /* =====================================================
    FORM FIELD FACTORY CLASSES
    Used by createFormField.tsx factory components.
-   The .form-field wrapper is consolidated with .form-group
+   The .form-field wrapper is the single canonical container for form controls.
    above (see "Form field wrapper" section).
    ===================================================== */
 

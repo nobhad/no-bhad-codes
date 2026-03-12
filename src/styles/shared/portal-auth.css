@@ -99,8 +99,8 @@
   gap: clamp(1rem, 2vw, 1.5rem);
 }
 
-/* Form Group */
-.auth-gate-form .form-group,
+/* Form Field */
+.auth-gate-form .form-field,
 .auth-gate .auth-form-group {
   position: relative;
   display: flex;
