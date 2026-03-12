@@ -252,7 +252,7 @@
             aria-hidden="true"
             style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;"
           />
-          <div class="form-group">
+        <div class="form-field">
             <label for="admin-password" class="sr-only">Admin Password</label>
             <div class="password-input-wrapper">
               <input
@@ -612,19 +612,19 @@
           <div class="admin-modal-body">
             <fieldset>
               <legend>Contact Information</legend>
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="new-client-email">Email *</label>
                 <input type="email" id="new-client-email" class="form-input" placeholder="client@example.com" required />
               </div>
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="new-client-name">Contact Name</label>
                 <input type="text" id="new-client-name" class="form-input" placeholder="John Smith" />
               </div>
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="new-client-company">Company Name</label>
                 <input type="text" id="new-client-company" class="form-input" placeholder="Acme Inc." />
               </div>
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="new-client-phone">Phone</label>
                 <input type="tel" id="new-client-phone" class="form-input" placeholder="(555) 123-4567" />
               </div>
@@ -653,7 +653,7 @@
         <form id="add-project-form">
           <div class="admin-modal-body">
             <!-- Client Selection -->
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="new-project-client">Client *</label>
               <div id="new-project-client-mount"></div>
             </div>
@@ -661,42 +661,42 @@
             <!-- New Client Fields (hidden by default) -->
             <fieldset id="new-client-fields" class="hidden">
               <legend>New Client Details</legend>
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="new-project-client-name">Contact Name *</label>
                 <input type="text" id="new-project-client-name" class="form-input" placeholder="John Smith" />
               </div>
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="new-project-client-email">Email *</label>
                 <input type="email" id="new-project-client-email" class="form-input" placeholder="client@example.com" />
               </div>
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="new-project-client-company">Company Name</label>
                 <input type="text" id="new-project-client-company" class="form-input" placeholder="Acme Inc." />
               </div>
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="new-project-client-phone">Phone</label>
                 <input type="tel" id="new-project-client-phone" class="form-input" placeholder="(555) 123-4567" />
               </div>
             </fieldset>
 
             <!-- Project Fields -->
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="new-project-type">Project Type *</label>
               <div id="new-project-type-mount"></div>
             </div>
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="new-project-description">Description *</label>
               <textarea id="new-project-description" class="form-textarea" rows="3" placeholder="Brief project description..." required></textarea>
             </div>
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="new-project-budget">Budget *</label>
               <div id="new-project-budget-mount"></div>
             </div>
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="new-project-timeline">Timeline *</label>
               <div id="new-project-timeline-mount"></div>
             </div>
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="new-project-notes">Additional Notes</label>
               <textarea id="new-project-notes" class="form-textarea" rows="2" placeholder="Any additional details..."></textarea>
             </div>
@@ -723,23 +723,23 @@
         </div>
         <form id="edit-client-info-form">
           <div class="admin-modal-body">
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="edit-client-email">Email</label>
               <input type="email" id="edit-client-email" class="form-input" placeholder="client@example.com" />
             </div>
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="edit-client-name">Contact Name</label>
               <input type="text" id="edit-client-name" class="form-input" placeholder="John Smith" />
             </div>
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="edit-client-company">Company Name</label>
               <input type="text" id="edit-client-company" class="form-input" placeholder="Acme Inc." />
             </div>
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="edit-client-phone">Phone</label>
               <input type="tel" id="edit-client-phone" class="form-input" placeholder="(555) 123-4567" />
             </div>
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="edit-client-status">Status</label>
               <div id="edit-client-status-mount"></div>
             </div>
@@ -766,34 +766,34 @@
         </div>
         <form id="edit-billing-form">
           <div class="admin-modal-body">
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="edit-billing-name">Billing Name</label>
               <input type="text" id="edit-billing-name" class="form-input" placeholder="John Smith" />
             </div>
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="edit-billing-email">Billing Email</label>
               <input type="email" id="edit-billing-email" class="form-input" placeholder="billing@example.com" />
             </div>
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="edit-billing-address">Address</label>
               <input type="text" id="edit-billing-address" class="form-input" placeholder="123 Main St" />
             </div>
             <div class="form-row">
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="edit-billing-city">City</label>
                 <input type="text" id="edit-billing-city" class="form-input" placeholder="New York" />
               </div>
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="edit-billing-state">State/Province</label>
                 <input type="text" id="edit-billing-state" class="form-input" placeholder="NY" />
               </div>
             </div>
             <div class="form-row">
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="edit-billing-zip">ZIP/Postal Code</label>
                 <input type="text" id="edit-billing-zip" class="form-input" placeholder="10001" />
               </div>
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="edit-billing-country">Country</label>
                 <input type="text" id="edit-billing-country" class="form-input" placeholder="USA" />
               </div>
@@ -822,79 +822,79 @@
         <form id="edit-project-form">
           <div class="admin-modal-body">
             <!-- Project Basics -->
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="edit-project-name">Project Name</label>
               <input type="text" id="edit-project-name" class="form-input" placeholder="Project Name" />
             </div>
             <div class="form-row">
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="edit-project-type">Project Type</label>
                 <div id="edit-project-type-mount"></div>
               </div>
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="edit-project-status">Status</label>
                 <div id="edit-project-status-mount"></div>
               </div>
             </div>
 
             <!-- Timeline -->
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="edit-project-timeline">Timeline</label>
               <input type="text" id="edit-project-timeline" class="form-input" placeholder="4-6 weeks" />
             </div>
             <div class="form-row">
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="edit-project-start-date">Start Date</label>
                 <input type="date" id="edit-project-start-date" class="form-input" />
               </div>
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="edit-project-end-date">Target End Date</label>
                 <input type="date" id="edit-project-end-date" class="form-input" />
               </div>
             </div>
 
             <!-- Description -->
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="edit-project-description">Project Description</label>
               <textarea id="edit-project-description" class="form-textarea" rows="4" placeholder="Describe the project scope and requirements..."></textarea>
             </div>
 
             <!-- Financial -->
             <div class="form-row">
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="edit-project-budget">Client Budget</label>
                 <input type="text" id="edit-project-budget" class="form-input" placeholder="Under 1k, 1000-2500, etc." />
               </div>
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="edit-project-price">Quoted Price</label>
                 <input type="text" id="edit-project-price" class="form-input" placeholder="$7,500" />
               </div>
             </div>
             <div class="form-row">
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="edit-project-deposit">Deposit Amount</label>
                 <input type="text" id="edit-project-deposit" class="form-input" placeholder="$1,000" />
               </div>
-              <div class="form-group">
+              <div class="form-field">
                 <label class="field-label" for="edit-project-contract-date">Contract Signed</label>
                 <input type="date" id="edit-project-contract-date" class="form-input" />
               </div>
             </div>
 
             <!-- URLs -->
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="edit-project-preview-url">Preview URL</label>
               <input type="url" id="edit-project-preview-url" class="form-input" placeholder="https://preview.example.com" />
             </div>
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="edit-project-repo-url">Repository URL</label>
               <input type="url" id="edit-project-repo-url" class="form-input" placeholder="https://github.com/..." />
             </div>
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="edit-project-production-url">Production URL</label>
               <input type="url" id="edit-project-production-url" class="form-input" placeholder="https://example.com" />
             </div>
-            <div class="form-group">
+            <div class="form-field">
               <label class="field-label" for="edit-project-notes">Admin Notes (internal)</label>
               <textarea id="edit-project-notes" class="form-textarea" rows="3" placeholder="Internal notes not visible to client..."></textarea>
             </div>

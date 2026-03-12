@@ -27,7 +27,7 @@
   visibility: visible;
 }
 
-/* .form-group base styles in portal-forms.css */
+/* .form-field base styles in portal-forms.css */
 
 .auth-form label {
   font-weight: var(--font-weight-semibold);
@@ -201,7 +201,7 @@ html[data-theme="dark"] body[data-page="client-landing"] .login-form {
   border-color: var(--color-border);
 }
 
-/* .login-form .form-group - base styles in portal-forms.css */
+/* .login-form .form-field - base styles in portal-forms.css */
 
 .login-form label {
   font-weight: var(--font-weight-semibold);
@@ -297,12 +297,12 @@ html[data-theme="dark"] body[data-page="client-landing"] .login-form {
     width: 100%;
   }
 
-  .mobile-login-form .form-group {
+  .mobile-login-form .form-field {
     margin-bottom: 1rem;
     text-align: center;
   }
 
-  .mobile-login-form .form-group label {
+  .mobile-login-form .form-field label {
     display: block;
     font-size: var(--font-size-sm);
     margin-bottom: 0.25rem;

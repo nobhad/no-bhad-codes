@@ -253,17 +253,17 @@
         background: var(--surface-elevated);
       }
 
-      .form-group {
+      .form-field {
         margin-bottom: 20px;
       }
 
-      .form-group label {
+      .form-field label {
         display: block;
         margin-bottom: 8px;
         font-weight: 500;
       }
 
-      .form-group input {
+      .form-field input {
         width: 100%;
         padding: 12px;
         border: 1px solid var(--border);
@@ -271,7 +271,7 @@
         font-size: 16px;
       }
 
-      .form-group input:focus {
+      .form-field input:focus {
         outline: none;
         border-color: var(--primary);
         box-shadow: var(--focus-ring);
@@ -503,11 +503,11 @@
           <div class="error-message" id="form-error"></div>
 
           <form id="signature-form">
-            <div class="form-group">
+            <div class="form-field">
               <label for="signer-email">Email Address</label>
               <input type="email" id="signer-email" name="signerEmail" readonly />
             </div>
-            <div class="form-group">
+            <div class="form-field">
               <label for="signer-name">Your Full Legal Name *</label>
               <input
                 type="text"
