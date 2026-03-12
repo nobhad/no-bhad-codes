@@ -58,7 +58,7 @@ export function WebhookTestModal({
       }
     >
       <div className="flex flex-col gap-4">
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label" htmlFor="webhook-test-event">Event Type</label>
           <select
             id="webhook-test-event"
@@ -73,7 +73,7 @@ export function WebhookTestModal({
           </select>
         </div>
 
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label" htmlFor="webhook-test-data">Sample Data (JSON, optional)</label>
           <textarea
             id="webhook-test-data"

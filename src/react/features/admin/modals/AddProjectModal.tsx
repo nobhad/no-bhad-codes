@@ -262,7 +262,7 @@ export function AddProjectModal({
       }
     >
       {/* Client Selection */}
-      <div className="form-group">
+      <div className="form-field">
         <label className="field-label">Client *</label>
         <ModalDropdown
           options={clientOptionsWithNew}
@@ -278,7 +278,7 @@ export function AddProjectModal({
         <fieldset>
           <legend>New Client Details</legend>
 
-          <div className="form-group">
+          <div className="form-field">
             <PortalInput
               type="text"
               label="Contact Name"
@@ -289,7 +289,7 @@ export function AddProjectModal({
             />
           </div>
 
-          <div className="form-group">
+          <div className="form-field">
             <PortalInput
               type="email"
               label="Email"
@@ -300,7 +300,7 @@ export function AddProjectModal({
             />
           </div>
 
-          <div className="form-group">
+          <div className="form-field">
             <PortalInput
               type="text"
               label="Company Name"
@@ -310,7 +310,7 @@ export function AddProjectModal({
             />
           </div>
 
-          <div className="form-group">
+          <div className="form-field">
             <PortalInput
               type="tel"
               label="Phone"
@@ -323,7 +323,7 @@ export function AddProjectModal({
       )}
 
       {/* Core Project Fields */}
-      <div className="form-group">
+      <div className="form-field">
         <label className="field-label">Project Type *</label>
         <ModalDropdown
           options={projectTypeOptions}
@@ -333,7 +333,7 @@ export function AddProjectModal({
         />
       </div>
 
-      <div className="form-group">
+      <div className="form-field">
         <label className="field-label" htmlFor="new-project-description">
           Description *
         </label>
@@ -348,7 +348,7 @@ export function AddProjectModal({
         />
       </div>
 
-      <div className="form-group">
+      <div className="form-field">
         <label className="field-label">Budget *</label>
         <ModalDropdown
           options={budgetOptions}
@@ -358,7 +358,7 @@ export function AddProjectModal({
         />
       </div>
 
-      <div className="form-group">
+      <div className="form-field">
         <label className="field-label">Timeline *</label>
         <ModalDropdown
           options={timelineOptions}
@@ -368,7 +368,7 @@ export function AddProjectModal({
         />
       </div>
 
-      <div className="form-group">
+      <div className="form-field">
         <label className="field-label" htmlFor="new-project-notes">
           Additional Notes
         </label>
@@ -386,7 +386,7 @@ export function AddProjectModal({
       <fieldset>
         <legend>Project Scope</legend>
 
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label" htmlFor="new-project-features">
             Features Requested
           </label>
@@ -400,7 +400,7 @@ export function AddProjectModal({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-field">
           <PortalInput
             type="text"
             label="Page Count"
@@ -410,7 +410,7 @@ export function AddProjectModal({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label" htmlFor="new-project-integrations">
             Integrations
           </label>
@@ -424,7 +424,7 @@ export function AddProjectModal({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label" htmlFor="new-project-addons">
             Add-ons
           </label>
@@ -443,7 +443,7 @@ export function AddProjectModal({
       <fieldset>
         <legend>Design &amp; Content</legend>
 
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label">Design Level</label>
           <ModalDropdown
             options={DESIGN_LEVEL_OPTIONS}
@@ -453,7 +453,7 @@ export function AddProjectModal({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label">Content Status</label>
           <ModalDropdown
             options={CONTENT_STATUS_OPTIONS}
@@ -463,7 +463,7 @@ export function AddProjectModal({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label">Brand Assets</label>
           <ModalDropdown
             options={BRAND_ASSETS_OPTIONS}
@@ -478,7 +478,7 @@ export function AddProjectModal({
       <fieldset>
         <legend>Technical</legend>
 
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label">Client Tech Comfort</label>
           <ModalDropdown
             options={TECH_COMFORT_OPTIONS}
@@ -488,7 +488,7 @@ export function AddProjectModal({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label">Hosting Preference</label>
           <ModalDropdown
             options={HOSTING_OPTIONS}
@@ -498,7 +498,7 @@ export function AddProjectModal({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-field">
           <PortalInput
             type="text"
             label="Current Site URL"
@@ -513,7 +513,7 @@ export function AddProjectModal({
       <fieldset>
         <legend>Background</legend>
 
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label" htmlFor="new-project-challenges">
             Known Challenges
           </label>
@@ -527,7 +527,7 @@ export function AddProjectModal({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-field">
           <PortalInput
             type="text"
             label="Referral Source"

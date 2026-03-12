@@ -92,9 +92,9 @@
    - .section-label: Section headers, filter labels
    - .stat-label   : Statistic/metric labels (KPIs, summaries)
 
-   LEGACY ALIASES (for backwards compatibility):
-   All aliases below map to the same styling.
-   Migrate to semantic classes when touching existing code.
+   ACTIVE ALIASES (still emitted by React components — migrate on touch):
+   .filter-section-label, .prompt-dialog-label, .kpi-card-label,
+   .section-title, .milestone-title
    ===================================================== */
 
 /* Label variables defined in portal-theme.css (single source of truth)
@@ -118,40 +118,13 @@ html[data-theme="light"] .portal :is(.field-label, .section-label, .stat-label) 
   color: var(--color-light-text);
 }
 
-/* Legacy aliases - inherit same styling via :is() */
+/* Aliases still in active use */
 .portal :is(
-  /* Form labels */
-  .form-label,
-  .filter-label,
   .filter-section-label,
-  .custom-field-label,
-  .documents-upload-label,
-  .client-selector-label,
   .prompt-dialog-label,
-  .template-editor-modal .form-group label,
-  #pd-tab-settings label,
-  /* Stat/KPI labels */
-  .meta-label,
   .kpi-card-label,
-  .kpi-card-change-label,
-  .summary-label,
-  .portal-stat-label,
-  .pd-stat-label,
-  .client-stat-label,
-  .cd-stat-label,
-  .cd-account-label,
-  .billing-label,
-  .health-label,
-  .health-factor-label,
-  .attention-label,
-  /* Section labels */
   .section-title,
   .milestone-title,
-  /* Chart labels */
-  .bar-chart-label,
-  .pie-chart-legend-label,
-  .funnel-stage-label,
-  /* Card heading elements */
   .summary-card h4,
   .payment-plans-section h4,
   .project-notes h4
@@ -164,33 +137,13 @@ html[data-theme="light"] .portal :is(.field-label, .section-label, .stat-label) 
   letter-spacing: var(--label-letter-spacing);
 }
 
-/* LIGHT MODE - ALL legacy labels black */
+/* LIGHT MODE - active aliases */
 html[data-theme="light"] .portal :is(
-  .form-label,
-  .filter-label,
   .filter-section-label,
-  .custom-field-label,
-  .documents-upload-label,
-  .client-selector-label,
   .prompt-dialog-label,
-  .meta-label,
   .kpi-card-label,
-  .kpi-card-change-label,
-  .summary-label,
-  .portal-stat-label,
-  .pd-stat-label,
-  .client-stat-label,
-  .cd-stat-label,
-  .cd-account-label,
-  .billing-label,
-  .health-label,
-  .health-factor-label,
-  .attention-label,
   .section-title,
   .milestone-title,
-  .bar-chart-label,
-  .pie-chart-legend-label,
-  .funnel-stage-label,
   .summary-card h4,
   .payment-plans-section h4,
   .project-notes h4

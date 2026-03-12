@@ -176,7 +176,7 @@ export function BusinessConfiguration({ showNotification, overviewMode }: Busine
         <FormField label="Default Currency" icon={<CreditCard className="icon-sm" />} value={invoiceSettings.defaultCurrency} onChange={(v) => updateInvoiceField('defaultCurrency', v)} />
         <FormField label="Invoice Prefix" icon={<FileText className="icon-sm" />} value={invoiceSettings.prefix} onChange={(v) => updateInvoiceField('prefix', v)} placeholder="INV-" />
         <div className="config-form-field config-form-field--wide">
-          <label className="config-form-label" htmlFor="config-payment-terms">
+          <label className="field-label" htmlFor="config-payment-terms">
             <FileText className="icon-sm" />
             <span>Default Payment Terms</span>
           </label>
@@ -189,7 +189,7 @@ export function BusinessConfiguration({ showNotification, overviewMode }: Busine
           />
         </div>
         <div className="config-form-field">
-          <label className="config-form-label">
+          <label className="field-label">
             <FileText className="icon-sm" />
             <span>Next Invoice Number</span>
           </label>
@@ -334,7 +334,7 @@ function FormField({ label, icon, value, onChange, type = 'text', placeholder }:
   const fieldId = useId();
   return (
     <div className="config-form-field">
-      <label className="config-form-label" htmlFor={fieldId}>
+      <label className="field-label" htmlFor={fieldId}>
         {icon}
         <span>{label}</span>
       </label>

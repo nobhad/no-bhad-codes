@@ -162,7 +162,7 @@ export function RateLimitingTab({
         <div className="rate-limit-forms">
           <form onSubmit={handleBlock} className="rate-limit-form">
             <h4 className="field-label">Block an IP Address</h4>
-            <div className="form-group">
+            <div className="form-field">
               <label className="field-label" htmlFor="block-ip">IP Address</label>
               <input
                 id="block-ip"
@@ -174,7 +174,7 @@ export function RateLimitingTab({
                 required
               />
             </div>
-            <div className="form-group">
+            <div className="form-field">
               <label className="field-label" htmlFor="block-reason">Reason (optional)</label>
               <input
                 id="block-reason"
@@ -193,7 +193,7 @@ export function RateLimitingTab({
 
           <form onSubmit={handleUnblock} className="rate-limit-form">
             <h4 className="field-label">Unblock an IP Address</h4>
-            <div className="form-group">
+            <div className="form-field">
               <label className="field-label" htmlFor="unblock-ip">IP Address</label>
               <input
                 id="unblock-ip"

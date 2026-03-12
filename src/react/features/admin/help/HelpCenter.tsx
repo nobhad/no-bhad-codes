@@ -103,7 +103,7 @@ export function HelpCenter({ getAuthToken }: HelpCenterProps) {
       {/* Search and Filter Bar */}
       <div className="panel">
         <div className="form-row">
-          <div className="form-group form-group-grow">
+          <div className="form-field">
             <div className="input-with-icon">
               <Search className="input-icon" />
               <input
@@ -116,7 +116,7 @@ export function HelpCenter({ getAuthToken }: HelpCenterProps) {
               />
             </div>
           </div>
-          <div className="form-group">
+          <div className="form-field">
             <select
               className="form-input"
               value={selectedCategory}
