@@ -569,18 +569,30 @@ router.get(
     );
     const deliverablesInReview = deliverablesInReviewResult?.count || 0;
 
-    // Get current active deliverable/milestone for active projects
+    // Get current active deliverable or milestone for active projects
     const currentDeliverable = await db.get(
-      `SELECT d.id, d.title, d.status, d.type, p.id as project_id
-       FROM deliverables d
-       JOIN active_projects p ON d.project_id = p.id
-       WHERE p.client_id = ? AND d.deleted_at IS NULL
-         AND d.status IN ('in_progress', 'in_review')
-       ORDER BY
-         CASE WHEN d.status = 'in_progress' THEN 0 ELSE 1 END,
-         d.updated_at DESC
-       LIMIT 1`,
-      [clientId]
+      `SELECT id, title, status, type, project_id FROM (
+        -- Deliverables (design review system)
+        SELECT d.id, d.title, d.status, d.type, p.id as project_id, d.updated_at
+        FROM deliverables d
+        JOIN active_projects p ON d.project_id = p.id
+        WHERE p.client_id = ? AND d.deleted_at IS NULL
+          AND d.status IN ('in_progress', 'in_review')
+
+        UNION ALL
+
+        -- Milestones (project milestones)
+        SELECT m.id, m.title, m.status, 'milestone' as type, p.id as project_id, m.updated_at
+        FROM milestones m
+        JOIN active_projects p ON m.project_id = p.id
+        WHERE p.client_id = ? AND m.deleted_at IS NULL
+          AND m.status = 'in_progress'
+      )
+      ORDER BY
+        CASE WHEN status = 'in_progress' THEN 0 ELSE 1 END,
+        updated_at DESC
+      LIMIT 1`,
+      [clientId, clientId]
     );
 
     sendSuccess(res, {
