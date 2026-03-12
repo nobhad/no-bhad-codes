@@ -165,7 +165,6 @@ export function TabList<T extends string>({
             onKeyDown={(e) => handleKeyDown(e, tab.id)}
             className={isActive ? 'active' : ''}
           >
-            {Icon && React.createElement(Icon)}
             {tab.label}
             {tab.badge !== undefined && tab.badge > 0 && (
               <span className="portal-tab-badge">

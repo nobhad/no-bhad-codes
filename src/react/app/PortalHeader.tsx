@@ -10,7 +10,8 @@
  */
 
 import * as React from 'react';
-import { Sun, Moon, PanelLeft, ChevronDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Sun, Moon, PanelLeft, ChevronDown, ChevronRight } from 'lucide-react';
 import {
   usePageTitle,
   usePortalTheme,
@@ -20,9 +21,11 @@ import {
   useProjects,
   useProjectCount,
   useActiveProjectId,
-  useSetActiveProject
+  useSetActiveProject,
+  useCurrentTab,
+  useCurrentGroup
 } from '../stores/portal-store';
-import { usePortalAuth } from '../hooks/usePortalAuth';
+import { UNIFIED_TAB_GROUPS } from '../../../server/config/unified-navigation';
 import { NotificationBell } from '../components/portal/NotificationBell';
 // ============================================
 // PROJECT SELECTOR (client portal only)
@@ -94,23 +97,52 @@ function ProjectSelector() {
 }
 
 // ============================================
+// HEADER BREADCRUMBS
+// ============================================
+
+function HeaderBreadcrumbs() {
+  const role = usePortalRole();
+  const pageTitle = usePageTitle();
+  const currentTab = useCurrentTab();
+  const currentGroup = useCurrentGroup();
+
+  // Admin: show Group > Tab when inside a group subtab
+  const isGroupOverview = currentTab === currentGroup;
+  const showGroupCrumb = role === 'admin' && currentGroup && !isGroupOverview;
+  const groupLabel = currentGroup ? UNIFIED_TAB_GROUPS[currentGroup]?.label : null;
+
+  return (
+    <nav className="breadcrumb-nav" aria-label="Breadcrumb">
+      <ol className="breadcrumb-list">
+        {showGroupCrumb && groupLabel && (
+          <>
+            <li className="breadcrumb-item">
+              <Link className="breadcrumb-link" to={`/${currentGroup}`}>
+                {groupLabel}
+              </Link>
+            </li>
+            <li className="breadcrumb-item breadcrumb-separator" aria-hidden="true">
+              <ChevronRight size={14} />
+            </li>
+          </>
+        )}
+        <li className="breadcrumb-item breadcrumb-current">
+          {pageTitle}
+        </li>
+      </ol>
+    </nav>
+  );
+}
+
+// ============================================
 // COMPONENT
 // ============================================
 
 export function PortalHeader() {
-  const pageTitle = usePageTitle();
   const role = usePortalRole();
   const theme = usePortalTheme();
   const toggleTheme = useToggleTheme();
   const toggleSidebar = useToggleSidebar();
-  const { user } = usePortalAuth();
-
-  // Get display name from user based on role
-  const userName = React.useMemo(() => {
-    if (!user) return null;
-    if (user.role === 'client') return user.contactName;
-    return user.username || user.email;
-  }, [user]);
 
   return (
     <>
@@ -134,18 +166,7 @@ export function PortalHeader() {
             />
           </button>
 
-          <h1
-            className="header-page-title"
-            id={role === 'client' ? 'portal-page-title' : 'admin-page-title'}
-          >
-            {role === 'client' && userName ? (
-              <>
-                Welcome Back, <span id="client-name">{userName}</span>!
-              </>
-            ) : (
-              pageTitle
-            )}
-          </h1>
+          <HeaderBreadcrumbs />
 
           {role === 'client' && <ProjectSelector />}
         </div>
