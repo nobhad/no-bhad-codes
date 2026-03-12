@@ -725,11 +725,6 @@ td {
   --font-size-base: 15px;
 }
 
-/* Dashboard Layout - used by PortalDashboard.ts tab content */
-.dashboard-layout {
-  display: flex;
-  width: 100%;
-}
 
 /* Reduced padding on smallest screens */
 @media (--xs-mobile) {
