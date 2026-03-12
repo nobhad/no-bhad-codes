@@ -43,6 +43,7 @@
 }
 
 .data-table th {
+  box-sizing: border-box;
   text-align: left;
   padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   color: var(--color-text-primary);
@@ -63,6 +64,7 @@
 }
 
 .data-table td {
+  box-sizing: border-box;
   padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   color: inherit;
   font-size: inherit;
@@ -73,20 +75,19 @@
 }
 
 /* ==============================================
-   OUTER COLUMN PADDING
+   OUTER COLUMN PADDING — same horizontal padding on all cells (root rule)
    ============================================== */
 
 .data-table :is(th, td):first-child {
-  padding-left: var(--space-1);
+  padding-left: var(--table-cell-padding-x);
 }
 
-/* Checkbox is hidden on mobile — apply left padding to the next visible cell */
 .data-table .col-checkbox + :is(th, td) {
-  padding-left: var(--space-1);
+  padding-left: var(--table-cell-padding-x);
 }
 
 .data-table :is(th, td):last-child {
-  padding-right: var(--space-1);
+  padding-right: var(--table-cell-padding-x);
 }
 
 /* ==============================================
@@ -567,11 +568,16 @@
   line-height: var(--line-height-snug);
 }
 
-/* Layout helpers - flex/block display */
+/* Layout helpers - flex column, vertically aligned with other cells (root rule) */
 .data-table .cell-content {
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   gap: var(--space-0-5);
+  vertical-align: middle;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
 }
 
 /* Empty cell placeholder — muted dash across all tables */
@@ -813,7 +819,11 @@
   text-align: center;
 }
 
-/* Center the dropdown within status cell */
+/* Center the dropdown within status cell — no margin so column aligns with others */
+.data-table td.status-cell .table-dropdown,
+.data-table td.status-cell .table-dropdown .custom-dropdown-trigger {
+  margin: 0;
+}
 .data-table td.status-cell .table-dropdown {
   display: inline-flex;
   justify-content: center;

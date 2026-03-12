@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useCallback, useState, useEffect } from 'react';
-import { StickyNote } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import type { Project } from '../../types';
 import { NOTIFICATIONS } from '@/constants/notifications';
@@ -66,49 +65,39 @@ export function NotesTab({
   );
 
   return (
-    <div className="section tab-section">
-      {/* Header */}
-      <div className="layout-row-between">
-        <div className="layout-row gap-2">
-          <StickyNote className="icon-lg" />
-          <h3 className="heading">
+    <div className="section">
+      <div className="panel">
+        <div className="layout-row-between">
+          <h3 className="section-title">
             Internal Notes
+            <span className="text-muted pd-hint"> (Only visible to admins)</span>
           </h3>
-          <span className="text-muted pd-hint">
-            (Only visible to admins)
-          </span>
+          <div className="layout-row gap-2">
+            {hasChanges && (
+              <span className="text-muted pd-hint">Unsaved changes</span>
+            )}
+            <IconButton
+              action="save"
+              onClick={handleSave}
+              disabled={!hasChanges}
+              loading={isSaving}
+              title="Save"
+            />
+          </div>
         </div>
-
-        <div className="layout-row gap-2">
-          {hasChanges && (
-            <span className="text-muted pd-hint">Unsaved changes</span>
-          )}
-          <IconButton
-            action="save"
-            onClick={handleSave}
-            disabled={!hasChanges}
-            loading={isSaving}
-            title="Save"
-          />
-        </div>
-      </div>
-
-      {/* Notes Editor */}
-      <div className="panel notes-panel">
         <textarea
           value={notes}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           placeholder="Add internal notes about this project..."
           rows={15}
-          className="textarea notes-textarea" aria-label="Internal project notes"
+          className="textarea"
+          aria-label="Internal project notes"
         />
-      </div>
-
-      {/* Keyboard shortcut hint */}
-      <div className="text-muted notes-hint">
-        Press <kbd className="badge msgtab-kbd">Cmd+S</kbd> or{' '}
-        <kbd className="badge msgtab-kbd">Ctrl+S</kbd> to save
+        <p className="text-muted form-helper-text">
+          Press <kbd className="badge msgtab-kbd">Cmd+S</kbd> or{' '}
+          <kbd className="badge msgtab-kbd">Ctrl+S</kbd> to save
+        </p>
       </div>
     </div>
   );

@@ -370,7 +370,6 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
             >
               Contact
             </PortalTableHead>
-            <PortalTableHead className="client-col">Client</PortalTableHead>
             <PortalTableHead className="status-col">Status</PortalTableHead>
             <PortalTableHead className="col-actions">Actions</PortalTableHead>
           </PortalTableRow>
@@ -378,12 +377,12 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={6} message={error} onRetry={refetch} />
+            <PortalTableError colSpan={5} message={error} onRetry={refetch} />
           ) : isLoading ? (
-            <PortalTableLoading colSpan={6} rows={5} />
+            <PortalTableLoading colSpan={5} rows={5} />
           ) : paginatedContacts.length === 0 ? (
             <PortalTableEmpty
-              colSpan={6}
+              colSpan={5}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No contacts match your filters' : 'No contacts yet'}
             />
@@ -431,23 +430,25 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
                     {contact.role && (
                       <span className="cell-subtitle">{contact.role}</span>
                     )}
+                    {contact.clientName && (
+                      <span className="identity-company">
+                        {contact.clientId != null ? (
+                          <Link
+                            to={`/clients/${contact.clientId}`}
+                            className="cell-link"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onNavigate?.('clients', String(contact.clientId));
+                            }}
+                          >
+                            {contact.clientName}
+                          </Link>
+                        ) : (
+                          contact.clientName
+                        )}
+                      </span>
+                    )}
                   </div>
-                </PortalTableCell>
-                <PortalTableCell className="client-cell">
-                  {contact.clientName && contact.clientId != null ? (
-                    <Link
-                      to={`/clients/${contact.clientId}`}
-                      className="cell-link"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onNavigate?.('clients', String(contact.clientId));
-                      }}
-                    >
-                      {contact.clientName}
-                    </Link>
-                  ) : contact.clientName ? (
-                    <span className="cell-text">{contact.clientName}</span>
-                  ) : null}
                 </PortalTableCell>
                 <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                   <PortalDropdown>

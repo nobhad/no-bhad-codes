@@ -104,11 +104,7 @@
   flex-direction: column;
 }
 
-#ad-hoc-analytics-widget .empty-state,
-#ad-hoc-analytics-widget .loading-state,
-#ad-hoc-analytics-widget .error-state {
-  min-height: 100px;
-}
+/* Empty/loading/error min-height: root rule in components/loading.css (min-height: 120px on parent) */
 
 /* ============================================
    Charts

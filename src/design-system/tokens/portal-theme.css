@@ -74,7 +74,7 @@ body[data-page="client-portal"] {
 
   /* Portal border shorthand — convenience alias */
   --portal-border: var(--border-width) solid var(--color-border-primary);
-  /* Input border — 1px since inputs are nested inside bordered panels */
+  /* Input border — 1px via root alias, since inputs are nested inside bordered panels */
   --portal-input-border: var(--border-width-px) solid var(--color-border-primary);
 
   /* Table border alias */

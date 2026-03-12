@@ -66,18 +66,20 @@
   gap: 0;
 }
 
-/* Thread area — bordered wrapper around scrollable messages */
+/* Thread area — top section: takes most space, always bigger than compose */
 .msgtab-thread-area {
-  flex: 1;
-  min-height: 0;
+  flex: 1 1 auto;
+  min-height: min(60vh, 20rem);
   display: flex;
   flex-direction: column;
   border: var(--portal-border);
   overflow: hidden;
 }
 
-/* Compose area — bordered wrapper around input + actions */
+/* Compose area — bottom send area: content-sized only, stays smaller than thread */
 .msgtab-compose-area {
+  flex: 0 0 auto;
+  max-height: 40vh;
   border: var(--portal-border);
 }
 

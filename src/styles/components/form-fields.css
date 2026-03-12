@@ -1,15 +1,18 @@
 /**
  * ===============================================
- * FORM FIELDS
+ * FORM FIELDS — PUBLIC / MARKETING SITE ONLY
  * ===============================================
  * @file src/styles/components/form-fields.css
  *
- * Form field styling including inputs, textareas,
- * selects, containers, labels, and layout.
+ * Styles ONLY .form-container and .login-form (e.g. contact form, public login).
+ * PORTAL FORMS (admin + client portal): single source of truth is
+ *   shared/portal-forms.css — do not add portal form rules here.
+ *
+ * Labels: .field-label / .meta-label SoT is shared/field-label-spacing.css
  */
 
 /* ============================================
- * FORM FIELD STYLING
+ * FORM FIELD STYLING — SCOPED TO CONTAINERS
  * ============================================ */
 
 /* Honeypot field for bot detection */
@@ -24,10 +27,10 @@ input[type="radio"] {
   z-index: var(--z-index-behind) !important;
 }
 
-/* Universal form field styling - EXCLUDE contact form */
-.form-input,
-.form-textarea,
-.form-select,
+/* Form controls — ONLY inside .form-container or .login-form (public site) */
+.form-container .form-input,
+.form-container .form-textarea,
+.form-container .form-select,
 .form-container input[type="text"],
 .form-container input[type="email"],
 .form-container input[type="password"],
@@ -42,7 +45,7 @@ input[type="radio"] {
 .login-form select {
   width: 100%;
   padding: clamp(6px, 1.5vw, 12px) clamp(8px, 2vw, 14px);
-  border: var(--border-width) solid var(--form-input-border);
+  border: var(--border-width) solid var(--form-input-border, var(--color-border-primary));
   border-radius: clamp(6px, 1.5vw, 12px);
   font-size: clamp(0.75rem, 2vw, 1rem);
   background-color: var(--color-black);
@@ -54,9 +57,9 @@ input[type="radio"] {
   height: auto;
 }
 
-/* Placeholder text - not bold */
-.form-input::placeholder,
-.form-textarea::placeholder,
+/* Placeholder — scoped */
+.form-container .form-input::placeholder,
+.form-container .form-textarea::placeholder,
 .form-container input::placeholder,
 .login-form input::placeholder,
 .form-container textarea::placeholder,
@@ -74,12 +77,13 @@ input[type="radio"] {
 }
 
 /* ============================================
- * SELECT DROPDOWN STYLING
+ * SELECT DROPDOWN — SCOPED
  * ============================================ */
 
-/* Standardized select dropdown component */
-.form-select,
-select {
+.form-container .form-select,
+.form-container select,
+.login-form .form-select,
+.login-form select {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -91,24 +95,24 @@ select {
   cursor: pointer;
 }
 
-/* Dark theme and portal select dropdown arrow - light color */
-[data-theme="dark"] .form-select,
-[data-theme="dark"] select,
-.portal .form-select,
-.portal select {
+[data-theme="dark"] .form-container .form-select,
+[data-theme="dark"] .form-container select,
+[data-theme="dark"] .login-form .form-select,
+[data-theme="dark"] .login-form select {
   background-image: var(--select-caret);
 }
 
-/* Remove default arrow in IE */
-.form-select::-ms-expand,
-select::-ms-expand {
+.form-container .form-select::-ms-expand,
+.form-container select::-ms-expand,
+.login-form .form-select::-ms-expand,
+.login-form select::-ms-expand {
   display: none;
 }
 
-/* Form field focus states - Green border (exclude submit buttons and contact form) */
-.form-input:focus,
-.form-textarea:focus,
-.form-select:focus,
+/* Focus — scoped */
+.form-container .form-input:focus,
+.form-container .form-textarea:focus,
+.form-container .form-select:focus,
 .form-container input:not([type="submit"]):focus,
 .login-form input:not([type="submit"]):focus,
 .form-container textarea:focus,
@@ -120,14 +124,10 @@ select::-ms-expand {
   box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb), 0.25);
 }
 
-/* Focus indicators inherited from global :focus-visible rule in reset.css */
-/* Border color change on focus is handled above via :focus */
-
 /* ============================================
  * FORM CONTAINER SYSTEM
  * ============================================ */
 
-/* Form container styling - EXCLUDE .contact-form (has custom styling in pages/contact.css) */
 .login-form {
   background: var(--color-neutral-300);
   padding: clamp(8px, 2.5vw, 20px);
@@ -142,25 +142,21 @@ select::-ms-expand {
   gap: clamp(8px, 2vw, 16px);
 }
 
-/* Form field spacing */
-.form-field,
-.form-row {
+.form-container .form-field,
+.form-container .form-row,
+.login-form .form-field,
+.login-form .form-row {
   margin: 0;
   display: flex;
   flex-direction: column;
   gap: clamp(4px, 1vw, 8px);
 }
 
-/* ============================================
- * FORM LABELS AND TEXT
- * ============================================ */
-
-/* .field-label, .meta-label, .meta-value, .meta-item
-   SINGLE SOURCE OF TRUTH: shared/field-label-spacing.css */
-
-/* Form labels */
-.form-field label,
-label {
+/* Labels: typography SoT is shared/field-label-spacing.css; only layout here */
+.form-container .form-field label,
+.form-container label,
+.login-form .form-field label,
+.login-form label {
   display: block;
   margin-bottom: 0;
   font-weight: var(--font-weight-semibold);
@@ -169,7 +165,7 @@ label {
 }
 
 /* ============================================
- * RESPONSIVE FORM FIELDS
+ * RESPONSIVE — SCOPED
  * ============================================ */
 
 @media (--mobile) {
@@ -180,9 +176,9 @@ label {
     gap: clamp(6px, 1.5vw, 12px);
   }
 
-  .form-input,
-  .form-textarea,
-  .form-select,
+  .form-container .form-input,
+  .form-container .form-textarea,
+  .form-container .form-select,
   .form-container input,
   .login-form input,
   .form-container textarea,
@@ -209,14 +205,13 @@ label {
 }
 
 /* ============================================
- * ACCESSIBILITY - FORM FIELDS
+ * ACCESSIBILITY — SCOPED
  * ============================================ */
 
-/* High contrast mode support */
 @media (prefers-contrast: high) {
-  .form-input,
-  .form-textarea,
-  .form-select,
+  .form-container .form-input,
+  .form-container .form-textarea,
+  .form-container .form-select,
   .form-container input,
   .login-form input,
   .form-container textarea,
@@ -227,11 +222,10 @@ label {
   }
 }
 
-/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .form-input,
-  .form-textarea,
-  .form-select,
+  .form-container .form-input,
+  .form-container .form-textarea,
+  .form-container .form-select,
   .form-container input,
   .login-form input,
   .form-container textarea,

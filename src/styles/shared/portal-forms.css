@@ -1,7 +1,13 @@
 /* =====================================================
-   SHARED PORTAL FORMS - BRUTALIST DESIGN
+   SHARED PORTAL FORMS — SINGLE SOURCE OF TRUTH
    @file src/styles/shared/portal-forms.css
-   Single source of truth for admin and client portal forms
+   =====================================================
+   ALL form controls used anywhere in the portal (admin + client) are
+   defined here. Do not add input/textarea/select border, padding,
+   focus, or typography in feature CSS — only layout (grid, gap, width).
+   Tokens: --portal-input-border, --focus-ring, --space-* (design-system).
+   Labels: .field-label SoT is shared/field-label-spacing.css.
+   =====================================================
 
    FORM SYSTEM ARCHITECTURE
    ========================
@@ -138,11 +144,9 @@
   margin-bottom: 0;
 }
 
-/* Field label - positioned above inputs */
+/* Field label in forms — base .field-label SoT: shared/field-label-spacing.css */
 :is(label.field-label, .field-label) {
   position: static;
-  display: block;
-  margin-bottom: var(--portal-field-label-gap);
   pointer-events: auto;
 }
 
@@ -534,7 +538,7 @@ input.search-bar-input {
   transform: translateY(-50%) rotate(180deg);
 }
 
-/* Textarea */
+/* Textarea — same token and focus as other portal inputs */
 .textarea {
   width: 100%;
   padding: var(--space-1) var(--space-1-5) var(--space-1) var(--space-2);
@@ -542,12 +546,12 @@ input.search-bar-input {
   font-weight: var(--font-weight-bold);
   font-family: var(--font-family-mono);
   background: inherit;
-  border: 1px solid var(--color-border-primary);
+  border: var(--portal-input-border);
   border-radius: 0;
   color: var(--color-text-primary);
   outline: none;
   resize: none;
-  min-height: var(--space-12); /* 96px ≈ 100px, on 8px grid */
+  min-height: var(--space-12);
 }
 
 .textarea::placeholder {
@@ -555,12 +559,18 @@ input.search-bar-input {
 }
 
 .textarea:focus {
-  border-color: var(--color-text-primary);
+  border-color: var(--color-accent);
+  box-shadow: var(--focus-ring);
 }
 
 .textarea:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Panel > textarea: single border (panel only), no inner textarea border */
+.panel > .textarea {
+  border: none;
 }
 
 /* Checkbox - all checkbox variants use same border */

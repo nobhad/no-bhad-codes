@@ -237,20 +237,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   font-weight: var(--font-weight-semibold);
 }
 
-/* Thicker focus border for admin form fields */
-[data-page="admin"] .form-input:focus,
-[data-page="admin"] input[type="text"]:focus,
-[data-page="admin"] input[type="email"]:focus,
-[data-page="admin"] input[type="password"]:focus,
-[data-page="admin"] input[type="tel"]:focus,
-[data-page="admin"] input[type="number"]:focus,
-[data-page="admin"] input[type="url"]:focus,
-[data-page="admin"] textarea:focus,
-[data-page="admin"] select:not(.status-select):focus,
-[data-page="admin"] .form-select:not(.status-select):focus {
-  border: var(--border-width-thick) solid var(--color-accent);
-  outline: none;
-}
+/* Form focus state: single source of truth in shared/portal-forms.css */
 
 /* Custom status dropdown for settings form */
 [data-page="admin"] #pd-setting-status {
@@ -1253,25 +1240,4 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* --- Messages Tab: styles moved to shared/message-thread.css --- */
 
-/* --- Notes Tab --- */
-
-/* Notes panel — no padding, border inherited from .panel (2px) */
-.notes-panel {
-  padding: 0;
-}
-
-/* Notes textarea full-bleed — two-class specificity beats .textarea in portal-forms.css */
-.notes-panel .notes-textarea {
-  width: 100%;
-  border: none;
-  resize: vertical;
-  min-height: 300px;
-  padding: var(--space-4);
-}
-
-/* Notes hint text */
-.notes-hint {
-  font-size: var(--font-size-sm);
-  margin-top: var(--space-2);
-  text-align: right;
-}
+/* --- Notes Tab: uses root .panel and .textarea (portal-forms.css), no overrides --- */

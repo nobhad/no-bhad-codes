@@ -1174,35 +1174,10 @@ body.modal-open .dashboard-content {
   min-height: auto;
 }
 
-/* Ensure hover background spans full card width for overview tables.
-   Remove horizontal padding from the cells and shift it to the inner content
-   via margins instead, so the background fill reaches the card edges. */
-[data-page="admin"] .overview-table-section .data-table :is(th, td) {
-  padding-left: 0;
-  padding-right: 0;
-}
+/* Overview tables use the same cell padding as other tables so all columns
+   (Name, Type, Status, Date, etc.) align; no margin on cell contents. */
 
-[data-page="admin"] .overview-table-section .data-table :is(th, td) > * {
-  margin-left: var(--table-cell-padding-x);
-  margin-right: var(--table-cell-padding-x);
-}
-
-/* Empty/loading states - compact height, no percentage stretch */
-[data-page="admin"] .overview-table-section .empty-state,
-[data-page="admin"] .overview-table-section .loading-state,
-[data-page="admin"] .subtab-content-wrapper > .loading-state,
-[data-page="admin"] .analytics-view > .loading-state,
-[data-page="admin"] .overview-linear > .loading-state,
-[data-page="admin"] .section > .loading-state,
-[data-page="admin"] .stats-grid > .loading-state,
-[data-page="admin"] .scroll-container > .loading-state,
-[data-page="admin"] .scroll-container > .empty-state {
-  height: auto;
-  min-height: var(--card-min-height-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+/* Empty/loading/error state centering: root rule in components/loading.css (.portal :has(> .empty-state) etc.) */
 
 /* Overview tables use the same header padding as all other tables.
    Mobile overrides in portal-tables.css apply uniformly. */

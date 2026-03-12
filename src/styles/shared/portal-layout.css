@@ -927,12 +927,7 @@ html[data-theme="light"] .portal .funnel-value {
 
 
 
-/* Loading/empty states inside section should not stretch to fill viewport */
-.section > .loading-state,
-.section > .empty-state {
-  height: auto;
-  min-height: 120px;
-}
+/* Empty/loading/error centering: root rule in components/loading.css (.portal :has(> .empty-state) etc.) */
 
 .panel {
   display: flex;
@@ -1256,14 +1251,25 @@ html[data-theme="light"] .portal .funnel-value {
 .section-padding-md { padding: var(--space-3); }
 .section-padding-lg { padding: var(--space-4); }
 
-/* Section header */
+/* Section header — single font-size and center alignment for row (root rule) */
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--icon-gap-sm, 6px);
   padding: var(--space-2) var(--space-3);
-  border-bottom: var(--border-width) solid var(--portal-border);
+  border-bottom: var(--border-width) solid var(--color-border-primary);
+  font-size: var(--font-size-sm);
+}
+
+.section-header--compact {
+  padding: var(--space-1) var(--space-2);
+}
+
+/* Title in header: no margin, tight line-height for vertical alignment */
+.section-header .section-title {
+  margin: 0;
+  line-height: 1;
 }
 
 .section-title-group {
@@ -1276,6 +1282,28 @@ html[data-theme="light"] .portal .funnel-value {
   width: var(--icon-size-sm);
   height: var(--icon-size-sm);
   color: var(--color-text-secondary);
+}
+
+/* All SVGs in section header = same size as text (1em), center-aligned (root rule) */
+.section-header svg {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+.section-header .section-icon,
+.section-title-group .section-icon {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+/* Icon buttons in section header: size to row so icon (1em) matches title text */
+.section-header .icon-btn {
+  width: 2em;
+  height: 2em;
+  min-width: 2em;
+  min-height: 2em;
 }
 
 /* .section-title definition consolidated to PORTAL TYPOGRAPHY section above */
