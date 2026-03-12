@@ -21,7 +21,7 @@
 .data-table {
   width: 100%;
   max-width: 100%;
-  min-width: 0;
+  min-width: 100%;
   border-collapse: collapse;
   border-spacing: 0;
   background: var(--table-bg);
@@ -366,29 +366,6 @@
 .data-table-card .empty-state,
 .data-table-container .empty-state {
   padding: var(--space-4);
-}
-
-/* Empty/loading/error states inside tables — flex fill + center */
-.data-table-card:has(.empty-state, .loading-state, .error-state) {
-  display: flex;
-  flex-direction: column;
-}
-
-.data-table-card:has(.empty-state, .loading-state, .error-state) .data-table-container,
-.data-table-card:has(.empty-state, .loading-state, .error-state) .data-table-scroll-wrapper,
-.data-table-card:has(.empty-state, .loading-state, .error-state) .data-table,
-.data-table-card:has(.empty-state, .loading-state, .error-state) .data-table tbody,
-.data-table-card:has(.empty-state, .loading-state, .error-state) .data-table tbody tr,
-.data-table-card:has(.empty-state, .loading-state, .error-state) .data-table tbody tr td[colspan] {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.data-table-card:has(.empty-state, .loading-state, .error-state) .data-table tbody tr td[colspan] {
-  align-items: center;
-  justify-content: center;
-  padding: 0;
 }
 
 /* Hide card-mode ::before label on colspan cells */
