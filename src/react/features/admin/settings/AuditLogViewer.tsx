@@ -158,7 +158,7 @@ export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: 
         <div className="audit-filters">
           <div className="audit-filter-row">
             <div className="audit-filter-field">
-              <label className="config-form-label" htmlFor="audit-filter-action">
+              <label className="field-label" htmlFor="audit-filter-action">
                 <Search className="icon-sm" />
                 <span>Action</span>
               </label>
@@ -171,7 +171,7 @@ export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: 
               />
             </div>
             <div className="audit-filter-field">
-              <label className="config-form-label" htmlFor="audit-filter-entity">
+              <label className="field-label" htmlFor="audit-filter-entity">
                 <Search className="icon-sm" />
                 <span>Entity Type</span>
               </label>
@@ -184,7 +184,7 @@ export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: 
               />
             </div>
             <div className="audit-filter-field">
-              <label className="config-form-label" htmlFor="audit-filter-user">
+              <label className="field-label" htmlFor="audit-filter-user">
                 <Search className="icon-sm" />
                 <span>User Email</span>
               </label>

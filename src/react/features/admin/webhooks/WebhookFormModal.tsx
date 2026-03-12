@@ -66,7 +66,7 @@ export function WebhookFormModal({
           <div className="form-error-message">{formError}</div>
         )}
 
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label" htmlFor="webhook-name">Name</label>
           <input
             id="webhook-name"
@@ -78,7 +78,7 @@ export function WebhookFormModal({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label" htmlFor="webhook-url">URL</label>
           <input
             id="webhook-url"
@@ -90,7 +90,7 @@ export function WebhookFormModal({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label">Events</label>
           <div className="flex flex-wrap gap-2 mt-1">
             {AVAILABLE_EVENTS.map((event) => (
@@ -106,7 +106,7 @@ export function WebhookFormModal({
           </div>
         </div>
 
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label" htmlFor="webhook-method">Method</label>
           <select
             id="webhook-method"
@@ -120,7 +120,7 @@ export function WebhookFormModal({
           </select>
         </div>
 
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label" htmlFor="webhook-headers">Headers (JSON)</label>
           <textarea
             id="webhook-headers"
@@ -133,7 +133,7 @@ export function WebhookFormModal({
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div className="form-group">
+          <div className="form-field">
             <label className="field-label" htmlFor="webhook-retry-attempts">Max Retry Attempts</label>
             <input
               id="webhook-retry-attempts"
@@ -148,7 +148,7 @@ export function WebhookFormModal({
               }))}
             />
           </div>
-          <div className="form-group">
+          <div className="form-field">
             <label className="field-label" htmlFor="webhook-retry-backoff">Retry Backoff (seconds)</label>
             <input
               id="webhook-retry-backoff"

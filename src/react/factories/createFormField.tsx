@@ -127,15 +127,15 @@ function FieldWrapper({
   return (
     <div className={cn('form-field', className)}>
       {label && (
-        <label htmlFor={name} className="form-field-label">
+        <label htmlFor={name} className="field-label">
           {label}
-          {required && <span className="form-field-required">*</span>}
+          {required && <span className="form-required">*</span>}
         </label>
       )}
       {children}
-      {error && <span className="form-field-error">{error}</span>}
+      {error && <span className="form-error-message">{error}</span>}
       {helperText && !error && (
-        <span className="form-field-helper">{helperText}</span>
+        <span className="form-helper-text">{helperText}</span>
       )}
     </div>
   );
@@ -208,7 +208,7 @@ export function TextField({
           autoComplete={autoComplete}
           maxLength={maxLength}
           className={cn(
-            'form-field-input',
+            'form-input',
             hasIconLeft && 'form-field-input--icon-left',
             hasIconRight && 'form-field-input--icon-right',
             error && 'form-field-input--error',
@@ -280,7 +280,7 @@ export function TextAreaField({
         rows={rows}
         maxLength={maxLength}
         className={cn(
-          'form-field-textarea',
+          'form-textarea',
           !resize && 'form-field-textarea--no-resize',
           error && 'form-field-input--error',
           inputClassName
@@ -409,15 +409,15 @@ export function CheckboxField({
         />
         <span className="form-field-checkbox-text">
           {label}
-          {required && <span className="form-field-required">*</span>}
+          {required && <span className="form-required">*</span>}
         </span>
       </label>
       {description && (
         <span className="form-field-checkbox-description">{description}</span>
       )}
-      {error && <span className="form-field-error">{error}</span>}
+      {error && <span className="form-error-message">{error}</span>}
       {helperText && !error && (
-        <span className="form-field-helper">{helperText}</span>
+        <span className="form-helper-text">{helperText}</span>
       )}
     </div>
   );
@@ -459,9 +459,9 @@ export function RadioGroupField({
   return (
     <div className={cn('form-field', className)}>
       {label && (
-        <span className="form-field-label">
+        <span className="field-label">
           {label}
-          {required && <span className="form-field-required">*</span>}
+          {required && <span className="form-required">*</span>}
         </span>
       )}
       <div
@@ -500,9 +500,9 @@ export function RadioGroupField({
           </label>
         ))}
       </div>
-      {error && <span className="form-field-error">{error}</span>}
+      {error && <span className="form-error-message">{error}</span>}
       {helperText && !error && (
-        <span className="form-field-helper">{helperText}</span>
+        <span className="form-helper-text">{helperText}</span>
       )}
     </div>
   );

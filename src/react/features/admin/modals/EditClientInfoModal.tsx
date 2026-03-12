@@ -130,7 +130,7 @@ export function EditClientInfoModal({
         </>
       }
     >
-      <div className="form-group">
+      <div className="form-field">
         <PortalInput
           type="email"
           label="Email"
@@ -140,7 +140,7 @@ export function EditClientInfoModal({
         />
       </div>
 
-      <div className="form-group">
+      <div className="form-field">
         <PortalInput
           type="text"
           label="Contact Name"
@@ -150,7 +150,7 @@ export function EditClientInfoModal({
         />
       </div>
 
-      <div className="form-group">
+      <div className="form-field">
         <PortalInput
           type="text"
           label="Company Name"
@@ -160,7 +160,7 @@ export function EditClientInfoModal({
         />
       </div>
 
-      <div className="form-group">
+      <div className="form-field">
         <PortalInput
           type="tel"
           label="Phone"
@@ -170,7 +170,7 @@ export function EditClientInfoModal({
         />
       </div>
 
-      <div className="form-group">
+      <div className="form-field">
         <label className="field-label">Status</label>
         <ModalDropdown
           options={statusOptions}

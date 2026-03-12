@@ -60,7 +60,7 @@ export function ValidationErrorsTab({
     <div className="portal-card">
       <div className="layout-row-between">
         <h3 className="section-title">Validation Errors</h3>
-        <div className="form-group mb-0">
+        <div className="form-field mb-0">
           <div className="filter-inline">
             <Filter size={14} />
             <select

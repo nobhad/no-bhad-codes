@@ -107,7 +107,7 @@ export function AddClientModal({
       <fieldset>
         <legend>Contact Information</legend>
 
-        <div className="form-group">
+        <div className="form-field">
           <PortalInput
             type="email"
             label="Email"
@@ -118,7 +118,7 @@ export function AddClientModal({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-field">
           <PortalInput
             type="text"
             label="Contact Name"
@@ -128,7 +128,7 @@ export function AddClientModal({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-field">
           <PortalInput
             type="text"
             label="Company Name"
@@ -138,7 +138,7 @@ export function AddClientModal({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-field">
           <PortalInput
             type="tel"
             label="Phone"

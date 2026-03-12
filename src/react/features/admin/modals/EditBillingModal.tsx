@@ -126,7 +126,7 @@ export function EditBillingModal({
         </>
       }
     >
-      <div className="form-group">
+      <div className="form-field">
         <PortalInput
           type="text"
           label="Billing Name"
@@ -136,7 +136,7 @@ export function EditBillingModal({
         />
       </div>
 
-      <div className="form-group">
+      <div className="form-field">
         <PortalInput
           type="email"
           label="Billing Email"
@@ -146,7 +146,7 @@ export function EditBillingModal({
         />
       </div>
 
-      <div className="form-group">
+      <div className="form-field">
         <PortalInput
           type="text"
           label="Address"
@@ -157,7 +157,7 @@ export function EditBillingModal({
       </div>
 
       <div className="form-row">
-        <div className="form-group">
+        <div className="form-field">
           <PortalInput
             type="text"
             label="City"
@@ -167,7 +167,7 @@ export function EditBillingModal({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-field">
           <PortalInput
             type="text"
             label="State/Province"
@@ -179,7 +179,7 @@ export function EditBillingModal({
       </div>
 
       <div className="form-row">
-        <div className="form-group">
+        <div className="form-field">
           <PortalInput
             type="text"
             label="ZIP/Postal Code"
@@ -189,7 +189,7 @@ export function EditBillingModal({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-field">
           <PortalInput
             type="text"
             label="Country"

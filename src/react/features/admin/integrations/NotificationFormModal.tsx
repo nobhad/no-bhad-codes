@@ -60,7 +60,7 @@ export function NotificationFormModal({
       }
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label" htmlFor="notification-name">Name</label>
           <input
             id="notification-name"
@@ -71,7 +71,7 @@ export function NotificationFormModal({
             required
           />
         </div>
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label" htmlFor="notification-channel">Channel</label>
           <select
             id="notification-channel"
@@ -84,7 +84,7 @@ export function NotificationFormModal({
             ))}
           </select>
         </div>
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label" htmlFor="notification-event">Event</label>
           <select
             id="notification-event"
@@ -99,7 +99,7 @@ export function NotificationFormModal({
             ))}
           </select>
         </div>
-        <div className="form-group">
+        <div className="form-field">
           <label className="field-label flex items-center gap-2">
             <input
               type="checkbox"

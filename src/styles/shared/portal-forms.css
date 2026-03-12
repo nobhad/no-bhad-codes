@@ -5,52 +5,32 @@
 
    FORM SYSTEM ARCHITECTURE
    ========================
-   This file provides THREE form class families, all sharing
-   a single canonical set of base input/select/textarea styles:
-
-   1. SEMANTIC CLASSES (canonical, used in EJS templates + modals)
-      Wrapper:  .form-group
+   CANONICAL FORM CLASS SYSTEM
+   ============================
+   1. SEMANTIC CLASSES (EJS templates + React modals)
+      Wrapper:  .form-group  (.form-field is an alias; .form-group kept for auth-gate.ejs)
       Inputs:   .form-input, .form-textarea, .form-select
-      Helpers:  .form-error-message, .form-helper-text, .form-required-indicator
-      Also:     native input/textarea/select elements inside .portal
+      Helpers:  .form-error-message, .form-helper-text, .form-required
 
-   2. FACTORY CLASSES (used by createFormField.tsx)
-      Wrapper:  .form-field  (alias of .form-group)
-      Inputs:   .form-field-input, .form-field-textarea, .form-field-select
-      Helpers:  .form-field-error, .form-field-helper, .form-field-required
-      Extras:   .form-field-label, .form-field-icon, .form-field-input-wrapper
+   2. FACTORY COMPONENT CLASSES (createFormField.tsx)
+      Wrapper:  .form-field
+      Extras:   .form-field-icon, .form-field-input-wrapper
                 .form-field--checkbox, .form-field-radio-*, .form-field-group
 
-   3. STANDALONE CLASSES (used directly on elements in React)
-      Inputs:   .input, .select, .textarea
-      Helpers:  .input-error, .form-error-text, .form-required
-      Note:     These have their own styling (mono font, bold weight)
-                distinct from the semantic/factory system.
+   3. STANDALONE CLASSES (direct React element usage)
+      Inputs:   .input, .select, .textarea  (mono font, bold weight — distinct styling)
+      Helpers:  .form-error-text, .form-required
 
    4. QUESTIONNAIRE CLASSES (.qform-*)
-      Used exclusively by QuestionnaireForm.tsx for layout.
-      NOT input styles - these are structural/layout classes.
-      Actual inputs use .input/.textarea/.select from system 3.
-
-   CONSOLIDATION NOTES:
-   - .form-group and .form-field share one rule via :is()
-   - .form-field-input/textarea/select inherit base styles from
-     the same selectors as .form-input/textarea/select (no duplication)
-   - Error/required/helper text classes are consolidated via :is()
+      Layout only — actual inputs use system 3 classes.
    ===================================================== */
 
-/* Base input styles - all form controls.
-   Covers both semantic classes (.form-input, .form-select, .form-textarea)
-   and factory classes (.form-field-input, .form-field-select, .form-field-textarea)
-   so no duplicate property blocks are needed for the factory system. */
+/* Base input styles — all form controls inside .portal and .modal-overlay. */
 .portal
   :is(
     .form-input,
     .form-textarea,
     .form-select,
-    .form-field-input,
-    .form-field-textarea,
-    .form-field-select,
     input[type="text"],
     input[type="email"],
     input[type="password"],
@@ -66,9 +46,6 @@
     .form-input,
     .form-textarea,
     .form-select,
-    .form-field-input,
-    .form-field-textarea,
-    .form-field-select,
     input[type="text"],
     input[type="email"],
     input[type="password"],
@@ -107,8 +84,8 @@
 }
 
 /* Textarea - different height/padding */
-.portal :is(textarea, .form-textarea, textarea.form-input, .form-field-textarea),
-.modal-overlay :is(textarea, .form-textarea, textarea.form-input, .form-field-textarea) {
+.portal :is(textarea, .form-textarea, textarea.form-input),
+.modal-overlay :is(textarea, .form-textarea, textarea.form-input) {
   height: auto;
   min-height: calc(var(--space-6) * 2);
   padding: var(--space-1-5) var(--space-2);
@@ -125,8 +102,8 @@
 }
 
 /* Placeholder text */
-.portal :is(.form-input, .form-textarea, .form-field-input, .form-field-textarea, input, textarea)::placeholder,
-.modal-overlay :is(.form-input, .form-textarea, .form-field-input, .form-field-textarea, input, textarea)::placeholder {
+.portal :is(.form-input, .form-textarea, input, textarea)::placeholder,
+.modal-overlay :is(.form-input, .form-textarea, input, textarea)::placeholder {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-regular);
   color: var(--portal-placeholder-color);
@@ -136,14 +113,14 @@
 }
 
 /* Hover state */
-.portal :is(.form-input, .form-textarea, .form-select, .form-field-input, .form-field-textarea, .form-field-select, input, textarea, select):hover,
-.modal-overlay :is(.form-input, .form-textarea, .form-select, .form-field-input, .form-field-textarea, .form-field-select, input, textarea, select):hover {
+.portal :is(.form-input, .form-textarea, .form-select, input, textarea, select):hover,
+.modal-overlay :is(.form-input, .form-textarea, .form-select, input, textarea, select):hover {
   border-color: var(--color-border-primary);
 }
 
 /* Focus state - border shifts to primary, subtle ring for contrast */
-.portal :is(.form-input, .form-textarea, .form-select, .form-field-input, .form-field-textarea, .form-field-select, input, textarea, select):is(:focus, :focus-visible),
-.modal-overlay :is(.form-input, .form-textarea, .form-select, .form-field-input, .form-field-textarea, .form-field-select, input, textarea, select):is(:focus, :focus-visible) {
+.portal :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(:focus, :focus-visible),
+.modal-overlay :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(:focus, :focus-visible) {
   outline: none;
   outline-offset: 0;
   border-color: var(--color-accent);
@@ -201,8 +178,8 @@
 }
 
 /* Select dropdown arrow - uses theme-aware caret variable */
-.portal :is(select:not(.status-select), .form-select, .form-field-select),
-.modal-overlay :is(select:not(.status-select), .form-select, .form-field-select) {
+.portal :is(select:not(.status-select), .form-select),
+.modal-overlay :is(select:not(.status-select), .form-select) {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -215,34 +192,33 @@
 }
 
 /* Select dropdown arrow - light mode override */
-html[data-theme="light"] .portal :is(select:not(.status-select), .form-select, .form-field-select),
-html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-select, .form-field-select) {
+html[data-theme="light"] .portal :is(select:not(.status-select), .form-select),
+html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-select) {
   background-image: var(--select-caret-light);
 }
 
 /* Disabled state */
-:is(input, textarea, select, .form-input, .form-textarea, .form-select, .form-field-input, .form-field-textarea, .form-field-select):disabled {
+:is(input, textarea, select, .form-input, .form-textarea, .form-select):disabled {
   opacity: 0.5;
   cursor: not-allowed;
   background-color: var(--color-bg-readonly);
 }
 
 /* Readonly state */
-:is(input, textarea, .form-input, .form-textarea, .form-field-input, .form-field-textarea):read-only {
+:is(input, textarea, .form-input, .form-textarea):read-only {
   background-color: var(--color-bg-readonly);
   cursor: default;
 }
 
 /* Error state - .error is legacy, .form-field-input--error is factory,
    .form-input-error is used by PortalInput.tsx */
-:is(.form-input, .form-textarea, .form-field-input, .form-field-textarea, .form-field-select, input, textarea, select):is(.error, .form-field-input--error, .form-input-error) {
+:is(.form-input, .form-textarea, input, textarea, select):is(.error, .form-field-input--error, .form-input-error) {
   border-color: var(--color-danger);
 }
 /* Error message text - consolidated aliases:
    .form-error-message = legacy / PortalInput
-   .form-field-error   = factory (createFormField.tsx)
    .form-error-text    = used by NewRequestForm */
-:is(.form-error-message, .form-field-error, .form-error-text) {
+:is(.form-error-message, .form-error-text) {
   color: var(--color-danger);
   font-size: var(--font-size-sm);
   margin-top: var(--space-0-5);
@@ -251,16 +227,16 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
 /* Required field indicator - consolidated aliases:
    .form-required-indicator = legacy
    .form-required            = used by PortalInput, QuestionnaireForm, NewRequestForm
-   .form-field-required      = factory (createFormField.tsx) */
-:is(.form-required-indicator, .form-required, .form-field-required) {
+
+:is(.form-required-indicator, .form-required) {
   color: var(--color-danger);
   margin-left: var(--space-0-5);
 }
 
 /* Helper text below inputs - consolidated aliases:
    .form-helper-text  = legacy / PortalInput
-   .form-field-helper = factory (createFormField.tsx) */
-:is(.form-helper-text, .form-field-helper) {
+
+.form-helper-text {
   color: var(--color-text-tertiary);
   font-size: var(--font-size-sm);
   margin-top: var(--space-0-5);
@@ -268,8 +244,8 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
 
 /* Mobile responsive */
 @media (--small-mobile) {
-  .portal :is(.form-input, .form-textarea, .form-select, .form-field-input, .form-field-textarea, .form-field-select, input, textarea, select),
-  .modal-overlay :is(.form-input, .form-textarea, .form-select, .form-field-input, .form-field-textarea, .form-field-select, input, textarea, select) {
+  .portal :is(.form-input, .form-textarea, .form-select, input, textarea, select),
+  .modal-overlay :is(.form-input, .form-textarea, .form-select, input, textarea, select) {
     height: calc(var(--space-5) + var(--space-0-5));
     padding: 0 var(--space-1-5);
     font-size: var(--font-size-sm);
@@ -279,8 +255,8 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   .modal-overlay :is(.search-bar:has(.search-bar-icon), .field-with-left-icon) input {
     padding-left: var(--input-icon-offset);
   }
-  .portal :is(textarea, .form-textarea, .form-field-textarea),
-  .modal-overlay :is(textarea, .form-textarea, .form-field-textarea) {
+  .portal :is(textarea, .form-textarea),
+  .modal-overlay :is(textarea, .form-textarea) {
     height: auto;
     min-height: var(--space-10);
     padding: var(--space-1) var(--space-1-5);
@@ -802,22 +778,6 @@ input.search-bar-input {
    above (see "Form field wrapper" section).
    ===================================================== */
 
-/* Form field label */
-.form-field-label {
-  display: block;
-  margin-bottom: var(--portal-field-label-gap);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
-}
-
-/* NOTE: .form-field-required, .form-field-error, .form-field-helper
-   are consolidated with their legacy equivalents above
-   (see "Required field indicator", "Error message text",
-   and "Helper text" sections). */
-
 /* Input wrapper - contains input + optional icons */
 .form-field-input-wrapper {
   position: relative;
@@ -851,11 +811,6 @@ input.search-bar-input {
 .form-field-icon-right {
   right: var(--space-1-5);
 }
-
-/* NOTE: .form-field-input, .form-field-textarea, .form-field-select
-   base styles + :focus, :disabled, ::placeholder, :read-only are now
-   provided by the consolidated base selectors at the top of this file.
-   Only unique modifiers remain below. */
 
 /* Input with icon padding adjustments */
 .form-field-input--icon-left {

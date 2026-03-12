@@ -57,7 +57,7 @@ export function DetailModal({
       }
     >
       {statusBadge && (
-        <div className="form-group">{statusBadge}</div>
+        <div className="form-field">{statusBadge}</div>
       )}
 
       {fields.length > 0 && (
