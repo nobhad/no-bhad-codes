@@ -34,6 +34,12 @@
 
 .data-table thead tr {
   height: var(--table-header-height);
+  /* Ensure header divider spans full table width (including narrow actions column). */
+  border-bottom: var(--portal-border);
+}
+
+.data-table thead {
+  border-bottom: none;
 }
 
 .data-table th {
@@ -45,7 +51,7 @@
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
   white-space: nowrap;
-  border-bottom: var(--portal-border);
+  border-bottom: none;
   vertical-align: middle;
   background: transparent;
 }

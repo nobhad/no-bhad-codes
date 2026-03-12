@@ -22,8 +22,8 @@
   max-width: 100%;
 }
 
-/* Overview greeting - matches subtabs spacing exactly */
-[data-page="admin"] .overview-greeting {
+/* Overview greeting - ONLY on main dashboard (Overview tab) */
+[data-page="admin"] #tab-overview .overview-greeting {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xl);
   color: var(--color-text-primary);
@@ -33,7 +33,7 @@
   margin-bottom: var(--space-2);
 }
 
-[data-page="admin"] .overview-greeting b {
+[data-page="admin"] #tab-overview .overview-greeting b {
   font-style: normal;
   font-weight: inherit;
   color: var(--color-accent);
