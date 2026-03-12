@@ -33,7 +33,6 @@ export const STORAGE_KEYS = {
 // ============================================
 
 export const PORTAL_SELECTORS = {
-  LAYOUT_CONTAINER: '.dashboard-layout',
   PORTAL_CONTAINER: '.portal'
 } as const;
 
