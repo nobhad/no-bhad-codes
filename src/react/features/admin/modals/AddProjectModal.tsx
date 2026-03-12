@@ -514,20 +514,6 @@ export function AddProjectModal({
         <legend>Background</legend>
 
         <div className="form-group">
-          <label className="field-label" htmlFor="new-project-inspiration">
-            Inspiration / Examples
-          </label>
-          <textarea
-            id="new-project-inspiration"
-            className="form-textarea"
-            rows={2}
-            placeholder="Links or examples of designs the client likes..."
-            value={formState.inspiration}
-            onChange={handleTextChange('inspiration')}
-          />
-        </div>
-
-        <div className="form-group">
           <label className="field-label" htmlFor="new-project-challenges">
             Known Challenges
           </label>
