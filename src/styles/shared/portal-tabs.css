@@ -49,7 +49,8 @@
   margin-bottom: var(--portal-section-gap);
 }
 
-/* .section flex gap handles tab→content spacing — cancel portal-tabs own margin-bottom */
+/* .dashboard-content flex gap is single source of truth — cancel margin so gap handles spacing */
+.portal .dashboard-content .portal-subtabs,
 .section > .portal-tabs,
 .section > .portal-subtabs {
   margin-bottom: 0;
