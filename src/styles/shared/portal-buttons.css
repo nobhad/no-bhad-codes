@@ -565,7 +565,9 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 
 /* ============================================
  * RESPONSIVE: Mobile sidebar icon-only (≤600px)
- * Laptop/desktop: no forced collapse — user controls sidebar state.
+ * On compact-mobile, sidebar auto-collapses to icon-only width via CSS
+ * (portal-sidebar.css) WITHOUT adding .collapsed class. These rules
+ * mirror the collapsed button styles for :not(.collapsed) on small screens.
  * ============================================ */
 
 @media (--compact-mobile) {

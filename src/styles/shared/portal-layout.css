@@ -79,21 +79,6 @@ body:has(.portal) {
   padding: 0 var(--space-3) 0 var(--sidebar-icon-indent);
 }
 
-/* Toggle in breadcrumb row matches sidebar icon size.
-   Higher specificity (0,3,0) to beat base .portal-global-header .header-sidebar-toggle (0,2,0). */
-.portal-global-header .portal-global-header-breadcrumbs .header-sidebar-toggle {
-  width: var(--sidebar-icon-size);
-  height: var(--sidebar-icon-size);
-  min-width: var(--sidebar-icon-size);
-  padding: 0;
-  flex-shrink: 0;
-}
-
-.portal-global-header .portal-global-header-breadcrumbs .header-sidebar-toggle svg {
-  width: var(--sidebar-icon-size);
-  height: var(--sidebar-icon-size);
-}
-
 /* Breadcrumb text matches sidebar nav font */
 .portal-global-header-breadcrumbs .breadcrumb-list {
   font-family: var(--font-family-mono);
@@ -143,33 +128,14 @@ body:has(.portal) {
   white-space: nowrap;
 }
 
-/* Logo in global header - Sans-serif font matching main site branding */
-.portal-global-header .header-logo {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: var(--color-text-primary);
-  font-family: var(--font-family-sans);
-  font-weight: var(--font-weight-regular);
-  font-size: var(--font-size-lg);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-title);
-  white-space: nowrap;
-  transition: color var(--transition-mouse) ease;
-}
-
-.portal-global-header .header-logo:hover {
-  color: var(--color-accent);
-  text-decoration: none;
-}
-
-/* Sidebar toggle button in header */
+/* Sidebar toggle button in header — sized to match sidebar nav icons */
 .portal-global-header .header-sidebar-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--icon-size-2xl);
-  height: var(--icon-size-2xl);
+  width: var(--sidebar-icon-size);
+  height: var(--sidebar-icon-size);
+  min-width: var(--sidebar-icon-size);
   padding: 0;
   background: transparent;
   border: none;
@@ -184,8 +150,8 @@ body:has(.portal) {
 }
 
 .portal-global-header .header-sidebar-toggle svg {
-  width: var(--icon-size-lg);
-  height: var(--icon-size-lg);
+  width: var(--sidebar-icon-size);
+  height: var(--sidebar-icon-size);
 }
 
 /* Page title in header */
