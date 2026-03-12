@@ -429,9 +429,7 @@ body.modal-open .dashboard-content {
   background: var(--color-bg-readonly);
 }
 
-[data-page="admin"] .portal-global-header .breadcrumb-list {
-  font-family: var(--font-family-sans);
-}
+/* Admin breadcrumb font override consolidated below in PORTAL LAYOUT section */
 
 /* Invite icon button - matches .icon-btn pattern */
 [data-page="admin"] .icon-btn-invite {

@@ -244,10 +244,7 @@ body[data-page="client-portal"] {
   flex-shrink: 0;
 }
 
-/* Toggle icon rotates when sidebar is collapsed */
-.sidebar.collapsed ~ .dashboard-content .header-sidebar-toggle .sidebar-toggle-icon {
-  transform: rotate(180deg);
-}
+/* Toggle icon rotation: handled in portal-sidebar.css (.sidebar.collapsed > .sidebar-toggle-btn svg) */
 
 .header-breadcrumb-nav {
   flex: 1;
