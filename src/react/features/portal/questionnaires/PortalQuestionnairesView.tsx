@@ -7,6 +7,7 @@ import * as React from 'react';
 import { useState, useMemo } from 'react';
 import { FileText, ChevronRight, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
+import { ProgressBar } from '@react/components/portal';
 import { IconButton } from '@react/factories';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -232,17 +233,7 @@ export function PortalQuestionnairesView({
 
                 {/* Progress bar (if in progress) */}
                 {response.status === 'in_progress' && response.progress > 0 && (
-                  <div className="portal-card-progress">
-                    <div className="progress-bar-sm">
-                      <div
-                        className="progress-fill"
-                        style={{ width: `${response.progress}%` }}
-                      />
-                    </div>
-                    <span className="text-muted text-xs">
-                      {response.progress}%
-                    </span>
-                  </div>
+                  <ProgressBar value={response.progress} />
                 )}
               </div>
             );

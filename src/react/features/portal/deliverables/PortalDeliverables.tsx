@@ -6,11 +6,12 @@
 
 import * as React from 'react';
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { Inbox, CheckCircle2, Circle } from 'lucide-react';
+import { Inbox, CheckCircle2, Clock, Box, Calendar } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { AccordionItem, IconButton } from '@react/factories';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { TableLayout } from '@react/components/portal/TableLayout';
+import { ProgressBar } from '@react/components/portal';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePortalFetch } from '@react/hooks/usePortalFetch';
 import { useActiveProjectId } from '@react/stores/portal-store';
@@ -138,15 +139,7 @@ export function PortalDeliverables({ getAuthToken }: PortalDeliverablesProps) {
     >
       {/* Progress */}
       {totalCount > 0 && (
-        <div className="progress-field">
-          <div className="progress-field-header">
-            <span className="field-label">Progress</span>
-            <span className="text-muted">{progress}% ({completedCount}/{totalCount})</span>
-          </div>
-          <div className="progress-bar-sm">
-            <div className="progress-fill" style={{ width: `${progress}%` }} />
-          </div>
-        </div>
+        <ProgressBar value={progress} detail={`(${completedCount}/${totalCount})`} />
       )}
 
       {/* Content */}
@@ -167,17 +160,23 @@ export function PortalDeliverables({ getAuthToken }: PortalDeliverablesProps) {
             const allCompleted = milestoneTasks.length > 0 && completedTasks === milestoneTasks.length;
 
             const header = (
-              <div className="flex-fill milestone-content">
-                <span className={cn('milestone-title', allCompleted && 'completed')}>
-                  {milestone.title}
-                </span>
+              <>
+                <div className="flex-fill milestone-content">
+                  <Box className="icon-xs" />
+                  <span className={cn('milestone-title', allCompleted && 'completed')}>
+                    {milestone.title}
+                  </span>
+                  {milestone.due_date && (
+                    <span className="milestone-due">
+                      <Calendar className="icon-xs" />
+                      {formatDate(milestone.due_date)}
+                    </span>
+                  )}
+                </div>
                 <span className="text-muted text-xs">
                   {completedTasks}/{milestoneTasks.length}
                 </span>
-                {milestone.due_date && (
-                  <span className="milestone-due">{formatDate(milestone.due_date)}</span>
-                )}
-              </div>
+              </>
             );
 
             return (
@@ -200,9 +199,9 @@ export function PortalDeliverables({ getAuthToken }: PortalDeliverablesProps) {
                     {milestoneTasks.map((task) => (
                       <li key={`task-${task.id}`} className="deliv-item">
                         {task.status === 'completed' ? (
-                          <CheckCircle2 className="icon-sm text-success" />
+                          <CheckCircle2 className="icon-sm text-status-completed" />
                         ) : (
-                          <Circle className="icon-sm text-muted" />
+                          <Clock className="icon-sm text-muted" />
                         )}
                         <span className={cn(task.status === 'completed' && 'text-muted pd-completed-text')}>
                           {task.title}

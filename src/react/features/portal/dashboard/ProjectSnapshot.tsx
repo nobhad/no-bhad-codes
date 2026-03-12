@@ -8,6 +8,7 @@
 import * as React from 'react';
 import { Calendar, ExternalLink, Target } from 'lucide-react';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { ProgressBar } from '@react/components/portal';
 import { formatCardDate } from '@react/utils/cardFormatters';
 
 // ============================================================================
@@ -66,11 +67,24 @@ export const ProjectHeader = React.memo(({ project }: ProjectHeaderProps) => {
 
   return (
     <div className="project-snapshot-header">
-      <div className="project-snapshot-title">
-        <h2>{project.name}</h2>
-        <StatusBadge status={getStatusVariant(project.status)}>
-          {statusLabel}
-        </StatusBadge>
+      <div className="project-snapshot-header-left">
+        <div className="project-snapshot-title">
+          <h2>{project.name}</h2>
+          <StatusBadge status={getStatusVariant(project.status)}>
+            {statusLabel}
+          </StatusBadge>
+        </div>
+
+        {(project.startDate || project.endDate) && (
+          <div className="project-snapshot-timeline">
+            <Calendar className="icon-xs" />
+            <span>
+              {project.startDate ? formatCardDate(project.startDate) : 'TBD'}
+              {' \u2192 '}
+              {project.endDate ? formatCardDate(project.endDate) : 'TBD'}
+            </span>
+          </div>
+        )}
       </div>
 
       {project.previewUrl && (
@@ -101,35 +115,8 @@ export const ProjectProgress = React.memo(({ project, currentDeliverable }: Proj
   return (
     <>
       {/* Progress bar */}
-      <div className="progress-field">
-        <div className="progress-field-header">
-          <span className="field-label">Progress</span>
-          <span className="text-primary text-sm">{progressPercent}%</span>
-        </div>
-        <div className="progress-bar-sm">
-          <div
-            className="progress-fill"
-            style={{ width: `${progressPercent}%` }}
-            role="progressbar"
-            aria-valuenow={progressPercent}
-            aria-valuemin={0}
-            aria-valuemax={PROGRESS_MAX}
-            aria-label={`Project progress: ${progressPercent}%`}
-          />
-        </div>
-      </div>
+      <ProgressBar value={progressPercent} />
 
-      {/* Timeline */}
-      {(project.startDate || project.endDate) && (
-        <div className="project-snapshot-timeline">
-          <Calendar className="icon-xs" />
-          <span>
-            {project.startDate ? formatCardDate(project.startDate) : 'TBD'}
-            {' \u2192 '}
-            {project.endDate ? formatCardDate(project.endDate) : 'TBD'}
-          </span>
-        </div>
-      )}
 
       {/* Current Deliverable/Milestone */}
       {currentDeliverable && (

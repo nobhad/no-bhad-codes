@@ -38,6 +38,18 @@ import { KEYS } from '@/constants/keyboard';
 /** Endpoint for client dashboard data */
 const DASHBOARD_ENDPOINT = `${API_ENDPOINTS.CLIENTS_ME}/dashboard`;
 
+/** Maps activity type to portal navigation tab */
+const ACTIVITY_TYPE_TO_TAB: Record<string, string> = {
+  project: 'projects',
+  invoice: 'documents',
+  message: 'messages',
+  document: 'documents',
+  contract: 'documents',
+  file: 'files',
+  request: 'files',
+  questionnaire: 'files'
+};
+
 /** Maps activity type to Lucide icon component */
 const ACTIVITY_TYPE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   project: FolderKanban,
@@ -146,7 +158,7 @@ const ActivityList = React.memo(({ activities, onNavigate }: ActivityListProps) 
           className="list-item"
           onClick={
             item.entityId && onNavigate
-              ? () => onNavigate(item.type, item.entityId)
+              ? () => onNavigate(ACTIVITY_TYPE_TO_TAB[item.type] ?? item.type, item.entityId)
               : undefined
           }
           role={item.entityId && onNavigate ? 'button' : undefined}
@@ -156,7 +168,7 @@ const ActivityList = React.memo(({ activities, onNavigate }: ActivityListProps) 
               ? (e) => {
                 if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) {
                   e.preventDefault();
-                  onNavigate(item.type, item.entityId);
+                  onNavigate(ACTIVITY_TYPE_TO_TAB[item.type] ?? item.type, item.entityId);
                 }
               }
               : undefined
@@ -284,12 +296,7 @@ export function PortalDashboard({
             </div>
           )}
 
-          {/* 3. Action Items (attention cards grid) */}
-          {actionCounts && (
-            <ActionItems counts={actionCounts} onNavigate={onNavigate} />
-          )}
-
-          {/* Stats Overview */}
+          {/* Stats + Action Items — single row */}
           <div className="dashboard-stats-grid">
             <StatCard
               label="Outstanding Balance"
@@ -297,13 +304,6 @@ export function PortalDashboard({
                 ? `$${(stats.outstandingBalance / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
                 : '$0.00'
               }
-              variant={stats?.outstandingBalance ? 'warning' : 'default'}
-              onClick={() => handleStatClick(NAV_TAB_DOCUMENTS)}
-            />
-            <StatCard
-              label="Pending Invoices"
-              value={stats?.pendingInvoices ?? 0}
-              variant={stats?.pendingInvoices ? 'warning' : 'default'}
               onClick={() => handleStatClick(NAV_TAB_DOCUMENTS)}
             />
             <StatCard
@@ -317,20 +317,9 @@ export function PortalDashboard({
               variant={stats?.unreadMessages ? 'alert' : 'default'}
               onClick={() => handleStatClick(NAV_TAB_MESSAGES)}
             />
-            <StatCard
-              label="Pending Actions"
-              value={
-                (stats?.pendingContracts ?? 0) +
-                (stats?.pendingApprovals ?? 0) +
-                (stats?.pendingQuestionnaires ?? 0) +
-                (stats?.pendingDocRequests ?? 0)
-              }
-              variant={
-                ((stats?.pendingContracts ?? 0) +
-                (stats?.pendingApprovals ?? 0)) > 0 ? 'warning' : 'default'
-              }
-              onClick={() => handleStatClick(NAV_TAB_FILES)}
-            />
+            {actionCounts && (
+              <ActionItems counts={actionCounts} onNavigate={onNavigate} />
+            )}
           </div>
 
           {/* Submit Request + Recent Activity */}
