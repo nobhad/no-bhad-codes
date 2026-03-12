@@ -209,6 +209,15 @@ export function ClientDetail({
 
   return (
     <div ref={containerRef} className="section">
+      {/* Tabs — top of page, like all other subtab nav */}
+      <TabList
+        tabs={TABS}
+        tabIcons={TAB_ICONS}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        ariaLabel="Client detail tabs"
+      />
+
       {/* Header */}
       <div className="detail-title-row">
         <div className="detail-title-group">
@@ -297,15 +306,6 @@ export function ClientDetail({
           </PortalDropdown>
         </div>
       </div>
-
-      {/* Tabs */}
-      <TabList
-        tabs={TABS}
-        tabIcons={TAB_ICONS}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        ariaLabel="Client detail tabs"
-      />
 
       {/* Tab Content */}
       <TabPanel tabId="overview" isActive={activeTab === 'overview'}>

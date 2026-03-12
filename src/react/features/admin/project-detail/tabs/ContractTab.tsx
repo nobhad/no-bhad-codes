@@ -123,14 +123,12 @@ export function ContractTab({
           </div>
 
           {/* Actions */}
-          <div className="layout-row gap-2">
-            {!isSigned && (
-              <>
-                <IconButton action="generate" onClick={handleGenerateContract} title="Generate Contract" />
-                <IconButton action="send" onClick={handleSendForSignature} title="Send for Signature" />
-              </>
-            )}
-          </div>
+          {!isSigned && (
+            <div className="detail-actions">
+              <IconButton action="generate" onClick={handleGenerateContract} title="Generate Contract" />
+              <IconButton action="send" onClick={handleSendForSignature} title="Send for Signature" />
+            </div>
+          )}
         </div>
       </div>
 

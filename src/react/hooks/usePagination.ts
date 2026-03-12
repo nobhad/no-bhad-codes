@@ -54,7 +54,7 @@ interface UsePaginationReturn {
 export function usePagination(options: UsePaginationOptions): UsePaginationReturn {
   const {
     storageKey,
-    pageSizeOptions = [10, 25, 50, 100],
+    pageSizeOptions = [10, 25, 50],
     defaultPageSize = 25,
     totalItems
   } = options;
