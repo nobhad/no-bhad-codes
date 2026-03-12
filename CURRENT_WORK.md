@@ -159,6 +159,14 @@ Removed duplicate import.
 - [ ] `admin/webhooks/WebhookFormModal.tsx` — HTTP method + event selects
 - [ ] `admin/integrations/NotificationFormModal.tsx` — channel + event selects
 
+### Pagination Page-Size Dropdown (Open State)
+
+- [ ] Divider line visible between menu and trigger when open (trigger top border shows through)
+- [ ] Menu item numbers don't align horizontally with trigger text when open
+- [ ] Menu and trigger should look like one seamless piece (no visible seam)
+- [ ] Caret must stay in exact same position open vs closed
+- File: `src/styles/shared/portal-dropdown.css` (pagination section ~line 970+)
+
 ---
 
 ## Upcoming - PDF Deep Dive
