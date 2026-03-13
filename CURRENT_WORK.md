@@ -232,14 +232,14 @@ Gap not properly applied on mobile in portal dashboard layout.
 - [ ] Formatting review (contracts, proposals, invoices, intake, receipts, SOW) — spacing, table layouts, typography consistency
 - [ ] SOW header — currently separate (`sowLogoHeight = 50`) — review if it should adopt the standard 100pt header or stay compact
 
-## Upcoming - Messages View Overhaul
+## Completed - Messages View Overhaul
 
-**Status:** TODO
+**Status:** COMPLETE
 
-- [ ] Sender name placement (consider under avatar instead of above bubble)
-- [ ] Overall layout and alignment review
-- [ ] Consistent styling between admin and client portal message views
-- [ ] Mobile responsiveness for message thread
+- [x] Sender name placement — moved under avatar (bottom of group) instead of above bubble
+- [x] Typing indicator — removed inline style, added `.msgtab-typing-indicator` CSS class
+- [x] Consistent styling — both views use shared factory; no divergence
+- [x] Mobile responsiveness — 85% max-width for bubbles, compose hint hidden on small screens
 
 ## Remaining (Future Enhancements)
 

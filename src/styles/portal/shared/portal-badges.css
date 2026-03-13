@@ -1,0 +1,385 @@
+/* =====================================================
+   SHARED PORTAL BADGES
+   @file src/styles/portal/shared/portal-badges.css
+   Single source of truth for status badges in admin and client portal
+   ===================================================== */
+
+/* =====================================================
+   BASE STATUS BADGE
+   Minimal badge with colored text
+   ===================================================== */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-0-5) var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  border: none;
+  background: transparent;
+  min-width: fit-content;
+  width: auto;
+  text-align: center;
+  box-sizing: border-box;
+  white-space: nowrap;
+  transition: opacity var(--transition-mouse) ease;
+}
+
+/* =====================================================
+   STANDARDIZED STATUS COLORS
+   =====================================================
+   CYAN (#06b6d4) - New: new
+   YELLOW (#fbbf24) - Awaiting Action: pending, on_hold, on-hold
+   BLUE (#3b82f6) - In Progress: active, in_progress, in-progress, contacted
+   GREEN (#10b981) - Success/Complete: completed, converted, replied
+   RED (#ef4444) - Cancelled/Lost: cancelled, lost, archived
+   PURPLE (#8b5cf6) - Qualified: qualified
+   GRAY (#9ca3af) - Read/Inactive: read
+   ===================================================== */
+
+/* Blue/Active status badges */
+.status-badge:is(.status-active, .status-in_progress, .status-in-progress, .status-contacted) {
+  color: var(--status-active);
+}
+
+/* Cyan/New and Upcoming status badges */
+.status-badge:is(.status-new, .status-upcoming) {
+  color: var(--status-new);
+}
+
+/* Yellow/Pending status badges */
+.status-badge:is(.status-pending, .status-on_hold, .status-on-hold) {
+  color: var(--status-pending);
+}
+
+/* Green/Completed status badges */
+.status-badge:is(.status-completed, .status-converted, .status-replied) {
+  color: var(--status-completed);
+}
+
+/* Red/Cancelled status badges */
+.status-badge:is(.status-cancelled, .status-lost, .status-archived) {
+  color: var(--status-cancelled);
+}
+
+/* Purple/Qualified status badge */
+.status-badge:is(.status-qualified, .status-in-review) {
+  color: var(--status-qualified);
+}
+
+/* Gray/Inactive status badges */
+.status-badge:is(.status-read, .status-inactive) {
+  color: var(--status-inactive);
+}
+
+/* Not Invited - muted text */
+.status-badge.status-not-invited {
+  color: var(--color-text-tertiary);
+}
+
+/* =====================================================
+   BEM-STYLE STATUS BADGE MODIFIERS
+   Alternative naming convention: .status-badge--{variant}
+   ===================================================== */
+.status-badge--danger {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.status-badge--muted {
+  border-color: var(--color-text-tertiary);
+  color: var(--color-text-tertiary);
+}
+
+/* =====================================================
+   SYSTEM STATUS BADGES
+   Used for health indicators (healthy, warning, error)
+   ===================================================== */
+.status-badge.status-healthy {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.status-badge.status-warning {
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+}
+
+.status-badge.status-error {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.status-badge.status-unknown {
+  border-color: var(--color-text-tertiary);
+  color: var(--color-text-tertiary);
+}
+
+/* =====================================================
+   INVOICE STATUS BADGES
+   ===================================================== */
+/* Draft - gray (not sent yet) */
+.status-badge.status-draft {
+  border-color: var(--status-inactive);
+  color: var(--status-inactive);
+}
+
+/* Sent/Viewed - blue (in progress) */
+.status-badge:is(.status-sent, .status-viewed) {
+  border-color: var(--status-active);
+  color: var(--status-active);
+}
+
+/* Partial - yellow (partially paid) */
+.status-badge.status-partial {
+  border-color: var(--status-pending);
+  color: var(--status-pending);
+}
+
+/* Paid - green (fully paid) */
+.status-badge.status-paid {
+  border-color: var(--status-completed);
+  color: var(--status-completed);
+}
+
+/* Overdue - red (past due) */
+.status-badge.status-overdue {
+  border-color: var(--status-cancelled);
+  color: var(--status-cancelled);
+}
+
+/* =====================================================
+   STATUS INDICATOR (DOT STYLE)
+   Minimal status display with colored dot + text
+   ===================================================== */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  font-size: inherit;
+  font-family: inherit;
+  color: inherit;
+  white-space: nowrap;
+}
+
+/* Status indicator in tables - inherits from table cell styles */
+/* Note: Base .status-indicator now uses inherit, this is redundant but kept for explicitness */
+
+.status-indicator .status-dot {
+  width: var(--status-dot-size, 8px);
+  height: var(--status-dot-size, 8px);
+  border-radius: var(--border-radius-full);
+  flex-shrink: 0;
+  background-color: var(--color-text-tertiary);
+}
+
+.status-indicator .status-text {
+  color: var(--color-text-primary);
+}
+
+/* Status indicator dot colors - Cyan/New and Upcoming */
+.status-indicator:is(.status-new, .status-upcoming) .status-dot {
+  background-color: var(--status-new);
+}
+
+/* Yellow/Pending */
+.status-indicator:is(.status-pending, .status-on-hold) .status-dot {
+  background-color: var(--status-pending);
+}
+
+/* Blue/Active */
+.status-indicator:is(.status-active, .status-in-progress, .status-contacted) .status-dot {
+  background-color: var(--status-active);
+}
+
+/* Green/Completed */
+.status-indicator:is(.status-completed, .status-converted, .status-replied, .status-paid)
+  .status-dot {
+  background-color: var(--status-completed);
+}
+
+/* Red/Cancelled */
+.status-indicator:is(.status-cancelled, .status-lost, .status-archived, .status-overdue)
+  .status-dot {
+  background-color: var(--status-cancelled);
+}
+
+/* Purple/Qualified */
+.status-indicator:is(.status-qualified, .status-in-review) .status-dot {
+  background-color: var(--status-qualified);
+}
+
+/* Gray/Inactive */
+.status-indicator:is(.status-read, .status-inactive, .status-draft, .status-not-invited)
+  .status-dot {
+  background-color: var(--status-inactive);
+}
+
+/* Invoice status dots - Sent/Viewed (blue) */
+.status-indicator:is(.status-sent, .status-viewed) .status-dot {
+  background-color: var(--status-active);
+}
+
+/* Invoice status dots - Partial (yellow) */
+.status-indicator.status-partial .status-dot {
+  background-color: var(--status-pending);
+}
+
+/* =====================================================
+   SIDEBAR NOTIFICATION BADGES
+   Small counter badges for sidebar nav items
+   ===================================================== */
+.sidebar-badge {
+  position: absolute;
+  top: var(--space-0-5);
+  right: var(--space-0-5);
+  min-width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+  padding: 0 var(--space-1);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--icon-size-lg);
+  text-align: center;
+  background: transparent;
+  border: var(--border-width) solid var(--color-accent);
+  color: var(--color-accent);
+  display: none;
+  z-index: var(--z-index-elevated);
+}
+
+/* Show badge when it has content */
+.sidebar-badge.has-count {
+  display: block;
+}
+
+/* Adjust badge position for expanded sidebar */
+.sidebar:not(.collapsed) .sidebar-badge {
+  top: 50%;
+  right: var(--space-1);
+  transform: translateY(-50%);
+}
+
+/* Collapsed sidebar - only show badges with count > 0 */
+.sidebar.collapsed .sidebar-badge:not(.has-count) {
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-badge.has-count {
+  display: block;
+  top: 0;
+  right: 0;
+  transform: none;
+}
+
+/* Mobile/compact view - only show badges with count > 0 */
+@media (--wide-down) {
+  .sidebar-badge:not(.has-count) {
+    display: none;
+  }
+
+  .sidebar-badge.has-count {
+    display: block;
+    top: 0;
+    right: 0;
+    transform: none;
+    min-width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
+    font-size: var(--font-size-2xs);
+    padding: 0 var(--space-0-5);
+    line-height: var(--icon-size-sm);
+  }
+}
+
+/* =====================================================
+   INLINE TAG BADGES
+   Small inline badges for tags, categories, systems
+   ===================================================== */
+:is(.tag-badge, .category-badge) {
+  display: inline-block;
+  padding: var(--space-0-5) var(--space-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  background: transparent;
+  border: var(--border-width) solid;
+}
+
+/* =====================================================
+   STATUS DROPDOWN TRIGGER
+   Button wrapper for status badge dropdowns in tables
+   ===================================================== */
+.status-dropdown-trigger {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--icon-gap);
+  position: relative;
+  /* Fixed width - MUST match menu width exactly */
+  width: var(--status-dropdown-width, 130px);
+  min-width: var(--status-dropdown-width, 130px);
+  max-width: var(--status-dropdown-width, 130px);
+  /* Symmetric horizontal padding - same on left/right of content */
+  padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
+  /* Extra right padding for absolutely positioned caret */
+  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
+  background: transparent;
+  border: var(--portal-input-border);
+  margin: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.status-dropdown-trigger:focus {
+  outline: none;
+}
+
+/* When open, remove bottom border to connect with menu */
+.status-dropdown-trigger[data-state="open"] {
+  border-bottom: none;
+}
+
+/* Status indicator inside trigger - align left */
+.status-dropdown-trigger > .status-indicator {
+  flex: 0 0 auto;
+  order: 0;
+}
+
+/* Caret icon in status dropdown - positioned absolutely on right */
+/* Uses --dropdown-padding-x for consistent spacing with left padding */
+.status-dropdown-trigger > .status-dropdown-caret {
+  position: absolute;
+  right: var(--dropdown-padding-x);
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--dropdown-caret-size);
+  height: var(--dropdown-caret-size);
+  color: currentColor;
+  transition: transform var(--transition-fast);
+}
+
+/* Rotate caret when dropdown is open */
+[data-state="open"] > .status-dropdown-caret {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* =====================================================
+   STATUS DOT — CANONICAL BASE
+   Single source of truth for ALL .status-dot elements.
+   Standalone colored dot used in dropdowns, triggers,
+   status indicators, and list items.
+   ===================================================== */
+.status-dot {
+  display: inline-block;
+  width: var(--status-dot-size, 8px);
+  height: var(--status-dot-size, 8px);
+  min-width: var(--status-dot-size, 8px);
+  min-height: var(--status-dot-size, 8px);
+  border-radius: var(--border-radius-full);
+  flex-shrink: 0;
+  background-color: var(--color-text-tertiary);
+}

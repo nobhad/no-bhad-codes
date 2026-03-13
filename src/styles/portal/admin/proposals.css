@@ -1,0 +1,93 @@
+/**
+ * ===============================================
+ * ADMIN PROPOSALS STYLES
+ * ===============================================
+ * @file src/styles/portal/admin/proposals.css
+ *
+ * Styles for proposal management including templates,
+ * version history, and e-signatures.
+ */
+
+/* View toggle: use shared .view-toggle (see shared/view-toggle.css) */
+
+/* ============================================================================
+   SIGNATURE STATUS
+   ============================================================================ */
+
+.signature-status {
+  background-color: var(--color-bg-tertiary);
+  padding: var(--space-1-5);
+}
+
+/* ============================================================================
+   CUSTOM LINE ITEMS
+   ============================================================================ */
+
+.item-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+/* ============================================================================
+   COMMENTS
+   ============================================================================ */
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: var(--space-2);
+  height: var(--space-2);
+  accent-color: var(--color-accent);
+}
+
+/* ============================================================================
+   ACTIVITY LOG
+   ============================================================================ */
+
+/* Uses utility classes: flex flex-col gap-0-5 */
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  padding: var(--space-0-5) 0;
+  border-bottom: var(--border-width) solid var(--color-border-primary);
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-type {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.activity-date {
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-tertiary);
+  margin-left: auto;
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (--compact-mobile) {
+  .activity-item {
+    flex-wrap: wrap;
+  }
+
+  .activity-date {
+    width: 100%;
+    margin-left: 0;
+    margin-top: var(--space-px);
+  }
+}

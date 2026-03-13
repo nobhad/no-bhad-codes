@@ -10,7 +10,7 @@
 /* Import all token files in order */
 @import "./colors.css";
 /* NOTE: portal-theme.css is intentionally NOT imported here.
-   It is imported UNLAYERED in src/styles/bundles/admin.css and portal.css.
+   It is imported UNLAYERED in src/styles/bundles/admin.css and client.css.
    Keeping it out of @layer tokens ensures portal overrides beat all layered styles. */
 @import "./typography.css";
 @import "./spacing.css";

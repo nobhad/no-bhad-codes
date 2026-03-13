@@ -48,6 +48,6 @@
 @import "../components/form-buttons.css" layer(components);
 @import "../components/form-validation.css" layer(components);
 @import "../components/loading.css" layer(components);
-@import "../shared/toast-notifications.css" layer(components);
-@import "../shared/field-label-spacing.css" layer(components);
+@import "../portal/shared/portal-toast-notifications.css" layer(components);
+@import "../portal/shared/portal-field-label-spacing.css" layer(components);
 /* progress.css and copy-email.css merged into portal-components.css */

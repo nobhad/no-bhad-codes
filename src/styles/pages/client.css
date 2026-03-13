@@ -9,7 +9,7 @@
  */
 
 /* Split modules */
-@import "./client-auth.css";
+@import "./auth-gate.css";
 
 .projects-list {
   flex: 1;

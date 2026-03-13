@@ -1,0 +1,64 @@
+/**
+ * ===============================================
+ * CLIENT PORTAL STYLES - INDEX
+ * ===============================================
+ * @file src/styles/portal/client/index.css
+ *
+ * Import file for all client portal styles.
+ * Uses same shared styles as admin portal.
+ */
+
+/* Shared portal styles (same as admin) */
+@import "../shared/portal-auth.css";
+@import "../shared/portal-layout.css";
+@import "../shared/portal-buttons.css";
+@import "../shared/portal-messages.css";
+@import "../shared/portal-message-thread.css";
+@import "../shared/portal-cards.css";
+@import "../shared/portal-stat-cards.css";
+@import "../shared/portal-dashboard-widgets.css";
+@import "../shared/portal-tables.css";
+@import "../shared/portal-details-card.css";
+@import "../shared/portal-forms.css";
+@import "../shared/portal-files.css";
+@import "../shared/portal-dropdown.css";
+@import "../shared/portal-badges.css";
+@import "../shared/portal-kanban.css";
+@import "../shared/portal-tags.css";
+@import "../shared/portal-charts.css";
+@import "../shared/portal-tooltips.css";
+@import "../shared/portal-progress.css";
+@import "../shared/portal-components.css";
+@import "../shared/portal-tabs.css";
+@import "../shared/portal-tab-components.css";
+@import "../shared/portal-confirm-dialog.css";
+@import "../shared/portal-notification-bell.css";
+@import "../shared/portal-accordion.css";
+@import "../shared/portal-copy-email.css";
+@import "../shared/portal-error-states.css";
+@import "../shared/portal-react-components.css";
+@import "../shared/portal-utilities.css";
+@import "../shared/portal-inline-edit.css";
+@import "../shared/portal-table-filters.css";
+
+/* Portal sidebar (shared with admin) */
+@import "../shared/portal-sidebar.css";
+
+/* Client portal layout (portal-main-container, mobile menu, etc.) */
+@import "./layout.css";
+
+/* Client-specific views */
+@import "./projects.css";
+@import "./settings.css";
+@import "./help.css";
+@import "./requests.css";
+@import "./documents.css";
+
+/* Unified modal system */
+@import "../shared/portal-modal-system.css";
+
+/* Command palette */
+@import "../shared/portal-command-palette.css";
+
+/* Keyboard shortcuts overlay */
+@import "../shared/portal-keyboard-shortcuts.css";

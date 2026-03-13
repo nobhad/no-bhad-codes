@@ -1,0 +1,1181 @@
+/**
+ * ===============================================
+ * ADMIN DASHBOARD STYLES - INDEX
+ * ===============================================
+ * @file src/styles/portal/admin/index.css
+ *
+ * Import file and base styles for all admin dashboard styles.
+ * Shared portal styles imported first, then admin-specific modules.
+ * Base admin portal overrides are inlined below all imports.
+ */
+
+/* Shared portal styles */
+@import "../shared/portal-auth.css";
+@import "../shared/portal-layout.css";
+@import "../shared/portal-buttons.css";
+@import "../shared/portal-messages.css";
+@import "../shared/portal-message-thread.css";
+@import "../shared/portal-cards.css";
+@import "../shared/portal-stat-cards.css";
+@import "../shared/portal-dashboard-widgets.css";
+@import "../shared/portal-tables.css";
+@import "../shared/portal-details-card.css";
+@import "../shared/portal-forms.css";
+@import "../shared/portal-files.css";
+@import "../shared/portal-dropdown.css";
+@import "../shared/portal-badges.css";
+@import "../shared/portal-kanban.css";
+@import "../shared/portal-tags.css";
+@import "../shared/portal-charts.css";
+@import "../shared/portal-tooltips.css";
+@import "../shared/portal-progress.css";
+@import "../shared/portal-components.css";
+@import "../shared/portal-tabs.css";
+@import "../shared/portal-tab-components.css";
+@import "../shared/portal-confirm-dialog.css";
+@import "../shared/portal-notification-bell.css";
+@import "../shared/portal-accordion.css";
+@import "../shared/portal-copy-email.css";
+@import "../shared/portal-error-states.css";
+@import "../shared/portal-react-components.css";
+@import "../shared/portal-status-panel.css";
+@import "../shared/portal-utilities.css";
+@import "../shared/portal-inline-edit.css";
+@import "../shared/portal-table-filters.css";
+
+/* Portal layout and sidebar (shared) */
+@import "../shared/portal-sidebar.css";
+
+/* Admin-specific modules */
+@import "./modal-system.css";
+@import "./analytics.css";
+@import "../shared/portal-analytics.css";
+@import "./detail-page-controls.css";
+@import "./project-detail.css";
+@import "./project-detail-contract.css";
+@import "./project-detail-invoices.css";
+@import "./client-detail.css";
+@import "./client-detail-crm.css";
+@import "./tasks.css";
+@import "./leads-pipeline.css";
+@import "./proposals.css";
+@import "./table-controls.css";
+@import "./workflows.css";
+@import "./questionnaires.css";
+@import "./system-status.css";
+@import "./configuration.css";
+@import "./audit-log.css";
+
+/* Layout refinements */
+@import "./dashboard-layout.css";
+
+/* Unified modal system */
+@import "../shared/portal-modal-system.css";
+
+/* Command palette */
+@import "../shared/portal-command-palette.css";
+
+/* Keyboard shortcuts overlay */
+@import "../shared/portal-keyboard-shortcuts.css";
+
+/* ================================================
+   ADMIN PORTAL BASE STYLES
+   ================================================ */
+
+/* Page background - pitch black as base canvas */
+body[data-page="admin"] {
+  background: var(--color-bg-primary);
+  font-weight: var(--font-weight-base, 500);  /* Medium weight as portal default */
+  color: var(--color-text-primary);
+}
+
+/* ================================================
+   GLOBAL SHADOW & BORDER REMOVAL — Admin backend
+   ================================================ */
+[data-page="admin"] {
+  --shadow-panel: none;
+  --shadow-card: none;
+  --shadow-card-rest: none;
+  --shadow-nav: none;
+  --shadow-elevated-sm: none;
+  --shadow-elevated-md: none;
+  --shadow-elevated-lg: none;
+  --shadow-dropdown-xl: none;
+  --shadow-sidebar: none;
+  --shadow-lg: none;
+  --shadow-md: none;
+  --shadow-modal: none;
+  --shadow-inset: none;
+  --shadow-inset-light: none;
+  --shadow-button-dark: none;
+  --shadow-button-focus: none;
+  --portal-btn-shadow: none;
+  --portal-btn-shadow-hover: none;
+  --portal-btn-shadow-focus: none;
+  --portal-shadow: none;
+}
+
+[data-page="admin"] .sidebar,
+[data-page="admin"] .portal-header,
+[data-page="admin"] .admin-header,
+[data-page="admin"] .portal-page-header,
+body[data-page="admin"] .portal-page-header {
+  box-shadow: none;
+}
+
+/* ================================================
+   ADMIN LOGIN PAGE - THEME TOGGLE SUPPORT
+   ================================================ */
+html[data-theme="dark"] body[data-page="admin"] {
+  --color-neutral-300: var(--color-dark);
+}
+
+/* ================================================
+   ADMIN LOGIN PAGE - HEADER & FOOTER
+   ================================================ */
+
+[data-page="admin"] .admin-header {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-index-portal-modal);
+  background: transparent;
+  height: var(--header-height, 60px);
+}
+
+body[data-page="admin"]:not(.admin-logged-in) .admin-header,
+body[data-page="admin"]:not(.admin-logged-in) .admin-header * {
+  color: var(--color-nav-text);
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+body[data-page="admin"]:not(.admin-logged-in) .nav-logo-row {
+  color: var(--color-nav-text);
+}
+
+body[data-page="admin"]:not(.admin-logged-in) .theme-button,
+body[data-page="admin"]:not(.admin-logged-in) .menu-button,
+body[data-page="admin"]:not(.admin-logged-in) .portal-button {
+  color: var(--color-nav-text);
+}
+
+body[data-page="admin"]:not(.admin-logged-in) .nav-logo-row:hover,
+body[data-page="admin"]:not(.admin-logged-in) .theme-button:hover,
+body[data-page="admin"]:not(.admin-logged-in) .menu-button:hover,
+body[data-page="admin"]:not(.admin-logged-in) .portal-button:hover {
+  color: var(--color-accent);
+}
+
+body.admin-logged-in[data-page="admin"] .admin-header {
+  display: none;
+}
+
+body[data-page="admin"]:not(.admin-logged-in) .admin-footer {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--footer-height, 40px);
+  background: var(--color-neutral-300);
+  padding: var(--space-2) 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-nav-text);
+  text-align: center;
+  z-index: var(--z-index-50);
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+body[data-page="admin"]:not(.admin-logged-in) .admin-footer a {
+  color: var(--color-nav-text);
+}
+
+body[data-page="admin"]:not(.admin-logged-in) .admin-footer a:hover {
+  text-decoration: underline;
+}
+
+body.admin-logged-in[data-page="admin"] .admin-footer {
+  display: none;
+}
+
+[data-page="admin"]:not(.admin-logged-in) .auth-gate {
+  top: var(--header-height, 60px);
+  bottom: var(--footer-height, 40px);
+  min-height: calc(100vh - var(--header-height, 60px) - var(--footer-height, 40px));
+}
+
+body[data-page="admin"]:not(.admin-logged-in) {
+  background: var(--color-neutral-300);
+}
+
+/* ================================================
+   ADMIN SIDEBAR LAYOUT
+   ================================================ */
+
+/* .portal is a scoping wrapper, NOT a layout container.
+   .portal-body handles the sidebar+content flex layout. */
+
+/* Sidebar — base styles in portal-sidebar.css.
+   Only admin-specific width/z-index overrides here. */
+[data-page="admin"] .sidebar {
+  width: var(--sidebar-width-open);
+  min-width: var(--sidebar-width-open);
+  background: var(--color-bg-primary);
+  display: flex;
+  flex-direction: column;
+  z-index: var(--z-index-50);
+  position: relative;
+}
+
+[data-page="admin"] .sidebar.collapsed {
+  width: var(--sidebar-width-collapsed);
+  min-width: var(--sidebar-width-collapsed);
+}
+
+/* Sidebar buttons/footer — base styles in portal-sidebar.css.
+   Only admin-specific overrides here. */
+[data-page="admin"] .sidebar-buttons {
+  gap: var(--space-1);
+}
+
+/* Dashboard Content Area — admin-specific overrides only.
+   Base layout (flex, gap, padding, overflow-y, height) in shared/portal-layout.css */
+[data-page="admin"] .dashboard-content {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ================================================
+   QUICK STATS GRID - Admin-specific overrides
+   Base styles in shared/portal-cards.css
+   ================================================ */
+
+body[data-page="admin"] #tab-analytics .quick-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+body[data-page="admin"] #tab-analytics .stat-card {
+  padding: var(--space-2) var(--space-2-5);
+  min-width: 0;
+}
+
+/* ================================================
+   SUMMARY CARD GRID RESPONSIVE BEHAVIOR
+   ================================================ */
+
+@media (--laptop-up) {
+  [data-page="admin"] #tab-overview .dashboard-stats-grid,
+  [data-page="admin"] #tab-leads .quick-stats,
+  [data-page="admin"] #tab-projects .quick-stats,
+  [data-page="admin"] #tab-clients .quick-stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+[data-page="admin"] #tab-contracts .quick-stats {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+@media (--laptop) {
+  [data-page="admin"] #tab-contracts .quick-stats {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  [data-page="admin"] #tab-overview .dashboard-stats-grid,
+  [data-page="admin"] #tab-leads .quick-stats,
+  [data-page="admin"] #tab-projects .quick-stats,
+  [data-page="admin"] #tab-clients .quick-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (--tablet-down) {
+  [data-page="admin"] #tab-contracts .quick-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  [data-page="admin"] #tab-overview .dashboard-stats-grid,
+  [data-page="admin"] #tab-leads .quick-stats,
+  [data-page="admin"] #tab-projects .quick-stats,
+  [data-page="admin"] #tab-clients .quick-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (--compact-mobile) {
+  [data-page="admin"] #tab-contracts .quick-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  [data-page="admin"] #tab-overview .dashboard-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (--xs-mobile) {
+  [data-page="admin"] #tab-contracts .quick-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+[data-page="admin"] .portal-shadow {
+  box-shadow: none;
+}
+
+/* ================================================
+   OVERVIEW TAB - Card styling
+   ================================================ */
+[data-page="admin"] #tab-overview .dashboard-stats-grid {
+  background: var(--color-bg-secondary);
+  border: none;
+  border-radius: var(--border-radius-sm, 8px);
+  padding: var(--portal-card-padding);
+}
+
+[data-page="admin"] #tab-overview .attention-card,
+[data-page="admin"] #tab-overview .stat-card {
+  background: var(--color-bg-tertiary);
+  border-radius: var(--border-radius-sm, 8px);
+  padding: var(--portal-card-padding);
+  min-height: var(--panel-min-height-sm);
+}
+
+[data-page="admin"] #tab-overview .attention-card:hover,
+[data-page="admin"] #tab-overview .stat-card-clickable:hover {
+  background: var(--color-bg-hover);
+}
+
+/* Ensure admin text is light on dark backgrounds */
+[data-page="admin"] .stat-card,
+[data-page="admin"] .data-table-card,
+[data-page="admin"] .chart-container,
+[data-page="admin"] .metric-group,
+[data-page="admin"] .analytics-section,
+[data-page="admin"] .analytics-overview,
+[data-page="admin"] .projects-table-container,
+[data-page="admin"] .data-table-header,
+[data-page="admin"] #tab-client-detail .portal-project-card {
+  color: var(--color-text-primary);
+}
+
+/* ================================================
+   ADMIN PORTAL - DATE INPUT STYLING
+   ================================================ */
+[data-page="admin"] input[type="date"] {
+  cursor: pointer;
+  position: relative;
+}
+
+[data-page="admin"] input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(1);
+  opacity: 0.7;
+  padding: var(--space-1);
+  border-radius: var(--border-radius-xs);
+  transition:
+    opacity var(--duration-faster) ease,
+    background-color var(--duration-faster) ease;
+}
+
+[data-page="admin"] input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  background-color: rgba(var(--color-accent-rgb), 0.2);
+}
+
+[data-page="admin"] input[type="date"]::-moz-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(1);
+}
+
+/* ================================================
+   ADMIN PORTAL - CARD SHADOWS
+   ================================================ */
+body[data-page="admin"] .data-table-card,
+body[data-page="admin"] .chart-container,
+body[data-page="admin"] .metric-group,
+body[data-page="admin"] .analytics-section,
+body[data-page="admin"] .analytics-overview,
+body[data-page="admin"] .project-detail-overview {
+  box-shadow: var(--shadow-panel);
+}
+
+/* ================================================
+   ADMIN TABLE LAYOUT
+   Base table styles in shared/portal-tables.css
+   ================================================ */
+
+[data-page="admin"] .page-header h2 {
+  color: var(--color-accent);
+}
+
+[data-page="admin"] .page-header .header-sidebar-toggle {
+  color: var(--color-accent);
+}
+
+/* Admin Dashboard Layout */
+.admin-dashboard {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+body.modal-open,
+body.modal-open .dashboard-content {
+  overflow: hidden;
+}
+
+.tab-content {
+  animation: fadeIn var(--duration-medium) var(--easing-decelerated);
+}
+
+[data-page="admin"] #tab-leads .page-title + .quick-stats {
+  margin-top: var(--space-1-5);
+}
+
+/* Overview Tab */
+[data-page="admin"] .overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+[data-page="admin"] .metric-card {
+  background: var(--color-bg-primary);
+  border: var(--portal-border);
+  border-radius: var(--border-radius-card);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-card-rest);
+  transition: var(--animation-card-hover);
+}
+
+[data-page="admin"] .metric-value {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-1);
+}
+
+[data-page="admin"] .metric-change {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+[data-page="admin"] .metric-change.positive {
+  color: var(--color-success);
+}
+[data-page="admin"] .metric-change.negative {
+  color: var(--color-danger);
+}
+[data-page="admin"] .metric-change.neutral {
+  color: var(--color-text-secondary);
+}
+
+/* Base .stat-card styles are in shared/portal-cards.css */
+[data-page="admin"] .stat-card-clickable:hover {
+  background: var(--color-bg-readonly);
+}
+
+[data-page="admin"] .stat-card-clickable.active {
+  background: var(--color-bg-readonly);
+}
+
+/* Breadcrumbs styled in shared/portal-layout.css — no admin overrides needed */
+
+/* Invite icon button - matches .icon-btn pattern */
+[data-page="admin"] .icon-btn-invite {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-btn-size-md);
+  height: var(--icon-btn-size-md);
+  min-width: var(--icon-btn-size-md);
+  min-height: var(--icon-btn-size-md);
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--border-radius-lg, 12px);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+[data-page="admin"] .icon-btn-invite:hover {
+  color: var(--color-accent);
+}
+
+[data-page="admin"] .icon-btn-invite:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+[data-page="admin"] .icon-btn-invite svg {
+  /* Use icon-lg for standalone buttons, tables will override with --table-action-icon-size */
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+  /* stroke-width inherited from global SVG rule */
+}
+
+/* ================================================
+   Data Table Card - Admin-only overrides
+   Base table styles in shared/portal-tables.css
+   ================================================ */
+
+[data-page="admin"] .admin-filter-select {
+  min-width: 10rem;
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  box-sizing: border-box;
+}
+
+[data-page="admin"] .data-table-actions .icon-btn:hover {
+  color: var(--color-danger);
+  background: transparent;
+}
+
+/* ================================================
+   File action buttons container
+   ================================================ */
+.file-actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+/* ================================================
+   Set Password Page Styles
+   ================================================ */
+.set-password-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: var(--color-bg-primary);
+}
+
+.set-password-container {
+  width: 100%;
+  max-width: var(--form-container-max-width);
+}
+
+.set-password-card {
+  background: var(--color-bg-tertiary);
+  border: var(--portal-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-panel);
+}
+
+.set-password-header {
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+
+.set-password-logo {
+  display: inline-block;
+  margin-bottom: var(--space-4);
+}
+
+.set-password-logo-img {
+  width: var(--icon-size-3xl);
+  height: var(--icon-size-3xl);
+}
+
+.set-password-header h1 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.set-password-subtitle {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+.set-password-loading,
+.set-password-error,
+.set-password-success {
+  text-align: center;
+  padding: var(--space-6);
+}
+
+.set-password-error .error-icon,
+.set-password-success .success-icon {
+  width: var(--icon-btn-size-xl);
+  height: var(--icon-btn-size-xl);
+  border-radius: var(--border-radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0 auto var(--space-4);
+}
+
+.set-password-error .error-icon {
+  background: rgba(var(--color-error-rgb), 0.1);
+  color: var(--color-danger);
+}
+
+.set-password-success .success-icon {
+  background: rgba(var(--color-success-rgb), 0.1);
+  color: var(--color-success);
+}
+
+.set-password-form .form-field {
+  margin-bottom: var(--space-4);
+}
+
+.set-password-form label {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-1);
+}
+
+.set-password-form .form-input {
+  padding: var(--space-3);
+  border: var(--portal-border);
+  border-radius: var(--border-radius-sm);
+  background: var(--color-bg-secondary);
+  font-size: var(--font-size-base);
+}
+
+.set-password-form .form-input[readonly] {
+  background: var(--color-bg-readonly);
+  cursor: not-allowed;
+}
+
+.set-password-form .form-error {
+  background: rgba(var(--color-error-rgb), 0.1);
+  color: var(--color-danger);
+  padding: var(--space-3);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-4);
+}
+
+/* ================================================
+   System Tab
+   ================================================ */
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-1-5) var(--space-2);
+  background: var(--color-bg-raised);
+  border-radius: var(--border-radius-md, 8px);
+  border: none;
+}
+
+.status-item .status-icon {
+  flex-shrink: 0;
+  width: var(--icon-size-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-item .status-name {
+  flex: 1;
+  color: var(--color-text-primary);
+  margin-left: var(--space-1-5);
+}
+
+/* .status-badge and .status-indicator styles in shared/portal-badges.css */
+
+.loader {
+  width: var(--icon-btn-size-lg);
+  height: var(--icon-btn-size-lg);
+  border: var(--border-width-heavy) solid var(--color-border-primary);
+  border-top: var(--border-width-heavy) solid var(--color-accent);
+  border-radius: var(--border-radius-full);
+  animation: spin var(--animation-spinner);
+  margin-bottom: var(--space-4);
+}
+
+/* Utility Classes */
+.text-success {
+  color: var(--color-success);
+}
+.text-warning {
+  color: var(--color-warning);
+}
+.text-danger {
+  color: var(--color-danger);
+}
+
+/* ================================================
+   Responsive Design
+   ================================================ */
+
+[data-page="admin"] .vitals-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+[data-page="admin"] .quick-stats > * {
+  height: 100%;
+}
+
+@media (--mobile) {
+  [data-page="admin"] .overview-stats-grid,
+  [data-page="admin"] .charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  [data-page="admin"] #tab-analytics > .quick-stats {
+    grid-template-columns: 1fr;
+  }
+
+  [data-page="admin"] #tab-overview .dashboard-stats-grid,
+  [data-page="admin"] #tab-leads .quick-stats,
+  [data-page="admin"] #tab-projects .quick-stats,
+  [data-page="admin"] #tab-clients .quick-stats,
+  [data-page="admin"] #tab-invoices .quick-stats {
+    grid-template-columns: 1fr;
+  }
+
+  [data-page="admin"] #tab-overview .upcoming-tasks,
+  [data-page="admin"] #tab-overview .recent-activity {
+    margin-bottom: 0;
+  }
+
+  /* .portal .dashboard-content padding is single source of truth in shared/portal-layout.css */
+}
+
+@media (--compact-mobile) {
+  body[data-page="admin"] .analytics-grid,
+  body[data-page="admin"] .vitals-grid,
+  body[data-page="admin"] .charts-grid,
+  body[data-page="admin"] .overview-grid {
+    grid-template-columns: 1fr;
+    gap: var(--portal-section-gap);
+  }
+
+  body[data-page="admin"] .stat-card,
+  body[data-page="admin"] .portal-project-card,
+  body[data-page="admin"] .chart-container {
+    padding: var(--space-1);
+    /* gap on .dashboard-content is the SoT for vertical spacing */
+  }
+
+  body[data-page="admin"] .data-table-card {
+    padding: 0;
+    /* gap on .dashboard-content is the SoT for vertical spacing */
+  }
+}
+
+@media (--small-mobile) {
+  [data-page="admin"] .dashboard-content {
+    touch-action: pan-y;
+  }
+
+  [data-page="admin"] .portal-project-card,
+  [data-page="admin"] .attention-card,
+  [data-page="admin"] .overview-card,
+  [data-page="admin"] .recent-activity,
+  [data-page="admin"] .upcoming-tasks {
+    padding: var(--space-1-5);
+    width: 100%;
+  }
+
+  [data-page="admin"] #tab-system .status-item {
+    background: transparent;
+    padding: var(--space-1) 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  [data-page="admin"] #tab-system .status-name {
+    flex: 1;
+    min-width: 0;
+    font-size: var(--table-mobile-identity-tertiary-size);
+  }
+
+  [data-page="admin"] #tab-system .status-badge {
+    flex-shrink: 0;
+    width: fit-content;
+    font-size: var(--font-size-2xs, 0.625rem);
+    font-weight: var(--font-weight-bold);
+    padding: var(--space-0-5) var(--space-1);
+    white-space: nowrap;
+  }
+
+  [data-page="admin"] #tab-system .status-list {
+    overflow: visible;
+  }
+
+  [data-page="admin"] #tab-system .portal-project-card {
+    overflow: visible;
+  }
+
+  [data-page="admin"] #tab-system .system-info-row {
+    flex-wrap: wrap;
+  }
+
+  [data-page="admin"] #tab-system .truncate-text {
+    white-space: normal;
+    word-break: break-word;
+    max-width: 100%;
+  }
+
+  [data-page="admin"] #tab-analytics .chart-container {
+    padding: var(--space-1);
+  }
+
+  [data-page="admin"] #tab-analytics .analytics-section {
+    padding: var(--space-1);
+  }
+
+  [data-page="admin"] #tab-analytics .chart {
+    height: var(--chart-height-md);
+    padding: var(--space-0-5);
+  }
+
+  [data-page="admin"] #tab-analytics .chart canvas {
+    padding: 0;
+  }
+
+  [data-page="admin"] #tab-analytics .chart-container ul {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-0-5);
+    justify-items: start;
+  }
+
+  [data-page="admin"] #tab-analytics .chart-container ul li {
+    margin: 0;
+  }
+
+  [data-page="admin"] .stat-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-1-5);
+    gap: var(--space-1);
+  }
+
+  [data-page="admin"] .data-table-card {
+    padding: 0;
+  }
+
+  [data-page="admin"] .data-table-scroll-wrapper,
+  [data-page="admin"] .data-table-container {
+    padding: 0;
+    max-width: 100%;
+    background: transparent;
+    overflow: visible;
+  }
+
+  [data-page="admin"] .data-table tbody td:empty {
+    display: none;
+  }
+}
+
+/* ================================================
+   INFO ICONS
+   ================================================ */
+
+[data-page="admin"] .info-icon-wrapper {
+  display: inline-block;
+  position: relative;
+  vertical-align: middle;
+  margin-left: var(--space-0-5);
+  cursor: default;
+}
+
+[data-page="admin"] .info-icon {
+  display: inline-block;
+  vertical-align: middle;
+  opacity: 0.6;
+  transition: opacity var(--transition-fast) ease;
+}
+
+[data-page="admin"] .info-icon-wrapper:hover .info-icon {
+  opacity: 1;
+}
+
+[data-page="admin"] .vital-card h4 {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-xs);
+}
+
+/* ================================================
+   FAST CUSTOM TOOLTIPS
+   ================================================ */
+
+[data-page="admin"] [data-tooltip] {
+  position: relative;
+}
+
+[data-page="admin"] [data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + var(--space-1));
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-1) var(--space-1-5);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal, 1.4);
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: pre-line;
+  width: max-content;
+  max-width: var(--tooltip-max-width);
+  text-align: left;
+  border-radius: var(--border-radius-xs);
+  box-shadow: var(--shadow-elevated-sm);
+  z-index: var(--z-index-portal-dropdown);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--duration-faster) ease,
+    visibility var(--duration-faster) ease;
+}
+
+[data-page="admin"] [data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+[data-page="admin"] [data-tooltip]::before {
+  content: "";
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: var(--tooltip-arrow-size) solid transparent;
+  border-top-color: var(--color-bg-secondary);
+  z-index: var(--z-index-portal-dropdown);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--duration-faster) ease,
+    visibility var(--duration-faster) ease;
+}
+
+[data-page="admin"] [data-tooltip]:hover::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+[data-page="admin"] td[data-tooltip]::after,
+[data-page="admin"] .table-cell[data-tooltip]::after {
+  left: 0;
+  transform: none;
+  white-space: normal;
+  max-width: var(--tooltip-max-width-sm);
+}
+
+[data-page="admin"] td[data-tooltip]::before,
+[data-page="admin"] .table-cell[data-tooltip]::before {
+  left: 20px;
+  transform: none;
+}
+
+/* Table filter controls - see admin/table-filters.css for all styles */
+
+@media (--small-mobile) {
+  .data-table-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    gap: var(--space-0-5) var(--space-1);
+    padding: var(--space-1) var(--space-1-5);
+  }
+
+  .data-table-header h3 {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: var(--font-size-lg);
+  }
+
+  .data-table-header h3 .title-full {
+    display: none;
+  }
+
+  .data-table-header h3 .title-mobile {
+    display: inline;
+  }
+
+  .data-table-header .data-table-actions {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .data-table-header > .status-badge {
+    display: none;
+  }
+
+  /* Stats on mobile - full width below title */
+  .stats-summary {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-left: 0;
+    margin-top: var(--space-1);
+    font-size: var(--font-size-xs);
+  }
+
+  .data-table-actions > * {
+    align-self: center;
+  }
+
+  /* Filter controls responsive - see admin/table-filters.css */
+
+  .data-table-actions .icon-btn,
+  .data-table-actions > .icon-btn,
+  .data-table-actions button.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    flex-shrink: 0;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-primary);
+    width: var(--icon-btn-size-sm);
+    height: var(--icon-btn-size-sm);
+    min-width: var(--icon-btn-size-sm);
+    min-height: var(--icon-btn-size-sm);
+    max-width: var(--icon-btn-size-sm);
+    max-height: var(--icon-btn-size-sm);
+    line-height: 1;
+    vertical-align: middle;
+  }
+
+  .data-table-actions .icon-btn svg {
+    /* Use unified table icon size from portal-tables.css */
+    width: var(--table-action-icon-size, var(--icon-size-md));
+    height: var(--table-action-icon-size, var(--icon-size-md));
+    display: block;
+    margin: 0;
+  }
+}
+
+/* ============================================
+ * LAYOUT OVERHAUL
+ * Base layout (height, flex, display) in shared/portal-layout.css.
+ * Only admin-specific overrides below.
+ * ============================================ */
+
+[data-page="admin"] .portal-body {
+  margin-top: var(--portal-header-height);
+}
+
+[data-page="admin"] .portal-body .sidebar {
+  background: transparent;
+}
+
+[data-page="admin"] .portal-page-header h1 {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-xl);
+  letter-spacing: var(--letter-spacing-tight, 0.01em);
+}
+
+[data-page="admin"] .sidebar-section {
+  border: none;
+}
+
+[data-page="admin"] .sidebar-footer {
+  border-top: none;
+}
+
+[data-page="admin"] .data-table-header {
+  border-bottom: var(--portal-border);
+}
+
+[data-page="admin"] .data-table-card,
+[data-page="admin"] .stat-card {
+  border: var(--portal-border);
+}
+
+/* Table transparency - using @layer utilities for proper cascade */
+@layer utilities {
+  [data-page="admin"] .data-table-container,
+  [data-page="admin"] .data-table-scroll-wrapper,
+  [data-page="admin"] .data-table,
+  [data-page="admin"] .data-table thead,
+  [data-page="admin"] .data-table tbody,
+  [data-page="admin"] .data-table thead tr,
+  [data-page="admin"] .data-table tbody tr,
+  [data-page="admin"] .data-table thead th,
+  [data-page="admin"] .data-table tbody td {
+    background: transparent;
+  }
+
+  [data-page="admin"] .table-pagination,
+  [data-page="admin"] .pagination,
+  [data-page="admin"] .data-table-pagination,
+  [data-page="admin"] .pagination-inner {
+    background: transparent;
+  }
+}
+
+/* Modal z-index - overlay must sit above sidebar, panel above overlay */
+@layer utilities {
+  [data-page="admin"] .details-panel,
+  [data-page="admin"] .portal-modal-overlay,
+  [data-page="admin"] #lead-details-panel,
+  [data-page="admin"] #contact-details-panel {
+    z-index: var(--z-index-portal-modal);
+  }
+
+  [data-page="admin"] .details-overlay {
+    z-index: calc(var(--z-index-portal-modal) - 1);
+  }
+}
+
+/* Tab section and overview-table-section layout moved to shared/portal-layout.css */
+
+/* -------------------------------------------------------
+ * Inline-edit compact input override
+ * portal-forms.css (layer(pages)) sets height: var(--space-7) on all
+ * portal inputs, overriding the 24px in layer(components)/inline-edit.css.
+ * This restores compact sizing for inline-edit fields.
+ * ------------------------------------------------------- */
+.portal .inline-edit-wrapper input {
+  height: 22px;
+  min-height: 0;
+  padding: 0 4px;
+}
+
+.portal .inline-edit-wrapper .inline-edit-input-compact--date {
+  padding-left: 24px;
+  padding-right: 4px;
+}

@@ -70,6 +70,8 @@ export interface PortalStoreState {
   // Actions
   setRole: (role: UserRole) => void;
   switchTab: (tabId: string) => void;
+  /** Override the page title (e.g. with a project/client name) */
+  setPageTitle: (title: string) => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
   toggleSidebar: () => void;
   setTheme: (theme: 'light' | 'dark') => void;
@@ -164,6 +166,10 @@ export const usePortalStore = create<PortalStoreState>()(
           }, false, 'switchTab');
         },
 
+        setPageTitle: (title) => {
+          set({ pageTitle: title }, false, 'setPageTitle');
+        },
+
         setSidebarCollapsed: (collapsed) => {
           localStorage.setItem(STORAGE_KEYS.SIDEBAR_COLLAPSED, String(collapsed));
           set({ sidebarCollapsed: collapsed }, false, 'setSidebarCollapsed');
@@ -226,6 +232,7 @@ export const useSidebarCollapsed = () => usePortalStore((s) => s.sidebarCollapse
 export const usePortalTheme = () => usePortalStore((s) => s.theme);
 export const usePortalRole = () => usePortalStore((s) => s.role);
 export const useSwitchTab = () => usePortalStore((s) => s.switchTab);
+export const useSetPageTitle = () => usePortalStore((s) => s.setPageTitle);
 export const useToggleSidebar = () => usePortalStore((s) => s.toggleSidebar);
 export const useToggleTheme = () => usePortalStore((s) => s.toggleTheme);
 export const useActiveProjectId = () => usePortalStore((s) => s.activeProjectId);

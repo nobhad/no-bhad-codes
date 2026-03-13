@@ -1,0 +1,622 @@
+/**
+ * ===============================================
+ * PORTAL DASHBOARD WIDGETS
+ * ===============================================
+ * @file src/styles/portal/shared/portal-dashboard-widgets.css
+ *
+ * Dashboard-specific components: activity feeds, task widgets,
+ * attention cards, kanban boards, and dashboard sections.
+ * Split from portal-cards.css for maintainability.
+ */
+
+/* =====================================================
+   PROJECT SNAPSHOT
+   Split into two parts:
+   - Header: title + badge + preview link (no panel)
+   - Progress: bar + timeline + deliverable (inside .panel)
+   ===================================================== */
+
+.portal .project-snapshot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.portal .project-snapshot-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.portal .project-snapshot-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.portal .project-snapshot-title .badge {
+  flex-shrink: 0;
+}
+
+.portal .project-snapshot-title h2 {
+  margin: 0;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.portal .project-snapshot-milestone {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.portal .project-snapshot-timeline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+/* =====================================================
+   PROGRESS FIELD
+   Label row + progress track. Used in dashboard panels
+   and admin project detail. Shared definition.
+   ===================================================== */
+
+.portal .progress-field {
+  padding: var(--space-2) 0;
+}
+
+.portal .progress-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+/* =====================================================
+   ACTION ITEMS GRID
+   Uses .attention-card pattern for clickable action cards.
+   ===================================================== */
+
+.portal .action-items-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.portal .action-items-section h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.portal .action-items-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* =====================================================
+   ACTIVITY ITEMS
+   Activity item with icon, content, and time
+   ===================================================== */
+
+.portal .activity-item {
+  display: flex;
+  align-items: center;
+}
+
+.portal .activity-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: var(--color-text-tertiary);
+}
+
+.portal .activity-icon svg {
+  width: var(--icon-size-sm);  /* 14px - matches font-size-sm */
+  height: var(--icon-size-sm);
+}
+
+.portal .activity-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+}
+
+.portal .activity-title {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.portal .activity-client {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.portal .activity-context {
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-normal);
+}
+
+.portal :is(.activity-time, .activity-date) {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+.portal .activity-item.empty {
+  justify-content: center;
+}
+
+/* =====================================================
+   UPCOMING TASKS WIDGET
+   ===================================================== */
+
+.portal .upcoming-tasks {
+  background: transparent;
+  border: var(--portal-border);
+  padding: var(--portal-card-padding);
+}
+
+.portal .upcoming-tasks .section-header-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.portal .upcoming-tasks .section-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* =====================================================
+   DASHBOARD KANBAN VIEW
+   ===================================================== */
+
+.portal .dashboard-tasks-kanban {
+  min-height: 200px;
+}
+
+.portal .dashboard-tasks-kanban .kanban-board {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.portal .dashboard-tasks-kanban .kanban-column {
+  min-width: 180px;
+  flex: 1 1 0;
+}
+
+.portal .dashboard-tasks-kanban .kanban-column-header {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-xs);  /* 12px */
+}
+
+.portal .dashboard-tasks-kanban .kanban-card {
+  padding: var(--space-2);
+}
+
+/* Mobile: Stack kanban columns vertically to prevent horizontal overflow */
+@media (--mobile) {
+  .portal .dashboard-tasks-kanban .kanban-board {
+    flex-direction: column;
+  }
+  .portal .dashboard-tasks-kanban .kanban-column {
+    min-width: 100%;
+  }
+}
+
+.portal .dashboard-tasks-kanban .task-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  margin-bottom: var(--space-1);
+}
+
+.portal .dashboard-tasks-kanban .task-card-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.portal .dashboard-tasks-kanban .task-card-project {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.portal .dashboard-tasks-kanban .task-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+
+.portal .dashboard-tasks-kanban .task-due-date {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.portal .dashboard-tasks-kanban .task-due-date.overdue {
+  color: var(--status-cancelled);
+}
+
+/* =====================================================
+   UPCOMING TASKS LIST
+   ===================================================== */
+
+.portal .upcoming-tasks-list .task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: var(--portal-border);
+  margin-bottom: var(--space-0-5);
+  cursor: pointer;
+  transition: border-color var(--transition-mouse) ease;
+}
+
+.portal .upcoming-tasks-list .task-item:hover {
+  border-color: var(--color-border-primary);
+}
+
+.portal .upcoming-tasks-list .task-item:last-child {
+  margin-bottom: 0;
+}
+
+.portal .upcoming-tasks-list .task-item.empty {
+  justify-content: center;
+  color: var(--color-text-tertiary);
+  font-style: italic;
+  cursor: default;
+}
+
+.portal .upcoming-tasks-list .task-item.empty:hover {
+  border-color: var(--color-border-primary);
+}
+
+.portal .task-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  flex: 1;
+  min-width: 0;
+}
+
+.portal .task-item .task-title {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.portal .task-item .task-project {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+}
+
+.portal .task-item-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.portal .task-item .task-due {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+.portal .task-item.task-overdue .task-due {
+  color: var(--status-cancelled);
+}
+
+/* =====================================================
+   TASK PRIORITY BADGES - UNIFIED
+   Single source of truth for .task-priority and .task-priority-badge
+   ===================================================== */
+
+.portal :is(.task-priority, .task-priority-badge) {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-xs);  /* 12px */
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+  padding: var(--space-0-5) var(--space-1);
+  background: transparent;
+  border: var(--portal-border);
+  color: var(--color-text-tertiary);
+}
+
+.portal :is(.task-priority, .task-priority-badge).task-priority-urgent {
+  background: transparent;
+  border-color: var(--status-cancelled);
+  color: var(--status-cancelled);
+}
+
+.portal :is(.task-priority, .task-priority-badge).task-priority-high {
+  background: transparent;
+  border-color: var(--status-on-hold);
+  color: var(--status-on-hold);
+}
+
+.portal :is(.task-priority, .task-priority-badge).task-priority-medium {
+  background: transparent;
+  border-color: var(--app-color-primary);
+  color: var(--app-color-primary);
+}
+
+.portal :is(.task-priority, .task-priority-badge).task-priority-low {
+  background: transparent;
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-secondary);
+}
+
+.portal .upcoming-tasks-list .loading-row {
+  padding: var(--space-2) var(--space-3);
+}
+
+/* =====================================================
+   DASHBOARD OVERVIEW CARD
+   Wraps all dashboard sections
+   ===================================================== */
+
+.portal .dashboard-overview-card {
+  padding: var(--space-6);
+  background: transparent;
+  border: var(--portal-border);
+}
+
+/* =====================================================
+   DASHBOARD SECTIONS
+   ===================================================== */
+
+.portal .dashboard-section {
+  margin-bottom: var(--space-3);
+}
+
+.portal .dashboard-section:last-child {
+  margin-bottom: 0;
+}
+
+.portal .dashboard-section-title {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);  /* 16px - matches h3 */
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  margin: 0 0 var(--space-1-5) 0;
+}
+
+/* =====================================================
+   ATTENTION CARD
+   ===================================================== */
+
+.portal .attention-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--portal-card-padding);
+  background: transparent;
+  border: var(--portal-border);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+  text-align: left;
+  box-shadow: none;
+}
+
+.portal .attention-card:hover {
+  border-color: var(--color-border-primary);
+}
+
+.portal .attention-card.attention-card--alert {
+  border-color: var(--status-cancelled);
+}
+
+/* Attention icon container - no background, just colored icon */
+.portal .attention-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: none;
+}
+
+.portal :is(.attention-icon-warning, .attention-icon-info, .attention-icon-danger) {
+  color: var(--color-text-secondary);
+}
+
+/* Attention content */
+.portal .attention-content {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--space-1);
+}
+
+.portal .attention-count {
+  display: block;
+  font-family: var(--font-family-mono, monospace);
+  font-size: var(--font-size-xl, 1.25rem);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  color: var(--color-text-primary);
+}
+
+/* Highlight attention cards with values > 0 */
+.portal .attention-card.has-items .attention-count {
+  color: var(--color-text-primary);
+}
+
+/* =====================================================
+   DASHBOARD WIDGETS MOBILE RESPONSIVE
+   ===================================================== */
+
+@media (--small-mobile) {
+  .portal .upcoming-tasks {
+    padding: var(--space-3);
+  }
+
+  .portal .upcoming-tasks .section-header-inline {
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+
+  .portal .upcoming-tasks .section-header-actions {
+    gap: var(--space-1);
+  }
+
+  .portal .upcoming-tasks-list .task-item {
+    flex-wrap: wrap;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .portal .task-item-meta {
+    width: 100%;
+    margin-top: var(--space-1);
+    justify-content: flex-end;
+  }
+
+  .portal .recent-activity {
+    padding: var(--space-3);
+  }
+
+  .portal .activity-list li {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  /* Kanban board - enable horizontal scroll on very small screens */
+  .portal .dashboard-tasks-kanban {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .portal .dashboard-tasks-kanban .kanban-board {
+    min-width: max-content;
+  }
+
+  .portal .dashboard-tasks-kanban .kanban-column {
+    min-width: 140px;
+  }
+
+  .portal .dashboard-overview-card {
+    padding: var(--space-4);
+  }
+
+  .portal .attention-card {
+    padding: var(--space-2);
+  }
+}
+
+/* =====================================================
+   MILESTONE / DELIVERABLE LIST (SHARED)
+   Used by both admin project detail and client portal
+   deliverables tab. Originally in admin/project-detail.css,
+   duplicated here so the client portal can also use them.
+   ===================================================== */
+
+.portal .milestone-list,
+.portal .milestone-item-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.portal .milestone-list {
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+}
+
+.portal .table-layout .progress-field {
+  padding: var(--space-2) var(--space-3) 0;
+}
+
+.portal .milestone-item-wrapper {
+  border: var(--portal-border);
+}
+
+.portal .milestone-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+}
+
+.portal .milestone-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
+}
+
+.portal .milestone-due {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: var(--space-3);
+}
+
+.portal .milestone-item .accordion-item-caret {
+  margin-left: var(--space-3);
+}
+
+.portal .milestone-expanded-content {
+  padding: 0 var(--space-2) var(--space-2);
+  padding-left: calc(var(--icon-size-lg) + var(--space-1-5) + var(--space-2));
+}
+
+/* Deliverables checklist */
+.portal .deliv-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.portal .deliv-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}

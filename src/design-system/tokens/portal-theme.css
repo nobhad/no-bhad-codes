@@ -7,7 +7,7 @@
  * Portal-specific CSS variable overrides.
  * All portal theme values are defined here — this is the ONLY place.
  *
- * LOAD ORDER: Imported UNLAYERED in admin.css and portal.css only.
+ * LOAD ORDER: Imported UNLAYERED in admin.css and client.css only.
  * NOT in @layer tokens. This ensures portal overrides beat all layered styles.
  * Main site pages do NOT load this file — complete style isolation.
  *

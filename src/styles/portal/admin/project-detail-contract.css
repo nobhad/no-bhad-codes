@@ -1,0 +1,49 @@
+/**
+ * ===============================================
+ * PROJECT DETAIL - CONTRACT TAB
+ * ===============================================
+ * @file src/styles/portal/admin/project-detail-contract.css
+ *
+ * Styles for the contract tab in project detail view.
+ * Split from project-detail.css for maintainability.
+ */
+
+/* =====================================================
+   CONTRACT TAB
+   ===================================================== */
+
+#pd-tab-contract {
+  display: none;
+}
+
+#pd-tab-contract.active {
+  display: block;
+}
+
+/* .contract-tab-content flex layout from shared/portal-components.css */
+
+/* =====================================================
+   COUNTERSIGN MODAL
+   ===================================================== */
+
+/* Uses utility classes: flex flex-col gap-2 */
+/* Uses utility classes: flex flex-col gap-1 */
+
+/* =====================================================
+   CONTRACT STATUS BADGES
+   ===================================================== */
+
+#pd-contract-status-badge.status-signed {
+  background: var(--color-success);
+  color: var(--color-white);
+}
+
+#pd-contract-status-badge.status-pending {
+  background: var(--color-warning);
+  color: var(--color-bg-tertiary);
+}
+
+#pd-contract-status-badge.status-not-signed {
+  background: var(--color-text-tertiary);
+  color: var(--color-white);
+}

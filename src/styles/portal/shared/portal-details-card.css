@@ -1,0 +1,120 @@
+/**
+ * =====================================================
+ * DETAILS CARD (reusable collapsible)
+ * @file src/styles/portal/shared/details-card.css
+ *
+ * Use: <details class="portal-project-card details-card">
+ *        <summary><h3>Title</h3></summary>
+ *        <div class="details-card-grid">
+ *          <div class="details-card-row"><span>Label</span><span>Value</span></div>
+ *        </div>
+ *      </details>
+ *
+ * For System tab, classes .system-details, .system-info-grid, .system-info-row
+ * are aliased so existing HTML works without change.
+ * ===================================================== */
+
+/* Override card padding so summary and grid control spacing consistently */
+.portal :is(.details-card, .system-details).portal-project-card {
+  padding: 0;
+}
+
+.portal :is(.details-card, .system-details) {
+  cursor: pointer;
+}
+
+/* Summary base styles */
+.portal :is(.details-card, .system-details) summary {
+  padding: var(--space-4);
+  margin: 0;
+}
+
+/* Caret: aligned with first line of heading */
+.portal :is(.details-card, .system-details) summary::before {
+  content: "";
+  flex-shrink: 0;
+  width: 0;
+  height: 0;
+  border-left: 5px solid var(--color-text-secondary);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform var(--transition-mouse) ease;
+}
+
+.portal :is(.details-card, .system-details)[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.portal :is(.details-card, .system-details) summary h3 {
+  margin: 0;
+  flex: 1;
+}
+
+/* Child grid: same horizontal padding as summary */
+.portal
+  :is(
+    .details-card-grid,
+    .system-info-grid,
+    .details-card .details-card-grid,
+    .system-details .system-info-grid
+  ) {
+  padding: 0 var(--space-4) var(--space-4);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Rows: consistent padding, no double borders */
+.portal :is(.details-card-row, .system-info-row) {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: var(--portal-border);
+  font-size: var(--font-size-sm);
+}
+
+/* Both portals: transparent row background */
+.portal :is(.details-card-row, .system-info-row) {
+  background: transparent;
+}
+
+.portal :is(.details-card-row, .system-info-row) span:first-child {
+  color: var(--color-text-secondary);
+}
+
+.portal :is(.details-card-row, .system-info-row) span:last-child {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Focus styles: border wraps entire card on keyboard focus */
+.portal :is(.details-card, .system-details):focus-within {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+/* Remove default focus from summary since parent handles it */
+.portal :is(.details-card, .system-details, details.portal-project-card) > summary:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Mobile responsive - tighter padding */
+@media (--mobile) {
+  .portal :is(.details-card, .system-details) summary {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .portal :is(.details-card-grid, .system-info-grid) {
+    padding: 0 var(--space-3) var(--space-2);
+    gap: var(--space-1);
+  }
+
+  .portal :is(.details-card-row, .system-info-row) {
+    padding: var(--space-1-5) var(--space-2);
+  }
+}

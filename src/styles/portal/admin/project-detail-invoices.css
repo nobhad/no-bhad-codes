@@ -1,0 +1,207 @@
+/**
+ * ===============================================
+ * PROJECT DETAIL - INVOICES TAB
+ * ===============================================
+ * @file src/styles/portal/admin/project-detail-invoices.css
+ *
+ * Styles for the invoices tab in project detail view.
+ * Split from project-detail.css for maintainability.
+ */
+
+/* =====================================================
+   INVOICES LIST
+   ===================================================== */
+
+/* Invoices list section - flex layout from shared/portal-components.css :has() rule */
+/* .card-header-with-action margin in project-detail.css */
+
+[data-page="admin"] #pd-tab-invoices .invoices-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 0;
+  min-height: 80px;
+}
+
+/* Empty/loading/error centering: root rule in components/loading.css */
+
+/* Invoice summary cards - consolidated from project-detail.css */
+[data-page="admin"] #pd-tab-invoices .invoice-summary {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+/* =====================================================
+   INVOICE ITEMS
+   ===================================================== */
+
+.invoice-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-1-5);
+  background: transparent;
+  border: none;
+  margin-bottom: var(--space-1);
+  box-shadow: var(--shadow-card);
+}
+
+.invoice-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.invoice-info strong {
+  display: block;
+}
+
+.invoice-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* Deposit Invoice Styling */
+.invoice-item.invoice-deposit {
+  border-left: var(--border-width-thick) solid var(--color-info);
+}
+
+.invoice-amount {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-accent);
+  min-width: 80px;
+  text-align: right;
+}
+
+.invoice-actions {
+  display: flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+/* =====================================================
+   INVOICE TABLE (in project details)
+   Base styling from shared/portal-tables.css
+   Only page-specific overrides here
+   ===================================================== */
+
+/* Deposit row highlight */
+#pd-invoices-list .data-table tr.invoice-deposit-row {
+  border-left: var(--border-width-thick) solid var(--color-info);
+}
+
+/* =====================================================
+   VIEW INVOICE MODAL
+   ===================================================== */
+
+#view-project-invoice-modal .invoice-view-content {
+  padding: var(--space-2) 0;
+}
+
+#view-project-invoice-modal .invoice-header-info {
+  margin-bottom: var(--space-3);
+}
+
+#view-project-invoice-modal .invoice-info-row {
+  display: flex;
+  gap: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+#view-project-invoice-modal .invoice-info-item {
+  flex: 1;
+}
+
+/* Label styling from unified rule in portal-forms.css - only layout here */
+#view-project-invoice-modal .field-label {
+  display: block;
+  margin-bottom: var(--space-0-5);
+}
+
+#view-project-invoice-modal .field-value {
+  font-size: var(--font-size-base);
+}
+
+/* Section title - styling from unified rule in portal-cards.css */
+#view-project-invoice-modal .section-title {
+  margin: 0 0 var(--space-1-5) 0;
+}
+
+#view-project-invoice-modal .invoice-line-items-section {
+  margin-bottom: var(--space-3);
+}
+
+#view-project-invoice-modal .invoice-line-items {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#view-project-invoice-modal .invoice-line-items th {
+  text-align: left;
+  padding: var(--space-1);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  border-bottom: var(--border-width) solid var(--color-border-primary);
+}
+
+#view-project-invoice-modal .invoice-line-items th.text-right {
+  text-align: right;
+}
+
+#view-project-invoice-modal .invoice-line-items td {
+  padding: var(--space-1);
+  border-bottom: var(--border-width) solid var(--portal-alpha-white-20);
+}
+
+#view-project-invoice-modal .invoice-line-items td.text-right {
+  text-align: right;
+}
+
+#view-project-invoice-modal .invoice-totals {
+  padding-top: var(--space-2);
+  border-top: var(--border-width) solid var(--color-border-primary);
+}
+
+#view-project-invoice-modal .total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-1) 0;
+  font-size: var(--font-size-base);
+}
+
+#view-project-invoice-modal .total-row.total-main {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-lg);
+  color: var(--color-accent);
+}
+
+#view-project-invoice-modal .total-row.balance-due {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-warning);
+}
+
+#view-project-invoice-modal .invoice-notes-section {
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: var(--border-width) solid var(--color-border-primary);
+}
+
+#view-project-invoice-modal .invoice-notes-section p {
+  line-height: var(--line-height-normal);
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media (--compact-mobile) {
+  #view-project-invoice-modal .invoice-info-row {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  #pd-invoices-list .data-table th:nth-child(3),
+  #pd-invoices-list .data-table td:nth-child(3) {
+    display: none;
+  }
+}

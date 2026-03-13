@@ -1,0 +1,168 @@
+/**
+ * ===============================================
+ * LEADS PIPELINE STYLES
+ * ===============================================
+ * @file src/styles/portal/admin/leads-pipeline.css
+ *
+ * Styles for lead pipeline (Kanban) view.
+ */
+
+/* View toggle: use shared .view-toggle (see shared/view-toggle.css) */
+
+/* ============================================
+   Lead Details Panel Tabs
+   ============================================ */
+
+.lead-details-tabs {
+  display: flex;
+  gap: var(--space-0-5);
+  border-bottom: var(--border-width) solid var(--portal-border);
+  margin-bottom: var(--space-1-5);
+  padding-bottom: var(--space-0-5);
+}
+
+.lead-tab {
+  position: relative;
+  padding: var(--space-0-5) var(--space-1-5);
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-faster);
+}
+
+.lead-tab:hover {
+  color: var(--color-text-primary);
+}
+
+.lead-tab.active {
+  background: transparent;
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Active indicator aligned with focus ring (outline: 2px, outline-offset: 2px) */
+.lead-tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-accent);
+}
+
+.lead-tab-content {
+  display: none;
+}
+
+.lead-tab-content.active {
+  display: block;
+}
+
+/* Tight gap under header */
+#lead-details-panel .details-header {
+  margin-bottom: 0;
+}
+
+/* Created date: very tight to header */
+#lead-details-panel .lead-details-created {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  margin-top: -0.5rem;
+  margin-bottom: var(--space-0-5);
+  padding-top: 0;
+}
+
+/* Status row: above tabs, below actions */
+#lead-details-panel .panel-status-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  margin-bottom: var(--space-4);
+}
+
+/* Lead details panel: single-column layout so Company / Project are not squished */
+#lead-details-panel .project-detail-meta {
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: var(--space-3);
+  column-gap: var(--space-1-5);
+}
+
+/* .meta-item, .meta-value base styles in shared/field-label-spacing.css */
+
+/* Email with copy icon: match spacing of other meta-values */
+#lead-details-panel .meta-value.meta-value-with-copy {
+  display: inline;
+  line-height: inherit;
+}
+
+#lead-details-panel .meta-value.meta-value-with-copy .copy-email-btn {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 0.3em;
+}
+
+/* Panel links (name -> client, project -> project details): inherit text, primary on hover */
+#lead-details-panel .panel-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+#lead-details-panel .panel-link:hover {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+/* ============================================
+   Lead Tasks
+   ============================================ */
+
+.lead-task-item {
+  gap: var(--icon-gap);
+  padding: var(--space-1);
+  margin-bottom: var(--space-1);
+  border: var(--border-width) solid var(--color-border-primary);
+}
+
+.lead-task-item.task-completed {
+  opacity: var(--opacity-completed, 0.5);
+}
+
+.lead-task-item.task-completed .task-title,
+.lead-task-item.task-completed .activity-text {
+  text-decoration: line-through;
+}
+
+/* ============================================
+   Lead Notes
+   ============================================ */
+
+.lead-note-item {
+  padding: var(--space-1-5);
+  margin-bottom: var(--space-1);
+  border: var(--border-width) solid var(--color-border-primary);
+}
+
+.lead-note-item.note-pinned {
+  border-left: var(--border-width-thick) solid var(--color-accent);
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (--mobile) {
+  .lead-details-tabs {
+    overflow-x: auto;
+    padding-bottom: var(--space-1);
+  }
+
+  .lead-tab {
+    white-space: nowrap;
+    font-size: var(--font-size-sm);
+    padding: var(--space-0-5) var(--space-1);
+  }
+}

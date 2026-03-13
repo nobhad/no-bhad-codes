@@ -11,7 +11,7 @@
 import './react/portal-entry';
 
 // Import client portal CSS bundle
-import './styles/bundles/portal.css';
+import './styles/bundles/client.css';
 
 // Vercel Analytics (privacy-focused, no cookies)
 import { inject } from '@vercel/analytics';

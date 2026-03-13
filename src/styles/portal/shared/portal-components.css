@@ -1,0 +1,54 @@
+/**
+ * ===============================================
+ * SHARED COMPONENT STYLES - BARREL FILE
+ * ===============================================
+ * @file src/styles/portal/shared/portal-components.css
+ *
+ * Barrel import that loads all shared component
+ * partials in the correct cascade order.
+ *
+ * Previously extracted to separate files:
+ * - portal-kanban.css: Kanban board
+ * - portal-tags.css: Tag input
+ * - portal-timeline.css: Timeline
+ * - portal-charts.css: Charts + KPI cards
+ * - portal-tooltips.css: CSS-only tooltips
+ * - portal-progress.css: Progress bars
+ *
+ * Now also split into:
+ * - portal-utilities.css: Global SVG, :has() auto-styling, utility classes
+ * - portal-copy-email.css: Copy email pattern, client nav link
+ * - portal-error-states.css: Error boundary, mount error
+ * - portal-react-components.css: Progress bar sm, dropdown, badge, status text
+ * - portal-status-panel.css: System status panel, grid column utilities
+ * - portal-performance.css: Performance metrics component
+ * - portal-analytics.css: Analytics component
+ * - portal-tab-components.css: Shared portal card layout classes (title-group, status-group, etc.)
+ */
+
+/* 1. Utilities first (foundational classes used everywhere) */
+@import "./portal-utilities.css";
+
+/* 2. Copy email pattern */
+@import "./portal-copy-email.css";
+
+/* 3. Error states (error boundary, mount error) */
+@import "./portal-error-states.css";
+
+/* 4. React component shared styles (dropdown, badge, progress-bar-sm) */
+@import "./portal-react-components.css";
+
+/* 4a. Accordion component */
+@import "./portal-accordion.css";
+
+/* 5. System status panel */
+@import "./portal-status-panel.css";
+
+/* 6. Performance metrics */
+@import "./portal-performance.css";
+
+/* 7. Analytics */
+@import "./portal-analytics.css";
+
+/* 8. Tab-specific component overrides (must be last for cascade) */
+@import "./portal-tab-components.css";

@@ -1,0 +1,96 @@
+/**
+ * ===============================================
+ * FIELD LABELS & META VALUES - SINGLE SOURCE OF TRUTH
+ * ===============================================
+ * @file src/styles/portal/shared/field-label-spacing.css
+ *
+ * ALL label and meta-value styling lives here.
+ * Do NOT define .field-label, .meta-label, .meta-value, .meta-item elsewhere.
+ *
+ * CSS Variables (defined in variables.css):
+ * - --portal-field-label-gap: Gap between label and value (0.25rem)
+ * - --portal-field-group-gap: Gap between field groups (1rem)
+ * - --color-text-secondary: Label text color
+ * - --color-text-primary: Value text color
+ */
+
+/* =====================================================
+   FIELD LABEL - Base styling for all labels
+   ===================================================== */
+.field-label,
+.meta-label,
+.stat-label {
+  font-size: var(--label-font-size, var(--font-size-xs));
+  font-weight: var(--label-font-weight, var(--font-weight-medium));
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+  letter-spacing: var(--label-letter-spacing, var(--letter-spacing-label));
+}
+
+.field-label,
+.meta-label {
+  display: block;
+  margin-bottom: var(--portal-field-label-gap, 0.25rem);
+  line-height: var(--line-height-tight);
+  /* Global rule: all field labels stay on a single line across the portal */
+  white-space: nowrap !important;
+}
+
+/* Icons inside labels should sit on the same row as the text,
+   with consistent spacing using the shared field-label gap token. */
+.field-label svg {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: var(--portal-field-label-gap, 0.25rem);
+}
+
+/* Label variants */
+.field-label--spaced {
+  margin-bottom: var(--space-2);
+}
+
+/* =====================================================
+   META VALUE - Base styling for all values
+   ===================================================== */
+.meta-value {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-primary, var(--color-text-inverse));
+  line-height: var(--line-height-snug);
+}
+
+/* Meta value links */
+.meta-value a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.meta-value a:hover {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+/* =====================================================
+   META ITEM - Label + Value container
+   ===================================================== */
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-field-label-gap, 0.25rem);
+}
+
+/* Remove margin-bottom from labels inside meta-item (gap handles spacing) */
+.meta-item .field-label,
+.meta-item .meta-label {
+  margin-bottom: 0;
+}
+
+/* =====================================================
+   STAT LABEL - Compact variant for stat cards
+   Base typography shared above; only override needed here.
+   ===================================================== */
+.stat-label {
+  margin: 0;
+}
+

@@ -1,12 +1,12 @@
 /**
  * ===============================================
- * ADMIN DASHBOARD CSS BUNDLE
+ * CLIENT PORTAL CSS BUNDLE
  * ===============================================
- * @file src/styles/bundles/admin.css
+ * @file src/styles/bundles/client.css
  *
- * Styles for the admin dashboard (admin/index.html).
- * Includes admin-specific components, tables, modals, analytics.
- * Does NOT include main site marketing styles or client portal.
+ * Styles for the client portal (client/portal.html, client/set-password.html).
+ * Includes portal-specific components, sidebar, dashboard, messages.
+ * Does NOT include main site marketing styles or admin dashboard.
  */
 
 /* ============================================
@@ -30,7 +30,7 @@
 @import "../responsive/breakpoints.css";
 
 /* ============================================
- * NAVIGATION (full nav styles for admin login page)
+ * NAVIGATION (main site nav for login page)
  * ============================================ */
 @import "../components/nav-base.css" layer(components);
 @import "../components/nav-animations.css" layer(components);
@@ -38,10 +38,14 @@
 @import "../components/nav-portal.css" layer(components);
 
 /* ============================================
- * ADMIN-SPECIFIC STYLES (pages layer)
- * Shared portal styles first, then page overrides last so they win cascade
+ * FOOTER (main site footer for auth pages)
  * ============================================ */
-@import "../portal/admin/index.css" layer(pages);
+@import "../components/footer.css" layer(components);
+
+/* ============================================
+ * CLIENT PORTAL STYLES (pages layer)
+ * ============================================ */
+@import "../portal/client/index.css" layer(pages);
 
 /* ============================================
  * PORTAL THEME (unlayered — beats all @layer rules)
@@ -62,18 +66,23 @@
 
 /* ============================================
  * UNLAYERED STYLES (global overrides)
+ * These MUST be unlayered to override layer rules
  * ============================================ */
 
-/* Admin dashboard background - must be unlayered to override
-   the inline <style> in admin/index.html (which is also unlayered).
-   Layered styles cannot beat unlayered styles regardless of specificity. */
-body.admin-logged-in[data-page="admin"] {
+/* Portal background - shared between admin and client */
+body[data-page="admin"],
+body[data-page="client-portal"] {
   background-color: var(--color-bg-primary);
-  /* Fixed height prevents body from growing beyond viewport */
   height: 100vh;
   height: 100dvh;
-  /* Prevent body scrolling - dashboard-content handles scroll */
   overflow: hidden;
+}
+
+/* html background - portal-theme.css sets --color-bg-primary on html via :has() */
+html:has(body[data-page="admin"]),
+html:has(body[data-page="client-portal"]) {
+  background-color: var(--color-bg-primary);
+  height: 100%;
 }
 
 /* Portal scoping wrapper — NOT a layout container.
@@ -86,10 +95,13 @@ body.admin-logged-in[data-page="admin"] {
   overflow: hidden;
 }
 
-/* html background - portal-theme.css sets --color-bg-primary on html via :has() */
-html:has(body.admin-logged-in[data-page="admin"]) {
-  background-color: var(--color-bg-primary);
-  height: 100%;
+/* Ensure portal is truly hidden when .hidden is applied (e.g. login page transition).
+   Unlayered CSS with compound selectors — high enough specificity to override all layers. */
+.portal.hidden,
+.portal.hidden .sidebar,
+.portal.hidden .dashboard-content {
+  display: none;
+  visibility: hidden;
 }
 
 /* Scrollbar styling */
@@ -109,10 +121,3 @@ html:has(body.admin-logged-in[data-page="admin"]) {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-neutral-500);
 }
-
-/* Sidebar spacing — unlayered to guarantee cascade priority.
-   padding-bottom on sidebar-content creates space below SIGN OUT. */
-.portal .sidebar-content {
-  padding-bottom: var(--space-2);
-}
-
