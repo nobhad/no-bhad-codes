@@ -160,6 +160,11 @@ export interface ProjectTemplate {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  // Enhanced template fields
+  defaultContentRequests?: TemplateContentRequest[];
+  defaultPaymentSchedule?: TemplatePaymentMilestone[];
+  contractTemplateId?: number;
+  tierDefinitions?: TemplateTierDefinition[];
 }
 
 export interface TemplateMilestone {
@@ -178,6 +183,29 @@ export interface TemplateTask {
   estimatedHours?: number;
 }
 
+export interface TemplateContentRequest {
+  title: string;
+  description?: string;
+  contentType: string;
+  category?: string;
+  isRequired?: boolean;
+  dueOffsetDays?: number;
+}
+
+export interface TemplatePaymentMilestone {
+  label?: string;
+  percentageOfTotal: number;
+  dueOffsetDays: number;
+}
+
+export interface TemplateTierDefinition {
+  tierName: string;
+  price: number;
+  features: string[];
+  description?: string;
+  estimatedHours?: number;
+}
+
 export interface TemplateData {
   name: string;
   description?: string;
@@ -186,6 +214,10 @@ export interface TemplateData {
   defaultTasks?: TemplateTask[];
   estimatedDurationDays?: number;
   defaultHourlyRate?: number;
+  defaultContentRequests?: TemplateContentRequest[];
+  defaultPaymentSchedule?: TemplatePaymentMilestone[];
+  contractTemplateId?: number;
+  tierDefinitions?: TemplateTierDefinition[];
 }
 
 // =====================================================
@@ -239,5 +271,7 @@ export const TASK_CHECKLIST_ITEM_COLUMNS = `
 
 export const PROJECT_TEMPLATE_COLUMNS = `
   id, name, description, project_type, default_milestones, default_tasks,
-  estimated_duration_days, default_hourly_rate, is_active, created_at, updated_at
+  estimated_duration_days, default_hourly_rate, is_active,
+  default_content_requests, default_payment_schedule, contract_template_id, tier_definitions,
+  created_at, updated_at
 `.replace(/\s+/g, ' ').trim();
