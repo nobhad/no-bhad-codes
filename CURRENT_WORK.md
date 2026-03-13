@@ -217,13 +217,20 @@ Gap not properly applied on mobile in portal dashboard layout.
 
 ---
 
+## Completed - PDF Header Unification
+
+**Status:** COMPLETE
+
+- Extracted `drawPdfDocumentHeader()` into `server/utils/pdf-utils.ts` using invoice styling as canonical reference
+- All four PDF generators (invoice, proposal, receipt, contract) now call the shared header function — no duplication
+- Unused `getPdfLogoBytes` imports removed from contracts and receipt-service
+
 ## Upcoming - PDF Deep Dive
 
 **Status:** TODO
 
-- [ ] Header layout overhaul (consistent spacing, dynamic field rendering across all PDF types)
-- [ ] Formatting review (contracts, proposals, invoices, intake, receipts, SOW)
-- [ ] Ensure all PDFs use shared header utility to avoid duplication
+- [ ] Formatting review (contracts, proposals, invoices, intake, receipts, SOW) — spacing, table layouts, typography consistency
+- [ ] SOW header — currently separate (`sowLogoHeight = 50`) — review if it should adopt the standard 100pt header or stay compact
 
 ## Upcoming - Messages View Overhaul
 

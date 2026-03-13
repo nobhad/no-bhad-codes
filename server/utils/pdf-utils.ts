@@ -12,6 +12,7 @@
 
 import { PDFDocument, PDFPage, PDFFont, rgb } from 'pdf-lib';
 import { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } from '../config/pdf-styles.js';
+import { BUSINESS_INFO, getPdfLogoBytes } from '../config/business.js';
 
 // ============================================
 // PDF CACHING
@@ -385,6 +386,122 @@ export function setPdfMetadata(
 
   // Set producer to indicate the generating application
   pdfDoc.setProducer('NoBhadCodes PDF Generator (pdf-lib)');
+}
+
+// ============================================
+// DOCUMENT HEADER
+// ============================================
+
+/**
+ * Draw the standard document header used by all PDF types:
+ * - Title (INVOICE / PROPOSAL / RECEIPT / CONTRACT) on the left
+ * - Logo + business info block on the right
+ * - Horizontal divider below
+ *
+ * Based on the invoice header as the canonical style reference.
+ *
+ * @returns New y position (after the divider, ready for content)
+ */
+export async function drawPdfDocumentHeader(params: {
+  page: PDFPage;
+  pdfDoc: PDFDocument;
+  fonts: { regular: PDFFont; bold: PDFFont };
+  startY: number;
+  leftMargin: number;
+  rightMargin: number;
+  title: string;
+}): Promise<number> {
+  const { page, pdfDoc, fonts, startY, leftMargin, rightMargin, title } = params;
+  const { regular, bold } = fonts;
+
+  // Title on the left (INVOICE / PROPOSAL / etc.)
+  page.drawText(title, {
+    x: leftMargin,
+    y: startY - 20,
+    size: PDF_TYPOGRAPHY.titleSize,
+    font: bold,
+    color: PDF_COLORS.title
+  });
+
+  // Logo + business info on the right
+  const logoHeight = PDF_SPACING.logoHeight;
+  let textStartX = rightMargin - 180;
+
+  const logoBytes = getPdfLogoBytes();
+  if (logoBytes) {
+    const logoImage = await pdfDoc.embedPng(logoBytes);
+    const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
+    const logoX = rightMargin - logoWidth - 150;
+    page.drawImage(logoImage, {
+      x: logoX,
+      y: startY - logoHeight + 10,
+      width: logoWidth,
+      height: logoHeight
+    });
+    textStartX = logoX + logoWidth + 18;
+  }
+
+  let infoY = startY - 11;
+  page.drawText(BUSINESS_INFO.name, {
+    x: textStartX,
+    y: infoY,
+    size: PDF_TYPOGRAPHY.businessNameSize,
+    font: bold,
+    color: PDF_COLORS.title
+  });
+  infoY -= 18;
+
+  if (BUSINESS_INFO.owner) {
+    page.drawText(BUSINESS_INFO.owner, {
+      x: textStartX,
+      y: infoY,
+      size: PDF_TYPOGRAPHY.bodySize,
+      font: regular,
+      color: PDF_COLORS.subtitle
+    });
+    infoY -= 16;
+  }
+  if (BUSINESS_INFO.tagline) {
+    page.drawText(BUSINESS_INFO.tagline, {
+      x: textStartX,
+      y: infoY,
+      size: PDF_TYPOGRAPHY.smallSize,
+      font: regular,
+      color: PDF_COLORS.muted
+    });
+    infoY -= 14;
+  }
+  if (BUSINESS_INFO.email) {
+    page.drawText(BUSINESS_INFO.email, {
+      x: textStartX,
+      y: infoY,
+      size: PDF_TYPOGRAPHY.smallSize,
+      font: regular,
+      color: PDF_COLORS.muted
+    });
+    infoY -= 14;
+  }
+  if (BUSINESS_INFO.website) {
+    page.drawText(BUSINESS_INFO.website, {
+      x: textStartX,
+      y: infoY,
+      size: PDF_TYPOGRAPHY.smallSize,
+      font: regular,
+      color: PDF_COLORS.muted
+    });
+    infoY -= 14;
+  }
+
+  // Advance y past the logo height, then draw divider
+  const afterHeader = Math.min(startY - 120, infoY - 20);
+  page.drawLine({
+    start: { x: leftMargin, y: afterHeader },
+    end: { x: rightMargin, y: afterHeader },
+    thickness: PDF_SPACING.dividerThickness,
+    color: PDF_COLORS.divider
+  });
+
+  return afterHeader - 21;
 }
 
 /**

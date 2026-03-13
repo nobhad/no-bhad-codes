@@ -14,14 +14,15 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import { InvoiceLineItem } from '../../services/invoice-service.js';
 import { getDatabase } from '../../database/init.js';
 import { getString } from '../../database/row-helpers.js';
-import { BUSINESS_INFO, getPdfLogoBytes } from '../../config/business.js';
+import { BUSINESS_INFO } from '../../config/business.js';
 import { ErrorCodes, errorResponse } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import {
   PdfPageContext,
   ensureSpace,
   addPageNumbers,
-  PAGE_MARGINS
+  PAGE_MARGINS,
+  drawPdfDocumentHeader
 } from '../../utils/pdf-utils.js';
 import { logger } from '../../services/logger.js';
 
@@ -119,76 +120,15 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   const rightMargin = ctx.rightMargin;
 
   // === HEADER ===
-  const logoHeight = 100;
-  const titleText = 'INVOICE';
-  page().drawText(titleText, {
-    x: leftMargin,
-    y: ctx.y - 20,
-    size: 28,
-    font: helveticaBold,
-    color: rgb(0.15, 0.15, 0.15)
+  ctx.y = await drawPdfDocumentHeader({
+    page: page(),
+    pdfDoc,
+    fonts: { regular: helvetica, bold: helveticaBold },
+    startY: ctx.y,
+    leftMargin,
+    rightMargin,
+    title: 'INVOICE'
   });
-
-  let textStartX = rightMargin - 180;
-  const logoBytes = getPdfLogoBytes();
-  if (logoBytes) {
-    const logoImage = await pdfDoc.embedPng(logoBytes);
-    const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
-    const logoX = rightMargin - logoWidth - 150;
-    page().drawImage(logoImage, {
-      x: logoX,
-      y: ctx.y - logoHeight + 10,
-      width: logoWidth,
-      height: logoHeight
-    });
-    textStartX = logoX + logoWidth + 18;
-  }
-
-  let infoY = ctx.y - 11;
-  page().drawText(BUSINESS_INFO.name, {
-    x: textStartX, y: infoY,
-    size: 15, font: helveticaBold, color: rgb(0.1, 0.1, 0.1)
-  });
-  infoY -= 18;
-  if (BUSINESS_INFO.owner) {
-    page().drawText(BUSINESS_INFO.owner, {
-      x: textStartX, y: infoY,
-      size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2)
-    });
-    infoY -= 16;
-  }
-  if (BUSINESS_INFO.tagline) {
-    page().drawText(BUSINESS_INFO.tagline, {
-      x: textStartX, y: infoY,
-      size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4)
-    });
-    infoY -= 14;
-  }
-  if (BUSINESS_INFO.email) {
-    page().drawText(BUSINESS_INFO.email, {
-      x: textStartX, y: infoY,
-      size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4)
-    });
-    infoY -= 14;
-  }
-  if (BUSINESS_INFO.website) {
-    page().drawText(BUSINESS_INFO.website, {
-      x: textStartX, y: infoY,
-      size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4)
-    });
-    infoY -= 14;
-  }
-
-  ctx.y = Math.min(ctx.y - 120, infoY - 20);
-
-  // Divider
-  page().drawLine({
-    start: { x: leftMargin, y: ctx.y },
-    end: { x: rightMargin, y: ctx.y },
-    thickness: 1,
-    color: rgb(0.7, 0.7, 0.7)
-  });
-  ctx.y -= 21;
 
   // === BILL TO & INVOICE DETAILS ===
   const detailsX = width / 2 + 36;

@@ -30,6 +30,7 @@ import {
   PAGE_MARGINS,
   ensureSpace,
   addPageNumbers,
+  drawPdfDocumentHeader,
   FEATURE_SELECTION_COLUMNS,
   PROPOSAL_SIGNATURE_COLUMNS
 } from './helpers.js';
@@ -226,95 +227,16 @@ router.get(
     const leftMargin = ctx.leftMargin;
     const rightMargin = ctx.rightMargin;
 
-    // === HEADER - Title on left, logo and business info on right ===
-    const logoHeight = PDF_SPACING.logoHeight;
-
-    // PROPOSAL title on left
-    const titleText = 'PROPOSAL';
-    page().drawText(titleText, {
-      x: leftMargin,
-      y: ctx.y - 20,
-      size: PDF_TYPOGRAPHY.titleSize,
-      font: helveticaBold,
-      color: PDF_COLORS.title
+    // === HEADER ===
+    ctx.y = await drawPdfDocumentHeader({
+      page: page(),
+      pdfDoc,
+      fonts: { regular: helvetica, bold: helveticaBold },
+      startY: ctx.y,
+      leftMargin,
+      rightMargin,
+      title: 'PROPOSAL'
     });
-
-    // Logo and business info on right (logo left of text, text left-aligned)
-    let textStartX = rightMargin - 180;
-    const logoBytes = getPdfLogoBytes();
-    if (logoBytes) {
-      const logoImage = await pdfDoc.embedPng(logoBytes);
-      const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
-      const logoX = rightMargin - logoWidth - 150;
-      page().drawImage(logoImage, {
-        x: logoX,
-        y: ctx.y - logoHeight + 10,
-        width: logoWidth,
-        height: logoHeight
-      });
-      textStartX = logoX + logoWidth + 18;
-    }
-
-    // Business info (left-aligned, to right of logo) - dynamic positioning to skip empty fields
-    let infoY = ctx.y - 11;
-    page().drawText(BUSINESS_INFO.name, {
-      x: textStartX,
-      y: infoY,
-      size: PDF_TYPOGRAPHY.businessNameSize,
-      font: helveticaBold,
-      color: PDF_COLORS.title
-    });
-    infoY -= 18;
-    if (BUSINESS_INFO.owner) {
-      page().drawText(BUSINESS_INFO.owner, {
-        x: textStartX,
-        y: infoY,
-        size: PDF_TYPOGRAPHY.bodySize,
-        font: helvetica,
-        color: PDF_COLORS.subtitle
-      });
-      infoY -= 16;
-    }
-    if (BUSINESS_INFO.tagline) {
-      page().drawText(BUSINESS_INFO.tagline, {
-        x: textStartX,
-        y: infoY,
-        size: PDF_TYPOGRAPHY.smallSize,
-        font: helvetica,
-        color: PDF_COLORS.muted
-      });
-      infoY -= 14;
-    }
-    if (BUSINESS_INFO.email) {
-      page().drawText(BUSINESS_INFO.email, {
-        x: textStartX,
-        y: infoY,
-        size: PDF_TYPOGRAPHY.smallSize,
-        font: helvetica,
-        color: PDF_COLORS.muted
-      });
-      infoY -= 14;
-    }
-    if (BUSINESS_INFO.website) {
-      page().drawText(BUSINESS_INFO.website, {
-        x: textStartX,
-        y: infoY,
-        size: PDF_TYPOGRAPHY.smallSize,
-        font: helvetica,
-        color: PDF_COLORS.muted
-      });
-      infoY -= 14;
-    }
-    ctx.y = Math.min(ctx.y - 120, infoY - 20); // Account for 100pt logo height
-
-    // Divider line
-    page().drawLine({
-      start: { x: leftMargin, y: ctx.y },
-      end: { x: rightMargin, y: ctx.y },
-      thickness: PDF_SPACING.dividerThickness,
-      color: PDF_COLORS.divider
-    });
-    ctx.y -= 21;
 
     // === PROPOSAL INFO - Two columns ===
     const rightCol = width / 2 + 36;

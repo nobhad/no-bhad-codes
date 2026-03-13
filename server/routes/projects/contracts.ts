@@ -15,7 +15,7 @@ import {
 } from '../../config/uploads.js';
 import { getString } from '../../database/row-helpers.js';
 import { getSchedulerService } from '../../services/scheduler-service.js';
-import { BUSINESS_INFO, getPdfLogoBytes, CONTRACT_TERMS } from '../../config/business.js';
+import { BUSINESS_INFO, CONTRACT_TERMS } from '../../config/business.js';
 import {
   getPdfCacheKey,
   getCachedPdf,
@@ -23,7 +23,8 @@ import {
   ensureSpace,
   drawWrappedText,
   addPageNumbers,
-  PAGE_MARGINS
+  PAGE_MARGINS,
+  drawPdfDocumentHeader
 } from '../../utils/pdf-utils.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
@@ -185,95 +186,16 @@ router.get(
 
     drawDraftWatermark(page);
 
-    // === HEADER - Title on left, logo and business info on right ===
-    const logoHeight = 100; // ~1.4 inch for prominent branding
-
-    // CONTRACT title on left: 28pt
-    const titleText = 'CONTRACT';
-    page.drawText(titleText, {
-      x: leftMargin,
-      y: y - 20,
-      size: 28,
-      font: helveticaBold,
-      color: rgb(0.15, 0.15, 0.15)
+    // === HEADER ===
+    y = await drawPdfDocumentHeader({
+      page,
+      pdfDoc,
+      fonts: { regular: helvetica, bold: helveticaBold },
+      startY: y,
+      leftMargin,
+      rightMargin,
+      title: 'CONTRACT'
     });
-
-    // Logo and business info on right (logo left of text, text left-aligned)
-    let textStartX = rightMargin - 180;
-    const logoBytes = getPdfLogoBytes();
-    if (logoBytes) {
-      const logoImage = await pdfDoc.embedPng(logoBytes);
-      const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
-      const logoX = rightMargin - logoWidth - 150;
-      page.drawImage(logoImage, {
-        x: logoX,
-        y: y - logoHeight + 10,
-        width: logoWidth,
-        height: logoHeight
-      });
-      textStartX = logoX + logoWidth + 18;
-    }
-
-    // Business info (left-aligned, to right of logo) - dynamic positioning to skip empty fields
-    let infoY = y - 11;
-    page.drawText(BUSINESS_INFO.name, {
-      x: textStartX,
-      y: infoY,
-      size: 15,
-      font: helveticaBold,
-      color: rgb(0.1, 0.1, 0.1)
-    });
-    infoY -= 18;
-    if (BUSINESS_INFO.owner) {
-      page.drawText(BUSINESS_INFO.owner, {
-        x: textStartX,
-        y: infoY,
-        size: 10,
-        font: helvetica,
-        color: rgb(0.2, 0.2, 0.2)
-      });
-      infoY -= 16;
-    }
-    if (BUSINESS_INFO.tagline) {
-      page.drawText(BUSINESS_INFO.tagline, {
-        x: textStartX,
-        y: infoY,
-        size: 9,
-        font: helvetica,
-        color: rgb(0.4, 0.4, 0.4)
-      });
-      infoY -= 14;
-    }
-    if (BUSINESS_INFO.email) {
-      page.drawText(BUSINESS_INFO.email, {
-        x: textStartX,
-        y: infoY,
-        size: 9,
-        font: helvetica,
-        color: rgb(0.4, 0.4, 0.4)
-      });
-      infoY -= 14;
-    }
-    if (BUSINESS_INFO.website) {
-      page.drawText(BUSINESS_INFO.website, {
-        x: textStartX,
-        y: infoY,
-        size: 9,
-        font: helvetica,
-        color: rgb(0.4, 0.4, 0.4)
-      });
-      infoY -= 14;
-    }
-    y = Math.min(y - 120, infoY - 20); // Account for 100pt logo height
-
-    // Divider line
-    page.drawLine({
-      start: { x: leftMargin, y: y },
-      end: { x: rightMargin, y: y },
-      thickness: 1,
-      color: rgb(0.7, 0.7, 0.7)
-    });
-    y -= 21;
 
     // === CONTRACT INFO - Two columns ===
     const rightCol = width / 2 + 36;
