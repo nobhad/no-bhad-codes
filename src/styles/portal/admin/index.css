@@ -78,6 +78,8 @@
    ADMIN PORTAL BASE STYLES
    ================================================ */
 
+@layer components {
+
 /* Page background - pitch black as base canvas */
 body[data-page="admin"] {
   background: var(--color-bg-primary);
@@ -1121,6 +1123,8 @@ body.modal-open .dashboard-content {
   border: var(--portal-border);
 }
 
+} /* end @layer components */
+
 /* Table transparency - using @layer utilities for proper cascade */
 @layer utilities {
   [data-page="admin"] .data-table-container,
@@ -1165,13 +1169,15 @@ body.modal-open .dashboard-content {
  * portal inputs, overriding the 24px in layer(components)/inline-edit.css.
  * This restores compact sizing for inline-edit fields.
  * ------------------------------------------------------- */
-.portal .inline-edit-wrapper input {
-  height: var(--inline-edit-compact-height);
-  min-height: 0;
-  padding: 0 var(--space-0-5);
-}
+@layer utilities {
+  .portal .inline-edit-wrapper input {
+    height: var(--inline-edit-compact-height);
+    min-height: 0;
+    padding: 0 var(--space-0-5);
+  }
 
-.portal .inline-edit-wrapper .inline-edit-input-compact--date {
-  padding-left: var(--space-3);
-  padding-right: 4px;
+  .portal .inline-edit-wrapper .inline-edit-input-compact--date {
+    padding-left: var(--space-3);
+    padding-right: var(--space-0-5);
+  }
 }

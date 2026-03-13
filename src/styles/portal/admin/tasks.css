@@ -7,6 +7,8 @@
  * Styles for project tasks and time tracking features.
  */
 
+@layer components {
+
 /* Global tasks tab content should fill available height */
 [data-page="admin"] #tab-tasks .kanban-board {
   min-height: calc(100vh - var(--tasks-kanban-board-offset));
@@ -15,6 +17,8 @@
 [data-page="admin"] #tab-tasks .kanban-column {
   min-height: calc(100vh - var(--tasks-kanban-column-offset));
 }
+
+} /* end @layer components */
 
 /* Global Tasks Kanban - ensure horizontal layout */
 @layer utilities {
@@ -45,6 +49,8 @@
     }
   }
 }
+
+@layer components {
 
 /* View toggle: use shared .view-toggle (see shared/view-toggle.css) */
 
@@ -256,3 +262,5 @@
 }
 
 /* Board view uses shared .kanban-* classes from portal-components.css */
+
+} /* end @layer components */

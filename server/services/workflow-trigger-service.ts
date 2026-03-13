@@ -73,6 +73,10 @@ export type EventType =
   | 'deliverable.submitted'
   | 'deliverable.approved'
   | 'deliverable.rejected'
+  // Content request events
+  | 'content_request.submitted'
+  | 'content_request.accepted'
+  | 'content_request.revision_needed'
   // Document request events
   | 'document_request.approved'
   | 'document_request.rejected'
