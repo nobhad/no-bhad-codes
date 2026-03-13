@@ -82,6 +82,8 @@ export const projectService = {
   createTemplate: templates.createTemplate,
   getTemplates: templates.getTemplates,
   getTemplate: templates.getTemplate,
+  updateTemplate: templates.updateTemplate,
+  deleteTemplate: templates.deleteTemplate,
   createProjectFromTemplate: templates.createProjectFromTemplate,
 
   // ── Health ────────────────────────────────────

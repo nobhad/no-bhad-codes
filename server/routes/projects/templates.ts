@@ -16,8 +16,11 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: Response) => {
-    const { projectType } = req.query;
-    const templates = await projectService.getTemplates(projectType as string | undefined);
+    const { projectType, includeInactive } = req.query;
+    const templates = await projectService.getTemplates(
+      projectType as string | undefined,
+      includeInactive === 'true'
+    );
     sendSuccess(res, { templates });
   })
 );
@@ -56,6 +59,48 @@ router.post(
 
     const template = await projectService.createTemplate(req.body);
     sendCreated(res, { template }, 'Template created successfully');
+  })
+);
+
+// Update template
+router.put(
+  '/templates/:templateId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: Response) => {
+    const templateId = parseInt(req.params.templateId, 10);
+    if (isNaN(templateId) || templateId <= 0) {
+      return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const existing = await projectService.getTemplate(templateId);
+    if (!existing) {
+      return errorResponse(res, 'Template not found', 404, ErrorCodes.TEMPLATE_NOT_FOUND);
+    }
+
+    const template = await projectService.updateTemplate(templateId, req.body);
+    sendSuccess(res, { template }, 'Template updated successfully');
+  })
+);
+
+// Delete template
+router.delete(
+  '/templates/:templateId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: Response) => {
+    const templateId = parseInt(req.params.templateId, 10);
+    if (isNaN(templateId) || templateId <= 0) {
+      return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const existing = await projectService.getTemplate(templateId);
+    if (!existing) {
+      return errorResponse(res, 'Template not found', 404, ErrorCodes.TEMPLATE_NOT_FOUND);
+    }
+
+    await projectService.deleteTemplate(templateId);
+    sendSuccess(res, null, 'Template deleted successfully');
   })
 );
 
