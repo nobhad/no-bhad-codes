@@ -9,6 +9,13 @@
  * Base admin portal overrides are inlined below all imports.
  */
 
+/* Explicit layer order — later layers win; unlayered CSS always beats all layers.
+ * tokens  → base design-system primitives (lowest)
+ * components → base component structure
+ * utilities  → functional overrides (higher than components)
+ * responsive → breakpoint-scoped overrides (highest among layers) */
+@layer tokens, components, utilities, responsive;
+
 /* Shared portal styles */
 @import "../shared/portal-layout.css";
 @import "../shared/portal-buttons.css";
