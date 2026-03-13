@@ -554,7 +554,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   background: transparent;
   border: none;
   border-bottom: var(--border-width) solid transparent;
-  margin-bottom: -1px;
+  margin-bottom: var(--space-neg-px);
   font-family: var(--portal-subtab-family);
   font-size: var(--portal-subtab-size);
   font-weight: var(--portal-subtab-weight);
@@ -1117,7 +1117,7 @@ html[data-theme="light"] .portal .funnel-value {
 .rounded { border-radius: 0; }
 
 /* Ring (focus outline) */
-.ring-2 { box-shadow: 0 0 0 2px var(--ring); }
+.ring-2 { box-shadow: 0 0 0 var(--focus-ring-width-thick) var(--ring); }
 .ring-white { --ring: var(--color-border-primary); }
 
 /* =====================================================

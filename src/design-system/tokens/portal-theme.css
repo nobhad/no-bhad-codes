@@ -144,6 +144,12 @@ body[data-page="client-portal"] {
   --focus-ring-offset: var(--space-0);
   /* Thin 1px ring — inherits element's own border visually, no thick glow */
   --focus-ring: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
+  /* Thick 2px outline-based focus ring — for interactive controls (buttons, inputs) */
+  --focus-ring-width-thick: 2px;
+  /* Standard outline-offset for focus indicators */
+  --focus-ring-offset-sm: 2px;
+  /* Inset outline-offset — draws focus ring inside element bounds (e.g. details cards) */
+  --focus-ring-offset-inset: -2px;
 
   /* ----------------------------------------
    * CARD & PANEL TOKENS
@@ -158,6 +164,8 @@ body[data-page="client-portal"] {
    * LAYOUT TOKENS
    * ---------------------------------------- */
   --portal-section-gap: var(--space-3); /* 24px */
+  --space-neg-px: -1px; /* Negative 1px — tab bottom-border overlap alignment */
+  --transform-scale-press: 0.95; /* Scale-down on button press (touch interaction) */
 
   /* ----------------------------------------
    * FIELD/LABEL SPACING
@@ -177,13 +185,14 @@ body[data-page="client-portal"] {
   --label-letter-spacing: var(--letter-spacing-label);
 
   /* ----------------------------------------
-   * SUBTAB FONT STYLING
+   * SUBTAB / TAB BUTTON FONT STYLING
+   * Used by portal-tabs.css and portal-layout.css tab buttons.
    * ---------------------------------------- */
-  --subtab-font-family: var(--font-family-mono);
-  --subtab-font-size: var(--font-size-base);
-  --subtab-font-weight: var(--font-weight-medium);
-  --subtab-text-transform: uppercase;
-  --subtab-letter-spacing: var(--letter-spacing-label);
+  --portal-subtab-family: var(--font-family-mono);
+  --portal-subtab-size: var(--font-size-base);
+  --portal-subtab-weight: var(--font-weight-medium);
+  --portal-subtab-transform: uppercase;
+  --portal-subtab-spacing: var(--letter-spacing-label);
 
   /* ----------------------------------------
    * DASHBOARD LAYOUT TOKENS
@@ -285,7 +294,8 @@ body[data-page="client-portal"] {
   /* ----------------------------------------
    * CONTROL HEIGHT TOKENS
    * ---------------------------------------- */
-  --min-height-textarea: 60px; /* Min height for multiline inputs and reply boxes */
+  --min-height-textarea: 60px;    /* Min height for multiline inputs and reply boxes */
+  --min-height-textarea-lg: 80px; /* Tall textareas in prompt dialogs and resizable forms */
 
   /* ----------------------------------------
    * COMPONENT TOKENS — PORTAL-SPECIFIC DIMENSIONS
@@ -343,6 +353,9 @@ body[data-page="client-portal"] {
 
   /* Group: Modal widths (portal additions) */
   --modal-width-xl: 1000px;
+  /* Modal viewport constraints */
+  --modal-max-height: 90vh;         /* Default max-height for portal modals */
+  --modal-edge-padding: 2rem;       /* Horizontal edge clearance for modal calc() values */
 
   /* Group: Files */
   --files-folder-panel-width: 220px;

@@ -411,7 +411,7 @@
 
 .portal .message-compose textarea {
   width: 100%;
-  min-height: 80px;
+  min-height: var(--min-height-textarea-lg);
   padding: var(--space-2);
   border: var(--portal-border);
   background: transparent;
