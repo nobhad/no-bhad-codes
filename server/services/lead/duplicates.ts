@@ -10,7 +10,7 @@ import {
   toLeadSummary,
   toDuplicateResult,
   type ProjectRow,
-  type DuplicateRow,
+  type DuplicateRow
 } from '../../database/entities/index.js';
 import type { DuplicateResult } from './types.js';
 import { LEAD_DUPLICATE_COLUMNS } from './types.js';

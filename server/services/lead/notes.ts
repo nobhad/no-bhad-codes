@@ -9,7 +9,7 @@ import { getDatabase } from '../../database/init.js';
 import { userService } from '../user-service.js';
 import {
   toLeadNote as toNote,
-  type LeadNoteRow as NoteRow,
+  type LeadNoteRow as NoteRow
 } from '../../database/entities/index.js';
 import type { LeadNote } from './types.js';
 

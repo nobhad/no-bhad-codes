@@ -10,13 +10,13 @@ import {
   toPipelineStage,
   toLeadSummary,
   type PipelineStageRow,
-  type ProjectRow,
+  type ProjectRow
 } from '../../database/entities/index.js';
 import type {
   SqlValue,
   PipelineStage,
   PipelineView,
-  PipelineStats,
+  PipelineStats
 } from './types.js';
 import { PIPELINE_STAGE_COLUMNS } from './types.js';
 

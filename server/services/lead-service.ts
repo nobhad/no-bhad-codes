@@ -19,7 +19,7 @@ import {
   toLeadSource,
   toLeadSummary,
   type LeadSourceRow,
-  type ProjectRow,
+  type ProjectRow
 } from '../database/entities/index.js';
 import * as scoring from './lead/scoring.js';
 import * as pipeline from './lead/pipeline.js';
@@ -46,7 +46,7 @@ export type {
   PipelineStats,
   FunnelData,
   SourceStats,
-  LeadAnalytics,
+  LeadAnalytics
 } from './lead/types.js';
 
 /**
@@ -175,7 +175,7 @@ export const leadService = {
       [stageId, ...projectIds]
     );
     return result.changes || 0;
-  },
+  }
 };
 
 export default leadService;

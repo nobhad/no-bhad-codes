@@ -9,14 +9,14 @@ import { getDatabase } from '../../database/init.js';
 import { userService } from '../user-service.js';
 import {
   toTimeEntry,
-  type TimeEntryRow,
+  type TimeEntryRow
 } from '../../database/entities/index.js';
 import type {
   SqlValue,
   TimeEntry,
   TimeEntryData,
   TimeStats,
-  TeamTimeReport,
+  TeamTimeReport
 } from './types.js';
 
 export async function logTime(projectId: number, data: TimeEntryData): Promise<TimeEntry> {

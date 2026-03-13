@@ -35,7 +35,7 @@ export type {
   TemplateData,
   ProjectHealth,
   BurndownData,
-  VelocityData,
+  VelocityData
 } from './project/types.js';
 
 /**
@@ -134,7 +134,7 @@ export const projectService = {
       'UPDATE projects SET archived_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
       [projectId]
     );
-  },
+  }
 };
 
 export default projectService;

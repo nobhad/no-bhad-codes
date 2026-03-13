@@ -21,12 +21,12 @@ import type {
   ReportSchedule,
   ReportScheduleRow,
   ReportDataResult,
-  ReportRun,
+  ReportRun
 } from './types.js';
 import {
   SAVED_REPORT_COLUMNS,
   REPORT_SCHEDULE_COLUMNS,
-  REPORT_RUN_COLUMNS,
+  REPORT_RUN_COLUMNS
 } from './types.js';
 
 // ============================================

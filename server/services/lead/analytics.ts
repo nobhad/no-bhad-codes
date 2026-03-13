@@ -10,7 +10,7 @@ import { getPipelineStages } from './pipeline.js';
 import type {
   LeadAnalytics,
   FunnelData,
-  SourceStats,
+  SourceStats
 } from './types.js';
 
 export async function getLeadAnalytics(): Promise<LeadAnalytics> {

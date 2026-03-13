@@ -9,12 +9,12 @@ import { getDatabase } from '../../database/init.js';
 import { userService } from '../user-service.js';
 import {
   toLeadTask as toTask,
-  type LeadTaskRow as TaskRow,
+  type LeadTaskRow as TaskRow
 } from '../../database/entities/index.js';
 import type {
   SqlValue,
   LeadTask,
-  TaskData,
+  TaskData
 } from './types.js';
 
 export async function createTask(projectId: number, data: TaskData): Promise<LeadTask> {

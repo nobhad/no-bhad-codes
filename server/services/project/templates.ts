@@ -8,12 +8,12 @@
 import { getDatabase } from '../../database/init.js';
 import {
   toProjectTemplate as toTemplate,
-  type TemplateRow,
+  type TemplateRow
 } from '../../database/entities/index.js';
 import type {
   SqlValue,
   ProjectTemplate,
-  TemplateData,
+  TemplateData
 } from './types.js';
 import { PROJECT_TEMPLATE_COLUMNS } from './types.js';
 
