@@ -9,13 +9,12 @@
  */
 
 import express from 'express';
-import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { invalidateCache } from '../../middleware/cache.js';
 import { messageService } from '../../services/message-service.js';
 import { ErrorCodes, errorResponse, sendSuccess, sendCreated } from '../../utils/api-response.js';
-import { MESSAGE_THREAD_COLUMNS, MESSAGE_COLUMNS, canAccessMessage, canAccessProject } from './helpers.js';
+import { canAccessMessage, canAccessProject } from './helpers.js';
 
 const router = express.Router();
 
@@ -940,29 +939,19 @@ router.post(
       return errorResponse(res, 'Message content is required', 400, ErrorCodes.MISSING_MESSAGE);
     }
 
-    const db = getDatabase();
-
     // Verify thread exists
-    const thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM active_message_threads WHERE id = ?`, [threadId]);
+    const thread = await messageService.getThreadById(threadId);
     if (!thread) {
       return errorResponse(res, 'Thread not found', 404, ErrorCodes.THREAD_NOT_FOUND);
     }
 
-    const result = await db.run(
-      `
-      INSERT INTO messages (
-        context_type, client_id, sender_type, sender_name, subject, message,
-        thread_id, is_internal
-      )
-      VALUES ('general', ?, 'admin', ?, ?, ?, ?, TRUE)
-      `,
-      [thread.client_id, req.user!.email, thread.subject, message.trim(), threadId]
+    const newMessage = await messageService.sendInternalMessage(
+      threadId,
+      thread.client_id as number | null,
+      req.user!.email,
+      thread.subject as string | null,
+      message.trim()
     );
-
-    // Process mentions in the internal message
-    await messageService.processMentions(result.lastID!, message.trim());
-
-    const newMessage = await db.get(`SELECT ${MESSAGE_COLUMNS} FROM active_messages WHERE id = ?`, [result.lastID]);
 
     sendCreated(res, { messageData: newMessage }, 'Internal message sent');
   })
@@ -998,14 +987,7 @@ router.get(
       return errorResponse(res, 'Invalid thread ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const db = getDatabase();
-
-    const messages = await db.all(
-      `SELECT ${MESSAGE_COLUMNS} FROM active_messages
-      WHERE thread_id = ? AND is_internal = TRUE AND context_type = 'general'
-      ORDER BY created_at ASC`,
-      [threadId]
-    );
+    const messages = await messageService.getInternalMessages(threadId);
 
     sendSuccess(res, { messages });
   })

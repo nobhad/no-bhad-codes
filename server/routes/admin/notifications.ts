@@ -11,8 +11,8 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
-import { getDatabase } from '../../database/init.js';
 import { authenticateToken, requireAdmin, type AuthenticatedRequest } from '../../middleware/auth.js';
+import { notificationService } from '../../services/notification-service.js';
 
 const router = express.Router();
 
@@ -29,14 +29,9 @@ router.get(
       return errorResponse(res, 'Invalid limit parameter', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const db = getDatabase();
-    const notifications = await db.all(
-      `SELECT id, type, title, message, is_read, created_at, data
-       FROM notification_history
-       WHERE user_id = ? AND user_type = 'admin'
-       ORDER BY created_at DESC
-       LIMIT ?`,
-      [req.user!.id, limit]
+    const notifications = await notificationService.getAdminNotificationHistory(
+      req.user!.id,
+      limit
     );
 
     sendSuccess(res, { notifications });
@@ -56,15 +51,12 @@ router.put(
       return errorResponse(res, 'Invalid notification ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const db = getDatabase();
-    const result = await db.run(
-      `UPDATE notification_history
-       SET is_read = 1, read_at = CURRENT_TIMESTAMP
-       WHERE id = ? AND user_id = ? AND user_type = 'admin'`,
-      [notificationId, req.user!.id]
+    const changes = await notificationService.markAdminNotificationRead(
+      notificationId,
+      req.user!.id
     );
 
-    if (result.changes === 0) {
+    if (changes === 0) {
       return errorResponse(res, 'Notification not found', 404, ErrorCodes.NOT_FOUND);
     }
 
@@ -80,14 +72,7 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const db = getDatabase();
-
-    await db.run(
-      `UPDATE notification_history
-       SET is_read = 1, read_at = CURRENT_TIMESTAMP
-       WHERE user_id = ? AND user_type = 'admin' AND is_read = 0`,
-      [req.user!.id]
-    );
+    await notificationService.markAllAdminNotificationsRead(req.user!.id);
 
     sendSuccess(res, undefined, 'All notifications marked as read');
   })

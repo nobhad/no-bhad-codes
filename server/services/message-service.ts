@@ -1166,6 +1166,325 @@ class MessageService {
       ORDER BY mt.archived_at DESC
     `);
   }
+  // =====================================================
+  // ANALYTICS & ADMIN QUERIES
+  // =====================================================
+
+  /**
+   * Get message analytics summary (thread counts, message counts, etc.)
+   */
+  async getMessageAnalytics(): Promise<Record<string, unknown> | null> {
+    const db = getDatabase();
+    const analytics = await db.get(`
+    SELECT
+      COUNT(DISTINCT mt.id) as total_threads,
+      COUNT(DISTINCT CASE WHEN mt.status = 'active' THEN mt.id END) as active_threads,
+      COUNT(m.id) as total_messages,
+      COUNT(CASE WHEN m.read_at IS NULL THEN m.id END) as unread_messages,
+      COUNT(CASE WHEN m.sender_type = 'client' THEN m.id END) as client_messages,
+      COUNT(CASE WHEN m.sender_type = 'admin' THEN m.id END) as admin_messages,
+      COUNT(CASE WHEN m.message_type = 'inquiry' THEN m.id END) as inquiries,
+      COUNT(CASE WHEN m.priority = 'urgent' THEN m.id END) as urgent_messages
+    FROM active_message_threads mt
+    LEFT JOIN active_messages m ON mt.id = m.thread_id AND m.context_type = 'general'
+    `);
+    return (analytics as Record<string, unknown>) ?? null;
+  }
+
+  /**
+   * Get recent message thread activity with client info
+   */
+  async getRecentMessageActivity(limit: number = 10): Promise<Record<string, unknown>[]> {
+    const db = getDatabase();
+    const activity = await db.all(`
+    SELECT
+      mt.subject,
+      mt.thread_type,
+      mt.priority,
+      mt.last_message_at,
+      mt.last_message_by,
+      c.company_name,
+      c.contact_name
+    FROM active_message_threads mt
+    JOIN active_clients c ON mt.client_id = c.id
+    ORDER BY mt.last_message_at DESC
+    LIMIT ?
+    `, [limit]);
+    return activity as Record<string, unknown>[];
+  }
+
+  /**
+   * Find a message by attachment filename, optionally scoped to a client.
+   * Returns the message row or null.
+   */
+  async findMessageByAttachmentFilename(
+    escapedFilename: string,
+    userType: 'admin' | 'client',
+    clientId?: number
+  ): Promise<Record<string, unknown> | null> {
+    const db = getDatabase();
+
+    const messageQuery = userType === 'admin'
+      ? 'SELECT m.id, m.attachments, m.thread_id FROM active_messages m WHERE m.attachments LIKE ? ESCAPE \'\\\''
+      : `SELECT m.id, m.attachments, m.thread_id FROM active_messages m
+         JOIN active_message_threads mt ON m.thread_id = mt.id
+         WHERE m.attachments LIKE ? ESCAPE '\\' AND mt.client_id = ?`;
+
+    const params = userType === 'admin'
+      ? [`%"filename":"${escapedFilename}"%`]
+      : [`%"filename":"${escapedFilename}"%`, clientId!];
+
+    const message = await db.get(messageQuery, params);
+    return (message as Record<string, unknown>) ?? null;
+  }
+
+  /**
+   * Verify thread exists and return it
+   */
+  async getThreadById(threadId: number): Promise<Record<string, unknown> | null> {
+    const db = getDatabase();
+    const MESSAGE_THREAD_COLUMNS = `
+      id, project_id, client_id, subject, thread_type, status, priority,
+      last_message_at, last_message_by, participant_count, created_at, updated_at,
+      pinned_count, archived_at, archived_by
+    `.replace(/\s+/g, ' ').trim();
+    const thread = await db.get(
+      `SELECT ${MESSAGE_THREAD_COLUMNS} FROM active_message_threads WHERE id = ?`,
+      [threadId]
+    );
+    return (thread as Record<string, unknown>) ?? null;
+  }
+
+  /**
+   * Send an internal message in a thread (admin only)
+   */
+  async sendInternalMessage(
+    threadId: number,
+    clientId: number | string | null,
+    senderEmail: string,
+    subject: string | null,
+    content: string
+  ): Promise<Record<string, unknown> | null> {
+    const db = getDatabase();
+    const MESSAGE_COLUMNS = `
+      id, project_id, client_id, thread_id, context_type, sender_type, sender_name,
+      subject, message, message_type, priority, read_at, attachments,
+      parent_message_id, is_internal, edited_at, deleted_at, deleted_by,
+      reaction_count, reply_count, created_at, updated_at
+    `.replace(/\s+/g, ' ').trim();
+
+    const result = await db.run(
+      `
+      INSERT INTO messages (
+        context_type, client_id, sender_type, sender_name, subject, message,
+        thread_id, is_internal
+      )
+      VALUES ('general', ?, 'admin', ?, ?, ?, ?, TRUE)
+      `,
+      [clientId, senderEmail, subject, content, threadId]
+    );
+
+    // Process mentions in the internal message
+    await this.processMentions(result.lastID!, content);
+
+    const newMessage = await db.get(
+      `SELECT ${MESSAGE_COLUMNS} FROM active_messages WHERE id = ?`,
+      [result.lastID]
+    );
+    return (newMessage as Record<string, unknown>) ?? null;
+  }
+
+  /**
+   * Get internal messages for a thread
+   */
+  async getInternalMessages(threadId: number): Promise<Record<string, unknown>[]> {
+    const db = getDatabase();
+    const MESSAGE_COLUMNS = `
+      id, project_id, client_id, thread_id, context_type, sender_type, sender_name,
+      subject, message, message_type, priority, read_at, attachments,
+      parent_message_id, is_internal, edited_at, deleted_at, deleted_by,
+      reaction_count, reply_count, created_at, updated_at
+    `.replace(/\s+/g, ' ').trim();
+
+    const messages = await db.all(
+      `SELECT ${MESSAGE_COLUMNS} FROM active_messages
+      WHERE thread_id = ? AND is_internal = TRUE AND context_type = 'general'
+      ORDER BY created_at ASC`,
+      [threadId]
+    );
+    return messages as Record<string, unknown>[];
+  }
+
+  /**
+   * Check if user can access a message (admin always yes, client checks ownership)
+   */
+  async canUserAccessMessage(userType: string, userId: number | undefined, messageId: number): Promise<boolean> {
+    if (userType === 'admin') return true;
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT 1
+       FROM active_messages m
+       JOIN active_message_threads mt ON m.thread_id = mt.id
+       WHERE m.id = ? AND mt.client_id = ?`,
+      [messageId, userId]
+    );
+    return !!row;
+  }
+
+  /**
+   * Check if user can access a project
+   */
+  async canUserAccessProject(userType: string, userId: number | undefined, projectId: number): Promise<boolean> {
+    if (userType === 'admin') return true;
+    const db = getDatabase();
+    const row = await db.get(
+      'SELECT 1 FROM active_projects WHERE id = ? AND client_id = ?',
+      [projectId, userId]
+    );
+    return !!row;
+  }
+
+  // =====================================================
+  // QUICK MESSAGE & NOTIFICATION PREFERENCES
+  // =====================================================
+
+  /**
+   * Create a quick inquiry thread and message
+   */
+  async createInquiryThread(params: {
+    clientId: number;
+    subject: string;
+    message: string;
+    senderType: string;
+    senderName: string;
+    messageType: string;
+    priority: string;
+    attachmentData: string | null;
+  }): Promise<number> {
+    const db = getDatabase();
+    const threadResult = await db.run(
+      `INSERT INTO message_threads (client_id, subject, thread_type, priority)
+       VALUES (?, ?, ?, ?)`,
+      [params.clientId, params.subject, 'general', params.priority]
+    );
+    const threadId = threadResult.lastID!;
+
+    await db.run(
+      `INSERT INTO messages (
+        context_type, client_id, sender_type, sender_name, subject, message,
+        message_type, priority, attachments, thread_id
+      )
+      VALUES ('general', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        params.clientId,
+        params.senderType,
+        params.senderName,
+        params.subject,
+        params.message,
+        params.messageType,
+        params.priority,
+        params.attachmentData,
+        threadId
+      ]
+    );
+
+    return threadId;
+  }
+
+  /**
+   * Get the sender display name for a client
+   */
+  async getClientSenderName(clientId: number): Promise<string> {
+    const db = getDatabase();
+    const sender = await db.get(
+      'SELECT contact_name, email FROM active_clients WHERE id = ?',
+      [clientId]
+    ) as { contact_name?: string; email?: string } | undefined;
+    return sender?.contact_name || sender?.email || 'Unknown';
+  }
+
+  /**
+   * Get notification preferences for a client, creating defaults if needed
+   */
+  async getNotificationPreferences(clientId: number): Promise<Record<string, unknown> | null> {
+    const db = getDatabase();
+    const NOTIFICATION_PREF_COLUMNS = `
+      id, client_id, email_enabled, sms_enabled, push_enabled,
+      new_message_notifications, project_updates_notifications,
+      invoice_notifications, marketing_notifications,
+      quiet_hours_start, quiet_hours_end, timezone, created_at, updated_at
+    `.replace(/\s+/g, ' ').trim();
+
+    let preferences = await db.get(
+      `SELECT ${NOTIFICATION_PREF_COLUMNS} FROM notification_preferences WHERE client_id = ?`,
+      [clientId]
+    );
+
+    if (!preferences) {
+      const result = await db.run(
+        'INSERT INTO notification_preferences (client_id) VALUES (?)',
+        [clientId]
+      );
+      preferences = await db.get(
+        `SELECT ${NOTIFICATION_PREF_COLUMNS} FROM notification_preferences WHERE id = ?`,
+        [result.lastID]
+      );
+    }
+
+    return (preferences as Record<string, unknown>) ?? null;
+  }
+
+  /**
+   * Update notification preferences for a client
+   */
+  async updateNotificationPreferences(
+    clientId: number,
+    updates: Record<string, unknown>
+  ): Promise<Record<string, unknown> | null> {
+    const db = getDatabase();
+    const NOTIFICATION_PREF_COLUMNS = `
+      id, client_id, email_enabled, sms_enabled, push_enabled,
+      new_message_notifications, project_updates_notifications,
+      invoice_notifications, marketing_notifications,
+      quiet_hours_start, quiet_hours_end, timezone, created_at, updated_at
+    `.replace(/\s+/g, ' ').trim();
+
+    const setClauses: string[] = [];
+    const values: (string | number | boolean | null)[] = [];
+    const allowedFields = [
+      'email_notifications',
+      'project_updates',
+      'new_messages',
+      'milestone_updates',
+      'invoice_notifications',
+      'marketing_emails',
+      'notification_frequency'
+    ];
+
+    for (const field of allowedFields) {
+      if (updates[field] !== undefined) {
+        setClauses.push(`${field} = ?`);
+        values.push(updates[field] as string | number | boolean | null);
+      }
+    }
+
+    if (setClauses.length === 0) return null;
+
+    values.push(clientId);
+
+    await db.run(
+      `UPDATE notification_preferences
+       SET ${setClauses.join(', ')}, updated_at = CURRENT_TIMESTAMP
+       WHERE client_id = ?`,
+      values
+    );
+
+    const updatedPreferences = await db.get(
+      `SELECT ${NOTIFICATION_PREF_COLUMNS} FROM notification_preferences WHERE client_id = ?`,
+      [clientId]
+    );
+    return (updatedPreferences as Record<string, unknown>) ?? null;
+  }
 }
 
 // Export singleton instance

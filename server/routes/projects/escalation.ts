@@ -1,5 +1,4 @@
 import express, { Response } from 'express';
-import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import {
@@ -7,6 +6,7 @@ import {
   previewEscalation,
   getEscalationSummary
 } from '../../services/priority-escalation-service.js';
+import { projectService } from '../../services/project-service.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
@@ -32,8 +32,7 @@ router.post(
     const preview = req.query.preview === 'true';
 
     // Verify project exists
-    const db = getDatabase();
-    const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
+    const project = await projectService.getProjectByIdAdmin(projectId);
     if (!project) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
@@ -72,8 +71,7 @@ router.get(
     }
 
     // Verify project exists
-    const db = getDatabase();
-    const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
+    const project = await projectService.getProjectByIdAdmin(projectId);
     if (!project) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }

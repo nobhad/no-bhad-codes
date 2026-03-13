@@ -8,7 +8,7 @@
  */
 
 import { getDatabase, Database } from '../database/init.js';
-import { getFloat, getFloatOrNull } from '../database/row-helpers.js';
+import { getFloat, getFloatOrNull, getString } from '../database/row-helpers.js';
 import { BUSINESS_INFO } from '../config/business.js';
 import { logger } from './logger.js';
 import { settingsService } from './settings-service.js';
@@ -37,6 +37,31 @@ import type {
   DepositSummary,
   InvoiceCreateData
 } from '../types/invoice-types.js';
+
+/** Minimal project reference returned by lookups in the invoice route layer */
+export interface ProjectRef {
+  id: number;
+  clientId: number;
+}
+
+/** Client contact details used for PDF generation and previews */
+export interface ClientContact {
+  contactName: string;
+  companyName: string | undefined;
+  email: string;
+  phone: string | undefined;
+}
+
+/** Project name reference for preview/PDF labeling */
+export interface ProjectNameRef {
+  projectName: string;
+}
+
+/** Client identity attached to an invoice (for email sending) */
+export interface InvoiceClientIdentity {
+  email: string;
+  displayName: string;
+}
 
 export type {
   InvoiceLineItem,
@@ -2126,6 +2151,75 @@ export class InvoiceService {
     monthlyRevenue: Array<{ month: string; revenue: number; count: number }>;
   }> {
     return this.reportingService.getComprehensiveStats(dateFrom, dateTo);
+  }
+
+  // ============================================
+  // ENTITY LOOKUP HELPERS (used by route layer)
+  // ============================================
+
+  /**
+   * Look up a non-deleted project by ID, returning its id and client_id.
+   * Returns undefined when the project does not exist or is soft-deleted.
+   */
+  async getProjectRef(projectId: number): Promise<ProjectRef | undefined> {
+    const db = getDatabase();
+    const row = await db.get<{ id: number; client_id: number }>(
+      'SELECT id, client_id FROM projects WHERE id = ? AND deleted_at IS NULL',
+      [projectId]
+    );
+    if (!row) return undefined;
+    return { id: row.id as number, clientId: row.client_id as number };
+  }
+
+  /**
+   * Look up client contact details by client ID.
+   * Returns undefined when the client does not exist.
+   */
+  async getClientContact(clientId: number): Promise<ClientContact | undefined> {
+    const db = getDatabase();
+    const row = await db.get(
+      'SELECT contact_name, company_name, email, phone FROM clients WHERE id = ?',
+      [clientId]
+    );
+    if (!row) return undefined;
+    return {
+      contactName: getString(row, 'contact_name'),
+      companyName: getString(row, 'company_name') || undefined,
+      email: getString(row, 'email'),
+      phone: getString(row, 'phone') || undefined
+    };
+  }
+
+  /**
+   * Look up a project name by project ID.
+   * Returns undefined when the project does not exist.
+   */
+  async getProjectName(projectId: number): Promise<ProjectNameRef | undefined> {
+    const db = getDatabase();
+    const row = await db.get<{ project_name: string }>(
+      'SELECT project_name FROM projects WHERE id = ?',
+      [projectId]
+    );
+    if (!row) return undefined;
+    return { projectName: getString(row, 'project_name') };
+  }
+
+  /**
+   * Look up the client identity (email + display name) tied to an invoice.
+   * Joins invoices -> users via client_id.
+   * Returns undefined when the invoice/user is not found.
+   */
+  async getInvoiceClientIdentity(invoiceId: number): Promise<InvoiceClientIdentity | undefined> {
+    const db = getDatabase();
+    const row = await db.get(
+      'SELECT u.email, u.display_name FROM invoices i JOIN users u ON i.client_id = u.id WHERE i.id = ?',
+      [invoiceId]
+    );
+    if (!row) return undefined;
+    return {
+      email: getString(row, 'email'),
+      displayName: getString(row, 'display_name')
+    };
   }
 }
 

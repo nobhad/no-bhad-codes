@@ -638,6 +638,189 @@ export class DeliverableService {
       created_at: row.created_at
     };
   }
+
+  // ===== CLIENT ACCESS =====
+
+  /**
+   * Get all deliverables for a client across all their projects
+   */
+  async getClientDeliverables(clientId: number): Promise<{
+    id: number;
+    title: string;
+    type: string;
+    status: string;
+    approval_status: string;
+    review_deadline: string | null;
+    round_number: number;
+    created_at: string;
+    project_name: string;
+  }[]> {
+    return this.getDb().all(
+      `SELECT d.id, d.title, d.type, d.status, d.approval_status,
+              d.review_deadline, d.round_number, d.created_at,
+              p.project_name
+       FROM deliverables d
+       JOIN projects p ON d.project_id = p.id
+       WHERE p.client_id = ? AND d.deleted_at IS NULL
+       ORDER BY d.created_at DESC`,
+      [clientId]
+    );
+  }
+
+  // ===== ADMIN LIST & UPDATE (route extraction) =====
+
+  /**
+   * List deliverables with project/client details for admin view.
+   * Supports optional projectId and status filters.
+   * Used by GET /api/admin/deliverables
+   */
+  async listAdminDeliverablesWithDetails(filters: {
+    projectId?: number;
+    status?: string;
+  }): Promise<{
+    deliverables: Record<string, unknown>[];
+    stats: {
+      total: number;
+      pending: number;
+      inProgress: number;
+      completed: number;
+      approved: number;
+    };
+  }> {
+    const db = this.getDb();
+    let query = `
+      SELECT
+        d.id,
+        d.project_id as projectId,
+        d.title,
+        d.description,
+        d.status,
+        d.due_date as dueDate,
+        d.completed_at as completedAt,
+        d.created_at as createdAt,
+        d.updated_at as updatedAt,
+        p.project_name as projectName,
+        c.company_name as clientName
+      FROM deliverables d
+      LEFT JOIN projects p ON d.project_id = p.id
+      LEFT JOIN clients c ON p.client_id = c.id
+      WHERE p.deleted_at IS NULL
+        AND d.deleted_at IS NULL
+    `;
+    const params: (string | number)[] = [];
+
+    if (filters.projectId) {
+      query += ' AND d.project_id = ?';
+      params.push(filters.projectId);
+    }
+    if (filters.status) {
+      query += ' AND d.status = ?';
+      params.push(filters.status);
+    }
+
+    query += ' ORDER BY d.due_date ASC, d.created_at DESC';
+
+    const deliverables = (await db.all(query, params)) as Record<
+      string,
+      unknown
+    >[];
+
+    const stats = {
+      total: deliverables.length,
+      pending: deliverables.filter((d) => d.status === 'pending').length,
+      inProgress: deliverables.filter((d) => d.status === 'in_progress').length,
+      completed: deliverables.filter((d) => d.status === 'completed').length,
+      approved: deliverables.filter((d) => d.status === 'approved').length
+    };
+
+    return { deliverables, stats };
+  }
+
+  /**
+   * Update a deliverable by ID with partial fields (admin route).
+   * Returns the updated deliverable with project/client details.
+   * Used by PUT /api/admin/deliverables/:id
+   */
+  async updateAdminDeliverable(
+    id: number,
+    fields: {
+      status?: string;
+      title?: string;
+      description?: string;
+      due_date?: string | null;
+    }
+  ): Promise<Record<string, unknown> | null> {
+    const db = this.getDb();
+    const updates: string[] = [];
+    const values: (string | number | null)[] = [];
+
+    if (fields.status !== undefined) {
+      updates.push('status = ?');
+      values.push(fields.status);
+    }
+    if (fields.title !== undefined) {
+      updates.push('title = ?');
+      values.push(fields.title);
+    }
+    if (fields.description !== undefined) {
+      updates.push('description = ?');
+      values.push(fields.description);
+    }
+    if (fields.due_date !== undefined) {
+      updates.push('due_date = ?');
+      values.push(fields.due_date);
+    }
+
+    if (updates.length === 0) return null;
+
+    updates.push('updated_at = CURRENT_TIMESTAMP');
+    values.push(id);
+
+    await db.run(
+      `UPDATE deliverables SET ${updates.join(', ')} WHERE id = ?`,
+      values
+    );
+
+    const updated = await db.get(
+      `
+      SELECT
+        d.id,
+        d.project_id as projectId,
+        d.title,
+        d.description,
+        d.status,
+        d.due_date as dueDate,
+        d.completed_at as completedAt,
+        d.created_at as createdAt,
+        d.updated_at as updatedAt,
+        p.project_name as projectName,
+        c.company_name as clientName
+      FROM deliverables d
+      LEFT JOIN projects p ON d.project_id = p.id
+      LEFT JOIN clients c ON p.client_id = c.id
+      WHERE d.id = ?
+    `,
+      [id]
+    );
+
+    return (updated as Record<string, unknown>) ?? null;
+  }
+
+  /**
+   * Check if a client can access a specific deliverable
+   */
+  async checkClientDeliverableAccess(
+    deliverableId: number,
+    clientId: number
+  ): Promise<boolean> {
+    const row = await this.getDb().get<{ project_id: number }>(
+      `SELECT d.project_id FROM deliverables d
+       JOIN projects p ON d.project_id = p.id
+       WHERE d.id = ? AND p.client_id = ? AND d.deleted_at IS NULL`,
+      [deliverableId, clientId]
+    );
+    return !!row;
+  }
 }
 
 // Export singleton instance
@@ -699,7 +882,17 @@ export const deliverableService = {
   getDeliverableReviews: (did: number) => getDeliverableService().getDeliverableReviews(did),
   setArchivedFileId: (did: number, fid: number) =>
     getDeliverableService().setArchivedFileId(did, fid),
-  getArchivedFileId: (did: number) => getDeliverableService().getArchivedFileId(did)
+  getArchivedFileId: (did: number) => getDeliverableService().getArchivedFileId(did),
+  getClientDeliverables: (clientId: number) =>
+    getDeliverableService().getClientDeliverables(clientId),
+  checkClientDeliverableAccess: (deliverableId: number, clientId: number) =>
+    getDeliverableService().checkClientDeliverableAccess(deliverableId, clientId),
+  listAdminDeliverablesWithDetails: (filters: { projectId?: number; status?: string }) =>
+    getDeliverableService().listAdminDeliverablesWithDetails(filters),
+  updateAdminDeliverable: (
+    id: number,
+    fields: { status?: string; title?: string; description?: string; due_date?: string | null }
+  ) => getDeliverableService().updateAdminDeliverable(id, fields)
 };
 
 export default deliverableService;

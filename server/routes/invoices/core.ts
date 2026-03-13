@@ -16,10 +16,9 @@ import {
   isUserAdmin
 } from '../../utils/access-control.js';
 import { InvoiceCreateData, InvoiceLineItem } from '../../services/invoice-service.js';
+import type { ClientContact } from '../../services/invoice-service.js';
 import type { InvoiceStatus } from '../../types/invoice-types.js';
 import { emailService } from '../../services/email-service.js';
-import { getDatabase } from '../../database/init.js';
-import { getString } from '../../database/row-helpers.js';
 import { generateInvoicePdf, InvoicePdfData } from './pdf.js';
 import { getPdfCacheKey, getCachedPdf, cachePdf } from '../../utils/pdf-utils.js';
 import { getInvoiceService, toSnakeCaseInvoice } from './helpers.js';
@@ -372,12 +371,8 @@ router.post(
     const invoiceData: InvoiceCreateData = req.body;
 
     // Verify project exists and check authorization
-    const db = getDatabase();
-    const project = await db.get(
-      'SELECT id, client_id FROM projects WHERE id = ? AND deleted_at IS NULL',
-      [invoiceData.projectId]
-    );
-    if (!project) {
+    const projectRef = await getInvoiceService().getProjectRef(invoiceData.projectId);
+    if (!projectRef) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
@@ -388,8 +383,7 @@ router.post(
 
     // For non-admins, verify clientId matches the project's actual client
     if (!(await isUserAdmin(req))) {
-      const projectClientId = (project as { client_id: number }).client_id;
-      if (projectClientId !== invoiceData.clientId) {
+      if (projectRef.clientId !== invoiceData.clientId) {
         return errorResponse(
           res,
           'Client ID must match the project owner',
@@ -456,20 +450,15 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { projectId, clientId, lineItems, notes, terms } = req.body;
 
-    const db = getDatabase();
-
     // Get client info
-    const client = await db.get(
-      'SELECT contact_name, company_name, email, phone FROM clients WHERE id = ?',
-      [clientId]
-    );
+    const clientContact = await getInvoiceService().getClientContact(clientId);
 
-    if (!client) {
+    if (!clientContact) {
       return errorResponse(res, 'Client not found', 404, ErrorCodes.CLIENT_NOT_FOUND);
     }
 
     // Get project info
-    const project = await db.get('SELECT project_name FROM projects WHERE id = ?', [projectId]);
+    const projectNameRef = await getInvoiceService().getProjectName(projectId);
 
     // Calculate totals
     const subtotal = lineItems.reduce(
@@ -493,17 +482,17 @@ router.post(
       invoiceNumber: previewNumber,
       issuedDate: formatDate(today),
       dueDate: formatDate(dueDate),
-      clientName: getString(client, 'contact_name') || 'Client',
-      clientCompany: getString(client, 'company_name') || undefined,
-      clientEmail: getString(client, 'email') || '',
-      clientPhone: getString(client, 'phone') || undefined,
+      clientName: clientContact.contactName || 'Client',
+      clientCompany: clientContact.companyName,
+      clientEmail: clientContact.email || '',
+      clientPhone: clientContact.phone,
       projectId: projectId,
       lineItems: lineItems.map((item: InvoiceLineItem) => ({
         description: item.description || '',
         quantity: item.quantity || 1,
         rate: item.rate || 0,
         amount: item.amount || 0,
-        details: project ? [`Project: ${getString(project, 'project_name')}`] : undefined
+        details: projectNameRef ? [`Project: ${projectNameRef.projectName}`] : undefined
       })),
       subtotal,
       total: subtotal,
@@ -760,11 +749,7 @@ router.get(
         return sendPdfResponse(res, cached, { filename, disposition, cacheStatus: 'HIT' });
       }
 
-      const db = getDatabase();
-      const clientRow = await db.get(
-        'SELECT contact_name, company_name, email, phone FROM clients WHERE id = ?',
-        [invoice.clientId]
-      );
+      const clientContact: ClientContact | undefined = await getInvoiceService().getClientContact(invoice.clientId);
 
       const lineItems: InvoicePdfData['lineItems'] = Array.isArray(invoice.lineItems)
         ? invoice.lineItems.map((item: InvoiceLineItem) => ({
@@ -798,10 +783,10 @@ router.get(
         issuedDate: formatDate(invoice.issuedDate || invoice.createdAt),
         dueDate: invoice.dueDate ? formatDate(invoice.dueDate) : undefined,
         clientName:
-          invoice.clientName || (clientRow ? getString(clientRow, 'contact_name') : '') || 'Client',
-        clientCompany: clientRow ? getString(clientRow, 'company_name') : undefined,
-        clientEmail: invoice.clientEmail || (clientRow ? getString(clientRow, 'email') : '') || '',
-        clientPhone: clientRow ? getString(clientRow, 'phone') : undefined,
+          invoice.clientName || (clientContact ? clientContact.contactName : '') || 'Client',
+        clientCompany: clientContact ? clientContact.companyName : undefined,
+        clientEmail: invoice.clientEmail || (clientContact ? clientContact.email : '') || '',
+        clientPhone: clientContact ? clientContact.phone : undefined,
         projectId: invoice.projectId,
         lineItems,
         subtotal: invoice.subtotal ?? invoice.amountTotal ?? 0,
@@ -907,26 +892,20 @@ router.post(
 
       // Send email notification to client
       try {
-        // Get client email from database
-        const db = getDatabase();
-        const clientRow = await db.get(
-          'SELECT u.email, u.display_name FROM invoices i JOIN users u ON i.client_id = u.id WHERE i.id = ?',
-          [invoiceId]
-        );
+        // Get client identity from service
+        const clientIdentity = await getInvoiceService().getInvoiceClientIdentity(invoiceId);
 
-        if (!clientRow) {
+        if (!clientIdentity) {
           throw new Error('Client not found');
         }
 
-        const clientEmail = getString(clientRow, 'email');
-        const clientName = getString(clientRow, 'display_name');
-        const client = { email: clientEmail, name: clientName };
+        const client = { email: clientIdentity.email, name: clientIdentity.displayName };
 
         const invoiceUrl = `${getPortalUrl()}?invoice=${invoiceId}`;
 
         // Send invoice email
         await emailService.sendEmail({
-          to: clientEmail,
+          to: client.email,
           subject: `Invoice #${invoice.invoiceNumber} from ${BUSINESS_INFO.name}`,
           text: `
             Hi ${client.name},

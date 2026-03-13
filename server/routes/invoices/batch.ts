@@ -12,8 +12,6 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
-import { getDatabase } from '../../database/init.js';
-import { getString } from '../../database/row-helpers.js';
 import { getInvoiceService, toSnakeCasePayment } from './helpers.js';
 import { generateInvoicePdf, InvoicePdfData } from './pdf.js';
 import { InvoiceLineItem } from '../../services/invoice-service.js';
@@ -85,7 +83,6 @@ router.post(
       );
     }
 
-    const db = getDatabase();
     const invoiceService = getInvoiceService();
 
     // Helper function to format date
@@ -127,11 +124,8 @@ router.post(
       try {
         const invoice = await invoiceService.getInvoiceById(invoiceId);
 
-        // Get client info
-        const client = await db.get(
-          'SELECT contact_name, company_name, email, client_type FROM clients WHERE id = ?',
-          [invoice.clientId]
-        );
+        // Get client info via service
+        const clientContact = await invoiceService.getClientContact(invoice.clientId);
 
         // Build line items
         const lineItems: InvoicePdfData['lineItems'] = Array.isArray(invoice.lineItems)
@@ -153,9 +147,9 @@ router.post(
           issuedDate: formatDate(invoice.issuedDate || invoice.createdAt),
           dueDate: 'Within 14 days',
           clientName:
-            invoice.clientName || (client ? getString(client, 'contact_name') : '') || 'Client',
-          clientCompany: client ? getString(client, 'company_name') : '',
-          clientEmail: invoice.clientEmail || (client ? getString(client, 'email') : '') || '',
+            invoice.clientName || clientContact?.contactName || 'Client',
+          clientCompany: clientContact?.companyName || '',
+          clientEmail: invoice.clientEmail || clientContact?.email || '',
           projectId: invoice.projectId,
           lineItems,
           subtotal: invoice.amountTotal || 0,

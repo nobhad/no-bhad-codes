@@ -9,12 +9,12 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import crypto from 'crypto';
-import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { emailService } from '../../services/email-service.js';
 import { rateLimit } from '../../middleware/security.js';
 import { auditLogger } from '../../services/audit-logger.js';
 import { logger } from '../../services/logger.js';
+import { userService } from '../../services/user-service.js';
 import {
   PASSWORD_CONFIG,
   JWT_CONFIG,
@@ -24,7 +24,6 @@ import {
 } from '../../utils/auth-constants.js';
 import { generateSecureToken } from '../../utils/token-utils.js';
 import { BUSINESS_INFO } from '../../config/business.js';
-import { getString, getNumber } from '../../database/row-helpers.js';
 import {
   sendSuccess,
   sendBadRequest,
@@ -40,15 +39,30 @@ const PasswordValidationSchemas = {
     email: [{ type: 'required' as const }, { type: 'email' as const }]
   },
   resetPassword: {
-    token: [{ type: 'required' as const }, { type: 'string' as const, minLength: 32, maxLength: 128 }],
-    password: [{ type: 'required' as const }, { type: 'string' as const, minLength: 12, maxLength: 128 }]
+    token: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 32, maxLength: 128 }
+    ],
+    password: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 12, maxLength: 128 }
+    ]
   },
   setPassword: {
-    token: [{ type: 'required' as const }, { type: 'string' as const, minLength: 32, maxLength: 128 }],
-    password: [{ type: 'required' as const }, { type: 'string' as const, minLength: 12, maxLength: 128 }]
+    token: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 32, maxLength: 128 }
+    ],
+    password: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 12, maxLength: 128 }
+    ]
   },
   verifyToken: {
-    token: [{ type: 'required' as const }, { type: 'string' as const, minLength: 32, maxLength: 256 }]
+    token: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 32, maxLength: 256 }
+    ]
   }
 };
 
@@ -119,13 +133,8 @@ router.post(
       return sendBadRequest(res, 'Invalid email format', ErrorCodes.INVALID_EMAIL);
     }
 
-    const db = getDatabase();
-
     // Find user by email
-    const client = await db.get(
-      'SELECT id, email, contact_name FROM clients WHERE email = ? AND status = "active"',
-      [email.toLowerCase()]
-    );
+    const client = await userService.findActiveClientForReset(email);
 
     // Always return success for security (don't reveal if email exists)
     if (client) {
@@ -135,31 +144,22 @@ router.post(
         const resetTokenExpiry = new Date(Date.now() + TIME_MS.HOUR); // 1 hour from now
 
         // Store reset token in database
-        await db.run(
-          `
-        UPDATE clients
-        SET reset_token = ?, reset_token_expiry = ?
-        WHERE id = ?
-      `,
-          [resetToken, resetTokenExpiry.toISOString(), getNumber(client, 'id')]
-        );
+        await userService.storeResetToken(client.id, resetToken, resetTokenExpiry);
 
         // Send reset email
-        const clientEmail = getString(client, 'email');
-        const clientContactName = getString(client, 'contact_name');
-        await emailService.sendPasswordResetEmail(clientEmail, {
-          name: clientContactName || 'Client',
+        await emailService.sendPasswordResetEmail(client.email, {
+          name: client.contactName || 'Client',
           resetToken
         });
 
         // Send admin notification
         await emailService.sendAdminNotification('Password Reset Request', {
           type: 'system-alert',
-          message: `Password reset requested for client: ${clientEmail}`,
+          message: `Password reset requested for client: ${client.email}`,
           details: {
-            clientId: getNumber(client, 'id'),
-            email: clientEmail,
-            name: clientContactName || 'Unknown'
+            clientId: client.id,
+            email: client.email,
+            name: client.contactName || 'Unknown'
           },
           timestamp: new Date()
         });
@@ -251,17 +251,8 @@ router.post(
       return sendBadRequest(res, passwordValidation.errors.join('. '), ErrorCodes.INVALID_PASSWORD);
     }
 
-    const db = getDatabase();
-
     // Find user by reset token
-    const client = await db.get(
-      `
-    SELECT id, email, contact_name, reset_token_expiry
-    FROM clients
-    WHERE reset_token = ? AND status = "active"
-  `,
-      [token]
-    );
+    const client = await userService.findClientByResetToken(token);
 
     if (!client) {
       return sendBadRequest(res, 'Invalid or expired reset token', ErrorCodes.INVALID_TOKEN);
@@ -269,8 +260,7 @@ router.post(
 
     // Check if token is expired
     const now = new Date();
-    const resetTokenExpiryStr = getString(client, 'reset_token_expiry');
-    const expiry = resetTokenExpiryStr ? new Date(resetTokenExpiryStr) : null;
+    const expiry = client.resetTokenExpiry ? new Date(client.resetTokenExpiry) : null;
 
     if (!expiry || now > expiry) {
       return sendBadRequest(res, 'Reset token has expired', ErrorCodes.TOKEN_EXPIRED);
@@ -280,19 +270,12 @@ router.post(
     const password_hash = await bcrypt.hash(password, PASSWORD_CONFIG.SALT_ROUNDS);
 
     // Update password and clear reset token
-    await db.run(
-      `
-    UPDATE clients
-    SET password_hash = ?, reset_token = NULL, reset_token_expiry = NULL
-    WHERE id = ?
-  `,
-      [password_hash, getNumber(client, 'id')]
-    );
+    await userService.updatePasswordAndClearResetToken(client.id, password_hash);
 
     // Send confirmation email
-    const clientId = getNumber(client, 'id');
-    const clientContactName = getString(client, 'contact_name');
-    const clientCompanyName = getString(client, 'company_name');
+    const clientId = client.id;
+    const clientContactName = client.contactName;
+    const clientCompanyName = client.companyName;
     try {
       await emailService.sendAdminNotification({
         subject: 'Password Reset Completed',
@@ -334,23 +317,14 @@ router.post(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { token } = req.body;
 
-    const db = getDatabase();
-    const client = await db.get(
-      `
-      SELECT id, email, contact_name, company_name, invitation_expires_at
-      FROM clients
-      WHERE invitation_token = ?
-    `,
-      [token]
-    );
+    const client = await userService.findClientByInvitationToken(token);
 
     if (!client) {
       return sendBadRequest(res, 'Invalid invitation token', ErrorCodes.INVALID_TOKEN);
     }
 
     // Check if token is expired
-    const invitationExpiresAtStr = getString(client, 'invitation_expires_at');
-    if (invitationExpiresAtStr && new Date(invitationExpiresAtStr) < new Date()) {
+    if (client.invitationExpiresAt && new Date(client.invitationExpiresAt) < new Date()) {
       return sendBadRequest(
         res,
         'Invitation has expired. Please contact support for a new invitation.',
@@ -362,9 +336,9 @@ router.post(
       value && value !== 'undefined' && value !== 'null' ? value : '';
 
     return sendSuccess(res, {
-      email: normalizeValue(getString(client, 'email')),
-      name: normalizeValue(getString(client, 'contact_name')),
-      company: normalizeValue(getString(client, 'company_name'))
+      email: normalizeValue(client.email),
+      name: normalizeValue(client.contactName),
+      company: normalizeValue(client.companyName)
     });
   })
 );
@@ -400,23 +374,14 @@ router.post(
       return sendBadRequest(res, passwordValidation.errors.join('. '), ErrorCodes.INVALID_PASSWORD);
     }
 
-    const db = getDatabase();
-    const client = await db.get(
-      `
-      SELECT id, email, invitation_expires_at
-      FROM clients
-      WHERE invitation_token = ?
-    `,
-      [token]
-    );
+    const client = await userService.findClientByInvitationToken(token);
 
     if (!client) {
       return sendBadRequest(res, 'Invalid invitation token', ErrorCodes.INVALID_TOKEN);
     }
 
     // Check if token is expired
-    const invitationExpiresAtStrForSet = getString(client, 'invitation_expires_at');
-    if (invitationExpiresAtStrForSet && new Date(invitationExpiresAtStrForSet) < new Date()) {
+    if (client.invitationExpiresAt && new Date(client.invitationExpiresAt) < new Date()) {
       return sendBadRequest(
         res,
         'Invitation has expired. Please contact support for a new invitation.',
@@ -427,25 +392,15 @@ router.post(
     // Hash the new password using centralized salt rounds
     const hashedPassword = await bcrypt.hash(password, PASSWORD_CONFIG.SALT_ROUNDS);
 
-    const clientId = getNumber(client, 'id');
-    const clientEmail = getString(client, 'email');
+    const clientId = client.id;
+    const clientEmail = client.email;
 
     // Update client with password and activate account
-    await db.run(
-      `
-      UPDATE clients
-      SET password_hash = ?, status = 'active', invitation_token = NULL, invitation_expires_at = NULL
-      WHERE id = ?
-    `,
-      [hashedPassword, clientId]
-    );
+    await userService.activateClientWithPassword(clientId, hashedPassword);
 
     // Get client name for personalization
-    const clientData = await db.get('SELECT contact_name, company_name FROM clients WHERE id = ?', [
-      clientId
-    ]);
-    const clientName =
-      getString(clientData, 'contact_name') || getString(clientData, 'company_name') || 'there';
+    const clientData = await userService.getClientNameById(clientId);
+    const clientName = clientData?.contactName || clientData?.companyName || 'there';
 
     // === ACCOUNT ACTIVATION WELCOME FLOW ===
     // 1. Send welcome email with billing CTA
@@ -468,15 +423,11 @@ router.post(
     // 2. Create welcome system message in portal inbox
     // Note: Uses unified messages table with context_type after migration 085
     try {
-      await db.run(
-        `INSERT INTO messages
-         (context_type, client_id, sender_type, sender_name, subject, message, message_type, priority, status)
-         VALUES ('general', ?, 'system', ?, ?, ?, 'system', 'normal', 'new')`,
-        [
-          clientId,
-          BUSINESS_INFO.name,
-          'Welcome to Your Client Portal!',
-          `Hi ${clientName},
+      await userService.createWelcomeMessage(
+        clientId,
+        BUSINESS_INFO.name,
+        'Welcome to Your Client Portal!',
+        `Hi ${clientName},
 
 Welcome to your ${BUSINESS_INFO.name} client portal! Your account is now active.
 
@@ -495,7 +446,6 @@ If you have any questions, feel free to send us a message through this portal.
 
 Best regards,
 ${BUSINESS_INFO.name} Team`
-        ]
       );
       await logger.info(`[Auth] Created welcome message for client ${clientId}`, {
         category: 'AUTH'
@@ -512,12 +462,10 @@ ${BUSINESS_INFO.name} Team`
     try {
       const verificationToken = generateSecureToken();
       const verificationSentAt = new Date();
-      await db.run(
-        `UPDATE clients
-         SET email_verification_token = ?,
-             email_verification_sent_at = ?
-         WHERE id = ?`,
-        [verificationToken, verificationSentAt.toISOString(), clientId]
+      await userService.storeEmailVerificationToken(
+        clientId,
+        verificationToken,
+        verificationSentAt
       );
       await emailService.sendEmailVerificationEmail(clientEmail, {
         verificationToken,
@@ -576,7 +524,11 @@ ${BUSINESS_INFO.name} Team`
       category: 'AUTH'
     });
 
-    return sendSuccess(res, { email: clientEmail, token: authToken }, 'Password set successfully.');
+    return sendSuccess(
+      res,
+      { email: clientEmail, token: authToken },
+      'Password set successfully.'
+    );
   })
 );
 

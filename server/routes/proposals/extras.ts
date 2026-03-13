@@ -14,7 +14,6 @@ import {
   authenticateToken,
   requireAdmin,
   canAccessProposal,
-  getDatabase,
   proposalService,
   signatureRateLimiter,
   ErrorCodes,
@@ -717,37 +716,13 @@ router.get(
   '/my',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const db = getDatabase();
     const clientId = req.user?.id;
 
     if (!clientId || req.user?.type === 'admin') {
       return sendSuccess(res, { proposals: [] });
     }
 
-    const proposals = await db.all(`
-      SELECT
-        pr.id,
-        COALESCE(p.project_name, 'Proposal #' || pr.id) as title,
-        CASE pr.status
-          WHEN 'reviewed'  THEN 'sent'
-          WHEN 'accepted'  THEN 'accepted'
-          WHEN 'rejected'  THEN 'declined'
-          WHEN 'converted' THEN 'accepted'
-          ELSE pr.status
-        END as status,
-        pr.final_price as amount,
-        pr.project_type as projectType,
-        pr.selected_tier as selectedTier,
-        pr.reviewed_at as sentAt,
-        NULL as validUntil,
-        pr.created_at as createdAt
-      FROM proposal_requests pr
-      LEFT JOIN projects p ON pr.project_id = p.id
-      WHERE pr.client_id = ?
-        AND pr.deleted_at IS NULL
-        AND pr.status != 'pending'
-      ORDER BY pr.created_at DESC
-    `, [clientId]);
+    const proposals = await proposalService.getClientProposalsList(clientId);
 
     sendSuccess(res, { proposals });
   })

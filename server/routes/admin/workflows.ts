@@ -5,7 +5,7 @@ import { getSchedulerService } from '../../services/scheduler-service.js';
 import { backfillMilestones } from '../../services/milestone-generator.js';
 import { backfillMilestoneTasks } from '../../services/task-generator.js';
 import { logger } from '../../services/logger.js';
-import { getDatabase } from '../../database/init.js';
+import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { sendSuccess, errorResponse, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
@@ -19,42 +19,8 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
-    const db = getDatabase();
-
-    // Get workflow triggers as "workflows"
-    const triggers = await db.all(`
-      SELECT
-        wt.id,
-        wt.name,
-        wt.description,
-        wt.event_type as trigger,
-        CASE WHEN wt.is_active = 1 THEN 'active' ELSE 'inactive' END as status,
-        (SELECT MAX(created_at) FROM workflow_trigger_logs WHERE trigger_id = wt.id) as lastRun,
-        (SELECT COUNT(*) FROM workflow_trigger_logs WHERE trigger_id = wt.id) as runCount,
-        COALESCE(
-          (SELECT ROUND(100.0 * SUM(CASE WHEN action_result = 'success' THEN 1 ELSE 0 END) / COUNT(*))
-           FROM workflow_trigger_logs WHERE trigger_id = wt.id),
-          100
-        ) as successRate,
-        1 as steps,
-        wt.created_at as createdAt,
-        wt.updated_at as updatedAt
-      FROM workflow_triggers wt
-      ORDER BY wt.created_at DESC
-    `);
-
-    // Calculate stats
-    const stats = {
-      total: triggers.length,
-      active: triggers.filter((t: { status: string }) => t.status === 'active').length,
-      inactive: triggers.filter((t: { status: string }) => t.status === 'inactive').length,
-      totalRuns: triggers.reduce((sum: number, t: { runCount: number }) => sum + (t.runCount || 0), 0),
-      avgSuccessRate: triggers.length > 0
-        ? Math.round(triggers.reduce((sum: number, t: { successRate: number }) => sum + (t.successRate || 0), 0) / triggers.length)
-        : 0
-    };
-
-    sendSuccess(res, { workflows: triggers, stats });
+    const { workflows, stats } = await workflowTriggerService.getAdminWorkflowListing();
+    sendSuccess(res, { workflows, stats });
   })
 );
 
@@ -72,19 +38,7 @@ router.post(
       return errorResponse(res, 'workflowIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
-    const db = getDatabase();
-    let deleted = 0;
-
-    for (const workflowId of workflowIds) {
-      const id = typeof workflowId === 'string' ? parseInt(workflowId, 10) : workflowId;
-      if (isNaN(id) || id <= 0) continue;
-
-      const result = await db.run('DELETE FROM workflow_triggers WHERE id = ?', [id]);
-      if (result.changes && result.changes > 0) {
-        deleted++;
-      }
-    }
-
+    const deleted = await workflowTriggerService.bulkDeleteTriggers(workflowIds);
     sendSuccess(res, { deleted });
   })
 );
@@ -107,23 +61,7 @@ router.post(
       return errorResponse(res, 'status must be "active" or "inactive"', 400, ErrorCodes.INVALID_STATUS);
     }
 
-    const db = getDatabase();
-    const isActive = status === 'active' ? 1 : 0;
-    let updated = 0;
-
-    for (const workflowId of workflowIds) {
-      const id = typeof workflowId === 'string' ? parseInt(workflowId, 10) : workflowId;
-      if (isNaN(id) || id <= 0) continue;
-
-      const result = await db.run(
-        'UPDATE workflow_triggers SET is_active = ?, updated_at = datetime(\'now\') WHERE id = ?',
-        [isActive, id]
-      );
-      if (result.changes && result.changes > 0) {
-        updated++;
-      }
-    }
-
+    const updated = await workflowTriggerService.bulkUpdateTriggerStatus(workflowIds, status);
     sendSuccess(res, { updated });
   })
 );

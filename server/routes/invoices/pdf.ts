@@ -12,8 +12,6 @@ import { PDFDocument as PDFLibDocument, StandardFonts, rgb } from 'pdf-lib';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { InvoiceLineItem } from '../../services/invoice-service.js';
-import { getDatabase } from '../../database/init.js';
-import { getString } from '../../database/row-helpers.js';
 import { BUSINESS_INFO } from '../../config/business.js';
 import { ErrorCodes, errorResponse } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
@@ -25,6 +23,7 @@ import {
   drawPdfDocumentHeader
 } from '../../utils/pdf-utils.js';
 import { logger } from '../../services/logger.js';
+import { getInvoiceService } from './helpers.js';
 
 const router = express.Router();
 
@@ -609,18 +608,15 @@ router.post(
       return errorResponse(res, 'Missing required fields', 400, ErrorCodes.MISSING_FIELDS);
     }
 
-    const db = getDatabase();
+    const invoiceService = getInvoiceService();
 
-    const client = await db.get(
-      'SELECT contact_name, company_name, email, phone FROM clients WHERE id = ?',
-      [clientId]
-    );
+    const clientContact = await invoiceService.getClientContact(clientId);
 
-    if (!client) {
+    if (!clientContact) {
       return errorResponse(res, 'Client not found', 404, ErrorCodes.CLIENT_NOT_FOUND);
     }
 
-    const project = await db.get('SELECT project_name FROM projects WHERE id = ?', [projectId]);
+    const projectNameRef = await invoiceService.getProjectName(projectId);
 
     const subtotal = lineItems.reduce(
       (sum: number, item: InvoiceLineItem) => sum + (item.amount || 0),
@@ -641,17 +637,17 @@ router.post(
       invoiceNumber: previewNumber,
       issuedDate: formatDate(today),
       dueDate: formatDate(dueDate),
-      clientName: getString(client, 'contact_name') || 'Client',
-      clientCompany: getString(client, 'company_name') || undefined,
-      clientEmail: getString(client, 'email') || '',
-      clientPhone: getString(client, 'phone') || undefined,
+      clientName: clientContact.contactName || 'Client',
+      clientCompany: clientContact.companyName || undefined,
+      clientEmail: clientContact.email || '',
+      clientPhone: clientContact.phone || undefined,
       projectId: projectId,
       lineItems: lineItems.map((item: InvoiceLineItem) => ({
         description: item.description || '',
         quantity: item.quantity || 1,
         rate: item.rate || 0,
         amount: item.amount || 0,
-        details: project ? [`Project: ${getString(project, 'project_name')}`] : undefined
+        details: projectNameRef ? [`Project: ${projectNameRef.projectName}`] : undefined
       })),
       subtotal,
       total: subtotal,

@@ -8,7 +8,6 @@
 
 import { Router, Request, Response } from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
-import { getDatabase } from '../../database/init.js';
 import {
   checkForDuplicates,
   mergeDuplicates,
@@ -16,8 +15,8 @@ import {
   MergeRequest
 } from '../../services/duplicate-detection-service.js';
 import { userService } from '../../services/user-service.js';
+import { dataQualityService } from '../../services/data-quality-service.js';
 import { errorResponseWithPayload, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
-import { DUPLICATE_DETECTION_LOG_COLUMNS, DUPLICATE_RESOLUTION_LOG_COLUMNS } from './shared.js';
 
 const router = Router();
 
@@ -227,23 +226,18 @@ router.post('/duplicates/merge', asyncHandler(async (req: Request, res: Response
 router.post('/duplicates/dismiss', asyncHandler(async (req: Request, res: Response) => {
   const { primaryId, primaryType, dismissedId, dismissedType, adminEmail, notes } = req.body;
 
-  const db = getDatabase();
   const resolvedBy = adminEmail || 'admin';
   // Look up user ID for resolved_by during transition period
   const resolvedByUserId = await userService.getUserIdByEmail(resolvedBy);
-  await db.run(
-    `INSERT INTO duplicate_resolution_log (primary_record_id, primary_record_type, merged_record_id, merged_record_type, resolution_type, resolved_by, resolved_by_user_id, notes)
-     VALUES (?, ?, ?, ?, 'mark_not_duplicate', ?, ?, ?)`,
-    [
-      primaryId,
-      primaryType,
-      dismissedId,
-      dismissedType,
-      resolvedBy,
-      resolvedByUserId,
-      notes || null
-    ]
-  );
+  await dataQualityService.dismissDuplicate({
+    primaryId,
+    primaryType,
+    dismissedId,
+    dismissedType,
+    resolvedBy,
+    resolvedByUserId,
+    notes: notes || null
+  });
 
   sendSuccess(res, undefined, 'Duplicate dismissed successfully');
 }));
@@ -263,12 +257,7 @@ router.post('/duplicates/dismiss', asyncHandler(async (req: Request, res: Respon
  *         description: Detection and resolution logs
  */
 router.get('/duplicates/history', asyncHandler(async (_req: Request, res: Response) => {
-  const db = getDatabase();
-
-  const [detectionLogs, resolutionLogs] = await Promise.all([
-    db.all(`SELECT ${DUPLICATE_DETECTION_LOG_COLUMNS} FROM duplicate_detection_log ORDER BY created_at DESC LIMIT 100`),
-    db.all(`SELECT ${DUPLICATE_RESOLUTION_LOG_COLUMNS} FROM duplicate_resolution_log ORDER BY created_at DESC LIMIT 100`)
-  ]);
+  const { detectionLogs, resolutionLogs } = await dataQualityService.getDuplicateHistory();
 
   sendSuccess(res, {
     detectionLogs,

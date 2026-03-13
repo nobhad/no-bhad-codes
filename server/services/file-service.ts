@@ -1459,6 +1459,170 @@ class FileService {
     }
     return file;
   }
+
+  // ============================================
+  // PROJECT FILE LIST & UPLOAD (route extraction)
+  // ============================================
+
+  /**
+   * Get all active (non-deleted) files for a project, ordered by newest first.
+   * Used by GET /api/projects/:id/files
+   */
+  async getProjectFilesList(projectId: number): Promise<
+    {
+      id: number;
+      filename: string;
+      original_filename: string;
+      file_size: number;
+      mime_type: string;
+      file_type: string | null;
+      file_path: string;
+      description: string | null;
+      uploaded_by: string;
+      created_at: string;
+    }[]
+  > {
+    const db = getDatabase();
+    const rows = await db.all(
+      `SELECT id, filename, original_filename, file_size, mime_type, file_type,
+              file_path, description, uploaded_by, created_at
+       FROM files
+       WHERE project_id = ? AND deleted_at IS NULL
+       ORDER BY created_at DESC`,
+      [projectId]
+    );
+    return rows as {
+      id: number;
+      filename: string;
+      original_filename: string;
+      file_size: number;
+      mime_type: string;
+      file_type: string | null;
+      file_path: string;
+      description: string | null;
+      uploaded_by: string;
+      created_at: string;
+    }[];
+  }
+
+  /**
+   * Insert a single uploaded file record for a project.
+   * Returns the new row ID.
+   * Used by POST /api/projects/:id/files
+   */
+  async insertProjectFile(params: {
+    projectId: number;
+    filename: string;
+    originalFilename: string;
+    filePath: string;
+    fileSize: number;
+    mimeType: string;
+    uploadedBy: string;
+    description: string | null;
+  }): Promise<number> {
+    const db = getDatabase();
+    const result = await db.run(
+      `INSERT INTO files (project_id, filename, original_filename, file_path, file_size, mime_type, uploaded_by, description)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        params.projectId,
+        params.filename,
+        params.originalFilename,
+        params.filePath,
+        params.fileSize,
+        params.mimeType,
+        params.uploadedBy,
+        params.description
+      ]
+    );
+    return result.lastID!;
+  }
+
+  // ============================================
+  // ADMIN FILE LIST & LOOKUP (route extraction)
+  // ============================================
+
+  /**
+   * List all files with project/client details for admin view.
+   * Supports optional projectId and file type filters.
+   * Used by GET /api/admin/files
+   */
+  async listAdminFilesWithDetails(filters: {
+    projectId?: number;
+    type?: string;
+  }): Promise<{
+    files: Record<string, unknown>[];
+    stats: { total: number; totalSize: number };
+  }> {
+    const db = getDatabase();
+    let query = `
+      SELECT
+        f.id,
+        f.filename,
+        f.original_filename as originalFilename,
+        f.file_path as filePath,
+        f.file_size as fileSize,
+        f.mime_type as mimeType,
+        f.file_type as fileType,
+        f.description,
+        f.uploaded_by as uploadedBy,
+        f.project_id as projectId,
+        f.created_at as createdAt,
+        f.shared_with_client as sharedWithClient,
+        f.shared_at as sharedAt,
+        f.shared_by as sharedBy,
+        p.project_name as projectName,
+        p.client_id as clientId,
+        c.company_name as clientName
+      FROM files f
+      LEFT JOIN projects p ON f.project_id = p.id
+      LEFT JOIN clients c ON p.client_id = c.id
+      WHERE f.deleted_at IS NULL
+    `;
+    const params: (string | number)[] = [];
+
+    if (filters.projectId) {
+      query += ' AND f.project_id = ?';
+      params.push(filters.projectId);
+    }
+    if (filters.type) {
+      query += ' AND f.file_type = ?';
+      params.push(filters.type);
+    }
+
+    query += ' ORDER BY f.created_at DESC';
+
+    const files = (await db.all(query, params)) as Record<string, unknown>[];
+
+    const stats = {
+      total: files.length,
+      totalSize: files.reduce(
+        (sum: number, f) => sum + ((f.fileSize as number) || 0),
+        0
+      )
+    };
+
+    return { files, stats };
+  }
+
+  /**
+   * Check if a non-deleted file exists by ID (admin deletion pre-check).
+   * Used by DELETE /api/admin/files/:fileId
+   */
+  async adminFileExists(fileId: number): Promise<boolean> {
+    const db = getDatabase();
+    const adminFileCols = `
+      id, project_id, filename, original_filename, file_path, file_size, mime_type,
+      file_type, description, uploaded_by, created_at, folder_id, category
+    `
+      .replace(/\s+/g, ' ')
+      .trim();
+    const file = await db.get(
+      `SELECT ${adminFileCols} FROM files WHERE id = ? AND deleted_at IS NULL`,
+      [fileId]
+    );
+    return Boolean(file);
+  }
 }
 
 // Export singleton instance

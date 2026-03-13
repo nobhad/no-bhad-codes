@@ -8,14 +8,14 @@
  */
 
 import express from 'express';
-import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { emailService } from '../../services/email-service.js';
+import { messageService } from '../../services/message-service.js';
 import { cache, invalidateCache } from '../../middleware/cache.js';
 import { ErrorCodes, errorResponse, sendSuccess, sendCreated } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
-import { NOTIFICATION_PREF_COLUMNS, upload } from './helpers.js';
+import { upload } from './helpers.js';
 
 const router = express.Router();
 
@@ -49,19 +49,6 @@ router.post(
       return errorResponse(res, 'Subject and message are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
-    const db = getDatabase();
-
-    // Create thread first
-    const threadResult = await db.run(
-      `
-    INSERT INTO message_threads (client_id, subject, thread_type, priority)
-    VALUES (?, ?, ?, ?)
-  `,
-      [req.user!.id, subject.trim(), 'general', priority]
-    );
-
-    const threadId = threadResult.lastID;
-
     // Process attachments
     let attachmentData = null;
     if (attachments && attachments.length > 0) {
@@ -77,33 +64,19 @@ router.post(
     }
 
     // Get the actual sender name from the clients table
-    const inquirySender = await db.get('SELECT contact_name, email FROM active_clients WHERE id = ?', [
-      req.user!.id
-    ]);
-    const inquirySenderName =
-      inquirySender?.contact_name || inquirySender?.email || req.user!.email;
+    const inquirySenderName = await messageService.getClientSenderName(req.user!.id);
 
-    // Send message
-    await db.run(
-      `
-    INSERT INTO messages (
-      context_type, client_id, sender_type, sender_name, subject, message,
-      message_type, priority, attachments, thread_id
-    )
-    VALUES ('general', ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `,
-      [
-        req.user!.id,
-        req.user!.type,
-        inquirySenderName,
-        subject.trim(),
-        message.trim(),
-        message_type,
-        priority,
-        attachmentData,
-        threadId
-      ]
-    );
+    // Create thread and send message
+    const threadId = await messageService.createInquiryThread({
+      clientId: req.user!.id,
+      subject: subject.trim(),
+      message: message.trim(),
+      senderType: req.user!.type,
+      senderName: inquirySenderName || req.user!.email,
+      messageType: message_type,
+      priority,
+      attachmentData
+    });
 
     // Send admin notification
     try {
@@ -153,23 +126,7 @@ router.get(
   authenticateToken,
   cache({ ttl: 300, tags: ['preferences'] }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const db = getDatabase();
-
-    let preferences = await db.get(`SELECT ${NOTIFICATION_PREF_COLUMNS} FROM notification_preferences WHERE client_id = ?`, [
-      req.user!.id
-    ]);
-
-    if (!preferences) {
-      // Create default preferences
-      const result = await db.run(
-        'INSERT INTO notification_preferences (client_id) VALUES (?)',
-        [req.user!.id]
-      );
-
-      preferences = await db.get(`SELECT ${NOTIFICATION_PREF_COLUMNS} FROM notification_preferences WHERE id = ?`, [
-        result.lastID
-      ]);
-    }
+    const preferences = await messageService.getNotificationPreferences(req.user!.id);
 
     sendSuccess(res, { preferences });
   })
@@ -193,46 +150,14 @@ router.put(
   authenticateToken,
   invalidateCache(['preferences']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const db = getDatabase();
+    const updatedPreferences = await messageService.updateNotificationPreferences(
+      req.user!.id,
+      req.body
+    );
 
-    const updates: string[] = [];
-    const values: (string | number | boolean | null)[] = [];
-    const allowedFields = [
-      'email_notifications',
-      'project_updates',
-      'new_messages',
-      'milestone_updates',
-      'invoice_notifications',
-      'marketing_emails',
-      'notification_frequency'
-    ];
-
-    for (const field of allowedFields) {
-      if (req.body[field] !== undefined) {
-        updates.push(`${field} = ?`);
-        values.push(req.body[field]);
-      }
-    }
-
-    if (updates.length === 0) {
+    if (!updatedPreferences) {
       return errorResponse(res, 'No valid fields to update', 400, ErrorCodes.NO_UPDATES);
     }
-
-    values.push(req.user!.id);
-
-    await db.run(
-      `
-    UPDATE notification_preferences
-    SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP
-    WHERE client_id = ?
-  `,
-      values
-    );
-
-    const updatedPreferences = await db.get(
-      `SELECT ${NOTIFICATION_PREF_COLUMNS} FROM notification_preferences WHERE client_id = ?`,
-      [req.user!.id]
-    );
 
     sendSuccess(
       res,

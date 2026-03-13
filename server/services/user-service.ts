@@ -66,6 +66,37 @@ export interface ClientMagicTokenRow {
   magicLinkExpiresAt: string;
 }
 
+/** Shape returned by findActiveClientForReset */
+export interface ClientResetRow {
+  id: number;
+  email: string;
+  contactName: string;
+}
+
+/** Shape returned by findClientByResetToken */
+export interface ClientResetTokenRow {
+  id: number;
+  email: string;
+  contactName: string;
+  companyName: string;
+  resetTokenExpiry: string;
+}
+
+/** Shape returned by findClientByInvitationToken */
+export interface ClientInvitationRow {
+  id: number;
+  email: string;
+  contactName: string;
+  companyName: string;
+  invitationExpiresAt: string;
+}
+
+/** Shape returned by getClientNameById */
+export interface ClientNameRow {
+  contactName: string;
+  companyName: string;
+}
+
 /** Shape returned by getSystemSetting */
 export interface SystemSettingRow {
   settingValue: string;
@@ -455,6 +486,163 @@ class UserService {
   }
 
   // =====================================================
+  // CLIENT PASSWORD / INVITATION HELPERS
+  // =====================================================
+
+  /**
+   * Find an active client by email for password reset.
+   */
+  async findActiveClientForReset(email: string): Promise<ClientResetRow | null> {
+    const db = await getDatabase();
+    const row = await db.get(
+      'SELECT id, email, contact_name FROM clients WHERE email = ? AND status = "active"',
+      [email.toLowerCase()]
+    ) as DatabaseRow | undefined;
+
+    if (!row) return null;
+
+    return {
+      id: getNumber(row, 'id'),
+      email: getString(row, 'email'),
+      contactName: getString(row, 'contact_name')
+    };
+  }
+
+  /**
+   * Store a password reset token and expiry for a client.
+   */
+  async storeResetToken(clientId: number, token: string, expiry: Date): Promise<void> {
+    const db = await getDatabase();
+    await db.run(
+      'UPDATE clients SET reset_token = ?, reset_token_expiry = ? WHERE id = ?',
+      [token, expiry.toISOString(), clientId]
+    );
+  }
+
+  /**
+   * Find a client by password reset token (active clients only).
+   */
+  async findClientByResetToken(token: string): Promise<ClientResetTokenRow | null> {
+    const db = await getDatabase();
+    const row = await db.get(
+      `SELECT id, email, contact_name, company_name, reset_token_expiry
+       FROM clients
+       WHERE reset_token = ? AND status = "active"`,
+      [token]
+    ) as DatabaseRow | undefined;
+
+    if (!row) return null;
+
+    return {
+      id: getNumber(row, 'id'),
+      email: getString(row, 'email'),
+      contactName: getString(row, 'contact_name'),
+      companyName: getString(row, 'company_name'),
+      resetTokenExpiry: getString(row, 'reset_token_expiry')
+    };
+  }
+
+  /**
+   * Update a client's password hash and clear the reset token.
+   */
+  async updatePasswordAndClearResetToken(clientId: number, passwordHash: string): Promise<void> {
+    const db = await getDatabase();
+    await db.run(
+      'UPDATE clients SET password_hash = ?, reset_token = NULL, reset_token_expiry = NULL WHERE id = ?',
+      [passwordHash, clientId]
+    );
+  }
+
+  /**
+   * Find a client by invitation token.
+   */
+  async findClientByInvitationToken(token: string): Promise<ClientInvitationRow | null> {
+    const db = await getDatabase();
+    const row = await db.get(
+      `SELECT id, email, contact_name, company_name, invitation_expires_at
+       FROM clients
+       WHERE invitation_token = ?`,
+      [token]
+    ) as DatabaseRow | undefined;
+
+    if (!row) return null;
+
+    return {
+      id: getNumber(row, 'id'),
+      email: getString(row, 'email'),
+      contactName: getString(row, 'contact_name'),
+      companyName: getString(row, 'company_name'),
+      invitationExpiresAt: getString(row, 'invitation_expires_at')
+    };
+  }
+
+  /**
+   * Activate a client account with a hashed password (clears invitation token).
+   */
+  async activateClientWithPassword(clientId: number, passwordHash: string): Promise<void> {
+    const db = await getDatabase();
+    await db.run(
+      `UPDATE clients
+       SET password_hash = ?, status = 'active', invitation_token = NULL, invitation_expires_at = NULL
+       WHERE id = ?`,
+      [passwordHash, clientId]
+    );
+  }
+
+  /**
+   * Get a client's contact name and company name by ID.
+   */
+  async getClientNameById(clientId: number): Promise<ClientNameRow | null> {
+    const db = await getDatabase();
+    const row = await db.get(
+      'SELECT contact_name, company_name FROM clients WHERE id = ?',
+      [clientId]
+    ) as DatabaseRow | undefined;
+
+    if (!row) return null;
+
+    return {
+      contactName: getString(row, 'contact_name'),
+      companyName: getString(row, 'company_name')
+    };
+  }
+
+  /**
+   * Create a welcome system message in the portal inbox for a newly activated client.
+   */
+  async createWelcomeMessage(
+    clientId: number,
+    senderName: string,
+    subject: string,
+    message: string
+  ): Promise<void> {
+    const db = await getDatabase();
+    await db.run(
+      `INSERT INTO messages
+       (context_type, client_id, sender_type, sender_name, subject, message, message_type, priority, status)
+       VALUES ('general', ?, 'system', ?, ?, ?, 'system', 'normal', 'new')`,
+      [clientId, senderName, subject, message]
+    );
+  }
+
+  /**
+   * Store an email verification token for a client.
+   */
+  async storeEmailVerificationToken(
+    clientId: number,
+    token: string,
+    sentAt: Date
+  ): Promise<void> {
+    const db = await getDatabase();
+    await db.run(
+      `UPDATE clients
+       SET email_verification_token = ?, email_verification_sent_at = ?
+       WHERE id = ?`,
+      [token, sentAt.toISOString(), clientId]
+    );
+  }
+
+  // =====================================================
   // ADMIN AUTH HELPERS (system_settings-based)
   // =====================================================
 
@@ -536,6 +724,26 @@ class UserService {
   async isAdmin2FAEnabled(settingKey: string): Promise<boolean> {
     const value = await this.getSystemSetting(settingKey);
     return value === 'true';
+  }
+
+  /**
+   * Upsert a system_settings value (INSERT OR REPLACE).
+   * Used by 2FA flows to store secrets, backup codes, and enabled state.
+   */
+  async upsertSystemSetting(
+    key: string,
+    value: string,
+    settingType: string,
+    description: string,
+    isSensitive: boolean
+  ): Promise<void> {
+    const db = await getDatabase();
+    await db.run(
+      `INSERT OR REPLACE INTO system_settings
+         (setting_key, setting_value, setting_type, description, is_sensitive, updated_at)
+       VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+      [key, value, settingType, description, isSensitive ? 1 : 0]
+    );
   }
 
   // =====================================================

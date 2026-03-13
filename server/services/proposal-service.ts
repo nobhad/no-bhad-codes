@@ -17,6 +17,7 @@
 
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
+import { notDeleted } from '../database/query-helpers.js';
 import * as crypto from 'crypto';
 import { logger } from './logger.js';
 import { getBaseUrl } from '../config/environment.js';
@@ -88,6 +89,118 @@ interface CustomItemData {
   isTaxable?: boolean;
   isOptional?: boolean;
   sortOrder?: number;
+}
+
+/** Summary row returned by the client-facing /my proposals endpoint */
+export interface ClientProposalSummary {
+  id: number;
+  title: string;
+  status: string;
+  amount: number | null;
+  projectType: string;
+  selectedTier: string;
+  sentAt: string | null;
+  validUntil: string | null;
+  createdAt: string;
+}
+
+/** Proposal row with project/client joins for PDF generation */
+export interface ProposalPdfRow {
+  id: number;
+  project_id: number;
+  client_id: number;
+  project_type: string;
+  selected_tier: string;
+  base_price: number;
+  final_price: number;
+  maintenance_option: string | null;
+  status: string;
+  client_notes: string | null;
+  admin_notes: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  signed_at?: string | null;
+  terms_and_conditions?: string | null;
+  contract_terms?: string | null;
+  default_deposit_percentage?: number | null;
+  project_name?: string;
+  project_description?: string;
+  client_name?: string;
+  client_email?: string;
+  company_name?: string;
+}
+
+/** Feature selection row for PDF generation */
+export interface ProposalFeatureSelectionRow {
+  id: number;
+  proposal_request_id: number;
+  feature_id: string;
+  feature_name: string;
+  feature_price: number;
+  feature_category: string | null;
+  is_included_in_tier: number;
+  is_addon: number;
+  created_at: string;
+}
+
+/** Signature data for PDF generation */
+export interface ProposalSignatureForPdf {
+  signer_name?: string;
+  signer_email?: string;
+  signer_title?: string;
+  signature_data?: string;
+  signature_method?: string;
+  signed_at?: string;
+  ip_address?: string;
+}
+
+// =====================================================
+// CORE PROPOSAL CRUD TYPES
+// =====================================================
+
+interface ProposalFeatureInput {
+  featureId: string;
+  featureName: string;
+  featurePrice: number;
+  featureCategory?: string;
+  isIncludedInTier: boolean;
+  isAddon: boolean;
+}
+
+interface CreateProposalData {
+  projectId: number;
+  clientId: number;
+  projectType: string;
+  selectedTier: string;
+  basePrice: number;
+  finalPrice: number;
+  maintenanceOption?: string | null;
+  clientNotes?: string | null;
+  features?: ProposalFeatureInput[];
+}
+
+interface ProposalListParams {
+  status?: string;
+  limit: number;
+  offset: number;
+}
+
+interface ProposalListResult {
+  proposals: ProposalPdfRow[];
+  total: number;
+}
+
+interface UpdateProposalData {
+  status?: string;
+  adminNotes?: string;
+  reviewerEmail?: string;
+  reviewedByUserId?: number | null;
+}
+
+interface ConvertProposalResult {
+  invoiceId: number;
+  invoiceNumber: string;
 }
 
 // =====================================================
@@ -1457,6 +1570,489 @@ class ProposalService {
     }
 
     return getNumber(row as Record<string, unknown>, 'id');
+  }
+
+  // =====================================================
+  // ADMIN ROUTE METHODS
+  // =====================================================
+
+  /** Columns for admin proposal request queries (includes sent_at, updated_at) */
+  private static readonly ADMIN_PROPOSAL_COLUMNS = `
+    id, project_id, client_id, project_type, selected_tier, base_price, final_price,
+    maintenance_option, status, client_notes, admin_notes, created_at, reviewed_at, reviewed_by,
+    sent_at, updated_at
+  `.replace(/\s+/g, ' ').trim();
+
+  /** Get all proposals for the admin listing view */
+  async getAllProposalsForAdmin(): Promise<Record<string, unknown>[]> {
+    const db = getDatabase();
+
+    return db.all(`
+      SELECT
+        pr.id,
+        COALESCE(p.project_name, 'Proposal #' || pr.id) as title,
+        pr.client_id as clientId,
+        COALESCE(c.company_name, c.contact_name) as clientName,
+        pr.project_type as projectType,
+        pr.status,
+        pr.final_price as amount,
+        pr.valid_until as validUntil,
+        pr.created_at as createdAt,
+        pr.sent_at as sentAt,
+        pr.viewed_at as viewedAt,
+        pr.accepted_at as acceptedAt
+      FROM proposal_requests pr
+      LEFT JOIN projects p ON pr.project_id = p.id
+      LEFT JOIN clients c ON pr.client_id = c.id
+      WHERE pr.deleted_at IS NULL
+      ORDER BY pr.created_at DESC
+    `);
+  }
+
+  /** Get a single proposal request by ID (admin columns) */
+  async getAdminProposalById(proposalId: number): Promise<Record<string, unknown> | undefined> {
+    const db = getDatabase();
+
+    return db.get(
+      `SELECT ${ProposalService.ADMIN_PROPOSAL_COLUMNS} FROM proposal_requests WHERE id = ?`,
+      [proposalId]
+    );
+  }
+
+  /** Mark a proposal as sent and return the updated row */
+  async sendProposalToClient(proposalId: number): Promise<Record<string, unknown> | undefined> {
+    const db = getDatabase();
+
+    await db.run(`
+      UPDATE proposal_requests
+      SET status = 'sent', sent_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `, [proposalId]);
+
+    return this.getAdminProposalById(proposalId);
+  }
+
+  /** Duplicate a proposal, returning the new copy in 'pending' status */
+  async duplicateProposal(proposalId: number): Promise<{
+    original: Record<string, unknown> | undefined;
+    duplicate: Record<string, unknown> | undefined;
+  }> {
+    const db = getDatabase();
+
+    const original = await this.getAdminProposalById(proposalId);
+    if (!original) {
+      return { original: undefined, duplicate: undefined };
+    }
+
+    const result = await db.run(`
+      INSERT INTO proposal_requests (
+        project_id, client_id, project_type, selected_tier,
+        base_price, final_price, maintenance_option, client_notes,
+        status, created_at, updated_at
+      )
+      SELECT
+        project_id, client_id, project_type, selected_tier,
+        base_price, final_price, maintenance_option, client_notes,
+        'pending', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+      FROM proposal_requests WHERE id = ?
+    `, [proposalId]);
+
+    const duplicate = await this.getAdminProposalById(result.lastID!);
+    return { original, duplicate };
+  }
+
+  /** Update proposal fields (status and/or admin_notes) */
+  async updateProposalFields(
+    proposalId: number,
+    fields: { status?: string; admin_notes?: string }
+  ): Promise<{ updated: boolean; proposal: Record<string, unknown> | undefined }> {
+    const updates: string[] = [];
+    const values: (string | number)[] = [];
+
+    if (fields.status !== undefined) {
+      updates.push('status = ?');
+      values.push(fields.status);
+    }
+    if (fields.admin_notes !== undefined) {
+      updates.push('admin_notes = ?');
+      values.push(fields.admin_notes);
+    }
+
+    if (updates.length === 0) {
+      return { updated: false, proposal: undefined };
+    }
+
+    updates.push('updated_at = CURRENT_TIMESTAMP');
+    values.push(proposalId);
+
+    const db = getDatabase();
+
+    await db.run(
+      `UPDATE proposal_requests SET ${updates.join(', ')} WHERE id = ?`,
+      values
+    );
+
+    const proposal = await this.getAdminProposalById(proposalId);
+    return { updated: true, proposal };
+  }
+
+  /** Soft-delete a single proposal */
+  async softDeleteProposal(proposalId: number): Promise<void> {
+    const db = getDatabase();
+
+    await db.run(`
+      UPDATE proposal_requests
+      SET deleted_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `, [proposalId]);
+  }
+
+  /** Bulk soft-delete proposals, returning the count of affected rows */
+  async bulkSoftDeleteProposals(proposalIds: (string | number)[]): Promise<number> {
+    const db = getDatabase();
+    let deleted = 0;
+
+    for (const proposalId of proposalIds) {
+      const id = typeof proposalId === 'string' ? parseInt(proposalId, 10) : proposalId;
+      if (isNaN(id) || id <= 0) continue;
+
+      const result = await db.run(
+        'UPDATE proposal_requests SET deleted_at = datetime(\'now\') WHERE id = ? AND deleted_at IS NULL',
+        [id]
+      );
+      if (result.changes && result.changes > 0) {
+        deleted++;
+      }
+    }
+
+    return deleted;
+  }
+
+  // =====================================================
+  // ENTITY LOOKUP HELPERS (used by route layer)
+  // =====================================================
+
+  /**
+   * Get proposals belonging to a client for the portal /my endpoint.
+   */
+  async getClientProposalsList(clientId: number): Promise<ClientProposalSummary[]> {
+    const db = getDatabase();
+    const rows = await db.all(`
+      SELECT
+        pr.id,
+        COALESCE(p.project_name, 'Proposal #' || pr.id) as title,
+        CASE pr.status
+          WHEN 'reviewed'  THEN 'sent'
+          WHEN 'accepted'  THEN 'accepted'
+          WHEN 'rejected'  THEN 'declined'
+          WHEN 'converted' THEN 'accepted'
+          ELSE pr.status
+        END as status,
+        pr.final_price as amount,
+        pr.project_type as projectType,
+        pr.selected_tier as selectedTier,
+        pr.reviewed_at as sentAt,
+        NULL as validUntil,
+        pr.created_at as createdAt
+      FROM proposal_requests pr
+      LEFT JOIN projects p ON pr.project_id = p.id
+      WHERE pr.client_id = ?
+        AND pr.deleted_at IS NULL
+        AND pr.status != 'pending'
+      ORDER BY pr.created_at DESC
+    `, [clientId]);
+
+    return rows as ClientProposalSummary[];
+  }
+
+  /**
+   * Get full proposal data with project/client joins for PDF generation.
+   */
+  async getProposalWithJoinsForPdf(proposalId: number): Promise<ProposalPdfRow | null> {
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT pr.*, p.project_name, p.description as project_description,
+              p.default_deposit_percentage,
+              c.contact_name as client_name, c.email as client_email, c.company_name
+       FROM proposal_requests pr
+       JOIN projects p ON pr.project_id = p.id
+       JOIN clients c ON pr.client_id = c.id
+       WHERE pr.id = ?`,
+      [proposalId]
+    );
+
+    return (row as ProposalPdfRow | undefined) ?? null;
+  }
+
+  /**
+   * Get feature selections for a proposal (used in PDF generation).
+   */
+  async getProposalFeatureSelectionsForPdf(proposalId: number): Promise<ProposalFeatureSelectionRow[]> {
+    const db = getDatabase();
+    const rows = await db.all(
+      `SELECT ${PROPOSAL_FEATURE_SELECTION_COLUMNS}
+       FROM proposal_feature_selections WHERE proposal_request_id = ?`,
+      [proposalId]
+    );
+
+    return rows as unknown as ProposalFeatureSelectionRow[];
+  }
+
+  /**
+   * Get the latest signature for a proposal (used in PDF generation).
+   */
+  async getProposalLatestSignatureForPdf(proposalId: number): Promise<ProposalSignatureForPdf | undefined> {
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT ${PROPOSAL_SIGNATURE_COLUMNS}
+       FROM proposal_signatures WHERE proposal_id = ? ORDER BY signed_at DESC LIMIT 1`,
+      [proposalId]
+    );
+
+    return row as ProposalSignatureForPdf | undefined;
+  }
+
+  // =====================================================
+  // CORE PROPOSAL CRUD METHODS (used by core routes)
+  // =====================================================
+
+  /**
+   * Verify a project exists and is not deleted
+   */
+  async getProjectForProposal(projectId: number): Promise<{ id: number; client_id: number } | null> {
+    const db = getDatabase();
+    const row = await db.get(
+      'SELECT id, client_id FROM projects WHERE id = ? AND deleted_at IS NULL',
+      [projectId]
+    );
+    return (row as { id: number; client_id: number } | undefined) ?? null;
+  }
+
+  /**
+   * Verify a client exists
+   */
+  async clientExists(clientId: number): Promise<boolean> {
+    const db = getDatabase();
+    const row = await db.get('SELECT id FROM clients WHERE id = ?', [clientId]);
+    return row != null;
+  }
+
+  /**
+   * Create a new proposal request with feature selections
+   */
+  async createProposal(data: CreateProposalData): Promise<number> {
+    const db = getDatabase();
+
+    return db.transaction(async (ctx) => {
+      const result = await ctx.run(
+        `INSERT INTO proposal_requests (
+          project_id, client_id, project_type, selected_tier,
+          base_price, final_price, maintenance_option,
+          status, client_notes, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, datetime('now'))`,
+        [
+          data.projectId,
+          data.clientId,
+          data.projectType,
+          data.selectedTier,
+          data.basePrice,
+          data.finalPrice,
+          data.maintenanceOption || null,
+          data.clientNotes || null
+        ]
+      );
+
+      const proposalId = result.lastID!;
+
+      if (data.features && data.features.length > 0) {
+        for (const feature of data.features) {
+          await ctx.run(
+            `INSERT INTO proposal_feature_selections (
+              proposal_request_id, feature_id, feature_name,
+              feature_price, feature_category, is_included_in_tier, is_addon
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+              proposalId,
+              feature.featureId,
+              feature.featureName,
+              feature.featurePrice,
+              feature.featureCategory || null,
+              feature.isIncludedInTier ? 1 : 0,
+              feature.isAddon ? 1 : 0
+            ]
+          );
+        }
+      }
+
+      return proposalId;
+    });
+  }
+
+  /**
+   * Get a single proposal with project/client joins
+   */
+  async getProposalWithJoins(proposalId: number): Promise<ProposalPdfRow | null> {
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT pr.*, p.project_name, c.contact_name as client_name, c.email as client_email, c.company_name
+       FROM proposal_requests pr
+       JOIN projects p ON pr.project_id = p.id AND ${notDeleted('p')}
+       JOIN clients c ON pr.client_id = c.id AND ${notDeleted('c')}
+       WHERE pr.id = ? AND ${notDeleted('pr')}`,
+      [proposalId]
+    );
+    return (row as ProposalPdfRow | undefined) ?? null;
+  }
+
+  /**
+   * Get feature selections for a proposal
+   */
+  async getProposalFeatures(proposalId: number): Promise<ProposalFeatureSelectionRow[]> {
+    const db = getDatabase();
+    const rows = await db.all(
+      `SELECT ${PROPOSAL_FEATURE_SELECTION_COLUMNS} FROM proposal_feature_selections WHERE proposal_request_id = ?`,
+      [proposalId]
+    );
+    return rows as unknown as ProposalFeatureSelectionRow[];
+  }
+
+  /**
+   * List proposals (admin) with pagination and optional status filter
+   */
+  async listProposals(params: ProposalListParams): Promise<ProposalListResult> {
+    const db = getDatabase();
+
+    let query = `
+      SELECT pr.*, p.project_name, c.contact_name as client_name, c.email as client_email, c.company_name
+      FROM proposal_requests pr
+      JOIN projects p ON pr.project_id = p.id AND ${notDeleted('p')}
+      JOIN clients c ON pr.client_id = c.id AND ${notDeleted('c')}
+      WHERE ${notDeleted('pr')}
+    `;
+    const queryParams: (string | number)[] = [];
+
+    if (params.status) {
+      query += ' AND pr.status = ?';
+      queryParams.push(params.status);
+    }
+
+    query += ' ORDER BY pr.created_at DESC LIMIT ? OFFSET ?';
+    queryParams.push(params.limit, params.offset);
+
+    const proposals = (await db.all(query, queryParams)) as unknown as ProposalPdfRow[];
+
+    let countQuery = `SELECT COUNT(*) as count FROM proposal_requests WHERE ${notDeleted()}`;
+    const countParams: string[] = [];
+    if (params.status) {
+      countQuery += ' AND status = ?';
+      countParams.push(params.status);
+    }
+    const countResult = (await db.get(countQuery, countParams)) as { count: number };
+
+    return { proposals, total: countResult.count };
+  }
+
+  /**
+   * Check if a proposal exists by ID
+   */
+  async proposalExists(proposalId: number): Promise<boolean> {
+    const db = getDatabase();
+    const row = await db.get('SELECT id FROM proposal_requests WHERE id = ?', [proposalId]);
+    return row != null;
+  }
+
+  /**
+   * Update a proposal (admin review)
+   */
+  async updateProposal(proposalId: number, data: UpdateProposalData): Promise<void> {
+    const db = getDatabase();
+
+    const updates: string[] = [];
+    const params: (string | number | null)[] = [];
+
+    if (data.status) {
+      updates.push('status = ?');
+      params.push(data.status);
+      updates.push('reviewed_at = datetime(\'now\')');
+      updates.push('reviewed_by = ?');
+      params.push(data.reviewerEmail || null);
+      updates.push('reviewed_by_user_id = ?');
+      params.push(data.reviewedByUserId ?? null);
+    }
+
+    if (data.adminNotes !== undefined) {
+      updates.push('admin_notes = ?');
+      params.push(data.adminNotes);
+    }
+
+    params.push(proposalId);
+
+    await db.run(`UPDATE proposal_requests SET ${updates.join(', ')} WHERE id = ?`, params);
+  }
+
+  /**
+   * Get proposal for conversion (with project/client IDs)
+   */
+  async getProposalForConversion(proposalId: number): Promise<ProposalPdfRow | null> {
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT pr.*, p.id as project_id, c.id as client_id
+       FROM proposal_requests pr
+       JOIN projects p ON pr.project_id = p.id
+       JOIN clients c ON pr.client_id = c.id
+       WHERE pr.id = ?`,
+      [proposalId]
+    );
+    return (row as ProposalPdfRow | undefined) ?? null;
+  }
+
+  /**
+   * Convert an accepted proposal to an invoice
+   */
+  async convertProposalToInvoice(
+    proposalId: number,
+    proposal: ProposalPdfRow,
+    lineItems: Array<{ description: string; quantity: number; unitPrice: number; total: number }>
+  ): Promise<ConvertProposalResult> {
+    const db = getDatabase();
+
+    const invoiceCount = (await db.get('SELECT COUNT(*) as count FROM invoices')) as {
+      count: number;
+    };
+    const invoiceNumber = `INV-${new Date().getFullYear()}-${String(invoiceCount.count + 1).padStart(4, '0')}`;
+
+    const DUE_DATE_DAYS = 30;
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + DUE_DATE_DAYS);
+
+    const p = proposal as unknown as Record<string, unknown>;
+
+    const invoiceId = await db.transaction(async (ctx) => {
+      const result = await ctx.run(
+        `INSERT INTO invoices (
+          invoice_number, project_id, client_id, amount_total,
+          status, due_date, issued_date, line_items, notes, created_at
+        ) VALUES (?, ?, ?, ?, 'draft', ?, date('now'), ?, ?, datetime('now'))`,
+        [
+          invoiceNumber,
+          getNumber(p, 'project_id'),
+          getNumber(p, 'client_id'),
+          getNumber(p, 'final_price'),
+          dueDate.toISOString().split('T')[0],
+          JSON.stringify(lineItems),
+          `Converted from proposal #${proposalId}`
+        ]
+      );
+
+      await ctx.run(
+        'UPDATE proposal_requests SET status = \'converted\', reviewed_at = datetime(\'now\') WHERE id = ?',
+        [proposalId]
+      );
+
+      return result.lastID!;
+    });
+
+    return { invoiceId, invoiceNumber };
   }
 }
 

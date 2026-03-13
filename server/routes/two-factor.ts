@@ -14,10 +14,10 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt, { SignOptions } from 'jsonwebtoken';
-import { getDatabase } from '../database/init.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { rateLimit } from '../middleware/security.js';
+import { userService } from '../services/user-service.js';
 import { auditLogger } from '../services/audit-logger.js';
 import { logger } from '../services/logger.js';
 import {
@@ -56,13 +56,7 @@ const router = express.Router();
  * Retrieve a system_settings value by key.
  */
 async function getSettingValue(key: string): Promise<string | null> {
-  const db = getDatabase();
-  const row = await db.get(
-    'SELECT setting_value FROM system_settings WHERE setting_key = ?',
-    [key]
-  );
-  if (!row) return null;
-  return (row as { setting_value: string }).setting_value;
+  return userService.getSystemSetting(key);
 }
 
 /**
@@ -75,13 +69,7 @@ async function upsertSetting(
   description: string,
   isSensitive: boolean
 ): Promise<void> {
-  const db = getDatabase();
-  await db.run(
-    `INSERT OR REPLACE INTO system_settings
-       (setting_key, setting_value, setting_type, description, is_sensitive, updated_at)
-     VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-    [key, value, settingType, description, isSensitive ? 1 : 0]
-  );
+  await userService.upsertSystemSetting(key, value, settingType, description, isSensitive);
 }
 
 /**

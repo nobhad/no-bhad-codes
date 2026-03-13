@@ -11,7 +11,6 @@ import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { approvalService, EntityType, WorkflowType } from '../services/approval-service.js';
-import { getDatabase } from '../database/init.js';
 import { errorResponse, sanitizeErrorMessage, sendSuccess, sendCreated, ErrorCodes } from '../utils/api-response.js';
 import { validateRequest, ValidationSchema } from '../middleware/validation.js';
 
@@ -590,13 +589,8 @@ router.post(
     const approverEmail = req.user?.email || 'unknown';
 
     if (req.user?.type !== 'admin') {
-      const db = getDatabase();
-      const request = (await db.get(
-        'SELECT approver_email FROM approval_requests WHERE id = ? AND status = ?',
-        [requestId, 'pending']
-      )) as { approver_email?: string } | undefined;
-
-      if (!request || request.approver_email !== approverEmail) {
+      const assignedEmail = await approvalService.getPendingRequestApproverEmail(requestId);
+      if (!assignedEmail || assignedEmail !== approverEmail) {
         return errorResponse(res, 'Access denied', 403, ErrorCodes.FORBIDDEN);
       }
     }
@@ -662,13 +656,8 @@ router.post(
     const approverEmail = req.user?.email || 'unknown';
 
     if (req.user?.type !== 'admin') {
-      const db = getDatabase();
-      const request = (await db.get(
-        'SELECT approver_email FROM approval_requests WHERE id = ? AND status = ?',
-        [requestId, 'pending']
-      )) as { approver_email?: string } | undefined;
-
-      if (!request || request.approver_email !== approverEmail) {
+      const assignedEmail = await approvalService.getPendingRequestApproverEmail(requestId);
+      if (!assignedEmail || assignedEmail !== approverEmail) {
         return errorResponse(res, 'Access denied', 403, ErrorCodes.FORBIDDEN);
       }
     }

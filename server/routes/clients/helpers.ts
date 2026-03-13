@@ -12,7 +12,6 @@ export { logger } from '../../services/logger.js';
 export { default as express } from 'express';
 export { default as bcrypt } from 'bcryptjs';
 export { default as crypto } from 'crypto';
-export { getDatabase } from '../../database/init.js';
 export { asyncHandler } from '../../middleware/errorHandler.js';
 export {
   authenticateToken,

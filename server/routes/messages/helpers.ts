@@ -11,8 +11,8 @@ import crypto from 'crypto';
 
 import multer from 'multer';
 import path from 'path';
-import { getDatabase } from '../../database/init.js';
 import { AuthenticatedRequest } from '../../middleware/auth.js';
+import { messageService } from '../../services/message-service.js';
 import { getUploadsSubdir, UPLOAD_DIRS } from '../../config/uploads.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
@@ -40,37 +40,14 @@ export const NOTIFICATION_PREF_COLUMNS = `
  * Check if the authenticated user can access a specific message
  */
 export async function canAccessMessage(req: AuthenticatedRequest, messageId: number): Promise<boolean> {
-  if (req.user?.type === 'admin') {
-    return true;
-  }
-
-  const db = getDatabase();
-  const row = await db.get(
-    `SELECT 1
-     FROM active_messages m
-     JOIN active_message_threads mt ON m.thread_id = mt.id
-     WHERE m.id = ? AND mt.client_id = ?`,
-    [messageId, req.user?.id]
-  );
-
-  return !!row;
+  return messageService.canUserAccessMessage(req.user?.type || '', req.user?.id, messageId);
 }
 
 /**
  * Check if the authenticated user can access a specific project
  */
 export async function canAccessProject(req: AuthenticatedRequest, projectId: number): Promise<boolean> {
-  if (req.user?.type === 'admin') {
-    return true;
-  }
-
-  const db = getDatabase();
-  const row = await db.get('SELECT 1 FROM active_projects WHERE id = ? AND client_id = ?', [
-    projectId,
-    req.user?.id
-  ]);
-
-  return !!row;
+  return messageService.canUserAccessProject(req.user?.type || '', req.user?.id, projectId);
 }
 
 // MIME type to extension mapping for validation

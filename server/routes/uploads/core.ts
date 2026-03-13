@@ -10,7 +10,6 @@ import { existsSync } from 'fs';
 import { logger } from '../../services/logger.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
-import { getDatabase } from '../../database/init.js';
 import { getString } from '../../database/row-helpers.js';
 import {
   errorResponse,
@@ -19,6 +18,7 @@ import {
   ErrorCodes
 } from '../../utils/api-response.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
+import { uploadService } from '../../services/upload-service.js';
 import {
   FileRow,
   ProjectRow,
@@ -68,16 +68,11 @@ router.post(
       return errorResponse(res, 'No files uploaded', 400, ErrorCodes.NO_FILES);
     }
 
-    const db = getDatabase();
     const uploadedFiles = [];
 
     let defaultProjectId: number | null = null;
-    if (req.user?.type !== 'admin') {
-      const project = (await db.get(
-        'SELECT id FROM projects WHERE client_id = ? ORDER BY created_at DESC LIMIT 1',
-        [req.user?.id]
-      )) as { id: number } | undefined;
-      defaultProjectId = project?.id ?? null;
+    if (req.user?.type !== 'admin' && req.user?.id) {
+      defaultProjectId = await uploadService.findDefaultProjectForClient(req.user.id);
     }
 
     for (const file of req.files as Express.Multer.File[]) {
@@ -92,22 +87,18 @@ router.post(
               : 'general';
       const filePath = `uploads/${subDir}/${file.filename}`;
 
-      const result = await db.run(
-        `INSERT INTO files (project_id, filename, original_filename, mime_type, file_size, file_path, uploaded_by, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-        [
-          defaultProjectId,
-          file.filename,
-          file.originalname,
-          file.mimetype,
-          file.size,
-          filePath,
-          req.user?.email || `${req.user?.type || 'unknown'}`
-        ]
-      );
+      const fileId = await uploadService.insertFileRecord({
+        projectId: defaultProjectId,
+        filename: file.filename,
+        originalFilename: file.originalname,
+        mimeType: file.mimetype,
+        fileSize: file.size,
+        filePath,
+        uploadedBy: req.user?.email || `${req.user?.type || 'unknown'}`
+      });
 
       uploadedFiles.push({
-        id: result.lastID,
+        id: fileId,
         filename: file.filename,
         originalName: file.originalname,
         mimetype: file.mimetype,
@@ -153,11 +144,7 @@ router.post(
 
     if (req.user?.id) {
       try {
-        const db = await getDatabase();
-        await db.run(
-          'UPDATE clients SET avatar_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-          [avatarInfo.url, req.user.id]
-        );
+        await uploadService.updateClientAvatar(req.user.id, avatarInfo.url);
       } catch (dbError) {
         await logger.error('Failed to update avatar in database:', {
           error: dbError instanceof Error ? dbError : undefined,
@@ -199,21 +186,15 @@ router.post(
 
     let fileId: number | undefined;
     try {
-      const db = await getDatabase();
-      const result = await db.run(
-        `INSERT INTO files (project_id, filename, original_filename, mime_type, file_size, file_path, uploaded_by, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-        [
-          projectId,
-          req.file.filename,
-          req.file.originalname,
-          req.file.mimetype,
-          req.file.size,
-          projectFile.url,
-          req.user?.email || `${req.user?.type || 'unknown'}`
-        ]
-      );
-      fileId = result.lastID;
+      fileId = await uploadService.insertFileRecord({
+        projectId,
+        filename: req.file.filename,
+        originalFilename: req.file.originalname,
+        mimeType: req.file.mimetype,
+        fileSize: req.file.size,
+        filePath: projectFile.url,
+        uploadedBy: req.user?.email || `${req.user?.type || 'unknown'}`
+      });
     } catch (dbError) {
       await logger.error('Failed to save file info to database:', {
         error: dbError instanceof Error ? dbError : undefined,
@@ -244,17 +225,10 @@ router.get(
     }
 
     try {
-      const db = await getDatabase();
-      const files = await db.all(
-        `SELECT id, project_id, filename, original_filename, mime_type, file_size, file_path, uploaded_by, created_at, description, shared_with_client, shared_at, shared_by
-         FROM files
-         WHERE project_id = ? AND deleted_at IS NULL
-         ORDER BY created_at DESC`,
-        [projectId]
-      );
+      const files = await uploadService.getFilesByProject(projectId);
 
       sendSuccess(res, {
-        files: (files as FileRow[]).map((file) => ({
+        files: files.map((file) => ({
           id: file.id,
           projectId: file.project_id,
           filename: file.filename,
@@ -297,56 +271,13 @@ router.get(
     const dateTo = req.query.dateTo as string | undefined;
 
     try {
-      const db = await getDatabase();
-
-      let query = `
-        SELECT f.id, f.project_id, f.filename, f.original_filename, f.mime_type, f.file_size,
-               f.file_path, f.uploaded_by, f.created_at, f.file_type, f.category,
-               f.shared_with_client, f.shared_at,
-               p.project_name as project_name
-        FROM files f
-        LEFT JOIN projects p ON f.project_id = p.id
-        WHERE f.deleted_at IS NULL
-          AND (f.uploaded_by = ? OR (p.client_id = ? AND f.shared_with_client = TRUE))
-      `;
-      const params: (string | number)[] = [clientId, clientId];
-
-      if (projectId) {
-        query += ' AND f.project_id = ?';
-        params.push(projectId);
-      }
-
-      if (fileType && fileType !== 'all') {
-        query += ' AND f.file_type = ?';
-        params.push(fileType);
-      }
-
-      if (category && category !== 'all') {
-        query += ' AND f.category = ?';
-        params.push(category);
-      }
-
-      if (dateFrom) {
-        query += ' AND date(f.created_at) >= date(?)';
-        params.push(dateFrom);
-      }
-
-      if (dateTo) {
-        query += ' AND date(f.created_at) <= date(?)';
-        params.push(dateTo);
-      }
-
-      query += ' ORDER BY f.created_at DESC';
-
-      const files = await db.all(query, params);
-
-      const projects = await db.all(
-        `SELECT DISTINCT p.id, p.project_name
-         FROM projects p
-         WHERE p.client_id = ?
-         ORDER BY p.project_name`,
-        [clientId]
-      );
+      const { files, projects } = await uploadService.getClientFiles(clientId, {
+        projectId,
+        fileType,
+        category,
+        dateFrom,
+        dateTo
+      });
 
       sendSuccess(res, {
         files: (files as FileRow[]).map((file) => ({
@@ -391,14 +322,7 @@ router.get(
     }
 
     try {
-      const db = await getDatabase();
-      const file = await db.get(
-        `SELECT f.*, p.client_id
-         FROM files f
-         LEFT JOIN projects p ON f.project_id = p.id
-         WHERE f.id = ? AND f.deleted_at IS NULL`,
-        [fileId]
-      );
+      const file = await uploadService.getFileWithClient(fileId);
 
       if (!file) {
         return errorResponse(res, 'File not found', 404, ErrorCodes.FILE_NOT_FOUND);
@@ -470,14 +394,7 @@ router.delete(
     }
 
     try {
-      const db = await getDatabase();
-      const file = await db.get(
-        `SELECT f.*, p.client_id
-         FROM files f
-         LEFT JOIN projects p ON f.project_id = p.id
-         WHERE f.id = ? AND f.deleted_at IS NULL`,
-        [fileId]
-      );
+      const file = await uploadService.getFileWithClient(fileId);
 
       if (!file) {
         return errorResponse(res, 'File not found', 404, ErrorCodes.FILE_NOT_FOUND);

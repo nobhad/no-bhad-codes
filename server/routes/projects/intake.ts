@@ -2,7 +2,6 @@ import express, { Response } from 'express';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { PDFDocument as PDFLibDocument, PDFPage, StandardFonts, rgb } from 'pdf-lib';
-import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../utils/access-control.js';
@@ -11,12 +10,7 @@ import { BUSINESS_INFO, getPdfLogoBytes } from '../../config/business.js';
 import { getPdfCacheKey, getCachedPdf, cachePdf } from '../../utils/pdf-utils.js';
 import { errorResponse, ErrorCodes } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
-
-// Explicit column lists for SELECT queries (avoid SELECT *)
-const FILE_COLUMNS = `
-  id, project_id, filename, original_filename, file_path, file_size,
-  mime_type, file_type, description, uploaded_by, created_at
-`.replace(/\s+/g, ' ').trim();
+import { intakeService } from '../../services/intake-service.js';
 
 const router = express.Router();
 
@@ -80,42 +74,25 @@ router.get(
     if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
-    const db = getDatabase();
-
     // Get project with client info
-    const project = await db.get(
-      `SELECT p.*, c.contact_name as client_name, c.email as client_email, c.company_name
-       FROM projects p
-       JOIN clients c ON p.client_id = c.id
-       WHERE p.id = ?`,
-      [projectId]
-    );
+    const project = await intakeService.getProjectWithClientForIntakePdf(projectId);
 
     if (!project) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
-    const p = project as Record<string, unknown>;
+    const p = project;
 
     if (!(await canAccessProject(req, projectId))) {
       return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     // Find the intake file for this project
-    const intakeFile = await db.get(
-      `SELECT ${FILE_COLUMNS} FROM files
-       WHERE project_id = ? AND deleted_at IS NULL
-       AND (category = 'intake' OR filename LIKE 'intake_%' OR filename LIKE 'nobhadcodes_intake_%' OR filename LIKE 'admin_project_%')
-       ORDER BY created_at DESC
-       LIMIT 1`,
-      [projectId]
-    );
+    const intakeFileRecord = await intakeService.getIntakeFileForProject(projectId);
 
-    if (!intakeFile) {
+    if (!intakeFileRecord) {
       return errorResponse(res, 'Intake form not found for this project', 404, ErrorCodes.FILE_NOT_FOUND);
     }
-
-    const intakeFileRecord = intakeFile as Record<string, unknown>;
     const cacheKey = getPdfCacheKey(
       'intake',
       projectId,

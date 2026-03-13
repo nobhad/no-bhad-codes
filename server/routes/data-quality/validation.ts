@@ -8,7 +8,6 @@
 
 import { Router, Request, Response } from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
-import { getDatabase } from '../../database/init.js';
 import {
   validateEmail,
   validatePhone,
@@ -19,6 +18,7 @@ import {
   detectXSS,
   detectSQLInjection
 } from '../../services/validation-service.js';
+import { dataQualityService } from '../../services/data-quality-service.js';
 import { errorResponseWithPayload, sendSuccess, sanitizeErrorMessage, ErrorCodes } from '../../utils/api-response.js';
 
 const router = Router();
@@ -336,18 +336,13 @@ router.post('/security/check', asyncHandler(async (req: Request, res: Response) 
 
   // Log if threats detected
   if (xssResult.detected || sqlResult.detected) {
-    const db = getDatabase();
-    await db.run(
-      `INSERT INTO validation_error_log (entity_type, field_name, field_value, error_type, error_message, source_ip, user_agent)
-       VALUES ('security_check', 'input', ?, ?, ?, ?, ?)`,
-      [
-        input.substring(0, 500),
-        xssResult.detected ? 'xss' : 'sql_injection',
-        xssResult.detected ? 'XSS patterns detected' : 'SQL injection patterns detected',
-        req.ip,
-        req.headers['user-agent'] || ''
-      ]
-    );
+    await dataQualityService.logSecurityThreat({
+      inputValue: input.substring(0, 500),
+      errorType: xssResult.detected ? 'xss' : 'sql_injection',
+      errorMessage: xssResult.detected ? 'XSS patterns detected' : 'SQL injection patterns detected',
+      sourceIp: req.ip,
+      userAgent: req.headers['user-agent'] || ''
+    });
   }
 
   sendSuccess(res, {

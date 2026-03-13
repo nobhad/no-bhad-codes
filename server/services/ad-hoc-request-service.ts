@@ -368,6 +368,62 @@ class AdHocRequestService {
   isValidUrgency(urgency: string): urgency is AdHocRequestUrgency {
     return REQUEST_URGENCY.includes(urgency as AdHocRequestUrgency);
   }
+
+  /**
+   * Verify a project belongs to a client and is not deleted
+   */
+  async verifyClientProject(projectId: number, clientId: number): Promise<boolean> {
+    const db = getDatabase();
+    const project = await db.get(
+      'SELECT id FROM projects WHERE id = ? AND client_id = ? AND deleted_at IS NULL',
+      [projectId, clientId]
+    );
+    return !!project;
+  }
+
+  /**
+   * Verify a file attachment belongs to a specific project and is not deleted
+   */
+  async verifyAttachmentForProject(fileId: number, projectId: number): Promise<boolean> {
+    const db = getDatabase();
+    const attachment = await db.get(
+      'SELECT id FROM files WHERE id = ? AND project_id = ? AND deleted_at IS NULL',
+      [fileId, projectId]
+    );
+    return !!attachment;
+  }
+
+  /**
+   * Get client display info (name/company/email) for notifications
+   */
+  async getClientDisplayInfo(clientId: number): Promise<{
+    displayName: string;
+    email?: string;
+  }> {
+    const db = getDatabase();
+    const clientInfo = await db.get(
+      'SELECT contact_name, company_name, email FROM clients WHERE id = ?',
+      [clientId]
+    ) as { contact_name?: string; company_name?: string; email?: string } | undefined;
+
+    const displayName =
+      clientInfo?.contact_name || clientInfo?.company_name || clientInfo?.email || 'Unknown client';
+
+    return { displayName, email: clientInfo?.email };
+  }
+
+  /**
+   * Get project display name for notifications
+   */
+  async getProjectDisplayName(projectId: number): Promise<string> {
+    const db = getDatabase();
+    const projectInfo = await db.get(
+      'SELECT project_name FROM projects WHERE id = ?',
+      [projectId]
+    ) as { project_name?: string } | undefined;
+
+    return projectInfo?.project_name || `Project #${projectId}`;
+  }
 }
 
 export const adHocRequestService = new AdHocRequestService();

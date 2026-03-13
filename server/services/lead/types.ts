@@ -8,8 +8,9 @@
 
 import type { SqlParam } from '../../database/init.js';
 
-// Type alias for backward compatibility
+// Type aliases for sub-module use
 export type SqlValue = SqlParam;
+export type { SqlParam };
 
 // =====================================================
 // Column Constants
