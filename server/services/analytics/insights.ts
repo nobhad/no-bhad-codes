@@ -698,3 +698,159 @@ export async function getProjectHealthSummary(): Promise<{
     projects: projectList
   };
 }
+
+// =====================================================
+// ADMIN KPI ANALYTICS (business dashboard)
+// =====================================================
+
+/** Calculate percentage change between two values */
+function calcChange(current: number, previous: number): number {
+  if (previous === 0) return current > 0 ? 100 : 0;
+  return Math.round(((current - previous) / previous) * 100);
+}
+
+/**
+ * Get full admin analytics KPI data for the admin analytics dashboard.
+ * Includes KPIs with period-over-period change, revenue chart, project chart, leads chart,
+ * and source breakdown.
+ */
+export async function getAdminKPIAnalytics(daysBack: number): Promise<Record<string, unknown>> {
+  const db = getDatabase();
+
+  const now = new Date();
+  const currentStart = new Date();
+  currentStart.setDate(currentStart.getDate() - daysBack);
+  const previousStart = new Date();
+  previousStart.setDate(previousStart.getDate() - (daysBack * 2));
+
+  const currentStartStr = currentStart.toISOString().split('T')[0];
+  const previousStartStr = previousStart.toISOString().split('T')[0];
+  const nowStr = now.toISOString().split('T')[0];
+
+  // Revenue
+  const currentRevenue = await db.get(`
+    SELECT COALESCE(SUM(amount_total), 0) as value
+    FROM invoices
+    WHERE status = 'paid' AND DATE(COALESCE(paid_date, updated_at)) >= ? AND DATE(COALESCE(paid_date, updated_at)) <= ?
+  `, [currentStartStr, nowStr]);
+  const previousRevenue = await db.get(`
+    SELECT COALESCE(SUM(amount_total), 0) as value
+    FROM invoices
+    WHERE status = 'paid' AND DATE(COALESCE(paid_date, updated_at)) >= ? AND DATE(COALESCE(paid_date, updated_at)) < ?
+  `, [previousStartStr, currentStartStr]);
+
+  // Clients
+  const currentClients = await db.get('SELECT COUNT(*) as value FROM clients WHERE deleted_at IS NULL');
+  const newClientsCurrentPeriod = await db.get(
+    'SELECT COUNT(*) as value FROM clients WHERE deleted_at IS NULL AND DATE(created_at) >= ?',
+    [currentStartStr]
+  );
+  const newClientsPreviousPeriod = await db.get(
+    'SELECT COUNT(*) as value FROM clients WHERE deleted_at IS NULL AND DATE(created_at) >= ? AND DATE(created_at) < ?',
+    [previousStartStr, currentStartStr]
+  );
+
+  // Projects
+  const activeProjects = await db.get(`
+    SELECT COUNT(*) as value FROM projects
+    WHERE status IN ('active', 'in-progress', 'in_progress') AND deleted_at IS NULL
+  `);
+  const newProjectsCurrentPeriod = await db.get(
+    'SELECT COUNT(*) as value FROM projects WHERE deleted_at IS NULL AND DATE(created_at) >= ?',
+    [currentStartStr]
+  );
+  const newProjectsPreviousPeriod = await db.get(
+    'SELECT COUNT(*) as value FROM projects WHERE deleted_at IS NULL AND DATE(created_at) >= ? AND DATE(created_at) < ?',
+    [previousStartStr, currentStartStr]
+  );
+
+  // Invoices
+  const invoicesSent = await db.get(
+    'SELECT COUNT(*) as value FROM invoices WHERE DATE(created_at) >= ?', [currentStartStr]
+  );
+  const invoicesSentPrevious = await db.get(
+    'SELECT COUNT(*) as value FROM invoices WHERE DATE(created_at) >= ? AND DATE(created_at) < ?',
+    [previousStartStr, currentStartStr]
+  );
+
+  // Conversion rate
+  const leadsStats = await db.get(`
+    SELECT COUNT(*) as total,
+      COALESCE(SUM(CASE WHEN status IN ('active', 'in-progress', 'in_progress', 'completed') THEN 1 ELSE 0 END), 0) as converted
+    FROM projects WHERE deleted_at IS NULL
+  `);
+  const leadsStatsPrevious = await db.get(`
+    SELECT COUNT(*) as total,
+      COALESCE(SUM(CASE WHEN status IN ('active', 'in-progress', 'in_progress', 'completed') THEN 1 ELSE 0 END), 0) as converted
+    FROM projects WHERE deleted_at IS NULL AND DATE(created_at) < ?
+  `, [currentStartStr]);
+
+  const cr = (leadsStats as Record<string, unknown>) || {};
+  const crp = (leadsStatsPrevious as Record<string, unknown>) || {};
+  const currentConversionRate = (Number(cr.total) || 0) > 0
+    ? Math.round((Number(cr.converted) / Number(cr.total)) * 100) : 0;
+  const previousConversionRate = (Number(crp.total) || 0) > 0
+    ? Math.round((Number(crp.converted) / Number(crp.total)) * 100) : 0;
+
+  // Avg project value
+  const avgProjectValue = await db.get(
+    'SELECT COALESCE(AVG(expected_value), 0) as value FROM projects WHERE deleted_at IS NULL AND expected_value > 0'
+  );
+  const avgProjectValuePrevious = await db.get(
+    'SELECT COALESCE(AVG(expected_value), 0) as value FROM projects WHERE deleted_at IS NULL AND expected_value > 0 AND DATE(created_at) < ?',
+    [currentStartStr]
+  );
+
+  // Charts
+  const revenueChartData = await db.all(`
+    SELECT strftime('%Y-%m-%d', COALESCE(paid_date, updated_at)) as date, SUM(amount_total) as revenue
+    FROM invoices WHERE status = 'paid' AND DATE(COALESCE(paid_date, updated_at)) >= ?
+    GROUP BY strftime('%Y-%m-%d', COALESCE(paid_date, updated_at)) ORDER BY date ASC
+  `, [currentStartStr]) as Array<{ date: string; revenue: number }>;
+
+  const projectsByStatus = await db.all(
+    'SELECT status, COUNT(*) as count FROM projects WHERE deleted_at IS NULL GROUP BY status'
+  ) as Array<{ status: string; count: number }>;
+
+  const leadFunnelData = await db.all(`
+    SELECT status, COUNT(*) as count FROM projects WHERE deleted_at IS NULL GROUP BY status
+    ORDER BY CASE status WHEN 'pending' THEN 1 WHEN 'active' THEN 2 WHEN 'in_progress' THEN 3
+      WHEN 'in-progress' THEN 3 WHEN 'completed' THEN 4 WHEN 'cancelled' THEN 5 ELSE 6 END
+  `) as Array<{ status: string; count: number }>;
+
+  const sourceBreakdownData = await db.all(
+    "SELECT 'Direct' as source, COUNT(*) as count FROM projects WHERE deleted_at IS NULL"
+  ) as Array<{ source: string; count: number }>;
+
+  const totalLeads = sourceBreakdownData.reduce((sum, s) => sum + s.count, 0);
+
+  const v = (row: Record<string, unknown> | null | undefined) => Number((row as Record<string, unknown>)?.value) || 0;
+
+  return {
+    kpis: {
+      revenue: { value: v(currentRevenue as Record<string, unknown>), change: calcChange(v(currentRevenue as Record<string, unknown>), v(previousRevenue as Record<string, unknown>)) },
+      clients: { value: v(currentClients as Record<string, unknown>), change: calcChange(v(newClientsCurrentPeriod as Record<string, unknown>), v(newClientsPreviousPeriod as Record<string, unknown>)) },
+      projects: { value: v(activeProjects as Record<string, unknown>), change: calcChange(v(newProjectsCurrentPeriod as Record<string, unknown>), v(newProjectsPreviousPeriod as Record<string, unknown>)) },
+      invoices: { value: v(invoicesSent as Record<string, unknown>), change: calcChange(v(invoicesSent as Record<string, unknown>), v(invoicesSentPrevious as Record<string, unknown>)) },
+      conversionRate: { value: currentConversionRate, change: currentConversionRate - previousConversionRate },
+      avgProjectValue: { value: Math.round(v(avgProjectValue as Record<string, unknown>)), change: calcChange(v(avgProjectValue as Record<string, unknown>), v(avgProjectValuePrevious as Record<string, unknown>)) }
+    },
+    revenueChart: {
+      labels: revenueChartData.map(d => d.date),
+      datasets: [{ label: 'Revenue', data: revenueChartData.map(d => d.revenue), color: 'var(--status-completed)' }]
+    },
+    projectsChart: {
+      labels: projectsByStatus.map(p => p.status),
+      datasets: [{ label: 'Projects', data: projectsByStatus.map(p => p.count), color: 'var(--color-brand-primary)' }]
+    },
+    leadsChart: {
+      labels: leadFunnelData.map(l => l.status),
+      datasets: [{ label: 'Leads', data: leadFunnelData.map(l => l.count), color: 'var(--status-pending)' }]
+    },
+    sourceBreakdown: sourceBreakdownData.map(s => ({
+      source: s.source,
+      count: s.count,
+      percentage: totalLeads > 0 ? Math.round((s.count / totalLeads) * 100) : 0
+    }))
+  };
+}

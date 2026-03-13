@@ -6,20 +6,20 @@
  */
 
 import express from 'express';
-import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { emailService } from '../../services/email-service.js';
 import { rateLimit } from '../../middleware/security.js';
 import { auditLogger } from '../../services/audit-logger.js';
 import { logger } from '../../services/logger.js';
+import { userService } from '../../services/user-service.js';
 import {
   RATE_LIMIT_CONFIG,
   EMAIL_VERIFICATION_CONFIG
 } from '../../utils/auth-constants.js';
 import { generateSecureToken } from '../../utils/token-utils.js';
 import { getBaseUrl } from '../../config/environment.js';
-import { getString, getNumber, getBoolean, getDate } from '../../database/row-helpers.js';
+import { getString, getNumber, getBoolean } from '../../database/row-helpers.js';
 import {
   sendSuccess,
   sendBadRequest,
@@ -54,43 +54,16 @@ const AccountValidationSchemas = {
  *     responses:
  *       200:
  *         description: User profile retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 user:
- *                   $ref: '#/components/schemas/User'
  *       401:
  *         description: Authentication required
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  *       404:
  *         description: User not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "User not found"
- *                 code:
- *                   type: string
- *                   example: "USER_NOT_FOUND"
  */
 router.get(
   '/profile',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const db = getDatabase();
-
-    const client = await db.get(
-      'SELECT id, email, company_name, contact_name, phone, status, is_admin, created_at FROM clients WHERE id = ?',
-      [req.user!.id]
-    );
+    const client = await userService.getClientProfile(req.user!.id);
 
     if (!client) {
       return sendNotFound(res, 'User not found', ErrorCodes.NOT_FOUND);
@@ -107,7 +80,7 @@ router.get(
         status: getString(client, 'status'),
         isAdmin,
         role: isAdmin ? 'admin' : 'client',
-        createdAt: getDate(client, 'created_at')?.toISOString() || null
+        createdAt: new Date(getString(client, 'created_at')).toISOString() || null
       }
     });
   })
@@ -146,14 +119,7 @@ router.get(
       return sendBadRequest(res, 'Invalid verification token', ErrorCodes.INVALID_TOKEN);
     }
 
-    const db = getDatabase();
-
-    const client = await db.get(
-      `SELECT id, email, email_verified, email_verification_sent_at
-       FROM clients
-       WHERE email_verification_token = ? AND deleted_at IS NULL`,
-      [token]
-    );
+    const client = await userService.findClientByVerificationToken(token);
 
     if (!client) {
       return sendBadRequest(res, 'Invalid or expired verification token', ErrorCodes.INVALID_TOKEN);
@@ -186,14 +152,7 @@ router.get(
     }
 
     // Mark email as verified and clear the token
-    await db.run(
-      `UPDATE clients
-       SET email_verified = 1,
-           email_verification_token = NULL,
-           email_verification_sent_at = NULL
-       WHERE id = ?`,
-      [clientId]
-    );
+    await userService.markEmailVerified(clientId);
 
     await auditLogger.log({
       action: 'email_verified',
@@ -248,14 +207,7 @@ router.post(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { email } = req.body;
 
-    const db = getDatabase();
-
-    const client = await db.get(
-      `SELECT id, email, contact_name, email_verified, email_verification_sent_at
-       FROM clients
-       WHERE email = ? AND deleted_at IS NULL`,
-      [email.toLowerCase()]
-    );
+    const client = await userService.findClientForResendVerification(email);
 
     // Always return success to avoid revealing account existence
     if (!client) {
@@ -298,13 +250,7 @@ router.post(
     const verificationToken = generateSecureToken();
     const now = new Date();
 
-    await db.run(
-      `UPDATE clients
-       SET email_verification_token = ?,
-           email_verification_sent_at = ?
-       WHERE id = ?`,
-      [verificationToken, now.toISOString(), clientId]
-    );
+    await userService.storeEmailVerificationToken(clientId, verificationToken, now);
 
     // Send verification email
     try {

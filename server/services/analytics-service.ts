@@ -260,5 +260,90 @@ export const analyticsService = {
   getOverdueInvoicesReport: insights.getOverdueInvoicesReport,
   getPendingApprovalsReport: insights.getPendingApprovalsReport,
   getDocumentRequestsStatusReport: insights.getDocumentRequestsStatusReport,
-  getProjectHealthSummary: insights.getProjectHealthSummary
+  getProjectHealthSummary: insights.getProjectHealthSummary,
+
+  // ── Admin KPI Analytics ────────────────────────
+  getAdminKPIAnalytics: insights.getAdminKPIAnalytics,
+
+  // ── Ad-hoc Analytics (custom SQL queries) ─────
+  async getSavedAnalyticsQueries(): Promise<Record<string, unknown>[]> {
+    const { getDatabase } = await import('../database/init.js');
+    const db = getDatabase();
+
+    // Ensure table exists
+    await db.run(`
+      CREATE TABLE IF NOT EXISTS saved_analytics_queries (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        description TEXT,
+        query TEXT NOT NULL,
+        last_run_at TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    return db.all(`
+      SELECT id, name, description, query, last_run_at as lastRun, created_at as createdAt
+      FROM saved_analytics_queries
+      ORDER BY created_at DESC
+    `) as Promise<Record<string, unknown>[]>;
+  },
+
+  async runAdHocQuery(query: string): Promise<{
+    columns: string[];
+    rows: Record<string, unknown>[];
+    rowCount: number;
+    executionTime: number;
+  }> {
+    const { getDatabase } = await import('../database/init.js');
+    const db = getDatabase();
+    const startTime = Date.now();
+
+    // Ensure LIMIT
+    let safeQuery = query.trim();
+    if (!safeQuery.toLowerCase().includes('limit')) {
+      safeQuery = `${safeQuery.replace(/;?\s*$/, '')} LIMIT 1000`;
+    }
+
+    const rows = await db.all(safeQuery) as Record<string, unknown>[];
+    const executionTime = Date.now() - startTime;
+    const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
+
+    return { columns, rows, rowCount: rows.length, executionTime };
+  },
+
+  async saveAnalyticsQuery(params: {
+    name: string;
+    description?: string | null;
+    query: string;
+  }): Promise<Record<string, unknown> | undefined> {
+    const { getDatabase } = await import('../database/init.js');
+    const db = getDatabase();
+
+    const result = await db.run(`
+      INSERT INTO saved_analytics_queries (name, description, query)
+      VALUES (?, ?, ?)
+    `, [params.name.trim(), params.description?.trim() || null, params.query.trim()]);
+
+    return db.get(`
+      SELECT id, name, description, query, created_at as createdAt
+      FROM saved_analytics_queries
+      WHERE id = ?
+    `, [result.lastID]) as Promise<Record<string, unknown> | undefined>;
+  },
+
+  async deleteAnalyticsQuery(queryId: number): Promise<boolean> {
+    const { getDatabase } = await import('../database/init.js');
+    const db = getDatabase();
+
+    const existing = await db.get(
+      'SELECT id FROM saved_analytics_queries WHERE id = ?',
+      [queryId]
+    );
+    if (!existing) return false;
+
+    await db.run('DELETE FROM saved_analytics_queries WHERE id = ?', [queryId]);
+    return true;
+  }
 };

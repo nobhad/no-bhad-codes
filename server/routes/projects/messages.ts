@@ -1,9 +1,10 @@
 import express, { Response } from 'express';
-import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../utils/access-control.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
+import { messageService } from '../../services/message-service.js';
+import { projectService } from '../../services/project-service.js';
 
 const router = express.Router();
 
@@ -16,10 +17,8 @@ router.get(
     if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
-    const db = getDatabase();
 
-    const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
-    if (!project) {
+    if (!(await projectService.projectExists(projectId))) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
@@ -27,16 +26,7 @@ router.get(
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
-    const messages = await db.all(
-      `
-    SELECT id, sender_type, sender_name, message as content, read_at, edited_at, created_at
-    FROM messages
-    WHERE project_id = ? AND context_type = 'project'
-    ORDER BY created_at ASC
-  `,
-      [projectId]
-    );
-
+    const messages = await messageService.getProjectMessages(projectId);
     sendSuccess(res, { messages });
   })
 );
@@ -57,10 +47,7 @@ router.post(
       return errorResponse(res, 'Message content is required', 400, ErrorCodes.MISSING_MESSAGE);
     }
 
-    const db = getDatabase();
-
-    const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
-    if (!project) {
+    if (!(await projectService.projectExists(projectId))) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
@@ -69,39 +56,22 @@ router.post(
     }
 
     // Get client_id from project for unified table
-    const projectData = await db.get('SELECT client_id FROM projects WHERE id = ?', [projectId]);
+    const clientId = await messageService.getProjectClientId(projectId);
 
     // Resolve display name: admin users → users.display_name, clients → clients.contact_name
-    let senderName = req.user!.email;
-    if (req.user!.type === 'admin') {
-      const adminUser = await db.get('SELECT display_name FROM users WHERE id = ?', [req.user!.id]);
-      senderName = adminUser?.display_name || 'Admin';
-    } else {
-      const client = await db.get('SELECT contact_name FROM clients WHERE id = ?', [req.user!.id]);
-      senderName = client?.contact_name || senderName;
-    }
-
-    const result = await db.run(
-      `
-    INSERT INTO messages (context_type, project_id, client_id, sender_type, sender_name, message)
-    VALUES ('project', ?, ?, ?, ?, ?)
-  `,
-      [
-        projectId,
-        projectData?.client_id,
-        req.user!.type,
-        senderName,
-        content.trim()
-      ]
+    const senderName = await messageService.resolveSenderName(
+      req.user!.id,
+      req.user!.type,
+      req.user!.email
     );
 
-    const newMessage = await db.get(
-      `
-    SELECT id, sender_type, sender_name, message as content, read_at, edited_at, created_at
-    FROM messages WHERE id = ?
-  `,
-      [result.lastID]
-    );
+    const newMessage = await messageService.createProjectMessage({
+      projectId,
+      clientId,
+      senderType: req.user!.type,
+      senderName,
+      content: content.trim()
+    });
 
     sendCreated(res, newMessage, 'Message sent');
   })
@@ -116,10 +86,8 @@ router.put(
     if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
-    const db = getDatabase();
 
-    const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
-    if (!project) {
+    if (!(await projectService.projectExists(projectId))) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
@@ -127,15 +95,7 @@ router.put(
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
-    await db.run(
-      `
-    UPDATE messages
-    SET read_at = CURRENT_TIMESTAMP
-    WHERE project_id = ? AND context_type = 'project' AND sender_type != ? AND read_at IS NULL
-  `,
-      [projectId, req.user!.type]
-    );
-
+    await messageService.markProjectMessagesRead(projectId, req.user!.type);
     sendSuccess(res, undefined, 'Messages marked as read');
   })
 );

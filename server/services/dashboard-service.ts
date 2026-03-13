@@ -219,6 +219,26 @@ async function getActiveProjects(limit: number = 5): Promise<ActiveProjectRow[]>
   return rows || [];
 }
 
+/**
+ * Get full dashboard data (attention, snapshot, activity, projects).
+ * Combines multiple queries into a single call for the dashboard endpoint.
+ */
+async function getFullDashboard(): Promise<{
+  attention: AttentionItems;
+  snapshot: DashboardSnapshot;
+  recentActivity: ActivityRow[];
+  activeProjects: ActiveProjectRow[];
+}> {
+  const [attention, snapshot, recentActivity, activeProjects] = await Promise.all([
+    getAttentionItems(),
+    getDashboardSnapshot(),
+    getRecentActivity(),
+    getActiveProjects()
+  ]);
+
+  return { attention, snapshot, recentActivity, activeProjects };
+}
+
 // =====================================================
 // EXPORTED SINGLETON
 // =====================================================
@@ -228,5 +248,6 @@ export const dashboardService = {
   getAttentionItems,
   getDashboardSnapshot,
   getRecentActivity,
-  getActiveProjects
+  getActiveProjects,
+  getFullDashboard
 };

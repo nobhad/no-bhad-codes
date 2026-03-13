@@ -20,6 +20,7 @@ import * as timeTracking from './project/time-tracking.js';
 import * as templates from './project/templates.js';
 import * as health from './project/health.js';
 import * as adminOps from './project/admin.js';
+import * as milestones from './project/milestones.js';
 
 // Re-export all types for consumers
 export type {
@@ -83,6 +84,8 @@ export const projectService = {
   getClientInfo: core.getClientInfo,
   saveFileRecord: core.saveFileRecord,
   projectExists: core.projectExists,
+  getProjectDashboard: core.getProjectDashboard,
+  addProjectUpdate: core.addProjectUpdate,
 
   // ── Tasks ─────────────────────────────────────
   createTask: tasks.createTask,
@@ -110,6 +113,7 @@ export const projectService = {
 
   // ── Global Tasks ──────────────────────────────
   getAllTasks: tasks.getAllTasks,
+  updateTaskAdmin: tasks.updateTaskAdmin,
 
   // ── Time Tracking ─────────────────────────────
   logTime: timeTracking.logTime,
@@ -118,6 +122,11 @@ export const projectService = {
   deleteTimeEntry: timeTracking.deleteTimeEntry,
   getProjectTimeStats: timeTracking.getProjectTimeStats,
   getTeamTimeReport: timeTracking.getTeamTimeReport,
+  getAdminTimeEntries: timeTracking.getAdminTimeEntries,
+  startTimer: timeTracking.startTimer,
+  stopTimer: timeTracking.stopTimer,
+  createAdminTimeEntry: timeTracking.createAdminTimeEntry,
+  timeEntryExists: timeTracking.timeEntryExists,
 
   // ── Templates ─────────────────────────────────
   createTemplate: templates.createTemplate,
@@ -139,6 +148,15 @@ export const projectService = {
   createAdminProject: adminOps.createProject,
   insertProjectUpdateRecord: adminOps.insertProjectUpdateRecord,
   insertFileRecord: adminOps.insertFileRecord,
+
+  // ── Milestones ──────────────────────────────────
+  milestoneProjectExists: milestones.projectExists,
+  getMilestones: milestones.getMilestones,
+  createMilestone: milestones.createMilestone,
+  getMilestoneByIdAndProject: milestones.getMilestoneByIdAndProject,
+  updateMilestone: milestones.updateMilestone,
+  getActiveMilestone: milestones.getActiveMilestone,
+  normalizeDeliverables: milestones.normalizeDeliverables,
 
   // ── Tags ──────────────────────────────────────
   async addTagToProject(projectId: number, tagId: number): Promise<void> {

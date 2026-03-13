@@ -12,7 +12,6 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessContract } from '../../utils/access-control.js';
 import { contractService } from '../../services/contract-service.js';
-import { getDatabase } from '../../database/init.js';
 import { getNumber, getString } from '../../database/row-helpers.js';
 import { sendSuccess, errorResponse, ErrorCodes } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
@@ -43,29 +42,13 @@ router.get(
   '/my',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const db = getDatabase();
     const clientId = req.user?.id;
 
     if (!clientId || req.user?.type === 'admin') {
       return sendSuccess(res, { contracts: [] });
     }
 
-    const contracts = await db.all(`
-      SELECT
-        c.id,
-        c.project_id as projectId,
-        p.project_name as projectName,
-        c.status,
-        c.signed_at as signedAt,
-        c.created_at as createdAt,
-        c.expires_at as expiresAt
-      FROM contracts c
-      LEFT JOIN projects p ON c.project_id = p.id
-      WHERE c.client_id = ?
-        AND c.status != 'cancelled'
-      ORDER BY c.created_at DESC
-    `, [clientId]);
-
+    const contracts = await contractService.getClientContracts(clientId);
     sendSuccess(res, { contracts });
   })
 );
@@ -151,23 +134,12 @@ router.get(
       return errorResponse(res, 'Invalid contract ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const db = getDatabase();
-
-    const contract = await db.get('SELECT project_id FROM contracts WHERE id = ?', [contractId]);
-    if (!contract) {
+    const projectId = await contractService.getContractProjectId(contractId);
+    if (projectId === null) {
       return errorResponse(res, 'Contract not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
-    const projectId = getNumber(contract as Record<string, unknown>, 'project_id');
-    // Filter by BOTH project_id AND contract_id for proper isolation
-    const logs = await db.all(
-      `SELECT id, action, actor_email, actor_ip, actor_user_agent, details, created_at
-       FROM contract_signature_log
-       WHERE project_id = ? AND contract_id = ?
-       ORDER BY created_at DESC`,
-      [projectId, contractId]
-    );
-
+    const logs = await contractService.getContractActivity(contractId, projectId);
     sendSuccess(res, { activity: logs });
   })
 );
@@ -220,7 +192,6 @@ router.post(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { contractId, signerName, signatureData, agreedToTerms } = req.body;
-    const db = getDatabase();
 
     // --- Validation ---
     if (!contractId || !signerName || !signatureData) {
@@ -247,89 +218,44 @@ router.post(
     }
 
     // --- Fetch contract and verify ownership ---
-    const contract = await db.get(
-      `SELECT c.id, c.project_id, c.client_id, c.status, c.signed_at,
-              p.project_name
-       FROM contracts c
-       LEFT JOIN projects p ON c.project_id = p.id
-       WHERE c.id = ?`,
-      [contractId]
-    );
+    const contract = await contractService.getContractForSigning(contractId);
 
     if (!contract) {
       return errorResponse(res, 'Contract not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
-    const c = contract as Record<string, unknown>;
-
     // Verify the contract belongs to this client
-    if (getNumber(c, 'client_id') !== clientId) {
+    if (getNumber(contract, 'client_id') !== clientId) {
       return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     // Verify contract status is 'sent' (awaiting signature)
-    const status = getString(c, 'status');
+    const status = getString(contract, 'status');
     if (status !== 'sent' && status !== 'viewed') {
-      const message = c.signed_at
+      const message = contract.signed_at
         ? 'This contract has already been signed.'
         : 'This contract is not available for signing.';
       return errorResponse(res, message, 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const projectId = getNumber(c, 'project_id');
-    const projectName = getString(c, 'project_name');
+    const projectId = getNumber(contract, 'project_id');
+    const projectName = getString(contract, 'project_name');
     const clientEmail = req.user?.email || '';
     const signerIp = req.ip || req.socket.remoteAddress || 'unknown';
     const signerUserAgent = (req.get('user-agent') || 'unknown').substring(0, 500);
     const signedAt = new Date().toISOString();
 
-    // --- Update contracts table ---
-    await db.run(
-      `UPDATE contracts SET
-        status = 'signed',
-        signed_at = ?,
-        signer_name = ?,
-        signer_email = ?,
-        signer_ip = ?,
-        signer_user_agent = ?,
-        signature_data = ?,
-        signature_token = NULL,
-        signature_expires_at = NULL,
-        updated_at = datetime('now')
-       WHERE id = ?`,
-      [signedAt, signerName, clientEmail, signerIp, signerUserAgent, signatureData, contractId]
-    );
-
-    // --- Dual-write: update projects table signature fields ---
-    if (projectId) {
-      await db.run(
-        `UPDATE projects SET
-          contract_signed_at = ?,
-          contract_signature_token = NULL,
-          contract_signature_expires_at = NULL,
-          contract_signer_name = ?,
-          contract_signer_email = ?,
-          contract_signer_ip = ?,
-          contract_signer_user_agent = ?,
-          contract_signature_data = ?
-         WHERE id = ?`,
-        [signedAt, signerName, clientEmail, signerIp, signerUserAgent, signatureData, projectId]
-      );
-    }
-
-    // --- Log to contract_signature_log ---
-    await db.run(
-      `INSERT INTO contract_signature_log (project_id, contract_id, action, actor_email, actor_ip, actor_user_agent, details)
-       VALUES (?, ?, 'signed', ?, ?, ?, ?)`,
-      [
-        projectId || null,
-        contractId,
-        clientEmail,
-        signerIp,
-        signerUserAgent,
-        JSON.stringify({ signerName, signedAt, method: 'portal' })
-      ]
-    );
+    // --- Execute signing via service ---
+    await contractService.signContractFromPortal({
+      contractId,
+      projectId: projectId || null,
+      signedAt,
+      signerName,
+      clientEmail,
+      signerIp,
+      signerUserAgent,
+      signatureData
+    });
 
     logger.info(
       `[Contract] Contract ${contractId} signed in-portal by ${signerName} (${clientEmail}) for project ${projectId || 'N/A'}`

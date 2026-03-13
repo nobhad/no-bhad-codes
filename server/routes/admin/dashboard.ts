@@ -5,8 +5,8 @@ import { cacheService } from '../../services/cache-service.js';
 import { emailService } from '../../services/email-service.js';
 import { errorTracker } from '../../services/error-tracking.js';
 import { auditLogger } from '../../services/audit-logger.js';
-import { getDatabase } from '../../database/init.js';
 import { projectService } from '../../services/project-service.js';
+import { dashboardService } from '../../services/dashboard-service.js';
 import { errorResponse, errorResponseWithPayload, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 
@@ -25,26 +25,6 @@ const router = express.Router();
  *     responses:
  *       200:
  *         description: System status retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "healthy"
- *                 timestamp:
- *                   type: string
- *                   format: date-time
- *                 services:
- *                   type: object
- *                   properties:
- *                     cache:
- *                       type: object
- *                     email:
- *                       type: object
- *                     database:
- *                       type: object
  *       403:
  *         description: Admin access required
  */
@@ -117,46 +97,6 @@ router.get(
  *     description: Export audit logs with optional filters and pagination
  *     security:
  *       - BearerAuth: []
- *     parameters:
- *       - in: query
- *         name: action
- *         schema:
- *           type: string
- *         description: Filter by action (e.g. create, update, delete, login)
- *       - in: query
- *         name: entityType
- *         schema:
- *           type: string
- *         description: Filter by entity type (e.g. client, project, invoice)
- *       - in: query
- *         name: userEmail
- *         schema:
- *           type: string
- *         description: Filter by user email
- *       - in: query
- *         name: startDate
- *         schema:
- *           type: string
- *           format: date-time
- *         description: Start date filter (ISO 8601)
- *       - in: query
- *         name: endDate
- *         schema:
- *           type: string
- *           format: date-time
- *         description: End date filter (ISO 8601)
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 100
- *         description: Max records to return
- *       - in: query
- *         name: offset
- *         schema:
- *           type: integer
- *           default: 0
- *         description: Pagination offset
  *     responses:
  *       200:
  *         description: Audit log retrieved successfully
@@ -217,29 +157,8 @@ router.get(
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     try {
-      const db = getDatabase();
-
-      // Get new leads count (pending intake + new contact submissions)
-      const leadsCount = await db.get(`
-        SELECT
-          (SELECT COUNT(*) FROM active_projects WHERE status = 'pending') +
-          (SELECT COUNT(*) FROM contact_submissions WHERE status = 'new') as count
-      `);
-
-      // Get unread messages count (from all threads)
-      // Note: Uses unified messages table with context_type after migration 085
-      const messagesCount = await db.get(`
-        SELECT COUNT(*) as count
-        FROM active_messages
-        WHERE context_type = 'general'
-          AND read_at IS NULL
-          AND sender_type != 'admin'
-      `);
-
-      sendSuccess(res, {
-        leads: leadsCount?.count || 0,
-        messages: messagesCount?.count || 0
-      });
+      const counts = await dashboardService.getSidebarCounts();
+      sendSuccess(res, counts);
     } catch (error) {
       logger.error('Error fetching sidebar counts:', {
         error: error instanceof Error ? error : undefined
@@ -259,25 +178,6 @@ router.get(
  *     description: Returns tasks from all active projects, ordered by priority and due date
  *     security:
  *       - BearerAuth: []
- *     parameters:
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *           enum: [pending, in_progress, completed, blocked, cancelled]
- *         description: Filter by task status
- *       - in: query
- *         name: priority
- *         schema:
- *           type: string
- *           enum: [low, medium, high, urgent]
- *         description: Filter by priority
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 100
- *         description: Max number of tasks to return
  *     responses:
  *       200:
  *         description: Tasks retrieved successfully
@@ -345,87 +245,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     try {
-      const db = getDatabase();
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const oneWeekAgo = new Date();
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-      // Attention items
-      const overdueInvoices = await db.get(`
-        SELECT COUNT(*) as count FROM active_invoices
-        WHERE due_date < date('now') AND status != 'paid'
-      `);
-
-      const pendingContracts = await db.get(`
-        SELECT COUNT(*) as count FROM active_projects
-        WHERE contract_signed_at IS NULL
-        AND status NOT IN ('completed', 'cancelled')
-      `);
-
-      const newLeadsThisWeek = await db.get(`
-        SELECT COUNT(*) as count FROM contact_submissions
-        WHERE created_at >= datetime('now', '-7 days')
-      `);
-
-      const unreadMessages = await db.get(`
-        SELECT COUNT(*) as count FROM active_messages
-        WHERE read_at IS NULL AND sender_type != 'admin'
-      `);
-
-      // Snapshot metrics
-      const activeProjects = await db.get(`
-        SELECT COUNT(*) as count FROM active_projects
-        WHERE status IN ('active', 'in-progress', 'in_progress')
-      `);
-
-      const totalClients = await db.get(`
-        SELECT COUNT(*) as count FROM active_clients
-      `);
-
-      const revenueMTD = await db.get(`
-        SELECT COALESCE(SUM(amount_paid), 0) as total FROM active_invoices
-        WHERE strftime('%Y-%m', paid_date) = strftime('%Y-%m', 'now')
-        AND status = 'paid'
-      `);
-
-      const leadsStats = await db.get(`
-        SELECT
-          COUNT(*) as total,
-          SUM(CASE WHEN status = 'converted' THEN 1 ELSE 0 END) as converted
-        FROM contact_submissions
-      `);
-
-      // Recent activity (from client_activities table)
-      const recentActivity = await db.all(`
-        SELECT
-          'activity' || id as id,
-          activity_type as type,
-          title as description,
-          created_at as timestamp,
-          'client' as entityType,
-          COALESCE(client_id, '') as entityId
-        FROM client_activities
-        ORDER BY created_at DESC
-        LIMIT 10
-      `);
-
-      // Active projects list
-      const activeProjectsList = await db.all(`
-        SELECT
-          p.id,
-          p.project_name as name,
-          COALESCE(c.company_name, c.contact_name, '') as client,
-          p.client_id,
-          p.status,
-          COALESCE(p.progress, 0) as progress,
-          p.estimated_end_date as dueDate
-        FROM active_projects p
-        LEFT JOIN active_clients c ON p.client_id = c.id
-        WHERE p.status IN ('active', 'in-progress', 'in_progress')
-        ORDER BY p.estimated_end_date ASC NULLS LAST
-        LIMIT 5
-      `);
+      const dashboard = await dashboardService.getFullDashboard();
 
       // Upcoming tasks
       const upcomingTasks = await projectService.getAllTasks({
@@ -433,25 +253,8 @@ router.get(
         limit: 10
       });
 
-      const totalLeads = Number(leadsStats?.total) || 0;
-      const convertedLeads = Number(leadsStats?.converted) || 0;
-      const conversionRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
-
       sendSuccess(res, {
-        attention: {
-          overdueInvoices: overdueInvoices?.count || 0,
-          pendingContracts: pendingContracts?.count || 0,
-          newLeadsThisWeek: newLeadsThisWeek?.count || 0,
-          unreadMessages: unreadMessages?.count || 0
-        },
-        snapshot: {
-          activeProjects: activeProjects?.count || 0,
-          totalClients: totalClients?.count || 0,
-          revenueMTD: revenueMTD?.total || 0,
-          conversionRate
-        },
-        recentActivity: recentActivity || [],
-        activeProjects: activeProjectsList || [],
+        ...dashboard,
         upcomingTasks: upcomingTasks.map((t) => ({
           id: String(t.id),
           title: t.title,

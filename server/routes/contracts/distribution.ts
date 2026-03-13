@@ -11,7 +11,6 @@ import express, { Response } from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { contractService } from '../../services/contract-service.js';
-import { getDatabase } from '../../database/init.js';
 import { getString } from '../../database/row-helpers.js';
 import { BUSINESS_INFO } from '../../config/business.js';
 import { sendSuccess, sendCreated, errorResponse, ErrorCodes } from '../../utils/api-response.js';
@@ -57,28 +56,18 @@ router.post(
       return errorResponse(res, 'Invalid contract ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const db = getDatabase();
-
     const contract = await contractService.getContract(contractId);
 
     // Get project and client info
-    const project = await db.get(
-      `SELECT p.id, p.project_name, p.contract_signature_token, p.contract_signature_expires_at,
-              c.contact_name, c.email
-       FROM projects p
-       LEFT JOIN clients c ON p.client_id = c.id
-       WHERE p.id = ?`,
-      [contract.projectId]
-    );
+    const project = await contractService.getProjectWithClientForDistribution(contract.projectId);
 
     if (!project) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
-    const p = project as Record<string, unknown>;
-    const clientEmail = getString(p, 'email');
-    const clientName = getString(p, 'contact_name') || 'there';
-    const projectName = getString(p, 'project_name');
+    const clientEmail = getString(project, 'email');
+    const clientName = getString(project, 'contact_name') || 'there';
+    const projectName = getString(project, 'project_name');
 
     // Validate email exists and has valid format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -87,19 +76,7 @@ router.post(
     }
 
     // Generate signature token if not exists
-    let signatureToken = p.contract_signature_token as string | null;
-    if (!signatureToken) {
-      const crypto = await import('crypto');
-      signatureToken = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Date();
-      const CONTRACT_SIGNATURE_EXPIRY_DAYS = 30;
-      expiresAt.setDate(expiresAt.getDate() + CONTRACT_SIGNATURE_EXPIRY_DAYS);
-
-      await db.run(
-        'UPDATE projects SET contract_signature_token = ?, contract_signature_expires_at = ? WHERE id = ?',
-        [signatureToken, expiresAt.toISOString(), contract.projectId]
-      );
-    }
+    const signatureToken = await contractService.ensureProjectSignatureToken(contract.projectId);
 
     const baseUrl = getBaseUrl();
     const signatureUrl = `${baseUrl}/sign-contract.html?token=${signatureToken}`;
@@ -139,11 +116,13 @@ router.post(
     });
 
     // Log the send action
-    await db.run(
-      `INSERT INTO contract_signature_log (project_id, contract_id, action, actor_email, details)
-       VALUES (?, ?, 'sent', ?, ?)`,
-      [contract.projectId, contractId, req.user?.email || 'admin', JSON.stringify({ contractId })]
-    );
+    await contractService.logSignatureAction({
+      projectId: contract.projectId,
+      contractId,
+      action: 'sent',
+      actorEmail: req.user?.email || 'admin',
+      details: JSON.stringify({ contractId })
+    });
 
     // Update contract status to sent if it's a draft
     let updatedContract = contract;
@@ -190,31 +169,21 @@ router.post(
       return errorResponse(res, 'Invalid contract ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const db = getDatabase();
-
     const contract = await contractService.getContract(contractId);
-    const project = await db.get(
-      `SELECT p.project_name, p.contract_signature_token, p.contract_signature_expires_at,
-              c.contact_name, c.email
-       FROM projects p
-       LEFT JOIN clients c ON p.client_id = c.id
-       WHERE p.id = ?`,
-      [contract.projectId]
-    );
+    const project = await contractService.getProjectWithClientForDistribution(contract.projectId);
 
     if (!project) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
-    const p = project as Record<string, unknown>;
-    const signatureToken = p.contract_signature_token as string | null;
+    const signatureToken = project.contract_signature_token as string | null;
     if (!signatureToken) {
       return errorResponse(res, 'No active signature token found', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const clientEmail = getString(p, 'email');
-    const clientName = getString(p, 'contact_name') || 'there';
-    const projectName = getString(p, 'project_name');
+    const clientEmail = getString(project, 'email');
+    const clientName = getString(project, 'contact_name') || 'there';
+    const projectName = getString(project, 'project_name');
 
     // Validate email exists and has valid format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -225,7 +194,7 @@ router.post(
     const baseUrl = getBaseUrl();
     const signatureUrl = `${baseUrl}/sign-contract.html?token=${signatureToken}`;
     const contractPreviewUrl = `${baseUrl}/api/projects/${contract.projectId}/contract/pdf`;
-    const expiresAt = p.contract_signature_expires_at as string | null;
+    const expiresAt = project.contract_signature_expires_at as string | null;
 
     const { emailService } = await import('../../services/email-service.js');
     await emailService.sendEmail({
@@ -261,17 +230,15 @@ router.post(
       `.trim()
     });
 
-    await db.run(
-      `INSERT INTO contract_signature_log (project_id, contract_id, action, actor_email, details)
-       VALUES (?, ?, 'reminder_sent', ?, ?)`,
-      [contract.projectId, contractId, req.user?.email || 'admin', JSON.stringify({ contractId })]
-    );
+    await contractService.logSignatureAction({
+      projectId: contract.projectId,
+      contractId,
+      action: 'reminder_sent',
+      actorEmail: req.user?.email || 'admin',
+      details: JSON.stringify({ contractId })
+    });
 
-    await db.run(
-      `UPDATE contracts SET last_reminder_at = datetime('now'), reminder_count = COALESCE(reminder_count, 0) + 1
-       WHERE id = ?`,
-      [contractId]
-    );
+    await contractService.updateContractReminder(contractId);
 
     sendSuccess(res, undefined, 'Reminder sent successfully');
   })
@@ -310,7 +277,6 @@ router.post(
       return errorResponse(res, 'Invalid contract ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const db = getDatabase();
     const now = new Date().toISOString();
 
     const contract = await contractService.updateContract(contractId, {
@@ -318,19 +284,15 @@ router.post(
       expiresAt: now
     });
 
-    await db.run(
-      `UPDATE projects SET
-        contract_signature_expires_at = ?,
-        contract_signature_token = NULL
-       WHERE id = ?`,
-      [now, contract.projectId]
-    );
+    await contractService.expireProjectSignatureToken(contract.projectId);
 
-    await db.run(
-      `INSERT INTO contract_signature_log (project_id, contract_id, action, actor_email, details)
-       VALUES (?, ?, 'expired', ?, ?)`,
-      [contract.projectId, contractId, req.user?.email || 'admin', JSON.stringify({ contractId })]
-    );
+    await contractService.logSignatureAction({
+      projectId: contract.projectId,
+      contractId,
+      action: 'expired',
+      actorEmail: req.user?.email || 'admin',
+      details: JSON.stringify({ contractId })
+    });
 
     sendSuccess(res, { contract }, 'Contract expired');
   })
@@ -430,25 +392,17 @@ router.post(
       return errorResponse(res, 'Invalid contract ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const db = getDatabase();
     const contract = await contractService.getContract(contractId);
 
-    const project = await db.get(
-      `SELECT p.project_name, c.contact_name, c.email
-       FROM projects p
-       LEFT JOIN clients c ON p.client_id = c.id
-       WHERE p.id = ?`,
-      [contract.projectId]
-    );
+    const project = await contractService.getProjectWithClientForRenewal(contract.projectId);
 
     if (!project) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
-    const p = project as Record<string, unknown>;
-    const clientEmail = getString(p, 'email');
-    const clientName = getString(p, 'contact_name') || 'there';
-    const projectName = getString(p, 'project_name');
+    const clientEmail = getString(project, 'email');
+    const clientName = getString(project, 'contact_name') || 'there';
+    const projectName = getString(project, 'project_name');
     const renewalAt = contract.renewalAt
       ? new Date(contract.renewalAt).toLocaleDateString('en-US')
       : 'soon';
@@ -492,11 +446,13 @@ router.post(
       reminderCount: (contract.reminderCount || 0) + 1
     });
 
-    await db.run(
-      `INSERT INTO contract_signature_log (project_id, contract_id, action, actor_email, details)
-       VALUES (?, ?, 'renewal_reminder_sent', ?, ?)`,
-      [contract.projectId, contractId, req.user?.email || 'admin', JSON.stringify({ contractId })]
-    );
+    await contractService.logSignatureAction({
+      projectId: contract.projectId,
+      contractId,
+      action: 'renewal_reminder_sent',
+      actorEmail: req.user?.email || 'admin',
+      details: JSON.stringify({ contractId })
+    });
 
     sendSuccess(res, undefined, 'Renewal reminder sent');
   })

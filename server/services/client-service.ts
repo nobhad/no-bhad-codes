@@ -2195,6 +2195,106 @@ class ClientService {
       [token, expiresAt, clientId]
     );
   }
+  // =====================================================
+  // ADMIN-WIDE CONTACT QUERIES
+  // =====================================================
+
+  /**
+   * Get all explicit client_contacts with company info (admin CRM view).
+   */
+  async getAllExplicitContacts(): Promise<Record<string, unknown>[]> {
+    const db = getDatabase();
+    return db.all(`
+      SELECT
+        cc.id,
+        cc.first_name as firstName,
+        cc.last_name as lastName,
+        cc.email,
+        cc.phone,
+        cc.role,
+        cc.is_primary as isPrimary,
+        'active' as status,
+        cc.client_id as clientId,
+        c.company_name as company,
+        c.company_name as clientName,
+        cc.created_at as createdAt,
+        cc.updated_at as updatedAt
+      FROM client_contacts cc
+      JOIN clients c ON cc.client_id = c.id
+      WHERE c.deleted_at IS NULL
+        AND cc.deleted_at IS NULL
+      ORDER BY cc.is_primary DESC, cc.created_at DESC
+    `) as Promise<Record<string, unknown>[]>;
+  }
+
+  /**
+   * Get all client records for the admin contacts view.
+   */
+  async getAllClientContactRecords(): Promise<Record<string, unknown>[]> {
+    const db = getDatabase();
+    return db.all(`
+      SELECT
+        c.id,
+        c.contact_name,
+        c.email,
+        c.phone,
+        c.company_name as company,
+        c.status,
+        c.created_at as createdAt,
+        c.updated_at as updatedAt
+      FROM clients c
+      WHERE c.deleted_at IS NULL
+    `) as Promise<Record<string, unknown>[]>;
+  }
+
+  /**
+   * Update a client_contact record by ID (admin contacts endpoint).
+   * Also handles setting is_primary across the same client's contacts.
+   */
+  async updateContactAdmin(
+    contactId: number,
+    data: { isPrimary?: boolean; firstName?: string; lastName?: string; email?: string; phone?: string; role?: string }
+  ): Promise<Record<string, unknown> | undefined> {
+    const db = getDatabase();
+    const updates: string[] = [];
+    const values: (string | number | null)[] = [];
+
+    if (data.isPrimary !== undefined) {
+      if (data.isPrimary) {
+        const contact = await db.get('SELECT client_id FROM client_contacts WHERE id = ?', [contactId]);
+        if (contact) {
+          await db.run('UPDATE client_contacts SET is_primary = 0 WHERE client_id = ?', [(contact as Record<string, unknown>).client_id as number]);
+        }
+      }
+      updates.push('is_primary = ?');
+      values.push(data.isPrimary ? 1 : 0);
+    }
+    if (data.firstName !== undefined) { updates.push('first_name = ?'); values.push(data.firstName); }
+    if (data.lastName !== undefined) { updates.push('last_name = ?'); values.push(data.lastName); }
+    if (data.email !== undefined) { updates.push('email = ?'); values.push(data.email); }
+    if (data.phone !== undefined) { updates.push('phone = ?'); values.push(data.phone); }
+    if (data.role !== undefined) { updates.push('role = ?'); values.push(data.role); }
+
+    if (updates.length === 0) return undefined;
+
+    updates.push('updated_at = CURRENT_TIMESTAMP');
+    values.push(contactId);
+
+    const CLIENT_CONTACT_COLUMNS = `
+      id, client_id, first_name, last_name, email, phone, title, department,
+      role, is_primary, notes, created_at, updated_at
+    `.replace(/\\s+/g, ' ').trim();
+
+    await db.run(
+      `UPDATE client_contacts SET ${updates.join(', ')} WHERE id = ?`,
+      values
+    );
+
+    return db.get(
+      `SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`,
+      [contactId]
+    ) as Promise<Record<string, unknown> | undefined>;
+  }
 }
 
 // Export singleton instance

@@ -1485,6 +1485,255 @@ class MessageService {
     );
     return (updatedPreferences as Record<string, unknown>) ?? null;
   }
+  // =====================================================
+  // BASIC PROJECT MESSAGE CRUD
+  // =====================================================
+
+  /**
+   * Get all project-context messages for a given project, ordered ASC.
+   */
+  async getProjectMessages(projectId: number): Promise<Record<string, unknown>[]> {
+    const db = getDatabase();
+    return db.all(
+      `SELECT id, sender_type, sender_name, message as content, read_at, edited_at, created_at
+       FROM messages
+       WHERE project_id = ? AND context_type = 'project'
+       ORDER BY created_at ASC`,
+      [projectId]
+    ) as Promise<Record<string, unknown>[]>;
+  }
+
+  /**
+   * Create a project-context message and return the new row.
+   */
+  async createProjectMessage(params: {
+    projectId: number;
+    clientId: number | null;
+    senderType: string;
+    senderName: string;
+    content: string;
+  }): Promise<Record<string, unknown> | undefined> {
+    const db = getDatabase();
+    const result = await db.run(
+      `INSERT INTO messages (context_type, project_id, client_id, sender_type, sender_name, message)
+       VALUES ('project', ?, ?, ?, ?, ?)`,
+      [params.projectId, params.clientId, params.senderType, params.senderName, params.content]
+    );
+
+    return db.get(
+      `SELECT id, sender_type, sender_name, message as content, read_at, edited_at, created_at
+       FROM messages WHERE id = ?`,
+      [result.lastID]
+    ) as Promise<Record<string, unknown> | undefined>;
+  }
+
+  /**
+   * Mark all unread project-context messages from the opposite sender type as read.
+   */
+  async markProjectMessagesRead(projectId: number, readerType: string): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      `UPDATE messages
+       SET read_at = CURRENT_TIMESTAMP
+       WHERE project_id = ? AND context_type = 'project' AND sender_type != ? AND read_at IS NULL`,
+      [projectId, readerType]
+    );
+  }
+
+  /**
+   * Resolve the display name for a sender (admin user or client).
+   */
+  async resolveSenderName(userId: number, userType: string, fallbackEmail: string): Promise<string> {
+    const db = getDatabase();
+    if (userType === 'admin') {
+      const adminUser = await db.get('SELECT display_name FROM users WHERE id = ?', [userId]);
+      return (adminUser as Record<string, unknown>)?.display_name as string || 'Admin';
+    }
+    const client = await db.get('SELECT contact_name FROM clients WHERE id = ?', [userId]);
+    return (client as Record<string, unknown>)?.contact_name as string || fallbackEmail;
+  }
+
+  /**
+   * Get the client_id associated with a project.
+   */
+  async getProjectClientId(projectId: number): Promise<number | null> {
+    const db = getDatabase();
+    const row = await db.get('SELECT client_id FROM projects WHERE id = ?', [projectId]);
+    return (row as Record<string, unknown>)?.client_id as number | null ?? null;
+  }
+
+  // =====================================================
+  // ADMIN CONVERSATION METHODS
+  // =====================================================
+
+  /**
+   * Get all admin conversations with client info and unread counts.
+   */
+  async getAdminConversations(): Promise<Record<string, unknown>[]> {
+    const db = getDatabase();
+    return db.all(`
+      SELECT
+        mt.id,
+        mt.subject,
+        mt.thread_type as type,
+        mt.status,
+        mt.priority,
+        mt.last_message_at as lastMessageAt,
+        mt.created_at as createdAt,
+        c.id as clientId,
+        COALESCE(c.company_name, c.contact_name) as clientName,
+        c.email as clientEmail,
+        p.id as projectId,
+        p.project_name as projectName,
+        (SELECT COUNT(*) FROM messages m WHERE m.thread_id = mt.id AND m.context_type = 'general') as messageCount,
+        (SELECT COUNT(*) FROM messages m
+         WHERE m.thread_id = mt.id
+         AND m.context_type = 'general'
+         AND m.read_at IS NULL
+         AND m.sender_type != 'admin'
+         AND (m.is_internal IS NULL OR m.is_internal = 0)) as unreadCount,
+        (SELECT m.message FROM messages m
+         WHERE m.thread_id = mt.id
+         AND m.context_type = 'general'
+         AND (m.is_internal IS NULL OR m.is_internal = 0)
+         ORDER BY m.created_at DESC LIMIT 1) as lastMessage
+      FROM message_threads mt
+      JOIN clients c ON mt.client_id = c.id
+      LEFT JOIN projects p ON mt.project_id = p.id
+      WHERE c.deleted_at IS NULL
+      ORDER BY mt.last_message_at DESC
+    `) as Promise<Record<string, unknown>[]>;
+  }
+
+  /**
+   * Get a single conversation with client details.
+   */
+  async getAdminConversation(conversationId: number): Promise<Record<string, unknown> | undefined> {
+    const db = getDatabase();
+    return db.get(`
+      SELECT
+        mt.*,
+        c.company_name,
+        c.contact_name,
+        c.email as client_email
+      FROM message_threads mt
+      JOIN clients c ON mt.client_id = c.id
+      WHERE mt.id = ?
+    `, [conversationId]) as Promise<Record<string, unknown> | undefined>;
+  }
+
+  /**
+   * Get all messages in a conversation (including internal for admin view).
+   */
+  async getAdminConversationMessages(conversationId: number): Promise<Record<string, unknown>[]> {
+    const db = getDatabase();
+    return db.all(`
+      SELECT
+        m.id,
+        m.message as content,
+        m.sender_type as senderType,
+        m.sender_name as senderName,
+        m.attachments,
+        m.is_internal as isInternal,
+        CASE WHEN m.read_at IS NOT NULL THEN 1 ELSE 0 END as isRead,
+        m.read_at as readAt,
+        m.created_at as createdAt
+      FROM messages m
+      WHERE m.thread_id = ?
+        AND m.context_type = 'general'
+      ORDER BY m.created_at ASC
+    `, [conversationId]) as Promise<Record<string, unknown>[]>;
+  }
+
+  /**
+   * Mark all unread client messages in a conversation as read (admin side).
+   */
+  async markAdminConversationRead(conversationId: number): Promise<void> {
+    const db = getDatabase();
+    await db.run(`
+      UPDATE messages
+      SET read_at = CURRENT_TIMESTAMP
+      WHERE thread_id = ?
+      AND sender_type != 'admin'
+      AND read_at IS NULL
+    `, [conversationId]);
+  }
+
+  /**
+   * Send an admin message in a conversation.
+   * Returns the created message row.
+   */
+  async sendAdminMessage(params: {
+    conversationId: number;
+    adminUserId: number;
+    content: string;
+    attachments?: unknown[] | null;
+  }): Promise<Record<string, unknown> | undefined> {
+    const db = getDatabase();
+
+    // Get thread info
+    const thread = await db.get(
+      'SELECT client_id, project_id FROM message_threads WHERE id = ?',
+      [params.conversationId]
+    );
+    if (!thread) return undefined;
+    const t = thread as Record<string, unknown>;
+
+    // Resolve admin display name
+    const adminUser = await db.get(
+      'SELECT display_name FROM users WHERE id = ?',
+      [params.adminUserId]
+    );
+    const senderName = (adminUser as Record<string, unknown>)?.display_name as string || 'Admin';
+
+    // Insert the message
+    const result = await db.run(`
+      INSERT INTO messages (
+        thread_id, client_id, project_id, context_type,
+        sender_type, sender_name, message, attachments,
+        created_at, updated_at
+      ) VALUES (?, ?, ?, 'general', 'admin', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `, [
+      params.conversationId,
+      t.client_id as number,
+      t.project_id as number | null,
+      senderName,
+      params.content.trim(),
+      params.attachments ? JSON.stringify(params.attachments) : null
+    ]);
+
+    // Update thread's last_message_at
+    await db.run(`
+      UPDATE message_threads
+      SET last_message_at = CURRENT_TIMESTAMP, last_message_by = 'admin'
+      WHERE id = ?
+    `, [params.conversationId]);
+
+    // Get the created message
+    return db.get(`
+      SELECT
+        id,
+        message as content,
+        sender_type as senderType,
+        sender_name as senderName,
+        attachments,
+        created_at as createdAt
+      FROM messages
+      WHERE id = ?
+    `, [result.lastID]) as Promise<Record<string, unknown> | undefined>;
+  }
+
+  /**
+   * Toggle star (pinned_count) on a conversation thread.
+   */
+  async toggleConversationStar(conversationId: number, starred: boolean): Promise<void> {
+    const db = getDatabase();
+    await db.run(`
+      UPDATE message_threads
+      SET pinned_count = ?
+      WHERE id = ?
+    `, [starred ? 1 : 0, conversationId]);
+  }
 }
 
 // Export singleton instance

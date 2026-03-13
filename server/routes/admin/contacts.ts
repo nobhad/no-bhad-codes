@@ -11,13 +11,8 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
-import { getDatabase } from '../../database/init.js';
+import { clientService } from '../../services/client-service.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
-
-const CLIENT_CONTACT_COLUMNS = `
-  id, client_id, first_name, last_name, email, phone, title, department,
-  role, is_primary, notes, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
 
 const router = express.Router();
 
@@ -30,59 +25,24 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
-    const db = getDatabase();
-
-    const explicitContacts = await db.all(`
-      SELECT
-        cc.id,
-        cc.first_name as firstName,
-        cc.last_name as lastName,
-        cc.email,
-        cc.phone,
-        cc.role,
-        cc.is_primary as isPrimary,
-        'active' as status,
-        cc.client_id as clientId,
-        c.company_name as company,
-        c.company_name as clientName,
-        cc.created_at as createdAt,
-        cc.updated_at as updatedAt
-      FROM client_contacts cc
-      JOIN clients c ON cc.client_id = c.id
-      WHERE c.deleted_at IS NULL
-        AND cc.deleted_at IS NULL
-      ORDER BY cc.is_primary DESC, cc.created_at DESC
-    `);
-
-    const clientContacts = await db.all(`
-      SELECT
-        c.id,
-        c.contact_name,
-        c.email,
-        c.phone,
-        c.company_name as company,
-        c.status,
-        c.created_at as createdAt,
-        c.updated_at as updatedAt
-      FROM clients c
-      WHERE c.deleted_at IS NULL
-    `);
+    const explicitContacts = await clientService.getAllExplicitContacts();
+    const clientContacts = await clientService.getAllClientContactRecords();
 
     const clientIdsWithContacts = new Set(
-      explicitContacts.map((c: { clientId: number }) => c.clientId)
+      explicitContacts.map((c) => c.clientId as number)
     );
 
     type ContactRow = Record<string, unknown>;
     const allContacts: ContactRow[] = [];
 
-    for (const c of explicitContacts as ContactRow[]) {
+    for (const c of explicitContacts) {
       allContacts.push({
         ...c,
         isPrimary: c.isPrimary === 1
       });
     }
 
-    for (const client of clientContacts as ContactRow[]) {
+    for (const client of clientContacts) {
       const contactName = (client.contact_name as string) || '';
       const nameParts = contactName.trim().split(/\s+/);
       const firstName = nameParts[0] || '';
@@ -137,58 +97,15 @@ router.put(
       return errorResponse(res, 'Invalid contact ID', 400, ErrorCodes.INVALID_ID);
     }
 
-    const db = getDatabase();
-
-    const updates: string[] = [];
-    const values: (string | number | null)[] = [];
-
-    if (isPrimary !== undefined) {
-      if (isPrimary) {
-        const contact = await db.get('SELECT client_id FROM client_contacts WHERE id = ?', [contactId]);
-        if (contact) {
-          await db.run('UPDATE client_contacts SET is_primary = 0 WHERE client_id = ?', [contact.client_id]);
-        }
-      }
-      updates.push('is_primary = ?');
-      values.push(isPrimary ? 1 : 0);
-    }
-    if (firstName !== undefined) {
-      updates.push('first_name = ?');
-      values.push(firstName);
-    }
-    if (lastName !== undefined) {
-      updates.push('last_name = ?');
-      values.push(lastName);
-    }
-    if (email !== undefined) {
-      updates.push('email = ?');
-      values.push(email);
-    }
-    if (phone !== undefined) {
-      updates.push('phone = ?');
-      values.push(phone);
-    }
-    if (role !== undefined) {
-      updates.push('role = ?');
-      values.push(role);
-    }
-
-    if (updates.length === 0) {
+    // Check if there are any fields to update
+    if (isPrimary === undefined && firstName === undefined && lastName === undefined &&
+        email === undefined && phone === undefined && role === undefined) {
       return errorResponse(res, 'No fields to update', 400, ErrorCodes.NO_FIELDS);
     }
 
-    updates.push('updated_at = CURRENT_TIMESTAMP');
-    values.push(contactId);
-
-    await db.run(
-      `UPDATE client_contacts SET ${updates.join(', ')} WHERE id = ?`,
-      values
-    );
-
-    const updatedContact = await db.get(
-      `SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`,
-      [contactId]
-    );
+    const updatedContact = await clientService.updateContactAdmin(contactId, {
+      isPrimary, firstName, lastName, email, phone, role
+    });
 
     sendSuccess(res, { contact: updatedContact });
   })
