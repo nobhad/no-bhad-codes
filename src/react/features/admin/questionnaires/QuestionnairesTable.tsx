@@ -134,7 +134,7 @@ function sortQuestionnaires(a: Questionnaire, b: Questionnaire, sort: SortConfig
   }
 }
 
-export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: QuestionnairesTableProps) {
+export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNotification: _showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: QuestionnairesTableProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
 
   // Build endpoint URL with query params — fetches responses (not templates)

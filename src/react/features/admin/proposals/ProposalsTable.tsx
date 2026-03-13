@@ -137,7 +137,7 @@ function sortProposals(a: Proposal, b: Proposal, sort: SortConfig): number {
   }
 }
 
-export function ProposalsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: ProposalsTableProps) {
+export function ProposalsTable({ getAuthToken, showNotification: _showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: ProposalsTableProps) {
   const containerRef = useFadeIn();
 
   // Data fetching via useListFetch

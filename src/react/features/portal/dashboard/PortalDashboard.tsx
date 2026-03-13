@@ -66,7 +66,7 @@ const ACTIVITY_TYPE_ICONS: Record<string, React.ComponentType<{ className?: stri
 const NAV_TAB_DOCUMENTS = 'documents';
 const NAV_TAB_MESSAGES = 'messages';
 const NAV_TAB_DELIVERABLES = 'deliverables';
-const NAV_TAB_FILES = 'files';
+const _NAV_TAB_FILES = 'files';
 
 // ============================================================================
 // TYPES

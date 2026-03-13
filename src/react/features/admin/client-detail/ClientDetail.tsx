@@ -121,7 +121,7 @@ export function ClientDetail({
     if (client) {
       setPageTitle(client.company_name || client.contact_name || 'Client');
     }
-  }, [client?.company_name, client?.contact_name, setPageTitle]);
+  }, [client, setPageTitle]);
 
   // Dialogs
   const deleteDialog = useConfirmDialog();

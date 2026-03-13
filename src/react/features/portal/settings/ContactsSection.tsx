@@ -152,14 +152,14 @@ export function ContactsSection({ portalFetch, showNotification }: ContactsSecti
         </h3>
         {!showAddForm && (
           <div className="data-table-actions">
-          <button
-            className="icon-btn"
-            onClick={() => { setShowAddForm(true); setEditingId(null); setFormData(EMPTY_FORM); }}
-            title="Add Contact"
-            aria-label="Add Contact"
-          >
-            <Plus />
-          </button>
+            <button
+              className="icon-btn"
+              onClick={() => { setShowAddForm(true); setEditingId(null); setFormData(EMPTY_FORM); }}
+              title="Add Contact"
+              aria-label="Add Contact"
+            >
+              <Plus />
+            </button>
           </div>
         )}
       </div>

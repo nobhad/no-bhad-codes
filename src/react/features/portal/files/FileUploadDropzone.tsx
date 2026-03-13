@@ -12,8 +12,7 @@ import { KEYS } from '@/constants/keyboard';
 import {
   ALLOWED_EXTENSIONS,
   ALLOWED_MIME_TYPES,
-  MAX_FILE_SIZE,
-  MAX_FILE_SIZE_DISPLAY
+  MAX_FILE_SIZE
 } from '@/utils/file-validation';
 import { formatErrorMessage } from '@/utils/error-utils';
 
