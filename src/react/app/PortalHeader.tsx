@@ -106,29 +106,51 @@ function HeaderBreadcrumbs() {
   const currentTab = useCurrentTab();
   const currentGroup = useCurrentGroup();
 
-  // Admin: show Group > Tab when inside a group subtab
-  const isGroupOverview = currentTab === currentGroup;
-  const showGroupCrumb = role === 'admin' && currentGroup && !isGroupOverview;
   const groupLabel = currentGroup ? UNIFIED_TAB_GROUPS[currentGroup]?.label : null;
+  const isSubtab = currentGroup && currentTab !== currentGroup;
+  const isDashboard = currentTab === 'dashboard';
 
   return (
     <nav className="breadcrumb-nav" aria-label="Breadcrumb">
       <ol className="breadcrumb-list">
-        {showGroupCrumb && groupLabel && (
+        {/* Dashboard root crumb — current page when on dashboard, link otherwise */}
+        <li className={`breadcrumb-item${isDashboard ? ' breadcrumb-current' : ''}`}>
+          {isDashboard ? (
+            'Dashboard'
+          ) : (
+            <Link className="breadcrumb-link" to="/dashboard">
+              Dashboard
+            </Link>
+          )}
+        </li>
+
+        {/* Remaining crumbs only when not on dashboard */}
+        {!isDashboard && (
           <>
-            <li className="breadcrumb-item">
-              <Link className="breadcrumb-link" to={`/${currentGroup}`}>
-                {groupLabel}
-              </Link>
-            </li>
             <li className="breadcrumb-item breadcrumb-separator" aria-hidden="true">
               <ChevronRight size={14} />
             </li>
+
+            {/* Group crumb (when inside a group subtab) */}
+            {isSubtab && groupLabel && (
+              <>
+                <li className="breadcrumb-item">
+                  <Link className="breadcrumb-link" to={`/${currentGroup}`}>
+                    {groupLabel}
+                  </Link>
+                </li>
+                <li className="breadcrumb-item breadcrumb-separator" aria-hidden="true">
+                  <ChevronRight size={14} />
+                </li>
+              </>
+            )}
+
+            {/* Current page */}
+            <li className="breadcrumb-item breadcrumb-current">
+              {pageTitle}
+            </li>
           </>
         )}
-        <li className="breadcrumb-item breadcrumb-current">
-          {pageTitle}
-        </li>
       </ol>
     </nav>
   );
