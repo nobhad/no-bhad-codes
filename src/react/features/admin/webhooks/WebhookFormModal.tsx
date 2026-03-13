@@ -5,11 +5,14 @@
 
 import * as React from 'react';
 import { PortalModal } from '@react/components/portal/PortalModal';
+import { FormDropdown } from '@react/components/portal/FormDropdown';
 import {
   AVAILABLE_EVENTS,
   METHOD_OPTIONS,
   type WebhookFormData
 } from './types';
+
+const METHOD_DROPDOWN_OPTIONS = METHOD_OPTIONS.map((m) => ({ value: m, label: m }));
 
 interface WebhookFormModalProps {
   open: boolean;
@@ -108,16 +111,12 @@ export function WebhookFormModal({
 
         <div className="form-field">
           <label className="field-label" htmlFor="webhook-method">Method</label>
-          <select
+          <FormDropdown
             id="webhook-method"
-            className="form-select"
             value={formData.method}
-            onChange={(e) => onFormDataChange((prev) => ({ ...prev, method: e.target.value }))}
-          >
-            {METHOD_OPTIONS.map((m) => (
-              <option key={m} value={m}>{m}</option>
-            ))}
-          </select>
+            onChange={(v) => onFormDataChange((prev) => ({ ...prev, method: v }))}
+            options={METHOD_DROPDOWN_OPTIONS}
+          />
         </div>
 
         <div className="form-field">

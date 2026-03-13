@@ -203,18 +203,17 @@ Gap not properly applied on mobile in portal dashboard layout.
 
 ### Remaining Outliers (native `<select>` not yet converted)
 
-- [ ] `admin/help/HelpCenter.tsx` — category filter
-- [ ] `admin/data-quality/ValidationErrorsTab.tsx` — error type filter
-- [ ] `admin/webhooks/WebhookFormModal.tsx` — HTTP method + event selects
-- [ ] `admin/integrations/NotificationFormModal.tsx` — channel + event selects
+- [x] `admin/help/HelpCenter.tsx` — category filter
+- [x] `admin/data-quality/ValidationErrorsTab.tsx` — error type filter
+- [x] `admin/webhooks/WebhookFormModal.tsx` — HTTP method select
+- [x] `admin/integrations/NotificationFormModal.tsx` — channel + event selects
 
 ### Pagination Page-Size Dropdown (Open State)
 
-- [ ] Divider line visible between menu and trigger when open (trigger top border shows through)
-- [ ] Menu item numbers don't align horizontally with trigger text when open
-- [ ] Menu and trigger should look like one seamless piece (no visible seam)
-- [ ] Caret must stay in exact same position open vs closed
-- File: `src/styles/shared/portal-dropdown.css` (pagination section ~line 970+)
+- [x] Divider line visible between menu and trigger when open — fixed with `margin-bottom: -1px` on menu
+- [x] Menu item numbers don't align horizontally with trigger text — fixed `justify-content: flex-start`
+- [x] Menu and trigger seamless piece — resolved by margin-bottom overlap approach
+- [ ] Caret position — awaiting visual confirmation
 
 ---
 

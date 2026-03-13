@@ -6,6 +6,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { PortalModal } from '@react/components/portal/PortalModal';
+import { FormDropdown } from '@react/components/portal/FormDropdown';
 import {
   CHANNEL_OPTIONS,
   EVENT_OPTIONS,
@@ -73,31 +74,22 @@ export function NotificationFormModal({
         </div>
         <div className="form-field">
           <label className="field-label" htmlFor="notification-channel">Channel</label>
-          <select
+          <FormDropdown
             id="notification-channel"
-            className="form-select"
             value={form.channel}
-            onChange={(e) => handleChange('channel', e.target.value)}
-          >
-            {CHANNEL_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
+            onChange={(v) => handleChange('channel', v)}
+            options={CHANNEL_OPTIONS}
+          />
         </div>
         <div className="form-field">
           <label className="field-label" htmlFor="notification-event">Event</label>
-          <select
+          <FormDropdown
             id="notification-event"
-            className="form-select"
             value={form.event}
-            onChange={(e) => handleChange('event', e.target.value)}
-            required
-          >
-            <option value="">Select event...</option>
-            {EVENT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
+            onChange={(v) => handleChange('event', v)}
+            options={EVENT_OPTIONS}
+            placeholder="Select event..."
+          />
         </div>
         <div className="form-field">
           <label className="field-label flex items-center gap-2">

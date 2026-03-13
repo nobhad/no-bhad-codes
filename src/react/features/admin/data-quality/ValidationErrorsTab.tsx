@@ -6,6 +6,7 @@
 import * as React from 'react';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Filter } from 'lucide-react';
+import { FormDropdown } from '@react/components/portal/FormDropdown';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import {
@@ -51,6 +52,14 @@ export function ValidationErrorsTab({
     return Array.from(types).sort();
   }, [errors]);
 
+  const errorTypeOptions = useMemo(
+    () => [
+      { value: '', label: 'All Error Types' },
+      ...errorTypes.map((t) => ({ value: t, label: t }))
+    ],
+    [errorTypes]
+  );
+
   const filteredErrors = useMemo(() => {
     if (!errorTypeFilter) return errors;
     return errors.filter(e => e.errorType === errorTypeFilter);
@@ -63,17 +72,12 @@ export function ValidationErrorsTab({
         <div className="data-table-actions">
           <div className="filter-inline">
             <Filter size={14} />
-            <select
-              className="form-input"
+            <FormDropdown
               value={errorTypeFilter}
-              onChange={e => setErrorTypeFilter(e.target.value)}
+              onChange={setErrorTypeFilter}
+              options={errorTypeOptions}
               aria-label="Filter by error type"
-            >
-              <option value="">All Error Types</option>
-              {errorTypes.map(type => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
+            />
           </div>
         </div>
       </div>
