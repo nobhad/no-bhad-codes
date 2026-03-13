@@ -56,6 +56,9 @@ router.get(
     sendSuccess(res, {
       configured,
       connected: Boolean(syncConfig?.isActive),
+      provider: configured ? 'Google Calendar' : null,
+      syncEnabled: Boolean(syncConfig?.isActive),
+      lastSync: syncConfig?.lastSyncAt ?? null,
       syncConfig: syncConfig
         ? {
           syncMilestones: syncConfig.syncMilestones,
@@ -209,7 +212,7 @@ router.put(
       errorResponse(res, 'Authentication required', 401, ErrorCodes.AUTH_REQUIRED);
       return;
     }
-    const { syncMilestones, syncTasks, syncInvoiceDueDates, isActive } = req.body;
+    const { syncMilestones, syncTasks, syncInvoiceDueDates, isActive, syncEnabled } = req.body;
 
     const existing = await getCalendarSyncConfig(userId);
     if (!existing) {
@@ -217,12 +220,15 @@ router.put(
       return;
     }
 
+    // Accept both isActive (direct) and syncEnabled (from UI toggle) for the active flag
+    const resolvedIsActive = isActive ?? syncEnabled ?? existing.isActive;
+
     await saveCalendarSyncConfig({
       ...existing,
       syncMilestones: syncMilestones ?? existing.syncMilestones,
       syncTasks: syncTasks ?? existing.syncTasks,
       syncInvoiceDueDates: syncInvoiceDueDates ?? existing.syncInvoiceDueDates,
-      isActive: isActive ?? existing.isActive
+      isActive: resolvedIsActive
     });
 
     sendSuccess(res, undefined, 'Calendar settings updated');

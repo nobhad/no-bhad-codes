@@ -123,6 +123,17 @@ const ICAL_PRODID = `-//${BUSINESS_INFO.name}//Calendar Export//EN`;
 const ICAL_VERSION = '2.0';
 
 /**
+ * Get the exclusive end date for an all-day event (next day in YYYY-MM-DD format).
+ * Both Google Calendar API and iCal spec use exclusive end dates for all-day events,
+ * so a single-day event on 2026-03-13 must have end = 2026-03-14.
+ */
+function getExclusiveEndDate(dateStr: string): string {
+  const date = new Date(dateStr.split('T')[0] + 'T12:00:00Z'); // Noon UTC to avoid DST issues
+  date.setUTCDate(date.getUTCDate() + 1);
+  return date.toISOString().split('T')[0];
+}
+
+/**
  * Sleep for the given number of milliseconds
  */
 function sleep(ms: number): Promise<void> {
@@ -437,7 +448,7 @@ export function milestoneToCalendarEvent(
       date: dueDate.split('T')[0] // All-day event
     },
     end: {
-      date: dueDate.split('T')[0]
+      date: getExclusiveEndDate(dueDate) // Exclusive end date (next day)
     },
     colorId: getColorIdForStatus(milestone.status as string),
     reminders: {
@@ -474,7 +485,7 @@ export function taskToCalendarEvent(
       date: dueDate.split('T')[0]
     },
     end: {
-      date: dueDate.split('T')[0]
+      date: getExclusiveEndDate(dueDate) // Exclusive end date (next day)
     },
     attendees: task.assigned_to
       ? [
