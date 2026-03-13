@@ -87,7 +87,7 @@ The Backend refers to the complete portal system with two interfaces:
 - **[Performance & Bundle Optimization](./OPTIMIZATION.md)** - Bundle optimization strategies, performance monitoring, Core Web Vitals tracking, and development best practices
 - **[Visitor Tracking System](./features/VISITOR-TRACKING.md)** - Privacy-compliant analytics, consent management, and engagement metrics
 - **[API Documentation](./API_DOCUMENTATION.md)** - Complete API reference with request/response examples
-- **[Code Protection Guide](./code-protection-guide.md)** - Code obfuscation, source map protection, and security practices
+- **[Code Protection Guide](./CODE_PROTECTION_GUIDE.md)** - Code obfuscation, source map protection, and security practices
 
 ### Development & Maintenance
 
