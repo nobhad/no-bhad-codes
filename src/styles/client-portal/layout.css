@@ -174,18 +174,7 @@ body[data-page="client-portal"] {
    Page header element removed - styles deprecated
    ============================================ */
 
-/* Page title in unified global header — overrides shared base font/size/spacing */
-.portal .portal-global-header .header-page-title {
-  font-family: var(--font-family-mono);
-  font-size: clamp(1rem, 3vw, 1.25rem);
-  letter-spacing: var(--letter-spacing-title, 0.02em);
-}
-
-/* Client name span styling - inline with greeting, "!" follows name */
-.portal .portal-global-header .header-page-title #client-name {
-  color: var(--color-accent);
-  white-space: nowrap;
-}
+/* .header-page-title removed — replaced by breadcrumb nav in global header. */
 
 /* Subtabs container base — shared/portal-layout.css (.portal .portal-header-subtabs) */
 
@@ -227,10 +216,7 @@ body[data-page="client-portal"] {
 
 /* Toggle icon rotation: handled in portal-sidebar.css (.sidebar.collapsed > .sidebar-toggle-btn svg) */
 
-.header-breadcrumb-nav {
-  flex: 1;
-  min-width: 0;
-}
+/* .header-breadcrumb-nav removed — see shared/portal-layout.css .portal-global-header .breadcrumb-nav */
 
 /* Admin primary header row (breadcrumbs) */
 .page-header.primary-header-row {
@@ -298,25 +284,7 @@ body[data-page="client-portal"] {
   transition: transform var(--transition-medium);
 }
 
-/* Breadcrumb nav in primary header row */
-.breadcrumb-nav {
-  flex: 1;
-  min-width: 0;
-}
-
-.breadcrumb-list {
-  display: flex;
-  align-items: center;
-  gap: var(--space-0-5);
-  flex-wrap: wrap;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-/* Breadcrumb portal overrides moved to shared/portal-layout.css */
+/* Legacy breadcrumb rules removed — see shared/portal-layout.css */
 
 /* Error States */
 .error-message {

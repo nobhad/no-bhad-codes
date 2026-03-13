@@ -35,6 +35,7 @@ import { CLIENT_STATUS_CONFIG, CLIENT_TYPE_LABELS } from '../types';
 import { buildEndpoint } from '@/constants/api-endpoints';
 import { NOTIFICATIONS, statusUpdatedMessage } from '@/constants/notifications';
 import { apiDelete } from '@/utils/api-client';
+import { useSetPageTitle } from '@react/stores/portal-store';
 
 interface ClientDetailProps {
   /** Client ID to display */
@@ -85,6 +86,7 @@ export function ClientDetail({
   showNotification
 }: ClientDetailProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
+  const setPageTitle = useSetPageTitle();
   const [activeTab, setActiveTab] = useState<ClientDetailTab>('overview');
 
   // Client data
@@ -112,6 +114,13 @@ export function ClientDetail({
     removeTag,
     sendInvitation
   } = useClientDetail({ clientId, getAuthToken });
+
+  // Update breadcrumb title with client name
+  React.useEffect(() => {
+    if (client) {
+      setPageTitle(client.company_name || client.contact_name || 'Client');
+    }
+  }, [client?.company_name, client?.contact_name, setPageTitle]);
 
   // Dialogs
   const deleteDialog = useConfirmDialog();

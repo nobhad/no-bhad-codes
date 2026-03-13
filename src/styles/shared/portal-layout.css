@@ -79,13 +79,6 @@ body:has(.portal) {
   padding: 0 var(--space-3) 0 var(--sidebar-icon-indent);
 }
 
-/* Breadcrumb text matches sidebar nav font */
-.portal-global-header-breadcrumbs .breadcrumb-list {
-  font-family: var(--font-family-mono);
-  font-size: var(--portal-nav-font-size);
-  font-weight: var(--font-weight-medium);
-}
-
 /* Branding in global header - avatar + text */
 .portal-global-header .header-branding {
   display: flex;
@@ -154,67 +147,44 @@ body:has(.portal) {
   height: var(--sidebar-icon-size);
 }
 
-/* Page title in header */
-.portal-global-header .header-page-title {
-  font-family: var(--font-family-sans);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-regular);
-  color: var(--color-text-primary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
-  margin: 0;
-  white-space: nowrap;
-}
-
-/* Breadcrumbs in global header */
-.portal-global-header .breadcrumb-nav {
-  flex: 1;
-  min-width: 0;
-}
-
-.portal-global-header .breadcrumb-list {
+/* Breadcrumbs — single inline row, left-aligned after sidebar toggle.
+   Uses flat <div> + <span>/<a>/<svg> (no <ol>/<li>) to avoid list resets. */
+.breadcrumb-trail {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  flex-wrap: wrap;
-  font-family: var(--font-family-sans);
+  gap: var(--space-1);
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.portal-global-header .breadcrumb-item {
-  display: inline-flex;
-  align-items: center;
-}
-
-.portal-global-header .breadcrumb-link {
-  background: none;
-  border: none;
-  color: var(--color-text-primary);
-  cursor: pointer;
-  font-size: inherit;
-  padding: 0;
+.breadcrumb-trail .breadcrumb-link {
+  color: var(--color-text-secondary);
   text-decoration: none;
-  transition: color var(--transition-mouse) ease;
+  transition: color var(--transition-fast);
+  flex-shrink: 0;
 }
 
-.portal-global-header .breadcrumb-link:hover {
+.breadcrumb-trail .breadcrumb-link:hover {
   color: var(--color-text-primary);
 }
 
-.portal-global-header .breadcrumb-current {
+.breadcrumb-trail .breadcrumb-current {
   color: var(--color-text-primary);
-  font-weight: var(--font-weight-semibold);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.portal-global-header .breadcrumb-separator {
+.breadcrumb-trail .breadcrumb-separator {
   color: var(--color-text-tertiary);
-  font-size: var(--font-size-xs);
+  flex-shrink: 0;
 }
 
 /* Theme toggle in global header — matches icon-btn sizing */
@@ -564,61 +534,8 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 
 }
 
-/* =====================================================
-   BREADCRUMB STYLING
-   Navigation breadcrumb trail styling
-   ===================================================== */
-.portal :is(.breadcrumb, .page-breadcrumb) {
-  display: flex;
-  align-items: center;
-  gap: var(--icon-gap);
-  font-family: var(--font-family-sans);
-  font-size: var(--font-size-2xs);
-  font-weight: var(--portal-font-weight-muted);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
-  color: var(--color-text-tertiary);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.portal :is(.breadcrumb, .page-breadcrumb) a {
-  color: var(--color-text-tertiary);
-  text-decoration: none;
-  transition: color var(--transition-fast);
-}
-
-.portal :is(.breadcrumb, .page-breadcrumb) a:hover {
-  text-decoration: underline;
-}
-
-.portal .breadcrumb-separator {
-  color: var(--color-bg-elevated);
-  font-size: var(--font-size-2xs);
-}
-
-.portal :is(.breadcrumb-current, .breadcrumb li:last-child) {
-  color: var(--color-text-secondary);
-}
-
-/* Breadcrumb list pattern (client portal style) */
-.portal .breadcrumb-list {
-  color: var(--color-text-secondary);
-}
-
-.portal .breadcrumb-link {
-  color: var(--color-text-secondary);
-}
-
-.portal .breadcrumb-link:hover {
-  color: var(--color-text-primary);
-}
-
-.portal .breadcrumb-current {
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-semibold);
-}
+/* Legacy breadcrumb classes removed — all breadcrumb styling is in the
+   .portal-global-header section above (header Row 2). */
 
 /* =====================================================
    PAGE HEADER TABS
@@ -882,25 +799,7 @@ html[data-theme="light"] .portal .funnel-value {
   }
 }
 
-/* =====================================================
-   LEGACY BREADCRUMB STYLING
-   ===================================================== */
-.breadcrumb-nav {
-  flex: 1;
-  min-width: 0;
-}
-
-.breadcrumb-list {
-  display: flex;
-  align-items: center;
-  gap: var(--space-0-5);
-  flex-wrap: wrap;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
+/* Legacy standalone breadcrumb rules removed — see .portal-global-header section. */
 
 /* =====================================================
    ERROR AND LOADING STATES
@@ -1420,10 +1319,7 @@ html[data-theme="light"] .portal .funnel-value {
   margin-bottom: var(--space-3);
 }
 
-.page-breadcrumbs {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
-}
+/* .page-breadcrumbs removed — breadcrumbs are in global header only. */
 
 .page-header-content {
   display: flex;
