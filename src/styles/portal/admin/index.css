@@ -554,24 +554,7 @@ body.modal-open .dashboard-content {
   justify-content: flex-end;
 }
 
-/* ================================================
-   Set Password Page Styles
-   Base layout/typography: shared/portal-auth.css
-   Admin-specific additions below.
-   ================================================ */
-
-/* Logo display (admin-only, not in shared) */
-.set-password-logo {
-  display: inline-block;
-  margin-bottom: var(--space-4);
-}
-
-.set-password-logo-img {
-  width: var(--icon-size-3xl);
-  height: var(--icon-size-3xl);
-}
-
-/* .set-password state classes moved to shared/portal-auth.css */
+/* Set Password Page: all styles in shared/portal-auth.css */
 
 .set-password-form label {
   color: var(--color-text-secondary);

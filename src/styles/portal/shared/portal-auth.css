@@ -4,11 +4,13 @@
  * ===============================================
  * @file src/styles/portal/shared/portal-auth.css
  *
- * Shared authentication gate and login form styles
- * for both admin and client portal login pages.
+ * Authentication styles for both admin and client portals.
+ * Loaded by both admin/index.css and client/index.css.
  *
- * Client portal overrides (nav/footer visibility, set-password page):
- * - src/styles/portal/shared/portal-auth.css
+ * Sections:
+ *   1. Auth gate (login overlay)
+ *   2. Nav/footer visibility (logged-out state)
+ *   3. Set password page (set-password, forgot-password, reset-password)
  */
 
 @layer components {
@@ -436,7 +438,9 @@ body.portal-logged-in[data-page="client-portal"] .nav-overlay {
 }
 
 /* =====================================================
-   SET PASSWORD PAGE - Client portal
+   SET PASSWORD PAGE
+   Used by: set-password.ejs, forgot-password.ejs, reset-password.ejs
+   Loaded via client CSS bundle (/src/portal.ts)
    ===================================================== */
 
 .set-password-page {
@@ -455,6 +459,16 @@ body.portal-logged-in[data-page="client-portal"] .nav-overlay {
 .set-password-card {
   border: var(--portal-border);
   padding: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.set-password-logo {
+  display: inline-block;
+  margin-bottom: var(--space-4);
+}
+
+.set-password-logo-img {
+  width: var(--icon-size-3xl);
+  height: var(--icon-size-3xl);
 }
 
 .set-password-header {
