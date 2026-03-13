@@ -245,11 +245,7 @@
   flex-shrink: 0;
 }
 
-.kanban-card-title {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-}
+/* .kanban-card-title defined in shared/portal-kanban.css */
 
 /* Kanban column title wrapper */
 .kanban-column-title-wrapper {

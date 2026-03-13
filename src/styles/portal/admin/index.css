@@ -556,34 +556,11 @@ body.modal-open .dashboard-content {
 
 /* ================================================
    Set Password Page Styles
+   Base layout/typography: shared/portal-auth.css
+   Admin-specific additions below.
    ================================================ */
-.set-password-page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-4);
-  background: var(--color-bg-primary);
-}
 
-.set-password-container {
-  width: 100%;
-  max-width: var(--form-container-max-width);
-}
-
-.set-password-card {
-  background: var(--color-bg-tertiary);
-  border: var(--portal-border);
-  border-radius: var(--border-radius-md);
-  padding: var(--space-8);
-  box-shadow: var(--shadow-panel);
-}
-
-.set-password-header {
-  text-align: center;
-  margin-bottom: var(--space-6);
-}
-
+/* Logo display (admin-only, not in shared) */
 .set-password-logo {
   display: inline-block;
   margin-bottom: var(--space-4);
@@ -592,19 +569,6 @@ body.modal-open .dashboard-content {
 .set-password-logo-img {
   width: var(--icon-size-3xl);
   height: var(--icon-size-3xl);
-}
-
-.set-password-header h1 {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin: 0 0 var(--space-2) 0;
-}
-
-.set-password-subtitle {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  margin: 0;
 }
 
 .set-password-loading,
