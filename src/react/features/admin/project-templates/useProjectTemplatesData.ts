@@ -74,7 +74,11 @@ export function useProjectTemplatesData({ showNotification }: UseProjectTemplate
       defaultHourlyRate: template.defaultHourlyRate || '',
       isActive: template.isActive,
       milestones: [...template.defaultMilestones],
-      tasks: [...template.defaultTasks]
+      tasks: [...template.defaultTasks],
+      contentRequests: [...(template.defaultContentRequests || [])],
+      paymentSchedule: [...(template.defaultPaymentSchedule || [])],
+      contractTemplateId: template.contractTemplateId || '',
+      tierDefinitions: [...(template.tierDefinitions || [])]
     });
     setFormError(null);
   }, []);
@@ -93,7 +97,11 @@ export function useProjectTemplatesData({ showNotification }: UseProjectTemplate
         defaultHourlyRate: formData.defaultHourlyRate || undefined,
         isActive: formData.isActive,
         defaultMilestones: formData.milestones,
-        defaultTasks: formData.tasks
+        defaultTasks: formData.tasks,
+        defaultContentRequests: formData.contentRequests.length > 0 ? formData.contentRequests : undefined,
+        defaultPaymentSchedule: formData.paymentSchedule.length > 0 ? formData.paymentSchedule : undefined,
+        contractTemplateId: formData.contractTemplateId || undefined,
+        tierDefinitions: formData.tierDefinitions.length > 0 ? formData.tierDefinitions : undefined
       };
 
       const isEditing = editingTemplate !== null;

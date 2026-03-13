@@ -110,7 +110,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: Response) => {
-    const { templateId, clientId, projectName, startDate } = req.body;
+    const { templateId, clientId, projectName, startDate, selectedTier, totalAmount } = req.body;
 
     if (!templateId || !clientId || !projectName || !startDate) {
       return errorResponse(
@@ -125,13 +125,17 @@ router.post(
       templateId,
       clientId,
       projectName,
-      startDate
+      startDate,
+      { selectedTier, totalAmount }
     );
 
     sendCreated(res, {
       projectId: result.projectId,
       milestoneIds: result.milestoneIds,
-      taskIds: result.taskIds
+      taskIds: result.taskIds,
+      checklistId: result.checklistId,
+      paymentInstallmentIds: result.paymentInstallmentIds,
+      contractId: result.contractId
     }, 'Project created from template successfully');
   })
 );
