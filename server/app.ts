@@ -61,6 +61,7 @@ import deliverablesRouter from './routes/deliverables.js';
 import integrationsRouter from './routes/integrations.js';
 import dataQualityRouter from './routes/data-quality.js';
 import paymentSchedulesRouter from './routes/payment-schedules.js';
+import contentRequestsRouter from './routes/content-requests.js';
 import settingsRouter from './routes/settings.js';
 import receiptsRouter from './routes/receipts.js';
 import { eventsRouter } from './routes/events.js';
@@ -373,7 +374,8 @@ const apiRouters = [
   { path: '/receipts', router: receiptsRouter },
   { path: '/events', router: eventsRouter },
   { path: '/search', router: searchRouter },
-  { path: '/payment-schedules', router: paymentSchedulesRouter }
+  { path: '/payment-schedules', router: paymentSchedulesRouter },
+  { path: '/content-requests', router: contentRequestsRouter }
 ];
 
 // Mount all routers at both /api and /api/v1
