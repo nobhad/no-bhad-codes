@@ -8,7 +8,7 @@
 /* Client portal body defaults - match admin portal */
 body[data-page="client-portal"] {
   background: var(--color-bg-primary);
-  font-weight: var(--font-weight-base, 500);
+  font-weight: var(--font-weight-base);
   color: var(--color-text-primary);
 }
 

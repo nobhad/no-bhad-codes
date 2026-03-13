@@ -60,7 +60,7 @@
 
 .overview-stat-card {
   background: var(--color-bg-primary);
-  border: var(--border-width, 2px) solid var(--color-border-primary, currentColor);
+  border: var(--portal-border);
   overflow: hidden;
   cursor: pointer;
   text-align: left;
@@ -91,7 +91,7 @@
 /* Value - LARGE and prominent */
 .overview-stats-strip .stat-value {
   font-family: var(--font-family-sans);
-  font-size: var(--font-size-3xl, 30px);
+  font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   line-height: var(--line-height-none);
@@ -123,8 +123,7 @@
 
 .overview-panel {
   background: var(--color-bg-primary);
-  /* Explicit fallback: 2px border if variables fail */
-  border: var(--border-width, 2px) solid var(--color-border-primary, currentColor);
+  border: var(--portal-border);
   overflow: hidden;
 }
 
@@ -344,7 +343,7 @@
 }
 
 .activity-time {
-  font-size: var(--font-size-2xs, 10px);
+  font-size: var(--font-size-2xs);
   color: var(--color-text-tertiary);
   margin-top: var(--space-0-5);
   display: block;

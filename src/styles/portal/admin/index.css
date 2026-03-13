@@ -74,7 +74,7 @@
 /* Page background - pitch black as base canvas */
 body[data-page="admin"] {
   background: var(--color-bg-primary);
-  font-weight: var(--font-weight-base, 500);  /* Medium weight as portal default */
+  font-weight: var(--font-weight-base); /* Medium weight as portal default */
   color: var(--color-text-primary);
 }
 
@@ -324,14 +324,14 @@ body[data-page="admin"] #tab-analytics .stat-card {
 [data-page="admin"] #tab-overview .dashboard-stats-grid {
   background: var(--color-bg-secondary);
   border: none;
-  border-radius: var(--border-radius-sm, 8px);
+  border-radius: var(--border-radius-sm);
   padding: var(--portal-card-padding);
 }
 
 [data-page="admin"] #tab-overview .attention-card,
 [data-page="admin"] #tab-overview .stat-card {
   background: var(--color-bg-tertiary);
-  border-radius: var(--border-radius-sm, 8px);
+  border-radius: var(--border-radius-sm);
   padding: var(--portal-card-padding);
   min-height: var(--panel-min-height-sm);
 }
@@ -490,7 +490,7 @@ body.modal-open .dashboard-content {
   padding: 0;
   background: transparent;
   border: none;
-  border-radius: var(--border-radius-lg, 12px);
+  border-radius: var(--border-radius-lg);
   color: var(--color-text-primary);
   cursor: pointer;
   flex-shrink: 0;
@@ -668,7 +668,7 @@ body.modal-open .dashboard-content {
   align-items: center;
   padding: var(--space-1-5) var(--space-2);
   background: var(--color-bg-raised);
-  border-radius: var(--border-radius-md, 8px);
+  border-radius: var(--border-radius-md);
   border: none;
 }
 
@@ -931,7 +931,7 @@ body.modal-open .dashboard-content {
   font-family: var(--font-family-sans);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  line-height: var(--line-height-normal, 1.4);
+  line-height: var(--line-height-normal);
   text-transform: none;
   letter-spacing: normal;
   white-space: pre-line;
@@ -1094,7 +1094,7 @@ body.modal-open .dashboard-content {
 [data-page="admin"] .portal-page-header h1 {
   font-family: var(--font-family-sans);
   font-size: var(--font-size-xl);
-  letter-spacing: var(--letter-spacing-tight, 0.01em);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 [data-page="admin"] .sidebar-section {

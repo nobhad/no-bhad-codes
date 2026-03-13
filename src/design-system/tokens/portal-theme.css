@@ -266,6 +266,7 @@ body[data-page="client-portal"] {
   --opacity-muted: 0.6;
   --opacity-subtle: 0.7;
   --opacity-secondary: 0.8;
+  --opacity-high: 0.9;
   --opacity-completed: 0.5; /* Completed/done items — same as disabled */
 
   /* ----------------------------------------

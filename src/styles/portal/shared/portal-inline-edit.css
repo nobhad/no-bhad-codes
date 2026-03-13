@@ -112,10 +112,10 @@
   justify-content: center;
   padding: var(--space-px);
   border: none;
-  border-radius: var(--border-radius-sm, 4px);
+  border-radius: var(--border-radius-sm);
   background: transparent;
   cursor: pointer;
-  transition: background-color var(--transition-faster, 0.1s) ease;
+  transition: background-color var(--transition-faster) ease;
 }
 
 .portal .inline-edit-btn svg {
@@ -148,8 +148,8 @@
   min-height: var(--space-3);
   padding: 0 var(--space-0-5);
   margin: 0 calc(-1 * var(--space-0-5));
-  border-radius: var(--border-radius-sm, 4px);
-  transition: background-color var(--transition-faster, 0.1s) ease;
+  border-radius: var(--border-radius-sm);
+  transition: background-color var(--transition-faster) ease;
 }
 
 .portal .inline-edit-display:hover {
@@ -180,7 +180,7 @@
   height: 10px;
   color: var(--color-text-tertiary);
   opacity: 0;
-  transition: opacity var(--transition-faster, 0.1s) ease;
+  transition: opacity var(--transition-faster) ease;
 }
 
 .portal .inline-edit-display:hover .inline-edit-icon {
@@ -196,7 +196,7 @@
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
   border: var(--border-width) solid var(--color-brand-primary, var(--color-accent));
-  border-radius: var(--border-radius-sm, 4px);
+  border-radius: var(--border-radius-sm);
   font-size: var(--font-size-xs);
   outline: none;
 }
@@ -255,7 +255,7 @@
 .portal .inline-edit-textarea {
   height: auto;
   min-height: 60px;
-  padding: var(--space-1) var(--space-2, 6px);
+  padding: var(--space-1) var(--space-2);
   resize: vertical;
   font-family: inherit;
   line-height: var(--line-height-normal);
@@ -266,7 +266,7 @@
   display: flex;
   align-items: center;
   gap: var(--action-btn-gap);
-  margin-top: var(--space-0-5, 2px);
+  margin-top: var(--space-0-5);
 }
 
 /* External link icon next to URL labels */
@@ -275,7 +275,7 @@
   align-items: center;
   margin-left: var(--icon-gap-xs);
   color: var(--color-text-tertiary);
-  transition: color var(--transition-faster, 0.1s) ease;
+  transition: color var(--transition-faster) ease;
 }
 
 .portal .inline-link-external:hover {
@@ -342,7 +342,7 @@
   gap: var(--icon-gap-xs);
   text-align: right;
   color: var(--color-text-primary);
-  font-size: var(--font-size-base, 14px);
+  font-size: var(--font-size-base);
   min-height: 24px;
   padding: var(--space-0-5) var(--space-1);
   margin: calc(-1 * var(--space-0-5)) calc(-1 * var(--space-1));
@@ -396,7 +396,7 @@
   border: var(--border-width) solid var(--color-accent);
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
-  font-size: var(--font-size-base, 14px);
+  font-size: var(--font-size-base);
   font-family: inherit;
   text-align: right;
   outline: none;
@@ -426,7 +426,7 @@
   border: var(--border-width) solid var(--color-accent);
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
-  font-size: var(--font-size-base, 14px);
+  font-size: var(--font-size-base);
   font-family: inherit;
   text-align: right;
   outline: none;
@@ -485,7 +485,7 @@
 /* Error message */
 .portal .inline-edit-row .inline-edit-error {
   color: var(--color-error);
-  font-size: var(--font-size-sm, 12px);
+  font-size: var(--font-size-sm);
   text-align: right;
 }
 

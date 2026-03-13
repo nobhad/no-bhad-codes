@@ -359,7 +359,7 @@
 
 /* Highlight shortcut on nav-btn hover */
 .portal .sidebar-buttons .nav-btn:hover .sidebar-shortcut {
-  opacity: 0.9;
+  opacity: var(--opacity-high);
 }
 
 /* Active button shortcut */

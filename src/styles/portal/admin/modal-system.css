@@ -84,8 +84,8 @@
   height: 100vh;
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
-  font-family: var(--font-family-sans, "Inconsolata", ui-monospace, monospace);
-  font-weight: var(--font-weight-medium, 500);
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-medium);
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
   box-shadow: var(--shadow-2xl);

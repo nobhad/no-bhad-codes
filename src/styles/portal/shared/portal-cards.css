@@ -728,7 +728,7 @@ html[data-theme="light"] .portal :is(
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
   text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label, 0.05em);
+  letter-spacing: var(--letter-spacing-label);
   color: var(--color-text-primary);
   margin: 0 0 var(--space-3);
 }

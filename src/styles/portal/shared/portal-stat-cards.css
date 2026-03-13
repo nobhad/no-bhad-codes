@@ -93,8 +93,8 @@
 /* stat-value is the canonical name; all others have been migrated */
 .portal .stat-value {
   display: block;
-  font-family: var(--font-family-mono, monospace);
-  font-size: var(--font-size-xl, 1.25rem);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-medium);
   line-height: 1;
   color: var(--color-text-primary);
