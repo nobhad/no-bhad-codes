@@ -1190,7 +1190,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   position: relative;
   display: block;
   width: 100%;
-  height: 48px;
+  height: var(--modal-input-height);
 }
 
 /* Trigger - matches form-input styling */
@@ -1202,7 +1202,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   justify-content: flex-start;
   position: relative;
   width: 100%;
-  height: 48px;
+  height: var(--modal-input-height);
   padding: 0 var(--space-4);
   padding-right: calc(var(--space-4) + var(--dropdown-caret-size) + var(--icon-gap));
   background-color: var(--color-black);
@@ -1301,7 +1301,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   display: flex;
   align-items: center;
   padding: 0 var(--space-4);
-  height: 44px;
+  height: var(--modal-dropdown-item-height);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
   color: var(--color-text-primary);

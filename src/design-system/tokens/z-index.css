@@ -45,9 +45,9 @@
    * Many components reference these short names directly.
    * Kept as aliases pointing at the proper z-index scale.
    */
-  --z-header: 10;   /* Alias for --z-index-elevated (header) */
-  --z-nav: 100;     /* Alias for --z-index-nav */
-  --z-modal: 1000;  /* Alias for portal modal range */
+  --z-header: var(--z-index-elevated);    /* Alias → --z-index-elevated (10) */
+  --z-nav: var(--z-index-nav);            /* Alias → --z-index-nav (100) */
+  --z-modal: var(--z-index-portal-modal); /* Alias → --z-index-portal-modal (9600) */
 
   /* Navigation layers */
   --z-index-nav-backdrop: 90;

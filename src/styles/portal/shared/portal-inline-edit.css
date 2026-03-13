@@ -124,19 +124,19 @@
 }
 
 .portal .inline-edit-btn-save {
-  color: var(--status-completed, var(--color-success));
+  color: var(--status-completed);
 }
 
 .portal .inline-edit-btn-save:hover {
-  background-color: var(--status-completed-bg, var(--color-success-alpha-15));
+  background-color: var(--status-completed-bg);
 }
 
 .portal .inline-edit-btn-cancel {
-  color: var(--status-cancelled, var(--color-danger));
+  color: var(--status-cancelled);
 }
 
 .portal .inline-edit-btn-cancel:hover {
-  background-color: var(--status-cancelled-bg, var(--color-danger-alpha-15));
+  background-color: var(--status-cancelled-bg);
 }
 
 /* Display mode - clickable value */
@@ -195,7 +195,7 @@
   padding: 0 var(--inline-edit-compact-padding-x);
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
-  border: var(--border-width) solid var(--color-brand-primary, var(--color-accent));
+  border: var(--border-width) solid var(--color-brand-primary);
   border-radius: var(--border-radius-sm);
   font-size: var(--font-size-xs);
   outline: none;
@@ -279,7 +279,7 @@
 }
 
 .portal .inline-link-external:hover {
-  color: var(--color-brand-primary, var(--color-accent));
+  color: var(--color-brand-primary);
 }
 
 /* ===============================================
@@ -459,19 +459,19 @@
 }
 
 .portal .inline-edit-row .inline-edit-btn.save {
-  color: var(--status-completed, var(--color-success));
+  color: var(--status-completed);
 }
 
 .portal .inline-edit-row .inline-edit-btn.save:hover {
-  background: var(--status-completed-bg, var(--color-success-alpha-15));
+  background: var(--status-completed-bg);
 }
 
 .portal .inline-edit-row .inline-edit-btn.cancel {
-  color: var(--status-cancelled, var(--color-error));
+  color: var(--status-cancelled);
 }
 
 .portal .inline-edit-row .inline-edit-btn.cancel:hover {
-  background: var(--status-cancelled-bg, var(--color-error-alpha-15));
+  background: var(--status-cancelled-bg);
 }
 
 /* Spinner */

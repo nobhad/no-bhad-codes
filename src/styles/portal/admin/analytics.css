@@ -204,7 +204,7 @@
 }
 
 .source-progress-track {
-  height: 4px;
+  height: var(--progress-track-height);
   background: var(--portal-alpha-white-10);
   overflow: hidden;
 }
@@ -353,7 +353,7 @@
   }
 
   #tab-system .section-header-with-actions h3 {
-    line-height: 36px;
+    line-height: var(--portal-btn-icon-size);
   }
 }
 

@@ -256,8 +256,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 18px;
-  height: 18px;
+  min-width: var(--inline-pill-height);
+  height: var(--inline-pill-height);
   padding: 0 var(--space-0-5);
   background: var(--color-bg-elevated);
   color: var(--color-text-secondary);
@@ -305,7 +305,7 @@
   }
 
   .portal-tabs::-webkit-scrollbar {
-    height: 4px;
+    height: var(--progress-track-height);
   }
 
   .portal-tabs::-webkit-scrollbar-track {

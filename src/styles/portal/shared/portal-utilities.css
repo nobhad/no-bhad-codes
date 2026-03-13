@@ -11,6 +11,37 @@
  */
 
 /* ============================================
+   PORTAL KEYFRAMES — SINGLE SOURCE OF TRUTH
+   All portal CSS animation keyframes live here.
+   @keyframes are globally scoped; centralize to
+   prevent redefinition and aid discoverability.
+   ============================================ */
+
+/* Pulsing opacity — used by health-loading indicators */
+@keyframes pulse {
+  0%, 100% { opacity: var(--opacity-inactive); }
+  50% { opacity: 1; }
+}
+
+/* Skeleton loading shimmer */
+@keyframes pulse-skeleton {
+  0%, 100% { opacity: 1; }
+  50% { opacity: var(--opacity-disabled); }
+}
+
+/* Panel / dropdown slide-in from top */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Typing indicator dot bounce */
+@keyframes typing-bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: var(--opacity-inactive); }
+  40%           { transform: scale(1); opacity: 1; }
+}
+
+/* ============================================
    GLOBAL SVG ICON STROKE WIDTH
    Match border thickness (2px) for visual consistency
    ============================================ */

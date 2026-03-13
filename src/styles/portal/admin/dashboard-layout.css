@@ -234,7 +234,7 @@
 
 .progress-bar {
   flex: 1;
-  height: 4px;
+  height: var(--progress-track-height);
   border-radius: 2px;
   background: var(--portal-alpha-white-08);
   overflow: hidden;

@@ -112,7 +112,7 @@
 }
 
 .status-progress-track {
-  height: 4px;
+  height: var(--progress-track-height);
   background: var(--color-bg-raised);
   overflow: hidden;
   margin-bottom: var(--space-1);

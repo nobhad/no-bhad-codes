@@ -110,11 +110,11 @@
 }
 
 .details-panel .field-label {
-  font-size: var(--label-font-size, var(--font-size-xs));
-  font-weight: var(--label-font-weight, var(--font-weight-medium));
-  color: var(--label-color, var(--color-text-secondary));
+  font-size: var(--label-font-size);
+  font-weight: var(--label-font-weight);
+  color: var(--label-color);
   text-transform: uppercase;
-  letter-spacing: var(--label-letter-spacing, var(--letter-spacing-label));
+  letter-spacing: var(--label-letter-spacing);
 }
 
 .details-panel .meta-value {

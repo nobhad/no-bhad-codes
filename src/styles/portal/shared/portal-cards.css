@@ -540,15 +540,6 @@ html[data-theme="light"] .portal :is(
   animation: pulse 1.5s ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: var(--opacity-inactive);
-  }
-  50% {
-    opacity: 1;
-  }
-}
 
 .portal .health-indicator.health-ok {
   background: var(--status-active);

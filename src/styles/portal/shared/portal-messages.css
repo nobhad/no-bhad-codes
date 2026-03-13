@@ -123,8 +123,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 18px;
-  height: 18px;
+  min-width: var(--inline-pill-height);
+  height: var(--inline-pill-height);
   padding: 0 var(--space-1);
   background: var(--color-accent);
   color: var(--color-bg-tertiary);
@@ -720,7 +720,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  margin-top: 0.25rem;
+  margin-top: var(--space-0-5);
 }
 
 /* Message area */
@@ -841,8 +841,8 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.25rem;
-  margin-top: 0.25rem;
+  gap: var(--space-0-5);
+  margin-top: var(--space-0-5);
   font-size: var(--font-size-2xs);
 }
 
@@ -1233,12 +1233,6 @@
   animation-delay: -0.16s;
 }
 
-/* Simple CSS animation — acceptable per guidelines since
-   GSAP cannot animate pseudo-elements in continuous loops */
-@keyframes typing-bounce {
-  0%, 80%, 100% { transform: scale(0.6); opacity: var(--opacity-inactive); }
-  40% { transform: scale(1); opacity: 1; }
-}
 
 .typing-indicator-text {
   font-style: italic;

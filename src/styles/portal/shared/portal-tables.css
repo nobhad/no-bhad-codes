@@ -712,8 +712,8 @@
 }
 
 .data-table .priority-stacked .priority-indicator {
-  width: 6px;
-  height: 6px;
+  width: var(--status-dot-size);
+  height: var(--status-dot-size);
   border-radius: var(--border-radius-full);
   flex-shrink: 0;
 }
