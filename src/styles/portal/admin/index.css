@@ -571,39 +571,7 @@ body.modal-open .dashboard-content {
   height: var(--icon-size-3xl);
 }
 
-.set-password-loading,
-.set-password-error,
-.set-password-success {
-  text-align: center;
-  padding: var(--space-6);
-}
-
-.set-password-error .error-icon,
-.set-password-success .success-icon {
-  width: var(--icon-btn-size-xl);
-  height: var(--icon-btn-size-xl);
-  border-radius: var(--border-radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  margin: 0 auto var(--space-4);
-}
-
-.set-password-error .error-icon {
-  background: rgba(var(--color-error-rgb), 0.1);
-  color: var(--color-danger);
-}
-
-.set-password-success .success-icon {
-  background: rgba(var(--color-success-rgb), 0.1);
-  color: var(--color-success);
-}
-
-.set-password-form .form-field {
-  margin-bottom: var(--space-4);
-}
+/* .set-password state classes moved to shared/portal-auth.css */
 
 .set-password-form label {
   color: var(--color-text-secondary);
