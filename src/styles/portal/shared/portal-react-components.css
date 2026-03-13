@@ -39,7 +39,7 @@
 
 .dropdown-item {
   padding: var(--space-2) var(--space-4);
-  font-size: var(--font-size-sm, 14px);
+  font-size: var(--font-size-sm);
   font-family: var(--font-family-mono, monospace);
   color: var(--color-text-secondary);
   cursor: pointer;

@@ -39,13 +39,13 @@
   overflow: visible;
   position: relative;
   padding: 0;
-  border-bottom: var(--border-width) solid var(--portal-border);
+  border-bottom: var(--portal-border);
 }
 
 .portal-subtabs {
   display: flex;
   gap: var(--space-1);
-  border-bottom: var(--border-width) solid var(--portal-border);
+  border-bottom: var(--portal-border);
   margin-bottom: var(--portal-section-gap);
 }
 
@@ -59,13 +59,13 @@
 .view-toggle {
   display: inline-flex;
   gap: var(--space-1);
-  border-bottom: var(--border-width) solid var(--portal-border);
+  border-bottom: var(--portal-border);
 }
 
 .tab-list {
   display: flex;
   gap: 0;
-  border-bottom: var(--border-width) solid var(--portal-border);
+  border-bottom: var(--portal-border);
 }
 
 /* =====================================================

@@ -477,8 +477,8 @@
 
 .portal .attention-count {
   display: block;
-  font-family: var(--font-family-mono, monospace);
-  font-size: var(--font-size-xl, 1.25rem);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
   line-height: 1;
   color: var(--color-text-primary);

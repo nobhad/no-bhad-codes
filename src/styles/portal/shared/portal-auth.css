@@ -111,8 +111,8 @@
   display: block;
   margin-bottom: var(--space-1);
   color: var(--color-text-primary);
-  font-weight: var(--font-weight-medium, 500);
-  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
 }
 
 /* =====================================================
@@ -128,7 +128,7 @@
   height: auto;
   line-height: normal;
   padding: var(--space-2) var(--space-3);
-  font-size: var(--font-size-base, 1rem);
+  font-size: var(--font-size-base);
   transition: all var(--transition-fast);
   min-height: var(--space-6);
 }
@@ -327,11 +327,11 @@
   }
 
   .auth-gate-header h1 {
-    font-size: var(--font-size-xl, 1.25rem);
+    font-size: var(--font-size-xl);
   }
 
   .auth-gate-header p {
-    font-size: var(--font-size-sm, 0.875rem);
+    font-size: var(--font-size-sm);
   }
 }
 

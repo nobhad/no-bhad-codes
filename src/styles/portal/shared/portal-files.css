@@ -564,11 +564,11 @@
 }
 
 .dropzone-text {
-  font-size: var(--font-size-xs, 12px);
+  font-size: var(--font-size-xs);
 }
 
 .dropzone-hint {
-  font-size: var(--font-size-xs, 12px);
+  font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
   margin-left: auto;
 }

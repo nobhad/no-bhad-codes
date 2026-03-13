@@ -194,8 +194,8 @@
 .portal .notification-toggle {
   position: relative;
   display: inline-flex;
-  height: var(--space-2-5, 20px);
-  width: var(--space-4-5, 36px);
+  height: var(--space-2-5);
+  width: var(--space-4-5);
   flex-shrink: 0;
   cursor: pointer;
   border: var(--portal-border);
@@ -216,8 +216,8 @@
 .portal .notification-toggle .toggle-thumb {
   pointer-events: none;
   display: inline-block;
-  height: var(--icon-size-sm, 16px);
-  width: var(--icon-size-sm, 16px);
+  height: var(--icon-size-sm);
+  width: var(--icon-size-sm);
   background: var(--color-text-primary);
   transform: translateX(0);
   transition: transform var(--transition-fast);
@@ -226,7 +226,7 @@
 
 .portal .notification-toggle.is-checked .toggle-thumb {
   background: var(--color-bg-tertiary);
-  transform: translateX(var(--icon-size-sm, 16px));
+  transform: translateX(var(--icon-size-sm));
 }
 
 /* Toggle loading state */
@@ -239,8 +239,8 @@
 }
 
 .portal .notification-toggle .toggle-loading svg {
-  width: var(--icon-size-xs, 12px);
-  height: var(--icon-size-xs, 12px);
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
   color: var(--color-text-primary);
   animation: spin 1s linear infinite;
 }

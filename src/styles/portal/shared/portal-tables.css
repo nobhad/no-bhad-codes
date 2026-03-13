@@ -1662,7 +1662,7 @@
 
 /* Cell name styling */
 .cell-name {
-  font-weight: var(--font-weight-medium, 500);
+  font-weight: var(--font-weight-medium);
 }
 
 /* Cell link styling */
