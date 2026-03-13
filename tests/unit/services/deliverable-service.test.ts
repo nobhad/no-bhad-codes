@@ -311,7 +311,7 @@ describe('DeliverableService', () => {
       const result = await service.lockDeliverable(1, 3);
 
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining("SET locked=1, status='approved'"),
+        expect.stringContaining('SET locked=1, status=\'approved\''),
         [3, 1]
       );
       expect(result.locked).toBe(true);
@@ -377,7 +377,7 @@ describe('DeliverableService', () => {
       const result = await service.requestRevision(1, 'Needs more color', 3);
 
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining("status='revision_requested'"),
+        expect.stringContaining('status=\'revision_requested\''),
         [3, 1]
       );
       expect(result.status).toBe('revision_requested');

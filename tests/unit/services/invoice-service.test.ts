@@ -2364,7 +2364,7 @@ describe('Invoice Service', () => {
       const result = await service.createDepositInvoice(1, 1, 500, 50, 'Project Deposit 50%');
 
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining("'deposit'"),
+        expect.stringContaining('\'deposit\''),
         expect.arrayContaining([1, 1, 500])
       );
       expect(result.invoiceType).toBe('deposit');
@@ -2400,7 +2400,7 @@ describe('Invoice Service', () => {
       await service.createDepositInvoice(2, 3, 1000);
 
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining("'deposit'"),
+        expect.stringContaining('\'deposit\''),
         expect.arrayContaining([2, 3, 1000])
       );
     });

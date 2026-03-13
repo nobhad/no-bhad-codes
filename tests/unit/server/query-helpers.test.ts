@@ -73,35 +73,35 @@ describe('isRecoverable', () => {
   it('returns correct fragment without alias using default 30 days', () => {
     const result = isRecoverable();
     expect(result).toBe(
-      "deleted_at IS NOT NULL AND datetime(deleted_at, '+30 days') > datetime('now')"
+      'deleted_at IS NOT NULL AND datetime(deleted_at, \'+30 days\') > datetime(\'now\')'
     );
   });
 
   it('returns correct fragment with alias and default days', () => {
     const result = isRecoverable('c');
     expect(result).toBe(
-      "c.deleted_at IS NOT NULL AND datetime(c.deleted_at, '+30 days') > datetime('now')"
+      'c.deleted_at IS NOT NULL AND datetime(c.deleted_at, \'+30 days\') > datetime(\'now\')'
     );
   });
 
   it('uses custom days value', () => {
     const result = isRecoverable(undefined, 7);
     expect(result).toBe(
-      "deleted_at IS NOT NULL AND datetime(deleted_at, '+7 days') > datetime('now')"
+      'deleted_at IS NOT NULL AND datetime(deleted_at, \'+7 days\') > datetime(\'now\')'
     );
   });
 
   it('uses custom alias and custom days', () => {
     const result = isRecoverable('inv', 14);
     expect(result).toBe(
-      "inv.deleted_at IS NOT NULL AND datetime(inv.deleted_at, '+14 days') > datetime('now')"
+      'inv.deleted_at IS NOT NULL AND datetime(inv.deleted_at, \'+14 days\') > datetime(\'now\')'
     );
   });
 
   it('returns correct fragment for 1 day retention', () => {
     const result = isRecoverable(undefined, 1);
     expect(result).toBe(
-      "deleted_at IS NOT NULL AND datetime(deleted_at, '+1 days') > datetime('now')"
+      'deleted_at IS NOT NULL AND datetime(deleted_at, \'+1 days\') > datetime(\'now\')'
     );
   });
 });
@@ -114,28 +114,28 @@ describe('isExpired', () => {
   it('returns correct fragment without alias using default 30 days', () => {
     const result = isExpired();
     expect(result).toBe(
-      "deleted_at IS NOT NULL AND datetime(deleted_at, '+30 days') <= datetime('now')"
+      'deleted_at IS NOT NULL AND datetime(deleted_at, \'+30 days\') <= datetime(\'now\')'
     );
   });
 
   it('returns correct fragment with alias and default days', () => {
     const result = isExpired('r');
     expect(result).toBe(
-      "r.deleted_at IS NOT NULL AND datetime(r.deleted_at, '+30 days') <= datetime('now')"
+      'r.deleted_at IS NOT NULL AND datetime(r.deleted_at, \'+30 days\') <= datetime(\'now\')'
     );
   });
 
   it('uses custom days value', () => {
     const result = isExpired(undefined, 90);
     expect(result).toBe(
-      "deleted_at IS NOT NULL AND datetime(deleted_at, '+90 days') <= datetime('now')"
+      'deleted_at IS NOT NULL AND datetime(deleted_at, \'+90 days\') <= datetime(\'now\')'
     );
   });
 
   it('uses custom alias and custom days', () => {
     const result = isExpired('p', 60);
     expect(result).toBe(
-      "p.deleted_at IS NOT NULL AND datetime(p.deleted_at, '+60 days') <= datetime('now')"
+      'p.deleted_at IS NOT NULL AND datetime(p.deleted_at, \'+60 days\') <= datetime(\'now\')'
     );
   });
 
@@ -312,7 +312,7 @@ describe('isValidFieldName', () => {
   });
 
   it('returns false for name with SQL injection attempt', () => {
-    expect(isValidFieldName("name'; DROP TABLE users--")).toBe(false);
+    expect(isValidFieldName('name\'; DROP TABLE users--')).toBe(false);
   });
 
   it('returns false for empty string', () => {

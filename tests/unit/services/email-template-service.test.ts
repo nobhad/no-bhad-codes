@@ -55,7 +55,7 @@ vi.mock('../../../server/services/logger', () => ({
 
 // Import service after mocks
 import { emailTemplateService } from '../../../server/services/email-template-service';
-import type { EmailTemplate, EmailTemplateVersion, EmailSendLog } from '../../../server/services/email-template-service';
+import type { EmailTemplate, EmailTemplateVersion } from '../../../server/services/email-template-service';
 
 // ============================================
 // Shared Test Data
@@ -682,7 +682,7 @@ describe('EmailTemplateService - interpolate', () => {
   });
 
   it('escapes all HTML special characters', () => {
-    const result = emailTemplateService.interpolate('{{val}}', { val: `& < > " '` });
+    const result = emailTemplateService.interpolate('{{val}}', { val: '& < > " \'' });
     expect(result).toBe('&amp; &lt; &gt; &quot; &#x27;');
   });
 

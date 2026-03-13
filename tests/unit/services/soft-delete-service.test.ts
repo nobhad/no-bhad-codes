@@ -265,7 +265,7 @@ describe('SoftDeleteService - softDeleteInvoice', () => {
     // Should call run twice: void + soft delete
     expect(mockDb.run).toHaveBeenCalledTimes(2);
     expect(mockDb.run).toHaveBeenCalledWith(
-      expect.stringContaining("status = 'voided'"),
+      expect.stringContaining('status = \'voided\''),
       expect.anything()
     );
   });
@@ -591,7 +591,7 @@ describe('SoftDeleteService - restore', () => {
 
     expect(result.success).toBe(true);
     expect(mockDb.run).toHaveBeenCalledWith(
-      expect.stringContaining("status = 'draft'"),
+      expect.stringContaining('status = \'draft\''),
       expect.anything()
     );
   });
@@ -605,7 +605,7 @@ describe('SoftDeleteService - restore', () => {
     expect(result.success).toBe(true);
     // Should NOT set status to draft since it wasn't voided
     expect(mockDb.run).not.toHaveBeenCalledWith(
-      expect.stringContaining("status = 'draft'"),
+      expect.stringContaining('status = \'draft\''),
       expect.anything()
     );
   });

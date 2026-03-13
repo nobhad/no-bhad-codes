@@ -505,7 +505,7 @@ describe('AdHocRequestService', () => {
       await adHocRequestService.updateRequest(1, { title: 'X' });
 
       const [query] = mockDb.run.mock.calls[0];
-      expect(query).toContain("updated_at = datetime('now')");
+      expect(query).toContain('updated_at = datetime(\'now\')');
     });
   });
 

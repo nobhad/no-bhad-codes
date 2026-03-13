@@ -68,7 +68,7 @@ describe('validateEmail', () => {
     // local(64) + '@'(1) + domain-label(63) + '.'(1) + 'com'(3) = 132 chars without padding
     // Use a long domain label to push total well past 254
     const local = 'a'.repeat(64);
-    const domain = 'b'.repeat(190) + '.com'; // 64 + 1 + 190 + 4 = 259 chars total
+    const domain = `${'b'.repeat(190)  }.com`; // 64 + 1 + 190 + 4 = 259 chars total
     const email = `${local}@${domain}`;
     expect(email.length).toBeGreaterThan(254);
     const result = validateEmail(email);
@@ -257,7 +257,7 @@ describe('sanitizeText', () => {
   });
 
   it('encodes single quotes', () => {
-    const result = sanitizeText("It's fine");
+    const result = sanitizeText('It\'s fine');
     expect(result).toContain('&#x27;');
   });
 
@@ -351,32 +351,32 @@ describe('detectSQLInjection', () => {
   });
 
   it('detects SELECT keyword', () => {
-    const result = detectSQLInjection("SELECT * FROM users");
+    const result = detectSQLInjection('SELECT * FROM users');
     expect(result.detected).toBe(true);
   });
 
   it('detects DROP keyword', () => {
-    const result = detectSQLInjection("DROP TABLE users;");
+    const result = detectSQLInjection('DROP TABLE users;');
     expect(result.detected).toBe(true);
   });
 
   it('detects UNION keyword', () => {
-    const result = detectSQLInjection("1 UNION SELECT id, password FROM users");
+    const result = detectSQLInjection('1 UNION SELECT id, password FROM users');
     expect(result.detected).toBe(true);
   });
 
   it('detects comment sequences (--)', () => {
-    const result = detectSQLInjection("admin'--");
+    const result = detectSQLInjection('admin\'--');
     expect(result.detected).toBe(true);
   });
 
   it('detects OR-based injection patterns', () => {
-    const result = detectSQLInjection("1 OR 1=1");
+    const result = detectSQLInjection('1 OR 1=1');
     expect(result.detected).toBe(true);
   });
 
   it('detects AND-based injection patterns', () => {
-    const result = detectSQLInjection("1 AND 1=1");
+    const result = detectSQLInjection('1 AND 1=1');
     expect(result.detected).toBe(true);
   });
 
@@ -386,7 +386,7 @@ describe('detectSQLInjection', () => {
   });
 
   it('returns detected patterns as array', () => {
-    const result = detectSQLInjection("SELECT id FROM clients");
+    const result = detectSQLInjection('SELECT id FROM clients');
     expect(Array.isArray(result.patterns)).toBe(true);
     expect(result.patterns.length).toBeGreaterThan(0);
   });

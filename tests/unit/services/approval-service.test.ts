@@ -536,7 +536,7 @@ describe('ApprovalService', () => {
       expect(results).toHaveLength(1);
       expect(results[0].workflow_name).toBe('Proposal Approval');
       const [query] = mockDb.all.mock.calls[0];
-      expect(query).toContain("status IN ('pending', 'in_progress')");
+      expect(query).toContain('status IN (\'pending\', \'in_progress\')');
     });
   });
 
@@ -555,7 +555,7 @@ describe('ApprovalService', () => {
       expect(results).toHaveLength(1);
       expect(results[0].approver_email).toBe('manager@example.com');
       const [query, params] = mockDb.all.mock.calls[0];
-      expect(query).toContain("ar.status = 'pending'");
+      expect(query).toContain('ar.status = \'pending\'');
       expect(params).toEqual(['manager@example.com']);
     });
 
@@ -615,7 +615,7 @@ describe('ApprovalService', () => {
 
       expect(result.current_step).toBe(2);
       const updateRequestCall = mockDb.run.mock.calls[0];
-      expect(updateRequestCall[0]).toContain("status = 'approved'");
+      expect(updateRequestCall[0]).toContain('status = \'approved\'');
       expect(updateRequestCall[1]).toEqual(['LGTM', 200]);
     });
 
@@ -638,7 +638,7 @@ describe('ApprovalService', () => {
 
       expect(result.status).toBe('approved');
       const completeCall = mockDb.run.mock.calls.find(([q]) =>
-        q.includes("status = 'approved'") && q.includes('approval_workflow_instances')
+        q.includes('status = \'approved\'') && q.includes('approval_workflow_instances')
       );
       expect(completeCall).toBeDefined();
     });
@@ -666,7 +666,7 @@ describe('ApprovalService', () => {
 
       // Verify "skip remaining" run call
       const skipCall = mockDb.run.mock.calls.find(([q]) =>
-        q.includes("status = 'skipped'") && q.includes('approval_requests')
+        q.includes('status = \'skipped\'') && q.includes('approval_requests')
       );
       expect(skipCall).toBeDefined();
     });
@@ -718,7 +718,7 @@ describe('ApprovalService', () => {
       expect(result.status).toBe('in_progress');
       // No "approved" instance update
       const approveInstanceCall = mockDb.run.mock.calls.find(([q]) =>
-        q.includes("status = 'approved'") && q.includes('approval_workflow_instances')
+        q.includes('status = \'approved\'') && q.includes('approval_workflow_instances')
       );
       expect(approveInstanceCall).toBeUndefined();
     });
@@ -757,12 +757,12 @@ describe('ApprovalService', () => {
       expect(result.status).toBe('rejected');
 
       const updateRequestCall = mockDb.run.mock.calls[0];
-      expect(updateRequestCall[0]).toContain("status = 'rejected'");
+      expect(updateRequestCall[0]).toContain('status = \'rejected\'');
       expect(updateRequestCall[1]).toEqual(['Budget too high', 200]);
 
       const updateInstanceCall = mockDb.run.mock.calls[1];
       expect(updateInstanceCall[0]).toContain('approval_workflow_instances');
-      expect(updateInstanceCall[0]).toContain("status = 'rejected'");
+      expect(updateInstanceCall[0]).toContain('status = \'rejected\'');
     });
   });
 
@@ -782,11 +782,11 @@ describe('ApprovalService', () => {
       expect(result.status).toBe('cancelled');
 
       const skipCall = mockDb.run.mock.calls[0];
-      expect(skipCall[0]).toContain("status = 'skipped'");
+      expect(skipCall[0]).toContain('status = \'skipped\'');
       expect(skipCall[1]).toEqual([100]);
 
       const updateCall = mockDb.run.mock.calls[1];
-      expect(updateCall[0]).toContain("status = 'cancelled'");
+      expect(updateCall[0]).toContain('status = \'cancelled\'');
       expect(updateCall[1]).toContain('No longer needed');
     });
 

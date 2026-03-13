@@ -558,7 +558,7 @@ describe('QuestionnaireService', () => {
       const result = await questionnaireService.saveProgress(1, { q2: 'New York' });
 
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining("SET answers = ?"),
+        expect.stringContaining('SET answers = ?'),
         expect.any(Array)
       );
       expect(result.status).toBe('in_progress');
@@ -600,7 +600,7 @@ describe('QuestionnaireService', () => {
       const result = await questionnaireService.submitResponse(1, { q1: 'Final Answer' });
 
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining("status = 'completed'"),
+        expect.stringContaining('status = \'completed\''),
         expect.any(Array)
       );
       expect(result.status).toBe('completed');
