@@ -6,8 +6,6 @@ Welcome to the no-bhad-codes portfolio and "The Backend" (portal) application do
 
 ### The Backend (Portal System)
 
-**[THE_BACKEND.md](./THE_BACKEND.md)** - Complete portal system documentation (Client Portal + Admin Dashboard)
-
 The Backend refers to the complete portal system with two interfaces:
 
 **Client Portal** - Client-facing dashboard:
@@ -79,9 +77,7 @@ The Backend refers to the complete portal system with two interfaces:
 
 ### Architecture & Development
 
-- **[THE BACKEND](./THE_BACKEND.md)** - Complete portal system documentation (Client Portal + Admin Dashboard)
 - **[System Architecture](./ARCHITECTURE.md)** - Core architecture, module system, service layer, and component system
-- **[System Documentation](./SYSTEM_DOCUMENTATION.md)** - Complete system overview, invoice/file systems, database schema, and deployment
 - **[Developer Guide](./DEVELOPER_GUIDE.md)** - Development practices, module patterns, service layer, and component system
 - **[Configuration Guide](./CONFIGURATION.md)** - Environment variables, frontend config files, TypeScript and Vite configuration
 - **[Performance & Bundle Optimization](./OPTIMIZATION.md)** - Bundle optimization strategies, performance monitoring, Core Web Vitals tracking, and development best practices
@@ -92,7 +88,7 @@ The Backend refers to the complete portal system with two interfaces:
 ### Development & Maintenance
 
 - **[Current Work](../CURRENT_WORK.md)** - Active development tracking and TODO list
-- **[Test Coverage](./COVERAGE.md)** - Automated testing coverage guide and requirements
+- **[Development Guide](./guides/DEVELOPMENT.md)** - Development workflow, npm scripts, test coverage
 
 ### Audits & Post-Mortems
 

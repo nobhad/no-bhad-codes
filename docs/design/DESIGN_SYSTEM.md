@@ -312,7 +312,7 @@ Both bundles:
 @import './components/form-fields.css';
 
 /* 6. Page-specific */
-@import './client-portal/index.css';
+@import './portal/client/index.css';
 
 /* 7. Mobile overrides (last) */
 @import './mobile/index.css';
@@ -634,8 +634,8 @@ These rules apply to ALL dropdowns across the entire portal -- admin AND client-
 
 ### Modals
 
-Portal modals use CSS classes from `src/styles/shared/modal-system.css` and
-`src/styles/admin/modals.css`. The React portal uses `PortalModal` components
+Portal modals use CSS classes from `src/styles/portal/shared/portal-modal-system.css` and
+`src/styles/portal/admin/modal-system.css`. The React portal uses `PortalModal` components
 defined in `src/react/components/portal/`.
 
 **Structure:**
@@ -1130,29 +1130,30 @@ All `!important` declarations are legitimate. Current count: ~65 instances.
 
 ```text
 src/styles/
-├── admin/           # Admin portal (29 files)
+├── portal/
+│   ├── admin/       # Admin-only styles (20+ files)
+│   ├── client/      # Client portal styles (7 files)
+│   └── shared/      # Shared portal components (35+ files)
 ├── base/            # Foundation (6 files)
 ├── bundles/         # Entry points (4 files)
-├── client-portal/   # Client portal (16 files)
-├── components/      # Reusable (14 files)
+├── components/      # Reusable components (14 files)
 ├── mobile/          # Mobile-specific (3 files)
 ├── pages/           # Page-specific (11 files)
-├── shared/          # Shared portal (19 files)
 └── variables.css    # CSS variables
 ```
 
 ### Key Files
 
-**Admin (`src/styles/admin/`):**
+**Admin (`src/styles/portal/admin/`):**
 
 | File | Purpose |
 |------|---------|
 | `index.css` | Orchestrator |
-| `table-filters.css` | Table filter controls + sortable headers |
+| `table-controls.css` | Table filter controls + sortable headers |
 | `project-detail.css` | Project detail (including messaging UI) |
 | `workflows.css` | Approvals and triggers |
 
-**Shared (`src/styles/shared/`):**
+**Shared (`src/styles/portal/shared/`):**
 
 | File | Purpose |
 |------|---------|

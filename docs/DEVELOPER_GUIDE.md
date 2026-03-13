@@ -7,11 +7,12 @@
 3. [Architecture Deep Dive](#architecture-deep-dive)
 4. [Frontend Development](#frontend-development)
 5. [Backend Development](#backend-development)
-6. [Database Management](#database-management)
-7. [Testing Guide](#testing-guide)
-8. [Deployment Guide](#deployment-guide)
-9. [Code Style Guide](#code-style-guide)
-10. [Troubleshooting](#troubleshooting)
+6. [Error Handling](#error-handling)
+7. [Database Management](#database-management)
+8. [Testing Guide](#testing-guide)
+9. [Deployment Guide](#deployment-guide)
+10. [Code Style Guide](#code-style-guide)
+11. [Troubleshooting](#troubleshooting)
 
 ## Getting Started
 
@@ -799,6 +800,31 @@ await emailService.sendEmail({
 });
 
 ```text
+
+## Error Handling
+
+Use a unified logger utility for all error handling in both backend and frontend modules. Never use silent catches.
+
+### Pattern
+
+```typescript
+try {
+  // ...code...
+} catch (error) {
+  logger.error('Descriptive error message', error);
+  // Optionally rethrow or handle
+}
+```
+
+### Implementation
+
+- **Backend**: Use `server/services/logger.ts`
+- **Frontend**: Use `src/utils/logger.ts`
+- Replace direct `console.error` and silent catches with logger calls
+- Always log errors in catch blocks including error context
+- Throw errors with descriptive messages after logging when re-throwing
+
+---
 
 ## Database Management
 
