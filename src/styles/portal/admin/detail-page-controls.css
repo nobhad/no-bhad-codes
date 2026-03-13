@@ -271,7 +271,7 @@
   list-style: none;
   background: var(--color-bg-tertiary);
   border: var(--portal-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--border-radius-md);
   box-shadow: var(--shadow-dropdown);
   z-index: var(--z-index-max);
   overflow: visible;

@@ -33,8 +33,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
  * This is critical for Lucide icons which use stroke="currentColor".
  * Without this, SVGs appear grey instead of matching button text.
  */
-.portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .form-button) > svg,
-.portal button:is(.btn, .btn-primary, .btn-secondary, .btn-outline) > svg {
+.portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .form-button) > svg {
   color: inherit;
 }
 
