@@ -281,15 +281,7 @@ body[data-page="client-portal"] {
 
 /* Legacy breadcrumb rules removed — see shared/portal-layout.css */
 
-/* Error States */
-.error-message {
-  padding: var(--space-2);
-  background: var(--color-error-light);
-  color: var(--color-error);
-  border: var(--border-width) solid var(--color-error);
-  text-align: center;
-  margin: var(--space-2) 0;
-}
+/* Error States: .error-message defined in shared/portal-layout.css */
 
 /* Loading States */
 .login-btn.loading {

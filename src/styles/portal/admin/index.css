@@ -707,16 +707,7 @@ body.modal-open .dashboard-content {
   margin-bottom: var(--space-4);
 }
 
-/* Utility Classes */
-.text-success {
-  color: var(--color-success);
-}
-.text-warning {
-  color: var(--color-warning);
-}
-.text-danger {
-  color: var(--color-danger);
-}
+/* Utility Classes: .text-success / .text-warning / .text-danger defined in shared/portal-utilities.css */
 
 /* ================================================
    Responsive Design
