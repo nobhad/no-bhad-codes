@@ -16,6 +16,9 @@ import type {
   TemplateData
 } from './types.js';
 import { PROJECT_TEMPLATE_COLUMNS } from './types.js';
+import { contentRequestService } from '../content-request-service.js';
+import { paymentScheduleService } from '../payment-schedule-service.js';
+import type { ContentType, ContentCategory } from '../../config/constants.js';
 
 export async function createTemplate(data: TemplateData): Promise<ProjectTemplate> {
   const db = getDatabase();
@@ -23,8 +26,9 @@ export async function createTemplate(data: TemplateData): Promise<ProjectTemplat
   const result = await db.run(
     `INSERT INTO project_templates (
       name, description, project_type, default_milestones, default_tasks,
-      estimated_duration_days, default_hourly_rate
-    ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      estimated_duration_days, default_hourly_rate,
+      default_content_requests, default_payment_schedule, contract_template_id, tier_definitions
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       data.name,
       data.description || null,
@@ -32,7 +36,11 @@ export async function createTemplate(data: TemplateData): Promise<ProjectTemplat
       data.defaultMilestones ? JSON.stringify(data.defaultMilestones) : null,
       data.defaultTasks ? JSON.stringify(data.defaultTasks) : null,
       data.estimatedDurationDays || null,
-      data.defaultHourlyRate || null
+      data.defaultHourlyRate || null,
+      data.defaultContentRequests ? JSON.stringify(data.defaultContentRequests) : null,
+      data.defaultPaymentSchedule ? JSON.stringify(data.defaultPaymentSchedule) : null,
+      data.contractTemplateId || null,
+      data.tierDefinitions ? JSON.stringify(data.tierDefinitions) : null
     ]
   );
 
@@ -106,6 +114,22 @@ export async function updateTemplate(templateId: number, data: Partial<TemplateD
     fields.push('is_active = ?');
     values.push((data as Record<string, unknown>).isActive ? 1 : 0);
   }
+  if (data.defaultContentRequests !== undefined) {
+    fields.push('default_content_requests = ?');
+    values.push(data.defaultContentRequests ? JSON.stringify(data.defaultContentRequests) : null);
+  }
+  if (data.defaultPaymentSchedule !== undefined) {
+    fields.push('default_payment_schedule = ?');
+    values.push(data.defaultPaymentSchedule ? JSON.stringify(data.defaultPaymentSchedule) : null);
+  }
+  if (data.contractTemplateId !== undefined) {
+    fields.push('contract_template_id = ?');
+    values.push(data.contractTemplateId || null);
+  }
+  if (data.tierDefinitions !== undefined) {
+    fields.push('tier_definitions = ?');
+    values.push(data.tierDefinitions ? JSON.stringify(data.tierDefinitions) : null);
+  }
 
   if (fields.length > 0) {
     fields.push('updated_at = CURRENT_TIMESTAMP');
@@ -123,12 +147,27 @@ export async function deleteTemplate(templateId: number): Promise<void> {
   await db.run('DELETE FROM project_templates WHERE id = ?', [templateId]);
 }
 
+export interface CreateFromTemplateOptions {
+  selectedTier?: string;
+  totalAmount?: number;
+}
+
+export interface CreateFromTemplateResult {
+  projectId: number;
+  milestoneIds: number[];
+  taskIds: number[];
+  checklistId?: number;
+  paymentInstallmentIds?: number[];
+  contractId?: number;
+}
+
 export async function createProjectFromTemplate(
   templateId: number,
   clientId: number,
   projectName: string,
-  startDate: string
-): Promise<{ projectId: number; milestoneIds: number[]; taskIds: number[] }> {
+  startDate: string,
+  options?: CreateFromTemplateOptions
+): Promise<CreateFromTemplateResult> {
   const db = getDatabase();
 
   const template = await getTemplate(templateId);
@@ -200,5 +239,63 @@ export async function createProjectFromTemplate(
     taskIds.push(taskResult.lastID as number);
   }
 
-  return { projectId, milestoneIds, taskIds };
+  // Auto-create content request checklist from template defaults
+  let checklistId: number | undefined;
+  if (template.defaultContentRequests && template.defaultContentRequests.length > 0) {
+    const checklist = await contentRequestService.createChecklist(
+      projectId, clientId,
+      { name: `${projectName} - Content`, description: 'Content items from project template' },
+      template.defaultContentRequests.map((item, index) => ({
+        title: item.title,
+        description: item.description,
+        contentType: item.contentType as ContentType,
+        category: (item.category || 'other') as ContentCategory,
+        isRequired: item.isRequired,
+        dueDate: item.dueOffsetDays
+          ? new Date(new Date(startDate).getTime() + item.dueOffsetDays * 86400000).toISOString().split('T')[0]
+          : undefined,
+        sortOrder: index
+      }))
+    );
+    checklistId = checklist.id;
+  }
+
+  // Auto-create payment schedule from template defaults
+  let paymentInstallmentIds: number[] | undefined;
+  const totalAmount = options?.selectedTier && template.tierDefinitions
+    ? template.tierDefinitions.find((t) => t.tierName === options.selectedTier)?.price
+    : options?.totalAmount;
+
+  if (template.defaultPaymentSchedule && template.defaultPaymentSchedule.length > 0 && totalAmount) {
+    const installments = await paymentScheduleService.createFromSplit(
+      projectId, clientId, totalAmount,
+      template.defaultPaymentSchedule.map((pm) => ({
+        label: pm.label,
+        percent: pm.percentageOfTotal,
+        offsetDays: pm.dueOffsetDays
+      })),
+      startDate
+    );
+    paymentInstallmentIds = installments.map((i) => i.id);
+  }
+
+  // Auto-create contract draft from linked template
+  let contractId: number | undefined;
+  if (template.contractTemplateId) {
+    const contractTemplate = await db.get(
+      'SELECT id, content, type FROM contract_templates WHERE id = ?',
+      [template.contractTemplateId]
+    );
+    if (contractTemplate) {
+      const ct = contractTemplate as unknown as { id: number; content: string; type: string };
+      const contractResult = await db.run(
+        `INSERT INTO contracts (project_id, client_id, template_id, content, status, created_at, updated_at)
+         VALUES (?, ?, ?, ?, 'draft', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+        [projectId, clientId, ct.id, ct.content]
+      );
+      contractId = contractResult.lastID as number;
+    }
+  }
+
+  return { projectId, milestoneIds, taskIds, checklistId, paymentInstallmentIds, contractId };
 }
