@@ -345,8 +345,8 @@
 }
 
 .portal .file-icon {
-  width: 36px;
-  height: 36px;
+  width: var(--portal-btn-icon-size);
+  height: var(--portal-btn-icon-size);
   background: var(--color-bg-secondary);
   display: flex;
   align-items: center;

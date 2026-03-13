@@ -421,29 +421,11 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 /* ============================================
  * TABLE ACTION BUTTONS - UTILITIES LAYER
  * ============================================
- * Using utilities layer for highest priority without !important
- * ALL table action buttons are COLORLESS - neutral color only
+ * ALL table action buttons are COLORLESS - neutral color only.
+ * Uses :is() to consolidate all table context selectors.
  */
 @layer utilities {
-  /* MASTER SELECTOR: Every icon-btn in table contexts */
-  td .icon-btn,
-  td > .icon-btn,
-  td button.icon-btn,
-  .col-actions .icon-btn,
-  .col-actions > .icon-btn,
-  .col-actions button.icon-btn,
-  .table-actions .icon-btn,
-  .table-actions > .icon-btn,
-  .table-actions button.icon-btn,
-  .data-table .icon-btn,
-  .data-table td .icon-btn,
-  .data-table .col-actions .icon-btn,
-  .data-table .table-actions .icon-btn,
-  table .icon-btn,
-  table td .icon-btn,
-.portal td .icon-btn,
-  .portal .col-actions .icon-btn,
-  .portal .table-actions .icon-btn {
+  :is(td, .col-actions, .table-actions, .data-table, table) .icon-btn {
     width: var(--portal-btn-icon-size);
     height: var(--portal-btn-icon-size);
     min-width: var(--portal-btn-icon-size);
@@ -455,53 +437,26 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    /* ALL table action buttons are neutral - no colors */
     color: var(--color-text-primary);
     background: transparent;
   }
 
-  /* TABLE ACTION BUTTONS - REMOVE ALL COLOR VARIANTS
-   * Override all colored variants (danger, success, warning, primary)
-   * to use neutral color in table contexts */
-  td .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
-  .col-actions .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
-  .table-actions .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
-  .data-table .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
-  table .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary) {
+  /* All color variants are neutralized in table contexts */
+  :is(td, .col-actions, .table-actions, .data-table, table)
+    .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary) {
     color: var(--color-text-primary);
     background: transparent;
   }
 
-  /* Hover state - ALL table buttons hover to primary, no backgrounds */
-  td .icon-btn:hover,
-  .col-actions .icon-btn:hover,
-  .table-actions .icon-btn:hover,
-  .data-table .icon-btn:hover,
-  table .icon-btn:hover {
+  /* Hover — accent color, no background */
+  :is(td, .col-actions, .table-actions, .data-table, table) .icon-btn:hover {
     color: var(--color-accent);
     background: transparent;
     box-shadow: none;
   }
 
-  /* MASTER SELECTOR: Every SVG in table icon buttons — match cell text size (1em) */
-  td .icon-btn svg,
-  td > .icon-btn svg,
-  td button.icon-btn svg,
-  .col-actions .icon-btn svg,
-  .col-actions > .icon-btn svg,
-  .col-actions button.icon-btn svg,
-  .table-actions .icon-btn svg,
-  .table-actions > .icon-btn svg,
-  .table-actions button.icon-btn svg,
-  .data-table .icon-btn svg,
-  .data-table td .icon-btn svg,
-  .data-table .col-actions .icon-btn svg,
-  .data-table .table-actions .icon-btn svg,
-  table .icon-btn svg,
-  table td .icon-btn svg,
-  .portal td .icon-btn svg,
-  .portal .col-actions .icon-btn svg,
-  .portal .table-actions .icon-btn svg {
+  /* SVG inside table icon buttons — follow cell text size */
+  :is(td, .col-actions, .table-actions, .data-table, table) .icon-btn svg {
     width: 1em;
     height: 1em;
     min-width: 1em;

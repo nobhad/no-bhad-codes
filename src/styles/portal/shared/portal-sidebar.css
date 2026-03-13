@@ -448,7 +448,7 @@
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  z-index: var(--z-nav);
+  z-index: var(--z-index-portal-dropdown);
   box-shadow: none;
   transition:
     opacity var(--transition-faster),

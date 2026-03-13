@@ -1070,8 +1070,8 @@ body.modal-open .dashboard-content {
 
   .data-table-actions .icon-btn svg {
     /* Use unified table icon size from portal-tables.css */
-    width: var(--table-action-icon-size, var(--icon-size-md));
-    height: var(--table-action-icon-size, var(--icon-size-md));
+    width: var(--table-action-icon-size);
+    height: var(--table-action-icon-size);
     display: block;
     margin: 0;
   }
@@ -1159,12 +1159,12 @@ body.modal-open .dashboard-content {
  * This restores compact sizing for inline-edit fields.
  * ------------------------------------------------------- */
 .portal .inline-edit-wrapper input {
-  height: 22px;
+  height: var(--inline-edit-compact-height);
   min-height: 0;
-  padding: 0 4px;
+  padding: 0 var(--space-0-5);
 }
 
 .portal .inline-edit-wrapper .inline-edit-input-compact--date {
-  padding-left: 24px;
+  padding-left: var(--space-3);
   padding-right: 4px;
 }

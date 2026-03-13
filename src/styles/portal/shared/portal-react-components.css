@@ -14,7 +14,7 @@
 /* Progress bars -- small (4px) inline variant used inside React components.
    The canonical 12px standalone .progress-bar lives in portal-dashboard-widgets.css. */
 .progress-bar-sm {
-  height: 4px;
+  height: var(--progress-track-height);
   background: var(--portal-alpha-white-20);
   overflow: hidden;
 }

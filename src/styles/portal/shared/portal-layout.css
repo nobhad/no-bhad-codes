@@ -695,7 +695,7 @@ td {
 
 /* Base text color in light mode - uses CSS variables */
 html[data-theme="light"] .portal {
-  color: var(--color-text-primary, var(--color-light-text));
+  color: var(--color-text-primary);
 }
 
 /* Headings in light mode */
@@ -705,11 +705,11 @@ html[data-theme="light"] .portal h3,
 html[data-theme="light"] .portal h4,
 html[data-theme="light"] .portal h5,
 html[data-theme="light"] .portal h6 {
-  color: var(--color-text-primary, var(--color-light-text));
+  color: var(--color-text-primary);
 }
 
 html[data-theme="light"] .portal hr {
-  background-color: var(--color-border-primary, var(--color-light-border));
+  background-color: var(--color-border-primary);
 }
 
 /* Secondary text elements - use muted color for hierarchy */
@@ -724,7 +724,7 @@ html[data-theme="light"] .portal .summary-label,
 html[data-theme="light"] .portal .funnel-stage-label,
 html[data-theme="light"] .portal .funnel-stage,
 html[data-theme="light"] .portal .funnel-value {
-  color: var(--color-text-secondary, var(--color-light-text-secondary));
+  color: var(--color-text-secondary);
 }
 
 /* =====================================================
@@ -882,7 +882,7 @@ html[data-theme="light"] .portal .funnel-value {
 }
 
 .scroll-container::-webkit-scrollbar {
-  width: 4px;
+  width: var(--progress-track-height);
 }
 
 .scroll-container::-webkit-scrollbar-track {
@@ -1144,7 +1144,7 @@ html[data-theme="light"] .portal .funnel-value {
 
 /* Semantic gap utilities (gap-0 through gap-6 defined in LAYOUT UTILITY CLASSES above) */
 .gap-sm { gap: var(--space-1); }
-.gap-md { gap: var(--portal-section-gap, var(--space-3)); }
+.gap-md { gap: var(--portal-section-gap); }
 .gap-lg { gap: var(--space-4); }
 
 /* Section padding */
@@ -1234,7 +1234,7 @@ html[data-theme="light"] .portal .funnel-value {
 .portal-content-stack {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-section-gap, var(--space-3));
+  gap: var(--portal-section-gap);
 }
 
 /* Content row (horizontal flex) */
@@ -1298,7 +1298,7 @@ html[data-theme="light"] .portal .funnel-value {
 .detail-view {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-section-gap, var(--space-3));
+  gap: var(--portal-section-gap);
 }
 
 .detail-view--compact {

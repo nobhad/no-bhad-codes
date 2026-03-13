@@ -96,17 +96,17 @@ body[data-page="client-portal"] {
   --portal-alpha-white-25: color-mix(in srgb, var(--color-text-primary), transparent 75%);
   --portal-alpha-white-30: color-mix(in srgb, var(--color-text-primary), transparent 70%);
   --portal-alpha-white-50: color-mix(in srgb, var(--color-text-primary), transparent 50%);
-  --portal-alpha-black-04: rgba(0, 0, 0, 0.04);
-  --portal-alpha-black-05: rgba(0, 0, 0, 0.05);
-  --portal-alpha-black-10: rgba(0, 0, 0, 0.1);
-  --portal-alpha-black-15: rgba(0, 0, 0, 0.15);
-  --portal-alpha-black-20: rgba(0, 0, 0, 0.2);
-  --portal-alpha-black-30: rgba(0, 0, 0, 0.3);
-  --portal-alpha-black-40: rgba(0, 0, 0, 0.4);
-  --portal-alpha-black-50: rgba(0, 0, 0, 0.5);
-  --portal-alpha-black-60: rgba(0, 0, 0, 0.6);
-  --portal-alpha-black-70: rgba(0, 0, 0, 0.7);
-  --portal-alpha-black-80: rgba(0, 0, 0, 0.8);
+  --portal-alpha-black-04: color-mix(in srgb, black, transparent 96%);
+  --portal-alpha-black-05: color-mix(in srgb, black, transparent 95%);
+  --portal-alpha-black-10: color-mix(in srgb, black, transparent 90%);
+  --portal-alpha-black-15: color-mix(in srgb, black, transparent 85%);
+  --portal-alpha-black-20: color-mix(in srgb, black, transparent 80%);
+  --portal-alpha-black-30: color-mix(in srgb, black, transparent 70%);
+  --portal-alpha-black-40: color-mix(in srgb, black, transparent 60%);
+  --portal-alpha-black-50: color-mix(in srgb, black, transparent 50%);
+  --portal-alpha-black-60: color-mix(in srgb, black, transparent 40%);
+  --portal-alpha-black-70: color-mix(in srgb, black, transparent 30%);
+  --portal-alpha-black-80: color-mix(in srgb, black, transparent 20%);
 
   /* Semantic color alphas - for colored highlights/backgrounds */
   --portal-alpha-primary-08: rgba(var(--color-accent-rgb), 0.08);
@@ -218,6 +218,9 @@ body[data-page="client-portal"] {
   --portal-placeholder-color: var(--color-text-tertiary);
   --portal-field-label-gap: var(--field-label-value-gap); /* 0.125rem */
   --action-bar-item-height: var(--portal-btn-icon-size); /* 36px */
+  /* Select dropdown caret — SVG chevron-down, theme-aware */
+  --select-caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  --select-caret-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23404040' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   /* Gap between adjacent icon/action buttons (edit, delete, save, close clusters) */
   --action-btn-gap: var(--space-1); /* 8px */
 
@@ -376,6 +379,14 @@ body[data-page="client-portal"] {
   --inline-edit-date-icon-size: 13px;     /* Calendar icon inside compact date input */
   --inline-edit-compact-padding-x: 6px;  /* Horizontal padding for compact row inputs */
   --inline-edit-required-margin: 2px;    /* Left gap before required asterisk */
+  --inline-edit-compact-height: 22px;    /* Compact override height (page-layer) */
+
+  /* Group: Component Sizes */
+  --btn-size-sm: 28px;                   /* Small action/pagination buttons */
+  --icon-container-lg: var(--space-6);   /* 48px — large icon/status containers */
+  --modal-input-height: var(--space-6);  /* 48px — modal dropdown trigger height */
+  --modal-dropdown-item-height: 44px;    /* Modal dropdown list item height */
+  --inline-pill-height: 18px;            /* Inline badge/pill height */
 
   /* Group: Help Center */
   --help-right-column-min-height: 400px; /* Article column floor height */
@@ -384,6 +395,10 @@ body[data-page="client-portal"] {
   /* Group: Toast Notifications */
   --toast-min-width: 250px;
   --toast-max-width: 400px;
+
+  /* Group: Progress / Indicators */
+  --progress-track-height: var(--space-0-5); /* 4px — horizontal progress bars */
+  --status-dot-size: 6px;                    /* Inline status indicator dot */
 
   /* ----------------------------------------
    * NOTIFICATION BELL TOKENS
@@ -501,16 +516,6 @@ html[data-theme="light"]:has(body[data-page="admin"]),
 html[data-theme="light"]:has(body[data-page="client-portal"]) {
   --color-bg-primary: var(--color-off-white); /* Portal light = off-white */
   background-color: var(--color-bg-primary);
-}
-
-/* ============================================
- * SVG COLOR — UNLAYERED (beats all @layer rules)
- * Ensures all lucide SVGs use primary text color inside the portal.
- * svg.lucide { color: currentColor } in portal-utilities.css (layer pages)
- * would otherwise inherit from nearest ancestor — this locks it to primary.
- * ============================================ */
-.portal svg.lucide {
-  color: var(--color-text-primary);
 }
 
 /* Active/hover nav items — icon must match text color (same variable) */

@@ -1134,7 +1134,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Invoice filter select — matches dropdown content min-width so trigger = content width */
 .invtab-filter {
-  height: 36px;
+  height: var(--portal-btn-icon-size);
   min-width: var(--status-dropdown-width);
 }
 

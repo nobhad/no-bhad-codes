@@ -219,15 +219,6 @@
   animation: pulse-skeleton 2s ease-in-out infinite;
 }
 
-@keyframes pulse-skeleton {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: var(--opacity-disabled);
-  }
-}
 
 /* Kanban empty state */
 .kanban-empty-state {
