@@ -7,6 +7,8 @@
  * Styles for the audit log viewer under Settings.
  */
 
+@layer components {
+
 /* ================================================
    Content wrapper
    ================================================ */
@@ -191,4 +193,6 @@
   .audit-td-details {
     display: none;
   }
+}
+
 }

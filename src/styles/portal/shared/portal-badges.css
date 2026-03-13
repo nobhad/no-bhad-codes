@@ -4,6 +4,8 @@
    Single source of truth for status badges in admin and client portal
    ===================================================== */
 
+@layer components {
+
 /* =====================================================
    BASE STATUS BADGE
    Minimal badge with colored text
@@ -392,4 +394,6 @@
   border-radius: var(--border-radius-full);
   flex-shrink: 0;
   background-color: var(--color-text-tertiary);
+}
+
 }

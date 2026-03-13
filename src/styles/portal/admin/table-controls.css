@@ -10,6 +10,8 @@
  * - Export buttons
  */
 
+@layer components {
+
 /* ===============================================
    PAGINATION
    =============================================== */
@@ -182,4 +184,6 @@
   border: var(--portal-border);
   font-family: inherit;
   font-size: inherit;
+}
+
 }

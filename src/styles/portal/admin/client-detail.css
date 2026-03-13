@@ -4,6 +4,8 @@
    Relies on: portal-cards.css, portal-layout.css, field-label-spacing.css
    ===================================================== */
 
+@layer components {
+
 /* Split modules */
 @import "./client-detail-crm.css";
 
@@ -438,3 +440,4 @@
   border-color: var(--color-accent);
 }
 
+}

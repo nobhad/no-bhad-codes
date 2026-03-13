@@ -8,6 +8,8 @@
  * Radix Dialog/AlertDialog component styles.
  */
 
+@layer components {
+
 /* =====================================================
    MODAL POSITIONING (for Radix Dialog)
    Fixed centered positioning for portal modals.
@@ -242,6 +244,8 @@
   border-top: none;
 }
 
+} /* end @layer components */
+
 /* Modal dropdown menu positioning - using @layer utilities for cascade priority */
 @layer utilities {
   .portal-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-menu {
@@ -254,6 +258,8 @@
     z-index: var(--z-index-portal-dropdown);
   }
 }
+
+@layer components {
 
 .portal-modal .custom-dropdown[data-modal-dropdown].flip-above.open .custom-dropdown-trigger {
   border-bottom: var(--border-width) solid var(--color-accent);
@@ -308,3 +314,5 @@
     padding: var(--space-3);
   }
 }
+
+} /* end @layer components */

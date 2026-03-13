@@ -12,6 +12,8 @@
  * - Sortable table headers
  */
 
+@layer components {
+
 /* =====================================================
    COMPACT FILTER SELECTS - React tables
    Height matches buttons (28px), prevents full-width stretch
@@ -252,4 +254,6 @@
     margin: 0;
     padding: 0;
   }
+}
+
 }

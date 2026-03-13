@@ -14,6 +14,8 @@
  * are aliased so existing HTML works without change.
  * ===================================================== */
 
+@layer components {
+
 /* Override card padding so summary and grid control spacing consistently */
 .portal :is(.details-card, .system-details).portal-project-card {
   padding: 0;
@@ -117,4 +119,6 @@
   .portal :is(.details-card-row, .system-info-row) {
     padding: var(--space-1-5) var(--space-2);
   }
+}
+
 }

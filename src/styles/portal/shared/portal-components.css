@@ -23,6 +23,8 @@
  * - Simple KPI cards (.kpi-card)
  */
 
+@layer components {
+
 /* 1. Utilities first (foundational classes used everywhere) */
 @import "./portal-utilities.css";
 
@@ -102,4 +104,6 @@
 
 .kpi-card-change.negative {
   color: var(--status-cancelled);
+}
+
 }

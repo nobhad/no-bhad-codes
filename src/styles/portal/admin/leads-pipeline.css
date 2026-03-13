@@ -7,6 +7,8 @@
  * Styles for lead pipeline (Kanban) view.
  */
 
+@layer components {
+
 /* View toggle: use shared .view-toggle (see shared/view-toggle.css) */
 
 /* ============================================
@@ -165,4 +167,6 @@
     font-size: var(--font-size-sm);
     padding: var(--space-0-5) var(--space-1);
   }
+}
+
 }

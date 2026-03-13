@@ -10,6 +10,8 @@
  * border, icon sizing, transitions, interactive, disabled).
  */
 
+@layer utilities {
+
 /* ============================================
    PORTAL KEYFRAMES — SINGLE SOURCE OF TRUTH
    All portal CSS animation keyframes live here.
@@ -419,4 +421,6 @@ a.text-danger:hover {
   opacity: var(--opacity-disabled);
   cursor: not-allowed;
   pointer-events: none;
+}
+
 }

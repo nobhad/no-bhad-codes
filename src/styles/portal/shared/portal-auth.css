@@ -11,6 +11,8 @@
  * - src/styles/portal/shared/portal-auth.css
  */
 
+@layer components {
+
 /* =====================================================
    AUTH GATE - Full Screen Login Overlay
    ===================================================== */
@@ -481,4 +483,6 @@ body.portal-logged-in[data-page="client-portal"] .nav-overlay {
 
 .set-password-form .btn-full {
   width: 100%;
+}
+
 }

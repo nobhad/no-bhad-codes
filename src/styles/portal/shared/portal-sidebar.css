@@ -17,6 +17,8 @@
    Mobile width/hide: styles/responsive/breakpoints.css (@layer responsive)
    ===================================================== */
 
+@layer components {
+
 /* Shared sidebar - same for both admin and client portal */
 .portal .sidebar {
   width: var(--sidebar-width-open);
@@ -204,6 +206,8 @@
   }
 }
 
+} /* end @layer components */
+
 /* Collapsed sidebar mobile - uses responsive layer for priority over auto-collapse */
 @layer responsive {
   @media (--mobile) {
@@ -216,6 +220,8 @@
     }
   }
 }
+
+@layer components {
 
 /* =====================================================
    SIDEBAR NOTIFICATION BADGES
@@ -464,4 +470,6 @@
 .portal .sidebar.collapsed .sidebar-toggle-btn::after {
   display: none;
 }
+
+} /* end @layer components */
 

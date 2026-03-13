@@ -3,6 +3,8 @@
    Minimal styles - uses shared portal styles
    ===================================================== */
 
+@layer components {
+
 /* ==============================================
    HERO SEARCH
    ============================================== */
@@ -325,4 +327,6 @@
   .help-contact-actions {
     align-items: stretch;
   }
+}
+
 }

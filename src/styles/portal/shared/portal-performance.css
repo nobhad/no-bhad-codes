@@ -9,6 +9,8 @@
  * project performance, and card layout helpers.
  */
 
+@layer components {
+
 /* Performance header */
 .perf-header {
   display: flex;
@@ -24,4 +26,6 @@
 
 .perf-tab-list {
   border-bottom: none;
+}
+
 }

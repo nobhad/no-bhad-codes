@@ -8,6 +8,8 @@
  * Bell button matches .header-theme-toggle sizing/styling.
  */
 
+@layer components {
+
 /* ============================================================================
    NOTIFICATION BELL CONTAINER
    ============================================================================ */
@@ -241,4 +243,6 @@
     right: calc(-1 * var(--notification-dropdown-mobile-bleed));
     max-width: calc(100vw - calc(var(--notification-dropdown-mobile-bleed) * 2));
   }
+}
+
 }

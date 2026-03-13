@@ -3,6 +3,8 @@
    Project navigation sidebar, items, detail views
    ===================================================== */
 
+@layer components {
+
 /* Project Status/Progress text labels */
 .project-status,
 .project-progress {
@@ -144,4 +146,6 @@
   .project-details {
     padding: var(--space-3);
   }
+}
+
 }

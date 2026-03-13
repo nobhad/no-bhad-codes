@@ -16,6 +16,8 @@
  * - project-detail-invoices.css - Invoices tab styles
  */
 
+@layer components {
+
 /* =====================================================
    PROJECT DETAIL VIEW STYLES
    ===================================================== */
@@ -1261,4 +1263,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 #pd-contract-status-badge.status-not-signed {
   background: var(--color-text-tertiary);
   color: var(--color-text-primary);
+}
+
 }

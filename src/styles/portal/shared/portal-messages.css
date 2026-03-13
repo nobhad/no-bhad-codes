@@ -1,5 +1,7 @@
 /* PORTAL MESSAGES - Layout only, inherits all other styles from portal base */
 
+@layer components {
+
 /* ===========================================
    FLEX COLUMN BASE - shared by all column containers
    =========================================== */
@@ -1236,4 +1238,6 @@
 
 .typing-indicator-text {
   font-style: italic;
+}
+
 }

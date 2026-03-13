@@ -6,6 +6,8 @@
    Matches portal button styling for consistency.
    ================================================ */
 
+@layer components {
+
 .confirm-dialog {
   background: var(--color-bg-secondary);
   border: var(--portal-border);
@@ -244,4 +246,6 @@
 .prompt-dialog-input.form-textarea {
   resize: vertical;
   min-height: var(--min-height-textarea-lg);
+}
+
 }

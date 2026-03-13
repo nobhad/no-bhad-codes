@@ -9,6 +9,8 @@
  * placeholder.
  */
 
+@layer components {
+
 /* ============================================
    ERROR BOUNDARY COMPONENT
    Fallback UI when React components crash
@@ -147,4 +149,6 @@
 /* React portal mount point */
 .react-portal-mount {
   min-height: var(--space-12);
+}
+
 }

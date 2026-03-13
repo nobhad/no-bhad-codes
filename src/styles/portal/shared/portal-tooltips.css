@@ -8,6 +8,8 @@
  * plus info icon wrapper pattern.
  */
 
+@layer components {
+
 /* Info icons */
 .portal .info-icon-wrapper {
   display: inline-block;
@@ -120,4 +122,6 @@
 .portal .table-cell[data-tooltip]::before {
   left: var(--space-2-5);
   transform: none;
+}
+
 }

@@ -31,6 +31,8 @@
       Layout only — actual inputs use system 3 classes.
    ===================================================== */
 
+@layer components {
+
 /* Base input styles — all form controls inside .portal, .modal-overlay, and .auth-gate. */
 .portal
   :is(
@@ -1049,4 +1051,6 @@ input.search-bar-input {
 }
 .file-upload-remove-btn:hover {
   color: var(--color-accent);
+}
+
 }

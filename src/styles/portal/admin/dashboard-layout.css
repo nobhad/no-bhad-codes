@@ -10,6 +10,8 @@
  * - Activity feed, project health
  */
 
+@layer components {
+
 /* =====================================================
    OVERVIEW CONTAINER
    Uses flex column + gap to space greeting, stats strip, and grid
@@ -478,4 +480,6 @@
 .ovdash-quick-actions .btn-secondary {
   border: var(--portal-btn-border-width) solid var(--portal-btn-border-color);
   border-bottom-width: var(--portal-btn-border-bottom-width);
+}
+
 }
