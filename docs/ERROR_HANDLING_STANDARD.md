@@ -34,4 +34,4 @@ try {
 
 ---
 
-For further details, see `docs/current_work.md` and update as modules are migrated.
+For further details, see `CURRENT_WORK.md` at the repository root and update as modules are migrated.

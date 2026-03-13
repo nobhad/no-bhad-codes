@@ -91,14 +91,16 @@ The Backend refers to the complete portal system with two interfaces:
 
 ### Development & Maintenance
 
-- **[Current Work](./current_work.md)** - Active development tracking and TODO list
+- **[Current Work](../CURRENT_WORK.md)** - Active development tracking and TODO list
 - **[Test Coverage](./COVERAGE.md)** - Automated testing coverage guide and requirements
 
 ### Archive
 
-- **[Archived Work 2025-12](./archive/ARCHIVED_WORK_2025-12.md)** - Completed work from December 2025
-- **[Archived Work 2026-01](./archive/ARCHIVED_WORK_2026-01.md)** - Completed work from January 2026
-- **[Archived Work 2026-02](./archive/ARCHIVED_WORK_2026-02.md)** - Completed work from February 2026
+- **[Archived Work 2025-12](./archive/work-logs/ARCHIVED_WORK_2025-12.md)** - Completed work from December 2025
+- **[Archived Work 2026-01](./archive/work-logs/ARCHIVED_WORK_2026-01.md)** - Completed work from January 2026
+- **[Archived Work 2026-02](./archive/work-logs/ARCHIVED_WORK_2026-02.md)** - Completed work from February 2026
+- **[Archived Work 2026-02 (mid-month)](./archive/work-logs/ARCHIVED_WORK_2026-02-12.md)** - Completed work mid-February 2026
+- **[Archived Work 2026-03](./archive/work-logs/ARCHIVED_WORK_2026-03.md)** - Completed work from March 2026
 
 ### Quick Links
 
