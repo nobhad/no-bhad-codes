@@ -8,7 +8,7 @@
 import { Router, Response } from 'express';
 import { deliverableService } from '../../services/deliverable-service.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
-import { logger } from '../../services/logger.js';
+import { asyncHandler } from '../../middleware/errorHandler.js';
 import type { AuthenticatedRequest } from '../../middleware/auth.js';
 import { validateRequest } from '../../middleware/validation.js';
 import { DeliverableValidationSchemas, canAccessDeliverable } from './shared.js';
@@ -56,7 +56,7 @@ const router = Router();
  *       404:
  *         description: Deliverable not found
  */
-router.post('/:id/versions', validateRequest(DeliverableValidationSchemas.uploadVersion, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/versions', validateRequest(DeliverableValidationSchemas.uploadVersion, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
@@ -90,13 +90,9 @@ router.post('/:id/versions', validateRequest(DeliverableValidationSchemas.upload
     if (error instanceof Error && error.message.includes('not found')) {
       return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
-    logger.error('[Deliverables] Failed to upload version', {
-      error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE'
-    });
-    errorResponse(res, 'Failed to upload version', 500, ErrorCodes.INTERNAL_ERROR);
+    throw error;
   }
-});
+}));
 
 /**
  * @swagger
@@ -117,29 +113,21 @@ router.post('/:id/versions', validateRequest(DeliverableValidationSchemas.upload
  *       200:
  *         description: List of versions
  */
-router.get('/:id/versions', async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const { id } = req.params;
-    const deliverableId = parseInt(id, 10);
-    if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
-    }
-
-    // Check authorization
-    if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
-    }
-
-    const versions = await deliverableService.getDeliverableVersions(deliverableId);
-    sendSuccess(res, { versions });
-  } catch (error) {
-    logger.error('[Deliverables] Failed to list versions', {
-      error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE'
-    });
-    errorResponse(res, 'Failed to list versions', 500, ErrorCodes.INTERNAL_ERROR);
+router.get('/:id/versions', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const deliverableId = parseInt(id, 10);
+  if (isNaN(deliverableId) || deliverableId <= 0) {
+    return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
   }
-});
+
+  // Check authorization
+  if (!(await canAccessDeliverable(req, deliverableId))) {
+    return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+  }
+
+  const versions = await deliverableService.getDeliverableVersions(deliverableId);
+  sendSuccess(res, { versions });
+}));
 
 /**
  * @swagger
@@ -162,33 +150,25 @@ router.get('/:id/versions', async (req: AuthenticatedRequest, res: Response) => 
  *       404:
  *         description: No versions found
  */
-router.get('/:id/versions/latest', async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const { id } = req.params;
-    const deliverableId = parseInt(id, 10);
-    if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
-    }
-
-    // Check authorization
-    if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
-    }
-
-    const version = await deliverableService.getLatestVersion(deliverableId);
-
-    if (!version) {
-      return errorResponse(res, 'No versions found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
-    }
-
-    sendSuccess(res, { version });
-  } catch (error) {
-    logger.error('[Deliverables] Failed to retrieve latest version', {
-      error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE'
-    });
-    errorResponse(res, 'Failed to retrieve latest version', 500, ErrorCodes.INTERNAL_ERROR);
+router.get('/:id/versions/latest', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const deliverableId = parseInt(id, 10);
+  if (isNaN(deliverableId) || deliverableId <= 0) {
+    return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
   }
-});
+
+  // Check authorization
+  if (!(await canAccessDeliverable(req, deliverableId))) {
+    return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+  }
+
+  const version = await deliverableService.getLatestVersion(deliverableId);
+
+  if (!version) {
+    return errorResponse(res, 'No versions found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+  }
+
+  sendSuccess(res, { version });
+}));
 
 export default router;

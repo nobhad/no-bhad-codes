@@ -7,6 +7,7 @@
  */
 
 import { Router, Request, Response } from 'express';
+import { asyncHandler } from '../../middleware/errorHandler.js';
 import { getDatabase } from '../../database/init.js';
 import {
   validateEmail,
@@ -320,46 +321,40 @@ router.post('/sanitize', (req: Request, res: Response) => {
  *       400:
  *         description: Input is required
  */
-router.post('/security/check', async (req: Request, res: Response) => {
-  try {
-    const { input } = req.body;
+router.post('/security/check', asyncHandler(async (req: Request, res: Response) => {
+  const { input } = req.body;
 
-    if (!input) {
-      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
-        message: 'input is required'
-      });
-      return;
-    }
-
-    const xssResult = detectXSS(input);
-    const sqlResult = detectSQLInjection(input);
-
-    // Log if threats detected
-    if (xssResult.detected || sqlResult.detected) {
-      const db = getDatabase();
-      await db.run(
-        `INSERT INTO validation_error_log (entity_type, field_name, field_value, error_type, error_message, source_ip, user_agent)
-         VALUES ('security_check', 'input', ?, ?, ?, ?, ?)`,
-        [
-          input.substring(0, 500),
-          xssResult.detected ? 'xss' : 'sql_injection',
-          xssResult.detected ? 'XSS patterns detected' : 'SQL injection patterns detected',
-          req.ip,
-          req.headers['user-agent'] || ''
-        ]
-      );
-    }
-
-    sendSuccess(res, {
-      safe: !xssResult.detected && !sqlResult.detected,
-      xss: xssResult,
-      sqlInjection: sqlResult
+  if (!input) {
+    errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
+      message: 'input is required'
     });
-  } catch (error) {
-    errorResponseWithPayload(res, 'Security check failed', 500, ErrorCodes.INTERNAL_ERROR, {
-      message: sanitizeErrorMessage(error, 'Security threat detection failed')
-    });
+    return;
   }
-});
+
+  const xssResult = detectXSS(input);
+  const sqlResult = detectSQLInjection(input);
+
+  // Log if threats detected
+  if (xssResult.detected || sqlResult.detected) {
+    const db = getDatabase();
+    await db.run(
+      `INSERT INTO validation_error_log (entity_type, field_name, field_value, error_type, error_message, source_ip, user_agent)
+       VALUES ('security_check', 'input', ?, ?, ?, ?, ?)`,
+      [
+        input.substring(0, 500),
+        xssResult.detected ? 'xss' : 'sql_injection',
+        xssResult.detected ? 'XSS patterns detected' : 'SQL injection patterns detected',
+        req.ip,
+        req.headers['user-agent'] || ''
+      ]
+    );
+  }
+
+  sendSuccess(res, {
+    safe: !xssResult.detected && !sqlResult.detected,
+    xss: xssResult,
+    sqlInjection: sqlResult
+  });
+}));
 
 export default router;

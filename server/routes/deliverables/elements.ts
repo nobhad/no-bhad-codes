@@ -8,7 +8,7 @@
 import { Router, Response } from 'express';
 import { deliverableService } from '../../services/deliverable-service.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
-import { logger } from '../../services/logger.js';
+import { asyncHandler } from '../../middleware/errorHandler.js';
 import type { AuthenticatedRequest } from '../../middleware/auth.js';
 import { validateRequest } from '../../middleware/validation.js';
 import { DeliverableValidationSchemas, canAccessDeliverable } from './shared.js';
@@ -46,7 +46,7 @@ const router = Router();
  *       201:
  *         description: Design element created
  */
-router.post('/:id/elements', validateRequest(DeliverableValidationSchemas.createElement, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/elements', validateRequest(DeliverableValidationSchemas.createElement, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
@@ -71,13 +71,9 @@ router.post('/:id/elements', validateRequest(DeliverableValidationSchemas.create
     if (error instanceof Error && error.message.includes('not found')) {
       return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
-    logger.error('[Deliverables] Failed to create design element', {
-      error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE'
-    });
-    errorResponse(res, 'Failed to create design element', 500, ErrorCodes.INTERNAL_ERROR);
+    throw error;
   }
-});
+}));
 
 /**
  * @swagger
@@ -98,29 +94,21 @@ router.post('/:id/elements', validateRequest(DeliverableValidationSchemas.create
  *       200:
  *         description: List of design elements
  */
-router.get('/:id/elements', async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const { id } = req.params;
-    const deliverableId = parseInt(id, 10);
-    if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
-    }
-
-    // Check authorization
-    if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
-    }
-
-    const elements = await deliverableService.getDeliverableElements(deliverableId);
-    sendSuccess(res, { elements });
-  } catch (error) {
-    logger.error('[Deliverables] Failed to list design elements', {
-      error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE'
-    });
-    errorResponse(res, 'Failed to list design elements', 500, ErrorCodes.INTERNAL_ERROR);
+router.get('/:id/elements', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const deliverableId = parseInt(id, 10);
+  if (isNaN(deliverableId) || deliverableId <= 0) {
+    return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
   }
-});
+
+  // Check authorization
+  if (!(await canAccessDeliverable(req, deliverableId))) {
+    return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+  }
+
+  const elements = await deliverableService.getDeliverableElements(deliverableId);
+  sendSuccess(res, { elements });
+}));
 
 /**
  * @swagger
@@ -162,7 +150,7 @@ router.get('/:id/elements', async (req: AuthenticatedRequest, res: Response) => 
 router.patch(
   '/:deliverableId/elements/:elementId/approval',
   validateRequest(DeliverableValidationSchemas.updateElementApproval),
-  async (req: AuthenticatedRequest, res: Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { deliverableId, elementId } = req.params;
       const parsedDeliverableId = parseInt(deliverableId, 10);
@@ -199,13 +187,9 @@ router.patch(
       if (error instanceof Error && error.message.includes('not found')) {
         return errorResponse(res, 'Design element not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       }
-      logger.error('[Deliverables] Failed to update element approval status', {
-        error: error instanceof Error ? error : new Error(String(error)),
-        category: 'DELIVERABLE'
-      });
-      errorResponse(res, 'Failed to update element approval status', 500, ErrorCodes.INTERNAL_ERROR);
+      throw error;
     }
-  }
+  })
 );
 
 export default router;

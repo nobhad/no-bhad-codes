@@ -241,7 +241,7 @@ p.contact-options {
 
 /* Contact text on card - always black on white card background */
 .contact-card-text {
-  color: var(--color-black);
+  color: var(--color-text-primary);
   font-size: var(--font-size-xl);
   line-height: var(--line-height-relaxed);
   text-align: left;
@@ -252,7 +252,7 @@ p.contact-options {
 .contact-card-link {
   font-weight: var(--font-weight-extrabold);
   text-decoration: underline;
-  color: var(--color-black);
+  color: var(--color-text-primary);
   transition: color var(--transition-mouse) ease;
 }
 

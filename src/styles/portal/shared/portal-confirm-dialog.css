@@ -108,7 +108,7 @@
 /* Danger variant - red background always */
 .confirm-dialog-confirm.danger {
   background: var(--color-danger);
-  color: var(--color-white);
+  color: var(--color-text-primary);
 }
 
 .confirm-dialog-confirm.danger:hover {

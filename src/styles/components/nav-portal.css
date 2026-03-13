@@ -295,14 +295,14 @@
 /* Valid state - all requirements met */
 .portal-dropdown .dropdown-submit.valid {
   background: var(--color-accent);
-  color: var(--color-black);
+  color: var(--color-bg-primary);
   opacity: 1;
 }
 
 .portal-dropdown .dropdown-submit.valid:hover,
 .portal-dropdown .dropdown-submit.valid:focus {
   background: var(--color-accent);
-  color: var(--color-black);
+  color: var(--color-bg-primary);
   filter: brightness(1.1);
 }
 

@@ -73,7 +73,7 @@
   font-weight: var(--font-weight-semibold);
   line-height: var(--notification-badge-size);
   text-align: center;
-  color: var(--color-white);
+  color: var(--color-text-primary);
   background: var(--color-danger);
   pointer-events: none;
 }

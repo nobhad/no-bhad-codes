@@ -407,15 +407,15 @@
 @media (prefers-contrast: high) {
   .business-card-inner {
     /* Strong border for high contrast - no shadow here, shadows on faces */
-    box-shadow: 0 0 0 2px var(--color-black);
+    box-shadow: 0 0 0 2px var(--color-text-primary);
   }
 
   .business-card-front,
   .business-card-back {
     background: var(--color-card-bg);
-    color: var(--color-black);
+    color: var(--color-text-primary);
     box-shadow:
-      0 0 0 1px var(--color-black),
+      0 0 0 1px var(--color-text-primary),
       0 10px 30px var(--color-shadow);
   }
 }
@@ -444,7 +444,7 @@
     box-shadow: none;
     border: none;
     background: var(--color-card-bg);
-    color: var(--color-black);
+    color: var(--color-text-primary);
   }
 
   /* Only show front face when printing */

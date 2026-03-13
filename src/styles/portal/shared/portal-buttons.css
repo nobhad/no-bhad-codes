@@ -61,7 +61,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 }
 .btn-success:hover {
   background: var(--color-success-500);
-  color: var(--color-white);
+  color: var(--color-text-primary);
   border-color: var(--color-success-500);
 }
 
@@ -143,14 +143,14 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 /* Filled primary button - solid background with thick bottom border */
 .btn-filled {
   background: var(--color-accent);
-  color: var(--color-white);
+  color: var(--color-text-primary);
   border: var(--portal-btn-border-width) solid var(--color-accent);
   border-bottom-width: var(--portal-btn-border-bottom-width);
   border-bottom-color: var(--portal-btn-border-color);
 }
 .btn-filled:hover {
   background: var(--color-brand-hover, var(--color-interactive-primary-hover));
-  color: var(--color-white);
+  color: var(--color-text-primary);
   border-color: var(--color-brand-hover, var(--color-interactive-primary-hover));
   border-bottom-color: var(--portal-btn-border-color);
 }
@@ -570,7 +570,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
   text-transform: uppercase;
-  color: var(--color-white);
+  color: var(--color-text-primary);
   cursor: pointer;
   transition:
     background-color var(--transition-mouse) ease,
@@ -583,8 +583,8 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   background: var(--portal-alpha-white-10);
 }
 .toggle-btn.is-active {
-  background: var(--color-white);
-  color: var(--color-black);
+  background: var(--color-text-primary);
+  color: var(--color-bg-primary);
 }
 
 /* ============================================

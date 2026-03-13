@@ -20,6 +20,7 @@ import { getSchedulerService } from '../services/scheduler-service.js';
 import { getMetricsSummary } from '../observability/metrics.js';
 import { getCurrentTraceId } from '../observability/tracing.js';
 import { getApiMetrics } from '../middleware/logger.js';
+import { asyncHandler } from '../middleware/errorHandler.js';
 
 const router = Router();
 
@@ -60,7 +61,7 @@ interface HealthResponse {
  *
  * Returns 200 if healthy, 503 if degraded/unhealthy
  */
-router.get('/', async (_req: Request, res: Response) => {
+router.get('/', asyncHandler(async (_req: Request, res: Response) => {
   const startTime = Date.now();
   const health: HealthResponse = {
     status: 'healthy',
@@ -146,7 +147,7 @@ router.get('/', async (_req: Request, res: Response) => {
   // Add response time header
   res.set('X-Response-Time', `${Date.now() - startTime}ms`);
   res.status(statusCode).json(health);
-});
+}));
 
 /**
  * Liveness probe
@@ -175,7 +176,7 @@ router.get('/live', (_req: Request, res: Response) => {
  *
  * Checks critical dependencies (database) but not optional services.
  */
-router.get('/ready', async (_req: Request, res: Response) => {
+router.get('/ready', asyncHandler(async (_req: Request, res: Response) => {
   const startTime = Date.now();
 
   try {
@@ -212,7 +213,7 @@ router.get('/ready', async (_req: Request, res: Response) => {
       timestamp: new Date().toISOString()
     });
   }
-});
+}));
 
 /**
  * Database-specific health check
@@ -222,7 +223,7 @@ router.get('/ready', async (_req: Request, res: Response) => {
  * - Connection pool statistics
  * - Query latency test
  */
-router.get('/db', async (_req: Request, res: Response) => {
+router.get('/db', asyncHandler(async (_req: Request, res: Response) => {
   const startTime = Date.now();
 
   try {
@@ -255,7 +256,7 @@ router.get('/db', async (_req: Request, res: Response) => {
       error: (err as Error).message
     });
   }
-});
+}));
 
 /**
  * API metrics endpoint

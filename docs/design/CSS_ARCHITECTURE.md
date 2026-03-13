@@ -738,22 +738,7 @@ These are places where the code deliberately breaks a stated rule. Each entry ex
 
 ---
 
-### 2. Inverted semantic color names
-
-**Rule broken:** Token names must describe purpose (`--color-white` should be white).
-
-**Where:** `src/design-system/tokens/portal-theme.css` — semantic color aliases section.
-
-```css
---color-white: var(--color-text-primary); /* Portal: "white" = most prominent text */
---color-black: var(--color-bg-primary);   /* Portal: "black" = base background */
-```
-
-**Why:** The portal uses an inverted Discothèque theme — dark mode has white text on black, light mode has dark text on light grey. Legacy code uses `--color-white` and `--color-black` expecting "prominent" and "background" respectively. Inverting these tokens makes legacy references work correctly in both modes without touching the call sites.
-
----
-
-### 3. Runtime-injected CSS variable with no definition in token files
+### 2. Runtime-injected CSS variable with no definition in token files
 
 **Rule broken:** All `var(--x)` references must be defined in `src/design-system/tokens/`.
 
@@ -767,7 +752,7 @@ width: var(--radix-dropdown-menu-trigger-width, var(--portal-dropdown-min-width)
 
 ---
 
-### 4. `--color-brand-hover` intentional undefined primary
+### 3. `--color-brand-hover` intentional undefined primary
 
 **Rule broken:** Use the defined token, not a fallback chain.
 
@@ -782,7 +767,7 @@ border-color: var(--color-brand-hover, var(--color-interactive-primary-hover));
 
 ---
 
-### 5. Dropdown context variables — defined only at component scope
+### 4. Dropdown context variables — defined only at component scope
 
 **Rule broken:** Tokens should be defined at `:root` or `body[data-page]` level.
 
@@ -802,7 +787,7 @@ border-color: var(--color-brand-hover, var(--color-interactive-primary-hover));
 
 ---
 
-### 6. `!important` on `white-space: nowrap`
+### 5. `!important` on `white-space: nowrap`
 
 **Rule broken:** No `!important`.
 
@@ -818,7 +803,7 @@ border-color: var(--color-brand-hover, var(--color-interactive-primary-hover));
 
 ---
 
-### 7. Unlayered portal CSS beats all `@layer` declarations
+### 6. Unlayered portal CSS beats all `@layer` declarations
 
 **Rule broken:** "Use cascade layers — all new styles must be placed in the correct layer."
 
@@ -835,7 +820,7 @@ New portal CSS should be unlayered unless it is explicitly a low-priority base s
 
 ---
 
-### 8. `color-scheme: dark` on date inputs
+### 7. `color-scheme: dark` on date inputs
 
 **Rule broken:** No browser-specific properties without a comment.
 
@@ -851,7 +836,7 @@ New portal CSS should be unlayered unless it is explicitly a low-priority base s
 
 ---
 
-### 9. `left: -9999px` in portal-auth.css
+### 8. `left: -9999px` in portal-auth.css
 
 **Rule broken:** No magic numbers — use tokens.
 
@@ -865,7 +850,7 @@ left: -9999px;
 
 ---
 
-### 10. `body[data-page]` specificity over `:root`
+### 9. `body[data-page]` specificity over `:root`
 
 **Rule broken:** Token definitions belong at `:root`.
 
@@ -882,7 +867,7 @@ body[data-page="client-portal"] {
 
 ---
 
-### 11. Multiple `@layer` blocks in the same file
+### 10. Multiple `@layer` blocks in the same file
 
 **Rule broken:** Each file should have one cohesive `@layer` block.
 

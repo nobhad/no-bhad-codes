@@ -284,10 +284,6 @@ html[data-theme="light"] {
   --color-light-text-muted: #737373;
   --color-light-border: #d4d4d4;
 
-  /* Legacy base colors */
-  --color-black: #000000;
-  --color-white: #fffefd;
-
   /* Legacy status colors */
   --color-success: #10b981;
   --color-success-dark: #047857;

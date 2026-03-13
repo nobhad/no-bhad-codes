@@ -188,7 +188,7 @@
 
 [data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-item.danger:hover {
   background: var(--color-danger);
-  color: var(--color-white);
+  color: var(--color-text-primary);
 }
 
 /* Divider between menu sections */

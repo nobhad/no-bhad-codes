@@ -7,7 +7,7 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { logger } from '../../services/logger.js';
+import { asyncHandler } from '../../middleware/errorHandler.js';
 import { getDatabase } from '../../database/init.js';
 import {
   checkForDuplicates,
@@ -16,7 +16,7 @@ import {
   MergeRequest
 } from '../../services/duplicate-detection-service.js';
 import { userService } from '../../services/user-service.js';
-import { errorResponseWithPayload, sendSuccess, sanitizeErrorMessage, ErrorCodes } from '../../utils/api-response.js';
+import { errorResponseWithPayload, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { DUPLICATE_DETECTION_LOG_COLUMNS, DUPLICATE_RESOLUTION_LOG_COLUMNS } from './shared.js';
 
 const router = Router();
@@ -55,37 +55,27 @@ const router = Router();
  *       500:
  *         description: Scan failed
  */
-router.post('/duplicates/scan', async (req: Request, res: Response) => {
-  try {
-    const { email, firstName, lastName, company, phone, website } = req.body;
+router.post('/duplicates/scan', asyncHandler(async (req: Request, res: Response) => {
+  const { email, firstName, lastName, company, phone, website } = req.body;
 
-    const startTime = Date.now();
-    const checkData: DuplicateCheckRequest = {
-      email,
-      firstName,
-      lastName,
-      company,
-      phone,
-      website
-    };
-    const results = await checkForDuplicates(checkData);
-    const duration = Date.now() - startTime;
+  const startTime = Date.now();
+  const checkData: DuplicateCheckRequest = {
+    email,
+    firstName,
+    lastName,
+    company,
+    phone,
+    website
+  };
+  const results = await checkForDuplicates(checkData);
+  const duration = Date.now() - startTime;
 
-    sendSuccess(res, {
-      duplicates: results,
-      count: results.length,
-      scanDuration: duration
-    });
-  } catch (error) {
-    await logger.error('Duplicate scan error:', {
-      error: error instanceof Error ? error : undefined,
-      category: 'DATA_QUALITY'
-    });
-    errorResponseWithPayload(res, 'Failed to scan for duplicates', 500, ErrorCodes.INTERNAL_ERROR, {
-      message: sanitizeErrorMessage(error, 'Failed to scan for duplicate records')
-    });
-  }
-});
+  sendSuccess(res, {
+    duplicates: results,
+    count: results.length,
+    scanDuration: duration
+  });
+}));
 
 /**
  * @swagger
@@ -115,45 +105,35 @@ router.post('/duplicates/scan', async (req: Request, res: Response) => {
  *       400:
  *         description: At least email or name required
  */
-router.post('/duplicates/check', async (req: Request, res: Response) => {
-  try {
-    const { email, firstName, lastName, company, phone, website } = req.body;
+router.post('/duplicates/check', asyncHandler(async (req: Request, res: Response) => {
+  const { email, firstName, lastName, company, phone, website } = req.body;
 
-    if (!email && !firstName && !lastName) {
-      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
-        message: 'At least email or name is required'
-      });
-      return;
-    }
-
-    const startTime = Date.now();
-    const checkData: DuplicateCheckRequest = {
-      email,
-      firstName,
-      lastName,
-      company,
-      phone,
-      website
-    };
-    const results = await checkForDuplicates(checkData);
-    const duration = Date.now() - startTime;
-
-    sendSuccess(res, {
-      hasDuplicates: results.length > 0,
-      duplicates: results,
-      count: results.length,
-      scanDuration: duration
+  if (!email && !firstName && !lastName) {
+    errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
+      message: 'At least email or name is required'
     });
-  } catch (error) {
-    await logger.error('Duplicate check error:', {
-      error: error instanceof Error ? error : undefined,
-      category: 'DATA_QUALITY'
-    });
-    errorResponseWithPayload(res, 'Failed to check for duplicates', 500, ErrorCodes.INTERNAL_ERROR, {
-      message: sanitizeErrorMessage(error, 'Failed to check for duplicate records')
-    });
+    return;
   }
-});
+
+  const startTime = Date.now();
+  const checkData: DuplicateCheckRequest = {
+    email,
+    firstName,
+    lastName,
+    company,
+    phone,
+    website
+  };
+  const results = await checkForDuplicates(checkData);
+  const duration = Date.now() - startTime;
+
+  sendSuccess(res, {
+    hasDuplicates: results.length > 0,
+    duplicates: results,
+    count: results.length,
+    scanDuration: duration
+  });
+}));
 
 /**
  * @swagger
@@ -192,37 +172,27 @@ router.post('/duplicates/check', async (req: Request, res: Response) => {
  *       400:
  *         description: Validation error
  */
-router.post('/duplicates/merge', async (req: Request, res: Response) => {
-  try {
-    const { keepId, keepType, mergeIds, fieldSelections } = req.body;
+router.post('/duplicates/merge', asyncHandler(async (req: Request, res: Response) => {
+  const { keepId, keepType, mergeIds, fieldSelections } = req.body;
 
-    if (!keepId || !keepType || !mergeIds || !Array.isArray(mergeIds)) {
-      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
-        message: 'keepId, keepType, and mergeIds array are required'
-      });
-      return;
-    }
-
-    const mergeRequest: MergeRequest = {
-      keepId,
-      keepType,
-      mergeIds,
-      fieldSelections
-    };
-
-    const result = await mergeDuplicates(mergeRequest);
-
-    sendSuccess(res, undefined, result.message);
-  } catch (error) {
-    await logger.error('Duplicate merge error:', {
-      error: error instanceof Error ? error : undefined,
-      category: 'DATA_QUALITY'
+  if (!keepId || !keepType || !mergeIds || !Array.isArray(mergeIds)) {
+    errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
+      message: 'keepId, keepType, and mergeIds array are required'
     });
-    errorResponseWithPayload(res, 'Failed to merge records', 500, ErrorCodes.INTERNAL_ERROR, {
-      message: sanitizeErrorMessage(error, 'Failed to merge duplicate records')
-    });
+    return;
   }
-});
+
+  const mergeRequest: MergeRequest = {
+    keepId,
+    keepType,
+    mergeIds,
+    fieldSelections
+  };
+
+  const result = await mergeDuplicates(mergeRequest);
+
+  sendSuccess(res, undefined, result.message);
+}));
 
 /**
  * @swagger
@@ -254,39 +224,29 @@ router.post('/duplicates/merge', async (req: Request, res: Response) => {
  *       200:
  *         description: Duplicate dismissed
  */
-router.post('/duplicates/dismiss', async (req: Request, res: Response) => {
-  try {
-    const { primaryId, primaryType, dismissedId, dismissedType, adminEmail, notes } = req.body;
+router.post('/duplicates/dismiss', asyncHandler(async (req: Request, res: Response) => {
+  const { primaryId, primaryType, dismissedId, dismissedType, adminEmail, notes } = req.body;
 
-    const db = getDatabase();
-    const resolvedBy = adminEmail || 'admin';
-    // Look up user ID for resolved_by during transition period
-    const resolvedByUserId = await userService.getUserIdByEmail(resolvedBy);
-    await db.run(
-      `INSERT INTO duplicate_resolution_log (primary_record_id, primary_record_type, merged_record_id, merged_record_type, resolution_type, resolved_by, resolved_by_user_id, notes)
-       VALUES (?, ?, ?, ?, 'mark_not_duplicate', ?, ?, ?)`,
-      [
-        primaryId,
-        primaryType,
-        dismissedId,
-        dismissedType,
-        resolvedBy,
-        resolvedByUserId,
-        notes || null
-      ]
-    );
+  const db = getDatabase();
+  const resolvedBy = adminEmail || 'admin';
+  // Look up user ID for resolved_by during transition period
+  const resolvedByUserId = await userService.getUserIdByEmail(resolvedBy);
+  await db.run(
+    `INSERT INTO duplicate_resolution_log (primary_record_id, primary_record_type, merged_record_id, merged_record_type, resolution_type, resolved_by, resolved_by_user_id, notes)
+     VALUES (?, ?, ?, ?, 'mark_not_duplicate', ?, ?, ?)`,
+    [
+      primaryId,
+      primaryType,
+      dismissedId,
+      dismissedType,
+      resolvedBy,
+      resolvedByUserId,
+      notes || null
+    ]
+  );
 
-    sendSuccess(res, undefined, 'Duplicate dismissed successfully');
-  } catch (error) {
-    await logger.error('Duplicate dismiss error:', {
-      error: error instanceof Error ? error : undefined,
-      category: 'DATA_QUALITY'
-    });
-    errorResponseWithPayload(res, 'Failed to dismiss duplicate', 500, ErrorCodes.INTERNAL_ERROR, {
-      message: sanitizeErrorMessage(error, 'Failed to dismiss duplicate record')
-    });
-  }
-});
+  sendSuccess(res, undefined, 'Duplicate dismissed successfully');
+}));
 
 /**
  * @swagger
@@ -302,28 +262,18 @@ router.post('/duplicates/dismiss', async (req: Request, res: Response) => {
  *       200:
  *         description: Detection and resolution logs
  */
-router.get('/duplicates/history', async (_req: Request, res: Response) => {
-  try {
-    const db = getDatabase();
+router.get('/duplicates/history', asyncHandler(async (_req: Request, res: Response) => {
+  const db = getDatabase();
 
-    const [detectionLogs, resolutionLogs] = await Promise.all([
-      db.all(`SELECT ${DUPLICATE_DETECTION_LOG_COLUMNS} FROM duplicate_detection_log ORDER BY created_at DESC LIMIT 100`),
-      db.all(`SELECT ${DUPLICATE_RESOLUTION_LOG_COLUMNS} FROM duplicate_resolution_log ORDER BY created_at DESC LIMIT 100`)
-    ]);
+  const [detectionLogs, resolutionLogs] = await Promise.all([
+    db.all(`SELECT ${DUPLICATE_DETECTION_LOG_COLUMNS} FROM duplicate_detection_log ORDER BY created_at DESC LIMIT 100`),
+    db.all(`SELECT ${DUPLICATE_RESOLUTION_LOG_COLUMNS} FROM duplicate_resolution_log ORDER BY created_at DESC LIMIT 100`)
+  ]);
 
-    sendSuccess(res, {
-      detectionLogs,
-      resolutionLogs
-    });
-  } catch (error) {
-    await logger.error('History fetch error:', {
-      error: error instanceof Error ? error : undefined,
-      category: 'DATA_QUALITY'
-    });
-    errorResponseWithPayload(res, 'Failed to fetch history', 500, ErrorCodes.INTERNAL_ERROR, {
-      message: sanitizeErrorMessage(error, 'Failed to fetch duplicate detection history')
-    });
-  }
-});
+  sendSuccess(res, {
+    detectionLogs,
+    resolutionLogs
+  });
+}));
 
 export default router;

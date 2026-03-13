@@ -20,6 +20,7 @@ import { getPortalConfig, ADMIN_TAB_IDS, CLIENT_TAB_IDS, ICONS } from '../config
 import { COOKIE_CONFIG } from '../utils/auth-constants.js';
 import { sendUnauthorized, sendNotFound, sendServerError, ErrorCodes } from '../utils/api-response.js';
 import { logger } from '../services/logger.js';
+import { asyncHandler } from '../middleware/errorHandler.js';
 import { createRateLimiter } from '../middleware/rate-limiter.js';
 import { BUSINESS_INFO } from '../config/business.js';
 
@@ -130,7 +131,7 @@ router.get('/dashboard', (req: Request, res: Response) => {
  * Returns an HTML fragment for a specific tab's table.
  * Used by the client-side TableManager to lazy-load tab content.
  */
-router.get('/dashboard/tab/:tabId', tabDataRateLimiter, async (req: Request, res: Response) => {
+router.get('/dashboard/tab/:tabId', tabDataRateLimiter, asyncHandler(async (req: Request, res: Response) => {
   const decoded = decodePortalJwt(req);
 
   if (!decoded) {
@@ -183,7 +184,7 @@ router.get('/dashboard/tab/:tabId', tabDataRateLimiter, async (req: Request, res
     });
     return sendServerError(res);
   }
-});
+}));
 
 // ============================================
 // Client Portal Entry Point

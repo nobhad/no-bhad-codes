@@ -1250,7 +1250,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Contract status badges */
 #pd-contract-status-badge.status-signed {
   background: var(--color-success);
-  color: var(--color-white);
+  color: var(--color-text-primary);
 }
 
 #pd-contract-status-badge.status-pending {
@@ -1260,5 +1260,5 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 #pd-contract-status-badge.status-not-signed {
   background: var(--color-text-tertiary);
-  color: var(--color-white);
+  color: var(--color-text-primary);
 }
