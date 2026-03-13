@@ -135,7 +135,7 @@ function sortDeletedItems(a: DeletedItem, b: DeletedItem, sort: SortConfig): num
   }
 }
 
-export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: _onNavigate, defaultPageSize = 25, overviewMode = false }: DeletedItemsTableProps) {
+export function DeletedItemsTable({ getAuthToken, showNotification: _showNotification, onNavigate: _onNavigate, defaultPageSize = 25, overviewMode = false }: DeletedItemsTableProps) {
   const containerRef = useFadeIn();
 
   // Fetch deleted items via factory hook

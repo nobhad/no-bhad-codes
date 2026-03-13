@@ -133,7 +133,7 @@ const DEFAULT_STATS: WorkflowStats = {
   avgSuccessRate: 0
 };
 
-export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: WorkflowsTableProps) {
+export function WorkflowsTable({ getAuthToken, showNotification: _showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: WorkflowsTableProps) {
   const containerRef = useFadeIn();
 
   const { data, isLoading, error, refetch, setData } = useListFetch<Workflow, WorkflowStats>({

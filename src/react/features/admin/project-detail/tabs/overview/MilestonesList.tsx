@@ -35,7 +35,7 @@ interface MilestonesListProps {
  */
 export function MilestonesList({
   milestones,
-  progress,
+  progress: _progress,
   onAddMilestone,
   onUpdateMilestone,
   onToggleMilestone,

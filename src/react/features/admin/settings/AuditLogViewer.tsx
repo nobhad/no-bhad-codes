@@ -110,7 +110,7 @@ export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: 
     } finally {
       setIsLoading(false);
     }
-  }, [page, filterAction, filterEntity, filterUser]);
+  }, [page, filterAction, filterEntity, filterUser, overviewMode]);
 
   useEffect(() => { loadLogs(); }, [loadLogs]);
 

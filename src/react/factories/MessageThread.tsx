@@ -339,201 +339,201 @@ export function MessageThread({
           ) : (
             <div className="msgtab-thread">
               {messages.map((message, index) => {
-              const prevMessage = index > 0 ? messages[index - 1] : null;
-              const nextMessage = index < messages.length - 1 ? messages[index + 1] : null;
-              const showDateSep = !prevMessage || !isSameDay(prevMessage.timestamp, message.timestamp);
-              const isContinuation =
+                const prevMessage = index > 0 ? messages[index - 1] : null;
+                const nextMessage = index < messages.length - 1 ? messages[index + 1] : null;
+                const showDateSep = !prevMessage || !isSameDay(prevMessage.timestamp, message.timestamp);
+                const isContinuation =
                 !showDateSep &&
                 prevMessage &&
                 prevMessage.isOwn === message.isOwn;
 
-              // Avatar shows on the LAST message in a group (aligned with bottom)
-              const isLastInGroup = !nextMessage ||
+                // Avatar shows on the LAST message in a group (aligned with bottom)
+                const isLastInGroup = !nextMessage ||
                 !isSameDay(message.timestamp, nextMessage.timestamp) ||
                 nextMessage.isOwn !== message.isOwn;
 
-              const isEditing = editingId === message.id;
+                const isEditing = editingId === message.id;
 
-              return (
-                <React.Fragment key={message.id}>
-                  {/* Date separator */}
-                  {showDateSep && (
-                    <div
-                      className="msgtab-date-sep"
-                      aria-label={formatDateSeparator(message.timestamp)}
-                    >
-                      <span className="msgtab-date-label">
-                        {formatDateSeparator(message.timestamp)}
-                      </span>
-                    </div>
-                  )}
-
-                  <div
-                    className={cn(
-                      'msgtab-row',
-                      message.isOwn && 'is-admin',
-                      isContinuation && 'is-continuation'
-                    )}
-                  >
-                    {/* Avatar column: avatar + sender name below (last in group), spacer otherwise */}
-                    {isLastInGroup ? (
-                      <div className="msgtab-avatar-col">
-                        <div
-                          className={cn('msgtab-avatar', message.isOwn ? 'is-admin' : 'is-client')}
-                          aria-hidden="true"
-                        >
-                          {!message.isOwn && <User className="icon-md" />}
-                        </div>
-                        {!message.isOwn && (
-                          <span className="msgtab-sender">
-                            {message.senderName ?? 'Client'}
-                          </span>
-                        )}
+                return (
+                  <React.Fragment key={message.id}>
+                    {/* Date separator */}
+                    {showDateSep && (
+                      <div
+                        className="msgtab-date-sep"
+                        aria-label={formatDateSeparator(message.timestamp)}
+                      >
+                        <span className="msgtab-date-label">
+                          {formatDateSeparator(message.timestamp)}
+                        </span>
                       </div>
-                    ) : (
-                      <div className="msgtab-avatar-spacer" aria-hidden="true" />
                     )}
 
-                    {/* Content wrap */}
-                    <div className={cn('msgtab-content-wrap', message.isOwn && 'is-admin')}>
+                    <div
+                      className={cn(
+                        'msgtab-row',
+                        message.isOwn && 'is-admin',
+                        isContinuation && 'is-continuation'
+                      )}
+                    >
+                      {/* Avatar column: avatar + sender name below (last in group), spacer otherwise */}
+                      {isLastInGroup ? (
+                        <div className="msgtab-avatar-col">
+                          <div
+                            className={cn('msgtab-avatar', message.isOwn ? 'is-admin' : 'is-client')}
+                            aria-hidden="true"
+                          >
+                            {!message.isOwn && <User className="icon-md" />}
+                          </div>
+                          {!message.isOwn && (
+                            <span className="msgtab-sender">
+                              {message.senderName ?? 'Client'}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="msgtab-avatar-spacer" aria-hidden="true" />
+                      )}
 
-                      {/* Bubble row: [inline actions] + [bubble-group] */}
-                      <div className="msgtab-bubble-row">
-                        {/* Inline hover actions — always in flow, hidden until hover */}
-                        {!isEditing && (
-                          <div className="msgtab-inline-actions">
-                            {onReact && (
-                              <div className="msgtab-reaction-anchor">
-                                <button
-                                  className="icon-btn message-action-btn"
-                                  aria-label="Add reaction"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setPickerOpenId(pickerOpenId === message.id ? null : message.id);
+                      {/* Content wrap */}
+                      <div className={cn('msgtab-content-wrap', message.isOwn && 'is-admin')}>
+
+                        {/* Bubble row: [inline actions] + [bubble-group] */}
+                        <div className="msgtab-bubble-row">
+                          {/* Inline hover actions — always in flow, hidden until hover */}
+                          {!isEditing && (
+                            <div className="msgtab-inline-actions">
+                              {onReact && (
+                                <div className="msgtab-reaction-anchor">
+                                  <button
+                                    className="icon-btn message-action-btn"
+                                    aria-label="Add reaction"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPickerOpenId(pickerOpenId === message.id ? null : message.id);
+                                    }}
+                                  >
+                                    <Smile className="icon-sm" />
+                                  </button>
+                                  {/* Reaction picker — anchored above the Smile button */}
+                                  <div
+                                    className={cn('reaction-picker', pickerOpenId !== message.id && 'hidden')}
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    {QUICK_EMOJIS.map((emoji) => (
+                                      <button
+                                        key={emoji}
+                                        onClick={() => handleReaction(message.id, emoji)}
+                                        aria-label={`React with ${emoji}`}
+                                      >
+                                        {emoji}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Bubble group: bubble only (footer is outside so Smile centers on bubble) */}
+                          <div className="msgtab-bubble-group">
+                            {isEditing ? (
+                              <div className="message-edit-form">
+                                <textarea
+                                  value={editContent}
+                                  onChange={(e) => setEditContent(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === KEYS.ESCAPE) handleCancelEdit();
+                                    if ((e.metaKey || e.ctrlKey) && e.key === KEYS.ENTER) {
+                                      e.preventDefault();
+                                      handleSaveEdit();
+                                    }
                                   }}
-                                >
-                                  <Smile className="icon-sm" />
-                                </button>
-                                {/* Reaction picker — anchored above the Smile button */}
-                                <div
-                                  className={cn('reaction-picker', pickerOpenId !== message.id && 'hidden')}
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  {QUICK_EMOJIS.map((emoji) => (
-                                    <button
-                                      key={emoji}
-                                      onClick={() => handleReaction(message.id, emoji)}
-                                      aria-label={`React with ${emoji}`}
-                                    >
-                                      {emoji}
-                                    </button>
-                                  ))}
+                                  className="textarea message-edit-textarea"
+                                  rows={2}
+                                  autoFocus
+                                  aria-label="Edit message"
+                                />
+                                <div className="message-edit-actions">
+                                  <button
+                                    className="icon-btn message-action-btn"
+                                    onClick={handleCancelEdit}
+                                    aria-label="Cancel edit"
+                                  >
+                                    <X className="icon-sm" />
+                                  </button>
+                                  <button
+                                    className="icon-btn message-action-btn"
+                                    onClick={handleSaveEdit}
+                                    disabled={isSavingEdit || !editContent.trim()}
+                                    aria-label="Save edit"
+                                  >
+                                    <Check className="icon-sm" />
+                                  </button>
                                 </div>
                               </div>
+                            ) : (
+                              <div
+                                className={cn('msgtab-bubble', message.isOwn ? 'is-admin' : 'is-client', message.isOwn && onEdit && 'is-editable')}
+                                onClick={() => handleBubbleClick(message)}
+                                onTouchStart={() => handleBubbleTouchStart(message.id)}
+                                onTouchEnd={handleBubbleTouchEnd}
+                                onTouchCancel={handleBubbleTouchEnd}
+                                onContextMenu={(e) => e.preventDefault()}
+                                role={message.isOwn && onEdit ? 'button' : undefined}
+                                aria-label={message.isOwn && onEdit ? 'Click to edit message' : undefined}
+                              >
+                                <p className="msgtab-content">{message.content}</p>
+                                {message.attachments && message.attachments.length > 0 && (
+                                  <AttachmentList attachments={message.attachments} />
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Footer: below bubble-row so Smile aligns with bubble only */}
+                        {!isEditing && (
+                          <div className={cn('msgtab-footer', message.isOwn && 'is-admin')}>
+                            {message.isEdited && (
+                              <span className="message-edited">(edited)</span>
+                            )}
+                            <span className="msgtab-time">
+                              {formatMessageTime(message.timestamp)}
+                            </span>
+                            {message.isOwn && (
+                              <span
+                                className={cn(
+                                  'msgtab-receipt',
+                                  message.readReceipt === 'read' && 'is-read'
+                                )}
+                                aria-label={message.readReceipt ?? 'sent'}
+                              >
+                                <CheckCheck className="icon-xs" />
+                              </span>
                             )}
                           </div>
                         )}
 
-                        {/* Bubble group: bubble only (footer is outside so Smile centers on bubble) */}
-                        <div className="msgtab-bubble-group">
-                          {isEditing ? (
-                            <div className="message-edit-form">
-                              <textarea
-                                value={editContent}
-                                onChange={(e) => setEditContent(e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === KEYS.ESCAPE) handleCancelEdit();
-                                  if ((e.metaKey || e.ctrlKey) && e.key === KEYS.ENTER) {
-                                    e.preventDefault();
-                                    handleSaveEdit();
-                                  }
-                                }}
-                                className="textarea message-edit-textarea"
-                                rows={2}
-                                autoFocus
-                                aria-label="Edit message"
-                              />
-                              <div className="message-edit-actions">
-                                <button
-                                  className="icon-btn message-action-btn"
-                                  onClick={handleCancelEdit}
-                                  aria-label="Cancel edit"
-                                >
-                                  <X className="icon-sm" />
-                                </button>
-                                <button
-                                  className="icon-btn message-action-btn"
-                                  onClick={handleSaveEdit}
-                                  disabled={isSavingEdit || !editContent.trim()}
-                                  aria-label="Save edit"
-                                >
-                                  <Check className="icon-sm" />
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div
-                              className={cn('msgtab-bubble', message.isOwn ? 'is-admin' : 'is-client', message.isOwn && onEdit && 'is-editable')}
-                              onClick={() => handleBubbleClick(message)}
-                              onTouchStart={() => handleBubbleTouchStart(message.id)}
-                              onTouchEnd={handleBubbleTouchEnd}
-                              onTouchCancel={handleBubbleTouchEnd}
-                              onContextMenu={(e) => e.preventDefault()}
-                              role={message.isOwn && onEdit ? 'button' : undefined}
-                              aria-label={message.isOwn && onEdit ? 'Click to edit message' : undefined}
-                            >
-                              <p className="msgtab-content">{message.content}</p>
-                              {message.attachments && message.attachments.length > 0 && (
-                                <AttachmentList attachments={message.attachments} />
-                              )}
-                            </div>
-                          )}
-                        </div>
+                        {/* Reaction badges */}
+                        {message.reactions && message.reactions.length > 0 && (
+                          <div className="message-reactions">
+                            {message.reactions.map((r) => (
+                              <button
+                                key={r.emoji}
+                                className={cn('reaction-badge', r.reacted && 'is-reacted')}
+                                onClick={() => onReact?.(message.id, r.emoji)}
+                                aria-label={`${r.emoji} ${r.count}`}
+                              >
+                                {r.emoji} {r.count}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
-
-                      {/* Footer: below bubble-row so Smile aligns with bubble only */}
-                      {!isEditing && (
-                        <div className={cn('msgtab-footer', message.isOwn && 'is-admin')}>
-                          {message.isEdited && (
-                            <span className="message-edited">(edited)</span>
-                          )}
-                          <span className="msgtab-time">
-                            {formatMessageTime(message.timestamp)}
-                          </span>
-                          {message.isOwn && (
-                            <span
-                              className={cn(
-                                'msgtab-receipt',
-                                message.readReceipt === 'read' && 'is-read'
-                              )}
-                              aria-label={message.readReceipt ?? 'sent'}
-                            >
-                              <CheckCheck className="icon-xs" />
-                            </span>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Reaction badges */}
-                      {message.reactions && message.reactions.length > 0 && (
-                        <div className="message-reactions">
-                          {message.reactions.map((r) => (
-                            <button
-                              key={r.emoji}
-                              className={cn('reaction-badge', r.reacted && 'is-reacted')}
-                              onClick={() => onReact?.(message.id, r.emoji)}
-                              aria-label={`${r.emoji} ${r.count}`}
-                            >
-                              {r.emoji} {r.count}
-                            </button>
-                          ))}
-                        </div>
-                      )}
                     </div>
-                  </div>
-                </React.Fragment>
-              );
-            })}
+                  </React.Fragment>
+                );
+              })}
               <div ref={messagesEndRef} />
             </div>
           )}
@@ -543,73 +543,73 @@ export function MessageThread({
       {/* Compose area — separate bordered section */}
       <div className="msgtab-compose-area">
         <div className="msgtab-input-panel">
-        {/* Pending file previews */}
-        {attachmentsEnabled && pendingFiles.length > 0 && (
-          <div className="msgtab-pending-files">
-            {pendingFiles.map((file, index) => (
-              <div key={`${file.name}-${index}`} className="msgtab-pending-file">
-                <FileIcon className="icon-xs" />
-                <span className="msgtab-pending-file-name">{file.name}</span>
-                <button
-                  className="icon-btn"
-                  onClick={() => handleRemoveFile(index)}
-                  aria-label={`Remove ${file.name}`}
-                >
-                  <X className="icon-xs" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+          {/* Pending file previews */}
+          {attachmentsEnabled && pendingFiles.length > 0 && (
+            <div className="msgtab-pending-files">
+              {pendingFiles.map((file, index) => (
+                <div key={`${file.name}-${index}`} className="msgtab-pending-file">
+                  <FileIcon className="icon-xs" />
+                  <span className="msgtab-pending-file-name">{file.name}</span>
+                  <button
+                    className="icon-btn"
+                    onClick={() => handleRemoveFile(index)}
+                    aria-label={`Remove ${file.name}`}
+                  >
+                    <X className="icon-xs" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
-        {attachmentsEnabled && (
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept={allowedFileTypes.join(',')}
-            onChange={handleFileSelect}
-            className="file-input-hidden"
+          {attachmentsEnabled && (
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept={allowedFileTypes.join(',')}
+              onChange={handleFileSelect}
+              className="file-input-hidden"
+            />
+          )}
+
+          <textarea
+            ref={textareaRef}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Type a message..."
+            rows={2}
+            className="textarea msgtab-textarea"
+            aria-label="Message"
           />
-        )}
 
-        <textarea
-          ref={textareaRef}
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Type a message..."
-          rows={2}
-          className="textarea msgtab-textarea"
-          aria-label="Message"
-        />
-
-        <div className="msgtab-compose-footer">
-          <div className="msgtab-compose-actions">
-            {attachmentsEnabled && (
-              <button
-                className="icon-btn msgtab-attach-btn"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isSending}
-                aria-label="Attach file"
+          <div className="msgtab-compose-footer">
+            <div className="msgtab-compose-actions">
+              {attachmentsEnabled && (
+                <button
+                  className="icon-btn msgtab-attach-btn"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isSending}
+                  aria-label="Attach file"
+                >
+                  <Paperclip className="icon-sm" />
+                </button>
+              )}
+              <PortalButton
+                variant="primary"
+                className="msgtab-send-btn"
+                onClick={handleSend}
+                disabled={(!draft.trim() && pendingFiles.length === 0) || isSending}
+                loading={isSending}
               >
-                <Paperclip className="icon-sm" />
-              </button>
-            )}
-            <PortalButton
-              variant="primary"
-              className="msgtab-send-btn"
-              onClick={handleSend}
-              disabled={(!draft.trim() && pendingFiles.length === 0) || isSending}
-              loading={isSending}
-            >
-              <Send className="icon-xs" />
+                <Send className="icon-xs" />
               Send Message
-            </PortalButton>
-          </div>
-          <div className="msgtab-compose-hint">
+              </PortalButton>
+            </div>
+            <div className="msgtab-compose-hint">
             Press <kbd className="badge msgtab-kbd">Cmd+Enter</kbd> to send
-          </div>
+            </div>
           </div>
         </div>
       </div>

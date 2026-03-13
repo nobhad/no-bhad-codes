@@ -57,7 +57,7 @@ const SECTIONS: { id: ActiveSection; label: string; icon: React.ReactNode }[] = 
   { id: 'invoice', label: 'Invoice Settings', icon: <FileText className="icon-sm" /> }
 ];
 
-export function BusinessConfiguration({ showNotification, overviewMode }: BusinessConfigurationProps) {
+export function BusinessConfiguration({ showNotification: _showNotification, overviewMode }: BusinessConfigurationProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);

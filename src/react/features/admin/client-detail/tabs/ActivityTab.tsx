@@ -180,68 +180,68 @@ export function ActivityTab({ activities, onNavigate }: ActivityTabProps) {
 
                 <div className="detail-list--spaced">
                   {group.items.map((activity, index) => {
-                  const Icon = getActivityIcon(activity.activityType);
-                  const iconColorVar = getActivityColorVar(activity.activityType);
-                  const isLast = index === group.items.length - 1;
+                    const Icon = getActivityIcon(activity.activityType);
+                    const iconColorVar = getActivityColorVar(activity.activityType);
+                    const isLast = index === group.items.length - 1;
 
-                  const activityRoute = getActivityRoute(activity.activityType);
-                  const entityId = activity.metadata?.entityId as string | undefined
+                    const activityRoute = getActivityRoute(activity.activityType);
+                    const entityId = activity.metadata?.entityId as string | undefined
                     ?? activity.metadata?.projectId as string | undefined
                     ?? activity.metadata?.invoiceId as string | undefined;
-                  const isNavigable = onNavigate && activityRoute && entityId;
+                    const isNavigable = onNavigate && activityRoute && entityId;
 
-                  return (
-                    <div key={activity.id} className="activity-event-row">
-                      {/* Timeline dot */}
-                      <div className="activity-dot">
-                        <Icon className="icon-sm" data-activity-type={activity.activityType} style={{ color: iconColorVar }} />
-                      </div>
-
-                      {/* Activity content */}
-                      <div
-                        className={cn(
-                          'activity-event-content panel',
-                          !isLast && 'item-spacing-bottom'
-                        )}
-                      >
-                        <div className="activity-event-header">
-                          <div className="activity-event-body">
-                            {isNavigable ? (
-                              <button
-                                className="heading client-nav-link"
-                                onClick={() => onNavigate(activityRoute, String(entityId))}
-                              >
-                                {activity.title}
-                              </button>
-                            ) : (
-                              <h4 className="heading">
-                                {activity.title}
-                              </h4>
-                            )}
-                            {activity.description && (
-                              <p className="text-muted text-sm description-text">
-                                {activity.description}
-                              </p>
-                            )}
-                          </div>
-
-                          <span
-                            className="text-muted whitespace-nowrap text-sm"
-                            title={formatFullDate(activity.createdAt)}
-                          >
-                            {formatRelativeTime(activity.createdAt)}
-                          </span>
+                    return (
+                      <div key={activity.id} className="activity-event-row">
+                        {/* Timeline dot */}
+                        <div className="activity-dot">
+                          <Icon className="icon-sm" data-activity-type={activity.activityType} style={{ color: iconColorVar }} />
                         </div>
 
-                        {/* Activity metadata */}
-                        {(activity.createdBy || activity.metadata) && (
-                          <div className="activity-metadata">
-                            {activity.createdBy && (
-                              <span className="text-muted text-sm">
+                        {/* Activity content */}
+                        <div
+                          className={cn(
+                            'activity-event-content panel',
+                            !isLast && 'item-spacing-bottom'
+                          )}
+                        >
+                          <div className="activity-event-header">
+                            <div className="activity-event-body">
+                              {isNavigable ? (
+                                <button
+                                  className="heading client-nav-link"
+                                  onClick={() => onNavigate(activityRoute, String(entityId))}
+                                >
+                                  {activity.title}
+                                </button>
+                              ) : (
+                                <h4 className="heading">
+                                  {activity.title}
+                                </h4>
+                              )}
+                              {activity.description && (
+                                <p className="text-muted text-sm description-text">
+                                  {activity.description}
+                                </p>
+                              )}
+                            </div>
+
+                            <span
+                              className="text-muted whitespace-nowrap text-sm"
+                              title={formatFullDate(activity.createdAt)}
+                            >
+                              {formatRelativeTime(activity.createdAt)}
+                            </span>
+                          </div>
+
+                          {/* Activity metadata */}
+                          {(activity.createdBy || activity.metadata) && (
+                            <div className="activity-metadata">
+                              {activity.createdBy && (
+                                <span className="text-muted text-sm">
                                 by {activity.createdBy}
-                              </span>
-                            )}
-                            {activity.metadata &&
+                                </span>
+                              )}
+                              {activity.metadata &&
                               Object.entries(activity.metadata).map(([key, value]) => (
                                 <span
                                   key={key}
@@ -250,11 +250,11 @@ export function ActivityTab({ activities, onNavigate }: ActivityTabProps) {
                                   {key}: {String(value)}
                                 </span>
                               ))}
-                          </div>
-                        )}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
+                    );
                   })}
                 </div>
               </div>

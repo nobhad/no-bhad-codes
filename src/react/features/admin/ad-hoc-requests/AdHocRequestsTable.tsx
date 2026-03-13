@@ -152,7 +152,7 @@ function sortAdHocRequests(a: AdHocRequest, b: AdHocRequest, sort: SortConfig): 
   }
 }
 
-export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: AdHocRequestsTableProps) {
+export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNotification: _showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: AdHocRequestsTableProps) {
   const containerRef = useFadeIn();
 
   // Build endpoint with optional query params

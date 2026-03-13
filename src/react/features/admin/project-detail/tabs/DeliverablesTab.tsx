@@ -53,7 +53,7 @@ const UNASSIGNED_ID = -1;
 export function DeliverablesTab({
   milestones,
   tasks,
-  progress,
+  progress: _progress,
   onToggleTaskComplete,
   onAssignTaskToMilestone,
   onAddMilestone,
@@ -84,7 +84,7 @@ export function DeliverablesTab({
   const unassignedTasks = tasksByMilestone.get(null) ?? [];
 
   // Stats
-  const { completedCount, totalCount } = useMemo(() => {
+  const { completedCount: _completedCount, totalCount: _totalCount } = useMemo(() => {
     const total = tasks.length;
     const completed = tasks.filter((t) => t.status === 'completed').length;
     return { completedCount: completed, totalCount: total };
