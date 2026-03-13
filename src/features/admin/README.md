@@ -84,7 +84,7 @@ src/features/admin/modules/   # Extracted modules (10 modules)
 
 admin/index.html              # Dashboard HTML entry point
 src/styles/pages/admin.css    # Dashboard styles (~1,850 lines)
-src/styles/admin/             # Admin style modules
+src/styles/portal/admin/      # Admin style modules
 ├── auth.css                  # Authentication styles
 ├── modals.css                # Modal styles
 ├── analytics.css             # Analytics/charts styles

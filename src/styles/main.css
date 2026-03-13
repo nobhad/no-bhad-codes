@@ -95,7 +95,6 @@
 @import "./pages/contact.css" layer(pages);
 
 /* Admin dashboard */
-@import "./pages/admin.css" layer(pages);
 @import "./admin/index.css" layer(pages);
 
 /* Client portal */
@@ -119,11 +118,6 @@
  * Must override page-specific CSS without !important.
  */
 @import "./components/page-transitions.css" layer(states);
-
-/* ============================================
- * 6. PORTALS LAYER (Admin & Client portals)
- * ============================================ */
-@import "./client-portal/index.css" layer(pages);
 
 /* ============================================
  * 7. MOBILE OVERRIDES LAYER (responsive layer)

@@ -1,0 +1,71 @@
+/**
+ * ===============================================
+ * COPY EMAIL PATTERN
+ * ===============================================
+ * @file src/styles/portal/shared/portal-copy-email.css
+ *
+ * Button size is proportional to text so it does not
+ * increase row height or gap.
+ * Overrides admin .icon-btn (36x36) in detail panels
+ * so the row stays tight.
+ *
+ * Also includes the clickable entity nav link
+ * (client name in project detail, dashboard, etc.)
+ */
+
+.meta-value-with-copy {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.2em;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/* Compact button so it doesn't create a larger gap */
+.meta-value-with-copy .copy-email-btn,
+.portal .meta-value-with-copy .copy-email-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15em;
+  height: 1.15em;
+  min-width: 1.15em;
+  min-height: 1.15em;
+  padding: 0;
+  box-sizing: border-box;
+  font-size: var(--font-size-sm);
+  line-height: 1;
+  vertical-align: middle;
+  color: var(--color-text-tertiary);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.meta-value-with-copy .copy-email-btn svg,
+.portal .meta-value-with-copy .copy-email-btn svg {
+  width: 0.85em;
+  height: 0.85em;
+}
+
+.meta-value-with-copy .copy-email-btn:hover {
+  color: var(--color-accent);
+}
+
+/* Clickable entity nav link (client name in project detail, dashboard, etc.) */
+.client-nav-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: left;
+}
+
+.client-nav-link:hover {
+  color: var(--color-error-500);
+  text-decoration: underline;
+}

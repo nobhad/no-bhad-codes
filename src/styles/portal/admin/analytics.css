@@ -1,0 +1,381 @@
+/**
+ * ===============================================
+ * ADMIN ANALYTICS STYLES
+ * ===============================================
+ * @file src/styles/portal/admin/analytics.css
+ *
+ * Analytics-specific layouts and components.
+ * Common card/item patterns in shared/portal-cards.css
+ */
+
+/* ============================================
+   Analytics View Container
+   Follows .portal-view pattern (flex column + section gap)
+   ============================================ */
+
+.analytics-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-section-gap);
+}
+
+/* ============================================
+   Analytics Actions Bar - Page-level controls
+   ============================================ */
+
+.analytics-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: 0;
+}
+
+/* Date range selector - extra right padding for absolute caret */
+.date-range-trigger {
+  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
+}
+
+/* Remove bottom border when dropdown is open - seamless connection */
+.date-range-trigger[data-state="open"] {
+  border-bottom-color: transparent;
+}
+
+/* ============================================
+   Grid Layouts
+   ============================================ */
+
+.analytics-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--portal-section-gap);
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: var(--portal-section-gap);
+}
+
+.kpi-cards-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--portal-section-gap);
+}
+
+/* KPI row variants for specific counts */
+.kpi-cards-row--2 {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 50%;
+}
+
+.kpi-cards-row--3 {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 75%;
+}
+
+/* .health-check-grid base styles in shared/portal-cards.css */
+
+/* ============================================
+   Analytics Chart Card
+   ============================================ */
+
+.analytics-chart-card {
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.analytics-chart-card h3 {
+  font-size: var(--font-size-sm);
+}
+
+.analytics-view .layout-row-between svg {
+  color: var(--color-text-primary);
+}
+
+/* .analytics-section base styles provided by .portal-section in portal-cards.css */
+
+/* Ad Hoc Analytics Widget - consistent min-height with chart containers */
+#ad-hoc-analytics-widget {
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Empty/loading/error min-height: root rule in components/loading.css (min-height: 120px on parent) */
+
+/* ============================================
+   Charts
+   ============================================ */
+
+/* Canvas-based charts: position relative required by Chart.js */
+.chart-canvas-wrapper {
+  position: relative;
+  height: 320px;
+}
+
+/* Non-canvas charts and placeholders */
+.chart {
+  height: 320px;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-primary);
+  font-style: italic;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.chart-container {
+  background: transparent;
+  border: var(--border-width) solid var(--color-border-primary);
+  overflow: hidden;
+}
+
+/* Chart Placeholder - for charts that haven't been implemented yet */
+.chart-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 200px;
+  padding: var(--space-4);
+  color: var(--app-color-primary);
+}
+
+.chart-placeholder svg {
+  color: currentColor;
+}
+
+.chart-placeholder p {
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+/* Stat Card Trend - trend indicator in KPI cards */
+.stat-card-trend {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  margin-top: var(--space-1);
+  font-size: var(--font-size-xs);
+}
+
+.stat-card-trend svg {
+  flex-shrink: 0;
+}
+
+.stat-card-trend .positive {
+  color: var(--status-active);
+}
+
+.stat-card-trend .negative {
+  color: var(--status-cancelled);
+}
+
+/* Source List - analytics lead source breakdown */
+.source-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.source-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.source-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.source-value {
+  color: var(--color-text-tertiary);
+}
+
+.source-progress-track {
+  height: 4px;
+  background: var(--portal-alpha-white-10);
+  overflow: hidden;
+}
+
+.source-progress-bar {
+  height: 100%;
+  transition: width var(--transition-normal) ease;
+}
+
+/* ============================================
+   KPI Cards - base styles in portal-cards.css
+   ============================================ */
+
+/* KPI Cards - Analytics specific styling */
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  text-align: center;
+  min-height: 120px;
+  transition: border-color var(--transition-faster);
+}
+
+.kpi-card:hover {
+  border-color: var(--color-border-primary);
+}
+
+.kpi-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-primary);
+}
+
+.kpi-card-icon svg {
+  width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
+}
+
+/* .kpi-card-label styles provided by unified label system in portal-cards.css */
+
+.kpi-card .stat-value {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+.kpi-card-change {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--icon-gap);
+  font-size: var(--font-size-xs);
+  margin-top: auto;
+}
+
+.kpi-card-change .change-value {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.kpi-card-change .change-label {
+  color: var(--color-text-tertiary);
+}
+
+.kpi-card-change.positive .change-value {
+  color: var(--status-active);
+}
+
+.kpi-card-change.negative .change-value {
+  color: var(--status-cancelled);
+}
+
+/* ============================================
+   Data Lists
+   ============================================ */
+
+/* Uses utility classes: flex flex-col gap-1 */
+
+.data-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.data-value {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+/* Uses utility classes: flex flex-col gap-0-5 */
+
+/* Uses utility classes: flex items-center gap-0-5 */
+
+/* Uses universal empty state from loading.css */
+
+/* Health Check base styles in shared/portal-cards.css */
+
+/* ============================================
+   Bundle Info (uses common .bundle-item from portal-cards.css)
+   ============================================ */
+
+/* Uses utility classes: flex flex-col gap-1 */
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (--mobile) {
+  .analytics-actions-bar {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .analytics-card-grid,
+  .analytics-grid,
+  .health-check-grid {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+
+  .kpi-cards-row,
+  .kpi-cards-row--2,
+  .kpi-cards-row--3 {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 100%;
+  }
+
+  .quick-actions-grid {
+    flex-direction: column;
+  }
+}
+
+@media (--small-mobile) {
+  #tab-analytics .section-header-with-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  #tab-system .section-header-with-actions {
+    padding: 0;
+  }
+
+  #tab-system .section-header-with-actions h3 {
+    line-height: 36px;
+  }
+}
+
+/* ============================================
+   Ad-Hoc Analytics: Chart Container
+   ============================================ */
+
+.analytics-chart-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.analytics-chart-type-toggle {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.analytics-chart-canvas-wrapper {
+  position: relative;
+  height: 320px;
+}
+
+/* .truncate-text styling in project-detail.css */

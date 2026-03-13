@@ -1,0 +1,179 @@
+/**
+ * ===============================================
+ * KEYBOARD SHORTCUTS OVERLAY STYLES
+ * ===============================================
+ * @file src/styles/portal/shared/keyboard-shortcuts.css
+ *
+ * Overlay for displaying keyboard shortcut reference.
+ * Follows command-palette.css patterns for consistency.
+ */
+
+/* ============================================
+ * OVERLAY
+ * ============================================ */
+
+.shortcuts-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-portal-modal);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 15vh;
+  background: var(--portal-alpha-black-50);
+  backdrop-filter: blur(4px);
+}
+
+/* ============================================
+ * PANEL
+ * ============================================ */
+
+.shortcuts-panel {
+  width: min(var(--cmd-palette-max-width), calc(100vw - var(--space-4)));
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-text-primary);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+/* ============================================
+ * HEADER
+ * ============================================ */
+
+.shortcuts-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+}
+
+.shortcuts-header-icon {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  color: var(--color-text-primary);
+}
+
+.shortcuts-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.shortcuts-divider {
+  height: var(--border-width);
+  background: var(--color-text-primary);
+}
+
+/* ============================================
+ * BODY
+ * ============================================ */
+
+.shortcuts-body {
+  padding: var(--space-3) var(--space-4);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ============================================
+ * GROUPS
+ * ============================================ */
+
+.shortcuts-group-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.shortcuts-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.shortcuts-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
+}
+
+.shortcuts-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.shortcuts-keys {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+/* ============================================
+ * KBD ELEMENT
+ * ============================================ */
+
+.shortcuts-kbd {
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-text-primary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--space-px) var(--space-1);
+  min-width: var(--space-3);
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* ============================================
+ * FOOTER
+ * ============================================ */
+
+.shortcuts-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) var(--space-4);
+  border-top: var(--border-width) solid var(--color-text-primary);
+  background: var(--color-bg-secondary);
+}
+
+.shortcuts-footer-hint {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* ============================================
+ * RESPONSIVE
+ * ============================================ */
+
+@media (--mobile) {
+  .shortcuts-overlay {
+    padding-top: 5vh;
+  }
+
+  .shortcuts-panel {
+    width: calc(100vw - var(--space-2));
+    max-height: 80vh;
+  }
+
+  .shortcuts-footer {
+    display: none;
+  }
+}

@@ -1,0 +1,255 @@
+/**
+ * ===============================================
+ * TABLE FILTER CONTROLS
+ * ===============================================
+ * @file src/styles/portal/admin/table-filters.css
+ *
+ * Filter controls for admin tables including:
+ * - Search dropdown
+ * - Filter dropdown menu
+ * - Checkbox groups
+ * - Date range inputs
+ * - Sortable table headers
+ */
+
+/* =====================================================
+   COMPACT FILTER SELECTS - React tables
+   Height matches buttons (28px), prevents full-width stretch
+   ===================================================== */
+
+[data-page="admin"] select[class*="tw-py-"],
+[data-page="admin"] .flex select {
+  height: var(--table-pagination-btn-size);
+  min-height: var(--table-pagination-btn-size);
+  max-height: var(--table-pagination-btn-size);
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: var(--space-2);
+  padding-right: var(--space-6);
+  line-height: calc(var(--table-pagination-btn-size) - var(--space-px) * 2);
+  flex-shrink: 0;
+  width: auto;
+  min-width: var(--table-col-sm);
+  max-width: var(--table-col-md);
+}
+
+/* Search inline wrapper — trigger on right, input expands left */
+.filter-search-wrapper {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  min-height: var(--portal-btn-icon-size, 36px);
+}
+
+/* Search trigger button */
+.filter-search-trigger {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Show indicator when has value */
+.filter-search-trigger.has-value::after {
+  content: "";
+  position: absolute;
+  top: calc(-1 * var(--space-px) * 2);
+  right: calc(-1 * var(--space-px) * 2);
+  width: var(--space-1);
+  height: var(--space-1);
+  background: var(--color-accent);
+  border-radius: var(--border-radius-full);
+  z-index: var(--z-index-content);
+}
+
+/* Search input — hidden when closed, expands inline to the left of trigger when open */
+.filter-search-dropdown,
+.filter-search-dropdown.search-bar {
+  display: none;
+  position: relative;
+  width: var(--table-col-xl);
+}
+
+.filter-search-wrapper.open .filter-search-dropdown,
+.filter-search-wrapper.open .filter-search-dropdown.search-bar {
+  display: flex;
+}
+
+/* Hide trigger when open — icon inside the input covers it */
+.filter-search-wrapper.open .filter-search-trigger {
+  display: none;
+}
+
+/* Search icon inside the input — left-aligned with proper padding */
+.filter-search-dropdown .search-bar-icon {
+  position: absolute;
+  left: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+/* Input padding + height to match filter dropdown row */
+.filter-search-dropdown input.search-bar-input {
+  padding-left: var(--input-icon-offset);
+  padding-top: var(--space-1-5);
+  padding-bottom: var(--space-1-5);
+  min-height: var(--portal-btn-icon-size, 36px);
+}
+
+/* Override thick admin focus border — search is a compact inline tool */
+.filter-search-dropdown input.search-bar-input:focus {
+  border-width: var(--border-width);
+  outline: none;
+}
+
+/* Filter dropdown wrapper */
+.filter-dropdown-wrapper {
+  position: relative;
+}
+
+/* Filter dropdown trigger - when used with .icon-btn, stay compact (36x36)
+   The min-width and padding-right were causing 120px+ width */
+.filter-dropdown-trigger {
+  position: relative;
+  cursor: pointer;
+}
+
+/* When filter-dropdown-trigger is an icon-btn, use icon-btn sizing (36x36) */
+.icon-btn.filter-dropdown-trigger {
+  /* Inherit all sizing from .icon-btn - don't override */
+  min-width: unset;
+  padding-right: 0;
+}
+
+/* .icon-btn styling: portal-buttons.css ONLY - NO overrides here */
+
+/* Filter active state - uses .has-value class */
+.filter-dropdown-trigger.has-value,
+.filter-search-trigger.has-value {
+  color: var(--color-accent);
+}
+
+.filter-count-badge {
+  display: none;
+  position: absolute;
+  top: calc(-1 * var(--space-0-5) - var(--space-px) * 2);
+  right: calc(-1 * var(--space-0-5) - var(--space-px) * 2);
+  min-width: var(--space-2);
+  height: var(--space-2);
+  padding: 0 var(--space-0-5);
+  background: var(--color-accent);
+  color: var(--color-white);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--space-2);
+  text-align: center;
+  z-index: var(--z-index-content);
+}
+
+.filter-count-badge.visible {
+  display: inline-block;
+}
+
+/* Filter dropdown menu — rendered via React portal at body level */
+.filter-dropdown-menu {
+  z-index: var(--z-index-portal-dropdown, 9700);
+  min-width: var(--table-col-lg);
+  padding: var(--space-1-5);
+  background: var(--color-bg-tertiary);
+  border: var(--portal-border);
+  box-shadow: var(--shadow-dropdown-xl);
+  /* Portal-mounted outside .portal — inherit the portal font explicitly */
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+/* Filter sections */
+.filter-section {
+  margin-bottom: var(--space-1);
+}
+
+.filter-section:last-of-type {
+  margin-bottom: 0;
+}
+
+/* Label styling from unified rule in portal-forms.css - only layout here */
+.filter-section-label {
+  display: block;
+  margin-bottom: var(--space-1);
+}
+
+/* Checkbox group */
+/* Uses utility classes: flex flex-col gap-1 */
+
+/* Filter options - simple clickable list items */
+.filter-options {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-option {
+  display: block;
+  width: 100%;
+  padding: var(--space-1-5) var(--space-2);
+  background: transparent;
+  border: none;
+  text-align: left;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.filter-option:hover {
+  background: var(--color-bg-hover);
+}
+
+.filter-option.active {
+  background: var(--color-bg-raised);
+  color: var(--color-text-primary);
+}
+
+/* Sortable table headers - styles moved to shared/portal-tables.css */
+
+/* ===============================================
+   MOBILE RESPONSIVE
+   =============================================== */
+
+@media (--mobile) {
+  .filter-search {
+    flex: 1;
+    min-width: var(--table-col-md);
+  }
+
+  .filter-search-input {
+    width: 100%;
+  }
+
+  .filter-dropdown-menu {
+    left: 0;
+    right: 0;
+    min-width: unset;
+  }
+
+  .filter-date-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (--small-mobile) {
+  /* Wrapper containers must have consistent height */
+  .filter-search-wrapper,
+  .filter-dropdown-wrapper {
+    display: flex;
+    align-items: center;
+    height: var(--table-pagination-btn-size);
+    width: auto;
+    margin: 0;
+    padding: 0;
+  }
+}

@@ -1,0 +1,136 @@
+/**
+ * ===============================================
+ * SHARED PORTAL CARD LAYOUT CLASSES
+ * ===============================================
+ * @file src/styles/portal/shared/portal-tab-components.css
+ *
+ * Shared layout classes used across admin and client portal
+ * card-based list views (projects, contracts, deliverables, etc.)
+ *
+ * Page-specific tab styles live in their canonical files:
+ * - Tasks, Messages, Contract, Invoices, Notes, Files → project-detail.css
+ * - Contacts, Activity → client-detail.css
+ * - Overview dashboard helpers → dashboard-layout.css
+ * - Message thread list items → portal-messages.css
+ */
+
+/* Tasks tab styles in project-detail.css */
+
+/* Contract tab styles in project-detail.css */
+
+/* ==============================================
+   SHARED TAB SECTION HEADERS (Portal tabs)
+   Ensures Contacts/Notes/etc headings match portal typography.
+   ============================================== */
+
+.panel-header-row,
+.panel-header-row--compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* Used for in-panel forms (Add/Edit). Spacing handled by those panels. */
+.panel-header-row { margin-bottom: var(--space-4); }
+.panel-header-row--compact { margin-bottom: var(--space-3); }
+
+/* Tab content headers use `.data-table-header` markup for single SoT. */
+
+/* =====================================================
+   CANONICAL CARD/PANEL HEADER LAYOUT (SoT)
+   Used across dashboard panels + settings snapshot cards + tab content headers.
+   ===================================================== */
+
+.portal :is(.overview-panel-header, .snapshot-card-header) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--portal-card-padding);
+}
+
+.portal :is(.overview-panel-title, .snapshot-card-title) {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  margin: 0;
+  font-size: var(--font-size-xs);
+}
+
+.portal :is(.overview-panel-title, .snapshot-card-title) svg {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+/* Make tab-section headers look like section titles (no extra overrides needed) */
+.portal .tab-section > .panel-header-row .heading,
+.portal .tab-section > .panel-header-row--compact .heading {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-widest);
+  margin: 0;
+}
+
+/* Standard icon sizing inside tab-section headings */
+.portal .tab-section > :is(.panel-header-row, .panel-header-row--compact) .heading svg {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   SHARED PORTAL CARD LAYOUT CLASSES
+   ============================================ */
+
+/* .portal-card-header moved to portal-cards.css */
+
+/* Title group -- icon + name, truncatable */
+.portal-card-title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+
+/* Status group -- badges + chevron, never truncated */
+.portal-card-status-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* Description text below header */
+.portal-card-description {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+}
+
+/* Progress section with bar */
+.portal-card-progress {
+  margin-bottom: 0.5rem;
+}
+
+/* Deliverables tab styles in project-detail.css */
+
+/* Files tab styles in project-detail.css */
+
+/* Overview dashboard styles in dashboard-layout.css */
+
+/* Activity tab styles merged into client-detail.css */
+
+/* Portal messages styles in portal-messages.css */
+
+/* Messages tab styles in project-detail.css */
+
+/* Contacts tab styles merged into client-detail.css */
+
+/* Invoices tab styles in project-detail.css */
+
+/* Notes tab styles in project-detail.css */

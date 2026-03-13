@@ -1,0 +1,696 @@
+/**
+ * SHARED PORTAL BUTTON STYLES
+ * @file src/styles/portal/shared/portal-buttons.css
+ *
+ * Base button styling handled by design-system/tokens/buttons.css + form-buttons.css
+ * This file contains ONLY portal-specific button overrides:
+ * - Sidebar buttons (navigation)
+ * - Icon buttons
+ * - Toggle buttons
+ * - Context-specific variants
+ */
+
+/* Button with icon - flex layout */
+button:has(> svg) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--icon-gap-md);
+}
+
+/* Icon before text (default order).
+   Exclude dropdown triggers — their SVG carets must stay AFTER text. */
+:is(.btn, .btn-primary, .btn-secondary, .btn-outline):not(.dropdown-trigger):not(.date-range-trigger) > :is(svg, .btn-icon),
+.icon-btn > :is(svg, .icon-btn-svg),
+button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-trigger):not(.status-dropdown-trigger):not(.form-dropdown-trigger):not(.modal-dropdown-trigger):not(.date-range-trigger) > :is(.icon-wrap, .tab-icon, svg) {
+  order: -1;
+}
+
+/* ============================================
+ * SVG ICON COLOR INHERITANCE - ROOT FIX
+ * ============================================
+ * Ensures SVG icons in buttons inherit the button's text color.
+ * This is critical for Lucide icons which use stroke="currentColor".
+ * Without this, SVGs appear grey instead of matching button text.
+ */
+.portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .form-button) > svg,
+.portal button:is(.btn, .btn-primary, .btn-secondary, .btn-outline) > svg {
+  color: inherit;
+}
+
+/* ============================================
+ * VARIANT BUTTONS - Color variants
+ * ============================================ */
+
+/* Danger button */
+.btn-danger {
+  background: var(--portal-btn-danger-bg);
+  color: var(--portal-btn-danger-color);
+  border-color: var(--portal-btn-danger-border);
+}
+.btn-danger:hover {
+  background: var(--portal-btn-danger-hover-bg);
+  color: var(--portal-btn-danger-hover-color);
+  border-color: var(--portal-btn-danger-hover-border);
+}
+
+/* Success button */
+.btn-success {
+  background: inherit;
+  color: var(--color-success-500);
+  border-color: var(--color-success-500);
+}
+.btn-success:hover {
+  background: var(--color-success-500);
+  color: var(--color-white);
+  border-color: var(--color-success-500);
+}
+
+/* Link button - text-only button styled as a link */
+.btn-link {
+  background: transparent;
+  border: none;
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: var(--font-weight-medium);
+  box-shadow: none;
+}
+.btn-link:hover {
+  color: var(--color-accent);
+  text-decoration: underline;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Small button */
+.btn-sm {
+  padding: var(--portal-btn-sm-padding-y) var(--portal-btn-sm-padding-x);
+  font-size: var(--portal-btn-sm-font-size);
+  min-height: var(--portal-btn-sm-min-height);
+}
+
+/* Outline button - inherits bg, uses button border tokens */
+.btn-outline {
+  background: inherit;
+  color: var(--portal-btn-color);
+  border: var(--portal-btn-border-width) solid var(--portal-btn-border-color);
+}
+.btn-outline:hover {
+  background: var(--portal-btn-hover-bg);
+  color: var(--portal-btn-hover-color);
+  border-color: var(--portal-btn-hover-border);
+}
+
+/* Ghost button - transparent, minimal */
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-text-primary);
+}
+.btn-ghost:hover {
+  background: var(--color-bg-prominent);
+  color: var(--color-accent);
+  border-color: transparent;
+}
+
+/* Unstyled button - reset all button defaults, used as dropdown triggers */
+.btn-unstyled {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+/* Full width button */
+.btn-full {
+  width: 100%;
+}
+
+/* Large button - for prominent CTAs */
+.btn-lg {
+  height: var(--space-7);
+  padding: 0 var(--space-3);
+  font-size: var(--portal-btn-font-size);
+  line-height: var(--space-7);
+}
+
+/* Filled primary button - solid background with thick bottom border */
+.btn-filled {
+  background: var(--color-accent);
+  color: var(--color-white);
+  border: var(--portal-btn-border-width) solid var(--color-accent);
+  border-bottom-width: var(--portal-btn-border-bottom-width);
+  border-bottom-color: var(--portal-btn-border-color, var(--color-white));
+}
+.btn-filled:hover {
+  background: var(--color-brand-hover, var(--color-interactive-primary-hover));
+  color: var(--color-white);
+  border-color: var(--color-brand-hover, var(--color-interactive-primary-hover));
+  border-bottom-color: var(--portal-btn-border-color, var(--color-white));
+}
+.btn-filled:disabled {
+  background: var(--color-bg-prominent);
+  color: var(--color-text-tertiary);
+  cursor: not-allowed;
+}
+
+/* ============================================
+ * AUTH BUTTON - Full width outline button for login/auth forms
+ * ============================================ */
+.btn-auth {
+  width: 100%;
+  padding: var(--space-1-5) var(--space-3);
+  border: var(--portal-btn-border-width) solid currentColor;
+  border-bottom-width: var(--portal-btn-border-bottom-width);
+  border-radius: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  font-family: var(--font-family-sans);
+  letter-spacing: var(--letter-spacing-wider);
+  transition: all var(--transition-fast);
+  text-transform: uppercase;
+  background-color: inherit;
+  color: inherit;
+  box-shadow: none;
+}
+
+.btn-auth:hover {
+  background-color: var(--portal-btn-hover-bg);
+  color: var(--portal-btn-hover-color);
+  border-color: var(--portal-btn-hover-border);
+}
+
+.btn-auth:disabled {
+  color: var(--color-text-tertiary);
+  border-color: var(--color-border-primary);
+  cursor: not-allowed;
+}
+.btn-sm .btn-icon {
+  width: 1em;
+  height: 1em;
+}
+
+/* ============================================
+ * SIDEBAR BUTTONS - Navigation link style
+ * These have completely different styling from action buttons
+ * Uses .nav-btn class to exclude from form-buttons.css styling
+ * ============================================ */
+.portal .nav-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-md);
+  width: 100%;
+  min-height: var(--space-5); /* 40px — matches collapsed icon-only height */
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--sidebar-icon-indent);
+  font-family: var(--font-family-mono);
+  font-size: var(--portal-nav-font-size);
+  font-weight: var(--font-weight-medium);
+  text-align: left;
+  justify-content: flex-start;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  border-radius: 0;
+  text-decoration: none;
+}
+.portal :is(.nav-btn:hover, .nav-btn.active) {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  color: var(--color-accent);
+}
+.portal :is(.nav-btn:hover, .nav-btn.active) .nav-icon {
+  color: var(--color-accent);
+}
+.portal .nav-btn .nav-icon {
+  flex-shrink: 0;
+  width: var(--sidebar-icon-size);
+  height: var(--sidebar-icon-size);
+}
+.portal .nav-btn .nav-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============================================
+ * ICON BUTTONS - Small clickable icons
+ * Single source of truth: use .icon-btn class
+ * ============================================ */
+
+/* Icon button - single source of truth for ALL icon-only buttons */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--portal-btn-icon-size);
+  height: var(--portal-btn-icon-size);
+  min-width: var(--portal-btn-icon-size);
+  min-height: var(--portal-btn-icon-size);
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--transition-mouse) ease;
+  text-decoration: none;
+  outline: none;
+}
+.icon-btn:hover {
+  color: var(--color-accent);
+  background: transparent;
+}
+.icon-btn.icon-btn-danger:hover {
+  color: var(--color-error-500);
+}
+.icon-btn.icon-btn-success {
+  color: var(--color-success);
+}
+.icon-btn.icon-btn-success:hover {
+  color: var(--color-success-500);
+}
+.icon-btn.icon-btn-active {
+  color: var(--status-active);
+}
+.icon-btn.icon-btn-active:hover {
+  color: var(--color-accent);
+}
+.icon-btn.icon-btn-warning {
+  color: var(--color-warning);
+}
+.icon-btn.icon-btn-warning:hover {
+  color: var(--color-warning);
+}
+/* Outline variant - icon button with border */
+.icon-btn.icon-btn-outline {
+  border: var(--border-width) solid var(--portal-border);
+}
+.icon-btn.icon-btn-outline:hover {
+  border-color: var(--color-accent);
+}
+.icon-btn.icon-btn-outline.icon-btn-danger:hover {
+  border-color: var(--color-danger);
+}
+/* Size modifiers */
+.icon-btn.icon-btn-sm {
+  width: var(--portal-btn-icon-size-sm);
+  height: var(--portal-btn-icon-size-sm);
+  min-width: var(--portal-btn-icon-size-sm);
+  min-height: var(--portal-btn-icon-size-sm);
+}
+.icon-btn.icon-btn-xs {
+  width: var(--portal-btn-icon-size-xs);
+  height: var(--portal-btn-icon-size-xs);
+  min-width: var(--portal-btn-icon-size-xs);
+  min-height: var(--portal-btn-icon-size-xs);
+}
+/* Icon button SVG — matches context text size */
+.icon-btn svg,
+.portal .nav-btn > svg {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+/* Icon button focus */
+/* .icon-btn = standalone icon-only <button> (focus ring via --focus-ring token) */
+/* .btn-icon = icon <span>/<svg> element INSIDE a regular button (not focusable itself) */
+.icon-btn:focus-visible {
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
+/* Icon button primary variant */
+.icon-btn.icon-btn-primary {
+  color: var(--color-accent);
+}
+.icon-btn.icon-btn-primary:hover {
+  color: var(--color-accent-hover, var(--color-accent));
+}
+
+/* Icon button with border active state */
+.icon-btn.icon-btn-outline.active {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* ============================================
+ * ICON BUTTON RESPONSIVE - Touch devices
+ * ============================================
+ * WCAG 2.1 requires 44x44px touch targets
+ */
+@media (pointer: coarse) {
+  .portal .icon-btn {
+    width: var(--space-5);
+    height: var(--space-5);
+    min-width: var(--space-5);
+    min-height: var(--space-5);
+  }
+
+  .icon-btn:active {
+    color: var(--color-accent);
+    transform: scale(0.95);
+  }
+
+  .icon-btn {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: var(--portal-alpha-primary-10);
+  }
+}
+
+/* Table action buttons stay compact even on touch devices - UTILITIES LAYER for override priority */
+@layer utilities {
+  @media (pointer: coarse) {
+    .data-table .icon-btn,
+    .data-table .table-actions .icon-btn,
+    .data-table .col-actions .icon-btn,
+    .data-table td .icon-btn,
+    .table-actions .icon-btn,
+    .col-actions .icon-btn {
+      width: var(--portal-btn-icon-size-xs);
+      height: var(--portal-btn-icon-size-xs);
+      min-width: var(--portal-btn-icon-size-xs);
+      min-height: var(--portal-btn-icon-size-xs);
+    }
+
+    .data-table .icon-btn svg,
+    .data-table .table-actions .icon-btn svg,
+    .data-table .col-actions .icon-btn svg,
+    .data-table td .icon-btn svg,
+    .table-actions .icon-btn svg,
+    .col-actions .icon-btn svg {
+      width: 1em;
+      height: 1em;
+    }
+  }
+}
+
+/* ============================================
+ * TABLE ACTION BUTTONS - UNIVERSAL RULE
+ * ============================================
+ * ONE RULE FOR ALL TABLE ACTION BUTTONS
+ * Desktop: 36x36px button, 18x18px icon (design system)
+ * Gap: 8px (--space-1)
+ *
+ * MUST CATCH ALL POSSIBLE SCENARIOS:
+ * - Vanilla JS tables with renderActionsCell()
+ * - Vanilla JS tables with manual buttons
+ * - React tables with PortalTableCell
+ * - Tables with .table-actions wrapper
+ * - Tables without .table-actions wrapper
+ */
+
+/* ============================================
+ * TABLE ACTION BUTTONS - UTILITIES LAYER
+ * ============================================
+ * Using utilities layer for highest priority without !important
+ * ALL table action buttons are COLORLESS - neutral color only
+ */
+@layer utilities {
+  /* MASTER SELECTOR: Every icon-btn in table contexts */
+  td .icon-btn,
+  td > .icon-btn,
+  td button.icon-btn,
+  .col-actions .icon-btn,
+  .col-actions > .icon-btn,
+  .col-actions button.icon-btn,
+  .table-actions .icon-btn,
+  .table-actions > .icon-btn,
+  .table-actions button.icon-btn,
+  .data-table .icon-btn,
+  .data-table td .icon-btn,
+  .data-table .col-actions .icon-btn,
+  .data-table .table-actions .icon-btn,
+  table .icon-btn,
+  table td .icon-btn,
+.portal td .icon-btn,
+  .portal .col-actions .icon-btn,
+  .portal .table-actions .icon-btn {
+    width: var(--portal-btn-icon-size);
+    height: var(--portal-btn-icon-size);
+    min-width: var(--portal-btn-icon-size);
+    min-height: var(--portal-btn-icon-size);
+    max-width: var(--portal-btn-icon-size);
+    max-height: var(--portal-btn-icon-size);
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    /* ALL table action buttons are neutral - no colors */
+    color: var(--color-text-primary);
+    background: transparent;
+  }
+
+  /* TABLE ACTION BUTTONS - REMOVE ALL COLOR VARIANTS
+   * Override all colored variants (danger, success, warning, primary)
+   * to use neutral color in table contexts */
+  td .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
+  .col-actions .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
+  .table-actions .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
+  .data-table .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
+  table .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary) {
+    color: var(--color-text-primary);
+    background: transparent;
+  }
+
+  /* Hover state - ALL table buttons hover to primary, no backgrounds */
+  td .icon-btn:hover,
+  .col-actions .icon-btn:hover,
+  .table-actions .icon-btn:hover,
+  .data-table .icon-btn:hover,
+  table .icon-btn:hover {
+    color: var(--color-accent);
+    background: transparent;
+    box-shadow: none;
+  }
+
+  /* MASTER SELECTOR: Every SVG in table icon buttons — match cell text size (1em) */
+  td .icon-btn svg,
+  td > .icon-btn svg,
+  td button.icon-btn svg,
+  .col-actions .icon-btn svg,
+  .col-actions > .icon-btn svg,
+  .col-actions button.icon-btn svg,
+  .table-actions .icon-btn svg,
+  .table-actions > .icon-btn svg,
+  .table-actions button.icon-btn svg,
+  .data-table .icon-btn svg,
+  .data-table td .icon-btn svg,
+  .data-table .col-actions .icon-btn svg,
+  .data-table .table-actions .icon-btn svg,
+  table .icon-btn svg,
+  table td .icon-btn svg,
+  .portal td .icon-btn svg,
+  .portal .col-actions .icon-btn svg,
+  .portal .table-actions .icon-btn svg {
+    width: 1em;
+    height: 1em;
+    min-width: 1em;
+    min-height: 1em;
+    max-width: 1em;
+    max-height: 1em;
+    flex-shrink: 0;
+  }
+}
+
+/* ============================================
+ * COLLAPSED SIDEBAR - Icon-only state
+ * ============================================ */
+
+/* Base icon-only button styles - applies to all collapsed states */
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .nav-btn {
+  padding: 0;
+  justify-content: center;
+  margin: 0 auto;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+  position: relative;
+}
+
+/* Active/hover states */
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .nav-btn.active {
+  background: transparent;
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.portal
+  :is(.sidebar.collapsed, .sidebar.icon-only)
+  .nav-btn:is(.active, :hover, :focus)
+  .nav-icon {
+  color: var(--color-accent);
+}
+
+/* Hidden text */
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .nav-btn .nav-label {
+  display: none;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  position: absolute;
+  left: -9999px;
+}
+
+/* Icon inherits natural size from nav-btn — no override needed */
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .nav-btn .nav-icon {
+  margin: 0;
+}
+
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .nav-btn:is(.active, :hover) .nav-icon svg {
+  filter: drop-shadow(0 1px 1px var(--portal-alpha-black-30));
+}
+
+/* ============================================
+ * RESPONSIVE: Mobile sidebar icon-only (≤600px)
+ * On compact-mobile, sidebar auto-collapses to icon-only width via CSS
+ * (portal-sidebar.css) WITHOUT adding .collapsed class. These rules
+ * mirror the collapsed button styles for :not(.collapsed) on small screens.
+ * ============================================ */
+
+@media (--compact-mobile) {
+  .portal .sidebar:not(.collapsed) .sidebar-buttons {
+    gap: var(--space-1);
+  }
+
+  .portal .sidebar:not(.collapsed) .nav-btn {
+    padding: 0;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    position: relative;
+    overflow: visible;
+  }
+
+  .portal .sidebar:not(.collapsed) .nav-btn.active,
+  .portal .sidebar:not(.collapsed) .nav-btn:is(:hover, :focus) {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+
+  .portal .sidebar:not(.collapsed) .nav-btn:is(.active, :hover) .nav-icon {
+    color: var(--color-accent);
+  }
+
+  .portal .sidebar:not(.collapsed) .nav-btn .nav-label {
+    display: none;
+    visibility: hidden;
+    position: absolute;
+    left: -9999px;
+  }
+}
+
+/* ============================================
+ * TOGGLE BUTTON GROUP
+ * ============================================ */
+.toggle-btn {
+  flex: 1;
+  padding: var(--space-1-5) var(--space-2-5);
+  background: transparent;
+  border: none;
+  font-family: var(--portal-btn-font-family);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  text-transform: uppercase;
+  color: var(--color-white);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-mouse) ease,
+    color var(--transition-mouse) ease;
+}
+.toggle-btn:not(:last-child) {
+  border-right: var(--border-width) solid var(--portal-btn-border-color);
+}
+.toggle-btn:hover:not(.active) {
+  background: var(--portal-alpha-white-10);
+}
+.toggle-btn.active {
+  background: var(--color-white);
+  color: var(--color-black);
+}
+
+/* ============================================
+ * BASE BUTTON - shared base for all portal buttons
+ * ============================================ */
+
+/* Base button — ghost/text style for standalone .btn without variant class.
+   .btn-primary, .btn-secondary, .btn-outline, .btn-danger get full styling
+   from form-buttons.css (components layer). We exclude them here so the
+   pages-layer ghost override doesn't strip their borders/backgrounds. */
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.nav-btn) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--portal-btn-font-size);
+  font-weight: var(--font-weight-regular);
+  font-family: var(--font-family-mono, monospace);
+  background: transparent;
+  color: var(--color-text-primary);
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.nav-btn):hover {
+  color: var(--color-accent);
+}
+
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.nav-btn):disabled {
+  color: var(--color-text-tertiary);
+  cursor: not-allowed;
+}
+
+/* tw-btn-primary/secondary/ghost/danger/icon/close removed — use .btn-primary,
+   .btn-secondary, .btn-ghost, .btn-danger, .icon-btn, .btn-close instead */
+
+/* ============================================
+ * ACTION BAR - Unified height for buttons and dropdowns in same row
+ * ============================================
+ * Use .action-bar class on container to ensure all children
+ * (buttons, dropdowns, selects) have consistent height
+ */
+.action-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* All actionable items in action bar - consistent height */
+.action-bar > :is(button, .btn, .btn-primary, .btn-secondary, .btn-outline, select, .form-select, [class*="dropdown-trigger"], [class*="date-selector"]) {
+  height: var(--action-bar-item-height);
+  min-height: var(--action-bar-item-height);
+  box-sizing: border-box;
+}
+
+/* Ensure flex children align properly */
+.action-bar > * {
+  display: inline-flex;
+  align-items: center;
+}

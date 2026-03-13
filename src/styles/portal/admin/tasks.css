@@ -1,0 +1,267 @@
+/**
+ * ===============================================
+ * TASKS & TIME TRACKING STYLES
+ * ===============================================
+ * @file src/styles/portal/admin/tasks.css
+ *
+ * Styles for project tasks and time tracking features.
+ */
+
+/* Global tasks tab content should fill available height */
+[data-page="admin"] #tab-tasks .kanban-board {
+  min-height: calc(100vh - 280px);
+}
+
+[data-page="admin"] #tab-tasks .kanban-column {
+  min-height: calc(100vh - 320px);
+}
+
+/* Global Tasks Kanban - ensure horizontal layout */
+@layer utilities {
+  #global-tasks-kanban-container .kanban-board {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+
+  #global-tasks-kanban-container .kanban-column {
+    flex: 1 1 0;
+    min-width: 200px;
+    max-width: none;
+  }
+}
+
+/* Only stack columns on mobile */
+@layer responsive {
+  @media (--mobile) {
+    #global-tasks-kanban-container .kanban-board {
+      flex-direction: column;
+    }
+
+    #global-tasks-kanban-container .kanban-column {
+      flex: 0 0 auto;
+      min-width: 100%;
+    }
+  }
+}
+
+/* View toggle: use shared .view-toggle (see shared/view-toggle.css) */
+
+/* ============================================
+   Task Card Enhancements (beyond Kanban default)
+   ============================================ */
+
+/* Task card project name */
+.kanban-card-project {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.kanban-card-project svg {
+  width: 1em;
+  height: 1em;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+/* Task priority badges - consolidated in shared/portal-cards.css */
+
+/* Priority indicator for dropdowns */
+.priority-indicator {
+  width: var(--space-1);
+  height: var(--space-1);
+  border-radius: var(--border-radius-full);
+  flex-shrink: 0;
+}
+
+/* Priority colors: data-attribute driven (used by React components) */
+.priority-indicator[data-priority="urgent"],
+.priority-dot[data-priority="urgent"] {
+  background-color: var(--status-cancelled);
+}
+
+.priority-indicator[data-priority="high"],
+.priority-dot[data-priority="high"] {
+  background-color: var(--status-pending);
+}
+
+.priority-indicator[data-priority="medium"],
+.priority-dot[data-priority="medium"] {
+  background-color: var(--status-active);
+}
+
+.priority-indicator[data-priority="low"],
+.priority-dot[data-priority="low"] {
+  background-color: var(--color-text-tertiary);
+}
+
+.priority-label[data-priority="urgent"] { color: var(--status-cancelled); }
+.priority-label[data-priority="high"] { color: var(--status-pending); }
+.priority-label[data-priority="medium"] { color: var(--status-active); }
+.priority-label[data-priority="low"] { color: var(--color-text-tertiary); }
+
+/* Dropdown styling: uses createModalDropdown from shared/modal-dropdown.ts */
+
+.task-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1-5);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.task-meta svg {
+  width: 1em;
+  height: 1em;
+  opacity: 0.7;
+}
+
+.task-due-date {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+}
+
+.task-due-date.overdue {
+  color: var(--status-cancelled);
+}
+
+.task-due-date.overdue svg {
+  opacity: 1;
+}
+
+.task-assignee {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+}
+
+/* ============================================
+   Task List View
+   REMOVED: .tasks-table specific styles
+   All table styles now in shared/portal-tables.css
+   using .data-table class
+   ============================================ */
+
+/* Time Entries Table - Base styling from shared/portal-tables.css
+   Only page-specific overrides here */
+#time-entries-list .data-table {
+  background: transparent;
+  border: var(--border-width) solid var(--color-border-primary);
+}
+
+#time-entries-list .data-table th {
+  background: transparent;
+}
+
+#time-entries-list .data-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Uses universal empty state from loading.css */
+
+/* Weekly chart container */
+/* time-weekly-chart now uses portal-project-card for base styling */
+/* h3 styling centralized in admin.css */
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (--mobile) {
+  #time-entries-list .data-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .view-toggle-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ============================================
+   Milestone Tags on Task Cards
+   ============================================ */
+
+/* .col-actions styling from shared/portal-tables.css */
+
+/* ============================================
+   GlobalTasksTable React Component Styles
+   ============================================ */
+
+.priority-label {
+  font-size: var(--font-size-sm);
+}
+
+/* Text muted utility */
+.text-muted {
+  color: var(--color-text-tertiary);
+}
+
+/* Date value styling - inherits from table */
+.date-value {
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Kanban loading skeleton */
+.kanban-loading .kanban-column-skeleton {
+  height: 256px;
+  background: transparent;
+  border: var(--border-width) solid var(--color-border-primary);
+  animation: pulse-skeleton 2s ease-in-out infinite;
+}
+
+@keyframes pulse-skeleton {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Kanban empty state */
+.kanban-empty-state {
+  padding: var(--space-4);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  opacity: 0.5;
+}
+
+/* Kanban card header */
+.kanban-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.kanban-card-header .priority-indicator {
+  margin-top: var(--space-1);
+  flex-shrink: 0;
+}
+
+.kanban-card-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+/* Kanban column title wrapper */
+.kanban-column-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Board view uses shared .kanban-* classes from portal-components.css */

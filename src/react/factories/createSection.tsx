@@ -14,9 +14,9 @@
  * - ContentRow: Horizontal flex container
  * - Grid: Responsive grid layouts
  *
- * @see src/styles/shared/portal-cards.css
- * @see src/styles/shared/portal-layout.css
- * @see src/styles/admin/overview-layout.css
+ * @see src/styles/portal/shared/portal-cards.css
+ * @see src/styles/portal/shared/portal-layout.css
+ * @see src/styles/portal/admin/overview-layout.css
  */
 
 import * as React from 'react';

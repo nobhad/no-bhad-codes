@@ -195,7 +195,7 @@ export function PortalMessagesView({
       }
     >
       {typingUser && (
-        <div className="text-muted text-sm" style={{ padding: 'var(--space-1) var(--space-2)' }}>
+        <div className="msgtab-typing-indicator">
           {typingUser} is typing...
         </div>
       )}

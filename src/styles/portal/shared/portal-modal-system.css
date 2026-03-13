@@ -1,0 +1,310 @@
+/**
+ * ===============================================
+ * UNIFIED MODAL SYSTEM
+ * ===============================================
+ * @file src/styles/portal/shared/portal-modal-system.css
+ *
+ * Shared modal styles used across admin and client portals.
+ * Radix Dialog/AlertDialog component styles.
+ */
+
+/* =====================================================
+   MODAL POSITIONING (for Radix Dialog)
+   Fixed centered positioning for portal modals.
+   ===================================================== */
+
+.modal.modal-content {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: var(--z-index-portal-modal);
+  width: calc(100% - 2rem);
+  background: var(--color-bg-primary);
+  border: var(--portal-border);
+  box-shadow: none;
+}
+
+/* =====================================================
+   MODAL TITLE AND DESCRIPTION
+   ===================================================== */
+
+.modal-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.modal-description {
+  font-size: var(--font-size-xs);
+  margin-top: var(--space-0-5);
+  color: var(--color-text-tertiary);
+}
+
+/* ==============================================
+   PORTAL MODAL OVERLAY
+   ============================================== */
+
+.portal-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-portal-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: var(--color-overlay-light);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  overscroll-behavior: contain;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity var(--transition-faster);
+}
+
+/* ==============================================
+   PORTAL MODAL CONTAINER
+   ============================================== */
+
+.portal-modal {
+  background: var(--color-bg-secondary);
+  box-shadow: var(--shadow-modal);
+  width: 100%;
+  max-width: var(--modal-width-md, 560px);
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.portal-modal.portal-modal--sm {
+  max-width: var(--modal-width-sm, 400px);
+}
+
+.portal-modal.portal-modal--wide {
+  max-width: var(--modal-width-lg, 860px);
+}
+
+.portal-modal.portal-modal--xl {
+  max-width: var(--modal-width-xl, 1000px);
+}
+
+.portal-modal.portal-modal--full {
+  max-width: calc(100vw - 2rem);
+  margin: var(--space-4);
+}
+
+/* ==============================================
+   PORTAL MODAL HEADER
+   ============================================== */
+
+.portal-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  flex-shrink: 0;
+}
+
+.portal-modal-title svg {
+  width: 1em;
+  height: 1em;
+  color: var(--color-text-primary);
+  flex-shrink: 0;
+}
+
+.portal-modal-header h2 {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.portal-modal-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  margin-top: var(--space-0-5);
+}
+
+.portal-modal-close {
+  border: none;
+  font-size: var(--font-size-2xl);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  line-height: 1;
+  transition: color var(--transition-faster);
+}
+
+.portal-modal-close:hover {
+  color: var(--color-text-primary);
+}
+
+/* ==============================================
+   PORTAL MODAL FORM ELEMENTS
+   ============================================== */
+
+.portal-modal form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.portal-modal fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 var(--space-4) 0;
+}
+
+.portal-modal legend {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+  padding: 0 0 var(--space-2) 0;
+  margin-bottom: var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-border-primary);
+  width: 100%;
+}
+
+/* ==============================================
+   PORTAL MODAL BODY & FOOTER
+   ============================================== */
+
+.portal-modal-body {
+  padding: var(--space-4) var(--space-5);
+  overflow-y: auto;
+  flex: 1;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  overscroll-behavior: contain;
+}
+
+.portal-modal-body .form-field {
+  margin-bottom: 0;
+}
+
+.portal-modal-body .form-row {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.portal-modal-body .form-row .form-field {
+  flex: 1;
+}
+
+.portal-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  flex-shrink: 0;
+  background: var(--color-bg-secondary);
+  position: relative;
+  z-index: var(--z-index-1);
+}
+
+/* ==============================================
+   MODAL DROPDOWN
+   ============================================== */
+
+.portal-modal .custom-dropdown[data-modal-dropdown] {
+  --dropdown-bg: var(--color-black);
+  --dropdown-border-color: var(--color-border-primary);
+  --dropdown-border-width: 1px;
+  --dropdown-radius: var(--border-radius-lg);
+}
+
+.portal-modal .custom-dropdown[data-modal-dropdown]:not(.open) .custom-dropdown-trigger {
+  border: var(--border-width) solid var(--dropdown-border-color);
+}
+
+.portal-modal .custom-dropdown[data-modal-dropdown]:not(.open) .custom-dropdown-trigger:focus,
+.portal-modal
+  .custom-dropdown[data-modal-dropdown]:not(.open)
+  .custom-dropdown-trigger:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.portal-modal .custom-dropdown[data-modal-dropdown].open .custom-dropdown-trigger {
+  border: var(--border-width) solid var(--color-accent);
+  border-bottom: none;
+  outline: none;
+}
+
+.portal-modal .custom-dropdown[data-modal-dropdown].open .custom-dropdown-menu {
+  border: var(--border-width) solid var(--color-accent);
+  border-top: none;
+}
+
+/* Modal dropdown menu positioning - using @layer utilities for cascade priority */
+@layer utilities {
+  .portal-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    bottom: auto;
+    left: 0;
+    right: 0;
+    margin-top: -1px;
+    z-index: var(--z-index-portal-dropdown);
+  }
+}
+
+.portal-modal .custom-dropdown[data-modal-dropdown].flip-above.open .custom-dropdown-trigger {
+  border-bottom: var(--border-width) solid var(--color-accent);
+  border-top: none;
+}
+
+.portal-modal .custom-dropdown[data-modal-dropdown].flip-above .custom-dropdown-menu {
+  border-bottom: none;
+  border-top: var(--border-width) solid var(--color-accent);
+}
+
+.portal-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger {
+  padding: var(--space-2) var(--space-3);
+  padding-right: var(--space-1-5);
+}
+
+.portal-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-item {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  justify-content: flex-start;
+}
+
+/* ==============================================
+   RESPONSIVE
+   ============================================== */
+
+@media (--small-mobile) {
+  .portal-modal-overlay {
+    padding: 0;
+    align-items: flex-start;
+  }
+
+  .portal-modal {
+    max-width: 100%;
+    width: 100%;
+    max-height: 100vh;
+    min-height: 100vh;
+    margin: 0;
+  }
+
+  .portal-modal-body {
+    padding: var(--space-3);
+    min-height: 0;
+    flex: 1;
+  }
+
+  .portal-modal-header {
+    padding: var(--space-3);
+  }
+
+  .portal-modal-footer {
+    padding: var(--space-3);
+  }
+}

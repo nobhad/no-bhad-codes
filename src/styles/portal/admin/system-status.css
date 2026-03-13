@@ -1,0 +1,285 @@
+/**
+ * ===============================================
+ * SYSTEM STATUS COMPONENT
+ * ===============================================
+ * @file src/styles/portal/admin/system-status.css
+ *
+ * Styles for the system status panel used in
+ * the admin system status tab. Uses TableLayout
+ * for consistent layout with other admin tabs.
+ */
+
+/* ================================================
+   Content wrapper
+   ================================================ */
+.status-content {
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ================================================
+   Section (Services / Metrics / Incidents)
+   ================================================ */
+.status-section-title {
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-2) 0;
+}
+
+/* ================================================
+   Services Grid
+   ================================================ */
+.status-services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-2);
+}
+
+.status-service-card {
+  padding: var(--space-3);
+}
+
+.status-service-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.status-service-name-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+}
+
+.status-service-icon {
+  flex-shrink: 0;
+}
+
+.status-service-name {
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.status-service-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.status-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-xs);
+}
+
+.status-detail-label {
+  color: var(--color-text-secondary);
+}
+
+/* ================================================
+   Metrics Grid
+   ================================================ */
+.status-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-2);
+}
+
+.status-metric-card {
+  padding: var(--space-3);
+}
+
+.status-metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-1);
+}
+
+.status-metric-name {
+  color: var(--color-text-secondary);
+}
+
+.status-metric-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1-5);
+}
+
+.status-progress-track {
+  height: 4px;
+  background: var(--color-bg-raised);
+  overflow: hidden;
+  margin-bottom: var(--space-1);
+}
+
+.status-progress-bar {
+  height: 100%;
+  transition: width var(--transition-fast);
+}
+
+.status-metric-threshold {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* ================================================
+   Incidents List
+   ================================================ */
+.status-incidents-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.status-incident-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+}
+
+.status-incident-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.status-incident-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.status-incident-severity {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  padding: var(--space-0-5) var(--space-1-5);
+  border: var(--border-width) solid var(--color-border-primary);
+}
+
+.status-incident-severity.severity-critical {
+  color: var(--status-cancelled);
+  border-color: var(--status-cancelled);
+}
+
+.status-incident-severity.severity-major {
+  color: var(--status-pending);
+  border-color: var(--status-pending);
+}
+
+.status-incident-severity.severity-minor {
+  color: var(--color-text-secondary);
+}
+
+.status-incident-title {
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.status-incident-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.status-incident-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: capitalize;
+  flex-shrink: 0;
+}
+
+/* ================================================
+   Auto-refresh label in header actions
+   ================================================ */
+.status-auto-refresh-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.status-auto-refresh-text {
+  display: none;
+}
+
+@media (--tablet) {
+  .status-auto-refresh-text {
+    display: inline;
+  }
+}
+
+/* ================================================
+   Empty state
+   ================================================ */
+.status-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* ================================================
+   Status color indicator (data-attribute driven)
+   Provides CSS-class fallback for dynamic status colors.
+   ================================================ */
+.status-color-indicator[data-status-variant="completed"] { color: var(--status-completed); }
+.status-color-indicator[data-status-variant="pending"] { color: var(--status-pending); }
+.status-color-indicator[data-status-variant="cancelled"] { color: var(--status-cancelled); }
+.status-color-indicator[data-status-variant="active"] { color: var(--status-active); }
+.status-color-indicator[data-status-variant="muted"] { color: var(--color-text-tertiary); }
+
+.status-progress-bar[data-status-variant="completed"] { background-color: var(--status-completed); }
+.status-progress-bar[data-status-variant="pending"] { background-color: var(--status-pending); }
+.status-progress-bar[data-status-variant="cancelled"] { background-color: var(--status-cancelled); }
+.status-progress-bar[data-status-variant="active"] { background-color: var(--status-active); }
+.status-progress-bar[data-status-variant="muted"] { background-color: var(--color-text-tertiary); }
+
+.status-service-icon[data-status-variant="completed"] { color: var(--status-completed); }
+.status-service-icon[data-status-variant="pending"] { color: var(--status-pending); }
+.status-service-icon[data-status-variant="cancelled"] { color: var(--status-cancelled); }
+.status-service-icon[data-status-variant="active"] { color: var(--status-active); }
+.status-service-icon[data-status-variant="muted"] { color: var(--color-text-tertiary); }
+
+/* ================================================
+   Shared utility
+   ================================================ */
+.status-text-capitalize {
+  text-transform: capitalize;
+}
+
+/* ================================================
+   Responsive
+   ================================================ */
+@media (--mobile) {
+  .status-services-grid,
+  .status-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .status-incident-card {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+}

@@ -1,0 +1,490 @@
+/**
+ * ===============================================
+ * SHARED PORTAL AUTH STYLES
+ * ===============================================
+ * @file src/styles/portal/shared/portal-auth.css
+ *
+ * Shared authentication gate and login form styles
+ * for both admin and client portal login pages.
+ *
+ * Client portal overrides (nav/footer visibility, set-password page):
+ * - src/styles/portal/shared/portal-auth.css
+ */
+
+/* =====================================================
+   AUTH GATE - Full Screen Login Overlay
+   ===================================================== */
+
+.auth-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--color-bg-secondary);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-index-portal-overlay);
+  transition: background-color var(--transition-fast);
+}
+
+.auth-gate.hidden {
+  display: none;
+}
+
+.auth-gate input::placeholder {
+  text-align: left;
+}
+
+.auth-gate input {
+  text-align: left;
+}
+
+/* =====================================================
+   AUTH GATE CONTAINER - Card
+   ===================================================== */
+
+.auth-gate-container {
+  background: var(--color-bg-primary);
+  border: var(--border-width) solid var(--color-border-primary);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  width: 100%;
+  max-width: min(500px, 90vw);
+  box-shadow: none;
+}
+
+/* =====================================================
+   AUTH GATE HEADER - Logo, Title, Subtitle
+   ===================================================== */
+
+.auth-gate-header {
+  text-align: center;
+  margin-bottom: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.auth-gate-logo {
+  width: clamp(80px, 15vw, 120px);
+  height: clamp(80px, 15vw, 120px);
+  object-fit: contain;
+  margin-bottom: var(--space-4);
+}
+
+.auth-gate-header h1 {
+  font-family: var(--font-family-mono);
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-1) 0;
+}
+
+.auth-gate-header p {
+  color: var(--color-text-secondary);
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+  margin: 0;
+}
+
+/* =====================================================
+   AUTH GATE FORM
+   ===================================================== */
+
+.auth-gate-form {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+
+/* Form Field */
+.auth-gate-form .form-field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 1vw, 8px);
+}
+
+.auth-gate-form label {
+  position: static;
+  display: block;
+  margin-bottom: var(--space-1);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium, 500);
+  font-size: var(--font-size-sm, 0.875rem);
+}
+
+/* =====================================================
+   AUTH FORM INPUTS
+   ===================================================== */
+
+.auth-gate-form .form-input,
+.auth-gate .form-input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border-primary);
+  font-size: var(--font-size-base, 1rem);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: all var(--transition-fast);
+  min-height: var(--space-6);
+}
+
+.auth-gate-form .form-input:focus,
+.auth-gate .form-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.auth-gate-form .form-input::placeholder,
+.auth-gate .form-input::placeholder {
+  color: var(--color-text-tertiary);
+  opacity: 0.7;
+}
+
+/* Password Input Wrapper */
+.auth-gate .password-input-wrapper,
+.auth-gate .portal-password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-gate .password-input-wrapper input,
+.auth-gate .portal-password-wrapper input {
+  padding-right: var(--space-6);
+}
+
+/* Password Toggle Button */
+.auth-gate .password-toggle,
+.auth-gate .portal-password-toggle {
+  position: absolute;
+  right: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-0-5);
+  transition: color var(--transition-fast);
+  color: var(--color-text-secondary);
+}
+
+.auth-gate .password-toggle:hover,
+.auth-gate .portal-password-toggle:hover {
+  color: var(--color-accent);
+}
+
+/* =====================================================
+   AUTH ERROR STATES
+   ===================================================== */
+
+.auth-gate .auth-error {
+  display: none;
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-2);
+  padding: var(--space-1-5);
+  background-color: transparent;
+  border: var(--border-width) solid var(--color-danger);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+}
+
+.auth-gate .auth-error:not(:empty) {
+  display: block;
+}
+
+.auth-gate-form .form-input.error {
+  border-color: var(--color-danger);
+}
+
+.auth-gate-form .error-message {
+  display: none;
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-0-5);
+  font-weight: var(--font-weight-medium);
+}
+
+.auth-gate-form .error-message:not(:empty) {
+  display: block;
+}
+
+/* =====================================================
+   AUTH SUBMIT BUTTON
+   Uses .btn-auth from shared/portal-buttons.css
+   ===================================================== */
+
+.auth-gate .auth-submit,
+.auth-gate-form .auth-submit {
+  width: 100%;
+  padding: var(--space-1-5) var(--space-3);
+  border: var(--portal-btn-border-width, 2px) solid currentColor;
+  border-bottom-width: var(--portal-btn-border-bottom-width, 6px);
+  border-radius: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  font-family: var(--font-family-mono);
+  letter-spacing: var(--letter-spacing-wider);
+  transition: all var(--transition-fast);
+  text-transform: uppercase;
+  background-color: inherit;
+  color: inherit;
+  margin-top: var(--space-2);
+}
+
+.auth-gate .auth-submit:hover,
+.auth-gate .auth-submit.active {
+  background-color: var(--color-accent);
+  color: var(--color-bg-tertiary);
+  border-color: var(--color-accent);
+}
+
+.auth-gate .auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading state */
+.auth-gate .auth-submit.loading .btn-text {
+  display: none;
+}
+
+.auth-gate .auth-submit.loading .btn-loader {
+  display: inline-block;
+}
+
+.auth-gate .auth-submit .btn-loader {
+  display: none;
+}
+
+/* =====================================================
+   AUTH FOOTER - Links
+   ===================================================== */
+
+.auth-gate-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.auth-link {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  transition: color var(--transition-fast);
+}
+
+.auth-link:hover {
+  color: var(--color-accent);
+}
+
+.auth-divider {
+  color: var(--color-text-tertiary);
+}
+
+/* =====================================================
+   AUTOFILL OVERRIDE - Keep dark background
+   ===================================================== */
+
+.auth-gate .form-input:-webkit-autofill,
+.auth-gate .form-input:-webkit-autofill:hover,
+.auth-gate .form-input:-webkit-autofill:focus,
+.auth-gate .form-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--color-bg-primary) inset !important;
+  -webkit-text-fill-color: var(--color-text-primary) !important;
+  background-color: var(--color-bg-primary) !important;
+  caret-color: var(--color-text-primary) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* =====================================================
+   RESPONSIVE - Mobile
+   ===================================================== */
+
+@media (--compact-mobile) {
+  .auth-gate {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .auth-gate-container {
+    max-width: 100%;
+    width: 100%;
+    padding: var(--space-3);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .auth-gate-logo {
+    width: 60px;
+    height: 60px;
+  }
+
+  .auth-gate-header h1 {
+    font-size: var(--font-size-xl, 1.25rem);
+  }
+
+  .auth-gate-header p {
+    font-size: var(--font-size-sm, 0.875rem);
+  }
+}
+
+@media (--mobile) {
+  .auth-gate-form {
+    gap: 1rem;
+  }
+}
+
+@media (--small-mobile) {
+  .auth-gate-container {
+    padding: var(--space-2);
+  }
+}
+
+/* =====================================================
+   HEADER Z-INDEX - Must appear above auth gate overlay
+   ===================================================== */
+
+body[data-page="admin"] .header,
+body[data-page="admin"] .admin-header,
+body[data-page="client-portal"] .header {
+  z-index: calc(var(--z-index-portal-overlay, 9500) + 200);
+}
+
+/* =====================================================
+   DASHBOARD HIDDEN STATE - Before authentication
+   ===================================================== */
+
+body[data-page="admin"] #admin-dashboard.hidden,
+body[data-page="client-portal"] #client-dashboard.hidden {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
+
+/* =====================================================
+   AUTH ERROR - Standalone (outside .auth-gate context)
+   ===================================================== */
+
+.auth-error {
+  background: rgba(var(--color-error-rgb), 0.1);
+  border: var(--border-width) solid rgba(var(--color-error-rgb), 0.3);
+  color: var(--color-danger);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+.auth-error:empty {
+  display: none;
+}
+
+/* =====================================================
+   CLIENT PORTAL - NAV/FOOTER VISIBILITY (logged-out state)
+   ===================================================== */
+
+body[data-page="client-portal"]:not(.portal-logged-in) .nav-logo-row {
+  color: var(--color-nav-text);
+}
+
+body[data-page="client-portal"]:not(.portal-logged-in) .theme-button,
+body[data-page="client-portal"]:not(.portal-logged-in) .menu-button {
+  color: var(--color-nav-text);
+}
+
+body[data-page="client-portal"]:not(.portal-logged-in) .nav-logo-row:hover,
+body[data-page="client-portal"]:not(.portal-logged-in) .theme-button:hover,
+body[data-page="client-portal"]:not(.portal-logged-in) .menu-button:hover {
+  color: var(--color-accent);
+}
+
+/* Footer visible on login page */
+body[data-page="client-portal"]:not(.portal-logged-in) .client-footer {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--footer-height, 40px);
+  background: var(--color-neutral-300);
+  padding: var(--space-2) 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-nav-text);
+  text-align: center;
+  z-index: var(--z-index-50);
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hide footer and nav overlay after login */
+body.portal-logged-in[data-page="client-portal"] .client-footer,
+body.portal-logged-in[data-page="client-portal"] .nav-overlay {
+  display: none;
+}
+
+/* =====================================================
+   SET PASSWORD PAGE - Client portal
+   ===================================================== */
+
+.set-password-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 2rem);
+}
+
+.set-password-container {
+  width: 100%;
+  max-width: min(500px, 90vw);
+}
+
+.set-password-card {
+  border: var(--border-width) solid var(--color-border-primary);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.set-password-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.set-password-header h1 {
+  font-family: var(--font-family-mono);
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.set-password-subtitle {
+  color: var(--color-text-secondary);
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+  margin: 0;
+}
+
+.set-password-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.set-password-form .btn-full {
+  width: 100%;
+}
