@@ -67,14 +67,14 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
   display: inline-flex;
   align-items: center;
   gap: var(--dropdown-caret-gap);
-  min-width: var(--portal-dropdown-min-width, var(--status-dropdown-width));
+  min-width: var(--portal-dropdown-min-width);
 }
 
 /* All Radix PortalDropdown triggers (asChild pattern) get minimum width.
    This catches btn-unstyled+badge triggers that don't have .dropdown-trigger.
    Excludes icon-only triggers (.icon-btn) and notification bell. */
 .portal [aria-haspopup="menu"]:not(.icon-btn):not(.notification-bell-btn) {
-  min-width: var(--portal-dropdown-min-width, var(--status-dropdown-width));
+  min-width: var(--portal-dropdown-min-width);
 }
 
 /* Badge child stretches to fill the trigger so closed width = open dropdown width */
@@ -170,8 +170,8 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
 /* Dropdown content: exact trigger width (open = closed).
    min-width matches trigger floor so both are always the same size. */
 .portal-dropdown-content {
-  width: var(--radix-dropdown-menu-trigger-width, var(--portal-dropdown-min-width, var(--status-dropdown-width)));
-  min-width: var(--portal-dropdown-min-width, var(--status-dropdown-width));
+  width: var(--radix-dropdown-menu-trigger-width, var(--portal-dropdown-min-width));
+  min-width: var(--portal-dropdown-min-width);
 }
 
 /* Remove top border when positioned below trigger - seamless connection.

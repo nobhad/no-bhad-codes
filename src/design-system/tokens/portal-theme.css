@@ -272,6 +272,7 @@ body[data-page="client-portal"] {
   --dropdown-padding-y: var(--space-1);
   --dropdown-item-height: var(--space-4);       /* 32px — fixed-height dropdown rows */
   --status-dropdown-width: var(--space-20); /* 160px */
+  --portal-dropdown-min-width: var(--status-dropdown-width); /* default trigger min-width */
 
   /* ----------------------------------------
    * OPACITY TOKENS
