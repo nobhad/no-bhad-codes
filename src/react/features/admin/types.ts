@@ -456,6 +456,83 @@ export const INVOICE_STATUS_CONFIG: Record<InvoiceStatus, { label: string; varia
 };
 
 // ============================================================================
+// PAYMENT INSTALLMENT TYPES
+// ============================================================================
+
+/**
+ * Payment installment status values
+ */
+export type PaymentInstallmentStatus = 'pending' | 'paid' | 'overdue' | 'cancelled';
+
+/**
+ * Payment installment status display configuration
+ */
+export const PAYMENT_INSTALLMENT_STATUS_CONFIG: Record<
+  PaymentInstallmentStatus,
+  { label: string; variant: string }
+> = {
+  pending: { label: 'Pending', variant: 'pending' },
+  paid: { label: 'Paid', variant: 'completed' },
+  overdue: { label: 'Overdue', variant: 'cancelled' },
+  cancelled: { label: 'Cancelled', variant: 'cancelled' }
+};
+
+/**
+ * Payment method display labels
+ */
+export const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  check: 'Check',
+  card: 'Card',
+  ach: 'ACH',
+  cash: 'Cash',
+  other: 'Other'
+};
+
+// ============================================================================
+// CONTENT REQUEST TYPES
+// ============================================================================
+
+/**
+ * Content request item status values
+ */
+export type ContentRequestItemStatus = 'pending' | 'submitted' | 'revision_needed' | 'accepted';
+
+/**
+ * Content request item status display configuration
+ */
+export const CONTENT_REQUEST_ITEM_STATUS_CONFIG: Record<
+  ContentRequestItemStatus,
+  { label: string; variant: string }
+> = {
+  pending: { label: 'Pending', variant: 'pending' },
+  submitted: { label: 'Submitted', variant: 'active' },
+  revision_needed: { label: 'Revision Needed', variant: 'warning' },
+  accepted: { label: 'Accepted', variant: 'completed' }
+};
+
+/**
+ * Content type display labels
+ */
+export const CONTENT_TYPE_LABELS: Record<string, string> = {
+  text: 'Text',
+  file: 'File',
+  url: 'URL',
+  structured: 'Structured Data'
+};
+
+/**
+ * Content category display labels
+ */
+export const CONTENT_CATEGORY_LABELS: Record<string, string> = {
+  copy: 'Copy/Writing',
+  photo: 'Photo',
+  brand_asset: 'Brand Asset',
+  credentials: 'Credentials',
+  reference: 'Reference',
+  other: 'Other'
+};
+
+// ============================================================================
 // PROJECT DETAIL TYPES
 // ============================================================================
 

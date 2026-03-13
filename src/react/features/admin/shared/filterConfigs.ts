@@ -11,11 +11,15 @@ import {
   INVOICE_STATUS_CONFIG,
   LEAD_STATUS_CONFIG,
   CLIENT_STATUS_CONFIG,
+  PAYMENT_INSTALLMENT_STATUS_CONFIG,
+  CONTENT_REQUEST_ITEM_STATUS_CONFIG,
   configToFilterOptions,
   labelsToFilterOptions,
   LEAD_SOURCE_LABELS,
   PROJECT_TYPE_LABELS,
-  CLIENT_TYPE_LABELS
+  CLIENT_TYPE_LABELS,
+  CONTENT_TYPE_LABELS,
+  CONTENT_CATEGORY_LABELS
 } from '../types';
 
 export interface FilterOption {
@@ -379,4 +383,42 @@ export const EMAIL_TEMPLATES_FILTER_CONFIG: FilterConfig[] = [
 export const TASKS_FILTER_CONFIG: FilterConfig[] = [
   { key: 'status', label: 'STATUS', options: TASK_STATUS_OPTIONS },
   { key: 'priority', label: 'PRIORITY', options: TASK_PRIORITY_OPTIONS }
+];
+
+// ============================================
+// PAYMENT SCHEDULE FILTER OPTIONS
+// ============================================
+
+export const PAYMENT_INSTALLMENT_STATUS_OPTIONS: FilterOption[] = [
+  STATUS_ALL_OPTION,
+  ...configToFilterOptions(PAYMENT_INSTALLMENT_STATUS_CONFIG)
+];
+
+export const PAYMENT_SCHEDULES_FILTER_CONFIG: FilterConfig[] = [
+  { key: 'status', label: 'STATUS', options: PAYMENT_INSTALLMENT_STATUS_OPTIONS }
+];
+
+// ============================================
+// CONTENT REQUEST FILTER OPTIONS
+// ============================================
+
+export const CONTENT_REQUEST_ITEM_STATUS_OPTIONS: FilterOption[] = [
+  STATUS_ALL_OPTION,
+  ...configToFilterOptions(CONTENT_REQUEST_ITEM_STATUS_CONFIG)
+];
+
+export const CONTENT_TYPE_OPTIONS: FilterOption[] = [
+  TYPE_ALL_OPTION,
+  ...labelsToFilterOptions(CONTENT_TYPE_LABELS)
+];
+
+export const CONTENT_CATEGORY_OPTIONS: FilterOption[] = [
+  { value: 'all', label: 'All Categories' },
+  ...labelsToFilterOptions(CONTENT_CATEGORY_LABELS)
+];
+
+export const CONTENT_REQUESTS_FILTER_CONFIG: FilterConfig[] = [
+  { key: 'status', label: 'STATUS', options: CONTENT_REQUEST_ITEM_STATUS_OPTIONS },
+  { key: 'content_type', label: 'TYPE', options: CONTENT_TYPE_OPTIONS },
+  { key: 'category', label: 'CATEGORY', options: CONTENT_CATEGORY_OPTIONS }
 ];
