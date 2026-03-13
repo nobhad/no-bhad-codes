@@ -65,6 +65,8 @@ body[data-page="client-portal"] {
   --color-bg-elevated:  var(--color-bg-primary);
   --color-bg-prominent: var(--color-bg-primary);
   --color-bg-readonly:  var(--color-bg-primary);
+  /* Active/pressed state — slightly stronger than hover */
+  --color-bg-active: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 15%);
 
   /* ----------------------------------------
    * BORDER SYSTEM — derived from primaries
@@ -172,6 +174,7 @@ body[data-page="client-portal"] {
    * ---------------------------------------- */
   --field-label-value-gap: calc(var(--space-px) * 2); /* 2px */
   --field-group-gap: var(--space-1-5); /* 12px */
+  --portal-field-group-gap: var(--field-group-gap); /* alias — used in project-detail and modal layouts */
   /* Left padding for inputs with a positioned icon inside */
   --input-icon-offset: calc(var(--icon-size-md) + var(--space-2-5)); /* icon + gap = ~36px */
 
@@ -469,6 +472,26 @@ body[data-page="client-portal"] {
   --btn-portal-hover-bg: var(--color-text-primary);
   --btn-portal-hover-color: var(--color-bg-primary);
   --btn-portal-hover-border: var(--color-text-primary);
+
+  /* ----------------------------------------
+   * DROPDOWN COMPONENT DEFAULTS
+   * Context variables — override per-component via selector scope.
+   * Defaults provide safe fallback when no context is set.
+   * ---------------------------------------- */
+  --dropdown-bg: var(--color-bg-secondary);
+  --dropdown-border-color: var(--color-border-primary);
+  --dropdown-border-width: var(--border-width);
+  --dropdown-radius: var(--border-radius-sm);
+
+  /* ----------------------------------------
+   * UTILITY ALIASES
+   * Map non-standard token names used in component CSS.
+   * ---------------------------------------- */
+  --portal-bg: var(--color-bg-primary);                  /* background context alias */
+  --ring: var(--focus-ring-color);                        /* Tailwind ring utility alias */
+  --font-mono: var(--font-family-mono);                   /* shorthand alias */
+  --card-grid-gap: var(--space-4);                        /* configurable grid gap default */
+  --table-mobile-identity-tertiary-size: var(--font-size-2xs); /* compact mobile table text */
 }
 
 /* ============================================

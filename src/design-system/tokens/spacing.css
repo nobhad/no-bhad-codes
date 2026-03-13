@@ -18,6 +18,7 @@
   /* Fixed Spacing Scale */
   --space-0: 0;
   --space-px: 1px;
+  --space-0-25: calc(var(--space-base) * 0.25); /* 2px */
   --space-0-5: calc(var(--space-base) * 0.5); /* 4px */
   --space-1: var(--space-base); /* 8px */
   --space-1-5: calc(var(--space-base) * 1.5); /* 12px */
@@ -26,6 +27,7 @@
   --space-3: calc(var(--space-base) * 3); /* 24px */
   --space-3-5: calc(var(--space-base) * 3.5); /* 28px */
   --space-4: calc(var(--space-base) * 4); /* 32px */
+  --space-4-5: calc(var(--space-base) * 4.5); /* 36px */
   --space-5: calc(var(--space-base) * 5); /* 40px */
   --space-6: calc(var(--space-base) * 6); /* 48px */
   --space-7: calc(var(--space-base) * 7); /* 56px */
