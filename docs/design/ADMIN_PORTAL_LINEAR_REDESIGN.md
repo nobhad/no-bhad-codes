@@ -6,6 +6,14 @@
 
 **Last Updated:** 2026-02-17
 
+> **Architecture Note (March 2026):** The admin is now a React SPA. `src/features/admin/admin-dashboard.ts`
+> was deleted on March 7, 2026. Tab navigation and keyboard shortcuts are handled by React Router
+> (`PortalRoutes.tsx`) and React components in `src/react/features/admin/`. The CSS implementation
+> (shadow removal, typography, spacing) documented below remains valid. The TypeScript file references
+> in the "Files Modified" table reflect the original implementation; the command palette and keyboard
+> help panel now operate within the React context. See
+> [PORTAL_ARCHITECTURE.md](../features/PORTAL_ARCHITECTURE.md) for the current architecture.
+
 ---
 
 ## Implementation Status Summary
@@ -31,7 +39,7 @@
 | Navigate up/down | `↑↓` or `J/K` | `J/K` in tables, `↑↓` in palette | ✅ |
 | Open item | `Enter` | Opens selected row/item | ✅ |
 | Go back | `Escape` | Closes palette/modal | ✅ |
-| Tab navigation | `1-9` | Sidebar shortcuts | ✅ |
+| Tab navigation | `1-9` | Sidebar shortcuts (React Router navigation) | ✅ |
 | Close modal | `Escape` | All modals | ✅ |
 | Select row | `X` or `Space` | Toggle selection | ✅ |
 | Bulk select | `Shift+Click` | Range selection | ✅ |
@@ -213,8 +221,7 @@ All tables (Clients, Projects, Invoices, Leads, Contracts):
 
 | File | Changes |
 |------|---------|
-| `src/features/admin/admin-dashboard.ts` | Keyboard nav, mobile drawer, help panel init |
-| `src/features/admin/admin-dashboard.ts` | Keyboard navigation (J/K) integrated |
+| `src/features/admin/admin-dashboard.ts` | Keyboard nav, mobile drawer, help panel init — **deleted March 7, 2026; admin is now React SPA** |
 | `src/components/command-palette.ts` | ⌘K palette |
 | `src/components/keyboard-help.ts` | `?` shortcut help panel |
 

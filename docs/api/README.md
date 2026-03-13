@@ -1,0 +1,105 @@
+# API Documentation Index
+
+Full API reference is in [`/docs/API_DOCUMENTATION.md`](../API_DOCUMENTATION.md).
+
+## Authentication
+
+The API uses HttpOnly JWT cookies for authentication.
+
+- Cookies are set automatically on login; all requests must include `credentials: 'include'`
+- `getAuthToken()` always returns `null` — token access from JavaScript is intentionally blocked (HttpOnly)
+- Bearer token header is supported as a fallback for API clients that cannot use cookies
+- Admin tokens expire in 1 hour; client tokens expire in 7 days
+
+See the [Authentication section](../API_DOCUMENTATION.md#authentication) in the full reference for cookie
+properties and the JWT payload structure.
+
+## Quick-Reference Index
+
+### Authentication
+
+- `POST /auth/login` — Authenticate and receive HttpOnly cookie
+- `POST /auth/logout` — Clear auth cookie
+- `GET /auth/me` — Get current user info
+
+### Admin
+
+- `GET /admin/stats` — Dashboard statistics
+- `GET /admin/activity` — Recent activity feed
+- `GET /admin/leads` — Lead management
+- `GET /admin/clients` — Client list
+- `GET /admin/projects` — Project list
+
+### Client Self-Service (`/clients/me/...`)
+
+- `GET /clients/me/dashboard` — Dashboard data (projects, stats, action items)
+- `GET /clients/me/projects` — Client's projects
+- `GET /clients/me/messages` — Message threads
+- `GET /clients/me/files` — Uploaded files
+- `GET /clients/me/invoices` — Invoice history
+
+### Client Management (Admin)
+
+- `GET /clients` — All clients
+- `POST /clients` — Create client
+- `GET /clients/:id` — Client detail
+- `PUT /clients/:id` — Update client
+- `DELETE /clients/:id` — Delete client
+
+### Project Management
+
+- `GET /projects` — All projects
+- `POST /projects` — Create project
+- `GET /projects/:id` — Project detail
+- `PUT /projects/:id` — Update project
+- `GET /projects/:id/milestones` — Project milestones
+- `GET /projects/:id/tasks` — Project tasks
+
+### File Management
+
+- `POST /uploads/single` — Upload a single file
+- `POST /uploads/multiple` — Upload up to 5 files
+- `POST /uploads/avatar` — Upload avatar (images only)
+- `POST /uploads/project/:projectId` — Upload project files
+- `GET /files` — List files
+- `DELETE /files/:id` — Delete file
+
+### Messaging
+
+- `GET /messages/threads` — List message threads
+- `POST /messages/threads` — Create thread
+- `GET /messages/threads/:id` — Thread messages
+- `POST /messages/threads/:id/messages` — Send message
+
+### Invoices
+
+- `GET /invoices` — All invoices
+- `POST /invoices` — Create invoice
+- `GET /invoices/:id` — Invoice detail
+- `PUT /invoices/:id` — Update invoice
+- `POST /invoices/:id/payments` — Record payment
+
+### Proposals
+
+- `GET /proposals` — All proposals
+- `POST /proposals` — Create proposal
+- `GET /proposals/:id` — Proposal detail
+- `POST /proposals/:id/sign` — Sign proposal
+
+### Analytics
+
+- `GET /analytics/overview` — Business overview metrics
+- `GET /analytics/revenue` — Revenue breakdown
+- `GET /analytics/projects` — Project statistics
+
+### Other Feature Areas
+
+- Questionnaires: `GET/POST /questionnaires`
+- Document Requests: `GET/POST /document-requests`
+- Ad Hoc Requests: `GET/POST /adhoc-requests`
+- Knowledge Base: `GET/POST /knowledge-base`
+- Contracts: `GET/POST /contracts`
+- Receipts: `GET /receipts`
+- Workflows: `GET/POST /workflows`
+
+See [`API_DOCUMENTATION.md`](../API_DOCUMENTATION.md) for full request/response schemas.

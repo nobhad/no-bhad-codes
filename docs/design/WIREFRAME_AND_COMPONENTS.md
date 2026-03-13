@@ -26,7 +26,7 @@ Design and front-end changes are applied **directly to the main site** (admin an
 - **Navigation is unchanged:** sidebar tabs, tab content, mobile menu, and all existing behavior keep working.
 - Uses current structure and shared layout; no separate wireframe pages.
 
-**What it shows:** The same UI as the main site (shared tabs, sidebar badge, navigation). See `docs/current_work.md` “Front-end work (on main site)” for the full list.
+**What it shows:** The same UI as the main site (shared tabs, sidebar badge, navigation). See `CURRENT_WORK.md` at the repository root for the current task list.
 
 ### Technical details
 
@@ -64,9 +64,9 @@ Below is what **should** be reusable components (or shared modules) but currentl
 
 ### 4. **Tab content switching**
 
-- **Admin:** `AdminDashboard.switchTab()` in `admin-dashboard.ts`; toggles `.tab-content.active` and `.sidebar-buttons .btn[data-tab].active`.
+- **Admin:** React Router (`<Link>`, `useNavigate()`) in `PortalRoutes.tsx`; admin feature components live in `src/react/features/admin/`. Navigation is hash-based React Router, not DOM tab toggling.
 - **Client:** `switchTab()` in `portal-navigation.ts`; same idea with different tab IDs and callbacks.
-- **Implemented:** `setupTabRouter(config)` in `src/components/tab-router.ts`; both portals can use it for main tab DOM + `onChange(tabName)` for data loading. Horizontal tab strips (project detail, client detail) share `shared/portal-tabs.css` (`.portal-tabs`, `.portal-tab-panel`).
+- **Implemented:** `setupTabRouter(config)` in `src/components/tab-router.ts`; client portal can use it for main tab DOM + `onChange(tabName)` for data loading. Admin uses React Router navigation. Horizontal tab strips (project detail, client detail) share `shared/portal-tabs.css` (`.portal-tabs`, `.portal-tab-panel`).
 
 ### 5. **Tables (admin)**
 
@@ -100,7 +100,7 @@ Below is what **should** be reusable components (or shared modules) but currentl
 
 ### 10. **Message bubbles / thread UI**
 
-- **Admin:** Message HTML built in `admin-dashboard.ts`, `admin-messaging.ts`, and `admin-messaging.renderer.ts` (avatar, header, body).
+- **Admin:** Message thread UI is rendered by the React component at `src/react/features/admin/project-detail/tabs/MessagesTab.tsx`.
 - **Client:** Message HTML in portal template and in messages module.
 - **Gap:** Same “message row” pattern (avatar, sender, time, body) in multiple places. A **MessageBubble** or **ThreadMessage** component would reduce duplication and keep layout/aria consistent.
 
@@ -113,31 +113,31 @@ Below is a scan of **admin and client portals** for patterns that **should be re
 ### 11. **Primary header row (toggle + breadcrumbs)**
 
 - **Pattern:** One shared row at top of content: sidebar toggle button + breadcrumb nav. Per-tab content then has only `.page-title` (e.g. `<h2>`).
-- **Where:** `admin/index.html` and `client/portal.html` each have a single `.page-header.primary-header-row` with `.header-sidebar-toggle.header-toggle-button` and `#breadcrumb-list`. Breadcrumbs are updated in JS (admin: `admin-dashboard.ts`; client: `portal-navigation.ts`).
-- **Gap:** Structure is duplicated in two HTML files; no shared **PrimaryHeader** component or template. Shared CSS in `client-portal/layout.css`. A shared factory could render the row from config (tabs/breadcrumb callback) so both portals use one implementation.
+- **Where:** Admin uses the React `PortalHeader.tsx` component (`src/react/app/PortalHeader.tsx`). Client portal uses `client/portal.html` with a `.page-header.primary-header-row` containing `.header-sidebar-toggle.header-toggle-button` and `#breadcrumb-list`; breadcrumbs updated in `portal-navigation.ts`.
+- **Gap:** Header structure differs between admin (React) and client portal (HTML + JS). Shared CSS in `client-portal/layout.css`. The React admin header is a natural reuse point for any future React-based client header.
 
 ### 12. **Empty states**
 
 - **Pattern:** “No X yet”, “Loading…”, “No data” messages inside list/table containers. Classes: `.empty-state`, `.no-files`, `.no-projects`, `.loading-row`, `.report-empty`.
-- **Where:** Many modules set `container.innerHTML = '<p class="empty-state">...'` or similar: `admin-project-details.ts`, `admin-client-details.ts`, `admin-clients.ts`, `admin-analytics.ts`, `admin-dashboard.ts`, `portal-files.ts`, `client-portal.ts`, etc. Also in HTML: `admin/index.html` (e.g. “No custom fields configured”, “No invoices found”).
+- **Where:** Many modules set `container.innerHTML = '<p class=”empty-state”>...'` or similar: `admin-project-details.ts`, `admin-client-details.ts`, `admin-clients.ts`, `admin-analytics.ts`, `portal-files.ts`, `client-portal.ts`, etc. Admin React components in `src/react/features/admin/` also render empty states inline.
 - **Gap:** No **EmptyState** component. A small factory `createEmptyState(message, options?: { icon?, ctaLabel?, ctaHref? })` would standardize copy, styling, and optional CTA.
 
 ### 13. **Status badges**
 
 - **Pattern:** `<span class="status-badge status-${variant}">...</span>`. Variants: status (active, pending, etc.), health (healthy, at-risk, critical), sidebar count, contract (signed, pending, not-signed).
-- **Where:** Built by hand in: `admin-project-details.ts`, `admin-clients.ts`, `admin-client-details.ts`, `admin-dashboard.ts`, `client-portal.ts`, `table-filter.ts` (filter count badge). Shared CSS: `shared/portal-badges.css`, `admin/client-detail.css`, `admin/project-detail.css`.
+- **Where:** Built by hand in: `admin-project-details.ts`, `admin-clients.ts`, `admin-client-details.ts`, `client-portal.ts`, `table-filter.ts` (filter count badge), and inline in React components under `src/react/features/admin/`. Shared CSS: `shared/portal-badges.css`, `admin/client-detail.css`, `admin/project-detail.css`.
 - **Gap:** No **StatusBadge** component. A `renderStatusBadge(label, variant)` (or similar) would ensure consistent markup and class names and make redesigns (e.g. badge clarity) one-place.
 
 ### 14. **Detail / meta cards (label + value rows)**
 
 - **Pattern:** Card with `.overview-header` (title + optional icon button) and rows of `.meta-item` (`.field-label` + `.meta-value`), e.g. Client, Company, Email, Status. Same structure for project detail, client detail, lead detail, contact detail.
-- **Where:** `admin-project-details.ts` (project overview), `admin-client-details.ts` (client overview, CRM section), `admin-leads.ts` (lead details panel), `admin-contacts.ts` (contact details), `admin/index.html` (static shells). Client: `portal-projects.ts`, project cards.
+- **Where:** `admin-project-details.ts` (project overview), `admin-client-details.ts` (client overview, CRM section), `admin-leads.ts` (lead details panel), `admin-contacts.ts` (contact details). Admin detail views are also rendered by React components in `src/react/features/admin/` (e.g. `ClientDetail.tsx`, `ProjectDetail.tsx`). Client: `portal-projects.ts`, project cards.
 - **Gap:** No **DetailCard** or **MetaGrid** component. Each feature builds `.project-detail-overview`, `.meta-item` HTML manually. A factory `createDetailCard({ title, editAction?, rows: { label, value }[] })` would unify structure and accessibility.
 
 ### 15. **Form modals (edit / add dialogs)**
 
 - **Pattern:** Overlay + modal with title, form body, Cancel/Submit. Close on overlay click, Escape; focus trap; `modal-open` on body.
-- **Where:** Implemented ad-hoc in many places: `admin-project-details.ts` (edit project), `admin-project-details.ts` (create invoice), `admin-clients.ts` (edit client info, edit billing, add client), `admin-projects.ts` (edit project, add project, file preview modal), `admin-tasks.ts` (task detail, create task, edit task), `admin-time-tracking.ts` (log time, edit time), `admin-files.ts` (file detail), `admin-proposals.ts` (template editor), `admin-dashboard.ts` (contact submission detail). Each implements its own overlay, close handlers, and often `manageFocusTrap`.
+- **Where:** Implemented ad-hoc in many places: `admin-project-details.ts` (edit project), `admin-project-details.ts` (create invoice), `admin-clients.ts` (edit client info, edit billing, add client), `admin-projects.ts` (edit project, add project, file preview modal), `admin-tasks.ts` (task detail, create task, edit task), `admin-time-tracking.ts` (log time, edit time), `admin-files.ts` (file detail), `admin-proposals.ts` (template editor). React admin components in `src/react/features/admin/` use their own modal patterns. Each implements its own overlay, close handlers, and often `manageFocusTrap`.
 - **Gap:** **ModalComponent** exists but is not used. Every form modal reimplements overlay + close + focus. A **FormModal** wrapper (or adoption of `ModalComponent`) with consistent title/body/footer and `onClose`/`onSubmit` would reduce duplication and standardize a11y.
 
 ### 16. **Icon buttons**
@@ -149,7 +149,7 @@ Below is a scan of **admin and client portals** for patterns that **should be re
 ### 17. **Table loading / error states**
 
 - **Pattern:** “Loading…”, “No X found”, “Error loading…” rows or full-table replacement. `showTableLoading`, `showTableError`, `.loading-row`.
-- **Where:** `admin-clients.ts`, `admin-leads.ts`, `admin-projects.ts`, `admin-contacts.ts`, `admin-analytics.ts`, `admin-dashboard.ts`, etc. Each module calls `showTableLoading(tableBody, n)` or sets `innerHTML` with loading/error message.
+- **Where:** `admin-clients.ts`, `admin-leads.ts`, `admin-projects.ts`, `admin-contacts.ts`, `admin-analytics.ts`, etc. Each module calls `showTableLoading(tableBody, n)` or sets `innerHTML` with loading/error message. React admin components handle their own loading/empty/error states.
 - **Gap:** Utilities exist (`loading-utils.ts`) but no shared **TableState** component for “loading | empty | error” that slots into `.admin-table-container`. Standardizing would keep messaging and layout consistent.
 
 ### 18. **Confirm / alert dialogs**
@@ -178,7 +178,7 @@ The following are now **reusable** and available for admin and client portals. W
 
 |Area|Implementation|Usage|
 |-----------------|----------------|-------|
-|**Breadcrumbs**|`src/components/breadcrumbs.ts`: `renderBreadcrumbs(container, items)`, `BreadcrumbItem`|Client portal: `portal-navigation.ts` uses it. Admin: `admin-dashboard.ts` uses it in `updateAdminBreadcrumbs()` for section + project name.|
+|**Breadcrumbs**|`src/components/breadcrumbs.ts`: `renderBreadcrumbs(container, items)`, `BreadcrumbItem`|Client portal: `portal-navigation.ts` uses it. Admin: React `PortalHeader.tsx` handles admin navigation; vanilla breadcrumbs no longer used in admin.|
 |**Tab switching**|`src/components/tab-router.ts`: `setupTabRouter(config)` with `buttonSelector`, `contentIdPrefix`, `onChange`|Available for admin and client; portals can call it to share tab DOM logic.|
 |**Stat cards**|`src/components/quick-stats.ts`: `createQuickStats(items)`, `QuickStatItem`|Factory for `.quick-stats` grid; use when building tabs dynamically.|
 |**Recent activity**|`src/components/recent-activity.ts`: `createRecentActivity(items, title?, listId?)`, `RecentActivityItem`|Factory for `.recent-activity` block; use when building tabs dynamically.|
