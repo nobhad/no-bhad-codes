@@ -16,6 +16,7 @@ import { apiFetch, unwrapApiData, getCsrfToken, CSRF_HEADER_NAME } from '@/utils
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { usePortalFetch } from '@react/hooks/usePortalFetch';
 import { TIMING } from '@/constants/timing';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 const logger = createLogger('usePortalMessages');
 
@@ -79,7 +80,7 @@ export function usePortalMessages({
       const data = await portalFetch<ThreadsResponse>(`${API_ENDPOINTS.MESSAGES}/threads`);
       setThreads(data.threads ?? []);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to load threads';
+      const message = formatErrorMessage(error, 'Failed to load threads');
       setThreadsError(message);
     } finally {
       setThreadsLoading(false);
@@ -119,7 +120,7 @@ export function usePortalMessages({
           return;
         }
         if (!options?.silent) {
-          const message = error instanceof Error ? error.message : 'Failed to load messages';
+          const message = formatErrorMessage(error, 'Failed to load messages');
           setMessagesError(message);
         }
       } finally {

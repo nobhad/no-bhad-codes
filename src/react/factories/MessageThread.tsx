@@ -25,21 +25,13 @@ import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { LoadingState, EmptyState } from '@react/factories/StateDisplay';
 import { KEYS } from '@/constants/keyboard';
+import { MAX_FILE_SIZE, ALLOWED_MIME_TYPES, formatFileSize } from '@/utils/file-validation';
 
 // ============================================
 // CONSTANTS
 // ============================================
 
 const QUICK_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🙏'] as const;
-
-const DEFAULT_MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10MB
-const DEFAULT_ALLOWED_FILE_TYPES = [
-  'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'text/plain'
-];
 
 // ============================================
 // PUBLIC TYPES
@@ -118,12 +110,6 @@ function isSameDay(a: string, b: string): boolean {
   return new Date(a).toDateString() === new Date(b).toDateString();
 }
 
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 // ============================================
 // SUB-COMPONENTS
 // ============================================
@@ -197,8 +183,8 @@ export function MessageThread({
   showNotification,
   className,
   attachmentsEnabled = true,
-  maxAttachmentSize = DEFAULT_MAX_ATTACHMENT_SIZE,
-  allowedFileTypes = DEFAULT_ALLOWED_FILE_TYPES
+  maxAttachmentSize = MAX_FILE_SIZE,
+  allowedFileTypes = ALLOWED_MIME_TYPES
 }: MessageThreadProps) {
   const [draft, setDraft] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -389,13 +375,20 @@ export function MessageThread({
                       isContinuation && 'is-continuation'
                     )}
                   >
-                    {/* Avatar on last message in group, spacer otherwise */}
+                    {/* Avatar column: avatar + sender name below (last in group), spacer otherwise */}
                     {isLastInGroup ? (
-                      <div
-                        className={cn('msgtab-avatar', message.isOwn ? 'is-admin' : 'is-client')}
-                        aria-hidden="true"
-                      >
-                        {!message.isOwn && <User className="icon-md" />}
+                      <div className="msgtab-avatar-col">
+                        <div
+                          className={cn('msgtab-avatar', message.isOwn ? 'is-admin' : 'is-client')}
+                          aria-hidden="true"
+                        >
+                          {!message.isOwn && <User className="icon-md" />}
+                        </div>
+                        {!message.isOwn && (
+                          <span className="msgtab-sender">
+                            {message.senderName ?? 'Client'}
+                          </span>
+                        )}
                       </div>
                     ) : (
                       <div className="msgtab-avatar-spacer" aria-hidden="true" />
@@ -403,12 +396,6 @@ export function MessageThread({
 
                     {/* Content wrap */}
                     <div className={cn('msgtab-content-wrap', message.isOwn && 'is-admin')}>
-                      {/* Sender name — other messages, first in group */}
-                      {!message.isOwn && !isContinuation && (
-                        <span className="msgtab-sender">
-                          {message.senderName ?? 'Client'}
-                        </span>
-                      )}
 
                       {/* Bubble row: [inline actions] + [bubble-group] */}
                       <div className="msgtab-bubble-row">

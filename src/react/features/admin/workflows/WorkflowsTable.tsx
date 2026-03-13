@@ -37,11 +37,9 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
 import { WORKFLOW_STATUS_OPTIONS } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
-import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { apiPost } from '@/utils/api-client';
-
-const logger = createLogger('WorkflowsTable');
+import { executeUpdateWithToast, executeWithToast } from '@/utils/api-wrappers';
 
 interface Workflow {
   id: number;
@@ -190,45 +188,38 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
   );
 
   const updateWorkflowStatus = useCallback(async (workflowId: number, newStatus: string) => {
-    try {
-      const response = await apiPost(API_ENDPOINTS.ADMIN.WORKFLOWS_BULK_STATUS, { workflowIds: [workflowId], status: newStatus });
-      if (!response.ok) throw new Error('Failed to update workflow status');
-      setData((prev) =>
+    await executeUpdateWithToast(
+      'workflow status',
+      () => apiPost(API_ENDPOINTS.ADMIN.WORKFLOWS_BULK_STATUS, { workflowIds: [workflowId], status: newStatus }),
+      () => setData((prev) =>
         prev ? { ...prev, items: prev.items.map((w) =>
           w.id === workflowId ? { ...w, status: newStatus as Workflow['status'] } : w
         ) } : prev
-      );
-      showNotification?.('Workflow status updated', 'success');
-    } catch (err) {
-      logger.error('Failed to update workflow status:', err);
-      showNotification?.('Failed to update workflow status', 'error');
-    }
-  }, [showNotification, setData]);
+      )
+    );
+  }, [setData]);
 
   const handleBulkStatusChange = useCallback(async (newStatus: string) => {
     if (selection.selectedCount === 0) return;
 
     setBulkLoading(true);
-    try {
-      const workflowIds = Array.from(selection.selectedIds);
-      const response = await apiPost(API_ENDPOINTS.ADMIN.WORKFLOWS_BULK_STATUS, { workflowIds, status: newStatus });
-      if (!response.ok) throw new Error('Failed to update workflow statuses');
-      setData((prev) =>
-        prev ? { ...prev, items: prev.items.map((w) =>
-          selection.selectedIds.has(w.id)
-            ? { ...w, status: newStatus as Workflow['status'] }
-            : w
-        ) } : prev
-      );
-      selection.clearSelection();
-      showNotification?.(`Updated ${workflowIds.length} workflow${workflowIds.length !== 1 ? 's' : ''}`, 'success');
-    } catch (err) {
-      logger.error('Failed to bulk update status:', err);
-      showNotification?.('Failed to update workflows', 'error');
-    } finally {
-      setBulkLoading(false);
-    }
-  }, [selection, showNotification, setData]);
+    const workflowIds = Array.from(selection.selectedIds);
+    await executeWithToast(
+      () => apiPost(API_ENDPOINTS.ADMIN.WORKFLOWS_BULK_STATUS, { workflowIds, status: newStatus }),
+      { success: `Updated ${workflowIds.length} workflow${workflowIds.length !== 1 ? 's' : ''}`, error: 'Failed to update workflows' },
+      () => {
+        setData((prev) =>
+          prev ? { ...prev, items: prev.items.map((w) =>
+            selection.selectedIds.has(w.id)
+              ? { ...w, status: newStatus as Workflow['status'] }
+              : w
+          ) } : prev
+        );
+        selection.clearSelection();
+      }
+    );
+    setBulkLoading(false);
+  }, [selection, setData]);
 
   const handleBulkDelete = useCallback(async () => {
     if (selection.selectedCount === 0) return;
@@ -238,22 +229,19 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
     }
 
     setBulkLoading(true);
-    try {
-      const workflowIds = Array.from(selection.selectedIds);
-      const response = await apiPost(API_ENDPOINTS.ADMIN.WORKFLOWS_BULK_DELETE, { workflowIds });
-      if (!response.ok) throw new Error('Failed to delete workflows');
-      setData((prev) =>
-        prev ? { ...prev, items: prev.items.filter((w) => !selection.selectedIds.has(w.id)) } : prev
-      );
-      selection.clearSelection();
-      showNotification?.(`Deleted ${workflowIds.length} workflow${workflowIds.length !== 1 ? 's' : ''}`, 'success');
-    } catch (err) {
-      logger.error('Failed to bulk delete:', err);
-      showNotification?.('Failed to delete workflows', 'error');
-    } finally {
-      setBulkLoading(false);
-    }
-  }, [selection, showNotification, setData]);
+    const workflowIds = Array.from(selection.selectedIds);
+    await executeWithToast(
+      () => apiPost(API_ENDPOINTS.ADMIN.WORKFLOWS_BULK_DELETE, { workflowIds }),
+      { success: `Deleted ${workflowIds.length} workflow${workflowIds.length !== 1 ? 's' : ''}`, error: 'Failed to delete workflows' },
+      () => {
+        setData((prev) =>
+          prev ? { ...prev, items: prev.items.filter((w) => !selection.selectedIds.has(w.id)) } : prev
+        );
+        selection.clearSelection();
+      }
+    );
+    setBulkLoading(false);
+  }, [selection, setData]);
 
   const filterSections = WORKFLOWS_FILTER_CONFIG.map((config) => ({
     key: config.key,

@@ -38,11 +38,9 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
 import { PROPOSALS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
-import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
-
-const logger = createLogger('ProposalsTable');
+import { executeWithToast } from '@/utils/api-wrappers';
 
 interface Proposal {
   id: number;
@@ -193,77 +191,66 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
 
   // Status change handler
   const handleStatusChange = useCallback(async (proposalId: number, newStatus: string) => {
-    try {
-      const response = await apiFetch(buildEndpoint.adminProposal(proposalId), {
+    await executeWithToast(
+      () => apiFetch(buildEndpoint.adminProposal(proposalId), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
-      });
-
-      if (!response.ok) throw new Error('Failed to update proposal');
-
-      setData((prev) => prev ? {
-        ...prev,
-        items: prev.items.map((p) =>
-          p.id === proposalId
-            ? { ...p, status: newStatus as Proposal['status'] }
-            : p
-        )
-      } : prev);
-      showNotification?.('Proposal status updated', 'success');
-    } catch (err) {
-      logger.error('Failed to update proposal status:', err);
-      showNotification?.('Failed to update proposal status', 'error');
-    }
-  }, [showNotification, setData]);
+      }),
+      { success: 'Proposal status updated', error: 'Failed to update proposal status' },
+      () => {
+        setData((prev) => prev ? {
+          ...prev,
+          items: prev.items.map((p) =>
+            p.id === proposalId
+              ? { ...p, status: newStatus as Proposal['status'] }
+              : p
+          )
+        } : prev);
+      }
+    );
+  }, [setData]);
 
   const handleSendProposal = useCallback(async (proposalId: number) => {
-    try {
-      const response = await apiPost(buildEndpoint.adminProposalSend(proposalId));
-      if (!response.ok) throw new Error('Failed to send proposal');
-      setData((prev) => prev ? {
-        ...prev,
-        items: prev.items.map((p) =>
-          p.id === proposalId ? { ...p, status: 'sent' as const, sentAt: new Date().toISOString() } : p
-        )
-      } : prev);
-      showNotification?.('Proposal sent', 'success');
-    } catch (err) {
-      logger.error('Failed to send proposal:', err);
-      showNotification?.('Failed to send proposal', 'error');
-    }
-  }, [showNotification, setData]);
+    await executeWithToast(
+      () => apiPost(buildEndpoint.adminProposalSend(proposalId)),
+      { success: 'Proposal sent', error: 'Failed to send proposal' },
+      () => {
+        setData((prev) => prev ? {
+          ...prev,
+          items: prev.items.map((p) =>
+            p.id === proposalId ? { ...p, status: 'sent' as const, sentAt: new Date().toISOString() } : p
+          )
+        } : prev);
+      }
+    );
+  }, [setData]);
 
   const handleDuplicate = useCallback(async (proposalId: number) => {
-    try {
-      const response = await apiPost(buildEndpoint.adminProposalDuplicate(proposalId));
-      if (!response.ok) throw new Error('Failed to duplicate proposal');
-      refetch();
-      showNotification?.('Proposal duplicated', 'success');
-    } catch (err) {
-      logger.error('Failed to duplicate proposal:', err);
-      showNotification?.('Failed to duplicate proposal', 'error');
-    }
-  }, [showNotification, refetch]);
+    await executeWithToast(
+      () => apiPost(buildEndpoint.adminProposalDuplicate(proposalId)),
+      { success: 'Proposal duplicated', error: 'Failed to duplicate proposal' },
+      () => refetch()
+    );
+  }, [refetch]);
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
     if (selection.selectedCount === 0) return;
 
     const ids = selection.selectedItems.map((p) => p.id);
-    try {
-      const response = await apiPost(API_ENDPOINTS.ADMIN.PROPOSALS_BULK_DELETE, { proposalIds: ids });
-
-      if (!response.ok) throw new Error('Failed to delete proposals');
-
-      setData((prev) => prev ? { ...prev, items: prev.items.filter((p) => !ids.includes(p.id)) } : prev);
-      selection.clearSelection();
-      showNotification?.(`Deleted ${ids.length} proposal${ids.length !== 1 ? 's' : ''}`, 'success');
-    } catch (err) {
-      logger.error('Failed to delete proposals:', err);
-      showNotification?.('Failed to delete proposals', 'error');
-    }
-  }, [selection, showNotification, setData]);
+    await executeWithToast(
+      () => apiPost(API_ENDPOINTS.ADMIN.PROPOSALS_BULK_DELETE, { proposalIds: ids }),
+      {
+        success: `Deleted ${ids.length} proposal${ids.length !== 1 ? 's' : ''}`,
+        error: 'Failed to delete proposals'
+      },
+      () => {
+        setData((prev) => prev ? { ...prev, items: prev.items.filter((p) => !ids.includes(p.id)) } : prev);
+        selection.clearSelection();
+      }
+    );
+  }, [selection, setData]);
 
   // Status options for bulk actions
   const bulkStatusOptions = useMemo(

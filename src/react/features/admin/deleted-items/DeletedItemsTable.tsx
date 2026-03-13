@@ -39,11 +39,9 @@ import { useSelection } from '@react/hooks/useSelection';
 import { formatDate } from '@react/utils/formatDate';
 import { DELETED_ITEMS_FILTER_CONFIG } from '@react/features/admin/shared/filterConfigs';
 import type { SortConfig } from '@react/features/admin/types';
-import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiDelete } from '@/utils/api-client';
-
-const logger = createLogger('DeletedItemsTable');
+import { executeWithToast, executeDeleteWithToast } from '@/utils/api-wrappers';
 
 interface DeletedItem {
   id: string;
@@ -198,16 +196,12 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
   );
 
   const handleRestore = useCallback(async (itemId: string) => {
-    try {
-      const response = await apiPost(buildEndpoint.adminDeletedItemRestore(itemId));
-      if (!response.ok) throw new Error('Failed to restore item');
-      setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => item.id !== itemId) } : prev);
-      showNotification?.('Item restored', 'success');
-    } catch (err) {
-      logger.error('Failed to restore item:', err);
-      showNotification?.('Failed to restore item', 'error');
-    }
-  }, [showNotification, setData]);
+    await executeWithToast(
+      () => apiPost(buildEndpoint.adminDeletedItemRestore(itemId)),
+      { success: 'Item restored', error: 'Failed to restore item' },
+      () => setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => item.id !== itemId) } : prev)
+    );
+  }, [setData]);
 
   const handlePermanentDelete = useCallback(async (itemId: string) => {
     if (
@@ -217,16 +211,12 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
     ) {
       return;
     }
-    try {
-      const response = await apiDelete(buildEndpoint.adminDeletedItem(itemId));
-      if (!response.ok) throw new Error('Failed to delete item');
-      setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => item.id !== itemId) } : prev);
-      showNotification?.('Item permanently deleted', 'success');
-    } catch (err) {
-      logger.error('Failed to delete item:', err);
-      showNotification?.('Failed to delete item', 'error');
-    }
-  }, [showNotification, setData]);
+    await executeDeleteWithToast(
+      'item',
+      () => apiDelete(buildEndpoint.adminDeletedItem(itemId)),
+      () => setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => item.id !== itemId) } : prev)
+    );
+  }, [setData]);
 
   const handleEmptyTrash = useCallback(async () => {
     if (
@@ -236,16 +226,12 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
     ) {
       return;
     }
-    try {
-      const response = await apiDelete(API_ENDPOINTS.ADMIN.DELETED_ITEMS_EMPTY);
-      if (!response.ok) throw new Error('Failed to empty trash');
-      setData((prev) => prev ? { ...prev, items: [] } : prev);
-      showNotification?.('Trash emptied', 'success');
-    } catch (err) {
-      logger.error('Failed to empty trash:', err);
-      showNotification?.('Failed to empty trash', 'error');
-    }
-  }, [showNotification, setData]);
+    await executeWithToast(
+      () => apiDelete(API_ENDPOINTS.ADMIN.DELETED_ITEMS_EMPTY),
+      { success: 'Trash emptied', error: 'Failed to empty trash' },
+      () => setData((prev) => prev ? { ...prev, items: [] } : prev)
+    );
+  }, [setData]);
 
   // Bulk restore
   const handleBulkRestore = useCallback(async () => {
@@ -258,20 +244,17 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
     }
 
     setBulkLoading(true);
-    try {
-      const ids = Array.from(selection.selectedIds);
-      const response = await apiPost(API_ENDPOINTS.ADMIN.DELETED_ITEMS_BULK_RESTORE, { ids });
-      if (!response.ok) throw new Error('Failed to restore items');
-      setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => !selection.selectedIds.has(item.id)) } : prev);
-      selection.clearSelection();
-      showNotification?.(`Restored ${ids.length} item${ids.length !== 1 ? 's' : ''}`, 'success');
-    } catch (err) {
-      logger.error('Failed to bulk restore:', err);
-      showNotification?.('Failed to restore items', 'error');
-    } finally {
-      setBulkLoading(false);
-    }
-  }, [selection, showNotification, setData]);
+    const ids = Array.from(selection.selectedIds);
+    await executeWithToast(
+      () => apiPost(API_ENDPOINTS.ADMIN.DELETED_ITEMS_BULK_RESTORE, { ids }),
+      { success: `Restored ${ids.length} item${ids.length !== 1 ? 's' : ''}`, error: 'Failed to restore items' },
+      () => {
+        setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => !selection.selectedIds.has(item.id)) } : prev);
+        selection.clearSelection();
+      }
+    );
+    setBulkLoading(false);
+  }, [selection, setData]);
 
   // Bulk permanent delete
   const handleBulkDelete = useCallback(async () => {
@@ -286,20 +269,17 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
     }
 
     setBulkLoading(true);
-    try {
-      const ids = Array.from(selection.selectedIds);
-      const response = await apiDelete(API_ENDPOINTS.ADMIN.DELETED_ITEMS_BULK_DELETE);
-      if (!response.ok) throw new Error('Failed to delete items');
-      setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => !selection.selectedIds.has(item.id)) } : prev);
-      selection.clearSelection();
-      showNotification?.(`Deleted ${ids.length} item${ids.length !== 1 ? 's' : ''}`, 'success');
-    } catch (err) {
-      logger.error('Failed to bulk delete:', err);
-      showNotification?.('Failed to delete items', 'error');
-    } finally {
-      setBulkLoading(false);
-    }
-  }, [selection, showNotification, setData]);
+    const ids = Array.from(selection.selectedIds);
+    await executeWithToast(
+      () => apiDelete(API_ENDPOINTS.ADMIN.DELETED_ITEMS_BULK_DELETE),
+      { success: `Deleted ${ids.length} item${ids.length !== 1 ? 's' : ''}`, error: 'Failed to delete items' },
+      () => {
+        setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => !selection.selectedIds.has(item.id)) } : prev);
+        selection.clearSelection();
+      }
+    );
+    setBulkLoading(false);
+  }, [selection, setData]);
 
   function isExpiringSoon(expiresAt: string): boolean {
     const daysUntilExpiry = Math.ceil(

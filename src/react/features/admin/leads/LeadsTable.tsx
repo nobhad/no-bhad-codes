@@ -37,6 +37,8 @@ import { LEAD_STATUS_CONFIG, LEAD_SOURCE_LABELS, PROJECT_TYPE_LABELS } from '../
 import { formatDate } from '@react/utils/formatDate';
 import { LEADS_FILTER_CONFIG } from '../shared/filterConfigs';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
+import { showToast } from '@/utils/toast-notifications';
+import { notifyResult, notifyBulkResult } from '@/utils/api-wrappers';
 import { LeadDetailPanel } from './LeadDetailPanel';
 
 interface LeadsTableProps {
@@ -173,7 +175,7 @@ export function LeadsTable({
     config: LEADS_EXPORT_CONFIG,
     data: filteredLeads,
     onExport: (count) => {
-      showNotification?.(`Exported ${count} lead${count !== 1 ? 's' : ''} to CSV`, 'success');
+      showToast(`Exported ${count} lead${count !== 1 ? 's' : ''} to CSV`, 'success');
     }
   });
 
@@ -197,19 +199,13 @@ export function LeadsTable({
 
       setBulkActionLoading(false);
       selection.clearSelection();
-
-      if (success) {
-        showNotification?.(
-          `Updated ${ids.length} lead${ids.length !== 1 ? 's' : ''} to ${LEAD_STATUS_CONFIG[newStatus as LeadStatus]?.label || newStatus}`,
-          'success'
-        );
-      } else {
-        showNotification?.('Failed to update leads', 'error');
-      }
-
+      notifyResult(success, {
+        success: `Updated ${ids.length} lead${ids.length !== 1 ? 's' : ''} to ${LEAD_STATUS_CONFIG[newStatus as LeadStatus]?.label || newStatus}`,
+        error: 'Failed to update leads'
+      });
       refetch();
     },
-    [selection, bulkUpdateStatus, showNotification, refetch]
+    [selection, bulkUpdateStatus, refetch]
   );
 
   // Handle bulk delete
@@ -220,23 +216,9 @@ export function LeadsTable({
     const result = await bulkDelete(ids);
 
     selection.clearSelection();
-
-    if (result.failed === 0) {
-      showNotification?.(
-        `Deleted ${result.success} lead${result.success !== 1 ? 's' : ''}`,
-        'success'
-      );
-    } else if (result.success > 0) {
-      showNotification?.(
-        `Deleted ${result.success}, failed ${result.failed} lead${result.failed !== 1 ? 's' : ''}`,
-        'warning'
-      );
-    } else {
-      showNotification?.('Failed to delete leads', 'error');
-    }
-
+    notifyBulkResult(result, 'lead', 'Deleted');
     refetch();
-  }, [selection, bulkDelete, showNotification, refetch]);
+  }, [selection, bulkDelete, refetch]);
 
   // Status options for bulk actions
   const bulkStatusOptions = useMemo(
@@ -253,13 +235,12 @@ export function LeadsTable({
   const handleStatusChange = useCallback(
     async (leadId: number, newStatus: LeadStatus) => {
       const success = await updateLead(leadId, { status: newStatus });
-      if (success) {
-        showNotification?.(`Status updated to ${LEAD_STATUS_CONFIG[newStatus].label}`, 'success');
-      } else {
-        showNotification?.('Failed to update status', 'error');
-      }
+      notifyResult(success, {
+        success: `Status updated to ${LEAD_STATUS_CONFIG[newStatus].label}`,
+        error: 'Failed to update status'
+      });
     },
-    [updateLead, showNotification]
+    [updateLead]
   );
 
   // Handle view lead (full-page navigation)
@@ -290,17 +271,18 @@ export function LeadsTable({
   const handlePanelStatusChange = useCallback(
     async (leadId: number, newStatus: LeadStatus) => {
       const success = await updateLead(leadId, { status: newStatus });
+      notifyResult(success, {
+        success: `Status updated to ${LEAD_STATUS_CONFIG[newStatus].label}`,
+        error: 'Failed to update status'
+      });
       if (success) {
-        showNotification?.(`Status updated to ${LEAD_STATUS_CONFIG[newStatus].label}`, 'success');
         // Update the selected lead in panel
         setSelectedLead((prev) =>
           prev && prev.id === leadId ? { ...prev, status: newStatus } : prev
         );
-      } else {
-        showNotification?.('Failed to update status', 'error');
       }
     },
-    [updateLead, showNotification]
+    [updateLead]
   );
 
   return (

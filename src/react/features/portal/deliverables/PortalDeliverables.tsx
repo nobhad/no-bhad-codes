@@ -17,6 +17,7 @@ import { usePortalFetch } from '@react/hooks/usePortalFetch';
 import { useActiveProjectId } from '@react/stores/portal-store';
 import { formatDate } from '@/utils/format-utils';
 import { buildEndpoint, API_ENDPOINTS } from '@/constants/api-endpoints';
+import { formatErrorMessage } from '@/utils/error-utils';
 import type { PortalViewProps } from '../types';
 
 // ============================================================================
@@ -90,7 +91,7 @@ export function PortalDeliverables({ getAuthToken }: PortalDeliverablesProps) {
       // Expand all milestones by default
       setExpandedIds(new Set(m.map((ms) => ms.id)));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load deliverables');
+      setError(formatErrorMessage(err, 'Failed to load deliverables'));
     } finally {
       setIsLoading(false);
     }

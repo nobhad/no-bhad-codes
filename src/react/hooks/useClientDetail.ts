@@ -10,6 +10,7 @@ import { useClientContacts } from './client-detail/useClientContacts';
 import { useClientNotes } from './client-detail/useClientNotes';
 import { useClientTags } from './client-detail/useClientTags';
 import type { UseClientDetailOptions, UseClientDetailReturn } from './client-detail/types';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 export type { UseClientDetailReturn, UseClientDetailOptions };
 
@@ -50,8 +51,7 @@ export function useClientDetail({
         fetchTags()
       ]);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'An error occurred';
-      setError(message);
+      setError(formatErrorMessage(err, 'An error occurred'));
     } finally {
       setIsLoading(false);
     }

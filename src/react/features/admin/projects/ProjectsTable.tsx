@@ -42,6 +42,8 @@ import { formatDate } from '@react/utils/formatDate';
 import { formatCurrency } from '@/utils/format-utils';
 import { PROJECTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
+import { showToast } from '@/utils/toast-notifications';
+import { notifyResult, notifyBulkResult } from '@/utils/api-wrappers';
 
 // Static dropdown options for the Add Project modal
 const PROJECT_TYPE_OPTIONS: ModalDropdownOption[] = [
@@ -151,7 +153,7 @@ function sortProjects(a: Project, b: Project, sort: SortConfig): number {
  */
 export function ProjectsTable({
   onNavigate,
-  showNotification,
+  showNotification: _showNotification,
   defaultPageSize = 25,
   overviewMode = false
 }: ProjectsTableProps) {
@@ -225,7 +227,7 @@ export function ProjectsTable({
     config: PROJECTS_EXPORT_CONFIG,
     data: filteredProjects,
     onExport: (count) => {
-      showNotification?.(`Exported ${count} project${count !== 1 ? 's' : ''} to CSV`, 'success');
+      showToast(`Exported ${count} project${count !== 1 ? 's' : ''} to CSV`, 'success');
     }
   });
 
@@ -252,22 +254,10 @@ export function ProjectsTable({
 
       setBulkActionLoading(false);
       selection.clearSelection();
-
-      if (failCount === 0) {
-        showNotification?.(
-          `Updated ${successCount} project${successCount !== 1 ? 's' : ''} to ${PROJECT_STATUS_CONFIG[newStatus as ProjectStatus]?.label || newStatus}`,
-          'success'
-        );
-      } else {
-        showNotification?.(
-          `Updated ${successCount}, failed ${failCount} project${failCount !== 1 ? 's' : ''}`,
-          'warning'
-        );
-      }
-
+      notifyBulkResult({ success: successCount, failed: failCount }, 'project', 'Updated');
       refetch();
     },
-    [selection, updateProject, showNotification, refetch]
+    [selection, updateProject, refetch]
   );
 
   // Handle bulk delete
@@ -278,23 +268,9 @@ export function ProjectsTable({
     const result = await bulkDelete(ids);
 
     selection.clearSelection();
-
-    if (result.failed === 0) {
-      showNotification?.(
-        `Deleted ${result.success} project${result.success !== 1 ? 's' : ''}`,
-        'success'
-      );
-    } else if (result.success > 0) {
-      showNotification?.(
-        `Deleted ${result.success}, failed ${result.failed} project${result.failed !== 1 ? 's' : ''}`,
-        'warning'
-      );
-    } else {
-      showNotification?.('Failed to delete projects', 'error');
-    }
-
+    notifyBulkResult(result, 'project', 'Deleted');
     refetch();
-  }, [selection, bulkDelete, showNotification, refetch]);
+  }, [selection, bulkDelete, refetch]);
 
   // Handle add project form submission
   const handleAddProjectSubmit = useCallback(
@@ -303,16 +279,16 @@ export function ProjectsTable({
       try {
         const result = await createProject(data);
         if (result) {
-          showNotification?.(`Project "${result.projectName}" created successfully`, 'success');
+          showToast(`Project "${result.projectName}" created successfully`, 'success');
           setAddProjectOpen(false);
         } else {
-          showNotification?.('Failed to create project', 'error');
+          showToast('Failed to create project', 'error');
         }
       } finally {
         setAddProjectLoading(false);
       }
     },
-    [createProject, showNotification]
+    [createProject]
   );
 
   // Status options for bulk actions
@@ -330,13 +306,12 @@ export function ProjectsTable({
   const handleStatusChange = useCallback(
     async (projectId: number, newStatus: ProjectStatus) => {
       const success = await updateProject(projectId, { status: newStatus });
-      if (success) {
-        showNotification?.(`Status updated to ${PROJECT_STATUS_CONFIG[newStatus].label}`, 'success');
-      } else {
-        showNotification?.('Failed to update status', 'error');
-      }
+      notifyResult(success, {
+        success: `Status updated to ${PROJECT_STATUS_CONFIG[newStatus].label}`,
+        error: 'Failed to update status'
+      });
     },
-    [updateProject, showNotification]
+    [updateProject]
   );
 
 

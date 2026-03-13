@@ -150,12 +150,7 @@ export const APP_CONSTANTS = {
     LIGHT: '#ffffff'
   },
 
-  // File upload limits
-  UPLOAD: {
-    MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
-    MAX_FILES: 5,
-    ALLOWED_TYPES: ['jpeg', 'jpg', 'png', 'pdf', 'doc', 'docx', 'txt', 'zip', 'rar']
-  },
+  // File upload limits — canonical source: src/utils/file-validation.ts
 
   // Security
   SECURITY: {

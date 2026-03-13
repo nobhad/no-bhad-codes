@@ -36,6 +36,7 @@ import type {
 import { createLogger } from '@/utils/logger';
 import { buildEndpoint } from '@/constants/api-endpoints';
 import { apiFetch } from '@/utils/api-client';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 const logger = createLogger('PortalProjectDetail');
 
@@ -259,7 +260,7 @@ export function PortalProjectDetail({
         logger.warn('[PortalProjectDetail] Could not fetch time summary:', err);
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'An error occurred';
+      const message = formatErrorMessage(err, 'An error occurred');
       setError(message);
       logger.error('[PortalProjectDetail] Error:', message);
     } finally {

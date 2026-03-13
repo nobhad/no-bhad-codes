@@ -21,6 +21,7 @@ import { ApprovalCard } from './ApprovalCard';
 import type { PendingApproval, PendingApprovalsResponse } from './types';
 import type { PortalViewProps } from '../types';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 export interface PortalApprovalsProps extends PortalViewProps {
   /** Callback to navigate to entity detail */
@@ -85,7 +86,7 @@ export function PortalApprovals({
         );
       } catch (err) {
         showNotification?.(
-          err instanceof Error ? err.message : `Failed to ${action} request`,
+          formatErrorMessage(err, `Failed to ${action} request`),
           'error'
         );
         throw err;

@@ -45,6 +45,7 @@ import { ErrorState, LoadingState } from '@react/factories';
 import { formatCurrencyCompact as formatCurrency } from '@/utils/format-utils';
 import { apiFetch, unwrapApiData } from '@/utils/api-client';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 // Register Chart.js components + controllers
 ChartJS.register(
@@ -357,7 +358,7 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
       const analyticsData = unwrapApiData<AnalyticsData>(await response.json());
       setData(analyticsData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load analytics');
+      setError(formatErrorMessage(err, 'Failed to load analytics'));
     } finally {
       setIsLoading(false);
     }

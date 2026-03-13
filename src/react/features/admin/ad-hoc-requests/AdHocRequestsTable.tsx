@@ -39,11 +39,9 @@ import { useSelection } from '@react/hooks/useSelection';
 import { AD_HOC_REQUESTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import { useListFetch } from '@react/factories/useDataFetch';
 import type { SortConfig } from '../types';
-import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
-
-const logger = createLogger('AdHocRequestsTable');
+import { executeUpdateWithToast, executeWithToast } from '@/utils/api-wrappers';
 
 interface AdHocRequest {
   id: number;
@@ -218,48 +216,38 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
 
   // Status change handler
   const handleStatusChange = useCallback(async (requestId: number, newStatus: string) => {
-    try {
-      const response = await apiFetch(buildEndpoint.adHocRequest(requestId), {
+    await executeUpdateWithToast(
+      'status',
+      () => apiFetch(buildEndpoint.adHocRequest(requestId), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
-      });
-
-      if (!response.ok) throw new Error('Failed to update request');
-
-      setData((prev) => prev ? {
+      }),
+      () => setData((prev) => prev ? {
         ...prev,
         items: prev.items.map((request) =>
           request.id === requestId
             ? { ...request, status: newStatus as AdHocRequest['status'] }
             : request
         )
-      } : prev);
-      showNotification?.('Status updated', 'success');
-    } catch (err) {
-      logger.error('Failed to update request status:', err);
-      showNotification?.('Failed to update status', 'error');
-    }
-  }, [setData, showNotification]);
+      } : prev)
+    );
+  }, [setData]);
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
     if (selection.selectedCount === 0) return;
 
     const ids = selection.selectedItems.map((r) => r.id);
-    try {
-      const response = await apiPost(API_ENDPOINTS.AD_HOC_REQUESTS_BULK_DELETE, { ids });
-
-      if (!response.ok) throw new Error('Failed to delete requests');
-
-      setData((prev) => prev ? { ...prev, items: prev.items.filter((r) => !ids.includes(r.id)) } : prev);
-      selection.clearSelection();
-      showNotification?.(`Deleted ${ids.length} request${ids.length !== 1 ? 's' : ''}`, 'success');
-    } catch (err) {
-      logger.error('Failed to delete requests:', err);
-      showNotification?.('Failed to delete requests', 'error');
-    }
-  }, [selection, setData, showNotification]);
+    await executeWithToast(
+      () => apiPost(API_ENDPOINTS.AD_HOC_REQUESTS_BULK_DELETE, { ids }),
+      { success: `Deleted ${ids.length} request${ids.length !== 1 ? 's' : ''}`, error: 'Failed to delete requests' },
+      () => {
+        setData((prev) => prev ? { ...prev, items: prev.items.filter((r) => !ids.includes(r.id)) } : prev);
+        selection.clearSelection();
+      }
+    );
+  }, [selection, setData]);
 
   // Status options for bulk actions
   const bulkStatusOptions = useMemo(

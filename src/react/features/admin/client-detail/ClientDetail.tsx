@@ -35,6 +35,7 @@ import { CLIENT_STATUS_CONFIG, CLIENT_TYPE_LABELS } from '../types';
 import { buildEndpoint } from '@/constants/api-endpoints';
 import { NOTIFICATIONS, statusUpdatedMessage } from '@/constants/notifications';
 import { apiDelete } from '@/utils/api-client';
+import { executeDeleteWithToast } from '@/utils/api-wrappers';
 import { useSetPageTitle } from '@react/stores/portal-store';
 
 interface ClientDetailProps {
@@ -152,19 +153,12 @@ export function ClientDetail({
 
   // Handle delete
   const handleDelete = useCallback(async () => {
-    try {
-      const response = await apiDelete(buildEndpoint.client(clientId));
-
-      if (response.ok) {
-        showNotification?.(NOTIFICATIONS.client.DELETED, 'success');
-        onBack?.();
-      } else {
-        showNotification?.(NOTIFICATIONS.client.DELETE_FAILED, 'error');
-      }
-    } catch {
-      showNotification?.(NOTIFICATIONS.client.DELETE_FAILED, 'error');
-    }
-  }, [clientId, showNotification, onBack]);
+    await executeDeleteWithToast(
+      'client',
+      () => apiDelete(buildEndpoint.client(clientId)),
+      () => onBack?.()
+    );
+  }, [clientId, onBack]);
 
   // Handle send invitation
   const handleSendInvitation = useCallback(async () => {

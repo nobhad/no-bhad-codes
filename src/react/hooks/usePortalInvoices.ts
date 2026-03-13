@@ -8,6 +8,7 @@ import type { PortalInvoice, PortalInvoiceSummary } from '../features/portal/typ
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
 import { unwrapApiData, apiFetch } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 const logger = createLogger('usePortalInvoices');
 
@@ -60,7 +61,7 @@ export function usePortalInvoices(_options: UsePortalInvoicesOptions = {}): UseP
       }
     } catch (err) {
       logger.error('[usePortalInvoices] Error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load invoices');
+      setError(formatErrorMessage(err, 'Failed to load invoices'));
     } finally {
       setIsLoading(false);
     }

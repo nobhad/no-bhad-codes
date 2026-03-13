@@ -35,6 +35,8 @@ import { useFadeIn } from '@react/hooks/useGsap';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { unwrapApiData, apiFetch, apiPost, apiDelete } from '@/utils/api-client';
+import { formatErrorMessage } from '@/utils/error-utils';
+import { executeCreateWithToast, executeDeleteWithToast } from '@/utils/api-wrappers';
 
 const logger = createLogger('AdHocAnalytics');
 
@@ -59,7 +61,7 @@ interface AdHocAnalyticsProps {
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification }: AdHocAnalyticsProps) {
+export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: _showNotification }: AdHocAnalyticsProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -102,7 +104,7 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification }
       const payload = unwrapApiData<Record<string, unknown>>(await response.json());
       setResult(payload.result as QueryResult);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to execute query');
+      setError(formatErrorMessage(err, 'Failed to execute query'));
     } finally {
       setIsLoading(false);
     }
@@ -111,34 +113,24 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification }
   async function saveQuery() {
     if (!query.trim() || !queryName.trim()) return;
 
-    try {
-      const response = await apiPost(API_ENDPOINTS.ADMIN.AD_HOC_ANALYTICS_QUERIES, { name: queryName, query });
-
-      if (!response.ok) throw new Error('Failed to save query');
-
-      loadSavedQueries();
-      setQueryName('');
-      showNotification?.('Query saved', 'success');
-    } catch (err) {
-      logger.error('Failed to save query:', err);
-      showNotification?.('Failed to save query', 'error');
-    }
+    await executeCreateWithToast(
+      'query',
+      () => apiPost(API_ENDPOINTS.ADMIN.AD_HOC_ANALYTICS_QUERIES, { name: queryName, query }),
+      () => {
+        loadSavedQueries();
+        setQueryName('');
+      }
+    );
   }
 
   async function deleteQuery(queryId: number) {
     if (!confirm('Are you sure you want to delete this saved query?')) return;
 
-    try {
-      const response = await apiDelete(buildEndpoint.adminAdHocQuery(queryId));
-
-      if (!response.ok) throw new Error('Failed to delete query');
-
-      setSavedQueries((prev) => prev.filter((q) => q.id !== queryId));
-      showNotification?.('Query deleted', 'success');
-    } catch (err) {
-      logger.error('Failed to delete query:', err);
-      showNotification?.('Failed to delete query', 'error');
-    }
+    await executeDeleteWithToast(
+      'query',
+      () => apiDelete(buildEndpoint.adminAdHocQuery(queryId)),
+      () => setSavedQueries((prev) => prev.filter((q) => q.id !== queryId))
+    );
   }
 
   function loadQuery(savedQuery: SavedQuery) {

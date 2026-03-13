@@ -9,6 +9,7 @@ import { Upload, X, Paperclip, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { formatFileSize } from '@react/utils/cardFormatters';
 import { FormDropdown } from '@react/components/portal/FormDropdown';
+import { MAX_FILE_SIZE } from '@/utils/file-validation';
 import type { AdHocRequestPriority, NewAdHocRequestPayload } from './types';
 import { AD_HOC_REQUEST_PRIORITY_CONFIG } from './types';
 
@@ -28,7 +29,6 @@ export interface NewRequestFormProps {
 }
 
 const PRIORITY_OPTIONS: AdHocRequestPriority[] = ['low', 'normal', 'high', 'urgent'];
-const DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const DEFAULT_MAX_FILES = 5;
 
 /**
@@ -39,7 +39,7 @@ export function NewRequestForm({
   onCancel,
   loading = false,
   projects = [],
-  maxFileSize = DEFAULT_MAX_FILE_SIZE,
+  maxFileSize = MAX_FILE_SIZE,
   maxFiles = DEFAULT_MAX_FILES
 }: NewRequestFormProps) {
   const [title, setTitle] = useState('');

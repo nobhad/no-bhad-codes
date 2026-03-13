@@ -32,6 +32,7 @@ import {
 import { authEndpoints, adminAuthEndpoints } from '../config/api';
 import { getCsrfToken, CSRF_HEADER_NAME } from '../utils/api-client';
 import { createLogger } from '../utils/logger';
+import { formatErrorMessage } from '../utils/error-utils';
 
 const logger = createLogger('AuthStore');
 
@@ -390,7 +391,7 @@ function createAuthStore(): AuthStore {
           isFirstLogin
         };
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Login failed';
+        const message = formatErrorMessage(error, 'Login failed');
         setState({ isProcessing: false, error: message });
         return { success: false, error: message };
       }
@@ -437,7 +438,7 @@ function createAuthStore(): AuthStore {
           sessionId
         };
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Admin login failed';
+        const message = formatErrorMessage(error, 'Admin login failed');
         setState({ isProcessing: false, error: message });
         return { success: false, error: message };
       }
@@ -551,7 +552,7 @@ function createAuthStore(): AuthStore {
 
         return { success: true };
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Failed to send magic link';
+        const message = formatErrorMessage(error, 'Failed to send magic link');
         return { success: false, error: message };
       }
     },
@@ -592,7 +593,7 @@ function createAuthStore(): AuthStore {
           sessionId
         };
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Invalid or expired magic link';
+        const message = formatErrorMessage(error, 'Invalid or expired magic link');
         setState({ isProcessing: false, error: message });
         return { success: false, error: message };
       }

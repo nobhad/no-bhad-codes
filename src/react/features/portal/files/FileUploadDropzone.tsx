@@ -9,24 +9,14 @@ import { Upload, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { UI_LIMITS } from '@react/config/portal-constants';
 import { KEYS } from '@/constants/keyboard';
+import {
+  ALLOWED_EXTENSIONS,
+  ALLOWED_MIME_TYPES,
+  MAX_FILE_SIZE,
+  MAX_FILE_SIZE_DISPLAY
+} from '@/utils/file-validation';
+import { formatErrorMessage } from '@/utils/error-utils';
 
-// Allowed file types (matches server validation)
-const ALLOWED_EXTENSIONS = /\.(jpeg|jpg|png|gif|pdf|doc|docx|txt|zip|rar)$/i;
-const ALLOWED_MIME_TYPES = [
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/gif',
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'text/plain',
-  'application/zip',
-  'application/x-rar-compressed',
-  'application/vnd.rar'
-];
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_FILES = 5;
 
 interface FileUploadDropzoneProps {
@@ -157,7 +147,7 @@ export function FileUploadDropzone({
         }, 3000);
       } catch (err) {
         setError({
-          message: err instanceof Error ? err.message : 'Upload failed',
+          message: formatErrorMessage(err, 'Upload failed'),
           files: valid
         });
         setState('error');

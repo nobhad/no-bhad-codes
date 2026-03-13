@@ -18,6 +18,8 @@ import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { IconButton } from '@react/factories';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { apiGet, apiPut, parseApiResponse } from '@/utils/api-client';
+import { formatErrorMessage } from '@/utils/error-utils';
+import { executeWithToast } from '@/utils/api-wrappers';
 
 interface BusinessInfo {
   name: string;
@@ -92,7 +94,7 @@ export function BusinessConfiguration({ showNotification, overviewMode }: Busine
       setInvoiceSettings(invData);
       setHasChanges(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load settings');
+      setError(formatErrorMessage(err, 'Failed to load settings'));
     } finally {
       setIsLoading(false);
     }
@@ -102,7 +104,9 @@ export function BusinessConfiguration({ showNotification, overviewMode }: Busine
 
   const handleSave = useCallback(async () => {
     setIsSaving(true);
-    try {
+
+    // Build the list of API calls based on active section
+    const buildSaveCall = (): () => Promise<Response> => {
       const requests: Promise<Response>[] = [];
 
       if (activeSection === 'business' || overviewMode) {
@@ -119,18 +123,20 @@ export function BusinessConfiguration({ showNotification, overviewMode }: Busine
         }));
       }
 
-      const results = await Promise.all(requests);
-      const failed = results.find(r => !r.ok);
-      if (failed) throw new Error('Failed to save settings');
+      return async () => {
+        const results = await Promise.all(requests);
+        const failed = results.find(r => !r.ok);
+        return failed || results[0];
+      };
+    };
 
-      showNotification?.('Settings saved successfully', 'success');
-      setHasChanges(false);
-    } catch (err) {
-      showNotification?.(err instanceof Error ? err.message : 'Failed to save settings', 'error');
-    } finally {
-      setIsSaving(false);
-    }
-  }, [activeSection, businessInfo, paymentSettings, invoiceSettings, showNotification, overviewMode]);
+    await executeWithToast(
+      buildSaveCall(),
+      { success: 'Settings saved successfully', error: 'Failed to save settings' },
+      () => setHasChanges(false)
+    );
+    setIsSaving(false);
+  }, [activeSection, businessInfo, paymentSettings, invoiceSettings, overviewMode]);
 
   const updateBusinessField = (field: keyof BusinessInfo, value: string) => {
     setBusinessInfo(prev => ({ ...prev, [field]: value }));

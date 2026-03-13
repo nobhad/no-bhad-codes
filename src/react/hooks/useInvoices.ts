@@ -3,6 +3,7 @@ import type { Invoice, InvoiceStats } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
 import { unwrapApiData, apiFetch, apiPut, apiDelete } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 const logger = createLogger('useInvoices');
 
@@ -108,7 +109,7 @@ export function useInvoices({
       setInvoices(data.invoices || []);
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') return;
-      const message = err instanceof Error ? err.message : 'An error occurred';
+      const message = formatErrorMessage(err, 'An error occurred');
       setError(message);
       logger.error('[useInvoices] Error:', message);
     } finally {

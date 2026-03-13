@@ -12,6 +12,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { unwrapApiData, apiFetch } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 const logger = createLogger('usePortalFetch');
 
@@ -191,7 +192,7 @@ export function usePortalData<T>({
       setData(currentTransform ? currentTransform(unwrapped) : unwrapped as T);
     } catch (err) {
       if ((err as Error).name === 'AbortError') return;
-      const message = err instanceof Error ? err.message : 'Failed to load data';
+      const message = formatErrorMessage(err, 'Failed to load data');
       logger.error(`Fetch error for ${url}:`, err);
       setError(message);
     } finally {

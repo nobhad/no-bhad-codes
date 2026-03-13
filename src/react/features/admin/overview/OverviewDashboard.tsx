@@ -30,6 +30,7 @@ import { formatTimeAgo } from '@/utils/time-utils';
 import { formatCurrency } from '@/utils/format-utils';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { apiFetch, unwrapApiData } from '@/utils/api-client';
+import { formatErrorMessage } from '@/utils/error-utils';
 import { useNavigate } from 'react-router-dom';
 
 interface OverviewDashboardProps {
@@ -145,7 +146,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
       setActiveProjects((payload.activeProjects as ProjectItem[]) || []);
       setUpcomingTasks((payload.upcomingTasks as TaskItem[]) || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load dashboard');
+      setError(formatErrorMessage(err, 'Failed to load dashboard'));
     } finally {
       setIsLoading(false);
     }

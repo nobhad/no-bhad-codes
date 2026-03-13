@@ -18,6 +18,7 @@ import type {
 } from './types';
 import { buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost } from '@/utils/api-client';
+import { executeWithToast, executeSilent } from '@/utils/api-wrappers';
 
 // ============================================================================
 // CONSTANTS
@@ -437,24 +438,21 @@ export function QuestionnaireForm({
 
     setIsSaving(true);
 
-    try {
-      const saveResponse = await apiPost(buildEndpoint.questionnaireResponseSave(response.id), {
+    const result = await executeSilent(
+      () => apiPost(buildEndpoint.questionnaireResponseSave(response.id), {
         answers,
         progress
-      });
+      })
+    );
 
-      if (!saveResponse.ok) {
-        throw new Error('Failed to save answers');
-      }
-
+    if (result.success) {
       setLastSaved(new Date());
       setHasUnsavedChanges(false);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to save';
-      showNotification?.(errorMessage, 'error');
-    } finally {
-      setIsSaving(false);
+    } else {
+      showNotification?.(result.errorMessage || 'Failed to save', 'error');
     }
+
+    setIsSaving(false);
   }, [answers, progress, response.id, showNotification, isReadOnly]);
 
   /**
@@ -514,26 +512,17 @@ export function QuestionnaireForm({
 
     setIsSubmitting(true);
 
-    try {
-      // First save latest answers
-      await saveAnswers();
+    // First save latest answers
+    await saveAnswers();
 
-      // Then submit
-      const submitResponse = await apiPost(buildEndpoint.questionnaireResponseSubmit(response.id), {
-        answers
-      });
+    // Then submit
+    await executeWithToast(
+      () => apiPost(buildEndpoint.questionnaireResponseSubmit(response.id), { answers }),
+      { success: 'Questionnaire submitted', error: 'Failed to submit questionnaire' },
+      () => onSubmitSuccess?.()
+    );
 
-      if (!submitResponse.ok) {
-        throw new Error('Failed to submit questionnaire');
-      }
-
-      onSubmitSuccess?.();
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to submit';
-      showNotification?.(errorMessage, 'error');
-    } finally {
-      setIsSubmitting(false);
-    }
+    setIsSubmitting(false);
   };
 
   return (

@@ -33,6 +33,8 @@ import { formatDate } from '@react/utils/formatDate';
 import { formatCurrency } from '@/utils/format-utils';
 import { INVOICES_FILTER_CONFIG } from '../shared/filterConfigs';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
+import { showToast } from '@/utils/toast-notifications';
+import { notifyResult, notifyBulkResult } from '@/utils/api-wrappers';
 
 interface InvoicesTableProps {
   /** Auth token getter for API calls */
@@ -137,7 +139,7 @@ export function InvoicesTable({
   getAuthToken,
   onViewInvoice,
   onNavigate,
-  showNotification,
+  showNotification: _showNotification,
   defaultPageSize = 25,
   overviewMode = false
 }: InvoicesTableProps) {
@@ -208,7 +210,7 @@ export function InvoicesTable({
     config: INVOICES_EXPORT_CONFIG,
     data: filteredInvoices,
     onExport: (count) => {
-      showNotification?.(`Exported ${count} invoice${count !== 1 ? 's' : ''} to CSV`, 'success');
+      showToast(`Exported ${count} invoice${count !== 1 ? 's' : ''} to CSV`, 'success');
     }
   });
 
@@ -223,23 +225,9 @@ export function InvoicesTable({
     const result = await bulkMarkPaid(ids);
 
     selection.clearSelection();
-
-    if (result.failed === 0) {
-      showNotification?.(
-        `Marked ${result.success} invoice${result.success !== 1 ? 's' : ''} as paid`,
-        'success'
-      );
-    } else if (result.success > 0) {
-      showNotification?.(
-        `Marked ${result.success} paid, failed ${result.failed}`,
-        'warning'
-      );
-    } else {
-      showNotification?.('Failed to mark invoices as paid', 'error');
-    }
-
+    notifyBulkResult(result, 'invoice', 'Marked');
     refetch();
-  }, [selection, bulkMarkPaid, showNotification, refetch]);
+  }, [selection, bulkMarkPaid, refetch]);
 
   // Handle bulk send
   const handleBulkSend = useCallback(async () => {
@@ -249,23 +237,9 @@ export function InvoicesTable({
     const result = await bulkSend(ids);
 
     selection.clearSelection();
-
-    if (result.failed === 0) {
-      showNotification?.(
-        `Sent ${result.success} invoice${result.success !== 1 ? 's' : ''}`,
-        'success'
-      );
-    } else if (result.success > 0) {
-      showNotification?.(
-        `Sent ${result.success}, failed ${result.failed}`,
-        'warning'
-      );
-    } else {
-      showNotification?.('Failed to send invoices', 'error');
-    }
-
+    notifyBulkResult(result, 'invoice', 'Sent');
     refetch();
-  }, [selection, bulkSend, showNotification, refetch]);
+  }, [selection, bulkSend, refetch]);
 
   // Handle bulk delete
   const handleBulkDelete = useCallback(async () => {
@@ -275,23 +249,9 @@ export function InvoicesTable({
     const result = await bulkDelete(ids);
 
     selection.clearSelection();
-
-    if (result.failed === 0) {
-      showNotification?.(
-        `Deleted ${result.success} invoice${result.success !== 1 ? 's' : ''}`,
-        'success'
-      );
-    } else if (result.success > 0) {
-      showNotification?.(
-        `Deleted ${result.success}, failed ${result.failed}`,
-        'warning'
-      );
-    } else {
-      showNotification?.('Failed to delete invoices', 'error');
-    }
-
+    notifyBulkResult(result, 'invoice', 'Deleted');
     refetch();
-  }, [selection, bulkDelete, showNotification, refetch]);
+  }, [selection, bulkDelete, refetch]);
 
   // Handle single invoice actions
   const handleMarkPaid = useCallback(
@@ -299,14 +259,9 @@ export function InvoicesTable({
       setActionLoading({ type: 'markPaid', id: invoiceId });
       const success = await markAsPaid(invoiceId);
       setActionLoading(null);
-
-      if (success) {
-        showNotification?.('Invoice marked as paid', 'success');
-      } else {
-        showNotification?.('Failed to mark invoice as paid', 'error');
-      }
+      notifyResult(success, { success: 'Invoice marked as paid', error: 'Failed to mark invoice as paid' });
     },
-    [markAsPaid, showNotification]
+    [markAsPaid]
   );
 
   const handleSend = useCallback(
@@ -314,14 +269,9 @@ export function InvoicesTable({
       setActionLoading({ type: 'send', id: invoiceId });
       const success = await sendInvoice(invoiceId);
       setActionLoading(null);
-
-      if (success) {
-        showNotification?.('Invoice sent', 'success');
-      } else {
-        showNotification?.('Failed to send invoice', 'error');
-      }
+      notifyResult(success, { success: 'Invoice sent', error: 'Failed to send invoice' });
     },
-    [sendInvoice, showNotification]
+    [sendInvoice]
   );
 
   const handleDownloadPdf = useCallback(
@@ -329,13 +279,13 @@ export function InvoicesTable({
       setActionLoading({ type: 'download', id: invoiceId });
       try {
         await downloadPdf(invoiceId);
-        showNotification?.('PDF downloaded', 'success');
+        showToast('PDF downloaded', 'success');
       } catch {
-        showNotification?.('Failed to download PDF', 'error');
+        showToast('Failed to download PDF', 'error');
       }
       setActionLoading(null);
     },
-    [downloadPdf, showNotification]
+    [downloadPdf]
   );
 
   // Handle view invoice

@@ -32,11 +32,9 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
 import { QUESTIONNAIRES_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
-import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
-
-const logger = createLogger('QuestionnairesTable');
+import { executeUpdateWithToast, executeWithToast } from '@/utils/api-wrappers';
 
 interface Questionnaire {
   id: number;
@@ -198,60 +196,46 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
 
   // Status change handler
   const handleStatusChange = useCallback(async (questionnaireId: number, newStatus: string) => {
-    try {
-      const response = await apiFetch(buildEndpoint.questionnaire(questionnaireId), {
+    await executeUpdateWithToast(
+      'questionnaire status',
+      () => apiFetch(buildEndpoint.questionnaire(questionnaireId), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
-      });
-
-      if (!response.ok) throw new Error('Failed to update questionnaire');
-
-      setData((prev) => prev ? {
+      }),
+      () => setData((prev) => prev ? {
         ...prev,
         items: prev.items.map((q) =>
           q.id === questionnaireId
             ? { ...q, status: newStatus as Questionnaire['status'] }
             : q
         )
-      } : prev);
-      showNotification?.('Questionnaire status updated', 'success');
-    } catch (err) {
-      logger.error('Failed to update questionnaire status:', err);
-      showNotification?.('Failed to update questionnaire status', 'error');
-    }
-  }, [showNotification, setData]);
+      } : prev)
+    );
+  }, [setData]);
 
   const handleSendQuestionnaire = useCallback(async (id: number) => {
-    try {
-      const response = await apiPost(buildEndpoint.questionnaireSend(id));
-      if (!response.ok) throw new Error('Failed to send questionnaire');
-      refetch();
-      showNotification?.('Questionnaire sent', 'success');
-    } catch (err) {
-      logger.error('Failed to send questionnaire:', err);
-      showNotification?.('Failed to send questionnaire', 'error');
-    }
-  }, [showNotification, refetch]);
+    await executeWithToast(
+      () => apiPost(buildEndpoint.questionnaireSend(id)),
+      { success: 'Questionnaire sent', error: 'Failed to send questionnaire' },
+      () => refetch()
+    );
+  }, [refetch]);
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
     if (selection.selectedCount === 0) return;
 
     const ids = selection.selectedItems.map((q) => q.id);
-    try {
-      const response = await apiPost(API_ENDPOINTS.QUESTIONNAIRES_BULK_DELETE, { ids });
-
-      if (!response.ok) throw new Error('Failed to delete questionnaires');
-
-      setData((prev) => prev ? { ...prev, items: prev.items.filter((q) => !ids.includes(q.id)) } : prev);
-      selection.clearSelection();
-      showNotification?.(`Deleted ${ids.length} questionnaire${ids.length !== 1 ? 's' : ''}`, 'success');
-    } catch (err) {
-      logger.error('Failed to delete questionnaires:', err);
-      showNotification?.('Failed to delete questionnaires', 'error');
-    }
-  }, [selection, showNotification, setData]);
+    await executeWithToast(
+      () => apiPost(API_ENDPOINTS.QUESTIONNAIRES_BULK_DELETE, { ids }),
+      { success: `Deleted ${ids.length} questionnaire${ids.length !== 1 ? 's' : ''}`, error: 'Failed to delete questionnaires' },
+      () => {
+        setData((prev) => prev ? { ...prev, items: prev.items.filter((q) => !ids.includes(q.id)) } : prev);
+        selection.clearSelection();
+      }
+    );
+  }, [selection, setData]);
 
   // Status options for bulk actions
   const bulkStatusOptions = useMemo(
