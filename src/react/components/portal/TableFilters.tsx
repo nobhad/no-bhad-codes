@@ -122,7 +122,7 @@ export function FilterDropdown({ sections, values, onChange }: FilterDropdownPro
       position: 'fixed',
       top: rect.bottom + 4,
       right: window.innerWidth - rect.right,
-      zIndex: 'var(--z-index-portal-dropdown, 9700)' as unknown as number,
+      zIndex: 'var(--z-index-portal-dropdown, 9700)' as unknown as number
     });
   }, []);
 
@@ -185,7 +185,7 @@ export function FilterDropdown({ sections, values, onChange }: FilterDropdownPro
                       <button
                         key={option.value}
                         type="button"
-                        className={cn('filter-option', isActive && 'active')}
+                        className={cn('filter-option', isActive && 'is-active')}
                         onClick={() => onChange(section.key, option.value)}
                       >
                         {option.label}

@@ -298,19 +298,19 @@ export function LeadDetailPanel({
         <div className="details-content">
           <div className="lead-details-tabs">
             <button
-              className={cn('lead-tab', activeTab === 'overview' && 'active')}
+              className={cn('lead-tab', activeTab === 'overview' && 'is-active')}
               onClick={() => setActiveTab('overview')}
             >
               Overview
             </button>
             <button
-              className={cn('lead-tab', activeTab === 'tasks' && 'active')}
+              className={cn('lead-tab', activeTab === 'tasks' && 'is-active')}
               onClick={() => setActiveTab('tasks')}
             >
               Tasks ({tasks.length})
             </button>
             <button
-              className={cn('lead-tab', activeTab === 'notes' && 'active')}
+              className={cn('lead-tab', activeTab === 'notes' && 'is-active')}
               onClick={() => setActiveTab('notes')}
             >
               Notes ({notes.length})
@@ -319,7 +319,7 @@ export function LeadDetailPanel({
 
           {/* Overview Tab */}
           {activeTab === 'overview' && (
-            <div className="lead-tab-content active">
+            <div className="lead-tab-content is-active">
               <div className="project-detail-meta">
                 {lead.project_name && (
                   <MetaItem
@@ -381,7 +381,7 @@ export function LeadDetailPanel({
 
           {/* Tasks Tab */}
           {activeTab === 'tasks' && (
-            <div className="lead-tab-content active">
+            <div className="lead-tab-content is-active">
               {isLoadingTasks ? (
                 <div className="loading-state"><div className="loading-spinner" /></div>
               ) : tasks.length === 0 ? (
@@ -418,7 +418,7 @@ export function LeadDetailPanel({
 
           {/* Notes Tab */}
           {activeTab === 'notes' && (
-            <div className="lead-tab-content active">
+            <div className="lead-tab-content is-active">
               {isLoadingNotes ? (
                 <div className="loading-state"><div className="loading-spinner" /></div>
               ) : notes.length === 0 ? (
@@ -438,7 +438,7 @@ export function LeadDetailPanel({
                       </div>
                       <div className="table-actions">
                         <button
-                          className={cn('icon-btn', note.is_pinned && 'active')}
+                          className={cn('icon-btn', note.is_pinned && 'is-active')}
                           onClick={() => handleTogglePin(note.id)}
                           title={note.is_pinned ? 'Unpin' : 'Pin'}
                           aria-label={note.is_pinned ? 'Unpin note' : 'Pin note'}

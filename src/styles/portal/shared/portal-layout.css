@@ -318,7 +318,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 
 /* Tab section — bordered panel for simple header+list tabs */
 .portal .tab-section {
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   padding: var(--space-3);
 }
 
@@ -570,7 +570,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   color: var(--color-text-primary);
 }
 
-.portal :is(.page-header-tabs, .tab-nav) .tab-btn.active {
+.portal :is(.page-header-tabs, .tab-nav) .tab-btn.is-active {
   color: var(--color-accent);
   border-bottom-color: var(--color-accent);
 }
@@ -814,7 +814,7 @@ html[data-theme="light"] .portal .funnel-value {
 }
 
 .login-btn.loading {
-  opacity: 0.7;
+  opacity: var(--opacity-subtle);
   cursor: not-allowed;
 }
 
@@ -837,7 +837,7 @@ html[data-theme="light"] .portal .funnel-value {
   align-items: stretch;
   gap: var(--space-3);
   background: var(--color-bg-primary);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   padding: var(--portal-card-padding);
 }
 
@@ -856,7 +856,7 @@ html[data-theme="light"] .portal .funnel-value {
 .card-clickable,
 .card-hover {
   background: transparent;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   padding: var(--space-4);
   transition: border-color var(--transition-fast);
   cursor: pointer;
@@ -1075,10 +1075,8 @@ html[data-theme="light"] .portal .funnel-value {
 .text-lg { font-size: var(--font-size-lg, 1.125rem); }
 .text-xl { font-size: var(--font-size-xl, 1.25rem); }
 
-/* Font weight */
-.font-bold { font-weight: var(--font-weight-bold); }
-.font-semibold { font-weight: var(--font-weight-semibold); }
-.font-mono { font-family: var(--font-family-mono, monospace); }
+/* Font weight — .font-bold and .font-semibold are canonical in portal-utilities.css */
+.font-mono { font-family: var(--font-family-mono); }
 
 /* Text alignment */
 .text-center { text-align: center; }
@@ -1159,7 +1157,7 @@ html[data-theme="light"] .portal .funnel-value {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--icon-gap-sm, 6px);
+  gap: var(--icon-gap-sm);
   padding: var(--space-2) var(--space-3);
   border-bottom: var(--border-width) solid var(--color-border-primary);
   font-size: var(--font-size-sm);

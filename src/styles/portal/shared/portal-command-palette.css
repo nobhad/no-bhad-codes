@@ -80,7 +80,7 @@
 
 .command-palette-input::placeholder {
   color: var(--color-text-primary);
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
 }
 
 .command-palette-kbd {
@@ -149,7 +149,7 @@
   width: var(--cmd-palette-item-icon-size);
   height: var(--cmd-palette-item-icon-size);
   flex-shrink: 0;
-  opacity: 0.6;
+  opacity: var(--opacity-muted);
 }
 
 .command-palette-item.selected .command-palette-item-icon,

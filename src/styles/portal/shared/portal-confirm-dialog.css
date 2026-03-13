@@ -47,10 +47,10 @@
 
 .confirm-dialog {
   background: var(--color-bg-secondary);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   box-shadow: none;
   width: 100%;
-  max-width: var(--modal-width-sm, 400px);
+  max-width: var(--modal-width-sm);
   padding: var(--space-6);
   text-align: left;
   font-family: var(--font-family-mono);
@@ -195,14 +195,14 @@
 }
 
 /* Active state for selection buttons (e.g., who cancelled) */
-.confirm-dialog-btn.active {
+.confirm-dialog-btn.is-active {
   background: var(--color-accent);
   color: var(--color-bg-tertiary);
 }
 
 /* Disabled state */
 .confirm-dialog-btn:disabled {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
 
@@ -225,7 +225,7 @@
 /* Scoped border box for icon inside the React body layout */
 .confirm-dialog-body .confirm-dialog-icon {
   padding: var(--space-1-5);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   flex-shrink: 0;
 }
 

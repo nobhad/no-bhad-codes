@@ -551,11 +551,10 @@
 
 /* =====================================================
    PROGRESS BAR
-   Inlined from portal-progress.css
    ===================================================== */
 
 .progress-bar {
-  height: var(--progress-bar-height, 12px);
+  height: var(--progress-bar-height);
   background: var(--color-bg-elevated);
   overflow: hidden;
   box-shadow: var(--shadow-inset-light);
@@ -571,12 +570,12 @@
 
 /* Small progress bar */
 .progress-bar.progress-sm {
-  height: var(--progress-bar-height-sm, 8px);
+  height: var(--progress-bar-height-sm);
 }
 
 /* Large progress bar */
 .progress-bar.progress-lg {
-  height: var(--progress-bar-height-lg, 16px);
+  height: var(--progress-bar-height-lg);
 }
 
 /* Success state */

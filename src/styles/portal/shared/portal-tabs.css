@@ -23,8 +23,8 @@
   display: none;
 }
 
-.tab-content.active,
-.portal-tab-panel.active {
+.tab-content.is-active,
+.portal-tab-panel.is-active {
   display: block;
 }
 
@@ -121,7 +121,7 @@
   .tab,
   .view-toggle button,
   .view-toggle-option
-):hover:not(.active):not(:disabled) {
+):hover:not(.is-active):not(:disabled) {
   color: var(--color-text-primary);
 }
 
@@ -136,7 +136,7 @@
   .portal-subtab,
   .view-toggle button,
   .view-toggle-option
-).active,
+).is-active,
 .tab-active {
   color: var(--color-accent);
   border-bottom: var(--border-width) solid var(--color-accent);
@@ -151,25 +151,25 @@
   .portal-subtab,
   .view-toggle button,
   .view-toggle-option
-).active:hover,
+).is-active:hover,
 :is(
   .portal-tabs button,
   .portal-subtabs button,
   .portal-tab
-).active:focus,
+).is-active:focus,
 :is(
   .portal-tabs button,
   .portal-subtabs button,
   .portal-tab
-).active:active {
+).is-active:active {
   color: var(--color-accent);
   background: transparent;
   outline: none;
 }
 
 /* Remove pseudo-element overlay on active tabs */
-.portal-tabs button.active::after,
-.portal-subtabs button.active::after {
+.portal-tabs button.is-active::after,
+.portal-subtabs button.is-active::after {
   display: none;
 }
 
@@ -228,7 +228,7 @@
   box-shadow: none;
 }
 
-.portal-tab-panel.active {
+.portal-tab-panel.is-active {
   display: block;
 }
 
@@ -244,7 +244,7 @@
   display: none;
 }
 
-.portal-subtab-content.active {
+.portal-subtab-content.is-active {
   display: block;
 }
 
@@ -266,7 +266,7 @@
   border-radius: var(--border-radius-full);
 }
 
-.portal-tab.active .portal-tab-badge {
+.portal-tab.is-active .portal-tab-badge {
   background: var(--color-accent);
   color: var(--color-white);
 }
@@ -285,7 +285,7 @@
   border-radius: var(--border-radius-full);
 }
 
-.portal-subtab.active .portal-subtab-badge {
+.portal-subtab.is-active .portal-subtab-badge {
   background: var(--color-accent);
   color: var(--color-white);
 }
@@ -331,9 +331,9 @@
     padding: var(--space-2) 0;
   }
 
-  .portal-tab-panel.active,
-  .portal-subtab-content.active,
-  .documents-subtab-content.active {
+  .portal-tab-panel.is-active,
+  .portal-subtab-content.is-active,
+  .documents-subtab-content.is-active {
     gap: var(--space-2);
   }
 }
@@ -366,7 +366,7 @@
     padding: var(--space-1-5) 0;
   }
 
-  .portal-tab-panel.active {
+  .portal-tab-panel.is-active {
     gap: var(--space-2);
   }
 }

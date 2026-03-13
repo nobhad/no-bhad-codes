@@ -12,7 +12,7 @@
 @layer components {
 
 /* Progress bars -- small (4px) inline variant used inside React components.
-   The canonical 12px standalone .progress-bar lives in portal-progress.css. */
+   The canonical 12px standalone .progress-bar lives in portal-dashboard-widgets.css. */
 .progress-bar-sm {
   height: 4px;
   background: var(--portal-alpha-white-20);
@@ -123,7 +123,7 @@
 
 .portal-checkbox:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
 }
 
 /* Checked — Radix UI controlled via data-state */

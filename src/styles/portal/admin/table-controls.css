@@ -43,7 +43,7 @@
   min-height: var(--space-6);
   box-sizing: border-box;
   background: var(--color-bg-raised);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   animation: slideDown var(--duration-fast) ease-out;
 }
 
@@ -176,7 +176,7 @@
   margin-left: var(--space-2);
   border-radius: var(--border-radius-sm);
   background: var(--color-bg-secondary);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   color: var(--color-text-tertiary);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
@@ -189,7 +189,7 @@
   min-width: 1rem;
   padding: 0 var(--space-0-5);
   background: var(--color-bg-tertiary);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   font-family: inherit;
   font-size: inherit;
 }

@@ -82,7 +82,7 @@ function ProjectSelector() {
             <li key={project.id} role="option" aria-selected={project.id === activeProjectId}>
               <button
                 type="button"
-                className={`project-selector-option${project.id === activeProjectId ? ' active' : ''}`}
+                className={`project-selector-option${project.id === activeProjectId ? ' is-active' : ''}`}
                 onClick={() => handleSelect(project.id)}
               >
                 {project.name}

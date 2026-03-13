@@ -13,18 +13,18 @@
   flex-direction: row;
   overflow-x: auto;
   padding: 0;
-  min-height: var(--kanban-board-min-height, 500px);
+  min-height: var(--kanban-board-min-height);
   width: 100%;
 }
 
 .kanban-column {
   flex: 1 1 0;
-  min-width: var(--kanban-column-min-width, 200px);
+  min-width: var(--kanban-column-min-width);
   background: transparent;
   border-left: var(--border-width) solid var(--color-border-primary);
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - var(--kanban-column-offset, 320px));
+  max-height: calc(100vh - var(--kanban-column-offset));
   box-shadow: none;
 }
 
@@ -73,7 +73,7 @@
 
 .kanban-column-count {
   background: transparent;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
@@ -91,7 +91,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  min-height: var(--kanban-content-min-height, 120px);
+  min-height: var(--kanban-content-min-height);
 }
 
 .kanban-column-content.is-drag-over {
@@ -103,7 +103,7 @@
   padding: var(--space-2) var(--space-3);
   cursor: grab;
   transition: border-color var(--transition-fast) ease;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   box-shadow: none;
   display: flex;
   flex-direction: column;
@@ -112,11 +112,11 @@
 
 .kanban-card:hover {
   border-color: var(--color-border-primary);
-  transform: translateY(var(--hover-lift-sm, -2px));
+  transform: translateY(var(--hover-lift-sm));
 }
 
 .kanban-card.is-dragging {
-  opacity: 0.6;
+  opacity: var(--opacity-muted);
   cursor: grabbing;
   transform: rotate(2deg);
 }
@@ -136,7 +136,7 @@
 .kanban-card-type svg {
   width: 1em;
   height: 1em;
-  opacity: 0.7;
+  opacity: var(--opacity-subtle);
 }
 
 .kanban-card-title {

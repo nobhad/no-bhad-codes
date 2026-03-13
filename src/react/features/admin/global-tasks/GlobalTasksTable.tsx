@@ -327,14 +327,14 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
           <div className="view-toggle">
             <button
               onClick={() => setViewMode('list')}
-              className={viewMode === 'list' ? 'active' : ''}
+              className={viewMode === 'list' ? 'is-active' : ''}
               title="List view"
             >
               <List className="icon-sm" />
             </button>
             <button
               onClick={() => setViewMode('kanban')}
-              className={viewMode === 'kanban' ? 'active' : ''}
+              className={viewMode === 'kanban' ? 'is-active' : ''}
               title="Board view"
             >
               <LayoutGrid className="icon-sm" />

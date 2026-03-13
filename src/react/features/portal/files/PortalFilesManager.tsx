@@ -218,7 +218,7 @@ const FolderTree = React.memo(({ folders, selectedFolder, totalCount, onSelectFo
       {/* All Files */}
       <button
         type="button"
-        className={cn('folder-item', selectedFolder === 'all' && 'active')}
+        className={cn('folder-item', selectedFolder === 'all' && 'is-active')}
         onClick={() => onSelectFolder('all')}
       >
         <Folder className="icon-sm" />
@@ -231,7 +231,7 @@ const FolderTree = React.memo(({ folders, selectedFolder, totalCount, onSelectFo
         <button
           key={folder.id}
           type="button"
-          className={cn('folder-item folder-item-nested', selectedFolder === folder.id && 'active')}
+          className={cn('folder-item folder-item-nested', selectedFolder === folder.id && 'is-active')}
           onClick={() => onSelectFolder(folder.id)}
         >
           <Folder className="icon-sm" />

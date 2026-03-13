@@ -112,11 +112,11 @@
    ===================================================== */
 .portal .files-browser {
   display: grid;
-  grid-template-columns: var(--files-folder-panel-width, 220px) 1fr;
+  grid-template-columns: var(--files-folder-panel-width) 1fr;
   gap: var(--space-px);
   background: var(--portal-border);
   overflow: hidden;
-  min-height: var(--files-browser-min-height, 300px);
+  min-height: var(--files-browser-min-height);
   padding: 0;
 }
 
@@ -168,7 +168,7 @@
   color: var(--color-text-primary);
 }
 
-.portal .folder-item.active {
+.portal .folder-item.is-active {
   background: transparent;
   color: var(--color-accent);
   border: var(--portal-input-border);
@@ -253,11 +253,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-0-5);
-  min-width: var(--files-filter-group-min-width, 140px);
+  min-width: var(--files-filter-group-min-width);
 }
 
 .portal .files-filter-bar .filter-group.filter-date {
-  min-width: var(--files-filter-date-min-width, 120px);
+  min-width: var(--files-filter-date-min-width);
 }
 
 .portal .files-filter-bar :is(.form-select, .form-input) {
@@ -266,7 +266,7 @@
   background: transparent;
   border: var(--portal-input-border);
   color: var(--color-text-primary);
-  height: var(--icon-btn-size-md, 36px);
+  height: var(--icon-btn-size-md);
 }
 
 .portal .files-filter-bar :is(.form-select, .form-input):focus {
@@ -275,7 +275,7 @@
 }
 
 .portal .files-filter-bar #files-clear-filters {
-  height: var(--icon-btn-size-md, 36px);
+  height: var(--icon-btn-size-md);
   white-space: nowrap;
 }
 
@@ -408,7 +408,7 @@
 
 /* Text buttons in file actions (exclude icon buttons) */
 .portal .file-actions :is(.btn-preview, .btn-download):not(.icon-btn) {
-  min-width: var(--files-action-btn-min-width, 90px);
+  min-width: var(--files-action-btn-min-width);
   text-align: center;
   justify-content: center;
 }
@@ -491,7 +491,7 @@
 }
 
 .files-filter .form-select {
-  max-width: var(--files-filter-select-max-width, 300px);
+  max-width: var(--files-filter-select-max-width);
 }
 
 .files-header {
@@ -633,12 +633,12 @@
 /* Files browser — flex layout: sidebar + content */
 .files-browser-layout {
   display: flex;
-  min-height: var(--files-browser-min-height, 300px);
+  min-height: var(--files-browser-min-height);
 }
 
 /* Folder sidebar — hidden on mobile, shown on desktop */
 .portal-files-sidebar {
-  width: var(--portal-files-sidebar-width, 200px);
+  width: var(--portal-files-sidebar-width);
   flex-shrink: 0;
   display: none;
   border-right: var(--portal-border);
@@ -728,7 +728,7 @@
    FILE ITEM STATES
    ===================================================== */
 .file-item.locked {
-  opacity: 0.7;
+  opacity: var(--opacity-subtle);
 }
 
 /* =====================================================
@@ -736,7 +736,7 @@
    ===================================================== */
 .files-list.grid-view {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--files-grid-item-min-width, 150px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(var(--files-grid-item-min-width), 1fr));
   gap: var(--space-1);
 }
 
@@ -769,6 +769,6 @@
    ===================================================== */
 @media (--mobile) {
   .folder-tree {
-    max-height: var(--files-folder-tree-max-height, 150px);
+    max-height: var(--files-folder-tree-max-height);
   }
 }

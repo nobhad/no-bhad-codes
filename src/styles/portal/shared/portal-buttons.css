@@ -227,13 +227,13 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   border-radius: 0;
   text-decoration: none;
 }
-.portal :is(.nav-btn:hover, .nav-btn.active) {
+.portal :is(.nav-btn:hover, .nav-btn.is-active) {
   background: transparent;
   box-shadow: none;
   border: none;
   color: var(--color-accent);
 }
-.portal :is(.nav-btn:hover, .nav-btn.active) .nav-icon {
+.portal :is(.nav-btn:hover, .nav-btn.is-active) .nav-icon {
   color: var(--color-accent);
 }
 .portal .nav-btn .nav-icon {
@@ -346,7 +346,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 }
 
 /* Icon button with border active state */
-.icon-btn.icon-btn-outline.active {
+.icon-btn.icon-btn-outline.is-active {
   border-color: var(--color-accent);
   color: var(--color-accent);
 }
@@ -529,7 +529,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 }
 
 /* Active/hover states */
-.portal :is(.sidebar.collapsed, .sidebar.icon-only) .nav-btn.active {
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .nav-btn.is-active {
   background: transparent;
   border: none;
   outline: none;
@@ -538,7 +538,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 
 .portal
   :is(.sidebar.collapsed, .sidebar.icon-only)
-  .nav-btn:is(.active, :hover, :focus)
+  .nav-btn:is(.is-active, :hover, :focus)
   .nav-icon {
   color: var(--color-accent);
 }
@@ -559,7 +559,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   margin: 0;
 }
 
-.portal :is(.sidebar.collapsed, .sidebar.icon-only) .nav-btn:is(.active, :hover) .nav-icon svg {
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .nav-btn:is(.is-active, :hover) .nav-icon svg {
   filter: drop-shadow(0 1px 1px var(--portal-alpha-black-30));
 }
 
@@ -585,14 +585,14 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
     overflow: visible;
   }
 
-  .portal .sidebar:not(.collapsed) .nav-btn.active,
+  .portal .sidebar:not(.collapsed) .nav-btn.is-active,
   .portal .sidebar:not(.collapsed) .nav-btn:is(:hover, :focus) {
     background: transparent;
     border: none;
     box-shadow: none;
   }
 
-  .portal .sidebar:not(.collapsed) .nav-btn:is(.active, :hover) .nav-icon {
+  .portal .sidebar:not(.collapsed) .nav-btn:is(.is-active, :hover) .nav-icon {
     color: var(--color-accent);
   }
 
@@ -625,10 +625,10 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 .toggle-btn:not(:last-child) {
   border-right: var(--border-width) solid var(--portal-btn-border-color);
 }
-.toggle-btn:hover:not(.active) {
+.toggle-btn:hover:not(.is-active) {
   background: var(--portal-alpha-white-10);
 }
-.toggle-btn.active {
+.toggle-btn.is-active {
   background: var(--color-white);
   color: var(--color-black);
 }

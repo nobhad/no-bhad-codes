@@ -62,7 +62,7 @@
 
 .config-form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--config-grid-min-width, 280px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(var(--config-grid-min-width), 1fr));
   gap: var(--space-3);
 }
 
@@ -82,7 +82,7 @@
 
 .config-textarea {
   resize: vertical;
-  min-height: var(--config-textarea-min-height, 72px);
+  min-height: var(--config-textarea-min-height);
   font-family: inherit;
 }
 
@@ -92,7 +92,7 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   background: var(--color-bg-raised);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   font-family: var(--font-family-mono);
   letter-spacing: var(--letter-spacing-wider);
 }
@@ -154,7 +154,7 @@
 
 .config-overview-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--config-overview-grid-min-width, 180px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(var(--config-overview-grid-min-width), 1fr));
   gap: var(--space-2);
 }
 
@@ -197,7 +197,7 @@
   display: flex;
   flex-direction: column;
   background: var(--color-bg-raised);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   border-radius: var(--border-radius-md);
   overflow: hidden;
 }
@@ -237,7 +237,7 @@
 
 .snapshot-field-label {
   color: var(--color-text-tertiary);
-  min-width: var(--config-field-label-min-width, 64px);
+  min-width: var(--config-field-label-min-width);
   flex-shrink: 0;
 }
 

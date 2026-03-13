@@ -65,7 +65,7 @@ export function PortalLayout() {
 
 function TabLoadingFallback() {
   return (
-    <div className="tab-content active">
+    <div className="tab-content is-active">
       <div className="loading-state">
         <div className="loading-spinner" />
         <p className="loading-text">Loading...</p>

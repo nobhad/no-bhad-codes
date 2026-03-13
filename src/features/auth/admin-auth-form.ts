@@ -26,7 +26,7 @@ const PASSWORD_INPUT_ID = 'admin-password';
 const AUTH_ERROR_ID = 'auth-error';
 const PASSWORD_TOGGLE_ID = 'password-toggle';
 const SUBMIT_BUTTON_SELECTOR = '.auth-submit';
-const ACTIVE_CLASS = 'active';
+const ACTIVE_CLASS = 'is-active';
 
 // --- Helpers ---
 

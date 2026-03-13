@@ -67,7 +67,7 @@
 
 [data-page="admin"] .inline-edit-input::placeholder {
   color: var(--color-text-tertiary);
-  opacity: 0.6;
+  opacity: var(--opacity-muted);
 }
 
 /* Placeholder text for empty values */
@@ -102,7 +102,7 @@
 .portal .inline-edit-wrapper {
   display: flex;
   align-items: center;
-  gap: var(--icon-gap-xs, 4px);
+  gap: var(--icon-gap-xs);
 }
 
 /* Action buttons (save/cancel) */
@@ -143,7 +143,7 @@
 .portal .inline-edit-display {
   display: flex;
   align-items: center;
-  gap: var(--icon-gap-xs, 4px);
+  gap: var(--icon-gap-xs);
   cursor: pointer;
   min-height: var(--space-3);
   padding: 0 var(--space-0-5);
@@ -216,7 +216,7 @@
   transform: translateY(-50%);
   width: 13px;
   height: 13px;
-  z-index: 1;
+  z-index: var(--z-index-1);
   cursor: pointer;
   pointer-events: all;
   color: var(--color-text-secondary);
@@ -225,7 +225,7 @@
 /* Date input — left padding makes room for the Calendar icon */
 .portal .inline-edit-input-compact--date {
   padding-left: var(--space-3);
-  min-width: var(--inline-edit-date-min-width, 130px);
+  min-width: var(--inline-edit-date-min-width);
   color-scheme: dark;
 }
 
@@ -248,7 +248,7 @@
 .portal .inline-edit-value--multiline {
   white-space: pre-wrap;
   word-break: break-word;
-  line-height: var(--line-height-normal, 1.5);
+  line-height: var(--line-height-normal);
 }
 
 /* Textarea input (standalone, not scoped to pd-header-card) */
@@ -258,7 +258,7 @@
   padding: var(--space-1) var(--space-2, 6px);
   resize: vertical;
   font-family: inherit;
-  line-height: var(--line-height-normal, 1.5);
+  line-height: var(--line-height-normal);
 }
 
 /* Actions row for textarea (standalone, not scoped to inline-edit-row) */
@@ -273,7 +273,7 @@
 .portal .inline-link-external {
   display: inline-flex;
   align-items: center;
-  margin-left: var(--icon-gap-xs, 4px);
+  margin-left: var(--icon-gap-xs);
   color: var(--color-text-tertiary);
   transition: color var(--transition-faster, 0.1s) ease;
 }
@@ -298,7 +298,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: var(--table-cell-padding-y, 12px) 0;
+  padding: var(--table-cell-padding-y) 0;
   border-bottom: var(--portal-border);
   gap: var(--space-4);
 }
@@ -311,9 +311,9 @@
 .portal .inline-edit-label {
   display: flex;
   align-items: center;
-  gap: var(--icon-gap-sm, 6px);
+  gap: var(--icon-gap-sm);
   flex-shrink: 0;
-  min-width: var(--inline-edit-label-min-width, 140px);
+  min-width: var(--inline-edit-label-min-width);
 }
 
 .portal .inline-edit-label .inline-edit-icon {
@@ -339,7 +339,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--icon-gap-xs, 4px);
+  gap: var(--icon-gap-xs);
   text-align: right;
   color: var(--color-text-primary);
   font-size: var(--font-size-base, 14px);
@@ -408,7 +408,7 @@
 
 .portal .inline-edit-row .inline-edit-input::placeholder {
   color: var(--color-text-tertiary);
-  opacity: 0.6;
+  opacity: var(--opacity-muted);
 }
 
 .portal .inline-edit-row .inline-edit-input.has-error {
@@ -416,7 +416,7 @@
 }
 
 .portal .inline-edit-row .inline-edit-input:disabled {
-  opacity: 0.6;
+  opacity: var(--opacity-muted);
 }
 
 /* Select in edit mode */

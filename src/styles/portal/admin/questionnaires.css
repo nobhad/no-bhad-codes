@@ -8,7 +8,7 @@
   display: flex;
   flex-direction: column;
   margin-bottom: var(--space-4);
-  min-height: var(--questionnaire-builder-min-height, 100px);
+  min-height: var(--questionnaire-builder-min-height);
 }
 
 /* .empty-state styling from components/loading.css */
@@ -16,7 +16,7 @@
 /* Individual question item */
 [data-page="admin"] .question-item {
   background-color: var(--color-bg-primary);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   padding: var(--space-3);
 }
 
@@ -35,7 +35,7 @@
 
 [data-page="admin"] .question-type-select {
   padding: var(--space-1) var(--space-2);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
@@ -61,7 +61,7 @@
 [data-page="admin"] .question-text {
   width: 100%;
   padding: var(--space-2);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-size: var(--font-size-base);
@@ -82,7 +82,7 @@
 [data-page="admin"] .question-options-input {
   width: 100%;
   padding: var(--space-2);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
@@ -114,7 +114,7 @@
 [data-page="admin"] .response-answer-item {
   padding: var(--space-3);
   background-color: var(--color-bg-primary);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
 }
 
 [data-page="admin"] .response-question {
@@ -175,13 +175,13 @@
 
 /* Larger modal for questionnaire editor */
 [data-page="admin"] #questionnaire-modal .portal-modal--lg {
-  max-width: var(--questionnaire-modal-max-width, 700px);
+  max-width: var(--questionnaire-modal-max-width);
   width: 90%;
 }
 
 /* View response modal sizing */
 [data-page="admin"] #view-response-modal .portal-modal--lg {
-  max-width: var(--questionnaire-modal-max-width, 700px);
+  max-width: var(--questionnaire-modal-max-width);
   width: 90%;
   max-height: 85vh;
 }
@@ -224,11 +224,11 @@
 [data-page="admin"] .conditional-question-select,
 [data-page="admin"] .conditional-value-select {
   padding: var(--space-1) var(--space-2);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
-  min-width: var(--conditional-select-min-width, 150px);
+  min-width: var(--conditional-select-min-width);
 }
 
 [data-page="admin"] .conditional-equals {

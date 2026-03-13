@@ -36,7 +36,7 @@
 
 .project-status {
   padding: 0.5rem 1rem;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
@@ -57,7 +57,7 @@
   display: flex;
   flex-direction: column;
   height: calc(100vh - 200px);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
 }
 
 .preview-toolbar {
@@ -73,7 +73,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   font-size: var(--font-size-sm);
 }
 

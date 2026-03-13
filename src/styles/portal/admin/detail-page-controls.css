@@ -83,8 +83,6 @@
   margin-bottom: 0;
 }
 
-/* Dropdown danger item styling moved to shared/portal-dropdown.css */
-
 /* ===============================================
    MORE MENU DROPDOWN
    Three-dot menu for secondary actions
@@ -142,7 +140,7 @@
   min-width: 200px;
   max-height: none;
   background: var(--color-bg-tertiary);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   list-style: none;
   margin: 0;
   padding: var(--space-0-5) 0;
@@ -272,7 +270,7 @@
   margin: 0;
   list-style: none;
   background: var(--color-bg-tertiary);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-dropdown);
   z-index: var(--z-index-max);

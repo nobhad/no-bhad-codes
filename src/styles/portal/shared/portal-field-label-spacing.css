@@ -30,7 +30,7 @@
 .field-label,
 .meta-label {
   display: block;
-  margin-bottom: var(--portal-field-label-gap, 0.25rem);
+  margin-bottom: var(--portal-field-label-gap);
   line-height: var(--line-height-tight);
   /* Global rule: all field labels stay on a single line across the portal */
   white-space: nowrap !important;
@@ -41,7 +41,7 @@
 .field-label svg {
   display: inline-block;
   vertical-align: middle;
-  margin-right: var(--portal-field-label-gap, 0.25rem);
+  margin-right: var(--portal-field-label-gap);
 }
 
 /* Label variants */
@@ -77,7 +77,7 @@
 .meta-item {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-field-label-gap, 0.25rem);
+  gap: var(--portal-field-label-gap);
 }
 
 /* Remove margin-bottom from labels inside meta-item (gap handles spacing) */

@@ -33,7 +33,7 @@
   line-height: 1.2;
   color: var(--color-text-primary);
   background: transparent;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
 }
 
 .help-search-input:focus {
@@ -125,7 +125,7 @@
   align-items: flex-start;
   gap: var(--space-1-5);
   padding: var(--space-1-5);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   color: var(--color-text-primary);
   width: 100%;
   cursor: pointer;
@@ -209,7 +209,7 @@
   gap: var(--space-1-5);
   padding: var(--space-1-5);
   width: 100%;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   color: var(--color-text-primary);
   cursor: pointer;
 }
@@ -304,7 +304,7 @@
 .help-article-body pre {
   margin: 0 0 var(--space-1-5);
   padding: var(--space-1-5);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   overflow-x: auto;
 }
 

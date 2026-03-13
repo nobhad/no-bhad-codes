@@ -21,7 +21,7 @@
   min-height: 200px;
   padding: var(--space-4);
   background: var(--color-bg-secondary);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
 }
 
 .error-boundary-content {
@@ -59,7 +59,7 @@
   width: 100%;
   padding: var(--space-2);
   background: var(--color-bg-primary);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   font-family: var(--font-family-mono, monospace);
   font-size: var(--font-size-xs);
   color: var(--color-danger);

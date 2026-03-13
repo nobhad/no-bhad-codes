@@ -169,13 +169,6 @@ body[data-page="client-portal"] {
   }
 }
 
-/* ============================================
-   Portal uses unified global header
-   Page header element removed - styles deprecated
-   ============================================ */
-
-/* .header-page-title removed — replaced by breadcrumb nav in global header. */
-
 /* Subtabs container base — shared/portal-layout.css (.portal .portal-header-subtabs) */
 
 /* ============================================
@@ -298,7 +291,7 @@ body[data-page="client-portal"] {
 
 /* Loading States */
 .login-btn.loading {
-  opacity: 0.7;
+  opacity: var(--opacity-subtle);
   cursor: not-allowed;
 }
 

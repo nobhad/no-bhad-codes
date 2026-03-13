@@ -149,7 +149,7 @@
   gap: var(--space-4);
   padding: var(--space-3);
   background: transparent;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
 }
 
 .portal .notification-option-content {
@@ -198,14 +198,14 @@
   width: var(--space-4-5, 36px);
   flex-shrink: 0;
   cursor: pointer;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   background: transparent;
   transition: background-color var(--transition-fast);
 }
 
 .portal .notification-toggle:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
 }
 
 .portal .notification-toggle.is-checked {

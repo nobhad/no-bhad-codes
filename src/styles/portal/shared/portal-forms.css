@@ -216,7 +216,7 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
 
 /* Disabled state */
 :is(input, textarea, select, .form-input, .form-textarea, .form-select):disabled {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
   background-color: var(--color-bg-readonly);
 }
@@ -241,18 +241,13 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   margin-top: var(--space-0-5);
 }
 
-/* Required field indicator - consolidated aliases:
-   .form-required-indicator = legacy
-   .form-required            = used by PortalInput, QuestionnaireForm, NewRequestForm
-
+/* Required field indicator */
 :is(.form-required-indicator, .form-required) {
   color: var(--color-danger);
   margin-left: var(--space-0-5);
 }
 
-/* Helper text below inputs - consolidated aliases:
-   .form-helper-text  = legacy / PortalInput
-
+/* Helper text below inputs */
 .form-helper-text {
   color: var(--color-text-tertiary);
   font-size: var(--font-size-sm);
@@ -368,7 +363,7 @@ input.search-bar-input {
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   /* Match adjacent filter dropdown height site-wide */
-  height: var(--portal-btn-icon-size, 36px);
+  height: var(--portal-btn-icon-size);
   box-sizing: border-box;
 }
 
@@ -451,7 +446,7 @@ input.search-bar-input {
 }
 
 .input:disabled {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
 
@@ -485,13 +480,15 @@ input.search-bar-input {
 }
 
 .select:disabled {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
 
 /* ============================================
  * FORM DROPDOWN TRIGGER
- * PortalDropdown-based replacement for native <select>
+ * PortalDropdown-based replacement for native <select>.
+ * Context-specific variant of .dropdown-trigger (portal-dropdown.css).
+ * Differs: full-width, form typography, border, background, outline.
  * ============================================ */
 
 .form-dropdown-trigger {
@@ -524,7 +521,7 @@ input.search-bar-input {
 }
 
 .form-dropdown-trigger:disabled {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
 
@@ -582,7 +579,7 @@ input.search-bar-input {
 }
 
 .textarea:disabled {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
 
@@ -600,10 +597,6 @@ input.search-bar-input {
   border-radius: 0;
   cursor: pointer;
 }
-
-/* NOTE: .form-required and .form-error-text are consolidated with their
-   factory equivalents above (see "Required field indicator" and
-   "Error message text" sections). */
 
 /* Form textarea resizable */
 .form-textarea-resizable {
@@ -774,7 +767,7 @@ input.search-bar-input {
 
 .qform-dropzone-disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
 }
 
 .qform-dropzone-text {
@@ -909,7 +902,7 @@ input.search-bar-input {
 }
 
 .form-field-radio-label--disabled {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
 
@@ -995,7 +988,7 @@ input.search-bar-input {
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-1-5);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
 }
 .file-upload-item.has-error {
   border-color: var(--color-danger);

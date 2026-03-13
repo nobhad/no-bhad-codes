@@ -478,5 +478,5 @@
 /* Quick action buttons - ensure visible borders with thicker bottom */
 .ovdash-quick-actions .btn-secondary {
   border: var(--portal-btn-border-width) solid var(--portal-btn-border-color);
-  border-bottom-width: var(--portal-btn-border-bottom-width, 6px);
+  border-bottom-width: var(--portal-btn-border-bottom-width);
 }

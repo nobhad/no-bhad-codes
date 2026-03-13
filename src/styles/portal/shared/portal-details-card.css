@@ -36,8 +36,8 @@
   width: 0;
   height: 0;
   border-left: 5px solid var(--color-text-secondary);
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
+  border-top: var(--border-width-4) solid transparent;
+  border-bottom: var(--border-width-4) solid transparent;
   transition: transform var(--transition-mouse) ease;
 }
 

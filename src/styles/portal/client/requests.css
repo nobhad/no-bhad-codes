@@ -95,7 +95,7 @@
   gap: var(--space-0-5);
   margin: 0 0 var(--space-1) 0;
   padding: var(--space-1);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
 }
@@ -119,7 +119,7 @@
   display: grid;
   gap: var(--space-0-5);
   padding: var(--space-1);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
 }

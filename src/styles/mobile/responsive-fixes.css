@@ -88,7 +88,7 @@
     border-color: var(--color-border-primary, var(--color-border-primary));
   }
 
-  .pagination-page-btn:hover:not(.active) {
+  .pagination-page-btn:hover:not(.is-active) {
     background: var(--color-bg-hover, var(--color-state-hover));
     border-color: var(--color-border-primary, var(--color-border-primary));
   }

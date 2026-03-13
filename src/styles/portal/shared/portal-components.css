@@ -18,9 +18,9 @@
  * - portal-analytics.css: Analytics component
  * - portal-tab-components.css: Shared portal card layout classes (title-group, status-group, etc.)
  *
- * Inlined (previously separate files):
- * - portal-tags.css → Tag input (.tag-remove)
- * - portal-charts.css → Simple KPI cards (.kpi-card)
+ * Inlined:
+ * - Tag input (.tag-remove)
+ * - Simple KPI cards (.kpi-card)
  */
 
 /* 1. Utilities first (foundational classes used everywhere) */
@@ -52,7 +52,6 @@
 
 /* =====================================================
    TAG INPUT
-   Inlined from portal-tags.css
    ===================================================== */
 
 .tag-remove {
@@ -63,7 +62,7 @@
   border: none;
   cursor: pointer;
   padding: 0;
-  opacity: 0.7;
+  opacity: var(--opacity-subtle);
   transition: opacity var(--transition-fast);
 }
 
@@ -73,7 +72,6 @@
 
 /* =====================================================
    SIMPLE CHARTS - KPI CARDS
-   Inlined from portal-charts.css
    ===================================================== */
 
 .kpi-card {

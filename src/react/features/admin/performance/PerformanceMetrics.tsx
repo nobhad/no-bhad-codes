@@ -127,7 +127,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: 
             <button
               key={p}
               onClick={() => setPeriod(p)}
-              className={cn('view-toggle-btn', period === p && 'active')}
+              className={cn('view-toggle-btn', period === p && 'is-active')}
             >
               {p}
             </button>

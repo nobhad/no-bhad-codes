@@ -106,7 +106,7 @@
   padding: var(--space-0-5) var(--space-1-5);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   white-space: nowrap;
 }
 
@@ -155,7 +155,7 @@
   width: 28px;
   height: 28px;
   background: none;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: border-color var(--transition-fast), color var(--transition-fast);
@@ -167,7 +167,7 @@
 }
 
 .audit-page-btn:disabled {
-  opacity: 0.3;
+  opacity: var(--opacity-faint);
   cursor: default;
 }
 
