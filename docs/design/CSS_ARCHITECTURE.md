@@ -719,6 +719,179 @@ Additional granular breakpoints are available. See `src/styles/variables.css` fo
 
 ---
 
+## Intentional Deviations from Standard Patterns
+
+These are places where the code deliberately breaks a stated rule. Each entry explains what the deviation is, why it exists, and how to recognize it as intentional rather than a mistake.
+
+### 1. Hardcoded hex values in `portal-theme.css`
+
+**Rule broken:** No hardcoded colors — use CSS variables.
+
+**Where:** `src/design-system/tokens/portal-theme.css` lines 46–47 (light mode) and 480–481 (dark mode).
+
+```css
+--color-text-primary: #333333;
+--color-bg-primary: #e0e0e0;
+```
+
+**Why:** These two values ARE the design tokens — the entire portal theme derives from them via `color-mix()`. They cannot reference other variables because they ARE the source. Every other portal color is computed from these two. This is the only place in the entire codebase where hex values are correct.
+
+---
+
+### 2. Inverted semantic color names
+
+**Rule broken:** Token names must describe purpose (`--color-white` should be white).
+
+**Where:** `src/design-system/tokens/portal-theme.css` — semantic color aliases section.
+
+```css
+--color-white: var(--color-text-primary); /* Portal: "white" = most prominent text */
+--color-black: var(--color-bg-primary);   /* Portal: "black" = base background */
+```
+
+**Why:** The portal uses an inverted Discothèque theme — dark mode has white text on black, light mode has dark text on light grey. Legacy code uses `--color-white` and `--color-black` expecting "prominent" and "background" respectively. Inverting these tokens makes legacy references work correctly in both modes without touching the call sites.
+
+---
+
+### 3. Runtime-injected CSS variable with no definition in token files
+
+**Rule broken:** All `var(--x)` references must be defined in `src/design-system/tokens/`.
+
+**Where:** `src/styles/portal/shared/portal-dropdown.css` line 173.
+
+```css
+width: var(--radix-dropdown-menu-trigger-width, var(--portal-dropdown-min-width));
+```
+
+**Why:** `--radix-dropdown-menu-trigger-width` is injected at runtime by Radix UI onto each dropdown trigger element. It cannot be pre-defined — it's computed from the rendered DOM. The fallback `var(--portal-dropdown-min-width)` ensures the rule degrades safely if Radix is not present.
+
+---
+
+### 4. `--color-brand-hover` intentional undefined primary
+
+**Rule broken:** Use the defined token, not a fallback chain.
+
+**Where:** `src/styles/portal/shared/portal-buttons.css` lines 152–154.
+
+```css
+background: var(--color-brand-hover, var(--color-interactive-primary-hover));
+border-color: var(--color-brand-hover, var(--color-interactive-primary-hover));
+```
+
+**Why:** `--color-brand-hover` is a customization slot — it's undefined by design so specific portals or themes can define it to override the button hover color without modifying the token files. The fallback `--color-interactive-primary-hover` (#b91c1c) is the actual operative value until a theme defines `--color-brand-hover`.
+
+---
+
+### 5. Dropdown context variables — defined only at component scope
+
+**Rule broken:** Tokens should be defined at `:root` or `body[data-page]` level.
+
+**Where:** `src/styles/portal/shared/portal-dropdown.css` and `src/styles/portal/shared/portal-modal-system.css`.
+
+```css
+/* Modal context sets these */
+.portal-modal .custom-dropdown[data-modal-dropdown] {
+  --dropdown-bg: var(--color-black);
+  --dropdown-border-color: var(--color-border-primary);
+  --dropdown-border-width: 1px;
+  --dropdown-radius: var(--border-radius-lg);
+}
+```
+
+**Why:** `--dropdown-bg`, `--dropdown-border-color`, `--dropdown-border-width`, and `--dropdown-radius` are intentional context variables — they exist to be overridden per-usage-site. The `.custom-dropdown` component reads them from its nearest ancestor scope. Defaults are defined in `portal-theme.css` so they always resolve, but the point of these tokens is that callers customize them.
+
+---
+
+### 6. `!important` on `white-space: nowrap`
+
+**Rule broken:** No `!important`.
+
+**Where:** `src/styles/portal/shared/portal-field-label-spacing.css` line 36.
+
+```css
+.field-label, .meta-label {
+  white-space: nowrap !important;
+}
+```
+
+**Why:** Field labels must never wrap — wrapping breaks the two-column label/value layout across all portal pages. Without `!important`, downstream component CSS (particularly table cell constraints and flex containers) overrides `white-space` and causes label text to break onto multiple lines. This was an explicit design decision after encountering layout bugs. Do not remove.
+
+---
+
+### 7. Unlayered portal CSS beats all `@layer` declarations
+
+**Rule broken:** "Use cascade layers — all new styles must be placed in the correct layer."
+
+**Where:** The majority of `src/styles/portal/shared/*.css`, `src/styles/portal/admin/*.css`, and `src/styles/portal/client/*.css` have no `@layer` wrapper.
+
+**Why:** This is intentional architecture. Files that use `@layer components` or `@layer utilities` (portal-tables.css, portal-buttons.css, etc.) contain BASE component structure at intentionally low priority. The unlayered portal files contain context-specific overrides that must beat those base styles. The layer order in both `admin/index.css` and `client/index.css` documents the intended cascade:
+
+```css
+@layer tokens, components, utilities, responsive;
+/* Unlayered (no @layer) = highest priority, beats all of the above */
+```
+
+New portal CSS should be unlayered unless it is explicitly a low-priority base style that should be overridable by other portal files.
+
+---
+
+### 8. `color-scheme: dark` on date inputs
+
+**Rule broken:** No browser-specific properties without a comment.
+
+**Where:** `src/styles/portal/shared/portal-inline-edit.css` line 229 and `portal-forms.css`.
+
+```css
+.portal .inline-edit-input-compact--date {
+  color-scheme: dark;
+}
+```
+
+**Why:** Without this, browsers render the native date picker UI (calendar popup, spinner) in light mode even when the portal is in dark mode. `color-scheme: dark` tells the browser to use its dark-mode native controls. This is the only supported cross-browser mechanism for this.
+
+---
+
+### 9. `left: -9999px` in portal-auth.css
+
+**Rule broken:** No magic numbers — use tokens.
+
+**Where:** `src/styles/portal/shared/portal-auth.css`.
+
+```css
+left: -9999px;
+```
+
+**Why:** This is the canonical CSS technique for screen-reader-only (visually hidden) content — moving an element far off-screen while keeping it in the accessibility tree. `-9999px` is an industry-standard idiom. Tokenizing it (e.g., `--sr-only-offset`) would obscure the intent. It is not a design value.
+
+---
+
+### 10. `body[data-page]` specificity over `:root`
+
+**Rule broken:** Token definitions belong at `:root`.
+
+**Where:** All of `src/design-system/tokens/portal-theme.css`.
+
+```css
+body[data-page="admin"],
+body[data-page="client-portal"] {
+  --color-text-primary: #333333; /* Overrides :root definition from colors.css */
+}
+```
+
+**Why:** Portal token overrides intentionally use `body[data-page]` rather than `:root` because they must beat the `:root` definitions in `colors.css` without using `!important`. CSS specificity ensures portal pages always use portal colors, and main-site pages always use main-site colors, without any import-order fragility.
+
+---
+
+### 11. Multiple `@layer` blocks in the same file
+
+**Rule broken:** Each file should have one cohesive `@layer` block.
+
+**Where:** `src/styles/portal/shared/portal-tables.css` — 15 separate `@layer` blocks.
+
+**Why:** `portal-tables.css` is the most complex file in the portal (~1,900 lines) and organizes its rules by feature section (base table, mobile responsive, kanban table, etc.). Interleaving `@layer components`, `@layer utilities`, and `@layer responsive` blocks throughout the file keeps related rules co-located while still declaring their correct cascade layer. CSS correctly merges all same-named layer blocks — multiple `@layer components` blocks in one file behave identically to one large block.
+
+---
+
 ## Recent Changes
 
 ### March 11, 2026 — Universal Dropdown Caret Positioning & Capitalization
