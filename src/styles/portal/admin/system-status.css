@@ -163,7 +163,7 @@
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
   padding: var(--space-0-5) var(--space-1-5);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
 }
 
 .status-incident-severity.severity-critical {

@@ -104,7 +104,7 @@ export function TablePagination({
               <ChevronLeft />
             </button>
 
-            <span className="pagination-page-btn active">
+            <span className="pagination-page-btn is-active">
               {page}
             </span>
 

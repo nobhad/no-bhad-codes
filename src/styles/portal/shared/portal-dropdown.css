@@ -93,8 +93,8 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
   right: var(--dropdown-padding-x);
   top: 50%;
   transform: translateY(-50%);
-  width: var(--dropdown-caret-size, 1em);
-  height: var(--dropdown-caret-size, 1em);
+  width: var(--dropdown-caret-size);
+  height: var(--dropdown-caret-size);
   color: currentColor;
   transition: transform var(--transition-fast);
 }
@@ -180,13 +180,13 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
    Those triggers require sideOffset={-4} at the usage site to close the remaining 4px gap. */
 .portal-dropdown-content[data-side="bottom"] {
   border-top: none;
-  margin-top: calc(-1 * var(--portal-btn-border-width, 2px));
+  margin-top: calc(-1 * var(--portal-btn-border-width));
 }
 
 /* Remove bottom border when positioned above trigger */
 .portal-dropdown-content[data-side="top"] {
   border-bottom: none;
-  margin-bottom: calc(-1 * var(--portal-btn-border-width, 2px));
+  margin-bottom: calc(-1 * var(--portal-btn-border-width));
 }
 
 /* Sub content - same styling as main content */
@@ -285,7 +285,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 
 .portal-dropdown-item[data-disabled] {
   pointer-events: none;
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
 }
 
 .portal-dropdown-item.inset {
@@ -353,7 +353,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 
 .portal-dropdown-checkbox-item[data-disabled] {
   pointer-events: none;
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
 }
 
 .portal-dropdown-checkbox-item .indicator-wrapper {
@@ -391,7 +391,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 
 .portal-dropdown-radio-item[data-disabled] {
   pointer-events: none;
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
 }
 
 .portal-dropdown-radio-item .indicator-wrapper {
@@ -811,7 +811,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   background-color: var(--color-bg-primary);
   border: var(--portal-input-border);
   border-top: none;
-  z-index: var(--z-index-portal-dropdown, 9700);
+  z-index: var(--z-index-portal-dropdown);
   display: none;
   box-shadow: none;
   clip-path: none;
@@ -1222,7 +1222,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 .confirm-dialog .modal-dropdown .custom-dropdown-text.placeholder,
 .portal-modal .modal-dropdown .custom-dropdown-text.placeholder {
   color: var(--color-text-primary);
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
 }
 
 /* Modal-dropdown caret — inherits size/color/transition from root .custom-dropdown-caret */
@@ -1275,7 +1275,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   top: 100%;
   left: 0;
   right: 0;
-  z-index: var(--z-index-portal-dropdown, 1000);
+  z-index: var(--z-index-portal-dropdown);
   margin-top: -1px;
   padding: 0;
   list-style: none;
@@ -1344,7 +1344,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 .modal-dropdown-overlay {
   position: fixed;
   inset: 0;
-  z-index: var(--z-index-modal, 50);
+  z-index: var(--z-index-modal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1376,7 +1376,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   border-color: var(--color-accent);
 }
 .modal-dropdown-trigger.is-disabled {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
 .modal-dropdown-trigger.has-error {
@@ -1472,7 +1472,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   color: var(--color-accent);
 }
 .modal-dropdown-option.is-disabled {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
 

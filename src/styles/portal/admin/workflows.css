@@ -41,7 +41,7 @@
 .data-table code {
   background: var(--color-bg-raised);
   padding: var(--space-0-5) var(--space-1);
-  font-size: var(--table-cell-font-size, 12px);
+  font-size: var(--table-cell-font-size);
 }
 
 

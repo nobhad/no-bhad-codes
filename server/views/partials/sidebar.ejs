@@ -4,7 +4,7 @@
     <!-- Navigation Buttons -->
     <div class="sidebar-buttons">
       <% config.navigation.forEach(item => { %>
-        <button class="nav-btn<%= item.active ? ' active' : '' %>" id="btn-<%= item.id %>" data-tab="<%= item.dataTab || item.id %>"<% if (item.shortcut) { %> data-shortcut="<%= item.shortcut %>"<% } %> aria-label="<%= item.ariaLabel || item.label %>">
+        <button class="nav-btn<%= item.active ? ' is-active' : '' %>" id="btn-<%= item.id %>" data-tab="<%= item.dataTab || item.id %>"<% if (item.shortcut) { %> data-shortcut="<%= item.shortcut %>"<% } %> aria-label="<%= item.ariaLabel || item.label %>">
           <%- item.icon.replace('<svg ', '<svg class="nav-icon" aria-hidden="true" ') %>
           <span class="nav-label"><%= item.label %></span>
           <% if (item.badge) { %>

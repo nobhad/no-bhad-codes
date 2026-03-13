@@ -176,7 +176,7 @@ function GlobalKeyboardShortcuts() {
           e.preventDefault();
           refreshBtn.click();
         }
-        return;
+
       }
     }
 

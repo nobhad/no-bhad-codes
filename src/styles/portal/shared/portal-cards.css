@@ -48,7 +48,7 @@
 .analytics-chart-card,
 .kpi-card {
   background: transparent;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   overflow: hidden;
 }
 
@@ -534,7 +534,7 @@ html[data-theme="light"] .portal :is(
 @keyframes pulse {
   0%,
   100% {
-    opacity: 0.4;
+    opacity: var(--opacity-inactive);
   }
   50% {
     opacity: 1;
@@ -640,7 +640,7 @@ html[data-theme="light"] .portal :is(
   :is(.milestone-title, .milestone-task-title) {
   text-decoration: line-through;
   color: var(--color-text-secondary);
-  opacity: 0.7;
+  opacity: var(--opacity-subtle);
 }
 
 /* =====================================================

@@ -266,10 +266,10 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
                 <span className="field-label">Upcoming Tasks</span>
               </button>
               <div className="view-toggle">
-                <button onClick={() => setTasksView('list')} className={cn('icon-btn icon-btn-outline', tasksView === 'list' && 'active')} title="List view">
+                <button onClick={() => setTasksView('list')} className={cn('icon-btn icon-btn-outline', tasksView === 'list' && 'is-active')} title="List view">
                   <List />
                 </button>
-                <button onClick={() => setTasksView('kanban')} className={cn('icon-btn icon-btn-outline', tasksView === 'kanban' && 'active')} title="Kanban view">
+                <button onClick={() => setTasksView('kanban')} className={cn('icon-btn icon-btn-outline', tasksView === 'kanban' && 'is-active')} title="Kanban view">
                   <LayoutGrid />
                 </button>
               </div>

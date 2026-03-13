@@ -58,7 +58,7 @@ export function PortalSidebar() {
                 <Link
                   key={item.id}
                   to={`/${tabId}`}
-                  className={`nav-btn${isActive ? ' active' : ''}`}
+                  className={`nav-btn${isActive ? ' is-active' : ''}`}
                   id={`btn-${item.id}`}
                   data-tab={tabId}
                   data-shortcut={item.shortcut}

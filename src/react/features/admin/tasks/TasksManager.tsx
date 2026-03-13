@@ -314,13 +314,13 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
               icon="list"
               title="List view"
               onClick={() => setViewMode('list')}
-              className={viewMode === 'list' ? 'active' : undefined}
+              className={viewMode === 'list' ? 'is-active' : undefined}
             />
             <IconButton
               icon="layout-dashboard"
               title="Board view"
               onClick={() => setViewMode('board')}
-              className={viewMode === 'board' ? 'active' : undefined}
+              className={viewMode === 'board' ? 'is-active' : undefined}
             />
           </div>
           <IconButton action="add" onClick={() => onNavigate?.('task-create')} title="Create Task" />

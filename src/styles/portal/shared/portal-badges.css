@@ -79,6 +79,15 @@
   color: var(--color-text-tertiary);
 }
 
+/* Contract signing status */
+.status-badge.status-signed {
+  color: var(--status-completed);
+}
+
+.status-badge.status-not-signed {
+  color: var(--status-inactive);
+}
+
 /* =====================================================
    BEM-STYLE STATUS BADGE MODIFIERS
    Alternative naming convention: .status-badge--{variant}
@@ -165,11 +174,10 @@
 }
 
 /* Status indicator in tables - inherits from table cell styles */
-/* Note: Base .status-indicator now uses inherit, this is redundant but kept for explicitness */
 
 .status-indicator .status-dot {
-  width: var(--status-dot-size, 8px);
-  height: var(--status-dot-size, 8px);
+  width: var(--status-dot-size);
+  height: var(--status-dot-size);
   border-radius: var(--border-radius-full);
   flex-shrink: 0;
   background-color: var(--color-text-tertiary);
@@ -307,7 +315,9 @@
 
 /* =====================================================
    STATUS DROPDOWN TRIGGER
-   Button wrapper for status badge dropdowns in tables
+   Button wrapper for status badge dropdowns in tables.
+   Context-specific variant of .dropdown-trigger (portal-dropdown.css).
+   Differs: fixed width (matches menu), transparent background, font: inherit.
    ===================================================== */
 .status-dropdown-trigger {
   display: inline-flex;
@@ -317,9 +327,9 @@
   gap: var(--icon-gap);
   position: relative;
   /* Fixed width - MUST match menu width exactly */
-  width: var(--status-dropdown-width, 130px);
-  min-width: var(--status-dropdown-width, 130px);
-  max-width: var(--status-dropdown-width, 130px);
+  width: var(--status-dropdown-width);
+  min-width: var(--status-dropdown-width);
+  max-width: var(--status-dropdown-width);
   /* Symmetric horizontal padding - same on left/right of content */
   padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
   /* Extra right padding for absolutely positioned caret */
@@ -375,10 +385,10 @@
    ===================================================== */
 .status-dot {
   display: inline-block;
-  width: var(--status-dot-size, 8px);
-  height: var(--status-dot-size, 8px);
-  min-width: var(--status-dot-size, 8px);
-  min-height: var(--status-dot-size, 8px);
+  width: var(--status-dot-size);
+  height: var(--status-dot-size);
+  min-width: var(--status-dot-size);
+  min-height: var(--status-dot-size);
   border-radius: var(--border-radius-full);
   flex-shrink: 0;
   background-color: var(--color-text-tertiary);

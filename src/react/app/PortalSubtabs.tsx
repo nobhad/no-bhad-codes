@@ -114,7 +114,7 @@ export function PortalSubtabs() {
             return (
               <button
                 key={subtab.id}
-                className={`portal-subtab${isActive ? ' active' : ''}`}
+                className={`portal-subtab${isActive ? ' is-active' : ''}`}
                 data-subtab={subtab.id}
                 onClick={() => handleSubtabClick(subtab.id, activeSubtabGroup.forTab)}
               >

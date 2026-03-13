@@ -153,13 +153,13 @@
 }
 
 /* Active/selected state - subtle primary accent */
-.portal .stat-card-clickable.active,
-.portal .stat-card.active {
+.portal .stat-card-clickable.is-active,
+.portal .stat-card.is-active {
   border-color: var(--color-accent);
 }
 
-.portal .stat-card-clickable.active .stat-value,
-.portal .stat-card.active .stat-value {
+.portal .stat-card-clickable.is-active .stat-value,
+.portal .stat-card.is-active .stat-value {
   color: var(--color-accent);
 }
 

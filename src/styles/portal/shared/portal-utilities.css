@@ -20,7 +20,7 @@
    The type+class selector (0,0,1,1) wins without !important.
    Color inherits from parent via currentColor (set by icon class or parent). */
 svg.lucide {
-  stroke-width: var(--svg-stroke-width, 2.5);
+  stroke-width: var(--svg-stroke-width);
   color: currentColor;
 }
 
@@ -263,7 +263,7 @@ a.text-danger:visited {
 
 a.text-danger:hover {
   color: var(--color-danger);
-  opacity: 0.8;
+  opacity: var(--opacity-secondary);
 }
 
 .text-secondary {
@@ -358,7 +358,7 @@ a.text-danger:hover {
 .icon-lg,
 .icon-xl {
   flex-shrink: 0;
-  stroke-width: var(--svg-stroke-width, 2.5);
+  stroke-width: var(--svg-stroke-width);
   color: currentColor;
 }
 
@@ -385,7 +385,7 @@ a.text-danger:hover {
 .disabled,
 [disabled],
 :disabled {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
   pointer-events: none;
 }

@@ -93,7 +93,7 @@
 
 /* Badge color on hover/active - shared for both portals */
 .portal .sidebar-buttons .nav-btn:hover .sidebar-badge,
-.portal .sidebar-buttons .nav-btn.active .sidebar-badge {
+.portal .sidebar-buttons .nav-btn.is-active .sidebar-badge {
   color: var(--color-bg-tertiary);
 }
 
@@ -278,7 +278,7 @@
 }
 
 /* Active button in expanded sidebar */
-.portal .sidebar:not(.collapsed) .sidebar-buttons .nav-btn.active .sidebar-badge {
+.portal .sidebar:not(.collapsed) .sidebar-buttons .nav-btn.is-active .sidebar-badge {
   background: var(--color-danger);
   color: var(--color-text-inverse);
 }
@@ -354,7 +354,7 @@
 /* Show shortcuts on sidebar hover */
 .portal .sidebar:hover .sidebar-shortcut,
 .portal .sidebar:focus-within .sidebar-shortcut {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
 }
 
 /* Highlight shortcut on nav-btn hover */
@@ -363,14 +363,14 @@
 }
 
 /* Active button shortcut */
-.portal .sidebar-buttons .nav-btn.active .sidebar-shortcut {
+.portal .sidebar-buttons .nav-btn.is-active .sidebar-shortcut {
   color: var(--color-accent);
-  opacity: 0.8;
+  opacity: var(--opacity-secondary);
 }
 
 /* Subtle on active button */
-.portal .sidebar .btn.active .sidebar-shortcut {
-  opacity: 0.3;
+.portal .sidebar .nav-btn.is-active .sidebar-shortcut {
+  opacity: var(--opacity-faint);
 }
 
 /* Collapsed sidebar - hide shortcuts */
@@ -404,11 +404,11 @@
    ===================================================== */
 
 /* Nav item active state - left accent bar */
-.portal .sidebar-buttons .nav-btn.active {
+.portal .sidebar-buttons .nav-btn.is-active {
   position: relative;
 }
 
-.portal .sidebar-buttons .nav-btn.active::before {
+.portal .sidebar-buttons .nav-btn.is-active::before {
   content: "";
   position: absolute;
   left: 0;
@@ -420,7 +420,7 @@
 }
 
 /* Collapsed sidebar - hide accent bar (icon-only mode) */
-.portal .sidebar.collapsed .sidebar-buttons .nav-btn.active::before {
+.portal .sidebar.collapsed .sidebar-buttons .nav-btn.is-active::before {
   display: none;
 }
 

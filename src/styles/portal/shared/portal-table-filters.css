@@ -38,7 +38,7 @@
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
-  min-height: var(--portal-btn-icon-size, 36px);
+  min-height: var(--portal-btn-icon-size);
 }
 
 /* Search trigger button */
@@ -96,7 +96,7 @@
   padding-left: var(--input-icon-offset);
   padding-top: var(--space-1-5);
   padding-bottom: var(--space-1-5);
-  min-height: var(--portal-btn-icon-size, 36px);
+  min-height: var(--portal-btn-icon-size);
 }
 
 /* Override thick admin focus border — search is a compact inline tool */
@@ -155,7 +155,7 @@
 
 /* Filter dropdown menu — rendered via React portal at body level */
 .filter-dropdown-menu {
-  z-index: var(--z-index-portal-dropdown, 9700);
+  z-index: var(--z-index-portal-dropdown);
   min-width: var(--table-col-lg);
   padding: var(--space-1-5);
   background: var(--color-bg-tertiary);
@@ -208,7 +208,7 @@
   background: var(--color-bg-hover);
 }
 
-.filter-option.active {
+.filter-option.is-active {
   background: var(--color-bg-raised);
   color: var(--color-text-primary);
 }

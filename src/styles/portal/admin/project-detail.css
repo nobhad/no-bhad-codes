@@ -13,7 +13,6 @@
  * - Document generation modal
  *
  * Related files:
- * - project-detail-contract.css - Contract tab styles
  * - project-detail-invoices.css - Invoices tab styles
  */
 
@@ -545,7 +544,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Table action buttons should use .btn-xs class */
 
-/* Invoices tab display handled by [id^="pd-tab-"].active rule */
+/* Invoices tab display handled by [id^="pd-tab-"].is-active rule */
 /* Invoices list section - flex layout from project-detail-invoices.css */
 
 /* Invoice styles consolidated in project-detail-invoices.css */
@@ -694,7 +693,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   background-color: var(--color-bg-primary);
   border: var(--border-width-heavy) solid var(--color-border-primary);
   border-top: none;
-  max-height: var(--pd-dropdown-max-height, 300px);
+  max-height: var(--pd-dropdown-max-height);
   overflow-y: auto;
   z-index: var(--z-index-dropdown);
   box-shadow: none;
@@ -813,7 +812,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   }
 }
 
-/* Legacy styles - keep for backward compat */
 /* Project Overview Card - Stack on mobile */
 @media (--mobile) {
   .project-detail-meta {
@@ -845,7 +843,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   }
 }
 
-/* Contract tab styles moved to project-detail-contract.css */
+/* Contract tab styles inlined below */
 
 /* =====================================================
    PROJECT DETAIL TAB SHARED CLASSES
@@ -895,7 +893,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: var(--pd-truncate-filename-max-width, 300px);
+  max-width: var(--pd-truncate-filename-max-width);
 }
 
 /* Hint text (small, secondary) */
@@ -1064,7 +1062,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Textarea minimum height */
 .tasks-textarea {
-  min-height: var(--tasks-textarea-min-height, 60px);
+  min-height: var(--tasks-textarea-min-height);
 }
 
 /* Date input width */
@@ -1080,7 +1078,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Progress track */
 .tasks-progress-track {
   margin-top: var(--space-2);
-  max-width: var(--tasks-progress-track-max-width, 200px);
+  max-width: var(--tasks-progress-track-max-width);
 }
 
 /* Expanded content border */
@@ -1237,14 +1235,13 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* =====================================================
    CONTRACT TAB
-   Inlined from project-detail-contract.css
    ===================================================== */
 
 #pd-tab-contract {
   display: none;
 }
 
-#pd-tab-contract.active {
+#pd-tab-contract.is-active {
   display: block;
 }
 

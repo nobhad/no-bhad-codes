@@ -281,13 +281,13 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
             icon="list"
             title="List view"
             onClick={() => setViewMode('list')}
-            className={viewMode === 'list' ? 'active' : undefined}
+            className={viewMode === 'list' ? 'is-active' : undefined}
           />
           <IconButton
             icon="list"
             title="Grid view"
             onClick={() => setViewMode('grid')}
-            className={viewMode === 'grid' ? 'active' : undefined}
+            className={viewMode === 'grid' ? 'is-active' : undefined}
           />
           <IconButton action="folder" title="New Folder" />
           <IconButton action="upload" title="Upload" />

@@ -66,7 +66,7 @@
 }
 
 .tag-remove-btn:hover {
-  opacity: 0.7;
+  opacity: var(--opacity-subtle);
 }
 
 /* Tag color dot */
@@ -79,7 +79,7 @@
 }
 
 #tab-client-detail .overview-grid {
-  grid-template-columns: 1fr var(--cd-sidebar-width, 300px);
+  grid-template-columns: 1fr var(--cd-sidebar-width);
 }
 /* .portal-project-card padding from portal-cards.css */
 

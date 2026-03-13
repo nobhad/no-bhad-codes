@@ -148,7 +148,7 @@ export function TabList<T extends string>({
       aria-label={ariaLabel}
     >
       {tabs.map((tab) => {
-        const Icon = tabIcons?.[tab.id];
+        const _Icon = tabIcons?.[tab.id];
         const isActive = activeTab === tab.id;
 
         return (
@@ -166,7 +166,7 @@ export function TabList<T extends string>({
             disabled={tab.disabled}
             onClick={() => !tab.disabled && setActiveTab(tab.id)}
             onKeyDown={(e) => handleKeyDown(e, tab.id)}
-            className={isActive ? 'active' : ''}
+            className={isActive ? 'is-active' : ''}
           >
             {tab.label}
             {tab.badge !== undefined && tab.badge > 0 && (
@@ -223,7 +223,7 @@ export function TabPanel({
       id={`panel-${tabId}`}
       aria-labelledby={`tab-${tabId}`}
       tabIndex={0}
-      className={cn('portal-tab-panel', 'active', className)}
+      className={cn('portal-tab-panel', 'is-active', className)}
     >
       {children}
     </div>
@@ -329,7 +329,7 @@ export function SubtabList<T extends string>({
             disabled={tab.disabled}
             onClick={() => !tab.disabled && setActiveTab(tab.id)}
             onKeyDown={(e) => handleKeyDown(e, tab.id)}
-            className={cn('portal-subtab', isActive && 'active')}
+            className={cn('portal-subtab', isActive && 'is-active')}
           >
             {tab.label}
             {tab.badge !== undefined && tab.badge > 0 && (
@@ -375,7 +375,7 @@ export function SubtabPanel({
       role="tabpanel"
       id={`subpanel-${tabId}`}
       aria-labelledby={`subtab-${tabId}`}
-      className={cn('portal-subtab-content', 'active', className)}
+      className={cn('portal-subtab-content', 'is-active', className)}
     >
       {children}
     </div>
@@ -447,7 +447,7 @@ export function ViewToggle<T extends string>({
             role="radio"
             aria-checked={isActive}
             onClick={() => onChange(option.id)}
-            className={isActive ? 'active' : ''}
+            className={isActive ? 'is-active' : ''}
             title={option.label}
           >
             {Icon && <Icon />}

@@ -258,6 +258,89 @@ body[data-page="client-portal"] {
   --status-dropdown-width: var(--space-20); /* 160px */
 
   /* ----------------------------------------
+   * OPACITY TOKENS
+   * ---------------------------------------- */
+  --opacity-faint: 0.3;
+  --opacity-inactive: 0.4;
+  --opacity-disabled: 0.5;
+  --opacity-muted: 0.6;
+  --opacity-subtle: 0.7;
+  --opacity-secondary: 0.8;
+  --opacity-completed: 0.5; /* Completed/done items — same as disabled */
+
+  /* ----------------------------------------
+   * COMPONENT TOKENS — PORTAL-SPECIFIC DIMENSIONS
+   * Component-scoped sizing tokens for predictable layout.
+   * Group: Analytics
+   * ---------------------------------------- */
+  --analytics-grid-min-width: 260px;
+  --kpi-card-min-height: 120px;
+  --chart-height: 320px;
+  --chart-placeholder-min-height: 200px;
+
+  /* Group: Progress Bar (portal overrides base 16px) */
+  --progress-bar-height: 12px;
+  --progress-bar-height-sm: 8px;
+  --progress-bar-height-lg: 16px;
+
+  /* Group: Kanban (shared portal-kanban.css) */
+  --kanban-board-min-height: 500px;
+  --kanban-column-min-width: 200px;
+  --kanban-column-offset: 320px;
+  --kanban-content-min-height: 120px;
+  --hover-lift-sm: -2px;
+
+  /* Group: Tasks (admin task kanban) */
+  --tasks-kanban-board-offset: 280px;
+  --tasks-kanban-column-offset: 320px;
+  --tasks-kanban-column-min-width: 200px;
+  --kanban-skeleton-height: 256px;
+  --tasks-textarea-min-height: 60px;
+  --tasks-progress-track-max-width: 200px;
+
+  /* Group: Configuration */
+  --config-grid-min-width: 280px;
+  --config-overview-grid-min-width: 180px;
+  --config-textarea-min-height: 72px;
+  --config-field-label-min-width: 64px;
+
+  /* Group: Client Detail */
+  --cd-sidebar-width: 300px;
+
+  /* Group: Project Detail */
+  --pd-dropdown-max-height: 300px;
+  --pd-truncate-filename-max-width: 300px;
+
+  /* Group: Modal / Details Panel */
+  --detail-row-label-width: 140px;
+  --detail-message-max-height: 200px;
+  --details-overlay-blur: 8px;
+  --details-panel-width: 500px;
+
+  /* Group: Questionnaires */
+  --questionnaire-builder-min-height: 100px;
+  --questionnaire-modal-max-width: 700px;
+  --conditional-select-min-width: 150px;
+
+  /* Group: Modal widths (portal additions) */
+  --modal-width-xl: 1000px;
+
+  /* Group: Files */
+  --files-folder-panel-width: 220px;
+  --files-browser-min-height: 300px;
+  --files-filter-group-min-width: 140px;
+  --files-filter-date-min-width: 120px;
+  --files-action-btn-min-width: 90px;
+  --files-filter-select-max-width: 300px;
+  --portal-files-sidebar-width: 200px;
+  --files-grid-item-min-width: 150px;
+  --files-folder-tree-max-height: 150px;
+
+  /* Group: Inline Edit */
+  --inline-edit-date-min-width: 130px;
+  --inline-edit-label-min-width: 140px;
+
+  /* ----------------------------------------
    * NOTIFICATION BELL TOKENS
    * ---------------------------------------- */
   --notification-badge-size: var(--icon-size-md);         /* 16px — corner count badge */
@@ -386,13 +469,13 @@ html[data-theme="light"]:has(body[data-page="client-portal"]) {
 }
 
 /* Active/hover nav items — icon must match text color (same variable) */
-.portal .nav-btn:is(.active, :hover) svg.lucide {
+.portal .nav-btn:is(.is-active, :hover) svg.lucide {
   color: var(--color-accent);
 }
 
 /* Active subtab items — icon must match tab text color */
-.portal .portal-tabs button.active svg.lucide,
-.portal .portal-subtab.active svg.lucide,
+.portal .portal-tabs button.is-active svg.lucide,
+.portal .portal-subtab.is-active svg.lucide,
 .portal .tab-active svg.lucide {
   color: var(--color-accent);
 }

@@ -78,7 +78,7 @@
   cursor: pointer;
 }
 
-.portal .thread-item.active {
+.portal .thread-item.is-active {
   background: var(--color-bg-elevated);
 }
 
@@ -275,7 +275,7 @@
   padding: var(--space-0-5);
   cursor: pointer;
   color: var(--color-text-tertiary);
-  opacity: 0.7;
+  opacity: var(--opacity-subtle);
 }
 
 .portal .message-actions button:hover {
@@ -423,7 +423,7 @@
 
 .portal .message-compose textarea::placeholder {
   color: var(--color-text-tertiary);
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
 }
 
 .portal .message-compose-actions {
@@ -469,7 +469,7 @@
 
 .portal .messages-contact-note {
   margin: 0;
-  opacity: 0.7;
+  opacity: var(--opacity-subtle);
   font-size: var(--font-size-sm);
 }
 
@@ -652,7 +652,7 @@
 .messaging-avatar {
   width: 2.5rem;
   height: 2.5rem;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -819,7 +819,7 @@
 .messaging-message-bubble {
   max-width: 70%;
   padding: 0.5rem 1rem;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
 }
 
 .messaging-message-bubble-admin {
@@ -1042,7 +1042,7 @@
   font-size: var(--font-size-xs);
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   resize: none;
 }
 
@@ -1090,7 +1090,7 @@
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-1);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
 }
 
 .attachment-preview-info {
@@ -1130,7 +1130,7 @@
   gap: 0.375rem;
   padding: var(--space-0-5) var(--space-1);
   font-size: var(--font-size-sm);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
 }
 
 /* Composer input row */

@@ -43,7 +43,7 @@ export const StatCard = React.memo(({ label, value, variant = 'default', onClick
     'stat-card',
     variant !== 'default' && `stat-card--${variant}`,
     onClick && 'stat-card-clickable',
-    isActive && 'active',
+    isActive && 'is-active',
     className
   );
 

@@ -48,7 +48,7 @@
 
 .auth-gate-container {
   background: var(--color-bg-primary);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   padding: clamp(1.5rem, 4vw, 2.5rem);
   width: 100%;
   max-width: min(500px, 90vw);
@@ -136,7 +136,7 @@
 .auth-gate-form .form-input::placeholder,
 .auth-gate .form-input::placeholder {
   color: var(--color-text-tertiary);
-  opacity: 0.7;
+  opacity: var(--opacity-subtle);
 }
 
 /* Password Input Wrapper */
@@ -217,8 +217,8 @@
 .auth-gate-form .auth-submit {
   width: 100%;
   padding: var(--space-1-5) var(--space-3);
-  border: var(--portal-btn-border-width, 2px) solid currentColor;
-  border-bottom-width: var(--portal-btn-border-bottom-width, 6px);
+  border: var(--portal-btn-border-width) solid currentColor;
+  border-bottom-width: var(--portal-btn-border-bottom-width);
   border-radius: 0;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
@@ -233,14 +233,14 @@
 }
 
 .auth-gate .auth-submit:hover,
-.auth-gate .auth-submit.active {
+.auth-gate .auth-submit.is-active {
   background-color: var(--color-accent);
   color: var(--color-bg-tertiary);
   border-color: var(--color-accent);
 }
 
 .auth-gate .auth-submit:disabled {
-  opacity: 0.6;
+  opacity: var(--opacity-muted);
   cursor: not-allowed;
 }
 
@@ -354,7 +354,7 @@
 body[data-page="admin"] .header,
 body[data-page="admin"] .admin-header,
 body[data-page="client-portal"] .header {
-  z-index: calc(var(--z-index-portal-overlay, 9500) + 200);
+  z-index: calc(var(--z-index-portal-overlay) + 200);
 }
 
 /* =====================================================
@@ -416,7 +416,7 @@ body[data-page="client-portal"]:not(.portal-logged-in) .client-footer {
   bottom: 0;
   left: 0;
   right: 0;
-  height: var(--footer-height, 40px);
+  height: var(--footer-height);
   background: var(--color-neutral-300);
   padding: var(--space-2) 0;
   font-size: var(--font-size-sm);
@@ -451,7 +451,7 @@ body.portal-logged-in[data-page="client-portal"] .nav-overlay {
 }
 
 .set-password-card {
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   padding: clamp(1.5rem, 4vw, 2.5rem);
 }
 

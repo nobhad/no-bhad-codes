@@ -53,7 +53,7 @@
 
 .analytics-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(var(--analytics-grid-min-width, 260px), 1fr));
+  grid-template-columns: repeat(2, minmax(var(--analytics-grid-min-width), 1fr));
   gap: var(--portal-section-gap);
 }
 
@@ -99,7 +99,7 @@
 
 /* Ad Hoc Analytics Widget - consistent min-height with chart containers */
 #ad-hoc-analytics-widget {
-  min-height: var(--kpi-card-min-height, 120px);
+  min-height: var(--kpi-card-min-height);
   display: flex;
   flex-direction: column;
 }
@@ -113,12 +113,12 @@
 /* Canvas-based charts: position relative required by Chart.js */
 .chart-canvas-wrapper {
   position: relative;
-  height: var(--chart-height, 320px);
+  height: var(--chart-height);
 }
 
 /* Non-canvas charts and placeholders */
 .chart {
-  height: var(--chart-height, 320px);
+  height: var(--chart-height);
   background: transparent;
   border: none;
   display: flex;
@@ -132,7 +132,7 @@
 
 .chart-container {
   background: transparent;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   overflow: hidden;
 }
 
@@ -143,7 +143,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  min-height: var(--chart-placeholder-min-height, 200px);
+  min-height: var(--chart-placeholder-min-height);
   padding: var(--space-4);
   color: var(--app-color-primary);
 }
@@ -227,7 +227,7 @@
   gap: var(--space-1);
   padding: var(--space-3);
   text-align: center;
-  min-height: var(--kpi-card-min-height, 120px);
+  min-height: var(--kpi-card-min-height);
   transition: border-color var(--transition-faster);
 }
 
@@ -375,7 +375,7 @@
 
 .analytics-chart-canvas-wrapper {
   position: relative;
-  height: var(--chart-height, 320px);
+  height: var(--chart-height);
 }
 
 /* .truncate-text styling in project-detail.css */

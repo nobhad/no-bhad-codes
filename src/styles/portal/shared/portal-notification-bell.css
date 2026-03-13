@@ -89,8 +89,8 @@
   width: var(--notification-dropdown-width);
   max-height: var(--notification-dropdown-max-height);
   background: var(--color-bg-secondary);
-  border: var(--border-width) solid var(--color-border-primary);
-  z-index: var(--z-index-portal-dropdown, 9700);
+  border: var(--portal-border);
+  z-index: var(--z-index-portal-dropdown);
   overflow: hidden;
   display: flex;
   flex-direction: column;

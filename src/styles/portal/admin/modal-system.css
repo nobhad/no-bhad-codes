@@ -5,7 +5,7 @@
    ===================================================== */
 
 .is-loading {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
 }
 
 /* ==============================================
@@ -20,7 +20,7 @@
 
 .detail-row {
   display: grid;
-  grid-template-columns: var(--detail-row-label-width, 140px) 1fr;
+  grid-template-columns: var(--detail-row-label-width) 1fr;
   gap: 0 var(--portal-field-label-gap);
 }
 
@@ -43,8 +43,8 @@
   background: var(--color-bg-primary);
   padding: var(--space-3);
   border-radius: var(--border-radius-sm);
-  border: var(--border-width) solid var(--color-border-primary);
-  max-height: var(--detail-message-max-height, 200px);
+  border: var(--portal-border);
+  max-height: var(--detail-message-max-height);
   overflow-y: auto;
 }
 
@@ -65,8 +65,8 @@
   inset: 0;
   background: var(--color-overlay-light);
   z-index: var(--z-index-max);
-  -webkit-backdrop-filter: blur(var(--details-overlay-blur, 8px));
-  backdrop-filter: blur(var(--details-overlay-blur, 8px));
+  -webkit-backdrop-filter: blur(var(--details-overlay-blur));
+  backdrop-filter: blur(var(--details-overlay-blur));
 }
 
 .details-overlay.hidden {
@@ -79,7 +79,7 @@
   position: fixed;
   top: 0;
   right: 0;
-  width: var(--details-panel-width, 500px);
+  width: var(--details-panel-width);
   max-width: 90vw;
   height: 100vh;
   background: var(--color-bg-secondary);
@@ -89,7 +89,7 @@
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
   box-shadow: var(--shadow-2xl);
-  z-index: var(--z-index-portal-modal, 9600);
+  z-index: var(--z-index-portal-modal);
   overflow-y: auto;
   padding: var(--space-4) var(--space-6) var(--space-6);
   border-left: var(--border-width-thick) solid var(--color-border-primary);
@@ -130,7 +130,7 @@
 
 /* Radix popper wrappers must sit above the details-panel (z-index 9600) */
 [data-radix-popper-content-wrapper] {
-  z-index: calc(var(--z-index-portal-modal, 9600) + 10) !important;
+  z-index: calc(var(--z-index-portal-modal) + 10) !important;
 }
 
 .details-panel.hidden {

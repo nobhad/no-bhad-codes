@@ -71,7 +71,7 @@
   background: var(--color-bg-secondary);
   box-shadow: var(--shadow-modal);
   width: 100%;
-  max-width: var(--modal-width-md, 560px);
+  max-width: var(--modal-width-md);
   max-height: 90vh;
   overflow: hidden;
   display: flex;
@@ -79,15 +79,15 @@
 }
 
 .portal-modal.portal-modal--sm {
-  max-width: var(--modal-width-sm, 400px);
+  max-width: var(--modal-width-sm);
 }
 
 .portal-modal.portal-modal--wide {
-  max-width: var(--modal-width-lg, 860px);
+  max-width: var(--modal-width-lg);
 }
 
 .portal-modal.portal-modal--xl {
-  max-width: var(--modal-width-xl, 1000px);
+  max-width: var(--modal-width-xl);
 }
 
 .portal-modal.portal-modal--full {

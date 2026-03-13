@@ -72,7 +72,7 @@ body[data-page="client-intake"] .terminal-window {
 
 /* Portal context: fill available tab content height */
 /* Only apply flex layout when tab is active to not break tab hiding */
-.portal #tab-new-project.active {
+.portal #tab-new-project.is-active {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 6rem); /* Subtract header and padding */
