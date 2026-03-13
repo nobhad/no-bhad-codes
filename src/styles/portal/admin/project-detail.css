@@ -1234,3 +1234,34 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* --- Messages Tab: styles moved to shared/message-thread.css --- */
 
 /* --- Notes Tab: uses root .panel and .textarea (portal-forms.css), no overrides --- */
+
+/* =====================================================
+   CONTRACT TAB
+   Inlined from project-detail-contract.css
+   ===================================================== */
+
+#pd-tab-contract {
+  display: none;
+}
+
+#pd-tab-contract.active {
+  display: block;
+}
+
+/* .contract-tab-content flex layout from shared/portal-components.css */
+
+/* Contract status badges */
+#pd-contract-status-badge.status-signed {
+  background: var(--color-success);
+  color: var(--color-white);
+}
+
+#pd-contract-status-badge.status-pending {
+  background: var(--color-warning);
+  color: var(--color-bg-tertiary);
+}
+
+#pd-contract-status-badge.status-not-signed {
+  background: var(--color-text-tertiary);
+  color: var(--color-white);
+}

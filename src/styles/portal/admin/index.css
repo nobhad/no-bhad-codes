@@ -25,21 +25,11 @@
 @import "../shared/portal-dropdown.css";
 @import "../shared/portal-badges.css";
 @import "../shared/portal-kanban.css";
-@import "../shared/portal-tags.css";
-@import "../shared/portal-charts.css";
 @import "../shared/portal-tooltips.css";
-@import "../shared/portal-progress.css";
 @import "../shared/portal-components.css";
 @import "../shared/portal-tabs.css";
-@import "../shared/portal-tab-components.css";
 @import "../shared/portal-confirm-dialog.css";
 @import "../shared/portal-notification-bell.css";
-@import "../shared/portal-accordion.css";
-@import "../shared/portal-copy-email.css";
-@import "../shared/portal-error-states.css";
-@import "../shared/portal-react-components.css";
-@import "../shared/portal-status-panel.css";
-@import "../shared/portal-utilities.css";
 @import "../shared/portal-inline-edit.css";
 @import "../shared/portal-table-filters.css";
 
@@ -52,7 +42,6 @@
 @import "../shared/portal-analytics.css";
 @import "./detail-page-controls.css";
 @import "./project-detail.css";
-@import "./project-detail-contract.css";
 @import "./project-detail-invoices.css";
 @import "./client-detail.css";
 @import "./client-detail-crm.css";
