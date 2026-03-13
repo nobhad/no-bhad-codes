@@ -20,7 +20,7 @@ export const LogLevel = {
   WARN: 1,
   INFO: 2,
   DEBUG: 3,
-  TRACE: 4,
+  TRACE: 4
 } as const;
 
 export type LogLevelType = keyof typeof LogLevel;
@@ -263,7 +263,7 @@ export const DEFAULT_LOGGER_CONFIG: LoggerConfig = {
   level: 'INFO',
   console: true,
   file: false,
-  enableColors: true,
+  enableColors: true
 };
 
 // ============================================
@@ -367,7 +367,7 @@ export const LOG_COLORS = {
   INFO: '\x1b[36m', // Cyan
   DEBUG: '\x1b[35m', // Magenta
   TRACE: '\x1b[90m', // Gray
-  RESET: '\x1b[0m',
+  RESET: '\x1b[0m'
 } as const;
 
 /**

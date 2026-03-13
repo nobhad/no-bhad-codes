@@ -21,7 +21,7 @@ import {
   validateRange,
   validateArray,
   type ValidationResult,
-  type FormValidationResult,
+  type FormValidationResult
 } from './validators';
 
 // ============================================
@@ -65,7 +65,7 @@ export function validateSchema(
       if (!result.isValid) {
         errors.push({
           field: fieldName,
-          error: result.error || `${fieldName} is invalid`,
+          error: result.error || `${fieldName} is invalid`
         });
         break; // Stop at first error for this field
       }
@@ -85,9 +85,9 @@ export function validateSchema(
     errors: errors.map((e) => ({
       isValid: false,
       field: e.field,
-      error: e.error,
+      error: e.error
     })),
-    sanitizedData: errors.length === 0 ? sanitizedData : undefined,
+    sanitizedData: errors.length === 0 ? sanitizedData : undefined
   };
 }
 
@@ -268,7 +268,7 @@ export function custom(
     }
     return {
       isValid: false,
-      error: typeof result === 'string' ? result : 'Validation failed',
+      error: typeof result === 'string' ? result : 'Validation failed'
     };
   };
 }
@@ -283,36 +283,36 @@ export function custom(
 export const contactFormSchema: FormSchema = {
   name: {
     rules: [required('Name'), name({ type: 'person' })],
-    optional: false,
+    optional: false
   },
   firstName: {
     rules: [name({ type: 'single', minLength: 1, maxLength: 50 })],
-    optional: true,
+    optional: true
   },
   lastName: {
     rules: [name({ type: 'single', minLength: 1, maxLength: 50 })],
-    optional: true,
+    optional: true
   },
   email: {
     rules: [required('Email'), email()],
-    optional: false,
+    optional: false
   },
   subject: {
     rules: [stringLength({ max: 200 }, 'Subject')],
-    optional: true,
+    optional: true
   },
   inquiryType: {
     rules: [stringLength({ max: 200 }, 'Inquiry type')],
-    optional: true,
+    optional: true
   },
   companyName: {
     rules: [name({ type: 'company' })],
-    optional: true,
+    optional: true
   },
   message: {
     rules: [required('Message'), messageContent({ minLength: 10, maxLength: 5000 })],
-    optional: false,
-  },
+    optional: false
+  }
 };
 
 /**
@@ -321,19 +321,19 @@ export const contactFormSchema: FormSchema = {
 export const clientIntakeSchema: FormSchema = {
   name: {
     rules: [required('Name'), name({ type: 'person', minLength: 2, maxLength: 100 })],
-    optional: false,
+    optional: false
   },
   email: {
     rules: [required('Email'), email()],
-    optional: false,
+    optional: false
   },
   companyName: {
     rules: [name({ type: 'company' })],
-    optional: true,
+    optional: true
   },
   phone: {
     rules: [phone({ format: 'generic' })],
-    optional: true,
+    optional: true
   },
   projectType: {
     rules: [
@@ -346,33 +346,33 @@ export const clientIntakeSchema: FormSchema = {
           'e-commerce',
           'web-app',
           'browser-extension',
-          'other',
+          'other'
         ],
         'Project type'
-      ),
+      )
     ],
-    optional: false,
+    optional: false
   },
   budgetRange: {
     rules: [
       required('Budget range'),
-      allowedValues(['under-2k', '2k-5k', '5k-10k', '10k-plus', 'discuss'], 'Budget range'),
+      allowedValues(['under-2k', '2k-5k', '5k-10k', '10k-plus', 'discuss'], 'Budget range')
     ],
-    optional: false,
+    optional: false
   },
   timeline: {
     rules: [
       required('Timeline'),
-      allowedValues(['asap', '1-3-months', '3-6-months', 'flexible'], 'Timeline'),
+      allowedValues(['asap', '1-3-months', '3-6-months', 'flexible'], 'Timeline')
     ],
-    optional: false,
+    optional: false
   },
   description: {
     rules: [
       required('Project description'),
-      messageContent({ minLength: 20, maxLength: 2000, checkSpam: true }),
+      messageContent({ minLength: 20, maxLength: 2000, checkSpam: true })
     ],
-    optional: false,
+    optional: false
   },
   features: {
     rules: [
@@ -390,19 +390,19 @@ export const clientIntakeSchema: FormSchema = {
               'e-commerce',
               'blog',
               'gallery',
-              'booking',
+              'booking'
             ];
             if (!validFeatures.includes(item)) {
               return { isValid: false, error: `Invalid feature: ${item}` };
             }
             return { isValid: true };
-          },
+          }
         },
         'Features'
-      ),
+      )
     ],
-    optional: true,
-  },
+    optional: true
+  }
 };
 
 /**
@@ -411,15 +411,15 @@ export const clientIntakeSchema: FormSchema = {
 export const userRegistrationSchema: FormSchema = {
   name: {
     rules: [required('Name'), name({ type: 'person', minLength: 2, maxLength: 100 })],
-    optional: false,
+    optional: false
   },
   email: {
     rules: [required('Email'), email({ strict: true })],
-    optional: false,
+    optional: false
   },
   password: {
     rules: [required('Password'), password({ strength: 'strong' })],
-    optional: false,
+    optional: false
   },
   confirmPassword: {
     rules: [
@@ -429,10 +429,10 @@ export const userRegistrationSchema: FormSchema = {
           return 'Passwords do not match';
         }
         return true;
-      }),
+      })
     ],
-    optional: false,
-  },
+    optional: false
+  }
 };
 
 /**
@@ -441,8 +441,8 @@ export const userRegistrationSchema: FormSchema = {
 export const adminLoginSchema: FormSchema = {
   password: {
     rules: [required('Password'), stringLength({ min: 1 }, 'Password')],
-    optional: false,
-  },
+    optional: false
+  }
 };
 
 /**
@@ -451,12 +451,12 @@ export const adminLoginSchema: FormSchema = {
 export const clientLoginSchema: FormSchema = {
   email: {
     rules: [required('Email'), email()],
-    optional: false,
+    optional: false
   },
   password: {
     rules: [required('Password'), stringLength({ min: 1 }, 'Password')],
-    optional: false,
-  },
+    optional: false
+  }
 };
 
 /**
@@ -466,10 +466,10 @@ export const messageSendSchema: FormSchema = {
   message: {
     rules: [
       required('Message'),
-      messageContent({ minLength: 1, maxLength: 10000, checkSpam: false }),
+      messageContent({ minLength: 1, maxLength: 10000, checkSpam: false })
     ],
-    optional: false,
-  },
+    optional: false
+  }
 };
 
 /**
@@ -478,7 +478,7 @@ export const messageSendSchema: FormSchema = {
 export const projectUpdateSchema: FormSchema = {
   name: {
     rules: [stringLength({ min: 1, max: 200 }, 'Project name')],
-    optional: true,
+    optional: true
   },
   status: {
     rules: [
@@ -490,21 +490,21 @@ export const projectUpdateSchema: FormSchema = {
           'review',
           'completed',
           'on-hold',
-          'on_hold', // Legacy support
+          'on_hold' // Legacy support
         ],
         'Status'
-      ),
+      )
     ],
-    optional: true,
+    optional: true
   },
   description: {
     rules: [stringLength({ max: 5000 }, 'Description')],
-    optional: true,
+    optional: true
   },
   progress: {
     rules: [numberRange({ min: 0, max: 100 }, 'Progress')],
-    optional: true,
-  },
+    optional: true
+  }
 };
 
 /**
@@ -528,17 +528,17 @@ export const leadStatusSchema: FormSchema = {
           'on-hold',
           'on_hold', // Legacy support
           'completed',
-          'cancelled',
+          'cancelled'
         ],
         'Status'
-      ),
+      )
     ],
-    optional: false,
+    optional: false
   },
   notes: {
     rules: [stringLength({ max: 2000 }, 'Notes')],
-    optional: true,
-  },
+    optional: true
+  }
 };
 
 /**
@@ -560,9 +560,9 @@ export const fileUploadSchema: FormSchema = {
           return 'Filename contains invalid characters';
         }
         return true;
-      }),
+      })
     ],
-    optional: false,
+    optional: false
   },
   fileType: {
     rules: [
@@ -570,17 +570,17 @@ export const fileUploadSchema: FormSchema = {
       allowedValues(
         ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'text/plain'],
         'File type'
-      ),
+      )
     ],
-    optional: false,
+    optional: false
   },
   fileSize: {
     rules: [
       required('File size'),
-      numberRange({ min: 1, max: 10 * 1024 * 1024 }, 'File size'), // 10MB max
+      numberRange({ min: 1, max: 10 * 1024 * 1024 }, 'File size') // 10MB max
     ],
-    optional: false,
-  },
+    optional: false
+  }
 };
 
 /**
@@ -589,22 +589,22 @@ export const fileUploadSchema: FormSchema = {
 export const paginationSchema: FormSchema = {
   page: {
     rules: [numberRange({ min: 1, max: 1000 }, 'Page')],
-    optional: true,
+    optional: true
   },
   limit: {
     rules: [numberRange({ min: 1, max: 100 }, 'Limit')],
-    optional: true,
+    optional: true
   },
   sortBy: {
     rules: [stringLength({ max: 50 }, 'Sort field')],
-    optional: true,
+    optional: true
   },
   sortOrder: {
     rules: [allowedValues(['asc', 'desc'], 'Sort order')],
-    optional: true,
+    optional: true
   },
   search: {
     rules: [stringLength({ max: 200 }, 'Search')],
-    optional: true,
-  },
+    optional: true
+  }
 };

@@ -75,7 +75,7 @@ export const VALIDATION_PATTERNS = {
    * - Maximum 128 characters
    */
   PASSWORD_STRONG:
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()\-_=+\[\]{}|;:,.<>])[A-Za-z\d@$!%*?&#^()\-_=+\[\]{}|;:,.<>]{12,128}$/,
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()\-_=+[\]{}|;:,.<>])[A-Za-z\d@$!%*?&#^()\-_=+[\]{}|;:,.<>]{12,128}$/,
 
   /**
    * Medium password validation
@@ -83,7 +83,7 @@ export const VALIDATION_PATTERNS = {
    * - At least one letter
    * - At least one digit
    */
-  PASSWORD_MEDIUM: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&#^()\-_=+\[\]{}|;:,.<>]{8,128}$/,
+  PASSWORD_MEDIUM: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&#^()\-_=+[\]{}|;:,.<>]{8,128}$/,
 
   /**
    * Basic password (minimum requirements)
@@ -102,7 +102,7 @@ export const VALIDATION_PATTERNS = {
    * - Allows spaces, apostrophes, hyphens
    * - 1-100 characters
    */
-  NAME: /^[\p{L}\p{M}][\p{L}\p{M}\s'\-]{0,99}$/u,
+  NAME: /^[\p{L}\p{M}][\p{L}\p{M}\s'-]{0,99}$/u,
 
   /**
    * First/Last name validation (stricter)
@@ -111,7 +111,7 @@ export const VALIDATION_PATTERNS = {
    * - No spaces (single name only)
    * - 1-50 characters
    */
-  NAME_SINGLE: /^[\p{L}\p{M}][\p{L}\p{M}'\-]{0,49}$/u,
+  NAME_SINGLE: /^[\p{L}\p{M}][\p{L}\p{M}'-]{0,49}$/u,
 
   /**
    * Company name validation
@@ -309,7 +309,7 @@ export const VALIDATION_PATTERNS = {
    * Spam patterns (for message validation)
    */
   SPAM_PATTERNS:
-    /\b(buy now|click here|limited time|act fast|urgent|winner|congratulations|viagra|casino|loan|mortgage|weight loss|get rich|free money|earn cash|make money fast)\b/gi,
+    /\b(buy now|click here|limited time|act fast|urgent|winner|congratulations|viagra|casino|loan|mortgage|weight loss|get rich|free money|earn cash|make money fast)\b/gi
 } as const;
 
 /**
@@ -355,7 +355,7 @@ export const PATTERN_DESCRIPTIONS: Record<keyof typeof VALIDATION_PATTERNS, stri
   NO_HTML: 'no HTML tags',
   WHITESPACE_ONLY: 'not empty or whitespace only',
   PRINTABLE_ASCII: 'printable ASCII characters only',
-  SPAM_PATTERNS: 'no spam-like content',
+  SPAM_PATTERNS: 'no spam-like content'
 };
 
 /**

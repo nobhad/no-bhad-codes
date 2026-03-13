@@ -67,7 +67,7 @@ export {
   featuresDataItemSchema,
   pricingDataSchema,
   tierStructureSchema,
-  lineItemSchema,
+  lineItemSchema
 } from './validators';
 
 // Export schemas and schema utilities
@@ -105,5 +105,5 @@ export {
   projectUpdateSchema,
   leadStatusSchema,
   fileUploadSchema,
-  paginationSchema,
+  paginationSchema
 } from './schemas';
