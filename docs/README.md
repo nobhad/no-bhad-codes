@@ -94,6 +94,13 @@ The Backend refers to the complete portal system with two interfaces:
 - **[Current Work](../CURRENT_WORK.md)** - Active development tracking and TODO list
 - **[Test Coverage](./COVERAGE.md)** - Automated testing coverage guide and requirements
 
+### Audits & Post-Mortems
+
+- **[Full Portal Audit](./audits/FULL_PORTAL_AUDIT.md)** - Portal architecture audit, grade A validation findings
+- **[Supplementary Audit](./audits/SUPPLEMENTARY_AUDIT.md)** - Additional audit notes and findings
+- **[Backend Audit Report](./audits/BACKEND_AUDIT_REPORT.md)** - Backend architecture audit
+- **[Claude Mistakes](./audits/CLAUDE_MISTAKES.md)** - Documented errors and lessons learned
+
 ### Archive
 
 - **[Archived Work 2025-12](./archive/work-logs/ARCHIVED_WORK_2025-12.md)** - Completed work from December 2025
