@@ -53,11 +53,7 @@
   gap: var(--portal-section-gap);
 }
 
-.analytics-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(var(--analytics-grid-min-width), 1fr));
-  gap: var(--portal-section-gap);
-}
+/* .analytics-grid defined in shared/portal-analytics.css (loaded immediately after this file) */
 
 .kpi-cards-row {
   display: grid;
