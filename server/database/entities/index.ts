@@ -310,6 +310,59 @@ export {
 } from './content-request.js';
 
 // =====================================================
+// QUESTIONNAIRE ENTITIES
+// =====================================================
+
+export {
+  // Types
+  type Questionnaire,
+  type QuestionnaireResponse,
+  type Question,
+  type QuestionType,
+  // Row types
+  type QuestionnaireRow,
+  type QuestionnaireResponseRow,
+  // Column constants
+  QUESTIONNAIRE_COLUMNS,
+  QUESTIONNAIRE_RESPONSE_COLUMNS,
+  // Schemas
+  questionnaireSchema,
+  questionnaireResponseSchema,
+  // Mappers
+  toQuestionnaire,
+  toQuestionnaireResponse
+} from './questionnaire.js';
+
+// =====================================================
+// DOCUMENT REQUEST ENTITIES
+// =====================================================
+
+export {
+  // Types
+  type DocumentRequest as DocumentRequestEntity,
+  type DocumentRequestTemplate as DocumentRequestTemplateEntity,
+  type DocumentRequestHistory as DocumentRequestHistoryEntity,
+  type DocumentType,
+  type TemplateCategory,
+  // Row types
+  type DocumentRequestRow,
+  type DocumentRequestTemplateRow,
+  type DocumentRequestHistoryRow,
+  // Column constants
+  DOC_REQUEST_COLUMNS,
+  DOC_REQUEST_TEMPLATE_COLUMNS,
+  DOC_REQUEST_HISTORY_COLUMNS,
+  // Schemas
+  documentRequestSchema,
+  documentRequestTemplateSchema,
+  documentRequestHistorySchema,
+  // Mappers
+  toDocumentRequest,
+  toDocumentRequestTemplate,
+  toDocumentRequestHistory
+} from './document-request.js';
+
+// =====================================================
 // AD HOC REQUEST ENTITIES
 // =====================================================
 

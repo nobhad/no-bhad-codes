@@ -204,14 +204,59 @@ export type DeliverableStatus = (typeof DELIVERABLE_STATUSES)[number];
 // ============================================
 
 export const DOCUMENT_REQUEST_STATUSES = [
-  'pending',
-  'submitted',
-  'reviewed',
+  'requested',
+  'viewed',
+  'uploaded',
+  'under_review',
   'approved',
   'rejected'
 ] as const;
 
 export type DocumentRequestStatus = (typeof DOCUMENT_REQUEST_STATUSES)[number];
+
+// ============================================
+// SHARED PRIORITY LEVELS
+// ============================================
+
+export const PRIORITY_LEVELS = [
+  'low',
+  'normal',
+  'high',
+  'urgent'
+] as const;
+
+export type PriorityLevel = (typeof PRIORITY_LEVELS)[number];
+
+// ============================================
+// SHARED REQUEST CATEGORIES
+// ============================================
+
+export const REQUEST_CATEGORIES = [
+  'general',
+  'copy',
+  'photo',
+  'brand_asset',
+  'credentials',
+  'reference',
+  'legal',
+  'technical',
+  'other'
+] as const;
+
+export type RequestCategory = (typeof REQUEST_CATEGORIES)[number];
+
+// ============================================
+// QUESTIONNAIRE RESPONSE CONSTANTS
+// ============================================
+
+export const QUESTIONNAIRE_RESPONSE_STATUSES = [
+  'pending',
+  'in_progress',
+  'completed',
+  'reviewed'
+] as const;
+
+export type QuestionnaireResponseStatus = (typeof QUESTIONNAIRE_RESPONSE_STATUSES)[number];
 
 // ============================================
 // PAYMENT INSTALLMENT CONSTANTS
@@ -252,7 +297,8 @@ export const CONTENT_REQUEST_ITEM_STATUSES = [
   'pending',
   'submitted',
   'revision_needed',
-  'accepted'
+  'accepted',
+  'rejected'
 ] as const;
 
 export type ContentRequestItemStatus = (typeof CONTENT_REQUEST_ITEM_STATUSES)[number];
