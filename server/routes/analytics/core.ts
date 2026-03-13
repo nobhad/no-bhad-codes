@@ -28,14 +28,10 @@
 import { Router, Request, Response } from 'express';
 import { authenticateToken, requireAdmin } from '../../middleware/auth.js';
 import { logger } from '../../services/logger.js';
-import { getDatabase } from '../../database/init.js';
-import { getNumber } from '../../database/row-helpers.js';
+import { analyticsService } from '../../services/analytics-service.js';
 import { UAParser } from 'ua-parser-js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import {
-  VISITOR_SESSION_COLUMNS,
-  PAGE_VIEW_COLUMNS,
-  INTERACTION_EVENT_COLUMNS,
   trackingRateLimit,
   adminRateLimit,
   getDateThreshold,
@@ -64,7 +60,6 @@ router.post('/track', trackingRateLimit, asyncHandler(async (req: Request, res: 
     return errorResponse(res, 'Invalid payload', 400, ErrorCodes.VALIDATION_ERROR);
   }
 
-  const db = getDatabase();
   const { session, events } = payload;
 
   // Parse user agent for device info
@@ -80,57 +75,32 @@ router.post('/track', trackingRateLimit, asyncHandler(async (req: Request, res: 
     req.socket.remoteAddress ||
     'unknown';
 
+  const sessionParams = {
+    sessionId: session.sessionId,
+    visitorId: session.visitorId,
+    startTime: session.startTime,
+    lastActivity: session.lastActivity,
+    pageViews: session.pageViews,
+    totalTimeOnSite: session.totalTimeOnSite,
+    bounced: session.bounced,
+    referrer: session.referrer,
+    userAgent: session.userAgent,
+    screenResolution: session.screenResolution,
+    language: session.language,
+    timezone: session.timezone,
+    ipAddress,
+    deviceType,
+    browser,
+    os
+  };
+
   // Check if session exists
-  const existingSession = await db.get(
-    'SELECT session_id FROM visitor_sessions WHERE session_id = ?',
-    [session.sessionId]
-  );
+  const existingSession = await analyticsService.findSession(session.sessionId);
 
   if (existingSession) {
-    // Update existing session
-    await db.run(
-      `UPDATE visitor_sessions SET
-        last_activity = datetime(?, 'unixepoch', 'subsec'),
-        page_views = ?,
-        total_time_on_site = ?,
-        bounced = ?,
-        updated_at = datetime('now')
-      WHERE session_id = ?`,
-      [
-        session.lastActivity / 1000,
-        session.pageViews,
-        session.totalTimeOnSite,
-        session.bounced ? 1 : 0,
-        session.sessionId
-      ]
-    );
+    await analyticsService.updateSession(sessionParams);
   } else {
-    // Insert new session
-    await db.run(
-      `INSERT INTO visitor_sessions (
-        session_id, visitor_id, start_time, last_activity, page_views,
-        total_time_on_site, bounced, referrer, user_agent, screen_resolution,
-        language, timezone, ip_address, device_type, browser, os
-      ) VALUES (?, ?, datetime(?, 'unixepoch', 'subsec'), datetime(?, 'unixepoch', 'subsec'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        session.sessionId,
-        session.visitorId,
-        session.startTime / 1000,
-        session.lastActivity / 1000,
-        session.pageViews,
-        session.totalTimeOnSite,
-        session.bounced ? 1 : 0,
-        session.referrer,
-        session.userAgent,
-        session.screenResolution,
-        session.language,
-        session.timezone,
-        ipAddress,
-        deviceType,
-        browser,
-        os
-      ]
-    );
+    await analyticsService.insertSession(sessionParams);
   }
 
   // Insert events
@@ -145,11 +115,9 @@ router.post('/track', trackingRateLimit, asyncHandler(async (req: Request, res: 
       const scrollDepth = typeof event.scrollDepth === 'number' ? event.scrollDepth : 0;
       const interactions = typeof event.interactions === 'number' ? event.interactions : 0;
 
-      await db.run(
-        `INSERT INTO page_views (session_id, url, title, timestamp, time_on_page, scroll_depth, interactions)
-         VALUES (?, ?, ?, datetime(?, 'unixepoch', 'subsec'), ?, ?, ?)`,
-        [sessionId, url, title, timestamp, timeOnPage, scrollDepth, interactions]
-      );
+      await analyticsService.insertPageView({
+        sessionId, url, title, timestamp, timeOnPage, scrollDepth, interactions
+      });
     } else if ('type' in event) {
       // Interaction event
       const sessionId = typeof event.sessionId === 'string' ? event.sessionId : null;
@@ -159,11 +127,9 @@ router.post('/track', trackingRateLimit, asyncHandler(async (req: Request, res: 
       const url = typeof event.url === 'string' ? event.url : null;
       const data = event.data ? JSON.stringify(event.data) : null;
 
-      await db.run(
-        `INSERT INTO interaction_events (session_id, event_type, element, timestamp, url, data)
-         VALUES (?, ?, ?, datetime(?, 'unixepoch', 'subsec'), ?, ?)`,
-        [sessionId, eventType, element, timestamp, url, data]
-      );
+      await analyticsService.insertInteraction({
+        sessionId, eventType, element, timestamp, url, data
+      });
     }
   }
 
@@ -197,111 +163,17 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: Request, res: Response) => {
-    const db = getDatabase();
     const { days = 30 } = req.query;
     const daysNum = Math.min(Math.max(parseInt(days as string, 10) || 30, 1), 365);
-
-    // Get summary metrics
-    // Note: total_time_on_site is stored in milliseconds
-    // Filter out sessions > 1 hour (3600000ms) as outliers (tabs left open)
-    const MAX_SESSION_MS = 3600000; // 1 hour in milliseconds
     const dateThreshold = getDateThreshold(daysNum);
 
-    const summary = await db.get(
-      `SELECT
-        COUNT(DISTINCT session_id) as total_sessions,
-        COUNT(DISTINCT visitor_id) as unique_visitors,
-        SUM(page_views) as total_page_views,
-        CAST(AVG(CASE WHEN total_time_on_site <= ? THEN total_time_on_site ELSE NULL END) AS INTEGER) as avg_session_duration,
-        ROUND(AVG(page_views), 2) as avg_pages_per_session,
-        ROUND(COUNT(CASE WHEN bounced = 1 THEN 1 END) * 100.0 / MAX(COUNT(*), 1), 2) as bounce_rate
-      FROM visitor_sessions
-      WHERE start_time >= ?`,
-      [MAX_SESSION_MS, dateThreshold]
-    );
-
-    // Get daily breakdown
-    const daily = await db.all(
-      `SELECT
-        DATE(start_time) as date,
-        COUNT(DISTINCT session_id) as sessions,
-        COUNT(DISTINCT visitor_id) as visitors,
-        SUM(page_views) as page_views
-      FROM visitor_sessions
-      WHERE start_time >= ?
-      GROUP BY DATE(start_time)
-      ORDER BY date DESC`,
-      [dateThreshold]
-    );
-
-    // Get top pages
-    const topPages = await db.all(
-      `SELECT
-        url,
-        COUNT(*) as views,
-        CAST(AVG(time_on_page) AS INTEGER) as avg_time
-      FROM page_views
-      WHERE timestamp >= ?
-      GROUP BY url
-      ORDER BY views DESC
-      LIMIT 10`,
-      [dateThreshold]
-    );
-
-    // Get top referrers
-    const topReferrers = await db.all(
-      `SELECT
-        CASE
-          WHEN referrer = '' OR referrer IS NULL THEN 'Direct'
-          ELSE referrer
-        END as source,
-        COUNT(*) as count
-      FROM visitor_sessions
-      WHERE start_time >= ?
-      GROUP BY source
-      ORDER BY count DESC
-      LIMIT 10`,
-      [dateThreshold]
-    );
-
-    // Get device breakdown
-    const devices = await db.all(
-      `SELECT
-        device_type,
-        COUNT(*) as count
-      FROM visitor_sessions
-      WHERE start_time >= ?
-      GROUP BY device_type
-      ORDER BY count DESC`,
-      [dateThreshold]
-    );
-
-    // Get browser breakdown
-    const browsers = await db.all(
-      `SELECT
-        browser,
-        COUNT(*) as count
-      FROM visitor_sessions
-      WHERE start_time >= ?
-      GROUP BY browser
-      ORDER BY count DESC
-      LIMIT 5`,
-      [dateThreshold]
-    );
-
-    // Get top interactions
-    const topInteractions = await db.all(
-      `SELECT
-        event_type,
-        element,
-        COUNT(*) as count
-      FROM interaction_events
-      WHERE timestamp >= ?
-      GROUP BY event_type, element
-      ORDER BY count DESC
-      LIMIT 10`,
-      [dateThreshold]
-    );
+    const summary = await analyticsService.getSummaryMetrics(dateThreshold);
+    const daily = await analyticsService.getDailyBreakdown(dateThreshold);
+    const topPages = await analyticsService.getTopPages(dateThreshold);
+    const topReferrers = await analyticsService.getTopReferrers(dateThreshold);
+    const devices = await analyticsService.getDeviceBreakdown(dateThreshold);
+    const browsers = await analyticsService.getBrowserBreakdown(dateThreshold);
+    const topInteractions = await analyticsService.getTopInteractions(dateThreshold);
 
     sendSuccess(res, {
       summary: summary || {},
@@ -334,36 +206,8 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: Request, res: Response) => {
-    const db = getDatabase();
-
-    // Active sessions (last 5 minutes)
-    const sessions = await db.all(
-      `SELECT
-        session_id,
-        visitor_id,
-        device_type,
-        browser,
-        referrer,
-        page_views,
-        last_activity
-      FROM visitor_sessions
-      WHERE last_activity >= datetime('now', '-5 minutes')
-      ORDER BY last_activity DESC`
-    );
-
-    // Recent page views (last 10 minutes)
-    const recentPages = await db.all(
-      `SELECT
-        pv.url,
-        pv.title,
-        pv.timestamp,
-        vs.device_type
-      FROM page_views pv
-      JOIN visitor_sessions vs ON pv.session_id = vs.session_id
-      WHERE pv.timestamp >= datetime('now', '-10 minutes')
-      ORDER BY pv.timestamp DESC
-      LIMIT 20`
-    );
+    const sessions = await analyticsService.getActiveSessions();
+    const recentPages = await analyticsService.getRecentPageViews();
 
     sendSuccess(res, {
       activeSessions: sessions.length,
@@ -392,38 +236,18 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: Request, res: Response) => {
-    const db = getDatabase();
     const { olderThanDays = 90 } = req.query;
     const days = Math.max(parseInt(olderThanDays as string, 10) || 90, 7);
     const dateThreshold = getDateThreshold(days);
 
-    // Delete old interaction events
-    await db.run(
-      `DELETE FROM interaction_events
-       WHERE timestamp < ?`,
-      [dateThreshold]
-    );
-
-    // Delete old page views
-    await db.run(
-      `DELETE FROM page_views
-       WHERE timestamp < ?`,
-      [dateThreshold]
-    );
-
-    // Delete old sessions (will cascade if foreign keys are set up)
-    const result = await db.run(
-      `DELETE FROM visitor_sessions
-       WHERE start_time < ?`,
-      [dateThreshold]
-    );
+    const result = await analyticsService.deleteOldData(dateThreshold);
 
     logger.info('Analytics data cleared', {
       category: 'analytics',
-      metadata: { deletedSessions: result.changes, olderThanDays: days }
+      metadata: { deletedSessions: result.deletedSessions, olderThanDays: days }
     });
 
-    sendSuccess(res, { deletedSessions: result.changes });
+    sendSuccess(res, { deletedSessions: result.deletedSessions });
   })
 );
 
@@ -446,7 +270,6 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: Request, res: Response) => {
-    const db = getDatabase();
     const { page = 1, limit = 50, days = 7 } = req.query;
 
     const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
@@ -455,36 +278,8 @@ router.get(
     const offset = (pageNum - 1) * limitNum;
     const dateThreshold = getDateThreshold(daysNum);
 
-    // Get total count
-    const countResult = await db.get(
-      `SELECT COUNT(*) as total FROM visitor_sessions
-       WHERE start_time >= ?`,
-      [dateThreshold]
-    );
-    const total = getNumber(countResult, 'total');
-
-    // Get sessions
-    const sessions = await db.all(
-      `SELECT
-        session_id,
-        visitor_id,
-        start_time,
-        last_activity,
-        page_views,
-        total_time_on_site,
-        bounced,
-        referrer,
-        device_type,
-        browser,
-        os,
-        country,
-        city
-      FROM visitor_sessions
-      WHERE start_time >= ?
-      ORDER BY start_time DESC
-      LIMIT ? OFFSET ?`,
-      [dateThreshold, limitNum, offset]
-    );
+    const total = await analyticsService.getSessionCount(dateThreshold);
+    const sessions = await analyticsService.getSessionList(dateThreshold, limitNum, offset);
 
     sendSuccess(res, {
       sessions,
@@ -526,36 +321,16 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: Request, res: Response) => {
-    const db = getDatabase();
     const { sessionId } = req.params;
 
-    // Get session
-    const session = await db.get(
-      `SELECT ${VISITOR_SESSION_COLUMNS} FROM visitor_sessions WHERE session_id = ?`,
-      [sessionId]
-    );
+    const session = await analyticsService.getSessionById(sessionId);
 
     if (!session) {
       return errorResponse(res, 'Session not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
-    // Get page views
-    const pageViews = await db.all(
-      `SELECT url, title, timestamp, time_on_page, scroll_depth, interactions
-       FROM page_views
-       WHERE session_id = ?
-       ORDER BY timestamp ASC`,
-      [sessionId]
-    );
-
-    // Get interactions
-    const interactions = await db.all(
-      `SELECT event_type, element, timestamp, url, data
-       FROM interaction_events
-       WHERE session_id = ?
-       ORDER BY timestamp ASC`,
-      [sessionId]
-    );
+    const pageViews = await analyticsService.getPageViewsBySession(sessionId);
+    const interactions = await analyticsService.getInteractionsBySession(sessionId);
 
     sendSuccess(res, {
       session,
@@ -584,32 +359,13 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: Request, res: Response) => {
-    const db = getDatabase();
     const { days = 30 } = req.query;
     const daysNum = Math.min(365, Math.max(1, parseInt(days as string, 10) || 30));
     const dateThreshold = getDateThreshold(daysNum);
 
-    // Get all data for export
-    const sessions = await db.all(
-      `SELECT ${VISITOR_SESSION_COLUMNS} FROM visitor_sessions
-       WHERE start_time >= ?
-       ORDER BY start_time DESC`,
-      [dateThreshold]
-    );
-
-    const pageViews = await db.all(
-      `SELECT ${PAGE_VIEW_COLUMNS} FROM page_views
-       WHERE timestamp >= ?
-       ORDER BY timestamp DESC`,
-      [dateThreshold]
-    );
-
-    const interactions = await db.all(
-      `SELECT ${INTERACTION_EVENT_COLUMNS} FROM interaction_events
-       WHERE timestamp >= ?
-       ORDER BY timestamp DESC`,
-      [dateThreshold]
-    );
+    const sessions = await analyticsService.getExportSessions(dateThreshold);
+    const pageViews = await analyticsService.getExportPageViews(dateThreshold);
+    const interactions = await analyticsService.getExportInteractions(dateThreshold);
 
     const exportData = {
       exportedAt: new Date().toISOString(),

@@ -21,9 +21,8 @@ import {
   verifyWebhookSignature,
   handleWebhookEvent
 } from '../../services/integrations/index.js';
-import { getDatabase } from '../../database/init.js';
+import { integrationStatusService } from '../../services/integration-status-service.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
-import { INVOICE_COLUMNS } from './shared.js';
 
 const router = Router();
 
@@ -106,8 +105,7 @@ router.post(
       return;
     }
 
-    const db = getDatabase();
-    const invoice = await db.get(`SELECT ${INVOICE_COLUMNS} FROM invoices WHERE id = ?`, [invoiceId]);
+    const invoice = await integrationStatusService.getInvoiceForPaymentLink(invoiceId);
 
     if (!invoice) {
       errorResponse(res, 'Invoice not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);

@@ -6,11 +6,13 @@
  *
  * Sub-modules:
  *   analytics/types.ts       — Shared types and column constants
+ *   analytics/core.ts        — Event tracking, sessions, realtime, export, cleanup
  *   analytics/reports.ts     — Saved reports, schedules, report data generation
  *   analytics/dashboards.ts  — Widgets, presets, KPI snapshots, metric alerts
  *   analytics/insights.ts    — Business intelligence, client insights, operational reports
  */
 
+import * as core from './analytics/core.js';
 import * as reports from './analytics/reports.js';
 import * as dashboards from './analytics/dashboards.js';
 import * as insights from './analytics/insights.js';
@@ -38,6 +40,25 @@ export type {
   MetricAlert
 } from './analytics/types.js';
 
+export type {
+  UpsertSessionParams,
+  InsertPageViewParams,
+  InsertInteractionParams,
+  SummaryMetrics,
+  DailyBreakdown,
+  TopPage,
+  TopReferrer,
+  DeviceBreakdown,
+  BrowserBreakdown,
+  TopInteraction,
+  ActiveSession,
+  RecentPageView,
+  SessionListItem,
+  SessionPageView,
+  SessionInteraction,
+  DeleteResult
+} from './analytics/core.js';
+
 /**
  * Singleton analytics service exposing route-compatible method names.
  *
@@ -45,6 +66,41 @@ export type {
  * Each method delegates to the appropriate sub-module function.
  */
 export const analyticsService = {
+  // ── Core Tracking ──────────────────────────────
+  findSession: core.findSession,
+  updateSession: core.updateSession,
+  insertSession: core.insertSession,
+  insertPageView: core.insertPageView,
+  insertInteraction: core.insertInteraction,
+
+  // ── Core Summary ───────────────────────────────
+  getSummaryMetrics: core.getSummaryMetrics,
+  getDailyBreakdown: core.getDailyBreakdown,
+  getTopPages: core.getTopPages,
+  getTopReferrers: core.getTopReferrers,
+  getDeviceBreakdown: core.getDeviceBreakdown,
+  getBrowserBreakdown: core.getBrowserBreakdown,
+  getTopInteractions: core.getTopInteractions,
+
+  // ── Core Realtime ──────────────────────────────
+  getActiveSessions: core.getActiveSessions,
+  getRecentPageViews: core.getRecentPageViews,
+
+  // ── Core Data Cleanup ──────────────────────────
+  deleteOldData: core.deleteOldData,
+
+  // ── Core Sessions ──────────────────────────────
+  getSessionCount: core.getSessionCount,
+  getSessionList: core.getSessionList,
+  getSessionById: core.getSessionById,
+  getPageViewsBySession: core.getPageViewsBySession,
+  getInteractionsBySession: core.getInteractionsBySession,
+
+  // ── Core Export ────────────────────────────────
+  getExportSessions: core.getExportSessions,
+  getExportPageViews: core.getExportPageViews,
+  getExportInteractions: core.getExportInteractions,
+
   // ── Reports ───────────────────────────────────
   getSavedReports(_type?: string, _favorites?: boolean) {
     return reports.getReports();

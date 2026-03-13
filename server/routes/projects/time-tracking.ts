@@ -1,5 +1,4 @@
 import express, { Response } from 'express';
-import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../utils/access-control.js';
@@ -21,10 +20,9 @@ router.get(
     if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
-    const db = getDatabase();
 
-    const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
-    if (!project) {
+    const exists = await projectService.projectExists(projectId);
+    if (!exists) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
@@ -64,10 +62,9 @@ router.get(
     if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
-    const db = getDatabase();
 
-    const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
-    if (!project) {
+    const exists = await projectService.projectExists(projectId);
+    if (!exists) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
@@ -75,23 +72,8 @@ router.get(
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
-    const summary = await db.get(
-      `SELECT
-        COALESCE(SUM(hours), 0) AS total_hours,
-        COUNT(*) AS entry_count,
-        MIN(date) AS first_entry,
-        MAX(date) AS last_entry
-       FROM time_entries
-       WHERE project_id = ? AND deleted_at IS NULL`,
-      [projectId]
-    );
-
-    sendSuccess(res, {
-      totalHours: Number(summary?.total_hours ?? 0),
-      entryCount: Number(summary?.entry_count ?? 0),
-      firstEntry: summary?.first_entry || null,
-      lastEntry: summary?.last_entry || null
-    });
+    const summary = await projectService.getProjectTimeStats(projectId);
+    sendSuccess(res, summary);
   })
 );
 
@@ -105,10 +87,9 @@ router.post(
     if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
-    const db = getDatabase();
 
-    const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
-    if (!project) {
+    const exists = await projectService.projectExists(projectId);
+    if (!exists) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 

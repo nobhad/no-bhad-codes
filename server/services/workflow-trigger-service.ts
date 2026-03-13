@@ -113,6 +113,28 @@ interface EventContext {
   triggeredBy?: string;
 }
 
+export interface AdminWorkflowRow {
+  id: number;
+  name: string;
+  description: string | null;
+  trigger: string;
+  status: string;
+  lastRun: string | null;
+  runCount: number;
+  successRate: number;
+  steps: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminWorkflowStats {
+  total: number;
+  active: number;
+  inactive: number;
+  totalRuns: number;
+  avgSuccessRate: number;
+}
+
 // ============================================
 // Workflow Trigger Service
 // ============================================
@@ -375,6 +397,103 @@ class WorkflowTriggerService {
       [id]
     );
     return this.getTrigger(id);
+  }
+
+  // ============================================
+  // ADMIN LISTING & BULK OPERATIONS
+  // ============================================
+
+  /**
+   * Get workflow triggers with admin dashboard stats (run counts, success rates).
+   * Used by the admin workflows view.
+   */
+  async getAdminWorkflowListing(): Promise<{
+    workflows: AdminWorkflowRow[];
+    stats: AdminWorkflowStats;
+  }> {
+    const db = getDatabase();
+
+    const triggers = await db.all<AdminWorkflowRow>(`
+      SELECT
+        wt.id,
+        wt.name,
+        wt.description,
+        wt.event_type as trigger,
+        CASE WHEN wt.is_active = 1 THEN 'active' ELSE 'inactive' END as status,
+        (SELECT MAX(created_at) FROM workflow_trigger_logs WHERE trigger_id = wt.id) as lastRun,
+        (SELECT COUNT(*) FROM workflow_trigger_logs WHERE trigger_id = wt.id) as runCount,
+        COALESCE(
+          (SELECT ROUND(100.0 * SUM(CASE WHEN action_result = 'success' THEN 1 ELSE 0 END) / COUNT(*))
+           FROM workflow_trigger_logs WHERE trigger_id = wt.id),
+          100
+        ) as successRate,
+        1 as steps,
+        wt.created_at as createdAt,
+        wt.updated_at as updatedAt
+      FROM workflow_triggers wt
+      ORDER BY wt.created_at DESC
+    `);
+
+    const stats: AdminWorkflowStats = {
+      total: triggers.length,
+      active: triggers.filter((t) => t.status === 'active').length,
+      inactive: triggers.filter((t) => t.status === 'inactive').length,
+      totalRuns: triggers.reduce((sum, t) => sum + (t.runCount || 0), 0),
+      avgSuccessRate: triggers.length > 0
+        ? Math.round(triggers.reduce((sum, t) => sum + (t.successRate || 0), 0) / triggers.length)
+        : 0
+    };
+
+    return { workflows: triggers, stats };
+  }
+
+  /**
+   * Bulk delete workflow triggers by IDs.
+   * Returns the number of triggers actually deleted.
+   */
+  async bulkDeleteTriggers(workflowIds: (string | number)[]): Promise<number> {
+    const db = getDatabase();
+    let deleted = 0;
+
+    for (const workflowId of workflowIds) {
+      const id = typeof workflowId === 'string' ? parseInt(workflowId, 10) : workflowId;
+      if (isNaN(id) || id <= 0) continue;
+
+      const result = await db.run('DELETE FROM workflow_triggers WHERE id = ?', [id]);
+      if (result.changes && result.changes > 0) {
+        deleted++;
+      }
+    }
+
+    return deleted;
+  }
+
+  /**
+   * Bulk update workflow trigger status (active/inactive).
+   * Returns the number of triggers actually updated.
+   */
+  async bulkUpdateTriggerStatus(
+    workflowIds: (string | number)[],
+    status: 'active' | 'inactive'
+  ): Promise<number> {
+    const db = getDatabase();
+    const isActive = status === 'active' ? 1 : 0;
+    let updated = 0;
+
+    for (const workflowId of workflowIds) {
+      const id = typeof workflowId === 'string' ? parseInt(workflowId, 10) : workflowId;
+      if (isNaN(id) || id <= 0) continue;
+
+      const result = await db.run(
+        'UPDATE workflow_triggers SET is_active = ?, updated_at = datetime(\'now\') WHERE id = ?',
+        [isActive, id]
+      );
+      if (result.changes && result.changes > 0) {
+        updated++;
+      }
+    }
+
+    return updated;
   }
 
   // ============================================

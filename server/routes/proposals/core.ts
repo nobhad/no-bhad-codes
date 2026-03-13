@@ -15,10 +15,9 @@ import {
   canAccessProject,
   canAccessProposal,
   isUserAdmin,
-  getDatabase,
   getString,
   getNumber,
-  notDeleted,
+  proposalService,
   userService,
   softDeleteService,
   workflowTriggerService,
@@ -30,7 +29,6 @@ import {
   sendCreated,
   sendPaginated,
   parsePaginationQuery,
-  FEATURE_SELECTION_COLUMNS,
   VALID_PROJECT_TYPES,
   VALID_TIERS,
   VALID_MAINTENANCE,
@@ -38,9 +36,7 @@ import {
 } from './helpers.js';
 import type {
   AuthenticatedRequest,
-  ProposalSubmission,
-  ProposalRow,
-  FeatureRow
+  ProposalSubmission
 } from './helpers.js';
 
 const router = express.Router();
@@ -117,13 +113,8 @@ router.post(
       });
     }
 
-    const db = getDatabase();
-
     // Verify project exists and get its client_id in one query
-    const project = await db.get(
-      'SELECT id, client_id FROM projects WHERE id = ? AND deleted_at IS NULL',
-      [submission.projectId]
-    );
+    const project = await proposalService.getProjectForProposal(submission.projectId);
     if (!project) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
@@ -135,8 +126,7 @@ router.post(
 
     // For non-admins, verify clientId matches the project's actual client
     if (!(await isUserAdmin(req))) {
-      const projectClientId = (project as { client_id: number }).client_id;
-      if (projectClientId !== submission.clientId) {
+      if (project.client_id !== submission.clientId) {
         return errorResponse(
           res,
           'Client ID must match the project owner',
@@ -147,8 +137,7 @@ router.post(
     }
 
     // Verify client exists
-    const client = await db.get('SELECT id FROM clients WHERE id = ?', [submission.clientId]);
-    if (!client) {
+    if (!(await proposalService.clientExists(submission.clientId))) {
       return errorResponse(res, 'Client not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
@@ -168,50 +157,16 @@ router.post(
     }
 
     // Create proposal in transaction
-    const result = await db.transaction(async (ctx) => {
-      // Insert proposal request
-      const proposalResult = await ctx.run(
-        `INSERT INTO proposal_requests (
-          project_id, client_id, project_type, selected_tier,
-          base_price, final_price, maintenance_option,
-          status, client_notes, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, datetime('now'))`,
-        [
-          submission.projectId,
-          submission.clientId,
-          submission.projectType,
-          submission.selectedTier,
-          submission.basePrice,
-          submission.finalPrice,
-          submission.maintenanceOption || null,
-          submission.clientNotes || null
-        ]
-      );
-
-      const proposalId = proposalResult.lastID!;
-
-      // Insert feature selections
-      if (submission.features && submission.features.length > 0) {
-        for (const feature of submission.features) {
-          await ctx.run(
-            `INSERT INTO proposal_feature_selections (
-              proposal_request_id, feature_id, feature_name,
-              feature_price, feature_category, is_included_in_tier, is_addon
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [
-              proposalId,
-              feature.featureId,
-              feature.featureName,
-              feature.featurePrice,
-              feature.featureCategory || null,
-              feature.isIncludedInTier ? 1 : 0,
-              feature.isAddon ? 1 : 0
-            ]
-          );
-        }
-      }
-
-      return proposalId;
+    const result = await proposalService.createProposal({
+      projectId: submission.projectId,
+      clientId: submission.clientId,
+      projectType: submission.projectType,
+      selectedTier: submission.selectedTier,
+      basePrice: submission.basePrice,
+      finalPrice: submission.finalPrice,
+      maintenanceOption: submission.maintenanceOption,
+      clientNotes: submission.clientNotes,
+      features: submission.features
     });
 
     await logger.info(
@@ -278,25 +233,14 @@ router.get(
       return errorResponse(res, 'Proposal not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
-    const db = getDatabase();
-    const proposal = (await db.get(
-      `SELECT pr.*, p.project_name, c.contact_name as client_name, c.email as client_email, c.company_name
-       FROM proposal_requests pr
-       JOIN projects p ON pr.project_id = p.id AND ${notDeleted('p')}
-       JOIN clients c ON pr.client_id = c.id AND ${notDeleted('c')}
-       WHERE pr.id = ? AND ${notDeleted('pr')}`,
-      [proposalId]
-    )) as ProposalRow | undefined;
+    const proposal = await proposalService.getProposalWithJoins(proposalId);
 
     if (!proposal) {
       return errorResponse(res, 'Proposal not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     // Get feature selections
-    const features = (await db.all(
-      `SELECT ${FEATURE_SELECTION_COLUMNS} FROM proposal_feature_selections WHERE proposal_request_id = ?`,
-      [id]
-    )) as unknown as FeatureRow[];
+    const features = await proposalService.getProposalFeatures(proposalId);
 
     // Cast proposal for helper functions
     const p = proposal as unknown as Record<string, unknown>;
@@ -399,39 +343,20 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const db = getDatabase();
     const { status } = req.query;
     const { page, perPage, limit, offset } = parsePaginationQuery(
       req.query as Record<string, unknown>
     );
 
-    let query = `
-      SELECT pr.*, p.project_name, c.contact_name as client_name, c.email as client_email, c.company_name
-      FROM proposal_requests pr
-      JOIN projects p ON pr.project_id = p.id AND ${notDeleted('p')}
-      JOIN clients c ON pr.client_id = c.id AND ${notDeleted('c')}
-      WHERE ${notDeleted('pr')}
-    `;
-    const params: (string | number)[] = [];
+    const validStatus = status && VALID_STATUSES.includes(status as string)
+      ? (status as string)
+      : undefined;
 
-    if (status && VALID_STATUSES.includes(status as string)) {
-      query += ' AND pr.status = ?';
-      params.push(status as string);
-    }
-
-    query += ' ORDER BY pr.created_at DESC LIMIT ? OFFSET ?';
-    params.push(limit, offset);
-
-    const proposals = (await db.all(query, params)) as unknown as ProposalRow[];
-
-    // Get total count (excluding soft-deleted)
-    let countQuery = `SELECT COUNT(*) as count FROM proposal_requests WHERE ${notDeleted()}`;
-    const countParams: string[] = [];
-    if (status && VALID_STATUSES.includes(status as string)) {
-      countQuery += ' AND status = ?';
-      countParams.push(status as string);
-    }
-    const countResult = (await db.get(countQuery, countParams)) as { count: number };
+    const { proposals, total } = await proposalService.listProposals({
+      status: validStatus,
+      limit,
+      offset
+    });
 
     const mappedProposals = proposals.map((proposal) => {
       const p = proposal as unknown as Record<string, unknown>;
@@ -461,7 +386,7 @@ router.get(
     sendPaginated(res, mappedProposals, {
       page,
       perPage,
-      total: countResult.count
+      total
     });
   })
 );
@@ -492,7 +417,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     const { status, adminNotes } = req.body;
-    const db = getDatabase();
+    const proposalId = parseInt(id, 10);
 
     // Validate status
     if (status && !VALID_STATUSES.includes(status)) {
@@ -502,41 +427,28 @@ router.put(
     }
 
     // Verify proposal exists
-    const proposal = await db.get('SELECT id FROM proposal_requests WHERE id = ?', [id]);
-    if (!proposal) {
+    if (!(await proposalService.proposalExists(proposalId))) {
       return errorResponse(res, 'Proposal not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
-    // Build update query
-    const updates: string[] = [];
-    const params: (string | number | null)[] = [];
+    // Build update data
+    const reviewerEmail = req.user?.email || 'admin';
+    let reviewedByUserId: number | null = null;
 
     if (status) {
-      const reviewerEmail = req.user?.email || 'admin';
-      // Look up user ID for reviewed_by during transition period
-      const reviewedByUserId = await userService.getUserIdByEmail(reviewerEmail);
-
-      updates.push('status = ?');
-      params.push(status);
-      updates.push('reviewed_at = datetime(\'now\')');
-      updates.push('reviewed_by = ?');
-      params.push(reviewerEmail);
-      updates.push('reviewed_by_user_id = ?');
-      params.push(reviewedByUserId);
+      reviewedByUserId = await userService.getUserIdByEmail(reviewerEmail);
     }
 
-    if (adminNotes !== undefined) {
-      updates.push('admin_notes = ?');
-      params.push(adminNotes);
-    }
-
-    if (updates.length === 0) {
+    if (!status && adminNotes === undefined) {
       return errorResponse(res, 'No updates provided', 400, ErrorCodes.NO_UPDATES);
     }
 
-    params.push(parseInt(id, 10));
-
-    await db.run(`UPDATE proposal_requests SET ${updates.join(', ')} WHERE id = ?`, params);
+    await proposalService.updateProposal(proposalId, {
+      status,
+      adminNotes,
+      reviewerEmail: status ? reviewerEmail : undefined,
+      reviewedByUserId
+    });
 
     await logger.info(`[Proposals] Updated proposal ${id} - status: ${status || 'unchanged'}`, {
       category: 'PROPOSALS'
@@ -545,12 +457,12 @@ router.put(
     // Emit workflow events for status changes
     if (status === 'accepted') {
       await workflowTriggerService.emit('proposal.accepted', {
-        entityId: parseInt(id, 10),
+        entityId: proposalId,
         triggeredBy: req.user?.email || 'admin'
       });
     } else if (status === 'rejected') {
       await workflowTriggerService.emit('proposal.rejected', {
-        entityId: parseInt(id, 10),
+        entityId: proposalId,
         triggeredBy: req.user?.email || 'admin'
       });
     }
@@ -584,17 +496,10 @@ router.post(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
-    const db = getDatabase();
+    const proposalId = parseInt(id, 10);
 
     // Get proposal with full details
-    const proposal = (await db.get(
-      `SELECT pr.*, p.id as project_id, c.id as client_id
-       FROM proposal_requests pr
-       JOIN projects p ON pr.project_id = p.id
-       JOIN clients c ON pr.client_id = c.id
-       WHERE pr.id = ?`,
-      [id]
-    )) as ProposalRow | undefined;
+    const proposal = await proposalService.getProposalForConversion(proposalId);
 
     if (!proposal) {
       return errorResponse(res, 'Proposal not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
@@ -610,10 +515,7 @@ router.post(
     }
 
     // Get feature selections for line items
-    const features = (await db.all(
-      `SELECT ${FEATURE_SELECTION_COLUMNS} FROM proposal_feature_selections WHERE proposal_request_id = ?`,
-      [id]
-    )) as unknown as FeatureRow[];
+    const features = await proposalService.getProposalFeatures(proposalId);
 
     // Create line items from features
     const lineItems = features.map((f) => {
@@ -626,42 +528,11 @@ router.post(
       };
     });
 
-    // Generate invoice number
-    const invoiceCount = (await db.get('SELECT COUNT(*) as count FROM invoices')) as {
-      count: number;
-    };
-    const invoiceNumber = `INV-${new Date().getFullYear()}-${String(invoiceCount.count + 1).padStart(4, '0')}`;
-
-    // Calculate due date (30 days from now)
-    const dueDate = new Date();
-    dueDate.setDate(dueDate.getDate() + 30);
-
-    // Create invoice in transaction
-    const invoiceId = await db.transaction(async (ctx) => {
-      const result = await ctx.run(
-        `INSERT INTO invoices (
-          invoice_number, project_id, client_id, amount_total,
-          status, due_date, issued_date, line_items, notes, created_at
-        ) VALUES (?, ?, ?, ?, 'draft', ?, date('now'), ?, ?, datetime('now'))`,
-        [
-          invoiceNumber,
-          getNumber(proposal as unknown as Record<string, unknown>, 'project_id'),
-          getNumber(proposal as unknown as Record<string, unknown>, 'client_id'),
-          getNumber(proposal as unknown as Record<string, unknown>, 'final_price'),
-          dueDate.toISOString().split('T')[0],
-          JSON.stringify(lineItems),
-          `Converted from proposal #${id}`
-        ]
-      );
-
-      // Update proposal status to converted
-      await ctx.run(
-        'UPDATE proposal_requests SET status = \'converted\', reviewed_at = datetime(\'now\') WHERE id = ?',
-        [id]
-      );
-
-      return result.lastID!;
-    });
+    const { invoiceId, invoiceNumber } = await proposalService.convertProposalToInvoice(
+      proposalId,
+      proposal,
+      lineItems
+    );
 
     await logger.info(`[Proposals] Converted proposal ${id} to invoice ${invoiceNumber}`, {
       category: 'PROPOSALS'

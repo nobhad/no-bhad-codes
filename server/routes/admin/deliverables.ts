@@ -11,7 +11,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
-import { getDatabase } from '../../database/init.js';
+import { deliverableService } from '../../services/deliverable-service.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 
 const router = express.Router();
@@ -24,50 +24,12 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const db = getDatabase();
     const { projectId, status } = req.query;
 
-    let query = `
-      SELECT
-        d.id,
-        d.project_id as projectId,
-        d.title,
-        d.description,
-        d.status,
-        d.due_date as dueDate,
-        d.completed_at as completedAt,
-        d.created_at as createdAt,
-        d.updated_at as updatedAt,
-        p.project_name as projectName,
-        c.company_name as clientName
-      FROM deliverables d
-      LEFT JOIN projects p ON d.project_id = p.id
-      LEFT JOIN clients c ON p.client_id = c.id
-      WHERE p.deleted_at IS NULL
-        AND d.deleted_at IS NULL
-    `;
-    const params: (string | number)[] = [];
-
-    if (projectId) {
-      query += ' AND d.project_id = ?';
-      params.push(parseInt(projectId as string, 10));
-    }
-    if (status) {
-      query += ' AND d.status = ?';
-      params.push(status as string);
-    }
-
-    query += ' ORDER BY d.due_date ASC, d.created_at DESC';
-
-    const deliverables = await db.all(query, params);
-
-    const stats = {
-      total: deliverables.length,
-      pending: deliverables.filter((d: { status: string }) => d.status === 'pending').length,
-      inProgress: deliverables.filter((d: { status: string }) => d.status === 'in_progress').length,
-      completed: deliverables.filter((d: { status: string }) => d.status === 'completed').length,
-      approved: deliverables.filter((d: { status: string }) => d.status === 'approved').length
-    };
+    const { deliverables, stats } = await deliverableService.listAdminDeliverablesWithDetails({
+      projectId: projectId ? parseInt(projectId as string, 10) : undefined,
+      status: status as string | undefined
+    });
 
     sendSuccess(res, { deliverables, stats });
   })
@@ -89,58 +51,19 @@ router.put(
 
     const { status, title, description, due_date } = req.body;
 
-    const updates: string[] = [];
-    const values: (string | number | null)[] = [];
+    const hasFields = status !== undefined || title !== undefined
+      || description !== undefined || due_date !== undefined;
 
-    if (status !== undefined) {
-      updates.push('status = ?');
-      values.push(status);
-    }
-    if (title !== undefined) {
-      updates.push('title = ?');
-      values.push(title);
-    }
-    if (description !== undefined) {
-      updates.push('description = ?');
-      values.push(description);
-    }
-    if (due_date !== undefined) {
-      updates.push('due_date = ?');
-      values.push(due_date);
-    }
-
-    if (updates.length === 0) {
+    if (!hasFields) {
       return errorResponse(res, 'No fields to update', 400, ErrorCodes.NO_FIELDS);
     }
 
-    updates.push('updated_at = CURRENT_TIMESTAMP');
-    values.push(id);
-
-    const db = getDatabase();
-
-    await db.run(
-      `UPDATE deliverables SET ${updates.join(', ')} WHERE id = ?`,
-      values
-    );
-
-    const updated = await db.get(`
-      SELECT
-        d.id,
-        d.project_id as projectId,
-        d.title,
-        d.description,
-        d.status,
-        d.due_date as dueDate,
-        d.completed_at as completedAt,
-        d.created_at as createdAt,
-        d.updated_at as updatedAt,
-        p.project_name as projectName,
-        c.company_name as clientName
-      FROM deliverables d
-      LEFT JOIN projects p ON d.project_id = p.id
-      LEFT JOIN clients c ON p.client_id = c.id
-      WHERE d.id = ?
-    `, [id]);
+    const updated = await deliverableService.updateAdminDeliverable(id, {
+      status,
+      title,
+      description,
+      due_date
+    });
 
     sendSuccess(res, { deliverable: updated });
   })

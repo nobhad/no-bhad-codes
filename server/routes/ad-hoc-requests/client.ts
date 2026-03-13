@@ -9,7 +9,6 @@
 import express, { Response } from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
-import { getDatabase } from '../../database/init.js';
 import {
   adHocRequestService,
   type AdHocRequestStatus,
@@ -150,22 +149,18 @@ router.post(
       return errorResponse(res, 'Invalid request urgency', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const db = getDatabase();
-    const project = await db.get(
-      'SELECT id FROM projects WHERE id = ? AND client_id = ? AND deleted_at IS NULL',
-      [Number(projectId), clientId]
-    );
+    const projectExists = await adHocRequestService.verifyClientProject(Number(projectId), clientId);
 
-    if (!project) {
+    if (!projectExists) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     if (attachmentFileId) {
-      const attachment = await db.get('SELECT id FROM files WHERE id = ? AND project_id = ? AND deleted_at IS NULL', [
+      const attachmentValid = await adHocRequestService.verifyAttachmentForProject(
         Number(attachmentFileId),
         Number(projectId)
-      ]);
-      if (!attachment) {
+      );
+      if (!attachmentValid) {
         return errorResponse(
           res,
           'Attachment must belong to the selected project',
@@ -189,18 +184,10 @@ router.post(
 
     // Send admin notification (non-blocking)
     try {
-      const clientInfo = await db.get(
-        'SELECT contact_name, company_name, email FROM clients WHERE id = ?',
-        [clientId]
-      ) as { contact_name?: string; company_name?: string; email?: string } | undefined;
+      const clientInfo = await adHocRequestService.getClientDisplayInfo(clientId);
+      const projectDisplayName = await adHocRequestService.getProjectDisplayName(Number(projectId));
 
-      const projectInfo = await db.get(
-        'SELECT project_name FROM projects WHERE id = ?',
-        [Number(projectId)]
-      ) as { project_name?: string } | undefined;
-
-      const clientDisplayName = clientInfo?.contact_name || clientInfo?.company_name || clientInfo?.email || 'Unknown client';
-      const projectDisplayName = projectInfo?.project_name || `Project #${projectId}`;
+      const clientDisplayName = clientInfo.displayName;
 
       await emailService.sendAdminNotification('New Ad-Hoc Request Submitted', {
         type: 'ad-hoc-request',

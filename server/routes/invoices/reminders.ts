@@ -12,7 +12,6 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { emailService } from '../../services/email-service.js';
-import { getDatabase } from '../../database/init.js';
 import { BUSINESS_INFO } from '../../config/business.js';
 import { getInvoiceService, toSnakeCaseReminder } from './helpers.js';
 import { getPortalUrl } from '../../config/environment.js';
@@ -132,18 +131,15 @@ router.post(
         );
       }
 
-      // Get client email
-      const db = getDatabase();
-      const clientRow = (await db.get('SELECT email, contact_name FROM clients WHERE id = ?', [
-        invoice.clientId
-      ])) as { email?: string; contact_name?: string } | undefined;
+      // Get client email via service
+      const clientContact = await getInvoiceService().getClientContact(invoice.clientId);
 
-      if (!clientRow || !clientRow.email) {
+      if (!clientContact || !clientContact.email) {
         return errorResponse(res, 'Client email not found', 400, ErrorCodes.NO_CLIENT_EMAIL);
       }
 
-      const clientEmail = clientRow.email;
-      const clientName = clientRow.contact_name || 'Valued Client';
+      const clientEmail = clientContact.email;
+      const clientName = clientContact.contactName || 'Valued Client';
 
       // Determine reminder urgency
       const today = new Date();

@@ -10,13 +10,16 @@
  *   project/time-tracking.ts  — Time entries, stats, team reports
  *   project/templates.ts      — Template CRUD, project creation from template
  *   project/health.ts         — Health scoring, burndown, velocity
+ *   project/admin.ts          — Admin project creation, client ops, file records
  */
 
 import { getDatabase } from '../database/init.js';
+import * as core from './project/core.js';
 import * as tasks from './project/tasks.js';
 import * as timeTracking from './project/time-tracking.js';
 import * as templates from './project/templates.js';
 import * as health from './project/health.js';
+import * as adminOps from './project/admin.js';
 
 // Re-export all types for consumers
 export type {
@@ -38,11 +41,49 @@ export type {
   VelocityData
 } from './project/types.js';
 
+export type {
+  ProjectRow,
+  ProjectFileRow,
+  ProjectMessageRow,
+  ProjectUpdateRow,
+  ClientInfoRow,
+  ProjectRequestData,
+  AdminProjectCreateData,
+  SaveFileRecordData
+} from './project/core.js';
+
+export type {
+  ClientRow as AdminClientRow,
+  NewClientData,
+  CreateProjectData,
+  FileRecordData
+} from './project/admin.js';
+
 /**
  * Singleton project service exposing all methods.
  * Route files import `{ projectService }` and call methods directly.
  */
 export const projectService = {
+  // ── Core CRUD ───────────────────────────────────
+  listProjectsAdmin: core.listProjectsAdmin,
+  listProjectsForClient: core.listProjectsForClient,
+  getProjectAdmin: core.getProjectAdmin,
+  getProjectForClient: core.getProjectForClient,
+  getProjectFiles: core.getProjectFiles,
+  getProjectMessages: core.getProjectMessages,
+  getProjectUpdates: core.getProjectUpdates,
+  createProjectRequest: core.createProjectRequest,
+  getClientById: core.getClientById,
+  createProjectAdmin: core.createProjectAdmin,
+  getProjectByIdAdmin: core.getProjectByIdAdmin,
+  getProjectByIdForClient: core.getProjectByIdForClient,
+  updateProject: core.updateProject,
+  setProjectCompletedDate: core.setProjectCompletedDate,
+  getUpdatedProject: core.getUpdatedProject,
+  getClientInfo: core.getClientInfo,
+  saveFileRecord: core.saveFileRecord,
+  projectExists: core.projectExists,
+
   // ── Tasks ─────────────────────────────────────
   createTask: tasks.createTask,
   getTasks: tasks.getTasks,
@@ -90,6 +131,14 @@ export const projectService = {
   calculateProjectHealth: health.calculateProjectHealth,
   getProjectBurndown: health.getProjectBurndown,
   getProjectVelocity: health.getProjectVelocity,
+
+  // ── Admin Project Operations ────────────────────
+  findClientByEmail: adminOps.findClientByEmail,
+  getAdminClientById: adminOps.getClientById,
+  createClient: adminOps.createClient,
+  createAdminProject: adminOps.createProject,
+  insertProjectUpdateRecord: adminOps.insertProjectUpdateRecord,
+  insertFileRecord: adminOps.insertFileRecord,
 
   // ── Tags ──────────────────────────────────────
   async addTagToProject(projectId: number, tagId: number): Promise<void> {

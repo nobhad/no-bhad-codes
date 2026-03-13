@@ -20,18 +20,14 @@ import { generateProjectPlan, ProjectPlan } from '../services/project-generator.
 import { generateInvoice } from '../services/invoice-generator.js';
 import { sendNewIntakeNotification } from '../services/email-service.js';
 import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../config/uploads.js';
-import { getString, getNumber } from '../database/row-helpers.js';
+import { getNumber } from '../database/row-helpers.js';
 import { userService } from '../services/user-service.js';
+import { intakeService } from '../services/intake-service.js';
 import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, sanitizeErrorMessage, ErrorCodes } from '../utils/api-response.js';
 import { rateLimiters } from '../middleware/rate-limiter.js';
 import { validateRequest, ValidationSchemas } from '../middleware/validation.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { leadService } from '../services/lead-service.js';
-
-// Explicit column lists for SELECT queries (avoid SELECT *)
-const PROJECT_UPDATE_COLUMNS = `
-  id, project_id, title, description, update_type, author_user_id, created_at
-`.replace(/\s+/g, ' ').trim();
 
 const router = express.Router();
 
@@ -43,8 +39,6 @@ async function saveIntakeAsFile(
   projectId: number,
   projectName: string
 ): Promise<void> {
-  const db = getDatabase();
-
   // Get uploads directory (uses persistent storage on Railway)
   const uploadsDir = getUploadsSubdir(UPLOAD_DIRS.INTAKE);
 
@@ -99,23 +93,15 @@ async function saveIntakeAsFile(
   // Insert into files table — JSON is source data, PDF is generated on-the-fly
   // via /api/projects/:id/intake/pdf (uploads endpoint redirects for category=intake)
   // Display as PDF to the client (original_filename + mime_type)
-  await db.run(
-    `INSERT INTO files (
-      project_id, filename, original_filename, file_path,
-      file_size, mime_type, file_type, category, description, uploaded_by,
-      shared_with_client, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, 'document', 'intake', ?, ?, 1, datetime('now'))`,
-    [
-      projectId,
-      filename,
-      pdfDisplayName,
-      relativePath,
-      fileSize,
-      'application/pdf',
-      'Project intake form submission',
-      'system'
-    ]
-  );
+  await intakeService.insertIntakeFile({
+    projectId,
+    filename,
+    originalFilename: pdfDisplayName,
+    relativePath,
+    fileSize,
+    description: 'Project intake form submission',
+    uploadedBy: 'system'
+  });
 
   await logger.info(`[Intake] Saved intake form as file: ${relativePath}`, { category: 'INTAKE' });
 }
@@ -548,51 +534,13 @@ router.get(
     try {
       const { projectId } = req.params;
 
-      const db = getDatabase();
-      const project = await db.get(
-        `
-      SELECT p.*, c.company_name, c.contact_name, c.email
-      FROM projects p
-      JOIN clients c ON p.client_id = c.id
-      WHERE p.id = ?
-    `,
-        [projectId]
-      );
+      const statusResult = await intakeService.getIntakeProjectStatus(projectId);
 
-      if (!project) {
+      if (!statusResult) {
         return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       }
 
-      // Get latest update
-      const latestUpdate = await db.get(
-        `SELECT ${PROJECT_UPDATE_COLUMNS} FROM project_updates
-         WHERE project_id = ? ORDER BY created_at DESC LIMIT 1`,
-        [projectId]
-      );
-
-      const responseData: ProjectStatusResponse = {
-        project: {
-          id: getNumber(project, 'id'),
-          name: getString(project, 'project_name'),
-          status: getString(project, 'status'),
-          type: getString(project, 'project_type'),
-          timeline: getString(project, 'timeline'),
-          budget: getString(project, 'budget_range')
-        },
-        client: {
-          name: getString(project, 'contact_name'),
-          company: getString(project, 'company_name'),
-          email: getString(project, 'email')
-        },
-        latestUpdate: latestUpdate
-          ? {
-            title: getString(latestUpdate, 'title'),
-            description: getString(latestUpdate, 'description'),
-            date: getString(latestUpdate, 'created_at'),
-            type: getString(latestUpdate, 'type')
-          }
-          : null
-      };
+      const responseData: ProjectStatusResponse = statusResult;
 
       sendSuccess(res, responseData);
     } catch (error: unknown) {

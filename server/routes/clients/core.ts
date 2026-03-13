@@ -18,7 +18,6 @@ import {
   requireAdmin,
   type AuthenticatedRequest,
   asyncHandler,
-  getDatabase,
   errorResponse,
   sendSuccess,
   sendCreated,
@@ -29,13 +28,12 @@ import {
   QueryCache,
   emailService,
   auditLogger,
-  getString,
-  getNumber,
   softDeleteService,
   clientService,
   ClientValidationSchemas
 } from './helpers.js';
 import { BUSINESS_INFO } from '../../config/business.js';
+import type { AdminClientListRow } from '../../services/client-service.js';
 
 const router = express.Router();
 
@@ -66,57 +64,34 @@ router.get(
     keyGenerator: (_req) => 'clients:all'
   }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const db = getDatabase();
-
     const clients = await QueryCache.getOrSet(
       'clients:all:with_projects',
       async () => {
         // Get base client data with project count and health score
         // Filter out soft-deleted clients and projects
-        const clientRows = await db.all(`
-          SELECT
-            c.id, c.email, c.company_name, c.contact_name, c.phone,
-            c.status, c.client_type, c.created_at, c.updated_at,
-            c.invitation_sent_at, c.invitation_expires_at,
-            c.health_score, c.health_status,
-            COUNT(p.id) as project_count
-          FROM active_clients c
-          LEFT JOIN active_projects p ON c.id = p.client_id
-          GROUP BY c.id
-          ORDER BY c.created_at DESC
-        `);
+        const clientRows = await clientService.getAdminClientList();
 
         // Get tags for all clients in one query
-        const tagRows = await db.all(`
-          SELECT ct.client_id, t.id, t.name, t.color
-          FROM client_tags ct
-          JOIN tags t ON ct.tag_id = t.id
-          ORDER BY t.name
-        `);
+        const tagRows = await clientService.getAllClientTags();
 
         // Group tags by client_id
         const tagsByClient = new Map<number, Array<{ id: number; name: string; color: string }>>();
         for (const row of tagRows) {
-          const r = row as Record<string, unknown>;
-          const clientId = r.client_id as number;
-          if (!tagsByClient.has(clientId)) {
-            tagsByClient.set(clientId, []);
+          if (!tagsByClient.has(row.client_id)) {
+            tagsByClient.set(row.client_id, []);
           }
-          tagsByClient.get(clientId)!.push({
-            id: r.id as number,
-            name: r.name as string,
-            color: (r.color as string) || '#6b7280'
+          tagsByClient.get(row.client_id)!.push({
+            id: row.id,
+            name: row.name,
+            color: row.color || '#6b7280'
           });
         }
 
         // Merge tags into client objects
-        return clientRows.map((client) => {
-          const c = client as Record<string, unknown>;
-          return {
-            ...c,
-            tags: tagsByClient.get(c.id as number) || []
-          };
-        });
+        return clientRows.map((client: AdminClientListRow) => ({
+          ...client,
+          tags: tagsByClient.get(client.id) || []
+        }));
       },
       {
         ttl: 300,
@@ -327,21 +302,10 @@ router.get(
       return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
-    const db = getDatabase();
-
     const client = await QueryCache.getOrSet(
       `client:${clientId}:profile`,
       async () => {
-        return await db.get(
-          `
-          SELECT
-            c.id, c.email, c.company_name, c.contact_name, c.phone,
-            c.status, c.client_type, c.created_at, c.updated_at
-          FROM active_clients c
-          WHERE c.id = ?
-        `,
-          [clientId]
-        );
+        return await clientService.getAdminClientDetail(clientId);
       },
       {
         ttl: 600,
@@ -357,18 +321,7 @@ router.get(
     const projects = await QueryCache.getOrSet(
       `client:${clientId}:projects`,
       async () => {
-        return await db.all(
-          `
-          SELECT
-            id, project_name as name, description, status, priority, start_date,
-            estimated_end_date as due_date, actual_end_date as completed_at,
-            budget_range as budget, created_at, updated_at
-          FROM active_projects
-          WHERE client_id = ?
-          ORDER BY created_at DESC
-        `,
-          [clientId]
-        );
+        return await clientService.getAdminClientProjectsAliased(clientId);
       },
       {
         ttl: 300,
@@ -427,14 +380,10 @@ router.post(
       );
     }
 
-    const db = getDatabase();
-
     // Check if email already exists
-    const existingClient = await db.get('SELECT id FROM active_clients WHERE email = ?', [
-      email.toLowerCase()
-    ]);
+    const emailTaken = await clientService.emailExists(email);
 
-    if (existingClient) {
+    if (emailTaken) {
       return errorResponse(res, 'Email already registered', 409, ErrorCodes.EMAIL_EXISTS);
     }
 
@@ -444,30 +393,15 @@ router.post(
 
     // Insert new client - status defaults to 'pending' if no password provided
     const clientStatus = password ? status || 'active' : 'pending';
-    const result = await db.run(
-      `
-    INSERT INTO clients (email, password_hash, company_name, contact_name, phone, client_type, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `,
-      [
-        email.toLowerCase(),
-        password_hash,
-        company_name || null,
-        contact_name || null,
-        phone || null,
-        client_type || 'business',
-        clientStatus
-      ]
-    );
-
-    // Get the created client
-    const newClient = await db.get(
-      `
-    SELECT id, email, company_name, contact_name, phone, status, client_type, created_at
-    FROM active_clients WHERE id = ?
-  `,
-      [result.lastID]
-    );
+    const newClient = await clientService.createClient({
+      email,
+      password_hash,
+      company_name,
+      contact_name,
+      phone,
+      client_type,
+      status: clientStatus
+    });
 
     if (!newClient) {
       return errorResponse(
@@ -481,11 +415,11 @@ router.post(
     // Send welcome email only if client is active (has password set)
     // Pending clients will receive an invitation email instead
     try {
-      const newClientEmail = getString(newClient, 'email');
-      const newClientContactName = getString(newClient, 'contact_name');
-      const newClientCompanyName = getString(newClient, 'company_name');
-      const newClientId = getNumber(newClient, 'id');
-      const newClientStatus = getString(newClient, 'status');
+      const newClientEmail = newClient.email;
+      const newClientContactName = newClient.contact_name;
+      const newClientCompanyName = newClient.company_name;
+      const newClientId = newClient.id;
+      const newClientStatus = newClient.status;
 
       // Only send welcome email to active clients (those created with a password)
       // Pending clients should receive an invitation email via the send-invite endpoint
@@ -572,7 +506,6 @@ router.put(
     }
 
     const { email, company_name, contact_name, phone, status } = req.body;
-    const db = getDatabase();
 
     // Build update query dynamically
     const updates: string[] = [];
@@ -589,11 +522,8 @@ router.put(
         return errorResponse(res, 'Invalid email format', 400, ErrorCodes.INVALID_EMAIL);
       }
       const normalized = trimmed.toLowerCase();
-      const existing = await db.get('SELECT id FROM active_clients WHERE email = ? AND id != ?', [
-        normalized,
-        clientId
-      ]);
-      if (existing) {
+      const emailTaken = await clientService.emailExists(normalized, clientId);
+      if (emailTaken) {
         return errorResponse(res, 'Email already in use by another client', 409, ErrorCodes.EMAIL_EXISTS);
       }
       updates.push('email = ?');
@@ -626,17 +556,7 @@ router.put(
       return errorResponse(res, 'No valid fields to update', 400, ErrorCodes.NO_UPDATES);
     }
 
-    updates.push('updated_at = CURRENT_TIMESTAMP');
-    values.push(clientId);
-
-    await db.run(`UPDATE clients SET ${updates.join(', ')} WHERE id = ?`, values);
-
-    // Get updated client
-    const updatedClient = await db.get(
-      `SELECT id, email, company_name, contact_name, phone, status, client_type, created_at, updated_at
-       FROM active_clients WHERE id = ?`,
-      [clientId]
-    );
+    const updatedClient = await clientService.updateClientFields(clientId, updates, values);
 
     sendSuccess(res, { client: updatedClient }, 'Client updated successfully');
   })
@@ -672,19 +592,7 @@ router.get(
       return errorResponse(res, 'Invalid client ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const db = getDatabase();
-
-    const projects = await db.all(
-      `
-      SELECT
-        id, project_name, description, status, priority, start_date,
-        estimated_end_date, actual_end_date, budget_range, created_at, updated_at
-      FROM active_projects
-      WHERE client_id = ?
-      ORDER BY created_at DESC
-      `,
-      [clientId]
-    );
+    const projects = await clientService.getAdminClientProjects(clientId);
 
     sendSuccess(res, { projects });
   })
@@ -721,32 +629,22 @@ router.post(
       return errorResponse(res, 'Invalid client ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const db = getDatabase();
-
     // Get client details
-    const client = await db.get(
-      'SELECT id, email, contact_name, company_name, status, invitation_sent_at FROM active_clients WHERE id = ?',
-      [clientId]
-    );
+    const client = await clientService.getClientForInvite(clientId);
 
     if (!client) {
       return errorResponse(res, 'Client not found', 404, ErrorCodes.CLIENT_NOT_FOUND);
     }
 
-    const clientEmail = getString(client, 'email');
-    const clientName = getString(client, 'contact_name');
+    const clientEmail = client.email;
+    const clientName = client.contact_name;
 
     // Generate invitation token (valid for 7 days)
     const invitationToken = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
     // Update client with invitation token
-    await db.run(
-      `UPDATE clients
-       SET invitation_token = ?, invitation_expires_at = ?, invitation_sent_at = CURRENT_TIMESTAMP, status = 'pending'
-       WHERE id = ?`,
-      [invitationToken, expiresAt, clientId]
-    );
+    await clientService.setInvitationToken(clientId, invitationToken, expiresAt);
 
     // Build invitation link
     const baseUrl = process.env.BASE_URL || 'http://localhost:4000';

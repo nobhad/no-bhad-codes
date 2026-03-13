@@ -1,9 +1,9 @@
 import express, { Response } from 'express';
-import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject, canAccessFile } from '../../utils/access-control.js';
 import { fileService } from '../../services/file-service.js';
+import { projectService } from '../../services/project-service.js';
 import { upload } from './uploads.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 
@@ -18,9 +18,8 @@ router.get(
     if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
-    const db = getDatabase();
 
-    const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
+    const project = await projectService.getProjectByIdAdmin(projectId);
     if (!project) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
@@ -29,32 +28,10 @@ router.get(
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
-    const files = await db.all(
-      `
-    SELECT id, filename, original_filename, file_size, mime_type, file_type,
-           file_path, description, uploaded_by, created_at
-    FROM files
-    WHERE project_id = ? AND deleted_at IS NULL
-    ORDER BY created_at DESC
-  `,
-      [projectId]
-    );
+    const files = await fileService.getProjectFilesList(projectId);
 
-    // Map to consistent field names
-    interface FileRow {
-      id: number;
-      filename: string;
-      original_filename: string;
-      file_size: number;
-      mime_type: string;
-      file_type: string | null;
-      file_path: string;
-      description: string | null;
-      uploaded_by: string;
-      created_at: string;
-    }
     sendSuccess(res, {
-      files: (files as FileRow[]).map((f) => ({
+      files: files.map((f) => ({
         ...f,
         size: f.file_size
       }))
@@ -78,9 +55,7 @@ router.post(
       return errorResponse(res, 'No files uploaded', 400, ErrorCodes.NO_FILES);
     }
 
-    const db = getDatabase();
-
-    const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
+    const project = await projectService.getProjectByIdAdmin(projectId);
     if (!project) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
@@ -94,25 +69,19 @@ router.post(
 
     for (const file of files) {
       // Always use email for uploaded_by for consistency and audit trails
-      const result = await db.run(
-        `
-      INSERT INTO files (project_id, filename, original_filename, file_path, file_size, mime_type, uploaded_by, description)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `,
-        [
-          projectId,
-          file.filename,
-          file.originalname,
-          file.path,
-          file.size,
-          file.mimetype,
-          req.user!.email || req.user!.type,
-          label
-        ]
-      );
+      const newId = await fileService.insertProjectFile({
+        projectId,
+        filename: file.filename,
+        originalFilename: file.originalname,
+        filePath: file.path,
+        fileSize: file.size,
+        mimeType: file.mimetype,
+        uploadedBy: req.user!.email || req.user!.type,
+        description: label
+      });
 
       uploadedFiles.push({
-        id: result.lastID,
+        id: newId,
         filename: file.filename,
         originalName: file.originalname,
         size: file.size,

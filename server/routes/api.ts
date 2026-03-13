@@ -16,23 +16,13 @@ import { validateRequest, ValidationSchemas } from '../middleware/validation.js'
 import { rateLimit, requestSizeLimit, suspiciousActivityDetector } from '../middleware/security.js';
 import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
 import { logger } from '../services/logger.js';
-import { getDatabase } from '../database/init.js';
 import { emailService } from '../services/email-service.js';
 import { getSchedulerService } from '../services/scheduler-service.js';
+import { contactService } from '../services/contact-service.js';
+import { generalUploadService } from '../services/general-upload-service.js';
+import { dataQueryService } from '../services/data-query-service.js';
+import { metricsService } from '../services/metrics-service.js';
 import { errorResponse, errorResponseWithPayload, sanitizeErrorMessage, sendSuccess, sendCreated, ErrorCodes } from '../utils/api-response.js';
-
-// Explicit column lists for SELECT queries (avoid SELECT *)
-const PROJECT_COLUMNS = `
-  id, client_id, project_name, description, status, priority, progress,
-  start_date, estimated_end_date, actual_end_date, budget_range, project_type,
-  timeline, preview_url, price, notes, repository_url, staging_url, production_url,
-  deposit_amount, contract_signed_at, cancelled_by, cancellation_reason,
-  default_deposit_percentage, hourly_rate, estimated_hours, actual_hours, template_id,
-  features, design_level, content_status, tech_comfort, hosting_preference,
-  page_count, integrations, brand_assets, inspiration, current_site, challenges,
-  additional_info, addons, referral_source, contract_reminders_enabled,
-  deleted_at, deleted_by, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
 
 const router = Router();
 
@@ -137,21 +127,16 @@ router.post(
       const messageId = `msg_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;
 
       // Store in database
-      const db = getDatabase();
       try {
-        await db.run(
-          `INSERT INTO contact_submissions (name, email, subject, message, ip_address, user_agent, message_id)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`,
-          [
-            name,
-            email,
-            subjectLine,
-            message,
-            req.ip || 'unknown',
-            (req.get('User-Agent') || 'unknown').substring(0, 500),
-            messageId
-          ]
-        );
+        await contactService.saveContactSubmission({
+          name,
+          email,
+          subject: subjectLine,
+          message,
+          ipAddress: req.ip || 'unknown',
+          userAgent: (req.get('User-Agent') || 'unknown').substring(0, 500),
+          messageId
+        });
         await logger.info(`Contact form saved to database - messageId: ${messageId}`);
       } catch (dbError) {
         // Log but don't fail - email will still be sent
@@ -281,15 +266,15 @@ router.post(
       };
 
       // Save file metadata to database (optional)
-      const db = getDatabase();
       let fileId = 0;
       try {
-        const result = await db.run(
-          `INSERT INTO uploaded_files (filename, original_filename, file_path, file_size, mime_type, created_at)
-           VALUES (?, ?, ?, ?, ?, datetime('now'))`,
-          [fileInfo.filename, fileInfo.originalName, fileInfo.url, fileInfo.size, fileInfo.mimetype]
-        );
-        fileId = result.lastID || 0;
+        fileId = await generalUploadService.saveUploadMetadata({
+          filename: fileInfo.filename,
+          originalFilename: fileInfo.originalName,
+          filePath: fileInfo.url,
+          fileSize: fileInfo.size,
+          mimeType: fileInfo.mimetype
+        });
       } catch (err) {
         await logger.error('Failed to save file metadata:', {
           error: err instanceof Error ? err : undefined,
@@ -372,59 +357,13 @@ router.get(
 
       await logger.info('Data query request');
 
-      // Implement actual data querying from projects table
-      const db = getDatabase();
-      const MAX_PAGE_SIZE = 500;
-      const pageNum = Math.max(1, Number(page) || 1);
-      const limitNum = Math.min(MAX_PAGE_SIZE, Math.max(1, Number(limit) || 20));
-      const offset = (pageNum - 1) * limitNum;
-
-      // Build query with search
-      let query = `SELECT ${PROJECT_COLUMNS} FROM projects`;
-      let countQuery = 'SELECT COUNT(*) as count FROM projects';
-      const params: (string | number)[] = [];
-
-      if (search) {
-        query += ' WHERE project_name LIKE ? OR description LIKE ?';
-        countQuery += ' WHERE project_name LIKE ? OR description LIKE ?';
-        const searchPattern = `%${search}%`;
-        params.push(searchPattern, searchPattern);
-      }
-
-      // Add sorting
-      const validSortFields = ['id', 'project_name', 'status', 'created_at', 'updated_at'];
-      const sortField = validSortFields.includes(String(sortBy)) ? sortBy : 'created_at';
-      const order = sortOrder === 'asc' ? 'ASC' : 'DESC';
-      query += ` ORDER BY ${sortField} ${order}`;
-
-      // Add pagination
-      query += ' LIMIT ? OFFSET ?';
-      params.push(limitNum, offset);
-
-      // Get total count
-      const countParams = search ? [`%${search}%`, `%${search}%`] : [];
-      const countRow = await db.get(countQuery, countParams);
-      const total = typeof countRow?.count === 'number' ? countRow.count : 0;
-
-      // Get data
-      const data = await db.all(query, params);
-
-      const totalPages = Math.ceil(total / limitNum);
-
-      const result = {
-        data,
-        pagination: {
-          page: pageNum,
-          limit: limitNum,
-          total,
-          totalPages
-        },
-        meta: {
-          sortBy: sortField,
-          sortOrder: order,
-          search: search || null
-        }
-      };
+      const result = await dataQueryService.queryProjects({
+        page: Number(page) || 1,
+        limit: Number(limit) || 20,
+        sortBy: String(sortBy),
+        sortOrder: String(sortOrder),
+        search: search ? String(search) : undefined
+      });
 
       sendSuccess(res, result);
     } catch (_error) {
@@ -448,32 +387,10 @@ router.get(
 
   async (req: AuthenticatedRequest, res) => {
     try {
-      // Gather actual metrics from database
-      const db = getDatabase();
-
-      let totalUsers = 0,
-        activeUsers = 0,
-        totalProjects = 0,
-        activeProjects = 0,
-        totalInvoices = 0;
+      let metrics = { totalUsers: 0, activeUsers: 0, totalProjects: 0, activeProjects: 0, totalInvoices: 0 };
 
       try {
-        const [clientsRow, activeClientsRow, projectsRow, activeProjectsRow, invoicesRow] =
-          await Promise.all([
-            db.get('SELECT COUNT(*) as count FROM clients'),
-            db.get('SELECT COUNT(*) as count FROM clients WHERE status = \'active\''),
-            db.get('SELECT COUNT(*) as count FROM projects'),
-            db.get(
-              'SELECT COUNT(*) as count FROM projects WHERE status IN (\'in-progress\', \'pending\')'
-            ),
-            db.get('SELECT COUNT(*) as count FROM invoices')
-          ]);
-
-        totalUsers = typeof clientsRow?.count === 'number' ? clientsRow.count : 0;
-        activeUsers = typeof activeClientsRow?.count === 'number' ? activeClientsRow.count : 0;
-        totalProjects = typeof projectsRow?.count === 'number' ? projectsRow.count : 0;
-        activeProjects = typeof activeProjectsRow?.count === 'number' ? activeProjectsRow.count : 0;
-        totalInvoices = typeof invoicesRow?.count === 'number' ? invoicesRow.count : 0;
+        metrics = await metricsService.getDatabaseMetrics();
       } catch (err) {
         await logger.error('Failed to gather metrics:', {
           error: err instanceof Error ? err : undefined,
@@ -490,15 +407,15 @@ router.get(
         uptime: process.uptime(),
         database: {
           users: {
-            total: totalUsers,
-            active: activeUsers
+            total: metrics.totalUsers,
+            active: metrics.activeUsers
           },
           projects: {
-            total: totalProjects,
-            active: activeProjects
+            total: metrics.totalProjects,
+            active: metrics.activeProjects
           },
           invoices: {
-            total: totalInvoices
+            total: metrics.totalInvoices
           }
         },
         requests: {

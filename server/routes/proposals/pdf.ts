@@ -13,12 +13,12 @@ import {
   asyncHandler,
   authenticateToken,
   canAccessProposal,
-  getDatabase,
   getString,
   getNumber,
   logger,
   ErrorCodes,
   errorResponse,
+  proposalService,
   BUSINESS_INFO,
   PDFLibDocument,
   StandardFonts,
@@ -29,16 +29,17 @@ import {
   PAGE_MARGINS,
   ensureSpace,
   addPageNumbers,
-  drawPdfDocumentHeader,
-  FEATURE_SELECTION_COLUMNS,
-  PROPOSAL_SIGNATURE_COLUMNS
+  drawPdfDocumentHeader
 } from './helpers.js';
 import type {
   AuthenticatedRequest,
-  PdfPageContext,
-  ProposalRow,
-  FeatureRow
+  PdfPageContext
 } from './helpers.js';
+import type {
+  ProposalPdfRow,
+  ProposalFeatureSelectionRow,
+  ProposalSignatureForPdf
+} from '../../services/proposal-service.js';
 import { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } from '../../config/pdf-styles.js';
 
 const router = express.Router();
@@ -79,19 +80,8 @@ router.get(
       return errorResponse(res, 'Proposal not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
-    const db = getDatabase();
-
-    // Get proposal with full details including deposit percentage
-    const proposal = (await db.get(
-      `SELECT pr.*, p.project_name, p.description as project_description,
-              p.default_deposit_percentage,
-              c.contact_name as client_name, c.email as client_email, c.company_name
-       FROM proposal_requests pr
-       JOIN projects p ON pr.project_id = p.id
-       JOIN clients c ON pr.client_id = c.id
-       WHERE pr.id = ?`,
-      [proposalId]
-    )) as ProposalRow | undefined;
+    // Get proposal with full details via service
+    const proposal = await proposalService.getProposalWithJoinsForPdf(proposalId);
 
     if (!proposal) {
       return errorResponse(res, 'Proposal not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
@@ -117,28 +107,12 @@ router.get(
     // Cast proposal for helper functions
     const p = proposal as unknown as Record<string, unknown>;
 
-    // Get feature selections
-    const features = (await db.all(
-      `SELECT ${FEATURE_SELECTION_COLUMNS} FROM proposal_feature_selections WHERE proposal_request_id = ?`,
-      [id]
-    )) as unknown as FeatureRow[];
+    // Get feature selections via service
+    const features = await proposalService.getProposalFeatureSelectionsForPdf(proposalId);
 
     // Get signature data if proposal is signed
-    const signature = proposal.signed_at
-      ? ((await db.get(
-        `SELECT ${PROPOSAL_SIGNATURE_COLUMNS} FROM proposal_signatures WHERE proposal_id = ? ORDER BY signed_at DESC LIMIT 1`,
-        [id]
-      )) as
-          | {
-              signer_name?: string;
-              signer_email?: string;
-              signer_title?: string;
-              signature_data?: string;
-              signature_method?: string;
-              signed_at?: string;
-              ip_address?: string;
-            }
-          | undefined)
+    const signature: ProposalSignatureForPdf | undefined = proposal.signed_at
+      ? await proposalService.getProposalLatestSignatureForPdf(proposalId)
       : undefined;
 
     // Check if proposal is signed for watermark

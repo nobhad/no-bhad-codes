@@ -3,11 +3,11 @@ import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { getDatabase } from '../../database/init.js';
 import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../../config/uploads.js';
 import { errorTracker } from '../../services/error-tracking.js';
 import { generateDefaultMilestones } from '../../services/milestone-generator.js';
 import { userService } from '../../services/user-service.js';
+import { projectService } from '../../services/project-service.js';
 import { errorResponse, sendSuccess, sendCreated, sanitizeErrorMessage, ErrorCodes } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
@@ -74,7 +74,6 @@ router.post(
       );
     }
 
-    const db = getDatabase();
     let finalClientId: number;
     let clientData: { contact_name: string; company_name: string | null; email: string };
 
@@ -87,9 +86,7 @@ router.post(
         }
 
         // Check for existing client with same email
-        const existing = await db.get('SELECT id FROM clients WHERE LOWER(email) = LOWER(?)', [
-          newClient.email
-        ]);
+        const existing = await projectService.findClientByEmail(newClient.email);
         if (existing) {
           return errorResponse(
             res,
@@ -100,12 +97,12 @@ router.post(
         }
 
         // Create client
-        const result = await db.run(
-          `INSERT INTO clients (company_name, contact_name, email, phone, password_hash, status, client_type, created_at, updated_at)
-           VALUES (?, ?, LOWER(?), ?, '', 'pending', 'business', datetime('now'), datetime('now'))`,
-          [newClient.companyName || null, newClient.contactName, newClient.email, newClient.phone || null]
-        );
-        finalClientId = result.lastID!;
+        finalClientId = await projectService.createClient({
+          contactName: newClient.contactName,
+          companyName: newClient.companyName || null,
+          email: newClient.email,
+          phone: newClient.phone || null
+        });
 
         clientData = {
           contact_name: newClient.contactName,
@@ -116,18 +113,15 @@ router.post(
         logger.info(`[AdminProjects] Created new client: ${finalClientId}`);
       } else {
         // Validate existing client
-        const client = await db.get(
-          'SELECT id, contact_name, company_name, email FROM clients WHERE id = ?',
-          [clientId]
-        );
+        const client = await projectService.getAdminClientById(clientId);
         if (!client) {
           return errorResponse(res, 'Client not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
         }
         finalClientId = clientId;
         clientData = {
-          contact_name: (client as { contact_name: string }).contact_name || '',
-          company_name: (client as { company_name: string | null }).company_name,
-          email: (client as { email: string }).email
+          contact_name: client.contact_name || '',
+          company_name: client.company_name,
+          email: client.email
         };
       }
 
@@ -135,26 +129,29 @@ router.post(
       const projectName = generateAdminProjectName(projectType, clientData);
 
       // Create project
-      const projectResult = await db.run(
-        `INSERT INTO projects (
-          client_id, project_name, description, status, project_type,
-          budget_range, timeline, notes,
-          features, page_count, integrations, addons,
-          design_level, content_status, brand_assets,
-          tech_comfort, hosting_preference, current_site,
-          inspiration, challenges, additional_info, referral_source,
-          created_at, updated_at
-        ) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-        [
-          finalClientId, projectName, description, projectType, budget, timeline,
-          notes || null,
-          features || null, pageCount || null, integrations || null, addons || null,
-          designLevel || null, contentStatus || null, brandAssets || null,
-          techComfort || null, hostingPreference || null, currentSite || null,
-          inspiration || null, challenges || null, additionalInfo || null, referralSource || null
-        ]
-      );
-      const projectId = projectResult.lastID!;
+      const projectId = await projectService.createAdminProject({
+        clientId: finalClientId,
+        projectName,
+        description,
+        projectType,
+        budget,
+        timeline,
+        notes: notes || null,
+        features: features || null,
+        pageCount: pageCount || null,
+        integrations: integrations || null,
+        addons: addons || null,
+        designLevel: designLevel || null,
+        contentStatus: contentStatus || null,
+        brandAssets: brandAssets || null,
+        techComfort: techComfort || null,
+        hostingPreference: hostingPreference || null,
+        currentSite: currentSite || null,
+        inspiration: inspiration || null,
+        challenges: challenges || null,
+        additionalInfo: additionalInfo || null,
+        referralSource: referralSource || null
+      });
 
       logger.info(`[AdminProjects] Created project: ${projectId} - ${projectName}`);
 
@@ -197,11 +194,12 @@ router.post(
 
       // Create initial project update
       const adminUserId = await userService.getUserIdByEmailOrName('admin');
-      await db.run(
-        `INSERT INTO project_updates (
-          project_id, title, description, update_type, author_user_id, created_at
-        ) VALUES (?, ?, ?, 'general', ?, datetime('now'))`,
-        [projectId, 'Project Created', 'Project was manually created by admin.', adminUserId]
+      await projectService.insertProjectUpdateRecord(
+        projectId,
+        'Project Created',
+        'Project was manually created by admin.',
+        'general',
+        adminUserId
       );
 
       // Generate default milestones and tasks for the new project
@@ -291,7 +289,6 @@ async function saveAdminProjectAsFile(
   projectId: number,
   projectName: string
 ): Promise<void> {
-  const db = getDatabase();
   const uploadsDir = getUploadsSubdir(UPLOAD_DIRS.INTAKE);
 
   // Parse features string into array so intake PDF can iterate it
@@ -361,23 +358,17 @@ async function saveAdminProjectAsFile(
   writeFileSync(filePath, JSON.stringify(document, null, 2), 'utf-8');
   const fileSize = Buffer.byteLength(JSON.stringify(document, null, 2), 'utf-8');
 
-  await db.run(
-    `INSERT INTO files (
-      project_id, filename, original_filename, file_path,
-      file_size, mime_type, file_type, description, uploaded_by, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
-    [
-      projectId,
-      filename,
-      filename, // Use descriptive filename for downloads
-      relativePath,
-      fileSize,
-      'application/json',
-      'document',
-      'Project intake form',
-      'admin'
-    ]
-  );
+  await projectService.insertFileRecord({
+    projectId,
+    filename,
+    originalFilename: filename,
+    filePath: relativePath,
+    fileSize,
+    mimeType: 'application/json',
+    fileType: 'document',
+    description: 'Project intake form',
+    uploadedBy: 'admin'
+  });
 
   logger.info(`[AdminProjects] Saved project file: ${relativePath}`);
 }

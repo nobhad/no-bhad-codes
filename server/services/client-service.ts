@@ -169,6 +169,70 @@ export interface TagData {
 // TagRow imported from entities
 
 // =====================================================
+// INTERFACES - Admin Listing
+// =====================================================
+
+export interface AdminClientRow {
+  id: number;
+  companyName: string | null;
+  contactName: string;
+  email: string;
+  phone: string | null;
+  status: string;
+  clientType: string | null;
+  createdAt: string;
+  updatedAt: string;
+  projectCount: number;
+  invoiceCount: number;
+}
+
+export interface AdminClientStats {
+  total: number;
+  active: number;
+  pending: number;
+  inactive: number;
+}
+
+export interface AdminClientListRow {
+  id: number;
+  company_name: string | null;
+  contact_name: string | null;
+  email: string;
+  phone: string | null;
+  status: string;
+  client_type: string | null;
+  health_score: number | null;
+  health_status: string | null;
+  created_at: string;
+  updated_at: string;
+  project_count: number;
+}
+
+export interface AllClientTagRow {
+  client_id: number;
+  id: number;
+  name: string;
+  color: string | null;
+}
+
+export interface CreateClientData {
+  email: string;
+  password_hash: string;
+  company_name?: string;
+  contact_name?: string;
+  phone?: string;
+  client_type?: string;
+  status?: string;
+}
+
+export interface InviteClientRow {
+  id: number;
+  email: string;
+  contact_name: string | null;
+  status: string;
+}
+
+// =====================================================
 // INTERFACES - Health Scoring & Stats
 // =====================================================
 
@@ -1877,6 +1941,43 @@ class ClientService {
   /**
    * Get clients due for follow-up
    */
+  /**
+   * Get all clients with project/invoice counts for the admin listing page.
+   */
+  async getAdminClientListing(): Promise<{
+    clients: AdminClientRow[];
+    stats: AdminClientStats;
+  }> {
+    const db = getDatabase();
+
+    const clients = await db.all<AdminClientRow>(`
+      SELECT
+        c.id,
+        c.company_name as companyName,
+        c.contact_name as contactName,
+        c.email,
+        c.phone,
+        c.status,
+        c.client_type as clientType,
+        c.created_at as createdAt,
+        c.updated_at as updatedAt,
+        (SELECT COUNT(*) FROM projects WHERE client_id = c.id AND deleted_at IS NULL) as projectCount,
+        (SELECT COUNT(*) FROM invoices WHERE client_id = c.id AND deleted_at IS NULL) as invoiceCount
+      FROM clients c
+      WHERE c.deleted_at IS NULL
+      ORDER BY c.created_at DESC
+    `);
+
+    const stats: AdminClientStats = {
+      total: clients.length,
+      active: clients.filter((c) => c.status === 'active').length,
+      pending: clients.filter((c) => c.status === 'pending').length,
+      inactive: clients.filter((c) => c.status === 'inactive').length
+    };
+
+    return { clients, stats };
+  }
+
   async getClientsForFollowUp(): Promise<ClientRow[]> {
     const db = getDatabase();
 
@@ -1887,6 +1988,212 @@ class ClientService {
          AND status = 'active'
        ORDER BY next_follow_up_date ASC`
     )) as unknown as ClientRow[];
+  }
+  // =====================================================
+  // NOTIFICATION HISTORY
+  // =====================================================
+
+  /**
+   * Get notification history for a client
+   */
+  async getClientNotificationHistory(
+    clientId: number,
+    limit: number
+  ): Promise<Record<string, unknown>[]> {
+    const db = getDatabase();
+    const notifications = await db.all(
+      `SELECT id, type, title, message, is_read, created_at, data
+       FROM notification_history
+       WHERE user_id = ? AND user_type = 'client'
+       ORDER BY created_at DESC
+       LIMIT ?`,
+      [clientId, limit]
+    );
+    return notifications as Record<string, unknown>[];
+  }
+
+  /**
+   * Mark a single notification as read for a client.
+   * Returns the number of rows changed.
+   */
+  async markClientNotificationRead(
+    notificationId: number,
+    clientId: number
+  ): Promise<number> {
+    const db = getDatabase();
+    const result = await db.run(
+      `UPDATE notification_history
+       SET is_read = 1, read_at = CURRENT_TIMESTAMP
+       WHERE id = ? AND user_id = ? AND user_type = 'client'`,
+      [notificationId, clientId]
+    );
+    return result.changes ?? 0;
+  }
+
+  /**
+   * Mark all unread notifications as read for a client
+   */
+  async markAllClientNotificationsRead(clientId: number): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      `UPDATE notification_history
+       SET is_read = 1, read_at = CURRENT_TIMESTAMP
+       WHERE user_id = ? AND user_type = 'client' AND is_read = 0`,
+      [clientId]
+    );
+  }
+
+  // ===================================================
+  // ADMIN CORE ROUTE HELPERS
+  // ===================================================
+
+  /**
+   * Get flat client list for admin route (without stats wrapper).
+   * Returns raw rows with id, company_name, contact_name, email, etc.
+   */
+  async getAdminClientList(): Promise<AdminClientListRow[]> {
+    const db = getDatabase();
+    return db.all<AdminClientListRow>(`
+      SELECT
+        c.id,
+        c.company_name,
+        c.contact_name,
+        c.email,
+        c.phone,
+        c.status,
+        c.client_type,
+        c.health_score,
+        c.health_status,
+        c.created_at,
+        c.updated_at,
+        (SELECT COUNT(*) FROM projects WHERE client_id = c.id AND deleted_at IS NULL) as project_count
+      FROM clients c
+      WHERE c.deleted_at IS NULL
+      ORDER BY c.created_at DESC
+    `);
+  }
+
+  /**
+   * Get all client-tag associations for bulk tag lookup.
+   */
+  async getAllClientTags(): Promise<AllClientTagRow[]> {
+    const db = getDatabase();
+    return db.all<AllClientTagRow>(`
+      SELECT ct.client_id, t.id, t.name, t.color
+      FROM client_tags ct
+      JOIN tags t ON t.id = ct.tag_id
+      ORDER BY t.name ASC
+    `);
+  }
+
+  /**
+   * Get single client detail for admin view (full profile).
+   */
+  async getAdminClientDetail(clientId: number): Promise<ClientProfile | undefined> {
+    const db = getDatabase();
+    return db.get<ClientProfile>(
+      `SELECT id, email, company_name, contact_name, phone, status, client_type,
+              billing_name, billing_company, billing_address, billing_address2,
+              billing_city, billing_state, billing_zip, billing_country,
+              created_at, updated_at
+       FROM clients WHERE id = ? AND deleted_at IS NULL`,
+      [clientId]
+    );
+  }
+
+  /**
+   * Get client projects for admin detail view (aliased column names).
+   */
+  async getAdminClientProjectsAliased(clientId: number): Promise<ClientProjectSummary[]> {
+    return this.getClientProjects(clientId);
+  }
+
+  /**
+   * Check if an email is already registered. Optionally exclude a client ID.
+   */
+  async emailExists(email: string, excludeClientId?: number): Promise<boolean> {
+    const db = getDatabase();
+    const query = excludeClientId
+      ? 'SELECT 1 FROM clients WHERE email = ? AND id != ? AND deleted_at IS NULL LIMIT 1'
+      : 'SELECT 1 FROM clients WHERE email = ? AND deleted_at IS NULL LIMIT 1';
+    const params = excludeClientId ? [email, excludeClientId] : [email];
+    const row = await db.get(query, params);
+    return !!row;
+  }
+
+  /**
+   * Create a new client and return the inserted row.
+   */
+  async createClient(data: CreateClientData): Promise<ClientProfile | undefined> {
+    const db = getDatabase();
+    const result = await db.run(
+      `INSERT INTO clients (email, password_hash, company_name, contact_name, phone, client_type, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+      [
+        data.email,
+        data.password_hash,
+        data.company_name || null,
+        data.contact_name || null,
+        data.phone || null,
+        data.client_type || null,
+        data.status || 'pending'
+      ]
+    );
+    if (!result.lastID) return undefined;
+    return this.getAdminClientDetail(result.lastID);
+  }
+
+  /**
+   * Update client fields using raw SET clauses and values array.
+   * Returns the updated client row.
+   */
+  async updateClientFields(
+    clientId: number,
+    setClauses: string[],
+    values: SqlValue[]
+  ): Promise<ClientProfile | undefined> {
+    const db = getDatabase();
+    const setString = [...setClauses, 'updated_at = CURRENT_TIMESTAMP'].join(', ');
+    await db.run(
+      `UPDATE clients SET ${setString} WHERE id = ? AND deleted_at IS NULL`,
+      [...values, clientId]
+    );
+    return this.getAdminClientDetail(clientId);
+  }
+
+  /**
+   * Get admin-facing project list for a client (same as getClientProjects).
+   */
+  async getAdminClientProjects(clientId: number): Promise<ClientProjectSummary[]> {
+    return this.getClientProjects(clientId);
+  }
+
+  /**
+   * Get minimal client info needed for sending an invitation.
+   */
+  async getClientForInvite(clientId: number): Promise<InviteClientRow | undefined> {
+    const db = getDatabase();
+    return db.get<InviteClientRow>(
+      'SELECT id, email, contact_name, status FROM clients WHERE id = ? AND deleted_at IS NULL',
+      [clientId]
+    );
+  }
+
+  /**
+   * Set invitation token and expiry on a client record.
+   */
+  async setInvitationToken(
+    clientId: number,
+    token: string,
+    expiresAt: string
+  ): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      `UPDATE clients
+       SET invitation_token = ?, invitation_expires_at = ?, invitation_sent_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [token, expiresAt, clientId]
+    );
   }
 }
 

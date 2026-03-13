@@ -13,7 +13,6 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middle
 import { sendSuccess, errorResponse, errorResponseWithPayload, sanitizeErrorMessage, ErrorCodes } from '../utils/api-response.js';
 import { sendPdfResponse } from '../utils/pdf-generator.js';
 import { receiptService, Receipt } from '../services/receipt-service.js';
-import { getDatabase } from '../database/init.js';
 
 const router = express.Router();
 
@@ -47,17 +46,7 @@ async function canAccessReceipt(req: AuthenticatedRequest, receiptId: number): P
   if (req.user?.type === 'admin') {
     return true;
   }
-
-  // For clients, check if receipt belongs to their invoice
-  const db = getDatabase();
-  const row = await db.get(
-    `SELECT 1 FROM receipts r
-     JOIN invoices i ON r.invoice_id = i.id
-     WHERE r.id = ? AND i.client_id = ?`,
-    [receiptId, req.user?.id]
-  );
-
-  return !!row;
+  return receiptService.canClientAccessReceipt(req.user!.id, receiptId);
 }
 
 /**
@@ -70,14 +59,7 @@ async function canAccessInvoiceReceipts(
   if (req.user?.type === 'admin') {
     return true;
   }
-
-  const db = getDatabase();
-  const row = await db.get('SELECT 1 FROM invoices WHERE id = ? AND client_id = ?', [
-    invoiceId,
-    req.user?.id
-  ]);
-
-  return !!row;
+  return receiptService.canClientAccessInvoiceReceipts(req.user!.id, invoiceId);
 }
 
 // ============================================
@@ -118,45 +100,7 @@ router.get(
         if (clientId) {
           receipts = await receiptService.getReceiptsByClient(clientId);
         } else {
-          // Get all receipts (no specific method, use DB directly)
-          const db = getDatabase();
-          const rows = await db.all(
-            `SELECT r.*, i.invoice_number,
-                    c.contact_name as client_name, c.email as client_email,
-                    p.project_name
-             FROM receipts r
-             JOIN invoices i ON r.invoice_id = i.id
-             JOIN clients c ON i.client_id = c.id
-             LEFT JOIN projects p ON i.project_id = p.id
-             ORDER BY r.created_at DESC
-             LIMIT 100`
-          );
-          interface ReceiptRow {
-            id: number;
-            receipt_number: string;
-            invoice_id: number;
-            payment_id: number | null;
-            amount: number | string;
-            file_id: number | null;
-            created_at: string;
-            invoice_number: string;
-            client_name: string;
-            client_email: string;
-            project_name: string | null;
-          }
-          receipts = (rows as ReceiptRow[]).map((row) => ({
-            id: row.id,
-            receiptNumber: row.receipt_number,
-            invoiceId: row.invoice_id,
-            paymentId: row.payment_id,
-            amount: typeof row.amount === 'string' ? parseFloat(row.amount) : row.amount,
-            fileId: row.file_id,
-            createdAt: row.created_at,
-            invoiceNumber: row.invoice_number,
-            clientName: row.client_name,
-            clientEmail: row.client_email,
-            projectName: row.project_name ?? undefined
-          }));
+          receipts = await receiptService.getAllReceipts();
         }
       } else {
         // Client gets their own receipts

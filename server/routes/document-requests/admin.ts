@@ -10,7 +10,6 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { getDatabase } from '../../database/init.js';
 import { documentRequestService, RequestStatus } from '../../services/document-request-service.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
@@ -263,20 +262,7 @@ router.put(
       return errorResponse(res, 'Status is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
-    const db = getDatabase();
-
-    await db.run(
-      'UPDATE document_requests SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      [status, id]
-    );
-
-    const updated = await db.get(
-      `SELECT id, client_id, project_id, requested_by, title, description, document_type,
-              priority, status, due_date, file_id, uploaded_by, uploaded_at, reviewed_by,
-              reviewed_at, review_notes, rejection_reason, is_required, created_at, updated_at
-       FROM document_requests WHERE id = ?`,
-      [id]
-    );
+    const updated = await documentRequestService.updateRequestStatusById(id, status);
 
     if (!updated) {
       return errorResponse(res, 'Document request not found', 404, ErrorCodes.NOT_FOUND);

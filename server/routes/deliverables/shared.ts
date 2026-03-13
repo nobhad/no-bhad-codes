@@ -9,7 +9,7 @@
 import type { ValidationSchema } from '../../middleware/validation.js';
 import type { AuthenticatedRequest } from '../../middleware/auth.js';
 import { isUserAdmin } from '../../utils/access-control.js';
-import { getDatabase } from '../../database/init.js';
+import { deliverableService } from '../../services/deliverable-service.js';
 
 // =====================================================
 // CONSTANTS
@@ -163,12 +163,7 @@ export async function canAccessDeliverable(
   deliverableId: number
 ): Promise<boolean> {
   if (await isUserAdmin(req)) return true;
-  const db = getDatabase();
-  const row = await db.get(
-    `SELECT d.project_id FROM deliverables d
-     JOIN projects p ON d.project_id = p.id
-     WHERE d.id = ? AND p.client_id = ? AND d.deleted_at IS NULL`,
-    [deliverableId, req.user?.id]
-  );
-  return !!row;
+  const clientId = req.user?.id;
+  if (!clientId) return false;
+  return deliverableService.checkClientDeliverableAccess(deliverableId, clientId);
 }

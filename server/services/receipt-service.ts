@@ -548,6 +548,54 @@ class ReceiptService {
   }
 
   /**
+   * Get all receipts with joined info (admin use)
+   */
+  async getAllReceipts(): Promise<Receipt[]> {
+    const db = getDatabase();
+    const ALL_RECEIPTS_LIMIT = 100;
+    const rows = await db.all(
+      `SELECT r.*, i.invoice_number,
+              c.contact_name as client_name, c.email as client_email,
+              p.project_name
+       FROM receipts r
+       JOIN invoices i ON r.invoice_id = i.id
+       JOIN clients c ON i.client_id = c.id
+       LEFT JOIN projects p ON i.project_id = p.id
+       ORDER BY r.created_at DESC
+       LIMIT ?`,
+      [ALL_RECEIPTS_LIMIT]
+    );
+
+    return rows.map((row) => this.transformRow(row as unknown as ReceiptRow));
+  }
+
+  /**
+   * Check if a client can access a specific receipt
+   */
+  async canClientAccessReceipt(clientId: number, receiptId: number): Promise<boolean> {
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT 1 FROM receipts r
+       JOIN invoices i ON r.invoice_id = i.id
+       WHERE r.id = ? AND i.client_id = ?`,
+      [receiptId, clientId]
+    );
+    return !!row;
+  }
+
+  /**
+   * Check if a client can access receipts for a specific invoice
+   */
+  async canClientAccessInvoiceReceipts(clientId: number, invoiceId: number): Promise<boolean> {
+    const db = getDatabase();
+    const row = await db.get(
+      'SELECT 1 FROM invoices WHERE id = ? AND client_id = ?',
+      [invoiceId, clientId]
+    );
+    return !!row;
+  }
+
+  /**
    * Get receipt PDF bytes for download
    */
   async getReceiptPdf(receiptId: number): Promise<{ pdfBytes: Uint8Array; filename: string }> {

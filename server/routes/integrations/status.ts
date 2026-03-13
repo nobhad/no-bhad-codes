@@ -10,9 +10,9 @@ import { Response } from 'express';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { checkIntegrationHealth } from '../../services/integrations/index.js';
-import { getDatabase } from '../../database/init.js';
+import { integrationStatusService } from '../../services/integration-status-service.js';
 import { sendSuccess } from '../../utils/api-response.js';
-import { INTEGRATION_STATUS_COLUMNS, checkRuntimeConfiguration } from './shared.js';
+import { checkRuntimeConfiguration } from './shared.js';
 
 const router = Router();
 
@@ -37,10 +37,7 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const db = getDatabase();
-    const statuses = await db.all(
-      `SELECT ${INTEGRATION_STATUS_COLUMNS} FROM integration_status ORDER BY integration_type LIMIT 100`
-    );
+    const statuses = await integrationStatusService.getAllIntegrationStatuses();
 
     // Enhance with runtime checks
     const enhanced = statuses.map((status: Record<string, unknown>) => ({

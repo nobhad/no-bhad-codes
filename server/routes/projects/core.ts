@@ -1,32 +1,18 @@
 import express, { Response } from 'express';
 import { logger } from '../../services/logger.js';
-import { getDatabase } from '../../database/init.js';
+import { projectService } from '../../services/project-service.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { cache, invalidateCache } from '../../middleware/cache.js';
 import { isUserAdmin } from '../../utils/access-control.js';
 import { emailService } from '../../services/email-service.js';
 import { getString, getNumber } from '../../database/row-helpers.js';
-import { notDeleted } from '../../database/query-helpers.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 import { generateDefaultMilestones } from '../../services/milestone-generator.js';
 import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
 import { BUSINESS_INFO } from '../../config/business.js';
-
-// Explicit column lists for SELECT queries (avoid SELECT *)
-const PROJECT_COLUMNS = `
-  id, client_id, project_name, description, status, priority, progress,
-  start_date, estimated_end_date, actual_end_date, budget_range, project_type,
-  timeline, preview_url, price, notes, repository_url, staging_url, production_url,
-  deposit_amount, contract_signed_at, cancelled_by, cancellation_reason,
-  default_deposit_percentage, hourly_rate, estimated_hours, actual_hours, template_id,
-  features, design_level, content_status, tech_comfort, hosting_preference,
-  page_count, integrations, brand_assets, inspiration, current_site, challenges,
-  additional_info, addons, referral_source, contract_reminders_enabled,
-  deleted_at, deleted_by, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
 
 const router = express.Router();
 
@@ -39,82 +25,11 @@ router.get(
     tags: ['projects', 'clients']
   }),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const db = getDatabase();
-    let query = '';
-    let params: (string | number | null)[] = [];
-
     const isAdmin = await isUserAdmin(req);
 
-    if (isAdmin) {
-      // Admin can see all projects with stats in single query (fixes N+1)
-      // Filter out soft-deleted projects and clients
-      query = `
-      SELECT
-        p.*,
-        p.estimated_end_date as end_date,
-        p.repository_url as repo_url,
-        p.contract_signed_at as contract_signed_date,
-        p.budget_range as budget,
-        c.company_name,
-        c.contact_name,
-        c.email as client_email,
-        COALESCE(f_stats.file_count, 0) as file_count,
-        COALESCE(m_stats.message_count, 0) as message_count,
-        COALESCE(m_stats.unread_count, 0) as unread_count
-      FROM projects p
-      JOIN clients c ON p.client_id = c.id AND ${notDeleted('c')}
-      LEFT JOIN (
-        SELECT project_id, COUNT(*) as file_count
-        FROM files
-        WHERE deleted_at IS NULL
-        GROUP BY project_id
-      ) f_stats ON p.id = f_stats.project_id
-      LEFT JOIN (
-        SELECT project_id,
-               COUNT(*) as message_count,
-               SUM(CASE WHEN read_at IS NULL THEN 1 ELSE 0 END) as unread_count
-        FROM messages
-        WHERE deleted_at IS NULL
-        GROUP BY project_id
-      ) m_stats ON p.id = m_stats.project_id
-      WHERE ${notDeleted('p')}
-      ORDER BY p.created_at DESC
-    `;
-    } else {
-      // Client can only see their own projects with stats in single query (fixes N+1)
-      // Filter out soft-deleted projects
-      query = `
-      SELECT
-        p.*,
-        p.estimated_end_date as end_date,
-        p.repository_url as repo_url,
-        p.contract_signed_at as contract_signed_date,
-        p.budget_range as budget,
-        COALESCE(f_stats.file_count, 0) as file_count,
-        COALESCE(m_stats.message_count, 0) as message_count,
-        COALESCE(m_stats.unread_count, 0) as unread_count
-      FROM projects p
-      LEFT JOIN (
-        SELECT project_id, COUNT(*) as file_count
-        FROM files
-        WHERE deleted_at IS NULL
-        GROUP BY project_id
-      ) f_stats ON p.id = f_stats.project_id
-      LEFT JOIN (
-        SELECT project_id,
-               COUNT(*) as message_count,
-               SUM(CASE WHEN read_at IS NULL THEN 1 ELSE 0 END) as unread_count
-        FROM messages
-        WHERE deleted_at IS NULL
-        GROUP BY project_id
-      ) m_stats ON p.id = m_stats.project_id
-      WHERE p.client_id = ? AND ${notDeleted('p')}
-      ORDER BY p.created_at DESC
-    `;
-      params = [req.user!.id];
-    }
-
-    const projects = await db.all(query, params);
+    const projects = isAdmin
+      ? await projectService.listProjectsAdmin()
+      : await projectService.listProjectsForClient(req.user!.id);
 
     // Format stats as nested object for API consistency
     for (const project of projects) {
@@ -142,78 +57,21 @@ router.get(
     if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
-    const db = getDatabase();
     const isAdmin = await isUserAdmin(req);
 
     // Get project with client info
-    let query = '';
-    let params: (string | number | null)[] = [projectId];
-
-    if (isAdmin) {
-      query = `
-      SELECT
-        p.*,
-        p.estimated_end_date as end_date,
-        p.repository_url as repo_url,
-        p.contract_signed_at as contract_signed_date,
-        p.budget_range as budget,
-        c.company_name, c.contact_name, c.email as client_email
-      FROM projects p
-      JOIN clients c ON p.client_id = c.id AND ${notDeleted('c')}
-      WHERE p.id = ? AND ${notDeleted('p')}
-    `;
-    } else {
-      query = `
-      SELECT
-        p.*,
-        p.estimated_end_date as end_date,
-        p.repository_url as repo_url,
-        p.contract_signed_at as contract_signed_date,
-        p.budget_range as budget
-      FROM projects p
-      WHERE p.id = ? AND p.client_id = ? AND ${notDeleted('p')}
-    `;
-      params = [projectId, req.user!.id];
-    }
-
-    const project = await db.get(query, params);
+    const project = isAdmin
+      ? await projectService.getProjectAdmin(projectId)
+      : await projectService.getProjectForClient(projectId, req.user!.id);
 
     if (!project) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
-    // Get project files
-    const files = await db.all(
-      `
-    SELECT id, filename, original_filename, file_size, mime_type, uploaded_by, created_at
-    FROM files
-    WHERE project_id = ? AND deleted_at IS NULL
-    ORDER BY created_at DESC
-  `,
-      [projectId]
-    );
-
-    // Get project messages (filter by context_type after migration 085)
-    const messages = await db.all(
-      `
-    SELECT id, sender_type, sender_name, message as content, read_at, created_at
-    FROM active_messages
-    WHERE project_id = ? AND context_type = 'project'
-    ORDER BY created_at ASC
-  `,
-      [projectId]
-    );
-
-    // Get project updates
-    const updates = await db.all(
-      `
-    SELECT id, title, description, update_type, created_at
-    FROM project_updates
-    WHERE project_id = ?
-    ORDER BY created_at DESC
-  `,
-      [projectId]
-    );
+    // Get project files, messages, and updates
+    const files = await projectService.getProjectFiles(projectId);
+    const messages = await projectService.getProjectMessages(projectId);
+    const updates = await projectService.getProjectUpdates(projectId);
 
     sendSuccess(res, {
       project,
@@ -236,22 +94,21 @@ router.post(
 
     const { name, projectType, budget, timeline, description } = req.body;
 
-    const db = getDatabase();
-
     // Create project with pending status
-    const result = await db.run(
-      `INSERT INTO projects (client_id, name, description, status, priority, project_type, budget_range, timeline)
-       VALUES (?, ?, ?, 'pending', 'medium', ?, ?, ?)`,
-      [req.user!.id, name, description, projectType, budget || null, timeline || null]
-    );
-
-    const newProject = await db.get(`SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ?`, [result.lastID]);
+    const { lastID, project: newProject } = await projectService.createProjectRequest({
+      clientId: req.user!.id,
+      name,
+      description,
+      projectType,
+      budget: budget || null,
+      timeline: timeline || null
+    });
 
     // Generate default milestones and tasks for the new project
     try {
-      const generationResult = await generateDefaultMilestones(result.lastID!, projectType);
+      const generationResult = await generateDefaultMilestones(lastID, projectType);
       await logger.info(
-        `[Projects] Generated ${generationResult.milestonesCreated} milestones and ${generationResult.tasksCreated} tasks for project ${result.lastID}`,
+        `[Projects] Generated ${generationResult.milestonesCreated} milestones and ${generationResult.tasksCreated} tasks for project ${lastID}`,
         { category: 'PROJECTS' }
       );
     } catch (milestoneError) {
@@ -263,16 +120,13 @@ router.post(
     }
 
     // Get client info for notification
-    const client = await db.get(
-      'SELECT email, contact_name, company_name FROM clients WHERE id = ?',
-      [req.user!.id]
-    );
+    const client = await projectService.getClientInfo(req.user!.id);
 
     // Send admin notification
     try {
       await emailService.sendAdminNotification({
         subject: 'New Project Request',
-        intakeId: result.lastID?.toString() || 'N/A',
+        intakeId: lastID?.toString() || 'N/A',
         clientName: client?.contact_name || 'Unknown',
         companyName: client?.company_name || 'Unknown Company',
         projectType: projectType,
@@ -288,7 +142,7 @@ router.post(
 
     // Emit workflow event for project creation
     await workflowTriggerService.emit('project.created', {
-      entityId: result.lastID,
+      entityId: lastID,
       triggeredBy: req.user?.email || 'client',
       clientId: req.user!.id,
       projectType,
@@ -316,36 +170,31 @@ router.post(
       budget
     } = req.body;
 
-    const db = getDatabase();
-
     // Verify client exists
-    const client = await db.get('SELECT id FROM clients WHERE id = ?', [client_id]);
+    const client = await projectService.getClientById(client_id);
     if (!client) {
       return errorResponse(res, 'Invalid client ID', 400, ErrorCodes.INVALID_CLIENT);
     }
 
-    const result = await db.run(
-      `
-    INSERT INTO projects (client_id, project_name, description, priority, start_date, estimated_end_date, budget_range)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `,
-      [client_id, name, description, priority, start_date, due_date, budget]
-    );
-
-    const newProject = await db.get(
-      `SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ?`,
-      [result.lastID]
-    );
+    const { lastID, project: newProject } = await projectService.createProjectAdmin({
+      clientId: client_id,
+      name,
+      description,
+      priority,
+      startDate: start_date,
+      dueDate: due_date,
+      budget
+    });
 
     // Generate default milestones and tasks for the new project
     try {
       const projectType = (newProject as { project_type?: string })?.project_type || null;
       const projectStartDate = start_date ? new Date(start_date) : undefined;
-      const generationResult = await generateDefaultMilestones(result.lastID!, projectType, {
+      const generationResult = await generateDefaultMilestones(lastID, projectType, {
         startDate: projectStartDate
       });
       await logger.info(
-        `[Projects] Generated ${generationResult.milestonesCreated} milestones and ${generationResult.tasksCreated} tasks for project ${result.lastID}`,
+        `[Projects] Generated ${generationResult.milestonesCreated} milestones and ${generationResult.tasksCreated} tasks for project ${lastID}`,
         { category: 'PROJECTS' }
       );
     } catch (milestoneError) {
@@ -358,7 +207,7 @@ router.post(
 
     // Emit workflow event for project creation
     await workflowTriggerService.emit('project.created', {
-      entityId: result.lastID,
+      entityId: lastID,
       triggeredBy: 'admin',
       clientId: client_id,
       name
@@ -378,19 +227,12 @@ router.put(
     if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
-    const db = getDatabase();
     const isAdmin = await isUserAdmin(req);
 
     // Check if user can update this project
-    let project;
-    if (isAdmin) {
-      project = await db.get(`SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ?`, [projectId]);
-    } else {
-      project = await db.get(`SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ? AND client_id = ?`, [
-        projectId,
-        req.user!.id
-      ]);
-    }
+    const project = isAdmin
+      ? await projectService.getProjectByIdAdmin(projectId)
+      : await projectService.getProjectByIdForClient(projectId, req.user!.id);
 
     if (!project) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
@@ -425,7 +267,7 @@ router.put(
       req.body.status = raw;
     }
 
-    const updates: string[] = [];
+    const updateClauses: string[] = [];
     const values: (string | number | boolean | null)[] = [];
     // Map frontend field names to database column names
     const fieldMapping: Record<string, string> = {
@@ -501,51 +343,23 @@ router.put(
     for (const field of allowedUpdates) {
       if (req.body[field] !== undefined) {
         const dbColumn = fieldMapping[field] || field;
-        updates.push(`${dbColumn} = ?`);
+        updateClauses.push(`${dbColumn} = ?`);
         values.push(req.body[field]);
       }
     }
 
-    if (updates.length === 0) {
+    if (updateClauses.length === 0) {
       return errorResponse(res, 'No valid fields to update', 400, ErrorCodes.NO_UPDATES);
     }
 
-    values.push(projectId);
-
-    await db.run(
-      `
-    UPDATE projects 
-    SET ${updates.join(', ')}
-    WHERE id = ?
-  `,
-      values
-    );
+    await projectService.updateProject(projectId, updateClauses, values);
 
     // If status changed to completed, set actual_end_date
     if (req.body.status === 'completed') {
-      await db.run(
-        `
-      UPDATE projects
-      SET actual_end_date = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `,
-        [projectId]
-      );
+      await projectService.setProjectCompletedDate(projectId);
     }
 
-    const updatedProject = await db.get(
-      `
-      SELECT
-        p.*,
-        p.estimated_end_date as end_date,
-        p.repository_url as repo_url,
-        p.contract_signed_at as contract_signed_date,
-        p.budget_range as budget
-      FROM projects p
-      WHERE p.id = ?
-    `,
-      [projectId]
-    );
+    const updatedProject = await projectService.getUpdatedProject(projectId);
 
     // Emit workflow event for status change
     if (req.body.status && req.body.status !== project.status) {
@@ -561,10 +375,7 @@ router.put(
     if (isAdmin && req.body.status && req.body.status !== project.status) {
       try {
         // Get client information
-        const client = await db.get(
-          'SELECT email, contact_name, company_name FROM clients WHERE id = ?',
-          [getNumber(project, 'client_id')]
-        );
+        const client = await projectService.getClientInfo(getNumber(project, 'client_id'));
 
         if (client) {
           const statusDescriptions: { [key: string]: string } = {
@@ -783,7 +594,6 @@ router.post(
     if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
-    const db = getDatabase();
 
     const { fetchProjectReportData, generateProjectReportPdf } =
       await import('../../services/project-report-service.js');
@@ -809,29 +619,22 @@ router.post(
     await fs.writeFile(filePath, Buffer.from(pdfBytes));
 
     // Create file record in database
-    const result = await db.run(
-      `INSERT INTO files (
-        project_id, filename, original_filename, file_path, file_size, mime_type,
-        file_type, description, uploaded_by, category, shared_with_client
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        projectId,
-        filename,
-        filename,
-        `uploads/projects/${projectId}/${filename}`,
-        pdfBytes.length,
-        'application/pdf',
-        'document',
-        `Project Report - Generated ${dateStr}`,
-        req.user?.email || 'admin',
-        'document',
-        false
-      ]
-    );
+    const fileId = await projectService.saveFileRecord({
+      projectId,
+      filename,
+      filePath: `uploads/projects/${projectId}/${filename}`,
+      fileSize: pdfBytes.length,
+      mimeType: 'application/pdf',
+      fileType: 'document',
+      description: `Project Report - Generated ${dateStr}`,
+      uploadedBy: req.user?.email || 'admin',
+      category: 'document',
+      sharedWithClient: false
+    });
 
     sendSuccess(res, {
       file: {
-        id: result.lastID,
+        id: fileId,
         filename,
         size: pdfBytes.length
       }
@@ -849,7 +652,6 @@ router.post(
     if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
-    const db = getDatabase();
 
     const { fetchSowData, generateSowPdf } = await import('../../services/sow-service.js');
 
@@ -874,29 +676,22 @@ router.post(
     await fs.writeFile(filePath, Buffer.from(pdfBytes));
 
     // Create file record in database
-    const result = await db.run(
-      `INSERT INTO files (
-        project_id, filename, original_filename, file_path, file_size, mime_type,
-        file_type, description, uploaded_by, category, shared_with_client
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        projectId,
-        filename,
-        filename,
-        `uploads/projects/${projectId}/${filename}`,
-        pdfBytes.length,
-        'application/pdf',
-        'document',
-        `Statement of Work - Generated ${dateStr}`,
-        req.user?.email || 'admin',
-        'contract',
-        false
-      ]
-    );
+    const fileId = await projectService.saveFileRecord({
+      projectId,
+      filename,
+      filePath: `uploads/projects/${projectId}/${filename}`,
+      fileSize: pdfBytes.length,
+      mimeType: 'application/pdf',
+      fileType: 'document',
+      description: `Statement of Work - Generated ${dateStr}`,
+      uploadedBy: req.user?.email || 'admin',
+      category: 'contract',
+      sharedWithClient: false
+    });
 
     sendSuccess(res, {
       file: {
-        id: result.lastID,
+        id: fileId,
         filename,
         size: pdfBytes.length
       }

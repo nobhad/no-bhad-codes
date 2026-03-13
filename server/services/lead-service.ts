@@ -175,6 +175,30 @@ export const leadService = {
       [stageId, ...projectIds]
     );
     return result.changes || 0;
+  },
+
+  /**
+   * Bulk soft-delete leads (projects) by ID
+   */
+  async bulkSoftDeleteLeads(leadIds: (number | string)[], deletedBy: string): Promise<number> {
+    const db = getDatabase();
+    const now = new Date().toISOString();
+    let deleted = 0;
+
+    for (const leadId of leadIds) {
+      const id = typeof leadId === 'string' ? parseInt(leadId, 10) : leadId;
+      if (isNaN(id) || id <= 0) continue;
+
+      const result = await db.run(
+        'UPDATE projects SET deleted_at = ?, deleted_by = ? WHERE id = ? AND deleted_at IS NULL',
+        [now, deletedBy, id]
+      );
+      if (result.changes && result.changes > 0) {
+        deleted++;
+      }
+    }
+
+    return deleted;
   }
 };
 

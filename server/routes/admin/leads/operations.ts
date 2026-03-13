@@ -9,7 +9,6 @@
 import express from 'express';
 import { asyncHandler } from '../../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../../middleware/auth.js';
-import { getDatabase } from '../../../database/init.js';
 import { leadService } from '../../../services/lead-service.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../../utils/api-response.js';
 
@@ -422,24 +421,8 @@ router.post(
       );
     }
 
-    const db = getDatabase();
     const deletedBy = req.user?.email || 'admin';
-    const now = new Date().toISOString();
-    let deleted = 0;
-
-    // Soft delete each lead (leads are stored in projects table)
-    for (const leadId of leadIds) {
-      const id = typeof leadId === 'string' ? parseInt(leadId, 10) : leadId;
-      if (isNaN(id) || id <= 0) continue;
-
-      const result = await db.run(
-        'UPDATE projects SET deleted_at = ?, deleted_by = ? WHERE id = ? AND deleted_at IS NULL',
-        [now, deletedBy, id]
-      );
-      if (result.changes && result.changes > 0) {
-        deleted++;
-      }
-    }
+    const deleted = await leadService.bulkSoftDeleteLeads(leadIds, deletedBy);
 
     sendSuccess(res, { deleted }, `Deleted ${deleted} leads`);
   })

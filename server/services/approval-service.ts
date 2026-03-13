@@ -583,6 +583,19 @@ class ApprovalService {
       [instanceId]
     ) as unknown as Promise<ApprovalRequest[]>;
   }
+
+  /**
+   * Get the approver email for a pending approval request.
+   * Used for access checks when non-admin users attempt to approve/reject.
+   */
+  async getPendingRequestApproverEmail(requestId: number): Promise<string | null> {
+    const db = getDatabase();
+    const row = await db.get<{ approver_email: string }>(
+      'SELECT approver_email FROM approval_requests WHERE id = ? AND status = ?',
+      [requestId, 'pending']
+    );
+    return row?.approver_email ?? null;
+  }
 }
 
 // Export singleton instance

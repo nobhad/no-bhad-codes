@@ -14,7 +14,7 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { getDatabase, getDatabaseStats } from '../database/init.js';
+import { healthCheckService } from '../services/health-check-service.js';
 import { emailService } from '../services/email-service.js';
 import { getSchedulerService } from '../services/scheduler-service.js';
 import { getMetricsSummary } from '../observability/metrics.js';
@@ -73,26 +73,15 @@ router.get('/', asyncHandler(async (_req: Request, res: Response) => {
   };
 
   // Check database connectivity
-  const dbStart = Date.now();
-  try {
-    const db = getDatabase();
-    await db.get('SELECT 1');
-    const dbStats = getDatabaseStats();
+  const dbHealth = await healthCheckService.checkDatabaseHealth();
+  health.services!.database = {
+    status: dbHealth.status,
+    latencyMs: dbHealth.latencyMs,
+    message: dbHealth.message
+  };
 
-    health.services!.database = {
-      status: 'up',
-      latencyMs: Date.now() - dbStart,
-      message: dbStats
-        ? `Pool: ${dbStats.activeConnections}/${dbStats.totalConnections} active, ${dbStats.queuedRequests} queued`
-        : undefined
-    };
-  } catch (err) {
+  if (dbHealth.status === 'down') {
     health.status = 'degraded';
-    health.services!.database = {
-      status: 'down',
-      message: (err as Error).message,
-      latencyMs: Date.now() - dbStart
-    };
   }
 
   // Check email service
@@ -180,22 +169,17 @@ router.get('/ready', asyncHandler(async (_req: Request, res: Response) => {
   const startTime = Date.now();
 
   try {
-    // Check database - this is critical for readiness
-    const db = getDatabase();
-    await db.get('SELECT 1');
-    const dbStats = getDatabaseStats();
+    const result = await healthCheckService.checkReadiness();
 
-    // Check if database pool is overwhelmed (too many queued requests)
-    const maxQueuedRequests = 10;
-    if (dbStats && dbStats.queuedRequests > maxQueuedRequests) {
+    if (!result.ready) {
       res.set('X-Response-Time', `${Date.now() - startTime}ms`);
       return res.status(503).json({
         status: 'not_ready',
-        reason: 'Database pool overwhelmed',
+        reason: result.reason,
         timestamp: new Date().toISOString(),
         details: {
-          queuedRequests: dbStats.queuedRequests,
-          maxAllowed: maxQueuedRequests
+          queuedRequests: result.queuedRequests,
+          maxAllowed: result.maxAllowed
         }
       });
     }
@@ -227,26 +211,14 @@ router.get('/db', asyncHandler(async (_req: Request, res: Response) => {
   const startTime = Date.now();
 
   try {
-    const db = getDatabase();
-    const dbStats = getDatabaseStats();
-
-    // Test query latency
-    const queryStart = Date.now();
-    await db.get('SELECT 1');
-    const queryLatency = Date.now() - queryStart;
+    const details = await healthCheckService.getDatabaseDetailedHealth();
 
     res.set('X-Response-Time', `${Date.now() - startTime}ms`);
     res.status(200).json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      latencyMs: queryLatency,
-      pool: dbStats || {
-        activeConnections: 0,
-        idleConnections: 0,
-        totalConnections: 0,
-        maxConnections: 0,
-        queuedRequests: 0
-      }
+      latencyMs: details.latencyMs,
+      pool: details.pool
     });
   } catch (err) {
     res.set('X-Response-Time', `${Date.now() - startTime}ms`);

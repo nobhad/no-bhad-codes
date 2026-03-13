@@ -15,7 +15,6 @@ import { workflowTriggerService } from '../../services/workflow-trigger-service.
 import { logger } from '../../services/logger.js';
 import type { AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject, isUserAdmin } from '../../utils/access-control.js';
-import { getDatabase } from '../../database/init.js';
 import { validateRequest } from '../../middleware/validation.js';
 import { DeliverableValidationSchemas, canAccessDeliverable } from './shared.js';
 
@@ -48,17 +47,7 @@ router.get('/my', asyncHandler(async (req: AuthenticatedRequest, res: Response) 
     return errorResponse(res, 'Authentication required', 401, ErrorCodes.UNAUTHORIZED);
   }
 
-  const db = getDatabase();
-  const deliverables = await db.all(
-    `SELECT d.id, d.title, d.type, d.status, d.approval_status,
-            d.review_deadline, d.round_number, d.created_at,
-            p.project_name
-     FROM deliverables d
-     JOIN projects p ON d.project_id = p.id
-     WHERE p.client_id = ? AND d.deleted_at IS NULL
-     ORDER BY d.created_at DESC`,
-    [clientId]
-  );
+  const deliverables = await deliverableService.getClientDeliverables(clientId);
 
   sendSuccess(res, { deliverables });
 }));

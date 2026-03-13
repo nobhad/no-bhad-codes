@@ -1,5 +1,4 @@
 import express, { Response } from 'express';
-import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import {
@@ -25,10 +24,9 @@ router.get(
     if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
-    const db = getDatabase();
 
-    const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
-    if (!project) {
+    const exists = await projectService.projectExists(projectId);
+    if (!exists) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
@@ -70,10 +68,9 @@ router.post(
     if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
-    const db = getDatabase();
 
-    const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
-    if (!project) {
+    const exists = await projectService.projectExists(projectId);
+    if (!exists) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 

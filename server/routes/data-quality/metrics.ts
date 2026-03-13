@@ -8,10 +8,9 @@
 
 import { Router, Request, Response } from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
-import { getDatabase } from '../../database/init.js';
 import { getDuplicateStats } from '../../services/duplicate-detection-service.js';
+import { dataQualityService } from '../../services/data-quality-service.js';
 import { sendSuccess } from '../../utils/api-response.js';
-import { DATA_QUALITY_METRICS_COLUMNS } from './shared.js';
 
 const router = Router();
 
@@ -49,22 +48,17 @@ router.get('/metrics', asyncHandler(async (_req: Request, res: Response) => {
  *         description: Metrics calculated and stored
  */
 router.post('/metrics/calculate', asyncHandler(async (_req: Request, res: Response) => {
-  const db = getDatabase();
   const metrics = await getDuplicateStats();
   const today = new Date().toISOString().split('T')[0];
 
   // Store metrics
-  await db.run(
-    `INSERT OR REPLACE INTO data_quality_metrics (metric_date, entity_type, total_records, duplicate_count, quality_score, details_json)
-     VALUES (?, 'duplicates', ?, ?, ?, ?)`,
-    [
-      today,
-      metrics.totalChecks,
-      metrics.duplicatesFound,
-      metrics.averageMatchScore * 100,
-      JSON.stringify(metrics)
-    ]
-  );
+  await dataQualityService.storeMetrics({
+    metricDate: today,
+    totalRecords: metrics.totalChecks,
+    duplicateCount: metrics.duplicatesFound,
+    qualityScore: metrics.averageMatchScore * 100,
+    detailsJson: JSON.stringify(metrics)
+  });
 
   sendSuccess(res, metrics, 'Data quality metrics calculated and stored');
 }));
@@ -92,15 +86,8 @@ router.post('/metrics/calculate', asyncHandler(async (_req: Request, res: Respon
 router.get('/metrics/history', asyncHandler(async (req: Request, res: Response) => {
   const daysParam = req.query.days;
   const days = typeof daysParam === 'string' ? Number(daysParam) : 30;
-  const db = getDatabase();
 
-  const history = await db.all(
-    `SELECT ${DATA_QUALITY_METRICS_COLUMNS} FROM data_quality_metrics
-     WHERE metric_date > date('now', '-' || ? || ' days')
-     ORDER BY metric_date DESC, entity_type
-     LIMIT 1000`,
-    [Number(days)]
-  );
+  const history = await dataQualityService.getMetricsHistory(days);
 
   sendSuccess(res, { history });
 }));
