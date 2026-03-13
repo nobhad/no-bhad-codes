@@ -4,23 +4,33 @@
  */
 
 import * as React from 'react';
-import { FileSignature, Calendar, FolderOpen, ChevronRight } from 'lucide-react';
+import { FileSignature, Calendar, FolderOpen, ChevronRight, PenTool } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { formatCardDate, isOverdue, getDueDaysText } from '@react/utils/cardFormatters';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import type { PortalContract } from './types';
 
+/** Statuses that allow signing in the portal */
+const SIGNABLE_STATUSES = new Set(['sent', 'viewed']);
+
 interface ContractCardProps {
   contract: PortalContract;
   onNavigate?: (entityType: string, entityId: string) => void;
+  onSign?: (contract: PortalContract) => void;
 }
 
-export const ContractCard = React.memo(({ contract, onNavigate }: ContractCardProps) => {
+export const ContractCard = React.memo(({ contract, onNavigate, onSign }: ContractCardProps) => {
   const overdue = isOverdue(contract.expiresAt ?? undefined);
   const dueDaysText = getDueDaysText(contract.expiresAt ?? undefined);
+  const canSign = SIGNABLE_STATUSES.has(contract.status);
 
   const handleClick = () => {
     onNavigate?.('contract', String(contract.id));
+  };
+
+  const handleSignClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSign?.(contract);
   };
 
   return (
@@ -74,14 +84,20 @@ export const ContractCard = React.memo(({ contract, onNavigate }: ContractCardPr
       </div>
 
       {/* Actions */}
-      {onNavigate && (
-        <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-2">
+        {canSign && onSign && (
+          <button className="btn-primary text-sm" onClick={handleSignClick}>
+            <PenTool size={14} />
+            Sign
+          </button>
+        )}
+        {onNavigate && (
           <button className="btn-ghost text-sm" onClick={handleClick}>
             View Contract
             <ChevronRight className="icon-xs" />
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 });

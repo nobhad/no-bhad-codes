@@ -252,3 +252,156 @@ Further reduced `any` type usage with proper type definitions.
 - TypeScript compilation passed
 - ESLint passed
 - Production build completed successfully (19.22s)
+
+---
+
+## Completed - March 13, 2026
+
+### Portal Forms — Single Source of Truth - COMPLETE
+
+- **Portal forms (admin + client):** `src/styles/portal/shared/portal-forms.css` is the only place for input/textarea/select border, padding, focus, and typography. Feature CSS should only add layout (grid, gap, width).
+- **Public/marketing forms:** `src/styles/components/form-fields.css` styles only `.form-container` and `.login-form`; no global `.form-input`/`.form-textarea` so portal forms are not overridden.
+- **Labels:** `src/styles/portal/shared/portal-field-label-spacing.css` is SoT for `.field-label`/`.meta-label`; portal-forms only adds form-context overrides (position, pointer-events).
+
+---
+
+### Intake Data → Client Detail - COMPLETE
+
+- **Intake form:** New clients created from `POST /api/intake` now store `contact_name`, `company_name`, `email`, and `phone` (optional) so Client Detail Overview shows Contact Information and Account Details from intake.
+- **Existing client:** When an existing client (matched by email) submits intake again, their record is updated with `contact_name`, `company_name`, and `phone` from the submission so the detail page stays in sync with intake data.
+- **Validation:** Optional `phone` field added to intake submission schema (max 50 chars).
+
+---
+
+### Full Portal Audit Fix - COMPLETE
+
+**Grade:** C+ → A (25 commits across 10 waves)
+
+All 70+ items resolved across 20 layers. Waves 1–10 complete.
+
+**Wave 10 (Grade A Push):**
+
+- [x] CI/CD pipeline (`.github/workflows/ci.yml`)
+- [x] Root ErrorBoundary wrapping PortalApp
+- [x] `usePortalFetch` transform stability (useRef)
+- [x] Database index migration (098, comprehensive FK indexes)
+- [x] Calendar service rate limiting (exponential backoff)
+- [x] Analytics service idempotency (transactions + dedup)
+- [x] Ad-hoc request email notifications
+- [x] Integration health check endpoint (`GET /integrations/health`)
+- [x] SystemStatusDashboard heading hierarchy fix
+- [x] Inline color styles converted to CSS classes
+- [x] ErrorCodes enum standardized across all routes
+- [x] 9 new unit test files for utilities and services
+
+---
+
+### Project Field Save & DB Fixes - COMPLETE
+
+**Issues Fixed:**
+
+- Project fields (budget, end_date, repo_url, contract_signed_date) showing empty after refresh
+- `PUT /api/projects/:id` returning 500 on any field update
+
+**Root Causes & Fixes:**
+
+1. Missing column aliases — `GET` list, `GET /:id`, and `PUT` response queries used `p.*`. Fixed by adding explicit aliases in `server/routes/projects/core.ts`.
+2. Migration 102 — restored `default_deposit_percentage` column dropped by migration 049.
+3. Migration 103 — fixed `message_mentions`, `message_reactions`, `message_read_receipts`, `pinned_messages` FKs pointing to dropped table `_general_messages_deprecated_085`.
+4. `Project.budget` typed as `number` — changed to `string` (maps to `budget_range TEXT`). Budget sort updated to `localeCompare`.
+5. Duplicate `buildEndpoint` import removed from `usePortalMessages.ts`.
+
+**Files Modified:**
+
+- `server/routes/projects/core.ts`
+- `server/database/migrations/102_restore_default_deposit_percentage.sql`
+- `server/database/migrations/103_fix_message_foreign_keys.sql`
+- `src/react/features/admin/types.ts`
+- `src/react/features/admin/projects/ProjectsTable.tsx`
+- `src/react/features/portal/messages/usePortalMessages.ts`
+
+---
+
+### Dashboard Kanban & Navigation Fixes - COMPLETE
+
+**Issues Fixed:**
+
+1. Kanban columns not scrollable — added `max-height` + `overflow-y` to `.kanban-items`.
+2. Kanban heading styling — reset browser-default top margin, fixed `border-bottom` / `border-left` overlap.
+3. "Upcoming Tasks" heading not navigating to Tasks subtab — fixed with `navigate('/work', { state: { subtab: 'tasks' } })` + `useLocation().state` in `WorkDashboard` useState initializer.
+4. Heading hover text not turning red — added `.overview-panel-action:hover .field-label { color: var(--color-accent); }`.
+
+**Files Modified:**
+
+- `src/styles/admin/overview-layout.css`
+- `src/react/features/admin/overview/OverviewDashboard.tsx`
+- `src/react/features/admin/work/WorkDashboard.tsx`
+
+---
+
+### Portal CSS Legacy Cleanup (Form Classes) - COMPLETE
+
+- Standardized form wrapper to `.form-field` — `.form-group` fully removed from all CSS, EJS, HTML, TS, and TSX files.
+- Auth gate converted to React component (`AuthGate.tsx` + `mount-auth-gate.tsx`); `auth-gate.ejs` is now a thin React mount point.
+- Build-time CSS selector typo in `portal-tabs.css` fixed (no more esbuild warnings).
+
+---
+
+### Validation & Status Mismatch Fixes - COMPLETE
+
+**Issues Fixed:**
+
+1. Task status update failing — removed `{ type: 'required' }` from `task.title` so status-only PUTs no longer return 400.
+2. Task status values mismatch — `allowedValues` corrected to `'in_progress'` (underscore) and `'cancelled'` to match frontend `TASK_STATUS_CONFIG`.
+3. Lead status update failing — added `'pending'` to `validStatuses`.
+4. Project status values mismatch — removed `'lead'`, added `'in-progress'` and `'in-review'` to match DB CHECK constraint.
+
+**Files Modified:**
+
+- `server/middleware/validation.ts`
+- `server/routes/admin/leads.ts`
+
+---
+
+### Portal Gap on Mobile (Root Fix) - COMPLETE
+
+**Root Cause:** `.dashboard-content` used `display: block` so flex `gap` was never applied.
+
+**Fix:**
+
+- `portal-layout.css` — Changed `.portal .dashboard-content` to `display: flex; flex-direction: column; gap: var(--portal-section-gap)`.
+- `portal-tabs.css` — Cancelled `margin-bottom` on `.portal .dashboard-content .portal-subtabs` to prevent double spacing.
+
+**Files Modified:**
+
+- `src/styles/portal/shared/portal-layout.css`
+- `src/styles/portal/shared/portal-tabs.css`
+
+---
+
+### PDF Header Unification - COMPLETE
+
+- Extracted `drawPdfDocumentHeader()` into `server/utils/pdf-utils.ts` using invoice styling as canonical reference.
+- All four PDF generators (invoice, proposal, receipt, contract) now call the shared header function.
+- Unused `getPdfLogoBytes` imports removed from contracts and receipt-service.
+
+---
+
+### Messages View Overhaul - COMPLETE
+
+- [x] Sender name placement — moved under avatar (bottom of group) instead of above bubble
+- [x] Typing indicator — removed inline style, added `.msgtab-typing-indicator` CSS class
+- [x] Consistent styling — both views use shared factory; no divergence
+- [x] Mobile responsiveness — 85% max-width for bubbles, compose hint hidden on small screens
+
+---
+
+### Documentation Audit - COMPLETE
+
+- Deleted stale duplicates: `THE_BACKEND.md`, `DELIVERABLES_MANAGER.md`, `SYSTEM_DOCUMENTATION.md`, `ERROR_HANDLING_STANDARD.md`, `COVERAGE.md`, `src/features/admin/README.md`, `src/react/factories/README.md`
+- Fixed CSS file paths across `CSS_ARCHITECTURE.md`, `DESIGN_SYSTEM.md`, `ARCHITECTURE.md` (styles/shared/ → styles/portal/shared/ etc.)
+- Consolidated audit/plan files into `docs/audits/`
+- Moved work-log archives to `docs/archive/work-logs/`
+- Created `docs/api/`, `docs/guides/` directories
+- Merged `ERROR_HANDLING_STANDARD.md` into `DEVELOPER_GUIDE.md`
+- Merged `COVERAGE.md` into `guides/DEVELOPMENT.md`

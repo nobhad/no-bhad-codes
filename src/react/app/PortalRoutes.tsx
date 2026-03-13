@@ -106,6 +106,7 @@ const PortalHelp = lazyNamed(() => import('../features/portal/help').then(m => (
 const PortalDocuments = lazyNamed(() => import('../features/portal/documents').then(m => ({ PortalDocuments: m.PortalDocuments })));
 const PortalFilesHub = lazyNamed(() => import('../features/portal/files-hub').then(m => ({ PortalFilesHub: m.PortalFilesHub })));
 const PortalDeliverablesHub = lazyNamed(() => import('../features/portal/deliverables-hub').then(m => ({ PortalDeliverablesHub: m.PortalDeliverablesHub })));
+const PortalContracts = lazyNamed(() => import('../features/portal/contracts').then(m => ({ PortalContracts: m.PortalContracts })));
 
 // ============================================
 // DETAIL VIEW WRAPPERS
@@ -276,7 +277,7 @@ export function PortalRoutes() {
           role === 'admin' ? (
             <LazyTabRoute tabId="contracts"><ContractsTable /></LazyTabRoute>
           ) : (
-            <Navigate to="/documents" replace />
+            <LazyTabRoute tabId="contracts"><PortalContracts /></LazyTabRoute>
           )
         } />
 
