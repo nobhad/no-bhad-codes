@@ -202,8 +202,8 @@ railway.env
 # Test results (generated)
 test-results/
 
-# Uploads (user data)
-uploads/
+# Uploads (user data — root-level uploads directory only)
+/uploads/
 
 # Generated Tailwind CSS for React components
 src/react/styles/tailwind-generated.css
