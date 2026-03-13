@@ -1266,7 +1266,7 @@ class MessageService {
     content: string
   ): Promise<Record<string, unknown> | null> {
     const db = getDatabase();
-    const MESSAGE_COLUMNS = `
+    const MSG_INSERT_COLUMNS = `
       id, project_id, client_id, thread_id, context_type, sender_type, sender_name,
       subject, message, message_type, priority, read_at, attachments,
       parent_message_id, is_internal, edited_at, deleted_at, deleted_by,
@@ -1288,7 +1288,7 @@ class MessageService {
     await this.processMentions(result.lastID!, content);
 
     const newMessage = await db.get(
-      `SELECT ${MESSAGE_COLUMNS} FROM active_messages WHERE id = ?`,
+      `SELECT ${MSG_INSERT_COLUMNS} FROM active_messages WHERE id = ?`,
       [result.lastID]
     );
     return (newMessage as Record<string, unknown>) ?? null;
@@ -1299,7 +1299,7 @@ class MessageService {
    */
   async getInternalMessages(threadId: number): Promise<Record<string, unknown>[]> {
     const db = getDatabase();
-    const MESSAGE_COLUMNS = `
+    const MSG_INTERNAL_COLUMNS = `
       id, project_id, client_id, thread_id, context_type, sender_type, sender_name,
       subject, message, message_type, priority, read_at, attachments,
       parent_message_id, is_internal, edited_at, deleted_at, deleted_by,
@@ -1307,7 +1307,7 @@ class MessageService {
     `.replace(/\s+/g, ' ').trim();
 
     const messages = await db.all(
-      `SELECT ${MESSAGE_COLUMNS} FROM active_messages
+      `SELECT ${MSG_INTERNAL_COLUMNS} FROM active_messages
       WHERE thread_id = ? AND is_internal = TRUE AND context_type = 'general'
       ORDER BY created_at ASC`,
       [threadId]

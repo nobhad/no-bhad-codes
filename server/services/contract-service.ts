@@ -1227,7 +1227,7 @@ class ContractService {
         updated_at = datetime('now')
        WHERE id = ?`,
       [params.signedAt, params.signerName, params.clientEmail, params.signerIp,
-       params.signerUserAgent, params.signatureData, params.contractId]
+        params.signerUserAgent, params.signatureData, params.contractId]
     );
 
     // Dual-write: update projects table signature fields
@@ -1244,7 +1244,7 @@ class ContractService {
           contract_signature_data = ?
          WHERE id = ?`,
         [params.signedAt, params.signerName, params.clientEmail, params.signerIp,
-         params.signerUserAgent, params.signatureData, params.projectId]
+          params.signerUserAgent, params.signatureData, params.projectId]
       );
     }
 

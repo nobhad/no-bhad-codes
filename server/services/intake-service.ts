@@ -261,7 +261,7 @@ class IntakeService {
       if (existingClient) {
         clientId = getNumber(existingClient as unknown as { [key: string]: unknown }, 'id');
         await ctx.run(
-          `UPDATE clients SET contact_name = ?, company_name = ?, phone = COALESCE(?, phone), updated_at = datetime('now') WHERE id = ?`,
+          'UPDATE clients SET contact_name = ?, company_name = ?, phone = COALESCE(?, phone), updated_at = datetime(\'now\') WHERE id = ?',
           [intakeData.name, companyName, intakePhone, clientId]
         );
       } else {

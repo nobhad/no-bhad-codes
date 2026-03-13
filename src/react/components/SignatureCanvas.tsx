@@ -15,7 +15,7 @@ import { Eraser, Pencil, Type } from 'lucide-react';
 const CANVAS_WIDTH = 500;
 const CANVAS_HEIGHT = 200;
 const LINE_WIDTH = 2;
-const SIGNATURE_FONT_FAMILY = "'Allura', 'Segoe Script', cursive";
+const SIGNATURE_FONT_FAMILY = '\'Allura\', \'Segoe Script\', cursive';
 const TYPED_FONT_SIZE = 40;
 const TYPED_CANVAS_FONT = `${TYPED_FONT_SIZE}px ${SIGNATURE_FONT_FAMILY}`;
 

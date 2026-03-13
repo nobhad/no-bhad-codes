@@ -25,7 +25,7 @@ import {
   type ContentRequestTemplateItem,
   type CompletionStats
 } from '../database/entities/content-request.js';
-import type { ContentRequestItemStatus, ContentType, ContentCategory } from '../config/constants.js';
+import type { ContentType, ContentCategory } from '../config/constants.js';
 import { logger } from './logger.js';
 
 // =====================================================
@@ -57,7 +57,7 @@ const CHECKLIST_JOINS = `
   LEFT JOIN clients c ON crc.client_id = c.id
 `.replace(/\s+/g, ' ').trim();
 
-const ITEM_FROM = `FROM content_request_items cri`;
+const ITEM_FROM = 'FROM content_request_items cri';
 
 // =====================================================
 // SERVICE

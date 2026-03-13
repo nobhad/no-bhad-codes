@@ -427,17 +427,17 @@ export async function deleteOldData(dateThreshold: string): Promise<DeleteResult
   const db = getDatabase();
 
   await db.run(
-    `DELETE FROM interaction_events WHERE timestamp < ?`,
+    'DELETE FROM interaction_events WHERE timestamp < ?',
     [dateThreshold]
   );
 
   await db.run(
-    `DELETE FROM page_views WHERE timestamp < ?`,
+    'DELETE FROM page_views WHERE timestamp < ?',
     [dateThreshold]
   );
 
   const result = await db.run(
-    `DELETE FROM visitor_sessions WHERE start_time < ?`,
+    'DELETE FROM visitor_sessions WHERE start_time < ?',
     [dateThreshold]
   );
 
@@ -452,7 +452,7 @@ export async function deleteOldData(dateThreshold: string): Promise<DeleteResult
 export async function getSessionCount(dateThreshold: string): Promise<number> {
   const db = getDatabase();
   const row = await db.get<{ total: number }>(
-    `SELECT COUNT(*) as total FROM visitor_sessions WHERE start_time >= ?`,
+    'SELECT COUNT(*) as total FROM visitor_sessions WHERE start_time >= ?',
     [dateThreshold]
   );
   return row?.total ?? 0;
