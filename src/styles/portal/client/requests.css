@@ -2,6 +2,8 @@
    CLIENT PORTAL - AD HOC REQUESTS
    ===================================================== */
 
+@layer components {
+
 .portal .requests-grid {
   display: grid;
 }
@@ -184,4 +186,6 @@
     flex-direction: column;
     gap: var(--space-0-5);
   }
+}
+
 }

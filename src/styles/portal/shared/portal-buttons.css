@@ -10,6 +10,8 @@
  * - Context-specific variants
  */
 
+@layer components {
+
 /* Button with icon - flex layout */
 button:has(> svg) {
   display: inline-flex;
@@ -375,6 +377,8 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   }
 }
 
+} /* end @layer components */
+
 /* Table action buttons stay compact even on touch devices - UTILITIES LAYER for override priority */
 @layer utilities {
   @media (pointer: coarse) {
@@ -465,6 +469,8 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
     flex-shrink: 0;
   }
 }
+
+@layer components {
 
 /* ============================================
  * COLLAPSED SIDEBAR - Icon-only state
@@ -648,3 +654,5 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   display: inline-flex;
   align-items: center;
 }
+
+} /* end @layer components */

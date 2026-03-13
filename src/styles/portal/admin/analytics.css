@@ -8,6 +8,8 @@
  * Common card/item patterns in shared/portal-cards.css
  */
 
+@layer components {
+
 /* ============================================
    Analytics View Container
    Follows .portal-view pattern (flex column + section gap)
@@ -379,3 +381,5 @@
 }
 
 /* .truncate-text styling in project-detail.css */
+
+}

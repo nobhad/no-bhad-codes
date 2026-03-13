@@ -4,6 +4,8 @@
    Shared layout styles for admin and client portals
    ===================================================== */
 
+@layer components {
+
 /* =====================================================
    OVERSCROLL BEHAVIOR
    Prevent elastic bounce showing background on scroll
@@ -1366,3 +1368,4 @@ html[data-theme="light"] .portal .funnel-value {
   flex-direction: column;
 }
 
+}

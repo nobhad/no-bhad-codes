@@ -4,6 +4,8 @@
    Shared portal modal classes live in shared/portal-modal-system.css.
    ===================================================== */
 
+@layer components {
+
 .is-loading {
   opacity: var(--opacity-disabled);
 }
@@ -220,4 +222,6 @@
     grid-template-columns: 1fr;
     gap: var(--space-0-5);
   }
+}
+
 }

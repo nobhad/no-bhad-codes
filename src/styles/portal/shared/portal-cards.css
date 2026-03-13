@@ -12,6 +12,8 @@
  * - portal-dashboard-widgets.css - Dashboard widgets (activity, tasks)
  */
 
+@layer components {
+
 /* =====================================================
    UNIFIED H3 HEADING STYLES
    Single source of truth for ALL h3 headings in portals
@@ -816,4 +818,6 @@ html[data-theme="light"] .portal :is(
   .invoice-summary {
     grid-template-columns: 1fr;
   }
+}
+
 }

@@ -3,6 +3,8 @@
    Uses portal theme tokens per CSS_ARCHITECTURE.md
    ===================================================== */
 
+@layer components {
+
 .portal .documents-intro {
   margin: 0 0 var(--space-2) 0;
   color: var(--color-text-secondary);
@@ -150,4 +152,6 @@
   .portal .documents-card.portal-list-item {
     padding: var(--space-2);
   }
+}
+
 }

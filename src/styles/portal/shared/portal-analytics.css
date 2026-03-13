@@ -9,6 +9,8 @@
  * chart empty state, and pagination.
  */
 
+@layer components {
+
 /* Grid layout for analytics sidebar + main */
 .analytics-grid {
   display: grid;
@@ -161,4 +163,6 @@
 
 .analytics-chart-hint {
   font-size: var(--label-font-size);
+}
+
 }

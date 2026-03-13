@@ -13,6 +13,8 @@
  *   contentClassName  → .accordion-item-content
  */
 
+@layer components {
+
 /* =====================================================
    WRAPPER — groups trigger + content with continuous border
    ===================================================== */
@@ -56,4 +58,6 @@
 .accordion-item-content {
   padding: var(--space-2);
   color: var(--color-text-primary);
+}
+
 }

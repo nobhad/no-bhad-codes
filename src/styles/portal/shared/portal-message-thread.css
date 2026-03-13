@@ -11,6 +11,8 @@
  * All classes prefixed msgtab- to avoid conflicts.
  */
 
+@layer components {
+
 /* Messages container layout — fills available viewport, no page scroll */
 .msgtab-container {
   display: flex;
@@ -472,4 +474,6 @@ kbd.msgtab-kbd {
   .msgtab-compose-hint {
     display: none;
   }
+}
+
 }

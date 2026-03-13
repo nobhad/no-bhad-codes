@@ -13,6 +13,8 @@
  * - Custom fields
  */
 
+@layer components {
+
 /* ===============================================
    CLIENT CRM ENHANCEMENTS
    =============================================== */
@@ -172,4 +174,6 @@
     width: 100%;
     justify-content: flex-end;
   }
+}
+
 }

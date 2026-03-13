@@ -4,6 +4,8 @@
    Single source of truth for admin and client portal file components
    ===================================================== */
 
+@layer components {
+
 /* =====================================================
    FILES SECTION CONTAINER
    Combined container for upload + files browser (matching admin)
@@ -771,4 +773,6 @@
   .folder-tree {
     max-height: var(--files-folder-tree-max-height);
   }
+}
+
 }

@@ -14,6 +14,8 @@
  * - --color-text-primary: Value text color
  */
 
+@layer components {
+
 /* =====================================================
    FIELD LABEL - Base styling for all labels
    ===================================================== */
@@ -94,3 +96,4 @@
   margin: 0;
 }
 
+}

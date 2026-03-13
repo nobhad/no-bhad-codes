@@ -4,6 +4,8 @@
    Uses shared portal card/form styles
    ===================================================== */
 
+@layer components {
+
 /* Settings Grid */
 .settings-grid {
   display: grid;
@@ -259,4 +261,6 @@
   .portal .notification-option-content {
     width: 100%;
   }
+}
+
 }
