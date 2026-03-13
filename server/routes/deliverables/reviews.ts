@@ -8,7 +8,7 @@
 import { Router, Response } from 'express';
 import { deliverableService } from '../../services/deliverable-service.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
-import { logger } from '../../services/logger.js';
+import { asyncHandler } from '../../middleware/errorHandler.js';
 import type { AuthenticatedRequest } from '../../middleware/auth.js';
 import { validateRequest } from '../../middleware/validation.js';
 import { DeliverableValidationSchemas, canAccessDeliverable } from './shared.js';
@@ -53,7 +53,7 @@ const router = Router();
  *       201:
  *         description: Review created
  */
-router.post('/:id/reviews', validateRequest(DeliverableValidationSchemas.createReview, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/reviews', validateRequest(DeliverableValidationSchemas.createReview, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
@@ -85,13 +85,9 @@ router.post('/:id/reviews', validateRequest(DeliverableValidationSchemas.createR
     if (error instanceof Error && error.message.includes('not found')) {
       return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
-    logger.error('[Deliverables] Failed to create review', {
-      error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE'
-    });
-    errorResponse(res, 'Failed to create review', 500, ErrorCodes.INTERNAL_ERROR);
+    throw error;
   }
-});
+}));
 
 /**
  * @swagger
@@ -112,28 +108,20 @@ router.post('/:id/reviews', validateRequest(DeliverableValidationSchemas.createR
  *       200:
  *         description: List of reviews
  */
-router.get('/:id/reviews', async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const { id } = req.params;
-    const deliverableId = parseInt(id, 10);
-    if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
-    }
-
-    // Check authorization
-    if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
-    }
-
-    const reviews = await deliverableService.getDeliverableReviews(deliverableId);
-    sendSuccess(res, { reviews });
-  } catch (error) {
-    logger.error('[Deliverables] Failed to list reviews', {
-      error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE'
-    });
-    errorResponse(res, 'Failed to list reviews', 500, ErrorCodes.INTERNAL_ERROR);
+router.get('/:id/reviews', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const deliverableId = parseInt(id, 10);
+  if (isNaN(deliverableId) || deliverableId <= 0) {
+    return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
   }
-});
+
+  // Check authorization
+  if (!(await canAccessDeliverable(req, deliverableId))) {
+    return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+  }
+
+  const reviews = await deliverableService.getDeliverableReviews(deliverableId);
+  sendSuccess(res, { reviews });
+}));
 
 export default router;

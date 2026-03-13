@@ -439,9 +439,6 @@ body[data-page="client-portal"] {
   --color-dark: var(--color-text-primary);
   --color-light: var(--color-bg-primary);
   --color-nav-text: var(--color-text-primary);
-  --color-white: var(--color-text-primary); /* Portal: "white" = most prominent text */
-  --color-black: var(--color-bg-primary);   /* Portal: "black" = base background */
-
   /* App-level aliases — derived from primaries */
   --app-color-primary: var(--color-text-primary);
   --app-color-primary-hover: var(--color-bg-primary);

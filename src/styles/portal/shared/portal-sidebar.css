@@ -298,7 +298,7 @@
   transform: none;
   border-radius: var(--border-radius-full);
   background: var(--color-danger);
-  color: var(--color-white);
+  color: var(--color-text-primary);
   box-shadow: 0 0 0 var(--border-width) var(--color-bg-tertiary);
 }
 
@@ -321,7 +321,7 @@
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-bold);
     background: var(--color-danger);
-    color: var(--color-white);
+    color: var(--color-text-primary);
     box-shadow: 0 0 0 var(--border-width) var(--color-bg-tertiary);
   }
 }

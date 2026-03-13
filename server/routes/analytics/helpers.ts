@@ -74,7 +74,7 @@ export interface TrackingPayload {
 
 /** Wrap async route handlers with error logging */
 export const asyncHandler =
-  (fn: (req: Request, res: Response) => Promise<void>) => (req: Request, res: Response) => {
+  (fn: (req: Request, res: Response) => Promise<unknown>) => (req: Request, res: Response) => {
     Promise.resolve(fn(req, res)).catch((error) => {
       logger.error('Route error', { category: 'analytics', metadata: { error } });
       errorResponse(res, 'Internal server error', 500, ErrorCodes.INTERNAL_ERROR);

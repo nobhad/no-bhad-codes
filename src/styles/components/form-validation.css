@@ -103,11 +103,11 @@
 /* Valid form state */
 .form-button.form-valid {
   background-color: var(--color-accent);
-  color: var(--color-black);
+  color: var(--color-bg-primary);
   border-color: var(--color-border);
 }
 
 .form-button.form-valid:hover {
   background-color: var(--color-accent);
-  color: var(--color-black);
+  color: var(--color-bg-primary);
 }

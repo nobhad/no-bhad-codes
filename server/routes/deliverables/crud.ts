@@ -10,6 +10,7 @@ import { Router, Response } from 'express';
 import { deliverableService } from '../../services/deliverable-service.js';
 import { fileService } from '../../services/file-service.js';
 import { errorResponse, sendSuccess, sendCreated, sendPaginated, parsePaginationQuery, ErrorCodes } from '../../utils/api-response.js';
+import { asyncHandler } from '../../middleware/errorHandler.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { logger } from '../../services/logger.js';
 import type { AuthenticatedRequest } from '../../middleware/auth.js';
@@ -37,38 +38,30 @@ const router = Router();
  *       403:
  *         description: Admin users should use admin endpoint
  */
-router.get('/my', async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    if (await isUserAdmin(req)) {
-      return errorResponse(res, 'Admin users should use /api/admin/deliverables', 403, ErrorCodes.FORBIDDEN);
-    }
-
-    const clientId = req.user?.id;
-    if (!clientId) {
-      return errorResponse(res, 'Authentication required', 401, ErrorCodes.UNAUTHORIZED);
-    }
-
-    const db = getDatabase();
-    const deliverables = await db.all(
-      `SELECT d.id, d.title, d.type, d.status, d.approval_status,
-              d.review_deadline, d.round_number, d.created_at,
-              p.project_name
-       FROM deliverables d
-       JOIN projects p ON d.project_id = p.id
-       WHERE p.client_id = ? AND d.deleted_at IS NULL
-       ORDER BY d.created_at DESC`,
-      [clientId]
-    );
-
-    sendSuccess(res, { deliverables });
-  } catch (err) {
-    logger.error('[Deliverables] Failed to fetch client deliverables', {
-      error: err instanceof Error ? err : new Error(String(err)),
-      category: 'DELIVERABLE'
-    });
-    errorResponse(res, 'Failed to fetch deliverables', 500, ErrorCodes.INTERNAL_ERROR);
+router.get('/my', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  if (await isUserAdmin(req)) {
+    return errorResponse(res, 'Admin users should use /api/admin/deliverables', 403, ErrorCodes.FORBIDDEN);
   }
-});
+
+  const clientId = req.user?.id;
+  if (!clientId) {
+    return errorResponse(res, 'Authentication required', 401, ErrorCodes.UNAUTHORIZED);
+  }
+
+  const db = getDatabase();
+  const deliverables = await db.all(
+    `SELECT d.id, d.title, d.type, d.status, d.approval_status,
+            d.review_deadline, d.round_number, d.created_at,
+            p.project_name
+     FROM deliverables d
+     JOIN projects p ON d.project_id = p.id
+     WHERE p.client_id = ? AND d.deleted_at IS NULL
+     ORDER BY d.created_at DESC`,
+    [clientId]
+  );
+
+  sendSuccess(res, { deliverables });
+}));
 
 // ===== DELIVERABLE CRUD =====
 
@@ -113,48 +106,40 @@ router.get('/my', async (req: AuthenticatedRequest, res: Response) => {
  *       404:
  *         description: Project not found
  */
-router.post('/', validateRequest(DeliverableValidationSchemas.create, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const { projectId, title, description, type, createdById, tags, reviewDeadline, roundNumber } =
-      req.body;
+router.post('/', validateRequest(DeliverableValidationSchemas.create, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { projectId, title, description, type, createdById, tags, reviewDeadline, roundNumber } =
+    req.body;
 
-    const parsedProjectId = parseInt(projectId, 10);
-    if (isNaN(parsedProjectId) || parsedProjectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
-    }
-
-    // Verify user can access this project
-    if (!(await canAccessProject(req, parsedProjectId))) {
-      return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
-    }
-
-    const deliverable = await deliverableService.createDeliverable(
-      projectId,
-      title,
-      description || '',
-      type,
-      createdById,
-      { tags, reviewDeadline, roundNumber }
-    );
-
-    // Emit workflow event for deliverable submission
-    await workflowTriggerService.emit('deliverable.submitted', {
-      entityId: deliverable.id,
-      triggeredBy: createdById?.toString() || 'system',
-      projectId,
-      title,
-      type
-    });
-
-    sendCreated(res, { deliverable });
-  } catch (error) {
-    logger.error('[Deliverables] Failed to create deliverable', {
-      error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE'
-    });
-    errorResponse(res, 'Failed to create deliverable', 500, ErrorCodes.INTERNAL_ERROR);
+  const parsedProjectId = parseInt(projectId, 10);
+  if (isNaN(parsedProjectId) || parsedProjectId <= 0) {
+    return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
   }
-});
+
+  // Verify user can access this project
+  if (!(await canAccessProject(req, parsedProjectId))) {
+    return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+  }
+
+  const deliverable = await deliverableService.createDeliverable(
+    projectId,
+    title,
+    description || '',
+    type,
+    createdById,
+    { tags, reviewDeadline, roundNumber }
+  );
+
+  // Emit workflow event for deliverable submission
+  await workflowTriggerService.emit('deliverable.submitted', {
+    entityId: deliverable.id,
+    triggeredBy: createdById?.toString() || 'system',
+    projectId,
+    title,
+    type
+  });
+
+  sendCreated(res, { deliverable });
+}));
 
 /**
  * @swagger
@@ -177,34 +162,26 @@ router.post('/', validateRequest(DeliverableValidationSchemas.create, { allowUnk
  *       404:
  *         description: Deliverable not found
  */
-router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const { id } = req.params;
-    const deliverableId = parseInt(id, 10);
-    if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
-    }
-
-    // Check authorization
-    if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
-    }
-
-    const deliverable = await deliverableService.getDeliverableById(deliverableId);
-
-    if (!deliverable) {
-      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
-    }
-
-    sendSuccess(res, { deliverable });
-  } catch (error) {
-    logger.error('[Deliverables] Failed to retrieve deliverable', {
-      error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE'
-    });
-    errorResponse(res, 'Failed to retrieve deliverable', 500, ErrorCodes.INTERNAL_ERROR);
+router.get('/:id', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const deliverableId = parseInt(id, 10);
+  if (isNaN(deliverableId) || deliverableId <= 0) {
+    return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
   }
-});
+
+  // Check authorization
+  if (!(await canAccessDeliverable(req, deliverableId))) {
+    return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+  }
+
+  const deliverable = await deliverableService.getDeliverableById(deliverableId);
+
+  if (!deliverable) {
+    return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+  }
+
+  sendSuccess(res, { deliverable });
+}));
 
 /**
  * @swagger
@@ -243,40 +220,32 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
  *       404:
  *         description: Project not found
  */
-router.get('/projects/:projectId/list', async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const { projectId } = req.params;
-    const parsedProjectId = parseInt(projectId, 10);
-    if (isNaN(parsedProjectId) || parsedProjectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
-    }
-
-    // Verify user can access this project
-    if (!(await canAccessProject(req, parsedProjectId))) {
-      return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
-    }
-
-    const { status, roundNumber } = req.query;
-    const { page, perPage, limit, offset } = parsePaginationQuery(
-      req.query as Record<string, unknown>
-    );
-
-    const result = await deliverableService.getProjectDeliverables(parsedProjectId, {
-      status: status as string | undefined,
-      roundNumber: roundNumber ? parseInt(roundNumber as string, 10) : undefined,
-      limit,
-      offset
-    });
-
-    sendPaginated(res, result.deliverables, { page, perPage, total: result.total });
-  } catch (error) {
-    logger.error('[Deliverables] Failed to list deliverables', {
-      error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE'
-    });
-    errorResponse(res, 'Failed to list deliverables', 500, ErrorCodes.INTERNAL_ERROR);
+router.get('/projects/:projectId/list', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { projectId } = req.params;
+  const parsedProjectId = parseInt(projectId, 10);
+  if (isNaN(parsedProjectId) || parsedProjectId <= 0) {
+    return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
   }
-});
+
+  // Verify user can access this project
+  if (!(await canAccessProject(req, parsedProjectId))) {
+    return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+  }
+
+  const { status, roundNumber } = req.query;
+  const { page, perPage, limit, offset } = parsePaginationQuery(
+    req.query as Record<string, unknown>
+  );
+
+  const result = await deliverableService.getProjectDeliverables(parsedProjectId, {
+    status: status as string | undefined,
+    roundNumber: roundNumber ? parseInt(roundNumber as string, 10) : undefined,
+    limit,
+    offset
+  });
+
+  sendPaginated(res, result.deliverables, { page, perPage, total: result.total });
+}));
 
 /**
  * @swagger
@@ -299,7 +268,7 @@ router.get('/projects/:projectId/list', async (req: AuthenticatedRequest, res: R
  *       404:
  *         description: Deliverable not found
  */
-router.put('/:id', validateRequest(DeliverableValidationSchemas.update, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
+router.put('/:id', validateRequest(DeliverableValidationSchemas.update, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
@@ -318,13 +287,9 @@ router.put('/:id', validateRequest(DeliverableValidationSchemas.update, { allowU
     if (error instanceof Error && error.message.includes('not found')) {
       return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
-    logger.error('[Deliverables] Failed to update deliverable', {
-      error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE'
-    });
-    errorResponse(res, 'Failed to update deliverable', 500, ErrorCodes.INTERNAL_ERROR);
+    throw error;
   }
-});
+}));
 
 /**
  * @swagger
@@ -357,7 +322,7 @@ router.put('/:id', validateRequest(DeliverableValidationSchemas.update, { allowU
  *       404:
  *         description: Deliverable not found
  */
-router.post('/:id/lock', validateRequest(DeliverableValidationSchemas.lockDeliverable, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/lock', validateRequest(DeliverableValidationSchemas.lockDeliverable, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
@@ -440,13 +405,9 @@ router.post('/:id/lock', validateRequest(DeliverableValidationSchemas.lockDelive
     if (error instanceof Error && error.message.includes('not found')) {
       return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
-    logger.error('[Deliverables] Failed to lock deliverable', {
-      error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE'
-    });
-    errorResponse(res, 'Failed to lock deliverable', 500, ErrorCodes.INTERNAL_ERROR);
+    throw error;
   }
-});
+}));
 
 /**
  * @swagger
@@ -481,7 +442,7 @@ router.post('/:id/lock', validateRequest(DeliverableValidationSchemas.lockDelive
  *       404:
  *         description: Deliverable not found
  */
-router.post('/:id/revision', validateRequest(DeliverableValidationSchemas.requestRevision, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/revision', validateRequest(DeliverableValidationSchemas.requestRevision, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
@@ -518,13 +479,9 @@ router.post('/:id/revision', validateRequest(DeliverableValidationSchemas.reques
     if (error instanceof Error && error.message.includes('not found')) {
       return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
-    logger.error('[Deliverables] Failed to request revision', {
-      error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE'
-    });
-    errorResponse(res, 'Failed to request revision', 500, ErrorCodes.INTERNAL_ERROR);
+    throw error;
   }
-});
+}));
 
 /**
  * @swagger
@@ -547,28 +504,20 @@ router.post('/:id/revision', validateRequest(DeliverableValidationSchemas.reques
  *       404:
  *         description: Deliverable not found
  */
-router.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const { id } = req.params;
-    const deliverableId = parseInt(id, 10);
-    if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
-    }
-
-    // Check authorization
-    if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
-    }
-
-    await deliverableService.deleteDeliverable(deliverableId);
-    sendSuccess(res, undefined, 'Deliverable archived');
-  } catch (error) {
-    logger.error('[Deliverables] Failed to delete deliverable', {
-      error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE'
-    });
-    errorResponse(res, 'Failed to delete deliverable', 500, ErrorCodes.INTERNAL_ERROR);
+router.delete('/:id', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const deliverableId = parseInt(id, 10);
+  if (isNaN(deliverableId) || deliverableId <= 0) {
+    return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
   }
-});
+
+  // Check authorization
+  if (!(await canAccessDeliverable(req, deliverableId))) {
+    return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+  }
+
+  await deliverableService.deleteDeliverable(deliverableId);
+  sendSuccess(res, undefined, 'Deliverable archived');
+}));
 
 export default router;

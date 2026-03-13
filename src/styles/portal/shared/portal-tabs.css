@@ -268,7 +268,7 @@
 
 .portal-tab.is-active .portal-tab-badge {
   background: var(--color-accent);
-  color: var(--color-white);
+  color: var(--color-text-primary);
 }
 
 .portal-subtab-badge {
@@ -287,7 +287,7 @@
 
 .portal-subtab.is-active .portal-subtab-badge {
   background: var(--color-accent);
-  color: var(--color-white);
+  color: var(--color-text-primary);
 }
 
 /* =====================================================

@@ -213,7 +213,7 @@
    ============================================== */
 
 .portal-modal .custom-dropdown[data-modal-dropdown] {
-  --dropdown-bg: var(--color-black);
+  --dropdown-bg: var(--color-bg-primary);
   --dropdown-border-color: var(--color-border-primary);
   --dropdown-border-width: 1px;
   --dropdown-radius: var(--border-radius-lg);

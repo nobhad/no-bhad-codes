@@ -7,9 +7,9 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { logger } from '../../services/logger.js';
+import { asyncHandler } from '../../middleware/errorHandler.js';
 import { blockIP, unblockIP, getRateLimitStats } from '../../middleware/rate-limiter.js';
-import { errorResponseWithPayload, sendSuccess, sanitizeErrorMessage, ErrorCodes } from '../../utils/api-response.js';
+import { errorResponseWithPayload, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 
 const router = Router();
 
@@ -27,20 +27,10 @@ const router = Router();
  *       200:
  *         description: Rate limit stats
  */
-router.get('/rate-limits/stats', async (_req: Request, res: Response) => {
-  try {
-    const stats = await getRateLimitStats();
-    sendSuccess(res, stats);
-  } catch (error) {
-    await logger.error('Rate limit stats error:', {
-      error: error instanceof Error ? error : undefined,
-      category: 'DATA_QUALITY'
-    });
-    errorResponseWithPayload(res, 'Failed to fetch rate limit stats', 500, ErrorCodes.INTERNAL_ERROR, {
-      message: sanitizeErrorMessage(error, 'Failed to fetch rate limit statistics')
-    });
-  }
-});
+router.get('/rate-limits/stats', asyncHandler(async (_req: Request, res: Response) => {
+  const stats = await getRateLimitStats();
+  sendSuccess(res, stats);
+}));
 
 /**
  * @swagger
@@ -75,30 +65,20 @@ router.get('/rate-limits/stats', async (_req: Request, res: Response) => {
  *       400:
  *         description: ip and reason required
  */
-router.post('/rate-limits/block', async (req: Request, res: Response) => {
-  try {
-    const { ip, reason, expiresAt, adminEmail } = req.body;
+router.post('/rate-limits/block', asyncHandler(async (req: Request, res: Response) => {
+  const { ip, reason, expiresAt, adminEmail } = req.body;
 
-    if (!ip || !reason) {
-      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
-        message: 'ip and reason are required'
-      });
-      return;
-    }
-
-    await blockIP(ip, reason, adminEmail || 'admin', expiresAt ? new Date(expiresAt) : undefined);
-
-    sendSuccess(res, undefined, `IP ${ip} has been blocked`);
-  } catch (error) {
-    await logger.error('IP block error:', {
-      error: error instanceof Error ? error : undefined,
-      category: 'DATA_QUALITY'
+  if (!ip || !reason) {
+    errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
+      message: 'ip and reason are required'
     });
-    errorResponseWithPayload(res, 'Failed to block IP', 500, ErrorCodes.INTERNAL_ERROR, {
-      message: sanitizeErrorMessage(error, 'Failed to block IP address')
-    });
+    return;
   }
-});
+
+  await blockIP(ip, reason, adminEmail || 'admin', expiresAt ? new Date(expiresAt) : undefined);
+
+  sendSuccess(res, undefined, `IP ${ip} has been blocked`);
+}));
 
 /**
  * @swagger
@@ -127,29 +107,19 @@ router.post('/rate-limits/block', async (req: Request, res: Response) => {
  *       400:
  *         description: ip is required
  */
-router.post('/rate-limits/unblock', async (req: Request, res: Response) => {
-  try {
-    const { ip } = req.body;
+router.post('/rate-limits/unblock', asyncHandler(async (req: Request, res: Response) => {
+  const { ip } = req.body;
 
-    if (!ip) {
-      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
-        message: 'ip is required'
-      });
-      return;
-    }
-
-    await unblockIP(ip);
-
-    sendSuccess(res, undefined, `IP ${ip} has been unblocked`);
-  } catch (error) {
-    await logger.error('IP unblock error:', {
-      error: error instanceof Error ? error : undefined,
-      category: 'DATA_QUALITY'
+  if (!ip) {
+    errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
+      message: 'ip is required'
     });
-    errorResponseWithPayload(res, 'Failed to unblock IP', 500, ErrorCodes.INTERNAL_ERROR, {
-      message: sanitizeErrorMessage(error, 'Failed to unblock IP address')
-    });
+    return;
   }
-});
+
+  await unblockIP(ip);
+
+  sendSuccess(res, undefined, `IP ${ip} has been unblocked`);
+}));
 
 export default router;
