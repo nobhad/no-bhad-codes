@@ -270,10 +270,601 @@ const TAG_COLUMNS = `
 `.replace(/\s+/g, ' ').trim();
 
 // =====================================================
+// INTERFACES - Client "Me" (Self-Service) Queries
+// =====================================================
+
+export interface ClientProfile {
+  id: number;
+  email: string;
+  company_name?: string;
+  contact_name?: string;
+  phone?: string;
+  status: string;
+  client_type?: string;
+  billing_name?: string;
+  billing_company?: string;
+  billing_address?: string;
+  billing_address2?: string;
+  billing_city?: string;
+  billing_state?: string;
+  billing_zip?: string;
+  billing_country?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ClientProfileBasic {
+  id: number;
+  email: string;
+  company_name?: string;
+  contact_name?: string;
+  phone?: string;
+  client_type?: string;
+}
+
+export interface ClientBilling {
+  billing_name?: string;
+  company?: string;
+  address?: string;
+  address2?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  country?: string;
+}
+
+export interface ClientPasswordHash {
+  password_hash: string;
+  [key: string]: unknown;
+}
+
+export interface ClientProjectSummary {
+  id: number;
+  name: string;
+  status: string;
+  progress?: number;
+  start_date?: string;
+  end_date?: string;
+  preview_url?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DashboardActivityItem {
+  type: string;
+  title: string;
+  context: string;
+  date: string;
+  entity_id?: number;
+}
+
+export interface CurrentDeliverableRow {
+  id: number;
+  title: string;
+  status: string;
+  type: string;
+  project_id: number;
+}
+
+export interface CountResult {
+  count: number;
+}
+
+export interface BalanceResult {
+  balance: number;
+}
+
+export interface ContactUpdateFields {
+  first_name?: string;
+  last_name?: string;
+  email?: string | null;
+  phone?: string | null;
+  title?: string | null;
+  department?: string | null;
+  role?: string;
+  notes?: string | null;
+}
+
+// =====================================================
 // CLIENT SERVICE CLASS
 // =====================================================
 
 class ClientService {
+  // ===================================================
+  // CLIENT "ME" (SELF-SERVICE) QUERIES
+  // ===================================================
+
+  /**
+   * Get full client profile by ID (for GET /me)
+   */
+  async getClientProfile(clientId: number): Promise<ClientProfile | undefined> {
+    const db = getDatabase();
+    return db.get(
+      `SELECT id, email, company_name, contact_name, phone, status, client_type,
+              billing_name, billing_company, billing_address, billing_address2, billing_city,
+              billing_state, billing_zip, billing_country,
+              created_at, updated_at
+       FROM active_clients WHERE id = ?`,
+      [clientId]
+    ) as Promise<ClientProfile | undefined>;
+  }
+
+  /**
+   * Update client profile fields (contact_name, company_name, phone)
+   */
+  async updateClientProfile(
+    clientId: number,
+    data: { contact_name?: string | null; company_name?: string | null; phone?: string | null }
+  ): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      `UPDATE clients SET contact_name = ?, company_name = ?, phone = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [data.contact_name || null, data.company_name || null, data.phone || null, clientId]
+    );
+  }
+
+  /**
+   * Get basic client profile after update (for PUT /me response)
+   */
+  async getClientProfileBasic(clientId: number): Promise<ClientProfileBasic | undefined> {
+    const db = getDatabase();
+    return db.get(
+      'SELECT id, email, company_name, contact_name, phone, client_type FROM active_clients WHERE id = ?',
+      [clientId]
+    ) as Promise<ClientProfileBasic | undefined>;
+  }
+
+  /**
+   * Get client password hash for verification (for PUT /me/password)
+   */
+  async getClientPasswordHash(clientId: number): Promise<ClientPasswordHash | undefined> {
+    const db = getDatabase();
+    return db.get(
+      'SELECT password_hash FROM active_clients WHERE id = ?',
+      [clientId]
+    ) as Promise<ClientPasswordHash | undefined>;
+  }
+
+  /**
+   * Update client password hash
+   */
+  async updateClientPassword(clientId: number, newHash: string): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      'UPDATE clients SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [newHash, clientId]
+    );
+  }
+
+  /**
+   * Get client billing information (for GET /me/billing)
+   */
+  async getClientBilling(clientId: number): Promise<ClientBilling | undefined> {
+    const db = getDatabase();
+    return db.get(
+      `SELECT
+         billing_name, billing_company as company,
+         billing_address as address, billing_address2 as address2,
+         billing_city as city, billing_state as state,
+         billing_zip as zip, billing_country as country
+       FROM active_clients WHERE id = ?`,
+      [clientId]
+    ) as Promise<ClientBilling | undefined>;
+  }
+
+  /**
+   * Update client billing information (for PUT /me/billing)
+   */
+  async updateClientBilling(
+    clientId: number,
+    data: {
+      billing_name?: string | null;
+      company?: string | null;
+      address?: string | null;
+      address2?: string | null;
+      city?: string | null;
+      state?: string | null;
+      zip?: string | null;
+      country?: string | null;
+    }
+  ): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      `UPDATE clients SET
+         billing_name = ?,
+         billing_company = ?,
+         billing_address = ?,
+         billing_address2 = ?,
+         billing_city = ?,
+         billing_state = ?,
+         billing_zip = ?,
+         billing_country = ?,
+         updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [
+        data.billing_name || null,
+        data.company || null,
+        data.address || null,
+        data.address2 || null,
+        data.city || null,
+        data.state || null,
+        data.zip || null,
+        data.country || null,
+        clientId
+      ]
+    );
+  }
+
+  /**
+   * Get all projects for a client (for dashboard)
+   */
+  async getClientProjects(clientId: number): Promise<ClientProjectSummary[]> {
+    const db = getDatabase();
+    return db.all(
+      `SELECT id, project_name as name, status, progress,
+              start_date, estimated_end_date as end_date, preview_url,
+              created_at, updated_at
+       FROM active_projects WHERE client_id = ?
+       ORDER BY
+         CASE WHEN status IN ('active', 'in-progress', 'in-review') THEN 0 ELSE 1 END,
+         updated_at DESC`,
+      [clientId]
+    ) as Promise<ClientProjectSummary[]>;
+  }
+
+  /**
+   * Get count of pending invoices for a client
+   */
+  async getPendingInvoiceCount(clientId: number): Promise<number> {
+    const db = getDatabase();
+    const result = await db.get(
+      `SELECT COUNT(*) as count FROM active_invoices
+       WHERE client_id = ? AND status IN ('sent', 'viewed', 'partial', 'overdue')`,
+      [clientId]
+    ) as CountResult | undefined;
+    return result?.count || 0;
+  }
+
+  /**
+   * Get count of unread messages for a client
+   */
+  async getUnreadMessageCount(clientId: number): Promise<number> {
+    const db = getDatabase();
+    const result = await db.get(
+      `SELECT COUNT(*) as count FROM active_messages m
+       JOIN active_message_threads t ON m.thread_id = t.id
+       WHERE t.client_id = ? AND m.read_at IS NULL AND m.sender_type = 'admin'`,
+      [clientId]
+    ) as CountResult | undefined;
+    return result?.count || 0;
+  }
+
+  /**
+   * Get recent activity feed for a client dashboard
+   */
+  async getClientRecentActivity(clientId: number): Promise<DashboardActivityItem[]> {
+    const db = getDatabase();
+    return db.all(
+      `SELECT type, title, context, date, entity_id FROM (
+        -- Project updates
+        SELECT
+          'project_update' as type,
+          pu.title as title,
+          p.project_name as context,
+          pu.created_at as date,
+          CAST(NULL as INTEGER) as entity_id
+        FROM project_updates pu
+        JOIN active_projects p ON pu.project_id = p.id
+        WHERE p.client_id = ?
+
+        UNION ALL
+
+        -- Messages received
+        SELECT
+          'message' as type,
+          'New message received' as title,
+          t.subject as context,
+          m.created_at as date,
+          t.id as entity_id
+        FROM active_messages m
+        JOIN active_message_threads t ON m.thread_id = t.id
+        WHERE t.client_id = ? AND m.sender_type = 'admin'
+
+        UNION ALL
+
+        -- Invoices
+        SELECT
+          'invoice' as type,
+          CASE
+            WHEN i.status = 'sent' THEN 'Invoice sent'
+            WHEN i.status = 'paid' THEN 'Invoice paid'
+            WHEN i.status = 'overdue' THEN 'Invoice overdue'
+            WHEN i.status = 'viewed' THEN 'Invoice viewed'
+            ELSE 'Invoice updated'
+          END as title,
+          i.invoice_number as context,
+          i.updated_at as date,
+          i.id as entity_id
+        FROM active_invoices i
+        WHERE i.client_id = ?
+
+        UNION ALL
+
+        -- Files uploaded
+        SELECT
+          'file' as type,
+          'File uploaded' as title,
+          f.original_filename as context,
+          f.created_at as date,
+          f.id as entity_id
+        FROM files f
+        JOIN active_projects p ON f.project_id = p.id
+        WHERE p.client_id = ? AND f.deleted_at IS NULL
+
+        UNION ALL
+
+        -- Document requests
+        SELECT
+          'document_request' as type,
+          CASE
+            WHEN dr.status = 'requested' THEN 'Document requested'
+            WHEN dr.status = 'approved' THEN 'Document approved'
+            WHEN dr.status = 'rejected' THEN 'Document rejected'
+            WHEN dr.status = 'under_review' THEN 'Document under review'
+            ELSE 'Document request updated'
+          END as title,
+          dr.title as context,
+          dr.updated_at as date,
+          dr.id as entity_id
+        FROM active_document_requests dr
+        WHERE dr.client_id = ?
+
+        UNION ALL
+
+        -- Contracts
+        SELECT
+          'contract' as type,
+          CASE
+            WHEN c.status = 'sent' THEN 'Contract sent for signature'
+            WHEN c.status = 'signed' THEN 'Contract signed'
+            WHEN c.status = 'expired' THEN 'Contract expired'
+            WHEN c.countersigned_at IS NOT NULL THEN 'Contract countersigned'
+            ELSE 'Contract updated'
+          END as title,
+          p.project_name as context,
+          COALESCE(c.signed_at, c.sent_at, c.updated_at) as date,
+          c.id as entity_id
+        FROM active_contracts c
+        JOIN active_projects p ON c.project_id = p.id
+        WHERE c.client_id = ?
+      ) AS activity
+      ORDER BY date DESC
+      LIMIT 10`,
+      [clientId, clientId, clientId, clientId, clientId, clientId]
+    ) as Promise<DashboardActivityItem[]>;
+  }
+
+  /**
+   * Get count of pending document requests for a client
+   */
+  async getPendingDocRequestCount(clientId: number): Promise<number> {
+    const db = getDatabase();
+    const result = await db.get(
+      `SELECT COUNT(*) as count FROM active_document_requests
+       WHERE client_id = ? AND status IN ('requested', 'rejected')`,
+      [clientId]
+    ) as CountResult | undefined;
+    return result?.count || 0;
+  }
+
+  /**
+   * Get count of pending contracts (sent but not signed)
+   */
+  async getPendingContractCount(clientId: number): Promise<number> {
+    const db = getDatabase();
+    const result = await db.get(
+      `SELECT COUNT(*) as count FROM active_contracts
+       WHERE client_id = ? AND status = 'sent'`,
+      [clientId]
+    ) as CountResult | undefined;
+    return result?.count || 0;
+  }
+
+  /**
+   * Get count of pending questionnaires for a client
+   */
+  async getPendingQuestionnaireCount(clientId: number): Promise<number> {
+    const db = getDatabase();
+    const result = await db.get(
+      `SELECT COUNT(*) as count FROM questionnaire_responses qr
+       JOIN active_projects p ON qr.project_id = p.id
+       WHERE p.client_id = ? AND qr.status IN ('pending', 'in_progress')`,
+      [clientId]
+    ) as CountResult | undefined;
+    return result?.count || 0;
+  }
+
+  /**
+   * Get count of pending approvals (deliverables awaiting client approval)
+   */
+  async getPendingApprovalCount(clientId: number): Promise<number> {
+    const db = getDatabase();
+    const result = await db.get(
+      `SELECT COUNT(*) as count FROM deliverables d
+       JOIN active_projects p ON d.project_id = p.id
+       WHERE p.client_id = ? AND d.approval_status = 'pending' AND d.deleted_at IS NULL`,
+      [clientId]
+    ) as CountResult | undefined;
+    return result?.count || 0;
+  }
+
+  /**
+   * Get outstanding balance for a client
+   */
+  async getOutstandingBalance(clientId: number): Promise<number> {
+    const db = getDatabase();
+    const result = await db.get(
+      `SELECT COALESCE(SUM(amount_total - COALESCE(amount_paid, 0)), 0) as balance
+       FROM active_invoices
+       WHERE client_id = ? AND status IN ('sent', 'viewed', 'partial', 'overdue')`,
+      [clientId]
+    ) as BalanceResult | undefined;
+    return result?.balance || 0;
+  }
+
+  /**
+   * Get count of deliverables in review for a client
+   */
+  async getDeliverablesInReviewCount(clientId: number): Promise<number> {
+    const db = getDatabase();
+    const result = await db.get(
+      `SELECT COUNT(*) as count FROM deliverables d
+       JOIN active_projects p ON d.project_id = p.id
+       WHERE p.client_id = ? AND d.status = 'in_review' AND d.deleted_at IS NULL`,
+      [clientId]
+    ) as CountResult | undefined;
+    return result?.count || 0;
+  }
+
+  /**
+   * Get the current active deliverable or milestone for a client
+   */
+  async getCurrentDeliverable(clientId: number): Promise<CurrentDeliverableRow | undefined> {
+    const db = getDatabase();
+    return db.get(
+      `SELECT id, title, status, type, project_id FROM (
+        -- Deliverables (design review system)
+        SELECT d.id, d.title, d.status, d.type, p.id as project_id, d.updated_at
+        FROM deliverables d
+        JOIN active_projects p ON d.project_id = p.id
+        WHERE p.client_id = ? AND d.deleted_at IS NULL
+          AND d.status IN ('in_progress', 'in_review')
+
+        UNION ALL
+
+        -- Milestones (project milestones)
+        SELECT m.id, m.title, m.status, 'milestone' as type, p.id as project_id, m.updated_at
+        FROM milestones m
+        JOIN active_projects p ON m.project_id = p.id
+        WHERE p.client_id = ? AND m.deleted_at IS NULL
+          AND m.status = 'in_progress'
+      )
+      ORDER BY
+        CASE WHEN status = 'in_progress' THEN 0 ELSE 1 END,
+        updated_at DESC
+      LIMIT 1`,
+      [clientId, clientId]
+    ) as Promise<CurrentDeliverableRow | undefined>;
+  }
+
+  /**
+   * Get all contacts for a client (self-service, includes deleted_at filter)
+   */
+  async getClientOwnContacts(clientId: number): Promise<Record<string, unknown>[]> {
+    const db = getDatabase();
+    const CONTACT_COLUMNS = 'id, client_id, first_name, last_name, email, phone, title, department, role, is_primary, notes, created_at, updated_at';
+    return db.all(
+      `SELECT ${CONTACT_COLUMNS} FROM client_contacts WHERE client_id = ? AND deleted_at IS NULL ORDER BY is_primary DESC, first_name ASC`,
+      [clientId]
+    ) as Promise<Record<string, unknown>[]>;
+  }
+
+  /**
+   * Insert a new client contact (self-service)
+   */
+  async insertClientContact(
+    clientId: number,
+    data: {
+      first_name: string;
+      last_name: string;
+      email?: string | null;
+      phone?: string | null;
+      title?: string | null;
+      department?: string | null;
+      role?: string;
+      notes?: string | null;
+    }
+  ): Promise<Record<string, unknown> | undefined> {
+    const db = getDatabase();
+    const CONTACT_COLUMNS = 'id, client_id, first_name, last_name, email, phone, title, department, role, is_primary, notes, created_at, updated_at';
+
+    const result = await db.run(
+      `INSERT INTO client_contacts (client_id, first_name, last_name, email, phone, title, department, role, notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [clientId, data.first_name, data.last_name, data.email || null, data.phone || null, data.title || null, data.department || null, data.role || 'general', data.notes || null]
+    );
+
+    return db.get(
+      `SELECT ${CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`,
+      [result.lastID]
+    ) as Promise<Record<string, unknown> | undefined>;
+  }
+
+  /**
+   * Verify contact ownership by client
+   */
+  async verifyContactOwnership(contactId: number, clientId: number): Promise<boolean> {
+    const db = getDatabase();
+    const existing = await db.get(
+      'SELECT id FROM client_contacts WHERE id = ? AND client_id = ?',
+      [contactId, clientId]
+    );
+    return !!existing;
+  }
+
+  /**
+   * Verify contact ownership (with soft-delete check)
+   */
+  async verifyContactOwnershipActive(contactId: number, clientId: number): Promise<boolean> {
+    const db = getDatabase();
+    const existing = await db.get(
+      'SELECT id FROM client_contacts WHERE id = ? AND client_id = ? AND deleted_at IS NULL',
+      [contactId, clientId]
+    );
+    return !!existing;
+  }
+
+  /**
+   * Update a client contact with dynamic fields
+   */
+  async updateClientContact(
+    contactId: number,
+    clientId: number,
+    fields: ContactUpdateFields
+  ): Promise<Record<string, unknown> | undefined> {
+    const db = getDatabase();
+    const CONTACT_COLUMNS = 'id, client_id, first_name, last_name, email, phone, title, department, role, is_primary, notes, created_at, updated_at';
+
+    const updates: string[] = [];
+    const values: (string | number | boolean | null | undefined)[] = [];
+
+    if (fields.first_name !== undefined) { updates.push('first_name = ?'); values.push(fields.first_name); }
+    if (fields.last_name !== undefined) { updates.push('last_name = ?'); values.push(fields.last_name); }
+    if (fields.email !== undefined) { updates.push('email = ?'); values.push(fields.email); }
+    if (fields.phone !== undefined) { updates.push('phone = ?'); values.push(fields.phone); }
+    if (fields.title !== undefined) { updates.push('title = ?'); values.push(fields.title); }
+    if (fields.department !== undefined) { updates.push('department = ?'); values.push(fields.department); }
+    if (fields.role !== undefined) { updates.push('role = ?'); values.push(fields.role); }
+    if (fields.notes !== undefined) { updates.push('notes = ?'); values.push(fields.notes); }
+
+    if (updates.length === 0) {
+      return undefined;
+    }
+
+    updates.push('updated_at = CURRENT_TIMESTAMP');
+    values.push(contactId, clientId);
+
+    await db.run(
+      `UPDATE client_contacts SET ${updates.join(', ')} WHERE id = ? AND client_id = ?`,
+      values
+    );
+
+    return db.get(
+      `SELECT ${CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`,
+      [contactId]
+    ) as Promise<Record<string, unknown> | undefined>;
+  }
   // ===================================================
   // CONTACT MANAGEMENT
   // ===================================================

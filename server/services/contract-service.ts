@@ -582,6 +582,420 @@ class ContractService {
     return this.getContract(contractId);
   }
 
+  // ============================================
+  // ROUTE-LEVEL DB ACCESS METHODS
+  // ============================================
+
+  /**
+   * Get project with client info for PDF generation
+   */
+  async getProjectWithClientForPdf(projectId: number): Promise<Record<string, unknown> | null> {
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT p.*, c.contact_name as client_name, c.email as client_email,
+              c.company_name, c.phone as client_phone, c.address as client_address
+       FROM projects p
+       JOIN clients c ON p.client_id = c.id
+       WHERE p.id = ?`,
+      [projectId]
+    );
+    return (row as Record<string, unknown>) || null;
+  }
+
+  /**
+   * Get the latest active contract for a project (excludes cancelled)
+   */
+  async getLatestActiveContract(projectId: number): Promise<Record<string, unknown> | null> {
+    const db = getDatabase();
+    const CONTRACT_COLUMNS = `
+      id, template_id, project_id, client_id, content, status, variables,
+      sent_at, signed_at, expires_at, signer_name, signer_email, signer_ip,
+      signer_user_agent, signature_data, countersigned_at, countersigner_name,
+      countersigner_email, countersigner_ip, countersigner_user_agent,
+      countersignature_data, signed_pdf_path, parent_contract_id, renewal_at,
+      renewal_reminder_sent_at, last_reminder_at, reminder_count,
+      signature_token, signature_requested_at, signature_expires_at,
+      created_at, updated_at
+    `.replace(/\s+/g, ' ').trim();
+
+    const row = await db.get(
+      `SELECT ${CONTRACT_COLUMNS} FROM contracts WHERE project_id = ? AND status != 'cancelled'
+       ORDER BY created_at DESC LIMIT 1`,
+      [projectId]
+    );
+    return (row as Record<string, unknown>) || null;
+  }
+
+  /**
+   * Get the latest active contract ID for a project
+   */
+  async getLatestActiveContractId(projectId: number): Promise<number | null> {
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT id FROM contracts WHERE project_id = ? AND status != 'cancelled'
+       ORDER BY created_at DESC LIMIT 1`,
+      [projectId]
+    );
+    if (!row) return null;
+    return (row as Record<string, unknown>).id as number;
+  }
+
+  /**
+   * Get latest active contract ID and status for a project
+   */
+  async getLatestActiveContractIdAndStatus(projectId: number): Promise<{ id: number; status: string } | null> {
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT id, status FROM contracts WHERE project_id = ? AND status != 'cancelled'
+       ORDER BY created_at DESC LIMIT 1`,
+      [projectId]
+    );
+    if (!row) return null;
+    const r = row as Record<string, unknown>;
+    return { id: r.id as number, status: r.status as string };
+  }
+
+  /**
+   * Save signed PDF path on the project record
+   */
+  async updateProjectSignedPdfPath(projectId: number, relativePath: string): Promise<void> {
+    const db = getDatabase();
+    await db.run('UPDATE projects SET contract_signed_pdf_path = ? WHERE id = ?', [
+      relativePath,
+      projectId
+    ]);
+  }
+
+  /**
+   * Save signed PDF path on a contract record
+   */
+  async updateContractSignedPdfPath(contractId: number, relativePath: string): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      'UPDATE contracts SET signed_pdf_path = ?, updated_at = datetime(\'now\') WHERE id = ?',
+      [relativePath, contractId]
+    );
+  }
+
+  /**
+   * Get project with client info for signature request
+   */
+  async getProjectWithClientForSignature(projectId: number): Promise<Record<string, unknown> | null> {
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT p.*, c.email as client_email, COALESCE(c.contact_name, c.company_name) as client_name
+       FROM projects p
+       LEFT JOIN clients c ON p.client_id = c.id
+       WHERE p.id = ?`,
+      [projectId]
+    );
+    return (row as Record<string, unknown>) || null;
+  }
+
+  /**
+   * Store signature request token and expiry on the project
+   */
+  async storeProjectSignatureRequest(
+    projectId: number,
+    signatureToken: string,
+    expiresAt: string
+  ): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      `UPDATE projects SET
+        contract_signature_token = ?,
+        contract_signature_requested_at = datetime('now'),
+        contract_signature_expires_at = ?
+       WHERE id = ?`,
+      [signatureToken, expiresAt, projectId]
+    );
+  }
+
+  /**
+   * Update contract with signature request details (Phase 3.3 normalization)
+   */
+  async updateContractSignatureRequest(
+    contractId: number,
+    signatureToken: string,
+    expiresAt: string
+  ): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      `UPDATE contracts SET
+        signature_token = ?,
+        signature_requested_at = datetime('now'),
+        signature_expires_at = ?,
+        status = 'sent',
+        sent_at = datetime('now'),
+        expires_at = ?,
+        updated_at = datetime('now')
+       WHERE id = ?`,
+      [signatureToken, expiresAt, expiresAt, contractId]
+    );
+  }
+
+  /**
+   * Log a contract signature action to the audit log
+   */
+  async logSignatureAction(params: {
+    projectId: number;
+    contractId?: number | null;
+    action: string;
+    actorEmail?: string;
+    actorIp?: string;
+    actorUserAgent?: string;
+    details?: string;
+  }): Promise<void> {
+    const db = getDatabase();
+    if (params.contractId !== undefined) {
+      await db.run(
+        `INSERT INTO contract_signature_log (project_id, contract_id, action, actor_email, actor_ip, actor_user_agent, details)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          params.projectId,
+          params.contractId ?? null,
+          params.action,
+          params.actorEmail || null,
+          params.actorIp || null,
+          params.actorUserAgent || null,
+          params.details || null
+        ]
+      );
+    } else {
+      await db.run(
+        `INSERT INTO contract_signature_log (project_id, action, actor_email, details)
+         VALUES (?, ?, ?, ?)`,
+        [
+          params.projectId,
+          params.action,
+          params.actorEmail || null,
+          params.details || null
+        ]
+      );
+    }
+  }
+
+  /**
+   * Get project by signature token (public, no auth)
+   */
+  async getProjectBySignatureToken(token: string): Promise<Record<string, unknown> | null> {
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT p.id, p.project_name, p.price, p.contract_signature_expires_at,
+              p.contract_signed_at, COALESCE(c.contact_name, c.company_name) as client_name, c.email as client_email
+       FROM projects p
+       LEFT JOIN clients c ON p.client_id = c.id
+       WHERE p.contract_signature_token = ?`,
+      [token]
+    );
+    return (row as Record<string, unknown>) || null;
+  }
+
+  /**
+   * Log a contract view event in the audit log
+   */
+  async logContractView(projectId: number, ip: string, userAgent: string): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      `INSERT INTO contract_signature_log (project_id, action, actor_ip, actor_user_agent)
+       VALUES (?, 'viewed', ?, ?)`,
+      [projectId, ip, userAgent]
+    );
+  }
+
+  /**
+   * Mark a contract as viewed (if not already signed)
+   */
+  async markContractViewed(contractId: number): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      'UPDATE contracts SET status = \'viewed\', updated_at = datetime(\'now\') WHERE id = ?',
+      [contractId]
+    );
+  }
+
+  /**
+   * Get project by signature token with full signing fields
+   */
+  async getProjectByTokenForSigning(token: string): Promise<Record<string, unknown> | null> {
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT p.id, p.project_name, p.contract_signature_expires_at, p.contract_signed_at,
+              COALESCE(c.contact_name, c.company_name) as client_name, c.email as client_email
+       FROM projects p
+       LEFT JOIN clients c ON p.client_id = c.id
+       WHERE p.contract_signature_token = ?`,
+      [token]
+    );
+    return (row as Record<string, unknown>) || null;
+  }
+
+  /**
+   * Update project with client signature data
+   */
+  async updateProjectWithSignature(
+    projectId: number,
+    data: {
+      signedAt: string;
+      signerName: string;
+      clientEmail: string;
+      signerIp: string;
+      signerUserAgent: string;
+      signatureData: string;
+    }
+  ): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      `UPDATE projects SET
+        contract_signed_at = ?,
+        contract_signature_token = NULL,
+        contract_signature_expires_at = NULL,
+        contract_signer_name = ?,
+        contract_signer_email = ?,
+        contract_signer_ip = ?,
+        contract_signer_user_agent = ?,
+        contract_signature_data = ?
+       WHERE id = ?`,
+      [data.signedAt, data.signerName, data.clientEmail, data.signerIp, data.signerUserAgent, data.signatureData, projectId]
+    );
+  }
+
+  /**
+   * Update contract with client signature data (Phase 3.3 normalization)
+   */
+  async updateContractWithSignature(
+    contractId: number,
+    data: {
+      signedAt: string;
+      signerName: string;
+      clientEmail: string;
+      signerIp: string;
+      signerUserAgent: string;
+      signatureData: string;
+    }
+  ): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      `UPDATE contracts SET
+        status = 'signed',
+        signed_at = ?,
+        signature_token = NULL,
+        signature_expires_at = NULL,
+        signer_name = ?,
+        signer_email = ?,
+        signer_ip = ?,
+        signer_user_agent = ?,
+        signature_data = ?,
+        updated_at = datetime('now')
+       WHERE id = ?`,
+      [data.signedAt, data.signerName, data.clientEmail, data.signerIp, data.signerUserAgent, data.signatureData, contractId]
+    );
+  }
+
+  /**
+   * Get project for countersigning (admin only)
+   */
+  async getProjectForCountersign(projectId: number): Promise<Record<string, unknown> | null> {
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT id, project_name, contract_signed_at
+       FROM projects
+       WHERE id = ?`,
+      [projectId]
+    );
+    return (row as Record<string, unknown>) || null;
+  }
+
+  /**
+   * Update project with countersignature data
+   */
+  async updateProjectWithCountersignature(
+    projectId: number,
+    data: {
+      countersignedAt: string;
+      signerName: string;
+      countersignerEmail: string;
+      countersignerIp: string;
+      countersignerUserAgent: string;
+      signatureData: string | null;
+    }
+  ): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      `UPDATE projects SET
+        contract_countersigned_at = ?,
+        contract_countersigner_name = ?,
+        contract_countersigner_email = ?,
+        contract_countersigner_ip = ?,
+        contract_countersigner_user_agent = ?,
+        contract_countersignature_data = ?
+       WHERE id = ?`,
+      [
+        data.countersignedAt,
+        data.signerName,
+        data.countersignerEmail,
+        data.countersignerIp,
+        data.countersignerUserAgent,
+        data.signatureData,
+        projectId
+      ]
+    );
+  }
+
+  /**
+   * Update contract with countersignature data (Phase 3.3 normalization)
+   */
+  async updateContractWithCountersignature(
+    contractId: number,
+    data: {
+      countersignedAt: string;
+      signerName: string;
+      countersignerEmail: string;
+      countersignerIp: string;
+      countersignerUserAgent: string;
+      signatureData: string | null;
+    }
+  ): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      `UPDATE contracts SET
+        status = 'signed',
+        countersigned_at = ?,
+        countersigner_name = ?,
+        countersigner_email = ?,
+        countersigner_ip = ?,
+        countersigner_user_agent = ?,
+        countersignature_data = ?,
+        updated_at = datetime('now')
+       WHERE id = ?`,
+      [
+        data.countersignedAt,
+        data.signerName,
+        data.countersignerEmail,
+        data.countersignerIp,
+        data.countersignerUserAgent,
+        data.signatureData,
+        contractId
+      ]
+    );
+  }
+
+  /**
+   * Get project signature status fields
+   */
+  async getProjectSignatureStatus(projectId: number): Promise<Record<string, unknown> | null> {
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT contract_signed_at, contract_signature_requested_at, contract_signature_expires_at,
+              contract_signer_name, contract_signer_email, contract_signer_ip,
+              contract_countersigned_at, contract_countersigner_name, contract_countersigner_email,
+              contract_countersigner_ip, contract_signed_pdf_path
+       FROM projects WHERE id = ?`,
+      [projectId]
+    );
+    return (row as Record<string, unknown>) || null;
+  }
+
   /**
    * Expire a contract signature request
    */

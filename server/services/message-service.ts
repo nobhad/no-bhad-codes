@@ -40,6 +40,40 @@ import {
 // TYPES
 // =====================================================
 
+/** User type discriminator for auth context */
+type UserType = 'admin' | 'client';
+
+/** Parameters for creating a new message thread */
+interface CreateThreadParams {
+  clientId: string;
+  projectId: number | null;
+  subject: string;
+  threadType: string;
+  priority: string;
+}
+
+/** Parameters for inserting a new message into a thread */
+interface InsertMessageParams {
+  clientId: string | number;
+  senderType: string;
+  senderName: string;
+  subject: string;
+  message: string;
+  priority: string;
+  replyTo: number | null;
+  attachments: string | null;
+  threadId: number;
+}
+
+/** Row shape returned by the reactions batch query */
+interface ReactionRow_Core {
+  id: number;
+  message_id: number;
+  reaction: string;
+  user_email: string;
+  created_at: string;
+}
+
 interface ReactionSummary {
   reaction: string;
   count: number;
@@ -785,6 +819,253 @@ class MessageService {
         projectName: r.project_name ? getString(r, 'project_name') : undefined
       };
     });
+  }
+
+  // =====================================================
+  // CORE CRUD METHODS (used by routes/messages/core.ts)
+  // =====================================================
+
+  /**
+   * Fetch all message threads — admin sees all, client sees own.
+   */
+  async getThreads(
+    userType: UserType,
+    userId: string
+  ): Promise<Record<string, unknown>[]> {
+    const db = getDatabase();
+
+    if (userType === 'admin') {
+      return db.all(`
+        SELECT
+          mt.*,
+          c.company_name,
+          c.contact_name,
+          c.email as client_email,
+          p.project_name,
+          COUNT(m.id) as message_count,
+          COUNT(CASE WHEN m.read_at IS NULL AND m.sender_type != 'admin' AND (m.is_internal IS NULL OR m.is_internal = 0) THEN 1 END) as unread_count
+        FROM active_message_threads mt
+        JOIN active_clients c ON mt.client_id = c.id
+        LEFT JOIN active_projects p ON mt.project_id = p.id
+        LEFT JOIN active_messages m ON mt.id = m.thread_id AND m.context_type = 'general'
+        GROUP BY mt.id
+        ORDER BY mt.last_message_at DESC
+      `);
+    }
+
+    return db.all(
+      `SELECT
+          mt.*,
+          p.project_name,
+          COUNT(CASE WHEN m.is_internal IS NULL OR m.is_internal = 0 THEN 1 END) as message_count,
+          COUNT(CASE WHEN m.read_at IS NULL AND m.sender_type != 'client' AND (m.is_internal IS NULL OR m.is_internal = 0) THEN 1 END) as unread_count
+        FROM active_message_threads mt
+        LEFT JOIN active_projects p ON mt.project_id = p.id
+        LEFT JOIN active_messages m ON mt.id = m.thread_id AND m.context_type = 'general'
+        WHERE mt.client_id = ?
+        GROUP BY mt.id
+        ORDER BY mt.last_message_at DESC`,
+      [userId]
+    );
+  }
+
+  /**
+   * Verify a project exists (and optionally belongs to a client).
+   * Returns the project row or undefined.
+   */
+  async verifyProjectAccess(
+    projectId: number,
+    userType: UserType,
+    userId: string
+  ): Promise<Record<string, unknown> | undefined> {
+    const db = getDatabase();
+
+    if (userType === 'admin') {
+      return db.get('SELECT id FROM active_projects WHERE id = ?', [projectId]);
+    }
+
+    return db.get('SELECT id FROM active_projects WHERE id = ? AND client_id = ?', [
+      projectId,
+      userId
+    ]);
+  }
+
+  /**
+   * Insert a new message thread row and return the full thread record.
+   */
+  async createThread(
+    params: CreateThreadParams,
+    threadColumns: string
+  ): Promise<Record<string, unknown> | undefined> {
+    const db = getDatabase();
+
+    const result = await db.run(
+      `INSERT INTO message_threads (client_id, project_id, subject, thread_type, priority)
+       VALUES (?, ?, ?, ?, ?)`,
+      [params.clientId, params.projectId, params.subject, params.threadType, params.priority]
+    );
+
+    return db.get(
+      `SELECT ${threadColumns} FROM active_message_threads WHERE id = ?`,
+      [result.lastID]
+    );
+  }
+
+  /**
+   * Find a thread by id, scoped to the user's access level.
+   */
+  async findThreadById(
+    threadId: number,
+    userType: UserType,
+    userId: string,
+    threadColumns: string
+  ): Promise<Record<string, unknown> | undefined> {
+    const db = getDatabase();
+
+    if (userType === 'admin') {
+      return db.get(
+        `SELECT ${threadColumns} FROM active_message_threads WHERE id = ?`,
+        [threadId]
+      );
+    }
+
+    return db.get(
+      `SELECT ${threadColumns} FROM active_message_threads WHERE id = ? AND client_id = ?`,
+      [threadId, userId]
+    );
+  }
+
+  /**
+   * Look up a client's contact_name and email by id.
+   */
+  async getClientContactInfo(
+    clientId: string
+  ): Promise<{ contact_name: string | null; email: string } | undefined> {
+    const db = getDatabase();
+    return db.get('SELECT contact_name, email FROM active_clients WHERE id = ?', [
+      clientId
+    ]) as Promise<{ contact_name: string | null; email: string } | undefined>;
+  }
+
+  /**
+   * Insert a message into a thread.
+   * Returns the inserted message row.
+   */
+  async insertMessage(
+    params: InsertMessageParams,
+    messageColumns: string
+  ): Promise<Record<string, unknown> | undefined> {
+    const db = getDatabase();
+
+    const result = await db.run(
+      `INSERT INTO messages (
+        context_type, client_id, sender_type, sender_name, subject, message, priority,
+        reply_to, attachments, thread_id
+      )
+      VALUES ('general', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        params.clientId,
+        params.senderType,
+        params.senderName,
+        params.subject,
+        params.message,
+        params.priority,
+        params.replyTo,
+        params.attachments,
+        params.threadId
+      ]
+    );
+
+    return db.get(
+      `SELECT ${messageColumns} FROM active_messages WHERE id = ?`,
+      [result.lastID]
+    );
+  }
+
+  /**
+   * Bump the thread's last_message_at timestamp and last_message_by.
+   */
+  async updateThreadLastMessage(threadId: number, senderName: string): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      `UPDATE message_threads
+       SET last_message_at = CURRENT_TIMESTAMP, last_message_by = ?
+       WHERE id = ?`,
+      [senderName, threadId]
+    );
+  }
+
+  /**
+   * Fetch client row by id (email + contact_name) — used for email notifications.
+   */
+  async getClientById(
+    clientId: number
+  ): Promise<Record<string, unknown> | undefined> {
+    const db = getDatabase();
+    return db.get('SELECT email, contact_name FROM active_clients WHERE id = ?', [clientId]);
+  }
+
+  /**
+   * Get all messages in a thread (excluding internal), with pinned status.
+   */
+  async getThreadMessages(threadId: number): Promise<Record<string, unknown>[]> {
+    const db = getDatabase();
+    return db.all(
+      `SELECT
+        m.id, m.sender_type, m.sender_name, m.message, m.priority, m.reply_to,
+        m.attachments, m.read_at, m.created_at, m.updated_at,
+        CASE WHEN pm.id IS NOT NULL THEN 1 ELSE 0 END as is_pinned
+      FROM active_messages m
+      LEFT JOIN pinned_messages pm ON m.id = pm.message_id AND pm.thread_id = ?
+      WHERE m.thread_id = ?
+        AND m.context_type = 'general'
+        AND (m.is_internal IS NULL OR m.is_internal = 0)
+      ORDER BY m.created_at ASC`,
+      [threadId, threadId]
+    );
+  }
+
+  /**
+   * Batch-fetch reactions for a set of message ids.
+   * Returns a Map keyed by message_id.
+   */
+  async getReactionsByMessageIds(
+    messageIds: number[]
+  ): Promise<Map<number, ReactionRow_Core[]>> {
+    const reactionsMap = new Map<number, ReactionRow_Core[]>();
+    if (messageIds.length === 0) return reactionsMap;
+
+    const db = getDatabase();
+    const placeholders = messageIds.map(() => '?').join(',');
+    const allReactions = await db.all(
+      `SELECT id, message_id, reaction, user_email, created_at
+       FROM message_reactions
+       WHERE message_id IN (${placeholders})`,
+      messageIds
+    );
+
+    for (const reaction of allReactions) {
+      const msgId = reaction.message_id as number;
+      if (!reactionsMap.has(msgId)) {
+        reactionsMap.set(msgId, []);
+      }
+      reactionsMap.get(msgId)!.push(reaction as unknown as ReactionRow_Core);
+    }
+
+    return reactionsMap;
+  }
+
+  /**
+   * Mark all messages in a thread as read (except messages sent by the given user type).
+   */
+  async markThreadMessagesAsRead(threadId: number, senderType: string): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      `UPDATE messages
+       SET read_at = CURRENT_TIMESTAMP
+       WHERE thread_id = ? AND sender_type != ? AND context_type = 'general'`,
+      [threadId, senderType]
+    );
   }
 
   // =====================================================

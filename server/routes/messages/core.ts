@@ -8,7 +8,6 @@
  */
 
 import express from 'express';
-import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { emailService } from '../../services/email-service.js';
@@ -20,6 +19,7 @@ import { validateRequest, ValidationSchemas } from '../../middleware/validation.
 import { MESSAGE_THREAD_COLUMNS, MESSAGE_COLUMNS, upload } from './helpers.js';
 import { BUSINESS_INFO } from '../../config/business.js';
 import { sseManager } from '../../services/sse-manager.js';
+import { messageService } from '../../services/message-service.js';
 
 const router = express.Router();
 
@@ -45,47 +45,10 @@ router.get(
   authenticateToken,
   cache({ ttl: 60, tags: ['messages'] }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const db = getDatabase();
-    let query = '';
-    let params: (string | number | null)[] = [];
-
-    if (req.user!.type === 'admin') {
-      // Admin can see all threads - internal messages visible to admin only
-      query = `
-      SELECT
-        mt.*,
-        c.company_name,
-        c.contact_name,
-        c.email as client_email,
-        p.project_name,
-        COUNT(m.id) as message_count,
-        COUNT(CASE WHEN m.read_at IS NULL AND m.sender_type != 'admin' AND (m.is_internal IS NULL OR m.is_internal = 0) THEN 1 END) as unread_count
-      FROM active_message_threads mt
-      JOIN active_clients c ON mt.client_id = c.id
-      LEFT JOIN active_projects p ON mt.project_id = p.id
-      LEFT JOIN active_messages m ON mt.id = m.thread_id AND m.context_type = 'general'
-      GROUP BY mt.id
-      ORDER BY mt.last_message_at DESC
-    `;
-    } else {
-      // Client can only see their own threads - exclude internal messages
-      query = `
-      SELECT
-        mt.*,
-        p.project_name,
-        COUNT(CASE WHEN m.is_internal IS NULL OR m.is_internal = 0 THEN 1 END) as message_count,
-        COUNT(CASE WHEN m.read_at IS NULL AND m.sender_type != 'client' AND (m.is_internal IS NULL OR m.is_internal = 0) THEN 1 END) as unread_count
-      FROM active_message_threads mt
-      LEFT JOIN active_projects p ON mt.project_id = p.id
-      LEFT JOIN active_messages m ON mt.id = m.thread_id AND m.context_type = 'general'
-      WHERE mt.client_id = ?
-      GROUP BY mt.id
-      ORDER BY mt.last_message_at DESC
-    `;
-      params = [req.user!.id];
-    }
-
-    const threads = await db.all(query, params);
+    const threads = await messageService.getThreads(
+      req.user!.type as 'admin' | 'client',
+      String(req.user!.id)
+    );
 
     sendSuccess(res, { threads });
   })
@@ -112,19 +75,13 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { subject, thread_type = 'general', priority = 'normal', project_id } = req.body;
 
-    const db = getDatabase();
-
     // If project_id provided, verify project access
     if (project_id) {
-      let project;
-      if (req.user!.type === 'admin') {
-        project = await db.get('SELECT id FROM active_projects WHERE id = ?', [project_id]);
-      } else {
-        project = await db.get('SELECT id FROM active_projects WHERE id = ? AND client_id = ?', [
-          project_id,
-          req.user!.id
-        ]);
-      }
+      const project = await messageService.verifyProjectAccess(
+        project_id,
+        req.user!.type as 'admin' | 'client',
+        String(req.user!.id)
+      );
 
       if (!project) {
         return errorResponse(res, 'Project not found or access denied', 404, ErrorCodes.PROJECT_NOT_FOUND);
@@ -133,17 +90,15 @@ router.post(
 
     const client_id = req.user!.type === 'admin' ? req.body.client_id : req.user!.id;
 
-    const result = await db.run(
-      `
-    INSERT INTO message_threads (client_id, project_id, subject, thread_type, priority)
-    VALUES (?, ?, ?, ?, ?)
-  `,
-      [client_id, project_id || null, subject.trim(), thread_type, priority]
-    );
-
-    const newThread = await db.get(
-      `SELECT ${MESSAGE_THREAD_COLUMNS} FROM active_message_threads WHERE id = ?`,
-      [result.lastID]
+    const newThread = await messageService.createThread(
+      {
+        clientId: client_id,
+        projectId: project_id || null,
+        subject: subject.trim(),
+        threadType: thread_type,
+        priority
+      },
+      MESSAGE_THREAD_COLUMNS
     );
 
     sendCreated(res, { thread: newThread }, 'Message thread created successfully');
@@ -199,18 +154,13 @@ router.post(
       }
     });
 
-    const db = getDatabase();
-
     // Verify thread access
-    let thread;
-    if (req.user!.type === 'admin') {
-      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM active_message_threads WHERE id = ?`, [threadId]);
-    } else {
-      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM active_message_threads WHERE id = ? AND client_id = ?`, [
-        threadId,
-        req.user!.id
-      ]);
-    }
+    const thread = await messageService.findThreadById(
+      threadId,
+      req.user!.type as 'admin' | 'client',
+      String(req.user!.id),
+      MESSAGE_THREAD_COLUMNS
+    );
 
     if (!thread) {
       return errorResponse(res, 'Message thread not found', 404, ErrorCodes.THREAD_NOT_FOUND);
@@ -231,9 +181,7 @@ router.post(
     }
 
     // Get the actual sender name from the clients table
-    const senderClient = (await db.get('SELECT contact_name, email FROM active_clients WHERE id = ?', [
-      req.user!.id
-    ])) as { contact_name: string | null; email: string } | undefined;
+    const senderClient = await messageService.getClientContactInfo(String(req.user!.id));
     const sender_name: string =
       senderClient?.contact_name || senderClient?.email || req.user!.email;
 
@@ -243,41 +191,23 @@ router.post(
       return errorResponse(res, 'Message content is required', 400, ErrorCodes.MESSAGE_REQUIRED);
     }
 
-    const result = await db.run(
-      `
-    INSERT INTO messages (
-      context_type, client_id, sender_type, sender_name, subject, message, priority,
-      reply_to, attachments, thread_id
-    )
-    VALUES ('general', ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `,
-      [
-        thread.client_id,
-        req.user!.type,
-        sender_name,
-        thread.subject,
-        message.trim(),
+    const newMessage = await messageService.insertMessage(
+      {
+        clientId: thread.client_id as string | number,
+        senderType: req.user!.type,
+        senderName: sender_name,
+        subject: thread.subject as string,
+        message: message.trim(),
         priority,
-        reply_to || null,
-        attachmentData,
+        replyTo: reply_to || null,
+        attachments: attachmentData,
         threadId
-      ]
+      },
+      MESSAGE_COLUMNS
     );
 
     // Update thread last message timestamp
-    await db.run(
-      `
-    UPDATE message_threads
-    SET last_message_at = CURRENT_TIMESTAMP, last_message_by = ?
-    WHERE id = ?
-  `,
-      [sender_name, threadId]
-    );
-
-    const newMessage = await db.get(
-      `SELECT ${MESSAGE_COLUMNS} FROM active_messages WHERE id = ?`,
-      [result.lastID]
-    );
+    await messageService.updateThreadLastMessage(threadId, sender_name);
 
     // Send email notification
     try {
@@ -286,9 +216,7 @@ router.post(
       if (recipientType === 'client') {
         // Notify client
         const clientId = getNumber(thread, 'client_id');
-        const client = await db.get('SELECT email, contact_name FROM active_clients WHERE id = ?', [
-          clientId
-        ]);
+        const client = await messageService.getClientById(clientId);
 
         if (client) {
           const clientEmail = getString(client, 'email');
@@ -305,7 +233,7 @@ router.post(
             await emailService.sendMessageNotification(clientEmail, {
               recipientName: clientContactName || 'Client',
               senderName: sender_name,
-              subject: thread.subject,
+              subject: thread.subject as string,
               message: message.trim(),
               threadId: threadId,
               portalUrl: `${process.env.CLIENT_PORTAL_URL || `https://${BUSINESS_INFO.website}/client/portal.html`}?thread=${threadId}`,
@@ -391,61 +319,23 @@ router.get(
       return errorResponse(res, 'Invalid thread ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const db = getDatabase();
-
     // Verify thread access
-    let thread;
-    if (req.user!.type === 'admin') {
-      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM active_message_threads WHERE id = ?`, [threadId]);
-    } else {
-      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM active_message_threads WHERE id = ? AND client_id = ?`, [
-        threadId,
-        req.user!.id
-      ]);
-    }
+    const thread = await messageService.findThreadById(
+      threadId,
+      req.user!.type as 'admin' | 'client',
+      String(req.user!.id),
+      MESSAGE_THREAD_COLUMNS
+    );
 
     if (!thread) {
       return errorResponse(res, 'Message thread not found', 404, ErrorCodes.THREAD_NOT_FOUND);
     }
 
-    const messages = await db.all(
-      `
-    SELECT
-      m.id, m.sender_type, m.sender_name, m.message, m.priority, m.reply_to,
-      m.attachments, m.read_at, m.created_at, m.updated_at,
-      CASE WHEN pm.id IS NOT NULL THEN 1 ELSE 0 END as is_pinned
-    FROM active_messages m
-    LEFT JOIN pinned_messages pm ON m.id = pm.message_id AND pm.thread_id = ?
-    WHERE m.thread_id = ?
-      AND m.context_type = 'general'
-      AND (m.is_internal IS NULL OR m.is_internal = 0)
-    ORDER BY m.created_at ASC
-  `,
-      [threadId, threadId]
-    );
+    const messages = await messageService.getThreadMessages(threadId);
 
     // Batch fetch all reactions for all messages in this thread (fixes N+1 query)
     const messageIds = messages.map((m) => m.id as number);
-    const reactionsMap: Map<number, Array<Record<string, unknown>>> = new Map();
-
-    if (messageIds.length > 0) {
-      const placeholders = messageIds.map(() => '?').join(',');
-      const allReactions = await db.all(
-        `SELECT id, message_id, reaction, user_email, created_at
-         FROM message_reactions
-         WHERE message_id IN (${placeholders})`,
-        messageIds
-      );
-
-      // Group reactions by message_id
-      for (const reaction of allReactions) {
-        const msgId = reaction.message_id as number;
-        if (!reactionsMap.has(msgId)) {
-          reactionsMap.set(msgId, []);
-        }
-        reactionsMap.get(msgId)!.push(reaction);
-      }
-    }
+    const reactionsMap = await messageService.getReactionsByMessageIds(messageIds);
 
     // Parse attachments JSON and assign reactions for each message
     for (const msg of messages) {
@@ -501,32 +391,20 @@ router.put(
       return errorResponse(res, 'Invalid thread ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const db = getDatabase();
-
     // Verify thread access
-    let thread;
-    if (req.user!.type === 'admin') {
-      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM active_message_threads WHERE id = ?`, [threadId]);
-    } else {
-      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM active_message_threads WHERE id = ? AND client_id = ?`, [
-        threadId,
-        req.user!.id
-      ]);
-    }
+    const thread = await messageService.findThreadById(
+      threadId,
+      req.user!.type as 'admin' | 'client',
+      String(req.user!.id),
+      MESSAGE_THREAD_COLUMNS
+    );
 
     if (!thread) {
       return errorResponse(res, 'Message thread not found', 404, ErrorCodes.THREAD_NOT_FOUND);
     }
 
     // Mark messages as read (except own messages)
-    await db.run(
-      `
-    UPDATE messages
-    SET read_at = CURRENT_TIMESTAMP
-    WHERE thread_id = ? AND sender_type != ? AND context_type = 'general'
-  `,
-      [threadId, req.user!.type]
-    );
+    await messageService.markThreadMessagesAsRead(threadId, req.user!.type);
 
     sendSuccess(res, undefined, 'Messages marked as read');
   })

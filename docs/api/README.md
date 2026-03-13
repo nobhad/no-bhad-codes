@@ -92,6 +92,30 @@ properties and the JWT payload structure.
 - `GET /analytics/revenue` — Revenue breakdown
 - `GET /analytics/projects` — Project statistics
 
+### Payment Schedules
+
+- `GET /payment-schedules?projectId=X` — List installments by project
+- `GET /payment-schedules/overdue` — Overdue installments
+- `POST /payment-schedules` — Create schedule (batch of installments)
+- `POST /payment-schedules/from-split` — Create from percentage split
+- `POST /payment-schedules/:id/mark-paid` — Mark installment as paid
+- `GET /payment-schedules/my` — Client's installments
+- `GET /payment-schedules/my/summary` — Client payment summary
+
+### Content Requests
+
+- `GET /content-requests` — List checklists (admin)
+- `GET /content-requests/overview` — Admin overview with completion stats
+- `POST /content-requests` — Create checklist (with items or from template)
+- `POST /content-requests/items/:id/accept` — Accept submitted item
+- `POST /content-requests/items/:id/request-revision` — Request revision
+- `GET /content-requests/my` — Client's checklists
+- `POST /content-requests/items/:id/submit-text` — Submit text content
+- `POST /content-requests/items/:id/submit-file` — Submit file
+- `POST /content-requests/items/:id/submit-url` — Submit URL
+- `POST /content-requests/items/:id/submit-data` — Submit structured data
+- `GET/POST /content-requests/templates` — Template CRUD
+
 ### Other Feature Areas
 
 - Questionnaires: `GET/POST /questionnaires`
