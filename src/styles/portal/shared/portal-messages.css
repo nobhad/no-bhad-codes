@@ -43,7 +43,7 @@
    =========================================== */
 .portal .messages-columns {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: var(--aside-width-medium) 1fr;
   flex: 1;
   min-height: 0;
   overflow: hidden;
@@ -896,7 +896,7 @@
 }
 
 .messaging-compose-textarea {
-  min-height: 40px;
+  min-height: var(--space-5);
   max-height: 120px;
 }
 
@@ -1037,7 +1037,7 @@
 
 .message-edit-textarea {
   width: 100%;
-  min-height: 60px;
+  min-height: var(--min-height-textarea);
   padding: var(--space-1);
   font-size: var(--font-size-xs);
   background: var(--color-bg-primary);

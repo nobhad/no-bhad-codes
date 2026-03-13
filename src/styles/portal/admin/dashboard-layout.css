@@ -105,7 +105,7 @@
 
 .overview-grid {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: 1fr var(--aside-width-wide);
   gap: var(--portal-section-gap);
   align-items: start;
 }

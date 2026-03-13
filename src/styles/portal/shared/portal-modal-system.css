@@ -55,8 +55,8 @@
   justify-content: center;
   padding: var(--space-4);
   background: var(--color-overlay-light);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(var(--blur-modal));
+  backdrop-filter: blur(var(--blur-modal));
   overscroll-behavior: contain;
   overflow: hidden;
   opacity: 1;

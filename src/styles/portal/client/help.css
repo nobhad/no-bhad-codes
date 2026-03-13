@@ -9,7 +9,7 @@
 
 .help-search-container {
   position: relative;
-  width: 280px;
+  width: var(--aside-width-medium);
 }
 
 .help-search-wrapper {
@@ -61,7 +61,7 @@
 
 .help-main-grid {
   display: grid;
-  grid-template-columns: minmax(220px, 280px) 1fr;
+  grid-template-columns: minmax(220px, var(--aside-width-medium)) 1fr;
   gap: var(--portal-section-gap);
   padding: var(--space-3);
   align-items: start;

@@ -254,7 +254,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   background-repeat: no-repeat;
   background-position: right var(--space-4) center;
   background-size: var(--icon-size-xs);
-  min-height: 60px;
+  min-height: var(--min-height-textarea);
 }
 
 #pd-setting-status:focus {

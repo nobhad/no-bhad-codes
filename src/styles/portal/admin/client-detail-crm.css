@@ -35,7 +35,7 @@
   background: var(--color-bg-readonly);
   border: var(--border-width) solid var(--portal-border);
   border-radius: var(--border-radius-md);
-  min-height: 40px;
+  min-height: var(--space-5);
   padding: var(--space-2) var(--space-3);
   transition: border-color var(--transition-faster);
 }

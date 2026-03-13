@@ -511,7 +511,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 /* Two-column layout - common for pages with sidebar */
 .portal .portal-two-column {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: var(--aside-width-medium) 1fr;
   align-items: start;
 }
 
@@ -773,8 +773,8 @@ html[data-theme="light"] .portal .funnel-value {
   display: none;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: var(--space-5);
+  height: var(--space-5);
   padding: 0;
   background: transparent;
   border: none;
@@ -1286,9 +1286,9 @@ html[data-theme="light"] .portal .funnel-value {
 }
 
 /* Two-column layout aside widths */
-.aside-narrow .overview-col-aside { width: 240px; }
-.aside-medium .overview-col-aside { width: 280px; }
-.aside-wide .overview-col-aside { width: 320px; }
+.aside-narrow .overview-col-aside { width: var(--aside-width-narrow); }
+.aside-medium .overview-col-aside { width: var(--aside-width-medium); }
+.aside-wide .overview-col-aside { width: var(--aside-width-wide); }
 
 .aside-left {
   grid-template-columns: auto 1fr;

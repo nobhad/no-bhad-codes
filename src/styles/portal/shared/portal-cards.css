@@ -103,23 +103,11 @@
    --label-letter-spacing: 0.05em
 */
 
-/* Primary semantic label classes */
-.portal :is(.field-label, .section-label, .stat-label) {
-  font-family: var(--font-family-sans);
-  font-size: var(--label-font-size);
-  font-weight: var(--label-font-weight);
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: var(--label-letter-spacing);
-}
-
-/* LIGHT MODE - ALL labels black */
-html[data-theme="light"] .portal :is(.field-label, .section-label, .stat-label) {
-  color: var(--color-light-text);
-}
-
-/* Aliases still in active use */
+/* Unified label rule — primary classes + active aliases */
 .portal :is(
+  .field-label,
+  .section-label,
+  .stat-label,
   .filter-section-label,
   .prompt-dialog-label,
   .kpi-card-label,
@@ -137,8 +125,11 @@ html[data-theme="light"] .portal :is(.field-label, .section-label, .stat-label) 
   letter-spacing: var(--label-letter-spacing);
 }
 
-/* LIGHT MODE - active aliases */
+/* LIGHT MODE - ALL labels */
 html[data-theme="light"] .portal :is(
+  .field-label,
+  .section-label,
+  .stat-label,
   .filter-section-label,
   .prompt-dialog-label,
   .kpi-card-label,
