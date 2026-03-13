@@ -261,6 +261,28 @@ export {
 // AD HOC REQUEST ENTITIES
 // =====================================================
 
+// =====================================================
+// PAYMENT SCHEDULE ENTITIES
+// =====================================================
+
+export {
+  // Types
+  type PaymentInstallment,
+  // Row types
+  type PaymentInstallmentRow,
+  // Column constants
+  INSTALLMENT_COLUMNS,
+  INSTALLMENT_COLUMNS_WITH_JOINS,
+  // Schemas
+  paymentInstallmentSchema,
+  // Mappers
+  toPaymentInstallment
+} from './payment-schedule.js';
+
+// =====================================================
+// AD HOC REQUEST ENTITIES
+// =====================================================
+
 export {
   // Types
   type AdHocRequestStatus,
