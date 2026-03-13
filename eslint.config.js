@@ -202,7 +202,7 @@ export default [
     }
   },
   {
-    files: ['src/**/*.{ts,tsx}', 'server/**/*.ts', 'scripts/**/*.ts', 'tests/**/*.ts', '*.config.ts'],
+    files: ['src/**/*.{ts,tsx}', 'server/**/*.ts', 'scripts/**/*.ts', 'tests/**/*.ts', 'shared/**/*.ts', '*.config.ts'],
     plugins: {
       '@typescript-eslint': tsPlugin,
       'react-hooks': reactHooksPlugin
