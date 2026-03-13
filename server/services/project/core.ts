@@ -425,3 +425,122 @@ export async function saveFileRecord(data: SaveFileRecordData): Promise<number> 
   );
   return result.lastID!;
 }
+
+// =====================================================
+// PROJECT DASHBOARD / ACTIVITY
+// =====================================================
+
+/**
+ * Get the full project dashboard data (project details, stats, milestones, updates, messages).
+ * Used by GET /projects/:id/dashboard.
+ */
+export async function getProjectDashboard(
+  projectId: number,
+  isAdmin: boolean,
+  clientId?: number
+): Promise<{
+  project: Record<string, unknown>;
+  stats: Record<string, unknown>;
+  progressPercentage: number;
+  upcomingMilestones: Record<string, unknown>[];
+  recentUpdates: Record<string, unknown>[];
+  recentMessages: Record<string, unknown>[];
+} | null> {
+  const db = getDatabase();
+  const projectCols = PROJECT_COLUMNS.split(', ').map(c => `p.${c}`).join(', ');
+
+  const project = isAdmin
+    ? await db.get(
+      `SELECT ${projectCols}, c.company_name, c.contact_name, c.email as client_email
+         FROM projects p JOIN clients c ON p.client_id = c.id WHERE p.id = ?`,
+      [projectId]
+    )
+    : await db.get(
+      `SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ? AND client_id = ?`,
+      [projectId, clientId]
+    );
+
+  if (!project) return null;
+
+  const stats = await db.get(`
+    SELECT
+      COUNT(DISTINCT m.id) as total_milestones,
+      COUNT(DISTINCT CASE WHEN m.is_completed = 1 THEN m.id END) as completed_milestones,
+      COUNT(DISTINCT f.id) as total_files,
+      COUNT(DISTINCT msg.id) as total_messages,
+      COUNT(DISTINCT CASE WHEN msg.read_at IS NULL THEN msg.id END) as unread_messages,
+      COUNT(DISTINCT u.id) as total_updates
+    FROM projects p
+    LEFT JOIN milestones m ON p.id = m.project_id
+    LEFT JOIN files f ON p.id = f.project_id
+    LEFT JOIN messages msg ON p.id = msg.project_id
+    LEFT JOIN project_updates u ON p.id = u.project_id
+    WHERE p.id = ?
+  `, [projectId]);
+
+  const upcomingMilestones = await db.all(`
+    SELECT id, title, description, due_date, is_completed
+    FROM milestones
+    WHERE project_id = ? AND is_completed = 0 AND deleted_at IS NULL
+    ORDER BY due_date ASC LIMIT 3
+  `, [projectId]);
+
+  const recentUpdates = await db.all(`
+    SELECT pu.id, pu.title, pu.description, pu.update_type, u.display_name as author, pu.created_at
+    FROM project_updates pu
+    LEFT JOIN users u ON pu.author_user_id = u.id
+    WHERE pu.project_id = ?
+    ORDER BY pu.created_at DESC LIMIT 5
+  `, [projectId]);
+
+  const recentMessages = await db.all(`
+    SELECT id, sender_type, sender_name, message, read_at, created_at
+    FROM messages WHERE project_id = ?
+    ORDER BY created_at DESC LIMIT 5
+  `, [projectId]);
+
+  const s = (stats || {}) as Record<string, unknown>;
+  const totalMilestones = Number(s.total_milestones) || 0;
+  const completedMilestones = Number(s.completed_milestones) || 0;
+  const projectProgress = Number((project as Record<string, unknown>).progress) || 0;
+  const progressPercentage = totalMilestones > 0
+    ? Math.round((completedMilestones / totalMilestones) * 100)
+    : projectProgress || 0;
+
+  return {
+    project: project as Record<string, unknown>,
+    stats: (stats || {}) as Record<string, unknown>,
+    progressPercentage,
+    upcomingMilestones: upcomingMilestones as Record<string, unknown>[],
+    recentUpdates: recentUpdates as Record<string, unknown>[],
+    recentMessages: recentMessages as Record<string, unknown>[]
+  };
+}
+
+/**
+ * Add a project update (admin only).
+ * Returns the newly created update row.
+ */
+export async function addProjectUpdate(params: {
+  projectId: number;
+  title: string;
+  description: string | null;
+  updateType: string;
+  authorUserId: number | null;
+}): Promise<Record<string, unknown> | undefined> {
+  const db = getDatabase();
+
+  const result = await db.run(
+    `INSERT INTO project_updates (project_id, title, description, update_type, author_user_id)
+     VALUES (?, ?, ?, ?, ?)`,
+    [params.projectId, params.title, params.description, params.updateType, params.authorUserId]
+  );
+
+  return db.get(
+    `SELECT pu.id, pu.title, pu.description, pu.update_type, u.display_name as author, pu.created_at
+     FROM project_updates pu
+     LEFT JOIN users u ON pu.author_user_id = u.id
+     WHERE pu.id = ?`,
+    [result.lastID]
+  ) as Promise<Record<string, unknown> | undefined>;
+}

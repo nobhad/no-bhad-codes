@@ -183,6 +183,167 @@ class IntakeService {
     );
     return (row as Record<string, unknown>) ?? null;
   }
+  /**
+   * Run the main intake form transaction: create/update client, create project,
+   * milestones, project update, and optional proposal.
+   * Returns the IDs created inside the transaction.
+   */
+  async runIntakeTransaction(params: {
+    intakeData: {
+      name: string;
+      email: string;
+      phone?: string;
+      projectType: string;
+      projectDescription: string;
+      timeline: string;
+      budget: string;
+      designLevel?: string;
+      techComfort?: string;
+      domainHosting?: string;
+      additionalInfo?: string;
+      proposalSelection?: {
+        selectedTier: string;
+        addedFeatures: string[];
+        removedFeatures: string[];
+        maintenanceOption: string | null;
+        calculatedPrice: number;
+        basePrice?: number;
+        subtotal?: number;
+        discountType?: 'percentage' | 'fixed' | null;
+        discountValue?: number;
+        discountAmount?: number;
+        taxRate?: number;
+        taxAmount?: number;
+        notes: string;
+        customItems?: Array<{
+          itemType?: string;
+          description: string;
+          quantity?: number;
+          unitPrice: number;
+          unitLabel?: string;
+          isTaxable?: boolean;
+          isOptional?: boolean;
+        }>;
+        expirationDate?: string | null;
+      };
+    };
+    companyName: string | null;
+    clientType: 'personal' | 'business';
+    hashedPassword: string;
+    features: string[];
+    projectName: string;
+    milestones: Array<{
+      title: string;
+      description: string;
+      dueDate: string;
+      deliverables: string[];
+    }>;
+    systemUserId: number | null;
+  }): Promise<{
+    clientId: number;
+    projectId: number;
+    isNewClient: boolean;
+    proposalRequestId: number | null;
+  }> {
+    const db = getDatabase();
+    const { intakeData, companyName, clientType, hashedPassword, features, projectName, milestones, systemUserId } = params;
+
+    return db.transaction(async (ctx) => {
+      // Check if client already exists
+      const existingClient = await ctx.get('SELECT id, email FROM clients WHERE email = ?', [
+        intakeData.email
+      ]) as { id: number; email: string } | undefined;
+
+      let clientId: number;
+      const isNewClient = !existingClient;
+      const intakePhone = (intakeData.phone ?? '').trim() || null;
+
+      if (existingClient) {
+        clientId = getNumber(existingClient as unknown as { [key: string]: unknown }, 'id');
+        await ctx.run(
+          `UPDATE clients SET contact_name = ?, company_name = ?, phone = COALESCE(?, phone), updated_at = datetime('now') WHERE id = ?`,
+          [intakeData.name, companyName, intakePhone, clientId]
+        );
+      } else {
+        const clientResult = await ctx.run(
+          `INSERT INTO clients (company_name, contact_name, email, phone, password_hash, status, client_type, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, 'pending', ?, datetime('now'), datetime('now'))`,
+          [companyName, intakeData.name, intakeData.email, intakePhone ?? '', hashedPassword, clientType]
+        );
+        clientId = clientResult.lastID!;
+      }
+
+      // Create project
+      const extraNotes: string[] = [];
+      if (features.length) extraNotes.push(`Features: ${features.join(', ')}`);
+      if (intakeData.designLevel) extraNotes.push(`Design level: ${intakeData.designLevel}`);
+      if (intakeData.techComfort) extraNotes.push(`Tech comfort: ${intakeData.techComfort}`);
+      if (intakeData.domainHosting) extraNotes.push(`Domain/hosting: ${intakeData.domainHosting}`);
+      if (intakeData.additionalInfo) extraNotes.push(`Additional info: ${intakeData.additionalInfo}`);
+      const notes = extraNotes.length ? extraNotes.join('\n') : null;
+
+      const projectResult = await ctx.run(
+        `INSERT INTO projects (client_id, project_name, description, status, priority, project_type, budget_range, timeline, notes, source_type, created_at, updated_at)
+         VALUES (?, ?, ?, 'pending', 'medium', ?, ?, ?, ?, 'intake_form', datetime('now'), datetime('now'))`,
+        [clientId, projectName, intakeData.projectDescription, intakeData.projectType, intakeData.budget, intakeData.timeline, notes]
+      );
+      const projectId = projectResult.lastID!;
+
+      // Create initial project update
+      await ctx.run(
+        `INSERT INTO project_updates (project_id, title, description, update_type, author_user_id, created_at)
+         VALUES (?, ?, ?, 'general', ?, datetime('now'))`,
+        [projectId, 'Project Intake Received', 'Thank you for submitting your project details! We\'re reviewing your requirements and will provide a detailed proposal within 24-48 hours.', systemUserId]
+      );
+
+      // Create milestones
+      for (const milestone of milestones) {
+        await ctx.run(
+          `INSERT INTO milestones (project_id, title, description, due_date, deliverables, is_completed, created_at)
+           VALUES (?, ?, ?, ?, ?, 0, datetime('now'))`,
+          [projectId, milestone.title, milestone.description, milestone.dueDate, JSON.stringify(milestone.deliverables)]
+        );
+      }
+
+      // Create proposal if provided
+      let proposalRequestId: number | null = null;
+      if (intakeData.proposalSelection) {
+        const proposal = intakeData.proposalSelection;
+        const basePrice = proposal.basePrice ?? proposal.calculatedPrice ?? 0;
+        const subtotal = proposal.subtotal ?? basePrice;
+        const discountType = proposal.discountType || null;
+        const discountValue = proposal.discountValue ?? 0;
+        const taxRate = proposal.taxRate ?? 0;
+        const taxAmount = proposal.taxAmount ?? 0;
+        const expirationDate = proposal.expirationDate || null;
+        let validityDays = 30;
+        if (expirationDate) {
+          const diffMs = new Date(expirationDate).getTime() - Date.now();
+          const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+          if (Number.isFinite(diffDays) && diffDays > 0) validityDays = diffDays;
+        }
+
+        const proposalResult = await ctx.run(
+          `INSERT INTO proposal_requests (project_id, client_id, project_type, selected_tier, base_price, final_price, maintenance_option, status, client_notes, created_at, subtotal, discount_type, discount_value, tax_rate, tax_amount, expiration_date, validity_days)
+           VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, datetime('now'), ?, ?, ?, ?, ?, ?, ?)`,
+          [projectId, clientId, intakeData.projectType, proposal.selectedTier || 'better', basePrice, proposal.calculatedPrice || basePrice, proposal.maintenanceOption || null, proposal.notes || null, subtotal, discountType, discountValue, taxRate, taxAmount, expirationDate, validityDays]
+        );
+        proposalRequestId = proposalResult.lastID!;
+
+        if (proposal.customItems && proposal.customItems.length > 0) {
+          for (const [index, item] of proposal.customItems.entries()) {
+            await ctx.run(
+              `INSERT INTO proposal_custom_items (proposal_id, item_type, description, quantity, unit_price, unit_label, is_taxable, is_optional, sort_order, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+              [proposalRequestId, item.itemType || 'service', item.description, item.quantity ?? 1, item.unitPrice, item.unitLabel || null, item.isTaxable !== false ? 1 : 0, item.isOptional ? 1 : 0, index]
+            );
+          }
+        }
+      }
+
+      return { clientId, projectId, isNewClient, proposalRequestId };
+    });
+  }
 }
 
 export const intakeService = new IntakeService();

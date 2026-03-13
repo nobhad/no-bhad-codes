@@ -9,7 +9,6 @@
 import express, { Response } from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { getDatabase } from '../../database/init.js';
 import {
   adHocRequestService,
   type AdHocRequestStatus,
@@ -362,12 +361,11 @@ router.post(
     }
 
     if (attachmentFileId && projectId) {
-      const db = getDatabase();
-      const attachment = await db.get('SELECT id FROM files WHERE id = ? AND project_id = ? AND deleted_at IS NULL', [
+      const isValid = await adHocRequestService.verifyAttachmentForProject(
         Number(attachmentFileId),
         Number(projectId)
-      ]);
-      if (!attachment) {
+      );
+      if (!isValid) {
         return errorResponse(
           res,
           'Attachment must belong to the selected project',
@@ -479,12 +477,7 @@ router.put(
             notes: `Ad Hoc Work - Request #${request.id}: ${request.title}\n\n${request.description}`
           });
 
-          const db = getDatabase();
-          await db.run(
-            `INSERT INTO ad_hoc_request_invoices (request_id, invoice_id, amount)
-             VALUES (?, ?, ?)`,
-            [request.id, autoInvoice.id, lineItem.amount]
-          );
+          await adHocRequestService.linkRequestInvoice(request.id!, autoInvoice.id!, lineItem.amount);
         }
       } catch (invoiceError) {
         // Log error but don't fail the request update
@@ -717,12 +710,7 @@ router.post(
       dueDate: dueDate || undefined
     });
 
-    const db = getDatabase();
-    await db.run(
-      `INSERT INTO ad_hoc_request_invoices (request_id, invoice_id, amount)
-       VALUES (?, ?, ?)`,
-      [request.id, invoice.id, lineItem.amount]
-    );
+    await adHocRequestService.linkRequestInvoice(request.id!, invoice.id!, lineItem.amount);
 
     sendCreated(res, { invoice, lineItem }, 'Invoice created');
   })
@@ -827,13 +815,8 @@ router.post(
       dueDate: dueDate || undefined
     });
 
-    const db = getDatabase();
     for (let i = 0; i < requests.length; i += 1) {
-      await db.run(
-        `INSERT INTO ad_hoc_request_invoices (request_id, invoice_id, amount)
-         VALUES (?, ?, ?)`,
-        [requests[i].id, invoice.id, lineItems[i].amount]
-      );
+      await adHocRequestService.linkRequestInvoice(requests[i].id!, invoice.id!, lineItems[i].amount);
     }
 
     sendCreated(res, { invoice, lineItems }, 'Invoice created');
@@ -870,36 +853,8 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const months = req.query.months ? Number(req.query.months) : 6;
     const clientId = req.query.clientId ? Number(req.query.clientId) : undefined;
-    const db = getDatabase();
 
-    const params: Array<number | string> = [];
-    let where = '1=1';
-
-    if (clientId) {
-      where += ' AND r.client_id = ?';
-      params.push(clientId);
-    }
-
-    where += ' AND i.issued_date >= date(\'now\', ?)';
-    params.push(`-${months} months`);
-
-    const rows = await db.all(
-      `SELECT
-        r.client_id,
-        c.contact_name as client_name,
-        c.company_name as company_name,
-        strftime('%Y-%m', i.issued_date) as month,
-        COUNT(DISTINCT r.id) as request_count,
-        SUM(ai.amount) as total_amount
-       FROM ad_hoc_request_invoices ai
-       JOIN ad_hoc_requests r ON ai.request_id = r.id
-       JOIN invoices i ON ai.invoice_id = i.id
-       JOIN clients c ON r.client_id = c.id
-       WHERE ${where}
-       GROUP BY r.client_id, month
-       ORDER BY month DESC, total_amount DESC`,
-      params
-    );
+    const rows = await adHocRequestService.getMonthlySummary({ months, clientId });
 
     sendSuccess(res, { summary: rows });
   })

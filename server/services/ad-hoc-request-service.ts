@@ -424,6 +424,57 @@ class AdHocRequestService {
 
     return projectInfo?.project_name || `Project #${projectId}`;
   }
+
+  /**
+   * Link an ad hoc request to an invoice record
+   */
+  async linkRequestInvoice(requestId: number, invoiceId: number, amount: number): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      `INSERT INTO ad_hoc_request_invoices (request_id, invoice_id, amount)
+       VALUES (?, ?, ?)`,
+      [requestId, invoiceId, amount]
+    );
+  }
+
+  /**
+   * Get monthly ad hoc invoicing summary grouped by client
+   */
+  async getMonthlySummary(params: {
+    months?: number;
+    clientId?: number;
+  }): Promise<Record<string, unknown>[]> {
+    const db = getDatabase();
+    const months = params.months || 6;
+    const queryParams: Array<number | string> = [];
+    let where = '1=1';
+
+    if (params.clientId) {
+      where += ' AND r.client_id = ?';
+      queryParams.push(params.clientId);
+    }
+
+    where += ' AND i.issued_date >= date(\'now\', ?)';
+    queryParams.push(`-${months} months`);
+
+    return db.all(
+      `SELECT
+        r.client_id,
+        c.contact_name as client_name,
+        c.company_name as company_name,
+        strftime('%Y-%m', i.issued_date) as month,
+        COUNT(DISTINCT r.id) as request_count,
+        SUM(ai.amount) as total_amount
+       FROM ad_hoc_request_invoices ai
+       JOIN ad_hoc_requests r ON ai.request_id = r.id
+       JOIN invoices i ON ai.invoice_id = i.id
+       JOIN clients c ON r.client_id = c.id
+       WHERE ${where}
+       GROUP BY r.client_id, month
+       ORDER BY month DESC, total_amount DESC`,
+      queryParams
+    ) as Promise<Record<string, unknown>[]>;
+  }
 }
 
 export const adHocRequestService = new AdHocRequestService();

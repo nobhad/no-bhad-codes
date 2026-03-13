@@ -12,16 +12,10 @@ import { asyncHandler } from '../../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../../middleware/auth.js';
 import { emailService } from '../../../services/email-service.js';
 import { errorTracker } from '../../../services/error-tracking.js';
-import { getDatabase } from '../../../database/init.js';
+import { leadService } from '../../../services/lead-service.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../../utils/api-response.js';
 import { logger } from '../../../services/logger.js';
 import { BUSINESS_INFO } from '../../../config/business.js';
-
-// Explicit column lists for SELECT queries (avoid SELECT *)
-const CONTACT_SUBMISSION_COLUMNS = `
-  id, name, email, subject, message, status, ip_address, user_agent,
-  message_id, created_at, updated_at, read_at, replied_at, client_id, converted_at
-`.replace(/\s+/g, ' ').trim();
 
 const router = express.Router();
 
@@ -45,60 +39,10 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
-      const db = getDatabase();
+      const leads = await leadService.getLeadsWithClients();
+      const stats = await leadService.getLeadStats();
 
-      // Get all projects with client info
-      const MAX_LEADS = 500;
-      const leads = await db.all(`
-        SELECT
-          p.id,
-          p.client_id,
-          p.project_name,
-          p.description,
-          p.status,
-          p.project_type,
-          p.budget_range,
-          p.timeline,
-          p.created_at,
-          p.start_date,
-          p.estimated_end_date as end_date,
-          p.price,
-          p.preview_url,
-          p.notes,
-          p.repository_url as repo_url,
-          p.production_url,
-          p.deposit_amount,
-          p.contract_signed_at as contract_signed_date,
-          p.progress,
-          c.contact_name,
-          c.company_name,
-          c.email,
-          c.phone
-        FROM projects p
-        LEFT JOIN clients c ON p.client_id = c.id
-        ORDER BY p.created_at DESC
-        LIMIT ?
-      `, [MAX_LEADS]);
-
-      // Get stats - using simplified lead statuses
-      const stats = await db.get(`
-        SELECT
-          COUNT(*) as total,
-          SUM(CASE WHEN status = 'new' THEN 1 ELSE 0 END) as new,
-          SUM(CASE WHEN status = 'in-progress' THEN 1 ELSE 0 END) as inProgress,
-          SUM(CASE WHEN status = 'converted' THEN 1 ELSE 0 END) as converted
-        FROM projects
-      `);
-
-      sendSuccess(res, {
-        leads,
-        stats: {
-          total: stats?.total || 0,
-          new: stats?.new || 0,
-          inProgress: stats?.inProgress || 0,
-          converted: stats?.converted || 0
-        }
-      });
+      sendSuccess(res, { leads, stats });
     } catch (error) {
       logger.error('Error fetching leads:', { error: error instanceof Error ? error : undefined });
       errorResponse(res, 'Failed to fetch leads', 500, ErrorCodes.INTERNAL_ERROR);
@@ -126,48 +70,10 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
-      const db = getDatabase();
+      const submissions = await leadService.getContactSubmissions();
+      const stats = await leadService.getContactSubmissionStats();
 
-      // Get all contact submissions
-      const MAX_SUBMISSIONS = 500;
-      const submissions = await db.all(`
-        SELECT
-          id,
-          name,
-          email,
-          subject,
-          message,
-          status,
-          message_id,
-          created_at,
-          read_at,
-          replied_at
-        FROM contact_submissions
-        ORDER BY created_at DESC
-        LIMIT ?
-      `, [MAX_SUBMISSIONS]);
-
-      // Get stats
-      const stats = await db.get(`
-        SELECT
-          COUNT(*) as total,
-          SUM(CASE WHEN status = 'new' THEN 1 ELSE 0 END) as new,
-          SUM(CASE WHEN status = 'read' THEN 1 ELSE 0 END) as read,
-          SUM(CASE WHEN status = 'replied' THEN 1 ELSE 0 END) as replied,
-          SUM(CASE WHEN status = 'archived' THEN 1 ELSE 0 END) as archived
-        FROM contact_submissions
-      `);
-
-      sendSuccess(res, {
-        submissions,
-        stats: {
-          total: stats?.total || 0,
-          new: stats?.new || 0,
-          read: stats?.read || 0,
-          replied: stats?.replied || 0,
-          archived: stats?.archived || 0
-        }
-      });
+      sendSuccess(res, { submissions, stats });
     } catch (error) {
       logger.error('Error fetching contact submissions:', {
         error: error instanceof Error ? error : undefined
@@ -201,20 +107,7 @@ router.put(
         return errorResponse(res, 'Invalid status value', 400, ErrorCodes.VALIDATION_ERROR);
       }
 
-      const db = getDatabase();
-
-      let updateFields = 'status = ?, updated_at = CURRENT_TIMESTAMP';
-      const values: (string | number)[] = [status];
-
-      if (status === 'read') {
-        updateFields += ', read_at = CURRENT_TIMESTAMP';
-      } else if (status === 'replied') {
-        updateFields += ', replied_at = CURRENT_TIMESTAMP';
-      }
-
-      values.push(id);
-
-      await db.run(`UPDATE contact_submissions SET ${updateFields} WHERE id = ?`, values);
+      await leadService.updateContactSubmissionStatus(id, status);
 
       sendSuccess(res, undefined, 'Status updated successfully');
     } catch (error) {
@@ -246,10 +139,8 @@ router.post(
       const { id } = req.params;
       const { sendInvitation = false } = req.body;
 
-      const db = getDatabase();
-
       // Get the contact submission
-      const contact = await db.get(`SELECT ${CONTACT_SUBMISSION_COLUMNS} FROM contact_submissions WHERE id = ?`, [id]);
+      const contact = await leadService.getContactSubmissionById(id);
 
       if (!contact) {
         return errorResponse(res, 'Contact submission not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
@@ -266,16 +157,13 @@ router.post(
       }
 
       // Check if client with this email already exists
-      const existingClient = (await db.get(
-        'SELECT id, contact_name, email FROM clients WHERE LOWER(email) = LOWER(?)',
-        [contact.email as string]
-      )) as { id: number; contact_name: string; email: string } | undefined;
+      const existingClient = await leadService.findClientByEmail(contact.email);
 
       let clientId: number;
 
       if (existingClient) {
         // Link to existing client
-        clientId = existingClient.id as number;
+        clientId = existingClient.id;
       } else {
         // Create new client with pending status
         const invitationToken = sendInvitation ? crypto.randomUUID() : null;
@@ -283,33 +171,19 @@ router.post(
           ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
           : null;
 
-        const result = await db.run(
-          `INSERT INTO clients (
-            email, password_hash, contact_name, company_name, phone,
-            status, client_type, invitation_token, invitation_expires_at,
-            invitation_sent_at, created_at, updated_at
-          ) VALUES (
-            LOWER(?), '', ?, ?, ?, 'pending', 'business', ?, ?,
-            ${sendInvitation ? 'CURRENT_TIMESTAMP' : 'NULL'},
-            CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-          )`,
-          [
-            contact.email as string,
-            contact.name as string,
-            null, // company_name - not available from contact form
-            null, // phone - not available from contact form
-            invitationToken,
-            expiresAt
-          ]
-        );
-
-        clientId = result.lastID!;
+        clientId = await leadService.createClientFromContact({
+          email: contact.email,
+          name: contact.name,
+          invitationToken,
+          expiresAt,
+          sendInvitation
+        });
 
         // Send invitation email if requested
         if (sendInvitation && invitationToken) {
           // Validate email format before sending
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          const contactEmail = contact.email as string;
+          const contactEmail = contact.email;
           if (!contactEmail || !emailRegex.test(contactEmail)) {
             logger.warn('Invalid contact email format, skipping invitation email', {
               category: 'leads',
@@ -345,12 +219,7 @@ router.post(
       }
 
       // Update contact submission with client_id and converted_at
-      await db.run(
-        `UPDATE contact_submissions
-         SET client_id = ?, converted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
-         WHERE id = ?`,
-        [clientId, id]
-      );
+      await leadService.markContactAsConverted(id, clientId);
 
       sendSuccess(
         res,
@@ -437,26 +306,19 @@ router.put(
         }
       }
 
-      const db = getDatabase();
-
       // Check if project exists
-      const project = await db.get('SELECT id, status FROM projects WHERE id = ?', [id]);
+      const project = await leadService.getProjectById(id);
       if (!project) {
         return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       }
 
       // Update status and cancellation fields (clear them if not cancelling)
-      if (status === 'cancelled') {
-        await db.run(
-          'UPDATE projects SET status = ?, cancelled_by = ?, cancellation_reason = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-          [status, cancelled_by, cancellation_reason || null, id]
-        );
-      } else {
-        await db.run(
-          'UPDATE projects SET status = ?, cancelled_by = NULL, cancellation_reason = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-          [status, id]
-        );
-      }
+      await leadService.updateProjectStatus(
+        id,
+        status,
+        status === 'cancelled' ? cancelled_by : null,
+        status === 'cancelled' ? cancellation_reason : null
+      );
 
       sendSuccess(
         res,
@@ -495,30 +357,9 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       const { id } = req.params;
-      const db = getDatabase();
 
       // Get the lead/project
-      const lead = await db.get(
-        `
-        SELECT
-          p.id,
-          p.project_name,
-          p.description,
-          p.project_type,
-          p.budget_range,
-          p.timeline,
-          p.features,
-          p.client_id,
-          c.email,
-          c.contact_name,
-          c.company_name,
-          c.phone
-        FROM projects p
-        LEFT JOIN clients c ON p.client_id = c.id
-        WHERE p.id = ?
-      `,
-        [id]
-      );
+      const lead = await leadService.getLeadWithClient(id);
 
       if (!lead) {
         return errorResponse(res, 'Lead not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
@@ -535,49 +376,40 @@ router.post(
 
       // Check if client already exists
       let clientId = typeof lead.client_id === 'number' ? lead.client_id : null;
-      const existingClient = await db.get(
-        'SELECT id, invitation_token FROM clients WHERE email = ?',
-        [leadEmail]
-      );
 
       // Generate invitation token (valid for 7 days)
       const invitationToken = crypto.randomBytes(32).toString('hex');
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+      const existingClient = await leadService.findClientByExactEmail(leadEmail);
 
       if (existingClient) {
         // Update existing client with new invitation token
         const existingClientId = typeof existingClient.id === 'number' ? existingClient.id : null;
         if (existingClientId) {
           clientId = existingClientId;
-          await db.run(
-            `
-            UPDATE clients
-            SET invitation_token = ?, invitation_expires_at = ?, invitation_sent_at = CURRENT_TIMESTAMP, status = 'pending'
-            WHERE id = ?
-          `,
-            [invitationToken, expiresAt, clientId]
-          );
+          await leadService.updateClientInvitation(clientId, invitationToken, expiresAt);
         }
       } else {
         // Create new client with pending status (no password yet)
-        const result = await db.run(
-          `
-          INSERT INTO clients (email, password_hash, contact_name, company_name, phone, status, invitation_token, invitation_expires_at, invitation_sent_at)
-          VALUES (?, '', ?, ?, ?, 'pending', ?, ?, CURRENT_TIMESTAMP)
-        `,
-          [leadEmail, leadContactName, leadCompanyName, leadPhone, invitationToken, expiresAt]
-        );
-        clientId = result.lastID || null;
+        clientId = await leadService.createClientFromLead({
+          email: leadEmail,
+          contactName: leadContactName,
+          companyName: leadCompanyName,
+          phone: leadPhone,
+          invitationToken,
+          expiresAt
+        });
 
         // Update project to link to new client
         if (clientId && typeof id === 'string') {
-          await db.run('UPDATE projects SET client_id = ? WHERE id = ?', [clientId, id]);
+          await leadService.linkProjectToClient(id, clientId);
         }
       }
 
       // Update lead status to converted (lead is now a project)
       if (typeof id === 'string') {
-        await db.run('UPDATE projects SET status = ? WHERE id = ?', ['converted', id]);
+        await leadService.updateProjectStatusToConverted(id);
       }
 
       // Validate email format before sending
@@ -689,10 +521,9 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       const { id } = req.params;
-      const db = getDatabase();
 
       // Get the lead/project
-      const lead = await db.get('SELECT id, status, project_name FROM projects WHERE id = ?', [id]);
+      const lead = await leadService.getProjectForActivation(id);
 
       if (!lead) {
         return errorResponse(res, 'Lead not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
@@ -703,10 +534,7 @@ router.post(
       }
 
       // Update lead status to converted and set start_date
-      await db.run(
-        'UPDATE projects SET status = ?, start_date = date(\'now\'), updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-        ['converted', id]
-      );
+      await leadService.activateProject(id);
 
       // Log the activation
       errorTracker.captureMessage('Admin activated lead as project', 'info', {

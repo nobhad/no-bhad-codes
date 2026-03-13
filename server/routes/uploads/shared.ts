@@ -11,7 +11,7 @@ import multer from 'multer';
 import { resolve, extname, normalize } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { AuthenticatedRequest } from '../../middleware/auth.js';
-import { getDatabase } from '../../database/init.js';
+import { uploadService } from '../../services/upload-service.js';
 import {
   getUploadsDir,
   getUploadsSubdir,
@@ -139,13 +139,7 @@ export async function canAccessProject(req: AuthenticatedRequest, projectId: num
     return true;
   }
 
-  const db = getDatabase();
-  const row = await db.get('SELECT 1 FROM projects WHERE id = ? AND client_id = ?', [
-    projectId,
-    req.user?.id
-  ]);
-
-  return !!row;
+  return uploadService.isProjectOwnedByClient(projectId, req.user?.id as number);
 }
 
 export async function canAccessFile(req: AuthenticatedRequest, fileId: number): Promise<boolean> {
@@ -153,25 +147,10 @@ export async function canAccessFile(req: AuthenticatedRequest, fileId: number): 
     return true;
   }
 
-  const db = getDatabase();
   const userId = req.user?.id;
   const userEmail = req.user?.email;
 
-  const row = await db.get(
-    `SELECT 1
-     FROM files f
-     LEFT JOIN projects p ON f.project_id = p.id
-     WHERE f.id = ? AND f.deleted_at IS NULL
-       AND (
-         f.uploaded_by = ?
-         OR f.uploaded_by = ?
-         OR f.uploaded_by = ?
-         OR (p.client_id = ? AND f.shared_with_client = TRUE)
-       )`,
-    [fileId, userEmail, userId, String(userId), userId]
-  );
-
-  return !!row;
+  return uploadService.canClientAccessFile(fileId, userId as number, userEmail as string);
 }
 
 // ============================================

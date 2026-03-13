@@ -11,15 +11,9 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
-import { getDatabase } from '../../database/init.js';
+import { projectService } from '../../services/project-service.js';
 import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
-
-const PROJECT_TASK_COLUMNS = `
-  id, project_id, milestone_id, title, description, status, priority, assigned_to,
-  due_date, estimated_hours, actual_hours, sort_order, parent_task_id,
-  created_at, updated_at, completed_at
-`.replace(/\s+/g, ' ').trim();
 
 const router = express.Router();
 
@@ -73,49 +67,14 @@ router.put(
       return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.INVALID_ID);
     }
 
-    const db = getDatabase();
-
-    const updates: string[] = [];
-    const values: (string | number | null)[] = [];
-
-    if (title !== undefined) {
-      updates.push('title = ?');
-      values.push(title);
-    }
-    if (description !== undefined) {
-      updates.push('description = ?');
-      values.push(description);
-    }
-    if (status !== undefined) {
-      updates.push('status = ?');
-      values.push(status);
-    }
-    if (priority !== undefined) {
-      updates.push('priority = ?');
-      values.push(priority);
-    }
-    if (dueDate !== undefined) {
-      updates.push('due_date = ?');
-      values.push(dueDate);
-    }
-    if (assignedTo !== undefined) {
-      updates.push('assigned_to = ?');
-      values.push(assignedTo);
-    }
-
-    if (updates.length === 0) {
+    if (title === undefined && description === undefined && status === undefined &&
+        priority === undefined && dueDate === undefined && assignedTo === undefined) {
       return errorResponse(res, 'No fields to update', 400, ErrorCodes.NO_FIELDS);
     }
 
-    updates.push('updated_at = CURRENT_TIMESTAMP');
-    values.push(taskId);
-
-    await db.run(
-      `UPDATE project_tasks SET ${updates.join(', ')} WHERE id = ?`,
-      values
-    );
-
-    const updatedTask = await db.get(`SELECT ${PROJECT_TASK_COLUMNS} FROM project_tasks WHERE id = ?`, [taskId]);
+    const updatedTask = await projectService.updateTaskAdmin(taskId, {
+      title, description, status, priority, dueDate, assignedTo
+    });
 
     sendSuccess(res, { task: updatedTask });
   })

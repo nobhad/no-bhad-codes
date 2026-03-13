@@ -11,7 +11,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { getDatabase } from '../../database/init.js';
+import { analyticsService } from '../../services/analytics-service.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 
@@ -57,41 +57,7 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
-    const db = getDatabase();
-
-    // Check if saved_queries table exists
-    const tableExists = await db.get(`
-      SELECT name FROM sqlite_master
-      WHERE type='table' AND name='saved_analytics_queries'
-    `);
-
-    if (!tableExists) {
-      // Create the table if it doesn't exist
-      await db.run(`
-        CREATE TABLE IF NOT EXISTS saved_analytics_queries (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL,
-          description TEXT,
-          query TEXT NOT NULL,
-          last_run_at TEXT,
-          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-          updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-        )
-      `);
-    }
-
-    const queries = await db.all(`
-      SELECT
-        id,
-        name,
-        description,
-        query,
-        last_run_at as lastRun,
-        created_at as createdAt
-      FROM saved_analytics_queries
-      ORDER BY created_at DESC
-    `);
-
+    const queries = await analyticsService.getSavedAnalyticsQueries();
     sendSuccess(res, { queries });
   })
 );
@@ -116,39 +82,19 @@ router.post(
       return errorResponse(res, validation.reason || 'Invalid query', 400, ErrorCodes.INVALID_QUERY);
     }
 
-    const db = getDatabase();
-    const startTime = Date.now();
-
     try {
-      // Execute the query with a LIMIT to prevent huge result sets
-      let safeQuery = query.trim();
-      if (!safeQuery.toLowerCase().includes('limit')) {
-        safeQuery = `${safeQuery.replace(/;?\s*$/, '')  } LIMIT 1000`;
-      }
-
-      const rows = await db.all(safeQuery);
-      const executionTime = Date.now() - startTime;
-
-      // Extract column names from first row
-      const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
+      const result = await analyticsService.runAdHocQuery(query);
 
       logger.info('[Ad-hoc Analytics] Query executed', {
         metadata: {
           queryLength: query.length,
-          rowCount: rows.length,
-          executionTime,
+          rowCount: result.rowCount,
+          executionTime: result.executionTime,
           user: req.user?.email
         }
       });
 
-      sendSuccess(res, {
-        result: {
-          columns,
-          rows,
-          rowCount: rows.length,
-          executionTime
-        }
-      });
+      sendSuccess(res, { result });
     } catch (err) {
       logger.error('[Ad-hoc Analytics] Query failed', {
         error: err instanceof Error ? err : new Error(String(err)),
@@ -191,23 +137,11 @@ router.post(
       return errorResponse(res, validation.reason || 'Invalid query', 400, ErrorCodes.INVALID_QUERY);
     }
 
-    const db = getDatabase();
-
-    const result = await db.run(`
-      INSERT INTO saved_analytics_queries (name, description, query)
-      VALUES (?, ?, ?)
-    `, [name.trim(), description?.trim() || null, query.trim()]);
-
-    const savedQuery = await db.get(`
-      SELECT
-        id,
-        name,
-        description,
-        query,
-        created_at as createdAt
-      FROM saved_analytics_queries
-      WHERE id = ?
-    `, [result.lastID]);
+    const savedQuery = await analyticsService.saveAnalyticsQuery({
+      name,
+      description: description?.trim() || null,
+      query
+    });
 
     sendCreated(res, { query: savedQuery }, 'Query saved');
   })
@@ -227,18 +161,11 @@ router.delete(
       return errorResponse(res, 'Invalid query ID', 400, ErrorCodes.INVALID_ID);
     }
 
-    const db = getDatabase();
+    const deleted = await analyticsService.deleteAnalyticsQuery(queryId);
 
-    const existing = await db.get(
-      'SELECT id FROM saved_analytics_queries WHERE id = ?',
-      [queryId]
-    );
-
-    if (!existing) {
+    if (!deleted) {
       return errorResponse(res, 'Query not found', 404, ErrorCodes.NOT_FOUND);
     }
-
-    await db.run('DELETE FROM saved_analytics_queries WHERE id = ?', [queryId]);
 
     sendSuccess(res);
   })

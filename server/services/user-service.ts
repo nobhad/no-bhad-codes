@@ -791,6 +791,62 @@ class UserService {
   }
 
   /**
+   * Get client profile data for the /profile endpoint.
+   */
+  async getClientProfile(clientId: number): Promise<Record<string, unknown> | null> {
+    const db = await getDatabase();
+    const row = await db.get(
+      'SELECT id, email, company_name, contact_name, phone, status, is_admin, created_at FROM clients WHERE id = ?',
+      [clientId]
+    );
+    return (row as Record<string, unknown>) || null;
+  }
+
+  /**
+   * Find a client by email verification token (for email verification flow).
+   */
+  async findClientByVerificationToken(token: string): Promise<Record<string, unknown> | null> {
+    const db = await getDatabase();
+    const row = await db.get(
+      `SELECT id, email, email_verified, email_verification_sent_at
+       FROM clients
+       WHERE email_verification_token = ? AND deleted_at IS NULL`,
+      [token]
+    );
+    return (row as Record<string, unknown>) || null;
+  }
+
+  /**
+   * Mark a client's email as verified and clear the verification token.
+   */
+  async markEmailVerified(clientId: number): Promise<void> {
+    const db = await getDatabase();
+    await db.run(
+      `UPDATE clients
+       SET email_verified = 1,
+           email_verification_token = NULL,
+           email_verification_sent_at = NULL
+       WHERE id = ?`,
+      [clientId]
+    );
+  }
+
+  /**
+   * Find a client by email for resend verification flow.
+   * Returns id, email, contact_name, email_verified, email_verification_sent_at.
+   */
+  async findClientForResendVerification(email: string): Promise<Record<string, unknown> | null> {
+    const db = await getDatabase();
+    const row = await db.get(
+      `SELECT id, email, contact_name, email_verified, email_verification_sent_at
+       FROM clients
+       WHERE email = ? AND deleted_at IS NULL`,
+      [email.toLowerCase()]
+    );
+    return (row as Record<string, unknown>) || null;
+  }
+
+  /**
    * Generic method for any TEXT/user_id column pair
    */
   async buildUserColumnSet(

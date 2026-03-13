@@ -27,6 +27,7 @@ import * as tasks from './lead/tasks.js';
 import * as notes from './lead/notes.js';
 import * as duplicates from './lead/duplicates.js';
 import * as analytics from './lead/analytics.js';
+import * as core from './lead/core.js';
 import { LEAD_SOURCE_COLUMNS } from './lead/types.js';
 import type { LeadSource, LeadSummary } from './lead/types.js';
 
@@ -49,11 +50,44 @@ export type {
   LeadAnalytics
 } from './lead/types.js';
 
+export type {
+  LeadRow,
+  LeadStats,
+  ContactSubmissionRow,
+  ContactSubmissionStats,
+  ContactSubmissionFull,
+  ExistingClientRow,
+  LeadWithClientRow,
+  ExistingClientInvitationRow,
+  ProjectStatusRow
+} from './lead/core.js';
+
 /**
  * Singleton lead service exposing all methods.
  * Route files import `{ leadService }` and call methods directly.
  */
 export const leadService = {
+  // ── Core CRUD ─────────────────────────────────────
+  getLeadsWithClients: core.getLeadsWithClients,
+  getLeadStats: core.getLeadStats,
+  getContactSubmissions: core.getContactSubmissions,
+  getContactSubmissionStats: core.getContactSubmissionStats,
+  updateContactSubmissionStatus: core.updateContactSubmissionStatus,
+  getContactSubmissionById: core.getContactSubmissionById,
+  findClientByEmail: core.findClientByEmail,
+  createClientFromContact: core.createClientFromContact,
+  markContactAsConverted: core.markContactAsConverted,
+  getProjectById: core.getProjectById,
+  updateProjectStatus: core.updateProjectStatus,
+  getLeadWithClient: core.getLeadWithClient,
+  findClientByExactEmail: core.findClientByExactEmail,
+  updateClientInvitation: core.updateClientInvitation,
+  createClientFromLead: core.createClientFromLead,
+  linkProjectToClient: core.linkProjectToClient,
+  updateProjectStatusToConverted: core.updateProjectStatusToConverted,
+  getProjectForActivation: core.getProjectForActivation,
+  activateProject: core.activateProject,
+
   // ── Scoring ─────────────────────────────────────
   getScoringRules: scoring.getScoringRules,
   createScoringRule: scoring.createScoringRule,

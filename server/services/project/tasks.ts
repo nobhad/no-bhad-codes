@@ -630,3 +630,41 @@ export async function getAllTasks(options?: {
     milestoneTitle: row.milestone_title
   }));
 }
+
+/**
+ * Update a task via raw column values (admin route).
+ * Returns the raw DB row for the updated task.
+ */
+export async function updateTaskAdmin(
+  taskId: number,
+  data: { title?: string; description?: string; status?: string; priority?: string; dueDate?: string; assignedTo?: string }
+): Promise<Record<string, unknown> | undefined> {
+  const db = getDatabase();
+  const updates: string[] = [];
+  const values: SqlValue[] = [];
+
+  if (data.title !== undefined) { updates.push('title = ?'); values.push(data.title); }
+  if (data.description !== undefined) { updates.push('description = ?'); values.push(data.description); }
+  if (data.status !== undefined) { updates.push('status = ?'); values.push(data.status); }
+  if (data.priority !== undefined) { updates.push('priority = ?'); values.push(data.priority); }
+  if (data.dueDate !== undefined) { updates.push('due_date = ?'); values.push(data.dueDate); }
+  if (data.assignedTo !== undefined) { updates.push('assigned_to = ?'); values.push(data.assignedTo); }
+
+  if (updates.length === 0) return undefined;
+
+  updates.push('updated_at = CURRENT_TIMESTAMP');
+  values.push(taskId);
+
+  await db.run(`UPDATE project_tasks SET ${updates.join(', ')} WHERE id = ?`, values);
+
+  const PROJECT_TASK_COLUMNS = `
+    id, project_id, milestone_id, title, description, status, priority, assigned_to,
+    due_date, estimated_hours, actual_hours, sort_order, parent_task_id,
+    created_at, updated_at, completed_at
+  `.replace(/\s+/g, ' ').trim();
+
+  return db.get(
+    `SELECT ${PROJECT_TASK_COLUMNS} FROM project_tasks WHERE id = ?`,
+    [taskId]
+  ) as Promise<Record<string, unknown> | undefined>;
+}

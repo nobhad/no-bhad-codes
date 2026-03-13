@@ -235,6 +235,186 @@ export async function getProjectTimeStats(projectId: number): Promise<TimeStats>
   };
 }
 
+// =====================================================
+// ADMIN TIME ENTRY METHODS (cross-project)
+// =====================================================
+
+/** Row returned by the admin time entry listing query */
+export interface AdminTimeEntryRow {
+  id: number;
+  projectId: number;
+  projectName: string;
+  taskId: number | null;
+  taskName: string | null;
+  userName: string;
+  description: string | null;
+  hours: number;
+  duration_minutes: number;
+  date: string;
+  is_billable: number;
+  hourlyRate: number | null;
+  createdAt: string;
+}
+
+/**
+ * Get all time entries across projects for admin view.
+ */
+export async function getAdminTimeEntries(options?: {
+  projectId?: string;
+  startDate?: string;
+}): Promise<AdminTimeEntryRow[]> {
+  const db = getDatabase();
+  let whereClause = 'WHERE te.deleted_at IS NULL';
+  const params: (string | number)[] = [];
+
+  if (options?.projectId) {
+    whereClause += ' AND te.project_id = ?';
+    params.push(String(options.projectId));
+  }
+
+  if (options?.startDate) {
+    whereClause += ' AND te.date >= ?';
+    params.push(options.startDate);
+  }
+
+  return db.all<AdminTimeEntryRow>(`
+    SELECT
+      te.id,
+      te.project_id as projectId,
+      p.project_name as projectName,
+      te.task_id as taskId,
+      pt.title as taskName,
+      COALESCE(u.display_name, u.email, 'Admin') as userName,
+      te.description,
+      te.hours,
+      ROUND(te.hours * 60) as duration_minutes,
+      te.date,
+      te.billable as is_billable,
+      te.hourly_rate as hourlyRate,
+      te.created_at as createdAt
+    FROM time_entries te
+    JOIN projects p ON te.project_id = p.id
+    LEFT JOIN project_tasks pt ON te.task_id = pt.id
+    LEFT JOIN users u ON te.user_id = u.id
+    ${whereClause}
+    ORDER BY te.date DESC, te.created_at DESC
+  `, params);
+}
+
+/**
+ * Start a timer — creates a time entry with 0 hours.
+ * Returns entry ID and project name.
+ */
+export async function startTimer(params: {
+  projectId: number;
+  taskId?: number | null;
+  description?: string;
+  adminEmail: string;
+}): Promise<{ entryId: number; projectName: string }> {
+  const db = getDatabase();
+
+  const project = await db.get('SELECT id, project_name FROM projects WHERE id = ?', [params.projectId]);
+  if (!project) throw new Error('Project not found');
+
+  const user = await db.get('SELECT id FROM users WHERE email = ?', [params.adminEmail]);
+
+  const userId = user ? (user as Record<string, unknown>).id as number : null;
+
+  const result = await db.run(`
+    INSERT INTO time_entries (
+      project_id, task_id, user_id, description, date, hours, billable, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, date('now'), 0, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  `, [
+    params.projectId,
+    params.taskId || null,
+    userId,
+    params.description || ''
+  ]);
+
+  return {
+    entryId: result.lastID!,
+    projectName: (project as Record<string, unknown>).project_name as string
+  };
+}
+
+/**
+ * Stop a timer — calculates elapsed hours from created_at.
+ * Returns the updated entry.
+ */
+export async function stopTimer(entryId: number): Promise<Record<string, unknown>> {
+  const db = getDatabase();
+
+  const entry = await db.get('SELECT created_at FROM time_entries WHERE id = ? AND hours = 0', [entryId]);
+  if (!entry) throw new Error('Active timer not found');
+
+  const startTime = new Date((entry as Record<string, unknown>).created_at as string);
+  const endTime = new Date();
+  const hours = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
+
+  await db.run(`
+    UPDATE time_entries
+    SET hours = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `, [Math.round(hours * 100) / 100, entryId]);
+
+  const TIME_ENTRY_COLUMNS = `
+    id, project_id, task_id, user_id, description, hours, date,
+    billable, hourly_rate, created_at, updated_at
+  `.replace(/\s+/g, ' ').trim();
+
+  return db.get(`SELECT ${TIME_ENTRY_COLUMNS} FROM time_entries WHERE id = ?`, [entryId]) as Promise<Record<string, unknown>>;
+}
+
+/**
+ * Create a manual admin time entry. Returns the new entry row.
+ */
+export async function createAdminTimeEntry(params: {
+  projectId: number;
+  taskId?: number | null;
+  description?: string;
+  hours: number;
+  date?: string;
+  billable?: boolean;
+  hourlyRate?: number | null;
+  adminEmail: string;
+}): Promise<Record<string, unknown>> {
+  const db = getDatabase();
+
+  const user = await db.get('SELECT id FROM users WHERE email = ?', [params.adminEmail]);
+  const userId = user ? (user as Record<string, unknown>).id as number : null;
+
+  const result = await db.run(`
+    INSERT INTO time_entries (
+      project_id, task_id, user_id, description, date, hours, billable, hourly_rate, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  `, [
+    params.projectId,
+    params.taskId || null,
+    userId,
+    params.description || '',
+    params.date || new Date().toISOString().split('T')[0],
+    params.hours,
+    params.billable ? 1 : 0,
+    params.hourlyRate || null
+  ]);
+
+  const TIME_ENTRY_COLUMNS = `
+    id, project_id, task_id, user_id, description, hours, date,
+    billable, hourly_rate, created_at, updated_at
+  `.replace(/\s+/g, ' ').trim();
+
+  return db.get(`SELECT ${TIME_ENTRY_COLUMNS} FROM time_entries WHERE id = ?`, [result.lastID]) as Promise<Record<string, unknown>>;
+}
+
+/**
+ * Check if a time entry exists (not soft-deleted).
+ */
+export async function timeEntryExists(entryId: number): Promise<boolean> {
+  const db = getDatabase();
+  const row = await db.get('SELECT id FROM time_entries WHERE id = ? AND deleted_at IS NULL', [entryId]);
+  return !!row;
+}
+
 export async function getTeamTimeReport(startDate: string, endDate: string): Promise<TeamTimeReport> {
   const db = getDatabase();
 

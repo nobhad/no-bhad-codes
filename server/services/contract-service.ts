@@ -997,6 +997,92 @@ class ContractService {
   }
 
   /**
+   * Get project with client info for contract distribution emails
+   */
+  async getProjectWithClientForDistribution(projectId: number): Promise<Record<string, unknown> | null> {
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT p.id, p.project_name, p.contract_signature_token, p.contract_signature_expires_at,
+              c.contact_name, c.email
+       FROM projects p
+       LEFT JOIN clients c ON p.client_id = c.id
+       WHERE p.id = ?`,
+      [projectId]
+    );
+    return (row as Record<string, unknown>) || null;
+  }
+
+  /**
+   * Get project with client info for renewal reminders (lighter query)
+   */
+  async getProjectWithClientForRenewal(projectId: number): Promise<Record<string, unknown> | null> {
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT p.project_name, c.contact_name, c.email
+       FROM projects p
+       LEFT JOIN clients c ON p.client_id = c.id
+       WHERE p.id = ?`,
+      [projectId]
+    );
+    return (row as Record<string, unknown>) || null;
+  }
+
+  /**
+   * Generate and store a signature token for a project if one doesn't exist.
+   * Returns the token.
+   */
+  async ensureProjectSignatureToken(projectId: number): Promise<string> {
+    const db = getDatabase();
+    const existing = await db.get(
+      'SELECT contract_signature_token FROM projects WHERE id = ?',
+      [projectId]
+    );
+    const existingToken = (existing as Record<string, unknown>)?.contract_signature_token as string | null;
+
+    if (existingToken) return existingToken;
+
+    const crypto = await import('crypto');
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date();
+    const CONTRACT_SIGNATURE_EXPIRY_DAYS = 30;
+    expiresAt.setDate(expiresAt.getDate() + CONTRACT_SIGNATURE_EXPIRY_DAYS);
+
+    await db.run(
+      'UPDATE projects SET contract_signature_token = ?, contract_signature_expires_at = ? WHERE id = ?',
+      [token, expiresAt.toISOString(), projectId]
+    );
+
+    return token;
+  }
+
+  /**
+   * Expire the project-level signature token and request
+   */
+  async expireProjectSignatureToken(projectId: number): Promise<void> {
+    const db = getDatabase();
+    const now = new Date().toISOString();
+    await db.run(
+      `UPDATE projects SET
+        contract_signature_expires_at = ?,
+        contract_signature_token = NULL
+       WHERE id = ?`,
+      [now, projectId]
+    );
+  }
+
+  /**
+   * Update contract reminder tracking fields
+   */
+  async updateContractReminder(contractId: number): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      `UPDATE contracts SET last_reminder_at = datetime('now'), reminder_count = COALESCE(reminder_count, 0) + 1
+       WHERE id = ?`,
+      [contractId]
+    );
+  }
+
+  /**
    * Expire a contract signature request
    */
   async expireSignatureRequest(contractId: number): Promise<Contract> {
@@ -1046,6 +1132,135 @@ class ContractService {
       countersignerIp: contract.countersignerIp ?? null,
       signedPdfPath: contract.signedPdfPath ?? null
     };
+  }
+  /**
+   * Get all non-cancelled contracts for a client (portal view).
+   */
+  async getClientContracts(clientId: number): Promise<Record<string, unknown>[]> {
+    const db = getDatabase();
+    return db.all(`
+      SELECT
+        c.id,
+        c.project_id as projectId,
+        p.project_name as projectName,
+        c.status,
+        c.signed_at as signedAt,
+        c.created_at as createdAt,
+        c.expires_at as expiresAt
+      FROM contracts c
+      LEFT JOIN projects p ON c.project_id = p.id
+      WHERE c.client_id = ?
+        AND c.status != 'cancelled'
+      ORDER BY c.created_at DESC
+    `, [clientId]) as Promise<Record<string, unknown>[]>;
+  }
+
+  /**
+   * Get the project_id for a contract (used for activity log isolation).
+   */
+  async getContractProjectId(contractId: number): Promise<number | null> {
+    const db = getDatabase();
+    const row = await db.get('SELECT project_id FROM contracts WHERE id = ?', [contractId]);
+    if (!row) return null;
+    return (row as Record<string, unknown>).project_id as number | null;
+  }
+
+  /**
+   * Get activity log entries for a contract, filtered by both project_id and contract_id.
+   */
+  async getContractActivity(contractId: number, projectId: number | null): Promise<Record<string, unknown>[]> {
+    const db = getDatabase();
+    return db.all(
+      `SELECT id, action, actor_email, actor_ip, actor_user_agent, details, created_at
+       FROM contract_signature_log
+       WHERE project_id = ? AND contract_id = ?
+       ORDER BY created_at DESC`,
+      [projectId, contractId]
+    ) as Promise<Record<string, unknown>[]>;
+  }
+
+  /**
+   * Fetch a contract for signing validation (includes project info).
+   * Returns raw row with client_id, status, signed_at, project_name etc.
+   */
+  async getContractForSigning(contractId: number): Promise<Record<string, unknown> | null> {
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT c.id, c.project_id, c.client_id, c.status, c.signed_at,
+              p.project_name
+       FROM contracts c
+       LEFT JOIN projects p ON c.project_id = p.id
+       WHERE c.id = ?`,
+      [contractId]
+    );
+    return (row as Record<string, unknown>) || null;
+  }
+
+  /**
+   * Sign a contract from the portal (authenticated client).
+   * Updates contract, dual-writes to project, and logs the action.
+   */
+  async signContractFromPortal(params: {
+    contractId: number;
+    projectId: number | null;
+    signedAt: string;
+    signerName: string;
+    clientEmail: string;
+    signerIp: string;
+    signerUserAgent: string;
+    signatureData: string;
+  }): Promise<void> {
+    const db = getDatabase();
+
+    // Update contracts table
+    await db.run(
+      `UPDATE contracts SET
+        status = 'signed',
+        signed_at = ?,
+        signer_name = ?,
+        signer_email = ?,
+        signer_ip = ?,
+        signer_user_agent = ?,
+        signature_data = ?,
+        signature_token = NULL,
+        signature_expires_at = NULL,
+        updated_at = datetime('now')
+       WHERE id = ?`,
+      [params.signedAt, params.signerName, params.clientEmail, params.signerIp,
+       params.signerUserAgent, params.signatureData, params.contractId]
+    );
+
+    // Dual-write: update projects table signature fields
+    if (params.projectId) {
+      await db.run(
+        `UPDATE projects SET
+          contract_signed_at = ?,
+          contract_signature_token = NULL,
+          contract_signature_expires_at = NULL,
+          contract_signer_name = ?,
+          contract_signer_email = ?,
+          contract_signer_ip = ?,
+          contract_signer_user_agent = ?,
+          contract_signature_data = ?
+         WHERE id = ?`,
+        [params.signedAt, params.signerName, params.clientEmail, params.signerIp,
+         params.signerUserAgent, params.signatureData, params.projectId]
+      );
+    }
+
+    // Log to contract_signature_log
+    await db.run(
+      `INSERT INTO contract_signature_log (project_id, contract_id, action, actor_email, actor_ip, actor_user_agent, details)
+       VALUES (?, ?, 'signed', ?, ?, ?, ?)`,
+      [
+        params.projectId || null,
+        params.contractId,
+        params.clientEmail,
+        params.signerIp,
+        params.signerUserAgent,
+        JSON.stringify({ signerName: params.signerName, signedAt: params.signedAt, method: 'portal' })
+      ]
+    );
   }
 }
 
