@@ -101,7 +101,6 @@ function ProjectSelector() {
 // ============================================
 
 function HeaderBreadcrumbs() {
-  const role = usePortalRole();
   const pageTitle = usePageTitle();
   const currentTab = useCurrentTab();
   const currentGroup = useCurrentGroup();
@@ -111,48 +110,30 @@ function HeaderBreadcrumbs() {
   const isDashboard = currentTab === 'dashboard';
 
   return (
-    <nav className="breadcrumb-nav" aria-label="Breadcrumb">
-      <ol className="breadcrumb-list">
-        {/* Dashboard root crumb — current page when on dashboard, link otherwise */}
-        <li className={`breadcrumb-item${isDashboard ? ' breadcrumb-current' : ''}`}>
-          {isDashboard ? (
-            'Dashboard'
-          ) : (
-            <Link className="breadcrumb-link" to="/dashboard">
-              Dashboard
-            </Link>
-          )}
-        </li>
+    <div className="breadcrumb-trail" aria-label="Breadcrumb">
+      {/* Dashboard root crumb */}
+      {isDashboard ? (
+        <span className="breadcrumb-current">Dashboard</span>
+      ) : (
+        <>
+          <Link className="breadcrumb-link" to="/dashboard">Dashboard</Link>
+          <ChevronRight size={14} className="breadcrumb-separator" aria-hidden="true" />
+        </>
+      )}
 
-        {/* Remaining crumbs only when not on dashboard */}
-        {!isDashboard && (
-          <>
-            <li className="breadcrumb-item breadcrumb-separator" aria-hidden="true">
-              <ChevronRight size={14} />
-            </li>
+      {/* Group crumb (when inside a group subtab) */}
+      {!isDashboard && isSubtab && groupLabel && (
+        <>
+          <Link className="breadcrumb-link" to={`/${currentGroup}`}>{groupLabel}</Link>
+          <ChevronRight size={14} className="breadcrumb-separator" aria-hidden="true" />
+        </>
+      )}
 
-            {/* Group crumb (when inside a group subtab) */}
-            {isSubtab && groupLabel && (
-              <>
-                <li className="breadcrumb-item">
-                  <Link className="breadcrumb-link" to={`/${currentGroup}`}>
-                    {groupLabel}
-                  </Link>
-                </li>
-                <li className="breadcrumb-item breadcrumb-separator" aria-hidden="true">
-                  <ChevronRight size={14} />
-                </li>
-              </>
-            )}
-
-            {/* Current page */}
-            <li className="breadcrumb-item breadcrumb-current">
-              {pageTitle}
-            </li>
-          </>
-        )}
-      </ol>
-    </nav>
+      {/* Current page */}
+      {!isDashboard && (
+        <span className="breadcrumb-current">{pageTitle}</span>
+      )}
+    </div>
   );
 }
 
