@@ -113,7 +113,7 @@ router.get('/dashboard', (req: Request, res: Response) => {
     icons: ICONS,
     tabIds: CLIENT_TAB_IDS,
     entryScript: '/src/portal.ts',
-    cssBundle: '/src/styles/bundles/portal.css',
+    cssBundle: '/src/styles/bundles/client.css',
     bodyClass: 'client-portal',
     bodyPage: 'client-portal',
     isDev,
@@ -237,6 +237,30 @@ router.get('/admin', (_req: Request, res: Response) => {
 
 router.get('/client', (_req: Request, res: Response) => {
   res.redirect(301, '/dashboard');
+});
+
+// ============================================
+// Legacy Auth Page Redirects (301 Permanent)
+// Preserves query params (?token=, ?email=)
+// ============================================
+
+const LEGACY_AUTH_REDIRECTS: Record<string, string> = {
+  '/client/set-password.html': '/set-password',
+  '/client/set-password': '/set-password',
+  '/client/forgot-password.html': '/forgot-password',
+  '/client/forgot-password': '/forgot-password',
+  '/client/reset-password.html': '/reset-password',
+  '/client/reset-password': '/reset-password',
+  '/client/intake.html': '/intake',
+  '/client/intake': '/intake'
+};
+
+Object.entries(LEGACY_AUTH_REDIRECTS).forEach(([oldPath, newPath]) => {
+  router.get(oldPath, (req: Request, res: Response) => {
+    const query = req.url.split('?')[1];
+    const destination = query ? `${newPath}?${query}` : newPath;
+    res.redirect(301, destination);
+  });
 });
 
 export { router as portalRoutes };

@@ -311,7 +311,7 @@ router.post(
           } else {
             const baseUrl =
             process.env.CLIENT_PORTAL_URL || process.env.FRONTEND_URL || 'http://localhost:4000';
-            const inviteLink = `${baseUrl}/client/set-password.html?token=${invitationToken}`;
+            const inviteLink = `${baseUrl}/set-password?token=${invitationToken}`;
 
             try {
               await emailService.sendEmail({
@@ -581,7 +581,7 @@ router.post(
 
       // Build invitation link
       const baseUrl = process.env.BASE_URL || 'http://localhost:4000';
-      const invitationUrl = new URL('/client/set-password.html', baseUrl);
+      const invitationUrl = new URL('/set-password', baseUrl);
       invitationUrl.searchParams.set('token', invitationToken);
       invitationUrl.searchParams.set('email', leadEmail);
       const invitationLink = invitationUrl.toString();

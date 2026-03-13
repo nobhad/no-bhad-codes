@@ -750,7 +750,7 @@ router.post(
 
     // Build invitation link
     const baseUrl = process.env.BASE_URL || 'http://localhost:4000';
-    const invitationUrl = new URL('/client/set-password.html', baseUrl);
+    const invitationUrl = new URL('/set-password', baseUrl);
     invitationUrl.searchParams.set('token', invitationToken);
     if (clientEmail) {
       invitationUrl.searchParams.set('email', clientEmail);

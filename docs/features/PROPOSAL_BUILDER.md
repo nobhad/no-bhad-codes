@@ -35,7 +35,7 @@ The Proposal Builder is a tiered pricing system that allows clients to customize
 - [x] Admin proposal management panel
 - [x] Convert proposals to invoices
 
-**Access:** Appears after terminal intake completion at `/client/intake.html`
+**Access:** Appears after terminal intake completion at `/intake`
 
 ---
 
