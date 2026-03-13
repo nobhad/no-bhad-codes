@@ -47,7 +47,19 @@ Automatic lead scoring based on configurable rules:
 - `in` - Match any in comma-separated list
 - `not_empty` - Field has value
 
-#### Default Scoring Rules:
+#### Scoring Fields
+
+- `budget_range` — Client's budget range
+- `project_type` — Type of project
+- `description` — Project description
+- `priority` — Project priority
+- `client_type` — New or returning client
+- `timeline` — Expected timeline
+- `feature_count` — Number of requested features (parsed from features/notes)
+- `design_level` — Design complexity level
+- `source_type` — Referral source
+
+#### Default Scoring Rules
 
 |Rule|Field|Points|
 |------|-------|--------|
@@ -55,11 +67,17 @@ Automatic lead scoring based on configurable rules:
 |Medium Budget|budget_range in $5k-$10k|+15|
 |Low Budget|budget_range in Under $2k,$2k-$5k|+5|
 |E-commerce|project_type = e-commerce|+20|
-|Custom App|project_type = custom|+25|
-|Business Website|project_type = business|+10|
+|Custom App|project_type = web-app|+25|
+|Business Website|project_type = business-site|+10|
 |Urgent Timeline|timeline in asap,1-2_weeks|+15|
+|Reasonable Timeline|timeline in 1-3-months,3-6-months|+15|
+|Rush Timeline Penalty|timeline in asap,ASAP|-10|
 |Has Description|description not empty|+10|
 |Returning Client|client_type = returning|+20|
+
+#### Auto-Scoring on Intake
+
+Lead scores are automatically calculated when a new intake form is submitted. The score is computed asynchronously after the intake transaction completes (non-blocking). See `server/routes/intake.ts`.
 
 ### 2. Pipeline Management
 
