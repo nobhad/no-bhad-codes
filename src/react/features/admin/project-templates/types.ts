@@ -57,6 +57,29 @@ export interface TemplateTask {
   estimatedHours?: number;
 }
 
+export interface TemplateContentRequest {
+  title: string;
+  description?: string;
+  contentType: string;
+  category?: string;
+  isRequired?: boolean;
+  dueOffsetDays?: number;
+}
+
+export interface TemplatePaymentMilestone {
+  label?: string;
+  percentageOfTotal: number;
+  dueOffsetDays: number;
+}
+
+export interface TemplateTierDefinition {
+  tierName: string;
+  price: number;
+  features: string[];
+  description?: string;
+  estimatedHours?: number;
+}
+
 export interface ProjectTemplateItem {
   id: number;
   name: string;
@@ -69,6 +92,11 @@ export interface ProjectTemplateItem {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  // Enhanced fields
+  defaultContentRequests?: TemplateContentRequest[];
+  defaultPaymentSchedule?: TemplatePaymentMilestone[];
+  contractTemplateId?: number;
+  tierDefinitions?: TemplateTierDefinition[];
 }
 
 export interface ProjectTemplateFormData {
@@ -80,6 +108,10 @@ export interface ProjectTemplateFormData {
   isActive: boolean;
   milestones: TemplateMilestone[];
   tasks: TemplateTask[];
+  contentRequests: TemplateContentRequest[];
+  paymentSchedule: TemplatePaymentMilestone[];
+  contractTemplateId: number | '';
+  tierDefinitions: TemplateTierDefinition[];
 }
 
 export interface ProjectTemplatesManagerProps {
@@ -96,7 +128,11 @@ export const EMPTY_FORM: ProjectTemplateFormData = {
   defaultHourlyRate: '',
   isActive: true,
   milestones: [],
-  tasks: []
+  tasks: [],
+  contentRequests: [],
+  paymentSchedule: [],
+  contractTemplateId: '',
+  tierDefinitions: []
 };
 
 // ============================================
