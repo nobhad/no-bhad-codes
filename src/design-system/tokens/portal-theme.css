@@ -270,6 +270,24 @@ body[data-page="client-portal"] {
   --opacity-completed: 0.5; /* Completed/done items — same as disabled */
 
   /* ----------------------------------------
+   * BLUR TOKENS
+   * ---------------------------------------- */
+  --blur-backdrop: 4px;  /* Overlay backdrops: keyboard shortcuts, command palette, confirm dialog */
+  --blur-modal: 8px;     /* Full modal overlays */
+
+  /* ----------------------------------------
+   * LAYOUT / ASIDE WIDTH TOKENS
+   * ---------------------------------------- */
+  --aside-width-narrow: 240px;
+  --aside-width-medium: 280px;
+  --aside-width-wide: 320px;
+
+  /* ----------------------------------------
+   * CONTROL HEIGHT TOKENS
+   * ---------------------------------------- */
+  --min-height-textarea: 60px; /* Min height for multiline inputs and reply boxes */
+
+  /* ----------------------------------------
    * COMPONENT TOKENS — PORTAL-SPECIFIC DIMENSIONS
    * Component-scoped sizing tokens for predictable layout.
    * Group: Analytics

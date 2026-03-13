@@ -325,7 +325,7 @@
 /* Message textarea full width */
 .msgtab-textarea {
   width: 100%;
-  min-height: 60px;
+  min-height: var(--min-height-textarea);
 }
 
 /* Send button spans full width matching textarea */

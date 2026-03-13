@@ -6,45 +6,6 @@
    Matches portal button styling for consistency.
    ================================================ */
 
-.confirm-dialog-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--color-overlay-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: var(--z-index-portal-confirm); /* Above all modals and overlays */
-  padding: var(--space-4);
-  animation: confirmFadeIn var(--animation-modal-backdrop);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-}
-
-.confirm-dialog-overlay.closing {
-  animation: confirmFadeOut var(--animation-modal-exit) forwards;
-}
-
-@keyframes confirmFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes confirmFadeOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-
 .confirm-dialog {
   background: var(--color-bg-secondary);
   border: var(--portal-border);
@@ -54,7 +15,6 @@
   padding: var(--space-6);
   text-align: left;
   font-family: var(--font-family-mono);
-  animation: confirmDialogSlideUp var(--animation-modal-enter);
 }
 
 /* Icon and title on same line, left-aligned at top */
@@ -63,32 +23,6 @@
   align-items: center;
   gap: var(--space-2);
   margin-bottom: var(--space-4);
-}
-
-.confirm-dialog-overlay.closing .confirm-dialog {
-  animation: confirmDialogSlideDown var(--animation-modal-exit) forwards;
-}
-
-@keyframes confirmDialogSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes confirmDialogSlideDown {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(10px) scale(0.98);
-  }
 }
 
 /* Icon proportional to title text — matches .heading-icon pattern in modals */
