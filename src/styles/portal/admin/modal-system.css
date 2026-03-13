@@ -20,7 +20,7 @@
 
 .detail-row {
   display: grid;
-  grid-template-columns: 140px 1fr;
+  grid-template-columns: var(--detail-row-label-width, 140px) 1fr;
   gap: 0 var(--portal-field-label-gap);
 }
 
@@ -44,7 +44,7 @@
   padding: var(--space-3);
   border-radius: var(--border-radius-sm);
   border: var(--border-width) solid var(--color-border-primary);
-  max-height: 200px;
+  max-height: var(--detail-message-max-height, 200px);
   overflow-y: auto;
 }
 
@@ -65,8 +65,8 @@
   inset: 0;
   background: var(--color-overlay-light);
   z-index: var(--z-index-max);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(var(--details-overlay-blur, 8px));
+  backdrop-filter: blur(var(--details-overlay-blur, 8px));
 }
 
 .details-overlay.hidden {
@@ -79,7 +79,7 @@
   position: fixed;
   top: 0;
   right: 0;
-  width: 500px;
+  width: var(--details-panel-width, 500px);
   max-width: 90vw;
   height: 100vh;
   background: var(--color-bg-secondary);

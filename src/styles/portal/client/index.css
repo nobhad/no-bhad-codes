@@ -9,7 +9,6 @@
  */
 
 /* Shared portal styles (same as admin) */
-@import "../shared/portal-auth.css";
 @import "../shared/portal-layout.css";
 @import "../shared/portal-buttons.css";
 @import "../shared/portal-messages.css";
@@ -20,6 +19,7 @@
 @import "../shared/portal-tables.css";
 @import "../shared/portal-details-card.css";
 @import "../shared/portal-forms.css";
+@import "../shared/portal-auth.css";
 @import "../shared/portal-files.css";
 @import "../shared/portal-dropdown.css";
 @import "../shared/portal-badges.css";

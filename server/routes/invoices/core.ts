@@ -14,7 +14,7 @@ import {
   canAccessInvoice,
   canAccessProject,
   isUserAdmin
-} from '../../middleware/access-control.js';
+} from '../../utils/access-control.js';
 import { InvoiceCreateData, InvoiceLineItem } from '../../services/invoice-service.js';
 import type { InvoiceStatus } from '../../types/invoice-types.js';
 import { emailService } from '../../services/email-service.js';

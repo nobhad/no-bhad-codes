@@ -1,7 +1,7 @@
 import express, { Response } from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { canAccessFile } from '../../middleware/access-control.js';
+import { canAccessFile } from '../../utils/access-control.js';
 import { fileService } from '../../services/file-service.js';
 import { upload } from './uploads.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';

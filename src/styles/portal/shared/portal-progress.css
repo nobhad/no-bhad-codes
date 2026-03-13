@@ -9,7 +9,7 @@
  */
 
 .progress-bar {
-  height: 12px;
+  height: var(--progress-bar-height, 12px);
   background: var(--color-bg-elevated);
   overflow: hidden;
   box-shadow: var(--shadow-inset-light);
@@ -25,12 +25,12 @@
 
 /* Small progress bar */
 .progress-bar.progress-sm {
-  height: 8px;
+  height: var(--progress-bar-height-sm, 8px);
 }
 
 /* Large progress bar */
 .progress-bar.progress-lg {
-  height: 16px;
+  height: var(--progress-bar-height-lg, 16px);
 }
 
 /* Success state */

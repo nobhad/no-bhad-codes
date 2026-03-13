@@ -27,11 +27,11 @@
 [data-page="admin"] .inline-editable-cell:hover:not(.is-editing)::after {
   content: "";
   position: absolute;
-  right: 8px;
+  right: var(--space-1);
   top: 50%;
   transform: translateY(-50%);
-  width: 12px;
-  height: 12px;
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'/%3E%3Cpath d='m15 5 4 4'/%3E%3C/svg%3E");
   background-size: contain;
   background-repeat: no-repeat;
@@ -145,9 +145,9 @@
   align-items: center;
   gap: var(--icon-gap-xs, 4px);
   cursor: pointer;
-  min-height: 24px;
-  padding: 0 4px;
-  margin: 0 -4px;
+  min-height: var(--space-3);
+  padding: 0 var(--space-0-5);
+  margin: 0 calc(-1 * var(--space-0-5));
   border-radius: var(--border-radius-sm, 4px);
   transition: background-color var(--transition-faster, 0.1s) ease;
 }
@@ -189,7 +189,7 @@
 
 /* Compact input for inline editing */
 .portal .inline-edit-input-compact {
-  height: 24px;
+  height: var(--space-3);
   min-width: 80px;
   width: 100%;
   padding: 0 6px;
@@ -224,8 +224,8 @@
 
 /* Date input — left padding makes room for the Calendar icon */
 .portal .inline-edit-input-compact--date {
-  padding-left: 24px;
-  min-width: 130px;
+  padding-left: var(--space-3);
+  min-width: var(--inline-edit-date-min-width, 130px);
   color-scheme: dark;
 }
 
@@ -313,7 +313,7 @@
   align-items: center;
   gap: var(--icon-gap-sm, 6px);
   flex-shrink: 0;
-  min-width: 140px;
+  min-width: var(--inline-edit-label-min-width, 140px);
 }
 
 .portal .inline-edit-label .inline-edit-icon {
@@ -476,8 +476,8 @@
 
 /* Spinner */
 .portal .inline-edit-row .inline-edit-spinner {
-  width: 16px;
-  height: 16px;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
   color: var(--color-text-tertiary);
   animation: spin 1s linear infinite;
 }

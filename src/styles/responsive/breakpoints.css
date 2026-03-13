@@ -9,10 +9,10 @@
  * adjustments to override page-specific styles without !important.
  *
  * BREAKPOINT REFERENCE (using CSS custom media from design system):
- * --mobile:  max-width: 639px
- * --tablet:  min-width: 640px
- * --desktop: min-width: 1024px
- * --wide:    min-width: 1440px
+ * --mobile:  max-width: 767px
+ * --tablet:  min-width: 768px
+ * --desktop: min-width: 992px
+ * --wide:    min-width: 1200px
  */
 
 @layer responsive {

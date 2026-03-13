@@ -9,11 +9,11 @@
 
 /* Global tasks tab content should fill available height */
 [data-page="admin"] #tab-tasks .kanban-board {
-  min-height: calc(100vh - 280px);
+  min-height: calc(100vh - var(--tasks-kanban-board-offset, 280px));
 }
 
 [data-page="admin"] #tab-tasks .kanban-column {
-  min-height: calc(100vh - 320px);
+  min-height: calc(100vh - var(--tasks-kanban-column-offset, 320px));
 }
 
 /* Global Tasks Kanban - ensure horizontal layout */
@@ -27,7 +27,7 @@
 
   #global-tasks-kanban-container .kanban-column {
     flex: 1 1 0;
-    min-width: 200px;
+    min-width: var(--tasks-kanban-column-min-width, 200px);
     max-width: none;
   }
 }
@@ -213,7 +213,7 @@
 
 /* Kanban loading skeleton */
 .kanban-loading .kanban-column-skeleton {
-  height: 256px;
+  height: var(--kanban-skeleton-height, 256px);
   background: transparent;
   border: var(--border-width) solid var(--color-border-primary);
   animation: pulse-skeleton 2s ease-in-out infinite;

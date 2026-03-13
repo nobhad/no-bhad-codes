@@ -4,7 +4,7 @@ import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { cache, invalidateCache } from '../../middleware/cache.js';
-import { isUserAdmin } from '../../middleware/access-control.js';
+import { isUserAdmin } from '../../utils/access-control.js';
 import { emailService } from '../../services/email-service.js';
 import { getString, getNumber } from '../../database/row-helpers.js';
 import { notDeleted } from '../../database/query-helpers.js';

@@ -13,7 +13,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
-import { canAccessInvoice } from '../../middleware/access-control.js';
+import { canAccessInvoice } from '../../utils/access-control.js';
 import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseInvoice } from './helpers.js';
 

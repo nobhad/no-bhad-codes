@@ -6,7 +6,7 @@ import {
   canAccessProject,
   canAccessTask,
   canAccessChecklistItem
-} from '../../middleware/access-control.js';
+} from '../../utils/access-control.js';
 import { projectService } from '../../services/project-service.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 

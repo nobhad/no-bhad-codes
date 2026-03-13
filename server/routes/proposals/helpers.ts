@@ -12,7 +12,7 @@
 export { asyncHandler } from '../../middleware/errorHandler.js';
 export { authenticateToken, requireAdmin } from '../../middleware/auth.js';
 export type { AuthenticatedRequest } from '../../middleware/auth.js';
-export { canAccessProject, canAccessProposal, isUserAdmin } from '../../middleware/access-control.js';
+export { canAccessProject, canAccessProposal, isUserAdmin } from '../../utils/access-control.js';
 export { getDatabase } from '../../database/init.js';
 export { getString, getNumber } from '../../database/row-helpers.js';
 export { proposalService } from '../../services/proposal-service.js';

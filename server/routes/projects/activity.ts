@@ -2,7 +2,7 @@ import express, { Response } from 'express';
 import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { canAccessProject, isUserAdmin } from '../../middleware/access-control.js';
+import { canAccessProject, isUserAdmin } from '../../utils/access-control.js';
 import { getNumber } from '../../database/row-helpers.js';
 import { userService } from '../../services/user-service.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';

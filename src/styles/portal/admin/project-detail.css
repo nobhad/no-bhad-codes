@@ -694,7 +694,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   background-color: var(--color-bg-primary);
   border: var(--border-width-heavy) solid var(--color-border-primary);
   border-top: none;
-  max-height: 300px;
+  max-height: var(--pd-dropdown-max-height, 300px);
   overflow-y: auto;
   z-index: var(--z-index-dropdown);
   box-shadow: none;
@@ -895,7 +895,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 300px;
+  max-width: var(--pd-truncate-filename-max-width, 300px);
 }
 
 /* Hint text (small, secondary) */
@@ -1064,7 +1064,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Textarea minimum height */
 .tasks-textarea {
-  min-height: 60px;
+  min-height: var(--tasks-textarea-min-height, 60px);
 }
 
 /* Date input width */
@@ -1080,7 +1080,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Progress track */
 .tasks-progress-track {
   margin-top: var(--space-2);
-  max-width: 200px;
+  max-width: var(--tasks-progress-track-max-width, 200px);
 }
 
 /* Expanded content border */

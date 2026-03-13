@@ -10,7 +10,7 @@
 import express, { Response } from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
-import { canAccessContract } from '../middleware/access-control.js';
+import { canAccessContract } from '../utils/access-control.js';
 import { contractService, type ContractStatus } from '../services/contract-service.js';
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
