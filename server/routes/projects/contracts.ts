@@ -5,7 +5,7 @@ import { PDFDocument as PDFLibDocument, StandardFonts, degrees, rgb, PDFPage } f
 import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { canAccessProject } from '../../middleware/access-control.js';
+import { canAccessProject } from '../../utils/access-control.js';
 import {
   getUploadsDir,
   getUploadsSubdir,

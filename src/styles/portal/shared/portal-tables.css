@@ -60,7 +60,7 @@
 .data-table tbody tr {
   height: var(--table-row-height);
   cursor: pointer;
-  transition: background var(--duration-faster);
+  transition: background var(--transition-faster);
 }
 
 .data-table td {
@@ -1030,7 +1030,7 @@
   user-select: none;
   position: relative;
   padding-right: calc(var(--table-cell-padding-x) + var(--space-2) + var(--space-0-5));
-  transition: background-color var(--duration-faster);
+  transition: background-color var(--transition-faster);
 }
 
 /* Disable background-color change on header hover — text/icon only */
@@ -1078,7 +1078,7 @@
   width: var(--table-icon-size);
   height: var(--table-icon-size);
   color: var(--color-text-primary);
-  transition: color var(--duration-faster);
+  transition: color var(--transition-faster);
 }
 
 .data-table th.sortable:hover .sort-icon svg,

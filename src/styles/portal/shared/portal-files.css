@@ -112,11 +112,11 @@
    ===================================================== */
 .portal .files-browser {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: var(--files-folder-panel-width, 220px) 1fr;
   gap: var(--space-px);
   background: var(--portal-border);
   overflow: hidden;
-  min-height: 300px;
+  min-height: var(--files-browser-min-height, 300px);
   padding: 0;
 }
 
@@ -253,11 +253,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-0-5);
-  min-width: 140px;
+  min-width: var(--files-filter-group-min-width, 140px);
 }
 
 .portal .files-filter-bar .filter-group.filter-date {
-  min-width: 120px;
+  min-width: var(--files-filter-date-min-width, 120px);
 }
 
 .portal .files-filter-bar :is(.form-select, .form-input) {
@@ -266,7 +266,7 @@
   background: transparent;
   border: var(--portal-input-border);
   color: var(--color-text-primary);
-  height: 36px;
+  height: var(--icon-btn-size-md, 36px);
 }
 
 .portal .files-filter-bar :is(.form-select, .form-input):focus {
@@ -275,7 +275,7 @@
 }
 
 .portal .files-filter-bar #files-clear-filters {
-  height: 36px;
+  height: var(--icon-btn-size-md, 36px);
   white-space: nowrap;
 }
 
@@ -408,7 +408,7 @@
 
 /* Text buttons in file actions (exclude icon buttons) */
 .portal .file-actions :is(.btn-preview, .btn-download):not(.icon-btn) {
-  min-width: 90px;
+  min-width: var(--files-action-btn-min-width, 90px);
   text-align: center;
   justify-content: center;
 }
@@ -491,7 +491,7 @@
 }
 
 .files-filter .form-select {
-  max-width: 300px;
+  max-width: var(--files-filter-select-max-width, 300px);
 }
 
 .files-header {
@@ -633,12 +633,12 @@
 /* Files browser — flex layout: sidebar + content */
 .files-browser-layout {
   display: flex;
-  min-height: 300px;
+  min-height: var(--files-browser-min-height, 300px);
 }
 
 /* Folder sidebar — hidden on mobile, shown on desktop */
 .portal-files-sidebar {
-  width: 200px;
+  width: var(--portal-files-sidebar-width, 200px);
   flex-shrink: 0;
   display: none;
   border-right: var(--portal-border);
@@ -713,7 +713,7 @@
 
 /* Nested folder items */
 .folder-item-nested {
-  padding-left: 1.5rem;
+  padding-left: var(--space-3);
 }
 
 .folder-item.nested {
@@ -736,7 +736,7 @@
    ===================================================== */
 .files-list.grid-view {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(var(--files-grid-item-min-width, 150px), 1fr));
   gap: var(--space-1);
 }
 
@@ -748,8 +748,8 @@
 }
 
 .files-list.grid-view .file-icon {
-  width: 48px;
-  height: 48px;
+  width: var(--space-6);
+  height: var(--space-6);
   margin-bottom: var(--space-1);
 }
 
@@ -769,6 +769,6 @@
    ===================================================== */
 @media (--mobile) {
   .folder-tree {
-    max-height: 150px;
+    max-height: var(--files-folder-tree-max-height, 150px);
   }
 }

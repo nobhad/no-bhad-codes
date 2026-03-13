@@ -62,7 +62,7 @@
 
 .config-form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(var(--config-grid-min-width, 280px), 1fr));
   gap: var(--space-3);
 }
 
@@ -82,7 +82,7 @@
 
 .config-textarea {
   resize: vertical;
-  min-height: 72px;
+  min-height: var(--config-textarea-min-height, 72px);
   font-family: inherit;
 }
 
@@ -154,7 +154,7 @@
 
 .config-overview-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(var(--config-overview-grid-min-width, 180px), 1fr));
   gap: var(--space-2);
 }
 
@@ -237,7 +237,7 @@
 
 .snapshot-field-label {
   color: var(--color-text-tertiary);
-  min-width: 64px;
+  min-width: var(--config-field-label-min-width, 64px);
   flex-shrink: 0;
 }
 

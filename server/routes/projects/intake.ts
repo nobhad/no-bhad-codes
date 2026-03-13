@@ -5,7 +5,7 @@ import { PDFDocument as PDFLibDocument, PDFPage, StandardFonts, rgb } from 'pdf-
 import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
-import { canAccessProject } from '../../middleware/access-control.js';
+import { canAccessProject } from '../../utils/access-control.js';
 import { getString } from '../../database/row-helpers.js';
 import { BUSINESS_INFO, getPdfLogoBytes } from '../../config/business.js';
 import { getPdfCacheKey, getCachedPdf, cachePdf } from '../../utils/pdf-utils.js';

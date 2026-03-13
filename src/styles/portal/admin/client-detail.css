@@ -79,7 +79,7 @@
 }
 
 #tab-client-detail .overview-grid {
-  grid-template-columns: 1fr 300px;
+  grid-template-columns: 1fr var(--cd-sidebar-width, 300px);
 }
 /* .portal-project-card padding from portal-cards.css */
 

@@ -10,7 +10,7 @@ import { errorResponse, sendSuccess, sendCreated, sendPaginated, parsePagination
 import { workflowTriggerService } from '../services/workflow-trigger-service.js';
 import { logger } from '../services/logger.js';
 import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
-import { canAccessProject, isUserAdmin } from '../middleware/access-control.js';
+import { canAccessProject, isUserAdmin } from '../utils/access-control.js';
 import { getDatabase } from '../database/init.js';
 import { validateRequest, ValidationSchema } from '../middleware/validation.js';
 

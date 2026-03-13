@@ -117,26 +117,20 @@
 
 /* =====================================================
    AUTH FORM INPUTS
+   Base styles (border, bg, color, font-family, box-sizing, width)
+   are inherited from portal-forms.css via .auth-gate ancestor.
+   Only auth-gate-specific overrides here.
    ===================================================== */
 
 .auth-gate-form .form-input,
 .auth-gate .form-input {
-  width: 100%;
+  /* Auth inputs use padding-based height, not portal-forms' fixed height */
+  height: auto;
+  line-height: normal;
   padding: var(--space-2) var(--space-3);
-  border: var(--border-width) solid var(--color-border-primary);
   font-size: var(--font-size-base, 1rem);
-  background-color: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  font-family: inherit;
-  box-sizing: border-box;
   transition: all var(--transition-fast);
   min-height: var(--space-6);
-}
-
-.auth-gate-form .form-input:focus,
-.auth-gate .form-input:focus {
-  outline: none;
-  border-color: var(--color-accent);
 }
 
 .auth-gate-form .form-input::placeholder,
@@ -343,7 +337,7 @@
 
 @media (--mobile) {
   .auth-gate-form {
-    gap: 1rem;
+    gap: var(--space-2);
   }
 }
 
@@ -463,7 +457,7 @@ body.portal-logged-in[data-page="client-portal"] .nav-overlay {
 
 .set-password-header {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-3);
 }
 
 .set-password-header h1 {
@@ -471,7 +465,7 @@ body.portal-logged-in[data-page="client-portal"] .nav-overlay {
   font-size: clamp(1.8rem, 4vw, 2.5rem);
   text-transform: uppercase;
   color: var(--color-text-primary);
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 var(--space-1) 0;
 }
 
 .set-password-subtitle {

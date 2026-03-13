@@ -2,7 +2,7 @@ import express, { Response } from 'express';
 import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
-import { canAccessProject } from '../../middleware/access-control.js';
+import { canAccessProject } from '../../utils/access-control.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();

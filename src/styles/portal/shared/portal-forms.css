@@ -31,7 +31,7 @@
       Layout only — actual inputs use system 3 classes.
    ===================================================== */
 
-/* Base input styles — all form controls inside .portal and .modal-overlay. */
+/* Base input styles — all form controls inside .portal, .modal-overlay, and .auth-gate. */
 .portal
   :is(
     .form-input,
@@ -48,6 +48,21 @@
     select:not(.status-select)
   ),
 .modal-overlay
+  :is(
+    .form-input,
+    .form-textarea,
+    .form-select,
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="url"],
+    input[type="date"],
+    textarea,
+    select:not(.status-select)
+  ),
+.auth-gate
   :is(
     .form-input,
     .form-textarea,
@@ -126,7 +141,8 @@
 
 /* Focus state - border shifts to primary, subtle ring for contrast */
 .portal :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(:focus, :focus-visible),
-.modal-overlay :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(:focus, :focus-visible) {
+.modal-overlay :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(:focus, :focus-visible),
+.auth-gate :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(:focus, :focus-visible) {
   outline: none;
   outline-offset: 0;
   border-color: var(--color-accent);

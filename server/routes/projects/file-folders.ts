@@ -5,7 +5,7 @@ import {
   canAccessProject,
   canAccessFolder,
   canAccessFile
-} from '../../middleware/access-control.js';
+} from '../../utils/access-control.js';
 import { fileService } from '../../services/file-service.js';
 import { errorResponse, sendSuccess, sendCreated, messageResponse, ErrorCodes } from '../../utils/api-response.js';
 
