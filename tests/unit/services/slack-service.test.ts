@@ -15,7 +15,7 @@
  * - testNotification
  */
 
-import { describe, it, expect, beforeEach, vi, type MockedFunction } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // ============================================
 // MOCK SETUP

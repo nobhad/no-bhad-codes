@@ -81,7 +81,7 @@ const makeRow = (key: string, value: string, type = 'string') => ({
   updated_at: '2026-01-01T00:00:00Z'
 });
 
-const makeSetting = (key: string, value: string, type = 'string') => ({
+const _makeSetting = (key: string, value: string, type = 'string') => ({
   id: 1,
   key,
   value,
@@ -461,7 +461,7 @@ describe('SettingsService - getNextInvoiceNumber', () => {
 
     expect(result).toBe('INV-0005');
     expect(mockDb.run).toHaveBeenCalledWith(
-      expect.stringContaining("WHERE setting_key = 'invoice.next_sequence'"),
+      expect.stringContaining('WHERE setting_key = \'invoice.next_sequence\''),
       ['6']
     );
   });

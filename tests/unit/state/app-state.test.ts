@@ -347,7 +347,7 @@ describe('appState — errorHandlingMiddleware', () => {
 
   it('records "Unknown error" string for non-Error throws', () => {
     appState.addReducer('THROW_STRING', () => {
-      throw 'just a string'; // eslint-disable-line no-throw-literal
+      throw 'just a string';
     });
 
     appState.dispatch({ type: 'THROW_STRING' });

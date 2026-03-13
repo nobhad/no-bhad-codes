@@ -947,7 +947,7 @@ describe('ProposalService - E-Signatures', () => {
       await proposalService.markSignatureViewed('abc123token');
 
       const sql = mockDb.run.mock.calls[0][0] as string;
-      expect(sql).toContain("status = CASE WHEN status = 'pending' THEN 'viewed'");
+      expect(sql).toContain('status = CASE WHEN status = \'pending\' THEN \'viewed\'');
       expect(mockDb.run.mock.calls[0][1]).toContain('abc123token');
     });
   });
@@ -969,7 +969,7 @@ describe('ProposalService - E-Signatures', () => {
       await proposalService.declineSignature('abc123token', 'Not interested');
 
       const updateSql = mockDb.run.mock.calls[0][0] as string;
-      expect(updateSql).toContain("status = 'declined'");
+      expect(updateSql).toContain('status = \'declined\'');
     });
 
     it('uses signerEmail as actor when signerName is null', async () => {

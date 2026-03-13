@@ -363,7 +363,7 @@ describe('ContractService - Templates', () => {
       await contractService.updateTemplate(1, { name: 'Changed' });
 
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining("updated_at = datetime('now')"),
+        expect.stringContaining('updated_at = datetime(\'now\')'),
         expect.any(Array)
       );
     });
@@ -776,7 +776,7 @@ describe('ContractService - Signature Lifecycle', () => {
       expect(result.status).toBe('signed');
       expect(result.signerName).toBe('Alice Smith');
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining("status = 'signed'"),
+        expect.stringContaining('status = \'signed\''),
         expect.arrayContaining(['Alice Smith', 'alice@example.com', '127.0.0.1'])
       );
     });
@@ -871,7 +871,7 @@ describe('ContractService - Signature Lifecycle', () => {
 
       expect(result.status).toBe('expired');
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining("status = 'expired'"),
+        expect.stringContaining('status = \'expired\''),
         [1]
       );
     });

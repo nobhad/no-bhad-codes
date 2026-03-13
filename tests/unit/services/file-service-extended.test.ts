@@ -78,7 +78,7 @@ describe('File Service Extended', () => {
       });
 
       const { fileService } = await import('../../../server/services/file-service');
-      const version = await fileService.getVersions(1);
+      await fileService.getVersions(1);
 
       expect(mockDb.all).toHaveBeenCalledWith(
         expect.stringContaining('ORDER BY version_number DESC'),
@@ -665,7 +665,7 @@ describe('File Service Extended', () => {
 
       expect(workflow?.status).toBe('in_review');
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining("SET status = 'in_review'"),
+        expect.stringContaining('SET status = \'in_review\''),
         expect.any(Array)
       );
     });
@@ -892,7 +892,7 @@ describe('File Service Extended', () => {
 
       expect(pending).toHaveLength(2);
       expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining("dw.status IN ('pending_review', 'in_review')")
+        expect.stringContaining('dw.status IN (\'pending_review\', \'in_review\')')
       );
     });
 

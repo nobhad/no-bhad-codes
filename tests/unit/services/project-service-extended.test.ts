@@ -441,7 +441,7 @@ describe('ProjectService - createProjectFromTemplate', () => {
     expect(result.taskIds).toContain(201);
 
     expect(mockDb.run).toHaveBeenCalledWith(
-      expect.stringContaining("INSERT INTO projects"),
+      expect.stringContaining('INSERT INTO projects'),
       expect.any(Array)
     );
   });

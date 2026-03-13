@@ -110,7 +110,7 @@ vi.mock('../../../server/database/query-helpers', () => ({
   buildSafeUpdate: vi.fn((updates, _allowed, _opts) => {
     const keys = Object.keys(updates);
     if (keys.length === 0) return { setClause: '', params: [] };
-    const setClause = keys.map((k) => `${k} = ?`).join(', ') + ', updated_at = CURRENT_TIMESTAMP';
+    const setClause = `${keys.map((k) => `${k} = ?`).join(', ')  }, updated_at = CURRENT_TIMESTAMP`;
     return { setClause, params: Object.values(updates) };
   })
 }));
@@ -1111,7 +1111,7 @@ describe('ClientService - Health Scoring', () => {
       const result = await clientService.getAtRiskClients();
 
       expect(result).toHaveLength(1);
-      expect(mockDb.all.mock.calls[0][0]).toContain("health_status IN ('at_risk', 'critical')");
+      expect(mockDb.all.mock.calls[0][0]).toContain('health_status IN (\'at_risk\', \'critical\')');
     });
   });
 });
@@ -1273,7 +1273,7 @@ describe('ClientService - CRM Fields', () => {
 
       expect(result).toHaveLength(1);
       expect(mockDb.all.mock.calls[0][0]).toContain('next_follow_up_date IS NOT NULL');
-      expect(mockDb.all.mock.calls[0][0]).toContain("next_follow_up_date <= DATE('now')");
+      expect(mockDb.all.mock.calls[0][0]).toContain('next_follow_up_date <= DATE(\'now\')');
     });
 
     it('returns empty array when no clients need follow-up', async () => {

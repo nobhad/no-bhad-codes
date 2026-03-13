@@ -680,7 +680,7 @@ describe('LeadService - Pipeline Management', () => {
       await leadService.moveToStage(10, 2);
 
       const sql: string = mockDb.run.mock.calls[0][0];
-      expect(sql).toContain("status = 'in-progress'");
+      expect(sql).toContain('status = \'in-progress\'');
     });
 
     it('sets lost_at and status on-hold when moving to a lost stage', async () => {
@@ -691,7 +691,7 @@ describe('LeadService - Pipeline Management', () => {
 
       const sql: string = mockDb.run.mock.calls[0][0];
       expect(sql).toContain('lost_at = CURRENT_TIMESTAMP');
-      expect(sql).toContain("status = 'on-hold'");
+      expect(sql).toContain('status = \'on-hold\'');
     });
   });
 
@@ -999,7 +999,6 @@ describe('LeadService - Task Management', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].projectName).toBe('Acme Website');
-      const sql: string = mockDb.all.mock.calls[0][0];
       const params = mockDb.all.mock.calls[0][1] as unknown[];
       expect(params[0]).toBe(7);
     });
@@ -1332,7 +1331,7 @@ describe('LeadService - Duplicate Detection', () => {
 
       expect(result).toHaveLength(1);
       const sql: string = mockDb.all.mock.calls[0][0];
-      expect(sql).toContain("status = 'pending'");
+      expect(sql).toContain('status = \'pending\'');
     });
 
     it('returns empty array when no pending duplicates', async () => {

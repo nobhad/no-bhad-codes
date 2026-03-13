@@ -699,7 +699,7 @@ describe('MessageService - Read Receipts', () => {
       expect(count).toBe(3);
       // Admin query uses a single email param
       expect(mockDb.get).toHaveBeenCalledWith(
-        expect.stringContaining("sender_type != 'admin'"),
+        expect.stringContaining('sender_type != \'admin\''),
         ['admin@example.com']
       );
     });
@@ -712,7 +712,7 @@ describe('MessageService - Read Receipts', () => {
       expect(count).toBe(5);
       // Client query uses email twice
       expect(mockDb.get).toHaveBeenCalledWith(
-        expect.stringContaining("sender_type != 'client'"),
+        expect.stringContaining('sender_type != \'client\''),
         ['client@example.com', 'client@example.com']
       );
     });
@@ -951,7 +951,7 @@ describe('MessageService - Threads', () => {
       await messageService.archiveThread(1, 'admin@example.com');
 
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining("status = 'archived'"),
+        expect.stringContaining('status = \'archived\''),
         ['admin@example.com', 1]
       );
     });
@@ -964,7 +964,7 @@ describe('MessageService - Threads', () => {
       await messageService.unarchiveThread(1);
 
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining("status = 'active'"),
+        expect.stringContaining('status = \'active\''),
         [1]
       );
     });

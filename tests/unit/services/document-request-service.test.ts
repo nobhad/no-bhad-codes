@@ -444,7 +444,7 @@ describe('DocumentRequestService - getPendingRequests', () => {
     const result = await documentRequestService.getPendingRequests();
     expect(result).toHaveLength(2);
     expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining("status IN ('requested', 'viewed', 'uploaded', 'under_review')")
+      expect.stringContaining('status IN (\'requested\', \'viewed\', \'uploaded\', \'under_review\')')
     );
   });
 });
@@ -461,7 +461,7 @@ describe('DocumentRequestService - getRequestsForReview', () => {
     const result = await documentRequestService.getRequestsForReview();
     expect(result).toHaveLength(1);
     expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining("status = 'uploaded'")
+      expect.stringContaining('status = \'uploaded\'')
     );
   });
 });
@@ -739,7 +739,7 @@ describe('DocumentRequestService - sendReminder', () => {
     mockDb.run.mockResolvedValueOnce({}); // logHistory
     mockDb.get.mockResolvedValueOnce(makeRequest({ reminder_count: 2 }));
 
-    const result = await documentRequestService.sendReminder(1);
+    await documentRequestService.sendReminder(1);
     expect(mockDb.run).toHaveBeenCalledTimes(2);
 
     const updateSql = mockDb.run.mock.calls[0][0] as string;
@@ -774,7 +774,7 @@ describe('DocumentRequestService - getOverdueRequests', () => {
     const result = await documentRequestService.getOverdueRequests();
     expect(result).toHaveLength(1);
     expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining("due_date < date('now')")
+      expect.stringContaining('due_date < date(\'now\')')
     );
   });
 });
@@ -791,7 +791,7 @@ describe('DocumentRequestService - getProjectPendingRequests', () => {
     const result = await documentRequestService.getProjectPendingRequests(5);
     expect(result).toHaveLength(1);
     expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining("status NOT IN ('approved', 'rejected')"),
+      expect.stringContaining('status NOT IN (\'approved\', \'rejected\')'),
       [5]
     );
   });
@@ -809,7 +809,7 @@ describe('DocumentRequestService - getClientPendingRequests', () => {
     const result = await documentRequestService.getClientPendingRequests(10);
     expect(result).toHaveLength(1);
     expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining("status IN ('requested', 'viewed')"),
+      expect.stringContaining('status IN (\'requested\', \'viewed\')'),
       [10]
     );
   });
