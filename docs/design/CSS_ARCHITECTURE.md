@@ -803,20 +803,11 @@ border-color: var(--color-brand-hover, var(--color-interactive-primary-hover));
 
 ---
 
-### 6. Unlayered portal CSS beats all `@layer` declarations
+### 6. ~~Unlayered portal CSS beats all `@layer` declarations~~ — RESOLVED
 
-**Rule broken:** "Use cascade layers — all new styles must be placed in the correct layer."
+**Original deviation:** Most portal CSS files had no `@layer` wrapper, relying on unlayered CSS's automatic cascade precedence over all `@layer` declarations.
 
-**Where:** The majority of `src/styles/portal/shared/*.css`, `src/styles/portal/admin/*.css`, and `src/styles/portal/client/*.css` have no `@layer` wrapper.
-
-**Why:** This is intentional architecture. Files that use `@layer components` or `@layer utilities` (portal-tables.css, portal-buttons.css, etc.) contain BASE component structure at intentionally low priority. The unlayered portal files contain context-specific overrides that must beat those base styles. The layer order in both `admin/index.css` and `client/index.css` documents the intended cascade:
-
-```css
-@layer tokens, components, utilities, responsive;
-/* Unlayered (no @layer) = highest priority, beats all of the above */
-```
-
-New portal CSS should be unlayered unless it is explicitly a low-priority base style that should be overridable by other portal files.
+**Resolution (March 2026):** All portal CSS files wrapped in appropriate `@layer` blocks (`@layer components`, `@layer utilities`, or `@layer responsive`). The deviation no longer exists. See deviation #10 for the remaining multiple-blocks-per-file pattern that emerged from this migration.
 
 ---
 
@@ -871,9 +862,16 @@ body[data-page="client-portal"] {
 
 **Rule broken:** Each file should have one cohesive `@layer` block.
 
-**Where:** `src/styles/portal/shared/portal-tables.css` — 15 separate `@layer` blocks.
+**Where:**
 
-**Why:** `portal-tables.css` is the most complex file in the portal (~1,900 lines) and organizes its rules by feature section (base table, mobile responsive, kanban table, etc.). Interleaving `@layer components`, `@layer utilities`, and `@layer responsive` blocks throughout the file keeps related rules co-located while still declaring their correct cascade layer. CSS correctly merges all same-named layer blocks — multiple `@layer components` blocks in one file behave identically to one large block.
+- `src/styles/portal/shared/portal-tables.css` — 15 separate `@layer` blocks
+- `src/styles/portal/shared/portal-buttons.css` — interleaved `@layer components` and `@layer utilities` blocks
+- `src/styles/portal/shared/portal-modal-system.css` — two `@layer components` blocks around a `@layer utilities` block
+- `src/styles/portal/shared/portal-sidebar.css` — two `@layer components` blocks around a `@layer responsive` block
+- `src/styles/portal/admin/tasks.css` — two `@layer components` blocks around `@layer utilities` and `@layer responsive` blocks
+- `src/styles/portal/admin/index.css` — `@layer components` block followed by two `@layer utilities` blocks and a closing `@layer utilities` block
+
+**Why:** Files containing content that must live in different cascade layers (e.g., base component rules in `@layer components` alongside functional overrides in `@layer utilities`) cannot use a single contiguous wrapper. CSS requires separate `@layer` blocks for different layer types. CSS correctly merges all same-named layer blocks — multiple `@layer components` blocks in one file behave identically to one large block. The split blocks keep related rules co-located by feature while still declaring correct cascade priority.
 
 ---
 
