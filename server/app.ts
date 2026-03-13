@@ -66,6 +66,7 @@ import { eventsRouter } from './routes/events.js';
 import { searchRouter } from './routes/search.js';
 import healthRouter from './routes/health.js';
 import { portalRoutes } from './routes/portal.js';
+import { authPageRoutes } from './routes/auth-pages.js';
 import { errorResponseWithPayload } from './utils/api-response.js';
 import { setupSwagger } from './config/swagger.js';
 import { BUSINESS_INFO } from './config/business.js';
@@ -301,6 +302,9 @@ app.use('/api/admin', rateLimiters.authenticated);
 
 // Standard rate limit for other API routes: 60 requests per minute
 app.use('/api', rateLimiters.standard);
+
+// Auth page routes (EJS server-rendered: set-password, forgot-password, reset-password, intake)
+app.use(authPageRoutes);
 
 // Portal routes (EJS server-rendered shells)
 // These render the admin and client portal HTML shells
