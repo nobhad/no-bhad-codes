@@ -58,6 +58,12 @@ export const API_ENDPOINTS = {
   PAYMENT_SCHEDULES_FROM_SPLIT: '/api/payment-schedules/from-split',
   PAYMENT_SCHEDULES_CHECK_OVERDUE: '/api/payment-schedules/check-overdue',
 
+  // Content requests
+  CONTENT_REQUESTS: '/api/content-requests',
+  CONTENT_REQUESTS_MY: '/api/content-requests/my',
+  CONTENT_REQUESTS_OVERVIEW: '/api/content-requests/overview',
+  CONTENT_REQUESTS_TEMPLATES: '/api/content-requests/templates',
+
   // Client portal features
   CLIENT_INFO: '/api/client-info',
   INTAKE: '/api/intake',

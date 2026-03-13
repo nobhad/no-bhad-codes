@@ -85,7 +85,11 @@ export type EventType =
   // Task events
   | 'task.created'
   | 'task.completed'
-  | 'task.overdue';
+  | 'task.overdue'
+  // Content request events
+  | 'content_request.submitted'
+  | 'content_request.accepted'
+  | 'content_request.revision_needed';
 
 export type ActionType = 'send_email' | 'create_task' | 'update_status' | 'webhook' | 'notify';
 
@@ -458,7 +462,10 @@ class WorkflowTriggerService {
       'questionnaire.completed',
       'task.created',
       'task.completed',
-      'task.overdue'
+      'task.overdue',
+      'content_request.submitted',
+      'content_request.accepted',
+      'content_request.revision_needed'
     ];
   }
 
