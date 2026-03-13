@@ -356,7 +356,7 @@ export function ContactsTab({
                           {getContactDisplayName(contact)}
                         </span>
                         {contact.isPrimary && (
-                          <Star className="icon-xs active-primary" />
+                          <Star className="icon-xs is-active-primary" />
                         )}
                       </div>
                       {contact.title && (

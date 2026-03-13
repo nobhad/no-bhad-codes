@@ -176,8 +176,8 @@
 
 /* Edit icon - hidden by default, shown on hover */
 .portal .inline-edit-icon {
-  width: 10px;
-  height: 10px;
+  width: var(--inline-edit-icon-size);
+  height: var(--inline-edit-icon-size);
   color: var(--color-text-tertiary);
   opacity: 0;
   transition: opacity var(--transition-faster) ease;
@@ -192,7 +192,7 @@
   height: var(--space-3);
   min-width: 80px;
   width: 100%;
-  padding: 0 6px;
+  padding: 0 var(--inline-edit-compact-padding-x);
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
   border: var(--border-width) solid var(--color-brand-primary, var(--color-accent));
@@ -211,11 +211,11 @@
 
 .portal .inline-edit-date-cal {
   position: absolute;
-  left: 6px;
+  left: var(--inline-edit-compact-padding-x);
   top: 50%;
   transform: translateY(-50%);
-  width: 13px;
-  height: 13px;
+  width: var(--inline-edit-date-icon-size);
+  height: var(--inline-edit-date-icon-size);
   z-index: var(--z-index-1);
   cursor: pointer;
   pointer-events: all;
@@ -330,7 +330,7 @@
 
 .portal .inline-edit-required {
   color: var(--color-accent);
-  margin-left: 2px;
+  margin-left: var(--inline-edit-required-margin);
 }
 
 /* Value column - display mode */
@@ -343,7 +343,7 @@
   text-align: right;
   color: var(--color-text-primary);
   font-size: var(--font-size-base);
-  min-height: 24px;
+  min-height: var(--icon-size-xl);
   padding: var(--space-0-5) var(--space-1);
   margin: calc(-1 * var(--space-0-5)) calc(-1 * var(--space-1));
 }

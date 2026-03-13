@@ -26,7 +26,7 @@
 .config-section-tabs {
   display: flex;
   gap: var(--space-1);
-  border-bottom: var(--border-width) solid var(--color-border-primary);
+  border-bottom: var(--portal-border);
   padding-bottom: var(--space-2);
 }
 
@@ -200,7 +200,7 @@
 
 .snapshot-card-header {
   padding: var(--portal-card-padding);
-  border-bottom: var(--border-width) solid var(--color-border-primary);
+  border-bottom: var(--portal-border);
 }
 
 .snapshot-card-title {
@@ -245,7 +245,7 @@
 
 /* Snapshot divider */
 .snapshot-divider {
-  border-top: var(--border-width) solid var(--color-border-primary);
+  border-top: var(--portal-border);
   margin: var(--space-1) 0;
 }
 

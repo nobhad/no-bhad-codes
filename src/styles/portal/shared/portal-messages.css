@@ -207,8 +207,8 @@
 /* Avatar styling */
 .portal .message-avatar {
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: var(--icon-size-2xl);
+  height: var(--icon-size-2xl);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -463,8 +463,8 @@
 }
 
 .portal .messages-contact-icon svg {
-  width: 16px;
-  height: 16px;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
 }
 
 .portal .messages-contact-note {
@@ -523,8 +523,8 @@
 
 /* Attachment thumbnail in messages */
 .attachment-thumbnail {
-  width: 32px;
-  height: 32px;
+  width: var(--icon-size-2xl);
+  height: var(--icon-size-2xl);
   object-fit: cover;
   flex-shrink: 0;
 }
@@ -567,7 +567,7 @@
   flex-direction: column;
   gap: var(--space-1-5);
   padding: var(--space-2) var(--space-3);
-  border-bottom: var(--border-width) solid var(--color-border-primary);
+  border-bottom: var(--portal-border);
 }
 
 /* Two-column row: sidebar + main area */
@@ -581,7 +581,7 @@
 .messaging-sidebar {
   width: 320px;
   flex-shrink: 0;
-  border-right: var(--border-width) solid var(--color-border-primary);
+  border-right: var(--portal-border);
 }
 
 /* Section header — filter actions right-aligned */
@@ -591,7 +591,7 @@
   justify-content: flex-end;
   gap: var(--space-1);
   padding: var(--space-1-5) var(--space-3);
-  border-bottom: var(--border-width) solid var(--color-border-primary);
+  border-bottom: var(--portal-border);
   flex-shrink: 0;
 }
 
@@ -882,7 +882,7 @@
 /* Compose area */
 .messaging-compose {
   padding: 0 var(--space-2) var(--space-2);
-  border-top: var(--border-width) solid var(--color-border-primary);
+  border-top: var(--portal-border);
 }
 
 .messaging-compose-row {
@@ -1059,8 +1059,8 @@
 
 /* Action button size overrides */
 .message-action-btn {
-  height: 24px;
-  width: 24px;
+  height: var(--icon-size-xl);
+  width: var(--icon-size-xl);
 }
 
 .message-action-btn:focus,
@@ -1074,7 +1074,7 @@
 }
 
 .message-edit-btn {
-  height: 24px;
+  height: var(--icon-size-xl);
   font-size: var(--font-size-2xs);
 }
 
@@ -1112,7 +1112,7 @@
 .message-composer {
   gap: var(--space-1);
   padding: var(--space-1-5);
-  border-top: var(--border-width) solid var(--color-border-primary);
+  border-top: var(--portal-border);
 }
 
 /* Composer attachments preview */

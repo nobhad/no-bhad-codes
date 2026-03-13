@@ -94,8 +94,8 @@
 }
 
 .error-boundary-retry-icon {
-  width: 16px;
-  height: 16px;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
 }
 
 .error-boundary-actions {

@@ -20,11 +20,11 @@
 .field-label,
 .meta-label,
 .stat-label {
-  font-size: var(--label-font-size, var(--font-size-xs));
-  font-weight: var(--label-font-weight, var(--font-weight-medium));
+  font-size: var(--label-font-size);
+  font-weight: var(--label-font-weight);
   color: var(--color-text-primary);
   text-transform: uppercase;
-  letter-spacing: var(--label-letter-spacing, var(--letter-spacing-label));
+  letter-spacing: var(--label-letter-spacing);
 }
 
 .field-label,

@@ -28,7 +28,7 @@
 
 .portal .help-search-container .help-search-input {
   width: 100%;
-  padding: var(--space-0-5) var(--space-3) var(--space-0-5) calc(var(--space-1-5) + 24px);
+  padding: var(--space-0-5) var(--space-3) var(--space-0-5) calc(var(--space-1-5) + var(--icon-size-xl));
   font-size: var(--font-size-base);
   line-height: 1.2;
   color: var(--color-text-primary);
@@ -72,7 +72,7 @@
 }
 
 .help-right-column {
-  min-height: 400px;
+  min-height: var(--help-right-column-min-height);
 }
 
 @media (--mobile) {
@@ -139,8 +139,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: var(--icon-size-2xl);
+  height: var(--icon-size-2xl);
 }
 
 .help-featured-card-content {
@@ -166,7 +166,7 @@
 
 .help-contact-section {
   padding: var(--space-3);
-  border-top: var(--border-width) solid var(--color-border-primary);
+  border-top: var(--portal-border);
 }
 
 .help-contact-content {
@@ -179,7 +179,7 @@
 
 .help-contact-text {
   flex: 1;
-  min-width: 200px;
+  min-width: var(--help-contact-min-width);
 }
 
 .help-contact-description {
@@ -251,7 +251,7 @@
   gap: var(--space-2);
   margin-bottom: var(--space-2);
   padding-bottom: var(--space-2);
-  border-bottom: var(--border-width) solid var(--color-border-primary);
+  border-bottom: var(--portal-border);
 }
 
 .help-article-title-row {

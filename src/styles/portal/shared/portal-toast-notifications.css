@@ -13,7 +13,7 @@
   flex-direction: column;
   gap: var(--space-2);
   pointer-events: none;
-  max-width: 400px;
+  max-width: var(--toast-max-width);
 }
 
 .toast {
@@ -21,10 +21,10 @@
   align-items: center;
   gap: var(--icon-gap-md);
   padding: var(--space-3) var(--space-4);
-  background: var(--color-bg-secondary, var(--color-bg-secondary));
-  border: var(--border-width) solid var(--color-border-primary, var(--color-border-primary));
+  background: var(--color-bg-secondary);
+  border: var(--portal-border);
   box-shadow: none;
-  color: var(--color-text-primary, var(--color-text-inverse));
+  color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-normal);
   pointer-events: auto;
@@ -33,8 +33,8 @@
   transition:
     opacity var(--transition-normal) ease,
     transform var(--transition-normal) ease;
-  min-width: 250px;
-  max-width: 400px;
+  min-width: var(--toast-min-width);
+  max-width: var(--toast-max-width);
 }
 
 .toast-show {
@@ -52,8 +52,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
 }
 
 .toast-icon svg {
@@ -67,7 +67,7 @@
 }
 
 .toast-action {
-  color: var(--color-text-primary, var(--color-text-inverse));
+  color: var(--color-text-primary);
   font-weight: var(--font-weight-semibold);
   text-decoration: none;
   border-bottom: var(--border-width) solid transparent;
@@ -87,7 +87,7 @@
   border: none;
   padding: var(--space-1);
   cursor: pointer;
-  color: var(--color-text-secondary, var(--color-text-secondary));
+  color: var(--color-text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -95,18 +95,18 @@
     background-color var(--transition-fast) ease,
     color var(--transition-fast) ease;
   flex-shrink: 0;
-  width: 24px;
-  height: 24px;
+  width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
 }
 
 .toast-close:hover {
-  background: var(--color-bg-raised, var(--color-surface-tertiary));
-  color: var(--color-text-primary, var(--color-text-inverse));
+  background: var(--color-bg-raised);
+  color: var(--color-text-primary);
 }
 
 .toast-close svg {
-  width: 16px;
-  height: 16px;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
 }
 
 /* Type-specific colors */

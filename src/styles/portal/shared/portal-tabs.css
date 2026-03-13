@@ -275,8 +275,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 16px;
-  height: 16px;
+  min-width: var(--icon-size-md);
+  height: var(--icon-size-md);
   padding: 0 var(--space-0-25);
   background: var(--color-bg-elevated);
   color: var(--color-text-secondary);
