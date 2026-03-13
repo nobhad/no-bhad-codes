@@ -55,7 +55,7 @@
 .meta-value {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-regular);
-  color: var(--color-text-primary, var(--color-text-inverse));
+  color: var(--color-text-primary);
   line-height: var(--line-height-snug);
 }
 
