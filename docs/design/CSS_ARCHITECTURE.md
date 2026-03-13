@@ -237,41 +237,77 @@ src/
       site.css                   # Main marketing site bundle
       portal.css                 # Client portal bundle
       admin.css                  # Admin dashboard bundle
-    shared/
-      portal-badges.css          # Status badges
-      portal-buttons.css         # Portal button styles
-      portal-cards.css           # Card components
-      portal-components.css      # Shared portal utilities (progress, copy-email, etc.)
-      portal-charts.css          # Chart styling
-      portal-dashboard-widgets.css # Dashboard widget components
-      portal-dropdown.css        # Dropdown menus
-      portal-files.css           # File manager components
-      portal-forms.css           # Portal form overrides
-      portal-kanban.css          # Kanban board
-      portal-layout.css          # Portal layout (sidebar, header, content)
-      portal-messages.css        # Message/chat components
-      portal-progress.css        # Progress bars
-      portal-sidebar.css         # Sidebar navigation
-      portal-stat-cards.css      # Stat card widgets
-      portal-tables.css          # Table components
-      portal-tabs.css            # Tab navigation
-      portal-tags.css            # Tag/label components
-      portal-tooltips.css        # Tooltip styles
-      confirm-dialog.css         # Confirmation dialog
-      details-card.css           # Detail view cards
-      field-label-spacing.css    # Field-label gap utilities
-      modal-system.css           # Modal framework
-      notification-bell.css      # Notification bell icon
-      portal-auth.css            # Auth page portal styles
-      table-filters.css          # Table filter UI
-      toast-notifications.css    # Toast messages
+    portal/
+      shared/                    # Shared portal components (35+ files)
+        portal-accordion.css     # Accordion components
+        portal-analytics.css     # Analytics UI
+        portal-auth.css          # Auth page portal styles
+        portal-badges.css        # Status badges
+        portal-buttons.css       # Portal button styles
+        portal-cards.css         # Card components
+        portal-command-palette.css # Command palette
+        portal-components.css    # Shared portal utilities (copy-email, etc.)
+        portal-confirm-dialog.css # Confirmation dialog
+        portal-copy-email.css    # Copy-email component
+        portal-dashboard-widgets.css # Dashboard widget components
+        portal-details-card.css  # Detail view cards
+        portal-dropdown.css      # Dropdown menus
+        portal-error-states.css  # Error state displays
+        portal-field-label-spacing.css # Field-label gap utilities
+        portal-files.css         # File manager components
+        portal-forms.css         # Portal form overrides
+        portal-inline-edit.css   # Inline edit
+        portal-kanban.css        # Kanban board
+        portal-keyboard-shortcuts.css # Keyboard shortcut display
+        portal-layout.css        # Portal layout (sidebar, header, content)
+        portal-message-thread.css # Message thread UI
+        portal-messages.css      # Message/chat components
+        portal-modal-system.css  # Shared modal framework
+        portal-notification-bell.css # Notification bell icon
+        portal-performance.css   # Performance metrics display
+        portal-react-components.css # React-specific portal components
+        portal-sidebar.css       # Sidebar navigation
+        portal-stat-cards.css    # Stat card widgets
+        portal-status-panel.css  # Status panel
+        portal-tab-components.css # Tab navigation components
+        portal-table-filters.css # Table filter UI
+        portal-tables.css        # Table components
+        portal-tabs.css          # Tab navigation
+        portal-toast-notifications.css # Toast messages
+        portal-tooltips.css      # Tooltip styles
+        portal-utilities.css     # Portal utility classes
+      admin/                     # Admin-only styles (20+ files)
+        index.css                # Admin styles entry
+        modal-system.css         # Admin modal overrides
+        analytics.css            # Analytics page styles
+        audit-log.css            # Audit log styles
+        client-detail.css        # Client detail page
+        client-detail-crm.css    # CRM tab styles
+        configuration.css        # Configuration page
+        dashboard-layout.css     # Admin dashboard layout
+        detail-page-controls.css # Detail page control bar
+        leads-pipeline.css       # Leads pipeline view
+        project-detail.css       # Project detail page
+        project-detail-invoices.css # Invoice tab in project detail
+        proposals.css            # Proposals page
+        questionnaires.css       # Questionnaires page
+        system-status.css        # System status display
+        table-controls.css       # Table control bar
+        tasks.css                # Tasks page
+        workflows.css            # Workflows page
+      client/                    # Client portal styles
+        index.css                # Client portal styles entry
+        documents.css            # Documents page
+        help.css                 # Help page
+        layout.css               # Client portal layout
+        projects.css             # Projects page
+        requests.css             # Requests page
+        settings.css             # Settings page
     components/
       form-fields.css            # Form input/select/textarea
       form-buttons.css           # Form submit/cancel buttons
       form-validation.css        # Validation error styles
       loading.css                # Loading spinners/skeletons
-      command-palette.css        # Command palette (admin)
-      inline-edit.css            # Inline edit (admin)
       nav-base.css               # Navigation base
       nav-animations.css         # Navigation animations
       nav-responsive.css         # Navigation responsive
@@ -281,12 +317,6 @@ src/
       intro-morph.css            # Intro morph animation (main site)
       intro-nav.css              # Intro navigation (main site)
       page-transitions.css       # Page transition states
-    admin/
-      index.css                  # Admin styles entry
-      (22 feature-specific CSS files)
-    client-portal/
-      index.css                  # Client portal styles entry
-      (11 feature-specific CSS files)
     layouts/
       index.css                  # Layout entry
       flex-patterns.css          # Flex layout patterns
@@ -431,7 +461,7 @@ Light mode is handled entirely by 2–3 variable overrides directly in `src/desi
 
 ### Buttons
 
-Defined in `src/styles/shared/portal-buttons.css` and `src/styles/components/form-buttons.css`.
+Defined in `src/styles/portal/shared/portal-buttons.css` and `src/styles/components/form-buttons.css`.
 
 ```css
 .btn               /* Base button */
@@ -445,7 +475,7 @@ Defined in `src/styles/shared/portal-buttons.css` and `src/styles/components/for
 
 ### Status Badges
 
-Defined in `src/styles/shared/portal-badges.css`.
+Defined in `src/styles/portal/shared/portal-badges.css`.
 
 ```css
 .status-badge             /* Base badge */
@@ -458,7 +488,7 @@ Defined in `src/styles/shared/portal-badges.css`.
 
 ### Layout
 
-Defined in `src/styles/shared/portal-layout.css` and `src/styles/shared/portal-cards.css`.
+Defined in `src/styles/portal/shared/portal-layout.css` and `src/styles/portal/shared/portal-cards.css`.
 
 ```css
 .portal-container
@@ -470,7 +500,7 @@ Defined in `src/styles/shared/portal-layout.css` and `src/styles/shared/portal-c
 
 ### Tables
 
-Defined in `src/styles/shared/portal-tables.css`.
+Defined in `src/styles/portal/shared/portal-tables.css`.
 
 ```css
 .data-table                   /* Base table */
@@ -489,7 +519,7 @@ since the scoped `--portal-btn-icon-size` token keeps buttons compact.
 
 ### Forms
 
-Defined in `src/styles/components/form-fields.css` and `src/styles/shared/portal-forms.css`.
+Defined in `src/styles/components/form-fields.css` and `src/styles/portal/shared/portal-forms.css`.
 
 ```css
 .form-group
@@ -502,7 +532,7 @@ Defined in `src/styles/components/form-fields.css` and `src/styles/shared/portal
 
 ### Modals
 
-Defined in `src/styles/shared/modal-system.css` and `src/styles/admin/modals.css`.
+Defined in `src/styles/portal/shared/portal-modal-system.css` and `src/styles/portal/admin/modal-system.css`.
 
 ```css
 .admin-modal-overlay
@@ -677,9 +707,9 @@ Additional granular breakpoints are available. See `src/styles/variables.css` fo
 |------|----------|
 | Design tokens | `src/design-system/tokens/` |
 | Base styles | `src/styles/base/` |
-| Shared portal components | `src/styles/shared/` |
-| Admin-only styles | `src/styles/admin/` |
-| Client portal styles | `src/styles/client-portal/` |
+| Shared portal components | `src/styles/portal/shared/` |
+| Admin-only styles | `src/styles/portal/admin/` |
+| Client portal styles | `src/styles/portal/client/` |
 | Form components | `src/styles/components/` |
 | Layout patterns | `src/styles/layouts/` |
 | Interactive/visibility states | `src/styles/states/` |
@@ -711,11 +741,11 @@ Additional granular breakpoints are available. See `src/styles/variables.css` fo
 
 **Files modified:**
 
-- `src/styles/shared/portal-dropdown.css` — root caret rules, trigger rules, pagination, modal, table-dropdown
-- `src/styles/shared/portal-forms.css` — removed orphaned `qform-select-*` classes
-- `src/styles/shared/portal-badges.css` — status-dropdown-trigger (unchanged, already correct)
-- `src/styles/admin/analytics.css` — date-range-trigger padding-right
-- `src/styles/admin/project-detail.css` — files-category-trigger padding
+- `src/styles/portal/shared/portal-dropdown.css` — root caret rules, trigger rules, pagination, modal, table-dropdown
+- `src/styles/portal/shared/portal-forms.css` — removed orphaned `qform-select-*` classes
+- `src/styles/portal/shared/portal-badges.css` — status-dropdown-trigger (unchanged, already correct)
+- `src/styles/portal/admin/analytics.css` — date-range-trigger padding-right
+- `src/styles/portal/admin/project-detail.css` — files-category-trigger padding
 - `src/styles/components/inline-edit.css` — removed orphaned `.inline-select-trigger`
 - `src/react/components/portal/FormDropdown.tsx` — normalized value comparison
 - `src/react/components/portal/InlineEdit.tsx` — normalized value comparison in InlineSelect

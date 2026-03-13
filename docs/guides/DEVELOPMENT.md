@@ -81,3 +81,37 @@ Do not push to main with failing type checks or lint errors.
 
 See [`DEVELOPER_GUIDE.md`](../DEVELOPER_GUIDE.md) for a full architecture deep dive, module patterns,
 service layer documentation, and troubleshooting.
+
+## Test coverage
+
+Coverage is collected via Vitest + V8 provider. Reports are generated in HTML, JSON, LCOV, and text formats.
+
+### Coverage scripts
+
+```bash
+npm run test:coverage          # Generate full coverage report
+npm run test:coverage:watch    # Interactive coverage monitoring
+npm run test:coverage:report   # Generate and open HTML report
+npm run test:coverage:ci       # CI-optimized coverage
+coverage:check                 # Validate coverage meets thresholds
+```
+
+### Thresholds
+
+| Module type | Lines | Functions | Branches | Statements |
+|-------------|-------|-----------|----------|------------|
+| Global | 70% | 70% | 70% | 70% |
+| Core modules (`src/core/**`) | 85% | 85% | 85% | 85% |
+| Services (`src/services/**`) | 80% | 80% | 80% | 80% |
+
+### Coverage output
+
+Reports are written to `coverage/`:
+
+- `index.html` — interactive HTML report
+- `coverage.json` — Vitest format test results
+- `lcov.info` — LCOV format for CI integration
+
+### CI/CD
+
+GitHub Actions runs coverage on push/PR to main and develop branches. Builds fail below the 70% global threshold. PRs receive an automated coverage summary comment.
