@@ -26,6 +26,7 @@ import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, sani
 import { rateLimiters } from '../middleware/rate-limiter.js';
 import { validateRequest, ValidationSchemas } from '../middleware/validation.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { leadService } from '../services/lead-service.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const PROJECT_UPDATE_COLUMNS = `
@@ -469,7 +470,7 @@ router.post(
         { expiresIn: '7d' }
       );
 
-      // Send notifications (async, don't wait)
+      // Send notifications and calculate lead score (async, don't wait)
       // NOTE: Welcome email is NOT sent here because new clients are in 'pending' status.
       // They will receive an invitation email to activate their account, and welcome
       // emails will be sent after account activation via the welcome sequence.
@@ -480,6 +481,15 @@ router.post(
         } catch (emailError) {
           await logger.error('Failed to send emails:', {
             error: emailError instanceof Error ? emailError : undefined,
+            category: 'INTAKE'
+          });
+        }
+        try {
+          // Auto-calculate lead score for the new project
+          await leadService.calculateLeadScore(projectId);
+        } catch (scoreError) {
+          await logger.error('Failed to calculate lead score:', {
+            error: scoreError instanceof Error ? scoreError : undefined,
             category: 'INTAKE'
           });
         }

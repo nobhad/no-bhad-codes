@@ -111,10 +111,22 @@ export async function deleteScoringRule(ruleId: number): Promise<void> {
 }
 
 /**
+ * Extended project row type for scoring — includes intake fields
+ * available via SELECT p.* even if not on the base ProjectRow interface
+ */
+interface ScoringProjectRow extends ProjectRow {
+  client_type?: string;
+  design_level?: string;
+  features?: string;
+  notes?: string;
+  referral_source?: string;
+}
+
+/**
  * Get field value from project for scoring
  */
 function getFieldValue(
-  project: ProjectRow & { client_type?: string },
+  project: ScoringProjectRow,
   fieldName: string
 ): string | undefined {
   const fieldMap: Record<string, string | undefined> = {
@@ -123,9 +135,37 @@ function getFieldValue(
     description: project.description,
     priority: project.priority,
     client_type: project.client_type,
-    timeline: project.expected_close_date
+    timeline: project.expected_close_date,
+    design_level: project.design_level,
+    source_type: project.referral_source,
+    feature_count: countFeatures(project.features, project.notes)
   };
   return fieldMap[fieldName];
+}
+
+/**
+ * Count features from the features field or notes to produce a numeric string
+ */
+function countFeatures(features?: string, notes?: string): string {
+  if (features) {
+    // Features stored as comma-separated or JSON array
+    try {
+      const parsed = JSON.parse(features);
+      if (Array.isArray(parsed)) return String(parsed.length);
+    } catch {
+      // Comma-separated fallback
+      return String(features.split(',').filter((f) => f.trim()).length);
+    }
+  }
+  if (notes) {
+    // Look for "Features:" section in notes
+    const featuresMatch = notes.match(/Features:\s*([\s\S]*?)(?:\n\n|$)/i);
+    if (featuresMatch) {
+      const lines = featuresMatch[1].split('\n').filter((l) => l.trim());
+      return String(lines.length);
+    }
+  }
+  return '0';
 }
 
 export async function calculateLeadScore(projectId: number): Promise<LeadScoreResult> {
@@ -143,7 +183,7 @@ export async function calculateLeadScore(projectId: number): Promise<LeadScoreRe
     throw new Error('Project not found');
   }
 
-  const project = projectRow as unknown as ProjectRow & { client_type?: string };
+  const project = projectRow as unknown as ScoringProjectRow;
 
   const rules = await getScoringRules();
 

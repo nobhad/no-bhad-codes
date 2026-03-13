@@ -48,7 +48,10 @@ const FIELD_OPTIONS = [
   { value: 'description', label: 'Description' },
   { value: 'priority', label: 'Priority' },
   { value: 'client_type', label: 'Client Type' },
-  { value: 'timeline', label: 'Timeline' }
+  { value: 'timeline', label: 'Timeline' },
+  { value: 'feature_count', label: 'Feature Count' },
+  { value: 'design_level', label: 'Design Level' },
+  { value: 'source_type', label: 'Referral Source' }
 ] as const;
 
 const OPERATOR_OPTIONS = [

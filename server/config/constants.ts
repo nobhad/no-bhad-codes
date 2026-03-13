@@ -214,6 +214,70 @@ export const DOCUMENT_REQUEST_STATUSES = [
 export type DocumentRequestStatus = (typeof DOCUMENT_REQUEST_STATUSES)[number];
 
 // ============================================
+// PAYMENT INSTALLMENT CONSTANTS
+// ============================================
+
+export const PAYMENT_INSTALLMENT_STATUSES = [
+  'pending',
+  'paid',
+  'overdue',
+  'cancelled'
+] as const;
+
+export type PaymentInstallmentStatus = (typeof PAYMENT_INSTALLMENT_STATUSES)[number];
+
+export const PAYMENT_METHODS = [
+  'check',
+  'card',
+  'ach',
+  'cash',
+  'other'
+] as const;
+
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
+// ============================================
+// CONTENT REQUEST CONSTANTS
+// ============================================
+
+export const CONTENT_CHECKLIST_STATUSES = [
+  'active',
+  'completed',
+  'cancelled'
+] as const;
+
+export type ContentChecklistStatus = (typeof CONTENT_CHECKLIST_STATUSES)[number];
+
+export const CONTENT_REQUEST_ITEM_STATUSES = [
+  'pending',
+  'submitted',
+  'revision_needed',
+  'accepted'
+] as const;
+
+export type ContentRequestItemStatus = (typeof CONTENT_REQUEST_ITEM_STATUSES)[number];
+
+export const CONTENT_TYPES = [
+  'text',
+  'file',
+  'url',
+  'structured'
+] as const;
+
+export type ContentType = (typeof CONTENT_TYPES)[number];
+
+export const CONTENT_CATEGORIES = [
+  'copy',
+  'photo',
+  'brand_asset',
+  'credentials',
+  'reference',
+  'other'
+] as const;
+
+export type ContentCategory = (typeof CONTENT_CATEGORIES)[number];
+
+// ============================================
 // NOTIFICATION CONSTANTS
 // ============================================
 
