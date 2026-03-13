@@ -25,21 +25,6 @@ const templates = [
     input: resolve(projectRoot, 'projects/index.html'),
     output: resolve(projectRoot, 'dist-temp/projects/index.html'),
     data: 'projects'
-  },
-  {
-    input: resolve(projectRoot, 'admin/index.html'),
-    output: resolve(projectRoot, 'dist-temp/admin/index.html'),
-    data: 'admin'
-  },
-  {
-    input: resolve(projectRoot, 'client/intake.html'),
-    output: resolve(projectRoot, 'dist-temp/client/intake.html'),
-    data: 'clientIntake'
-  },
-  {
-    input: resolve(projectRoot, 'client/portal.html'),
-    output: resolve(projectRoot, 'dist-temp/client/portal.html'),
-    data: 'clientPortal'
   }
 ];
 

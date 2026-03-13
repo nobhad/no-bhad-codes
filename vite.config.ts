@@ -1,32 +1,7 @@
-import { defineConfig, Plugin, type Terser } from 'vite';
+import { defineConfig, type Terser } from 'vite';
 import { resolve } from 'path';
 import { ViteEjsPlugin } from 'vite-plugin-ejs';
 import { createObfuscationPlugin } from './src/utils/obfuscation-plugin';
-
-/**
- * Custom plugin to handle MPA routing in development
- * Rewrites URLs for static HTML pages (non-EJS routes)
- * Note: /portal, /dashboard, /admin and /client are served by Express EJS
- */
-function mpaRoutingPlugin(): Plugin {
-  return {
-    name: 'mpa-routing',
-    configureServer(server) {
-      server.middlewares.use((req, res, next) => {
-        const url = req.url || '';
-
-        // Rewrite /client/intake to /client/intake.html (static page)
-        if (url === '/client/intake' || url === '/client/intake/') {
-          req.url = '/client/intake.html';
-        } else if (url.startsWith('/client/set-password')) {
-          req.url = url.replace('/client/set-password', '/client/set-password.html');
-        }
-
-        next();
-      });
-    }
-  };
-}
 
 export default defineConfig({
   // Root directory
@@ -44,10 +19,7 @@ export default defineConfig({
     // Build all HTML entry points
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html'),
-        client: resolve(__dirname, 'client/index.html'),
-        'client-intake': resolve(__dirname, 'client/intake.html'),
-        'client-set-password': resolve(__dirname, 'client/set-password.html')
+        main: resolve(__dirname, 'index.html')
       },
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
@@ -120,20 +92,32 @@ export default defineConfig({
         target: 'http://localhost:4001',
         changeOrigin: true,
         secure: false,
-        // Only proxy main client portal, not static pages (intake, set-password)
-        bypass: (req) => {
-          const url = req.url || '';
-          // Skip proxy for static HTML pages - let Vite serve them
-          if (url.includes('/intake') || url.includes('/set-password')) {
-            return url;
-          }
-          return null; // Proxy to Express for EJS rendering
-        },
         configure: (proxy) => {
           proxy.on('error', (err) => {
             console.warn('[vite-proxy] /client error:', (err as Error).message);
           });
         }
+      },
+      // Auth pages - served by Express EJS
+      '/set-password': {
+        target: 'http://localhost:4001',
+        changeOrigin: true,
+        secure: false
+      },
+      '/forgot-password': {
+        target: 'http://localhost:4001',
+        changeOrigin: true,
+        secure: false
+      },
+      '/reset-password': {
+        target: 'http://localhost:4001',
+        changeOrigin: true,
+        secure: false
+      },
+      '/intake': {
+        target: 'http://localhost:4001',
+        changeOrigin: true,
+        secure: false
       },
       // API routes
       '/api': {
@@ -203,9 +187,6 @@ export default defineConfig({
     // because their Fast Refresh preamble detection fails with island architecture
     // (mounting React components into vanilla TS pages via dynamic imports).
     // Instead, we use esbuild's built-in JSX transformation configured below.
-
-    // MPA routing for dev server
-    mpaRoutingPlugin(),
 
     ViteEjsPlugin({
       // EJS template configuration

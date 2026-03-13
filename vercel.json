@@ -29,12 +29,37 @@
       "source": "/api/:path*",
       "destination": "https://no-bhad-codes-production.up.railway.app/api/:path*"
     },
-    { "source": "/client/portal", "destination": "/client/portal.html" },
-    { "source": "/client/intake", "destination": "/client/intake.html" },
     {
-      "source": "/client/set-password",
-      "destination": "/client/set-password.html"
+      "source": "/set-password/:path*",
+      "destination": "https://no-bhad-codes-production.up.railway.app/set-password"
     },
-    { "source": "/admin", "destination": "/admin/index.html" }
+    {
+      "source": "/forgot-password/:path*",
+      "destination": "https://no-bhad-codes-production.up.railway.app/forgot-password"
+    },
+    {
+      "source": "/reset-password/:path*",
+      "destination": "https://no-bhad-codes-production.up.railway.app/reset-password"
+    },
+    {
+      "source": "/intake/:path*",
+      "destination": "https://no-bhad-codes-production.up.railway.app/intake"
+    },
+    {
+      "source": "/dashboard/:path*",
+      "destination": "https://no-bhad-codes-production.up.railway.app/dashboard"
+    },
+    {
+      "source": "/portal/:path*",
+      "destination": "https://no-bhad-codes-production.up.railway.app/portal"
+    },
+    {
+      "source": "/client/:path*",
+      "destination": "https://no-bhad-codes-production.up.railway.app/client/:path*"
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "https://no-bhad-codes-production.up.railway.app/admin/:path*"
+    }
   ]
 }
