@@ -428,13 +428,13 @@
 }
 
 /* Active primary color for icons/text */
-.active-primary {
-  color: var(--portal-accent);
+.is-active-primary {
+  color: var(--color-accent);
   fill: currentColor;
 }
 
 /* Primary border accent */
 .border-primary-accent {
-  border-color: var(--portal-accent);
+  border-color: var(--color-accent);
 }
 

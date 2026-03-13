@@ -1083,7 +1083,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Expanded content border */
 .tasks-expanded-content {
-  border-top: var(--border-width) solid var(--color-border-primary);
+  border-top: var(--portal-border);
 }
 
 /* Description text */

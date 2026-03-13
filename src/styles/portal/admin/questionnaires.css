@@ -169,7 +169,7 @@
 /* HR separator in form */
 [data-page="admin"] #questionnaire-form hr {
   border: none;
-  border-top: var(--border-width) solid var(--color-border-primary);
+  border-top: var(--portal-border);
   margin: var(--space-4) 0;
 }
 

@@ -16,7 +16,7 @@
 .lead-details-tabs {
   display: flex;
   gap: var(--space-0-5);
-  border-bottom: var(--border-width) solid var(--portal-border);
+  border-bottom: var(--portal-border);
   margin-bottom: var(--space-1-5);
   padding-bottom: var(--space-0-5);
 }

@@ -141,7 +141,7 @@
   padding: var(--space-1);
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
-  border-bottom: var(--border-width) solid var(--color-border-primary);
+  border-bottom: var(--portal-border);
 }
 
 #view-project-invoice-modal .invoice-line-items th.text-right {
@@ -159,7 +159,7 @@
 
 #view-project-invoice-modal .invoice-totals {
   padding-top: var(--space-2);
-  border-top: var(--border-width) solid var(--color-border-primary);
+  border-top: var(--portal-border);
 }
 
 #view-project-invoice-modal .total-row {
@@ -183,7 +183,7 @@
 #view-project-invoice-modal .invoice-notes-section {
   margin-top: var(--space-3);
   padding-top: var(--space-2);
-  border-top: var(--border-width) solid var(--color-border-primary);
+  border-top: var(--portal-border);
 }
 
 #view-project-invoice-modal .invoice-notes-section p {

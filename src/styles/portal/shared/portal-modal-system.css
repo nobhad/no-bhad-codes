@@ -165,7 +165,7 @@
   letter-spacing: var(--letter-spacing-wider);
   padding: 0 0 var(--space-2) 0;
   margin-bottom: var(--space-3);
-  border-bottom: var(--border-width) solid var(--color-border-primary);
+  border-bottom: var(--portal-border);
   width: 100%;
 }
 

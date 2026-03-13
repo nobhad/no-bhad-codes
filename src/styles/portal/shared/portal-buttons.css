@@ -300,7 +300,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 }
 /* Outline variant - icon button with border */
 .icon-btn.icon-btn-outline {
-  border: var(--border-width) solid var(--portal-border);
+  border: var(--portal-border);
 }
 .icon-btn.icon-btn-outline:hover {
   border-color: var(--color-accent);

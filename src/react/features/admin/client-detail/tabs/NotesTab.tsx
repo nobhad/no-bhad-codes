@@ -190,7 +190,7 @@ export function NotesTab({
       <div className="note-card-header">
         <div className="note-meta">
           {note.is_pinned && (
-            <Pin className="icon-xs active-primary" />
+            <Pin className="icon-xs is-active-primary" />
           )}
           <span className="text-muted text-xs">
             {formatNoteDate(note.created_at)}
@@ -203,7 +203,7 @@ export function NotesTab({
             onClick={() => handleTogglePin(note)}
             className={cn(
               'btn-icon',
-              note.is_pinned && 'active-primary'
+              note.is_pinned && 'is-active-primary'
             )}
             title={note.is_pinned ? 'Unpin' : 'Pin'}
           >

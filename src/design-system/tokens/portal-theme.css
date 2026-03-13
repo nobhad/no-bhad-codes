@@ -264,6 +264,7 @@ body[data-page="client-portal"] {
    * ---------------------------------------- */
   --dropdown-padding-x: var(--space-1-5);
   --dropdown-padding-y: var(--space-1);
+  --dropdown-item-height: var(--space-4);       /* 32px — fixed-height dropdown rows */
   --status-dropdown-width: var(--space-20); /* 160px */
 
   /* ----------------------------------------
@@ -371,6 +372,18 @@ body[data-page="client-portal"] {
   /* Group: Inline Edit */
   --inline-edit-date-min-width: 130px;
   --inline-edit-label-min-width: 140px;
+  --inline-edit-icon-size: 10px;          /* Hover pencil edit icon — smaller than --icon-size-xs */
+  --inline-edit-date-icon-size: 13px;     /* Calendar icon inside compact date input */
+  --inline-edit-compact-padding-x: 6px;  /* Horizontal padding for compact row inputs */
+  --inline-edit-required-margin: 2px;    /* Left gap before required asterisk */
+
+  /* Group: Help Center */
+  --help-right-column-min-height: 400px; /* Article column floor height */
+  --help-contact-min-width: 200px;       /* Contact card text block min-width */
+
+  /* Group: Toast Notifications */
+  --toast-min-width: 250px;
+  --toast-max-width: 400px;
 
   /* ----------------------------------------
    * NOTIFICATION BELL TOKENS

@@ -33,7 +33,7 @@
 /* Tag input in client detail: fit overview card, match portal form look */
 #tab-client-detail #cd-tags-container .tag-input-wrapper {
   background: var(--color-bg-readonly);
-  border: var(--border-width) solid var(--portal-border);
+  border: var(--portal-border);
   border-radius: var(--border-radius-md);
   min-height: var(--space-5);
   padding: var(--space-2) var(--space-3);
@@ -65,7 +65,7 @@
 }
 
 .contact-card.primary {
-  border-color: var(--portal-accent);
+  border-color: var(--color-accent);
 }
 
 .contact-name {
@@ -78,7 +78,7 @@
 .contact-name .primary-badge {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
-  background: var(--portal-accent);
+  background: var(--color-accent);
   color: var(--color-dark);
   padding: var(--space-0-5) var(--space-1);
   margin-left: var(--space-1);
@@ -106,8 +106,8 @@
 }
 
 .contact-detail svg {
-  width: 14px;
-  height: 14px;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
 }
 
 .contact-actions {
@@ -125,7 +125,7 @@
 }
 
 .note-card.pinned {
-  border-color: var(--portal-accent);
+  border-color: var(--color-accent);
   background: var(--color-bg-tertiary);
 }
 

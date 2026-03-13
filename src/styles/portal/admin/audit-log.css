@@ -21,7 +21,7 @@
    ================================================ */
 .audit-filters {
   padding: var(--space-3);
-  border-bottom: var(--border-width) solid var(--color-border-primary);
+  border-bottom: var(--portal-border);
 }
 
 .audit-filter-row {
@@ -62,7 +62,7 @@
   text-align: left;
   padding: var(--space-2) var(--space-3);
   color: var(--color-text-secondary);
-  border-bottom: var(--border-width) solid var(--color-border-primary);
+  border-bottom: var(--portal-border);
   white-space: nowrap;
 }
 
@@ -78,7 +78,7 @@
   padding: var(--space-2) var(--space-3);
   font-size: var(--font-size-xs);
   color: var(--color-text-primary);
-  border-bottom: var(--border-width) solid var(--color-border-primary);
+  border-bottom: var(--portal-border);
   vertical-align: top;
 }
 

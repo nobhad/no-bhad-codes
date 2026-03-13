@@ -67,7 +67,7 @@
 .portal .content-section > h3:first-child {
   padding: var(--portal-section-heading-padding);
   margin: 0;
-  border-bottom: var(--border-width) solid var(--color-border-primary);
+  border-bottom: var(--portal-border);
 }
 
 /* =====================================================
