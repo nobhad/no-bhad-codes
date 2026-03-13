@@ -40,14 +40,18 @@ const DASHBOARD_ENDPOINT = `${API_ENDPOINTS.CLIENTS_ME}/dashboard`;
 
 /** Maps activity type to portal navigation tab */
 const ACTIVITY_TYPE_TO_TAB: Record<string, string> = {
-  project: 'projects',
+  project: 'dashboard',
   invoice: 'documents',
   message: 'messages',
   document: 'documents',
-  contract: 'documents',
+  contract: 'contracts',
   file: 'files',
-  request: 'files',
-  questionnaire: 'files'
+  request: 'requests-hub',
+  questionnaire: 'requests-hub',
+  content_request: 'requests-hub',
+  payment: 'payment-schedule',
+  deliverable: 'deliverables',
+  approval: 'deliverables'
 };
 
 /** Maps activity type to Lucide icon component */

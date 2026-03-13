@@ -197,48 +197,62 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
   // Client top-level items (no group — visible directly in sidebar)
   // No separate Projects tab — multi-project clients use header dropdown
   {
+    id: 'messages',
+    label: 'Messages',
+    icon: 'messageSquare',
+    roles: ['client'],
+    order: 2,
+    badge: 'badge-messages'
+  },
+  {
     id: 'documents',
     label: 'Documents',
     icon: 'fileText',
     roles: ['client'],
-    order: 2,
+    order: 3,
     badge: 'badge-documents'
+  },
+  {
+    id: 'requests-hub',
+    label: 'Requests',
+    icon: 'clipboardList',
+    roles: ['client'],
+    order: 4
   },
   {
     id: 'deliverables',
     label: 'Deliverables',
     icon: 'package',
     roles: ['client'],
-    order: 3
-  },
-  {
-    id: 'messages',
-    label: 'Messages',
-    icon: 'messageSquare',
-    roles: ['client'],
-    order: 4,
-    badge: 'badge-messages'
+    order: 5
   },
   {
     id: 'files',
     label: 'Files',
-    icon: 'fileText',
+    icon: 'folder',
     roles: ['client'],
-    order: 5,
+    order: 6,
     badge: 'badge-files',
     dataTab: 'files'
   },
   {
-    id: 'help',
-    label: 'Help',
-    icon: 'helpCircle',
+    id: 'payment-schedule',
+    label: 'Payments',
+    icon: 'receipt',
     roles: ['client'],
-    order: 6
+    order: 7
   },
   {
     id: 'settings',
     label: 'Settings',
     icon: 'settingsClient',
+    roles: ['client'],
+    order: 8
+  },
+  {
+    id: 'help',
+    label: 'Help',
+    icon: 'helpCircle',
     roles: ['client'],
     order: 100
   },
@@ -497,6 +511,9 @@ export const UNIFIED_TAB_TITLES: Record<string, string> = {
   review: 'Project Preview',
   help: 'Help',
   'new-project': 'New Project',
+  'requests-hub': 'Requests',
+  'content-requests': 'Content Requests',
+  'payment-schedule': 'Payments',
   // Redirects keep working via title lookup
   'client-documents': 'Documents'
 };

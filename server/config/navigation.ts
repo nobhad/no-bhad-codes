@@ -294,22 +294,16 @@ export const ADMIN_TAB_IDS = [
  */
 export const CLIENT_TAB_IDS = [
   'dashboard',
-  'projects',
-  'project-detail',
   'messages',
-  'files',
-  'invoices',
-  'proposals',
-  'contracts',
-  'deliverables',
-  'requests',
-  'questionnaires',
   'documents',
-  'approvals',
-  'review',
-  'help',
+  'requests-hub',
+  'content-requests',
+  'deliverables',
+  'files',
+  'payment-schedule',
+  'contracts',
   'settings',
-  'new-project',
+  'help',
   'onboarding'
 ];
 

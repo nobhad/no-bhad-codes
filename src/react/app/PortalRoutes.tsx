@@ -107,6 +107,9 @@ const PortalDocuments = lazyNamed(() => import('../features/portal/documents').t
 const PortalFilesHub = lazyNamed(() => import('../features/portal/files-hub').then(m => ({ PortalFilesHub: m.PortalFilesHub })));
 const PortalDeliverablesHub = lazyNamed(() => import('../features/portal/deliverables-hub').then(m => ({ PortalDeliverablesHub: m.PortalDeliverablesHub })));
 const PortalContracts = lazyNamed(() => import('../features/portal/contracts').then(m => ({ PortalContracts: m.PortalContracts })));
+const PortalRequestsHub = lazyNamed(() => import('../features/portal/requests-hub').then(m => ({ PortalRequestsHub: m.PortalRequestsHub })));
+const ContentChecklistView = lazyNamed(() => import('../features/portal/content-requests').then(m => ({ ContentChecklistView: m.ContentChecklistView })));
+const PaymentScheduleView = lazyNamed(() => import('../features/portal/payment-schedule').then(m => ({ PaymentScheduleView: m.PaymentScheduleView })));
 
 // ============================================
 // DETAIL VIEW WRAPPERS
@@ -258,7 +261,14 @@ export function PortalRoutes() {
           role === 'admin' ? (
             <LazyTabRoute tabId="questionnaires"><QuestionnairesTable /></LazyTabRoute>
           ) : (
-            <Navigate to="/files" replace />
+            <Navigate to="/requests-hub" replace />
+          )
+        } />
+        <Route path="/document-requests" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="document-requests"><DocumentRequestsTable /></LazyTabRoute>
+          ) : (
+            <Navigate to="/requests-hub" replace />
           )
         } />
         <Route path="/projects" element={
@@ -301,7 +311,7 @@ export function PortalRoutes() {
           role === 'admin' ? (
             <LazyTabRoute tabId="requests"><AdHocRequestsTable /></LazyTabRoute>
           ) : (
-            <Navigate to="/dashboard" replace />
+            <Navigate to="/requests-hub" replace />
           )
         } />
         <Route path="/ad-hoc-requests" element={<Navigate to="/requests" replace />} />
@@ -319,7 +329,7 @@ export function PortalRoutes() {
             <Navigate to="/documents" replace />
           )
         } />
-        <Route path="/document-requests" element={<LazyTabRoute tabId="document-requests"><DocumentRequestsTable /></LazyTabRoute>} />
+        {/* document-requests now handled above with role-based routing */}
         <Route path="/support" element={<LazyTabRoute tabId="support"><KnowledgeBase /></LazyTabRoute>} />
         <Route path="/system" element={<LazyTabRoute tabId="system"><SettingsManager /></LazyTabRoute>} />
         <Route path="/email-templates" element={<LazyTabRoute tabId="email-templates"><EmailTemplatesManager /></LazyTabRoute>} />
@@ -345,6 +355,27 @@ export function PortalRoutes() {
         } />
         <Route path="/review" element={<Navigate to="/dashboard" replace />} />
         <Route path="/help" element={<LazyTabRoute tabId="help"><PortalHelp /></LazyTabRoute>} />
+
+        {/* ========== NEW: Requests Hub, Content Requests, Payment Schedule ========== */}
+        <Route path="/requests-hub" element={
+          role === 'admin' ? (
+            <Navigate to="/documents" replace />
+          ) : (
+            <LazyTabRoute tabId="requests-hub"><PortalRequestsHub /></LazyTabRoute>
+          )
+        } />
+        <Route path="/content-requests" element={
+          role === 'admin' ? (
+            <Navigate to="/documents" replace />
+          ) : (
+            <LazyTabRoute tabId="content-requests"><ContentChecklistView /></LazyTabRoute>
+          )
+        } />
+        <Route path="/payment-schedule" element={
+          <LazyTabRoute tabId="payment-schedule">
+            <PaymentScheduleView />
+          </LazyTabRoute>
+        } />
 
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
