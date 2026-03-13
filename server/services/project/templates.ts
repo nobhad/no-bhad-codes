@@ -45,15 +45,24 @@ export async function createTemplate(data: TemplateData): Promise<ProjectTemplat
   return toTemplate(template as unknown as TemplateRow);
 }
 
-export async function getTemplates(projectType?: string): Promise<ProjectTemplate[]> {
+export async function getTemplates(projectType?: string, includeInactive = false): Promise<ProjectTemplate[]> {
   const db = getDatabase();
 
-  let query = `SELECT ${PROJECT_TEMPLATE_COLUMNS} FROM project_templates WHERE is_active = 1`;
+  let query = `SELECT ${PROJECT_TEMPLATE_COLUMNS} FROM project_templates`;
   const params: SqlValue[] = [];
+  const conditions: string[] = [];
+
+  if (!includeInactive) {
+    conditions.push('is_active = 1');
+  }
 
   if (projectType) {
-    query += ' AND project_type = ?';
+    conditions.push('project_type = ?');
     params.push(projectType);
+  }
+
+  if (conditions.length > 0) {
+    query += ` WHERE ${conditions.join(' AND ')}`;
   }
 
   query += ' ORDER BY name ASC';
@@ -66,6 +75,52 @@ export async function getTemplate(templateId: number): Promise<ProjectTemplate |
   const db = getDatabase();
   const row = await db.get(`SELECT ${PROJECT_TEMPLATE_COLUMNS} FROM project_templates WHERE id = ?`, [templateId]);
   return row ? toTemplate(row as unknown as TemplateRow) : null;
+}
+
+export async function updateTemplate(templateId: number, data: Partial<TemplateData>): Promise<ProjectTemplate> {
+  const db = getDatabase();
+
+  const fields: string[] = [];
+  const values: SqlValue[] = [];
+
+  if (data.name !== undefined) { fields.push('name = ?'); values.push(data.name); }
+  if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description || null); }
+  if (data.projectType !== undefined) { fields.push('project_type = ?'); values.push(data.projectType || null); }
+  if (data.defaultMilestones !== undefined) {
+    fields.push('default_milestones = ?');
+    values.push(data.defaultMilestones ? JSON.stringify(data.defaultMilestones) : null);
+  }
+  if (data.defaultTasks !== undefined) {
+    fields.push('default_tasks = ?');
+    values.push(data.defaultTasks ? JSON.stringify(data.defaultTasks) : null);
+  }
+  if (data.estimatedDurationDays !== undefined) {
+    fields.push('estimated_duration_days = ?');
+    values.push(data.estimatedDurationDays || null);
+  }
+  if (data.defaultHourlyRate !== undefined) {
+    fields.push('default_hourly_rate = ?');
+    values.push(data.defaultHourlyRate || null);
+  }
+  if ((data as Record<string, unknown>).isActive !== undefined) {
+    fields.push('is_active = ?');
+    values.push((data as Record<string, unknown>).isActive ? 1 : 0);
+  }
+
+  if (fields.length > 0) {
+    fields.push('updated_at = CURRENT_TIMESTAMP');
+    values.push(templateId);
+    await db.run(`UPDATE project_templates SET ${fields.join(', ')} WHERE id = ?`, values);
+  }
+
+  const row = await db.get(`SELECT ${PROJECT_TEMPLATE_COLUMNS} FROM project_templates WHERE id = ?`, [templateId]);
+  if (!row) throw new Error('Template not found after update');
+  return toTemplate(row as unknown as TemplateRow);
+}
+
+export async function deleteTemplate(templateId: number): Promise<void> {
+  const db = getDatabase();
+  await db.run('DELETE FROM project_templates WHERE id = ?', [templateId]);
 }
 
 export async function createProjectFromTemplate(
