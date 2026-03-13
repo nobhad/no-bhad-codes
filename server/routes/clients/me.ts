@@ -14,7 +14,6 @@ import {
   authenticateToken,
   type AuthenticatedRequest,
   asyncHandler,
-  getDatabase,
   errorResponse,
   sendSuccess,
   sendCreated,
@@ -24,8 +23,8 @@ import {
   invalidateCache,
   notificationPreferencesService,
   auditLogger,
-  getString,
   softDeleteService,
+  clientService,
   ClientValidationSchemas
 } from './helpers.js';
 
@@ -56,15 +55,7 @@ router.get(
       return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
-    const db = getDatabase();
-    const client = await db.get(
-      `SELECT id, email, company_name, contact_name, phone, status, client_type,
-              billing_name, billing_company, billing_address, billing_address2, billing_city,
-              billing_state, billing_zip, billing_country,
-              created_at, updated_at
-       FROM active_clients WHERE id = ?`,
-      [req.user!.id]
-    );
+    const client = await clientService.getClientProfile(req.user!.id);
 
     if (!client) {
       return errorResponse(res, 'Client not found', 404, ErrorCodes.CLIENT_NOT_FOUND);
@@ -98,18 +89,14 @@ router.put(
     }
 
     const { contact_name, company_name, phone } = req.body;
-    const db = getDatabase();
 
-    await db.run(
-      `UPDATE clients SET contact_name = ?, company_name = ?, phone = ?, updated_at = CURRENT_TIMESTAMP
-       WHERE id = ?`,
-      [contact_name || null, company_name || null, phone || null, req.user!.id]
-    );
+    await clientService.updateClientProfile(req.user!.id, {
+      contact_name,
+      company_name,
+      phone
+    });
 
-    const updatedClient = await db.get(
-      'SELECT id, email, company_name, contact_name, phone, client_type FROM active_clients WHERE id = ?',
-      [req.user!.id]
-    );
+    const updatedClient = await clientService.getClientProfileBasic(req.user!.id);
 
     await auditLogger.logUpdate(
       'client',
@@ -166,15 +153,14 @@ router.put(
       return errorResponse(res, 'Password must be at least 8 characters', 400, ErrorCodes.WEAK_PASSWORD);
     }
 
-    const db = getDatabase();
-    const client = await db.get('SELECT password_hash FROM active_clients WHERE id = ?', [req.user!.id]);
+    const client = await clientService.getClientPasswordHash(req.user!.id);
 
     if (!client) {
       return errorResponse(res, 'Client not found', 404, ErrorCodes.CLIENT_NOT_FOUND);
     }
 
     // Verify current password
-    const passwordHash = getString(client, 'password_hash');
+    const passwordHash = client.password_hash;
     const validPassword = await bcrypt.compare(currentPassword, passwordHash);
     if (!validPassword) {
       return errorResponse(res, 'Current password is incorrect', 401, ErrorCodes.INVALID_PASSWORD);
@@ -182,10 +168,7 @@ router.put(
 
     // Hash and save new password
     const newHash = await bcrypt.hash(newPassword, 12);
-    await db.run(
-      'UPDATE clients SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      [newHash, req.user!.id]
-    );
+    await clientService.updateClientPassword(req.user!.id, newHash);
 
     sendSuccess(res, undefined, 'Password changed successfully');
   })
@@ -285,16 +268,7 @@ router.get(
       return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
-    const db = getDatabase();
-    const client = await db.get(
-      `SELECT
-         billing_name, billing_company as company,
-         billing_address as address, billing_address2 as address2,
-         billing_city as city, billing_state as state,
-         billing_zip as zip, billing_country as country
-       FROM active_clients WHERE id = ?`,
-      [req.user!.id]
-    );
+    const client = await clientService.getClientBilling(req.user!.id);
 
     if (!client) {
       return errorResponse(res, 'Client not found', 404, ErrorCodes.CLIENT_NOT_FOUND);
@@ -326,32 +300,17 @@ router.put(
     }
 
     const { billing_name, company, address, address2, city, state, zip, country } = req.body;
-    const db = getDatabase();
 
-    await db.run(
-      `UPDATE clients SET
-         billing_name = ?,
-         billing_company = ?,
-         billing_address = ?,
-         billing_address2 = ?,
-         billing_city = ?,
-         billing_state = ?,
-         billing_zip = ?,
-         billing_country = ?,
-         updated_at = CURRENT_TIMESTAMP
-       WHERE id = ?`,
-      [
-        billing_name || null,
-        company || null,
-        address || null,
-        address2 || null,
-        city || null,
-        state || null,
-        zip || null,
-        country || null,
-        req.user!.id
-      ]
-    );
+    await clientService.updateClientBilling(req.user!.id, {
+      billing_name,
+      company,
+      address,
+      address2,
+      city,
+      state,
+      zip,
+      country
+    });
 
     sendSuccess(res, undefined, 'Billing information updated');
   })
@@ -379,221 +338,41 @@ router.get(
       return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
-    const db = getDatabase();
     const clientId = req.user!.id;
 
     // Get all projects for this client (for project selector + count)
-    const allProjects = await db.all(
-      `SELECT id, project_name as name, status, progress,
-              start_date, estimated_end_date as end_date, preview_url,
-              created_at, updated_at
-       FROM active_projects WHERE client_id = ?
-       ORDER BY
-         CASE WHEN status IN ('active', 'in-progress', 'in-review') THEN 0 ELSE 1 END,
-         updated_at DESC`,
-      [clientId]
-    );
+    const allProjects = await clientService.getClientProjects(clientId);
     const totalProjects = allProjects.length;
 
     // Get active projects count
     const activeProjects = allProjects.filter(
-      (p: Record<string, unknown>) => ['pending', 'active', 'in-progress', 'in-review'].includes(p.status as string)
+      (p) => ['pending', 'active', 'in-progress', 'in-review'].includes(p.status)
     ).length;
 
-    // Get pending invoices count (sent, viewed, partial, overdue)
-    const invoicesResult = await db.get(
-      `SELECT COUNT(*) as count FROM active_invoices
-       WHERE client_id = ? AND status IN ('sent', 'viewed', 'partial', 'overdue')`,
-      [clientId]
-    );
-    const pendingInvoices = invoicesResult?.count || 0;
-
-    // Get unread messages count
-    const messagesResult = await db.get(
-      `SELECT COUNT(*) as count FROM active_messages m
-       JOIN active_message_threads t ON m.thread_id = t.id
-       WHERE t.client_id = ? AND m.read_at IS NULL AND m.sender_type = 'admin'`,
-      [clientId]
-    );
-    const unreadMessages = messagesResult?.count || 0;
-
-    // Get recent activity (last 10 items)
-    const recentActivity = await db.all(
-      `SELECT type, title, context, date, entity_id FROM (
-        -- Project updates
-        SELECT
-          'project_update' as type,
-          pu.title as title,
-          p.project_name as context,
-          pu.created_at as date,
-          CAST(NULL as INTEGER) as entity_id
-        FROM project_updates pu
-        JOIN active_projects p ON pu.project_id = p.id
-        WHERE p.client_id = ?
-
-        UNION ALL
-
-        -- Messages received
-        SELECT
-          'message' as type,
-          'New message received' as title,
-          t.subject as context,
-          m.created_at as date,
-          t.id as entity_id
-        FROM active_messages m
-        JOIN active_message_threads t ON m.thread_id = t.id
-        WHERE t.client_id = ? AND m.sender_type = 'admin'
-
-        UNION ALL
-
-        -- Invoices
-        SELECT
-          'invoice' as type,
-          CASE
-            WHEN i.status = 'sent' THEN 'Invoice sent'
-            WHEN i.status = 'paid' THEN 'Invoice paid'
-            WHEN i.status = 'overdue' THEN 'Invoice overdue'
-            WHEN i.status = 'viewed' THEN 'Invoice viewed'
-            ELSE 'Invoice updated'
-          END as title,
-          i.invoice_number as context,
-          i.updated_at as date,
-          i.id as entity_id
-        FROM active_invoices i
-        WHERE i.client_id = ?
-
-        UNION ALL
-
-        -- Files uploaded
-        SELECT
-          'file' as type,
-          'File uploaded' as title,
-          f.original_filename as context,
-          f.created_at as date,
-          f.id as entity_id
-        FROM files f
-        JOIN active_projects p ON f.project_id = p.id
-        WHERE p.client_id = ? AND f.deleted_at IS NULL
-
-        UNION ALL
-
-        -- Document requests
-        SELECT
-          'document_request' as type,
-          CASE
-            WHEN dr.status = 'requested' THEN 'Document requested'
-            WHEN dr.status = 'approved' THEN 'Document approved'
-            WHEN dr.status = 'rejected' THEN 'Document rejected'
-            WHEN dr.status = 'under_review' THEN 'Document under review'
-            ELSE 'Document request updated'
-          END as title,
-          dr.title as context,
-          dr.updated_at as date,
-          dr.id as entity_id
-        FROM active_document_requests dr
-        WHERE dr.client_id = ?
-
-        UNION ALL
-
-        -- Contracts
-        SELECT
-          'contract' as type,
-          CASE
-            WHEN c.status = 'sent' THEN 'Contract sent for signature'
-            WHEN c.status = 'signed' THEN 'Contract signed'
-            WHEN c.status = 'expired' THEN 'Contract expired'
-            WHEN c.countersigned_at IS NOT NULL THEN 'Contract countersigned'
-            ELSE 'Contract updated'
-          END as title,
-          p.project_name as context,
-          COALESCE(c.signed_at, c.sent_at, c.updated_at) as date,
-          c.id as entity_id
-        FROM active_contracts c
-        JOIN active_projects p ON c.project_id = p.id
-        WHERE c.client_id = ?
-      ) AS activity
-      ORDER BY date DESC
-      LIMIT 10`,
-      [clientId, clientId, clientId, clientId, clientId, clientId]
-    );
-
-    // Get pending document requests count
-    const docRequestsResult = await db.get(
-      `SELECT COUNT(*) as count FROM active_document_requests
-       WHERE client_id = ? AND status IN ('requested', 'rejected')`,
-      [clientId]
-    );
-    const pendingDocRequests = docRequestsResult?.count || 0;
-
-    // Get pending contracts count (sent but not signed)
-    const contractsResult = await db.get(
-      `SELECT COUNT(*) as count FROM active_contracts
-       WHERE client_id = ? AND status = 'sent'`,
-      [clientId]
-    );
-    const pendingContracts = contractsResult?.count || 0;
-
-    // Get pending questionnaires count (responses not yet completed)
-    const questionnairesResult = await db.get(
-      `SELECT COUNT(*) as count FROM questionnaire_responses qr
-       JOIN active_projects p ON qr.project_id = p.id
-       WHERE p.client_id = ? AND qr.status IN ('pending', 'in_progress')`,
-      [clientId]
-    );
-    const pendingQuestionnaires = questionnairesResult?.count || 0;
-
-    // Get pending approvals count (deliverables awaiting client approval)
-    const approvalsResult = await db.get(
-      `SELECT COUNT(*) as count FROM deliverables d
-       JOIN active_projects p ON d.project_id = p.id
-       WHERE p.client_id = ? AND d.approval_status = 'pending' AND d.deleted_at IS NULL`,
-      [clientId]
-    );
-    const pendingApprovals = approvalsResult?.count || 0;
-
-    // Get outstanding balance
-    const balanceResult = await db.get(
-      `SELECT COALESCE(SUM(amount_total - COALESCE(amount_paid, 0)), 0) as balance
-       FROM active_invoices
-       WHERE client_id = ? AND status IN ('sent', 'viewed', 'partial', 'overdue')`,
-      [clientId]
-    );
-    const outstandingBalance = balanceResult?.balance || 0;
-
-    // Get deliverables in review count
-    const deliverablesInReviewResult = await db.get(
-      `SELECT COUNT(*) as count FROM deliverables d
-       JOIN active_projects p ON d.project_id = p.id
-       WHERE p.client_id = ? AND d.status = 'in_review' AND d.deleted_at IS NULL`,
-      [clientId]
-    );
-    const deliverablesInReview = deliverablesInReviewResult?.count || 0;
-
-    // Get current active deliverable or milestone for active projects
-    const currentDeliverable = await db.get(
-      `SELECT id, title, status, type, project_id FROM (
-        -- Deliverables (design review system)
-        SELECT d.id, d.title, d.status, d.type, p.id as project_id, d.updated_at
-        FROM deliverables d
-        JOIN active_projects p ON d.project_id = p.id
-        WHERE p.client_id = ? AND d.deleted_at IS NULL
-          AND d.status IN ('in_progress', 'in_review')
-
-        UNION ALL
-
-        -- Milestones (project milestones)
-        SELECT m.id, m.title, m.status, 'milestone' as type, p.id as project_id, m.updated_at
-        FROM milestones m
-        JOIN active_projects p ON m.project_id = p.id
-        WHERE p.client_id = ? AND m.deleted_at IS NULL
-          AND m.status = 'in_progress'
-      )
-      ORDER BY
-        CASE WHEN status = 'in_progress' THEN 0 ELSE 1 END,
-        updated_at DESC
-      LIMIT 1`,
-      [clientId, clientId]
-    );
+    // Run independent dashboard queries in parallel
+    const [
+      pendingInvoices,
+      unreadMessages,
+      recentActivity,
+      pendingDocRequests,
+      pendingContracts,
+      pendingQuestionnaires,
+      pendingApprovals,
+      outstandingBalance,
+      deliverablesInReview,
+      currentDeliverable
+    ] = await Promise.all([
+      clientService.getPendingInvoiceCount(clientId),
+      clientService.getUnreadMessageCount(clientId),
+      clientService.getClientRecentActivity(clientId),
+      clientService.getPendingDocRequestCount(clientId),
+      clientService.getPendingContractCount(clientId),
+      clientService.getPendingQuestionnaireCount(clientId),
+      clientService.getPendingApprovalCount(clientId),
+      clientService.getOutstandingBalance(clientId),
+      clientService.getDeliverablesInReviewCount(clientId),
+      clientService.getCurrentDeliverable(clientId)
+    ]);
 
     sendSuccess(res, {
       stats: {
@@ -608,7 +387,7 @@ router.get(
         deliverablesInReview
       },
       totalProjects,
-      projects: allProjects.map((p: Record<string, unknown>) => ({
+      projects: allProjects.map((p) => ({
         id: p.id,
         name: p.name,
         status: p.status,
@@ -620,7 +399,7 @@ router.get(
       currentDeliverable: currentDeliverable
         ? { id: currentDeliverable.id, title: currentDeliverable.title, status: currentDeliverable.status, type: currentDeliverable.type, projectId: currentDeliverable.project_id }
         : null,
-      recentActivity: recentActivity.map((item: Record<string, unknown>) => ({
+      recentActivity: recentActivity.map((item) => ({
         type: item.type,
         title: item.title,
         context: item.context,
@@ -634,8 +413,6 @@ router.get(
 // ===================================
 // CLIENT CONTACT MANAGEMENT (/me/contacts)
 // ===================================
-
-const CONTACT_COLUMNS = 'id, client_id, first_name, last_name, email, phone, title, department, role, is_primary, notes, created_at, updated_at';
 
 /**
  * @swagger
@@ -659,11 +436,7 @@ router.get(
       return errorResponse(res, 'Authentication required', 401, ErrorCodes.UNAUTHORIZED);
     }
 
-    const db = getDatabase();
-    const contacts = await db.all(
-      `SELECT ${CONTACT_COLUMNS} FROM client_contacts WHERE client_id = ? AND deleted_at IS NULL ORDER BY is_primary DESC, first_name ASC`,
-      [clientId]
-    );
+    const contacts = await clientService.getClientOwnContacts(clientId);
 
     sendSuccess(res, { contacts });
   })
@@ -697,17 +470,16 @@ router.post(
       return errorResponse(res, 'First name and last name are required', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const db = getDatabase();
-    const result = await db.run(
-      `INSERT INTO client_contacts (client_id, first_name, last_name, email, phone, title, department, role, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [clientId, first_name, last_name, email || null, phone || null, title || null, department || null, role || 'general', notes || null]
-    );
-
-    const contact = await db.get(
-      `SELECT ${CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`,
-      [result.lastID]
-    );
+    const contact = await clientService.insertClientContact(clientId, {
+      first_name,
+      last_name,
+      email,
+      phone,
+      title,
+      department,
+      role,
+      notes
+    });
 
     sendCreated(res, { contact });
   })
@@ -746,47 +518,29 @@ router.put(
       return errorResponse(res, 'Invalid contact ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const db = getDatabase();
-
     // Verify ownership
-    const existing = await db.get(
-      'SELECT id FROM client_contacts WHERE id = ? AND client_id = ?',
-      [contactId, clientId]
-    );
-    if (!existing) {
+    const ownershipValid = await clientService.verifyContactOwnership(contactId, clientId);
+    if (!ownershipValid) {
       return errorResponse(res, 'Contact not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     const { first_name, last_name, email, phone, title, department, role, notes } = req.body;
 
-    const updates: string[] = [];
-    const values: (string | number | boolean | null | undefined)[] = [];
+    const fields: Record<string, string | null | undefined> = {};
+    if (first_name !== undefined) fields.first_name = first_name;
+    if (last_name !== undefined) fields.last_name = last_name;
+    if (email !== undefined) fields.email = email || null;
+    if (phone !== undefined) fields.phone = phone || null;
+    if (title !== undefined) fields.title = title || null;
+    if (department !== undefined) fields.department = department || null;
+    if (role !== undefined) fields.role = role;
+    if (notes !== undefined) fields.notes = notes || null;
 
-    if (first_name !== undefined) { updates.push('first_name = ?'); values.push(first_name); }
-    if (last_name !== undefined) { updates.push('last_name = ?'); values.push(last_name); }
-    if (email !== undefined) { updates.push('email = ?'); values.push(email || null); }
-    if (phone !== undefined) { updates.push('phone = ?'); values.push(phone || null); }
-    if (title !== undefined) { updates.push('title = ?'); values.push(title || null); }
-    if (department !== undefined) { updates.push('department = ?'); values.push(department || null); }
-    if (role !== undefined) { updates.push('role = ?'); values.push(role); }
-    if (notes !== undefined) { updates.push('notes = ?'); values.push(notes || null); }
-
-    if (updates.length === 0) {
+    if (Object.keys(fields).length === 0) {
       return errorResponse(res, 'No fields to update', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    updates.push('updated_at = CURRENT_TIMESTAMP');
-    values.push(contactId, clientId);
-
-    await db.run(
-      `UPDATE client_contacts SET ${updates.join(', ')} WHERE id = ? AND client_id = ?`,
-      values
-    );
-
-    const contact = await db.get(
-      `SELECT ${CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`,
-      [contactId]
-    );
+    const contact = await clientService.updateClientContact(contactId, clientId, fields);
 
     sendSuccess(res, { contact });
   })
@@ -825,14 +579,9 @@ router.delete(
       return errorResponse(res, 'Invalid contact ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const db = getDatabase();
-
     // Verify ownership
-    const existing = await db.get(
-      'SELECT id FROM client_contacts WHERE id = ? AND client_id = ? AND deleted_at IS NULL',
-      [contactId, clientId]
-    );
-    if (!existing) {
+    const ownershipValid = await clientService.verifyContactOwnershipActive(contactId, clientId);
+    if (!ownershipValid) {
       return errorResponse(res, 'Contact not found', 404, ErrorCodes.NOT_FOUND);
     }
 

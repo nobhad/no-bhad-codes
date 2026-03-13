@@ -9,12 +9,12 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import crypto from 'crypto';
-import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { emailService } from '../../services/email-service.js';
 import { rateLimit } from '../../middleware/security.js';
 import { auditLogger } from '../../services/audit-logger.js';
 import { logger } from '../../services/logger.js';
+import { userService } from '../../services/user-service.js';
 import {
   JWT_CONFIG,
   TIME_MS,
@@ -22,7 +22,6 @@ import {
   COOKIE_CONFIG,
   ACCOUNT_LOCKOUT_CONFIG
 } from '../../utils/auth-constants.js';
-import { getString, getNumber, getBoolean } from '../../database/row-helpers.js';
 import {
   sendSuccess,
   sendBadRequest,
@@ -55,14 +54,7 @@ async function handleAdmin2FACheck(
   res: express.Response,
   adminEmail: string
 ): Promise<boolean> {
-  const db = getDatabase();
-  const enabledRow = await db.get(
-    'SELECT setting_value FROM system_settings WHERE setting_key = ?',
-    [TWO_FACTOR_SETTINGS_KEYS.ENABLED]
-  );
-
-  const twoFactorEnabled = enabledRow
-    && (enabledRow as { setting_value: string }).setting_value === 'true';
+  const twoFactorEnabled = await userService.isAdmin2FAEnabled(TWO_FACTOR_SETTINGS_KEYS.ENABLED);
 
   if (!twoFactorEnabled) {
     return false;
@@ -203,27 +195,23 @@ router.post(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { email, password } = req.body;
 
-    const db = getDatabase();
-
     // Find user in database (include lockout columns)
-    const client = await db.get(
-      'SELECT id, email, password_hash, company_name, contact_name, status, is_admin, last_login, failed_login_attempts, locked_until FROM clients WHERE email = ? AND deleted_at IS NULL',
-      [email.toLowerCase()]
-    );
+    const client = await userService.findClientByEmail(email);
 
     if (!client) {
       await auditLogger.logLoginFailed(email, req, 'User not found');
       return sendUnauthorized(res, 'Invalid credentials', ErrorCodes.INVALID_CREDENTIALS);
     }
 
-    // Extract typed values using helpers
-    const clientId = getNumber(client, 'id');
-    const clientEmail = getString(client, 'email');
-    const clientStatus = getString(client, 'status');
-    const clientIsAdmin = getBoolean(client, 'is_admin');
-    const passwordHash = getString(client, 'password_hash');
-    const failedLoginAttempts = getNumber(client, 'failed_login_attempts') || 0;
-    const lockedUntilStr = getString(client, 'locked_until');
+    const {
+      id: clientId,
+      email: clientEmail,
+      status: clientStatus,
+      isAdmin: clientIsAdmin,
+      passwordHash,
+      failedLoginAttempts,
+      lockedUntil: lockedUntilStr
+    } = client;
 
     // Check if account is locked
     if (lockedUntilStr) {
@@ -239,10 +227,7 @@ router.post(
         );
       }
       // Lockout has expired - reset the counter so user gets fresh attempts
-      await db.run(
-        'UPDATE clients SET failed_login_attempts = 0, locked_until = NULL WHERE id = ?',
-        [clientId]
-      );
+      await userService.resetClientLockout(clientId);
     }
 
     // Check if client is active
@@ -264,10 +249,7 @@ router.post(
       if (newFailedAttempts >= ACCOUNT_LOCKOUT_CONFIG.MAX_FAILED_ATTEMPTS) {
         // Lock the account
         const lockUntil = new Date(Date.now() + ACCOUNT_LOCKOUT_CONFIG.LOCKOUT_DURATION_MS);
-        await db.run(
-          'UPDATE clients SET failed_login_attempts = ?, locked_until = ? WHERE id = ?',
-          [newFailedAttempts, lockUntil.toISOString(), clientId]
-        );
+        await userService.lockClientAccount(clientId, newFailedAttempts, lockUntil);
         await auditLogger.logLoginFailed(
           email,
           req,
@@ -281,10 +263,7 @@ router.post(
       }
 
       // Just increment the counter
-      await db.run('UPDATE clients SET failed_login_attempts = ? WHERE id = ?', [
-        newFailedAttempts,
-        clientId
-      ]);
+      await userService.incrementClientFailedAttempts(clientId, newFailedAttempts);
 
       await auditLogger.logLoginFailed(email, req, 'Invalid password');
       return sendUnauthorized(res, 'Invalid credentials', ErrorCodes.INVALID_CREDENTIALS);
@@ -313,14 +292,10 @@ router.post(
     );
 
     // Check if this is first login (last_login was NULL)
-    const previousLastLogin = client.last_login;
-    const isFirstLogin = previousLastLogin === null;
+    const isFirstLogin = client.lastLogin === null;
 
     // Update last_login timestamp and reset failed login attempts
-    await db.run(
-      'UPDATE clients SET last_login = CURRENT_TIMESTAMP, failed_login_attempts = 0, locked_until = NULL WHERE id = ?',
-      [clientId]
-    );
+    await userService.recordClientLoginSuccess(clientId);
 
     // Log successful login
     await auditLogger.logLogin(clientId, clientEmail, clientIsAdmin ? 'admin' : 'client', req);
@@ -335,9 +310,9 @@ router.post(
         user: {
           id: clientId,
           email: clientEmail,
-          name: getString(client, 'contact_name'),
-          companyName: getString(client, 'company_name'),
-          contactName: getString(client, 'contact_name'),
+          name: client.contactName,
+          companyName: client.companyName,
+          contactName: client.contactName,
           status: clientStatus,
           isAdmin: clientIsAdmin,
           role: clientIsAdmin ? 'admin' : 'client'
@@ -405,32 +380,27 @@ router.post(
   validateRequest(LoginValidationSchemas.adminLogin),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { password } = req.body;
-    const db = getDatabase();
 
     // Check admin account lockout status from system_settings
-    const lockoutSetting = await db.get(
-      'SELECT setting_value FROM system_settings WHERE setting_key = \'admin.locked_until\''
-    );
-    if (lockoutSetting) {
-      const lockedUntil = new Date(lockoutSetting.setting_value as string);
-      const now = new Date();
-      if (now < lockedUntil) {
-        const remainingMinutes = Math.ceil((lockedUntil.getTime() - now.getTime()) / 60000);
-        await auditLogger.logLoginFailed(
-          process.env.ADMIN_EMAIL || 'admin',
-          req,
-          'Admin account locked'
-        );
-        return sendUnauthorized(
-          res,
-          `Admin account is temporarily locked. Please try again in ${remainingMinutes} minute(s).`,
-          ErrorCodes.ACCOUNT_LOCKED
-        );
-      }
-      // Lockout expired - reset
-      await db.run(
-        'DELETE FROM system_settings WHERE setting_key IN (\'admin.locked_until\', \'admin.failed_login_attempts\')'
+    const lockedUntil = await userService.getAdminLockoutExpiry();
+    if (lockedUntil) {
+      const remainingMinutes = Math.ceil((lockedUntil.getTime() - Date.now()) / 60000);
+      await auditLogger.logLoginFailed(
+        process.env.ADMIN_EMAIL || 'admin',
+        req,
+        'Admin account locked'
       );
+      return sendUnauthorized(
+        res,
+        `Admin account is temporarily locked. Please try again in ${remainingMinutes} minute(s).`,
+        ErrorCodes.ACCOUNT_LOCKED
+      );
+    }
+
+    // If there was an expired lockout, getAdminLockoutExpiry returned null; reset it
+    const lockoutValue = await userService.getSystemSetting('admin.locked_until');
+    if (lockoutValue) {
+      await userService.resetAdminLockout();
     }
 
     // Get admin password hash from environment
@@ -444,25 +414,13 @@ router.post(
     const isValidPassword = await bcrypt.compare(password, adminPasswordHash);
     if (!isValidPassword) {
       // Get current failed attempts
-      const attemptsSetting = await db.get(
-        'SELECT setting_value FROM system_settings WHERE setting_key = \'admin.failed_login_attempts\''
-      );
-      const currentAttempts = attemptsSetting
-        ? parseInt(attemptsSetting.setting_value as string, 10)
-        : 0;
+      const currentAttempts = await userService.getAdminFailedAttempts();
       const newAttempts = currentAttempts + 1;
 
       if (newAttempts >= ACCOUNT_LOCKOUT_CONFIG.MAX_FAILED_ATTEMPTS) {
         // Lock the admin account
         const lockUntil = new Date(Date.now() + ACCOUNT_LOCKOUT_CONFIG.LOCKOUT_DURATION_MS);
-        await db.run(
-          'INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES (\'admin.locked_until\', ?, \'string\', \'Admin account lockout expiry\')',
-          [lockUntil.toISOString()]
-        );
-        await db.run(
-          'INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES (\'admin.failed_login_attempts\', ?, \'number\', \'Admin failed login attempts\')',
-          [newAttempts.toString()]
-        );
+        await userService.lockAdminAccount(newAttempts, lockUntil);
         await auditLogger.logLoginFailed(
           process.env.ADMIN_EMAIL || 'admin',
           req,
@@ -476,10 +434,7 @@ router.post(
       }
 
       // Increment failed attempts
-      await db.run(
-        'INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES (\'admin.failed_login_attempts\', ?, \'number\', \'Admin failed login attempts\')',
-        [newAttempts.toString()]
-      );
+      await userService.incrementAdminFailedAttempts(newAttempts);
       await auditLogger.logLoginFailed(
         process.env.ADMIN_EMAIL || 'admin',
         req,
@@ -489,9 +444,7 @@ router.post(
     }
 
     // Successful login - reset failed attempts
-    await db.run(
-      'DELETE FROM system_settings WHERE setting_key IN (\'admin.locked_until\', \'admin.failed_login_attempts\')'
-    );
+    await userService.resetAdminLockout();
 
     const adminEmail = process.env.ADMIN_EMAIL;
     if (!adminEmail) {
@@ -610,13 +563,8 @@ router.post(
       return sendBadRequest(res, 'Invalid email format', ErrorCodes.INVALID_EMAIL);
     }
 
-    const db = getDatabase();
-
     // Find active user by email
-    const client = await db.get(
-      'SELECT id, email, contact_name FROM clients WHERE email = ? AND status = "active"',
-      [email.toLowerCase()]
-    );
+    const client = await userService.findActiveClientByEmail(email);
 
     // Always return success for security (don't reveal if email exists)
     if (client) {
@@ -627,31 +575,23 @@ router.post(
         const magicLinkExpiresAt = new Date(Date.now() + TIME_MS.FIFTEEN_MINUTES);
 
         // Store magic link token in database
-        await db.run(
-          `UPDATE clients
-           SET magic_link_token = ?, magic_link_expires_at = ?
-           WHERE id = ?`,
-          [magicLinkToken, magicLinkExpiresAt.toISOString(), getNumber(client, 'id')]
-        );
+        await userService.storeMagicLinkToken(client.id, magicLinkToken, magicLinkExpiresAt);
 
         // Send magic link email
-        const clientEmailForMagic = getString(client, 'email');
-        const clientContactNameForMagic = getString(client, 'contact_name');
-        const clientIdForMagic = getNumber(client, 'id');
-        await emailService.sendMagicLinkEmail(clientEmailForMagic, {
+        await emailService.sendMagicLinkEmail(client.email, {
           magicLinkToken,
-          name: clientContactNameForMagic || undefined
+          name: client.contactName || undefined
         });
 
         await auditLogger.log({
           action: 'magic_link_requested',
           entityType: 'session',
-          entityId: String(clientIdForMagic),
-          entityName: clientEmailForMagic,
-          userId: clientIdForMagic,
-          userEmail: clientEmailForMagic,
+          entityId: String(client.id),
+          entityName: client.email,
+          userId: client.id,
+          userEmail: client.email,
           userType: 'client',
-          metadata: { email: clientEmailForMagic },
+          metadata: { email: client.email },
           ipAddress: req.ip || 'unknown',
           userAgent: req.get('user-agent') || 'unknown'
         });
@@ -722,15 +662,8 @@ router.post(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { token } = req.body;
 
-    const db = getDatabase();
-
     // Find client by magic link token
-    const client = await db.get(
-      `SELECT id, email, contact_name, company_name, status, is_admin, magic_link_expires_at
-       FROM clients
-       WHERE magic_link_token = ?`,
-      [token]
-    );
+    const client = await userService.findClientByMagicToken(token);
 
     if (!client) {
       return sendBadRequest(res, 'Invalid or expired login link', ErrorCodes.INVALID_TOKEN);
@@ -738,18 +671,12 @@ router.post(
 
     // Check if token is expired
     const now = new Date();
-    const magicLinkExpiresAtStr = getString(client, 'magic_link_expires_at');
-    const expiresAt = magicLinkExpiresAtStr ? new Date(magicLinkExpiresAtStr) : null;
-    const clientId = getNumber(client, 'id');
-    const clientStatus = getString(client, 'status');
+    const expiresAt = client.magicLinkExpiresAt ? new Date(client.magicLinkExpiresAt) : null;
 
     if (!expiresAt || now > expiresAt) {
       // Clear expired token
-      if (clientId) {
-        await db.run(
-          'UPDATE clients SET magic_link_token = NULL, magic_link_expires_at = NULL WHERE id = ?',
-          [clientId]
-        );
+      if (client.id) {
+        await userService.clearMagicLinkToken(client.id);
       }
 
       return sendBadRequest(
@@ -760,7 +687,7 @@ router.post(
     }
 
     // Check if account is active
-    if (clientStatus !== 'active') {
+    if (client.status !== 'active') {
       return sendUnauthorized(
         res,
         'Account is not active. Please contact support.',
@@ -768,18 +695,9 @@ router.post(
       );
     }
 
-    // Clear the magic link token (single use)
-    const clientIdForMagicLink = getNumber(client, 'id');
-    const clientEmailForMagicLink = getString(client, 'email');
-    const clientContactNameForMagicLink = getString(client, 'contact_name');
-    const clientCompanyNameForMagicLink = getString(client, 'company_name');
-    const clientIsAdminForMagicLink = getBoolean(client, 'is_admin');
-
-    if (clientIdForMagicLink) {
-      await db.run(
-        'UPDATE clients SET magic_link_token = NULL, magic_link_expires_at = NULL, last_login_at = ? WHERE id = ?',
-        [new Date().toISOString(), clientIdForMagicLink]
-      );
+    // Clear the magic link token (single use) and record login
+    if (client.id) {
+      await userService.consumeMagicLinkToken(client.id);
     }
 
     // Generate JWT token
@@ -789,23 +707,23 @@ router.post(
       return sendServerError(res, 'Server configuration error', ErrorCodes.CONFIG_ERROR);
     }
 
-    if (!clientIdForMagicLink) {
+    if (!client.id) {
       return sendBadRequest(res, 'Invalid user data', ErrorCodes.INVALID_TOKEN);
     }
 
     const jwtToken = jwt.sign(
       {
-        id: clientIdForMagicLink,
-        email: clientEmailForMagicLink,
-        type: clientIsAdminForMagicLink ? 'admin' : 'client',
-        isAdmin: clientIsAdminForMagicLink
+        id: client.id,
+        email: client.email,
+        type: client.isAdmin ? 'admin' : 'client',
+        isAdmin: client.isAdmin
       },
       secret,
       { expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY } as SignOptions
     );
 
     // Log successful magic link login
-    await auditLogger.logLogin(clientIdForMagicLink, clientEmailForMagicLink, 'client', req, {
+    await auditLogger.logLogin(client.id, client.email, 'client', req, {
       method: 'magic_link'
     });
 
@@ -816,14 +734,14 @@ router.post(
       res,
       {
         user: {
-          id: clientIdForMagicLink,
-          email: clientEmailForMagicLink,
-          name: clientContactNameForMagicLink,
-          companyName: clientCompanyNameForMagicLink,
-          contactName: clientContactNameForMagicLink,
-          status: clientStatus,
-          isAdmin: clientIsAdminForMagicLink,
-          role: clientIsAdminForMagicLink ? 'admin' : 'client'
+          id: client.id,
+          email: client.email,
+          name: client.contactName,
+          companyName: client.companyName,
+          contactName: client.contactName,
+          status: client.status,
+          isAdmin: client.isAdmin,
+          role: client.isAdmin ? 'admin' : 'client'
         },
         expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY
       },
@@ -870,26 +788,22 @@ router.post(
 
     // ── Admin path ────────────────────────────────────────────────────────────
     if (isAdminAttempt) {
-      const db = getDatabase();
-
       // Check admin lockout
-      const lockoutSetting = await db.get(
-        'SELECT setting_value FROM system_settings WHERE setting_key = \'admin.locked_until\''
-      );
-      if (lockoutSetting) {
-        const lockedUntil = new Date(lockoutSetting.setting_value as string);
-        if (new Date() < lockedUntil) {
-          const remainingMinutes = Math.ceil((lockedUntil.getTime() - Date.now()) / 60000);
-          await auditLogger.logLoginFailed(normalizedEmail, req, 'Admin account locked');
-          return sendUnauthorized(
-            res,
-            `Admin account is temporarily locked. Please try again in ${remainingMinutes} minute(s).`,
-            ErrorCodes.ACCOUNT_LOCKED
-          );
-        }
-        await db.run(
-          'DELETE FROM system_settings WHERE setting_key IN (\'admin.locked_until\', \'admin.failed_login_attempts\')'
+      const lockedUntil = await userService.getAdminLockoutExpiry();
+      if (lockedUntil) {
+        const remainingMinutes = Math.ceil((lockedUntil.getTime() - Date.now()) / 60000);
+        await auditLogger.logLoginFailed(normalizedEmail, req, 'Admin account locked');
+        return sendUnauthorized(
+          res,
+          `Admin account is temporarily locked. Please try again in ${remainingMinutes} minute(s).`,
+          ErrorCodes.ACCOUNT_LOCKED
         );
+      }
+
+      // If there was an expired lockout, reset it
+      const lockoutValue = await userService.getSystemSetting('admin.locked_until');
+      if (lockoutValue) {
+        await userService.resetAdminLockout();
       }
 
       const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
@@ -900,24 +814,12 @@ router.post(
 
       const isValidPassword = await bcrypt.compare(password, adminPasswordHash);
       if (!isValidPassword) {
-        const attemptsSetting = await db.get(
-          'SELECT setting_value FROM system_settings WHERE setting_key = \'admin.failed_login_attempts\''
-        );
-        const currentAttempts = attemptsSetting
-          ? parseInt(attemptsSetting.setting_value as string, 10)
-          : 0;
+        const currentAttempts = await userService.getAdminFailedAttempts();
         const newAttempts = currentAttempts + 1;
 
         if (newAttempts >= ACCOUNT_LOCKOUT_CONFIG.MAX_FAILED_ATTEMPTS) {
           const lockUntil = new Date(Date.now() + ACCOUNT_LOCKOUT_CONFIG.LOCKOUT_DURATION_MS);
-          await db.run(
-            'INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES (\'admin.locked_until\', ?, \'string\', \'Admin account lockout expiry\')',
-            [lockUntil.toISOString()]
-          );
-          await db.run(
-            'INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES (\'admin.failed_login_attempts\', ?, \'number\', \'Admin failed login attempts\')',
-            [newAttempts.toString()]
-          );
+          await userService.lockAdminAccount(newAttempts, lockUntil);
           await auditLogger.logLoginFailed(normalizedEmail, req, 'Admin account locked');
           return sendUnauthorized(
             res,
@@ -926,18 +828,13 @@ router.post(
           );
         }
 
-        await db.run(
-          'INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES (\'admin.failed_login_attempts\', ?, \'number\', \'Admin failed login attempts\')',
-          [newAttempts.toString()]
-        );
+        await userService.incrementAdminFailedAttempts(newAttempts);
         await auditLogger.logLoginFailed(normalizedEmail, req, 'Invalid admin password');
         return sendUnauthorized(res, 'Invalid credentials', ErrorCodes.INVALID_CREDENTIALS);
       }
 
       // Success — reset lockout
-      await db.run(
-        'DELETE FROM system_settings WHERE setting_key IN (\'admin.locked_until\', \'admin.failed_login_attempts\')'
-      );
+      await userService.resetAdminLockout();
 
       // Check if 2FA is enabled -- if so, issue temp token instead of full JWT
       const requires2FA = await handleAdmin2FACheck(req, res, adminEmail);
@@ -977,29 +874,27 @@ router.post(
     }
 
     // ── Client path ───────────────────────────────────────────────────────────
-    const db = getDatabase();
-    const client = await db.get(
-      'SELECT id, email, password_hash, company_name, contact_name, status, is_admin, last_login, failed_login_attempts, locked_until FROM clients WHERE email = ? AND deleted_at IS NULL',
-      [normalizedEmail]
-    );
+    const client = await userService.findClientByEmail(normalizedEmail);
 
     if (!client) {
       await auditLogger.logLoginFailed(normalizedEmail, req, 'User not found');
       return sendUnauthorized(res, 'Invalid credentials', ErrorCodes.INVALID_CREDENTIALS);
     }
 
-    const clientId = getNumber(client, 'id');
-    const clientEmail = getString(client, 'email');
-    const clientStatus = getString(client, 'status');
-    const clientIsAdmin = getBoolean(client, 'is_admin');
-    const passwordHash = getString(client, 'password_hash');
-    const failedLoginAttempts = getNumber(client, 'failed_login_attempts') || 0;
-    const lockedUntilStr = getString(client, 'locked_until');
+    const {
+      id: clientId,
+      email: clientEmail,
+      status: clientStatus,
+      isAdmin: clientIsAdmin,
+      passwordHash,
+      failedLoginAttempts,
+      lockedUntil: lockedUntilStr
+    } = client;
 
     if (lockedUntilStr) {
-      const lockedUntil = new Date(lockedUntilStr);
-      if (new Date() < lockedUntil) {
-        const remainingMinutes = Math.ceil((lockedUntil.getTime() - Date.now()) / 60000);
+      const clientLockedUntil = new Date(lockedUntilStr);
+      if (new Date() < clientLockedUntil) {
+        const remainingMinutes = Math.ceil((clientLockedUntil.getTime() - Date.now()) / 60000);
         await auditLogger.logLoginFailed(normalizedEmail, req, 'Account locked');
         return sendUnauthorized(
           res,
@@ -1007,10 +902,7 @@ router.post(
           ErrorCodes.ACCOUNT_LOCKED
         );
       }
-      await db.run(
-        'UPDATE clients SET failed_login_attempts = 0, locked_until = NULL WHERE id = ?',
-        [clientId]
-      );
+      await userService.resetClientLockout(clientId);
     }
 
     if (clientStatus !== 'active') {
@@ -1028,10 +920,7 @@ router.post(
 
       if (newFailedAttempts >= ACCOUNT_LOCKOUT_CONFIG.MAX_FAILED_ATTEMPTS) {
         const lockUntil = new Date(Date.now() + ACCOUNT_LOCKOUT_CONFIG.LOCKOUT_DURATION_MS);
-        await db.run(
-          'UPDATE clients SET failed_login_attempts = ?, locked_until = ? WHERE id = ?',
-          [newFailedAttempts, lockUntil.toISOString(), clientId]
-        );
+        await userService.lockClientAccount(clientId, newFailedAttempts, lockUntil);
         await auditLogger.logLoginFailed(normalizedEmail, req, 'Account locked');
         return sendUnauthorized(
           res,
@@ -1040,10 +929,7 @@ router.post(
         );
       }
 
-      await db.run('UPDATE clients SET failed_login_attempts = ? WHERE id = ?', [
-        newFailedAttempts,
-        clientId
-      ]);
+      await userService.incrementClientFailedAttempts(clientId, newFailedAttempts);
       await auditLogger.logLoginFailed(normalizedEmail, req, 'Invalid password');
       return sendUnauthorized(res, 'Invalid credentials', ErrorCodes.INVALID_CREDENTIALS);
     }
@@ -1068,12 +954,9 @@ router.post(
       { expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY } as SignOptions
     );
 
-    const isFirstLogin = client.last_login === null;
+    const isFirstLogin = client.lastLogin === null;
 
-    await db.run(
-      'UPDATE clients SET last_login = CURRENT_TIMESTAMP, failed_login_attempts = 0, locked_until = NULL WHERE id = ?',
-      [clientId]
-    );
+    await userService.recordClientLoginSuccess(clientId);
     await auditLogger.logLogin(clientId, clientEmail, clientIsAdmin ? 'admin' : 'client', req);
 
     res.cookie(COOKIE_CONFIG.AUTH_TOKEN_NAME, token, COOKIE_CONFIG.USER_OPTIONS);
@@ -1084,9 +967,9 @@ router.post(
         user: {
           id: clientId,
           email: clientEmail,
-          name: getString(client, 'contact_name'),
-          companyName: getString(client, 'company_name'),
-          contactName: getString(client, 'contact_name'),
+          name: client.contactName,
+          companyName: client.companyName,
+          contactName: client.contactName,
           status: clientStatus,
           isAdmin: clientIsAdmin,
           role: clientIsAdmin ? 'admin' : 'client'

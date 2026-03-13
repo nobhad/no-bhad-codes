@@ -2,7 +2,6 @@ import express, { Response } from 'express';
 import path from 'path';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { PDFDocument as PDFLibDocument, StandardFonts, degrees, rgb, PDFPage } from 'pdf-lib';
-import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../utils/access-control.js';
@@ -31,18 +30,7 @@ import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { logger } from '../../services/logger.js';
 import { getBaseUrl } from '../../config/environment.js';
-
-// Explicit column lists for SELECT queries (avoid SELECT *)
-const CONTRACT_COLUMNS = `
-  id, template_id, project_id, client_id, content, status, variables,
-  sent_at, signed_at, expires_at, signer_name, signer_email, signer_ip,
-  signer_user_agent, signature_data, countersigned_at, countersigner_name,
-  countersigner_email, countersigner_ip, countersigner_user_agent,
-  countersignature_data, signed_pdf_path, parent_contract_id, renewal_at,
-  renewal_reminder_sent_at, last_reminder_at, reminder_count,
-  signature_token, signature_requested_at, signature_expires_at,
-  created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+import { contractService } from '../../services/contract-service.js';
 
 const router = express.Router();
 
@@ -58,17 +46,8 @@ router.get(
     if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
-    const db = getDatabase();
-
     // Get project with client info
-    const project = await db.get(
-      `SELECT p.*, c.contact_name as client_name, c.email as client_email,
-              c.company_name, c.phone as client_phone, c.address as client_address
-       FROM projects p
-       JOIN clients c ON p.client_id = c.id
-       WHERE p.id = ?`,
-      [projectId]
-    );
+    const project = await contractService.getProjectWithClientForPdf(projectId);
 
     if (!project) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
@@ -82,12 +61,7 @@ router.get(
     const p = project as Record<string, unknown>;
 
     // Load latest contract draft (if any) for content and cache invalidation
-    const contractRow = await db.get(
-      `SELECT ${CONTRACT_COLUMNS} FROM contracts WHERE project_id = ? AND status != 'cancelled'
-       ORDER BY created_at DESC LIMIT 1`,
-      [projectId]
-    );
-    const contract = contractRow as Record<string, unknown> | undefined;
+    const contract = await contractService.getLatestActiveContract(projectId);
     const contractContent = contract ? getString(contract, 'content') : '';
     const contractStatus = contract ? getString(contract, 'status') : '';
     const contractUpdatedAt = contract ? getString(contract, 'updated_at') : undefined;
@@ -529,22 +503,11 @@ router.get(
       writeFileSync(absolutePath, pdfBytes);
       const relativePath = getRelativePath(UPLOAD_DIRS.CONTRACTS, filename) as string;
 
-      await db.run('UPDATE projects SET contract_signed_pdf_path = ? WHERE id = ?', [
-        relativePath,
-        projectId
-      ]);
+      await contractService.updateProjectSignedPdfPath(projectId, relativePath);
 
-      const latestContract = await db.get(
-        `SELECT id FROM contracts WHERE project_id = ? AND status != 'cancelled'
-         ORDER BY created_at DESC LIMIT 1`,
-        [projectId]
-      );
-
-      if (latestContract) {
-        await db.run(
-          'UPDATE contracts SET signed_pdf_path = ?, updated_at = datetime(\'now\') WHERE id = ?',
-          [relativePath, (latestContract as Record<string, unknown>).id as number]
-        );
+      const latestContractId = await contractService.getLatestActiveContractId(projectId);
+      if (latestContractId) {
+        await contractService.updateContractSignedPdfPath(latestContractId, relativePath);
       }
     }
 
@@ -570,16 +533,8 @@ router.post(
     if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
-    const db = getDatabase();
-
     // Get project with client info
-    const project = await db.get(
-      `SELECT p.*, c.email as client_email, COALESCE(c.contact_name, c.company_name) as client_name
-       FROM projects p
-       LEFT JOIN clients c ON p.client_id = c.id
-       WHERE p.id = ?`,
-      [projectId]
-    );
+    const project = await contractService.getProjectWithClientForSignature(projectId);
 
     if (!project) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
@@ -606,52 +561,21 @@ router.post(
     expiresAt.setDate(expiresAt.getDate() + 7); // Token valid for 7 days
 
     // Store the signature request (dual-write: projects + contracts for rollback)
-    await db.run(
-      `UPDATE projects SET
-        contract_signature_token = ?,
-        contract_signature_requested_at = datetime('now'),
-        contract_signature_expires_at = ?
-       WHERE id = ?`,
-      [signatureToken, expiresAt.toISOString(), projectId]
-    );
+    await contractService.storeProjectSignatureRequest(projectId, signatureToken, expiresAt.toISOString());
 
-    const latestContract = await db.get(
-      `SELECT id FROM contracts WHERE project_id = ? AND status != 'cancelled'
-       ORDER BY created_at DESC LIMIT 1`,
-      [projectId]
-    );
-
-    if (latestContract) {
+    const latestContractId = await contractService.getLatestActiveContractId(projectId);
+    if (latestContractId) {
       // Write signature request to contracts table (Phase 3.3 normalization)
-      await db.run(
-        `UPDATE contracts SET
-          signature_token = ?,
-          signature_requested_at = datetime('now'),
-          signature_expires_at = ?,
-          status = 'sent',
-          sent_at = datetime('now'),
-          expires_at = ?,
-          updated_at = datetime('now')
-         WHERE id = ?`,
-        [
-          signatureToken,
-          expiresAt.toISOString(),
-          expiresAt.toISOString(),
-          (latestContract as Record<string, unknown>).id as number
-        ]
-      );
+      await contractService.updateContractSignatureRequest(latestContractId, signatureToken, expiresAt.toISOString());
     }
 
     // Log signature request to audit log
-    await db.run(
-      `INSERT INTO contract_signature_log (project_id, action, actor_email, details)
-       VALUES (?, 'requested', ?, ?)`,
-      [
-        projectId,
-        req.user?.email || 'admin',
-        JSON.stringify({ clientEmail, expiresAt: expiresAt.toISOString() })
-      ]
-    );
+    await contractService.logSignatureAction({
+      projectId,
+      action: 'requested',
+      actorEmail: req.user?.email || 'admin',
+      details: JSON.stringify({ clientEmail, expiresAt: expiresAt.toISOString() })
+    });
 
     // Generate signature URL
     const baseUrl = getBaseUrl();
@@ -754,16 +678,8 @@ router.get(
   '/contract/by-token/:token',
   asyncHandler(async (req: express.Request, res: Response) => {
     const { token } = req.params;
-    const db = getDatabase();
 
-    const project = await db.get(
-      `SELECT p.id, p.project_name, p.price, p.contract_signature_expires_at,
-              p.contract_signed_at, COALESCE(c.contact_name, c.company_name) as client_name, c.email as client_email
-       FROM projects p
-       LEFT JOIN clients c ON p.client_id = c.id
-       WHERE p.contract_signature_token = ?`,
-      [token]
-    );
+    const project = await contractService.getProjectBySignatureToken(token);
 
     if (!project) {
       return errorResponse(res, 'Invalid or expired signature link', 404, ErrorCodes.INVALID_SIGNATURE_LINK);
@@ -795,23 +711,12 @@ router.get(
     // Log view (truncate User-Agent to prevent log bloat)
     const projectId = p.id as number;
     const userAgent = (req.get('user-agent') || 'unknown').substring(0, 500);
-    await db.run(
-      `INSERT INTO contract_signature_log (project_id, action, actor_ip, actor_user_agent)
-       VALUES (?, 'viewed', ?, ?)`,
-      [projectId, req.ip || 'unknown', userAgent]
-    );
+    await contractService.logContractView(projectId, req.ip || 'unknown', userAgent);
 
-    const latestContract = await db.get(
-      `SELECT id, status FROM contracts WHERE project_id = ? AND status != 'cancelled'
-       ORDER BY created_at DESC LIMIT 1`,
-      [projectId]
-    );
+    const latestContract = await contractService.getLatestActiveContractIdAndStatus(projectId);
 
-    if (latestContract && (latestContract as Record<string, unknown>).status !== 'signed') {
-      await db.run(
-        'UPDATE contracts SET status = \'viewed\', updated_at = datetime(\'now\') WHERE id = ?',
-        [(latestContract as Record<string, unknown>).id as number]
-      );
+    if (latestContract && latestContract.status !== 'signed') {
+      await contractService.markContractViewed(latestContract.id);
     }
 
     sendSuccess(res, {
@@ -835,7 +740,6 @@ router.post(
   asyncHandler(async (req: express.Request, res: Response) => {
     const { token } = req.params;
     const { signatureData, signerName, agreedToTerms } = req.body;
-    const db = getDatabase();
 
     if (!signatureData || !signerName) {
       return errorResponse(res, 'Signature and name are required', 400, ErrorCodes.MISSING_SIGNATURE);
@@ -846,14 +750,7 @@ router.post(
     }
 
     // Get project by token
-    const project = await db.get(
-      `SELECT p.id, p.project_name, p.contract_signature_expires_at, p.contract_signed_at,
-              COALESCE(c.contact_name, c.company_name) as client_name, c.email as client_email
-       FROM projects p
-       LEFT JOIN clients c ON p.client_id = c.id
-       WHERE p.contract_signature_token = ?`,
-      [token]
-    );
+    const project = await contractService.getProjectByTokenForSigning(token);
 
     if (!project) {
       return errorResponse(res, 'Invalid or expired signature link', 404, ErrorCodes.INVALID_SIGNATURE_LINK);
@@ -891,62 +788,40 @@ router.post(
     const signedAt = new Date().toISOString();
 
     // Update the project with signature
-    await db.run(
-      `UPDATE projects SET
-        contract_signed_at = ?,
-        contract_signature_token = NULL,
-        contract_signature_expires_at = NULL,
-        contract_signer_name = ?,
-        contract_signer_email = ?,
-        contract_signer_ip = ?,
-        contract_signer_user_agent = ?,
-        contract_signature_data = ?
-       WHERE id = ?`,
-      [signedAt, signerName, clientEmail, signerIp, signerUserAgent, signatureData, projectId]
-    );
+    await contractService.updateProjectWithSignature(projectId, {
+      signedAt,
+      signerName,
+      clientEmail,
+      signerIp,
+      signerUserAgent,
+      signatureData
+    });
 
-    const latestContract = await db.get(
-      `SELECT id FROM contracts WHERE project_id = ? AND status != 'cancelled'
-       ORDER BY created_at DESC LIMIT 1`,
-      [projectId]
-    );
+    const latestContractId = await contractService.getLatestActiveContractId(projectId);
 
-    if (latestContract) {
-      const contractId = (latestContract as Record<string, unknown>).id as number;
+    if (latestContractId) {
       // Clear signature token and update signature data (Phase 3.3 normalization)
-      await db.run(
-        `UPDATE contracts SET
-          status = 'signed',
-          signed_at = ?,
-          signature_token = NULL,
-          signature_expires_at = NULL,
-          signer_name = ?,
-          signer_email = ?,
-          signer_ip = ?,
-          signer_user_agent = ?,
-          signature_data = ?,
-          updated_at = datetime('now')
-         WHERE id = ?`,
-        [signedAt, signerName, clientEmail, signerIp, signerUserAgent, signatureData, contractId]
-      );
-    }
-
-    // Log signature to audit log (include contract_id for Phase 3.3)
-    const contractId = latestContract
-      ? ((latestContract as Record<string, unknown>).id as number)
-      : null;
-    await db.run(
-      `INSERT INTO contract_signature_log (project_id, contract_id, action, actor_email, actor_ip, actor_user_agent, details)
-       VALUES (?, ?, 'signed', ?, ?, ?, ?)`,
-      [
-        projectId,
-        contractId,
+      await contractService.updateContractWithSignature(latestContractId, {
+        signedAt,
+        signerName,
         clientEmail,
         signerIp,
         signerUserAgent,
-        JSON.stringify({ signerName, signedAt })
-      ]
-    );
+        signatureData
+      });
+    }
+
+    // Log signature to audit log (include contract_id for Phase 3.3)
+    const contractId = latestContractId;
+    await contractService.logSignatureAction({
+      projectId,
+      contractId,
+      action: 'signed',
+      actorEmail: clientEmail,
+      actorIp: signerIp,
+      actorUserAgent: signerUserAgent,
+      details: JSON.stringify({ signerName, signedAt })
+    });
 
     // Send confirmation email to client
     const { emailService } = await import('../../services/email-service.js');
@@ -1077,18 +952,12 @@ router.post(
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { signatureData, signerName } = req.body;
-    const db = getDatabase();
 
     if (!signerName) {
       return errorResponse(res, 'Signer name is required', 400, ErrorCodes.MISSING_SIGNER_NAME);
     }
 
-    const project = await db.get(
-      `SELECT id, project_name, contract_signed_at
-       FROM projects
-       WHERE id = ?`,
-      [projectId]
-    );
+    const project = await contractService.getProjectForCountersign(projectId);
 
     if (!project) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
@@ -1110,67 +979,30 @@ router.post(
     const countersignerUserAgent = (req.get('user-agent') || 'unknown').substring(0, 500);
     const countersignerEmail = req.user?.email || 'admin';
 
-    await db.run(
-      `UPDATE projects SET
-        contract_countersigned_at = ?,
-        contract_countersigner_name = ?,
-        contract_countersigner_email = ?,
-        contract_countersigner_ip = ?,
-        contract_countersigner_user_agent = ?,
-        contract_countersignature_data = ?
-       WHERE id = ?`,
-      [
-        countersignedAt,
-        signerName,
-        countersignerEmail,
-        countersignerIp,
-        countersignerUserAgent,
-        signatureData || null,
-        projectId
-      ]
-    );
+    const countersignData = {
+      countersignedAt,
+      signerName,
+      countersignerEmail,
+      countersignerIp,
+      countersignerUserAgent,
+      signatureData: signatureData || null
+    };
 
-    const latestContract = await db.get(
-      `SELECT id FROM contracts WHERE project_id = ? AND status != 'cancelled'
-       ORDER BY created_at DESC LIMIT 1`,
-      [projectId]
-    );
+    await contractService.updateProjectWithCountersignature(projectId, countersignData);
 
-    if (latestContract) {
-      await db.run(
-        `UPDATE contracts SET
-          status = 'signed',
-          countersigned_at = ?,
-          countersigner_name = ?,
-          countersigner_email = ?,
-          countersigner_ip = ?,
-          countersigner_user_agent = ?,
-          countersignature_data = ?,
-          updated_at = datetime('now')
-         WHERE id = ?`,
-        [
-          countersignedAt,
-          signerName,
-          countersignerEmail,
-          countersignerIp,
-          countersignerUserAgent,
-          signatureData || null,
-          (latestContract as Record<string, unknown>).id
-        ]
-      );
+    const latestContractId = await contractService.getLatestActiveContractId(projectId);
+    if (latestContractId) {
+      await contractService.updateContractWithCountersignature(latestContractId, countersignData);
     }
 
-    await db.run(
-      `INSERT INTO contract_signature_log (project_id, action, actor_email, actor_ip, actor_user_agent, details)
-       VALUES (?, 'countersigned', ?, ?, ?, ?)`,
-      [
-        projectId,
-        countersignerEmail,
-        countersignerIp,
-        countersignerUserAgent,
-        JSON.stringify({ signerName, countersignedAt })
-      ]
-    );
+    await contractService.logSignatureAction({
+      projectId,
+      action: 'countersigned',
+      actorEmail: countersignerEmail,
+      actorIp: countersignerIp,
+      actorUserAgent: countersignerUserAgent,
+      details: JSON.stringify({ signerName, countersignedAt })
+    });
 
     sendSuccess(res, {
       countersignedAt,
@@ -1191,16 +1023,7 @@ router.get(
     if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
-    const db = getDatabase();
-
-    const project = await db.get(
-      `SELECT contract_signed_at, contract_signature_requested_at, contract_signature_expires_at,
-              contract_signer_name, contract_signer_email, contract_signer_ip,
-              contract_countersigned_at, contract_countersigner_name, contract_countersigner_email,
-              contract_countersigner_ip, contract_signed_pdf_path
-       FROM projects WHERE id = ?`,
-      [projectId]
-    );
+    const project = await contractService.getProjectSignatureStatus(projectId);
 
     if (!project) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
