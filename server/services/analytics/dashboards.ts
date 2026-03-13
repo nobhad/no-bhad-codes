@@ -20,13 +20,13 @@ import type {
   KPISnapshot,
   KPISnapshotRow,
   MetricAlert,
-  MetricAlertRow,
+  MetricAlertRow
 } from './types.js';
 import {
   DASHBOARD_WIDGET_COLUMNS,
   DASHBOARD_PRESET_COLUMNS,
   KPI_SNAPSHOT_COLUMNS,
-  METRIC_ALERT_COLUMNS,
+  METRIC_ALERT_COLUMNS
 } from './types.js';
 
 // ============================================
@@ -294,7 +294,7 @@ export async function captureSnapshot(): Promise<number> {
 
 async function calculateKPIs(): Promise<
   { type: string; value: number; metadata?: Record<string, unknown> }[]
-> {
+  > {
   const db = getDatabase();
   const kpis: { type: string; value: number; metadata?: Record<string, unknown> }[] = [];
 

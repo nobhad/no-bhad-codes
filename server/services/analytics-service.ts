@@ -35,7 +35,7 @@ export type {
   ReportDataResult,
   DashboardPreset,
   ReportRun,
-  MetricAlert,
+  MetricAlert
 } from './analytics/types.js';
 
 /**
@@ -204,5 +204,5 @@ export const analyticsService = {
   getOverdueInvoicesReport: insights.getOverdueInvoicesReport,
   getPendingApprovalsReport: insights.getPendingApprovalsReport,
   getDocumentRequestsStatusReport: insights.getDocumentRequestsStatusReport,
-  getProjectHealthSummary: insights.getProjectHealthSummary,
+  getProjectHealthSummary: insights.getProjectHealthSummary
 };

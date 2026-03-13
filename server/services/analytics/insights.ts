@@ -391,7 +391,7 @@ export async function getUpsellOpportunities(): Promise<
     potentialValue: number;
     lastContact: string;
   }>
-> {
+  > {
   const db = getDatabase();
 
   const clients = (await db.all(`
@@ -460,7 +460,7 @@ export async function getOverdueInvoicesReport(): Promise<
     daysOverdue: number;
     remindersSent: number;
   }>
-> {
+  > {
   const db = getDatabase();
 
   const results = (await db.all(`
@@ -511,7 +511,7 @@ export async function getPendingApprovalsReport(): Promise<
     daysWaiting: number;
     remindersSent: number;
   }>
-> {
+  > {
   const db = getDatabase();
 
   const results = (await db.all(`

@@ -9,13 +9,13 @@ import { getDatabase } from '../../database/init.js';
 import {
   toScoringRule,
   type ScoringRuleRow,
-  type ProjectRow,
+  type ProjectRow
 } from '../../database/entities/index.js';
 import type {
   SqlValue,
   ScoringRule,
   ScoringRuleData,
-  LeadScoreResult,
+  LeadScoreResult
 } from './types.js';
 import { SCORING_RULE_COLUMNS } from './types.js';
 

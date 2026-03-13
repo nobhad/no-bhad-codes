@@ -17,7 +17,7 @@ import {
   type TaskRow,
   type DependencyRow,
   type CommentRow,
-  type ChecklistRow,
+  type ChecklistRow
 } from '../../database/entities/index.js';
 import type {
   SqlValue,
@@ -25,12 +25,12 @@ import type {
   TaskCreateData,
   TaskDependency,
   TaskComment,
-  ChecklistItem,
+  ChecklistItem
 } from './types.js';
 import {
   PROJECT_TASK_COLUMNS,
   TASK_DEPENDENCY_COLUMNS,
-  TASK_CHECKLIST_ITEM_COLUMNS,
+  TASK_CHECKLIST_ITEM_COLUMNS
 } from './types.js';
 
 // ============================================
