@@ -19,7 +19,7 @@
   top: 50%;
   transform: translate(-50%, -50%);
   z-index: var(--z-index-portal-modal);
-  width: calc(100% - 2rem);
+  width: calc(100% - var(--modal-edge-padding));
   background: var(--color-bg-primary);
   border: var(--portal-border);
   box-shadow: none;
@@ -72,7 +72,7 @@
   box-shadow: var(--shadow-modal);
   width: 100%;
   max-width: var(--modal-width-md);
-  max-height: 90vh;
+  max-height: var(--modal-max-height);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -91,7 +91,7 @@
 }
 
 .portal-modal.portal-modal--full {
-  max-width: calc(100vw - 2rem);
+  max-width: calc(100vw - var(--modal-edge-padding));
   margin: var(--space-4);
 }
 

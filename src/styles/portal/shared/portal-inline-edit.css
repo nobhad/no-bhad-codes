@@ -62,7 +62,7 @@
 
 [data-page="admin"] .inline-edit-input:focus {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 2px var(--portal-alpha-primary-20);
+  box-shadow: 0 0 0 var(--focus-ring-width-thick) var(--portal-alpha-primary-20);
 }
 
 [data-page="admin"] .inline-edit-input::placeholder {
@@ -358,8 +358,8 @@
 }
 
 .portal .inline-edit-row .inline-edit-value.editable:focus {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+  outline: var(--focus-ring-width-thick) solid var(--color-accent);
+  outline-offset: var(--focus-ring-offset-sm);
 }
 
 .portal .inline-edit-row .inline-edit-value.placeholder {

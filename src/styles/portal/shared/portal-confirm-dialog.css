@@ -120,12 +120,12 @@
 .confirm-dialog-btn:focus,
 .confirm-dialog-btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-accent);
+  box-shadow: 0 0 0 var(--focus-ring-width-thick) var(--color-accent);
 }
 
 .confirm-dialog-confirm.danger:focus,
 .confirm-dialog-confirm.danger:focus-visible {
-  box-shadow: 0 0 0 2px var(--color-danger);
+  box-shadow: 0 0 0 var(--focus-ring-width-thick) var(--color-danger);
 }
 
 /* Active state for selection buttons (e.g., who cancelled) */
@@ -243,5 +243,5 @@
 /* Textarea in prompt */
 .prompt-dialog-input.form-textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: var(--min-height-textarea-lg);
 }

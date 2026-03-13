@@ -856,7 +856,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   top: auto;
   bottom: 100%;
   margin-top: 0;
-  margin-bottom: -1px;
+  margin-bottom: var(--space-neg-px);
   border-top: var(--portal-input-border);
   border-bottom: none;
   background-color: var(--color-bg-primary);
@@ -996,7 +996,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   border: var(--portal-input-border);
   border-bottom: none;
   margin: 0;
-  margin-bottom: -1px;
+  margin-bottom: var(--space-neg-px);
   padding: 0;
   box-shadow: none;
   z-index: var(--z-index-content);

@@ -143,6 +143,24 @@ html[data-theme="light"] .portal :is(
 }
 
 /* =====================================================
+   OVERLAY SECTION GROUP TITLES
+   Compact uppercase labels inside overlays/panels.
+   xs font-size + semibold — distinguishable from body text in dense UI.
+   Used by: command palette sections, keyboard shortcut groups, config sections.
+   ===================================================== */
+.portal :is(
+  .command-palette-section-label,
+  .shortcuts-group-title,
+  .config-section-title
+) {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+}
+
+/* =====================================================
    MODAL FORM LABELS - Same styling as unified labels
    ===================================================== */
 .portal .modal-body .form-field > label:not(.portal-checkbox-label),

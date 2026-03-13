@@ -366,7 +366,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 
   .icon-btn:active {
     color: var(--color-accent);
-    transform: scale(0.95);
+    transform: scale(var(--transform-scale-press));
   }
 
   .icon-btn {
