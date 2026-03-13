@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <%- include('../partials/head', { config, portalType: 'login' }) %>
+  <% if (typeof cssBundle !== 'undefined' && cssBundle) { %>
+    <link rel="stylesheet" href="<%= cssBundle %>" />
+  <% } %>
+</head>
+<body data-page="<%= bodyPage %>" data-view="<%= bodyView %>">
+  <!-- Site Header -->
+  <%- include('../partials/header', { portalType: 'login' }) %>
+
+  <!-- Mobile/Overlay Navigation -->
+  <%- include('../partials/mobile-nav', { portalType: 'login' }) %>
+
+  <!-- Page Content -->
+  <%- content %>
+
+  <!-- Footer -->
+  <%- include('../partials/footer', { portalType: 'auth', businessName }) %>
+
+  <% if (isDev) { %>
+    <!-- Vite client for HMR in development -->
+    <script type="module" src="/@vite/client"></script>
+  <% } %>
+
+  <!-- Entry script -->
+  <script type="module" src="<%= entryScript %>"></script>
+
+  <!-- Page init script -->
+  <% if (typeof initModule !== 'undefined' && initModule) { %>
+    <script type="module">
+      import { setCopyrightYear } from '/src/utils/set-copyright-year.ts';
+      import { <%- initFunction %> } from '<%- initModule %>';
+      setCopyrightYear('auth-copyright-year');
+      document.addEventListener('DOMContentLoaded', () => <%- initFunction %>());
+    </script>
+  <% } %>
+</body>
+</html>
