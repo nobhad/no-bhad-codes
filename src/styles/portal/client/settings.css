@@ -244,7 +244,7 @@
   width: var(--icon-size-xs);
   height: var(--icon-size-xs);
   color: var(--color-text-primary);
-  animation: spin 1s linear infinite;
+  animation: spin var(--animation-spinner);
 }
 
 .portal .notification-toggle.is-checked .toggle-loading svg {

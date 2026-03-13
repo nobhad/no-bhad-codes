@@ -206,10 +206,7 @@
   font-size: var(--font-size-sm);
 }
 
-/* Text muted utility */
-.text-muted {
-  color: var(--color-text-tertiary);
-}
+/* Text muted utility: .text-muted defined in shared/portal-layout.css */
 
 /* Date value styling - inherits from table */
 .date-value {
