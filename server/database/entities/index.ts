@@ -280,6 +280,36 @@ export {
 } from './payment-schedule.js';
 
 // =====================================================
+// CONTENT REQUEST ENTITIES
+// =====================================================
+
+export {
+  // Types
+  type ContentChecklist,
+  type ContentItem,
+  type ContentRequestTemplate,
+  type ContentRequestTemplateItem,
+  type CompletionStats,
+  // Row types
+  type ContentChecklistRow,
+  type ContentItemRow,
+  type ContentRequestTemplateRow,
+  // Column constants
+  CHECKLIST_COLUMNS,
+  CHECKLIST_COLUMNS_WITH_JOINS,
+  ITEM_COLUMNS,
+  TEMPLATE_COLUMNS as CONTENT_TEMPLATE_COLUMNS,
+  // Schemas
+  contentChecklistSchema,
+  contentItemSchema,
+  contentRequestTemplateSchema,
+  // Mappers
+  toContentChecklist,
+  toContentItem,
+  toContentRequestTemplate
+} from './content-request.js';
+
+// =====================================================
 // AD HOC REQUEST ENTITIES
 // =====================================================
 

@@ -60,6 +60,7 @@ import webhooksRouter from './routes/webhooks.js';
 import deliverablesRouter from './routes/deliverables.js';
 import integrationsRouter from './routes/integrations.js';
 import dataQualityRouter from './routes/data-quality.js';
+import paymentSchedulesRouter from './routes/payment-schedules.js';
 import settingsRouter from './routes/settings.js';
 import receiptsRouter from './routes/receipts.js';
 import { eventsRouter } from './routes/events.js';
@@ -371,7 +372,8 @@ const apiRouters = [
   { path: '/settings', router: settingsRouter },
   { path: '/receipts', router: receiptsRouter },
   { path: '/events', router: eventsRouter },
-  { path: '/search', router: searchRouter }
+  { path: '/search', router: searchRouter },
+  { path: '/payment-schedules', router: paymentSchedulesRouter }
 ];
 
 // Mount all routers at both /api and /api/v1

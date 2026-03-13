@@ -50,6 +50,14 @@ export const API_ENDPOINTS = {
   FILES_MULTIPLE: '/api/uploads/multiple',
   RECEIPTS: '/api/receipts',
 
+  // Payment schedules
+  PAYMENT_SCHEDULES: '/api/payment-schedules',
+  PAYMENT_SCHEDULES_MY: '/api/payment-schedules/my',
+  PAYMENT_SCHEDULES_MY_SUMMARY: '/api/payment-schedules/my/summary',
+  PAYMENT_SCHEDULES_OVERDUE: '/api/payment-schedules/overdue',
+  PAYMENT_SCHEDULES_FROM_SPLIT: '/api/payment-schedules/from-split',
+  PAYMENT_SCHEDULES_CHECK_OVERDUE: '/api/payment-schedules/check-overdue',
+
   // Client portal features
   CLIENT_INFO: '/api/client-info',
   INTAKE: '/api/intake',
