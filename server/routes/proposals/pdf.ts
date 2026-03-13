@@ -36,8 +36,6 @@ import type {
   PdfPageContext
 } from './helpers.js';
 import type {
-  ProposalPdfRow,
-  ProposalFeatureSelectionRow,
   ProposalSignatureForPdf
 } from '../../services/proposal-service.js';
 import { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } from '../../config/pdf-styles.js';

@@ -819,7 +819,7 @@ export async function getAdminKPIAnalytics(daysBack: number): Promise<Record<str
   `) as Array<{ status: string; count: number }>;
 
   const sourceBreakdownData = await db.all(
-    "SELECT 'Direct' as source, COUNT(*) as count FROM projects WHERE deleted_at IS NULL"
+    'SELECT \'Direct\' as source, COUNT(*) as count FROM projects WHERE deleted_at IS NULL'
   ) as Array<{ source: string; count: number }>;
 
   const totalLeads = sourceBreakdownData.reduce((sum, s) => sum + s.count, 0);

@@ -361,7 +361,7 @@ export async function updateProject(
 export async function setProjectCompletedDate(projectId: number): Promise<void> {
   const db = getDatabase();
   await db.run(
-    `UPDATE projects SET actual_end_date = CURRENT_TIMESTAMP WHERE id = ?`,
+    'UPDATE projects SET actual_end_date = CURRENT_TIMESTAMP WHERE id = ?',
     [projectId]
   );
 }

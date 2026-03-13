@@ -16,7 +16,6 @@ import {
   type PaymentInstallmentRow
 } from '../database/entities/payment-schedule.js';
 import type { PaymentInstallmentStatus, PaymentMethod } from '../config/constants.js';
-import { PAYMENT_INSTALLMENT_STATUSES } from '../config/constants.js';
 import { logger } from './logger.js';
 
 // =====================================================
@@ -260,7 +259,7 @@ class PaymentScheduleService {
   async getClientSummary(clientId: number): Promise<PaymentSummary> {
     const db = getDatabase();
     const rows = await db.all(
-      `SELECT status, amount, paid_amount FROM payment_schedule_installments WHERE client_id = ?`,
+      'SELECT status, amount, paid_amount FROM payment_schedule_installments WHERE client_id = ?',
       [clientId]
     );
 

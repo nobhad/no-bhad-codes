@@ -2280,7 +2280,7 @@ class ClientService {
     updates.push('updated_at = CURRENT_TIMESTAMP');
     values.push(contactId);
 
-    const CLIENT_CONTACT_COLUMNS = `
+    const CONTACT_UPDATE_COLUMNS = `
       id, client_id, first_name, last_name, email, phone, title, department,
       role, is_primary, notes, created_at, updated_at
     `.replace(/\\s+/g, ' ').trim();
@@ -2291,7 +2291,7 @@ class ClientService {
     );
 
     return db.get(
-      `SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`,
+      `SELECT ${CONTACT_UPDATE_COLUMNS} FROM client_contacts WHERE id = ?`,
       [contactId]
     ) as Promise<Record<string, unknown> | undefined>;
   }

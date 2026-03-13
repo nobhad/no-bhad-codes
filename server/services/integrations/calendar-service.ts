@@ -128,7 +128,7 @@ const ICAL_VERSION = '2.0';
  * so a single-day event on 2026-03-13 must have end = 2026-03-14.
  */
 function getExclusiveEndDate(dateStr: string): string {
-  const date = new Date(dateStr.split('T')[0] + 'T12:00:00Z'); // Noon UTC to avoid DST issues
+  const date = new Date(`${dateStr.split('T')[0]  }T12:00:00Z`); // Noon UTC to avoid DST issues
   date.setUTCDate(date.getUTCDate() + 1);
   return date.toISOString().split('T')[0];
 }

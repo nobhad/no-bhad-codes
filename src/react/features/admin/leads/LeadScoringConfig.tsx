@@ -12,7 +12,6 @@ import {
   Pencil,
   Trash2,
   RefreshCw,
-  Scale,
   ToggleLeft,
   ToggleRight,
   Inbox

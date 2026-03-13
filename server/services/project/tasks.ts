@@ -657,14 +657,14 @@ export async function updateTaskAdmin(
 
   await db.run(`UPDATE project_tasks SET ${updates.join(', ')} WHERE id = ?`, values);
 
-  const PROJECT_TASK_COLUMNS = `
+  const TASK_UPDATE_COLUMNS = `
     id, project_id, milestone_id, title, description, status, priority, assigned_to,
     due_date, estimated_hours, actual_hours, sort_order, parent_task_id,
     created_at, updated_at, completed_at
   `.replace(/\s+/g, ' ').trim();
 
   return db.get(
-    `SELECT ${PROJECT_TASK_COLUMNS} FROM project_tasks WHERE id = ?`,
+    `SELECT ${TASK_UPDATE_COLUMNS} FROM project_tasks WHERE id = ?`,
     [taskId]
   ) as Promise<Record<string, unknown> | undefined>;
 }
