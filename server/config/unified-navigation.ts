@@ -344,7 +344,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     order: 16,
     shortcut: '8',
     ariaLabel: 'Settings & Configuration'
-  },
+  }
 
   // ========== CLIENT-ONLY TABS (consolidated) ==========
   // proposals, contracts, invoices → merged into /documents

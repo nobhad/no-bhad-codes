@@ -20,7 +20,6 @@ import {
   ErrorCodes,
   errorResponse,
   BUSINESS_INFO,
-  getPdfLogoBytes,
   PDFLibDocument,
   StandardFonts,
   degrees,

@@ -61,7 +61,7 @@ const PAGE_MARGIN = 45; // Slightly smaller margins
 const CONTENT_WIDTH = PAGE_WIDTH - PAGE_MARGIN * 2;
 
 // Font sizes
-const FONT_SIZE_H1 = 18;
+const _FONT_SIZE_H1 = 18;
 const FONT_SIZE_H2 = 13;
 const FONT_SIZE_H3 = 10;
 const FONT_SIZE_H4 = 10;
@@ -505,7 +505,7 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
         if (inDetails) {
           const labelMatch = blockLine.match(/^\*\*([^*]+):\*\*\s*(.*)$/);
           if (labelMatch) {
-            detailLines.push({ label: labelMatch[1] + ':', value: labelMatch[2] });
+            detailLines.push({ label: `${labelMatch[1]  }:`, value: labelMatch[2] });
           }
         } else {
           billToLines.push(blockLine);
