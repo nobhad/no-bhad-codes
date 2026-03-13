@@ -46,6 +46,55 @@
 
 ---
 
+## Completed - Backend Enhancements (March 13, 2026)
+
+**Status:** COMPLETE
+
+### Payment Schedule System
+
+- [x] Migration 107: `payment_schedule_installments` table
+- [x] Entity mapper, service, routes (admin CRUD + client read-only)
+- [x] SSOT: constants, types, filter configs
+- [x] Portal view: `PaymentScheduleView.tsx`
+
+### Content Request System
+
+- [x] Migration 108: 3 tables + seeded "Website Build" template
+- [x] Migration 110: `content_request_history` audit trail
+- [x] Migration 111: priority column
+- [x] Entity, service, routes (admin + client submissions)
+- [x] Audit history logging on all submissions and reviews
+- [x] Rejection state + bulk operations
+- [x] Portal view: `ContentChecklistView.tsx`
+
+### Lead Scoring Enhancements
+
+- [x] Auto-score on intake submission
+- [x] Fixed rule thresholds (business-site, web-app)
+- [x] Expanded scoring fields (feature_count, design_level, source_type)
+
+### Project Template Enhancement
+
+- [x] Migration 109: 4 new JSON columns (content requests, payment schedule, contract template, tiers)
+- [x] `createProjectFromTemplate()` auto-generates content checklists, payment schedules, contracts
+
+### SSOT & Request Systems Refinement
+
+- [x] Fixed `DOCUMENT_REQUEST_STATUSES` mismatch in constants.ts
+- [x] Added shared `PRIORITY_LEVELS`, `REQUEST_CATEGORIES`, `QUESTIONNAIRE_RESPONSE_STATUSES`
+- [x] Added `DOCUMENT_REQUEST_STATUS_CONFIG`, `QUESTIONNAIRE_RESPONSE_STATUS_CONFIG` to frontend types
+- [x] Replaced hardcoded filter options with `configToFilterOptions()` derivations
+- [x] Entity mappers: `questionnaire.ts`, `document-request.ts`
+
+### Portal UI
+
+- [x] `PortalRequestsHub` — unified tabbed view (Questionnaires, Doc Requests, Content)
+- [x] `ContentChecklistView` — checklist with type-specific submission UI
+- [x] `PaymentScheduleView` — installments with summary card
+- [x] Routes: `/requests-hub`, `/content-requests`, `/payment-schedule`
+
+---
+
 ## Upcoming - PDF Deep Dive
 
 **Status:** TODO

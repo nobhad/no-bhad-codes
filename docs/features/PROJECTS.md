@@ -125,6 +125,19 @@ Reusable project templates:
 - Default hourly rate
 - Create project from template with auto-calculated dates
 
+#### Enhanced Template Fields (March 2026)
+
+Templates can now include:
+
+- **Content request defaults** — array of content items auto-created as a checklist when project is created from template
+- **Payment schedule defaults** — percentage splits with day offsets, auto-generates installments when total amount is provided
+- **Contract template link** — auto-creates a draft contract from the linked template
+- **Tier definitions** — Good/Better/Best pricing tiers with features, price, and estimated hours per tier
+
+When creating a project from template with `POST /api/projects/from-template`, pass optional `selectedTier` and/or `totalAmount` to auto-generate payment schedules and apply tier pricing.
+
+**Response includes:** `{ projectId, milestoneIds, taskIds, checklistId?, paymentInstallmentIds?, contractId? }`
+
 ### 7. Project Health
 
 Automatic project health calculation:
