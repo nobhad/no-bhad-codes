@@ -85,6 +85,7 @@ export const API_ENDPOINTS = {
     CONTACT_SUBMISSIONS: '/api/admin/contact-submissions',
     LEADS_BULK_STATUS: '/api/admin/leads/bulk/status',
     LEADS_BULK_DELETE: '/api/admin/leads/bulk/delete',
+    LEADS_SCORING_RULES: '/api/admin/leads/scoring-rules',
     CLIENTS: '/api/admin/clients',
     CONTACTS: '/api/admin/contacts',
     CONTACTS_BULK_DELETE: '/api/admin/contacts/bulk-delete',
@@ -153,6 +154,9 @@ export const API_ENDPOINTS = {
     KB_CATEGORIES: '/api/kb/admin/categories',
     KB_ARTICLES: '/api/kb/admin/articles',
     KB_STATS: '/api/kb/admin/stats',
+
+    // Project Templates
+    PROJECT_TEMPLATES: '/api/projects/templates',
 
     // Webhooks
     WEBHOOKS: '/api/v1/webhooks',
@@ -296,6 +300,8 @@ export const buildEndpoint = {
   adminLead: (id: number | string) => `${API_ENDPOINTS.ADMIN.LEADS}/${id}`,
   adminLeadStatus: (id: number | string) => `${API_ENDPOINTS.ADMIN.LEADS}/${id}/status`,
   adminLeadInvite: (id: number | string) => `${API_ENDPOINTS.ADMIN.LEADS}/${id}/invite`,
+  adminLeadCalculateScore: (id: number | string) => `${API_ENDPOINTS.ADMIN.LEADS}/${id}/calculate-score`,
+  adminScoringRule: (id: number | string) => `${API_ENDPOINTS.ADMIN.LEADS_SCORING_RULES}/${id}`,
 
   // Contact Submissions
   adminContactSubmissionStatus: (id: number | string) => `${API_ENDPOINTS.ADMIN.CONTACT_SUBMISSIONS}/${id}/status`,
@@ -314,6 +320,9 @@ export const buildEndpoint = {
 
   // Document request file downloads
   documentRequestFileDownload: (documentId: number | string) => `${API_ENDPOINTS.DOCUMENT_REQUESTS}/files/${documentId}/download`,
+
+  // Project Templates
+  projectTemplate: (id: number | string) => `${API_ENDPOINTS.ADMIN.PROJECT_TEMPLATES}/${id}`,
 
   // Webhooks
   webhook: (id: number | string) => `${API_ENDPOINTS.ADMIN.WEBHOOKS}/${id}`,
