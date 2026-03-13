@@ -197,6 +197,10 @@ export const projectTemplateSchema = defineSchema<ProjectTemplate>({
   estimatedDurationDays: { column: 'estimated_duration_days', type: 'number?' },
   defaultHourlyRate: { column: 'default_hourly_rate', type: 'float?' },
   isActive: { column: 'is_active', type: 'boolean' },
+  defaultContentRequests: { column: 'default_content_requests', type: 'json?' },
+  defaultPaymentSchedule: { column: 'default_payment_schedule', type: 'json?' },
+  contractTemplateId: { column: 'contract_template_id', type: 'number?' },
+  tierDefinitions: { column: 'tier_definitions', type: 'json?' },
   createdAt: { column: 'created_at', type: 'string' },
   updatedAt: { column: 'updated_at', type: 'string' }
 });
