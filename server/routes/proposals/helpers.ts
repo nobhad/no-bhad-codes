@@ -42,7 +42,8 @@ export {
   cachePdf,
   PAGE_MARGINS,
   ensureSpace,
-  addPageNumbers
+  addPageNumbers,
+  drawPdfDocumentHeader
 } from '../../utils/pdf-utils.js';
 export type { PdfPageContext } from '../../utils/pdf-utils.js';
 

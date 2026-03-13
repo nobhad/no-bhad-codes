@@ -13,10 +13,10 @@ import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { getDatabase } from '../database/init.js';
 import { getFloat } from '../database/row-helpers.js';
-import { BUSINESS_INFO, getPdfLogoBytes } from '../config/business.js';
+import { BUSINESS_INFO } from '../config/business.js';
 import { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } from '../config/pdf-styles.js';
 import { getUploadsSubdir, getRelativePath, sanitizeFilename } from '../config/uploads.js';
-import { PAGE_MARGINS } from '../utils/pdf-utils.js';
+import { PAGE_MARGINS, drawPdfDocumentHeader } from '../utils/pdf-utils.js';
 import { logger } from './logger.js';
 
 // ============================================
@@ -94,91 +94,16 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
   let y = height - 43;
 
   // === HEADER ===
-  const logoHeight = PDF_SPACING.logoHeight;
-  const titleText = 'RECEIPT';
-  page.drawText(titleText, {
-    x: leftMargin,
-    y: y - 20,
-    size: PDF_TYPOGRAPHY.titleSize,
-    font: helveticaBold,
-    color: PDF_COLORS.title
+  y = await drawPdfDocumentHeader({
+    page,
+    pdfDoc,
+    fonts: { regular: helvetica, bold: helveticaBold },
+    startY: y,
+    leftMargin,
+    rightMargin,
+    title: 'RECEIPT'
   });
-
-  let textStartX = rightMargin - 180;
-  const logoBytes = getPdfLogoBytes();
-  if (logoBytes) {
-    const logoImage = await pdfDoc.embedPng(logoBytes);
-    const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
-    const logoX = rightMargin - logoWidth - 150;
-    page.drawImage(logoImage, {
-      x: logoX,
-      y: y - logoHeight + 10,
-      width: logoWidth,
-      height: logoHeight
-    });
-    textStartX = logoX + logoWidth + 18;
-  }
-
-  // Business info - dynamic positioning to skip empty fields
-  let infoY = y - 11;
-  page.drawText(BUSINESS_INFO.name, {
-    x: textStartX,
-    y: infoY,
-    size: PDF_TYPOGRAPHY.businessNameSize,
-    font: helveticaBold,
-    color: PDF_COLORS.title
-  });
-  infoY -= 18;
-  if (BUSINESS_INFO.owner) {
-    page.drawText(BUSINESS_INFO.owner, {
-      x: textStartX,
-      y: infoY,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: helvetica,
-      color: PDF_COLORS.subtitle
-    });
-    infoY -= 16;
-  }
-  if (BUSINESS_INFO.tagline) {
-    page.drawText(BUSINESS_INFO.tagline, {
-      x: textStartX,
-      y: infoY,
-      size: PDF_TYPOGRAPHY.smallSize,
-      font: helvetica,
-      color: PDF_COLORS.muted
-    });
-    infoY -= 14;
-  }
-  if (BUSINESS_INFO.email) {
-    page.drawText(BUSINESS_INFO.email, {
-      x: textStartX,
-      y: infoY,
-      size: PDF_TYPOGRAPHY.smallSize,
-      font: helvetica,
-      color: PDF_COLORS.muted
-    });
-    infoY -= 14;
-  }
-  if (BUSINESS_INFO.website) {
-    page.drawText(BUSINESS_INFO.website, {
-      x: textStartX,
-      y: infoY,
-      size: PDF_TYPOGRAPHY.smallSize,
-      font: helvetica,
-      color: PDF_COLORS.muted
-    });
-    infoY -= 14;
-  }
-  y = Math.min(y - 120, infoY - 20);
-
-  // Divider
-  page.drawLine({
-    start: { x: leftMargin, y },
-    end: { x: rightMargin, y },
-    thickness: PDF_SPACING.dividerThickness,
-    color: PDF_COLORS.divider
-  });
-  y -= 30;
+  y -= 9; // Receipt adds extra gap before "PAYMENT RECEIVED"
 
   // === PAYMENT CONFIRMATION ===
   page.drawText('PAYMENT RECEIVED', {
