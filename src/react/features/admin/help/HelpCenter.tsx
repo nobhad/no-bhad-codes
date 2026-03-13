@@ -10,6 +10,7 @@ import { Search, ChevronDown, ChevronUp, BookOpen, RefreshCw } from 'lucide-reac
 import { useFadeIn } from '@react/hooks/useGsap';
 import { useListFetch } from '@react/factories/useDataFetch';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
+import { FormDropdown } from '@react/components/portal/FormDropdown';
 import { formatDate } from '@react/utils/formatDate';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import DOMPurify from 'dompurify';
@@ -61,6 +62,14 @@ export function HelpCenter({ getAuthToken }: HelpCenterProps) {
     const cats = new Set(articles.map((a) => a.category));
     return Array.from(cats).sort();
   }, [articles]);
+
+  const categoryOptions = useMemo(
+    () => [
+      { value: ALL_CATEGORIES_VALUE, label: 'All Categories' },
+      ...categories.map((cat) => ({ value: cat, label: cat }))
+    ],
+    [categories]
+  );
 
   // Filter articles by search query and category
   const filteredArticles = useMemo(() => {
@@ -117,19 +126,12 @@ export function HelpCenter({ getAuthToken }: HelpCenterProps) {
             </div>
           </div>
           <div className="form-field">
-            <select
-              className="form-input"
+            <FormDropdown
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              onChange={setSelectedCategory}
+              options={categoryOptions}
               aria-label="Filter by category"
-            >
-              <option value={ALL_CATEGORIES_VALUE}>All Categories</option>
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
+            />
           </div>
         </div>
       </div>
