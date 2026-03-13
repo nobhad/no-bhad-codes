@@ -147,13 +147,13 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   color: var(--color-white);
   border: var(--portal-btn-border-width) solid var(--color-accent);
   border-bottom-width: var(--portal-btn-border-bottom-width);
-  border-bottom-color: var(--portal-btn-border-color, var(--color-white));
+  border-bottom-color: var(--portal-btn-border-color);
 }
 .btn-filled:hover {
   background: var(--color-brand-hover, var(--color-interactive-primary-hover));
   color: var(--color-white);
   border-color: var(--color-brand-hover, var(--color-interactive-primary-hover));
-  border-bottom-color: var(--portal-btn-border-color, var(--color-white));
+  border-bottom-color: var(--portal-btn-border-color);
 }
 .btn-filled:disabled {
   background: var(--color-bg-prominent);
@@ -342,7 +342,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   color: var(--color-accent);
 }
 .icon-btn.icon-btn-primary:hover {
-  color: var(--color-accent-hover, var(--color-accent));
+  color: var(--color-accent-hover);
 }
 
 /* Icon button with border active state */

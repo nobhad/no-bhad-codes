@@ -66,7 +66,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: var(--dropdown-caret-gap, var(--space-2));
+  gap: var(--dropdown-caret-gap);
   min-width: var(--portal-dropdown-min-width, var(--status-dropdown-width));
 }
 
@@ -1493,7 +1493,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 .modal-dropdown-check-icon {
   width: 0.75rem;
   height: 0.75rem;
-  color: var(--color-text-inverse, var(--color-black));
+  color: var(--color-text-inverse);
 }
 
 .modal-dropdown-option-text {

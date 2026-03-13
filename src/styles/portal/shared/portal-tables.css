@@ -1975,7 +1975,7 @@
 }
 
 .copy-cell-icon--success {
-  color: var(--status-completed, var(--app-color-success));
+  color: var(--status-completed);
 }
 
 /* Count label - text after number */
@@ -2051,8 +2051,8 @@
   /* Styled via data attributes in CSS */
 }
 .data-table-checkbox[data-state="checked"] {
-  background-color: var(--color-brand-primary, var(--color-accent));
-  border-color: var(--color-brand-primary, var(--color-accent));
+  background-color: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
 }
 
 .data-table-row-selected {
