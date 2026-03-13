@@ -481,7 +481,7 @@ Invite a lead to create a client portal account.
 {
   "success": true,
   "message": "Invitation sent successfully",
-  "inviteLink": "https://nobhad.codes/client/set-password.html?token=abc123..."
+  "inviteLink": "https://nobhad.codes/set-password?token=abc123..."
 }
 ```
 

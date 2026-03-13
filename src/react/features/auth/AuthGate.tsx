@@ -319,7 +319,7 @@ export function AuthGate(props: AuthGateProps) {
           )}
 
           <div className="auth-gate-footer">
-            <a href="/client/forgot-password.html" id="forgot-password-link" className="auth-link">
+            <a href="/forgot-password" id="forgot-password-link" className="auth-link">
               Forgot password?
             </a>
             <span className="auth-divider">|</span>
