@@ -81,7 +81,7 @@ router.get(
         id: p.id as number,
         title: p.project_name as string,
         subtitle: (p.status as string) || 'project',
-        path: isAdmin ? `/projects/${p.id}` : `/projects`
+        path: isAdmin ? `/projects/${p.id}` : '/projects'
       });
     }
 
@@ -107,7 +107,7 @@ router.get(
         id: t.id as number,
         title: t.subject as string,
         subtitle: 'message thread',
-        path: `/messages`
+        path: '/messages'
       });
     }
 
@@ -134,7 +134,7 @@ router.get(
         id: inv.id as number,
         title: (inv.invoice_number as string) || `Invoice #${inv.id}`,
         subtitle: (inv.status as string) || 'invoice',
-        path: `/invoices`
+        path: '/invoices'
       });
     }
 
