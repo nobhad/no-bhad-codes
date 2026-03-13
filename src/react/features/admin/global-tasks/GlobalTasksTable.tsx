@@ -48,6 +48,7 @@ import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { unwrapApiData, apiFetch, apiPost } from '@/utils/api-client';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 const logger = createLogger('GlobalTasksTable');
 
@@ -222,7 +223,7 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
         overdue: 0
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load tasks');
+      setError(formatErrorMessage(err, 'Failed to load tasks'));
     } finally {
       setIsLoading(false);
     }

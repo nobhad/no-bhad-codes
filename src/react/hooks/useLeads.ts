@@ -4,6 +4,7 @@ import { API_ENDPOINTS } from '../../constants/api-endpoints';
 import { unwrapApiData, apiFetch, apiPut, apiPost, apiDelete } from '../../utils/api-client';
 import { decodeArrayFields } from '../utils/decodeText';
 import { createLogger } from '../../utils/logger';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 const logger = createLogger('useLeads');
 
@@ -102,7 +103,7 @@ export function useLeads({ autoFetch = true }: UseLeadsOptions = {}): UseLeadsRe
       setLeads(decodeArrayFields(leadsArray, LEAD_TEXT_FIELDS));
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') return;
-      const message = err instanceof Error ? err.message : 'An error occurred';
+      const message = formatErrorMessage(err, 'An error occurred');
       setError(message);
       logger.error('[useLeads] Error:', message);
     } finally {

@@ -4,22 +4,10 @@ import { Upload, X, File, AlertCircle } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { KEYS } from '../../../constants/keyboard';
+import { MAX_FILE_SIZE, ALLOWED_MIME_TYPES } from '../../../utils/file-validation';
+import { formatErrorMessage } from '../../../utils/error-utils';
 
-const DEFAULT_MAX_SIZE = 10 * 1024 * 1024; // 10MB
 const DEFAULT_MAX_FILES = 5;
-
-const DEFAULT_ACCEPTED_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'text/plain',
-  'application/zip',
-  'application/x-rar-compressed'
-];
 
 export interface FileUploadFile {
   file: File;
@@ -60,8 +48,8 @@ export interface FileUploadProps {
  */
 export function FileUpload({
   onFilesSelected,
-  acceptedTypes = DEFAULT_ACCEPTED_TYPES,
-  maxSize = DEFAULT_MAX_SIZE,
+  acceptedTypes = ALLOWED_MIME_TYPES,
+  maxSize = MAX_FILE_SIZE,
   maxFiles = DEFAULT_MAX_FILES,
   multiple = true,
   disabled = false,
@@ -372,7 +360,7 @@ export function useFileUpload({
         await uploadFn(files);
         onSuccess?.();
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Upload failed';
+        const message = formatErrorMessage(err, 'Upload failed');
         setError(message);
         onError?.(message);
       } finally {

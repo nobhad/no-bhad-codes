@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { createLogger } from '@/utils/logger';
 import { unwrapApiData, apiFetch, apiPost, apiPut, apiDelete } from '@/utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
+import { formatErrorMessage } from '@/utils/error-utils';
 import {
   EMPTY_FORM,
   type WebhookItem,
@@ -68,7 +69,7 @@ export function useWebhooksData({ showNotification }: UseWebhooksDataParams) {
       const payload = unwrapApiData<{ webhooks?: WebhookItem[] }>(await response.json());
       setWebhooks(payload.webhooks || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load webhooks');
+      setError(formatErrorMessage(err, 'Failed to load webhooks'));
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +84,7 @@ export function useWebhooksData({ showNotification }: UseWebhooksDataParams) {
       const payload = unwrapApiData<{ deliveries?: WebhookDelivery[] }>(await response.json());
       setDeliveries(payload.deliveries || []);
     } catch (err) {
-      setDeliveriesError(err instanceof Error ? err.message : 'Failed to load deliveries');
+      setDeliveriesError(formatErrorMessage(err, 'Failed to load deliveries'));
     } finally {
       setDeliveriesLoading(false);
     }
@@ -196,7 +197,7 @@ export function useWebhooksData({ showNotification }: UseWebhooksDataParams) {
       onClose();
       loadWebhooks();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to save webhook';
+      const message = formatErrorMessage(err, 'Failed to save webhook');
       setFormError(message);
       logger.error('Failed to save webhook:', err);
     } finally {

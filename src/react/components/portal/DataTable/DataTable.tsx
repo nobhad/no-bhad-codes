@@ -34,6 +34,7 @@ import { useExport } from '@react/hooks/useExport';
 import { useFadeIn } from '@react/hooks/useGsap';
 import type { ExportConfig } from '../../../../utils/table-export';
 import type { DataTableProps, SortConfig } from './types';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 /**
  * Default filter function - searches all string fields
@@ -207,8 +208,7 @@ export function DataTable<T extends { id: number }>({
 
       onRefetch();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Delete operation failed';
-      showNotification?.(message, 'error');
+      showNotification?.(formatErrorMessage(err, 'Delete operation failed'), 'error');
     }
   }, [selection, onBulkDelete, showNotification, onRefetch]);
 

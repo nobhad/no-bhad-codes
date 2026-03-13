@@ -24,6 +24,7 @@ import { IconButton } from '@react/factories';
 import { TIMING } from '@/constants/timing';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { unwrapApiData, apiFetch, apiPost } from '@/utils/api-client';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 interface ServiceStatus {
   id: string;
@@ -162,7 +163,7 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _
         lastUpdated: (payload.lastUpdated as string) || new Date().toISOString()
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load system status');
+      setError(formatErrorMessage(err, 'Failed to load system status'));
     } finally {
       setIsLoading(false);
     }
@@ -175,7 +176,7 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _
       if (!response.ok) throw new Error('Failed to clear cache');
       showNotification?.('Cache cleared successfully', 'success');
     } catch (err) {
-      showNotification?.(err instanceof Error ? err.message : 'Failed to clear cache', 'error');
+      showNotification?.(formatErrorMessage(err, 'Failed to clear cache'), 'error');
     } finally {
       setIsClearingCache(false);
     }
@@ -189,7 +190,7 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _
       const payload = unwrapApiData<{ to: string }>(await response.json());
       showNotification?.(`Test email sent to ${payload.to}`, 'success');
     } catch (err) {
-      showNotification?.(err instanceof Error ? err.message : 'Failed to send test email', 'error');
+      showNotification?.(formatErrorMessage(err, 'Failed to send test email'), 'error');
     } finally {
       setIsSendingTestEmail(false);
     }

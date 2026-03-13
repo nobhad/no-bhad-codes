@@ -18,6 +18,7 @@ import { TIMING } from '@/constants/timing';
 import { apiFetch, unwrapApiData } from '@/utils/api-client';
 import type { PortalViewProps } from '../types';
 import { createLogger } from '@/utils/logger';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 const logger = createLogger('PortalHelp');
 
@@ -127,7 +128,7 @@ function usePortalHelp(_getAuthToken?: () => string | null) {
     try {
       await Promise.all([fetchFeatured(), fetchCategories()]);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to load help center';
+      const message = formatErrorMessage(err, 'Failed to load help center');
       setError(message);
     } finally {
       setIsLoading(false);

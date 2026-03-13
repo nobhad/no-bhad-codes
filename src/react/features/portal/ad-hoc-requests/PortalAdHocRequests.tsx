@@ -23,6 +23,7 @@ import type { PortalViewProps } from '../types';
 import { createLogger } from '@/utils/logger';
 import { getCsrfToken, CSRF_HEADER_NAME } from '@/utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 const logger = createLogger('PortalAdHocRequests');
 
@@ -142,7 +143,7 @@ export function PortalAdHocRequests({
     } catch (err) {
       logger.error('Error submitting request:', err);
       showNotification?.(
-        err instanceof Error ? err.message : 'Failed to submit request',
+        formatErrorMessage(err, 'Failed to submit request'),
         'error'
       );
     } finally {
@@ -161,7 +162,7 @@ export function PortalAdHocRequests({
     } catch (err) {
       logger.error('Error approving quote:', err);
       showNotification?.(
-        err instanceof Error ? err.message : 'Failed to approve quote',
+        formatErrorMessage(err, 'Failed to approve quote'),
         'error'
       );
       throw err; // Re-throw for the card to handle
@@ -179,7 +180,7 @@ export function PortalAdHocRequests({
     } catch (err) {
       logger.error('Error declining quote:', err);
       showNotification?.(
-        err instanceof Error ? err.message : 'Failed to decline quote',
+        formatErrorMessage(err, 'Failed to decline quote'),
         'error'
       );
       throw err; // Re-throw for the card to handle

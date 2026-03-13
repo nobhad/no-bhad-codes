@@ -14,6 +14,7 @@ import { SanitizationUtils } from '../utils/sanitization-utils';
 import { getFormspreeUrl } from '../config/api';
 import { getContactEmail } from '../config/branding';
 import { APP_CONSTANTS } from '../config/constants';
+import { formatErrorMessage } from '../utils/error-utils';
 
 export interface ContactFormData {
   name: string;
@@ -159,7 +160,7 @@ export class ContactService extends BaseService {
       }
     } catch (error) {
       this.error('Form submission failed:', error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage = formatErrorMessage(error, 'An unknown error occurred');
 
       // Provide user-friendly error messages based on error type
       let userMessage = 'Unable to send message. Please try again.';

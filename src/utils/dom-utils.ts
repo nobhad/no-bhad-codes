@@ -398,3 +398,73 @@ export function focusLast(container: HTMLElement): boolean {
   }
   return false;
 }
+
+// ===============================================
+// EVENT LISTENER MANAGER
+// ===============================================
+
+/* eslint-disable no-undef -- DOM global types */
+type Listener = EventListenerOrEventListenerObject;
+type AddOptions = boolean | AddEventListenerOptions;
+type RemoveOptions = boolean | EventListenerOptions;
+/* eslint-enable no-undef */
+
+/**
+ * Event listener manager for tracking and cleaning up listeners.
+ * Use this to prevent memory leaks from orphaned event listeners.
+ *
+ * @example
+ * const manager = createEventManager();
+ * manager.on(button, 'click', handleClick);
+ * manager.on(window, 'resize', handleResize);
+ * manager.cleanup(); // Removes all listeners
+ */
+export interface EventManager {
+  on: (element: EventTarget, type: string, listener: Listener, options?: AddOptions) => void;
+  off: (element: EventTarget, type: string, listener: Listener, options?: RemoveOptions) => void;
+  cleanup: () => void;
+  count: () => number;
+}
+
+interface ListenerRegistration {
+  element: EventTarget;
+  type: string;
+  listener: Listener;
+  options?: AddOptions;
+}
+
+/**
+ * Create an event manager instance for a module/component.
+ * Each manager tracks its own listeners independently.
+ */
+export function createEventManager(): EventManager {
+  const listeners: ListenerRegistration[] = [];
+
+  return {
+    on(element, type, listener, options) {
+      element.addEventListener(type, listener, options);
+      listeners.push({ element, type, listener, options });
+    },
+
+    off(element, type, listener, options) {
+      element.removeEventListener(type, listener, options);
+      const index = listeners.findIndex(
+        (l) => l.element === element && l.type === type && l.listener === listener
+      );
+      if (index !== -1) {
+        listeners.splice(index, 1);
+      }
+    },
+
+    cleanup() {
+      for (const { element, type, listener, options } of listeners) {
+        element.removeEventListener(type, listener, options);
+      }
+      listeners.length = 0;
+    },
+
+    count() {
+      return listeners.length;
+    }
+  };
+}

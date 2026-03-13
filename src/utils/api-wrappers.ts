@@ -462,6 +462,71 @@ function extractErrorMessage(
   return fallbackMessage;
 }
 
+// ============================================================================
+// HOOK-RESULT NOTIFICATION HELPERS
+// ============================================================================
+// These helpers bridge hook return values (booleans / {success,failed} counts)
+// to the toast system, eliminating repetitive if/else + showNotification blocks
+// found in table components.
+
+/**
+ * Show a toast for a simple boolean result from a hook action.
+ *
+ * Replaces the common pattern:
+ *   if (success) { showNotification?.('Done', 'success'); }
+ *   else { showNotification?.('Failed', 'error'); }
+ *
+ * @param success - Whether the action succeeded
+ * @param messages - Success and error message strings
+ */
+export function notifyResult(
+  success: boolean,
+  messages: { success: string; error: string }
+): void {
+  showToast(success ? messages.success : messages.error, success ? 'success' : 'error');
+}
+
+/**
+ * Result shape returned by bulk operations in data hooks.
+ */
+export interface BulkResult {
+  success: number;
+  failed: number;
+}
+
+/**
+ * Show a toast for a bulk operation result from a hook.
+ *
+ * Replaces the repetitive 3-way conditional:
+ *   if (result.failed === 0) showNotification(allSuccessMsg, 'success');
+ *   else if (result.success > 0) showNotification(partialMsg, 'warning');
+ *   else showNotification(allFailedMsg, 'error');
+ *
+ * @param result - The { success, failed } counts from a hook bulk op
+ * @param entityName - Singular entity name (e.g. "invoice", "client")
+ * @param verb - Past-tense verb (e.g. "Deleted", "Archived", "Sent")
+ */
+export function notifyBulkResult(
+  result: BulkResult,
+  entityName: string,
+  verb: string
+): void {
+  const { success: successCount, failed: failCount } = result;
+
+  if (failCount === 0 && successCount > 0) {
+    const plural = successCount !== 1 ? 's' : '';
+    showToast(`${verb} ${successCount} ${entityName}${plural}`, 'success');
+  } else if (successCount > 0) {
+    showToast(`${verb} ${successCount}, failed ${failCount}`, 'warning');
+  } else {
+    showToast(`Failed to ${verb.toLowerCase()} ${entityName}s`, 'error');
+  }
+}
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
 /**
  * Capitalize first letter of a string
  */

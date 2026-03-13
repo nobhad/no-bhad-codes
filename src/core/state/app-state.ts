@@ -6,6 +6,7 @@
 import { StateManager } from './state-manager';
 import type { AppState, StateMiddleware } from './types';
 import { createLogger } from '../../utils/logger';
+import { formatErrorMessage } from '../../utils/error-utils';
 
 const logger = createLogger('AppState');
 
@@ -91,7 +92,7 @@ const errorHandlingMiddleware: StateMiddleware<AppState> = (store) => (next) => 
   } catch (error) {
     logger.error('State update error:', error);
     store.setState({
-      lastError: error instanceof Error ? error.message : 'Unknown error',
+      lastError: formatErrorMessage(error, 'Unknown error'),
       errorCount: store.getState().errorCount + 1
     });
   }

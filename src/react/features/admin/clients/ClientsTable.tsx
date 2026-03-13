@@ -38,6 +38,8 @@ import { CLIENT_STATUS_CONFIG, CLIENT_TYPE_LABELS } from '../types';
 import { formatDate } from '@react/utils/formatDate';
 import { CLIENTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
+import { showToast } from '@/utils/toast-notifications';
+import { notifyResult, notifyBulkResult } from '@/utils/api-wrappers';
 
 // Status options for bulk actions (derived from constant config, computed once at module level)
 const BULK_STATUS_OPTIONS = Object.entries(CLIENT_STATUS_CONFIG).map(([value, config]) => ({
@@ -150,7 +152,7 @@ function getInvitationStatus(client: Client): 'invited' | 'not-invited' | 'activ
 export function ClientsTable({
   getAuthToken,
   onNavigate,
-  showNotification,
+  showNotification: _showNotification,
   defaultPageSize = 25,
   overviewMode = false
 }: ClientsTableProps) {
@@ -210,7 +212,7 @@ export function ClientsTable({
     config: CLIENTS_EXPORT_CONFIG,
     data: filteredClients,
     onExport: (count) => {
-      showNotification?.(`Exported ${count} client${count !== 1 ? 's' : ''} to CSV`, 'success');
+      showToast(`Exported ${count} client${count !== 1 ? 's' : ''} to CSV`, 'success');
     }
   });
 
@@ -228,23 +230,9 @@ export function ClientsTable({
 
     setBulkActionLoading(false);
     selection.clearSelection();
-
-    if (result.failed === 0) {
-      showNotification?.(
-        `Archived ${result.success} client${result.success !== 1 ? 's' : ''}`,
-        'success'
-      );
-    } else if (result.success > 0) {
-      showNotification?.(
-        `Archived ${result.success}, failed ${result.failed} client${result.failed !== 1 ? 's' : ''}`,
-        'warning'
-      );
-    } else {
-      showNotification?.('Failed to archive clients', 'error');
-    }
-
+    notifyBulkResult(result, 'client', 'Archived');
     refetch();
-  }, [selection, bulkArchive, showNotification, refetch]);
+  }, [selection, bulkArchive, refetch]);
 
   // Handle bulk delete
   const handleBulkDelete = useCallback(async () => {
@@ -254,23 +242,9 @@ export function ClientsTable({
     const result = await bulkDelete(ids);
 
     selection.clearSelection();
-
-    if (result.failed === 0) {
-      showNotification?.(
-        `Deleted ${result.success} client${result.success !== 1 ? 's' : ''}`,
-        'success'
-      );
-    } else if (result.success > 0) {
-      showNotification?.(
-        `Deleted ${result.success}, failed ${result.failed} client${result.failed !== 1 ? 's' : ''}`,
-        'warning'
-      );
-    } else {
-      showNotification?.('Failed to delete clients', 'error');
-    }
-
+    notifyBulkResult(result, 'client', 'Deleted');
     refetch();
-  }, [selection, bulkDelete, showNotification, refetch]);
+  }, [selection, bulkDelete, refetch]);
 
   // Handle send invite
   const handleSendInvite = useCallback(
@@ -278,14 +252,9 @@ export function ClientsTable({
       setInviteLoading(clientId);
       const success = await sendInvite(clientId);
       setInviteLoading(null);
-
-      if (success) {
-        showNotification?.('Invitation sent successfully', 'success');
-      } else {
-        showNotification?.('Failed to send invitation', 'error');
-      }
+      notifyResult(success, { success: 'Invitation sent successfully', error: 'Failed to send invitation' });
     },
-    [sendInvite, showNotification]
+    [sendInvite]
   );
 
   const bulkStatusOptions = BULK_STATUS_OPTIONS;
@@ -294,13 +263,12 @@ export function ClientsTable({
   const handleStatusChange = useCallback(
     async (clientId: number, newStatus: ClientStatus) => {
       const success = await updateClient(clientId, { status: newStatus });
-      if (success) {
-        showNotification?.(`Status updated to ${CLIENT_STATUS_CONFIG[newStatus].label}`, 'success');
-      } else {
-        showNotification?.('Failed to update status', 'error');
-      }
+      notifyResult(success, {
+        success: `Status updated to ${CLIENT_STATUS_CONFIG[newStatus].label}`,
+        error: 'Failed to update status'
+      });
     },
-    [updateClient, showNotification]
+    [updateClient]
   );
 
   // Handle bulk status change
@@ -323,22 +291,10 @@ export function ClientsTable({
 
       setBulkActionLoading(false);
       selection.clearSelection();
-
-      if (failCount === 0) {
-        showNotification?.(
-          `Updated ${successCount} client${successCount !== 1 ? 's' : ''} to ${CLIENT_STATUS_CONFIG[newStatus as ClientStatus]?.label || newStatus}`,
-          'success'
-        );
-      } else {
-        showNotification?.(
-          `Updated ${successCount}, failed ${failCount} client${failCount !== 1 ? 's' : ''}`,
-          'warning'
-        );
-      }
-
+      notifyBulkResult({ success: successCount, failed: failCount }, 'client', 'Updated');
       refetch();
     },
-    [selection, updateClient, showNotification, refetch]
+    [selection, updateClient, refetch]
   );
 
   // Handle view client

@@ -31,6 +31,7 @@ import { validateEmail } from '../../../../../shared/validation/validators';
 import { createLogger } from '@/utils/logger';
 import { apiFetch, apiPost, unwrapApiData } from '@/utils/api-client';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { executeWithToast } from '@/utils/api-wrappers';
 
 const logger = createLogger('OnboardingWizard');
 
@@ -262,27 +263,19 @@ export function OnboardingWizard({
 
     setIsSubmitting(true);
 
-    try {
-      const response = await apiPost(API_ENDPOINTS.ONBOARDING_COMPLETE, {
+    await executeWithToast(
+      () => apiPost(API_ENDPOINTS.ONBOARDING_COMPLETE, {
         formData,
         completedAt: new Date().toISOString()
-      });
-
-      if (response.ok) {
-        // Clear localStorage draft
+      }),
+      { success: 'Onboarding completed successfully!', error: 'Failed to submit. Please try again.' },
+      () => {
         localStorage.removeItem(DRAFT_STORAGE_KEY);
-        showNotification?.('Onboarding completed successfully!', 'success');
         onComplete?.();
-      } else {
-        const errorData = await response.json();
-        showNotification?.(errorData.error || 'Failed to submit onboarding', 'error');
       }
-    } catch (error) {
-      logger.error('Failed to submit onboarding:', error);
-      showNotification?.('Failed to submit. Please try again.', 'error');
-    } finally {
-      setIsSubmitting(false);
-    }
+    );
+
+    setIsSubmitting(false);
   }, [formData, onComplete, showNotification]);
 
   /**

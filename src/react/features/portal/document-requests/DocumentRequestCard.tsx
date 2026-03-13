@@ -12,6 +12,7 @@ import { IconButton } from '@react/factories';
 import { createLogger } from '@/utils/logger';
 import { getCsrfToken, CSRF_HEADER_NAME, apiPost } from '@/utils/api-client';
 import { buildEndpoint } from '@/constants/api-endpoints';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 const logger = createLogger('DocumentRequestCard');
 
@@ -201,7 +202,7 @@ export function DocumentRequestCard({
     } catch (err) {
       logger.error('[DocumentRequestCard] Upload error:', err);
       showNotification?.(
-        err instanceof Error ? err.message : 'Failed to upload document',
+        formatErrorMessage(err, 'Failed to upload document'),
         'error'
       );
     } finally {

@@ -12,6 +12,7 @@ import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { IconButton } from '@react/factories';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { apiFetch, unwrapApiData } from '@/utils/api-client';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 interface AuditEntry {
   id: number;
@@ -105,7 +106,7 @@ export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: 
       setEntries(result.data);
       setTotalCount(result.count);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load audit log');
+      setError(formatErrorMessage(err, 'Failed to load audit log'));
     } finally {
       setIsLoading(false);
     }

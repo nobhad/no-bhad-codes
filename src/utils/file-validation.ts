@@ -47,6 +47,7 @@ export const ALLOWED_MIME_TYPES = [
   // Archives
   'application/zip',
   'application/x-rar-compressed',
+  'application/vnd.rar',
   'application/x-7z-compressed'
 ];
 

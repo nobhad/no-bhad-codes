@@ -39,6 +39,7 @@ import { createLogger } from '@/utils/logger';
 import { getCsrfToken, CSRF_HEADER_NAME } from '@/utils/api-client';
 import { downloadFile } from '@/utils/file-download';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 const logger = createLogger('PortalFilesManager');
 
@@ -417,7 +418,7 @@ export function PortalFilesManager({
         fetchFiles();
       } catch (err) {
         logger.error('[PortalFilesManager] Upload error:', err);
-        showNotification?.(err instanceof Error ? err.message : 'Upload failed', 'error');
+        showNotification?.(formatErrorMessage(err, 'Upload failed'), 'error');
         throw err;
       } finally {
         setIsUploading(false);
@@ -459,7 +460,7 @@ export function PortalFilesManager({
       fetchFiles();
     } catch (err) {
       logger.error('[PortalFilesManager] Delete error:', err);
-      showNotification?.(err instanceof Error ? err.message : 'Failed to delete file', 'error');
+      showNotification?.(formatErrorMessage(err, 'Failed to delete file'), 'error');
     }
 
     setFileToDelete(null);

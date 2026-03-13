@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { createLogger } from '@/utils/logger';
 import { unwrapApiData, apiFetch, apiPut, apiDelete, apiPost } from '@/utils/api-client';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { formatErrorMessage } from '@/utils/error-utils';
 import {
   EMPTY_NOTIFICATION_FORM,
   type IntegrationStatus,
@@ -91,7 +92,7 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
         loadIntegrations(), loadNotifications(), loadStripeStatus(), loadCalendarStatus()
       ]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load integrations data');
+      setError(formatErrorMessage(err, 'Failed to load integrations data'));
     } finally {
       setIsLoading(false);
     }
@@ -128,7 +129,7 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
       await loadNotifications();
     } catch (err) {
       showNotification?.(
-        err instanceof Error ? err.message : 'Failed to save notification',
+        formatErrorMessage(err, 'Failed to save notification'),
         'error'
       );
     } finally {
@@ -145,7 +146,7 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
       await loadNotifications();
     } catch (err) {
       showNotification?.(
-        err instanceof Error ? err.message : 'Failed to delete notification',
+        formatErrorMessage(err, 'Failed to delete notification'),
         'error'
       );
     }
@@ -159,7 +160,7 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
       showNotification?.('Test notification sent', 'success');
     } catch (err) {
       showNotification?.(
-        err instanceof Error ? err.message : 'Failed to send test notification',
+        formatErrorMessage(err, 'Failed to send test notification'),
         'error'
       );
     } finally {
@@ -185,7 +186,7 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
       await loadCalendarStatus();
     } catch (err) {
       showNotification?.(
-        err instanceof Error ? err.message : 'Failed to update calendar settings',
+        formatErrorMessage(err, 'Failed to update calendar settings'),
         'error'
       );
     }

@@ -14,8 +14,7 @@ import { useProjectInvoices } from './project-detail/useProjectInvoices';
 import { useProjectMessages } from './project-detail/useProjectMessages';
 
 import type { UseProjectDetailOptions, UseProjectDetailReturn } from './project-detail/types';
-
-const DEFAULT_ERROR_MESSAGE = 'An error occurred';
+import { formatErrorMessage } from '@/utils/error-utils';
 const PERCENTAGE_MULTIPLIER = 100;
 
 /**
@@ -116,8 +115,7 @@ export function useProjectDetail({
       setInvoices(fetchedInvoices);
       setMessages([]);
     } catch (err) {
-      const message = err instanceof Error ? err.message : DEFAULT_ERROR_MESSAGE;
-      setError(message);
+      setError(formatErrorMessage(err, 'An error occurred'));
     } finally {
       setIsLoading(false);
     }

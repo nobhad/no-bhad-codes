@@ -19,6 +19,7 @@ import { LoadingState } from '@react/components/portal/EmptyState';
 import { formatCurrencyCompact as formatCurrency } from '@/utils/format-utils';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { apiFetch, unwrapApiData } from '@/utils/api-client';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 interface PerformanceKPI {
   id: string;
@@ -96,7 +97,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: 
       const payload = unwrapApiData<PerformanceData>(await response.json());
       setData(payload);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load performance data');
+      setError(formatErrorMessage(err, 'Failed to load performance data'));
     } finally {
       setIsLoading(false);
     }

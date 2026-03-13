@@ -14,6 +14,7 @@ import { formatTimeAgo } from '@/utils/time-utils';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { unwrapApiData, apiFetch, apiPost, apiPut } from '@/utils/api-client';
+import { formatErrorMessage } from '@/utils/error-utils';
 import { MessageThread } from '@react/factories';
 import { FilterDropdown } from '@react/components/portal/TableFilters';
 import type { FilterSection } from '@react/components/portal/TableFilters';
@@ -98,7 +99,7 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
       setConversations((data.conversations as Conversation[]) || []);
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') return;
-      setError(err instanceof Error ? err.message : 'Failed to load conversations');
+      setError(formatErrorMessage(err, 'Failed to load conversations'));
     } finally {
       setIsLoading(false);
     }

@@ -45,6 +45,8 @@ import { PROJECT_STATUS_CONFIG, PROJECT_TYPE_LABELS } from '../types';
 import { buildEndpoint } from '@/constants/api-endpoints';
 import { NOTIFICATIONS, statusUpdatedMessage } from '@/constants/notifications';
 import { apiDelete } from '@/utils/api-client';
+import { executeDeleteWithToast } from '@/utils/api-wrappers';
+import { useSetPageTitle } from '@react/stores/portal-store';
 
 interface ProjectDetailProps {
   /** Project ID to display */
@@ -136,6 +138,14 @@ export function ProjectDetail({
     toggleReaction
   } = useProjectDetail({ projectId, getAuthToken });
 
+  // Update breadcrumb title with project name
+  const setPageTitle = useSetPageTitle();
+  React.useEffect(() => {
+    if (project?.project_name) {
+      setPageTitle(project.project_name);
+    }
+  }, [project?.project_name, setPageTitle]);
+
   // Dialogs
   const deleteDialog = useConfirmDialog();
   const archiveDialog = useConfirmDialog();
@@ -166,19 +176,12 @@ export function ProjectDetail({
 
   // Handle delete
   const handleDelete = useCallback(async () => {
-    try {
-      const response = await apiDelete(buildEndpoint.project(projectId));
-
-      if (response.ok) {
-        showNotification?.(NOTIFICATIONS.project.DELETED, 'success');
-        onBack?.();
-      } else {
-        showNotification?.(NOTIFICATIONS.project.DELETE_FAILED, 'error');
-      }
-    } catch {
-      showNotification?.(NOTIFICATIONS.project.DELETE_FAILED, 'error');
-    }
-  }, [projectId, showNotification, onBack]);
+    await executeDeleteWithToast(
+      'project',
+      () => apiDelete(buildEndpoint.project(projectId)),
+      () => onBack?.()
+    );
+  }, [projectId, onBack]);
 
   // Handle duplicate (placeholder - would need API support)
   const handleDuplicate = useCallback(() => {

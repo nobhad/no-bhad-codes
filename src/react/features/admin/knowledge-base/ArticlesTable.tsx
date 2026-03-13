@@ -30,6 +30,7 @@ import { ARTICLES_FILTER_CONFIG, ARTICLE_STATUS_OPTIONS } from '../shared/filter
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { apiFetch } from '@/utils/api-client';
+import { formatErrorMessage } from '@/utils/error-utils';
 
 interface Article {
   id: number;
@@ -175,7 +176,7 @@ export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken: _getAuthT
         setStats(statsData.data || statsData || { totalArticles: 0, totalViews: 0, published: 0, draft: 0 });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load articles');
+      setError(formatErrorMessage(err, 'Failed to load articles'));
     } finally {
       setIsLoading(false);
     }
