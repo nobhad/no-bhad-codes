@@ -57,6 +57,13 @@ svg.lucide {
   color: currentColor;
 }
 
+/* Decorative icon — large standalone icon (success states, empty states).
+   Overrides the root 1em rule for icons that should NOT match text size. */
+.icon-decorative {
+  width: var(--icon-size-2xl) !important;
+  height: var(--icon-size-2xl) !important;
+}
+
 /* =====================================================
    :HAS() AUTOMATIC STYLING
    Apply styles automatically based on child elements

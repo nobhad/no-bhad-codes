@@ -288,53 +288,14 @@ summary::-webkit-details-marker {
 }
 
 /* ============================================
- * ICON-TEXT SIZE MATCHING - ROOT LEVEL FIX
- * Icons in same row as text MUST match text size
- * Uses currentSize (1em) to match adjacent text
+ * ICON-TEXT SIZE MATCHING
+ * Root rule in portal-theme.css: .portal svg.lucide { width: 1em; height: 1em }
+ * handles all Lucide icons globally. Rules below cover non-Lucide SVGs
+ * (e.g. custom inline SVGs, .btn-icon wrappers).
  * ============================================ */
 
-/* Universal: SVGs next to text in buttons/links match text size */
-.portal :is(button, a, .btn, .btn-primary, .btn-secondary, .btn-outline):not(.icon-btn):not(.nav-btn) > svg,
+/* Non-Lucide SVGs in buttons/links — match text size */
 .portal :is(button, a, .btn, .btn-primary, .btn-secondary, .btn-outline):not(.icon-btn):not(.nav-btn) > .btn-icon {
-  width: 1em;
-  height: 1em;
-  flex-shrink: 0;
-}
-
-/* Universal icon-text match: SVGs in flex rows with text inherit text size */
-.portal :is(
-  .stat-card,
-  .tw-stat-card,
-  .activity-item,
-  .task-item,
-  .attention-card,
-  .section-header-inline,
-  .card-header-with-action,
-  h3,
-  .dashboard-section-title
-) > svg,
-.portal :is(
-  .stat-card,
-  .tw-stat-card,
-  .activity-item,
-  .task-item,
-  .attention-card,
-  .section-header-inline,
-  .card-header-with-action,
-  h3,
-  .dashboard-section-title
-) > .stat-icon,
-.portal :is(
-  .stat-card,
-  .tw-stat-card,
-  .activity-item,
-  .task-item,
-  .attention-card,
-  .section-header-inline,
-  .card-header-with-action,
-  h3,
-  .dashboard-section-title
-) > .heading-icon {
   width: 1em;
   height: 1em;
   flex-shrink: 0;

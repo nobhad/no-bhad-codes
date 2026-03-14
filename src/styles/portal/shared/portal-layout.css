@@ -1187,13 +1187,8 @@ html[data-theme="light"] .portal .funnel-value {
   color: var(--color-text-secondary);
 }
 
-/* All SVGs in section header = same size as text (1em), center-aligned (root rule) */
-.section-header svg {
-  width: 1em;
-  height: 1em;
-  flex-shrink: 0;
-}
-
+/* Section icon wrappers — 1em sizing handled by root rule (.portal svg.lucide).
+   These cover non-Lucide SVGs and wrapper elements. */
 .section-header .section-icon,
 .section-title-group .section-icon {
   width: 1em;

@@ -58,6 +58,12 @@
   margin-bottom: 0;
 }
 
+/* When tab panel immediately follows tab nav (self-contained tab section, e.g. RequestsHub),
+   apply standard section gap between nav and content. */
+.portal-tabs + .portal-tab-panel {
+  margin-top: var(--portal-section-gap);
+}
+
 .view-toggle {
   display: inline-flex;
   gap: var(--space-1);
@@ -269,7 +275,6 @@
 }
 
 .portal-tab.is-active .portal-tab-badge {
-  background: var(--color-accent);
   color: var(--color-text-primary);
 }
 
@@ -288,7 +293,6 @@
 }
 
 .portal-subtab.is-active .portal-subtab-badge {
-  background: var(--color-accent);
   color: var(--color-text-primary);
 }
 
