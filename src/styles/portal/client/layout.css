@@ -20,41 +20,29 @@ body[data-page="client-portal"] {
    NOT a layout container. .portal-body handles the flex sidebar+content layout.
    Height is determined by .portal-body (single source of truth in portal-layout.css). */
 
-/* Dashboard Content Area — client portal padding overrides only.
+/* Dashboard Content Area — client portal overrides only.
    Base layout (flex, gap, overflow-y, height) in shared/portal-layout.css. */
 .dashboard-content {
-  padding-top: var(--portal-page-top);
-  padding-left: clamp(0.75rem, 2vw, 1.5rem);
-  padding-right: clamp(0.75rem, 2vw, 1.5rem);
   overflow-x: hidden;
 }
 
-/* Reduced padding on smallest screens */
-@media (--xs-mobile) {
-  .dashboard-content {
-    padding-left: var(--space-1);
-    padding-right: var(--space-1);
-  }
-
-  /* .portal-header-subtabs padding reset — shared/portal-layout.css @media (--xs-mobile) */
+/* First child gets top spacing */
+.dashboard-content > :first-child {
+  padding-top: var(--portal-page-top);
 }
 
 /* Messages layout gap: 0 — shared/portal-layout.css */
 
-/* Messages page: remove ALL outer padding on mobile so content fills width */
-/* Specificity increased via .portal ancestor to override .dashboard-content base padding */
+/* Messages page: full-bleed on mobile (subtabs keep their own padding) */
 @media (--compact-mobile) {
-  /* Primary selector: data attribute on body + .portal ancestor for specificity */
-  body[data-active-tab="messages"] .portal .dashboard-content,
-  /* Fallback: class-based selector added via JS */
-  body.messages-tab-active .portal .dashboard-content {
-    padding: 0;
+  body[data-active-tab="messages"] .portal .dashboard-content > :first-child,
+  body.messages-tab-active .portal .dashboard-content > :first-child {
+    padding-top: 0;
   }
 
   body[data-active-tab="messages"] .portal .portal-header-subtabs,
   body.messages-tab-active .portal .portal-header-subtabs {
     margin: 0;
-    padding: var(--space-2);
   }
 
   body[data-active-tab="messages"] .portal .tab-content,
@@ -137,7 +125,6 @@ body[data-page="client-portal"] {
 
 /* Content Area */
 .content-area {
-  padding: var(--space-4) 0;
   max-width: 100%;
 }
 
@@ -150,25 +137,11 @@ body[data-page="client-portal"] {
 /* ============================================
    PORTAL MAIN CONTAINER
    Required wrapper for all portal page content.
-   Provides consistent padding and max-width.
    ============================================ */
 .portal-main-container {
   width: 100%;
-  padding: var(--space-4) var(--space-5);
   max-width: 1400px;
   border: var(--portal-border);
-}
-
-@media (--mobile) {
-  .portal-main-container {
-    padding: var(--space-3) var(--space-3);
-  }
-}
-
-@media (--small-mobile) {
-  .portal-main-container {
-    padding: var(--space-2) var(--space-2);
-  }
 }
 
 /* Subtabs container base — shared/portal-layout.css (.portal .portal-header-subtabs) */

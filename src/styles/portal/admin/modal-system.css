@@ -43,7 +43,6 @@
 .detail-value.message-full {
   white-space: pre-wrap;
   background: var(--color-bg-primary);
-  padding: var(--space-3);
   border-radius: var(--border-radius-sm);
   border: var(--portal-border);
   max-height: var(--detail-message-max-height);
@@ -93,7 +92,6 @@
   box-shadow: var(--shadow-2xl);
   z-index: var(--z-index-portal-modal);
   overflow-y: auto;
-  padding: var(--space-4) var(--space-6) var(--space-6);
   border-left: var(--border-width-thick) solid var(--color-border-primary);
   border-right: var(--border-width-thick) solid var(--color-border-primary);
 }
@@ -151,7 +149,6 @@
   font-size: var(--font-size-2xl);
   color: var(--color-text-secondary);
   cursor: pointer;
-  padding: var(--space-2);
   line-height: 1;
 }
 .details-panel .close-btn:hover {
@@ -175,7 +172,6 @@
   background: var(--color-bg-raised);
   border: var(--border-width) solid var(--color-border-secondary);
   border-radius: var(--border-radius-md);
-  padding: var(--space-4);
   margin-top: var(--space-4);
 }
 

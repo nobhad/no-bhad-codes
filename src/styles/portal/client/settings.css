@@ -20,11 +20,10 @@
   }
 }
 
-/* Settings Section - uses shared .portal-section styling */
+/* Settings Section — uses shared .portal-section styling for border. */
 .settings-section {
   display: flex;
   flex-direction: column;
-  padding: var(--portal-card-padding);
 }
 
 .settings-section-wide {
@@ -105,9 +104,8 @@
   gap: var(--space-3);
 }
 
-/* Content below header gets same padding as data-table-header */
+/* Content children below header */
 .portal .settings-form-section .data-table-card > *:not(.data-table-header) {
-  padding: var(--space-2);
 }
 
 .portal .settings-form-section .section-description {
@@ -135,7 +133,6 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-4);
-  padding: var(--space-3);
   background: transparent;
   border: var(--portal-border);
 }

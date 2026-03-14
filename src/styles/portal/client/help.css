@@ -28,28 +28,11 @@
 }
 
 
-/* Content padding — matches data-table-header padding */
 .portal .help-right-column .data-table-header + .section {
-  padding: var(--space-2);
 }
 
 .portal .help-contact-description,
 .portal .help-contact-actions {
-  padding: var(--space-2);
-}
-
-/* Accordion: consistent horizontal padding so trigger icons and article icons align */
-.portal .help-main-grid .accordion-item-wrapper {
-  padding: 0;
-  border: none;
-}
-
-.portal .help-main-grid .accordion-item-trigger {
-  padding: var(--space-1) var(--space-2);
-}
-
-.portal .help-main-grid .accordion-item-content {
-  padding: 0 var(--space-2) var(--space-1);
 }
 
 .help-left-column {
@@ -71,23 +54,24 @@
    ============================================== */
 
 .help-category-icon {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
 }
 
 .help-accordion-articles {
   display: flex;
   flex-direction: column;
   gap: var(--space-0-5);
-  padding-left: 0;
 }
 
 .help-accordion-article {
   display: flex;
   align-items: center;
   gap: var(--icon-gap);
-  padding: var(--space-1) 0;
+  margin: 0;
   width: 100%;
   color: var(--color-text-primary);
   background: none;
@@ -109,7 +93,6 @@
   display: flex;
   align-items: flex-start;
   gap: var(--space-1-5);
-  padding: var(--space-1-5);
   border: var(--portal-border);
   color: var(--color-text-primary);
   width: 100%;
@@ -190,7 +173,6 @@
   display: flex;
   align-items: flex-start;
   gap: var(--space-1-5);
-  padding: var(--space-1-5);
   width: 100%;
   border: var(--portal-border);
   color: var(--color-text-primary);
@@ -232,7 +214,6 @@
   align-items: center;
   gap: var(--space-2);
   margin-bottom: var(--space-2);
-  padding-bottom: var(--space-2);
   border-bottom: var(--portal-border);
 }
 
@@ -278,14 +259,12 @@
 }
 
 .help-article-body code {
-  padding: var(--space-0-5) var(--space-1);
   font-family: monospace;
   font-size: var(--font-size-sm);
 }
 
 .help-article-body pre {
   margin: 0 0 var(--space-1-5);
-  padding: var(--space-1-5);
   border: var(--portal-border);
   overflow-x: auto;
 }

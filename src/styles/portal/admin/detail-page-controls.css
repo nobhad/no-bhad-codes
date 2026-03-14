@@ -145,7 +145,6 @@
   border: var(--portal-border);
   list-style: none;
   margin: 0;
-  padding: var(--space-0-5) 0;
   box-shadow: var(--shadow-dropdown);
   z-index: var(--z-index-max);
   overflow: visible;
@@ -160,7 +159,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   cursor: pointer;
@@ -217,7 +215,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
-  padding: var(--space-1-5) var(--space-3);
   height: var(--icon-btn-size-md);
   min-width: auto;
   background: transparent;
@@ -268,7 +265,6 @@
   right: 0;
   left: auto;
   min-width: 200px;
-  padding: var(--space-1) 0;
   margin: 0;
   list-style: none;
   background: var(--color-bg-tertiary);
@@ -287,7 +283,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
@@ -371,7 +366,6 @@
 .detail-actions-menu-trigger-row {
   display: flex;
   justify-content: flex-end;
-  padding: var(--space-1) var(--space-1-5);
   color: var(--color-text-primary);
 }
 

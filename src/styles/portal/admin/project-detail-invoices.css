@@ -42,7 +42,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
-  padding: var(--space-1-5);
   background: transparent;
   border: none;
   margin-bottom: var(--space-1);
@@ -97,7 +96,6 @@
    ===================================================== */
 
 #view-project-invoice-modal .invoice-view-content {
-  padding: var(--space-2) 0;
 }
 
 #view-project-invoice-modal .invoice-header-info {
@@ -140,7 +138,6 @@
 
 #view-project-invoice-modal .invoice-line-items th {
   text-align: left;
-  padding: var(--space-1);
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   border-bottom: var(--portal-border);
@@ -151,7 +148,6 @@
 }
 
 #view-project-invoice-modal .invoice-line-items td {
-  padding: var(--space-1);
   border-bottom: var(--border-width) solid var(--portal-alpha-white-20);
 }
 
@@ -160,14 +156,12 @@
 }
 
 #view-project-invoice-modal .invoice-totals {
-  padding-top: var(--space-2);
   border-top: var(--portal-border);
 }
 
 #view-project-invoice-modal .total-row {
   display: flex;
   justify-content: space-between;
-  padding: var(--space-1) 0;
   font-size: var(--font-size-base);
 }
 
@@ -184,7 +178,6 @@
 
 #view-project-invoice-modal .invoice-notes-section {
   margin-top: var(--space-3);
-  padding-top: var(--space-2);
   border-top: var(--portal-border);
 }
 

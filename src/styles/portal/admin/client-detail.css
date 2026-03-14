@@ -61,7 +61,6 @@
 .tag-remove-btn {
   background: transparent;
   border: none;
-  padding: 2px;
   cursor: pointer;
   color: inherit;
   line-height: 0;
@@ -213,7 +212,6 @@
 /* Notes section within contact card */
 .contact-notes {
   margin-top: var(--space-3);
-  padding-top: var(--space-3);
   font-size: var(--font-size-xs);
   border-top: var(--border-width) solid var(--color-border-secondary);
 }
@@ -243,7 +241,6 @@
 /* Timeline wrapper: positioned container with left padding */
 .activity-timeline-wrapper {
   position: relative;
-  padding-left: var(--space-8, 2rem);
 }
 
 /* Timeline vertical line: absolute positioned */
@@ -301,7 +298,6 @@
   align-items: center;
   gap: var(--space-3);
   margin-top: var(--space-2);
-  padding-top: var(--space-2);
   border-top: var(--border-width) solid var(--color-border-secondary);
 }
 
@@ -352,7 +348,6 @@
 /* Note footer: author info with top border */
 .note-footer {
   margin-top: var(--space-2);
-  padding-top: var(--space-2);
   border-top: var(--portal-border);
 }
 
