@@ -301,16 +301,6 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 
 /* Bottom breathing room removed — table-layout padding handles it */
 
-/* Universal wrapper used by tab/subtab views.
-   Layout only -- bottom breathing room comes from the :last-child rule above. */
-.portal .subtab-content-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: var(--portal-section-gap);
-  width: 100%;
-  min-height: 0;
-}
-
 /* Tab section — bordered panel for simple header+list tabs. */
 .portal .tab-section {
   border: var(--portal-border);

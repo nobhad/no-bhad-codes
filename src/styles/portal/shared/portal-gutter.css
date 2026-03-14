@@ -2,26 +2,45 @@
    CONTENT GUTTER — SINGLE SOURCE OF TRUTH
    This file is imported UNLAYERED by both admin.css and client.css bundles.
    It MUST NOT be inside any @layer or @import with layer().
+
+   PATTERN: Padding on direct content children, never on wrapper containers.
+   Each content container (dashboard-content, tab-panel, subtab-content, etc.)
+   applies gutter padding to its DIRECT children only.
+   Components deeper in the tree handle their own internal spacing.
    ===================================================== */
 
 .portal {
   --content-gutter: var(--space-2);
 }
 
-/* Header, sidebar, and top-level content children get the gutter */
+/* =====================================================
+   TIER 1: Top-level content children
+   Direct children of dashboard-content and tab wrappers
+   get horizontal gutter padding.
+   ===================================================== */
+
 .portal .portal-global-header,
 .portal .sidebar-content,
 .portal .sidebar-footer,
-.portal .dashboard-content > *:not(.tab-content):not(.subtab-content-wrapper):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content),
-.portal .dashboard-content .tab-content > *,
-.portal .dashboard-content .subtab-content-wrapper > *,
-.portal .dashboard-content .tab-content-wrapper > *,
-.portal .dashboard-content .portal-tab-panel > *,
-.portal .dashboard-content .portal-subtab-content > *,
+/* Structural containers that should NEVER receive gutter padding */
+.portal .dashboard-content > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content):not(.table-layout):not(.section):not(.data-table-card):not(.panel):not(.dashboard-stats-grid),
+.portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > *:not(.table-layout):not(.section):not(.data-table-card):not(.panel):not(.dashboard-stats-grid):not(.settings-form-section) {
+  padding-left: var(--content-gutter);
+  padding-right: var(--content-gutter);
+  box-sizing: border-box;
+}
+
+/* =====================================================
+   TIER 2: Named content elements
+   Specific elements that need gutter regardless of depth
+   (because they sit inside non-padded containers like
+   .data-table-card or .panel).
+   ===================================================== */
+
 .portal .dashboard-content .data-table-header,
 .portal .dashboard-content .accordion-item-wrapper > *,
 .portal .dashboard-content .msgtab-bubble > *,
-.portal .dashboard-content .portal-tabs,
+/* .portal-tabs removed — gets gutter from .section > * or parent context */
 .portal .dashboard-content .help-featured-card,
 .portal .dashboard-content .dropzone,
 .portal .dashboard-content .dropzone-content,
@@ -37,25 +56,63 @@
   box-sizing: border-box;
 }
 
-/* Leaf children inside panels, stat grids, table layouts, nested containers.
-   Excludes: project-snapshot-header, li children, data-table-header children. */
-.portal .dashboard-content .panel *:not(:has(*)):not(.project-snapshot-header *):not(li *):not(.data-table-header *):not(.folder-item *):not(.settings-fields *):not(input):not(textarea):not(select):not(td *):not(th *):not(.msgtab-row *),
-.portal .dashboard-content .dashboard-stats-grid *:not(:has(*)):not(.project-snapshot-header *):not(li *):not(.data-table-header *):not(.folder-item *):not(.settings-fields *):not(input):not(textarea):not(select):not(td *):not(th *):not(.msgtab-row *),
-.portal .dashboard-content .table-layout > div *:not(:has(*)):not(.project-snapshot-header *):not(li *):not(.data-table-header *):not(.folder-item *):not(.settings-fields *):not(input):not(textarea):not(select):not(td *):not(th *):not(.msgtab-row *),
-.portal .dashboard-content > div > div > div *:not(:has(*)):not(.project-snapshot-header *):not(li *):not(.data-table-header *):not(.folder-item *):not(.settings-fields *):not(input):not(textarea):not(select):not(td *):not(th *):not(.msgtab-row *),
-.portal .dashboard-content ul,
-.portal .dashboard-content ul > li,
-.portal .dashboard-content .data-table-container table > *,
-.portal .dashboard-content .data-table-container tbody > *,
-.portal .dashboard-content .data-table-container td,
-.portal .dashboard-content .data-table-container th {
-  padding-left: var(--space-2);
-  padding-right: var(--space-2);
+/* =====================================================
+   TIER 3: Container children
+   Direct children of bordered containers (panels, cards,
+   stat cards, lists) get gutter so content is inset
+   from the container's border.
+   ===================================================== */
+
+/* Panel, section, and scroll-wrapper direct children — excludes elements already handled */
+.portal .dashboard-content .panel > *:not(.accordion-item-wrapper):not(.data-table-header):not(.milestone-list),
+.portal .dashboard-content .portal-section > *,
+.portal .dashboard-content .section-content > *,
+.portal .dashboard-content .section > *:not(.data-table-header):not(.accordion-item-wrapper):not(.milestone-list):not(.table-layout):not(.data-table-card):not(.data-table-container):not(.panel):not(.dashboard-stats-grid):not(.section):not(.settings-form-section):not(.project-snapshot-header),
+.portal .dashboard-content .data-table-scroll-wrapper > *:not(.data-table):not(.milestone-list):not(.files-browser-layout):not(.msgtab-container),
+.portal .dashboard-content .milestone-list,
+.portal .dashboard-content .portal-cards-list > *,
+/* Stat cards — small bordered summary cards */
+.portal .dashboard-content :is(.stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card),
+/* Lists inside data containers */
+.portal .dashboard-content .data-table-container ul,
+.portal .dashboard-content .data-table-container ul > li,
+/* Activity and detail list items */
+.portal .dashboard-content .activity-list > li,
+.portal .dashboard-content .detail-list > li,
+/* Help contact section */
+.portal .dashboard-content .help-contact-text > *:not(.data-table-header),
+.portal .dashboard-content .help-contact-actions {
+  padding-left: var(--content-gutter);
+  padding-right: var(--content-gutter);
+  box-sizing: border-box;
 }
 
-/* Table layout — no extra padding, gutter handles children */
+/* =====================================================
+   GAP-BASED CONTAINERS: Remove bottom padding on last child
+   Containers using gap handle vertical spacing — the last
+   child should not have extra bottom padding from gutter.
+   ===================================================== */
 
-/* Message thread and compose area children */
+.portal .dashboard-content :is(.section, .portal-section, .panel, .data-table-scroll-wrapper, .milestone-list, .section-content) > *:last-child {
+  padding-bottom: 0;
+}
+
+/* =====================================================
+   TIER 4: Table cells
+   Data table cells get gutter for consistent alignment.
+   ===================================================== */
+
+.portal .dashboard-content .data-table-container td,
+.portal .dashboard-content .data-table-container th {
+  padding-left: var(--content-gutter);
+  padding-right: var(--content-gutter);
+}
+
+/* =====================================================
+   TIER 5: Message thread
+   Thread and compose area children get gutter.
+   ===================================================== */
+
 .portal .dashboard-content .msgtab-thread-area > *,
 .portal .dashboard-content .msgtab-thread-area > div > div > *:not(.msgtab-row),
 .portal .dashboard-content .msgtab-compose-area > * {
