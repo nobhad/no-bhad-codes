@@ -153,7 +153,7 @@ export function PortalQuestionnairesView({
   }
 
   return (
-    <TableLayout
+    <TableLayout nested
       containerRef={containerRef}
       title="QUESTIONNAIRES"
       stats={

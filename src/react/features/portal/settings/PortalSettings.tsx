@@ -100,7 +100,7 @@ export function PortalSettings({ getAuthToken, showNotification }: PortalSetting
       />
 
       <TabPanel tabId="profile" isActive={activeTab === 'profile'}>
-        <div className="settings-form-section">
+        <div className="subsection settings-form-section">
           {profile && (
             <ProfileForm
               profile={profile}
@@ -117,17 +117,21 @@ export function PortalSettings({ getAuthToken, showNotification }: PortalSetting
       </TabPanel>
 
       <TabPanel tabId="billing" isActive={activeTab === 'billing'}>
-        <BillingForm
-          billing={billing}
-          onUpdate={handleBillingUpdate}
-        />
+        <div className="subsection settings-form-section">
+          <BillingForm
+            billing={billing}
+            onUpdate={handleBillingUpdate}
+          />
+        </div>
       </TabPanel>
 
       <TabPanel tabId="notifications" isActive={activeTab === 'notifications'}>
-        <NotificationsForm
-          preferences={notifications}
-          onUpdate={handleNotificationsUpdate}
-        />
+        <div className="subsection settings-form-section">
+          <NotificationsForm
+            preferences={notifications}
+            onUpdate={handleNotificationsUpdate}
+          />
+        </div>
       </TabPanel>
     </div>
   );

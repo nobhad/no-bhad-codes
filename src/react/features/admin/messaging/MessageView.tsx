@@ -229,10 +229,8 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
   const totalUnread = conversations.reduce((sum, c) => sum + c.unreadCount, 0);
 
   return (
-    <div
-      ref={containerRef as React.RefObject<HTMLDivElement>}
-      className="panel messaging-panel-container"
-    >
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">
+    <div className="panel messaging-panel-container">
       {/* Title + search bar above both columns */}
       <div className="messaging-top-bar">
         <h2 className="heading messaging-heading-with-badge">
@@ -391,6 +389,7 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }

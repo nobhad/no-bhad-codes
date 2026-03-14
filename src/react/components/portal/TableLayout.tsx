@@ -29,6 +29,9 @@ export interface TableLayoutProps {
   className?: string;
   /** Ref for the outer container (for animations) */
   containerRef?: React.Ref<HTMLDivElement>;
+  /** When true, wraps in .subsection (for use inside hubs/detail pages).
+   *  When false (default), wraps in .section (for standalone routes). */
+  nested?: boolean;
 }
 
 export function TableLayout({
@@ -39,37 +42,40 @@ export function TableLayout({
   pagination,
   bulkActions,
   className,
-  containerRef
+  containerRef,
+  nested = false
 }: TableLayoutProps) {
   return (
-    <div ref={containerRef} className={cn('table-layout', className)}>
-      <div className="data-table-card">
-        {/* Table Header */}
-        <div className="data-table-header">
-          <h3>
-            <span className="title-full">{title}</span>
-            <span className="title-mobile">{title}</span>
-          </h3>
-          {stats}
-          {actions && (
-            <div className="data-table-actions">
-              {actions}
-            </div>
-          )}
-        </div>
-
-        {/* Bulk Actions */}
-        {bulkActions}
-
-        {/* Table Container */}
-        <div className="data-table-container">
-          <div className="data-table-scroll-wrapper">
-            {children}
+    <div ref={containerRef} className={nested ? 'subsection' : 'section'}>
+      <div className={cn('table-layout', className)}>
+        <div className="data-table-card">
+          {/* Table Header */}
+          <div className="data-table-header">
+            <h3>
+              <span className="title-full">{title}</span>
+              <span className="title-mobile">{title}</span>
+            </h3>
+            {stats}
+            {actions && (
+              <div className="data-table-actions">
+                {actions}
+              </div>
+            )}
           </div>
-        </div>
 
-        {/* Pagination */}
-        {pagination}
+          {/* Bulk Actions */}
+          {bulkActions}
+
+          {/* Table Container */}
+          <div className="data-table-container">
+            <div className="data-table-scroll-wrapper">
+              {children}
+            </div>
+          </div>
+
+          {/* Pagination */}
+          {pagination}
+        </div>
       </div>
     </div>
   );

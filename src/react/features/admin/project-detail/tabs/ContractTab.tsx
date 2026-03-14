@@ -87,7 +87,7 @@ export function ContractTab({
   };
 
   return (
-    <div className="section">
+    <div className="subsection">
       {/* Contract Status Card */}
       <div className="panel">
         <div className="contract-status-layout">

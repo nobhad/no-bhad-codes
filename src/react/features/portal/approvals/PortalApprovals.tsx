@@ -116,7 +116,7 @@ export function PortalApprovals({
   const countByType = countByField(items, 'entity_type');
 
   return (
-    <TableLayout
+    <TableLayout nested
       containerRef={containerRef}
       title="APPROVALS"
       stats={

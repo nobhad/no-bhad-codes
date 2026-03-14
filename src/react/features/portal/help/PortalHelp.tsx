@@ -338,7 +338,7 @@ function CategoriesSidebar({ categories, onToggle, onArticleClick }: CategoriesS
   return (
     <div ref={listRef} className="section">
       <div className="data-table-header"><h3><span className="title-full">Categories</span></h3></div>
-      <div className="section">
+      <div className="subsection">
         {categories.map((category) => {
           const isExpanded = category.articles.length > 0 || category.isLoading;
 
@@ -397,7 +397,7 @@ function FeaturedArticles({ articles, onArticleClick }: FeaturedArticlesProps) {
   return (
     <div className="section">
       <div className="data-table-header"><h3><span className="title-full">Featured Articles</span></h3></div>
-      <div ref={gridRef} className="section">
+      <div ref={gridRef} className="subsection">
         {articles.map((article) => (
           <button
             key={article.id}
@@ -450,7 +450,7 @@ function SearchResults({ results, query, isSearching, onArticleClick }: SearchRe
       <div className="data-table-header">
         <h3><span className="title-full">{results.length} result{results.length !== 1 ? 's' : ''} for &ldquo;{query}&rdquo;</span></h3>
       </div>
-      <div ref={listRef} className="section">
+      <div ref={listRef} className="subsection">
         {results.map((article) => (
           <button
             key={article.id}

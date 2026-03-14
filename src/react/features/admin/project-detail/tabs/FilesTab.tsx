@@ -164,7 +164,7 @@ export function FilesTab({
   }, []);
 
   return (
-    <div className="section">
+    <div className="subsection">
       {/* Upload Section */}
       <div
         className={cn(

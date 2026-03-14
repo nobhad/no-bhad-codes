@@ -195,7 +195,7 @@ export function ContentChecklistView(_props: ContentChecklistViewProps) {
   }, [refetch]);
 
   return (
-    <TableLayout
+    <TableLayout nested
       containerRef={containerRef}
       title="CONTENT"
       stats={

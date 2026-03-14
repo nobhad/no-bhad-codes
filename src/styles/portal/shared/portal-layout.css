@@ -794,6 +794,16 @@ html[data-theme="light"] .portal .funnel-value {
   display: flex;
   flex-direction: column;
   gap: var(--content-gutter);
+  padding-bottom: var(--portal-page-bottom);
+  background-color: inherit;
+}
+
+/* Subsection — nested content group inside a .section.
+   Same flex layout as .section but no gutter rules apply. */
+.subsection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--content-gutter);
   background-color: inherit;
 }
 

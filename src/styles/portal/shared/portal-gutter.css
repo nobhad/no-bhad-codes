@@ -23,8 +23,8 @@
 .portal .sidebar-content,
 .portal .sidebar-footer,
 /* Structural containers that should NEVER receive gutter padding */
-.portal .dashboard-content > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content):not(.table-layout):not(.section):not(.data-table-card):not(.panel):not(.dashboard-stats-grid),
-.portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > *:not(.table-layout):not(.section):not(.data-table-card):not(.panel):not(.dashboard-stats-grid):not(.settings-form-section) {
+.portal .dashboard-content > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content):not(.subsection),
+.portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > *:not(.subsection) {
   padding-left: var(--content-gutter);
   padding-right: var(--content-gutter);
   box-sizing: border-box;
@@ -42,8 +42,6 @@
 .portal .dashboard-content .msgtab-bubble > *,
 /* .portal-tabs removed — gets gutter from .section > * or parent context */
 .portal .dashboard-content .help-featured-card,
-.portal .dashboard-content .dropzone,
-.portal .dashboard-content .dropzone-content,
 .portal .dashboard-content #folder-sidebar > *,
 .portal .dashboard-content .folder-item,
 /* Settings fields: apply to wrapper AND children (inline-edit rows need gutter) */
@@ -67,7 +65,7 @@
 .portal .dashboard-content .panel > *:not(.accordion-item-wrapper):not(.data-table-header):not(.milestone-list),
 .portal .dashboard-content .portal-section > *,
 .portal .dashboard-content .section-content > *,
-.portal .dashboard-content .section > *:not(.data-table-header):not(.accordion-item-wrapper):not(.milestone-list):not(.table-layout):not(.data-table-card):not(.data-table-container):not(.panel):not(.dashboard-stats-grid):not(.section):not(.settings-form-section):not(.project-snapshot-header),
+/* .section > * removed — .section gets gutter from tier 1, children inherit the indentation */
 .portal .dashboard-content .data-table-scroll-wrapper > *:not(.data-table):not(.milestone-list):not(.files-browser-layout):not(.msgtab-container),
 .portal .dashboard-content .milestone-list,
 .portal .dashboard-content .portal-cards-list > *,
@@ -88,13 +86,13 @@
 }
 
 /* =====================================================
-   GAP-BASED CONTAINERS: Remove bottom padding on last child
-   Containers using gap handle vertical spacing — the last
-   child should not have extra bottom padding from gutter.
+   BOTTOM PADDING: Match horizontal gutter on content containers
+   so padding is even on all sides.
    ===================================================== */
 
-.portal .dashboard-content :is(.section, .portal-section, .panel, .data-table-scroll-wrapper, .milestone-list, .section-content) > *:last-child {
-  padding-bottom: 0;
+.portal .dashboard-content > .section,
+.portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > .section {
+  padding-bottom: var(--content-gutter);
 }
 
 /* =====================================================

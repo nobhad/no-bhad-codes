@@ -119,7 +119,7 @@ export function PortalDocumentRequests({
   }, [filteredRequests]);
 
   return (
-    <TableLayout
+    <TableLayout nested
       containerRef={containerRef}
       title="DOCUMENT REQUESTS"
       stats={
@@ -163,7 +163,7 @@ export function PortalDocumentRequests({
                 <h3><span className="title-full">Action Needed</span></h3>
                 <span className="badge">{actionNeeded.length}</span>
               </div>
-              <div className="section">
+              <div className="subsection">
                 {actionNeeded.map(request => (
                   <DocumentRequestCard
                     key={request.id}
@@ -181,7 +181,7 @@ export function PortalDocumentRequests({
           {inReview.length > 0 && (
             <div className="section">
               <div className="data-table-header"><h3><span className="title-full">In Review</span></h3></div>
-              <div className="section">
+              <div className="subsection">
                 {inReview.map(request => (
                   <DocumentRequestCard
                     key={request.id}
@@ -199,7 +199,7 @@ export function PortalDocumentRequests({
           {completed.length > 0 && (
             <div className="section">
               <div className="data-table-header"><h3><span className="title-full">Completed</span></h3></div>
-              <div className="section">
+              <div className="subsection">
                 {completed.map(request => (
                   <DocumentRequestCard
                     key={request.id}
