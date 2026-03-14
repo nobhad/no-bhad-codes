@@ -263,15 +263,7 @@ html[data-theme="light"] .portal :is(
   box-shadow: none;
 }
 
-/* First child in card - typically header, no top margin */
-.portal .portal-card > *:first-child {
-  margin-top: 0;
-}
-
-/* Subsequent children - consistent spacing */
-.portal .portal-card > * + * {
-  margin-top: var(--space-3);
-}
+/* Card children spacing removed — parent gap handles vertical spacing */
 
 /* Card header — flex row with title + status
    Canonical layout definition (merged from portal-components.css) */

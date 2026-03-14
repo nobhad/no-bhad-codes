@@ -7,6 +7,8 @@
    Each content container (dashboard-content, tab-panel, subtab-content, etc.)
    applies gutter padding to its DIRECT children only.
    Components deeper in the tree handle their own internal spacing.
+
+   .subsection is a structural wrapper that NEVER receives gutter padding.
    ===================================================== */
 
 .portal {
@@ -16,18 +18,21 @@
 /* =====================================================
    TIER 1: Top-level content children
    Direct children of dashboard-content and tab wrappers
-   get horizontal gutter padding.
+   get uniform gutter padding on all four sides.
+   Only .subsection is excluded (pure layout wrapper).
    ===================================================== */
 
 .portal .portal-global-header,
-.portal .sidebar-content,
-.portal .sidebar-footer,
-/* Structural containers that should NEVER receive gutter padding */
 .portal .dashboard-content > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content):not(.subsection),
 .portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > *:not(.subsection) {
-  padding-left: var(--content-gutter);
-  padding-right: var(--content-gutter);
+  padding: var(--content-gutter);
   box-sizing: border-box;
+}
+
+/* .section padding override — top + left/right match, bottom = 2x top.
+   Must be in this unlayered file to beat the Tier 1 rule above. */
+.portal .dashboard-content .section {
+  padding: var(--portal-page-top) var(--portal-page-top) var(--portal-page-bottom);
 }
 
 /* =====================================================
@@ -40,7 +45,6 @@
 .portal .dashboard-content .data-table-header,
 .portal .dashboard-content .accordion-item-wrapper > *,
 .portal .dashboard-content .msgtab-bubble > *,
-/* .portal-tabs removed — gets gutter from .section > * or parent context */
 .portal .dashboard-content .help-featured-card,
 .portal .dashboard-content #folder-sidebar > *,
 .portal .dashboard-content .folder-item,
@@ -49,8 +53,7 @@
 .portal .dashboard-content .settings-fields > *,
 .portal .dashboard-content .notification-options,
 .portal .dashboard-content .notification-options > * {
-  padding-left: var(--content-gutter);
-  padding-right: var(--content-gutter);
+  padding: var(--content-gutter);
   box-sizing: border-box;
 }
 
@@ -61,38 +64,21 @@
    from the container's border.
    ===================================================== */
 
-/* Panel, section, and scroll-wrapper direct children — excludes elements already handled */
 .portal .dashboard-content .panel > *:not(.accordion-item-wrapper):not(.data-table-header):not(.milestone-list),
 .portal .dashboard-content .portal-section > *,
 .portal .dashboard-content .section-content > *,
-/* .section > * removed — .section gets gutter from tier 1, children inherit the indentation */
 .portal .dashboard-content .data-table-scroll-wrapper > *:not(.data-table):not(.milestone-list):not(.files-browser-layout):not(.msgtab-container),
 .portal .dashboard-content .milestone-list,
-.portal .dashboard-content .portal-cards-list > *,
 /* Stat cards — small bordered summary cards */
 .portal .dashboard-content :is(.stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card),
-/* Lists inside data containers */
-.portal .dashboard-content .data-table-container ul,
-.portal .dashboard-content .data-table-container ul > li,
 /* Activity and detail list items */
 .portal .dashboard-content .activity-list > li,
 .portal .dashboard-content .detail-list > li,
 /* Help contact section */
 .portal .dashboard-content .help-contact-text > *:not(.data-table-header),
 .portal .dashboard-content .help-contact-actions {
-  padding-left: var(--content-gutter);
-  padding-right: var(--content-gutter);
+  padding: var(--content-gutter);
   box-sizing: border-box;
-}
-
-/* =====================================================
-   BOTTOM PADDING: Match horizontal gutter on content containers
-   so padding is even on all sides.
-   ===================================================== */
-
-.portal .dashboard-content > .section,
-.portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > .section {
-  padding-bottom: var(--content-gutter);
 }
 
 /* =====================================================
@@ -102,8 +88,7 @@
 
 .portal .dashboard-content .data-table-container td,
 .portal .dashboard-content .data-table-container th {
-  padding-left: var(--content-gutter);
-  padding-right: var(--content-gutter);
+  padding: var(--content-gutter);
 }
 
 /* =====================================================
@@ -114,7 +99,6 @@
 .portal .dashboard-content .msgtab-thread-area > *,
 .portal .dashboard-content .msgtab-thread-area > div > div > *:not(.msgtab-row),
 .portal .dashboard-content .msgtab-compose-area > * {
-  padding-left: var(--content-gutter);
-  padding-right: var(--content-gutter);
+  padding: var(--content-gutter);
   box-sizing: border-box;
 }

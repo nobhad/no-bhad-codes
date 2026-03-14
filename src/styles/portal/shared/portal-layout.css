@@ -789,12 +789,12 @@ html[data-theme="light"] .portal .funnel-value {
    Consolidated from brutalist.css
    ===================================================== */
 
-/* Section layout */
+/* Section layout — top-level page wrapper.
+   Padding is handled in portal-gutter.css (unlayered) to beat cascade layers. */
 .section {
   display: flex;
   flex-direction: column;
   gap: var(--content-gutter);
-  padding-bottom: var(--portal-page-bottom);
   background-color: inherit;
 }
 
