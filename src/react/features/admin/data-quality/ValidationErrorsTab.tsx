@@ -71,7 +71,7 @@ export function ValidationErrorsTab({
         <h3><span className="title-full">Validation Errors</span></h3>
         <div className="data-table-actions">
           <div className="filter-inline">
-            <Filter size={14} />
+            <Filter />
             <FormDropdown
               value={errorTypeFilter}
               onChange={setErrorTypeFilter}

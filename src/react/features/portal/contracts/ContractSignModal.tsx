@@ -127,7 +127,7 @@ export function ContractSignModal({
       open={open}
       onOpenChange={onOpenChange}
       title="Sign Contract"
-      icon={<FileSignature size={18} />}
+      icon={<FileSignature />}
       size="lg"
       onSubmit={handleSubmit}
       footer={
@@ -148,12 +148,12 @@ export function ContractSignModal({
             >
               {signingState === 'submitting' ? (
                 <>
-                  <Loader2 size={16} className="animate-spin" />
+                  <Loader2 className="animate-spin" />
                   Signing...
                 </>
               ) : (
                 <>
-                  <FileSignature size={16} />
+                  <FileSignature />
                   Sign Contract
                 </>
               )}
@@ -165,7 +165,7 @@ export function ContractSignModal({
       {/* Success state */}
       {signingState === 'success' && (
         <div className="flex flex-col items-center gap-4 py-8">
-          <CheckCircle2 size={48} className="text-success" />
+          <CheckCircle2 className="text-success icon-decorative" />
           <p className="text-lg text-center">Contract signed successfully!</p>
         </div>
       )}
@@ -176,7 +176,7 @@ export function ContractSignModal({
           {/* Error message */}
           {errorMessage && (
             <div className="form-error-banner mb-4">
-              <AlertCircle size={16} />
+              <AlertCircle />
               <span>{errorMessage}</span>
             </div>
           )}

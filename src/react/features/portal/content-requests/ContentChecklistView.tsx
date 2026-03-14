@@ -69,11 +69,11 @@ const STATUS_LABELS: Record<string, string> = {
 
 function getStatusIcon(status: string) {
   switch (status) {
-  case 'accepted': return <Check size={14} />;
-  case 'submitted': return <Clock size={14} />;
-  case 'revision_needed': return <AlertCircle size={14} />;
-  case 'rejected': return <AlertCircle size={14} />;
-  default: return <Clock size={14} />;
+  case 'accepted': return <Check />;
+  case 'submitted': return <Clock />;
+  case 'revision_needed': return <AlertCircle />;
+  case 'rejected': return <AlertCircle />;
+  default: return <Clock />;
   }
 }
 
@@ -150,9 +150,9 @@ function ItemSubmissionForm({
         className="btn-primary"
         onClick={handleSubmit}
         disabled={submitting || !value.trim()}
-        style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}
+        style={{ whiteSpace: 'nowrap' }}
       >
-        <Send size={14} />
+        <Send />
         {submitting ? 'Sending...' : 'Submit'}
       </button>
     </div>

@@ -166,7 +166,7 @@ export function LeadScoringRuleForm({
       open={open}
       onOpenChange={onOpenChange}
       title={title}
-      icon={<Scale size={18} />}
+      icon={<Scale />}
       size="md"
       onSubmit={handleSubmit}
       footer={

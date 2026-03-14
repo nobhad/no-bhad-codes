@@ -117,7 +117,7 @@ function HeaderBreadcrumbs() {
       ) : (
         <>
           <Link className="breadcrumb-link" to="/dashboard">Dashboard</Link>
-          <ChevronRight size={14} className="breadcrumb-separator" aria-hidden="true" />
+          <ChevronRight className="breadcrumb-separator" aria-hidden="true" />
         </>
       )}
 
@@ -125,7 +125,7 @@ function HeaderBreadcrumbs() {
       {!isDashboard && isSubtab && groupLabel && (
         <>
           <Link className="breadcrumb-link" to={`/${currentGroup}`}>{groupLabel}</Link>
-          <ChevronRight size={14} className="breadcrumb-separator" aria-hidden="true" />
+          <ChevronRight className="breadcrumb-separator" aria-hidden="true" />
         </>
       )}
 
@@ -186,7 +186,6 @@ export function PortalHeader() {
             onClick={toggleSidebar}
           >
             <PanelLeft
-              size={18}
               className="sidebar-toggle-icon"
               aria-hidden="true"
             />

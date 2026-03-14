@@ -49,7 +49,7 @@ export function DetailModal({
       open={open}
       onOpenChange={onOpenChange}
       title={title}
-      icon={<Info size={20} />}
+      icon={<Info />}
       footer={
         <DialogPrimitive.Close className="btn btn-secondary">
           Close

@@ -110,7 +110,7 @@ export function DuplicateDetectionTab({
             onClick={handleScan}
             disabled={scanning}
           >
-            <Play size={14} />
+            <Play />
             {scanning ? 'Scanning...' : 'Run Duplicate Scan'}
           </button>
         </div>
@@ -154,7 +154,7 @@ export function DuplicateDetectionTab({
                     onClick={() => handleMerge(dup.id)}
                     title="Merge records"
                   >
-                    <Merge size={14} />
+                    <Merge />
                     Merge
                   </button>
                   <button
@@ -162,7 +162,7 @@ export function DuplicateDetectionTab({
                     onClick={() => handleDismiss(dup.id)}
                     title="Dismiss duplicate"
                   >
-                    <X size={14} />
+                    <X />
                     Dismiss
                   </button>
                 </td>

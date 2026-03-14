@@ -87,7 +87,7 @@ export const ContractCard = React.memo(({ contract, onNavigate, onSign }: Contra
       <div className="flex items-center justify-end gap-2">
         {canSign && onSign && (
           <button className="btn-primary text-sm" onClick={handleSignClick}>
-            <PenTool size={14} />
+            <PenTool />
             Sign
           </button>
         )}
