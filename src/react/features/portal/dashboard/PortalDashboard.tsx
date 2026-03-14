@@ -155,7 +155,7 @@ const ActivityList = React.memo(({ activities, onNavigate }: ActivityListProps) 
   }
 
   return (
-    <ul>
+    <ul className="activity-list">
       {activities.map((item, index) => (
         <li
           key={`${item.type}-${item.entityId ?? 'none'}-${index}`}

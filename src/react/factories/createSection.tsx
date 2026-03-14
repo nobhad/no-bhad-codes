@@ -167,7 +167,7 @@ export function Panel({
   return (
     <div className={cn(variantClass, className)}>
       {(title || actions) && (
-        <div className="overview-panel-header">
+        <div className="panel-header">
           <div className="overview-panel-title">
             {Icon && <Icon />}
             <span>{title}</span>

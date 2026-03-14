@@ -220,7 +220,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
         <div className="overview-col-main">
           {/* Active Projects */}
           <div className="overview-panel">
-            <div className="overview-panel-header">
+            <div className="panel-header">
               <div className="overview-panel-title">
                 <Briefcase className="panel-icon" />
                 <span className="field-label">Active Projects</span>
@@ -257,7 +257,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
 
           {/* Upcoming Tasks */}
           <div className="overview-panel">
-            <div className="overview-panel-header">
+            <div className="panel-header">
               <button
                 className="overview-panel-title overview-panel-action"
                 onClick={() => navigate('/work', { state: { subtab: 'tasks' } })}
@@ -304,7 +304,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
         <div className="overview-col-aside">
           {/* Recent Activity */}
           <div className="overview-panel">
-            <div className="overview-panel-header">
+            <div className="panel-header">
               <div className="overview-panel-title">
                 <span className="field-label">Recent Activity</span>
               </div>
@@ -333,7 +333,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
 
           {/* Quick Actions */}
           <div className="overview-panel">
-            <div className="overview-panel-header">
+            <div className="panel-header">
               <div className="overview-panel-title">
                 <span className="field-label">Quick Actions</span>
               </div>
