@@ -75,7 +75,7 @@ export function PortalContracts({
   }, [refetch]);
 
   return (
-    <>
+    <div className="section">
       <TableLayout
         containerRef={containerRef}
         title="CONTRACTS"
@@ -139,6 +139,6 @@ export function PortalContracts({
           onSigned={handleSigned}
         />
       )}
-    </>
+    </div>
   );
 }

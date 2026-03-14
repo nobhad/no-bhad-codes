@@ -132,7 +132,7 @@ export function AdHocRequestCard({
 
         {/* Expanded Content */}
         {isExpanded && (
-          <div className="section border-t border-[var(--color-border-primary)] mt-3 pt-3">
+          <div className="section border-t border-[var(--color-border-primary)] mt-3">
             {/* Description */}
             <div>
               <label className="field-label">Description</label>
@@ -189,7 +189,7 @@ export function AdHocRequestCard({
 
             {/* Quote Details */}
             {hasQuote && (
-              <div className="panel p-3">
+              <div className="panel">
                 <label className="field-label">Quote Details</label>
                 <div className="mt-2 flex flex-col gap-2">
                   {/* Hours and Rate */}
@@ -223,7 +223,7 @@ export function AdHocRequestCard({
                   )}
 
                   {/* Total */}
-                  <div className="flex items-center justify-between pt-2 mt-2 border-t border-[var(--color-border-primary)]">
+                  <div className="flex items-center justify-between mt-2 border-t border-[var(--color-border-primary)]">
                     <span className="text-primary text-xs font-semibold">
                       Total
                     </span>
@@ -234,7 +234,7 @@ export function AdHocRequestCard({
 
                   {/* Notes */}
                   {request.quote!.notes && (
-                    <div className="pt-2">
+                    <div className="mt-2">
                       <span className="text-muted text-xs">Notes:</span>
                       <p className="text-muted text-xs mt-0.5">
                         {request.quote!.notes}
@@ -254,7 +254,7 @@ export function AdHocRequestCard({
 
             {/* Actions */}
             {canRespond && (
-              <div className="flex items-center justify-end gap-2 pt-2">
+              <div className="flex items-center justify-end gap-2 mt-2">
                 <button
                   className="btn-secondary flex items-center gap-1.5"
                   onClick={() => setShowDeclineDialog(true)}

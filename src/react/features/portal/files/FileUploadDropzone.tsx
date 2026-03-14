@@ -300,7 +300,6 @@ export function FileUploadDropzone({
       aria-disabled={disabled}
     >
       <div className="dropzone-content">
-        <Upload className={cn('icon-lg', state === 'drag-active' && 'text-primary')} />
         <p className="dropzone-text text-primary">
           Drag and drop files here or
         </p>

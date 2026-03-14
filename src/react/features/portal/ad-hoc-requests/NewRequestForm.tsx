@@ -334,7 +334,7 @@ export function NewRequestForm({
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-end gap-2 pt-2">
+      <div className="flex items-center justify-end gap-2 mt-2">
         {onCancel && (
           <button
             type="button"

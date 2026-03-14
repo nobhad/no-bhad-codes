@@ -245,7 +245,7 @@ export function ContentChecklistView(_props: ContentChecklistViewProps) {
                       </p>
                     )}
                     {item.adminNotes && item.status === 'revision_needed' && (
-                      <div style={{ marginTop: '4px', padding: '4px 8px', background: 'var(--app-color-warning-bg, #fff3cd)', borderRadius: '4px', fontSize: 'var(--font-size-sm)' }}>
+                      <div style={{ marginTop: 'var(--space-0-5)', padding: 'var(--space-0-5) var(--space-1)', background: 'var(--app-color-warning-bg)', fontSize: 'var(--font-size-sm)' }}>
                         {item.adminNotes}
                       </div>
                     )}
