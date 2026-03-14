@@ -50,7 +50,7 @@
   --portal-neutral-900: #f4f4f4;
 
   /* Base primitives */
-  --color-off-white: #fffefd;
+  --color-off-white: #e5e5e5;
 
   /* Functional Colors */
   --color-success-500: #10b981;
@@ -68,7 +68,7 @@
    * Light background, dark text for main site
    */
 
-  /* Background Colors - Light base (off-white) */
+  /* Background Colors - Light base */
   --color-bg-primary: var(--color-off-white);
   --color-bg-secondary: var(--color-gray-100);
   --color-bg-tertiary: var(--color-gray-200);

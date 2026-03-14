@@ -35,7 +35,7 @@
 
 /* ============================================
  * PORTAL LIGHT MODE (DEFAULT) - INVERTED DISCOTHÈQUE
- * Off-white background, off-black text. Matches main site default.
+ * Portal light mode — inherits bg from design system (colors.css).
  * Uses body[data-page] for higher specificity than :root in colors.css
  * ============================================ */
 body[data-page="admin"],
@@ -44,8 +44,8 @@ body[data-page="client-portal"] {
    * PRIMARY COLORS — solid hex, no mixing
    * ---------------------------------------- */
   --color-text-primary: #333333;
-  --color-bg-primary: #e0e0e0;
-  --color-bg-hover:   var(--color-off-white);
+  --color-bg-primary: var(--color-off-white);
+  --color-bg-hover:   var(--color-gray-100);
   --form-btn-shadow: var(--color-text-primary);
 
   /* ----------------------------------------
@@ -500,7 +500,7 @@ html[data-theme="dark"] body[data-page="admin"],
 html[data-theme="dark"] body[data-page="client-portal"] {
   --color-text-primary: #ffffff;
   --color-bg-primary: #171717;
-  --color-bg-hover:   #000000;
+  --color-bg-hover:   color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 6%);
   --form-btn-shadow: var(--portal-alpha-black-30);
 }
 
@@ -535,7 +535,7 @@ html:has(body[data-page="client-portal"]) {
  * ============================================ */
 html[data-theme="light"]:has(body[data-page="admin"]),
 html[data-theme="light"]:has(body[data-page="client-portal"]) {
-  --color-bg-primary: var(--color-off-white); /* Portal light = off-white */
+  --color-bg-primary: var(--color-off-white); /* Portal light = #e5e5e5 */
   background-color: var(--color-bg-primary);
 }
 
@@ -588,12 +588,26 @@ html[data-theme="light"]:has(body[data-page="client-portal"]) {
 }
 
 /* =================================================================
-   ROOT SVG COLOR — always follow parent's color context.
-   Overrides reset.css fixed --color-text-primary so SVGs remain
-   visible when parent hover/active state changes color.
+   ROOT SVG — size + color for ALL Lucide icons.
+   1em = always matches adjacent text size. Flex-shrink: 0 prevents
+   icons from collapsing in flex rows. color: currentColor inherits
+   from parent so hover/active states just work.
    ================================================================= */
 .portal svg.lucide {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
   color: currentColor;
+}
+
+/* =================================================================
+   ROOT ICON-TEXT GAP — any flex row with an SVG + text gets
+   consistent responsive spacing. Single source of truth.
+   ================================================================= */
+.portal :is(button, a, span, div, label, p, li, h1, h2, h3, h4):has(> svg.lucide) {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap);
 }
 
 /* Status dot in dropdown items: use base icon-size-xs (12px), not full 1em.

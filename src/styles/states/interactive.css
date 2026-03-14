@@ -76,10 +76,9 @@
    * ACTIVE/SELECTED STATES
    * ============================================ */
 
-  /* Active - currently selected/active item */
-  .is-active {
-    background-color: var(--color-bg-hover, var(--color-state-hover));
-  }
+  /* Active - currently selected/active item
+     No background — components define their own active backgrounds.
+     This generic rule only sets non-visual active state properties. */
 
   /* Selected - checkbox/radio style selection */
   .is-selected {
