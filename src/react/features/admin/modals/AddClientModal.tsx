@@ -82,7 +82,7 @@ export function AddClientModal({
       open={open}
       onOpenChange={onOpenChange}
       title="Add New Client"
-      icon={<UserPlus size={20} />}
+      icon={<UserPlus />}
       onSubmit={handleSubmit}
       footer={
         <>

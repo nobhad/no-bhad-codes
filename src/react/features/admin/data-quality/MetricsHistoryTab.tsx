@@ -88,7 +88,7 @@ export function MetricsHistoryTab({
               onClick={handleRecalculate}
               disabled={calculating}
             >
-              <RefreshCw size={14} />
+              <RefreshCw />
               {calculating ? 'Calculating...' : 'Recalculate Metrics'}
             </button>
           </div>

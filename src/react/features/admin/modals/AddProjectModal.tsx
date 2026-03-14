@@ -239,7 +239,7 @@ export function AddProjectModal({
       open={open}
       onOpenChange={onOpenChange}
       title="Add New Project"
-      icon={<FolderPlus size={20} />}
+      icon={<FolderPlus />}
       onSubmit={handleSubmit}
       footer={
         <>

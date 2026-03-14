@@ -189,7 +189,7 @@ export function SignatureCanvas({ onSignatureChange, mode, onModeChange }: Signa
           className={`btn-outline-sm ${mode === 'draw' ? 'is-active' : ''}`}
           onClick={() => onModeChange('draw')}
         >
-          <Pencil size={14} />
+          <Pencil />
           Draw
         </button>
         <button
@@ -197,7 +197,7 @@ export function SignatureCanvas({ onSignatureChange, mode, onModeChange }: Signa
           className={`btn-outline-sm ${mode === 'type' ? 'is-active' : ''}`}
           onClick={() => onModeChange('type')}
         >
-          <Type size={14} />
+          <Type />
           Type
         </button>
       </div>
@@ -222,7 +222,7 @@ export function SignatureCanvas({ onSignatureChange, mode, onModeChange }: Signa
           <p className="signature-hint">Draw your signature above using your mouse or finger</p>
           <div className="signature-actions">
             <button type="button" className="btn-outline-sm" onClick={clearCanvas}>
-              <Eraser size={14} />
+              <Eraser />
               Clear
             </button>
           </div>

@@ -267,7 +267,6 @@ export function LeadScoringConfig() {
               title="Recalculate all lead scores"
             >
               <RefreshCw
-                size={14}
                 className={isRecalculating ? 'icon-spin' : ''}
               />
               <span>{isRecalculating ? 'Recalculating...' : 'Recalculate All'}</span>
@@ -277,7 +276,7 @@ export function LeadScoringConfig() {
               onClick={handleCreate}
               title="Add scoring rule"
             >
-              <Plus size={14} />
+              <Plus />
               <span>Add Rule</span>
             </button>
             <IconButton

@@ -108,7 +108,7 @@ export function EditClientInfoModal({
       open={open}
       onOpenChange={onOpenChange}
       title="Edit Client Info"
-      icon={<Pencil size={20} />}
+      icon={<Pencil />}
       onSubmit={handleSubmit}
       footer={
         <>

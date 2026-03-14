@@ -92,7 +92,7 @@ export function PortalModal({
             )}
             {showCloseButton && (
               <DialogPrimitive.Close className="portal-modal-close" aria-label="Close modal">
-                <X size={18} />
+                <X />
               </DialogPrimitive.Close>
             )}
           </div>

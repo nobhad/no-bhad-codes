@@ -104,7 +104,7 @@ export function EditBillingModal({
       open={open}
       onOpenChange={onOpenChange}
       title="Edit Billing Details"
-      icon={<CreditCard size={20} />}
+      icon={<CreditCard />}
       onSubmit={handleSubmit}
       footer={
         <>

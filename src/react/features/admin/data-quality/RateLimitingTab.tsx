@@ -105,7 +105,7 @@ export function RateLimitingTab({
             <h3><span className="title-full">Rate Limit Overview</span></h3>
             <div className="data-table-actions">
               <button className="btn btn-secondary" onClick={loadStats}>
-                <RefreshCw size={14} />
+                <RefreshCw />
                 Refresh
               </button>
             </div>
@@ -188,7 +188,7 @@ export function RateLimitingTab({
               />
             </div>
             <button className="btn btn-danger" type="submit" disabled={actionLoading || !blockIp.trim()}>
-              <Ban size={14} />
+              <Ban />
               Block IP
             </button>
           </form>
@@ -208,7 +208,7 @@ export function RateLimitingTab({
               />
             </div>
             <button className="btn btn-secondary" type="submit" disabled={actionLoading || !unblockIp.trim()}>
-              <Unlock size={14} />
+              <Unlock />
               Unblock IP
             </button>
           </form>
