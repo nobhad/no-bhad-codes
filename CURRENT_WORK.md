@@ -164,6 +164,21 @@ Mixed default/named imports for route mounting. Zero runtime impact.
 - [ ] Docker setup for deployment
 - [ ] RBAC (granular admin permissions beyond binary requireAdmin)
 
+### Questionnaire → Proposal Pre-Population
+
+Build a service that maps completed questionnaire responses into proposal builder pre-population data. When all questionnaires are completed, auto-generate a draft proposal with:
+
+- [ ] **Tier suggestion** — based on budget (intake), page count (content questionnaire), feature complexity (type-specific questionnaire)
+- [ ] **Feature auto-selection** — map questionnaire answers to feature IDs (e.g., "blog needed: yes" → `blog-setup`, integrations checklist → matching features)
+- [ ] **Custom items auto-generation** — "need logo: yes" → add "Logo Design" line item, "help with domain: yes" → add "Domain Registration" item, low tech comfort → add "Training & Documentation"
+- [ ] **Maintenance recommendation** — tech comfort level + update frequency answers → suggest DIY/essential/standard/premium
+- [ ] **Scope section pre-fill** — page list from content questionnaire populates scope of work, service descriptions from business-site questionnaire populate deliverables
+- [ ] **Admin notes enrichment** — inspiration sites, brand values, competitor info, design preferences aggregated into structured admin notes for proposal review
+- [ ] **Timeline/validity inference** — timeline answer drives proposal `validity_days`
+- [ ] **Service**: `server/services/proposal-prefill-service.ts` — takes `projectId`, fetches all completed questionnaire responses, returns `ProposalPrefillData` object
+- [ ] **Route**: `GET /api/proposals/prefill/:projectId` — admin endpoint returning prefill data
+- [ ] **Frontend**: proposal builder reads prefill data and pre-checks features, suggests tier, shows recommendations
+
 ---
 
 ## Archived Work
