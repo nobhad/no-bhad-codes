@@ -143,11 +143,11 @@ export function ContactsSection({ portalFetch, showNotification }: ContactsSecti
   }
 
   return (
-    <div className="portal-section">
+    <div className="data-table-card">
       {/* Header */}
       <div className="data-table-header">
         <h3>
-          <Users className="icon-sm" />
+          <Users />
           <span className="title-full">Contacts</span>
         </h3>
         {!showAddForm && (
