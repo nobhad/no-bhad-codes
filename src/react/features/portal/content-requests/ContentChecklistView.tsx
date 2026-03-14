@@ -9,7 +9,9 @@ import { useState, useMemo, useCallback } from 'react';
 import { Check, Clock, AlertCircle, Send } from 'lucide-react';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { usePortalData } from '@react/hooks/usePortalFetch';
+import { useFadeIn } from '@react/hooks/useGsap';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import type { PortalViewProps } from '../types';
 
@@ -164,6 +166,7 @@ function ItemSubmissionForm({
 // ============================================
 
 export function ContentChecklistView(_props: ContentChecklistViewProps) {
+  const containerRef = useFadeIn<HTMLDivElement>();
   const { data, isLoading, error, refetch } = usePortalData<{ checklists: ContentChecklist[] }>({
     url: API_ENDPOINTS.CONTENT_REQUESTS_MY
   });
@@ -191,80 +194,94 @@ export function ContentChecklistView(_props: ContentChecklistViewProps) {
     refetch();
   }, [refetch]);
 
-  if (isLoading) return <LoadingState message="Loading content checklists..." />;
-  if (error) return <ErrorState message={error} onRetry={refetch} />;
-  if (checklists.length === 0) {
-    return <EmptyState message="No content has been requested yet." />;
-  }
-
   return (
-    <div className="content-checklist-view">
-      {checklists.map((checklist) => (
-        <div key={checklist.id} className="card" style={{ marginBottom: 'var(--spacing-md)' }}>
-          <div style={{ padding: 'var(--spacing-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--app-color-border)' }}>
-            <div>
-              <h3 style={{ margin: 0 }}>{checklist.name}</h3>
-              {checklist.projectName && (
-                <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--app-color-text-muted)' }}>
-                  {checklist.projectName}
-                </span>
-              )}
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ width: '120px', height: '8px', background: 'var(--app-color-border)', borderRadius: '4px' }}>
-                <div style={{
-                  width: `${checklist.completionStats.completionPercent}%`,
-                  height: '100%',
-                  background: 'var(--app-color-success)',
-                  borderRadius: '4px',
-                  transition: 'width 0.3s ease'
-                }} />
+    <TableLayout
+      containerRef={containerRef}
+      title="CONTENT"
+      stats={
+        <TableStats items={[
+          { value: checklists.reduce((sum, c) => sum + c.completionStats.total, 0), label: 'total' },
+          { value: checklists.reduce((sum, c) => sum + c.completionStats.accepted, 0), label: 'complete', variant: 'completed' },
+          { value: checklists.reduce((sum, c) => sum + c.completionStats.pending, 0), label: 'pending', variant: 'pending' }
+        ]} />
+      }
+    >
+      {isLoading ? (
+        <LoadingState message="Loading content checklists..." />
+      ) : error ? (
+        <ErrorState message={error} onRetry={refetch} />
+      ) : checklists.length === 0 ? (
+        <EmptyState message="No content has been requested yet." />
+      ) : (
+        <div className="portal-cards-list">
+          {checklists.map((checklist) => (
+            <div key={checklist.id} className="card" style={{ marginBottom: 'var(--spacing-md)' }}>
+              <div style={{ padding: 'var(--spacing-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--app-color-border)' }}>
+                <div>
+                  <h3 style={{ margin: 0 }}>{checklist.name}</h3>
+                  {checklist.projectName && (
+                    <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--app-color-text-muted)' }}>
+                      {checklist.projectName}
+                    </span>
+                  )}
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ width: '120px', height: '8px', background: 'var(--app-color-border)', borderRadius: '4px' }}>
+                    <div style={{
+                      width: `${checklist.completionStats.completionPercent}%`,
+                      height: '100%',
+                      background: 'var(--app-color-success)',
+                      borderRadius: '4px',
+                      transition: 'width 0.3s ease'
+                    }} />
+                  </div>
+                  <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--app-color-text-muted)' }}>
+                    {checklist.completionStats.accepted}/{checklist.completionStats.total} complete
+                  </span>
+                </div>
               </div>
-              <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--app-color-text-muted)' }}>
-                {checklist.completionStats.accepted}/{checklist.completionStats.total} complete
-              </span>
-            </div>
-          </div>
 
-          <div>
-            {checklist.items.map((item) => (
-              <div key={item.id} style={{
-                padding: 'var(--spacing-sm) var(--spacing-md)',
-                borderBottom: '1px solid var(--app-color-border)'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--spacing-sm)' }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}>
-                      {getStatusIcon(item.status)}
-                      <strong>{item.title}</strong>
-                      {item.isRequired && <span style={{ color: 'var(--app-color-danger)', fontSize: 'var(--font-size-xs)' }}>*</span>}
+              <div>
+                {checklist.items.map((item) => (
+                  <div key={item.id} style={{
+                    padding: 'var(--spacing-sm) var(--spacing-md)',
+                    borderBottom: '1px solid var(--app-color-border)'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--spacing-sm)' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}>
+                          {getStatusIcon(item.status)}
+                          <strong>{item.title}</strong>
+                          {item.isRequired && <span style={{ color: 'var(--app-color-danger)', fontSize: 'var(--font-size-xs)' }}>*</span>}
+                        </div>
+                        {item.description && (
+                          <p style={{ margin: '4px 0 0', fontSize: 'var(--font-size-sm)', color: 'var(--app-color-text-muted)' }}>
+                            {item.description}
+                          </p>
+                        )}
+                        {item.adminNotes && item.status === 'revision_needed' && (
+                          <div style={{ marginTop: 'var(--space-0-5)', padding: 'var(--space-0-5) var(--space-1)', background: 'var(--app-color-warning-bg)', fontSize: 'var(--font-size-sm)' }}>
+                            {item.adminNotes}
+                          </div>
+                        )}
+                      </div>
+                      <StatusBadge status={getStatusVariant(item.status)}>
+                        {STATUS_LABELS[item.status] || item.status}
+                      </StatusBadge>
                     </div>
-                    {item.description && (
-                      <p style={{ margin: '4px 0 0', fontSize: 'var(--font-size-sm)', color: 'var(--app-color-text-muted)' }}>
-                        {item.description}
-                      </p>
-                    )}
-                    {item.adminNotes && item.status === 'revision_needed' && (
-                      <div style={{ marginTop: 'var(--space-0-5)', padding: 'var(--space-0-5) var(--space-1)', background: 'var(--app-color-warning-bg)', fontSize: 'var(--font-size-sm)' }}>
-                        {item.adminNotes}
+
+                    {(item.status === 'pending' || item.status === 'revision_needed') && (
+                      <div style={{ marginTop: 'var(--spacing-sm)' }}>
+                        <ItemSubmissionForm item={item} onSubmit={handleSubmit} />
                       </div>
                     )}
                   </div>
-                  <StatusBadge status={getStatusVariant(item.status)}>
-                    {STATUS_LABELS[item.status] || item.status}
-                  </StatusBadge>
-                </div>
-
-                {(item.status === 'pending' || item.status === 'revision_needed') && (
-                  <div style={{ marginTop: 'var(--spacing-sm)' }}>
-                    <ItemSubmissionForm item={item} onSubmit={handleSubmit} />
-                  </div>
-                )}
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
+      )}
+    </TableLayout>
   );
 }

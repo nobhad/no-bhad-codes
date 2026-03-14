@@ -17,7 +17,7 @@ export function useFadeIn<T extends HTMLElement>(delay = 0) {
       gsap.fromTo(
         ref.current,
         { opacity: 0, y: GSAP.FADE_Y_OFFSET },
-        { opacity: 1, y: 0, duration: GSAP.DURATION_NORMAL, delay, ease: GSAP.EASE_DEFAULT }
+        { opacity: 1, y: 0, duration: GSAP.DURATION_NORMAL, delay, ease: GSAP.EASE_DEFAULT, clearProps: 'all' }
       );
     });
 
@@ -50,7 +50,7 @@ export function useSlideIn<T extends HTMLElement>(
       gsap.fromTo(
         ref.current,
         { opacity: 0, [axis]: value },
-        { opacity: 1, [axis]: 0, duration: GSAP.DURATION_NORMAL, delay, ease: GSAP.EASE_DEFAULT }
+        { opacity: 1, [axis]: 0, duration: GSAP.DURATION_NORMAL, delay, ease: GSAP.EASE_DEFAULT, clearProps: 'all' }
       );
     });
 
@@ -84,7 +84,8 @@ export function useStaggerChildren<T extends HTMLElement>(stagger: number = GSAP
           duration: GSAP.DURATION_NORMAL,
           delay,
           stagger,
-          ease: GSAP.EASE_DEFAULT
+          ease: GSAP.EASE_DEFAULT,
+          clearProps: 'all'
         }
       );
     });
@@ -109,7 +110,7 @@ export function useScaleIn<T extends HTMLElement>(delay = 0) {
       gsap.fromTo(
         ref.current,
         { opacity: 0, scale: GSAP.SCALE_START },
-        { opacity: 1, scale: 1, duration: GSAP.DURATION_FAST, delay, ease: GSAP.EASE_DEFAULT }
+        { opacity: 1, scale: 1, duration: GSAP.DURATION_FAST, delay, ease: GSAP.EASE_DEFAULT, clearProps: 'all' }
       );
     });
 
