@@ -20,12 +20,36 @@
    MAIN LAYOUT
    ============================================== */
 
-.help-main-grid {
+.portal .help-main-grid {
   display: grid;
-  grid-template-columns: minmax(220px, var(--aside-width-medium)) 1fr;
-  gap: var(--portal-section-gap);
-  padding: var(--space-3);
+  grid-template-columns: minmax(280px, var(--aside-width-wide)) 1fr;
+  gap: 0;
   align-items: start;
+}
+
+
+/* Content padding — matches data-table-header padding */
+.portal .help-right-column .data-table-header + .section {
+  padding: var(--space-2);
+}
+
+.portal .help-contact-description,
+.portal .help-contact-actions {
+  padding: var(--space-2);
+}
+
+/* Accordion: consistent horizontal padding so trigger icons and article icons align */
+.portal .help-main-grid .accordion-item-wrapper {
+  padding: 0;
+  border: none;
+}
+
+.portal .help-main-grid .accordion-item-trigger {
+  padding: var(--space-1) var(--space-2);
+}
+
+.portal .help-main-grid .accordion-item-content {
+  padding: 0 var(--space-2) var(--space-1);
 }
 
 .help-left-column {
@@ -56,14 +80,14 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-0-5);
-  padding-left: var(--space-2);
+  padding-left: 0;
 }
 
 .help-accordion-article {
   display: flex;
   align-items: center;
   gap: var(--icon-gap);
-  padding: var(--space-1) var(--space-1-5);
+  padding: var(--space-1) 0;
   width: 100%;
   color: var(--color-text-primary);
   background: none;
@@ -126,7 +150,6 @@
    ============================================== */
 
 .help-contact-section {
-  padding: var(--space-3);
   border-top: var(--portal-border);
 }
 
@@ -161,7 +184,6 @@
    ============================================== */
 
 .help-search-results {
-  padding: var(--space-3);
 }
 
 .help-result-item {
@@ -203,7 +225,6 @@
    ============================================== */
 
 .help-article-view {
-  padding: var(--space-3);
 }
 
 .help-article-header {

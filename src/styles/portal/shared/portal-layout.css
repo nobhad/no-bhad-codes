@@ -452,12 +452,12 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
     .analytics-breakdown,
     [class*="-grid"],
     [class*="-stack"]
-  ) {
+  ):not(.gap-none):not(.help-main-grid) {
   gap: var(--portal-section-gap);
 }
 
 /* Layout containers with their own internal spacing */
-.portal :is([class*="-layout"]):not(.messages-layout):not(.files-browser-layout) {
+.portal :is([class*="-layout"]):not(.gap-none):not(.messages-layout):not(.files-browser-layout) {
   gap: var(--portal-section-gap);
 }
 
