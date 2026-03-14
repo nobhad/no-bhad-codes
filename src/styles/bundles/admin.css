@@ -50,6 +50,7 @@
  * Must be last @import — CSS spec ignores @import after any rules.
  * ============================================ */
 @import "../../design-system/tokens/portal-theme.css";
+@import "../portal/shared/portal-gutter.css";
 
 /* Wireframe mode merged into base/utilities.css */
 
@@ -110,9 +111,4 @@ html:has(body.admin-logged-in[data-page="admin"]) {
   background: var(--color-neutral-500);
 }
 
-/* Sidebar spacing — unlayered to guarantee cascade priority.
-   padding-bottom on sidebar-content creates space below SIGN OUT. */
-.portal .sidebar-content {
-  padding-bottom: var(--space-2);
-}
 
