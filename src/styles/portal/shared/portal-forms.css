@@ -351,21 +351,28 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   width: 100%;
 }
 
-/* Search bar inputs: padding for icon comes from portal-forms.css (input with left icon).
-   No padding override here - single source of truth in portal-forms. */
-/* Specificity (0,2,1): ties the broad input[type="text"] rule — later position wins */
+/* Search icon — absolutely positioned inside the input */
+.search-bar .search-bar-icon {
+  position: absolute;
+  left: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+/* Search bar input — single source of truth for all search inputs */
 .search-bar input.search-bar-input,
 input.search-bar-input {
   width: 100%;
-  padding-top: var(--space-px);
-  padding-bottom: var(--space-px);
-  padding-right: var(--space-4);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--input-icon-offset);
+  height: var(--portal-btn-icon-size);
+  min-height: var(--portal-btn-icon-size);
   background-color: inherit;
   border: var(--portal-border);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
-  /* Match adjacent filter dropdown height site-wide */
-  height: var(--portal-btn-icon-size);
   box-sizing: border-box;
 }
 
