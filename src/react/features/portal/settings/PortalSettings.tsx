@@ -5,7 +5,8 @@
  */
 
 import * as React from 'react';
-import { TabPanel } from '@react/factories';
+import { TabList, TabPanel } from '@react/factories';
+import type { TabItem } from '@react/factories';
 import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { ProfileForm } from './ProfileForm';
@@ -43,6 +44,12 @@ export interface NotificationPreferences {
 
 export type SettingsTab = 'profile' | 'billing' | 'notifications';
 
+const SETTINGS_TABS: Array<TabItem<SettingsTab>> = [
+  { id: 'profile', label: 'Profile' },
+  { id: 'billing', label: 'Billing' },
+  { id: 'notifications', label: 'Notifications' }
+];
+
 export interface PortalSettingsProps extends PortalViewProps {}
 
 /**
@@ -54,6 +61,7 @@ export function PortalSettings({ getAuthToken, showNotification }: PortalSetting
 
   const {
     activeTab,
+    setActiveTab,
     isLoading,
     error,
     profile,
@@ -84,6 +92,13 @@ export function PortalSettings({ getAuthToken, showNotification }: PortalSetting
 
   return (
     <div ref={containerRef} className="section">
+      <TabList
+        tabs={SETTINGS_TABS}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        ariaLabel="Settings navigation"
+      />
+
       <TabPanel tabId="profile" isActive={activeTab === 'profile'}>
         <div className="settings-form-section">
           {profile && (

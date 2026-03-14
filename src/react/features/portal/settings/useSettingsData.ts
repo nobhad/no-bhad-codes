@@ -2,10 +2,10 @@
  * useSettingsData Hook
  * Encapsulates all state and API logic for portal settings:
  * profile fetching/updating, billing updates, notification preferences,
- * tab management, and EJS subtab event listening.
+ * and tab management.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, type Dispatch, type SetStateAction } from 'react';
 import { unwrapApiData, apiFetch } from '@/utils/api-client';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { createLogger } from '@/utils/logger';
@@ -18,9 +18,6 @@ import type {
 } from './PortalSettings';
 
 const logger = createLogger('useSettingsData');
-
-const SUBTAB_EVENT = 'settingsSubtabChange';
-const VALID_TABS: readonly SettingsTab[] = ['profile', 'billing', 'notifications'] as const;
 
 const DEFAULT_NOTIFICATION_PREFS: NotificationPreferences = {
   email_invoices: true,
@@ -36,6 +33,7 @@ interface UseSettingsDataOptions {
 
 interface UseSettingsDataReturn {
   activeTab: SettingsTab;
+  setActiveTab: Dispatch<SetStateAction<SettingsTab>>;
   isLoading: boolean;
   error: string | null;
   profile: ClientProfile | null;
@@ -47,12 +45,6 @@ interface UseSettingsDataReturn {
   handleBillingUpdate: (updates: BillingAddress) => Promise<boolean>;
   handleNotificationsUpdate: (updates: NotificationPreferences) => Promise<boolean>;
 }
-
-/**
- * Checks whether a string is a valid settings tab.
- */
-const isValidTab = (value: string): value is SettingsTab =>
-  (VALID_TABS as readonly string[]).includes(value);
 
 export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettingsDataReturn {
   const { getAuthToken, showNotification } = options;
@@ -113,18 +105,6 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
     fetchProfile();
   }, [fetchProfile]);
 
-  // Listen for EJS subtab changes
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const subtab = (e as CustomEvent).detail?.subtab;
-      if (typeof subtab === 'string' && isValidTab(subtab)) {
-        setActiveTab(subtab);
-      }
-    };
-    document.addEventListener(SUBTAB_EVENT, handler);
-    return () => document.removeEventListener(SUBTAB_EVENT, handler);
-  }, []);
-
   // --- Update handlers ---
   const handleProfileUpdate = useCallback(async (updates: Partial<ClientProfile>): Promise<boolean> => {
     try {
@@ -167,6 +147,7 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
 
   return {
     activeTab,
+    setActiveTab,
     isLoading,
     error,
     profile,
