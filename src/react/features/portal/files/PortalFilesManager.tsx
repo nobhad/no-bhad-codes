@@ -473,7 +473,7 @@ export function PortalFilesManager({
   }, []);
 
   return (
-    <div className="section">
+    <>
       {/* Upload dropzone */}
       <FileUploadDropzone
         onUpload={handleUpload}
@@ -659,6 +659,6 @@ export function PortalFilesManager({
         variant="danger"
         loading={deleteDialog.isLoading}
       />
-    </div>
+    </>
   );
 }

@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { usePortalData } from '@react/hooks/usePortalFetch';
+import { useFadeIn } from '@react/hooks/useGsap';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { formatCurrency, formatDate } from '@react/factories/formatters';
 import type { PortalViewProps } from '../types';
@@ -58,6 +59,7 @@ const STATUS_LABELS: Record<string, string> = {
 // ============================================
 
 export function PaymentScheduleView(_props: PaymentScheduleViewProps) {
+  const containerRef = useFadeIn<HTMLDivElement>();
   const { data: installmentData, isLoading: loadingInstallments, error: installmentError, refetch } = usePortalData<{ installments: PaymentInstallment[] }>({
     url: API_ENDPOINTS.PAYMENT_SCHEDULES_MY
   });
@@ -69,14 +71,14 @@ export function PaymentScheduleView(_props: PaymentScheduleViewProps) {
   const installments = useMemo(() => installmentData?.installments || [], [installmentData]);
   const summary = summaryData?.summary;
 
-  if (loadingInstallments) return <LoadingState message="Loading payment schedule..." />;
-  if (installmentError) return <ErrorState message={installmentError} onRetry={refetch} />;
+  if (loadingInstallments) return <div ref={containerRef} className="section"><LoadingState message="Loading payment schedule..." /></div>;
+  if (installmentError) return <div ref={containerRef} className="section"><ErrorState message={installmentError} onRetry={refetch} /></div>;
   if (installments.length === 0) {
-    return <EmptyState message="No payment schedule has been set up yet." />;
+    return <div ref={containerRef} className="section"><EmptyState message="No payment schedule has been set up yet." /></div>;
   }
 
   return (
-    <div className="payment-schedule-view">
+    <div ref={containerRef} className="section">
       {/* Summary Card */}
       {summary && (
         <div className="card" style={{ marginBottom: 'var(--spacing-md)' }}>

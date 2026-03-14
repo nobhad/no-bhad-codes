@@ -37,7 +37,7 @@ export function KnowledgeBase({ onNavigate, getAuthToken, showNotification }: Kn
   // Individual subtab views
   if (activeSubtab === 'categories') {
     return (
-      <div className="subtab-content-wrapper">
+      <div className="section">
         <React.Suspense fallback={<LoadingState message="Loading categories..." />}>
           <CategoriesTable
             onNavigate={onNavigate}
@@ -51,7 +51,7 @@ export function KnowledgeBase({ onNavigate, getAuthToken, showNotification }: Kn
 
   if (activeSubtab === 'articles') {
     return (
-      <div className="subtab-content-wrapper">
+      <div className="section">
         <React.Suspense fallback={<LoadingState message="Loading articles..." />}>
           <ArticlesTable
             onNavigate={onNavigate}
@@ -65,7 +65,7 @@ export function KnowledgeBase({ onNavigate, getAuthToken, showNotification }: Kn
 
   // Overview - show all tables stacked with default pagination of 10
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subtab-content-wrapper">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
       <React.Suspense fallback={<LoadingState message="Loading categories..." />}>
         <section className="overview-table-section">
           <CategoriesTable
