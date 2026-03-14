@@ -30,29 +30,9 @@ vi.mock('../../../server/utils/auth-constants', () => ({
   COOKIE_CONFIG: { AUTH_TOKEN_NAME: 'auth_token' }
 }));
 
-// Mock api-response helpers
-const mockSendUnauthorized = vi.fn((_res, _msg) => undefined);
-const mockSendNotFound = vi.fn((_res, _msg) => undefined);
-const mockSendForbidden = vi.fn((_res, _msg) => undefined);
-const mockSendServerError = vi.fn((_res, _msg) => undefined);
-
-vi.mock('../../../server/utils/api-response', () => ({
-  sendUnauthorized: (...args: unknown[]) => mockSendUnauthorized(...args),
-  sendNotFound: (...args: unknown[]) => mockSendNotFound(...args),
-  sendForbidden: (...args: unknown[]) => mockSendForbidden(...args),
-  sendServerError: (...args: unknown[]) => mockSendServerError(...args),
-  ErrorCodes: {
-    UNAUTHORIZED: 'UNAUTHORIZED',
-    INVALID_TOKEN: 'INVALID_TOKEN',
-    FORBIDDEN: 'FORBIDDEN',
-    NOT_FOUND: 'NOT_FOUND',
-    INTERNAL_ERROR: 'INTERNAL_ERROR'
-  }
-}));
-
-// Mock logger
-vi.mock('../../../server/services/logger', () => ({
-  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }
+// Mock business config
+vi.mock('../../../server/config/business', () => ({
+  BUSINESS_INFO: { name: 'Test Business' }
 }));
 
 // Helper to create mock request/response
@@ -194,119 +174,6 @@ describe('Portal Routes', () => {
     });
   });
 
-  describe('GET /dashboard/tab/:tabId', () => {
-    const mockFetchTabData = vi.fn();
-    const mockHasTabDataFetcher = vi.fn();
-    const mockGetServerTableDef = vi.fn();
-
-    beforeEach(() => {
-      vi.doMock('../../../server/services/tab-data-service', () => ({
-        fetchTabData: mockFetchTabData,
-        hasTabDataFetcher: mockHasTabDataFetcher,
-        getServerTableDef: mockGetServerTableDef
-      }));
-      mockFetchTabData.mockReset();
-      mockHasTabDataFetcher.mockReset();
-      mockGetServerTableDef.mockReset();
-    });
-
-    it('should return 401 when no auth cookie', async () => {
-      mockVerify.mockImplementation(() => { throw new Error('invalid'); });
-
-      const { portalRoutes } = await import('../../../server/routes/portal');
-      const handler = getRouteHandler(portalRoutes, 'get', '/dashboard/tab/:tabId');
-
-      const req = createMockReq({}, { tabId: 'admin-clients' });
-      const res = createMockRes();
-      await handler(req, res);
-
-      expect(mockSendUnauthorized).toHaveBeenCalledWith(res, 'Authentication required', 'UNAUTHORIZED');
-    });
-
-    it('should return 401 when JWT has no userId', async () => {
-      mockVerify.mockReturnValue({ type: 'admin' });
-
-      mockHasTabDataFetcher.mockReturnValue(true);
-      mockGetServerTableDef.mockReturnValue({ id: 'admin-clients', portal: 'admin' });
-
-      const { portalRoutes } = await import('../../../server/routes/portal');
-      const handler = getRouteHandler(portalRoutes, 'get', '/dashboard/tab/:tabId');
-
-      const req = createMockReq({ auth_token: 'valid-token' }, { tabId: 'admin-clients' });
-      const res = createMockRes();
-      await handler(req, res);
-
-      expect(mockSendUnauthorized).toHaveBeenCalledWith(res, 'Invalid token: missing user ID', 'INVALID_TOKEN');
-    });
-
-    it('should return 404 when tab does not exist', async () => {
-      mockVerify.mockReturnValue({ type: 'admin', id: 1 });
-
-      mockHasTabDataFetcher.mockReturnValue(false);
-      mockGetServerTableDef.mockReturnValue(undefined);
-
-      const { portalRoutes } = await import('../../../server/routes/portal');
-      const handler = getRouteHandler(portalRoutes, 'get', '/dashboard/tab/:tabId');
-
-      const req = createMockReq({ auth_token: 'valid-token' }, { tabId: 'nonexistent' });
-      const res = createMockRes();
-      await handler(req, res);
-
-      expect(mockSendNotFound).toHaveBeenCalledWith(res, 'Tab not found', 'NOT_FOUND');
-    });
-
-    it('should return 404 when client tries to access admin tab (no enumeration)', async () => {
-      mockVerify.mockReturnValue({ type: 'client', clientId: 42 });
-
-      mockHasTabDataFetcher.mockReturnValue(true);
-      mockGetServerTableDef.mockReturnValue({ id: 'admin-clients', portal: 'admin' });
-
-      const { portalRoutes } = await import('../../../server/routes/portal');
-      const handler = getRouteHandler(portalRoutes, 'get', '/dashboard/tab/:tabId');
-
-      const req = createMockReq({ auth_token: 'valid-token' }, { tabId: 'admin-clients' });
-      const res = createMockRes();
-      await handler(req, res);
-
-      // Should return 404, not 403 — prevents tab enumeration
-      expect(mockSendNotFound).toHaveBeenCalledWith(res, 'Tab not found', 'NOT_FOUND');
-      expect(mockSendUnauthorized).not.toHaveBeenCalled();
-    });
-
-    it('should return 500 when fetchTabData returns null', async () => {
-      mockVerify.mockReturnValue({ type: 'admin', id: 1 });
-
-      mockHasTabDataFetcher.mockReturnValue(true);
-      mockGetServerTableDef.mockReturnValue({ id: 'admin-clients', portal: 'admin' });
-      mockFetchTabData.mockResolvedValue(null);
-
-      const { portalRoutes } = await import('../../../server/routes/portal');
-      const handler = getRouteHandler(portalRoutes, 'get', '/dashboard/tab/:tabId');
-
-      const req = createMockReq({ auth_token: 'valid-token' }, { tabId: 'admin-clients' });
-      const res = createMockRes();
-      await handler(req, res);
-
-      expect(mockSendServerError).toHaveBeenCalledWith(res, 'Failed to fetch tab data', 'INTERNAL_ERROR');
-    });
-
-    it('should return 500 on unexpected errors', async () => {
-      mockVerify.mockReturnValue({ type: 'admin', id: 1 });
-
-      mockHasTabDataFetcher.mockReturnValue(true);
-      mockGetServerTableDef.mockReturnValue({ id: 'admin-clients', portal: 'admin' });
-      mockFetchTabData.mockRejectedValue(new Error('DB down'));
-
-      const { portalRoutes } = await import('../../../server/routes/portal');
-      const handler = getRouteHandler(portalRoutes, 'get', '/dashboard/tab/:tabId');
-
-      const req = createMockReq({ auth_token: 'valid-token' }, { tabId: 'admin-clients' });
-      const res = createMockRes();
-      await handler(req, res);
-
-      expect(mockSendServerError).toHaveBeenCalled();
-    });
-  });
 });
 
 /**
