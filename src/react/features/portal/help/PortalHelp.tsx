@@ -298,11 +298,11 @@ interface SearchBarProps {
 function SearchBar({ query, onChange, onClear }: SearchBarProps) {
   return (
     <div className="help-search-container">
-      <div className="help-search-wrapper">
-        {SearchIcon && <SearchIcon className="help-search-icon icon-sm" />}
+      <div className="search-bar">
+        {SearchIcon && <SearchIcon className="search-bar-icon" />}
         <input
           type="text"
-          className="help-search-input"
+          className="search-bar-input"
           placeholder="Search help articles..."
           value={query}
           onChange={(e) => onChange(e.target.value)}
@@ -311,7 +311,7 @@ function SearchBar({ query, onChange, onClear }: SearchBarProps) {
         {query && (
           <button
             type="button"
-            className="help-search-clear"
+            className="search-bar-clear"
             onClick={onClear}
             aria-label="Clear search"
           >

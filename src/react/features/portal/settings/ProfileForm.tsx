@@ -64,10 +64,10 @@ export function ProfileForm({ profile, onUpdate }: ProfileFormProps) {
   return (
     <>
       {/* Contact Information Section */}
-      <div className="portal-section">
+      <div className="data-table-card">
         <div className="data-table-header">
           <h3>
-            <User className="icon-sm" />
+            <User />
             <span className="title-full">Contact Information</span>
           </h3>
         </div>
