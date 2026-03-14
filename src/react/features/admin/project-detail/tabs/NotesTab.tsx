@@ -65,7 +65,7 @@ export function NotesTab({
   );
 
   return (
-    <div className="section">
+    <div className="subsection">
       <div className="panel">
         <div className="data-table-header">
           <h3>

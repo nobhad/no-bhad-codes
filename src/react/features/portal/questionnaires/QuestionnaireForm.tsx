@@ -588,7 +588,7 @@ export function QuestionnaireForm({
       )}
 
       {/* Questions */}
-      <div className="section">
+      <div className="subsection">
         {visibleQuestions.map((question, index) => {
           const InputComponent = QUESTION_COMPONENTS[question.type];
           const value = getAnswerValue(question.id, answers);

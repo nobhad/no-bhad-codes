@@ -152,7 +152,7 @@ export function ActivityTab({ activities, onNavigate }: ActivityTabProps) {
   }
 
   return (
-    <div className="section">
+    <div className="subsection">
       <div className="panel">
         <div className="data-table-header">
           <h3><span className="title-full">Activity ({activities.length})</span></h3>

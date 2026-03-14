@@ -160,7 +160,7 @@ export function DeliverablesTab({
   }, [deletingId, onDeleteMilestone, showNotification]);
 
   return (
-    <div className="section">
+    <div className="subsection">
       {/* Progress header */}
       <div className="panel">
         <div className="data-table-header">

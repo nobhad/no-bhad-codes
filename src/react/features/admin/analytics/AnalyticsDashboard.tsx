@@ -429,7 +429,7 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
   ];
 
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="analytics-view">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section analytics-view">
       {/* Actions Bar */}
       <div className="analytics-actions-bar action-bar">
         <PortalDropdown>

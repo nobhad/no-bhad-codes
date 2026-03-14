@@ -111,7 +111,7 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
   };
 
   return (
-    <div className="section">
+    <div className="subsection">
       <div className="panel">
         <div className="data-table-header">
           <h3><span className="title-full">Projects ({projects.length})</span></h3>

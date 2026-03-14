@@ -185,7 +185,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
   }
 
   return (
-    <div ref={containerRef} className="overview-linear">
+    <div ref={containerRef} className="section overview-linear">
       {/* Stats Strip */}
       <div className="overview-stats-strip">
         {snapshotMetrics.map((metric) => (

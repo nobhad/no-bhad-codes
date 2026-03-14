@@ -245,7 +245,7 @@ export function NotesTab({
   );
 
   return (
-    <div className="section">
+    <div className="subsection">
       <div className="panel">
         <div className="data-table-header">
           <h3><span className="title-full">Notes</span></h3>

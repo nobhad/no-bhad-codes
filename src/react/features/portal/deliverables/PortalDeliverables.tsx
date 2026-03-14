@@ -131,7 +131,7 @@ export function PortalDeliverables({ getAuthToken }: PortalDeliverablesProps) {
   }, []);
 
   return (
-    <TableLayout
+    <TableLayout nested
       containerRef={containerRef}
       title="DELIVERABLES"
       actions={

@@ -482,7 +482,7 @@ export function PortalFilesManager({
       />
 
       {/* Files table */}
-      <TableLayout
+      <TableLayout nested
         containerRef={containerRef}
         title="FILES"
         stats={

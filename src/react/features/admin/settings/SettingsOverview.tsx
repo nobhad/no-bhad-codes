@@ -136,7 +136,7 @@ export function SettingsOverview({ onSubtabNavigate }: SettingsOverviewProps) {
   }
 
   return (
-    <div ref={containerRef} className="settings-overview">
+    <div ref={containerRef} className="subsection settings-overview">
       {/* Top row: Config + System Status */}
       <div className="settings-overview-row">
         <SnapshotCard
