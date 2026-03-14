@@ -17,6 +17,35 @@
 
 ---
 
+## Completed - Portal HTML Wrapper Standardization (March 14, 2026)
+
+**Status:** COMPLETE
+
+Unified HTML wrapper structure across all admin and client portal components.
+
+### Changes
+
+- [x] Every top-level route renders `.section` as outermost wrapper
+- [x] Every nested content wrapper uses `.subsection` (no nested `.section`)
+- [x] `TableLayout` component: `nested` prop controls `.section` (default) vs `.subsection`
+- [x] Admin hubs migrated from `subtab-content-wrapper` to `.section` (dead CSS removed)
+- [x] Admin detail subtabs (8 files) changed from `.section` to `.subsection`
+- [x] Custom wrapper classes (`analytics-view`, `overview-linear`, etc.) paired with `.section`/`.subsection`
+- [x] `PortalViewLayout` updated from `portal-main-container` to `.section`
+- [x] GSAP `useGsap.ts` hooks: added `clearProps: 'all'` to remove inline styles after animation
+- [x] `.section` gets `padding-bottom: var(--portal-page-bottom)` (2x top padding)
+- [x] Gutter CSS updated: `.subsection` excluded from Tier 1 and Tier 3 gutter rules
+- [x] Documentation updated: CSS_ARCHITECTURE.md, COMPONENT_LIBRARY.md
+
+### Rules (see CSS_ARCHITECTURE.md for full docs)
+
+- `.section` = top-level route wrapper (gutter + bottom padding)
+- `.subsection` = nested wrapper (layout only, no gutter)
+- `<TableLayout>` = standalone route (renders `.section`)
+- `<TableLayout nested>` = inside hub/detail page (renders `.subsection`)
+
+---
+
 ## In Progress - Universal Dropdown Unification
 
 **Status:** ACTIVE

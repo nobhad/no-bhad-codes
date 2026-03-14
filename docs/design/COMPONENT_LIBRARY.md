@@ -1,6 +1,6 @@
 # Component Library Documentation
 
-**Last Updated:** March 11, 2026
+**Last Updated:** March 14, 2026
 
 ---
 
@@ -82,11 +82,19 @@ for the full catalog and naming conventions.
 ### Layout
 
 ```css
-.portal-section    /* Bordered section container */
-.portal-card       /* Card with padding */
-.panel             /* Panel container */
+.section           /* Top-level page wrapper — MUST be outermost element for all routes */
+.subsection        /* Nested wrapper — for content inside hubs, TabPanels, detail pages */
+.panel             /* Bordered content container */
 .panel-actions     /* Icon button cluster in panel header */
+.table-layout      /* Table wrapper (rendered by TableLayout component) */
+.data-table-card   /* Data table card container */
+.portal-card       /* Card with padding */
 ```
+
+**TableLayout component** (`src/react/components/portal/TableLayout.tsx`):
+
+- `<TableLayout>` (default) — wraps in `.section` (for standalone routes)
+- `<TableLayout nested>` — wraps in `.subsection` (for content inside hubs/detail pages)
 
 ---
 

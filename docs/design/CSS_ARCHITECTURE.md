@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** March 9, 2026
+**Last Updated:** March 14, 2026
 
 This document defines the CSS architecture, naming conventions, and design token system used throughout the application.
 
@@ -457,6 +457,109 @@ Light mode is handled entirely by 2–3 variable overrides directly in `src/desi
 
 ---
 
+## Portal Layout Wrapper System
+
+All portal page content follows a strict two-tier wrapper system that controls layout, spacing, and gutter (horizontal padding) application.
+
+### Wrapper Classes
+
+| Class | Purpose | Gutter | Bottom Padding |
+|-------|---------|--------|----------------|
+| `.section` | Top-level page wrapper. Direct child of `.dashboard-content`. | Tier 3: children get horizontal gutter | Last child gets `padding-bottom: var(--portal-page-bottom)` |
+| `.subsection` | Nested content wrapper inside a `.section`. | None — gutter comes from deeper tiers (Tier 2) | None |
+
+Both classes provide `display: flex; flex-direction: column; gap: var(--content-gutter)`.
+
+### Rules
+
+1. **Every top-level route component** must have `.section` as its outermost wrapper element
+2. **Every nested content wrapper** (inside TabPanel, inside a hub, inside a detail page) must use `.subsection`
+3. **Never nest `.section` inside `.section`** — inner wrappers must be `.subsection`
+4. **`TableLayout` component** handles this automatically via the `nested` prop:
+   - `<TableLayout>` (default) renders `.section` wrapper — use for standalone routes
+   - `<TableLayout nested>` renders `.subsection` wrapper — use inside hubs/detail pages
+
+### Component Patterns
+
+#### Standalone Route (Dashboard, Documents, Help, etc.)
+
+```tsx
+// Option A: Manual section wrapper
+<div ref={containerRef} className="section">
+  {/* page content */}
+</div>
+
+// Option B: TableLayout handles it (for table-based views)
+<TableLayout containerRef={containerRef} title="DOCUMENTS">
+  {/* table content */}
+</TableLayout>
+```
+
+#### Hub Component (RequestsHub, WorkDashboard, etc.)
+
+```tsx
+<div ref={containerRef} className="section">
+  <TabList tabs={TABS} ... />
+  <TabPanel tabId="subtab-a" isActive={...}>
+    <SubtabComponent />  {/* must use .subsection or <TableLayout nested> */}
+  </TabPanel>
+</div>
+```
+
+#### Subtab Inside a Hub
+
+```tsx
+// Table-based subtab
+<TableLayout nested containerRef={containerRef} title="TITLE">
+  {/* table content */}
+</TableLayout>
+
+// Non-table subtab (settings, forms)
+<div className="subsection">
+  {/* content */}
+</div>
+```
+
+#### Detail Page Subtabs (ClientDetail, ProjectDetail)
+
+```tsx
+// Parent detail page
+<div ref={containerRef} className="section">
+  <TabList ... />
+  <TabPanel tabId="contacts" isActive={...}>
+    <ContactsTab />  {/* returns <div className="subsection"> */}
+  </TabPanel>
+</div>
+
+// Subtab component
+export function ContactsTab() {
+  return (
+    <div className="subsection">
+      <div className="panel">{/* content */}</div>
+    </div>
+  );
+}
+```
+
+### Gutter System
+
+The gutter system (`portal-gutter.css`) applies horizontal padding to content at multiple tiers. The `.section` / `.subsection` distinction controls which tiers activate:
+
+- **Tier 1**: Direct children of `.dashboard-content` and tab wrappers (excludes `.section`, `.subsection`, `.table-layout`, `.panel`)
+- **Tier 2**: Named content elements (`.data-table-header`, `.settings-fields`, etc.) — always applied regardless of nesting
+- **Tier 3**: Children of `.section` — applies gutter to `.section > *` (excludes structural elements). Does NOT apply to `.subsection > *`
+- **Tier 4**: Table cells
+- **Tier 5**: Message thread elements
+
+### CSS Files
+
+- `src/styles/portal/shared/portal-layout.css` — `.section` and `.subsection` class definitions
+- `src/styles/portal/shared/portal-gutter.css` — gutter system (single source of truth)
+- `src/design-system/tokens/portal-theme.css` — `--portal-page-top`, `--portal-page-bottom`, `--content-gutter` tokens
+- `src/react/components/portal/TableLayout.tsx` — `TableLayout` component with `nested` prop
+
+---
+
 ## Reusable Component Classes
 
 ### Buttons
@@ -491,11 +594,14 @@ Defined in `src/styles/portal/shared/portal-badges.css`.
 Defined in `src/styles/portal/shared/portal-layout.css` and `src/styles/portal/shared/portal-cards.css`.
 
 ```css
-.portal-container
-.portal-section
-.portal-card
-.detail-grid
-.detail-row
+.section           /* Top-level page wrapper (flex column + gap + bottom padding) */
+.subsection        /* Nested content wrapper (flex column + gap, no gutter/bottom padding) */
+.panel             /* Bordered content container */
+.table-layout      /* Table wrapper (inside TableLayout component) */
+.data-table-card   /* Data table card container */
+.portal-card       /* Card with padding */
+.detail-grid       /* Detail view grid */
+.detail-row        /* Detail view row */
 ```
 
 ### Tables
@@ -876,6 +982,27 @@ body[data-page="client-portal"] {
 ---
 
 ## Recent Changes
+
+### March 14, 2026 — Portal HTML Wrapper Standardization (section/subsection)
+
+Unified all portal page/tab/subtab components to use a strict two-tier wrapper system.
+
+**New classes:**
+
+- `.section` — top-level route wrapper. Provides flex column layout, gap, Tier 3 gutter on children, and `padding-bottom: var(--portal-page-bottom)` on last child.
+- `.subsection` — nested content wrapper (inside hubs, TabPanels, detail pages). Same flex layout but no gutter rules and no bottom padding.
+
+**TableLayout component** now wraps content in `.section` by default. Pass `nested` prop to use `.subsection` when inside a hub or detail page.
+
+**Gutter CSS** (`portal-gutter.css`) updated:
+
+- `.subsection` added to Tier 1 exclusion list (line 26)
+- `.subsection` excluded from `.section > *` Tier 3 gutter (line 70)
+- `.subsection` added to gap-based container last-child rule (line 96)
+
+**Removed:** `.subtab-content-wrapper` class — replaced by `.section` in all admin hub components. CSS definition removed from `portal-layout.css`.
+
+**Files modified:** `TableLayout.tsx`, `portal-layout.css`, `portal-gutter.css`, `PortalViewLayout.tsx`, all hub/dashboard components (6 admin, 3 client), all admin detail subtabs (8 files), `OnboardingWizard.tsx`, `MessageView.tsx`, `SettingsOverview.tsx`, `PortalDocumentRequests.tsx`.
 
 ### March 11, 2026 — Universal Dropdown Caret Positioning & Capitalization
 
