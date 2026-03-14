@@ -360,7 +360,7 @@ input.search-bar-input {
   padding-top: var(--space-px);
   padding-bottom: var(--space-px);
   padding-right: var(--space-4);
-  background: inherit;
+  background-color: inherit;
   border: var(--portal-border);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
@@ -594,10 +594,19 @@ input.search-bar-input {
 .data-table-checkbox {
   width: var(--space-2);
   height: var(--space-2);
+  min-width: var(--space-2);
+  min-height: var(--space-2);
   background: transparent;
   border: var(--border-width-px) solid var(--color-border-primary);
   border-radius: 0;
   cursor: pointer;
+}
+
+/* Checkbox SVG fills container, not text 1em */
+.data-table-checkbox svg.lucide {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
 }
 
 /* Form textarea resizable */

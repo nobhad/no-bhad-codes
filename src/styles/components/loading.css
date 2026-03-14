@@ -550,10 +550,14 @@ p.empty-state {
 
 /* Portal-specific: Ensure SVG icons inherit text color (not muted gray) */
 /* Higher specificity to override any other rules */
+/* Size: decorative context — override root 1em to --icon-size-xl (24px) */
 .portal .empty-state svg,
 .portal .loading-state svg,
 .portal .error-state svg,
 .portal .empty-icon svg {
+  width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
+  margin: 0;
   color: inherit;
   stroke: currentColor;
 }

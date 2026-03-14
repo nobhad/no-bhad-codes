@@ -158,7 +158,7 @@
 /* Time Entries Table - Base styling from shared/portal-tables.css
    Only page-specific overrides here */
 #time-entries-list .data-table {
-  background: transparent;
+  background-color: inherit;
   border: var(--portal-border);
 }
 

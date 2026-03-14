@@ -100,8 +100,10 @@
   display: grid;
   place-content: center;
   --svg-stroke-width: 3.5;
-  width: 1em;
-  height: 1em;
+  width: var(--space-2);
+  height: var(--space-2);
+  min-width: var(--space-2);
+  min-height: var(--space-2);
   flex-shrink: 0;
   border: var(--border-width-px) solid var(--color-border-primary);
   border-radius: 0;
@@ -110,6 +112,13 @@
   transition:
     background-color var(--transition-fast),
     border-color var(--transition-fast);
+}
+
+/* Checkbox SVG fills the checkbox container, not the text 1em */
+.portal-checkbox svg.lucide {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
 }
 
 .portal-checkbox:hover {

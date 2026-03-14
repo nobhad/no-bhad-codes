@@ -261,7 +261,7 @@ html[data-theme="light"] .portal :is(
 
 /* Base card container - main content containers */
 .portal .portal-card {
-  background: var(--color-bg-primary);
+  background-color: inherit;
   border: var(--portal-border);
   box-shadow: none;
   padding: var(--space-4);

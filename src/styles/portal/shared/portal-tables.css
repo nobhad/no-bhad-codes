@@ -24,9 +24,10 @@
   min-width: 100%;
   border-collapse: collapse;
   border-spacing: 0;
-  background: var(--table-bg);
+  background-color: inherit;
   table-layout: auto;
   border: none;
+  border-top: var(--portal-border);
   font-family: inherit;
   font-size: inherit;
   color: var(--table-cell-color);
@@ -230,6 +231,7 @@
   width: 1%;
   white-space: nowrap;
   text-align: right;
+  padding-inline: var(--icon-gap);
 }
 
 /* Star/favorite column — fixed icon width, never expands */
@@ -269,11 +271,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--portal-card-padding);
+  padding: var(--space-2);
   border-top: none;
   border-bottom: none;
   border-radius: 0;
-  background: transparent;
+  background-color: inherit;
 }
 
 .data-table-header > .status-badge {
@@ -377,7 +379,7 @@
 }
 
 .data-table-card {
-  background: inherit;
+  background-color: inherit;
   border: var(--portal-border);
   overflow: visible;
   min-width: 0;
@@ -415,7 +417,7 @@
   width: 100%;
   overflow-x: auto;
   overflow-y: visible;
-  background: var(--table-bg);
+  background-color: inherit;
   border: none;
 }
 
@@ -447,7 +449,7 @@
 .table-pagination {
   display: flex;
   align-items: center;
-  padding: var(--space-1-5) var(--space-1);
+  padding: var(--space-2);
   border-top: var(--portal-border);
   color: inherit;
   font-size: inherit;
@@ -1625,33 +1627,6 @@
 
 @layer components {
 
-/* =====================================================
-   PROGRESSIVE ENHANCEMENT
-   Hide JS-only elements until TableManager initializes.
-   The data-initialized attribute is set to "true" by TableManager.init().
-   ===================================================== */
-
-[data-table-id]:not([data-initialized="true"]) .col-checkbox {
-  display: none;
-}
-
-[data-table-id]:not([data-initialized="true"]) [data-action="search"] {
-  display: none;
-}
-
-[data-table-id]:not([data-initialized="true"]) [data-action="export"] {
-  display: none;
-}
-
-[data-table-id]:not([data-initialized="true"]) [data-action="filter"] {
-  display: none;
-}
-
-/* Row hidden state (set by TableFilter/TablePaginator) */
-.table-row.row-hidden {
-  display: none;
-}
-
 /* Cell secondary text (below primary text in name columns) */
 .cell-secondary {
   display: block;
@@ -1705,88 +1680,11 @@
 
 @layer components {
 
-/* ==============================================
-   EJS TABLE HEADER PARTIAL CLASSES
-   Used by server/views/partials/table/table-header.ejs
-   ============================================== */
-
-/* Header left section - title + stats */
-.table-header-left {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-width: 0;
-}
-
-/* Table title inside EJS header */
-.table-title {
-  margin: 0;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
-  white-space: nowrap;
-}
-
-/* Stats badge in EJS header */
+/* Stats badge — used by LeadScoringConfig and table headers */
 .table-stat {
   font-size: var(--font-size-sm);
   color: var(--color-text-tertiary);
   white-space: nowrap;
-}
-
-/* Header right section - search, filters, actions */
-.table-header-right {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
-/* Search input in EJS header */
-.table-search {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.table-search-input {
-  width: 180px;
-  height: var(--space-5);
-  padding: 0 var(--space-2);
-  font-size: var(--font-size-sm);
-  background: transparent;
-  border: var(--portal-border);
-  color: var(--color-text-primary);
-  transition: border-color var(--transition-fast);
-}
-
-.table-search-input:focus {
-  outline: none;
-  border-color: var(--color-accent);
-}
-
-.table-search-input::placeholder {
-  color: var(--color-text-tertiary);
-}
-
-/* Filter select in EJS header */
-.table-filter-select {
-  height: var(--space-5);
-  padding: 0 var(--space-4) 0 var(--space-2);
-  font-size: var(--font-size-sm);
-  background: transparent;
-  border: var(--portal-border);
-  color: var(--color-text-primary);
-  cursor: pointer;
-  appearance: none;
-}
-
-/* Button label text */
-.btn-label {
-  font-size: var(--font-size-sm);
 }
 
 /* Bulk selected count text */
@@ -1806,22 +1704,6 @@
   background: var(--color-bg-raised);
 }
 
-/* ==============================================
-   EJS TABLE EMPTY STATE
-   Used by server/views/partials/table/table.ejs
-   ============================================== */
-
-.table-empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(12px, 2vw, 20px);
-  padding: clamp(var(--space-4), 5vw, var(--space-8));
-  text-align: center;
-  color: var(--color-text-primary, inherit);
-}
-
 .empty-message {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
@@ -1829,58 +1711,11 @@
   margin: 0;
 }
 
-/* ==============================================
-   EJS SORT BUTTON (alias for sort-header-btn)
-   Used by server/views/partials/table/table-body.ejs
-   ============================================== */
-
-.sort-button {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--icon-gap);
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin: 0;
-  font: inherit;
-  color: inherit;
-  text-transform: inherit;
-  letter-spacing: inherit;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.sort-button:hover {
-  color: var(--color-text-primary);
-}
-
-/* Sort indicator in EJS sort buttons */
+/* Sort indicator */
 .sort-indicator {
   font-size: var(--table-sort-indicator-size);
   color: var(--color-accent);
 }
-
-/* ==============================================
-   EJS PAGINATION CLASSES
-   Used by server/views/partials/table/table-pagination.ejs
-   ============================================== */
-
-.pagination-showing {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.pagination-current {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-  min-width: max-content;
-}
-
-/* ==============================================
-   EJS ROW CLASSES
-   Used by server/views/partials/table/table-row.ejs
-   ============================================== */
 
 } /* end @layer components */
 
@@ -1901,15 +1736,6 @@
 /* Row checkbox */
 .row-checkbox {
   cursor: pointer;
-}
-
-/* Lucide SVG icon sizing for EJS templates */
-.lucide-icon {
-  display: inline-block;
-  vertical-align: middle;
-  flex-shrink: 0;
-  width: var(--table-icon-size);
-  height: var(--table-icon-size);
 }
 
 /* ==============================================

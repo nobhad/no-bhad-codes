@@ -34,27 +34,29 @@
    TAB/SUBTAB CONTAINERS
    ===================================================== */
 
-.portal-tabs {
+/* Unified tab container styles — all tab systems share the same base */
+.portal-tabs,
+.portal-subtabs,
+.tab-list,
+.view-toggle {
   display: flex;
   gap: var(--space-1);
   margin-bottom: 0;
   overflow: visible;
   position: relative;
   padding: 0;
-  border-bottom: var(--portal-border);
+  border-bottom: none;
 }
 
-.portal-subtabs {
-  display: flex;
-  gap: var(--space-1);
-  border-bottom: var(--portal-border);
-  margin-bottom: var(--portal-section-gap);
+.view-toggle {
+  display: inline-flex;
 }
 
 /* .dashboard-content flex gap is single source of truth — cancel margin so gap handles spacing */
 .portal .dashboard-content .portal-subtabs,
 .section > .portal-tabs,
-.section > .portal-subtabs {
+.section > .portal-subtabs,
+.section > .tab-list {
   margin-bottom: 0;
 }
 
@@ -62,18 +64,6 @@
    apply standard section gap between nav and content. */
 .portal-tabs + .portal-tab-panel {
   margin-top: var(--portal-section-gap);
-}
-
-.view-toggle {
-  display: inline-flex;
-  gap: var(--space-1);
-  border-bottom: var(--portal-border);
-}
-
-.tab-list {
-  display: flex;
-  gap: 0;
-  border-bottom: var(--portal-border);
 }
 
 /* =====================================================

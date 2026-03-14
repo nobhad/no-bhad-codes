@@ -41,29 +41,10 @@
 
 /* =====================================================
    CANONICAL CARD/PANEL HEADER LAYOUT (SoT)
-   Used across dashboard panels + settings snapshot cards + tab content headers.
+   Moved to portal-theme.css (unlayered) so it can't be overridden.
    ===================================================== */
 
-.portal :is(.overview-panel-header, .snapshot-card-header) {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--portal-card-padding);
-}
-
-.portal :is(.overview-panel-title, .snapshot-card-title) {
-  display: flex;
-  align-items: center;
-  gap: var(--icon-gap);
-  margin: 0;
-  font-size: var(--font-size-xs);
-}
-
-.portal :is(.overview-panel-title, .snapshot-card-title) svg {
-  width: 1em;
-  height: 1em;
-  flex-shrink: 0;
-}
+/* .overview-panel-title / .snapshot-card-title moved to portal-theme.css (unlayered) */
 
 /* Make tab-section headers look like section titles (no extra overrides needed) */
 .portal .tab-section > .panel-header-row .heading,

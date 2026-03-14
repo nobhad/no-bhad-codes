@@ -62,22 +62,22 @@
   z-index: var(--z-index-content);
 }
 
-/* Search input — hidden when closed, expands inline to the left of trigger when open */
-.filter-search-dropdown,
-.filter-search-dropdown.search-bar {
-  display: none;
+/* Search wrapper — relative anchor for absolute input */
+.filter-search-wrapper {
   position: relative;
-  width: var(--table-col-xl);
 }
 
-.filter-search-wrapper.open .filter-search-dropdown,
-.filter-search-wrapper.open .filter-search-dropdown.search-bar {
+/* Search input — absolutely positioned, expands left from the right edge.
+   React conditionally renders the dropdown (no CSS display toggle needed). */
+.filter-search-dropdown {
   display: flex;
-}
-
-/* Hide trigger when open — icon inside the input covers it */
-.filter-search-wrapper.open .filter-search-trigger {
-  display: none;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--table-col-xl);
+  z-index: var(--z-index-content, 1);
+  background-color: var(--color-bg-primary);
 }
 
 /* Search icon inside the input — left-aligned with proper padding */
@@ -93,11 +93,10 @@
   flex-shrink: 0;
 }
 
-/* Input padding + height to match filter dropdown row */
+/* Input padding + height to match adjacent icon buttons */
 .filter-search-dropdown input.search-bar-input {
-  padding-left: var(--input-icon-offset);
-  padding-top: var(--space-1-5);
-  padding-bottom: var(--space-1-5);
+  padding: var(--space-0-5) var(--space-2) var(--space-0-5) var(--input-icon-offset);
+  height: var(--portal-btn-icon-size);
   min-height: var(--portal-btn-icon-size);
 }
 
@@ -222,15 +221,6 @@
    =============================================== */
 
 @media (--mobile) {
-  .filter-search {
-    flex: 1;
-    min-width: var(--table-col-md);
-  }
-
-  .filter-search-input {
-    width: 100%;
-  }
-
   .filter-dropdown-menu {
     left: 0;
     right: 0;
