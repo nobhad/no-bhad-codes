@@ -36,7 +36,7 @@ export interface PortalViewLayoutProps {
  * PortalViewLayout — standard wrapper for all portal views.
  *
  * Handles:
- * - `portal-main-container` div with GSAP fade-in
+ * - `.section` div with GSAP fade-in
  * - Centralized loading state via LoadingState
  * - Centralized error state via ErrorState with retry
  *
@@ -65,7 +65,7 @@ export function PortalViewLayout({
   }
 
   return (
-    <div ref={containerRef} className={cn('portal-main-container', className)}>
+    <div ref={containerRef} className={cn('section', className)}>
       {children}
     </div>
   );

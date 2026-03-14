@@ -158,7 +158,7 @@ export function PortalDocumentRequests({
         <div className="portal-cards-list">
           {/* Action Needed Section */}
           {actionNeeded.length > 0 && (
-            <div className="section">
+            <div className="subsection">
               <div className="data-table-header">
                 <h3><span className="title-full">Action Needed</span></h3>
                 <span className="badge">{actionNeeded.length}</span>
@@ -179,7 +179,7 @@ export function PortalDocumentRequests({
 
           {/* In Review Section */}
           {inReview.length > 0 && (
-            <div className="section">
+            <div className="subsection">
               <div className="data-table-header"><h3><span className="title-full">In Review</span></h3></div>
               <div className="subsection">
                 {inReview.map(request => (
@@ -197,7 +197,7 @@ export function PortalDocumentRequests({
 
           {/* Completed Section */}
           {completed.length > 0 && (
-            <div className="section">
+            <div className="subsection">
               <div className="data-table-header"><h3><span className="title-full">Completed</span></h3></div>
               <div className="subsection">
                 {completed.map(request => (

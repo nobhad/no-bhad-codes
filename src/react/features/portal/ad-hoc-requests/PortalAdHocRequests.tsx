@@ -194,7 +194,7 @@ export function PortalAdHocRequests({
 
   return (
     <div className="section">
-      <TableLayout
+      <TableLayout nested
         containerRef={containerRef}
         title="AD-HOC REQUESTS"
         stats={<TableStats items={[{ value: items.length, label: 'total' }]} />}
