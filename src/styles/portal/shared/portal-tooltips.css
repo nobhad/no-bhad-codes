@@ -48,7 +48,6 @@
   bottom: calc(100% + var(--space-1));
   left: 50%;
   transform: translateX(-50%);
-  padding: var(--space-1) var(--space-1-5);
   background: var(--color-bg-inverse);
   color: var(--color-text-inverse);
   font-family: var(

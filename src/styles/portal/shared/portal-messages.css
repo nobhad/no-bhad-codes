@@ -36,7 +36,6 @@
    =========================================== */
 .portal .messages-global-search {
   flex-shrink: 0;
-  padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   border-bottom: var(--portal-border);
 }
 
@@ -61,7 +60,6 @@
 
 .portal .thread-list-header {
   flex-shrink: 0;
-  padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   border-bottom: var(--portal-border);
 }
 
@@ -76,7 +74,6 @@
 }
 
 .portal .thread-item {
-  padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   cursor: pointer;
 }
 
@@ -127,7 +124,6 @@
   justify-content: center;
   min-width: var(--inline-pill-height);
   height: var(--inline-pill-height);
-  padding: 0 var(--space-1);
   background: var(--color-accent);
   color: var(--color-bg-tertiary);
   font-size: var(--font-size-2xs);
@@ -147,7 +143,6 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
 }
 
 /* Individual messages */
@@ -177,7 +172,6 @@
 /* Message content box */
 .portal .message-content {
   border: var(--portal-border);
-  padding: var(--space-2) var(--space-3);
   max-width: 70%;
 }
 
@@ -274,7 +268,6 @@
 .portal .message-actions button {
   background: transparent;
   border: none;
-  padding: var(--space-0-5);
   cursor: pointer;
   color: var(--color-text-tertiary);
   opacity: var(--opacity-subtle);
@@ -301,7 +294,6 @@
   transform: translateX(-50%);
   background: var(--color-bg-tertiary);
   border: var(--portal-border);
-  padding: var(--space-1);
   display: flex;
   align-items: center;
   gap: var(--space-1);
@@ -316,7 +308,6 @@
 .portal .reaction-picker button {
   border: none;
   background: transparent;
-  padding: var(--space-1);
   font-size: var(--font-size-base);
   line-height: 1;
   cursor: pointer;
@@ -342,7 +333,6 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-0-5);
-  padding: var(--space-0-5) var(--space-1);
   background: var(--color-bg-elevated);
   border: var(--portal-border);
   font-size: var(--font-size-xs);
@@ -352,7 +342,6 @@
 /* Pinned message indicator */
 .portal .message.pinned {
   border-left: var(--border-width) solid var(--color-accent);
-  padding-left: var(--space-2);
 }
 
 .portal .pin-message-btn.pinned {
@@ -369,7 +358,6 @@
   display: flex;
   align-items: center;
   gap: var(--icon-gap);
-  padding: var(--space-1) var(--space-2);
   background: var(--color-bg-elevated);
   border: var(--portal-border);
   font-size: var(--font-size-xs);
@@ -407,14 +395,12 @@
 .portal .message-compose {
   flex-shrink: 0;
   gap: var(--space-2);
-  padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   border-top: var(--portal-border);
 }
 
 .portal .message-compose textarea {
   width: 100%;
   min-height: var(--min-height-textarea-lg);
-  padding: var(--space-2);
   border: var(--portal-border);
   background: transparent;
   color: inherit;
@@ -449,7 +435,6 @@
 
 .portal .messages-contact-info,
 .portal .messages-tips-list {
-  padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
 }
 
 .portal .messages-contact-item {
@@ -477,7 +462,6 @@
 
 .portal .messages-tips-list {
   margin: 0;
-  padding-left: var(--space-4);
   list-style: disc;
 }
 
@@ -568,7 +552,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1-5);
-  padding: var(--space-2) var(--space-3);
   border-bottom: var(--portal-border);
 }
 
@@ -592,7 +575,6 @@
   align-items: center;
   justify-content: flex-end;
   gap: var(--space-1);
-  padding: var(--space-1-5) var(--space-3);
   border-bottom: var(--portal-border);
   flex-shrink: 0;
 }
@@ -624,7 +606,6 @@
 .messaging-search-container .input,
 .messaging-search-container input {
   width: 100%;
-  padding-left: 2.5rem;
 }
 
 /* Filter tabs — icon-only to prevent overflow in narrow sidebar */
@@ -638,7 +619,6 @@
 /* Icon-only tabs: hide text via font-size:0, icon retains explicit size */
 .messaging-filter-tab {
   font-size: 0;
-  padding: var(--space-1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -768,12 +748,10 @@
 .messaging-main-area .msgtab-input-panel {
   margin-left: 0;
   margin-right: 0;
-  padding: var(--space-2);
 }
 
 /* Conversation header */
 .messaging-conv-header {
-  padding: 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -791,23 +769,22 @@
 .messaging-conv-actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-1);
 }
 
 /* Messages container */
 .messaging-messages-container {
   flex: 1;
-  padding: 1rem;
 }
 
 .messaging-messages-list {
-  gap: 1rem;
+  gap: var(--space-2);
 }
 
 /* Message bubble */
 .messaging-message-row {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--space-1-5);
 }
 
 .messaging-message-row-admin {
@@ -820,7 +797,6 @@
 
 .messaging-message-bubble {
   max-width: 70%;
-  padding: 0.5rem 1rem;
   border: var(--portal-border);
 }
 
@@ -883,7 +859,6 @@
 
 /* Compose area */
 .messaging-compose {
-  padding: 0 var(--space-2) var(--space-2);
   border-top: var(--portal-border);
 }
 
@@ -903,12 +878,11 @@
 }
 
 .messaging-compose-send-btn {
-  padding: 0.5rem;
 }
 
 .messaging-attachment-icon {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
 }
 
 .messaging-send-icon {
@@ -986,7 +960,6 @@
 /* Message bubble */
 .message-bubble {
   max-width: 280px;
-  padding: var(--space-1) var(--space-1-5);
 }
 
 .message-bubble.own {
@@ -1040,7 +1013,6 @@
 .message-edit-textarea {
   width: 100%;
   min-height: var(--min-height-textarea);
-  padding: var(--space-1);
   font-size: var(--font-size-xs);
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
@@ -1091,7 +1063,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  padding: var(--space-1);
   border: var(--portal-border);
 }
 
@@ -1113,7 +1084,6 @@
 /* Composer container - border-top only (sits at bottom of card) */
 .message-composer {
   gap: var(--space-1);
-  padding: var(--space-1-5);
   border-top: var(--portal-border);
 }
 
@@ -1122,7 +1092,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1);
-  padding: 0 var(--space-1);
 }
 
 /* Composer attachment item */
@@ -1130,7 +1099,6 @@
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  padding: var(--space-0-5) var(--space-1);
   font-size: var(--font-size-sm);
   border: var(--portal-border);
 }
@@ -1149,7 +1117,6 @@
 /* Messages area container */
 .messages-area {
   flex: 1;
-  padding: var(--space-1-5);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -1208,7 +1175,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  padding: var(--space-0-5) var(--space-2);
   font-size: var(--font-size-2xs);
   color: var(--color-text-tertiary);
 }

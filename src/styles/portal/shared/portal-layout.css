@@ -37,7 +37,6 @@ body:has(.portal) {
   flex-direction: column;
   justify-content: center;
   gap: var(--space-1);
-  padding: 0 var(--space-3);
   box-sizing: border-box;
   z-index: var(--z-index-nav);
   box-shadow: none;
@@ -76,9 +75,7 @@ body:has(.portal) {
   align-items: center;
   gap: var(--icon-gap-md);
   min-height: var(--space-5);
-  /* Cancel header padding and re-apply sidebar indent so icons align with sidebar */
-  margin: 0 calc(-1 * var(--space-3));
-  padding: 0 var(--space-3) 0 var(--sidebar-icon-indent);
+  margin: 0;
 }
 
 /* Branding in global header - avatar + text */
@@ -89,8 +86,7 @@ body:has(.portal) {
   text-decoration: none;
   color: var(--color-text-primary);
   transition: color var(--transition-mouse) ease;
-  padding-left: calc((var(--space-7) - var(--icon-size-2xl)) / 2);
-  margin-left: calc(-1 * var(--space-3));
+  margin-left: 0;
 }
 
 .portal-global-header .header-branding:hover {
@@ -288,25 +284,22 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
    Flex column + gap is the single source of truth for spacing between
    subtabs and route content. Children use flex: 0 0 auto so they don't
    stretch; gap provides consistent spacing on all viewports including mobile.
-   flex: 1 / min-width: 0 are flex-CHILD properties for the portal-body layout. */
+   flex: 1 / min-width: 0 are flex-CHILD properties for the portal-body layout.
+   PADDING RULE: NO padding on wrapper — children get their own via --content-gutter. */
 .portal .dashboard-content {
   display: flex;
   flex-direction: column;
   gap: var(--portal-section-gap);
   flex: 1;
   min-width: 0;
-  padding: 0 var(--space-3);
   overflow-y: auto;
   background-color: var(--color-bg-primary);
   box-sizing: border-box;
 }
 
-/* SINGLE SOURCE OF TRUTH: bottom breathing room for the entire portal.
-   Applied as margin on the last child (not padding on the scroll container,
-   which is unreliable in flex-column overflow:auto containers). */
-.portal .dashboard-content > :last-child {
-  margin-bottom: calc(var(--portal-page-bottom) + env(safe-area-inset-bottom, 0px));
-}
+/* Content gutter rules moved to unlayered block at end of file */
+
+/* Bottom breathing room removed — table-layout padding handles it */
 
 /* Universal wrapper used by tab/subtab views.
    Layout only -- bottom breathing room comes from the :last-child rule above. */
@@ -318,10 +311,9 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   min-height: 0;
 }
 
-/* Tab section — bordered panel for simple header+list tabs */
+/* Tab section — bordered panel for simple header+list tabs. */
 .portal .tab-section {
   border: var(--portal-border);
-  padding: var(--space-3);
 }
 
 /* Overview table section — full width, no extra margins */
@@ -381,7 +373,6 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   align-items: center;
   margin-left: 0;
   /* Align with table cell padding for visual consistency */
-  padding-left: var(--table-cell-padding-x);
 }
 
 /* Hide all header subtab groups by default */
@@ -466,24 +457,9 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
    Provides consistent section spacing across all portal pages.
    ===================================================== */
 
-/* Standard section - consistent bottom margin */
-.portal .portal-section {
-  margin-bottom: var(--space-6);
-}
+/* Section spacing handled by parent flex/grid gap */
 
-.portal .portal-section:last-child {
-  margin-bottom: 0;
-}
-
-/* Section with no top margin on first child */
-.portal .portal-section > *:first-child {
-  margin-top: 0;
-}
-
-/* Consistent gap between section children */
-.portal .portal-section > * + * {
-  margin-top: var(--space-4);
-}
+/* Gap between section children handled by parent flex/grid gap */
 
 /* Section title - secondary heading within a page */
 .portal .portal-section-title {
@@ -550,7 +526,6 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 .portal :is(.page-header-tabs, .tab-nav) .tab-btn {
-  padding: var(--space-1) var(--space-2);
   background: transparent;
   border: none;
   border-bottom: var(--border-width) solid transparent;
@@ -647,6 +622,8 @@ td {
 
   /* Override base font size for all portal elements */
   --font-size-base: 15px;
+
+  /* --content-gutter defined in unlayered block at end of file */
 }
 
 
@@ -805,7 +782,6 @@ html[data-theme="light"] .portal .funnel-value {
    ERROR AND LOADING STATES
    ===================================================== */
 .error-message {
-  padding: var(--space-2);
   background: var(--color-error-light);
   color: var(--color-error);
   border: var(--border-width) solid var(--color-error);
@@ -827,7 +803,7 @@ html[data-theme="light"] .portal .funnel-value {
 .section {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-section-gap);
+  gap: var(--content-gutter);
   background-color: inherit;
 }
 
@@ -835,10 +811,9 @@ html[data-theme="light"] .portal .funnel-value {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--space-3);
+  gap: 0;
   background-color: inherit;
   border: var(--portal-border);
-  padding: var(--portal-card-padding);
 }
 
 /* Nested cards/accordions inside a panel get a thinner 1px border.
@@ -852,12 +827,11 @@ html[data-theme="light"] .portal .funnel-value {
 }
 
 
-/* Clickable card variant — portal-card + card-clickable */
+/* Clickable card variant — portal-card + card-clickable. */
 .card-clickable,
 .card-hover {
   background: transparent;
   border: var(--portal-border);
-  padding: var(--space-4);
   transition: border-color var(--transition-fast);
   cursor: pointer;
 }
@@ -1147,24 +1121,17 @@ html[data-theme="light"] .portal .funnel-value {
 .gap-md { gap: var(--portal-section-gap); }
 .gap-lg { gap: var(--space-4); }
 
-/* Section padding */
-.section-padding-sm { padding: var(--space-2); }
-.section-padding-md { padding: var(--space-3); }
-.section-padding-lg { padding: var(--space-4); }
-
 /* Section header — single font-size and center alignment for row (root rule) */
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--icon-gap-sm);
-  padding: var(--space-2) var(--space-3);
   border-bottom: var(--portal-border);
   font-size: var(--font-size-sm);
 }
 
 .section-header--compact {
-  padding: var(--space-1) var(--space-2);
 }
 
 /* Title in header: no margin, tight line-height for vertical alignment */
@@ -1215,7 +1182,6 @@ html[data-theme="light"] .portal .funnel-value {
 }
 
 .section-content {
-  padding: var(--space-3);
 }
 
 /* Panel actions */
@@ -1361,4 +1327,7 @@ html[data-theme="light"] .portal .funnel-value {
   flex-direction: column;
 }
 
-}
+} /* end @layer components */
+
+/* CONTENT GUTTER rules are in bundles/admin.css and bundles/client.css (unlayered) */
+

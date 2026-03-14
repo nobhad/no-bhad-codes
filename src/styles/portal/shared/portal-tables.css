@@ -46,7 +46,6 @@
 .data-table th {
   box-sizing: border-box;
   text-align: left;
-  padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   color: var(--color-text-primary);
   font-size: inherit;
   font-weight: var(--font-weight-medium);
@@ -66,7 +65,6 @@
 
 .data-table td {
   box-sizing: border-box;
-  padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   color: inherit;
   font-size: inherit;
   font-weight: inherit;
@@ -80,15 +78,12 @@
    ============================================== */
 
 .data-table :is(th, td):first-child {
-  padding-left: var(--table-cell-padding-x);
 }
 
 .data-table .col-checkbox + :is(th, td) {
-  padding-left: var(--table-cell-padding-x);
 }
 
 .data-table :is(th, td):last-child {
-  padding-right: var(--table-cell-padding-x);
 }
 
 /* ==============================================
@@ -231,7 +226,6 @@
   width: 1%;
   white-space: nowrap;
   text-align: right;
-  padding-inline: var(--icon-gap);
 }
 
 /* Star/favorite column — fixed icon width, never expands */
@@ -271,7 +265,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-2);
   border-top: none;
   border-bottom: none;
   border-radius: 0;
@@ -403,7 +396,6 @@
 
 .data-table-card .empty-state,
 .data-table-container .empty-state {
-  padding: var(--space-4);
 }
 
 /* Hide card-mode ::before label on colspan cells */
@@ -439,7 +431,6 @@
 
 /* When no pagination, add bottom padding to last row */
 .data-table-card:not(:has(.table-pagination)) .data-table tbody tr:last-child td {
-  padding-bottom: var(--space-1-5);
 }
 
 /* ==============================================
@@ -449,7 +440,6 @@
 .table-pagination {
   display: flex;
   align-items: center;
-  padding: var(--space-2);
   border-top: var(--portal-border);
   color: inherit;
   font-size: inherit;
@@ -822,8 +812,6 @@
     min-width: var(--table-checkbox-width);
     max-width: var(--table-checkbox-width);
     text-align: center;
-    padding-left: var(--table-outer-padding);
-    padding-right: var(--space-1);
   }
 }
 
@@ -1031,7 +1019,6 @@
   cursor: pointer;
   user-select: none;
   position: relative;
-  padding-right: calc(var(--table-cell-padding-x) + var(--space-2) + var(--space-0-5));
   transition: background-color var(--transition-faster);
 }
 
@@ -1121,23 +1108,18 @@
 @media (--mobile) {
   /* Slightly more breathing room on mobile */
   .data-table-header {
-    padding-inline: var(--space-1-5);
   }
 
   .data-table :is(th, td):first-child {
-    padding-left: var(--space-1-5);
   }
 
   .data-table .col-checkbox + :is(th, td) {
-    padding-left: var(--space-1-5);
   }
 
   .data-table :is(th, td):last-child {
-    padding-right: var(--space-1-5);
   }
 
   .table-pagination {
-    padding-inline: var(--space-1-5);
   }
 
   .data-table {
@@ -1210,7 +1192,6 @@
 @media (--desktop-wide) {
   .data-table th,
   .data-table td {
-    padding: var(--space-1) var(--space-1-5);
   }
 }
 
@@ -1218,7 +1199,6 @@
 @media (--laptop-wide) {
   .data-table th,
   .data-table td {
-    padding: var(--space-1) var(--space-1);
   }
 
   .data-table :is(.source-col, .source-cell) {
@@ -1380,7 +1360,6 @@
   .data-table tbody tr {
     height: auto;
     background: transparent;
-    padding: var(--space-1-5) var(--space-1-5);
     margin-bottom: 0;
     border: none;
     border-bottom: var(--portal-border);
@@ -1410,7 +1389,6 @@
     justify-content: flex-start;
     align-items: baseline;
     gap: var(--space-2);
-    padding: var(--space-1) 0;
     min-height: auto;
     height: auto;
     border: none;
@@ -1611,7 +1589,6 @@
 /* 479px: Tighter card spacing for very small screens */
 @media (--small-mobile) {
   .data-table tbody tr {
-    padding: var(--space-1-5) var(--space-2);
   }
 
   .data-table td {
@@ -1663,7 +1640,6 @@
     /* Mobile-only: Identity cell first, actions cell last */
     .data-table tbody td.identity-cell {
       order: -2;
-      padding-bottom: var(--space-2);
       margin-bottom: var(--space-1);
     }
 
@@ -1671,7 +1647,6 @@
       order: 10;
       display: flex;
       justify-content: flex-end;
-      padding-top: var(--space-2);
       border-top: var(--portal-border);
       margin-top: var(--space-2);
     }
@@ -1699,7 +1674,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-1) var(--table-cell-padding-x);
   border-bottom: var(--portal-border);
   background: var(--color-bg-raised);
 }
@@ -1726,8 +1700,6 @@
     min-width: var(--table-checkbox-width);
     max-width: var(--table-checkbox-width);
     text-align: center;
-    padding-left: var(--table-outer-padding);
-    padding-right: var(--space-1);
   }
 }
 
@@ -1870,7 +1842,6 @@
 }
 
 .data-table-search-input {
-  padding-left: var(--space-5);
 }
 
 .data-table-checkbox {
@@ -1887,7 +1858,6 @@
 
 .data-table-pagination {
   margin-top: var(--space-3);
-  padding: var(--space-2) var(--space-3);
   border: var(--portal-border);
 }
 
@@ -1926,7 +1896,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-0-5);
-  padding: 0 var(--space-1);
 }
 
 .data-table-row-actions {
@@ -1938,8 +1907,6 @@
 }
 
 .form-select-sm {
-  padding-top: var(--space-0-5);
-  padding-bottom: var(--space-0-5);
 }
 
 } /* end @layer components */

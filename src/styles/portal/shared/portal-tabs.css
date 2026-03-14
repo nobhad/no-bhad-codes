@@ -40,7 +40,7 @@
 .tab-list,
 .view-toggle {
   display: flex;
-  gap: var(--space-1);
+  gap: var(--space-2);
   margin-bottom: 0;
   overflow: visible;
   position: relative;
@@ -60,11 +60,7 @@
   margin-bottom: 0;
 }
 
-/* When tab panel immediately follows tab nav (self-contained tab section, e.g. RequestsHub),
-   apply standard section gap between nav and content. */
-.portal-tabs + .portal-tab-panel {
-  margin-top: var(--portal-section-gap);
-}
+/* Tab panel margin removed — parent gap handles spacing */
 
 /* =====================================================
    SHARED TAB BUTTON BASE STYLES
@@ -85,7 +81,6 @@
   display: inline-flex;
   align-items: center;
   gap: var(--icon-gap);
-  padding: var(--space-0-5) var(--space-1-5);
   background: transparent;
   border: none;
   color: var(--color-text-primary);
@@ -103,7 +98,6 @@
 
 /* Main tabs get slightly more padding */
 :is(.portal-tabs button, .portal-tab) {
-  padding: var(--space-1) var(--space-2);
   margin-bottom: 0;
 }
 
@@ -256,7 +250,6 @@
   justify-content: center;
   min-width: var(--inline-pill-height);
   height: var(--inline-pill-height);
-  padding: 0 var(--space-0-5);
   background: var(--color-bg-elevated);
   color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
@@ -274,7 +267,6 @@
   justify-content: center;
   min-width: var(--icon-size-md);
   height: var(--icon-size-md);
-  padding: 0 var(--space-0-25);
   background: var(--color-bg-elevated);
   color: var(--color-text-secondary);
   font-size: var(--font-size-2xs);
@@ -319,12 +311,10 @@
   }
 
   :is(.portal-tabs button, .portal-tab) {
-    padding: var(--space-1) var(--space-1-5);
     font-size: var(--font-size-sm);
   }
 
   .portal-tab-panel {
-    padding: var(--space-2) 0;
   }
 
   .portal-tab-panel.is-active,
@@ -336,7 +326,6 @@
 
 @media (--compact-mobile) {
   :is(.portal-tabs button, .portal-tab) {
-    padding: var(--space-0-5) var(--space-1);
     font-size: var(--font-size-sm);
   }
 }
@@ -349,7 +338,6 @@
     .view-toggle button,
     .view-toggle-option
   ) {
-    padding: var(--space-0-5) var(--space-1);
     font-size: var(--font-size-xs);
   }
 
@@ -359,7 +347,6 @@
   }
 
   .portal-tab-panel {
-    padding: var(--space-1-5) 0;
   }
 
   .portal-tab-panel.is-active {

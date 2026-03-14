@@ -81,7 +81,6 @@
   ) {
   width: 100%;
   height: var(--space-7);
-  padding: 0 var(--space-3);
   border: var(--portal-input-border);
   font-size: inherit;
   font-family: inherit;
@@ -97,13 +96,11 @@
 /* Input with left icon - text must not overlap */
 .portal :is(.search-bar:has(.search-bar-icon), .field-with-left-icon) input,
 .modal-overlay :is(.search-bar:has(.search-bar-icon), .field-with-left-icon) input {
-  padding: var(--space-1) var(--space-2) var(--space-1) var(--input-icon-offset);
 }
 
 /* Universal: Any container with positioned icon + input - ensure proper left padding */
 .portal [class*="search-container"] input,
 .portal [class*="search-container"] .input {
-  padding-left: var(--input-icon-offset);
 }
 
 /* Textarea - different height/padding */
@@ -111,7 +108,6 @@
 .modal-overlay :is(textarea, .form-textarea, textarea.form-input) {
   height: auto;
   min-height: calc(var(--space-6) * 2);
-  padding: var(--space-1-5) var(--space-2);
   line-height: var(--line-height-snug);
   resize: vertical;
 }
@@ -187,8 +183,6 @@
 }
 .form-field.label-inside :is(input, select, textarea) {
   height: calc(var(--space-6) + var(--space-1-5));
-  padding: var(--space-3) var(--space-2) var(--space-1)
-    var(--space-2);
   line-height: normal;
 }
 .form-field.label-inside textarea {
@@ -202,7 +196,6 @@
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  padding-right: var(--space-5);
   background-image: var(--select-caret);
   background-repeat: no-repeat;
   background-position: right var(--space-1-5) center;
@@ -261,19 +254,16 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   .portal :is(.form-input, .form-textarea, .form-select, input, textarea, select),
   .modal-overlay :is(.form-input, .form-textarea, .form-select, input, textarea, select) {
     height: calc(var(--space-5) + var(--space-0-5));
-    padding: 0 var(--space-1-5);
     font-size: var(--font-size-sm);
     line-height: calc(var(--space-5) + var(--space-0-5));
   }
   .portal :is(.search-bar:has(.search-bar-icon), .field-with-left-icon) input,
   .modal-overlay :is(.search-bar:has(.search-bar-icon), .field-with-left-icon) input {
-    padding-left: var(--input-icon-offset);
   }
   .portal :is(textarea, .form-textarea),
   .modal-overlay :is(textarea, .form-textarea) {
     height: auto;
     min-height: var(--space-10);
-    padding: var(--space-1) var(--space-1-5);
     line-height: var(--line-height-normal);
   }
 }
@@ -286,7 +276,6 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   width: 100%;
 }
 .password-input-wrapper input {
-  padding-right: var(--space-6); /* leave room for the toggle button */
 }
 .password-toggle,
 .portal-password-toggle {
@@ -297,7 +286,6 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   background: none;
   border: none;
   cursor: pointer;
-  padding: var(--space-0-5);
   color: var(--color-text-secondary);
   display: flex;
   align-items: center;
@@ -366,7 +354,6 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
 .search-bar input.search-bar-input,
 input.search-bar-input {
   width: 100%;
-  padding: var(--space-2) var(--space-2) var(--space-2) var(--input-icon-offset);
   height: var(--portal-btn-icon-size);
   min-height: var(--portal-btn-icon-size);
   background-color: inherit;
@@ -434,7 +421,6 @@ input.search-bar-input {
 /* Text input */
 .input {
   width: 100%;
-  padding: var(--space-1) var(--space-1-5) var(--space-1) var(--space-2);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   font-family: var(--font-family-mono);
@@ -466,7 +452,6 @@ input.search-bar-input {
 
 /* Select dropdown */
 .select {
-  padding: var(--space-1) var(--space-5) var(--space-1) var(--space-2);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   font-family: var(--font-family-mono);
@@ -507,9 +492,7 @@ input.search-bar-input {
   position: relative;
   width: 100%;
   /* Symmetric horizontal padding — caret right = content left */
-  padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
   /* Extra right padding for absolutely positioned caret */
-  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   font-family: var(--font-family-mono);
@@ -565,7 +548,6 @@ input.search-bar-input {
 /* Textarea — same token and focus as other portal inputs */
 .textarea {
   width: 100%;
-  padding: var(--space-1) var(--space-1-5) var(--space-1) var(--space-2);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   font-family: var(--font-family-mono);
@@ -711,13 +693,11 @@ input.search-bar-input {
 }
 
 .qform-question-input {
-  padding-left: var(--space-2-5);
 }
 
 /* Action buttons row */
 .qform-actions {
   gap: var(--space-1-5);
-  padding-top: var(--space-1);
 }
 
 .qform-btn-with-icon {
@@ -729,7 +709,6 @@ input.search-bar-input {
 /* Read-only notice */
 .qform-readonly-notice {
   text-align: center;
-  padding: var(--space-1-5) 0;
   font-size: var(--font-size-2xs);
 }
 
@@ -742,7 +721,6 @@ input.search-bar-input {
 
 .qform-multiselect-btn {
   font-size: var(--font-size-2xs);
-  padding: var(--space-0-5) var(--space-1-5);
 }
 
 /* File upload dropzone */
@@ -778,7 +756,6 @@ input.search-bar-input {
   align-items: center;
   justify-content: center;
   gap: var(--space-1);
-  padding: var(--space-3);
   border: var(--border-width) dashed var(--color-border-primary);
   cursor: pointer;
 }
@@ -850,11 +827,9 @@ input.search-bar-input {
 
 /* Input with icon padding adjustments */
 .form-field-input--icon-left {
-  padding-left: var(--input-icon-offset);
 }
 
 .form-field-input--icon-right {
-  padding-right: var(--input-icon-offset);
 }
 
 /* Textarea no-resize modifier */
@@ -896,7 +871,6 @@ input.search-bar-input {
   font-size: var(--font-size-sm);
   color: var(--color-text-tertiary);
   margin-top: var(--space-0-5);
-  padding-left: calc(var(--space-2) + var(--space-1-5));
 }
 
 /* Radio group */
@@ -1005,7 +979,6 @@ input.search-bar-input {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-1-5);
   border: var(--portal-border);
 }
 .file-upload-item.has-error {
@@ -1058,7 +1031,6 @@ input.search-bar-input {
 }
 
 .file-upload-remove-btn {
-  padding: var(--space-0-5);
   background: transparent;
   border: none;
   color: var(--color-text-tertiary);

@@ -49,7 +49,6 @@
 /* Input field styling */
 [data-page="admin"] .inline-edit-input {
   width: 100%;
-  padding: var(--space-0-5) var(--space-1);
   border: var(--border-width) solid var(--color-accent);
   border-radius: var(--border-radius-sm);
   background: var(--color-bg-secondary);
@@ -112,7 +111,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-px);
   border: none;
   border-radius: var(--border-radius-sm);
   background: transparent;
@@ -148,7 +146,6 @@
   gap: var(--icon-gap-xs);
   cursor: pointer;
   min-height: var(--space-3);
-  padding: 0 var(--space-0-5);
   margin: 0 calc(-1 * var(--space-0-5));
   border-radius: var(--border-radius-sm);
   transition: background-color var(--transition-faster) ease;
@@ -194,7 +191,6 @@
   height: var(--space-3);
   min-width: 80px;
   width: 100%;
-  padding: 0 var(--inline-edit-compact-padding-x);
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
   border: var(--border-width) solid var(--color-brand-primary);
@@ -226,7 +222,6 @@
 
 /* Date input — left padding makes room for the Calendar icon */
 .portal .inline-edit-input-compact--date {
-  padding-left: var(--space-3);
   min-width: var(--inline-edit-date-min-width);
   color-scheme: dark;
 }
@@ -257,7 +252,6 @@
 .portal .inline-edit-textarea {
   height: auto;
   min-height: var(--min-height-textarea);
-  padding: var(--space-1) var(--space-2);
   resize: vertical;
   font-family: inherit;
   line-height: var(--line-height-normal);
@@ -300,7 +294,6 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: var(--table-cell-padding-y) 0;
   border-bottom: var(--portal-border);
   gap: var(--space-4);
 }
@@ -346,7 +339,6 @@
   color: var(--color-text-primary);
   font-size: var(--font-size-base);
   min-height: var(--icon-size-xl);
-  padding: var(--space-0-5) var(--space-1);
   margin: calc(-1 * var(--space-0-5)) calc(-1 * var(--space-1));
 }
 
@@ -394,7 +386,6 @@
 
 .portal .inline-edit-row .inline-edit-input {
   width: 100%;
-  padding: var(--space-1) var(--space-2);
   border: var(--border-width) solid var(--color-accent);
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
@@ -424,7 +415,6 @@
 /* Select in edit mode */
 .portal .inline-edit-row .inline-edit-select {
   width: 100%;
-  padding: var(--space-1) var(--space-2);
   border: var(--border-width) solid var(--color-accent);
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
@@ -448,7 +438,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-0-5);
   border: none;
   background: transparent;
   cursor: pointer;

@@ -22,7 +22,6 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 15vh;
   background: var(--portal-alpha-black-50);
   backdrop-filter: blur(var(--blur-backdrop));
 }
@@ -51,7 +50,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
 }
 
 .command-palette-search-icon {
@@ -93,7 +91,6 @@
   background: var(--color-bg-secondary);
   border: var(--border-width) solid var(--color-text-primary);
   border-radius: var(--border-radius-sm);
-  padding: calc(var(--space-px) * 2) calc(var(--space-px) * 6);
   line-height: 1.4;
 }
 
@@ -113,13 +110,11 @@
 .command-palette-list {
   list-style: none;
   margin: 0;
-  padding: var(--space-1);
   overflow-y: auto;
   max-height: 50vh;
 }
 
 .command-palette-empty {
-  padding: var(--space-6) var(--space-4);
   text-align: center;
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
@@ -133,7 +128,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
   border-radius: var(--border-radius-md);
   cursor: pointer;
   color: var(--color-text-primary);
@@ -181,7 +175,6 @@
   background: var(--color-bg-secondary);
   border: var(--border-width) solid var(--color-text-primary);
   border-radius: var(--border-radius-sm);
-  padding: var(--space-px) calc(var(--space-px) * 5);
   min-width: var(--cmd-palette-item-icon-size);
   text-align: center;
   line-height: 1.4;
@@ -193,7 +186,6 @@
 
 /* Typography from shared/portal-cards.css — .portal .command-palette-section-label */
 .command-palette-section-label {
-  padding: var(--space-1) var(--space-3);
   list-style: none;
 }
 
@@ -204,7 +196,6 @@
 .command-palette-footer {
   display: flex;
   gap: var(--space-4);
-  padding: var(--space-2) var(--space-4);
   border-top: var(--border-width) solid var(--color-text-primary);
   background: var(--color-bg-secondary);
 }
@@ -224,7 +215,6 @@
   background: var(--color-bg-secondary);
   border: var(--border-width) solid var(--color-text-primary);
   border-radius: var(--border-radius-sm);
-  padding: 0 var(--space-0-5);
   min-width: var(--cmd-palette-item-icon-size);
   text-align: center;
   line-height: 1.6;
@@ -236,7 +226,6 @@
 
 @media (--mobile) {
   .command-palette-overlay {
-    padding-top: 5vh;
   }
 
   .command-palette {

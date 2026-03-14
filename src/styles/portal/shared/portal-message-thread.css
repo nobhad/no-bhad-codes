@@ -89,7 +89,6 @@
 .msgtab-panel {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-4);
   border-radius: 0;
 }
 
@@ -160,7 +159,6 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   white-space: nowrap;
-  padding: 0 var(--space-1);
 }
 
 /* Avatar column: avatar icon + optional sender name stacked vertically */
@@ -168,6 +166,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-end;
   gap: var(--space-0-5);
   flex-shrink: 0;
   width: var(--icon-size-2xl);
@@ -196,11 +195,9 @@
   align-items: flex-end;
 }
 
-/* Sender name below avatar (client messages, last in group) */
+/* Sender name below avatar — hidden */
 .msgtab-sender {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  text-align: center;
+  display: none;
   max-width: var(--icon-size-2xl);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -255,7 +252,6 @@
 
 /* Message bubble — border and color shared by both admin and client */
 .msgtab-bubble {
-  padding: var(--space-2) var(--space-4);
   border: var(--portal-border);
   border-radius: 0;
 }
@@ -295,7 +291,6 @@
   gap: var(--space-1);
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-  padding: 0 var(--space-1);
 }
 
 .msgtab-footer.is-admin {
@@ -321,7 +316,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-2);
 }
 
 /* Message textarea full width */
@@ -341,7 +335,6 @@ kbd.msgtab-kbd {
   font-weight: var(--font-weight-normal);
   text-transform: none;
   letter-spacing: 0;
-  padding: 1px var(--space-1);
   border-color: var(--color-border-primary);
 }
 
@@ -366,7 +359,6 @@ kbd.msgtab-kbd {
   text-decoration: none;
   color: inherit;
   border: var(--portal-border);
-  padding: var(--space-1) var(--space-2);
   transition: background var(--transition-faster);
 }
 
@@ -405,14 +397,12 @@ kbd.msgtab-kbd {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1);
-  padding: 0 0 var(--space-1);
 }
 
 .msgtab-pending-file {
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  padding: var(--space-0-5) var(--space-1);
   border: var(--portal-border);
   font-size: var(--font-size-xs);
   max-width: 200px;
@@ -427,7 +417,6 @@ kbd.msgtab-kbd {
 
 /* Typing indicator — shown above thread in client portal when admin is typing */
 .msgtab-typing-indicator {
-  padding: var(--space-1) var(--space-2);
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
 }

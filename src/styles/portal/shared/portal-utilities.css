@@ -186,7 +186,6 @@ svg.lucide {
 
 /* Universal list item styling for portal lists */
 .portal :is(.activity-list, .notes-list, .files-list, .tasks-list) > li {
-  padding: var(--space-2) var(--space-3);
   background: transparent;
   color: var(--color-text-primary);
   margin-bottom: var(--space-0-5);
@@ -219,7 +218,6 @@ svg.lucide {
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
-  padding: var(--space-1) var(--space-3);
   background: var(--color-bg-raised);
   cursor: pointer;
   transition: background-color var(--transition-fast);
@@ -234,7 +232,6 @@ svg.lucide {
   display: flex;
   align-items: center;
   gap: var(--icon-gap);
-  padding: var(--space-1-5) var(--space-2);
   background: var(--color-bg-raised);
   cursor: pointer;
   transition: background-color var(--transition-fast);

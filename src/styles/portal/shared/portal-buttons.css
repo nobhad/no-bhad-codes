@@ -90,7 +90,6 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 
 /* Small button */
 .btn-sm {
-  padding: var(--portal-btn-sm-padding-y) var(--portal-btn-sm-padding-x);
   font-size: var(--portal-btn-sm-font-size);
   min-height: var(--portal-btn-sm-min-height);
 }
@@ -137,7 +136,6 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 /* Large button - for prominent CTAs */
 .btn-lg {
   height: var(--space-7);
-  padding: 0 var(--space-3);
   font-size: var(--portal-btn-font-size);
   line-height: var(--space-7);
 }
@@ -167,7 +165,6 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
  * ============================================ */
 .btn-auth {
   width: 100%;
-  padding: var(--space-1-5) var(--space-3);
   border: var(--portal-btn-border-width) solid currentColor;
   border-bottom-width: var(--portal-btn-border-bottom-width);
   border-radius: 0;
@@ -210,7 +207,6 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   gap: var(--icon-gap-md);
   width: 100%;
   min-height: var(--space-5); /* 40px — matches collapsed icon-only height */
-  padding: var(--space-1) var(--space-3) var(--space-1) var(--sidebar-icon-indent);
   font-family: var(--font-family-mono);
   font-size: var(--portal-nav-font-size);
   font-weight: var(--font-weight-medium);
@@ -569,7 +565,6 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
  * ============================================ */
 .toggle-btn {
   flex: 1;
-  padding: var(--space-1-5) var(--space-2-5);
   background: transparent;
   border: none;
   font-family: var(--portal-btn-font-family);
@@ -606,7 +601,6 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   align-items: center;
   justify-content: center;
   gap: var(--space-1);
-  padding: var(--space-1) var(--space-2);
   font-size: var(--portal-btn-font-size);
   font-weight: var(--font-weight-regular);
   font-family: var(--font-family-mono, monospace);

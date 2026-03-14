@@ -93,7 +93,6 @@
 
 .analytics-name-input {
   width: 200px;
-  padding: var(--space-1) var(--space-2);
   font-size: var(--font-size-xs);
 }
 
@@ -136,7 +135,6 @@
 }
 
 .analytics-view-toggle {
-  padding: var(--space-1) var(--space-2);
 }
 
 /* Table overflow container */

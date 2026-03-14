@@ -70,7 +70,6 @@
   right: var(--notification-badge-offset);
   min-width: var(--notification-badge-size);
   height: var(--notification-badge-size);
-  padding: 0 var(--space-0-5);
   font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-semibold);
   line-height: var(--notification-badge-size);
@@ -107,7 +106,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-3) var(--space-4);
   border-bottom: var(--portal-border);
 }
 
@@ -147,7 +145,6 @@
 }
 
 .notification-empty {
-  padding: var(--space-8) var(--space-4);
   text-align: center;
   color: var(--color-text-tertiary);
   font-size: var(--font-size-sm);
@@ -162,7 +159,6 @@
   align-items: flex-start;
   gap: var(--space-2);
   width: 100%;
-  padding: var(--space-3) var(--space-4);
   border: none;
   border-bottom: var(--portal-border);
   background: transparent;

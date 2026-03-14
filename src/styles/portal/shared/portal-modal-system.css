@@ -55,7 +55,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-4);
   background: var(--color-overlay-light);
   -webkit-backdrop-filter: blur(var(--blur-modal));
   backdrop-filter: blur(var(--blur-modal));
@@ -69,12 +68,14 @@
    PORTAL MODAL CONTAINER
    ============================================== */
 
+/* Modal container — margin provides viewport edge spacing (was overlay padding) */
 .portal-modal {
   background: var(--color-bg-secondary);
   box-shadow: var(--shadow-modal);
   width: 100%;
   max-width: var(--modal-width-md);
   max-height: var(--modal-max-height);
+  margin: var(--space-4);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -105,7 +106,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-5) var(--space-5) var(--space-4);
   flex-shrink: 0;
 }
 
@@ -165,7 +165,6 @@
   color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wider);
-  padding: 0 0 var(--space-2) 0;
   margin-bottom: var(--space-3);
   border-bottom: var(--portal-border);
   width: 100%;
@@ -175,8 +174,8 @@
    PORTAL MODAL BODY & FOOTER
    ============================================== */
 
+/* Modal body — IS a content child of .portal-modal, gets its own padding */
 .portal-modal-body {
-  padding: var(--space-4) var(--space-5);
   overflow-y: auto;
   flex: 1;
   min-height: 300px;
@@ -199,11 +198,11 @@
   flex: 1;
 }
 
+/* Modal footer — IS a content child of .portal-modal, gets its own padding */
 .portal-modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-2);
-  padding: var(--space-4) var(--space-5) var(--space-5);
   flex-shrink: 0;
   background: var(--color-bg-secondary);
   position: relative;
@@ -272,12 +271,9 @@
 }
 
 .portal-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger {
-  padding: var(--space-2) var(--space-3);
-  padding-right: var(--space-1-5);
 }
 
 .portal-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-item {
-  padding: var(--space-2) var(--space-3);
   text-align: left;
   justify-content: flex-start;
 }
@@ -301,17 +297,14 @@
   }
 
   .portal-modal-body {
-    padding: var(--space-3);
     min-height: 0;
     flex: 1;
   }
 
   .portal-modal-header {
-    padding: var(--space-3);
   }
 
   .portal-modal-footer {
-    padding: var(--space-3);
   }
 }
 
