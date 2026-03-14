@@ -96,15 +96,12 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-3);
   border: var(--portal-border);
   margin-bottom: var(--space-3);
 }
 
 /* Milestone expanded detail area — inside wrapper border */
 .milestone-expanded-content {
-  padding: var(--space-2);
-  padding-left: calc(var(--icon-size-lg) + var(--space-1-5) + var(--space-2));
 }
 
 /* Quick stats 2-col grid inside sidebar panel */
@@ -116,7 +113,6 @@
 
 /* Progress field: label row + track */
 .progress-field {
-  padding: var(--space-2) 0;
 }
 
 .progress-field-header {
@@ -233,7 +229,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Readonly form value display */
 [data-page="admin"] .form-value-readonly {
-  padding: var(--space-1-5) 0;
   margin-top: var(--space-1-5);
   font-weight: var(--font-weight-semibold);
 }
@@ -243,7 +238,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Custom status dropdown for settings form */
 [data-page="admin"] #pd-setting-status {
   width: 100%;
-  padding: 1.75rem var(--space-3) var(--space-1) var(--space-3);
   border: none;
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -311,7 +305,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Settings form inputs — padding override only, font from portal-forms.css */
 #pd-tab-settings input,
 #pd-tab-settings .form-input {
-  padding: var(--space-2) var(--space-4);
   min-height: auto;
 }
 
@@ -328,8 +321,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Project status dropdown - match input field styling */
 #pd-status-dropdown .custom-dropdown-trigger {
-  padding: var(--space-1) var(--space-1-5);
-  padding-left: var(--space-2);
   min-height: auto;
 }
 
@@ -350,7 +341,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 #pd-status-dropdown .custom-dropdown-option {
   display: block;
   width: 100%;
-  padding: var(--space-1) var(--space-1-5);
   background: transparent;
   border: none;
   text-align: left;
@@ -380,7 +370,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
-  padding: var(--space-2) var(--space-3);
   background: transparent;
   cursor: pointer;
   transition: background-color var(--transition-fast);
@@ -477,7 +466,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Project Notes - standalone */
 .project-notes {
   background: var(--color-bg-raised);
-  padding: var(--space-2);
   border: var(--portal-border);
   min-height: 100px;
   white-space: pre-wrap;
@@ -500,7 +488,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 .project-notes .feature-tag {
   background: var(--color-bg-raised);
-  padding: var(--space-0-5) var(--space-1-5);
   display: inline-block;
   text-transform: capitalize;
 }
@@ -510,7 +497,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
-  padding: var(--space-1-5);
   background: transparent;
   border: var(--portal-border);
   margin-bottom: var(--space-1);
@@ -578,7 +564,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 .milestone-deliverables {
   margin: var(--space-2) 0;
-  padding-left: var(--space-4);
 }
 
 .milestone-deliverables li {
@@ -639,8 +624,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   justify-content: space-between;
   width: 100%;
   box-sizing: border-box;
-  padding: var(--space-2) var(--space-3);
-  padding-right: var(--space-1-5);
   border: var(--border-width-heavy) solid var(--color-border-primary);
   background-color: var(--color-bg-primary);
   cursor: pointer;
@@ -728,7 +711,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
   cursor: pointer;
   transition: background-color var(--transition-faster);
 }
@@ -857,7 +839,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* --- Table cells --- */
 
 .pd-table-cell {
-  padding: var(--space-3) var(--space-4);
 }
 
 .pd-cell-left {
@@ -995,8 +976,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 .files-category-trigger {
   height: var(--space-4);
   position: relative;
-  padding: var(--space-1) var(--dropdown-padding-x);
-  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
   background: transparent;
   border: var(--portal-border);
   color: var(--color-text-primary);
@@ -1020,7 +999,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Progress header block — wraps stats row + progress bar with border */
 .tasks-progress-block {
   border: var(--portal-border);
-  padding: var(--space-2) var(--space-3) var(--space-2);
 }
 
 /* Milestone order indicator */
@@ -1034,8 +1012,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
    to account for drag handle + checkbox indent.
    Right padding matches milestone-item right padding (var(--space-3)) for alignment. */
 .milestone-expanded-content.tasks-expanded-content {
-  padding: var(--space-3) var(--space-3) var(--space-4);
-  padding-left: calc(var(--icon-size-md) + var(--space-2-5) + var(--space-1-5) * 3);
 }
 
 /* Tasks deliverable list */
@@ -1208,7 +1184,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   min-width: var(--status-dropdown-width);
   max-width: var(--status-dropdown-width);
   height: var(--space-5);
-  padding: 0 var(--space-2);
   font-size: var(--font-size-xs);
   line-height: var(--space-5);
   display: inline-flex;

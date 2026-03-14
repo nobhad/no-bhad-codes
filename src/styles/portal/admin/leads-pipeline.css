@@ -20,12 +20,10 @@
   gap: var(--space-0-5);
   border-bottom: var(--portal-border);
   margin-bottom: var(--space-1-5);
-  padding-bottom: var(--space-0-5);
 }
 
 .lead-tab {
   position: relative;
-  padding: var(--space-0-5) var(--space-1-5);
   background: transparent;
   border: none;
   color: var(--color-text-secondary);
@@ -124,7 +122,6 @@
 
 .lead-task-item {
   gap: var(--icon-gap);
-  padding: var(--space-1);
   margin-bottom: var(--space-1);
   border: var(--portal-border);
 }
@@ -143,7 +140,6 @@
    ============================================ */
 
 .lead-note-item {
-  padding: var(--space-1-5);
   margin-bottom: var(--space-1);
   border: var(--portal-border);
 }
@@ -159,13 +155,11 @@
 @media (--mobile) {
   .lead-details-tabs {
     overflow-x: auto;
-    padding-bottom: var(--space-1);
   }
 
   .lead-tab {
     white-space: nowrap;
     font-size: var(--font-size-sm);
-    padding: var(--space-0-5) var(--space-1);
   }
 }
 

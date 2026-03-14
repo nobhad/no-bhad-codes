@@ -31,7 +31,6 @@
   color: var(--color-text-primary);
   letter-spacing: var(--letter-spacing-normal);
   line-height: var(--portal-header-height-line);
-  padding-top: var(--space-3);
   margin-bottom: var(--space-2);
 }
 
@@ -169,20 +168,18 @@
   font-size: var(--font-size-xs);
 }
 
+/* Panel body IS a content child — it gets its own padding (not the panel wrapper) */
 .overview-panel-body {
-  padding: var(--portal-card-padding);
 }
 
 /* Activity feeds handle their own padding per item (8px top/bottom, 24px sides).
    Zero out the body padding entirely — items provide the spacing.
    Small bottom padding so the last item isn't flush with the panel border. */
 .overview-panel-body:has(.activity-feed) {
-  padding: 0 0 var(--space-1) 0;
 }
 
-/* Quick actions grid uses same padding token */
+/* Quick actions grid — content child gets its own padding */
 .overview-panel-body.ovdash-quick-actions {
-  padding: var(--portal-card-padding);
 }
 
 .overview-panel-body--compact {
@@ -280,7 +277,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-1) var(--space-3);
   border-bottom: none;
   transition: background var(--transition-faster);
   cursor: default;
@@ -363,14 +359,12 @@
   gap: var(--space-2);
 }
 
-/* Overview mini-kanban: add internal padding so content clears the border-left */
+/* Overview mini-kanban: NO padding on column wrapper — children handle their own */
 .kanban-grid .kanban-column {
-  padding: var(--space-2) var(--space-2) var(--space-1);
 }
 
 .kanban-column h4 {
   margin: 0 0 var(--space-2) 0;
-  padding-bottom: var(--space-1-5);
   text-align: left;
 }
 
@@ -384,7 +378,6 @@
 }
 
 .kanban-grid .kanban-card {
-  padding: var(--space-1);
   border: var(--border-width) solid var(--color-border-secondary);
 }
 
@@ -397,7 +390,6 @@
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
   text-align: center;
-  padding: var(--space-3) 0;
   min-height: var(--space-12);
 }
 
@@ -406,7 +398,6 @@
 /* Project health error state */
 .health-error {
   width: 100%;
-  padding: var(--space-6);
   text-align: center;
   color: var(--color-text-tertiary);
   font-size: var(--font-size-xs);
@@ -428,7 +419,6 @@
 
 @media (--compact-mobile) {
   .overview-linear {
-    padding-bottom: var(--space-6);
     gap: var(--portal-section-gap);
   }
 
@@ -444,7 +434,6 @@
 /* Error state panel */
 .ovdash-error-panel {
   text-align: center;
-  padding: var(--space-6);
 }
 
 /* Error message spacing */

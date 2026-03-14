@@ -180,7 +180,6 @@ body[data-page="admin"]:not(.admin-logged-in) .admin-footer {
   right: 0;
   height: var(--footer-height);
   background: var(--color-neutral-300);
-  padding: var(--space-2) 0;
   font-size: var(--font-size-sm);
   color: var(--color-nav-text);
   text-align: center;
@@ -263,7 +262,6 @@ body[data-page="admin"] #tab-analytics .quick-stats {
 }
 
 body[data-page="admin"] #tab-analytics .stat-card {
-  padding: var(--space-2) var(--space-2-5);
   min-width: 0;
 }
 
@@ -330,18 +328,18 @@ body[data-page="admin"] #tab-analytics .stat-card {
 /* ================================================
    OVERVIEW TAB - Card styling
    ================================================ */
+/* Stats grid — NO padding on wrapper, children handle their own */
 [data-page="admin"] #tab-overview .dashboard-stats-grid {
   background: var(--color-bg-secondary);
   border: none;
   border-radius: var(--border-radius-sm);
-  padding: var(--portal-card-padding);
 }
 
+/* Stat/attention cards — content children, keep their own padding */
 [data-page="admin"] #tab-overview .attention-card,
 [data-page="admin"] #tab-overview .stat-card {
   background: var(--color-bg-tertiary);
   border-radius: var(--border-radius-sm);
-  padding: var(--portal-card-padding);
   min-height: var(--panel-min-height-sm);
 }
 
@@ -375,7 +373,6 @@ body[data-page="admin"] #tab-analytics .stat-card {
   cursor: pointer;
   filter: invert(1);
   opacity: var(--opacity-subtle);
-  padding: var(--space-1);
   border-radius: var(--border-radius-xs);
   transition:
     opacity var(--duration-faster) ease,
@@ -449,7 +446,6 @@ body.modal-open .dashboard-content {
   background: var(--color-bg-primary);
   border: var(--portal-border);
   border-radius: var(--border-radius-card);
-  padding: var(--space-6);
   box-shadow: var(--shadow-card-rest);
   transition: var(--animation-card-hover);
 }
@@ -531,7 +527,6 @@ body.modal-open .dashboard-content {
 
 [data-page="admin"] .admin-filter-select {
   min-width: 10rem;
-  padding: var(--space-2) var(--space-3);
   border: var(--portal-border);
   border-radius: var(--border-radius-sm);
   background: var(--color-bg-secondary);
@@ -562,7 +557,6 @@ body.modal-open .dashboard-content {
 }
 
 .set-password-form .form-input {
-  padding: var(--space-3);
   border: var(--portal-border);
   border-radius: var(--border-radius-sm);
   background: var(--color-bg-secondary);
@@ -577,7 +571,6 @@ body.modal-open .dashboard-content {
 .set-password-form .form-error {
   background: rgba(var(--color-error-rgb), 0.1);
   color: var(--color-danger);
-  padding: var(--space-3);
   border-radius: var(--border-radius-sm);
   font-size: var(--font-size-sm);
   margin-bottom: var(--space-4);
@@ -590,7 +583,6 @@ body.modal-open .dashboard-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-1-5) var(--space-2);
   background: var(--color-bg-raised);
   border-radius: var(--border-radius-md);
   border: none;
@@ -676,7 +668,6 @@ body.modal-open .dashboard-content {
   body[data-page="admin"] .stat-card,
   body[data-page="admin"] .portal-project-card,
   body[data-page="admin"] .chart-container {
-    padding: var(--space-1);
     /* gap on .dashboard-content is the SoT for vertical spacing */
   }
 
@@ -696,13 +687,11 @@ body.modal-open .dashboard-content {
   [data-page="admin"] .overview-card,
   [data-page="admin"] .recent-activity,
   [data-page="admin"] .upcoming-tasks {
-    padding: var(--space-1-5);
     width: 100%;
   }
 
   [data-page="admin"] #tab-system .status-item {
     background: transparent;
-    padding: var(--space-1) 0;
     border: none;
     border-radius: 0;
     box-shadow: none;
@@ -722,7 +711,6 @@ body.modal-open .dashboard-content {
     width: fit-content;
     font-size: var(--font-size-2xs, 0.625rem);
     font-weight: var(--font-weight-bold);
-    padding: var(--space-0-5) var(--space-1);
     white-space: nowrap;
   }
 
@@ -745,16 +733,13 @@ body.modal-open .dashboard-content {
   }
 
   [data-page="admin"] #tab-analytics .chart-container {
-    padding: var(--space-1);
   }
 
   [data-page="admin"] #tab-analytics .analytics-section {
-    padding: var(--space-1);
   }
 
   [data-page="admin"] #tab-analytics .chart {
     height: var(--chart-height-md);
-    padding: var(--space-0-5);
   }
 
   [data-page="admin"] #tab-analytics .chart canvas {
@@ -776,7 +761,6 @@ body.modal-open .dashboard-content {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: var(--space-1-5);
     gap: var(--space-1);
   }
 
@@ -840,7 +824,6 @@ body.modal-open .dashboard-content {
   bottom: calc(100% + var(--space-1));
   left: 50%;
   transform: translateX(-50%);
-  padding: var(--space-1) var(--space-1-5);
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
   font-family: var(--font-family-sans);
@@ -914,7 +897,6 @@ body.modal-open .dashboard-content {
     grid-template-rows: auto auto;
     align-items: center;
     gap: var(--space-0-5) var(--space-1);
-    padding: var(--space-1) var(--space-1-5);
   }
 
   .data-table-header h3 {
@@ -1079,11 +1061,8 @@ body.modal-open .dashboard-content {
   .portal .inline-edit-wrapper input {
     height: var(--inline-edit-compact-height);
     min-height: 0;
-    padding: 0 var(--space-0-5);
   }
 
   .portal .inline-edit-wrapper .inline-edit-input-compact--date {
-    padding-left: var(--space-3);
-    padding-right: var(--space-0-5);
   }
 }
