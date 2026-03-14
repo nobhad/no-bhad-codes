@@ -75,9 +75,8 @@ export function PortalContracts({
   }, [refetch]);
 
   return (
-    <div className="section">
+    <div ref={containerRef} className="section">
       <TableLayout
-        containerRef={containerRef}
         title="CONTRACTS"
         stats={
           <TableStats

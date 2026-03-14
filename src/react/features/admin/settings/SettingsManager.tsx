@@ -48,7 +48,7 @@ export function SettingsManager({ getAuthToken, showNotification, onNavigate }: 
   // Configuration subtab
   if (activeSubtab === 'configuration') {
     return (
-      <div className="subtab-content-wrapper">
+      <div className="section">
         <React.Suspense fallback={<LoadingState message="Loading configuration..." />}>
           <BusinessConfiguration {...sharedProps} />
         </React.Suspense>
@@ -59,7 +59,7 @@ export function SettingsManager({ getAuthToken, showNotification, onNavigate }: 
   // Workflows subtab
   if (activeSubtab === 'workflows') {
     return (
-      <div className="subtab-content-wrapper">
+      <div className="section">
         <React.Suspense fallback={<LoadingState message="Loading workflows..." />}>
           <WorkflowsTable {...sharedProps} />
         </React.Suspense>
@@ -70,7 +70,7 @@ export function SettingsManager({ getAuthToken, showNotification, onNavigate }: 
   // Email Templates subtab
   if (activeSubtab === 'email-templates') {
     return (
-      <div className="subtab-content-wrapper">
+      <div className="section">
         <React.Suspense fallback={<LoadingState message="Loading email templates..." />}>
           <EmailTemplatesManager {...sharedProps} />
         </React.Suspense>
@@ -81,7 +81,7 @@ export function SettingsManager({ getAuthToken, showNotification, onNavigate }: 
   // Audit Log subtab
   if (activeSubtab === 'audit-log') {
     return (
-      <div className="subtab-content-wrapper">
+      <div className="section">
         <React.Suspense fallback={<LoadingState message="Loading audit log..." />}>
           <AuditLogViewer {...sharedProps} />
         </React.Suspense>
@@ -92,7 +92,7 @@ export function SettingsManager({ getAuthToken, showNotification, onNavigate }: 
   // System Health subtab
   if (activeSubtab === 'system-health') {
     return (
-      <div className="subtab-content-wrapper">
+      <div className="section">
         <React.Suspense fallback={<LoadingState message="Loading system status..." />}>
           <SystemStatusDashboard {...sharedProps} />
         </React.Suspense>
@@ -102,7 +102,7 @@ export function SettingsManager({ getAuthToken, showNotification, onNavigate }: 
 
   // Overview - lightweight snapshot cards
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subtab-content-wrapper">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
       <React.Suspense fallback={<LoadingState message="Loading settings overview..." />}>
         <SettingsOverview getAuthToken={getAuthToken} onSubtabNavigate={handleSubtabNavigate} />
       </React.Suspense>

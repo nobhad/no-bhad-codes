@@ -39,7 +39,7 @@ export function DocumentsDashboard({ onNavigate, getAuthToken, showNotification 
   // Render individual views for specific subtabs
   if (activeSubtab === 'invoices') {
     return (
-      <div className="subtab-content-wrapper">
+      <div className="section">
         <React.Suspense fallback={<LoadingState message="Loading invoices..." />}>
           <InvoicesTable
             onNavigate={onNavigate}
@@ -53,7 +53,7 @@ export function DocumentsDashboard({ onNavigate, getAuthToken, showNotification 
 
   if (activeSubtab === 'contracts') {
     return (
-      <div className="subtab-content-wrapper">
+      <div className="section">
         <React.Suspense fallback={<LoadingState message="Loading contracts..." />}>
           <ContractsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
         </React.Suspense>
@@ -63,7 +63,7 @@ export function DocumentsDashboard({ onNavigate, getAuthToken, showNotification 
 
   if (activeSubtab === 'document-requests') {
     return (
-      <div className="subtab-content-wrapper">
+      <div className="section">
         <React.Suspense fallback={<LoadingState message="Loading document requests..." />}>
           <DocumentRequestsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
         </React.Suspense>
@@ -73,7 +73,7 @@ export function DocumentsDashboard({ onNavigate, getAuthToken, showNotification 
 
   if (activeSubtab === 'questionnaires') {
     return (
-      <div className="subtab-content-wrapper">
+      <div className="section">
         <React.Suspense fallback={<LoadingState message="Loading questionnaires..." />}>
           <QuestionnairesTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
         </React.Suspense>
@@ -83,7 +83,7 @@ export function DocumentsDashboard({ onNavigate, getAuthToken, showNotification 
 
   // Overview - show all tables stacked with default pagination of 10
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subtab-content-wrapper">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
       <React.Suspense fallback={<LoadingState message="Loading invoices..." />}>
         <section className="overview-table-section">
           <InvoicesTable

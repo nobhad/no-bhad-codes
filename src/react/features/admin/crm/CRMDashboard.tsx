@@ -40,7 +40,7 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
   // Render individual views for specific subtabs
   if (activeSubtab === 'leads') {
     return (
-      <div className="subtab-content-wrapper">
+      <div className="section">
         <React.Suspense fallback={<LoadingState message="Loading leads..." />}>
           <LeadsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
         </React.Suspense>
@@ -50,7 +50,7 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
 
   if (activeSubtab === 'contacts') {
     return (
-      <div className="subtab-content-wrapper">
+      <div className="section">
         <React.Suspense fallback={<LoadingState message="Loading contacts..." />}>
           <ContactsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
         </React.Suspense>
@@ -60,7 +60,7 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
 
   if (activeSubtab === 'messages') {
     return (
-      <div className="subtab-content-wrapper">
+      <div className="section">
         <React.Suspense fallback={<LoadingState message="Loading messages..." />}>
           <MessageView onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
         </React.Suspense>
@@ -70,7 +70,7 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
 
   if (activeSubtab === 'clients') {
     return (
-      <div className="subtab-content-wrapper">
+      <div className="section">
         <React.Suspense fallback={<LoadingState message="Loading clients..." />}>
           <ClientsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
         </React.Suspense>
@@ -80,7 +80,7 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
 
   // Overview - show all tables stacked with default pagination of 10
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subtab-content-wrapper">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
       <React.Suspense fallback={<LoadingState message="Loading leads..." />}>
         <section className="overview-table-section">
           <LeadsTable

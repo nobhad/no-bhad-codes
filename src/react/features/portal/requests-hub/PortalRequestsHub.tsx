@@ -8,6 +8,7 @@ import * as React from 'react';
 import { Suspense } from 'react';
 import { useTabs, TabList, TabPanel } from '@react/factories/createTabs';
 import { LoadingState } from '@react/components/portal/EmptyState';
+import { useFadeIn } from '@react/hooks/useGsap';
 import type { PortalViewProps } from '../types';
 
 // Lazy load sub-views
@@ -32,12 +33,13 @@ const TABS = [
 ];
 
 export function PortalRequestsHub(_props: PortalRequestsHubProps) {
+  const containerRef = useFadeIn<HTMLDivElement>();
   const { activeTab, setActiveTab, isActive } = useTabs<RequestTab>({
     initialTab: 'questionnaires'
   });
 
   return (
-    <div className="portal-requests-hub">
+    <div ref={containerRef} className="section">
       <TabList<RequestTab>
         tabs={TABS}
         activeTab={activeTab}
