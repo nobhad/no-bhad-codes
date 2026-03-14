@@ -580,25 +580,14 @@ html[data-theme="light"]:has(body[data-page="client-portal"]) {
   justify-content: space-between;
   flex-wrap: nowrap;
   gap: var(--space-2);
-  padding: var(--space-2);
   white-space: nowrap;
 }
 
-/* Action buttons column — icon-gap padding left and right */
-.portal .data-table :is(td, th).col-actions {
-  padding-inline: var(--icon-gap);
-}
+/* Action buttons column — padding removed, controlled by root */
 
-/* Table header + pagination right padding aligns with action column */
-.portal .data-table-header,
-.portal .table-pagination {
-  padding-right: var(--icon-gap);
-}
+/* padding-right removed — controlled by root --content-gutter */
 
-/* Checkbox column — left padding aligns with table header title */
-.portal .data-table :is(td, th).col-checkbox {
-  padding-left: var(--space-2);
-}
+/* Checkbox column — padding removed, controlled by root */
 
 .portal :is(.overview-panel-title, .snapshot-card-title) {
   display: inline-flex;

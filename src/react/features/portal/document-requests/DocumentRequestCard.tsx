@@ -267,7 +267,7 @@ export function DocumentRequestCard({
 
       {/* Uploaded File Info (for submitted/approved) */}
       {(isSubmitted || isApproved) && request.uploaded_file && (
-        <div className="panel flex items-center gap-2 p-2 mb-2">
+        <div className="panel flex items-center gap-2 mb-2">
           <FileText className="icon-xs" />
           <span className="text-primary flex-1 text-sm">
             {request.uploaded_file.filename}
@@ -282,7 +282,7 @@ export function DocumentRequestCard({
       {canUpload && (
         <div className="mt-2">
           {selectedFile ? (
-            <div className="panel flex items-center gap-2 p-2">
+            <div className="panel flex items-center gap-2">
               <FileText className="icon-xs" />
               <span className="text-primary flex-1 text-sm">{selectedFile.name}</span>
               <span className="text-muted text-xs">{formatFileSize(selectedFile.size)}</span>

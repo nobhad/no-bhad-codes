@@ -139,15 +139,7 @@ export function PortalMessagesView({
     [sendMessage]
   );
 
-  // Derive conversation title from the other party's name (admin)
-  // instead of using the thread subject which may contain the project name
-  const threadTitle = useMemo(() => {
-    const adminMessage = messages.find((m) => m.sender_type === 'admin');
-    if (adminMessage?.sender_name) {
-      return `Conversation with ${adminMessage.sender_name}`;
-    }
-    return selectedThread?.subject ?? 'Messages';
-  }, [messages, selectedThread]);
+  const threadTitle = 'Messages';
 
   // Loading threads
   if (threadsLoading && threads.length === 0) {

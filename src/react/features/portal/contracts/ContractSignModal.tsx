@@ -164,7 +164,7 @@ export function ContractSignModal({
     >
       {/* Success state */}
       {signingState === 'success' && (
-        <div className="flex flex-col items-center gap-4 py-8">
+        <div className="flex flex-col items-center gap-4 my-4">
           <CheckCircle2 className="text-success icon-decorative" />
           <p className="text-lg text-center">Contract signed successfully!</p>
         </div>

@@ -480,7 +480,7 @@ export function OnboardingWizard({
       </div>
 
       {/* Navigation Footer */}
-      <div className="flex items-center justify-between pt-2">
+      <div className="flex items-center justify-between mt-2">
         <div>
           {!isFirstStep && (
             <button
