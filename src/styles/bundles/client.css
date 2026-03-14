@@ -54,6 +54,7 @@
  * Must be last @import — CSS spec ignores @import after any rules.
  * ============================================ */
 @import "../../design-system/tokens/portal-theme.css";
+@import "../portal/shared/portal-gutter.css";
 
 /* Wireframe mode merged into base/utilities.css */
 

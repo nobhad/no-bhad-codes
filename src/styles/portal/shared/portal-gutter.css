@@ -1,0 +1,65 @@
+/* =====================================================
+   CONTENT GUTTER — SINGLE SOURCE OF TRUTH
+   This file is imported UNLAYERED by both admin.css and client.css bundles.
+   It MUST NOT be inside any @layer or @import with layer().
+   ===================================================== */
+
+.portal {
+  --content-gutter: var(--space-2);
+}
+
+/* Header, sidebar, and top-level content children get the gutter */
+.portal .portal-global-header,
+.portal .sidebar-content,
+.portal .sidebar-footer,
+.portal .dashboard-content > *:not(.tab-content):not(.subtab-content-wrapper):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content),
+.portal .dashboard-content .tab-content > *,
+.portal .dashboard-content .subtab-content-wrapper > *,
+.portal .dashboard-content .tab-content-wrapper > *,
+.portal .dashboard-content .portal-tab-panel > *,
+.portal .dashboard-content .portal-subtab-content > *,
+.portal .dashboard-content .data-table-header,
+.portal .dashboard-content .accordion-item-wrapper > *,
+.portal .dashboard-content .msgtab-bubble > *,
+.portal .dashboard-content .portal-tabs,
+.portal .dashboard-content .help-featured-card,
+.portal .dashboard-content .dropzone,
+.portal .dashboard-content .dropzone-content,
+.portal .dashboard-content #folder-sidebar > *,
+.portal .dashboard-content .folder-item,
+/* Settings fields: apply to wrapper AND children (inline-edit rows need gutter) */
+.portal .dashboard-content .settings-fields,
+.portal .dashboard-content .settings-fields > *,
+.portal .dashboard-content .notification-options,
+.portal .dashboard-content .notification-options > * {
+  padding-left: var(--content-gutter);
+  padding-right: var(--content-gutter);
+  box-sizing: border-box;
+}
+
+/* Leaf children inside panels, stat grids, table layouts, nested containers.
+   Excludes: project-snapshot-header, li children, data-table-header children. */
+.portal .dashboard-content .panel *:not(:has(*)):not(.project-snapshot-header *):not(li *):not(.data-table-header *):not(.folder-item *):not(.settings-fields *):not(input):not(textarea):not(select):not(td *):not(th *):not(.msgtab-row *),
+.portal .dashboard-content .dashboard-stats-grid *:not(:has(*)):not(.project-snapshot-header *):not(li *):not(.data-table-header *):not(.folder-item *):not(.settings-fields *):not(input):not(textarea):not(select):not(td *):not(th *):not(.msgtab-row *),
+.portal .dashboard-content .table-layout > div *:not(:has(*)):not(.project-snapshot-header *):not(li *):not(.data-table-header *):not(.folder-item *):not(.settings-fields *):not(input):not(textarea):not(select):not(td *):not(th *):not(.msgtab-row *),
+.portal .dashboard-content > div > div > div *:not(:has(*)):not(.project-snapshot-header *):not(li *):not(.data-table-header *):not(.folder-item *):not(.settings-fields *):not(input):not(textarea):not(select):not(td *):not(th *):not(.msgtab-row *),
+.portal .dashboard-content ul,
+.portal .dashboard-content ul > li,
+.portal .dashboard-content .data-table-container table > *,
+.portal .dashboard-content .data-table-container tbody > *,
+.portal .dashboard-content .data-table-container td,
+.portal .dashboard-content .data-table-container th {
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+}
+
+/* Table layout — no extra padding, gutter handles children */
+
+/* Message thread and compose area children */
+.portal .dashboard-content .msgtab-thread-area > *,
+.portal .dashboard-content .msgtab-thread-area > div > div > *:not(.msgtab-row),
+.portal .dashboard-content .msgtab-compose-area > * {
+  padding-left: var(--content-gutter);
+  padding-right: var(--content-gutter);
+  box-sizing: border-box;
+}
