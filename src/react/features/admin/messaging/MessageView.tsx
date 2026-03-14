@@ -230,166 +230,166 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
 
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">
-    <div className="panel messaging-panel-container">
-      {/* Title + search bar above both columns */}
-      <div className="messaging-top-bar">
-        <h2 className="heading messaging-heading-with-badge">
+      <div className="panel messaging-panel-container">
+        {/* Title + search bar above both columns */}
+        <div className="messaging-top-bar">
+          <h2 className="heading messaging-heading-with-badge">
           Messages
-          {totalUnread > 0 && (
-            <span className="badge ml-2">
-              {totalUnread}
-            </span>
-          )}
-        </h2>
-        <div className="messaging-search-container">
-          <Search className="messaging-search-icon" />
-          <input
-            type="text"
-            placeholder="Search conversations..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="input messaging-search-input"
-            aria-label="Search conversations"
-          />
-        </div>
-      </div>
-
-      {/* Two-column area */}
-      <div className="messaging-columns">
-        {/* Conversation List */}
-        <div className="messaging-sidebar">
-          {/* Filter */}
-          <div className="messaging-section-header">
-            <FilterDropdown
-              sections={filterSections}
-              values={filterValues}
-              onChange={(key, value) => setFilterValues(prev => {
-                if (value === 'all') return { ...prev, [key]: [] };
-                const current = prev[key] ?? [];
-                const next = current.includes(value) ? current.filter(v => v !== value) : [...current, value];
-                return { ...prev, [key]: next };
-              })}
+            {totalUnread > 0 && (
+              <span className="badge ml-2">
+                {totalUnread}
+              </span>
+            )}
+          </h2>
+          <div className="messaging-search-container">
+            <Search className="messaging-search-icon" />
+            <input
+              type="text"
+              placeholder="Search conversations..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="input messaging-search-input"
+              aria-label="Search conversations"
             />
           </div>
+        </div>
 
+        {/* Two-column area */}
+        <div className="messaging-columns">
           {/* Conversation List */}
-          <div className="scroll-container flex-1">
-            {isLoading ? (
-              <div className="loading-state">Loading conversations...</div>
-            ) : filteredConversations.length === 0 ? (
-              <div className="empty-state">
-                <Inbox className="messaging-icon-lg" />
-                <p>No conversations</p>
-              </div>
-            ) : (
-              filteredConversations.map((conv) => (
-                <div
-                  key={conv.id}
-                  onClick={() => setSelectedConversation(conv)}
-                  className={cn(
-                    'list-item',
-                    selectedConversation?.id === conv.id && 'table-row-selected'
-                  )}
-                >
-                  <div className="messaging-conv-item-content">
-                    <div className="messaging-avatar">
-                      <User className="messaging-avatar-icon" />
-                    </div>
-                    <div className="messaging-conv-item-details">
-                      <div className="messaging-conv-item-header">
-                        <span className={cn('messaging-conv-name', conv.unreadCount > 0 && 'messaging-conv-name-unread')}>
-                          {conv.clientName}
-                        </span>
-                        <span className="text-muted messaging-conv-time">
-                          {conv.lastMessageAt ? formatTimeAgo(conv.lastMessageAt) : ''}
-                        </span>
+          <div className="messaging-sidebar">
+            {/* Filter */}
+            <div className="messaging-section-header">
+              <FilterDropdown
+                sections={filterSections}
+                values={filterValues}
+                onChange={(key, value) => setFilterValues(prev => {
+                  if (value === 'all') return { ...prev, [key]: [] };
+                  const current = prev[key] ?? [];
+                  const next = current.includes(value) ? current.filter(v => v !== value) : [...current, value];
+                  return { ...prev, [key]: next };
+                })}
+              />
+            </div>
+
+            {/* Conversation List */}
+            <div className="scroll-container flex-1">
+              {isLoading ? (
+                <div className="loading-state">Loading conversations...</div>
+              ) : filteredConversations.length === 0 ? (
+                <div className="empty-state">
+                  <Inbox className="messaging-icon-lg" />
+                  <p>No conversations</p>
+                </div>
+              ) : (
+                filteredConversations.map((conv) => (
+                  <div
+                    key={conv.id}
+                    onClick={() => setSelectedConversation(conv)}
+                    className={cn(
+                      'list-item',
+                      selectedConversation?.id === conv.id && 'table-row-selected'
+                    )}
+                  >
+                    <div className="messaging-conv-item-content">
+                      <div className="messaging-avatar">
+                        <User className="messaging-avatar-icon" />
                       </div>
-                      {conv.projectName && (
-                        <span className="text-muted messaging-conv-project">
-                          {conv.projectName}
-                        </span>
-                      )}
-                      {conv.lastMessage && (
-                        <p className={cn('messaging-conv-preview', conv.unreadCount > 0 ? 'text-primary' : 'text-muted')}>
-                          {conv.lastMessage}
-                        </p>
+                      <div className="messaging-conv-item-details">
+                        <div className="messaging-conv-item-header">
+                          <span className={cn('messaging-conv-name', conv.unreadCount > 0 && 'messaging-conv-name-unread')}>
+                            {conv.clientName}
+                          </span>
+                          <span className="text-muted messaging-conv-time">
+                            {conv.lastMessageAt ? formatTimeAgo(conv.lastMessageAt) : ''}
+                          </span>
+                        </div>
+                        {conv.projectName && (
+                          <span className="text-muted messaging-conv-project">
+                            {conv.projectName}
+                          </span>
+                        )}
+                        {conv.lastMessage && (
+                          <p className={cn('messaging-conv-preview', conv.unreadCount > 0 ? 'text-primary' : 'text-muted')}>
+                            {conv.lastMessage}
+                          </p>
+                        )}
+                      </div>
+                      {conv.unreadCount > 0 && (
+                        <span className="badge">{conv.unreadCount}</span>
                       )}
                     </div>
-                    {conv.unreadCount > 0 && (
-                      <span className="badge">{conv.unreadCount}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Message Area */}
+          <div className="messaging-main-area">
+            {selectedConversation ? (
+              <>
+                {/* Conversation Header */}
+                <div className="messaging-conv-header">
+                  <div>
+                    <h3 className="heading messaging-conv-heading">
+                      {selectedConversation.clientName}
+                    </h3>
+                    {selectedConversation.projectName && (
+                      <button
+                        onClick={() => onNavigate?.('projects', selectedConversation.projectId != null ? String(selectedConversation.projectId) : undefined)}
+                        className="btn-ghost messaging-conv-project-link"
+                      >
+                        {selectedConversation.projectName}
+                      </button>
                     )}
                   </div>
+                  <div className="messaging-conv-actions">
+                    <button
+                      onClick={() => toggleStar(selectedConversation.id, selectedConversation.isStarred)}
+                      className={cn('icon-btn', selectedConversation.isStarred ? 'text-primary' : 'text-muted')}
+                      aria-label={selectedConversation.isStarred ? 'Unstar conversation' : 'Star conversation'}
+                    >
+                      <Star
+                        className="messaging-star-icon"
+                        style={{ fill: selectedConversation.isStarred ? 'currentColor' : 'none' }}
+                      />
+                    </button>
+                    <button className="icon-btn" aria-label="More actions">
+                      <MoreHorizontal className="messaging-more-icon" />
+                    </button>
+                  </div>
                 </div>
-              ))
+
+                <MessageThread
+                  messages={messages.map((m) => ({
+                    id: m.id,
+                    content: m.content,
+                    isOwn: m.senderType === 'admin',
+                    senderName: m.senderName,
+                    timestamp: m.createdAt,
+                    readReceipt: m.isRead ? 'read' : 'sent',
+                    isEdited: m.isEdited,
+                    reactions: m.reactions
+                  }))}
+                  isLoading={messagesLoading}
+                  onSend={handleSend}
+                  onEdit={handleEdit}
+                  onReact={handleReact}
+                  showNotification={showNotification}
+                  className="messaging-main-area-thread"
+                />
+              </>
+            ) : (
+              <div className="empty-state messaging-empty-state-full">
+                <Users className="messaging-icon-xl" />
+                <p className="messaging-empty-state-message">Select a conversation</p>
+                <p className="text-muted">Choose a conversation from the list to view messages</p>
+              </div>
             )}
           </div>
         </div>
-
-        {/* Message Area */}
-        <div className="messaging-main-area">
-          {selectedConversation ? (
-            <>
-              {/* Conversation Header */}
-              <div className="messaging-conv-header">
-                <div>
-                  <h3 className="heading messaging-conv-heading">
-                    {selectedConversation.clientName}
-                  </h3>
-                  {selectedConversation.projectName && (
-                    <button
-                      onClick={() => onNavigate?.('projects', selectedConversation.projectId != null ? String(selectedConversation.projectId) : undefined)}
-                      className="btn-ghost messaging-conv-project-link"
-                    >
-                      {selectedConversation.projectName}
-                    </button>
-                  )}
-                </div>
-                <div className="messaging-conv-actions">
-                  <button
-                    onClick={() => toggleStar(selectedConversation.id, selectedConversation.isStarred)}
-                    className={cn('icon-btn', selectedConversation.isStarred ? 'text-primary' : 'text-muted')}
-                    aria-label={selectedConversation.isStarred ? 'Unstar conversation' : 'Star conversation'}
-                  >
-                    <Star
-                      className="messaging-star-icon"
-                      style={{ fill: selectedConversation.isStarred ? 'currentColor' : 'none' }}
-                    />
-                  </button>
-                  <button className="icon-btn" aria-label="More actions">
-                    <MoreHorizontal className="messaging-more-icon" />
-                  </button>
-                </div>
-              </div>
-
-              <MessageThread
-                messages={messages.map((m) => ({
-                  id: m.id,
-                  content: m.content,
-                  isOwn: m.senderType === 'admin',
-                  senderName: m.senderName,
-                  timestamp: m.createdAt,
-                  readReceipt: m.isRead ? 'read' : 'sent',
-                  isEdited: m.isEdited,
-                  reactions: m.reactions
-                }))}
-                isLoading={messagesLoading}
-                onSend={handleSend}
-                onEdit={handleEdit}
-                onReact={handleReact}
-                showNotification={showNotification}
-                className="messaging-main-area-thread"
-              />
-            </>
-          ) : (
-            <div className="empty-state messaging-empty-state-full">
-              <Users className="messaging-icon-xl" />
-              <p className="messaging-empty-state-message">Select a conversation</p>
-              <p className="text-muted">Choose a conversation from the list to view messages</p>
-            </div>
-          )}
-        </div>
       </div>
-    </div>
     </div>
   );
 }
