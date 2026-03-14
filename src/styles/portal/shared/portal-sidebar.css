@@ -71,7 +71,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: 0 0 var(--space-2);
   margin-top: auto;
   border-top: none;
   flex-shrink: 0;
@@ -112,7 +111,6 @@
 
 /* Collapsed footer positioning — bottom padding only (matches base .sidebar-footer) */
 .sidebar.collapsed .sidebar-footer {
-  padding: 0 0 var(--space-2);
   display: flex;
   justify-content: center;
 }
@@ -185,7 +183,6 @@
 
   .portal .sidebar:not(.collapsed) .sidebar-content {
     display: flex;
-    padding: 0 var(--space-1);
     gap: var(--space-1);
     align-items: center;
     overflow: hidden;
@@ -242,7 +239,6 @@
   justify-content: center;
   min-width: var(--icon-size-xl);
   height: var(--icon-size-xl);
-  padding: 0 var(--space-0-5);
   border-radius: var(--border-radius-full);
   background: var(--color-danger);
   color: var(--color-text-inverse);
@@ -443,7 +439,6 @@
   transform: translateY(-50%);
   background: var(--color-bg-inverse);
   color: var(--color-text-inverse);
-  padding: var(--space-1) var(--space-2);
   border-radius: var(--border-radius-sm);
   font-family: var(--font-family-sans);
   font-size: var(--font-size-2xs);

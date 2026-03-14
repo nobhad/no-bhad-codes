@@ -23,7 +23,6 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-1);
-  padding: var(--portal-card-padding);
   background: transparent;
   border: var(--portal-border);
   transition: border-color var(--transition-fast);
@@ -76,7 +75,6 @@
 .portal :is(.content-card, .template-card, .preview-card) {
   background: transparent;
   border: var(--portal-border);
-  padding: var(--space-2);
   transition: border-color var(--transition-fast);
 }
 
@@ -223,7 +221,6 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: var(--space-1) var(--space-1-5);
     gap: var(--space-1);
   }
 

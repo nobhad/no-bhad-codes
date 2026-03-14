@@ -34,11 +34,9 @@
 .dropdown {
   background: var(--color-bg-primary);
   border: var(--border-width) solid var(--portal-alpha-white-30);
-  padding: var(--space-1) 0;
 }
 
 .dropdown-item {
-  padding: var(--space-2) var(--space-4);
   font-size: var(--font-size-sm);
   font-family: var(--font-family-mono, monospace);
   color: var(--color-text-secondary);
@@ -56,7 +54,6 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1-5);
-  padding: var(--space-0-5) var(--space-2);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;

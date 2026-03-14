@@ -37,7 +37,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-4);
 }
 
 /* =====================================================
@@ -67,7 +66,6 @@
 .portal .data-table-card > h3:first-child,
 .portal .portal-card > h3:first-child,
 .portal .content-section > h3:first-child {
-  padding: var(--portal-section-heading-padding);
   margin: 0;
   border-bottom: var(--portal-border);
 }
@@ -81,7 +79,6 @@
 .portal .chart-container > *:not(h3:first-child),
 .portal .analytics-column > *:not(h3:first-child),
 .portal .analytics-column-full > *:not(h3:first-child) {
-  padding: var(--space-2);
 }
 
 /* =====================================================
@@ -259,12 +256,11 @@ html[data-theme="light"] .portal :is(
    Use these base classes to reduce custom CSS per page.
    ===================================================== */
 
-/* Base card container - main content containers */
+/* Base card container */
 .portal .portal-card {
   background-color: inherit;
   border: var(--portal-border);
   box-shadow: none;
-  padding: var(--space-4);
 }
 
 /* First child in card - typically header, no top margin */
@@ -293,11 +289,10 @@ html[data-theme="light"] .portal :is(
   margin: 0 0 var(--space-2) 0;
 }
 
-/* Inner card - nested content with lighter background, no shadow */
+/* Inner card */
 .portal .portal-card-inner {
   background: transparent;
   border: var(--portal-border);
-  padding: var(--space-3);
   box-shadow: none;
 }
 
@@ -322,17 +317,6 @@ html[data-theme="light"] .portal :is(
 /* Card body - standard content area */
 .portal .portal-card-body {
   color: var(--color-text-primary);
-}
-
-/* Mobile responsive for base cards */
-@media (--mobile) {
-  .portal .portal-card {
-    padding: var(--space-2);
-  }
-
-  .portal .portal-card-inner {
-    padding: var(--space-2);
-  }
 }
 
 /* =====================================================
@@ -435,10 +419,10 @@ html[data-theme="light"] .portal :is(
 /* =====================================================
    OVERVIEW CARD
    ===================================================== */
+/* Overview card */
 .portal .overview-card {
   background: transparent;
   border: var(--portal-border);
-  padding: var(--portal-card-padding);
   color: var(--color-text-primary);
   overflow: hidden;
   transition: border-color var(--transition-fast);
@@ -452,6 +436,7 @@ html[data-theme="light"] .portal :is(
    CONSISTENT CARD STYLING
    All main content sections use identical flat card styling
    ===================================================== */
+/* Activity/progress/milestone/approval cards */
 .portal
   :is(
     .recent-activity,
@@ -461,7 +446,6 @@ html[data-theme="light"] .portal :is(
   ) {
   background: transparent;
   border: var(--portal-border);
-  padding: var(--portal-card-padding);
   color: var(--color-text-primary);
   overflow: hidden;
   transition: border-color var(--transition-fast);
@@ -484,11 +468,11 @@ html[data-theme="light"] .portal :is(
 /* =====================================================
    PORTAL PROJECT CARD
    ===================================================== */
+/* Project card */
 .portal .portal-project-card {
   display: block;
   background: transparent;
   border: var(--portal-border);
-  padding: var(--portal-card-padding);
   color: var(--color-text-primary);
   overflow: hidden;
   transition: border-color var(--transition-fast);
@@ -525,7 +509,6 @@ html[data-theme="light"] .portal :is(
   display: flex;
   align-items: center;
   gap: var(--icon-gap-lg);
-  padding: var(--space-2) var(--space-3);
   background: transparent;
   border: var(--portal-border);
 }
@@ -612,10 +595,10 @@ html[data-theme="light"] .portal :is(
    SUMMARY CARD
    Used for invoice totals, stats summaries
    ===================================================== */
+/* Summary card */
 .portal .summary-card {
   background: transparent;
   border: var(--portal-border);
-  padding: var(--portal-card-padding);
   color: var(--color-text-primary);
   transition: border-color var(--transition-fast);
 }
@@ -654,7 +637,6 @@ html[data-theme="light"] .portal :is(
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-0-5) var(--space-2);
   background: transparent;
   border: none;
   color: var(--color-text-primary);
@@ -677,10 +659,10 @@ html[data-theme="light"] .portal :is(
    INVOICES LIST
    Container for invoice history items
    ===================================================== */
+/* Invoices list */
 .portal .invoices-list {
   background: transparent;
   border: var(--portal-border);
-  padding: var(--portal-card-padding);
   color: var(--color-text-primary);
   overflow: hidden;
   transition: border-color var(--transition-fast);
@@ -717,10 +699,10 @@ html[data-theme="light"] .portal :is(
    CONTENT SECTION CARD
    Generic wrapper for content groups that need containment
    ===================================================== */
+/* Content section card */
 .portal .content-section-card {
   background: transparent;
   border: var(--portal-border);
-  padding: var(--space-4);
   margin-bottom: var(--space-4);
   box-shadow: none;
 }
@@ -739,25 +721,7 @@ html[data-theme="light"] .portal :is(
    MOBILE RESPONSIVE
    ===================================================== */
 @media (--mobile) {
-  /* Tighter padding for main container cards on mobile */
-  .portal
-    :is(
-      .portal-project-card,
-      .overview-card,
-      .recent-activity,
-      .upcoming-tasks,
-      .summary-card,
-      .invoices-list,
-      .messages-container,
-      .settings-section,
-      .project-progress-section,
-      .pending-approvals-section
-    ) {
-    padding: var(--space-2);
-  }
-
   .portal .data-table-card {
-    padding: 0;
   }
 
   /* Tighter gap on grids for mobile */
@@ -810,7 +774,6 @@ html[data-theme="light"] .portal :is(
   color: var(--color-text-secondary);
   font-style: italic;
   text-align: left;
-  padding: var(--space-2) 0;
 }
 
 /* Invoice Summary Responsive */

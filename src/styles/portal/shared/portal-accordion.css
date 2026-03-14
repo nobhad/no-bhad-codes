@@ -21,7 +21,6 @@
 .accordion-item-wrapper {
   display: flex;
   flex-direction: column;
-  border: var(--portal-border);
 }
 
 /* =====================================================
@@ -32,7 +31,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
-  padding: var(--space-2) var(--space-3);
   background: transparent;
   cursor: pointer;
   color: var(--color-text-primary);
@@ -55,8 +53,9 @@
 /* =====================================================
    CONTENT — revealed when expanded, primary text color
    ===================================================== */
+/* Content — same horizontal padding as trigger so icons align.
+   Content is a direct child of wrapper, matching the padding-on-children pattern. */
 .accordion-item-content {
-  padding: var(--space-2);
   color: var(--color-text-primary);
 }
 

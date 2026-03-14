@@ -14,7 +14,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-0-5) var(--space-2);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
@@ -247,7 +246,6 @@
   right: var(--space-0-5);
   min-width: var(--icon-size-lg);
   height: var(--icon-size-lg);
-  padding: 0 var(--space-1);
   font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-bold);
   line-height: var(--icon-size-lg);
@@ -297,7 +295,6 @@
     min-width: var(--icon-size-sm);
     height: var(--icon-size-sm);
     font-size: var(--font-size-2xs);
-    padding: 0 var(--space-0-5);
     line-height: var(--icon-size-sm);
   }
 }
@@ -308,7 +305,6 @@
    ===================================================== */
 :is(.tag-badge, .category-badge) {
   display: inline-block;
-  padding: var(--space-0-5) var(--space-1);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   background: transparent;
@@ -333,9 +329,7 @@
   min-width: var(--status-dropdown-width);
   max-width: var(--status-dropdown-width);
   /* Symmetric horizontal padding - same on left/right of content */
-  padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
   /* Extra right padding for absolutely positioned caret */
-  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
   background: transparent;
   border: var(--portal-input-border);
   margin: 0;

@@ -21,7 +21,6 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 15vh;
   background: var(--portal-alpha-black-50);
   backdrop-filter: blur(var(--blur-backdrop));
 }
@@ -50,7 +49,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
 }
 
 .shortcuts-header-icon {
@@ -77,7 +75,6 @@
  * ============================================ */
 
 .shortcuts-body {
-  padding: var(--space-3) var(--space-4);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -104,7 +101,6 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-1) 0;
 }
 
 .shortcuts-description {
@@ -130,7 +126,6 @@
   background: var(--color-bg-secondary);
   border: var(--border-width) solid var(--color-text-primary);
   border-radius: var(--border-radius-sm);
-  padding: var(--space-px) var(--space-1);
   min-width: var(--space-3);
   text-align: center;
   line-height: 1.6;
@@ -144,7 +139,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-2) var(--space-4);
   border-top: var(--border-width) solid var(--color-text-primary);
   background: var(--color-bg-secondary);
 }
@@ -163,7 +157,6 @@
 
 @media (--mobile) {
   .shortcuts-overlay {
-    padding-top: 5vh;
   }
 
   .shortcuts-panel {

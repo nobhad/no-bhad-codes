@@ -50,10 +50,10 @@
    AUTH GATE CONTAINER - Card
    ===================================================== */
 
+/* Auth card */
 .auth-gate-container {
   background: var(--color-bg-primary);
   border: var(--portal-border);
-  padding: clamp(1.5rem, 4vw, 2.5rem);
   width: 100%;
   max-width: min(500px, 90vw);
   box-shadow: none;
@@ -131,7 +131,6 @@
   /* Auth inputs use padding-based height, not portal-forms' fixed height */
   height: auto;
   line-height: normal;
-  padding: var(--space-2) var(--space-3);
   font-size: var(--font-size-base);
   transition: all var(--transition-fast);
   min-height: var(--space-6);
@@ -153,7 +152,6 @@
 
 .auth-gate .password-input-wrapper input,
 .auth-gate .portal-password-wrapper input {
-  padding-right: var(--space-6);
 }
 
 /* Password Toggle Button */
@@ -166,7 +164,6 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: var(--space-0-5);
   transition: color var(--transition-fast);
   color: var(--color-text-secondary);
 }
@@ -185,7 +182,6 @@
   color: var(--color-danger);
   font-size: var(--font-size-sm);
   margin-bottom: var(--space-2);
-  padding: var(--space-1-5);
   background-color: transparent;
   border: var(--border-width) solid var(--color-danger);
   font-weight: var(--font-weight-medium);
@@ -220,7 +216,6 @@
 .auth-gate .auth-submit,
 .auth-gate-form .auth-submit {
   width: 100%;
-  padding: var(--space-1-5) var(--space-3);
   border: var(--portal-btn-border-width) solid currentColor;
   border-bottom-width: var(--portal-btn-border-bottom-width);
   border-radius: 0;
@@ -316,7 +311,6 @@
   .auth-gate-container {
     max-width: 100%;
     width: 100%;
-    padding: var(--space-3);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -347,7 +341,6 @@
 
 @media (--small-mobile) {
   .auth-gate-container {
-    padding: var(--space-2);
   }
 }
 
@@ -384,7 +377,6 @@ body[data-page="client-portal"] #client-dashboard.hidden {
   background: rgba(var(--color-error-rgb), 0.1);
   border: var(--border-width) solid rgba(var(--color-error-rgb), 0.3);
   color: var(--color-danger);
-  padding: var(--space-3) var(--space-4);
   border-radius: var(--border-radius-md);
   font-size: var(--font-size-sm);
   text-align: center;
@@ -422,7 +414,6 @@ body[data-page="client-portal"]:not(.portal-logged-in) .client-footer {
   right: 0;
   height: var(--footer-height);
   background: var(--color-neutral-300);
-  padding: var(--space-2) 0;
   font-size: var(--font-size-sm);
   color: var(--color-nav-text);
   text-align: center;
@@ -443,22 +434,24 @@ body.portal-logged-in[data-page="client-portal"] .nav-overlay {
    Loaded via client CSS bundle (/src/portal.ts)
    ===================================================== */
 
+/* Page wrapper */
 .set-password-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(1rem, 4vw, 2rem);
 }
 
+/* Container gets margin for viewport edge spacing (was page padding) */
 .set-password-container {
   width: 100%;
   max-width: min(500px, 90vw);
+  margin: clamp(1rem, 4vw, 2rem);
 }
 
+/* Card */
 .set-password-card {
   border: var(--portal-border);
-  padding: clamp(1.5rem, 4vw, 2.5rem);
 }
 
 .set-password-logo {
@@ -508,7 +501,6 @@ body.portal-logged-in[data-page="client-portal"] .nav-overlay {
 .set-password-error,
 .set-password-success {
   text-align: center;
-  padding: var(--space-6);
 }
 
 .set-password-error .error-icon,

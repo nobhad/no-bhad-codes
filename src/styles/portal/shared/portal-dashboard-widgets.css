@@ -72,7 +72,6 @@
    ===================================================== */
 
 .portal .progress-field {
-  padding: var(--space-2) 0;
 }
 
 .portal .progress-field-header {
@@ -110,10 +109,10 @@
    Activity item with icon, content, and time
    ===================================================== */
 
-/* Activity list — bottom padding matches li horizontal padding */
+/* Activity list — last item gets bottom margin for breathing room. */
 .portal .activity-list {
-  padding-bottom: var(--space-2);
 }
+
 
 /* Activity list item — flex row with icon gap */
 .portal .activity-list > li,
@@ -181,10 +180,10 @@
    UPCOMING TASKS WIDGET
    ===================================================== */
 
+/* Upcoming tasks */
 .portal .upcoming-tasks {
   background: transparent;
   border: var(--portal-border);
-  padding: var(--portal-card-padding);
 }
 
 .portal .upcoming-tasks .section-header-inline {
@@ -223,12 +222,10 @@
 }
 
 .portal .dashboard-tasks-kanban .kanban-column-header {
-  padding: var(--space-1) var(--space-2);
   font-size: var(--font-size-xs);  /* 12px */
 }
 
 .portal .dashboard-tasks-kanban .kanban-card {
-  padding: var(--space-2);
 }
 
 /* Mobile: Stack kanban columns vertically to prevent horizontal overflow */
@@ -291,7 +288,6 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
   background: transparent;
   border: var(--portal-border);
   margin-bottom: var(--space-0-5);
@@ -369,7 +365,6 @@
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wider);
-  padding: var(--space-0-5) var(--space-1);
   background: transparent;
   border: var(--portal-border);
   color: var(--color-text-tertiary);
@@ -400,7 +395,6 @@
 }
 
 .portal .upcoming-tasks-list .loading-row {
-  padding: var(--space-2) var(--space-3);
 }
 
 /* =====================================================
@@ -409,7 +403,6 @@
    ===================================================== */
 
 .portal .dashboard-overview-card {
-  padding: var(--space-6);
   background: transparent;
   border: var(--portal-border);
 }
@@ -445,7 +438,6 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-1);
-  padding: var(--portal-card-padding);
   background: transparent;
   border: var(--portal-border);
   color: var(--color-text-primary);
@@ -505,7 +497,6 @@
 
 @media (--small-mobile) {
   .portal .upcoming-tasks {
-    padding: var(--space-3);
   }
 
   .portal .upcoming-tasks .section-header-inline {
@@ -519,7 +510,6 @@
 
   .portal .upcoming-tasks-list .task-item {
     flex-wrap: wrap;
-    padding: var(--space-2) var(--space-3);
   }
 
   .portal .task-item-meta {
@@ -529,11 +519,9 @@
   }
 
   .portal .recent-activity {
-    padding: var(--space-3);
   }
 
   .portal .activity-list li {
-    padding: var(--space-2) var(--space-3);
   }
 
   /* Kanban board - enable horizontal scroll on very small screens */
@@ -551,11 +539,9 @@
   }
 
   .portal .dashboard-overview-card {
-    padding: var(--space-4);
   }
 
   .portal .attention-card {
-    padding: var(--space-2);
   }
 }
 
@@ -618,11 +604,9 @@
 
 .portal .milestone-list {
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
 }
 
 .portal .table-layout .progress-field {
-  padding: var(--space-2) var(--space-3) 0;
 }
 
 .portal .milestone-item-wrapper {
@@ -633,7 +617,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
-  padding: var(--space-2) var(--space-3);
   cursor: pointer;
 }
 
@@ -656,8 +639,6 @@
 }
 
 .portal .milestone-expanded-content {
-  padding: 0 var(--space-2) var(--space-2);
-  padding-left: calc(var(--icon-size-lg) + var(--space-1-5) + var(--space-2));
 }
 
 /* Deliverables checklist */

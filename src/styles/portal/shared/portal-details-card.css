@@ -27,7 +27,6 @@
 
 /* Summary base styles */
 .portal :is(.details-card, .system-details) summary {
-  padding: var(--space-4);
   margin: 0;
 }
 
@@ -60,7 +59,6 @@
     .details-card .details-card-grid,
     .system-details .system-info-grid
   ) {
-  padding: 0 var(--space-4) var(--space-4);
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -72,7 +70,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-2) var(--space-3);
   background: transparent;
   border: var(--portal-border);
   font-size: var(--font-size-sm);
@@ -107,17 +104,14 @@
 /* Mobile responsive - tighter padding */
 @media (--mobile) {
   .portal :is(.details-card, .system-details) summary {
-    padding: var(--space-2) var(--space-3);
     gap: var(--space-2);
   }
 
   .portal :is(.details-card-grid, .system-info-grid) {
-    padding: 0 var(--space-3) var(--space-2);
     gap: var(--space-1);
   }
 
   .portal :is(.details-card-row, .system-info-row) {
-    padding: var(--space-1-5) var(--space-2);
   }
 }
 

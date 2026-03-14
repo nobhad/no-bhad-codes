@@ -13,7 +13,6 @@
 .portal .files-section-container {
   background: transparent;
   border: none;
-  padding: var(--space-4);
   color: var(--color-text-primary);
   box-shadow: none;
   display: flex;
@@ -35,7 +34,6 @@
 .portal .files-upload-section {
   background: transparent;
   border: none;
-  padding: var(--space-3);
   color: var(--color-text-primary);
   box-shadow: none;
 }
@@ -50,7 +48,6 @@
    ===================================================== */
 .portal .upload-dropzone {
   border: var(--border-width) dashed var(--color-text-primary);
-  padding: var(--space-4);
   text-align: center;
   background: transparent;
   color: var(--color-text-primary);
@@ -96,7 +93,6 @@
 .portal .files-list-section {
   background: transparent;
   border: none;
-  padding: var(--space-4);
   color: var(--color-text-primary);
   display: flex;
   flex-direction: column;
@@ -133,7 +129,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-1) var(--space-1-5);
   border-bottom: var(--portal-border);
 }
 
@@ -150,14 +145,12 @@
 .portal .folder-tree {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-1);
 }
 
 .portal .folder-item {
   display: flex;
   align-items: center;
   gap: var(--icon-gap);
-  padding: var(--space-1) var(--space-1-5);
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast) ease;
@@ -193,7 +186,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-1) var(--space-1-5);
   border-bottom: var(--portal-border);
   background: transparent;
 }
@@ -206,7 +198,6 @@
 .portal .files-panel .files-list {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-1);
 }
 
 /* Files Browser Responsive */
@@ -223,7 +214,6 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-1);
-    padding: var(--space-2);
   }
 
   .portal .folder-item {
@@ -240,7 +230,6 @@
   flex-direction: column;
   gap: var(--space-1-5);
   margin-bottom: var(--space-2);
-  padding-bottom: var(--space-2);
   border-bottom: var(--portal-border);
 }
 
@@ -264,7 +253,6 @@
 
 .portal .files-filter-bar :is(.form-select, .form-input) {
   font-size: var(--font-size-sm);
-  padding: var(--space-1) var(--space-1-5);
   background: transparent;
   border: var(--portal-input-border);
   color: var(--color-text-primary);
@@ -339,7 +327,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
-  padding: var(--space-1-5);
   background: transparent;
   border: var(--border-width-px) solid transparent;
   color: var(--color-text-primary);
@@ -429,7 +416,6 @@
   color: var(--color-accent);
   text-decoration: none;
   font-weight: var(--font-weight-semibold);
-  padding: var(--space-1) var(--space-2);
   border: var(--border-width-px) solid var(--color-accent);
   transition: all var(--transition-fast);
 }
@@ -444,7 +430,6 @@
    ===================================================== */
 .portal .no-files {
   text-align: center;
-  padding: var(--space-4);
   color: var(--color-text-secondary);
   font-style: italic;
 }
@@ -498,7 +483,6 @@
 
 .files-header {
   margin-bottom: var(--space-4);
-  padding-bottom: var(--space-2);
   border-bottom: var(--portal-border);
 }
 
@@ -528,7 +512,6 @@
   cursor: pointer;
   align-items: center;
   justify-content: center;
-  padding: var(--space-4);
   transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
 
@@ -537,10 +520,10 @@
   border-width: var(--border-width);
   border-color: var(--color-border-primary);
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
-  padding: var(--space-1-5) var(--space-3);
   cursor: pointer;
   transition: border-color var(--transition-fast);
 }
@@ -560,7 +543,7 @@
 
 .dropzone-content {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   gap: var(--space-2);
 }
@@ -572,7 +555,6 @@
 .dropzone-hint {
   font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
-  margin-left: auto;
 }
 
 .dropzone-actions {
@@ -657,7 +639,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-0-5);
-  padding: var(--space-3) var(--space-2);
   border-top: var(--portal-border);
 }
 
@@ -671,8 +652,6 @@
 
 /* Non-table children get horizontal padding; tables go edge-to-edge */
 .files-content-area > :not(table) {
-  padding-left: var(--space-3);
-  padding-right: var(--space-3);
 }
 
 /* Mobile folder selector — visible on mobile, hidden on desktop */
@@ -700,7 +679,6 @@
   align-items: center;
   justify-content: space-between;
   margin-top: auto;
-  padding-top: var(--space-3);
   font-size: var(--font-size-sm);
 }
 
@@ -711,7 +689,6 @@
 }
 
 .files-pagination-page {
-  padding: 0 var(--space-2);
 }
 
 /* Folder list item */
@@ -721,15 +698,12 @@
 
 /* Nested folder items */
 .folder-item-nested {
-  padding-left: var(--space-3);
 }
 
 .folder-item.nested {
-  padding-left: var(--space-3-5);
 }
 
 .folder-item.nested-2 {
-  padding-left: calc(var(--space-3-5) + var(--space-2));
 }
 
 /* =====================================================
@@ -750,7 +724,6 @@
 
 .files-list.grid-view .file-item {
   flex-direction: column;
-  padding: var(--space-1-5);
   text-align: center;
   margin-bottom: 0;
 }
