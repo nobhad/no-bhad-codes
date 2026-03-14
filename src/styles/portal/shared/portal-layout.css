@@ -297,7 +297,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   min-width: 0;
   padding: 0 var(--space-3);
   overflow-y: auto;
-  background: inherit;
+  background-color: var(--color-bg-primary);
   box-sizing: border-box;
 }
 
@@ -401,9 +401,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 [data-page="admin"][data-active-group="workflows"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="workflows"],
 /* Admin detail subtabs */
 [data-page="admin"][data-active-tab="project-detail"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="project-detail"],
-[data-page="admin"][data-active-tab="client-detail"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="client-detail"],
-/* Client subtabs (settings only — project-detail uses React TabList) */
-[data-page="client-portal"][data-active-tab="settings"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="settings"] {
+[data-page="admin"][data-active-tab="client-detail"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="client-detail"] {
   display: flex;
   gap: var(--space-1);
   align-items: center;
@@ -459,7 +457,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 /* Layout containers with their own internal spacing */
-.portal :is([class*="-layout"]):not(.messages-layout) {
+.portal :is([class*="-layout"]):not(.messages-layout):not(.files-browser-layout) {
   gap: var(--portal-section-gap);
 }
 
@@ -830,7 +828,7 @@ html[data-theme="light"] .portal .funnel-value {
   display: flex;
   flex-direction: column;
   gap: var(--portal-section-gap);
-  background: transparent;
+  background-color: inherit;
 }
 
 .panel {
@@ -838,7 +836,7 @@ html[data-theme="light"] .portal .funnel-value {
   flex-direction: column;
   align-items: stretch;
   gap: var(--space-3);
-  background: var(--color-bg-primary);
+  background-color: inherit;
   border: var(--portal-border);
   padding: var(--portal-card-padding);
 }

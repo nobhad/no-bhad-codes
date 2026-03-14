@@ -110,9 +110,17 @@
    Activity item with icon, content, and time
    ===================================================== */
 
+/* Activity list — bottom padding matches li horizontal padding */
+.portal .activity-list {
+  padding-bottom: var(--space-2);
+}
+
+/* Activity list item — flex row with icon gap */
+.portal .activity-list > li,
 .portal .activity-item {
   display: flex;
   align-items: center;
+  gap: var(--icon-gap);
 }
 
 .portal .activity-icon {

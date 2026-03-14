@@ -28,7 +28,7 @@
 .config-section-tabs {
   display: flex;
   gap: var(--space-1);
-  border-bottom: var(--portal-border);
+  border-bottom: none;
   padding-bottom: var(--space-2);
 }
 
