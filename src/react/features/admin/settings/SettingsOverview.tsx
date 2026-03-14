@@ -300,7 +300,7 @@ function SnapshotCard({ title, icon, badge, onViewAll, children }: {
 }) {
   return (
     <div className="snapshot-card">
-      <div className="snapshot-card-header">
+      <div className="panel-header">
         <div className="snapshot-card-title">
           {icon}
           <span className="field-label">{title}</span>

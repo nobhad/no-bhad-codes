@@ -43,43 +43,47 @@ export function SearchFilter({ value, onChange, placeholder = 'Search...' }: Sea
       ref={ref}
       className={cn('filter-search-wrapper', isOpen && 'open', value && 'has-value')}
     >
-      <button
-        type="button"
-        className={cn('icon-btn filter-search-trigger', value && 'has-value')}
-        onClick={() => setIsOpen(!isOpen)}
-        title="Search"
-        aria-label={placeholder || 'Search'}
-      >
-        <Search />
-      </button>
-      <div className="filter-search-dropdown search-bar">
-        <Search className="search-bar-icon" aria-hidden="true" />
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder={placeholder}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="search-bar-input"
+      {!isOpen && (
+        <button
+          type="button"
+          className={cn('icon-btn filter-search-trigger', value && 'has-value')}
+          onClick={() => setIsOpen(true)}
+          title="Search"
           aria-label={placeholder || 'Search'}
-          onKeyDown={(e) => {
-            if (e.key === KEYS.ESCAPE) setIsOpen(false);
-          }}
-        />
-        {value && (
-          <button
-            type="button"
-            className="search-bar-clear"
-            onClick={() => {
-              onChange('');
-              inputRef.current?.focus();
+        >
+          <Search />
+        </button>
+      )}
+      {isOpen && (
+        <div className="filter-search-dropdown">
+          <Search className="search-bar-icon" aria-hidden="true" />
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder={placeholder}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="search-bar-input"
+            aria-label={placeholder || 'Search'}
+            onKeyDown={(e) => {
+              if (e.key === KEYS.ESCAPE) setIsOpen(false);
             }}
-            title="Clear search"
-          >
-            <X />
-          </button>
-        )}
-      </div>
+          />
+          {value && (
+            <button
+              type="button"
+              className="search-bar-clear"
+              onClick={() => {
+                onChange('');
+                inputRef.current?.focus();
+              }}
+              title="Clear search"
+            >
+              <X />
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

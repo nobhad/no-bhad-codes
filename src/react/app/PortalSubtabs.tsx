@@ -32,8 +32,7 @@ const GROUP_EVENTS: Record<string, string> = {
   documents: 'documentsSubtabChange',
   analytics: 'analyticsSubtabChange',
   system: 'systemSubtabChange',
-  support: 'knowledgeBaseSubtabChange',
-  settings: 'settingsSubtabChange'
+  support: 'knowledgeBaseSubtabChange'
 };
 
 export function PortalSubtabs() {

@@ -121,7 +121,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: 
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
       {/* Header */}
-      <div className="layout-row-between">
+      <div className="panel-header">
         <div className="view-toggle">
           {(['week', 'month', 'quarter', 'year'] as const).map((p) => (
             <button

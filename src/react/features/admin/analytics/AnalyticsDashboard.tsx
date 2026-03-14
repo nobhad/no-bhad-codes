@@ -486,28 +486,28 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
               </div>
               <div className="analytics-card-grid">
                 <div className="analytics-chart-card">
-                  <div className="layout-row-between">
+                  <div className="panel-header">
                     <h3>Revenue Over Time</h3>
                     <LineChart className="icon-md" />
                   </div>
                   <ChartWidget data={data?.revenueChart} type="line" />
                 </div>
                 <div className="analytics-chart-card">
-                  <div className="layout-row-between">
+                  <div className="panel-header">
                     <h3>Projects by Status</h3>
                     <PieChart className="icon-md" />
                   </div>
                   <ChartWidget data={data?.projectsChart} type="pie" />
                 </div>
                 <div className="analytics-chart-card">
-                  <div className="layout-row-between">
+                  <div className="panel-header">
                     <h3>Lead Funnel</h3>
                     <BarChart3 className="icon-md" />
                   </div>
                   <ChartWidget data={data?.leadsChart} type="bar" />
                 </div>
                 <div className="analytics-chart-card">
-                  <h3>Lead Sources</h3>
+                  <div className="panel-header"><h3>Lead Sources</h3></div>
                   <SourceBreakdown sources={data?.sourceBreakdown} />
                 </div>
               </div>
@@ -522,7 +522,7 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
                   .map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
               </div>
               <div className="analytics-chart-card">
-                <div className="layout-row-between">
+                <div className="panel-header">
                   <h3>Revenue Over Time</h3>
                   <LineChart className="icon-md" />
                 </div>
@@ -540,14 +540,14 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
               </div>
               <div className="analytics-card-grid">
                 <div className="analytics-chart-card">
-                  <div className="layout-row-between">
+                  <div className="panel-header">
                     <h3>Lead Funnel</h3>
                     <BarChart3 className="icon-md" />
                   </div>
                   <ChartWidget data={data?.leadsChart} type="bar" />
                 </div>
                 <div className="analytics-chart-card">
-                  <h3>Lead Sources</h3>
+                  <div className="panel-header"><h3>Lead Sources</h3></div>
                   <SourceBreakdown sources={data?.sourceBreakdown} />
                 </div>
               </div>
@@ -562,7 +562,7 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
                   .map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
               </div>
               <div className="analytics-chart-card">
-                <div className="layout-row-between">
+                <div className="panel-header">
                   <h3>Projects by Status</h3>
                   <PieChart className="icon-md" />
                 </div>

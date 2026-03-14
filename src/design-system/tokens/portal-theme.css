@@ -235,7 +235,7 @@ body[data-page="client-portal"] {
   --table-cell-padding-x: clamp(var(--space-1), 2vw, var(--space-2));
   --table-cell-padding-y: clamp(var(--space-0-5), 1vw, var(--space-1-5));
   --table-outer-padding: var(--portal-panel-padding-x);
-  --table-actions-gap: var(--space-1);
+  --table-actions-gap: var(--icon-gap);
   --table-header-font-size: var(--font-size-sm);
   --table-cell-font-size: var(--font-size-sm);
   --table-header-font-weight: var(--font-weight-medium);
@@ -570,6 +570,64 @@ html[data-theme="light"]:has(body[data-page="client-portal"]) {
   color: var(--color-warning);
 }
 
+/* =================================================================
+   PANEL/CARD HEADERS — unlayered so @layer components can't break it.
+   Must stay single-line: icon + title + action on one row.
+   ================================================================= */
+.portal :is(.panel-header, .overview-panel-header, .snapshot-card-header) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  white-space: nowrap;
+}
+
+/* Action buttons column — icon-gap padding left and right */
+.portal .data-table :is(td, th).col-actions {
+  padding-inline: var(--icon-gap);
+}
+
+/* Table header + pagination right padding aligns with action column */
+.portal .data-table-header,
+.portal .table-pagination {
+  padding-right: var(--icon-gap);
+}
+
+/* Checkbox column — left padding aligns with table header title */
+.portal .data-table :is(td, th).col-checkbox {
+  padding-left: var(--space-2);
+}
+
+.portal :is(.overview-panel-title, .snapshot-card-title) {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  margin: 0;
+  font-size: var(--font-size-xs);
+}
+
+/* =================================================================
+   CHECKBOX SIZING — unlayered to override @layer components.
+   Fixed size so checkboxes don't collapse to dots.
+   ================================================================= */
+.portal .portal-checkbox,
+.portal .data-table-checkbox {
+  width: var(--space-2);
+  height: var(--space-2);
+  min-width: var(--space-2);
+  min-height: var(--space-2);
+}
+
+/* SVG inside checkbox fills the container, not the text 1em */
+.portal .portal-checkbox svg.lucide,
+.portal .data-table-checkbox svg.lucide {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
 /* Checkbox check icon — must contrast against the filled background */
 .portal .portal-checkbox[data-state="checked"] svg.lucide,
 .portal .portal-checkbox.is-completed svg.lucide {
@@ -601,24 +659,21 @@ html[data-theme="light"]:has(body[data-page="client-portal"]) {
 }
 
 /* =================================================================
-   ROOT ICON-TEXT GAP — margin-based, works on ANY layout (flex,
-   block, inline). Icons that are NOT the only child get spacing.
-   Uses :not(:only-child) so icon-only buttons are unaffected.
+   ROOT ICON-TEXT GAP — flex gap only, no margin.
+   Elements containing icons must use display:flex + gap:var(--icon-gap).
+   The rule below auto-applies flex+gap to common elements with
+   a direct Lucide SVG child. Uses :where() for zero specificity
+   so any component rule can override.
    ================================================================= */
-
-/* Icon before text — right margin */
-.portal svg.lucide:not(:only-child):not(:last-child) {
-  margin-inline-end: var(--icon-gap);
+.portal :where(button, a, span, div, label, p, li, h1, h2, h3, h4, td):has(> svg.lucide) {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap);
 }
 
-/* Icon after text (trailing chevrons, etc.) — left margin */
-.portal svg.lucide:not(:only-child):last-child {
-  margin-inline-start: var(--icon-gap);
-}
-
-/* Reset margin in flex containers that manage their own gap */
-.portal :is(.icon-btn, .nav-btn) svg.lucide {
-  margin-inline: 0;
+/* Block elements should stay flex (not inline-flex) */
+.portal :where(div, li, p, td):has(> svg.lucide) {
+  display: flex;
 }
 
 /* Status dot in dropdown items: use base icon-size-xs (12px), not full 1em.
