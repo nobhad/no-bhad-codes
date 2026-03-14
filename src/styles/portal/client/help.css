@@ -14,48 +14,7 @@
   width: var(--aside-width-medium);
 }
 
-.help-search-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.help-search-icon {
-  position: absolute;
-  left: var(--space-1-5);
-  color: var(--color-text-secondary);
-  pointer-events: none;
-  z-index: var(--z-index-content);
-}
-
-.portal .help-search-container .help-search-input {
-  width: 100%;
-  padding: var(--space-0-5) var(--space-3) var(--space-0-5) calc(var(--space-1-5) + var(--icon-size-xl));
-  font-size: var(--font-size-base);
-  line-height: 1.2;
-  color: var(--color-text-primary);
-  background: transparent;
-  border: var(--portal-border);
-}
-
-.help-search-input:focus {
-  outline: none;
-  border-color: var(--color-accent);
-}
-
-.help-search-clear {
-  position: absolute;
-  right: var(--space-1);
-  padding: var(--space-0-5);
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-}
-
-.help-search-clear:hover {
-  color: var(--color-text-primary);
-}
+/* Help search uses shared .search-bar classes from portal-forms.css */
 
 /* ==============================================
    MAIN LAYOUT

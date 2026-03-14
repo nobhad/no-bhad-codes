@@ -95,7 +95,7 @@
 
 /* Input padding + height to match adjacent icon buttons */
 .filter-search-dropdown input.search-bar-input {
-  padding: var(--space-0-5) var(--space-2) var(--space-0-5) var(--input-icon-offset);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--input-icon-offset);
   height: var(--portal-btn-icon-size);
   min-height: var(--portal-btn-icon-size);
 }

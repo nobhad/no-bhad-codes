@@ -105,23 +105,9 @@
   gap: var(--space-3);
 }
 
-.portal .settings-form-section > .portal-section {
-  margin-bottom: 0;
-}
-
-/* Settings headers: icon + title left, action button right via ml-auto */
-.portal .settings-form-section .section-header {
-  justify-content: flex-start;
-}
-
-/* Section title — reset margin, inherit everything else from root */
-.portal .settings-form-section .section-title {
-  margin: 0;
-}
-
-/* Tighter spacing between children inside settings portal-sections */
-.portal .settings-form-section .portal-section > * + * {
-  margin-top: var(--space-1);
+/* Settings fields padding — match data-table-header padding */
+.portal .settings-form-section .settings-fields {
+  padding: var(--space-2);
 }
 
 .portal .settings-form-section .section-description {
