@@ -1,7 +1,0 @@
-<%# Currency Cell %>
-<%# Locals: value, col, row %>
-<% if (value != null && !isNaN(Number(value))) {
-  var num = Number(value);
-  var formatted = num.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-  %><%= formatted %><%
-} else { %>—<% } %>

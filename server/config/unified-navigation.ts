@@ -453,18 +453,8 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
       { id: 'categories', label: 'Categories', roles: ['admin'] },
       { id: 'articles', label: 'Articles', roles: ['admin'] }
     ]
-  },
-  // Client: Settings subtabs
-  {
-    id: 'settings-subtabs',
-    forTab: 'settings',
-    roles: ['client'],
-    subtabs: [
-      { id: 'profile', label: 'Profile', roles: ['client'], active: true },
-      { id: 'billing', label: 'Billing', roles: ['client'] },
-      { id: 'notifications', label: 'Notifications', roles: ['client'] }
-    ]
   }
+  // Client settings subtabs are rendered by React TabList in PortalSettings.tsx
   // NOTE: project-detail and client-detail subtabs are managed by their React components
   // (PortalProjectDetail.tsx, ClientDetail.tsx) and must NOT be defined here —
   // doing so creates duplicate tab bars that don't connect to React state.

@@ -1,3 +1,0 @@
-<%# Email Cell %>
-<%# Locals: value, col, row %>
-<% if (value && value.includes('@')) { %><a href="mailto:<%= value %>" class="cell-link"><%= value %></a><% } else { %><span class="cell-text"><%= value || '—' %></span><% } %>

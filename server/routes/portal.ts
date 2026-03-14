@@ -18,28 +18,8 @@ import { Router, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { getPortalConfig, ADMIN_TAB_IDS, CLIENT_TAB_IDS, ICONS } from '../config/navigation.js';
 import { COOKIE_CONFIG } from '../utils/auth-constants.js';
-import { sendUnauthorized, sendNotFound, sendServerError, ErrorCodes } from '../utils/api-response.js';
-import { logger } from '../services/logger.js';
-import { asyncHandler } from '../middleware/errorHandler.js';
-import { createRateLimiter } from '../middleware/rate-limiter.js';
+
 import { BUSINESS_INFO } from '../config/business.js';
-
-// Rate limiter for tab data endpoint: 30 req/min per authenticated user
-const TAB_DATA_MAX_REQUESTS = 30;
-const TAB_DATA_WINDOW_MS = 60 * 1000;
-const TAB_DATA_BLOCK_DURATION_MS = 60 * 1000;
-
-const tabDataRateLimiter = createRateLimiter({
-  windowMs: TAB_DATA_WINDOW_MS,
-  maxRequests: TAB_DATA_MAX_REQUESTS,
-  blockDurationMs: TAB_DATA_BLOCK_DURATION_MS,
-  keyGenerator: (req) => {
-    // Key by IP + userId from JWT for per-user limiting
-    const token = req.cookies?.auth_token;
-    const ip = req.ip || 'unknown';
-    return `tab-data:${ip}:${token ? token.slice(-16) : 'anon'}`;
-  }
-});
 
 const router = Router();
 
@@ -121,70 +101,6 @@ router.get('/dashboard', (req: Request, res: Response) => {
     businessName: BUSINESS_INFO.name
   });
 });
-
-// ============================================
-// Tab Data Route (EJS hybrid tables)
-// ============================================
-
-/**
- * GET /dashboard/tab/:tabId
- * Returns an HTML fragment for a specific tab's table.
- * Used by the client-side TableManager to lazy-load tab content.
- */
-router.get('/dashboard/tab/:tabId', tabDataRateLimiter, asyncHandler(async (req: Request, res: Response) => {
-  const decoded = decodePortalJwt(req);
-
-  if (!decoded) {
-    return sendUnauthorized(res, 'Authentication required', ErrorCodes.UNAUTHORIZED);
-  }
-
-  const { tabId } = req.params;
-
-  try {
-    // Dynamic import to avoid circular dependencies at startup
-    const { fetchTabData, hasTabDataFetcher, getServerTableDef } = await import('../services/tab-data-service.js');
-
-    // Extract and validate user ID from JWT (admin uses 'id', client uses 'clientId')
-    const decodedPayload = decoded as Record<string, unknown>;
-    const userId = (decodedPayload.id as number) ?? (decodedPayload.clientId as number);
-
-    if (!userId || typeof userId !== 'number' || userId <= 0) {
-      return sendUnauthorized(res, 'Invalid token: missing user ID', ErrorCodes.INVALID_TOKEN);
-    }
-
-    // Validate tab exists, has a table definition for this portal, and user role matches.
-    // All checks return the same generic "not found" to prevent tab enumeration.
-    const tableDef = getServerTableDef(tabId);
-    if (!hasTabDataFetcher(tabId) || !tableDef || tableDef.portal !== decoded.type) {
-      return sendNotFound(res, 'Tab not found', ErrorCodes.NOT_FOUND);
-    }
-
-    const data = await fetchTabData(tabId, decoded.type as 'admin' | 'client', userId);
-
-    if (!data) {
-      return sendServerError(res, 'Failed to fetch tab data', ErrorCodes.INTERNAL_ERROR);
-    }
-
-    // Render the table partial as an HTML fragment
-    res.render('partials/table/table', {
-      tableDef,
-      rows: data.rows,
-      stats: data.stats,
-      icons: ICONS
-    }, (err: Error | null, html: string) => {
-      if (err) {
-        logger.error('EJS render error:', { error: err });
-        return sendServerError(res, 'Render failed', ErrorCodes.INTERNAL_ERROR);
-      }
-      res.type('html').send(html);
-    });
-  } catch (error) {
-    logger.error(`Tab data error for ${tabId}:`, {
-      error: error instanceof Error ? error : new Error(String(error))
-    });
-    return sendServerError(res);
-  }
-}));
 
 // ============================================
 // Client Portal Entry Point
