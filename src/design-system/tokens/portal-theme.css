@@ -601,13 +601,24 @@ html[data-theme="light"]:has(body[data-page="client-portal"]) {
 }
 
 /* =================================================================
-   ROOT ICON-TEXT GAP — any flex row with an SVG + text gets
-   consistent responsive spacing. Single source of truth.
+   ROOT ICON-TEXT GAP — margin-based, works on ANY layout (flex,
+   block, inline). Icons that are NOT the only child get spacing.
+   Uses :not(:only-child) so icon-only buttons are unaffected.
    ================================================================= */
-.portal :is(button, a, span, div, label, p, li, h1, h2, h3, h4):has(> svg.lucide) {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--icon-gap);
+
+/* Icon before text — right margin */
+.portal svg.lucide:not(:only-child):not(:last-child) {
+  margin-inline-end: var(--icon-gap);
+}
+
+/* Icon after text (trailing chevrons, etc.) — left margin */
+.portal svg.lucide:not(:only-child):last-child {
+  margin-inline-start: var(--icon-gap);
+}
+
+/* Reset margin in flex containers that manage their own gap */
+.portal :is(.icon-btn, .nav-btn) svg.lucide {
+  margin-inline: 0;
 }
 
 /* Status dot in dropdown items: use base icon-size-xs (12px), not full 1em.
