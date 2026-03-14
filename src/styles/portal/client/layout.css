@@ -26,10 +26,7 @@ body[data-page="client-portal"] {
   overflow-x: hidden;
 }
 
-/* First child gets top spacing */
-.dashboard-content > :first-child {
-  padding-top: var(--portal-page-top);
-}
+/* Top spacing now handled by .section in shared/portal-layout.css */
 
 /* Messages layout gap: 0 — shared/portal-layout.css */
 
