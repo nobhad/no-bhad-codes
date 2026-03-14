@@ -76,7 +76,7 @@ export function PortalContracts({
 
   return (
     <div ref={containerRef} className="section">
-      <TableLayout
+      <TableLayout nested
         title="CONTRACTS"
         stats={
           <TableStats

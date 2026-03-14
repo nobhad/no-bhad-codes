@@ -440,7 +440,7 @@ export function OnboardingWizard({
   }
 
   return (
-    <div ref={containerRef} className="portal-main-container">
+    <div ref={containerRef} className="section">
       {/* Header with Step Indicator */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">

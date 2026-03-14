@@ -255,7 +255,7 @@ export function DocumentRequestCard({
 
       {/* Due Date */}
       {request.due_date && (
-        <div className="flex items-center gap-1 mb-2">
+        <div className="flex items-center gap-1 ">
           <Clock className="icon-xs" />
           <span className={cn('text-sm', overdue ? 'text-primary' : 'text-muted')}>
             Due {formatCardDate(request.due_date)}
@@ -267,7 +267,7 @@ export function DocumentRequestCard({
 
       {/* Uploaded File Info (for submitted/approved) */}
       {(isSubmitted || isApproved) && request.uploaded_file && (
-        <div className="panel flex items-center gap-2 mb-2">
+        <div className="panel flex items-center gap-2 ">
           <FileText className="icon-xs" />
           <span className="text-primary flex-1 text-sm">
             {request.uploaded_file.filename}
@@ -280,7 +280,7 @@ export function DocumentRequestCard({
 
       {/* Upload Area (for pending/rejected) */}
       {canUpload && (
-        <div className="mt-2">
+        <div>
           {selectedFile ? (
             <div className="panel flex items-center gap-2">
               <FileText className="icon-xs" />
@@ -312,7 +312,7 @@ export function DocumentRequestCard({
           />
 
           {selectedFile && (
-            <div className="mt-2">
+            <div>
               <button className="btn-primary w-full" onClick={handleUpload} disabled={isUploading}>
                 {isUploading ? 'Uploading...' : 'Upload Document'}
               </button>
@@ -323,7 +323,7 @@ export function DocumentRequestCard({
 
       {/* Rejection Message */}
       {isRejected && (
-        <div className="panel mt-2 text-status-cancelled">
+        <div className="panel text-status-cancelled">
           <p className="text-sm">Please resubmit with the requested changes.</p>
         </div>
       )}
