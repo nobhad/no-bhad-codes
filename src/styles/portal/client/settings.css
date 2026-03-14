@@ -105,8 +105,8 @@
   gap: var(--space-3);
 }
 
-/* Settings fields padding — match data-table-header padding */
-.portal .settings-form-section .settings-fields {
+/* Content below header gets same padding as data-table-header */
+.portal .settings-form-section .data-table-card > *:not(.data-table-header) {
   padding: var(--space-2);
 }
 
