@@ -1,10 +1,12 @@
 /**
  * ActionItems
  * "Needs Your Attention" section showing pending actions for the client.
- * Each item is clickable and navigates to the relevant tab.
+ * Each item renders as a StatCard for consistent structure.
  */
 
 import * as React from 'react';
+import { StatCard } from '@react/components/portal';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -51,24 +53,18 @@ export const ActionItems = React.memo(({ counts, onNavigate }: ActionItemsProps)
 
   if (activeItems.length === 0) return null;
 
-  // Returns fragment of cards — intended to be placed directly inside a grid/flex row
+  // Returns fragment of StatCards — placed directly inside dashboard-stats-grid
   return (
     <>
-      {activeItems.map((item) => {
-        const count = counts[item.key];
-
-        return (
-          <button
-            key={item.key}
-            className={`attention-card has-items${item.alert ? ' attention-card--alert' : ''}`}
-            onClick={onNavigate ? () => onNavigate(item.navigateTo) : undefined}
-            type="button"
-          >
-            <span className="field-label">{item.label}</span>
-            <span className="attention-count">{count}</span>
-          </button>
-        );
-      })}
+      {activeItems.map((item) => (
+        <StatCard
+          key={item.key}
+          label={item.label}
+          value={counts[item.key]}
+          variant={item.alert ? 'alert' : 'warning'}
+          onClick={onNavigate ? () => onNavigate(item.navigateTo) : undefined}
+        />
+      ))}
     </>
   );
 });
