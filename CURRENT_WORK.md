@@ -133,6 +133,17 @@ Unified HTML wrapper structure across all admin and client portal components.
 
 ---
 
+## Concern — ADD Button Not Working Across Portal
+
+**Status:** NOT STARTED
+
+ADD button is non-functional in various areas of the portal. Needs investigation across all features that use an add/create action.
+
+- [ ] Identify all ADD button instances across admin and client portal
+- [ ] Debug and fix non-functional handlers
+
+---
+
 ## Architecture Audit — Deferred Items
 
 **Status:** IN PROGRESS

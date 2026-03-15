@@ -108,8 +108,14 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
   // --- Update handlers ---
   const handleProfileUpdate = useCallback(async (updates: Partial<ClientProfile>): Promise<boolean> => {
     try {
-      await portalFetch(API_ENDPOINTS.CLIENTS_ME, { method: 'PUT', body: updates });
-      setProfile(prev => prev ? { ...prev, ...updates } : null);
+      const response = await portalFetch(API_ENDPOINTS.CLIENTS_ME, { method: 'PUT', body: updates });
+      // Use server response if available, otherwise optimistic update
+      const serverProfile = (response as { client?: ClientProfile })?.client;
+      if (serverProfile) {
+        setProfile(serverProfile);
+      } else {
+        setProfile(prev => prev ? { ...prev, ...updates } : null);
+      }
       showNotificationRef.current?.('Profile updated', 'success');
       return true;
     } catch (err) {
