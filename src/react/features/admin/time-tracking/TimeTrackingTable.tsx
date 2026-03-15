@@ -29,6 +29,7 @@ import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { unwrapApiData, apiPost } from '@/utils/api-client';
+import { NOTIFICATIONS } from '@/constants/notifications';
 
 const logger = createLogger('TimeTrackingTable');
 
@@ -267,7 +268,7 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
           {!activeTimer && (
             <IconButton action="start" onClick={startTimer} title="Start Timer" />
           )}
-          <IconButton action="add" title="Add Entry" />
+          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="Add Entry" />
         </>
       }
       bulkActions={

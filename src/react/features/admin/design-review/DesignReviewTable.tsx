@@ -29,6 +29,7 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { DESIGN_REVIEWS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { NOTIFICATIONS } from '@/constants/notifications';
 
 interface DesignReview {
   id: number;
@@ -112,7 +113,7 @@ function sortReviews(a: DesignReview, b: DesignReview, sort: SortConfig): number
   }
 }
 
-export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNotification: _showNotification }: DesignReviewTableProps) {
+export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNotification }: DesignReviewTableProps) {
   const containerRef = useFadeIn();
 
   const endpoint = projectId
@@ -182,7 +183,7 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
             values={filterValues}
             onChange={setFilter}
           />
-          <IconButton action="add" title="Submit for Review" />
+          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="Submit for Review" />
         </>
       }
       pagination={

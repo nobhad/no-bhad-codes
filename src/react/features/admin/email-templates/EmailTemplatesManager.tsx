@@ -30,6 +30,7 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { EMAIL_TEMPLATES_FILTER_CONFIG, EMAIL_TEMPLATE_STATUS_OPTIONS } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { NOTIFICATIONS } from '@/constants/notifications';
 
 interface TemplateVariable {
   name: string;
@@ -114,7 +115,7 @@ function sortTemplates(a: EmailTemplate, b: EmailTemplate, sort: SortConfig): nu
   }
 }
 
-export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, showNotification: _showNotification, defaultPageSize = 25, overviewMode = false }: EmailTemplatesManagerProps) {
+export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, showNotification, defaultPageSize = 25, overviewMode = false }: EmailTemplatesManagerProps) {
   const containerRef = useFadeIn();
   const { data, isLoading, error, refetch } = useListFetch<EmailTemplate, EmailTemplateStats>({
     endpoint: API_ENDPOINTS.ADMIN.EMAIL_TEMPLATES,
@@ -187,7 +188,7 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
             onChange={setFilter}
           />
           <IconButton action="export" />
-          <IconButton action="add" title="New Template" />
+          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="New Template" />
         </>
       }
       pagination={

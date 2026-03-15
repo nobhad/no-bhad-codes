@@ -42,6 +42,7 @@ import type { SortConfig } from '../types';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
 import { executeUpdateWithToast, executeWithToast } from '@/utils/api-wrappers';
+import { NOTIFICATIONS } from '@/constants/notifications';
 
 interface AdHocRequest {
   id: number;
@@ -152,7 +153,7 @@ function sortAdHocRequests(a: AdHocRequest, b: AdHocRequest, sort: SortConfig): 
   }
 }
 
-export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNotification: _showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: AdHocRequestsTableProps) {
+export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: AdHocRequestsTableProps) {
   const containerRef = useFadeIn();
 
   // Build endpoint with optional query params
@@ -323,7 +324,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
             disabled={filteredRequests.length === 0}
             title="Export to CSV"
           />
-          <IconButton action="add" title="New Request" />
+          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="New Request" />
         </>
       }
       bulkActions={

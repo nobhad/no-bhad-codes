@@ -31,6 +31,7 @@ import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { apiFetch } from '@/utils/api-client';
 import { formatErrorMessage } from '@/utils/error-utils';
+import { NOTIFICATIONS } from '@/constants/notifications';
 
 interface Article {
   id: number;
@@ -122,7 +123,7 @@ function sortArticles(a: Article, b: Article, sort: SortConfig): number {
   }
 }
 
-export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken: _getAuthToken, showNotification: _showNotification, defaultPageSize = 25, overviewMode = false }: ArticlesTableProps) {
+export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken: _getAuthToken, showNotification, defaultPageSize = 25, overviewMode = false }: ArticlesTableProps) {
   const containerRef = useFadeIn();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -239,7 +240,7 @@ export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken: _getAuthT
           />
           <IconButton action="download" title="Export" />
           <IconButton action="refresh" onClick={loadData} disabled={isLoading} title="Refresh" />
-          <IconButton action="add" title="New Article" />
+          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="New Article" />
         </>
       }
       pagination={
