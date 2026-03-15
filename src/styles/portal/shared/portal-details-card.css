@@ -92,7 +92,7 @@
 }
 
 /* Remove default focus from summary since parent handles it */
-.portal :is(.details-card, .system-details, details.portal-project-card) > summary:focus-visible {
+.portal :is(.details-card, .system-details) > summary:focus-visible {
   outline: none;
   box-shadow: none;
 }

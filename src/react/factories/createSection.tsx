@@ -8,8 +8,8 @@
  * layout patterns across admin and client portals.
  *
  * Established patterns:
- * - Section: Main bordered container (.portal-section)
- * - Panel: Card-style content block (.overview-panel)
+ * - Section: Main bordered container (.panel)
+ * - Panel: Card-style content block (.panel)
  * - ContentStack: Vertical flex container
  * - ContentRow: Horizontal flex container
  * - Grid: Responsive grid layouts
@@ -51,7 +51,7 @@ export interface SectionProps {
 /**
  * Section - Main container with optional border, title, and actions.
  *
- * Uses .portal-section CSS class for consistent styling across portals.
+ * Uses .panel CSS class for consistent styling across portals.
  *
  * @example
  * <Section title="User Information" icon={User} bordered>
@@ -89,7 +89,7 @@ export const Section = React.forwardRef<HTMLElement, SectionProps>(
         ref={ref}
         id={id}
         className={cn(
-          bordered && 'portal-section',
+          bordered && 'panel',
           paddingClass,
           className
         )}
@@ -137,7 +137,7 @@ export interface PanelProps {
 /**
  * Panel - Card-style content block.
  *
- * Uses .overview-panel CSS class for admin-style cards.
+ * Uses .panel CSS class for admin-style cards.
  *
  * @example
  * <Panel title="Revenue" icon={DollarSign}>
@@ -159,16 +159,16 @@ export function Panel({
   variant = 'default'
 }: PanelProps) {
   const variantClass = {
-    default: 'overview-panel',
-    stat: 'overview-panel overview-stat-card',
-    activity: 'overview-panel activity-panel'
+    default: 'panel',
+    stat: 'panel stat-card',
+    activity: 'panel activity-panel'
   }[variant];
 
   return (
     <div className={cn(variantClass, className)}>
       {(title || actions) && (
         <div className="panel-header">
-          <div className="overview-panel-title">
+          <div className="panel-title">
             {Icon && <Icon />}
             <span>{title}</span>
           </div>
@@ -177,8 +177,8 @@ export function Panel({
       )}
       <div
         className={cn(
-          'overview-panel-body',
-          compact && 'overview-panel-body--compact'
+          'panel-body',
+          compact && 'panel-body--compact'
         )}
       >
         {children}

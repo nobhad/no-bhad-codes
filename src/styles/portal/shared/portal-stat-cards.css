@@ -18,7 +18,7 @@
    ===================================================== */
 
 .portal
-  :is(.stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card) {
+  .stat-card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -32,54 +32,20 @@
 
 /* Remove gradient overlay - flat design */
 .portal
-  :is(
-    .stat-card,
-    .kpi-card,
-    .tasks-stat-card,
-    .overview-stat-card,
-    .vital-card
-  )::after {
+  .stat-card::after {
   display: none;
 }
 
 /* Remove any accent lines - keep it clean */
 .portal
-  :is(
-    .stat-card,
-    .kpi-card,
-    .tasks-stat-card,
-    .overview-stat-card,
-    .vital-card
-  )::before {
+  .stat-card::before {
   display: none;
 }
 
 /* Hover state for clickable stat cards */
 .portal
-  :is(
-    .stat-card,
-    .kpi-card,
-    .tasks-stat-card,
-    .overview-stat-card,
-    .vital-card
-  ):hover {
+  .stat-card:hover {
   border-color: var(--color-border-primary);
-}
-
-/* =====================================================
-   CONTENT CARD - UNIFIED
-   Bordered cards for templates, previews, selections.
-   Hover effect with border color change.
-   ===================================================== */
-
-.portal :is(.content-card, .template-card, .preview-card) {
-  background: transparent;
-  border: var(--portal-border);
-  transition: border-color var(--transition-fast);
-}
-
-.portal :is(.content-card, .template-card, .preview-card):hover {
-  border-color: var(--color-accent);
 }
 
 /* =====================================================
@@ -114,8 +80,8 @@
    ===================================================== */
 
 .portal .stat-card-icon,
-.portal :is(.stat-card, .overview-stat-card) .stat-icon,
-.portal :is(.stat-card, .overview-stat-card) svg:not(.btn-icon) {
+.portal .stat-card .stat-icon,
+.portal .stat-card svg:not(.btn-icon) {
   display: inline-flex;
   align-items: center;
   justify-content: center;

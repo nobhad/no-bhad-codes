@@ -44,7 +44,7 @@
    Moved to portal-theme.css (unlayered) so it can't be overridden.
    ===================================================== */
 
-/* .overview-panel-title / .snapshot-card-title moved to portal-theme.css (unlayered) */
+/* .panel-title moved to portal-theme.css (unlayered) */
 
 /* Make tab-section headers look like section titles (no extra overrides needed) */
 .portal .tab-section > .panel-header-row .heading,

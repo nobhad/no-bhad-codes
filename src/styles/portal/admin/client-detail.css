@@ -82,8 +82,6 @@
 #tab-client-detail .overview-grid {
   grid-template-columns: 1fr var(--cd-sidebar-width);
 }
-/* .portal-project-card padding from portal-cards.css */
-
 /* ==============================================
    CRM INFO GRID
    ============================================== */
@@ -200,13 +198,6 @@
 .align-end {
   display: flex;
   align-items: flex-end;
-}
-
-/* Form field column */
-.form-field-col {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1-5);
 }
 
 /* Notes section within contact card */

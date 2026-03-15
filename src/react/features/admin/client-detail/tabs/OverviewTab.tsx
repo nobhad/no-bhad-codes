@@ -232,7 +232,7 @@ export function OverviewTab({
             <h3><span className="title-full">Contact Information</span></h3>
             {onSwitchTab && (
               <button
-                className="overview-panel-action"
+                className="panel-action"
                 onClick={() => onSwitchTab('contacts')}
               >
                 View All <ArrowRight className="panel-icon" />

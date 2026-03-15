@@ -20,7 +20,6 @@
  *
  * Inlined:
  * - Tag input (.tag-remove)
- * - Simple KPI cards (.kpi-card)
  */
 
 @layer components {
@@ -70,39 +69,6 @@
 
 .tag-remove:hover {
   opacity: 1;
-}
-
-/* =====================================================
-   SIMPLE CHARTS - KPI CARDS
-   ===================================================== */
-
-.kpi-card {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1-5);
-  background: var(--color-bg-tertiary);
-  border-top: var(--border-width-thick) solid var(--color-accent);
-}
-
-.kpi-card-icon {
-  font-size: var(--font-size-xl);
-  color: var(--color-text-secondary);
-}
-
-.kpi-card-change {
-  display: flex;
-  align-items: center;
-  gap: var(--icon-gap-xs);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-}
-
-.kpi-card-change.positive {
-  color: var(--status-active);
-}
-
-.kpi-card-change.negative {
-  color: var(--status-cancelled);
 }
 
 }

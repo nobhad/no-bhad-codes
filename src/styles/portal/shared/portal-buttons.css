@@ -12,6 +12,61 @@
 
 @layer components {
 
+/* ============================================
+ * PORTAL BASE BUTTON SYSTEM
+ * ============================================
+ * Single source of truth for ALL portal button styles.
+ * Base layout + padding for text buttons with variant classes.
+ * .icon-btn and .nav-btn are excluded — they have separate styling below.
+ */
+
+/* Base layout for all portal text buttons */
+.portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--icon-gap-md, 0.5rem);
+  padding: var(--portal-btn-padding, 8px 18px);
+  border: var(--portal-btn-border-width, 2px) solid var(--portal-btn-border-color, var(--color-dark));
+  border-bottom-width: var(--portal-btn-border-bottom-width, 2px);
+  border-radius: var(--portal-btn-border-radius, 0);
+  font-size: var(--portal-btn-font-size, var(--font-size-sm));
+  font-weight: var(--portal-btn-font-weight, 600);
+  font-family: var(--portal-btn-font-family, inherit);
+  letter-spacing: var(--portal-btn-letter-spacing, normal);
+  text-transform: var(--portal-btn-text-transform, uppercase);
+  cursor: pointer;
+  background: inherit;
+  color: var(--portal-btn-color, var(--color-dark));
+  box-shadow: var(--portal-btn-shadow, none);
+  transition: var(--portal-btn-transition, all 0.2s ease);
+  text-decoration: none;
+  white-space: nowrap;
+  text-shadow: none;
+  box-sizing: border-box;
+}
+
+/* SVG icons inherit button color */
+.portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success, .form-button):not(.icon-btn):not(.nav-btn) > svg {
+  color: inherit;
+}
+
+/* Default hover state */
+.portal :is(.btn-primary, .btn-secondary, .btn-outline):not(.icon-btn):not(.nav-btn):hover {
+  background: var(--portal-btn-hover-bg, var(--color-dark));
+  color: var(--portal-btn-hover-color, var(--color-light));
+  border-color: var(--portal-btn-hover-border, var(--color-dark));
+  box-shadow: var(--portal-btn-shadow-hover, none);
+}
+
+/* Focus state */
+.portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn):focus,
+.portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn):focus-visible {
+  outline: 2px solid var(--color-off-white);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
 /* Button with icon - flex layout */
 button:has(> svg) {
   display: inline-flex;
@@ -22,21 +77,10 @@ button:has(> svg) {
 
 /* Icon before text (default order).
    Exclude dropdown triggers — their SVG carets must stay AFTER text. */
-:is(.btn, .btn-primary, .btn-secondary, .btn-outline):not(.dropdown-trigger):not(.date-range-trigger) > :is(svg, .btn-icon),
+:is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.dropdown-trigger):not(.date-range-trigger) > :is(svg, .btn-icon),
 .icon-btn > :is(svg, .icon-btn-svg),
-button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-trigger):not(.status-dropdown-trigger):not(.form-dropdown-trigger):not(.modal-dropdown-trigger):not(.date-range-trigger) > :is(.icon-wrap, .tab-icon, svg) {
+button:not(.panel-action):not(.custom-dropdown-trigger):not(.dropdown-trigger):not(.status-dropdown-trigger):not(.form-dropdown-trigger):not(.modal-dropdown-trigger):not(.date-range-trigger) > :is(.icon-wrap, .tab-icon, svg) {
   order: -1;
-}
-
-/* ============================================
- * SVG ICON COLOR INHERITANCE - ROOT FIX
- * ============================================
- * Ensures SVG icons in buttons inherit the button's text color.
- * This is critical for Lucide icons which use stroke="currentColor".
- * Without this, SVGs appear grey instead of matching button text.
- */
-.portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .form-button) > svg {
-  color: inherit;
 }
 
 /* ============================================
@@ -647,6 +691,35 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 .action-bar > * {
   display: inline-flex;
   align-items: center;
+}
+
+/* ============================================
+ * RESPONSIVE BUTTONS
+ * ============================================ */
+
+@media (--small-mobile) {
+  .portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn) {
+    padding: clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 20px);
+    font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+  }
+}
+
+/* ============================================
+ * ACCESSIBILITY - BUTTONS
+ * ============================================ */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn) {
+    border-width: var(--border-width-thick);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn) {
+    transition: none;
+  }
 }
 
 } /* end @layer components */

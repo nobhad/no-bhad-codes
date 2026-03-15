@@ -293,12 +293,12 @@ function ChartWidget({ data, type }: ChartWidgetProps) {
 
 const KpiCard = React.memo(({ kpi }: { kpi: KPI }) => {
   return (
-    <div className="kpi-card">
-      <div className="kpi-card-icon">{kpi.icon}</div>
-      <span className="kpi-card-label">{kpi.label}</span>
+    <div className="stat-card">
+      <div className="stat-card-icon">{kpi.icon}</div>
+      <span className="stat-label">{kpi.label}</span>
       <div className="stat-value stat-value-primary">{kpi.value}</div>
       {kpi.change !== undefined && (
-        <div className={cn('kpi-card-change', kpi.change >= 0 ? 'positive' : 'negative')}>
+        <div className={cn('stat-change', kpi.change >= 0 ? 'positive' : 'negative')}>
           {kpi.change >= 0 ? <TrendingUp className="icon-xs" /> : <TrendingDown className="icon-xs" />}
           <span className="change-value">
             {kpi.change >= 0 ? '+' : ''}
@@ -485,28 +485,28 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
                 {kpis.map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
               </div>
               <div className="analytics-card-grid">
-                <div className="analytics-chart-card">
+                <div className="panel analytics-chart-panel">
                   <div className="panel-header">
                     <h3>Revenue Over Time</h3>
                     <LineChart className="icon-md" />
                   </div>
                   <ChartWidget data={data?.revenueChart} type="line" />
                 </div>
-                <div className="analytics-chart-card">
+                <div className="panel analytics-chart-panel">
                   <div className="panel-header">
                     <h3>Projects by Status</h3>
                     <PieChart className="icon-md" />
                   </div>
                   <ChartWidget data={data?.projectsChart} type="pie" />
                 </div>
-                <div className="analytics-chart-card">
+                <div className="panel analytics-chart-panel">
                   <div className="panel-header">
                     <h3>Lead Funnel</h3>
                     <BarChart3 className="icon-md" />
                   </div>
                   <ChartWidget data={data?.leadsChart} type="bar" />
                 </div>
-                <div className="analytics-chart-card">
+                <div className="panel analytics-chart-panel">
                   <div className="panel-header"><h3>Lead Sources</h3></div>
                   <SourceBreakdown sources={data?.sourceBreakdown} />
                 </div>
@@ -521,7 +521,7 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
                   .filter((kpi) => ['revenue', 'invoices', 'avgValue'].includes(kpi.id))
                   .map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
               </div>
-              <div className="analytics-chart-card">
+              <div className="panel analytics-chart-panel">
                 <div className="panel-header">
                   <h3>Revenue Over Time</h3>
                   <LineChart className="icon-md" />
@@ -539,14 +539,14 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
                   .map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
               </div>
               <div className="analytics-card-grid">
-                <div className="analytics-chart-card">
+                <div className="panel analytics-chart-panel">
                   <div className="panel-header">
                     <h3>Lead Funnel</h3>
                     <BarChart3 className="icon-md" />
                   </div>
                   <ChartWidget data={data?.leadsChart} type="bar" />
                 </div>
-                <div className="analytics-chart-card">
+                <div className="panel analytics-chart-panel">
                   <div className="panel-header"><h3>Lead Sources</h3></div>
                   <SourceBreakdown sources={data?.sourceBreakdown} />
                 </div>
@@ -561,7 +561,7 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
                   .filter((kpi) => ['projects', 'avgValue'].includes(kpi.id))
                   .map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
               </div>
-              <div className="analytics-chart-card">
+              <div className="panel analytics-chart-panel">
                 <div className="panel-header">
                   <h3>Projects by Status</h3>
                   <PieChart className="icon-md" />

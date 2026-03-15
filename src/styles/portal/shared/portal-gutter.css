@@ -11,7 +11,9 @@
    .subsection is a structural wrapper that NEVER receives gutter padding.
    ===================================================== */
 
-.portal {
+/* Defined on :root so modals (rendered via Radix Portal into <body>)
+   can also access the gutter variable. */
+:root {
   --content-gutter: var(--space-2);
 }
 
@@ -25,19 +27,15 @@
 .portal .portal-global-header,
 .portal .sidebar-content,
 .portal .sidebar-footer,
-.portal .dashboard-content > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content):not(.subsection),
-.portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > *:not(.subsection) {
+.portal .dashboard-content > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content):not(.subsection):not(.data-table-scroll-wrapper):not(button),
+.portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > *:not(.subsection):not(.data-table-scroll-wrapper):not(button) {
   padding: var(--content-gutter);
   box-sizing: border-box;
 }
 
-/* .section padding override — vertical padding differs from gutter.
-   Left/right use --content-gutter to align with header and other elements.
-   Top = --portal-page-top, bottom = 2x top (--portal-page-bottom).
-   Must be in this unlayered file to beat the Tier 1 rule above. */
-.portal .dashboard-content .section {
-  padding: var(--portal-page-top) var(--content-gutter) var(--portal-page-bottom);
-}
+/* .section is the layout-level page wrapper (from PortalLayout).
+   No padding — children get gutter via Tier rules below.
+   Gap between children uses --portal-section-gap (set in portal-layout.css). */
 
 /* Help accordion: zero content padding, push gutter to article buttons
    so their icons align with the trigger's category icons. */
@@ -57,11 +55,11 @@
    ===================================================== */
 
 .portal .dashboard-content .data-table-header,
-.portal .dashboard-content .accordion-item-wrapper > *,
-.portal .dashboard-content .msgtab-bubble > *,
+.portal .dashboard-content .accordion-item-wrapper > *:not(button),
+.portal .dashboard-content .msgtab-bubble > *:not(button),
 .portal .dashboard-content .help-featured-card,
 .portal .dashboard-content .dropzone-content,
-.portal .dashboard-content #folder-sidebar > *,
+.portal .dashboard-content #folder-sidebar > *:not(button),
 .portal .dashboard-content .folder-item,
 /* Settings fields: wrapper gets full gutter, children get top padding only */
 .portal .dashboard-content .settings-fields,
@@ -87,13 +85,13 @@
    from the container's border.
    ===================================================== */
 
-.portal .dashboard-content .panel > *:not(.accordion-item-wrapper):not(.data-table-header):not(.milestone-list),
-.portal .dashboard-content .portal-section > *,
-.portal .dashboard-content .section-content > *,
-.portal .dashboard-content .data-table-scroll-wrapper > *:not(.data-table):not(.milestone-list):not(.files-browser-layout):not(.msgtab-container),
+.portal .dashboard-content .panel > *:not(.accordion-item-wrapper):not(.data-table-header):not(.milestone-list):not(.messaging-top-bar):not(.messaging-columns):not(button),
+.portal .dashboard-content .section-content > *:not(button),
+.portal .dashboard-content .data-table-card > *:not(.data-table-scroll-wrapper):not(.data-table-container):not(button),
+.portal .dashboard-content .config-content > *:not(button),
 .portal .dashboard-content .milestone-list,
 /* Stat cards — small bordered summary cards */
-.portal .dashboard-content :is(.stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card),
+.portal .dashboard-content .stat-card,
 /* Activity and detail list items */
 .portal .dashboard-content .activity-list > li,
 .portal .dashboard-content .detail-list > li,
@@ -118,20 +116,22 @@
 }
 
 /* Compact/scrollable panel bodies — content scrolls edge-to-edge */
-.portal .overview-panel-body--compact,
-.portal .activity-panel .overview-panel-body {
+.portal .panel-body--compact,
+.portal .activity-panel .panel-body {
   padding: 0;
 }
 
-/* Analytics chart cards — chart fills entire card */
-.portal .analytics-chart-card {
+/* Analytics chart panels — chart fills entire panel */
+.portal .analytics-chart-panel {
   padding: 0;
 }
 
-/* Details/project cards — spacing controlled by internal grid */
-.portal :is(.details-card, .system-details).portal-project-card {
+/* Data table scroll wrapper — layout container, never gets gutter.
+   High specificity to beat Tier 1 :not() chain. */
+.portal .dashboard-content .data-table-scroll-wrapper.data-table-scroll-wrapper {
   padding: 0;
 }
+
 
 /* Messages mobile — full-bleed message thread */
 @media (--compact-mobile) {

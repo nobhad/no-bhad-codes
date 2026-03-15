@@ -299,20 +299,20 @@ function SnapshotCard({ title, icon, badge, onViewAll, children }: {
   children: React.ReactNode;
 }) {
   return (
-    <div className="snapshot-card">
+    <div className="panel">
       <div className="panel-header">
-        <div className="snapshot-card-title">
+        <div className="panel-title">
           {icon}
           <span className="field-label">{title}</span>
           {badge}
         </div>
         {onViewAll && (
-          <button onClick={onViewAll} className="overview-panel-action">
+          <button onClick={onViewAll} className="panel-action">
             View <ArrowRight className="panel-icon" />
           </button>
         )}
       </div>
-      <div className="snapshot-card-body">
+      <div className="panel-body">
         {children}
       </div>
     </div>

@@ -50,8 +50,6 @@
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
 
-/* Overview cards use shared .overview-card styles */
-
 /* Preview Container */
 .preview-container {
   display: flex;

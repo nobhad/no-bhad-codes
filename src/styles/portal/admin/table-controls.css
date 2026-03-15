@@ -40,11 +40,9 @@
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  margin-bottom: var(--space-2);
   min-height: var(--space-6);
   box-sizing: border-box;
   background: var(--color-bg-raised);
-  border: var(--portal-border);
   animation: slideDown var(--duration-fast) ease-out;
 }
 

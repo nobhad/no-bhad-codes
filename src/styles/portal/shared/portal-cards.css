@@ -39,26 +39,12 @@
   gap: var(--space-3);
 }
 
-/* =====================================================
-   PORTAL SECTION - BASE CONTAINER STYLE
-   Single source of truth for ALL bordered section containers.
-   Applies uniform structure: border, transparent background.
-   Individual selectors add their own padding/layout.
-   ===================================================== */
-.portal-section,
-.analytics-chart-card,
-.kpi-card {
-  background: transparent;
-  border: var(--portal-border);
-  overflow: hidden;
-}
 
 /* =====================================================
    PORTAL SECTION HEADING - BASE STYLE
    Single source of truth for ALL section headings.
    Uses --portal-section-heading-padding from design tokens.
    ===================================================== */
-.portal-section > h3:first-child,
 .portal .analytics-section > h3:first-child,
 .portal .chart-container > h3:first-child,
 .portal .analytics-column > h3:first-child,
@@ -74,7 +60,6 @@
    PORTAL SECTION CONTENT - BASE STYLE
    Uniform padding for content area below headings.
    ===================================================== */
-.portal-section > *:not(h3:first-child),
 .portal .analytics-section > *:not(h3:first-child),
 .portal .chart-container > *:not(h3:first-child),
 .portal .analytics-column > *:not(h3:first-child),
@@ -92,7 +77,7 @@
    - .stat-label   : Statistic/metric labels (KPIs, summaries)
 
    ACTIVE ALIASES (still emitted by React components — migrate on touch):
-   .filter-section-label, .prompt-dialog-label, .kpi-card-label,
+   .filter-section-label, .prompt-dialog-label,
    .section-title, .milestone-title
    ===================================================== */
 
@@ -109,10 +94,8 @@
   .stat-label,
   .filter-section-label,
   .prompt-dialog-label,
-  .kpi-card-label,
   .section-title,
   .milestone-title,
-  .summary-card h4,
   .payment-plans-section h4,
   .project-notes h4
 ) {
@@ -131,10 +114,8 @@ html[data-theme="light"] .portal :is(
   .stat-label,
   .filter-section-label,
   .prompt-dialog-label,
-  .kpi-card-label,
   .section-title,
   .milestone-title,
-  .summary-card h4,
   .payment-plans-section h4,
   .project-notes h4
 ) {
@@ -408,85 +389,7 @@ html[data-theme="light"] .portal :is(
   gap: var(--portal-section-gap);
 }
 
-/* =====================================================
-   OVERVIEW CARD
-   ===================================================== */
-/* Overview card */
-.portal .overview-card {
-  background: transparent;
-  border: var(--portal-border);
-  color: var(--color-text-primary);
-  overflow: hidden;
-  transition: border-color var(--transition-fast);
-}
-
-.portal .overview-card h3 {
-  margin-bottom: var(--space-2);
-}
-
-/* =====================================================
-   CONSISTENT CARD STYLING
-   All main content sections use identical flat card styling
-   ===================================================== */
-/* Activity/progress/milestone/approval cards */
-.portal
-  :is(
-    .recent-activity,
-    .project-progress-section,
-    .milestones-section,
-    .pending-approvals-section
-  ) {
-  background: transparent;
-  border: var(--portal-border);
-  color: var(--color-text-primary);
-  overflow: hidden;
-  transition: border-color var(--transition-fast);
-}
-
-.portal
-  :is(
-    .recent-activity,
-    .project-progress-section,
-    .milestones-section,
-    .pending-approvals-section,
-    .analytics-overview
-  )
-  h3 {
-  margin: 0 0 var(--space-2) 0;
-}
-
 /* Activity and task widgets: see portal-dashboard-widgets.css */
-
-/* =====================================================
-   PORTAL PROJECT CARD
-   ===================================================== */
-/* Project card */
-.portal .portal-project-card {
-  display: block;
-  background: transparent;
-  border: var(--portal-border);
-  color: var(--color-text-primary);
-  overflow: hidden;
-  transition: border-color var(--transition-fast);
-}
-
-.portal .portal-project-card h3 {
-  margin: 0 0 var(--space-2) 0;
-}
-
-/* =====================================================
-   PORTAL PROJECT CARD - Section Header with Actions
-   ===================================================== */
-.portal .portal-project-card .section-header-with-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 0 0 var(--space-2) 0;
-}
-
-.portal .portal-project-card .section-header-with-actions h3 {
-  margin: 0;
-}
 
 /* =====================================================
    HEALTH CHECK GRID - System Status
@@ -550,62 +453,6 @@ html[data-theme="light"] .portal :is(
   gap: var(--portal-section-gap);
 }
 
-/* =====================================================
-   CARD SHADOWS - Consolidated
-   Minimal shadows for depth; cards use flat design
-   ===================================================== */
-.portal
-  :is(
-    .overview-card,
-    .recent-activity,
-    .upcoming-tasks,
-    .messages-container,
-    .invoices-list,
-    .settings-section,
-    .project-progress-section,
-    .pending-approvals-section
-  ) {
-  box-shadow: none;
-}
-
-/* No shadows on child divs inside main containers */
-.portal
-  :is(
-    .overview-card,
-    .recent-activity,
-    .portal-project-card,
-    .messages-container,
-    .summary-card,
-    .invoices-list,
-    .settings-section
-  )
-  > div {
-  box-shadow: none;
-}
-
-/* =====================================================
-   SUMMARY CARD
-   Used for invoice totals, stats summaries
-   ===================================================== */
-/* Summary card */
-.portal .summary-card {
-  background: transparent;
-  border: var(--portal-border);
-  color: var(--color-text-primary);
-  transition: border-color var(--transition-fast);
-}
-
-.portal .summary-card .summary-label {
-  display: block;
-  margin-bottom: var(--space-1);
-}
-
-.portal .summary-card .summary-value {
-  display: block;
-  font-family: var(--font-family-sans);
-  font-size: var(--font-size-2xl);
-  color: var(--color-text-primary);
-}
 
 
 /* =====================================================
@@ -647,67 +494,6 @@ html[data-theme="light"] .portal :is(
   background: var(--portal-alpha-white-05);
 }
 
-/* =====================================================
-   INVOICES LIST
-   Container for invoice history items
-   ===================================================== */
-/* Invoices list */
-.portal .invoices-list {
-  background: transparent;
-  border: var(--portal-border);
-  color: var(--color-text-primary);
-  overflow: hidden;
-  transition: border-color var(--transition-fast);
-}
-
-.portal .invoices-list h3 {
-  margin: 0 0 var(--space-2) 0;
-}
-
-/* =====================================================
-   PROGRESS CARD
-   ===================================================== */
-.portal .progress-card .progress-bar {
-  width: 100%;
-  height: var(--progress-bar-height);
-  background: var(--portal-alpha-white-10);
-  border: none;
-  margin: var(--space-2) 0;
-  overflow: hidden;
-}
-
-.portal .progress-card .progress-fill {
-  height: 100%;
-  background: var(--color-accent);
-  transition: width var(--transition-normal) ease;
-}
-
-.portal .progress-card .progress-text {
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-}
-
-/* =====================================================
-   CONTENT SECTION CARD
-   Generic wrapper for content groups that need containment
-   ===================================================== */
-/* Content section card */
-.portal .content-section-card {
-  background: transparent;
-  border: var(--portal-border);
-  margin-bottom: var(--space-4);
-  box-shadow: none;
-}
-
-.portal .content-section-card .section-title {
-  font-family: var(--font-family-sans);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-regular);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
-  color: var(--color-text-primary);
-  margin: 0 0 var(--space-3);
-}
 
 /* =====================================================
    MOBILE RESPONSIVE
@@ -735,44 +521,10 @@ html[data-theme="light"] .portal :is(
     grid-template-columns: 1fr;
   }
 
-  .portal :is(.portal-project-card, .recent-activity, .upcoming-tasks) h3 {
-    margin-bottom: var(--space-2);
-  }
 }
 
 /* Stat card and dashboard widget mobile styles: see respective files */
 
 /* Dashboard widgets: see portal-dashboard-widgets.css */
-
-/* =====================================================
-   INVOICE SUMMARY GRID
-   (Merged from client-portal/invoices.css)
-   ===================================================== */
-
-/* Invoice Summary Grid */
-.invoice-summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  margin-bottom: var(--space-3);
-}
-
-/* Summary Card - shared portal styling */
-.portal .summary-card {
-  text-align: center;
-}
-
-/* No Invoices Message */
-.no-invoices-message {
-  color: var(--color-text-secondary);
-  font-style: italic;
-  text-align: left;
-}
-
-/* Invoice Summary Responsive */
-@media (--compact-mobile) {
-  .invoice-summary {
-    grid-template-columns: 1fr;
-  }
-}
 
 }

@@ -157,12 +157,6 @@
 @media (--mobile) {
   /* Tab panels use base .portal-tab-panel from portal-tabs.css */
 
-  /* Ensure cards are contained on mobile */
-  #tab-client-detail .portal-project-card {
-    max-width: 100%;
-    overflow: hidden;
-  }
-
   .contact-card {
     flex-direction: column;
     gap: var(--space-2);

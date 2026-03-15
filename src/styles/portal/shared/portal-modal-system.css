@@ -68,14 +68,24 @@
    PORTAL MODAL CONTAINER
    ============================================== */
 
-/* Modal container — margin provides viewport edge spacing (was overlay padding) */
+/* Modal container — fixed + centered in viewport.
+   Radix renders Content as a sibling to Overlay (not inside it),
+   so the modal needs its own fixed positioning.
+   Uses inset + margin:auto for centering (not transform, which
+   conflicts with GSAP scale animation + clearProps). */
 .portal-modal {
-  background: var(--color-bg-secondary);
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  z-index: calc(var(--z-index-portal-modal) + 1);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono);
   box-shadow: var(--shadow-modal);
-  width: 100%;
+  width: calc(100% - var(--space-4) * 2);
   max-width: var(--modal-width-md);
   max-height: var(--modal-max-height);
-  margin: var(--space-4);
+  height: fit-content;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -106,7 +116,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: var(--content-gutter);
   flex-shrink: 0;
+}
+
+.portal-modal-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  min-width: 0;
 }
 
 .portal-modal-title svg {
@@ -116,10 +134,21 @@
   flex-shrink: 0;
 }
 
+/* Match data-table-header h3 pattern used across the portal.
+   font-family explicit to override typography.css h2 Acme font
+   since modal renders outside .portal via Radix portal. */
 .portal-modal-header h2 {
-  color: var(--color-text-primary);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  white-space: nowrap;
 }
 
 .portal-modal-description {
@@ -142,35 +171,6 @@
 }
 
 /* ==============================================
-   PORTAL MODAL FORM ELEMENTS
-   ============================================== */
-
-.portal-modal form {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.portal-modal fieldset {
-  border: none;
-  padding: 0;
-  margin: 0 0 var(--space-4) 0;
-}
-
-.portal-modal legend {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wider);
-  margin-bottom: var(--space-3);
-  border-bottom: var(--portal-border);
-  width: 100%;
-}
-
-/* ==============================================
    PORTAL MODAL BODY & FOOTER
    ============================================== */
 
@@ -179,23 +179,11 @@
   overflow-y: auto;
   flex: 1;
   min-height: 300px;
+  padding: var(--content-gutter);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
   overscroll-behavior: contain;
-}
-
-.portal-modal-body .form-field {
-  margin-bottom: 0;
-}
-
-.portal-modal-body .form-row {
-  display: flex;
-  gap: var(--space-4);
-}
-
-.portal-modal-body .form-row .form-field {
-  flex: 1;
 }
 
 /* Modal footer — IS a content child of .portal-modal, gets its own padding */
@@ -203,80 +191,16 @@
   display: flex;
   justify-content: flex-end;
   gap: var(--space-2);
+  padding: var(--content-gutter);
   flex-shrink: 0;
-  background: var(--color-bg-secondary);
+  background: inherit;
   position: relative;
   z-index: var(--z-index-1);
 }
 
-/* ==============================================
-   MODAL DROPDOWN
-   ============================================== */
-
-.portal-modal .custom-dropdown[data-modal-dropdown] {
-  --dropdown-bg: var(--color-bg-primary);
-  --dropdown-border-color: var(--color-border-primary);
-  --dropdown-border-width: 1px;
-  --dropdown-radius: var(--border-radius-lg);
-}
-
-.portal-modal .custom-dropdown[data-modal-dropdown]:not(.open) .custom-dropdown-trigger {
-  border: var(--border-width) solid var(--dropdown-border-color);
-}
-
-.portal-modal .custom-dropdown[data-modal-dropdown]:not(.open) .custom-dropdown-trigger:focus,
-.portal-modal
-  .custom-dropdown[data-modal-dropdown]:not(.open)
-  .custom-dropdown-trigger:focus-visible {
-  outline: none;
-  border-color: var(--color-accent);
-}
-
-.portal-modal .custom-dropdown[data-modal-dropdown].open .custom-dropdown-trigger {
-  border: var(--border-width) solid var(--color-accent);
-  border-bottom: none;
-  outline: none;
-}
-
-.portal-modal .custom-dropdown[data-modal-dropdown].open .custom-dropdown-menu {
-  border: var(--border-width) solid var(--color-accent);
-  border-top: none;
-}
-
 } /* end @layer components */
 
-/* Modal dropdown menu positioning - using @layer utilities for cascade priority */
-@layer utilities {
-  .portal-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-menu {
-    position: absolute;
-    top: 100%;
-    bottom: auto;
-    left: 0;
-    right: 0;
-    margin-top: -1px;
-    z-index: var(--z-index-portal-dropdown);
-  }
-}
-
 @layer components {
-
-.portal-modal .custom-dropdown[data-modal-dropdown].flip-above.open .custom-dropdown-trigger {
-  border-bottom: var(--border-width) solid var(--color-accent);
-  border-top: none;
-}
-
-.portal-modal .custom-dropdown[data-modal-dropdown].flip-above .custom-dropdown-menu {
-  border-bottom: none;
-  border-top: var(--border-width) solid var(--color-accent);
-}
-
-.portal-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger {
-}
-
-.portal-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-item {
-  text-align: left;
-  justify-content: flex-start;
-}
 
 /* ==============================================
    RESPONSIVE

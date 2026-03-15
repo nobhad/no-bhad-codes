@@ -70,9 +70,7 @@
   gap: var(--space-1);
 }
 
-.config-form-field .form-input {
-  background-color: var(--color-bg-primary);
-}
+/* Form inputs inherit from portal-forms.css — no overrides needed */
 
 .config-form-field--wide {
   grid-column: 1 / -1;
@@ -182,29 +180,24 @@
 }
 
 /* ================================================
-   Snapshot cards (settings overview)
+   Snapshot panels (settings overview)
+   Uses base .panel from portal-layout.css.
+   Overrides: rounded corners, raised background.
    ================================================ */
-.snapshot-card {
-  display: flex;
-  flex-direction: column;
+.settings-overview .panel {
   background: var(--color-bg-raised);
-  border: var(--portal-border);
   border-radius: var(--border-radius-md);
-  overflow: hidden;
 }
 
-.snapshot-card-header {
+.settings-overview .panel-header {
   border-bottom: var(--portal-border);
 }
 
-.snapshot-card-title {
+.settings-overview .panel-title {
   color: var(--color-text-secondary);
 }
 
-/* snapshot header/title layout + icon sizing are single source of truth:
-   shared/portal-tab-components.css */
-
-.snapshot-card-body {
+.settings-overview .panel-body {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);

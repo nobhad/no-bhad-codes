@@ -356,8 +356,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
 [data-page="admin"] .analytics-section,
 [data-page="admin"] .analytics-overview,
 [data-page="admin"] .projects-table-container,
-[data-page="admin"] .data-table-header,
-[data-page="admin"] #tab-client-detail .portal-project-card {
+[data-page="admin"] .data-table-header {
   color: var(--color-text-primary);
 }
 
@@ -556,25 +555,7 @@ body.modal-open .dashboard-content {
   margin-bottom: var(--space-1);
 }
 
-.set-password-form .form-input {
-  border: var(--portal-border);
-  border-radius: var(--border-radius-sm);
-  background: var(--color-bg-secondary);
-  font-size: var(--font-size-base);
-}
-
-.set-password-form .form-input[readonly] {
-  background: var(--color-bg-readonly);
-  cursor: not-allowed;
-}
-
-.set-password-form .form-error {
-  background: rgba(var(--color-error-rgb), 0.1);
-  color: var(--color-danger);
-  border-radius: var(--border-radius-sm);
-  font-size: var(--font-size-sm);
-  margin-bottom: var(--space-4);
-}
+/* Form inputs inherit from portal-forms.css — no overrides needed */
 
 /* ================================================
    System Tab
@@ -666,7 +647,6 @@ body.modal-open .dashboard-content {
   }
 
   body[data-page="admin"] .stat-card,
-  body[data-page="admin"] .portal-project-card,
   body[data-page="admin"] .chart-container {
     /* gap on .dashboard-content is the SoT for vertical spacing */
   }
@@ -682,11 +662,7 @@ body.modal-open .dashboard-content {
     touch-action: pan-y;
   }
 
-  [data-page="admin"] .portal-project-card,
-  [data-page="admin"] .attention-card,
-  [data-page="admin"] .overview-card,
-  [data-page="admin"] .recent-activity,
-  [data-page="admin"] .upcoming-tasks {
+  [data-page="admin"] .attention-card {
     width: 100%;
   }
 
@@ -715,10 +691,6 @@ body.modal-open .dashboard-content {
   }
 
   [data-page="admin"] #tab-system .status-list {
-    overflow: visible;
-  }
-
-  [data-page="admin"] #tab-system .portal-project-card {
     overflow: visible;
   }
 

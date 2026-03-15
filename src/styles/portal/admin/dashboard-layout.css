@@ -54,22 +54,6 @@
   gap: var(--portal-section-gap);
 }
 
-/* =====================================================
-   STAT CARDS - Visual Hierarchy
-   Primary KPIs: Large values, prominent display
-   ===================================================== */
-
-.overview-stat-card {
-  background-color: inherit;
-  border: var(--portal-border);
-  overflow: hidden;
-  cursor: pointer;
-  text-align: left;
-  font-family: inherit;
-  transition: border-color var(--transition-faster);
-  /* padding via portal-stat-cards.css: --portal-card-padding (higher specificity) */
-}
-
 .stat-card-top {
   display: flex;
   align-items: center;
@@ -119,22 +103,12 @@
 }
 
 /* =====================================================
-   PANELS
+   PANEL CHILDREN (dashboard-specific)
+   Base .panel definition in shared/portal-layout.css
    ===================================================== */
 
-.overview-panel {
-  background-color: inherit;
-  border: var(--portal-border);
-  overflow: hidden;
-}
-
-/* overview panel header + title layout are single source of truth:
-   shared/portal-tab-components.css */
-
-/* Panel icon sizing already handled by .portal .panel-icon in portal-cards.css */
-
 /* Panel action link - borderless, text-only */
-.overview-panel-action {
+.panel-action {
   display: inline-flex;
   align-items: center;
   gap: var(--icon-gap-xs);
@@ -148,16 +122,16 @@
   padding: 0;
 }
 
-.overview-panel-action:hover {
+.panel-action:hover {
   color: var(--color-accent);
 }
 
-.overview-panel-action:hover .field-label {
+.panel-action:hover .field-label {
   color: var(--color-accent);
 }
 
 /* Panel action icons - match action link text size (1em = --font-size-xs) */
-.overview-panel-action > :is(svg, .panel-icon) {
+.panel-action > :is(svg, .panel-icon) {
   width: 1em;
   height: 1em;
   flex-shrink: 0;
@@ -168,32 +142,14 @@
   font-size: var(--font-size-xs);
 }
 
-/* Panel body IS a content child — it gets its own padding (not the panel wrapper) */
-.overview-panel-body {
-}
-
-/* Activity feeds handle their own padding per item (8px top/bottom, 24px sides).
-   Zero out the body padding entirely — items provide the spacing.
-   Small bottom padding so the last item isn't flush with the panel border. */
-.overview-panel-body:has(.activity-feed) {
-}
-
-/* Quick actions grid — content child gets its own padding */
-.overview-panel-body.ovdash-quick-actions {
-}
-
-.overview-panel-body--compact {
+.panel-body--compact {
   max-height: 280px;
   overflow-y: auto;
   scrollbar-width: thin;
 }
 
 /* Activity panel variant - used by Panel component with variant="activity" */
-.activity-panel {
-  /* Inherits from .overview-panel */
-}
-
-.activity-panel .overview-panel-body {
+.activity-panel .panel-body {
   max-height: 400px;
   overflow-y: auto;
   scrollbar-width: thin;
