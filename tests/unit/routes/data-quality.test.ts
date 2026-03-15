@@ -92,6 +92,22 @@ vi.mock('../../../server/database/row-helpers', () => ({
   transformData: (data: unknown) => data
 }));
 
+// Mock error handler (asyncHandler) - just call the fn
+vi.mock('../../../server/middleware/errorHandler', () => ({
+  asyncHandler: (fn: any) => fn
+}));
+
+// Mock data quality service
+vi.mock('../../../server/services/data-quality-service', () => ({
+  dataQualityService: {
+    logSecurityThreat: vi.fn().mockResolvedValue(undefined),
+    dismissDuplicate: vi.fn().mockResolvedValue(undefined),
+    getDuplicateHistory: vi.fn().mockResolvedValue({ detectionLogs: [], resolutionLogs: [] }),
+    storeMetrics: vi.fn().mockResolvedValue(undefined),
+    getMetricsHistory: vi.fn().mockResolvedValue([])
+  }
+}));
+
 // Mock logger
 vi.mock('../../../server/services/logger', () => ({
   logger: {
@@ -151,7 +167,7 @@ describe('Data Quality Routes', () => {
     it('should validate a valid email address', async () => {
       mockValidateEmail.mockReturnValue({ valid: true, normalized: 'user@example.com' });
 
-      const routerModule = await import('../../../server/routes/data-quality');
+      const routerModule = await import('../../../server/routes/data-quality/validation');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/validate/email');
 
@@ -164,7 +180,7 @@ describe('Data Quality Routes', () => {
     });
 
     it('should return validation error when email is missing', async () => {
-      const routerModule = await import('../../../server/routes/data-quality');
+      const routerModule = await import('../../../server/routes/data-quality/validation');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/validate/email');
 
@@ -182,7 +198,7 @@ describe('Data Quality Routes', () => {
     it('should return invalid result for bad email format', async () => {
       mockValidateEmail.mockReturnValue({ valid: false, reason: 'Invalid format' });
 
-      const routerModule = await import('../../../server/routes/data-quality');
+      const routerModule = await import('../../../server/routes/data-quality/validation');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/validate/email');
 
@@ -197,7 +213,7 @@ describe('Data Quality Routes', () => {
     it('should handle thrown errors in validation', async () => {
       mockValidateEmail.mockImplementation(() => { throw new Error('Validation crashed'); });
 
-      const routerModule = await import('../../../server/routes/data-quality');
+      const routerModule = await import('../../../server/routes/data-quality/validation');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/validate/email');
 
@@ -219,7 +235,7 @@ describe('Data Quality Routes', () => {
       ];
       mockCheckForDuplicates.mockResolvedValue(mockResults);
 
-      const routerModule = await import('../../../server/routes/data-quality');
+      const routerModule = await import('../../../server/routes/data-quality/duplicates');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/duplicates/scan');
 
@@ -248,7 +264,7 @@ describe('Data Quality Routes', () => {
     it('should return empty results when no duplicates found', async () => {
       mockCheckForDuplicates.mockResolvedValue([]);
 
-      const routerModule = await import('../../../server/routes/data-quality');
+      const routerModule = await import('../../../server/routes/data-quality/duplicates');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/duplicates/scan');
 
@@ -266,7 +282,7 @@ describe('Data Quality Routes', () => {
     it('should handle duplicate detection service errors', async () => {
       mockCheckForDuplicates.mockRejectedValue(new Error('Service unavailable'));
 
-      const routerModule = await import('../../../server/routes/data-quality');
+      const routerModule = await import('../../../server/routes/data-quality/duplicates');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/duplicates/scan');
 
@@ -285,7 +301,7 @@ describe('Data Quality Routes', () => {
     it('should check for duplicates with email', async () => {
       mockCheckForDuplicates.mockResolvedValue([]);
 
-      const routerModule = await import('../../../server/routes/data-quality');
+      const routerModule = await import('../../../server/routes/data-quality/duplicates');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/duplicates/check');
 
@@ -300,7 +316,7 @@ describe('Data Quality Routes', () => {
     });
 
     it('should require at least email or name', async () => {
-      const routerModule = await import('../../../server/routes/data-quality');
+      const routerModule = await import('../../../server/routes/data-quality/duplicates');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/duplicates/check');
 
@@ -319,7 +335,7 @@ describe('Data Quality Routes', () => {
     it('should merge duplicate records successfully', async () => {
       mockMergeDuplicates.mockResolvedValue({ message: 'Records merged successfully' });
 
-      const routerModule = await import('../../../server/routes/data-quality');
+      const routerModule = await import('../../../server/routes/data-quality/duplicates');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/duplicates/merge');
 
@@ -341,7 +357,7 @@ describe('Data Quality Routes', () => {
     });
 
     it('should validate required merge parameters', async () => {
-      const routerModule = await import('../../../server/routes/data-quality');
+      const routerModule = await import('../../../server/routes/data-quality/duplicates');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/duplicates/merge');
 
@@ -361,7 +377,7 @@ describe('Data Quality Routes', () => {
       mockDetectXSS.mockReturnValue({ detected: false });
       mockDetectSQLInjection.mockReturnValue({ detected: false });
 
-      const routerModule = await import('../../../server/routes/data-quality');
+      const routerModule = await import('../../../server/routes/data-quality/validation');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/security/check');
 
@@ -381,7 +397,7 @@ describe('Data Quality Routes', () => {
       mockDetectSQLInjection.mockReturnValue({ detected: false });
       mockDbRun.mockResolvedValue({ changes: 1 });
 
-      const routerModule = await import('../../../server/routes/data-quality');
+      const routerModule = await import('../../../server/routes/data-quality/validation');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/security/check');
 
@@ -399,7 +415,7 @@ describe('Data Quality Routes', () => {
     });
 
     it('should require input parameter', async () => {
-      const routerModule = await import('../../../server/routes/data-quality');
+      const routerModule = await import('../../../server/routes/data-quality/validation');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/security/check');
 
@@ -423,7 +439,7 @@ describe('Data Quality Routes', () => {
       };
       mockGetDuplicateStats.mockResolvedValue(mockMetrics);
 
-      const routerModule = await import('../../../server/routes/data-quality');
+      const routerModule = await import('../../../server/routes/data-quality/metrics');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/metrics');
 
@@ -437,7 +453,7 @@ describe('Data Quality Routes', () => {
     it('should handle metrics service errors', async () => {
       mockGetDuplicateStats.mockRejectedValue(new Error('Stats unavailable'));
 
-      const routerModule = await import('../../../server/routes/data-quality');
+      const routerModule = await import('../../../server/routes/data-quality/metrics');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/metrics');
 
@@ -456,7 +472,7 @@ describe('Data Quality Routes', () => {
     it('should sanitize input text', async () => {
       mockSanitizeInput.mockReturnValue({ sanitized: 'clean text', changes: 1 });
 
-      const routerModule = await import('../../../server/routes/data-quality');
+      const routerModule = await import('../../../server/routes/data-quality/validation');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/sanitize');
 
@@ -469,7 +485,7 @@ describe('Data Quality Routes', () => {
     });
 
     it('should require input parameter', async () => {
-      const routerModule = await import('../../../server/routes/data-quality');
+      const routerModule = await import('../../../server/routes/data-quality/validation');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/sanitize');
 

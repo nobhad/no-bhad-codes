@@ -50,7 +50,7 @@ vi.mock('../../../server/services/workflow-trigger-service', () => ({
 
 // Mock access control
 const mockCanAccessInvoice = vi.fn();
-vi.mock('../../../server/middleware/access-control', () => ({
+vi.mock('../../../server/utils/access-control', () => ({
   canAccessInvoice: (...args: unknown[]) => mockCanAccessInvoice(...args),
   canAccessProject: vi.fn().mockResolvedValue(true),
   isUserAdmin: vi.fn().mockResolvedValue(true)

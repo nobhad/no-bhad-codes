@@ -105,10 +105,38 @@ vi.mock('../../../server/services/notification-preferences-service', () => ({
 }));
 
 // Client service mock
+const mockGetClientProfile = vi.fn();
+const mockGetClientProfileBasic = vi.fn();
+const mockUpdateClientProfile = vi.fn();
+const mockGetClientPasswordHash = vi.fn();
+const mockUpdateClientPassword = vi.fn();
 vi.mock('../../../server/services/client-service', () => ({
   clientService: {
     getClientById: vi.fn(),
-    updateClient: vi.fn()
+    updateClient: vi.fn(),
+    getClientProfile: (...args: unknown[]) => mockGetClientProfile(...args),
+    getClientProfileBasic: (...args: unknown[]) => mockGetClientProfileBasic(...args),
+    updateClientProfile: (...args: unknown[]) => mockUpdateClientProfile(...args),
+    getClientPasswordHash: (...args: unknown[]) => mockGetClientPasswordHash(...args),
+    updateClientPassword: (...args: unknown[]) => mockUpdateClientPassword(...args),
+    getClientBilling: vi.fn(),
+    updateClientBilling: vi.fn(),
+    getClientProjects: vi.fn(),
+    getPendingInvoiceCount: vi.fn(),
+    getUnreadMessageCount: vi.fn(),
+    getClientRecentActivity: vi.fn(),
+    getPendingDocRequestCount: vi.fn(),
+    getPendingContractCount: vi.fn(),
+    getPendingQuestionnaireCount: vi.fn(),
+    getPendingApprovalCount: vi.fn(),
+    getOutstandingBalance: vi.fn(),
+    getDeliverablesInReviewCount: vi.fn(),
+    getCurrentDeliverable: vi.fn(),
+    getClientOwnContacts: vi.fn(),
+    insertClientContact: vi.fn(),
+    verifyContactOwnership: vi.fn(),
+    updateClientContact: vi.fn(),
+    verifyContactOwnershipActive: vi.fn()
   }
 }));
 
@@ -311,7 +339,7 @@ describe('Client Portal Routes', () => {
         created_at: '2025-01-01',
         updated_at: '2025-06-01'
       };
-      mockDbGet.mockResolvedValue(clientRow);
+      mockGetClientProfile.mockResolvedValue(clientRow);
 
       const { default: router } = await import('../../../server/routes/clients');
       const handler = getRouteHandler(router, 'get', '/me');
@@ -350,7 +378,7 @@ describe('Client Portal Routes', () => {
     });
 
     it('should return 404 when client record does not exist', async () => {
-      mockDbGet.mockResolvedValue(undefined);
+      mockGetClientProfile.mockResolvedValue(undefined);
 
       const { default: router } = await import('../../../server/routes/clients');
       const handler = getRouteHandler(router, 'get', '/me');
@@ -379,8 +407,8 @@ describe('Client Portal Routes', () => {
         phone: '555-9999',
         client_type: 'business'
       };
-      mockDbRun.mockResolvedValue({ changes: 1 });
-      mockDbGet.mockResolvedValue(updatedRow);
+      mockUpdateClientProfile.mockResolvedValue(undefined);
+      mockGetClientProfileBasic.mockResolvedValue(updatedRow);
 
       const { default: router } = await import('../../../server/routes/clients');
       const handler = getRouteHandler(router, 'put', '/me');
@@ -397,10 +425,11 @@ describe('Client Portal Routes', () => {
       handler(req, res);
       await flushPromises();
 
-      expect(mockDbRun).toHaveBeenCalledWith(
-        expect.stringContaining('UPDATE clients SET'),
-        expect.arrayContaining(['Jane Smith', 'Acme Inc', '555-9999', 42])
-      );
+      expect(mockUpdateClientProfile).toHaveBeenCalledWith(42, {
+        contact_name: 'Jane Smith',
+        company_name: 'Acme Inc',
+        phone: '555-9999'
+      });
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -431,10 +460,10 @@ describe('Client Portal Routes', () => {
   // =========================================================================
   describe('Client Password -- PUT /me/password', () => {
     it('should change password when current password is valid', async () => {
-      mockDbGet.mockResolvedValue({ password_hash: '$2a$12$existinghash' });
+      mockGetClientPasswordHash.mockResolvedValue({ password_hash: '$2a$12$existinghash' });
       mockBcryptCompare.mockResolvedValue(true);
       mockBcryptHash.mockResolvedValue('$2a$12$newhashedpassword');
-      mockDbRun.mockResolvedValue({ changes: 1 });
+      mockUpdateClientPassword.mockResolvedValue(undefined);
 
       const { default: router } = await import('../../../server/routes/clients');
       const handler = getRouteHandler(router, 'put', '/me/password');
@@ -449,10 +478,7 @@ describe('Client Portal Routes', () => {
 
       expect(mockBcryptCompare).toHaveBeenCalledWith('OldPass123!', '$2a$12$existinghash');
       expect(mockBcryptHash).toHaveBeenCalledWith('NewSecure456!', 12);
-      expect(mockDbRun).toHaveBeenCalledWith(
-        expect.stringContaining('UPDATE clients SET password_hash'),
-        ['$2a$12$newhashedpassword', 42]
-      );
+      expect(mockUpdateClientPassword).toHaveBeenCalledWith(42, '$2a$12$newhashedpassword');
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({ success: true, message: 'Password changed successfully' })
@@ -460,7 +486,7 @@ describe('Client Portal Routes', () => {
     });
 
     it('should return 401 when current password is wrong', async () => {
-      mockDbGet.mockResolvedValue({ password_hash: '$2a$12$existinghash' });
+      mockGetClientPasswordHash.mockResolvedValue({ password_hash: '$2a$12$existinghash' });
       mockBcryptCompare.mockResolvedValue(false);
 
       const { default: router } = await import('../../../server/routes/clients');
