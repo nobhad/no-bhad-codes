@@ -57,7 +57,8 @@ vi.mock('../../../server/config/uploads', () => ({
 }));
 
 vi.mock('../../../server/utils/pdf-utils', () => ({
-  PAGE_MARGINS: { left: 50, right: 50, top: 50, bottom: 50 }
+  PAGE_MARGINS: { left: 50, right: 50, top: 50, bottom: 50 },
+  drawPdfDocumentHeader: vi.fn().mockResolvedValue(700)
 }));
 
 vi.mock('fs', () => ({

@@ -33,6 +33,17 @@ const mockUpdateTemplate = vi.fn();
 const mockDeleteTemplate = vi.fn();
 const mockIsValidTemplateType = vi.fn();
 const mockCreateContractFromTemplate = vi.fn();
+const mockEnsureProjectSignatureToken = vi.fn();
+const mockLogSignatureAction = vi.fn();
+const mockExpireProjectSignatureToken = vi.fn();
+const mockGetProjectWithClientForDistribution = vi.fn();
+const mockGetProjectWithClientForRenewal = vi.fn();
+const mockUpdateContractReminder = vi.fn();
+const mockGetClientContracts = vi.fn();
+const mockGetContractProjectId = vi.fn();
+const mockGetContractActivity = vi.fn();
+const mockGetContractForSigning = vi.fn();
+const mockSignContractFromPortal = vi.fn();
 
 vi.mock('../../../server/services/contract-service', () => ({
   contractService: {
@@ -47,7 +58,18 @@ vi.mock('../../../server/services/contract-service', () => ({
     updateTemplate: (...args: unknown[]) => mockUpdateTemplate(...args),
     deleteTemplate: (...args: unknown[]) => mockDeleteTemplate(...args),
     isValidTemplateType: (...args: unknown[]) => mockIsValidTemplateType(...args),
-    createContractFromTemplate: (...args: unknown[]) => mockCreateContractFromTemplate(...args)
+    createContractFromTemplate: (...args: unknown[]) => mockCreateContractFromTemplate(...args),
+    ensureProjectSignatureToken: (...args: unknown[]) => mockEnsureProjectSignatureToken(...args),
+    logSignatureAction: (...args: unknown[]) => mockLogSignatureAction(...args),
+    expireProjectSignatureToken: (...args: unknown[]) => mockExpireProjectSignatureToken(...args),
+    getProjectWithClientForDistribution: (...args: unknown[]) => mockGetProjectWithClientForDistribution(...args),
+    getProjectWithClientForRenewal: (...args: unknown[]) => mockGetProjectWithClientForRenewal(...args),
+    updateContractReminder: (...args: unknown[]) => mockUpdateContractReminder(...args),
+    getClientContracts: (...args: unknown[]) => mockGetClientContracts(...args),
+    getContractProjectId: (...args: unknown[]) => mockGetContractProjectId(...args),
+    getContractActivity: (...args: unknown[]) => mockGetContractActivity(...args),
+    getContractForSigning: (...args: unknown[]) => mockGetContractForSigning(...args),
+    signContractFromPortal: (...args: unknown[]) => mockSignContractFromPortal(...args)
   }
 }));
 
@@ -93,9 +115,9 @@ vi.mock('../../../server/services/workflow-trigger-service', () => ({
   }
 }));
 
-// Mock access control
+// Mock access control (source imports from utils/access-control)
 const mockCanAccessContract = vi.fn();
-vi.mock('../../../server/middleware/access-control', () => ({
+vi.mock('../../../server/utils/access-control', () => ({
   canAccessContract: (...args: unknown[]) => mockCanAccessContract(...args)
 }));
 
@@ -130,6 +152,20 @@ vi.mock('../../../server/config/environment', () => ({
 // Mock business config
 vi.mock('../../../server/config/business', () => ({
   BUSINESS_INFO: { name: 'Test Agency' }
+}));
+
+// Mock email styles config
+vi.mock('../../../server/config/email-styles', () => ({
+  EMAIL_COLORS: {
+    bodyText: '#333',
+    contentBg: '#fff',
+    buttonContractBg: '#007bff',
+    buttonContractText: '#fff'
+  },
+  EMAIL_TYPOGRAPHY: {
+    fontFamily: 'Arial, sans-serif',
+    lineHeight: '1.6'
+  }
 }));
 
 // Mock logger
@@ -202,16 +238,28 @@ function createMockRes() {
 
 /**
  * Extract a route handler from an Express router by method + path.
+ * Searches recursively through nested sub-routers (router.use).
  * Returns the last handler in the stack (after middleware).
  */
-function getRouteHandler(router: any, method: string, path: string) {
-  const layer = router.stack.find((l: any) => {
-    if (!l.route) return false;
-    return l.route.path === path && l.route.methods[method];
-  });
-  if (!layer) throw new Error(`No route found for ${method.toUpperCase()} ${path}`);
-  const handlers = layer.route.stack;
-  return handlers[handlers.length - 1].handle;
+function getRouteHandler(router: any, method: string, path: string): Function {
+  // Direct route on this router
+  for (const l of router.stack) {
+    if (l.route && l.route.path === path && l.route.methods[method]) {
+      const handlers = l.route.stack;
+      return handlers[handlers.length - 1].handle;
+    }
+  }
+  // Search nested sub-routers (mounted via router.use)
+  for (const l of router.stack) {
+    if (!l.route && l.handle && l.handle.stack) {
+      try {
+        return getRouteHandler(l.handle, method, path);
+      } catch {
+        // Not found in this sub-router, continue
+      }
+    }
+  }
+  throw new Error(`No route found for ${method.toUpperCase()} ${path}`);
 }
 
 // ============================================
@@ -324,7 +372,7 @@ describe('Contract Routes', () => {
 
     it('should send contract for signature and generate token', async () => {
       mockGetContract.mockResolvedValue(mockContract);
-      mockDbGet.mockResolvedValue({
+      mockGetProjectWithClientForDistribution.mockResolvedValue({
         id: 10,
         project_name: 'Test Project',
         contract_signature_token: null,
@@ -332,8 +380,9 @@ describe('Contract Routes', () => {
         contact_name: 'Client Name',
         email: 'client@test.com'
       });
+      mockEnsureProjectSignatureToken.mockResolvedValue('new-token-xyz');
+      mockLogSignatureAction.mockResolvedValue(undefined);
       mockUpdateContract.mockResolvedValue({ ...mockContract, status: 'sent' });
-      mockDbRun.mockResolvedValue({ changes: 1 });
 
       const contractRouter = (await import('../../../server/routes/contracts')).default;
       const handler = getRouteHandler(contractRouter, 'post', '/:contractId/send');
@@ -355,7 +404,7 @@ describe('Contract Routes', () => {
     it('should use existing signature token if present', async () => {
       const existingToken = 'existing-token-abc123';
       mockGetContract.mockResolvedValue(mockContract);
-      mockDbGet.mockResolvedValue({
+      mockGetProjectWithClientForDistribution.mockResolvedValue({
         id: 10,
         project_name: 'Test Project',
         contract_signature_token: existingToken,
@@ -363,6 +412,8 @@ describe('Contract Routes', () => {
         contact_name: 'Client Name',
         email: 'client@test.com'
       });
+      mockEnsureProjectSignatureToken.mockResolvedValue(existingToken);
+      mockLogSignatureAction.mockResolvedValue(undefined);
       mockUpdateContract.mockResolvedValue({ ...mockContract, status: 'sent' });
 
       const contractRouter = (await import('../../../server/routes/contracts')).default;
@@ -380,13 +431,15 @@ describe('Contract Routes', () => {
 
     it('should update draft contract status to sent', async () => {
       mockGetContract.mockResolvedValue({ ...mockContract, status: 'draft' });
-      mockDbGet.mockResolvedValue({
+      mockGetProjectWithClientForDistribution.mockResolvedValue({
         id: 10,
         project_name: 'Test Project',
         contract_signature_token: 'token-123',
         contact_name: 'Client',
         email: 'client@test.com'
       });
+      mockEnsureProjectSignatureToken.mockResolvedValue('token-123');
+      mockLogSignatureAction.mockResolvedValue(undefined);
       mockUpdateContract.mockResolvedValue({ ...mockContract, status: 'sent' });
 
       const contractRouter = (await import('../../../server/routes/contracts')).default;
@@ -417,7 +470,7 @@ describe('Contract Routes', () => {
 
     it('should return 404 when project not found', async () => {
       mockGetContract.mockResolvedValue(mockContract);
-      mockDbGet.mockResolvedValue(null);
+      mockGetProjectWithClientForDistribution.mockResolvedValue(null);
 
       const contractRouter = (await import('../../../server/routes/contracts')).default;
       const handler = getRouteHandler(contractRouter, 'post', '/:contractId/send');
@@ -435,7 +488,7 @@ describe('Contract Routes', () => {
 
     it('should return 400 when client has no valid email', async () => {
       mockGetContract.mockResolvedValue(mockContract);
-      mockDbGet.mockResolvedValue({
+      mockGetProjectWithClientForDistribution.mockResolvedValue({
         id: 10,
         project_name: 'Test Project',
         contract_signature_token: 'tok',
@@ -465,7 +518,8 @@ describe('Contract Routes', () => {
         projectId: 10,
         status: 'expired'
       });
-      mockDbRun.mockResolvedValue({ changes: 1 });
+      mockExpireProjectSignatureToken.mockResolvedValue(undefined);
+      mockLogSignatureAction.mockResolvedValue(undefined);
 
       const contractRouter = (await import('../../../server/routes/contracts')).default;
       const handler = getRouteHandler(contractRouter, 'post', '/:contractId/expire');
@@ -489,7 +543,8 @@ describe('Contract Routes', () => {
 
     it('should log expiration in signature log', async () => {
       mockUpdateContract.mockResolvedValue({ id: 1, projectId: 10, status: 'expired' });
-      mockDbRun.mockResolvedValue({ changes: 1 });
+      mockExpireProjectSignatureToken.mockResolvedValue(undefined);
+      mockLogSignatureAction.mockResolvedValue(undefined);
 
       const contractRouter = (await import('../../../server/routes/contracts')).default;
       const handler = getRouteHandler(contractRouter, 'post', '/:contractId/expire');
@@ -499,10 +554,14 @@ describe('Contract Routes', () => {
 
       await handler(req, res);
 
-      // Should insert 'expired' action into contract_signature_log
-      expect(mockDbRun).toHaveBeenCalledWith(
-        expect.stringContaining('contract_signature_log'),
-        expect.arrayContaining([10, 1, 'admin@test.com'])
+      // Should call logSignatureAction with 'expired' action
+      expect(mockLogSignatureAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          projectId: 10,
+          contractId: 1,
+          action: 'expired',
+          actorEmail: 'admin@test.com'
+        })
       );
     });
 
@@ -525,8 +584,8 @@ describe('Contract Routes', () => {
         { id: 1, action: 'sent', actor_email: 'admin@test.com', created_at: '2026-03-01' },
         { id: 2, action: 'viewed', actor_email: 'client@test.com', created_at: '2026-03-02' }
       ];
-      mockDbGet.mockResolvedValue({ project_id: 10 });
-      mockDbAll.mockResolvedValue(mockLogs);
+      mockGetContractProjectId.mockResolvedValue(10);
+      mockGetContractActivity.mockResolvedValue(mockLogs);
 
       const contractRouter = (await import('../../../server/routes/contracts')).default;
       const handler = getRouteHandler(contractRouter, 'get', '/:contractId/activity');
@@ -548,7 +607,7 @@ describe('Contract Routes', () => {
     });
 
     it('should return 404 when contract not found', async () => {
-      mockDbGet.mockResolvedValue(null);
+      mockGetContractProjectId.mockResolvedValue(null);
 
       const contractRouter = (await import('../../../server/routes/contracts')).default;
       const handler = getRouteHandler(contractRouter, 'get', '/:contractId/activity');

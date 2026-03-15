@@ -345,14 +345,14 @@ describe('appState — errorHandlingMiddleware', () => {
     appState.dispatch({ type: 'CLEAR_ERROR' });
   });
 
-  it('records "Unknown error" string for non-Error throws', () => {
+  it('records thrown string for non-Error throws', () => {
     appState.addReducer('THROW_STRING', () => {
       throw 'just a string';
     });
 
     appState.dispatch({ type: 'THROW_STRING' });
 
-    expect(appState.getState('lastError')).toBe('Unknown error');
+    expect(appState.getState('lastError')).toBe('just a string');
     appState.dispatch({ type: 'CLEAR_ERROR' });
   });
 });

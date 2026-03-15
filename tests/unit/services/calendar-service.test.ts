@@ -467,7 +467,7 @@ describe('milestoneToCalendarEvent', () => {
   it('uses the date portion of due_date for all-day event', () => {
     const event = milestoneToCalendarEvent(milestone, 'My Project');
     expect(event.start.date).toBe('2026-04-15');
-    expect(event.end.date).toBe('2026-04-15');
+    expect(event.end.date).toBe('2026-04-16'); // Exclusive end date (next day)
   });
 
   it('includes project name in description', () => {
@@ -533,7 +533,7 @@ describe('taskToCalendarEvent', () => {
   it('uses the date portion of due_date for all-day event', () => {
     const event = taskToCalendarEvent(task, 'Test Project');
     expect(event.start.date).toBe('2026-03-10');
-    expect(event.end.date).toBe('2026-03-10');
+    expect(event.end.date).toBe('2026-03-11'); // Exclusive end date (next day)
   });
 
   it('includes priority in description', () => {
