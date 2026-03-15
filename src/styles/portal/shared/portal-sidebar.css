@@ -413,7 +413,7 @@
 .portal .sidebar-buttons .nav-btn.is-active::before {
   content: "";
   position: absolute;
-  left: 0;
+  left: calc(-1 * var(--content-gutter));
   top: 20%;
   bottom: 20%;
   width: var(--border-width-thick);

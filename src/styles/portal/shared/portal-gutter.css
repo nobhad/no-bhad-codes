@@ -23,16 +23,20 @@
    ===================================================== */
 
 .portal .portal-global-header,
+.portal .sidebar-content,
+.portal .sidebar-footer,
 .portal .dashboard-content > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content):not(.subsection),
 .portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > *:not(.subsection) {
   padding: var(--content-gutter);
   box-sizing: border-box;
 }
 
-/* .section padding override — top + left/right match, bottom = 2x top.
+/* .section padding override — vertical padding differs from gutter.
+   Left/right use --content-gutter to align with header and other elements.
+   Top = --portal-page-top, bottom = 2x top (--portal-page-bottom).
    Must be in this unlayered file to beat the Tier 1 rule above. */
 .portal .dashboard-content .section {
-  padding: var(--portal-page-top) var(--portal-page-top) var(--portal-page-bottom);
+  padding: var(--portal-page-top) var(--content-gutter) var(--portal-page-bottom);
 }
 
 /* =====================================================
@@ -43,18 +47,27 @@
    ===================================================== */
 
 .portal .dashboard-content .data-table-header,
-.portal .dashboard-content .accordion-item-wrapper > *,
+.portal .dashboard-content .accordion-item-wrapper > *:not(.accordion-item-content),
 .portal .dashboard-content .msgtab-bubble > *,
 .portal .dashboard-content .help-featured-card,
+.portal .dashboard-content .dropzone-content,
 .portal .dashboard-content #folder-sidebar > *,
 .portal .dashboard-content .folder-item,
-/* Settings fields: apply to wrapper AND children (inline-edit rows need gutter) */
+/* Settings fields: wrapper gets full gutter, children get top padding only */
 .portal .dashboard-content .settings-fields,
-.portal .dashboard-content .settings-fields > *,
 .portal .dashboard-content .notification-options,
-.portal .dashboard-content .notification-options > * {
+.portal .dashboard-content .notification-options > *,
+/* Form inputs, textareas, selects — internal content padding */
+.portal .dashboard-content input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([hidden]),
+.portal .dashboard-content textarea,
+.portal .dashboard-content select {
   padding: var(--content-gutter);
   box-sizing: border-box;
+}
+
+/* Settings fields children — top padding only for row separation */
+.portal .dashboard-content .settings-fields > * {
+  padding-top: var(--content-gutter);
 }
 
 /* =====================================================

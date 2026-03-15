@@ -298,9 +298,7 @@
   gap: var(--space-4);
 }
 
-.portal .inline-edit-row:last-child {
-  border-bottom: none;
-}
+/* All rows keep border-bottom including last — consistent underline */
 
 /* Label column */
 .portal .inline-edit-label {

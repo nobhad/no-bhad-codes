@@ -361,6 +361,8 @@ input.search-bar-input {
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   box-sizing: border-box;
+  /* Left padding clears the absolutely-positioned search icon */
+  padding-left: calc(var(--space-2) + 1em + var(--icon-gap));
 }
 
 .search-bar .search-bar-input::placeholder,
