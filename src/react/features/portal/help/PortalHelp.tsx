@@ -336,7 +336,7 @@ function CategoriesSidebar({ categories, onToggle, onArticleClick }: CategoriesS
   if (categories.length === 0) return null;
 
   return (
-    <div ref={listRef} className="section">
+    <div ref={listRef} className="subsection">
       <div className="data-table-header"><h3><span className="title-full">Categories</span></h3></div>
       <div className="subsection">
         {categories.map((category) => {
@@ -395,7 +395,7 @@ function FeaturedArticles({ articles, onArticleClick }: FeaturedArticlesProps) {
   if (articles.length === 0) return null;
 
   return (
-    <div className="section">
+    <div className="subsection">
       <div className="data-table-header"><h3><span className="title-full">Featured Articles</span></h3></div>
       <div ref={gridRef} className="subsection">
         {articles.map((article) => (
