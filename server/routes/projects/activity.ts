@@ -81,5 +81,29 @@ router.get(
   })
 );
 
+// Get project activity/updates
+router.get(
+  '/:id/activity',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    if (!(await projectService.projectExists(projectId))) {
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
+    }
+
+    if (!(await canAccessProject(req, projectId))) {
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
+    }
+
+    const updates = await projectService.getProjectUpdates(projectId);
+
+    sendSuccess(res, { updates });
+  })
+);
+
 export { router as activityRouter };
 export default router;

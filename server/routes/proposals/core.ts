@@ -325,71 +325,112 @@ router.delete(
   })
 );
 
+/** Shared handler for admin proposal listing (paginated) */
+const adminListHandler = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { status } = req.query;
+  const { page, perPage, limit, offset } = parsePaginationQuery(
+    req.query as Record<string, unknown>
+  );
+
+  const validStatus = status && VALID_STATUSES.includes(status as string)
+    ? (status as string)
+    : undefined;
+
+  const { proposals, total } = await proposalService.listProposals({
+    status: validStatus,
+    limit,
+    offset
+  });
+
+  const mappedProposals = proposals.map((proposal) => {
+    const p = proposal as unknown as Record<string, unknown>;
+    return {
+      id: getNumber(p, 'id'),
+      projectId: getNumber(p, 'project_id'),
+      clientId: getNumber(p, 'client_id'),
+      projectType: getString(p, 'project_type'),
+      selectedTier: getString(p, 'selected_tier'),
+      basePrice: getNumber(p, 'base_price'),
+      finalPrice: getNumber(p, 'final_price'),
+      maintenanceOption: proposal.maintenance_option,
+      status: getString(p, 'status'),
+      createdAt: getString(p, 'created_at'),
+      reviewedAt: proposal.reviewed_at,
+      project: {
+        name: getString(p, 'project_name')
+      },
+      client: {
+        name: getString(p, 'client_name'),
+        email: getString(p, 'client_email'),
+        company: proposal.company_name
+      }
+    };
+  });
+
+  sendPaginated(res, mappedProposals, {
+    page,
+    perPage,
+    total
+  });
+});
+
+/**
+ * @swagger
+ * /api/proposals:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: GET /api/proposals
+ *     description: List proposals (admin — paginated, filterable by status).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: perPage
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
+router.get('/', authenticateToken, requireAdmin, adminListHandler);
+
 /**
  * @swagger
  * /api/proposals/admin/list:
  *   get:
  *     tags: [Proposals]
- *     summary: GET /api/admin/proposals
- *     description: GET /api/admin/proposals.
+ *     summary: GET /api/proposals/admin/list
+ *     description: List all proposals for admin (paginated).
  *     security:
  *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Success
  */
-router.get(
-  '/admin/list',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const { status } = req.query;
-    const { page, perPage, limit, offset } = parsePaginationQuery(
-      req.query as Record<string, unknown>
-    );
+router.get('/admin/list', authenticateToken, requireAdmin, adminListHandler);
 
-    const validStatus = status && VALID_STATUSES.includes(status as string)
-      ? (status as string)
-      : undefined;
-
-    const { proposals, total } = await proposalService.listProposals({
-      status: validStatus,
-      limit,
-      offset
-    });
-
-    const mappedProposals = proposals.map((proposal) => {
-      const p = proposal as unknown as Record<string, unknown>;
-      return {
-        id: getNumber(p, 'id'),
-        projectId: getNumber(p, 'project_id'),
-        clientId: getNumber(p, 'client_id'),
-        projectType: getString(p, 'project_type'),
-        selectedTier: getString(p, 'selected_tier'),
-        basePrice: getNumber(p, 'base_price'),
-        finalPrice: getNumber(p, 'final_price'),
-        maintenanceOption: proposal.maintenance_option,
-        status: getString(p, 'status'),
-        createdAt: getString(p, 'created_at'),
-        reviewedAt: proposal.reviewed_at,
-        project: {
-          name: getString(p, 'project_name')
-        },
-        client: {
-          name: getString(p, 'client_name'),
-          email: getString(p, 'client_email'),
-          company: proposal.company_name
-        }
-      };
-    });
-
-    sendPaginated(res, mappedProposals, {
-      page,
-      perPage,
-      total
-    });
-  })
-);
+/**
+ * @swagger
+ * /api/proposals/admin/all:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: GET /api/proposals/admin/all
+ *     description: List all proposals for admin (paginated). Alias for /admin/list.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ */
+router.get('/admin/all', authenticateToken, requireAdmin, adminListHandler);
 
 /**
  * @swagger
