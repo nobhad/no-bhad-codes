@@ -72,6 +72,7 @@
   align-items: center;
   gap: var(--icon-gap);
   margin: 0;
+  padding: var(--content-gutter);
   width: 100%;
   color: var(--color-text-primary);
   background: none;
