@@ -825,6 +825,16 @@
   max-width: var(--table-cell-max-width);
 }
 
+/* Checkbox cells — no truncation; just the checkbox button */
+.data-table :is(th, td):has(> .portal-checkbox),
+.data-table :is(th, td):has(> .data-table-checkbox) {
+  overflow: visible;
+  text-overflow: clip;
+  max-width: none;
+  width: var(--table-checkbox-width);
+  min-width: var(--table-checkbox-width);
+}
+
 /* Status cells need visible overflow for dropdowns, centered content */
 .data-table :is(th, td).status-col,
 .data-table :is(th, td).status-cell {
@@ -1674,7 +1684,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  border-bottom: var(--portal-border);
   background: var(--color-bg-raised);
 }
 

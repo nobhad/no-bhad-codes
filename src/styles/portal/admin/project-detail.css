@@ -179,27 +179,6 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   box-shadow: var(--shadow-panel);
 }
 
-/* Invoice summary moved to project-detail-invoices.css */
-
-/* Summary card — base from portal-cards.css, only layout tweaks */
-body[data-page="admin"] [id^="pd-tab-"] .summary-card {
-  flex: 1;
-}
-
-/* Summary card values - match overview stat numbers */
-[data-page="admin"] [id^="pd-tab-"] .summary-card .summary-value {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-}
-
-[data-page="admin"] [id^="pd-tab-"] .summary-card .summary-value.outstanding {
-  color: var(--color-warning);
-}
-
-[data-page="admin"] [id^="pd-tab-"] .summary-card .summary-value.paid {
-  color: var(--color-accent);
-}
-
 /* Settings tab sections - darker background and equal heights */
 [data-page="admin"] #pd-tab-settings .settings-grid {
   align-items: stretch;
@@ -217,12 +196,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 }
 
 /* Form input base styles (including background-color) in shared/portal-forms.css */
-
-/* Readonly form value display */
-[data-page="admin"] .form-value-readonly {
-  margin-top: var(--space-1-5);
-  font-weight: var(--font-weight-semibold);
-}
 
 /* Form focus state: single source of truth in shared/portal-forms.css */
 
@@ -285,28 +258,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   pointer-events: auto;
 }
 
-/* Settings tab form fields - match meta-item styling */
-#pd-tab-settings .form-field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-0-5);
-  position: relative;
-}
-
-/* Settings form inputs — padding override only, font from portal-forms.css */
-#pd-tab-settings input,
-#pd-tab-settings .form-input {
-  min-height: auto;
-}
-
-/* Form row for Account Status and Last Login - overrides from portal-forms.css */
-#pd-tab-settings .form-row {
-  gap: var(--space-8);
-}
-
-#pd-tab-settings .form-row .form-field {
-  gap: var(--space-1);
-}
+/* Form inputs/rows inherit from portal-forms.css — no overrides needed */
 
 /* Readonly form values — meta-value styling from shared */
 
@@ -573,7 +525,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
    Overview Stats Grid
    ================================================ */
 
-/* .overview-stat — uses .summary-card from portal-cards.css */
 .overview-stat {
   text-align: center;
 }
@@ -727,13 +678,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   display: none;
 }
 
-/* Caret color matches text color */
-[data-page="admin"] input,
-[data-page="admin"] textarea,
-[data-page="admin"] select {
-  caret-color: var(--color-text-primary);
-}
-
 /* System info grid/rows: see shared/details-card.css */
 
 /* Details panel styles moved to details-panel.css */
@@ -801,11 +745,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 @media (--small-mobile) {
   .project-detail-meta {
     grid-template-columns: 1fr;
-  }
-
-  /* Invoice summary cards stack on mobile */
-  body[data-page="admin"] [id^="pd-tab-"] .invoice-summary {
-    flex-direction: column;
   }
 
   /* Settings grid stacks on mobile */

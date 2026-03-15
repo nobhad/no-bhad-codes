@@ -546,12 +546,9 @@
   padding: 0;
 }
 
-/* Title + search bar above both columns — stacked column */
+/* Title + search bar — inherits data-table-header layout */
 .messaging-top-bar {
   flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1-5);
   border-bottom: var(--portal-border);
 }
 

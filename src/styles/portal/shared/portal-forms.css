@@ -49,6 +49,21 @@
     textarea,
     select:not(.status-select)
   ),
+.portal-modal
+  :is(
+    .form-input,
+    .form-textarea,
+    .form-select,
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="url"],
+    input[type="date"],
+    textarea,
+    select:not(.status-select)
+  ),
 .modal-overlay
   :is(
     .form-input,
@@ -105,6 +120,7 @@
 
 /* Textarea - different height/padding */
 .portal :is(textarea, .form-textarea, textarea.form-input),
+.portal-modal :is(textarea, .form-textarea, textarea.form-input),
 .modal-overlay :is(textarea, .form-textarea, textarea.form-input) {
   height: auto;
   min-height: calc(var(--space-6) * 2);
@@ -122,6 +138,7 @@
 
 /* Placeholder text */
 .portal :is(.form-input, .form-textarea, input, textarea)::placeholder,
+.portal-modal :is(.form-input, .form-textarea, input, textarea)::placeholder,
 .modal-overlay :is(.form-input, .form-textarea, input, textarea)::placeholder {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-regular);
@@ -133,12 +150,14 @@
 
 /* Hover state */
 .portal :is(.form-input, .form-textarea, .form-select, input, textarea, select):hover,
+.portal-modal :is(.form-input, .form-textarea, .form-select, input, textarea, select):hover,
 .modal-overlay :is(.form-input, .form-textarea, .form-select, input, textarea, select):hover {
   border-color: var(--color-border-primary);
 }
 
 /* Focus state - border shifts to primary, subtle ring for contrast */
 .portal :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(:focus, :focus-visible),
+.portal-modal :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(:focus, :focus-visible),
 .modal-overlay :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(:focus, :focus-visible),
 .auth-gate :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(:focus, :focus-visible) {
   outline: none;
@@ -156,6 +175,12 @@
 }
 .form-field:last-child {
   margin-bottom: 0;
+}
+
+/* Readonly form value display — non-editable field content */
+.form-value-readonly {
+  margin-top: var(--space-1-5);
+  font-weight: var(--font-weight-semibold);
 }
 
 /* Field label in forms — base .field-label SoT: shared/field-label-spacing.css */
@@ -192,6 +217,7 @@
 
 /* Select dropdown arrow - uses theme-aware caret variable */
 .portal :is(select:not(.status-select), .form-select),
+.portal-modal :is(select:not(.status-select), .form-select),
 .modal-overlay :is(select:not(.status-select), .form-select) {
   appearance: none;
   -webkit-appearance: none;
@@ -205,6 +231,7 @@
 
 /* Select dropdown arrow - light mode override */
 html[data-theme="light"] .portal :is(select:not(.status-select), .form-select),
+html[data-theme="light"] .portal-modal :is(select:not(.status-select), .form-select),
 html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-select) {
   background-image: var(--select-caret-light);
 }
@@ -356,7 +383,7 @@ input.search-bar-input {
   width: 100%;
   height: var(--portal-btn-icon-size);
   min-height: var(--portal-btn-icon-size);
-  background-color: inherit;
+  background-color: var(--color-bg-primary);
   border: var(--portal-border);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
@@ -426,7 +453,7 @@ input.search-bar-input {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   font-family: var(--font-family-mono);
-  background: inherit;
+  background: var(--color-bg-primary);
   border: var(--portal-input-border);
   border-radius: 0;
   color: var(--color-text-primary);
@@ -553,7 +580,7 @@ input.search-bar-input {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   font-family: var(--font-family-mono);
-  background: inherit;
+  background: var(--color-bg-primary);
   border: var(--portal-input-border);
   border-radius: 0;
   color: var(--color-text-primary);

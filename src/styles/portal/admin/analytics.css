@@ -74,20 +74,12 @@
 /* .health-check-grid base styles in shared/portal-cards.css */
 
 /* ============================================
-   Analytics Chart Card
+   Analytics Chart Panel
+   Base .panel from portal-layout.css; overrides here.
    ============================================ */
 
-.analytics-chart-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.analytics-chart-card h3 {
+.analytics-chart-panel h3 {
   font-size: var(--font-size-sm);
-}
-
-.analytics-chart-card .chart-canvas-wrapper {
 }
 
 .analytics-view .panel-header svg {
@@ -98,7 +90,7 @@
 
 /* Ad Hoc Analytics Widget - consistent min-height with chart containers */
 #ad-hoc-analytics-widget {
-  min-height: var(--kpi-card-min-height);
+  min-height: var(--stat-card-min-height);
   display: flex;
   flex-direction: column;
 }
@@ -141,6 +133,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
+  flex: 1;
   min-height: var(--chart-placeholder-min-height);
   color: var(--app-color-primary);
 }
@@ -212,46 +205,34 @@
 }
 
 /* ============================================
-   KPI Cards - base styles in portal-cards.css
+   Stat Cards - Analytics-specific overrides
+   Base styles in portal-stat-cards.css
    ============================================ */
 
-/* KPI Cards - Analytics specific styling */
-.kpi-card {
-  display: flex;
-  flex-direction: column;
+/* Analytics stat cards: centered layout, min-height */
+.analytics-section .stat-card {
   align-items: center;
   justify-content: center;
-  gap: var(--space-1);
   text-align: center;
-  min-height: var(--kpi-card-min-height);
-  transition: border-color var(--transition-faster);
+  min-height: var(--stat-card-min-height);
 }
 
-.kpi-card:hover {
-  border-color: var(--color-border-primary);
-}
-
-.kpi-card-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.analytics-section .stat-card-icon {
   color: var(--color-text-primary);
 }
 
-.kpi-card-icon svg {
+.analytics-section .stat-card-icon svg {
   width: var(--icon-size-xl);
   height: var(--icon-size-xl);
 }
 
-/* .kpi-card-label styles provided by unified label system in portal-cards.css */
-
-.kpi-card .stat-value {
+.analytics-section .stat-card .stat-value {
   font-family: var(--font-family-sans);
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-semibold);
 }
 
-.kpi-card-change {
+.analytics-section .stat-change {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -260,20 +241,20 @@
   margin-top: auto;
 }
 
-.kpi-card-change .change-value {
+.analytics-section .stat-change .change-value {
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
 }
 
-.kpi-card-change .change-label {
+.analytics-section .stat-change .change-label {
   color: var(--color-text-tertiary);
 }
 
-.kpi-card-change.positive .change-value {
+.analytics-section .stat-change.positive .change-value {
   color: var(--status-active);
 }
 
-.kpi-card-change.negative .change-value {
+.analytics-section .stat-change.negative .change-value {
   color: var(--status-cancelled);
 }
 

@@ -139,7 +139,7 @@ export function BillingForm({ billing, onUpdate }: BillingFormProps) {
   return (
     <div className="settings-form-section">
       {/* Billing Address Section */}
-      <div className="portal-section">
+      <div className="panel">
         <div className="data-table-header">
           <h3>
             <MapPin className="icon-sm" />

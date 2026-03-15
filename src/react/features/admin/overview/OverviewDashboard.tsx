@@ -175,7 +175,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
 
   if (error) {
     return (
-      <div className="overview-panel ovdash-error-panel">
+      <div className="panel ovdash-error-panel">
         <p className="field-label ovdash-error-message">{error}</p>
         <button onClick={loadDashboardData} className="btn btn-outline">
           <RefreshCw /> Retry
@@ -185,11 +185,11 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
   }
 
   return (
-    <div ref={containerRef} className="section overview-linear">
+    <div ref={containerRef} className="overview-linear">
       {/* Stats Strip */}
       <div className="overview-stats-strip">
         {snapshotMetrics.map((metric) => (
-          <div key={metric.label} className="overview-stat-card">
+          <div key={metric.label} className="stat-card">
             <div className="stat-card-top">
               {metric.icon}
               <span className="field-label">{metric.label}</span>
@@ -203,7 +203,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
       {attentionItems.length > 0 && (
         <div className="overview-stats-strip" style={{ gridTemplateColumns: `repeat(${attentionItems.length}, 1fr)` }}>
           {attentionItems.map((item) => (
-            <button key={item.type} onClick={item.action} className="overview-stat-card">
+            <button key={item.type} onClick={item.action} className="stat-card stat-card-clickable">
               <div className="stat-card-top">
                 {item.icon}
                 <span className="field-label">{item.label}</span>
@@ -219,17 +219,17 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
         {/* Main Column */}
         <div className="overview-col-main">
           {/* Active Projects */}
-          <div className="overview-panel">
+          <div className="panel">
             <div className="panel-header">
-              <div className="overview-panel-title">
+              <div className="panel-title">
                 <Briefcase className="panel-icon" />
                 <span className="field-label">Active Projects</span>
               </div>
-              <button onClick={() => onNavigate?.('projects')} className="overview-panel-action">
+              <button onClick={() => onNavigate?.('projects')} className="panel-action">
                 View All <ArrowRight className="panel-icon" />
               </button>
             </div>
-            <div className="overview-panel-body">
+            <div className="panel-body">
               {activeProjects.length === 0 ? (
                 <div className="empty-state">
                   <Briefcase className="icon-xl" />
@@ -256,10 +256,10 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
           </div>
 
           {/* Upcoming Tasks */}
-          <div className="overview-panel">
+          <div className="panel">
             <div className="panel-header">
               <button
-                className="overview-panel-title overview-panel-action"
+                className="panel-title panel-action"
                 onClick={() => navigate('/work', { state: { subtab: 'tasks' } })}
               >
                 <Clock className="panel-icon" />
@@ -274,7 +274,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
                 </button>
               </div>
             </div>
-            <div className="overview-panel-body">
+            <div className="panel-body">
               {upcomingTasks.length === 0 ? (
                 <div className="empty-state">
                   <Clock className="icon-xl" />
@@ -303,13 +303,13 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
         {/* Aside Column */}
         <div className="overview-col-aside">
           {/* Recent Activity */}
-          <div className="overview-panel">
+          <div className="panel">
             <div className="panel-header">
-              <div className="overview-panel-title">
+              <div className="panel-title">
                 <span className="field-label">Recent Activity</span>
               </div>
             </div>
-            <div className="overview-panel-body--compact">
+            <div className="panel-body--compact">
               {recentActivity.length === 0 ? (
                 <div className="empty-state">
                   <Inbox className="icon-xl" />
@@ -332,13 +332,13 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
           </div>
 
           {/* Quick Actions */}
-          <div className="overview-panel">
+          <div className="panel">
             <div className="panel-header">
-              <div className="overview-panel-title">
+              <div className="panel-title">
                 <span className="field-label">Quick Actions</span>
               </div>
             </div>
-            <div className="overview-panel-body ovdash-quick-actions">
+            <div className="panel-body ovdash-quick-actions">
               <button onClick={() => onNavigate?.('projects')} className="btn-secondary btn-sm">
                 <Plus /> New Project
               </button>

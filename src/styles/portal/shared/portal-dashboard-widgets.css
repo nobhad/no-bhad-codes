@@ -393,16 +393,6 @@
 }
 
 /* =====================================================
-   DASHBOARD OVERVIEW CARD
-   Wraps all dashboard sections
-   ===================================================== */
-
-.portal .dashboard-overview-card {
-  background: transparent;
-  border: var(--portal-border);
-}
-
-/* =====================================================
    DASHBOARD SECTIONS
    ===================================================== */
 
@@ -531,9 +521,6 @@
 
   .portal .dashboard-tasks-kanban .kanban-column {
     min-width: 140px;
-  }
-
-  .portal .dashboard-overview-card {
   }
 
   .portal .attention-card {

@@ -684,7 +684,6 @@ html[data-theme="light"] .portal .stat-meta,
 html[data-theme="light"] .portal .field-label,
 html[data-theme="light"] .portal .section-label,
 html[data-theme="light"] .portal .meta-label,
-html[data-theme="light"] .portal .kpi-card-label,
 html[data-theme="light"] .portal .summary-label,
 html[data-theme="light"] .portal .funnel-stage-label,
 html[data-theme="light"] .portal .funnel-stage,
@@ -792,7 +791,7 @@ html[data-theme="light"] .portal .funnel-value {
 .section {
   display: flex;
   flex-direction: column;
-  gap: var(--content-gutter);
+  gap: var(--portal-section-gap);
   background-color: inherit;
 }
 

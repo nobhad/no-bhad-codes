@@ -20,7 +20,7 @@
   }
 }
 
-/* Settings Section — uses shared .portal-section styling for border. */
+/* Settings Section — uses shared .panel styling for border. */
 .settings-section {
   display: flex;
   flex-direction: column;
@@ -96,8 +96,8 @@
    Styles for inline-edit based settings components
    ===================================================== */
 
-/* Form section container - vertical stack of portal-sections.
-   Uses flex gap; neutralize portal-section margin-bottom to avoid double spacing. */
+/* Form section container - vertical stack of panels.
+   Uses flex gap; neutralize panel margin-bottom to avoid double spacing. */
 .portal .settings-form-section {
   display: flex;
   flex-direction: column;

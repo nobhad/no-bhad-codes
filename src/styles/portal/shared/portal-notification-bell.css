@@ -106,6 +106,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: var(--content-gutter);
   border-bottom: var(--portal-border);
 }
 
@@ -146,6 +147,7 @@
 
 .notification-empty {
   text-align: center;
+  padding: var(--content-gutter);
   color: var(--color-text-tertiary);
   font-size: var(--font-size-sm);
 }
@@ -158,6 +160,7 @@
   display: flex;
   align-items: flex-start;
   gap: var(--space-2);
+  padding: var(--content-gutter);
   width: 100%;
   border: none;
   border-bottom: var(--portal-border);

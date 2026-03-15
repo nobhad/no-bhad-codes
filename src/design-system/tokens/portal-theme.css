@@ -40,6 +40,9 @@
  * ============================================ */
 body[data-page="admin"],
 body[data-page="client-portal"] {
+  /* Portal uses mono font everywhere — set on body so Radix portals inherit */
+  font-family: var(--font-family-mono);
+
   /* ----------------------------------------
    * PRIMARY COLORS — solid hex, no mixing
    * ---------------------------------------- */
@@ -311,7 +314,7 @@ body[data-page="client-portal"] {
    * Group: Analytics
    * ---------------------------------------- */
   --analytics-grid-min-width: 260px;
-  --kpi-card-min-height: 120px;
+  --stat-card-min-height: 120px;
   --chart-height: 320px;
   --chart-placeholder-min-height: 200px;
 
@@ -574,7 +577,7 @@ html[data-theme="light"]:has(body[data-page="client-portal"]) {
    PANEL/CARD HEADERS — unlayered so @layer components can't break it.
    Must stay single-line: icon + title + action on one row.
    ================================================================= */
-.portal :is(.panel-header, .overview-panel-header, .snapshot-card-header) {
+.portal .panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -589,7 +592,7 @@ html[data-theme="light"]:has(body[data-page="client-portal"]) {
 
 /* Checkbox column — padding removed, controlled by root */
 
-.portal :is(.overview-panel-title, .snapshot-card-title) {
+.portal .panel-title {
   display: inline-flex;
   align-items: center;
   gap: var(--icon-gap);
@@ -654,7 +657,7 @@ html[data-theme="light"]:has(body[data-page="client-portal"]) {
    a direct Lucide SVG child. Uses :where() for zero specificity
    so any component rule can override.
    ================================================================= */
-.portal :where(button, a, span, div, label, p, li, h1, h2, h3, h4, td):has(> svg.lucide) {
+.portal :where(button, a, span, div, label, p, li, h1, h2, h3, h4, td):not(.portal-checkbox):not(.portal-checkbox-indicator):has(> svg.lucide) {
   display: inline-flex;
   align-items: center;
   gap: var(--icon-gap);
@@ -663,6 +666,24 @@ html[data-theme="light"]:has(body[data-page="client-portal"]) {
 /* Block elements should stay flex (not inline-flex) */
 .portal :where(div, li, p, td):has(> svg.lucide) {
   display: flex;
+}
+
+/* Checkbox — unlayered overrides so they beat @layer components */
+.portal .portal-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portal .portal-checkbox-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portal .portal-checkbox svg.lucide {
+  width: calc(var(--space-2) * 0.75);
+  height: calc(var(--space-2) * 0.75);
 }
 
 /* Status dot in dropdown items: use base icon-size-xs (12px), not full 1em.

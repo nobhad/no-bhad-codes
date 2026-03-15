@@ -15,12 +15,6 @@
   color: var(--color-text-secondary);
 }
 
-.modal-body .form-field--checkbox {
-  display: flex;
-  align-items: center;
-  min-height: var(--space-6);
-}
-
 .modal-body .portal-checkbox-label {
   display: inline-flex;
   flex-direction: row;
