@@ -461,11 +461,20 @@ class ClientService {
     data: { contact_name?: string | null; company_name?: string | null; phone?: string | null }
   ): Promise<void> {
     const db = getDatabase();
-    await db.run(
-      `UPDATE clients SET contact_name = ?, company_name = ?, phone = ?, updated_at = CURRENT_TIMESTAMP
-       WHERE id = ?`,
-      [data.contact_name || null, data.company_name || null, data.phone || null, clientId]
-    );
+    // Only update fields that were actually sent — prevents wiping unrelated fields
+    const setClauses: string[] = [];
+    const params: (string | null)[] = [];
+
+    if ('contact_name' in data) { setClauses.push('contact_name = ?'); params.push(data.contact_name || null); }
+    if ('company_name' in data) { setClauses.push('company_name = ?'); params.push(data.company_name || null); }
+    if ('phone' in data) { setClauses.push('phone = ?'); params.push(data.phone || null); }
+
+    if (setClauses.length === 0) return;
+
+    setClauses.push('updated_at = CURRENT_TIMESTAMP');
+    params.push(clientId as unknown as string);
+
+    await db.run(`UPDATE clients SET ${setClauses.join(', ')} WHERE id = ?`, params);
   }
 
   /**

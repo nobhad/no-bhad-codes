@@ -247,6 +247,42 @@ router.get(
   })
 );
 
+// Alias: /me/notification-preferences → same handlers as /me/notifications
+router.get('/me/notification-preferences', authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user!.type !== 'client') {
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
+    }
+    const prefs = await notificationPreferencesService.getPreferences(req.user!.id, 'client');
+    sendSuccess(res, {
+      notifications: {
+        messages: prefs.notify_new_message,
+        status: prefs.notify_project_update,
+        invoices: prefs.notify_invoice_created,
+        weekly: prefs.email_frequency === 'weekly_digest'
+      },
+      fullPreferences: prefs
+    });
+  })
+);
+
+router.put('/me/notification-preferences', authenticateToken,
+  validateRequest(ClientValidationSchemas.updateNotifications, { allowUnknownFields: true }),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user!.type !== 'client') {
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
+    }
+    const { messages, status, invoices, weekly } = req.body;
+    await notificationPreferencesService.updatePreferences(req.user!.id, 'client', {
+      notify_new_message: messages,
+      notify_project_update: status,
+      notify_invoice_created: invoices,
+      email_frequency: weekly ? 'weekly_digest' : 'immediate'
+    });
+    sendSuccess(res, undefined, 'Notification preferences updated');
+  })
+);
+
 /**
  * @swagger
  * /api/clients/me/billing:
