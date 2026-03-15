@@ -113,11 +113,13 @@ vi.mock('../../../server/database/row-helpers', () => ({
 
 // Mock integration status service
 const mockGetAllIntegrationStatuses = vi.fn();
+const mockGetInvoiceForPaymentLink = vi.fn();
 vi.mock('../../../server/services/integration-status-service', () => ({
   integrationStatusService: {
     getAllIntegrationStatuses: (...args: unknown[]) => mockGetAllIntegrationStatuses(...args),
     getIntegrationStatus: vi.fn(),
-    updateIntegrationStatus: vi.fn()
+    updateIntegrationStatus: vi.fn(),
+    getInvoiceForPaymentLink: (...args: unknown[]) => mockGetInvoiceForPaymentLink(...args)
   }
 }));
 
@@ -352,7 +354,7 @@ describe('Integrations Routes', () => {
       ];
       mockGetNotificationConfigs.mockResolvedValue(configs);
 
-      const routerModule = await import('../../../server/routes/integrations/status');
+      const routerModule = await import('../../../server/routes/integrations/notifications');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/notifications');
 
@@ -369,7 +371,7 @@ describe('Integrations Routes', () => {
       const saved = { id: 1, name: 'Slack Alert', platform: 'slack' };
       mockSaveNotificationConfig.mockResolvedValue(saved);
 
-      const routerModule = await import('../../../server/routes/integrations/status');
+      const routerModule = await import('../../../server/routes/integrations/notifications');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/notifications');
 
@@ -389,7 +391,7 @@ describe('Integrations Routes', () => {
     });
 
     it('should reject invalid platform', async () => {
-      const routerModule = await import('../../../server/routes/integrations/status');
+      const routerModule = await import('../../../server/routes/integrations/notifications');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/notifications');
 
@@ -413,7 +415,7 @@ describe('Integrations Routes', () => {
     });
 
     it('should validate required notification fields', async () => {
-      const routerModule = await import('../../../server/routes/integrations/status');
+      const routerModule = await import('../../../server/routes/integrations/notifications');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/notifications');
 
@@ -434,7 +436,7 @@ describe('Integrations Routes', () => {
     it('should return Stripe configuration status', async () => {
       mockGetStripeStatus.mockReturnValue({ configured: true, mode: 'test' });
 
-      const routerModule = await import('../../../server/routes/integrations/status');
+      const routerModule = await import('../../../server/routes/integrations/stripe');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/stripe/status');
 
@@ -450,7 +452,7 @@ describe('Integrations Routes', () => {
     it('should return error when Stripe is not configured', async () => {
       mockIsStripeConfigured.mockReturnValue(false);
 
-      const routerModule = await import('../../../server/routes/integrations/status');
+      const routerModule = await import('../../../server/routes/integrations/stripe');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/stripe/payment-link');
 
@@ -469,7 +471,7 @@ describe('Integrations Routes', () => {
     it('should return error when invoice ID is missing', async () => {
       mockIsStripeConfigured.mockReturnValue(true);
 
-      const routerModule = await import('../../../server/routes/integrations/status');
+      const routerModule = await import('../../../server/routes/integrations/stripe');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/stripe/payment-link');
 
@@ -487,9 +489,9 @@ describe('Integrations Routes', () => {
 
     it('should return error when invoice not found in DB', async () => {
       mockIsStripeConfigured.mockReturnValue(true);
-      mockDbGet.mockResolvedValue(null);
+      mockGetInvoiceForPaymentLink.mockResolvedValue(null);
 
-      const routerModule = await import('../../../server/routes/integrations/status');
+      const routerModule = await import('../../../server/routes/integrations/stripe');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/stripe/payment-link');
 
@@ -510,7 +512,7 @@ describe('Integrations Routes', () => {
     it('should return calendar status when not configured', async () => {
       mockIsGoogleCalendarConfigured.mockReturnValue(false);
 
-      const routerModule = await import('../../../server/routes/integrations/status');
+      const routerModule = await import('../../../server/routes/integrations/calendar');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/calendar/status');
 
@@ -535,7 +537,7 @@ describe('Integrations Routes', () => {
         lastSyncAt: '2024-01-01T00:00:00Z'
       });
 
-      const routerModule = await import('../../../server/routes/integrations/status');
+      const routerModule = await import('../../../server/routes/integrations/calendar');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/calendar/status');
 
@@ -555,7 +557,7 @@ describe('Integrations Routes', () => {
       mockIsGoogleCalendarConfigured.mockReturnValue(true);
       mockGetGoogleAuthUrl.mockReturnValue('https://accounts.google.com/o/oauth2/auth?...');
 
-      const routerModule = await import('../../../server/routes/integrations/status');
+      const routerModule = await import('../../../server/routes/integrations/calendar');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/calendar/auth-url');
 
@@ -571,7 +573,7 @@ describe('Integrations Routes', () => {
     it('should return error when calendar is not configured', async () => {
       mockIsGoogleCalendarConfigured.mockReturnValue(false);
 
-      const routerModule = await import('../../../server/routes/integrations/status');
+      const routerModule = await import('../../../server/routes/integrations/calendar');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/calendar/auth-url');
 
