@@ -49,6 +49,7 @@ import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { unwrapApiData, apiFetch, apiPost } from '@/utils/api-client';
 import { formatErrorMessage } from '@/utils/error-utils';
+import { NOTIFICATIONS } from '@/constants/notifications';
 
 const logger = createLogger('GlobalTasksTable');
 
@@ -355,7 +356,7 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
             disabled={filteredTasks.length === 0}
             title="Export to CSV"
           />
-          <IconButton action="add" title="Add Task" />
+          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="Add Task" />
         </>
       }
       bulkActions={

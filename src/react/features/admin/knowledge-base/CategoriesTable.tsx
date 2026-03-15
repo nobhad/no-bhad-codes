@@ -27,6 +27,7 @@ import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { NOTIFICATIONS } from '@/constants/notifications';
 
 interface Category {
   id: number;
@@ -81,7 +82,7 @@ function sortCategories(a: Category, b: Category, sort: SortConfig): number {
   }
 }
 
-export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNotification: _showNotification, defaultPageSize = 25, overviewMode = false }: CategoriesTableProps) {
+export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNotification, defaultPageSize = 25, overviewMode = false }: CategoriesTableProps) {
   const containerRef = useFadeIn();
 
   const { data, isLoading, error, refetch } = useListFetch<Category>({
@@ -141,7 +142,7 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
             placeholder="Search categories..."
           />
           <IconButton action="refresh" onClick={refetch} disabled={isLoading} title="Refresh" />
-          <IconButton action="add" title="New Category" />
+          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="New Category" />
         </>
       }
       pagination={

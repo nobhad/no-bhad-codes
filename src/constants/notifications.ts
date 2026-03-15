@@ -101,6 +101,11 @@ export const NOTIFICATIONS = {
     INVITATION_FAILED: 'Failed to send invitation'
   },
 
+  // Generic
+  generic: {
+    COMING_SOON: 'This feature is coming soon'
+  },
+
   // Contact messages
   contact: {
     ADDED: 'Contact added',

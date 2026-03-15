@@ -41,6 +41,7 @@ import type { SortConfig } from '../types';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
 import { executeWithToast } from '@/utils/api-wrappers';
+import { NOTIFICATIONS } from '@/constants/notifications';
 
 interface Proposal {
   id: number;
@@ -137,7 +138,7 @@ function sortProposals(a: Proposal, b: Proposal, sort: SortConfig): number {
   }
 }
 
-export function ProposalsTable({ getAuthToken, showNotification: _showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: ProposalsTableProps) {
+export function ProposalsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: ProposalsTableProps) {
   const containerRef = useFadeIn();
 
   // Data fetching via useListFetch
@@ -317,7 +318,7 @@ export function ProposalsTable({ getAuthToken, showNotification: _showNotificati
             disabled={filteredProposals.length === 0}
             title="Export to CSV"
           />
-          <IconButton action="add" title="New Proposal" />
+          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="New Proposal" />
         </>
       }
       bulkActions={

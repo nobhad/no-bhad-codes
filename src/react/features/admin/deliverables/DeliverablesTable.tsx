@@ -42,6 +42,7 @@ import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
+import { NOTIFICATIONS } from '@/constants/notifications';
 
 const logger = createLogger('DeliverablesTable');
 
@@ -318,7 +319,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
             disabled={filteredDeliverables.length === 0}
             title="Export to CSV"
           />
-          <IconButton action="add" title="New Deliverable" />
+          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="New Deliverable" />
         </>
       }
       bulkActions={
