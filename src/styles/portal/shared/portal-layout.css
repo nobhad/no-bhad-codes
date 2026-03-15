@@ -310,14 +310,12 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 .portal .overview-table-section {
   width: 100%;
   margin: 0;
-  padding: 0;
 }
 
 .portal .overview-table-section .table-layout,
 .portal .overview-table-section .data-table-card {
   width: 100%;
   margin: 0;
-  padding: 0;
 }
 
 .portal .overview-table-section .data-table,

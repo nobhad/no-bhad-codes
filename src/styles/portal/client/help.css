@@ -70,9 +70,8 @@
 .help-accordion-article {
   display: flex;
   align-items: center;
-  gap: var(--icon-gap);
+  gap: var(--space-1-5); /* Match accordion trigger gap */
   margin: 0;
-  padding: var(--content-gutter);
   width: 100%;
   color: var(--color-text-primary);
   background: none;

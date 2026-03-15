@@ -53,14 +53,10 @@
 /* =====================================================
    CONTENT — revealed when expanded, primary text color
    ===================================================== */
-/* Content gets NO horizontal padding — its children (article buttons etc.)
-   must align flush with the trigger's content. The trigger already has
-   gutter padding from .accordion-item-wrapper > * in portal-gutter.css.
-   Adding padding here would double-indent content children. */
+/* Content gets gutter from .accordion-item-wrapper > * in portal-gutter.css.
+   Help page overrides this to remove padding for flush icon alignment. */
 .accordion-item-content {
   color: var(--color-text-primary);
-  padding-left: 0;
-  padding-right: 0;
 }
 
 }

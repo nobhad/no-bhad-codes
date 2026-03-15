@@ -16,10 +16,6 @@
 
 @layer components {
 
-/* Override card padding so summary and grid control spacing consistently */
-.portal :is(.details-card, .system-details).portal-project-card {
-  padding: 0;
-}
 
 .portal :is(.details-card, .system-details) {
   cursor: pointer;
