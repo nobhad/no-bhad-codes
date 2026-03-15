@@ -30,6 +30,45 @@ const router = express.Router();
 
 /**
  * @swagger
+ * /api/proposals/{id}/signatures:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: Get all signatures for a proposal
+ *     description: Get all signatures for a proposal.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
+router.get(
+  '/:id/signatures',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id, 10);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    // Authorization check for non-admin users
+    if (req.user?.type !== 'admin' && !(await canAccessProposal(req, proposalId))) {
+      return errorResponse(res, 'Proposal not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+    }
+
+    const signatures = await proposalService.getProposalSignatures(proposalId);
+    sendSuccess(res, { signatures });
+  })
+);
+
+/**
+ * @swagger
  * /api/proposals/{id}/request-signature:
  *   post:
  *     tags: [Proposals]

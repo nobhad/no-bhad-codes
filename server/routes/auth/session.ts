@@ -189,4 +189,49 @@ router.get('/validate', authenticateToken, (req: AuthenticatedRequest, res) => {
   return sendSuccess(res, { valid: true, user: req.user });
 });
 
+/**
+ * @swagger
+ * /api/auth/validate:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Validate JWT token (POST)
+ *     description: Check if the provided JWT token is valid and return user info (POST variant used by session refresh)
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Token is valid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 valid:
+ *                   type: boolean
+ *                   example: true
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     email:
+ *                       type: string
+ *                       format: email
+ *                       example: "client@example.com"
+ *                     type:
+ *                       type: string
+ *                       example: "client"
+ *       401:
+ *         description: Invalid token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post('/validate', authenticateToken, (req: AuthenticatedRequest, res) => {
+  return sendSuccess(res, { valid: true, user: req.user });
+});
+
 export { router as sessionRouter };
