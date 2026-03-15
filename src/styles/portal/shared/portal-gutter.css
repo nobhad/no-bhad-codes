@@ -39,6 +39,16 @@
   padding: var(--portal-page-top) var(--content-gutter) var(--portal-page-bottom);
 }
 
+/* Help accordion: zero content padding, push gutter to article buttons
+   so their icons align with the trigger's category icons. */
+.portal .dashboard-content .help-left-column .accordion-item-content {
+  padding: 0;
+}
+
+.portal .dashboard-content .help-accordion-article {
+  padding: var(--content-gutter);
+}
+
 /* =====================================================
    TIER 2: Named content elements
    Specific elements that need gutter regardless of depth
@@ -47,7 +57,7 @@
    ===================================================== */
 
 .portal .dashboard-content .data-table-header,
-.portal .dashboard-content .accordion-item-wrapper > *:not(.accordion-item-content),
+.portal .dashboard-content .accordion-item-wrapper > *,
 .portal .dashboard-content .msgtab-bubble > *,
 .portal .dashboard-content .help-featured-card,
 .portal .dashboard-content .dropzone-content,
@@ -92,6 +102,42 @@
 .portal .dashboard-content .help-contact-actions {
   padding: var(--content-gutter);
   box-sizing: border-box;
+}
+
+/* =====================================================
+   ZERO-PADDING OVERRIDES
+   Elements that genuinely need no padding despite gutter rules.
+   Must be in this unlayered file to beat the tier rules above.
+   ===================================================== */
+
+/* Overview table sections — sit flush inside overview grid */
+.portal .overview-table-section,
+.portal .overview-table-section .table-layout,
+.portal .overview-table-section .data-table-card {
+  padding: 0;
+}
+
+/* Compact/scrollable panel bodies — content scrolls edge-to-edge */
+.portal .overview-panel-body--compact,
+.portal .activity-panel .overview-panel-body {
+  padding: 0;
+}
+
+/* Analytics chart cards — chart fills entire card */
+.portal .analytics-chart-card {
+  padding: 0;
+}
+
+/* Details/project cards — spacing controlled by internal grid */
+.portal :is(.details-card, .system-details).portal-project-card {
+  padding: 0;
+}
+
+/* Messages mobile — full-bleed message thread */
+@media (--compact-mobile) {
+  body:is([data-active-tab="messages"], .messages-tab-active) .portal .tab-content {
+    padding: 0;
+  }
 }
 
 /* =====================================================

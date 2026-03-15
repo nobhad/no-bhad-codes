@@ -183,7 +183,6 @@
 }
 
 .overview-panel-body--compact {
-  padding: 0;
   max-height: 280px;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -195,7 +194,6 @@
 }
 
 .activity-panel .overview-panel-body {
-  padding: 0;
   max-height: 400px;
   overflow-y: auto;
   scrollbar-width: thin;
