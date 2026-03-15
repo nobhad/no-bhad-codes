@@ -53,10 +53,14 @@
 /* =====================================================
    CONTENT — revealed when expanded, primary text color
    ===================================================== */
-/* Content — same horizontal padding as trigger so icons align.
-   Content is a direct child of wrapper, matching the padding-on-children pattern. */
+/* Content gets NO horizontal padding — its children (article buttons etc.)
+   must align flush with the trigger's content. The trigger already has
+   gutter padding from .accordion-item-wrapper > * in portal-gutter.css.
+   Adding padding here would double-indent content children. */
 .accordion-item-content {
   color: var(--color-text-primary);
+  padding-left: 0;
+  padding-right: 0;
 }
 
 }
