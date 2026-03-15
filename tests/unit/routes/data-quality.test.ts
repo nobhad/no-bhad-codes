@@ -288,12 +288,9 @@ describe('Data Quality Routes', () => {
 
       const req = createMockReq({ email: 'user@example.com' });
       const res = createMockRes();
-      await handler(req, res);
 
-      expect(mockErrorResponseWithPayload).toHaveBeenCalledWith(
-        res, 'Failed to scan for duplicates', 500, 'INTERNAL_ERROR',
-        expect.objectContaining({ message: expect.any(String) })
-      );
+      // Route delegates error handling to asyncHandler/middleware
+      await expect(handler(req, res)).rejects.toThrow('Service unavailable');
     });
   });
 
@@ -395,8 +392,8 @@ describe('Data Quality Routes', () => {
     it('should detect XSS threats and log them', async () => {
       mockDetectXSS.mockReturnValue({ detected: true, pattern: 'script' });
       mockDetectSQLInjection.mockReturnValue({ detected: false });
-      mockDbRun.mockResolvedValue({ changes: 1 });
 
+      const { dataQualityService } = await import('../../../server/services/data-quality-service');
       const routerModule = await import('../../../server/routes/data-quality/validation');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/security/check');
@@ -410,8 +407,8 @@ describe('Data Quality Routes', () => {
         xss: { detected: true, pattern: 'script' },
         sqlInjection: { detected: false }
       });
-      // Should log the threat to DB
-      expect(mockDbRun).toHaveBeenCalled();
+      // Should log the threat via service
+      expect(dataQualityService.logSecurityThreat).toHaveBeenCalled();
     });
 
     it('should require input parameter', async () => {
@@ -459,12 +456,9 @@ describe('Data Quality Routes', () => {
 
       const req = createMockReq();
       const res = createMockRes();
-      await handler(req, res);
 
-      expect(mockErrorResponseWithPayload).toHaveBeenCalledWith(
-        res, 'Failed to fetch metrics', 500, 'INTERNAL_ERROR',
-        expect.objectContaining({ message: expect.any(String) })
-      );
+      // Route delegates error handling to asyncHandler/middleware
+      await expect(handler(req, res)).rejects.toThrow('Stats unavailable');
     });
   });
 

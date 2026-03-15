@@ -109,11 +109,6 @@
    Activity item with icon, content, and time
    ===================================================== */
 
-/* Activity list — last item gets bottom margin for breathing room. */
-.portal .activity-list {
-}
-
-
 /* Activity list item — flex row with icon gap */
 .portal .activity-list > li,
 .portal .activity-item {
@@ -597,19 +592,16 @@
    ===================================================== */
 
 .portal .milestone-list,
-.portal .milestone-item-wrapper {
+/* Milestone layout — shared between admin and client portals */
+.portal .milestone-list {
   display: flex;
   flex-direction: column;
-}
-
-.portal .milestone-list {
   gap: var(--space-2);
 }
 
-.portal .table-layout .progress-field {
-}
-
 .portal .milestone-item-wrapper {
+  display: flex;
+  flex-direction: column;
   border: var(--portal-border);
 }
 
