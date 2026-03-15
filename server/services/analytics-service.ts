@@ -125,6 +125,15 @@ export const analyticsService = {
     return reports.generateReportData(report.report_type, report.filters || {});
   },
 
+  // ── Reports (direct aliases) ─────────────────
+  getReports: reports.getReports,
+  createReport: reports.createReport,
+  getReport: reports.getReport,
+  updateReport: reports.updateReport,
+  deleteReport: reports.deleteReport,
+  toggleFavorite: reports.toggleFavorite,
+  generateReportData: reports.generateReportData,
+
   // ── Schedules ─────────────────────────────────
   getReportSchedules(reportId?: number) {
     return reports.getSchedules(reportId);
@@ -138,6 +147,16 @@ export const analyticsService = {
   deleteReportSchedule(scheduleId: number) {
     return reports.deleteSchedule(scheduleId);
   },
+
+  // ── Schedules (direct aliases) ───────────────
+  getSchedules: reports.getSchedules,
+  createSchedule: reports.createSchedule,
+  getSchedule: reports.getSchedule,
+  updateSchedule: reports.updateSchedule,
+  deleteSchedule: reports.deleteSchedule,
+  getDueSchedules: reports.getDueSchedules,
+  markScheduleSent: reports.markScheduleSent,
+
   async processDueSchedules() {
     const dueSchedules = await reports.getDueSchedules();
     let processed = 0;
@@ -186,7 +205,18 @@ export const analyticsService = {
     return dashboards.applyPreset(userEmail, presetId);
   },
 
+  // ── Widgets (direct aliases) ─────────────────
+  getWidgets: dashboards.getWidgets,
+  createWidget: dashboards.createWidget,
+  getWidget: dashboards.getWidget,
+  updateWidget: dashboards.updateWidget,
+  deleteWidget: dashboards.deleteWidget,
+  saveWidgetLayout: dashboards.saveWidgetLayout,
+  getPresets: dashboards.getPresets,
+  applyPreset: dashboards.applyPreset,
+
   // ── KPIs ──────────────────────────────────────
+  captureSnapshot: dashboards.captureSnapshot,
   captureKPISnapshot() {
     return dashboards.captureSnapshot();
   },
@@ -213,6 +243,14 @@ export const analyticsService = {
   checkAlertTriggers() {
     return dashboards.checkAlerts();
   },
+
+  // ── Alerts (direct aliases) ──────────────────
+  getAlerts: dashboards.getAlerts,
+  getAlert: dashboards.getAlert,
+  createAlert: dashboards.createAlert,
+  updateAlert: dashboards.updateAlert,
+  deleteAlert: dashboards.deleteAlert,
+  checkAlerts: dashboards.checkAlerts,
 
   // ── Quick Analytics ───────────────────────────
   async getRevenueAnalytics(days?: number): Promise<ReportDataResult> {
