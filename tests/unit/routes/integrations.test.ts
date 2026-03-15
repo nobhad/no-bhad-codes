@@ -111,6 +111,16 @@ vi.mock('../../../server/database/row-helpers', () => ({
   transformData: (data: unknown) => data
 }));
 
+// Mock integration status service
+const mockGetAllIntegrationStatuses = vi.fn();
+vi.mock('../../../server/services/integration-status-service', () => ({
+  integrationStatusService: {
+    getAllIntegrationStatuses: (...args: unknown[]) => mockGetAllIntegrationStatuses(...args),
+    getIntegrationStatus: vi.fn(),
+    updateIntegrationStatus: vi.fn()
+  }
+}));
+
 // Mock logger
 vi.mock('../../../server/services/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }
@@ -168,13 +178,13 @@ describe('Integrations Routes', () => {
 
   describe('GET /status', () => {
     it('should return integration statuses from DB', async () => {
-      mockDbAll.mockResolvedValue([
+      mockGetAllIntegrationStatuses.mockResolvedValue([
         { integration_type: 'stripe', is_configured: 1, is_active: 1 },
         { integration_type: 'slack', is_configured: 1, is_active: 0 }
       ]);
       mockIsStripeConfigured.mockReturnValue(true);
 
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/status');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/status');
 
@@ -190,12 +200,12 @@ describe('Integrations Routes', () => {
     });
 
     it('should enhance statuses with runtime configuration checks', async () => {
-      mockDbAll.mockResolvedValue([
+      mockGetAllIntegrationStatuses.mockResolvedValue([
         { integration_type: 'stripe', is_configured: 1 }
       ]);
       mockIsStripeConfigured.mockReturnValue(true);
 
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/status');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/status');
 
@@ -208,9 +218,9 @@ describe('Integrations Routes', () => {
     });
 
     it('should return empty integrations when DB has none', async () => {
-      mockDbAll.mockResolvedValue([]);
+      mockGetAllIntegrationStatuses.mockResolvedValue([]);
 
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/status');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/status');
 
@@ -235,7 +245,7 @@ describe('Integrations Routes', () => {
       };
       mockCheckIntegrationHealth.mockResolvedValue(mockReport);
 
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/status');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/health');
 
@@ -257,7 +267,7 @@ describe('Integrations Routes', () => {
       };
       mockCheckIntegrationHealth.mockResolvedValue(mockReport);
 
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/status');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/health');
 
@@ -275,7 +285,7 @@ describe('Integrations Routes', () => {
       const events = ['invoice.created', 'client.created', 'project.updated'];
       mockGetZapierEventTypes.mockReturnValue(events);
 
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/zapier');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/zapier/events');
 
@@ -291,7 +301,7 @@ describe('Integrations Routes', () => {
     it('should create a new Zapier webhook', async () => {
       mockCreateZapierWebhook.mockResolvedValue({ id: 1, secret_key: 'abc123' });
 
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/zapier');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/zapier/webhook');
 
@@ -318,7 +328,7 @@ describe('Integrations Routes', () => {
     });
 
     it('should validate required webhook fields', async () => {
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/zapier');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/zapier/webhook');
 
@@ -342,7 +352,7 @@ describe('Integrations Routes', () => {
       ];
       mockGetNotificationConfigs.mockResolvedValue(configs);
 
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/status');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/notifications');
 
@@ -359,7 +369,7 @@ describe('Integrations Routes', () => {
       const saved = { id: 1, name: 'Slack Alert', platform: 'slack' };
       mockSaveNotificationConfig.mockResolvedValue(saved);
 
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/status');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/notifications');
 
@@ -379,7 +389,7 @@ describe('Integrations Routes', () => {
     });
 
     it('should reject invalid platform', async () => {
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/status');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/notifications');
 
@@ -403,7 +413,7 @@ describe('Integrations Routes', () => {
     });
 
     it('should validate required notification fields', async () => {
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/status');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/notifications');
 
@@ -424,7 +434,7 @@ describe('Integrations Routes', () => {
     it('should return Stripe configuration status', async () => {
       mockGetStripeStatus.mockReturnValue({ configured: true, mode: 'test' });
 
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/status');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/stripe/status');
 
@@ -440,7 +450,7 @@ describe('Integrations Routes', () => {
     it('should return error when Stripe is not configured', async () => {
       mockIsStripeConfigured.mockReturnValue(false);
 
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/status');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/stripe/payment-link');
 
@@ -459,7 +469,7 @@ describe('Integrations Routes', () => {
     it('should return error when invoice ID is missing', async () => {
       mockIsStripeConfigured.mockReturnValue(true);
 
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/status');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/stripe/payment-link');
 
@@ -479,7 +489,7 @@ describe('Integrations Routes', () => {
       mockIsStripeConfigured.mockReturnValue(true);
       mockDbGet.mockResolvedValue(null);
 
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/status');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'post', '/stripe/payment-link');
 
@@ -500,7 +510,7 @@ describe('Integrations Routes', () => {
     it('should return calendar status when not configured', async () => {
       mockIsGoogleCalendarConfigured.mockReturnValue(false);
 
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/status');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/calendar/status');
 
@@ -525,7 +535,7 @@ describe('Integrations Routes', () => {
         lastSyncAt: '2024-01-01T00:00:00Z'
       });
 
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/status');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/calendar/status');
 
@@ -545,7 +555,7 @@ describe('Integrations Routes', () => {
       mockIsGoogleCalendarConfigured.mockReturnValue(true);
       mockGetGoogleAuthUrl.mockReturnValue('https://accounts.google.com/o/oauth2/auth?...');
 
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/status');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/calendar/auth-url');
 
@@ -561,7 +571,7 @@ describe('Integrations Routes', () => {
     it('should return error when calendar is not configured', async () => {
       mockIsGoogleCalendarConfigured.mockReturnValue(false);
 
-      const routerModule = await import('../../../server/routes/integrations');
+      const routerModule = await import('../../../server/routes/integrations/status');
       const router = routerModule.default;
       const handler = getRouteHandler(router, 'get', '/calendar/auth-url');
 
