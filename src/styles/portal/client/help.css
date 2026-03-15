@@ -70,6 +70,7 @@
 .help-accordion-article {
   display: flex;
   align-items: center;
+  justify-content: flex-start; /* Override button:has(> svg) center */
   gap: var(--space-1-5); /* Match accordion trigger gap */
   margin: 0;
   width: 100%;
