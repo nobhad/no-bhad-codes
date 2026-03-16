@@ -30,14 +30,14 @@
 .portal .portal-global-header,
 .portal .sidebar-content,
 .portal .sidebar-footer,
-.portal .dashboard-content > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content):not(.subsection):not(.data-table-scroll-wrapper):not(button),
-.portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > *:not(.subsection):not(.data-table-scroll-wrapper):not(button) {
+.portal .dashboard-content > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content):not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(button),
+.portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > *:not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(button) {
   padding: var(--content-gutter);
   box-sizing: border-box;
 }
 
-/* .section is the layout-level page wrapper (from PortalLayout).
-   No padding — children get gutter via Tier rules below.
+/* .section and .subsection are layout-level wrappers — NEVER receive gutter padding.
+   Their children get gutter via Tier 2/3 rules below.
    Gap between children uses --portal-section-gap (set in portal-layout.css). */
 
 /* Help accordion: zero content padding, push gutter to article buttons

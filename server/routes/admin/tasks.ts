@@ -10,12 +10,43 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 import { projectService } from '../../services/project-service.js';
 import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 
 const router = express.Router();
+
+/**
+ * POST /api/admin/tasks - Create a new task
+ */
+router.post(
+  '/tasks',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { projectId, title, description, priority, dueDate, milestoneId } = req.body;
+
+    if (!projectId || !title) {
+      return errorResponse(res, 'projectId and title are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+    }
+
+    const parsedProjectId = parseInt(projectId, 10);
+    if (isNaN(parsedProjectId) || parsedProjectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
+    }
+
+    const task = await projectService.createTask(parsedProjectId, {
+      title,
+      description,
+      priority,
+      dueDate,
+      milestoneId: milestoneId ? parseInt(milestoneId, 10) : undefined
+    });
+
+    sendCreated(res, { task }, 'Task created');
+  })
+);
 
 /**
  * POST /api/admin/tasks/bulk-delete - Bulk delete tasks

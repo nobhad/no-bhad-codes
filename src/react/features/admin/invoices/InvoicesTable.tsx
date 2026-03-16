@@ -326,7 +326,7 @@ export function InvoicesTable({
   );
 
   return (
-    <div>
+    <>
       <TableLayout
         containerRef={containerRef as React.RefObject<HTMLDivElement>}
         title="INVOICES"
@@ -625,6 +625,6 @@ export function InvoicesTable({
         variant="info"
         loading={sendDialog.isLoading}
       />
-    </div>
+    </>
   );
 }

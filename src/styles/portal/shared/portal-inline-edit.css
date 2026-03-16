@@ -8,7 +8,6 @@
  * Used across both admin and client portals.
  */
 
-@layer components {
 
 /* Editable cell indicator */
 [data-page="admin"] .inline-editable,
@@ -501,4 +500,3 @@
   }
 }
 
-}

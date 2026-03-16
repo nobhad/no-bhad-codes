@@ -7,8 +7,6 @@
  * Styles for project tasks and time tracking features.
  */
 
-@layer components {
-
 /* Global tasks tab content should fill available height */
 [data-page="admin"] #tab-tasks .kanban-board {
   min-height: calc(100vh - var(--tasks-kanban-board-offset));
@@ -18,39 +16,31 @@
   min-height: calc(100vh - var(--tasks-kanban-column-offset));
 }
 
-} /* end @layer components */
-
 /* Global Tasks Kanban - ensure horizontal layout */
-@layer utilities {
-  #global-tasks-kanban-container .kanban-board {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    width: 100%;
-  }
+#global-tasks-kanban-container .kanban-board {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: 100%;
+}
 
-  #global-tasks-kanban-container .kanban-column {
-    flex: 1 1 0;
-    min-width: var(--tasks-kanban-column-min-width);
-    max-width: none;
-  }
+#global-tasks-kanban-container .kanban-column {
+  flex: 1 1 0;
+  min-width: var(--tasks-kanban-column-min-width);
+  max-width: none;
 }
 
 /* Only stack columns on mobile */
-@layer responsive {
-  @media (--mobile) {
-    #global-tasks-kanban-container .kanban-board {
-      flex-direction: column;
-    }
+@media (--mobile) {
+  #global-tasks-kanban-container .kanban-board {
+    flex-direction: column;
+  }
 
-    #global-tasks-kanban-container .kanban-column {
-      flex: 0 0 auto;
-      min-width: 100%;
-    }
+  #global-tasks-kanban-container .kanban-column {
+    flex: 0 0 auto;
+    min-width: 100%;
   }
 }
-
-@layer components {
 
 /* View toggle: use shared .view-toggle (see shared/view-toggle.css) */
 
@@ -253,5 +243,3 @@
 }
 
 /* Board view uses shared .kanban-* classes from portal-components.css */
-
-} /* end @layer components */

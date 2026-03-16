@@ -6,7 +6,8 @@
 
 import * as React from 'react';
 import { useMemo } from 'react';
-import { CheckCircle, XCircle, RefreshCw, Inbox } from 'lucide-react';
+import { CheckCircle, XCircle, RefreshCw, Inbox, ShieldCheck } from 'lucide-react';
+import { PageHeader } from '@react/factories/createSection';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { formatDate } from '@react/utils/formatDate';
 import { useListFetch } from '@react/factories/useDataFetch';
@@ -90,13 +91,16 @@ export function ApprovalsTable({ getAuthToken, showNotification }: ApprovalsTabl
 
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>}>
-      <div className="perf-header">
-        <h2 className="heading perf-heading">Pending Approvals</h2>
-        <button className="btn btn-secondary" onClick={refetch}>
-          <RefreshCw className="btn-icon-left" />
-          Refresh
-        </button>
-      </div>
+      <PageHeader
+        title="Pending Approvals"
+        icon={ShieldCheck}
+        actions={
+          <button className="btn btn-secondary" onClick={refetch}>
+            <RefreshCw className="btn-icon-left" />
+            Refresh
+          </button>
+        }
+      />
 
       <PortalTable className="data-table">
         <PortalTableHeader>

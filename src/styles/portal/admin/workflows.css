@@ -4,8 +4,6 @@
    Relies on: portal-forms.css, portal-badges.css, modal-system.css
    ===================================================== */
 
-@layer components {
-
 /* ==============================================
    ADD STEP FORM
    ============================================== */
@@ -56,6 +54,4 @@
     word-break: normal;
     white-space: normal;
   }
-}
-
 }

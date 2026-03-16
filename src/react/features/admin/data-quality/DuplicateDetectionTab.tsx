@@ -6,6 +6,7 @@
 import * as React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { Play, Merge, X } from 'lucide-react';
+import { EmptyState } from '@react/factories';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import {
@@ -119,7 +120,7 @@ export function DuplicateDetectionTab({
       {loading ? (
         <div className="loading-state">Loading duplicates...</div>
       ) : pendingDuplicates.length === 0 ? (
-        <div className="empty-state">No pending duplicates found.</div>
+        <EmptyState message="No pending duplicates found." />
       ) : (
         <table className="data-table">
           <thead>

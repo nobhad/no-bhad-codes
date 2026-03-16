@@ -16,7 +16,7 @@ export function PortalFilesHub({ getAuthToken, showNotification }: PortalViewPro
   const containerRef = useFadeIn<HTMLDivElement>();
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className="subsection">
       <React.Suspense fallback={<div className="loading-state"><div className="loading-spinner" /></div>}>
         <PortalFilesManager getAuthToken={getAuthToken} showNotification={showNotification} />
       </React.Suspense>

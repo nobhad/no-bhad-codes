@@ -304,7 +304,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
   }, [showNotification, refetch]);
 
   return (
-    <div>
+    <>
       <TableLayout
         containerRef={containerRef as React.RefObject<HTMLDivElement>}
         title="CONTACTS"
@@ -493,6 +493,6 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
         loading={createLoading}
         clientOptions={clientOptions}
       />
-    </div>
+    </>
   );
 }

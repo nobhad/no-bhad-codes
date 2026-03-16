@@ -6,7 +6,8 @@
 
 import * as React from 'react';
 import { useState, useMemo } from 'react';
-import { Search, ChevronDown, ChevronUp, BookOpen, RefreshCw } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, BookOpen, HelpCircle, RefreshCw } from 'lucide-react';
+import { PageHeader } from '@react/factories/createSection';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { useListFetch } from '@react/factories/useDataFetch';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
@@ -101,13 +102,16 @@ export function HelpCenter({ getAuthToken }: HelpCenterProps) {
 
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>}>
-      <div className="perf-header">
-        <h2 className="heading perf-heading">Help Center</h2>
-        <button className="btn btn-secondary" onClick={refetch}>
-          <RefreshCw className="btn-icon-left" />
-          Refresh
-        </button>
-      </div>
+      <PageHeader
+        title="Help Center"
+        icon={HelpCircle}
+        actions={
+          <button className="btn btn-secondary" onClick={refetch}>
+            <RefreshCw className="btn-icon-left" />
+            Refresh
+          </button>
+        }
+      />
 
       {/* Search and Filter Bar */}
       <div className="panel">

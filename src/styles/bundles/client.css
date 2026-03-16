@@ -60,25 +60,15 @@
  * These MUST be unlayered to override layer rules
  * ============================================ */
 
-/* Portal background - shared between admin and client */
-body[data-page="admin"],
+/* Client portal body — fixed viewport, no body scroll.
+   Background and html styles in portal-theme.css (single source of truth). */
 body[data-page="client"] {
-  background-color: var(--color-bg-primary);
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
 }
 
-/* html background - portal-theme.css sets --color-bg-primary on html via :has() */
-html:has(body[data-page="admin"]),
-html:has(body[data-page="client"]) {
-  background-color: var(--color-bg-primary);
-  height: 100%;
-}
-
-/* Portal scoping wrapper — NOT a layout container.
-   display: block is default for a div; width/overflow prevent
-   horizontal overflow from content area. */
+/* Portal scoping wrapper */
 .portal {
   display: block;
   width: 100%;

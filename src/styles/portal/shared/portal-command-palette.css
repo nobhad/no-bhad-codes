@@ -9,7 +9,6 @@
  * Tokens: --cmd-palette-* defined in portal-theme.css
  */
 
-@layer components {
 
 /* ============================================
  * OVERLAY
@@ -238,4 +237,3 @@
   }
 }
 
-}

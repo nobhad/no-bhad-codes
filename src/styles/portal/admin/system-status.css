@@ -9,8 +9,6 @@
  * for consistent layout with other admin tabs.
  */
 
-@layer components {
-
 /* ================================================
    Content wrapper
    ================================================ */
@@ -274,6 +272,4 @@
     flex-direction: column;
     gap: var(--space-2);
   }
-}
-
 }

@@ -6,6 +6,8 @@
 import * as React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { RefreshCw } from 'lucide-react';
+import { EmptyState } from '@react/factories';
+import { StatCard } from '@react/components/portal/StatCard';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import {
@@ -95,22 +97,22 @@ export function MetricsHistoryTab({
         </div>
 
         {metrics.length === 0 ? (
-          <div className="empty-state">No metrics available. Run a calculation to generate metrics.</div>
+          <EmptyState message="No metrics available. Run a calculation to generate metrics." />
         ) : (
           <div className="stats-grid">
             {metrics.map(metric => (
-              <div className="stat-card" key={metric.name}>
-                <span className={`status-badge status-badge-${getMetricStatusVariant(metric.status)}`}>
-                  {metric.status}
-                </span>
-                <div className="stat-value">
-                  {metric.value}{metric.unit === '%' ? '%' : ` ${metric.unit}`}
-                </div>
-                <div className="stat-label">{metric.name}</div>
-                <div className="stat-meta">
-                  Last calculated: {formatDate(metric.lastCalculated)}
-                </div>
-              </div>
+              <StatCard
+                key={metric.name}
+                label={metric.name}
+                value={`${metric.value}${metric.unit === '%' ? '%' : ` ${metric.unit}`}`}
+                meta={`Last calculated: ${formatDate(metric.lastCalculated)}`}
+                className={`has-badge`}
+                icon={
+                  <span className={`status-badge status-badge-${getMetricStatusVariant(metric.status)}`}>
+                    {metric.status}
+                  </span>
+                }
+              />
             ))}
           </div>
         )}
@@ -122,7 +124,7 @@ export function MetricsHistoryTab({
         </div>
 
         {history.length === 0 ? (
-          <div className="empty-state">No metric history available.</div>
+          <EmptyState message="No metric history available." />
         ) : (
           <table className="data-table">
             <thead>

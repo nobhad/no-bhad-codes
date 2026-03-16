@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 import { deliverableService } from '../../services/deliverable-service.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 
@@ -32,6 +32,39 @@ router.get(
     });
 
     sendSuccess(res, { deliverables, stats });
+  })
+);
+
+/**
+ * POST /api/admin/deliverables - Create a new deliverable
+ */
+router.post(
+  '/deliverables',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { projectId, title, description, type, reviewDeadline, tags } = req.body;
+
+    if (!projectId || !title || !type) {
+      return errorResponse(res, 'projectId, title, and type are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+    }
+
+    const parsedProjectId = parseInt(projectId, 10);
+    if (isNaN(parsedProjectId) || parsedProjectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
+    }
+
+    const createdById = req.user?.id || 0;
+    const deliverable = await deliverableService.createDeliverable(
+      parsedProjectId,
+      title,
+      description || '',
+      type,
+      createdById,
+      { reviewDeadline, tags }
+    );
+
+    sendCreated(res, { deliverable }, 'Deliverable created');
   })
 );
 

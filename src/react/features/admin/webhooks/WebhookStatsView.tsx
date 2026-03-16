@@ -30,7 +30,7 @@ export function WebhookStatsView({
           <ArrowLeft className="h-4 w-4" />
           Back
         </button>
-        <h3 className="font-semibold">Stats: {selectedWebhook.name}</h3>
+        <h3><span className="title-full">Stats: {selectedWebhook.name}</span></h3>
         <IconButton
           action="refresh"
           onClick={() => onRefresh(selectedWebhook.id)}

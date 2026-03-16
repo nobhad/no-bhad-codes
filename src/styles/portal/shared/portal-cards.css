@@ -12,7 +12,6 @@
  * - portal-dashboard-widgets.css - Dashboard widgets (activity, tasks)
  */
 
-@layer components {
 
 /* =====================================================
    UNIFIED H3 HEADING STYLES
@@ -287,10 +286,9 @@ html[data-theme="light"] .portal :is(
   color: var(--color-text-primary);
 }
 
-/* Title block -- stacked title + subtitle inside .portal-card-title-group */
-.portal .portal-card-title-block {
-  display: flex;
-  flex-direction: column;
+/* Title group (stacked variant) -- tighter gap when used as column */
+.portal .portal-card-title-group.flex-col {
+  align-items: flex-start;
   gap: var(--space-0-5, 0.125rem);
 }
 
@@ -418,17 +416,6 @@ html[data-theme="light"] .portal :is(
   .portal .card-grid-2 {
     grid-template-columns: 1fr;
   }
-}
-
-/* =====================================================
-   BASE VIEW CONTAINER
-   Shared by all portal page views — flex column with
-   consistent section spacing.
-   ===================================================== */
-.portal-view {
-  display: flex;
-  flex-direction: column;
-  gap: var(--portal-section-gap);
 }
 
 /* Activity and task widgets: see portal-dashboard-widgets.css */
@@ -569,4 +556,3 @@ html[data-theme="light"] .portal :is(
 
 /* Dashboard widgets: see portal-dashboard-widgets.css */
 
-}

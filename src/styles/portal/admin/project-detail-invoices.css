@@ -8,8 +8,6 @@
  * Split from project-detail.css for maintainability.
  */
 
-@layer components {
-
 /* =====================================================
    INVOICES LIST
    ===================================================== */
@@ -179,6 +177,4 @@
   #pd-invoices-list .data-table td:nth-child(3) {
     display: none;
   }
-}
-
 }

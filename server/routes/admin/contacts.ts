@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 import { clientService } from '../../services/client-service.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 
@@ -79,6 +79,43 @@ router.get(
     };
 
     sendSuccess(res, { contacts: allContacts, stats });
+  })
+);
+
+/**
+ * POST /api/admin/contacts - Create a new contact
+ */
+router.post(
+  '/contacts',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { clientId, name, email, phone, title, company, isPrimary } = req.body;
+
+    if (!clientId || !name || !email) {
+      return errorResponse(res, 'clientId, name, and email are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+    }
+
+    const parsedClientId = parseInt(clientId, 10);
+    if (isNaN(parsedClientId) || parsedClientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, ErrorCodes.INVALID_ID);
+    }
+
+    const nameParts = name.trim().split(/\s+/);
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    const contact = await clientService.createContact(parsedClientId, {
+      firstName,
+      lastName,
+      email,
+      phone: phone || '',
+      title: title || '',
+      role: 'general',
+      isPrimary: isPrimary || false
+    });
+
+    sendCreated(res, { contact }, 'Contact created');
   })
 );
 

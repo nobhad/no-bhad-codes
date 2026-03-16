@@ -8,7 +8,6 @@
  * Bell button matches .header-theme-toggle sizing/styling.
  */
 
-@layer components {
 
 /* ============================================================================
    NOTIFICATION BELL CONTAINER
@@ -244,4 +243,3 @@
   }
 }
 
-}

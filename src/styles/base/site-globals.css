@@ -7,7 +7,8 @@
  * Global variables and unlayered overrides for the main site.
  */
 
-/* Theme integration */
+/* Theme integration — html + body background (single source of truth) */
+html,
 body {
   background-color: var(--color-neutral-300);
   color: var(--color-dark);

@@ -68,7 +68,7 @@ export function DateCell({
 }: DateCellProps) {
   if (!value) {
     return (
-      <TableCellWrapper className={cn('date-cell', className)}>
+      <TableCellWrapper className={cn('date-col', className)}>
         <span className="cell-empty">{fallback}</span>
       </TableCellWrapper>
     );
@@ -77,7 +77,7 @@ export function DateCell({
   const formatted = formatDate(value, { includeTime, relative, fallback });
 
   return (
-    <TableCellWrapper className={cn('date-cell', className)}>
+    <TableCellWrapper className={cn('date-col', className)}>
       <span title={new Date(value).toLocaleString()}>
         {formatted}
       </span>
@@ -284,7 +284,7 @@ export function PhoneCell({
           className="cell-link"
           onClick={(e) => e.stopPropagation()}
         >
-          <Phone className="cell-icon" aria-hidden="true" />
+          <Phone className="icon-sm" aria-hidden="true" />
           {formatted}
         </a>
       ) : (
@@ -343,7 +343,7 @@ export function EmailCell({
           title={value}
           onClick={(e) => e.stopPropagation()}
         >
-          <Mail className="cell-icon" aria-hidden="true" />
+          <Mail className="icon-sm" aria-hidden="true" />
           {displayValue}
         </a>
       ) : (
@@ -407,7 +407,7 @@ export function LinkCell({
         onClick={(e) => e.stopPropagation()}
       >
         {displayText}
-        {external && <ExternalLink className="cell-icon" aria-hidden="true" />}
+        {external && <ExternalLink className="icon-sm" aria-hidden="true" />}
       </a>
     </TableCellWrapper>
   );

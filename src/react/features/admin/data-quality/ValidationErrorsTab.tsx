@@ -6,6 +6,7 @@
 import * as React from 'react';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Filter } from 'lucide-react';
+import { EmptyState } from '@react/factories';
 import { FormDropdown } from '@react/components/portal/FormDropdown';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
@@ -85,9 +86,7 @@ export function ValidationErrorsTab({
       {loading ? (
         <div className="loading-state">Loading validation errors...</div>
       ) : filteredErrors.length === 0 ? (
-        <div className="empty-state">
-          {errorTypeFilter ? 'No errors match the selected filter.' : 'No validation errors found.'}
-        </div>
+        <EmptyState message={errorTypeFilter ? 'No errors match the selected filter.' : 'No validation errors found.'} />
       ) : (
         <table className="data-table">
           <thead>

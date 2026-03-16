@@ -19,7 +19,6 @@
  * - Tag input (.tag-remove)
  */
 
-@layer components {
 
 /* 1. Utilities first (foundational classes used everywhere) */
 @import "./portal-utilities.css";
@@ -56,4 +55,3 @@
   opacity: 1;
 }
 
-}

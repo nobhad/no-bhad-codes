@@ -72,7 +72,7 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
 
   // Overview - show all tables stacked with default pagination of 10
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>}>
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">
       <React.Suspense fallback={<LoadingState message="Loading leads..." />}>
         <section className="overview-table-section">
           <LeadsTable

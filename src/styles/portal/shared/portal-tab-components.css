@@ -14,7 +14,6 @@
  * - Message thread list items → portal-messages.css
  */
 
-@layer components {
 
 /* Tasks tab styles in project-detail.css */
 
@@ -118,4 +117,3 @@
 
 /* Notes tab styles in project-detail.css */
 
-}

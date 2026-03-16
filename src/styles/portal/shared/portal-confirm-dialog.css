@@ -6,7 +6,6 @@
    Matches portal button styling for consistency.
    ================================================ */
 
-@layer components {
 
 .confirm-dialog {
   background: var(--color-bg-secondary);
@@ -244,4 +243,3 @@
   min-height: var(--min-height-textarea-lg);
 }
 
-}

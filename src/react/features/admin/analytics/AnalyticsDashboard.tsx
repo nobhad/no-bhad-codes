@@ -20,7 +20,6 @@ import {
 } from 'chart.js';
 import {
   TrendingUp,
-  TrendingDown,
   DollarSign,
   Users,
   Briefcase,
@@ -40,8 +39,9 @@ import {
   PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
 import { PortalButton } from '@react/components/portal';
+import { StatCard } from '@react/components/portal/StatCard';
 import { useFadeIn } from '@react/hooks/useGsap';
-import { ErrorState, LoadingState } from '@react/factories';
+import { EmptyState, ErrorState, LoadingState } from '@react/factories';
 import { formatCurrencyCompact as formatCurrency } from '@/utils/format-utils';
 import { apiFetch, unwrapApiData } from '@/utils/api-client';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
@@ -292,22 +292,17 @@ function ChartWidget({ data, type }: ChartWidgetProps) {
 // ============================================
 
 const KpiCard = React.memo(({ kpi }: { kpi: KPI }) => {
+  const changeText = kpi.change !== undefined
+    ? `${kpi.change >= 0 ? '+' : ''}${kpi.change}% ${kpi.changeLabel ?? ''}`
+    : undefined;
+
   return (
-    <div className="stat-card">
-      <div className="stat-card-icon">{kpi.icon}</div>
-      <span className="stat-label">{kpi.label}</span>
-      <div className="stat-value stat-value-primary">{kpi.value}</div>
-      {kpi.change !== undefined && (
-        <div className={cn('stat-change', kpi.change >= 0 ? 'positive' : 'negative')}>
-          {kpi.change >= 0 ? <TrendingUp className="icon-xs" /> : <TrendingDown className="icon-xs" />}
-          <span className="change-value">
-            {kpi.change >= 0 ? '+' : ''}
-            {kpi.change}%
-          </span>
-          <span className="change-label">{kpi.changeLabel}</span>
-        </div>
-      )}
-    </div>
+    <StatCard
+      label={kpi.label}
+      value={kpi.value}
+      icon={kpi.icon}
+      meta={changeText}
+    />
   );
 });
 
@@ -487,27 +482,27 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
               <div className="analytics-card-grid">
                 <div className="panel analytics-chart-panel">
                   <div className="panel-header">
-                    <h3>Revenue Over Time</h3>
+                    <h3><span className="title-full">Revenue Over Time</span></h3>
                     <LineChart className="icon-md" />
                   </div>
                   <ChartWidget data={data?.revenueChart} type="line" />
                 </div>
                 <div className="panel analytics-chart-panel">
                   <div className="panel-header">
-                    <h3>Projects by Status</h3>
+                    <h3><span className="title-full">Projects by Status</span></h3>
                     <PieChart className="icon-md" />
                   </div>
                   <ChartWidget data={data?.projectsChart} type="pie" />
                 </div>
                 <div className="panel analytics-chart-panel">
                   <div className="panel-header">
-                    <h3>Lead Funnel</h3>
+                    <h3><span className="title-full">Lead Funnel</span></h3>
                     <BarChart3 className="icon-md" />
                   </div>
                   <ChartWidget data={data?.leadsChart} type="bar" />
                 </div>
                 <div className="panel analytics-chart-panel">
-                  <div className="panel-header"><h3>Lead Sources</h3></div>
+                  <div className="panel-header"><h3><span className="title-full">Lead Sources</span></h3></div>
                   <SourceBreakdown sources={data?.sourceBreakdown} />
                 </div>
               </div>
@@ -523,7 +518,7 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
               </div>
               <div className="panel analytics-chart-panel">
                 <div className="panel-header">
-                  <h3>Revenue Over Time</h3>
+                  <h3><span className="title-full">Revenue Over Time</span></h3>
                   <LineChart className="icon-md" />
                 </div>
                 <ChartWidget data={data?.revenueChart} type="line" />
@@ -541,13 +536,13 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
               <div className="analytics-card-grid">
                 <div className="panel analytics-chart-panel">
                   <div className="panel-header">
-                    <h3>Lead Funnel</h3>
+                    <h3><span className="title-full">Lead Funnel</span></h3>
                     <BarChart3 className="icon-md" />
                   </div>
                   <ChartWidget data={data?.leadsChart} type="bar" />
                 </div>
                 <div className="panel analytics-chart-panel">
-                  <div className="panel-header"><h3>Lead Sources</h3></div>
+                  <div className="panel-header"><h3><span className="title-full">Lead Sources</span></h3></div>
                   <SourceBreakdown sources={data?.sourceBreakdown} />
                 </div>
               </div>
@@ -563,7 +558,7 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
               </div>
               <div className="panel analytics-chart-panel">
                 <div className="panel-header">
-                  <h3>Projects by Status</h3>
+                  <h3><span className="title-full">Projects by Status</span></h3>
                   <PieChart className="icon-md" />
                 </div>
                 <ChartWidget data={data?.projectsChart} type="pie" />
@@ -595,7 +590,7 @@ function SourceBreakdown({
   sources?: { source: string; count: number; percentage: number }[];
 }) {
   if (!sources?.length) {
-    return <div className="empty-state">No data available</div>;
+    return <EmptyState message="No data available" />;
   }
 
   return (

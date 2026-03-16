@@ -209,7 +209,7 @@ export function ContactsTab({
     <div className="panel">
       <div className="panel-header-row">
         <h3 className="heading">
-          {editingId ? 'Edit Contact' : 'Add Contact'}
+          <span className="title-full">{editingId ? 'Edit Contact' : 'Add Contact'}</span>
         </h3>
         <button
           onClick={handleCancel}

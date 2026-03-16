@@ -3,8 +3,6 @@
    Dashboard structure, containers, page framework
    ===================================================== */
 
-@layer components {
-
 /* Scroll prevention on .portal — shared/portal-layout.css */
 
 /* Client portal body defaults - match admin portal */
@@ -307,6 +305,4 @@ body[data-page="client"] .msgtab-avatar.is-client {
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-position: center;
   border: none;
-}
-
 }

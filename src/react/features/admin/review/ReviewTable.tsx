@@ -6,7 +6,8 @@
 
 import * as React from 'react';
 import { useMemo } from 'react';
-import { Eye, RefreshCw, Inbox } from 'lucide-react';
+import { Eye, RefreshCw, Inbox, ClipboardCheck } from 'lucide-react';
+import { PageHeader } from '@react/factories/createSection';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { formatDate } from '@react/utils/formatDate';
 import { useListFetch } from '@react/factories/useDataFetch';
@@ -80,13 +81,16 @@ export function ReviewTable({ getAuthToken, showNotification: _showNotification,
 
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>}>
-      <div className="perf-header">
-        <h2 className="heading perf-heading">Design Reviews</h2>
-        <button className="btn btn-secondary" onClick={refetch}>
-          <RefreshCw className="btn-icon-left" />
-          Refresh
-        </button>
-      </div>
+      <PageHeader
+        title="Design Reviews"
+        icon={ClipboardCheck}
+        actions={
+          <button className="btn btn-secondary" onClick={refetch}>
+            <RefreshCw className="btn-icon-left" />
+            Refresh
+          </button>
+        }
+      />
 
       <PortalTable className="data-table">
         <PortalTableHeader>

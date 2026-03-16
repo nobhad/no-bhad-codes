@@ -2,8 +2,6 @@ import * as React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import {
   RefreshCw,
-  TrendingUp,
-  TrendingDown,
   Clock,
   Target,
   Award,
@@ -14,6 +12,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { StatCard } from '@react/components/portal/StatCard';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { LoadingState } from '@react/components/portal/EmptyState';
 import { formatCurrencyCompact as formatCurrency } from '@/utils/format-utils';
@@ -154,41 +153,19 @@ export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: 
         {isLoading ? (
           <LoadingState message="Loading performance data..." />
         ) : (
-          data.kpis.map((kpi) => (
-            <div key={kpi.id} className="stat-card">
-              <div className="stat-card-top">
-                <span className="field-label">{kpi.name}</span>
-                <span>
-                  {KPI_ICONS[kpi.icon] || <BarChart3 className="icon-lg" />}
-                </span>
-              </div>
-              <div className="stat-value">
-                {kpi.unit === '$' ? formatCurrency(kpi.value) : `${kpi.value}${kpi.unit}`}
-              </div>
-              <div className="stat-card-trend">
-                {kpi.trend === 'up' ? (
-                  <TrendingUp className="icon-xs" />
-                ) : kpi.trend === 'down' ? (
-                  <TrendingDown className="icon-xs" />
-                ) : null}
-                <span>
-                  {formatPercentage(((kpi.value - kpi.previousValue) / kpi.previousValue) * 100)}
-                </span>
-                <span>
-                  Target: {kpi.unit === '$' ? formatCurrency(kpi.target) : `${kpi.target}${kpi.unit}`}
-                </span>
-              </div>
-              <div className="progress-bar-sm">
-                <div
-                  className="progress-fill"
-                  style={{
-                    width: `${Math.min((kpi.value / kpi.target) * 100, 100)}%`,
-                    backgroundColor: kpi.value >= kpi.target ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)'
-                  }}
-                />
-              </div>
-            </div>
-          ))
+          data.kpis.map((kpi) => {
+            const changePercent = formatPercentage(((kpi.value - kpi.previousValue) / kpi.previousValue) * 100);
+            const targetLabel = kpi.unit === '$' ? formatCurrency(kpi.target) : `${kpi.target}${kpi.unit}`;
+            return (
+              <StatCard
+                key={kpi.id}
+                label={kpi.name}
+                value={kpi.unit === '$' ? formatCurrency(kpi.value) : `${kpi.value}${kpi.unit}`}
+                icon={KPI_ICONS[kpi.icon] || <BarChart3 className="icon-lg" />}
+                meta={`${changePercent} | Target: ${targetLabel}`}
+              />
+            );
+          })
         )}
       </div>
 

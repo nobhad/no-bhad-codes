@@ -10,7 +10,6 @@
  * Inlines: portal-progress.css (.progress-bar, .progress-fill)
  */
 
-@layer components {
 
 /* =====================================================
    PROJECT SNAPSHOT
@@ -636,4 +635,3 @@
   gap: var(--space-3);
 }
 
-}

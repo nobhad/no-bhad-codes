@@ -196,7 +196,7 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
         position: fixed;
         left: 0;
         right: 0;
-        background: var(--color-neutral-300, #e5e5e5);
+        background: var(--color-neutral-300, #e0e0e0);
         backdrop-filter: blur(10px);
         border: 2px solid var(--color-border-primary, #d4d4d4);
         box-shadow: 0 4px 20px var(--color-shadow, rgba(0, 0, 0, 0.15));
@@ -291,7 +291,7 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
         margin-top: 12px;
         font-size: var(--font-size-xs, 0.75rem);
         line-height: var(--line-height-normal, 1.5);
-        border: 1px solid var(--color-border-secondary, #e5e5e5);
+        border: 1px solid var(--color-border-secondary, #e0e0e0);
       }
 
       .consent-banner--dark .consent-banner__details {
@@ -369,7 +369,7 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
       }
 
       .consent-banner__btn--secondary:hover {
-        background: var(--color-gray-200, #e5e5e5);
+        background: var(--color-gray-200, #e0e0e0);
         color: #404040;
         border-color: #000000;
       }

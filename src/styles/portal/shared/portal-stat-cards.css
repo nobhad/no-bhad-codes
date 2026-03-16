@@ -8,7 +8,6 @@
  * Split from portal-cards.css for maintainability.
  */
 
-@layer components {
 
 /* =====================================================
    STAT CARD - UNIFIED
@@ -205,4 +204,3 @@
 /* Standalone tw-* aliases removed — .stat-card, .stat-value, .stat-label
    are now the canonical class names and covered by the :is() groups above. */
 
-}

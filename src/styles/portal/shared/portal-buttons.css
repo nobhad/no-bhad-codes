@@ -10,7 +10,6 @@
  * - Context-specific variants
  */
 
-@layer components {
 
 /* ============================================
  * PORTAL BASE BUTTON SYSTEM
@@ -417,10 +416,8 @@ button:not(.portal-checkbox):not(.panel-action):not(.dropdown-trigger--custom):n
   }
 }
 
-} /* end @layer components */
 
 /* Table action buttons stay compact even on touch devices - UTILITIES LAYER for override priority */
-@layer utilities {
   @media (pointer: coarse) {
     .data-table .icon-btn,
     .data-table .table-actions .icon-btn,
@@ -444,7 +441,6 @@ button:not(.portal-checkbox):not(.panel-action):not(.dropdown-trigger--custom):n
       height: 1em;
     }
   }
-}
 
 /* ============================================
  * TABLE ACTION BUTTONS - UNIVERSAL RULE
@@ -467,7 +463,6 @@ button:not(.portal-checkbox):not(.panel-action):not(.dropdown-trigger--custom):n
  * ALL table action buttons are COLORLESS - neutral color only.
  * Uses :is() to consolidate all table context selectors.
  */
-@layer utilities {
   :is(td, .col-actions, .table-actions, .data-table, table) .icon-btn {
     width: var(--portal-btn-icon-size);
     height: var(--portal-btn-icon-size);
@@ -508,9 +503,7 @@ button:not(.portal-checkbox):not(.panel-action):not(.dropdown-trigger--custom):n
     max-height: 1em;
     flex-shrink: 0;
   }
-}
 
-@layer components {
 
 /* ============================================
  * COLLAPSED SIDEBAR - Icon-only state
@@ -722,4 +715,3 @@ button:not(.portal-checkbox):not(.panel-action):not(.dropdown-trigger--custom):n
   }
 }
 
-} /* end @layer components */

@@ -8,8 +8,6 @@
  * Provides consistent title row with actions and More Menu dropdown.
  */
 
-@layer components {
-
 /* ===============================================
    DETAIL TITLE ROW
    Name + Status + Actions in a single row
@@ -370,5 +368,3 @@
 }
 
 /* Detail action buttons follow universal .icon-btn sizing (--portal-btn-icon-size) */
-
-}

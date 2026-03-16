@@ -9,7 +9,7 @@ import {
   FileAudio,
   Inbox
 } from 'lucide-react';
-import { IconButton } from '@react/factories';
+import { EmptyState, IconButton } from '@react/factories';
 import { formatDateShort } from '@react/utils/formatDate';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -453,12 +453,10 @@ function FilesGrid({
 
   if (files.length === 0) {
     return (
-      <div className="empty-state">
-        <Inbox className="empty-icon" />
-        <p className="empty-message">
-          {hasActiveFilters ? 'No files match your filters' : 'No files yet'}
-        </p>
-      </div>
+      <EmptyState
+        icon={<Inbox className="empty-icon" />}
+        message={hasActiveFilters ? 'No files match your filters' : 'No files yet'}
+      />
     );
   }
 
