@@ -100,7 +100,7 @@ export function HelpCenter({ getAuthToken }: HelpCenterProps) {
   }
 
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>}>
       <div className="perf-header">
         <h2 className="heading perf-heading">Help Center</h2>
         <button className="btn btn-secondary" onClick={refetch}>
@@ -161,7 +161,7 @@ export function HelpCenter({ getAuthToken }: HelpCenterProps) {
                     <BookOpen className="help-article-icon" />
                     <div className="help-article-meta">
                       <span className="help-article-title">{article.title}</span>
-                      <span className="text-muted help-article-info">
+                      <span className="help-article-info">
                         {article.category} &middot; Updated {formatDate(article.updatedAt)}
                       </span>
                     </div>

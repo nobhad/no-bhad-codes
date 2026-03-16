@@ -15,7 +15,6 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { CopyEmailButton, ProgressBar } from '@react/components/portal';
-import { cn } from '@react/lib/utils';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
@@ -120,7 +119,7 @@ export function OverviewTab({
                 <span className="stat-value">
                   {health.score}
                 </span>
-                <span className="text-muted">
+                <span>
                   {getHealthStatusLabel(health.score)}
                 </span>
               </div>
@@ -145,21 +144,21 @@ export function OverviewTab({
             <StatCard
               label="Projects"
               value={stats.totalProjects || 0}
-              icon={<FolderKanban className="icon-md text-muted" />}
+              icon={<FolderKanban className="icon-md" />}
               meta={`${stats.activeProjects || 0} active, ${stats.completedProjects || 0} completed`}
               onClick={onSwitchTab ? () => onSwitchTab('projects') : undefined}
             />
             <StatCard
               label="Revenue"
               value={formatCurrency(stats.totalPaid)}
-              icon={<TrendingUp className="icon-md text-muted" />}
+              icon={<TrendingUp className="icon-md" />}
               meta={`${formatCurrency(stats.totalInvoiced)} invoiced`}
               onClick={onNavigate ? () => onNavigate('invoices') : undefined}
             />
             <StatCard
               label="Outstanding"
               value={formatCurrency(stats.totalOutstanding)}
-              icon={<DollarSign className="icon-md text-muted" />}
+              icon={<DollarSign className="icon-md" />}
               onClick={onNavigate ? () => onNavigate('invoices') : undefined}
             />
           </StatsRow>
@@ -200,14 +199,14 @@ export function OverviewTab({
 
           <div className="layout-row-wrap">
             {tags.length === 0 ? (
-              <span className="text-muted text-italic">
+              <span className="text-italic">
                 No tags assigned
               </span>
             ) : (
               tags.map((tag) => (
                 <span
                   key={tag.id}
-                  className="badge badge-tag"
+                  className="tag-badge"
                   style={{ backgroundColor: tag.color }}
                 >
                   {tag.name}
@@ -243,8 +242,8 @@ export function OverviewTab({
           <div className="layout-stack">
             {client.contact_name && (
               <div className="layout-row">
-                <User className="icon-md text-muted" />
-                <span className="text-muted">
+                <User className="icon-md" />
+                <span>
                   {client.contact_name}
                 </span>
               </div>
@@ -252,8 +251,8 @@ export function OverviewTab({
 
             {client.company_name && (
               <div className="layout-row">
-                <Building2 className="icon-md text-muted" />
-                <span className="text-muted">
+                <Building2 className="icon-md" />
+                <span>
                   {client.company_name}
                 </span>
               </div>
@@ -261,11 +260,11 @@ export function OverviewTab({
 
             {client.email && (
               <div className="layout-row">
-                <Mail className="icon-md text-muted" />
+                <Mail className="icon-md" />
                 <span className="meta-value meta-value-with-copy">
                   <a
                     href={`mailto:${client.email}`}
-                    className="text-primary"
+                    className="link-btn"
                   >
                     {client.email}
                   </a>
@@ -276,10 +275,9 @@ export function OverviewTab({
 
             {client.phone && (
               <div className="layout-row">
-                <Phone className="icon-md text-muted" />
+                <Phone className="icon-md" />
                 <a
                   href={`tel:${client.phone}`}
-                  className="text-muted"
                 >
                   {client.phone}
                 </a>
@@ -297,7 +295,7 @@ export function OverviewTab({
           <div className="layout-stack">
             <div className="layout-row-between">
               <span className="field-label">Created</span>
-              <span className="text-muted">
+              <span>
                 {formatDate(client.created_at, 'label')}
               </span>
             </div>
@@ -305,7 +303,7 @@ export function OverviewTab({
             {client.invitation_sent_at && (
               <div className="layout-row-between">
                 <span className="field-label">Invited</span>
-                <span className="text-muted">
+                <span>
                   {formatDate(client.invitation_sent_at, 'label')}
                 </span>
               </div>
@@ -313,13 +311,7 @@ export function OverviewTab({
 
             <div className="layout-row-between">
               <span className="field-label">Portal Access</span>
-              <span
-                className={cn(
-                  client.status === 'active'
-                    ? 'text-primary'
-                    : 'text-muted'
-                )}
-              >
+              <span>
                 {client.status === 'active' ? 'Active' : 'Inactive'}
               </span>
             </div>
