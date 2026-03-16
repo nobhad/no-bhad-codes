@@ -118,7 +118,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: 
   }
 
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>}>
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">
       {/* Header */}
       <div className="panel-header">
         <div className="view-toggle">
@@ -126,7 +126,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: 
             <button
               key={p}
               onClick={() => setPeriod(p)}
-              className={cn('view-toggle-btn', period === p && 'is-active')}
+              className={period === p ? 'is-active' : ''}
             >
               {p}
             </button>

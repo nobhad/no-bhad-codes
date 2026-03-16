@@ -291,20 +291,20 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
                   <span>Executed in {result.executionTime}ms</span>
                 </div>
                 <div className="analytics-results-actions">
-                  <div className="tab-list perf-tab-list">
+                  <div className="view-toggle">
                     <button
                       onClick={() => setViewMode('table')}
-                      className={cn(viewMode === 'table' ? 'tab-active' : 'tab', 'analytics-view-toggle')}
+                      className={viewMode === 'table' ? 'is-active' : ''}
                       aria-label="Table view"
                     >
-                      <Table className="analytics-action-icon" />
+                      <Table className="icon-sm" />
                     </button>
                     <button
                       onClick={() => setViewMode('chart')}
-                      className={cn(viewMode === 'chart' ? 'tab-active' : 'tab', 'analytics-view-toggle')}
+                      className={viewMode === 'chart' ? 'is-active' : ''}
                       aria-label="Chart view"
                     >
-                      <BarChart3 className="analytics-action-icon" />
+                      <BarChart3 className="icon-sm" />
                     </button>
                   </div>
                   <button className="btn-secondary" onClick={exportResults}>

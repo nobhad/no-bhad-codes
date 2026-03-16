@@ -34,7 +34,7 @@ export function DataQualityDashboard({ getAuthToken, showNotification, onNavigat
         {TAB_CONFIG.map(tab => (
           <button
             key={tab.key}
-            className={`view-toggle-btn${activeTab === tab.key ? ' is-active' : ''}`}
+            className={activeTab === tab.key ? 'is-active' : ''}
             onClick={() => setActiveTab(tab.key)}
           >
             {tab.icon}

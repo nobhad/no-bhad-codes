@@ -26,7 +26,7 @@ import {
 import { useFadeIn } from '@react/hooks/useGsap';
 import { EmptyState, LoadingState } from '@react/factories';
 import { StatCard } from '@react/components/portal/StatCard';
-import { cn } from '@react/lib/utils';
+
 import { formatTimeAgo } from '@/utils/time-utils';
 import { formatCurrency } from '@/utils/format-utils';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
@@ -267,11 +267,11 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
                 <span className="field-label">Upcoming Tasks</span>
               </button>
               <div className="view-toggle">
-                <button onClick={() => setTasksView('list')} className={cn('icon-btn icon-btn-outline', tasksView === 'list' && 'is-active')} title="List view">
-                  <List />
+                <button onClick={() => setTasksView('list')} className={tasksView === 'list' ? 'is-active' : ''} title="List view">
+                  <List className="icon-sm" />
                 </button>
-                <button onClick={() => setTasksView('kanban')} className={cn('icon-btn icon-btn-outline', tasksView === 'kanban' && 'is-active')} title="Kanban view">
-                  <LayoutGrid />
+                <button onClick={() => setTasksView('kanban')} className={tasksView === 'kanban' ? 'is-active' : ''} title="Kanban view">
+                  <LayoutGrid className="icon-sm" />
                 </button>
               </div>
             </div>
