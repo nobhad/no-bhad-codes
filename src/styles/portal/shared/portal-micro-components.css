@@ -35,7 +35,8 @@
   vertical-align: middle;
 }
 
-/* Compact button so it doesn't create a larger gap */
+/* Copy email button — works standalone or inside .meta-value-with-copy */
+.portal .copy-email-btn,
 .meta-value-with-copy .copy-email-btn,
 .portal .meta-value-with-copy .copy-email-btn {
   flex-shrink: 0;
@@ -57,12 +58,14 @@
   cursor: pointer;
 }
 
+.portal .copy-email-btn svg,
 .meta-value-with-copy .copy-email-btn svg,
 .portal .meta-value-with-copy .copy-email-btn svg {
   width: 0.85em;
   height: 0.85em;
 }
 
+.portal .copy-email-btn:hover,
 .meta-value-with-copy .copy-email-btn:hover {
   color: var(--color-accent);
 }
