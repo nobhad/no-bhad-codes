@@ -196,7 +196,8 @@
   margin-bottom: var(--space-4);
 }
 
-/* Label styling from unified rule in portal-forms.css - only layout here */
+/* Layout only — typography via .field-label (canonical) on same element.
+   Add class="field-label prompt-dialog-label" when using in TSX. */
 .prompt-dialog-label {
   display: block;
   margin-bottom: var(--space-2);

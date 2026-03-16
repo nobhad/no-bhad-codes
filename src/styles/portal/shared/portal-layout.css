@@ -1011,7 +1011,9 @@ html[data-theme="light"] .portal .funnel-value {
   letter-spacing: var(--letter-spacing-wide);
 }
 
-/* Category/group label — small caps */
+/* Category/group label — small caps
+   DEPRECATED: Not used in any React component. Use .section-label instead.
+   Kept for .section-header .section-title layout rule below. */
 .section-title {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);

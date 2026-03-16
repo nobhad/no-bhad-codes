@@ -52,7 +52,7 @@
   gap: var(--portal-section-gap);
 }
 
-/* .analytics-grid defined in shared/portal-analytics.css (loaded immediately after this file) */
+/* .analytics-grid defined in shared/portal-micro-components.css (loaded via portal-components.css) */
 
 .kpi-cards-row {
   display: grid;
