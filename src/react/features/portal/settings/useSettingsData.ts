@@ -81,9 +81,15 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
       const rawClient = (payload.client || payload) as Record<string, unknown>;
       setProfile(rawClient as unknown as ClientProfile);
 
-      // Billing address
-      const billingData = (rawClient.billing_address || payload.billing_address) as BillingAddress | undefined;
-      if (billingData) {
+      // Billing address — server returns flat billing_* fields, map to BillingAddress shape
+      const billingData: BillingAddress = {
+        street_address: (rawClient.billing_address ?? rawClient.address ?? '') as string || undefined,
+        city: (rawClient.billing_city ?? rawClient.city ?? '') as string || undefined,
+        state: (rawClient.billing_state ?? rawClient.state ?? '') as string || undefined,
+        postal_code: (rawClient.billing_zip ?? rawClient.zip ?? '') as string || undefined,
+        country: (rawClient.billing_country ?? rawClient.country ?? '') as string || undefined
+      };
+      if (Object.values(billingData).some(Boolean)) {
         setBilling(billingData);
       }
 
@@ -127,7 +133,15 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
 
   const handleBillingUpdate = useCallback(async (updates: BillingAddress): Promise<boolean> => {
     try {
-      await portalFetch(API_ENDPOINTS.CLIENTS_ME_BILLING, { method: 'PUT', body: updates });
+      // Map frontend field names to server field names
+      const serverPayload = {
+        address: updates.street_address,
+        city: updates.city,
+        state: updates.state,
+        zip: updates.postal_code,
+        country: updates.country
+      };
+      await portalFetch(API_ENDPOINTS.CLIENTS_ME_BILLING, { method: 'PUT', body: serverPayload });
       setBilling(updates);
       showNotificationRef.current?.('Billing address updated', 'success');
       return true;
