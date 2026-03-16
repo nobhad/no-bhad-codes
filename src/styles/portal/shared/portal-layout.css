@@ -794,6 +794,10 @@ td {
   gap: var(--space-3);
 }
 
+.layout-row-top > svg {
+  margin-top: 0.2em;
+}
+
 .layout-row-end {
   display: flex;
   align-items: center;
