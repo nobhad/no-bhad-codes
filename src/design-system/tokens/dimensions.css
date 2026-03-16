@@ -44,10 +44,8 @@
    * PORTAL NAVIGATION FONT SIZE (migrated from variables.css)
    * ============================================ */
 
-  /* Header logo text */
+  /* Shared by header logo text + sidebar buttons */
   --portal-nav-font-size: 1.25rem;
-  /* Sidebar nav button text — smaller than header logo */
-  --sidebar-nav-font-size: 1rem;
 
   /* ============================================
    * SIDEBAR ICON SIZE (migrated from variables.css)
