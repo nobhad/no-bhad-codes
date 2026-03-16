@@ -130,70 +130,8 @@ section,
   padding: 0 var(--container-padding);
 }
 
-/* Responsive Grid System */
-.grid {
-  display: grid;
-  gap: var(--gap);
-}
-
-.grid-cols-1 {
-  grid-template-columns: 1fr;
-}
-.grid-cols-2 {
-  grid-template-columns: repeat(2, 1fr);
-}
-.grid-cols-3 {
-  grid-template-columns: repeat(3, 1fr);
-}
-.grid-cols-4 {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-/* Responsive Breakpoints */
-@media (--mobile) {
-  .grid-cols-2,
-  .grid-cols-3,
-  .grid-cols-4 {
-    grid-template-columns: 1fr;
-  }
-
-  .md\:grid-cols-2 {
-    grid-template-columns: 1fr;
-  }
-  .md\:grid-cols-3 {
-    grid-template-columns: 1fr;
-  }
-  .md\:grid-cols-4 {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (--tablet) {
-  .md\:grid-cols-2 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .md\:grid-cols-3 {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .md\:grid-cols-4 {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (--desktop) {
-  .lg\:grid-cols-2 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .lg\:grid-cols-3 {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .lg\:grid-cols-4 {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-/* Flexible Layout Utilities defined in base/utilities.css */
-
+/* Grid & Layout Utilities - defined in base/layout.css */
+/* Flexible Layout Utilities - defined in base/utilities.css */
 /* Responsive Text Utilities - defined in base/typography.css */
 
 /* Responsive Spacing Utilities */

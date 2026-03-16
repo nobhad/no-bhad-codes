@@ -13,7 +13,10 @@
  * - Justify: .justify-center, .justify-between, .justify-start, .justify-end
  * - Gap: .gap-0, .gap-1, .gap-2, .gap-3, .gap-4
  * - Padding: .p-1, .p-2, .p-3, .p-4, .px-2, .py-2
- * - Text: .text-center, .text-left, .text-right, .text-muted, .text-xs, .text-sm
+ *
+ * CANONICAL LOCATIONS (avoid duplicating):
+ * - Typography (.text-*, .font-*, .uppercase, etc.) → base/typography.css
+ * - Layout (.grid, .block, .relative, .absolute, etc.) → base/layout.css
  */
 
 /* ============================================
@@ -23,15 +26,11 @@
 .flex {
   display: flex;
 }
-.grid {
-  display: grid;
-}
+/* .grid defined in base/layout.css (with gap) */
 .hidden {
   display: none;
 }
-.block {
-  display: block;
-}
+/* .block defined in base/layout.css */
 
 /* ============================================
    FLEX DIRECTION
@@ -223,38 +222,12 @@
 }
 
 /* ============================================
-   TEXT ALIGNMENT
+   TEXT ALIGNMENT - defined in base/typography.css
    ============================================ */
-
-.text-left {
-  text-align: left;
-}
-.text-center {
-  text-align: center;
-}
-.text-right {
-  text-align: right;
-}
 
 /* ============================================
-   TEXT SIZE (uses --font-size-* variables)
+   TEXT SIZE - defined in base/typography.css
    ============================================ */
-
-.text-xs {
-  font-size: var(--font-size-xs);
-}
-.text-sm {
-  font-size: var(--font-size-sm);
-}
-.text-base {
-  font-size: var(--font-size-base);
-}
-.text-lg {
-  font-size: var(--font-size-lg);
-}
-.text-xl {
-  font-size: var(--font-size-xl);
-}
 
 /* ============================================
    TEXT COLOR
@@ -296,18 +269,8 @@
 }
 
 /* ============================================
-   FONT WEIGHT
+   FONT WEIGHT - defined in base/typography.css
    ============================================ */
-
-.font-medium {
-  font-weight: var(--font-weight-medium);
-}
-.font-semibold {
-  font-weight: var(--font-weight-semibold);
-}
-.font-bold {
-  font-weight: var(--font-weight-bold);
-}
 
 /* ============================================
    BACKGROUND
@@ -382,21 +345,8 @@
 }
 
 /* ============================================
-   POSITION
+   POSITION - defined in base/layout.css
    ============================================ */
-
-.relative {
-  position: relative;
-}
-.absolute {
-  position: absolute;
-}
-.fixed {
-  position: fixed;
-}
-.sticky {
-  position: sticky;
-}
 
 /* ============================================
    CURSOR
