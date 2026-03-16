@@ -224,9 +224,6 @@ export function ClientDetail({
       {/* Header */}
       <div className="detail-title-row">
         <div className="detail-title-group">
-          {/* Back Button */}
-          <IconButton action="back" onClick={onBack} title="Back to clients" />
-
           {/* Client Info */}
           <div className="detail-info">
             <div className="detail-name-row">

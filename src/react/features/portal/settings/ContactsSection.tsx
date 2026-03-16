@@ -207,22 +207,22 @@ export function ContactsSection({ portalFetch, showNotification }: ContactsSecti
                       {contact.title && <span>{contact.title}</span>}
                     </div>
                   </div>
-                  <div className="portal-card-actions">
+                  <div className="action-group">
                     <button
-                      className="btn-ghost p-1"
+                      className="icon-btn"
                       onClick={() => startEdit(contact)}
                       title="Edit"
                       aria-label="Edit contact"
                     >
-                      <Edit2 className="icon-xs" />
+                      <Edit2 className="icon-md" />
                     </button>
                     <button
-                      className="btn-ghost p-1"
+                      className="icon-btn"
                       onClick={() => handleDelete(contact.id)}
                       title="Delete"
                       aria-label="Delete contact"
                     >
-                      <Trash2 className="icon-xs" />
+                      <Trash2 className="icon-md" />
                     </button>
                   </div>
                 </div>
