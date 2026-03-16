@@ -48,6 +48,7 @@ export type ProjectStatus =
   | 'pending'
   | 'active'
   | 'in-progress'
+  | 'in-review'
   | 'on-hold'
   | 'completed'
   | 'cancelled';
@@ -171,6 +172,7 @@ export const PROJECT_STATUS_CONFIG: Record<ProjectStatus, { label: string; varia
   pending: { label: 'Pending', variant: 'pending' },
   active: { label: 'Active', variant: 'active' },
   'in-progress': { label: 'In Progress', variant: 'active' },
+  'in-review': { label: 'In Review', variant: 'warning' },
   'on-hold': { label: 'On Hold', variant: 'on-hold' },
   completed: { label: 'Completed', variant: 'completed' },
   cancelled: { label: 'Cancelled', variant: 'cancelled' }

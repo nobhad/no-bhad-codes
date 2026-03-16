@@ -42,7 +42,18 @@ router.get(
       });
     }
 
+    // Track emails already seen from explicit contacts for deduplication
+    const seenEmails = new Set<string>();
+    for (const c of explicitContacts) {
+      if (c.email) seenEmails.add(String(c.email).toLowerCase());
+    }
+
     for (const client of clientContacts) {
+      const clientEmail = String(client.email || '').toLowerCase();
+
+      // Skip if this client's email is already represented in explicit contacts
+      if (clientEmail && seenEmails.has(clientEmail)) continue;
+
       const contactName = (client.contact_name as string) || '';
       const nameParts = contactName.trim().split(/\s+/);
       const firstName = nameParts[0] || '';
@@ -57,6 +68,7 @@ router.get(
         phone: client.phone,
         role: 'client',
         isPrimary,
+        synthetic: true,
         status: 'active',
         clientId: client.id,
         company: client.company,
@@ -64,6 +76,8 @@ router.get(
         createdAt: client.createdAt,
         updatedAt: client.updatedAt
       });
+
+      if (clientEmail) seenEmails.add(clientEmail);
     }
 
     allContacts.sort((a, b) => {

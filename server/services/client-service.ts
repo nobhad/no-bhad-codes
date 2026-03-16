@@ -353,6 +353,8 @@ export interface ClientProfile {
   billing_state?: string;
   billing_zip?: string;
   billing_country?: string;
+  billing_phone?: string;
+  billing_email?: string;
   created_at: string;
   updated_at: string;
 }
@@ -375,6 +377,8 @@ export interface ClientBilling {
   state?: string;
   zip?: string;
   country?: string;
+  phone?: string;
+  email?: string;
 }
 
 export interface ClientPasswordHash {
@@ -446,7 +450,7 @@ class ClientService {
     return db.get(
       `SELECT id, email, company_name, contact_name, phone, status, client_type,
               billing_name, billing_company, billing_address, billing_address2, billing_city,
-              billing_state, billing_zip, billing_country,
+              billing_state, billing_zip, billing_country, billing_phone, billing_email,
               created_at, updated_at
        FROM active_clients WHERE id = ?`,
       [clientId]
@@ -1005,7 +1009,7 @@ class ClientService {
     const db = getDatabase();
     const rows = (await db.all(
       `SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts
-       WHERE client_id = ?
+       WHERE client_id = ? AND deleted_at IS NULL
        ORDER BY is_primary DESC, first_name ASC`,
       [clientId]
     )) as unknown as ContactRow[];
@@ -1122,6 +1126,20 @@ class ClientService {
       'UPDATE client_contacts SET is_primary = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND client_id = ?',
       [contactId, clientId]
     );
+
+    // Sync primary contact name back to clients table
+    const contact = (await db.get(
+      'SELECT first_name, last_name FROM client_contacts WHERE id = ? AND client_id = ?',
+      [contactId, clientId]
+    )) as { first_name: string; last_name: string } | undefined;
+
+    if (contact) {
+      const fullName = `${contact.first_name} ${contact.last_name}`.trim();
+      await db.run(
+        'UPDATE clients SET contact_name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+        [fullName, clientId]
+      );
+    }
   }
 
   // ===================================================

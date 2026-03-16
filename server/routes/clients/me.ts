@@ -97,6 +97,26 @@ router.put(
 
     await clientService.updateClientProfile(req.user!.id, profileUpdates);
 
+    // Sync profile name/phone to primary client_contact if present
+    if ('contact_name' in profileUpdates || 'phone' in profileUpdates) {
+      const contacts = await clientService.getContacts(req.user!.id);
+      const primaryContact = contacts.find((c) => c.isPrimary);
+      if (primaryContact) {
+        const contactUpdates: Record<string, string | null> = {};
+        if ('contact_name' in profileUpdates && profileUpdates.contact_name) {
+          const nameParts = profileUpdates.contact_name.trim().split(/\s+/);
+          contactUpdates.first_name = nameParts[0] || '';
+          contactUpdates.last_name = nameParts.slice(1).join(' ') || '';
+        }
+        if ('phone' in profileUpdates) {
+          contactUpdates.phone = profileUpdates.phone || null;
+        }
+        if (Object.keys(contactUpdates).length > 0) {
+          await clientService.updateClientContact(primaryContact.id, req.user!.id, contactUpdates);
+        }
+      }
+    }
+
     // Auto-populate billing name/company on first profile save if billing fields are empty
     const currentBilling = await clientService.getClientBilling(req.user!.id);
     const billingUpdates: Record<string, string | null> = {};
@@ -542,6 +562,8 @@ router.post(
       notes
     });
 
+    await QueryCache.invalidate([`client:${clientId}`, 'clients']);
+
     sendCreated(res, { contact });
   })
 );
@@ -603,6 +625,8 @@ router.put(
 
     const contact = await clientService.updateClientContact(contactId, clientId, fields);
 
+    await QueryCache.invalidate([`client:${clientId}`, 'clients']);
+
     sendSuccess(res, { contact });
   })
 );
@@ -648,6 +672,8 @@ router.delete(
 
     const deletedBy = req.user?.email || 'client';
     await softDeleteService.softDelete('contact', contactId, deletedBy);
+
+    await QueryCache.invalidate([`client:${clientId}`, 'clients']);
 
     sendSuccess(res, undefined, 'Contact deleted');
   })
