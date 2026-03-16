@@ -284,6 +284,7 @@ export const buildEndpoint = {
 
   // Message Threads (Portal)
   messageThread: (id: number | string) => `${API_ENDPOINTS.MESSAGES}/threads/${id}`,
+  messageThreadByProject: (projectId: number | string) => `${API_ENDPOINTS.MESSAGES}/threads/by-project/${projectId}`,
   messageThreadMessages: (id: number | string) => `${API_ENDPOINTS.MESSAGES}/threads/${id}/messages`,
   messageItem: (id: number | string) => `${API_ENDPOINTS.MESSAGES}/messages/${id}`,
   messageReactions: (id: number | string) => `${API_ENDPOINTS.MESSAGES}/messages/${id}/reactions`,
