@@ -662,12 +662,6 @@ body.modal-open .dashboard-content {
     max-width: 100%;
   }
 
-  [data-page="admin"] #tab-analytics .chart-container {
-  }
-
-  [data-page="admin"] #tab-analytics .analytics-section {
-  }
-
   [data-page="admin"] #tab-analytics .chart {
     height: var(--chart-height-md);
   }
@@ -984,7 +978,4 @@ body.modal-open .dashboard-content {
 .portal .inline-edit-wrapper input {
   height: var(--inline-edit-compact-height);
   min-height: 0;
-}
-
-.portal .inline-edit-wrapper .inline-edit-input-compact--date {
 }

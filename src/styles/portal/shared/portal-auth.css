@@ -149,10 +149,6 @@
   align-items: center;
 }
 
-.auth-gate .password-input-wrapper input,
-.auth-gate .portal-password-wrapper input {
-}
-
 /* Password Toggle Button */
 .auth-gate .password-toggle,
 .auth-gate .portal-password-toggle {
@@ -338,10 +334,6 @@
   }
 }
 
-@media (--small-mobile) {
-  .auth-gate-container {
-  }
-}
 
 /* =====================================================
    HEADER Z-INDEX - Must appear above auth gate overlay

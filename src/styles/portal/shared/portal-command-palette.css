@@ -224,9 +224,6 @@
  * ============================================ */
 
 @media (--mobile) {
-  .command-palette-overlay {
-  }
-
   .command-palette {
     width: calc(100vw - var(--space-2));
     max-height: 80vh;

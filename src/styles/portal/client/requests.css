@@ -13,11 +13,6 @@
   }
 }
 
-/* Uses .portal-card from shared styles - only layout overrides here */
-.portal .requests-form,
-.portal .requests-list {
-}
-
 /* h3 styling comes from shared .section-header-with-actions */
 
 .portal .requests-intro {
@@ -291,10 +286,6 @@
    ===================================================== */
 
 @media (--mobile) {
-  .portal .requests-form,
-  .portal .requests-list {
-  }
-
   .portal .requests-card-header {
     flex-direction: column;
     align-items: flex-start;
@@ -313,9 +304,6 @@
 @media (--compact-mobile) {
   .portal .requests-grid {
     gap: var(--space-2);
-  }
-
-  .portal .requests-card.portal-list-item {
   }
 
   .portal .requests-card-meta {

@@ -102,10 +102,6 @@
   gap: var(--space-3);
 }
 
-/* Content children below header */
-.portal .settings-form-section .data-table-card > *:not(.data-table-header) {
-}
-
 .portal .settings-form-section .section-description {
   margin: 0;
   font-size: var(--font-size-sm);

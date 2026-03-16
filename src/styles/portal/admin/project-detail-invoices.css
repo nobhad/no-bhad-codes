@@ -73,9 +73,6 @@
    VIEW INVOICE MODAL
    ===================================================== */
 
-#view-project-invoice-modal .invoice-view-content {
-}
-
 #view-project-invoice-modal .invoice-header-info {
   margin-bottom: var(--space-3);
 }

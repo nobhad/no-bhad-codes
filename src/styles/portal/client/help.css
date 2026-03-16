@@ -26,13 +26,6 @@
 }
 
 
-.portal .help-right-column .data-table-header + .section {
-}
-
-.portal .help-contact-description,
-.portal .help-contact-actions {
-}
-
 .help-left-column {
   overflow-y: auto;
 }
@@ -165,9 +158,6 @@
    SEARCH RESULTS
    ============================================== */
 
-.help-search-results {
-}
-
 .help-result-item {
   display: flex;
   align-items: flex-start;
@@ -204,9 +194,6 @@
 /* ==============================================
    ARTICLE VIEW
    ============================================== */
-
-.help-article-view {
-}
 
 .help-article-header {
   display: flex;

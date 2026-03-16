@@ -386,9 +386,6 @@
   gap: var(--space-2);
 }
 
-.analytics-view-toggle {
-}
-
 /* Table overflow container */
 .analytics-table-container {
   overflow-x: auto;
@@ -519,8 +516,6 @@
     gap: var(--space-1);
   }
 
-  .portal :is(.details-card-row, .system-info-row) {
-  }
 }
 
 /* =====================================================
