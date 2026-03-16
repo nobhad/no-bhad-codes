@@ -27,7 +27,7 @@
   z-index: var(--z-index-50);
   min-width: var(--portal-dropdown-min-width);
   overflow: hidden;
-  border: var(--portal-border);
+  border: var(--portal-input-border);
   background-color: var(--color-bg-primary);
   padding: 0;
   box-shadow: none;
@@ -167,19 +167,16 @@ td:has(.dropdown-trigger--status) .portal-dropdown-content,
   color: inherit;
 }
 
-/* Remove top border when positioned below trigger - seamless connection.
-   margin-top: -2px compensates for the trigger's side/top border width (--portal-btn-border-width = 2px).
-   NOTE: .btn/.btn-secondary triggers also have --portal-btn-border-bottom-width: 6px (transparent 3D effect).
-   Those triggers require sideOffset={-4} at the usage site to close the remaining 4px gap. */
+/* Seamless connection: remove border between trigger and menu.
+   margin compensates for trigger's border width so menu sits flush. */
 .portal-dropdown-content[data-side="bottom"] {
   border-top: none;
-  margin-top: calc(-1 * var(--portal-btn-border-width));
+  margin-top: calc(-1 * var(--border-width-px));
 }
 
-/* Remove bottom border when positioned above trigger */
 .portal-dropdown-content[data-side="top"] {
   border-bottom: none;
-  margin-bottom: calc(-1 * var(--portal-btn-border-width));
+  margin-bottom: calc(-1 * var(--border-width-px));
 }
 
 /* Sub content - same styling as main content */
@@ -189,7 +186,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-content,
   overflow: hidden;
   border: var(--portal-input-border);
   background-color: var(--color-bg-primary);
-  padding: var(--space-1);
+  padding: 0;
   box-shadow: none;
 }
 
@@ -330,7 +327,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   cursor: pointer;
   user-select: none;
   align-items: center;
-  padding: var(--dropdown-padding-y) var(--dropdown-padding-x) var(--dropdown-padding-y) 28px;
+  padding: var(--dropdown-padding-y) var(--dropdown-padding-x) var(--dropdown-padding-y) var(--dropdown-indicator-inset, 28px);
   font-size: inherit;
   color: var(--color-text-primary);
   outline: none;
@@ -368,7 +365,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   cursor: pointer;
   user-select: none;
   align-items: center;
-  padding: var(--space-1) var(--space-2) var(--space-1) 28px;
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--dropdown-indicator-inset, 28px);
   font-size: inherit;
   color: var(--color-text-primary);
   outline: none;

@@ -494,6 +494,8 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 }
 
 /* Form/settings dropdowns only; table dropdowns use base in portal-dropdown.css */
+/* Form/settings dropdowns — inherits border from --portal-input-border.
+   Open state: seamless trigger+menu (trigger loses bottom border, menu loses top). */
 [data-page="admin"]
   .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown)
   .dropdown-trigger--custom {
@@ -502,7 +504,7 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   justify-content: space-between;
   width: 100%;
   box-sizing: border-box;
-  border: var(--border-width-heavy) solid var(--color-border-primary);
+  border: var(--portal-input-border);
   background-color: var(--color-bg-primary);
   cursor: pointer;
   text-align: left;
@@ -540,7 +542,6 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   transform: rotate(180deg);
 }
 
-/* Exclude .table-dropdown so table status/per-page dropdowns use admin.css positioning (top of menu matches bottom of trigger) */
 [data-page="admin"]
   .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown)
   .custom-dropdown-menu {
@@ -550,11 +551,10 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   left: 0;
   right: 0;
   margin: 0;
-  margin-top: calc(-1 * var(--space-1));
   padding: 0;
   list-style: none;
   background-color: var(--color-bg-primary);
-  border: var(--border-width-heavy) solid var(--color-border-primary);
+  border: var(--portal-input-border);
   border-top: none;
   max-height: var(--pd-dropdown-max-height);
   overflow-y: auto;
@@ -566,21 +566,12 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown).open
   .custom-dropdown-menu {
   display: block;
-  border-color: var(--color-accent);
-  /* Only sides and bottom shadow - clip top shadow with clip-path */
-  box-shadow: var(--shadow-spread);
-  clip-path: inset(0 calc(var(--space-2-5) * -1) calc(var(--space-2-5) * -1) calc(var(--space-2-5) * -1));
-  margin-top: calc(-1 * var(--space-1));
 }
 
 [data-page="admin"]
   .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown).open
   .dropdown-trigger--custom {
-  border-color: var(--color-accent);
   border-bottom: none;
-  /* Only top and side shadows - clip bottom shadow */
-  box-shadow: var(--shadow-dropdown);
-  clip-path: inset(calc(var(--space-2-5) * -1) calc(var(--space-2-5) * -1) 0 calc(var(--space-2-5) * -1));
   position: relative;
   z-index: var(--z-index-nav-dropdown);
 }
