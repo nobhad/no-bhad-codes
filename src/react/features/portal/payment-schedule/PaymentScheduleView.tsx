@@ -81,24 +81,24 @@ export function PaymentScheduleView(_props: PaymentScheduleViewProps) {
     <div ref={containerRef}>
       {/* Summary Card */}
       {summary && (
-        <div className="card" style={{ marginBottom: 'var(--spacing-md)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 'var(--spacing-md)', padding: 'var(--spacing-md)' }}>
+        <div className="card payment-summary-card">
+          <div className="payment-summary-grid">
             <div>
-              <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--app-color-text-muted)' }}>Total</span>
-              <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600 }}>{formatCurrency(summary.totalAmount)}</div>
+              <span className="payment-stat-label">Total</span>
+              <div className="payment-stat-value">{formatCurrency(summary.totalAmount)}</div>
             </div>
             <div>
-              <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--app-color-text-muted)' }}>Paid</span>
-              <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, color: 'var(--app-color-success)' }}>{formatCurrency(summary.paidAmount)}</div>
+              <span className="payment-stat-label">Paid</span>
+              <div className="payment-stat-value payment-stat-value--success">{formatCurrency(summary.paidAmount)}</div>
             </div>
             <div>
-              <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--app-color-text-muted)' }}>Remaining</span>
-              <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600 }}>{formatCurrency(summary.pendingAmount)}</div>
+              <span className="payment-stat-label">Remaining</span>
+              <div className="payment-stat-value">{formatCurrency(summary.pendingAmount)}</div>
             </div>
             {summary.overdueAmount > 0 && (
               <div>
-                <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--app-color-text-muted)' }}>Overdue</span>
-                <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, color: 'var(--app-color-danger)' }}>{formatCurrency(summary.overdueAmount)}</div>
+                <span className="payment-stat-label">Overdue</span>
+                <div className="payment-stat-value payment-stat-value--danger">{formatCurrency(summary.overdueAmount)}</div>
               </div>
             )}
           </div>
@@ -108,24 +108,18 @@ export function PaymentScheduleView(_props: PaymentScheduleViewProps) {
       {/* Installments List */}
       <div className="card">
         {installments.map((inst) => (
-          <div key={inst.id} style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: 'var(--spacing-sm) var(--spacing-md)',
-            borderBottom: '1px solid var(--app-color-border)'
-          }}>
+          <div key={inst.id} className="payment-item-row">
             <div>
-              <div style={{ fontWeight: 500 }}>
+              <div className="payment-item-label">
                 {inst.label || `Payment ${inst.installmentNumber}`}
               </div>
-              <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--app-color-text-muted)' }}>
+              <span className="payment-item-meta">
                 Due {formatDate(inst.dueDate)}
                 {inst.paidDate && ` - Paid ${formatDate(inst.paidDate)}`}
               </span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
-              <span style={{ fontWeight: 600 }}>{formatCurrency(inst.amount)}</span>
+            <div className="payment-item-actions">
+              <span className="payment-item-amount">{formatCurrency(inst.amount)}</span>
               <StatusBadge status={getStatusVariant(inst.status)}>
                 {STATUS_LABELS[inst.status] || inst.status}
               </StatusBadge>
