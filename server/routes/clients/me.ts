@@ -425,7 +425,7 @@ router.get(
       totalProjects,
       projects: allProjects.map((p) => ({
         id: p.id,
-        name: p.name,
+        name: p.project_name,
         status: p.status,
         progress: p.progress,
         startDate: p.start_date,

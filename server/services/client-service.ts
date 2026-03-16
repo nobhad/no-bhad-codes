@@ -384,7 +384,7 @@ export interface ClientPasswordHash {
 
 export interface ClientProjectSummary {
   id: number;
-  name: string;
+  project_name: string;
   status: string;
   progress?: number;
   start_date?: string;
@@ -575,7 +575,7 @@ class ClientService {
   async getClientProjects(clientId: number): Promise<ClientProjectSummary[]> {
     const db = getDatabase();
     return db.all(
-      `SELECT id, project_name as name, status, progress,
+      `SELECT id, project_name, status, progress,
               start_date, estimated_end_date as end_date, preview_url,
               created_at, updated_at
        FROM active_projects WHERE client_id = ?

@@ -53,7 +53,7 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
     return (
       <div
         key={project.id}
-        className="portal-card clickable"
+        className="portal-card clickable group"
         onClick={() => handleCardClick(project)}
         role="button"
         tabIndex={0}
@@ -65,14 +65,13 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
               <h4 className="heading truncate">
                 {project.project_name}
               </h4>
+              <span className="text-secondary text-xs">
+                <Clock className="icon-xs" aria-hidden="true" />
+                {formatDate(project.created_at, 'label')}
+              </span>
               <span className="badge">
                 {statusConfig?.label || project.status}
               </span>
-            </div>
-
-            <div className="project-date-row text-secondary">
-              <Clock className="icon-xs" />
-              <span>Created {formatDate(project.created_at, 'label')}</span>
             </div>
           </div>
         </div>
@@ -102,7 +101,7 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
             {emptyMessage}
           </p>
         ) : (
-          <div className="grid-2col gap-3">
+          <div className="layout-stack gap-3">
             {projectList.map(renderProjectCard)}
           </div>
         )}
