@@ -613,6 +613,17 @@ export function getDefaultTabForRole(role: UserRole): string {
 /**
  * Resolve a tab name to its actual tab (handles group -> default tab resolution)
  */
+/** Detail view tabs and their parent groups + list pages */
+export const DETAIL_VIEW_TABS: Record<string, {
+  parentGroup: string;
+  parentTab: string;
+  parentLabel: string;
+  roles: UserRole[];
+}> = {
+  'client-detail': { parentGroup: 'crm', parentTab: 'clients', parentLabel: 'Clients', roles: ['admin'] },
+  'project-detail': { parentGroup: 'work', parentTab: 'projects', parentLabel: 'Projects', roles: ['admin'] }
+};
+
 export function resolveTab(
   tabName: string,
   role: UserRole
@@ -620,6 +631,12 @@ export function resolveTab(
   // Check if it's a group — tab stays as the group name (overview view)
   if (UNIFIED_TAB_GROUPS[tabName] && UNIFIED_TAB_GROUPS[tabName].roles.includes(role)) {
     return { group: tabName, tab: tabName };
+  }
+
+  // Check if it's a detail view tab (e.g., client-detail → crm group)
+  const detailConfig = DETAIL_VIEW_TABS[tabName];
+  if (detailConfig && detailConfig.roles.includes(role)) {
+    return { group: detailConfig.parentGroup, tab: tabName };
   }
 
   // Find which group this tab belongs to (if any)
@@ -651,6 +668,10 @@ const LEGACY_CLIENT_TABS = new Set([
 export function canAccessTab(tabId: string, role: UserRole): boolean {
   // Allow legacy client tabs for redirect support
   if (role === 'client' && LEGACY_CLIENT_TABS.has(tabId)) return true;
+
+  // Allow detail view tabs (client-detail, project-detail)
+  const detailConfig = DETAIL_VIEW_TABS[tabId];
+  if (detailConfig && detailConfig.roles.includes(role)) return true;
 
   // Check top-level navigation items — use .some() not .find() because
   // UNIFIED_NAVIGATION has duplicate IDs for shared tabs (admin + client versions)
