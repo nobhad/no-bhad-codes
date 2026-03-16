@@ -98,7 +98,7 @@
    Action badges
    ================================================ */
 .audit-action-badge {
-  display: inline-block;
+  padding: var(--space-0-25) var(--space-0-5);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   border: var(--portal-border);
