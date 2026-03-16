@@ -378,16 +378,18 @@ export function OverviewTab({
 
                     {hasAddress && (
                       <div className="layout-row">
-                        <MapPin className="icon-md" />
-                        <span>
-                          {client.billing_address}
-                          {client.billing_address2 && ` ${client.billing_address2}`}
-                          {(client.billing_city || client.billing_state || client.billing_zip) && <br />}
-                          {client.billing_city}
-                          {client.billing_city && client.billing_state && ', '}
-                          {client.billing_state}
-                          {client.billing_zip && ` ${client.billing_zip}`}
-                        </span>
+                        <MapPin className="icon-md" style={{ alignSelf: 'flex-start', marginTop: '2px' }} />
+                        <div>
+                          <div>{client.billing_address}{client.billing_address2 && ` ${client.billing_address2}`}</div>
+                          {(client.billing_city || client.billing_state || client.billing_zip) && (
+                            <div>
+                              {client.billing_city}
+                              {client.billing_city && client.billing_state && ', '}
+                              {client.billing_state}
+                              {client.billing_zip && ` ${client.billing_zip}`}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
 
