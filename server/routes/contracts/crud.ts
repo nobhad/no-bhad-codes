@@ -16,6 +16,7 @@ import { workflowTriggerService } from '../../services/workflow-trigger-service.
 import { validateRequest } from '../../middleware/validation.js';
 import { invalidateCache } from '../../middleware/cache.js';
 import { ContractValidationSchemas } from './shared.js';
+import { getDatabase } from '../../database/init.js';
 
 const router = express.Router();
 
@@ -159,6 +160,77 @@ router.post(
     });
 
     sendCreated(res, { contract }, 'Contract created successfully');
+  })
+);
+
+/**
+ * GET /api/contracts/:contractId/export
+ * Export full contract data as JSON
+ */
+router.get(
+  '/:contractId/export',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const contractId = parseInt(req.params.contractId, 10);
+
+    if (isNaN(contractId) || contractId <= 0) {
+      return errorResponse(res, 'Invalid contract ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const db = getDatabase();
+
+    // Get contract with related data
+    const contract = await db.get(
+      `SELECT c.*, p.project_name, cl.contact_name as client_name, cl.email as client_email, cl.company_name
+       FROM contracts c
+       LEFT JOIN projects p ON c.project_id = p.id
+       LEFT JOIN clients cl ON c.client_id = cl.id
+       WHERE c.id = ?`,
+      [contractId]
+    ) as Record<string, unknown> | undefined;
+
+    if (!contract) {
+      return errorResponse(res, 'Contract not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+    }
+
+    // Get signature log
+    const signatures = await db.all(
+      'SELECT * FROM contract_signature_log WHERE contract_id = ? ORDER BY created_at DESC',
+      [contractId]
+    ) as Array<Record<string, unknown>>;
+
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      contract: {
+        id: contract.id,
+        projectId: contract.project_id,
+        clientId: contract.client_id,
+        content: contract.content,
+        status: contract.status,
+        createdAt: contract.created_at,
+        updatedAt: contract.updated_at,
+        expiresAt: contract.expires_at,
+        signedAt: contract.signed_at,
+        project: {
+          name: contract.project_name || null
+        },
+        client: {
+          name: contract.client_name || null,
+          email: contract.client_email || null,
+          company: contract.company_name || null
+        }
+      },
+      signatures: signatures.map((s) => ({
+        id: s.id,
+        signerName: s.signer_name,
+        signerEmail: s.signer_email,
+        signedAt: s.created_at,
+        details: s.details ? (() => { try { return JSON.parse(String(s.details)); } catch { return s.details; } })() : null
+      }))
+    };
+
+    sendSuccess(res, exportData);
   })
 );
 
