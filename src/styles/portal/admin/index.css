@@ -787,7 +787,7 @@ body.modal-open .dashboard-content {
 [data-page="admin"] [data-tooltip]::before {
   content: "";
   position: absolute;
-  bottom: calc(100% + 2px);
+  bottom: calc(100% + var(--space-0-25));
   left: 50%;
   transform: translateX(-50%);
   border: var(--tooltip-arrow-size) solid transparent;
@@ -816,7 +816,7 @@ body.modal-open .dashboard-content {
 
 [data-page="admin"] td[data-tooltip]::before,
 [data-page="admin"] .table-cell[data-tooltip]::before {
-  left: 20px;
+  left: var(--space-2-5);
   transform: none;
 }
 

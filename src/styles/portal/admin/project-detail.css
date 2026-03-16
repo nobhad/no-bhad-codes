@@ -633,7 +633,7 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   border-color: var(--color-accent);
   /* Only sides and bottom shadow - clip top shadow with clip-path */
   box-shadow: var(--shadow-spread);
-  clip-path: inset(0 -20px -20px -20px);
+  clip-path: inset(0 calc(var(--space-2-5) * -1) calc(var(--space-2-5) * -1) calc(var(--space-2-5) * -1));
   margin-top: calc(-1 * var(--space-1));
 }
 
@@ -644,7 +644,7 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   border-bottom: none;
   /* Only top and side shadows - clip bottom shadow */
   box-shadow: var(--shadow-dropdown);
-  clip-path: inset(-20px -20px 0 -20px);
+  clip-path: inset(calc(var(--space-2-5) * -1) calc(var(--space-2-5) * -1) 0 calc(var(--space-2-5) * -1));
   position: relative;
   z-index: var(--z-index-nav-dropdown);
 }
@@ -1020,7 +1020,7 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 
 .contract-warning-icon {
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: var(--space-0-25);
   color: var(--color-accent);
 }
 
