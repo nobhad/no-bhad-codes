@@ -282,7 +282,7 @@ button:not(.portal-checkbox):not(.panel-action):not(.dropdown-trigger--custom):n
   height: var(--sidebar-icon-size);
 }
 .portal .nav-btn .nav-label {
-  flex: 1;
+  flex: 0 1 auto;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
