@@ -163,7 +163,7 @@ export function ApprovalCard({
 
         {/* Actions */}
         <div className="portal-card-actions justify-between" onClick={(e) => e.stopPropagation()}>
-          <div className="portal-card-actions">
+          <div className="button-group">
             <button className="btn-primary" disabled={disabled} onClick={() => setShowApproveDialog(true)}>
               <Check className="icon-xs" />
               Approve

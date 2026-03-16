@@ -165,7 +165,7 @@ export function MilestoneAddForm({ onAdd, onCancel, showNotification }: Mileston
           </div>
         </div>
 
-        <div className="layout-row-end pd-mt-2">
+        <div className="portal-card-actions pd-mt-2">
           <PortalButton variant="ghost" onClick={resetAndClose}>
             Cancel
           </PortalButton>

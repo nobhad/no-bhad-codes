@@ -331,7 +331,7 @@ export function FilesTab({
                     </button>
                   </td>
                   <td className="pd-table-cell pd-cell-right">
-                    <div className="layout-row-end">
+                    <div className="table-actions">
                       {file.download_url && (
                         <button
                           className="icon-btn"

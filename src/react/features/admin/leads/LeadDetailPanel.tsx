@@ -411,7 +411,7 @@ export function LeadDetailPanel({
                           {formatDate(note.created_at)}
                         </span>
                       </div>
-                      <div className="table-actions">
+                      <div className="button-group">
                         <button
                           className={cn('icon-btn', note.is_pinned && 'is-active')}
                           onClick={() => handleTogglePin(note.id)}
