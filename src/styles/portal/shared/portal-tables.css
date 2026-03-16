@@ -255,7 +255,8 @@
   display: inline;
 }
 
-/* Stats summary — left-aligned after title, actions push right */
+/* Stats summary — left-aligned after title, actions push right.
+   Matches h3 capitalization (uppercase + label letter-spacing). */
 .stats-summary {
   order: 1;
   display: inline-flex;
@@ -264,6 +265,9 @@
   margin-left: var(--space-4);
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
   flex-wrap: wrap;
 }
 
