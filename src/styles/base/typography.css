@@ -145,13 +145,13 @@ section h2 + hr {
 
 /* Font weights */
 .font-medium {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 .font-semibold {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 .font-bold {
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 
 /* Font styles */
