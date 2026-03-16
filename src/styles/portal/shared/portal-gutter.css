@@ -15,6 +15,9 @@
    can also access the gutter variable. */
 :root {
   --content-gutter: var(--space-2);
+  /* Alias for form input borders — used by portal-forms.css, portal-dropdown.css.
+     Falls back to --portal-border which is defined in portal theme. */
+  --portal-input-border: var(--portal-border);
 }
 
 /* =====================================================
@@ -64,11 +67,7 @@
 /* Settings fields: wrapper gets full gutter, children get top padding only */
 .portal .dashboard-content .settings-fields,
 .portal .dashboard-content .notification-options,
-.portal .dashboard-content .notification-options > *,
-/* Form inputs, textareas, selects — internal content padding */
-.portal .dashboard-content input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([hidden]),
-.portal .dashboard-content textarea,
-.portal .dashboard-content select {
+.portal .dashboard-content .notification-options > * {
   padding: var(--content-gutter);
   box-sizing: border-box;
 }
@@ -95,6 +94,12 @@
 /* Activity and detail list items */
 .portal .dashboard-content .activity-list > li,
 .portal .dashboard-content .detail-list > li,
+/* Empty, loading, and error states */
+.portal .dashboard-content .status-empty,
+.portal .dashboard-content .status-content,
+.portal .dashboard-content .loading-state,
+.portal .dashboard-content .empty-state,
+.portal .dashboard-content .error-state,
 /* Help contact section */
 .portal .dashboard-content .help-contact-text > *:not(.data-table-header),
 .portal .dashboard-content .help-contact-actions {

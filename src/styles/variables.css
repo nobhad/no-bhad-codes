@@ -108,7 +108,7 @@ body {
 }
 
 /* Portal pages use Inconsolata monospace font */
-body:is([data-page="admin"], [data-page="client-portal"]) {
+body:is([data-page="admin"], [data-page="client"]) {
   font-family: var(--font-family-mono, "Inconsolata", monospace);
 }
 

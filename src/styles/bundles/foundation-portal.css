@@ -1,0 +1,45 @@
+/**
+ * ===============================================
+ * PORTAL FOUNDATION CSS BUNDLE
+ * ===============================================
+ * @file src/styles/bundles/foundation-portal.css
+ *
+ * Minimal foundation for portal apps (admin + client).
+ * Completely separate from main site — no main site
+ * typography, layout, form fields, or button styles.
+ *
+ * Portal-specific versions:
+ * - Buttons: portal/shared/portal-buttons.css
+ * - Forms: portal/shared/portal-forms.css
+ * - Layout: portal/shared/portal-layout.css
+ */
+
+/* ============================================
+ * CASCADE LAYER ORDER - SINGLE SOURCE OF TRUTH
+ * ============================================ */
+@import "../core/layer-order.css";
+
+/* ============================================
+ * 0. FONT FACE DEFINITIONS (MUST BE FIRST, NO LAYER)
+ * ============================================ */
+@import "../base/fonts.css";
+
+/* ============================================
+ * 1. RESET LAYER
+ * ============================================ */
+@import "../base/reset.css" layer(reset);
+
+/* ============================================
+ * 2. DESIGN TOKENS LAYER
+ * ============================================ */
+@import "../../design-system/index.css" layer(tokens);
+@import "../variables.css" layer(tokens);
+
+/* ============================================
+ * 3. SHARED COMPONENTS LAYER
+ * Portal-only components — no main site form/button styles
+ * ============================================ */
+@import "../base/components.css" layer(components);
+@import "../components/loading.css" layer(components);
+@import "../portal/shared/portal-toast-notifications.css" layer(components);
+@import "../portal/shared/portal-field-label-spacing.css" layer(components);

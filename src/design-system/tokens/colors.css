@@ -172,7 +172,7 @@
  * Dark theme for the main site (not portals)
  */
 
-html[data-theme="dark"]:not([data-page="admin"]):not([data-page="client-portal"]) {
+html[data-theme="dark"]:not([data-page="admin"]):not([data-page="client"]) {
   /* Background Colors */
   --color-bg-primary: var(--color-gray-900);
   --color-bg-secondary: var(--color-gray-800);
@@ -278,7 +278,7 @@ html[data-theme="light"] {
   --app-color-danger-dark: var(--color-danger-dark);
 
   /* Light mode semantic colors - used by portal light mode fallbacks */
-  --color-light-bg: #ffffff;
+  --color-light-bg: #e5e5e5;
   --color-light-text: #171717;
   --color-light-text-secondary: #525252;
   --color-light-text-muted: #737373;
@@ -458,7 +458,7 @@ html[data-theme="light"] {
 }
 
 /* Dark theme legacy aliases - Main site only */
-html[data-theme="dark"]:not([data-page="admin"]):not([data-page="client-portal"]) {
+html[data-theme="dark"]:not([data-page="admin"]):not([data-page="client"]) {
   --color-neutral-300: #333333;
   --color-neutral-100: #3a3a3a;
   --color-neutral-200: #3a3a3a;

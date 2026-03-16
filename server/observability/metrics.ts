@@ -26,7 +26,7 @@ let activeConnectionsCallback: (() => number) | null = null;
  * Call this after OpenTelemetry is initialized
  */
 export function initMetrics(): void {
-  const meter = getMeter('client-portal');
+  const meter = getMeter('client');
 
   // HTTP Request Duration Histogram
   // Measures request latency with specific percentile buckets
@@ -218,7 +218,7 @@ export function getMetricsSummary(): {
  * Create a custom counter metric
  */
 export function createCounter(name: string, description: string): Counter {
-  const meter = getMeter('client-portal');
+  const meter = getMeter('client');
   return meter.createCounter(name, { description });
 }
 
@@ -226,7 +226,7 @@ export function createCounter(name: string, description: string): Counter {
  * Create a custom histogram metric
  */
 export function createHistogram(name: string, description: string, buckets?: number[]): Histogram {
-  const meter = getMeter('client-portal');
+  const meter = getMeter('client');
   return meter.createHistogram(name, {
     description,
     advice: buckets ? { explicitBucketBoundaries: buckets } : undefined
@@ -242,7 +242,7 @@ let taskCounter: Counter | null = null;
  * Initialize business-specific metrics
  */
 export function initBusinessMetrics(): void {
-  const meter = getMeter('client-portal-business');
+  const meter = getMeter('client-business');
 
   invoiceCounter = meter.createCounter('business.invoices.created', {
     description: 'Number of invoices created'

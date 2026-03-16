@@ -28,6 +28,7 @@
 .tab-content.is-active,
 .portal-tab-panel.is-active {
   display: block;
+  animation: fadeIn var(--duration-medium) var(--easing-decelerated);
 }
 
 /* =====================================================

@@ -8,13 +8,13 @@
 /* Scroll prevention on .portal — shared/portal-layout.css */
 
 /* Client portal body defaults - match admin portal */
-body[data-page="client-portal"] {
+body[data-page="client"] {
   background: var(--color-bg-primary);
   font-weight: var(--font-weight-base);
   color: var(--color-text-primary);
 }
 
-/* Footer is hidden via footer.css [data-page="client-portal"] selector */
+/* Footer is hidden via footer.css [data-page="client"] selector */
 
 /* Portal wrapper — scoping element for CSS selectors.
    NOT a layout container. .portal-body handles the flex sidebar+content layout.
@@ -285,7 +285,7 @@ body[data-page="client-portal"] {
    ============================================ */
 
 /* Own messages (client): plain bordered box with User icon instead of admin mask */
-body[data-page="client-portal"] .msgtab-avatar.is-admin {
+body[data-page="client"] .msgtab-avatar.is-admin {
   mask-image: none;
   -webkit-mask-image: none;
   background-color: transparent;
@@ -296,7 +296,7 @@ body[data-page="client-portal"] .msgtab-avatar.is-admin {
 }
 
 /* Other messages (admin): show admin branding mask */
-body[data-page="client-portal"] .msgtab-avatar.is-client {
+body[data-page="client"] .msgtab-avatar.is-client {
   background-color: var(--color-text-primary);
   mask-image: url('/images/avatar_small_sidebar.svg');
   mask-size: contain;

@@ -311,7 +311,7 @@ export class Application {
     const pageType = document.body.getAttribute('data-page') || '';
     const isDashboard = currentPath === '/dashboard';
     const isClientPortal =
-      (isDashboard && pageType === 'client-portal') ||
+      (isDashboard && pageType === 'client') ||
       (currentPath.startsWith('/client') && !currentPath.includes('/client/intake'));
     const isClientIntake = currentPath.includes('/client/intake');
     const isAdminPage =

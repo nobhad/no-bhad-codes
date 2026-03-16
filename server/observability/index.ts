@@ -31,7 +31,7 @@ import {
 } from '@opentelemetry/api';
 
 // Environment configuration
-const SERVICE_NAME = process.env.OTEL_SERVICE_NAME || 'client-portal';
+const SERVICE_NAME = process.env.OTEL_SERVICE_NAME || 'client';
 const SERVICE_VERSION = process.env.npm_package_version || '1.0.0';
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const OTEL_ENABLED = process.env.OTEL_ENABLED !== 'false';

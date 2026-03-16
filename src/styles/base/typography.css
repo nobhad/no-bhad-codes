@@ -22,13 +22,8 @@
  * TYPOGRAPHY SCALE
  * ============================================ */
 
-/* Universal heading styling - Main site uses Acme */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+/* Universal heading styling - Main site uses Acme (excluded from portal pages) */
+body:not([data-page="admin"]):not([data-page="client"]) :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--font-family-acme);
   line-height: 1.2;
   text-transform: uppercase;

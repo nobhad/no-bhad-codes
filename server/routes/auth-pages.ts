@@ -76,7 +76,7 @@ function renderAuthPage(
 router.get('/set-password', (req: Request, res: Response) => {
   renderAuthPage(res, 'set-password', {
     title: `Set Your Password - ${BUSINESS_INFO.name} Client Portal`,
-    bodyPage: 'client-portal',
+    bodyPage: 'client',
     bodyView: 'set-password',
     entryScript: '/src/portal.ts',
     initModule: '/src/features/auth/set-password-handler.ts',
@@ -87,7 +87,7 @@ router.get('/set-password', (req: Request, res: Response) => {
 router.get('/forgot-password', (req: Request, res: Response) => {
   renderAuthPage(res, 'forgot-password', {
     title: `Forgot Password - ${BUSINESS_INFO.name} Client Portal`,
-    bodyPage: 'client-portal',
+    bodyPage: 'client',
     bodyView: 'forgot-password',
     entryScript: '/src/portal.ts',
     initModule: '/src/features/auth/forgot-password-handler.ts',
@@ -98,7 +98,7 @@ router.get('/forgot-password', (req: Request, res: Response) => {
 router.get('/reset-password', (req: Request, res: Response) => {
   renderAuthPage(res, 'reset-password', {
     title: `Reset Password - ${BUSINESS_INFO.name} Client Portal`,
-    bodyPage: 'client-portal',
+    bodyPage: 'client',
     bodyView: 'reset-password',
     entryScript: '/src/portal.ts',
     initModule: '/src/features/auth/reset-password-handler.ts',

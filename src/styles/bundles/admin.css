@@ -10,19 +10,9 @@
  */
 
 /* ============================================
- * FOUNDATION (includes layer-order.css, reset, tokens, base, form components)
+ * PORTAL FOUNDATION (layer-order, reset, tokens — NO main site styles)
  * ============================================ */
-@import "./foundation.css";
-
-/* ============================================
- * LAYOUTS LAYER
- * ============================================ */
-@import "../layouts/index.css";
-
-/* ============================================
- * STATES LAYER
- * ============================================ */
-@import "../states/index.css";
+@import "./foundation-portal.css";
 
 /* ============================================
  * RESPONSIVE LAYER
