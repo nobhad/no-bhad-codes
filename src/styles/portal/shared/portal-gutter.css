@@ -84,7 +84,7 @@
    from the container's border.
    ===================================================== */
 
-.portal .dashboard-content .panel > *:not(.accordion-item-wrapper):not(.data-table-header):not(.milestone-list):not(.messaging-top-bar):not(.messaging-columns):not(button),
+.portal .dashboard-content .panel > *:not(.accordion-item-wrapper):not(.data-table-header):not(.milestone-list):not(.messaging-top-bar):not(.messaging-columns):not(.panel-body):not(.panel-body--compact):not(button),
 .portal .dashboard-content .section-content > *:not(button),
 .portal .dashboard-content .data-table-card > *:not(.data-table-scroll-wrapper):not(.data-table-container):not(button),
 .portal .dashboard-content .config-content > *:not(button),
@@ -93,6 +93,7 @@
 .portal .dashboard-content .stat-card,
 /* Activity and detail list items */
 .portal .dashboard-content .activity-list > li,
+.portal .dashboard-content .activity-feed > li,
 .portal .dashboard-content .detail-list > li,
 /* Empty, loading, and error states */
 .portal .dashboard-content .status-empty,
@@ -120,10 +121,27 @@
   padding: 0;
 }
 
+/* Grid layout wrappers — structural containers, never get gutter padding */
+.portal .project-overview-grid,
+.portal .overview-grid,
+.portal .analytics-card-grid,
+.portal .kpi-cards-row {
+  padding: 0;
+}
+
 /* Compact/scrollable panel bodies — content scrolls edge-to-edge */
 .portal .panel-body--compact,
 .portal .activity-panel .panel-body {
   padding: 0;
+}
+
+/* Panel-body children — content inside panel body gets gutter.
+   .panel-body itself gets padding when it doubles as content container
+   (has additional layout class like .ovdash-quick-actions). */
+.portal .dashboard-content .panel-body > *,
+.portal .dashboard-content .panel-body.ovdash-quick-actions {
+  padding: var(--content-gutter);
+  box-sizing: border-box;
 }
 
 /* Analytics chart panels — chart fills entire panel */
