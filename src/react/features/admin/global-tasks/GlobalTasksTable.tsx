@@ -12,7 +12,7 @@ import {
   LayoutGrid,
   List
 } from 'lucide-react';
-import { IconButton } from '@react/factories';
+import { EmptyState, IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
@@ -324,7 +324,7 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
   }, [showNotification, loadTasks]);
 
   return (
-    <div>
+    <>
       <TableLayout
         containerRef={containerRef as React.RefObject<HTMLDivElement>}
         title="TASKS"
@@ -566,7 +566,7 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
         loading={createLoading}
         projectOptions={entityProjects}
       />
-    </div>
+    </>
   );
 }
 
@@ -627,9 +627,7 @@ function TasksKanbanView({
             </div>
             <div className="kanban-column-content">
               {columnTasks.length === 0 ? (
-                <div className="kanban-empty-state">
-                  No tasks
-                </div>
+                <EmptyState message="No tasks" className="kanban-empty-state" />
               ) : (
                 columnTasks.map((task) => (
                   <div

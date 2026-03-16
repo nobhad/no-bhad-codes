@@ -4,8 +4,6 @@
    Non-intrusive toast notifications for success/error/info messages.
    ================================================ */
 
-@layer components {
-
 .toast-container {
   position: fixed;
   top: var(--space-4);
@@ -164,6 +162,4 @@
   .toast-hide {
     transform: translateY(-100%);
   }
-}
-
 }

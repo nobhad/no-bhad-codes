@@ -8,8 +8,6 @@
  * version history, and e-signatures.
  */
 
-@layer components {
-
 /* View toggle: use shared .view-toggle (see shared/view-toggle.css) */
 
 /* ============================================================================
@@ -90,6 +88,4 @@
     margin-left: 0;
     margin-top: var(--space-px);
   }
-}
-
 }

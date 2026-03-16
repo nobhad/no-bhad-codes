@@ -141,7 +141,7 @@ export function NotesTab({
     <div className="panel">
       <div className="panel-header-row--compact">
         <h3 className="heading">
-          {editingId ? 'Edit Note' : 'New Note'}
+          <span className="title-full">{editingId ? 'Edit Note' : 'New Note'}</span>
         </h3>
         <button
           onClick={handleCancel}

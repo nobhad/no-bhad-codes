@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { IconButton, TabList, TabPanel, formatRelativeTime, formatCurrency } from '@react/factories';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { StatCard } from '@react/components/portal/StatCard';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { ProgressBar } from '@react/components/portal';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
@@ -677,10 +678,7 @@ function TimeSummaryTab({ summary }: { summary: TimeSummary | null }) {
   return (
     <div className="grid grid-cols-2 gap-3">
       {stats.map((stat) => (
-        <div key={stat.label} className="portal-card text-center">
-          <span className="stat-value">{stat.value}</span>
-          <span className="label block mt-1">{stat.label}</span>
-        </div>
+        <StatCard key={stat.label} label={stat.label} value={stat.value} className="text-center" />
       ))}
     </div>
   );

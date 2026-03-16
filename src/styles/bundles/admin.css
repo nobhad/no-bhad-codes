@@ -55,32 +55,20 @@
  * UNLAYERED STYLES (global overrides)
  * ============================================ */
 
-/* Admin dashboard background - must be unlayered to override
-   the inline <style> in admin/index.html (which is also unlayered).
-   Layered styles cannot beat unlayered styles regardless of specificity. */
+/* Admin dashboard body — fixed viewport, no body scroll.
+   Background and html styles in portal-theme.css (single source of truth). */
 body.admin-logged-in[data-page="admin"] {
-  background-color: var(--color-bg-primary);
-  /* Fixed height prevents body from growing beyond viewport */
   height: 100vh;
   height: 100dvh;
-  /* Prevent body scrolling - dashboard-content handles scroll */
   overflow: hidden;
 }
 
-/* Portal scoping wrapper — NOT a layout container.
-   display: block is default for a div; width/overflow prevent
-   horizontal overflow from content area. */
+/* Portal scoping wrapper */
 .portal {
   display: block;
   width: 100%;
   max-width: 100vw;
   overflow: hidden;
-}
-
-/* html background - portal-theme.css sets --color-bg-primary on html via :has() */
-html:has(body.admin-logged-in[data-page="admin"]) {
-  background-color: var(--color-bg-primary);
-  height: 100%;
 }
 
 /* Scrollbar styling */

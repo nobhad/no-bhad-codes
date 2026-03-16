@@ -3,8 +3,6 @@
    Uses portal theme tokens per STYLE_CONSISTENCY_REPORT
    ===================================================== */
 
-@layer components {
-
 /* Question builder container */
 [data-page="admin"] #questions-builder {
   display: flex;
@@ -206,6 +204,4 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   font-weight: var(--font-weight-medium);
-}
-
 }

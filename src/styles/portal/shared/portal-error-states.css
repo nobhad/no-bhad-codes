@@ -9,7 +9,6 @@
  * placeholder.
  */
 
-@layer components {
 
 /* ============================================
    ERROR BOUNDARY COMPONENT
@@ -146,4 +145,3 @@
   min-height: var(--space-12);
 }
 
-}

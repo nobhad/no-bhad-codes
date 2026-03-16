@@ -93,7 +93,7 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
     if (projectList.length === 0 && !emptyMessage) return null;
 
     return (
-      <div>
+      <div className="subsection">
         <div className="data-table-header">
           <h3><span className="title-full">{title} ({projectList.length})</span></h3>
         </div>

@@ -92,7 +92,7 @@ export function SettingsManager({ getAuthToken, showNotification, onNavigate }: 
 
   // Overview - lightweight snapshot cards
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>}>
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">
       <React.Suspense fallback={<LoadingState message="Loading settings overview..." />}>
         <SettingsOverview getAuthToken={getAuthToken} onSubtabNavigate={handleSubtabNavigate} />
       </React.Suspense>

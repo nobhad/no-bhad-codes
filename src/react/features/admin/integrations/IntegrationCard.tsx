@@ -26,7 +26,7 @@ export function IntegrationCard({ integration }: IntegrationCardProps) {
         <div className="portal-card-header">
           <div className="portal-card-title-group">
             <span className="text-secondary">{icon}</span>
-            <h3 className="font-semibold">{integration.name}</h3>
+            <h3><span className="title-full">{integration.name}</span></h3>
           </div>
           <span className={healthClass} />
         </div>

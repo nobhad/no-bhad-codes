@@ -280,7 +280,7 @@ export function LeadsTable({
   );
 
   return (
-    <div>
+    <>
       <TableLayout
         containerRef={containerRef as React.RefObject<HTMLDivElement>}
         title="LEADS"
@@ -521,6 +521,6 @@ export function LeadsTable({
         getAuthToken={getAuthToken}
         showNotification={showNotification}
       />
-    </div>
+    </>
   );
 }

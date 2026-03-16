@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useMemo } from 'react';
 import { Inbox } from 'lucide-react';
-import { IconButton } from '@react/factories';
+import { EmptyState, IconButton } from '@react/factories';
 import { useListFetch } from '@react/factories/useDataFetch';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
@@ -236,7 +236,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
             </div>
             <div className="kanban-column-content">
               {tasksByStatus[status].length === 0 ? (
-                <div className="empty-state">No tasks</div>
+                <EmptyState message="No tasks" />
               ) : (
                 tasksByStatus[status].map((task) => (
                   <div

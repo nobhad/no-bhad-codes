@@ -6,6 +6,7 @@
 import * as React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { RefreshCw, Ban, Unlock } from 'lucide-react';
+import { StatCard } from '@react/components/portal/StatCard';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import {
@@ -112,18 +113,9 @@ export function RateLimitingTab({
           </div>
 
           <div className="stats-grid">
-            <div className="stat-card">
-              <div className="stat-value">{stats.totalRequests.toLocaleString()}</div>
-              <div className="stat-label">Total Requests</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">{stats.blockedRequests.toLocaleString()}</div>
-              <div className="stat-label">Blocked Requests</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">{stats.activeBlocks}</div>
-              <div className="stat-label">Active Blocks</div>
-            </div>
+            <StatCard label="Total Requests" value={stats.totalRequests.toLocaleString()} />
+            <StatCard label="Blocked Requests" value={stats.blockedRequests.toLocaleString()} />
+            <StatCard label="Active Blocks" value={stats.activeBlocks} />
           </div>
 
           {stats.topOffenders.length > 0 && (

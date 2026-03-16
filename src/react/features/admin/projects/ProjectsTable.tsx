@@ -326,7 +326,7 @@ export function ProjectsTable({
   );
 
   return (
-    <div>
+    <>
       <TableLayout
         containerRef={containerRef as React.RefObject<HTMLDivElement>}
         title="PROJECTS"
@@ -590,6 +590,6 @@ export function ProjectsTable({
         timelineOptions={TIMELINE_OPTIONS}
         loading={addProjectLoading}
       />
-    </div>
+    </>
   );
 }

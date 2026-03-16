@@ -8,7 +8,6 @@
  * Used by admin tasks board view and leads pipeline.
  */
 
-@layer components {
 
 .kanban-board {
   display: flex;
@@ -162,4 +161,3 @@
   }
 }
 
-}

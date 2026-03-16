@@ -8,8 +8,6 @@
  * Follows command-palette.css patterns for consistency.
  */
 
-@layer components {
-
 /* ============================================
  * OVERLAY
  * ============================================ */
@@ -167,6 +165,4 @@
   .shortcuts-footer {
     display: none;
   }
-}
-
 }

@@ -46,6 +46,35 @@ router.get(
 );
 
 /**
+ * POST /api/admin/proposals - Create a new proposal
+ */
+router.post(
+  '/proposals',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { projectId, clientId, projectType, selectedTier, basePrice, finalPrice, maintenanceOption, clientNotes } = req.body;
+
+    if (!projectId || !clientId || !projectType || !selectedTier) {
+      return errorResponse(res, 'projectId, clientId, projectType, and selectedTier are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+    }
+
+    const proposalId = await proposalService.createProposal({
+      projectId: parseInt(projectId, 10),
+      clientId: parseInt(clientId, 10),
+      projectType,
+      selectedTier,
+      basePrice: parseFloat(basePrice) || 0,
+      finalPrice: parseFloat(finalPrice) || 0,
+      maintenanceOption,
+      clientNotes
+    });
+
+    sendCreated(res, { proposalId }, 'Proposal created');
+  })
+);
+
+/**
  * POST /api/admin/proposals/:proposalId/send - Send a proposal to client
  */
 router.post(

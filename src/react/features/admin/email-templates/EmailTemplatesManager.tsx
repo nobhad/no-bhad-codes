@@ -180,7 +180,7 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
   }, [showNotification, refetch]);
 
   return (
-    <div>
+    <>
       <TableLayout
         containerRef={containerRef as React.RefObject<HTMLDivElement>}
         title="EMAIL TEMPLATES"
@@ -325,6 +325,6 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
         onSubmit={handleCreate}
         loading={createLoading}
       />
-    </div>
+    </>
   );
 }

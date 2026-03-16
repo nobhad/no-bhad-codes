@@ -99,7 +99,7 @@ export function ContractTab({
                 <FileSignature className="icon-md" />
               )}
               <h3 className="heading">
-                Contract Status
+                <span className="title-full">Contract Status</span>
               </h3>
               <span className="badge">
                 {contractStatus.label}
@@ -169,7 +169,7 @@ export function ContractTab({
             message="No contract documents. Upload contracts in the Files tab or generate one above."
           />
         ) : (
-          <div>
+          <div className="subsection">
             {contractFiles.map((file) => (
               <div
                 key={file.id}

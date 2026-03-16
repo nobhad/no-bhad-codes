@@ -12,7 +12,6 @@
   EXCEPTION: .slug-cell uses monospace font.
 */
 
-@layer components {
 
 /* ==============================================
    BASE TABLE STYLES
@@ -126,10 +125,8 @@
    TABLE ACTIONS
    ============================================== */
 
-} /* end @layer components */
 
 /* Table actions - use utilities layer for override priority */
-@layer utilities {
   /* Button group - generic flex wrapper for icon buttons */
   .button-group {
     display: flex;
@@ -170,9 +167,7 @@
     /* Ensure background is transparent so row hover shows through */
     background: transparent;
   }
-}
 
-@layer components {
 
 .data-table :is(th, td).col-actions,
 .data-table :is(th, td):last-child:has(.table-actions) {
@@ -755,19 +750,15 @@
    COLUMN TYPES - Width and alignment only
    ============================================== */
 
-} /* end @layer components */
 
 /* Checkbox column - use utilities layer for padding override */
-@layer utilities {
   .data-table :is(td, th).col-checkbox {
     width: var(--table-checkbox-width);
     min-width: var(--table-checkbox-width);
     max-width: var(--table-checkbox-width);
     text-align: center;
   }
-}
 
-@layer components {
 
 .data-table th,
 .data-table td {
@@ -959,9 +950,7 @@
    EMPTY/LOADING/ERROR STATES - utilities layer for override
    ============================================== */
 
-} /* end @layer components */
 
-@layer utilities {
   .data-table td[colspan],
   .data-table :is(td.error-row, td.loading-row, td.empty-row) {
     width: 100%;
@@ -971,9 +960,7 @@
     white-space: normal;
     text-align: center;
   }
-}
 
-@layer components {
 
 /* ==============================================
    SORTABLE TABLE HEADERS
@@ -1061,13 +1048,11 @@
   text-decoration: underline;
 }
 
-} /* end @layer components */
 
 /* ==============================================
    RESPONSIVE - Mobile
    ============================================== */
 
-@layer responsive {
 
 @media (--mobile) {
   .data-table {
@@ -1081,7 +1066,7 @@
     white-space: nowrap;
   }
 
-  .data-table :is(.type-col, .type-cell, .date-col, .status-col, .status-col) {
+  .data-table :is(.type-col, .type-cell, .date-col, .status-col) {
     width: auto;
   }
 
@@ -1176,7 +1161,7 @@
 
 /* 1000px: Hide date, timeline, assigned, company, project, type columns */
 @media (--laptop) {
-  .data-table :is(.date-col, .created-col, .created-col, .timeline-col, .timeline-cell, .assigned-col, .assigned-cell) {
+  .data-table :is(.date-col, .created-col, .timeline-col, .timeline-cell, .assigned-col, .assigned-cell) {
     display: none;
   }
 
@@ -1312,15 +1297,11 @@
   /* Each cell: label on left, value on right */
   .data-table td,
   .data-table td.status-col,
-  .data-table td.status-col,
   .data-table td.amount-col,
-  .data-table td.amount-col,
-  .data-table td.col-actions,
   .data-table td.col-actions,
   .data-table td.priority-cell,
   .data-table td.priority-col,
   .data-table td.date-col,
-  .data-table td.created-col,
   .data-table td.created-col {
     display: flex;
     justify-content: flex-start;
@@ -1428,8 +1409,7 @@
     display: none;
   }
 
-  /* Status cell needs center alignment for badges */
-  .data-table td.status-col,
+  /* Status column needs center alignment for badges */
   .data-table td.status-col {
     align-items: center;
   }
@@ -1450,7 +1430,7 @@
   }
 
   /* CSS fallback labels for common column classes (when data-label not set).
-     Both -cell and -col suffixes are supported since admin tables use either. */
+     Canonical suffix is -col. */
   .data-table td.name-cell:not([data-label]):before,
   .data-table td.name-col:not([data-label]):before { content: "Name"; }
   .data-table td.primary-cell:not([data-label]):before { content: "Name"; }
@@ -1461,9 +1441,7 @@
   .data-table td.client-cell:not([data-label]):before,
   .data-table td.client-col:not([data-label]):before { content: "Client"; }
   .data-table td.date-col:not([data-label]):before { content: "Date"; }
-  .data-table td.amount-col:not([data-label]):before,
   .data-table td.amount-col:not([data-label]):before { content: "Amount"; }
-  .data-table td.status-col:not([data-label]):before,
   .data-table td.status-col:not([data-label]):before { content: "Status"; }
   .data-table td.email-cell:not([data-label]):before,
   .data-table td.email-col:not([data-label]):before { content: "Email"; }
@@ -1533,9 +1511,7 @@
   }
 }
 
-} /* end @layer responsive */
 
-@layer components {
 
 /* Cell secondary text (below primary text in name columns) */
 .cell-secondary {
@@ -1560,10 +1536,8 @@
   text-decoration: underline;
 }
 
-} /* end @layer components */
 
 /* Small mobile layout overrides - utilities layer for override */
-@layer utilities {
   @media (--small-mobile) {
     .data-table .col-checkbox,
     .data-table th.col-checkbox {
@@ -1584,9 +1558,7 @@
       margin-top: var(--space-2);
     }
   }
-}
 
-@layer components {
 
 /* Stats badge — used by LeadScoringConfig and table headers */
 .table-stat {
@@ -1617,11 +1589,9 @@
   color: var(--color-accent);
 }
 
-} /* end @layer components */
 
 /* Select column — see col-checkbox definition in utilities layer above (line ~807) */
 
-@layer components {
 
 /* Row checkbox */
 .row-checkbox {
@@ -1816,7 +1786,6 @@
   --portal-btn-icon-size: var(--icon-size-sm);
 }
 
-} /* end @layer components */
 
 /* =====================================================
    TABLE ACTION BUTTON SIZES — UNLAYERED

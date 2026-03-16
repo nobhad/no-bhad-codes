@@ -75,7 +75,7 @@ export function DocumentsDashboard({ onNavigate, getAuthToken, showNotification 
 
   // Overview - show all tables stacked with default pagination of 10
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>}>
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">
       <React.Suspense fallback={<LoadingState message="Loading invoices..." />}>
         <section className="overview-table-section">
           <InvoicesTable

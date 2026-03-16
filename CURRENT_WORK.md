@@ -55,9 +55,9 @@ Unified HTML wrapper structure across all admin and client portal components.
 - [x] All native `<select>` elements converted to `FormDropdown` (admin + portal)
 - [x] Radix Select in DeliverablesTab converted to `FormDropdown`
 - [x] QuestionnaireForm hand-rolled select converted to `FormDropdown`
-- [x] ContactsTab role dropdown: hide-selected-option filter + `form-dropdown-trigger` classes
-- [x] ClientDetail status dropdown: `StatusBadge` + `status-dropdown-caret`
-- [x] ProjectDetail status dropdown: `status-dropdown-caret` (was `dropdown-caret`)
+- [x] ContactsTab role dropdown: hide-selected-option filter + `dropdown-trigger--form` classes
+- [x] ClientDetail status dropdown: `StatusBadge` + `dropdown-caret--status`
+- [x] ProjectDetail status dropdown: `dropdown-caret--status` (was `dropdown-caret`)
 - [x] Absolute caret positioning for ALL dropdown types (status, form, custom, table, modal, pagination)
 - [x] `text-transform: none` universal rule for all dropdown triggers and items
 - [x] Normalized value comparison in `FormDropdown` and `InlineSelect` (handles DB format mismatches)
@@ -133,14 +133,18 @@ Unified HTML wrapper structure across all admin and client portal components.
 
 ---
 
-## Concern — ADD Button Not Working Across Portal
+## Completed — ADD Button Create Modals (March 15, 2026)
 
-**Status:** NOT STARTED
+**Status:** COMPLETE
 
-ADD button is non-functional in various areas of the portal. Needs investigation across all features that use an add/create action.
+12 ADD buttons had no onClick handler. Built create modals for 11 entities (2 have no POST endpoint).
 
-- [ ] Identify all ADD button instances across admin and client portal
-- [ ] Debug and fix non-functional handlers
+- [x] Identified all 21 ADD button instances (8 working, 13 broken)
+- [x] Created `CreateEntityModals.tsx` with 11 modal components following AddClientModal pattern
+- [x] Wired all 11 tables with modal state, API POST handlers, and refetch
+- [x] Dropdown options derived from existing table data where available
+- [x] 2 entities without POST endpoints: Contacts (standalone) shows info notification, Design Reviews keeps "Coming Soon"
+- [x] TypeScript: 0 errors, ESLint: 0 errors, Build: passing
 
 ---
 

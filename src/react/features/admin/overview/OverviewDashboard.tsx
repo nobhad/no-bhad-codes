@@ -24,7 +24,8 @@ import {
   Inbox
 } from 'lucide-react';
 import { useFadeIn } from '@react/hooks/useGsap';
-import { LoadingState } from '@react/factories';
+import { EmptyState, LoadingState } from '@react/factories';
+import { StatCard } from '@react/components/portal/StatCard';
 import { cn } from '@react/lib/utils';
 import { formatTimeAgo } from '@/utils/time-utils';
 import { formatCurrency } from '@/utils/format-utils';
@@ -110,7 +111,7 @@ const TasksKanban = React.memo(({ tasks }: { tasks: TaskItem[] }) => {
                 </div>
               ))}
               {columnTasks.length === 0 && (
-                <div className="empty-state-small">No tasks</div>
+                <EmptyState message="No tasks" className="empty-state-small" />
               )}
             </div>
           </div>
@@ -189,13 +190,12 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
       {/* Stats Strip */}
       <div className="overview-stats-strip">
         {snapshotMetrics.map((metric) => (
-          <div key={metric.label} className="stat-card">
-            <div className="stat-card-top">
-              {metric.icon}
-              <span className="field-label">{metric.label}</span>
-            </div>
-            <div className="stat-value">{metric.value}</div>
-          </div>
+          <StatCard
+            key={metric.label}
+            label={metric.label}
+            value={metric.value}
+            icon={metric.icon}
+          />
         ))}
       </div>
 
@@ -203,13 +203,14 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
       {attentionItems.length > 0 && (
         <div className="overview-stats-strip" style={{ gridTemplateColumns: `repeat(${attentionItems.length}, 1fr)` }}>
           {attentionItems.map((item) => (
-            <button key={item.type} onClick={item.action} className="stat-card stat-card-clickable">
-              <div className="stat-card-top">
-                {item.icon}
-                <span className="field-label">{item.label}</span>
-              </div>
-              <div className="stat-value stat-value-alert">{item.count}</div>
-            </button>
+            <StatCard
+              key={item.type}
+              label={item.label}
+              value={item.count}
+              icon={item.icon}
+              variant="alert"
+              onClick={item.action}
+            />
           ))}
         </div>
       )}
@@ -231,10 +232,10 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
             </div>
             <div className="panel-body">
               {activeProjects.length === 0 ? (
-                <div className="empty-state">
-                  <Briefcase className="icon-xl" />
-                  <span>No active projects</span>
-                </div>
+                <EmptyState
+                  icon={<Briefcase className="icon-xl" />}
+                  message="No active projects"
+                />
               ) : (
                 <ul className="activity-feed">
                   {activeProjects.slice(0, 5).map((project) => (
@@ -276,10 +277,10 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
             </div>
             <div className="panel-body">
               {upcomingTasks.length === 0 ? (
-                <div className="empty-state">
-                  <Clock className="icon-xl" />
-                  <span>No upcoming tasks</span>
-                </div>
+                <EmptyState
+                  icon={<Clock className="icon-xl" />}
+                  message="No upcoming tasks"
+                />
               ) : tasksView === 'list' ? (
                 <ul className="activity-feed">
                   {upcomingTasks.slice(0, 5).map((task) => (
@@ -311,10 +312,10 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
             </div>
             <div className="panel-body--compact">
               {recentActivity.length === 0 ? (
-                <div className="empty-state">
-                  <Inbox className="icon-xl" />
-                  <span>No recent activity</span>
-                </div>
+                <EmptyState
+                  icon={<Inbox className="icon-xl" />}
+                  message="No recent activity"
+                />
               ) : (
                 <ul className="activity-feed">
                   {recentActivity.slice(0, 8).map((activity) => (

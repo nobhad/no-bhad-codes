@@ -37,29 +37,25 @@ export function WorkflowsManager({ getAuthToken, showNotification, onNavigate }:
   // Individual subtab views
   if (activeSubtab === 'approvals' || activeSubtab === 'triggers') {
     return (
-      <div>
-        <React.Suspense fallback={<LoadingState message="Loading workflows..." />}>
-          <WorkflowsTable
-            onNavigate={onNavigate}
-            getAuthToken={getAuthToken}
-            showNotification={showNotification}
-          />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading workflows..." />}>
+        <WorkflowsTable
+          onNavigate={onNavigate}
+          getAuthToken={getAuthToken}
+          showNotification={showNotification}
+        />
+      </React.Suspense>
     );
   }
 
   if (activeSubtab === 'email-templates') {
     return (
-      <div>
-        <React.Suspense fallback={<LoadingState message="Loading email templates..." />}>
-          <EmailTemplatesManager
-            onNavigate={onNavigate}
-            getAuthToken={getAuthToken}
-            showNotification={showNotification}
-          />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading email templates..." />}>
+        <EmailTemplatesManager
+          onNavigate={onNavigate}
+          getAuthToken={getAuthToken}
+          showNotification={showNotification}
+        />
+      </React.Suspense>
     );
   }
 

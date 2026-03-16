@@ -15,7 +15,7 @@ import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { unwrapApiData, apiFetch, apiPost, apiPut } from '@/utils/api-client';
 import { formatErrorMessage } from '@/utils/error-utils';
-import { MessageThread } from '@react/factories';
+import { EmptyState, MessageThread } from '@react/factories';
 import { FilterDropdown } from '@react/components/portal/TableFilters';
 import type { FilterSection } from '@react/components/portal/TableFilters';
 
@@ -279,10 +279,10 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
               {isLoading ? (
                 <div className="loading-state">Loading conversations...</div>
               ) : filteredConversations.length === 0 ? (
-                <div className="empty-state">
-                  <Inbox className="messaging-icon-lg" />
-                  <p>No conversations</p>
-                </div>
+                <EmptyState
+                  icon={<Inbox className="messaging-icon-lg" />}
+                  message="No conversations"
+                />
               ) : (
                 filteredConversations.map((conv) => (
                   <div
@@ -383,11 +383,13 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
                 />
               </>
             ) : (
-              <div className="empty-state messaging-empty-state-full">
-                <Users className="messaging-icon-xl" />
-                <p className="messaging-empty-state-message">Select a conversation</p>
+              <EmptyState
+                icon={<Users className="messaging-icon-xl" />}
+                message="Select a conversation"
+                className="messaging-empty-state-full"
+              >
                 <p>Choose a conversation from the list to view messages</p>
-              </div>
+              </EmptyState>
             )}
           </div>
         </div>

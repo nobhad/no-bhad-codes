@@ -16,8 +16,6 @@
  * - project-detail-invoices.css - Invoices tab styles
  */
 
-@layer components {
-
 /* =====================================================
    PROJECT DETAIL VIEW STYLES
    ===================================================== */
@@ -524,10 +522,6 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 /* ================================================
    Overview Stats Grid
    ================================================ */
-
-.overview-stat {
-  text-align: center;
-}
 
 /* Stat value styling from unified rule in portal-stat-cards.css */
 
@@ -1168,6 +1162,4 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 #pd-contract-status-badge.status-not-signed {
   background: var(--color-text-tertiary);
   color: var(--color-text-primary);
-}
-
 }

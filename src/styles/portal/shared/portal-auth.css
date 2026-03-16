@@ -13,7 +13,6 @@
  *   3. Set password page (set-password, forgot-password, reset-password)
  */
 
-@layer components {
 
 /* =====================================================
    AUTH GATE - Full Screen Login Overlay
@@ -526,4 +525,3 @@ body.portal-logged-in[data-page="client"] .nav-overlay {
   color: var(--color-success);
 }
 
-}

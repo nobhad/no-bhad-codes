@@ -42,6 +42,7 @@ body[data-page="admin"],
 body[data-page="client"] {
   /* Portal uses mono font everywhere — set on body so Radix portals inherit */
   font-family: var(--font-family-mono);
+  background-color: var(--color-bg-primary);
 
   /* ----------------------------------------
    * PRIMARY COLORS — solid hex, no mixing
@@ -253,7 +254,6 @@ body[data-page="client"] {
   --table-name-max-width: calc(var(--space-base) * 31.25);
   --table-compact-max-width: calc(var(--space-base) * 15);
   --table-icon-size: var(--icon-size-md);
-  --table-cell-icon-size: var(--table-icon-size);
   --table-action-icon-size: var(--table-icon-size);
   --table-sort-indicator-size: calc(var(--icon-size-xs) - var(--border-width));
   --table-pagination-btn-size: var(--space-3-5);                 /* 28px */
@@ -547,7 +547,7 @@ html:has(body[data-page="client"]) {
  * ============================================ */
 html[data-theme="light"]:has(body[data-page="admin"]),
 html[data-theme="light"]:has(body[data-page="client"]) {
-  --color-bg-primary: var(--color-off-white); /* Portal light = #e5e5e5 */
+  --color-bg-primary: var(--color-off-white); /* Portal light = #e0e0e0 */
   background-color: var(--color-bg-primary);
 }
 

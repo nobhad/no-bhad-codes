@@ -22,8 +22,10 @@ import {
   BarChart3,
   Table,
   Code,
-  Trash2
+  Trash2,
+  TrendingUp
 } from 'lucide-react';
+import { PageHeader } from '@react/factories/createSection';
 
 // Register Chart.js components
 ChartJS.register(
@@ -31,6 +33,7 @@ ChartJS.register(
   BarElement, BarController, ArcElement, PieController, Tooltip, Legend, Filler
 );
 import { cn } from '@react/lib/utils';
+import { EmptyState } from '@react/factories';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
@@ -166,20 +169,23 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>}>
       {/* Header */}
-      <div className="perf-header">
-        <h2 className="heading perf-heading">Custom Analytics</h2>
-        <div className="tab-list perf-tab-list">
-          {(['7d', '30d', '90d', 'custom'] as const).map((range) => (
-            <button
-              key={range}
-              onClick={() => setDateRange(range)}
-              className={dateRange === range ? 'tab-active' : 'tab'}
-            >
-              {range === '7d' ? '7 Days' : range === '30d' ? '30 Days' : range === '90d' ? '90 Days' : 'Custom'}
-            </button>
-          ))}
-        </div>
-      </div>
+      <PageHeader
+        title="Custom Analytics"
+        icon={TrendingUp}
+        actions={
+          <div className="tab-list perf-tab-list">
+            {(['7d', '30d', '90d', 'custom'] as const).map((range) => (
+              <button
+                key={range}
+                onClick={() => setDateRange(range)}
+                className={dateRange === range ? 'tab-active' : 'tab'}
+              >
+                {range === '7d' ? '7 Days' : range === '30d' ? '30 Days' : range === '90d' ? '90 Days' : 'Custom'}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       <div className="analytics-grid">
         {/* Saved Queries Sidebar */}
@@ -189,7 +195,7 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
             {savedQueries.length === 0 ? (
               <p className="analytics-empty-text">No saved queries yet</p>
             ) : (
-              <div>
+              <div className="subsection">
                 {savedQueries.map((sq) => (
                   <div
                     key={sq.id}
@@ -468,11 +474,13 @@ function QueryChart({ result }: { result: QueryResult }) {
 
   if (numericCols.length === 0) {
     return (
-      <div className="empty-state analytics-chart-empty">
-        <BarChart3 className="analytics-chart-icon" />
-        <p>No numeric columns to chart</p>
+      <EmptyState
+        icon={<BarChart3 className="analytics-chart-icon" />}
+        message="No numeric columns to chart"
+        className="analytics-chart-empty"
+      >
         <p className="analytics-chart-hint">Query must return at least one numeric column</p>
-      </div>
+      </EmptyState>
     );
   }
 

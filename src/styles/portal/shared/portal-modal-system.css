@@ -4,45 +4,11 @@
  * ===============================================
  * @file src/styles/portal/shared/portal-modal-system.css
  *
- * Shared modal styles used across admin and client portals.
- * Radix Dialog/AlertDialog component styles.
+ * Minimal modal styles — layout and positioning only.
+ * Typography, forms, buttons, and dropdowns inherit from
+ * shared portal styles (modal renders inside .portal scope).
  */
 
-@layer components {
-
-/* =====================================================
-   MODAL POSITIONING (for Radix Dialog)
-   Fixed centered positioning for portal modals.
-   ===================================================== */
-
-.modal.modal-content {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  z-index: var(--z-index-portal-modal);
-  width: calc(100% - var(--modal-edge-padding));
-  background: var(--color-bg-primary);
-  border: var(--portal-border);
-  box-shadow: none;
-}
-
-/* =====================================================
-   MODAL TITLE AND DESCRIPTION
-   ===================================================== */
-
-.modal-title {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin: 0;
-}
-
-.modal-description {
-  font-size: var(--font-size-xs);
-  margin-top: var(--space-0-5);
-  color: var(--color-text-tertiary);
-}
 
 /* ==============================================
    PORTAL MODAL OVERLAY
@@ -60,49 +26,37 @@
   backdrop-filter: blur(var(--blur-modal));
   overscroll-behavior: contain;
   overflow: hidden;
-  opacity: 1;
-  transition: opacity var(--transition-faster);
 }
 
 /* ==============================================
    PORTAL MODAL CONTAINER
    ============================================== */
 
-/* Modal container — fixed + centered in viewport.
-   Radix renders Content as a sibling to Overlay (not inside it),
-   so the modal needs its own fixed positioning.
-   Uses inset + margin:auto for centering (not transform, which
-   conflicts with GSAP scale animation + clearProps). */
+/* Fixed + centered via inset:0 + margin:auto.
+   Renders inside .portal (via Radix container prop),
+   so all portal styles apply naturally. */
 .portal-modal {
   position: fixed;
   inset: 0;
   margin: auto;
   z-index: calc(var(--z-index-portal-modal) + 1);
   background: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  font-family: var(--font-family-mono);
+  border: var(--portal-border);
   box-shadow: var(--shadow-modal);
   width: calc(100% - var(--space-4) * 2);
   max-width: var(--modal-width-md);
+  /* Constrain height so body can scroll. fit-content up to max-height. */
+  height: min(fit-content, var(--modal-max-height));
   max-height: var(--modal-max-height);
-  height: fit-content;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-.portal-modal.portal-modal--sm {
-  max-width: var(--modal-width-sm);
-}
-
-.portal-modal.portal-modal--wide {
-  max-width: var(--modal-width-lg);
-}
-
-.portal-modal.portal-modal--xl {
-  max-width: var(--modal-width-xl);
-}
-
+/* Size variants */
+.portal-modal.portal-modal--sm { max-width: var(--modal-width-sm); }
+.portal-modal.portal-modal--wide { max-width: var(--modal-width-lg); }
+.portal-modal.portal-modal--xl { max-width: var(--modal-width-xl); }
 .portal-modal.portal-modal--full {
   max-width: calc(100vw - var(--modal-edge-padding));
   margin: var(--space-4);
@@ -127,58 +81,42 @@
   min-width: 0;
 }
 
-.portal-modal-title svg {
-  width: 1em;
-  height: 1em;
-  color: var(--color-text-primary);
-  flex-shrink: 0;
-}
-
-/* Match data-table-header h3 pattern used across the portal.
-   font-family explicit to override typography.css h2 Acme font
-   since modal renders outside .portal via Radix portal. */
-.portal-modal-header h2 {
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--icon-gap);
-  color: var(--color-text-secondary);
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
-  white-space: nowrap;
-}
-
 .portal-modal-description {
   font-size: var(--font-size-sm);
   color: var(--color-text-tertiary);
   margin-top: var(--space-0-5);
 }
 
+/* Modal close button — transparent, icon-only */
 .portal-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
   border: none;
-  font-size: var(--font-size-2xl);
-  color: var(--color-text-secondary);
+  padding: 0;
   cursor: pointer;
-  line-height: 1;
-  transition: color var(--transition-faster);
+  color: var(--color-text-secondary);
+  transition: color var(--transition-fast);
+  flex-shrink: 0;
 }
 
 .portal-modal-close:hover {
   color: var(--color-text-primary);
 }
 
+.portal-modal-close:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-accent);
+  outline-offset: var(--focus-ring-offset);
+}
+
 /* ==============================================
    PORTAL MODAL BODY & FOOTER
    ============================================== */
 
-/* Modal body — IS a content child of .portal-modal, gets its own padding */
 .portal-modal-body {
   overflow-y: auto;
   flex: 1;
-  min-height: 300px;
   padding: var(--content-gutter);
   display: flex;
   flex-direction: column;
@@ -186,21 +124,15 @@
   overscroll-behavior: contain;
 }
 
-/* Modal footer — IS a content child of .portal-modal, gets its own padding */
 .portal-modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-2);
   padding: var(--content-gutter);
+  margin-top: auto;
   flex-shrink: 0;
-  background: inherit;
-  position: relative;
-  z-index: var(--z-index-1);
+  border-top: var(--portal-border);
 }
-
-} /* end @layer components */
-
-@layer components {
 
 /* ==============================================
    RESPONSIVE
@@ -224,12 +156,5 @@
     min-height: 0;
     flex: 1;
   }
-
-  .portal-modal-header {
-  }
-
-  .portal-modal-footer {
-  }
 }
 
-} /* end @layer components */

@@ -9,8 +9,6 @@
  * layout with other admin tabs.
  */
 
-@layer components {
-
 /* ================================================
    Content wrapper
    ================================================ */
@@ -350,6 +348,4 @@
   .config-overview-grid {
     grid-template-columns: 1fr 1fr;
   }
-}
-
 }
