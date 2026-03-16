@@ -29,7 +29,7 @@ export function DataQualityDashboard({ getAuthToken, showNotification, onNavigat
   const sharedProps = useMemo(() => ({ getAuthToken, showNotification, onNavigate }), [getAuthToken, showNotification, onNavigate]);
 
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section data-quality-panel">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
       <div className="view-toggle">
         {TAB_CONFIG.map(tab => (
           <button
