@@ -31,7 +31,14 @@
   padding: 0;
 }
 
-/* Remove bottom border when dropdown is open - seamless connection */
+/* Date range trigger — flat, border-only style matching other dropdowns */
+.date-range-trigger {
+  border: var(--portal-input-border);
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Seamless connection when open — remove bottom border */
 .date-range-trigger[data-state="open"] {
   border-bottom-color: transparent;
 }
@@ -348,4 +355,3 @@
   height: var(--chart-height);
 }
 
-/* .truncate-text styling in project-detail.css */
