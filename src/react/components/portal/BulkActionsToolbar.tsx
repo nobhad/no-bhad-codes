@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { X, Trash2, ArrowRight } from 'lucide-react';
+import { X, ChevronDown } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-import { PortalButton } from './PortalButton';
+import { IconButton } from '@react/factories';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
@@ -102,12 +102,12 @@ export function BulkActionsToolbar({
         {statusOptions && statusOptions.length > 0 && onStatusChange && (
           <PortalDropdown>
             <PortalDropdownTrigger asChild>
-              <PortalButton variant="secondary" size="sm">
-                <ArrowRight className="icon-sm" />
+              <button className="dropdown-trigger">
                 Change Status
-              </PortalButton>
+                <ChevronDown className="dropdown-caret" />
+              </button>
             </PortalDropdownTrigger>
-            <PortalDropdownContent>
+            <PortalDropdownContent sideOffset={0}>
               {statusOptions.map((option) => (
                 <PortalDropdownItem key={option.value} onClick={() => onStatusChange(option.value)}>
                   {option.color && (
@@ -126,30 +126,18 @@ export function BulkActionsToolbar({
 
         {/* Custom actions */}
         {actions.map((action) => (
-          <PortalButton
+          <IconButton
             key={action.id}
-            variant={action.variant === 'danger' ? 'danger' : 'secondary'}
-            size="sm"
+            action={action.id as 'edit' | 'delete' | 'view'}
+            title={action.label}
             onClick={action.onClick}
-            loading={action.loading}
             disabled={action.disabled}
-          >
-            {action.icon}
-            {action.label}
-          </PortalButton>
+          />
         ))}
 
         {/* Delete action */}
         {onDelete && (
-          <PortalButton
-            variant="danger"
-            size="sm"
-            onClick={onDelete}
-            loading={deleteLoading}
-          >
-            <Trash2 className="icon-sm" />
-            Delete
-          </PortalButton>
+          <IconButton action="delete" title="Delete selected" onClick={onDelete} disabled={deleteLoading} />
         )}
 
         {/* Clear selection */}
