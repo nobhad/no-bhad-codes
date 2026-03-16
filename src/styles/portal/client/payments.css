@@ -1,0 +1,71 @@
+/**
+ * ===============================================
+ * CLIENT PORTAL - PAYMENT SCHEDULE STYLES
+ * ===============================================
+ * @file src/styles/portal/client/payments.css
+ *
+ * Styles for the client payment schedule view,
+ * including summary stats grid and installment list.
+ */
+
+/* --- Summary Card --- */
+
+.payment-summary-card {
+  margin-bottom: var(--spacing-md);
+}
+
+.payment-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+}
+
+/* --- Stat Labels & Values --- */
+
+.payment-stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--app-color-text-muted);
+}
+
+.payment-stat-value {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.payment-stat-value--success {
+  color: var(--app-color-success);
+}
+
+.payment-stat-value--danger {
+  color: var(--app-color-danger);
+}
+
+/* --- Installment List Items --- */
+
+.payment-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--app-color-border);
+}
+
+.payment-item-label {
+  font-weight: 500;
+}
+
+.payment-item-meta {
+  font-size: var(--font-size-sm);
+  color: var(--app-color-text-muted);
+}
+
+.payment-item-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.payment-item-amount {
+  font-weight: 600;
+}

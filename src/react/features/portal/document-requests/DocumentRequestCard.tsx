@@ -286,7 +286,7 @@ export function DocumentRequestCard({
               <FileText className="icon-xs" />
               <span className="text-primary flex-1">{selectedFile.name}</span>
               <span className="text-secondary">{formatFileSize(selectedFile.size)}</span>
-              <IconButton action="close" onClick={clearSelectedFile} disabled={isUploading} />
+              <IconButton action="close" title="Remove selected file" onClick={clearSelectedFile} disabled={isUploading} />
             </div>
           ) : (
             <div
