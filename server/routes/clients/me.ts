@@ -21,6 +21,7 @@ import {
   validateRequest,
   rateLimit,
   invalidateCache,
+  QueryCache,
   notificationPreferencesService,
   auditLogger,
   softDeleteService,
@@ -97,6 +98,9 @@ router.put(
     });
 
     const updatedClient = await clientService.getClientProfileBasic(req.user!.id);
+
+    // Invalidate admin client detail cache
+    await QueryCache.invalidate([`client:${req.user!.id}`]);
 
     await auditLogger.logUpdate(
       'client',
@@ -347,6 +351,9 @@ router.put(
       zip,
       country
     });
+
+    // Invalidate admin client detail cache so billing shows immediately
+    await QueryCache.invalidate([`client:${req.user!.id}`, 'clients']);
 
     sendSuccess(res, undefined, 'Billing information updated');
   })
