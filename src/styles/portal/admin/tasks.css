@@ -54,14 +54,12 @@
   align-items: center;
   gap: var(--icon-gap);
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-2);
+  color: var(--color-text-primary);
 }
 
 .kanban-card-project svg {
   width: 1em;
   height: 1em;
-  opacity: var(--opacity-subtle);
   flex-shrink: 0;
 }
 
@@ -109,13 +107,12 @@
   flex-wrap: wrap;
   gap: var(--space-1-5);
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
 }
 
 .task-meta svg {
   width: 1em;
   height: 1em;
-  opacity: var(--opacity-subtle);
 }
 
 .task-due-date {
@@ -216,8 +213,7 @@
 .kanban-empty-state {
   text-align: center;
   font-size: var(--font-size-sm);
-  color: var(--color-text-tertiary);
-  opacity: var(--opacity-disabled);
+  color: var(--color-text-secondary);
 }
 
 /* Kanban card header */
@@ -225,7 +221,6 @@
   display: flex;
   align-items: flex-start;
   gap: var(--space-2);
-  margin-bottom: var(--space-2);
 }
 
 .kanban-card-header .priority-indicator {

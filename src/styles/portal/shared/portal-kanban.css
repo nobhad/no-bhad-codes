@@ -71,16 +71,9 @@
 }
 
 .kanban-column-count {
-  background: transparent;
-  border: var(--portal-border);
   color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
-  min-width: var(--icon-size-xl);
-  height: var(--icon-size-xl);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 /* Column content */
@@ -105,7 +98,8 @@
   box-shadow: none;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: var(--space-1);
+  padding: var(--content-gutter);
 }
 
 .kanban-card:hover {

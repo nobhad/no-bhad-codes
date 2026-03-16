@@ -57,6 +57,10 @@
    ===================================================== */
 
 .portal .dashboard-content .data-table-header,
+.portal .dashboard-content .kanban-column-header,
+.portal .dashboard-content .kanban-column-content,
+.portal .dashboard-content .kanban-column > h4,
+.portal .dashboard-content .kanban-column > .kanban-items,
 .portal .dashboard-content .accordion-item-wrapper > *:not(button),
 .portal .dashboard-content .msgtab-bubble > *:not(button),
 .portal .dashboard-content .help-featured-card,
