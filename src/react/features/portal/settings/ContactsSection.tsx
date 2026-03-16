@@ -194,7 +194,7 @@ export function ContactsSection({ portalFetch, showNotification }: ContactsSecti
             ) : (
               <div key={contact.id} className="portal-card">
                 <div className="portal-card-header">
-                  <div className="portal-card-title-block">
+                  <div className="portal-card-title-group flex-col">
                     <span className="text-primary text-sm font-medium">
                       {contact.first_name} {contact.last_name}
                       {contact.is_primary && (
@@ -212,6 +212,7 @@ export function ContactsSection({ portalFetch, showNotification }: ContactsSecti
                       className="btn-ghost p-1"
                       onClick={() => startEdit(contact)}
                       title="Edit"
+                      aria-label="Edit contact"
                     >
                       <Edit2 className="icon-xs" />
                     </button>
@@ -219,6 +220,7 @@ export function ContactsSection({ portalFetch, showNotification }: ContactsSecti
                       className="btn-ghost p-1"
                       onClick={() => handleDelete(contact.id)}
                       title="Delete"
+                      aria-label="Delete contact"
                     >
                       <Trash2 className="icon-xs" />
                     </button>

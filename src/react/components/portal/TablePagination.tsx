@@ -91,6 +91,7 @@ export function TablePagination({
               onClick={onFirstPage}
               disabled={!canGoPrev}
               title="First page"
+              aria-label="First page"
             >
               <ChevronsLeft />
             </button>
@@ -100,6 +101,7 @@ export function TablePagination({
               onClick={onPrevPage}
               disabled={!canGoPrev}
               title="Previous page"
+              aria-label="Previous page"
             >
               <ChevronLeft />
             </button>
@@ -114,6 +116,7 @@ export function TablePagination({
               onClick={onNextPage}
               disabled={!canGoNext}
               title="Next page"
+              aria-label="Next page"
             >
               <ChevronRight />
             </button>
@@ -123,6 +126,7 @@ export function TablePagination({
               onClick={onLastPage}
               disabled={!canGoNext}
               title="Last page"
+              aria-label="Last page"
             >
               <ChevronsRight />
             </button>
