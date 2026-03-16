@@ -26,9 +26,7 @@ import {
   FileText,
   BarChart3,
   PieChart,
-  LineChart,
-  Download,
-  RefreshCw
+  LineChart
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { ChevronDown } from 'lucide-react';
@@ -38,7 +36,7 @@ import {
   PortalDropdownContent,
   PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
-import { PortalButton } from '@react/components/portal';
+import { IconButton } from '@react/factories';
 import { StatCard } from '@react/components/portal/StatCard';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { EmptyState, ErrorState, LoadingState } from '@react/factories';
@@ -426,42 +424,28 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">
       {/* Actions Bar */}
-      <div className="analytics-actions-bar action-bar">
-        <PortalDropdown>
-          <PortalDropdownTrigger asChild>
-            <button className="dropdown-trigger date-range-trigger">
-              {dateRangeOptions.find((o) => o.value === dateRange)?.label}
-              <ChevronDown className="dropdown-caret" />
-            </button>
-          </PortalDropdownTrigger>
-          <PortalDropdownContent align="start" sideOffset={0}>
-            {dateRangeOptions.map((option) => (
-              <PortalDropdownItem
-                key={option.value}
-                className={cn(dateRange === option.value && 'is-active')}
-                onSelect={() => setDateRange(option.value as typeof dateRange)}
-              >
-                {option.label}
-              </PortalDropdownItem>
-            ))}
-          </PortalDropdownContent>
-        </PortalDropdown>
-        <PortalButton
-          variant="icon"
-          size="icon"
-          aria-label="Refresh analytics"
-          onClick={() => loadAnalytics()}
-          disabled={isLoading}
-        >
-          <RefreshCw className={cn('icon-sm', isLoading && 'animate-spin')} />
-        </PortalButton>
-        <PortalButton
-          variant="icon"
-          size="icon"
-          aria-label="Export analytics"
-        >
-          <Download className="icon-sm" />
-        </PortalButton>
+      <div className="data-table-actions">
+          <PortalDropdown>
+            <PortalDropdownTrigger asChild>
+              <button className="dropdown-trigger date-range-trigger">
+                {dateRangeOptions.find((o) => o.value === dateRange)?.label}
+                <ChevronDown className="dropdown-caret" />
+              </button>
+            </PortalDropdownTrigger>
+            <PortalDropdownContent align="start" sideOffset={0}>
+              {dateRangeOptions.map((option) => (
+                <PortalDropdownItem
+                  key={option.value}
+                  className={cn(dateRange === option.value && 'is-active')}
+                  onSelect={() => setDateRange(option.value as typeof dateRange)}
+                >
+                  {option.label}
+                </PortalDropdownItem>
+              ))}
+            </PortalDropdownContent>
+          </PortalDropdown>
+          <IconButton action="refresh" title="Refresh analytics" onClick={() => loadAnalytics()} disabled={isLoading} />
+          <IconButton action="download" title="Export analytics" />
       </div>
 
       {error && (
