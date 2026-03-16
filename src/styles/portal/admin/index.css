@@ -1,13 +1,11 @@
-/**
- * ===============================================
- * ADMIN DASHBOARD STYLES - INDEX
- * ===============================================
- * @file src/styles/portal/admin/index.css
- *
- * Import file and base styles for all admin dashboard styles.
- * Shared portal styles imported first, then admin-specific modules.
- * Base admin portal overrides are inlined below all imports.
- */
+/* ═══════════════════════════════════════════════════════
+   ADMIN DASHBOARD STYLES - INDEX
+   @file src/styles/portal/admin/index.css
+
+   Import file and base styles for all admin dashboard styles.
+   Shared portal styles imported first, then admin-specific modules.
+   Base admin portal overrides are inlined below all imports.
+   ═══════════════════════════════════════════════════════ */
 
 /* Layer order inherited from core/layer-order.css via foundation.css bundle.
  * Do NOT redeclare @layer here — it fragments the cascade. */
@@ -36,20 +34,20 @@
 /* Layout refinements */
 @import "./dashboard-layout.css";
 
-/* ================================================
-   ADMIN PORTAL BASE STYLES
-   ================================================ */
-
-/* Page background - pitch black as base canvas */
+/* ═══════════════════════════════════════════════════════
+   BODY / PAGE SETUP
+   Background, font-weight, and text color for admin pages
+   ═══════════════════════════════════════════════════════ */
 body[data-page="admin"] {
   background: var(--color-bg-primary);
   font-weight: var(--font-weight-base); /* Medium weight as portal default */
   color: var(--color-text-primary);
 }
 
-/* ================================================
-   GLOBAL SHADOW & BORDER REMOVAL — Admin backend
-   ================================================ */
+/* ═══════════════════════════════════════════════════════
+   SHADOW REMOVAL
+   Zero out all shadow tokens for flat admin aesthetic
+   ═══════════════════════════════════════════════════════ */
 [data-page="admin"] {
   --shadow-panel: none;
   --shadow-card: none;
@@ -81,16 +79,12 @@ body[data-page="admin"] .portal-page-header {
   box-shadow: none;
 }
 
-/* ================================================
-   ADMIN LOGIN PAGE - THEME TOGGLE SUPPORT
-   ================================================ */
+/* --- Admin Login Theme Toggle --- */
 html[data-theme="dark"] body[data-page="admin"] {
   --color-neutral-300: var(--color-dark);
 }
 
-/* ================================================
-   ADMIN LOGIN PAGE - HEADER & FOOTER
-   ================================================ */
+/* --- Admin Login Header & Footer --- */
 
 [data-page="admin"] .admin-header {
   display: flex;
@@ -173,9 +167,7 @@ body[data-page="admin"]:not(.admin-logged-in) {
   background: var(--color-neutral-300);
 }
 
-/* ================================================
-   ADMIN SIDEBAR LAYOUT
-   ================================================ */
+/* --- Admin Sidebar Layout --- */
 
 /* .portal is a scoping wrapper, NOT a layout container.
    .portal-body handles the sidebar+content flex layout. */
@@ -210,10 +202,10 @@ body[data-page="admin"]:not(.admin-logged-in) {
   -webkit-overflow-scrolling: touch;
 }
 
-/* ================================================
-   QUICK STATS GRID - Admin-specific overrides
-   Base styles in shared/portal-cards.css
-   ================================================ */
+/* ═══════════════════════════════════════════════════════
+   STAT CARD OVERRIDES
+   Quick stats grid, summary cards, and responsive breakpoints
+   ═══════════════════════════════════════════════════════ */
 
 body[data-page="admin"] #tab-analytics .quick-stats {
   display: grid;
@@ -225,9 +217,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
   min-width: 0;
 }
 
-/* ================================================
-   SUMMARY CARD GRID RESPONSIVE BEHAVIOR
-   ================================================ */
+/* --- Summary Card Grid Responsive --- */
 
 @media (--laptop-up) {
   [data-page="admin"] #tab-overview .dashboard-stats-grid,
@@ -285,9 +275,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
   box-shadow: none;
 }
 
-/* ================================================
-   OVERVIEW TAB - Card styling
-   ================================================ */
+/* --- Overview Tab Cards --- */
 /* Stats grid — NO padding on wrapper, children handle their own */
 [data-page="admin"] #tab-overview .dashboard-stats-grid {
   background: var(--color-bg-secondary);
@@ -320,9 +308,10 @@ body[data-page="admin"] #tab-analytics .stat-card {
   color: var(--color-text-primary);
 }
 
-/* ================================================
-   ADMIN PORTAL - DATE INPUT STYLING
-   ================================================ */
+/* ═══════════════════════════════════════════════════════
+   DATE INPUTS
+   Calendar picker indicator, theme-aware filter/opacity
+   ═══════════════════════════════════════════════════════ */
 [data-page="admin"] input[type="date"] {
   cursor: pointer;
   position: relative;
@@ -348,9 +337,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
   filter: var(--filter-invert-controls);
 }
 
-/* ================================================
-   ADMIN PORTAL - CARD SHADOWS
-   ================================================ */
+/* --- Card Shadows --- */
 body[data-page="admin"] .data-table-card,
 body[data-page="admin"] .chart-container,
 body[data-page="admin"] .metric-group,
@@ -360,10 +347,10 @@ body[data-page="admin"] .project-detail-overview {
   box-shadow: var(--shadow-panel);
 }
 
-/* ================================================
-   ADMIN TABLE LAYOUT
-   Base table styles in shared/portal-tables.css
-   ================================================ */
+/* ═══════════════════════════════════════════════════════
+   TEXT OVERRIDES
+   Heading colors, metric values, stat card text
+   ═══════════════════════════════════════════════════════ */
 
 [data-page="admin"] .page-header h2 {
   color: var(--color-accent);
@@ -386,8 +373,6 @@ body.modal-open,
 body.modal-open .dashboard-content {
   overflow: hidden;
 }
-
-/* .tab-content animation moved to shared/portal-tabs.css */
 
 [data-page="admin"] #tab-leads .page-title + .quick-stats {
   margin-top: var(--space-1-5);
@@ -437,8 +422,6 @@ body.modal-open .dashboard-content {
 [data-page="admin"] .stat-card-clickable.is-active {
   background: var(--color-bg-readonly);
 }
-
-/* Breadcrumbs styled in shared/portal-layout.css — no admin overrides needed */
 
 /* Invite icon button - matches .icon-btn pattern */
 [data-page="admin"] .icon-btn-invite {
@@ -497,27 +480,19 @@ body.modal-open .dashboard-content {
   background: transparent;
 }
 
-/* ================================================
-   File action buttons container
-   ================================================ */
+/* --- File Actions --- */
 .file-actions {
   display: flex;
   gap: var(--space-2);
   justify-content: flex-end;
 }
 
-/* Set Password Page: all styles in shared/portal-auth.css */
-
 .set-password-form label {
   color: var(--color-text-secondary);
   margin-bottom: var(--space-1);
 }
 
-/* Form inputs inherit from portal-forms.css — no overrides needed */
-
-/* ================================================
-   System Tab
-   ================================================ */
+/* --- System Tab --- */
 .status-item {
   display: flex;
   justify-content: space-between;
@@ -541,8 +516,6 @@ body.modal-open .dashboard-content {
   margin-left: var(--space-1-5);
 }
 
-/* .status-badge and .status-indicator styles in shared/portal-badges.css */
-
 .loader {
   width: var(--icon-btn-size-lg);
   height: var(--icon-btn-size-lg);
@@ -553,11 +526,10 @@ body.modal-open .dashboard-content {
   margin-bottom: var(--space-4);
 }
 
-/* Utility Classes: .text-success / .text-warning / .text-danger defined in shared/portal-utilities.css */
-
-/* ================================================
-   Responsive Design
-   ================================================ */
+/* ═══════════════════════════════════════════════════════
+   MOBILE RESPONSIVE
+   Breakpoint overrides for grids, cards, tables, charts
+   ═══════════════════════════════════════════════════════ */
 
 [data-page="admin"] .vitals-grid {
   display: grid;
@@ -705,9 +677,7 @@ body.modal-open .dashboard-content {
   }
 }
 
-/* ================================================
-   INFO ICONS
-   ================================================ */
+/* --- Info Icons --- */
 
 [data-page="admin"] .info-icon-wrapper {
   display: inline-block;
@@ -734,9 +704,7 @@ body.modal-open .dashboard-content {
   gap: var(--icon-gap-xs);
 }
 
-/* ================================================
-   FAST CUSTOM TOOLTIPS
-   ================================================ */
+/* --- Custom Tooltips --- */
 
 [data-page="admin"] [data-tooltip] {
   position: relative;
@@ -811,8 +779,6 @@ body.modal-open .dashboard-content {
   left: var(--space-2-5);
   transform: none;
 }
-
-/* Table filter controls - see admin/table-filters.css for all styles */
 
 @media (--small-mobile) {
   .data-table-header {
@@ -898,11 +864,11 @@ body.modal-open .dashboard-content {
   }
 }
 
-/* ============================================
- * LAYOUT OVERHAUL
- * Base layout (height, flex, display) in shared/portal-layout.css.
- * Only admin-specific overrides below.
- * ============================================ */
+/* ═══════════════════════════════════════════════════════
+   ADMIN BACKGROUND / LAYOUT OVERHAUL
+   Portal body, sidebar, borders, table transparency,
+   modal z-index, inline-edit compact override
+   ═══════════════════════════════════════════════════════ */
 
 [data-page="admin"] .portal-body {
   margin-top: var(--portal-header-height);
@@ -966,8 +932,6 @@ body.modal-open .dashboard-content {
 [data-page="admin"] .details-overlay {
   z-index: calc(var(--z-index-portal-modal) - 1);
 }
-
-/* Tab section and overview-table-section layout moved to shared/portal-layout.css */
 
 /* -------------------------------------------------------
  * Inline-edit compact input override

@@ -61,7 +61,7 @@ export function KnowledgeBase({ onNavigate, getAuthToken, showNotification }: Kn
 
   // Overview - show all tables stacked with default pagination of 10
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>}>
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">
       <React.Suspense fallback={<LoadingState message="Loading categories..." />}>
         <section className="overview-table-section">
           <CategoriesTable

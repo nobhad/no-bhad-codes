@@ -3,30 +3,17 @@
    Dashboard structure, containers, page framework
    ===================================================== */
 
-/* Scroll prevention on .portal — shared/portal-layout.css */
-
-/* Client portal body defaults - match admin portal */
+/* Client portal body defaults */
 body[data-page="client"] {
   background: var(--color-bg-primary);
   font-weight: var(--font-weight-base);
   color: var(--color-text-primary);
 }
 
-/* Footer is hidden via footer.css [data-page="client"] selector */
-
-/* Portal wrapper — scoping element for CSS selectors.
-   NOT a layout container. .portal-body handles the flex sidebar+content layout.
-   Height is determined by .portal-body (single source of truth in portal-layout.css). */
-
-/* Dashboard Content Area — client portal overrides only.
-   Base layout (flex, gap, overflow-y, height) in shared/portal-layout.css. */
+/* Dashboard Content Area — client portal overrides only */
 .dashboard-content {
   overflow-x: hidden;
 }
-
-/* Top spacing now handled by .section in shared/portal-layout.css */
-
-/* Messages layout gap: 0 — shared/portal-layout.css */
 
 /* Messages page: full-bleed on mobile (subtabs keep their own padding) */
 @media (--compact-mobile) {
@@ -90,10 +77,6 @@ body[data-page="client"] {
   }
 }
 
-/* .dashboard-content color — inherited from .portal base in shared/portal-layout.css */
-
-/* Portal theme variables are defined in variables.css */
-
 /* ================================================
    PORTAL TYPOGRAPHY
    Overrides global Acme headings with serif for portals
@@ -108,25 +91,10 @@ body[data-page="client"] {
   font-family: var(--font-family-serif, "Cormorant Garamond", Georgia, serif);
 }
 
-/* .page-header h2 / .client-name text-shadow: none — shared/portal-layout.css */
-
-/* Brutalist border-radius + hr — shared/portal-layout.css */
-
-/* Card shadows + card backgrounds — shared/portal-layout.css */
-
-/* .content-wrapper REMOVED from DOM — subtabs and tab-content
-   are now direct children of .dashboard-content */
-
 /* Content Area */
 .content-area {
   max-width: 100%;
 }
-
-/* .tab-content base display:none in shared/portal-tabs.css */
-
-/* NOTE: .portal-view-content and #portal-view-content removed — client portal
-   now uses EJS-rendered .tab-content containers (identical to admin architecture).
-   See shared/portal-tabs.css for .tab-content base styles. */
 
 /* ============================================
    PORTAL MAIN CONTAINER
@@ -137,8 +105,6 @@ body[data-page="client"] {
   max-width: 1400px;
   border: var(--portal-border);
 }
-
-/* Subtabs container base — shared/portal-layout.css (.portal .portal-header-subtabs) */
 
 /* ============================================
    Shared header elements (admin + client portal)
@@ -175,10 +141,6 @@ body[data-page="client"] {
   height: var(--space-2);
   flex-shrink: 0;
 }
-
-/* Toggle icon rotation: handled in portal-sidebar.css (.sidebar.collapsed > .sidebar-toggle-btn svg) */
-
-/* .header-breadcrumb-nav removed — see shared/portal-layout.css .portal-global-header .breadcrumb-nav */
 
 /* Admin primary header row (breadcrumbs) */
 .page-header.primary-header-row {
@@ -227,9 +189,6 @@ body[data-page="client"] {
   text-transform: uppercase;
 }
 
-/* Generic Card - uses shared portal styles from portal-cards.css */
-/* No overrides here - all card styling comes from shared styles */
-
 /* Portal Header - transparent */
 .portal-header {
   position: sticky;
@@ -246,17 +205,11 @@ body[data-page="client"] {
   transition: transform var(--transition-medium);
 }
 
-/* Legacy breadcrumb rules removed — see shared/portal-layout.css */
-
-/* Error States: .error-message defined in shared/portal-layout.css */
-
 /* Loading States */
 .login-btn.loading {
   opacity: var(--opacity-subtle);
   cursor: not-allowed;
 }
-
-/* .btn-loader: components/loading.css */
 
 /* ============================================
    FILES VIEW - FOLDER SIDEBAR

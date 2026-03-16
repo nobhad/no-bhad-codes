@@ -389,8 +389,6 @@ html[data-theme="light"] .portal :is(
   }
 }
 
-/* Stat card styles: see portal-stat-cards.css */
-
 /* =====================================================
    2-COLUMN CARD GRID (SHARED)
    Replaces page-specific .card-grid-2col, .pd-grid-2
@@ -411,8 +409,6 @@ html[data-theme="light"] .portal :is(
     grid-template-columns: 1fr;
   }
 }
-
-/* Activity and task widgets: see portal-dashboard-widgets.css */
 
 /* =====================================================
    HEALTH CHECK GRID - System Status
@@ -543,7 +539,4 @@ html[data-theme="light"] .portal :is(
 
 }
 
-/* Stat card and dashboard widget mobile styles: see respective files */
-
-/* Dashboard widgets: see portal-dashboard-widgets.css */
 

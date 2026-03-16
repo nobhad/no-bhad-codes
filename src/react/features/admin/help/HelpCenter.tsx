@@ -101,7 +101,7 @@ export function HelpCenter({ getAuthToken }: HelpCenterProps) {
   }
 
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>}>
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">
       <PageHeader
         title="Help Center"
         icon={HelpCircle}

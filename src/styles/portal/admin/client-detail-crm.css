@@ -17,19 +17,6 @@
    CLIENT CRM ENHANCEMENTS
    =============================================== */
 
-/* Client Detail Tabs: strip and panel styles come from shared/portal-tabs.css
-   (.portal-tabs, .portal-tab-panel). Add class="portal-tabs" on the strip and
-   class="portal-tab-panel" on content divs so they match project detail tabs. */
-
-/* Health Score */
-/* Uses utility classes: flex items-center */
-
-/* Health factors breakdown */
-/* Uses utility classes: flex flex-col gap-1 */
-
-/* Label styling from unified rule in portal-forms.css */
-
-/* Tags Section */
 /* Tag input in client detail: fit overview card, match portal form look */
 #tab-client-detail #cd-tags-container .tag-input-wrapper {
   background: var(--color-bg-readonly);
@@ -51,9 +38,6 @@
 #tab-client-detail #cd-tags-container .tag-input-field::placeholder {
   color: var(--color-text-tertiary);
 }
-
-/* Contacts Tab */
-/* Uses utility classes: flex flex-col gap-2 */
 
 .contact-card {
   display: flex;
@@ -113,10 +97,6 @@
   gap: var(--space-1);
 }
 
-/* Activity Timeline */
-
-/* Notes Tab */
-
 .note-card {
   background: var(--color-bg-prominent);
   border-radius: var(--border-radius-md);
@@ -132,8 +112,6 @@
   color: var(--color-text-secondary);
 }
 
-/* .note-actions — single definition in client-detail.css (with align-items, opacity hover) */
-
 .note-content {
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
@@ -141,17 +119,8 @@
   white-space: pre-wrap;
 }
 
-/* Uses utility classes: flex flex-col gap-2 */
-
-/* Custom Fields */
-/* Uses utility classes: flex flex-col gap-1 */
-
-/* Label styling from unified rule in portal-forms.css */
-
 /* Responsive */
 @media (--mobile) {
-  /* Tab panels use base .portal-tab-panel from portal-tabs.css */
-
   .contact-card {
     flex-direction: column;
     gap: var(--space-2);

@@ -1,18 +1,15 @@
-/* =====================================================
+/* ═══════════════════════════════════════════════════════
    SHARED PORTAL FORMS — SINGLE SOURCE OF TRUTH
    @file src/styles/portal/shared/portal-forms.css
-   =====================================================
+
    ALL form controls used anywhere in the portal (admin + client) are
    defined here. Do not add input/textarea/select border, padding,
    focus, or typography in feature CSS — only layout (grid, gap, width).
    Tokens: --portal-input-border, --focus-ring, --space-* (design-system).
    Labels: .field-label SoT is shared/field-label-spacing.css.
-   =====================================================
 
    FORM SYSTEM ARCHITECTURE
    ========================
-   CANONICAL FORM CLASS SYSTEM
-   ============================
    1. SEMANTIC CLASSES (EJS templates + React modals)
       Wrapper:  .form-field
       Inputs:   .form-input, .form-textarea, .form-select
@@ -29,7 +26,13 @@
 
    4. QUESTIONNAIRE CLASSES (.qform-*)
       Layout only — actual inputs use system 3 classes.
-   ===================================================== */
+   ═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   BASE INPUTS
+   Shared border, padding, focus, and typography for all
+   .form-input, .form-textarea, .form-select, and native elements
+   ═══════════════════════════════════════════════════════ */
 
 /* Base input styles — all form controls inside .portal, .modal-overlay, and .auth-gate. */
 .portal
@@ -107,9 +110,7 @@
   caret-color: var(--color-text-primary);
 }
 
-/* Empty icon-left-padding and search-container rules removed */
-
-/* Textarea - different height/padding */
+/* --- Textareas --- */
 .portal :is(textarea, .form-textarea, textarea.form-input),
 .portal-modal :is(textarea, .form-textarea, textarea.form-input),
 .modal-overlay :is(textarea, .form-textarea, textarea.form-input) {
@@ -157,7 +158,10 @@
   box-shadow: var(--focus-ring);
 }
 
-/* Form field wrapper - canonical container for label + input + error. */
+/* ═══════════════════════════════════════════════════════
+   FORM FIELD WRAPPER
+   .form-field canonical container, labels, readonly values
+   ═══════════════════════════════════════════════════════ */
 .form-field {
   position: relative;
   display: flex;
@@ -206,7 +210,10 @@
   min-height: var(--space-12);
 }
 
-/* Select dropdown arrow - uses theme-aware caret variable */
+/* ═══════════════════════════════════════════════════════
+   SELECTS
+   Custom caret, appearance reset, light-mode override
+   ═══════════════════════════════════════════════════════ */
 .portal :is(select:not(.status-select), .form-select),
 .portal-modal :is(select:not(.status-select), .form-select),
 .modal-overlay :is(select:not(.status-select), .form-select) {
@@ -227,7 +234,10 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   background-image: var(--select-caret-light);
 }
 
-/* Disabled state */
+/* ═══════════════════════════════════════════════════════
+   FORM ERROR / HELPER TEXT
+   Disabled, readonly, error, required, and helper states
+   ═══════════════════════════════════════════════════════ */
 :is(input, textarea, select, .form-input, .form-textarea, .form-select):disabled {
   opacity: var(--opacity-disabled);
   cursor: not-allowed;
@@ -265,7 +275,7 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   margin-top: var(--space-0-5);
 }
 
-/* Mobile responsive */
+/* --- Form Responsive --- */
 @media (--small-mobile) {
   .portal :is(.form-input, .form-textarea, .form-select, input, textarea, select),
   .modal-overlay :is(.form-input, .form-textarea, .form-select, input, textarea, select) {
@@ -281,7 +291,7 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   }
 }
 
-/* Password input wrapper & toggle */
+/* --- Password Toggle --- */
 .password-input-wrapper {
   position: relative;
   display: flex;
@@ -321,7 +331,10 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   display: block;
 }
 
-/* Form row - side-by-side fields */
+/* ═══════════════════════════════════════════════════════
+   FORM LAYOUT
+   .form-row grid, side-by-side fields, responsive stacking
+   ═══════════════════════════════════════════════════════ */
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -336,12 +349,10 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   }
 }
 
-/* =====================================================
+/* ═══════════════════════════════════════════════════════
    SEARCH BAR
-   (Merged from shared/search-bar.css)
-   Reusable inline search: icon + input (+ optional clear).
-   Use class .search-bar on wrapper, .search-bar-icon, .search-bar-input, .search-bar-clear.
-   ===================================================== */
+   Reusable inline search: icon + input + optional clear
+   ═══════════════════════════════════════════════════════ */
 
 .search-bar {
   position: relative;
@@ -424,12 +435,10 @@ input.search-bar-input {
   height: var(--icon-size-sm);
 }
 
-/* =====================================================
-   STANDALONE FORM CLASSES - .input / .select / .textarea
-   Used directly on elements in React components.
-   These have distinct styling from the semantic/factory
-   system: mono font, bold weight, custom padding.
-   ===================================================== */
+/* ═══════════════════════════════════════════════════════
+   STANDALONE CLASSES (.input / .select / .textarea)
+   Mono font, bold weight — used directly in React components
+   ═══════════════════════════════════════════════════════ */
 
 /* Text input */
 .input {
@@ -491,12 +500,7 @@ input.search-bar-input {
   cursor: not-allowed;
 }
 
-/* ============================================
- * FORM DROPDOWN TRIGGER
- * PortalDropdown-based replacement for native <select>.
- * Context-specific variant of .dropdown-trigger (portal-dropdown.css).
- * Differs: full-width, form typography, border, background, outline.
- * ============================================ */
+/* --- Form Dropdown Trigger --- */
 
 /* Explicit resets (avoid `all: unset` so other selectors don't need :not() exclusions) */
 .dropdown-trigger--form {
@@ -602,19 +606,16 @@ input.search-bar-input {
   border: none;
 }
 
-/* .data-table-checkbox — inherits all styles from .portal-checkbox
-   (single source of truth in portal-react-components.css) */
-
 /* Form textarea resizable */
 .form-textarea-resizable {
   min-height: var(--min-height-textarea-lg);
   resize: vertical;
 }
 
-/* =====================================================
-   QUESTIONNAIRE FORM COMPONENT CLASSES
-   Used by QuestionnaireForm.tsx
-   ===================================================== */
+/* ═══════════════════════════════════════════════════════
+   QUESTIONNAIRE FORMS (.qform-*)
+   Layout and controls for QuestionnaireForm.tsx
+   ═══════════════════════════════════════════════════════ */
 
 /* Shared flex row: center + space-between */
 .qform-header,
@@ -703,8 +704,6 @@ input.search-bar-input {
   font-size: var(--font-size-2xs);
   margin-top: var(--space-px);
 }
-
-/* .qform-question-input — removed (empty rule) */
 
 /* Action buttons row */
 .qform-actions {
@@ -795,12 +794,11 @@ input.search-bar-input {
   flex-shrink: 0;
 }
 
-/* =====================================================
+/* ═══════════════════════════════════════════════════════
    FORM FIELD FACTORY CLASSES
-   Used by createFormField.tsx factory components.
-   The .form-field wrapper is the single canonical container for form controls.
-   above (see "Form field wrapper" section).
-   ===================================================== */
+   Used by createFormField.tsx: input wrapper, icons,
+   checkbox, radio group, fieldset group
+   ═══════════════════════════════════════════════════════ */
 
 /* Input wrapper - contains input + optional icons */
 .form-field-input-wrapper {
@@ -835,8 +833,6 @@ input.search-bar-input {
 .form-field-icon-right {
   right: var(--space-1-5);
 }
-
-/* .form-field-input--icon-left, .form-field-input--icon-right — removed (empty rules) */
 
 /* Textarea no-resize modifier */
 .form-field-textarea--no-resize {
@@ -953,9 +949,10 @@ input.search-bar-input {
   gap: var(--space-2);
 }
 
-/* ============================================
- * FILE UPLOAD COMPONENT
- * ============================================ */
+/* ═══════════════════════════════════════════════════════
+   FILE UPLOAD
+   Dropzone, progress bar, file items, remove button
+   ═══════════════════════════════════════════════════════ */
 .file-upload-zone {
   display: flex;
   flex-direction: column;

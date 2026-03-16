@@ -118,8 +118,6 @@
   padding-right: 0;
 }
 
-/* .icon-btn styling: portal-buttons.css ONLY - NO overrides here */
-
 /* Filter active state - uses .has-value class */
 .filter-dropdown-trigger.has-value,
 .filter-search-trigger.has-value {
@@ -203,8 +201,6 @@
   background: var(--color-bg-raised);
   color: var(--color-text-primary);
 }
-
-/* Sortable table headers - styles moved to shared/portal-tables.css */
 
 /* ===============================================
    MOBILE RESPONSIVE

@@ -1,7 +1,7 @@
-/* =====================================================
+/* ═══════════════════════════════════════════════════════
    SHARED - PORTAL TABLES
    Single source of truth for ALL table styling
-   ===================================================== */
+   ═══════════════════════════════════════════════════════ */
 
 /*
   TABLE CLASS: .data-table
@@ -13,9 +13,10 @@
 */
 
 
-/* ==============================================
-   BASE TABLE STYLES
-   ============================================== */
+/* ═══════════════════════════════════════════════════════
+   BASE TABLE
+   Core table element, thead, tbody, th, td defaults
+   ═══════════════════════════════════════════════════════ */
 
 .data-table {
   width: 100%;
@@ -72,19 +73,10 @@
   background: transparent;
 }
 
-/* ==============================================
-   OUTER COLUMN PADDING — same horizontal padding on all cells (root rule)
-   ============================================== */
-
-
-/* ==============================================
-   TABLE ROW STATES
-   ============================================== */
-
-/* ==============================================
-   ROW HOVER - ALL CELLS MUST MATCH
-   Single rule for uniform hover background
-   ============================================== */
+/* ═══════════════════════════════════════════════════════
+   ROW STATES
+   Hover, active, focused, and selected row backgrounds
+   ═══════════════════════════════════════════════════════ */
 
 .data-table tbody tr:hover td {
   background: var(--color-bg-hover);
@@ -121,9 +113,10 @@
   background: var(--color-bg-raised);
 }
 
-/* ==============================================
-   TABLE ACTIONS
-   ============================================== */
+/* ═══════════════════════════════════════════════════════
+   ACTIONS COLUMN
+   Row action buttons, button groups, .col-actions cell
+   ═══════════════════════════════════════════════════════ */
 
 
 /* Table actions - use utilities layer for override priority */
@@ -214,11 +207,10 @@
    and .data-table-row-actions containers — the unlayered .icon-btn base rule
    reads the token via DOM inheritance, making @layer overrides unnecessary. */
 
-/* ==============================================
+/* ═══════════════════════════════════════════════════════
    TABLE HEADER
-   Shared between admin and client portal.
-   Used by .data-table-header class inside .data-table-card.
-   ============================================== */
+   .data-table-header bar: title, stats summary, actions
+   ═══════════════════════════════════════════════════════ */
 
 .data-table-header {
   display: flex;
@@ -320,9 +312,10 @@
   align-self: center;
 }
 
-/* ==============================================
+/* ═══════════════════════════════════════════════════════
    TABLE CONTAINERS
-   ============================================== */
+   Card wrapper, scroll wrapper, table-layout
+   ═══════════════════════════════════════════════════════ */
 
 /* Table layout wrapper - outer container from TableLayout component */
 .table-layout {
@@ -375,9 +368,7 @@
   border: var(--portal-border);
 }
 
-/* ==============================================
-   TABLE CORNERS - Brutalist: no border radius
-   ============================================== */
+/* --- Table Corners --- */
 
 /* When pagination exists, remove bottom radius from scroll wrapper */
 .data-table-card:has(.table-pagination) .data-table-scroll-wrapper {
@@ -386,9 +377,10 @@
 }
 
 
-/* ==============================================
-   TABLE PAGINATION
-   ============================================== */
+/* ═══════════════════════════════════════════════════════
+   PAGINATION
+   Page navigation, page-size selector, page buttons
+   ═══════════════════════════════════════════════════════ */
 
 .table-pagination {
   display: flex;
@@ -481,9 +473,7 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* ==============================================
-   TABLE LINKS
-   ============================================== */
+/* --- Table Links --- */
 
 .data-table td a {
   color: inherit;
@@ -494,10 +484,11 @@
   text-decoration: underline;
 }
 
-/* ==============================================
-   ALL CELL TEXT - Inherit from table
-   Only .slug-cell has different styling
-   ============================================== */
+/* ═══════════════════════════════════════════════════════
+   CELL TYPES
+   Identity, date, status, amount, type, slug, and
+   all text inheritance rules for cell content
+   ═══════════════════════════════════════════════════════ */
 
 /* Identity cell container */
 .data-table .identity-cell {
@@ -552,10 +543,7 @@
   color: var(--color-text-tertiary);
 }
 
-/* ==============================================
-   CELL WITH ICON - Icon aligned left of text
-   Icons appear inline with checkboxes visually
-   ============================================== */
+/* --- Cell With Icon --- */
 
 .data-table .cell-with-icon {
   display: flex;
@@ -718,11 +706,7 @@
   font-size: inherit;
 }
 
-/* ==============================================
-   SLUG CELL - ONLY SPECIAL TEXT STYLING
-   Monospace font for code/slug display
-   Same size as rest of table text
-   ============================================== */
+/* --- Slug Cell (Monospace) --- */
 
 .data-table .slug-cell,
 .data-table .slug-cell code,
@@ -746,9 +730,10 @@
   font-size: inherit;
 }
 
-/* ==============================================
-   COLUMN TYPES - Width and alignment only
-   ============================================== */
+/* ═══════════════════════════════════════════════════════
+   COLUMN SIZING
+   Width, min-width, max-width, and text-align per column
+   ═══════════════════════════════════════════════════════ */
 
 
 /* Checkbox column - use utilities layer for padding override */
@@ -941,9 +926,7 @@
   text-align: right;
 }
 
-/* ==============================================
-   TEXT TRUNCATION
-   ============================================== */
+/* --- Text Truncation --- */
 
 .data-table .truncate {
   max-width: var(--table-truncate-max-width);
@@ -966,9 +949,7 @@
   line-height: var(--line-height-snug);
 }
 
-/* ==============================================
-   EMPTY/LOADING/ERROR STATES - utilities layer for override
-   ============================================== */
+/* --- Empty / Loading / Error States --- */
 
 
   .data-table td[colspan],
@@ -982,9 +963,7 @@
   }
 
 
-/* ==============================================
-   SORTABLE TABLE HEADERS
-   ============================================== */
+/* --- Sortable Table Headers --- */
 
 .data-table th.sortable {
   cursor: pointer;
@@ -1053,10 +1032,7 @@
   color: var(--color-accent);
 }
 
-/* ==============================================
-   TABLE LINKS
-   Clickable text links in table cells
-   ============================================== */
+/* --- Clickable Table Links --- */
 .table-link {
   color: var(--color-text-primary);
   cursor: pointer;
@@ -1069,9 +1045,10 @@
 }
 
 
-/* ==============================================
-   RESPONSIVE - Mobile
-   ============================================== */
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE - MOBILE & CARD LAYOUT
+   Progressive column collapse and card-mode stacking
+   ═══════════════════════════════════════════════════════ */
 
 
 @media (--mobile) {
@@ -1136,10 +1113,7 @@
   }
 }
 
-/* ==============================================
-   RESPONSIVE - Narrow viewports (e.g., DevTools open)
-   Progressive column collapse as viewport shrinks
-   ============================================== */
+/* --- Progressive Column Collapse (narrow viewports) --- */
 
 /* 1100px: Hide source, project, priority, date — combine into primary cell */
 @media (--laptop-wide) {
@@ -1533,6 +1507,11 @@
 
 
 
+/* ═══════════════════════════════════════════════════════
+   BULK ACTIONS & MISC
+   Bulk selection count, stats badges, empty messages
+   ═══════════════════════════════════════════════════════ */
+
 /* Cell secondary text (below primary text in name columns) */
 .cell-secondary {
   display: block;
@@ -1618,10 +1597,10 @@
   cursor: pointer;
 }
 
-/* ==============================================
+/* ═══════════════════════════════════════════════════════
    TABLE CELL FACTORY CLASSES
    Used by createTableCells.tsx factory components
-   ============================================== */
+   ═══════════════════════════════════════════════════════ */
 
 /* Table cell wrapper - inline display for cell content */
 .table-cell-content {
@@ -1814,11 +1793,10 @@
 }
 
 
-/* =====================================================
-   TABLE ACTION BUTTON SIZES — UNLAYERED
-   Unlayered + higher specificity (0,2,0) definitively
-   overrides the base .icon-btn (0,1,0) in portal-buttons.css.
-   ===================================================== */
+/* ═══════════════════════════════════════════════════════
+   TABLE ACTION BUTTON SIZES
+   Unlayered overrides for icon-btn in table contexts
+   ═══════════════════════════════════════════════════════ */
 
 /* Row action buttons: compact, tightly grouped */
 .table-actions .icon-btn,
