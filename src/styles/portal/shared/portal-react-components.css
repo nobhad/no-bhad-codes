@@ -9,7 +9,7 @@
  * status text color utilities, and card drag highlight.
  */
 
-@layer components {
+/* Layer provided by parent import (portal-components.css → @layer components) */
 
 /* Progress bars -- small (4px) inline variant used inside React components.
    The canonical 12px standalone .progress-bar lives in portal-dashboard-widgets.css. */
@@ -49,7 +49,8 @@
   color: var(--color-text-primary);
 }
 
-/* Badges/Status */
+/* Generic inline label badge — used for counts, page numbers, tags.
+   NOT for status indicators (use .status-badge / StatusBadge component). */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -75,92 +76,10 @@
 .text-status-active { color: var(--status-active); }
 .text-status-cancelled { color: var(--status-cancelled); }
 
-/* Data-attribute driven priority colors for badges (CSS fallback) */
-.badge[data-priority="urgent"] { color: var(--status-cancelled); }
-.badge[data-priority="high"] { color: var(--status-pending); }
-.badge[data-priority="normal"] { color: var(--status-active); }
-.badge[data-priority="medium"] { color: var(--status-active); }
-.badge[data-priority="low"] { color: var(--color-text-tertiary); }
-
 /* Card drag-over highlight state */
 .card-drag-highlight {
   background: var(--portal-alpha-white-10);
   border-color: var(--color-text-primary);
 }
 
-/* =====================================================
-   PORTAL CHECKBOX — Reusable checkbox component
-   Used by: Checkbox.tsx (Radix UI) + milestone button toggles
-   Size is 1em so it scales with the surrounding text context.
-   ===================================================== */
-.portal-checkbox {
-  display: grid;
-  place-content: center;
-  --svg-stroke-width: 3.5;
-  width: var(--space-2);
-  height: var(--space-2);
-  min-width: var(--space-2);
-  min-height: var(--space-2);
-  flex-shrink: 0;
-  border: var(--border-width-px) solid var(--color-border-primary);
-  border-radius: 0;
-  background: transparent;
-  cursor: pointer;
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast);
-}
-
-/* Checkbox SVG fills the checkbox container, not the text 1em */
-.portal-checkbox svg.lucide {
-  width: 100% !important;
-  height: 100% !important;
-  margin: 0 !important;
-}
-
-.portal-checkbox:hover {
-  border-color: var(--color-border-primary);
-}
-
-.portal-checkbox:focus-visible {
-  outline: none;
-  border-color: var(--color-accent);
-}
-
-.portal-checkbox:disabled {
-  cursor: not-allowed;
-  opacity: var(--opacity-disabled);
-}
-
-/* Checked — Radix UI controlled via data-state */
-.portal-checkbox[data-state="checked"] {
-  background: var(--color-text-primary);
-  border-color: var(--color-text-primary);
-}
-
-/* Checked — manual toggle (milestone buttons) */
-.portal-checkbox.is-completed {
-  background: var(--color-text-primary);
-  border-color: var(--color-text-primary);
-}
-
-/* Icon color inside a checked/completed checkbox */
-.portal-checkbox[data-state="checked"] .portal-checkbox-indicator,
-.portal-checkbox.is-completed .icon-sm {
-  color: var(--color-bg-primary);
-}
-
-.portal-checkbox-indicator {
-  display: grid;
-  place-content: center;
-  width: 100%;
-  height: 100%;
-  color: var(--color-bg-primary);
-}
-
-.portal-checkbox-icon {
-  width: 1em;
-  height: 1em;
-}
-
-} /* end @layer components */
+/* PORTAL CHECKBOX — all styles in portal-theme.css (unlayered) */

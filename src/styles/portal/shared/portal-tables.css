@@ -77,14 +77,6 @@
    OUTER COLUMN PADDING — same horizontal padding on all cells (root rule)
    ============================================== */
 
-.data-table :is(th, td):first-child {
-}
-
-.data-table .col-checkbox + :is(th, td) {
-}
-
-.data-table :is(th, td):last-child {
-}
 
 /* ==============================================
    TABLE ROW STATES
@@ -99,12 +91,8 @@
   background: var(--color-bg-hover);
 }
 
-/* Ensure actions cell inherits row hover - no exceptions */
-.data-table tbody tr:hover td.col-actions,
-.data-table tbody tr:hover td:last-child,
-.portal .data-table tbody tr:hover td {
-  background: var(--color-bg-hover);
-}
+/* Row hover already covers ALL cells including .col-actions and :last-child
+   via the base .data-table tbody tr:hover td rule above. */
 
 /* No hover effect for empty state rows */
 .data-table tbody tr:hover td[colspan],
@@ -150,36 +138,17 @@
     flex-wrap: nowrap;
   }
 
-  /* Button group context modifiers */
-  .button-group--table {
-    gap: var(--space-0-5);
-  }
-
+  /* Button group context modifiers — only variants that differ from base gap */
   .button-group--modal {
     gap: var(--space-1-5);
   }
 
-  .button-group--toolbar {
-    gap: var(--space-1);
-  }
-
-  .button-group--card {
-    gap: var(--space-0-5);
-  }
-
+  .button-group--toolbar,
   .button-group--sidebar {
     gap: var(--space-1);
   }
 
-  .button-group--inline {
-    gap: var(--space-0-5);
-  }
-
-  .table-actions,
-  .data-table .table-actions,
-  td .table-actions,
-  .col-actions .table-actions,
-  .portal .table-actions {
+  .table-actions {
     display: inline-flex;
     align-items: center;
     gap: var(--table-actions-gap);
@@ -190,12 +159,7 @@
   }
 
   /* Actions cell - DO NOT use display:flex on td, it breaks table-cell behavior */
-  .col-actions,
-  td.col-actions,
-  .data-table .col-actions,
-  .data-table td.col-actions,
-  .portal .col-actions,
-  .portal td.col-actions {
+  .col-actions {
     /* Keep table-cell display for proper row background inheritance */
     display: table-cell;
     vertical-align: middle;
@@ -394,9 +358,6 @@
   padding: 0;
 }
 
-.data-table-card .empty-state,
-.data-table-container .empty-state {
-}
 
 /* Hide card-mode ::before label on colspan cells */
 .data-table td[colspan]::before {
@@ -429,9 +390,6 @@
   border-bottom-right-radius: 0;
 }
 
-/* When no pagination, add bottom padding to last row */
-.data-table-card:not(:has(.table-pagination)) .data-table tbody tr:last-child td {
-}
 
 /* ==============================================
    TABLE PAGINATION
@@ -805,9 +763,7 @@
 
 /* Checkbox column - use utilities layer for padding override */
 @layer utilities {
-  .data-table .col-checkbox,
-  .data-table .col-checkbox,
-  .data-table th.col-checkbox {
+  .data-table :is(td, th).col-checkbox {
     width: var(--table-checkbox-width);
     min-width: var(--table-checkbox-width);
     max-width: var(--table-checkbox-width);
@@ -826,8 +782,7 @@
 }
 
 /* Checkbox cells — no truncation; just the checkbox button */
-.data-table :is(th, td):has(> .portal-checkbox),
-.data-table :is(th, td):has(> .data-table-checkbox) {
+.data-table :is(th, td):has(> .portal-checkbox) {
   overflow: visible;
   text-overflow: clip;
   max-width: none;
@@ -850,7 +805,7 @@
 
 /* Center the dropdown within status cell — no margin so column aligns with others */
 .data-table td.status-cell .table-dropdown,
-.data-table td.status-cell .table-dropdown .custom-dropdown-trigger {
+.data-table td.status-cell .table-dropdown .dropdown-trigger--custom {
   margin: 0;
 }
 .data-table td.status-cell .table-dropdown {
@@ -956,7 +911,14 @@
   text-align: center;
 }
 
-/* Ensure icons in centered cells display inline for proper centering */
+/* Icon-only centered cells: flex-center so the SVG sits at the true
+   cell midpoint, matching the vertical alignment of action-column icons. */
+.data-table td.text-center:has(> svg:only-child) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .data-table td.text-center svg,
 .data-table th.text-center svg {
   display: inline-block;
@@ -1116,22 +1078,6 @@
 @layer responsive {
 
 @media (--mobile) {
-  /* Slightly more breathing room on mobile */
-  .data-table-header {
-  }
-
-  .data-table :is(th, td):first-child {
-  }
-
-  .data-table .col-checkbox + :is(th, td) {
-  }
-
-  .data-table :is(th, td):last-child {
-  }
-
-  .table-pagination {
-  }
-
   .data-table {
     min-width: 0;
     width: 100%;
@@ -1198,18 +1144,8 @@
    Progressive column collapse as viewport shrinks
    ============================================== */
 
-/* 1200px: Reduce cell padding slightly */
-@media (--desktop-wide) {
-  .data-table th,
-  .data-table td {
-  }
-}
-
 /* 1100px: Hide source, project, priority, date — combine into primary cell */
 @media (--laptop-wide) {
-  .data-table th,
-  .data-table td {
-  }
 
   .data-table :is(.source-col, .source-cell) {
     display: none;
@@ -1598,9 +1534,6 @@
 
 /* 479px: Tighter card spacing for very small screens */
 @media (--small-mobile) {
-  .data-table tbody tr {
-  }
-
   .data-table td {
     font-size: var(--font-size-xs);
   }
@@ -1702,15 +1635,7 @@
 
 } /* end @layer components */
 
-/* Select column (alias for col-checkbox) */
-@layer utilities {
-  .data-table .col-checkbox {
-    width: var(--table-checkbox-width);
-    min-width: var(--table-checkbox-width);
-    max-width: var(--table-checkbox-width);
-    text-align: center;
-  }
-}
+/* Select column — see col-checkbox definition in utilities layer above (line ~807) */
 
 @layer components {
 
@@ -1850,16 +1775,9 @@
   color: var(--color-text-tertiary);
 }
 
-.data-table-search-input {
-}
 
-.data-table-checkbox {
-  /* Styled via data attributes in CSS */
-}
-.data-table-checkbox[data-state="checked"] {
-  background-color: var(--color-brand-primary);
-  border-color: var(--color-brand-primary);
-}
+/* .data-table-checkbox — inherits all styles from .portal-checkbox
+   (single source of truth in portal-react-components.css) */
 
 .data-table-row-selected {
   background-color: var(--portal-alpha-primary-10);
@@ -1913,9 +1831,6 @@
   gap: var(--table-actions-gap);
   /* Scope icon-btn size to match icon — gap variable controls all visual spacing */
   --portal-btn-icon-size: var(--icon-size-sm);
-}
-
-.form-select-sm {
 }
 
 } /* end @layer components */

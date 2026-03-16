@@ -9,44 +9,15 @@
  * Base admin portal overrides are inlined below all imports.
  */
 
-/* Explicit layer order — later layers win; unlayered CSS always beats all layers.
- * tokens  → base design-system primitives (lowest)
- * components → base component structure
- * utilities  → functional overrides (higher than components)
- * responsive → breakpoint-scoped overrides (highest among layers) */
-@layer tokens, components, utilities, responsive;
+/* Layer order inherited from core/layer-order.css via foundation.css bundle.
+ * Do NOT redeclare @layer here — it fragments the cascade. */
 
-/* Shared portal styles */
-@import "../shared/portal-layout.css";
-@import "../shared/portal-buttons.css";
-@import "../shared/portal-messages.css";
-@import "../shared/portal-message-thread.css";
-@import "../shared/portal-cards.css";
-@import "../shared/portal-stat-cards.css";
-@import "../shared/portal-dashboard-widgets.css";
-@import "../shared/portal-tables.css";
-@import "../shared/portal-details-card.css";
-@import "../shared/portal-forms.css";
-@import "../shared/portal-auth.css";
-@import "../shared/portal-files.css";
-@import "../shared/portal-dropdown.css";
-@import "../shared/portal-badges.css";
-@import "../shared/portal-kanban.css";
-@import "../shared/portal-tooltips.css";
-@import "../shared/portal-components.css";
-@import "../shared/portal-tabs.css";
-@import "../shared/portal-confirm-dialog.css";
-@import "../shared/portal-notification-bell.css";
-@import "../shared/portal-inline-edit.css";
-@import "../shared/portal-table-filters.css";
-
-/* Portal layout and sidebar (shared) */
-@import "../shared/portal-sidebar.css";
+/* Shared portal styles (barrel import) */
+@import "../shared/index.css";
 
 /* Admin-specific modules */
 @import "./modal-system.css";
 @import "./analytics.css";
-@import "../shared/portal-analytics.css";
 @import "./detail-page-controls.css";
 @import "./project-detail.css";
 @import "./project-detail-invoices.css";
@@ -64,15 +35,6 @@
 
 /* Layout refinements */
 @import "./dashboard-layout.css";
-
-/* Unified modal system */
-@import "../shared/portal-modal-system.css";
-
-/* Command palette */
-@import "../shared/portal-command-palette.css";
-
-/* Keyboard shortcuts overlay */
-@import "../shared/portal-keyboard-shortcuts.css";
 
 /* ================================================
    ADMIN PORTAL BASE STYLES
@@ -370,7 +332,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
 
 [data-page="admin"] input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
-  filter: invert(1);
+  filter: var(--filter-invert-controls);
   opacity: var(--opacity-subtle);
   border-radius: var(--border-radius-xs);
   transition:
@@ -385,7 +347,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
 
 [data-page="admin"] input[type="date"]::-moz-calendar-picker-indicator {
   cursor: pointer;
-  filter: invert(1);
+  filter: var(--filter-invert-controls);
 }
 
 /* ================================================
@@ -427,9 +389,7 @@ body.modal-open .dashboard-content {
   overflow: hidden;
 }
 
-.tab-content {
-  animation: fadeIn var(--duration-medium) var(--easing-decelerated);
-}
+/* .tab-content animation moved to shared/portal-tabs.css */
 
 [data-page="admin"] #tab-leads .page-title + .quick-stats {
   margin-top: var(--space-1-5);
@@ -1025,7 +985,7 @@ body.modal-open .dashboard-content {
 
 /* -------------------------------------------------------
  * Inline-edit compact input override
- * portal-forms.css (layer(pages)) sets height: var(--space-7) on all
+ * portal-forms.css (layer(components)) sets height: var(--space-7) on all
  * portal inputs, overriding the 24px in layer(components)/inline-edit.css.
  * This restores compact sizing for inline-edit fields.
  * ------------------------------------------------------- */

@@ -164,7 +164,7 @@ export function NewRequestForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="section">
+    <form onSubmit={handleSubmit}>
       {/* Title */}
       <div className="flex flex-col gap-1">
         <label className="field-label" htmlFor="request-title">
@@ -186,7 +186,7 @@ export function NewRequestForm({
           className={cn('input', errors.title && 'input-error')}
         />
         {errors.title && (
-          <span className="form-error-text">{errors.title}</span>
+          <span className="form-error-message">{errors.title}</span>
         )}
       </div>
 
@@ -211,7 +211,7 @@ export function NewRequestForm({
           className={cn('textarea form-textarea-resizable', errors.description && 'input-error')}
         />
         {errors.description && (
-          <span className="form-error-text">{errors.description}</span>
+          <span className="form-error-message">{errors.description}</span>
         )}
       </div>
 
@@ -295,7 +295,7 @@ export function NewRequestForm({
 
         {/* File Error */}
         {fileError && (
-          <div className="flex items-center gap-1.5 text-xs form-error-text">
+          <div className="flex items-center gap-1.5 text-xs form-error-message">
             <AlertCircle className="icon-xs" />
             {fileError}
           </div>
