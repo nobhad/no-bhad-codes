@@ -28,6 +28,7 @@ import {
 } from '../../utils/api-response.js';
 import { getBaseUrl } from '../../config/environment.js';
 import { validateRequest } from '../../middleware/validation.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { logger } from '../../services/logger.js';
 import {
   AdHocValidationSchemas,
@@ -318,6 +319,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   validateRequest(AdHocValidationSchemas.adminCreate, { allowUnknownFields: true }),
+  invalidateCache(['ad-hoc-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const {
       projectId,
@@ -419,6 +421,7 @@ router.put(
   authenticateToken,
   requireAdmin,
   validateRequest(AdHocValidationSchemas.adminUpdate, { allowUnknownFields: true }),
+  invalidateCache(['ad-hoc-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = Number(req.params.requestId);
     const {
@@ -1013,6 +1016,7 @@ router.post(
   '/bulk-delete',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['ad-hoc-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { requestIds } = req.body;
 
@@ -1062,6 +1066,7 @@ router.delete(
   '/:requestId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['ad-hoc-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = Number(req.params.requestId);
     const deletedBy = req.user?.email || String(req.user?.id || 'system');

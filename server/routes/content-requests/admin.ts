@@ -14,6 +14,7 @@ import { contentRequestService } from '../../services/content-request-service.js
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 import { validateRequest } from '../../middleware/validation.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { ContentRequestValidationSchemas } from './shared.js';
 
 const router = express.Router();
@@ -164,6 +165,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   validateRequest(ContentRequestValidationSchemas.createChecklist),
+  invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { project_id, client_id, name, description, items, template_id } = req.body;
 
@@ -201,6 +203,7 @@ router.put(
   authenticateToken,
   requireAdmin,
   validateRequest(ContentRequestValidationSchemas.updateChecklist),
+  invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const checklist = await contentRequestService.updateChecklist(Number(req.params.id), {
       name: req.body.name,
@@ -219,6 +222,7 @@ router.delete(
   '/:id',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     await contentRequestService.deleteChecklist(Number(req.params.id));
     sendSuccess(res, null, 'Checklist deleted');
@@ -238,6 +242,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   validateRequest(ContentRequestValidationSchemas.createItem),
+  invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const checklist = await contentRequestService.getChecklist(Number(req.params.checklistId));
     if (!checklist) {
@@ -270,6 +275,7 @@ router.put(
   authenticateToken,
   requireAdmin,
   validateRequest(ContentRequestValidationSchemas.updateItem),
+  invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const item = await contentRequestService.updateItem(Number(req.params.itemId), {
       title: req.body.title,
@@ -290,6 +296,7 @@ router.delete(
   '/items/:itemId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     await contentRequestService.deleteItem(Number(req.params.itemId));
     sendSuccess(res, null, 'Item deleted');

@@ -558,6 +558,8 @@ router.put(
 
     const updatedClient = await clientService.updateClientFields(clientId, updates, values);
 
+    await QueryCache.invalidate(['clients', `client:${clientId}`]);
+
     sendSuccess(res, { client: updatedClient }, 'Client updated successfully');
   })
 );

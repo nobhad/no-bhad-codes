@@ -2178,14 +2178,17 @@ export class InvoiceService {
   async getClientContact(clientId: number): Promise<ClientContact | undefined> {
     const db = getDatabase();
     const row = await db.get(
-      'SELECT contact_name, company_name, email, phone FROM clients WHERE id = ?',
+      `SELECT contact_name, company_name, email,
+              COALESCE(billing_phone, phone) as phone,
+              COALESCE(billing_email, email) as billing_email
+       FROM clients WHERE id = ?`,
       [clientId]
     );
     if (!row) return undefined;
     return {
       contactName: getString(row, 'contact_name'),
       companyName: getString(row, 'company_name') || undefined,
-      email: getString(row, 'email'),
+      email: getString(row, 'billing_email') || getString(row, 'email'),
       phone: getString(row, 'phone') || undefined
     };
   }
