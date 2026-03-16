@@ -17,11 +17,9 @@
    Mobile width/hide: styles/responsive/breakpoints.css (@layer responsive)
    ===================================================== */
 
-/* Shared sidebar - same for both admin and client portal.
-   fit-content sizes to longest nav label; max prevents blowout. */
+/* Shared sidebar - same for both admin and client portal */
 .portal .sidebar {
-  width: fit-content;
-  max-width: var(--sidebar-width-open);
+  width: var(--sidebar-width-open);
   min-width: var(--sidebar-collapsed-width); /* Allow collapse to icon-only */
   background: var(--color-bg-primary);
   border-right: none;
@@ -52,7 +50,7 @@
 .sidebar-content {
   display: flex;
   flex-direction: column;
-  padding: var(--space-1);
+  padding: 0;
   gap: 0;
   flex: 1;
   min-height: 0; /* Allow flex shrinking */
@@ -72,7 +70,6 @@
   flex-direction: column;
   gap: var(--space-2);
   margin-top: auto;
-  padding: var(--space-1);
   border-top: none;
   flex-shrink: 0;
 }
