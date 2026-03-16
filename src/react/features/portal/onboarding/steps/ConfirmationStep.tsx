@@ -39,8 +39,8 @@ function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: Summar
     <div className="portal-card">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Icon className="icon-sm text-primary" />
-          <h4 className="text-sm font-mono text-primary">
+          <Icon className="icon-sm" />
+          <h4 className="font-mono">
             {title}
           </h4>
           {stepNumber && (
@@ -53,7 +53,7 @@ function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: Summar
           <button
             type="button"
             onClick={onEdit}
-            className="btn-ghost text-xs"
+            className="btn-ghost"
           >
             <Edit3 className="icon-xs" />
             Edit
@@ -62,11 +62,11 @@ function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: Summar
       </div>
       <div className="space-y-2">
         {items.map((item) => (
-          <div key={item.label} className="flex gap-2 text-sm font-mono">
+          <div key={item.label} className="flex gap-2 font-mono">
             <span className="text-muted min-w-[100px] flex-shrink-0">
               {item.label}:
             </span>
-            <span className="text-primary">{item.value || '-'}</span>
+            <span>{item.value || '-'}</span>
           </div>
         ))}
       </div>
@@ -95,13 +95,13 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
     assets?.files && assets.files.length > 0 ? `${assets.files.length} file(s)` : 'No files uploaded';
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef}>
       {/* Section Header */}
       <div className="mb-4">
         <h3 className="heading text-lg">
           Review Your Information
         </h3>
-        <p className="text-muted text-sm mt-1">
+        <p className="text-muted mt-1">
           Please review all the information below before submitting.
         </p>
       </div>
@@ -111,12 +111,12 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
         <div className="error-state flex items-start gap-3">
           <AlertCircle className="icon-sm flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-bold font-mono">
+            <p className="font-mono">
               Please fix the following issues:
             </p>
             <ul className="mt-1 space-y-1">
               {errors.map((error) => (
-                <li key={error.message} className="text-sm font-mono">
+                <li key={error.message} className="font-mono">
                   {error.message}
                 </li>
               ))}
@@ -174,7 +174,7 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
           <h4 className="label mb-2">
             Project Description
           </h4>
-          <p className="text-sm text-primary font-mono whitespace-pre-wrap">
+          <p className="font-mono whitespace-pre-wrap">
             {projectOverview.projectDescription}
           </p>
         </div>
@@ -253,7 +253,7 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
           <h4 className="label mb-2">
             Additional Notes
           </h4>
-          <p className="text-sm text-primary font-mono whitespace-pre-wrap">
+          <p className="font-mono whitespace-pre-wrap">
             {requirements.additionalNotes}
           </p>
         </div>
@@ -261,12 +261,12 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
 
       {/* Submission Notice */}
       <div className="portal-card flex items-start gap-3 mt-2 border-primary">
-        <Check className="icon-sm text-primary flex-shrink-0 mt-0.5" />
+        <Check className="icon-sm flex-shrink-0 mt-0.5" />
         <div>
-          <p className="text-sm font-bold font-mono text-primary">
+          <p className="font-mono">
             Ready to submit
           </p>
-          <p className="text-sm text-muted mt-1 font-mono">
+          <p className="text-muted mt-1 font-mono">
             Click "Complete Onboarding" below to submit your information. We'll review everything and
             get back to you within 1-2 business days.
           </p>
