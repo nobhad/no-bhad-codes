@@ -748,26 +748,10 @@
   margin-right: 0;
 }
 
-/* Conversation header */
-.messaging-conv-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.messaging-conv-heading {
-  font-size: var(--font-size-sm);
-}
 
 .messaging-conv-project-link {
   padding: 0;
   font-size: var(--font-size-xs);
-}
-
-.messaging-conv-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
 }
 
 /* Messages container */
