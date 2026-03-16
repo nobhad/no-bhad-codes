@@ -350,7 +350,7 @@
 
 body[data-page="admin"] .header,
 body[data-page="admin"] .admin-header,
-body[data-page="client-portal"] .header {
+body[data-page="client"] .header {
   z-index: calc(var(--z-index-portal-overlay) + 200);
 }
 
@@ -359,7 +359,7 @@ body[data-page="client-portal"] .header {
    ===================================================== */
 
 body[data-page="admin"] #admin-dashboard.hidden,
-body[data-page="client-portal"] #client-dashboard.hidden {
+body[data-page="client"] #client-dashboard.hidden {
   display: none !important;
   visibility: hidden !important;
   width: 0 !important;
@@ -390,23 +390,23 @@ body[data-page="client-portal"] #client-dashboard.hidden {
    CLIENT PORTAL - NAV/FOOTER VISIBILITY (logged-out state)
    ===================================================== */
 
-body[data-page="client-portal"]:not(.portal-logged-in) .nav-logo-row {
+body[data-page="client"]:not(.portal-logged-in) .nav-logo-row {
   color: var(--color-nav-text);
 }
 
-body[data-page="client-portal"]:not(.portal-logged-in) .theme-button,
-body[data-page="client-portal"]:not(.portal-logged-in) .menu-button {
+body[data-page="client"]:not(.portal-logged-in) .theme-button,
+body[data-page="client"]:not(.portal-logged-in) .menu-button {
   color: var(--color-nav-text);
 }
 
-body[data-page="client-portal"]:not(.portal-logged-in) .nav-logo-row:hover,
-body[data-page="client-portal"]:not(.portal-logged-in) .theme-button:hover,
-body[data-page="client-portal"]:not(.portal-logged-in) .menu-button:hover {
+body[data-page="client"]:not(.portal-logged-in) .nav-logo-row:hover,
+body[data-page="client"]:not(.portal-logged-in) .theme-button:hover,
+body[data-page="client"]:not(.portal-logged-in) .menu-button:hover {
   color: var(--color-accent);
 }
 
 /* Footer visible on login page */
-body[data-page="client-portal"]:not(.portal-logged-in) .client-footer {
+body[data-page="client"]:not(.portal-logged-in) .client-footer {
   display: flex;
   position: fixed;
   bottom: 0;
@@ -423,8 +423,8 @@ body[data-page="client-portal"]:not(.portal-logged-in) .client-footer {
 }
 
 /* Hide footer and nav overlay after login */
-body.portal-logged-in[data-page="client-portal"] .client-footer,
-body.portal-logged-in[data-page="client-portal"] .nav-overlay {
+body.portal-logged-in[data-page="client"] .client-footer,
+body.portal-logged-in[data-page="client"] .nav-overlay {
   display: none;
 }
 

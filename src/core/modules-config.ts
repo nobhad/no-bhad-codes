@@ -212,7 +212,7 @@ export function registerModules(debug: boolean = false): void {
         const pageType = document.body.getAttribute('data-page') || '';
         const isPortalPage =
           currentPath.includes('/admin') ||
-          (currentPath === '/dashboard' && (pageType === 'admin' || pageType === 'client-portal')) ||
+          (currentPath === '/dashboard' && (pageType === 'admin' || pageType === 'client')) ||
           (currentPath.startsWith('/client') && !currentPath.includes('/client/intake'));
 
         if (isPortalPage) {

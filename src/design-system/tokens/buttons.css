@@ -16,7 +16,7 @@
  * SCOPED to portal pages only to prevent main site bleed
  */
 [data-page="admin"],
-[data-page="client-portal"] {
+[data-page="client"] {
   /* Button sizing */
   --portal-btn-padding-y: var(--space-2);
   --portal-btn-padding-x: var(--space-4);
@@ -84,9 +84,9 @@
  * ============================================
  * Transparent background, black text/border (matches dark mode pattern)
  */
-html[data-theme="light"] body[data-page="client-portal"],
+html[data-theme="light"] body[data-page="client"],
 html[data-theme="light"] body[data-page="admin"],
-html[data-theme="light"] [data-page="client-portal"],
+html[data-theme="light"] [data-page="client"],
 html[data-theme="light"] [data-page="admin"] {
   /* Button borders - matches portal text color */
   --portal-btn-border-color: var(--color-gray-900);
@@ -108,6 +108,6 @@ html[data-theme="light"] [data-page="admin"] {
 /* ============================================
  * PORTAL BUTTON STYLES
  * ============================================
- * Applied styles moved to: src/styles/client-portal/buttons.css
+ * Applied styles moved to: src/styles/portal/shared/portal-buttons.css
  * This file contains only CSS variables (tokens).
  */

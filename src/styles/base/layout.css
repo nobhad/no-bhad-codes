@@ -99,7 +99,7 @@ main > section:not(.contact-section):not(.tech-stack-section) {
    IMPORTANT: do not apply to portal/admin dashboards, which use <section>
    as normal flow containers (tables, panels) and must NOT be centered. */
 /* Note: display is overridden by .page-active rules for contact/about sections */
-body:not([data-page="admin"]):not([data-page="client-portal"]) section {
+body:not([data-page="admin"]):not([data-page="client"]) section {
   flex: 1 0 100%;
   width: 100%;
   display: flex;
@@ -388,7 +388,7 @@ main {
     height: calc(100vh - var(--header-height) - var(--footer-height));
   }
 
-  body:not([data-page="admin"]):not([data-page="client-portal"]) section {
+  body:not([data-page="admin"]):not([data-page="client"]) section {
     padding: 1.5rem;
   }
 
@@ -423,7 +423,7 @@ main {
 }
 
 @media (--small-mobile) {
-  body:not([data-page="admin"]):not([data-page="client-portal"]) section {
+  body:not([data-page="admin"]):not([data-page="client"]) section {
     padding: 0.75rem;
   }
 

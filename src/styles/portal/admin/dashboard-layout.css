@@ -185,17 +185,18 @@
   flex: 1;
 }
 
-.progress-bar {
+/* Progress bar inside overview table — scoped overrides only.
+   Base .progress-bar styles in portal-dashboard-widgets.css (SOT). */
+.progress-cell .progress-bar {
   flex: 1;
   height: var(--progress-track-height);
   border-radius: 2px;
   background: var(--portal-alpha-white-08);
-  overflow: hidden;
+  box-shadow: none;
+  margin: 0;
 }
 
-.progress-fill {
-  height: 100%;
-  background: var(--color-accent);
+.progress-cell .progress-fill {
   transition: width var(--transition-slow) ease;
 }
 

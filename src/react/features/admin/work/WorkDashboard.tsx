@@ -46,37 +46,31 @@ export function WorkDashboard({ onNavigate, getAuthToken, showNotification }: Wo
   // Render individual views for specific subtabs
   if (activeSubtab === 'projects') {
     return (
-      <div className="section">
-        <React.Suspense fallback={<LoadingState message="Loading projects..." />}>
-          <ProjectsTable onNavigate={onNavigate} showNotification={showNotification} />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading projects..." />}>
+        <ProjectsTable onNavigate={onNavigate} showNotification={showNotification} />
+      </React.Suspense>
     );
   }
 
   if (activeSubtab === 'tasks') {
     return (
-      <div className="section">
-        <React.Suspense fallback={<LoadingState message="Loading tasks..." />}>
-          <GlobalTasksTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading tasks..." />}>
+        <GlobalTasksTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+      </React.Suspense>
     );
   }
 
   if (activeSubtab === 'ad-hoc-requests') {
     return (
-      <div className="section">
-        <React.Suspense fallback={<LoadingState message="Loading requests..." />}>
-          <AdHocRequestsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading requests..." />}>
+        <AdHocRequestsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+      </React.Suspense>
     );
   }
 
   // Overview - show all tables stacked with default pagination of 10
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">
       <React.Suspense fallback={<LoadingState message="Loading projects..." />}>
         <section className="overview-table-section">
           <ProjectsTable

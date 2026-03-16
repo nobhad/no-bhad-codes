@@ -252,7 +252,7 @@ const configSchema: ConfigSchema = {
 
   // OpenTelemetry
   OTEL_ENABLED: { required: false, default: true, type: 'boolean' },
-  OTEL_SERVICE_NAME: { required: false, default: 'client-portal' },
+  OTEL_SERVICE_NAME: { required: false, default: 'client' },
   OTEL_EXPORTER_OTLP_ENDPOINT: { required: false },
   OTEL_DEBUG: { required: false, default: false, type: 'boolean' }
 };

@@ -127,7 +127,7 @@ describe('Portal Routes', () => {
 
       expect(res.render).toHaveBeenCalledWith('layouts/portal', expect.objectContaining({
         portalType: 'client',
-        bodyClass: 'client-portal'
+        bodyClass: 'client'
       }));
     });
   });

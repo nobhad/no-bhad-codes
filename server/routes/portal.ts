@@ -95,8 +95,8 @@ router.get('/dashboard', (req: Request, res: Response) => {
     tabIds: CLIENT_TAB_IDS,
     entryScript: '/src/portal.ts',
     cssBundle: '/src/styles/bundles/client.css',
-    bodyClass: 'client-portal',
-    bodyPage: 'client-portal',
+    bodyClass: 'client',
+    bodyPage: 'client',
     isDev,
     businessName: BUSINESS_INFO.name
   });
