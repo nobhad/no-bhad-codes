@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useMemo } from 'react';
-import { Inbox } from 'lucide-react';
+import { Inbox, List, LayoutGrid } from 'lucide-react';
 import { EmptyState, IconButton } from '@react/factories';
 import { useListFetch } from '@react/factories/useDataFetch';
 import { TablePagination } from '@react/components/portal/TablePagination';
@@ -310,18 +310,20 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
             onChange={setFilter}
           />
           <div className="view-toggle">
-            <IconButton
-              icon="list"
-              title="List view"
+            <button
               onClick={() => setViewMode('list')}
-              className={viewMode === 'list' ? 'is-active' : undefined}
-            />
-            <IconButton
-              icon="layout-dashboard"
-              title="Board view"
+              className={viewMode === 'list' ? 'is-active' : ''}
+              title="List view"
+            >
+              <List className="icon-sm" />
+            </button>
+            <button
               onClick={() => setViewMode('board')}
-              className={viewMode === 'board' ? 'is-active' : undefined}
-            />
+              className={viewMode === 'board' ? 'is-active' : ''}
+              title="Board view"
+            >
+              <LayoutGrid className="icon-sm" />
+            </button>
           </div>
           <IconButton action="add" onClick={() => onNavigate?.('task-create')} title="Create Task" />
         </>
