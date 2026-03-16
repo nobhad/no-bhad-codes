@@ -424,7 +424,7 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">
       {/* Actions Bar */}
-      <div className="layout-row-end">
+      <div className="data-table-actions">
           <PortalDropdown>
             <PortalDropdownTrigger asChild>
               <button className="dropdown-trigger date-range-trigger">
