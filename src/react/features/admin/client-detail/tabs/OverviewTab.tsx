@@ -13,7 +13,11 @@ import {
   X,
   Plus,
   ArrowRight,
-  CreditCard
+  CreditCard,
+  MapPin,
+  Globe,
+  ContactRound,
+  ShieldCheck
 } from 'lucide-react';
 import { CopyEmailButton, ProgressBar } from '@react/components/portal';
 import {
@@ -229,7 +233,7 @@ export function OverviewTab({
         {/* Contact Info */}
         <div className="panel">
           <div className="data-table-header">
-            <h3><span className="title-full">Contact Information</span></h3>
+            <h3><ContactRound className="icon-sm" /><span className="title-full">Contact Information</span></h3>
             {onSwitchTab && (
               <button
                 className="panel-action"
@@ -290,7 +294,7 @@ export function OverviewTab({
         {/* Account Details */}
         <div className="panel">
           <div className="data-table-header">
-            <h3><span className="title-full">Account Details</span></h3>
+            <h3><ShieldCheck className="icon-sm" /><span className="title-full">Account Details</span></h3>
           </div>
 
           <div className="layout-stack">
@@ -328,66 +332,78 @@ export function OverviewTab({
             </h3>
           </div>
 
-          <div className="layout-stack">
-            {(client.billing_name || client.billing_phone || client.billing_email || client.billing_address || client.billing_city || client.billing_country) ? (
-              <>
-                {client.billing_name && (
-                  <div className="layout-row-between">
-                    <span className="field-label">Name</span>
-                    <span>{client.billing_name}</span>
-                  </div>
-                )}
+          {(() => {
+            // Billing defaults: fall back to client contact info
+            const billingName = client.billing_name || client.contact_name;
+            const billingPhone = client.billing_phone || client.phone;
+            const billingEmail = client.billing_email || client.email;
+            const hasAddress = client.billing_address || client.billing_city;
 
-                {client.billing_company && (
-                  <div className="layout-row-between">
-                    <span className="field-label">Company</span>
-                    <span>{client.billing_company}</span>
-                  </div>
-                )}
+            return (
+              <div className="layout-stack">
+                {(billingName || billingPhone || billingEmail || hasAddress) ? (
+                  <>
+                    {client.billing_company && (
+                      <div className="layout-row">
+                        <Building2 className="icon-md" />
+                        <span>{client.billing_company}</span>
+                      </div>
+                    )}
 
-                {client.billing_phone && (
-                  <div className="layout-row-between">
-                    <span className="field-label">Phone</span>
-                    <a href={`tel:${client.billing_phone}`}>{client.billing_phone}</a>
-                  </div>
-                )}
+                    {billingName && (
+                      <div className="layout-row">
+                        <User className="icon-md" />
+                        <span>{billingName}</span>
+                      </div>
+                    )}
 
-                {client.billing_email && (
-                  <div className="layout-row-between">
-                    <span className="field-label">Email</span>
-                    <span className="meta-value meta-value-with-copy">
-                      <a href={`mailto:${client.billing_email}`} className="link-btn">
-                        {client.billing_email}
-                      </a>
-                      <CopyEmailButton email={client.billing_email} showNotification={showNotification} />
-                    </span>
-                  </div>
-                )}
+                    {billingPhone && (
+                      <div className="layout-row">
+                        <Phone className="icon-md" />
+                        <a href={`tel:${billingPhone}`}>{billingPhone}</a>
+                      </div>
+                    )}
 
-                {(client.billing_address || client.billing_city) && (
-                  <div className="layout-row-between">
-                    <span className="field-label">Address</span>
-                    <span>
-                      {client.billing_address}
-                      {client.billing_address2 && `, ${client.billing_address2}`}
-                      {client.billing_city && `, ${client.billing_city}`}
-                      {client.billing_state && `, ${client.billing_state}`}
-                      {client.billing_zip && ` ${client.billing_zip}`}
-                    </span>
-                  </div>
-                )}
+                    {billingEmail && (
+                      <div className="layout-row">
+                        <Mail className="icon-md" />
+                        <span className="meta-value meta-value-with-copy">
+                          <a href={`mailto:${billingEmail}`} className="link-btn">
+                            {billingEmail}
+                          </a>
+                          <CopyEmailButton email={billingEmail} showNotification={showNotification} />
+                        </span>
+                      </div>
+                    )}
 
-                {client.billing_country && (
-                  <div className="layout-row-between">
-                    <span className="field-label">Country</span>
-                    <span>{client.billing_country}</span>
-                  </div>
+                    {hasAddress && (
+                      <div className="layout-row">
+                        <MapPin className="icon-md" />
+                        <span>
+                          {client.billing_address}
+                          {client.billing_address2 && ` ${client.billing_address2}`}
+                          {(client.billing_city || client.billing_state || client.billing_zip) && <br />}
+                          {client.billing_city}
+                          {client.billing_city && client.billing_state && ', '}
+                          {client.billing_state}
+                          {client.billing_zip && ` ${client.billing_zip}`}
+                        </span>
+                      </div>
+                    )}
+
+                    {client.billing_country && (
+                      <div className="layout-row">
+                        <Globe className="icon-md" />
+                        <span>{client.billing_country}</span>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <span className="text-muted">No billing information on file</span>
                 )}
-              </>
-            ) : (
-              <span className="text-muted">No billing information on file</span>
-            )}
-          </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>

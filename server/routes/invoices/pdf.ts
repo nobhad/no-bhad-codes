@@ -139,21 +139,33 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     font: helveticaBold,
     color: rgb(0.2, 0.2, 0.2)
   });
-  page().drawText(data.clientName, {
-    x: leftMargin,
-    y: ctx.y - 14,
-    size: 10,
-    font: helveticaBold,
-    color: rgb(0, 0, 0)
-  });
-
-  let clientLineY = ctx.y - 25;
+  // Company name first (bold) if present, then contact name below
+  let clientLineY = ctx.y - 14;
   if (data.clientCompany) {
     page().drawText(data.clientCompany, {
       x: leftMargin,
       y: clientLineY,
       size: 10,
+      font: helveticaBold,
+      color: rgb(0, 0, 0)
+    });
+    clientLineY -= 11;
+    // Contact name after company (regular weight)
+    page().drawText(data.clientName, {
+      x: leftMargin,
+      y: clientLineY,
+      size: 10,
       font: helvetica,
+      color: rgb(0, 0, 0)
+    });
+    clientLineY -= 11;
+  } else {
+    // No company — contact name is the primary (bold)
+    page().drawText(data.clientName, {
+      x: leftMargin,
+      y: clientLineY,
+      size: 10,
+      font: helveticaBold,
       color: rgb(0, 0, 0)
     });
     clientLineY -= 11;
