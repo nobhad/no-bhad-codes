@@ -88,6 +88,38 @@ export const ClientValidationSchemas = {
     status: { type: 'boolean' as const },
     invoices: { type: 'boolean' as const },
     weekly: { type: 'boolean' as const }
+  },
+  updateBilling: {
+    billing_name: { type: 'string' as const, maxLength: 100 },
+    company: { type: 'string' as const, maxLength: 200 },
+    address: { type: 'string' as const, maxLength: 255 },
+    address2: { type: 'string' as const, maxLength: 255 },
+    city: { type: 'string' as const, maxLength: 100 },
+    state: { type: 'string' as const, maxLength: 50 },
+    zip: { type: 'string' as const, maxLength: 20 },
+    country: { type: 'string' as const, maxLength: 100 },
+    phone: { type: 'string' as const, maxLength: 30 },
+    email: { type: 'email' as const }
+  },
+  createContact: {
+    first_name: [{ type: 'required' as const }, { type: 'string' as const, maxLength: 100 }],
+    last_name: [{ type: 'required' as const }, { type: 'string' as const, maxLength: 100 }],
+    email: { type: 'email' as const },
+    phone: { type: 'string' as const, maxLength: 30 },
+    title: { type: 'string' as const, maxLength: 100 },
+    department: { type: 'string' as const, maxLength: 100 },
+    role: { type: 'string' as const, maxLength: 50 },
+    notes: { type: 'string' as const, maxLength: 2000 }
+  },
+  updateContact: {
+    first_name: { type: 'string' as const, maxLength: 100 },
+    last_name: { type: 'string' as const, maxLength: 100 },
+    email: { type: 'email' as const },
+    phone: { type: 'string' as const, maxLength: 30 },
+    title: { type: 'string' as const, maxLength: 100 },
+    department: { type: 'string' as const, maxLength: 100 },
+    role: { type: 'string' as const, maxLength: 50 },
+    notes: { type: 'string' as const, maxLength: 2000 }
   }
 };
 
@@ -110,4 +142,14 @@ export function toApiNote(n: {
     updated_at: n.updatedAt,
     created_by: n.author
   };
+}
+
+/** Normalize email: trim + lowercase */
+export function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+/** Basic email format validation */
+export function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
