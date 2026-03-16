@@ -204,7 +204,7 @@ export function PortalQuestionnairesView({
                 <div className="portal-card-header">
                   <div className="portal-card-title-group">
                     {getStatusIcon(response.status)}
-                    <div className="flex flex-col gap-0.5">
+                    <div className="portal-card-title-block">
                       <span className="text-primary">
                         {response.questionnaire.title}
                       </span>
@@ -216,7 +216,7 @@ export function PortalQuestionnairesView({
                     </div>
                   </div>
                   <div className="portal-card-status-group">
-                    <div className="flex flex-col items-end gap-0.5">
+                    <div className="portal-card-title-block items-end">
                       <span className="badge">{config.label}</span>
                       <span className="text-muted text-xs">
                         {response.submitted_at

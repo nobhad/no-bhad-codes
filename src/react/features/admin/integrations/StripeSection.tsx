@@ -19,12 +19,14 @@ export function StripeSection({ stripeStatus }: StripeSectionProps) {
         <div className="stats-grid">
           <div className="portal-card">
             <div className="stat-card">
-              <div className="flex items-center gap-2 mb-3">
-                <CreditCard className="icon-lg text-muted" />
-                <span className="font-semibold">Stripe Payment Gateway</span>
+              <div className="portal-card-header">
+                <div className="portal-card-title-group">
+                  <CreditCard className="icon-lg text-muted" />
+                  <span className="font-semibold">Stripe Payment Gateway</span>
+                </div>
               </div>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
+              <div className="portal-card-detail-list">
+                <div className="portal-card-detail-row">
                   <span className="text-muted">Connected</span>
                   <span>
                     {stripeStatus.connected ? (
@@ -35,18 +37,18 @@ export function StripeSection({ stripeStatus }: StripeSectionProps) {
                   </span>
                 </div>
                 {stripeStatus.accountId && (
-                  <div className="flex justify-between">
+                  <div className="portal-card-detail-row">
                     <span className="text-muted">Account</span>
                     <span>{stripeStatus.accountId}</span>
                   </div>
                 )}
                 {stripeStatus.mode && (
-                  <div className="flex justify-between">
+                  <div className="portal-card-detail-row">
                     <span className="text-muted">Mode</span>
                     <span className="status-badge">{stripeStatus.mode}</span>
                   </div>
                 )}
-                <div className="flex justify-between">
+                <div className="portal-card-detail-row">
                   <span className="text-muted">Last Charge</span>
                   <span>{formatDate(stripeStatus.lastCharge)}</span>
                 </div>

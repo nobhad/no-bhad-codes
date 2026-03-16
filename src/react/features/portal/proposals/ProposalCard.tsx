@@ -33,8 +33,8 @@ export const ProposalCard = React.memo(({ proposal, onNavigate }: ProposalCardPr
       <div className="portal-card-header">
         <div className="portal-card-title-group">
           <div className="text-muted"><FileText className="icon-xs" /></div>
-          <div className="flex flex-col gap-0.5">
-            <span className="text-primary text-sm">{proposal.title}</span>
+          <div className="portal-card-title-block">
+            <h3 className="text-primary text-sm">{proposal.title}</h3>
             {proposal.projectType && (
               <span className="label text-xs">{proposal.projectType}</span>
             )}
@@ -47,30 +47,30 @@ export const ProposalCard = React.memo(({ proposal, onNavigate }: ProposalCardPr
       </div>
 
       {/* Meta row */}
-      <div className="flex items-center gap-3 flex-wrap mb-3">
+      <div className="portal-card-meta">
         {proposal.amount != null && (
-          <div className="flex items-center gap-1 text-muted">
+          <div className="portal-card-meta-item">
             <DollarSign className="icon-xs" />
             <span className="text-xs">{formatCurrency(proposal.amount)}</span>
           </div>
         )}
 
         {proposal.selectedTier && (
-          <div className="flex items-center gap-1 text-muted">
+          <div className="portal-card-meta-item">
             <Layers className="icon-xs" />
             <span className="text-xs">{proposal.selectedTier}</span>
           </div>
         )}
 
         {proposal.sentAt && (
-          <div className="flex items-center gap-1 text-muted">
+          <div className="portal-card-meta-item">
             <Calendar className="icon-xs" />
             <span className="text-xs">Sent {formatCardDate(proposal.sentAt)}</span>
           </div>
         )}
 
         {dueDaysText && (
-          <div className={cn('flex items-center gap-1', overdue ? 'text-primary' : 'text-muted')}>
+          <div className={cn('portal-card-meta-item', overdue && 'text-primary')}>
             <span className="text-xs">{dueDaysText}</span>
           </div>
         )}
@@ -78,7 +78,7 @@ export const ProposalCard = React.memo(({ proposal, onNavigate }: ProposalCardPr
 
       {/* Actions */}
       {onNavigate && (
-        <div className="flex justify-end">
+        <div className="portal-card-actions">
           <button className="btn-ghost text-sm" onClick={handleClick}>
             View Proposal
             <ChevronRight className="icon-xs" />

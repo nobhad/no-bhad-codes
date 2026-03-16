@@ -193,21 +193,21 @@ export function ContactsSection({ portalFetch, showNotification }: ContactsSecti
               />
             ) : (
               <div key={contact.id} className="portal-card">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex flex-col gap-0.5">
+                <div className="portal-card-header">
+                  <div className="portal-card-title-block">
                     <span className="text-primary text-sm font-medium">
                       {contact.first_name} {contact.last_name}
                       {contact.is_primary && (
                         <span className="badge ml-2">Primary</span>
                       )}
                     </span>
-                    <div className="flex items-center gap-3 text-muted text-xs flex-wrap">
+                    <div className="portal-card-meta">
                       {contact.email && <span>{contact.email}</span>}
                       {contact.phone && <span>{contact.phone}</span>}
                       {contact.title && <span>{contact.title}</span>}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="portal-card-actions">
                     <button
                       className="btn-ghost p-1"
                       onClick={() => startEdit(contact)}

@@ -42,13 +42,13 @@ export const ContractCard = React.memo(({ contract, onNavigate, onSign }: Contra
       <div className="portal-card-header">
         <div className="portal-card-title-group">
           <div className="text-muted"><FileSignature className="icon-xs" /></div>
-          <div className="flex flex-col gap-0.5">
-            <span className="text-primary text-sm">
+          <div className="portal-card-title-block">
+            <h3 className="text-primary text-sm">
               {contract.projectName || `Contract #${contract.id}`}
-            </span>
+            </h3>
             {contract.projectName && (
               <span className="label text-xs">
-                <FolderOpen className="icon-xs inline mr-0.5" />
+                <FolderOpen className="icon-xs inline" />
                 {contract.projectName}
               </span>
             )}
@@ -61,30 +61,30 @@ export const ContractCard = React.memo(({ contract, onNavigate, onSign }: Contra
       </div>
 
       {/* Meta row */}
-      <div className="flex items-center gap-3 flex-wrap mb-3">
+      <div className="portal-card-meta">
         {contract.signedAt && (
-          <div className="flex items-center gap-1 text-muted">
+          <div className="portal-card-meta-item">
             <Calendar className="icon-xs" />
             <span className="text-xs">Signed {formatCardDate(contract.signedAt)}</span>
           </div>
         )}
 
         {!contract.signedAt && contract.createdAt && (
-          <div className="flex items-center gap-1 text-muted">
+          <div className="portal-card-meta-item">
             <Calendar className="icon-xs" />
             <span className="text-xs">Created {formatCardDate(contract.createdAt)}</span>
           </div>
         )}
 
         {dueDaysText && (
-          <div className={cn('flex items-center gap-1', overdue ? 'text-primary' : 'text-muted')}>
+          <div className={cn('portal-card-meta-item', overdue && 'text-primary')}>
             <span className="text-xs">{dueDaysText}</span>
           </div>
         )}
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-end gap-2">
+      <div className="portal-card-actions">
         {canSign && onSign && (
           <button className="btn-primary text-sm" onClick={handleSignClick}>
             <PenTool />

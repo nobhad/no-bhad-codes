@@ -23,23 +23,23 @@ export function IntegrationCard({ integration }: IntegrationCardProps) {
   return (
     <div className="portal-card">
       <div className="stat-card">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
+        <div className="portal-card-header">
+          <div className="portal-card-title-group">
             <span className="text-muted">{icon}</span>
-            <span className="font-semibold">{integration.name}</span>
+            <h3 className="font-semibold">{integration.name}</h3>
           </div>
           <span className={healthClass} />
         </div>
-        <div className="space-y-1 text-sm">
-          <div className="flex justify-between">
+        <div className="portal-card-detail-list">
+          <div className="portal-card-detail-row">
             <span className="text-muted">Configured</span>
             <span>{integration.configured ? 'Yes' : 'No'}</span>
           </div>
-          <div className="flex justify-between">
+          <div className="portal-card-detail-row">
             <span className="text-muted">Active</span>
             <span>{integration.active ? 'Yes' : 'No'}</span>
           </div>
-          <div className="flex justify-between">
+          <div className="portal-card-detail-row">
             <span className="text-muted">Last Activity</span>
             <span>{formatDate(integration.lastActivity)}</span>
           </div>

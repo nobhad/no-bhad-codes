@@ -123,10 +123,10 @@ export function ApprovalCard({
             {/* Entity type icon */}
             <div className="text-muted">{entityIcon}</div>
 
-            <div className="flex flex-col gap-0.5">
-              <span className="text-primary text-sm">
+            <div className="portal-card-title-block">
+              <h3 className="text-primary text-sm">
                 {approval.entity_name || `${entityLabel} #${approval.entity_id}`}
-              </span>
+              </h3>
               <span className="label text-xs">{entityLabel}</span>
             </div>
           </div>
@@ -139,22 +139,22 @@ export function ApprovalCard({
 
         {/* Description */}
         {approval.description && (
-          <p className="text-muted text-sm mb-2">
+          <p className="portal-card-description mb-2">
             {approval.description}
           </p>
         )}
 
         {/* Meta info row */}
-        <div className="flex items-center gap-3 mb-3">
+        <div className="portal-card-meta">
           {/* Requested date */}
-          <div className="flex items-center gap-1 text-muted">
+          <div className="portal-card-meta-item">
             <Clock className="icon-xs" />
             <span className="text-xs">Requested {formatCardDate(approval.requested_at)}</span>
           </div>
 
           {/* Due date indicator */}
           {dueDaysText && (
-            <div className={cn('flex items-center gap-1', overdue ? 'text-primary' : 'text-muted')}>
+            <div className={cn('portal-card-meta-item', overdue && 'text-primary')}>
               {overdue && <AlertCircle className="icon-xs" />}
               <span className="text-xs">{dueDaysText}</span>
             </div>
@@ -162,8 +162,8 @@ export function ApprovalCard({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
-          <div className="flex items-center gap-2">
+        <div className="portal-card-actions justify-between" onClick={(e) => e.stopPropagation()}>
+          <div className="portal-card-actions">
             <button className="btn-primary" disabled={disabled} onClick={() => setShowApproveDialog(true)}>
               <Check className="icon-xs" />
               Approve
