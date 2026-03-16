@@ -29,8 +29,8 @@
 
 .portal .portal-global-header,
 .portal .sidebar-content,
-.portal .dashboard-content > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content):not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(.project-overview-grid):not(.overview-grid):not(.analytics-card-grid):not(.kpi-cards-row):not(button),
-.portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > *:not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(.project-overview-grid):not(.overview-grid):not(.analytics-card-grid):not(.kpi-cards-row):not(button) {
+.portal .dashboard-content > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content):not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(.data-table-card):not(.project-overview-grid):not(.overview-grid):not(.analytics-card-grid):not(.kpi-cards-row):not(button),
+.portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > *:not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(.data-table-card):not(.project-overview-grid):not(.overview-grid):not(.analytics-card-grid):not(.kpi-cards-row):not(button) {
   padding: var(--content-gutter);
   box-sizing: border-box;
 }
@@ -89,7 +89,7 @@
 
 .portal .dashboard-content .panel > *:not(.accordion-item-wrapper):not(.data-table-header):not(.milestone-list):not(.messaging-top-bar):not(.messaging-columns):not(.panel-body):not(.panel-body--compact):not(button),
 .portal .dashboard-content .section-content > *:not(button),
-.portal .dashboard-content .data-table-card > *:not(.data-table-scroll-wrapper):not(.data-table-container):not(button),
+.portal .dashboard-content .data-table-card > *:not(.data-table-scroll-wrapper):not(.data-table-container):not(.msgtab-container):not(button),
 .portal .dashboard-content .config-content > *:not(button),
 .portal .dashboard-content .milestone-list,
 /* Cards — bordered containers get gutter on the card itself */
@@ -159,6 +159,14 @@
   padding: 0;
 }
 
+
+/* Message containers — wrappers that never get gutter.
+   Gutter applied to their children via Tier 5 below. */
+.portal .dashboard-content .msgtab-container,
+.portal .dashboard-content .msgtab-thread-area,
+.portal .dashboard-content .msgtab-compose-area {
+  padding: 0;
+}
 
 /* Messages mobile — full-bleed message thread */
 @media (--compact-mobile) {

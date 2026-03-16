@@ -101,7 +101,7 @@
 /* Message row (avatar + bubble) */
 .msgtab-row {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: var(--space-3);
 }
 
@@ -131,11 +131,18 @@
 }
 
 .msgtab-avatar.is-client {
-  background-color: transparent;
-  border: var(--portal-border);
+  background-color: var(--color-text-primary);
+  border-radius: var(--border-radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--color-bg-primary);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+  line-height: 1;
 }
 
 /* Date separator between messages from different days */

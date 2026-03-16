@@ -216,7 +216,7 @@
   justify-content: space-between;
   align-items: center;
   border-top: none;
-  border-bottom: none;
+  border-bottom: var(--portal-border);
   border-radius: 0;
   background-color: inherit;
 }
