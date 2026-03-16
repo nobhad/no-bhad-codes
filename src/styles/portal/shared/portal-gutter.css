@@ -168,13 +168,15 @@
 }
 
 /* =====================================================
-   TIER 4: Table cells
-   Data table cells get gutter for consistent alignment.
+   TIER 4: Table cells — horizontal gutter only
+   Matches original pattern: left/right padding on cells
+   so row content aligns with data-table-header gutter.
+   No top/bottom padding — row height handles vertical spacing.
    ===================================================== */
 
 .portal .dashboard-content .data-table-container td,
 .portal .dashboard-content .data-table-container th {
-  padding: var(--content-gutter);
+  padding: var(--space-1) var(--content-gutter);
 }
 
 /* =====================================================
