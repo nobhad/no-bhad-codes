@@ -38,6 +38,8 @@
   --z-index-base: 0;
   --z-index-content: 1;
   --z-index-elevated: 10;
+  --z-index-footer: 50;
+  --z-index-skip-link: 9999;
 
   /* ============================================
    * LEGACY SHORT-NAME ALIASES (migrated from variables.css)
@@ -123,7 +125,7 @@
 /* Create stacking contexts for major components */
 .stacking-context {
   position: relative;
-  z-index: 0; /* Creates new stacking context */
+  z-index: var(--z-index-base); /* Creates new stacking context */
 }
 
 /* Navigation stacking context */

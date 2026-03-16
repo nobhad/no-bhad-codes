@@ -30,7 +30,7 @@
 }
 
 .container {
-  z-index: 1;
+  z-index: var(--z-index-content);
   max-width: var(--size-container);
   padding-left: var(--container-padding);
   padding-right: var(--container-padding);
@@ -54,7 +54,7 @@ li {
    4. HEADER & NAVIGATION STRUCTURE
    ===================================================== */
 .header {
-  z-index: 130; /* Above menu (125) so header buttons remain accessible when nav is open */
+  z-index: var(--z-index-nav-header); /* Above menu (125) so header buttons remain accessible when nav is open */
   font-family: var(--font-family-acme);
   padding: 0;
   position: fixed;
@@ -133,14 +133,14 @@ li {
   flex-shrink: 0;
   white-space: nowrap;
   position: relative;
-  z-index: 125; /* Above overlay (115) so theme toggle and menu button remain accessible */
+  z-index: var(--z-index-nav-menu-content); /* Above overlay (115) so theme toggle and menu button remain accessible */
 }
 
 /* =====================================================
    5. MAIN NAVIGATION OVERLAY
    ===================================================== */
 .nav {
-  z-index: 120; /* Higher than header (110) so nav menu appears above */
+  z-index: var(--z-index-nav-menu); /* Higher than header (110) so nav menu appears above */
   width: 100%;
   height: 100vh;
   margin-left: auto;
@@ -156,7 +156,7 @@ li {
 }
 
 .overlay {
-  z-index: 115; /* Between header (110) and nav menu (120) to blur header */
+  z-index: var(--z-index-nav-overlay); /* Between header (110) and nav menu (120) to blur header */
   cursor: pointer;
   background-color: rgba(var(--bg-rgb, 25, 25, 25), 0.7);
   width: 100vw;
@@ -188,7 +188,7 @@ li {
    6. MENU CONTAINER & BACKGROUND PANELS
    ===================================================== */
 .menu {
-  z-index: 125; /* Above overlay (115) so menu content isn't blurred */
+  z-index: var(--z-index-nav-menu-content); /* Above overlay (115) so menu content isn't blurred */
   grid-column-gap: 5em;
   grid-row-gap: 5em;
   flex-flow: column;
@@ -197,25 +197,21 @@ li {
   position: relative;
   overflow: auto;
   padding-top: calc(3 * var(--menu-padding));
+  padding-bottom: var(--menu-padding);
   width: var(--menu-width-desktop);
   height: 100%;
   margin-left: auto;
   transform: translateX(120%);
 }
 
-.menu {
-  padding-bottom: var(--menu-padding);
-  padding-top: calc(3 * var(--menu-padding));
-}
-
 .menu-bg {
-  z-index: 1;
+  z-index: var(--z-index-content);
   position: absolute;
   inset: 0%;
 }
 
 .menu-inner {
-  z-index: 1;
+  z-index: var(--z-index-content);
   grid-column-gap: 5em;
   grid-row-gap: 5em;
   padding-right: 0rem;
@@ -229,7 +225,7 @@ li {
 }
 
 .bg-panel {
-  z-index: 1;
+  z-index: var(--z-index-content);
   background-color: var(--color-neutral-100);
   border-top-left-radius: var(--menu-border-radius);
   border-bottom-left-radius: var(--menu-border-radius);
@@ -289,7 +285,7 @@ li {
   text-shadow:
     0 1em 0 var(--color-neutral-100),
     0 2px 4px var(--color-shadow);
-  z-index: 1;
+  z-index: var(--z-index-content);
   text-transform: uppercase;
   font-family: var(--font-family-acme);
   font-weight: 700;
@@ -311,7 +307,7 @@ li {
    (see nav-responsive.css submenu section). */
 
 .menu-link-bg {
-  z-index: 0;
+  z-index: var(--z-index-base);
   background-color: var(--color-dark);
   transform-origin: 50% 100%;
   transform-style: preserve-3d;
@@ -388,7 +384,7 @@ li {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  z-index: 10;
+  z-index: var(--z-index-elevated);
   font-family: monospace;
   text-shadow: none;
   box-shadow: 0 2px 8px rgba(var(--color-accent-rgb), 0.3);
@@ -405,7 +401,7 @@ html[data-theme="dark"] .coming-soon-banner {
    10. EYEBROW & DECORATIVE ELEMENTS
    ===================================================== */
 .menu-link .eyebrow {
-  z-index: 1;
+  z-index: var(--z-index-content);
   color: var(--color-accent);
   text-transform: uppercase;
   font-family: monospace;
@@ -430,6 +426,10 @@ html[data-theme="dark"] .coming-soon-banner {
   display: inline-flex;
   align-items: center;
   gap: 0.25em;
+  text-decoration: none;
+  position: relative;
+  color: inherit;
+  text-transform: uppercase;
 }
 
 /* Underline hover effect for text links */
@@ -465,6 +465,7 @@ html[data-theme="dark"] .coming-soon-banner {
   border: none;
   cursor: pointer;
   padding: 8px 0;
+  min-height: 40px;
   color: inherit;
   text-transform: uppercase;
   flex-shrink: 0;
@@ -545,12 +546,6 @@ html[data-theme="dark"] .coming-soon-banner {
   /* Close text - hidden initially (GSAP will handle) */
 }
 
-/* Ensure menu button has enough space */
-.menu-button {
-  min-height: 40px;
-  align-items: center;
-}
-
 /* =====================================================
    11. MENU DETAILS & CONTENT
    ===================================================== */
@@ -581,13 +576,6 @@ html[data-theme="dark"] .coming-soon-banner {
 .p-large {
   font-size: 1.125em;
   font-family: var(--font-family-acme);
-  text-transform: uppercase;
-}
-
-.text-link {
-  text-decoration: none;
-  position: relative;
-  color: inherit;
   text-transform: uppercase;
 }
 
