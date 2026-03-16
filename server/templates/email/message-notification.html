@@ -6,11 +6,10 @@
     <title>New Message - {{companyName}}</title>
     <style>
       /*
-       * EMAIL TEMPLATE COLOR SYSTEM
-       * ---------------------------
+       * EMAIL TEMPLATE — BRUTALIST MONOSPACE DESIGN
+       * --------------------------------------------
        * Email clients strip external CSS, so these colors MUST be inline.
-       * Keep in sync with brand config (server/config/business.ts):
-       *   Primary gradient: #667eea → #764ba2 (message notification accent)
+       * No gradients, no border-radius, monospace throughout.
        * If brand colors change, update ALL email templates:
        *   - proposal-signed.html
        *   - proposal-signed-client.html
@@ -24,38 +23,40 @@
       }
 
       body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-family: "Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "Courier New", monospace;
         line-height: 1.6;
-        color: #333;
-        background-color: #f8fafc;
+        color: #333333;
+        background-color: #e0e0e0;
       }
 
       .container {
         max-width: 600px;
         margin: 0 auto;
-        background: white;
-        border-radius: 12px;
+        background: #ffffff;
+        border: 1px solid #333333;
         overflow: hidden;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
       }
 
       .header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        background: #171717;
+        color: #ffffff;
         text-align: center;
         padding: 2rem;
       }
 
       .header h1 {
         font-size: 1.5rem;
-        font-weight: 600;
+        font-weight: 700;
         margin-bottom: 0.5rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        font-family: "Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "Courier New", monospace;
       }
 
       .header p {
-        opacity: 0.9;
-        font-size: 0.95rem;
+        color: #cccccc;
+        font-size: 0.9rem;
+        letter-spacing: 0.03em;
       }
 
       .content {
@@ -63,11 +64,10 @@
       }
 
       .message-info {
-        background: #f1f5f9;
-        border-radius: 8px;
+        background: #f5f5f5;
         padding: 1.5rem;
         margin: 1.5rem 0;
-        border-left: 4px solid #667eea;
+        border: 1px solid #333333;
       }
 
       .message-meta {
@@ -80,27 +80,30 @@
       }
 
       .sender {
-        font-weight: 600;
-        color: #1e293b;
+        font-weight: 700;
+        color: #333333;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        font-size: 0.85rem;
       }
 
       .subject {
         font-size: 1.1rem;
-        font-weight: 600;
-        color: #1e293b;
+        font-weight: 700;
+        color: #333333;
         margin-bottom: 1rem;
+        letter-spacing: 0.02em;
       }
 
       .message-preview {
-        background: white;
-        border-radius: 6px;
+        background: #ffffff;
         padding: 1rem;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #333333;
         margin: 1rem 0;
       }
 
       .message-text {
-        color: #475569;
+        color: #333333;
         line-height: 1.6;
         word-wrap: break-word;
         max-height: 150px;
@@ -115,22 +118,17 @@
         left: 0;
         right: 0;
         height: 30px;
-        background: linear-gradient(transparent, white);
+        background: linear-gradient(transparent, #ffffff);
       }
 
       .attachment-notice {
-        background: #fef3c7;
-        border: 1px solid #f59e0b;
-        border-radius: 6px;
+        background: #f5f5f5;
+        border-left: 2px solid #333333;
         padding: 0.75rem 1rem;
         margin-top: 1rem;
-        color: #92400e;
+        color: #333333;
         font-size: 0.9rem;
-      }
-
-      .attachment-notice::before {
-        content: '📎';
-        margin-right: 0.5rem;
+        letter-spacing: 0.02em;
       }
 
       .cta-section {
@@ -140,43 +138,43 @@
 
       .cta-button {
         display: inline-block;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white !important;
+        background: #333333;
+        color: #ffffff !important;
         text-decoration: none;
         padding: 1rem 2rem;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        font-weight: 700;
+        font-size: 0.9rem;
+        font-family: "Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "Courier New", monospace;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        border: 1px solid #333333;
       }
 
       .cta-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        background: #171717;
       }
 
       .footer {
-        background: #f8fafc;
+        background: #e0e0e0;
         padding: 2rem;
         text-align: center;
-        border-top: 1px solid #e2e8f0;
-        color: #64748b;
-        font-size: 0.9rem;
+        border-top: 1px solid #333333;
+        color: #666666;
+        font-size: 0.85rem;
       }
 
       .footer a {
-        color: #667eea;
-        text-decoration: none;
+        color: #333333;
+        text-decoration: underline;
       }
 
       .footer a:hover {
-        text-decoration: underline;
+        color: #171717;
       }
 
       .divider {
         height: 1px;
-        background: linear-gradient(to right, transparent, #e2e8f0, transparent);
+        background: #333333;
         margin: 1.5rem 0;
       }
 
@@ -184,7 +182,6 @@
       @media (max-width: 640px) {
         .container {
           margin: 0.5rem;
-          border-radius: 8px;
         }
 
         .header,
@@ -204,7 +201,7 @@
 
         .cta-button {
           padding: 0.75rem 1.5rem;
-          font-size: 0.95rem;
+          font-size: 0.85rem;
         }
       }
     </style>
@@ -212,7 +209,7 @@
   <body>
     <div class="container">
       <div class="header">
-        <h1>💬 New Message</h1>
+        <h1>New Message</h1>
         <p>You have received a new message in your client portal</p>
       </div>
 
@@ -241,29 +238,29 @@
         </div>
 
         <div class="cta-section">
-          <a href="{{portalUrl}}" class="cta-button"> View Full Message & Reply </a>
+          <a href="{{portalUrl}}" class="cta-button"> View Full Message &amp; Reply </a>
         </div>
 
         <div class="divider"></div>
 
-        <p style="color: #64748b; font-size: 0.9rem; text-align: center">
-          <strong>Quick Response Tips:</strong><br />
-          • Log into your client portal to view the complete conversation<br />
-          • Reply directly from the portal for the best experience<br />
-          • All message history is saved for your reference
+        <p style="color: #666666; font-size: 0.85rem; text-align: center">
+          <strong style="letter-spacing: 0.05em; text-transform: uppercase">Response Tips</strong><br />
+          Log into your client portal to view the complete conversation.<br />
+          Reply directly from the portal for the best experience.<br />
+          All message history is saved for your reference.
         </p>
       </div>
 
       <div class="footer">
         <p>
-          <strong>{{companyName}}</strong><br />
+          <strong style="letter-spacing: 0.05em; text-transform: uppercase">{{companyName}}</strong><br />
           Professional Web Development Services
         </p>
         <p style="margin-top: 1rem">
           Visit your <a href="{{portalUrl}}">Client Portal</a> |
           <a href="mailto:{{supportEmail}}">Contact Support</a>
         </p>
-        <p style="margin-top: 1rem; font-size: 0.8rem; color: #94a3b8">
+        <p style="margin-top: 1rem; font-size: 0.75rem; color: #999999">
           This is an automated notification. Please do not reply to this email.<br />
           Use the client portal for all project-related communications.
         </p>

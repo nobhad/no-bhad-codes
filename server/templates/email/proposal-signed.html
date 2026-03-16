@@ -6,70 +6,74 @@
     <title>Proposal Signed - {{clientName}}</title>
     <style>
       /*
-       * EMAIL TEMPLATE COLOR SYSTEM
-       * ---------------------------
-       * Email clients strip external CSS, so these colors MUST be inline.
-       * Keep in sync with brand config (server/config/business.ts):
-       *   --primary-color  → BRAND_COLOR env var (default #00ff41)
-       *   --secondary-color → DARK_BG_COLOR env var (default #0d1117)
+       * EMAIL TEMPLATE — BRUTALIST MONOSPACE DESIGN
+       * --------------------------------------------
+       * Monospace font stack, no border-radius, no gradients.
+       * All colors inline (email clients strip CSS variables).
+       *
+       * Colors:
+       *   body text:   #333333
+       *   body bg:     #e0e0e0
+       *   card bg:     #ffffff
+       *   header bg:   #171717
+       *   header text: #ffffff
+       *   borders:     #333333
+       *   muted text:  #666666
+       *   buttons:     bg #333333, text #ffffff
+       *   boxes:       bg #f5f5f5
+       *   footer bg:   #e0e0e0
+       *   footer text: #666666
+       *
        * If brand colors change, update ALL email templates:
        *   - proposal-signed.html
        *   - proposal-signed-client.html
        *   - admin-notification.html
        *   - message-notification.html
        */
-      :root {
-        --primary-color: #00ff41;
-        --secondary-color: #0d1117;
-        --text-color: #24292f;
-        --background-color: #ffffff;
-        --border-color: #d0d7de;
-        --success-color: #1a7f37;
-        --tier-good: #3b82f6;
-        --tier-better: #8b5cf6;
-        --tier-best: #f59e0b;
-      }
 
       body {
         margin: 0;
         padding: 0;
-        font-family:
-          -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+        font-family: "Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "Courier New", monospace;
         line-height: 1.6;
-        color: var(--text-color);
-        background-color: #f6f8fa;
+        color: #333333;
+        background-color: #e0e0e0;
       }
 
       .email-container {
         max-width: 600px;
         margin: 20px auto;
-        background: white;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
+        background: #ffffff;
+        border: 1px solid #333333;
         overflow: hidden;
       }
 
       .header {
-        background: linear-gradient(135deg, var(--success-color) 0%, #15803d 100%);
-        color: white;
+        background: #171717;
+        color: #ffffff;
         padding: 30px;
         text-align: center;
       }
 
       .header-icon {
-        font-size: 48px;
+        font-size: 36px;
         margin-bottom: 10px;
+        letter-spacing: 0.05em;
       }
 
       .header h1 {
         margin: 0;
-        font-size: 24px;
-        font-weight: 600;
+        font-size: 22px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
 
       .header p {
         margin: 8px 0 0;
-        opacity: 0.9;
+        color: #cccccc;
+        font-size: 14px;
+        letter-spacing: 0.05em;
       }
 
       .content {
@@ -79,33 +83,32 @@
       .tier-badge {
         display: inline-block;
         padding: 8px 20px;
-        border-radius: 20px;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.05em;
         margin-bottom: 20px;
+        border: 1px solid #333333;
       }
 
       .tier-good {
-        background-color: #dbeafe;
-        color: var(--tier-good);
+        background-color: #f0f0f0;
+        color: #333333;
       }
 
       .tier-better {
-        background-color: #ede9fe;
-        color: var(--tier-better);
+        background-color: #e8e8e8;
+        color: #333333;
       }
 
       .tier-best {
-        background-color: #fef3c7;
-        color: var(--tier-best);
+        background-color: #d8d8d8;
+        color: #333333;
       }
 
       .info-card {
-        background-color: #f8f9fa;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
+        background-color: #f5f5f5;
+        border: 1px solid #333333;
         padding: 20px;
         margin: 20px 0;
       }
@@ -114,7 +117,7 @@
         display: flex;
         justify-content: space-between;
         padding: 10px 0;
-        border-bottom: 1px solid #e5e7eb;
+        border-bottom: 1px solid #cccccc;
       }
 
       .info-row:last-child {
@@ -122,22 +125,21 @@
       }
 
       .info-label {
-        color: #6b7280;
-        font-size: 14px;
+        color: #666666;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
 
       .info-value {
-        font-weight: 600;
-        color: var(--text-color);
+        font-weight: 700;
+        color: #333333;
       }
 
       .price-highlight {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #00cc33 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
         font-size: 28px;
         font-weight: 700;
+        color: #333333;
       }
 
       .features-section {
@@ -146,8 +148,10 @@
 
       .features-section h3 {
         margin: 0 0 15px;
-        font-size: 16px;
-        color: var(--text-color);
+        font-size: 14px;
+        color: #333333;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
 
       .feature-list {
@@ -161,14 +165,14 @@
         padding-left: 24px;
         position: relative;
         font-size: 14px;
-        color: #4b5563;
+        color: #333333;
       }
 
       .feature-list li::before {
-        content: '✓';
+        content: '+';
         position: absolute;
         left: 0;
-        color: var(--success-color);
+        color: #333333;
         font-weight: bold;
       }
 
@@ -180,21 +184,23 @@
       .cta-button {
         display: inline-block;
         padding: 14px 32px;
-        background: var(--secondary-color);
-        color: white;
+        background: #333333;
+        color: #ffffff;
         text-decoration: none;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 14px;
+        font-weight: 700;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border: 1px solid #333333;
       }
 
       .cta-button:hover {
-        background: #1f2937;
+        background: #171717;
       }
 
       .timestamp {
         text-align: center;
-        color: #9ca3af;
+        color: #666666;
         font-size: 12px;
         margin-top: 20px;
       }
@@ -202,21 +208,20 @@
       .footer {
         padding: 20px 30px;
         text-align: center;
-        color: #6b7280;
+        color: #666666;
         font-size: 13px;
-        background-color: #f9fafb;
-        border-top: 1px solid var(--border-color);
+        background-color: #e0e0e0;
+        border-top: 1px solid #333333;
       }
 
       .footer a {
-        color: var(--success-color);
-        text-decoration: none;
+        color: #333333;
+        text-decoration: underline;
       }
 
       @media (max-width: 600px) {
         .email-container {
           margin: 0;
-          border-radius: 0;
         }
 
         .content,
@@ -239,7 +244,7 @@
     <div class="email-container">
       <div class="header">
         <div class="header-icon">&#10003;</div>
-        <h1>Proposal Signed!</h1>
+        <h1>Proposal Signed</h1>
         <p>A client has accepted your proposal</p>
       </div>
 
@@ -290,8 +295,8 @@
         </div>
         {{/if}}
 
-        <div class="info-card" style="background-color: #f0fdf4; border-color: #86efac">
-          <h3 style="margin: 0 0 10px; color: var(--success-color)">Signature Details</h3>
+        <div class="info-card">
+          <h3 style="margin: 0 0 10px; color: #333333; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em">Signature Details</h3>
           <div class="info-row">
             <span class="info-label">Signed By</span>
             <span class="info-value">{{signerName}}</span>
