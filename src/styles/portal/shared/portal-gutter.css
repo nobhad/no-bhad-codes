@@ -85,6 +85,7 @@
    ===================================================== */
 
 .portal .dashboard-content .panel > *:not(.accordion-item-wrapper):not(.data-table-header):not(.milestone-list):not(.messaging-top-bar):not(.messaging-columns):not(.panel-body):not(.panel-body--compact):not(button),
+.portal .dashboard-content .portal-card > *:not(button),
 .portal .dashboard-content .section-content > *:not(button),
 .portal .dashboard-content .data-table-card > *:not(.data-table-scroll-wrapper):not(.data-table-container):not(button),
 .portal .dashboard-content .config-content > *:not(button),
