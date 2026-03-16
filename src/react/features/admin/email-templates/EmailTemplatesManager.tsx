@@ -306,7 +306,7 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
                     <>
                       <PortalTableCell className="date-col">{formatDate(template.updated_at)}</PortalTableCell>
                       <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                        <div className="table-actions">
+                        <div className="action-group">
                           <IconButton action="edit" title="Edit" />
                           <IconButton action="delete" title="Delete" />
                         </div>

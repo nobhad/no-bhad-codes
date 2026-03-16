@@ -590,7 +590,7 @@ export function PortalFilesManager({
                             </span>
                           </PortalTableCell>
                           <PortalTableCell className="col-actions">
-                            <div className="table-actions">
+                            <div className="action-group">
                               <IconButton
                                 action="view"
                                 onClick={() => handlePreview(file)}

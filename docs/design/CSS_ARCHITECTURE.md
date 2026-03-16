@@ -612,11 +612,11 @@ Defined in `src/styles/portal/shared/portal-tables.css`.
 .data-table                   /* Base table */
 .data-table th / .data-table td
 .col-actions                  /* Actions column cell (EJS tables) */
-.table-actions                /* Row action button container (EJS tables) */
+.action-group                 /* Row action button container (EJS tables) */
 .data-table-row-actions       /* Row action button container (React DataTable) */
 ```
 
-Both `.table-actions` and `.data-table-row-actions` scope `--portal-btn-icon-size` to
+Both `.action-group` and `.data-table-row-actions` scope `--portal-btn-icon-size` to
 `--icon-size-sm` (16px) so icon buttons in table rows are smaller than the default 36px.
 Gap between row action buttons is controlled by `--table-actions-gap` (8px).
 
@@ -1041,7 +1041,7 @@ Unified all portal page/tab/subtab components to use a strict two-tier wrapper s
   (`.panel-actions`, `.note-actions`, `.message-actions`, `.inline-edit-actions`, etc.)
 - `--table-actions-gap: var(--space-1)` (8px) — row-level table action buttons specifically
 
-**Table row action buttons** — `.table-actions` and `.data-table-row-actions` now scope
+**Table row action buttons** — `.action-group` and `.data-table-row-actions` now scope
 `--portal-btn-icon-size: var(--icon-size-sm)` directly on the container. This means the `.icon-btn`
 base rule reads the scoped token and renders at 16px without needing separate size overrides.
 

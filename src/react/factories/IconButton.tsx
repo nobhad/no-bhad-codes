@@ -451,7 +451,7 @@ interface TableActionsProps {
  */
 export function TableActions({ children, className }: TableActionsProps) {
   return (
-    <div className={cn('table-actions', className)}>
+    <div className={cn('action-group', className)}>
       {children}
     </div>
   );

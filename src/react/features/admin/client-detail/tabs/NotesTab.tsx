@@ -198,16 +198,17 @@ export function NotesTab({
           </span>
         </div>
 
-        <div className="note-actions">
+        <div className="action-group">
           <button
             onClick={() => handleTogglePin(note)}
             className={cn(
-              'btn-icon',
+              'icon-btn',
               note.is_pinned && 'is-active-primary'
             )}
             title={note.is_pinned ? 'Unpin' : 'Pin'}
+            aria-label={note.is_pinned ? 'Unpin note' : 'Pin note'}
           >
-            <Pin className="icon-sm" />
+            <Pin className="icon-md" />
           </button>
           <button
             onClick={() => handleStartEdit(note)}
@@ -215,7 +216,7 @@ export function NotesTab({
             title="Edit"
             aria-label="Edit note"
           >
-            <Pencil className="icon-sm" />
+            <Pencil className="icon-md" />
           </button>
           <button
             onClick={() => handleDeleteClick(note)}
@@ -223,7 +224,7 @@ export function NotesTab({
             title="Delete"
             aria-label="Delete note"
           >
-            <Trash2 className="icon-sm" />
+            <Trash2 className="icon-md" />
           </button>
         </div>
       </div>
@@ -273,7 +274,7 @@ export function NotesTab({
                 <h3 className="label section-label-block">
                   Pinned
                 </h3>
-                <div className="grid-2col gap-3">
+                <div className="layout-stack gap-3">
                   {pinnedNotes.map(renderNote)}
                 </div>
               </div>
@@ -287,7 +288,7 @@ export function NotesTab({
                     Recent
                   </h3>
                 )}
-                <div className="grid-2col gap-3">
+                <div className="layout-stack gap-3">
                   {unpinnedNotes.map(renderNote)}
                 </div>
               </div>

@@ -367,7 +367,7 @@ export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken: _getAuthT
                   <PortalTableCell className="text-center">{article.view_count}</PortalTableCell>
                   <PortalTableCell className="date-col">{formatDate(article.updated_at)}</PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                    <div className="table-actions">
+                    <div className="action-group">
                       <IconButton action="view" title="View" />
                       <IconButton action="edit" title="Edit" />
                       <IconButton action="delete" title="Delete" />

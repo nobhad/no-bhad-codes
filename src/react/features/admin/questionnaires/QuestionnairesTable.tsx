@@ -478,7 +478,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                   </div>
                 </PortalTableCell>
                 <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                  <div className="table-actions">
+                  <div className="action-group">
                     <IconButton
                       action="view"
                       onClick={() => onNavigate?.('questionnaire-detail', String(questionnaire.id))}

@@ -155,9 +155,8 @@
   gap: var(--space-3);
 }
 
-/* Scoped border box for icon inside the React body layout */
+/* Icon inside the React body layout — no border, matches portal SVG styling */
 .confirm-dialog-body .confirm-dialog-icon {
-  border: var(--portal-border);
   flex-shrink: 0;
 }
 

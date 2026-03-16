@@ -477,7 +477,7 @@ export function LeadsTable({
 
                   {/* Actions */}
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                    <div className="table-actions">
+                    <div className="action-group">
                       <IconButton
                         action="view"
                         onClick={() => handleViewLead(lead.id)}

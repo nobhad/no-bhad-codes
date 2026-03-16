@@ -85,19 +85,21 @@ export function NotesTab({
             />
           </div>
         </div>
-        <textarea
-          value={notes}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          placeholder="Add internal notes about this project..."
-          rows={15}
-          className="textarea"
-          aria-label="Internal project notes"
-        />
-        <p className="text-secondary form-helper-text">
-          Press <kbd className="badge msgtab-kbd">Cmd+S</kbd> or{' '}
-          <kbd className="badge msgtab-kbd">Ctrl+S</kbd> to save
-        </p>
+        <div className="notes-input-panel">
+          <textarea
+            value={notes}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            placeholder="Add internal notes about this project..."
+            rows={15}
+            className="textarea"
+            aria-label="Internal project notes"
+          />
+          <p className="text-secondary form-helper-text">
+            Press <kbd className="badge msgtab-kbd">Cmd+S</kbd> or{' '}
+            <kbd className="badge msgtab-kbd">Ctrl+S</kbd> to save
+          </p>
+        </div>
       </div>
     </div>
   );

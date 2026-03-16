@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState, useCallback } from 'react';
-import { AlertTriangle, Trash2, Info } from 'lucide-react';
+import { AlertTriangle, Trash2, Info, X } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,15 +43,15 @@ const variantConfig: Record<DialogVariant, {
   buttonClass: string;
 }> = {
   danger: {
-    icon: <Trash2 />,
+    icon: <Trash2 className="icon-md" aria-hidden="true" />,
     buttonClass: 'btn-danger'
   },
   warning: {
-    icon: <AlertTriangle />,
+    icon: <AlertTriangle className="icon-md" aria-hidden="true" />,
     buttonClass: 'btn-primary'
   },
   info: {
-    icon: <Info />,
+    icon: <Info className="icon-md" aria-hidden="true" />,
     buttonClass: 'btn-primary'
   }
 };
@@ -88,20 +88,24 @@ export function ConfirmDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="portal-modal">
         <AlertDialogHeader className="portal-modal-header">
-          <div className="confirm-dialog-body">
-            <div className="confirm-dialog-icon">
-              {config.icon}
-            </div>
-            <div className="confirm-dialog-content">
-              <AlertDialogTitle className="portal-modal-title">
-                {title}
-              </AlertDialogTitle>
-              <AlertDialogDescription className="confirm-dialog-description">
-                {description}
-              </AlertDialogDescription>
-            </div>
-          </div>
+          <AlertDialogTitle className="portal-modal-title">
+            {config.icon}
+            {title}
+          </AlertDialogTitle>
+          <button
+            onClick={handleCancel}
+            className="icon-btn portal-modal-close"
+            aria-label="Close dialog"
+            type="button"
+          >
+            <X className="icon-md" />
+          </button>
         </AlertDialogHeader>
+        <div className="confirm-dialog-content">
+          <AlertDialogDescription className="confirm-dialog-description">
+            {description}
+          </AlertDialogDescription>
+        </div>
         <AlertDialogFooter className="confirm-dialog-footer">
           <AlertDialogCancel
             onClick={handleCancel}

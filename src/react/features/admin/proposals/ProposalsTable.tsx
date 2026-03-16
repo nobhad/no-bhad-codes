@@ -489,7 +489,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
                   </div>
                 </PortalTableCell>
                 <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                  <div className="table-actions">
+                  <div className="action-group">
                     <IconButton action="view" title="View" />
                     {proposal.status === 'draft' && (
                       <>

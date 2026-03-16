@@ -392,7 +392,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
                   </PortalTableCell>
                   <PortalTableCell className="date-col">{formatDateShort(file.updatedAt)}</PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                    <div className="table-actions">
+                    <div className="action-group">
                       {file.type !== 'folder' && (
                         <>
                           <IconButton action="preview" />

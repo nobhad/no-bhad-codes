@@ -1444,7 +1444,7 @@ Added global tasks view across all projects.
 
 - **Workflows Table Cell Classes** - COMPLETE
   - Added `type-cell`, `status-cell`, `date-cell` classes to match other tables
-  - Wrapped action buttons in `table-actions` div for proper flex layout
+  - Wrapped action buttons in `action-group` div for proper flex layout
   - Added outer column padding rules
   - Files: `src/features/admin/modules/admin-workflows.ts`, `src/styles/admin/workflows.css`
 
@@ -1695,7 +1695,7 @@ Added global tasks view across all projects.
 - **Table Action Buttons Styling** - COMPLETE
   - All action column buttons now neutral color (not red)
   - Turn red on hover (matches other icon buttons)
-  - Added `table-actions` wrapper to leads table
+  - Added `action-group` wrapper to leads table
   - Removed special `.icon-btn-convert` red styling
   - Files: `src/styles/pages/admin.css`, `src/features/admin/modules/admin-leads.ts`
 

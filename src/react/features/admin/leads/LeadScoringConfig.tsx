@@ -353,7 +353,7 @@ export function LeadScoringConfig() {
                   </PortalTableCell>
 
                   <PortalTableCell className="col-actions">
-                    <div className="table-actions">
+                    <div className="action-group">
                       <button
                         className="icon-btn"
                         onClick={() => handleToggleActive(rule)}

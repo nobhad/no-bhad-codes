@@ -67,7 +67,7 @@ for the full catalog and naming conventions.
 ```css
 .data-table              /* Base table */
 .col-actions             /* Actions column (EJS) */
-.table-actions           /* Row action container (EJS) */
+.action-group            /* Row action container (EJS) */
 .data-table-row-actions  /* Row action container (React DataTable) */
 ```
 

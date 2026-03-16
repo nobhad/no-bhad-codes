@@ -137,7 +137,7 @@
     gap: var(--space-1);
   }
 
-  .table-actions {
+  .action-group {
     display: inline-flex;
     align-items: center;
     gap: var(--table-actions-gap);
@@ -162,7 +162,7 @@
 
 
 .data-table :is(th, td).col-actions,
-.data-table :is(th, td):last-child:has(.table-actions) {
+.data-table :is(th, td):last-child:has(.action-group) {
   width: auto;
   min-width: fit-content;
   white-space: nowrap;
@@ -189,7 +189,7 @@
   text-align: center;
 }
 
-.col-actions:not(:has(.table-actions)) {
+.col-actions:not(:has(.action-group)) {
   gap: var(--table-actions-gap);
 }
 
@@ -202,7 +202,7 @@
   margin: 0;
 }
 
-/* Icon size is controlled via --portal-btn-icon-size scoped on .table-actions
+/* Icon size is controlled via --portal-btn-icon-size scoped on .action-group
    and .data-table-row-actions containers — the unlayered .icon-btn base rule
    reads the token via DOM inheritance, making @layer overrides unnecessary. */
 
@@ -1422,7 +1422,7 @@
   }
 
   /* Compact actions */
-  .data-table .col-actions .table-actions {
+  .data-table .col-actions .action-group {
     gap: var(--space-0-5);
   }
 
@@ -1802,7 +1802,7 @@
    ═══════════════════════════════════════════════════════ */
 
 /* Row action buttons: compact, tightly grouped */
-.table-actions .icon-btn,
+.action-group .icon-btn,
 .data-table-row-actions .icon-btn {
   width: var(--icon-size-sm);
   height: var(--icon-size-sm);
