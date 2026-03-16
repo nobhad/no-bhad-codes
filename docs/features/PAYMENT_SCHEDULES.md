@@ -1,7 +1,7 @@
 # Payment Schedule System
 
 **Status:** Complete
-**Last Updated:** March 13, 2026
+**Last Updated:** March 16, 2026
 
 ## Overview
 
@@ -59,6 +59,7 @@ Admin marks installments as paid with optional payment details:
 
 - Payment date, amount, method, and reference
 - Defaults paid amount to the installment amount if not specified
+- **Receipt auto-generation**: When an installment with a linked `invoice_id` is marked paid, a receipt PDF is automatically generated and an email notification is sent to the client
 
 ## Database Schema
 
@@ -204,6 +205,13 @@ await fetch('/api/payment-schedules/42/mark-paid', {
 - `src/react/features/admin/shared/filterConfigs.ts` — added filter config
 
 ## Change Log
+
+### March 16, 2026 — Receipt Auto-Generation on Mark-Paid
+
+- `POST /:id/mark-paid` now auto-generates a receipt PDF when installment has a linked `invoice_id`
+- Receipt includes billing address and uses billing-preferred fields (COALESCE)
+- Email notification sent to client with receipt summary
+- Non-critical: receipt/email failures don't block the mark-paid operation
 
 ### March 13, 2026 — Initial Implementation
 

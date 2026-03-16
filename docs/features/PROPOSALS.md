@@ -1,7 +1,7 @@
 # Proposal System Enhancement
 
 **Status:** Complete
-**Last Updated:** February 10, 2026
+**Last Updated:** March 16, 2026
 
 ## Overview
 
@@ -343,6 +343,12 @@ ALTER TABLE proposal_requests ADD COLUMN access_token TEXT;
 |POST|`/api/proposals/:id/discount`|Apply discount|
 |DELETE|`/api/proposals/:id/discount`|Remove discount|
 
+### Export
+
+|Method|Endpoint|Description|
+|--------|----------|-------------|
+|GET|`/api/proposals/:id/export`|Export full proposal data as JSON|
+
 ### Expiration & Send
 
 |Method|Endpoint|Description|
@@ -620,6 +626,14 @@ When a proposal is deleted via `DELETE /api/proposals/:id`:
 ---
 
 ## Change Log
+
+### March 16, 2026 - Tier-Driven Task Generation + JSON Export
+
+- Proposal acceptance now uses `selected_tier` to drive milestone/task generation scope
+- `good` tier generates fewer milestones/tasks, `best` generates the most comprehensive set
+- Addon features (`is_addon = true`) from `proposal_feature_selections` auto-create tasks
+- Added `GET /api/proposals/:id/export` endpoint for full proposal data export (JSON)
+- Input validation added to contact endpoints related to proposals
 
 ### February 6, 2026 - Soft Delete System
 

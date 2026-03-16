@@ -1,6 +1,6 @@
 # PDF Generation System
 
-**Last Updated:** February 10, 2026
+**Last Updated:** March 16, 2026
 
 ## Table of Contents
 
@@ -54,6 +54,7 @@ All PDF documents in the system are generated using **pdf-lib**, a pure JavaScri
 |Contract|`server/routes/projects.ts`|`GET /api/projects/:id/contract/pdf`|CONTRACT|
 |Intake|`server/routes/projects.ts`|`GET /api/projects/:id/intake/pdf`|INTAKE|
 |Proposal|`server/routes/proposals.ts`|`GET /api/proposals/:id/pdf`|PROPOSAL|
+|Receipt|`server/services/receipt-service.ts`|`GET /api/receipts/:id/pdf`|RECEIPT|
 
 ---
 
@@ -333,6 +334,17 @@ res.send(Buffer.from(pdfBytes));
 |Body text|Helvetica|10pt|
 |Small text|Helvetica|9pt|
 |Footer text|Helvetica|9pt|
+
+---
+
+## Receipt PDF Enhancements (March 16, 2026)
+
+Receipt PDFs now include:
+
+- **Billing-preferred fields**: Uses `COALESCE(billing_name, contact_name)`, `COALESCE(billing_email, email)`, etc.
+- **Client billing address**: Full address rendered in the "RECEIVED FROM" section (address, city/state/zip, country)
+- **Client phone number**: Displayed below email in the client info section
+- **Email notification**: Automatic email with receipt summary sent to client when receipt is generated
 
 ---
 

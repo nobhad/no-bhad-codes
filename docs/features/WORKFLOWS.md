@@ -477,6 +477,13 @@ POST /api/email-templates/:id/test
 
 ## Change Log
 
+### March 16, 2026 - Tier-Aware Proposal Acceptance
+
+- `proposal.accepted` handler now uses `generateTierMilestones()` instead of `generateDefaultMilestones()`
+- Fetches proposal features via `proposalService.getProposalFeatures()` and passes them to the tier-aware generator
+- Addon features automatically generate tasks on the development-phase milestone
+- File modified: `server/services/workflow-automations.ts`
+
 ### February 10, 2026 - Email Templates & Test Coverage
 
 - Added Email Templates system (Section 6.2 complete)

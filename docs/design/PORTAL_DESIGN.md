@@ -10,21 +10,22 @@ Portal-specific design standards for the admin dashboard and client portal. For 
 
 1. [Theme System](#theme-system)
 2. [Variable Naming Precedence](#variable-naming-precedence)
-3. [Buttons](#buttons)
-4. [Forms](#forms)
-5. [Cards](#cards)
-6. [Tables](#tables)
-7. [Dropdowns](#dropdowns)
-8. [Modals](#modals)
-9. [Status Badges](#status-badges)
-10. [Layout Wrapper System](#layout-wrapper-system)
-11. [Page Structure](#page-structure)
-12. [Gutter System](#gutter-system)
-13. [Tailwind vs Portal CSS](#tailwind-vs-portal-css)
-14. [Focus States](#focus-states)
-15. [Loading and Empty States](#loading-and-empty-states)
-16. [Intentional Deviations](#intentional-deviations)
-17. [Recent Changes](#recent-changes)
+3. [Heading and Title Hierarchy](#heading-and-title-hierarchy)
+4. [Buttons](#buttons)
+5. [Forms](#forms)
+6. [Cards](#cards)
+7. [Tables](#tables)
+8. [Dropdowns](#dropdowns)
+9. [Modals](#modals)
+10. [Status Badges](#status-badges)
+11. [Layout Wrapper System](#layout-wrapper-system)
+12. [Page Structure](#page-structure)
+13. [Gutter System](#gutter-system)
+14. [Tailwind vs Portal CSS](#tailwind-vs-portal-css)
+15. [Focus States](#focus-states)
+16. [Loading and Empty States](#loading-and-empty-states)
+17. [Intentional Deviations](#intentional-deviations)
+18. [Recent Changes](#recent-changes)
 
 ---
 
@@ -104,6 +105,134 @@ Three naming conventions coexist. Use this precedence for new code:
 - Portal layout/sizing: use `--portal-*` tokens
 - Status colors: use `--status-*` tokens
 - Never use `--app-color-*` in new code (legacy bridge only)
+
+---
+
+## Heading and Title Hierarchy
+
+All portal headings follow a 4-tier token system defined in `src/design-system/tokens/portal-theme.css`. Every heading class uses these tokens -- never hardcode font-size, weight, or letter-spacing on headings.
+
+### Tier Tokens
+
+| Tier | Token Prefix | Font Size | Weight | Color | Usage |
+|------|-------------|-----------|--------|-------|-------|
+| 1 -- Page | `--heading-page-*` | xl (20px) | 600 semibold | text-primary | Page-level headings (`.page-title`) |
+| 2 -- Card | `--heading-card-*` | lg (18px) | 400 regular | text-primary | Entity card names (`.portal-card-header`) |
+| 3 -- Section | `--heading-section-*` | base (15px) | 500 medium | text-primary | Table headers, panel headers, section dividers |
+| 4 -- Label | `--label-*` | sm (14px) | 500 medium | text-secondary | Form labels, stat labels, filter labels |
+
+Stats text next to section titles (e.g., "7 TOTAL" in table headers) uses Tier 4 label sizing to stay visually subordinate to the title.
+
+All tiers share `--heading-text-transform: uppercase` and `--heading-font-family: var(--font-family-sans)`.
+
+### Tier 1 -- Page Title
+
+The largest heading. Used once per page for the main title.
+
+```css
+.page-title {
+  font-size: var(--heading-page-font-size);      /* xl / 20px */
+  font-weight: var(--heading-page-font-weight);  /* 600 */
+  color: var(--heading-page-color);              /* text-primary */
+}
+```
+
+### Tier 2 -- Card Title
+
+Used for entity card headers (contracts, projects, approvals, deliverables, etc.).
+
+```css
+.portal-card-header {
+  font-size: var(--heading-card-font-size);      /* lg / 18px */
+  font-weight: var(--heading-card-font-weight);  /* 400 */
+  color: var(--heading-card-color);              /* text-primary */
+  letter-spacing: var(--heading-card-letter-spacing);
+}
+```
+
+### Tier 3 -- Section Title
+
+Used for ALL section-level headings: data table titles, panel headers, section dividers. These classes all use the same tokens:
+
+- `.portal h3` (base rule)
+- `.data-table-header h3`
+- `.panel-header-row .heading` / `.panel-header-row--compact .heading`
+- `.portal-section-title`
+- `.section-header .section-title`
+
+```css
+/* All resolve to: */
+font-size: var(--heading-section-font-size);      /* base / 15px */
+font-weight: var(--heading-section-font-weight);  /* 500 */
+color: var(--heading-section-color);              /* text-primary */
+letter-spacing: var(--heading-section-letter-spacing);
+text-transform: uppercase;
+```
+
+### Tier 4 -- Labels
+
+Form field labels, stat card labels, filter labels. See the unified label system below.
+
+```css
+.field-label, .section-label, .stat-label {
+  font-size: var(--label-font-size);
+  font-weight: var(--label-font-weight);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--label-letter-spacing);
+}
+```
+
+### h3 Border Rule
+
+The first `h3` child inside card/section containers automatically gets a bottom border:
+
+```css
+.portal .data-table-card > h3:first-child,
+.portal .portal-card > h3:first-child,
+.portal .content-section > h3:first-child {
+  border-bottom: var(--portal-border);
+}
+```
+
+### Icons in Headings
+
+Use `.heading-icon` or inline SVG with `1em` sizing:
+
+```css
+.heading svg { width: 1em; height: 1em; flex-shrink: 0; }
+```
+
+### Action Buttons in Headers -- Always Right-Aligned
+
+Action button groups in ANY header context are right-aligned via `margin-left: auto`:
+
+```css
+.portal :is(
+  .page-header-actions,
+  .admin-table-actions,
+  .data-table-actions,
+  .section-actions,
+  .panel-actions
+) {
+  display: flex;
+  align-items: center;
+  gap: var(--action-btn-gap);
+  margin-left: auto;
+}
+```
+
+Header containers use `display: flex; justify-content: space-between` so the title sits left and actions sit right. Never put actions before the title in markup.
+
+### Rules
+
+- Always use the tier tokens -- never hardcode font-size/weight/spacing on headings
+- One `.page-title` per page maximum
+- Card headers (`.portal-card-header`) always have `justify-content: space-between` for title + actions
+- Section headers (`.data-table-header`, `.section-header`, `.panel-header-row`) always right-align actions
+- To change heading appearance across the entire portal, modify the tokens in `portal-theme.css`
+
+**Token source:** `src/design-system/tokens/portal-theme.css`
 
 ---
 

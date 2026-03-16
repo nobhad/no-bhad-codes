@@ -1,7 +1,7 @@
 # Milestones & Tasks Feature
 
 **Status:** Active
-**Last Updated:** 2026-02-11
+**Last Updated:** 2026-03-16
 
 ## Overview
 
@@ -12,11 +12,24 @@ Milestones and tasks provide structured progress tracking for projects. When a n
 ### Auto-Generation
 
 1. Project is created with a specific project type (e.g., "business-site")
-2. System looks up milestone templates for that project type
+2. System looks up milestone templates for that project type **and proposal tier** (good/better/best)
 3. Due dates are calculated from project start date + estimated days
 4. Milestones are inserted into the database linked to the project
-5. **NEW:** For each milestone, tasks are auto-generated from templates
+5. For each milestone, tasks are auto-generated from tier-specific or default templates
 6. Task due dates are distributed evenly before the milestone due date
+7. Addon features from the proposal generate additional tasks on the development milestone
+
+### Tier-Aware Generation (NEW)
+
+When a proposal is accepted, the system uses the **selected tier** to determine milestone and task scope:
+
+- **Good tier**: Base milestones with core tasks (fewest deliverables)
+- **Better tier**: Adds SEO, content strategy, additional design rounds, and more tasks
+- **Best tier**: Full scope with post-launch support, accessibility audits, comprehensive testing
+
+The tier-aware generator (`server/services/tier-milestone-generator.ts`) falls back to default templates if no tier-specific config exists for a given project type.
+
+**Addon features** from `proposal_feature_selections` where `is_addon = true` are automatically added as tasks on the most appropriate development-phase milestone.
 
 ### Progress Tracking
 
@@ -346,13 +359,16 @@ CREATE TABLE project_tasks (
 
 ### Configuration
 
-- `server/config/default-milestones.ts` - Milestone templates per project type
-- `server/config/default-tasks.ts` - Task templates per milestone and project type
+- `server/config/default-milestones.ts` - Default milestone templates per project type
+- `server/config/default-tasks.ts` - Default task templates per milestone and project type
+- `server/config/tier-milestones.ts` - Tier-aware milestone templates (projectType + tier)
+- `server/config/tier-tasks.json` - Tier-aware task templates (projectType + tier + milestone)
 
 ### Services
 
-- `server/services/milestone-generator.ts` - Milestone auto-generation and backfill logic
-- `server/services/task-generator.ts` - Task auto-generation and backfill logic
+- `server/services/milestone-generator.ts` - Default milestone auto-generation and backfill logic
+- `server/services/task-generator.ts` - Default task auto-generation and backfill logic
+- `server/services/tier-milestone-generator.ts` - Tier-aware milestone and task generation (used by proposal acceptance workflow)
 - `server/services/progress-calculator.ts` - Progress calculation and milestone auto-completion
 - `server/services/project-service.ts` - Task CRUD with automatic progress updates
 
@@ -440,3 +456,47 @@ Auto-generated milestones and tasks are a starting point. You can:
 - **Cascading Deletes**: Deleting a milestone deletes all its tasks
 - **Progress Integrity**: Milestone completion is calculated from tasks (not editable directly)
 - **Due Date Intelligence**: If milestone is overdue, tasks get milestone due date
+
+## JSON Export / Import
+
+### Export Milestones
+
+```text
+GET /api/projects/:id/export-milestones
+```
+
+Returns all milestones and tasks as structured JSON. Useful for backing up project configurations or copying structures between projects.
+
+### Import Milestones
+
+```text
+POST /api/projects/:id/import-milestones
+Body: { milestones: [...], clearExisting?: boolean }
+```
+
+Creates milestones and tasks from a JSON payload. If `clearExisting` is true, deletes existing milestones first (cascades to tasks).
+
+### Admin Config Endpoints
+
+```text
+GET  /api/admin/config/tier-milestones    — Export tier milestone config
+GET  /api/admin/config/default-tasks      — Export default-tasks.json
+POST /api/admin/config/default-tasks      — Update default-tasks.json
+GET  /api/admin/config/tier-tasks         — Export tier-tasks.json
+POST /api/admin/config/tier-tasks         — Update tier-tasks.json
+```
+
+These allow admins to modify milestone/task templates via JSON without code changes.
+
+## Change Log
+
+### March 16, 2026 - Tier-Aware Generation + JSON Import/Export
+
+- Added tier-aware milestone/task generation driven by proposal `selected_tier`
+- New config: `tier-milestones.ts` (5 project types x 3 tiers)
+- New config: `tier-tasks.json` (tier-specific tasks per milestone)
+- New service: `tier-milestone-generator.ts` (falls back to defaults)
+- Modified `workflow-automations.ts` to use tier-aware generator on proposal acceptance
+- Addon features from proposals generate additional tasks automatically
+- Added `GET/POST /api/projects/:id/export-milestones` and `/import-milestones`
+- Added admin config export/import endpoints for tier and default task configs
