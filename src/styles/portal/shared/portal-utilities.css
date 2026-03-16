@@ -10,8 +10,6 @@
  * border, icon sizing, transitions, interactive, disabled).
  */
 
-@layer utilities {
-
 /* ============================================
    PORTAL KEYFRAMES — SINGLE SOURCE OF TRUTH
    All portal CSS animation keyframes live here.
@@ -58,10 +56,11 @@ svg.lucide {
 }
 
 /* Decorative icon — large standalone icon (success states, empty states).
-   Overrides the root 1em rule for icons that should NOT match text size. */
-.icon-decorative {
-  width: var(--icon-size-2xl) !important;
-  height: var(--icon-size-2xl) !important;
+   Overrides the root 1em rule for icons that should NOT match text size.
+   Uses .portal prefix for higher specificity instead of !important. */
+.portal .icon-decorative {
+  width: var(--icon-size-2xl);
+  height: var(--icon-size-2xl);
 }
 
 /* =====================================================
@@ -307,6 +306,10 @@ a.text-danger:hover {
 }
 
 .text-primary {
+  color: var(--color-text-primary);
+}
+
+.text-accent {
   color: var(--color-accent);
 }
 
@@ -426,4 +429,3 @@ a.text-danger:hover {
   pointer-events: none;
 }
 
-}

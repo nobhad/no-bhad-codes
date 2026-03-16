@@ -31,8 +31,6 @@
       Layout only — actual inputs use system 3 classes.
    ===================================================== */
 
-@layer components {
-
 /* Base input styles — all form controls inside .portal, .modal-overlay, and .auth-gate. */
 .portal
   :is(
@@ -109,15 +107,7 @@
   caret-color: var(--color-text-primary);
 }
 
-/* Input with left icon - text must not overlap */
-.portal :is(.search-bar:has(.search-bar-icon), .field-with-left-icon) input,
-.modal-overlay :is(.search-bar:has(.search-bar-icon), .field-with-left-icon) input {
-}
-
-/* Universal: Any container with positioned icon + input - ensure proper left padding */
-.portal [class*="search-container"] input,
-.portal [class*="search-container"] .input {
-}
+/* Empty icon-left-padding and search-container rules removed */
 
 /* Textarea - different height/padding */
 .portal :is(textarea, .form-textarea, textarea.form-input),
@@ -283,9 +273,6 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
     font-size: var(--font-size-sm);
     line-height: calc(var(--space-5) + var(--space-0-5));
   }
-  .portal :is(.search-bar:has(.search-bar-icon), .field-with-left-icon) input,
-  .modal-overlay :is(.search-bar:has(.search-bar-icon), .field-with-left-icon) input {
-  }
   .portal :is(textarea, .form-textarea),
   .modal-overlay :is(textarea, .form-textarea) {
     height: auto;
@@ -300,8 +287,6 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   display: flex;
   align-items: center;
   width: 100%;
-}
-.password-input-wrapper input {
 }
 .password-toggle,
 .portal-password-toggle {
@@ -714,8 +699,7 @@ input.search-bar-input {
   margin-top: var(--space-px);
 }
 
-.qform-question-input {
-}
+/* .qform-question-input — removed (empty rule) */
 
 /* Action buttons row */
 .qform-actions {
@@ -847,12 +831,7 @@ input.search-bar-input {
   right: var(--space-1-5);
 }
 
-/* Input with icon padding adjustments */
-.form-field-input--icon-left {
-}
-
-.form-field-input--icon-right {
-}
+/* .form-field-input--icon-left, .form-field-input--icon-right — removed (empty rules) */
 
 /* Textarea no-resize modifier */
 .form-field-textarea--no-resize {
@@ -1063,4 +1042,4 @@ input.search-bar-input {
   color: var(--color-accent);
 }
 
-}
+
