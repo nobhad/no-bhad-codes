@@ -248,7 +248,8 @@ button:not(.portal-checkbox):not(.panel-action):not(.dropdown-trigger--custom):n
   display: flex;
   align-items: center;
   gap: var(--icon-gap-md);
-  width: 100%;
+  width: auto;
+  padding-right: calc(var(--icon-gap-md) + var(--sidebar-icon-size));
   min-height: var(--space-5); /* 40px — matches collapsed icon-only height */
   font-family: var(--font-family-mono);
   font-size: var(--portal-nav-font-size);

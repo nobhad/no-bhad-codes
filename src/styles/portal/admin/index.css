@@ -174,9 +174,12 @@ body[data-page="admin"]:not(.admin-logged-in) {
 
 /* Sidebar — base styles in portal-sidebar.css.
    Only admin-specific width/z-index overrides here. */
+/* Sidebar sizes to its content (nav labels); capped at --sidebar-width-open.
+   min-width uses collapsed width so it never goes smaller than icon-only. */
 [data-page="admin"] .sidebar {
-  width: var(--sidebar-width-open);
-  min-width: var(--sidebar-width-open);
+  width: fit-content;
+  min-width: var(--sidebar-width-collapsed);
+  max-width: var(--sidebar-width-open);
   background: var(--color-bg-primary);
   display: flex;
   flex-direction: column;
