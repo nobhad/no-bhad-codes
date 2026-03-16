@@ -251,7 +251,7 @@ export function PortalInvoicesTable({
                       </StatusBadge>
                     </PortalTableCell>
                     <PortalTableCell className="col-actions">
-                      <div className="table-actions">
+                      <div className="action-group">
                         <IconButton
                           action="view"
                           onClick={() => handlePreview(invoice)}

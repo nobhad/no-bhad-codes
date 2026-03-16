@@ -601,9 +601,15 @@ input.search-bar-input {
   cursor: not-allowed;
 }
 
-/* Panel > textarea: single border (panel only), no inner textarea border */
-.panel > .textarea {
+/* Panel > textarea: no inner border, no focus shadow */
+.panel > .textarea,
+.notes-input-panel > .textarea {
   border: none;
+}
+
+.panel > .textarea:focus,
+.notes-input-panel > .textarea:focus {
+  box-shadow: none;
 }
 
 /* Form textarea resizable */

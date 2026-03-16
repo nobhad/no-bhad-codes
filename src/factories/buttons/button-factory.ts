@@ -137,7 +137,7 @@ export function renderActionsCell(configs: ButtonConfig[], context: UIContext = 
   const buttonsHtml = renderButtons(configs.map((cfg) => ({ ...cfg, context })));
 
   if (!buttonsHtml) return '';
-  return `<div class="table-actions">${buttonsHtml}</div>`;
+  return `<div class="action-group">${buttonsHtml}</div>`;
 }
 
 /**

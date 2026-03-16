@@ -312,7 +312,7 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
                   </PortalTableCell>
                   <PortalTableCell className="date-col">{formatDate(review.submittedAt)}</PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                    <div className="table-actions">
+                    <div className="action-group">
                       <IconButton action="view" title="View" />
                       {review.status === 'in-review' && (
                         <>

@@ -542,7 +542,7 @@ export function ClientsTable({
 
                     {/* Actions */}
                     <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                      <div className="table-actions">
+                      <div className="action-group">
                         <IconButton
                           action="view"
                           onClick={() => handleViewClient(client.id)}

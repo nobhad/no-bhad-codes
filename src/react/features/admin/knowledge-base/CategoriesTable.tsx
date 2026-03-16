@@ -246,7 +246,7 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
                     )}
                   </PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                    <div className="table-actions">
+                    <div className="action-group">
                       <IconButton action="edit" title="Edit" />
                       <IconButton action="delete" title="Delete" />
                     </div>

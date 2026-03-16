@@ -258,7 +258,7 @@ export function ClientDetail({
         <div className="detail-actions">
           <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
 
-          {!client.invitation_sent_at && (
+          {client.status !== 'active' && (
             <IconButton action="send" onClick={handleSendInvitation} title="Send Invite" />
           )}
 
@@ -270,7 +270,7 @@ export function ClientDetail({
                 <MoreHorizontal className="icon-lg" />
               </button>
             </PortalDropdownTrigger>
-            <PortalDropdownContent align="end">
+            <PortalDropdownContent align="end" className="detail-actions-menu">
               <PortalDropdownItem onClick={() => onEdit?.(clientId)}>
                 <Pencil className="icon-sm" />
                 Edit Client

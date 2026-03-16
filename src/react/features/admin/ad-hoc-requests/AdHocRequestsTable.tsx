@@ -533,7 +533,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                   {request.dueDate && formatDate(request.dueDate)}
                 </PortalTableCell>
                 <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                  <div className="table-actions">
+                  <div className="action-group">
                     <IconButton action="view" title="View" />
                     <IconButton action="edit" title="Edit" />
                     {request.status === 'pending' && (

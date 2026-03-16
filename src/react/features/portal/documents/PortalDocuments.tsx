@@ -349,7 +349,7 @@ export function PortalDocuments({ getAuthToken, showNotification }: PortalViewPr
     case 'invoice': {
       const invoice = doc.source as PortalInvoice;
       return (
-        <div className="table-actions">
+        <div className="action-group">
           <IconButton action="view" onClick={() => handleViewInvoice(invoice)} title="Preview" />
           <IconButton action="download" onClick={() => handleDownloadInvoice(invoice)} title="Download" />
         </div>
@@ -358,7 +358,7 @@ export function PortalDocuments({ getAuthToken, showNotification }: PortalViewPr
     case 'intake': {
       const intake = doc.source as IntakeFile;
       return (
-        <div className="table-actions">
+        <div className="action-group">
           <IconButton action="view" onClick={() => handleViewIntake(intake)} title="View PDF" />
         </div>
       );

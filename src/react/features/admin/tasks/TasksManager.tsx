@@ -460,7 +460,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
                     </span>
                   </PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                    <div className="table-actions">
+                    <div className="action-group">
                       <PortalButton
                         variant="ghost"
                         size="sm"

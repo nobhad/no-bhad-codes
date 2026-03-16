@@ -246,7 +246,7 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
                   }
                 </PortalTableCell>
                 <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                  <div className="table-actions">
+                  <div className="action-group">
                     <IconButton
                       action="view"
                       title="Open Conversation"

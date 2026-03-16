@@ -498,7 +498,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
                   </span>
                 </PortalTableCell>
                 <PortalTableCell className="col-actions">
-                  <div className="table-actions">
+                  <div className="action-group">
                     <IconButton
                       action="restore"
                       onClick={() => handleRestore(item.id)}

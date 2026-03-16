@@ -183,7 +183,10 @@
    ===================================================== */
 
 .portal .dashboard-content .data-table-container td,
-.portal .dashboard-content .data-table-container th {
+.portal .dashboard-content .data-table-container th,
+.portal .dashboard-content .contract-panel-no-padding .pd-table-cell,
+.portal .dashboard-content .invtab-header-row .pd-table-cell,
+.portal .dashboard-content .invtab-row .pd-table-cell {
   padding: var(--space-1) var(--content-gutter);
 }
 
