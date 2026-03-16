@@ -236,7 +236,7 @@
 
 .data-table-header h3 {
   order: 0;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   margin: 0;
   display: inline-flex;
   align-items: center;
@@ -263,13 +263,13 @@
   display: inline;
 }
 
-/* Stats summary — inline display next to title */
+/* Stats summary — left-aligned after title, actions push right */
 .stats-summary {
   order: 1;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  margin-left: var(--space-3);
+  margin-left: var(--space-4);
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   flex-wrap: wrap;
