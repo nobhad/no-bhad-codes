@@ -304,6 +304,7 @@
    ===================================================== */
 :is(.tag-badge, .category-badge) {
   display: inline-block;
+  padding: var(--space-0-25) var(--space-0-5);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   background: transparent;
@@ -322,13 +323,12 @@
   align-items: center;
   justify-content: flex-start;
   gap: var(--icon-gap);
-  position: relative;
   /* Fixed width - MUST match menu width exactly */
   width: var(--status-dropdown-width);
   min-width: var(--status-dropdown-width);
   max-width: var(--status-dropdown-width);
-  /* Symmetric horizontal padding - same on left/right of content */
-  /* Extra right padding for absolutely positioned caret */
+  /* Symmetric horizontal padding */
+  padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
   background: transparent;
   border: var(--portal-input-border);
   margin: 0;
@@ -354,13 +354,10 @@
   order: 0;
 }
 
-/* Caret icon in status dropdown - positioned absolutely on right */
-/* Uses --dropdown-padding-x for consistent spacing with left padding */
+/* Caret icon in status dropdown - flex child pushed right */
 .dropdown-trigger--status > .dropdown-caret--status {
-  position: absolute;
-  right: var(--dropdown-padding-x);
-  top: 50%;
-  transform: translateY(-50%);
+  margin-left: auto;
+  flex-shrink: 0;
   width: var(--dropdown-caret-size);
   height: var(--dropdown-caret-size);
   color: currentColor;
@@ -369,7 +366,7 @@
 
 /* Rotate caret when dropdown is open */
 [data-state="open"] > .dropdown-caret--status {
-  transform: translateY(-50%) rotate(180deg);
+  transform: rotate(180deg);
 }
 
 /* =====================================================

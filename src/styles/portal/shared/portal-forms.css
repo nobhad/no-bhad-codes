@@ -518,7 +518,6 @@ input.search-bar-input {
   width: 100%;
   height: var(--space-7);
   padding: var(--content-gutter);
-  padding-right: calc(var(--content-gutter) + var(--dropdown-caret-size) + var(--icon-gap));
   font-size: inherit;
   font-weight: var(--font-weight-medium);
   font-family: inherit;
@@ -555,21 +554,19 @@ input.search-bar-input {
   white-space: nowrap;
 }
 
-/* Caret — absolutely positioned, same distance from right edge
-   as content start is from left edge (--dropdown-padding-x) */
+/* Caret — flex child pushed right */
 .dropdown-caret--form {
-  position: absolute;
-  right: var(--dropdown-padding-x);
-  top: 50%;
-  transform: translateY(-50%);
+  margin-left: auto;
+  flex-shrink: 0;
   width: var(--dropdown-caret-size);
   height: var(--dropdown-caret-size);
   color: var(--color-text-muted);
+  transition: transform var(--transition-fast);
 }
 
 /* Rotate caret when dropdown is open */
 .dropdown-trigger--form[data-state="open"] > .dropdown-caret--form {
-  transform: translateY(-50%) rotate(180deg);
+  transform: rotate(180deg);
 }
 
 /* Textarea — same token and focus as other portal inputs */
