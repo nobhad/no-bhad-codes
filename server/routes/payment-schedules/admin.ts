@@ -206,6 +206,29 @@ router.post(
       paymentReference: req.body.payment_reference
     });
 
+    // Generate receipt for installment payment
+    if (installment.invoiceId) {
+      try {
+        const { receiptService } = await import('../../services/receipt-service.js');
+        await receiptService.createReceipt(
+          installment.invoiceId,
+          null,
+          req.body.paid_amount || existing.amount,
+          {
+            paymentMethod: req.body.payment_method,
+            paymentReference: req.body.payment_reference,
+            paymentDate: req.body.paid_date
+          }
+        );
+      } catch (receiptError) {
+        // Non-critical — don't fail the mark-paid operation
+        const { logger } = await import('../../services/logger.js');
+        logger.error('[PaymentSchedules] Failed to generate receipt for installment payment:', {
+          error: receiptError instanceof Error ? receiptError : undefined
+        });
+      }
+    }
+
     sendSuccess(res, { installment }, 'Installment marked as paid');
   })
 );

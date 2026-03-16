@@ -62,6 +62,8 @@ export interface ReceiptPdfData {
   clientName: string;
   clientEmail: string;
   clientCompany?: string;
+  clientPhone?: string;
+  clientAddress?: string; // Pre-formatted address string
   projectName?: string;
 }
 
@@ -149,7 +151,31 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     font: helvetica,
     color: PDF_COLORS.bodyLight
   });
-  y -= 30;
+  y -= 12;
+  if (data.clientPhone) {
+    page.drawText(data.clientPhone, {
+      x: leftMargin,
+      y,
+      size: PDF_TYPOGRAPHY.bodySize,
+      font: helvetica,
+      color: PDF_COLORS.bodyLight
+    });
+    y -= 12;
+  }
+  if (data.clientAddress) {
+    const addressLines = data.clientAddress.split('\n');
+    for (const line of addressLines) {
+      page.drawText(line, {
+        x: leftMargin,
+        y,
+        size: PDF_TYPOGRAPHY.bodySize,
+        font: helvetica,
+        color: PDF_COLORS.bodyLight
+      });
+      y -= 12;
+    }
+  }
+  y -= 18;
 
   // === RECEIPT DETAILS BOX ===
   const boxTop = y;
@@ -350,7 +376,12 @@ class ReceiptService {
     // Get invoice and client info
     const invoiceRow = await db.get(
       `SELECT i.invoice_number, i.project_id,
-              c.contact_name as client_name, c.email as client_email, c.company_name,
+              COALESCE(c.billing_name, c.contact_name) as client_name,
+              COALESCE(c.billing_email, c.email) as client_email,
+              COALESCE(c.billing_company, c.company_name) as company_name,
+              COALESCE(c.billing_phone, c.phone) as client_phone,
+              c.billing_address, c.billing_address2,
+              c.billing_city, c.billing_state, c.billing_zip, c.billing_country,
               p.project_name
        FROM invoices i
        JOIN clients c ON i.client_id = c.id
@@ -365,6 +396,21 @@ class ReceiptService {
 
     const receiptNumber = await this.generateReceiptNumber();
     const paymentDate = paymentData.paymentDate || new Date().toISOString().split('T')[0];
+
+    // Build formatted billing address
+    const addressParts: string[] = [];
+    if (invoiceRow.billing_address) addressParts.push(String(invoiceRow.billing_address));
+    if (invoiceRow.billing_address2) addressParts.push(String(invoiceRow.billing_address2));
+    const cityStateZip = [
+      invoiceRow.billing_city,
+      invoiceRow.billing_state,
+      invoiceRow.billing_zip
+    ].filter(Boolean).join(', ');
+    if (cityStateZip) addressParts.push(cityStateZip);
+    if (invoiceRow.billing_country && String(invoiceRow.billing_country) !== 'US' && String(invoiceRow.billing_country) !== 'United States') {
+      addressParts.push(String(invoiceRow.billing_country));
+    }
+    const formattedAddress = addressParts.length > 0 ? addressParts.join('\n') : undefined;
 
     // Generate PDF
     const pdfData: ReceiptPdfData = {
@@ -381,6 +427,8 @@ class ReceiptService {
       clientName: String(invoiceRow.client_name || 'Client'),
       clientEmail: String(invoiceRow.client_email || ''),
       clientCompany: invoiceRow.company_name ? String(invoiceRow.company_name) : undefined,
+      clientPhone: invoiceRow.client_phone ? String(invoiceRow.client_phone) : undefined,
+      clientAddress: formattedAddress,
       projectName: invoiceRow.project_name ? String(invoiceRow.project_name) : undefined
     };
 
@@ -453,6 +501,38 @@ class ReceiptService {
        VALUES (?, ?, ?, ?, ?)`,
       [receiptNumber, invoiceId, paymentId, amount, fileId]
     );
+
+    // Send receipt email notification
+    if (pdfData.clientEmail) {
+      try {
+        const { emailService } = await import('./email-service.js');
+        await emailService.sendEmail({
+          to: pdfData.clientEmail,
+          subject: `Payment Receipt ${receiptNumber} - ${BUSINESS_INFO.name}`,
+          text: `Thank you for your payment of $${amount.toFixed(2)}.\n\nReceipt Number: ${receiptNumber}\nInvoice: ${pdfData.invoiceNumber}\nDate: ${pdfData.paymentDate}\nMethod: ${pdfData.paymentMethod}\n\nThis receipt confirms your payment has been received. Please retain for your records.\n\n${BUSINESS_INFO.name}`,
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #333;">Payment Receipt</h2>
+              <p>Thank you for your payment of <strong>$${amount.toFixed(2)}</strong>.</p>
+              <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Receipt Number</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${receiptNumber}</td></tr>
+                <tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Invoice</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${pdfData.invoiceNumber}</td></tr>
+                <tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Payment Date</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${pdfData.paymentDate}</td></tr>
+                <tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Payment Method</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${pdfData.paymentMethod}</td></tr>
+                ${pdfData.projectName ? `<tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Project</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${pdfData.projectName}</td></tr>` : ''}
+              </table>
+              <p style="color: #666; font-size: 14px;">This receipt confirms your payment has been received. You can view and download your receipt from the client portal.</p>
+              <p style="color: #999; font-size: 12px; margin-top: 30px;">${BUSINESS_INFO.name} &bull; ${BUSINESS_INFO.email}</p>
+            </div>
+          `
+        });
+      } catch (emailError) {
+        logger.error('[ReceiptService] Failed to send receipt email notification:', {
+          error: emailError instanceof Error ? emailError : undefined
+        });
+        // Non-critical — don't fail receipt creation
+      }
+    }
 
     return this.getReceiptById(result.lastID!);
   }
@@ -604,7 +684,12 @@ class ReceiptService {
     // Get receipt with all related info
     const row = (await db.get(
       `SELECT r.*, i.invoice_number, i.project_id,
-              c.contact_name as client_name, c.email as client_email, c.company_name,
+              COALESCE(c.billing_name, c.contact_name) as client_name,
+              COALESCE(c.billing_email, c.email) as client_email,
+              COALESCE(c.billing_company, c.company_name) as company_name,
+              COALESCE(c.billing_phone, c.phone) as client_phone,
+              c.billing_address, c.billing_address2,
+              c.billing_city, c.billing_state, c.billing_zip, c.billing_country,
               p.project_name,
               ip.payment_method, ip.payment_reference, ip.payment_date
        FROM receipts r
@@ -622,6 +707,17 @@ class ReceiptService {
 
     // Regenerate PDF (in case original file is missing)
     const paymentDateStr = row.payment_date || row.created_at;
+
+    // Build address
+    const addressParts: string[] = [];
+    if (row.billing_address) addressParts.push(String(row.billing_address));
+    if (row.billing_address2) addressParts.push(String(row.billing_address2));
+    const cityStateZip = [row.billing_city, row.billing_state, row.billing_zip].filter(Boolean).join(', ');
+    if (cityStateZip) addressParts.push(cityStateZip);
+    if (row.billing_country && String(row.billing_country) !== 'US' && String(row.billing_country) !== 'United States') {
+      addressParts.push(String(row.billing_country));
+    }
+
     const pdfData: ReceiptPdfData = {
       receiptNumber: String(row.receipt_number),
       invoiceNumber: String(row.invoice_number || `INV-${row.invoice_id}`),
@@ -636,6 +732,8 @@ class ReceiptService {
       clientName: String(row.client_name || 'Client'),
       clientEmail: String(row.client_email || ''),
       clientCompany: row.company_name ? String(row.company_name) : undefined,
+      clientPhone: row.client_phone ? String(row.client_phone) : undefined,
+      clientAddress: addressParts.length > 0 ? addressParts.join('\n') : undefined,
       projectName: row.project_name ? String(row.project_name) : undefined
     };
 
