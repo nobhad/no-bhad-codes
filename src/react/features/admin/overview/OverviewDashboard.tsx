@@ -256,53 +256,76 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
             </div>
           </div>
 
-          {/* Upcoming Tasks */}
-          <div className="panel">
-            <div className="panel-header">
-              <button
-                className="panel-title panel-action"
-                onClick={() => navigate('/work', { state: { subtab: 'tasks' } })}
-              >
-                <Clock className="panel-icon" />
-                <span className="field-label">Upcoming Tasks</span>
-              </button>
-              <div className="view-toggle">
-                <button onClick={() => setTasksView('list')} className={tasksView === 'list' ? 'is-active' : ''} title="List view">
-                  <List className="icon-sm" />
+          {/* Upcoming Tasks — list view only (kanban renders below grid) */}
+          {tasksView === 'list' && (
+            <div className="panel">
+              <div className="panel-header">
+                <button
+                  className="panel-title panel-action"
+                  onClick={() => navigate('/work', { state: { subtab: 'tasks' } })}
+                >
+                  <Clock className="panel-icon" />
+                  <span className="field-label">Upcoming Tasks</span>
                 </button>
-                <button onClick={() => setTasksView('kanban')} className={tasksView === 'kanban' ? 'is-active' : ''} title="Kanban view">
-                  <LayoutGrid className="icon-sm" />
-                </button>
+                <div className="view-toggle">
+                  <button onClick={() => setTasksView('list')} className="is-active" title="List view">
+                    <List className="icon-sm" />
+                  </button>
+                  <button onClick={() => setTasksView('kanban')} title="Kanban view">
+                    <LayoutGrid className="icon-sm" />
+                  </button>
+                </div>
+              </div>
+              <div className="panel-body">
+                {upcomingTasks.length === 0 ? (
+                  <EmptyState
+                    icon={<Clock className="icon-xl" />}
+                    message="No upcoming tasks"
+                  />
+                ) : (
+                  <ul className="activity-feed">
+                    {upcomingTasks.slice(0, 5).map((task) => (
+                      <li key={task.id} className="activity-feed-item">
+                        <span className="dashboard-status-dot" data-priority={task.priority} style={{ background: getPriorityColor(task.priority), borderColor: getPriorityColor(task.priority) }} />
+                        <div className="activity-body">
+                          <span className="activity-text">{task.title}</span>
+                          <span className="activity-time">{task.projectName}</span>
+                        </div>
+                        {task.dueDate && <span className="due-cell">{formatDate(task.dueDate)}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
-            <div className="panel-body">
-              {upcomingTasks.length === 0 ? (
-                <EmptyState
-                  icon={<Clock className="icon-xl" />}
-                  message="No upcoming tasks"
-                />
-              ) : tasksView === 'list' ? (
-                <ul className="activity-feed">
-                  {upcomingTasks.slice(0, 5).map((task) => (
-                    <li key={task.id} className="activity-feed-item">
-                      <span className="dashboard-status-dot" data-priority={task.priority} style={{ background: getPriorityColor(task.priority), borderColor: getPriorityColor(task.priority) }} />
-                      <div className="activity-body">
-                        <span className="activity-text">{task.title}</span>
-                        <span className="activity-time">{task.projectName}</span>
-                      </div>
-                      {task.dueDate && <span className="due-cell">{formatDate(task.dueDate)}</span>}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <TasksKanban tasks={upcomingTasks} />
-              )}
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Aside Column */}
         <div className="overview-col-aside">
+          {/* Quick Actions */}
+          <div className="panel">
+            <div className="panel-header">
+              <div className="panel-title">
+                <span className="field-label">Quick Actions</span>
+              </div>
+            </div>
+            <div className="panel-body ovdash-quick-actions">
+              <button onClick={() => onNavigate?.('projects')} className="btn-secondary btn-sm">
+                <Plus /> New Project
+              </button>
+              <button onClick={() => onNavigate?.('clients')} className="btn-secondary btn-sm">
+                <Users /> Add Client
+              </button>
+              <button onClick={() => onNavigate?.('invoices')} className="btn-secondary btn-sm">
+                <FileUp /> Create Invoice
+              </button>
+              <button onClick={() => onNavigate?.('messages')} className="btn-secondary btn-sm">
+                <Send /> Send Message
+              </button>
+            </div>
+          </div>
+
           {/* Recent Activity */}
           <div className="panel">
             <div className="panel-header">
@@ -331,31 +354,41 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
               )}
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Quick Actions */}
-          <div className="panel">
-            <div className="panel-header">
-              <div className="panel-title">
-                <span className="field-label">Quick Actions</span>
-              </div>
-            </div>
-            <div className="panel-body ovdash-quick-actions">
-              <button onClick={() => onNavigate?.('projects')} className="btn-secondary btn-sm">
-                <Plus /> New Project
+      {/* Upcoming Tasks — kanban view (full width, outside grid) */}
+      {tasksView === 'kanban' && (
+        <div className="panel">
+          <div className="panel-header">
+            <button
+              className="panel-title panel-action"
+              onClick={() => navigate('/work', { state: { subtab: 'tasks' } })}
+            >
+              <Clock className="panel-icon" />
+              <span className="field-label">Upcoming Tasks</span>
+            </button>
+            <div className="view-toggle">
+              <button onClick={() => setTasksView('list')} title="List view">
+                <List className="icon-sm" />
               </button>
-              <button onClick={() => onNavigate?.('clients')} className="btn-secondary btn-sm">
-                <Users /> Add Client
-              </button>
-              <button onClick={() => onNavigate?.('invoices')} className="btn-secondary btn-sm">
-                <FileUp /> Create Invoice
-              </button>
-              <button onClick={() => onNavigate?.('messages')} className="btn-secondary btn-sm">
-                <Send /> Send Message
+              <button onClick={() => setTasksView('kanban')} className="is-active" title="Kanban view">
+                <LayoutGrid className="icon-sm" />
               </button>
             </div>
           </div>
+          <div className="panel-body">
+            {upcomingTasks.length === 0 ? (
+              <EmptyState
+                icon={<Clock className="icon-xl" />}
+                message="No upcoming tasks"
+              />
+            ) : (
+              <TasksKanban tasks={upcomingTasks} />
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

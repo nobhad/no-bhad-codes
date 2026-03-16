@@ -242,8 +242,9 @@
   height: var(--space-1-5);
   border: 1.5px solid currentColor;
   border-color: inherit;
-  margin-top: var(--space-1);
+  margin-top: 0.35em;
   flex-shrink: 0;
+  border-radius: 50%;
 }
 
 /* Dashboard status dot colors from design-system/tokens/colors.css */
@@ -310,8 +311,14 @@
   gap: var(--space-2);
 }
 
+.kanban-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
 .kanban-column h4 {
-  margin: 0 0 var(--space-2) 0;
+  margin: 0;
   text-align: left;
 }
 
@@ -319,13 +326,20 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  max-height: 300px;
   overflow-y: auto;
   scrollbar-width: thin;
 }
 
 .kanban-grid .kanban-card {
-  border: var(--border-width) solid var(--color-border-secondary);
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--content-gutter);
+}
+
+.kanban-grid .kanban-card > div {
+  flex: 1;
+  min-width: 0;
 }
 
 .empty-state-small {
