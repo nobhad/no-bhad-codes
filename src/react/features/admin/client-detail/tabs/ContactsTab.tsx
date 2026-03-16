@@ -258,11 +258,11 @@ export function ContactsTab({
           </label>
           <PortalDropdown>
             <PortalDropdownTrigger asChild>
-              <button className="form-dropdown-trigger" type="button">
-                <span className="form-dropdown-value">
+              <button className="dropdown-trigger--form" type="button">
+                <span className="dropdown-value--form">
                   {CONTACT_ROLE_LABELS[formData.role as keyof typeof CONTACT_ROLE_LABELS] || formData.role}
                 </span>
-                <ChevronDown className="form-dropdown-caret" />
+                <ChevronDown className="dropdown-caret--form" />
               </button>
             </PortalDropdownTrigger>
             <PortalDropdownContent align="start" sideOffset={0}>

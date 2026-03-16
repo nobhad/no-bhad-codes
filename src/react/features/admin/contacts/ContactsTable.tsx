@@ -1,11 +1,10 @@
 import * as React from 'react';
-import { useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Inbox,
   Star,
-  StarOff,
-  ChevronDown
+  StarOff
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { useListFetch } from '@react/factories/useDataFetch';
@@ -15,7 +14,7 @@ import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { cn } from '@react/lib/utils';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { StatusDropdownCell } from '@react/components/portal/StatusDropdownCell';
 import {
   PortalTable,
   PortalTableHeader,
@@ -27,12 +26,6 @@ import {
   PortalTableLoading,
   PortalTableError
 } from '@react/components/portal/PortalTable';
-import {
-  PortalDropdown,
-  PortalDropdownTrigger,
-  PortalDropdownContent,
-  PortalDropdownItem
-} from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
@@ -42,7 +35,8 @@ import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
-import { NOTIFICATIONS } from '@/constants/notifications';
+import { CreateContactModal } from '../modals/CreateEntityModals';
+import { useEntityOptions } from '@react/hooks/useEntityOptions';
 
 const logger = createLogger('ContactsTable');
 
@@ -138,6 +132,9 @@ function sortContacts(a: Contact, b: Contact, sort: SortConfig): number {
 
 export function ContactsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: ContactsTableProps) {
   const containerRef = useFadeIn();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const { clientOptions } = useEntityOptions(createOpen);
 
   // Data fetching via useListFetch
   const { data, isLoading, error, refetch, setData } = useListFetch<Contact, ContactStats>({
@@ -288,207 +285,214 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
     [setFilter]
   );
 
-  return (
-    <TableLayout
-      containerRef={containerRef as React.RefObject<HTMLDivElement>}
-      title="CONTACTS"
-      stats={
-        <TableStats
-          items={[
-            { value: stats.total, label: 'total' },
-            { value: stats.active, label: 'active', variant: 'active' },
-            { value: stats.primary, label: 'primary', variant: 'pending' }
-          ]}
-          tooltip={`${stats.total} Total • ${stats.active} Active • ${stats.primary} Primary • ${stats.withCompany} With Company`}
-        />
+  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
+    setCreateLoading(true);
+    try {
+      const res = await apiPost(API_ENDPOINTS.ADMIN.CONTACTS, formData);
+      if (res.ok) {
+        showNotification?.('Contact created successfully', 'success');
+        setCreateOpen(false);
+        refetch();
+      } else {
+        showNotification?.('Failed to create contact', 'error');
       }
-      actions={
-        <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search contacts..."
-          />
-          <FilterDropdown
-            sections={CONTACTS_FILTER_CONFIG}
-            values={filterValues}
-            onChange={handleFilterChange}
-          />
-          <IconButton
-            action="download"
-            disabled={filteredContacts.length === 0}
-            title="Export to CSV"
-          />
-          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="Add Contact" />
-        </>
-      }
-      bulkActions={
-        <BulkActionsToolbar
-          selectedCount={selection.selectedCount}
-          totalCount={filteredContacts.length}
-          onClearSelection={selection.clearSelection}
-          onSelectAll={() => selection.selectMany(filteredContacts)}
-          allSelected={selection.allSelected && selection.selectedCount === filteredContacts.length}
-          statusOptions={bulkStatusOptions}
-          onStatusChange={handleBulkStatusChange}
-          onDelete={handleBulkDelete}
-        />
-      }
-      pagination={
-        !isLoading && filteredContacts.length > 0 ? (
-          <TablePagination
-            pageInfo={pagination.pageInfo}
-            page={pagination.page}
-            pageSize={pagination.pageSize}
-            pageSizeOptions={pagination.pageSizeOptions}
-            canGoPrev={pagination.canGoPrev}
-            canGoNext={pagination.canGoNext}
-            onPageSizeChange={pagination.setPageSize}
-            onFirstPage={pagination.firstPage}
-            onPrevPage={pagination.prevPage}
-            onNextPage={pagination.nextPage}
-            onLastPage={pagination.lastPage}
-          />
-        ) : undefined
-      }
-    >
-      <PortalTable>
-        <PortalTableHeader>
-          <PortalTableRow>
-            <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
-              <Checkbox
-                checked={selection.allSelected}
-                onCheckedChange={selection.toggleSelectAll}
-                aria-label="Select all"
-              />
-            </PortalTableHead>
-            <PortalTableHead className="star-col"></PortalTableHead>
-            <PortalTableHead
-              className="contact-col"
-              sortable
-              sortDirection={sort?.column === 'name' ? sort.direction : null}
-              onClick={() => toggleSort('name')}
-            >
-              Contact
-            </PortalTableHead>
-            <PortalTableHead className="status-col">Status</PortalTableHead>
-            <PortalTableHead className="col-actions">Actions</PortalTableHead>
-          </PortalTableRow>
-        </PortalTableHeader>
+    } catch {
+      showNotification?.('Failed to create contact', 'error');
+    } finally {
+      setCreateLoading(false);
+    }
+  }, [showNotification, refetch]);
 
-        <PortalTableBody animate={!isLoading && !error}>
-          {error ? (
-            <PortalTableError colSpan={5} message={error} onRetry={refetch} />
-          ) : isLoading ? (
-            <PortalTableLoading colSpan={5} rows={5} />
-          ) : paginatedContacts.length === 0 ? (
-            <PortalTableEmpty
-              colSpan={5}
-              icon={<Inbox />}
-              message={hasActiveFilters ? 'No contacts match your filters' : 'No contacts yet'}
+  return (
+    <div>
+      <TableLayout
+        containerRef={containerRef as React.RefObject<HTMLDivElement>}
+        title="CONTACTS"
+        stats={
+          <TableStats
+            items={[
+              { value: stats.total, label: 'total' },
+              { value: stats.active, label: 'active', variant: 'active' },
+              { value: stats.primary, label: 'primary', variant: 'pending' }
+            ]}
+            tooltip={`${stats.total} Total • ${stats.active} Active • ${stats.primary} Primary • ${stats.withCompany} With Company`}
+          />
+        }
+        actions={
+          <>
+            <SearchFilter
+              value={search}
+              onChange={setSearch}
+              placeholder="Search contacts..."
             />
-          ) : (
-            paginatedContacts.map((contact) => (
-              <PortalTableRow
-                key={contact.id}
-                clickable
-                selected={selection.isSelected(contact)}
+            <FilterDropdown
+              sections={CONTACTS_FILTER_CONFIG}
+              values={filterValues}
+              onChange={handleFilterChange}
+            />
+            <IconButton
+              action="download"
+              disabled={filteredContacts.length === 0}
+              title="Export to CSV"
+            />
+            <IconButton action="add" onClick={() => setCreateOpen(true)} title="Add Contact" />
+          </>
+        }
+        bulkActions={
+          <BulkActionsToolbar
+            selectedCount={selection.selectedCount}
+            totalCount={filteredContacts.length}
+            onClearSelection={selection.clearSelection}
+            onSelectAll={() => selection.selectMany(filteredContacts)}
+            allSelected={selection.allSelected && selection.selectedCount === filteredContacts.length}
+            statusOptions={bulkStatusOptions}
+            onStatusChange={handleBulkStatusChange}
+            onDelete={handleBulkDelete}
+          />
+        }
+        pagination={
+          !isLoading && filteredContacts.length > 0 ? (
+            <TablePagination
+              pageInfo={pagination.pageInfo}
+              page={pagination.page}
+              pageSize={pagination.pageSize}
+              pageSizeOptions={pagination.pageSizeOptions}
+              canGoPrev={pagination.canGoPrev}
+              canGoNext={pagination.canGoNext}
+              onPageSizeChange={pagination.setPageSize}
+              onFirstPage={pagination.firstPage}
+              onPrevPage={pagination.prevPage}
+              onNextPage={pagination.nextPage}
+              onLastPage={pagination.lastPage}
+            />
+          ) : undefined
+        }
+      >
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
+                <Checkbox
+                  checked={selection.allSelected}
+                  onCheckedChange={selection.toggleSelectAll}
+                  aria-label="Select all"
+                />
+              </PortalTableHead>
+              <PortalTableHead className="star-col"></PortalTableHead>
+              <PortalTableHead
+                className="contact-col"
+                sortable
+                sortDirection={sort?.column === 'name' ? sort.direction : null}
+                onClick={() => toggleSort('name')}
               >
-                <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
-                  <Checkbox
-                    checked={selection.isSelected(contact)}
-                    onCheckedChange={() => selection.toggleSelection(contact)}
-                    aria-label={`Select ${contact.firstName} ${contact.lastName}`}
-                  />
-                </PortalTableCell>
-                <PortalTableCell className="star-cell" onClick={(e) => e.stopPropagation()}>
-                  <button
-                    onClick={() => togglePrimary(contact.id, contact.isPrimary)}
-                    className={cn(
-                      'icon-btn icon-btn-star',
-                      contact.isPrimary && 'is-primary'
-                    )}
-                    title={contact.isPrimary ? 'Primary contact' : 'Mark as primary'}
-                  >
-                    {contact.isPrimary ? (
-                      <Star className="icon-sm fill-current" />
-                    ) : (
-                      <StarOff className="icon-sm" />
-                    )}
-                  </button>
-                </PortalTableCell>
-                <PortalTableCell className="primary-cell contact-cell">
-                  <div className="cell-content">
-                    {contact.company && (
-                      <span className="identity-company">{contact.company}</span>
-                    )}
-                    <span className="cell-title identity-name">
-                      {contact.firstName} {contact.lastName}
-                    </span>
-                    <span className="cell-subtitle identity-email">{contact.email}</span>
-                    {contact.phone && (
-                      <span className="cell-subtitle identity-phone">{contact.phone}</span>
-                    )}
-                    {contact.role && contact.role !== 'client' && (
-                      <span className="cell-subtitle">{contact.role}</span>
-                    )}
-                    {contact.clientName && (
-                      <span className="cell-subtitle">
-                        {contact.clientId != null ? (
-                          <Link
-                            to={`/clients/${contact.clientId}`}
-                            className="cell-link"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onNavigate?.('clients', String(contact.clientId));
-                            }}
-                          >
-                            {contact.clientName}
-                          </Link>
-                        ) : (
-                          contact.clientName
-                        )}
+              Contact
+              </PortalTableHead>
+              <PortalTableHead className="status-col">Status</PortalTableHead>
+              <PortalTableHead className="col-actions">Actions</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
+
+          <PortalTableBody animate={!isLoading && !error}>
+            {error ? (
+              <PortalTableError colSpan={5} message={error} onRetry={refetch} />
+            ) : isLoading ? (
+              <PortalTableLoading colSpan={5} rows={5} />
+            ) : paginatedContacts.length === 0 ? (
+              <PortalTableEmpty
+                colSpan={5}
+                icon={<Inbox />}
+                message={hasActiveFilters ? 'No contacts match your filters' : 'No contacts yet'}
+              />
+            ) : (
+              paginatedContacts.map((contact) => (
+                <PortalTableRow
+                  key={contact.id}
+                  clickable
+                  selected={selection.isSelected(contact)}
+                >
+                  <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={selection.isSelected(contact)}
+                      onCheckedChange={() => selection.toggleSelection(contact)}
+                      aria-label={`Select ${contact.firstName} ${contact.lastName}`}
+                    />
+                  </PortalTableCell>
+                  <PortalTableCell className="star-cell" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => togglePrimary(contact.id, contact.isPrimary)}
+                      className={cn(
+                        'icon-btn icon-btn-star',
+                        contact.isPrimary && 'is-primary'
+                      )}
+                      title={contact.isPrimary ? 'Primary contact' : 'Mark as primary'}
+                    >
+                      {contact.isPrimary ? (
+                        <Star className="icon-sm fill-current" />
+                      ) : (
+                        <StarOff className="icon-sm" />
+                      )}
+                    </button>
+                  </PortalTableCell>
+                  <PortalTableCell className="primary-cell contact-cell">
+                    <div className="cell-content">
+                      {contact.company && (
+                        <span className="identity-company">{contact.company}</span>
+                      )}
+                      <span className="cell-title identity-name">
+                        {contact.firstName} {contact.lastName}
                       </span>
-                    )}
-                  </div>
-                </PortalTableCell>
-                <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
-                  <PortalDropdown>
-                    <PortalDropdownTrigger asChild>
-                      <button className="status-dropdown-trigger" aria-label="Change contact status">
-                        <StatusBadge status={getStatusVariant(contact.status)} size="sm">
-                          {CONTACT_STATUS_CONFIG[contact.status]?.label || contact.status}
-                        </StatusBadge>
-                        <ChevronDown className="status-dropdown-caret" />
-                      </button>
-                    </PortalDropdownTrigger>
-                    <PortalDropdownContent sideOffset={0} align="start">
-                      {Object.entries(CONTACT_STATUS_CONFIG)
-                        .filter(([status]) => status !== contact.status)
-                        .map(([status, config]) => (
-                          <PortalDropdownItem
-                            key={status}
-                            onClick={() => handleStatusChange(contact.id, status)}
-                          >
-                            <StatusBadge status={getStatusVariant(status)} size="sm">
-                              {config.label}
-                            </StatusBadge>
-                          </PortalDropdownItem>
-                        ))}
-                    </PortalDropdownContent>
-                  </PortalDropdown>
-                </PortalTableCell>
-                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                  <div className="table-actions">
-                    <IconButton action="view" title="View" />
-                    <IconButton action="edit" title="Edit" />
-                  </div>
-                </PortalTableCell>
-              </PortalTableRow>
-            ))
-          )}
-        </PortalTableBody>
-      </PortalTable>
-    </TableLayout>
+                      <span className="cell-subtitle identity-email">{contact.email}</span>
+                      {contact.phone && (
+                        <span className="cell-subtitle identity-phone">{contact.phone}</span>
+                      )}
+                      {contact.role && contact.role !== 'client' && (
+                        <span className="cell-subtitle">{contact.role}</span>
+                      )}
+                      {contact.clientName && (
+                        <span className="cell-subtitle">
+                          {contact.clientId != null ? (
+                            <Link
+                              to={`/clients/${contact.clientId}`}
+                              className="cell-link"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onNavigate?.('clients', String(contact.clientId));
+                              }}
+                            >
+                              {contact.clientName}
+                            </Link>
+                          ) : (
+                            contact.clientName
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  </PortalTableCell>
+                  <StatusDropdownCell
+                    status={contact.status}
+                    statusConfig={CONTACT_STATUS_CONFIG}
+                    onStatusChange={(newStatus) => handleStatusChange(contact.id, newStatus)}
+                    ariaLabel="Change contact status"
+                  />
+                  <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
+                    <div className="table-actions">
+                      <IconButton action="view" title="View" />
+                      <IconButton action="edit" title="Edit" />
+                    </div>
+                  </PortalTableCell>
+                </PortalTableRow>
+              ))
+            )}
+          </PortalTableBody>
+        </PortalTable>
+      </TableLayout>
+      <CreateContactModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onSubmit={handleCreate}
+        loading={createLoading}
+        clientOptions={clientOptions}
+      />
+    </div>
   );
 }

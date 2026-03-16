@@ -1,9 +1,8 @@
 import * as React from 'react';
-import { useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   FileText,
-  Inbox,
-  ChevronDown
+  Inbox
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { useListFetch } from '@react/factories/useDataFetch';
@@ -14,7 +13,7 @@ import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilt
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { formatDate } from '@react/utils/formatDate';
 import { formatCurrency } from '@/utils/format-utils';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { StatusDropdownCell } from '@react/components/portal/StatusDropdownCell';
 import {
   PortalTable,
   PortalTableHeader,
@@ -26,22 +25,17 @@ import {
   PortalTableLoading,
   PortalTableError
 } from '@react/components/portal/PortalTable';
-import {
-  PortalDropdown,
-  PortalDropdownTrigger,
-  PortalDropdownContent,
-  PortalDropdownItem
-} from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
+import { useEntityOptions } from '@react/hooks/useEntityOptions';
 import { PROPOSALS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
 import { executeWithToast } from '@/utils/api-wrappers';
-import { NOTIFICATIONS } from '@/constants/notifications';
+import { CreateProposalModal } from '../modals/CreateEntityModals';
 
 interface Proposal {
   id: number;
@@ -140,6 +134,9 @@ function sortProposals(a: Proposal, b: Proposal, sort: SortConfig): number {
 
 export function ProposalsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: ProposalsTableProps) {
   const containerRef = useFadeIn();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const { clientOptions: entityClients, projectOptions: entityProjects } = useEntityOptions(createOpen);
 
   // Data fetching via useListFetch
   const { data, isLoading, error, refetch, setData } = useListFetch<Proposal, ProposalStats>({
@@ -285,6 +282,39 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
     [setFilter]
   );
 
+  // Merge entity options (full list) with locally-derived options (dedup by value)
+  const clientOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    entityClients.forEach((o) => map.set(o.value, o.label));
+    proposals.forEach((p) => { if (p.clientId && p.clientName) map.set(String(p.clientId), p.clientName); });
+    return Array.from(map, ([value, label]) => ({ value, label }));
+  }, [proposals, entityClients]);
+
+  const projectTypeOptions = useMemo(() => {
+    const types = new Set<string>();
+    proposals.forEach((p) => { if (p.projectType) types.add(p.projectType); });
+    return Array.from(types, (t) => ({ value: t, label: t }));
+  }, [proposals]);
+
+  // Create handler
+  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
+    setCreateLoading(true);
+    try {
+      const res = await apiPost(API_ENDPOINTS.ADMIN.PROPOSALS, formData);
+      if (res.ok) {
+        showNotification?.('Proposal created successfully', 'success');
+        setCreateOpen(false);
+        refetch();
+      } else {
+        showNotification?.('Failed to create proposal', 'error');
+      }
+    } catch {
+      showNotification?.('Failed to create proposal', 'error');
+    } finally {
+      setCreateLoading(false);
+    }
+  }, [showNotification, refetch]);
+
   return (
     <TableLayout
       containerRef={containerRef as React.RefObject<HTMLDivElement>}
@@ -318,7 +348,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
             disabled={filteredProposals.length === 0}
             title="Export to CSV"
           />
-          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="New Proposal" />
+          <IconButton action="add" onClick={() => setCreateOpen(true)} title="New Proposal" />
         </>
       }
       bulkActions={
@@ -442,32 +472,12 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
                 <PortalTableCell className="text-right">
                   {formatCurrency(proposal.amount)}
                 </PortalTableCell>
-                <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
-                  <PortalDropdown>
-                    <PortalDropdownTrigger asChild>
-                      <button className="status-dropdown-trigger" aria-label="Change proposal status">
-                        <StatusBadge status={getStatusVariant(proposal.status)} size="sm">
-                          {PROPOSAL_STATUS_CONFIG[proposal.status]?.label || proposal.status}
-                        </StatusBadge>
-                        <ChevronDown className="status-dropdown-caret" />
-                      </button>
-                    </PortalDropdownTrigger>
-                    <PortalDropdownContent sideOffset={0} align="start">
-                      {Object.entries(PROPOSAL_STATUS_CONFIG)
-                        .filter(([status]) => status !== proposal.status)
-                        .map(([status, config]) => (
-                          <PortalDropdownItem
-                            key={status}
-                            onClick={() => handleStatusChange(proposal.id, status)}
-                          >
-                            <StatusBadge status={getStatusVariant(status)} size="sm">
-                              {config.label}
-                            </StatusBadge>
-                          </PortalDropdownItem>
-                        ))}
-                    </PortalDropdownContent>
-                  </PortalDropdown>
-                </PortalTableCell>
+                <StatusDropdownCell
+                  status={proposal.status}
+                  statusConfig={PROPOSAL_STATUS_CONFIG}
+                  onStatusChange={(newStatus) => handleStatusChange(proposal.id, newStatus)}
+                  ariaLabel="Change proposal status"
+                />
                 <PortalTableCell className="date-cell">
                   <div className="cell-content">
                     <span className="cell-title">{formatDate(proposal.createdAt)}</span>
@@ -500,6 +510,15 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
           )}
         </PortalTableBody>
       </PortalTable>
+      <CreateProposalModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onSubmit={handleCreate}
+        loading={createLoading}
+        clientOptions={clientOptions}
+        projectOptions={entityProjects}
+        projectTypeOptions={projectTypeOptions}
+      />
     </TableLayout>
   );
 }

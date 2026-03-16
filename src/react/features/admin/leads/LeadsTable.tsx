@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { Inbox, ChevronDown } from 'lucide-react';
+import { Inbox } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import {
@@ -14,16 +14,10 @@ import {
   PortalTableLoading,
   PortalTableError
 } from '@react/components/portal/PortalTable';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { StatusDropdownCell } from '@react/components/portal/StatusDropdownCell';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
-import {
-  PortalDropdown,
-  PortalDropdownTrigger,
-  PortalDropdownContent,
-  PortalDropdownItem
-} from '@react/components/portal/PortalDropdown';
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import { useLeads } from '@react/hooks/useLeads';
@@ -286,7 +280,7 @@ export function LeadsTable({
   );
 
   return (
-    <>
+    <div>
       <TableLayout
         containerRef={containerRef as React.RefObject<HTMLDivElement>}
         title="LEADS"
@@ -469,32 +463,12 @@ export function LeadsTable({
                   </PortalTableCell>
 
                   {/* Status */}
-                  <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
-                    <PortalDropdown>
-                      <PortalDropdownTrigger asChild>
-                        <button className="status-dropdown-trigger" aria-label="Change lead status">
-                          <StatusBadge status={getStatusVariant(lead.status)}>
-                            {LEAD_STATUS_CONFIG[lead.status]?.label || lead.status}
-                          </StatusBadge>
-                          <ChevronDown className="status-dropdown-caret" />
-                        </button>
-                      </PortalDropdownTrigger>
-                      <PortalDropdownContent sideOffset={0} align="start">
-                        {Object.entries(LEAD_STATUS_CONFIG)
-                          .filter(([status]) => status !== lead.status)
-                          .map(([status, config]) => (
-                            <PortalDropdownItem
-                              key={status}
-                              onClick={() => handleStatusChange(lead.id, status as LeadStatus)}
-                            >
-                              <StatusBadge status={getStatusVariant(status)} size="sm">
-                                {config.label}
-                              </StatusBadge>
-                            </PortalDropdownItem>
-                          ))}
-                      </PortalDropdownContent>
-                    </PortalDropdown>
-                  </PortalTableCell>
+                  <StatusDropdownCell
+                    status={lead.status}
+                    statusConfig={LEAD_STATUS_CONFIG}
+                    onStatusChange={(newStatus) => handleStatusChange(lead.id, newStatus as LeadStatus)}
+                    ariaLabel="Change lead status"
+                  />
 
                   {/* Created Date */}
                   <PortalTableCell className="date-cell">
@@ -547,6 +521,6 @@ export function LeadsTable({
         getAuthToken={getAuthToken}
         showNotification={showNotification}
       />
-    </>
+    </div>
   );
 }

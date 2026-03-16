@@ -263,7 +263,7 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 /* Readonly form values — meta-value styling from shared */
 
 /* Project status dropdown - match input field styling */
-#pd-status-dropdown .custom-dropdown-trigger {
+#pd-status-dropdown .dropdown-trigger--custom {
   min-height: auto;
 }
 
@@ -480,7 +480,7 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 
 /* Invoice styles consolidated in project-detail-invoices.css */
 
-/* Message styles now in client-portal/messages.css (unified for all portals) */
+/* Message styles now in portal/shared/portal-messages.css (unified for all portals) */
 
 /* Client account buttons should use .btn-outline .btn-full classes */
 
@@ -560,7 +560,7 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 /* Form/settings dropdowns only; table dropdowns use base in portal-dropdown.css */
 [data-page="admin"]
   .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown)
-  .custom-dropdown-trigger {
+  .dropdown-trigger--custom {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -574,13 +574,13 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 
 [data-page="admin"]
   .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown)
-  .custom-dropdown-trigger:hover {
+  .dropdown-trigger--custom:hover {
   border-color: var(--color-accent);
 }
 
 [data-page="admin"]
   .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown)
-  .custom-dropdown-trigger:focus {
+  .dropdown-trigger--custom:focus {
   outline: none;
   border-color: var(--color-accent);
 }
@@ -594,13 +594,13 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   text-align: left;
 }
 
-[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]) .custom-dropdown-caret {
+[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]) .dropdown-caret--custom {
   flex-shrink: 0;
   margin-left: var(--space-2);
   transition: transform var(--transition-fast);
 }
 
-[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]).open .custom-dropdown-caret {
+[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]).open .dropdown-caret--custom {
   transform: rotate(180deg);
 }
 
@@ -639,7 +639,7 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 
 [data-page="admin"]
   .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown).open
-  .custom-dropdown-trigger {
+  .dropdown-trigger--custom {
   border-color: var(--color-accent);
   border-bottom: none;
   /* Only top and side shadows - clip bottom shadow */

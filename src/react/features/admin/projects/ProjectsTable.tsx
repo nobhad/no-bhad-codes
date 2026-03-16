@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { Inbox, ChevronDown } from 'lucide-react';
+import { Inbox } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import {
@@ -14,16 +14,10 @@ import {
   PortalTableLoading,
   PortalTableError
 } from '@react/components/portal/PortalTable';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { StatusDropdownCell } from '@react/components/portal/StatusDropdownCell';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
-import {
-  PortalDropdown,
-  PortalDropdownTrigger,
-  PortalDropdownContent,
-  PortalDropdownItem
-} from '@react/components/portal/PortalDropdown';
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import { AddProjectModal } from '../modals/AddProjectModal';
@@ -332,7 +326,7 @@ export function ProjectsTable({
   );
 
   return (
-    <>
+    <div>
       <TableLayout
         containerRef={containerRef as React.RefObject<HTMLDivElement>}
         title="PROJECTS"
@@ -531,32 +525,12 @@ export function ProjectsTable({
                   </PortalTableCell>
 
                   {/* Status */}
-                  <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
-                    <PortalDropdown>
-                      <PortalDropdownTrigger asChild>
-                        <button className="status-dropdown-trigger" aria-label="Change project status">
-                          <StatusBadge status={getStatusVariant(project.status)}>
-                            {PROJECT_STATUS_CONFIG[project.status]?.label || project.status}
-                          </StatusBadge>
-                          <ChevronDown className="status-dropdown-caret" />
-                        </button>
-                      </PortalDropdownTrigger>
-                      <PortalDropdownContent align="start">
-                        {Object.entries(PROJECT_STATUS_CONFIG)
-                          .filter(([status]) => status !== project.status)
-                          .map(([status, config]) => (
-                            <PortalDropdownItem
-                              key={status}
-                              onClick={() => handleStatusChange(project.id, status as ProjectStatus)}
-                            >
-                              <StatusBadge status={getStatusVariant(status)} size="sm">
-                                {config.label}
-                              </StatusBadge>
-                            </PortalDropdownItem>
-                          ))}
-                      </PortalDropdownContent>
-                    </PortalDropdown>
-                  </PortalTableCell>
+                  <StatusDropdownCell
+                    status={project.status}
+                    statusConfig={PROJECT_STATUS_CONFIG}
+                    onStatusChange={(newStatus) => handleStatusChange(project.id, newStatus as ProjectStatus)}
+                    ariaLabel="Change project status"
+                  />
 
                   {/* Budget */}
                   <PortalTableCell className="amount-col">
@@ -616,6 +590,6 @@ export function ProjectsTable({
         timelineOptions={TIMELINE_OPTIONS}
         loading={addProjectLoading}
       />
-    </>
+    </div>
   );
 }

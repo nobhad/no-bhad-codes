@@ -21,7 +21,7 @@
  */
 
 /* Base layout for all portal text buttons */
-.portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn) {
+:is(.portal, .portal-modal) :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -47,12 +47,12 @@
 }
 
 /* SVG icons inherit button color */
-.portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success, .form-button):not(.icon-btn):not(.nav-btn) > svg {
+:is(.portal, .portal-modal) :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success, .form-button):not(.icon-btn):not(.nav-btn) > svg {
   color: inherit;
 }
 
 /* Default hover state */
-.portal :is(.btn-primary, .btn-secondary, .btn-outline):not(.icon-btn):not(.nav-btn):hover {
+:is(.portal, .portal-modal) :is(.btn-primary, .btn-secondary, .btn-outline):not(.icon-btn):not(.nav-btn):hover {
   background: var(--portal-btn-hover-bg, var(--color-dark));
   color: var(--portal-btn-hover-color, var(--color-light));
   border-color: var(--portal-btn-hover-border, var(--color-dark));
@@ -60,15 +60,15 @@
 }
 
 /* Focus state */
-.portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn):focus,
-.portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn):focus-visible {
+:is(.portal, .portal-modal) :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn):focus,
+:is(.portal, .portal-modal) :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn):focus-visible {
   outline: 2px solid var(--color-off-white);
   outline-offset: 2px;
   box-shadow: none;
 }
 
-/* Button with icon - flex layout */
-button:has(> svg) {
+/* Button with icon - flex layout (exclude checkboxes) */
+button:has(> svg):not(.portal-checkbox) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -79,7 +79,7 @@ button:has(> svg) {
    Exclude dropdown triggers — their SVG carets must stay AFTER text. */
 :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.dropdown-trigger):not(.date-range-trigger) > :is(svg, .btn-icon),
 .icon-btn > :is(svg, .icon-btn-svg),
-button:not(.panel-action):not(.custom-dropdown-trigger):not(.dropdown-trigger):not(.status-dropdown-trigger):not(.form-dropdown-trigger):not(.modal-dropdown-trigger):not(.date-range-trigger) > :is(.icon-wrap, .tab-icon, svg) {
+button:not(.portal-checkbox):not(.panel-action):not(.dropdown-trigger--custom):not(.dropdown-trigger):not(.dropdown-trigger--status):not(.dropdown-trigger--form):not(.modal-dropdown-trigger):not(.date-range-trigger) > :is(.icon-wrap, .tab-icon, svg) {
   order: -1;
 }
 
@@ -398,7 +398,7 @@ button:not(.panel-action):not(.custom-dropdown-trigger):not(.dropdown-trigger):n
  * WCAG 2.1 requires 44x44px touch targets
  */
 @media (pointer: coarse) {
-  .portal .icon-btn {
+  :is(.portal, .portal-modal) .icon-btn {
     width: var(--space-5);
     height: var(--space-5);
     min-width: var(--space-5);
@@ -698,7 +698,7 @@ button:not(.panel-action):not(.custom-dropdown-trigger):not(.dropdown-trigger):n
  * ============================================ */
 
 @media (--small-mobile) {
-  .portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn) {
+  :is(.portal, .portal-modal) :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn) {
     padding: clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 20px);
     font-size: clamp(0.7rem, 2.5vw, 0.9rem);
   }
@@ -710,14 +710,14 @@ button:not(.panel-action):not(.custom-dropdown-trigger):not(.dropdown-trigger):n
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
-  .portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn) {
+  :is(.portal, .portal-modal) :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn) {
     border-width: var(--border-width-thick);
   }
 }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn) {
+  :is(.portal, .portal-modal) :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn) {
     transition: none;
   }
 }

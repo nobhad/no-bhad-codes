@@ -1,10 +1,9 @@
 import * as React from 'react';
-import { useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   Package,
   AlertCircle,
-  Inbox,
-  ChevronDown
+  Inbox
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -14,7 +13,7 @@ import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilt
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { formatDate } from '@react/utils/formatDate';
 import { cn } from '@react/lib/utils';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { StatusDropdownCell } from '@react/components/portal/StatusDropdownCell';
 import {
   PortalTable,
   PortalTableHeader,
@@ -26,23 +25,18 @@ import {
   PortalTableLoading,
   PortalTableError
 } from '@react/components/portal/PortalTable';
-import {
-  PortalDropdown,
-  PortalDropdownTrigger,
-  PortalDropdownContent,
-  PortalDropdownItem
-} from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
+import { useEntityOptions } from '@react/hooks/useEntityOptions';
 import { DELIVERABLES_FILTER_CONFIG } from '../shared/filterConfigs';
 import { useListFetch } from '@react/factories/useDataFetch';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
-import { NOTIFICATIONS } from '@/constants/notifications';
+import { CreateDeliverableModal } from '../modals/CreateEntityModals';
 
 const logger = createLogger('DeliverablesTable');
 
@@ -144,6 +138,9 @@ function sortDeliverables(a: Deliverable, b: Deliverable, sort: SortConfig): num
 
 export function DeliverablesTable({ projectId, getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: DeliverablesTableProps) {
   const containerRef = useFadeIn();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const { projectOptions: entityProjects } = useEntityOptions(createOpen);
 
   // Build endpoint with optional projectId query param
   const endpoint = useMemo(() => {
@@ -280,6 +277,33 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
     [setFilter]
   );
 
+  // Merge entity options (full list) with locally-derived options (dedup by value)
+  const projectOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    entityProjects.forEach((o) => map.set(o.value, o.label));
+    deliverables.forEach((d) => { if (d.projectId && d.projectName) map.set(String(d.projectId), d.projectName); });
+    return Array.from(map, ([value, label]) => ({ value, label }));
+  }, [deliverables, entityProjects]);
+
+  // Create handler
+  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
+    setCreateLoading(true);
+    try {
+      const res = await apiPost(API_ENDPOINTS.ADMIN.DELIVERABLES, formData);
+      if (res.ok) {
+        showNotification?.('Deliverable created successfully', 'success');
+        setCreateOpen(false);
+        refetch();
+      } else {
+        showNotification?.('Failed to create deliverable', 'error');
+      }
+    } catch {
+      showNotification?.('Failed to create deliverable', 'error');
+    } finally {
+      setCreateLoading(false);
+    }
+  }, [showNotification, refetch]);
+
   function isOverdue(dueDate?: string, status?: string): boolean {
     if (!dueDate || status === 'delivered' || status === 'approved') return false;
     return new Date(dueDate) < new Date();
@@ -319,7 +343,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
             disabled={filteredDeliverables.length === 0}
             title="Export to CSV"
           />
-          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="New Deliverable" />
+          <IconButton action="add" onClick={() => setCreateOpen(true)} title="New Deliverable" />
         </>
       }
       bulkActions={
@@ -450,32 +474,12 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                     {deliverable.projectName}
                   </button>
                 </PortalTableCell>
-                <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
-                  <PortalDropdown>
-                    <PortalDropdownTrigger asChild>
-                      <button className="status-dropdown-trigger" aria-label="Change deliverable status">
-                        <StatusBadge status={getStatusVariant(deliverable.status)} size="sm">
-                          {DELIVERABLE_STATUS_CONFIG[deliverable.status]?.label || deliverable.status.replace('-', ' ')}
-                        </StatusBadge>
-                        <ChevronDown className="status-dropdown-caret" />
-                      </button>
-                    </PortalDropdownTrigger>
-                    <PortalDropdownContent sideOffset={0} align="start">
-                      {Object.entries(DELIVERABLE_STATUS_CONFIG)
-                        .filter(([status]) => status !== deliverable.status)
-                        .map(([status, config]) => (
-                          <PortalDropdownItem
-                            key={status}
-                            onClick={() => handleStatusChange(deliverable.id, status)}
-                          >
-                            <StatusBadge status={getStatusVariant(status)} size="sm">
-                              {config.label}
-                            </StatusBadge>
-                          </PortalDropdownItem>
-                        ))}
-                    </PortalDropdownContent>
-                  </PortalDropdown>
-                </PortalTableCell>
+                <StatusDropdownCell
+                  status={deliverable.status}
+                  statusConfig={DELIVERABLE_STATUS_CONFIG}
+                  onStatusChange={(newStatus) => handleStatusChange(deliverable.id, newStatus)}
+                  ariaLabel="Change deliverable status"
+                />
                 <PortalTableCell>v{deliverable.version}</PortalTableCell>
                 <PortalTableCell>{deliverable.files}</PortalTableCell>
                 <PortalTableCell className="date-cell">
@@ -509,6 +513,13 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
           )}
         </PortalTableBody>
       </PortalTable>
+      <CreateDeliverableModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onSubmit={handleCreate}
+        loading={createLoading}
+        projectOptions={projectOptions}
+      />
     </TableLayout>
   );
 }

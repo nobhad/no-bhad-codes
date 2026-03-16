@@ -715,9 +715,9 @@ The admin Messages tab uses a custom dropdown for better styling control:
 
 ```html
 <div class="custom-dropdown" id="admin-client-dropdown">
-  <button class="custom-dropdown-trigger" id="admin-client-trigger">
+  <button class="dropdown-trigger--custom" id="admin-client-trigger">
     <span class="custom-dropdown-text">Select a client...</span>
-    <span class="custom-dropdown-caret"></span>
+    <span class="dropdown-caret--custom"></span>
   </button>
   <ul class="custom-dropdown-menu" id="admin-client-menu">
     <!-- Client items populated dynamically -->

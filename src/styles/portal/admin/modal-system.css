@@ -123,7 +123,7 @@
   color: var(--color-text-primary);
 }
 
-.details-panel .status-dropdown-trigger {
+.details-panel .dropdown-trigger--status {
   background: transparent;
   border: var(--portal-input-border);
 }

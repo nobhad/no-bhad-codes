@@ -2,8 +2,7 @@ import * as React from 'react';
 import { useState, useMemo, useCallback } from 'react';
 import {
   GitBranch,
-  Inbox,
-  ChevronDown
+  Inbox
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { useListFetch } from '@react/factories/useDataFetch';
@@ -14,6 +13,7 @@ import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilt
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { formatDate } from '@react/utils/formatDate';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { StatusDropdownCell } from '@react/components/portal/StatusDropdownCell';
 import {
   PortalTable,
   PortalTableHeader,
@@ -25,12 +25,6 @@ import {
   PortalTableLoading,
   PortalTableError
 } from '@react/components/portal/PortalTable';
-import {
-  PortalDropdown,
-  PortalDropdownTrigger,
-  PortalDropdownContent,
-  PortalDropdownItem
-} from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
@@ -400,35 +394,12 @@ export function WorkflowsTable({ getAuthToken, showNotification: _showNotificati
                     </div>
                   </div>
                 </PortalTableCell>
-                <PortalTableCell
-                  className="status-cell"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <PortalDropdown>
-                    <PortalDropdownTrigger asChild>
-                      <button type="button" className="status-dropdown-trigger" aria-label="Change workflow status">
-                        <StatusBadge status={getStatusVariant(workflow.status)} size="sm">
-                          {WORKFLOW_STATUS_CONFIG[workflow.status]?.label || workflow.status}
-                        </StatusBadge>
-                        <ChevronDown className="status-dropdown-caret" />
-                      </button>
-                    </PortalDropdownTrigger>
-                    <PortalDropdownContent sideOffset={0} align="start">
-                      {Object.entries(WORKFLOW_STATUS_CONFIG)
-                        .filter(([value]) => value !== workflow.status)
-                        .map(([value, config]) => (
-                          <PortalDropdownItem
-                            key={value}
-                            onClick={() => updateWorkflowStatus(workflow.id, value)}
-                          >
-                            <StatusBadge status={getStatusVariant(value)} size="sm">
-                              {config.label}
-                            </StatusBadge>
-                          </PortalDropdownItem>
-                        ))}
-                    </PortalDropdownContent>
-                  </PortalDropdown>
-                </PortalTableCell>
+                <StatusDropdownCell
+                  status={workflow.status}
+                  statusConfig={WORKFLOW_STATUS_CONFIG}
+                  onStatusChange={(newStatus) => updateWorkflowStatus(workflow.id, newStatus)}
+                  ariaLabel="Change workflow status"
+                />
                 {!overviewMode && (
                   <>
                     <PortalTableCell className="date-cell">
