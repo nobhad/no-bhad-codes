@@ -134,10 +134,7 @@
   color: var(--color-text-secondary);
 }
 
-.note-actions {
-  display: flex;
-  gap: var(--action-btn-gap);
-}
+/* .note-actions — single definition in client-detail.css (with align-items, opacity hover) */
 
 .note-content {
   font-size: var(--font-size-sm);

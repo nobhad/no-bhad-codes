@@ -569,14 +569,10 @@
   gap: var(--space-2);
 }
 
-/* ALL table cell icons - UNIFORM SIZE
-   Both .cell-icon and .cell-icon-sm use the same size for consistency */
-.data-table .cell-icon,
-.data-table .cell-icon-sm {
-  flex-shrink: 0;
-  width: var(--table-cell-icon-size);
-  height: var(--table-cell-icon-size);
-  /* Inherit color from parent - no grey override */
+/* Table cell icons - use .icon-sm / .icon-xs utility classes (portal-utilities.css).
+   Override color inside tables so icons inherit from parent cells. */
+.data-table .icon-sm,
+.data-table .icon-xs {
   color: inherit;
 }
 
@@ -790,25 +786,24 @@
   min-width: var(--table-checkbox-width);
 }
 
-/* Status cells need visible overflow for dropdowns, centered content */
-.data-table :is(th, td).status-col,
-.data-table :is(th, td).status-cell {
+/* Status columns need visible overflow for dropdowns, centered content */
+.data-table :is(th, td).status-col {
   min-width: 10rem;
   width: 10rem;
 }
 
-.data-table td.status-cell {
+.data-table td.status-col {
   overflow: visible;
   text-overflow: clip;
   text-align: center;
 }
 
 /* Center the dropdown within status cell — no margin so column aligns with others */
-.data-table td.status-cell .table-dropdown,
-.data-table td.status-cell .table-dropdown .dropdown-trigger--custom {
+.data-table td.status-col .table-dropdown,
+.data-table td.status-col .table-dropdown .dropdown-trigger--custom {
   margin: 0;
 }
-.data-table td.status-cell .table-dropdown {
+.data-table td.status-col .table-dropdown {
   display: inline-flex;
   justify-content: center;
 }
@@ -871,15 +866,12 @@
     .type-col,
     .type-cell,
     .status-col,
-    .status-cell,
     .date-col,
-    .date-cell,
     .timeline-col,
     .timeline-cell,
     .budget-col,
     .budget-cell,
     .amount-col,
-    .amount-cell,
     .count-col,
     .count-cell,
     .slug-col,
@@ -892,7 +884,7 @@
 
 /* CENTER ALIGNED COLUMNS - status, articles, active, featured, views, runs, success, steps, counts, dates */
 .data-table :is(
-  .status-col, .status-cell,
+  .status-col,
   .count-col, .count-cell,
   .articles-col, .articles-cell,
   .active-col, .active-cell,
@@ -902,10 +894,10 @@
   .success-col, .success-cell,
   .steps-col, .steps-cell,
   .projects-col, .projects-cell,
-  .date-col, .date-cell,
+  .date-col,
   .due-date-col, .due-date-cell,
-  .created-col, .created-cell,
-  .updated-col, .updated-cell,
+  .created-col,
+  .updated-col,
   .text-center
 ) {
   text-align: center;
@@ -925,7 +917,7 @@
   vertical-align: middle;
 }
 
-.data-table :is(.amount-col, .amount-cell, .text-right),
+.data-table :is(.amount-col, .text-right),
 .data-table th.amount-col,
 .data-table th.text-right,
 .data-table th[class*="amount"] {
@@ -1089,7 +1081,7 @@
     white-space: nowrap;
   }
 
-  .data-table :is(.type-col, .type-cell, .date-col, .date-cell, .status-col, .status-cell) {
+  .data-table :is(.type-col, .type-cell, .date-col, .status-col, .status-col) {
     width: auto;
   }
 
@@ -1159,8 +1151,8 @@
   .data-table :is(
     .project-col, .project-cell,
     .priority-col, .priority-cell,
-    .date-col, .date-cell,
-    .created-col, .created-cell
+    .date-col,
+    .created-col
   ):not(.primary-cell) {
     display: none;
   }
@@ -1184,7 +1176,7 @@
 
 /* 1000px: Hide date, timeline, assigned, company, project, type columns */
 @media (--laptop) {
-  .data-table :is(.date-col, .date-cell, .created-col, .created-cell, .timeline-col, .timeline-cell, .assigned-col, .assigned-cell) {
+  .data-table :is(.date-col, .created-col, .created-col, .timeline-col, .timeline-cell, .assigned-col, .assigned-cell) {
     display: none;
   }
 
@@ -1220,7 +1212,7 @@
 
 /* Hide budget, priority, invoice, amount, status columns on narrow viewports */
 @media (--tablet-landscape) {
-  .data-table :is(.budget-col, .budget-cell, .amount-col, .amount-cell, .priority-col, .priority-cell, .invoice-col, .invoice-cell):not(.primary-cell) {
+  .data-table :is(.budget-col, .budget-cell, .amount-col, .priority-col, .priority-cell, .invoice-col, .invoice-cell):not(.primary-cell) {
     display: none;
   }
 
@@ -1285,8 +1277,8 @@
     .source-col, .source-cell,
     .timeline-col, .timeline-cell,
     .budget-col, .budget-cell,
-    .date-col, .date-cell,
-    .created-col, .created-cell,
+    .date-col,
+    .created-col,
     .assigned-col, .assigned-cell,
     .company-col, .company-cell,
     .project-col, .project-cell,
@@ -1294,10 +1286,10 @@
     .projects-col, .projects-cell,
     .count-col, .count-cell,
     .category-col, .category-cell,
-    .amount-col, .amount-cell,
+    .amount-col,
     .priority-col, .priority-cell,
     .invoice-col, .invoice-cell,
-    .status-col, .status-cell
+    .status-col
   ):not(.primary-cell) {
     display: flex;
   }
@@ -1319,17 +1311,17 @@
 
   /* Each cell: label on left, value on right */
   .data-table td,
-  .data-table td.status-cell,
   .data-table td.status-col,
-  .data-table td.amount-cell,
+  .data-table td.status-col,
+  .data-table td.amount-col,
   .data-table td.amount-col,
   .data-table td.col-actions,
   .data-table td.col-actions,
   .data-table td.priority-cell,
   .data-table td.priority-col,
-  .data-table td.date-cell,
+  
   .data-table td.date-col,
-  .data-table td.created-cell,
+  .data-table td.created-col,
   .data-table td.created-col {
     display: flex;
     justify-content: flex-start;
@@ -1438,7 +1430,7 @@
   }
 
   /* Status cell needs center alignment for badges */
-  .data-table td.status-cell,
+  .data-table td.status-col,
   .data-table td.status-col {
     align-items: center;
   }
@@ -1469,11 +1461,11 @@
   .data-table td.project-col:not([data-label]):before { content: "Project"; }
   .data-table td.client-cell:not([data-label]):before,
   .data-table td.client-col:not([data-label]):before { content: "Client"; }
-  .data-table td.date-cell:not([data-label]):before,
+  .data-table td.date-col:not([data-label]):before,
   .data-table td.date-col:not([data-label]):before { content: "Date"; }
-  .data-table td.amount-cell:not([data-label]):before,
+  .data-table td.amount-col:not([data-label]):before,
   .data-table td.amount-col:not([data-label]):before { content: "Amount"; }
-  .data-table td.status-cell:not([data-label]):before,
+  .data-table td.status-col:not([data-label]):before,
   .data-table td.status-col:not([data-label]):before { content: "Status"; }
   .data-table td.email-cell:not([data-label]):before,
   .data-table td.email-col:not([data-label]):before { content: "Email"; }
@@ -1612,13 +1604,7 @@
   white-space: nowrap;
 }
 
-/* Bulk actions toolbar */
-.bulk-actions-toolbar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  background: var(--color-bg-raised);
-}
+/* Bulk actions toolbar — single definition in admin/table-controls.css */
 
 .empty-message {
   font-size: var(--font-size-base);
@@ -1720,7 +1706,6 @@
 .currency-cell,
 .file-size-cell,
 .text-cell,
-.date-cell,
 .phone-cell,
 .email-cell,
 .link-cell,
@@ -1764,7 +1749,7 @@
   position: relative;
   flex: 1;
   min-width: 200px;
-  max-width: 320px;
+  max-width: var(--search-input-max-width);
 }
 
 .data-table-search-icon {

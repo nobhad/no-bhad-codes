@@ -102,7 +102,7 @@ const TasksKanban = React.memo(({ tasks }: { tasks: TaskItem[] }) => {
             <div className="kanban-items">
               {columnTasks.map((task) => (
                 <div key={task.id} className="kanban-card">
-                  <span className="activity-dot" data-priority={task.priority} style={{ background: getPriorityColor(task.priority), borderColor: getPriorityColor(task.priority) }} />
+                  <span className="dashboard-status-dot" data-priority={task.priority} style={{ background: getPriorityColor(task.priority), borderColor: getPriorityColor(task.priority) }} />
                   <div>
                     <div className="activity-text">{task.title}</div>
                     <div className="activity-time">{task.projectName}</div>
@@ -284,7 +284,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
                 <ul className="activity-feed">
                   {upcomingTasks.slice(0, 5).map((task) => (
                     <li key={task.id} className="activity-feed-item">
-                      <span className="activity-dot" data-priority={task.priority} style={{ background: getPriorityColor(task.priority), borderColor: getPriorityColor(task.priority) }} />
+                      <span className="dashboard-status-dot" data-priority={task.priority} style={{ background: getPriorityColor(task.priority), borderColor: getPriorityColor(task.priority) }} />
                       <div className="activity-body">
                         <span className="activity-text">{task.title}</span>
                         <span className="activity-time">{task.projectName}</span>
@@ -319,7 +319,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
                 <ul className="activity-feed">
                   {recentActivity.slice(0, 8).map((activity) => (
                     <li key={activity.id} className="activity-feed-item">
-                      <span className="activity-dot dot-blue" />
+                      <span className="dashboard-status-dot dot-blue" />
                       <div className="activity-body">
                         <span className="activity-text">{activity.description}</span>
                         <span className="activity-time">{formatTimeAgo(activity.timestamp)}</span>

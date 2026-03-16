@@ -241,7 +241,7 @@
   background: var(--color-bg-hover);
 }
 
-.activity-dot {
+.dashboard-status-dot {
   width: var(--space-1-5);
   height: var(--space-1-5);
   border: 1.5px solid currentColor;
@@ -250,29 +250,29 @@
   flex-shrink: 0;
 }
 
-/* Activity dot colors from design-system/tokens/colors.css */
+/* Dashboard status dot colors from design-system/tokens/colors.css */
 .dot-blue {
   border-color: var(--status-active);
   background: var(--status-active-bg);
 }
 
-/* Data-attribute driven priority colors for activity dots */
-.activity-dot[data-priority="urgent"] {
+/* Data-attribute driven priority colors for dashboard status dots */
+.dashboard-status-dot[data-priority="urgent"] {
   border-color: var(--status-cancelled);
   background: var(--status-cancelled);
 }
 
-.activity-dot[data-priority="high"] {
+.dashboard-status-dot[data-priority="high"] {
   border-color: var(--status-pending);
   background: var(--status-pending);
 }
 
-.activity-dot[data-priority="medium"] {
+.dashboard-status-dot[data-priority="medium"] {
   border-color: var(--color-text-primary);
   background: var(--color-text-primary);
 }
 
-.activity-dot[data-priority="low"] {
+.dashboard-status-dot[data-priority="low"] {
   border-color: var(--color-text-tertiary);
   background: var(--color-text-tertiary);
 }

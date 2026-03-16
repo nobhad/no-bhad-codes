@@ -25,6 +25,11 @@
   display: none;
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 .tab-content.is-active,
 .portal-tab-panel.is-active {
   display: block;
@@ -315,9 +320,6 @@
     font-size: var(--font-size-sm);
   }
 
-  .portal-tab-panel {
-  }
-
   .portal-tab-panel.is-active,
   .portal-subtab-content.is-active,
   .documents-subtab-content.is-active {
@@ -345,9 +347,6 @@
   :is(.view-toggle button, .view-toggle-option) svg {
     width: 1em;
     height: 1em;
-  }
-
-  .portal-tab-panel {
   }
 
   .portal-tab-panel.is-active {
