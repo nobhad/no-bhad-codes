@@ -60,34 +60,8 @@
 }
 
 /* ==========================================
-   BUSINESS CARD CONTAINER - CLS PREVENTION
-   ========================================== */
-
-/* Reserve space for business card to prevent CLS */
-.business-card-container {
-  width: 525px;
-  height: 294.19px; /* 525 ÷ 1.784582 = 294.19 (exact SVG aspect) */
-  margin: 0 auto;
-  contain: layout style size;
-}
-
-/* Responsive business card container sizes */
-@media (--mobile) {
-  .business-card-container {
-    width: 380px;
-    height: 213px; /* 380 ÷ 1.784582 = 212.96 */
-  }
-}
-
-@media (--small-mobile) {
-  .business-card-container {
-    width: 315px;
-    height: 177px; /* 315 ÷ 1.784582 = 176.54 */
-  }
-}
-
-/* ==========================================
    BUSINESS CARD CONTAINER - INVISIBLE WRAPPER
+   CLS prevention + layout + invisible styling
    ========================================== */
 .business-card-container {
   /* Positioning and layout - NORMAL SECTION POSITIONING */
@@ -108,6 +82,8 @@
   min-height: 294.19px;
   max-width: 525px;
   max-height: 294.19px;
+  margin: 0 auto;
+  contain: layout style size;
 
   /* Disable user selection to prevent blue highlights */
   -webkit-touch-callout: none;
@@ -128,7 +104,21 @@
   border: none;
   box-shadow: none;
   padding: 0;
-  margin: 0;
+}
+
+/* Responsive business card container sizes */
+@media (--mobile) {
+  .business-card-container {
+    width: 380px;
+    height: 213px; /* 380 ÷ 1.784582 = 212.96 */
+  }
+}
+
+@media (--small-mobile) {
+  .business-card-container {
+    width: 315px;
+    height: 177px; /* 315 ÷ 1.784582 = 176.54 */
+  }
 }
 
 /* Ensure all child elements also prevent selection */

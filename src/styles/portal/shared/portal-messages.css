@@ -1,6 +1,5 @@
 /* PORTAL MESSAGES - Layout only, inherits all other styles from portal base */
 
-@layer components {
 
 /* ===========================================
    FLEX COLUMN BASE - shared by all column containers
@@ -20,6 +19,12 @@
 .message-composer {
   display: flex;
   flex-direction: column;
+}
+
+/* Composer container - border-top only (sits at bottom of card) */
+.message-composer {
+  gap: var(--space-1);
+  border-top: var(--portal-border);
 }
 
 /* ===========================================
@@ -1078,12 +1083,6 @@
   color: var(--color-text-tertiary);
 }
 
-/* Composer container - border-top only (sits at bottom of card) */
-.message-composer {
-  gap: var(--space-1);
-  border-top: var(--portal-border);
-}
-
 /* Composer attachments preview */
 .composer-attachments-preview {
   display: flex;
@@ -1203,4 +1202,3 @@
   font-style: italic;
 }
 
-}

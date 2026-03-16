@@ -12,7 +12,6 @@
  * - Sortable table headers
  */
 
-@layer components {
 
 /* =====================================================
    COMPACT FILTER SELECTS - React tables
@@ -33,12 +32,14 @@
   max-width: var(--table-col-md);
 }
 
-/* Search inline wrapper — trigger on right, input expands left */
+/* Search inline wrapper — trigger on right, input expands left.
+   Also serves as relative anchor for absolutely-positioned search input. */
 .filter-search-wrapper {
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
   min-height: var(--portal-btn-icon-size);
+  position: relative;
 }
 
 /* Search trigger button */
@@ -58,11 +59,6 @@
   background: var(--color-accent);
   border-radius: var(--border-radius-full);
   z-index: var(--z-index-content);
-}
-
-/* Search wrapper — relative anchor for absolute input */
-.filter-search-wrapper {
-  position: relative;
 }
 
 /* Search input — absolutely positioned, expands left from the right edge.
@@ -240,4 +236,3 @@
   }
 }
 
-}
