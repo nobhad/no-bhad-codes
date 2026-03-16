@@ -26,7 +26,8 @@ import {
   auditLogger,
   softDeleteService,
   clientService,
-  ClientValidationSchemas
+  ClientValidationSchemas,
+  normalizeEmail
 } from './helpers.js';
 
 const router = express.Router();
@@ -370,12 +371,16 @@ router.get(
 router.put(
   '/me/billing',
   authenticateToken,
+  validateRequest(ClientValidationSchemas.updateBilling, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
       return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const { billing_name, company, address, address2, city, state, zip, country, phone, email } = req.body;
+
+    // Normalize email if provided
+    const normalizedEmail = email ? normalizeEmail(email) : email;
 
     await clientService.updateClientBilling(req.user!.id, {
       billing_name,
@@ -387,7 +392,7 @@ router.put(
       zip,
       country,
       phone,
-      email
+      email: normalizedEmail
     });
 
     // Invalidate admin client detail cache so billing shows immediately
@@ -539,6 +544,7 @@ router.get(
 router.post(
   '/me/contacts',
   authenticateToken,
+  validateRequest(ClientValidationSchemas.createContact, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = req.user?.id;
     if (!clientId) {
@@ -551,10 +557,12 @@ router.post(
       return errorResponse(res, 'First name and last name are required', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
+    const normalizedEmail = email ? normalizeEmail(email) : email;
+
     const contact = await clientService.insertClientContact(clientId, {
       first_name,
       last_name,
-      email,
+      email: normalizedEmail,
       phone,
       title,
       department,
@@ -590,6 +598,7 @@ router.post(
 router.put(
   '/me/contacts/:id',
   authenticateToken,
+  validateRequest(ClientValidationSchemas.updateContact, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = req.user?.id;
     if (!clientId) {
@@ -612,7 +621,7 @@ router.put(
     const fields: Record<string, string | null | undefined> = {};
     if (first_name !== undefined) fields.first_name = first_name;
     if (last_name !== undefined) fields.last_name = last_name;
-    if (email !== undefined) fields.email = email || null;
+    if (email !== undefined) fields.email = email ? normalizeEmail(email) : null;
     if (phone !== undefined) fields.phone = phone || null;
     if (title !== undefined) fields.title = title || null;
     if (department !== undefined) fields.department = department || null;

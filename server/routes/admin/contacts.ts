@@ -14,8 +14,29 @@ import { invalidateCache, QueryCache } from '../../middleware/cache.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 import { clientService } from '../../services/client-service.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
+import { validateRequest } from '../../middleware/validation.js';
 
 const router = express.Router();
+
+const AdminContactSchemas = {
+  create: {
+    clientId: [{ type: 'required' as const }, { type: 'number' as const }],
+    name: [{ type: 'required' as const }, { type: 'string' as const, maxLength: 200 }],
+    email: [{ type: 'required' as const }, { type: 'email' as const }],
+    phone: { type: 'string' as const, maxLength: 30 },
+    title: { type: 'string' as const, maxLength: 100 },
+    company: { type: 'string' as const, maxLength: 200 },
+    isPrimary: { type: 'boolean' as const }
+  },
+  update: {
+    firstName: { type: 'string' as const, maxLength: 100 },
+    lastName: { type: 'string' as const, maxLength: 100 },
+    email: { type: 'email' as const },
+    phone: { type: 'string' as const, maxLength: 30 },
+    role: { type: 'string' as const, maxLength: 50 },
+    isPrimary: { type: 'boolean' as const }
+  }
+};
 
 /**
  * GET /api/admin/contacts - List all contacts across all clients
@@ -105,6 +126,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   invalidateCache(['contacts', 'clients']),
+  validateRequest(AdminContactSchemas.create, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { clientId, name, email, phone, title, company, isPrimary } = req.body;
 
@@ -121,10 +143,12 @@ router.post(
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     const contact = await clientService.createContact(parsedClientId, {
       firstName,
       lastName,
-      email,
+      email: normalizedEmail,
       phone: phone || '',
       title: title || '',
       role: 'general',
@@ -143,6 +167,7 @@ router.put(
   authenticateToken,
   requireAdmin,
   invalidateCache(['contacts', 'clients']),
+  validateRequest(AdminContactSchemas.update, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const contactId = parseInt(req.params.contactId, 10);
     const { isPrimary, firstName, lastName, email, phone, role } = req.body;
@@ -151,6 +176,9 @@ router.put(
       return errorResponse(res, 'Invalid contact ID', 400, ErrorCodes.INVALID_ID);
     }
 
+    // Normalize email if provided
+    const normalizedEmail = (email !== undefined && email) ? email.trim().toLowerCase() : email;
+
     // Check if there are any fields to update
     if (isPrimary === undefined && firstName === undefined && lastName === undefined &&
         email === undefined && phone === undefined && role === undefined) {
@@ -158,7 +186,7 @@ router.put(
     }
 
     const updatedContact = await clientService.updateContactAdmin(contactId, {
-      isPrimary, firstName, lastName, email, phone, role
+      isPrimary, firstName, lastName, email: normalizedEmail, phone, role
     });
 
     if (updatedContact?.client_id) {

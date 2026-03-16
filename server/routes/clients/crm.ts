@@ -21,10 +21,37 @@ import {
   invalidateCache,
   QueryCache,
   clientService,
-  toApiNote
+  toApiNote,
+  validateRequest,
+  normalizeEmail
 } from './helpers.js';
 
 const router = express.Router();
+
+const CrmContactSchemas = {
+  create: {
+    firstName: [{ type: 'required' as const }, { type: 'string' as const, maxLength: 100 }],
+    lastName: [{ type: 'required' as const }, { type: 'string' as const, maxLength: 100 }],
+    email: { type: 'email' as const },
+    phone: { type: 'string' as const, maxLength: 30 },
+    title: { type: 'string' as const, maxLength: 100 },
+    department: { type: 'string' as const, maxLength: 100 },
+    role: { type: 'string' as const, maxLength: 50 },
+    isPrimary: { type: 'boolean' as const },
+    notes: { type: 'string' as const, maxLength: 2000 }
+  },
+  update: {
+    firstName: { type: 'string' as const, maxLength: 100 },
+    lastName: { type: 'string' as const, maxLength: 100 },
+    email: { type: 'email' as const },
+    phone: { type: 'string' as const, maxLength: 30 },
+    title: { type: 'string' as const, maxLength: 100 },
+    department: { type: 'string' as const, maxLength: 100 },
+    role: { type: 'string' as const, maxLength: 50 },
+    isPrimary: { type: 'boolean' as const },
+    notes: { type: 'string' as const, maxLength: 2000 }
+  }
+};
 
 // =====================================================
 // CRM ENHANCEMENT ENDPOINTS
@@ -93,6 +120,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   invalidateCache(['clients']),
+  validateRequest(CrmContactSchemas.create, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = parseInt(req.params.id, 10);
 
@@ -112,10 +140,12 @@ router.post(
       );
     }
 
+    const normalizedEmail = email ? normalizeEmail(email) : email;
+
     const contact = await clientService.createContact(clientId, {
       firstName,
       lastName,
-      email,
+      email: normalizedEmail,
       phone,
       title,
       department,
@@ -152,11 +182,17 @@ router.put(
   authenticateToken,
   requireAdmin,
   invalidateCache(['clients']),
+  validateRequest(CrmContactSchemas.update, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const contactId = parseInt(req.params.contactId, 10);
 
     if (isNaN(contactId) || contactId <= 0) {
       return errorResponse(res, 'Invalid contact ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    // Normalize email if provided
+    if (req.body.email) {
+      req.body.email = normalizeEmail(req.body.email);
     }
 
     const contact = await clientService.updateContact(contactId, req.body);
