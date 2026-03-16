@@ -195,7 +195,7 @@ export function ContactsSection({ portalFetch, showNotification }: ContactsSecti
               <div key={contact.id} className="portal-card">
                 <div className="portal-card-header">
                   <div className="portal-card-title-group flex-col">
-                    <span className="text-primary text-sm font-medium">
+                    <span className="text-primary font-medium">
                       {contact.first_name} {contact.last_name}
                       {contact.is_primary && (
                         <span className="badge ml-2">Primary</span>
@@ -257,7 +257,7 @@ function ContactForm({
     <div className="portal-card flex flex-col gap-3">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="label text-xs mb-1 block" htmlFor="contact-first-name">First Name *</label>
+          <label className="label mb-1 block" htmlFor="contact-first-name">First Name *</label>
           <input
             id="contact-first-name"
             className="form-input w-full"
@@ -267,7 +267,7 @@ function ContactForm({
           />
         </div>
         <div>
-          <label className="label text-xs mb-1 block" htmlFor="contact-last-name">Last Name *</label>
+          <label className="label mb-1 block" htmlFor="contact-last-name">Last Name *</label>
           <input
             id="contact-last-name"
             className="form-input w-full"
@@ -279,7 +279,7 @@ function ContactForm({
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="label text-xs mb-1 block" htmlFor="contact-email">Email</label>
+          <label className="label mb-1 block" htmlFor="contact-email">Email</label>
           <input
             id="contact-email"
             className="form-input w-full"
@@ -290,7 +290,7 @@ function ContactForm({
           />
         </div>
         <div>
-          <label className="label text-xs mb-1 block" htmlFor="contact-phone">Phone</label>
+          <label className="label mb-1 block" htmlFor="contact-phone">Phone</label>
           <input
             id="contact-phone"
             className="form-input w-full"
@@ -302,7 +302,7 @@ function ContactForm({
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="label text-xs mb-1 block" htmlFor="contact-title">Title</label>
+          <label className="label mb-1 block" htmlFor="contact-title">Title</label>
           <input
             id="contact-title"
             className="form-input w-full"
@@ -312,7 +312,7 @@ function ContactForm({
           />
         </div>
         <div>
-          <label className="label text-xs mb-1 block" htmlFor="contact-role">Role</label>
+          <label className="label mb-1 block" htmlFor="contact-role">Role</label>
           <FormDropdown
             id="contact-role"
             value={formData.role}
@@ -328,11 +328,11 @@ function ContactForm({
         </div>
       </div>
       <div className="flex justify-end gap-2">
-        <button className="btn-ghost text-sm" onClick={onCancel}>
+        <button className="btn-ghost" onClick={onCancel}>
           <X className="icon-xs" />
           Cancel
         </button>
-        <button className="btn-primary text-sm" onClick={onSave}>
+        <button className="btn-primary" onClick={onSave}>
           <Check className="icon-xs" />
           Save
         </button>

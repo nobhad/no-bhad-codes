@@ -445,10 +445,10 @@ export function OnboardingWizard({
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="heading text-xl">
+            <h2 className="heading">
               Client Onboarding
             </h2>
-            <p className="text-muted mt-0.5">
+            <p className="text-secondary mt-0.5">
               {currentStepConfig?.description}
             </p>
           </div>

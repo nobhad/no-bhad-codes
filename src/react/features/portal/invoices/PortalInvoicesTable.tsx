@@ -239,13 +239,13 @@ export function PortalInvoicesTable({
                         <span className="date-stacked">{formatCardDate(invoice.created_at)}</span>
                       </div>
                     </PortalTableCell>
-                    <PortalTableCell className="date-cell" label="Date">
+                    <PortalTableCell className="date-col" label="Date">
                       {formatCardDate(invoice.created_at)}
                     </PortalTableCell>
-                    <PortalTableCell className="amount-cell" label="Amount">
+                    <PortalTableCell className="amount-col" label="Amount">
                       {formatCurrency(invoice.amount_total)}
                     </PortalTableCell>
-                    <PortalTableCell className="status-cell" label="Status">
+                    <PortalTableCell className="status-col" label="Status">
                       <StatusBadge status={getStatusVariant(invoice.status)}>
                         {PORTAL_INVOICE_STATUS_CONFIG[invoice.status]?.label || invoice.status}
                       </StatusBadge>

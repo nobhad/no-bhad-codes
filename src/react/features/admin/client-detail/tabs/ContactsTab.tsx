@@ -286,7 +286,7 @@ export function ContactsTab({
               checked={formData.is_primary}
               onCheckedChange={(checked) => handleFieldChange('is_primary', checked === true)}
             />
-            <span className="text-muted">
+            <span className="text-secondary">
               Primary Contact
             </span>
           </label>
@@ -348,7 +348,7 @@ export function ContactsTab({
                 <div className="contact-card-header">
                   <div className="contact-identity">
                     <div className="contact-avatar">
-                      <User className="icon-lg text-muted" />
+                      <User className="icon-lg text-secondary" />
                     </div>
                     <div>
                       <div className="contact-name-row">
@@ -360,7 +360,7 @@ export function ContactsTab({
                         )}
                       </div>
                       {contact.title && (
-                        <span className="text-muted text-sm">
+                        <span className="text-secondary">
                           {contact.title}
                         </span>
                       )}
@@ -395,10 +395,10 @@ export function ContactsTab({
                 {/* Contact Details */}
                 <div className="detail-list">
                   <div className="contact-detail-row">
-                    <Mail className="icon-sm text-muted" />
+                    <Mail className="icon-sm text-secondary" />
                     <a
                       href={`mailto:${contact.email}`}
-                      className="text-sm text-accent"
+                      className="text-accent"
                     >
                       {contact.email}
                     </a>
@@ -406,10 +406,10 @@ export function ContactsTab({
 
                   {contact.phone && (
                     <div className="contact-detail-row">
-                      <Phone className="icon-sm text-muted" />
+                      <Phone className="icon-sm text-secondary" />
                       <a
                         href={`tel:${contact.phone}`}
-                        className="text-muted text-sm"
+                        className="text-secondary"
                       >
                         {contact.phone}
                       </a>
@@ -418,8 +418,8 @@ export function ContactsTab({
 
                   {contact.role && (
                     <div className="contact-detail-row">
-                      <Briefcase className="icon-sm text-muted" />
-                      <span className="text-muted text-sm">
+                      <Briefcase className="icon-sm text-secondary" />
+                      <span className="text-secondary">
                         {CONTACT_ROLE_LABELS[contact.role] || contact.role}
                       </span>
                     </div>
@@ -428,7 +428,7 @@ export function ContactsTab({
 
                 {/* Notes */}
                 {contact.notes && (
-                  <p className="text-muted contact-notes">
+                  <p className="text-secondary contact-notes">
                     {contact.notes}
                   </p>
                 )}

@@ -39,51 +39,43 @@ export function DocumentsDashboard({ onNavigate, getAuthToken, showNotification 
   // Render individual views for specific subtabs
   if (activeSubtab === 'invoices') {
     return (
-      <div className="section">
-        <React.Suspense fallback={<LoadingState message="Loading invoices..." />}>
-          <InvoicesTable
-            onNavigate={onNavigate}
-            getAuthToken={getAuthToken}
-            showNotification={showNotification}
-          />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading invoices..." />}>
+        <InvoicesTable
+          onNavigate={onNavigate}
+          getAuthToken={getAuthToken}
+          showNotification={showNotification}
+        />
+      </React.Suspense>
     );
   }
 
   if (activeSubtab === 'contracts') {
     return (
-      <div className="section">
-        <React.Suspense fallback={<LoadingState message="Loading contracts..." />}>
-          <ContractsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading contracts..." />}>
+        <ContractsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+      </React.Suspense>
     );
   }
 
   if (activeSubtab === 'document-requests') {
     return (
-      <div className="section">
-        <React.Suspense fallback={<LoadingState message="Loading document requests..." />}>
-          <DocumentRequestsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading document requests..." />}>
+        <DocumentRequestsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+      </React.Suspense>
     );
   }
 
   if (activeSubtab === 'questionnaires') {
     return (
-      <div className="section">
-        <React.Suspense fallback={<LoadingState message="Loading questionnaires..." />}>
-          <QuestionnairesTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading questionnaires..." />}>
+        <QuestionnairesTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+      </React.Suspense>
     );
   }
 
   // Overview - show all tables stacked with default pagination of 10
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>}>
       <React.Suspense fallback={<LoadingState message="Loading invoices..." />}>
         <section className="overview-table-section">
           <InvoicesTable

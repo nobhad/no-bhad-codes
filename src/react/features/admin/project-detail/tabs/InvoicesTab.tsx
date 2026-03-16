@@ -195,18 +195,18 @@ export function InvoicesTab({
       <div className="panel-header">
         <div className="invtab-stats">
           <div>
-            <span className="text-muted">Outstanding: </span>
+            <span className="text-secondary">Outstanding: </span>
             <span
               className={cn(
                 'pd-highlight-value',
-                totalOutstanding === 0 && 'text-muted'
+                totalOutstanding === 0 && 'text-secondary'
               )}
             >
               {formatCurrency(totalOutstanding)}
             </span>
           </div>
           <div>
-            <span className="text-muted">Paid: </span>
+            <span className="text-secondary">Paid: </span>
             <span className="pd-highlight-value">
               {formatCurrency(totalPaid)}
             </span>
@@ -310,7 +310,7 @@ export function InvoicesTab({
                         className={cn(
                           isOverdue(invoice)
                             ? 'pd-highlight-value'
-                            : 'text-muted'
+                            : 'text-secondary'
                         )}
                       >
                         {formatDate(invoice.due_date)}

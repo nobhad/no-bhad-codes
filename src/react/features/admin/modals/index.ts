@@ -27,3 +27,17 @@ export type { EditBillingModalProps, EditBillingFormData } from './EditBillingMo
 
 export { AdminModalsProvider } from './AdminModalsProvider';
 export type { AdminModalsProviderProps } from './AdminModalsProvider';
+
+export {
+  CreateContactModal,
+  CreateTaskModal,
+  CreateEmailTemplateModal,
+  CreateKBCategoryModal,
+  CreateKBArticleModal,
+  CreateContractModal,
+  CreateDocumentRequestModal,
+  CreateAdHocRequestModal,
+  CreateDeliverableModal,
+  CreateTimeEntryModal,
+  CreateProposalModal
+} from './CreateEntityModals';

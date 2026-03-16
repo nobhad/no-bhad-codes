@@ -193,8 +193,8 @@ export function PortalAdHocRequests({
   }, [fetchProjects]);
 
   return (
-    <div className="section">
-      <TableLayout nested
+    <>
+      <TableLayout
         containerRef={containerRef}
         title="AD-HOC REQUESTS"
         stats={<TableStats items={[{ value: items.length, label: 'total' }]} />}
@@ -252,6 +252,6 @@ export function PortalAdHocRequests({
           projects={projects}
         />
       </PortalModal>
-    </div>
+    </>
   );
 }

@@ -471,7 +471,7 @@ export function LeadsTable({
                   />
 
                   {/* Created Date */}
-                  <PortalTableCell className="date-cell">
+                  <PortalTableCell className="date-col">
                     {formatDate(lead.created_at)}
                   </PortalTableCell>
 

@@ -21,13 +21,13 @@ export function StripeSection({ stripeStatus }: StripeSectionProps) {
             <div className="stat-card">
               <div className="portal-card-header">
                 <div className="portal-card-title-group">
-                  <CreditCard className="icon-lg text-muted" />
+                  <CreditCard className="icon-lg text-secondary" />
                   <span className="font-semibold">Stripe Payment Gateway</span>
                 </div>
               </div>
               <div className="portal-card-detail-list">
                 <div className="portal-card-detail-row">
-                  <span className="text-muted">Connected</span>
+                  <span className="text-secondary">Connected</span>
                   <span>
                     {stripeStatus.connected ? (
                       <CheckCircle className="icon-sm text-status-success" />
@@ -38,18 +38,18 @@ export function StripeSection({ stripeStatus }: StripeSectionProps) {
                 </div>
                 {stripeStatus.accountId && (
                   <div className="portal-card-detail-row">
-                    <span className="text-muted">Account</span>
+                    <span className="text-secondary">Account</span>
                     <span>{stripeStatus.accountId}</span>
                   </div>
                 )}
                 {stripeStatus.mode && (
                   <div className="portal-card-detail-row">
-                    <span className="text-muted">Mode</span>
+                    <span className="text-secondary">Mode</span>
                     <span className="status-badge">{stripeStatus.mode}</span>
                   </div>
                 )}
                 <div className="portal-card-detail-row">
-                  <span className="text-muted">Last Charge</span>
+                  <span className="text-secondary">Last Charge</span>
                   <span>{formatDate(stripeStatus.lastCharge)}</span>
                 </div>
               </div>
@@ -58,7 +58,7 @@ export function StripeSection({ stripeStatus }: StripeSectionProps) {
         </div>
       ) : (
         <div className="status-empty">
-          <CreditCard className="icon-lg text-muted" />
+          <CreditCard className="icon-lg text-secondary" />
           <span>Stripe status unavailable.</span>
         </div>
       )}

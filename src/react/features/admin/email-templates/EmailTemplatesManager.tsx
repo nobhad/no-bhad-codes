@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   Mail,
   Inbox,
@@ -30,7 +30,8 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { EMAIL_TEMPLATES_FILTER_CONFIG, EMAIL_TEMPLATE_STATUS_OPTIONS } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { NOTIFICATIONS } from '@/constants/notifications';
+import { apiPost } from '@/utils/api-client';
+import { CreateEmailTemplateModal } from '../modals/CreateEntityModals';
 
 interface TemplateVariable {
   name: string;
@@ -117,6 +118,8 @@ function sortTemplates(a: EmailTemplate, b: EmailTemplate, sort: SortConfig): nu
 
 export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, showNotification, defaultPageSize = 25, overviewMode = false }: EmailTemplatesManagerProps) {
   const containerRef = useFadeIn();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
   const { data, isLoading, error, refetch } = useListFetch<EmailTemplate, EmailTemplateStats>({
     endpoint: API_ENDPOINTS.ADMIN.EMAIL_TEMPLATES,
     getAuthToken,
@@ -158,144 +161,170 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
     pagination.page * pagination.pageSize
   );
 
-  return (
-    <TableLayout
-      containerRef={containerRef as React.RefObject<HTMLDivElement>}
-      title="EMAIL TEMPLATES"
-      stats={
-        <TableStats
-          items={[
-            { value: stats.total, label: 'total' },
-            { value: stats.active, label: 'active', variant: 'completed' },
-            { value: stats.total - stats.active, label: 'inactive', variant: 'pending' }
-          ]}
-          tooltip={`${stats.total} Total • ${stats.active} Active • ${stats.total - stats.active} Inactive`}
-        />
+  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
+    setCreateLoading(true);
+    try {
+      const res = await apiPost(API_ENDPOINTS.ADMIN.EMAIL_TEMPLATES, formData);
+      if (res.ok) {
+        showNotification?.('Template created successfully', 'success');
+        setCreateOpen(false);
+        refetch();
+      } else {
+        showNotification?.('Failed to create template', 'error');
       }
-      actions={
-        <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search templates..."
-          />
-          <FilterDropdown
-            sections={[
-              { key: 'category', label: 'CATEGORY', options: categoryFilterOptions },
-              { key: 'status', label: 'STATUS', options: EMAIL_TEMPLATE_STATUS_OPTIONS }
-            ]}
-            values={filterValues}
-            onChange={setFilter}
-          />
-          <IconButton action="export" />
-          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="New Template" />
-        </>
-      }
-      pagination={
-        !isLoading && filteredTemplates.length > 0 ? (
-          <TablePagination
-            pageInfo={pagination.pageInfo}
-            page={pagination.page}
-            pageSize={pagination.pageSize}
-            pageSizeOptions={pagination.pageSizeOptions}
-            canGoPrev={pagination.canGoPrev}
-            canGoNext={pagination.canGoNext}
-            onPageSizeChange={pagination.setPageSize}
-            onFirstPage={pagination.firstPage}
-            onPrevPage={pagination.prevPage}
-            onNextPage={pagination.nextPage}
-            onLastPage={pagination.lastPage}
-          />
-        ) : undefined
-      }
-    >
-      <PortalTable>
-        <PortalTableHeader>
-          <PortalTableRow>
-            <PortalTableHead
-              className="name-col"
-              sortable
-              sortDirection={sort?.column === 'name' ? sort.direction : null}
-              onClick={() => toggleSort('name')}
-            >
-              Template
-            </PortalTableHead>
-            {!overviewMode && <PortalTableHead className="category-col">Category</PortalTableHead>}
-            <PortalTableHead className="status-col">Status</PortalTableHead>
-            {!overviewMode && (
-              <>
-                <PortalTableHead
-                  className="date-col"
-                  sortable
-                  sortDirection={sort?.column === 'updated_at' ? sort.direction : null}
-                  onClick={() => toggleSort('updated_at')}
-                >
-                  Updated
-                </PortalTableHead>
-                <PortalTableHead className="col-actions">Actions</PortalTableHead>
-              </>
-            )}
-          </PortalTableRow>
-        </PortalTableHeader>
+    } catch {
+      showNotification?.('Failed to create template', 'error');
+    } finally {
+      setCreateLoading(false);
+    }
+  }, [showNotification, refetch]);
 
-        <PortalTableBody animate={!isLoading && !error}>
-          {error ? (
-            <PortalTableError colSpan={overviewMode ? 2 : 5} message={error} onRetry={refetch} />
-          ) : isLoading ? (
-            <PortalTableLoading colSpan={overviewMode ? 2 : 5} rows={5} />
-          ) : paginatedTemplates.length === 0 ? (
-            <PortalTableEmpty
-              colSpan={overviewMode ? 2 : 5}
-              icon={<Inbox />}
-              message={hasActiveFilters ? 'No templates match your filters' : 'No templates yet'}
+  return (
+    <div>
+      <TableLayout
+        containerRef={containerRef as React.RefObject<HTMLDivElement>}
+        title="EMAIL TEMPLATES"
+        stats={
+          <TableStats
+            items={[
+              { value: stats.total, label: 'total' },
+              { value: stats.active, label: 'active', variant: 'completed' },
+              { value: stats.total - stats.active, label: 'inactive', variant: 'pending' }
+            ]}
+            tooltip={`${stats.total} Total • ${stats.active} Active • ${stats.total - stats.active} Inactive`}
+          />
+        }
+        actions={
+          <>
+            <SearchFilter
+              value={search}
+              onChange={setSearch}
+              placeholder="Search templates..."
             />
-          ) : (
-            paginatedTemplates.map((template) => (
-              <PortalTableRow key={template.id} clickable>
-                <PortalTableCell className="primary-cell">
-                  <div className="cell-with-icon">
-                    <Mail className="cell-icon" />
-                    <div className="cell-content">
-                      <span className="cell-title">{decodeHtmlEntities(template.name)}</span>
-                      <span className="cell-subtitle">{decodeHtmlEntities(template.subject)}</span>
-                      <span className="category-stacked">{template.category}</span>
-                      <span className="status-stacked">
-                        <StatusBadge status={template.is_active ? 'completed' : 'pending'} size="sm">
-                          {template.is_active ? 'Active' : 'Inactive'}
-                        </StatusBadge>
-                      </span>
-                    </div>
-                  </div>
-                </PortalTableCell>
-                {!overviewMode && (
-                  <PortalTableCell className="category-cell">
+            <FilterDropdown
+              sections={[
+                { key: 'category', label: 'CATEGORY', options: categoryFilterOptions },
+                { key: 'status', label: 'STATUS', options: EMAIL_TEMPLATE_STATUS_OPTIONS }
+              ]}
+              values={filterValues}
+              onChange={setFilter}
+            />
+            <IconButton action="export" />
+            <IconButton action="add" onClick={() => setCreateOpen(true)} title="New Template" />
+          </>
+        }
+        pagination={
+          !isLoading && filteredTemplates.length > 0 ? (
+            <TablePagination
+              pageInfo={pagination.pageInfo}
+              page={pagination.page}
+              pageSize={pagination.pageSize}
+              pageSizeOptions={pagination.pageSizeOptions}
+              canGoPrev={pagination.canGoPrev}
+              canGoNext={pagination.canGoNext}
+              onPageSizeChange={pagination.setPageSize}
+              onFirstPage={pagination.firstPage}
+              onPrevPage={pagination.prevPage}
+              onNextPage={pagination.nextPage}
+              onLastPage={pagination.lastPage}
+            />
+          ) : undefined
+        }
+      >
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead
+                className="name-col"
+                sortable
+                sortDirection={sort?.column === 'name' ? sort.direction : null}
+                onClick={() => toggleSort('name')}
+              >
+              Template
+              </PortalTableHead>
+              {!overviewMode && <PortalTableHead className="category-col">Category</PortalTableHead>}
+              <PortalTableHead className="status-col">Status</PortalTableHead>
+              {!overviewMode && (
+                <>
+                  <PortalTableHead
+                    className="date-col"
+                    sortable
+                    sortDirection={sort?.column === 'updated_at' ? sort.direction : null}
+                    onClick={() => toggleSort('updated_at')}
+                  >
+                  Updated
+                  </PortalTableHead>
+                  <PortalTableHead className="col-actions">Actions</PortalTableHead>
+                </>
+              )}
+            </PortalTableRow>
+          </PortalTableHeader>
+
+          <PortalTableBody animate={!isLoading && !error}>
+            {error ? (
+              <PortalTableError colSpan={overviewMode ? 2 : 5} message={error} onRetry={refetch} />
+            ) : isLoading ? (
+              <PortalTableLoading colSpan={overviewMode ? 2 : 5} rows={5} />
+            ) : paginatedTemplates.length === 0 ? (
+              <PortalTableEmpty
+                colSpan={overviewMode ? 2 : 5}
+                icon={<Inbox />}
+                message={hasActiveFilters ? 'No templates match your filters' : 'No templates yet'}
+              />
+            ) : (
+              paginatedTemplates.map((template) => (
+                <PortalTableRow key={template.id} clickable>
+                  <PortalTableCell className="primary-cell">
                     <div className="cell-with-icon">
-                      <Tag className="cell-icon-sm" />
-                      <span>{template.category}</span>
+                      <Mail className="icon-sm" />
+                      <div className="cell-content">
+                        <span className="cell-title">{decodeHtmlEntities(template.name)}</span>
+                        <span className="cell-subtitle">{decodeHtmlEntities(template.subject)}</span>
+                        <span className="category-stacked">{template.category}</span>
+                        <span className="status-stacked">
+                          <StatusBadge status={template.is_active ? 'completed' : 'pending'} size="sm">
+                            {template.is_active ? 'Active' : 'Inactive'}
+                          </StatusBadge>
+                        </span>
+                      </div>
                     </div>
                   </PortalTableCell>
-                )}
-                <PortalTableCell className="status-cell">
-                  <StatusBadge status={template.is_active ? 'completed' : 'pending'} size="sm">
-                    {template.is_active ? 'Active' : 'Inactive'}
-                  </StatusBadge>
-                </PortalTableCell>
-                {!overviewMode && (
-                  <>
-                    <PortalTableCell className="date-cell">{formatDate(template.updated_at)}</PortalTableCell>
-                    <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                      <div className="table-actions">
-                        <IconButton action="edit" title="Edit" />
-                        <IconButton action="delete" title="Delete" />
+                  {!overviewMode && (
+                    <PortalTableCell className="category-cell">
+                      <div className="cell-with-icon">
+                        <Tag className="icon-xs" />
+                        <span>{template.category}</span>
                       </div>
                     </PortalTableCell>
-                  </>
-                )}
-              </PortalTableRow>
-            ))
-          )}
-        </PortalTableBody>
-      </PortalTable>
-    </TableLayout>
+                  )}
+                  <PortalTableCell className="status-col">
+                    <StatusBadge status={template.is_active ? 'completed' : 'pending'} size="sm">
+                      {template.is_active ? 'Active' : 'Inactive'}
+                    </StatusBadge>
+                  </PortalTableCell>
+                  {!overviewMode && (
+                    <>
+                      <PortalTableCell className="date-col">{formatDate(template.updated_at)}</PortalTableCell>
+                      <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
+                        <div className="table-actions">
+                          <IconButton action="edit" title="Edit" />
+                          <IconButton action="delete" title="Delete" />
+                        </div>
+                      </PortalTableCell>
+                    </>
+                  )}
+                </PortalTableRow>
+              ))
+            )}
+          </PortalTableBody>
+        </PortalTable>
+      </TableLayout>
+      <CreateEmailTemplateModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onSubmit={handleCreate}
+        loading={createLoading}
+      />
+    </div>
   );
 }

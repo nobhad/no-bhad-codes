@@ -516,7 +516,7 @@ export function DataTable<T extends { id: number }>({
                   <span className="badge">
                     {pagination.page}
                   </span>
-                  <span className="text-muted">of {pagination.totalPages}</span>
+                  <span className="text-secondary">of {pagination.totalPages}</span>
                 </div>
 
                 <button

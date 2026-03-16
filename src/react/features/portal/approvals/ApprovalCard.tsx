@@ -121,13 +121,13 @@ export function ApprovalCard({
         <div className="portal-card-header">
           <div className="portal-card-title-group">
             {/* Entity type icon */}
-            <div className="text-muted">{entityIcon}</div>
+            <div className="text-secondary">{entityIcon}</div>
 
-            <div className="portal-card-title-block">
-              <h3 className="text-primary text-sm">
+            <div className="portal-card-title-group flex-col">
+              <h3 className="text-primary">
                 {approval.entity_name || `${entityLabel} #${approval.entity_id}`}
               </h3>
-              <span className="label text-xs">{entityLabel}</span>
+              <span className="label">{entityLabel}</span>
             </div>
           </div>
 
@@ -149,14 +149,14 @@ export function ApprovalCard({
           {/* Requested date */}
           <div className="portal-card-meta-item">
             <Clock className="icon-xs" />
-            <span className="text-xs">Requested {formatCardDate(approval.requested_at)}</span>
+            <span>Requested {formatCardDate(approval.requested_at)}</span>
           </div>
 
           {/* Due date indicator */}
           {dueDaysText && (
             <div className={cn('portal-card-meta-item', overdue && 'text-primary')}>
               {overdue && <AlertCircle className="icon-xs" />}
-              <span className="text-xs">{dueDaysText}</span>
+              <span>{dueDaysText}</span>
             </div>
           )}
         </div>
@@ -176,7 +176,7 @@ export function ApprovalCard({
 
           {/* View detail link */}
           {onNavigate && (
-            <button className="btn-ghost text-sm" onClick={handleCardClick}>
+            <button className="btn-ghost" onClick={handleCardClick}>
               View Details
               <ChevronRight className="icon-xs" />
             </button>

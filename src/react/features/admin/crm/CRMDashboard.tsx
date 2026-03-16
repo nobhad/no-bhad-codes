@@ -40,47 +40,39 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
   // Render individual views for specific subtabs
   if (activeSubtab === 'leads') {
     return (
-      <div className="section">
-        <React.Suspense fallback={<LoadingState message="Loading leads..." />}>
-          <LeadsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading leads..." />}>
+        <LeadsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+      </React.Suspense>
     );
   }
 
   if (activeSubtab === 'contacts') {
     return (
-      <div className="section">
-        <React.Suspense fallback={<LoadingState message="Loading contacts..." />}>
-          <ContactsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading contacts..." />}>
+        <ContactsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+      </React.Suspense>
     );
   }
 
   if (activeSubtab === 'messages') {
     return (
-      <div className="section">
-        <React.Suspense fallback={<LoadingState message="Loading messages..." />}>
-          <MessageView onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading messages..." />}>
+        <MessageView onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+      </React.Suspense>
     );
   }
 
   if (activeSubtab === 'clients') {
     return (
-      <div className="section">
-        <React.Suspense fallback={<LoadingState message="Loading clients..." />}>
-          <ClientsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading clients..." />}>
+        <ClientsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+      </React.Suspense>
     );
   }
 
   // Overview - show all tables stacked with default pagination of 10
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>}>
       <React.Suspense fallback={<LoadingState message="Loading leads..." />}>
         <section className="overview-table-section">
           <LeadsTable

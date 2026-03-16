@@ -119,7 +119,7 @@ export function FormDropdown({
         disabled={disabled}
         onClick={handleToggle}
       >
-        <span className={cn('dropdown-value--form', isPlaceholder && 'text-muted')}>
+        <span className={cn('dropdown-value--form', isPlaceholder && 'text-secondary')}>
           {displayLabel}
         </span>
         <ChevronDown className="dropdown-caret--custom dropdown-caret--form" />

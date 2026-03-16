@@ -312,11 +312,11 @@ export function PortalProjectDetail({
               {/* Project Info */}
               <div className="portal-card-title-group flex-col">
                 <div className="flex items-center gap-2">
-                  <h2 className="heading text-lg m-0">{project.name}</h2>
+                  <h2 className="heading m-0">{project.name}</h2>
                   <span className="badge">{statusLabel}</span>
                 </div>
                 {project.description && (
-                  <p className="text-muted m-0">
+                  <p className="text-secondary m-0">
                     {project.description}
                   </p>
                 )}
@@ -336,11 +336,11 @@ export function PortalProjectDetail({
           <div className="panel">
             <ProgressBar value={progress} label="Overall Progress" />
             <div className="flex items-center justify-between mt-2">
-              <span className="text-muted">
+              <span className="text-secondary">
                 {project.start_date ? `Started ${formatDate(project.start_date)}` : 'Not started'}
               </span>
               {milestones.length > 0 && (
-                <span className="text-muted">
+                <span className="text-secondary">
                   {completedMilestones}/{milestones.length} milestones
                 </span>
               )}
@@ -426,23 +426,23 @@ function MilestonesList({ milestones, containerRef }: MilestonesListProps) {
             {/* Content */}
             <div className="flex-1">
               <div className="flex items-center justify-between gap-2">
-                <span className={milestone.is_completed ? 'text-muted line-through' : undefined}>
+                <span className={milestone.is_completed ? 'text-secondary line-through' : undefined}>
                   {milestone.title}
                 </span>
                 {milestone.due_date && (
-                  <div className="flex items-center gap-1 text-muted">
+                  <div className="flex items-center gap-1 text-secondary">
                     <Clock className="icon-xs" />
                     <span>{formatDate(milestone.due_date)}</span>
                   </div>
                 )}
               </div>
               {milestone.description && (
-                <p className="text-muted m-0 mt-1">
+                <p className="text-secondary m-0 mt-1">
                   {milestone.description}
                 </p>
               )}
               {milestone.is_completed && milestone.completed_date && (
-                <span className="text-muted">
+                <span className="text-secondary">
                   Completed {formatDate(milestone.completed_date)}
                 </span>
               )}
@@ -483,18 +483,18 @@ function UpdatesTimeline({ updates, containerRef }: UpdatesTimelineProps) {
           <div key={update.id} className="flex gap-3 relative">
             {/* Timeline dot */}
             <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center bg-[var(--portal-bg)] z-10">
-              <span className="text-muted">{getUpdateIcon(update.update_type)}</span>
+              <span className="text-secondary">{getUpdateIcon(update.update_type)}</span>
             </div>
 
             {/* Content */}
             <div className="portal-card flex-1">
               <div className="flex items-center justify-between gap-2">
                 <span>{update.title}</span>
-                <span className="text-muted">{formatRelativeTime(update.created_at)}</span>
+                <span className="text-secondary">{formatRelativeTime(update.created_at)}</span>
               </div>
-              <p className="text-muted m-0 mt-1">{update.content}</p>
+              <p className="text-secondary m-0 mt-1">{update.content}</p>
               {update.created_by && (
-                <span className="text-muted">
+                <span className="text-secondary">
                   by {update.created_by}
                 </span>
               )}
@@ -532,12 +532,12 @@ function FilesList({ files }: { files: ProjectFile[] }) {
         <div key={file.id} className="portal-card">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <FileText className="icon-xs flex-shrink-0 text-muted" />
+              <FileText className="icon-xs flex-shrink-0 text-secondary" />
               <div className="flex flex-col min-w-0">
                 <span className="truncate">
                   {file.original_name}
                 </span>
-                <div className="flex items-center gap-2 text-muted">
+                <div className="flex items-center gap-2 text-secondary">
                   {file.file_size != null && (
                     <span>{formatFileSize(file.file_size)}</span>
                   )}
@@ -579,12 +579,12 @@ function ThreadsList({ threads }: { threads: ProjectThread[] }) {
         <div key={thread.id} className="portal-card">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <MessageSquare className={`icon-xs flex-shrink-0${thread.is_read !== false ? ' text-muted' : ''}`} />
+              <MessageSquare className={`icon-xs flex-shrink-0${thread.is_read !== false ? ' text-secondary' : ''}`} />
               <div className="flex flex-col min-w-0">
                 <span className="truncate">
                   {thread.subject}
                 </span>
-                <div className="flex items-center gap-2 text-muted">
+                <div className="flex items-center gap-2 text-secondary">
                   {thread.message_count != null && (
                     <span>{thread.message_count} messages</span>
                   )}
@@ -620,12 +620,12 @@ function InvoicesList({ invoices }: { invoices: ProjectInvoice[] }) {
         <div key={invoice.id} className="portal-card">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <DollarSign className="icon-xs flex-shrink-0 text-muted" />
+              <DollarSign className="icon-xs flex-shrink-0 text-secondary" />
               <div className="flex flex-col min-w-0">
                 <span>
                   {invoice.invoice_number || `Invoice #${invoice.id}`}
                 </span>
-                <div className="flex items-center gap-2 text-muted">
+                <div className="flex items-center gap-2 text-secondary">
                   <span>{formatCurrency(invoice.amount)}</span>
                   {invoice.due_date && (
                     <span>Due {formatDate(invoice.due_date)}</span>
@@ -678,7 +678,7 @@ function TimeSummaryTab({ summary }: { summary: TimeSummary | null }) {
     <div className="grid grid-cols-2 gap-3">
       {stats.map((stat) => (
         <div key={stat.label} className="portal-card text-center">
-          <span className="text-2xl">{stat.value}</span>
+          <span className="stat-value">{stat.value}</span>
           <span className="label block mt-1">{stat.label}</span>
         </div>
       ))}

@@ -442,12 +442,12 @@ export function PortalDocuments({ getAuthToken, showNotification }: PortalViewPr
                     <PortalTableCell className="name-cell" label="Name">
                       <span className="cell-title">{doc.name}</span>
                     </PortalTableCell>
-                    <PortalTableCell className="status-cell" label="Status">
+                    <PortalTableCell className="status-col" label="Status">
                       <StatusBadge status={getStatusVariant(doc.status)}>
                         {doc.statusLabel}
                       </StatusBadge>
                     </PortalTableCell>
-                    <PortalTableCell className="date-cell" label="Date">
+                    <PortalTableCell className="date-col" label="Date">
                       {formatCardDate(doc.date)}
                     </PortalTableCell>
                     <PortalTableCell className="col-actions">

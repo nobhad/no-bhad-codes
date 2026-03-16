@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Inbox
 } from 'lucide-react';
@@ -29,7 +29,7 @@ import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { unwrapApiData, apiPost } from '@/utils/api-client';
-import { NOTIFICATIONS } from '@/constants/notifications';
+import { CreateTimeEntryModal } from '../modals/CreateEntityModals';
 
 const logger = createLogger('TimeTrackingTable');
 
@@ -117,6 +117,8 @@ function sortTimeEntries(a: TimeEntry, b: TimeEntry, sort: SortConfig): number {
 
 export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNotification }: TimeTrackingTableProps) {
   const containerRef = useFadeIn();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
 
   // Active timer
   const [activeTimer, setActiveTimer] = useState<{
@@ -235,156 +237,183 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
     }
   }
 
-  return (
-    <TableLayout
-      containerRef={containerRef as React.RefObject<HTMLDivElement>}
-      title="TIME TRACKING"
-      stats={
-        <TableStats
-          items={[
-            { value: formatDuration(stats.totalHours * 60), label: 'total' },
-            { value: formatDuration(stats.billableHours * 60), label: 'billable', variant: 'completed' },
-            { value: formatDuration(stats.unbilledHours * 60), label: 'unbilled', variant: 'pending' },
-            { value: formatCurrency(stats.totalValue), label: 'value' }
-          ]}
-          tooltip={`${formatDuration(stats.totalHours * 60)} Total • ${formatDuration(stats.billableHours * 60)} Billable • ${formatDuration(stats.unbilledHours * 60)} Unbilled • ${formatCurrency(stats.totalValue)} Value`}
-        />
+  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
+    setCreateLoading(true);
+    try {
+      const res = await apiPost(API_ENDPOINTS.ADMIN.TIME_ENTRIES, formData);
+      if (res.ok) {
+        showNotification?.('Time entry created successfully', 'success');
+        setCreateOpen(false);
+        refetch();
+      } else {
+        showNotification?.('Failed to create time entry', 'error');
       }
-      actions={
-        <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search entries..."
-          />
-          <FilterDropdown
-            sections={[
-              { key: 'dateRange', label: 'DATE RANGE', options: TIME_TRACKING_DATE_RANGE_OPTIONS },
-              { key: 'billable', label: 'BILLABLE', options: TIME_TRACKING_BILLABLE_OPTIONS }
-            ]}
-            values={{ ...filterValues, dateRange: dateRange ? [dateRange] : [] }}
-            onChange={handleFilterChange}
-          />
-          {!activeTimer && (
-            <IconButton action="start" onClick={startTimer} title="Start Timer" />
-          )}
-          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="Add Entry" />
-        </>
-      }
-      bulkActions={
-        activeTimer ? (
-          <div className="active-timer-banner">
-            <div className="timer-status">
-              <div className="timer-pulse" />
-              <div className="timer-info">
-                <div className="timer-display">{timerDisplay}</div>
-                <div className="timer-project">{activeTimer.projectName || 'No project'}</div>
-              </div>
-            </div>
-            <IconButton action="stop" variant="danger" onClick={stopTimer} title="Stop Timer" />
-          </div>
-        ) : undefined
-      }
-      pagination={
-        !isLoading && filteredEntries.length > 0 ? (
-          <TablePagination
-            pageInfo={pagination.pageInfo}
-            page={pagination.page}
-            pageSize={pagination.pageSize}
-            pageSizeOptions={pagination.pageSizeOptions}
-            canGoPrev={pagination.canGoPrev}
-            canGoNext={pagination.canGoNext}
-            onPageSizeChange={pagination.setPageSize}
-            onFirstPage={pagination.firstPage}
-            onPrevPage={pagination.prevPage}
-            onNextPage={pagination.nextPage}
-            onLastPage={pagination.lastPage}
-          />
-        ) : undefined
-      }
-    >
-      <PortalTable>
-        <PortalTableHeader>
-          <PortalTableRow>
-            <PortalTableHead>Description</PortalTableHead>
-            <PortalTableHead
-              sortable
-              sortDirection={sort?.column === 'project' ? sort.direction : null}
-              onClick={() => toggleSort('project')}
-            >
-              Project
-            </PortalTableHead>
-            <PortalTableHead
-              className="date-col"
-              sortable
-              sortDirection={sort?.column === 'date' ? sort.direction : null}
-              onClick={() => toggleSort('date')}
-            >
-              Date
-            </PortalTableHead>
-            <PortalTableHead>Time</PortalTableHead>
-            <PortalTableHead
-              className="text-right"
-              sortable
-              sortDirection={sort?.column === 'duration' ? sort.direction : null}
-              onClick={() => toggleSort('duration')}
-            >
-              Duration
-            </PortalTableHead>
-            <PortalTableHead className="text-center">Billable</PortalTableHead>
-            <PortalTableHead className="col-actions">Actions</PortalTableHead>
-          </PortalTableRow>
-        </PortalTableHeader>
+    } catch {
+      showNotification?.('Failed to create time entry', 'error');
+    } finally {
+      setCreateLoading(false);
+    }
+  }, [showNotification, refetch]);
 
-        <PortalTableBody animate={!isLoading && !error}>
-          {error ? (
-            <PortalTableError colSpan={7} message={error} onRetry={refetch} />
-          ) : isLoading ? (
-            <PortalTableLoading colSpan={7} rows={5} />
-          ) : paginatedEntries.length === 0 ? (
-            <PortalTableEmpty
-              colSpan={7}
-              icon={<Inbox />}
-              message={hasActiveFilters ? 'No entries match your filters' : 'No time entries yet'}
+  return (
+    <div>
+      <TableLayout
+        containerRef={containerRef as React.RefObject<HTMLDivElement>}
+        title="TIME TRACKING"
+        stats={
+          <TableStats
+            items={[
+              { value: formatDuration(stats.totalHours * 60), label: 'total' },
+              { value: formatDuration(stats.billableHours * 60), label: 'billable', variant: 'completed' },
+              { value: formatDuration(stats.unbilledHours * 60), label: 'unbilled', variant: 'pending' },
+              { value: formatCurrency(stats.totalValue), label: 'value' }
+            ]}
+            tooltip={`${formatDuration(stats.totalHours * 60)} Total • ${formatDuration(stats.billableHours * 60)} Billable • ${formatDuration(stats.unbilledHours * 60)} Unbilled • ${formatCurrency(stats.totalValue)} Value`}
+          />
+        }
+        actions={
+          <>
+            <SearchFilter
+              value={search}
+              onChange={setSearch}
+              placeholder="Search entries..."
             />
-          ) : (
-            paginatedEntries.map((entry) => (
-              <PortalTableRow key={entry.id} clickable>
-                <PortalTableCell className="primary-cell">
-                  <div className="cell-content">
-                    <span className="cell-title">{entry.description || 'No description'}</span>
-                    {entry.taskName && <span className="cell-subtitle">{entry.taskName}</span>}
-                  </div>
-                </PortalTableCell>
-                <PortalTableCell>
-                  {entry.projectName && (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); onNavigate?.('projects', entry.projectId != null ? String(entry.projectId) : undefined); }}
-                      className="link-btn"
-                    >
-                      {entry.projectName}
-                    </button>
-                  )}
-                </PortalTableCell>
-                <PortalTableCell className="date-cell">{formatDateShort(entry.date)}</PortalTableCell>
-                <PortalTableCell className="mono-text">
-                  {entry.startTime} - {entry.endTime || 'ongoing'}
-                </PortalTableCell>
-                <PortalTableCell className="text-right mono-text">{formatDuration(entry.duration)}</PortalTableCell>
-                <PortalTableCell className="text-center">
-                  <span className={entry.billable ? 'status-dot status-completed' : 'status-dot status-muted'} />
-                </PortalTableCell>
-                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                  <div className="table-actions">
-                    <IconButton action="edit" title="Edit entry" />
-                  </div>
-                </PortalTableCell>
-              </PortalTableRow>
-            ))
-          )}
-        </PortalTableBody>
-      </PortalTable>
-    </TableLayout>
+            <FilterDropdown
+              sections={[
+                { key: 'dateRange', label: 'DATE RANGE', options: TIME_TRACKING_DATE_RANGE_OPTIONS },
+                { key: 'billable', label: 'BILLABLE', options: TIME_TRACKING_BILLABLE_OPTIONS }
+              ]}
+              values={{ ...filterValues, dateRange: dateRange ? [dateRange] : [] }}
+              onChange={handleFilterChange}
+            />
+            {!activeTimer && (
+              <IconButton action="start" onClick={startTimer} title="Start Timer" />
+            )}
+            <IconButton action="add" onClick={() => setCreateOpen(true)} title="Add Entry" />
+          </>
+        }
+        bulkActions={
+          activeTimer ? (
+            <div className="active-timer-banner">
+              <div className="timer-status">
+                <div className="timer-pulse" />
+                <div className="timer-info">
+                  <div className="timer-display">{timerDisplay}</div>
+                  <div className="timer-project">{activeTimer.projectName || 'No project'}</div>
+                </div>
+              </div>
+              <IconButton action="stop" variant="danger" onClick={stopTimer} title="Stop Timer" />
+            </div>
+          ) : undefined
+        }
+        pagination={
+          !isLoading && filteredEntries.length > 0 ? (
+            <TablePagination
+              pageInfo={pagination.pageInfo}
+              page={pagination.page}
+              pageSize={pagination.pageSize}
+              pageSizeOptions={pagination.pageSizeOptions}
+              canGoPrev={pagination.canGoPrev}
+              canGoNext={pagination.canGoNext}
+              onPageSizeChange={pagination.setPageSize}
+              onFirstPage={pagination.firstPage}
+              onPrevPage={pagination.prevPage}
+              onNextPage={pagination.nextPage}
+              onLastPage={pagination.lastPage}
+            />
+          ) : undefined
+        }
+      >
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead>Description</PortalTableHead>
+              <PortalTableHead
+                sortable
+                sortDirection={sort?.column === 'project' ? sort.direction : null}
+                onClick={() => toggleSort('project')}
+              >
+              Project
+              </PortalTableHead>
+              <PortalTableHead
+                className="date-col"
+                sortable
+                sortDirection={sort?.column === 'date' ? sort.direction : null}
+                onClick={() => toggleSort('date')}
+              >
+              Date
+              </PortalTableHead>
+              <PortalTableHead>Time</PortalTableHead>
+              <PortalTableHead
+                className="text-right"
+                sortable
+                sortDirection={sort?.column === 'duration' ? sort.direction : null}
+                onClick={() => toggleSort('duration')}
+              >
+              Duration
+              </PortalTableHead>
+              <PortalTableHead className="text-center">Billable</PortalTableHead>
+              <PortalTableHead className="col-actions">Actions</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
+
+          <PortalTableBody animate={!isLoading && !error}>
+            {error ? (
+              <PortalTableError colSpan={7} message={error} onRetry={refetch} />
+            ) : isLoading ? (
+              <PortalTableLoading colSpan={7} rows={5} />
+            ) : paginatedEntries.length === 0 ? (
+              <PortalTableEmpty
+                colSpan={7}
+                icon={<Inbox />}
+                message={hasActiveFilters ? 'No entries match your filters' : 'No time entries yet'}
+              />
+            ) : (
+              paginatedEntries.map((entry) => (
+                <PortalTableRow key={entry.id} clickable>
+                  <PortalTableCell className="primary-cell">
+                    <div className="cell-content">
+                      <span className="cell-title">{entry.description || 'No description'}</span>
+                      {entry.taskName && <span className="cell-subtitle">{entry.taskName}</span>}
+                    </div>
+                  </PortalTableCell>
+                  <PortalTableCell>
+                    {entry.projectName && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onNavigate?.('projects', entry.projectId != null ? String(entry.projectId) : undefined); }}
+                        className="link-btn"
+                      >
+                        {entry.projectName}
+                      </button>
+                    )}
+                  </PortalTableCell>
+                  <PortalTableCell className="date-col">{formatDateShort(entry.date)}</PortalTableCell>
+                  <PortalTableCell className="mono-text">
+                    {entry.startTime} - {entry.endTime || 'ongoing'}
+                  </PortalTableCell>
+                  <PortalTableCell className="text-right mono-text">{formatDuration(entry.duration)}</PortalTableCell>
+                  <PortalTableCell className="text-center">
+                    <span className={entry.billable ? 'status-dot status-completed' : 'status-dot status-muted'} />
+                  </PortalTableCell>
+                  <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
+                    <div className="table-actions">
+                      <IconButton action="edit" title="Edit entry" />
+                    </div>
+                  </PortalTableCell>
+                </PortalTableRow>
+              ))
+            )}
+          </PortalTableBody>
+        </PortalTable>
+      </TableLayout>
+      <CreateTimeEntryModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onSubmit={handleCreate}
+        loading={createLoading}
+        projectOptions={[]}
+      />
+    </div>
   );
 }
 

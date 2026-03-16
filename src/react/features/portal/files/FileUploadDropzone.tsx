@@ -258,7 +258,7 @@ export function FileUploadDropzone({
       <div className={cn('dropzone', className)}>
         <div className="dropzone-content">
           <RefreshCw className="icon-lg loading-spin" />
-          <p className="dropzone-text text-muted">Uploading files...</p>
+          <p className="dropzone-text text-secondary">Uploading files...</p>
           <div className="progress-bar-sm">
             <div className="progress-fill" style={{ width: `${uploadProgress}%` }} />
           </div>

@@ -17,7 +17,7 @@ import {
   ClipboardList,
   Activity
 } from 'lucide-react';
-import { StatCard } from '@react/components/portal';
+import { StatCard, TableLayout } from '@react/components/portal';
 import { formatRelativeTime, IconButton } from '@react/factories';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { useFadeIn } from '@react/hooks/useGsap';
@@ -278,7 +278,7 @@ export function PortalDashboard({
   );
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef}>
       {isLoading ? (
         <LoadingState message="Loading dashboard..." />
       ) : error ? (
@@ -327,21 +327,14 @@ export function PortalDashboard({
           </div>
 
           {/* Submit Request + Recent Activity */}
-          <div className="table-layout">
-            <div className="data-table-card">
-              <div className="data-table-header">
-                <h3>
-                  <span className="title-full">RECENT ACTIVITY</span>
-                </h3>
-                <div className="data-table-actions">
-                  <IconButton action="refresh" onClick={refetch} title="Refresh" />
-                </div>
-              </div>
-              <div className="data-table-container">
-                <ActivityList activities={recentActivity} onNavigate={onNavigate} />
-              </div>
-            </div>
-          </div>
+          <TableLayout
+            title="RECENT ACTIVITY"
+            actions={
+              <IconButton action="refresh" onClick={refetch} title="Refresh" />
+            }
+          >
+            <ActivityList activities={recentActivity} onNavigate={onNavigate} />
+          </TableLayout>
         </>
       )}
     </div>

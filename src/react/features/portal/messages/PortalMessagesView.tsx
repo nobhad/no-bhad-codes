@@ -144,7 +144,7 @@ export function PortalMessagesView({
   // Loading threads
   if (threadsLoading && threads.length === 0) {
     return (
-      <div ref={containerRef} className="section">
+      <div ref={containerRef}>
         <LoadingState message="Loading messages..." />
       </div>
     );
@@ -153,7 +153,7 @@ export function PortalMessagesView({
   // Error loading threads
   if (messagesError && !selectedThread) {
     return (
-      <div ref={containerRef} className="section">
+      <div ref={containerRef}>
         <ErrorState message={messagesError} onRetry={refreshThreads} />
       </div>
     );

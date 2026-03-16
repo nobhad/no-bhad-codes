@@ -221,7 +221,7 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
               >
                 <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
-                    <User className="cell-icon" />
+                    <User className="icon-sm" />
                     <div className="cell-content">
                       <span className="cell-title">{conversation.clientName}</span>
                       <span className="cell-subtitle">{conversation.clientEmail}</span>
@@ -236,10 +236,10 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
                 </PortalTableCell>
                 <PortalTableCell className="text-center">
                   {conversation.unreadCount > 0 && (
-                    <span className="badge badge-pending">{conversation.unreadCount}</span>
+                    <span className="badge">{conversation.unreadCount}</span>
                   )}
                 </PortalTableCell>
-                <PortalTableCell className="date-cell">
+                <PortalTableCell className="date-col">
                   {conversation.lastMessageAt
                     ? formatDate(conversation.lastMessageAt)
                     : null

@@ -223,7 +223,7 @@ const FolderTree = React.memo(({ folders, selectedFolder, totalCount, onSelectFo
       >
         <Folder className="icon-sm" />
         <span className="flex-1">All Files</span>
-        <span className="text-muted">{totalCount}</span>
+        <span className="text-secondary">{totalCount}</span>
       </button>
 
       {/* Folder categories */}
@@ -236,7 +236,7 @@ const FolderTree = React.memo(({ folders, selectedFolder, totalCount, onSelectFo
         >
           <Folder className="icon-sm" />
           <span className="flex-1">{folder.name}</span>
-          <span className="text-muted">{folder.count}</span>
+          <span className="text-secondary">{folder.count}</span>
         </button>
       ))}
     </div>
@@ -571,7 +571,7 @@ export function PortalFilesManager({
                         <PortalTableRow key={file.id}>
                           <PortalTableCell className="name-cell" label="File">
                             <div className="file-cell-name">
-                              <span className="text-muted">
+                              <span className="text-secondary">
                                 {getFileIcon(file.mimetype)}
                               </span>
                               <span className="file-name" title={displayName}>
@@ -580,12 +580,12 @@ export function PortalFilesManager({
                             </div>
                           </PortalTableCell>
                           <PortalTableCell className="size-cell" label="Size">
-                            <span className="text-muted">
+                            <span className="text-secondary">
                               {formatFileSize(file.size)}
                             </span>
                           </PortalTableCell>
-                          <PortalTableCell className="date-cell" label="Uploaded">
-                            <span className="text-muted">
+                          <PortalTableCell className="date-col" label="Uploaded">
+                            <span className="text-secondary">
                               {formatCardDate(file.uploadedAt)}
                             </span>
                           </PortalTableCell>
@@ -620,7 +620,7 @@ export function PortalFilesManager({
               {/* Pagination */}
               {filteredFiles.length > 0 && (
                 <div className="files-pagination">
-                  <span className="text-muted">{pagination.pageInfo}</span>
+                  <span className="text-secondary">{pagination.pageInfo}</span>
                   <div className="files-pagination-controls">
                     <PortalButton
                       variant="ghost"
@@ -629,7 +629,7 @@ export function PortalFilesManager({
                     >
                           Previous
                     </PortalButton>
-                    <span className="text-muted files-pagination-page">
+                    <span className="text-secondary files-pagination-page">
                           Page {pagination.page} of {pagination.totalPages}
                     </span>
                     <PortalButton

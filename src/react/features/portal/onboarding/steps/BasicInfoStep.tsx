@@ -45,10 +45,10 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
     <div ref={containerRef}>
       {/* Section Header */}
       <div className="mb-4">
-        <h3 className="heading text-lg">
+        <h3 className="heading">
           Contact Information
         </h3>
-        <p className="text-muted mt-1">
+        <p className="text-secondary mt-1">
           Tell us how to reach you during the project.
         </p>
       </div>
@@ -61,7 +61,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
             Contact Name <span className="form-required">*</span>
           </label>
           <div className="relative">
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary">
               <User className="icon-xs" />
             </div>
             <input
@@ -84,7 +84,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
             Email Address <span className="form-required">*</span>
           </label>
           <div className="relative">
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary">
               <Mail className="icon-xs" />
             </div>
             <input
@@ -105,7 +105,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
         <div className="flex flex-col gap-1">
           <label className="field-label" htmlFor="basic-contact-phone">Phone Number</label>
           <div className="relative">
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary">
               <Phone className="icon-xs" />
             </div>
             <input
@@ -126,7 +126,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
         <div className="flex flex-col gap-1">
           <label className="field-label" htmlFor="basic-timezone">Timezone</label>
           <div className="relative">
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary">
               <Clock className="icon-xs" />
             </div>
             <FormDropdown
@@ -144,10 +144,10 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Company Section */}
       <div className="mb-4">
-        <h3 className="heading text-lg">
+        <h3 className="heading">
           Company Details
         </h3>
-        <p className="text-muted mt-1">
+        <p className="text-secondary mt-1">
           Help us understand your business.
         </p>
       </div>
@@ -157,7 +157,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
         <div className="flex flex-col gap-1">
           <label className="field-label" htmlFor="basic-company-name">Company Name</label>
           <div className="relative">
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary">
               <Building2 className="icon-xs" />
             </div>
             <input
@@ -175,7 +175,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
         <div className="flex flex-col gap-1">
           <label className="field-label" htmlFor="basic-company-website">Current Website</label>
           <div className="relative">
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary">
               <Globe className="icon-xs" />
             </div>
             <input
@@ -187,7 +187,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
               className="input pl-10"
             />
           </div>
-          <span className="text-muted">
+          <span className="text-secondary">
             Leave blank if this is a new business
           </span>
         </div>
@@ -207,7 +207,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
                 'px-3 py-2',
                 'border transition-colors',
                 basicInfo.preferredContactMethod === method
-                  ? 'border-primary bg-white text-dark'
+                  ? 'border-primary bg-white'
                   : 'border border-default hover-border-primary'
               )}
             >
@@ -231,7 +231,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
                   <span className="w-1.5 h-1.5 bg-white" />
                 )}
               </span>
-              <span className="font-mono capitalize">
+              <span className="capitalize">
                 {method}
               </span>
             </label>

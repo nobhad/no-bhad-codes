@@ -83,12 +83,12 @@ const DEFAULT_STATS: DeletedItemsStats = {
 };
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
-  client: <User className="cell-icon" />,
-  project: <Briefcase className="cell-icon" />,
-  invoice: <FileText className="cell-icon" />,
-  file: <File className="cell-icon" />,
-  message: <MessageSquare className="cell-icon" />,
-  contact: <User className="cell-icon" />
+  client: <User className="icon-sm" />,
+  project: <Briefcase className="icon-sm" />,
+  invoice: <FileText className="icon-sm" />,
+  file: <File className="icon-sm" />,
+  message: <MessageSquare className="icon-sm" />,
+  contact: <User className="icon-sm" />
 };
 
 // Filter function for deleted items
@@ -373,7 +373,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
           />
         ) : stats.expiringIn7Days > 0 ? (
           <div className="table-warning-banner">
-            <AlertTriangle className="cell-icon" />
+            <AlertTriangle className="icon-sm" />
             <span>
               {stats.expiringIn7Days} item(s) will be permanently deleted within the next 7
               days.
@@ -486,13 +486,13 @@ export function DeletedItemsTable({ getAuthToken, showNotification: _showNotific
                 </PortalTableCell>
                 <PortalTableCell className="type-cell">{item.type}</PortalTableCell>
                 <PortalTableCell className="user-cell">{item.deletedBy}</PortalTableCell>
-                <PortalTableCell className="date-cell">
+                <PortalTableCell className="date-col">
                   {formatDate(item.deletedAt)}
                 </PortalTableCell>
-                <PortalTableCell className="date-cell">
+                <PortalTableCell className="date-col">
                   <span className={cn(isExpiringSoon(item.expiresAt) && 'text-danger')}>
                     <span className="cell-with-icon">
-                      {isExpiringSoon(item.expiresAt) && <Clock className="cell-icon-sm" />}
+                      {isExpiringSoon(item.expiresAt) && <Clock className="icon-xs" />}
                       {getDaysUntilExpiry(item.expiresAt)}
                     </span>
                   </span>

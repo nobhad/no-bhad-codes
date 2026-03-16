@@ -31,11 +31,11 @@ export const DeliverableCard = React.memo(({ deliverable, onNavigate }: Delivera
       {/* Header */}
       <div className="portal-card-header">
         <div className="portal-card-title-group">
-          <div className="text-muted"><Package className="icon-xs" /></div>
-          <div className="portal-card-title-block">
-            <h3 className="text-primary text-sm">{deliverable.title}</h3>
+          <div className="text-secondary"><Package className="icon-xs" /></div>
+          <div className="portal-card-title-group flex-col">
+            <h3 className="text-primary">{deliverable.title}</h3>
             {deliverable.project_name && (
-              <span className="label text-xs">
+              <span className="label">
                 <FolderOpen className="icon-xs inline" />
                 {deliverable.project_name}
               </span>
@@ -55,26 +55,26 @@ export const DeliverableCard = React.memo(({ deliverable, onNavigate }: Delivera
         {deliverable.type && (
           <div className="portal-card-meta-item">
             <Layers className="icon-xs" />
-            <span className="text-xs">{deliverable.type}</span>
+            <span>{deliverable.type}</span>
           </div>
         )}
 
         {deliverable.round_number > 1 && (
           <div className="portal-card-meta-item">
-            <span className="text-xs">Round {deliverable.round_number}</span>
+            <span>Round {deliverable.round_number}</span>
           </div>
         )}
 
         {deliverable.review_deadline && (
           <div className="portal-card-meta-item">
             <Calendar className="icon-xs" />
-            <span className="text-xs">Due {formatCardDate(deliverable.review_deadline)}</span>
+            <span>Due {formatCardDate(deliverable.review_deadline)}</span>
           </div>
         )}
 
         {dueDaysText && (
           <div className={cn('portal-card-meta-item', overdue && 'text-primary')}>
-            <span className="text-xs">{dueDaysText}</span>
+            <span>{dueDaysText}</span>
           </div>
         )}
       </div>
@@ -82,7 +82,7 @@ export const DeliverableCard = React.memo(({ deliverable, onNavigate }: Delivera
       {/* Actions */}
       {onNavigate && (
         <div className="portal-card-actions">
-          <button className="btn-ghost text-sm" onClick={handleClick}>
+          <button className="btn-ghost" onClick={handleClick}>
             View Deliverable
             <ChevronRight className="icon-xs" />
           </button>

@@ -295,7 +295,7 @@ export function ModalDropdown({
         <span
           className={cn(
             'text-truncate',
-            selectedValues.length === 0 && 'text-muted'
+            selectedValues.length === 0 && 'text-secondary'
           )}
         >
           {displayText}

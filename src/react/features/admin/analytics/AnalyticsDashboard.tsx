@@ -274,8 +274,8 @@ function ChartWidget({ data, type }: ChartWidgetProps) {
   if (!hasData) {
     return (
       <div className="chart-placeholder">
-        <BarChart3 className="icon-xl text-muted" />
-        <p className="text-muted">No data available</p>
+        <BarChart3 className="icon-xl text-secondary" />
+        <p className="text-secondary">No data available</p>
       </div>
     );
   }

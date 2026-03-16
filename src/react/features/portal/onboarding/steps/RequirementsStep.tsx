@@ -53,10 +53,10 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
     <div ref={containerRef}>
       {/* Design Preferences Section */}
       <div className="mb-4">
-        <h3 className="heading text-lg">
+        <h3 className="heading">
           Design Preferences
         </h3>
-        <p className="text-muted mt-1">
+        <p className="text-secondary mt-1">
           Help us understand your visual style.
         </p>
       </div>
@@ -76,7 +76,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
                 'flex items-center justify-center gap-2',
                 'px-3 py-2',
                 'border transition-all duration-200',
-                'text-center font-mono',
+                'text-center',
                 'focus:outline-none focus:ring-2 focus:ring-white',
                 requirements.designStyle === style
                   ? 'border-primary bg-white text-[var(--color-text-inverse)]'
@@ -114,7 +114,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
             checked={requirements.brandGuidelines}
             onCheckedChange={(checked) => handleChange('brandGuidelines', checked === true)}
           />
-          <span className="font-mono">
+          <span>
             I have brand guidelines
           </span>
         </label>
@@ -125,7 +125,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
             checked={requirements.contentReady}
             onCheckedChange={(checked) => handleChange('contentReady', checked === true)}
           />
-          <span className="font-mono">
+          <span>
             Content is ready/prepared
           </span>
         </label>
@@ -135,10 +135,10 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Features Section */}
       <div className="mb-4">
-        <h3 className="heading text-lg">
+        <h3 className="heading">
           Features & Functionality
         </h3>
-        <p className="text-muted mt-1">
+        <p className="text-secondary mt-1">
           Select the features you need for your project.
         </p>
       </div>
@@ -156,7 +156,6 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
                 'flex items-center gap-2 text-left',
                 'px-3 py-2',
                 'border transition-all duration-200',
-                'font-mono',
                 'focus:outline-none focus:ring-2 focus:ring-white',
                 isSelected
                   ? 'border-primary bg-white text-[var(--color-text-inverse)]'

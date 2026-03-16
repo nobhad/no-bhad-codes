@@ -69,9 +69,15 @@ export function PortalModal({
     </>
   );
 
+  // Render into .portal div so modal inherits portal CSS scope
+  const portalContainer = React.useMemo(
+    () => document.querySelector<HTMLElement>('.portal') ?? document.body,
+    []
+  );
+
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
-      <DialogPrimitive.Portal>
+      <DialogPrimitive.Portal container={portalContainer}>
         <DialogPrimitive.Overlay className="portal-modal-overlay" />
         <DialogPrimitive.Content
           ref={contentRef}

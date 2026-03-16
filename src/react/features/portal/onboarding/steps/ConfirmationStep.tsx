@@ -40,7 +40,7 @@ function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: Summar
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Icon className="icon-sm" />
-          <h4 className="font-mono">
+          <h4>
             {title}
           </h4>
           {stepNumber && (
@@ -62,8 +62,8 @@ function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: Summar
       </div>
       <div className="space-y-2">
         {items.map((item) => (
-          <div key={item.label} className="flex gap-2 font-mono">
-            <span className="text-muted min-w-[100px] flex-shrink-0">
+          <div key={item.label} className="flex gap-2">
+            <span className="text-secondary min-w-[100px] flex-shrink-0">
               {item.label}:
             </span>
             <span>{item.value || '-'}</span>
@@ -98,10 +98,10 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
     <div ref={containerRef}>
       {/* Section Header */}
       <div className="mb-4">
-        <h3 className="heading text-lg">
+        <h3 className="heading">
           Review Your Information
         </h3>
-        <p className="text-muted mt-1">
+        <p className="text-secondary mt-1">
           Please review all the information below before submitting.
         </p>
       </div>
@@ -111,12 +111,12 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
         <div className="error-state flex items-start gap-3">
           <AlertCircle className="icon-sm flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-mono">
+            <p>
               Please fix the following issues:
             </p>
             <ul className="mt-1 space-y-1">
               {errors.map((error) => (
-                <li key={error.message} className="font-mono">
+                <li key={error.message}>
                   {error.message}
                 </li>
               ))}
@@ -174,7 +174,7 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
           <h4 className="label mb-2">
             Project Description
           </h4>
-          <p className="font-mono whitespace-pre-wrap">
+          <p className="whitespace-pre-wrap">
             {projectOverview.projectDescription}
           </p>
         </div>
@@ -253,7 +253,7 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
           <h4 className="label mb-2">
             Additional Notes
           </h4>
-          <p className="font-mono whitespace-pre-wrap">
+          <p className="whitespace-pre-wrap">
             {requirements.additionalNotes}
           </p>
         </div>
@@ -263,10 +263,10 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
       <div className="portal-card flex items-start gap-3 mt-2 border-primary">
         <Check className="icon-sm flex-shrink-0 mt-0.5" />
         <div>
-          <p className="font-mono">
+          <p>
             Ready to submit
           </p>
-          <p className="text-muted mt-1 font-mono">
+          <p className="text-secondary mt-1 ">
             Click "Complete Onboarding" below to submit your information. We'll review everything and
             get back to you within 1-2 business days.
           </p>

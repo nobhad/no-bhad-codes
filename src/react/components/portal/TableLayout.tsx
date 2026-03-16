@@ -29,8 +29,8 @@ export interface TableLayoutProps {
   className?: string;
   /** Ref for the outer container (for animations) */
   containerRef?: React.Ref<HTMLDivElement>;
-  /** When true, wraps in .subsection (for use inside hubs/detail pages).
-   *  When false (default), wraps in .section (for standalone routes). */
+  /** When true (default), wraps in .subsection (layout provides .section).
+   *  When false, wraps in .section (for contexts outside PortalLayout). */
   nested?: boolean;
 }
 
@@ -43,7 +43,7 @@ export function TableLayout({
   bulkActions,
   className,
   containerRef,
-  nested = false
+  nested = true
 }: TableLayoutProps) {
   return (
     <div ref={containerRef} className={nested ? 'subsection' : 'section'}>

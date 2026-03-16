@@ -85,7 +85,7 @@ export function StatusDropdown({
 }
 
 interface StatusDropdownCellProps extends StatusDropdownProps {
-  /** Additional className for the PortalTableCell (defaults to 'status-cell') */
+  /** Additional className for the PortalTableCell (defaults to 'status-col') */
   cellClassName?: string;
 }
 
@@ -94,7 +94,7 @@ interface StatusDropdownCellProps extends StatusDropdownProps {
  * Drop-in replacement for the repeated status cell pattern in admin tables.
  */
 export function StatusDropdownCell({
-  cellClassName = 'status-cell',
+  cellClassName = 'status-col',
   ...dropdownProps
 }: StatusDropdownCellProps) {
   return (

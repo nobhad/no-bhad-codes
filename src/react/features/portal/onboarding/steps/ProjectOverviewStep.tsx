@@ -44,10 +44,10 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
     <div ref={containerRef}>
       {/* Section Header */}
       <div className="mb-4">
-        <h3 className="heading text-lg">
+        <h3 className="heading">
           Project Details
         </h3>
-        <p className="text-muted mt-1">
+        <p className="text-secondary mt-1">
           Tell us about your project goals and timeline.
         </p>
       </div>
@@ -60,7 +60,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
             Project Name <span className="form-required">*</span>
           </label>
           <div className="relative">
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary">
               <FolderKanban className="icon-xs" />
             </div>
             <input
@@ -121,10 +121,10 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Timeline & Budget Section */}
       <div className="mb-4">
-        <h3 className="heading text-lg">
+        <h3 className="heading">
           Timeline & Budget
         </h3>
-        <p className="text-muted mt-1">
+        <p className="text-secondary mt-1">
           Help us understand your constraints.
         </p>
       </div>
@@ -134,7 +134,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
         <div className="flex flex-col gap-1">
           <label className="field-label" htmlFor="project-launch-date">Target Launch Date</label>
           <div className="relative">
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary">
               <Calendar className="icon-xs" />
             </div>
             <input
@@ -145,7 +145,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
               className="input pl-10"
             />
           </div>
-          <span className="text-muted">
+          <span className="text-secondary">
             When do you want to launch?
           </span>
         </div>
@@ -154,7 +154,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
         <div className="flex flex-col gap-1">
           <label className="field-label" htmlFor="project-budget">Budget Range</label>
           <div className="relative">
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted z-10">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary z-10">
               <DollarSign className="icon-xs" />
             </div>
             <FormDropdown
@@ -169,7 +169,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
               className="pl-10"
             />
           </div>
-          <span className="text-muted">
+          <span className="text-secondary">
             This helps us recommend the right scope
           </span>
         </div>
@@ -179,7 +179,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
       <div className="flex flex-col gap-1 mt-4">
         <label className="field-label" htmlFor="project-target-audience">Target Audience</label>
         <div className="relative">
-          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary">
             <Users className="icon-xs" />
           </div>
           <input

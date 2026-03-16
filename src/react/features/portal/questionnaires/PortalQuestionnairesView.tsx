@@ -204,21 +204,21 @@ export function PortalQuestionnairesView({
                 <div className="portal-card-header">
                   <div className="portal-card-title-group">
                     {getStatusIcon(response.status)}
-                    <div className="portal-card-title-block">
+                    <div className="portal-card-title-group flex-col">
                       <span className="text-primary">
                         {response.questionnaire.title}
                       </span>
                       {response.questionnaire.description && (
-                        <span className="text-muted text-xs">
+                        <span className="text-secondary">
                           {response.questionnaire.description}
                         </span>
                       )}
                     </div>
                   </div>
                   <div className="portal-card-status-group">
-                    <div className="portal-card-title-block items-end">
+                    <div className="portal-card-title-group flex-col items-end">
                       <span className="badge">{config.label}</span>
-                      <span className="text-muted text-xs">
+                      <span className="text-secondary">
                         {response.submitted_at
                           ? `Submitted ${formatCardDate(response.submitted_at)}`
                           : `Updated ${formatCardDate(response.updated_at || response.created_at)}`

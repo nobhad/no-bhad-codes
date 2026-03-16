@@ -29,9 +29,9 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { ARTICLES_FILTER_CONFIG, ARTICLE_STATUS_OPTIONS } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { apiFetch } from '@/utils/api-client';
+import { apiFetch, apiPost } from '@/utils/api-client';
 import { formatErrorMessage } from '@/utils/error-utils';
-import { NOTIFICATIONS } from '@/constants/notifications';
+import { CreateKBArticleModal } from '../modals/CreateEntityModals';
 
 interface Article {
   id: number;
@@ -125,6 +125,8 @@ function sortArticles(a: Article, b: Article, sort: SortConfig): number {
 
 export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken: _getAuthToken, showNotification, defaultPageSize = 25, overviewMode = false }: ArticlesTableProps) {
   const containerRef = useFadeIn();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -196,6 +198,32 @@ export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken: _getAuthT
     }))
   ], [categories]);
 
+  // Category options for the create modal
+  const modalCategoryOptions = useMemo(() =>
+    categories.map((cat) => ({
+      value: String(cat.id),
+      label: cat.name
+    })),
+  [categories]);
+
+  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
+    setCreateLoading(true);
+    try {
+      const res = await apiPost(API_ENDPOINTS.ADMIN.KB_ARTICLES, formData);
+      if (res.ok) {
+        showNotification?.('Article created successfully', 'success');
+        setCreateOpen(false);
+        loadData();
+      } else {
+        showNotification?.('Failed to create article', 'error');
+      }
+    } catch {
+      showNotification?.('Failed to create article', 'error');
+    } finally {
+      setCreateLoading(false);
+    }
+  }, [showNotification, loadData]);
+
   const filteredArticles = useMemo(() => applyFilters(articles), [applyFilters, articles]);
 
   const pagination = usePagination({
@@ -210,145 +238,154 @@ export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken: _getAuthT
   );
 
   return (
-    <TableLayout
-      containerRef={containerRef as React.RefObject<HTMLDivElement>}
-      title="ARTICLES"
-      stats={
-        <TableStats
-          items={[
-            { value: stats.totalArticles, label: 'articles' },
-            { value: stats.published, label: 'published', variant: 'completed' },
-            { value: stats.draft, label: 'draft', variant: 'pending' }
-          ]}
-          tooltip={`${stats.totalArticles} Articles • ${stats.published} Published • ${stats.draft} Draft • ${stats.totalViews} Views`}
-        />
-      }
-      actions={
-        <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search articles..."
-          />
-          <FilterDropdown
-            sections={[
-              { key: 'category', label: 'CATEGORY', options: categoryFilterOptions },
-              { key: 'status', label: 'STATUS', options: ARTICLE_STATUS_OPTIONS }
+    <>
+      <TableLayout
+        containerRef={containerRef as React.RefObject<HTMLDivElement>}
+        title="ARTICLES"
+        stats={
+          <TableStats
+            items={[
+              { value: stats.totalArticles, label: 'articles' },
+              { value: stats.published, label: 'published', variant: 'completed' },
+              { value: stats.draft, label: 'draft', variant: 'pending' }
             ]}
-            values={filterValues}
-            onChange={setFilter}
+            tooltip={`${stats.totalArticles} Articles • ${stats.published} Published • ${stats.draft} Draft • ${stats.totalViews} Views`}
           />
-          <IconButton action="download" title="Export" />
-          <IconButton action="refresh" onClick={loadData} disabled={isLoading} title="Refresh" />
-          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="New Article" />
-        </>
-      }
-      pagination={
-        !isLoading && filteredArticles.length > 0 ? (
-          <TablePagination
-            pageInfo={pagination.pageInfo}
-            page={pagination.page}
-            pageSize={pagination.pageSize}
-            pageSizeOptions={pagination.pageSizeOptions}
-            canGoPrev={pagination.canGoPrev}
-            canGoNext={pagination.canGoNext}
-            onPageSizeChange={pagination.setPageSize}
-            onFirstPage={pagination.firstPage}
-            onPrevPage={pagination.prevPage}
-            onNextPage={pagination.nextPage}
-            onLastPage={pagination.lastPage}
-          />
-        ) : undefined
-      }
-    >
-      <PortalTable>
-        <PortalTableHeader>
-          <PortalTableRow>
-            <PortalTableHead
-              sortable
-              sortDirection={sort?.column === 'title' ? sort.direction : null}
-              onClick={() => toggleSort('title')}
-            >
-              Article
-            </PortalTableHead>
-            <PortalTableHead>Category</PortalTableHead>
-            <PortalTableHead>Status</PortalTableHead>
-            <PortalTableHead className="text-center">Featured</PortalTableHead>
-            <PortalTableHead
-              className="text-center"
-              sortable
-              sortDirection={sort?.column === 'view_count' ? sort.direction : null}
-              onClick={() => toggleSort('view_count')}
-            >
-              Views
-            </PortalTableHead>
-            <PortalTableHead
-              className="date-col"
-              sortable
-              sortDirection={sort?.column === 'updated_at' ? sort.direction : null}
-              onClick={() => toggleSort('updated_at')}
-            >
-              Updated
-            </PortalTableHead>
-            <PortalTableHead className="col-actions">Actions</PortalTableHead>
-          </PortalTableRow>
-        </PortalTableHeader>
-
-        <PortalTableBody animate={!isLoading && !error}>
-          {error ? (
-            <PortalTableError colSpan={7} message={error} onRetry={loadData} />
-          ) : isLoading ? (
-            <PortalTableLoading colSpan={7} rows={5} />
-          ) : paginatedArticles.length === 0 ? (
-            <PortalTableEmpty
-              colSpan={7}
-              icon={<Inbox />}
-              message={hasActiveFilters ? 'No articles match your filters' : 'No articles yet'}
+        }
+        actions={
+          <>
+            <SearchFilter
+              value={search}
+              onChange={setSearch}
+              placeholder="Search articles..."
             />
-          ) : (
-            paginatedArticles.map((article) => (
-              <PortalTableRow key={article.id} clickable>
-                <PortalTableCell className="primary-cell">
-                  <div className="cell-with-icon">
-                    <FileText className="cell-icon" />
-                    <div className="cell-content">
-                      <span className="cell-title">{article.title}</span>
-                      {article.summary && (
-                        <span className="cell-subtitle">{article.summary}</span>
-                      )}
+            <FilterDropdown
+              sections={[
+                { key: 'category', label: 'CATEGORY', options: categoryFilterOptions },
+                { key: 'status', label: 'STATUS', options: ARTICLE_STATUS_OPTIONS }
+              ]}
+              values={filterValues}
+              onChange={setFilter}
+            />
+            <IconButton action="download" title="Export" />
+            <IconButton action="refresh" onClick={loadData} disabled={isLoading} title="Refresh" />
+            <IconButton action="add" onClick={() => setCreateOpen(true)} title="New Article" />
+          </>
+        }
+        pagination={
+          !isLoading && filteredArticles.length > 0 ? (
+            <TablePagination
+              pageInfo={pagination.pageInfo}
+              page={pagination.page}
+              pageSize={pagination.pageSize}
+              pageSizeOptions={pagination.pageSizeOptions}
+              canGoPrev={pagination.canGoPrev}
+              canGoNext={pagination.canGoNext}
+              onPageSizeChange={pagination.setPageSize}
+              onFirstPage={pagination.firstPage}
+              onPrevPage={pagination.prevPage}
+              onNextPage={pagination.nextPage}
+              onLastPage={pagination.lastPage}
+            />
+          ) : undefined
+        }
+      >
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead
+                sortable
+                sortDirection={sort?.column === 'title' ? sort.direction : null}
+                onClick={() => toggleSort('title')}
+              >
+              Article
+              </PortalTableHead>
+              <PortalTableHead>Category</PortalTableHead>
+              <PortalTableHead>Status</PortalTableHead>
+              <PortalTableHead className="text-center">Featured</PortalTableHead>
+              <PortalTableHead
+                className="text-center"
+                sortable
+                sortDirection={sort?.column === 'view_count' ? sort.direction : null}
+                onClick={() => toggleSort('view_count')}
+              >
+              Views
+              </PortalTableHead>
+              <PortalTableHead
+                className="date-col"
+                sortable
+                sortDirection={sort?.column === 'updated_at' ? sort.direction : null}
+                onClick={() => toggleSort('updated_at')}
+              >
+              Updated
+              </PortalTableHead>
+              <PortalTableHead className="col-actions">Actions</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
+
+          <PortalTableBody animate={!isLoading && !error}>
+            {error ? (
+              <PortalTableError colSpan={7} message={error} onRetry={loadData} />
+            ) : isLoading ? (
+              <PortalTableLoading colSpan={7} rows={5} />
+            ) : paginatedArticles.length === 0 ? (
+              <PortalTableEmpty
+                colSpan={7}
+                icon={<Inbox />}
+                message={hasActiveFilters ? 'No articles match your filters' : 'No articles yet'}
+              />
+            ) : (
+              paginatedArticles.map((article) => (
+                <PortalTableRow key={article.id} clickable>
+                  <PortalTableCell className="primary-cell">
+                    <div className="cell-with-icon">
+                      <FileText className="icon-sm" />
+                      <div className="cell-content">
+                        <span className="cell-title">{article.title}</span>
+                        {article.summary && (
+                          <span className="cell-subtitle">{article.summary}</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </PortalTableCell>
-                <PortalTableCell>
-                  <div className="cell-with-icon">
-                    <Folder className="cell-icon-sm" />
-                    <span>{article.category_name}</span>
-                  </div>
-                </PortalTableCell>
-                <PortalTableCell className="status-cell">
-                  <StatusBadge status={getStatusVariant(article.is_published ? 'published' : 'draft')} size="sm">
-                    {article.is_published ? 'Published' : 'Draft'}
-                  </StatusBadge>
-                </PortalTableCell>
-                <PortalTableCell className="text-center">
-                  {article.is_featured && (
-                    <CheckCircle className="cell-icon-sm status-completed" />
-                  )}
-                </PortalTableCell>
-                <PortalTableCell className="text-center">{article.view_count}</PortalTableCell>
-                <PortalTableCell className="date-cell">{formatDate(article.updated_at)}</PortalTableCell>
-                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                  <div className="table-actions">
-                    <IconButton action="view" title="View" />
-                    <IconButton action="edit" title="Edit" />
-                    <IconButton action="delete" title="Delete" />
-                  </div>
-                </PortalTableCell>
-              </PortalTableRow>
-            ))
-          )}
-        </PortalTableBody>
-      </PortalTable>
-    </TableLayout>
+                  </PortalTableCell>
+                  <PortalTableCell>
+                    <div className="cell-with-icon">
+                      <Folder className="icon-xs" />
+                      <span>{article.category_name}</span>
+                    </div>
+                  </PortalTableCell>
+                  <PortalTableCell className="status-col">
+                    <StatusBadge status={getStatusVariant(article.is_published ? 'published' : 'draft')} size="sm">
+                      {article.is_published ? 'Published' : 'Draft'}
+                    </StatusBadge>
+                  </PortalTableCell>
+                  <PortalTableCell className="text-center">
+                    {article.is_featured && (
+                      <CheckCircle className="icon-xs status-completed" />
+                    )}
+                  </PortalTableCell>
+                  <PortalTableCell className="text-center">{article.view_count}</PortalTableCell>
+                  <PortalTableCell className="date-col">{formatDate(article.updated_at)}</PortalTableCell>
+                  <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
+                    <div className="table-actions">
+                      <IconButton action="view" title="View" />
+                      <IconButton action="edit" title="Edit" />
+                      <IconButton action="delete" title="Delete" />
+                    </div>
+                  </PortalTableCell>
+                </PortalTableRow>
+              ))
+            )}
+          </PortalTableBody>
+        </PortalTable>
+      </TableLayout>
+      <CreateKBArticleModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onSubmit={handleCreate}
+        loading={createLoading}
+        categoryOptions={modalCategoryOptions}
+      />
+    </>
   );
 }

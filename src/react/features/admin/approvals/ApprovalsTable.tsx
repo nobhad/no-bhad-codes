@@ -6,11 +6,21 @@
 
 import * as React from 'react';
 import { useMemo } from 'react';
-import { CheckCircle, XCircle, RefreshCw } from 'lucide-react';
+import { CheckCircle, XCircle, RefreshCw, Inbox } from 'lucide-react';
 import { useFadeIn } from '@react/hooks/useGsap';
-import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { formatDate } from '@react/utils/formatDate';
 import { useListFetch } from '@react/factories/useDataFetch';
+import {
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost } from '@/utils/api-client';
@@ -76,18 +86,10 @@ export function ApprovalsTable({ getAuthToken, showNotification }: ApprovalsTabl
     }
   }
 
-  // Loading state
-  if (isLoading) {
-    return <LoadingState message="Loading approvals..." />;
-  }
-
-  // Error state
-  if (error) {
-    return <ErrorState message={error} onRetry={refetch} />;
-  }
+  const COLUMN_COUNT = 6;
 
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>}>
       <div className="perf-header">
         <h2 className="heading perf-heading">Pending Approvals</h2>
         <button className="btn btn-secondary" onClick={refetch}>
@@ -96,65 +98,68 @@ export function ApprovalsTable({ getAuthToken, showNotification }: ApprovalsTabl
         </button>
       </div>
 
-      {approvals.length === 0 ? (
-        <EmptyState
-          message="You have no items awaiting your approval."
-        />
-      ) : (
-        <div className="panel">
-          <div className="analytics-table-container">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th className="table-header">Type</th>
-                  <th className="table-header">Title</th>
-                  <th className="table-header">Requester</th>
-                  <th className="table-header">Date</th>
-                  <th className="table-header">Status</th>
-                  <th className="table-header">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {approvals.map((item) => (
-                  <tr key={item.id} className="table-row">
-                    <td className="table-cell">{item.type}</td>
-                    <td className="table-cell">{item.title}</td>
-                    <td className="table-cell">{item.requester}</td>
-                    <td className="table-cell">{formatDate(item.date)}</td>
-                    <td className="table-cell">
-                      <span className={STATUS_CLASS_MAP[item.status] || 'status-badge'}>
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="table-cell">
-                      {item.status === 'pending' && (
-                        <div className="btn-group">
-                          <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() => handleRespond(item.id, 'approve')}
-                            aria-label={`Approve ${item.title}`}
-                          >
-                            <CheckCircle className="btn-icon-left" />
-                            Approve
-                          </button>
-                          <button
-                            className="btn btn-danger btn-sm"
-                            onClick={() => handleRespond(item.id, 'decline')}
-                            aria-label={`Decline ${item.title}`}
-                          >
-                            <XCircle className="btn-icon-left" />
-                            Decline
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      <PortalTable className="data-table">
+        <PortalTableHeader>
+          <PortalTableRow>
+            <PortalTableHead>Type</PortalTableHead>
+            <PortalTableHead>Title</PortalTableHead>
+            <PortalTableHead>Requester</PortalTableHead>
+            <PortalTableHead className="date-col">Date</PortalTableHead>
+            <PortalTableHead className="status-col">Status</PortalTableHead>
+            <PortalTableHead className="col-actions">Actions</PortalTableHead>
+          </PortalTableRow>
+        </PortalTableHeader>
+
+        <PortalTableBody animate={!isLoading && !error}>
+          {error ? (
+            <PortalTableError colSpan={COLUMN_COUNT} message={error} onRetry={refetch} />
+          ) : isLoading ? (
+            <PortalTableLoading colSpan={COLUMN_COUNT} rows={5} />
+          ) : approvals.length === 0 ? (
+            <PortalTableEmpty
+              colSpan={COLUMN_COUNT}
+              icon={<Inbox />}
+              message="You have no items awaiting your approval."
+            />
+          ) : (
+            approvals.map((item) => (
+              <PortalTableRow key={item.id}>
+                <PortalTableCell>{item.type}</PortalTableCell>
+                <PortalTableCell>{item.title}</PortalTableCell>
+                <PortalTableCell>{item.requester}</PortalTableCell>
+                <PortalTableCell className="date-col">{formatDate(item.date)}</PortalTableCell>
+                <PortalTableCell className="status-col">
+                  <span className={STATUS_CLASS_MAP[item.status] || 'status-badge'}>
+                    {item.status}
+                  </span>
+                </PortalTableCell>
+                <PortalTableCell className="col-actions">
+                  {item.status === 'pending' && (
+                    <div className="btn-group">
+                      <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => handleRespond(item.id, 'approve')}
+                        aria-label={`Approve ${item.title}`}
+                      >
+                        <CheckCircle className="btn-icon-left" />
+                        Approve
+                      </button>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleRespond(item.id, 'decline')}
+                        aria-label={`Decline ${item.title}`}
+                      >
+                        <XCircle className="btn-icon-left" />
+                        Decline
+                      </button>
+                    </div>
+                  )}
+                </PortalTableCell>
+              </PortalTableRow>
+            ))
+          )}
+        </PortalTableBody>
+      </PortalTable>
     </div>
   );
 }

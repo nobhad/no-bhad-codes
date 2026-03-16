@@ -444,7 +444,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                 </PortalTableCell>
                 <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
-                    <Package className="cell-icon" />
+                    <Package className="icon-sm" />
                     <div className="cell-content">
                       <span className="cell-title">{deliverable.title}</span>
                       {deliverable.clientId && onNavigate ? (
@@ -482,7 +482,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                 />
                 <PortalTableCell>v{deliverable.version}</PortalTableCell>
                 <PortalTableCell>{deliverable.files}</PortalTableCell>
-                <PortalTableCell className="date-cell">
+                <PortalTableCell className="date-col">
                   {deliverable.dueDate && (
                     <span
                       className={cn(

@@ -225,7 +225,7 @@ export function NewRequestForm({
               type="button"
               onClick={() => setPriority(p)}
               disabled={loading}
-              className={cn('flex-1 text-xs', priority === p ? 'btn-primary' : 'btn-secondary')}
+              className={cn('flex-1', priority === p ? 'btn-primary' : 'btn-secondary')}
               style={{
                 color: priority === p ? 'var(--color-text-primary)' : AD_HOC_REQUEST_PRIORITY_CONFIG[p].color,
                 backgroundColor: priority === p ? AD_HOC_REQUEST_PRIORITY_CONFIG[p].color : 'transparent',
@@ -270,7 +270,7 @@ export function NewRequestForm({
         >
           <Upload className="icon-sm" />
           <div className="text-center">
-            <p className="text-secondary text-xs">
+            <p className="text-secondary">
               Drop files here or{' '}
               <button
                 type="button"
@@ -280,7 +280,7 @@ export function NewRequestForm({
                 browse
               </button>
             </p>
-            <p className="text-muted text-xs mt-0.5">
+            <p className="text-secondary mt-0.5">
               Max {maxFiles} files, {formatFileSize(maxFileSize)} each
             </p>
           </div>
@@ -295,7 +295,7 @@ export function NewRequestForm({
 
         {/* File Error */}
         {fileError && (
-          <div className="flex items-center gap-1.5 text-xs form-error-message">
+          <div className="flex items-center gap-1.5 form-error-message">
             <AlertCircle className="icon-xs" />
             {fileError}
           </div>
@@ -311,10 +311,10 @@ export function NewRequestForm({
               >
                 <div className="flex items-center gap-2 card-content-truncate">
                   <Paperclip className="icon-xs flex-shrink-0" />
-                  <span className="text-primary text-xs">
+                  <span className="text-primary">
                     {file.name}
                   </span>
-                  <span className="text-muted text-xs">
+                  <span className="text-secondary">
                     ({formatFileSize(file.size)})
                   </span>
                 </div>

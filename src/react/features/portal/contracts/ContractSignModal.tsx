@@ -166,7 +166,7 @@ export function ContractSignModal({
       {signingState === 'success' && (
         <div className="flex flex-col items-center gap-4 my-4">
           <CheckCircle2 className="text-success icon-decorative" />
-          <p className="text-lg text-center">Contract signed successfully!</p>
+          <p className="text-center">Contract signed successfully!</p>
         </div>
       )}
 
@@ -184,7 +184,7 @@ export function ContractSignModal({
           {/* PDF Preview */}
           {pdfUrl && (
             <div className="mb-4">
-              <label className="form-label mb-2">Contract Preview</label>
+              <label className="field-label mb-2">Contract Preview</label>
               <iframe
                 src={pdfUrl}
                 title="Contract PDF Preview"
@@ -196,7 +196,7 @@ export function ContractSignModal({
 
           {/* Signer name */}
           <div className="form-field mb-4">
-            <label className="form-label" htmlFor="signer-name-input">
+            <label className="field-label" htmlFor="signer-name-input">
               Your Full Legal Name
             </label>
             <input
@@ -212,7 +212,7 @@ export function ContractSignModal({
 
           {/* Signature */}
           <div className="form-field mb-4">
-            <label className="form-label">Your Signature</label>
+            <label className="field-label">Your Signature</label>
             <SignatureCanvas
               onSignatureChange={setSignatureData}
               mode={signatureMode}
@@ -229,7 +229,7 @@ export function ContractSignModal({
               onChange={(e) => setAgreedToTerms(e.target.checked)}
               required
             />
-            <label htmlFor="agree-terms-input" className="text-sm">
+            <label htmlFor="agree-terms-input">
               I have read and agree to the terms outlined in the contract above. I understand
               that by signing, I am entering into a legally binding agreement.
             </label>

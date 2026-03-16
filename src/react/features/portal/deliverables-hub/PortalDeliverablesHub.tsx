@@ -51,7 +51,7 @@ export function PortalDeliverablesHub({ getAuthToken, showNotification }: Portal
   const viewProps = { getAuthToken, showNotification };
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef}>
       <TabList
         tabs={SUBTABS}
         tabIcons={SUBTAB_ICONS}

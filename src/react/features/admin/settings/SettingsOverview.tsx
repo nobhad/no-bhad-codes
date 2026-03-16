@@ -160,7 +160,7 @@ export function SettingsOverview({ onSubtabNavigate }: SettingsOverviewProps) {
               <SnapshotField label="PayPal" value={data.config.paypal} />
             </div>
           ) : (
-            <span className="text-muted">Not configured</span>
+            <span className="text-secondary">Not configured</span>
           )}
         </SnapshotCard>
 
@@ -282,7 +282,7 @@ export function SettingsOverview({ onSubtabNavigate }: SettingsOverviewProps) {
             ))}
           </ul>
         ) : (
-          <span className="text-muted">No recent activity</span>
+          <span className="text-secondary">No recent activity</span>
         )}
       </SnapshotCard>
     </div>

@@ -130,7 +130,7 @@ export function PortalPreview({
   }, [previewUrl]);
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef}>
       {isLoading ? (
         <LoadingState message="Loading preview..." />
       ) : error ? (

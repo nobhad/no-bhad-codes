@@ -82,7 +82,7 @@ export function AdHocRequestCard({
         >
           <div className="portal-card-title-group flex-col items-start">
             <div className="portal-card-meta-item gap-2">
-              <h3 className="text-primary text-sm font-semibold">
+              <h3 className="text-primary font-semibold">
                 {request.title}
               </h3>
               {hasAttachments && (
@@ -100,7 +100,7 @@ export function AdHocRequestCard({
               >
                 {AD_HOC_REQUEST_PRIORITY_CONFIG[request.priority]?.label || request.priority}
               </span>
-              <span className="text-muted text-xs">
+              <span className="text-secondary">
                 {formatCardDate(request.created_at)}
               </span>
             </div>
@@ -108,7 +108,7 @@ export function AdHocRequestCard({
 
           <div className="portal-card-status-group">
             {hasQuote && (
-              <span className="text-primary text-sm font-semibold">
+              <span className="text-primary font-semibold">
                 {formatCurrency(request.quote!.total_amount)}
               </span>
             )}
@@ -136,7 +136,7 @@ export function AdHocRequestCard({
             {/* Description */}
             <div>
               <label className="field-label">Description</label>
-              <p className="text-muted text-sm mt-1 whitespace-pre-wrap">
+              <p className="text-secondary mt-1 whitespace-pre-wrap">
                 {request.description}
               </p>
             </div>
@@ -145,7 +145,7 @@ export function AdHocRequestCard({
             {request.project_name && (
               <div className="portal-card-meta-item">
                 <FileText className="icon-xs" />
-                <span className="text-xs">
+                <span>
                   Project: {request.project_name}
                 </span>
               </div>
@@ -163,10 +163,10 @@ export function AdHocRequestCard({
                     >
                       <div className="portal-card-meta-item card-content-truncate">
                         <Paperclip className="icon-xs flex-shrink-0" />
-                        <span className="text-primary text-xs">
+                        <span className="text-primary">
                           {attachment.filename}
                         </span>
-                        <span className="text-muted text-xs">
+                        <span className="text-secondary">
                           ({formatFileSize(attachment.file_size)})
                         </span>
                       </div>
@@ -197,11 +197,11 @@ export function AdHocRequestCard({
                     <div className="portal-card-detail-row">
                       <div className="portal-card-meta-item">
                         <Clock className="icon-xs" />
-                        <span className="text-xs">
+                        <span>
                           Estimated Hours
                         </span>
                       </div>
-                      <span className="text-primary text-sm">
+                      <span className="text-primary">
                         {request.quote!.hours_estimated}h @ {formatCurrency(request.quote!.hourly_rate)}/hr
                       </span>
                     </div>
@@ -212,11 +212,11 @@ export function AdHocRequestCard({
                     <div className="portal-card-detail-row">
                       <div className="portal-card-meta-item">
                         <DollarSign className="icon-xs" />
-                        <span className="text-xs">
+                        <span>
                           Flat Fee
                         </span>
                       </div>
-                      <span className="text-primary text-sm">
+                      <span className="text-primary">
                         {formatCurrency(request.quote!.flat_fee)}
                       </span>
                     </div>
@@ -224,10 +224,10 @@ export function AdHocRequestCard({
 
                   {/* Total */}
                   <div className="portal-card-detail-row mt-2 border-t">
-                    <span className="text-primary text-xs font-semibold">
+                    <span className="text-primary font-semibold">
                       Total
                     </span>
-                    <span className="text-primary text-sm font-bold">
+                    <span className="text-primary font-bold">
                       {formatCurrency(request.quote!.total_amount)}
                     </span>
                   </div>
@@ -235,8 +235,8 @@ export function AdHocRequestCard({
                   {/* Notes */}
                   {request.quote!.notes && (
                     <div className="mt-2">
-                      <span className="text-muted text-xs">Notes:</span>
-                      <p className="text-muted text-xs mt-0.5">
+                      <span className="text-secondary">Notes:</span>
+                      <p className="text-secondary mt-0.5">
                         {request.quote!.notes}
                       </p>
                     </div>
@@ -244,7 +244,7 @@ export function AdHocRequestCard({
 
                   {/* Expiry */}
                   {request.quote!.expires_at && (
-                    <div className="text-muted text-xs">
+                    <div className="text-secondary">
                       Quote valid until: {formatCardDate(request.quote!.expires_at)}
                     </div>
                   )}

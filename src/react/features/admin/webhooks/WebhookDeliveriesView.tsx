@@ -184,7 +184,7 @@ export function WebhookDeliveriesView({
                   <PortalTableCell className="type-cell">
                     <span className="status-badge">{delivery.eventType}</span>
                   </PortalTableCell>
-                  <PortalTableCell className="status-cell">
+                  <PortalTableCell className="status-col">
                     <StatusBadge status={getStatusVariant(getDeliveryStatusVariant(delivery.status))} size="sm">
                       {delivery.status}
                     </StatusBadge>
@@ -192,7 +192,7 @@ export function WebhookDeliveriesView({
                   <PortalTableCell className="count-cell">
                     {delivery.responseStatus ?? '-'}
                   </PortalTableCell>
-                  <PortalTableCell className="date-cell">
+                  <PortalTableCell className="date-col">
                     {formatDate(delivery.createdAt)}
                   </PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>

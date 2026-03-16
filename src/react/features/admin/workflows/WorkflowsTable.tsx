@@ -382,7 +382,7 @@ export function WorkflowsTable({ getAuthToken, showNotification: _showNotificati
                 )}
                 <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
-                    <GitBranch className="cell-icon" />
+                    <GitBranch className="icon-sm" />
                     <div className="cell-content">
                       <span className="cell-title">{workflow.name}</span>
                       <span className="cell-subtitle">{workflow.trigger} · {workflow.steps} steps</span>
@@ -402,7 +402,7 @@ export function WorkflowsTable({ getAuthToken, showNotification: _showNotificati
                 />
                 {!overviewMode && (
                   <>
-                    <PortalTableCell className="date-cell">
+                    <PortalTableCell className="date-col">
                       {formatDate(workflow.updatedAt)}
                     </PortalTableCell>
                     <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
