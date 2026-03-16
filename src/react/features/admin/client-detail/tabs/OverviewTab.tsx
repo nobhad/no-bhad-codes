@@ -12,7 +12,8 @@ import {
   Tag,
   X,
   Plus,
-  ArrowRight
+  ArrowRight,
+  CreditCard
 } from 'lucide-react';
 import { CopyEmailButton, ProgressBar } from '@react/components/portal';
 import {
@@ -315,6 +316,70 @@ export function OverviewTab({
                 {client.status === 'active' ? 'Active' : 'Inactive'}
               </span>
             </div>
+          </div>
+        </div>
+
+        {/* Billing Information */}
+        <div className="panel">
+          <div className="data-table-header">
+            <h3>
+              <CreditCard className="icon-sm" />
+              <span className="title-full">Billing Information</span>
+            </h3>
+          </div>
+
+          <div className="layout-stack">
+            {(client.billing_name || client.billing_address || client.billing_city || client.billing_country) ? (
+              <>
+                {client.billing_name && (
+                  <div className="layout-row-between">
+                    <span className="field-label">Name</span>
+                    <span>{client.billing_name}</span>
+                  </div>
+                )}
+
+                {client.billing_company && (
+                  <div className="layout-row-between">
+                    <span className="field-label">Company</span>
+                    <span>{client.billing_company}</span>
+                  </div>
+                )}
+
+                {client.billing_email && (
+                  <div className="layout-row-between">
+                    <span className="field-label">Email</span>
+                    <span className="meta-value meta-value-with-copy">
+                      <a href={`mailto:${client.billing_email}`} className="link-btn">
+                        {client.billing_email}
+                      </a>
+                      <CopyEmailButton email={client.billing_email} showNotification={showNotification} />
+                    </span>
+                  </div>
+                )}
+
+                {(client.billing_address || client.billing_city) && (
+                  <div className="layout-row-between">
+                    <span className="field-label">Address</span>
+                    <span>
+                      {client.billing_address}
+                      {client.billing_address2 && `, ${client.billing_address2}`}
+                      {client.billing_city && `, ${client.billing_city}`}
+                      {client.billing_state && `, ${client.billing_state}`}
+                      {client.billing_zip && ` ${client.billing_zip}`}
+                    </span>
+                  </div>
+                )}
+
+                {client.billing_country && (
+                  <div className="layout-row-between">
+                    <span className="field-label">Country</span>
+                    <span>{client.billing_country}</span>
+                  </div>
+                )}
+              </>
+            ) : (
+              <span className="text-muted">No billing information on file</span>
+            )}
           </div>
         </div>
       </div>
