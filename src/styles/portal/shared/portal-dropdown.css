@@ -32,6 +32,8 @@
   padding: 0;
   box-shadow: none;
   color: var(--color-text-primary);
+  /* Match trigger font-size — Radix portals render outside .portal/table context */
+  font-size: var(--table-cell-font-size);
   /* Exact trigger width (open = closed) */
   width: var(--radix-dropdown-menu-trigger-width, var(--portal-dropdown-min-width));
 }
@@ -84,34 +86,29 @@ td:has(.dropdown-trigger--status) .portal-dropdown-content,
 }
 
 /* Caret icon — SINGLE source of truth for ALL dropdown carets.
-   Absolutely positioned on the right, same distance from the right edge
-   as content start is from the left edge (--dropdown-padding-x).
+   Flex child pushed to the right via margin-left: auto.
    Size and transition are uniform across all dropdown types. */
 .dropdown-caret,
 .dropdown-caret--custom {
-  position: absolute;
-  right: var(--dropdown-padding-x);
-  top: 50%;
-  transform: translateY(-50%);
+  margin-left: auto;
+  flex-shrink: 0;
   width: var(--dropdown-caret-size);
   height: var(--dropdown-caret-size);
   color: currentColor;
   transition: transform var(--transition-fast);
 }
 
-/* All .dropdown-trigger buttons: position relative for absolute caret,
-   symmetric padding using --dropdown-padding-x, extra right padding for caret.
+/* All .dropdown-trigger buttons: symmetric padding on both sides.
    Excludes dropdown-trigger--status and icon-btns (they handle their own layout). */
 .dropdown-trigger:not(.dropdown-trigger--status):not(.icon-btn) {
-  position: relative;
   padding-left: var(--dropdown-padding-x);
-  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
+  padding-right: var(--dropdown-padding-x);
 }
 
 /* Rotate caret when open */
 .dropdown-trigger[data-state="open"] .dropdown-caret,
 .dropdown-trigger[data-state="open"] > svg:last-child {
-  transform: translateY(-50%) rotate(180deg);
+  transform: rotate(180deg);
 }
 
 /* Text styling consistent open/closed - no changes to font, size, or color */
@@ -452,7 +449,6 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   justify-content: flex-start;
   position: relative;
   padding: var(--space-3) var(--space-4);
-  padding-right: calc(var(--space-4) + var(--dropdown-caret-size) + var(--icon-gap));
   background-color: var(--dropdown-bg);
   border: var(--dropdown-border-width) solid var(--dropdown-border-color);
   border-radius: var(--dropdown-radius);
@@ -503,13 +499,8 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   text-align: left;
 }
 
-/* Modal-dropdown caret — match trigger's left padding (--space-4) for symmetric spacing */
-.custom-dropdown[data-modal-dropdown] .dropdown-caret--custom {
-  right: var(--space-4);
-}
-
 .custom-dropdown[data-modal-dropdown].open .dropdown-caret--custom {
-  transform: translateY(-50%) rotate(180deg);
+  transform: rotate(180deg);
 }
 
 /* Dropdown menu */
@@ -620,7 +611,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   width: 100%;
   min-width: 0;
   padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
-  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
+  padding-right: var(--dropdown-padding-x);
   box-sizing: border-box;
   text-align: left;
 }
@@ -721,7 +712,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   gap: var(--icon-gap);
   position: relative;
   padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
-  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
+  padding-right: var(--dropdown-padding-x);
   border: var(--portal-input-border);
   background-color: transparent;
   color: inherit;
@@ -790,7 +781,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
 
 /* Rotate caret when table-dropdown is open */
 :is(.portal, .portal-modal) .table-dropdown.open .dropdown-caret--custom {
-  transform: translateY(-50%) rotate(180deg);
+  transform: rotate(180deg);
 }
 
 /* Dropdown menu - sides + bottom, no top */
@@ -928,7 +919,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
 
 :is(.portal, .portal-modal) .table-dropdown.filter-dropdown-with-check .dropdown-trigger--custom {
   padding-left: calc(var(--space-3) / 2 + 1rem + var(--space-0-5) / 2);
-  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
+  padding-right: var(--dropdown-padding-x);
 }
 
 /* ================================================
@@ -956,7 +947,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   max-height: var(--table-pagination-btn-size);
   position: relative;
   padding: 0 var(--dropdown-padding-x);
-  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
+  padding-right: var(--dropdown-padding-x);
   border: var(--portal-input-border);
   background-color: var(--color-bg-primary);
   color: var(--color-text-secondary);
@@ -1201,7 +1192,6 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   width: 100%;
   height: var(--modal-input-height);
   padding: 0 var(--space-4);
-  padding-right: calc(var(--space-4) + var(--dropdown-caret-size) + var(--icon-gap));
   background-color: var(--color-bg-primary);
   border: var(--border-width-px) solid transparent;
   color: var(--color-text-primary);
@@ -1240,18 +1230,11 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   box-shadow: none;
 }
 
-/* Modal-dropdown caret — match trigger's left padding (--space-4) */
-.portal .modal-dropdown .dropdown-caret--custom,
-.confirm-dialog .modal-dropdown .dropdown-caret--custom,
-.portal-modal .modal-dropdown .dropdown-caret--custom {
-  right: var(--space-4);
-}
-
 /* Rotate caret when open */
 .portal .modal-dropdown.open .dropdown-caret--custom,
 .confirm-dialog .modal-dropdown.open .dropdown-caret--custom,
 .portal-modal .modal-dropdown.open .dropdown-caret--custom {
-  transform: translateY(-50%) rotate(180deg);
+  transform: rotate(180deg);
 }
 
 /* Trigger when open - connect to menu */
