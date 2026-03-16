@@ -25,6 +25,7 @@ import {
   PAGE_MARGINS,
   drawPdfDocumentHeader
 } from '../../utils/pdf-utils.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
@@ -528,6 +529,7 @@ router.get(
 router.post(
   '/:id/contract/request-signature',
   authenticateToken,
+  invalidateCache(['projects', 'contracts']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
@@ -737,6 +739,7 @@ router.get(
  */
 router.post(
   '/contract/sign-by-token/:token',
+  invalidateCache(['projects', 'contracts']),
   asyncHandler(async (req: express.Request, res: Response) => {
     const { token } = req.params;
     const { signatureData, signerName, agreedToTerms } = req.body;
@@ -946,6 +949,7 @@ router.post(
   '/:id/contract/countersign',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects', 'contracts']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {

@@ -10,6 +10,7 @@ import express from 'express';
 import { asyncHandler } from '../../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../../middleware/auth.js';
 import { leadService } from '../../../services/lead-service.js';
+import { invalidateCache } from '../../../middleware/cache.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../../utils/api-response.js';
 
 const router = express.Router();
@@ -67,6 +68,7 @@ router.post(
   '/leads/:id/source',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
@@ -111,6 +113,7 @@ router.post(
   '/leads/:id/assign',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
@@ -261,6 +264,7 @@ router.post(
   '/leads/duplicates/:id/resolve',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const duplicateId = parseInt(req.params.id, 10);
     if (isNaN(duplicateId) || duplicateId <= 0) {
@@ -304,6 +308,7 @@ router.post(
   '/leads/bulk/status',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { projectIds, status } = req.body;
 
@@ -339,6 +344,7 @@ router.post(
   '/leads/bulk/assign',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { projectIds, assignee } = req.body;
 
@@ -374,6 +380,7 @@ router.post(
   '/leads/bulk/move-stage',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { projectIds, stageId } = req.body;
 
@@ -409,6 +416,7 @@ router.post(
   '/leads/bulk/delete',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { leadIds } = req.body;
 

@@ -19,6 +19,7 @@ import {
   sendCreated
 } from './helpers.js';
 import type { AuthenticatedRequest } from './helpers.js';
+import { invalidateCache } from '../../middleware/cache.js';
 
 const router = express.Router();
 
@@ -102,6 +103,7 @@ router.post(
   '/templates',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { name } = req.body;
     if (!name) {
@@ -135,6 +137,7 @@ router.put(
   '/templates/:templateId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const templateId = parseInt(req.params.templateId, 10);
 
@@ -170,6 +173,7 @@ router.delete(
   '/templates/:templateId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const templateId = parseInt(req.params.templateId, 10);
 

@@ -7,6 +7,7 @@ import {
   getEscalationSummary
 } from '../../services/priority-escalation-service.js';
 import { projectService } from '../../services/project-service.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
@@ -24,6 +25,7 @@ router.post(
   '/:id/tasks/escalate-priorities',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {

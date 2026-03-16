@@ -2,6 +2,7 @@ import express, { Response } from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { projectService } from '../../services/project-service.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
@@ -29,6 +30,7 @@ router.post(
   '/:id/tags/:tagId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: express.Request, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     const tagId = parseInt(req.params.tagId, 10);
@@ -46,6 +48,7 @@ router.delete(
   '/:id/tags/:tagId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: express.Request, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     const tagId = parseInt(req.params.tagId, 10);

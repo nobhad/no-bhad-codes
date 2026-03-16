@@ -13,6 +13,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import { contractService } from '../../services/contract-service.js';
 import { sendSuccess, sendCreated, errorResponse, ErrorCodes } from '../../utils/api-response.js';
 import { validateRequest } from '../../middleware/validation.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { ContractValidationSchemas } from './shared.js';
 
 const router = express.Router();
@@ -136,6 +137,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   validateRequest(ContractValidationSchemas.createTemplate, { allowUnknownFields: true }),
+  invalidateCache(['contracts']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { name, type, content } = req.body;
 
@@ -179,6 +181,7 @@ router.put(
   authenticateToken,
   requireAdmin,
   validateRequest(ContractValidationSchemas.updateTemplate, { allowUnknownFields: true }),
+  invalidateCache(['contracts']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const templateId = parseInt(req.params.templateId, 10);
 
@@ -221,6 +224,7 @@ router.delete(
   '/templates/:templateId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['contracts']),
   asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
     const templateId = parseInt(_req.params.templateId, 10);
 

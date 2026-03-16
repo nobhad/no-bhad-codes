@@ -9,6 +9,7 @@ import express from 'express';
 import { asyncHandler } from '../../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../../middleware/auth.js';
 import { leadService } from '../../../services/lead-service.js';
+import { invalidateCache } from '../../../middleware/cache.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../../utils/api-response.js';
 
 const router = express.Router();
@@ -71,6 +72,7 @@ router.post(
   '/leads/:id/tasks',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
@@ -122,6 +124,7 @@ router.put(
   '/leads/tasks/:taskId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId) || taskId <= 0) {
@@ -156,6 +159,7 @@ router.post(
   '/leads/tasks/:taskId/complete',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId) || taskId <= 0) {

@@ -8,6 +8,7 @@ import { errorTracker } from '../../services/error-tracking.js';
 import { generateDefaultMilestones } from '../../services/milestone-generator.js';
 import { userService } from '../../services/user-service.js';
 import { projectService } from '../../services/project-service.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { errorResponse, sendSuccess, sendCreated, sanitizeErrorMessage, ErrorCodes } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
@@ -29,6 +30,7 @@ router.post(
   '/projects',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const {
       newClient,
@@ -395,6 +397,7 @@ router.post(
   '/projects/bulk/delete',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { projectIds } = req.body;
 

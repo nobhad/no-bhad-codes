@@ -5,6 +5,7 @@ import { canAccessProject, canAccessFile } from '../../utils/access-control.js';
 import { fileService } from '../../services/file-service.js';
 import { projectService } from '../../services/project-service.js';
 import { upload } from './uploads.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
@@ -44,6 +45,7 @@ router.post(
   '/:id/files',
   authenticateToken,
   upload.array('files', 5),
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
@@ -117,6 +119,7 @@ router.get(
 router.post(
   '/files/:fileId/tags/:tagId',
   authenticateToken,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     const tagId = parseInt(req.params.tagId, 10);
@@ -137,6 +140,7 @@ router.post(
 router.delete(
   '/files/:fileId/tags/:tagId',
   authenticateToken,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     const tagId = parseInt(req.params.tagId, 10);
@@ -177,6 +181,7 @@ router.get(
 router.post(
   '/files/:fileId/access',
   authenticateToken,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     const { access_type } = req.body;
@@ -244,6 +249,7 @@ router.get(
 router.post(
   '/files/:fileId/archive',
   authenticateToken,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     if (isNaN(fileId) || fileId <= 0) {
@@ -263,6 +269,7 @@ router.post(
 router.post(
   '/files/:fileId/restore',
   authenticateToken,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     if (isNaN(fileId) || fileId <= 0) {
@@ -302,6 +309,7 @@ router.put(
   '/files/:fileId/expiration',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     if (isNaN(fileId) || fileId <= 0) {
@@ -330,6 +338,7 @@ router.post(
   '/files/process-expired',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const count = await fileService.processExpiredFiles();
     sendSuccess(res, { count }, `Processed ${count} expired files`);
@@ -340,6 +349,7 @@ router.post(
 router.post(
   '/files/:fileId/lock',
   authenticateToken,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     if (isNaN(fileId) || fileId <= 0) {
@@ -359,6 +369,7 @@ router.post(
 router.post(
   '/files/:fileId/unlock',
   authenticateToken,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     const isAdmin = req.user!.type === 'admin';
@@ -379,6 +390,7 @@ router.post(
 router.put(
   '/files/:fileId/category',
   authenticateToken,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     const { category } = req.body;

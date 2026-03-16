@@ -9,6 +9,7 @@ import express from 'express';
 import { asyncHandler } from '../../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../../middleware/auth.js';
 import { leadService } from '../../../services/lead-service.js';
+import { invalidateCache } from '../../../middleware/cache.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../../utils/api-response.js';
 
 const router = express.Router();
@@ -56,6 +57,7 @@ router.post(
   '/leads/scoring-rules',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { name, description, fieldName, operator, thresholdValue, points, isActive } = req.body;
 
@@ -106,6 +108,7 @@ router.put(
   '/leads/scoring-rules/:id',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const ruleId = parseInt(req.params.id, 10);
     if (isNaN(ruleId) || ruleId <= 0) {
@@ -140,6 +143,7 @@ router.delete(
   '/leads/scoring-rules/:id',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const ruleId = parseInt(req.params.id, 10);
     if (isNaN(ruleId) || ruleId <= 0) {
@@ -174,6 +178,7 @@ router.post(
   '/leads/:id/calculate-score',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
@@ -202,6 +207,7 @@ router.post(
   '/leads/recalculate-all',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const count = await leadService.updateAllLeadScores();
     sendSuccess(res, { count }, `Recalculated scores for ${count} leads`);

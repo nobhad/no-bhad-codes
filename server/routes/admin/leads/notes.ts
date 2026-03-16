@@ -9,6 +9,7 @@ import express from 'express';
 import { asyncHandler } from '../../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../../middleware/auth.js';
 import { leadService } from '../../../services/lead-service.js';
+import { invalidateCache } from '../../../middleware/cache.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../../utils/api-response.js';
 
 const router = express.Router();
@@ -71,6 +72,7 @@ router.post(
   '/leads/:id/notes',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
@@ -111,6 +113,7 @@ router.post(
   '/leads/notes/:noteId/toggle-pin',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const noteId = parseInt(req.params.noteId, 10);
     if (isNaN(noteId) || noteId <= 0) {
@@ -145,6 +148,7 @@ router.delete(
   '/leads/notes/:noteId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const noteId = parseInt(req.params.noteId, 10);
     if (isNaN(noteId) || noteId <= 0) {

@@ -6,6 +6,7 @@ import { backfillMilestones } from '../../services/milestone-generator.js';
 import { backfillMilestoneTasks } from '../../services/task-generator.js';
 import { logger } from '../../services/logger.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { sendSuccess, errorResponse, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
@@ -31,6 +32,7 @@ router.post(
   '/workflows/bulk-delete',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['workflows']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { workflowIds } = req.body;
 
@@ -50,6 +52,7 @@ router.post(
   '/workflows/bulk-status',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['workflows']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { workflowIds, status } = req.body;
 
@@ -73,6 +76,7 @@ router.post(
   '/run-scheduler',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['workflows']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const scheduler = getSchedulerService();
 
@@ -99,6 +103,7 @@ router.post(
   '/milestones/backfill',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['workflows']),
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     logger.info('[Admin] Starting milestone backfill...');
 
@@ -123,6 +128,7 @@ router.post(
   '/tasks/backfill',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['workflows']),
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     logger.info('[Admin] Starting task backfill...');
 

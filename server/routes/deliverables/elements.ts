@@ -11,6 +11,7 @@ import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import type { AuthenticatedRequest } from '../../middleware/auth.js';
 import { validateRequest } from '../../middleware/validation.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { DeliverableValidationSchemas, canAccessDeliverable } from './shared.js';
 
 const router = Router();
@@ -46,7 +47,7 @@ const router = Router();
  *       201:
  *         description: Design element created
  */
-router.post('/:id/elements', validateRequest(DeliverableValidationSchemas.createElement, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/elements', validateRequest(DeliverableValidationSchemas.createElement, { allowUnknownFields: true }), invalidateCache(['deliverables']), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
@@ -150,6 +151,7 @@ router.get('/:id/elements', asyncHandler(async (req: AuthenticatedRequest, res: 
 router.patch(
   '/:deliverableId/elements/:elementId/approval',
   validateRequest(DeliverableValidationSchemas.updateElementApproval),
+  invalidateCache(['deliverables']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { deliverableId, elementId } = req.params;

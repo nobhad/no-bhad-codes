@@ -3,6 +3,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../utils/access-control.js';
 import { projectService } from '../../services/project-service.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { errorResponse, sendSuccess, sendCreated, messageResponse, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
@@ -82,6 +83,7 @@ router.post(
   '/:id/time-entries',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
@@ -144,6 +146,7 @@ router.put(
   '/:id/time-entries/:entryId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: express.Request, res: Response) => {
     const entryId = parseInt(req.params.entryId, 10);
     if (isNaN(entryId) || entryId <= 0) {
@@ -189,6 +192,7 @@ router.delete(
   '/:id/time-entries/:entryId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: express.Request, res: Response) => {
     const entryId = parseInt(req.params.entryId, 10);
     if (isNaN(entryId) || entryId <= 0) {
