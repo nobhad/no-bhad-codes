@@ -50,13 +50,13 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
   };
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef}>
       {/* Design Preferences Section */}
       <div className="mb-4">
         <h3 className="heading text-lg">
           Design Preferences
         </h3>
-        <p className="text-muted text-sm mt-1">
+        <p className="text-muted mt-1">
           Help us understand your visual style.
         </p>
       </div>
@@ -64,7 +64,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
       {/* Design Style Selection */}
       <div className="flex flex-col gap-2">
         <label className="field-label">
-          Design Style <span className="text-primary">*</span>
+          Design Style <span className="form-required">*</span>
         </label>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
           {DESIGN_STYLES.map((style) => (
@@ -76,7 +76,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
                 'flex items-center justify-center gap-2',
                 'px-3 py-2',
                 'border transition-all duration-200',
-                'text-sm text-center font-mono',
+                'text-center font-mono',
                 'focus:outline-none focus:ring-2 focus:ring-white',
                 requirements.designStyle === style
                   ? 'border-primary bg-white text-[var(--color-text-inverse)]'
@@ -89,7 +89,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
           ))}
         </div>
         {getFieldError('designStyle') && (
-          <span className="text-xs text-primary">{getFieldError('designStyle')}</span>
+          <span className="form-error-message">{getFieldError('designStyle')}</span>
         )}
       </div>
 
@@ -114,7 +114,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
             checked={requirements.brandGuidelines}
             onCheckedChange={(checked) => handleChange('brandGuidelines', checked === true)}
           />
-          <span className="text-sm font-mono">
+          <span className="font-mono">
             I have brand guidelines
           </span>
         </label>
@@ -125,7 +125,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
             checked={requirements.contentReady}
             onCheckedChange={(checked) => handleChange('contentReady', checked === true)}
           />
-          <span className="text-sm font-mono">
+          <span className="font-mono">
             Content is ready/prepared
           </span>
         </label>
@@ -138,7 +138,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
         <h3 className="heading text-lg">
           Features & Functionality
         </h3>
-        <p className="text-muted text-sm mt-1">
+        <p className="text-muted mt-1">
           Select the features you need for your project.
         </p>
       </div>
@@ -156,7 +156,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
                 'flex items-center gap-2 text-left',
                 'px-3 py-2',
                 'border transition-all duration-200',
-                'text-sm font-mono',
+                'font-mono',
                 'focus:outline-none focus:ring-2 focus:ring-white',
                 isSelected
                   ? 'border-primary bg-white text-[var(--color-text-inverse)]'

@@ -142,13 +142,13 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
   };
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef}>
       {/* Section Header */}
       <div className="mb-4">
         <h3 className="heading text-lg">
           Upload Assets
         </h3>
-        <p className="text-muted text-sm mt-1">
+        <p className="text-muted mt-1">
           Share any files, logos, or resources for your project.
         </p>
       </div>
@@ -179,14 +179,14 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
         <Upload
           className={cn(
             'h-8 w-8 mb-3',
-            isDragging ? 'text-primary' : 'text-muted'
+            isDragging ? '' : 'text-muted'
           )}
         />
 
-        <p className="text-sm text-primary font-mono mb-1">
+        <p className="font-mono mb-1">
           Drag and drop files here
         </p>
-        <p className="text-xs text-muted mb-3">
+        <p className="text-muted mb-3">
           or click to browse
         </p>
 
@@ -194,7 +194,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
           Browse Files
         </button>
 
-        <p className="text-xs text-muted mt-3">
+        <p className="text-muted mt-3">
           Max 25MB per file. Supports images, PDFs, and documents.
         </p>
       </div>
@@ -223,10 +223,10 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
                 >
                   <FileIcon className="icon-sm text-muted flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-primary font-mono truncate">
+                    <p className="font-mono truncate">
                       {file.name}
                     </p>
-                    <p className="text-xs text-muted">
+                    <p className="text-muted">
                       {formatFileSize(file.size)}
                     </p>
                   </div>
@@ -253,7 +253,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
             checked={assets.logoProvided}
             onCheckedChange={(checked) => handleChange('logoProvided', checked === true)}
           />
-          <span className="text-sm font-mono">
+          <span className="font-mono">
             Logo included in uploaded files
           </span>
         </label>
@@ -266,7 +266,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
         <h3 className="heading text-lg">
           Additional Resources
         </h3>
-        <p className="text-muted text-sm mt-1">
+        <p className="text-muted mt-1">
           Tell Noelle about any other assets or content access needed.
         </p>
       </div>
@@ -295,7 +295,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
           rows={2}
           className="textarea"
         />
-        <span className="text-xs text-muted">
+        <span className="text-muted">
           Never share passwords directly. We'll provide a secure way to share credentials if needed.
         </span>
       </div>

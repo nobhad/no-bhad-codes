@@ -18,7 +18,6 @@ import {
   Receipt,
   DollarSign
 } from 'lucide-react';
-import { cn } from '@react/lib/utils';
 import { IconButton, TabList, TabPanel, formatRelativeTime, formatCurrency } from '@react/factories';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
@@ -311,13 +310,13 @@ export function PortalProjectDetail({
               )}
 
               {/* Project Info */}
-              <div className="portal-card-title-block">
+              <div className="portal-card-title-group flex-col">
                 <div className="flex items-center gap-2">
                   <h2 className="heading text-lg m-0">{project.name}</h2>
                   <span className="badge">{statusLabel}</span>
                 </div>
                 {project.description && (
-                  <p className="text-muted text-sm m-0">
+                  <p className="text-muted m-0">
                     {project.description}
                   </p>
                 )}
@@ -337,11 +336,11 @@ export function PortalProjectDetail({
           <div className="panel">
             <ProgressBar value={progress} label="Overall Progress" />
             <div className="flex items-center justify-between mt-2">
-              <span className="text-muted text-xs">
+              <span className="text-muted">
                 {project.start_date ? `Started ${formatDate(project.start_date)}` : 'Not started'}
               </span>
               {milestones.length > 0 && (
-                <span className="text-muted text-xs">
+                <span className="text-muted">
                   {completedMilestones}/{milestones.length} milestones
                 </span>
               )}
@@ -427,27 +426,23 @@ function MilestonesList({ milestones, containerRef }: MilestonesListProps) {
             {/* Content */}
             <div className="flex-1">
               <div className="flex items-center justify-between gap-2">
-                <span
-                  className={cn(
-                    milestone.is_completed ? 'text-muted line-through' : 'text-primary'
-                  )}
-                >
+                <span className={milestone.is_completed ? 'text-muted line-through' : undefined}>
                   {milestone.title}
                 </span>
                 {milestone.due_date && (
                   <div className="flex items-center gap-1 text-muted">
                     <Clock className="icon-xs" />
-                    <span className="text-xs">{formatDate(milestone.due_date)}</span>
+                    <span>{formatDate(milestone.due_date)}</span>
                   </div>
                 )}
               </div>
               {milestone.description && (
-                <p className="text-muted text-sm m-0 mt-1">
+                <p className="text-muted m-0 mt-1">
                   {milestone.description}
                 </p>
               )}
               {milestone.is_completed && milestone.completed_date && (
-                <span className="text-xs text-muted">
+                <span className="text-muted">
                   Completed {formatDate(milestone.completed_date)}
                 </span>
               )}
@@ -494,12 +489,12 @@ function UpdatesTimeline({ updates, containerRef }: UpdatesTimelineProps) {
             {/* Content */}
             <div className="portal-card flex-1">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-primary">{update.title}</span>
-                <span className="text-muted text-xs">{formatRelativeTime(update.created_at)}</span>
+                <span>{update.title}</span>
+                <span className="text-muted">{formatRelativeTime(update.created_at)}</span>
               </div>
-              <p className="text-muted text-sm m-0 mt-1">{update.content}</p>
+              <p className="text-muted m-0 mt-1">{update.content}</p>
               {update.created_by && (
-                <span className="text-xs text-muted">
+                <span className="text-muted">
                   by {update.created_by}
                 </span>
               )}
@@ -539,20 +534,20 @@ function FilesList({ files }: { files: ProjectFile[] }) {
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <FileText className="icon-xs flex-shrink-0 text-muted" />
               <div className="flex flex-col min-w-0">
-                <span className="text-primary text-sm truncate">
+                <span className="truncate">
                   {file.original_name}
                 </span>
                 <div className="flex items-center gap-2 text-muted">
                   {file.file_size != null && (
-                    <span className="text-xs">{formatFileSize(file.file_size)}</span>
+                    <span>{formatFileSize(file.file_size)}</span>
                   )}
-                  <span className="text-xs">{formatDate(file.created_at)}</span>
+                  <span>{formatDate(file.created_at)}</span>
                 </div>
               </div>
             </div>
             <a
               href={buildEndpoint.fileDownload(file.id)}
-              className="btn-ghost text-sm flex-shrink-0"
+              className="btn-ghost flex-shrink-0"
               download
             >
               <Download className="icon-xs" />
@@ -584,17 +579,17 @@ function ThreadsList({ threads }: { threads: ProjectThread[] }) {
         <div key={thread.id} className="portal-card">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <MessageSquare className={cn('icon-xs flex-shrink-0', thread.is_read === false ? 'text-primary' : 'text-muted')} />
+              <MessageSquare className={`icon-xs flex-shrink-0${thread.is_read !== false ? ' text-muted' : ''}`} />
               <div className="flex flex-col min-w-0">
-                <span className={cn('text-sm truncate', thread.is_read === false ? 'text-primary font-medium' : 'text-primary')}>
+                <span className="truncate">
                   {thread.subject}
                 </span>
                 <div className="flex items-center gap-2 text-muted">
                   {thread.message_count != null && (
-                    <span className="text-xs">{thread.message_count} messages</span>
+                    <span>{thread.message_count} messages</span>
                   )}
                   {thread.last_message_at && (
-                    <span className="text-xs">{formatRelativeTime(thread.last_message_at)}</span>
+                    <span>{formatRelativeTime(thread.last_message_at)}</span>
                   )}
                 </div>
               </div>
@@ -627,13 +622,13 @@ function InvoicesList({ invoices }: { invoices: ProjectInvoice[] }) {
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <DollarSign className="icon-xs flex-shrink-0 text-muted" />
               <div className="flex flex-col min-w-0">
-                <span className="text-primary text-sm">
+                <span>
                   {invoice.invoice_number || `Invoice #${invoice.id}`}
                 </span>
                 <div className="flex items-center gap-2 text-muted">
-                  <span className="text-xs">{formatCurrency(invoice.amount)}</span>
+                  <span>{formatCurrency(invoice.amount)}</span>
                   {invoice.due_date && (
-                    <span className="text-xs">Due {formatDate(invoice.due_date)}</span>
+                    <span>Due {formatDate(invoice.due_date)}</span>
                   )}
                 </div>
               </div>
@@ -644,7 +639,7 @@ function InvoicesList({ invoices }: { invoices: ProjectInvoice[] }) {
               </StatusBadge>
               <a
                 href={buildEndpoint.invoicePdf(invoice.id)}
-                className="btn-ghost text-sm flex-shrink-0"
+                className="btn-ghost flex-shrink-0"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -683,8 +678,8 @@ function TimeSummaryTab({ summary }: { summary: TimeSummary | null }) {
     <div className="grid grid-cols-2 gap-3">
       {stats.map((stat) => (
         <div key={stat.label} className="portal-card text-center">
-          <span className="text-2xl font-semibold text-primary">{stat.value}</span>
-          <span className="label text-xs block mt-1">{stat.label}</span>
+          <span className="text-2xl">{stat.value}</span>
+          <span className="label block mt-1">{stat.label}</span>
         </div>
       ))}
     </div>

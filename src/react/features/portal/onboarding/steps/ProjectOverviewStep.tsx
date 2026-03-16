@@ -41,13 +41,13 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
   };
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef}>
       {/* Section Header */}
       <div className="mb-4">
         <h3 className="heading text-lg">
           Project Details
         </h3>
-        <p className="text-muted text-sm mt-1">
+        <p className="text-muted mt-1">
           Tell us about your project goals and timeline.
         </p>
       </div>
@@ -57,7 +57,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
         {/* Project Name */}
         <div className="flex flex-col gap-1">
           <label className="field-label" htmlFor="project-name">
-            Project Name <span className="text-primary">*</span>
+            Project Name <span className="form-required">*</span>
           </label>
           <div className="relative">
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
@@ -73,14 +73,14 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
             />
           </div>
           {getFieldError('projectName') && (
-            <span className="text-xs text-primary">{getFieldError('projectName')}</span>
+            <span className="form-error-message">{getFieldError('projectName')}</span>
           )}
         </div>
 
         {/* Project Type */}
         <div className="flex flex-col gap-1">
           <label className="field-label" htmlFor="project-type">
-            Project Type <span className="text-primary">*</span>
+            Project Type <span className="form-required">*</span>
           </label>
           <FormDropdown
             id="project-type"
@@ -94,7 +94,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
             className={cn(getFieldError('projectType') && 'border-primary')}
           />
           {getFieldError('projectType') && (
-            <span className="text-xs text-primary">{getFieldError('projectType')}</span>
+            <span className="form-error-message">{getFieldError('projectType')}</span>
           )}
         </div>
       </div>
@@ -102,7 +102,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
       {/* Project Description */}
       <div className="flex flex-col gap-1 mt-4">
         <label className="field-label" htmlFor="project-description">
-          Project Description <span className="text-primary">*</span>
+          Project Description <span className="form-required">*</span>
         </label>
         <textarea
           id="project-description"
@@ -113,7 +113,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
           className={cn('textarea', getFieldError('projectDescription') && 'border-primary')}
         />
         {getFieldError('projectDescription') && (
-          <span className="text-xs text-primary">{getFieldError('projectDescription')}</span>
+          <span className="form-error-message">{getFieldError('projectDescription')}</span>
         )}
       </div>
 
@@ -124,7 +124,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
         <h3 className="heading text-lg">
           Timeline & Budget
         </h3>
-        <p className="text-muted text-sm mt-1">
+        <p className="text-muted mt-1">
           Help us understand your constraints.
         </p>
       </div>
@@ -145,7 +145,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
               className="input pl-10"
             />
           </div>
-          <span className="text-xs text-muted">
+          <span className="text-muted">
             When do you want to launch?
           </span>
         </div>
@@ -169,7 +169,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
               className="pl-10"
             />
           </div>
-          <span className="text-xs text-muted">
+          <span className="text-muted">
             This helps us recommend the right scope
           </span>
         </div>

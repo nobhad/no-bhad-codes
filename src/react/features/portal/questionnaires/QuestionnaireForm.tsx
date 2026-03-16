@@ -310,10 +310,10 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
         <div className="portal-card qform-file-selected">
           <div className="qform-file-info">
             <Check className="icon-xs qform-check-success" />
-            <span className="text-primary qform-file-name">
+            <span className="qform-file-name">
               {fileMetadata.filename}
             </span>
-            <span className="text-muted qform-file-size">
+            <span className="qform-file-size">
               ({formatFileSize(fileMetadata.fileSize)})
             </span>
           </div>
@@ -342,10 +342,10 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
         >
           <Upload className="icon-sm" />
           <div className="qform-dropzone-text">
-            <span className="text-primary qform-dropzone-label">
+            <span className="qform-dropzone-label">
               Drop file here or click to upload
             </span>
-            <div className="text-muted qform-dropzone-hint">
+            <div className="qform-dropzone-hint">
               {question.acceptedFileTypes && `Accepted: ${question.acceptedFileTypes}`}
               {question.acceptedFileTypes && ' | '}
               Max size: {formatFileSize(maxSize)}
@@ -526,7 +526,7 @@ export function QuestionnaireForm({
   };
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef}>
       {/* Header */}
       <div className="qform-header">
         <div className="qform-header-left">
@@ -543,7 +543,7 @@ export function QuestionnaireForm({
               {questionnaire.title}
             </h2>
             {questionnaire.description && (
-              <p className="text-muted qform-description">
+              <p className="qform-description">
                 {questionnaire.description}
               </p>
             )}
@@ -553,13 +553,13 @@ export function QuestionnaireForm({
         {/* Save status */}
         <div className="qform-status">
           {isSaving && (
-            <div className="text-muted qform-status-item">
+            <div className="qform-status-item">
               <RefreshCw className="icon-xs loading-spin" />
               Saving...
             </div>
           )}
           {!isSaving && lastSaved && (
-            <div className="text-muted qform-status-item">
+            <div className="qform-status-item">
               <Check className="icon-xs qform-check-success" />
               Saved
             </div>
@@ -581,7 +581,7 @@ export function QuestionnaireForm({
               style={{ width: `${progress}%` }}
             />
           </div>
-          <span className="text-muted qform-progress-text">
+          <span className="qform-progress-text">
             {progress}%
           </span>
         </div>
@@ -600,7 +600,7 @@ export function QuestionnaireForm({
             >
               {/* Question label */}
               <div className="qform-question-label-row">
-                <span className="text-muted qform-question-number">
+                <span className="qform-question-number">
                   {index + 1}.
                 </span>
                 <div className="qform-question-label-container">
@@ -611,7 +611,7 @@ export function QuestionnaireForm({
                     )}
                   </label>
                   {question.helpText && (
-                    <p className="text-muted qform-question-help">
+                    <p className="qform-question-help">
                       {question.helpText}
                     </p>
                   )}
@@ -661,7 +661,7 @@ export function QuestionnaireForm({
 
       {/* Read-only notice */}
       {isReadOnly && (
-        <div className="text-muted qform-readonly-notice">
+        <div className="qform-readonly-notice">
           This questionnaire has been submitted and cannot be edited.
         </div>
       )}

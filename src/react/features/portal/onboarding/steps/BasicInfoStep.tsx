@@ -42,13 +42,13 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
   };
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef}>
       {/* Section Header */}
       <div className="mb-4">
         <h3 className="heading text-lg">
           Contact Information
         </h3>
-        <p className="text-muted text-sm mt-1">
+        <p className="text-muted mt-1">
           Tell us how to reach you during the project.
         </p>
       </div>
@@ -58,7 +58,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
         {/* Contact Name */}
         <div className="flex flex-col gap-1">
           <label className="field-label" htmlFor="basic-contact-name">
-            Contact Name <span className="text-primary">*</span>
+            Contact Name <span className="form-required">*</span>
           </label>
           <div className="relative">
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
@@ -74,14 +74,14 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
             />
           </div>
           {getFieldError('contactName') && (
-            <span className="text-xs text-primary">{getFieldError('contactName')}</span>
+            <span className="form-error-message">{getFieldError('contactName')}</span>
           )}
         </div>
 
         {/* Contact Email */}
         <div className="flex flex-col gap-1">
           <label className="field-label" htmlFor="basic-contact-email">
-            Email Address <span className="text-primary">*</span>
+            Email Address <span className="form-required">*</span>
           </label>
           <div className="relative">
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
@@ -97,7 +97,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
             />
           </div>
           {getFieldError('contactEmail') && (
-            <span className="text-xs text-primary">{getFieldError('contactEmail')}</span>
+            <span className="form-error-message">{getFieldError('contactEmail')}</span>
           )}
         </div>
 
@@ -118,7 +118,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
             />
           </div>
           {getFieldError('contactPhone') && (
-            <span className="text-xs text-primary">{getFieldError('contactPhone')}</span>
+            <span className="form-error-message">{getFieldError('contactPhone')}</span>
           )}
         </div>
 
@@ -126,7 +126,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
         <div className="flex flex-col gap-1">
           <label className="field-label" htmlFor="basic-timezone">Timezone</label>
           <div className="relative">
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted z-10">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
               <Clock className="icon-xs" />
             </div>
             <FormDropdown
@@ -147,7 +147,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
         <h3 className="heading text-lg">
           Company Details
         </h3>
-        <p className="text-muted text-sm mt-1">
+        <p className="text-muted mt-1">
           Help us understand your business.
         </p>
       </div>
@@ -187,7 +187,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
               className="input pl-10"
             />
           </div>
-          <span className="text-xs text-muted">
+          <span className="text-muted">
             Leave blank if this is a new business
           </span>
         </div>
@@ -231,10 +231,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
                   <span className="w-1.5 h-1.5 bg-white" />
                 )}
               </span>
-              <span className={cn(
-                'text-sm font-mono capitalize',
-                basicInfo.preferredContactMethod === method ? 'text-dark' : 'text-primary'
-              )}>
+              <span className="font-mono capitalize">
                 {method}
               </span>
             </label>

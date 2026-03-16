@@ -440,7 +440,7 @@ export function OnboardingWizard({
   }
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef}>
       {/* Header with Step Indicator */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
@@ -448,7 +448,7 @@ export function OnboardingWizard({
             <h2 className="heading text-xl">
               Client Onboarding
             </h2>
-            <p className="text-muted text-sm mt-0.5">
+            <p className="text-muted mt-0.5">
               {currentStepConfig?.description}
             </p>
           </div>
