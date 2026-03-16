@@ -86,7 +86,7 @@ export function ConfirmDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="portal-modal">
+      <AlertDialogContent className="portal-modal--sm">
         <AlertDialogHeader className="portal-modal-header">
           <AlertDialogTitle className="portal-modal-title">
             {config.icon}

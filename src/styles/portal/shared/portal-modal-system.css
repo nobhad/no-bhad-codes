@@ -32,21 +32,20 @@
    PORTAL MODAL CONTAINER
    ============================================== */
 
-/* Fixed + centered via inset:0 + margin:auto.
+/* Fixed + centered via top/left + translate.
    Renders inside .portal (via Radix container prop),
    so all portal styles apply naturally. */
 .portal-modal {
   position: fixed;
-  inset: 0;
-  margin: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: calc(var(--z-index-portal-modal) + 1);
   background: var(--color-bg-primary);
   border: var(--portal-border);
   box-shadow: var(--shadow-modal);
   width: calc(100% - var(--space-4) * 2);
   max-width: var(--modal-width-md);
-  /* Constrain height so body can scroll. fit-content up to max-height. */
-  height: min(fit-content, var(--modal-max-height));
   max-height: var(--modal-max-height);
   overflow: hidden;
   display: flex;

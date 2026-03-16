@@ -689,6 +689,7 @@ td {
   background-color: inherit;
   padding: var(--space-2) var(--space-2) var(--space-4);
   box-sizing: border-box;
+  min-width: 0;
 }
 
 /* Subsection — nested content group inside a .section.

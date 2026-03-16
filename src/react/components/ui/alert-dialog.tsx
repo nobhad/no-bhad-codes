@@ -41,7 +41,7 @@ const AlertDialogHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn('portal-modal-header flex-col gap-2', className)}
+    className={cn('portal-modal-header', className)}
     {...props}
   />
 );

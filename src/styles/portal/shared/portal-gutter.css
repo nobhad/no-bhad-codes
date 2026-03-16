@@ -29,8 +29,8 @@
 
 .portal .portal-global-header,
 .portal .sidebar-content,
-.portal .dashboard-content > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content):not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(.data-table-card):not(.project-overview-grid):not(.overview-grid):not(.analytics-card-grid):not(.kpi-cards-row):not(button),
-.portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > *:not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(.data-table-card):not(.project-overview-grid):not(.overview-grid):not(.analytics-card-grid):not(.kpi-cards-row):not(button) {
+.portal .dashboard-content > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content):not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(.data-table-card):not(.project-overview-grid):not(.overview-grid):not(.client-overview-grid):not(.analytics-card-grid):not(.kpi-cards-row):not(button),
+.portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > *:not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(.data-table-card):not(.project-overview-grid):not(.overview-grid):not(.client-overview-grid):not(.analytics-card-grid):not(.kpi-cards-row):not(button) {
   padding: var(--content-gutter);
   box-sizing: border-box;
 }
@@ -92,8 +92,8 @@
 .portal .dashboard-content .data-table-card > *:not(.data-table-scroll-wrapper):not(.data-table-container):not(.msgtab-container):not(button),
 .portal .dashboard-content .config-content > *:not(button),
 .portal .dashboard-content .milestone-list,
-/* Cards — gutter on children, not the card itself */
-.portal .dashboard-content .portal-card > *:not(button),
+/* Cards — gutter on children, not card wrapper (matches .panel pattern) */
+.portal .dashboard-content .portal-card > *:not(.data-table-header):not(button),
 .portal .dashboard-content .stat-card,
 /* Activity and detail list items */
 .portal .dashboard-content .activity-list > li,
@@ -128,6 +128,7 @@
 /* Grid layout wrappers — structural containers, never get gutter padding */
 .portal .project-overview-grid,
 .portal .overview-grid,
+.portal .client-overview-grid,
 .portal .analytics-card-grid,
 .portal .kpi-cards-row {
   padding: 0;
