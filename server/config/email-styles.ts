@@ -10,6 +10,13 @@
  * All email-generating services should import from here
  * to ensure consistent branding and easy theme updates.
  *
+ * Matches the portal's brutalist monospace design system:
+ * - Monochrome palette (black/white/gray)
+ * - No border-radius (sharp corners)
+ * - No gradients
+ * - Monospace typography
+ * - Solid borders, minimal decoration
+ *
  * Key values are configurable via environment variables
  * with sensible defaults for the No Bhad Codes brand.
  */
@@ -20,6 +27,7 @@
 
 /**
  * Semantic color constants for email templates.
+ * Aligned with portal-theme.css design tokens.
  *
  * Convention:
  *  - env-backed values: colors that a client deployment may want to change
@@ -30,19 +38,19 @@
  * const html = `<div style="background: ${EMAIL_COLORS.headerBg};">`;
  */
 export const EMAIL_COLORS = {
-  /** Dark header background (e.g. #1a1a2e) */
-  headerBg: process.env.EMAIL_HEADER_BG || '#1a1a2e',
-  /** Gradient end for the dark header */
-  headerBgGradientEnd: process.env.EMAIL_HEADER_BG_END || '#16213e',
-  /** Header text color */
+  /** Header background — matches portal dark mode bg */
+  headerBg: process.env.EMAIL_HEADER_BG || '#171717',
+  /** Header gradient end — same as headerBg (no gradients in brutalist style) */
+  headerBgGradientEnd: process.env.EMAIL_HEADER_BG || '#171717',
+  /** Header text color — matches portal dark mode text */
   headerText: process.env.EMAIL_HEADER_TEXT || '#ffffff',
 
-  /** Primary brand accent (neon green) */
-  brandAccent: process.env.EMAIL_BRAND_ACCENT || '#7ff709',
-  /** Alternate brand accent used in simple templates */
-  brandAccentAlt: process.env.EMAIL_BRAND_ACCENT_ALT || '#00ff41',
+  /** Primary brand accent — matches portal --color-text-primary */
+  brandAccent: process.env.EMAIL_BRAND_ACCENT || '#333333',
+  /** Alternate brand accent — same as brandAccent (no dual-accent in brutalist) */
+  brandAccentAlt: process.env.EMAIL_BRAND_ACCENT || '#333333',
 
-  /** Primary body text */
+  /** Primary body text — matches portal light --color-text-primary */
   bodyText: '#333333',
   /** Secondary body text (labels, descriptions) */
   bodyTextLight: '#555555',
@@ -51,55 +59,61 @@ export const EMAIL_COLORS = {
   /** Near-black body text (strong values) */
   bodyTextDark: '#222222',
 
-  /** Email outer background */
-  outerBg: '#f5f5f5',
+  /** Email outer background — matches portal light --color-bg-primary */
+  outerBg: '#e0e0e0',
   /** Main content area background */
-  contentBg: '#f9f9f9',
+  contentBg: '#e0e0e0',
   /** Alternate content background (info boxes, code blocks) */
-  contentBgAlt: '#f8f9fa',
+  contentBgAlt: '#f5f5f5',
   /** Card / box background */
   cardBg: '#ffffff',
   /** Footer background */
-  footerBg: '#f0f0f0',
+  footerBg: '#e0e0e0',
 
-  /** Standard border / divider */
-  border: '#eeeeee',
-  /** Heavier border for inputs / boxes */
-  borderMedium: '#dddddd',
+  /** Standard border — matches portal --color-border-primary */
+  border: '#333333',
+  /** Lighter border for secondary elements */
+  borderLight: '#999999',
+  /** Medium border — alias for backward compat */
+  borderMedium: '#333333',
 
-  /** Hyperlink color */
-  link: '#0066cc',
+  /** Hyperlink color — matches portal text (underlined for distinction) */
+  link: '#333333',
 
-  /** Primary button background — uses the brand accent */
-  buttonPrimaryBg: process.env.EMAIL_BUTTON_COLOR || '#00ff41',
-  /** Primary button text */
-  buttonPrimaryText: '#000000',
-  /** Secondary button background — uses dark header color */
-  buttonSecondaryBg: process.env.EMAIL_BUTTON_SECONDARY || '#1a1a2e',
+  /** Primary button background — solid, matches portal btn-primary */
+  buttonPrimaryBg: process.env.EMAIL_BUTTON_COLOR || '#333333',
+  /** Primary button text — matches portal btn-primary-hover-color */
+  buttonPrimaryText: '#ffffff',
+  /** Secondary button background — transparent/outlined in portal, solid border here */
+  buttonSecondaryBg: process.env.EMAIL_BUTTON_SECONDARY || '#ffffff',
   /** Secondary button text */
-  buttonSecondaryText: '#ffffff',
-  /** Contract / neutral button */
-  buttonContractBg: process.env.EMAIL_BUTTON_CONTRACT || '#00aff0',
+  buttonSecondaryText: '#333333',
+  /** Secondary button border */
+  buttonSecondaryBorder: '#333333',
+  /** Contract button — uses primary style in brutalist design */
+  buttonContractBg: process.env.EMAIL_BUTTON_COLOR || '#333333',
   /** Contract button text */
   buttonContractText: '#ffffff',
 
-  /** Section heading border accent (brand green line) */
-  sectionBorder: '#7ff709',
+  /** Section heading border accent — solid dark line */
+  sectionBorder: '#333333',
 
   /** Feature badge / tag background */
-  featureBadgeBg: '#e8f5e9',
+  featureBadgeBg: '#f5f5f5',
   /** Feature badge / tag text */
-  featureBadgeText: '#2e7d32',
+  featureBadgeText: '#333333',
+  /** Feature badge / tag border */
+  featureBadgeBorder: '#333333',
 
   /** Highlight / warning box background */
-  highlightBg: '#fff3cd',
+  highlightBg: '#f5f5f5',
   /** Highlight / warning box border */
-  highlightBorder: '#ffc107',
+  highlightBorder: '#333333',
 
-  /** Info box background (admin action items) */
-  infoBg: '#e7f5ff',
+  /** Info box background */
+  infoBg: '#f5f5f5',
   /** Info box border */
-  infoBorder: '#0066cc',
+  infoBorder: '#333333',
 
   /** Danger / error / overdue color */
   danger: '#dc3545',
@@ -113,6 +127,7 @@ export const EMAIL_COLORS = {
 
 /**
  * Standard layout values for email templates.
+ * Brutalist: no border-radius, solid borders, sharp edges.
  */
 export const EMAIL_LAYOUT = {
   /** Maximum width of the email container */
@@ -120,13 +135,13 @@ export const EMAIL_LAYOUT = {
   /** Standard content padding */
   contentPadding: '20px',
   /** Header padding */
-  headerPadding: '30px 20px',
-  /** Standard border radius */
-  borderRadius: '8px',
-  /** Button border radius */
-  buttonRadius: '4px',
-  /** Contract button border radius */
-  buttonContractRadius: '6px'
+  headerPadding: '24px 20px',
+  /** Border radius — brutalist: 0 everywhere */
+  borderRadius: '0',
+  /** Button border radius — brutalist: 0 */
+  buttonRadius: '0',
+  /** Border width — matches portal --border-width */
+  borderWidth: '1px'
 } as const;
 
 // ============================================
@@ -135,20 +150,29 @@ export const EMAIL_LAYOUT = {
 
 /**
  * Standard font stacks and sizes for email templates.
+ * Uses monospace to match the portal's Inconsolata-based system.
  */
 export const EMAIL_TYPOGRAPHY = {
-  /** Primary font stack (email-safe) */
-  fontFamily: 'Arial, sans-serif',
+  /** Primary font stack — monospace (email-safe fallbacks) */
+  fontFamily: '"Inconsolata", "Cascadia Code", "Source Code Pro", Menlo, Consolas, "Courier New", monospace',
   /** Enhanced font stack for modern clients */
-  fontFamilyFull: '-apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, sans-serif',
+  fontFamilyFull: '"Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "Courier New", monospace',
   /** Standard line height */
   lineHeight: '1.6',
+  /** Body font size */
+  bodyFontSize: '14px',
   /** Footer font size */
-  footerFontSize: '0.9em',
+  footerFontSize: '12px',
   /** Small text (fine print, legal) */
-  smallFontSize: '14px',
+  smallFontSize: '12px',
   /** Feature badge font size */
-  badgeFontSize: '14px'
+  badgeFontSize: '12px',
+  /** Heading font size */
+  headingFontSize: '16px',
+  /** Letter spacing — matches portal uppercase labels */
+  letterSpacingLabel: '0.05em',
+  /** Text transform for labels */
+  textTransformLabel: 'uppercase'
 } as const;
 
 // ============================================
