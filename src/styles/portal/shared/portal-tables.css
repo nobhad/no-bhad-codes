@@ -215,6 +215,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-height: var(--space-7);
   border-top: none;
   border-bottom: var(--portal-border);
   border-radius: 0;
@@ -225,6 +226,7 @@
   display: none;
 }
 
+/* Table header h3 — Tier 3 (section title) tokens */
 .data-table-header h3 {
   order: 0;
   flex: 0 0 auto;
@@ -232,11 +234,11 @@
   display: inline-flex;
   align-items: center;
   gap: var(--icon-gap);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
+  color: var(--heading-section-color);
+  font-size: var(--heading-section-font-size);
+  font-weight: var(--heading-section-font-weight);
+  text-transform: var(--heading-text-transform);
+  letter-spacing: var(--heading-section-letter-spacing);
   white-space: nowrap;
 }
 
@@ -254,19 +256,19 @@
   display: inline;
 }
 
-/* Stats summary — left-aligned after title, actions push right.
-   Matches h3 capitalization (uppercase + label letter-spacing). */
+/* Stats summary — left-aligned after title, smaller than h3 title.
+   Uses label-font-size to stay subordinate to heading-section-font-size. */
 .stats-summary {
   order: 1;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   margin-left: var(--space-4);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  color: var(--color-text-tertiary);
+  font-size: var(--label-font-size);
+  font-weight: var(--label-font-weight);
   text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
+  letter-spacing: var(--label-letter-spacing);
   flex-wrap: wrap;
 }
 
