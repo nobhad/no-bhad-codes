@@ -2,8 +2,6 @@
    CLIENT PORTAL - AD HOC REQUESTS
    ===================================================== */
 
-@layer components {
-
 .portal .requests-grid {
   display: grid;
 }
@@ -146,6 +144,149 @@
 }
 
 /* =====================================================
+   CONTENT CHECKLIST VIEW
+   ===================================================== */
+
+/* Checklist card */
+.portal .checklist-card {
+  margin-bottom: var(--spacing-md);
+}
+
+/* Checklist card header row */
+.portal .checklist-card-header {
+  padding: var(--spacing-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--app-color-border);
+}
+
+/* Checklist progress area (right side of header) */
+.portal .checklist-progress {
+  text-align: right;
+}
+
+/* Progress bar track */
+.portal .checklist-progress-bar {
+  width: 120px;
+  height: 8px;
+  background: var(--app-color-border);
+  border-radius: 4px;
+}
+
+/* Progress bar fill */
+.portal .checklist-progress-fill {
+  height: 100%;
+  background: var(--app-color-success);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* Progress count label */
+.portal .checklist-progress-label {
+  font-size: var(--font-size-xs);
+  color: var(--app-color-text-muted);
+}
+
+/* Content item row */
+.portal .content-item-row {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--app-color-border);
+}
+
+/* Content item header (title + badge) */
+.portal .content-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+}
+
+/* Content item body (left side) */
+.portal .content-item-body {
+  flex: 1;
+}
+
+/* Content item title row (icon + title + required marker) */
+.portal .content-item-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+/* Required field marker */
+.portal .content-item-required {
+  color: var(--app-color-danger);
+  font-size: var(--font-size-xs);
+}
+
+/* Content item description */
+.portal .content-item-description {
+  margin: 4px 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--app-color-text-muted);
+}
+
+/* Admin revision notes callout */
+.portal .content-item-revision-notes {
+  margin-top: var(--space-0-5);
+  padding: var(--space-0-5) var(--space-1);
+  background: var(--app-color-warning-bg);
+  font-size: var(--font-size-sm);
+}
+
+/* Submission form area */
+.portal .content-item-submission {
+  margin-top: var(--spacing-sm);
+}
+
+/* Submission form input row */
+.portal .content-submission-form {
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: flex-start;
+}
+
+/* Submission form text input fills remaining space */
+.portal .content-submission-form .form-input {
+  flex: 1;
+}
+
+/* Submit button nowrap */
+.portal .content-submission-form .btn-primary {
+  white-space: nowrap;
+}
+
+/* Submitted content display text */
+.portal .content-item-submitted p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+/* Submitted content display pre */
+.portal .content-item-submitted pre {
+  margin: 0;
+  font-size: var(--font-size-xs);
+}
+
+/* File upload hint */
+.portal .content-file-hint {
+  font-size: var(--font-size-sm);
+  color: var(--app-color-text-muted);
+}
+
+/* Project name subtitle */
+.portal .checklist-project-name {
+  font-size: var(--font-size-sm);
+  color: var(--app-color-text-muted);
+}
+
+/* Submitted file indicator */
+.portal .content-item-submitted span {
+  font-size: var(--font-size-sm);
+}
+
+/* =====================================================
    MOBILE RESPONSIVE STYLES
    ===================================================== */
 
@@ -181,6 +322,4 @@
     flex-direction: column;
     gap: var(--space-0-5);
   }
-}
-
 }
