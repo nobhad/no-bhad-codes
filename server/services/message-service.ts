@@ -1554,6 +1554,31 @@ class MessageService {
   }
 
   /**
+   * Find an existing thread for a project.
+   */
+  async findThreadByProjectId(
+    projectId: number,
+    threadColumns: string
+  ): Promise<Record<string, unknown> | undefined> {
+    const db = getDatabase();
+    return db.get(
+      `SELECT ${threadColumns} FROM active_message_threads WHERE project_id = ? LIMIT 1`,
+      [projectId]
+    );
+  }
+
+  /**
+   * Get project name and client_id for thread creation.
+   */
+  async getProjectInfo(projectId: number): Promise<{ project_name: string; client_id: number } | undefined> {
+    const db = getDatabase();
+    return db.get(
+      'SELECT project_name, client_id FROM active_projects WHERE id = ?',
+      [projectId]
+    ) as Promise<{ project_name: string; client_id: number } | undefined>;
+  }
+
+  /**
    * Get the client_id associated with a project.
    */
   async getProjectClientId(projectId: number): Promise<number | null> {

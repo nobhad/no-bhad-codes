@@ -55,6 +55,53 @@ router.get(
 );
 
 /**
+ * Find or create a thread for a project.
+ * Returns the existing thread or creates one automatically.
+ */
+router.get(
+  '/threads/by-project/:projectId',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.projectId, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const project = await messageService.verifyProjectAccess(
+      projectId,
+      req.user!.type as 'admin' | 'client',
+      String(req.user!.id)
+    );
+
+    if (!project) {
+      return errorResponse(res, 'Project not found or access denied', 404, ErrorCodes.PROJECT_NOT_FOUND);
+    }
+
+    // Try to find existing thread for this project
+    let thread = await messageService.findThreadByProjectId(projectId, MESSAGE_THREAD_COLUMNS);
+
+    if (!thread) {
+      // Get project details for thread creation
+      const projectInfo = await messageService.getProjectInfo(projectId);
+      const clientId = String(projectInfo?.client_id ?? (req.user!.type === 'client' ? req.user!.id : 0));
+
+      thread = await messageService.createThread(
+        {
+          clientId,
+          projectId,
+          subject: projectInfo?.project_name || `Project #${projectId}`,
+          threadType: 'project',
+          priority: 'normal'
+        },
+        MESSAGE_THREAD_COLUMNS
+      );
+    }
+
+    sendSuccess(res, { thread });
+  })
+);
+
+/**
  * @swagger
  * /api/messages/threads:
  *   post:

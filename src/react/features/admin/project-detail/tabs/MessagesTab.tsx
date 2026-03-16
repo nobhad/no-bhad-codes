@@ -37,7 +37,7 @@ export function MessagesTab({
     () =>
       messages.map((m) => ({
         id: m.id,
-        content: m.content,
+        content: m.content || m.message || '',
         isOwn: m.sender_type === 'admin',
         senderName: m.sender_name,
         timestamp: m.created_at,

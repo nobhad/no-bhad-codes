@@ -605,10 +605,15 @@ export interface Message {
   thread_id: number;
   sender_type: 'admin' | 'client';
   sender_name?: string;
+  /** Message content — API may return as 'content' or 'message' */
   content: string;
+  /** Raw 'message' field from DB (thread endpoints use this name) */
+  message?: string;
   is_read: boolean;
+  read_at?: string;
   edited_at?: string;
   created_at: string;
+  updated_at?: string;
 }
 
 /**
