@@ -34,6 +34,7 @@ import {
   VALID_MAINTENANCE,
   VALID_STATUSES
 } from './helpers.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import type {
   AuthenticatedRequest,
   ProposalSubmission
@@ -93,6 +94,7 @@ router.get(
 router.post(
   '/',
   authenticateToken,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const submission: ProposalSubmission = req.body;
 
@@ -306,6 +308,7 @@ router.delete(
   '/:id',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id, 10);
 
@@ -455,6 +458,7 @@ router.put(
   '/admin/:id',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     const { status, adminNotes } = req.body;
@@ -535,6 +539,8 @@ router.post(
   '/admin/:id/convert',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['proposals']),
+  invalidateCache(['invoices']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     const proposalId = parseInt(id, 10);

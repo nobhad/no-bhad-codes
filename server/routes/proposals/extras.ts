@@ -21,6 +21,7 @@ import {
   sendSuccess,
   sendCreated
 } from './helpers.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import type { AuthenticatedRequest } from './helpers.js';
 
 const router = express.Router();
@@ -91,6 +92,7 @@ router.get(
 router.post(
   '/:id/comments',
   authenticateToken,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id, 10);
 
@@ -143,6 +145,7 @@ router.delete(
   '/comments/:commentId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const commentId = parseInt(req.params.commentId, 10);
 
@@ -298,6 +301,7 @@ router.post(
   '/:id/custom-items',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id, 10);
 
@@ -337,6 +341,7 @@ router.put(
   '/custom-items/:itemId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const itemId = parseInt(req.params.itemId, 10);
 
@@ -372,6 +377,7 @@ router.delete(
   '/custom-items/:itemId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const itemId = parseInt(req.params.itemId, 10);
 
@@ -411,6 +417,7 @@ router.post(
   '/:id/discount',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id, 10);
 
@@ -453,6 +460,7 @@ router.delete(
   '/:id/discount',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id, 10);
 
@@ -492,6 +500,7 @@ router.put(
   '/:id/expiration',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id, 10);
 
@@ -531,6 +540,7 @@ router.post(
   '/:id/send',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id, 10);
 

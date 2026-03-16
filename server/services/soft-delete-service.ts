@@ -121,7 +121,8 @@ class SoftDeleteService {
         clients: 1,
         projects: 0,
         invoices: 0,
-        proposals: 0
+        proposals: 0,
+        contacts: 0
       };
 
       // 1. Soft delete associated projects and their proposals using batch operations
@@ -170,7 +171,15 @@ class SoftDeleteService {
       );
       affectedItems.invoices = voidResult.changes || 0;
 
-      // 4. Soft delete the client
+      // 4. Cascade soft-delete to client_contacts
+      const contactResult = await db.run(
+        `UPDATE client_contacts SET deleted_at = ?, deleted_by = ?
+         WHERE client_id = ? AND deleted_at IS NULL`,
+        [now, deletedBy, clientId]
+      );
+      affectedItems.contacts = contactResult.changes || 0;
+
+      // 5. Soft delete the client
       await db.run('UPDATE clients SET deleted_at = ?, deleted_by = ? WHERE id = ?', [
         now,
         deletedBy,
@@ -193,7 +202,7 @@ class SoftDeleteService {
       });
 
       logger.info(
-        `Soft deleted client ${clientId} (${clientName}) and ${affectedItems.projects} projects, ${affectedItems.proposals} proposals, voided ${affectedItems.invoices} invoices`
+        `Soft deleted client ${clientId} (${clientName}) and ${affectedItems.projects} projects, ${affectedItems.proposals} proposals, ${affectedItems.contacts} contacts, voided ${affectedItems.invoices} invoices`
       );
 
       return {

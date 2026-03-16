@@ -10,6 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
+import { invalidateCache, QueryCache } from '../../middleware/cache.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 import { clientService } from '../../services/client-service.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
@@ -103,6 +104,7 @@ router.post(
   '/contacts',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['contacts', 'clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { clientId, name, email, phone, title, company, isPrimary } = req.body;
 
@@ -140,6 +142,7 @@ router.put(
   '/contacts/:contactId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['contacts', 'clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const contactId = parseInt(req.params.contactId, 10);
     const { isPrimary, firstName, lastName, email, phone, role } = req.body;
@@ -158,6 +161,10 @@ router.put(
       isPrimary, firstName, lastName, email, phone, role
     });
 
+    if (updatedContact?.client_id) {
+      await QueryCache.invalidate([`client:${updatedContact.client_id}`]);
+    }
+
     sendSuccess(res, { contact: updatedContact });
   })
 );
@@ -169,6 +176,7 @@ router.post(
   '/contacts/bulk-delete',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['contacts', 'clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { contactIds } = req.body;
 

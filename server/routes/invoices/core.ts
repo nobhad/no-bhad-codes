@@ -37,6 +37,7 @@ import { workflowTriggerService } from '../../services/workflow-trigger-service.
 import { receiptService } from '../../services/receipt-service.js';
 import { logger } from '../../services/logger.js';
 import { validateRequest } from '../../middleware/validation.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { getPortalUrl } from '../../config/environment.js';
 import { BUSINESS_INFO } from '../../config/business.js';
 
@@ -367,6 +368,7 @@ router.post(
   authenticateToken,
   // Validate and sanitize input
   validateRequest(InvoiceValidationSchemas.create),
+  invalidateCache(['invoices']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceData: InvoiceCreateData = req.body;
 
@@ -834,6 +836,7 @@ router.put(
   requireAdmin,
   // Validate and sanitize input
   validateRequest(InvoiceValidationSchemas.updateStatus),
+  invalidateCache(['invoices']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id, 10);
     const { status, paymentData } = req.body;
@@ -869,6 +872,7 @@ router.post(
   '/:id/send',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['invoices']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id, 10);
 
@@ -1001,6 +1005,7 @@ router.post(
   authenticateToken,
   // Validate and sanitize input
   validateRequest(InvoiceValidationSchemas.recordPayment),
+  invalidateCache(['invoices']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id, 10);
     const { amountPaid, paymentMethod, paymentReference } = req.body;

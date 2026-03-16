@@ -14,6 +14,7 @@ import { contractService, type ContractStatus } from '../../services/contract-se
 import { sendSuccess, sendCreated, errorResponse, ErrorCodes } from '../../utils/api-response.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { validateRequest } from '../../middleware/validation.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { ContractValidationSchemas } from './shared.js';
 
 const router = express.Router();
@@ -130,6 +131,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   validateRequest(ContractValidationSchemas.create, { allowUnknownFields: true }),
+  invalidateCache(['contracts']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { projectId, clientId, content, status } = req.body;
 
@@ -200,6 +202,7 @@ router.put(
   authenticateToken,
   requireAdmin,
   validateRequest(ContractValidationSchemas.update, { allowUnknownFields: true }),
+  invalidateCache(['contracts']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const contractId = parseInt(req.params.contractId, 10);
 
@@ -242,6 +245,7 @@ router.delete(
   '/:contractId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['contracts']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const contractId = parseInt(req.params.contractId, 10);
 
@@ -290,6 +294,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   validateRequest(ContractValidationSchemas.bulkDelete),
+  invalidateCache(['contracts']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { contractIds } = req.body;
 
@@ -360,6 +365,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   validateRequest(ContractValidationSchemas.fromTemplate, { allowUnknownFields: true }),
+  invalidateCache(['contracts']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { templateId, projectId, clientId, status, expiresAt } = req.body;
 

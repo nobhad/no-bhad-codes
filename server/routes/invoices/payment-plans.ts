@@ -13,6 +13,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, messageResponse, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseInvoice, toSnakeCasePaymentPlan } from './helpers.js';
 import { validateRequest } from '../../middleware/validation.js';
+import { invalidateCache } from '../../middleware/cache.js';
 
 const router = express.Router();
 
@@ -98,6 +99,7 @@ router.post(
   requireAdmin,
   // Validate and sanitize input
   validateRequest(PaymentPlanValidationSchemas.create),
+  invalidateCache(['invoices']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { name, description, payments, isDefault } = req.body;
 
@@ -136,6 +138,7 @@ router.delete(
   '/payment-plans/:id',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['invoices']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const templateId = parseInt(req.params.id, 10);
 
@@ -172,6 +175,7 @@ router.post(
   '/generate-from-plan',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['invoices']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { projectId, clientId, templateId, totalAmount } = req.body;
 
