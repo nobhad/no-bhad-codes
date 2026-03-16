@@ -15,7 +15,7 @@
   border: var(--border-width) solid var(--color-border);
   border-top-color: var(--color-accent);
   border-radius: var(--border-radius-full, 50%);
-  animation: spin 0.8s linear infinite;
+  animation: spin var(--animation-spinner-fast);
 }
 
 .loading-spinner--small {
@@ -112,7 +112,7 @@ button[aria-busy="true"] .loading-spinner {
   );
   background-size: 200% 100%;
   border-radius: var(--border-radius-sm, 4px);
-  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  animation: skeleton-shimmer var(--animation-skeleton-shimmer);
 }
 
 .skeleton-line--title {
@@ -171,7 +171,7 @@ button[aria-busy="true"] .loading-spinner {
   );
   background-size: 200% 100%;
   border-radius: var(--border-radius-sm, 4px) var(--border-radius-sm, 4px) 0 0;
-  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  animation: skeleton-shimmer var(--animation-skeleton-shimmer);
 }
 
 /* Reduced motion */
@@ -448,7 +448,7 @@ p.empty-state {
   border: var(--border-width-thick) solid var(--color-border);
   border-top-color: var(--color-accent);
   border-radius: var(--border-radius-full, 50%);
-  animation: spin 0.8s linear infinite;
+  animation: spin var(--animation-spinner-fast);
   flex-shrink: 0;
 }
 
@@ -631,7 +631,7 @@ p.empty-state {
   border-radius: var(--border-radius-md, 8px);
   box-shadow: var(--shadow-elevated-sm);
   z-index: var(--z-index-loading);
-  animation: slide-in-right 0.3s ease;
+  /* Entrance animated by GSAP — see gsap-utilities.ts slideIn() */
 }
 
 .error-notification .error-icon {
@@ -654,17 +654,6 @@ p.empty-state {
 
 .error-dismiss:hover {
   color: var(--color-text);
-}
-
-@keyframes slide-in-right {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
 }
 
 /* ========================================
@@ -745,7 +734,7 @@ p.empty-state {
   );
   background-size: 200% 100%;
   border-radius: var(--border-radius-sm, 4px);
-  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  animation: skeleton-shimmer var(--animation-skeleton-shimmer);
 }
 
 /* Error state type variants — all use same layout, different icon via JSX */
@@ -770,7 +759,7 @@ p.empty-state {
 /* Spinning animation class - applied to SVG icons (e.g., IconButton loading) */
 .spinning,
 .loading-spin {
-  animation: spin 0.8s linear infinite;
+  animation: spin var(--animation-spinner-fast);
 }
 
 /* =====================================================

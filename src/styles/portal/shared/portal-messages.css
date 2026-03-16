@@ -1163,7 +1163,7 @@
   height: 4px;
   border-radius: var(--border-radius-full);
   background: var(--color-text-tertiary);
-  animation: typing-bounce 1.4s infinite ease-in-out both;
+  animation: typing-bounce var(--animation-typing-bounce);
 }
 
 .typing-dot:nth-child(1) {

@@ -436,7 +436,7 @@ html[data-theme="light"] .portal :is(
 
 .portal .health-indicator.health-loading {
   background: var(--color-text-tertiary);
-  animation: pulse 1.5s ease-in-out infinite;
+  animation: pulse var(--animation-pulse-loading);
 }
 
 

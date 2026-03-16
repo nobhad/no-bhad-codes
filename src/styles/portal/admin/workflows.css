@@ -38,7 +38,7 @@
 
 
 #trigger-test-btn svg.spin {
-  animation: spin 1s linear infinite;
+  animation: spin var(--animation-spinner);
 }
 
 /* ==============================================

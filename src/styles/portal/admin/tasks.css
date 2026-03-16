@@ -205,7 +205,7 @@
   height: var(--kanban-skeleton-height);
   background: transparent;
   border: var(--portal-border);
-  animation: pulse-skeleton 2s ease-in-out infinite;
+  animation: pulse-skeleton var(--animation-pulse-skeleton);
 }
 
 

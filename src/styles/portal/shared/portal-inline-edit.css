@@ -467,7 +467,7 @@
   width: var(--icon-size-md);
   height: var(--icon-size-md);
   color: var(--color-text-tertiary);
-  animation: spin 1s linear infinite;
+  animation: spin var(--animation-spinner);
 }
 
 /* Error message */
