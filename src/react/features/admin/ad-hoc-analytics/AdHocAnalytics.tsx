@@ -164,7 +164,7 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
   }
 
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>}>
       {/* Header */}
       <div className="perf-header">
         <h2 className="heading perf-heading">Custom Analytics</h2>
@@ -187,7 +187,7 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
           <div className="panel">
             <div className="data-table-header"><h3><span className="title-full">Saved Queries</span></h3></div>
             {savedQueries.length === 0 ? (
-              <p className="text-muted analytics-empty-text">No saved queries yet</p>
+              <p className="analytics-empty-text">No saved queries yet</p>
             ) : (
               <div>
                 {savedQueries.map((sq) => (
@@ -200,7 +200,7 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
                       <div className="analytics-query-content">
                         <span className="analytics-query-name">{sq.name}</span>
                         {sq.lastRun && (
-                          <span className="text-muted analytics-query-date">
+                          <span className="analytics-query-date">
                             Last run: {formatDate(sq.lastRun)}
                           </span>
                         )}
@@ -256,7 +256,7 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
               aria-label="Analytics query"
             />
             <div className="analytics-editor-footer">
-              <span className="text-muted analytics-hint">
+              <span className="analytics-hint">
                 Use SQL-like syntax to query your data
               </span>
               <button className="btn-primary" onClick={runQuery} disabled={isLoading || !query}>
@@ -282,7 +282,7 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
               <div className="analytics-results-header">
                 <div className="analytics-results-stats">
                   <span>{result.rowCount} rows</span>
-                  <span className="text-muted">Executed in {result.executionTime}ms</span>
+                  <span>Executed in {result.executionTime}ms</span>
                 </div>
                 <div className="analytics-results-actions">
                   <div className="tab-list perf-tab-list">
@@ -329,7 +329,7 @@ export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification: 
                     </tbody>
                   </table>
                   {result.rowCount > 100 && (
-                    <p className="text-muted analytics-pagination">
+                    <p className="analytics-pagination">
                       Showing first 100 of {result.rowCount} rows
                     </p>
                   )}
@@ -471,7 +471,7 @@ function QueryChart({ result }: { result: QueryResult }) {
       <div className="empty-state analytics-chart-empty">
         <BarChart3 className="analytics-chart-icon" />
         <p>No numeric columns to chart</p>
-        <p className="text-muted analytics-chart-hint">Query must return at least one numeric column</p>
+        <p className="analytics-chart-hint">Query must return at least one numeric column</p>
       </div>
     );
   }

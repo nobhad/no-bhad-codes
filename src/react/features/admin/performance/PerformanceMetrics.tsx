@@ -119,7 +119,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: 
   }
 
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>}>
       {/* Header */}
       <div className="panel-header">
         <div className="view-toggle">
@@ -158,7 +158,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: 
             <div key={kpi.id} className="stat-card">
               <div className="stat-card-top">
                 <span className="field-label">{kpi.name}</span>
-                <span className="text-muted">
+                <span>
                   {KPI_ICONS[kpi.icon] || <BarChart3 className="icon-lg" />}
                 </span>
               </div>
@@ -171,10 +171,10 @@ export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: 
                 ) : kpi.trend === 'down' ? (
                   <TrendingDown className="icon-xs" />
                 ) : null}
-                <span className="text-muted">
+                <span>
                   {formatPercentage(((kpi.value - kpi.previousValue) / kpi.previousValue) * 100)}
                 </span>
-                <span className="text-muted">
+                <span>
                   Target: {kpi.unit === '$' ? formatCurrency(kpi.target) : `${kpi.target}${kpi.unit}`}
                 </span>
               </div>
@@ -207,14 +207,14 @@ export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: 
             <div className="source-list">
               {data.teamMembers.map((member, index) => (
                 <div key={member.id} className="list-item">
-                  <span className="text-muted">{index + 1}</span>
+                  <span>{index + 1}</span>
                   <div className="flex-1">
                     <div>{member.name}</div>
-                    <div className="text-muted">{member.role}</div>
+                    <div>{member.role}</div>
                   </div>
                   <div className="text-right">
                     <div>{formatCurrency(member.revenueGenerated)}</div>
-                    <div className="text-muted">{member.projectsCompleted} projects</div>
+                    <div>{member.projectsCompleted} projects</div>
                   </div>
                 </div>
               ))}
@@ -243,13 +243,13 @@ export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: 
                   <div className="source-row">
                     <div>
                       <div>{project.name}</div>
-                      <div className="text-muted">{project.clientName}</div>
+                      <div>{project.clientName}</div>
                     </div>
                     <span className="badge">
                       {project.onTrack ? 'On Track' : 'At Risk'}
                     </span>
                   </div>
-                  <div className="source-row text-muted">
+                  <div className="source-row">
                     <span>Budget: {formatCurrency(project.budget)}</span>
                     <span>{project.progress}%</span>
                   </div>

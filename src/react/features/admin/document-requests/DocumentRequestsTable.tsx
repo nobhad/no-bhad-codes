@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   FileUp,
   FileCheck,
@@ -29,13 +29,14 @@ import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
+import { useEntityOptions } from '@react/hooks/useEntityOptions';
 import { DOCUMENT_REQUESTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import { useListFetch } from '@react/factories/useDataFetch';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
-import { NOTIFICATIONS } from '@/constants/notifications';
+import { CreateDocumentRequestModal } from '../modals/CreateEntityModals';
 
 const logger = createLogger('DocumentRequestsTable');
 
@@ -145,6 +146,9 @@ function sortDocumentRequests(a: DocumentRequest, b: DocumentRequest, sort: Sort
 
 export function DocumentRequestsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: DocumentRequestsTableProps) {
   const containerRef = useFadeIn();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const { clientOptions: entityClients, projectOptions: entityProjects } = useEntityOptions(createOpen);
 
   // Data fetching via useListFetch
   const { data, isLoading, error, refetch, setData } = useListFetch<DocumentRequest, DocumentRequestStats>({
@@ -272,6 +276,40 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
     [setFilter]
   );
 
+  // Merge entity options (full list) with locally-derived options (dedup by value)
+  const clientOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    entityClients.forEach((o) => map.set(o.value, o.label));
+    requests.forEach((r) => { if (r.clientId && r.clientName) map.set(String(r.clientId), r.clientName); });
+    return Array.from(map, ([value, label]) => ({ value, label }));
+  }, [requests, entityClients]);
+
+  const projectOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    entityProjects.forEach((o) => map.set(o.value, o.label));
+    requests.forEach((r) => { if (r.projectId && r.projectName) map.set(String(r.projectId), r.projectName); });
+    return Array.from(map, ([value, label]) => ({ value, label }));
+  }, [requests, entityProjects]);
+
+  // Create handler
+  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
+    setCreateLoading(true);
+    try {
+      const res = await apiPost(API_ENDPOINTS.DOCUMENT_REQUESTS, formData);
+      if (res.ok) {
+        showNotification?.('Document request created successfully', 'success');
+        setCreateOpen(false);
+        refetch();
+      } else {
+        showNotification?.('Failed to create document request', 'error');
+      }
+    } catch {
+      showNotification?.('Failed to create document request', 'error');
+    } finally {
+      setCreateLoading(false);
+    }
+  }, [showNotification, refetch]);
+
   function isOverdue(dueDate?: string): boolean {
     if (!dueDate) return false;
     return new Date(dueDate) < new Date();
@@ -310,7 +348,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
             disabled={filteredRequests.length === 0}
             title="Export to CSV"
           />
-          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="New Request" />
+          <IconButton action="add" onClick={() => setCreateOpen(true)} title="New Request" />
         </>
       }
       bulkActions={
@@ -403,7 +441,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
                 </PortalTableCell>
                 <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
-                    <FileUp className="cell-icon" />
+                    <FileUp className="icon-sm" />
                     <div className="cell-content">
                       <span className="cell-title">{request.title}</span>
                       {request.projectName && (
@@ -449,13 +487,13 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
                     {getStatusLabel(request.status)}
                   </StatusBadge>
                 </PortalTableCell>
-                <PortalTableCell className={cn(isOverdue(request.dueDate) && 'text-danger')}>
+                <PortalTableCell className={cn(isOverdue(request.dueDate) && 'status-overdue')}>
                   {request.dueDate && formatDate(request.dueDate)}
                 </PortalTableCell>
                 <PortalTableCell className="text-right">
                   {request.documents > 0 && (
                     <span className="cell-with-icon">
-                      <FileCheck className="cell-icon-sm" />
+                      <FileCheck className="icon-xs" />
                       {request.documents}
                     </span>
                   )}
@@ -477,6 +515,14 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
           )}
         </PortalTableBody>
       </PortalTable>
+      <CreateDocumentRequestModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onSubmit={handleCreate}
+        loading={createLoading}
+        clientOptions={clientOptions}
+        projectOptions={projectOptions}
+      />
     </TableLayout>
   );
 }

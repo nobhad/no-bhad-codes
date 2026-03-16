@@ -232,25 +232,27 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">
       <div className="panel messaging-panel-container">
         {/* Title + search bar above both columns */}
-        <div className="messaging-top-bar">
-          <h2 className="heading messaging-heading-with-badge">
-          Messages
+        <div className="data-table-header messaging-top-bar">
+          <h3>
+            Messages
             {totalUnread > 0 && (
               <span className="badge ml-2">
                 {totalUnread}
               </span>
             )}
-          </h2>
-          <div className="messaging-search-container">
-            <Search className="messaging-search-icon" />
-            <input
-              type="text"
-              placeholder="Search conversations..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="input messaging-search-input"
-              aria-label="Search conversations"
-            />
+          </h3>
+          <div className="data-table-actions">
+            <div className="search-bar">
+              <Search className="search-bar-icon" aria-hidden="true" />
+              <input
+                type="text"
+                placeholder="Search conversations..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-bar-input"
+                aria-label="Search conversations"
+              />
+            </div>
           </div>
         </div>
 
@@ -300,17 +302,17 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
                           <span className={cn('messaging-conv-name', conv.unreadCount > 0 && 'messaging-conv-name-unread')}>
                             {conv.clientName}
                           </span>
-                          <span className="text-muted messaging-conv-time">
+                          <span className="messaging-conv-time">
                             {conv.lastMessageAt ? formatTimeAgo(conv.lastMessageAt) : ''}
                           </span>
                         </div>
                         {conv.projectName && (
-                          <span className="text-muted messaging-conv-project">
+                          <span className="messaging-conv-project">
                             {conv.projectName}
                           </span>
                         )}
                         {conv.lastMessage && (
-                          <p className={cn('messaging-conv-preview', conv.unreadCount > 0 ? 'text-primary' : 'text-muted')}>
+                          <p className={cn('messaging-conv-preview', conv.unreadCount > 0 && 'messaging-conv-preview-unread')}>
                             {conv.lastMessage}
                           </p>
                         )}
@@ -347,7 +349,7 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
                   <div className="messaging-conv-actions">
                     <button
                       onClick={() => toggleStar(selectedConversation.id, selectedConversation.isStarred)}
-                      className={cn('icon-btn', selectedConversation.isStarred ? 'text-primary' : 'text-muted')}
+                      className={cn('icon-btn', selectedConversation.isStarred && 'is-active')}
                       aria-label={selectedConversation.isStarred ? 'Unstar conversation' : 'Star conversation'}
                     >
                       <Star
@@ -384,7 +386,7 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
               <div className="empty-state messaging-empty-state-full">
                 <Users className="messaging-icon-xl" />
                 <p className="messaging-empty-state-message">Select a conversation</p>
-                <p className="text-muted">Choose a conversation from the list to view messages</p>
+                <p>Choose a conversation from the list to view messages</p>
               </div>
             )}
           </div>
