@@ -103,7 +103,6 @@ export function PortalSubtabs() {
         <div
           className="portal-subtabs header-subtab-group"
           data-for-tab={activeSubtabGroup.forTab}
-          style={{ display: 'flex' }}
         >
           {activeSubtabGroup.subtabs.map((subtab) => {
             const isActive = subtab.id === 'overview'
