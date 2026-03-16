@@ -520,7 +520,8 @@ class ClientService {
          billing_name, billing_company as company,
          billing_address as address, billing_address2 as address2,
          billing_city as city, billing_state as state,
-         billing_zip as zip, billing_country as country
+         billing_zip as zip, billing_country as country,
+         billing_phone as phone, billing_email as email
        FROM active_clients WHERE id = ?`,
       [clientId]
     ) as Promise<ClientBilling | undefined>;
@@ -540,6 +541,8 @@ class ClientService {
       state?: string | null;
       zip?: string | null;
       country?: string | null;
+      phone?: string | null;
+      email?: string | null;
     }
   ): Promise<void> {
     const db = getDatabase();
@@ -553,6 +556,8 @@ class ClientService {
          billing_state = ?,
          billing_zip = ?,
          billing_country = ?,
+         billing_phone = ?,
+         billing_email = ?,
          updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
       [
@@ -564,6 +569,8 @@ class ClientService {
         data.state || null,
         data.zip || null,
         data.country || null,
+        data.phone || null,
+        data.email || null,
         clientId
       ]
     );
@@ -2103,6 +2110,7 @@ class ClientService {
     return db.get<ClientProfile>(
       `SELECT id, email, company_name, contact_name, phone, status, client_type,
               billing_name, billing_company, billing_address, billing_address2,
+              billing_phone, billing_email,
               billing_city, billing_state, billing_zip, billing_country,
               created_at, updated_at
        FROM clients WHERE id = ? AND deleted_at IS NULL`,

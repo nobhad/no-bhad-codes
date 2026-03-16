@@ -329,7 +329,7 @@ export function OverviewTab({
           </div>
 
           <div className="layout-stack">
-            {(client.billing_name || client.billing_address || client.billing_city || client.billing_country) ? (
+            {(client.billing_name || client.billing_phone || client.billing_email || client.billing_address || client.billing_city || client.billing_country) ? (
               <>
                 {client.billing_name && (
                   <div className="layout-row-between">
@@ -342,6 +342,13 @@ export function OverviewTab({
                   <div className="layout-row-between">
                     <span className="field-label">Company</span>
                     <span>{client.billing_company}</span>
+                  </div>
+                )}
+
+                {client.billing_phone && (
+                  <div className="layout-row-between">
+                    <span className="field-label">Phone</span>
+                    <a href={`tel:${client.billing_phone}`}>{client.billing_phone}</a>
                   </div>
                 )}
 

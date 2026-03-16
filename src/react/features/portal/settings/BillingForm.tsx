@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import { useCallback } from 'react';
-import { MapPin, Building, Globe } from 'lucide-react';
+import { MapPin, Building, Globe, Phone, Mail, User } from 'lucide-react';
 import { InlineEditField, InlineEditSelect } from '@react/components/portal/InlineEditField';
 import type { BillingAddress } from './PortalSettings';
 
@@ -108,6 +108,18 @@ function validatePostalCode(postalCode: string, country?: string): string | null
  */
 export function BillingForm({ billing, onUpdate }: BillingFormProps) {
   // Save handlers - each field updates the full billing object
+  const handleSaveName = useCallback(async (value: string) => {
+    return await onUpdate({ ...billing, billing_name: value || undefined });
+  }, [billing, onUpdate]);
+
+  const handleSavePhone = useCallback(async (value: string) => {
+    return await onUpdate({ ...billing, billing_phone: value || undefined });
+  }, [billing, onUpdate]);
+
+  const handleSaveEmail = useCallback(async (value: string) => {
+    return await onUpdate({ ...billing, billing_email: value || undefined });
+  }, [billing, onUpdate]);
+
   const handleSaveStreet = useCallback(async (value: string) => {
     return await onUpdate({ ...billing, street_address: value || undefined });
   }, [billing, onUpdate]);
@@ -152,6 +164,30 @@ export function BillingForm({ billing, onUpdate }: BillingFormProps) {
         </p>
 
         <div className="settings-fields">
+          <InlineEditField
+            label="Billing Name"
+            value={billing.billing_name || ''}
+            onSave={handleSaveName}
+            placeholder="Enter billing name"
+            icon={<User />}
+          />
+
+          <InlineEditField
+            label="Phone"
+            value={billing.billing_phone || ''}
+            onSave={handleSavePhone}
+            placeholder="Enter phone number"
+            icon={<Phone />}
+          />
+
+          <InlineEditField
+            label="Email"
+            value={billing.billing_email || ''}
+            onSave={handleSaveEmail}
+            placeholder="Enter billing email"
+            icon={<Mail />}
+          />
+
           <InlineEditField
             label="Street Address"
             value={billing.street_address || ''}
