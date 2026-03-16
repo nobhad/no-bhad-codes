@@ -199,6 +199,78 @@ router.post(
   })
 );
 
+// =====================================================
+// PROPOSAL EXPORT
+// =====================================================
+
+/**
+ * GET /api/proposals/:id/export
+ * Export full proposal data as JSON
+ */
+router.get(
+  '/:id/export',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id, 10);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const proposal = await proposalService.getProposalWithJoins(proposalId);
+
+    if (!proposal) {
+      return errorResponse(res, 'Proposal not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+    }
+
+    const features = await proposalService.getProposalFeatures(proposalId);
+
+    const p = proposal as unknown as Record<string, unknown>;
+
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      proposal: {
+        id: getNumber(p, 'id'),
+        projectId: getNumber(p, 'project_id'),
+        clientId: getNumber(p, 'client_id'),
+        projectType: getString(p, 'project_type'),
+        selectedTier: getString(p, 'selected_tier'),
+        basePrice: getNumber(p, 'base_price'),
+        finalPrice: getNumber(p, 'final_price'),
+        maintenanceOption: proposal.maintenance_option,
+        status: getString(p, 'status'),
+        clientNotes: proposal.client_notes,
+        adminNotes: proposal.admin_notes,
+        createdAt: getString(p, 'created_at'),
+        reviewedAt: proposal.reviewed_at,
+        reviewedBy: proposal.reviewed_by,
+        project: {
+          name: getString(p, 'project_name')
+        },
+        client: {
+          name: getString(p, 'client_name'),
+          email: getString(p, 'client_email'),
+          company: proposal.company_name
+        }
+      },
+      features: features.map((f) => {
+        const fr = f as unknown as Record<string, unknown>;
+        return {
+          featureId: getString(fr, 'feature_id'),
+          featureName: getString(fr, 'feature_name'),
+          featurePrice: getNumber(fr, 'feature_price'),
+          featureCategory: f.feature_category,
+          isIncludedInTier: Boolean(f.is_included_in_tier),
+          isAddon: Boolean(f.is_addon)
+        };
+      })
+    };
+
+    sendSuccess(res, exportData);
+  })
+);
+
 /**
  * @swagger
  * /api/proposals/{id}:
