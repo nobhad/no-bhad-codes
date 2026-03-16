@@ -298,25 +298,18 @@
   gap: var(--space-2);
 }
 
-/* Hover-reveal opacity — shared pattern for .note-actions and .hover-reveal */
-.note-actions,
+/* Hover-reveal opacity — shared pattern for card action buttons and .hover-reveal */
+.portal-card .action-group,
 .hover-reveal {
   opacity: 0;
   transition: opacity var(--transition-fast);
 }
 
-.group:hover .note-actions,
-.portal-card:hover .note-actions,
+.group:hover .action-group,
+.portal-card:hover .action-group,
 .group:hover .hover-reveal,
 .portal-card:hover .hover-reveal {
   opacity: 1;
-}
-
-/* Note action buttons layout */
-.note-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--action-btn-gap);
 }
 
 /* Note content with preserved whitespace */
@@ -360,12 +353,6 @@
   margin-bottom: var(--space-1);
 }
 
-/* Project date row */
-.project-date-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
 
 /* Progress section within project card */
 .project-card-progress {
