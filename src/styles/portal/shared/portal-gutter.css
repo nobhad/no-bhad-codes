@@ -28,6 +28,7 @@
    ===================================================== */
 
 .portal .portal-global-header,
+.portal .sidebar-content,
 .portal .dashboard-content > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content):not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(.project-overview-grid):not(.overview-grid):not(.analytics-card-grid):not(.kpi-cards-row):not(button),
 .portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > *:not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(.project-overview-grid):not(.overview-grid):not(.analytics-card-grid):not(.kpi-cards-row):not(button) {
   padding: var(--content-gutter);
@@ -56,10 +57,6 @@
    ===================================================== */
 
 .portal .dashboard-content .data-table-header,
-.portal .dashboard-content .kanban-column-header,
-.portal .dashboard-content .kanban-column-content > *,
-.portal .dashboard-content .kanban-column > h4,
-.portal .dashboard-content .kanban-column > .kanban-items,
 .portal .dashboard-content .accordion-item-wrapper > *:not(button),
 .portal .dashboard-content .msgtab-bubble > *:not(button),
 .portal .dashboard-content .help-featured-card,
@@ -141,7 +138,7 @@
 /* Panel-body children — content inside panel body gets gutter.
    .panel-body itself gets padding when it doubles as content container
    (has additional layout class like .ovdash-quick-actions). */
-.portal .dashboard-content .panel-body > *:not(.kanban-grid):not(.kanban-board),
+.portal .dashboard-content .panel-body > *,
 .portal .dashboard-content .panel-body.ovdash-quick-actions {
   padding: var(--content-gutter);
   box-sizing: border-box;
