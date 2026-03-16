@@ -1319,7 +1319,6 @@
   .data-table td.col-actions,
   .data-table td.priority-cell,
   .data-table td.priority-col,
-  
   .data-table td.date-col,
   .data-table td.created-col,
   .data-table td.created-col {
@@ -1461,7 +1460,6 @@
   .data-table td.project-col:not([data-label]):before { content: "Project"; }
   .data-table td.client-cell:not([data-label]):before,
   .data-table td.client-col:not([data-label]):before { content: "Client"; }
-  .data-table td.date-col:not([data-label]):before,
   .data-table td.date-col:not([data-label]):before { content: "Date"; }
   .data-table td.amount-col:not([data-label]):before,
   .data-table td.amount-col:not([data-label]):before { content: "Amount"; }

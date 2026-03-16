@@ -196,6 +196,7 @@
    * FORM INPUT WIDTHS
    * ============================================ */
   --input-width-search-table: 180px;
+  --search-input-max-width: 20rem;
 
   /* ============================================
    * PROGRESS COMPONENT

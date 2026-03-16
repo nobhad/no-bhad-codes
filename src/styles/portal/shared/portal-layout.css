@@ -701,7 +701,7 @@ html[data-theme="light"] .portal .funnel-value {
 }
 
 .portal hr {
-  height: 2px;
+  height: var(--divider-size);
   border-radius: 0;
   background-color: var(--color-text-primary);
 }

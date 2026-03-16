@@ -46,10 +46,10 @@
 .lead-tab.is-active::after {
   content: "";
   position: absolute;
-  bottom: -4px;
+  bottom: calc(var(--space-0-5) * -1);
   left: 0;
   right: 0;
-  height: 2px;
+  height: var(--divider-size);
   background: var(--color-accent);
 }
 
