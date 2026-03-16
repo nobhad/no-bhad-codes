@@ -14,20 +14,11 @@
    PAGINATION
    =============================================== */
 
-/* Base pagination styles in shared/portal-tables.css */
-
-/* Pagination base styles moved to shared/portal-tables.css */
-
-/* Per-page dropdown: sizing only (styles in portal-dropdown.css) */
+/* Per-page dropdown sizing */
 .pagination-page-size-dropdown .table-dropdown {
   min-width: var(--table-col-xs);
   height: var(--table-pagination-btn-size);
 }
-
-/* Pagination dropdown styling is in shared/portal-dropdown.css
-   React TablePagination now uses same classes as vanilla:
-   .pagination-page-size-dropdown .table-dropdown.custom-dropdown
-   ================================================ */
 
 /* ===============================================
    REACT BULK ACTIONS TOOLBAR
@@ -152,9 +143,7 @@
    Linear-style keyboard row navigation
    =============================================== */
 
-/* Row states moved to shared/portal-tables.css - single source of truth */
-
-/* Keyboard hint in table header (optional) */
+/* Keyboard hint in table header */
 [data-page="admin"] .table-keyboard-hint {
   display: inline-flex;
   align-items: center;

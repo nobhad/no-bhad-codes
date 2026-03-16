@@ -278,7 +278,7 @@ export function PortalDashboard({
   );
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className="subsection">
       {isLoading ? (
         <LoadingState message="Loading dashboard..." />
       ) : error ? (

@@ -49,13 +49,7 @@
 
 /* =====================================================
    STAT VALUES
-   Stat number - the big value (unified)
-   Single source of truth for all stat/kpi value styling.
-   Must be smaller than page title to maintain hierarchy.
-  Aliases have been removed; .stat-value is canonical.
    ===================================================== */
-
-/* stat-value is the canonical name; all others have been migrated */
 .portal .stat-value {
   display: block;
   font-family: var(--font-family-mono);
@@ -201,6 +195,4 @@
   }
 }
 
-/* Standalone tw-* aliases removed — .stat-card, .stat-value, .stat-label
-   are now the canonical class names and covered by the :is() groups above. */
 

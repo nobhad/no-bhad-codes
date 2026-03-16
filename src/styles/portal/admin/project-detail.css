@@ -1,29 +1,20 @@
-/**
- * ===============================================
- * ADMIN - PROJECT DETAIL STYLES
- * ===============================================
- * @file src/styles/portal/admin/project-detail.css
- *
- * Styles for the project detail view including:
- * - Project header and navigation
- * - Tab content (Overview, Messages, Files)
- * - Message thread display
- * - File uploads and listing
- * - Milestones and progress
- * - Document generation modal
- *
- * Related files:
- * - project-detail-invoices.css - Invoices tab styles
- */
+/* ═══════════════════════════════════════════════════════
+   ADMIN - PROJECT DETAIL STYLES
+   @file src/styles/portal/admin/project-detail.css
 
-/* =====================================================
-   PROJECT DETAIL VIEW STYLES
-   ===================================================== */
+   Styles for the project detail view including:
+   - Project header and navigation
+   - Tab content (Overview, Messages, Files)
+   - Milestones and progress
+   - Contract and deliverables tabs
 
-/* =====================================================
-   OVERVIEW TAB LAYOUT
-   Two-column responsive grid: main content + sidebar
-   ===================================================== */
+   Related: project-detail-invoices.css
+   ═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   DETAIL PAGE LAYOUT
+   Overview grid, sidebar, stat normalization
+   ═══════════════════════════════════════════════════════ */
 
 .project-overview-grid {
   display: grid;
@@ -57,8 +48,6 @@
   align-items: center;
   gap: var(--space-1);
 }
-
-/* Panel card header — use .portal-card-header-row from portal-cards.css */
 
 /* Description divider within a panel card */
 .panel-description {
@@ -103,7 +92,10 @@
   margin-bottom: var(--space-2);
 }
 
-/* .btn-back: portal-buttons.css - only layout overrides here */
+/* ═══════════════════════════════════════════════════════
+   DETAIL TITLE / HEADER
+   Page title, back button, status badge, heading font
+   ═══════════════════════════════════════════════════════ */
 .project-detail .btn-back {
   margin-right: var(--space-4);
 }
@@ -128,11 +120,6 @@
   margin: 0;
 }
 
-/* h3 styling centralized in admin.css */
-
-/* .field-label, .meta-label, .meta-value, .meta-item
-   SINGLE SOURCE OF TRUTH: shared/field-label-spacing.css */
-
 /* URL link with external-link icon (opens in new tab) */
 .meta-value .url-link {
   display: inline-flex;
@@ -149,6 +136,11 @@
   display: none;
 }
 
+/* ═══════════════════════════════════════════════════════
+   PROJECT INFO FIELDS
+   Meta grid, description row, notes, features, files
+   ═══════════════════════════════════════════════════════ */
+
 .project-detail-meta {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -156,12 +148,10 @@
   column-gap: var(--portal-section-gap);
 }
 
-/* ==============================================
-   PROJECT DETAIL TABS
-   Strip and panel base styles are in shared/portal-tabs.css
-   (.portal-tabs, .portal-tab-panel). Use class="portal-tabs" on the strip
-   and class="portal-tab-panel" on content divs.
-   ============================================== */
+/* ═══════════════════════════════════════════════════════
+   TABS
+   Tab panels, settings grid, status dropdown overrides
+   ═══════════════════════════════════════════════════════ */
 
 /* Messages container keeps its light background styling */
 body[data-page="admin"] [id^="pd-tab-"] .messages-container {
@@ -184,10 +174,6 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   flex: 1;
   min-width: 0;
 }
-
-/* Form input base styles (including background-color) in shared/portal-forms.css */
-
-/* Form focus state: single source of truth in shared/portal-forms.css */
 
 /* Custom status dropdown for settings form */
 [data-page="admin"] #pd-setting-status {
@@ -248,10 +234,6 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   pointer-events: auto;
 }
 
-/* Form inputs/rows inherit from portal-forms.css — no overrides needed */
-
-/* Readonly form values — meta-value styling from shared */
-
 /* Project status dropdown - match input field styling */
 #pd-status-dropdown .dropdown-trigger--custom {
   min-height: auto;
@@ -285,18 +267,17 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   background: var(--color-accent);
 }
 
-/* Text color inherited from portal theme — no overrides needed */
-
 /* Sans-serif font for main name heading in each detail view */
 #tab-project-detail #pd-project-name,
 #tab-client-detail #cd-client-name {
   font-family: var(--font-family-sans);
 }
 
-/* Text color inherited from portal theme — no overrides needed */
-/* .empty-state, .loading-state, .error-state styling from components/loading.css */
-
-/* Milestones List - flex layout from shared/portal-components.css :has() rule */
+/* ═══════════════════════════════════════════════════════
+   MILESTONE / DELIVERABLE
+   Milestone items, checkboxes, add form, actions,
+   deliverable checklists and edit lists
+   ═══════════════════════════════════════════════════════ */
 
 .milestone-item,
 [data-page="admin"] .milestone-item {
@@ -349,12 +330,6 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   align-items: center;
   gap: var(--icon-gap);
 }
-
-/* .milestone-title styled by unified rule in portal-cards.css */
-
-/* .milestone-item.completed styling consolidated in shared/portal-cards.css */
-
-/* .milestone-description, .milestone-due — font-size from portal theme */
 
 /* Expand/collapse caret — primary text color, zero padding so button aligns flush */
 .milestone-item > .icon-btn:last-child {
@@ -452,8 +427,6 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   text-overflow: ellipsis;
 }
 
-/* .file-meta font-size from portal theme */
-
 #pd-files-list .file-actions {
   display: flex;
   gap: var(--space-1);
@@ -462,19 +435,6 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 /* Project Detail Tables (Files, Invoices) - Scoped to detail pages only */
 /* Base table styling from shared/portal-tables.css
    Tables are transparent - container provides the visual boundary */
-
-/* Table action buttons should use .btn-xs class */
-
-/* Invoices tab display handled by [id^="pd-tab-"].is-active rule */
-/* Invoices list section - flex layout from project-detail-invoices.css */
-
-/* Invoice styles consolidated in project-detail-invoices.css */
-
-/* Message styles now in portal/shared/portal-messages.css (unified for all portals) */
-
-/* Client account buttons should use .btn-outline .btn-full classes */
-
-/* Invoice styles moved to project-detail-invoices.css */
 
 /* Enhanced Milestone Styles */
 .milestone-header {
@@ -507,19 +467,7 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   flex-shrink: 0;
 }
 
-/* File upload dropzone styles in shared/portal-files.css */
-
-/* Invoice Summary and Payment Plans moved to project-detail-invoices.css */
-
-/* ================================================
-   Overview Stats Grid
-   ================================================ */
-
-/* Stat value styling from unified rule in portal-stat-cards.css */
-
-/* Label styling from unified rule in portal-forms.css */
-
-/* Spacing for stacked cards now handled by shared/portal-layout.css */
+/* --- Overview Stats Grid --- */
 
 /* Client selector wrapper - aligns with messages-container */
 [data-page="admin"] .client-selector-wrapper {
@@ -532,12 +480,14 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   box-shadow: none;
 }
 
-/* Label styling from unified rule in portal-forms.css - only layout here */
 [data-page="admin"] .client-selector-label {
   margin-bottom: var(--space-1);
 }
 
-/* Custom dropdown component (excludes modal dropdowns which have their own styles) */
+/* ═══════════════════════════════════════════════════════
+   CUSTOM DROPDOWN
+   Non-modal dropdown trigger, menu, items, and states
+   ═══════════════════════════════════════════════════════ */
 [data-page="admin"] .custom-dropdown:not([data-modal-dropdown]) {
   position: relative;
   width: 100%;
@@ -664,14 +614,7 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   display: none;
 }
 
-/* System info grid/rows: see shared/details-card.css */
-
-/* Details panel styles moved to details-panel.css */
-/* System status styles moved to system-status.css */
-
-/* ================================================
-   Admin Sidebar Footer & Logout Button
-   ================================================ */
+/* --- Sidebar Footer & Logout --- */
 [data-page="admin"] .sidebar-footer {
   z-index: var(--z-index-max);
   pointer-events: auto;
@@ -684,16 +627,10 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   position: relative;
 }
 
-/* ================================================
-   RESPONSIVE STYLES
-   ================================================ */
-
-/* Tab strip/panel mobile styles are in shared/portal-tabs.css (.portal-tabs, .portal-tab-panel) */
-/* Table mobile responsive styles are in shared/portal-tables.css */
-
-/* =====================================================
-   RESPONSIVE - PROJECT DETAIL
-   ===================================================== */
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE
+   Tablet, mobile, and small-mobile breakpoints
+   ═══════════════════════════════════════════════════════ */
 
 /* Tablet landscape - stack to single column */
 @media (--tablet-landscape) {
@@ -745,10 +682,7 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 
 /* Contract tab styles inlined below */
 
-/* =====================================================
-   PROJECT DETAIL TAB SHARED CLASSES
-   Semantic replacements for Tailwind utilities
-   ===================================================== */
+/* --- Project Detail Shared Utility Classes --- */
 
 /* --- Layout: Row / Column / Grid --- */
 
@@ -977,7 +911,10 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   white-space: pre-wrap;
 }
 
-/* --- Contract Tab --- */
+/* ═══════════════════════════════════════════════════════
+   CONTRACT TAB
+   Status header, warning card, panel, status badges
+   ═══════════════════════════════════════════════════════ */
 
 /* Contract status header layout */
 .contract-status-layout {
@@ -1113,13 +1050,7 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   min-width: var(--status-dropdown-width) !important;
 }
 
-/* --- Messages Tab: styles moved to shared/message-thread.css --- */
-
-/* --- Notes Tab: uses root .panel and .textarea (portal-forms.css), no overrides --- */
-
-/* =====================================================
-   CONTRACT TAB
-   ===================================================== */
+/* --- Contract Tab Visibility --- */
 
 #pd-tab-contract {
   display: none;
@@ -1128,8 +1059,6 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 #pd-tab-contract.is-active {
   display: block;
 }
-
-/* .contract-tab-content flex layout from shared/portal-components.css */
 
 /* Contract status badges */
 #pd-contract-status-badge.status-signed {

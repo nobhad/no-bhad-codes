@@ -1,27 +1,124 @@
-/* =====================================================
+/* ═══════════════════════════════════════════════════════
    SHARED PORTAL LAYOUT
    @file src/styles/portal/shared/portal-layout.css
    Shared layout styles for admin and client portals
-   ===================================================== */
+   ═══════════════════════════════════════════════════════ */
 
-/* =====================================================
-   OVERSCROLL BEHAVIOR
-   Prevent elastic bounce showing background on scroll
-   ===================================================== */
+
+/* ═══════════════════════════════════════════════════════
+   1. PORTAL SHELL
+   html/body overscroll, .portal wrapper, root text styling
+   ═══════════════════════════════════════════════════════ */
+
 html:has(.portal),
 body:has(.portal) {
   overscroll-behavior: none;
 }
 
-/* Prevent content area elastic bounce */
-.portal .dashboard-content {
-  overscroll-behavior: contain;
+/* Prevent horizontal scroll on mobile */
+/* ROOT TEXT STYLING - Discothèque theme */
+.portal {
+  overflow: hidden; /* Both axes — prevents implicit overflow-y: auto */
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+
+  /* Override base font size for all portal elements */
+  --font-size-base: 15px;
+
+  /* --content-gutter defined in unlayered block at end of file */
 }
 
-/* =====================================================
-   FULL-WIDTH PORTAL HEADER
-   Spans entire viewport, contains logo and global actions
-   ===================================================== */
+/* ================================================
+   PORTAL COLOR HIERARCHY
+   Defined in: src/design-system/tokens/portal-theme.css
+   ================================================
+   Canvas (body): --color-bg-primary  - #1a1a1a dark / #e7e6e6 light
+   Sidebar:       --color-bg-primary  - matches canvas
+   Cards/Panels:  --color-bg-primary  - flat design, same as canvas
+   Nested:        --color-bg-tertiary - inside cards
+   Hover:         --color-bg-hover    - interactive states
+   Inputs:        inherit from container
+   ================================================ */
+
+/* --- Brutalist Design: Sharp Corners --- */
+
+.portal *,
+.portal *::before,
+.portal *::after {
+  border-radius: 0;
+}
+
+.portal hr {
+  height: var(--divider-size);
+  border-radius: 0;
+  background-color: var(--color-text-primary);
+}
+
+/* --- Card/Section Backgrounds: Flat Design --- */
+
+.portal .file-section,
+.portal .content-section {
+  /* No shadows - flat design */
+}
+
+.portal .content-section > div {
+  box-shadow: none;
+}
+
+.portal .card,
+.portal .cp-card,
+.portal .cp-stat,
+.portal .content-section,
+.portal .timeline-content,
+.portal .update-item,
+.portal .content-item,
+.portal .settings-form {
+  background: transparent;
+  border: none;
+}
+
+/* --- Light Mode Overrides --- */
+
+/* Base text color in light mode - uses CSS variables */
+html[data-theme="light"] .portal {
+  color: var(--color-text-primary);
+}
+
+/* Headings in light mode */
+html[data-theme="light"] .portal h1,
+html[data-theme="light"] .portal h2,
+html[data-theme="light"] .portal h3,
+html[data-theme="light"] .portal h4,
+html[data-theme="light"] .portal h5,
+html[data-theme="light"] .portal h6 {
+  color: var(--color-text-primary);
+}
+
+html[data-theme="light"] .portal hr {
+  background-color: var(--color-border-primary);
+}
+
+/* Secondary text elements - use muted color for hierarchy */
+html[data-theme="light"] .portal .stat-label,
+html[data-theme="light"] .portal .stat-secondary,
+html[data-theme="light"] .portal .stat-meta,
+html[data-theme="light"] .portal .field-label,
+html[data-theme="light"] .portal .section-label,
+html[data-theme="light"] .portal .meta-label,
+html[data-theme="light"] .portal .summary-label,
+html[data-theme="light"] .portal .funnel-stage-label,
+html[data-theme="light"] .portal .funnel-stage,
+html[data-theme="light"] .portal .funnel-value {
+  color: var(--color-text-secondary);
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   2. GLOBAL HEADER
+   .portal-global-header: branding, toggle, breadcrumbs, theme
+   ═══════════════════════════════════════════════════════ */
+
 .portal-global-header {
   position: fixed;
   top: 0;
@@ -43,7 +140,8 @@ body:has(.portal) {
 /* NOTE: Header background uses --color-bg-primary for consistency
    with sidebar and content areas across all portals */
 
-/* Row 1: branding + toggle + right actions */
+/* --- Header Row 1: Branding + Toggle + Right Actions --- */
+
 .portal-global-header-row {
   display: flex;
   align-items: center;
@@ -66,6 +164,8 @@ body:has(.portal) {
   flex-shrink: 0;
 }
 
+/* --- Header Row 2: Toggle + Breadcrumbs --- */
+
 /* Row 2: toggle + breadcrumbs — always on its own row, aligned with sidebar nav.
    Height matches sidebar nav-btn (--space-5 = 40px) for even vertical icon spacing. */
 .portal-global-header-breadcrumbs {
@@ -76,7 +176,8 @@ body:has(.portal) {
   margin: 0;
 }
 
-/* Branding in global header - avatar + text */
+/* --- Header Branding: Avatar + Text --- */
+
 .portal-global-header .header-branding {
   display: flex;
   align-items: center;
@@ -117,6 +218,8 @@ body:has(.portal) {
   white-space: nowrap;
 }
 
+/* --- Sidebar Toggle Button --- */
+
 /* Sidebar toggle button in header — sized to match sidebar nav icons */
 .portal-global-header .header-sidebar-toggle {
   display: flex;
@@ -142,6 +245,8 @@ body:has(.portal) {
   width: var(--sidebar-icon-size);
   height: var(--sidebar-icon-size);
 }
+
+/* --- Breadcrumbs --- */
 
 /* Breadcrumbs — single inline row, left-aligned after sidebar toggle.
    Uses flat <div> + <span>/<a>/<svg> (no <ol>/<li>) to avoid list resets. */
@@ -182,6 +287,8 @@ body:has(.portal) {
   color: var(--color-text-tertiary);
   flex-shrink: 0;
 }
+
+/* --- Theme Toggle --- */
 
 /* Theme toggle in global header — matches icon-btn sizing */
 .portal-global-header .header-theme-toggle {
@@ -244,10 +351,12 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   opacity: 1;
 }
 
-/* =====================================================
-   PORTAL BODY LAYOUT
-   Contains sidebar + content, positioned below global header
-   ===================================================== */
+
+/* ═══════════════════════════════════════════════════════
+   3. PORTAL BODY & SIDEBAR
+   .portal-body, sidebar/content height inheritance
+   ═══════════════════════════════════════════════════════ */
+
 /* Portal body — SINGLE SOURCE OF TRUTH for portal viewport height.
    All children (sidebar, dashboard-content) use height: 100% to inherit.
    Do NOT re-declare height on .sidebar or .dashboard-content elsewhere. */
@@ -261,22 +370,19 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   overflow: hidden; /* Only .dashboard-content scrolls — sidebar stays fixed */
 }
 
-/* =====================================================
-   SHARED HEADER ALIGNMENT
-   Ensures page title aligns with sidebar branding
-   ===================================================== */
+/* Sidebar and dashboard-content inherit height from .portal-body (100%).
+   Do NOT set explicit height here — .portal-body is the single source of truth. */
+.portal .portal-body .sidebar,
+.portal .portal-body .dashboard-content {
+  height: 100%;
+  min-height: 100%;
+}
 
-/* ================================================
-   PORTAL COLOR HIERARCHY
-   Defined in: src/design-system/tokens/portal-theme.css
-   ================================================
-   Canvas (body): --color-bg-primary  - #1a1a1a dark / #e7e6e6 light
-   Sidebar:       --color-bg-primary  - matches canvas
-   Cards/Panels:  --color-bg-primary  - flat design, same as canvas
-   Nested:        --color-bg-tertiary - inside cards
-   Hover:         --color-bg-hover    - interactive states
-   Inputs:        inherit from container
-   ================================================ */
+
+/* ═══════════════════════════════════════════════════════
+   4. DASHBOARD CONTENT
+   .dashboard-content scroll container, tab panels, subtab content
+   ═══════════════════════════════════════════════════════ */
 
 /* Dashboard content - scroll container next to sidebar.
    Flex column + gap is the single source of truth for spacing between
@@ -291,13 +397,10 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   flex: 1;
   min-width: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
   background-color: var(--color-bg-primary);
   box-sizing: border-box;
 }
-
-/* Content gutter rules moved to unlayered block at end of file */
-
-/* Bottom breathing room removed — table-layout padding handles it */
 
 /* Tab section — bordered panel for simple header+list tabs. */
 .portal .tab-section {
@@ -320,6 +423,49 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 .portal .overview-table-section .data-table tbody {
   min-height: auto;
 }
+
+/* --- Consistent Section Spacing --- */
+
+/* SECTION GAP NOTE:
+   Gap is applied at BASE LEVEL (.dashboard-content) - NOT at tab level.
+   This ensures consistent spacing without duplication.
+
+   Specific containers that need their own internal gap: */
+.portal
+  :is(
+    .overview-grid,
+    .overview-col-main,
+    .overview-col-aside,
+    .content-cards,
+    .analytics-dashboard,
+    .analytics-breakdown,
+    [class*="-grid"],
+    [class*="-stack"]
+  ):not(.gap-none):not(.help-main-grid) {
+  gap: var(--portal-section-gap);
+}
+
+/* Layout containers with their own internal spacing */
+.portal :is([class*="-layout"]):not(.gap-none):not(.messages-layout):not(.files-browser-layout) {
+  gap: var(--portal-section-gap);
+}
+
+/* Messages layout - no gap between search bar and columns */
+.portal .messages-layout {
+  gap: 0;
+}
+
+/* Tabs container */
+.tabs-container {
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   5. HEADER CONTROLS
+   header-controls, header-subtabs, breadcrumbs visibility
+   ═══════════════════════════════════════════════════════ */
 
 /* Page header - no extra spacing */
 .portal .portal-page-header {
@@ -401,114 +547,12 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 /* Header subtab groups and buttons are styled by shared/portal-tabs.css.
    Keep only show/hide + layout rules in this file. */
 
-/* .content-wrapper REMOVED from DOM — subtabs and tab-content
-   are now direct children of .dashboard-content. */
 
-/* Tab content visibility: single source of truth in shared/portal-tabs.css */
+/* ═══════════════════════════════════════════════════════
+   6. PAGE HEADER TABS
+   Secondary tab navigation in page headers (.page-header-tabs, .tab-nav)
+   ═══════════════════════════════════════════════════════ */
 
-/* Sidebar and dashboard-content inherit height from .portal-body (100%).
-   Do NOT set explicit height here — .portal-body is the single source of truth. */
-.portal .portal-body .sidebar,
-.portal .portal-body .dashboard-content {
-  height: 100%;
-  min-height: 100%;
-}
-
-
-/* =====================================================
-   CONSISTENT SECTION SPACING - SINGLE SOURCE OF TRUTH
-   Standard gap between major content sections
-   ===================================================== */
-
-/* SECTION GAP NOTE:
-   Gap is applied at BASE LEVEL (.dashboard-content) - NOT at tab level.
-   This ensures consistent spacing without duplication.
-
-   Specific containers that need their own internal gap: */
-.portal
-  :is(
-    .overview-grid,
-    .overview-col-main,
-    .overview-col-aside,
-    .content-cards,
-    .analytics-dashboard,
-    .analytics-breakdown,
-    [class*="-grid"],
-    [class*="-stack"]
-  ):not(.gap-none):not(.help-main-grid) {
-  gap: var(--portal-section-gap);
-}
-
-/* Layout containers with their own internal spacing */
-.portal :is([class*="-layout"]):not(.gap-none):not(.messages-layout):not(.files-browser-layout) {
-  gap: var(--portal-section-gap);
-}
-
-/* =====================================================
-   BASE SECTION SYSTEM
-   Provides consistent section spacing across all portal pages.
-   ===================================================== */
-
-/* Section spacing handled by parent flex/grid gap */
-
-/* Gap between section children handled by parent flex/grid gap */
-
-/* Section title - secondary heading within a page */
-.portal .portal-section-title {
-  font-family: var(--font-family-sans);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wider);
-  margin: 0 0 var(--space-2) 0;
-}
-
-/* Content row - flex row with standard gap */
-.portal .portal-content-row {
-  display: flex;
-  align-items: flex-start;
-}
-
-/* Content stack - flex column with standard gap */
-.portal .portal-content-stack {
-  display: flex;
-  flex-direction: column;
-}
-
-/* Two-column layout - common for pages with sidebar */
-.portal .portal-two-column {
-  display: grid;
-  grid-template-columns: var(--aside-width-medium) 1fr;
-  align-items: start;
-}
-
-/* Responsive: Stack on smaller screens */
-@media (--mobile) {
-  .portal .portal-two-column {
-    grid-template-columns: 1fr;
-  }
-
-  .portal .portal-content-row {
-    flex-direction: column;
-  }
-
-  /* Header subtabs wrap on mobile */
-  .portal .portal-header-subtabs .header-subtab-group {
-    flex-wrap: wrap;
-  }
-
-  /* Header subtab font/padding responsive sizing handled by portal-tabs.css shared rules */
-
-}
-
-/* Legacy breadcrumb classes removed — all breadcrumb styling is in the
-   .portal-global-header section above (header Row 2). */
-
-/* =====================================================
-   PAGE HEADER TABS
-   Secondary tab navigation in page headers
-   ===================================================== */
 .portal :is(.page-header-tabs, .tab-nav) {
   display: flex;
   align-items: flex-end;
@@ -542,10 +586,8 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   border-bottom-color: var(--color-accent);
 }
 
-/* =====================================================
-   PAGE HEADER ACTIONS
-   Action buttons in page headers
-   ===================================================== */
+/* --- Page Header Actions --- */
+
 .portal :is(.page-header-actions, .admin-table-actions, .data-table-actions) {
   display: flex;
   align-items: center;
@@ -553,10 +595,11 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   flex-shrink: 0;
 }
 
-/* =====================================================
-   GRID SYSTEMS
-   Standard grid configurations for portal pages
-   ===================================================== */
+
+/* ═══════════════════════════════════════════════════════
+   7. GRID SYSTEMS
+   portal-grid-2, portal-grid-3, portal-grid-4, project-overview-grid
+   ═══════════════════════════════════════════════════════ */
 
 /* 2-column and 3-column grids */
 .portal .portal-grid-2 {
@@ -569,20 +612,51 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   grid-template-columns: repeat(3, 1fr);
 }
 
-/* Responsive grids */
-@media (--tablet-landscape) {
-  .portal .portal-grid-3 {
-    grid-template-columns: repeat(2, 1fr);
-  }
+/* Grid columns */
+.portal-grid-1 {
+  display: grid;
+  grid-template-columns: 1fr;
 }
 
-@media (--narrow-mobile) {
-  .portal :is(.portal-grid-2, .portal-grid-3) {
-    grid-template-columns: 1fr;
-  }
+.portal-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
 }
 
-/* Sidebar styles consolidated in shared/portal-sidebar.css */
+/* Two-column layout - common for pages with sidebar */
+.portal .portal-two-column {
+  display: grid;
+  grid-template-columns: var(--aside-width-medium) 1fr;
+  align-items: start;
+}
+
+/* Two-column layout aside widths */
+.aside-narrow .overview-col-aside { width: var(--aside-width-narrow); }
+.aside-medium .overview-col-aside { width: var(--aside-width-medium); }
+.aside-wide .overview-col-aside { width: var(--aside-width-wide); }
+
+.aside-left {
+  grid-template-columns: auto 1fr;
+}
+
+/* Form 2-column grid */
+.form-grid-2col {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   8. TABLE BASE
+   Global table resets — prevents horizontal scroll, forces wrapping
+   ═══════════════════════════════════════════════════════ */
 
 /* Prevent horizontal scrolling in tables and force content to wrap */
 table {
@@ -599,196 +673,11 @@ td {
   /* No padding here — .data-table uses variable-based padding from portal-tables.css */
 }
 
-/* =====================================================
-   PORTAL MAIN CONTAINERS
-   Dashboard structure, containers, page framework
-   ===================================================== */
 
-/* Prevent horizontal scroll on mobile */
-/* ROOT TEXT STYLING - Discothèque theme */
-.portal {
-  overflow: hidden; /* Both axes — prevents implicit overflow-y: auto */
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-
-  /* Override base font size for all portal elements */
-  --font-size-base: 15px;
-
-  /* --content-gutter defined in unlayered block at end of file */
-}
-
-
-/* Reduced padding on smallest screens */
-@media (--xs-mobile) {
-  .portal .portal-header-subtabs {
-    padding-left: 0;
-    padding-right: 0;
-  }
-}
-
-/* Messages layout - no gap between search bar and columns */
-.portal .messages-layout {
-  gap: 0;
-}
-
-/* =====================================================
-   PORTAL TYPOGRAPHY
-   ===================================================== */
-.portal h1,
-.portal h2,
-.portal h3,
-.portal h4,
-.portal h5,
-.portal h6 {
-  font-family: var(--font-family-sans);
-  letter-spacing: var(--letter-spacing-tightest, -0.09em);
-  text-shadow: none;
-  color: var(--color-text-primary);
-}
-
-/* Serif display font — detail header entity names */
-.portal .detail-name-row h1 {
-  font-family: var(--font-family-serif, "Cormorant Garamond", Georgia, serif);
-}
-
-.portal .page-header h2,
-.portal .client-name {
-  text-shadow: none;
-}
-
-/* =====================================================
-   PORTAL LIGHT MODE - Typography and base colors
-   Uses CSS variables for proper theming without !important overrides
-   ===================================================== */
-
-/* Base text color in light mode - uses CSS variables */
-html[data-theme="light"] .portal {
-  color: var(--color-text-primary);
-}
-
-/* Headings in light mode */
-html[data-theme="light"] .portal h1,
-html[data-theme="light"] .portal h2,
-html[data-theme="light"] .portal h3,
-html[data-theme="light"] .portal h4,
-html[data-theme="light"] .portal h5,
-html[data-theme="light"] .portal h6 {
-  color: var(--color-text-primary);
-}
-
-html[data-theme="light"] .portal hr {
-  background-color: var(--color-border-primary);
-}
-
-/* Secondary text elements - use muted color for hierarchy */
-html[data-theme="light"] .portal .stat-label,
-html[data-theme="light"] .portal .stat-secondary,
-html[data-theme="light"] .portal .stat-meta,
-html[data-theme="light"] .portal .field-label,
-html[data-theme="light"] .portal .section-label,
-html[data-theme="light"] .portal .meta-label,
-html[data-theme="light"] .portal .summary-label,
-html[data-theme="light"] .portal .funnel-stage-label,
-html[data-theme="light"] .portal .funnel-stage,
-html[data-theme="light"] .portal .funnel-value {
-  color: var(--color-text-secondary);
-}
-
-/* =====================================================
-   PORTAL BRUTALIST DESIGN - SHARP CORNERS
-   ===================================================== */
-.portal *,
-.portal *::before,
-.portal *::after {
-  border-radius: 0;
-}
-
-.portal hr {
-  height: var(--divider-size);
-  border-radius: 0;
-  background-color: var(--color-text-primary);
-}
-
-/* =====================================================
-   PORTAL CARD/SECTION BACKGROUNDS
-   ===================================================== */
-.portal .file-section,
-.portal .content-section {
-  /* No shadows - flat design */
-}
-
-.portal .content-section > div {
-  box-shadow: none;
-}
-
-.portal .card,
-.portal .cp-card,
-.portal .cp-stat,
-.portal .content-section,
-.portal .timeline-content,
-.portal .update-item,
-.portal .content-item,
-.portal .settings-form {
-  background: transparent;
-  border: none;
-}
-
-/* =====================================================
-   MOBILE MENU TOGGLE
-   ===================================================== */
-.mobile-menu-toggle {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  width: var(--space-5);
-  height: var(--space-5);
-  padding: 0;
-  background: transparent;
-  border: none;
-  color: var(--color-text-primary);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.mobile-menu-toggle svg {
-  width: var(--icon-size-lg);
-  height: var(--icon-size-lg);
-}
-
-.mobile-menu-toggle:focus-visible {
-  box-shadow: var(--focus-ring);
-  outline: none;
-}
-
-@media (--compact-mobile) {
-  .portal .sidebar.collapsed ~ .dashboard-content .mobile-menu-toggle {
-    display: flex;
-  }
-}
-
-/* Legacy standalone breadcrumb rules removed — see .portal-global-header section. */
-
-/* =====================================================
-   ERROR AND LOADING STATES
-   ===================================================== */
-.error-message {
-  background: var(--color-error-light);
-  color: var(--color-error);
-  border: var(--border-width) solid var(--color-error);
-  text-align: center;
-  margin: var(--space-2) 0;
-}
-
-.login-btn.loading {
-  opacity: var(--opacity-subtle);
-  cursor: not-allowed;
-}
-
-/* =====================================================
-   REACT COMPONENT LAYOUT CLASSES
-   Consolidated from brutalist.css
-   ===================================================== */
+/* ═══════════════════════════════════════════════════════
+   9. SECTION / SUBSECTION / PANEL
+   Three-tier layout hierarchy for portal pages
+   ═══════════════════════════════════════════════════════ */
 
 /* Section layout — top-level page wrapper.
    Padding is handled in portal-gutter.css (unlayered) to beat cascade layers. */
@@ -817,12 +706,70 @@ html[data-theme="light"] .portal .funnel-value {
   border: var(--portal-border);
 }
 
-/* =====================================================
-   LAYOUT UTILITIES
-   Flex/grid patterns for portal pages. Replaces the
-   layouts/flex-patterns.css and grid-systems.css that
-   were removed from the portal bundle.
-   ===================================================== */
+/* Nested cards/accordions inside a panel get a thinner 1px border.
+   .portal prefix raises specificity to (0,3,0,0) to beat
+   .portal :is(.stat-card, ...) defined in portal-stat-cards.css. */
+.portal .panel .panel,
+.portal .panel .stat-card,
+.portal .panel .card,
+.portal .panel .accordion-item-wrapper {
+  border-width: var(--border-width-px);
+}
+
+/* --- Portal Section Title --- */
+
+.portal .portal-section-title {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+  margin: 0 0 var(--space-2) 0;
+}
+
+/* --- Content Row/Stack --- */
+
+/* Content row - flex row with standard gap */
+.portal .portal-content-row {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Content stack - flex column with standard gap */
+.portal .portal-content-stack {
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Clickable Card Variant --- */
+
+.card-clickable,
+.card-hover {
+  background: transparent;
+  border: var(--portal-border);
+  transition: border-color var(--transition-fast);
+  cursor: pointer;
+}
+
+.card-clickable:hover,
+.card-hover:hover {
+  border-color: var(--color-text-primary);
+}
+
+/* --- Panel Actions --- */
+
+.panel-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--action-btn-gap);
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   10. LAYOUT UTILITIES
+   layout-row, layout-stack, grid-2col, flex-fill, skip-link
+   ═══════════════════════════════════════════════════════ */
 
 .layout-row {
   display: flex;
@@ -861,67 +808,33 @@ html[data-theme="light"] .portal .funnel-value {
   min-width: 0;
 }
 
-.grid-2col {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-3);
+/* Content stack (vertical flex) */
+.portal-content-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-section-gap);
 }
 
-.form-grid-2col {
-  display: grid;
-  gap: var(--space-4);
-  grid-template-columns: repeat(2, 1fr);
+/* Content row (horizontal flex) */
+.portal-content-row {
+  display: flex;
+  align-items: center;
 }
 
-/* Skip link — accessibility (visually hidden, visible on focus) */
-.skip-link {
-  position: absolute;
-  top: -100%;
-  left: 0;
-  z-index: var(--z-index-skip-link);
-  padding: var(--space-1) var(--space-2);
-  background-color: var(--color-text-primary);
-  color: var(--color-bg-primary);
-  text-decoration: none;
-  font-size: var(--font-size-sm);
+/* Detail view container */
+.detail-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-section-gap);
 }
 
-.skip-link:focus {
-  top: 0;
+.detail-view--compact {
+  gap: var(--space-2);
 }
 
-/* Nested cards/accordions inside a panel get a thinner 1px border.
-   .portal prefix raises specificity to (0,3,0,0) to beat
-   .portal :is(.stat-card, ...) defined in portal-stat-cards.css. */
-.portal .panel .panel,
-.portal .panel .stat-card,
-.portal .panel .card,
-.portal .panel .accordion-item-wrapper {
-  border-width: var(--border-width-px);
+.detail-view--wide {
+  max-width: none;
 }
-
-
-/* Clickable card variant — portal-card + card-clickable. */
-.card-clickable,
-.card-hover {
-  background: transparent;
-  border: var(--portal-border);
-  transition: border-color var(--transition-fast);
-  cursor: pointer;
-}
-
-.card-clickable:hover,
-.card-hover:hover {
-  border-color: var(--color-text-primary);
-}
-
-/* Dividers */
-.divider {
-  height: 1px;
-  background: var(--portal-alpha-white-20);
-  margin: var(--space-4) 0;
-}
-
 
 /* Scrolling container */
 .scroll-container {
@@ -945,146 +858,51 @@ html[data-theme="light"] .portal .funnel-value {
   background: var(--portal-alpha-white-30);
 }
 
-/* =====================================================
-   LAYOUT UTILITY CLASSES
-   Flexbox, grid, spacing, sizing utilities
-   ===================================================== */
-
-/* Flexbox */
-.flex { display: flex; }
-.flex-col { flex-direction: column; }
-.flex-row { flex-direction: row; }
-.flex-1 { flex: 1 1 0%; }
-.flex-wrap { flex-wrap: wrap; }
-.flex-shrink-0 { flex-shrink: 0; }
-.shrink-0 { flex-shrink: 0; }
-.items-center { align-items: center; }
-.items-start { align-items: flex-start; }
-.items-end { align-items: flex-end; }
-.justify-center { justify-content: center; }
-.justify-between { justify-content: space-between; }
-.justify-end { justify-content: flex-end; }
-.justify-start { justify-content: flex-start; }
-
-/* Grid */
-.grid { display: grid; }
-.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-
-/* tw-* responsive grid aliases removed — use semantic class names directly */
-
-/* Gap — canonical definitions in portal-utilities.css */
-
-/* Margin */
-.m-0 { margin: 0; }
-.mb-1 { margin-bottom: var(--space-0-5); }
-.mb-2 { margin-bottom: var(--space-1); }
-.mb-3 { margin-bottom: var(--space-1-5); }
-.mb-4 { margin-bottom: var(--space-2); }
-.mt-1 { margin-top: var(--space-0-5); }
-.mt-2 { margin-top: var(--space-1); }
-.mt-3 { margin-top: var(--space-1-5); }
-.mt-4 { margin-top: var(--space-2); }
-.ml-2 { margin-left: var(--space-1); }
-.mb-6 { margin-bottom: var(--space-3); }
-.mt-6 { margin-top: var(--space-3); }
-
-/* Padding */
-.p-0 { padding: 0; }
-.p-1 { padding: var(--space-0-5); }
-.p-2 { padding: var(--space-1); }
-.p-3 { padding: var(--space-1-5); }
-.p-4 { padding: var(--space-2); }
-.px-3 { padding-left: var(--space-1-5); padding-right: var(--space-1-5); }
-.px-4 { padding-left: var(--space-2); padding-right: var(--space-2); }
-.py-1 { padding-top: var(--space-0-5); padding-bottom: var(--space-0-5); }
-.py-2 { padding-top: var(--space-1); padding-bottom: var(--space-1); }
-.py-8 { padding-top: var(--space-4); padding-bottom: var(--space-4); }
-.pt-2 { padding-top: var(--space-1); }
-.pt-3 { padding-top: var(--space-1-5); }
-
-/* Width/Height */
-.w-full { width: 100%; }
-.w-fit { width: fit-content; }
-.w-px { width: 1px; }
-.w-1 { width: var(--space-0-5); }
-.w-2 { width: var(--space-1); }
-.w-3 { width: var(--space-1-5); }
-.w-4 { width: var(--space-2); }
-.w-5 { width: var(--space-2-5); }
-.w-7 { width: var(--space-3-5); }
-.w-8 { width: var(--space-4); }
-.h-full { height: 100%; }
-.h-1 { height: var(--space-0-5); }
-.h-2 { height: var(--space-1); }
-.h-3 { height: var(--space-1-5); }
-.h-4 { height: var(--space-2); }
-.h-5 { height: var(--space-2-5); }
-.h-6 { height: var(--space-3); }
-.h-7 { height: var(--space-3-5); }
-.h-8 { height: var(--space-4); }
-.h-9 { height: 2.25rem; }
-
-/* Space between children */
-.space-y-1 > * + * { margin-top: var(--space-0-5); }
-.space-y-2 > * + * { margin-top: var(--space-1); }
-.space-y-4 > * + * { margin-top: var(--space-2); }
-
-/* Additional Tailwind-compatible utilities with decimal names.
-   0.125rem = 2px = --space-0-25; 0.375rem and 0.875rem have no exact token. */
-.mt-0\.5 { margin-top: var(--space-0-25); }
-.gap-1\.5 { gap: 0.375rem; }
-.gap-0\.5 { gap: var(--space-0-25); }
-.h-3\.5 { height: 0.875rem; }
-.w-3\.5 { width: 0.875rem; }
-
-/* Card content truncation helper */
-.card-content-truncate {
-  min-width: 0;
+/* Skip link — accessibility (visually hidden, visible on focus) */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: var(--z-index-skip-link);
+  padding: var(--space-1) var(--space-2);
+  background-color: var(--color-text-primary);
+  color: var(--color-bg-primary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
 }
 
-/* Positioning */
-.relative { position: relative; }
-.absolute { position: absolute; }
-.fixed { position: fixed; }
-.top-0 { top: 0; }
-.top-1 { top: var(--space-0-5, 0.25rem); }
-.bottom-0 { bottom: 0; }
-.left-2 { left: var(--space-1); }
-.left-3 { left: var(--space-1-5); }
-.top-1\/2 { top: 50%; }
-.-translate-y-1\/2 { transform: translateY(-50%); }
-.z-10 { z-index: var(--z-index-elevated); }
-.-left-5 { left: -1.25rem; }
-
-/* Misc layout */
-.hidden { display: none; }
-.inline-block { display: inline-block; }
-.cursor-pointer { cursor: pointer; }
-.cursor-not-allowed { cursor: not-allowed; }
-
-/* Transitions */
-.transition-colors {
-  transition: color var(--transition-fast),
-              background-color var(--transition-fast),
-              border-color var(--transition-fast);
-}
-.transition-all { transition: all var(--transition-fast); }
-
-/* Transform */
-.rotate-180 { transform: rotate(180deg); }
-
-/* Animation — @keyframes spin defined in loading.css */
-.animate-spin {
-  animation: spin 1s linear infinite;
+.skip-link:focus {
+  top: 0;
 }
 
-/* =====================================================
-   PORTAL TYPOGRAPHY
-   Headings, labels, text utilities, status colors
-   ===================================================== */
+
+/* ═══════════════════════════════════════════════════════
+   11. TYPOGRAPHY
+   h1-h6 styles, heading patterns, text utilities
+   ═══════════════════════════════════════════════════════ */
+
+.portal h1,
+.portal h2,
+.portal h3,
+.portal h4,
+.portal h5,
+.portal h6 {
+  font-family: var(--font-family-sans);
+  letter-spacing: var(--letter-spacing-tightest, -0.09em);
+  text-shadow: none;
+  color: var(--color-text-primary);
+}
+
+/* Serif display font — detail header entity names */
+.portal .detail-name-row h1 {
+  font-family: var(--font-family-serif, "Cormorant Garamond", Georgia, serif);
+}
+
+.portal .page-header h2,
+.portal .client-name {
+  text-shadow: none;
+}
+
 .heading {
   font-family: var(--font-family-mono, monospace);
   color: var(--color-text-primary);
@@ -1113,20 +931,21 @@ html[data-theme="light"] .portal .funnel-value {
   color: var(--color-text-tertiary);
 }
 
-/* text/font utilities — canonical definitions in portal-utilities.css.
-   .font-mono kept here as it is layout-specific and not in utilities. */
 .font-mono { font-family: var(--font-family-mono); }
 
-/* Text alignment */
+/* --- Text Alignment --- */
+
 .text-center { text-align: center; }
 .text-left { text-align: left; }
 .text-right { text-align: right; }
 
-/* Text transforms */
+/* --- Text Transforms --- */
+
 .capitalize { text-transform: capitalize; }
 .uppercase { text-transform: uppercase; }
 
-/* Text wrapping */
+/* --- Text Wrapping & Decoration --- */
+
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .whitespace-nowrap { white-space: nowrap; }
 .whitespace-pre-wrap { white-space: pre-wrap; }
@@ -1134,16 +953,179 @@ html[data-theme="light"] .portal .funnel-value {
 .italic,
 .text-italic { font-style: italic; }
 
-/* .text-secondary — canonical definition in portal-utilities.css */
+/* --- Background Colors --- */
 
-/* Background colors */
 .bg-white { background-color: var(--color-text-primary); }
 .bg-black { background-color: var(--color-bg-primary); }
 .bg-transparent { background: transparent; }
 
-/* =====================================================
-   BORDER UTILITY CLASSES
-   ===================================================== */
+
+/* ═══════════════════════════════════════════════════════
+   12. SPACING UTILITIES
+   gap-*, margin-*, padding-*, width/height helpers
+   ═══════════════════════════════════════════════════════ */
+
+/* --- Semantic Gap Utilities --- */
+
+.gap-sm { gap: var(--space-1); }
+.gap-md { gap: var(--portal-section-gap); }
+.gap-lg { gap: var(--space-4); }
+
+/* --- Margin --- */
+
+.m-0 { margin: 0; }
+.mb-1 { margin-bottom: var(--space-0-5); }
+.mb-2 { margin-bottom: var(--space-1); }
+.mb-3 { margin-bottom: var(--space-1-5); }
+.mb-4 { margin-bottom: var(--space-2); }
+.mt-1 { margin-top: var(--space-0-5); }
+.mt-2 { margin-top: var(--space-1); }
+.mt-3 { margin-top: var(--space-1-5); }
+.mt-4 { margin-top: var(--space-2); }
+.ml-2 { margin-left: var(--space-1); }
+.mb-6 { margin-bottom: var(--space-3); }
+.mt-6 { margin-top: var(--space-3); }
+
+/* --- Padding --- */
+
+.p-0 { padding: 0; }
+.p-1 { padding: var(--space-0-5); }
+.p-2 { padding: var(--space-1); }
+.p-3 { padding: var(--space-1-5); }
+.p-4 { padding: var(--space-2); }
+.px-3 { padding-left: var(--space-1-5); padding-right: var(--space-1-5); }
+.px-4 { padding-left: var(--space-2); padding-right: var(--space-2); }
+.py-1 { padding-top: var(--space-0-5); padding-bottom: var(--space-0-5); }
+.py-2 { padding-top: var(--space-1); padding-bottom: var(--space-1); }
+.py-8 { padding-top: var(--space-4); padding-bottom: var(--space-4); }
+.pt-2 { padding-top: var(--space-1); }
+.pt-3 { padding-top: var(--space-1-5); }
+
+/* --- Width/Height --- */
+
+.w-full { width: 100%; }
+.w-fit { width: fit-content; }
+.w-px { width: 1px; }
+.w-1 { width: var(--space-0-5); }
+.w-2 { width: var(--space-1); }
+.w-3 { width: var(--space-1-5); }
+.w-4 { width: var(--space-2); }
+.w-5 { width: var(--space-2-5); }
+.w-7 { width: var(--space-3-5); }
+.w-8 { width: var(--space-4); }
+.h-full { height: 100%; }
+.h-1 { height: var(--space-0-5); }
+.h-2 { height: var(--space-1); }
+.h-3 { height: var(--space-1-5); }
+.h-4 { height: var(--space-2); }
+.h-5 { height: var(--space-2-5); }
+.h-6 { height: var(--space-3); }
+.h-7 { height: var(--space-3-5); }
+.h-8 { height: var(--space-4); }
+.h-9 { height: 2.25rem; }
+
+/* --- Space Between Children --- */
+
+.space-y-1 > * + * { margin-top: var(--space-0-5); }
+.space-y-2 > * + * { margin-top: var(--space-1); }
+.space-y-4 > * + * { margin-top: var(--space-2); }
+
+/* --- Decimal-Named Utilities --- */
+
+/* Additional Tailwind-compatible utilities with decimal names.
+   0.125rem = 2px = --space-0-25; 0.375rem and 0.875rem have no exact token. */
+.mt-0\.5 { margin-top: var(--space-0-25); }
+.gap-1\.5 { gap: 0.375rem; }
+.gap-0\.5 { gap: var(--space-0-25); }
+.h-3\.5 { height: 0.875rem; }
+.w-3\.5 { width: 0.875rem; }
+
+/* Card content truncation helper */
+.card-content-truncate {
+  min-width: 0;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   13. DISPLAY & POSITION
+   Flex, grid, hidden, relative/absolute, transitions
+   ═══════════════════════════════════════════════════════ */
+
+/* --- Flexbox --- */
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-row { flex-direction: row; }
+.flex-1 { flex: 1 1 0%; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-shrink-0 { flex-shrink: 0; }
+.shrink-0 { flex-shrink: 0; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.items-end { align-items: flex-end; }
+.items-stretch { align-items: stretch; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-end { justify-content: flex-end; }
+.justify-start { justify-content: flex-start; }
+.justify-around { justify-content: space-around; }
+
+/* --- Grid --- */
+
+.grid { display: grid; }
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* --- Positioning --- */
+
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.top-0 { top: 0; }
+.top-1 { top: var(--space-0-5, 0.25rem); }
+.bottom-0 { bottom: 0; }
+.left-2 { left: var(--space-1); }
+.left-3 { left: var(--space-1-5); }
+.top-1\/2 { top: 50%; }
+.-translate-y-1\/2 { transform: translateY(-50%); }
+.z-10 { z-index: var(--z-index-elevated); }
+.-left-5 { left: -1.25rem; }
+
+/* --- Display & Cursor --- */
+
+.hidden { display: none; }
+.inline-block { display: inline-block; }
+.cursor-pointer { cursor: pointer; }
+.cursor-not-allowed { cursor: not-allowed; }
+
+/* --- Transitions --- */
+
+.transition-colors {
+  transition: color var(--transition-fast),
+              background-color var(--transition-fast),
+              border-color var(--transition-fast);
+}
+.transition-all { transition: all var(--transition-fast); }
+
+/* --- Transform --- */
+
+.rotate-180 { transform: rotate(180deg); }
+
+/* --- Animation --- */
+
+/* Animation — @keyframes spin defined in loading.css */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   14. BORDER UTILITIES
+   Border classes, border-radius, focus ring
+   ═══════════════════════════════════════════════════════ */
+
 .border { border: var(--border-width) solid var(--portal-alpha-white-30); }
 .border-2 { border-width: 2px; }
 .border-b { border-bottom: var(--border-width) solid var(--portal-alpha-white-30); }
@@ -1159,32 +1141,30 @@ html[data-theme="light"] .portal .funnel-value {
 .ring-2 { box-shadow: 0 0 0 var(--focus-ring-width-thick) var(--ring); }
 .ring-white { --ring: var(--color-border-primary); }
 
-/* =====================================================
-   MISC UTILITY CLASSES
-   ===================================================== */
-.fill-current { fill: currentColor; }
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
+
+/* ═══════════════════════════════════════════════════════
+   15. ERROR & LOADING STATES
+   error-message, loading button, progress-field
+   ═══════════════════════════════════════════════════════ */
+
+.error-message {
+  background: var(--color-error-light);
+  color: var(--color-error);
+  border: var(--border-width) solid var(--color-error);
+  text-align: center;
+  margin: var(--space-2) 0;
 }
-.group { /* Group container for hover states */ }
 
-/* =====================================================
-   SECTION COMPONENT UTILITIES
-   For use with createSection.tsx factory components
-   ===================================================== */
+.login-btn.loading {
+  opacity: var(--opacity-subtle);
+  cursor: not-allowed;
+}
 
-/* Semantic gap utilities (gap-0 through gap-6 defined in LAYOUT UTILITY CLASSES above) */
-.gap-sm { gap: var(--space-1); }
-.gap-md { gap: var(--portal-section-gap); }
-.gap-lg { gap: var(--space-4); }
+
+/* ═══════════════════════════════════════════════════════
+   16. SECTION HEADER COMPONENT
+   .section-header, .section-title, .section-actions
+   ═══════════════════════════════════════════════════════ */
 
 /* Section header — single font-size and center alignment for row (root rule) */
 .section-header {
@@ -1195,8 +1175,6 @@ html[data-theme="light"] .portal .funnel-value {
   border-bottom: var(--portal-border);
   font-size: var(--font-size-sm);
 }
-
-/* .section-header--compact — removed (empty rule) */
 
 /* Title in header: no margin, tight line-height for vertical alignment */
 .section-header .section-title {
@@ -1233,8 +1211,6 @@ html[data-theme="light"] .portal .funnel-value {
   min-height: 2em;
 }
 
-/* .section-title definition consolidated to PORTAL TYPOGRAPHY section above */
-
 .section-header-action {
   margin-left: auto;
 }
@@ -1245,103 +1221,18 @@ html[data-theme="light"] .portal .funnel-value {
   gap: var(--space-1);
 }
 
-/* .section-content — removed (empty rule) */
 
-/* Panel actions */
-.panel-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--action-btn-gap);
-}
+/* ═══════════════════════════════════════════════════════
+   17. PAGE HEADER COMPONENT
+   .page-header, .page-title-group, .page-actions
+   ═══════════════════════════════════════════════════════ */
 
-/* Content stack (vertical flex) */
-.portal-content-stack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--portal-section-gap);
-}
-
-/* Content row (horizontal flex) */
-.portal-content-row {
-  display: flex;
-  align-items: center;
-}
-
-/* Additional flex utilities (base set defined in LAYOUT UTILITY CLASSES above) */
-.items-stretch { align-items: stretch; }
-.justify-around { justify-content: space-around; }
-
-/* Grid columns */
-.portal-grid-1 {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-.portal-grid-4 {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-}
-
-/* Responsive grid */
-.grid-responsive {
-  /* Default stays as defined */
-}
-
-@media (--tablet-landscape) {
-  .grid-responsive.portal-grid-4 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (--narrow-mobile) {
-  .grid-responsive:is(.portal-grid-3, .portal-grid-4) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .grid-responsive.portal-grid-2 {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (--small-mobile) {
-  .grid-responsive:is(.portal-grid-2, .portal-grid-3, .portal-grid-4) {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Two-column layout aside widths */
-.aside-narrow .overview-col-aside { width: var(--aside-width-narrow); }
-.aside-medium .overview-col-aside { width: var(--aside-width-medium); }
-.aside-wide .overview-col-aside { width: var(--aside-width-wide); }
-
-.aside-left {
-  grid-template-columns: auto 1fr;
-}
-
-/* Detail view container */
-.detail-view {
-  display: flex;
-  flex-direction: column;
-  gap: var(--portal-section-gap);
-}
-
-.detail-view--compact {
-  gap: var(--space-2);
-}
-
-.detail-view--wide {
-  max-width: none;
-}
-
-/* Page header */
 .page-header {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
   margin-bottom: var(--space-3);
 }
-
-/* .page-breadcrumbs removed — breadcrumbs are in global header only. */
 
 .page-header-content {
   display: flex;
@@ -1384,12 +1275,142 @@ html[data-theme="light"] .portal .funnel-value {
   flex-shrink: 0;
 }
 
-/* Tabs container */
-.tabs-container {
-  display: flex;
-  flex-direction: column;
+
+/* ═══════════════════════════════════════════════════════
+   18. MISCELLANEOUS
+   Divider, mobile-menu-toggle, sr-only, fill-current, .group
+   ═══════════════════════════════════════════════════════ */
+
+/* Dividers */
+.divider {
+  height: 1px;
+  background: var(--portal-alpha-white-20);
+  margin: var(--space-4) 0;
+}
+
+/* Mobile menu toggle */
+.mobile-menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-5);
+  height: var(--space-5);
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.mobile-menu-toggle svg {
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+}
+
+.mobile-menu-toggle:focus-visible {
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
+/* SVG utilities */
+.fill-current { fill: currentColor; }
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Group container for hover states */
+.group { }
+
+/* Responsive grid */
+.grid-responsive {
+  /* Default stays as defined */
 }
 
 
-/* CONTENT GUTTER rules are in bundles/admin.css and bundles/client.css (unlayered) */
+/* ═══════════════════════════════════════════════════════
+   19. MOBILE RESPONSIVE
+   All @media queries grouped at the end
+   ═══════════════════════════════════════════════════════ */
 
+/* --- Tablet Landscape --- */
+
+@media (--tablet-landscape) {
+  .portal .portal-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-responsive.portal-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* --- Narrow Mobile --- */
+
+@media (--narrow-mobile) {
+  .portal :is(.portal-grid-2, .portal-grid-3) {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-responsive:is(.portal-grid-3, .portal-grid-4) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-responsive.portal-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Small Mobile --- */
+
+@media (--small-mobile) {
+  .grid-responsive:is(.portal-grid-2, .portal-grid-3, .portal-grid-4) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Compact Mobile --- */
+
+@media (--compact-mobile) {
+  .portal .sidebar.collapsed ~ .dashboard-content .mobile-menu-toggle {
+    display: flex;
+  }
+}
+
+/* --- XS Mobile --- */
+
+@media (--xs-mobile) {
+  .portal .portal-header-subtabs {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+/* --- Mobile (General) --- */
+
+@media (--mobile) {
+  .portal .portal-two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .portal .portal-content-row {
+    flex-direction: column;
+  }
+
+  /* Header subtabs wrap on mobile */
+  .portal .portal-header-subtabs .header-subtab-group {
+    flex-wrap: wrap;
+  }
+
+  /* Header subtab font/padding responsive sizing handled by portal-tabs.css shared rules */
+}

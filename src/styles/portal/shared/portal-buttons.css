@@ -658,9 +658,6 @@ button:not(.portal-checkbox):not(.panel-action):not(.dropdown-trigger--custom):n
   cursor: not-allowed;
 }
 
-/* tw-btn-primary/secondary/ghost/danger/icon/close removed — use .btn-primary,
-   .btn-secondary, .btn-ghost, .btn-danger, .icon-btn, .btn-close instead */
-
 /* ============================================
  * ACTION BAR - Unified height for buttons and dropdowns in same row
  * ============================================

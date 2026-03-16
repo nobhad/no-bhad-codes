@@ -74,10 +74,6 @@
   flex-shrink: 0;
 }
 
-/* Logout button uses .nav-btn class - inherits all sidebar button styles */
-
-/* Sidebar logo/branding styles in shared/portal-layout.css */
-
 /* Sidebar Buttons - no top padding; button's own padding provides spacing.
    flex: 1 pushes footer to bottom. */
 .sidebar-buttons {
@@ -87,8 +83,6 @@
   padding: 0;
   flex: 1;
 }
-
-/* Sidebar button and icon styles now in shared/portal-buttons.css */
 
 /* Badge color on hover/active - shared for both portals */
 .portal .sidebar-buttons .nav-btn:hover .sidebar-badge,
@@ -105,9 +99,7 @@
   padding: 0;
 }
 
-/* Focus indicators inherited from global :focus-visible rule in reset.css */
-
-/* Collapsed footer positioning — bottom padding only (matches base .sidebar-footer) */
+/* Collapsed footer positioning */
 .sidebar.collapsed .sidebar-footer {
   display: flex;
   justify-content: center;

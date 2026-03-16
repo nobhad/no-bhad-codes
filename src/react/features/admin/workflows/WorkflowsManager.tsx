@@ -61,7 +61,7 @@ export function WorkflowsManager({ getAuthToken, showNotification, onNavigate }:
 
   // Overview - show all tables stacked with default pagination of 10
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>}>
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">
       <React.Suspense fallback={<LoadingState message="Loading workflows..." />}>
         <section className="overview-table-section">
           <WorkflowsTable

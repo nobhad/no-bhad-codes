@@ -90,8 +90,6 @@
   gap: var(--space-4);
 }
 
-/* Modal form labels — styled by portal-cards.css unified label system */
-
 /* ==============================================
    RESPONSIVE
    ============================================== */
@@ -116,8 +114,6 @@
    ============================================== */
 
 /* --- Shared Tab Layout --- */
-
-/* Panel header row styles live in shared/portal-tab-components.css */
 
 /* Form actions row: buttons aligned right */
 .form-actions,

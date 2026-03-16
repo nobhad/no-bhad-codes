@@ -9,10 +9,7 @@
  * status text color utilities, and card drag highlight.
  */
 
-/* Layer provided by parent import (portal-components.css → @layer components) */
-
-/* Progress bars -- small (4px) inline variant used inside React components.
-   The canonical 12px standalone .progress-bar lives in portal-dashboard-widgets.css. */
+/* Progress bars -- small (4px) inline variant used inside React components */
 .progress-bar-sm {
   height: var(--progress-track-height);
   background: var(--portal-alpha-white-20);
@@ -24,11 +21,6 @@
   background: var(--color-text-primary);
   transition: width var(--transition-normal);
 }
-
-/* .list-item -- canonical definition is .portal .list-item (portal-utilities.css).
-   Removed unscoped duplicate to prevent cascade conflicts. */
-
-/* Modals/Popups -- see admin/modal-system.css for portal-modal-* definitions */
 
 /* Dropdown menus */
 .dropdown {
@@ -64,8 +56,6 @@
   border-radius: 0;
 }
 
-/* .status-dot base definition moved to portal-badges.css */
-
 /* Table row selected state */
 .table-row-selected {
   background: var(--portal-alpha-white-10);
@@ -82,4 +72,3 @@
   border-color: var(--color-text-primary);
 }
 
-/* PORTAL CHECKBOX — all styles in portal-theme.css (unlayered) */
