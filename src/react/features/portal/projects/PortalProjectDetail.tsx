@@ -292,7 +292,7 @@ export function PortalProjectDetail({
     : (project?.progress ?? 0);
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef}>
       {isLoading ? (
         <LoadingState message="Loading project..." />
       ) : error || !project ? (
@@ -311,7 +311,7 @@ export function PortalProjectDetail({
               )}
 
               {/* Project Info */}
-              <div className="flex flex-col gap-0.5">
+              <div className="portal-card-title-block">
                 <div className="flex items-center gap-2">
                   <h2 className="heading text-lg m-0">{project.name}</h2>
                   <span className="badge">{statusLabel}</span>

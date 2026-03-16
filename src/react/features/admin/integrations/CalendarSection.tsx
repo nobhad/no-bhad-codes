@@ -26,12 +26,14 @@ export function CalendarSection({ calendarStatus, onToggleSync }: CalendarSectio
         <div className="stats-grid">
           <div className="portal-card">
             <div className="stat-card">
-              <div className="flex items-center gap-2 mb-3">
-                <Calendar className="icon-lg text-muted" />
-                <span className="font-semibold">Calendar Sync</span>
+              <div className="portal-card-header">
+                <div className="portal-card-title-group">
+                  <Calendar className="icon-lg text-muted" />
+                  <span className="font-semibold">Calendar Sync</span>
+                </div>
               </div>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
+              <div className="portal-card-detail-list">
+                <div className="portal-card-detail-row">
                   <span className="text-muted">Connected</span>
                   <span>
                     {calendarStatus.connected ? (
@@ -42,12 +44,12 @@ export function CalendarSection({ calendarStatus, onToggleSync }: CalendarSectio
                   </span>
                 </div>
                 {calendarStatus.provider && (
-                  <div className="flex justify-between">
+                  <div className="portal-card-detail-row">
                     <span className="text-muted">Provider</span>
                     <span>{calendarStatus.provider}</span>
                   </div>
                 )}
-                <div className="flex justify-between">
+                <div className="portal-card-detail-row">
                   <span className="text-muted">Sync Enabled</span>
                   <button
                     className="btn btn-secondary p-0 border-0"
@@ -61,7 +63,7 @@ export function CalendarSection({ calendarStatus, onToggleSync }: CalendarSectio
                     )}
                   </button>
                 </div>
-                <div className="flex justify-between">
+                <div className="portal-card-detail-row">
                   <span className="text-muted">Last Sync</span>
                   <span>{formatDate(calendarStatus.lastSync)}</span>
                 </div>

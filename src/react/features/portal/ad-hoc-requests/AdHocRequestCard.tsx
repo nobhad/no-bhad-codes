@@ -81,15 +81,15 @@ export function AdHocRequestCard({
           onClick={() => setIsExpanded(!isExpanded)}
         >
           <div className="portal-card-title-group flex-col items-start">
-            <div className="flex items-center gap-2">
-              <span className="text-primary text-sm font-semibold">
+            <div className="portal-card-meta-item gap-2">
+              <h3 className="text-primary text-sm font-semibold">
                 {request.title}
-              </span>
+              </h3>
               {hasAttachments && (
                 <Paperclip className="icon-xs flex-shrink-0" />
               )}
             </div>
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="portal-card-meta">
               <span className="badge">
                 {AD_HOC_REQUEST_STATUS_CONFIG[request.status]?.label || request.status}
               </span>
@@ -132,7 +132,7 @@ export function AdHocRequestCard({
 
         {/* Expanded Content */}
         {isExpanded && (
-          <div className="section border-t border-[var(--color-border-primary)] mt-3">
+          <div className="section border-t mt-3">
             {/* Description */}
             <div>
               <label className="field-label">Description</label>
@@ -143,9 +143,9 @@ export function AdHocRequestCard({
 
             {/* Project */}
             {request.project_name && (
-              <div className="flex items-center gap-2">
+              <div className="portal-card-meta-item">
                 <FileText className="icon-xs" />
-                <span className="text-muted text-xs">
+                <span className="text-xs">
                   Project: {request.project_name}
                 </span>
               </div>
@@ -155,13 +155,13 @@ export function AdHocRequestCard({
             {hasAttachments && (
               <div>
                 <label className="field-label">Attachments</label>
-                <div className="mt-1 flex flex-col gap-1">
+                <div className="mt-1 portal-card-detail-list">
                   {request.attachments!.map((attachment) => (
                     <div
                       key={attachment.id}
                       className="list-item justify-between"
                     >
-                      <div className="flex items-center gap-2 card-content-truncate">
+                      <div className="portal-card-meta-item card-content-truncate">
                         <Paperclip className="icon-xs flex-shrink-0" />
                         <span className="text-primary text-xs">
                           {attachment.filename}
@@ -191,13 +191,13 @@ export function AdHocRequestCard({
             {hasQuote && (
               <div className="panel">
                 <label className="field-label">Quote Details</label>
-                <div className="mt-2 flex flex-col gap-2">
+                <div className="mt-2 portal-card-detail-list">
                   {/* Hours and Rate */}
                   {request.quote!.hours_estimated > 0 && (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+                    <div className="portal-card-detail-row">
+                      <div className="portal-card-meta-item">
                         <Clock className="icon-xs" />
-                        <span className="text-muted text-xs">
+                        <span className="text-xs">
                           Estimated Hours
                         </span>
                       </div>
@@ -209,10 +209,10 @@ export function AdHocRequestCard({
 
                   {/* Flat Fee */}
                   {request.quote!.flat_fee && request.quote!.flat_fee > 0 && (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+                    <div className="portal-card-detail-row">
+                      <div className="portal-card-meta-item">
                         <DollarSign className="icon-xs" />
-                        <span className="text-muted text-xs">
+                        <span className="text-xs">
                           Flat Fee
                         </span>
                       </div>
@@ -223,7 +223,7 @@ export function AdHocRequestCard({
                   )}
 
                   {/* Total */}
-                  <div className="flex items-center justify-between mt-2 border-t border-[var(--color-border-primary)]">
+                  <div className="portal-card-detail-row mt-2 border-t">
                     <span className="text-primary text-xs font-semibold">
                       Total
                     </span>
@@ -254,9 +254,9 @@ export function AdHocRequestCard({
 
             {/* Actions */}
             {canRespond && (
-              <div className="flex items-center justify-end gap-2 mt-2">
+              <div className="portal-card-actions mt-2">
                 <button
-                  className="btn-secondary flex items-center gap-1.5"
+                  className="btn-secondary"
                   onClick={() => setShowDeclineDialog(true)}
                   disabled={disabled || isLoading}
                 >
@@ -264,7 +264,7 @@ export function AdHocRequestCard({
                   Decline
                 </button>
                 <button
-                  className="btn-primary flex items-center gap-1.5"
+                  className="btn-primary"
                   onClick={() => setShowApproveDialog(true)}
                   disabled={disabled || isLoading}
                 >

@@ -241,7 +241,7 @@ export function DocumentRequestCard({
       {/* Header */}
       <div className="portal-card-header">
         <div className="portal-card-title-group">
-          <span className="text-primary text-sm">{request.title}</span>
+          <h3 className="text-primary text-sm">{request.title}</h3>
         </div>
         <div className="portal-card-status-group">
           <span className="badge">{statusInfo.text}</span>
@@ -255,9 +255,9 @@ export function DocumentRequestCard({
 
       {/* Due Date */}
       {request.due_date && (
-        <div className="flex items-center gap-1 ">
+        <div className={cn('portal-card-meta-item', overdue && 'text-primary')}>
           <Clock className="icon-xs" />
-          <span className={cn('text-sm', overdue ? 'text-primary' : 'text-muted')}>
+          <span className="text-sm">
             Due {formatCardDate(request.due_date)}
             {daysUntilDue !== null && daysUntilDue > 0 && ` (${daysUntilDue} day${daysUntilDue === 1 ? '' : 's'})`}
             {overdue && ' - Overdue'}
@@ -267,7 +267,7 @@ export function DocumentRequestCard({
 
       {/* Uploaded File Info (for submitted/approved) */}
       {(isSubmitted || isApproved) && request.uploaded_file && (
-        <div className="panel flex items-center gap-2 ">
+        <div className="panel portal-card-meta-item">
           <FileText className="icon-xs" />
           <span className="text-primary flex-1 text-sm">
             {request.uploaded_file.filename}
@@ -282,7 +282,7 @@ export function DocumentRequestCard({
       {canUpload && (
         <div>
           {selectedFile ? (
-            <div className="panel flex items-center gap-2">
+            <div className="panel portal-card-meta-item">
               <FileText className="icon-xs" />
               <span className="text-primary flex-1 text-sm">{selectedFile.name}</span>
               <span className="text-muted text-xs">{formatFileSize(selectedFile.size)}</span>
