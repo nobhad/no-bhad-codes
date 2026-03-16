@@ -10,8 +10,6 @@
  * - Activity feed, project health
  */
 
-@layer components {
-
 /* =====================================================
    OVERVIEW CONTAINER
    Uses flex column + gap to space greeting, stats strip, and grid
@@ -59,6 +57,7 @@
   align-items: center;
   gap: var(--icon-gap);
   margin-bottom: var(--space-2);
+  font-size: var(--font-size-xs);
 }
 
 /* Stat card SVG color from portal-stat-cards.css; sizing from unified rule below */
@@ -137,10 +136,7 @@
   flex-shrink: 0;
 }
 
-/* Stat card top row: set font-size context so icon 1em = field-label size */
-.stat-card-top {
-  font-size: var(--font-size-xs);
-}
+/* Stat card top row: font-size context merged into primary definition above */
 
 .panel-body--compact {
   max-height: 280px;
@@ -424,6 +420,4 @@
 .ovdash-quick-actions .btn-secondary {
   border: var(--portal-btn-border-width) solid var(--portal-btn-border-color);
   border-bottom-width: var(--portal-btn-border-bottom-width);
-}
-
 }

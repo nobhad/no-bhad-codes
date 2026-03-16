@@ -14,7 +14,6 @@
  *   --dropdown-radius: border radius (default var(--border-radius-sm))
  */
 
-@layer components {
 
 /* ================================================
    Radix UI Portal Dropdown (PortalDropdown.tsx)
@@ -26,17 +25,19 @@
    Typography inherits from body[data-page] portal theme. */
 .portal-dropdown-content {
   z-index: var(--z-index-50);
-  min-width: var(--radix-dropdown-menu-trigger-width, 8rem);
+  min-width: var(--portal-dropdown-min-width);
   overflow: hidden;
   border: var(--portal-border);
   background-color: var(--color-bg-primary);
   padding: 0;
   box-shadow: none;
   color: var(--color-text-primary);
+  /* Exact trigger width (open = closed) */
+  width: var(--radix-dropdown-menu-trigger-width, var(--portal-dropdown-min-width));
 }
 
 /* Status dropdown content in TABLES ONLY - match trigger width, no padding */
-.status-cell .portal-dropdown-content,
+.status-col .portal-dropdown-content,
 td:has(.dropdown-trigger--status) .portal-dropdown-content,
 .data-table .portal-dropdown-content:has(.status-indicator),
 .portal-dropdown-content:has(.status-indicator) {
@@ -166,13 +167,6 @@ td:has(.dropdown-trigger--status) .portal-dropdown-content,
   color: inherit;
 }
 
-/* Dropdown content: exact trigger width (open = closed).
-   min-width matches trigger floor so both are always the same size. */
-.portal-dropdown-content {
-  width: var(--radix-dropdown-menu-trigger-width, var(--portal-dropdown-min-width));
-  min-width: var(--portal-dropdown-min-width);
-}
-
 /* Remove top border when positioned below trigger - seamless connection.
    margin-top: -2px compensates for the trigger's side/top border width (--portal-btn-border-width = 2px).
    NOTE: .btn/.btn-secondary triggers also have --portal-btn-border-bottom-width: 6px (transparent 3D effect).
@@ -250,14 +244,14 @@ td:has(.dropdown-trigger--status) .portal-dropdown-content,
    Only applies to table status cells, not analytics or other dropdowns
    ================================================ */
 
-.status-cell .portal-dropdown-item:has(.status-indicator),
+.status-col .portal-dropdown-item:has(.status-indicator),
 td:has(.dropdown-trigger--status) .portal-dropdown-item:has(.status-indicator),
 .data-table .portal-dropdown-item:has(.status-indicator) {
   padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
 }
 
 /* Match the status-indicator styling in trigger */
-.status-cell .portal-dropdown-item .status-indicator,
+.status-col .portal-dropdown-item .status-indicator,
 td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
 .data-table .portal-dropdown-item .status-indicator {
   display: inline-flex;
@@ -1536,4 +1530,3 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   white-space: nowrap;
 }
 
-} /* end @layer components */

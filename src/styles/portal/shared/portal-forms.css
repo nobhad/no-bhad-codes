@@ -626,6 +626,11 @@ input.search-bar-input {
   justify-content: space-between;
 }
 
+/* File upload item header - additional spacing */
+.file-upload-item-header {
+  margin-bottom: var(--space-0-5);
+}
+
 /* Form header row */
 .qform-header {
   gap: var(--space-1-5);
@@ -996,10 +1001,6 @@ input.search-bar-input {
 .file-upload-item-info {
   flex: 1;
   min-width: 0;
-}
-
-.file-upload-item-header {
-  margin-bottom: var(--space-0-5);
 }
 
 .file-upload-item-name {

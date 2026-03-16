@@ -15,7 +15,6 @@
  * 5. Factory tabs: .portal-tab
  */
 
-@layer components {
 
 /* =====================================================
    TAB CONTENT VISIBILITY
@@ -54,6 +53,7 @@
   border-bottom: none;
 }
 
+/* Override flex to inline-flex for toggle variant */
 .view-toggle {
   display: inline-flex;
 }
@@ -354,4 +354,3 @@
   }
 }
 
-}
