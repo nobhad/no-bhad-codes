@@ -70,9 +70,6 @@
    and admin project detail. Shared definition.
    ===================================================== */
 
-.portal .progress-field {
-}
-
 .portal .progress-field-header {
   display: flex;
   align-items: center;
@@ -217,9 +214,6 @@
 
 .portal .dashboard-tasks-kanban .kanban-column-header {
   font-size: var(--font-size-xs);  /* 12px */
-}
-
-.portal .dashboard-tasks-kanban .kanban-card {
 }
 
 /* Mobile: Stack kanban columns vertically to prevent horizontal overflow */
@@ -388,9 +382,6 @@
   color: var(--color-text-secondary);
 }
 
-.portal .upcoming-tasks-list .loading-row {
-}
-
 /* =====================================================
    DASHBOARD SECTIONS
    ===================================================== */
@@ -480,9 +471,6 @@
    ===================================================== */
 
 @media (--small-mobile) {
-  .portal .upcoming-tasks {
-  }
-
   .portal .upcoming-tasks .section-header-inline {
     flex-wrap: wrap;
     gap: var(--space-1);
@@ -502,12 +490,6 @@
     justify-content: flex-end;
   }
 
-  .portal .recent-activity {
-  }
-
-  .portal .activity-list li {
-  }
-
   /* Kanban board - enable horizontal scroll on very small screens */
   .portal .dashboard-tasks-kanban {
     overflow-x: auto;
@@ -522,8 +504,6 @@
     min-width: 140px;
   }
 
-  .portal .attention-card {
-  }
 }
 
 /* =====================================================
@@ -614,9 +594,6 @@
 
 .portal .milestone-item .accordion-item-caret {
   margin-left: var(--space-3);
-}
-
-.portal .milestone-expanded-content {
 }
 
 /* Deliverables checklist */

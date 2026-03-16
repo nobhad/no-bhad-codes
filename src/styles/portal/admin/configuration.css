@@ -53,9 +53,6 @@
 /* ================================================
    Form sections
    ================================================ */
-.config-form-section {
-}
-
 .config-form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--config-grid-min-width), 1fr));

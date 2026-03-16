@@ -89,19 +89,11 @@
   margin-bottom: var(--space-3);
 }
 
-/* Milestone expanded detail area — inside wrapper border */
-.milestone-expanded-content {
-}
-
 /* Quick stats 2-col grid inside sidebar panel */
 .quick-stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-3);
-}
-
-/* Progress field: label row + track */
-.progress-field {
 }
 
 .progress-field-header {
@@ -762,9 +754,6 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 
 /* --- Table cells --- */
 
-.pd-table-cell {
-}
-
 .pd-cell-left {
   text-align: left;
 }
@@ -930,12 +919,6 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   width: var(--space-6);
   text-align: center;
   font-size: var(--font-size-xs);
-}
-
-/* Tasks expanded content area — overrides milestone-expanded-content padding
-   to account for drag handle + checkbox indent.
-   Right padding matches milestone-item right padding (var(--space-3)) for alignment. */
-.milestone-expanded-content.tasks-expanded-content {
 }
 
 /* Tasks deliverable list */

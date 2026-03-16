@@ -31,10 +31,6 @@
   padding: 0;
 }
 
-/* Date range selector - extra right padding for absolute caret */
-.date-range-trigger {
-}
-
 /* Remove bottom border when dropdown is open - seamless connection */
 .date-range-trigger[data-state="open"] {
   border-bottom-color: transparent;

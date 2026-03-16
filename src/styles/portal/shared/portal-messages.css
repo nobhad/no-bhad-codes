@@ -438,10 +438,6 @@
   padding: 0;
 }
 
-.portal .messages-contact-info,
-.portal .messages-tips-list {
-}
-
 .portal .messages-contact-item {
   display: flex;
   align-items: center;
@@ -877,9 +873,6 @@
 .messaging-compose-textarea {
   min-height: var(--space-5);
   max-height: 120px;
-}
-
-.messaging-compose-send-btn {
 }
 
 .messaging-attachment-icon {

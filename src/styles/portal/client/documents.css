@@ -9,10 +9,6 @@
   font-size: var(--font-size-sm);
 }
 
-.portal .documents-list-wrap,
-.portal .documents-detail-wrap {
-}
-
 .portal .documents-list {
   display: flex;
   flex-direction: column;
@@ -136,7 +132,3 @@
   }
 }
 
-@media (--compact-mobile) {
-  .portal .documents-card.portal-list-item {
-  }
-}

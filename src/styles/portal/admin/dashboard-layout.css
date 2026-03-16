@@ -310,10 +310,6 @@
   gap: var(--space-2);
 }
 
-/* Overview mini-kanban: NO padding on column wrapper — children handle their own */
-.kanban-grid .kanban-column {
-}
-
 .kanban-column h4 {
   margin: 0 0 var(--space-2) 0;
   text-align: left;

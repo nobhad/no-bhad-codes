@@ -649,10 +649,6 @@
   flex-direction: column;
 }
 
-/* Non-table children get horizontal padding; tables go edge-to-edge */
-.files-content-area > :not(table) {
-}
-
 /* Mobile folder selector — visible on mobile, hidden on desktop */
 .files-mobile-select {
   display: block;
@@ -687,22 +683,9 @@
   gap: var(--space-1);
 }
 
-.files-pagination-page {
-}
-
 /* Folder list item */
 .folder-item {
   border-bottom: none;
-}
-
-/* Nested folder items */
-.folder-item-nested {
-}
-
-.folder-item.nested {
-}
-
-.folder-item.nested-2 {
 }
 
 /* =====================================================

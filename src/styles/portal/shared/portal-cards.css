@@ -59,12 +59,6 @@
    PORTAL SECTION CONTENT - BASE STYLE
    Uniform padding for content area below headings.
    ===================================================== */
-.portal .analytics-section > *:not(h3:first-child),
-.portal .chart-container > *:not(h3:first-child),
-.portal .analytics-column > *:not(h3:first-child),
-.portal .analytics-column-full > *:not(h3:first-child) {
-}
-
 /* =====================================================
    UNIFIED LABEL SYSTEM
    Single source of truth for ALL field labels in portals
@@ -528,9 +522,6 @@ html[data-theme="light"] .portal :is(
    MOBILE RESPONSIVE
    ===================================================== */
 @media (--mobile) {
-  .portal .data-table-card {
-  }
-
   /* Tighter gap on grids for mobile */
   .portal
     :is(

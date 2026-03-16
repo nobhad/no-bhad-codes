@@ -808,7 +808,15 @@
     .subject-col,
     .subject-cell,
     .message-col,
-    .message-cell
+    .message-cell,
+    .client-col,
+    .client-cell,
+    .contact-col,
+    .contract-col,
+    .contract-cell,
+    .email-col,
+    .user-col,
+    .user-cell
   ) {
   max-width: var(--table-name-max-width);
 }
@@ -868,7 +876,15 @@
     .slug-col,
     .slug-cell,
     .size-col,
-    .size-cell
+    .size-cell,
+    .docs-col,
+    .docs-cell,
+    .hours-col,
+    .hours-cell,
+    .progress-col,
+    .progress-cell,
+    .version-col,
+    .version-cell
   ) {
   max-width: var(--table-compact-max-width);
 }
@@ -885,6 +901,10 @@
   .success-col, .success-cell,
   .steps-col, .steps-cell,
   .projects-col, .projects-cell,
+  .docs-col, .docs-cell,
+  .hours-col, .hours-cell,
+  .progress-col, .progress-cell,
+  .version-col, .version-cell,
   .date-col,
   .due-date-col, .due-date-cell,
   .created-col,
@@ -1678,7 +1698,14 @@
 .email-cell,
 .link-cell,
 .count-cell,
-.contact-cell {
+.contact-cell,
+.client-cell,
+.contract-cell,
+.docs-cell,
+.hours-cell,
+.progress-cell,
+.user-cell,
+.version-cell {
   /* Inherit table cell styling */
 }
 
