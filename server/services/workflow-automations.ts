@@ -15,6 +15,7 @@ import { getDatabase } from '../database/init.js';
 import { workflowTriggerService } from './workflow-trigger-service.js';
 import { invoiceService } from './invoice-service.js';
 import { generateDefaultMilestones } from './milestone-generator.js';
+import { generateTierMilestones } from './tier-milestone-generator.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { logger } from './logger.js';
 import { emailService } from './email-service.js';
@@ -156,13 +157,28 @@ async function handleProposalAccepted(data: {
       metadata: { projectId, proposalId }
     });
 
-    // Generate default milestones for the project
+    // Generate tier-aware milestones and tasks
     try {
-      const milestoneResult = await generateDefaultMilestones(projectId!, proposal.project_type);
-      logger.info('proposal.accepted: Generated milestones and tasks', {
+      // Fetch proposal features for tier-aware generation
+      const { proposalService } = await import('./proposal-service.js');
+      const features = await proposalService.getProposalFeatures(proposalId);
+
+      const milestoneResult = await generateTierMilestones(
+        projectId!,
+        proposal.project_type || 'other',
+        proposal.selected_tier || 'good',
+        features as Array<{
+          feature_name: string;
+          feature_category?: string | null;
+          is_addon?: number | boolean;
+        }>,
+        { startDate: new Date() }
+      );
+      logger.info('proposal.accepted: Generated tier-aware milestones and tasks', {
         category: 'workflow',
         metadata: {
           projectId,
+          tier: proposal.selected_tier || 'good',
           milestonesCreated: milestoneResult.milestonesCreated,
           tasksCreated: milestoneResult.tasksCreated
         }

@@ -13,6 +13,7 @@ import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, Erro
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
 import { BUSINESS_INFO } from '../../config/business.js';
+import { getDatabase } from '../../database/init.js';
 
 const router = express.Router();
 
@@ -700,6 +701,205 @@ router.post(
         size: pdfBytes.length
       }
     }, 'Statement of Work saved to files');
+  })
+);
+
+// =====================================================
+// MILESTONE JSON EXPORT / IMPORT
+// =====================================================
+
+/**
+ * GET /api/projects/:id/export-milestones
+ * Export all milestones + tasks as structured JSON
+ */
+router.get(
+  '/:id/export-milestones',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const db = getDatabase();
+
+    // Get project info
+    const project = await db.get(
+      'SELECT project_type, project_name FROM projects WHERE id = ? AND deleted_at IS NULL',
+      [projectId]
+    );
+
+    if (!project) {
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
+    }
+
+    // Get milestones with tasks
+    const milestones = await db.all(
+      `SELECT id, title, description, due_date, deliverables, sort_order
+       FROM milestones
+       WHERE project_id = ?
+       ORDER BY sort_order, due_date`,
+      [projectId]
+    ) as Array<Record<string, unknown>>;
+
+    const exportData = {
+      projectType: project.project_type || null,
+      projectName: project.project_name || null,
+      exportedAt: new Date().toISOString(),
+      milestones: [] as Array<{
+        title: string;
+        description: string;
+        order: number;
+        estimatedDays: number | null;
+        deliverables: string[];
+        tasks: Array<{
+          title: string;
+          description: string | null;
+          order: number;
+          estimatedHours: number | null;
+        }>;
+      }>
+    };
+
+    for (const milestone of milestones) {
+      const tasks = await db.all(
+        `SELECT title, description, sort_order, estimated_hours
+         FROM project_tasks
+         WHERE milestone_id = ? AND deleted_at IS NULL
+         ORDER BY sort_order, due_date`,
+        [Number(milestone.id)]
+      ) as Array<Record<string, unknown>>;
+
+      let deliverables: string[] = [];
+      try {
+        if (milestone.deliverables) {
+          deliverables = JSON.parse(String(milestone.deliverables));
+        }
+      } catch {
+        // Skip invalid JSON
+      }
+
+      exportData.milestones.push({
+        title: String(milestone.title || ''),
+        description: String(milestone.description || ''),
+        order: Number(milestone.sort_order || 0),
+        estimatedDays: null, // Can't reverse-calculate from due_date without start_date
+        deliverables,
+        tasks: tasks.map((t) => ({
+          title: String(t.title || ''),
+          description: t.description ? String(t.description) : null,
+          order: Number(t.sort_order || 0),
+          estimatedHours: t.estimated_hours ? Number(t.estimated_hours) : null
+        }))
+      });
+    }
+
+    sendSuccess(res, exportData);
+  })
+);
+
+/**
+ * POST /api/projects/:id/import-milestones
+ * Create milestones + tasks from JSON payload
+ */
+router.post(
+  '/:id/import-milestones',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['projects']),
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const db = getDatabase();
+
+    // Verify project exists
+    const project = await db.get(
+      'SELECT id, start_date FROM projects WHERE id = ? AND deleted_at IS NULL',
+      [projectId]
+    ) as Record<string, unknown> | undefined;
+
+    if (!project) {
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
+    }
+
+    const { milestones, clearExisting } = req.body;
+
+    if (!milestones || !Array.isArray(milestones) || milestones.length === 0) {
+      return errorResponse(res, 'milestones array is required', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    // Optionally clear existing milestones (cascades to tasks via FK)
+    if (clearExisting) {
+      await db.run('DELETE FROM milestones WHERE project_id = ?', [projectId]);
+    }
+
+    const startDate = project.start_date ? new Date(String(project.start_date)) : new Date();
+    let milestonesCreated = 0;
+    let tasksCreated = 0;
+
+    for (const ms of milestones) {
+      if (!ms.title) continue;
+
+      // Calculate due date from estimatedDays if provided
+      let dueDate: string | null = null;
+      if (ms.estimatedDays && typeof ms.estimatedDays === 'number') {
+        const dd = new Date(startDate);
+        dd.setDate(dd.getDate() + ms.estimatedDays);
+        dueDate = dd.toISOString().split('T')[0];
+      }
+
+      const deliverables = ms.deliverables ? JSON.stringify(ms.deliverables) : null;
+
+      const msResult = await db.run(
+        `INSERT INTO milestones (
+          project_id, title, description, due_date, deliverables,
+          sort_order, is_completed, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, FALSE, datetime('now'), datetime('now'))`,
+        [
+          projectId,
+          ms.title,
+          ms.description || '',
+          dueDate,
+          deliverables,
+          ms.order || milestonesCreated + 1
+        ]
+      );
+
+      if (msResult?.lastID) {
+        milestonesCreated++;
+        const milestoneId = msResult.lastID;
+
+        // Import tasks if provided
+        if (ms.tasks && Array.isArray(ms.tasks)) {
+          for (const task of ms.tasks) {
+            if (!task.title) continue;
+
+            await db.run(
+              `INSERT INTO project_tasks (
+                project_id, milestone_id, title, description,
+                status, priority, estimated_hours, sort_order,
+                created_at, updated_at
+              ) VALUES (?, ?, ?, ?, 'pending', 'medium', ?, ?, datetime('now'), datetime('now'))`,
+              [
+                projectId,
+                milestoneId,
+                task.title,
+                task.description || null,
+                task.estimatedHours || null,
+                task.order || tasksCreated + 1
+              ]
+            );
+            tasksCreated++;
+          }
+        }
+      }
+    }
+
+    sendSuccess(res, { milestonesCreated, tasksCreated }, `Imported ${milestonesCreated} milestones and ${tasksCreated} tasks`);
   })
 );
 
