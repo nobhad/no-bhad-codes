@@ -17,6 +17,87 @@
 
 ---
 
+## Completed - Proposal Tier Milestones, Receipt Hardening, Validation, JSON Import/Export (March 16, 2026)
+
+**Status:** COMPLETE
+
+Four interconnected improvements to proposals, receipts, validation, and admin tooling.
+
+### Part 1: Tier-Driven Milestone & Task Generation
+
+- [x] New `server/config/tier-milestones.ts` — milestone templates for 5 project types x 3 tiers (good/better/best)
+- [x] New `server/config/tier-tasks.json` — tier-specific task templates scaled by tier complexity
+- [x] New `server/services/tier-milestone-generator.ts` — generates milestones/tasks from tier config, falls back to defaults
+- [x] Modified `workflow-automations.ts` `handleProposalAccepted()` to use tier-aware generator
+- [x] Addon features from `proposal_feature_selections` auto-create tasks on development milestone
+
+### Part 2: Receipt Hardening
+
+- [x] Receipt PDFs use billing-preferred fields via `COALESCE(billing_name, contact_name)` etc.
+- [x] Billing address rendered in receipt PDF "RECEIVED FROM" section
+- [x] Email notification sent automatically when receipt is generated
+- [x] Payment schedule `mark-paid` auto-generates receipt when installment has linked `invoice_id`
+
+### Part 3: Input Validation
+
+- [x] Added `validateRequest()` schemas to `PUT /me/billing` (billing fields with length limits)
+- [x] Added validation to 6 contact endpoints (`POST/PUT` for `/me/contacts`, admin contacts, CRM contacts)
+- [x] Email normalization (trim + lowercase) applied before all contact/billing storage calls
+- [x] Added `normalizeEmail()` and `isValidEmail()` shared utilities
+
+### Part 4: JSON Import/Export
+
+- [x] `GET/POST /api/projects/:id/export-milestones` and `/import-milestones`
+- [x] `GET /api/proposals/:id/export` — full proposal data export
+- [x] `GET /api/contracts/:contractId/export` — contract + signature log export
+- [x] `GET/POST /api/admin/config/tier-milestones` — tier config export
+- [x] `GET/POST /api/admin/config/default-tasks` and `/tier-tasks` — task config round-trip with backup
+
+### Files Changed/Created
+
+- **New:** `server/config/tier-milestones.ts`, `server/config/tier-tasks.json`, `server/services/tier-milestone-generator.ts`, `server/routes/admin/config.ts`
+- **Modified:** `server/routes/clients/helpers.ts`, `server/routes/clients/me.ts`, `server/routes/admin/contacts.ts`, `server/routes/clients/crm.ts`, `server/services/receipt-service.ts`, `server/routes/payment-schedules/admin.ts`, `server/services/workflow-automations.ts`, `server/routes/projects/core.ts`, `server/routes/proposals/core.ts`, `server/routes/contracts/crud.ts`, `server/routes/admin/index.ts`
+
+---
+
+## Completed - Design System Audit and Documentation Restructure (March 16, 2026)
+
+**Status:** COMPLETE
+
+Full audit of the design system implementation vs documentation, followed by restructure and fixes.
+
+### Documentation Restructure
+
+- [x] Separated portal and main site into dedicated documents
+- [x] Created `PORTAL_DESIGN.md` (759 lines) -- portal theme, components, layout, dropdowns, wrappers
+- [x] Created `MAIN_SITE_DESIGN.md` -- page architecture, GSAP animations, business card, navigation, responsive
+- [x] Rewrote `DESIGN_SYSTEM.md` (1211 -> 168 lines) -- now a concise index linking to specialist docs
+- [x] Rewrote `COMPONENT_LIBRARY.md` (200 -> 343 lines) -- full catalog of 29 portal components, 10 UI primitives, 28 hooks
+- [x] Rewrote `ANIMATIONS.md` (565 -> 327 lines) -- accurate inventory separated by portal/main site
+- [x] Trimmed `CSS_ARCHITECTURE.md` (1111 -> 806 lines) -- shared concerns only, portal sections moved out
+- [x] Deleted `BACKGROUND_COLORS.md` -- entirely obsolete (referenced non-existent `--portal-bg-*` variables)
+- [x] Updated dropdown outlier status -- all 5 raw `<select>` elements already converted to `FormDropdown`
+
+### Hardcoded Animation Duration Fixes (14 instances)
+
+- [x] Added 5 new animation tokens to `src/design-system/tokens/animations.css`
+- [x] Fixed 4 portal spinner durations (workflows, inline-edit, layout, micro-components)
+- [x] Fixed portal pulse (cards), typing-bounce (messages), pulse-skeleton (tasks), skeleton-loading (interactive)
+- [x] Fixed 6 instances in `loading.css` (3 spinner, 3 skeleton-shimmer)
+- [x] Zero hardcoded animation durations remain in CSS
+
+### GSAP Migration (6 CSS keyframes removed)
+
+- [x] Migrated `project-drop-in/out` stagger to GSAP `gsap.to()` + `stagger` in `projects.ts`
+- [x] Migrated `scale-in-left` heading divider to GSAP `gsap.to()` scaleX
+- [x] Migrated `back-button-slide-in/out` to GSAP `gsap.fromTo()` in `projects.ts`
+- [x] Migrated `header-img-fade-in/out` to GSAP `gsap.fromTo()`
+- [x] Migrated `worksub-fade-in/out` to GSAP `gsap.fromTo()`
+- [x] Migrated `slide-in-right` error toast to GSAP dynamic import in `error-utils.ts`
+- [x] TypeScript: 0 errors, ESLint: 0 errors, Build: passing
+
+---
+
 ## Completed - Portal HTML Wrapper Standardization (March 14, 2026)
 
 **Status:** COMPLETE
@@ -46,11 +127,9 @@ Unified HTML wrapper structure across all admin and client portal components.
 
 ---
 
-## In Progress - Universal Dropdown Unification
+## Completed - Universal Dropdown Unification
 
-**Status:** ACTIVE
-
-### Completed
+**Status:** COMPLETE
 
 - [x] All native `<select>` elements converted to `FormDropdown` (admin + portal)
 - [x] Radix Select in DeliverablesTab converted to `FormDropdown`
@@ -62,16 +141,9 @@ Unified HTML wrapper structure across all admin and client portal components.
 - [x] `text-transform: none` universal rule for all dropdown triggers and items
 - [x] Normalized value comparison in `FormDropdown` and `InlineSelect` (handles DB format mismatches)
 - [x] Removed orphaned CSS: `.qform-select-*`, `.inline-select-trigger`
-- [x] Design docs updated (DESIGN_SYSTEM.md, CSS_ARCHITECTURE.md)
-- [x] `admin/help/HelpCenter.tsx` — category filter
-- [x] `admin/data-quality/ValidationErrorsTab.tsx` — error type filter
-- [x] `admin/webhooks/WebhookFormModal.tsx` — HTTP method select
-- [x] `admin/integrations/NotificationFormModal.tsx` — channel + event selects
-- [x] Pagination page-size dropdown open state fixes (divider, alignment, seamless trigger)
-
-### Remaining
-
-- [ ] Caret position — awaiting visual confirmation
+- [x] All 5 outliers (O9-O14) converted
+- [x] Pagination page-size dropdown open state fixes
+- [ ] Caret position -- awaiting visual confirmation
 
 ---
 

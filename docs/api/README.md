@@ -116,6 +116,21 @@ properties and the JWT payload structure.
 - `POST /content-requests/items/:id/submit-data` — Submit structured data
 - `GET/POST /content-requests/templates` — Template CRUD
 
+### JSON Export / Import
+
+- `GET /projects/:id/export-milestones` — Export milestones + tasks as JSON
+- `POST /projects/:id/import-milestones` — Import milestones + tasks from JSON
+- `GET /proposals/:id/export` — Export full proposal data as JSON
+- `GET /contracts/:contractId/export` — Export contract + signatures as JSON
+
+### Admin Config
+
+- `GET /admin/config/tier-milestones` — Export tier milestone config
+- `GET /admin/config/default-tasks` — Export default-tasks.json
+- `POST /admin/config/default-tasks` — Update default-tasks.json
+- `GET /admin/config/tier-tasks` — Export tier-tasks.json
+- `POST /admin/config/tier-tasks` — Update tier-tasks.json
+
 ### Other Feature Areas
 
 - Questionnaires: `GET/POST /questionnaires`

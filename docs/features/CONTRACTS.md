@@ -1,7 +1,7 @@
 # Contracts System
 
 **Status:** Complete (Backend + Admin UI + E-Signature UI)
-**Last Updated:** February 10, 2026
+**Last Updated:** March 16, 2026
 
 ## Table of Contents
 
@@ -525,6 +525,11 @@ When both parties have signed:
 ---
 
 ## Change Log
+
+### March 16, 2026 - JSON Export Endpoint
+
+- Added `GET /api/contracts/:contractId/export` — exports full contract data with signature log as JSON
+- Files modified: `server/routes/contracts/crud.ts`
 
 ### February 15, 2026 - Rich Text Editor Added
 
