@@ -1,0 +1,44 @@
+/**
+ * ===============================================
+ * SHARED PORTAL STYLES - BARREL
+ * ===============================================
+ * @file src/styles/portal/shared/index.css
+ *
+ * Single import point for all shared portal styles.
+ * Used by both admin/index.css and client/index.css.
+ * No @layer wrapper here — parent files handle layering.
+ */
+
+/* Core shared modules */
+@import "./portal-layout.css";
+@import "./portal-buttons.css";
+@import "./portal-messages.css";
+@import "./portal-message-thread.css";
+@import "./portal-cards.css";
+@import "./portal-stat-cards.css";
+@import "./portal-dashboard-widgets.css";
+@import "./portal-tables.css";
+@import "./portal-forms.css";
+@import "./portal-auth.css";
+@import "./portal-files.css";
+@import "./portal-dropdown.css";
+@import "./portal-badges.css";
+@import "./portal-kanban.css";
+@import "./portal-components.css";
+@import "./portal-tabs.css";
+@import "./portal-confirm-dialog.css";
+@import "./portal-notification-bell.css";
+@import "./portal-inline-edit.css";
+@import "./portal-table-filters.css";
+
+/* Portal sidebar */
+@import "./portal-sidebar.css";
+
+/* Unified modal system */
+@import "./portal-modal-system.css";
+
+/* Command palette */
+@import "./portal-command-palette.css";
+
+/* Keyboard shortcuts overlay */
+@import "./portal-keyboard-shortcuts.css";

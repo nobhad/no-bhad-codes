@@ -25,7 +25,7 @@
 
    3. STANDALONE CLASSES (direct React element usage)
       Inputs:   .input, .select, .textarea  (mono font, bold weight — distinct styling)
-      Helpers:  .form-error-text, .form-required
+      Helpers:  .form-error-message, .form-required
 
    4. QUESTIONNAIRE CLASSES (.qform-*)
       Layout only — actual inputs use system 3 classes.
@@ -96,6 +96,7 @@
   ) {
   width: 100%;
   height: var(--space-7);
+  padding: var(--content-gutter);
   border: var(--portal-input-border);
   font-size: inherit;
   font-family: inherit;
@@ -254,10 +255,8 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
 :is(.form-input, .form-textarea, input, textarea, select):is(.error, .form-field-input--error, .form-input-error) {
   border-color: var(--color-danger);
 }
-/* Error message text - consolidated aliases:
-   .form-error-message = legacy / PortalInput
-   .form-error-text    = used by NewRequestForm */
-:is(.form-error-message, .form-error-text) {
+/* Error message text */
+.form-error-message {
   color: var(--color-danger);
   font-size: var(--font-size-sm);
   margin-top: var(--space-0-5);
@@ -514,43 +513,53 @@ input.search-bar-input {
  * Differs: full-width, form typography, border, background, outline.
  * ============================================ */
 
-.form-dropdown-trigger {
-  display: inline-flex;
+/* Explicit resets (avoid `all: unset` so other selectors don't need :not() exclusions) */
+.dropdown-trigger--form {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  text-decoration: none;
+  box-shadow: none;
+  display: flex;
   flex-direction: row;
   align-items: center;
   position: relative;
   width: 100%;
-  /* Symmetric horizontal padding — caret right = content left */
-  /* Extra right padding for absolutely positioned caret */
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  font-family: var(--font-family-mono);
+  height: var(--space-7);
+  padding: var(--content-gutter);
+  padding-right: calc(var(--content-gutter) + var(--dropdown-caret-size) + var(--icon-gap));
+  font-size: inherit;
+  font-weight: var(--font-weight-medium);
+  font-family: inherit;
+  line-height: var(--space-7);
   background-color: var(--color-bg-primary);
-  border: var(--portal-border);
+  border: var(--portal-input-border);
   border-radius: 0;
   color: var(--color-text-primary);
   cursor: pointer;
-  outline: none;
   box-sizing: border-box;
   text-align: left;
   text-transform: none;
+  letter-spacing: normal;
 }
 
-.form-dropdown-trigger:focus {
+.dropdown-trigger--form:focus {
   border-color: var(--color-accent);
   box-shadow: var(--focus-ring);
 }
 
-.form-dropdown-trigger:disabled {
+.dropdown-trigger--form:disabled {
   opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
 
-.form-dropdown-trigger[data-state="open"] {
+.dropdown-trigger--form[data-state="open"] {
   border-color: var(--color-accent);
 }
 
-.form-dropdown-value {
+.dropdown-value--form {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -559,7 +568,7 @@ input.search-bar-input {
 
 /* Caret — absolutely positioned, same distance from right edge
    as content start is from left edge (--dropdown-padding-x) */
-.form-dropdown-caret {
+.dropdown-caret--form {
   position: absolute;
   right: var(--dropdown-padding-x);
   top: 50%;
@@ -570,7 +579,7 @@ input.search-bar-input {
 }
 
 /* Rotate caret when dropdown is open */
-.form-dropdown-trigger[data-state="open"] > .form-dropdown-caret {
+.dropdown-trigger--form[data-state="open"] > .dropdown-caret--form {
   transform: translateY(-50%) rotate(180deg);
 }
 
@@ -608,24 +617,8 @@ input.search-bar-input {
   border: none;
 }
 
-/* Checkbox - all checkbox variants use same border */
-.data-table-checkbox {
-  width: var(--space-2);
-  height: var(--space-2);
-  min-width: var(--space-2);
-  min-height: var(--space-2);
-  background: transparent;
-  border: var(--border-width-px) solid var(--color-border-primary);
-  border-radius: 0;
-  cursor: pointer;
-}
-
-/* Checkbox SVG fills container, not text 1em */
-.data-table-checkbox svg.lucide {
-  width: 100% !important;
-  height: 100% !important;
-  margin: 0 !important;
-}
+/* .data-table-checkbox — inherits all styles from .portal-checkbox
+   (single source of truth in portal-react-components.css) */
 
 /* Form textarea resizable */
 .form-textarea-resizable {
