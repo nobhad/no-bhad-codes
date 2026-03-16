@@ -27,7 +27,6 @@
   background-color: inherit;
   table-layout: auto;
   border: none;
-  border-top: var(--portal-border);
   font-family: inherit;
   font-size: inherit;
   color: var(--table-cell-color);
