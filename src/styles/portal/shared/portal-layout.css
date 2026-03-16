@@ -817,6 +817,79 @@ html[data-theme="light"] .portal .funnel-value {
   border: var(--portal-border);
 }
 
+/* =====================================================
+   LAYOUT UTILITIES
+   Flex/grid patterns for portal pages. Replaces the
+   layouts/flex-patterns.css and grid-systems.css that
+   were removed from the portal bundle.
+   ===================================================== */
+
+.layout-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.layout-row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.layout-row-top {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.layout-row-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.layout-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.flex-fill {
+  flex: 1;
+  min-width: 0;
+}
+
+.grid-2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+.form-grid-2col {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Skip link — accessibility (visually hidden, visible on focus) */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: var(--z-index-skip-link);
+  padding: var(--space-1) var(--space-2);
+  background-color: var(--color-text-primary);
+  color: var(--color-bg-primary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
 /* Nested cards/accordions inside a panel get a thinner 1px border.
    .portal prefix raises specificity to (0,3,0,0) to beat
    .portal :is(.stat-card, ...) defined in portal-stat-cards.css. */
@@ -981,6 +1054,9 @@ html[data-theme="light"] .portal .funnel-value {
 .bottom-0 { bottom: 0; }
 .left-2 { left: var(--space-1); }
 .left-3 { left: var(--space-1-5); }
+.top-1\/2 { top: 50%; }
+.-translate-y-1\/2 { transform: translateY(-50%); }
+.z-10 { z-index: var(--z-index-elevated); }
 .-left-5 { left: -1.25rem; }
 
 /* Misc layout */
