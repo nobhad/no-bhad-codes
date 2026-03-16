@@ -210,7 +210,7 @@ export function ClientDetail({
   }
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className="section">
       {/* Tabs — top of page, like all other subtab nav */}
       <TabList
         tabs={TABS}

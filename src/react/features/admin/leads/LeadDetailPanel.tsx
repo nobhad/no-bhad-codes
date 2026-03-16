@@ -17,7 +17,7 @@ import {
 import { CopyEmailButton } from '@react/components/portal';
 import { cn } from '@react/lib/utils';
 import { StatusDropdown } from '@react/components/portal/StatusDropdownCell';
-import { IconButton } from '@react/factories';
+import { EmptyState, IconButton } from '@react/factories';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import type { Lead, LeadStatus } from '../types';
 import { LEAD_STATUS_CONFIG, LEAD_SOURCE_LABELS, PROJECT_TYPE_LABELS } from '../types';
@@ -226,7 +226,7 @@ export function LeadDetailPanel({
       <div ref={panelRef} id="lead-details-panel" className="details-panel" role="dialog" aria-label="Lead details">
         {/* Header */}
         <div className="details-header">
-          <h3>{decodedName}</h3>
+          <h3><span className="title-full">{decodedName}</span></h3>
           <button className="close-btn" onClick={onClose} aria-label="Close panel">
             <X />
           </button>
@@ -270,7 +270,7 @@ export function LeadDetailPanel({
         </div>
 
         {/* Tabs */}
-        <div className="details-content">
+        <div className="details-content section">
           <div className="lead-details-tabs">
             <button
               className={cn('lead-tab', activeTab === 'overview' && 'is-active')}
@@ -294,7 +294,7 @@ export function LeadDetailPanel({
 
           {/* Overview Tab */}
           {activeTab === 'overview' && (
-            <div className="lead-tab-content is-active">
+            <div className="lead-tab-content section is-active">
               <div className="project-detail-meta">
                 {lead.project_name && (
                   <MetaItem
@@ -356,13 +356,11 @@ export function LeadDetailPanel({
 
           {/* Tasks Tab */}
           {activeTab === 'tasks' && (
-            <div className="lead-tab-content is-active">
+            <div className="lead-tab-content section is-active">
               {isLoadingTasks ? (
                 <div className="loading-state"><div className="loading-spinner" /></div>
               ) : tasks.length === 0 ? (
-                <div className="empty-state">
-                  <span>No tasks yet</span>
-                </div>
+                <EmptyState message="No tasks yet" />
               ) : (
                 <ul className="activity-feed">
                   {tasks.map((task) => (
@@ -393,13 +391,11 @@ export function LeadDetailPanel({
 
           {/* Notes Tab */}
           {activeTab === 'notes' && (
-            <div className="lead-tab-content is-active">
+            <div className="lead-tab-content section is-active">
               {isLoadingNotes ? (
                 <div className="loading-state"><div className="loading-spinner" /></div>
               ) : notes.length === 0 ? (
-                <div className="empty-state">
-                  <span>No notes yet</span>
-                </div>
+                <EmptyState message="No notes yet" />
               ) : (
                 <ul className="activity-feed">
                   {[...notes].sort((a, b) => (b.is_pinned ? 1 : 0) - (a.is_pinned ? 1 : 0)).map((note) => (
