@@ -680,12 +680,15 @@ td {
    ═══════════════════════════════════════════════════════ */
 
 /* Section layout — top-level page wrapper.
-   Padding is handled in portal-gutter.css (unlayered) to beat cascade layers. */
+   Excluded from gutter Tier 1 — manages its own padding.
+   Top/sides: --space-2, bottom: double for visual breathing room. */
 .section {
   display: flex;
   flex-direction: column;
   gap: var(--portal-section-gap);
   background-color: inherit;
+  padding: var(--space-2) var(--space-2) var(--space-4);
+  box-sizing: border-box;
 }
 
 /* Subsection — nested content group inside a .section.
