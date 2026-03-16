@@ -41,13 +41,13 @@ export const ContractCard = React.memo(({ contract, onNavigate, onSign }: Contra
       {/* Header */}
       <div className="portal-card-header">
         <div className="portal-card-title-group">
-          <div className="text-muted"><FileSignature className="icon-xs" /></div>
-          <div className="portal-card-title-block">
-            <h3 className="text-primary text-sm">
+          <div className="text-secondary"><FileSignature className="icon-xs" /></div>
+          <div className="portal-card-title-group flex-col">
+            <h3 className="text-primary">
               {contract.projectName || `Contract #${contract.id}`}
             </h3>
             {contract.projectName && (
-              <span className="label text-xs">
+              <span className="label">
                 <FolderOpen className="icon-xs inline" />
                 {contract.projectName}
               </span>
@@ -65,20 +65,20 @@ export const ContractCard = React.memo(({ contract, onNavigate, onSign }: Contra
         {contract.signedAt && (
           <div className="portal-card-meta-item">
             <Calendar className="icon-xs" />
-            <span className="text-xs">Signed {formatCardDate(contract.signedAt)}</span>
+            <span>Signed {formatCardDate(contract.signedAt)}</span>
           </div>
         )}
 
         {!contract.signedAt && contract.createdAt && (
           <div className="portal-card-meta-item">
             <Calendar className="icon-xs" />
-            <span className="text-xs">Created {formatCardDate(contract.createdAt)}</span>
+            <span>Created {formatCardDate(contract.createdAt)}</span>
           </div>
         )}
 
         {dueDaysText && (
           <div className={cn('portal-card-meta-item', overdue && 'text-primary')}>
-            <span className="text-xs">{dueDaysText}</span>
+            <span>{dueDaysText}</span>
           </div>
         )}
       </div>
@@ -86,13 +86,13 @@ export const ContractCard = React.memo(({ contract, onNavigate, onSign }: Contra
       {/* Actions */}
       <div className="portal-card-actions">
         {canSign && onSign && (
-          <button className="btn-primary text-sm" onClick={handleSignClick}>
+          <button className="btn-primary" onClick={handleSignClick}>
             <PenTool />
             Sign
           </button>
         )}
         {onNavigate && (
-          <button className="btn-ghost text-sm" onClick={handleClick}>
+          <button className="btn-ghost" onClick={handleClick}>
             View Contract
             <ChevronRight className="icon-xs" />
           </button>

@@ -28,13 +28,13 @@ export function CalendarSection({ calendarStatus, onToggleSync }: CalendarSectio
             <div className="stat-card">
               <div className="portal-card-header">
                 <div className="portal-card-title-group">
-                  <Calendar className="icon-lg text-muted" />
+                  <Calendar className="icon-lg text-secondary" />
                   <span className="font-semibold">Calendar Sync</span>
                 </div>
               </div>
               <div className="portal-card-detail-list">
                 <div className="portal-card-detail-row">
-                  <span className="text-muted">Connected</span>
+                  <span className="text-secondary">Connected</span>
                   <span>
                     {calendarStatus.connected ? (
                       <CheckCircle className="icon-sm text-status-success" />
@@ -45,12 +45,12 @@ export function CalendarSection({ calendarStatus, onToggleSync }: CalendarSectio
                 </div>
                 {calendarStatus.provider && (
                   <div className="portal-card-detail-row">
-                    <span className="text-muted">Provider</span>
+                    <span className="text-secondary">Provider</span>
                     <span>{calendarStatus.provider}</span>
                   </div>
                 )}
                 <div className="portal-card-detail-row">
-                  <span className="text-muted">Sync Enabled</span>
+                  <span className="text-secondary">Sync Enabled</span>
                   <button
                     className="btn btn-secondary p-0 border-0"
                     onClick={onToggleSync}
@@ -59,12 +59,12 @@ export function CalendarSection({ calendarStatus, onToggleSync }: CalendarSectio
                     {calendarStatus.syncEnabled ? (
                       <ToggleRight className="icon-md text-status-success" />
                     ) : (
-                      <ToggleLeft className="icon-md text-muted" />
+                      <ToggleLeft className="icon-md text-secondary" />
                     )}
                   </button>
                 </div>
                 <div className="portal-card-detail-row">
-                  <span className="text-muted">Last Sync</span>
+                  <span className="text-secondary">Last Sync</span>
                   <span>{formatDate(calendarStatus.lastSync)}</span>
                 </div>
               </div>
@@ -73,7 +73,7 @@ export function CalendarSection({ calendarStatus, onToggleSync }: CalendarSectio
         </div>
       ) : (
         <div className="status-empty">
-          <Calendar className="icon-lg text-muted" />
+          <Calendar className="icon-lg text-secondary" />
           <span>Calendar status unavailable.</span>
         </div>
       )}

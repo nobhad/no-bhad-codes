@@ -3,7 +3,7 @@
  * Form modal to add a new project with client selection and new-client toggle.
  * Captures all intake form fields so the project record is fully populated.
  * Uses shared PortalModal + PortalInput for consistent UI.
- * Uses ModalDropdown for client, project type, budget, and timeline selections.
+ * Uses FormDropdown (Radix PortalDropdown) for client, project type, budget, and timeline selections.
  */
 
 import * as React from 'react';
@@ -11,9 +11,9 @@ import { useState, useCallback } from 'react';
 import { FolderPlus } from 'lucide-react';
 import { PortalModal } from '@react/components/portal/PortalModal';
 import { PortalInput } from '@react/components/portal/PortalInput';
-import { ModalDropdown } from '@react/components/portal/ModalDropdown';
+import { FormDropdown } from '@react/components/portal/FormDropdown';
+import type { FormDropdownOption } from '@react/components/portal/FormDropdown';
 import { DESIGN_STYLES } from '@react/features/portal/onboarding/types';
-import type { ModalDropdownOption } from '@react/components/portal/ModalDropdown';
 
 // ============================================
 // TYPES
@@ -62,13 +62,13 @@ export interface AddProjectModalProps {
   /** Callback when form is submitted */
   onSubmit: (data: AddProjectFormData) => void | Promise<void>;
   /** Available clients for selection */
-  clientOptions: ModalDropdownOption[];
+  clientOptions: FormDropdownOption[];
   /** Available project type options */
-  projectTypeOptions: ModalDropdownOption[];
+  projectTypeOptions: FormDropdownOption[];
   /** Available budget range options */
-  budgetOptions: ModalDropdownOption[];
+  budgetOptions: FormDropdownOption[];
   /** Available timeline options */
-  timelineOptions: ModalDropdownOption[];
+  timelineOptions: FormDropdownOption[];
   /** Whether submission is in progress */
   loading?: boolean;
 }
@@ -108,33 +108,33 @@ const INITIAL_FORM_STATE = {
   referralSource: ''
 };
 
-const DESIGN_LEVEL_OPTIONS: ModalDropdownOption[] = DESIGN_STYLES.map((style) => ({
+const DESIGN_LEVEL_OPTIONS: FormDropdownOption[] = DESIGN_STYLES.map((style) => ({
   value: style,
   label: style
 }));
 
-const CONTENT_STATUS_OPTIONS: ModalDropdownOption[] = [
+const CONTENT_STATUS_OPTIONS: FormDropdownOption[] = [
   { value: 'Ready', label: 'Ready' },
   { value: 'In Progress', label: 'In Progress' },
   { value: 'Need Help', label: 'Need Help' },
   { value: 'Not Started', label: 'Not Started' }
 ];
 
-const BRAND_ASSETS_OPTIONS: ModalDropdownOption[] = [
+const BRAND_ASSETS_OPTIONS: FormDropdownOption[] = [
   { value: 'Have Full Brand Kit', label: 'Have Full Brand Kit' },
   { value: 'Have Logo Only', label: 'Have Logo Only' },
   { value: 'Need Brand Design', label: 'Need Brand Design' },
   { value: 'Not Sure', label: 'Not Sure' }
 ];
 
-const TECH_COMFORT_OPTIONS: ModalDropdownOption[] = [
+const TECH_COMFORT_OPTIONS: FormDropdownOption[] = [
   { value: 'Very Comfortable', label: 'Very Comfortable' },
   { value: 'Somewhat Comfortable', label: 'Somewhat Comfortable' },
   { value: 'Not Very Comfortable', label: 'Not Very Comfortable' },
   { value: 'Prefer Not To', label: 'Prefer Not To' }
 ];
 
-const HOSTING_OPTIONS: ModalDropdownOption[] = [
+const HOSTING_OPTIONS: FormDropdownOption[] = [
   { value: 'Have Hosting', label: 'Have Hosting' },
   { value: 'Need Hosting', label: 'Need Hosting' },
   { value: 'Not Sure', label: 'Not Sure' }
@@ -160,7 +160,7 @@ export function AddProjectModal({
   const isNewClient = formState.clientId === NEW_CLIENT_VALUE;
 
   // Build client options with "Add New Client" entry
-  const clientOptionsWithNew: ModalDropdownOption[] = React.useMemo(
+  const clientOptionsWithNew: FormDropdownOption[] = React.useMemo(
     () => [
       ...clientOptions,
       { value: NEW_CLIENT_VALUE, label: '+ Add New Client' }
@@ -178,9 +178,8 @@ export function AddProjectModal({
 
   const handleDropdownChange = useCallback(
     (field: keyof typeof INITIAL_FORM_STATE) =>
-      (value: string | string[]) => {
-        const selected = Array.isArray(value) ? value[0] : value;
-        setFormState((prev) => ({ ...prev, [field]: selected }));
+      (value: string) => {
+        setFormState((prev) => ({ ...prev, [field]: value }));
       },
     []
   );
@@ -264,12 +263,11 @@ export function AddProjectModal({
       {/* Client Selection */}
       <div className="form-field">
         <label className="field-label">Client *</label>
-        <ModalDropdown
+        <FormDropdown
           options={clientOptionsWithNew}
           value={formState.clientId}
           onChange={handleDropdownChange('clientId')}
           placeholder="Select a client"
-          searchable={clientOptions.length > 5}
         />
       </div>
 
@@ -325,7 +323,7 @@ export function AddProjectModal({
       {/* Core Project Fields */}
       <div className="form-field">
         <label className="field-label">Project Type *</label>
-        <ModalDropdown
+        <FormDropdown
           options={projectTypeOptions}
           value={formState.projectType}
           onChange={handleDropdownChange('projectType')}
@@ -350,7 +348,7 @@ export function AddProjectModal({
 
       <div className="form-field">
         <label className="field-label">Budget *</label>
-        <ModalDropdown
+        <FormDropdown
           options={budgetOptions}
           value={formState.budget}
           onChange={handleDropdownChange('budget')}
@@ -360,7 +358,7 @@ export function AddProjectModal({
 
       <div className="form-field">
         <label className="field-label">Timeline *</label>
-        <ModalDropdown
+        <FormDropdown
           options={timelineOptions}
           value={formState.timeline}
           onChange={handleDropdownChange('timeline')}
@@ -445,7 +443,7 @@ export function AddProjectModal({
 
         <div className="form-field">
           <label className="field-label">Design Level</label>
-          <ModalDropdown
+          <FormDropdown
             options={DESIGN_LEVEL_OPTIONS}
             value={formState.designLevel}
             onChange={handleDropdownChange('designLevel')}
@@ -455,7 +453,7 @@ export function AddProjectModal({
 
         <div className="form-field">
           <label className="field-label">Content Status</label>
-          <ModalDropdown
+          <FormDropdown
             options={CONTENT_STATUS_OPTIONS}
             value={formState.contentStatus}
             onChange={handleDropdownChange('contentStatus')}
@@ -465,7 +463,7 @@ export function AddProjectModal({
 
         <div className="form-field">
           <label className="field-label">Brand Assets</label>
-          <ModalDropdown
+          <FormDropdown
             options={BRAND_ASSETS_OPTIONS}
             value={formState.brandAssets}
             onChange={handleDropdownChange('brandAssets')}
@@ -480,7 +478,7 @@ export function AddProjectModal({
 
         <div className="form-field">
           <label className="field-label">Client Tech Comfort</label>
-          <ModalDropdown
+          <FormDropdown
             options={TECH_COMFORT_OPTIONS}
             value={formState.techComfort}
             onChange={handleDropdownChange('techComfort')}
@@ -490,7 +488,7 @@ export function AddProjectModal({
 
         <div className="form-field">
           <label className="field-label">Hosting Preference</label>
-          <ModalDropdown
+          <FormDropdown
             options={HOSTING_OPTIONS}
             value={formState.hostingPreference}
             onChange={handleDropdownChange('hostingPreference')}

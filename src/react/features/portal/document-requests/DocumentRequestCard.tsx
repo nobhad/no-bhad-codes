@@ -241,7 +241,7 @@ export function DocumentRequestCard({
       {/* Header */}
       <div className="portal-card-header">
         <div className="portal-card-title-group">
-          <h3 className="text-primary text-sm">{request.title}</h3>
+          <h3 className="text-primary">{request.title}</h3>
         </div>
         <div className="portal-card-status-group">
           <span className="badge">{statusInfo.text}</span>
@@ -257,7 +257,7 @@ export function DocumentRequestCard({
       {request.due_date && (
         <div className={cn('portal-card-meta-item', overdue && 'text-primary')}>
           <Clock className="icon-xs" />
-          <span className="text-sm">
+          <span>
             Due {formatCardDate(request.due_date)}
             {daysUntilDue !== null && daysUntilDue > 0 && ` (${daysUntilDue} day${daysUntilDue === 1 ? '' : 's'})`}
             {overdue && ' - Overdue'}
@@ -269,10 +269,10 @@ export function DocumentRequestCard({
       {(isSubmitted || isApproved) && request.uploaded_file && (
         <div className="panel portal-card-meta-item">
           <FileText className="icon-xs" />
-          <span className="text-primary flex-1 text-sm">
+          <span className="text-primary flex-1">
             {request.uploaded_file.filename}
           </span>
-          <span className="text-muted text-xs">
+          <span className="text-secondary">
             {formatFileSize(request.uploaded_file.file_size)}
           </span>
         </div>
@@ -284,8 +284,8 @@ export function DocumentRequestCard({
           {selectedFile ? (
             <div className="panel portal-card-meta-item">
               <FileText className="icon-xs" />
-              <span className="text-primary flex-1 text-sm">{selectedFile.name}</span>
-              <span className="text-muted text-xs">{formatFileSize(selectedFile.size)}</span>
+              <span className="text-primary flex-1">{selectedFile.name}</span>
+              <span className="text-secondary">{formatFileSize(selectedFile.size)}</span>
               <IconButton action="close" onClick={clearSelectedFile} disabled={isUploading} />
             </div>
           ) : (
@@ -294,10 +294,10 @@ export function DocumentRequestCard({
               onClick={() => fileInputRef.current?.click()}
             >
               <Upload className="icon-xs" />
-              <span className="text-muted text-xs">
+              <span className="text-secondary">
                 Drop file here or <span className="text-primary">browse</span>
               </span>
-              <span className="text-muted text-xs dropzone-hint">
+              <span className="text-secondary dropzone-hint">
                 PDF, DOC, JPG, PNG · max 10MB
               </span>
             </div>
@@ -324,7 +324,7 @@ export function DocumentRequestCard({
       {/* Rejection Message */}
       {isRejected && (
         <div className="panel text-status-cancelled">
-          <p className="text-sm">Please resubmit with the requested changes.</p>
+          <p>Please resubmit with the requested changes.</p>
         </div>
       )}
     </div>

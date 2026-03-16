@@ -421,7 +421,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
                       </div>
                     </div>
                   </PortalTableCell>
-                  <PortalTableCell className="status-cell">
+                  <PortalTableCell className="status-col">
                     <StatusBadge status={getStatusVariant(task.status)} size="sm">
                       {getStatusLabel(task.status)}
                     </StatusBadge>
@@ -443,14 +443,14 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
                       {task.project_name && <span className="cell-title">{task.project_name}</span>}
                     </div>
                   </PortalTableCell>
-                  <PortalTableCell className="date-cell">
+                  <PortalTableCell className="date-col">
                     <span className={isOverdue(task) ? 'text-danger' : ''}>
                       {formatDate(task.due_date)}
                       {isOverdue(task) && <span className="overdue-label">Overdue</span>}
                     </span>
                   </PortalTableCell>
                   <PortalTableCell className="text-right">
-                    <span className="text-muted">
+                    <span className="text-secondary">
                       {task.actual_hours !== null ? `${task.actual_hours}` : ''}
                       {task.estimated_hours !== null && (
                         <span>/{task.estimated_hours}h</span>

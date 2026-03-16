@@ -6,11 +6,21 @@
 
 import * as React from 'react';
 import { useMemo } from 'react';
-import { Eye, RefreshCw } from 'lucide-react';
+import { Eye, RefreshCw, Inbox } from 'lucide-react';
 import { useFadeIn } from '@react/hooks/useGsap';
-import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { formatDate } from '@react/utils/formatDate';
 import { useListFetch } from '@react/factories/useDataFetch';
+import {
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 
 // ============================================================================
@@ -66,18 +76,10 @@ export function ReviewTable({ getAuthToken, showNotification: _showNotification,
     }
   }
 
-  // Loading state
-  if (isLoading) {
-    return <LoadingState message="Loading design reviews..." />;
-  }
-
-  // Error state
-  if (error) {
-    return <ErrorState message={error} onRetry={refetch} />;
-  }
+  const COLUMN_COUNT = 5;
 
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>}>
       <div className="perf-header">
         <h2 className="heading perf-heading">Design Reviews</h2>
         <button className="btn btn-secondary" onClick={refetch}>
@@ -86,51 +88,54 @@ export function ReviewTable({ getAuthToken, showNotification: _showNotification,
         </button>
       </div>
 
-      {reviews.length === 0 ? (
-        <EmptyState
-          message="You have no design reviews assigned at this time."
-        />
-      ) : (
-        <div className="panel">
-          <div className="analytics-table-container">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th className="table-header">Project</th>
-                  <th className="table-header">Review Title</th>
-                  <th className="table-header">Status</th>
-                  <th className="table-header">Date</th>
-                  <th className="table-header">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reviews.map((item) => (
-                  <tr key={item.id} className="table-row">
-                    <td className="table-cell">{item.projectName}</td>
-                    <td className="table-cell">{item.title}</td>
-                    <td className="table-cell">
-                      <span className={STATUS_CLASS_MAP[item.status] || 'status-badge'}>
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="table-cell">{formatDate(item.date)}</td>
-                    <td className="table-cell">
-                      <button
-                        className="btn btn-primary btn-sm"
-                        onClick={() => handleViewReview(item)}
-                        aria-label={`View review: ${item.title}`}
-                      >
-                        <Eye className="btn-icon-left" />
-                        View
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      <PortalTable className="data-table">
+        <PortalTableHeader>
+          <PortalTableRow>
+            <PortalTableHead>Project</PortalTableHead>
+            <PortalTableHead>Review Title</PortalTableHead>
+            <PortalTableHead className="status-col">Status</PortalTableHead>
+            <PortalTableHead className="date-col">Date</PortalTableHead>
+            <PortalTableHead className="col-actions">Action</PortalTableHead>
+          </PortalTableRow>
+        </PortalTableHeader>
+
+        <PortalTableBody animate={!isLoading && !error}>
+          {error ? (
+            <PortalTableError colSpan={COLUMN_COUNT} message={error} onRetry={refetch} />
+          ) : isLoading ? (
+            <PortalTableLoading colSpan={COLUMN_COUNT} rows={5} />
+          ) : reviews.length === 0 ? (
+            <PortalTableEmpty
+              colSpan={COLUMN_COUNT}
+              icon={<Inbox />}
+              message="You have no design reviews assigned at this time."
+            />
+          ) : (
+            reviews.map((item) => (
+              <PortalTableRow key={item.id}>
+                <PortalTableCell>{item.projectName}</PortalTableCell>
+                <PortalTableCell>{item.title}</PortalTableCell>
+                <PortalTableCell className="status-col">
+                  <span className={STATUS_CLASS_MAP[item.status] || 'status-badge'}>
+                    {item.status}
+                  </span>
+                </PortalTableCell>
+                <PortalTableCell className="date-col">{formatDate(item.date)}</PortalTableCell>
+                <PortalTableCell className="col-actions">
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => handleViewReview(item)}
+                    aria-label={`View review: ${item.title}`}
+                  >
+                    <Eye className="btn-icon-left" />
+                    View
+                  </button>
+                </PortalTableCell>
+              </PortalTableRow>
+            ))
+          )}
+        </PortalTableBody>
+      </PortalTable>
     </div>
   );
 }

@@ -213,7 +213,7 @@ export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: 
         <ErrorState message={error} onRetry={loadLogs} />
       ) : entries.length === 0 ? (
         <div className="team-empty">
-          <Search className="icon-lg text-muted" />
+          <Search className="icon-lg text-secondary" />
           <span>{hasFilters ? 'No entries match your filters' : 'No audit log entries found'}</span>
         </div>
       ) : (

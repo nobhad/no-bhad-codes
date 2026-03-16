@@ -39,7 +39,7 @@ export function PortalRequestsHub(_props: PortalRequestsHubProps) {
   });
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef}>
       <TabList<RequestTab>
         tabs={TABS}
         activeTab={activeTab}

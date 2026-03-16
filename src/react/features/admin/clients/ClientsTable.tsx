@@ -536,7 +536,7 @@ export function ClientsTable({
                     </PortalTableCell>
 
                     {/* Created Date */}
-                    <PortalTableCell className="date-cell">
+                    <PortalTableCell className="date-col">
                       {formatDate(client.created_at)}
                     </PortalTableCell>
 

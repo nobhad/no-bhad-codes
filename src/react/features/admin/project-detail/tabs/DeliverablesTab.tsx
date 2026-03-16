@@ -224,7 +224,7 @@ export function DeliverablesTab({
                       </span>
                     )}
                   </div>
-                  <span className="text-muted text-xs">
+                  <span className="text-secondary">
                     {completedTasks}/{milestoneTasks.length}
                   </span>
                 </>
@@ -261,26 +261,26 @@ export function DeliverablesTab({
                           />
                           <span
                             className={cn(
-                              task.status === 'completed' && 'text-muted pd-completed-text'
+                              task.status === 'completed' && 'text-secondary pd-completed-text'
                             )}
                           >
                             {task.title}
                           </span>
                           {task.due_date && (
-                            <span className="text-muted text-xs">{formatDate(task.due_date)}</span>
+                            <span className="text-secondary">{formatDate(task.due_date)}</span>
                           )}
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-muted text-sm">
+                    <p className="text-secondary">
                       No tasks assigned to this milestone yet.
                     </p>
                   )}
 
                   {/* Auto-complete indicator */}
                   {allCompleted && milestone.completed_date && (
-                    <p className="text-muted text-xs">
+                    <p className="text-secondary">
                       Milestone completed on {formatDate(milestone.completed_date, 'label')}
                     </p>
                   )}
@@ -319,7 +319,7 @@ export function DeliverablesTab({
                   <div className="flex-fill milestone-content">
                     <AlertCircle className="icon-sm text-warning" />
                     <span className="milestone-title">Needs Assignment</span>
-                    <span className="text-muted text-xs">
+                    <span className="text-secondary">
                       {unassignedTasks.length} task{unassignedTasks.length !== 1 ? 's' : ''}
                     </span>
                   </div>
@@ -343,7 +343,7 @@ export function DeliverablesTab({
                       <span
                         className={cn(
                           'flex-fill',
-                          task.status === 'completed' && 'text-muted pd-completed-text'
+                          task.status === 'completed' && 'text-secondary pd-completed-text'
                         )}
                       >
                         {task.title}

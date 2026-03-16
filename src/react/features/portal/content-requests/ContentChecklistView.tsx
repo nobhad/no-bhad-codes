@@ -110,23 +110,23 @@ function ItemSubmissionForm({
   if (item.status === 'submitted' || item.status === 'accepted') {
     return (
       <div className="content-item-submitted">
-        {item.textContent && <p style={{ margin: 0, fontSize: 'var(--font-size-sm)' }}>{item.textContent}</p>}
-        {item.fileId && <span style={{ fontSize: 'var(--font-size-sm)' }}>File uploaded</span>}
-        {item.structuredData && <pre style={{ margin: 0, fontSize: 'var(--font-size-xs)' }}>{JSON.stringify(item.structuredData, null, 2)}</pre>}
+        {item.textContent && <p>{item.textContent}</p>}
+        {item.fileId && <span>File uploaded</span>}
+        {item.structuredData && <pre>{JSON.stringify(item.structuredData, null, 2)}</pre>}
       </div>
     );
   }
 
   if (item.contentType === 'file') {
     return (
-      <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--app-color-text-muted)' }}>
+      <div className="content-file-hint">
         Use the Files section to upload, then link the file here.
       </div>
     );
   }
 
   return (
-    <div style={{ display: 'flex', gap: 'var(--spacing-xs)', alignItems: 'flex-start' }}>
+    <div className="content-submission-form">
       {item.contentType === 'text' ? (
         <textarea
           className="form-input"
@@ -135,7 +135,6 @@ function ItemSubmissionForm({
           placeholder="Enter your content here..."
           rows={3}
           disabled={submitting}
-          style={{ flex: 1 }}
         />
       ) : (
         <input
@@ -145,14 +144,12 @@ function ItemSubmissionForm({
           onChange={(e) => setValue(e.target.value)}
           placeholder={item.contentType === 'url' ? 'https://example.com' : 'Enter data as JSON...'}
           disabled={submitting}
-          style={{ flex: 1 }}
         />
       )}
       <button
         className="btn-primary"
         onClick={handleSubmit}
         disabled={submitting || !value.trim()}
-        style={{ whiteSpace: 'nowrap' }}
       >
         <Send />
         {submitting ? 'Sending...' : 'Submit'}
@@ -215,27 +212,24 @@ export function ContentChecklistView(_props: ContentChecklistViewProps) {
       ) : (
         <div className="portal-cards-list">
           {checklists.map((checklist) => (
-            <div key={checklist.id} className="card" style={{ marginBottom: 'var(--spacing-md)' }}>
-              <div style={{ padding: 'var(--spacing-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--app-color-border)' }}>
+            <div key={checklist.id} className="card checklist-card">
+              <div className="checklist-card-header">
                 <div>
-                  <h3 style={{ margin: 0 }}>{checklist.name}</h3>
+                  <h3>{checklist.name}</h3>
                   {checklist.projectName && (
-                    <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--app-color-text-muted)' }}>
+                    <span className="checklist-project-name">
                       {checklist.projectName}
                     </span>
                   )}
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ width: '120px', height: '8px', background: 'var(--app-color-border)', borderRadius: '4px' }}>
-                    <div style={{
-                      width: `${checklist.completionStats.completionPercent}%`,
-                      height: '100%',
-                      background: 'var(--app-color-success)',
-                      borderRadius: '4px',
-                      transition: 'width 0.3s ease'
-                    }} />
+                <div className="checklist-progress">
+                  <div className="checklist-progress-bar">
+                    <div
+                      className="checklist-progress-fill"
+                      style={{ width: `${checklist.completionStats.completionPercent}%` }}
+                    />
                   </div>
-                  <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--app-color-text-muted)' }}>
+                  <span className="checklist-progress-label">
                     {checklist.completionStats.accepted}/{checklist.completionStats.total} complete
                   </span>
                 </div>
@@ -243,24 +237,21 @@ export function ContentChecklistView(_props: ContentChecklistViewProps) {
 
               <div>
                 {checklist.items.map((item) => (
-                  <div key={item.id} style={{
-                    padding: 'var(--spacing-sm) var(--spacing-md)',
-                    borderBottom: '1px solid var(--app-color-border)'
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--spacing-sm)' }}>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}>
+                  <div key={item.id} className="content-item-row">
+                    <div className="content-item-header">
+                      <div className="content-item-body">
+                        <div className="content-item-title">
                           {getStatusIcon(item.status)}
                           <strong>{item.title}</strong>
-                          {item.isRequired && <span style={{ color: 'var(--app-color-danger)', fontSize: 'var(--font-size-xs)' }}>*</span>}
+                          {item.isRequired && <span className="content-item-required">*</span>}
                         </div>
                         {item.description && (
-                          <p style={{ margin: '4px 0 0', fontSize: 'var(--font-size-sm)', color: 'var(--app-color-text-muted)' }}>
+                          <p className="content-item-description">
                             {item.description}
                           </p>
                         )}
                         {item.adminNotes && item.status === 'revision_needed' && (
-                          <div style={{ marginTop: 'var(--space-0-5)', padding: 'var(--space-0-5) var(--space-1)', background: 'var(--app-color-warning-bg)', fontSize: 'var(--font-size-sm)' }}>
+                          <div className="content-item-revision-notes">
                             {item.adminNotes}
                           </div>
                         )}
@@ -271,7 +262,7 @@ export function ContentChecklistView(_props: ContentChecklistViewProps) {
                     </div>
 
                     {(item.status === 'pending' || item.status === 'revision_needed') && (
-                      <div style={{ marginTop: 'var(--spacing-sm)' }}>
+                      <div className="content-item-submission">
                         <ItemSubmissionForm item={item} onSubmit={handleSubmit} />
                       </div>
                     )}

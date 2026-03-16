@@ -526,7 +526,7 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
                       onStatusChange={(newStatus) => handleStatusChange(task.id, newStatus)}
                       ariaLabel="Change task status"
                     />
-                    <PortalTableCell className="date-cell">
+                    <PortalTableCell className="date-col">
                       {task.dueDate && (
                         <span
                           className={cn(

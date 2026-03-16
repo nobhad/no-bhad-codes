@@ -81,7 +81,7 @@ export function BulkActionsToolbar({
       {/* Selection info */}
       <div className="bulk-actions-info">
         <span className="bulk-actions-count">{selectedCount}</span>
-        <span className="text-muted">selected</span>
+        <span className="text-secondary">selected</span>
 
         {!allSelected && selectedCount < totalCount && (
           <button

@@ -55,24 +55,19 @@ export const StepIndicator = React.memo(({
               className={cn(
                 'flex items-center justify-center',
                 'w-7 h-7',
-                'text-sm font-mono',
                 'transition-all duration-200',
                 'border border-primary',
                 'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black',
                 isCompleted && [
                   'bg-white',
-                  'text-dark',
                   isAccessible && 'cursor-pointer hover:opacity-80'
                 ],
                 isCurrent &&
-                  !isCompleted && [
-                  'bg-white',
-                  'text-dark'
-                ],
+                  !isCompleted && 'bg-white',
                 !isCompleted &&
                   !isCurrent && [
                   'bg-transparent',
-                  'text-muted',
+                  'text-secondary',
                   'border border-default'
                 ],
                 !isAccessible && 'cursor-not-allowed opacity-50'
@@ -157,24 +152,19 @@ export const StepIndicatorDetailed = React.memo(({
                   className={cn(
                     'flex items-center justify-center flex-shrink-0',
                     'w-8 h-8',
-                    'text-sm font-mono',
                     'transition-all duration-200',
                     'border border-primary',
                     'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black',
                     isCompleted && [
                       'bg-white',
-                      'text-dark',
                       isAccessible && 'cursor-pointer hover:opacity-80'
                     ],
                     isCurrent &&
-                      !isCompleted && [
-                      'bg-white',
-                      'text-dark'
-                    ],
+                      !isCompleted && 'bg-white',
                     !isCompleted &&
                       !isCurrent && [
                       'bg-transparent',
-                      'text-muted',
+                      'text-secondary',
                       'border border-default'
                     ],
                     !isAccessible && 'cursor-not-allowed opacity-50'
@@ -205,10 +195,10 @@ export const StepIndicatorDetailed = React.memo(({
               {/* Step Title */}
               <span
                 className={cn(
-                  'mt-2 text-2xs text-center max-w-[80px] leading-tight font-mono',
+                  'mt-2 text-center max-w-[80px] leading-tight',
                   isCurrent
                     ? 'text-primary font-bold'
-                    : 'text-muted'
+                    : 'text-secondary'
                 )}
               >
                 {step.title}

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   Palette,
   MessageSquare,
@@ -29,7 +29,9 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { DESIGN_REVIEWS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { NOTIFICATIONS } from '@/constants/notifications';
+import { apiPost } from '@/utils/api-client';
+import { CreateDeliverableModal } from '@react/features/admin/modals/CreateEntityModals';
+import { useEntityOptions } from '@react/hooks/useEntityOptions';
 
 interface DesignReview {
   id: number;
@@ -115,6 +117,9 @@ function sortReviews(a: DesignReview, b: DesignReview, sort: SortConfig): number
 
 export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNotification }: DesignReviewTableProps) {
   const containerRef = useFadeIn();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const { projectOptions: entityProjects } = useEntityOptions(createOpen);
 
   const endpoint = projectId
     ? `${API_ENDPOINTS.ADMIN.DESIGN_REVIEWS}?projectId=${encodeURIComponent(projectId)}`
@@ -147,6 +152,24 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
     sortFn: sortReviews
   });
 
+  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
+    setCreateLoading(true);
+    try {
+      const res = await apiPost(API_ENDPOINTS.ADMIN.DELIVERABLES, formData);
+      if (res.ok) {
+        showNotification?.('Submitted for review', 'success');
+        setCreateOpen(false);
+        refetch();
+      } else {
+        showNotification?.('Failed to submit', 'error');
+      }
+    } catch {
+      showNotification?.('Failed to submit', 'error');
+    } finally {
+      setCreateLoading(false);
+    }
+  }, [showNotification, refetch]);
+
   const filteredReviews = useMemo(() => applyFilters(reviews), [applyFilters, reviews]);
 
   const pagination = usePagination({ storageKey: 'admin_design_review_pagination', totalItems: filteredReviews.length });
@@ -156,156 +179,165 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
   );
 
   return (
-    <TableLayout
-      containerRef={containerRef as React.RefObject<HTMLDivElement>}
-      title="DESIGN REVIEWS"
-      stats={
-        <TableStats
-          items={[
-            { value: stats.total, label: 'total' },
-            { value: stats.pending, label: 'pending', variant: 'pending' },
-            { value: stats.inReview, label: 'in review', variant: 'active' },
-            { value: stats.approved, label: 'approved', variant: 'completed' },
-            { value: stats.needsRevision, label: 'needs revision', variant: 'overdue' }
-          ]}
-          tooltip={`${stats.total} Total • ${stats.pending} Pending • ${stats.inReview} In Review • ${stats.approved} Approved • Avg: ${stats.avgReviewTime}`}
-        />
-      }
-      actions={
-        <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search reviews..."
+    <div>
+      <TableLayout
+        containerRef={containerRef as React.RefObject<HTMLDivElement>}
+        title="DESIGN REVIEWS"
+        stats={
+          <TableStats
+            items={[
+              { value: stats.total, label: 'total' },
+              { value: stats.pending, label: 'pending', variant: 'pending' },
+              { value: stats.inReview, label: 'in review', variant: 'active' },
+              { value: stats.approved, label: 'approved', variant: 'completed' },
+              { value: stats.needsRevision, label: 'needs revision', variant: 'overdue' }
+            ]}
+            tooltip={`${stats.total} Total • ${stats.pending} Pending • ${stats.inReview} In Review • ${stats.approved} Approved • Avg: ${stats.avgReviewTime}`}
           />
-          <FilterDropdown
-            sections={DESIGN_REVIEWS_FILTER_CONFIG}
-            values={filterValues}
-            onChange={setFilter}
-          />
-          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="Submit for Review" />
-        </>
-      }
-      pagination={
-        !isLoading && filteredReviews.length > 0 ? (
-          <TablePagination
-            pageInfo={pagination.pageInfo}
-            page={pagination.page}
-            pageSize={pagination.pageSize}
-            pageSizeOptions={pagination.pageSizeOptions}
-            canGoPrev={pagination.canGoPrev}
-            canGoNext={pagination.canGoNext}
-            onPageSizeChange={pagination.setPageSize}
-            onFirstPage={pagination.firstPage}
-            onPrevPage={pagination.prevPage}
-            onNextPage={pagination.nextPage}
-            onLastPage={pagination.lastPage}
-          />
-        ) : undefined
-      }
-    >
-      <PortalTable>
-        <PortalTableHeader>
-          <PortalTableRow>
-            <PortalTableHead
-              sortable
-              sortDirection={sort?.column === 'title' ? sort.direction : null}
-              onClick={() => toggleSort('title')}
-            >
-              Design
-            </PortalTableHead>
-            <PortalTableHead
-              sortable
-              sortDirection={sort?.column === 'project' ? sort.direction : null}
-              onClick={() => toggleSort('project')}
-            >
-              Project
-            </PortalTableHead>
-            <PortalTableHead>Status</PortalTableHead>
-            <PortalTableHead className="text-center">Ver</PortalTableHead>
-            <PortalTableHead className="text-right">Comments</PortalTableHead>
-            <PortalTableHead
-              className="date-col"
-              sortable
-              sortDirection={sort?.column === 'submittedAt' ? sort.direction : null}
-              onClick={() => toggleSort('submittedAt')}
-            >
-              Submitted
-            </PortalTableHead>
-            <PortalTableHead className="col-actions">Actions</PortalTableHead>
-          </PortalTableRow>
-        </PortalTableHeader>
-
-        <PortalTableBody animate={!isLoading && !error}>
-          {error ? (
-            <PortalTableError colSpan={7} message={error} onRetry={refetch} />
-          ) : isLoading ? (
-            <PortalTableLoading colSpan={7} rows={5} />
-          ) : paginatedReviews.length === 0 ? (
-            <PortalTableEmpty
-              colSpan={7}
-              icon={<Inbox />}
-              message={hasActiveFilters ? 'No reviews match your filters' : 'No design reviews yet'}
+        }
+        actions={
+          <>
+            <SearchFilter
+              value={search}
+              onChange={setSearch}
+              placeholder="Search reviews..."
             />
-          ) : (
-            paginatedReviews.map((review) => (
-              <PortalTableRow key={review.id} clickable>
-                <PortalTableCell className="primary-cell">
-                  <div className="cell-with-icon">
-                    <Palette className="cell-icon" />
-                    <div className="cell-content">
-                      <span className="cell-title">{review.title}</span>
-                      <span className="cell-subtitle">
-                        {review.attachments} files - {review.clientName}
-                      </span>
+            <FilterDropdown
+              sections={DESIGN_REVIEWS_FILTER_CONFIG}
+              values={filterValues}
+              onChange={setFilter}
+            />
+            <IconButton action="add" onClick={() => setCreateOpen(true)} title="Submit for Review" />
+          </>
+        }
+        pagination={
+          !isLoading && filteredReviews.length > 0 ? (
+            <TablePagination
+              pageInfo={pagination.pageInfo}
+              page={pagination.page}
+              pageSize={pagination.pageSize}
+              pageSizeOptions={pagination.pageSizeOptions}
+              canGoPrev={pagination.canGoPrev}
+              canGoNext={pagination.canGoNext}
+              onPageSizeChange={pagination.setPageSize}
+              onFirstPage={pagination.firstPage}
+              onPrevPage={pagination.prevPage}
+              onNextPage={pagination.nextPage}
+              onLastPage={pagination.lastPage}
+            />
+          ) : undefined
+        }
+      >
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead
+                sortable
+                sortDirection={sort?.column === 'title' ? sort.direction : null}
+                onClick={() => toggleSort('title')}
+              >
+              Design
+              </PortalTableHead>
+              <PortalTableHead
+                sortable
+                sortDirection={sort?.column === 'project' ? sort.direction : null}
+                onClick={() => toggleSort('project')}
+              >
+              Project
+              </PortalTableHead>
+              <PortalTableHead>Status</PortalTableHead>
+              <PortalTableHead className="text-center">Ver</PortalTableHead>
+              <PortalTableHead className="text-right">Comments</PortalTableHead>
+              <PortalTableHead
+                className="date-col"
+                sortable
+                sortDirection={sort?.column === 'submittedAt' ? sort.direction : null}
+                onClick={() => toggleSort('submittedAt')}
+              >
+              Submitted
+              </PortalTableHead>
+              <PortalTableHead className="col-actions">Actions</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
+
+          <PortalTableBody animate={!isLoading && !error}>
+            {error ? (
+              <PortalTableError colSpan={7} message={error} onRetry={refetch} />
+            ) : isLoading ? (
+              <PortalTableLoading colSpan={7} rows={5} />
+            ) : paginatedReviews.length === 0 ? (
+              <PortalTableEmpty
+                colSpan={7}
+                icon={<Inbox />}
+                message={hasActiveFilters ? 'No reviews match your filters' : 'No design reviews yet'}
+              />
+            ) : (
+              paginatedReviews.map((review) => (
+                <PortalTableRow key={review.id} clickable>
+                  <PortalTableCell className="primary-cell">
+                    <div className="cell-with-icon">
+                      <Palette className="icon-sm" />
+                      <div className="cell-content">
+                        <span className="cell-title">{review.title}</span>
+                        <span className="cell-subtitle">
+                          {review.attachments} files - {review.clientName}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </PortalTableCell>
-                <PortalTableCell>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onNavigate?.('projects', String(review.projectId));
-                    }}
-                    className="link-btn"
-                  >
-                    {review.projectName}
-                  </button>
-                </PortalTableCell>
-                <PortalTableCell className="status-cell">
-                  <StatusBadge status={getStatusVariant(review.status)} size="sm">
-                    {review.status.replace('-', ' ')}
-                  </StatusBadge>
-                </PortalTableCell>
-                <PortalTableCell className="text-center">v{review.version}</PortalTableCell>
-                <PortalTableCell className="text-right">
-                  {review.comments > 0 && (
-                    <span className="cell-with-icon-inline">
-                      <MessageSquare className="cell-icon-sm" />
-                      {review.comments}
-                    </span>
-                  )}
-                </PortalTableCell>
-                <PortalTableCell className="date-cell">{formatDate(review.submittedAt)}</PortalTableCell>
-                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                  <div className="table-actions">
-                    <IconButton action="view" title="View" />
-                    {review.status === 'in-review' && (
-                      <>
-                        <IconButton action="approve" title="Approve" />
-                        <IconButton action="reject" title="Request Revision" />
-                      </>
+                  </PortalTableCell>
+                  <PortalTableCell>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNavigate?.('projects', String(review.projectId));
+                      }}
+                      className="link-btn"
+                    >
+                      {review.projectName}
+                    </button>
+                  </PortalTableCell>
+                  <PortalTableCell className="status-col">
+                    <StatusBadge status={getStatusVariant(review.status)} size="sm">
+                      {review.status.replace('-', ' ')}
+                    </StatusBadge>
+                  </PortalTableCell>
+                  <PortalTableCell className="text-center">v{review.version}</PortalTableCell>
+                  <PortalTableCell className="text-right">
+                    {review.comments > 0 && (
+                      <span className="cell-with-icon-inline">
+                        <MessageSquare className="icon-xs" />
+                        {review.comments}
+                      </span>
                     )}
-                    <IconButton icon="image" title="View Files" />
-                    <IconButton action="copy-link" title="Share Link" />
-                    <IconButton action="message" title="Add Comment" />
-                  </div>
-                </PortalTableCell>
-              </PortalTableRow>
-            ))
-          )}
-        </PortalTableBody>
-      </PortalTable>
-    </TableLayout>
+                  </PortalTableCell>
+                  <PortalTableCell className="date-col">{formatDate(review.submittedAt)}</PortalTableCell>
+                  <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
+                    <div className="table-actions">
+                      <IconButton action="view" title="View" />
+                      {review.status === 'in-review' && (
+                        <>
+                          <IconButton action="approve" title="Approve" />
+                          <IconButton action="reject" title="Request Revision" />
+                        </>
+                      )}
+                      <IconButton icon="image" title="View Files" />
+                      <IconButton action="copy-link" title="Share Link" />
+                      <IconButton action="message" title="Add Comment" />
+                    </div>
+                  </PortalTableCell>
+                </PortalTableRow>
+              ))
+            )}
+          </PortalTableBody>
+        </PortalTable>
+      </TableLayout>
+      <CreateDeliverableModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onSubmit={handleCreate}
+        loading={createLoading}
+        projectOptions={entityProjects}
+      />
+    </div>
   );
 }

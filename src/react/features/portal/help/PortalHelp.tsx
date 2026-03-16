@@ -8,6 +8,7 @@ import * as React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import DOMPurify from 'dompurify';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
+import { TableLayout } from '@react/components/portal';
 import { getLucideIcon } from '@react/factories';
 import { AccordionItem } from '@react/factories/createAccordion';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
@@ -354,7 +355,7 @@ function CategoriesSidebar({ categories, onToggle, onArticleClick }: CategoriesS
                     {BookOpenIcon && <BookOpenIcon className="icon-sm" />}
                   </span>
                   <span className="flex-1">{category.name}</span>
-                  <span className="text-muted">{category.article_count}</span>
+                  <span className="text-secondary">{category.article_count}</span>
                 </>
               }
             >
@@ -499,7 +500,7 @@ function ArticleDetail({ article, onBack }: ArticleDetailProps) {
           <h1>{article.title}</h1>
         </div>
         {article.summary && (
-          <p className="text-muted">{article.summary}</p>
+          <p className="text-secondary">{article.summary}</p>
         )}
         {article.content && (
           <div
@@ -583,66 +584,59 @@ export function PortalHelp({
   } = usePortalHelp(getAuthToken);
 
   return (
-    <div ref={containerRef} className="section">
-      <div className="table-layout">
-        <div className="data-table-card">
-          <div className="data-table-header">
-            <h3>
-              <span className="title-full">HELP CENTER</span>
-            </h3>
-            <div className="data-table-actions">
-              <SearchBar
-                query={searchQuery}
-                onChange={handleSearchChange}
-                onClear={clearSearch}
-              />
+    <div ref={containerRef}>
+      <TableLayout
+        title="HELP CENTER"
+        actions={
+          <SearchBar
+            query={searchQuery}
+            onChange={handleSearchChange}
+            onClear={clearSearch}
+          />
+        }
+      >
+        {isLoading && viewMode === 'browse' ? (
+          <LoadingState message="Loading help center..." />
+        ) : error ? (
+          <ErrorState message={error} onRetry={loadInitialData} />
+        ) : (
+          <>
+            {/* Two-column layout — left column always visible */}
+            <div className="help-main-grid">
+              {/* Left: Categories accordion — always on screen */}
+              <div className="help-left-column">
+                <CategoriesSidebar
+                  categories={categories}
+                  onToggle={toggleCategory}
+                  onArticleClick={viewArticle}
+                />
+              </div>
+
+              {/* Right: content area swaps by view mode */}
+              <div className="help-right-column">
+                {viewMode === 'article' && selectedArticle ? (
+                  <ArticleDetail article={selectedArticle} onBack={goBack} />
+                ) : viewMode === 'search' ? (
+                  <SearchResults
+                    results={searchResults}
+                    query={searchQuery}
+                    isSearching={isSearching}
+                    onArticleClick={viewArticle}
+                  />
+                ) : (
+                  <FeaturedArticles
+                    articles={featuredArticles}
+                    onArticleClick={viewArticle}
+                  />
+                )}
+              </div>
             </div>
-          </div>
-          <div className="data-table-container">
-            {isLoading && viewMode === 'browse' ? (
-              <LoadingState message="Loading help center..." />
-            ) : error ? (
-              <ErrorState message={error} onRetry={loadInitialData} />
-            ) : (
-              <>
-                {/* Two-column layout — left column always visible */}
-                <div className="help-main-grid">
-                  {/* Left: Categories accordion — always on screen */}
-                  <div className="help-left-column">
-                    <CategoriesSidebar
-                      categories={categories}
-                      onToggle={toggleCategory}
-                      onArticleClick={viewArticle}
-                    />
-                  </div>
 
-                  {/* Right: content area swaps by view mode */}
-                  <div className="help-right-column">
-                    {viewMode === 'article' && selectedArticle ? (
-                      <ArticleDetail article={selectedArticle} onBack={goBack} />
-                    ) : viewMode === 'search' ? (
-                      <SearchResults
-                        results={searchResults}
-                        query={searchQuery}
-                        isSearching={isSearching}
-                        onArticleClick={viewArticle}
-                      />
-                    ) : (
-                      <FeaturedArticles
-                        articles={featuredArticles}
-                        onArticleClick={viewArticle}
-                      />
-                    )}
-                  </div>
-                </div>
-
-                {/* Contact section */}
-                <ContactSection onNavigate={onNavigate} />
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+            {/* Contact section */}
+            <ContactSection onNavigate={onNavigate} />
+          </>
+        )}
+      </TableLayout>
     </div>
   );
 }

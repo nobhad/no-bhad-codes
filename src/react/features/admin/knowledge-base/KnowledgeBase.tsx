@@ -37,35 +37,31 @@ export function KnowledgeBase({ onNavigate, getAuthToken, showNotification }: Kn
   // Individual subtab views
   if (activeSubtab === 'categories') {
     return (
-      <div className="section">
-        <React.Suspense fallback={<LoadingState message="Loading categories..." />}>
-          <CategoriesTable
-            onNavigate={onNavigate}
-            getAuthToken={getAuthToken}
-            showNotification={showNotification}
-          />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading categories..." />}>
+        <CategoriesTable
+          onNavigate={onNavigate}
+          getAuthToken={getAuthToken}
+          showNotification={showNotification}
+        />
+      </React.Suspense>
     );
   }
 
   if (activeSubtab === 'articles') {
     return (
-      <div className="section">
-        <React.Suspense fallback={<LoadingState message="Loading articles..." />}>
-          <ArticlesTable
-            onNavigate={onNavigate}
-            getAuthToken={getAuthToken}
-            showNotification={showNotification}
-          />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading articles..." />}>
+        <ArticlesTable
+          onNavigate={onNavigate}
+          getAuthToken={getAuthToken}
+          showNotification={showNotification}
+        />
+      </React.Suspense>
     );
   }
 
   // Overview - show all tables stacked with default pagination of 10
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>}>
       <React.Suspense fallback={<LoadingState message="Loading categories..." />}>
         <section className="overview-table-section">
           <CategoriesTable

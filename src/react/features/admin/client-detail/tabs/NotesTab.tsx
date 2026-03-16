@@ -140,7 +140,7 @@ export function NotesTab({
   const renderForm = () => (
     <div className="panel">
       <div className="panel-header-row--compact">
-        <h3 className="heading text-sm">
+        <h3 className="heading">
           {editingId ? 'Edit Note' : 'New Note'}
         </h3>
         <button
@@ -192,7 +192,7 @@ export function NotesTab({
           {note.is_pinned && (
             <Pin className="icon-xs is-active-primary" />
           )}
-          <span className="text-muted text-xs">
+          <span className="text-secondary">
             {formatNoteDate(note.created_at)}
             {note.updated_at !== note.created_at && ' (edited)'}
           </span>
@@ -229,14 +229,14 @@ export function NotesTab({
       </div>
 
       {/* Note content */}
-      <p className="text-muted text-sm note-content">
+      <p className="text-secondary note-content">
         {note.content}
       </p>
 
       {/* Note footer */}
       {note.created_by && (
         <div className="note-footer">
-          <span className="text-muted text-xs">
+          <span className="text-secondary">
             by {note.created_by}
           </span>
         </div>

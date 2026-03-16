@@ -48,61 +48,51 @@ export function SettingsManager({ getAuthToken, showNotification, onNavigate }: 
   // Configuration subtab
   if (activeSubtab === 'configuration') {
     return (
-      <div className="section">
-        <React.Suspense fallback={<LoadingState message="Loading configuration..." />}>
-          <BusinessConfiguration {...sharedProps} />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading configuration..." />}>
+        <BusinessConfiguration {...sharedProps} />
+      </React.Suspense>
     );
   }
 
   // Workflows subtab
   if (activeSubtab === 'workflows') {
     return (
-      <div className="section">
-        <React.Suspense fallback={<LoadingState message="Loading workflows..." />}>
-          <WorkflowsTable {...sharedProps} />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading workflows..." />}>
+        <WorkflowsTable {...sharedProps} />
+      </React.Suspense>
     );
   }
 
   // Email Templates subtab
   if (activeSubtab === 'email-templates') {
     return (
-      <div className="section">
-        <React.Suspense fallback={<LoadingState message="Loading email templates..." />}>
-          <EmailTemplatesManager {...sharedProps} />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading email templates..." />}>
+        <EmailTemplatesManager {...sharedProps} />
+      </React.Suspense>
     );
   }
 
   // Audit Log subtab
   if (activeSubtab === 'audit-log') {
     return (
-      <div className="section">
-        <React.Suspense fallback={<LoadingState message="Loading audit log..." />}>
-          <AuditLogViewer {...sharedProps} />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading audit log..." />}>
+        <AuditLogViewer {...sharedProps} />
+      </React.Suspense>
     );
   }
 
   // System Health subtab
   if (activeSubtab === 'system-health') {
     return (
-      <div className="section">
-        <React.Suspense fallback={<LoadingState message="Loading system status..." />}>
-          <SystemStatusDashboard {...sharedProps} />
-        </React.Suspense>
-      </div>
+      <React.Suspense fallback={<LoadingState message="Loading system status..." />}>
+        <SystemStatusDashboard {...sharedProps} />
+      </React.Suspense>
     );
   }
 
   // Overview - lightweight snapshot cards
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>}>
       <React.Suspense fallback={<LoadingState message="Loading settings overview..." />}>
         <SettingsOverview getAuthToken={getAuthToken} onSubtabNavigate={handleSubtabNavigate} />
       </React.Suspense>

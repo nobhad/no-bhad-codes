@@ -456,7 +456,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                 </PortalTableCell>
                 <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
-                    <Zap className="cell-icon" />
+                    <Zap className="icon-sm" />
                     <div className="cell-content">
                       <span className="cell-title">{request.title}</span>
                       {request.projectName && (
@@ -478,7 +478,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                       )}
                       {request.assignee && (
                         <span className="cell-subtitle">
-                          <User className="cell-icon-sm" />
+                          <User className="icon-xs" />
                           {request.assignee}
                         </span>
                       )}
@@ -522,14 +522,14 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                     <span>
                       {request.actualHours}
                       {request.estimatedHours && (
-                        <span className="text-muted">/{request.estimatedHours}h</span>
+                        <span className="text-secondary">/{request.estimatedHours}h</span>
                       )}
                     </span>
                   ) : request.estimatedHours ? (
-                    <span className="text-muted">{request.estimatedHours}h est</span>
+                    <span className="text-secondary">{request.estimatedHours}h est</span>
                   ) : null}
                 </PortalTableCell>
-                <PortalTableCell className="date-cell">
+                <PortalTableCell className="date-col">
                   {request.dueDate && formatDate(request.dueDate)}
                 </PortalTableCell>
                 <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>

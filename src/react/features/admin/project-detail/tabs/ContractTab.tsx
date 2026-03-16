@@ -107,14 +107,14 @@ export function ContractTab({
             </div>
 
             {isSigned && project.contract_signed_date && (
-              <div className="layout-row gap-2 text-muted pd-mt-2">
+              <div className="layout-row gap-2 text-secondary pd-mt-2">
                 <Calendar className="icon-md" />
                 <span>Signed on {formatDate(project.contract_signed_date, 'label')}</span>
               </div>
             )}
 
             {!isSigned && (
-              <p className="text-muted pd-mt-1">
+              <p className="text-secondary pd-mt-1">
                 {contractStatus.status === 'pending'
                   ? 'Contract has been sent and is awaiting client signature.'
                   : 'Contract has not been sent to the client yet.'}
@@ -158,7 +158,7 @@ export function ContractTab({
             <FileText className="icon-sm" />
             <span className="title-full">Contract Documents</span>
           </h3>
-          <span className="text-muted pd-hint">
+          <span className="text-secondary pd-hint">
             {contractFiles.length} file{contractFiles.length !== 1 ? 's' : ''}
           </span>
         </div>
@@ -181,7 +181,7 @@ export function ContractTab({
                     <span className="pd-highlight-value">
                       {file.original_name}
                     </span>
-                    <div className="text-muted pd-hint">
+                    <div className="text-secondary pd-hint">
                       {formatDate(file.created_at, 'label')}
                     </div>
                   </div>
@@ -211,7 +211,7 @@ export function ContractTab({
             <h4 className="heading">
               Contract Not Signed
             </h4>
-            <p className="text-muted pd-mt-1">
+            <p className="text-secondary pd-mt-1">
               This project is active but the contract has not been signed.
               Consider sending the contract for signature before proceeding with work.
             </p>

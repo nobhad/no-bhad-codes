@@ -70,11 +70,11 @@ export function NotesTab({
         <div className="data-table-header">
           <h3>
             <span className="title-full">Internal Notes</span>
-            <span className="text-muted pd-hint"> (Only visible to admins)</span>
+            <span className="text-secondary pd-hint"> (Only visible to admins)</span>
           </h3>
           <div className="data-table-actions layout-row gap-2">
             {hasChanges && (
-              <span className="text-muted pd-hint">Unsaved changes</span>
+              <span className="text-secondary pd-hint">Unsaved changes</span>
             )}
             <IconButton
               action="save"
@@ -94,7 +94,7 @@ export function NotesTab({
           className="textarea"
           aria-label="Internal project notes"
         />
-        <p className="text-muted form-helper-text">
+        <p className="text-secondary form-helper-text">
           Press <kbd className="badge msgtab-kbd">Cmd+S</kbd> or{' '}
           <kbd className="badge msgtab-kbd">Ctrl+S</kbd> to save
         </p>

@@ -69,12 +69,12 @@ interface FileStats {
 }
 
 const FILE_ICONS: Record<string, React.ReactNode> = {
-  folder: <Folder className="cell-icon status-pending" />,
-  image: <FileImage className="cell-icon status-active" />,
-  video: <FileVideo className="cell-icon status-cancelled" />,
-  audio: <FileAudio className="cell-icon status-qualified" />,
-  document: <FileText className="cell-icon status-primary" />,
-  default: <File className="cell-icon" />
+  folder: <Folder className="icon-sm status-pending" />,
+  image: <FileImage className="icon-sm status-active" />,
+  video: <FileVideo className="icon-sm status-cancelled" />,
+  audio: <FileAudio className="icon-sm status-qualified" />,
+  document: <FileText className="icon-sm status-primary" />,
+  default: <File className="icon-sm" />
 };
 
 interface FilesManagerProps {
@@ -390,7 +390,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
                   <PortalTableCell className="text-right">
                     {file.type !== 'folder' && formatFileSize(file.size || 0)}
                   </PortalTableCell>
-                  <PortalTableCell className="date-cell">{formatDateShort(file.updatedAt)}</PortalTableCell>
+                  <PortalTableCell className="date-col">{formatDateShort(file.updatedAt)}</PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions">
                       {file.type !== 'folder' && (

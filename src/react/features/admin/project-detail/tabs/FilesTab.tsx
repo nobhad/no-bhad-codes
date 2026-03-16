@@ -49,7 +49,7 @@ function getFileIcon(fileType: string): React.ReactNode {
   if (fileType.includes('zip') || fileType.includes('rar') || fileType.includes('archive')) {
     return <FileArchive className="icon-lg text-status-warning" />;
   }
-  return <File className="icon-lg text-muted" />;
+  return <File className="icon-lg text-secondary" />;
 }
 
 /**
@@ -208,13 +208,13 @@ export function FilesTab({
             Browse Files
           </button>
 
-          <p className="text-muted pd-hint">
+          <p className="text-secondary pd-hint">
             Supports images, PDFs, documents, and archives
           </p>
 
           {/* Category Selector */}
           <div className="layout-row gap-2 pd-mt-2" onClick={(e) => e.stopPropagation()}>
-            <span className="text-muted pd-hint">Category:</span>
+            <span className="text-secondary pd-hint">Category:</span>
             <PortalDropdown>
               <PortalDropdownTrigger asChild>
                 <button className="files-category-trigger dropdown-trigger" type="button">
@@ -302,17 +302,17 @@ export function FilesTab({
                           {file.original_name}
                         </span>
                         {file.category && (
-                          <span className="text-muted pd-hint">
+                          <span className="text-secondary pd-hint">
                             {FILE_CATEGORY_OPTIONS.find((c) => c.value === file.category)?.label || file.category}
                           </span>
                         )}
                       </div>
                     </div>
                   </td>
-                  <td className="pd-table-cell text-muted">
+                  <td className="pd-table-cell text-secondary">
                     {formatFileSize(file.file_size)}
                   </td>
-                  <td className="pd-table-cell text-muted">
+                  <td className="pd-table-cell text-secondary">
                     {formatDate(file.created_at)}
                   </td>
                   <td className="pd-table-cell pd-cell-center">

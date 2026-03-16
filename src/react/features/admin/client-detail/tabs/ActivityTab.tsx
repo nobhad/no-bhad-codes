@@ -156,7 +156,7 @@ export function ActivityTab({ activities, onNavigate }: ActivityTabProps) {
       <div className="panel">
         <div className="data-table-header">
           <h3><span className="title-full">Activity ({activities.length})</span></h3>
-          <span className="text-muted text-sm">
+          <span className="text-secondary">
             {activities.length === 1 ? 'event' : 'events'}
           </span>
         </div>
@@ -219,14 +219,14 @@ export function ActivityTab({ activities, onNavigate }: ActivityTabProps) {
                                 </h4>
                               )}
                               {activity.description && (
-                                <p className="text-muted text-sm description-text">
+                                <p className="text-secondary description-text">
                                   {activity.description}
                                 </p>
                               )}
                             </div>
 
                             <span
-                              className="text-muted whitespace-nowrap text-sm"
+                              className="text-secondary whitespace-nowrap"
                               title={formatFullDate(activity.createdAt)}
                             >
                               {formatRelativeTime(activity.createdAt)}
@@ -237,7 +237,7 @@ export function ActivityTab({ activities, onNavigate }: ActivityTabProps) {
                           {(activity.createdBy || activity.metadata) && (
                             <div className="activity-metadata">
                               {activity.createdBy && (
-                                <span className="text-muted text-sm">
+                                <span className="text-secondary">
                                 by {activity.createdBy}
                                 </span>
                               )}
@@ -245,7 +245,7 @@ export function ActivityTab({ activities, onNavigate }: ActivityTabProps) {
                               Object.entries(activity.metadata).map(([key, value]) => (
                                 <span
                                   key={key}
-                                  className="text-muted text-sm"
+                                  className="text-secondary"
                                 >
                                   {key}: {String(value)}
                                 </span>

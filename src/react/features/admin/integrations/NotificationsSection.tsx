@@ -103,7 +103,7 @@ export function NotificationsSection({
         </table>
       ) : (
         <div className="status-empty">
-          <AlertCircle className="icon-lg text-muted" />
+          <AlertCircle className="icon-lg text-secondary" />
           <span>No notification configurations yet.</span>
         </div>
       )}

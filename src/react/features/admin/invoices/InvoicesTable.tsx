@@ -326,7 +326,7 @@ export function InvoicesTable({
   );
 
   return (
-    <>
+    <div>
       <TableLayout
         containerRef={containerRef as React.RefObject<HTMLDivElement>}
         title="INVOICES"
@@ -489,7 +489,7 @@ export function InvoicesTable({
                     {/* Invoice */}
                     <PortalTableCell className="primary-cell">
                       <div className="cell-with-icon">
-                        <Receipt className="cell-icon" />
+                        <Receipt className="icon-sm" />
                         <div className="cell-content">
                           {invoice.project_id && onNavigate ? (
                             <span
@@ -526,19 +526,19 @@ export function InvoicesTable({
                     </PortalTableCell>
 
                     {/* Amount */}
-                    <PortalTableCell className="amount-cell">
+                    <PortalTableCell className="amount-col">
                       {formatCurrency(invoice.amount_total)}
                     </PortalTableCell>
 
                     {/* Status */}
-                    <PortalTableCell className="status-cell">
+                    <PortalTableCell className="status-col">
                       <StatusBadge status={getStatusVariant(displayStatus)}>
                         {INVOICE_STATUS_CONFIG[displayStatus]?.label || displayStatus}
                       </StatusBadge>
                     </PortalTableCell>
 
                     {/* Due Date */}
-                    <PortalTableCell className="date-cell">
+                    <PortalTableCell className="date-col">
                       {invoice.due_date && formatDate(invoice.due_date)}
                     </PortalTableCell>
 
@@ -625,6 +625,6 @@ export function InvoicesTable({
         variant="info"
         loading={sendDialog.isLoading}
       />
-    </>
+    </div>
   );
 }

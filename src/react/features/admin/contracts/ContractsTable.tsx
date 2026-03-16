@@ -465,7 +465,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                 </PortalTableCell>
                 <PortalTableCell className="contract-cell">
                   <div className="cell-with-icon">
-                    <FileText className="cell-icon" />
+                    <FileText className="icon-sm" />
                     <div className="cell-content">
                       <span className="cell-title">{contract.templateName || `Contract #${contract.id}`}</span>
                       {contract.templateType && (
@@ -507,7 +507,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                   onStatusChange={(newStatus) => handleStatusChange(contract.id, newStatus)}
                   ariaLabel="Change contract status"
                 />
-                <PortalTableCell className="date-cell">{formatDate(contract.createdAt)}</PortalTableCell>
+                <PortalTableCell className="date-col">{formatDate(contract.createdAt)}</PortalTableCell>
                 <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />

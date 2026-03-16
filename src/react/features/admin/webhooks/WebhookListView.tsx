@@ -217,7 +217,7 @@ export function WebhookListView({
               <PortalTableRow key={webhook.id}>
                 <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
-                    <Webhook className="cell-icon" />
+                    <Webhook className="icon-sm" />
                     <div className="cell-content">
                       <span className="cell-title">{webhook.name}</span>
                     </div>
@@ -233,7 +233,7 @@ export function WebhookListView({
                   {webhook.method}
                 </PortalTableCell>
                 <PortalTableCell
-                  className="status-cell"
+                  className="status-col"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <button
@@ -245,7 +245,7 @@ export function WebhookListView({
                     {webhook.is_active ? (
                       <ToggleRight className="h-5 w-5 text-success" />
                     ) : (
-                      <ToggleLeft className="h-5 w-5 text-muted" />
+                      <ToggleLeft className="h-5 w-5 text-secondary" />
                     )}
                   </button>
                 </PortalTableCell>

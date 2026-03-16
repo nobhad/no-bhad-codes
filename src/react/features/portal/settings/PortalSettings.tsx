@@ -76,7 +76,7 @@ export function PortalSettings({ getAuthToken, showNotification }: PortalSetting
 
   if (isLoading) {
     return (
-      <div ref={containerRef} className="section">
+      <div ref={containerRef}>
         <LoadingState message="Loading settings..." />
       </div>
     );
@@ -84,14 +84,14 @@ export function PortalSettings({ getAuthToken, showNotification }: PortalSetting
 
   if (error) {
     return (
-      <div ref={containerRef} className="section">
+      <div ref={containerRef}>
         <ErrorState message={error} onRetry={fetchProfile} />
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef}>
       <TabList
         tabs={SETTINGS_TABS}
         activeTab={activeTab}

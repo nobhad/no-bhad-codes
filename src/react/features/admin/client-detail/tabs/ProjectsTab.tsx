@@ -70,7 +70,7 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
               </span>
             </div>
 
-            <div className="project-date-row text-muted text-sm">
+            <div className="project-date-row text-secondary">
               <Clock className="icon-xs" />
               <span>Created {formatDate(project.created_at, 'label')}</span>
             </div>
@@ -98,7 +98,7 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
           <h3><span className="title-full">{title} ({projectList.length})</span></h3>
         </div>
         {projectList.length === 0 ? (
-          <p className="text-muted empty-text-italic">
+          <p className="text-secondary empty-text-italic">
             {emptyMessage}
           </p>
         ) : (
@@ -117,16 +117,16 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
           <h3><span className="title-full">Projects ({projects.length})</span></h3>
           <div className="summary-stats-inline">
             <div className="stat-inline">
-              <span className="stat-value text-lg">
+              <span className="stat-value">
                 {activeProjects.length}
               </span>
-              <span className="text-muted text-sm stat-inline-label">Active</span>
+              <span className="text-secondary stat-inline-label">Active</span>
             </div>
             <div className="stat-inline">
-              <span className="stat-value text-lg">
+              <span className="stat-value">
                 {completedProjects.length}
               </span>
-              <span className="text-muted text-sm stat-inline-label">
+              <span className="text-secondary stat-inline-label">
                 Completed
               </span>
             </div>

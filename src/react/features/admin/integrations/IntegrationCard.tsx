@@ -25,22 +25,22 @@ export function IntegrationCard({ integration }: IntegrationCardProps) {
       <div className="stat-card">
         <div className="portal-card-header">
           <div className="portal-card-title-group">
-            <span className="text-muted">{icon}</span>
+            <span className="text-secondary">{icon}</span>
             <h3 className="font-semibold">{integration.name}</h3>
           </div>
           <span className={healthClass} />
         </div>
         <div className="portal-card-detail-list">
           <div className="portal-card-detail-row">
-            <span className="text-muted">Configured</span>
+            <span className="text-secondary">Configured</span>
             <span>{integration.configured ? 'Yes' : 'No'}</span>
           </div>
           <div className="portal-card-detail-row">
-            <span className="text-muted">Active</span>
+            <span className="text-secondary">Active</span>
             <span>{integration.active ? 'Yes' : 'No'}</span>
           </div>
           <div className="portal-card-detail-row">
-            <span className="text-muted">Last Activity</span>
+            <span className="text-secondary">Last Activity</span>
             <span>{formatDate(integration.lastActivity)}</span>
           </div>
         </div>

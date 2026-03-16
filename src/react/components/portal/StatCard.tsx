@@ -58,7 +58,7 @@ export const StatCard = React.memo(({ label, value, variant = 'default', onClick
         <span className="stat-label">{label}</span>
       )}
       <span className="stat-value">{value}</span>
-      {meta && <span className="text-muted stat-meta">{meta}</span>}
+      {meta && <span className="text-secondary stat-meta">{meta}</span>}
     </>
   );
 

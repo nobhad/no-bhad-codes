@@ -25,7 +25,7 @@ export function ProgressBar({ value, label = 'Progress', showPercent = true, det
         <div className="progress-field-header">
           <span className="field-label">{label}</span>
           {(showPercent || detail) && (
-            <span className="text-muted text-sm">
+            <span className="text-secondary">
               {showPercent ? `${clamped}%` : ''}{detail ? ` ${detail}` : ''}
             </span>
           )}

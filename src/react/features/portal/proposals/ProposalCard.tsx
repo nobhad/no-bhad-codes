@@ -32,11 +32,11 @@ export const ProposalCard = React.memo(({ proposal, onNavigate }: ProposalCardPr
       {/* Header */}
       <div className="portal-card-header">
         <div className="portal-card-title-group">
-          <div className="text-muted"><FileText className="icon-xs" /></div>
-          <div className="portal-card-title-block">
-            <h3 className="text-primary text-sm">{proposal.title}</h3>
+          <div className="text-secondary"><FileText className="icon-xs" /></div>
+          <div className="portal-card-title-group flex-col">
+            <h3 className="text-primary">{proposal.title}</h3>
             {proposal.projectType && (
-              <span className="label text-xs">{proposal.projectType}</span>
+              <span className="label">{proposal.projectType}</span>
             )}
           </div>
         </div>
@@ -51,27 +51,27 @@ export const ProposalCard = React.memo(({ proposal, onNavigate }: ProposalCardPr
         {proposal.amount != null && (
           <div className="portal-card-meta-item">
             <DollarSign className="icon-xs" />
-            <span className="text-xs">{formatCurrency(proposal.amount)}</span>
+            <span>{formatCurrency(proposal.amount)}</span>
           </div>
         )}
 
         {proposal.selectedTier && (
           <div className="portal-card-meta-item">
             <Layers className="icon-xs" />
-            <span className="text-xs">{proposal.selectedTier}</span>
+            <span>{proposal.selectedTier}</span>
           </div>
         )}
 
         {proposal.sentAt && (
           <div className="portal-card-meta-item">
             <Calendar className="icon-xs" />
-            <span className="text-xs">Sent {formatCardDate(proposal.sentAt)}</span>
+            <span>Sent {formatCardDate(proposal.sentAt)}</span>
           </div>
         )}
 
         {dueDaysText && (
           <div className={cn('portal-card-meta-item', overdue && 'text-primary')}>
-            <span className="text-xs">{dueDaysText}</span>
+            <span>{dueDaysText}</span>
           </div>
         )}
       </div>
@@ -79,7 +79,7 @@ export const ProposalCard = React.memo(({ proposal, onNavigate }: ProposalCardPr
       {/* Actions */}
       {onNavigate && (
         <div className="portal-card-actions">
-          <button className="btn-ghost text-sm" onClick={handleClick}>
+          <button className="btn-ghost" onClick={handleClick}>
             View Proposal
             <ChevronRight className="icon-xs" />
           </button>

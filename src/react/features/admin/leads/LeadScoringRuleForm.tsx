@@ -192,7 +192,7 @@ export function LeadScoringRuleForm({
       <div className="form-grid">
         {/* Name */}
         <div className="form-group">
-          <label className="form-label" htmlFor="rule-name">Name</label>
+          <label className="field-label" htmlFor="rule-name">Name</label>
           <input
             id="rule-name"
             type="text"
@@ -206,7 +206,7 @@ export function LeadScoringRuleForm({
 
         {/* Description */}
         <div className="form-group">
-          <label className="form-label" htmlFor="rule-description">Description</label>
+          <label className="field-label" htmlFor="rule-description">Description</label>
           <input
             id="rule-description"
             type="text"
@@ -220,7 +220,7 @@ export function LeadScoringRuleForm({
         {/* Field + Operator row */}
         <div className="form-row form-row--half">
           <div className="form-group">
-            <label className="form-label" htmlFor="rule-field">Field</label>
+            <label className="field-label" htmlFor="rule-field">Field</label>
             <select
               id="rule-field"
               className="form-input"
@@ -235,7 +235,7 @@ export function LeadScoringRuleForm({
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="rule-operator">Operator</label>
+            <label className="field-label" htmlFor="rule-operator">Operator</label>
             <select
               id="rule-operator"
               className="form-input"
@@ -253,7 +253,7 @@ export function LeadScoringRuleForm({
         {/* Threshold Value */}
         {needsThreshold && (
           <div className="form-group">
-            <label className="form-label" htmlFor="rule-threshold">
+            <label className="field-label" htmlFor="rule-threshold">
               Threshold Value
               {form.operator === 'in' && (
                 <span className="field-label field-label--inline"> (comma-separated)</span>
@@ -274,7 +274,7 @@ export function LeadScoringRuleForm({
         {/* Points + Active row */}
         <div className="form-row form-row--half">
           <div className="form-group">
-            <label className="form-label" htmlFor="rule-points">Points</label>
+            <label className="field-label" htmlFor="rule-points">Points</label>
             <input
               id="rule-points"
               type="number"
@@ -288,7 +288,7 @@ export function LeadScoringRuleForm({
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="rule-active">Status</label>
+            <label className="field-label" htmlFor="rule-active">Status</label>
             <select
               id="rule-active"
               className="form-input"

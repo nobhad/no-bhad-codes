@@ -37,7 +37,7 @@ export function WorkflowsManager({ getAuthToken, showNotification, onNavigate }:
   // Individual subtab views
   if (activeSubtab === 'approvals' || activeSubtab === 'triggers') {
     return (
-      <div className="section">
+      <div>
         <React.Suspense fallback={<LoadingState message="Loading workflows..." />}>
           <WorkflowsTable
             onNavigate={onNavigate}
@@ -51,7 +51,7 @@ export function WorkflowsManager({ getAuthToken, showNotification, onNavigate }:
 
   if (activeSubtab === 'email-templates') {
     return (
-      <div className="section">
+      <div>
         <React.Suspense fallback={<LoadingState message="Loading email templates..." />}>
           <EmailTemplatesManager
             onNavigate={onNavigate}
@@ -65,7 +65,7 @@ export function WorkflowsManager({ getAuthToken, showNotification, onNavigate }:
 
   // Overview - show all tables stacked with default pagination of 10
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>}>
       <React.Suspense fallback={<LoadingState message="Loading workflows..." />}>
         <section className="overview-table-section">
           <WorkflowsTable

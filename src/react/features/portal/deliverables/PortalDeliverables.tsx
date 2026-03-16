@@ -174,7 +174,7 @@ export function PortalDeliverables({ getAuthToken }: PortalDeliverablesProps) {
                     </span>
                   )}
                 </div>
-                <span className="text-muted text-xs">
+                <span className="text-secondary">
                   {completedTasks}/{milestoneTasks.length}
                 </span>
               </>
@@ -202,23 +202,23 @@ export function PortalDeliverables({ getAuthToken }: PortalDeliverablesProps) {
                         {task.status === 'completed' ? (
                           <CheckCircle2 className="icon-sm text-status-completed" />
                         ) : (
-                          <Clock className="icon-sm text-muted" />
+                          <Clock className="icon-sm text-secondary" />
                         )}
-                        <span className={cn(task.status === 'completed' && 'text-muted pd-completed-text')}>
+                        <span className={cn(task.status === 'completed' && 'text-secondary pd-completed-text')}>
                           {task.title}
                         </span>
                         {task.due_date && (
-                          <span className="text-muted text-xs">{formatDate(task.due_date)}</span>
+                          <span className="text-secondary">{formatDate(task.due_date)}</span>
                         )}
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-muted text-sm">No tasks in this milestone yet.</p>
+                  <p className="text-secondary">No tasks in this milestone yet.</p>
                 )}
 
                 {allCompleted && milestone.completed_date && (
-                  <p className="text-muted text-xs">
+                  <p className="text-secondary">
                     Completed on {formatDate(milestone.completed_date, 'label')}
                   </p>
                 )}

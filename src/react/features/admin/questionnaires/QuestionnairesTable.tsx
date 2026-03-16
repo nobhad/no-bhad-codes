@@ -413,7 +413,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                 </PortalTableCell>
                 <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
-                    <ClipboardList className="cell-icon" />
+                    <ClipboardList className="icon-sm" />
                     <div className="cell-content">
                       <span className="cell-title">
                         {decodeHtmlEntities(questionnaire.questionnaire_name || questionnaire.title)}

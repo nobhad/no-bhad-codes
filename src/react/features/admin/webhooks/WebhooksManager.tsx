@@ -96,7 +96,7 @@ export function WebhooksManager({
   }
 
   return (
-    <>
+    <div>
       <WebhookListView
         containerRef={containerRef}
         webhooks={data.webhooks}
@@ -149,7 +149,7 @@ export function WebhooksManager({
         loading={deleteDialog.isLoading}
         onConfirm={() => deleteDialog.confirm(data.handleDelete)}
       />
-    </>
+    </div>
   );
 }
 

@@ -71,14 +71,14 @@ export function PaymentScheduleView(_props: PaymentScheduleViewProps) {
   const installments = useMemo(() => installmentData?.installments || [], [installmentData]);
   const summary = summaryData?.summary;
 
-  if (loadingInstallments) return <div ref={containerRef} className="section"><LoadingState message="Loading payment schedule..." /></div>;
-  if (installmentError) return <div ref={containerRef} className="section"><ErrorState message={installmentError} onRetry={refetch} /></div>;
+  if (loadingInstallments) return <div ref={containerRef}><LoadingState message="Loading payment schedule..." /></div>;
+  if (installmentError) return <div ref={containerRef}><ErrorState message={installmentError} onRetry={refetch} /></div>;
   if (installments.length === 0) {
-    return <div ref={containerRef} className="section"><EmptyState message="No payment schedule has been set up yet." /></div>;
+    return <div ref={containerRef}><EmptyState message="No payment schedule has been set up yet." /></div>;
   }
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef}>
       {/* Summary Card */}
       {summary && (
         <div className="card" style={{ marginBottom: 'var(--spacing-md)' }}>

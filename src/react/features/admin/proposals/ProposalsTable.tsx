@@ -447,7 +447,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
                 </PortalTableCell>
                 <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
-                    <FileText className="cell-icon" />
+                    <FileText className="icon-sm" />
                     <div className="cell-content">
                       <span className="cell-title">{proposal.title}</span>
                       {proposal.clientId && onNavigate ? (
@@ -478,7 +478,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
                   onStatusChange={(newStatus) => handleStatusChange(proposal.id, newStatus)}
                   ariaLabel="Change proposal status"
                 />
-                <PortalTableCell className="date-cell">
+                <PortalTableCell className="date-col">
                   <div className="cell-content">
                     <span className="cell-title">{formatDate(proposal.createdAt)}</span>
                     {proposal.validUntil && (
