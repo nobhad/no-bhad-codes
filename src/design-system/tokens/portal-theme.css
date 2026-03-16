@@ -39,7 +39,7 @@
  * Uses body[data-page] for higher specificity than :root in colors.css
  * ============================================ */
 body[data-page="admin"],
-body[data-page="client-portal"] {
+body[data-page="client"] {
   /* Portal uses mono font everywhere — set on body so Radix portals inherit */
   font-family: var(--font-family-mono);
 
@@ -485,6 +485,14 @@ body[data-page="client-portal"] {
   --dropdown-radius: var(--border-radius-sm);
 
   /* ----------------------------------------
+   * FILTER TOKENS — theme-aware native control filters
+   * Light mode: native controls are already visible, no filter needed.
+   * Dark mode override below sets invert(1) so dark native controls
+   * (e.g. date picker calendar icon) become visible on dark backgrounds.
+   * ---------------------------------------- */
+  --filter-invert-controls: none;
+
+  /* ----------------------------------------
    * UTILITY ALIASES
    * Map non-standard token names used in component CSS.
    * ---------------------------------------- */
@@ -500,11 +508,12 @@ body[data-page="client-portal"] {
  * Near-black background, white text.
  * ============================================ */
 html[data-theme="dark"] body[data-page="admin"],
-html[data-theme="dark"] body[data-page="client-portal"] {
+html[data-theme="dark"] body[data-page="client"] {
   --color-text-primary: #ffffff;
   --color-bg-primary: #171717;
   --color-bg-hover:   color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 6%);
   --form-btn-shadow: var(--portal-alpha-black-30);
+  --filter-invert-controls: invert(1);
 }
 
 /* ============================================
@@ -527,7 +536,7 @@ html[data-theme="dark"] body[data-page="client-portal"] {
  * data-page="admin" — without this, html inherits the main-site :root value.
  * ============================================ */
 html:has(body[data-page="admin"]),
-html:has(body[data-page="client-portal"]) {
+html:has(body[data-page="client"]) {
   --color-bg-primary: var(--portal-neutral-0); /* Portal dark = black */
   background-color: var(--color-bg-primary);
   height: 100%;
@@ -537,7 +546,7 @@ html:has(body[data-page="client-portal"]) {
  * HTML ELEMENT - PORTAL LIGHT MODE
  * ============================================ */
 html[data-theme="light"]:has(body[data-page="admin"]),
-html[data-theme="light"]:has(body[data-page="client-portal"]) {
+html[data-theme="light"]:has(body[data-page="client"]) {
   --color-bg-primary: var(--color-off-white); /* Portal light = #e5e5e5 */
   background-color: var(--color-bg-primary);
 }
@@ -601,35 +610,52 @@ html[data-theme="light"]:has(body[data-page="client-portal"]) {
 }
 
 /* =================================================================
-   CHECKBOX SIZING — unlayered to override @layer components.
-   Fixed size so checkboxes don't collapse to dots.
+   CHECKBOX — SINGLE SOURCE OF TRUTH (unlayered)
+   Flat square with text-primary border. Checked = filled text-primary,
+   checkmark = bg-primary. Must be unlayered to beat all @layer rules.
    ================================================================= */
-.portal .portal-checkbox,
-.portal .data-table-checkbox {
+.portal .portal-checkbox {
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: var(--space-2);
   height: var(--space-2);
   min-width: var(--space-2);
   min-height: var(--space-2);
+  flex-shrink: 0;
+  border: var(--border-width-px) solid var(--color-text-primary);
+  border-radius: 0;
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* SVG inside checkbox fills the container, not the text 1em */
-.portal .portal-checkbox svg.lucide,
-.portal .data-table-checkbox svg.lucide {
+.portal .portal-checkbox:focus-visible {
+  border-color: var(--color-accent);
+}
+
+.portal .portal-checkbox:disabled {
+  cursor: not-allowed;
+  opacity: var(--opacity-disabled);
+}
+
+.portal .portal-checkbox[data-state="checked"],
+.portal .portal-checkbox.is-completed {
+  background: var(--color-text-primary);
+  border-color: var(--color-text-primary);
+  color: var(--color-bg-primary);
+}
+
+.portal .portal-checkbox svg.lucide {
   width: 100%;
   height: 100%;
   margin: 0;
-}
-
-/* Checkbox check icon — must contrast against the filled background */
-.portal .portal-checkbox[data-state="checked"] svg.lucide,
-.portal .portal-checkbox.is-completed svg.lucide {
-  color: var(--color-bg-primary);
+  color: inherit;
+  stroke: currentColor;
   stroke-width: 3.5;
-}
-
-/* Table checkbox — checkmark must be light against brand-primary background */
-.portal .data-table-checkbox[data-state="checked"] svg.lucide {
-  color: var(--color-off-white);
 }
 
 /* Muted contexts — text-muted containers should pass through muted color */
@@ -668,22 +694,13 @@ html[data-theme="light"]:has(body[data-page="client-portal"]) {
   display: flex;
 }
 
-/* Checkbox — unlayered overrides so they beat @layer components */
-.portal .portal-checkbox {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .portal .portal-checkbox-indicator {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.portal .portal-checkbox svg.lucide {
-  width: calc(var(--space-2) * 0.75);
-  height: calc(var(--space-2) * 0.75);
+  width: 100%;
+  height: 100%;
+  color: inherit;
 }
 
 /* Status dot in dropdown items: use base icon-size-xs (12px), not full 1em.
@@ -724,7 +741,7 @@ html[data-theme="light"]:has(body[data-page="client-portal"]) {
  * ============================================ */
 @media (--compact-mobile) {
   body[data-page="admin"],
-  body[data-page="client-portal"] {
+  body[data-page="client"] {
     --portal-card-padding: var(--space-1) var(--space-2); /* 8px 16px */
     --portal-panel-padding-x: var(--space-2); /* 16px */
   }
