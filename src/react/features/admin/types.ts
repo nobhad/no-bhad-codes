@@ -333,6 +333,7 @@ export interface Client {
   billing_name?: string | null;
   billing_company?: string | null;
   billing_email?: string | null;
+  billing_phone?: string | null;
   billing_address?: string | null;
   billing_address2?: string | null;
   billing_city?: string | null;

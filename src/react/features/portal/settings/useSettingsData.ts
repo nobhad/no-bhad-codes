@@ -83,6 +83,9 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
 
       // Billing address — server returns flat billing_* fields, map to BillingAddress shape
       const billingData: BillingAddress = {
+        billing_name: (rawClient.billing_name ?? '') as string || undefined,
+        billing_phone: (rawClient.billing_phone ?? rawClient.phone ?? '') as string || undefined,
+        billing_email: (rawClient.billing_email ?? rawClient.email ?? '') as string || undefined,
         street_address: (rawClient.billing_address ?? rawClient.address ?? '') as string || undefined,
         city: (rawClient.billing_city ?? rawClient.city ?? '') as string || undefined,
         state: (rawClient.billing_state ?? rawClient.state ?? '') as string || undefined,
@@ -135,6 +138,9 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
     try {
       // Map frontend field names to server field names
       const serverPayload = {
+        billing_name: updates.billing_name,
+        phone: updates.billing_phone,
+        email: updates.billing_email,
         address: updates.street_address,
         city: updates.city,
         state: updates.state,

@@ -339,7 +339,7 @@ router.put(
       return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
-    const { billing_name, company, address, address2, city, state, zip, country } = req.body;
+    const { billing_name, company, address, address2, city, state, zip, country, phone, email } = req.body;
 
     await clientService.updateClientBilling(req.user!.id, {
       billing_name,
@@ -349,7 +349,9 @@ router.put(
       city,
       state,
       zip,
-      country
+      country,
+      phone,
+      email
     });
 
     // Invalidate admin client detail cache so billing shows immediately

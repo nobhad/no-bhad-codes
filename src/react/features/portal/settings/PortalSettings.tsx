@@ -28,6 +28,9 @@ export interface ClientProfile {
 }
 
 export interface BillingAddress {
+  billing_name?: string;
+  billing_phone?: string;
+  billing_email?: string;
   street_address?: string;
   city?: string;
   state?: string;
