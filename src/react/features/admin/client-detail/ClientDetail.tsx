@@ -9,8 +9,7 @@ import {
   MoreHorizontal,
   Pencil,
   Archive,
-  Trash2,
-  ChevronDown
+  Trash2
 } from 'lucide-react';
 import { IconButton, TabList, TabPanel } from '@react/factories';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
@@ -29,7 +28,7 @@ import { ContactsTab } from './tabs/ContactsTab';
 import { ActivityTab } from './tabs/ActivityTab';
 import { ProjectsTab } from './tabs/ProjectsTab';
 import { NotesTab } from './tabs/NotesTab';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { StatusDropdown } from '@react/components/portal/StatusDropdownCell';
 import type { ClientDetailTab, ClientStatus } from '../types';
 import { CLIENT_STATUS_CONFIG, CLIENT_TYPE_LABELS } from '../types';
 import { buildEndpoint } from '@/constants/api-endpoints';
@@ -211,7 +210,7 @@ export function ClientDetail({
   }
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef}>
       {/* Tabs — top of page, like all other subtab nav */}
       <TabList
         tabs={TABS}
@@ -234,30 +233,12 @@ export function ClientDetail({
               <h1 className="detail-title">
                 {getDisplayName()}
               </h1>
-              <PortalDropdown>
-                <PortalDropdownTrigger asChild>
-                  <button className="status-dropdown-trigger" aria-label="Change client status">
-                    <StatusBadge status={getStatusVariant(client.status)}>
-                      {CLIENT_STATUS_CONFIG[client.status]?.label || client.status}
-                    </StatusBadge>
-                    <ChevronDown className="status-dropdown-caret" />
-                  </button>
-                </PortalDropdownTrigger>
-                <PortalDropdownContent>
-                  {Object.entries(CLIENT_STATUS_CONFIG)
-                    .filter(([status]) => status !== client.status)
-                    .map(([status, config]) => (
-                      <PortalDropdownItem
-                        key={status}
-                        onClick={() => handleStatusChange(status as ClientStatus)}
-                      >
-                        <StatusBadge status={getStatusVariant(status)} size="sm">
-                          {config.label}
-                        </StatusBadge>
-                      </PortalDropdownItem>
-                    ))}
-                </PortalDropdownContent>
-              </PortalDropdown>
+              <StatusDropdown
+                status={client.status}
+                statusConfig={CLIENT_STATUS_CONFIG}
+                onStatusChange={(newStatus) => handleStatusChange(newStatus as ClientStatus)}
+                ariaLabel="Change client status"
+              />
             </div>
 
             <div className="detail-meta">

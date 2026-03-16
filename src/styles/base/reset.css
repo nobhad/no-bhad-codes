@@ -343,7 +343,8 @@ details > summary:focus-visible {
   box-shadow: none;
 }
 
-/* Dropdowns - focus wraps entire dropdown when open */
+/* Dropdowns - unlayered base (must beat @layer components in portal-dropdown.css).
+   Full dropdown styles in portal-dropdown.css + project-detail.css. */
 .custom-dropdown {
   border-radius: var(--border-radius-lg, 12px);
 }
@@ -359,8 +360,8 @@ details > summary:focus-visible {
   outline: none;
 }
 
-.custom-dropdown.open .custom-dropdown-trigger:focus,
-.custom-dropdown.open .custom-dropdown-trigger:focus-visible {
+.custom-dropdown.open .dropdown-trigger--custom:focus,
+.custom-dropdown.open .dropdown-trigger--custom:focus-visible {
   outline: none;
   box-shadow: none;
 }

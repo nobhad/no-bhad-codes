@@ -9,7 +9,6 @@ import { createPortal } from 'react-dom';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   X,
-  ChevronDown,
   Check,
   Pin,
   Trash2,
@@ -17,14 +16,8 @@ import {
 } from 'lucide-react';
 import { CopyEmailButton } from '@react/components/portal';
 import { cn } from '@react/lib/utils';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { StatusDropdown } from '@react/components/portal/StatusDropdownCell';
 import { IconButton } from '@react/factories';
-import {
-  PortalDropdown,
-  PortalDropdownTrigger,
-  PortalDropdownContent,
-  PortalDropdownItem
-} from '@react/components/portal/PortalDropdown';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import type { Lead, LeadStatus } from '../types';
 import { LEAD_STATUS_CONFIG, LEAD_SOURCE_LABELS, PROJECT_TYPE_LABELS } from '../types';
@@ -268,30 +261,12 @@ export function LeadDetailPanel({
         {/* Status row */}
         <div className="panel-status-row">
           <span className="field-label">Status</span>
-          <PortalDropdown>
-            <PortalDropdownTrigger asChild>
-              <button className="status-dropdown-trigger" aria-label="Change lead status">
-                <StatusBadge status={getStatusVariant(lead.status)}>
-                  {LEAD_STATUS_CONFIG[lead.status]?.label || lead.status}
-                </StatusBadge>
-                <ChevronDown className="status-dropdown-caret" />
-              </button>
-            </PortalDropdownTrigger>
-            <PortalDropdownContent sideOffset={0} align="start">
-              {Object.entries(LEAD_STATUS_CONFIG)
-                .filter(([status]) => status !== lead.status)
-                .map(([status, config]) => (
-                  <PortalDropdownItem
-                    key={status}
-                    onClick={() => onStatusChange?.(lead.id, status as LeadStatus)}
-                  >
-                    <StatusBadge status={getStatusVariant(status)} size="sm">
-                      {config.label}
-                    </StatusBadge>
-                  </PortalDropdownItem>
-                ))}
-            </PortalDropdownContent>
-          </PortalDropdown>
+          <StatusDropdown
+            status={lead.status}
+            statusConfig={LEAD_STATUS_CONFIG}
+            onStatusChange={(newStatus) => onStatusChange?.(lead.id, newStatus as LeadStatus)}
+            ariaLabel="Change lead status"
+          />
         </div>
 
         {/* Tabs */}

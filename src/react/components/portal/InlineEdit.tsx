@@ -473,11 +473,11 @@ export function InlineSelect({
       >
         <PortalDropdown defaultOpen onOpenChange={(open) => { if (!open) cancelEditing(); }}>
           <PortalDropdownTrigger asChild>
-            <button className="form-dropdown-trigger" disabled={isSaving}>
-              <span className="form-dropdown-value">
+            <button className="dropdown-trigger--form" disabled={isSaving}>
+              <span className="dropdown-value--form">
                 {triggerLabel}
               </span>
-              <ChevronDown className="form-dropdown-caret" />
+              <ChevronDown className="dropdown-caret--form" />
             </button>
           </PortalDropdownTrigger>
           <PortalDropdownContent align="start" sideOffset={0}>

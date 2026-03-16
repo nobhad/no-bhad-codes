@@ -317,7 +317,7 @@
    Context-specific variant of .dropdown-trigger (portal-dropdown.css).
    Differs: fixed width (matches menu), transparent background, font: inherit.
    ===================================================== */
-.status-dropdown-trigger {
+.dropdown-trigger--status {
   display: inline-flex;
   flex-direction: row;
   align-items: center;
@@ -340,24 +340,24 @@
   box-sizing: border-box;
 }
 
-.status-dropdown-trigger:focus {
+.dropdown-trigger--status:focus {
   outline: none;
 }
 
 /* When open, remove bottom border to connect with menu */
-.status-dropdown-trigger[data-state="open"] {
+.dropdown-trigger--status[data-state="open"] {
   border-bottom: none;
 }
 
 /* Status indicator inside trigger - align left */
-.status-dropdown-trigger > .status-indicator {
+.dropdown-trigger--status > .status-indicator {
   flex: 0 0 auto;
   order: 0;
 }
 
 /* Caret icon in status dropdown - positioned absolutely on right */
 /* Uses --dropdown-padding-x for consistent spacing with left padding */
-.status-dropdown-trigger > .status-dropdown-caret {
+.dropdown-trigger--status > .dropdown-caret--status {
   position: absolute;
   right: var(--dropdown-padding-x);
   top: 50%;
@@ -369,7 +369,7 @@
 }
 
 /* Rotate caret when dropdown is open */
-[data-state="open"] > .status-dropdown-caret {
+[data-state="open"] > .dropdown-caret--status {
   transform: translateY(-50%) rotate(180deg);
 }
 

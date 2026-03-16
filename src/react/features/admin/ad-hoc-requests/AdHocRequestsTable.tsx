@@ -1,10 +1,9 @@
 import * as React from 'react';
-import { useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   Zap,
   Inbox,
-  User,
-  ChevronDown
+  User
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -14,7 +13,7 @@ import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilt
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { formatDate } from '@react/utils/formatDate';
 import { formatCurrency } from '@/utils/format-utils';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { StatusDropdownCell } from '@react/components/portal/StatusDropdownCell';
 import {
   PortalTable,
   PortalTableHeader,
@@ -26,23 +25,18 @@ import {
   PortalTableLoading,
   PortalTableError
 } from '@react/components/portal/PortalTable';
-import {
-  PortalDropdown,
-  PortalDropdownTrigger,
-  PortalDropdownContent,
-  PortalDropdownItem
-} from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
+import { useEntityOptions } from '@react/hooks/useEntityOptions';
 import { AD_HOC_REQUESTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import { useListFetch } from '@react/factories/useDataFetch';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
 import { executeUpdateWithToast, executeWithToast } from '@/utils/api-wrappers';
-import { NOTIFICATIONS } from '@/constants/notifications';
+import { CreateAdHocRequestModal } from '../modals/CreateEntityModals';
 
 interface AdHocRequest {
   id: number;
@@ -155,6 +149,9 @@ function sortAdHocRequests(a: AdHocRequest, b: AdHocRequest, sort: SortConfig): 
 
 export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: AdHocRequestsTableProps) {
   const containerRef = useFadeIn();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const { clientOptions: entityClients, projectOptions: entityProjects } = useEntityOptions(createOpen);
 
   // Build endpoint with optional query params
   const endpoint = useMemo(() => {
@@ -282,6 +279,40 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
     [setFilter]
   );
 
+  // Merge entity options (full list) with locally-derived options (dedup by value)
+  const clientOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    entityClients.forEach((o) => map.set(o.value, o.label));
+    requests.forEach((r) => { if (r.clientId && r.clientName) map.set(String(r.clientId), r.clientName); });
+    return Array.from(map, ([value, label]) => ({ value, label }));
+  }, [requests, entityClients]);
+
+  const projectOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    entityProjects.forEach((o) => map.set(o.value, o.label));
+    requests.forEach((r) => { if (r.projectId && r.projectName) map.set(String(r.projectId), r.projectName); });
+    return Array.from(map, ([value, label]) => ({ value, label }));
+  }, [requests, entityProjects]);
+
+  // Create handler
+  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
+    setCreateLoading(true);
+    try {
+      const res = await apiPost(API_ENDPOINTS.AD_HOC_REQUESTS, formData);
+      if (res.ok) {
+        showNotification?.('Ad-hoc request created successfully', 'success');
+        setCreateOpen(false);
+        refetch();
+      } else {
+        showNotification?.('Failed to create ad-hoc request', 'error');
+      }
+    } catch {
+      showNotification?.('Failed to create ad-hoc request', 'error');
+    } finally {
+      setCreateLoading(false);
+    }
+  }, [showNotification, refetch]);
+
   function getPriorityColor(priority: string): string {
     switch (priority) {
     case 'urgent': return 'var(--status-cancelled)';
@@ -324,7 +355,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
             disabled={filteredRequests.length === 0}
             title="Export to CSV"
           />
-          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="New Request" />
+          <IconButton action="add" onClick={() => setCreateOpen(true)} title="New Request" />
         </>
       }
       bulkActions={
@@ -480,32 +511,12 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                     {request.priority}
                   </span>
                 </PortalTableCell>
-                <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
-                  <PortalDropdown>
-                    <PortalDropdownTrigger asChild>
-                      <button className="status-dropdown-trigger" aria-label="Change request status">
-                        <StatusBadge status={getStatusVariant(request.status)} size="sm">
-                          {AD_HOC_STATUS_CONFIG[request.status]?.label || request.status.replace('-', ' ')}
-                        </StatusBadge>
-                        <ChevronDown className="status-dropdown-caret" />
-                      </button>
-                    </PortalDropdownTrigger>
-                    <PortalDropdownContent sideOffset={0} align="start">
-                      {Object.entries(AD_HOC_STATUS_CONFIG)
-                        .filter(([status]) => status !== request.status)
-                        .map(([status, config]) => (
-                          <PortalDropdownItem
-                            key={status}
-                            onClick={() => handleStatusChange(request.id, status)}
-                          >
-                            <StatusBadge status={getStatusVariant(status)} size="sm">
-                              {config.label}
-                            </StatusBadge>
-                          </PortalDropdownItem>
-                        ))}
-                    </PortalDropdownContent>
-                  </PortalDropdown>
-                </PortalTableCell>
+                <StatusDropdownCell
+                  status={request.status}
+                  statusConfig={AD_HOC_STATUS_CONFIG}
+                  onStatusChange={(newStatus) => handleStatusChange(request.id, newStatus)}
+                  ariaLabel="Change request status"
+                />
                 <PortalTableCell className="text-right">
                   {request.actualHours !== undefined ? (
                     <span>
@@ -539,6 +550,14 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
           )}
         </PortalTableBody>
       </PortalTable>
+      <CreateAdHocRequestModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onSubmit={handleCreate}
+        loading={createLoading}
+        clientOptions={clientOptions}
+        projectOptions={projectOptions}
+      />
     </TableLayout>
   );
 }

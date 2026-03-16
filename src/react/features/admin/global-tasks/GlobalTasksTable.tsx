@@ -10,8 +10,7 @@ import {
   Briefcase,
   Inbox,
   LayoutGrid,
-  List,
-  ChevronDown
+  List
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -21,7 +20,7 @@ import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilt
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { formatDateShort } from '@react/utils/formatDate';
 import { cn } from '@react/lib/utils';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { StatusDropdownCell } from '@react/components/portal/StatusDropdownCell';
 import {
   PortalTable,
   PortalTableHeader,
@@ -33,23 +32,18 @@ import {
   PortalTableLoading,
   PortalTableError
 } from '@react/components/portal/PortalTable';
-import {
-  PortalDropdown,
-  PortalDropdownTrigger,
-  PortalDropdownContent,
-  PortalDropdownItem
-} from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
+import { useEntityOptions } from '@react/hooks/useEntityOptions';
 import { GLOBAL_TASKS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { unwrapApiData, apiFetch, apiPost } from '@/utils/api-client';
 import { formatErrorMessage } from '@/utils/error-utils';
-import { NOTIFICATIONS } from '@/constants/notifications';
+import { CreateTaskModal } from '../modals/CreateEntityModals';
 
 const logger = createLogger('GlobalTasksTable');
 
@@ -154,6 +148,9 @@ function sortTasks(a: Task, b: Task, sort: SortConfig): number {
 
 export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: GlobalTasksTableProps) {
   const containerRef = useFadeIn();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const { projectOptions: entityProjects } = useEntityOptions(createOpen);
   const [isLoading, setIsLoading] = useState(true);
 
   const [error, setError] = useState<string | null>(null);
@@ -308,261 +305,268 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
     [setFilter]
   );
 
-  return (
-    <TableLayout
-      containerRef={containerRef as React.RefObject<HTMLDivElement>}
-      title="TASKS"
-      stats={
-        <TableStats
-          items={[
-            { value: stats.total, label: 'total' },
-            { value: stats.pending, label: 'to do', variant: 'pending' },
-            { value: stats.inProgress, label: 'in progress', variant: 'active' },
-            { value: stats.overdue, label: 'overdue', variant: 'overdue' }
-          ]}
-          tooltip={`${stats.total} Total - ${stats.pending} To Do - ${stats.inProgress} In Progress - ${stats.completed} Done${stats.overdue > 0 ? ` - ${stats.overdue} Overdue` : ''}`}
-        />
+  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
+    setCreateLoading(true);
+    try {
+      const res = await apiPost(API_ENDPOINTS.ADMIN.TASKS, formData);
+      if (res.ok) {
+        showNotification?.('Task created successfully', 'success');
+        setCreateOpen(false);
+        loadTasks();
+      } else {
+        showNotification?.('Failed to create task', 'error');
       }
-      actions={
-        <>
-          <div className="view-toggle">
-            <button
-              onClick={() => setViewMode('list')}
-              className={viewMode === 'list' ? 'is-active' : ''}
-              title="List view"
-            >
-              <List className="icon-sm" />
-            </button>
-            <button
-              onClick={() => setViewMode('kanban')}
-              className={viewMode === 'kanban' ? 'is-active' : ''}
-              title="Board view"
-            >
-              <LayoutGrid className="icon-sm" />
-            </button>
-          </div>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search tasks..."
-          />
-          <FilterDropdown
-            sections={GLOBAL_TASKS_FILTER_CONFIG}
-            values={filterValues}
-            onChange={handleFilterChange}
-          />
-          <IconButton
-            action="download"
-            disabled={filteredTasks.length === 0}
-            title="Export to CSV"
-          />
-          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="Add Task" />
-        </>
-      }
-      bulkActions={
-        <BulkActionsToolbar
-          selectedCount={selection.selectedCount}
-          totalCount={filteredTasks.length}
-          onClearSelection={selection.clearSelection}
-          onSelectAll={() => selection.selectMany(filteredTasks)}
-          allSelected={selection.allSelected && selection.selectedCount === filteredTasks.length}
-          statusOptions={bulkStatusOptions}
-          onStatusChange={handleBulkStatusChange}
-          onDelete={handleBulkDelete}
-        />
-      }
-      pagination={
-        viewMode === 'list' && !isLoading && filteredTasks.length > 0 ? (
-          <TablePagination
-            pageInfo={pagination.pageInfo}
-            page={pagination.page}
-            pageSize={pagination.pageSize}
-            pageSizeOptions={pagination.pageSizeOptions}
-            canGoPrev={pagination.canGoPrev}
-            canGoNext={pagination.canGoNext}
-            onPageSizeChange={pagination.setPageSize}
-            onFirstPage={pagination.firstPage}
-            onPrevPage={pagination.prevPage}
-            onNextPage={pagination.nextPage}
-            onLastPage={pagination.lastPage}
-          />
-        ) : undefined
-      }
-    >
-      {viewMode === 'list' ? (
-        <PortalTable>
-          <PortalTableHeader>
-            <PortalTableRow>
-              <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
-                <Checkbox
-                  checked={selection.allSelected}
-                  onCheckedChange={selection.toggleSelectAll}
-                  aria-label="Select all"
-                />
-              </PortalTableHead>
-              <PortalTableHead
-                className="name-col"
-                sortable
-                sortDirection={sort?.column === 'title' ? sort.direction : null}
-                onClick={() => toggleSort('title')}
-              >
-                Task
-              </PortalTableHead>
-              <PortalTableHead className="project-col">Project</PortalTableHead>
-              <PortalTableHead
-                className="priority-col"
-                sortable
-                sortDirection={sort?.column === 'priority' ? sort.direction : null}
-                onClick={() => toggleSort('priority')}
-              >
-                Priority
-              </PortalTableHead>
-              <PortalTableHead
-                className="status-col"
-                sortable
-                sortDirection={sort?.column === 'status' ? sort.direction : null}
-                onClick={() => toggleSort('status')}
-              >
-                Status
-              </PortalTableHead>
-              <PortalTableHead
-                className="date-col"
-                sortable
-                sortDirection={sort?.column === 'dueDate' ? sort.direction : null}
-                onClick={() => toggleSort('dueDate')}
-              >
-                Due Date
-              </PortalTableHead>
-              <PortalTableHead className="col-actions">Actions</PortalTableHead>
-            </PortalTableRow>
-          </PortalTableHeader>
+    } catch {
+      showNotification?.('Failed to create task', 'error');
+    } finally {
+      setCreateLoading(false);
+    }
+  }, [showNotification, loadTasks]);
 
-          <PortalTableBody animate={!isLoading && !error}>
-            {error ? (
-              <PortalTableError colSpan={7} message={error} onRetry={loadTasks} />
-            ) : isLoading ? (
-              <PortalTableLoading colSpan={7} rows={5} />
-            ) : paginatedTasks.length === 0 ? (
-              <PortalTableEmpty
-                colSpan={7}
-                icon={<Inbox />}
-                message={hasActiveFilters ? 'No tasks match your filters' : 'No tasks yet'}
-              />
-            ) : (
-              paginatedTasks.map((task) => (
-                <PortalTableRow
-                  key={task.id}
-                  clickable
-                  selected={selection.isSelected(task)}
+  return (
+    <div>
+      <TableLayout
+        containerRef={containerRef as React.RefObject<HTMLDivElement>}
+        title="TASKS"
+        stats={
+          <TableStats
+            items={[
+              { value: stats.total, label: 'total' },
+              { value: stats.pending, label: 'to do', variant: 'pending' },
+              { value: stats.inProgress, label: 'in progress', variant: 'active' },
+              { value: stats.overdue, label: 'overdue', variant: 'overdue' }
+            ]}
+            tooltip={`${stats.total} Total - ${stats.pending} To Do - ${stats.inProgress} In Progress - ${stats.completed} Done${stats.overdue > 0 ? ` - ${stats.overdue} Overdue` : ''}`}
+          />
+        }
+        actions={
+          <>
+            <div className="view-toggle">
+              <button
+                onClick={() => setViewMode('list')}
+                className={viewMode === 'list' ? 'is-active' : ''}
+                title="List view"
+              >
+                <List className="icon-sm" />
+              </button>
+              <button
+                onClick={() => setViewMode('kanban')}
+                className={viewMode === 'kanban' ? 'is-active' : ''}
+                title="Board view"
+              >
+                <LayoutGrid className="icon-sm" />
+              </button>
+            </div>
+            <SearchFilter
+              value={search}
+              onChange={setSearch}
+              placeholder="Search tasks..."
+            />
+            <FilterDropdown
+              sections={GLOBAL_TASKS_FILTER_CONFIG}
+              values={filterValues}
+              onChange={handleFilterChange}
+            />
+            <IconButton
+              action="download"
+              disabled={filteredTasks.length === 0}
+              title="Export to CSV"
+            />
+            <IconButton action="add" onClick={() => setCreateOpen(true)} title="Add Task" />
+          </>
+        }
+        bulkActions={
+          <BulkActionsToolbar
+            selectedCount={selection.selectedCount}
+            totalCount={filteredTasks.length}
+            onClearSelection={selection.clearSelection}
+            onSelectAll={() => selection.selectMany(filteredTasks)}
+            allSelected={selection.allSelected && selection.selectedCount === filteredTasks.length}
+            statusOptions={bulkStatusOptions}
+            onStatusChange={handleBulkStatusChange}
+            onDelete={handleBulkDelete}
+          />
+        }
+        pagination={
+          viewMode === 'list' && !isLoading && filteredTasks.length > 0 ? (
+            <TablePagination
+              pageInfo={pagination.pageInfo}
+              page={pagination.page}
+              pageSize={pagination.pageSize}
+              pageSizeOptions={pagination.pageSizeOptions}
+              canGoPrev={pagination.canGoPrev}
+              canGoNext={pagination.canGoNext}
+              onPageSizeChange={pagination.setPageSize}
+              onFirstPage={pagination.firstPage}
+              onPrevPage={pagination.prevPage}
+              onNextPage={pagination.nextPage}
+              onLastPage={pagination.lastPage}
+            />
+          ) : undefined
+        }
+      >
+        {viewMode === 'list' ? (
+          <PortalTable>
+            <PortalTableHeader>
+              <PortalTableRow>
+                <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    checked={selection.allSelected}
+                    onCheckedChange={selection.toggleSelectAll}
+                    aria-label="Select all"
+                  />
+                </PortalTableHead>
+                <PortalTableHead
+                  className="name-col"
+                  sortable
+                  sortDirection={sort?.column === 'title' ? sort.direction : null}
+                  onClick={() => toggleSort('title')}
                 >
-                  <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
-                    <Checkbox
-                      checked={selection.isSelected(task)}
-                      onCheckedChange={() => selection.toggleSelection(task)}
-                      aria-label={`Select ${task.title}`}
-                    />
-                  </PortalTableCell>
-                  <PortalTableCell className="primary-cell name-cell">
-                    <div className="cell-content">
+                Task
+                </PortalTableHead>
+                <PortalTableHead className="project-col">Project</PortalTableHead>
+                <PortalTableHead
+                  className="priority-col"
+                  sortable
+                  sortDirection={sort?.column === 'priority' ? sort.direction : null}
+                  onClick={() => toggleSort('priority')}
+                >
+                Priority
+                </PortalTableHead>
+                <PortalTableHead
+                  className="status-col"
+                  sortable
+                  sortDirection={sort?.column === 'status' ? sort.direction : null}
+                  onClick={() => toggleSort('status')}
+                >
+                Status
+                </PortalTableHead>
+                <PortalTableHead
+                  className="date-col"
+                  sortable
+                  sortDirection={sort?.column === 'dueDate' ? sort.direction : null}
+                  onClick={() => toggleSort('dueDate')}
+                >
+                Due Date
+                </PortalTableHead>
+                <PortalTableHead className="col-actions">Actions</PortalTableHead>
+              </PortalTableRow>
+            </PortalTableHeader>
+
+            <PortalTableBody animate={!isLoading && !error}>
+              {error ? (
+                <PortalTableError colSpan={7} message={error} onRetry={loadTasks} />
+              ) : isLoading ? (
+                <PortalTableLoading colSpan={7} rows={5} />
+              ) : paginatedTasks.length === 0 ? (
+                <PortalTableEmpty
+                  colSpan={7}
+                  icon={<Inbox />}
+                  message={hasActiveFilters ? 'No tasks match your filters' : 'No tasks yet'}
+                />
+              ) : (
+                paginatedTasks.map((task) => (
+                  <PortalTableRow
+                    key={task.id}
+                    clickable
+                    selected={selection.isSelected(task)}
+                  >
+                    <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        checked={selection.isSelected(task)}
+                        onCheckedChange={() => selection.toggleSelection(task)}
+                        aria-label={`Select ${task.title}`}
+                      />
+                    </PortalTableCell>
+                    <PortalTableCell className="primary-cell name-cell">
+                      <div className="cell-content">
+                        {task.projectName && (
+                          <span className="project-stacked">{task.projectName}</span>
+                        )}
+                        <span className="cell-title">{task.title}</span>
+                        {task.description && (
+                          <span className="cell-subtitle">{task.description}</span>
+                        )}
+                        <span className="priority-stacked">
+                          <span
+                            className="priority-indicator"
+                            data-priority={task.priority}
+                            style={{ backgroundColor: PRIORITY_CONFIG[task.priority]?.color }}
+                          />
+                          {PRIORITY_CONFIG[task.priority]?.label}
+                        </span>
+                        {task.dueDate && (
+                          <span className="date-stacked">{formatDateShort(task.dueDate)}</span>
+                        )}
+                      </div>
+                    </PortalTableCell>
+                    <PortalTableCell className="project-cell">
                       {task.projectName && (
-                        <span className="project-stacked">{task.projectName}</span>
+                        <span
+                          onClick={() => onNavigate?.('project-detail', task.projectId != null ? String(task.projectId) : undefined)}
+                          className="table-link"
+                        >
+                          {task.projectName}
+                        </span>
                       )}
-                      <span className="cell-title">{task.title}</span>
-                      {task.description && (
-                        <span className="cell-subtitle">{task.description}</span>
-                      )}
-                      <span className="priority-stacked">
+                    </PortalTableCell>
+                    <PortalTableCell className="priority-cell">
+                      <div className="cell-with-icon">
                         <span
                           className="priority-indicator"
                           data-priority={task.priority}
                           style={{ backgroundColor: PRIORITY_CONFIG[task.priority]?.color }}
                         />
-                        {PRIORITY_CONFIG[task.priority]?.label}
-                      </span>
+                        <span>{PRIORITY_CONFIG[task.priority]?.label}</span>
+                      </div>
+                    </PortalTableCell>
+                    <StatusDropdownCell
+                      status={task.status}
+                      statusConfig={TASK_STATUS_CONFIG}
+                      onStatusChange={(newStatus) => handleStatusChange(task.id, newStatus)}
+                      ariaLabel="Change task status"
+                    />
+                    <PortalTableCell className="date-cell">
                       {task.dueDate && (
-                        <span className="date-stacked">{formatDateShort(task.dueDate)}</span>
+                        <span
+                          className={cn(
+                            'date-value',
+                            new Date(task.dueDate) < new Date() && task.status !== 'completed'
+                              ? 'overdue'
+                              : ''
+                          )}
+                        >
+                          {formatDateShort(task.dueDate)}
+                        </span>
                       )}
-                    </div>
-                  </PortalTableCell>
-                  <PortalTableCell className="project-cell">
-                    {task.projectName && (
-                      <span
-                        onClick={() => onNavigate?.('project-detail', task.projectId != null ? String(task.projectId) : undefined)}
-                        className="table-link"
-                      >
-                        {task.projectName}
-                      </span>
-                    )}
-                  </PortalTableCell>
-                  <PortalTableCell className="priority-cell">
-                    <div className="cell-with-icon">
-                      <span
-                        className="priority-indicator"
-                        data-priority={task.priority}
-                        style={{ backgroundColor: PRIORITY_CONFIG[task.priority]?.color }}
-                      />
-                      <span>{PRIORITY_CONFIG[task.priority]?.label}</span>
-                    </div>
-                  </PortalTableCell>
-                  <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
-                    <PortalDropdown>
-                      <PortalDropdownTrigger asChild>
-                        <button className="status-dropdown-trigger" aria-label="Change task status">
-                          <StatusBadge status={getStatusVariant(task.status)}>
-                            {TASK_STATUS_CONFIG[task.status]?.label || task.status}
-                          </StatusBadge>
-                          <ChevronDown className="status-dropdown-caret" />
-                        </button>
-                      </PortalDropdownTrigger>
-                      <PortalDropdownContent sideOffset={0} align="start">
-                        {Object.entries(TASK_STATUS_CONFIG)
-                          .filter(([status]) => status !== task.status)
-                          .map(([status, config]) => (
-                            <PortalDropdownItem
-                              key={status}
-                              onClick={() => handleStatusChange(task.id, status)}
-                            >
-                              <StatusBadge status={getStatusVariant(status)} size="sm">
-                                {config.label}
-                              </StatusBadge>
-                            </PortalDropdownItem>
-                          ))}
-                      </PortalDropdownContent>
-                    </PortalDropdown>
-                  </PortalTableCell>
-                  <PortalTableCell className="date-cell">
-                    {task.dueDate && (
-                      <span
-                        className={cn(
-                          'date-value',
-                          new Date(task.dueDate) < new Date() && task.status !== 'completed'
-                            ? 'overdue'
-                            : ''
-                        )}
-                      >
-                        {formatDateShort(task.dueDate)}
-                      </span>
-                    )}
-                  </PortalTableCell>
-                  <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                    <div className="table-actions">
-                      <IconButton action="view" title="View" />
-                      <IconButton action="edit" title="Edit" />
-                    </div>
-                  </PortalTableCell>
-                </PortalTableRow>
-              ))
-            )}
-          </PortalTableBody>
-        </PortalTable>
-      ) : (
-        <TasksKanbanView
-          tasks={filteredTasks}
-          onStatusChange={handleStatusChange}
-          isLoading={isLoading}
-        />
-      )}
-    </TableLayout>
+                    </PortalTableCell>
+                    <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
+                      <div className="table-actions">
+                        <IconButton action="view" title="View" />
+                        <IconButton action="edit" title="Edit" />
+                      </div>
+                    </PortalTableCell>
+                  </PortalTableRow>
+                ))
+              )}
+            </PortalTableBody>
+          </PortalTable>
+        ) : (
+          <TasksKanbanView
+            tasks={filteredTasks}
+            onStatusChange={handleStatusChange}
+            isLoading={isLoading}
+          />
+        )}
+      </TableLayout>
+      <CreateTaskModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onSubmit={handleCreate}
+        loading={createLoading}
+        projectOptions={entityProjects}
+      />
+    </div>
   );
 }
 

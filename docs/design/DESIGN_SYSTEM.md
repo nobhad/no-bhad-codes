@@ -100,7 +100,7 @@ This document is the single source of truth for the project's design system, com
 ```
 
 **Portal Theme Variables** (defined in `src/design-system/tokens/portal-theme.css`,
-scoped to `body[data-page="admin"]` and `body[data-page="client-portal"]`):
+scoped to `body[data-page="admin"]` and `body[data-page="client"]`):
 
 The portal overrides the same semantic `--color-*` tokens that the main site defines.
 All portal colors derive from two primary variables:
@@ -283,7 +283,7 @@ box-shadow:
 | Bundle | Served On | Contents |
 |--------|-----------|----------|
 | `admin.css` | Admin dashboard | Shared base + nav + admin pages + admin modules |
-| `portal.css` | Client portal | Shared base + nav-portal only + client-portal modules |
+| `portal.css` | Client portal | Shared base + nav-portal only + client modules |
 
 Both bundles:
 
@@ -328,7 +328,7 @@ Both bundles:
 
 - **Class prefix**: `portal-` for portal-only components (e.g., `.portal-card`, `.portal-btn`)
 - **CSS variables**: `--portal-*` for portal-only tokens
-- **Scoping**: `[data-page="admin"]` or `[data-page="client-portal"]` for page-specific overrides
+- **Scoping**: `[data-page="admin"]` or `[data-page="client"]` for page-specific overrides
 
 ### Theme System
 
@@ -523,9 +523,9 @@ The **ProjectsTable status dropdown** is the gold standard. ALL dropdowns across
 **Required anatomy (trigger):**
 
 - `PortalDropdown` (Radix DropdownMenu) wrapper
-- `PortalDropdownTrigger` with `button.status-dropdown-trigger`
+- `PortalDropdownTrigger` with `button.dropdown-trigger--status`
 - Content: status indicator (colored dot via `StatusBadge`) + label text + `ChevronDown` caret
-- Caret MUST be on the RIGHT via `className="status-dropdown-caret"`
+- Caret MUST be on the RIGHT via `className="dropdown-caret--status"`
 
 **Required anatomy (content):**
 
@@ -537,9 +537,9 @@ The **ProjectsTable status dropdown** is the gold standard. ALL dropdowns across
 {/* CORRECT: Reference pattern */}
 <PortalDropdown>
   <PortalDropdownTrigger asChild>
-    <button className="status-dropdown-trigger">
+    <button className="dropdown-trigger--status">
       <StatusBadge status={currentStatus}>{label}</StatusBadge>
-      <ChevronDown className="status-dropdown-caret" />
+      <ChevronDown className="dropdown-caret--status" />
     </button>
   </PortalDropdownTrigger>
   <PortalDropdownContent sideOffset={0} align="start">
@@ -597,12 +597,12 @@ These rules apply to ALL dropdowns across the entire portal -- admin AND client-
 
 | Context | Trigger Class | Caret Class |
 |---------|--------------|-------------|
-| Table status cells | `status-dropdown-trigger` | `status-dropdown-caret` |
-| Form selects / filters | `form-dropdown-trigger` | `form-dropdown-caret` |
-| Inline edit selects | `form-dropdown-trigger` | `form-dropdown-caret` |
+| Table status cells | `dropdown-trigger--status` | `dropdown-caret--status` |
+| Form selects / filters | `dropdown-trigger--form` | `dropdown-caret--form` |
+| Inline edit selects | `dropdown-trigger--form` | `dropdown-caret--form` |
 | Button triggers (analytics, filters) | `dropdown-trigger` | `dropdown-caret` |
-| Custom table dropdowns | `custom-dropdown-trigger` | `custom-dropdown-caret` |
-| Modal form selects | `custom-dropdown-trigger` | `custom-dropdown-caret` |
+| Custom table dropdowns | `dropdown-trigger--custom` | `dropdown-caret--custom` |
+| Modal form selects | `dropdown-trigger--custom` | `dropdown-caret--custom` |
 
 #### Compliance Audit (March 11, 2026)
 
@@ -619,8 +619,8 @@ These rules apply to ALL dropdowns across the entire portal -- admin AND client-
 - O15-O16: DataTable -- 2x converted to `FormDropdown`
 - O18: createFormField SelectField -- now uses `FormDropdown` internally
 - O19: DeliverablesTab -- converted from Radix Select to `FormDropdown`
-- O33: ClientDetail -- fixed to use `StatusBadge` + `status-dropdown-caret`
-- O34: ProjectDetail -- fixed CSS classes to `status-dropdown-trigger` + `status-dropdown-caret`
+- O33: ClientDetail -- fixed to use `StatusBadge` + `dropdown-caret--status`
+- O34: ProjectDetail -- fixed CSS classes to `dropdown-trigger--status` + `dropdown-caret--status`
 - QuestionnaireForm SelectInput -- converted from hand-rolled select to `FormDropdown`
 
 **REMAINING OUTLIERS:**

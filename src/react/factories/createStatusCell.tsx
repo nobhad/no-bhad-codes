@@ -114,7 +114,7 @@ export function StatusCell({
       <PortalDropdownTrigger asChild disabled={disabled}>
         <button
           type="button"
-          className={cn('status-dropdown-trigger', className)}
+          className={cn('dropdown-trigger--status', className)}
           data-status={value}
           data-id={rowId}
           disabled={disabled}
@@ -123,7 +123,7 @@ export function StatusCell({
             {currentLabel}
           </StatusBadge>
           <ChevronDown
-            className="status-dropdown-caret"
+            className="dropdown-caret--status"
             aria-hidden="true"
           />
         </button>

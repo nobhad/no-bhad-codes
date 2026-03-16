@@ -97,7 +97,7 @@
   min-width: auto;
 }
 
-[data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-trigger {
+[data-page="admin"] .detail-more-menu.table-dropdown .dropdown-trigger--custom {
   width: var(--icon-btn-size-md);
   height: var(--icon-btn-size-md);
   min-width: var(--icon-btn-size-md);
@@ -112,21 +112,21 @@
   transition: all var(--transition-fast);
 }
 
-[data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-trigger:hover {
+[data-page="admin"] .detail-more-menu.table-dropdown .dropdown-trigger--custom:hover {
   background: var(--color-bg-prominent);
   border-color: var(--color-border-secondary);
 }
 
 /* Focus state (closed) - border color change, no box-shadow for consistency with other dropdowns.
    Selector specificity (0,4,1,0) already exceeds the global :focus-visible rule (0,0,1,0) in reset.css. */
-[data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-trigger:focus,
-[data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-trigger:focus-visible {
+[data-page="admin"] .detail-more-menu.table-dropdown .dropdown-trigger--custom:focus,
+[data-page="admin"] .detail-more-menu.table-dropdown .dropdown-trigger--custom:focus-visible {
   outline: none;
   border-color: var(--color-accent);
   box-shadow: none;
 }
 
-[data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-trigger svg {
+[data-page="admin"] .detail-more-menu.table-dropdown .dropdown-trigger--custom svg {
   width: 1em;
   height: 1em;
 }
@@ -211,7 +211,7 @@
   height: auto;
 }
 
-[data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-trigger {
+[data-page="admin"] .generate-document-menu.table-dropdown .dropdown-trigger--custom {
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
@@ -227,25 +227,25 @@
   white-space: nowrap;
 }
 
-[data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-trigger:hover {
+[data-page="admin"] .generate-document-menu.table-dropdown .dropdown-trigger--custom:hover {
   background: var(--color-bg-prominent);
   border-color: var(--color-border-secondary);
 }
 
-[data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-trigger:focus,
-[data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-trigger:focus-visible {
+[data-page="admin"] .generate-document-menu.table-dropdown .dropdown-trigger--custom:focus,
+[data-page="admin"] .generate-document-menu.table-dropdown .dropdown-trigger--custom:focus-visible {
   outline: none;
   border-color: var(--color-border-secondary);
   box-shadow: 0 0 0 1px var(--color-border-secondary);
 }
 
-[data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-trigger svg {
+[data-page="admin"] .generate-document-menu.table-dropdown .dropdown-trigger--custom svg {
   flex-shrink: 0;
 }
 
 [data-page="admin"]
   .generate-document-menu.table-dropdown
-  .custom-dropdown-trigger
+  .dropdown-trigger--custom
   .dropdown-caret {
   margin-left: var(--space-1);
   transition: transform var(--transition-fast);
@@ -253,7 +253,7 @@
 
 [data-page="admin"]
   .generate-document-menu.table-dropdown.open
-  .custom-dropdown-trigger
+  .dropdown-trigger--custom
   .dropdown-caret {
   transform: rotate(180deg);
 }

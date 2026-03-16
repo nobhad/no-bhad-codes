@@ -60,11 +60,11 @@ export function TablePagination({
               <div className={`table-dropdown custom-dropdown ${isOpen ? 'open' : ''}`}>
                 <button
                   type="button"
-                  className="custom-dropdown-trigger"
+                  className="dropdown-trigger--custom"
                   onClick={() => setIsOpen(!isOpen)}
                 >
                   <span className="custom-dropdown-text">{pageSize}</span>
-                  <ChevronDown className="custom-dropdown-caret" />
+                  <ChevronDown className="dropdown-caret--custom" />
                 </button>
                 <ul className="custom-dropdown-menu">
                   {pageSizeOptions.map((size) => (

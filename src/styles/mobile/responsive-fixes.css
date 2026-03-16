@@ -475,7 +475,7 @@
 @media (pointer: coarse) {
   .btn,
   .sidebar-buttons .nav-btn,
-  .custom-dropdown-trigger,
+  .dropdown-trigger--custom,
   .portal-tab,
   .admin-tab {
     -webkit-user-select: none;

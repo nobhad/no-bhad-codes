@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   FileText,
   Inbox,
@@ -7,8 +7,7 @@ import {
   Clock,
   XCircle,
   Eye,
-  Send,
-  ChevronDown
+  Send
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { useListFetch } from '@react/factories/useDataFetch';
@@ -18,7 +17,7 @@ import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { formatDate } from '@react/utils/formatDate';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { StatusDropdownCell } from '@react/components/portal/StatusDropdownCell';
 import {
   PortalTable,
   PortalTableHeader,
@@ -30,22 +29,17 @@ import {
   PortalTableLoading,
   PortalTableError
 } from '@react/components/portal/PortalTable';
-import {
-  PortalDropdown,
-  PortalDropdownTrigger,
-  PortalDropdownContent,
-  PortalDropdownItem
-} from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
+import { useEntityOptions } from '@react/hooks/useEntityOptions';
 import { CONTRACTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
-import { NOTIFICATIONS } from '@/constants/notifications';
+import { CreateContractModal } from '../modals/CreateEntityModals';
 
 const logger = createLogger('ContractsTable');
 
@@ -148,6 +142,9 @@ function sortContracts(a: Contract, b: Contract, sort: SortConfig): number {
 
 export function ContractsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: ContractsTableProps) {
   const containerRef = useFadeIn();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const { clientOptions: entityClients, projectOptions: entityProjects } = useEntityOptions(createOpen);
 
   const { data, isLoading, error, refetch, setData } = useListFetch<Contract, ContractStats>({
     endpoint: API_ENDPOINTS.CONTRACTS,
@@ -298,6 +295,40 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
     [setFilter]
   );
 
+  // Merge entity options (full list) with locally-derived options (dedup by value)
+  const clientOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    entityClients.forEach((o) => map.set(o.value, o.label));
+    contracts.forEach((c) => { if (c.clientId && c.clientName) map.set(String(c.clientId), c.clientName); });
+    return Array.from(map, ([value, label]) => ({ value, label }));
+  }, [contracts, entityClients]);
+
+  const projectOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    entityProjects.forEach((o) => map.set(o.value, o.label));
+    contracts.forEach((c) => { if (c.projectId && c.projectName) map.set(String(c.projectId), c.projectName); });
+    return Array.from(map, ([value, label]) => ({ value, label }));
+  }, [contracts, entityProjects]);
+
+  // Create handler
+  const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
+    setCreateLoading(true);
+    try {
+      const res = await apiPost(API_ENDPOINTS.CONTRACTS, { ...formData, status: 'draft' });
+      if (res.ok) {
+        showNotification?.('Contract created successfully', 'success');
+        setCreateOpen(false);
+        refetch();
+      } else {
+        showNotification?.('Failed to create contract', 'error');
+      }
+    } catch {
+      showNotification?.('Failed to create contract', 'error');
+    } finally {
+      setCreateLoading(false);
+    }
+  }, [showNotification, refetch]);
+
   return (
     <TableLayout
       containerRef={containerRef as React.RefObject<HTMLDivElement>}
@@ -331,7 +362,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
             disabled={filteredContracts.length === 0}
             title="Export to CSV"
           />
-          <IconButton action="add" onClick={() => showNotification?.(NOTIFICATIONS.generic.COMING_SOON, 'info')} title="New Contract" />
+          <IconButton action="add" onClick={() => setCreateOpen(true)} title="New Contract" />
         </>
       }
       bulkActions={
@@ -470,32 +501,12 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                 <PortalTableCell className="email-cell">
                   {contract.clientEmail}
                 </PortalTableCell>
-                <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
-                  <PortalDropdown>
-                    <PortalDropdownTrigger asChild>
-                      <button className="status-dropdown-trigger" aria-label="Change contract status">
-                        <StatusBadge status={getStatusVariant(contract.status)} size="sm">
-                          {CONTRACT_STATUS_CONFIG[contract.status]?.label || contract.status}
-                        </StatusBadge>
-                        <ChevronDown className="status-dropdown-caret" />
-                      </button>
-                    </PortalDropdownTrigger>
-                    <PortalDropdownContent sideOffset={0} align="start">
-                      {Object.entries(CONTRACT_STATUS_CONFIG)
-                        .filter(([status]) => status !== contract.status)
-                        .map(([status, config]) => (
-                          <PortalDropdownItem
-                            key={status}
-                            onClick={() => handleStatusChange(contract.id, status)}
-                          >
-                            <StatusBadge status={getStatusVariant(status)} size="sm">
-                              {config.label}
-                            </StatusBadge>
-                          </PortalDropdownItem>
-                        ))}
-                    </PortalDropdownContent>
-                  </PortalDropdown>
-                </PortalTableCell>
+                <StatusDropdownCell
+                  status={contract.status}
+                  statusConfig={CONTRACT_STATUS_CONFIG}
+                  onStatusChange={(newStatus) => handleStatusChange(contract.id, newStatus)}
+                  ariaLabel="Change contract status"
+                />
                 <PortalTableCell className="date-cell">{formatDate(contract.createdAt)}</PortalTableCell>
                 <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
@@ -515,6 +526,14 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
           )}
         </PortalTableBody>
       </PortalTable>
+      <CreateContractModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onSubmit={handleCreate}
+        loading={createLoading}
+        clientOptions={clientOptions}
+        projectOptions={projectOptions}
+      />
     </TableLayout>
   );
 }

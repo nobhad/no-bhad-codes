@@ -58,7 +58,7 @@ Defined in `src/design-system/tokens/colors.css`. Used across the entire applica
 
 ### Portal: `--color-*` (portal-scoped overrides)
 
-Defined in `src/design-system/tokens/portal-theme.css`. Scoped to `body[data-page="admin"]` and `body[data-page="client-portal"]` selectors. These override the global `--color-*` tokens for portal UI.
+Defined in `src/design-system/tokens/portal-theme.css`. Scoped to `body[data-page="admin"]` and `body[data-page="client"]` selectors. These override the global `--color-*` tokens for portal UI.
 
 The entire portal theme derives from two primary variables:
 
@@ -350,7 +350,7 @@ Defined once in `src/styles/core/layer-order.css`. All bundles import this first
 3. `base` - HTML element defaults, typography
 4. `components` - Reusable UI components (buttons, forms, cards, nav)
 5. `layouts` - Grid/flex layout systems
-6. `pages` - Page-specific styles (admin, client-portal, main site pages)
+6. `pages` - Page-specific styles (admin, client, main site pages)
 7. `states` - Visibility and interactive states
 8. `responsive` - Media query overrides
 9. `utilities` - Final overrides (highest priority)
@@ -381,7 +381,7 @@ Main marketing site. Adds navigation, business card, intro, portfolio, page styl
 
 ### Portal Bundle (`portal.css`)
 
-Client portal. Adds navigation, footer, client-portal styles, light mode overrides.
+Client portal. Adds navigation, footer, client styles, light mode overrides.
 
 ### Admin Bundle (`admin.css`)
 
@@ -676,7 +676,7 @@ Activated by `html[data-theme="dark"]`. Four variables change on the body:
 
 ```css
 html[data-theme="dark"] body[data-page="admin"],
-html[data-theme="dark"] body[data-page="client-portal"] {
+html[data-theme="dark"] body[data-page="client"] {
   --color-text-primary: #ffffff;
   --color-bg-primary:   #171717;
   --color-bg-hover:     #000000;
@@ -695,7 +695,7 @@ Portal styles are scoped using `data-page` attribute selectors:
 
 ```css
 [data-page="admin"] { }
-[data-page="client-portal"] { }
+[data-page="client"] { }
 ```
 
 ---
@@ -783,7 +783,7 @@ Additional granular breakpoints are available. See `src/styles/variables.css` fo
 1. **Use CSS variables for all colors** - Never hardcode hex/rgb in component CSS
 2. **Use spacing tokens** - Use `--space-*` and `--icon-gap-*` instead of raw pixels
 3. **Semantic class names** - Describe purpose, not appearance
-4. **Scope portal styles** - Use `[data-page="admin"]` or `[data-page="client-portal"]`
+4. **Scope portal styles** - Use `[data-page="admin"]` or `[data-page="client"]`
 5. **Use cascade layers** - All new styles must be placed in the correct layer
 
 ### Forbidden
@@ -955,7 +955,7 @@ left: -9999px;
 
 ```css
 body[data-page="admin"],
-body[data-page="client-portal"] {
+body[data-page="client"] {
   --color-text-primary: #333333; /* Overrides :root definition from colors.css */
 }
 ```
@@ -1010,10 +1010,10 @@ Unified all portal page/tab/subtab components to use a strict two-tier wrapper s
 
 **CSS changes:**
 
-- `.dropdown-caret`, `.custom-dropdown-caret` — changed from `margin-left` to `position: absolute; right: var(--dropdown-padding-x); top: 50%; transform: translateY(-50%)`
+- `.dropdown-caret`, `.dropdown-caret--custom` — changed from `margin-left` to `position: absolute; right: var(--dropdown-padding-x); top: 50%; transform: translateY(-50%)`
 - `.dropdown-trigger` — added `position: relative` and `padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap))`
-- `.custom-dropdown-trigger` (table-dropdown, modal-dropdown, pagination contexts) — added `position: relative`, extra `padding-right`, changed `justify-content` from `space-between` to `flex-start`
-- `.form-dropdown-trigger` — separated from font-inherit rule to preserve `text-transform: none`
+- `.dropdown-trigger--custom` (table-dropdown, modal-dropdown, pagination contexts) — added `position: relative`, extra `padding-right`, changed `justify-content` from `space-between` to `flex-start`
+- `.dropdown-trigger--form` — separated from font-inherit rule to preserve `text-transform: none`
 - All open-state caret rotations updated to include `translateY(-50%)` to maintain vertical centering
 
 **Capitalization** — `text-transform: none` applied universally to all dropdown triggers and items in `portal-dropdown.css` (line ~219). Form dropdown triggers explicitly exclude `text-transform: inherit` to prevent parent uppercase labels from bleeding through.
@@ -1026,7 +1026,7 @@ Unified all portal page/tab/subtab components to use a strict two-tier wrapper s
 
 - `src/styles/portal/shared/portal-dropdown.css` — root caret rules, trigger rules, pagination, modal, table-dropdown
 - `src/styles/portal/shared/portal-forms.css` — removed orphaned `qform-select-*` classes
-- `src/styles/portal/shared/portal-badges.css` — status-dropdown-trigger (unchanged, already correct)
+- `src/styles/portal/shared/portal-badges.css` — dropdown-trigger--status (unchanged, already correct)
 - `src/styles/portal/admin/analytics.css` — date-range-trigger padding-right
 - `src/styles/portal/admin/project-detail.css` — files-category-trigger padding
 - `src/styles/components/inline-edit.css` — removed orphaned `.inline-select-trigger`

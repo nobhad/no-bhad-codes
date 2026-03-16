@@ -4,20 +4,16 @@
  * ===============================================
  * @file src/react/components/portal/FormDropdown.tsx
  *
- * PortalDropdown-based replacement for native <select> in form contexts.
- * Visually matches the .select class styling with consistent portal dropdown behavior.
- * Selected option is hidden from the dropdown list.
+ * Simple custom dropdown for form selects.
+ * No Radix — uses the existing custom-dropdown CSS pattern.
+ * Visually matches form input styling.
  */
 
 import * as React from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-import {
-  PortalDropdown,
-  PortalDropdownTrigger,
-  PortalDropdownContent,
-  PortalDropdownItem
-} from './PortalDropdown';
+import { KEYS } from '../../../constants/keyboard';
 
 // ============================================================================
 // TYPES
@@ -40,7 +36,7 @@ export interface FormDropdownProps {
   placeholder?: string;
   /** Disabled state */
   disabled?: boolean;
-  /** Additional trigger className */
+  /** Additional className */
   className?: string;
   /** Element id (for label htmlFor) */
   id?: string;
@@ -49,36 +45,9 @@ export interface FormDropdownProps {
 }
 
 // ============================================================================
-// HELPERS
-// ============================================================================
-
-/** Normalize a value for fuzzy comparison (lowercase, hyphens → spaces) */
-function normalizeValue(val: string): string {
-  return val.toLowerCase().replace(/-/g, ' ').trim();
-}
-
-// ============================================================================
 // COMPONENT
 // ============================================================================
 
-/**
- * FormDropdown
- * Drop-in replacement for native <select> using the PortalDropdown system.
- * Hides the currently selected option from the dropdown list.
- *
- * @example
- * <FormDropdown
- *   id="project-type"
- *   value={projectType}
- *   onChange={setProjectType}
- *   options={[
- *     { value: 'web', label: 'Web Design' },
- *     { value: 'app', label: 'App Development' }
- *   ]}
- *   placeholder="Select project type..."
- *   aria-label="Filter by project type"
- * />
- */
 export function FormDropdown({
   value,
   onChange,
@@ -89,40 +58,94 @@ export function FormDropdown({
   id,
   'aria-label': ariaLabel
 }: FormDropdownProps) {
-  const normalizedValue = normalizeValue(value);
-  const selectedOption = options.find((opt) => normalizeValue(opt.value) === normalizedValue);
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const selectedOption = options.find((opt) => opt.value === value);
   const displayLabel = selectedOption?.label || placeholder;
   const isPlaceholder = !selectedOption;
 
+  const handleToggle = useCallback(() => {
+    if (!disabled) setIsOpen((prev) => !prev);
+  }, [disabled]);
+
+  const handleSelect = useCallback(
+    (optionValue: string) => {
+      onChange(optionValue);
+      setIsOpen(false);
+    },
+    [onChange]
+  );
+
+  // Close on outside click
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === KEYS.ESCAPE) setIsOpen(false);
+    }
+
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [isOpen]);
+
   return (
-    <PortalDropdown>
-      <PortalDropdownTrigger asChild disabled={disabled}>
-        <button
-          type="button"
-          id={id}
-          className={cn('form-dropdown-trigger', className)}
-          aria-label={ariaLabel}
-          disabled={disabled}
-        >
-          <span className={cn('form-dropdown-value', isPlaceholder && 'text-muted')}>
-            {displayLabel}
-          </span>
-          <ChevronDown className="form-dropdown-caret" />
-        </button>
-      </PortalDropdownTrigger>
-      <PortalDropdownContent>
-        {options
-          .filter((option) => normalizeValue(option.value) !== normalizedValue)
-          .map((option) => (
-            <PortalDropdownItem
+    <div
+      ref={containerRef}
+      className={cn('custom-dropdown', isOpen && 'open', className)}
+      data-modal-dropdown
+    >
+      <button
+        type="button"
+        id={id}
+        className="dropdown-trigger--custom dropdown-trigger--form"
+        aria-label={ariaLabel}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        disabled={disabled}
+        onClick={handleToggle}
+      >
+        <span className={cn('dropdown-value--form', isPlaceholder && 'text-muted')}>
+          {displayLabel}
+        </span>
+        <ChevronDown className="dropdown-caret--custom dropdown-caret--form" />
+      </button>
+
+      {isOpen && (
+        <ul className="custom-dropdown-menu" role="listbox">
+          {options.map((option) => (
+            <li
               key={option.value}
-              onClick={() => onChange(option.value)}
-              disabled={option.disabled}
+              role="option"
+              aria-selected={option.value === value}
+              className={cn(
+                'custom-dropdown-item',
+                option.value === value && 'selected',
+                option.disabled && 'disabled'
+              )}
+              onClick={() => {
+                if (!option.disabled) handleSelect(option.value);
+              }}
             >
               {option.label}
-            </PortalDropdownItem>
+            </li>
           ))}
-      </PortalDropdownContent>
-    </PortalDropdown>
+        </ul>
+      )}
+    </div>
   );
 }

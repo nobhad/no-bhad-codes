@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { Inbox, ChevronDown } from 'lucide-react';
+import { Inbox } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import {
@@ -15,15 +15,10 @@ import {
   PortalTableError
 } from '@react/components/portal/PortalTable';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { StatusDropdownCell } from '@react/components/portal/StatusDropdownCell';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
-import {
-  PortalDropdown,
-  PortalDropdownTrigger,
-  PortalDropdownContent,
-  PortalDropdownItem
-} from '@react/components/portal/PortalDropdown';
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import { useClients } from '@react/hooks/useClients';
@@ -520,34 +515,20 @@ export function ClientsTable({
                     </PortalTableCell>
 
                     {/* Status */}
-                    <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
-                      <PortalDropdown>
-                        <PortalDropdownTrigger asChild>
-                          <button className="status-dropdown-trigger" aria-label="Change client status">
-                            <StatusBadge status={inviteStatus === 'not-invited' ? 'not-invited' : getStatusVariant(client.status)}>
-                              {inviteStatus === 'not-invited' ? 'Not Invited' :
-                                inviteStatus === 'invited' ? 'Invited' :
-                                  CLIENT_STATUS_CONFIG[client.status]?.label || client.status}
-                            </StatusBadge>
-                            <ChevronDown className="status-dropdown-caret" />
-                          </button>
-                        </PortalDropdownTrigger>
-                        <PortalDropdownContent sideOffset={0} align="start">
-                          {Object.entries(CLIENT_STATUS_CONFIG)
-                            .filter(([status]) => status !== client.status)
-                            .map(([status, config]) => (
-                              <PortalDropdownItem
-                                key={status}
-                                onClick={() => handleStatusChange(client.id, status as ClientStatus)}
-                              >
-                                <StatusBadge status={getStatusVariant(status)} size="sm">
-                                  {config.label}
-                                </StatusBadge>
-                              </PortalDropdownItem>
-                            ))}
-                        </PortalDropdownContent>
-                      </PortalDropdown>
-                    </PortalTableCell>
+                    <StatusDropdownCell
+                      status={client.status}
+                      statusConfig={CLIENT_STATUS_CONFIG}
+                      onStatusChange={(newStatus) => handleStatusChange(client.id, newStatus as ClientStatus)}
+                      ariaLabel="Change client status"
+                      renderTriggerLabel={(s) =>
+                        inviteStatus === 'not-invited' ? 'Not Invited' :
+                          inviteStatus === 'invited' ? 'Invited' :
+                            CLIENT_STATUS_CONFIG[s as ClientStatus]?.label || s
+                      }
+                      getVariant={(s) =>
+                        inviteStatus === 'not-invited' ? 'not-invited' : getStatusVariant(s)
+                      }
+                    />
 
                     {/* Project Count */}
                     <PortalTableCell className="projects-cell">

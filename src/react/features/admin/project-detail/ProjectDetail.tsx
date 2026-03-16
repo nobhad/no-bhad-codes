@@ -15,7 +15,6 @@ import {
   FileText,
   Trash2,
   FolderKanban,
-  ChevronDown,
   MoreVertical
 } from 'lucide-react';
 import { IconButton, TabList, TabPanel } from '@react/factories';
@@ -38,7 +37,7 @@ import { InvoicesTab } from './tabs/InvoicesTab';
 import { ContractTab } from './tabs/ContractTab';
 import { NotesTab } from './tabs/NotesTab';
 import { IntakeTab } from './tabs/IntakeTab';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { StatusDropdown } from '@react/components/portal/StatusDropdownCell';
 import { ProgressBar } from '@react/components/portal';
 import type { ProjectDetailTab, ProjectStatus } from '../types';
 import { PROJECT_STATUS_CONFIG, PROJECT_TYPE_LABELS } from '../types';
@@ -225,7 +224,7 @@ export function ProjectDetail({
   }
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef}>
       {/* Tabs — top of page, like all other subtab nav */}
       <TabList
         tabs={TABS}
@@ -245,30 +244,12 @@ export function ProjectDetail({
               <h1 className="detail-title">
                 {project.project_name || 'Untitled Project'}
               </h1>
-              <PortalDropdown>
-                <PortalDropdownTrigger asChild>
-                  <button className="status-dropdown-trigger" aria-label="Change project status">
-                    <StatusBadge status={getStatusVariant(project.status)}>
-                      {PROJECT_STATUS_CONFIG[project.status]?.label || project.status}
-                    </StatusBadge>
-                    <ChevronDown className="status-dropdown-caret" />
-                  </button>
-                </PortalDropdownTrigger>
-                <PortalDropdownContent>
-                  {Object.entries(PROJECT_STATUS_CONFIG)
-                    .filter(([status]) => status !== project.status)
-                    .map(([status, config]) => (
-                      <PortalDropdownItem
-                        key={status}
-                        onClick={() => handleStatusChange(status as ProjectStatus)}
-                      >
-                        <StatusBadge status={getStatusVariant(status)}>
-                          {config.label}
-                        </StatusBadge>
-                      </PortalDropdownItem>
-                    ))}
-                </PortalDropdownContent>
-              </PortalDropdown>
+              <StatusDropdown
+                status={project.status}
+                statusConfig={PROJECT_STATUS_CONFIG}
+                onStatusChange={(newStatus) => handleStatusChange(newStatus as ProjectStatus)}
+                ariaLabel="Change project status"
+              />
             </div>
 
             <div className="detail-meta">
