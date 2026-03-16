@@ -424,12 +424,12 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
   ];
 
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section analytics-view">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">
       {/* Actions Bar */}
       <div className="analytics-actions-bar action-bar">
         <PortalDropdown>
           <PortalDropdownTrigger asChild>
-            <button className="btn-secondary dropdown-trigger date-range-trigger">
+            <button className="dropdown-trigger--custom date-range-trigger">
               {dateRangeOptions.find((o) => o.value === dateRange)?.label}
               <ChevronDown className="dropdown-caret" />
             </button>
