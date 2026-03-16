@@ -106,7 +106,7 @@ export function MetricsHistoryTab({
                 label={metric.name}
                 value={`${metric.value}${metric.unit === '%' ? '%' : ` ${metric.unit}`}`}
                 meta={`Last calculated: ${formatDate(metric.lastCalculated)}`}
-                className={`has-badge`}
+                className={'has-badge'}
                 icon={
                   <span className={`status-badge status-badge-${getMetricStatusVariant(metric.status)}`}>
                     {metric.status}

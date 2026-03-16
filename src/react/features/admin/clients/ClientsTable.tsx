@@ -14,7 +14,7 @@ import {
   PortalTableLoading,
   PortalTableError
 } from '@react/components/portal/PortalTable';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { getStatusVariant } from '@react/components/portal/StatusBadge';
 import { StatusDropdownCell } from '@react/components/portal/StatusDropdownCell';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
