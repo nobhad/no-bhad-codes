@@ -123,7 +123,7 @@
     position: absolute;
     top: -100%;
     left: 0;
-    z-index: 9999;
+    z-index: var(--z-index-skip-link);
     padding: 8px 16px;
     background-color: var(--app-color-surface, #000);
     color: var(--app-color-text, #fff);
