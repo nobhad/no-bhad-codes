@@ -30,8 +30,8 @@
 .portal .portal-global-header,
 .portal .sidebar-content,
 .portal .sidebar-footer,
-.portal .dashboard-content > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content):not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(button),
-.portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > *:not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(button) {
+.portal .dashboard-content > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content):not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(.project-overview-grid):not(.overview-grid):not(.analytics-card-grid):not(.kpi-cards-row):not(button),
+.portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > *:not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(.project-overview-grid):not(.overview-grid):not(.analytics-card-grid):not(.kpi-cards-row):not(button) {
   padding: var(--content-gutter);
   box-sizing: border-box;
 }
