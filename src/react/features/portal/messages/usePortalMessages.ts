@@ -12,7 +12,7 @@ import type {
   UpdateMessageResponse
 } from './types';
 import { createLogger } from '@/utils/logger';
-import { apiFetch, unwrapApiData, getCsrfToken, CSRF_HEADER_NAME } from '@/utils/api-client';
+import { apiFetch, unwrapApiData, getCsrfToken, CSRF_HEADER_NAME, apiPost } from '@/utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { usePortalFetch } from '@react/hooks/usePortalFetch';
 import { TIMING } from '@/constants/timing';
@@ -43,6 +43,7 @@ interface UsePortalMessagesReturn {
   sendMessage: (content: string, attachments?: File[]) => Promise<boolean>;
   editMessage: (messageId: number, content: string) => Promise<boolean>;
   deleteMessage: (messageId: number) => Promise<boolean>;
+  reactToMessage: (messageId: number, emoji: string) => Promise<boolean>;
   markThreadRead: (threadId: number) => Promise<void>;
 }
 
@@ -286,6 +287,29 @@ export function usePortalMessages({
   );
 
   /**
+   * React to a message with an emoji
+   */
+  const reactToMessage = useCallback(
+    async (messageId: number, emoji: string): Promise<boolean> => {
+      try {
+        const response = await apiPost(buildEndpoint.messageReactions(messageId), { emoji });
+        if (response.ok) {
+          // Refresh messages to get updated reaction counts
+          if (selectedThread) {
+            await fetchMessages(selectedThread.id, { silent: true });
+          }
+          return true;
+        }
+        return false;
+      } catch (error) {
+        logger.error('Error reacting to message:', error);
+        return false;
+      }
+    },
+    [selectedThread, fetchMessages]
+  );
+
+  /**
    * Delete a message
    */
   const deleteMessage = useCallback(
@@ -349,6 +373,7 @@ export function usePortalMessages({
     sendMessage,
     editMessage,
     deleteMessage,
+    reactToMessage,
     markThreadRead
   };
 }

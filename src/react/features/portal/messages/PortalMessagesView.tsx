@@ -83,7 +83,8 @@ export function PortalMessagesView({
     refreshThreads,
     refreshMessages,
     sendMessage,
-    editMessage
+    editMessage,
+    reactToMessage
   } = usePortalMessages({ getAuthToken });
 
   // Typing indicator state
@@ -196,7 +197,9 @@ export function PortalMessagesView({
         isLoading={messagesLoading}
         onSend={handleSend}
         onEdit={editMessage}
+        onReact={reactToMessage}
         showNotification={showNotification}
+        ownAvatarLabel="YOU"
         attachmentsEnabled
       />
     </TableLayout>

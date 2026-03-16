@@ -20,7 +20,7 @@
 
 import * as React from 'react';
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { User, MessageSquare, CheckCheck, Smile, X, Check, Paperclip, Download, File as FileIcon, Send } from 'lucide-react';
+import { MessageSquare, CheckCheck, Smile, X, Check, Paperclip, Download, File as FileIcon, Send } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { LoadingState, EmptyState } from '@react/factories/StateDisplay';
@@ -55,6 +55,8 @@ export interface ThreadMessage {
   isEdited?: boolean;
   /** Read receipt status for own messages */
   readReceipt?: 'sent' | 'delivered' | 'read';
+  /** Short label for the "other" avatar (e.g. "YOU", "HH", "NB") */
+  avatarLabel?: string;
   /** Emoji reactions */
   reactions?: Array<{ emoji: string; count: number; reacted: boolean }>;
   /** File attachments on this message */
@@ -69,6 +71,8 @@ export interface MessageThreadProps {
   onEdit?: (messageId: number, content: string) => Promise<boolean>;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   className?: string;
+  /** Label for "own" avatar (e.g. "YOU" on client portal). Omit to use default SVG mask. */
+  ownAvatarLabel?: string;
   /** Enable file attachment in compose area */
   attachmentsEnabled?: boolean;
   /** Max file size in bytes (default 10MB) */
@@ -182,6 +186,7 @@ export function MessageThread({
   onEdit,
   showNotification,
   className,
+  ownAvatarLabel,
   attachmentsEnabled = true,
   maxAttachmentSize = MAX_FILE_SIZE,
   allowedFileTypes = ALLOWED_MIME_TYPES
@@ -379,10 +384,18 @@ export function MessageThread({
                       {isLastInGroup ? (
                         <div className="msgtab-avatar-col">
                           <div
-                            className={cn('msgtab-avatar', message.isOwn ? 'is-admin' : 'is-client')}
+                            className={cn(
+                              'msgtab-avatar',
+                              message.isOwn
+                                ? (ownAvatarLabel ? 'is-client' : 'is-admin')
+                                : 'is-client'
+                            )}
                             aria-hidden="true"
                           >
-                            {!message.isOwn && <User className="icon-md" />}
+                            {message.isOwn
+                              ? (ownAvatarLabel || null)
+                              : (message.avatarLabel || null)
+                            }
                           </div>
                           {!message.isOwn && (
                             <span className="msgtab-sender">

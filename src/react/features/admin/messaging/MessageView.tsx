@@ -47,6 +47,17 @@ interface Conversation {
   isArchived: boolean;
 }
 
+/** Extract initials from a name (e.g. "Hedgewitch Horticulture" → "HH", "Noelle Bhaduri" → "NB") */
+function getInitials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+}
+
 interface MessageViewProps {
   /** Auth token getter for API calls */
   getAuthToken?: () => string | null;
@@ -332,21 +343,20 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
             {selectedConversation ? (
               <>
                 {/* Conversation Header */}
-                <div className="messaging-conv-header">
-                  <div>
-                    <h3 className="heading messaging-conv-heading">
-                      {selectedConversation.clientName}
-                    </h3>
-                    {selectedConversation.projectName && (
-                      <button
-                        onClick={() => onNavigate?.('projects', selectedConversation.projectId != null ? String(selectedConversation.projectId) : undefined)}
-                        className="btn-ghost messaging-conv-project-link"
-                      >
-                        {selectedConversation.projectName}
-                      </button>
-                    )}
-                  </div>
-                  <div className="messaging-conv-actions">
+                <div className="data-table-header">
+                  <h3>
+                    <span className="title-full">{selectedConversation.clientName}</span>
+                    <span className="title-mobile">{selectedConversation.clientName}</span>
+                  </h3>
+                  {selectedConversation.projectName && (
+                    <button
+                      onClick={() => onNavigate?.('projects', selectedConversation.projectId != null ? String(selectedConversation.projectId) : undefined)}
+                      className="btn-ghost messaging-conv-project-link"
+                    >
+                      {selectedConversation.projectName}
+                    </button>
+                  )}
+                  <div className="data-table-actions">
                     <button
                       onClick={() => toggleStar(selectedConversation.id, selectedConversation.isStarred)}
                       className={cn('icon-btn', selectedConversation.isStarred && 'is-active')}
@@ -369,6 +379,9 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
                     content: m.content,
                     isOwn: m.senderType === 'admin',
                     senderName: m.senderName,
+                    avatarLabel: m.senderType === 'client'
+                      ? getInitials(selectedConversation.clientName)
+                      : undefined,
                     timestamp: m.createdAt,
                     readReceipt: m.isRead ? 'read' : 'sent',
                     isEdited: m.isEdited,
