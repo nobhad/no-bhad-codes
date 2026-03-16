@@ -134,7 +134,12 @@
 
   /* Loading animations */
   --animation-spinner: 1s var(--easing-linear) infinite;
+  --animation-spinner-fast: 0.8s var(--easing-linear) infinite;
   --animation-pulse: 2s var(--easing-smooth) infinite alternate;
+  --animation-pulse-loading: 1.5s var(--easing-ease-in-out) infinite;
+  --animation-pulse-skeleton: 2s var(--easing-ease-in-out) infinite;
+  --animation-skeleton-shimmer: 1.5s var(--easing-ease-in-out) infinite;
+  --animation-typing-bounce: 1.4s var(--easing-ease-in-out) infinite both;
   --animation-fade-in: var(--duration-slow) var(--easing-decelerated);
   --animation-fade-out: var(--duration-normal) var(--easing-accelerated);
 

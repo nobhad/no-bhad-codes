@@ -1125,7 +1125,7 @@ td {
 
 /* Animation — @keyframes spin defined in loading.css */
 .animate-spin {
-  animation: spin 1s linear infinite;
+  animation: spin var(--animation-spinner);
 }
 
 
