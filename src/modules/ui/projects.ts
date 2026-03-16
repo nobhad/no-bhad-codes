@@ -255,6 +255,12 @@ export class ProjectsModule extends BaseModule {
     // Render CRT TV and setup hover events (desktop only)
     this.renderCrtTv();
     this.setupCardHoverEvents();
+
+    // GSAP staggered entrance animation for cards
+    this.animateCardEntrance();
+
+    // GSAP heading divider scale animation
+    this.animateHeadingDivider();
   }
 
   /**
@@ -607,8 +613,8 @@ export class ProjectsModule extends BaseModule {
     // Update next/prev navigation
     this.renderProjectNavigation(project);
 
-    // Reset animations by removing and re-adding classes
-    this.resetDetailAnimations();
+    // GSAP entrance animations for detail page elements
+    this.animateDetailEntrance();
   }
 
   /**
@@ -738,24 +744,92 @@ export class ProjectsModule extends BaseModule {
   }
 
   /**
-   * Reset animations for project detail elements
+   * GSAP staggered entrance animation for project cards
    */
-  private resetDetailAnimations(): void {
+  private animateCardEntrance(): void {
+    const cards = this.projectsContent?.querySelectorAll('.card-container');
+    if (!cards?.length) return;
+
+    const ENTRANCE_DELAY = 0.3;
+    const STAGGER_INTERVAL = 0.1;
+    const DURATION = 0.5;
+    const EASE = 'power2.out';
+
+    gsap.set(cards, { y: '-105%' });
+    gsap.to(cards, {
+      y: 0,
+      duration: DURATION,
+      stagger: STAGGER_INTERVAL,
+      delay: ENTRANCE_DELAY,
+      ease: EASE,
+      clearProps: 'transform'
+    });
+  }
+
+  /**
+   * GSAP heading divider scale-in animation
+   */
+  private animateHeadingDivider(): void {
+    const divider = this.projectsContent?.querySelector('.heading-divider');
+    if (!divider) return;
+
+    const DELAY = 0.4;
+    const DURATION = 0.8;
+    const EASE = 'power2.out';
+
+    gsap.set(divider, { scaleX: 0 });
+    gsap.to(divider, {
+      scaleX: 1,
+      duration: DURATION,
+      delay: DELAY,
+      ease: EASE,
+      clearProps: 'transform'
+    });
+  }
+
+  /**
+   * Animate project detail elements on entrance using GSAP
+   */
+  private animateDetailEntrance(): void {
     if (!this.projectDetailSection) return;
 
-    const animatedElements = this.projectDetailSection.querySelectorAll(
-      '.worksub-header, .worksub-intro, .worksub-info, .worksub-links, .back-button'
-    );
+    const backButton = this.projectDetailSection.querySelector('.back-button');
+    const header = this.projectDetailSection.querySelector('.worksub-header');
+    const intro = this.projectDetailSection.querySelector('.worksub-intro');
 
-    animatedElements.forEach((el) => {
-      const htmlEl = el as HTMLElement;
-      htmlEl.classList.remove('leaving');
-      // Remove animation, force reflow, then restore — this is the only reliable
-      // way to restart a CSS animation that has already completed.
-      htmlEl.style.animation = 'none';
-      void htmlEl.offsetWidth;
-      htmlEl.style.animation = '';
+    // Kill existing tweens on these elements
+    const elements = [backButton, header, intro].filter(Boolean) as HTMLElement[];
+    elements.forEach((el) => {
+      el.classList.remove('leaving');
+      gsap.killTweensOf(el);
     });
+
+    // Back button — slide in from left
+    if (backButton) {
+      gsap.fromTo(
+        backButton,
+        { opacity: 0, x: '-170%' },
+        { opacity: 1, x: 0, duration: 0.8, delay: 0.8, ease: 'power2.out', clearProps: 'transform,opacity' }
+      );
+    }
+
+    // Header image — fade in from top
+    if (header) {
+      gsap.fromTo(
+        header,
+        { opacity: 0, y: '-30%' },
+        { opacity: 1, y: 0, duration: 0.5, delay: 0.3, ease: 'power2.out', clearProps: 'transform,opacity' }
+      );
+    }
+
+    // Intro section — fade in from bottom
+    if (intro) {
+      gsap.fromTo(
+        intro,
+        { opacity: 0, y: 100 },
+        { opacity: 1, y: 0, duration: 0.5, delay: 0.5, ease: 'power2.out', clearProps: 'transform,opacity' }
+      );
+    }
   }
 
   /**

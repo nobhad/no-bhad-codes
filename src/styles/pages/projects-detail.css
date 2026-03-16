@@ -62,7 +62,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: back-button-slide-in var(--transition-long, 0.8s) 0.8s both;
+  /* Entrance animated by GSAP in projects.ts */
   transition:
     background-color var(--transition-theme, 0.4s),
     box-shadow var(--transition-theme, 0.4s);
@@ -88,31 +88,9 @@
   outline-offset: 2px;
 }
 
-/* Back button animations */
-@keyframes back-button-slide-in {
-  0% {
-    opacity: 0;
-    transform: translate(-170%, -50%);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(-50%);
-  }
-}
-
-@keyframes back-button-slide-out {
-  0% {
-    opacity: 1;
-    transform: translateY(-50%);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-170%, -50%);
-  }
-}
-
+/* Back button exit — GSAP handles entrance/exit in projects.ts */
 .back-button.leaving {
-  animation: back-button-slide-out var(--transition-length, 0.5s) forwards;
+  pointer-events: none;
 }
 
 /* Hide circular back button on smaller screens (< 1400px) */
@@ -165,7 +143,7 @@
 
 .worksub-header {
   width: 100%;
-  animation: header-img-fade-in var(--transition-length, 0.5s) 0.3s both;
+  /* Entrance animated by GSAP in projects.ts */
 }
 
 .worksub-header figure {
@@ -192,34 +170,14 @@
   justify-content: center;
 }
 
-@keyframes header-img-fade-in {
-  0% {
-    opacity: 0;
-    transform: translateY(-30%);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes header-img-fade-out {
-  0% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-60%);
-  }
-}
+/* header-img entrance/exit handled by GSAP in projects.ts */
 
 /* ===============================================
    PROJECT DETAIL INTRO (Title + Metadata)
    =============================================== */
 
 .worksub-intro {
-  animation: worksub-fade-in var(--transition-length, 0.5s) 0.5s both;
+  /* Entrance animated by GSAP in projects.ts */
 }
 
 .worksub-intro h1 {
@@ -389,27 +347,7 @@
   transition: background-color var(--transition-theme, 0.4s);
 }
 
-@keyframes worksub-fade-in {
-  0% {
-    opacity: 0;
-    transform: translateY(100px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes worksub-fade-out {
-  0% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(100px);
-  }
-}
+/* worksub entrance/exit handled by GSAP in projects.ts */
 
 /* ===============================================
    PROJECT DETAIL INFO (Screenshots)

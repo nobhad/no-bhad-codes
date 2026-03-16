@@ -149,6 +149,16 @@ export function createErrorNotification(message: string, duration: number = 5000
     setTimeout(() => notification.remove(), duration);
   }
 
+  // GSAP slide-in entrance animation
+  import('gsap').then(({ gsap }) => {
+    gsap.from(notification, {
+      x: '100%',
+      opacity: 0,
+      duration: 0.3,
+      ease: 'power2.out'
+    });
+  });
+
   return notification;
 }
 
