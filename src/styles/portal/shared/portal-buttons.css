@@ -251,7 +251,7 @@ button:not(.portal-checkbox):not(.panel-action):not(.dropdown-trigger--custom):n
   width: 100%;
   min-height: var(--space-5); /* 40px — matches collapsed icon-only height */
   font-family: var(--font-family-mono);
-  font-size: var(--portal-nav-font-size);
+  font-size: var(--sidebar-nav-font-size);
   font-weight: var(--font-weight-medium);
   text-align: left;
   justify-content: flex-start;
