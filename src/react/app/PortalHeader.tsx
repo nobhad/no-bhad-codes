@@ -150,15 +150,20 @@ export function PortalHeader() {
   return (
     <>
       <header className="portal-global-header">
-        <div className="portal-global-header-row">
-          <div className="portal-global-header-left">
-            <a href="/" className="header-branding" aria-label="Go to homepage">
-              <span className="header-avatar" aria-hidden="true" />
-              <span className="header-logo-text">NO BHAD CODES</span>
-            </a>
+        <div className="portal-global-header-breadcrumbs">
+          <button
+            className="header-sidebar-toggle"
+            id="header-sidebar-toggle"
+            aria-label="Toggle sidebar"
+            onClick={toggleSidebar}
+          >
+            <PanelLeft
+              className="sidebar-toggle-icon"
+              aria-hidden="true"
+            />
+          </button>
 
-            {role === 'client' && <ProjectSelector />}
-          </div>
+          <HeaderBreadcrumbs />
 
           <div className="portal-global-header-right">
             <NotificationBell />
@@ -178,20 +183,15 @@ export function PortalHeader() {
           </div>
         </div>
 
-        <div className="portal-global-header-breadcrumbs">
-          <button
-            className="header-sidebar-toggle"
-            id="header-sidebar-toggle"
-            aria-label="Toggle sidebar"
-            onClick={toggleSidebar}
-          >
-            <PanelLeft
-              className="sidebar-toggle-icon"
-              aria-hidden="true"
-            />
-          </button>
+        <div className="portal-global-header-row">
+          <div className="portal-global-header-left">
+            <a href="/" className="header-branding" aria-label="Go to homepage">
+              <span className="header-avatar" aria-hidden="true" />
+              <span className="header-logo-text">NO BHAD CODES</span>
+            </a>
 
-          <HeaderBreadcrumbs />
+            {role === 'client' && <ProjectSelector />}
+          </div>
         </div>
       </header>
     </>
