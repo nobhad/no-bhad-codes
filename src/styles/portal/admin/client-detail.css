@@ -147,39 +147,6 @@
 
 /* --- Contacts Tab --- */
 
-/* Contact card header */
-.contact-card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: var(--space-3);
-}
-
-/* Contact identity: avatar + name/title */
-.contact-identity {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-/* Contact avatar circle */
-.contact-avatar {
-  width: var(--space-5);
-  height: var(--space-5);
-  border: var(--portal-border);
-  border-radius: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Contact name row: name + star icon */
-.contact-name-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
 /* Checkbox label: single definition in proposals.css */
 
 /* Align to bottom of container */

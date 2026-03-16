@@ -24,6 +24,7 @@ import {
 } from '@react/components/portal/PortalDropdown';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import { PortalButton } from '@react/components/portal/PortalButton';
+import { CopyEmailButton } from '@react/components/portal/CopyEmailButton';
 import { EmptyState } from '@react/components/portal/EmptyState';
 import { useFormState } from '@react/hooks/useFormState';
 import type { ClientContact } from '../../types';
@@ -344,69 +345,58 @@ export function ContactsTab({
                   contact.isPrimary && 'border-primary-accent'
                 )}
               >
-                {/* Contact Header */}
-                <div className="contact-card-header">
-                  <div className="contact-identity">
-                    <div className="contact-avatar">
-                      <User className="icon-lg text-secondary" />
-                    </div>
-                    <div>
-                      <div className="contact-name-row">
-                        <span className="heading">
-                          {getContactDisplayName(contact)}
-                        </span>
-                        {contact.isPrimary && (
-                          <Star className="icon-xs is-active-primary" />
-                        )}
-                      </div>
-                      {contact.title && (
-                        <span className="text-secondary">
-                          {contact.title}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <PortalDropdown>
-                    <PortalDropdownTrigger asChild>
-                      <button className="icon-btn" aria-label="Contact actions">
-                        <Pencil className="icon-md" />
-                      </button>
-                    </PortalDropdownTrigger>
-                    <PortalDropdownContent align="end">
-                      <PortalDropdownItem onClick={() => handleStartEdit(contact)}>
-                        <Pencil className="icon-md dropdown-item-icon" />
-                        Edit
-                      </PortalDropdownItem>
-                      {!contact.isPrimary && (
-                        <PortalDropdownItem onClick={() => handleSetPrimary(contact)}>
-                          <Star className="icon-md dropdown-item-icon" />
-                          Set as Primary
+                {/* Contact Header — same class as all other section headers */}
+                <div className="data-table-header">
+                  <h3>
+                    <User className="icon-sm" />
+                    <span className="title-full">{getContactDisplayName(contact)}</span>
+                    {contact.isPrimary && (
+                      <Star className="icon-xs is-active-primary" />
+                    )}
+                  </h3>
+                  <div className="data-table-actions">
+                    <PortalDropdown>
+                      <PortalDropdownTrigger asChild>
+                        <button className="icon-btn" aria-label="Contact actions">
+                          <Pencil className="icon-md" />
+                        </button>
+                      </PortalDropdownTrigger>
+                      <PortalDropdownContent align="end">
+                        <PortalDropdownItem onClick={() => handleStartEdit(contact)}>
+                          <Pencil className="icon-md dropdown-item-icon" />
+                          Edit
                         </PortalDropdownItem>
-                      )}
-                      <PortalDropdownItem onClick={() => handleDeleteClick(contact)}>
-                        <Trash2 className="icon-md dropdown-item-icon" />
-                        Delete
-                      </PortalDropdownItem>
-                    </PortalDropdownContent>
-                  </PortalDropdown>
+                        {!contact.isPrimary && (
+                          <PortalDropdownItem onClick={() => handleSetPrimary(contact)}>
+                            <Star className="icon-md dropdown-item-icon" />
+                            Set as Primary
+                          </PortalDropdownItem>
+                        )}
+                        <PortalDropdownItem onClick={() => handleDeleteClick(contact)}>
+                          <Trash2 className="icon-md dropdown-item-icon" />
+                          Delete
+                        </PortalDropdownItem>
+                      </PortalDropdownContent>
+                    </PortalDropdown>
+                  </div>
                 </div>
 
                 {/* Contact Details */}
                 <div className="detail-list">
                   <div className="contact-detail-row">
-                    <Mail className="icon-sm text-secondary" />
+                    <Mail className="icon-sm" />
                     <a
                       href={`mailto:${contact.email}`}
                       className="text-accent"
                     >
                       {contact.email}
                     </a>
+                    <CopyEmailButton email={contact.email || ''} showNotification={showNotification} />
                   </div>
 
                   {contact.phone && (
                     <div className="contact-detail-row">
-                      <Phone className="icon-sm text-secondary" />
+                      <Phone className="icon-sm" />
                       <a
                         href={`tel:${contact.phone}`}
                         className="text-secondary"
@@ -418,7 +408,7 @@ export function ContactsTab({
 
                   {contact.role && (
                     <div className="contact-detail-row">
-                      <Briefcase className="icon-sm text-secondary" />
+                      <Briefcase className="icon-sm" />
                       <span className="text-secondary">
                         {CONTACT_ROLE_LABELS[contact.role] || contact.role}
                       </span>
