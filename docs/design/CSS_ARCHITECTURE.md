@@ -1,8 +1,8 @@
 # CSS Architecture
 
-**Last Updated:** March 14, 2026
+**Last Updated:** March 16, 2026
 
-This document defines the CSS architecture, naming conventions, and design token system used throughout the application.
+Shared CSS architecture, design tokens, naming conventions, and file organization used across both the main site and portals. For portal-specific design (theme, components, layout wrappers), see [Portal Design](./PORTAL_DESIGN.md).
 
 ---
 
@@ -457,110 +457,9 @@ Light mode is handled entirely by 2–3 variable overrides directly in `src/desi
 
 ---
 
-## Portal Layout Wrapper System
-
-All portal page content follows a strict two-tier wrapper system that controls layout, spacing, and gutter (horizontal padding) application.
-
-### Wrapper Classes
-
-| Class | Purpose | Gutter | Bottom Padding |
-|-------|---------|--------|----------------|
-| `.section` | Top-level page wrapper. Direct child of `.dashboard-content`. | Tier 3: children get horizontal gutter | Last child gets `padding-bottom: var(--portal-page-bottom)` |
-| `.subsection` | Nested content wrapper inside a `.section`. | None — gutter comes from deeper tiers (Tier 2) | None |
-
-Both classes provide `display: flex; flex-direction: column; gap: var(--content-gutter)`.
-
-### Rules
-
-1. **Every top-level route component** must have `.section` as its outermost wrapper element
-2. **Every nested content wrapper** (inside TabPanel, inside a hub, inside a detail page) must use `.subsection`
-3. **Never nest `.section` inside `.section`** — inner wrappers must be `.subsection`
-4. **`TableLayout` component** handles this automatically via the `nested` prop:
-   - `<TableLayout>` (default) renders `.section` wrapper — use for standalone routes
-   - `<TableLayout nested>` renders `.subsection` wrapper — use inside hubs/detail pages
-
-### Component Patterns
-
-#### Standalone Route (Dashboard, Documents, Help, etc.)
-
-```tsx
-// Option A: Manual section wrapper
-<div ref={containerRef} className="section">
-  {/* page content */}
-</div>
-
-// Option B: TableLayout handles it (for table-based views)
-<TableLayout containerRef={containerRef} title="DOCUMENTS">
-  {/* table content */}
-</TableLayout>
-```
-
-#### Hub Component (RequestsHub, WorkDashboard, etc.)
-
-```tsx
-<div ref={containerRef} className="section">
-  <TabList tabs={TABS} ... />
-  <TabPanel tabId="subtab-a" isActive={...}>
-    <SubtabComponent />  {/* must use .subsection or <TableLayout nested> */}
-  </TabPanel>
-</div>
-```
-
-#### Subtab Inside a Hub
-
-```tsx
-// Table-based subtab
-<TableLayout nested containerRef={containerRef} title="TITLE">
-  {/* table content */}
-</TableLayout>
-
-// Non-table subtab (settings, forms)
-<div className="subsection">
-  {/* content */}
-</div>
-```
-
-#### Detail Page Subtabs (ClientDetail, ProjectDetail)
-
-```tsx
-// Parent detail page
-<div ref={containerRef} className="section">
-  <TabList ... />
-  <TabPanel tabId="contacts" isActive={...}>
-    <ContactsTab />  {/* returns <div className="subsection"> */}
-  </TabPanel>
-</div>
-
-// Subtab component
-export function ContactsTab() {
-  return (
-    <div className="subsection">
-      <div className="panel">{/* content */}</div>
-    </div>
-  );
-}
-```
-
-### Gutter System
-
-The gutter system (`portal-gutter.css`) applies horizontal padding to content at multiple tiers. The `.section` / `.subsection` distinction controls which tiers activate:
-
-- **Tier 1**: Direct children of `.dashboard-content` and tab wrappers (excludes `.section`, `.subsection`, `.table-layout`, `.panel`)
-- **Tier 2**: Named content elements (`.data-table-header`, `.settings-fields`, etc.) — always applied regardless of nesting
-- **Tier 3**: Children of `.section` — applies gutter to `.section > *` (excludes structural elements). Does NOT apply to `.subsection > *`
-- **Tier 4**: Table cells
-- **Tier 5**: Message thread elements
-
-### CSS Files
-
-- `src/styles/portal/shared/portal-layout.css` — `.section` and `.subsection` class definitions
-- `src/styles/portal/shared/portal-gutter.css` — gutter system (single source of truth)
-- `src/design-system/tokens/portal-theme.css` — `--portal-page-top`, `--portal-page-bottom`, `--content-gutter` tokens
-- `src/react/components/portal/TableLayout.tsx` — `TableLayout` component with `nested` prop
-
----
-
 ## Reusable Component Classes
+
+For portal-specific component details (theme, dropdowns, layout wrappers, gutter system), see [Portal Design](./PORTAL_DESIGN.md).
 
 ### Buttons
 
@@ -657,104 +556,9 @@ Defined in `src/styles/portal/shared/portal-modal-system.css` and `src/styles/po
 
 ---
 
-## Portal Theme System
+## Portal Theme and Tailwind
 
-The portal uses a "DISCOTHEQUE" brutalist design with two modes:
-
-### Light Mode (Default)
-
-- Off-white background (`--color-bg-primary: #e0e0e0`)
-- Near-black text (`--color-text-primary: #333333`)
-- Dark borders (`--color-border-primary` = same as text primary)
-- 0 border-radius everywhere (sharp corners)
-- Monospace font (Inconsolata)
-- All other colors automatically derived via `color-mix()` from these two values
-
-### Dark Mode
-
-Activated by `html[data-theme="dark"]`. Four variables change on the body:
-
-```css
-html[data-theme="dark"] body[data-page="admin"],
-html[data-theme="dark"] body[data-page="client"] {
-  --color-text-primary: #ffffff;
-  --color-bg-primary:   #171717;
-  --color-bg-hover:     #000000;
-  --form-btn-shadow:    var(--portal-alpha-black-30);
-}
-```
-
-All other colors (text ramp, background ramp, borders, alpha layers) automatically re-derive
-from the updated primaries via `color-mix()`. `--color-border-primary` is defined in the base
-block as `var(--color-text-primary)`, so it automatically becomes white in dark mode without
-a separate override.
-
-### Portal Scoping
-
-Portal styles are scoped using `data-page` attribute selectors:
-
-```css
-[data-page="admin"] { }
-[data-page="client"] { }
-```
-
----
-
-## Tailwind (`tw-`) vs Portal CSS Classes
-
-The codebase uses **two CSS systems** with clear boundaries.
-
-### Portal CSS Classes (Primary)
-
-Used in EJS templates and vanilla TS orchestrators:
-
-```css
-/* Forms */
-.form-group, .field-label, .form-input, .form-textarea, .form-row, .form-select
-
-/* Buttons */
-.btn, .btn-primary, .btn-secondary, .btn-danger, .btn-sm, .btn-icon
-
-/* Tables */
-.data-table, .data-table th, .data-table td
-
-/* Layout */
-.portal-card, .portal-container, .portal-section, .detail-grid, .detail-row
-
-/* Modals */
-.admin-modal-overlay, .admin-modal-content, .admin-modal-header, .admin-modal-body
-
-/* Status */
-.status-badge, .status-badge-active, .status-badge-completed
-```
-
-### Tailwind (`tw-` prefix) - React Only
-
-All Tailwind classes are prefixed with `tw-` to avoid collisions. Used **only inside React components** for layout utilities:
-
-```tsx
-// Correct: tw- prefix in React components
-<div className="tw-flex tw-items-center tw-gap-2">
-
-// WRONG: Unprefixed Tailwind
-<div className="flex items-center gap-2">
-
-// WRONG: Tailwind in EJS or vanilla TS
-```
-
-### When to Use Which
-
-| Context | System | Example |
-|---------|--------|---------|
-| EJS templates | Portal CSS | `class="form-input"` |
-| Vanilla TS (DOM creation) | Portal CSS | `el.className = 'btn btn-primary'` |
-| React component layout | Tailwind (`tw-`) | `className="tw-flex tw-gap-2"` |
-| React component semantics | Portal CSS | `className="portal-card"` |
-| React forms | Portal CSS | `className="form-group"` |
-
-### Rule
-
-**Portal CSS classes take priority.** Only use `tw-` utilities for flex/grid layout, spacing, and positioning within React components. All semantic styling (buttons, forms, tables, cards, badges) must use portal CSS classes.
+For the portal theme system (light/dark mode, color derivation, scoping), Tailwind vs Portal CSS rules, and portal layout wrappers, see [Portal Design](./PORTAL_DESIGN.md).
 
 ---
 
@@ -983,128 +787,20 @@ body[data-page="client"] {
 
 ## Recent Changes
 
-### March 14, 2026 — Portal HTML Wrapper Standardization (section/subsection)
+Portal-specific changes are documented in [Portal Design -- Recent Changes](./PORTAL_DESIGN.md#recent-changes).
 
-Unified all portal page/tab/subtab components to use a strict two-tier wrapper system.
+### March 16, 2026 -- Documentation Restructure
 
-**New classes:**
-
-- `.section` — top-level route wrapper. Provides flex column layout, gap, Tier 3 gutter on children, and `padding-bottom: var(--portal-page-bottom)` on last child.
-- `.subsection` — nested content wrapper (inside hubs, TabPanels, detail pages). Same flex layout but no gutter rules and no bottom padding.
-
-**TableLayout component** now wraps content in `.section` by default. Pass `nested` prop to use `.subsection` when inside a hub or detail page.
-
-**Gutter CSS** (`portal-gutter.css`) updated:
-
-- `.subsection` added to Tier 1 exclusion list (line 26)
-- `.subsection` excluded from `.section > *` Tier 3 gutter (line 70)
-- `.subsection` added to gap-based container last-child rule (line 96)
-
-**Removed:** `.subtab-content-wrapper` class — replaced by `.section` in all admin hub components. CSS definition removed from `portal-layout.css`.
-
-**Files modified:** `TableLayout.tsx`, `portal-layout.css`, `portal-gutter.css`, `PortalViewLayout.tsx`, all hub/dashboard components (6 admin, 3 client), all admin detail subtabs (8 files), `OnboardingWizard.tsx`, `MessageView.tsx`, `SettingsOverview.tsx`, `PortalDocumentRequests.tsx`.
-
-### March 11, 2026 — Universal Dropdown Caret Positioning & Capitalization
-
-**Caret positioning** — ALL dropdown carets now use absolute positioning (`position: absolute; right: var(--dropdown-padding-x)`) instead of the old `margin-left: auto` flex push. This ensures the caret is always the same distance from the right border as content is from the left border.
-
-**CSS changes:**
-
-- `.dropdown-caret`, `.dropdown-caret--custom` — changed from `margin-left` to `position: absolute; right: var(--dropdown-padding-x); top: 50%; transform: translateY(-50%)`
-- `.dropdown-trigger` — added `position: relative` and `padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap))`
-- `.dropdown-trigger--custom` (table-dropdown, modal-dropdown, pagination contexts) — added `position: relative`, extra `padding-right`, changed `justify-content` from `space-between` to `flex-start`
-- `.dropdown-trigger--form` — separated from font-inherit rule to preserve `text-transform: none`
-- All open-state caret rotations updated to include `translateY(-50%)` to maintain vertical centering
-
-**Capitalization** — `text-transform: none` applied universally to all dropdown triggers and items in `portal-dropdown.css` (line ~219). Form dropdown triggers explicitly exclude `text-transform: inherit` to prevent parent uppercase labels from bleeding through.
-
-**Selected option hiding** — `FormDropdown` and `InlineSelect` now use `normalizeValue()` for fuzzy comparison (lowercase + hyphens to spaces) so DB value format mismatches don't break the hide-selected-option filter.
-
-**New component:** `FormDropdown` (`src/react/components/portal/FormDropdown.tsx`) — drop-in replacement for native `<select>` using the PortalDropdown system. Hides selected option, absolute caret, `text-transform: none`.
-
-**Files modified:**
-
-- `src/styles/portal/shared/portal-dropdown.css` — root caret rules, trigger rules, pagination, modal, table-dropdown
-- `src/styles/portal/shared/portal-forms.css` — removed orphaned `qform-select-*` classes
-- `src/styles/portal/shared/portal-badges.css` — dropdown-trigger--status (unchanged, already correct)
-- `src/styles/portal/admin/analytics.css` — date-range-trigger padding-right
-- `src/styles/portal/admin/project-detail.css` — files-category-trigger padding
-- `src/styles/components/inline-edit.css` — removed orphaned `.inline-select-trigger`
-- `src/react/components/portal/FormDropdown.tsx` — normalized value comparison
-- `src/react/components/portal/InlineEdit.tsx` — normalized value comparison in InlineSelect
-
-### March 9, 2026 — Action Button Gaps, Icon Sizing, Dead CSS Removal
-
-**New tokens** added to `portal-theme.css`:
-
-- `--action-btn-gap: var(--space-1)` (8px) — use on all icon/action button cluster containers
-  (`.panel-actions`, `.note-actions`, `.message-actions`, `.inline-edit-actions`, etc.)
-- `--table-actions-gap: var(--space-1)` (8px) — row-level table action buttons specifically
-
-**Table row action buttons** — `.action-group` and `.data-table-row-actions` now scope
-`--portal-btn-icon-size: var(--icon-size-sm)` directly on the container. This means the `.icon-btn`
-base rule reads the scoped token and renders at 16px without needing separate size overrides.
-
-**Icon sizes** — All SVG icon width/height declarations in portal CSS files changed from
-`var(--icon-size-sm)` / `var(--icon-size-xs)` to `1em`. This lets icons scale proportionally
-with their parent's `font-size`, making them context-aware.
-
-**Redundant styles removed** — Labels (`font-size`, `text-transform`, `letter-spacing`),
-`background: transparent`, `color: var(--color-text-primary)`, and `margin: 0` declarations
-removed from 20+ files where they were already covered by portal-theme.css or portal-cards.css.
-
-**portal-cards.css** `.portal-section` rule extended to also cover `.analytics-chart-card`
-and `.kpi-card` so those get `border + transparent bg` without per-file declarations.
-
-### CSS Class Renames
-
-| Old Class | New Class | Location |
-|-----------|-----------|----------|
-| `.empty-state-icon` | `.empty-icon` | `src/styles/components/loading.css` |
-| `.tw-relative` (reaction anchor) | `.msgtab-reaction-anchor` | `portal-messages.css` |
+Separated portal and main site documentation. Created `PORTAL_DESIGN.md`. Moved portal-specific sections (theme, layout wrappers, component classes, Tailwind rules, recent portal changes) out of this file.
 
 ### SVG Color Baseline (reset.css)
 
-All portal SVGs default to `--color-text-primary` via a rule in `src/styles/base/reset.css`:
+All portal SVGs default to `--color-text-primary` via `src/styles/base/reset.css`. Interactive elements (buttons, links) inherit parent's hover/active color.
 
-```css
-/* All portal SVGs inherit primary text color */
-.portal svg {
-  color: var(--color-text-primary);
-}
+### Avatar CSS Mask Technique
 
-/* Interactive elements override to inherit parent context */
-.portal button svg,
-.portal a svg {
-  color: inherit;
-}
-```
-
-This ensures standalone icons (empty states, headings, stat cards) always render at the correct text color. Interactive elements (buttons, links) still pick up their parent's hover/active color.
-
-### Avatar CSS Mask Technique (portal-layout.css)
-
-The header avatar uses a CSS mask instead of `<img>` so it responds to `--color-text-primary` in both themes:
-
-```css
-.portal-global-header .header-avatar {
-  display: inline-block;
-  background-color: var(--color-text-primary);
-  mask-image: url('/images/avatar_small_sidebar.svg');
-  mask-size: contain;
-  -webkit-mask-image: url('/images/avatar_small_sidebar.svg');
-  -webkit-mask-size: contain;
-}
-```
-
-The React component renders `<span className="header-avatar" aria-hidden="true" />` rather than an `<img>`.
+Header avatar uses CSS mask instead of `<img>` to respond to `--color-text-primary` in both themes. React renders `<span className="header-avatar" aria-hidden="true" />`.
 
 ### Primary Border Variable
 
-`--color-border-primary` is defined in `portal-theme.css` as:
-
-```css
---color-border-primary: var(--color-text-primary);
-```
-
-This ensures borders always match text color in both themes without a separate light-mode override.
+`--color-border-primary` is defined as `var(--color-text-primary)` in `portal-theme.css`, so borders match text color in both themes automatically.
