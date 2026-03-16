@@ -11,6 +11,7 @@ import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import type { AuthenticatedRequest } from '../../middleware/auth.js';
 import { validateRequest } from '../../middleware/validation.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { DeliverableValidationSchemas, canAccessDeliverable } from './shared.js';
 
 const router = Router();
@@ -56,7 +57,7 @@ const router = Router();
  *       404:
  *         description: Deliverable not found
  */
-router.post('/:id/versions', validateRequest(DeliverableValidationSchemas.uploadVersion, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/versions', validateRequest(DeliverableValidationSchemas.uploadVersion, { allowUnknownFields: true }), invalidateCache(['deliverables']), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);

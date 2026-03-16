@@ -12,6 +12,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { designReviewService } from '../../services/design-review-service.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
@@ -76,6 +77,7 @@ router.patch(
   '/design-reviews/:reviewId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['design-reviews']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const reviewId = parseInt(req.params.reviewId, 10);
     const { status } = req.body;

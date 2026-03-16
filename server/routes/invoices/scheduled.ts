@@ -11,6 +11,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { getInvoiceService, toSnakeCaseScheduledInvoice } from './helpers.js';
 
 const router = express.Router();
@@ -27,6 +28,7 @@ router.post(
   '/schedule',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['invoices']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const {
       projectId,
@@ -152,6 +154,7 @@ router.delete(
   '/scheduled/:id',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['invoices']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const scheduledId = parseInt(req.params.id, 10);
 

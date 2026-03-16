@@ -12,6 +12,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 import { projectService } from '../../services/project-service.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 
@@ -24,6 +25,7 @@ router.post(
   '/tasks',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['tasks']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { projectId, title, description, priority, dueDate, milestoneId } = req.body;
 
@@ -55,6 +57,7 @@ router.post(
   '/tasks/bulk-delete',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['tasks']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { taskIds } = req.body;
 
@@ -90,6 +93,7 @@ router.put(
   authenticateToken,
   requireAdmin,
   validateRequest(ValidationSchemas.task),
+  invalidateCache(['tasks']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     const { title, description, status, priority, dueDate, assignedTo } = req.body;

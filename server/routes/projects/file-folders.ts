@@ -8,6 +8,7 @@ import {
 } from '../../utils/access-control.js';
 import { fileService } from '../../services/file-service.js';
 import { errorResponse, sendSuccess, sendCreated, messageResponse, ErrorCodes } from '../../utils/api-response.js';
+import { invalidateCache } from '../../middleware/cache.js';
 
 const router = express.Router();
 
@@ -35,6 +36,7 @@ router.get(
 router.post(
   '/:id/folders',
   authenticateToken,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     const { name, description, parent_folder_id, color, icon } = req.body;
@@ -68,6 +70,7 @@ router.post(
 router.put(
   '/folders/:folderId',
   authenticateToken,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const folderId = parseInt(req.params.folderId, 10);
     const { name, description, color, icon, sort_order } = req.body;
@@ -95,6 +98,7 @@ router.delete(
   '/folders/:folderId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const folderId = parseInt(req.params.folderId, 10);
     if (isNaN(folderId) || folderId <= 0) {
@@ -112,6 +116,7 @@ router.delete(
 router.post(
   '/files/:fileId/move',
   authenticateToken,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     const { folder_id } = req.body;
@@ -132,6 +137,7 @@ router.post(
 router.post(
   '/folders/:folderId/move',
   authenticateToken,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const folderId = parseInt(req.params.folderId, 10);
     const { parent_folder_id } = req.body;

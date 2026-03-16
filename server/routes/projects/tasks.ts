@@ -7,6 +7,7 @@ import {
   canAccessChecklistItem
 } from '../../utils/access-control.js';
 import { projectService } from '../../services/project-service.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
@@ -63,6 +64,7 @@ router.post(
   '/:id/tasks',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: express.Request, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
@@ -107,6 +109,7 @@ router.put(
   '/tasks/:taskId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: express.Request, res: Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId) || taskId <= 0) {
@@ -122,6 +125,7 @@ router.delete(
   '/tasks/:taskId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: express.Request, res: Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId) || taskId <= 0) {
@@ -137,6 +141,7 @@ router.post(
   '/tasks/:taskId/complete',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: express.Request, res: Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId) || taskId <= 0) {
@@ -152,6 +157,7 @@ router.post(
   '/tasks/:taskId/move',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: express.Request, res: Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId) || taskId <= 0) {
@@ -173,6 +179,7 @@ router.post(
   '/tasks/:taskId/dependencies',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: express.Request, res: Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId) || taskId <= 0) {
@@ -194,6 +201,7 @@ router.delete(
   '/tasks/:taskId/dependencies/:dependsOnTaskId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: express.Request, res: Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     const dependsOnTaskId = parseInt(req.params.dependsOnTaskId, 10);
@@ -252,6 +260,7 @@ router.get(
 router.post(
   '/tasks/:taskId/comments',
   authenticateToken,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     const { content } = req.body;
@@ -278,6 +287,7 @@ router.delete(
   '/tasks/comments/:commentId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: express.Request, res: Response) => {
     const commentId = parseInt(req.params.commentId, 10);
     if (isNaN(commentId) || commentId <= 0) {
@@ -297,6 +307,7 @@ router.post(
   '/tasks/:taskId/checklist',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: express.Request, res: Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId) || taskId <= 0) {
@@ -317,6 +328,7 @@ router.post(
 router.post(
   '/tasks/checklist/:itemId/toggle',
   authenticateToken,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const itemId = parseInt(req.params.itemId, 10);
     if (isNaN(itemId) || itemId <= 0) {
@@ -337,6 +349,7 @@ router.delete(
   '/tasks/checklist/:itemId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: express.Request, res: Response) => {
     const itemId = parseInt(req.params.itemId, 10);
     if (isNaN(itemId) || itemId <= 0) {

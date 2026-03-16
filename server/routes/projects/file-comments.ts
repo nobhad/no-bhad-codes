@@ -4,6 +4,7 @@ import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.j
 import { canAccessFile, canAccessFileComment } from '../../utils/access-control.js';
 import { fileService } from '../../services/file-service.js';
 import { errorResponse, sendSuccess, sendCreated, messageResponse, ErrorCodes } from '../../utils/api-response.js';
+import { invalidateCache } from '../../middleware/cache.js';
 
 const router = express.Router();
 
@@ -31,6 +32,7 @@ router.get(
 router.post(
   '/files/:fileId/comments',
   authenticateToken,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     const { content, is_internal, parent_comment_id, author_name } = req.body;
@@ -65,6 +67,7 @@ router.post(
 router.delete(
   '/files/comments/:commentId',
   authenticateToken,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const commentId = parseInt(req.params.commentId, 10);
     if (isNaN(commentId) || commentId <= 0) {

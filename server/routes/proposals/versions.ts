@@ -20,6 +20,7 @@ import {
   sendCreated
 } from './helpers.js';
 import type { AuthenticatedRequest } from './helpers.js';
+import { invalidateCache } from '../../middleware/cache.js';
 
 const router = express.Router();
 
@@ -89,6 +90,7 @@ router.post(
   '/:id/versions',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id, 10);
 
@@ -130,6 +132,7 @@ router.post(
   '/:id/versions/:versionId/restore',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id, 10);
     const versionId = parseInt(req.params.versionId, 10);

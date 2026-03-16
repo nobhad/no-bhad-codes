@@ -5,6 +5,7 @@ import { canAccessProject } from '../../utils/access-control.js';
 import { getString } from '../../database/row-helpers.js';
 import { projectService } from '../../services/project-service.js';
 import { normalizeDeliverables } from '../../services/project/milestones.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { errorResponse, sendSuccess, sendCreated, messageResponse, ErrorCodes } from '../../utils/api-response.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
@@ -41,6 +42,7 @@ router.post(
   '/:id/milestones',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: express.Request, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
@@ -84,6 +86,7 @@ router.put(
   '/:id/milestones/:milestoneId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: express.Request, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     const milestoneId = parseInt(req.params.milestoneId, 10);
@@ -180,6 +183,7 @@ router.delete(
   '/:id/milestones/:milestoneId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     const milestoneId = parseInt(req.params.milestoneId, 10);

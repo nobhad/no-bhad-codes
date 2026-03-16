@@ -11,6 +11,7 @@ import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import type { AuthenticatedRequest } from '../../middleware/auth.js';
 import { validateRequest } from '../../middleware/validation.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { DeliverableValidationSchemas, canAccessDeliverable } from './shared.js';
 
 const router = Router();
@@ -54,7 +55,7 @@ const router = Router();
  *       201:
  *         description: Comment added
  */
-router.post('/:id/comments', validateRequest(DeliverableValidationSchemas.addComment, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/comments', validateRequest(DeliverableValidationSchemas.addComment, { allowUnknownFields: true }), invalidateCache(['deliverables']), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
@@ -166,6 +167,7 @@ router.get('/:id/comments', asyncHandler(async (req: AuthenticatedRequest, res: 
  */
 router.patch(
   '/:deliverableId/comments/:commentId/resolve',
+  invalidateCache(['deliverables']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { deliverableId, commentId } = req.params;
@@ -230,6 +232,7 @@ router.patch(
  */
 router.delete(
   '/:deliverableId/comments/:commentId',
+  invalidateCache(['deliverables']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { deliverableId, commentId } = req.params;
     const parsedDeliverableId = parseInt(deliverableId, 10);

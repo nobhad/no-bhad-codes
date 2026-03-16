@@ -10,6 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 import { deliverableService } from '../../services/deliverable-service.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
@@ -42,6 +43,7 @@ router.post(
   '/deliverables',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['deliverables']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { projectId, title, description, type, reviewDeadline, tags } = req.body;
 
@@ -75,6 +77,7 @@ router.put(
   '/deliverables/:id',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['deliverables']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id, 10);
 
@@ -109,6 +112,7 @@ router.post(
   '/deliverables/bulk-delete',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['deliverables']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { deliverableIds } = req.body;
 

@@ -16,6 +16,7 @@ import { BUSINESS_INFO } from '../../config/business.js';
 import { sendSuccess, sendCreated, errorResponse, ErrorCodes } from '../../utils/api-response.js';
 import { getBaseUrl } from '../../config/environment.js';
 import { validateRequest } from '../../middleware/validation.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { EMAIL_COLORS, EMAIL_TYPOGRAPHY } from '../../config/email-styles.js';
 import { ContractValidationSchemas } from './shared.js';
 
@@ -49,6 +50,7 @@ router.post(
   '/:contractId/send',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['contracts']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const contractId = parseInt(req.params.contractId, 10);
 
@@ -162,6 +164,7 @@ router.post(
   '/:contractId/resend-reminder',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['contracts']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const contractId = parseInt(req.params.contractId, 10);
 
@@ -270,6 +273,7 @@ router.post(
   '/:contractId/expire',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['contracts']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const contractId = parseInt(req.params.contractId, 10);
 
@@ -333,6 +337,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   validateRequest(ContractValidationSchemas.amendment, { allowUnknownFields: true }),
+  invalidateCache(['contracts']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const contractId = parseInt(req.params.contractId, 10);
 
@@ -385,6 +390,7 @@ router.post(
   '/:contractId/renewal-reminder',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['contracts']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const contractId = parseInt(req.params.contractId, 10);
 

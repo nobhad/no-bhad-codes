@@ -5,6 +5,7 @@ import { canAccessFile } from '../../utils/access-control.js';
 import { fileService } from '../../services/file-service.js';
 import { upload } from './uploads.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
+import { invalidateCache } from '../../middleware/cache.js';
 
 const router = express.Router();
 
@@ -32,6 +33,7 @@ router.post(
   '/files/:fileId/versions',
   authenticateToken,
   upload.single('file'),
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     const file = req.file;
@@ -68,6 +70,7 @@ router.post(
   '/files/:fileId/versions/:versionId/restore',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     const versionId = parseInt(req.params.versionId, 10);

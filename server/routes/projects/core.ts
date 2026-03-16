@@ -87,6 +87,7 @@ router.post(
   '/request',
   authenticateToken,
   validateRequest(ValidationSchemas.projectRequest),
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     if (req.user!.type !== 'client') {
       return errorResponse(res, 'Only clients can submit project requests', 403, ErrorCodes.ACCESS_DENIED);
@@ -159,6 +160,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   validateRequest(ValidationSchemas.projectCreate),
+  invalidateCache(['projects']),
   asyncHandler(async (req: express.Request, res: Response) => {
     const {
       client_id,
@@ -589,6 +591,7 @@ router.post(
   '/:id/report/save',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
@@ -647,6 +650,7 @@ router.post(
   '/:id/sow/save',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {

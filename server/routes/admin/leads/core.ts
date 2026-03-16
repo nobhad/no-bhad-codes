@@ -13,6 +13,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../../
 import { emailService } from '../../../services/email-service.js';
 import { errorTracker } from '../../../services/error-tracking.js';
 import { leadService } from '../../../services/lead-service.js';
+import { invalidateCache } from '../../../middleware/cache.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../../utils/api-response.js';
 import { logger } from '../../../services/logger.js';
 import { BUSINESS_INFO } from '../../../config/business.js';
@@ -98,6 +99,7 @@ router.put(
   '/contact-submissions/:id/status',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       const { id } = req.params;
@@ -134,6 +136,7 @@ router.post(
   '/contact-submissions/:id/convert-to-client',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       const { id } = req.params;
@@ -256,6 +259,7 @@ router.put(
   '/leads/:id/status',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       const { id } = req.params;
@@ -354,6 +358,7 @@ router.post(
   '/leads/:id/invite',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       const { id } = req.params;
@@ -518,6 +523,7 @@ router.post(
   '/leads/:id/activate',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['leads']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       const { id } = req.params;
