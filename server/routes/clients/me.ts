@@ -89,13 +89,29 @@ router.put(
       return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
-    const { contact_name, company_name, phone } = req.body;
+    // Only pass fields that are actually present in the request body
+    const profileUpdates: Record<string, string | null> = {};
+    if ('contact_name' in req.body) profileUpdates.contact_name = req.body.contact_name;
+    if ('company_name' in req.body) profileUpdates.company_name = req.body.company_name;
+    if ('phone' in req.body) profileUpdates.phone = req.body.phone;
 
-    await clientService.updateClientProfile(req.user!.id, {
-      contact_name,
-      company_name,
-      phone
-    });
+    await clientService.updateClientProfile(req.user!.id, profileUpdates);
+
+    // Auto-populate billing name/company on first profile save if billing fields are empty
+    const currentBilling = await clientService.getClientBilling(req.user!.id);
+    const billingUpdates: Record<string, string | null> = {};
+    if ('contact_name' in req.body && !currentBilling?.billing_name) {
+      billingUpdates.billing_name = req.body.contact_name;
+    }
+    if ('company_name' in req.body && !currentBilling?.company) {
+      billingUpdates.company = req.body.company_name;
+    }
+    if ('phone' in req.body && !(currentBilling as Record<string, unknown>)?.phone) {
+      billingUpdates.phone = req.body.phone;
+    }
+    if (Object.keys(billingUpdates).length > 0) {
+      await clientService.updateClientBilling(req.user!.id, billingUpdates);
+    }
 
     const updatedClient = await clientService.getClientProfileBasic(req.user!.id);
 
@@ -110,7 +126,7 @@ router.put(
         contact_name: req.body.original_contact_name,
         company_name: req.body.original_company_name
       },
-      { contact_name, company_name, phone },
+      profileUpdates,
       req
     );
 
