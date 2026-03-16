@@ -480,51 +480,13 @@ div.page-hero-desktop {
   cursor: pointer;
   pointer-events: auto;
   border-bottom: var(--border-width) solid var(--color-dark);
-  transform: translateY(-105%);
-  animation: project-drop-in var(--transition-length, 0.5s) cubic-bezier(0.3, 0.9, 0.3, 0.9)
-    forwards;
+  /* Initial state set by GSAP in projects.ts — entrance/exit via gsap.stagger() */
   transition: border-color var(--transition-theme, 0.4s);
 }
 
-/* Staggered entrance delays */
-.card-container.index-0 {
-  animation-delay: 0.3s;
-}
-.card-container.index-1 {
-  animation-delay: 0.4s;
-}
-.card-container.index-2 {
-  animation-delay: 0.5s;
-}
-.card-container.index-3 {
-  animation-delay: 0.6s;
-}
-.card-container.index-4 {
-  animation-delay: 0.7s;
-}
-
-/* Exit animation */
+/* Exit state — pointer-events disabled during GSAP exit animation */
 .card-container.leaving {
   pointer-events: none;
-  transform: translateY(0);
-  animation: project-drop-out var(--transition-length, 0.5s) cubic-bezier(0.3, 0.9, 0.3, 0.9)
-    forwards;
-}
-
-.card-container.leaving.index-0 {
-  animation-delay: 0.1s;
-}
-.card-container.leaving.index-1 {
-  animation-delay: 0.15s;
-}
-.card-container.leaving.index-2 {
-  animation-delay: 0.2s;
-}
-.card-container.leaving.index-3 {
-  animation-delay: 0.25s;
-}
-.card-container.leaving.index-4 {
-  animation-delay: 0.3s;
 }
 
 /* Arrow icon - hidden by default, revealed on hover */
@@ -602,47 +564,13 @@ div.page-hero-desktop {
     box-shadow var(--transition-theme, 0.4s);
 }
 
-/* ===============================================
-   DROP-IN/DROP-OUT ANIMATIONS
-   =============================================== */
-
-@keyframes project-drop-in {
-  0% {
-    transform: translateY(-105%);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-
-@keyframes project-drop-out {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(105%);
-  }
-}
-
-/* Heading divider animation */
+/* Heading divider — entrance animated by GSAP in projects.ts */
 .projects-section .heading-divider {
   background-color: var(--color-dark);
   height: 4px;
   border-radius: var(--border-radius-xs, 2px) 0 var(--border-radius-sm, 4px) var(--border-radius-xs, 2px);
-  transform: scaleX(0);
   transform-origin: bottom left;
-  animation: scale-in-left var(--transition-long, 0.8s) cubic-bezier(0.3, 0.9, 0.3, 0.9) 0.4s
-    forwards;
   transition: background-color var(--transition-theme, 0.4s);
-}
-
-@keyframes scale-in-left {
-  0% {
-    transform: scaleX(0);
-  }
-  100% {
-    transform: scaleX(1);
-  }
 }
 
 /* ===============================================
