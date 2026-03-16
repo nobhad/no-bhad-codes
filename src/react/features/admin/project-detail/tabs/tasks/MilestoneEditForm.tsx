@@ -175,7 +175,7 @@ export function MilestoneEditForm({ milestone, onSave, onCancel, showNotificatio
           </div>
         </div>
 
-        <div className="layout-row-end pd-mt-2">
+        <div className="portal-card-actions pd-mt-2">
           <PortalButton variant="ghost" onClick={onCancel}>
             Cancel
           </PortalButton>

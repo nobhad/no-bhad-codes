@@ -317,7 +317,7 @@ export function InvoicesTab({
                       </span>
                     </td>
                     <td className="pd-table-cell" onClick={(e) => e.stopPropagation()}>
-                      <div className="layout-row-end">
+                      <div className="table-actions">
                         <button
                           className="icon-btn"
                           onClick={() => onViewInvoice?.(invoice.id)}
