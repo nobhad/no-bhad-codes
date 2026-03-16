@@ -13,6 +13,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, messageResponse, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseRecurringInvoice } from './helpers.js';
 import { validateRequest } from '../../middleware/validation.js';
+import { invalidateCache } from '../../middleware/cache.js';
 
 const router = express.Router();
 
@@ -49,6 +50,7 @@ router.post(
   requireAdmin,
   // Validate and sanitize input
   validateRequest(RecurringValidationSchemas.create),
+  invalidateCache(['invoices']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const {
       projectId,
@@ -170,6 +172,7 @@ router.put(
   '/recurring/:id',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['invoices']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const recurringId = parseInt(req.params.id, 10);
 
@@ -201,6 +204,7 @@ router.post(
   '/recurring/:id/pause',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['invoices']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const recurringId = parseInt(req.params.id, 10);
 
@@ -232,6 +236,7 @@ router.post(
   '/recurring/:id/resume',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['invoices']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const recurringId = parseInt(req.params.id, 10);
 
@@ -263,6 +268,7 @@ router.delete(
   '/recurring/:id',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['invoices']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const recurringId = parseInt(req.params.id, 10);
 

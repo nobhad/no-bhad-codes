@@ -16,6 +16,7 @@ import { logger } from '../../services/logger.js';
 import type { AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject, isUserAdmin } from '../../utils/access-control.js';
 import { validateRequest } from '../../middleware/validation.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { DeliverableValidationSchemas, canAccessDeliverable } from './shared.js';
 
 const router = Router();
@@ -95,7 +96,7 @@ router.get('/my', asyncHandler(async (req: AuthenticatedRequest, res: Response) 
  *       404:
  *         description: Project not found
  */
-router.post('/', validateRequest(DeliverableValidationSchemas.create, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.post('/', validateRequest(DeliverableValidationSchemas.create, { allowUnknownFields: true }), invalidateCache(['deliverables']), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const { projectId, title, description, type, createdById, tags, reviewDeadline, roundNumber } =
     req.body;
 
@@ -257,7 +258,7 @@ router.get('/projects/:projectId/list', asyncHandler(async (req: AuthenticatedRe
  *       404:
  *         description: Deliverable not found
  */
-router.put('/:id', validateRequest(DeliverableValidationSchemas.update, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.put('/:id', validateRequest(DeliverableValidationSchemas.update, { allowUnknownFields: true }), invalidateCache(['deliverables']), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
@@ -311,7 +312,7 @@ router.put('/:id', validateRequest(DeliverableValidationSchemas.update, { allowU
  *       404:
  *         description: Deliverable not found
  */
-router.post('/:id/lock', validateRequest(DeliverableValidationSchemas.lockDeliverable, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/lock', validateRequest(DeliverableValidationSchemas.lockDeliverable, { allowUnknownFields: true }), invalidateCache(['deliverables']), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
@@ -431,7 +432,7 @@ router.post('/:id/lock', validateRequest(DeliverableValidationSchemas.lockDelive
  *       404:
  *         description: Deliverable not found
  */
-router.post('/:id/revision', validateRequest(DeliverableValidationSchemas.requestRevision, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/revision', validateRequest(DeliverableValidationSchemas.requestRevision, { allowUnknownFields: true }), invalidateCache(['deliverables']), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
@@ -493,7 +494,7 @@ router.post('/:id/revision', validateRequest(DeliverableValidationSchemas.reques
  *       404:
  *         description: Deliverable not found
  */
-router.delete('/:id', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.delete('/:id', invalidateCache(['deliverables']), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
   const deliverableId = parseInt(id, 10);
   if (isNaN(deliverableId) || deliverableId <= 0) {

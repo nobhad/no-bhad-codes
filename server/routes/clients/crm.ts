@@ -19,6 +19,7 @@ import {
   sendCreated,
   ErrorCodes,
   invalidateCache,
+  QueryCache,
   clientService,
   toApiNote
 } from './helpers.js';
@@ -159,6 +160,14 @@ router.put(
     }
 
     const contact = await clientService.updateContact(contactId, req.body);
+
+    // Sync primary contact name back to clients.contact_name
+    if (contact.isPrimary) {
+      const fullName = [contact.firstName, contact.lastName].filter(Boolean).join(' ');
+      await clientService.updateClientProfile(contact.clientId, { contact_name: fullName });
+      await QueryCache.invalidate([`client:${contact.clientId}`, 'clients']);
+    }
+
     sendSuccess(res, { contact });
   })
 );

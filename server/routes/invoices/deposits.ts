@@ -11,6 +11,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, sanitizeErrorMessage } from '../../utils/api-response.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { getInvoiceService, toSnakeCaseDeposit, toSnakeCaseInvoice } from './helpers.js';
 import { logger } from '../../services/logger.js';
 
@@ -29,6 +30,7 @@ router.post(
   '/deposit',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['invoices']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { projectId, clientId, amount, percentage, description } = req.body;
 

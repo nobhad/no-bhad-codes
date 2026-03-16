@@ -15,6 +15,7 @@ import { contractService } from '../../services/contract-service.js';
 import { getNumber, getString } from '../../database/row-helpers.js';
 import { sendSuccess, errorResponse, ErrorCodes } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
+import { invalidateCache } from '../../middleware/cache.js';
 
 const router = express.Router();
 
@@ -190,6 +191,7 @@ router.get(
 router.post(
   '/sign',
   authenticateToken,
+  invalidateCache(['contracts']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { contractId, signerName, signatureData, agreedToTerms } = req.body;
 

@@ -11,6 +11,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { getInvoiceService, toSnakeCaseCredit } from './helpers.js';
 
 const router = express.Router();
@@ -28,6 +29,7 @@ router.post(
   '/:id/apply-credit',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['invoices']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id, 10);
     const { depositInvoiceId, amount } = req.body;

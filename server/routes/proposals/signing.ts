@@ -20,6 +20,7 @@ import {
   sendSuccess,
   sendCreated
 } from './helpers.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import type { AuthenticatedRequest } from './helpers.js';
 
 const router = express.Router();
@@ -90,6 +91,7 @@ router.post(
   '/:id/request-signature',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id, 10);
 
@@ -133,6 +135,7 @@ router.post(
 router.post(
   '/:id/sign',
   signatureRateLimiter,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: Request, res: Response) => {
     const proposalId = parseInt(req.params.id, 10);
 
@@ -282,6 +285,7 @@ router.get(
 router.post(
   '/sign/:token/decline',
   signatureRateLimiter,
+  invalidateCache(['proposals']),
   asyncHandler(async (req: Request, res: Response) => {
     const { token } = req.params;
 

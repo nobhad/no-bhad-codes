@@ -2179,16 +2179,18 @@ export class InvoiceService {
     const db = getDatabase();
     const row = await db.get(
       `SELECT contact_name, company_name, email,
+              COALESCE(billing_name, contact_name) as resolved_name,
+              COALESCE(billing_company, company_name) as resolved_company,
               COALESCE(billing_phone, phone) as phone,
-              COALESCE(billing_email, email) as billing_email
+              COALESCE(billing_email, email) as resolved_email
        FROM clients WHERE id = ?`,
       [clientId]
     );
     if (!row) return undefined;
     return {
-      contactName: getString(row, 'contact_name'),
-      companyName: getString(row, 'company_name') || undefined,
-      email: getString(row, 'billing_email') || getString(row, 'email'),
+      contactName: getString(row, 'resolved_name'),
+      companyName: getString(row, 'resolved_company') || undefined,
+      email: getString(row, 'resolved_email') || getString(row, 'email'),
       phone: getString(row, 'phone') || undefined
     };
   }
