@@ -20,6 +20,7 @@ import {
   useCurrentGroup,
   useSwitchTab
 } from '../stores/portal-store';
+import { DETAIL_VIEW_TABS } from '../../../server/config/unified-navigation';
 
 /**
  * Every subtab group dispatches a custom DOM event so the parent
@@ -94,6 +95,9 @@ export function PortalSubtabs() {
   const activeSubtabGroup = subtabGroups.find(
     (group) => group.forTab === activeGroup
   );
+
+  // Detail views (client-detail, project-detail) have their own internal tabs
+  if (DETAIL_VIEW_TABS[currentTab]) return null;
 
   if (!activeSubtabGroup) return null;
 

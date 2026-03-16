@@ -25,7 +25,7 @@ import {
   useCurrentTab,
   useCurrentGroup
 } from '../stores/portal-store';
-import { UNIFIED_TAB_GROUPS } from '../../../server/config/unified-navigation';
+import { UNIFIED_TAB_GROUPS, DETAIL_VIEW_TABS } from '../../../server/config/unified-navigation';
 import { NotificationBell } from '../components/portal/NotificationBell';
 // ============================================
 // PROJECT SELECTOR (client portal only)
@@ -108,6 +108,7 @@ function HeaderBreadcrumbs() {
   const groupLabel = currentGroup ? UNIFIED_TAB_GROUPS[currentGroup]?.label : null;
   const isSubtab = currentGroup && currentTab !== currentGroup;
   const isDashboard = currentTab === 'dashboard';
+  const detailConfig = DETAIL_VIEW_TABS[currentTab] ?? null;
 
   return (
     <div className="breadcrumb-trail" aria-label="Breadcrumb">
@@ -125,6 +126,14 @@ function HeaderBreadcrumbs() {
       {!isDashboard && isSubtab && groupLabel && (
         <>
           <Link className="breadcrumb-link" to={`/${currentGroup}`}>{groupLabel}</Link>
+          <ChevronRight className="breadcrumb-separator" aria-hidden="true" />
+        </>
+      )}
+
+      {/* Parent list crumb for detail views (e.g., Clients, Projects) */}
+      {!isDashboard && detailConfig && (
+        <>
+          <Link className="breadcrumb-link" to={`/${detailConfig.parentTab}`}>{detailConfig.parentLabel}</Link>
           <ChevronRight className="breadcrumb-separator" aria-hidden="true" />
         </>
       )}
