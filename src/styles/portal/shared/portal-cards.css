@@ -71,14 +71,15 @@
    Single source of truth for ALL field labels in portals
    Matches table column headers: grey, thin, uppercase, 11px
 
-   PRIMARY SEMANTIC CLASSES (prefer these in new code):
-   - .field-label  : Form field labels
-   - .section-label: Section headers, filter labels
-   - .stat-label   : Statistic/metric labels (KPIs, summaries)
+   CANONICAL CLASSES (use these in new code):
+   - .field-label    : Form field labels
+   - .section-label  : Section headers, filter labels
+   - .stat-label     : Statistic/metric labels (KPIs, summaries)
+   - .milestone-title: Milestone heading text (shares label typography)
 
-   ACTIVE ALIASES (still emitted by React components — migrate on touch):
-   .filter-section-label, .prompt-dialog-label,
-   .section-title, .milestone-title
+   LAYOUT-ONLY ALIASES (typography removed — canonical class on element):
+   .filter-section-label  → use .field-label on element; layout in portal-table-filters.css
+   .prompt-dialog-label   → use .field-label on element; layout in portal-confirm-dialog.css
    ===================================================== */
 
 /* Label variables defined in portal-theme.css (single source of truth)
@@ -87,14 +88,11 @@
    --label-letter-spacing: 0.05em
 */
 
-/* Unified label rule — primary classes + active aliases */
+/* Unified label rule — canonical classes only */
 .portal :is(
   .field-label,
   .section-label,
   .stat-label,
-  .filter-section-label,
-  .prompt-dialog-label,
-  .section-title,
   .milestone-title,
   .payment-plans-section h4,
   .project-notes h4
@@ -112,9 +110,6 @@ html[data-theme="light"] .portal :is(
   .field-label,
   .section-label,
   .stat-label,
-  .filter-section-label,
-  .prompt-dialog-label,
-  .section-title,
   .milestone-title,
   .payment-plans-section h4,
   .project-notes h4
@@ -290,6 +285,53 @@ html[data-theme="light"] .portal :is(
 /* Card body - standard content area */
 .portal .portal-card-body {
   color: var(--color-text-primary);
+}
+
+/* Title block -- stacked title + subtitle inside .portal-card-title-group */
+.portal .portal-card-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5, 0.125rem);
+}
+
+/* Meta row -- horizontal list of icon+text metadata items */
+.portal .portal-card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-3);
+}
+
+/* Single meta item -- icon + label pair */
+.portal .portal-card-meta-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-secondary);
+}
+
+/* Card actions row -- right-aligned action buttons */
+.portal .portal-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+/* Detail list -- stacked key-value rows (integrations, quotes) */
+.portal .portal-card-detail-list {
+  font-size: var(--font-size-sm);
+}
+
+.portal .portal-card-detail-list > * + * {
+  margin-top: var(--space-0-5, 0.125rem);
+}
+
+/* Detail row -- key-value pair within a detail list */
+.portal .portal-card-detail-row {
+  display: flex;
+  justify-content: space-between;
 }
 
 /* =====================================================

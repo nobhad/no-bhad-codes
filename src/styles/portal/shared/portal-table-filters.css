@@ -172,7 +172,7 @@
   margin-bottom: 0;
 }
 
-/* Label styling from unified rule in portal-forms.css - only layout here */
+/* Layout only — typography via .field-label (canonical) on same element */
 .filter-section-label {
   display: block;
   margin-bottom: var(--space-1);
