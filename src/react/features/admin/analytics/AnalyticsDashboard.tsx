@@ -429,12 +429,12 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
       <div className="analytics-actions-bar action-bar">
         <PortalDropdown>
           <PortalDropdownTrigger asChild>
-            <button className="dropdown-trigger--custom date-range-trigger">
+            <button className="dropdown-trigger date-range-trigger">
               {dateRangeOptions.find((o) => o.value === dateRange)?.label}
               <ChevronDown className="dropdown-caret" />
             </button>
           </PortalDropdownTrigger>
-          <PortalDropdownContent align="start" sideOffset={-4}>
+          <PortalDropdownContent align="start" sideOffset={0}>
             {dateRangeOptions.map((option) => (
               <PortalDropdownItem
                 key={option.value}
