@@ -167,6 +167,7 @@
 
 .confirm-dialog-content {
   flex: 1;
+  padding: var(--content-gutter);
 }
 
 .confirm-dialog-description {
@@ -179,7 +180,6 @@
   display: flex;
   justify-content: flex-end;
   gap: var(--space-2);
-  border-top: var(--portal-border);
 }
 
 /* ================================================
