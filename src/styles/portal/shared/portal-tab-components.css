@@ -28,16 +28,17 @@
 
 /* Tab content headers use `.data-table-header` markup for single SoT. */
 
-/* Make tab-section headers look like section titles */
+/* Panel headers — Tier 3 (section title) tokens */
 .portal .tab-section > .panel-header-row .heading,
 .portal .tab-section > .panel-header-row--compact .heading {
   display: inline-flex;
   align-items: center;
   gap: var(--icon-gap);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-widest);
+  font-size: var(--heading-section-font-size);
+  font-weight: var(--heading-section-font-weight);
+  color: var(--heading-section-color);
+  text-transform: var(--heading-text-transform);
+  letter-spacing: var(--heading-section-letter-spacing);
   margin: 0;
 }
 

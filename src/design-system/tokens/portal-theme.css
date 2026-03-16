@@ -183,7 +183,38 @@ body[data-page="client"] {
   --input-icon-offset: calc(var(--icon-size-md) + var(--space-2-5)); /* icon + gap = ~36px */
 
   /* ----------------------------------------
-   * LABEL STYLING
+   * HEADING TIER SYSTEM
+   * ----------------------------------------
+   * Tier 1: Page title (.page-title) — largest, for page-level headings
+   * Tier 2: Card title (.portal-card-header) — entity card names (contracts, projects, etc.)
+   * Tier 3: Section title (.data-table-header h3, .section-title, .panel-header-row .heading,
+   *          .portal-section-title) — table headers, panel headers, section dividers
+   * Tier 4: Labels (.field-label, .section-label, .stat-label) — form labels, stat labels
+   */
+
+  /* Tier 1 — Page title */
+  --heading-page-font-size: var(--font-size-xl);
+  --heading-page-font-weight: var(--font-weight-semibold);
+  --heading-page-color: var(--color-text-primary);
+
+  /* Tier 2 — Card title */
+  --heading-card-font-size: var(--font-size-lg);
+  --heading-card-font-weight: var(--font-weight-regular);
+  --heading-card-color: var(--color-text-primary);
+  --heading-card-letter-spacing: var(--letter-spacing-label);
+
+  /* Tier 3 — Section title (tables, panels, sections) */
+  --heading-section-font-size: var(--font-size-base);
+  --heading-section-font-weight: var(--font-weight-medium);
+  --heading-section-color: var(--color-text-primary);
+  --heading-section-letter-spacing: var(--letter-spacing-label);
+
+  /* Shared heading properties */
+  --heading-text-transform: uppercase;
+  --heading-font-family: var(--font-family-sans);
+
+  /* ----------------------------------------
+   * LABEL STYLING (Tier 4)
    * ---------------------------------------- */
   --label-font-size: var(--font-size-sm);
   --label-color: var(--color-text-primary);

@@ -203,6 +203,34 @@ td:has(.dropdown-trigger--status) .portal-dropdown-content,
   text-transform: none;
 }
 
+/* ================================================
+   DROPDOWN TRIGGER BORDER — UNIFIED RULE
+   Closed: transparent border (preserves layout width).
+   Hover: visible border via --color-border-primary.
+   Open/Active: visible border via --color-border-primary.
+   ================================================ */
+.dropdown-trigger,
+.dropdown-trigger--custom,
+.dropdown-trigger--status,
+.dropdown-trigger--form {
+  border-color: transparent;
+  transition: border-color var(--transition-fast);
+}
+
+.dropdown-trigger:hover,
+.dropdown-trigger--custom:hover,
+.dropdown-trigger--status:hover,
+.dropdown-trigger--form:hover {
+  border-color: var(--color-border-primary);
+}
+
+.dropdown-trigger[data-state="open"],
+.dropdown-trigger--custom.open,
+.dropdown-trigger--status[data-state="open"],
+.dropdown-trigger--form[data-state="open"] {
+  border-color: var(--color-border-primary);
+}
+
 /* Dropdown item - base styles */
 .portal-dropdown-item {
   position: relative;
@@ -441,7 +469,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   --dropdown-radius: 0;
 }
 
-/* Dropdown trigger button - CLOSED state */
+/* Dropdown trigger button - CLOSED state (transparent border by default) */
 .custom-dropdown[data-modal-dropdown] .dropdown-trigger--custom {
   width: 100%;
   display: flex;
@@ -450,7 +478,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   position: relative;
   padding: var(--space-3) var(--space-4);
   background-color: var(--dropdown-bg);
-  border: var(--dropdown-border-width) solid var(--dropdown-border-color);
+  border: var(--dropdown-border-width) solid transparent;
   border-radius: var(--dropdown-radius);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
@@ -474,7 +502,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
 }
 
 .custom-dropdown[data-modal-dropdown] .dropdown-trigger--custom:hover {
-  border-color: var(--color-text-secondary);
+  border-color: var(--color-border-primary);
 }
 
 /* Trigger - OPEN state */

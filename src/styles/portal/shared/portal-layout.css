@@ -588,11 +588,14 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 
 /* --- Page Header Actions --- */
 
-.portal :is(.page-header-actions, .admin-table-actions, .data-table-actions) {
+/* Action button groups — always right-aligned in headers via margin-left: auto.
+   Applies to ALL header contexts: page, table, section, panel, card. */
+.portal :is(.page-header-actions, .admin-table-actions, .data-table-actions, .section-actions, .panel-actions) {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--action-btn-gap);
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 
@@ -722,13 +725,14 @@ td {
 
 /* --- Portal Section Title --- */
 
+/* Portal section title — Tier 3 (section title) tokens */
 .portal .portal-section-title {
-  font-family: var(--font-family-sans);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wider);
+  font-family: var(--heading-font-family);
+  font-size: var(--heading-section-font-size);
+  font-weight: var(--heading-section-font-weight);
+  color: var(--heading-section-color);
+  text-transform: var(--heading-text-transform);
+  letter-spacing: var(--heading-section-letter-spacing);
   margin: 0 0 var(--space-2) 0;
 }
 
@@ -761,13 +765,7 @@ td {
   border-color: var(--color-text-primary);
 }
 
-/* --- Panel Actions --- */
-
-.panel-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--action-btn-gap);
-}
+/* Panel actions — layout handled by unified action rule above (section 6) */
 
 
 /* ═══════════════════════════════════════════════════════
@@ -1223,11 +1221,7 @@ td {
   margin-left: auto;
 }
 
-.section-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-}
+/* Section actions — layout handled by unified action rule above (section 6) */
 
 
 /* ═══════════════════════════════════════════════════════
@@ -1261,10 +1255,11 @@ td {
   color: var(--color-accent);
 }
 
+/* Page title — Tier 1 tokens */
 .page-title {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+  font-size: var(--heading-page-font-size);
+  font-weight: var(--heading-page-font-weight);
+  color: var(--heading-page-color);
   margin: 0;
   line-height: var(--line-height-tight);
 }

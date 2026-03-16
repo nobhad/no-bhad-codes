@@ -17,14 +17,15 @@
    UNIFIED H3 HEADING STYLES
    Single source of truth for ALL h3 headings in portals
    ===================================================== */
+/* Base h3 inherits Tier 3 (section title) tokens */
 .portal h3 {
   margin: 0;
-  font-family: var(--font-family-sans);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
+  font-family: var(--heading-font-family);
+  font-size: var(--heading-section-font-size);
+  font-weight: var(--heading-section-font-weight);
+  color: var(--heading-section-color);
+  text-transform: var(--heading-text-transform);
+  letter-spacing: var(--heading-section-letter-spacing);
   line-height: var(--line-height-tight);
 }
 
@@ -234,20 +235,27 @@ html[data-theme="light"] .portal :is(
 
 /* Card children spacing removed — parent gap handles vertical spacing */
 
-/* Card header — flex row with title + status
-   Canonical layout definition (merged from portal-components.css) */
+/* Card header — Tier 2 (card title) typography
+   flex row with title left, actions/status pushed right */
 .portal .portal-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  font-family: var(--font-family-sans);
-  font-size: var(--font-size-lg);  /* 18px - card titles */
-  font-weight: var(--font-weight-regular);
-  color: var(--color-text-primary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
+  font-family: var(--heading-font-family);
+  font-size: var(--heading-card-font-size);
+  font-weight: var(--heading-card-font-weight);
+  color: var(--heading-card-color);
+  text-transform: var(--heading-text-transform);
+  letter-spacing: var(--heading-card-letter-spacing);
   margin: 0 0 var(--space-2) 0;
+}
+
+/* Action buttons in card headers — always right-aligned */
+.portal .portal-card-header .portal-card-actions,
+.portal .portal-card-header .panel-actions,
+.portal .portal-card-header .icon-btn {
+  margin-left: auto;
 }
 
 /* Inner card */
