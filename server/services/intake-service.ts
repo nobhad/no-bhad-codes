@@ -273,6 +273,24 @@ class IntakeService {
         clientId = clientResult.lastID!;
       }
 
+      // Create primary contact from intake data (if none exists for this client)
+      const nameParts = intakeData.name.trim().split(/\s+/);
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      const existingContact = await ctx.get(
+        'SELECT id FROM client_contacts WHERE client_id = ? AND deleted_at IS NULL LIMIT 1',
+        [clientId]
+      );
+
+      if (!existingContact) {
+        await ctx.run(
+          `INSERT INTO client_contacts (client_id, first_name, last_name, email, phone, role, is_primary, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, 'primary', 1, datetime('now'), datetime('now'))`,
+          [clientId, firstName, lastName, intakeData.email, intakePhone]
+        );
+      }
+
       // Create project
       const extraNotes: string[] = [];
       if (features.length) extraNotes.push(`Features: ${features.join(', ')}`);
