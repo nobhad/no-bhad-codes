@@ -1,0 +1,683 @@
+{
+  "simple-site": {
+    "good": {
+      "discovery planning": [
+        { "title": "Schedule kickoff call", "description": "Set up initial consultation with client", "order": 1, "estimatedHours": 0.5 },
+        { "title": "Gather requirements", "description": "Document client needs, goals, and preferences", "order": 2, "estimatedHours": 2 },
+        { "title": "Collect brand assets", "description": "Gather logos, colors, fonts from client", "order": 3, "estimatedHours": 1 },
+        { "title": "Create sitemap", "description": "Define site structure and navigation", "order": 4, "estimatedHours": 1 },
+        { "title": "Review project brief with client", "description": "Present and approve project scope and timeline", "order": 5, "estimatedHours": 1 }
+      ],
+      "design development": [
+        { "title": "Create design mockups", "description": "Design homepage and key page layouts", "order": 1, "estimatedHours": 6 },
+        { "title": "Client review of designs", "description": "Present designs and gather feedback", "order": 2, "estimatedHours": 1 },
+        { "title": "Set up development environment", "description": "Initialize project repository and local dev", "order": 3, "estimatedHours": 1 },
+        { "title": "Build responsive HTML/CSS", "description": "Convert designs to responsive code", "order": 4, "estimatedHours": 8 },
+        { "title": "Integrate content", "description": "Add text, images, and media to pages", "order": 5, "estimatedHours": 3 },
+        { "title": "Optimize images and assets", "description": "Compress and optimize all media files", "order": 6, "estimatedHours": 1 }
+      ],
+      "testing launch": [
+        { "title": "Cross-browser testing", "description": "Test on Chrome, Firefox, Safari, Edge", "order": 1, "estimatedHours": 1.5 },
+        { "title": "Mobile device testing", "description": "Test responsive behavior on various screen sizes", "order": 2, "estimatedHours": 1.5 },
+        { "title": "Client final review", "description": "Walk through completed site with client", "order": 3, "estimatedHours": 1 },
+        { "title": "Set up hosting and domain", "description": "Configure production server and DNS", "order": 4, "estimatedHours": 1 },
+        { "title": "Deploy to production", "description": "Launch site to live server", "order": 5, "estimatedHours": 1 }
+      ]
+    },
+    "better": {
+      "discovery planning": [
+        { "title": "Schedule kickoff call", "description": "Set up initial consultation with client", "order": 1, "estimatedHours": 0.5 },
+        { "title": "Gather requirements", "description": "Document client needs, goals, and preferences", "order": 2, "estimatedHours": 2 },
+        { "title": "Collect brand assets", "description": "Gather logos, colors, fonts from client", "order": 3, "estimatedHours": 1 },
+        { "title": "Create sitemap", "description": "Define site structure and navigation", "order": 4, "estimatedHours": 1.5 },
+        { "title": "Draft content outline", "description": "Outline key messages and content for each page", "order": 5, "estimatedHours": 2 },
+        { "title": "Conduct SEO keyword research", "description": "Identify target keywords and search opportunities", "order": 6, "estimatedHours": 2 },
+        { "title": "Review project brief with client", "description": "Present and approve project scope and timeline", "order": 7, "estimatedHours": 1 }
+      ],
+      "design development": [
+        { "title": "Create design mockups", "description": "Design homepage and key page layouts", "order": 1, "estimatedHours": 6 },
+        { "title": "Client review of designs", "description": "Present designs and gather feedback", "order": 2, "estimatedHours": 1 },
+        { "title": "Revise designs based on feedback", "description": "Implement requested design changes", "order": 3, "estimatedHours": 3 },
+        { "title": "Set up development environment", "description": "Initialize project repository and local dev", "order": 4, "estimatedHours": 1 },
+        { "title": "Build responsive HTML/CSS", "description": "Convert designs to responsive code", "order": 5, "estimatedHours": 8 },
+        { "title": "Implement navigation and interactions", "description": "Add menus, buttons, hover states, animations", "order": 6, "estimatedHours": 3 },
+        { "title": "Integrate content", "description": "Add text, images, and media to pages", "order": 7, "estimatedHours": 4 },
+        { "title": "Optimize images and assets", "description": "Compress and optimize all media files", "order": 8, "estimatedHours": 2 }
+      ],
+      "seo optimization": [
+        { "title": "Set up SEO meta tags", "description": "Add page titles, descriptions, Open Graph tags", "order": 1, "estimatedHours": 2 },
+        { "title": "Implement on-page SEO", "description": "Optimize headings, alt text, internal linking", "order": 2, "estimatedHours": 2 },
+        { "title": "Performance optimization", "description": "Optimize load times and Core Web Vitals", "order": 3, "estimatedHours": 2 },
+        { "title": "Set up analytics", "description": "Configure Google Analytics or alternative", "order": 4, "estimatedHours": 1 },
+        { "title": "Create XML sitemap", "description": "Generate sitemap for search engines", "order": 5, "estimatedHours": 0.5 }
+      ],
+      "testing launch": [
+        { "title": "Cross-browser testing", "description": "Test on Chrome, Firefox, Safari, Edge", "order": 1, "estimatedHours": 2 },
+        { "title": "Mobile device testing", "description": "Test responsive behavior on various screen sizes", "order": 2, "estimatedHours": 2 },
+        { "title": "Form validation testing", "description": "Verify all forms work correctly", "order": 3, "estimatedHours": 1 },
+        { "title": "Client training session", "description": "Train client on content updates and site management", "order": 4, "estimatedHours": 1.5 },
+        { "title": "Client final review", "description": "Walk through completed site with client", "order": 5, "estimatedHours": 1 },
+        { "title": "Set up hosting and domain", "description": "Configure production server and DNS", "order": 6, "estimatedHours": 1 },
+        { "title": "Deploy to production", "description": "Launch site to live server", "order": 7, "estimatedHours": 1 }
+      ]
+    },
+    "best": {
+      "discovery strategy": [
+        { "title": "Schedule kickoff call", "description": "Set up deep consultation with client", "order": 1, "estimatedHours": 0.5 },
+        { "title": "Gather detailed requirements", "description": "Document comprehensive client needs, goals, and preferences", "order": 2, "estimatedHours": 3 },
+        { "title": "Collect brand assets", "description": "Gather logos, colors, fonts, brand guidelines", "order": 3, "estimatedHours": 1 },
+        { "title": "Conduct competitor analysis", "description": "Research competitor websites and positioning", "order": 4, "estimatedHours": 3 },
+        { "title": "Create sitemap", "description": "Define detailed site structure and navigation", "order": 5, "estimatedHours": 2 },
+        { "title": "Develop content strategy", "description": "Plan content types, messaging framework, and tone", "order": 6, "estimatedHours": 3 },
+        { "title": "Conduct SEO keyword research", "description": "Comprehensive keyword research and search opportunity analysis", "order": 7, "estimatedHours": 3 },
+        { "title": "Review project brief with client", "description": "Present and approve detailed project scope", "order": 8, "estimatedHours": 1 }
+      ],
+      "design": [
+        { "title": "Create design concepts", "description": "Develop multiple design directions for client review", "order": 1, "estimatedHours": 8 },
+        { "title": "Client review of concepts", "description": "Present design concepts and gather direction", "order": 2, "estimatedHours": 1 },
+        { "title": "Develop selected concept", "description": "Refine chosen design direction into full mockups", "order": 3, "estimatedHours": 6 },
+        { "title": "Brand integration review", "description": "Ensure design aligns with brand guidelines", "order": 4, "estimatedHours": 2 },
+        { "title": "Design revision round 1", "description": "Implement first round of client feedback", "order": 5, "estimatedHours": 3 },
+        { "title": "Design revision round 2", "description": "Implement second round of client feedback", "order": 6, "estimatedHours": 2 },
+        { "title": "Create style guide", "description": "Document design system with typography, colors, components", "order": 7, "estimatedHours": 3 },
+        { "title": "Final design approval", "description": "Get client sign-off on all designs", "order": 8, "estimatedHours": 1 }
+      ],
+      "development": [
+        { "title": "Set up development environment", "description": "Initialize project repository and build tools", "order": 1, "estimatedHours": 1 },
+        { "title": "Build responsive framework", "description": "Create base HTML/CSS structure with responsive grid", "order": 2, "estimatedHours": 4 },
+        { "title": "Develop homepage", "description": "Build homepage with all sections and interactions", "order": 3, "estimatedHours": 8 },
+        { "title": "Develop interior pages", "description": "Build all interior page templates", "order": 4, "estimatedHours": 8 },
+        { "title": "Implement advanced features", "description": "Build interactive elements, forms, and custom functionality", "order": 5, "estimatedHours": 6 },
+        { "title": "Integrate third-party services", "description": "Connect analytics, email, social media, and other integrations", "order": 6, "estimatedHours": 4 },
+        { "title": "Integrate content", "description": "Add final text, images, and media to all pages", "order": 7, "estimatedHours": 4 },
+        { "title": "Optimize images and assets", "description": "Compress and optimize all media files", "order": 8, "estimatedHours": 2 },
+        { "title": "Implement animations", "description": "Add scroll animations, transitions, and micro-interactions", "order": 9, "estimatedHours": 4 }
+      ],
+      "seo optimization": [
+        { "title": "Implement technical SEO", "description": "Configure robots.txt, canonical tags, structured data", "order": 1, "estimatedHours": 2 },
+        { "title": "Set up SEO meta tags", "description": "Add optimized page titles, descriptions, Open Graph tags", "order": 2, "estimatedHours": 2 },
+        { "title": "Implement on-page SEO", "description": "Optimize headings, alt text, internal linking, content", "order": 3, "estimatedHours": 3 },
+        { "title": "Performance optimization", "description": "Optimize load times, Core Web Vitals, lazy loading", "order": 4, "estimatedHours": 3 },
+        { "title": "Set up analytics and tracking", "description": "Configure analytics, conversion tracking, event tracking", "order": 5, "estimatedHours": 2 },
+        { "title": "Create XML sitemap", "description": "Generate comprehensive sitemap for search engines", "order": 6, "estimatedHours": 0.5 }
+      ],
+      "testing launch": [
+        { "title": "Cross-browser testing", "description": "Test on all major browsers and versions", "order": 1, "estimatedHours": 2 },
+        { "title": "Mobile device testing", "description": "Test responsive behavior across devices and screen sizes", "order": 2, "estimatedHours": 2 },
+        { "title": "Accessibility audit", "description": "Check WCAG compliance and screen reader compatibility", "order": 3, "estimatedHours": 3 },
+        { "title": "Form validation testing", "description": "Verify all forms work correctly with validation", "order": 4, "estimatedHours": 1 },
+        { "title": "Performance testing", "description": "Run Lighthouse audits and optimize scores", "order": 5, "estimatedHours": 2 },
+        { "title": "Client training session", "description": "Train client on content management and site updates", "order": 6, "estimatedHours": 2 },
+        { "title": "Client final review", "description": "Comprehensive walkthrough of completed site", "order": 7, "estimatedHours": 1 },
+        { "title": "Set up hosting and domain", "description": "Configure production server and DNS", "order": 8, "estimatedHours": 1 },
+        { "title": "Deploy to production", "description": "Launch site to live server", "order": 9, "estimatedHours": 1 },
+        { "title": "Create post-launch support plan", "description": "Document support schedule, contacts, and procedures", "order": 10, "estimatedHours": 1 }
+      ]
+    }
+  },
+  "business-site": {
+    "good": {
+      "discovery": [
+        { "title": "Conduct business analysis", "description": "Review business goals, KPIs, and success metrics", "order": 1, "estimatedHours": 2 },
+        { "title": "Define user personas", "description": "Identify primary user demographics and needs", "order": 2, "estimatedHours": 2 },
+        { "title": "Document feature requirements", "description": "List all required features and functionality", "order": 3, "estimatedHours": 2 },
+        { "title": "Create discovery document", "description": "Compile requirements into formal document", "order": 4, "estimatedHours": 2 },
+        { "title": "Client approval of discovery", "description": "Review and approve discovery deliverables", "order": 5, "estimatedHours": 1 }
+      ],
+      "design": [
+        { "title": "Create wireframes", "description": "Low-fidelity layouts for key page templates", "order": 1, "estimatedHours": 5 },
+        { "title": "Design homepage mockup", "description": "High-fidelity homepage design", "order": 2, "estimatedHours": 5 },
+        { "title": "Design interior page templates", "description": "High-fidelity designs for content pages", "order": 3, "estimatedHours": 6 },
+        { "title": "Client design review", "description": "Present designs and gather feedback", "order": 4, "estimatedHours": 1 },
+        { "title": "Design revisions", "description": "Implement client feedback", "order": 5, "estimatedHours": 3 },
+        { "title": "Prepare design assets", "description": "Export icons, images, style specifications", "order": 6, "estimatedHours": 2 }
+      ],
+      "development": [
+        { "title": "Set up project repository", "description": "Initialize Git repo and configure build tools", "order": 1, "estimatedHours": 1 },
+        { "title": "Configure CMS", "description": "Set up and configure content management system", "order": 2, "estimatedHours": 3 },
+        { "title": "Build responsive framework", "description": "Create base HTML/CSS structure with responsive grid", "order": 3, "estimatedHours": 5 },
+        { "title": "Develop homepage", "description": "Build homepage with all sections", "order": 4, "estimatedHours": 6 },
+        { "title": "Develop interior pages", "description": "Build reusable templates for content pages", "order": 5, "estimatedHours": 8 },
+        { "title": "Implement contact forms", "description": "Build and connect contact/inquiry forms", "order": 6, "estimatedHours": 2 },
+        { "title": "Development QA", "description": "Test all functionality in development environment", "order": 7, "estimatedHours": 2 }
+      ],
+      "content integration": [
+        { "title": "Receive content from client", "description": "Collect all text, images, videos from client", "order": 1, "estimatedHours": 1 },
+        { "title": "Populate page content", "description": "Add content to all pages", "order": 2, "estimatedHours": 5 },
+        { "title": "Optimize images", "description": "Compress and properly size all images", "order": 3, "estimatedHours": 2 },
+        { "title": "Set up basic SEO", "description": "Add page titles, descriptions, and meta tags", "order": 4, "estimatedHours": 2 },
+        { "title": "Content review with client", "description": "Walk through all content for approval", "order": 5, "estimatedHours": 1 }
+      ],
+      "testing launch": [
+        { "title": "Browser compatibility testing", "description": "Test on all major browsers", "order": 1, "estimatedHours": 2 },
+        { "title": "Mobile testing", "description": "Test responsive behavior across devices", "order": 2, "estimatedHours": 2 },
+        { "title": "Form submission testing", "description": "Verify all forms send correctly", "order": 3, "estimatedHours": 1 },
+        { "title": "Set up production hosting", "description": "Configure production server and DNS", "order": 4, "estimatedHours": 1 },
+        { "title": "Deploy to production", "description": "Launch site to live server", "order": 5, "estimatedHours": 1 }
+      ]
+    },
+    "better": {
+      "discovery": [
+        { "title": "Conduct business analysis workshop", "description": "Deep dive into business goals, KPIs, success metrics", "order": 1, "estimatedHours": 3 },
+        { "title": "Research competitors", "description": "Analyze competitor websites and positioning", "order": 2, "estimatedHours": 4 },
+        { "title": "Define user personas", "description": "Create detailed user personas and user journeys", "order": 3, "estimatedHours": 3 },
+        { "title": "Document feature requirements", "description": "List all required features and functionality", "order": 4, "estimatedHours": 3 },
+        { "title": "Define content strategy", "description": "Plan content types, tone, and messaging framework", "order": 5, "estimatedHours": 2 },
+        { "title": "Create discovery document", "description": "Compile all research and requirements into formal document", "order": 6, "estimatedHours": 3 },
+        { "title": "Client approval of discovery", "description": "Review and approve discovery deliverables", "order": 7, "estimatedHours": 1 }
+      ],
+      "design": [
+        { "title": "Create wireframes for all templates", "description": "Low-fidelity layouts for homepage, about, services, contact", "order": 1, "estimatedHours": 6 },
+        { "title": "Develop style guide", "description": "Define typography, colors, spacing, UI components", "order": 2, "estimatedHours": 4 },
+        { "title": "Design homepage mockup", "description": "High-fidelity design for homepage", "order": 3, "estimatedHours": 6 },
+        { "title": "Design interior page templates", "description": "High-fidelity designs for key page types", "order": 4, "estimatedHours": 8 },
+        { "title": "Client design review round 1", "description": "Present initial designs and gather feedback", "order": 5, "estimatedHours": 1 },
+        { "title": "Design revisions", "description": "Implement feedback from client review", "order": 6, "estimatedHours": 4 },
+        { "title": "Client design review round 2", "description": "Final design approval", "order": 7, "estimatedHours": 1 },
+        { "title": "Prepare design assets for development", "description": "Export icons, images, style specifications", "order": 8, "estimatedHours": 2 }
+      ],
+      "development": [
+        { "title": "Set up project repository", "description": "Initialize Git repo, configure build tools", "order": 1, "estimatedHours": 1 },
+        { "title": "Configure CMS", "description": "Set up WordPress, Webflow, or headless CMS", "order": 2, "estimatedHours": 3 },
+        { "title": "Build responsive framework", "description": "Create base HTML/CSS structure with responsive grid", "order": 3, "estimatedHours": 6 },
+        { "title": "Develop homepage", "description": "Build homepage with all sections and interactions", "order": 4, "estimatedHours": 8 },
+        { "title": "Develop interior page templates", "description": "Build reusable templates for content pages", "order": 5, "estimatedHours": 10 },
+        { "title": "Implement contact forms", "description": "Build and connect contact/inquiry forms", "order": 6, "estimatedHours": 3 },
+        { "title": "Set up blog", "description": "Configure blog templates and functionality", "order": 7, "estimatedHours": 4 },
+        { "title": "Integrate newsletter", "description": "Set up newsletter signup and email integration", "order": 8, "estimatedHours": 2 },
+        { "title": "Add animations and interactions", "description": "Implement scroll animations, hover effects", "order": 9, "estimatedHours": 4 },
+        { "title": "Development QA", "description": "Test all functionality in development environment", "order": 10, "estimatedHours": 3 }
+      ],
+      "content seo": [
+        { "title": "Receive final content from client", "description": "Collect all text, images, videos from client", "order": 1, "estimatedHours": 1 },
+        { "title": "Populate page content", "description": "Add content to all pages", "order": 2, "estimatedHours": 6 },
+        { "title": "Optimize images for web", "description": "Compress and properly size all images", "order": 3, "estimatedHours": 2 },
+        { "title": "Set up SEO meta tags", "description": "Add page titles, descriptions, Open Graph tags", "order": 4, "estimatedHours": 2 },
+        { "title": "Implement on-page SEO", "description": "Optimize headings, alt text, internal linking", "order": 5, "estimatedHours": 2 },
+        { "title": "Set up analytics", "description": "Configure Google Analytics or alternative", "order": 6, "estimatedHours": 1 },
+        { "title": "Create XML sitemap", "description": "Generate sitemap for search engines", "order": 7, "estimatedHours": 0.5 },
+        { "title": "Content review with client", "description": "Walk through all content for approval", "order": 8, "estimatedHours": 1 }
+      ],
+      "testing launch": [
+        { "title": "Browser compatibility testing", "description": "Test on all major browsers and versions", "order": 1, "estimatedHours": 3 },
+        { "title": "Mobile and tablet testing", "description": "Test responsive behavior across devices", "order": 2, "estimatedHours": 3 },
+        { "title": "Form submission testing", "description": "Verify all forms send correctly", "order": 3, "estimatedHours": 1 },
+        { "title": "Performance optimization", "description": "Optimize load times, lazy loading, caching", "order": 4, "estimatedHours": 3 },
+        { "title": "Create client training materials", "description": "Document how to update content and manage site", "order": 5, "estimatedHours": 2 },
+        { "title": "Conduct client training session", "description": "Train client on CMS and site management", "order": 6, "estimatedHours": 2 },
+        { "title": "Complete launch checklist", "description": "Verify all pre-launch requirements are met", "order": 7, "estimatedHours": 1 },
+        { "title": "Set up production hosting", "description": "Configure production server and DNS", "order": 8, "estimatedHours": 2 },
+        { "title": "Deploy to production", "description": "Launch site to live server", "order": 9, "estimatedHours": 2 }
+      ]
+    },
+    "best": {
+      "discovery strategy": [
+        { "title": "Conduct business analysis workshop", "description": "Deep dive into business goals, KPIs, success metrics", "order": 1, "estimatedHours": 4 },
+        { "title": "Research competitors", "description": "Comprehensive competitor website and positioning analysis", "order": 2, "estimatedHours": 5 },
+        { "title": "Define user personas", "description": "Create detailed user personas with journey maps", "order": 3, "estimatedHours": 4 },
+        { "title": "Develop content strategy", "description": "Plan content types, tone, messaging, and editorial calendar", "order": 4, "estimatedHours": 4 },
+        { "title": "Create SEO strategy", "description": "Keyword research, competitive SEO analysis, and content plan", "order": 5, "estimatedHours": 4 },
+        { "title": "Document feature requirements", "description": "Comprehensive feature list with priorities", "order": 6, "estimatedHours": 3 },
+        { "title": "Create project roadmap", "description": "Detailed project plan with phases and milestones", "order": 7, "estimatedHours": 3 },
+        { "title": "Create discovery document", "description": "Compile all research into formal document", "order": 8, "estimatedHours": 4 },
+        { "title": "Client approval of strategy", "description": "Review and approve all discovery deliverables", "order": 9, "estimatedHours": 1 }
+      ],
+      "design": [
+        { "title": "Create wireframes for all templates", "description": "Detailed wireframes for every page type", "order": 1, "estimatedHours": 8 },
+        { "title": "Build interactive prototypes", "description": "Clickable prototypes for key user flows", "order": 2, "estimatedHours": 6 },
+        { "title": "Develop style guide", "description": "Comprehensive typography, colors, spacing guide", "order": 3, "estimatedHours": 4 },
+        { "title": "Create design system", "description": "Component library with all UI patterns", "order": 4, "estimatedHours": 6 },
+        { "title": "Design homepage mockup", "description": "High-fidelity homepage with multiple sections", "order": 5, "estimatedHours": 8 },
+        { "title": "Design interior page templates", "description": "High-fidelity designs for all page types", "order": 6, "estimatedHours": 10 },
+        { "title": "Client design review round 1", "description": "Present initial designs and gather feedback", "order": 7, "estimatedHours": 1 },
+        { "title": "Design revisions round 1", "description": "Implement first round of feedback", "order": 8, "estimatedHours": 4 },
+        { "title": "Client design review round 2", "description": "Present revised designs", "order": 9, "estimatedHours": 1 },
+        { "title": "Design revisions round 2", "description": "Implement final feedback", "order": 10, "estimatedHours": 3 },
+        { "title": "Prepare design assets for development", "description": "Export all icons, images, specifications", "order": 11, "estimatedHours": 2 }
+      ],
+      "development": [
+        { "title": "Set up project repository", "description": "Initialize Git repo, configure build tools, CI/CD", "order": 1, "estimatedHours": 2 },
+        { "title": "Configure CMS", "description": "Set up and configure content management system", "order": 2, "estimatedHours": 4 },
+        { "title": "Build responsive framework", "description": "Create base structure with responsive grid and components", "order": 3, "estimatedHours": 8 },
+        { "title": "Develop homepage", "description": "Build homepage with all sections and interactions", "order": 4, "estimatedHours": 10 },
+        { "title": "Develop interior page templates", "description": "Build all interior page templates", "order": 5, "estimatedHours": 12 },
+        { "title": "Implement advanced forms", "description": "Build multi-step forms with validation", "order": 6, "estimatedHours": 4 },
+        { "title": "Set up blog with full functionality", "description": "Blog templates, categories, tags, RSS", "order": 7, "estimatedHours": 6 },
+        { "title": "Integrate newsletter service", "description": "Set up newsletter signup and email marketing integration", "order": 8, "estimatedHours": 3 },
+        { "title": "Integrate third-party services", "description": "Connect CRM, social media, chat, and other integrations", "order": 9, "estimatedHours": 6 },
+        { "title": "Add animations and interactions", "description": "Implement scroll animations, transitions, micro-interactions", "order": 10, "estimatedHours": 6 },
+        { "title": "Development QA", "description": "Test all functionality in development environment", "order": 11, "estimatedHours": 4 }
+      ],
+      "content seo optimization": [
+        { "title": "Receive final content from client", "description": "Collect all text, images, videos", "order": 1, "estimatedHours": 1 },
+        { "title": "Populate all page content", "description": "Add content to every page", "order": 2, "estimatedHours": 8 },
+        { "title": "Implement technical SEO", "description": "Configure robots.txt, canonical tags, structured data", "order": 3, "estimatedHours": 3 },
+        { "title": "Set up on-page SEO", "description": "Optimize headings, alt text, internal linking, meta tags", "order": 4, "estimatedHours": 4 },
+        { "title": "Optimize images for web", "description": "Compress, resize, and add WebP versions", "order": 5, "estimatedHours": 3 },
+        { "title": "Performance optimization", "description": "Optimize load times, Core Web Vitals, caching", "order": 6, "estimatedHours": 4 },
+        { "title": "Set up analytics and tracking", "description": "Configure analytics, conversion tracking, event tracking", "order": 7, "estimatedHours": 2 },
+        { "title": "Content review with client", "description": "Walk through all content for approval", "order": 8, "estimatedHours": 1 }
+      ],
+      "testing launch": [
+        { "title": "Browser compatibility testing", "description": "Test on all major browsers and versions", "order": 1, "estimatedHours": 3 },
+        { "title": "Mobile and tablet testing", "description": "Test responsive behavior across devices", "order": 2, "estimatedHours": 3 },
+        { "title": "Accessibility audit", "description": "Check WCAG compliance and screen reader compatibility", "order": 3, "estimatedHours": 3 },
+        { "title": "Form submission testing", "description": "Verify all forms send correctly", "order": 4, "estimatedHours": 1 },
+        { "title": "Performance testing", "description": "Run Lighthouse audits and optimize scores", "order": 5, "estimatedHours": 2 },
+        { "title": "Security hardening", "description": "SSL setup, security headers, CMS security", "order": 6, "estimatedHours": 2 },
+        { "title": "Create client training materials", "description": "Document CMS usage, content updates, site management", "order": 7, "estimatedHours": 3 },
+        { "title": "Conduct client training session", "description": "Train client on CMS and site management", "order": 8, "estimatedHours": 2 },
+        { "title": "Set up production hosting", "description": "Configure production server and DNS", "order": 9, "estimatedHours": 2 },
+        { "title": "Deploy to production", "description": "Launch site to live server", "order": 10, "estimatedHours": 2 },
+        { "title": "Post-launch monitoring", "description": "Monitor site for issues in first 48 hours", "order": 11, "estimatedHours": 2 }
+      ],
+      "postlaunch support": [
+        { "title": "Set up monitoring", "description": "Configure uptime monitoring and error alerts", "order": 1, "estimatedHours": 2 },
+        { "title": "Generate first performance report", "description": "Baseline performance and analytics report", "order": 2, "estimatedHours": 2 },
+        { "title": "Implement content updates", "description": "Make requested post-launch content changes", "order": 3, "estimatedHours": 4 },
+        { "title": "Fix post-launch bugs", "description": "Address any issues discovered after launch", "order": 4, "estimatedHours": 4 },
+        { "title": "Monthly performance review", "description": "Review analytics and performance metrics", "order": 5, "estimatedHours": 2 },
+        { "title": "Create ongoing support handoff", "description": "Document procedures for ongoing maintenance", "order": 6, "estimatedHours": 2 }
+      ]
+    }
+  },
+  "ecommerce-site": {
+    "good": {
+      "discovery planning": [
+        { "title": "Define business requirements", "description": "Identify store goals, target market, business model", "order": 1, "estimatedHours": 2 },
+        { "title": "Analyze product catalog", "description": "Review product list, categories, pricing structure", "order": 2, "estimatedHours": 2 },
+        { "title": "Research platforms", "description": "Evaluate e-commerce platform options", "order": 3, "estimatedHours": 3 },
+        { "title": "Platform recommendation", "description": "Present recommendation with pros/cons", "order": 4, "estimatedHours": 1 },
+        { "title": "Create requirements document", "description": "Document all requirements and specifications", "order": 5, "estimatedHours": 2 }
+      ],
+      "design": [
+        { "title": "Create store wireframes", "description": "Wireframes for homepage, category, and product pages", "order": 1, "estimatedHours": 5 },
+        { "title": "Design product page layouts", "description": "High-fidelity product detail page designs", "order": 2, "estimatedHours": 5 },
+        { "title": "Client design review", "description": "Present designs and gather feedback", "order": 3, "estimatedHours": 1 },
+        { "title": "Design revisions", "description": "Implement client feedback", "order": 4, "estimatedHours": 3 }
+      ],
+      "development": [
+        { "title": "Set up e-commerce platform", "description": "Install and configure chosen platform", "order": 1, "estimatedHours": 3 },
+        { "title": "Develop custom theme", "description": "Build custom theme matching designs", "order": 2, "estimatedHours": 12 },
+        { "title": "Integrate payment gateway", "description": "Set up payment processor", "order": 3, "estimatedHours": 3 },
+        { "title": "Configure shipping", "description": "Set up shipping zones and rates", "order": 4, "estimatedHours": 2 },
+        { "title": "Build cart and checkout", "description": "Customize cart and checkout flow", "order": 5, "estimatedHours": 6 },
+        { "title": "Configure email notifications", "description": "Set up order confirmation and shipping emails", "order": 6, "estimatedHours": 2 }
+      ],
+      "product setup": [
+        { "title": "Create product categories", "description": "Build category hierarchy", "order": 1, "estimatedHours": 2 },
+        { "title": "Import product catalog", "description": "Bulk import products with attributes", "order": 2, "estimatedHours": 5 },
+        { "title": "Add product images", "description": "Upload and optimize product photos", "order": 3, "estimatedHours": 4 },
+        { "title": "Product content review", "description": "Review all listings for accuracy", "order": 4, "estimatedHours": 2 }
+      ],
+      "testing launch": [
+        { "title": "Test checkout process", "description": "Complete test orders with various scenarios", "order": 1, "estimatedHours": 2 },
+        { "title": "Test payment processing", "description": "Verify payment methods work correctly", "order": 2, "estimatedHours": 2 },
+        { "title": "Mobile shopping testing", "description": "Test shopping flow on mobile devices", "order": 3, "estimatedHours": 2 },
+        { "title": "Set up production environment", "description": "Configure production hosting and domain", "order": 4, "estimatedHours": 2 },
+        { "title": "Launch store", "description": "Deploy store to production", "order": 5, "estimatedHours": 2 }
+      ]
+    },
+    "better": {
+      "discovery planning": [
+        { "title": "Define business requirements", "description": "Identify store goals, target market, business model", "order": 1, "estimatedHours": 3 },
+        { "title": "Analyze product catalog", "description": "Review product list, categories, variants, pricing", "order": 2, "estimatedHours": 3 },
+        { "title": "Conduct competitor analysis", "description": "Analyze competitor stores and positioning", "order": 3, "estimatedHours": 4 },
+        { "title": "Research platforms", "description": "Evaluate Shopify, WooCommerce, custom solutions", "order": 4, "estimatedHours": 4 },
+        { "title": "Platform recommendation", "description": "Present recommendation with pros/cons", "order": 5, "estimatedHours": 2 },
+        { "title": "Define product structure", "description": "Plan product attributes, categories, filters", "order": 6, "estimatedHours": 3 },
+        { "title": "Create requirements document", "description": "Document all requirements and specifications", "order": 7, "estimatedHours": 4 }
+      ],
+      "design": [
+        { "title": "Create store wireframes", "description": "Wireframes for all key store pages", "order": 1, "estimatedHours": 8 },
+        { "title": "Design product page layouts", "description": "High-fidelity product detail page designs", "order": 2, "estimatedHours": 6 },
+        { "title": "Design checkout flow", "description": "Optimized multi-step checkout process design", "order": 3, "estimatedHours": 5 },
+        { "title": "Design homepage and category pages", "description": "High-fidelity designs for main store pages", "order": 4, "estimatedHours": 6 },
+        { "title": "Client design review", "description": "Present designs and gather feedback", "order": 5, "estimatedHours": 1 },
+        { "title": "Design revisions", "description": "Implement client feedback", "order": 6, "estimatedHours": 4 }
+      ],
+      "development": [
+        { "title": "Set up e-commerce platform", "description": "Install and configure chosen platform", "order": 1, "estimatedHours": 3 },
+        { "title": "Develop custom theme", "description": "Build custom theme matching designs", "order": 2, "estimatedHours": 16 },
+        { "title": "Integrate multiple payment gateways", "description": "Set up Stripe, PayPal, and other processors", "order": 3, "estimatedHours": 6 },
+        { "title": "Configure shipping methods", "description": "Set up shipping zones, rates, fulfillment", "order": 4, "estimatedHours": 3 },
+        { "title": "Build cart and checkout flow", "description": "Customize cart and multi-step checkout", "order": 5, "estimatedHours": 8 },
+        { "title": "Implement discount system", "description": "Build coupon codes and promotional pricing", "order": 6, "estimatedHours": 4 },
+        { "title": "Set up customer accounts", "description": "Configure registration, login, order history", "order": 7, "estimatedHours": 4 },
+        { "title": "Configure email notifications", "description": "Set up order, shipping, and abandoned cart emails", "order": 8, "estimatedHours": 3 }
+      ],
+      "product setup seo": [
+        { "title": "Create product categories", "description": "Build category hierarchy and navigation", "order": 1, "estimatedHours": 2 },
+        { "title": "Import product catalog", "description": "Bulk import products with all attributes", "order": 2, "estimatedHours": 6 },
+        { "title": "Add product images", "description": "Upload and optimize product photos", "order": 3, "estimatedHours": 6 },
+        { "title": "Configure product variants", "description": "Set up size, color, and other variants", "order": 4, "estimatedHours": 4 },
+        { "title": "Set up inventory management", "description": "Configure stock tracking and low stock alerts", "order": 5, "estimatedHours": 3 },
+        { "title": "Implement product SEO", "description": "Optimize product titles, descriptions, and meta data", "order": 6, "estimatedHours": 4 },
+        { "title": "Product content review", "description": "Review all product listings for accuracy", "order": 7, "estimatedHours": 3 }
+      ],
+      "testing launch": [
+        { "title": "Test checkout process", "description": "Complete test orders with various scenarios", "order": 1, "estimatedHours": 3 },
+        { "title": "Test payment processing", "description": "Verify all payment methods work correctly", "order": 2, "estimatedHours": 2 },
+        { "title": "Test shipping calculations", "description": "Verify shipping rates calculate correctly", "order": 3, "estimatedHours": 2 },
+        { "title": "Performance testing", "description": "Optimize store load times", "order": 4, "estimatedHours": 3 },
+        { "title": "Mobile shopping testing", "description": "Test full shopping flow on mobile devices", "order": 5, "estimatedHours": 3 },
+        { "title": "Train client on store management", "description": "Walk through product management, orders, settings", "order": 6, "estimatedHours": 3 },
+        { "title": "Set up production environment", "description": "Configure production hosting and domain", "order": 7, "estimatedHours": 2 },
+        { "title": "Launch store", "description": "Deploy store to production", "order": 8, "estimatedHours": 2 }
+      ]
+    },
+    "best": {
+      "discovery strategy": [
+        { "title": "Define business requirements", "description": "Comprehensive store goals, market analysis, business model", "order": 1, "estimatedHours": 4 },
+        { "title": "Analyze product catalog", "description": "Deep review of products, variants, pricing, taxonomy", "order": 2, "estimatedHours": 4 },
+        { "title": "Conduct competitor analysis", "description": "Detailed competitor store and strategy analysis", "order": 3, "estimatedHours": 5 },
+        { "title": "Develop marketing strategy", "description": "Plan email marketing, social commerce, SEO approach", "order": 4, "estimatedHours": 4 },
+        { "title": "Research platforms", "description": "Comprehensive platform evaluation", "order": 5, "estimatedHours": 4 },
+        { "title": "Define product structure", "description": "Plan attributes, categories, filters, search taxonomy", "order": 6, "estimatedHours": 4 },
+        { "title": "Create requirements document", "description": "Complete technical and business requirements", "order": 7, "estimatedHours": 5 }
+      ],
+      "design": [
+        { "title": "Create store wireframes", "description": "Comprehensive wireframes for all store pages", "order": 1, "estimatedHours": 10 },
+        { "title": "Design product page layouts", "description": "Multiple product page layouts for different types", "order": 2, "estimatedHours": 8 },
+        { "title": "Design checkout optimization", "description": "Conversion-optimized checkout flow", "order": 3, "estimatedHours": 6 },
+        { "title": "Design mobile shopping experience", "description": "Mobile-first optimized designs", "order": 4, "estimatedHours": 6 },
+        { "title": "Create design system", "description": "Complete UI component library for store", "order": 5, "estimatedHours": 6 },
+        { "title": "Client design review", "description": "Present designs and gather feedback", "order": 6, "estimatedHours": 1 },
+        { "title": "Design revisions", "description": "Implement client feedback with multiple rounds", "order": 7, "estimatedHours": 6 }
+      ],
+      "development": [
+        { "title": "Set up e-commerce platform", "description": "Install and configure with advanced settings", "order": 1, "estimatedHours": 4 },
+        { "title": "Develop custom theme", "description": "Build fully custom theme matching designs", "order": 2, "estimatedHours": 20 },
+        { "title": "Integrate multiple payment gateways", "description": "Set up Stripe, PayPal, Apple Pay, and others", "order": 3, "estimatedHours": 8 },
+        { "title": "Configure advanced shipping", "description": "Complex shipping rules, zones, real-time rates", "order": 4, "estimatedHours": 5 },
+        { "title": "Build optimized cart and checkout", "description": "Conversion-optimized multi-step checkout", "order": 5, "estimatedHours": 10 },
+        { "title": "Implement discount system", "description": "Coupons, promotions, tiered pricing, bundles", "order": 6, "estimatedHours": 6 },
+        { "title": "Integrate email marketing", "description": "Connect email platform with automated flows", "order": 7, "estimatedHours": 5 },
+        { "title": "Set up inventory management", "description": "Advanced stock tracking with multi-location support", "order": 8, "estimatedHours": 5 },
+        { "title": "Configure customer accounts", "description": "Registration, wishlists, order history, reviews", "order": 9, "estimatedHours": 6 },
+        { "title": "Configure email notifications", "description": "Order, shipping, review request, and marketing emails", "order": 10, "estimatedHours": 4 },
+        { "title": "Add analytics and conversion tracking", "description": "E-commerce tracking, funnel analysis, attribution", "order": 11, "estimatedHours": 3 }
+      ],
+      "product setup seo": [
+        { "title": "Create product categories", "description": "Build comprehensive category hierarchy", "order": 1, "estimatedHours": 3 },
+        { "title": "Import product catalog", "description": "Bulk import with all attributes and variants", "order": 2, "estimatedHours": 8 },
+        { "title": "Add product images", "description": "Upload, optimize, and add alt text to all images", "order": 3, "estimatedHours": 8 },
+        { "title": "Configure product variants", "description": "Set up all size, color, and custom variants", "order": 4, "estimatedHours": 5 },
+        { "title": "Set up inventory management", "description": "Configure stock tracking, alerts, and backorders", "order": 5, "estimatedHours": 3 },
+        { "title": "Implement product SEO", "description": "Optimize all product titles, descriptions, meta data", "order": 6, "estimatedHours": 5 },
+        { "title": "Add schema markup", "description": "Implement product structured data for rich results", "order": 7, "estimatedHours": 3 },
+        { "title": "Set up social commerce", "description": "Configure Facebook Shop, Instagram Shopping", "order": 8, "estimatedHours": 3 },
+        { "title": "Product content review", "description": "Review all product listings for accuracy", "order": 9, "estimatedHours": 3 }
+      ],
+      "testing optimization": [
+        { "title": "Test checkout process", "description": "Complete test orders with all scenarios", "order": 1, "estimatedHours": 4 },
+        { "title": "Test payment processing", "description": "Verify all payment methods and currencies", "order": 2, "estimatedHours": 3 },
+        { "title": "Performance optimization", "description": "Optimize load times, image delivery, caching", "order": 3, "estimatedHours": 4 },
+        { "title": "Set up analytics", "description": "Configure e-commerce analytics and dashboards", "order": 4, "estimatedHours": 3 },
+        { "title": "Set up conversion tracking", "description": "Track funnels, abandonment, and attribution", "order": 5, "estimatedHours": 3 },
+        { "title": "Security audit", "description": "Verify PCI compliance, SSL, secure checkout", "order": 6, "estimatedHours": 3 },
+        { "title": "Mobile shopping testing", "description": "Comprehensive mobile shopping flow testing", "order": 7, "estimatedHours": 3 }
+      ],
+      "launch support": [
+        { "title": "Final pre-launch review", "description": "Complete comprehensive launch checklist", "order": 1, "estimatedHours": 2 },
+        { "title": "Launch store", "description": "Deploy store to production", "order": 2, "estimatedHours": 2 },
+        { "title": "Staff training", "description": "Train client team on store management and fulfillment", "order": 3, "estimatedHours": 4 },
+        { "title": "Post-launch monitoring", "description": "Monitor orders, performance, and issues", "order": 4, "estimatedHours": 6 },
+        { "title": "Generate optimization reports", "description": "Analyze initial performance and recommend improvements", "order": 5, "estimatedHours": 3 }
+      ]
+    }
+  },
+  "web-app": {
+    "good": {
+      "discovery architecture": [
+        { "title": "Conduct stakeholder interviews", "description": "Interview stakeholders to understand requirements", "order": 1, "estimatedHours": 3 },
+        { "title": "Define user stories", "description": "Document user flows and application scenarios", "order": 2, "estimatedHours": 4 },
+        { "title": "Create functional requirements", "description": "Specification of all features and functionality", "order": 3, "estimatedHours": 4 },
+        { "title": "Design technical architecture", "description": "Choose tech stack, define system architecture", "order": 4, "estimatedHours": 6 },
+        { "title": "Create architecture diagrams", "description": "Visual diagrams of system architecture", "order": 5, "estimatedHours": 3 },
+        { "title": "Technical spec review with client", "description": "Present and approve technical approach", "order": 6, "estimatedHours": 2 }
+      ],
+      "uiux design": [
+        { "title": "Create wireframes", "description": "Low-fidelity layouts for key application screens", "order": 1, "estimatedHours": 8 },
+        { "title": "Design UI mockups", "description": "High-fidelity designs for main screens", "order": 2, "estimatedHours": 12 },
+        { "title": "Client design review", "description": "Present designs for approval", "order": 3, "estimatedHours": 1 },
+        { "title": "Design revisions", "description": "Implement client feedback", "order": 4, "estimatedHours": 4 }
+      ],
+      "core development": [
+        { "title": "Set up development environment", "description": "Configure local dev environment and tools", "order": 1, "estimatedHours": 3 },
+        { "title": "Set up database", "description": "Configure database and create schema", "order": 2, "estimatedHours": 3 },
+        { "title": "Develop core API endpoints", "description": "Build API for core features", "order": 3, "estimatedHours": 20 },
+        { "title": "Implement business logic", "description": "Core application logic and algorithms", "order": 4, "estimatedHours": 16 },
+        { "title": "Write API documentation", "description": "Document all API endpoints", "order": 5, "estimatedHours": 4 }
+      ],
+      "frontend integration": [
+        { "title": "Set up frontend framework", "description": "Initialize chosen frontend framework", "order": 1, "estimatedHours": 2 },
+        { "title": "Build main application screens", "description": "Develop all primary application views", "order": 2, "estimatedHours": 20 },
+        { "title": "Integrate API client", "description": "Set up API communication layer", "order": 3, "estimatedHours": 6 },
+        { "title": "Build responsive layouts", "description": "Ensure all screens work on mobile and tablet", "order": 4, "estimatedHours": 8 }
+      ],
+      "testing deployment": [
+        { "title": "Integration testing", "description": "Test all features end-to-end", "order": 1, "estimatedHours": 8 },
+        { "title": "Browser compatibility testing", "description": "Test on all major browsers", "order": 2, "estimatedHours": 3 },
+        { "title": "Bug fixes", "description": "Fix all critical and high-priority bugs", "order": 3, "estimatedHours": 10 },
+        { "title": "Production environment setup", "description": "Configure production servers", "order": 4, "estimatedHours": 4 },
+        { "title": "Deploy to production", "description": "Production deployment and smoke testing", "order": 5, "estimatedHours": 3 }
+      ]
+    },
+    "better": {
+      "discovery architecture": [
+        { "title": "Conduct stakeholder interviews", "description": "Interview all stakeholders", "order": 1, "estimatedHours": 4 },
+        { "title": "Define user stories and use cases", "description": "Document all user flows and scenarios", "order": 2, "estimatedHours": 6 },
+        { "title": "Create functional requirements spec", "description": "Detailed feature specification", "order": 3, "estimatedHours": 6 },
+        { "title": "Design technical architecture", "description": "Choose tech stack, define architecture", "order": 4, "estimatedHours": 8 },
+        { "title": "Create database schema", "description": "Design data models and relationships", "order": 5, "estimatedHours": 5 },
+        { "title": "Define API structure", "description": "Plan API endpoints and contracts", "order": 6, "estimatedHours": 4 },
+        { "title": "Create security plan", "description": "Define authentication, authorization, and security measures", "order": 7, "estimatedHours": 3 },
+        { "title": "Create project roadmap", "description": "Break work into phases with milestones", "order": 8, "estimatedHours": 3 },
+        { "title": "Technical spec review", "description": "Present and approve technical approach", "order": 9, "estimatedHours": 2 }
+      ],
+      "uiux design": [
+        { "title": "Map user flows", "description": "Diagram all user journeys through the application", "order": 1, "estimatedHours": 6 },
+        { "title": "Create wireframes for all screens", "description": "Low-fidelity layouts for all screens", "order": 2, "estimatedHours": 10 },
+        { "title": "Build interactive prototype", "description": "Clickable prototype for key flows", "order": 3, "estimatedHours": 8 },
+        { "title": "Create UI design system", "description": "Design system with components and patterns", "order": 4, "estimatedHours": 8 },
+        { "title": "Design high-fidelity mockups", "description": "Pixel-perfect designs for all key screens", "order": 5, "estimatedHours": 14 },
+        { "title": "Client design review", "description": "Present designs for approval", "order": 6, "estimatedHours": 2 },
+        { "title": "Design revisions", "description": "Implement client feedback", "order": 7, "estimatedHours": 6 }
+      ],
+      "core development": [
+        { "title": "Set up development environment", "description": "Configure dev environment, Docker, CI/CD", "order": 1, "estimatedHours": 4 },
+        { "title": "Set up database", "description": "Configure database server and create schema", "order": 2, "estimatedHours": 3 },
+        { "title": "Build authentication system", "description": "Implement registration, login, sessions", "order": 3, "estimatedHours": 10 },
+        { "title": "Implement role-based access", "description": "Build user roles and permission system", "order": 4, "estimatedHours": 6 },
+        { "title": "Develop core API endpoints", "description": "Build API for all core features", "order": 5, "estimatedHours": 24 },
+        { "title": "Implement business logic", "description": "Core application logic and algorithms", "order": 6, "estimatedHours": 20 },
+        { "title": "Add email notification system", "description": "Set up transactional email service", "order": 7, "estimatedHours": 4 },
+        { "title": "Write API documentation", "description": "Document all API endpoints with examples", "order": 8, "estimatedHours": 6 },
+        { "title": "Backend unit testing", "description": "Write tests for core business logic", "order": 9, "estimatedHours": 10 }
+      ],
+      "frontend integration": [
+        { "title": "Set up frontend framework", "description": "Initialize React, Vue, or chosen framework", "order": 1, "estimatedHours": 3 },
+        { "title": "Build component library", "description": "Create reusable UI components from design system", "order": 2, "estimatedHours": 12 },
+        { "title": "Build authentication UI", "description": "Create login, registration, password reset screens", "order": 3, "estimatedHours": 6 },
+        { "title": "Integrate API client", "description": "Set up API communication with error handling", "order": 4, "estimatedHours": 6 },
+        { "title": "Implement state management", "description": "Set up state solution", "order": 5, "estimatedHours": 4 },
+        { "title": "Build main application screens", "description": "Develop all primary application views", "order": 6, "estimatedHours": 20 },
+        { "title": "Add form validation", "description": "Client-side validation for all forms", "order": 7, "estimatedHours": 4 },
+        { "title": "Implement error handling", "description": "Comprehensive error handling and user feedback", "order": 8, "estimatedHours": 4 },
+        { "title": "Build responsive layouts", "description": "Ensure all screens work on mobile and tablet", "order": 9, "estimatedHours": 8 }
+      ],
+      "testing deployment": [
+        { "title": "Integration testing", "description": "Test all features end-to-end", "order": 1, "estimatedHours": 10 },
+        { "title": "Browser compatibility testing", "description": "Test on all major browsers", "order": 2, "estimatedHours": 4 },
+        { "title": "Performance testing", "description": "Load testing, optimize bottlenecks", "order": 3, "estimatedHours": 4 },
+        { "title": "Bug fixes", "description": "Fix all critical and high-priority bugs", "order": 4, "estimatedHours": 12 },
+        { "title": "Set up CI/CD pipeline", "description": "Configure automated build and deploy", "order": 5, "estimatedHours": 4 },
+        { "title": "Production environment setup", "description": "Configure production servers, database", "order": 6, "estimatedHours": 4 },
+        { "title": "Deploy to production", "description": "Production deployment and smoke testing", "order": 7, "estimatedHours": 4 },
+        { "title": "Create documentation", "description": "Write user guides and technical documentation", "order": 8, "estimatedHours": 6 }
+      ]
+    },
+    "best": {
+      "discovery architecture": [
+        { "title": "Conduct stakeholder interviews", "description": "Interview all stakeholders to understand requirements", "order": 1, "estimatedHours": 4 },
+        { "title": "Define user stories and use cases", "description": "Document all user flows and application scenarios", "order": 2, "estimatedHours": 6 },
+        { "title": "Create functional requirements spec", "description": "Detailed specification of all features", "order": 3, "estimatedHours": 8 },
+        { "title": "Design technical architecture", "description": "Choose tech stack, define system architecture", "order": 4, "estimatedHours": 8 },
+        { "title": "Create database schema", "description": "Design data models and relationships", "order": 5, "estimatedHours": 6 },
+        { "title": "Define API structure", "description": "Plan RESTful or GraphQL API endpoints", "order": 6, "estimatedHours": 4 },
+        { "title": "Conduct security audit plan", "description": "Define security requirements and threat model", "order": 7, "estimatedHours": 4 },
+        { "title": "Create scalability plan", "description": "Define scaling strategy and infrastructure needs", "order": 8, "estimatedHours": 3 },
+        { "title": "Create architecture diagrams", "description": "Visual diagrams of architecture and data flow", "order": 9, "estimatedHours": 4 },
+        { "title": "Plan development sprints", "description": "Break work into sprints with milestones", "order": 10, "estimatedHours": 3 },
+        { "title": "Technical spec review", "description": "Present and approve technical approach", "order": 11, "estimatedHours": 2 }
+      ],
+      "uiux design": [
+        { "title": "Conduct user research", "description": "User interviews, surveys, competitive analysis", "order": 1, "estimatedHours": 8 },
+        { "title": "Create user personas", "description": "Detailed personas representing target users", "order": 2, "estimatedHours": 4 },
+        { "title": "Map user flows", "description": "Diagram all user journeys", "order": 3, "estimatedHours": 6 },
+        { "title": "Create wireframes for all screens", "description": "Low-fidelity layouts for all screens", "order": 4, "estimatedHours": 12 },
+        { "title": "Build interactive prototype", "description": "Clickable prototype for user testing", "order": 5, "estimatedHours": 8 },
+        { "title": "Conduct usability testing", "description": "Test prototype with real users", "order": 6, "estimatedHours": 6 },
+        { "title": "Create design system", "description": "Comprehensive component library", "order": 7, "estimatedHours": 10 },
+        { "title": "Design high-fidelity mockups", "description": "Pixel-perfect designs for all screens", "order": 8, "estimatedHours": 16 },
+        { "title": "Client design review", "description": "Present designs for approval", "order": 9, "estimatedHours": 2 },
+        { "title": "Design revisions", "description": "Implement client feedback", "order": 10, "estimatedHours": 6 }
+      ],
+      "core development": [
+        { "title": "Set up development environment", "description": "Configure local dev, Docker, CI/CD", "order": 1, "estimatedHours": 4 },
+        { "title": "Initialize project repository", "description": "Set up Git repo with branching strategy", "order": 2, "estimatedHours": 1 },
+        { "title": "Set up database", "description": "Configure database and create schema", "order": 3, "estimatedHours": 3 },
+        { "title": "Build auth system", "description": "Implement registration, login, sessions, MFA", "order": 4, "estimatedHours": 12 },
+        { "title": "Develop core API endpoints", "description": "Build API for all core features", "order": 5, "estimatedHours": 24 },
+        { "title": "Implement business logic", "description": "Core application logic and algorithms", "order": 6, "estimatedHours": 20 },
+        { "title": "Integrate third-party services", "description": "Connect external APIs and services", "order": 7, "estimatedHours": 8 },
+        { "title": "Implement real-time features", "description": "Build WebSocket connections for live updates", "order": 8, "estimatedHours": 8 },
+        { "title": "Add email notification system", "description": "Set up transactional email service", "order": 9, "estimatedHours": 4 },
+        { "title": "Implement logging and monitoring", "description": "Add application logging and error tracking", "order": 10, "estimatedHours": 4 },
+        { "title": "Write API documentation", "description": "Document all API endpoints with examples", "order": 11, "estimatedHours": 6 },
+        { "title": "Backend unit testing", "description": "Write tests for core business logic", "order": 12, "estimatedHours": 12 }
+      ],
+      "frontend integration": [
+        { "title": "Set up frontend framework", "description": "Initialize chosen framework with build tools", "order": 1, "estimatedHours": 3 },
+        { "title": "Build component library", "description": "Create reusable UI components from design system", "order": 2, "estimatedHours": 16 },
+        { "title": "Build authentication UI", "description": "Create login, registration, MFA screens", "order": 3, "estimatedHours": 8 },
+        { "title": "Integrate API client", "description": "Set up API communication with error handling", "order": 4, "estimatedHours": 6 },
+        { "title": "Implement real-time UI", "description": "Build live update interfaces", "order": 5, "estimatedHours": 8 },
+        { "title": "Implement offline support", "description": "Add service worker and offline capabilities", "order": 6, "estimatedHours": 6 },
+        { "title": "Implement advanced state management", "description": "Set up comprehensive state solution", "order": 7, "estimatedHours": 6 },
+        { "title": "Build main application screens", "description": "Develop all primary views", "order": 8, "estimatedHours": 24 },
+        { "title": "Add form validation", "description": "Client-side validation for all forms", "order": 9, "estimatedHours": 6 },
+        { "title": "Build responsive layouts", "description": "Ensure all screens work on mobile and tablet", "order": 10, "estimatedHours": 10 },
+        { "title": "Frontend unit testing", "description": "Write tests for components and logic", "order": 11, "estimatedHours": 12 }
+      ],
+      "testing qa": [
+        { "title": "Integration testing", "description": "Test all features end-to-end", "order": 1, "estimatedHours": 12 },
+        { "title": "Security testing", "description": "Penetration testing, vulnerability scan", "order": 2, "estimatedHours": 8 },
+        { "title": "Performance testing", "description": "Load testing, optimize bottlenecks", "order": 3, "estimatedHours": 6 },
+        { "title": "Accessibility audit", "description": "WCAG compliance testing", "order": 4, "estimatedHours": 4 },
+        { "title": "Browser compatibility testing", "description": "Test on all major browsers", "order": 5, "estimatedHours": 4 },
+        { "title": "Mobile device testing", "description": "Test on various mobile devices", "order": 6, "estimatedHours": 4 },
+        { "title": "Bug fixes", "description": "Fix all critical and high-priority bugs", "order": 7, "estimatedHours": 16 },
+        { "title": "User acceptance testing", "description": "Client testing and feedback", "order": 8, "estimatedHours": 8 }
+      ],
+      "deployment support": [
+        { "title": "Set up CI/CD pipeline", "description": "Configure automated build and deploy", "order": 1, "estimatedHours": 6 },
+        { "title": "Production environment setup", "description": "Configure production servers, database, CDN", "order": 2, "estimatedHours": 6 },
+        { "title": "Set up monitoring and alerts", "description": "Configure uptime monitoring, error alerts", "order": 3, "estimatedHours": 4 },
+        { "title": "Deploy to production", "description": "Production deployment and smoke testing", "order": 4, "estimatedHours": 4 },
+        { "title": "Create technical documentation", "description": "Write architecture and deployment documentation", "order": 5, "estimatedHours": 8 },
+        { "title": "Create user documentation", "description": "Write user guides and help content", "order": 6, "estimatedHours": 6 },
+        { "title": "Post-launch monitoring", "description": "Monitor application for 72 hours post-launch", "order": 7, "estimatedHours": 6 }
+      ]
+    }
+  },
+  "maintenance": {
+    "good": {
+      "month 1 setup": [
+        { "title": "Conduct site audit", "description": "Audit performance, security, and functionality", "order": 1, "estimatedHours": 3 },
+        { "title": "Set up uptime monitoring", "description": "Configure monitoring service", "order": 2, "estimatedHours": 1 },
+        { "title": "Set up automated backups", "description": "Configure automated backups", "order": 3, "estimatedHours": 1 },
+        { "title": "Review dependencies", "description": "Update outdated software and plugins", "order": 4, "estimatedHours": 2 },
+        { "title": "Create maintenance schedule", "description": "Document regular maintenance tasks", "order": 5, "estimatedHours": 1 }
+      ],
+      "month 2 optimization": [
+        { "title": "Performance audit", "description": "Analyze site speed and Core Web Vitals", "order": 1, "estimatedHours": 2 },
+        { "title": "Optimize images", "description": "Compress and properly size images", "order": 2, "estimatedHours": 2 },
+        { "title": "Apply security updates", "description": "Apply all security patches", "order": 3, "estimatedHours": 2 },
+        { "title": "Generate performance report", "description": "Monthly report with metrics", "order": 4, "estimatedHours": 1 }
+      ],
+      "month 3 review": [
+        { "title": "Quarterly analytics review", "description": "Analyze traffic and user behavior", "order": 1, "estimatedHours": 2 },
+        { "title": "Update dependencies", "description": "Apply all updates and test", "order": 2, "estimatedHours": 2 },
+        { "title": "Create quarterly report", "description": "Comprehensive report on site health", "order": 3, "estimatedHours": 2 },
+        { "title": "Plan next quarter", "description": "Identify improvements for next period", "order": 4, "estimatedHours": 1 }
+      ]
+    },
+    "better": {
+      "month 1 setup audit": [
+        { "title": "Conduct comprehensive site audit", "description": "Audit performance, security, SEO, accessibility", "order": 1, "estimatedHours": 4 },
+        { "title": "Conduct security audit", "description": "Review security configuration and vulnerabilities", "order": 2, "estimatedHours": 3 },
+        { "title": "Set up uptime monitoring", "description": "Configure monitoring service for availability", "order": 3, "estimatedHours": 1 },
+        { "title": "Configure error tracking", "description": "Set up error monitoring and alerts", "order": 4, "estimatedHours": 1 },
+        { "title": "Set up automated backups", "description": "Configure daily automated backups", "order": 5, "estimatedHours": 2 },
+        { "title": "Review dependencies", "description": "Update all outdated software", "order": 6, "estimatedHours": 2 },
+        { "title": "Create maintenance schedule", "description": "Document tasks and schedule", "order": 7, "estimatedHours": 2 },
+        { "title": "Client onboarding call", "description": "Review maintenance process", "order": 8, "estimatedHours": 1 }
+      ],
+      "month 2 optimization": [
+        { "title": "Performance audit", "description": "Analyze site speed and Core Web Vitals", "order": 1, "estimatedHours": 2 },
+        { "title": "Optimize images", "description": "Compress and properly size images", "order": 2, "estimatedHours": 3 },
+        { "title": "Implement caching improvements", "description": "Optimize caching strategy", "order": 3, "estimatedHours": 2 },
+        { "title": "Apply security updates", "description": "Apply all security patches", "order": 4, "estimatedHours": 2 },
+        { "title": "Make content updates", "description": "Implement requested content changes", "order": 5, "estimatedHours": 3 },
+        { "title": "Apply optimization updates", "description": "Performance and code improvements", "order": 6, "estimatedHours": 2 },
+        { "title": "Generate performance report", "description": "Monthly report with metrics and improvements", "order": 7, "estimatedHours": 2 }
+      ],
+      "month 3 review planning": [
+        { "title": "Quarterly analytics review", "description": "Analyze traffic, conversions, user behavior", "order": 1, "estimatedHours": 3 },
+        { "title": "Review analytics data", "description": "Deep dive into analytics metrics", "order": 2, "estimatedHours": 2 },
+        { "title": "Update dependencies", "description": "Apply all updates and test compatibility", "order": 3, "estimatedHours": 2 },
+        { "title": "Create quarterly report", "description": "Comprehensive report on site health", "order": 4, "estimatedHours": 3 },
+        { "title": "Plan next period priorities", "description": "Identify improvements for next quarter", "order": 5, "estimatedHours": 2 },
+        { "title": "Create recommendations document", "description": "Document improvement recommendations", "order": 6, "estimatedHours": 2 },
+        { "title": "Quarterly client review call", "description": "Present report and discuss next quarter", "order": 7, "estimatedHours": 1 }
+      ]
+    },
+    "best": {
+      "month 1 setup audit": [
+        { "title": "Conduct comprehensive site audit", "description": "Audit performance, security, SEO, accessibility", "order": 1, "estimatedHours": 4 },
+        { "title": "Conduct security audit", "description": "Detailed security review and vulnerability assessment", "order": 2, "estimatedHours": 4 },
+        { "title": "Establish performance baseline", "description": "Record baseline metrics for all performance indicators", "order": 3, "estimatedHours": 2 },
+        { "title": "Set up uptime monitoring", "description": "Configure monitoring service for availability", "order": 4, "estimatedHours": 1 },
+        { "title": "Configure error tracking", "description": "Set up error monitoring and alerts", "order": 5, "estimatedHours": 1 },
+        { "title": "Set up automated backups", "description": "Configure daily automated backups with verification", "order": 6, "estimatedHours": 2 },
+        { "title": "Review all dependencies", "description": "Update all outdated software and plugins", "order": 7, "estimatedHours": 3 },
+        { "title": "Create maintenance schedule", "description": "Document comprehensive tasks and schedule", "order": 8, "estimatedHours": 2 },
+        { "title": "Set up monthly reporting", "description": "Configure analytics and reporting dashboard", "order": 9, "estimatedHours": 2 },
+        { "title": "Client onboarding call", "description": "Review maintenance process and communication", "order": 10, "estimatedHours": 1 }
+      ],
+      "month 2 optimization updates": [
+        { "title": "Performance optimization", "description": "Optimize load times, Core Web Vitals, caching", "order": 1, "estimatedHours": 4 },
+        { "title": "Optimize images and assets", "description": "Compress images and optimize delivery", "order": 2, "estimatedHours": 3 },
+        { "title": "Apply security patches", "description": "Apply all security updates", "order": 3, "estimatedHours": 2 },
+        { "title": "Make content updates", "description": "Implement all requested content changes", "order": 4, "estimatedHours": 4 },
+        { "title": "Implement feature enhancements", "description": "Small feature improvements and additions", "order": 5, "estimatedHours": 4 },
+        { "title": "Verify backups", "description": "Test backup restoration process", "order": 6, "estimatedHours": 1 },
+        { "title": "Review security logs", "description": "Check for suspicious activity", "order": 7, "estimatedHours": 1 },
+        { "title": "Generate performance report", "description": "Monthly report comparing to baseline", "order": 8, "estimatedHours": 2 }
+      ],
+      "month 3 review strategy": [
+        { "title": "Quarterly analytics deep-dive", "description": "Comprehensive analysis of traffic, conversions, behavior", "order": 1, "estimatedHours": 4 },
+        { "title": "SEO performance review", "description": "Review SEO rankings and search performance", "order": 2, "estimatedHours": 3 },
+        { "title": "Accessibility check", "description": "Verify WCAG compliance", "order": 3, "estimatedHours": 2 },
+        { "title": "Update all dependencies", "description": "Apply updates and test compatibility", "order": 4, "estimatedHours": 2 },
+        { "title": "Create strategy plan", "description": "Develop strategy for next quarter based on data", "order": 5, "estimatedHours": 3 },
+        { "title": "Conduct training session", "description": "Train client on new features and updates", "order": 6, "estimatedHours": 2 },
+        { "title": "Create quarterly report", "description": "Comprehensive report with analytics deep-dive", "order": 7, "estimatedHours": 4 },
+        { "title": "Create recommendations document", "description": "Detailed improvement recommendations", "order": 8, "estimatedHours": 2 },
+        { "title": "Quarterly client review call", "description": "Present report, strategy, and discuss next quarter", "order": 9, "estimatedHours": 1 }
+      ]
+    }
+  }
+}
