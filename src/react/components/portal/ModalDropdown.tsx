@@ -3,6 +3,7 @@ import { useState, useCallback, useMemo, useRef, useEffect, useId } from 'react'
 import { ChevronDown, Check, Search, X } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useScaleIn } from '@react/hooks/useGsap';
+import { useClickOutside } from '@react/hooks/useClickOutside';
 import { KEYS } from '../../../constants/keyboard';
 
 /** Delay before focusing search input, allows open animation to start */
@@ -193,19 +194,7 @@ export function ModalDropdown({
   }, [isOpen, focusedIndex]);
 
   // Close on click outside
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest('.modal-dropdown-overlay')) {
-        handleClose();
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, handleClose]);
+  useClickOutside(dropdownRef, handleClose, isOpen);
 
   // Focus trap: keep focus within modal when open
   useEffect(() => {

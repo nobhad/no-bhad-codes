@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Search, X, Filter } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { useClickOutside } from '@react/hooks/useClickOutside';
 import { KEYS } from '../../../constants/keyboard';
 
 /**
@@ -21,15 +22,7 @@ export function SearchFilter({ value, onChange, placeholder = 'Search...' }: Sea
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Close on click outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(ref, () => setIsOpen(false), isOpen);
 
   // Focus input when opened
   useEffect(() => {
@@ -131,21 +124,8 @@ export function FilterDropdown({ sections, values, onChange }: FilterDropdownPro
     });
   }, []);
 
-  // Close on click outside
-  useEffect(() => {
-    if (!isOpen) return;
-    function handleClickOutside(event: MouseEvent) {
-      const target = event.target as Node;
-      if (
-        triggerRef.current && !triggerRef.current.contains(target) &&
-        menuRef.current && !menuRef.current.contains(target)
-      ) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
+  // Close on click outside (supports both trigger and portaled menu refs)
+  useClickOutside([triggerRef, menuRef], () => setIsOpen(false), isOpen);
 
   // Reposition on scroll/resize while open
   useEffect(() => {

@@ -26,6 +26,7 @@ import {
   useCurrentGroup
 } from '../stores/portal-store';
 import { UNIFIED_TAB_GROUPS, DETAIL_VIEW_TABS } from '../../../server/config/unified-navigation';
+import { useClickOutside } from '../hooks/useClickOutside';
 import { NotificationBell } from '../components/portal/NotificationBell';
 // ============================================
 // PROJECT SELECTOR (client portal only)
@@ -47,16 +48,7 @@ function ProjectSelector() {
   }, [setActiveProject]);
 
   // Close on outside click
-  React.useEffect(() => {
-    if (!isOpen) return;
-    const handleClick = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [isOpen]);
+  useClickOutside(dropdownRef, () => setIsOpen(false), isOpen);
 
   // Only show when client has multiple projects
   if (projectCount <= 1) return null;
