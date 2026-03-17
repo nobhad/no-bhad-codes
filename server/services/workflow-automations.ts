@@ -209,14 +209,14 @@ async function handleProposalAccepted(data: {
 
       // Check if contract already exists for this project
       const existingContract = await db.get(
-        `SELECT id FROM contracts WHERE project_id = ? AND status != 'cancelled' AND deleted_at IS NULL LIMIT 1`,
+        'SELECT id FROM contracts WHERE project_id = ? AND status != \'cancelled\' AND deleted_at IS NULL LIMIT 1',
         [projectId]
       );
 
       if (!existingContract) {
         // Get the default contract template
         const template = (await db.get(
-          `SELECT id, content FROM contract_templates WHERE is_default = 1 AND is_active = 1 LIMIT 1`
+          'SELECT id, content FROM contract_templates WHERE is_default = 1 AND is_active = 1 LIMIT 1'
         )) as { id: number; content: string } | undefined;
 
         if (template) {
@@ -352,6 +352,32 @@ async function handleProposalAccepted(data: {
         }
       );
       // Non-critical — don't fail the automation
+    }
+
+    // Store maintenance tier on project if selected
+    try {
+      if (proposal.maintenance_option && proposal.maintenance_option !== 'diy' && projectId) {
+        const isBestTier = proposal.selected_tier === 'best';
+        const includedMonths = isBestTier ? 3 : 0;
+
+        await db.run(
+          `UPDATE projects SET
+            maintenance_tier = ?,
+            maintenance_status = 'pending',
+            maintenance_included_months = ?
+          WHERE id = ?`,
+          [proposal.maintenance_option, includedMonths, projectId]
+        );
+
+        logger.info('proposal.accepted: Stored maintenance tier on project', {
+          category: 'workflow',
+          metadata: { projectId, tier: proposal.maintenance_option, includedMonths }
+        });
+      }
+    } catch (maintenanceError) {
+      logger.error('[WorkflowAutomation] proposal.accepted: Failed to store maintenance tier', {
+        error: maintenanceError instanceof Error ? maintenanceError : undefined
+      });
     }
 
     // Emit project.created event
@@ -651,12 +677,119 @@ async function getClientEmail(clientId: number): Promise<{ email: string; name: 
 /**
  * Send notification email to client
  */
+/**
+ * Substitute {{variable}} placeholders in a template string.
+ */
+function substituteVariables(template: string, vars: Record<string, string>): string {
+  return Object.entries(vars).reduce(
+    (result, [key, value]) => result.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value ?? ''),
+    template
+  );
+}
+
+/**
+ * Try to load an email template from the DB by slug.
+ * Returns null if not found — caller falls back to hardcoded.
+ */
+async function loadEmailTemplate(
+  slug: string,
+  vars: Record<string, string>
+): Promise<{ subject: string; html: string; text: string } | null> {
+  try {
+    const db = getDatabase();
+    const template = (await db.get(
+      'SELECT subject, body_html, body_text FROM email_templates WHERE name = ? AND is_active = 1 LIMIT 1',
+      [slug]
+    )) as { subject: string; body_html: string; body_text: string | null } | undefined;
+
+    if (!template) return null;
+
+    return {
+      subject: substituteVariables(template.subject, vars),
+      html: substituteVariables(template.body_html, vars),
+      text: substituteVariables(template.body_text || '', vars)
+    };
+  } catch {
+    return null; // Template system failure should never block notifications
+  }
+}
+
+/**
+ * Dispatch event to configured Slack/Discord webhooks.
+ * Non-blocking — failures are logged but never thrown.
+ */
+async function dispatchWebhooks(eventType: string, data: Record<string, unknown>): Promise<void> {
+  try {
+    const db = getDatabase();
+    const configs = await db.all(
+      'SELECT id, platform, webhook_url, channel FROM notification_integrations WHERE is_active = 1 AND events LIKE ?',
+      [`%${eventType}%`]
+    ) as Array<{ id: number; platform: string; webhook_url: string; channel: string | null }>;
+
+    if (configs.length === 0) return;
+
+    const {
+      sendSlackNotification,
+      sendDiscordNotification,
+      formatSlackMessage,
+      formatDiscordMessage
+    } = await import('./integrations/slack-service.js');
+
+    for (const config of configs) {
+      try {
+        if (config.platform === 'slack') {
+          const msg = formatSlackMessage(eventType, data, { channel: config.channel || undefined });
+          await sendSlackNotification(config.webhook_url, msg);
+        } else if (config.platform === 'discord') {
+          const msg = formatDiscordMessage(eventType, data);
+          await sendDiscordNotification(config.webhook_url, msg);
+        }
+
+        // Log success
+        await db.run(
+          'INSERT INTO notification_delivery_logs (integration_id, event_type, payload, status) VALUES (?, ?, ?, ?)',
+          [config.id, eventType, JSON.stringify(data), 'success']
+        );
+      } catch (err) {
+        // Log failure per webhook — don't stop processing others
+        await db.run(
+          'INSERT INTO notification_delivery_logs (integration_id, event_type, payload, status, error_message) VALUES (?, ?, ?, ?, ?)',
+          [config.id, eventType, JSON.stringify(data), 'failed', String(err)]
+        ).catch(() => { /* ignore logging failures */ });
+
+        logger.error(`Webhook dispatch failed for ${config.platform}`, {
+          category: 'workflow',
+          metadata: { integrationId: config.id, eventType, error: String(err) }
+        });
+      }
+    }
+  } catch (error) {
+    logger.error('Webhook dispatch error', {
+      category: 'workflow',
+      metadata: { eventType, error: String(error) }
+    });
+  }
+}
+
+/**
+ * Send a client notification email.
+ *
+ * 1. Tries to load a DB email template by slug (if templateSlug provided)
+ * 2. Falls back to hardcoded HTML template
+ * 3. Dispatches to configured Slack/Discord webhooks
+ */
 async function sendClientNotification(
   clientId: number,
   subject: string,
   message: string,
   ctaText?: string,
-  ctaUrl?: string
+  ctaUrl?: string,
+  options?: {
+    templateSlug?: string;
+    templateVars?: Record<string, string>;
+    eventType?: string;
+    eventData?: Record<string, unknown>;
+  }
 ): Promise<void> {
   const client = await getClientEmail(clientId);
   if (!client) {
@@ -668,51 +801,87 @@ async function sendClientNotification(
   }
 
   const finalCtaUrl = ctaUrl || getPortalUrl();
+  const templateVars: Record<string, string> = {
+    client_name: client.name,
+    business_name: BUSINESS_INFO.name,
+    portal_url: finalCtaUrl,
+    cta_text: ctaText || '',
+    cta_url: finalCtaUrl,
+    message,
+    subject,
+    ...options?.templateVars
+  };
 
   try {
-    await emailService.sendEmail({
-      to: client.email,
-      subject,
-      text: `Hi ${client.name},\n\n${message}\n\n${ctaText ? `${ctaText}: ${finalCtaUrl}` : ''}\n\nBest regards,\n${BUSINESS_INFO.name} Team`,
-      html: `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <style>
-            body { font-family: ${EMAIL_TYPOGRAPHY.fontFamily}; line-height: ${EMAIL_TYPOGRAPHY.lineHeight}; color: ${EMAIL_COLORS.bodyText}; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: ${EMAIL_COLORS.headerBg}; color: ${EMAIL_COLORS.headerText}; padding: 20px; text-align: center; }
-            .header h1 { margin: 0; color: ${EMAIL_COLORS.brandAccent}; font-size: 20px; }
-            .content { padding: 30px 20px; background: ${EMAIL_COLORS.contentBg}; }
-            .button { display: inline-block; padding: 12px 24px; background: ${EMAIL_COLORS.brandAccent}; color: ${EMAIL_COLORS.buttonPrimaryText}; text-decoration: none; border-radius: 4px; font-weight: bold; }
-            .footer { padding: 20px; text-align: center; color: ${EMAIL_COLORS.bodyTextMuted}; font-size: 12px; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header"><h1>${BUSINESS_INFO.name}</h1></div>
-            <div class="content">
-              <p>Hi ${client.name},</p>
-              <p>${message}</p>
-              ${ctaText ? `<p style="text-align: center; margin-top: 30px;"><a href="${finalCtaUrl}" class="button">${ctaText}</a></p>` : ''}
+    // Try DB template first
+    const dbTemplate = options?.templateSlug
+      ? await loadEmailTemplate(options.templateSlug, templateVars)
+      : null;
+
+    if (dbTemplate) {
+      await emailService.sendEmail({
+        to: client.email,
+        subject: dbTemplate.subject,
+        text: dbTemplate.text,
+        html: dbTemplate.html
+      });
+    } else {
+      // Fallback: hardcoded HTML (backward compatible)
+      await emailService.sendEmail({
+        to: client.email,
+        subject,
+        text: `Hi ${client.name},\n\n${message}\n\n${ctaText ? `${ctaText}: ${finalCtaUrl}` : ''}\n\nBest regards,\n${BUSINESS_INFO.name} Team`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: ${EMAIL_TYPOGRAPHY.fontFamily}; line-height: ${EMAIL_TYPOGRAPHY.lineHeight}; color: ${EMAIL_COLORS.bodyText}; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background: ${EMAIL_COLORS.headerBg}; color: ${EMAIL_COLORS.headerText}; padding: 20px; text-align: center; }
+              .header h1 { margin: 0; color: ${EMAIL_COLORS.brandAccent}; font-size: 20px; }
+              .content { padding: 30px 20px; background: ${EMAIL_COLORS.contentBg}; }
+              .button { display: inline-block; padding: 12px 24px; background: ${EMAIL_COLORS.brandAccent}; color: ${EMAIL_COLORS.buttonPrimaryText}; text-decoration: none; border-radius: 4px; font-weight: bold; }
+              .footer { padding: 20px; text-align: center; color: ${EMAIL_COLORS.bodyTextMuted}; font-size: 12px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header"><h1>${BUSINESS_INFO.name}</h1></div>
+              <div class="content">
+                <p>Hi ${client.name},</p>
+                <p>${message}</p>
+                ${ctaText ? `<p style="text-align: center; margin-top: 30px;"><a href="${finalCtaUrl}" class="button">${ctaText}</a></p>` : ''}
+              </div>
+              <div class="footer">${BUSINESS_INFO.name} - Professional Web Solutions</div>
             </div>
-            <div class="footer">${BUSINESS_INFO.name} - Professional Web Solutions</div>
-          </div>
-        </body>
-        </html>
-      `
-    });
+          </body>
+          </html>
+        `
+      });
+    }
 
     logger.info('Client notification sent', {
       category: 'workflow',
-      metadata: { clientId, subject }
+      metadata: { clientId, subject, usedTemplate: !!dbTemplate }
     });
   } catch (error) {
     logger.error('Failed to send client notification', {
       category: 'workflow',
       metadata: { clientId, subject, error: String(error) }
     });
+  }
+
+  // Dispatch to Slack/Discord webhooks (non-blocking)
+  if (options?.eventType) {
+    dispatchWebhooks(options.eventType, {
+      clientId,
+      clientName: client.name,
+      subject,
+      message,
+      ...options?.eventData
+    }).catch(() => { /* non-blocking */ });
   }
 }
 
@@ -745,7 +914,8 @@ async function notifyProposalAccepted(data: {
     'Great News! Your Proposal Has Been Accepted',
     `Your proposal for "${projectName}" has been accepted! The next step is to review and sign the contract to get started.`,
     'View Your Portal',
-    getPortalUrl()
+    getPortalUrl(),
+    { templateSlug: 'Proposal Accepted', templateVars: { project_name: projectName }, eventType: 'proposal.accepted', eventData: { projectName } }
   );
 }
 
@@ -774,7 +944,8 @@ async function notifyContractSigned(data: {
     'Contract Signed - Project Now Active!',
     `The contract for "${projectName}" has been signed and your project is now active! You can track progress, view milestones, and communicate with us through your portal.`,
     'View Project Status',
-    `${getPortalUrl()}#projects`
+    `${getPortalUrl()}#projects`,
+    { templateSlug: 'Contract Signed', templateVars: { project_name: projectName }, eventType: 'contract.signed', eventData: { projectName } }
   );
 }
 
@@ -808,7 +979,8 @@ async function notifyDeliverableApproved(data: {
     'Deliverable Approved and Ready!',
     `"${title}" for "${projectName}" has been approved and is now available in your Files. You can download it from your portal.`,
     'View Files',
-    `${getPortalUrl()}#files`
+    `${getPortalUrl()}#files`,
+    { templateSlug: 'Deliverable Approved', templateVars: { project_name: projectName, deliverable_title: title }, eventType: 'deliverable.approved', eventData: { projectName, title } }
   );
 }
 
@@ -839,7 +1011,8 @@ async function notifyQuestionnaireCompleted(data: { entityId?: number | null }):
     'Questionnaire Completed - Thank You!',
     `Thank you for completing "${title}" for "${projectName}". Your responses have been received and a PDF summary has been added to your project files.`,
     'View Your Portal',
-    getPortalUrl()
+    getPortalUrl(),
+    { templateSlug: 'Questionnaire Completed', templateVars: { project_name: projectName, questionnaire_title: title }, eventType: 'questionnaire.completed', eventData: { projectName, title } }
   );
 }
 
@@ -870,7 +1043,8 @@ async function notifyDocumentRequestApproved(data: { entityId?: number | null })
     'Document Approved!',
     `Your submitted document "${title}" for "${projectName}" has been approved. It has been added to your project files.`,
     'View Files',
-    `${getPortalUrl()}#files`
+    `${getPortalUrl()}#files`,
+    { templateSlug: 'Document Approved', templateVars: { project_name: projectName, document_title: title }, eventType: 'document_request.approved', eventData: { projectName, title } }
   );
 }
 
@@ -902,7 +1076,8 @@ async function notifyInvoicePaid(data: { entityId?: number | null }): Promise<vo
     'Payment Received - Thank You!',
     `We've received your payment of $${amount.toFixed(2)} for Invoice #${invoiceNumber} (${projectName}). A receipt has been generated and is available in your portal.`,
     'View Receipt',
-    `${getPortalUrl()}#invoices`
+    `${getPortalUrl()}#invoices`,
+    { templateSlug: 'Invoice Paid', templateVars: { project_name: projectName, invoice_number: invoiceNumber, amount: amount.toFixed(2) }, eventType: 'invoice.paid', eventData: { projectName, invoiceNumber, amount } }
   );
 }
 
@@ -936,7 +1111,8 @@ async function notifyMilestoneCompleted(data: {
     'Milestone Completed!',
     `Great news! The milestone "${title}" for "${projectName}" has been completed. Check your portal for updated project progress.`,
     'View Project Progress',
-    `${getPortalUrl()}#projects`
+    `${getPortalUrl()}#projects`,
+    { templateSlug: 'Milestone Completed', templateVars: { project_name: projectName, milestone_title: title }, eventType: 'project.milestone_completed', eventData: { projectName, title } }
   );
 }
 
@@ -1011,6 +1187,131 @@ async function handleAutoAssignQuestionnaires(data: {
 }
 
 // ============================================
+// Maintenance Tier Activation
+// ============================================
+
+/**
+ * Handler: Project Completed -> Activate Maintenance
+ *
+ * When a project status changes to 'completed':
+ * 1. Check if project has a maintenance tier (not 'diy')
+ * 2. Create a recurring invoice based on tier pricing
+ * 3. If Best tier: billing starts after included months
+ * 4. Update project maintenance_status to 'active'
+ */
+async function handleMaintenanceActivation(data: {
+  entityId?: number | null;
+  triggeredBy?: string;
+  newStatus?: string;
+}): Promise<void> {
+  // Only act on completion
+  if (data.newStatus !== 'completed') return;
+
+  const projectId = data.entityId;
+  if (!projectId) return;
+
+  const db = getDatabase();
+
+  const project = (await db.get(
+    `SELECT id, client_id, project_name, maintenance_tier, maintenance_status,
+            maintenance_included_months, maintenance_recurring_invoice_id
+     FROM projects WHERE id = ?`,
+    [projectId]
+  )) as {
+    id: number; client_id: number; project_name: string;
+    maintenance_tier: string | null; maintenance_status: string;
+    maintenance_included_months: number; maintenance_recurring_invoice_id: number | null;
+  } | undefined;
+
+  if (!project) return;
+  if (!project.maintenance_tier || project.maintenance_tier === 'diy') return;
+  if (project.maintenance_status !== 'pending') return; // Already activated or manually managed
+  if (project.maintenance_recurring_invoice_id) return; // Idempotency: already has recurring invoice
+
+  try {
+    // Look up tier pricing from config
+    const { getMaintenanceOptions } = await import('../config/proposal-templates.js');
+    const allOptions = getMaintenanceOptions();
+    const tierConfig = allOptions[project.maintenance_tier];
+    if (!tierConfig || tierConfig.monthlyPrice <= 0) {
+      logger.info(`Maintenance tier '${project.maintenance_tier}' has no monthly price, skipping recurring invoice`, {
+        category: 'workflow'
+      });
+      await db.run(
+        'UPDATE projects SET maintenance_status = \'active\', maintenance_start_date = ? WHERE id = ?',
+        [new Date().toISOString().split('T')[0], projectId]
+      );
+      return;
+    }
+
+    // Calculate billing start date
+    const now = new Date();
+    let billingStartDate: string;
+    if (project.maintenance_included_months > 0) {
+      // Best tier: billing starts AFTER included months
+      const start = new Date(now);
+      start.setMonth(start.getMonth() + project.maintenance_included_months);
+      billingStartDate = start.toISOString().split('T')[0];
+
+      // Store when included period ends
+      await db.run(
+        'UPDATE projects SET maintenance_included_until = ? WHERE id = ?',
+        [billingStartDate, projectId]
+      );
+    } else {
+      // Billing starts next month (give 30 days grace after project completion)
+      const start = new Date(now);
+      start.setDate(start.getDate() + 30);
+      billingStartDate = start.toISOString().split('T')[0];
+    }
+
+    // Create recurring invoice via invoice service
+    const { invoiceService: invSvc } = await import('./invoice-service.js');
+    const recurringInvoice = await invSvc.createRecurringInvoice({
+      projectId,
+      clientId: project.client_id,
+      frequency: 'monthly',
+      dayOfMonth: 1,
+      lineItems: [{
+        description: `${tierConfig.displayName} — Monthly Maintenance`,
+        quantity: 1,
+        rate: tierConfig.monthlyPrice,
+        amount: tierConfig.monthlyPrice
+      }],
+      notes: `Auto-generated maintenance plan for ${project.project_name}`,
+      startDate: billingStartDate
+    });
+
+    // Update project with maintenance activation
+    await db.run(
+      `UPDATE projects SET
+        maintenance_status = 'active',
+        maintenance_start_date = ?,
+        maintenance_recurring_invoice_id = ?
+      WHERE id = ?`,
+      [now.toISOString().split('T')[0], recurringInvoice.id, projectId]
+    );
+
+    logger.info(`Maintenance activated for project ${projectId}`, {
+      category: 'workflow',
+      metadata: {
+        projectId,
+        tier: project.maintenance_tier,
+        monthlyPrice: tierConfig.monthlyPrice,
+        billingStartDate,
+        includedMonths: project.maintenance_included_months,
+        recurringInvoiceId: recurringInvoice.id
+      }
+    });
+  } catch (error) {
+    logger.error('[WorkflowAutomation] Failed to activate maintenance', {
+      error: error instanceof Error ? error : undefined,
+      metadata: { projectId, tier: project.maintenance_tier }
+    });
+  }
+}
+
+// ============================================
 // Registration
 // ============================================
 
@@ -1034,6 +1335,9 @@ export function registerWorkflowAutomations(): void {
   // Project created -> Auto-assign questionnaires
   workflowTriggerService.on('project.created', handleAutoAssignQuestionnaires);
 
+  // Project completed -> Activate maintenance tier
+  workflowTriggerService.on('project.status_changed', handleMaintenanceActivation);
+
   // Client Notification Handlers
   workflowTriggerService.on('proposal.accepted', notifyProposalAccepted);
   workflowTriggerService.on('contract.signed', notifyContractSigned);
@@ -1043,15 +1347,16 @@ export function registerWorkflowAutomations(): void {
   workflowTriggerService.on('invoice.paid', notifyInvoicePaid);
   workflowTriggerService.on('project.milestone_completed', notifyMilestoneCompleted);
 
-  logger.info('Registered 11 automation handlers', {
+  logger.info('Registered 12 automation handlers', {
     category: 'workflow',
     metadata: {
       handlers: [
-        'proposal.accepted -> Create project + contract + payment schedule',
+        'proposal.accepted -> Create project + contract + payment schedule + store maintenance tier',
         'proposal.accepted -> Notify client',
         'contract.signed -> Update project status',
         'contract.signed -> Notify client',
         'project.created -> Auto-assign questionnaires',
+        'project.status_changed (completed) -> Activate maintenance tier + recurring invoice',
         'project.milestone_completed -> Create invoice',
         'project.milestone_completed -> Notify client',
         'deliverable.approved -> Notify client',
@@ -1068,5 +1373,6 @@ export {
   handleProposalAccepted,
   handleContractSigned,
   handleMilestoneCompleted,
-  handleAutoAssignQuestionnaires
+  handleAutoAssignQuestionnaires,
+  handleMaintenanceActivation
 };
