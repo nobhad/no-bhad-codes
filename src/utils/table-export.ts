@@ -420,3 +420,82 @@ function formatBillableAmount(_value: unknown, row: Record<string, unknown>): st
 
   return ((minutes / 60) * rate).toFixed(2);
 }
+
+// =====================================================
+// Additional Export Configs
+// =====================================================
+
+export const CONTRACTS_EXPORT_CONFIG: ExportConfig = {
+  filename: 'contracts',
+  columns: [
+    { key: 'id', label: 'ID' },
+    { key: 'projectName', label: 'Project' },
+    { key: 'clientName', label: 'Client' },
+    { key: 'status', label: 'Status' },
+    { key: 'sentAt', label: 'Sent', formatter: formatDate },
+    { key: 'signedAt', label: 'Signed', formatter: formatDate },
+    { key: 'createdAt', label: 'Created', formatter: formatDate }
+  ]
+};
+
+export const QUESTIONNAIRES_EXPORT_CONFIG: ExportConfig = {
+  filename: 'questionnaires',
+  columns: [
+    { key: 'id', label: 'ID' },
+    { key: 'title', label: 'Title' },
+    { key: 'projectName', label: 'Project' },
+    { key: 'status', label: 'Status' },
+    { key: 'questionCount', label: 'Questions' },
+    { key: 'createdAt', label: 'Created', formatter: formatDate }
+  ]
+};
+
+export const WORKFLOWS_EXPORT_CONFIG: ExportConfig = {
+  filename: 'workflows',
+  columns: [
+    { key: 'id', label: 'ID' },
+    { key: 'name', label: 'Name' },
+    { key: 'trigger', label: 'Trigger' },
+    { key: 'status', label: 'Status' },
+    { key: 'runCount', label: 'Runs' },
+    { key: 'createdAt', label: 'Created', formatter: formatDate }
+  ]
+};
+
+export const GLOBAL_TASKS_EXPORT_CONFIG: ExportConfig = {
+  filename: 'tasks',
+  columns: [
+    { key: 'id', label: 'ID' },
+    { key: 'title', label: 'Title' },
+    { key: 'projectName', label: 'Project' },
+    { key: 'status', label: 'Status' },
+    { key: 'priority', label: 'Priority' },
+    { key: 'dueDate', label: 'Due Date', formatter: formatDate },
+    { key: 'createdAt', label: 'Created', formatter: formatDate }
+  ]
+};
+
+export const AD_HOC_REQUESTS_EXPORT_CONFIG: ExportConfig = {
+  filename: 'ad_hoc_requests',
+  columns: [
+    { key: 'id', label: 'ID' },
+    { key: 'title', label: 'Title' },
+    { key: 'clientName', label: 'Client' },
+    { key: 'requestType', label: 'Type' },
+    { key: 'urgency', label: 'Urgency' },
+    { key: 'status', label: 'Status' },
+    { key: 'createdAt', label: 'Created', formatter: formatDate }
+  ]
+};
+
+export const DELIVERABLES_EXPORT_CONFIG: ExportConfig = {
+  filename: 'deliverables',
+  columns: [
+    { key: 'id', label: 'ID' },
+    { key: 'title', label: 'Title' },
+    { key: 'projectName', label: 'Project' },
+    { key: 'status', label: 'Status' },
+    { key: 'type', label: 'Type' },
+    { key: 'createdAt', label: 'Created', formatter: formatDate }
+  ]
+};
