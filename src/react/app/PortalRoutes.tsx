@@ -126,6 +126,17 @@ const MeetingRequestsTable = lazyNamed(() => import('../features/admin/meetings'
 const AutomationsTable = lazyNamed(() => import('../features/admin/automations').then(m => ({ AutomationsTable: m.AutomationsTable })));
 const AutomationDetailLazy = React.lazy(() => import('../features/admin/automations').then(m => ({ default: m.AutomationDetailPanel })));
 
+// Admin: Feedback & Testimonials
+const FeedbackTable = lazyNamed(() => import('../features/admin/feedback').then(m => ({ FeedbackTable: m.FeedbackTable })));
+const TestimonialsTable = lazyNamed(() => import('../features/admin/feedback').then(m => ({ TestimonialsTable: m.TestimonialsTable })));
+const FeedbackAnalytics = lazyNamed(() => import('../features/admin/feedback').then(m => ({ FeedbackAnalytics: m.FeedbackAnalytics })));
+
+// Portal: Feedback
+const PortalFeedback = lazyNamed(() => import('../features/portal/feedback').then(m => ({ PortalFeedback: m.PortalFeedback })));
+
+// Admin: Embed Widgets
+const EmbedWidgetsManager = lazyNamed(() => import('../features/admin/embed').then(m => ({ EmbedWidgetsManager: m.EmbedWidgetsManager })));
+
 // Admin: Expenses & Retainers
 const ExpensesTable = lazyNamed(() => import('../features/admin/expenses').then(m => ({ ExpensesTable: m.ExpensesTable })));
 const RetainersTable = lazyNamed(() => import('../features/admin/retainers').then(m => ({ RetainersTable: m.RetainersTable })));
@@ -451,6 +462,26 @@ export function PortalRoutes() {
           ) : (
             <LazyTabRoute tabId="retainers"><PortalRetainers /></LazyTabRoute>
           )
+        } />
+
+        {/* ========== FEEDBACK & TESTIMONIALS ========== */}
+        <Route path="/feedback" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="feedback"><FeedbackTable /></LazyTabRoute>
+          ) : (
+            <LazyTabRoute tabId="feedback"><PortalFeedback /></LazyTabRoute>
+          )
+        } />
+        <Route path="/feedback-analytics" element={
+          <LazyTabRoute tabId="feedback"><FeedbackAnalytics /></LazyTabRoute>
+        } />
+        <Route path="/testimonials" element={
+          <LazyTabRoute tabId="testimonials"><TestimonialsTable /></LazyTabRoute>
+        } />
+
+        {/* ========== EMBED WIDGETS ========== */}
+        <Route path="/embed-widgets" element={
+          <LazyTabRoute tabId="embed-widgets"><EmbedWidgetsManager /></LazyTabRoute>
         } />
 
         {/* ========== AGREEMENTS ========== */}

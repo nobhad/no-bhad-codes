@@ -357,10 +357,68 @@ Date: _______________                     Date: _______________`;
           color: PDF_COLORS.black
         });
 
-        // Contract content body
+        // === PARTIES — three columns: Developer | AND | Client ===
+        const partiesY = ctx.y;
+        const colWidth = (contentWidth - 40) / 2; // two equal columns with 40px AND column
+        const andX = leftMargin + colWidth;
+        const clientX = leftMargin + colWidth + 40;
+        const bodySize = PDF_TYPOGRAPHY.bodySize;
+        const lh = PDF_SPACING.lineHeight;
+
+        // Intro line
+        ctx.currentPage.drawText('This Agreement is entered into as of March 1, 2026 between:', {
+          x: leftMargin, y: ctx.y, size: bodySize, font: helvetica, color: PDF_COLORS.black
+        });
+        ctx.y -= lh * 2;
+
+        // Developer column (left)
+        const devLines = [
+          { text: 'No Bhad Codes ("Developer")', bold: true },
+          { text: 'Noelle Bhaduri', bold: false },
+          { text: 'nobhaduri@gmail.com', bold: false },
+          { text: 'nobhad.codes', bold: false }
+        ];
+        let devY = ctx.y;
+        for (const line of devLines) {
+          ctx.currentPage.drawText(line.text, {
+            x: leftMargin, y: devY, size: bodySize,
+            font: line.bold ? helveticaBold : helvetica, color: PDF_COLORS.black
+          });
+          devY -= lh;
+        }
+
+        // AND column (center)
+        const andY = ctx.y - lh; // vertically centered-ish
+        ctx.currentPage.drawText('AND', {
+          x: andX + 8, y: andY, size: bodySize, font: helveticaBold, color: PDF_COLORS.black
+        });
+
+        // Client column (right)
+        const clientLines = [
+          { text: 'Hedgewitch Horticulture LLC ("Client")', bold: true },
+          { text: 'Emily Gold & Abigail Wolf', bold: false },
+          { text: 'offerings@hedgewitchhorticulture.com', bold: false },
+          { text: '24 Crescent Heights, Fitchburg, MA 01420', bold: false }
+        ];
+        let cliY = ctx.y;
+        for (const line of clientLines) {
+          ctx.currentPage.drawText(line.text, {
+            x: clientX, y: cliY, size: bodySize,
+            font: line.bold ? helveticaBold : helvetica, color: PDF_COLORS.black
+          });
+          cliY -= lh;
+        }
+
+        ctx.y = Math.min(devY, cliY) - lh;
+
+        // Contract content body — skip the parties block (already rendered above)
         const plainContent = contractContent.replace(/<[^>]+>/g, '');
-        const lines = plainContent.split('\n');
-        for (const rawLine of lines) {
+        const allLines = plainContent.split('\n');
+        // Find where "1. SCOPE OF WORK" starts and render from there
+        const scopeIndex = allLines.findIndex(l => l.trim().startsWith('1. SCOPE'));
+        const contentLines = scopeIndex >= 0 ? allLines.slice(scopeIndex) : allLines;
+
+        for (const rawLine of contentLines) {
           const trimmed = rawLine.trim();
           if (!trimmed) { ctx.y -= 10; continue; }
 
