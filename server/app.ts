@@ -64,6 +64,9 @@ import paymentSchedulesRouter from './routes/payment-schedules.js';
 import contentRequestsRouter from './routes/content-requests.js';
 import settingsRouter from './routes/settings.js';
 import receiptsRouter from './routes/receipts.js';
+import paymentsRouter from './routes/payments/index.js';
+import agreementsRouter from './routes/agreements/index.js';
+import onboardingChecklistRouter from './routes/onboarding-checklist/index.js';
 import { eventsRouter } from './routes/events.js';
 import { searchRouter } from './routes/search.js';
 import healthRouter from './routes/health.js';
@@ -126,12 +129,13 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ['\'self\''],
-        scriptSrc: ['\'self\'', '\'unsafe-inline\''], // GSAP does not require unsafe-eval
+        scriptSrc: ['\'self\'', '\'unsafe-inline\'', 'https://js.stripe.com'], // GSAP does not require unsafe-eval; Stripe Elements SDK
         styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
         imgSrc: ['\'self\'', 'data:', 'https:', 'blob:'],
         connectSrc: [
           '\'self\'',
           'https://api.sentry.io',
+          'https://api.stripe.com',
           // Allow localhost API connections in development (Vite on 4000 -> Express on 4001)
           ...(process.env.NODE_ENV !== 'production'
             ? ['http://localhost:4001', 'ws://localhost:4001']
@@ -140,7 +144,7 @@ app.use(
         fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
         mediaSrc: ['\'self\''],
         objectSrc: ['\'none\''],
-        frameSrc: ['\'none\''],
+        frameSrc: ['\'self\'', 'https://js.stripe.com'],
         baseUri: ['\'self\''],
         formAction: ['\'self\'']
       }
@@ -184,7 +188,9 @@ app.use(
 app.use((req, res, next) => {
   if (
     req.path === '/api/integrations/stripe/webhook' ||
-    req.path === '/api/v1/integrations/stripe/webhook'
+    req.path === '/api/v1/integrations/stripe/webhook' ||
+    req.path === '/api/payments/webhook' ||
+    req.path === '/api/v1/payments/webhook'
   ) {
     next();
   } else {
@@ -322,6 +328,8 @@ app.use(
     skipIf: (req) => {
       // Skip CSRF for webhook endpoints (they use signature verification)
       if (req.path.includes('/webhooks/')) return true;
+      // Skip CSRF for payment webhooks (Stripe signature verification)
+      if (req.path.includes('/payments/webhook')) return true;
       // Skip CSRF for file uploads (may use FormData without custom headers)
       if (req.path.includes('/uploads') && req.method === 'POST') return true;
       // Skip CSRF for intake form (public endpoint)
@@ -375,7 +383,10 @@ const apiRouters = [
   { path: '/events', router: eventsRouter },
   { path: '/search', router: searchRouter },
   { path: '/payment-schedules', router: paymentSchedulesRouter },
-  { path: '/content-requests', router: contentRequestsRouter }
+  { path: '/content-requests', router: contentRequestsRouter },
+  { path: '/payments', router: paymentsRouter },
+  { path: '/agreements', router: agreementsRouter },
+  { path: '/onboarding-checklist', router: onboardingChecklistRouter }
 ];
 
 // Mount all routers at both /api and /api/v1
