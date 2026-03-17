@@ -179,6 +179,13 @@ router.post(
       return errorResponse(res, 'Access denied', 403, ErrorCodes.FORBIDDEN);
     }
 
+    // Validate answer payload size
+    const MAX_ANSWERS_SIZE = 100000; // 100KB
+    const answersJson = JSON.stringify(answers || {});
+    if (answersJson.length > MAX_ANSWERS_SIZE) {
+      return errorResponse(res, 'Answers data too large', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
     const response = await questionnaireService.saveProgress(responseId, answers || {});
 
     sendSuccess(res, { response }, 'Progress saved');
@@ -245,6 +252,13 @@ router.post(
 
     if (existing.status === 'completed') {
       return errorResponse(res, 'Questionnaire already submitted', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    // Validate answer payload size
+    const MAX_ANSWERS_SIZE = 100000; // 100KB
+    const answersJson = JSON.stringify(answers || {});
+    if (answersJson.length > MAX_ANSWERS_SIZE) {
+      return errorResponse(res, 'Answers data too large', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Submit the response
