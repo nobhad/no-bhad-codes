@@ -59,6 +59,18 @@ export const API_ENDPOINTS = {
   PAYMENT_SCHEDULES_FROM_SPLIT: '/api/payment-schedules/from-split',
   PAYMENT_SCHEDULES_CHECK_OVERDUE: '/api/payment-schedules/check-overdue',
 
+  // Payments (embedded Stripe)
+  PAYMENTS: '/api/payments',
+  PAYMENTS_CREATE_INTENT: '/api/payments/create-intent',
+
+  // Agreements
+  AGREEMENTS: '/api/agreements',
+  AGREEMENTS_MY: '/api/agreements/my',
+
+  // Onboarding Checklist
+  ONBOARDING_CHECKLIST: '/api/onboarding-checklist',
+  ONBOARDING_CHECKLIST_MY: '/api/onboarding-checklist/my',
+
   // Content requests
   CONTENT_REQUESTS: '/api/content-requests',
   CONTENT_REQUESTS_MY: '/api/content-requests/my',
@@ -352,7 +364,17 @@ export const buildEndpoint = {
   webhookTest: (id: number | string) => `${API_ENDPOINTS.ADMIN.WEBHOOKS}/${id}/test`,
   webhookRetry: (id: number | string) => `${API_ENDPOINTS.ADMIN.WEBHOOKS}/${id}/retry`,
   webhookToggle: (id: number | string) => `${API_ENDPOINTS.ADMIN.WEBHOOKS}/${id}/toggle`,
-  webhookSecret: (id: number | string) => `${API_ENDPOINTS.ADMIN.WEBHOOKS}/${id}/secret/regenerate`
+  webhookSecret: (id: number | string) => `${API_ENDPOINTS.ADMIN.WEBHOOKS}/${id}/secret/regenerate`,
+
+  // Agreements
+  agreement: (id: number | string) => `${API_ENDPOINTS.AGREEMENTS}/${id}`,
+  agreementSend: (id: number | string) => `${API_ENDPOINTS.AGREEMENTS}/${id}/send`,
+  agreementCancel: (id: number | string) => `${API_ENDPOINTS.AGREEMENTS}/${id}/cancel`,
+  agreementStepComplete: (stepId: number | string) => `${API_ENDPOINTS.AGREEMENTS}/steps/${stepId}/complete`,
+  agreementView: (id: number | string) => `${API_ENDPOINTS.AGREEMENTS}/${id}/view`,
+
+  // Onboarding Checklist
+  onboardingStepComplete: (stepId: number | string) => `${API_ENDPOINTS.ONBOARDING_CHECKLIST}/steps/${stepId}/complete`
 
 } as const;
 

@@ -30,6 +30,7 @@ import type { ActionItemCounts } from './ActionItems';
 import type { PortalViewProps } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { KEYS } from '@/constants/keyboard';
+import { OnboardingCard } from '../onboarding-checklist/OnboardingCard';
 
 // ============================================================================
 // CONSTANTS
@@ -299,6 +300,13 @@ export function PortalDashboard({
               />
             </div>
           )}
+
+          {/* 3. Onboarding Checklist (shows when active) */}
+          <OnboardingCard
+            getAuthToken={getAuthToken}
+            showNotification={showNotification}
+            onNavigate={onNavigate}
+          />
 
           {/* Stats + Action Items — single row */}
           <div className="dashboard-stats-grid">
