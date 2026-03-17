@@ -72,6 +72,8 @@ import meetingRequestsRouter from './routes/meeting-requests/index.js';
 import automationsRouter from './routes/automations/index.js';
 import expensesRouter from './routes/expenses/index.js';
 import retainersRouter from './routes/retainers/index.js';
+import feedbackRouter from './routes/feedback/index.js';
+import embedRouter from './routes/embed/index.js';
 import { eventsRouter } from './routes/events.js';
 import { searchRouter } from './routes/search.js';
 import healthRouter from './routes/health.js';
@@ -346,6 +348,12 @@ app.use(
       if (req.path.match(/\/proposals\/\d+\/sign/) || req.path.match(/\/proposals\/sign\//)) return true;
       // Skip CSRF for analytics tracking (public endpoint, uses rate limiting)
       if (req.path.includes('/analytics/track')) return true;
+      // Skip CSRF for public feedback survey submission
+      if (req.path.includes('/feedback/survey/') && req.method === 'POST') return true;
+      // Skip CSRF for public testimonial reads
+      if (req.path.includes('/feedback/testimonials/public') || req.path.includes('/feedback/testimonials/featured')) return true;
+      // Skip CSRF for public embed widget endpoints
+      if (req.path.includes('/embed/contact-form') || req.path.includes('/embed/testimonials') || req.path.includes('/embed/status')) return true;
       return false;
     }
   })
@@ -396,7 +404,9 @@ const apiRouters = [
   { path: '/meeting-requests', router: meetingRequestsRouter },
   { path: '/automations', router: automationsRouter },
   { path: '/expenses', router: expensesRouter },
-  { path: '/retainers', router: retainersRouter }
+  { path: '/retainers', router: retainersRouter },
+  { path: '/feedback', router: feedbackRouter },
+  { path: '/embed', router: embedRouter }
 ];
 
 // Mount all routers at both /api and /api/v1
