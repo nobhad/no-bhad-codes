@@ -781,9 +781,43 @@ body[data-page="client"] {
 
 ---
 
+### 11. `portal-theme.css` imported UNLAYERED
+
+**Rule broken:** All CSS should be inside an `@layer` block.
+
+**Where:** `src/design-system/tokens/portal-theme.css` — imported directly (no `@layer` wrapper) in `src/styles/bundles/admin.css` and `src/styles/bundles/client.css`.
+
+**Why:** Portal theme defines the source color tokens (`--color-text-primary`, `--color-bg-primary`) from which all other portal colors derive via `color-mix()`. Unlayered CSS always beats layered CSS in the cascade — this guarantees portal overrides win over every `@layer tokens`, `@layer components`, etc. declaration without needing `!important`. If portal-theme were inside `@layer tokens`, any unlayered third-party CSS could override portal colors. The comment in `src/design-system/tokens/index.css` explicitly documents this decision.
+
+---
+
+### 12. Typography wide-tracking overrides
+
+**Rule broken:** Token values should be defined once in their canonical token file.
+
+**Where:** `src/design-system/tokens/typography.css` lines 101-104 — `--letter-spacing-label-wide: 0.05em` and `--letter-spacing-title-wide: 0.02em`.
+
+**Why:** The main site intentionally uses wider letter-spacing than the design system defaults for label and title typography. These overrides are co-located in the typography token file (not scattered across component CSS) and clearly commented as intentional main-site overrides.
+
+---
+
 ## Recent Changes
 
 Portal-specific changes are documented in [Portal Design -- Recent Changes](./PORTAL_DESIGN.md#recent-changes).
+
+### March 17, 2026 -- CSS Class Consolidation
+
+Eliminated ~20 duplicate CSS classes across the portal. ~180 lines of dead CSS removed.
+
+- Payment view: `payment-stat-*`, `payment-item-*`, `payment-summary-*` → shared `stat-label`, `stat-value`, `list-item`, `action-group`, `panel`
+- Invoice tab: `invtab-stats`, `invtab-header-row` → `detail-meta`, removed
+- Empty states: `empty-state-small`, `kanban-empty-state`, `messaging-empty-state-*` → shared `empty-state--compact`, `empty-state--full`
+- Card actions: `portal-card-actions` → `action-group`
+- Checklist: `checklist-card/header` → `portal-card`, `portal-card-header`
+- Milestone actions: `milestone-actions` → `action-group`
+
+New shared CSS file: `portal-detail-header.css` (moved from admin-only to shared).
+New reusable component: `DetailHeader.tsx` (replaces 5 duplicate HTML patterns).
 
 ### March 16, 2026 -- Documentation Restructure
 

@@ -1,7 +1,7 @@
 # Workflow Automation System
 
 **Status:** Complete
-**Last Updated:** March 16, 2026
+**Last Updated:** March 17, 2026
 
 ## Overview
 
@@ -83,6 +83,22 @@ Each workflow has ordered steps with:
 | `update_status` | Update entity status |
 | `webhook` | Call external webhook |
 | `notify` | Send in-app notification |
+
+### Maintenance Tier Activation
+
+Handler: `handleMaintenanceActivation` — triggers on `project.status_changed` to `completed`.
+
+- Creates a recurring invoice for non-DIY maintenance tiers
+- **Best tier**: billing starts 3 months after completion (included period)
+- Migration: `118_maintenance_tier_activation.sql` adds maintenance columns to `projects` table
+
+### Webhook Dispatch
+
+All client notification actions now dispatch to configured Slack/Discord webhooks in addition to email.
+
+### Email Template Lookup
+
+Notification emails try to load a DB template by slug (e.g., `contract-signed`, `invoice-created`) before falling back to hardcoded HTML. This allows admin customization of notification content via the Email Templates UI.
 
 ### Trigger Features
 
@@ -281,6 +297,14 @@ DELETE /api/approvals/steps/:stepId
   Returns: success message
 ```
 
+### Workflow Triggers (Admin)
+
+```text
+POST /api/admin/workflows
+  Body: { name, event_type, action_type, action_config, conditions?, is_active? }
+  Returns: created workflow trigger
+```
+
 ### Event Triggers
 
 ```text
@@ -476,6 +500,17 @@ POST /api/email-templates/:id/test
 ---
 
 ## Change Log
+
+### March 17, 2026 - Maintenance Activation, Webhook Dispatch, Email Templates, Workflow Creation Endpoint
+
+- New handler: `handleMaintenanceActivation` — triggers on `project.status_changed` to `completed`
+  - Creates recurring invoice for non-DIY maintenance tiers
+  - Best tier: billing starts 3 months after completion (included period)
+- New migration: `118_maintenance_tier_activation.sql` adds maintenance columns to `projects` table
+- Webhook dispatch: all client notifications now dispatch to configured Slack/Discord webhooks
+- Email templates: notifications try DB template by slug before falling back to hardcoded HTML
+- New endpoint: `POST /api/admin/workflows` for creating workflow triggers
+- Files modified: `server/services/workflow-automations.ts`, `server/routes/api.ts`
 
 ### March 16, 2026 - Pipeline Automations
 

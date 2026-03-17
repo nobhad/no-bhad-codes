@@ -1,7 +1,7 @@
 # Portal Architecture
 
 **Status:** Complete
-**Last Updated:** 2026-03-08
+**Last Updated:** 2026-03-16
 
 ## Overview
 
@@ -32,7 +32,8 @@ Both portals mount into `.dashboard-container.portal` via `src/react/app/mount-p
 | `src/react/app/PortalLayout.tsx` | Shell: sidebar + header + `<Outlet />` content |
 | `src/react/app/PortalSidebar.tsx` | Left navigation (collapsed/expanded state, nav items from store) |
 | `src/react/app/PortalHeader.tsx` | Top header: logo, sidebar toggle, page title, notification bell, theme toggle |
-| `src/react/app/PortalSubtabs.tsx` | Subtab group navigation (Work, CRM, Documents groups) |
+| `src/react/app/PortalSubtabs.tsx` | Subtab group navigation (Work, CRM, Documents groups). Renders page-specific actions on right side. |
+| `src/react/contexts/SubtabContext.tsx` | Subtab state context: active subtab, set subtab, page-specific actions |
 | `src/react/app/LazyTabRoute.tsx` | Suspense wrapper for lazy-loaded route components |
 | `src/react/app/mount-portal.tsx` | React SPA mount factory (called once on page load) |
 | `src/react/stores/portal-store.ts` | Zustand store |
@@ -139,7 +140,25 @@ Each feature directory has:
 - Collapsed state is stored in localStorage under `STORAGE_KEYS.SIDEBAR_COLLAPSED`
 - Applied as a CSS class on the layout container
 
+## Subtab State Management
+
+Portal subtabs use `SubtabContext` (React context) for state management:
+
+- `useActiveSubtab<T>()` — read the active subtab with type safety
+- `useSetSubtab()` — change the active subtab
+- `useSetSubtabActions()` — inject page-specific actions into the subtab row
+- `SubtabProvider` wraps the portal app in `PortalApp.tsx`
+
+This replaced the previous DOM custom event system (`document.dispatchEvent`/`addEventListener`).
+
 ## Change Log
+
+### 2026-03-16 — Subtab system refactor
+
+- Replaced DOM custom events with `SubtabContext` (React context)
+- Added `SubtabProvider` to `PortalApp.tsx`
+- Updated 7 dashboard components to use context hooks
+- Fixed race condition with `pendingSubtab` ref pattern
 
 ### 2026-03-08 — Initial documentation
 

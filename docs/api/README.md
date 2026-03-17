@@ -29,6 +29,11 @@ properties and the JWT payload structure.
 - `GET /admin/leads` — Lead management
 - `GET /admin/clients` — Client list
 - `GET /admin/projects` — Project list
+- `GET /admin/invoices` — All invoices with stats (Phase 0K)
+- `POST /admin/invoices/bulk-delete` — Bulk soft-delete invoices
+- `POST /admin/invoices/bulk-status` — Bulk status change
+- `POST /admin/design-reviews` — Create design review (Phase 0L)
+- `POST /admin/workflows` — Create workflow trigger (Phase 0L)
 
 ### Client Self-Service (`/clients/me/...`)
 
@@ -37,6 +42,11 @@ properties and the JWT payload structure.
 - `GET /clients/me/messages` — Message threads
 - `GET /clients/me/files` — Uploaded files
 - `GET /clients/me/invoices` — Invoice history
+- `GET /proposals/my` — Client's proposals
+- `GET /proposals/:id` — Proposal detail (client can view if they own it)
+- `POST /proposals/:id/accept` — Accept proposal (triggers project creation cascade)
+- `GET /contracts/my` — Client's contracts
+- `POST /contracts/sign` — Sign contract in portal (emits contract.signed event)
 
 ### Client Management (Admin)
 
@@ -59,6 +69,7 @@ properties and the JWT payload structure.
 - `GET /projects/:id/intake-checklist` — Get intake information checklist
 - `POST /projects/:id/request-info` — Request missing info from client
 - `POST /projects/:id/generate-questionnaire` — Generate custom questionnaire from missing info
+- `GET /projects/:id/maintenance` — Get maintenance plan status (Phase 0C)
 
 ### File Management
 

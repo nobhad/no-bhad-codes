@@ -1,7 +1,7 @@
 # Contracts System
 
 **Status:** Complete (Backend + Admin UI + E-Signature UI)
-**Last Updated:** March 16, 2026
+**Last Updated:** March 17, 2026
 
 ## Table of Contents
 
@@ -527,6 +527,13 @@ When both parties have signed:
 ---
 
 ## Change Log
+
+### March 17, 2026 - Fixed Portal Signing Event Emission
+
+- Portal contract signing now correctly emits `contract.signed` workflow event
+- Previously missing: project stayed in `pending` status after client signed because no event was emitted
+- Fix in `server/routes/contracts/client.ts` — added `workflowTriggerService.emit()` call after signature capture
+- This allows downstream workflow automations (e.g., project status update) to fire on contract signing
 
 ### March 16, 2026 - Auto-Generation + JSON Export
 

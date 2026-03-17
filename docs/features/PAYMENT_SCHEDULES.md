@@ -1,7 +1,7 @@
 # Payment Schedule System
 
 **Status:** Complete
-**Last Updated:** March 16, 2026
+**Last Updated:** March 17, 2026
 
 ## Overview
 
@@ -53,7 +53,16 @@ Batch operation to detect and update overdue installments:
 - `POST /api/payment-schedules/check-overdue` updates all pending installments past their due date to `overdue` status
 - Can be triggered manually or via scheduled task
 
-### 4. Mark as Paid
+### 4. Installment-to-Invoice Auto-Generation
+
+Installments automatically generate invoices when they become due:
+
+- `paymentScheduleService.generateDueInvoices()` checks for installments due within 3 days
+- Runs daily via `scheduler-service.ts` invoice generation cron job
+- Invoices created as `draft` status with installment tracking in notes
+- Links the generated invoice back to the installment via `invoice_id`
+
+### 5. Mark as Paid
 
 Admin marks installments as paid with optional payment details:
 
@@ -137,6 +146,7 @@ The `payment-schedule-service.ts` provides:
 
 - `getClientSummary(clientId)` — totals: paid, pending, overdue amounts and counts
 - `checkAndUpdateOverdue()` — batch update pending to overdue where past due date
+- `generateDueInvoices()` — auto-generate draft invoices for installments due within 3 days
 
 ## Usage Examples
 
@@ -205,6 +215,13 @@ await fetch('/api/payment-schedules/42/mark-paid', {
 - `src/react/features/admin/shared/filterConfigs.ts` — added filter config
 
 ## Change Log
+
+### March 17, 2026 — Added Installment-to-Invoice Auto-Generation Cascade
+
+- New method: `paymentScheduleService.generateDueInvoices()` — auto-generates draft invoices for installments due within 3 days
+- Runs daily via `scheduler-service.ts` invoice generation cron job
+- Invoices created as `draft` status with installment tracking in notes
+- Links generated invoice back to installment via `invoice_id`
 
 ### March 16, 2026 — Receipt Auto-Generation + Auto-Creation on Proposal Acceptance
 

@@ -1,7 +1,7 @@
 # Proposal System Enhancement
 
 **Status:** Complete
-**Last Updated:** March 16, 2026
+**Last Updated:** March 17, 2026
 
 ## Overview
 
@@ -496,6 +496,7 @@ await fetch('/api/proposals/123/discount', {
 
 - `server/routes/proposals.ts` - Added 35+ new endpoints
 - `src/types/api.ts` - Added TypeScript interfaces
+- `src/constants/api-endpoints.ts` - Added `PROPOSALS_PREFILL` constant
 
 ## Frontend UI
 
@@ -531,6 +532,14 @@ await fetch('/api/proposals/123/discount', {
 - Create/edit template modal
 - Template fields: name, description, project type, tier, base price, default toggle
 - Use/edit/delete template actions
+
+### Client Portal Proposal View
+
+- `src/react/features/portal/proposals/PortalProposalDetail.tsx` - Client proposal detail view
+- Route: `/proposals/:id` in client portal
+- Clients can review proposal details and accept directly from the portal
+- `ProposalCard` navigates to `/proposals/:id` instead of generic `onNavigate`
+- Acceptance endpoint: `POST /api/proposals/:id/accept`
 
 ### Related Files
 
@@ -627,6 +636,13 @@ When a proposal is deleted via `DELETE /api/proposals/:id`:
 ---
 
 ## Change Log
+
+### March 17, 2026 - Added Client Proposal Detail View and Acceptance UI
+
+- Client portal now has proposal detail view at `/proposals/:id` (`PortalProposalDetail.tsx`)
+- Clients can accept proposals directly from the portal via `POST /api/proposals/:id/accept`
+- `PROPOSALS_PREFILL` constant added to frontend `api-endpoints.ts`
+- `ProposalCard` now navigates to `/proposals/:id` instead of generic `onNavigate`
 
 ### March 16, 2026 - Full Proposal Pipeline
 

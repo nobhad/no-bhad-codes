@@ -5336,6 +5336,34 @@ Phase 7 (International — Do Last)
 
 ## Change Log
 
+### 2026-03-17 — Phase 0 Implementation Complete
+
+All 12 verified Phase 0 items implemented (3 more proved false during implementation):
+
+**Critical (4/4):**
+- 0B: PortalProposalDetail.tsx + /proposals/:id route + accept flow with confirmation
+- 0C: Migration 118 + handleMaintenanceActivation handler + recurring invoice creation + GET /projects/:id/maintenance
+- 0D: Added workflowTriggerService.emit('contract.signed') to contracts/client.ts (1-line fix)
+- 0G: Added generateDueInvoices() to payment-schedule-service + hooked into scheduler
+
+**High (4/4):**
+- 0E: dispatchWebhooks() function queries notification_integrations, sends via slack-service.ts, logs delivery
+- 0F: loadEmailTemplate() + substituteVariables() — all 7 handlers pass templateSlug, falls back to hardcoded
+- 0K: server/routes/admin/invoices.ts (GET list+stats, POST bulk-delete, POST bulk-status) + mounted in admin barrel
+- 0L: POST /api/admin/design-reviews (+ create() on service) + POST /api/admin/workflows
+
+**Medium (3/3):**
+- 0J: Wired useExport to 9 tables, created 6 new export configs (Contracts, Questionnaires, Workflows, GlobalTasks, AdHocRequests, Deliverables)
+- 0M: Proved false — LeadDetailPanel already imported and rendered in LeadsTable
+- 0P: Added PROPOSALS_PREFILL + ADMIN.INVOICES to api-endpoints.ts
+
+**Low (2/2):**
+- 0N: Proved false — CSS_ARCHITECTURE.md (836 lines) and UX_GUIDELINES.md (69 lines) already exist
+- 0O: Demo/test scripts now require env vars for passwords, bcrypt standardized to 12 rounds in intake.ts
+
+**Files created:** 3 (migration, admin invoices route, PortalProposalDetail.tsx)
+**Files modified:** ~25 (workflow-automations.ts, 9 table exports, routes, services, types, constants)
+
 ### 2026-03-16 — Verification Pass (Plan vs Actual Code)
 
 Audited every Phase 0 claim against actual code with file paths and line numbers.

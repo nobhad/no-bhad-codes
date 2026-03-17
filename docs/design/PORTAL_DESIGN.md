@@ -694,41 +694,39 @@ background-color: var(--color-status-*);
 
 ### Wrapper Classes
 
-| Class | Purpose | Gutter | Bottom Padding |
-|-------|---------|--------|----------------|
-| `.section` | Top-level page wrapper. Direct child of `.dashboard-content`. | Tier 3: children get horizontal gutter | Last child gets `padding-bottom: var(--portal-page-bottom)` |
-| `.subsection` | Nested content wrapper inside a `.section`. | None -- gutter comes from deeper tiers | None |
+| Class | Purpose | Gutter | Padding |
+|-------|---------|--------|---------|
+| `.section` | Layout wrapper. Rendered by `PortalLayout.tsx` as the direct child of `.dashboard-content`. | Tier 3: children get horizontal gutter | `padding: var(--portal-section-gap) var(--space-2) var(--space-8)` |
+| `.subsection` | Content wrapper for route components and nested content. | None -- gutter comes from deeper tiers | None |
 
-Both provide `display: flex; flex-direction: column; gap: var(--content-gutter)`.
+Both provide `display: flex; flex-direction: column; gap`.
 
 ### Rules
 
-1. Every top-level route component must have `.section` as its outermost wrapper
-2. Every nested wrapper (inside TabPanel, hub, detail page) must use `.subsection`
-3. Never nest `.section` inside `.section` -- inner wrappers must be `.subsection`
-4. `TableLayout` component handles this automatically:
-   - `<TableLayout>` (default) renders `.section`
-   - `<TableLayout nested>` renders `.subsection`
+1. **`.section` is ONLY used by `PortalLayout.tsx`** -- it wraps `<PortalSubtabs />` + `<Outlet />`. Route components NEVER render their own `.section`.
+2. Route components use `.subsection` as their outermost wrapper (or `<TableLayout>` which defaults to `.subsection`).
+3. Never nest `.section` inside `.section` -- all route content is `.subsection` or plain divs.
+4. `TableLayout` component renders `.subsection` by default (`nested = true`).
 
 ### Component Patterns
 
 ```tsx
-// Standalone route
-<div ref={containerRef} className="section">
+// Route component (rendered inside layout .section via <Outlet />)
+<div ref={containerRef} className="subsection">
   {/* page content */}
 </div>
 
-// Hub component
-<div ref={containerRef} className="section">
+// Route with internal tabs (e.g. Settings)
+<div ref={containerRef} className="subsection">
   <TabList tabs={TABS} ... />
-  <TabPanel tabId="subtab-a" isActive={...}>
-    <SubtabComponent />  {/* must use .subsection or <TableLayout nested> */}
+  <TabPanel tabId="tab-a" isActive={...}>
+    {/* tab content */}
   </TabPanel>
 </div>
 
-// Subtab inside a hub
-<TableLayout nested containerRef={containerRef} title="TITLE">
-  {/* table content */}
+// Table route (most common)
+<TableLayout containerRef={containerRef} title="TITLE">
+  {/* table content -- TableLayout renders .subsection wrapper */}
 </TableLayout>
 ```
 
@@ -892,11 +890,20 @@ Use utility functions from `loading-utils.ts`: `showTableLoading()`, `showContai
 </div>
 ```
 
-Use utility functions: `showTableEmpty()`, `showContainerEmpty()`, `getTableEmptyRow()`, `getContainerEmptyHTML()`
+Use the `<EmptyState>` React component from `@react/factories` or utility functions: `showTableEmpty()`, `showContainerEmpty()`.
+
+#### Modifiers
+
+| Class | Purpose |
+|-------|---------|
+| `.empty-state` | Default empty state with centered layout |
+| `.empty-state--compact` | Reduced padding/font for inline contexts (kanban columns, small panels) |
+| `.empty-state--full` | `flex: 1` to fill available space in split-pane layouts |
 
 ### Rules
 
-- Always use utility functions, never inline HTML
+- Use `<EmptyState>` component in React, utility functions in vanilla TS
+- Never create component-specific empty state classes (e.g. `kanban-empty-state`, `messaging-empty-state`)
 - Spinner animation for async operations
 - Skeleton loaders for content areas
 - Disable interactive elements during loading
@@ -942,6 +949,10 @@ Files with content in different cascade layers (e.g., `@layer components` + `@la
 ---
 
 ## Recent Changes
+
+### March 17, 2026 -- CSS Class Bloat Cleanup + Layout Fix
+
+Eliminated ~40 duplicate CSS classes (~300 lines removed) across two rounds. Consolidated one-off component classes to shared patterns: `portal-card-header`, `action-group`, `empty-state` modifiers, `stat-label`/`stat-value`, `list-item`. Removed 18 dead classes from requests.css (131 lines). Consolidated `.task-due-date`/`.task-assignee` into `.task-meta-item`, `.kanban-column-title-wrapper` into `.kanban-column-header`. Fixed `.note-meta` duplicate definition conflict. Changed layout `.section` to be owned exclusively by `PortalLayout.tsx` — all route components now use `.subsection`. Increased `.section` top padding to `var(--portal-section-gap)` and bottom to `var(--space-8)` for uniform spacing. Removed dropdown shadows from admin portal (`--shadow-dropdown: none`).
 
 ### March 16, 2026 -- Detail Panel Factory and Entity Panels
 
