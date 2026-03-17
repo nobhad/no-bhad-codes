@@ -569,14 +569,6 @@ export function drawTwoColumnInfo(
     font: fonts.bold,
     color: PDF_COLORS.black
   });
-  const labelW = fonts.bold.widthOfTextAtSize(labelText, size);
-  page.drawLine({
-    start: { x: leftMargin, y: y - 4 },
-    end: { x: leftMargin + labelW, y: y - 4 },
-    thickness: PDF_SPACING.dividerThin,
-    color: PDF_COLORS.black
-  });
-
   let leftY = y - 20;
   for (const line of opts.left.lines) {
     if (!line.text) continue;
@@ -642,7 +634,7 @@ export function drawSectionLabel(
     font: PDFFont;
   }
 ): number {
-  const size = PDF_TYPOGRAPHY.bodySize;
+  const size = PDF_TYPOGRAPHY.sectionHeadingSize;
   const text = label.toUpperCase();
 
   page.drawText(text, {

@@ -349,6 +349,14 @@ Date: _______________                     Date: _______________`;
           }
         });
 
+        // HR separating detail section from content (no table header follows)
+        ctx.currentPage.drawLine({
+          start: { x: leftMargin, y: ctx.y + 10 },
+          end: { x: rightMargin, y: ctx.y + 10 },
+          thickness: PDF_SPACING.underlineThickness,
+          color: PDF_COLORS.black
+        });
+
         // Contract content body
         const plainContent = contractContent.replace(/<[^>]+>/g, '');
         const lines = plainContent.split('\n');
@@ -458,6 +466,14 @@ Date: _______________                     Date: _______________`;
           { label: 'DATE:', value: 'March 17, 2026' }
         ]
       }
+    });
+
+    // HR separating detail section from content (no table header follows)
+    page.drawLine({
+      start: { x: left, y: y + 10 },
+      end: { x: right, y: y + 10 },
+      thickness: PDF_SPACING.underlineThickness,
+      color: PDF_COLORS.black
     });
 
     // Project Details

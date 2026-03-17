@@ -155,6 +155,14 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     right: { pairs: rightPairs }
   });
 
+  // HR separating detail section from content (no table header follows)
+  page.drawLine({
+    start: { x: leftMargin, y: y + 10 },
+    end: { x: rightMargin, y: y + 10 },
+    thickness: PDF_SPACING.underlineThickness,
+    color: PDF_COLORS.black
+  });
+
   // === AMOUNT PAID (matches invoice totals pattern) ===
   const totalsX = rightMargin - 144;
   y -= PDF_SPACING.sectionSpacing;

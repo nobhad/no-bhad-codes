@@ -278,6 +278,14 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
     right: { pairs: rightPairs }
   });
 
+  // HR separating detail section from content (no table header follows)
+  ctx.currentPage.drawLine({
+    start: { x: leftMargin, y: ctx.y + 10 },
+    end: { x: rightMargin, y: ctx.y + 10 },
+    thickness: PDF_SPACING.underlineThickness,
+    color: PDF_COLORS.black
+  });
+
   // === SCOPE OF WORK ===
   ctx.y -= PDF_SPACING.sectionSpacing;
   ensureSpace(ctx, 100, onNewPage);
@@ -348,10 +356,13 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
     }
   }
 
+  // === PAGE BREAK: Timeline starts on page 2 ===
+  ctx.currentPage = pdfDoc.addPage([612, 792]);
+  ctx.pageNumber++;
+  ctx.y = ctx.height - ctx.topMargin;
+
   // === TIMELINE ===
   if (data.milestones.length > 0) {
-    ctx.y -= PDF_SPACING.sectionSpacing;
-    ensureSpace(ctx, 100, onNewPage);
     ctx.y = drawSectionLabel(ctx.currentPage, 'TIMELINE & MILESTONES', {
       x: leftMargin, y: ctx.y, font: fonts.bold
     });
@@ -407,9 +418,12 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
     }
   }
 
+  // === PAGE BREAK: Pricing starts on page 3 ===
+  ctx.currentPage = pdfDoc.addPage([612, 792]);
+  ctx.pageNumber++;
+  ctx.y = ctx.height - ctx.topMargin;
+
   // === PRICING ===
-  ctx.y -= PDF_SPACING.sectionSpacing;
-  ensureSpace(ctx, 150, onNewPage);
   ctx.y = drawSectionLabel(ctx.currentPage, 'PRICING & PAYMENT', {
     x: leftMargin, y: ctx.y, font: fonts.bold
   });
