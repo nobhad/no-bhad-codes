@@ -15,6 +15,7 @@ import {
 import { getString } from '../../database/row-helpers.js';
 import { getSchedulerService } from '../../services/scheduler-service.js';
 import { BUSINESS_INFO, CONTRACT_TERMS } from '../../config/business.js';
+import { PDF_COLORS } from '../../config/pdf-styles.js';
 import {
   getPdfCacheKey,
   getCachedPdf,
@@ -181,14 +182,14 @@ router.get(
       y: y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0.2, 0.2, 0.2)
+      color: PDF_COLORS.black
     });
     page.drawText(getString(p, 'client_name') || 'Client', {
       x: leftMargin,
       y: y - 15,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     let clientLineY = y - 30;
     if (p.company_name) {
@@ -197,7 +198,7 @@ router.get(
         y: clientLineY,
         size: 10,
         font: helvetica,
-        color: rgb(0, 0, 0)
+        color: PDF_COLORS.black
       });
       clientLineY -= 15;
     }
@@ -206,7 +207,7 @@ router.get(
       y: clientLineY,
       size: 10,
       font: helvetica,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.black
     });
 
     // Right side - Service Provider
@@ -215,28 +216,28 @@ router.get(
       y: y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0.2, 0.2, 0.2)
+      color: PDF_COLORS.black
     });
     page.drawText(BUSINESS_INFO.name, {
       x: rightCol,
       y: y - 15,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     page.drawText('Contract Date:', {
       x: rightCol,
       y: y - 45,
       size: 10,
       font: helveticaBold,
-      color: rgb(0.2, 0.2, 0.2)
+      color: PDF_COLORS.black
     });
     page.drawText(formatDate(getString(p, 'contract_signed_at') || getString(p, 'created_at')), {
       x: rightCol,
       y: y - 60,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
 
     y -= 90;
@@ -363,7 +364,7 @@ router.get(
       y: ctx.y,
       size: 12,
       font: helveticaBold,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     ctx.y -= 22;
 
@@ -396,13 +397,13 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     ctx.currentPage.drawLine({
       start: { x: leftMargin, y: signatureLineY },
       end: { x: leftMargin + signatureWidth, y: signatureLineY },
       thickness: 1,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     if (clientSignatureBytes) {
       const clientSignatureImage = await pdfDoc.embedPng(clientSignatureBytes);
@@ -418,14 +419,14 @@ router.get(
       y: signatureLineY - 15,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     ctx.currentPage.drawText(`Date: ${signedDate}`, {
       x: leftMargin,
       y: signatureLineY - 30,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
 
     ctx.currentPage.drawText('Service Provider:', {
@@ -433,13 +434,13 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     ctx.currentPage.drawLine({
       start: { x: rightCol, y: signatureLineY },
       end: { x: rightCol + signatureWidth, y: signatureLineY },
       thickness: 1,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     if (countersignatureBytes) {
       const countersignatureImage = await pdfDoc.embedPng(countersignatureBytes);
@@ -455,14 +456,14 @@ router.get(
       y: signatureLineY - 15,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     ctx.currentPage.drawText(`Date: ${countersignedDate}`, {
       x: rightCol,
       y: signatureLineY - 30,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
 
     // === FOOTERS ===
@@ -477,14 +478,14 @@ router.get(
         y: 52,
         size: 8,
         font: helvetica,
-        color: rgb(0.5, 0.5, 0.5)
+        color: PDF_COLORS.black
       });
       footerPage.drawText(footerContact, {
         x: (footerWidth - contactWidth) / 2,
         y: 40,
         size: 9,
         font: helvetica,
-        color: rgb(0.4, 0.4, 0.4)
+        color: PDF_COLORS.black
       });
     }
 

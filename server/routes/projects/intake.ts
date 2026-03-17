@@ -1,12 +1,13 @@
 import express, { Response } from 'express';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { PDFDocument as PDFLibDocument, PDFPage, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument as PDFLibDocument, PDFPage, StandardFonts } from 'pdf-lib';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../utils/access-control.js';
 import { getString } from '../../database/row-helpers.js';
 import { BUSINESS_INFO, getPdfLogoBytes } from '../../config/business.js';
+import { PDF_COLORS } from '../../config/pdf-styles.js';
 import { getPdfCacheKey, getCachedPdf, cachePdf } from '../../utils/pdf-utils.js';
 import { errorResponse, ErrorCodes } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
@@ -229,10 +230,10 @@ router.get(
     const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    const black = rgb(0, 0, 0);
-    const dimGray = rgb(0.3, 0.3, 0.3);
-    const lightGray = rgb(0.5, 0.5, 0.5);
-    const lineGray = rgb(0.8, 0.8, 0.8);
+    const black = PDF_COLORS.black;
+    const dimGray = PDF_COLORS.black;
+    const lightGray = PDF_COLORS.black;
+    const lineGray = PDF_COLORS.dividerLight;
 
     // =========================================================
     // MULTI-PAGE STATE
@@ -303,7 +304,7 @@ router.get(
         start: { x: LEFT, y: y + gap / 2 },
         end: { x: RIGHT, y: y + gap / 2 },
         thickness: 0.5,
-        color: rgb(0.9, 0.9, 0.9)
+        color: PDF_COLORS.dividerVeryLight
       });
       y -= gap;
     };
@@ -410,7 +411,7 @@ router.get(
       y: y - 20,
       size: 28,
       font: helveticaBold,
-      color: rgb(0.15, 0.15, 0.15)
+      color: PDF_COLORS.black
     });
 
     const intakeLogoBytes = getPdfLogoBytes();
@@ -430,34 +431,34 @@ router.get(
     let infoY = y - 11;
     currentPage.drawText(BUSINESS_INFO.name, {
       x: textStartX, y: infoY,
-      size: 15, font: helveticaBold, color: rgb(0.1, 0.1, 0.1)
+      size: 15, font: helveticaBold, color: PDF_COLORS.black
     });
     infoY -= 18;
     if (BUSINESS_INFO.owner) {
       currentPage.drawText(BUSINESS_INFO.owner, {
         x: textStartX, y: infoY,
-        size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2)
+        size: 10, font: helvetica, color: PDF_COLORS.black
       });
       infoY -= 16;
     }
     if (BUSINESS_INFO.tagline) {
       currentPage.drawText(BUSINESS_INFO.tagline, {
         x: textStartX, y: infoY,
-        size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4)
+        size: 9, font: helvetica, color: PDF_COLORS.black
       });
       infoY -= 14;
     }
     if (BUSINESS_INFO.email) {
       currentPage.drawText(BUSINESS_INFO.email, {
         x: textStartX, y: infoY,
-        size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4)
+        size: 9, font: helvetica, color: PDF_COLORS.black
       });
       infoY -= 14;
     }
     if (BUSINESS_INFO.website) {
       currentPage.drawText(BUSINESS_INFO.website, {
         x: textStartX, y: infoY,
-        size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4)
+        size: 9, font: helvetica, color: PDF_COLORS.black
       });
       infoY -= 14;
     }
@@ -481,7 +482,7 @@ router.get(
 
     currentPage.drawText('PREPARED FOR:', {
       x: LEFT, y,
-      size: 11, font: helveticaBold, color: rgb(0.2, 0.2, 0.2)
+      size: 11, font: helveticaBold, color: PDF_COLORS.black
     });
 
     currentPage.drawText(clean(intakeData.clientInfo.name), {

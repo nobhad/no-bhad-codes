@@ -212,7 +212,8 @@ router.post(
           : intakeData.companyName || intakeData.name;
 
       // Generate password hash outside transaction
-      const hashedPassword = await bcrypt.hash(generateRandomPassword(), 10);
+      const BCRYPT_ROUNDS = 12;
+      const hashedPassword = await bcrypt.hash(generateRandomPassword(), BCRYPT_ROUNDS);
 
       // Auto-generate project milestones based on project type and timeline
       const milestones = generateProjectMilestones(intakeData.projectType, intakeData.timeline);

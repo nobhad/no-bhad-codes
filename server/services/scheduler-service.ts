@@ -13,6 +13,7 @@ import { emailService, processEmailRetryQueue } from './email-service.js';
 import { getDatabase, Database } from '../database/init.js';
 import { softDeleteService } from './soft-delete-service.js';
 import { escalateAllProjects, EscalationResult } from './priority-escalation-service.js';
+import { paymentScheduleService } from './payment-schedule-service.js';
 import { logger } from './logger.js';
 import { getBaseUrl, getAdminUrl, getPortalUrl } from '../config/environment.js';
 import { BUSINESS_INFO } from '../config/business.js';
@@ -321,6 +322,18 @@ export class SchedulerService {
       try {
         // Check and mark overdue invoices first
         await this.checkOverdueInvoices();
+
+        // Check and mark overdue payment schedule installments
+        const overdueInstallments = await paymentScheduleService.checkAndUpdateOverdue();
+        if (overdueInstallments > 0) {
+          logger.info(`[Scheduler] Marked ${overdueInstallments} installments as overdue`);
+        }
+
+        // Auto-generate invoices from due payment schedule installments
+        const installmentInvoices = await paymentScheduleService.generateDueInvoices();
+        if (installmentInvoices.generated > 0) {
+          logger.info(`[Scheduler] Generated ${installmentInvoices.generated} invoices from payment schedule installments`);
+        }
 
         if (this.config.enableScheduledInvoices) {
           await this.processScheduledInvoices();
