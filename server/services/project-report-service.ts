@@ -15,7 +15,7 @@
 import { PDFDocument } from 'pdf-lib';
 import { getDatabase } from '../database/init.js';
 import { BUSINESS_INFO } from '../config/business.js';
-import { PDF_COLORS, PDF_TYPOGRAPHY } from '../config/pdf-styles.js';
+import { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } from '../config/pdf-styles.js';
 import {
   createPdfContext,
   drawPdfDocumentHeader,
@@ -24,6 +24,9 @@ import {
   ensureSpace,
   addPageNumbers,
   setPdfMetadata,
+  drawTwoColumnInfo,
+  drawSectionLabel,
+  drawLabelValue,
   type PdfPageContext
 } from '../utils/pdf-utils.js';
 
@@ -301,449 +304,306 @@ export async function generateProjectReportPdf(data: ProjectReportData): Promise
   });
 
   const ctx = await createPdfContext(pdfDoc);
+  const { leftMargin, rightMargin, fonts } = ctx;
+  const lineHeight = PDF_SPACING.lineHeight;
+  const labelWidth = 120;
 
-  // Draw header on new pages
+  // Continuation header on new pages
   const onNewPage = (pageCtx: PdfPageContext) => {
-    drawPageHeader(pageCtx, data.project.name);
+    pageCtx.currentPage.drawText(`Project Report: ${data.project.name} (continued)`, {
+      x: pageCtx.leftMargin,
+      y: pageCtx.height - 30,
+      size: PDF_TYPOGRAPHY.bodySize,
+      font: pageCtx.fonts.regular,
+      color: PDF_COLORS.black
+    });
+    pageCtx.y = pageCtx.height - pageCtx.topMargin - 20;
   };
 
-  // === PAGE 1: HEADER ===
-  await drawReportHeader(ctx, data);
+  // === HEADER ===
+  ctx.y = await drawPdfDocumentHeader({
+    page: ctx.currentPage,
+    pdfDoc,
+    fonts,
+    startY: ctx.y,
+    leftMargin,
+    rightMargin,
+    title: 'PROJECT REPORT'
+  });
+
+  // === TWO-COLUMN INFO: PROJECT / REPORT DETAILS ===
+  const leftLines: Array<{ text: string; bold?: boolean }> = [
+    { text: data.project.name, bold: true },
+    { text: `CLIENT: ${data.client.name}${data.client.company ? ` (${data.client.company})` : ''}` }
+  ];
+
+  const rightPairs: Array<{ label: string; value: string }> = [
+    { label: 'STATUS:', value: formatStatus(data.project.status) },
+    { label: 'PRIORITY:', value: formatStatus(data.project.priority || 'Normal') },
+    { label: 'TYPE:', value: formatStatus(data.project.projectType || 'Not specified') },
+    { label: 'GENERATED:', value: formatDate(new Date().toISOString()) }
+  ];
+
+  ctx.y = drawTwoColumnInfo(ctx.currentPage, {
+    leftMargin,
+    rightMargin,
+    width: ctx.width,
+    y: ctx.y,
+    fonts,
+    left: { label: 'PROJECT:', lines: leftLines },
+    right: { pairs: rightPairs }
+  });
 
   // === PROJECT OVERVIEW ===
-  ctx.y -= 20;
-  drawSectionTitle(ctx, 'PROJECT OVERVIEW');
-  ctx.y -= 5;
-  drawProjectOverview(ctx, data);
+  ctx.y -= PDF_SPACING.sectionSpacing;
+  ensureSpace(ctx, 100, onNewPage);
+  ctx.y = drawSectionLabel(ctx.currentPage, 'PROJECT OVERVIEW', {
+    x: leftMargin, y: ctx.y, font: fonts.bold
+  });
+
+  ctx.y = drawLabelValue(ctx.currentPage, 'START DATE:', formatDate(data.project.startDate), {
+    x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+  });
+  ctx.y = drawLabelValue(ctx.currentPage, 'DEADLINE:', formatDate(data.project.deadline), {
+    x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+  });
+  if (data.project.budget) {
+    ctx.y = drawLabelValue(ctx.currentPage, 'BUDGET:', formatCurrency(data.project.budget), {
+      x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+    });
+  }
+
+  if (data.project.description) {
+    ctx.y -= 8;
+    ctx.y = drawLabelValue(ctx.currentPage, 'DESCRIPTION:', '', {
+      x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+    });
+    drawWrappedText(ctx, data.project.description, {
+      fontSize: PDF_TYPOGRAPHY.bodySize,
+      color: PDF_COLORS.black,
+      lineHeight,
+      onNewPage
+    });
+  }
 
   // === MILESTONES ===
   if (data.milestones.length > 0) {
-    ctx.y -= 25;
+    ctx.y -= PDF_SPACING.sectionSpacing;
     ensureSpace(ctx, 100, onNewPage);
-    drawSectionTitle(ctx, 'MILESTONES');
-    ctx.y -= 5;
-    drawMilestones(ctx, data.milestones, onNewPage);
+    ctx.y = drawSectionLabel(ctx.currentPage, 'MILESTONES', {
+      x: leftMargin, y: ctx.y, font: fonts.bold
+    });
+
+    const completed = data.milestones.filter((m) => m.isCompleted).length;
+    const total = data.milestones.length;
+
+    ctx.y = drawLabelValue(ctx.currentPage, 'PROGRESS:', `${completed}/${total} completed (${Math.round((completed / total) * 100)}%)`, {
+      x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+    });
+    ctx.y -= 8;
+
+    for (const milestone of data.milestones) {
+      ensureSpace(ctx, 30, onNewPage);
+
+      const checkmark = milestone.isCompleted ? '[x]' : '[ ]';
+      ctx.currentPage.drawText(checkmark, {
+        x: leftMargin,
+        y: ctx.y,
+        size: PDF_TYPOGRAPHY.bodySize,
+        font: fonts.regular,
+        color: PDF_COLORS.black
+      });
+
+      ctx.currentPage.drawText(milestone.title, {
+        x: leftMargin + 25,
+        y: ctx.y,
+        size: PDF_TYPOGRAPHY.bodySize,
+        font: fonts.bold,
+        color: PDF_COLORS.black
+      });
+
+      if (milestone.dueDate) {
+        const dueDateText = formatDate(milestone.dueDate);
+        const dueDateW = fonts.regular.widthOfTextAtSize(dueDateText, PDF_TYPOGRAPHY.bodySize);
+        ctx.currentPage.drawText(dueDateText, {
+          x: rightMargin - dueDateW,
+          y: ctx.y,
+          size: PDF_TYPOGRAPHY.bodySize,
+          font: fonts.regular,
+          color: PDF_COLORS.black
+        });
+      }
+
+      ctx.y -= lineHeight;
+    }
   }
 
   // === DELIVERABLES ===
   if (data.deliverables.length > 0) {
-    ctx.y -= 25;
+    ctx.y -= PDF_SPACING.sectionSpacing;
     ensureSpace(ctx, 100, onNewPage);
-    drawSectionTitle(ctx, 'DELIVERABLES');
-    ctx.y -= 5;
-    drawDeliverables(ctx, data.deliverables, onNewPage);
+    ctx.y = drawSectionLabel(ctx.currentPage, 'DELIVERABLES', {
+      x: leftMargin, y: ctx.y, font: fonts.bold
+    });
+
+    for (const deliverable of data.deliverables) {
+      ensureSpace(ctx, 20, onNewPage);
+
+      ctx.currentPage.drawText(`- ${deliverable.name}`, {
+        x: leftMargin,
+        y: ctx.y,
+        size: PDF_TYPOGRAPHY.bodySize,
+        font: fonts.regular,
+        color: PDF_COLORS.black
+      });
+
+      const statusText = formatStatus(deliverable.status);
+      const statusW = fonts.regular.widthOfTextAtSize(statusText, PDF_TYPOGRAPHY.bodySize);
+      ctx.currentPage.drawText(statusText, {
+        x: rightMargin - statusW,
+        y: ctx.y,
+        size: PDF_TYPOGRAPHY.bodySize,
+        font: fonts.regular,
+        color: PDF_COLORS.black
+      });
+
+      ctx.y -= lineHeight;
+    }
   }
 
   // === TIME TRACKING ===
   if (data.timeTracking.totalHours > 0) {
-    ctx.y -= 25;
+    ctx.y -= PDF_SPACING.sectionSpacing;
     ensureSpace(ctx, 100, onNewPage);
-    drawSectionTitle(ctx, 'TIME TRACKING');
-    ctx.y -= 5;
-    drawTimeTracking(ctx, data.timeTracking, onNewPage);
+    ctx.y = drawSectionLabel(ctx.currentPage, 'TIME TRACKING', {
+      x: leftMargin, y: ctx.y, font: fonts.bold
+    });
+
+    ctx.y = drawLabelValue(ctx.currentPage, 'TOTAL HOURS:', data.timeTracking.totalHours.toFixed(1), {
+      x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+    });
+
+    if (data.timeTracking.entries.length > 0) {
+      ctx.y -= 8;
+      ctx.y = drawLabelValue(ctx.currentPage, 'RECENT ENTRIES:', '', {
+        x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+      });
+
+      const MAX_TIME_ENTRIES = 10;
+      const entriesToShow = data.timeTracking.entries.slice(0, MAX_TIME_ENTRIES);
+      for (const entry of entriesToShow) {
+        ensureSpace(ctx, lineHeight, onNewPage);
+
+        ctx.currentPage.drawText(`${formatDate(entry.date)} - ${entry.hours.toFixed(1)}h`, {
+          x: leftMargin + PDF_SPACING.indent,
+          y: ctx.y,
+          size: PDF_TYPOGRAPHY.bodySize,
+          font: fonts.regular,
+          color: PDF_COLORS.black
+        });
+
+        const MAX_DESC_LENGTH = 60;
+        const TRUNCATED_DESC_LENGTH = 57;
+        const desc = entry.description.length > MAX_DESC_LENGTH
+          ? `${entry.description.substring(0, TRUNCATED_DESC_LENGTH)}...`
+          : entry.description;
+
+        ctx.currentPage.drawText(desc, {
+          x: leftMargin + labelWidth,
+          y: ctx.y,
+          size: PDF_TYPOGRAPHY.bodySize,
+          font: fonts.regular,
+          color: PDF_COLORS.black
+        });
+
+        ctx.y -= lineHeight;
+      }
+
+      if (data.timeTracking.entries.length > MAX_TIME_ENTRIES) {
+        ctx.currentPage.drawText(`... and ${data.timeTracking.entries.length - MAX_TIME_ENTRIES} more entries`, {
+          x: leftMargin + PDF_SPACING.indent,
+          y: ctx.y,
+          size: PDF_TYPOGRAPHY.bodySize,
+          font: fonts.regular,
+          color: PDF_COLORS.black
+        });
+        ctx.y -= lineHeight;
+      }
+    }
   }
 
   // === FINANCIAL SUMMARY ===
-  ctx.y -= 25;
+  ctx.y -= PDF_SPACING.sectionSpacing;
   ensureSpace(ctx, 150, onNewPage);
-  drawSectionTitle(ctx, 'FINANCIAL SUMMARY');
-  ctx.y -= 5;
-  drawFinancialSummary(ctx, data.financial, onNewPage);
-
-  // === FOOTER — on all pages ===
-  for (const footerPage of pdfDoc.getPages()) {
-    drawPdfFooter(footerPage, {
-      leftMargin: ctx.leftMargin,
-      rightMargin: ctx.rightMargin,
-      width: ctx.width,
-      fonts: ctx.fonts,
-      thankYouText: 'Thank you for your business!'
-    });
-  }
-
-  // Add page numbers
-  await addPageNumbers(pdfDoc);
-
-  return pdfDoc.save();
-}
-
-// ============================================
-// PDF DRAWING HELPERS
-// ============================================
-
-function drawPageHeader(ctx: PdfPageContext, projectName: string): void {
-  ctx.currentPage.drawText(`Project Report: ${projectName}`, {
-    x: ctx.leftMargin,
-    y: ctx.height - 30,
-    size: 10,
-    font: ctx.fonts.regular,
-    color: PDF_COLORS.black
+  ctx.y = drawSectionLabel(ctx.currentPage, 'FINANCIAL SUMMARY', {
+    x: leftMargin, y: ctx.y, font: fonts.bold
   });
-  ctx.y = ctx.height - ctx.topMargin - 20;
-}
 
-async function drawReportHeader(ctx: PdfPageContext, data: ProjectReportData): Promise<void> {
-  const { currentPage, leftMargin, fonts } = ctx;
-
-  // Shared header (logo + business info + title) — same as all other PDFs
-  ctx.y = await drawPdfDocumentHeader({
-    page: currentPage,
-    pdfDoc: ctx.pdfDoc,
-    fonts: { regular: fonts.regular, bold: fonts.bold },
-    startY: ctx.y,
-    leftMargin: ctx.leftMargin,
-    rightMargin: ctx.rightMargin,
-    title: 'PROJECT REPORT'
+  ctx.y = drawLabelValue(ctx.currentPage, 'TOTAL INVOICED:', formatCurrency(data.financial.totalInvoiced), {
+    x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
   });
-  // Project name
-  currentPage.drawText(data.project.name, {
-    x: leftMargin,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: fonts.bold,
-    color: PDF_COLORS.black
+  ctx.y = drawLabelValue(ctx.currentPage, 'TOTAL PAID:', formatCurrency(data.financial.totalPaid), {
+    x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
   });
-  ctx.y -= 14;
-
-  // Client
-  currentPage.drawText(
-    `Client: ${data.client.name}${data.client.company ? ` (${data.client.company})` : ''}`,
-    {
-      x: leftMargin,
-      y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: fonts.regular,
-      color: PDF_COLORS.black
-    }
-  );
-  ctx.y -= 14;
-
-  // Generated date
-  currentPage.drawText(`Generated: ${formatDate(new Date().toISOString())}`, {
-    x: leftMargin,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: fonts.regular,
-    color: PDF_COLORS.black
+  ctx.y = drawLabelValue(ctx.currentPage, 'OUTSTANDING:', formatCurrency(data.financial.outstanding), {
+    x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
   });
-  ctx.y -= 20;
-}
-
-function drawSectionTitle(ctx: PdfPageContext, title: string): void {
-  const size = PDF_TYPOGRAPHY.bodySize;
-  ctx.currentPage.drawText(title, {
-    x: ctx.leftMargin,
-    y: ctx.y,
-    size,
-    font: ctx.fonts.bold,
-    color: PDF_COLORS.black
-  });
-  const textWidth = ctx.fonts.bold.widthOfTextAtSize(title, size);
-  ctx.y -= 4;
-
-  // Underline — matches text width exactly
-  ctx.currentPage.drawLine({
-    start: { x: ctx.leftMargin, y: ctx.y },
-    end: { x: ctx.leftMargin + textWidth, y: ctx.y },
-    thickness: 0.5,
-    color: PDF_COLORS.black
-  });
-  ctx.y -= 15;
-}
-
-function drawProjectOverview(ctx: PdfPageContext, data: ProjectReportData): void {
-  const labelWidth = 120;
-  const lineHeight = 14;
-
-  const fields = [
-    ['Status', formatStatus(data.project.status)],
-    ['Priority', data.project.priority || 'Normal'],
-    ['Project Type', data.project.projectType || 'Not specified'],
-    ['Start Date', formatDate(data.project.startDate)],
-    ['Deadline', formatDate(data.project.deadline)],
-    ['Budget', data.project.budget ? formatCurrency(data.project.budget) : 'Not specified']
-  ];
-
-  for (const [label, value] of fields) {
-    ctx.currentPage.drawText(`${label}:`, {
-      x: ctx.leftMargin,
-      y: ctx.y,
-      size: 10,
-      font: ctx.fonts.bold,
-      color: PDF_COLORS.black
-    });
-    ctx.currentPage.drawText(value, {
-      x: ctx.leftMargin + labelWidth,
-      y: ctx.y,
-      size: 10,
-      font: ctx.fonts.regular,
-      color: PDF_COLORS.black
-    });
-    ctx.y -= lineHeight;
-  }
-
-  // Description
-  if (data.project.description) {
-    ctx.y -= 5;
-    ctx.currentPage.drawText('Description:', {
-      x: ctx.leftMargin,
-      y: ctx.y,
-      size: 10,
-      font: ctx.fonts.bold,
-      color: PDF_COLORS.black
-    });
-    ctx.y -= 14;
-    drawWrappedText(ctx, data.project.description, {
-      fontSize: 10,
-      color: PDF_COLORS.black,
-      lineHeight: 14
-    });
-  }
-}
-
-function drawMilestones(
-  ctx: PdfPageContext,
-  milestones: ProjectReportData['milestones'],
-  onNewPage: (ctx: PdfPageContext) => void
-): void {
-  const completed = milestones.filter((m) => m.isCompleted).length;
-  const total = milestones.length;
-
-  // Summary
-  ctx.currentPage.drawText(
-    `Progress: ${completed}/${total} completed (${Math.round((completed / total) * 100)}%)`,
-    {
-      x: ctx.leftMargin,
-      y: ctx.y,
-      size: 10,
-      font: ctx.fonts.bold,
-      color: PDF_COLORS.black
-    }
-  );
-  ctx.y -= 18;
-
-  // List milestones
-  for (const milestone of milestones) {
-    ensureSpace(ctx, 40, onNewPage);
-
-    const checkmark = milestone.isCompleted ? '[x]' : '[ ]';
-    const statusColor = milestone.isCompleted ? PDF_COLORS.black : PDF_COLORS.black;
-
-    ctx.currentPage.drawText(checkmark, {
-      x: ctx.leftMargin,
-      y: ctx.y,
-      size: 10,
-      font: ctx.fonts.regular,
-      color: statusColor
-    });
-
-    ctx.currentPage.drawText(milestone.title, {
-      x: ctx.leftMargin + 25,
-      y: ctx.y,
-      size: 10,
-      font: ctx.fonts.bold,
-      color: PDF_COLORS.black
-    });
-
-    if (milestone.dueDate) {
-      ctx.currentPage.drawText(`Due: ${formatDate(milestone.dueDate)}`, {
-        x: ctx.rightMargin - 100,
-        y: ctx.y,
-        size: 9,
-        font: ctx.fonts.regular,
-        color: PDF_COLORS.black
-      });
-    }
-
-    ctx.y -= 16;
-  }
-}
-
-function drawDeliverables(
-  ctx: PdfPageContext,
-  deliverables: ProjectReportData['deliverables'],
-  onNewPage: (ctx: PdfPageContext) => void
-): void {
-  for (const deliverable of deliverables) {
-    ensureSpace(ctx, 30, onNewPage);
-
-    ctx.currentPage.drawText(`- ${deliverable.name}`, {
-      x: ctx.leftMargin,
-      y: ctx.y,
-      size: 10,
-      font: ctx.fonts.regular,
-      color: PDF_COLORS.black
-    });
-
-    const statusColor =
-      deliverable.status === 'approved'
-        ? PDF_COLORS.black
-        : deliverable.status === 'rejected'
-          ? PDF_COLORS.black
-          : PDF_COLORS.black;
-
-    ctx.currentPage.drawText(formatStatus(deliverable.status), {
-      x: ctx.rightMargin - 80,
-      y: ctx.y,
-      size: 9,
-      font: ctx.fonts.regular,
-      color: statusColor
-    });
-
-    ctx.y -= 16;
-  }
-}
-
-function drawTimeTracking(
-  ctx: PdfPageContext,
-  timeTracking: ProjectReportData['timeTracking'],
-  onNewPage: (ctx: PdfPageContext) => void
-): void {
-  // Total hours
-  ctx.currentPage.drawText(`Total Hours: ${timeTracking.totalHours.toFixed(1)}`, {
-    x: ctx.leftMargin,
-    y: ctx.y,
-    size: 11,
-    font: ctx.fonts.bold,
-    color: PDF_COLORS.black
-  });
-  ctx.y -= 20;
-
-  // Recent entries (limit to 10)
-  if (timeTracking.entries.length > 0) {
-    ctx.currentPage.drawText('Recent Entries:', {
-      x: ctx.leftMargin,
-      y: ctx.y,
-      size: 10,
-      font: ctx.fonts.bold,
-      color: PDF_COLORS.black
-    });
-    ctx.y -= 14;
-
-    const entriesToShow = timeTracking.entries.slice(0, 10);
-    for (const entry of entriesToShow) {
-      ensureSpace(ctx, 16, onNewPage);
-
-      ctx.currentPage.drawText(`${formatDate(entry.date)} - ${entry.hours.toFixed(1)}h`, {
-        x: ctx.leftMargin,
-        y: ctx.y,
-        size: 9,
-        font: ctx.fonts.regular,
-        color: PDF_COLORS.black
-      });
-
-      const desc =
-        entry.description.length > 60
-          ? `${entry.description.substring(0, 57)}...`
-          : entry.description;
-
-      ctx.currentPage.drawText(desc, {
-        x: ctx.leftMargin + 100,
-        y: ctx.y,
-        size: 9,
-        font: ctx.fonts.regular,
-        color: PDF_COLORS.black
-      });
-
-      ctx.y -= 14;
-    }
-
-    if (timeTracking.entries.length > 10) {
-      ctx.currentPage.drawText(`... and ${timeTracking.entries.length - 10} more entries`, {
-        x: ctx.leftMargin,
-        y: ctx.y,
-        size: 9,
-        font: ctx.fonts.regular,
-        color: PDF_COLORS.black
-      });
-      ctx.y -= 14;
-    }
-  }
-}
-
-function drawFinancialSummary(
-  ctx: PdfPageContext,
-  financial: ProjectReportData['financial'],
-  onNewPage: (ctx: PdfPageContext) => void
-): void {
-  const lineHeight = 18;
-
-  // Summary boxes
-  const summaryItems = [
-    ['Total Invoiced', formatCurrency(financial.totalInvoiced)],
-    ['Total Paid', formatCurrency(financial.totalPaid)],
-    ['Outstanding', formatCurrency(financial.outstanding)]
-  ];
-
-  for (const [label, value] of summaryItems) {
-    ctx.currentPage.drawText(`${label}:`, {
-      x: ctx.leftMargin,
-      y: ctx.y,
-      size: 10,
-      font: ctx.fonts.bold,
-      color: PDF_COLORS.black
-    });
-    ctx.currentPage.drawText(value, {
-      x: ctx.leftMargin + 120,
-      y: ctx.y,
-      size: 10,
-      font: ctx.fonts.regular,
-      color: PDF_COLORS.black
-    });
-    ctx.y -= lineHeight;
-  }
 
   // Invoice list
-  if (financial.invoices.length > 0) {
-    ctx.y -= 10;
-    ensureSpace(ctx, 60, onNewPage);
-
-    ctx.currentPage.drawText('Invoices:', {
-      x: ctx.leftMargin,
-      y: ctx.y,
-      size: 10,
-      font: ctx.fonts.bold,
-      color: PDF_COLORS.black
+  if (data.financial.invoices.length > 0) {
+    ctx.y -= 8;
+    ctx.y = drawLabelValue(ctx.currentPage, 'INVOICES:', '', {
+      x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
     });
-    ctx.y -= 16;
 
-    for (const invoice of financial.invoices.slice(0, 10)) {
-      ensureSpace(ctx, 16, onNewPage);
+    const MAX_INVOICE_ENTRIES = 10;
+    for (const invoice of data.financial.invoices.slice(0, MAX_INVOICE_ENTRIES)) {
+      ensureSpace(ctx, lineHeight, onNewPage);
 
       ctx.currentPage.drawText(invoice.invoiceNumber, {
-        x: ctx.leftMargin,
+        x: leftMargin + PDF_SPACING.indent,
         y: ctx.y,
-        size: 9,
-        font: ctx.fonts.regular,
+        size: PDF_TYPOGRAPHY.bodySize,
+        font: fonts.regular,
         color: PDF_COLORS.black
       });
 
       ctx.currentPage.drawText(formatCurrency(invoice.amount), {
-        x: ctx.leftMargin + 100,
+        x: leftMargin + labelWidth,
         y: ctx.y,
-        size: 9,
-        font: ctx.fonts.regular,
+        size: PDF_TYPOGRAPHY.bodySize,
+        font: fonts.regular,
         color: PDF_COLORS.black
       });
 
-      const statusColor =
-        invoice.status === 'paid'
-          ? PDF_COLORS.black
-          : invoice.status === 'overdue'
-            ? PDF_COLORS.black
-            : PDF_COLORS.black;
-
-      ctx.currentPage.drawText(formatStatus(invoice.status), {
-        x: ctx.rightMargin - 80,
+      const invoiceStatusText = formatStatus(invoice.status);
+      const invoiceStatusW = fonts.regular.widthOfTextAtSize(invoiceStatusText, PDF_TYPOGRAPHY.bodySize);
+      ctx.currentPage.drawText(invoiceStatusText, {
+        x: rightMargin - invoiceStatusW,
         y: ctx.y,
-        size: 9,
-        font: ctx.fonts.regular,
-        color: statusColor
+        size: PDF_TYPOGRAPHY.bodySize,
+        font: fonts.regular,
+        color: PDF_COLORS.black
       });
 
-      ctx.y -= 14;
+      ctx.y -= lineHeight;
     }
   }
+
+  // === FOOTER — on all pages ===
+  for (const footerPage of pdfDoc.getPages()) {
+    drawPdfFooter(footerPage, {
+      leftMargin,
+      rightMargin,
+      width: ctx.width,
+      fonts,
+      thankYouText: 'Thank you for your business!'
+    });
+  }
+
+  await addPageNumbers(pdfDoc);
+
+  return pdfDoc.save();
 }
 
 // ============================================

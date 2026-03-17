@@ -20,6 +20,9 @@ import {
   ensureSpace,
   addPageNumbers,
   setPdfMetadata,
+  drawTwoColumnInfo,
+  drawSectionLabel,
+  drawLabelValue,
   type PdfPageContext
 } from '../utils/pdf-utils.js';
 
@@ -217,380 +220,185 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
   });
 
   const ctx = await createPdfContext(pdfDoc);
+  const { leftMargin, rightMargin, fonts } = ctx;
+  const lineHeight = PDF_SPACING.lineHeight;
 
-  // Draw header on new pages
+  // Continuation header on new pages
   const onNewPage = (pageCtx: PdfPageContext) => {
-    drawPageHeader(pageCtx, data.project.name);
+    pageCtx.currentPage.drawText(`Statement of Work: ${data.project.name} (continued)`, {
+      x: pageCtx.leftMargin,
+      y: pageCtx.height - 30,
+      size: PDF_TYPOGRAPHY.bodySize,
+      font: pageCtx.fonts.regular,
+      color: PDF_COLORS.black
+    });
+    pageCtx.y = pageCtx.height - pageCtx.topMargin - 20;
   };
 
-  // === HEADER (shared across all PDF types) ===
+  // === HEADER ===
   ctx.y = await drawPdfDocumentHeader({
     page: ctx.currentPage,
     pdfDoc,
-    fonts: { regular: ctx.fonts.regular, bold: ctx.fonts.bold },
+    fonts,
     startY: ctx.y,
-    leftMargin: ctx.leftMargin,
-    rightMargin: ctx.rightMargin,
+    leftMargin,
+    rightMargin,
     title: 'STATEMENT OF WORK'
   });
 
-  // === PARTIES ===
-  ctx.y -= 25;
-  drawSectionTitle(ctx, '1. PARTIES');
-  drawParties(ctx, data);
-
-  // === PROJECT SCOPE ===
-  ctx.y -= 20;
-  ensureSpace(ctx, 100, onNewPage);
-  drawSectionTitle(ctx, '2. PROJECT SCOPE');
-  drawProjectScope(ctx, data, onNewPage);
-
-  // === DELIVERABLES ===
-  ctx.y -= 20;
-  ensureSpace(ctx, 100, onNewPage);
-  drawSectionTitle(ctx, '3. DELIVERABLES');
-  drawDeliverables(ctx, data, onNewPage);
-
-  // === TIMELINE ===
-  if (data.milestones.length > 0) {
-    ctx.y -= 20;
-    ensureSpace(ctx, 100, onNewPage);
-    drawSectionTitle(ctx, '4. TIMELINE & MILESTONES');
-    drawTimeline(ctx, data, onNewPage);
-  }
-
-  // === PRICING ===
-  ctx.y -= 20;
-  ensureSpace(ctx, 150, onNewPage);
-  drawSectionTitle(ctx, '5. PRICING & PAYMENT');
-  drawPricing(ctx, data, onNewPage);
-
-  // === TERMS ===
-  ctx.y -= 20;
-  ensureSpace(ctx, 100, onNewPage);
-  drawSectionTitle(ctx, '6. TERMS & CONDITIONS');
-  drawTerms(ctx, onNewPage);
-
-  // === FOOTER — on all pages ===
-  for (const footerPage of pdfDoc.getPages()) {
-    drawPdfFooter(footerPage, {
-      leftMargin: ctx.leftMargin,
-      rightMargin: ctx.rightMargin,
-      width: ctx.width,
-      fonts: ctx.fonts,
-      thankYouText: 'Thank you for your business!'
-    });
-  }
-
-  // Add page numbers
-  await addPageNumbers(pdfDoc);
-
-  return pdfDoc.save();
-}
-
-// ============================================
-// PDF DRAWING HELPERS
-// ============================================
-
-function drawPageHeader(ctx: PdfPageContext, projectName: string): void {
-  ctx.currentPage.drawText(`Statement of Work: ${projectName}`, {
-    x: ctx.leftMargin,
-    y: ctx.height - 30,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: ctx.fonts.regular,
-    color: PDF_COLORS.pageHeader
-  });
-  ctx.y = ctx.height - ctx.topMargin - 20;
-}
-
-function drawSectionTitle(ctx: PdfPageContext, title: string): void {
-  const size = PDF_TYPOGRAPHY.bodySize;
-  ctx.currentPage.drawText(title, {
-    x: ctx.leftMargin,
-    y: ctx.y,
-    size,
-    font: ctx.fonts.bold,
-    color: PDF_COLORS.black
-  });
-  const textWidth = ctx.fonts.bold.widthOfTextAtSize(title, size);
-  ctx.y -= 4;
-
-  // Underline — matches text width exactly
-  ctx.currentPage.drawLine({
-    start: { x: ctx.leftMargin, y: ctx.y },
-    end: { x: ctx.leftMargin + textWidth, y: ctx.y },
-    thickness: 0.5,
-    color: PDF_COLORS.black
-  });
-  ctx.y -= 14;
-}
-
-function drawParties(ctx: PdfPageContext, data: SowData): void {
-  const lineHeight = PDF_SPACING.lineHeight;
-
-  // Provider
-  ctx.currentPage.drawText('Service Provider:', {
-    x: ctx.leftMargin,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: ctx.fonts.bold,
-    color: PDF_COLORS.black
-  });
-  ctx.y -= lineHeight;
-
-  ctx.currentPage.drawText(BUSINESS_INFO.name, {
-    x: ctx.leftMargin + PDF_SPACING.indentDouble,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: ctx.fonts.regular,
-    color: PDF_COLORS.black
-  });
-  ctx.y -= lineHeight;
-
-  ctx.currentPage.drawText(BUSINESS_INFO.email, {
-    x: ctx.leftMargin + PDF_SPACING.indentDouble,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: ctx.fonts.regular,
-    color: PDF_COLORS.black
-  });
-  ctx.y -= lineHeight + 8;
-
-  // Client
-  ctx.currentPage.drawText('Client:', {
-    x: ctx.leftMargin,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: ctx.fonts.bold,
-    color: PDF_COLORS.black
-  });
-  ctx.y -= lineHeight;
-
-  ctx.currentPage.drawText(data.client.name, {
-    x: ctx.leftMargin + PDF_SPACING.indentDouble,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: ctx.fonts.regular,
-    color: PDF_COLORS.black
-  });
-  ctx.y -= lineHeight;
-
+  // === TWO-COLUMN INFO: PREPARED FOR / PROJECT DETAILS ===
+  const leftLines: Array<{ text: string; bold?: boolean }> = [];
   if (data.client.company) {
-    ctx.currentPage.drawText(data.client.company, {
-      x: ctx.leftMargin + PDF_SPACING.indentDouble,
-      y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: ctx.fonts.regular,
-      color: PDF_COLORS.black
-    });
-    ctx.y -= lineHeight;
+    leftLines.push({ text: data.client.company, bold: true });
+    leftLines.push({ text: data.client.name });
+  } else {
+    leftLines.push({ text: data.client.name, bold: true });
+  }
+  leftLines.push({ text: data.client.email });
+
+  const rightPairs: Array<{ label: string; value: string }> = [
+    { label: 'PROJECT TYPE:', value: formatProjectType(data.project.projectType) },
+    { label: 'PACKAGE:', value: data.proposal.tierName },
+    { label: 'DATE:', value: formatDate(data.proposal.createdAt) }
+  ];
+  if (data.project.startDate) {
+    rightPairs.push({ label: 'START:', value: formatDate(data.project.startDate) });
+  }
+  if (data.project.deadline) {
+    rightPairs.push({ label: 'DEADLINE:', value: formatDate(data.project.deadline) });
   }
 
-  ctx.currentPage.drawText(data.client.email, {
-    x: ctx.leftMargin + PDF_SPACING.indentDouble,
+  ctx.y = drawTwoColumnInfo(ctx.currentPage, {
+    leftMargin,
+    rightMargin,
+    width: ctx.width,
     y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: ctx.fonts.regular,
-    color: PDF_COLORS.black
+    fonts,
+    left: { label: 'PREPARED FOR:', lines: leftLines },
+    right: { pairs: rightPairs }
   });
-  ctx.y -= lineHeight;
-}
 
-function drawProjectScope(
-  ctx: PdfPageContext,
-  data: SowData,
-  onNewPage: (ctx: PdfPageContext) => void
-): void {
-  const lineHeight = PDF_SPACING.lineHeight;
+  // === SCOPE OF WORK ===
+  ctx.y -= PDF_SPACING.sectionSpacing;
+  ensureSpace(ctx, 100, onNewPage);
+  ctx.y = drawSectionLabel(ctx.currentPage, 'SCOPE OF WORK', {
+    x: leftMargin, y: ctx.y, font: fonts.bold
+  });
 
-  // Project type — label bold, value regular on same line
-  ctx.currentPage.drawText('Project Type:', {
-    x: ctx.leftMargin,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: ctx.fonts.bold,
-    color: PDF_COLORS.black
-  });
-  const ptLabelW = ctx.fonts.bold.widthOfTextAtSize('Project Type:', PDF_TYPOGRAPHY.bodySize);
-  ctx.currentPage.drawText(` ${formatProjectType(data.project.projectType)}`, {
-    x: ctx.leftMargin + ptLabelW,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: ctx.fonts.regular,
-    color: PDF_COLORS.black
-  });
-  ctx.y -= lineHeight;
-
-  ctx.currentPage.drawText('Package:', {
-    x: ctx.leftMargin,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: ctx.fonts.bold,
-    color: PDF_COLORS.black
-  });
-  const pkgLabelW = ctx.fonts.bold.widthOfTextAtSize('Package:', PDF_TYPOGRAPHY.bodySize);
-  ctx.currentPage.drawText(` ${data.proposal.tierName}`, {
-    x: ctx.leftMargin + pkgLabelW,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: ctx.fonts.regular,
-    color: PDF_COLORS.black
-  });
-  ctx.y -= lineHeight + 8;
-
-  // Description
   if (data.project.description) {
-    ctx.currentPage.drawText('Project Description:', {
-      x: ctx.leftMargin,
-      y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: ctx.fonts.bold,
-      color: PDF_COLORS.black
-    });
-    ctx.y -= lineHeight;
-
     drawWrappedText(ctx, data.project.description, {
       fontSize: PDF_TYPOGRAPHY.bodySize,
       color: PDF_COLORS.black,
-      lineHeight: PDF_SPACING.lineHeight,
+      lineHeight,
       onNewPage
     });
   }
-}
 
-function drawDeliverables(
-  ctx: PdfPageContext,
-  data: SowData,
-  onNewPage: (ctx: PdfPageContext) => void
-): void {
-  // Included features
+  // === DELIVERABLES ===
+  ctx.y -= PDF_SPACING.sectionSpacing;
+  ensureSpace(ctx, 100, onNewPage);
+  ctx.y = drawSectionLabel(ctx.currentPage, 'DELIVERABLES', {
+    x: leftMargin, y: ctx.y, font: fonts.bold
+  });
+
   const includedFeatures = data.proposal.features.filter((f) => f.isIncluded && !f.isAddon);
   const addons = data.proposal.features.filter((f) => f.isAddon);
 
   if (includedFeatures.length > 0) {
-    ctx.currentPage.drawText('Included in Package:', {
-      x: ctx.leftMargin,
-      y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: ctx.fonts.bold,
-      color: PDF_COLORS.black
+    ctx.y = drawLabelValue(ctx.currentPage, 'INCLUDED IN PACKAGE:', '', {
+      x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular
     });
-    ctx.y -= PDF_SPACING.lineHeight;
-
     for (const feature of includedFeatures) {
       ensureSpace(ctx, 16, onNewPage);
       ctx.currentPage.drawText(`- ${feature.name}`, {
-        x: ctx.leftMargin + PDF_SPACING.indent,
+        x: leftMargin + PDF_SPACING.indent,
         y: ctx.y,
         size: PDF_TYPOGRAPHY.bodySize,
-        font: ctx.fonts.regular,
+        font: fonts.regular,
         color: PDF_COLORS.black
       });
-      ctx.y -= PDF_SPACING.lineHeight;
+      ctx.y -= lineHeight;
     }
   }
 
   if (addons.length > 0) {
     ctx.y -= 8;
-    ctx.currentPage.drawText('Additional Features:', {
-      x: ctx.leftMargin,
-      y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: ctx.fonts.bold,
-      color: PDF_COLORS.black
+    ctx.y = drawLabelValue(ctx.currentPage, 'ADDITIONAL FEATURES:', '', {
+      x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular
     });
-    ctx.y -= PDF_SPACING.lineHeight;
-
     for (const feature of addons) {
       ensureSpace(ctx, 16, onNewPage);
       ctx.currentPage.drawText(`- ${feature.name}`, {
-        x: ctx.leftMargin + PDF_SPACING.indent,
+        x: leftMargin + PDF_SPACING.indent,
         y: ctx.y,
         size: PDF_TYPOGRAPHY.bodySize,
-        font: ctx.fonts.regular,
+        font: fonts.regular,
         color: PDF_COLORS.black
       });
-
-      ctx.currentPage.drawText(`+${formatCurrency(feature.price)}`, {
-        x: ctx.rightMargin - 60,
+      const priceText = `+${formatCurrency(feature.price)}`;
+      const priceW = fonts.regular.widthOfTextAtSize(priceText, PDF_TYPOGRAPHY.bodySize);
+      ctx.currentPage.drawText(priceText, {
+        x: rightMargin - priceW,
         y: ctx.y,
         size: PDF_TYPOGRAPHY.bodySize,
-        font: ctx.fonts.regular,
+        font: fonts.regular,
         color: PDF_COLORS.black
       });
-      ctx.y -= PDF_SPACING.lineHeight;
+      ctx.y -= lineHeight;
     }
   }
-}
 
-function drawTimeline(
-  ctx: PdfPageContext,
-  data: SowData,
-  onNewPage: (ctx: PdfPageContext) => void
-): void {
-  // Project dates
-  if (data.project.startDate) {
-    ctx.currentPage.drawText(`Start Date: ${formatDate(data.project.startDate)}`, {
-      x: ctx.leftMargin,
-      y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: ctx.fonts.regular,
-      color: PDF_COLORS.black
-    });
-    ctx.y -= PDF_SPACING.lineHeight;
-  }
-
-  if (data.project.deadline) {
-    ctx.currentPage.drawText(`Target Completion: ${formatDate(data.project.deadline)}`, {
-      x: ctx.leftMargin,
-      y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: ctx.fonts.regular,
-      color: PDF_COLORS.black
-    });
-    ctx.y -= PDF_SPACING.sectionGap;
-  }
-
-  // Milestones
+  // === TIMELINE ===
   if (data.milestones.length > 0) {
-    ctx.currentPage.drawText('Milestones:', {
-      x: ctx.leftMargin,
-      y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: ctx.fonts.bold,
-      color: PDF_COLORS.black
+    ctx.y -= PDF_SPACING.sectionSpacing;
+    ensureSpace(ctx, 100, onNewPage);
+    ctx.y = drawSectionLabel(ctx.currentPage, 'TIMELINE & MILESTONES', {
+      x: leftMargin, y: ctx.y, font: fonts.bold
     });
-    ctx.y -= PDF_SPACING.lineHeight;
+
+    if (data.project.startDate) {
+      ctx.y = drawLabelValue(ctx.currentPage, 'START DATE:', formatDate(data.project.startDate), {
+        x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular
+      });
+    }
+    if (data.project.deadline) {
+      ctx.y = drawLabelValue(ctx.currentPage, 'TARGET COMPLETION:', formatDate(data.project.deadline), {
+        x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular
+      });
+    }
+    ctx.y -= 8;
 
     for (let i = 0; i < data.milestones.length; i++) {
       const milestone = data.milestones[i];
       ensureSpace(ctx, 30, onNewPage);
 
       ctx.currentPage.drawText(`${i + 1}. ${milestone.title}`, {
-        x: ctx.leftMargin + PDF_SPACING.indent,
+        x: leftMargin + PDF_SPACING.indent,
         y: ctx.y,
         size: PDF_TYPOGRAPHY.bodySize,
-        font: ctx.fonts.bold,
+        font: fonts.bold,
         color: PDF_COLORS.black
       });
 
       if (milestone.dueDate) {
-        ctx.currentPage.drawText(formatDate(milestone.dueDate), {
-          x: ctx.rightMargin - 80,
+        const dueDateText = formatDate(milestone.dueDate);
+        const dueDateW = fonts.regular.widthOfTextAtSize(dueDateText, PDF_TYPOGRAPHY.bodySize);
+        ctx.currentPage.drawText(dueDateText, {
+          x: rightMargin - dueDateW,
           y: ctx.y,
-          size: PDF_TYPOGRAPHY.smallSize,
-          font: ctx.fonts.regular,
+          size: PDF_TYPOGRAPHY.bodySize,
+          font: fonts.regular,
           color: PDF_COLORS.black
         });
       }
-      ctx.y -= PDF_SPACING.lineHeight;
+      ctx.y -= lineHeight;
 
       if (milestone.description) {
         drawWrappedText(ctx, milestone.description, {
-          x: ctx.leftMargin + PDF_SPACING.indentDouble,
-          fontSize: PDF_TYPOGRAPHY.smallSize,
+          x: leftMargin + PDF_SPACING.indentDouble,
+          fontSize: PDF_TYPOGRAPHY.bodySize,
           color: PDF_COLORS.black,
-          lineHeight: PDF_SPACING.lineHeightCompact,
+          lineHeight,
           maxWidth: ctx.contentWidth - PDF_SPACING.indentDouble,
           onNewPage
         });
@@ -598,172 +406,137 @@ function drawTimeline(
       }
     }
   }
-}
 
-function drawPricing(
-  ctx: PdfPageContext,
-  data: SowData,
-  onNewPage: (ctx: PdfPageContext) => void
-): void {
-  const lineHeight = PDF_SPACING.pricingRowHeight;
-  const labelX = ctx.leftMargin;
-  const valueX = ctx.leftMargin + PDF_SPACING.pricingValueOffset;
-
-  // Base price
-  ctx.currentPage.drawText('Base Package Price:', {
-    x: labelX,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: ctx.fonts.regular,
-    color: PDF_COLORS.black
+  // === PRICING ===
+  ctx.y -= PDF_SPACING.sectionSpacing;
+  ensureSpace(ctx, 150, onNewPage);
+  ctx.y = drawSectionLabel(ctx.currentPage, 'PRICING & PAYMENT', {
+    x: leftMargin, y: ctx.y, font: fonts.bold
   });
-  ctx.currentPage.drawText(formatCurrency(data.proposal.basePrice), {
-    x: valueX,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: ctx.fonts.regular,
-    color: PDF_COLORS.black
-  });
-  ctx.y -= lineHeight;
 
-  // Addons total
+  const labelWidth = 120;
+
+  ctx.y = drawLabelValue(ctx.currentPage, 'BASE PACKAGE:', formatCurrency(data.proposal.basePrice), {
+    x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+  });
+
   const addonsTotal = data.proposal.features
     .filter((f) => f.isAddon)
     .reduce((sum, f) => sum + f.price, 0);
 
   if (addonsTotal > 0) {
-    ctx.currentPage.drawText('Additional Features:', {
-      x: labelX,
-      y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: ctx.fonts.regular,
-      color: PDF_COLORS.black
+    ctx.y = drawLabelValue(ctx.currentPage, 'ADDONS:', formatCurrency(addonsTotal), {
+      x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
     });
-    ctx.currentPage.drawText(formatCurrency(addonsTotal), {
-      x: valueX,
-      y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: ctx.fonts.regular,
-      color: PDF_COLORS.black
-    });
-    ctx.y -= lineHeight;
   }
 
-  // Maintenance
   if (data.proposal.maintenanceOption && data.proposal.maintenanceOption !== 'diy') {
-    ctx.currentPage.drawText('Maintenance Plan:', {
-      x: labelX,
-      y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: ctx.fonts.regular,
-      color: PDF_COLORS.black
+    ctx.y = drawLabelValue(ctx.currentPage, 'MAINTENANCE:', formatMaintenanceOption(data.proposal.maintenanceOption), {
+      x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
     });
-    ctx.currentPage.drawText(formatMaintenanceOption(data.proposal.maintenanceOption), {
-      x: valueX,
-      y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: ctx.fonts.regular,
-      color: PDF_COLORS.black
-    });
-    ctx.y -= lineHeight;
   }
 
-  // Divider
-  ctx.y -= 5;
+  // Totals divider + total (matching invoice pattern)
+  const totalsX = rightMargin - 144;
+  ctx.y -= 10;
   ctx.currentPage.drawLine({
-    start: { x: labelX, y: ctx.y },
-    end: { x: valueX + 80, y: ctx.y },
-    thickness: PDF_SPACING.dividerThickness,
-    color: PDF_COLORS.pricingDivider
+    start: { x: totalsX - 14, y: ctx.y + 18 },
+    end: { x: rightMargin, y: ctx.y + 18 },
+    thickness: 2,
+    color: PDF_COLORS.divider
   });
-  ctx.y -= lineHeight;
 
-  // Total
   ctx.currentPage.drawText('TOTAL:', {
-    x: labelX,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.subHeadingSize,
-    font: ctx.fonts.bold,
-    color: PDF_COLORS.black
-  });
-  ctx.currentPage.drawText(formatCurrency(data.proposal.finalPrice), {
-    x: valueX,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.subHeadingSize,
-    font: ctx.fonts.bold,
-    color: PDF_COLORS.black
-  });
-  ctx.y -= lineHeight + 10;
-
-  // Payment terms
-  ensureSpace(ctx, 50, onNewPage);
-  ctx.currentPage.drawText('Payment Terms:', {
-    x: ctx.leftMargin,
+    x: totalsX,
     y: ctx.y,
     size: PDF_TYPOGRAPHY.bodySize,
-    font: ctx.fonts.bold,
+    font: fonts.bold,
     color: PDF_COLORS.black
   });
-  ctx.y -= PDF_SPACING.lineHeight;
+  const totalText = formatCurrency(data.proposal.finalPrice);
+  const totalW = fonts.bold.widthOfTextAtSize(totalText, PDF_TYPOGRAPHY.bodySize);
+  ctx.currentPage.drawText(totalText, {
+    x: rightMargin - totalW,
+    y: ctx.y,
+    size: PDF_TYPOGRAPHY.bodySize,
+    font: fonts.bold,
+    color: PDF_COLORS.black
+  });
+  ctx.y -= 30;
+
+  // Payment terms
+  ensureSpace(ctx, 60, onNewPage);
+  ctx.y = drawSectionLabel(ctx.currentPage, 'PAYMENT TERMS', {
+    x: leftMargin, y: ctx.y, font: fonts.bold
+  });
 
   const paymentTerms = [
     '- 50% deposit required before work begins',
     '- 25% due at midpoint milestone',
     '- 25% due upon project completion'
   ];
-
   for (const term of paymentTerms) {
     ctx.currentPage.drawText(term, {
-      x: ctx.leftMargin + PDF_SPACING.indent,
+      x: leftMargin + PDF_SPACING.indent,
       y: ctx.y,
-      size: PDF_TYPOGRAPHY.smallSize,
-      font: ctx.fonts.regular,
+      size: PDF_TYPOGRAPHY.bodySize,
+      font: fonts.regular,
       color: PDF_COLORS.black
     });
-    ctx.y -= PDF_SPACING.lineHeightCompact;
+    ctx.y -= lineHeight;
   }
-}
 
-function drawTerms(ctx: PdfPageContext, onNewPage: (ctx: PdfPageContext) => void): void {
-  // CONTRACT_TERMS is an array of strings, or use default structured terms
+  // === TERMS & CONDITIONS ===
+  ctx.y -= PDF_SPACING.sectionSpacing;
+  ensureSpace(ctx, 100, onNewPage);
+  ctx.y = drawSectionLabel(ctx.currentPage, 'TERMS & CONDITIONS', {
+    x: leftMargin, y: ctx.y, font: fonts.bold
+  });
+
   const termsStrings = CONTRACT_TERMS && CONTRACT_TERMS.length > 0 ? CONTRACT_TERMS : [];
   const structuredTerms = getDefaultTerms();
 
   if (termsStrings.length > 0) {
-    // Use string-based terms from config
     for (const term of termsStrings.slice(0, 5)) {
       ensureSpace(ctx, 30, onNewPage);
       drawWrappedText(ctx, term, {
-        fontSize: PDF_TYPOGRAPHY.smallSize,
+        fontSize: PDF_TYPOGRAPHY.bodySize,
         color: PDF_COLORS.black,
-        lineHeight: PDF_SPACING.lineHeightTight,
+        lineHeight,
         onNewPage
       });
       ctx.y -= 8;
     }
   } else {
-    // Use structured default terms
     for (const term of structuredTerms.slice(0, 5)) {
       ensureSpace(ctx, 40, onNewPage);
-
-      ctx.currentPage.drawText(`${term.title}:`, {
-        x: ctx.leftMargin,
-        y: ctx.y,
-        size: PDF_TYPOGRAPHY.bodySize,
-        font: ctx.fonts.bold,
-        color: PDF_COLORS.black
+      ctx.y = drawLabelValue(ctx.currentPage, `${term.title.toUpperCase()}:`, '', {
+        x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular
       });
-      ctx.y -= PDF_SPACING.lineHeightCompact;
-
       drawWrappedText(ctx, term.content, {
-        fontSize: PDF_TYPOGRAPHY.smallSize,
+        fontSize: PDF_TYPOGRAPHY.bodySize,
         color: PDF_COLORS.black,
-        lineHeight: PDF_SPACING.lineHeightTight,
+        lineHeight,
         onNewPage
       });
       ctx.y -= 8;
     }
   }
+
+  // === FOOTER — on all pages ===
+  for (const footerPage of pdfDoc.getPages()) {
+    drawPdfFooter(footerPage, {
+      leftMargin,
+      rightMargin,
+      width: ctx.width,
+      fonts,
+      thankYouText: 'Thank you for your business!'
+    });
+  }
+
+  await addPageNumbers(pdfDoc);
+
+  return pdfDoc.save();
 }
 
 // ============================================

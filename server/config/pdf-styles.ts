@@ -4,227 +4,170 @@
  * ===============================================
  * @file server/config/pdf-styles.ts
  *
- * Single source of truth for all colors, typography,
- * and spacing used in PDF generation (pdf-lib).
+ * Single source of truth for ALL PDF styling.
+ * Mirrors portal design system: black foreground, thick borders,
+ * uppercase headings, monospace feel.
  *
- * All PDF services (sow, receipt, proposal, contract)
- * should import from here to ensure consistent styling.
- *
- * Colors are expressed as { r, g, b } objects (0-1 range)
- * matching pdf-lib's rgb() function signature.
+ * Every PDF generator imports from here. NO inline values.
  */
 
 import { rgb } from 'pdf-lib';
 
-// ============================================
-// HELPER
-// ============================================
-
-/** Shorthand to create an rgb color value for pdf-lib */
 const c = (r: number, g: number, b: number) => rgb(r, g, b);
 
 // ============================================
-// COLOR TOKENS
+// COLORS — black foreground, white background
 // ============================================
 
-/**
- * Semantic color constants for PDF rendering.
- *
- * All values are pdf-lib rgb() compatible (0-1 range).
- * Grouped by purpose for easy discovery.
- *
- * @example
- * import { PDF_COLORS } from '../config/pdf-styles.js';
- * page.drawText('Title', { color: PDF_COLORS.title });
- */
 export const PDF_COLORS = {
-  // --- Text hierarchy (all black — no grays) ---
-  /** Main title text */
-  title: c(0, 0, 0),
-  /** Secondary title / project name */
-  subtitle: c(0, 0, 0),
-  /** Standard body text */
-  body: c(0, 0, 0),
-  /** Secondary body text (descriptions, emails) */
-  bodyLight: c(0, 0, 0),
-  /** Muted text (dates, fine print) */
-  muted: c(0, 0, 0),
-  /** Very muted text (page numbers, legal) */
-  faint: c(0, 0, 0),
-  /** Lightest text (watermarks, IP addresses) */
-  whisper: c(0, 0, 0),
-  /** Pure black */
+  /** All foreground text */
   black: c(0, 0, 0),
+  /** White (table header text, backgrounds) */
+  white: c(1, 1, 1),
 
-  // --- Section headings ---
-  /** Section heading color */
+  // Aliases — every token resolves to black for consistency
+  title: c(0, 0, 0),
+  subtitle: c(0, 0, 0),
+  body: c(0, 0, 0),
+  bodyLight: c(0, 0, 0),
+  muted: c(0, 0, 0),
+  faint: c(0, 0, 0),
+  whisper: c(0, 0, 0),
   sectionHeading: c(0, 0, 0),
-
-  // --- Branding ---
-  /** Brand accent (underlines, highlights) */
   brandGreen: c(0, 0, 0),
-  /** Signed watermark */
   watermarkGreen: c(0, 0, 0),
-  /** Typed signature */
   signatureBlue: c(0, 0, 0),
-  /** Payment confirmed */
   paymentGreen: c(0, 0, 0),
+  continuationHeader: c(0, 0, 0),
+  pageHeader: c(0, 0, 0),
 
-  // --- Lines & borders (all black) ---
-  /** Standard divider line */
+  // Lines — all black
   divider: c(0, 0, 0),
-  /** Light divider (between table rows) */
   dividerLight: c(0, 0, 0),
-  /** Very light divider (row separators) */
   dividerVeryLight: c(0, 0, 0),
-  /** Section title underline (pricing divider) */
   pricingDivider: c(0, 0, 0),
 
-  // --- Table header (dark background, white text — invoice style) ---
-  /** Table/section header background — dark (matches invoice table header) */
+  // Table header — dark bg, white text (matches portal .admin-table-header)
   tableHeaderBg: c(0, 0, 0),
-  /** Table/section header text — white on dark background */
   tableHeaderText: c(1, 1, 1),
 
-  // --- Backgrounds & borders ---
-  /** Receipt details box header background — dark (matches table header) */
+  // Backgrounds
   boxHeaderBg: c(0, 0, 0),
-  /** Signature box background — white */
   signatureBoxBg: c(1, 1, 1),
-  /** Receipt box border */
   boxBorder: c(0, 0, 0),
-  /** Signature box border */
-  signatureBoxBorder: c(0, 0, 0),
-
-  // --- Continuation header ---
-  /** Continuation header on subsequent pages */
-  continuationHeader: c(0, 0, 0),
-  /** Page header on subsequent pages (SOW) */
-  pageHeader: c(0, 0, 0)
+  signatureBoxBorder: c(0, 0, 0)
 } as const;
 
 // ============================================
-// TYPOGRAPHY TOKENS
+// TYPOGRAPHY — matches portal tokens
 // ============================================
 
-/**
- * Standard font sizes (in points) for PDF generation.
- * Grouped by document element for consistency across services.
- */
 export const PDF_TYPOGRAPHY = {
-  /** Document main title (e.g. "PROPOSAL", "RECEIPT") */
+  /** Document title: "INVOICE", "CONTRACT" etc. Matches portal --font-size-2xl (~28pt) */
   titleSize: 28,
-  /** Large title (SOW "STATEMENT OF WORK") */
-  titleLargeSize: 22,
-  /** Section heading size */
-  sectionHeadingSize: 14,
-  /** Sub-section heading size */
-  subHeadingSize: 12,
-  /** Section heading (SOW numbered sections) — matches sectionHeadingSize */
-  sowSectionSize: 14,
-  /** Label/field name size */
-  labelSize: 11,
-  /** Standard body text */
-  bodySize: 10,
-  /** Small body text (descriptions, terms) */
-  smallSize: 9,
-  /** Fine print (legal, payment notes) */
-  finePrintSize: 8,
-  /** Footer text size */
-  footerSize: 7,
-  /** Page number font size */
-  pageNumberSize: 9,
-  /** Payment amount display size */
-  amountSize: 18,
-  /** Payment confirmed header */
-  paymentHeaderSize: 16,
-  /** Business name in header */
+  /** Business name in header. Matches portal --font-size-lg (~15pt) */
   businessNameSize: 15,
-  /** Typed signature size */
+
+  /** ALL body text, labels, values, list items. ONE size everywhere.
+   *  Matches portal --font-size-2xs (~10pt) */
+  bodySize: 10,
+
+  /** Footer business info line */
+  footerSize: 7,
+
+  // Legacy aliases — all resolve to bodySize for uniformity
+  titleLargeSize: 22,
+  sectionHeadingSize: 10,
+  subHeadingSize: 10,
+  sowSectionSize: 10,
+  labelSize: 10,
+  smallSize: 10,
+  finePrintSize: 8,
+  pageNumberSize: 8,
+  amountSize: 10,
+  paymentHeaderSize: 10,
   typedSignatureSize: 24,
-  /** Watermark text size */
   watermarkSize: 72
 } as const;
 
 // ============================================
-// SPACING TOKENS
+// SPACING — matches portal spacing tokens
 // ============================================
 
-/**
- * Standard spacing values (in points) for PDF layout.
- */
 export const PDF_SPACING = {
-  /** Standard line height for body text */
+  // --- Line heights ---
+  /** Standard line height (matches portal --space-2 = 16px, but tighter for print) */
   lineHeight: 14,
-  /** Compact line height (terms, descriptions) */
+  /** Compact line height */
   lineHeightCompact: 12,
-  /** Tight line height (terms text) */
+  /** Tight line height */
   lineHeightTight: 11,
-  /** Pricing row height */
-  pricingRowHeight: 16,
-  /** Payment schedule row height */
-  paymentRowHeight: 18,
 
-  /** Gap after section title before content */
+  // --- Section spacing ---
+  /** Gap after section label underline before content */
   sectionGap: 20,
-  /** Gap between major document sections */
+  /** Gap between major sections */
   sectionSpacing: 25,
-  /** Indent for list items / sub-content */
+  /** Gap below a label before its content (e.g., "BILL TO:" then client info) */
+  labelGap: 18,
+
+  // --- Indentation ---
   indent: 10,
-  /** Double indent for nested content */
   indentDouble: 20,
 
-  /** Space after drawing a section underline */
-  afterUnderline: 15,
-  /** Section underline length */
-  underlineLength: 200,
-  /** Section underline thickness */
-  underlineThickness: 2,
+  // --- Underlines — ONE thickness everywhere ---
+  /** ALL underline thickness (consistent across every PDF) */
+  underlineThickness: 1,
+  /** Alias — same as underlineThickness */
+  underlineThin: 1,
 
-  /** Standard divider thickness */
+  // --- Dividers ---
+  /** HR thickness (matches portal --border-width: 2px) */
   dividerThickness: 1,
-  /** Thin divider thickness (row separators) */
   dividerThin: 0.5,
-  /** Very thin divider (light separators) */
   dividerVeryThin: 0.25,
 
-  /** Footer position from bottom */
+  // --- Table header ---
+  /** Height of dark table header bar */
+  tableHeaderHeight: 18,
+  /** Text Y offset inside table header bar */
+  tableHeaderTextOffset: 4,
+  /** Padding inside table header bar */
+  tableHeaderPadding: 7,
+
+  // --- Two-column layout (matches invoice BILL TO / INVOICE DETAILS) ---
+  /** Right column X offset from page center */
+  rightColumnOffset: 36,
+  /** Label column width in right-side detail pairs */
+  detailLabelWidth: 100,
+
+  // --- Footer ---
   footerY: 72,
-  /** Legal text position from bottom */
-  legalTextY: 40,
-  /** Footer text position from bottom */
   footerTextY: 54,
-  /** Page number margin from bottom */
+  legalTextY: 40,
   pageNumberMarginBottom: 30,
 
-  /** Logo height in header */
+  // --- Header ---
   logoHeight: 100,
-  /** SOW logo height */
-  sowLogoHeight: 50,
-  /** Max signature image width */
-  maxSignatureWidth: 200,
-  /** Max signature image height */
-  maxSignatureHeight: 50,
 
-  /** Value column X offset from left margin (SOW pricing) */
+  // --- Legacy (kept for backward compat) ---
+  sowLogoHeight: 50,
+  maxSignatureWidth: 200,
+  maxSignatureHeight: 50,
   pricingValueOffset: 180,
-  /** Detail value column X offset in receipt */
   receiptDetailOffset: 150,
-  /** Receipt details box height */
   receiptBoxHeight: 140,
-  /** Receipt box header height */
-  receiptBoxHeaderHeight: 25
+  receiptBoxHeaderHeight: 25,
+  afterUnderline: 15,
+  underlineLength: 200,
+  pricingRowHeight: 16,
+  paymentRowHeight: 18
 } as const;
 
 // ============================================
-// CONVENIENCE EXPORT
+// CONVENIENCE
 // ============================================
 
-/**
- * Combined PDF styles export.
- * Prefer importing individual constants (PDF_COLORS, etc.)
- * for clarity, but this aggregate is available when convenient.
- */
 export const PDF_STYLES = {
   colors: PDF_COLORS,
   typography: PDF_TYPOGRAPHY,

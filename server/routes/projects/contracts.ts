@@ -1,7 +1,7 @@
 import express, { Response } from 'express';
 import path from 'path';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
-import { PDFDocument as PDFLibDocument, StandardFonts, degrees, rgb, PDFPage } from 'pdf-lib';
+import { PDFDocument as PDFLibDocument, StandardFonts, degrees, PDFPage } from 'pdf-lib';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../utils/access-control.js';
@@ -15,7 +15,7 @@ import {
 import { getString } from '../../database/row-helpers.js';
 import { getSchedulerService } from '../../services/scheduler-service.js';
 import { BUSINESS_INFO, CONTRACT_TERMS } from '../../config/business.js';
-import { PDF_COLORS } from '../../config/pdf-styles.js';
+import { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } from '../../config/pdf-styles.js';
 import {
   getPdfCacheKey,
   getCachedPdf,
@@ -25,7 +25,9 @@ import {
   addPageNumbers,
   PAGE_MARGINS,
   drawPdfDocumentHeader,
-  drawPdfFooter
+  drawPdfFooter,
+  drawTwoColumnInfo,
+  drawSectionLabel
 } from '../../utils/pdf-utils.js';
 import { invalidateCache } from '../../middleware/cache.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
@@ -175,74 +177,24 @@ router.get(
       title: 'CONTRACT'
     });
 
-    // === CONTRACT INFO - Two columns ===
-    const rightCol = width / 2 + 36;
-
-    // Left side - Client Info
-    page.drawText('Client:', {
-      x: leftMargin,
-      y: y,
-      size: 10,
-      font: helveticaBold,
-      color: PDF_COLORS.black
-    });
-    page.drawText(getString(p, 'client_name') || 'Client', {
-      x: leftMargin,
-      y: y - 15,
-      size: 10,
-      font: helvetica,
-      color: PDF_COLORS.black
-    });
-    let clientLineY = y - 30;
-    if (p.company_name) {
-      page.drawText(String(p.company_name), {
-        x: leftMargin,
-        y: clientLineY,
-        size: 10,
-        font: helvetica,
-        color: PDF_COLORS.black
-      });
-      clientLineY -= 15;
+    // === TWO-COLUMN INFO: BILL TO / CONTRACT DETAILS ===
+    const leftLines: Array<{ text: string; bold?: boolean }> = [];
+    const companyName = p.company_name ? String(p.company_name) : '';
+    const clientName = getString(p, 'client_name') || 'Client';
+    if (companyName) {
+      leftLines.push({ text: companyName, bold: true });
+      leftLines.push({ text: clientName });
+    } else {
+      leftLines.push({ text: clientName, bold: true });
     }
-    page.drawText(getString(p, 'client_email') || '', {
-      x: leftMargin,
-      y: clientLineY,
-      size: 10,
-      font: helvetica,
-      color: PDF_COLORS.black
-    });
-
-    // Right side - Service Provider
-    page.drawText('Service Provider:', {
-      x: rightCol,
-      y: y,
-      size: 10,
-      font: helveticaBold,
-      color: PDF_COLORS.black
-    });
-    page.drawText(BUSINESS_INFO.name, {
-      x: rightCol,
-      y: y - 15,
-      size: 10,
-      font: helvetica,
-      color: PDF_COLORS.black
-    });
-    page.drawText('Contract Date:', {
-      x: rightCol,
-      y: y - 45,
-      size: 10,
-      font: helveticaBold,
-      color: PDF_COLORS.black
-    });
-    page.drawText(formatDate(getString(p, 'contract_signed_at') || getString(p, 'created_at')), {
-      x: rightCol,
-      y: y - 60,
-      size: 10,
-      font: helvetica,
-      color: PDF_COLORS.black
-    });
-
-    y -= 90;
+    const clientEmail = getString(p, 'client_email');
+    if (clientEmail) leftLines.push({ text: clientEmail });
+    const clientAddress = getString(p, 'client_address');
+    if (clientAddress) {
+      for (const addrLine of clientAddress.split('\n')) {
+        leftLines.push({ text: addrLine });
+      }
+    }
 
     const formatCurrency = (value?: string): string => {
       if (!value) return '';
@@ -258,6 +210,25 @@ router.get(
     const description = getString(p, 'description');
     const price = getString(p, 'price');
     const depositAmount = getString(p, 'deposit_amount');
+
+    const rightPairs: Array<{ label: string; value: string }> = [
+      { label: 'DATE:', value: formatDate(getString(p, 'contract_signed_at') || getString(p, 'created_at')) }
+    ];
+    const selectedTier = getString(p, 'selected_tier');
+    if (selectedTier) rightPairs.push({ label: 'PACKAGE:', value: selectedTier });
+    if (price) rightPairs.push({ label: 'TOTAL:', value: formatCurrency(price) });
+    if (startDate) rightPairs.push({ label: 'START:', value: formatDate(startDate) });
+    if (dueDate) rightPairs.push({ label: 'LAUNCH:', value: formatDate(dueDate) });
+
+    y = drawTwoColumnInfo(page, {
+      leftMargin,
+      rightMargin,
+      width,
+      y,
+      fonts: { regular: helvetica, bold: helveticaBold },
+      left: { label: 'BILL TO:', lines: leftLines },
+      right: { pairs: rightPairs }
+    });
 
     const fallbackContent = [
       'CONTRACT AGREEMENT',
@@ -329,11 +300,15 @@ router.get(
 
       let text = trimmed;
       let font = helvetica;
-      let fontSize = 10;
+      let fontSize: number = PDF_TYPOGRAPHY.bodySize;
       let indent = 0;
 
+      const BULLET_INDENT = 12;
+      const CONTRACT_TITLE_SIZE = 14;
+      const CONTRACT_SECTION_SIZE = 12;
+
       if (/^[-*]\s+/.test(text)) {
-        indent = 12;
+        indent = BULLET_INDENT;
         text = text.replace(/^[-*]\s+/, '');
       }
 
@@ -342,10 +317,10 @@ router.get(
 
       if (isTitle) {
         font = helveticaBold;
-        fontSize = 14;
+        fontSize = CONTRACT_TITLE_SIZE;
       } else if (isSection) {
         font = helveticaBold;
-        fontSize = 12;
+        fontSize = CONTRACT_SECTION_SIZE;
       }
 
       drawWrappedText(ctx, text, {
@@ -360,15 +335,11 @@ router.get(
     }
 
     // === SIGNATURES ===
+    const rightCol = width / 2 + PDF_SPACING.rightColumnOffset;
     ensureSpace(ctx, 120, onNewPage);
-    ctx.currentPage.drawText('Signatures', {
-      x: leftMargin,
-      y: ctx.y,
-      size: 12,
-      font: helveticaBold,
-      color: PDF_COLORS.black
+    ctx.y = drawSectionLabel(ctx.currentPage, 'SIGNATURES', {
+      x: leftMargin, y: ctx.y, font: helveticaBold
     });
-    ctx.y -= 22;
 
     const signatureWidth = 200;
     const signatureLineY = ctx.y - 30;
@@ -394,17 +365,17 @@ router.get(
     const signatureImageHeight = 40;
     const signatureImageWidth = 140;
 
-    ctx.currentPage.drawText('Client:', {
+    ctx.currentPage.drawText('CLIENT:', {
       x: leftMargin,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helveticaBold,
       color: PDF_COLORS.black
     });
     ctx.currentPage.drawLine({
       start: { x: leftMargin, y: signatureLineY },
       end: { x: leftMargin + signatureWidth, y: signatureLineY },
-      thickness: 1,
+      thickness: PDF_SPACING.dividerThickness,
       color: PDF_COLORS.black
     });
     if (clientSignatureBytes) {
@@ -419,14 +390,14 @@ router.get(
     ctx.currentPage.drawText(getString(p, 'client_name') || 'Client Name', {
       x: leftMargin,
       y: signatureLineY - 15,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
       color: PDF_COLORS.black
     });
     ctx.currentPage.drawText(`Date: ${signedDate}`, {
       x: leftMargin,
       y: signatureLineY - 30,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
       color: PDF_COLORS.black
     });
@@ -434,14 +405,14 @@ router.get(
     ctx.currentPage.drawText('Service Provider:', {
       x: rightCol,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helveticaBold,
       color: PDF_COLORS.black
     });
     ctx.currentPage.drawLine({
       start: { x: rightCol, y: signatureLineY },
       end: { x: rightCol + signatureWidth, y: signatureLineY },
-      thickness: 1,
+      thickness: PDF_SPACING.dividerThickness,
       color: PDF_COLORS.black
     });
     if (countersignatureBytes) {
@@ -456,14 +427,14 @@ router.get(
     ctx.currentPage.drawText(BUSINESS_INFO.name, {
       x: rightCol,
       y: signatureLineY - 15,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
       color: PDF_COLORS.black
     });
     ctx.currentPage.drawText(`Date: ${countersignedDate}`, {
       x: rightCol,
       y: signatureLineY - 30,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
       color: PDF_COLORS.black
     });

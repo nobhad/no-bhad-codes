@@ -291,43 +291,108 @@ Date: _______________                     Date: _______________`;
       }
 
       {
-        const { PDFDocument, StandardFonts, rgb } = await import('pdf-lib');
-        const { drawPdfDocumentHeader, PAGE_MARGINS } = await import('../server/utils/pdf-utils.js');
+        const { PDFDocument, StandardFonts } = await import('pdf-lib');
+        const {
+          drawPdfDocumentHeader, drawTwoColumnInfo, drawPdfFooter,
+          drawWrappedText, drawSectionLabel, ensureSpace, addPageNumbers, PAGE_MARGINS
+        } = await import('../server/utils/pdf-utils.js');
+        const { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } = await import('../server/config/pdf-styles.js');
 
         const pdfDoc = await PDFDocument.create();
         const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
         const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+        const fonts = { regular: helvetica, bold: helveticaBold };
 
-        let page = pdfDoc.addPage([612, 792]);
+        const page = pdfDoc.addPage([612, 792]);
         const { width, height } = page.getSize();
-        let y = height - 43;
+        const leftMargin = PAGE_MARGINS.left;
+        const rightMargin = width - PAGE_MARGINS.right;
+        const contentWidth = rightMargin - leftMargin;
 
-        y = await drawPdfDocumentHeader({
-          page, pdfDoc,
-          fonts: { regular: helvetica, bold: helveticaBold },
-          startY: y,
-          leftMargin: PAGE_MARGINS.left,
-          rightMargin: width - PAGE_MARGINS.right,
-          title: 'CONTRACT'
+        const ctx = {
+          pdfDoc, currentPage: page, pageNumber: 1,
+          y: height - 43, width: 612, height: 792,
+          leftMargin, rightMargin,
+          topMargin: PAGE_MARGINS.top, bottomMargin: PAGE_MARGINS.bottom,
+          contentWidth, fonts
+        };
+
+        const onNewPage = (nextCtx: typeof ctx) => { nextCtx.y = nextCtx.height - nextCtx.topMargin - 20; };
+
+        // Header
+        ctx.y = await drawPdfDocumentHeader({
+          page, pdfDoc, fonts, startY: ctx.y, leftMargin, rightMargin, title: 'CONTRACT'
         });
-        y -= 20;
 
+        // Bill To two-column info
+        ctx.y = drawTwoColumnInfo(page, {
+          leftMargin, rightMargin, width: 612, y: ctx.y, fonts,
+          left: {
+            label: 'BILL TO:',
+            lines: [
+              { text: 'Hedgewitch Horticulture LLC', bold: true },
+              { text: 'Emily Gold & Abigail Wolf' },
+              { text: 'offerings@hedgewitchhorticulture.com' },
+              { text: '24 Crescent Heights, Fitchburg, MA 01420' }
+            ]
+          },
+          right: {
+            pairs: [
+              { label: 'DATE:', value: 'March 1, 2026' },
+              { label: 'PACKAGE:', value: 'Better' },
+              { label: 'TOTAL:', value: '$4,000.00' },
+              { label: 'START:', value: 'March 1, 2026' },
+              { label: 'LAUNCH:', value: 'April 15, 2026' }
+            ]
+          }
+        });
+
+        // Contract content body
         const plainContent = contractContent.replace(/<[^>]+>/g, '');
         const lines = plainContent.split('\n');
-        for (const line of lines) {
-          if (y < 60) {
-            page = pdfDoc.addPage([612, 792]);
-            y = page.getSize().height - 50;
-          }
-          if (line.trim()) {
-            const text = line.trim().slice(0, 90);
-            page.drawText(text, {
-              x: PAGE_MARGINS.left, y,
-              size: 10, font: helvetica, color: rgb(0.1, 0.1, 0.1)
-            });
-          }
-          y -= 14;
+        for (const rawLine of lines) {
+          const trimmed = rawLine.trim();
+          if (!trimmed) { ctx.y -= 10; continue; }
+
+          let text = trimmed;
+          let font = helvetica;
+          let fontSize: number = PDF_TYPOGRAPHY.bodySize;
+          const BULLET_INDENT = 12;
+          let indent = 0;
+
+          if (/^[-*]\s+/.test(text)) { indent = BULLET_INDENT; text = text.replace(/^[-*]\s+/, ''); }
+          const isTitle = /^[A-Z][A-Z\s]{3,}$/.test(text);
+          const isSection = /^\d+\.\s+/.test(text);
+          if (isTitle) { font = helveticaBold; fontSize = 14; }
+          else if (isSection) { font = helveticaBold; fontSize = 12; }
+
+          drawWrappedText(ctx, text, { x: leftMargin + indent, fontSize, font, maxWidth: contentWidth - indent, onNewPage });
+          ctx.y -= isTitle || isSection ? 6 : 2;
         }
+
+        // Signatures
+        ensureSpace(ctx, 120, onNewPage);
+        ctx.y = drawSectionLabel(ctx.currentPage, 'SIGNATURES', { x: leftMargin, y: ctx.y, font: helveticaBold });
+
+        const sigLineY = ctx.y - 30;
+        const sigWidth = 200;
+        const rightCol = 612 / 2 + PDF_SPACING.rightColumnOffset;
+
+        ctx.currentPage.drawText('Client:', { x: leftMargin, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: helveticaBold, color: PDF_COLORS.black });
+        ctx.currentPage.drawLine({ start: { x: leftMargin, y: sigLineY }, end: { x: leftMargin + sigWidth, y: sigLineY }, thickness: PDF_SPACING.dividerThickness, color: PDF_COLORS.black });
+        ctx.currentPage.drawText('Emily Gold', { x: leftMargin, y: sigLineY - 15, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
+        ctx.currentPage.drawText('Date: _______________', { x: leftMargin, y: sigLineY - 30, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
+
+        ctx.currentPage.drawText('Service Provider:', { x: rightCol, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: helveticaBold, color: PDF_COLORS.black });
+        ctx.currentPage.drawLine({ start: { x: rightCol, y: sigLineY }, end: { x: rightCol + sigWidth, y: sigLineY }, thickness: PDF_SPACING.dividerThickness, color: PDF_COLORS.black });
+        ctx.currentPage.drawText('Noelle Bhaduri', { x: rightCol, y: sigLineY - 15, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
+        ctx.currentPage.drawText('Date: _______________', { x: rightCol, y: sigLineY - 30, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
+
+        // Footer + page numbers
+        for (const footerPage of pdfDoc.getPages()) {
+          drawPdfFooter(footerPage, { leftMargin, rightMargin, width: 612, fonts, thankYouText: 'Thank you for your business!' });
+        }
+        await addPageNumbers(pdfDoc);
 
         const pdfBytes = await pdfDoc.save();
         writeFileSync(join(DESKTOP, 'SAMPLE-contract.pdf'), Buffer.from(pdfBytes));
@@ -341,87 +406,94 @@ Date: _______________                     Date: _______________`;
     console.error('✗ DB init failed:', (e as Error).message);
   }
 
-  // 6. Intake PDF (standalone with dummy data — uses pdf-lib directly)
+  // 6. Intake PDF (standalone with dummy data — uses shared layout helpers)
   try {
-    const { PDFDocument, StandardFonts, rgb } = await import('pdf-lib');
-    const { drawPdfDocumentHeader, PAGE_MARGINS } = await import('../server/utils/pdf-utils.js');
+    const { PDFDocument, StandardFonts } = await import('pdf-lib');
+    const {
+      drawPdfDocumentHeader, drawTwoColumnInfo, drawSectionLabel,
+      drawLabelValue, drawPdfFooter, addPageNumbers, PAGE_MARGINS
+    } = await import('../server/utils/pdf-utils.js');
+    const { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } = await import('../server/config/pdf-styles.js');
 
     const pdfDoc = await PDFDocument.create();
     pdfDoc.setTitle('Client Intake — Hedgewitch Horticulture');
     const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const fonts = { regular: helvetica, bold: helveticaBold };
 
-    let page = pdfDoc.addPage([612, 792]);
+    const page = pdfDoc.addPage([612, 792]);
     const { width, height } = page.getSize();
     const left = PAGE_MARGINS.left;
     const right = width - PAGE_MARGINS.right;
+    const labelWidth = 120;
     let y = height - 43;
 
+    // Header
     y = await drawPdfDocumentHeader({
-      page, pdfDoc,
-      fonts: { regular: helvetica, bold: helveticaBold },
-      startY: y, leftMargin: left, rightMargin: right,
-      title: 'INTAKE'
+      page, pdfDoc, fonts, startY: y, leftMargin: left, rightMargin: right, title: 'INTAKE'
     });
-    y -= 20;
 
-    // Helper to draw a field
-    const drawField = (label: string, value: string) => {
-      if (y < 70) {
-        page = pdfDoc.addPage([612, 792]);
-        y = page.getSize().height - 50;
+    // Two-column info
+    y = drawTwoColumnInfo(page, {
+      leftMargin: left, rightMargin: right, width: 612, y, fonts,
+      left: {
+        label: 'PREPARED FOR:',
+        lines: [
+          { text: 'Emily Gold & Abigail Wolf', bold: true },
+          { text: 'Hedgewitch Horticulture LLC' },
+          { text: 'offerings@hedgewitchhorticulture.com' },
+          { text: '(508) 555-0123' }
+        ]
+      },
+      right: {
+        pairs: [
+          { label: 'PROJECT TYPE:', value: 'Business Website' },
+          { label: 'BUDGET:', value: '$2,000 - $6,500' },
+          { label: 'TIMELINE:', value: '1 Month' },
+          { label: 'DATE:', value: 'March 17, 2026' }
+        ]
       }
-      page.drawText(label, { x: left, y, size: 9, font: helveticaBold, color: rgb(0.4, 0.4, 0.4) });
-      y -= 14;
-      page.drawText(value, { x: left, y, size: 10, font: helvetica, color: rgb(0.1, 0.1, 0.1) });
-      y -= 20;
-    };
-
-    const drawSection = (title: string) => {
-      if (y < 100) {
-        page = pdfDoc.addPage([612, 792]);
-        y = page.getSize().height - 50;
-      }
-      y -= 10;
-      page.drawLine({ start: { x: left, y: y + 5 }, end: { x: right, y: y + 5 }, thickness: 0.5, color: rgb(0.7, 0.7, 0.7) });
-      page.drawText(title.toUpperCase(), { x: left, y: y - 10, size: 11, font: helveticaBold, color: rgb(0.15, 0.15, 0.15) });
-      y -= 30;
-    };
-
-    // Client Info
-    drawSection('Client Information');
-    drawField('Name', 'Emily Gold & Abigail Wolf');
-    drawField('Company', 'Hedgewitch Horticulture LLC');
-    drawField('Email', 'offerings@hedgewitchhorticulture.com');
-    drawField('Phone', '(508) 555-0123');
+    });
 
     // Project Details
-    drawSection('Project Details');
-    drawField('Project Type', 'Business Website');
-    drawField('Budget', '$2,000 - $6,500 (with flexibility for May/June)');
-    drawField('Timeline', '1 month (target launch March 1, 2026)');
-    drawField('Current Website', 'hedgewitchhorticulture.com (Squarespace)');
-    drawField('Description', 'Website redesign for sustainable garden design company. Currently on Squarespace but hitting template limitations. Want earthy/witchy aesthetic with custom animations.');
+    y -= PDF_SPACING.sectionSpacing;
+    y = drawSectionLabel(page, 'PROJECT DETAILS', { x: left, y, font: helveticaBold });
+    y = drawLabelValue(page, 'Project Name:', 'Hedgewitch Horticulture Website', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'Current Site:', 'hedgewitchhorticulture.com (Squarespace)', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'Target Audience:', 'Homeowners, garden enthusiasts', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'Description:', '', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    const descText = 'Website redesign for sustainable garden design company. Currently on Squarespace but hitting template limitations. Want earthy/witchy aesthetic with custom animations.';
+    const descWords = descText.split(' ');
+    let descLine = '';
+    for (const word of descWords) {
+      const test = descLine + (descLine ? ' ' : '') + word;
+      if (helvetica.widthOfTextAtSize(test, PDF_TYPOGRAPHY.bodySize) > right - left && descLine) {
+        page.drawText(descLine, { x: left, y, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
+        y -= PDF_SPACING.lineHeight;
+        descLine = word;
+      } else { descLine = test; }
+    }
+    if (descLine) { page.drawText(descLine, { x: left, y, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black }); y -= PDF_SPACING.lineHeight; }
 
     // Design Preferences
-    drawSection('Design Preferences');
-    drawField('Design Level', 'Custom — unique to brand, handcrafted feel');
-    drawField('Brand Assets', 'Logo (needs simplified variant for mobile), brand colors');
-    drawField('Inspiration', 'Earthy/witchy aesthetic, NOT pristine/white/minimal. Want it to feel like nature.');
-    drawField('Content Status', 'Have some content, need help organizing photos (in Google Cloud)');
+    y -= PDF_SPACING.sectionSpacing;
+    y = drawSectionLabel(page, 'DESIGN PREFERENCES', { x: left, y, font: helveticaBold });
+    y = drawLabelValue(page, 'Design Level:', 'Custom — unique to brand, handcrafted feel', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'Brand Assets:', 'Logo, brand colors', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'Inspiration:', 'Earthy/witchy aesthetic, nature feel', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'Content Status:', 'Have some content, need help organizing', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
 
-    // Features
-    drawSection('Desired Features');
-    drawField('Features', 'Contact form, Blog, Photo gallery, Newsletter signup, Social media integration');
-    drawField('Integrations', 'Google Analytics replacement (custom), Newsletter service');
-    drawField('Pages Needed', '8-12 pages: Home, About, Services (Meadows, Edibles), Gallery, Resources, FAQ, Blog, Contact');
+    // Technical Details
+    y -= PDF_SPACING.sectionSpacing;
+    y = drawSectionLabel(page, 'TECHNICAL DETAILS', { x: left, y, font: helveticaBold });
+    y = drawLabelValue(page, 'Tech Comfort:', 'Comfortable — can handle basic updates', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'Hosting:', 'Free hosting (Netlify/Vercel)', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'Constraints:', 'Emily unavailable Feb 12-22', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'How Found Us:', 'Referral from a friend', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
 
-    // Technical
-    drawSection('Technical Details');
-    drawField('Tech Comfort', 'Comfortable — can handle basic updates with a guide');
-    drawField('Hosting Preference', 'Free hosting (Netlify/Vercel) — no monthly platform fees');
-    drawField('Constraints', 'Emily unavailable Feb 12-22. Abby works Mon/Tues only.');
-    drawField('How Found Us', 'Referral from a friend');
+    // Footer + page numbers
+    drawPdfFooter(page, { leftMargin: left, rightMargin: right, width: 612, fonts, thankYouText: 'Thank you for your business!' });
+    await addPageNumbers(pdfDoc);
 
     const pdfBytes = await pdfDoc.save();
     writeFileSync(join(DESKTOP, 'SAMPLE-intake.pdf'), Buffer.from(pdfBytes));
