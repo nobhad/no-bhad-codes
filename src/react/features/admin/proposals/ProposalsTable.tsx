@@ -36,6 +36,7 @@ import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
 import { executeWithToast } from '@/utils/api-wrappers';
 import { CreateProposalModal } from '../modals/CreateEntityModals';
+import { ProposalDetailPanel } from './ProposalDetailPanel';
 
 interface Proposal {
   id: number;
@@ -136,6 +137,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
   const containerRef = useFadeIn();
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
+  const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(null);
   const { clientOptions: entityClients, projectOptions: entityProjects } = useEntityOptions(createOpen);
 
   // Data fetching via useListFetch
@@ -315,7 +317,27 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
     }
   }, [showNotification, refetch]);
 
+  // Detail panel handlers
+  const handleRowClick = useCallback((proposal: Proposal) => {
+    setSelectedProposal(proposal);
+  }, []);
+
+  const handleClosePanel = useCallback(() => {
+    setSelectedProposal(null);
+  }, []);
+
+  const handlePanelStatusChange = useCallback(
+    async (proposalId: number, newStatus: string) => {
+      await handleStatusChange(proposalId, newStatus);
+      setSelectedProposal((prev) =>
+        prev && prev.id === proposalId ? { ...prev, status: newStatus as Proposal['status'] } : prev
+      );
+    },
+    [handleStatusChange]
+  );
+
   return (
+    <>
     <TableLayout
       containerRef={containerRef as React.RefObject<HTMLDivElement>}
       title="PROPOSALS"
@@ -437,6 +459,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
                 key={proposal.id}
                 clickable
                 selected={selection.isSelected(proposal)}
+                onClick={() => handleRowClick(proposal)}
               >
                 <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
@@ -517,5 +540,15 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
         projectTypeOptions={projectTypeOptions}
       />
     </TableLayout>
+    <ProposalDetailPanel
+      proposal={selectedProposal}
+      onClose={handleClosePanel}
+      onStatusChange={handlePanelStatusChange}
+      onNavigate={onNavigate}
+      onSend={(id) => handleSendProposal(id)}
+      onDuplicate={(id) => handleDuplicate(id)}
+      showNotification={showNotification}
+    />
+    </>
   );
 }

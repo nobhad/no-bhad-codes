@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   ClipboardList,
   Inbox
@@ -35,6 +35,7 @@ import type { SortConfig } from '../types';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
 import { executeUpdateWithToast, executeWithToast } from '@/utils/api-wrappers';
+import { QuestionnaireDetailPanel } from './QuestionnaireDetailPanel';
 
 interface Questionnaire {
   id: number;
@@ -287,7 +288,31 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
     return { total, draft, sent, inProgress, completed, avgCompletion };
   }, [questionnaires]);
 
+  // Detail panel state
+  const [selectedQuestionnaire, setSelectedQuestionnaire] = useState<Questionnaire | null>(null);
+
+  const handleRowClick = useCallback((questionnaire: Questionnaire) => {
+    setSelectedQuestionnaire(questionnaire);
+  }, []);
+
+  const handleClosePanel = useCallback(() => {
+    setSelectedQuestionnaire(null);
+  }, []);
+
+  const handlePanelStatusChange = useCallback(
+    async (questionnaireId: number, newStatus: string) => {
+      await handleStatusChange(questionnaireId, newStatus);
+      setSelectedQuestionnaire((prev) =>
+        prev && prev.id === questionnaireId
+          ? { ...prev, status: newStatus as Questionnaire['status'] }
+          : prev
+      );
+    },
+    [handleStatusChange]
+  );
+
   return (
+    <>
     <TableLayout
       containerRef={containerRef as React.RefObject<HTMLDivElement>}
       title="QUESTIONNAIRES"
@@ -403,6 +428,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                 key={questionnaire.id}
                 clickable
                 selected={selection.isSelected(questionnaire)}
+                onClick={() => handleRowClick(questionnaire)}
               >
                 <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
@@ -497,5 +523,15 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
         </PortalTableBody>
       </PortalTable>
     </TableLayout>
+
+    <QuestionnaireDetailPanel
+      questionnaire={selectedQuestionnaire}
+      onClose={handleClosePanel}
+      onStatusChange={handlePanelStatusChange}
+      onNavigate={onNavigate}
+      onSend={handleSendQuestionnaire}
+      showNotification={_showNotification}
+    />
+    </>
   );
 }

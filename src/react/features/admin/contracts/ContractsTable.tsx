@@ -40,6 +40,7 @@ import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
 import { CreateContractModal } from '../modals/CreateEntityModals';
+import { ContractDetailPanel } from './ContractDetailPanel';
 
 const logger = createLogger('ContractsTable');
 
@@ -144,6 +145,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
   const containerRef = useFadeIn();
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
+  const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
   const { clientOptions: entityClients, projectOptions: entityProjects } = useEntityOptions(createOpen);
 
   const { data, isLoading, error, refetch, setData } = useListFetch<Contract, ContractStats>({
@@ -329,7 +331,27 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
     }
   }, [showNotification, refetch]);
 
+  // Detail panel handlers
+  const handleRowClick = useCallback((contract: Contract) => {
+    setSelectedContract(contract);
+  }, []);
+
+  const handleClosePanel = useCallback(() => {
+    setSelectedContract(null);
+  }, []);
+
+  const handlePanelStatusChange = useCallback(
+    async (contractId: number, newStatus: string) => {
+      await handleStatusChange(contractId, newStatus);
+      setSelectedContract((prev) =>
+        prev && prev.id === contractId ? { ...prev, status: newStatus as Contract['status'] } : prev
+      );
+    },
+    [handleStatusChange]
+  );
+
   return (
+    <>
     <TableLayout
       containerRef={containerRef as React.RefObject<HTMLDivElement>}
       title="CONTRACTS"
@@ -455,6 +477,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                 key={contract.id}
                 clickable
                 selected={selection.isSelected(contract)}
+                onClick={() => handleRowClick(contract)}
               >
                 <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
@@ -535,5 +558,15 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
         projectOptions={projectOptions}
       />
     </TableLayout>
+    <ContractDetailPanel
+      contract={selectedContract}
+      onClose={handleClosePanel}
+      onStatusChange={handlePanelStatusChange}
+      onNavigate={onNavigate}
+      onSend={(id) => handleSendContract(id)}
+      onDownload={() => {}}
+      showNotification={showNotification}
+    />
+    </>
   );
 }

@@ -30,6 +30,7 @@ import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
 import { WORKFLOW_STATUS_OPTIONS } from '../shared/filterConfigs';
+import { WorkflowDetailPanel } from './WorkflowDetailPanel';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { apiPost } from '@/utils/api-client';
@@ -127,7 +128,7 @@ const DEFAULT_STATS: WorkflowStats = {
   avgSuccessRate: 0
 };
 
-export function WorkflowsTable({ getAuthToken, showNotification: _showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: WorkflowsTableProps) {
+export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: WorkflowsTableProps) {
   const containerRef = useFadeIn();
 
   const { data, isLoading, error, refetch, setData } = useListFetch<Workflow, WorkflowStats>({
@@ -237,6 +238,30 @@ export function WorkflowsTable({ getAuthToken, showNotification: _showNotificati
     setBulkLoading(false);
   }, [selection, setData]);
 
+  // Detail panel state
+  const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
+
+  const handleRowClick = useCallback(
+    (workflow: Workflow) => {
+      setSelectedWorkflow(workflow);
+    },
+    []
+  );
+
+  const handleClosePanel = useCallback(() => {
+    setSelectedWorkflow(null);
+  }, []);
+
+  const handlePanelStatusChange = useCallback(
+    async (workflowId: number, newStatus: string) => {
+      await updateWorkflowStatus(workflowId, newStatus);
+      setSelectedWorkflow((prev) =>
+        prev && prev.id === workflowId ? { ...prev, status: newStatus as Workflow['status'] } : prev
+      );
+    },
+    [updateWorkflowStatus]
+  );
+
   const filterSections = WORKFLOWS_FILTER_CONFIG.map((config) => ({
     key: config.key,
     label: config.label,
@@ -244,6 +269,7 @@ export function WorkflowsTable({ getAuthToken, showNotification: _showNotificati
   }));
 
   return (
+    <>
     <TableLayout
       containerRef={containerRef as React.RefObject<HTMLDivElement>}
       title="WORKFLOWS"
@@ -367,6 +393,7 @@ export function WorkflowsTable({ getAuthToken, showNotification: _showNotificati
                 key={workflow.id}
                 clickable
                 selected={!overviewMode && selection.isSelected(workflow)}
+                onClick={() => handleRowClick(workflow)}
               >
                 {!overviewMode && (
                   <PortalTableCell
@@ -426,5 +453,14 @@ export function WorkflowsTable({ getAuthToken, showNotification: _showNotificati
         </PortalTableBody>
       </PortalTable>
     </TableLayout>
+
+    <WorkflowDetailPanel
+      workflow={selectedWorkflow}
+      onClose={handleClosePanel}
+      onStatusChange={handlePanelStatusChange}
+      onEdit={(workflowId) => onNavigate?.('workflow-editor', String(workflowId))}
+      showNotification={showNotification}
+    />
+    </>
   );
 }

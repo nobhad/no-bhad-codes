@@ -32,6 +32,7 @@ import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { apiPost } from '@/utils/api-client';
 import { CreateEmailTemplateModal } from '../modals/CreateEntityModals';
+import { EmailTemplateDetailPanel } from './EmailTemplateDetailPanel';
 
 interface TemplateVariable {
   name: string;
@@ -179,6 +180,20 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
     }
   }, [showNotification, refetch]);
 
+  // Detail panel state
+  const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
+
+  const handleRowClick = useCallback(
+    (template: EmailTemplate) => {
+      setSelectedTemplate(template);
+    },
+    []
+  );
+
+  const handleClosePanel = useCallback(() => {
+    setSelectedTemplate(null);
+  }, []);
+
   return (
     <>
       <TableLayout
@@ -273,7 +288,7 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
               />
             ) : (
               paginatedTemplates.map((template) => (
-                <PortalTableRow key={template.id} clickable>
+                <PortalTableRow key={template.id} clickable onClick={() => handleRowClick(template)}>
                   <PortalTableCell className="primary-cell">
                     <div className="cell-with-icon">
                       <Mail className="icon-sm" />
@@ -324,6 +339,13 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
         onOpenChange={setCreateOpen}
         onSubmit={handleCreate}
         loading={createLoading}
+      />
+
+      <EmailTemplateDetailPanel
+        template={selectedTemplate}
+        onClose={handleClosePanel}
+        onEdit={(templateId) => onNavigate?.('email-template', String(templateId))}
+        showNotification={showNotification}
       />
     </>
   );

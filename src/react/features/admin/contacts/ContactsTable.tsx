@@ -38,6 +38,7 @@ import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
 import { CreateContactModal } from '../modals/CreateEntityModals';
 import { useEntityOptions } from '@react/hooks/useEntityOptions';
+import { ContactDetailPanel } from './ContactDetailPanel';
 
 const logger = createLogger('ContactsTable');
 
@@ -317,6 +318,29 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
     [setFilter]
   );
 
+  // Detail panel state
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+
+  const handleRowClick = useCallback((contact: Contact) => {
+    setSelectedContact(contact);
+  }, []);
+
+  const handleClosePanel = useCallback(() => {
+    setSelectedContact(null);
+  }, []);
+
+  const handlePanelStatusChange = useCallback(
+    async (contactId: number, newStatus: string) => {
+      await handleStatusChange(contactId, newStatus);
+      setSelectedContact((prev) =>
+        prev && prev.id === contactId
+          ? { ...prev, status: newStatus as Contact['status'] }
+          : prev
+      );
+    },
+    [handleStatusChange]
+  );
+
   const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
     setCreateLoading(true);
     try {
@@ -441,6 +465,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
                   key={contact.id}
                   clickable
                   selected={selection.isSelected(contact)}
+                  onClick={() => handleRowClick(contact)}
                 >
                   <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
@@ -547,6 +572,14 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
         onSubmit={handleCreate}
         loading={createLoading}
         clientOptions={clientOptions}
+      />
+
+      <ContactDetailPanel
+        contact={selectedContact}
+        onClose={handleClosePanel}
+        onStatusChange={handlePanelStatusChange}
+        onNavigate={onNavigate}
+        showNotification={showNotification}
       />
     </>
   );
