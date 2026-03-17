@@ -10,6 +10,7 @@
  */
 
 import { getDatabase } from '../../database/init.js';
+import { generateProjectCode } from '../../utils/project-code.js';
 
 // =====================================================
 // TYPES
@@ -89,7 +90,7 @@ export async function createClient(data: NewClientData): Promise<number> {
   const db = getDatabase();
   const result = await db.run(
     `INSERT INTO clients (company_name, contact_name, email, phone, password_hash, status, client_type, created_at, updated_at)
-     VALUES (?, ?, LOWER(?), ?, '', 'pending', 'business', datetime('now'), datetime('now'))`,
+     VALUES (?, ?, LOWER(?), ?, '', 'pending', 'company', datetime('now'), datetime('now'))`,
     [data.companyName, data.contactName, data.email, data.phone]
   );
   return result.lastID!;
@@ -102,6 +103,14 @@ export async function createClient(data: NewClientData): Promise<number> {
 /** Insert a new project and return the generated ID. */
 export async function createProject(data: CreateProjectData): Promise<number> {
   const db = getDatabase();
+
+  const client = await db.get<{ company_name: string | null; contact_name: string }>(
+    'SELECT company_name, contact_name FROM clients WHERE id = ?',
+    [data.clientId]
+  );
+  const clientLabel = client?.company_name || client?.contact_name || 'unknown';
+  const projectCode = await generateProjectCode(clientLabel);
+
   const result = await db.run(
     `INSERT INTO projects (
       client_id, project_name, description, status, project_type,
@@ -110,15 +119,16 @@ export async function createProject(data: CreateProjectData): Promise<number> {
       design_level, content_status, brand_assets,
       tech_comfort, hosting_preference, current_site,
       inspiration, challenges, additional_info, referral_source,
-      created_at, updated_at
-    ) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+      project_code, created_at, updated_at
+    ) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
     [
       data.clientId, data.projectName, data.description, data.projectType,
       data.budget, data.timeline, data.notes,
       data.features, data.pageCount, data.integrations, data.addons,
       data.designLevel, data.contentStatus, data.brandAssets,
       data.techComfort, data.hostingPreference, data.currentSite,
-      data.inspiration, data.challenges, data.additionalInfo, data.referralSource
+      data.inspiration, data.challenges, data.additionalInfo, data.referralSource,
+      projectCode
     ]
   );
   return result.lastID!;

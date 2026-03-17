@@ -91,6 +91,7 @@ export interface ProjectRow extends DatabaseRow {
   id: number;
   client_id: number;
   project_name: string;
+  project_code?: string;
   description?: string;
   status: string;
   priority: string;

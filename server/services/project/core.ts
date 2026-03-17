@@ -9,13 +9,14 @@
 import { getDatabase } from '../../database/init.js';
 import type { SqlParam, DatabaseRow } from '../../database/init.js';
 import { notDeleted } from '../../database/query-helpers.js';
+import { generateProjectCode } from '../../utils/project-code.js';
 
 // =====================================================
 // COLUMN CONSTANTS
 // =====================================================
 
 const PROJECT_COLUMNS = `
-  id, client_id, project_name, description, status, priority, progress,
+  id, client_id, project_name, project_code, description, status, priority, progress,
   start_date, estimated_end_date, actual_end_date, budget_range, project_type,
   timeline, preview_url, price, notes, repository_url, staging_url, production_url,
   deposit_amount, contract_signed_at, cancelled_by, cancellation_reason,
@@ -110,9 +111,15 @@ export interface SaveFileRecordData {
 // LIST QUERIES
 // =====================================================
 
+/** Default safety limit for project list queries. */
+const DEFAULT_PROJECT_LIMIT = 200;
+/** Maximum allowed limit for project list queries. */
+const MAX_PROJECT_LIMIT = 500;
+
 /** Fetch all projects with stats (admin view — includes client info). */
-export async function listProjectsAdmin(): Promise<ProjectRow[]> {
+export async function listProjectsAdmin(limit = DEFAULT_PROJECT_LIMIT): Promise<ProjectRow[]> {
   const db = getDatabase();
+  const safeLimit = Math.min(Math.max(1, limit), MAX_PROJECT_LIMIT);
   const query = `
     SELECT
       p.*,
@@ -144,13 +151,15 @@ export async function listProjectsAdmin(): Promise<ProjectRow[]> {
     ) m_stats ON p.id = m_stats.project_id
     WHERE ${notDeleted('p')}
     ORDER BY p.created_at DESC
+    LIMIT ?
   `;
-  return (await db.all(query)) as ProjectRow[];
+  return (await db.all(query, [safeLimit])) as ProjectRow[];
 }
 
 /** Fetch projects for a specific client (with stats). */
-export async function listProjectsForClient(clientId: number): Promise<ProjectRow[]> {
+export async function listProjectsForClient(clientId: number, limit = DEFAULT_PROJECT_LIMIT): Promise<ProjectRow[]> {
   const db = getDatabase();
+  const safeLimit = Math.min(Math.max(1, limit), MAX_PROJECT_LIMIT);
   const query = `
     SELECT
       p.*,
@@ -178,8 +187,9 @@ export async function listProjectsForClient(clientId: number): Promise<ProjectRo
     ) m_stats ON p.id = m_stats.project_id
     WHERE p.client_id = ? AND ${notDeleted('p')}
     ORDER BY p.created_at DESC
+    LIMIT ?
   `;
-  return (await db.all(query, [clientId])) as ProjectRow[];
+  return (await db.all(query, [clientId, safeLimit])) as ProjectRow[];
 }
 
 // =====================================================
@@ -268,10 +278,18 @@ export async function createProjectRequest(
   data: ProjectRequestData
 ): Promise<{ lastID: number; project: ProjectRow }> {
   const db = getDatabase();
+
+  const client = await db.get<{ company_name: string | null; contact_name: string }>(
+    'SELECT company_name, contact_name FROM clients WHERE id = ?',
+    [data.clientId]
+  );
+  const clientLabel = client?.company_name || client?.contact_name || 'unknown';
+  const projectCode = await generateProjectCode(clientLabel);
+
   const result = await db.run(
-    `INSERT INTO projects (client_id, name, description, status, priority, project_type, budget_range, timeline)
-     VALUES (?, ?, ?, 'pending', 'medium', ?, ?, ?)`,
-    [data.clientId, data.name, data.description, data.projectType, data.budget, data.timeline]
+    `INSERT INTO projects (client_id, name, description, status, priority, project_type, budget_range, timeline, project_code)
+     VALUES (?, ?, ?, 'pending', 'medium', ?, ?, ?, ?)`,
+    [data.clientId, data.name, data.description, data.projectType, data.budget, data.timeline, projectCode]
   );
   const project = await db.get(`SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ?`, [
     result.lastID
@@ -294,9 +312,17 @@ export async function createProjectAdmin(
   data: AdminProjectCreateData
 ): Promise<{ lastID: number; project: ProjectRow }> {
   const db = getDatabase();
+
+  const client = await db.get<{ company_name: string | null; contact_name: string }>(
+    'SELECT company_name, contact_name FROM clients WHERE id = ?',
+    [data.clientId]
+  );
+  const clientLabel = client?.company_name || client?.contact_name || 'unknown';
+  const projectCode = await generateProjectCode(clientLabel);
+
   const result = await db.run(
-    `INSERT INTO projects (client_id, project_name, description, priority, start_date, estimated_end_date, budget_range)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO projects (client_id, project_name, description, priority, start_date, estimated_end_date, budget_range, project_code)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       data.clientId,
       data.name,
@@ -304,7 +330,8 @@ export async function createProjectAdmin(
       data.priority,
       data.startDate,
       data.dueDate,
-      data.budget
+      data.budget,
+      projectCode
     ]
   );
   const project = await db.get(`SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ?`, [
