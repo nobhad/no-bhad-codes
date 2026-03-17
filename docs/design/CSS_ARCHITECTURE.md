@@ -238,43 +238,39 @@ src/
       portal.css                 # Client portal bundle
       admin.css                  # Admin dashboard bundle
     portal/
-      shared/                    # Shared portal components (35+ files)
-        portal-accordion.css     # Accordion components
-        portal-analytics.css     # Analytics UI
+      shared/                    # Shared portal components (33 files)
+        index.css                # Portal shared entry
         portal-auth.css          # Auth page portal styles
         portal-badges.css        # Status badges
         portal-buttons.css       # Portal button styles
         portal-cards.css         # Card components
         portal-command-palette.css # Command palette
-        portal-components.css    # Shared portal utilities (copy-email, etc.)
+        portal-components.css    # Shared portal utilities
         portal-confirm-dialog.css # Confirmation dialog
-        portal-copy-email.css    # Copy-email component
         portal-dashboard-widgets.css # Dashboard widget components
-        portal-details-card.css  # Detail view cards
         portal-dropdown.css      # Dropdown menus
         portal-error-states.css  # Error state displays
         portal-field-label-spacing.css # Field-label gap utilities
         portal-files.css         # File manager components
         portal-forms.css         # Portal form overrides
+        portal-gutter.css        # Content gutter spacing
         portal-inline-edit.css   # Inline edit
         portal-kanban.css        # Kanban board
         portal-keyboard-shortcuts.css # Keyboard shortcut display
         portal-layout.css        # Portal layout (sidebar, header, content)
         portal-message-thread.css # Message thread UI
         portal-messages.css      # Message/chat components
+        portal-micro-components.css # Micro UI patterns (copy-email, nav links)
         portal-modal-system.css  # Shared modal framework
         portal-notification-bell.css # Notification bell icon
-        portal-performance.css   # Performance metrics display
         portal-react-components.css # React-specific portal components
         portal-sidebar.css       # Sidebar navigation
         portal-stat-cards.css    # Stat card widgets
-        portal-status-panel.css  # Status panel
         portal-tab-components.css # Tab navigation components
         portal-table-filters.css # Table filter UI
         portal-tables.css        # Table components
         portal-tabs.css          # Tab navigation
         portal-toast-notifications.css # Toast messages
-        portal-tooltips.css      # Tooltip styles
         portal-utilities.css     # Portal utility classes
       admin/                     # Admin-only styles (20+ files)
         index.css                # Admin styles entry

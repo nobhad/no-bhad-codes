@@ -1,6 +1,6 @@
 # UI Factory System
 
-**Last Updated:** 2026-03-02
+**Last Updated:** 2026-03-16
 
 ## Overview
 
@@ -31,7 +31,19 @@ src/react/factories/
 ├── index.ts                    # React factory exports (re-exports StatusBadge from components/portal)
 ├── IconButton.tsx              # React icon button component
 ├── useFactory.ts               # React hooks
-└── StateDisplay.tsx            # React state components
+├── StateDisplay.tsx            # React state components
+├── createDetailPanel.tsx       # Slide-in detail panel factory (DetailPanel, MetaItem, MetaGrid, Timeline)
+├── createTabs.tsx              # Tab navigation factory (TabList, TabPanel, SubtabList, ViewToggle)
+├── createFormField.tsx         # Form field factory (TextField, SelectField, etc.)
+├── createStatusCell.tsx        # Status dropdown cell factory
+├── createTableCells.tsx        # Table cell factory (DateCell, CurrencyCell, etc.)
+├── createSection.tsx           # Layout section factory (Section, Panel, Grid, etc.)
+├── createNotification.tsx      # Notification message templates
+├── createAccordion.tsx         # Accordion component
+├── MessageThread.tsx           # Chat thread component
+├── useBulkAction.tsx           # Bulk action hook
+├── useDataFetch.tsx            # Data fetching hooks
+└── formatters.ts               # Formatting utilities
 
 src/react/components/portal/
 └── StatusBadge.tsx             # Canonical StatusBadge component (exported via factories/index.ts)
@@ -560,6 +572,79 @@ function MyTable({ data }) {
   return data.map(row => <td>{renderActions(row.id, row)}</td>);
 }
 ```
+
+## DetailPanel Factory
+
+The `DetailPanel` factory (`createDetailPanel.tsx`) provides a reusable slide-in detail panel for any entity. It handles all shared logic: `createPortal`, overlay backdrop, Escape key close, header, status dropdown, and tab switching.
+
+### Sub-Components
+
+| Component | Purpose |
+|-----------|---------|
+| `DetailPanel` | Full panel with portal, overlay, header, title row, tabs |
+| `MetaItem` | Single label/value pair for overview grids |
+| `MetaGrid` | Grid of MetaItem fields + optional description blocks |
+| `Timeline` | Date event list for history/timeline tabs |
+
+### Configuration
+
+Each entity panel defines a `DetailPanelConfig<T>` object:
+
+```tsx
+interface DetailPanelConfig<T> {
+  entityLabel: string;         // Header h3 text (e.g. "Contract")
+  panelId: string;             // DOM id for CSS targeting
+  title: (entity: T) => string;
+  subtitle?: (entity: T) => string | undefined;
+  status?: { current, config, onChange };
+  meta?: (entity: T) => PanelMetaField[];
+  actions?: (entity: T) => React.ReactNode;
+  tabs: (entity: T) => PanelTab[];
+}
+```
+
+### Integration Pattern
+
+```tsx
+// 1. Define config with useMemo
+const config = useMemo((): DetailPanelConfig<Contract> => ({
+  entityLabel: 'Contract',
+  panelId: 'contract-details-panel',
+  title: (c) => c.templateName || 'Untitled Contract',
+  // ... tabs, meta, actions
+}), [dependencies]);
+
+// 2. Render factory component
+<DetailPanel entity={selectedContract} onClose={handleClose} config={config} />
+```
+
+### Table Wiring Pattern
+
+```tsx
+const [selected, setSelected] = useState<Entity | null>(null);
+const handleRowClick = useCallback((entity: Entity) => setSelected(entity), []);
+const handleClosePanel = useCallback(() => setSelected(null), []);
+
+// In JSX:
+<PortalTableRow clickable onClick={() => handleRowClick(entity)}>
+// ... after table:
+<EntityDetailPanel entity={selected} onClose={handleClosePanel} ... />
+```
+
+### Entity Panels Using Factory
+
+| Panel | Tabs | Actions |
+|-------|------|---------|
+| Contract | Overview, Timeline | Send, Download |
+| Proposal | Overview, Timeline | Send, Duplicate |
+| Document Request | Overview, Timeline | Remind, Download |
+| Contact | Overview | Email, Call |
+| Questionnaire | Overview, Progress | Send |
+| Design Review | Overview, Timeline | Approve, Request Revision |
+| Workflow | Overview, Stats | Edit |
+| Email Template | Overview, Variables | Edit |
+
+Note: `LeadDetailPanel` predates the factory and uses `createPortal` directly. It follows the same visual pattern but is not yet migrated to the factory.
 
 ## Best Practices
 

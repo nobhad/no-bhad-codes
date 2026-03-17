@@ -565,14 +565,81 @@ When a project is deleted via `DELETE /api/projects/:id`:
 - `GET /api/admin/deleted-items?type=project` - List deleted projects
 - `POST /api/admin/deleted-items/project/:id/restore` - Restore a project
 
+## Project Code
+
+Every project is assigned a unique `project_code` in the format `NBC-YYYY-NNN-slug`:
+
+| Part | Description | Example |
+|------|-------------|---------|
+| `NBC` | No Bhad Codes brand prefix | `NBC` |
+| `YYYY` | Year project was created | `2026` |
+| `NNN` | Sequential number (zero-padded) | `001` |
+| `slug` | Kebab-case client name (max 30 chars) | `hedgewitch` |
+
+**Full example:** `NBC-2026-001-hedgewitch`
+
+Project codes are auto-generated on creation via `server/utils/project-code.ts`. The sequence number auto-increments per year by querying existing codes. The slug is derived from the client's company name (or contact name for individuals).
+
+### Database
+
+```sql
+ALTER TABLE projects ADD COLUMN project_code TEXT UNIQUE;
+```
+
+### Generation Points
+
+All project creation paths auto-generate codes:
+
+- `server/services/project/core.ts` — client requests + admin creation
+- `server/services/project/admin.ts` — admin project creation
+- `server/services/intake-service.ts` — intake form submissions
+- `server/services/workflow-automations.ts` — proposal → project conversion
+- `server/services/project/templates.ts` — template-based creation
+
 ## Change Log
 
-### March 16, 2026 - Export/Import + Performance
+### March 16, 2026 - Project Code System
+
+- Added `project_code` column (TEXT UNIQUE) to projects table via migration 117
+- Created `server/utils/project-code.ts` — auto-generates `NBC-YYYY-NNN-slug` codes
+- All 5 project creation paths now auto-generate project codes
+- Added `project_code` to `ProjectRow` types and `PROJECT_COLUMNS` constant
+- Files created: `server/utils/project-code.ts`, `server/database/migrations/117_project_code_and_client_type.sql`
+- Files modified: `server/services/project/core.ts`, `server/services/project/admin.ts`, `server/services/project/templates.ts`, `server/services/intake-service.ts`, `server/services/workflow-automations.ts`, `server/types/database.ts`, `server/database/entities/lead.ts`
+
+### March 16, 2026 - Dynamic Questionnaire + Intake Checklist
+
+- Added dynamic questionnaire system for email-initiated projects:
+  - `POST /api/projects/:id/generate-questionnaire` — auto-generates personalized questionnaire
+  - Includes ALL 21 questions (6 categories: about you, project details, design, content, technical, billing)
+  - Pre-fills answers from existing project/client data — client reviews and edits
+  - Only requires answers on truly missing essential fields
+  - Auto-triggered on project creation (admin and client routes)
+- Added intake information checklist:
+  - `GET /api/projects/:id/intake-checklist` — shows collected vs missing data by priority
+  - `POST /api/projects/:id/request-info` — sends targeted email requesting specific missing fields
+  - Categories: essential (6 fields), important (9 fields), nice-to-have (8 fields)
+- New services: `dynamic-questionnaire-service.ts`, `intake-checklist-service.ts`
+
+### March 16, 2026 - Full Pipeline + Completion + Intake Checklist
+
+- Added project completion automation:
+  - `GET /api/projects/:id/completion-status` — checks milestones, tasks, invoices for blockers
+  - `POST /api/projects/:id/complete` — completes project with pre-flight checks (admin can force-override)
+  - Completion email auto-sent to client
+- Added intake checklist for email-initiated projects:
+  - `GET /api/projects/:id/intake-checklist` — tracks collected vs missing intake information
+  - `POST /api/projects/:id/request-info` — sends email to client requesting specific missing fields
+  - Categorizes fields as essential, important, or nice-to-have
+- Added export/import endpoints (see earlier entry)
+- Parallelized project detail fetches (files/messages/updates) with Promise.all()
+- Rate limiting added to POST /request (5/hour per client)
+- New services: `project-completion-service.ts`, `intake-checklist-service.ts`
+
+### March 16, 2026 - Export/Import
 
 - Added `GET /api/projects/:id/export-milestones` — export milestones + tasks as JSON
 - Added `POST /api/projects/:id/import-milestones` — import milestones from JSON
-- Project detail endpoint: parallelized file/message/update fetches with Promise.all()
-- Rate limiting added to POST `/request` (5/hour per client)
 - Files modified: `server/routes/projects/core.ts`
 
 ### March 9, 2026 - Status Values Corrected

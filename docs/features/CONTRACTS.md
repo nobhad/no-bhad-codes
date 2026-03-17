@@ -441,6 +441,8 @@ When both parties have signed:
 | `server/database/migrations/054_contract_countersign.sql` | Countersign fields |
 | `src/features/admin/admin-project-details.ts` | Contract tab UI |
 | `src/styles/admin/pd-contract.css` | Contract tab styles |
+| `src/react/features/admin/contracts/ContractsTable.tsx` | Admin contracts table (React) |
+| `src/react/features/admin/contracts/ContractDetailPanel.tsx` | Slide-in detail panel (Overview, Timeline) |
 | `client/sign-contract.html` | Public signing page |
 
 ---
@@ -526,10 +528,15 @@ When both parties have signed:
 
 ## Change Log
 
-### March 16, 2026 - JSON Export Endpoint
+### March 16, 2026 - Auto-Generation + JSON Export
 
+- Auto-contract generation when proposal is accepted
+  - Uses default active contract template
+  - Variables auto-substituted: client name, email, company, project name, type, price, date
+  - Created as 'draft' status for admin review before sending
+  - Emits contract.created workflow event
 - Added `GET /api/contracts/:contractId/export` — exports full contract data with signature log as JSON
-- Files modified: `server/routes/contracts/crud.ts`
+- Files modified: `server/routes/contracts/crud.ts`, `server/services/workflow-automations.ts`
 
 ### February 15, 2026 - Rich Text Editor Added
 

@@ -431,7 +431,29 @@ When a client is deleted via `DELETE /api/clients/:id`:
 - `GET /api/admin/deleted-items?type=client` - List deleted clients
 - `POST /api/admin/deleted-items/client/:id/restore` - Restore a client
 
+## Client Type
+
+The `client_type` column distinguishes between client categories:
+
+| Value | Description |
+|-------|-------------|
+| `individual` | Personal/individual client (no company) |
+| `company` | Business/company client |
+| `nonprofit` | Non-profit organization |
+| `government` | Government entity |
+
+Display name logic uses `COALESCE(billing_name, contact_name, company_name)`. For `individual` clients, `company_name` is typically null.
+
 ## Change Log
+
+### March 16, 2026 - Client Type Standardization
+
+- Updated `client_type` values from `personal`/`business` to `individual`/`company`
+- Migration 117 backfills existing records
+- Added `ClientType` union type to `server/types/database.ts`
+- Updated validation schema in `clients/helpers.ts` to accept: `individual`, `company`, `nonprofit`, `government`
+- Updated intake route mapping: form value `personal` → DB value `individual`, form value `business` → DB value `company`
+- Files modified: `server/types/database.ts`, `server/routes/intake.ts`, `server/routes/clients/helpers.ts`, `server/services/intake-service.ts`, `server/services/project/admin.ts`, `server/services/lead/core.ts`
 
 ### March 16, 2026 - Billing Field Preferences + Validation Hardening
 

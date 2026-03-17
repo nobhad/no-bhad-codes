@@ -316,9 +316,9 @@ Always UPPERCASE, font-weight 600.
 All password fields MUST have a visibility toggle:
 
 ```html
-<div class="cp-password-wrapper">
-  <input type="password" class="cp-input" />
-  <button type="button" class="cp-password-toggle">
+<div class="password-input-wrapper">
+  <input type="password" class="form-input" />
+  <button type="button" class="password-toggle">
     <!-- Lucide Eye/EyeOff icon -->
   </button>
 </div>
@@ -563,6 +563,90 @@ Portal modals use `PortalModal` React component backed by Radix primitives.
 - GSAP scale-in animation on open
 
 **CSS files:** `src/styles/portal/shared/portal-modal-system.css`, `src/styles/portal/admin/modal-system.css`
+
+### Detail Panels (Slide-in)
+
+Slide-in detail panels use `createPortal(jsx, document.body)` and render as a right-anchored overlay. Built via the `DetailPanel` factory in `src/react/factories/createDetailPanel.tsx`.
+
+#### Structure
+
+```html
+<div class="details-overlay" />
+<div class="details-panel" role="dialog">
+  <div class="details-header">
+    <h3>Entity Label</h3>
+    <button class="close-btn">X</button>
+  </div>
+  <div class="detail-title-row">
+    <div class="detail-title-group">
+      <div class="detail-info">
+        <div class="detail-name-row">
+          <h1 class="detail-title">Title</h1>
+          <!-- StatusDropdown -->
+        </div>
+        <div class="detail-subtitle">Subtitle</div>
+        <div class="detail-meta"><!-- meta-item spans --></div>
+      </div>
+    </div>
+    <div class="detail-actions"><!-- IconButtons --></div>
+  </div>
+  <div class="details-content">
+    <div class="lead-details-tabs"><!-- tab buttons --></div>
+    <div class="lead-tab-content is-active"><!-- tab content --></div>
+  </div>
+</div>
+```
+
+#### Factory Usage
+
+The `DetailPanel` factory handles all shared logic (portal, overlay, keyboard/Escape, header, status dropdown, tab switching). Each entity defines only its config:
+
+```tsx
+import { DetailPanel, MetaGrid, Timeline, IconButton } from '@react/factories';
+import type { DetailPanelConfig } from '@react/factories';
+
+const config: DetailPanelConfig<MyEntity> = {
+  entityLabel: 'Contract',
+  panelId: 'contract-details-panel',
+  title: (entity) => entity.name,
+  subtitle: (entity) => entity.clientName,
+  status: { current: (e) => e.status, config: STATUS_CONFIG, onChange: handleChange },
+  meta: (entity) => [{ label: 'Created', value: formatDate(entity.createdAt) }],
+  actions: (entity) => <IconButton action="send" onClick={...} />,
+  tabs: (entity) => [
+    { id: 'overview', label: 'Overview', render: () => <MetaGrid fields={...} /> },
+    { id: 'timeline', label: 'Timeline', render: () => <Timeline events={...} /> }
+  ]
+};
+
+<DetailPanel entity={selectedEntity} onClose={handleClose} config={config} />
+```
+
+#### Entity Panels Implemented
+
+| Entity | File | Tabs |
+|--------|------|------|
+| Lead | `leads/LeadDetailPanel.tsx` | Overview, Tasks, Notes |
+| Contract | `contracts/ContractDetailPanel.tsx` | Overview, Timeline |
+| Proposal | `proposals/ProposalDetailPanel.tsx` | Overview, Timeline |
+| Document Request | `document-requests/DocumentRequestDetailPanel.tsx` | Overview, Timeline |
+| Contact | `contacts/ContactDetailPanel.tsx` | Overview |
+| Questionnaire | `questionnaires/QuestionnaireDetailPanel.tsx` | Overview, Progress |
+| Design Review | `design-review/DesignReviewDetailPanel.tsx` | Overview, Timeline |
+| Workflow | `workflows/WorkflowDetailPanel.tsx` | Overview, Stats |
+| Email Template | `email-templates/EmailTemplateDetailPanel.tsx` | Overview, Variables |
+
+#### Rules
+
+- Always use `DetailPanel` factory -- never duplicate portal/overlay/keyboard logic
+- Gutter applies to children, not wrappers (header-type rows push gutter to their children)
+- Header h3 shows entity type label, h1 shows entity title
+- Actions right-aligned in title row
+- Single-tab panels hide the tab bar automatically
+- Close on Escape key and overlay click
+- Use `MetaGrid` for overview fields, `Timeline` for date event sequences
+
+**CSS files:** `src/styles/portal/admin/modal-system.css` (`.details-panel`, `.details-overlay`, `.detail-title-row`)
 
 ---
 
@@ -858,6 +942,10 @@ Files with content in different cascade layers (e.g., `@layer components` + `@la
 ---
 
 ## Recent Changes
+
+### March 16, 2026 -- Detail Panel Factory and Entity Panels
+
+Added `DetailPanel` factory (`src/react/factories/createDetailPanel.tsx`) with reusable `MetaItem`, `MetaGrid`, and `Timeline` sub-components. Built 8 entity-specific detail panels (Contract, Proposal, DocumentRequest, Contact, Questionnaire, DesignReview, Workflow, EmailTemplate) using the factory, each ~80-120 lines of pure config. Wired all 8 admin tables to open slide-in panels on row click.
 
 ### March 14, 2026 -- Portal HTML Wrapper Standardization
 

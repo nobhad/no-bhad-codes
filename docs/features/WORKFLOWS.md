@@ -477,12 +477,17 @@ POST /api/email-templates/:id/test
 
 ## Change Log
 
-### March 16, 2026 - Tier-Aware Proposal Acceptance
+### March 16, 2026 - Pipeline Automations
 
-- `proposal.accepted` handler now uses `generateTierMilestones()` instead of `generateDefaultMilestones()`
-- Fetches proposal features via `proposalService.getProposalFeatures()` and passes them to the tier-aware generator
-- Addon features automatically generate tasks on the development-phase milestone
-- Workflow notification emails now use billing-preferred client fields via COALESCE in getClientEmail()
+- `proposal.accepted` handler now triggers full cascade:
+  - Tier-aware milestone/task generation via `generateTierMilestones()`
+  - Auto-contract generation from default template with variable substitution
+  - Auto-payment schedule creation (tier-based splits: 50/50, 40/30/30, or 25x4)
+- New handler: `handleAutoAssignQuestionnaires` on `project.created` event
+  - Auto-assigns active questionnaires matching project type
+  - 11 total handlers registered
+- Dynamic questionnaire auto-generated on `project.created` (auto-triggered in route handlers)
+- Workflow notification emails now use billing-preferred client fields via COALESCE
 - File modified: `server/services/workflow-automations.ts`
 
 ### February 10, 2026 - Email Templates & Test Coverage

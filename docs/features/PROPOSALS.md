@@ -536,6 +536,7 @@ await fetch('/api/proposals/123/discount', {
 
 - `src/features/admin/modules/admin-proposals.ts` - Proposal management module
 - `src/styles/admin/proposals.css` - Proposal styles
+- `src/react/features/admin/proposals/ProposalDetailPanel.tsx` - Slide-in detail panel (Overview, Timeline)
 
 ---
 
@@ -626,6 +627,20 @@ When a proposal is deleted via `DELETE /api/proposals/:id`:
 ---
 
 ## Change Log
+
+### March 16, 2026 - Full Proposal Pipeline
+
+- **Budget-relative template system**: Tiers priced around client's budget (Good=45%, Better=80%, Best=130%)
+- **Feature catalog**: 155 features + 63 addons across 6 project types in `proposal-templates.json`
+- **Maintenance inclusion**: Good=none, Better=optional add-on, Best=3 months Standard included
+- **Proposal prefill service**: Maps questionnaire answers to suggested tier, features, and maintenance recommendation
+- **Client acceptance endpoint**: `POST /api/proposals/:id/accept` — clients can accept from portal
+- **From-template endpoint**: `POST /api/proposals/from-template` — create proposal from template + budget
+- **Prefill endpoint**: `GET /api/proposals/prefill/:projectId` — get tier/feature suggestions from questionnaires
+- **Auto-cascade on acceptance**: Project creation, tier-aware milestones, draft contract, payment schedule
+- **Duplicate prevention**: Cannot create a second active proposal on the same project
+- **Pricing validation**: Non-negative prices, sanity bounds
+- New files: `proposal-prefill-service.ts`, `proposal-templates.json`, `proposal-templates.ts`
 
 ### March 16, 2026 - Tier-Driven Task Generation + JSON Export
 

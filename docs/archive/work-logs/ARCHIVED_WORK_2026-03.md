@@ -4,6 +4,99 @@ This file contains completed work from March 2026. Items are moved here from `..
 
 ---
 
+## Completed - March 16, 2026
+
+### 1. Project Code System (NBC-YYYY-NNN-slug) - COMPLETE
+
+**Status:** COMPLETE
+**Implementation:** Auto-generated project codes for all projects using brand prefix NBC.
+
+#### Files Created
+
+- `server/utils/project-code.ts`
+- `server/database/migrations/117_project_code_and_client_type.sql`
+
+#### Files Modified
+
+- `server/services/project/core.ts`
+- `server/services/project/admin.ts`
+- `server/services/project/templates.ts`
+- `server/services/intake-service.ts`
+- `server/services/workflow-automations.ts`
+- `server/types/database.ts`
+- `server/database/entities/lead.ts`
+
+### 2. Client Type Standardization - COMPLETE
+
+**Status:** COMPLETE
+**Implementation:** Updated client_type from personal/business to individual/company across all code and DB.
+
+#### Files Modified
+
+- `server/types/database.ts`
+- `server/routes/intake.ts`
+- `server/routes/clients/helpers.ts`
+- `server/services/intake-service.ts`
+- `server/services/project/admin.ts`
+- `server/services/lead/core.ts`
+
+### 3. CSS Text Clipping Fixes - COMPLETE
+
+**Status:** COMPLETE
+**Implementation:** Fixed text clipping in table cells and detail page titles.
+
+#### Root Causes & Fixes
+
+- Table cells: `.inline-edit-display` had negative margin (`calc(-1 * var(--space-0-5))`) pulling text outside `overflow: hidden` containers. Added `.data-table .inline-edit-display { margin: 0; }`.
+- Detail page titles: Serif font glyphs at large sizes extended past bounding box, clipped by `overflow: hidden`. Added `padding: 2px` to `.detail-title`.
+- Removed redundant `overflow: hidden` from `.detail-info`.
+- Contact info alignment: Changed `.meta-value-with-copy` from `align-items: baseline` to `align-items: center`.
+- Contacts table: Removed redundant "primary" role text (star icon already indicates primary).
+
+#### Files Modified
+
+- `src/styles/portal/shared/portal-inline-edit.css`
+- `src/styles/portal/admin/detail-page-controls.css`
+- `src/styles/portal/shared/portal-micro-components.css`
+- `src/react/features/admin/contacts/ContactsTable.tsx`
+
+### 4. Proposal Tier Milestones, Receipt Hardening, Validation, JSON Import/Export - COMPLETE
+
+**Status:** COMPLETE
+**Implementation:** Four interconnected improvements to proposals, receipts, validation, and admin tooling.
+
+### 5. Comprehensive Backend Audit & Hardening - COMPLETE
+
+**Status:** COMPLETE
+**Implementation:** Full audit of data integrity, security, performance, and consistency across the entire backend.
+
+### 6. Design System Audit and Documentation Restructure - COMPLETE
+
+**Status:** COMPLETE
+**Implementation:** Full audit of design system implementation vs documentation, with restructure and fixes.
+
+### 7. Portal HTML Wrapper Standardization (March 14) - COMPLETE
+
+**Status:** COMPLETE
+**Implementation:** Unified HTML wrapper structure across all admin and client portal components.
+
+### 8. Universal Dropdown Unification - COMPLETE
+
+**Status:** COMPLETE
+**Implementation:** All native select elements converted to FormDropdown.
+
+### 9. ADD Button Create Modals (March 15) - COMPLETE
+
+**Status:** COMPLETE
+**Implementation:** 12 ADD buttons wired with create modals.
+
+### 10. Backend Enhancements (March 13) - COMPLETE
+
+**Status:** COMPLETE
+**Implementation:** Payment Schedule System, Content Request System, Lead Scoring, Project Templates.
+
+---
+
 ## Completed - March 2, 2026
 
 ### State of the Art Codebase Audit - COMPLETE

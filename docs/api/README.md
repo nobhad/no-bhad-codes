@@ -54,6 +54,11 @@ properties and the JWT payload structure.
 - `PUT /projects/:id` — Update project
 - `GET /projects/:id/milestones` — Project milestones
 - `GET /projects/:id/tasks` — Project tasks
+- `GET /projects/:id/completion-status` — Check project completion readiness
+- `POST /projects/:id/complete` — Mark project as completed
+- `GET /projects/:id/intake-checklist` — Get intake information checklist
+- `POST /projects/:id/request-info` — Request missing info from client
+- `POST /projects/:id/generate-questionnaire` — Generate custom questionnaire from missing info
 
 ### File Management
 
@@ -85,6 +90,9 @@ properties and the JWT payload structure.
 - `POST /proposals` — Create proposal
 - `GET /proposals/:id` — Proposal detail
 - `POST /proposals/:id/sign` — Sign proposal
+- `GET /proposals/prefill/:projectId` — Get proposal prefill data from questionnaires
+- `POST /proposals/:id/accept` — Client accepts a proposal
+- `POST /proposals/from-template` — Create proposal from template + budget
 
 ### Analytics
 
