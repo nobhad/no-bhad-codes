@@ -391,7 +391,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   ctx.y -= 24;
 
   page().drawLine({
-    start: { x: totalsX - 14, y: ctx.y + 18 },
+    start: { x: leftMargin, y: ctx.y + 18 },
     end: { x: rightMargin, y: ctx.y + 18 },
     thickness: PDF_SPACING.underlineThickness,
     color: PDF_COLORS.divider
@@ -401,7 +401,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     x: totalsX,
     y: ctx.y,
     size: PDF_TYPOGRAPHY.bodySize,
-    font: helvetica,
+    font: helveticaBold,
     color: PDF_COLORS.black
   });
   const subtotalText = `$${data.subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
@@ -420,7 +420,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
       x: totalsX,
       y: ctx.y,
       size: PDF_TYPOGRAPHY.bodySize,
-      font: helvetica,
+      font: helveticaBold,
       color: PDF_COLORS.black
     });
     const discountText = `-$${data.discount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
@@ -440,7 +440,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
       x: totalsX,
       y: ctx.y,
       size: PDF_TYPOGRAPHY.bodySize,
-      font: helvetica,
+      font: helveticaBold,
       color: PDF_COLORS.black
     });
     const taxText = `$${data.tax.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
@@ -527,22 +527,18 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
 
   ctx.y -= 50;
 
-  // === PAYMENT INSTRUCTIONS ===
+  // === PAYMENT INSTRUCTIONS (boxed) ===
   ensureSpace(ctx, 80, drawContinuationHeader);
+
+  const BOX_PADDING = 10;
+  const boxTop = ctx.y + 4;
 
   const paymentHeading = 'PAYMENT INSTRUCTIONS';
   page().drawText(paymentHeading, {
-    x: leftMargin,
+    x: leftMargin + BOX_PADDING,
     y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
+    size: PDF_TYPOGRAPHY.sectionHeadingSize,
     font: helveticaBold,
-    color: PDF_COLORS.black
-  });
-  const paymentHeadingW = helveticaBold.widthOfTextAtSize(paymentHeading, PDF_TYPOGRAPHY.bodySize);
-  page().drawLine({
-    start: { x: leftMargin, y: ctx.y - 4 },
-    end: { x: leftMargin + paymentHeadingW, y: ctx.y - 4 },
-    thickness: PDF_SPACING.underlineThickness,
     color: PDF_COLORS.black
   });
   ctx.y -= 18;
@@ -556,7 +552,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
 
   for (const line of paymentInstructions) {
     page().drawText(line, {
-      x: leftMargin,
+      x: leftMargin + BOX_PADDING,
       y: ctx.y,
       size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
@@ -564,6 +560,16 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     });
     ctx.y -= 11;
   }
+
+  const boxBottom = ctx.y - BOX_PADDING + 4;
+  page().drawRectangle({
+    x: leftMargin,
+    y: boxBottom,
+    width: rightMargin - leftMargin,
+    height: boxTop - boxBottom,
+    borderColor: PDF_COLORS.black,
+    borderWidth: PDF_SPACING.underlineThickness
+  });
 
   // === FOOTER ===
   drawPdfFooter(page(), {

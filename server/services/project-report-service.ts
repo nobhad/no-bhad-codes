@@ -354,6 +354,14 @@ export async function generateProjectReportPdf(data: ProjectReportData): Promise
     right: { pairs: rightPairs }
   });
 
+  // HR separating detail section from content (no table header follows)
+  ctx.currentPage.drawLine({
+    start: { x: leftMargin, y: ctx.y + 10 },
+    end: { x: rightMargin, y: ctx.y + 10 },
+    thickness: PDF_SPACING.underlineThickness,
+    color: PDF_COLORS.black
+  });
+
   // === PROJECT OVERVIEW ===
   ctx.y -= PDF_SPACING.sectionSpacing;
   ensureSpace(ctx, 100, onNewPage);

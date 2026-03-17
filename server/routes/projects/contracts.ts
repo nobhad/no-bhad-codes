@@ -234,6 +234,14 @@ router.get(
       right: { pairs: rightPairs }
     });
 
+    // HR separating detail section from content (no table header follows)
+    page.drawLine({
+      start: { x: leftMargin, y: y + 10 },
+      end: { x: rightMargin, y: y + 10 },
+      thickness: PDF_SPACING.underlineThickness,
+      color: PDF_COLORS.black
+    });
+
     const fallbackContent = [
       'CONTRACT AGREEMENT',
       '',

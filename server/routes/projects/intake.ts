@@ -378,6 +378,14 @@ router.get(
       right: { pairs: rightPairs }
     });
 
+    // HR separating detail section from content (no table header follows)
+    ctx.currentPage.drawLine({
+      start: { x: LEFT, y: ctx.y + 10 },
+      end: { x: RIGHT, y: ctx.y + 10 },
+      thickness: PDF_SPACING.underlineThickness,
+      color: PDF_COLORS.black
+    });
+
     // =========================================================
     // PROJECT DETAILS
     // =========================================================

@@ -77,9 +77,9 @@ export const PDF_TYPOGRAPHY = {
 
   // Legacy aliases — all resolve to bodySize for uniformity
   titleLargeSize: 22,
-  sectionHeadingSize: 10,
+  sectionHeadingSize: 12,
   subHeadingSize: 10,
-  sowSectionSize: 10,
+  sowSectionSize: 12,
   labelSize: 10,
   smallSize: 10,
   finePrintSize: 8,
