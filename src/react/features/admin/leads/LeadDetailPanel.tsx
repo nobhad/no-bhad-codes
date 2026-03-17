@@ -290,7 +290,7 @@ export function LeadDetailPanel({
         </div>
 
         {/* Tabs */}
-        <div className="details-content section">
+        <div className="details-content">
           <div className="lead-details-tabs">
             <button
               className={cn('lead-tab', activeTab === 'overview' && 'is-active')}
@@ -314,7 +314,7 @@ export function LeadDetailPanel({
 
           {/* Overview Tab */}
           {activeTab === 'overview' && (
-            <div className="lead-tab-content section is-active">
+            <div className="lead-tab-content is-active">
               <div className="project-detail-meta">
                 <MetaItem label="Email">
                   <span className="meta-value meta-value-with-copy">
@@ -361,7 +361,7 @@ export function LeadDetailPanel({
 
           {/* Tasks Tab */}
           {activeTab === 'tasks' && (
-            <div className="lead-tab-content section is-active">
+            <div className="lead-tab-content is-active">
               {isLoadingTasks ? (
                 <div className="loading-state"><div className="loading-spinner" /></div>
               ) : tasks.length === 0 ? (
@@ -396,7 +396,7 @@ export function LeadDetailPanel({
 
           {/* Notes Tab */}
           {activeTab === 'notes' && (
-            <div className="lead-tab-content section is-active">
+            <div className="lead-tab-content is-active">
               {isLoadingNotes ? (
                 <div className="loading-state"><div className="loading-spinner" /></div>
               ) : notes.length === 0 ? (
