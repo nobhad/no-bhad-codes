@@ -80,11 +80,11 @@ export const PDF_COLORS = {
   /** Section title underline (pricing divider) */
   pricingDivider: c(0, 0, 0),
 
-  // --- Backgrounds & borders (all black) ---
-  /** Receipt details box header background */
-  boxHeaderBg: c(0, 0, 0),
-  /** Signature box background */
-  signatureBoxBg: c(0, 0, 0),
+  // --- Backgrounds & borders ---
+  /** Receipt details box header background — white (no tint) */
+  boxHeaderBg: c(1, 1, 1),
+  /** Signature box background — white (no tint) */
+  signatureBoxBg: c(1, 1, 1),
   /** Receipt box border */
   boxBorder: c(0, 0, 0),
   /** Signature box border */
