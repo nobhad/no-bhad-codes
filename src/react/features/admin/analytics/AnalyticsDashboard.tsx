@@ -310,6 +310,13 @@ const KpiCard = React.memo(({ kpi }: { kpi: KPI }) => {
 // AnalyticsDashboard
 // ============================================
 
+const DATE_RANGE_OPTIONS = [
+  { value: '7d', label: 'Last 7 days' },
+  { value: '30d', label: 'Last 30 days' },
+  { value: '90d', label: 'Last 90 days' },
+  { value: '1y', label: 'Last year' }
+];
+
 export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDashboardProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
@@ -423,12 +430,7 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
     exportDataToCsv(exportRows, config);
   }, [data, kpis, dateRange]);
 
-  const dateRangeOptions = [
-    { value: '7d', label: 'Last 7 days' },
-    { value: '30d', label: 'Last 30 days' },
-    { value: '90d', label: 'Last 90 days' },
-    { value: '1y', label: 'Last year' }
-  ];
+  const dateRangeOptions = DATE_RANGE_OPTIONS;
 
   // Inject actions into the subtab row via context
   useEffect(() => {
@@ -459,7 +461,7 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
     );
 
     return () => setSubtabActions(null);
-  }, [dateRange, isLoading, data, setSubtabActions, handleExport, loadAnalytics]);
+  }, [dateRange, isLoading, data, setSubtabActions, handleExport, loadAnalytics, dateRangeOptions]);
 
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">

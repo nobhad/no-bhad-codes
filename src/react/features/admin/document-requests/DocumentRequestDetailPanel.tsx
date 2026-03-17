@@ -135,9 +135,9 @@ export function DocumentRequestDetailPanel({
               visible: !!req.projectName,
               onClick: req.projectId
                 ? () => {
-                    onClose();
-                    onNavigate?.('project-detail', String(req.projectId));
-                  }
+                  onClose();
+                  onNavigate?.('project-detail', String(req.projectId));
+                }
                 : undefined
             },
             {

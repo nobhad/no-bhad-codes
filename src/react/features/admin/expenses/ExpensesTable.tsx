@@ -10,7 +10,7 @@
 
 import * as React from 'react';
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { DollarSign, Inbox, Plus, X } from 'lucide-react';
+import { DollarSign, Inbox, Plus as _Plus, X as _X } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import {
   PortalTable,

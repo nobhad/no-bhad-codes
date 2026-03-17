@@ -10,12 +10,12 @@ import {
   DetailPanel,
   MetaGrid,
   IconButton,
-  EmptyState,
+  EmptyState
 } from '@react/factories';
 import type {
   DetailPanelConfig,
   PanelMetaField,
-  PanelDescriptionField,
+  PanelDescriptionField
 } from '@react/factories';
 import { formatDate } from '@react/utils/formatDate';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
@@ -68,7 +68,7 @@ const formatBoolean = (value: boolean): string => (value ? 'Yes' : 'No');
 export function EmailTemplateDetailPanel({
   template,
   onClose,
-  onEdit,
+  onEdit
 }: EmailTemplateDetailPanelProps) {
   const config = useMemo<DetailPanelConfig<EmailTemplate>>(
     () => ({
@@ -82,17 +82,17 @@ export function EmailTemplateDetailPanel({
       meta: (t) => [
         {
           label: 'Category',
-          value: t.category,
+          value: t.category
         },
         {
           label: 'Active',
-          value: t.is_active ? 'Active' : 'Inactive',
+          value: t.is_active ? 'Active' : 'Inactive'
         },
         {
           label: 'System',
           value: 'System Template',
-          visible: t.is_system,
-        },
+          visible: t.is_system
+        }
       ],
 
       actions: (t) => (
@@ -115,40 +115,40 @@ export function EmailTemplateDetailPanel({
             const fields: PanelMetaField[] = [
               {
                 label: 'Subject',
-                value: decodeHtmlEntities(t.subject),
+                value: decodeHtmlEntities(t.subject)
               },
               {
                 label: 'Category',
-                value: t.category,
+                value: t.category
               },
               {
                 label: 'Active',
-                value: formatBoolean(t.is_active),
+                value: formatBoolean(t.is_active)
               },
               {
                 label: 'System',
-                value: formatBoolean(t.is_system),
+                value: formatBoolean(t.is_system)
               },
               {
                 label: 'Created',
-                value: formatDate(t.created_at),
+                value: formatDate(t.created_at)
               },
               {
                 label: 'Updated',
-                value: formatDate(t.updated_at),
-              },
+                value: formatDate(t.updated_at)
+              }
             ];
 
             const descriptions: PanelDescriptionField[] = [
               {
                 label: 'Description',
                 value: t.description ? decodeHtmlEntities(t.description) : undefined,
-                visible: !!t.description,
-              },
+                visible: !!t.description
+              }
             ];
 
             return <MetaGrid fields={fields} descriptions={descriptions} />;
-          },
+          }
         },
         {
           id: 'variables',
@@ -171,9 +171,9 @@ export function EmailTemplateDetailPanel({
                 ))}
               </ul>
             );
-          },
-        },
-      ],
+          }
+        }
+      ]
     }),
     [onEdit]
   );

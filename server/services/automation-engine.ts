@@ -627,7 +627,7 @@ async function executeAutomation(
 async function executeAction(
   action: AutomationActionRow,
   context: Record<string, unknown>,
-  runId: number
+  _runId: number
 ): Promise<string> {
   const config = safeParseJson(action.action_config);
 

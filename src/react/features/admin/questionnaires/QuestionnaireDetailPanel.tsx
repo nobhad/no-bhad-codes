@@ -86,7 +86,7 @@ export function QuestionnaireDetailPanel({
   onStatusChange,
   onNavigate,
   onSend,
-  showNotification
+  showNotification: _showNotification
 }: QuestionnaireDetailPanelProps) {
   const handleNavigateToClient = useCallback(
     (clientId: number) => {

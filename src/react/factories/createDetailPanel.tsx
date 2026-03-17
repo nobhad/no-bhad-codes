@@ -13,7 +13,7 @@
 
 import * as React from 'react';
 import { createPortal } from 'react-dom';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback as _useCallback, useRef } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { DetailHeader } from '@react/components/portal/DetailHeader';

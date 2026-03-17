@@ -128,7 +128,7 @@ router.post(
   invalidateCache(['contacts', 'clients']),
   validateRequest(AdminContactSchemas.create, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { clientId, name, email, phone, title, company, isPrimary } = req.body;
+    const { clientId, name, email, phone, title, company: _company, isPrimary } = req.body;
 
     if (!clientId || !name || !email) {
       return errorResponse(res, 'clientId, name, and email are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);

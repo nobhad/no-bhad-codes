@@ -76,7 +76,7 @@ export function ProposalDetailPanel({
   onNavigate,
   onSend,
   onDuplicate,
-  showNotification
+  showNotification: _showNotification
 }: ProposalDetailPanelProps) {
   const handleNavigateToClient = useCallback(
     (clientId: number) => {

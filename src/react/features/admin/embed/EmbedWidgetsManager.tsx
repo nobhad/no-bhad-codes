@@ -10,7 +10,7 @@
 
 import * as React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Code, Inbox, Copy, RefreshCw, Check, Plus, Trash2 } from 'lucide-react';
+import { Code, Inbox, Copy as _Copy, RefreshCw as _RefreshCw, Check as _Check, Plus as _Plus, Trash2 as _Trash2 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import {
   PortalTable,
@@ -28,7 +28,7 @@ import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/Confir
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { formatDate } from '@react/utils/formatDate';
-import { apiFetch, apiPost, apiPut, apiDelete } from '@/utils/api-client';
+import { apiFetch, apiPost, apiPut as _apiPut, apiDelete } from '@/utils/api-client';
 import { showToast } from '@/utils/toast-notifications';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 

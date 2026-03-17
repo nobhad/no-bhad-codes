@@ -10,7 +10,7 @@
 
 import * as React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { MessageSquareQuote, Inbox, Star, Award } from 'lucide-react';
+import { MessageSquareQuote as _MessageSquareQuote, Inbox, Star, Award } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import {
   PortalTable,
@@ -31,7 +31,7 @@ import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilt
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { usePagination } from '@react/hooks/usePagination';
 import { useFadeIn } from '@react/hooks/useGsap';
-import { formatDate } from '@react/utils/formatDate';
+import { formatDate as _formatDate } from '@react/utils/formatDate';
 import { apiFetch, apiPut, apiDelete } from '@/utils/api-client';
 import { showToast } from '@/utils/toast-notifications';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';

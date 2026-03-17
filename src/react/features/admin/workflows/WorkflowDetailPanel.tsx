@@ -9,12 +9,12 @@ import { useMemo } from 'react';
 import {
   DetailPanel,
   MetaGrid,
-  IconButton,
+  IconButton
 } from '@react/factories';
 import type {
   DetailPanelConfig,
   PanelMetaField,
-  PanelDescriptionField,
+  PanelDescriptionField
 } from '@react/factories';
 import { formatDate } from '@react/utils/formatDate';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
@@ -41,7 +41,7 @@ interface Workflow {
 
 const WORKFLOW_STATUS_CONFIG: Record<WorkflowStatus, { label: string }> = {
   active: { label: 'Active' },
-  inactive: { label: 'Inactive' },
+  inactive: { label: 'Inactive' }
 };
 
 // ============================================
@@ -70,7 +70,7 @@ export function WorkflowDetailPanel({
   workflow,
   onClose,
   onStatusChange,
-  onEdit,
+  onEdit
 }: WorkflowDetailPanelProps) {
   const config = useMemo<DetailPanelConfig<Workflow>>(
     () => ({
@@ -84,18 +84,18 @@ export function WorkflowDetailPanel({
       status: {
         current: (w) => w.status,
         config: WORKFLOW_STATUS_CONFIG,
-        onChange: (w, newStatus) => onStatusChange?.(w.id, newStatus),
+        onChange: (w, newStatus) => onStatusChange?.(w.id, newStatus)
       },
 
       meta: (w) => [
         {
           label: 'Steps',
-          value: String(w.steps),
+          value: String(w.steps)
         },
         {
           label: 'Updated',
-          value: formatDate(w.updatedAt),
-        },
+          value: formatDate(w.updatedAt)
+        }
       ],
 
       actions: (w) => (
@@ -118,32 +118,32 @@ export function WorkflowDetailPanel({
             const fields: PanelMetaField[] = [
               {
                 label: 'Trigger',
-                value: w.trigger,
+                value: w.trigger
               },
               {
                 label: 'Steps',
-                value: String(w.steps),
+                value: String(w.steps)
               },
               {
                 label: 'Status',
-                value: WORKFLOW_STATUS_CONFIG[w.status].label,
+                value: WORKFLOW_STATUS_CONFIG[w.status].label
               },
               {
                 label: 'Last Run',
-                value: w.lastRun ? formatDate(w.lastRun) : 'Never',
-              },
+                value: w.lastRun ? formatDate(w.lastRun) : 'Never'
+              }
             ];
 
             const descriptions: PanelDescriptionField[] = [
               {
                 label: 'Description',
                 value: w.description ? decodeHtmlEntities(w.description) : undefined,
-                visible: !!w.description,
-              },
+                visible: !!w.description
+              }
             ];
 
             return <MetaGrid fields={fields} descriptions={descriptions} />;
-          },
+          }
         },
         {
           id: 'stats',
@@ -152,30 +152,30 @@ export function WorkflowDetailPanel({
             const fields: PanelMetaField[] = [
               {
                 label: 'Run Count',
-                value: String(w.runCount),
+                value: String(w.runCount)
               },
               {
                 label: 'Success Rate',
-                value: formatPercentage(w.successRate),
+                value: formatPercentage(w.successRate)
               },
               {
                 label: 'Last Run',
-                value: w.lastRun ? formatDate(w.lastRun) : 'Never',
+                value: w.lastRun ? formatDate(w.lastRun) : 'Never'
               },
               {
                 label: 'Created',
-                value: formatDate(w.createdAt),
+                value: formatDate(w.createdAt)
               },
               {
                 label: 'Updated',
-                value: formatDate(w.updatedAt),
-              },
+                value: formatDate(w.updatedAt)
+              }
             ];
 
             return <MetaGrid fields={fields} />;
-          },
-        },
-      ],
+          }
+        }
+      ]
     }),
     [onStatusChange, onEdit]
   );
