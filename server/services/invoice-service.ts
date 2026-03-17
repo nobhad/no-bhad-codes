@@ -910,17 +910,29 @@ export class InvoiceService {
       return [];
     }
 
-    // For each deposit, calculate how much has been applied as credits
+    // Batch fetch all applied credits at once (avoids N+1 query)
+    const depositIds = deposits.map((d: Record<string, unknown>) => d.id as number);
+    const creditMap = new Map<number, number>();
+
+    if (depositIds.length > 0) {
+      const placeholders = depositIds.map(() => '?').join(',');
+      const creditRows = await this.getDb().all(
+        `SELECT deposit_invoice_id, COALESCE(SUM(amount), 0) as total_applied
+         FROM invoice_credits
+         WHERE deposit_invoice_id IN (${placeholders})
+         GROUP BY deposit_invoice_id`,
+        depositIds
+      ) as Array<{ deposit_invoice_id: number; total_applied: number }>;
+
+      for (const row of creditRows) {
+        creditMap.set(row.deposit_invoice_id, row.total_applied);
+      }
+    }
+
     const summaries: DepositSummary[] = [];
 
     for (const deposit of deposits) {
-      const appliedSql = `
-        SELECT COALESCE(SUM(amount), 0) as total_applied
-        FROM invoice_credits
-        WHERE deposit_invoice_id = ?
-      `;
-      const appliedResult = await this.getDb().get(appliedSql, [deposit.id]);
-      const totalApplied = appliedResult?.total_applied || 0;
+      const totalApplied = creditMap.get(deposit.id as number) || 0;
       const totalAmount =
         typeof deposit.amount_total === 'string'
           ? parseFloat(deposit.amount_total)
