@@ -19,10 +19,58 @@ export interface PortalProposal {
   createdAt: string;
 }
 
+/** Full proposal detail from GET /api/proposals/:id */
+export interface PortalProposalDetail {
+  id: number;
+  projectId: number;
+  clientId: number;
+  projectType: string;
+  selectedTier: string;
+  basePrice: number;
+  finalPrice: number;
+  maintenanceOption: string | null;
+  status: string;
+  clientNotes: string | null;
+  adminNotes: string | null;
+  createdAt: string;
+  reviewedAt: string | null;
+  reviewedBy: string | null;
+  project: { name: string };
+  client: { name: string; email: string; company: string | null };
+  features: PortalProposalFeature[];
+}
+
+export interface PortalProposalFeature {
+  featureId: string;
+  featureName: string;
+  featurePrice: number;
+  featureCategory: string;
+  isIncludedInTier: boolean;
+  isAddon: boolean;
+}
+
 /** API response for client proposals */
 export interface PortalProposalsResponse {
   proposals: PortalProposal[];
 }
+
+/** Tier display labels */
+export const TIER_LABELS: Record<string, string> = {
+  good: 'Good',
+  better: 'Better',
+  best: 'Best'
+};
+
+/** Maintenance tier display labels */
+export const MAINTENANCE_LABELS: Record<string, string> = {
+  diy: 'DIY (Self-Managed)',
+  essential: 'Essential Care',
+  standard: 'Standard Care',
+  premium: 'Premium Care'
+};
+
+/** Statuses that allow acceptance */
+export const ACCEPTABLE_STATUSES = ['sent', 'pending', 'reviewed'];
 
 /** Proposal status display config */
 export const PROPOSAL_STATUS_CONFIG: Record<string, { label: string; color: string }> = {

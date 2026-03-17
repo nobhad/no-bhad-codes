@@ -110,6 +110,8 @@ const PortalContracts = lazyNamed(() => import('../features/portal/contracts').t
 const PortalRequestsHub = lazyNamed(() => import('../features/portal/requests-hub').then(m => ({ PortalRequestsHub: m.PortalRequestsHub })));
 const ContentChecklistView = lazyNamed(() => import('../features/portal/content-requests').then(m => ({ ContentChecklistView: m.ContentChecklistView })));
 const PaymentScheduleView = lazyNamed(() => import('../features/portal/payment-schedule').then(m => ({ PaymentScheduleView: m.PaymentScheduleView })));
+const PortalProposals = lazyNamed(() => import('../features/portal/proposals').then(m => ({ PortalProposals: m.PortalProposals })));
+const PortalProposalDetailView = lazyNamed(() => import('../features/portal/proposals').then(m => ({ PortalProposalDetail: m.PortalProposalDetail })));
 
 // ============================================
 // DETAIL VIEW WRAPPERS
@@ -326,8 +328,11 @@ export function PortalRoutes() {
           role === 'admin' ? (
             <LazyTabRoute tabId="proposals"><ProposalsTable /></LazyTabRoute>
           ) : (
-            <Navigate to="/documents" replace />
+            <LazyTabRoute tabId="proposals"><PortalProposals /></LazyTabRoute>
           )
+        } />
+        <Route path="/proposals/:id" element={
+          <LazyTabRoute tabId="proposals"><PortalProposalDetailView /></LazyTabRoute>
         } />
         {/* document-requests now handled above with role-based routing */}
         <Route path="/support" element={<LazyTabRoute tabId="support"><KnowledgeBase /></LazyTabRoute>} />
