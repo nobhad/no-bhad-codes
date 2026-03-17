@@ -12,6 +12,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { IconButton, TabList, TabPanel } from '@react/factories';
+import { DetailHeader } from '@react/components/portal/DetailHeader';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import {
   PortalDropdown,
@@ -210,7 +211,7 @@ export function ClientDetail({
   }
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef} className="subsection">
       {/* Tabs — top of page, like all other subtab nav */}
       <TabList
         tabs={TABS}
@@ -222,72 +223,57 @@ export function ClientDetail({
       />
 
       {/* Header */}
-      <div className="detail-title-row">
-        <div className="detail-title-group">
-          {/* Client Info */}
-          <div className="detail-info">
-            <div className="detail-name-row">
-              <h1 className="detail-title">
-                {getDisplayName()}
-              </h1>
-              <StatusDropdown
-                status={client.status}
-                statusConfig={CLIENT_STATUS_CONFIG}
-                onStatusChange={(newStatus) => handleStatusChange(newStatus as ClientStatus)}
-                ariaLabel="Change client status"
-              />
-            </div>
+      <DetailHeader
+        title={getDisplayName()}
+        status={
+          <StatusDropdown
+            status={client.status}
+            statusConfig={CLIENT_STATUS_CONFIG}
+            onStatusChange={(newStatus) => handleStatusChange(newStatus as ClientStatus)}
+            ariaLabel="Change client status"
+          />
+        }
+        meta={client.client_type ? [
+          { label: 'Type', value: CLIENT_TYPE_LABELS[client.client_type] || client.client_type }
+        ] : []}
+        actions={
+          <>
+            <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
 
-            <div className="detail-meta">
-              {client.client_type && (
-                <span className="meta-item">
-                  <span className="field-label">Type:</span>{' '}
-                  <span className="meta-value">
-                    {CLIENT_TYPE_LABELS[client.client_type] || client.client_type}
-                  </span>
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
+            {client.status !== 'active' && (
+              <IconButton action="send" onClick={handleSendInvitation} title="Send Invite" />
+            )}
 
-        {/* Actions */}
-        <div className="detail-actions">
-          <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
+            <IconButton action="edit" onClick={() => onEdit?.(clientId)} title="Edit" />
 
-          {client.status !== 'active' && (
-            <IconButton action="send" onClick={handleSendInvitation} title="Send Invite" />
-          )}
-
-          <IconButton action="edit" onClick={() => onEdit?.(clientId)} title="Edit" />
-
-          <PortalDropdown>
-            <PortalDropdownTrigger asChild>
-              <button className="icon-btn" aria-label="More actions">
-                <MoreHorizontal className="icon-lg" />
-              </button>
-            </PortalDropdownTrigger>
-            <PortalDropdownContent align="end" className="detail-actions-menu">
-              <PortalDropdownItem onClick={() => onEdit?.(clientId)}>
-                <Pencil className="icon-sm" />
-                Edit Client
-              </PortalDropdownItem>
-              <PortalDropdownItem onClick={archiveDialog.open}>
-                <Archive className="icon-sm" />
-                Archive Client
-              </PortalDropdownItem>
-              <PortalDropdownSeparator />
-              <PortalDropdownItem
-                onClick={deleteDialog.open}
-                className="danger"
-              >
-                <Trash2 className="icon-sm" />
-                Delete Client
-              </PortalDropdownItem>
-            </PortalDropdownContent>
-          </PortalDropdown>
-        </div>
-      </div>
+            <PortalDropdown>
+              <PortalDropdownTrigger asChild>
+                <button className="icon-btn" aria-label="More actions">
+                  <MoreHorizontal className="icon-lg" />
+                </button>
+              </PortalDropdownTrigger>
+              <PortalDropdownContent align="end" className="detail-actions-menu">
+                <PortalDropdownItem onClick={() => onEdit?.(clientId)}>
+                  <Pencil className="icon-sm" />
+                  Edit Client
+                </PortalDropdownItem>
+                <PortalDropdownItem onClick={archiveDialog.open}>
+                  <Archive className="icon-sm" />
+                  Archive Client
+                </PortalDropdownItem>
+                <PortalDropdownSeparator />
+                <PortalDropdownItem
+                  onClick={deleteDialog.open}
+                  className="danger"
+                >
+                  <Trash2 className="icon-sm" />
+                  Delete Client
+                </PortalDropdownItem>
+              </PortalDropdownContent>
+            </PortalDropdown>
+          </>
+        }
+      />
 
       {/* Tab Content */}
       <TabPanel tabId="overview" isActive={activeTab === 'overview'}>
