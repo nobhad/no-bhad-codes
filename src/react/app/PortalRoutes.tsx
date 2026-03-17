@@ -120,9 +120,11 @@ const AgreementFlowLazy = React.lazy(() => import('../features/portal/agreements
 // Meetings (Portal)
 const MeetingRequestsList = lazyNamed(() => import('../features/portal/meetings').then(m => ({ MeetingRequestsList: m.MeetingRequestsList })));
 
-// Admin: Sequences & Meetings
+// Admin: Sequences, Meetings & Automations
 const SequencesTable = lazyNamed(() => import('../features/admin/sequences').then(m => ({ SequencesTable: m.SequencesTable })));
 const MeetingRequestsTable = lazyNamed(() => import('../features/admin/meetings').then(m => ({ MeetingRequestsTable: m.MeetingRequestsTable })));
+const AutomationsTable = lazyNamed(() => import('../features/admin/automations').then(m => ({ AutomationsTable: m.AutomationsTable })));
+const AutomationDetailLazy = React.lazy(() => import('../features/admin/automations').then(m => ({ default: m.AutomationDetailPanel })));
 
 // ============================================
 // DETAIL VIEW WRAPPERS
@@ -147,6 +149,16 @@ function ClientDetailRoute(props: Record<string, unknown>) {
       {...props}
     />
   );
+}
+
+function AutomationDetailRoute() {
+  const params = useParams();
+  const navigate = useNavigate();
+  const automationId = params.automationId ? parseInt(params.automationId, 10) : 0;
+
+  if (!automationId) return <Navigate to="/automations" replace />;
+
+  return <AutomationDetailLazy automationId={automationId} onBack={() => navigate('/automations')} />;
 }
 
 function AgreementFlowRoute() {
@@ -411,9 +423,15 @@ export function PortalRoutes() {
           )
         } />
 
-        {/* ========== ADMIN: SEQUENCES ========== */}
+        {/* ========== ADMIN: SEQUENCES & AUTOMATIONS ========== */}
         <Route path="/sequences" element={
           <LazyTabRoute tabId="sequences"><SequencesTable /></LazyTabRoute>
+        } />
+        <Route path="/automations" element={
+          <LazyTabRoute tabId="automations"><AutomationsTable /></LazyTabRoute>
+        } />
+        <Route path="/automation-detail/:automationId" element={
+          <LazyTabRoute tabId="automations"><AutomationDetailRoute /></LazyTabRoute>
         } />
 
         {/* ========== AGREEMENTS ========== */}
