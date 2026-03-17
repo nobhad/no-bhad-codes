@@ -458,35 +458,26 @@ class ReceiptService {
 
     const pdfBytes = await generateReceiptPdf(pdfData);
 
-    // Save PDF to files system
-    let fileId: number | null = null;
+    // Run DB operations in a transaction: folder, file record, receipt record
     const projectId = invoiceRow.project_id as number | null;
+    const filename = sanitizeFilename(`${receiptNumber}.pdf`);
+    const relativePath = projectId ? getRelativePath('receipts', filename) : null;
 
-    if (projectId) {
-      try {
-        // Ensure receipts directory exists
-        const receiptsDir = getUploadsSubdir('receipts');
-        const filename = sanitizeFilename(`${receiptNumber}.pdf`);
-        const filePath = join(receiptsDir, filename);
+    const { receiptId, fileId } = await db.transaction(async (ctx) => {
+      let txFileId: number | null = null;
 
-        // Write PDF to disk
-        await writeFile(filePath, Buffer.from(pdfBytes));
-
-        // Create file record in database
-        const relativePath = getRelativePath('receipts', filename);
-
+      if (projectId && relativePath) {
         // Get or create Documents folder for the project
-        let folderId: number | null = null;
-        const folderRow = (await db.get(
+        const folderRow = (await ctx.get(
           'SELECT id FROM file_folders WHERE project_id = ? AND name = \'Documents\'',
           [projectId as number]
-        )) as { id: number } | null;
+        )) as { id: number } | undefined;
 
+        let folderId: number | null = null;
         if (folderRow) {
           folderId = folderRow.id as number;
         } else {
-          // Create Documents folder if it doesn't exist
-          const folderResult = await db.run(
+          const folderResult = await ctx.run(
             `INSERT INTO file_folders (project_id, name, description, icon, color)
              VALUES (?, 'Documents', 'Project documents and receipts', 'file-text', '#6366F1')`,
             [projectId as number]
@@ -495,7 +486,7 @@ class ReceiptService {
         }
 
         // Insert file record
-        const fileResult = await db.run(
+        const fileResult = await ctx.run(
           `INSERT INTO files (
             project_id, filename, original_filename, file_path, file_type,
             file_size, mime_type, uploaded_by, folder_id, category, description
@@ -510,23 +501,33 @@ class ReceiptService {
             `Payment receipt for invoice ${String(invoiceRow.invoice_number || '')}`
           ]
         );
-        fileId = fileResult.lastID || null;
-      } catch (error) {
-        logger.error('[ReceiptService] Failed to save receipt PDF:', {
-          error: error instanceof Error ? error : undefined
+        txFileId = fileResult.lastID || null;
+      }
+
+      // Insert receipt record
+      const receiptResult = await ctx.run(
+        `INSERT INTO receipts (receipt_number, invoice_id, payment_id, amount, file_id)
+         VALUES (?, ?, ?, ?, ?)`,
+        [receiptNumber, invoiceId, paymentId, amount, txFileId]
+      );
+
+      return { receiptId: receiptResult.lastID!, fileId: txFileId };
+    });
+
+    // Write PDF to disk AFTER transaction succeeds (non-critical — DB records are the source of truth)
+    if (projectId && fileId) {
+      try {
+        const receiptsDir = getUploadsSubdir('receipts');
+        const filePath = join(receiptsDir, filename);
+        await writeFile(filePath, Buffer.from(pdfBytes));
+      } catch (diskError) {
+        logger.error('[ReceiptService] Failed to write receipt PDF to disk (DB records saved):', {
+          error: diskError instanceof Error ? diskError : undefined
         });
-        // Continue without file - receipt record still created
       }
     }
 
-    // Insert receipt record
-    const result = await db.run(
-      `INSERT INTO receipts (receipt_number, invoice_id, payment_id, amount, file_id)
-       VALUES (?, ?, ?, ?, ?)`,
-      [receiptNumber, invoiceId, paymentId, amount, fileId]
-    );
-
-    // Send receipt email notification
+    // Send receipt email notification (non-critical)
     if (pdfData.clientEmail) {
       try {
         const { emailService } = await import('./email-service.js');
@@ -558,7 +559,7 @@ class ReceiptService {
       }
     }
 
-    return this.getReceiptById(result.lastID!);
+    return this.getReceiptById(receiptId);
   }
 
   /**
