@@ -81,7 +81,7 @@ class DesignReviewService {
   async getAll(projectId?: string | number): Promise<DesignReviewListItem[]> {
     const db = getDatabase();
 
-    let whereClause = 'WHERE d.status IN (\'ready_for_review\', \'revision_requested\', \'approved\')';
+    let whereClause = 'WHERE d.status IN (\'ready_for_review\', \'revision_requested\', \'approved\') AND d.deleted_at IS NULL AND p.deleted_at IS NULL AND c.deleted_at IS NULL';
     const params: (string | number)[] = [];
 
     if (projectId) {

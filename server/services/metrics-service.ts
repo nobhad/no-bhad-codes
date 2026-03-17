@@ -34,13 +34,13 @@ async function getDatabaseMetrics(): Promise<DatabaseMetrics> {
 
   const [clientsRow, activeClientsRow, projectsRow, activeProjectsRow, invoicesRow] =
     await Promise.all([
-      db.get<{ count: number }>('SELECT COUNT(*) as count FROM clients'),
-      db.get<{ count: number }>('SELECT COUNT(*) as count FROM clients WHERE status = \'active\''),
-      db.get<{ count: number }>('SELECT COUNT(*) as count FROM projects'),
+      db.get<{ count: number }>('SELECT COUNT(*) as count FROM active_clients'),
+      db.get<{ count: number }>('SELECT COUNT(*) as count FROM active_clients WHERE status = \'active\''),
+      db.get<{ count: number }>('SELECT COUNT(*) as count FROM active_projects'),
       db.get<{ count: number }>(
-        'SELECT COUNT(*) as count FROM projects WHERE status IN (\'in-progress\', \'pending\')'
+        'SELECT COUNT(*) as count FROM active_projects WHERE status IN (\'in-progress\', \'pending\')'
       ),
-      db.get<{ count: number }>('SELECT COUNT(*) as count FROM invoices')
+      db.get<{ count: number }>('SELECT COUNT(*) as count FROM active_invoices')
     ]);
 
   return {
