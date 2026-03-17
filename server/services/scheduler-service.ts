@@ -179,6 +179,7 @@ export class SchedulerService {
   private retainerUsageAlertJob: SimpleTask | null = null;
   private feedbackReminderJob: SimpleTask | null = null;
   private feedbackExpirationJob: SimpleTask | null = null;
+  private aiCacheCleanupJob: SimpleTask | null = null;
   private isRunning = false;
 
   private constructor(config: Partial<SchedulerConfig> = {}) {
@@ -253,6 +254,9 @@ export class SchedulerService {
     this.scheduleFeedbackReminders();
     this.scheduleFeedbackExpiration();
 
+    // Schedule AI cache cleanup (daily at 3:30 AM)
+    this.scheduleAiCacheCleanup();
+
     // Start all scheduled jobs
     const jobs = [
       this.reminderJob,
@@ -266,7 +270,8 @@ export class SchedulerService {
       this.retainerBillingJob,
       this.retainerUsageAlertJob,
       this.feedbackReminderJob,
-      this.feedbackExpirationJob
+      this.feedbackExpirationJob,
+      this.aiCacheCleanupJob
     ].filter(Boolean);
 
     for (const job of jobs) {
@@ -341,6 +346,11 @@ export class SchedulerService {
     if (this.feedbackExpirationJob) {
       this.feedbackExpirationJob.stop();
       this.feedbackExpirationJob = null;
+    }
+
+    if (this.aiCacheCleanupJob) {
+      this.aiCacheCleanupJob.stop();
+      this.aiCacheCleanupJob = null;
     }
 
     this.isRunning = false;
@@ -630,6 +640,29 @@ export class SchedulerService {
         }
       } catch (error) {
         logger.error('[Scheduler] Error during feedback expiration:', {
+          error: error instanceof Error ? error : undefined
+        });
+      }
+    });
+  }
+
+  /**
+   * Schedule AI response cache cleanup — daily at 3:30 AM
+   */
+  private scheduleAiCacheCleanup(): void {
+    const AI_CACHE_CRON = '30 3 * * *';
+    logger.info(`[Scheduler] Scheduling AI cache cleanup: ${AI_CACHE_CRON}`);
+
+    this.aiCacheCleanupJob = createSimpleTask(AI_CACHE_CRON, async () => {
+      try {
+        const { aiService } = await import('./ai-service.js');
+        const deleted = await aiService.cleanupExpiredCache();
+
+        if (deleted > 0) {
+          logger.info(`[Scheduler] Cleaned ${deleted} expired AI cache entries`);
+        }
+      } catch (error) {
+        logger.error('[Scheduler] Error during AI cache cleanup:', {
           error: error instanceof Error ? error : undefined
         });
       }
