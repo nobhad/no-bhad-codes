@@ -211,7 +211,7 @@ export async function sendInfoRequestEmail(
     await emailService.sendEmail({
       to: row.client_email,
       subject: `Information Needed for ${row.project_name} - ${BUSINESS_INFO.name}`,
-      text: `Hi ${row.client_name},\n\nTo keep your project "${row.project_name}" moving forward, we need a few more details from you:\n\n${itemsList}\n\n${customMessage ? customMessage + '\n\n' : ''}You can provide this information by logging into the client portal or replying to this email.\n\nThank you!\n${BUSINESS_INFO.owner}\n${BUSINESS_INFO.name}`,
+      text: `Hi ${row.client_name},\n\nTo keep your project "${row.project_name}" moving forward, we need a few more details from you:\n\n${itemsList}\n\n${customMessage ? `${customMessage  }\n\n` : ''}You can provide this information by logging into the client portal or replying to this email.\n\nThank you!\n${BUSINESS_INFO.owner}\n${BUSINESS_INFO.name}`,
       html: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">Information Needed</h2>
         <p>Hi ${safeClientName},</p>

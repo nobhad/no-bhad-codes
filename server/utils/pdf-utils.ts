@@ -558,7 +558,7 @@ export function drawTwoColumnInfo(
   const size = PDF_TYPOGRAPHY.bodySize;
   const lineHeight = PDF_SPACING.lineHeight;
   const detailsX = width / 2 + 36;
-  let y = opts.y;
+  const y = opts.y;
 
   // --- LEFT COLUMN: section label + client lines ---
   const labelText = opts.left.label.toUpperCase();
@@ -591,10 +591,10 @@ export function drawTwoColumnInfo(
     let displayText = text;
     // Truncate with ellipsis if value is too wide
     if (font.widthOfTextAtSize(displayText, size) > maxValueWidth) {
-      while (displayText.length > 1 && font.widthOfTextAtSize(displayText + '...', size) > maxValueWidth) {
+      while (displayText.length > 1 && font.widthOfTextAtSize(`${displayText  }...`, size) > maxValueWidth) {
         displayText = displayText.slice(0, -1);
       }
-      displayText = displayText.trimEnd() + '...';
+      displayText = `${displayText.trimEnd()  }...`;
     }
     const w = font.widthOfTextAtSize(displayText, size);
     page.drawText(displayText, { x: rightMargin - w, y: yPos, size, font, color: PDF_COLORS.black });
