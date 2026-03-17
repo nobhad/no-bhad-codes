@@ -457,15 +457,16 @@ Client view of active retainer agreements with utilization tracking.
 - [Onboarding Checklist](./ONBOARDING_CHECKLIST.md) - Post-agreement onboarding (Phase 1D)
 - [Embedded Payments](./EMBEDDED_PAYMENTS.md) - Stripe Elements payment (Phase 1B)
 - [Meeting Requests](./MEETING_REQUESTS.md) - Meeting scheduling (Phase 2B)
+- [Retainers](./RETAINERS.md) - Retainer utilization tracking (Phase 4B)
 - [CSS Architecture](../design/CSS_ARCHITECTURE.md) - Styling system
 - [Architecture Overview](../architecture/ARCHITECTURE.md) - System design
 
 ## Change Log
 
-### 2026-03-17 - Phase 1 and Phase 2 features
+### 2026-03-17 - Phase 1-4 features
 
-- Added Phase 1 + Phase 2 features section documenting agreements, onboarding, payments, meetings
-- Updated routing table with 6 new routes (proposals/:id, agreements, meetings, payment-schedule, requests-hub, content-requests)
+- Added Phase 1-4 features section documenting agreements, onboarding, payments, meetings, retainers
+- Updated routing table with 7 new routes (proposals/:id, agreements, meetings, retainers, payment-schedule, requests-hub, content-requests)
 - Added Related Documentation links for all new feature docs
 
 ### 2026-03-08 - Full rewrite to React architecture
