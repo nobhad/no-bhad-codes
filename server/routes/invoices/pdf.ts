@@ -8,12 +8,12 @@
  */
 
 import express from 'express';
-import { PDFDocument as PDFLibDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument as PDFLibDocument, StandardFonts } from 'pdf-lib';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { InvoiceLineItem } from '../../services/invoice-service.js';
 import { BUSINESS_INFO } from '../../config/business.js';
-import { PDF_COLORS } from '../../config/pdf-styles.js';
+import { PDF_COLORS, PDF_TYPOGRAPHY } from '../../config/pdf-styles.js';
 import { ErrorCodes, errorResponse } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import {
@@ -21,7 +21,8 @@ import {
   ensureSpace,
   addPageNumbers,
   PAGE_MARGINS,
-  drawPdfDocumentHeader
+  drawPdfDocumentHeader,
+  drawPdfFooter
 } from '../../utils/pdf-utils.js';
 import { logger } from '../../services/logger.js';
 import { getInvoiceService } from './helpers.js';
@@ -109,7 +110,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     context.currentPage.drawText(`Invoice ${data.invoiceNumber} (continued)`, {
       x: ctx.leftMargin,
       y: context.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
       color: PDF_COLORS.black
     });
@@ -136,17 +137,17 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   page().drawText('BILL TO:', {
     x: leftMargin,
     y: ctx.y,
-    size: 11,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helveticaBold,
     color: PDF_COLORS.black
   });
   // Company name first (bold) if present, then contact name below
-  let clientLineY = ctx.y - 14;
+  let clientLineY = ctx.y - 20;
   if (data.clientCompany) {
     page().drawText(data.clientCompany, {
       x: leftMargin,
       y: clientLineY,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helveticaBold,
       color: PDF_COLORS.black
     });
@@ -155,7 +156,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     page().drawText(data.clientName, {
       x: leftMargin,
       y: clientLineY,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
       color: PDF_COLORS.black
     });
@@ -165,7 +166,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     page().drawText(data.clientName, {
       x: leftMargin,
       y: clientLineY,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helveticaBold,
       color: PDF_COLORS.black
     });
@@ -175,7 +176,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     page().drawText(data.clientAddress, {
       x: leftMargin,
       y: clientLineY,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
       color: PDF_COLORS.black
     });
@@ -185,7 +186,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     page().drawText(data.clientCityStateZip, {
       x: leftMargin,
       y: clientLineY,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
       color: PDF_COLORS.black
     });
@@ -194,7 +195,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   page().drawText(data.clientEmail, {
     x: leftMargin,
     y: clientLineY,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helvetica,
     color: PDF_COLORS.black
   });
@@ -203,7 +204,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     page().drawText(data.clientPhone, {
       x: leftMargin,
       y: clientLineY,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
       color: PDF_COLORS.black
     });
@@ -217,7 +218,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   page().drawText('INVOICE #:', {
     x: detailsX,
     y: ctx.y,
-    size: 9,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helveticaBold,
     color: PDF_COLORS.black
   });
@@ -225,7 +226,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   page().drawText('INVOICE DATE:', {
     x: detailsX,
     y: ctx.y - 14,
-    size: 9,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helveticaBold,
     color: PDF_COLORS.black
   });
@@ -233,7 +234,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   page().drawText('DUE DATE:', {
     x: detailsX,
     y: ctx.y - 28,
-    size: 9,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helveticaBold,
     color: PDF_COLORS.black
   });
@@ -243,7 +244,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     page().drawText('PROJECT #:', {
       x: detailsX,
       y: ctx.y - 42,
-      size: 9,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helveticaBold,
       color: PDF_COLORS.black
     });
@@ -258,38 +259,38 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     y: ctx.y - 2,
     width: rightMargin - leftMargin,
     height: 18,
-    color: rgb(0.25, 0.25, 0.25)
+    color: PDF_COLORS.tableHeaderBg
   });
 
   page().drawText('DESCRIPTION', {
     x: leftMargin + 7,
     y: ctx.y + 4,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helveticaBold,
-    color: rgb(1, 1, 1)
+    color: PDF_COLORS.tableHeaderText
   });
   page().drawText('QTY', {
     x: rightMargin - 144,
     y: ctx.y + 4,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helveticaBold,
-    color: rgb(1, 1, 1)
+    color: PDF_COLORS.tableHeaderText
   });
   page().drawText('RATE', {
     x: rightMargin - 94,
     y: ctx.y + 4,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helveticaBold,
-    color: rgb(1, 1, 1)
+    color: PDF_COLORS.tableHeaderText
   });
   const amountLabel = 'AMOUNT';
   const amountLabelW = helveticaBold.widthOfTextAtSize(amountLabel, 10);
   page().drawText(amountLabel, {
     x: rightMargin - 7 - amountLabelW,
     y: ctx.y + 4,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helveticaBold,
-    color: rgb(1, 1, 1)
+    color: PDF_COLORS.tableHeaderText
   });
 
   ctx.y -= 22;
@@ -301,14 +302,14 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     page().drawText(item.description, {
       x: leftMargin + 7,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helveticaBold,
       color: PDF_COLORS.black
     });
     page().drawText(String(item.quantity), {
       x: rightMargin - 144,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
       color: PDF_COLORS.black
     });
@@ -317,7 +318,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     page().drawText(rateText, {
       x: rightMargin - 94,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
       color: PDF_COLORS.black
     });
@@ -327,7 +328,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     page().drawText(amountText, {
       x: rightMargin - amountW,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helveticaBold,
       color: PDF_COLORS.black
     });
@@ -353,7 +354,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
             page().drawText(line, {
               x: detailStartX,
               y: ctx.y,
-              size: 9,
+              size: PDF_TYPOGRAPHY.bodySize,
               font: helvetica,
               color: PDF_COLORS.black
             });
@@ -369,7 +370,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
           page().drawText(line, {
             x: detailStartX,
             y: ctx.y,
-            size: 9,
+            size: PDF_TYPOGRAPHY.bodySize,
             font: helvetica,
             color: PDF_COLORS.black
           });
@@ -395,7 +396,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   page().drawText('Subtotal:', {
     x: totalsX,
     y: ctx.y,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helvetica,
     color: PDF_COLORS.black
   });
@@ -404,7 +405,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   page().drawText(subtotalText, {
     x: rightMargin - subtotalW,
     y: ctx.y,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helvetica,
     color: PDF_COLORS.black
   });
@@ -414,7 +415,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     page().drawText('Discount:', {
       x: totalsX,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
       color: PDF_COLORS.black
     });
@@ -423,7 +424,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     page().drawText(discountText, {
       x: rightMargin - discountW,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
       color: PDF_COLORS.black
     });
@@ -434,7 +435,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     page().drawText('Tax:', {
       x: totalsX,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
       color: PDF_COLORS.black
     });
@@ -443,7 +444,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     page().drawText(taxText, {
       x: rightMargin - taxW,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
       color: PDF_COLORS.black
     });
@@ -454,7 +455,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     page().drawText('DEPOSIT CREDITS APPLIED:', {
       x: totalsX - 40,
       y: ctx.y,
-      size: 9,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helveticaBold,
       color: PDF_COLORS.black
     });
@@ -465,7 +466,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
       page().drawText(creditLabel, {
         x: totalsX,
         y: ctx.y,
-        size: 9,
+        size: PDF_TYPOGRAPHY.bodySize,
         font: helvetica,
         color: PDF_COLORS.black
       });
@@ -474,7 +475,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
       page().drawText(creditText, {
         x: rightMargin - creditW,
         y: ctx.y,
-        size: 9,
+        size: PDF_TYPOGRAPHY.bodySize,
         font: helvetica,
         color: PDF_COLORS.black
       });
@@ -496,26 +497,26 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   page().drawText(totalLabel, {
     x: totalsX,
     y: ctx.y,
-    size: 14,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helveticaBold,
     color: PDF_COLORS.black
   });
   const totalText = `$${finalTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-  const totalW = helveticaBold.widthOfTextAtSize(totalText, 16);
+  const totalW = helveticaBold.widthOfTextAtSize(totalText, PDF_TYPOGRAPHY.bodySize);
   page().drawText(totalText, {
     x: rightMargin - totalW,
     y: ctx.y,
-    size: 16,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helveticaBold,
     color: PDF_COLORS.black
   });
 
   const amtDueText = 'Amount Due (USD)';
-  const amtDueW = helvetica.widthOfTextAtSize(amtDueText, 9);
+  const amtDueW = helvetica.widthOfTextAtSize(amtDueText, PDF_TYPOGRAPHY.bodySize);
   page().drawText(amtDueText, {
     x: rightMargin - amtDueW,
     y: ctx.y - 16,
-    size: 9,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helvetica,
     color: PDF_COLORS.black
   });
@@ -525,18 +526,20 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   // === PAYMENT INSTRUCTIONS ===
   ensureSpace(ctx, 80, drawContinuationHeader);
 
-  page().drawText('PAYMENT INSTRUCTIONS', {
+  const paymentHeading = 'PAYMENT INSTRUCTIONS';
+  page().drawText(paymentHeading, {
     x: leftMargin,
     y: ctx.y,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helveticaBold,
     color: PDF_COLORS.black
   });
+  const paymentHeadingW = helveticaBold.widthOfTextAtSize(paymentHeading, PDF_TYPOGRAPHY.bodySize);
   page().drawLine({
     start: { x: leftMargin, y: ctx.y - 4 },
-    end: { x: leftMargin + 144, y: ctx.y - 4 },
+    end: { x: leftMargin + paymentHeadingW, y: ctx.y - 4 },
     thickness: 0.5,
-    color: PDF_COLORS.divider
+    color: PDF_COLORS.black
   });
   ctx.y -= 18;
 
@@ -551,7 +554,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     page().drawText(line, {
       x: leftMargin,
       y: ctx.y,
-      size: 9,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
       color: PDF_COLORS.black
     });
@@ -559,31 +562,11 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   }
 
   // === FOOTER ===
-  page().drawLine({
-    start: { x: leftMargin, y: 72 },
-    end: { x: rightMargin, y: 72 },
-    thickness: 0.5,
-    color: PDF_COLORS.dividerLight
-  });
-
-  const thankYouText = 'Thank you for your business!';
-  const thankYouW = helvetica.widthOfTextAtSize(thankYouText, 10);
-  page().drawText(thankYouText, {
-    x: (width - thankYouW) / 2,
-    y: 54,
-    size: 10,
-    font: helvetica,
-    color: PDF_COLORS.black
-  });
-
-  const footerText = `${BUSINESS_INFO.name} • ${BUSINESS_INFO.owner} • ${BUSINESS_INFO.email} • ${BUSINESS_INFO.website}`;
-  const footerW = helvetica.widthOfTextAtSize(footerText, 7);
-  page().drawText(footerText, {
-    x: (width - footerW) / 2,
-    y: 36,
-    size: 7,
-    font: helvetica,
-    color: PDF_COLORS.black
+  drawPdfFooter(page(), {
+    leftMargin,
+    rightMargin,
+    width,
+    fonts: { regular: helvetica, bold: helveticaBold }
   });
 
   if (ctx.pageNumber > 1) {

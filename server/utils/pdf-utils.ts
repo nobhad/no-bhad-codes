@@ -420,10 +420,10 @@ export async function drawPdfDocumentHeader(params: {
     y: startY - 20,
     size: PDF_TYPOGRAPHY.titleSize,
     font: bold,
-    color: PDF_COLORS.title
+    color: PDF_COLORS.black
   });
 
-  // Logo + business info on the right
+  // Logo + business info on the right (original layout)
   const logoHeight = PDF_SPACING.logoHeight;
   let textStartX = rightMargin - 180;
 
@@ -441,64 +441,45 @@ export async function drawPdfDocumentHeader(params: {
     textStartX = logoX + logoWidth + 18;
   }
 
+  // Business info
+  const infoSize = PDF_TYPOGRAPHY.bodySize;
+  const infoLineHeight = 14;
   let infoY = startY - 11;
-  page.drawText(BUSINESS_INFO.name, {
+
+  // Business name — ALL CAPS
+  page.drawText(BUSINESS_INFO.name.toUpperCase(), {
     x: textStartX,
     y: infoY,
     size: PDF_TYPOGRAPHY.businessNameSize,
     font: bold,
-    color: PDF_COLORS.title
+    color: PDF_COLORS.black
   });
   infoY -= 18;
 
-  if (BUSINESS_INFO.owner) {
-    page.drawText(BUSINESS_INFO.owner, {
+  const infoLines = [
+    BUSINESS_INFO.owner,
+    BUSINESS_INFO.email,
+    BUSINESS_INFO.website
+  ].filter(Boolean);
+
+  for (const line of infoLines) {
+    page.drawText(line!, {
       x: textStartX,
       y: infoY,
-      size: PDF_TYPOGRAPHY.bodySize,
+      size: infoSize,
       font: regular,
-      color: PDF_COLORS.subtitle
+      color: PDF_COLORS.black
     });
-    infoY -= 16;
-  }
-  if (BUSINESS_INFO.tagline) {
-    page.drawText(BUSINESS_INFO.tagline, {
-      x: textStartX,
-      y: infoY,
-      size: PDF_TYPOGRAPHY.smallSize,
-      font: regular,
-      color: PDF_COLORS.muted
-    });
-    infoY -= 14;
-  }
-  if (BUSINESS_INFO.email) {
-    page.drawText(BUSINESS_INFO.email, {
-      x: textStartX,
-      y: infoY,
-      size: PDF_TYPOGRAPHY.smallSize,
-      font: regular,
-      color: PDF_COLORS.muted
-    });
-    infoY -= 14;
-  }
-  if (BUSINESS_INFO.website) {
-    page.drawText(BUSINESS_INFO.website, {
-      x: textStartX,
-      y: infoY,
-      size: PDF_TYPOGRAPHY.smallSize,
-      font: regular,
-      color: PDF_COLORS.muted
-    });
-    infoY -= 14;
+    infoY -= infoLineHeight;
   }
 
-  // Advance y past the logo height, then draw divider
-  const afterHeader = Math.min(startY - 120, infoY - 20);
+  // HR — just below the logo/info block, with space below for content
+  const afterHeader = Math.min(startY - logoHeight - 6, infoY);
   page.drawLine({
     start: { x: leftMargin, y: afterHeader },
     end: { x: rightMargin, y: afterHeader },
     thickness: PDF_SPACING.dividerThickness,
-    color: PDF_COLORS.divider
+    color: PDF_COLORS.black
   });
 
   return afterHeader - 21;
@@ -530,7 +511,7 @@ export function drawSectionHeading(
   });
 
   const lineY = y - 4;
-  const lineEnd = opts.width ? x + opts.width : x + font.widthOfTextAtSize(text.toUpperCase(), size) + 2;
+  const lineEnd = opts.width ? x + opts.width : x + font.widthOfTextAtSize(text.toUpperCase(), size);
 
   page.drawLine({
     start: { x, y: lineY },
@@ -577,6 +558,109 @@ export function drawLabelValue(
   });
 
   return opts.y - PDF_SPACING.lineHeight;
+}
+
+/**
+ * Draw a table header row — dark background with white uppercase text.
+ * Matches the invoice line items table header style.
+ *
+ * @param page - PDF page to draw on
+ * @param columns - Array of { label, x } for each column header
+ * @param opts - Position and font options
+ * @returns Y position after the header
+ */
+export function drawTableHeader(
+  page: PDFPage,
+  columns: Array<{ label: string; x: number; align?: 'left' | 'right' }>,
+  opts: {
+    y: number;
+    leftMargin: number;
+    rightMargin: number;
+    font: PDFFont;
+    height?: number;
+  }
+): number {
+  const height = opts.height || 18;
+  const textSize = PDF_TYPOGRAPHY.bodySize;
+
+  // Dark background bar
+  page.drawRectangle({
+    x: opts.leftMargin,
+    y: opts.y - 2,
+    width: opts.rightMargin - opts.leftMargin,
+    height,
+    color: PDF_COLORS.tableHeaderBg
+  });
+
+  // Column labels in white
+  for (const col of columns) {
+    const label = col.label.toUpperCase();
+    let x = col.x;
+
+    if (col.align === 'right') {
+      const w = opts.font.widthOfTextAtSize(label, textSize);
+      x = col.x - w;
+    }
+
+    page.drawText(label, {
+      x,
+      y: opts.y + 4,
+      size: textSize,
+      font: opts.font,
+      color: PDF_COLORS.tableHeaderText
+    });
+  }
+
+  return opts.y - height - 4;
+}
+
+/**
+ * Draw the standard PDF footer — HR + thank you + business info.
+ * Call this at the bottom of every PDF's last page (or every page).
+ *
+ * Matches the invoice footer as the canonical style reference.
+ */
+export function drawPdfFooter(
+  page: PDFPage,
+  opts: {
+    leftMargin: number;
+    rightMargin: number;
+    width: number;
+    fonts: { regular: PDFFont; bold: PDFFont };
+    thankYouText?: string;
+  }
+): void {
+  const footerY = PDF_SPACING.footerY;
+
+  // HR
+  page.drawLine({
+    start: { x: opts.leftMargin, y: footerY },
+    end: { x: opts.rightMargin, y: footerY },
+    thickness: PDF_SPACING.dividerThin,
+    color: PDF_COLORS.dividerLight
+  });
+
+  // Thank you text (centered)
+  const thankYou = opts.thankYouText || 'Thank you for your business!';
+  const thankYouW = opts.fonts.regular.widthOfTextAtSize(thankYou, PDF_TYPOGRAPHY.bodySize);
+  page.drawText(thankYou, {
+    x: (opts.width - thankYouW) / 2,
+    y: PDF_SPACING.footerTextY,
+    size: PDF_TYPOGRAPHY.bodySize,
+    font: opts.fonts.regular,
+    color: PDF_COLORS.black
+  });
+
+  // Business info line (centered)
+  const bizLine = `${BUSINESS_INFO.name} \u2022 ${BUSINESS_INFO.owner} \u2022 ${BUSINESS_INFO.email} \u2022 ${BUSINESS_INFO.website}`;
+  const bizW = opts.fonts.regular.widthOfTextAtSize(bizLine, PDF_TYPOGRAPHY.footerSize);
+  page.drawText(bizLine, {
+    x: (opts.width - bizW) / 2,
+    y: PDF_SPACING.legalTextY,
+    size: PDF_TYPOGRAPHY.footerSize,
+    font: opts.fonts.regular,
+    color: PDF_COLORS.black
+  });
 }
 
 /**

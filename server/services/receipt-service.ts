@@ -14,9 +14,9 @@ import { join } from 'path';
 import { getDatabase } from '../database/init.js';
 import { getFloat } from '../database/row-helpers.js';
 import { BUSINESS_INFO } from '../config/business.js';
-import { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } from '../config/pdf-styles.js';
+import { PDF_COLORS, PDF_TYPOGRAPHY } from '../config/pdf-styles.js';
 import { getUploadsSubdir, getRelativePath, sanitizeFilename } from '../config/uploads.js';
-import { PAGE_MARGINS, drawPdfDocumentHeader } from '../utils/pdf-utils.js';
+import { PAGE_MARGINS, drawPdfDocumentHeader, drawPdfFooter } from '../utils/pdf-utils.js';
 import { logger } from './logger.js';
 
 // ============================================
@@ -105,27 +105,42 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     rightMargin,
     title: 'RECEIPT'
   });
-  y -= 9; // Receipt adds extra gap before "PAYMENT RECEIVED"
-
-  // === PAYMENT CONFIRMATION ===
-  page.drawText('PAYMENT RECEIVED', {
+  // === PAYMENT RECEIVED — section label with underline ===
+  const paymentReceivedLabel = 'PAYMENT RECEIVED';
+  page.drawText(paymentReceivedLabel, {
     x: leftMargin,
     y,
-    size: PDF_TYPOGRAPHY.paymentHeaderSize,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helveticaBold,
-    color: PDF_COLORS.paymentGreen
+    color: PDF_COLORS.black
   });
-  y -= 30;
+  const paymentReceivedW = helveticaBold.widthOfTextAtSize(paymentReceivedLabel, PDF_TYPOGRAPHY.bodySize);
+  page.drawLine({
+    start: { x: leftMargin, y: y - 4 },
+    end: { x: leftMargin + paymentReceivedW, y: y - 4 },
+    thickness: 0.5,
+    color: PDF_COLORS.black
+  });
+  y -= 20;
 
-  // === CLIENT INFO ===
-  page.drawText('RECEIVED FROM:', {
+  // === CLIENT INFO — section label with underline ===
+  const receivedFromLabel = 'RECEIVED FROM:';
+  page.drawText(receivedFromLabel, {
     x: leftMargin,
     y,
-    size: PDF_TYPOGRAPHY.labelSize,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helveticaBold,
-    color: PDF_COLORS.subtitle
+    color: PDF_COLORS.black
   });
-  y -= 16;
+  const receivedFromW = helveticaBold.widthOfTextAtSize(receivedFromLabel, PDF_TYPOGRAPHY.bodySize);
+  page.drawLine({
+    start: { x: leftMargin, y: y - 4 },
+    end: { x: leftMargin + receivedFromW, y: y - 4 },
+    thickness: 0.5,
+    color: PDF_COLORS.black
+  });
+  y -= 20;
+
   page.drawText(data.clientName, {
     x: leftMargin,
     y,
@@ -149,7 +164,7 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     y,
     size: PDF_TYPOGRAPHY.bodySize,
     font: helvetica,
-    color: PDF_COLORS.bodyLight
+    color: PDF_COLORS.black
   });
   y -= 12;
   if (data.clientPhone) {
@@ -158,7 +173,7 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
       y,
       size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
-      color: PDF_COLORS.bodyLight
+      color: PDF_COLORS.black
     });
     y -= 12;
   }
@@ -170,60 +185,48 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
         y,
         size: PDF_TYPOGRAPHY.bodySize,
         font: helvetica,
-        color: PDF_COLORS.bodyLight
+        color: PDF_COLORS.black
       });
       y -= 12;
     }
   }
   y -= 18;
 
-  // === RECEIPT DETAILS BOX ===
-  const boxTop = y;
-  const boxHeight = PDF_SPACING.receiptBoxHeight;
+  // === PAYMENT DETAILS — table header bar (matches invoice table header) ===
   page.drawRectangle({
     x: leftMargin,
-    y: y - boxHeight,
+    y: y - 2,
     width: rightMargin - leftMargin,
-    height: boxHeight,
-    borderColor: PDF_COLORS.boxBorder,
-    borderWidth: 1
-  });
-
-  // Box header
-  page.drawRectangle({
-    x: leftMargin,
-    y: y - PDF_SPACING.receiptBoxHeaderHeight,
-    width: rightMargin - leftMargin,
-    height: PDF_SPACING.receiptBoxHeaderHeight,
-    color: PDF_COLORS.boxHeaderBg
+    height: 18,
+    color: PDF_COLORS.tableHeaderBg
   });
   page.drawText('PAYMENT DETAILS', {
-    x: leftMargin + PDF_SPACING.indent,
-    y: y - 17,
-    size: PDF_TYPOGRAPHY.labelSize,
+    x: leftMargin + 7,
+    y: y + 4,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helveticaBold,
-    color: PDF_COLORS.subtitle
+    color: PDF_COLORS.tableHeaderText
   });
+  y -= 22;
 
-  y -= 45;
-
-  // Detail rows
+  // Detail rows — label bold, value regular, 14px line height
+  const detailValueX = leftMargin + 150;
   const drawDetailRow = (label: string, value: string) => {
     page.drawText(label, {
-      x: leftMargin + PDF_SPACING.indent,
+      x: leftMargin + 7,
       y,
       size: PDF_TYPOGRAPHY.bodySize,
       font: helveticaBold,
-      color: PDF_COLORS.bodyLight
+      color: PDF_COLORS.black
     });
     page.drawText(value, {
-      x: leftMargin + PDF_SPACING.receiptDetailOffset,
+      x: detailValueX,
       y,
       size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
       color: PDF_COLORS.black
     });
-    y -= PDF_SPACING.paymentRowHeight;
+    y -= 14;
   };
 
   drawDetailRow('Receipt Number:', data.receiptNumber);
@@ -237,72 +240,42 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     drawDetailRow('Project:', data.projectName);
   }
 
-  y = boxTop - boxHeight - 30;
+  y -= 24;
 
-  // === AMOUNT PAID ===
+  // === AMOUNT PAID — right-aligned label:value (matches invoice totals pattern) ===
+  const totalsX = rightMargin - 144;
+
   page.drawLine({
-    start: { x: leftMargin, y: y + 15 },
-    end: { x: rightMargin, y: y + 15 },
-    thickness: PDF_SPACING.underlineThickness,
-    color: PDF_COLORS.paymentGreen
+    start: { x: totalsX - 14, y: y + 18 },
+    end: { x: rightMargin, y: y + 18 },
+    thickness: 2,
+    color: PDF_COLORS.divider
   });
 
   page.drawText('AMOUNT PAID:', {
-    x: leftMargin,
+    x: totalsX,
     y,
-    size: PDF_TYPOGRAPHY.sectionHeadingSize,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helveticaBold,
-    color: PDF_COLORS.title
+    color: PDF_COLORS.black
   });
   const amountText = `$${data.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  const amountWidth = helveticaBold.widthOfTextAtSize(amountText, PDF_TYPOGRAPHY.amountSize);
+  const amountWidth = helveticaBold.widthOfTextAtSize(amountText, PDF_TYPOGRAPHY.bodySize);
   page.drawText(amountText, {
     x: rightMargin - amountWidth,
     y,
-    size: PDF_TYPOGRAPHY.amountSize,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helveticaBold,
-    color: PDF_COLORS.paymentGreen
+    color: PDF_COLORS.black
   });
 
-  y -= 50;
-
-  // === THANK YOU ===
-  const thankYouText = 'Thank you for your payment!';
-  const thankYouWidth = helvetica.widthOfTextAtSize(thankYouText, PDF_TYPOGRAPHY.subHeadingSize);
-  page.drawText(thankYouText, {
-    x: (width - thankYouWidth) / 2,
-    y,
-    size: PDF_TYPOGRAPHY.subHeadingSize,
-    font: helvetica,
-    color: PDF_COLORS.bodyLight
-  });
-
-  // === FOOTER ===
-  page.drawLine({
-    start: { x: leftMargin, y: PDF_SPACING.footerY },
-    end: { x: rightMargin, y: PDF_SPACING.footerY },
-    thickness: PDF_SPACING.dividerThin,
-    color: PDF_COLORS.dividerLight
-  });
-
-  const footerText = `${BUSINESS_INFO.name} • ${BUSINESS_INFO.owner} • ${BUSINESS_INFO.email} • ${BUSINESS_INFO.website}`;
-  const footerWidth = helvetica.widthOfTextAtSize(footerText, PDF_TYPOGRAPHY.footerSize);
-  page.drawText(footerText, {
-    x: (width - footerWidth) / 2,
-    y: PDF_SPACING.footerTextY,
-    size: PDF_TYPOGRAPHY.footerSize,
-    font: helvetica,
-    color: PDF_COLORS.faint
-  });
-
-  const legalText = 'This receipt confirms payment received. Please retain for your records.';
-  const legalWidth = helvetica.widthOfTextAtSize(legalText, PDF_TYPOGRAPHY.footerSize);
-  page.drawText(legalText, {
-    x: (width - legalWidth) / 2,
-    y: PDF_SPACING.legalTextY,
-    size: PDF_TYPOGRAPHY.footerSize,
-    font: helvetica,
-    color: PDF_COLORS.faint
+  // === FOOTER — shared pattern (HR + thank you + business info) ===
+  drawPdfFooter(page, {
+    leftMargin,
+    rightMargin,
+    width,
+    fonts: { regular: helvetica, bold: helveticaBold },
+    thankYouText: 'Thank you for your payment!'
   });
 
   return await pdfDoc.save();
