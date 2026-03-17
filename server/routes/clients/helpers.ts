@@ -48,7 +48,7 @@ export const ClientValidationSchemas = {
     phone: { type: 'string' as const, maxLength: 30 },
     client_type: {
       type: 'string' as const,
-      allowedValues: ['business', 'individual', 'nonprofit', 'government']
+      allowedValues: ['individual', 'company', 'nonprofit', 'government']
     },
     status: {
       type: 'string' as const,

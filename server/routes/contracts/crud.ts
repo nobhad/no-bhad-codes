@@ -149,6 +149,19 @@ router.post(
       return errorResponse(res, 'Invalid contract status', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
+    // Verify project exists
+    const db = getDatabase();
+    const project = await db.get('SELECT id FROM active_projects WHERE id = ?', [projectId]);
+    if (!project) {
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
+    }
+
+    // Verify client exists
+    const client = await db.get('SELECT id FROM active_clients WHERE id = ?', [clientId]);
+    if (!client) {
+      return errorResponse(res, 'Client not found', 404, ErrorCodes.CLIENT_NOT_FOUND);
+    }
+
     const contract = await contractService.createContract(req.body);
 
     // Emit workflow event for contract creation

@@ -13,6 +13,7 @@
 
 import { getDatabase } from '../database/init.js';
 import { workflowTriggerService } from './workflow-trigger-service.js';
+import { generateProjectCode } from '../utils/project-code.js';
 import { invoiceService } from './invoice-service.js';
 import { generateDefaultMilestones } from './milestone-generator.js';
 import { generateTierMilestones } from './tier-milestone-generator.js';
@@ -130,17 +131,26 @@ async function handleProposalAccepted(data: {
       proposal.project_name ||
       `${proposal.project_type || 'Web'} Project - ${new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
 
+    // Look up client name for project code generation
+    const client = await db.get<{ company_name: string | null; contact_name: string }>(
+      'SELECT company_name, contact_name FROM clients WHERE id = ?',
+      [proposal.client_id]
+    );
+    const clientLabel = client?.company_name || client?.contact_name || 'unknown';
+    const projectCode = await generateProjectCode(clientLabel);
+
     const result = await db.run(
       `INSERT INTO projects (
         client_id, project_name, project_type, description, status, price,
-        created_at, updated_at
-      ) VALUES (?, ?, ?, ?, 'pending', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+        project_code, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, 'pending', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
       [
         proposal.client_id,
         projectName,
         proposal.project_type,
         proposal.description,
-        proposal.final_price
+        proposal.final_price,
+        projectCode
       ]
     );
 

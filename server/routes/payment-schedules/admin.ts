@@ -103,6 +103,22 @@ router.post(
       return;
     }
 
+    // Verify project and client exist before creating schedule
+    const { getDatabase } = await import('../../database/init.js');
+    const db = getDatabase();
+
+    const project = await db.get('SELECT id FROM active_projects WHERE id = ?', [project_id]);
+    if (!project) {
+      errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+      return;
+    }
+
+    const client = await db.get('SELECT id FROM active_clients WHERE id = ?', [client_id]);
+    if (!client) {
+      errorResponse(res, 'Client not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+      return;
+    }
+
     const created = await paymentScheduleService.createSchedule(
       project_id,
       client_id,

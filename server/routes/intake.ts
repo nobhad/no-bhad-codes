@@ -204,11 +204,11 @@ router.post(
         : [intakeData.features].filter(Boolean);
 
       // Determine client type and company name
-      const clientType: 'personal' | 'business' =
-        intakeData.projectFor === 'personal' ? 'personal' : 'business';
+      const clientType: 'individual' | 'company' =
+        intakeData.projectFor === 'personal' ? 'individual' : 'company';
       const companyName =
-        clientType === 'personal'
-          ? null // Personal clients don't have a company name
+        clientType === 'individual'
+          ? null // Individual clients don't have a company name
           : intakeData.companyName || intakeData.name;
 
       // Generate password hash outside transaction
@@ -383,7 +383,7 @@ function generateRandomPassword(length: number = 12): string {
 
 function generateProjectName(
   projectType: string,
-  clientType: 'personal' | 'business',
+  clientType: 'individual' | 'company',
   companyName: string | null,
   contactName: string
 ): string {

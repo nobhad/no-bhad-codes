@@ -274,7 +274,7 @@ export async function createClientFromContact(params: {
       status, client_type, invitation_token, invitation_expires_at,
       invitation_sent_at, created_at, updated_at
     ) VALUES (
-      LOWER(?), '', ?, ?, ?, 'pending', 'business', ?, ?,
+      LOWER(?), '', ?, ?, ?, 'pending', 'company', ?, ?,
       ${params.sendInvitation ? 'CURRENT_TIMESTAMP' : 'NULL'},
       CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     )`,
