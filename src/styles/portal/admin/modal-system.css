@@ -90,6 +90,9 @@
   box-shadow: var(--shadow-2xl);
   z-index: var(--z-index-portal-modal);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
   border-left: var(--border-width-thick) solid var(--color-border-primary);
   border-right: var(--border-width-thick) solid var(--color-border-primary);
 }
@@ -167,17 +170,29 @@
   display: none;
 }
 
-/* Panel uses flex column with gap for consistent vertical spacing */
-.details-panel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
 .details-panel .details-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
+}
+
+.details-panel .detail-title-row {
+  flex-shrink: 0;
+}
+
+/* Contact name subtitle — below the h1 company name */
+.details-panel .detail-subtitle {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Override overflow:hidden from detail-page-controls.css — panel has no width constraint */
+.details-panel .detail-info,
+.details-panel .detail-title {
+  overflow: visible;
 }
 
 /* Content area fills remaining space and scrolls */
@@ -187,6 +202,7 @@
   gap: var(--space-3);
   flex: 1;
   overflow-y: auto;
+  min-height: 0;
 }
 
 .details-panel .close-btn {
