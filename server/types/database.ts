@@ -100,12 +100,15 @@ export interface LeadUpdate {
 
 export type ClientStatus = 'active' | 'inactive' | 'pending';
 
+export type ClientType = 'individual' | 'company' | 'nonprofit' | 'government';
+
 export interface ClientRow extends BaseEntity {
   company_name: string;
   contact_name: string;
   email: string;
   phone: string | null;
   status: ClientStatus;
+  client_type: ClientType;
   password_hash: string | null;
   magic_link_token: string | null;
   magic_link_expires: string | null;
@@ -185,6 +188,7 @@ export interface ProjectRow extends BaseEntity {
   name: string;
   client_id: number;
   status: ProjectStatus;
+  project_code: string | null;
   start_date: string | null;
   end_date: string | null;
   budget: number | null;

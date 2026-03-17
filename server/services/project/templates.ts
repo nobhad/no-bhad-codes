@@ -10,6 +10,7 @@ import {
   toProjectTemplate as toTemplate,
   type TemplateRow
 } from '../../database/entities/index.js';
+import { generateProjectCode } from '../../utils/project-code.js';
 import type {
   SqlValue,
   ProjectTemplate,
@@ -175,11 +176,18 @@ export async function createProjectFromTemplate(
     throw new Error('Template not found');
   }
 
+  const client = await db.get<{ company_name: string | null; contact_name: string }>(
+    'SELECT company_name, contact_name FROM clients WHERE id = ?',
+    [clientId]
+  );
+  const clientLabel = client?.company_name || client?.contact_name || 'unknown';
+  const projectCode = await generateProjectCode(clientLabel);
+
   const projectResult = await db.run(
     `INSERT INTO projects (
       client_id, project_name, project_type, status, template_id,
-      hourly_rate, estimated_hours, start_date, created_at, updated_at
-    ) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+      hourly_rate, estimated_hours, start_date, project_code, created_at, updated_at
+    ) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
     [
       clientId,
       projectName,
@@ -187,7 +195,8 @@ export async function createProjectFromTemplate(
       templateId,
       template.defaultHourlyRate,
       template.defaultTasks.reduce((sum, t) => sum + (t.estimatedHours || 0), 0),
-      startDate
+      startDate,
+      projectCode
     ]
   );
   const projectId = projectResult.lastID as number;
