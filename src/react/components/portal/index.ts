@@ -142,6 +142,9 @@ export { ProgressBar, type ProgressBarProps } from './ProgressBar';
 // Copy Email Button
 export { CopyEmailButton } from './CopyEmailButton';
 
+// Detail Header
+export { DetailHeader, type DetailHeaderProps, type MetaField } from './DetailHeader';
+
 // Empty State (re-exports from factories)
 export {
   EmptyState,
