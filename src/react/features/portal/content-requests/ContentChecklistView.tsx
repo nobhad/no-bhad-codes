@@ -8,6 +8,7 @@ import * as React from 'react';
 import { useState, useMemo, useCallback } from 'react';
 import { Check, Clock, AlertCircle, Send } from 'lucide-react';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
+import { ProgressBar } from '@react/components/portal/ProgressBar';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { usePortalData } from '@react/hooks/usePortalFetch';
@@ -212,8 +213,8 @@ export function ContentChecklistView(_props: ContentChecklistViewProps) {
       ) : (
         <div className="portal-cards-list">
           {checklists.map((checklist) => (
-            <div key={checklist.id} className="card checklist-card">
-              <div className="checklist-card-header">
+            <div key={checklist.id} className="portal-card checklist-card">
+              <div className="portal-card-header">
                 <div>
                   <h3>{checklist.name}</h3>
                   {checklist.projectName && (
@@ -222,17 +223,12 @@ export function ContentChecklistView(_props: ContentChecklistViewProps) {
                     </span>
                   )}
                 </div>
-                <div className="checklist-progress">
-                  <div className="checklist-progress-bar">
-                    <div
-                      className="checklist-progress-fill"
-                      style={{ width: `${checklist.completionStats.completionPercent}%` }}
-                    />
-                  </div>
-                  <span className="checklist-progress-label">
-                    {checklist.completionStats.accepted}/{checklist.completionStats.total} complete
-                  </span>
-                </div>
+                <ProgressBar
+                  value={checklist.completionStats.completionPercent}
+                  label=""
+                  showPercent={false}
+                  detail={`(${checklist.completionStats.accepted}/${checklist.completionStats.total} complete)`}
+                />
               </div>
 
               <div>

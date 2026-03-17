@@ -254,7 +254,7 @@ export function AdHocRequestCard({
 
             {/* Actions */}
             {canRespond && (
-              <div className="portal-card-actions mt-2">
+              <div className="action-group mt-2">
                 <button
                   className="btn-secondary"
                   onClick={() => setShowDeclineDialog(true)}
