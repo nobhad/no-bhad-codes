@@ -17,6 +17,7 @@ import {
 } from '../database/entities/payment-schedule.js';
 import type { PaymentInstallmentStatus, PaymentMethod } from '../config/constants.js';
 import { logger } from './logger.js';
+import { workflowTriggerService } from './workflow-trigger-service.js';
 
 // =====================================================
 // TYPES
@@ -305,6 +306,90 @@ class PaymentScheduleService {
       await logger.info(`Updated ${count} installments to overdue`, { category: 'PAYMENT_SCHEDULE' });
     }
     return count;
+  }
+
+  // -----------------------------------------------
+  // INSTALLMENT → INVOICE CASCADE
+  // -----------------------------------------------
+
+  /**
+   * Auto-generate draft invoices for payment schedule installments
+   * that are due within 3 days and don't already have a linked invoice.
+   * Runs daily via scheduler.
+   */
+  async generateDueInvoices(): Promise<{ generated: number; skipped: number }> {
+    const db = getDatabase();
+
+    // Find installments due within 3 days that have no linked invoice yet
+    const dueInstallments = await db.all(`
+      SELECT
+        psi.id, psi.project_id, psi.client_id, psi.installment_number,
+        psi.label, psi.amount, psi.due_date, psi.status,
+        p.project_name
+      FROM payment_schedule_installments psi
+      LEFT JOIN projects p ON p.id = psi.project_id
+      WHERE psi.status IN ('pending', 'overdue')
+        AND psi.due_date <= date('now', '+3 days')
+        AND psi.amount > 0
+        AND NOT EXISTS (
+          SELECT 1 FROM invoices inv
+          WHERE inv.project_id = psi.project_id
+            AND inv.deleted_at IS NULL
+            AND abs(inv.amount_total - psi.amount) < 0.01
+            AND inv.notes LIKE '%installment_id:' || psi.id || '%'
+        )
+    `) as Array<{
+      id: number; project_id: number; client_id: number;
+      installment_number: number; label: string | null;
+      amount: number; due_date: string; status: string;
+      project_name: string | null;
+    }>;
+
+    let generated = 0;
+    let skipped = 0;
+
+    // Lazy-import invoice service to avoid circular dependency
+    const { invoiceService } = await import('./invoice-service.js');
+
+    for (const inst of dueInstallments) {
+      try {
+        const description = inst.label || `Payment #${inst.installment_number}`;
+
+        const invoice = await invoiceService.createInvoice({
+          projectId: inst.project_id,
+          clientId: inst.client_id,
+          lineItems: [{
+            description,
+            quantity: 1,
+            rate: inst.amount,
+            amount: inst.amount
+          }],
+          dueDate: inst.due_date,
+          notes: `Auto-generated from payment schedule (installment_id:${inst.id})`
+        });
+
+        await workflowTriggerService.emit('invoice.created', {
+          entityId: invoice.id,
+          triggeredBy: 'installment-auto',
+          projectId: inst.project_id,
+          clientId: inst.client_id
+        });
+
+        generated++;
+        await logger.info(
+          `Auto-generated invoice #${invoice.invoiceNumber} from installment ${inst.id} (${description}: $${inst.amount})`,
+          { category: 'PAYMENT_SCHEDULE' }
+        );
+      } catch (error) {
+        skipped++;
+        await logger.error(
+          `Failed to generate invoice for installment ${inst.id}`,
+          { error: error instanceof Error ? error : undefined, category: 'PAYMENT_SCHEDULE' }
+        );
+      }
+    }
+
+    return { generated, skipped };
   }
 }
 
