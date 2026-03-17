@@ -403,6 +403,38 @@ export const FILE_UPLOAD = {
 } as const;
 
 // ============================================
+// STRIPE PROCESSING FEES
+// ============================================
+
+/** Stripe processing fee percentage (e.g., 0.029 = 2.9%) */
+export const STRIPE_PROCESSING_FEE_PERCENT = 0.029;
+
+/** Stripe per-transaction fixed fee in cents (e.g., 30 = $0.30) */
+export const STRIPE_PROCESSING_FEE_FIXED_CENTS = 30;
+
+/**
+ * Calculate the total amount (in cents) that covers the base amount
+ * plus Stripe processing fees, so the business receives the full base amount.
+ *
+ * Formula: total = (base + fixedFee) / (1 - percentFee)
+ * This ensures after Stripe takes its cut, the business gets exactly `baseCents`.
+ */
+export function calculateAmountWithProcessingFee(baseCents: number): {
+  totalCents: number;
+  feeCents: number;
+  baseCents: number;
+} {
+  const total = Math.ceil(
+    (baseCents + STRIPE_PROCESSING_FEE_FIXED_CENTS) / (1 - STRIPE_PROCESSING_FEE_PERCENT)
+  );
+  return {
+    totalCents: total,
+    feeCents: total - baseCents,
+    baseCents
+  };
+}
+
+// ============================================
 // STRIPE WEBHOOK IDEMPOTENCY
 // ============================================
 
