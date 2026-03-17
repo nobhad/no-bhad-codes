@@ -8,12 +8,12 @@
  */
 
 import express from 'express';
-import { PDFDocument as PDFLibDocument, StandardFonts } from 'pdf-lib';
+import { PDFDocument as PDFLibDocument } from 'pdf-lib';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { InvoiceLineItem } from '../../services/invoice-service.js';
 import { BUSINESS_INFO } from '../../config/business.js';
-import { PDF_COLORS, PDF_TYPOGRAPHY } from '../../config/pdf-styles.js';
+import { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } from '../../config/pdf-styles.js';
 import { ErrorCodes, errorResponse } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import {
@@ -22,7 +22,10 @@ import {
   addPageNumbers,
   PAGE_MARGINS,
   drawPdfDocumentHeader,
-  drawPdfFooter
+  drawPdfFooter,
+  getRegularFontBytes,
+  getBoldFontBytes,
+  registerFontkit
 } from '../../utils/pdf-utils.js';
 import { logger } from '../../services/logger.js';
 import { getInvoiceService } from './helpers.js';
@@ -81,8 +84,9 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   pdfDoc.setSubject('Invoice');
   pdfDoc.setCreator('NoBhadCodes');
 
-  const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  registerFontkit(pdfDoc);
+  const helvetica = await pdfDoc.embedFont(getRegularFontBytes());
+  const helveticaBold = await pdfDoc.embedFont(getBoldFontBytes());
 
   const pageWidth = 612;
   const pageHeight = 792;
@@ -389,7 +393,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   page().drawLine({
     start: { x: totalsX - 14, y: ctx.y + 18 },
     end: { x: rightMargin, y: ctx.y + 18 },
-    thickness: 0.5,
+    thickness: PDF_SPACING.underlineThickness,
     color: PDF_COLORS.divider
   });
 
@@ -488,7 +492,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   page().drawLine({
     start: { x: totalsX - 14, y: ctx.y + 18 },
     end: { x: rightMargin, y: ctx.y + 18 },
-    thickness: 2,
+    thickness: PDF_SPACING.underlineThickness,
     color: PDF_COLORS.divider
   });
 
@@ -538,7 +542,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   page().drawLine({
     start: { x: leftMargin, y: ctx.y - 4 },
     end: { x: leftMargin + paymentHeadingW, y: ctx.y - 4 },
-    thickness: 0.5,
+    thickness: PDF_SPACING.underlineThickness,
     color: PDF_COLORS.black
   });
   ctx.y -= 18;

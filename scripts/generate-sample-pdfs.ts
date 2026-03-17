@@ -291,16 +291,18 @@ Date: _______________                     Date: _______________`;
       }
 
       {
-        const { PDFDocument, StandardFonts } = await import('pdf-lib');
+        const { PDFDocument } = await import('pdf-lib');
         const {
           drawPdfDocumentHeader, drawTwoColumnInfo, drawPdfFooter,
-          drawWrappedText, drawSectionLabel, ensureSpace, addPageNumbers, PAGE_MARGINS
+          drawWrappedText, drawSectionLabel, ensureSpace, addPageNumbers, PAGE_MARGINS,
+          getRegularFontBytes, getBoldFontBytes, registerFontkit
         } = await import('../server/utils/pdf-utils.js');
         const { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } = await import('../server/config/pdf-styles.js');
 
         const pdfDoc = await PDFDocument.create();
-        const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
-        const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+        registerFontkit(pdfDoc);
+        const helvetica = await pdfDoc.embedFont(getRegularFontBytes());
+        const helveticaBold = await pdfDoc.embedFont(getBoldFontBytes());
         const fonts = { regular: helvetica, bold: helveticaBold };
 
         const page = pdfDoc.addPage([612, 792]);
@@ -378,12 +380,12 @@ Date: _______________                     Date: _______________`;
         const sigWidth = 200;
         const rightCol = 612 / 2 + PDF_SPACING.rightColumnOffset;
 
-        ctx.currentPage.drawText('Client:', { x: leftMargin, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: helveticaBold, color: PDF_COLORS.black });
+        ctx.currentPage.drawText('CLIENT:', { x: leftMargin, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: helveticaBold, color: PDF_COLORS.black });
         ctx.currentPage.drawLine({ start: { x: leftMargin, y: sigLineY }, end: { x: leftMargin + sigWidth, y: sigLineY }, thickness: PDF_SPACING.dividerThickness, color: PDF_COLORS.black });
         ctx.currentPage.drawText('Emily Gold', { x: leftMargin, y: sigLineY - 15, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
         ctx.currentPage.drawText('Date: _______________', { x: leftMargin, y: sigLineY - 30, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
 
-        ctx.currentPage.drawText('Service Provider:', { x: rightCol, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: helveticaBold, color: PDF_COLORS.black });
+        ctx.currentPage.drawText('SERVICE PROVIDER:', { x: rightCol, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: helveticaBold, color: PDF_COLORS.black });
         ctx.currentPage.drawLine({ start: { x: rightCol, y: sigLineY }, end: { x: rightCol + sigWidth, y: sigLineY }, thickness: PDF_SPACING.dividerThickness, color: PDF_COLORS.black });
         ctx.currentPage.drawText('Noelle Bhaduri', { x: rightCol, y: sigLineY - 15, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
         ctx.currentPage.drawText('Date: _______________', { x: rightCol, y: sigLineY - 30, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
@@ -408,17 +410,20 @@ Date: _______________                     Date: _______________`;
 
   // 6. Intake PDF (standalone with dummy data — uses shared layout helpers)
   try {
-    const { PDFDocument, StandardFonts } = await import('pdf-lib');
+    const { PDFDocument } = await import('pdf-lib');
     const {
       drawPdfDocumentHeader, drawTwoColumnInfo, drawSectionLabel,
-      drawLabelValue, drawPdfFooter, addPageNumbers, PAGE_MARGINS
+      drawLabelValue, drawPdfFooter, addPageNumbers, PAGE_MARGINS,
+      getRegularFontBytes: getRegular, getBoldFontBytes: getBold,
+      registerFontkit: regFontkit
     } = await import('../server/utils/pdf-utils.js');
     const { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } = await import('../server/config/pdf-styles.js');
 
     const pdfDoc = await PDFDocument.create();
     pdfDoc.setTitle('Client Intake — Hedgewitch Horticulture');
-    const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    regFontkit(pdfDoc);
+    const helvetica = await pdfDoc.embedFont(getRegular());
+    const helveticaBold = await pdfDoc.embedFont(getBold());
     const fonts = { regular: helvetica, bold: helveticaBold };
 
     const page = pdfDoc.addPage([612, 792]);
@@ -439,8 +444,8 @@ Date: _______________                     Date: _______________`;
       left: {
         label: 'PREPARED FOR:',
         lines: [
-          { text: 'Emily Gold & Abigail Wolf', bold: true },
-          { text: 'Hedgewitch Horticulture LLC' },
+          { text: 'Hedgewitch Horticulture LLC', bold: true },
+          { text: 'Emily Gold & Abigail Wolf' },
           { text: 'offerings@hedgewitchhorticulture.com' },
           { text: '(508) 555-0123' }
         ]
@@ -458,10 +463,10 @@ Date: _______________                     Date: _______________`;
     // Project Details
     y -= PDF_SPACING.sectionSpacing;
     y = drawSectionLabel(page, 'PROJECT DETAILS', { x: left, y, font: helveticaBold });
-    y = drawLabelValue(page, 'Project Name:', 'Hedgewitch Horticulture Website', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'Current Site:', 'hedgewitchhorticulture.com (Squarespace)', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'Target Audience:', 'Homeowners, garden enthusiasts', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'Description:', '', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'PROJECT NAME:', 'Hedgewitch Horticulture Website', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'CURRENT SITE:', 'hedgewitchhorticulture.com (Squarespace)', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'TARGET AUDIENCE:', 'Homeowners, garden enthusiasts', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'DESCRIPTION:', '', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
     const descText = 'Website redesign for sustainable garden design company. Currently on Squarespace but hitting template limitations. Want earthy/witchy aesthetic with custom animations.';
     const descWords = descText.split(' ');
     let descLine = '';
@@ -478,18 +483,18 @@ Date: _______________                     Date: _______________`;
     // Design Preferences
     y -= PDF_SPACING.sectionSpacing;
     y = drawSectionLabel(page, 'DESIGN PREFERENCES', { x: left, y, font: helveticaBold });
-    y = drawLabelValue(page, 'Design Level:', 'Custom — unique to brand, handcrafted feel', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'Brand Assets:', 'Logo, brand colors', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'Inspiration:', 'Earthy/witchy aesthetic, nature feel', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'Content Status:', 'Have some content, need help organizing', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'DESIGN LEVEL:', 'Custom — unique to brand, handcrafted feel', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'BRAND ASSETS:', 'Logo, brand colors', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'INSPIRATION:', 'Earthy/witchy aesthetic, nature feel', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'CONTENT STATUS:', 'Have some content, need help organizing', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
 
     // Technical Details
     y -= PDF_SPACING.sectionSpacing;
     y = drawSectionLabel(page, 'TECHNICAL DETAILS', { x: left, y, font: helveticaBold });
-    y = drawLabelValue(page, 'Tech Comfort:', 'Comfortable — can handle basic updates', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'Hosting:', 'Free hosting (Netlify/Vercel)', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'Constraints:', 'Emily unavailable Feb 12-22', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'How Found Us:', 'Referral from a friend', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'TECH COMFORT:', 'Comfortable — can handle basic updates', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'HOSTING:', 'Free hosting (Netlify/Vercel)', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'CONSTRAINTS:', 'Emily unavailable Feb 12-22', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'HOW FOUND US:', 'Referral from a friend', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
 
     // Footer + page numbers
     drawPdfFooter(page, { leftMargin: left, rightMargin: right, width: 612, fonts, thankYouText: 'Thank you for your business!' });

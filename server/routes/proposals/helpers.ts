@@ -35,7 +35,7 @@ export {
 
 // PDF-related exports (used by core.ts for PDF generation)
 export { BUSINESS_INFO, getPdfLogoBytes } from '../../config/business.js';
-export { PDFDocument as PDFLibDocument, StandardFonts, rgb, degrees } from 'pdf-lib';
+export { PDFDocument as PDFLibDocument, rgb, degrees } from 'pdf-lib';
 export {
   getPdfCacheKey,
   getCachedPdf,
@@ -43,7 +43,10 @@ export {
   PAGE_MARGINS,
   ensureSpace,
   addPageNumbers,
-  drawPdfDocumentHeader
+  drawPdfDocumentHeader,
+  getRegularFontBytes,
+  getBoldFontBytes,
+  registerFontkit
 } from '../../utils/pdf-utils.js';
 export type { PdfPageContext } from '../../utils/pdf-utils.js';
 

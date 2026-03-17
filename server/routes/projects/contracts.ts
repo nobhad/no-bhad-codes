@@ -1,7 +1,7 @@
 import express, { Response } from 'express';
 import path from 'path';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
-import { PDFDocument as PDFLibDocument, StandardFonts, degrees, PDFPage } from 'pdf-lib';
+import { PDFDocument as PDFLibDocument, degrees, PDFPage } from 'pdf-lib';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../utils/access-control.js';
@@ -27,7 +27,10 @@ import {
   drawPdfDocumentHeader,
   drawPdfFooter,
   drawTwoColumnInfo,
-  drawSectionLabel
+  drawSectionLabel,
+  getRegularFontBytes,
+  getBoldFontBytes,
+  registerFontkit
 } from '../../utils/pdf-utils.js';
 import { invalidateCache } from '../../middleware/cache.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
@@ -121,12 +124,13 @@ router.get(
     pdfDoc.setTitle(`Contract - ${getString(p, 'project_name')}`);
     pdfDoc.setAuthor(BUSINESS_INFO.name);
 
+    registerFontkit(pdfDoc);
     const page = pdfDoc.addPage([612, 792]); // LETTER size
     const { width, height } = page.getSize();
 
     // Embed fonts
-    const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const helvetica = await pdfDoc.embedFont(getRegularFontBytes());
+    const helveticaBold = await pdfDoc.embedFont(getBoldFontBytes());
 
     // Layout constants (0.75 inch margins per template)
     const leftMargin = 54;
@@ -402,7 +406,7 @@ router.get(
       color: PDF_COLORS.black
     });
 
-    ctx.currentPage.drawText('Service Provider:', {
+    ctx.currentPage.drawText('SERVICE PROVIDER:', {
       x: rightCol,
       y: ctx.y,
       size: PDF_TYPOGRAPHY.bodySize,

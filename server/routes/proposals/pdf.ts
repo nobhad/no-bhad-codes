@@ -21,7 +21,6 @@ import {
   proposalService,
   BUSINESS_INFO,
   PDFLibDocument,
-  StandardFonts,
   degrees,
   getPdfCacheKey,
   getCachedPdf,
@@ -29,7 +28,10 @@ import {
   PAGE_MARGINS,
   ensureSpace,
   addPageNumbers,
-  drawPdfDocumentHeader
+  drawPdfDocumentHeader,
+  getRegularFontBytes,
+  getBoldFontBytes,
+  registerFontkit
 } from './helpers.js';
 import type {
   AuthenticatedRequest,
@@ -153,9 +155,10 @@ router.get(
     pdfDoc.setTitle(`Proposal - ${getString(p, 'project_name')}`);
     pdfDoc.setAuthor(BUSINESS_INFO.name);
 
-    // Embed fonts first
-    const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    // Register fontkit and embed Inconsolata
+    registerFontkit(pdfDoc);
+    const helvetica = await pdfDoc.embedFont(getRegularFontBytes());
+    const helveticaBold = await pdfDoc.embedFont(getBoldFontBytes());
 
     // Create multi-page context
     const pageWidth = 612;
@@ -213,27 +216,37 @@ router.get(
     const rightCol = width / 2 + 36;
 
     // Left side - Prepared For
-    page().drawText('Prepared For:', {
+    page().drawText('PREPARED FOR:', {
       x: leftMargin,
       y: ctx.y,
       size: 10,
       font: helveticaBold,
       color: PDF_COLORS.subtitle
     });
-    page().drawText(getString(p, 'client_name') || 'Client', {
-      x: leftMargin,
-      y: ctx.y - 15,
-      size: 10,
-      font: helvetica,
-      color: PDF_COLORS.black
-    });
-    let clientLineY = ctx.y - 30;
+    let clientLineY = ctx.y - 15;
     if (proposal.company_name) {
       page().drawText(proposal.company_name, {
         x: leftMargin,
         y: clientLineY,
         size: 10,
+        font: helveticaBold,
+        color: PDF_COLORS.black
+      });
+      clientLineY -= 15;
+      page().drawText(getString(p, 'client_name') || 'Client', {
+        x: leftMargin,
+        y: clientLineY,
+        size: 10,
         font: helvetica,
+        color: PDF_COLORS.black
+      });
+      clientLineY -= 15;
+    } else {
+      page().drawText(getString(p, 'client_name') || 'Client', {
+        x: leftMargin,
+        y: clientLineY,
+        size: 10,
+        font: helveticaBold,
         color: PDF_COLORS.black
       });
       clientLineY -= 15;
@@ -247,7 +260,7 @@ router.get(
     });
 
     // Right side - Prepared By & Date
-    page().drawText('Prepared By:', {
+    page().drawText('PREPARED BY:', {
       x: rightCol,
       y: ctx.y,
       size: 10,
@@ -261,7 +274,7 @@ router.get(
       font: helvetica,
       color: PDF_COLORS.black
     });
-    page().drawText('Date:', {
+    page().drawText('DATE:', {
       x: rightCol,
       y: ctx.y - 45,
       size: 10,
@@ -279,7 +292,7 @@ router.get(
     ctx.y -= 90;
 
     // === PROJECT DETAILS ===
-    page().drawText('Project Details', {
+    page().drawText('PROJECT DETAILS', {
       x: leftMargin,
       y: ctx.y,
       size: 14,
@@ -288,7 +301,7 @@ router.get(
     });
     ctx.y -= 18;
 
-    page().drawText('Project:', {
+    page().drawText('PROJECT:', {
       x: leftMargin,
       y: ctx.y,
       size: 10,
@@ -304,7 +317,7 @@ router.get(
     });
     ctx.y -= 15;
 
-    page().drawText('Project Type:', {
+    page().drawText('PROJECT TYPE:', {
       x: leftMargin,
       y: ctx.y,
       size: 10,
@@ -320,7 +333,7 @@ router.get(
     ctx.y -= 25;
 
     // === SELECTED PACKAGE ===
-    page().drawText('Selected Package', {
+    page().drawText('SELECTED PACKAGE', {
       x: leftMargin,
       y: ctx.y,
       size: 14,
@@ -338,7 +351,7 @@ router.get(
       color: PDF_COLORS.black
     });
     ctx.y -= 15;
-    page().drawText(`Base Price: $${getNumber(p, 'base_price').toLocaleString()}`, {
+    page().drawText(`BASE PRICE: $${getNumber(p, 'base_price').toLocaleString()}`, {
       x: leftMargin,
       y: ctx.y,
       size: 10,
@@ -350,7 +363,7 @@ router.get(
     // === INCLUDED FEATURES ===
     const includedFeatures = features.filter((f) => f.is_included_in_tier);
     if (includedFeatures.length > 0) {
-      page().drawText('Included Features:', {
+      page().drawText('INCLUDED FEATURES:', {
         x: leftMargin,
         y: ctx.y,
         size: 12,
@@ -379,7 +392,7 @@ router.get(
     if (addons.length > 0) {
       // Check for page break before add-ons section
       ensureSpace(ctx, 30, drawContinuationHeader);
-      page().drawText('Add-Ons:', {
+      page().drawText('ADD-ONS:', {
         x: leftMargin,
         y: ctx.y,
         size: 12,
@@ -407,7 +420,7 @@ router.get(
     // === MAINTENANCE OPTION ===
     if (proposal.maintenance_option) {
       ensureSpace(ctx, 40, drawContinuationHeader);
-      page().drawText('Maintenance Plan:', {
+      page().drawText('MAINTENANCE PLAN:', {
         x: leftMargin,
         y: ctx.y,
         size: 12,
@@ -429,7 +442,7 @@ router.get(
     // Ensure pricing summary fits on current page
     ensureSpace(ctx, 100, drawContinuationHeader);
     ctx.y -= 10;
-    page().drawText('Pricing Summary', {
+    page().drawText('PRICING SUMMARY', {
       x: leftMargin,
       y: ctx.y,
       size: 14,
@@ -438,7 +451,7 @@ router.get(
     });
     ctx.y -= 18;
 
-    page().drawText('Base Package Price:', {
+    page().drawText('BASE PACKAGE:', {
       x: leftMargin,
       y: ctx.y,
       size: 10,
@@ -457,7 +470,7 @@ router.get(
 
     if (addons.length > 0) {
       const addonsTotal = addons.reduce((sum, f) => sum + (f.feature_price || 0), 0);
-      page().drawText('Add-Ons:', {
+      page().drawText('ADD-ONS:', {
         x: leftMargin,
         y: ctx.y,
         size: 10,
@@ -486,7 +499,7 @@ router.get(
     ctx.y -= 15;
 
     // Total
-    page().drawText('Total:', {
+    page().drawText('TOTAL:', {
       x: leftMargin,
       y: ctx.y,
       size: 12,
@@ -505,7 +518,7 @@ router.get(
     // === PAYMENT SCHEDULE ===
     ctx.y -= 35;
     ensureSpace(ctx, 100, drawContinuationHeader);
-    page().drawText('Payment Schedule', {
+    page().drawText('PAYMENT SCHEDULE', {
       x: leftMargin,
       y: ctx.y,
       size: 14,
@@ -525,21 +538,21 @@ router.get(
     const paymentRowHeight = 18;
 
     // Table header
-    page().drawText('Payment', {
+    page().drawText('PAYMENT', {
       x: leftMargin,
       y: ctx.y,
       size: 10,
       font: helveticaBold,
       color: PDF_COLORS.bodyLight
     });
-    page().drawText('When Due', {
+    page().drawText('WHEN DUE', {
       x: leftMargin + colWidth,
       y: ctx.y,
       size: 10,
       font: helveticaBold,
       color: PDF_COLORS.bodyLight
     });
-    page().drawText('Amount', {
+    page().drawText('AMOUNT', {
       x: rightMargin - 70,
       y: ctx.y,
       size: 10,
@@ -626,7 +639,7 @@ router.get(
     ctx.y -= paymentRowHeight;
 
     // Total row
-    page().drawText('Total Project Investment', {
+    page().drawText('TOTAL PROJECT INVESTMENT', {
       x: leftMargin,
       y: ctx.y,
       size: 10,
@@ -659,7 +672,7 @@ router.get(
     if (proposal.client_notes) {
       ctx.y -= 35;
       ensureSpace(ctx, 30, drawContinuationHeader);
-      page().drawText('Client Notes:', {
+      page().drawText('CLIENT NOTES:', {
         x: leftMargin,
         y: ctx.y,
         size: 12,
@@ -681,7 +694,7 @@ router.get(
     if (termsText) {
       ctx.y -= 35;
       ensureSpace(ctx, 80, drawContinuationHeader);
-      page().drawText('Terms & Conditions', {
+      page().drawText('TERMS & CONDITIONS', {
         x: leftMargin,
         y: ctx.y,
         size: 14,
@@ -736,7 +749,7 @@ router.get(
       ensureSpace(ctx, 120, drawContinuationHeader);
 
       // Signature section header
-      page().drawText('Authorization & Signature', {
+      page().drawText('AUTHORIZATION & SIGNATURE', {
         x: leftMargin,
         y: ctx.y,
         size: 14,

@@ -425,7 +425,7 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
     .reduce((sum, f) => sum + f.price, 0);
 
   if (addonsTotal > 0) {
-    ctx.y = drawLabelValue(ctx.currentPage, 'ADDONS:', formatCurrency(addonsTotal), {
+    ctx.y = drawLabelValue(ctx.currentPage, 'ADD-ONS:', formatCurrency(addonsTotal), {
       x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
     });
   }
@@ -442,7 +442,7 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
   ctx.currentPage.drawLine({
     start: { x: totalsX - 14, y: ctx.y + 18 },
     end: { x: rightMargin, y: ctx.y + 18 },
-    thickness: 2,
+    thickness: PDF_SPACING.underlineThickness,
     color: PDF_COLORS.divider
   });
 

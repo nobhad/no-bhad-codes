@@ -40,9 +40,10 @@
  * ============================================================
  */
 
-import { PDFDocument, PDFFont, PDFPage, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, PDFFont, PDFPage, rgb } from 'pdf-lib';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { getRegularFontBytes, getBoldFontBytes, registerFontkit } from '../server/utils/pdf-utils.js';
 
 // Business info - matches server/config/business.ts defaults
 const BUSINESS_INFO = {
@@ -106,9 +107,10 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
   const pdfDoc = await PDFDocument.create();
   const form = pdfDoc.getForm();
 
-  // Embed fonts
-  const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  // Register fontkit and embed Inconsolata
+  registerFontkit(pdfDoc);
+  const helvetica = await pdfDoc.embedFont(getRegularFontBytes());
+  const helveticaBold = await pdfDoc.embedFont(getBoldFontBytes());
   // Add first page
   let page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
   let y = PAGE_HEIGHT - PAGE_MARGIN;
