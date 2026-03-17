@@ -74,6 +74,9 @@ export const API_ENDPOINTS = {
   // Email Sequences (admin)
   SEQUENCES: '/api/sequences',
 
+  // Custom Automations (admin)
+  AUTOMATIONS: '/api/automations',
+
   // Meeting Requests
   MEETING_REQUESTS: '/api/meeting-requests',
   MEETING_REQUESTS_MY: '/api/meeting-requests/my',
