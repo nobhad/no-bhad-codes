@@ -119,6 +119,7 @@ All routes are hash-based (e.g., `/#/dashboard`). `PortalRoutes.tsx` renders cli
 | `/agreements` | `AgreementsList` | Project agreements list (Phase 1C) |
 | `/agreements/:id` | `AgreementFlow` | Step-by-step agreement flow (Phase 1C) |
 | `/meetings` | `MeetingRequestsList` | Meeting request submission and tracking (Phase 2B) |
+| `/retainers` | `PortalRetainers` | Active retainer agreements with utilization (Phase 4B) |
 | `/payment-schedule` | `PaymentScheduleView` | Payment installment tracking |
 | `/requests-hub` | `PortalRequestsHub` | Ad hoc requests, questionnaires, document requests |
 | `/content-requests` | `ContentChecklistView` | Content request checklists |
@@ -435,6 +436,14 @@ Client-initiated meeting scheduling with admin confirmation.
 - **Components:** `MeetingRequestForm` (submit), `MeetingRequestsList` (track)
 - **Flow:** Client proposes up to 3 time slots, admin confirms or declines
 - See [MEETING_REQUESTS.md](./MEETING_REQUESTS.md) for full documentation
+
+### Retainers (Phase 4B)
+
+Client view of active retainer agreements with utilization tracking.
+
+- **Route:** `/retainers`
+- **Component:** `PortalRetainers` — Card per retainer with utilization bar, period info, rollover
+- See [RETAINERS.md](./RETAINERS.md) for full documentation
 
 ---
 
