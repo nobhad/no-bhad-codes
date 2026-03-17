@@ -18,6 +18,7 @@ import {
   MoreVertical
 } from 'lucide-react';
 import { IconButton, TabList, TabPanel } from '@react/factories';
+import { DetailHeader } from '@react/components/portal/DetailHeader';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import {
   PortalDropdown,
@@ -224,7 +225,7 @@ export function ProjectDetail({
   }
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef} className="subsection">
       {/* Tabs — top of page, like all other subtab nav */}
       <TabList
         tabs={TABS}
@@ -236,78 +237,62 @@ export function ProjectDetail({
       />
 
       {/* Header */}
-      <div className="detail-title-row">
-        <div className="detail-title-group">
-          {/* Project Info */}
-          <div className="detail-info">
-            <div className="detail-name-row">
-              <h1 className="detail-title">
-                {project.project_name || 'Untitled Project'}
-              </h1>
-              <StatusDropdown
-                status={project.status}
-                statusConfig={PROJECT_STATUS_CONFIG}
-                onStatusChange={(newStatus) => handleStatusChange(newStatus as ProjectStatus)}
-                ariaLabel="Change project status"
-              />
-            </div>
+      <DetailHeader
+        title={project.project_name || 'Untitled Project'}
+        status={
+          <StatusDropdown
+            status={project.status}
+            statusConfig={PROJECT_STATUS_CONFIG}
+            onStatusChange={(newStatus) => handleStatusChange(newStatus as ProjectStatus)}
+            ariaLabel="Change project status"
+          />
+        }
+        meta={[
+          ...(project.client_name ? [{ label: 'Client', value: project.client_name }] : []),
+          ...(project.project_type ? [{ label: 'Type', value: PROJECT_TYPE_LABELS[project.project_type] || project.project_type }] : [])
+        ]}
+        actions={
+          <>
+            <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
 
-            <div className="detail-meta">
-              {project.client_name && (
-                <span className="meta-item">
-                  <span className="field-label">Client:</span> <span className="meta-value">{project.client_name}</span>
-                </span>
-              )}
-              {project.project_type && (
-                <span className="meta-item">
-                  <span className="field-label">Type:</span> <span className="meta-value">{PROJECT_TYPE_LABELS[project.project_type] || project.project_type}</span>
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="detail-actions">
-          <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
-
-          <PortalDropdown>
-            <PortalDropdownTrigger asChild>
-              <IconButton action="more" title="More actions" />
-            </PortalDropdownTrigger>
-            <PortalDropdownContent align="end" sideOffset={-36} className="detail-actions-menu">
-              <PortalDropdownLabel className="detail-actions-menu-trigger-row">
-                <MoreVertical className="icon-sm" />
-              </PortalDropdownLabel>
-              <PortalDropdownItem onClick={() => onEdit?.(projectId)}>
-                <Pencil className="icon-sm" />
-                Edit Project
-              </PortalDropdownItem>
-              <PortalDropdownItem onClick={handleDuplicate}>
-                <Copy className="icon-sm" />
-                Duplicate Project
-              </PortalDropdownItem>
-              <PortalDropdownItem onClick={archiveDialog.open}>
-                <Archive className="icon-sm" />
-                Archive Project
-              </PortalDropdownItem>
-              <PortalDropdownItem onClick={handleGenerateDocuments}>
-                <FileText className="icon-sm" />
-                Generate Documents
-              </PortalDropdownItem>
-              {project.status === 'cancelled' && (
-                <PortalDropdownItem
-                  onClick={deleteDialog.open}
-                  className="danger"
-                >
-                  <Trash2 className="icon-sm" />
-                  Delete Project
+            <PortalDropdown>
+              <PortalDropdownTrigger asChild>
+                <IconButton action="more" title="More actions" />
+              </PortalDropdownTrigger>
+              <PortalDropdownContent align="end" sideOffset={-36} className="detail-actions-menu">
+                <PortalDropdownLabel className="detail-actions-menu-trigger-row">
+                  <MoreVertical className="icon-sm" />
+                </PortalDropdownLabel>
+                <PortalDropdownItem onClick={() => onEdit?.(projectId)}>
+                  <Pencil className="icon-sm" />
+                  Edit Project
                 </PortalDropdownItem>
-              )}
-            </PortalDropdownContent>
-          </PortalDropdown>
-        </div>
-      </div>
+                <PortalDropdownItem onClick={handleDuplicate}>
+                  <Copy className="icon-sm" />
+                  Duplicate Project
+                </PortalDropdownItem>
+                <PortalDropdownItem onClick={archiveDialog.open}>
+                  <Archive className="icon-sm" />
+                  Archive Project
+                </PortalDropdownItem>
+                <PortalDropdownItem onClick={handleGenerateDocuments}>
+                  <FileText className="icon-sm" />
+                  Generate Documents
+                </PortalDropdownItem>
+                {project.status === 'cancelled' && (
+                  <PortalDropdownItem
+                    onClick={deleteDialog.open}
+                    className="danger"
+                  >
+                    <Trash2 className="icon-sm" />
+                    Delete Project
+                  </PortalDropdownItem>
+                )}
+              </PortalDropdownContent>
+            </PortalDropdown>
+          </>
+        }
+      />
 
       {/* Progress Bar */}
       <ProgressBar value={progress} />

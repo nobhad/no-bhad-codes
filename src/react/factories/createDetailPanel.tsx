@@ -16,6 +16,7 @@ import { createPortal } from 'react-dom';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { DetailHeader } from '@react/components/portal/DetailHeader';
 import { StatusDropdown } from '@react/components/portal/StatusDropdownCell';
 import { KEYS } from '@/constants/keyboard';
 
@@ -126,7 +127,9 @@ export function DetailPanel<T>({
 
   const tabs = config.tabs(entity);
   const meta = config.meta?.(entity) ?? [];
-  const visibleMeta = meta.filter((m) => m.visible !== false);
+  const visibleMeta = meta
+    .filter((m) => m.visible !== false && m.value != null && m.value !== '')
+    .map(({ label, value }) => ({ label, value: value! }));
   const titleText = config.title(entity);
   const subtitleText = config.subtitle?.(entity);
   const actionsNode = config.actions?.(entity);
@@ -165,45 +168,20 @@ export function DetailPanel<T>({
         </div>
 
         {/* Title row */}
-        <div className="detail-title-row">
-          <div className="detail-title-group">
-            <div className="detail-info">
-              <div className="detail-name-row">
-                <h1 className="detail-title">{titleText}</h1>
-                {config.status && (
-                  <StatusDropdown
-                    status={config.status.current(entity)}
-                    statusConfig={config.status.config}
-                    onStatusChange={(newStatus) => config.status!.onChange(entity, newStatus)}
-                    ariaLabel={`Change ${config.entityLabel.toLowerCase()} status`}
-                  />
-                )}
-              </div>
-
-              {subtitleText && (
-                <div className="detail-subtitle">{subtitleText}</div>
-              )}
-
-              {visibleMeta.length > 0 && (
-                <div className="detail-meta">
-                  {visibleMeta.map((field) => (
-                    <span key={field.label} className="meta-item">
-                      <span className="field-label">{field.label}:</span>{' '}
-                      <span className="meta-value">{field.value}</span>
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Actions — right-aligned */}
-          {actionsNode && (
-            <div className="detail-actions">
-              {actionsNode}
-            </div>
-          )}
-        </div>
+        <DetailHeader
+          title={titleText}
+          status={config.status ? (
+            <StatusDropdown
+              status={config.status.current(entity)}
+              statusConfig={config.status.config}
+              onStatusChange={(newStatus) => config.status!.onChange(entity, newStatus)}
+              ariaLabel={`Change ${config.entityLabel.toLowerCase()} status`}
+            />
+          ) : undefined}
+          subtitle={subtitleText || undefined}
+          meta={visibleMeta}
+          actions={actionsNode}
+        />
 
         {/* Tabbed content */}
         <div className="details-content">

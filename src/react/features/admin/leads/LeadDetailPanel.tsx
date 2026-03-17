@@ -15,6 +15,7 @@ import {
   Rocket
 } from 'lucide-react';
 import { CopyEmailButton } from '@react/components/portal';
+import { DetailHeader } from '@react/components/portal/DetailHeader';
 import { cn } from '@react/lib/utils';
 import { StatusDropdown } from '@react/components/portal/StatusDropdownCell';
 import { EmptyState, IconButton } from '@react/factories';
@@ -233,59 +234,43 @@ export function LeadDetailPanel({
         </div>
 
         {/* Title row — company is primary, contact name is secondary */}
-        <div className="detail-title-row">
-          <div className="detail-title-group">
-            <div className="detail-info">
-              <div className="detail-name-row">
-                <h1 className="detail-title">{decodedCompany || decodedName}</h1>
-                <StatusDropdown
-                  status={lead.status}
-                  statusConfig={LEAD_STATUS_CONFIG}
-                  onStatusChange={(newStatus) => onStatusChange?.(lead.id, newStatus as LeadStatus)}
-                  ariaLabel="Change lead status"
-                />
-              </div>
-
-              {decodedCompany && (
-                <div className="detail-subtitle">{decodedName}</div>
+        <DetailHeader
+          title={decodedCompany || decodedName}
+          status={
+            <StatusDropdown
+              status={lead.status}
+              statusConfig={LEAD_STATUS_CONFIG}
+              onStatusChange={(newStatus) => onStatusChange?.(lead.id, newStatus as LeadStatus)}
+              ariaLabel="Change lead status"
+            />
+          }
+          subtitle={decodedCompany ? decodedName : undefined}
+          meta={[
+            ...(lead.source ? [{ label: 'Source', value: LEAD_SOURCE_LABELS[lead.source] || lead.source }] : []),
+            { label: 'Created', value: formatDate(lead.created_at) }
+          ]}
+          actions={
+            <>
+              {canActivate && (
+                <button
+                  className="icon-btn"
+                  onClick={activateDialog.open}
+                  title="Activate as Project"
+                  aria-label="Activate as Project"
+                >
+                  <Rocket />
+                </button>
               )}
-
-              <div className="detail-meta">
-                {lead.source && (
-                  <span className="meta-item">
-                    <span className="field-label">Source:</span>{' '}
-                    <span className="meta-value">{LEAD_SOURCE_LABELS[lead.source] || lead.source}</span>
-                  </span>
-                )}
-                <span className="meta-item">
-                  <span className="field-label">Created:</span>{' '}
-                  <span className="meta-value">{formatDate(lead.created_at)}</span>
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Actions — right-aligned */}
-          <div className="detail-actions">
-            {canActivate && (
-              <button
-                className="icon-btn"
-                onClick={activateDialog.open}
-                title="Activate as Project"
-                aria-label="Activate as Project"
-              >
-                <Rocket />
-              </button>
-            )}
-            {lead.email && (
-              <IconButton
-                action="email"
-                onClick={() => window.location.href = `mailto:${lead.email}`}
-                title="Send email"
-              />
-            )}
-          </div>
-        </div>
+              {lead.email && (
+                <IconButton
+                  action="email"
+                  onClick={() => window.location.href = `mailto:${lead.email}`}
+                  title="Send email"
+                />
+              )}
+            </>
+          }
+        />
 
         {/* Tabs */}
         <div className="details-content">
