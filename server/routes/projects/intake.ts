@@ -199,7 +199,7 @@ router.get(
       return map[type] || type.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
     };
 
-    const formatContact = (val: string): string => {
+    const _formatContact = (val: string): string => {
       const map: Record<string, string> = {
         email: 'Email',
         phone: 'Phone',
@@ -284,7 +284,7 @@ router.get(
       const cleanVal = clean(value);
       if (!cleanVal) return;
 
-      const upperLabel = label.toUpperCase() + ':';
+      const upperLabel = `${label.toUpperCase()  }:`;
       const valueX = LEFT + labelWidth;
       const valueMaxW = RIGHT - valueX;
 
@@ -326,7 +326,7 @@ router.get(
     const drawBoolField = (label: string, value: boolean | undefined) => {
       if (value === undefined || value === null) return;
       const indicator = value ? 'Yes' : 'No';
-      ctx.y = drawLabelValue(ctx.currentPage, label.toUpperCase() + ':', indicator, {
+      ctx.y = drawLabelValue(ctx.currentPage, `${label.toUpperCase()  }:`, indicator, {
         x: LEFT, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
       });
     };

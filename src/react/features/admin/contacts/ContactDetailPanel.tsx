@@ -146,9 +146,9 @@ export function ContactDetailPanel({
               visible: !!c.clientId && !!c.clientName,
               onClick: c.clientId
                 ? () => {
-                    onClose();
-                    onNavigate?.('client-detail', String(c.clientId));
-                  }
+                  onClose();
+                  onNavigate?.('client-detail', String(c.clientId));
+                }
                 : undefined
             },
             {

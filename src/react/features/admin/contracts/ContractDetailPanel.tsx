@@ -9,7 +9,7 @@ import { useMemo, useCallback } from 'react';
 import {
   DetailPanel,
   MetaGrid,
-  MetaItem,
+  MetaItem as _MetaItem,
   Timeline,
   IconButton
 } from '@react/factories';

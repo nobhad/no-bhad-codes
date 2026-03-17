@@ -346,7 +346,7 @@ const QUESTION_BANK: QuestionBankEntry[] = [
 // Fields prefixed with 'client.' come from the clients table;
 // all others come from the projects table.
 
-const CLIENT_FIELDS = new Set([
+const _CLIENT_FIELDS = new Set([
   'company_name',
   'phone',
   'billing_name',
@@ -452,7 +452,7 @@ export async function generateDynamicQuestionnaire(
 
   // Create the questionnaire record
   const projectName = String(row.project_name || 'Your Project');
-  const title = `Project Information - ${projectName}`;
+  const _title = `Project Information - ${projectName}`;
   const missingCount = allQuestions.length - collectedFields.size;
   const description = missingCount > 0
     ? 'We have some of your project details already — please review what we have and fill in anything that\'s missing. ' +

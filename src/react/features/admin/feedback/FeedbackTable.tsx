@@ -10,7 +10,7 @@
 
 import * as React from 'react';
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { Send, Inbox, Star, BarChart3 } from 'lucide-react';
+import { Send as _Send, Inbox, Star, BarChart3 as _BarChart3 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import {
   PortalTable,

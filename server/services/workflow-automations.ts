@@ -16,7 +16,7 @@ import { getDatabase } from '../database/init.js';
 import { workflowTriggerService } from './workflow-trigger-service.js';
 import { generateProjectCode } from '../utils/project-code.js';
 import { invoiceService } from './invoice-service.js';
-import { generateDefaultMilestones } from './milestone-generator.js';
+import { generateDefaultMilestones as _generateDefaultMilestones } from './milestone-generator.js';
 import { generateTierMilestones } from './tier-milestone-generator.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { logger } from './logger.js';
@@ -182,10 +182,10 @@ async function handleProposalAccepted(data: {
         });
       } else {
       // Fetch proposal features for tier-aware generation
-      const { proposalService } = await import('./proposal-service.js');
-      const features = await proposalService.getProposalFeatures(proposalId);
+        const { proposalService } = await import('./proposal-service.js');
+        const features = await proposalService.getProposalFeatures(proposalId);
 
-      const milestoneResult = await generateTierMilestones(
+        const milestoneResult = await generateTierMilestones(
         projectId!,
         proposal.project_type || 'other',
         proposal.selected_tier || 'good',
@@ -195,16 +195,16 @@ async function handleProposalAccepted(data: {
           is_addon?: number | boolean;
         }>,
         { startDate: new Date() }
-      );
-      logger.info('proposal.accepted: Generated tier-aware milestones and tasks', {
-        category: 'workflow',
-        metadata: {
-          projectId,
-          tier: proposal.selected_tier || 'good',
-          milestonesCreated: milestoneResult.milestonesCreated,
-          tasksCreated: milestoneResult.tasksCreated
-        }
-      });
+        );
+        logger.info('proposal.accepted: Generated tier-aware milestones and tasks', {
+          category: 'workflow',
+          metadata: {
+            projectId,
+            tier: proposal.selected_tier || 'good',
+            milestonesCreated: milestoneResult.milestonesCreated,
+            tasksCreated: milestoneResult.tasksCreated
+          }
+        });
       } // end else (no existing milestones)
     } catch (milestoneError) {
       logger.error('[WorkflowAutomation] proposal.accepted: Failed to generate milestones', {

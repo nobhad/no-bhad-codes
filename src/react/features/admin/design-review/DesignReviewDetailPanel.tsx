@@ -89,7 +89,7 @@ export function DesignReviewDetailPanel({
   onNavigate,
   onApprove,
   onRequestRevision,
-  showNotification
+  showNotification: _showNotification
 }: DesignReviewDetailPanelProps) {
   const handleNavigateToClient = useCallback(
     (clientId: number) => {
