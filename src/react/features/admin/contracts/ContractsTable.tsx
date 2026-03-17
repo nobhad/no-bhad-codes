@@ -40,6 +40,7 @@ import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
 import { CreateContractModal } from '../modals/CreateEntityModals';
+import { useExport, CONTRACTS_EXPORT_CONFIG } from '@react/hooks/useExport';
 import { ContractDetailPanel } from './ContractDetailPanel';
 
 const logger = createLogger('ContractsTable');
@@ -177,6 +178,14 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
 
   // Apply filters
   const filteredContracts = useMemo(() => applyFilters(contracts), [applyFilters, contracts]);
+
+  const { exportCsv, isExporting } = useExport({
+    config: CONTRACTS_EXPORT_CONFIG,
+    data: filteredContracts,
+    onExport: (count) => {
+      showNotification?.(`Exported ${count} item${count !== 1 ? 's' : ''} to CSV`, 'success');
+    }
+  });
 
   // Pagination
   const pagination = usePagination({
@@ -352,221 +361,222 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
 
   return (
     <>
-    <TableLayout
-      containerRef={containerRef as React.RefObject<HTMLDivElement>}
-      title="CONTRACTS"
-      stats={
-        <TableStats
-          items={[
-            { value: stats.total, label: 'total' },
-            { value: stats.draft, label: 'draft' },
-            { value: stats.pending, label: 'pending', variant: 'pending' },
-            { value: stats.signed, label: 'signed', variant: 'completed' },
-            { value: stats.expired, label: 'expired', variant: 'overdue' }
-          ]}
-          tooltip={`${stats.total} Total • ${stats.draft} Draft • ${stats.pending} Pending • ${stats.signed} Signed`}
-        />
-      }
-      actions={
-        <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search contracts..."
+      <TableLayout
+        containerRef={containerRef as React.RefObject<HTMLDivElement>}
+        title="CONTRACTS"
+        stats={
+          <TableStats
+            items={[
+              { value: stats.total, label: 'total' },
+              { value: stats.draft, label: 'draft' },
+              { value: stats.pending, label: 'pending', variant: 'pending' },
+              { value: stats.signed, label: 'signed', variant: 'completed' },
+              { value: stats.expired, label: 'expired', variant: 'overdue' }
+            ]}
+            tooltip={`${stats.total} Total • ${stats.draft} Draft • ${stats.pending} Pending • ${stats.signed} Signed`}
           />
-          <FilterDropdown
-            sections={CONTRACTS_FILTER_CONFIG}
-            values={filterValues}
-            onChange={handleFilterChange}
-          />
-          <IconButton
-            action="download"
-            disabled={filteredContracts.length === 0}
-            title="Export to CSV"
-          />
-          <IconButton action="add" onClick={() => setCreateOpen(true)} title="New Contract" />
-        </>
-      }
-      bulkActions={
-        <BulkActionsToolbar
-          selectedCount={selection.selectedCount}
-          totalCount={filteredContracts.length}
-          onClearSelection={selection.clearSelection}
-          onSelectAll={() => selection.selectMany(filteredContracts)}
-          allSelected={selection.allSelected && selection.selectedCount === filteredContracts.length}
-          statusOptions={bulkStatusOptions}
-          onStatusChange={handleBulkStatusChange}
-          onDelete={handleBulkDelete}
-        />
-      }
-      pagination={
-        !isLoading && filteredContracts.length > 0 ? (
-          <TablePagination
-            pageInfo={pagination.pageInfo}
-            page={pagination.page}
-            pageSize={pagination.pageSize}
-            pageSizeOptions={pagination.pageSizeOptions}
-            canGoPrev={pagination.canGoPrev}
-            canGoNext={pagination.canGoNext}
-            onPageSizeChange={pagination.setPageSize}
-            onFirstPage={pagination.firstPage}
-            onPrevPage={pagination.prevPage}
-            onNextPage={pagination.nextPage}
-            onLastPage={pagination.lastPage}
-          />
-        ) : undefined
-      }
-    >
-      <PortalTable>
-        <PortalTableHeader>
-          <PortalTableRow>
-            <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
-              <Checkbox
-                checked={selection.allSelected}
-                onCheckedChange={selection.toggleSelectAll}
-                aria-label="Select all"
-              />
-            </PortalTableHead>
-            <PortalTableHead
-              className="contract-col"
-              sortable
-              sortDirection={sort?.column === 'title' ? sort.direction : null}
-              onClick={() => toggleSort('title')}
-            >
-              Contract
-            </PortalTableHead>
-            <PortalTableHead
-              className="client-col"
-              sortable
-              sortDirection={sort?.column === 'client' ? sort.direction : null}
-              onClick={() => toggleSort('client')}
-            >
-              Client
-            </PortalTableHead>
-            <PortalTableHead className="project-col">Project</PortalTableHead>
-            <PortalTableHead className="email-col">
-              Email
-            </PortalTableHead>
-            <PortalTableHead className="status-col">Status</PortalTableHead>
-            <PortalTableHead
-              className="date-col"
-              sortable
-              sortDirection={sort?.column === 'createdAt' ? sort.direction : null}
-              onClick={() => toggleSort('createdAt')}
-            >
-              Created
-            </PortalTableHead>
-            <PortalTableHead className="col-actions">Actions</PortalTableHead>
-          </PortalTableRow>
-        </PortalTableHeader>
-
-        <PortalTableBody animate={!isLoading && !error}>
-          {error ? (
-            <PortalTableError colSpan={8} message={error} onRetry={refetch} />
-          ) : isLoading ? (
-            <PortalTableLoading colSpan={8} rows={5} />
-          ) : paginatedContracts.length === 0 ? (
-            <PortalTableEmpty
-              colSpan={8}
-              icon={<Inbox />}
-              message={hasActiveFilters ? 'No contracts match your filters' : 'No contracts yet'}
+        }
+        actions={
+          <>
+            <SearchFilter
+              value={search}
+              onChange={setSearch}
+              placeholder="Search contracts..."
             />
-          ) : (
-            paginatedContracts.map((contract) => (
-              <PortalTableRow
-                key={contract.id}
-                clickable
-                selected={selection.isSelected(contract)}
-                onClick={() => handleRowClick(contract)}
+            <FilterDropdown
+              sections={CONTRACTS_FILTER_CONFIG}
+              values={filterValues}
+              onChange={handleFilterChange}
+            />
+            <IconButton
+              action="download"
+              onClick={exportCsv}
+              disabled={isExporting || filteredContracts.length === 0}
+              title="Export to CSV"
+            />
+            <IconButton action="add" onClick={() => setCreateOpen(true)} title="New Contract" />
+          </>
+        }
+        bulkActions={
+          <BulkActionsToolbar
+            selectedCount={selection.selectedCount}
+            totalCount={filteredContracts.length}
+            onClearSelection={selection.clearSelection}
+            onSelectAll={() => selection.selectMany(filteredContracts)}
+            allSelected={selection.allSelected && selection.selectedCount === filteredContracts.length}
+            statusOptions={bulkStatusOptions}
+            onStatusChange={handleBulkStatusChange}
+            onDelete={handleBulkDelete}
+          />
+        }
+        pagination={
+          !isLoading && filteredContracts.length > 0 ? (
+            <TablePagination
+              pageInfo={pagination.pageInfo}
+              page={pagination.page}
+              pageSize={pagination.pageSize}
+              pageSizeOptions={pagination.pageSizeOptions}
+              canGoPrev={pagination.canGoPrev}
+              canGoNext={pagination.canGoNext}
+              onPageSizeChange={pagination.setPageSize}
+              onFirstPage={pagination.firstPage}
+              onPrevPage={pagination.prevPage}
+              onNextPage={pagination.nextPage}
+              onLastPage={pagination.lastPage}
+            />
+          ) : undefined
+        }
+      >
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
+                <Checkbox
+                  checked={selection.allSelected}
+                  onCheckedChange={selection.toggleSelectAll}
+                  aria-label="Select all"
+                />
+              </PortalTableHead>
+              <PortalTableHead
+                className="contract-col"
+                sortable
+                sortDirection={sort?.column === 'title' ? sort.direction : null}
+                onClick={() => toggleSort('title')}
               >
-                <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
-                  <Checkbox
-                    checked={selection.isSelected(contract)}
-                    onCheckedChange={() => selection.toggleSelection(contract)}
-                    aria-label={`Select ${contract.templateName || `Contract ${  contract.id}`}`}
-                  />
-                </PortalTableCell>
-                <PortalTableCell className="contract-cell">
-                  <div className="cell-with-icon">
-                    <FileText className="icon-sm" />
-                    <div className="cell-content">
-                      <span className="cell-title">{contract.templateName || `Contract #${contract.id}`}</span>
-                      {contract.templateType && (
-                        <span className="cell-subtitle">{contract.templateType}</span>
-                      )}
+              Contract
+              </PortalTableHead>
+              <PortalTableHead
+                className="client-col"
+                sortable
+                sortDirection={sort?.column === 'client' ? sort.direction : null}
+                onClick={() => toggleSort('client')}
+              >
+              Client
+              </PortalTableHead>
+              <PortalTableHead className="project-col">Project</PortalTableHead>
+              <PortalTableHead className="email-col">
+              Email
+              </PortalTableHead>
+              <PortalTableHead className="status-col">Status</PortalTableHead>
+              <PortalTableHead
+                className="date-col"
+                sortable
+                sortDirection={sort?.column === 'createdAt' ? sort.direction : null}
+                onClick={() => toggleSort('createdAt')}
+              >
+              Created
+              </PortalTableHead>
+              <PortalTableHead className="col-actions">Actions</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
+
+          <PortalTableBody animate={!isLoading && !error}>
+            {error ? (
+              <PortalTableError colSpan={8} message={error} onRetry={refetch} />
+            ) : isLoading ? (
+              <PortalTableLoading colSpan={8} rows={5} />
+            ) : paginatedContracts.length === 0 ? (
+              <PortalTableEmpty
+                colSpan={8}
+                icon={<Inbox />}
+                message={hasActiveFilters ? 'No contracts match your filters' : 'No contracts yet'}
+              />
+            ) : (
+              paginatedContracts.map((contract) => (
+                <PortalTableRow
+                  key={contract.id}
+                  clickable
+                  selected={selection.isSelected(contract)}
+                  onClick={() => handleRowClick(contract)}
+                >
+                  <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={selection.isSelected(contract)}
+                      onCheckedChange={() => selection.toggleSelection(contract)}
+                      aria-label={`Select ${contract.templateName || `Contract ${  contract.id}`}`}
+                    />
+                  </PortalTableCell>
+                  <PortalTableCell className="contract-cell">
+                    <div className="cell-with-icon">
+                      <FileText className="icon-sm" />
+                      <div className="cell-content">
+                        <span className="cell-title">{contract.templateName || `Contract #${contract.id}`}</span>
+                        {contract.templateType && (
+                          <span className="cell-subtitle">{contract.templateType}</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </PortalTableCell>
-                <PortalTableCell className="client-cell">
-                  <span
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onNavigate?.('clients', String(contract.clientId));
-                    }}
-                    className="table-link"
-                  >
-                    {contract.clientName}
-                  </span>
-                </PortalTableCell>
-                <PortalTableCell className="project-cell">
-                  {contract.projectName && (
+                  </PortalTableCell>
+                  <PortalTableCell className="client-cell">
                     <span
                       onClick={(e) => {
                         e.stopPropagation();
-                        onNavigate?.('projects', String(contract.projectId));
+                        onNavigate?.('clients', String(contract.clientId));
                       }}
                       className="table-link"
                     >
-                      {contract.projectName}
+                      {contract.clientName}
                     </span>
-                  )}
-                </PortalTableCell>
-                <PortalTableCell className="email-cell">
-                  {contract.clientEmail}
-                </PortalTableCell>
-                <StatusDropdownCell
-                  status={contract.status}
-                  statusConfig={CONTRACT_STATUS_CONFIG}
-                  onStatusChange={(newStatus) => handleStatusChange(contract.id, newStatus)}
-                  ariaLabel="Change contract status"
-                />
-                <PortalTableCell className="date-col">{formatDate(contract.createdAt)}</PortalTableCell>
-                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                  <div className="action-group">
-                    <IconButton action="view" title="View" onClick={() => setSelectedContract(contract)} />
-                    {contract.status === 'draft' && (
-                      <IconButton
-                        action="send"
-                        title="Send"
-                        onClick={() => handleSendContract(contract.id)}
-                      />
+                  </PortalTableCell>
+                  <PortalTableCell className="project-cell">
+                    {contract.projectName && (
+                      <span
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onNavigate?.('projects', String(contract.projectId));
+                        }}
+                        className="table-link"
+                      >
+                        {contract.projectName}
+                      </span>
                     )}
-                    <IconButton action="download" title="Download" />
-                  </div>
-                </PortalTableCell>
-              </PortalTableRow>
-            ))
-          )}
-        </PortalTableBody>
-      </PortalTable>
-      <CreateContractModal
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        onSubmit={handleCreate}
-        loading={createLoading}
-        clientOptions={clientOptions}
-        projectOptions={projectOptions}
+                  </PortalTableCell>
+                  <PortalTableCell className="email-cell">
+                    {contract.clientEmail}
+                  </PortalTableCell>
+                  <StatusDropdownCell
+                    status={contract.status}
+                    statusConfig={CONTRACT_STATUS_CONFIG}
+                    onStatusChange={(newStatus) => handleStatusChange(contract.id, newStatus)}
+                    ariaLabel="Change contract status"
+                  />
+                  <PortalTableCell className="date-col">{formatDate(contract.createdAt)}</PortalTableCell>
+                  <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
+                    <div className="action-group">
+                      <IconButton action="view" title="View" onClick={() => setSelectedContract(contract)} />
+                      {contract.status === 'draft' && (
+                        <IconButton
+                          action="send"
+                          title="Send"
+                          onClick={() => handleSendContract(contract.id)}
+                        />
+                      )}
+                      <IconButton action="download" title="Download" />
+                    </div>
+                  </PortalTableCell>
+                </PortalTableRow>
+              ))
+            )}
+          </PortalTableBody>
+        </PortalTable>
+        <CreateContractModal
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          onSubmit={handleCreate}
+          loading={createLoading}
+          clientOptions={clientOptions}
+          projectOptions={projectOptions}
+        />
+      </TableLayout>
+      <ContractDetailPanel
+        contract={selectedContract}
+        onClose={handleClosePanel}
+        onStatusChange={handlePanelStatusChange}
+        onNavigate={onNavigate}
+        onSend={(id) => handleSendContract(id)}
+        onDownload={() => {}}
+        showNotification={showNotification}
       />
-    </TableLayout>
-    <ContractDetailPanel
-      contract={selectedContract}
-      onClose={handleClosePanel}
-      onStatusChange={handlePanelStatusChange}
-      onNavigate={onNavigate}
-      onSend={(id) => handleSendContract(id)}
-      onDownload={() => {}}
-      showNotification={showNotification}
-    />
     </>
   );
 }

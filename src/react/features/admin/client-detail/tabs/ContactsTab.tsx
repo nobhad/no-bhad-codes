@@ -303,7 +303,7 @@ export function ContactsTab({
         />
       </div>
 
-      <div className="form-actions">
+      <div className="action-group" style={{ marginTop: 'var(--space-4)' }}>
         <PortalButton variant="ghost" onClick={handleCancel}>
           Cancel
         </PortalButton>

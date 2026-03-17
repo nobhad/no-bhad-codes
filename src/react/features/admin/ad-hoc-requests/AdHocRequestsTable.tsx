@@ -36,6 +36,7 @@ import type { SortConfig } from '../types';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
 import { executeUpdateWithToast, executeWithToast } from '@/utils/api-wrappers';
+import { useExport, AD_HOC_REQUESTS_EXPORT_CONFIG } from '@react/hooks/useExport';
 import { CreateAdHocRequestModal } from '../modals/CreateEntityModals';
 
 interface AdHocRequest {
@@ -193,6 +194,14 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
 
   // Apply filters
   const filteredRequests = useMemo(() => applyFilters(requests), [applyFilters, requests]);
+
+  const { exportCsv, isExporting } = useExport({
+    config: AD_HOC_REQUESTS_EXPORT_CONFIG,
+    data: filteredRequests,
+    onExport: (count) => {
+      showNotification?.(`Exported ${count} item${count !== 1 ? 's' : ''} to CSV`, 'success');
+    }
+  });
 
   // Pagination - overview mode disables persistence
   const pagination = usePagination({
@@ -389,7 +398,8 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
           />
           <IconButton
             action="download"
-            disabled={filteredRequests.length === 0}
+            onClick={exportCsv}
+            disabled={isExporting || filteredRequests.length === 0}
             title="Export to CSV"
           />
           <IconButton action="add" onClick={() => setCreateOpen(true)} title="New Request" />

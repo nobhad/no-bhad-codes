@@ -36,6 +36,7 @@ import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
 import { executeWithToast } from '@/utils/api-wrappers';
 import { CreateProposalModal } from '../modals/CreateEntityModals';
+import { useExport, PROPOSALS_EXPORT_CONFIG } from '@react/hooks/useExport';
 import { ProposalDetailPanel } from './ProposalDetailPanel';
 
 interface Proposal {
@@ -170,6 +171,14 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
 
   // Apply filters
   const filteredProposals = useMemo(() => applyFilters(proposals), [applyFilters, proposals]);
+
+  const { exportCsv, isExporting } = useExport({
+    config: PROPOSALS_EXPORT_CONFIG,
+    data: filteredProposals,
+    onExport: (count) => {
+      showNotification?.(`Exported ${count} item${count !== 1 ? 's' : ''} to CSV`, 'success');
+    }
+  });
 
   // Pagination
   const pagination = usePagination({
@@ -350,217 +359,218 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
 
   return (
     <>
-    <TableLayout
-      containerRef={containerRef as React.RefObject<HTMLDivElement>}
-      title="PROPOSALS"
-      stats={
-        <TableStats
-          items={[
-            { value: stats.total, label: 'total' },
-            { value: stats.draft, label: 'draft' },
-            { value: stats.sent, label: 'sent', variant: 'active' },
-            { value: stats.accepted, label: 'accepted', variant: 'completed' },
-            { value: stats.declined, label: 'declined', variant: 'cancelled' }
-          ]}
-          tooltip={`${stats.total} Total | ${formatCurrency(stats.totalValue)} Value | ${stats.acceptanceRate}% Acceptance`}
-        />
-      }
-      actions={
-        <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search proposals..."
+      <TableLayout
+        containerRef={containerRef as React.RefObject<HTMLDivElement>}
+        title="PROPOSALS"
+        stats={
+          <TableStats
+            items={[
+              { value: stats.total, label: 'total' },
+              { value: stats.draft, label: 'draft' },
+              { value: stats.sent, label: 'sent', variant: 'active' },
+              { value: stats.accepted, label: 'accepted', variant: 'completed' },
+              { value: stats.declined, label: 'declined', variant: 'cancelled' }
+            ]}
+            tooltip={`${stats.total} Total | ${formatCurrency(stats.totalValue)} Value | ${stats.acceptanceRate}% Acceptance`}
           />
-          <FilterDropdown
-            sections={PROPOSALS_FILTER_CONFIG}
-            values={filterValues}
-            onChange={handleFilterChange}
-          />
-          <IconButton
-            action="download"
-            disabled={filteredProposals.length === 0}
-            title="Export to CSV"
-          />
-          <IconButton action="add" onClick={() => setCreateOpen(true)} title="New Proposal" />
-        </>
-      }
-      bulkActions={
-        <BulkActionsToolbar
-          selectedCount={selection.selectedCount}
-          totalCount={filteredProposals.length}
-          onClearSelection={selection.clearSelection}
-          onSelectAll={() => selection.selectMany(filteredProposals)}
-          allSelected={selection.allSelected && selection.selectedCount === filteredProposals.length}
-          statusOptions={bulkStatusOptions}
-          onStatusChange={handleBulkStatusChange}
-          onDelete={handleBulkDelete}
-        />
-      }
-      pagination={
-        !isLoading && filteredProposals.length > 0 ? (
-          <TablePagination
-            pageInfo={pagination.pageInfo}
-            page={pagination.page}
-            pageSize={pagination.pageSize}
-            pageSizeOptions={pagination.pageSizeOptions}
-            canGoPrev={pagination.canGoPrev}
-            canGoNext={pagination.canGoNext}
-            onPageSizeChange={pagination.setPageSize}
-            onFirstPage={pagination.firstPage}
-            onPrevPage={pagination.prevPage}
-            onNextPage={pagination.nextPage}
-            onLastPage={pagination.lastPage}
-          />
-        ) : undefined
-      }
-    >
-      <PortalTable>
-        <PortalTableHeader>
-          <PortalTableRow>
-            <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
-              <Checkbox
-                checked={selection.allSelected}
-                onCheckedChange={selection.toggleSelectAll}
-                aria-label="Select all"
-              />
-            </PortalTableHead>
-            <PortalTableHead
-              className="contact-col"
-              sortable
-              sortDirection={sort?.column === 'title' ? sort.direction : null}
-              onClick={() => toggleSort('title')}
-            >
-              Proposal
-            </PortalTableHead>
-            <PortalTableHead
-              className="amount-col"
-              sortable
-              sortDirection={sort?.column === 'amount' ? sort.direction : null}
-              onClick={() => toggleSort('amount')}
-            >
-              Amount
-            </PortalTableHead>
-            <PortalTableHead className="status-col">Status</PortalTableHead>
-            <PortalTableHead
-              className="date-col"
-              sortable
-              sortDirection={sort?.column === 'createdAt' ? sort.direction : null}
-              onClick={() => toggleSort('createdAt')}
-            >
-              Dates
-            </PortalTableHead>
-            <PortalTableHead className="col-actions">Actions</PortalTableHead>
-          </PortalTableRow>
-        </PortalTableHeader>
-
-        <PortalTableBody animate={!isLoading && !error}>
-          {error ? (
-            <PortalTableError colSpan={6} message={error} onRetry={refetch} />
-          ) : isLoading ? (
-            <PortalTableLoading colSpan={6} rows={5} />
-          ) : paginatedProposals.length === 0 ? (
-            <PortalTableEmpty
-              colSpan={6}
-              icon={<Inbox />}
-              message={hasActiveFilters ? 'No proposals match your filters' : 'No proposals yet'}
+        }
+        actions={
+          <>
+            <SearchFilter
+              value={search}
+              onChange={setSearch}
+              placeholder="Search proposals..."
             />
-          ) : (
-            paginatedProposals.map((proposal) => (
-              <PortalTableRow
-                key={proposal.id}
-                clickable
-                selected={selection.isSelected(proposal)}
-                onClick={() => handleRowClick(proposal)}
+            <FilterDropdown
+              sections={PROPOSALS_FILTER_CONFIG}
+              values={filterValues}
+              onChange={handleFilterChange}
+            />
+            <IconButton
+              action="download"
+              onClick={exportCsv}
+              disabled={isExporting || filteredProposals.length === 0}
+              title="Export to CSV"
+            />
+            <IconButton action="add" onClick={() => setCreateOpen(true)} title="New Proposal" />
+          </>
+        }
+        bulkActions={
+          <BulkActionsToolbar
+            selectedCount={selection.selectedCount}
+            totalCount={filteredProposals.length}
+            onClearSelection={selection.clearSelection}
+            onSelectAll={() => selection.selectMany(filteredProposals)}
+            allSelected={selection.allSelected && selection.selectedCount === filteredProposals.length}
+            statusOptions={bulkStatusOptions}
+            onStatusChange={handleBulkStatusChange}
+            onDelete={handleBulkDelete}
+          />
+        }
+        pagination={
+          !isLoading && filteredProposals.length > 0 ? (
+            <TablePagination
+              pageInfo={pagination.pageInfo}
+              page={pagination.page}
+              pageSize={pagination.pageSize}
+              pageSizeOptions={pagination.pageSizeOptions}
+              canGoPrev={pagination.canGoPrev}
+              canGoNext={pagination.canGoNext}
+              onPageSizeChange={pagination.setPageSize}
+              onFirstPage={pagination.firstPage}
+              onPrevPage={pagination.prevPage}
+              onNextPage={pagination.nextPage}
+              onLastPage={pagination.lastPage}
+            />
+          ) : undefined
+        }
+      >
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
+                <Checkbox
+                  checked={selection.allSelected}
+                  onCheckedChange={selection.toggleSelectAll}
+                  aria-label="Select all"
+                />
+              </PortalTableHead>
+              <PortalTableHead
+                className="contact-col"
+                sortable
+                sortDirection={sort?.column === 'title' ? sort.direction : null}
+                onClick={() => toggleSort('title')}
               >
-                <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
-                  <Checkbox
-                    checked={selection.isSelected(proposal)}
-                    onCheckedChange={() => selection.toggleSelection(proposal)}
-                    aria-label={`Select ${proposal.title}`}
+              Proposal
+              </PortalTableHead>
+              <PortalTableHead
+                className="amount-col"
+                sortable
+                sortDirection={sort?.column === 'amount' ? sort.direction : null}
+                onClick={() => toggleSort('amount')}
+              >
+              Amount
+              </PortalTableHead>
+              <PortalTableHead className="status-col">Status</PortalTableHead>
+              <PortalTableHead
+                className="date-col"
+                sortable
+                sortDirection={sort?.column === 'createdAt' ? sort.direction : null}
+                onClick={() => toggleSort('createdAt')}
+              >
+              Dates
+              </PortalTableHead>
+              <PortalTableHead className="col-actions">Actions</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
+
+          <PortalTableBody animate={!isLoading && !error}>
+            {error ? (
+              <PortalTableError colSpan={6} message={error} onRetry={refetch} />
+            ) : isLoading ? (
+              <PortalTableLoading colSpan={6} rows={5} />
+            ) : paginatedProposals.length === 0 ? (
+              <PortalTableEmpty
+                colSpan={6}
+                icon={<Inbox />}
+                message={hasActiveFilters ? 'No proposals match your filters' : 'No proposals yet'}
+              />
+            ) : (
+              paginatedProposals.map((proposal) => (
+                <PortalTableRow
+                  key={proposal.id}
+                  clickable
+                  selected={selection.isSelected(proposal)}
+                  onClick={() => handleRowClick(proposal)}
+                >
+                  <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={selection.isSelected(proposal)}
+                      onCheckedChange={() => selection.toggleSelection(proposal)}
+                      aria-label={`Select ${proposal.title}`}
+                    />
+                  </PortalTableCell>
+                  <PortalTableCell className="primary-cell">
+                    <div className="cell-with-icon">
+                      <FileText className="icon-sm" />
+                      <div className="cell-content">
+                        <span className="cell-title">{proposal.title}</span>
+                        {proposal.clientId && onNavigate ? (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onNavigate('client-detail', String(proposal.clientId));
+                            }}
+                            className="table-link cell-subtitle"
+                          >
+                            {proposal.clientName}
+                          </button>
+                        ) : (
+                          <span className="cell-subtitle">{proposal.clientName}</span>
+                        )}
+                        {proposal.projectType && (
+                          <span className="identity-company">{proposal.projectType}</span>
+                        )}
+                      </div>
+                    </div>
+                  </PortalTableCell>
+                  <PortalTableCell className="text-right">
+                    {formatCurrency(proposal.amount)}
+                  </PortalTableCell>
+                  <StatusDropdownCell
+                    status={proposal.status}
+                    statusConfig={PROPOSAL_STATUS_CONFIG}
+                    onStatusChange={(newStatus) => handleStatusChange(proposal.id, newStatus)}
+                    ariaLabel="Change proposal status"
                   />
-                </PortalTableCell>
-                <PortalTableCell className="primary-cell">
-                  <div className="cell-with-icon">
-                    <FileText className="icon-sm" />
+                  <PortalTableCell className="date-col">
                     <div className="cell-content">
-                      <span className="cell-title">{proposal.title}</span>
-                      {proposal.clientId && onNavigate ? (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onNavigate('client-detail', String(proposal.clientId));
-                          }}
-                          className="table-link cell-subtitle"
-                        >
-                          {proposal.clientName}
-                        </button>
-                      ) : (
-                        <span className="cell-subtitle">{proposal.clientName}</span>
-                      )}
-                      {proposal.projectType && (
-                        <span className="identity-company">{proposal.projectType}</span>
+                      <span className="cell-title">{formatDate(proposal.createdAt)}</span>
+                      {proposal.validUntil && (
+                        <span className={`cell-subtitle ${new Date(proposal.validUntil) < new Date() ? 'text-danger' : ''}`}>
+                        Valid until {formatDate(proposal.validUntil)}
+                        </span>
                       )}
                     </div>
-                  </div>
-                </PortalTableCell>
-                <PortalTableCell className="text-right">
-                  {formatCurrency(proposal.amount)}
-                </PortalTableCell>
-                <StatusDropdownCell
-                  status={proposal.status}
-                  statusConfig={PROPOSAL_STATUS_CONFIG}
-                  onStatusChange={(newStatus) => handleStatusChange(proposal.id, newStatus)}
-                  ariaLabel="Change proposal status"
-                />
-                <PortalTableCell className="date-col">
-                  <div className="cell-content">
-                    <span className="cell-title">{formatDate(proposal.createdAt)}</span>
-                    {proposal.validUntil && (
-                      <span className={`cell-subtitle ${new Date(proposal.validUntil) < new Date() ? 'text-danger' : ''}`}>
-                        Valid until {formatDate(proposal.validUntil)}
-                      </span>
-                    )}
-                  </div>
-                </PortalTableCell>
-                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                  <div className="action-group">
-                    <IconButton action="view" title="View" onClick={() => onNavigate?.('proposal-detail', String(proposal.id))} />
-                    {proposal.status === 'draft' && (
-                      <IconButton
-                        action="send"
-                        title="Send"
-                        onClick={() => handleSendProposal(proposal.id)}
-                      />
-                    )}
-                    <IconButton action="duplicate" title="Duplicate" onClick={() => handleDuplicate(proposal.id)} />
-                    <IconButton action="delete" title="Delete" onClick={() => handleDeleteProposal(proposal.id)} />
-                  </div>
-                </PortalTableCell>
-              </PortalTableRow>
-            ))
-          )}
-        </PortalTableBody>
-      </PortalTable>
-      <CreateProposalModal
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        onSubmit={handleCreate}
-        loading={createLoading}
-        clientOptions={clientOptions}
-        projectOptions={entityProjects}
-        projectTypeOptions={projectTypeOptions}
+                  </PortalTableCell>
+                  <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
+                    <div className="action-group">
+                      <IconButton action="view" title="View" onClick={() => onNavigate?.('proposal-detail', String(proposal.id))} />
+                      {proposal.status === 'draft' && (
+                        <IconButton
+                          action="send"
+                          title="Send"
+                          onClick={() => handleSendProposal(proposal.id)}
+                        />
+                      )}
+                      <IconButton action="duplicate" title="Duplicate" onClick={() => handleDuplicate(proposal.id)} />
+                      <IconButton action="delete" title="Delete" onClick={() => handleDeleteProposal(proposal.id)} />
+                    </div>
+                  </PortalTableCell>
+                </PortalTableRow>
+              ))
+            )}
+          </PortalTableBody>
+        </PortalTable>
+        <CreateProposalModal
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          onSubmit={handleCreate}
+          loading={createLoading}
+          clientOptions={clientOptions}
+          projectOptions={entityProjects}
+          projectTypeOptions={projectTypeOptions}
+        />
+      </TableLayout>
+      <ProposalDetailPanel
+        proposal={selectedProposal}
+        onClose={handleClosePanel}
+        onStatusChange={handlePanelStatusChange}
+        onNavigate={onNavigate}
+        onSend={(id) => handleSendProposal(id)}
+        onDuplicate={(id) => handleDuplicate(id)}
+        showNotification={showNotification}
       />
-    </TableLayout>
-    <ProposalDetailPanel
-      proposal={selectedProposal}
-      onClose={handleClosePanel}
-      onStatusChange={handlePanelStatusChange}
-      onNavigate={onNavigate}
-      onSend={(id) => handleSendProposal(id)}
-      onDuplicate={(id) => handleDuplicate(id)}
-      showNotification={showNotification}
-    />
     </>
   );
 }

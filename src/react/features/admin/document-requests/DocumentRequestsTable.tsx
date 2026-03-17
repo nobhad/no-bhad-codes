@@ -37,6 +37,7 @@ import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
 import { CreateDocumentRequestModal } from '../modals/CreateEntityModals';
+import { useExport, DOCUMENT_REQUESTS_EXPORT_CONFIG } from '@react/hooks/useExport';
 import { DocumentRequestDetailPanel } from './DocumentRequestDetailPanel';
 
 const logger = createLogger('DocumentRequestsTable');
@@ -181,6 +182,14 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
 
   // Apply filters
   const filteredRequests = useMemo(() => applyFilters(requests), [applyFilters, requests]);
+
+  const { exportCsv, isExporting } = useExport({
+    config: DOCUMENT_REQUESTS_EXPORT_CONFIG,
+    data: filteredRequests,
+    onExport: (count) => {
+      showNotification?.(`Exported ${count} item${count !== 1 ? 's' : ''} to CSV`, 'success');
+    }
+  });
 
   // Pagination
   const pagination = usePagination({
@@ -355,223 +364,224 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
 
   return (
     <>
-    <TableLayout
-      containerRef={containerRef as React.RefObject<HTMLDivElement>}
-      title="DOCUMENT REQUESTS"
-      stats={
-        <TableStats
-          items={[
-            { value: stats.total, label: 'total' },
-            { value: stats.pending, label: 'pending', variant: 'pending' },
-            { value: stats.submitted, label: 'submitted', variant: 'active' },
-            { value: stats.approved, label: 'approved', variant: 'completed' },
-            { value: stats.overdue, label: 'overdue', variant: 'overdue' }
-          ]}
-          tooltip={`${stats.total} Total • ${stats.pending} Pending • ${stats.submitted} Submitted • ${stats.approved} Approved • ${stats.overdue} Overdue`}
-        />
-      }
-      actions={
-        <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search requests..."
+      <TableLayout
+        containerRef={containerRef as React.RefObject<HTMLDivElement>}
+        title="DOCUMENT REQUESTS"
+        stats={
+          <TableStats
+            items={[
+              { value: stats.total, label: 'total' },
+              { value: stats.pending, label: 'pending', variant: 'pending' },
+              { value: stats.submitted, label: 'submitted', variant: 'active' },
+              { value: stats.approved, label: 'approved', variant: 'completed' },
+              { value: stats.overdue, label: 'overdue', variant: 'overdue' }
+            ]}
+            tooltip={`${stats.total} Total • ${stats.pending} Pending • ${stats.submitted} Submitted • ${stats.approved} Approved • ${stats.overdue} Overdue`}
           />
-          <FilterDropdown
-            sections={DOCUMENT_REQUESTS_FILTER_CONFIG}
-            values={filterValues}
-            onChange={handleFilterChange}
-          />
-          <IconButton
-            action="download"
-            disabled={filteredRequests.length === 0}
-            title="Export to CSV"
-          />
-          <IconButton action="add" onClick={() => setCreateOpen(true)} title="New Request" />
-        </>
-      }
-      bulkActions={
-        <BulkActionsToolbar
-          selectedCount={selection.selectedCount}
-          totalCount={filteredRequests.length}
-          onClearSelection={selection.clearSelection}
-          onSelectAll={() => selection.selectMany(filteredRequests)}
-          allSelected={selection.allSelected && selection.selectedCount === filteredRequests.length}
-          statusOptions={bulkStatusOptions}
-          onStatusChange={handleBulkStatusChange}
-          onDelete={handleBulkDelete}
-        />
-      }
-      pagination={
-        !isLoading && filteredRequests.length > 0 ? (
-          <TablePagination
-            pageInfo={pagination.pageInfo}
-            page={pagination.page}
-            pageSize={pagination.pageSize}
-            pageSizeOptions={pagination.pageSizeOptions}
-            canGoPrev={pagination.canGoPrev}
-            canGoNext={pagination.canGoNext}
-            onPageSizeChange={pagination.setPageSize}
-            onFirstPage={pagination.firstPage}
-            onPrevPage={pagination.prevPage}
-            onNextPage={pagination.nextPage}
-            onLastPage={pagination.lastPage}
-          />
-        ) : undefined
-      }
-    >
-      <PortalTable>
-        <PortalTableHeader>
-          <PortalTableRow>
-            <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
-              <Checkbox
-                checked={selection.allSelected}
-                onCheckedChange={selection.toggleSelectAll}
-                aria-label="Select all"
-              />
-            </PortalTableHead>
-            <PortalTableHead
-              className="name-col"
-              sortable
-              sortDirection={sort?.column === 'title' ? sort.direction : null}
-              onClick={() => toggleSort('title')}
-            >
-              Request
-            </PortalTableHead>
-            <PortalTableHead className="client-col">Client</PortalTableHead>
-            <PortalTableHead className="status-col">Status</PortalTableHead>
-            <PortalTableHead
-              className="date-col"
-              sortable
-              sortDirection={sort?.column === 'dueDate' ? sort.direction : null}
-              onClick={() => toggleSort('dueDate')}
-            >
-              Due Date
-            </PortalTableHead>
-            <PortalTableHead className="docs-col">Docs</PortalTableHead>
-            <PortalTableHead className="col-actions">Actions</PortalTableHead>
-          </PortalTableRow>
-        </PortalTableHeader>
-
-        <PortalTableBody animate={!isLoading && !error}>
-          {error ? (
-            <PortalTableError colSpan={7} message={error} onRetry={refetch} />
-          ) : isLoading ? (
-            <PortalTableLoading colSpan={7} rows={5} />
-          ) : paginatedRequests.length === 0 ? (
-            <PortalTableEmpty
-              colSpan={7}
-              icon={<Inbox />}
-              message={hasActiveFilters ? 'No requests match your filters' : 'No document requests yet'}
+        }
+        actions={
+          <>
+            <SearchFilter
+              value={search}
+              onChange={setSearch}
+              placeholder="Search requests..."
             />
-          ) : (
-            paginatedRequests.map((request) => (
-              <PortalTableRow
-                key={request.id}
-                clickable
-                selected={selection.isSelected(request)}
-                onClick={() => handleRowClick(request)}
+            <FilterDropdown
+              sections={DOCUMENT_REQUESTS_FILTER_CONFIG}
+              values={filterValues}
+              onChange={handleFilterChange}
+            />
+            <IconButton
+              action="download"
+              onClick={exportCsv}
+              disabled={isExporting || filteredRequests.length === 0}
+              title="Export to CSV"
+            />
+            <IconButton action="add" onClick={() => setCreateOpen(true)} title="New Request" />
+          </>
+        }
+        bulkActions={
+          <BulkActionsToolbar
+            selectedCount={selection.selectedCount}
+            totalCount={filteredRequests.length}
+            onClearSelection={selection.clearSelection}
+            onSelectAll={() => selection.selectMany(filteredRequests)}
+            allSelected={selection.allSelected && selection.selectedCount === filteredRequests.length}
+            statusOptions={bulkStatusOptions}
+            onStatusChange={handleBulkStatusChange}
+            onDelete={handleBulkDelete}
+          />
+        }
+        pagination={
+          !isLoading && filteredRequests.length > 0 ? (
+            <TablePagination
+              pageInfo={pagination.pageInfo}
+              page={pagination.page}
+              pageSize={pagination.pageSize}
+              pageSizeOptions={pagination.pageSizeOptions}
+              canGoPrev={pagination.canGoPrev}
+              canGoNext={pagination.canGoNext}
+              onPageSizeChange={pagination.setPageSize}
+              onFirstPage={pagination.firstPage}
+              onPrevPage={pagination.prevPage}
+              onNextPage={pagination.nextPage}
+              onLastPage={pagination.lastPage}
+            />
+          ) : undefined
+        }
+      >
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
+                <Checkbox
+                  checked={selection.allSelected}
+                  onCheckedChange={selection.toggleSelectAll}
+                  aria-label="Select all"
+                />
+              </PortalTableHead>
+              <PortalTableHead
+                className="name-col"
+                sortable
+                sortDirection={sort?.column === 'title' ? sort.direction : null}
+                onClick={() => toggleSort('title')}
               >
-                <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
-                  <Checkbox
-                    checked={selection.isSelected(request)}
-                    onCheckedChange={() => selection.toggleSelection(request)}
-                    aria-label={`Select ${request.title}`}
-                  />
-                </PortalTableCell>
-                <PortalTableCell className="primary-cell">
-                  <div className="cell-with-icon">
-                    <FileUp className="icon-sm" />
-                    <div className="cell-content">
-                      <span className="cell-title">{request.title}</span>
-                      {request.projectName && (
-                        <span className="cell-subtitle">
-                          {request.projectId && onNavigate ? (
-                            <span
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onNavigate('project-detail', String(request.projectId));
-                              }}
-                              className="table-link"
-                            >
-                              {request.projectName}
-                            </span>
-                          ) : (
-                            request.projectName
-                          )}
-                        </span>
-                      )}
-                      {request.description && (
-                        <span className="cell-subtitle">{request.description}</span>
-                      )}
-                    </div>
-                  </div>
-                </PortalTableCell>
-                <PortalTableCell>
-                  {request.clientId && onNavigate ? (
-                    <span
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onNavigate('client-detail', String(request.clientId));
-                      }}
-                      className="table-link"
-                    >
-                      {request.clientName}
-                    </span>
-                  ) : (
-                    <span>{request.clientName}</span>
-                  )}
-                </PortalTableCell>
-                <PortalTableCell>
-                  <StatusBadge status={getStatusVariant(request.status)}>
-                    {getStatusLabel(request.status)}
-                  </StatusBadge>
-                </PortalTableCell>
-                <PortalTableCell className={cn(isOverdue(request.dueDate) && 'status-overdue')}>
-                  {request.dueDate && formatDate(request.dueDate)}
-                </PortalTableCell>
-                <PortalTableCell className="text-right">
-                  {request.documents > 0 && (
-                    <span className="cell-with-icon">
-                      <FileCheck className="icon-xs" />
-                      {request.documents}
-                    </span>
-                  )}
-                </PortalTableCell>
-                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                  <div className="action-group">
-                    <IconButton action="view" title="View" onClick={() => setSelectedRequest(request)} />
-                    {request.status === 'pending' && (
-                      <IconButton action="remind" title="Send Reminder" />
-                    )}
-                    {request.documents > 0 && (
-                      <IconButton action="download" title="Download All" />
-                    )}
-                    <IconButton action="delete" title="Delete" onClick={() => handleDeleteRequest(request.id)} />
-                  </div>
-                </PortalTableCell>
-              </PortalTableRow>
-            ))
-          )}
-        </PortalTableBody>
-      </PortalTable>
-      <CreateDocumentRequestModal
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        onSubmit={handleCreate}
-        loading={createLoading}
-        clientOptions={clientOptions}
-        projectOptions={projectOptions}
-      />
-    </TableLayout>
+              Request
+              </PortalTableHead>
+              <PortalTableHead className="client-col">Client</PortalTableHead>
+              <PortalTableHead className="status-col">Status</PortalTableHead>
+              <PortalTableHead
+                className="date-col"
+                sortable
+                sortDirection={sort?.column === 'dueDate' ? sort.direction : null}
+                onClick={() => toggleSort('dueDate')}
+              >
+              Due Date
+              </PortalTableHead>
+              <PortalTableHead className="docs-col">Docs</PortalTableHead>
+              <PortalTableHead className="col-actions">Actions</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
 
-    <DocumentRequestDetailPanel
-      request={selectedRequest}
-      onClose={handleClosePanel}
-      onStatusChange={handlePanelStatusChange}
-      onNavigate={onNavigate}
-      showNotification={showNotification}
-    />
+          <PortalTableBody animate={!isLoading && !error}>
+            {error ? (
+              <PortalTableError colSpan={7} message={error} onRetry={refetch} />
+            ) : isLoading ? (
+              <PortalTableLoading colSpan={7} rows={5} />
+            ) : paginatedRequests.length === 0 ? (
+              <PortalTableEmpty
+                colSpan={7}
+                icon={<Inbox />}
+                message={hasActiveFilters ? 'No requests match your filters' : 'No document requests yet'}
+              />
+            ) : (
+              paginatedRequests.map((request) => (
+                <PortalTableRow
+                  key={request.id}
+                  clickable
+                  selected={selection.isSelected(request)}
+                  onClick={() => handleRowClick(request)}
+                >
+                  <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={selection.isSelected(request)}
+                      onCheckedChange={() => selection.toggleSelection(request)}
+                      aria-label={`Select ${request.title}`}
+                    />
+                  </PortalTableCell>
+                  <PortalTableCell className="primary-cell">
+                    <div className="cell-with-icon">
+                      <FileUp className="icon-sm" />
+                      <div className="cell-content">
+                        <span className="cell-title">{request.title}</span>
+                        {request.projectName && (
+                          <span className="cell-subtitle">
+                            {request.projectId && onNavigate ? (
+                              <span
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onNavigate('project-detail', String(request.projectId));
+                                }}
+                                className="table-link"
+                              >
+                                {request.projectName}
+                              </span>
+                            ) : (
+                              request.projectName
+                            )}
+                          </span>
+                        )}
+                        {request.description && (
+                          <span className="cell-subtitle">{request.description}</span>
+                        )}
+                      </div>
+                    </div>
+                  </PortalTableCell>
+                  <PortalTableCell>
+                    {request.clientId && onNavigate ? (
+                      <span
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onNavigate('client-detail', String(request.clientId));
+                        }}
+                        className="table-link"
+                      >
+                        {request.clientName}
+                      </span>
+                    ) : (
+                      <span>{request.clientName}</span>
+                    )}
+                  </PortalTableCell>
+                  <PortalTableCell>
+                    <StatusBadge status={getStatusVariant(request.status)}>
+                      {getStatusLabel(request.status)}
+                    </StatusBadge>
+                  </PortalTableCell>
+                  <PortalTableCell className={cn(isOverdue(request.dueDate) && 'status-overdue')}>
+                    {request.dueDate && formatDate(request.dueDate)}
+                  </PortalTableCell>
+                  <PortalTableCell className="text-right">
+                    {request.documents > 0 && (
+                      <span className="cell-with-icon">
+                        <FileCheck className="icon-xs" />
+                        {request.documents}
+                      </span>
+                    )}
+                  </PortalTableCell>
+                  <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
+                    <div className="action-group">
+                      <IconButton action="view" title="View" onClick={() => setSelectedRequest(request)} />
+                      {request.status === 'pending' && (
+                        <IconButton action="remind" title="Send Reminder" />
+                      )}
+                      {request.documents > 0 && (
+                        <IconButton action="download" title="Download All" />
+                      )}
+                      <IconButton action="delete" title="Delete" onClick={() => handleDeleteRequest(request.id)} />
+                    </div>
+                  </PortalTableCell>
+                </PortalTableRow>
+              ))
+            )}
+          </PortalTableBody>
+        </PortalTable>
+        <CreateDocumentRequestModal
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          onSubmit={handleCreate}
+          loading={createLoading}
+          clientOptions={clientOptions}
+          projectOptions={projectOptions}
+        />
+      </TableLayout>
+
+      <DocumentRequestDetailPanel
+        request={selectedRequest}
+        onClose={handleClosePanel}
+        onStatusChange={handlePanelStatusChange}
+        onNavigate={onNavigate}
+        showNotification={showNotification}
+      />
     </>
   );
 }

@@ -193,7 +193,7 @@ export function InvoicesTab({
     <div className="section tab-section">
       {/* Header with stats and actions */}
       <div className="panel-header">
-        <div className="invtab-stats">
+        <div className="detail-meta">
           <div>
             <span className="text-secondary">Outstanding: </span>
             <span
@@ -252,10 +252,10 @@ export function InvoicesTab({
           message={statusFilter === 'all' ? 'No invoices yet.' : `No ${statusFilter} invoices.`}
         />
       ) : (
-        <div className="panel invtab-panel">
+        <div className="panel contract-panel-no-padding">
           <table className="pd-full-width">
             <thead>
-              <tr className="invtab-header-row">
+              <tr>
                 <th scope="col" className="label pd-table-cell pd-cell-left">
                   Invoice #
                 </th>
@@ -284,7 +284,7 @@ export function InvoicesTab({
                 return (
                   <tr
                     key={invoice.id}
-                    className="invtab-row"
+                    className="pd-clickable-row"
                     onClick={() => onViewInvoice?.(invoice.id)}
                     role="button"
                     tabIndex={0}
@@ -384,7 +384,7 @@ export function InvoicesTab({
                                     deleteDialog.open();
                                   }}
                                 >
-                                  <Trash2 className="icon-md invtab-dropdown-icon" />
+                                  <Trash2 className="icon-md" />
                                   Delete
                                 </PortalDropdownItem>
                               </>

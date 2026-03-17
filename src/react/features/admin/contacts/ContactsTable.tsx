@@ -38,6 +38,7 @@ import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
 import { CreateContactModal } from '../modals/CreateEntityModals';
 import { useEntityOptions } from '@react/hooks/useEntityOptions';
+import { useExport, CONTACTS_EXPORT_CONFIG } from '@react/hooks/useExport';
 import { ContactDetailPanel } from './ContactDetailPanel';
 
 const logger = createLogger('ContactsTable');
@@ -168,6 +169,14 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
 
   // Apply filters
   const filteredContacts = useMemo(() => applyFilters(contacts), [applyFilters, contacts]);
+
+  const { exportCsv, isExporting } = useExport({
+    config: CONTACTS_EXPORT_CONFIG,
+    data: filteredContacts,
+    onExport: (count) => {
+      showNotification?.(`Exported ${count} item${count !== 1 ? 's' : ''} to CSV`, 'success');
+    }
+  });
 
   // Pagination
   const pagination = usePagination({
@@ -388,7 +397,8 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
             />
             <IconButton
               action="download"
-              disabled={filteredContacts.length === 0}
+              onClick={exportCsv}
+              disabled={isExporting || filteredContacts.length === 0}
               title="Export to CSV"
             />
             <IconButton action="add" onClick={() => setCreateOpen(true)} title="Add Contact" />

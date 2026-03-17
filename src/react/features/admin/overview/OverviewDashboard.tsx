@@ -111,7 +111,7 @@ const TasksKanban = React.memo(({ tasks }: { tasks: TaskItem[] }) => {
                 </div>
               ))}
               {columnTasks.length === 0 && (
-                <EmptyState message="No tasks" className="empty-state-small" />
+                <EmptyState message="No tasks" className="empty-state--compact" />
               )}
             </div>
           </div>

@@ -35,6 +35,7 @@ import type { SortConfig } from '../types';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
 import { executeUpdateWithToast, executeWithToast } from '@/utils/api-wrappers';
+import { useExport, QUESTIONNAIRES_EXPORT_CONFIG } from '@react/hooks/useExport';
 import { QuestionnaireDetailPanel } from './QuestionnaireDetailPanel';
 
 interface Questionnaire {
@@ -177,6 +178,14 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
   // Apply filters
   const filteredQuestionnaires = useMemo(() => applyFilters(questionnaires), [applyFilters, questionnaires]);
 
+  const { exportCsv, isExporting } = useExport({
+    config: QUESTIONNAIRES_EXPORT_CONFIG,
+    data: filteredQuestionnaires,
+    onExport: (count) => {
+      _showNotification?.(`Exported ${count} item${count !== 1 ? 's' : ''} to CSV`, 'success');
+    }
+  });
+
   // Pagination
   const pagination = usePagination({
     storageKey: overviewMode ? undefined : 'admin_questionnaires_pagination',
@@ -313,225 +322,226 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
 
   return (
     <>
-    <TableLayout
-      containerRef={containerRef as React.RefObject<HTMLDivElement>}
-      title="QUESTIONNAIRES"
-      stats={
-        <TableStats
-          items={[
-            { value: stats.total, label: 'total' },
-            { value: stats.draft, label: 'draft' },
-            { value: stats.sent, label: 'sent', variant: 'pending' },
-            { value: stats.inProgress, label: 'in progress', variant: 'active' },
-            { value: stats.completed, label: 'completed', variant: 'completed' }
-          ]}
-          tooltip={`${stats.total} Total | ${stats.avgCompletion}% Avg Completion`}
-        />
-      }
-      actions={
-        <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search questionnaires..."
+      <TableLayout
+        containerRef={containerRef as React.RefObject<HTMLDivElement>}
+        title="QUESTIONNAIRES"
+        stats={
+          <TableStats
+            items={[
+              { value: stats.total, label: 'total' },
+              { value: stats.draft, label: 'draft' },
+              { value: stats.sent, label: 'sent', variant: 'pending' },
+              { value: stats.inProgress, label: 'in progress', variant: 'active' },
+              { value: stats.completed, label: 'completed', variant: 'completed' }
+            ]}
+            tooltip={`${stats.total} Total | ${stats.avgCompletion}% Avg Completion`}
           />
-          <FilterDropdown
-            sections={QUESTIONNAIRES_FILTER_CONFIG}
-            values={filterValues}
-            onChange={handleFilterChange}
-          />
-          <IconButton
-            action="download"
-            disabled={filteredQuestionnaires.length === 0}
-            title="Export to CSV"
-          />
-          <IconButton action="add" title="Create Questionnaire" onClick={() => onNavigate?.('questionnaire-create')} />
-        </>
-      }
-      bulkActions={
-        <BulkActionsToolbar
-          selectedCount={selection.selectedCount}
-          totalCount={filteredQuestionnaires.length}
-          onClearSelection={selection.clearSelection}
-          onSelectAll={() => selection.selectMany(filteredQuestionnaires)}
-          allSelected={selection.allSelected && selection.selectedCount === filteredQuestionnaires.length}
-          statusOptions={bulkStatusOptions}
-          onStatusChange={handleBulkStatusChange}
-          onDelete={handleBulkDelete}
-        />
-      }
-      pagination={
-        !isLoading && filteredQuestionnaires.length > 0 ? (
-          <TablePagination
-            pageInfo={pagination.pageInfo}
-            page={pagination.page}
-            pageSize={pagination.pageSize}
-            pageSizeOptions={pagination.pageSizeOptions}
-            canGoPrev={pagination.canGoPrev}
-            canGoNext={pagination.canGoNext}
-            onPageSizeChange={pagination.setPageSize}
-            onFirstPage={pagination.firstPage}
-            onPrevPage={pagination.prevPage}
-            onNextPage={pagination.nextPage}
-            onLastPage={pagination.lastPage}
-          />
-        ) : undefined
-      }
-    >
-      <PortalTable>
-        <PortalTableHeader>
-          <PortalTableRow>
-            <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
-              <Checkbox
-                checked={selection.allSelected}
-                onCheckedChange={selection.toggleSelectAll}
-                aria-label="Select all"
-              />
-            </PortalTableHead>
-            <PortalTableHead
-              className="name-col"
-              sortable
-              sortDirection={sort?.column === 'title' ? sort.direction : null}
-              onClick={() => toggleSort('title')}
-            >
-              Questionnaire
-            </PortalTableHead>
-            <PortalTableHead className="client-col">Client</PortalTableHead>
-            <PortalTableHead className="status-col">Status</PortalTableHead>
-            <PortalTableHead
-              className="date-col"
-              sortable
-              sortDirection={sort?.column === 'due_date' ? sort.direction : null}
-              onClick={() => toggleSort('due_date')}
-            >
-              Due Date
-            </PortalTableHead>
-            <PortalTableHead className="progress-col">Progress</PortalTableHead>
-            <PortalTableHead className="col-actions">Actions</PortalTableHead>
-          </PortalTableRow>
-        </PortalTableHeader>
-
-        <PortalTableBody animate={!isLoading && !error}>
-          {error ? (
-            <PortalTableError colSpan={7} message={error} onRetry={refetch} />
-          ) : isLoading ? (
-            <PortalTableLoading colSpan={7} rows={5} />
-          ) : paginatedQuestionnaires.length === 0 ? (
-            <PortalTableEmpty
-              colSpan={7}
-              icon={<Inbox />}
-              message={hasActiveFilters ? 'No questionnaires match your filters' : 'No questionnaires yet'}
+        }
+        actions={
+          <>
+            <SearchFilter
+              value={search}
+              onChange={setSearch}
+              placeholder="Search questionnaires..."
             />
-          ) : (
-            paginatedQuestionnaires.map((questionnaire) => (
-              <PortalTableRow
-                key={questionnaire.id}
-                clickable
-                selected={selection.isSelected(questionnaire)}
-                onClick={() => handleRowClick(questionnaire)}
+            <FilterDropdown
+              sections={QUESTIONNAIRES_FILTER_CONFIG}
+              values={filterValues}
+              onChange={handleFilterChange}
+            />
+            <IconButton
+              action="download"
+              onClick={exportCsv}
+              disabled={isExporting || filteredQuestionnaires.length === 0}
+              title="Export to CSV"
+            />
+            <IconButton action="add" title="Create Questionnaire" onClick={() => onNavigate?.('questionnaire-create')} />
+          </>
+        }
+        bulkActions={
+          <BulkActionsToolbar
+            selectedCount={selection.selectedCount}
+            totalCount={filteredQuestionnaires.length}
+            onClearSelection={selection.clearSelection}
+            onSelectAll={() => selection.selectMany(filteredQuestionnaires)}
+            allSelected={selection.allSelected && selection.selectedCount === filteredQuestionnaires.length}
+            statusOptions={bulkStatusOptions}
+            onStatusChange={handleBulkStatusChange}
+            onDelete={handleBulkDelete}
+          />
+        }
+        pagination={
+          !isLoading && filteredQuestionnaires.length > 0 ? (
+            <TablePagination
+              pageInfo={pagination.pageInfo}
+              page={pagination.page}
+              pageSize={pagination.pageSize}
+              pageSizeOptions={pagination.pageSizeOptions}
+              canGoPrev={pagination.canGoPrev}
+              canGoNext={pagination.canGoNext}
+              onPageSizeChange={pagination.setPageSize}
+              onFirstPage={pagination.firstPage}
+              onPrevPage={pagination.prevPage}
+              onNextPage={pagination.nextPage}
+              onLastPage={pagination.lastPage}
+            />
+          ) : undefined
+        }
+      >
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
+                <Checkbox
+                  checked={selection.allSelected}
+                  onCheckedChange={selection.toggleSelectAll}
+                  aria-label="Select all"
+                />
+              </PortalTableHead>
+              <PortalTableHead
+                className="name-col"
+                sortable
+                sortDirection={sort?.column === 'title' ? sort.direction : null}
+                onClick={() => toggleSort('title')}
               >
-                <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
-                  <Checkbox
-                    checked={selection.isSelected(questionnaire)}
-                    onCheckedChange={() => selection.toggleSelection(questionnaire)}
-                    aria-label={`Select ${questionnaire.title}`}
-                  />
-                </PortalTableCell>
-                <PortalTableCell className="primary-cell">
-                  <div className="cell-with-icon">
-                    <ClipboardList className="icon-sm" />
-                    <div className="cell-content">
-                      <span className="cell-title">
-                        {decodeHtmlEntities(questionnaire.questionnaire_name || questionnaire.title)}
-                      </span>
-                      {questionnaire.project_name && (
-                        <span className="cell-subtitle">
-                          {questionnaire.project_id && onNavigate ? (
-                            <span
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onNavigate('project-detail', String(questionnaire.project_id));
-                              }}
-                              className="table-link"
-                            >
-                              {decodeHtmlEntities(questionnaire.project_name)}
-                            </span>
-                          ) : (
-                            decodeHtmlEntities(questionnaire.project_name)
-                          )}
+              Questionnaire
+              </PortalTableHead>
+              <PortalTableHead className="client-col">Client</PortalTableHead>
+              <PortalTableHead className="status-col">Status</PortalTableHead>
+              <PortalTableHead
+                className="date-col"
+                sortable
+                sortDirection={sort?.column === 'due_date' ? sort.direction : null}
+                onClick={() => toggleSort('due_date')}
+              >
+              Due Date
+              </PortalTableHead>
+              <PortalTableHead className="progress-col">Progress</PortalTableHead>
+              <PortalTableHead className="col-actions">Actions</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
+
+          <PortalTableBody animate={!isLoading && !error}>
+            {error ? (
+              <PortalTableError colSpan={7} message={error} onRetry={refetch} />
+            ) : isLoading ? (
+              <PortalTableLoading colSpan={7} rows={5} />
+            ) : paginatedQuestionnaires.length === 0 ? (
+              <PortalTableEmpty
+                colSpan={7}
+                icon={<Inbox />}
+                message={hasActiveFilters ? 'No questionnaires match your filters' : 'No questionnaires yet'}
+              />
+            ) : (
+              paginatedQuestionnaires.map((questionnaire) => (
+                <PortalTableRow
+                  key={questionnaire.id}
+                  clickable
+                  selected={selection.isSelected(questionnaire)}
+                  onClick={() => handleRowClick(questionnaire)}
+                >
+                  <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={selection.isSelected(questionnaire)}
+                      onCheckedChange={() => selection.toggleSelection(questionnaire)}
+                      aria-label={`Select ${questionnaire.title}`}
+                    />
+                  </PortalTableCell>
+                  <PortalTableCell className="primary-cell">
+                    <div className="cell-with-icon">
+                      <ClipboardList className="icon-sm" />
+                      <div className="cell-content">
+                        <span className="cell-title">
+                          {decodeHtmlEntities(questionnaire.questionnaire_name || questionnaire.title)}
                         </span>
+                        {questionnaire.project_name && (
+                          <span className="cell-subtitle">
+                            {questionnaire.project_id && onNavigate ? (
+                              <span
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onNavigate('project-detail', String(questionnaire.project_id));
+                                }}
+                                className="table-link"
+                              >
+                                {decodeHtmlEntities(questionnaire.project_name)}
+                              </span>
+                            ) : (
+                              decodeHtmlEntities(questionnaire.project_name)
+                            )}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </PortalTableCell>
+                  <PortalTableCell>
+                    {questionnaire.client_id && onNavigate ? (
+                      <span
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onNavigate('client-detail', String(questionnaire.client_id));
+                        }}
+                        className="table-link"
+                      >
+                        {decodeHtmlEntities(questionnaire.client_name)}
+                      </span>
+                    ) : (
+                      decodeHtmlEntities(questionnaire.client_name)
+                    )}
+                  </PortalTableCell>
+                  <PortalTableCell>
+                    <StatusBadge status={getStatusVariant(questionnaire.status)}>
+                      {getStatusLabel(questionnaire.status)}
+                    </StatusBadge>
+                  </PortalTableCell>
+                  <PortalTableCell className={cn(isOverdue(questionnaire) && 'text-danger')}>
+                    {questionnaire.due_date && formatDate(questionnaire.due_date)}
+                  </PortalTableCell>
+                  <PortalTableCell>
+                    <div className="cell-content">
+                      <div className="progress-cell">
+                        <div className="progress-bar progress-sm">
+                          <div
+                            className={`progress-fill ${questionnaire.completion_rate === 100 ? 'progress-success' : ''}`}
+                            style={{ width: `${questionnaire.completion_rate}%` }}
+                          />
+                        </div>
+                        <span className="progress-pct">{questionnaire.completion_rate}%</span>
+                      </div>
+                      <span className="cell-subtitle">
+                        {questionnaire.responses_count}/{questionnaire.questions_count} questions
+                      </span>
+                    </div>
+                  </PortalTableCell>
+                  <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
+                    <div className="action-group">
+                      <IconButton
+                        action="view"
+                        onClick={() => onNavigate?.('questionnaire-detail', String(questionnaire.id))}
+                      />
+                      {questionnaire.status === 'draft' && (
+                        <IconButton
+                          action="send"
+                          onClick={() => handleSendQuestionnaire(questionnaire.id)}
+                        />
                       )}
                     </div>
-                  </div>
-                </PortalTableCell>
-                <PortalTableCell>
-                  {questionnaire.client_id && onNavigate ? (
-                    <span
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onNavigate('client-detail', String(questionnaire.client_id));
-                      }}
-                      className="table-link"
-                    >
-                      {decodeHtmlEntities(questionnaire.client_name)}
-                    </span>
-                  ) : (
-                    decodeHtmlEntities(questionnaire.client_name)
-                  )}
-                </PortalTableCell>
-                <PortalTableCell>
-                  <StatusBadge status={getStatusVariant(questionnaire.status)}>
-                    {getStatusLabel(questionnaire.status)}
-                  </StatusBadge>
-                </PortalTableCell>
-                <PortalTableCell className={cn(isOverdue(questionnaire) && 'text-danger')}>
-                  {questionnaire.due_date && formatDate(questionnaire.due_date)}
-                </PortalTableCell>
-                <PortalTableCell>
-                  <div className="cell-content">
-                    <div className="progress-cell">
-                      <div className="progress-bar progress-sm">
-                        <div
-                          className={`progress-fill ${questionnaire.completion_rate === 100 ? 'progress-success' : ''}`}
-                          style={{ width: `${questionnaire.completion_rate}%` }}
-                        />
-                      </div>
-                      <span className="progress-pct">{questionnaire.completion_rate}%</span>
-                    </div>
-                    <span className="cell-subtitle">
-                      {questionnaire.responses_count}/{questionnaire.questions_count} questions
-                    </span>
-                  </div>
-                </PortalTableCell>
-                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                  <div className="action-group">
-                    <IconButton
-                      action="view"
-                      onClick={() => onNavigate?.('questionnaire-detail', String(questionnaire.id))}
-                    />
-                    {questionnaire.status === 'draft' && (
-                      <IconButton
-                        action="send"
-                        onClick={() => handleSendQuestionnaire(questionnaire.id)}
-                      />
-                    )}
-                  </div>
-                </PortalTableCell>
-              </PortalTableRow>
-            ))
-          )}
-        </PortalTableBody>
-      </PortalTable>
-    </TableLayout>
+                  </PortalTableCell>
+                </PortalTableRow>
+              ))
+            )}
+          </PortalTableBody>
+        </PortalTable>
+      </TableLayout>
 
-    <QuestionnaireDetailPanel
-      questionnaire={selectedQuestionnaire}
-      onClose={handleClosePanel}
-      onStatusChange={handlePanelStatusChange}
-      onNavigate={onNavigate}
-      onSend={handleSendQuestionnaire}
-      showNotification={_showNotification}
-    />
+      <QuestionnaireDetailPanel
+        questionnaire={selectedQuestionnaire}
+        onClose={handleClosePanel}
+        onStatusChange={handlePanelStatusChange}
+        onNavigate={onNavigate}
+        onSend={handleSendQuestionnaire}
+        showNotification={_showNotification}
+      />
     </>
   );
 }

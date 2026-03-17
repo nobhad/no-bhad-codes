@@ -35,6 +35,7 @@ import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { apiPost } from '@/utils/api-client';
 import { executeUpdateWithToast, executeWithToast } from '@/utils/api-wrappers';
+import { useExport, WORKFLOWS_EXPORT_CONFIG } from '@react/hooks/useExport';
 
 interface Workflow {
   id: number;
@@ -161,6 +162,14 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
 
   const filteredWorkflows = useMemo(() => applyFilters(workflows), [applyFilters, workflows]);
 
+  const { exportCsv, isExporting } = useExport({
+    config: WORKFLOWS_EXPORT_CONFIG,
+    data: filteredWorkflows,
+    onExport: (count) => {
+      showNotification?.(`Exported ${count} item${count !== 1 ? 's' : ''} to CSV`, 'success');
+    }
+  });
+
   const pagination = usePagination({
     storageKey: overviewMode ? undefined : 'admin_workflows_pagination',
     totalItems: filteredWorkflows.length,
@@ -270,197 +279,198 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
 
   return (
     <>
-    <TableLayout
-      containerRef={containerRef as React.RefObject<HTMLDivElement>}
-      title="WORKFLOWS"
-      stats={
-        <TableStats
-          items={[
-            { value: stats.total, label: 'total' },
-            { value: stats.active, label: 'active', variant: 'completed' },
-            { value: stats.inactive, label: 'inactive', variant: 'cancelled' }
-          ]}
-          tooltip={`${stats.total} Total • ${stats.active} Active • ${stats.inactive} Inactive • ${stats.totalRuns} Runs`}
-        />
-      }
-      actions={
-        <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search workflows..."
+      <TableLayout
+        containerRef={containerRef as React.RefObject<HTMLDivElement>}
+        title="WORKFLOWS"
+        stats={
+          <TableStats
+            items={[
+              { value: stats.total, label: 'total' },
+              { value: stats.active, label: 'active', variant: 'completed' },
+              { value: stats.inactive, label: 'inactive', variant: 'cancelled' }
+            ]}
+            tooltip={`${stats.total} Total • ${stats.active} Active • ${stats.inactive} Inactive • ${stats.totalRuns} Runs`}
           />
-          <FilterDropdown
-            sections={filterSections}
-            values={filterValues}
-            onChange={handleFilterChange}
-          />
-          <IconButton
-            action="download"
-            disabled={filteredWorkflows.length === 0}
-            title="Export to CSV"
-          />
-          <IconButton
-            action="refresh"
-            onClick={refetch}
-            disabled={isLoading}
-            title="Refresh"
-          />
-        </>
-      }
-      bulkActions={
-        <BulkActionsToolbar
-          selectedCount={selection.selectedCount}
-          totalCount={filteredWorkflows.length}
-          onClearSelection={selection.clearSelection}
-          onSelectAll={() => selection.selectMany(filteredWorkflows)}
-          allSelected={selection.allSelected && selection.selectedCount === filteredWorkflows.length}
-          statusOptions={BULK_STATUS_OPTIONS}
-          onStatusChange={handleBulkStatusChange}
-          onDelete={handleBulkDelete}
-          deleteLoading={bulkLoading}
-        />
-      }
-      pagination={
-        !isLoading && filteredWorkflows.length > 0 ? (
-          <TablePagination
-            pageInfo={pagination.pageInfo}
-            page={pagination.page}
-            pageSize={pagination.pageSize}
-            pageSizeOptions={pagination.pageSizeOptions}
-            canGoPrev={pagination.canGoPrev}
-            canGoNext={pagination.canGoNext}
-            onPageSizeChange={pagination.setPageSize}
-            onFirstPage={pagination.firstPage}
-            onPrevPage={pagination.prevPage}
-            onNextPage={pagination.nextPage}
-            onLastPage={pagination.lastPage}
-          />
-        ) : undefined
-      }
-    >
-      <PortalTable>
-        <PortalTableHeader>
-          <PortalTableRow>
-            {!overviewMode && (
-              <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
-                <Checkbox
-                  checked={selection.allSelected ? true : selection.someSelected ? 'indeterminate' : false}
-                  onCheckedChange={selection.toggleSelectAll}
-                  aria-label="Select all"
-                />
-              </PortalTableHead>
-            )}
-            <PortalTableHead
-              className="name-col"
-              sortable
-              sortDirection={sort?.column === 'name' ? sort.direction : null}
-              onClick={() => toggleSort('name')}
-            >
-              Workflow
-            </PortalTableHead>
-            <PortalTableHead className="status-col">Status</PortalTableHead>
-            {!overviewMode && (
-              <>
-                <PortalTableHead
-                  className="date-col"
-                  sortable
-                  sortDirection={sort?.column === 'updatedAt' ? sort.direction : null}
-                  onClick={() => toggleSort('updatedAt')}
-                >
-                  Updated
-                </PortalTableHead>
-                <PortalTableHead className="col-actions">Actions</PortalTableHead>
-              </>
-            )}
-          </PortalTableRow>
-        </PortalTableHeader>
-
-        <PortalTableBody animate={!isLoading && !error}>
-          {error ? (
-            <PortalTableError colSpan={overviewMode ? 2 : 5} message={error} onRetry={refetch} />
-          ) : isLoading ? (
-            <PortalTableLoading colSpan={overviewMode ? 2 : 5} rows={5} />
-          ) : paginatedWorkflows.length === 0 ? (
-            <PortalTableEmpty
-              colSpan={overviewMode ? 2 : 5}
-              icon={<Inbox />}
-              message={hasActiveFilters ? 'No workflows match your filters' : 'No workflows yet'}
+        }
+        actions={
+          <>
+            <SearchFilter
+              value={search}
+              onChange={setSearch}
+              placeholder="Search workflows..."
             />
-          ) : (
-            paginatedWorkflows.map((workflow) => (
-              <PortalTableRow
-                key={workflow.id}
-                clickable
-                selected={!overviewMode && selection.isSelected(workflow)}
-                onClick={() => handleRowClick(workflow)}
+            <FilterDropdown
+              sections={filterSections}
+              values={filterValues}
+              onChange={handleFilterChange}
+            />
+            <IconButton
+              action="download"
+              onClick={exportCsv}
+              disabled={isExporting || filteredWorkflows.length === 0}
+              title="Export to CSV"
+            />
+            <IconButton
+              action="refresh"
+              onClick={refetch}
+              disabled={isLoading}
+              title="Refresh"
+            />
+          </>
+        }
+        bulkActions={
+          <BulkActionsToolbar
+            selectedCount={selection.selectedCount}
+            totalCount={filteredWorkflows.length}
+            onClearSelection={selection.clearSelection}
+            onSelectAll={() => selection.selectMany(filteredWorkflows)}
+            allSelected={selection.allSelected && selection.selectedCount === filteredWorkflows.length}
+            statusOptions={BULK_STATUS_OPTIONS}
+            onStatusChange={handleBulkStatusChange}
+            onDelete={handleBulkDelete}
+            deleteLoading={bulkLoading}
+          />
+        }
+        pagination={
+          !isLoading && filteredWorkflows.length > 0 ? (
+            <TablePagination
+              pageInfo={pagination.pageInfo}
+              page={pagination.page}
+              pageSize={pagination.pageSize}
+              pageSizeOptions={pagination.pageSizeOptions}
+              canGoPrev={pagination.canGoPrev}
+              canGoNext={pagination.canGoNext}
+              onPageSizeChange={pagination.setPageSize}
+              onFirstPage={pagination.firstPage}
+              onPrevPage={pagination.prevPage}
+              onNextPage={pagination.nextPage}
+              onLastPage={pagination.lastPage}
+            />
+          ) : undefined
+        }
+      >
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              {!overviewMode && (
+                <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    checked={selection.allSelected ? true : selection.someSelected ? 'indeterminate' : false}
+                    onCheckedChange={selection.toggleSelectAll}
+                    aria-label="Select all"
+                  />
+                </PortalTableHead>
+              )}
+              <PortalTableHead
+                className="name-col"
+                sortable
+                sortDirection={sort?.column === 'name' ? sort.direction : null}
+                onClick={() => toggleSort('name')}
               >
-                {!overviewMode && (
-                  <PortalTableCell
-                    className="col-checkbox"
-                    onClick={(e) => e.stopPropagation()}
+              Workflow
+              </PortalTableHead>
+              <PortalTableHead className="status-col">Status</PortalTableHead>
+              {!overviewMode && (
+                <>
+                  <PortalTableHead
+                    className="date-col"
+                    sortable
+                    sortDirection={sort?.column === 'updatedAt' ? sort.direction : null}
+                    onClick={() => toggleSort('updatedAt')}
                   >
-                    <Checkbox
-                      checked={selection.isSelected(workflow)}
-                      onCheckedChange={() => selection.toggleSelection(workflow)}
-                      aria-label={`Select ${workflow.name}`}
-                    />
-                  </PortalTableCell>
-                )}
-                <PortalTableCell className="primary-cell">
-                  <div className="cell-with-icon">
-                    <GitBranch className="icon-sm" />
-                    <div className="cell-content">
-                      <span className="cell-title">{workflow.name}</span>
-                      <span className="cell-subtitle">{workflow.trigger} · {workflow.steps} steps</span>
-                      <span className="status-stacked">
-                        <StatusBadge status={getStatusVariant(workflow.status)} size="sm">
-                          {WORKFLOW_STATUS_CONFIG[workflow.status]?.label || workflow.status}
-                        </StatusBadge>
-                      </span>
-                    </div>
-                  </div>
-                </PortalTableCell>
-                <StatusDropdownCell
-                  status={workflow.status}
-                  statusConfig={WORKFLOW_STATUS_CONFIG}
-                  onStatusChange={(newStatus) => updateWorkflowStatus(workflow.id, newStatus)}
-                  ariaLabel="Change workflow status"
-                />
-                {!overviewMode && (
-                  <>
-                    <PortalTableCell className="date-col">
-                      {formatDate(workflow.updatedAt)}
-                    </PortalTableCell>
-                    <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
-                      <div className="action-group">
-                        <IconButton
-                          action="edit"
-                          title="Configure"
-                          onClick={() => onNavigate?.('workflow-editor', String(workflow.id))}
-                        />
-                        <IconButton
-                          action="delete"
-                          title="Delete"
-                        />
-                      </div>
-                    </PortalTableCell>
-                  </>
-                )}
-              </PortalTableRow>
-            ))
-          )}
-        </PortalTableBody>
-      </PortalTable>
-    </TableLayout>
+                  Updated
+                  </PortalTableHead>
+                  <PortalTableHead className="col-actions">Actions</PortalTableHead>
+                </>
+              )}
+            </PortalTableRow>
+          </PortalTableHeader>
 
-    <WorkflowDetailPanel
-      workflow={selectedWorkflow}
-      onClose={handleClosePanel}
-      onStatusChange={handlePanelStatusChange}
-      onEdit={(workflowId) => onNavigate?.('workflow-editor', String(workflowId))}
-      showNotification={showNotification}
-    />
+          <PortalTableBody animate={!isLoading && !error}>
+            {error ? (
+              <PortalTableError colSpan={overviewMode ? 2 : 5} message={error} onRetry={refetch} />
+            ) : isLoading ? (
+              <PortalTableLoading colSpan={overviewMode ? 2 : 5} rows={5} />
+            ) : paginatedWorkflows.length === 0 ? (
+              <PortalTableEmpty
+                colSpan={overviewMode ? 2 : 5}
+                icon={<Inbox />}
+                message={hasActiveFilters ? 'No workflows match your filters' : 'No workflows yet'}
+              />
+            ) : (
+              paginatedWorkflows.map((workflow) => (
+                <PortalTableRow
+                  key={workflow.id}
+                  clickable
+                  selected={!overviewMode && selection.isSelected(workflow)}
+                  onClick={() => handleRowClick(workflow)}
+                >
+                  {!overviewMode && (
+                    <PortalTableCell
+                      className="col-checkbox"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Checkbox
+                        checked={selection.isSelected(workflow)}
+                        onCheckedChange={() => selection.toggleSelection(workflow)}
+                        aria-label={`Select ${workflow.name}`}
+                      />
+                    </PortalTableCell>
+                  )}
+                  <PortalTableCell className="primary-cell">
+                    <div className="cell-with-icon">
+                      <GitBranch className="icon-sm" />
+                      <div className="cell-content">
+                        <span className="cell-title">{workflow.name}</span>
+                        <span className="cell-subtitle">{workflow.trigger} · {workflow.steps} steps</span>
+                        <span className="status-stacked">
+                          <StatusBadge status={getStatusVariant(workflow.status)} size="sm">
+                            {WORKFLOW_STATUS_CONFIG[workflow.status]?.label || workflow.status}
+                          </StatusBadge>
+                        </span>
+                      </div>
+                    </div>
+                  </PortalTableCell>
+                  <StatusDropdownCell
+                    status={workflow.status}
+                    statusConfig={WORKFLOW_STATUS_CONFIG}
+                    onStatusChange={(newStatus) => updateWorkflowStatus(workflow.id, newStatus)}
+                    ariaLabel="Change workflow status"
+                  />
+                  {!overviewMode && (
+                    <>
+                      <PortalTableCell className="date-col">
+                        {formatDate(workflow.updatedAt)}
+                      </PortalTableCell>
+                      <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
+                        <div className="action-group">
+                          <IconButton
+                            action="edit"
+                            title="Configure"
+                            onClick={() => onNavigate?.('workflow-editor', String(workflow.id))}
+                          />
+                          <IconButton
+                            action="delete"
+                            title="Delete"
+                          />
+                        </div>
+                      </PortalTableCell>
+                    </>
+                  )}
+                </PortalTableRow>
+              ))
+            )}
+          </PortalTableBody>
+        </PortalTable>
+      </TableLayout>
+
+      <WorkflowDetailPanel
+        workflow={selectedWorkflow}
+        onClose={handleClosePanel}
+        onStatusChange={handlePanelStatusChange}
+        onEdit={(workflowId) => onNavigate?.('workflow-editor', String(workflowId))}
+        showNotification={showNotification}
+      />
     </>
   );
 }

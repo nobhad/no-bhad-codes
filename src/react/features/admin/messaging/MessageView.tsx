@@ -399,7 +399,7 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
               <EmptyState
                 icon={<Users className="messaging-icon-xl" />}
                 message="Select a conversation"
-                className="messaging-empty-state-full"
+                className="empty-state--full"
               >
                 <p>Choose a conversation from the list to view messages</p>
               </EmptyState>
