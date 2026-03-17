@@ -1,7 +1,7 @@
 # Client Portal
 
 **Status:** Complete
-**Last Updated:** 2026-03-08
+**Last Updated:** 2026-03-17
 
 ## Table of Contents
 
@@ -115,8 +115,14 @@ All routes are hash-based (e.g., `/#/dashboard`). `PortalRoutes.tsx` renders cli
 | `/requests` | `PortalAdHocRequests` | Ad hoc request management |
 | `/deliverables` | `PortalDeliverables` | Deliverable cards |
 | `/proposals` | `PortalProposals` | Proposal cards |
-| `/approvals` | `PortalApprovals` | Approval cards |
-| `/review` | `PortalPreview` | Live site preview via iframe |
+| `/proposals/:id` | `PortalProposalDetail` | Proposal detail view with accept/decline (Phase 0B) |
+| `/agreements` | `AgreementsList` | Project agreements list (Phase 1C) |
+| `/agreements/:id` | `AgreementFlow` | Step-by-step agreement flow (Phase 1C) |
+| `/meetings` | `MeetingRequestsList` | Meeting request submission and tracking (Phase 2B) |
+| `/payment-schedule` | `PaymentScheduleView` | Payment installment tracking |
+| `/requests-hub` | `PortalRequestsHub` | Ad hoc requests, questionnaires, document requests |
+| `/content-requests` | `ContentChecklistView` | Content request checklists |
+| `/deliverables` | `PortalDeliverablesHub` | Deliverable cards |
 | `/help` | `PortalHelp` | Help center |
 
 Note: `/settings` and `/contracts` are shared routes accessible to both clients and admins.
@@ -391,16 +397,67 @@ Do not dynamically change `autocomplete` attributes in JavaScript — browsers m
 
 ---
 
+## Phase 1 and Phase 2 Features
+
+### Project Agreements (Phase 1C)
+
+Unified flow combining proposal review, contract signing, deposit payment, and questionnaire into one step-by-step experience. Clients complete everything in one session.
+
+- **Route:** `/agreements` (list), `/agreements/:id` (flow)
+- **Components:** `AgreementFlow` (vertical card stack, GSAP transitions), `AgreementsList`
+- **Step types:** Welcome, Proposal Review, Contract Sign, Deposit Payment, Questionnaire
+- **Auto-complete:** Steps complete automatically when matching events fire (contract.signed, invoice.paid, questionnaire.completed)
+- See [AGREEMENTS.md](./AGREEMENTS.md) for full documentation
+
+### Onboarding Checklist (Phase 1D)
+
+Dashboard widget guiding new clients through getting-started steps after an agreement is completed.
+
+- **Component:** `OnboardingCard` rendered at top of `PortalDashboard` when active
+- **Steps:** Review proposal, sign contract, pay deposit, complete questionnaire, upload assets
+- **Auto-complete:** Steps auto-complete from workflow events
+- See [ONBOARDING_CHECKLIST.md](./ONBOARDING_CHECKLIST.md) for full documentation
+
+### Embedded Stripe Payments (Phase 1B)
+
+Clients pay invoices and installments directly in the portal using Stripe Elements.
+
+- **Component:** `StripePaymentForm` with fee breakdown and processing fee notice
+- **Integration:** Embedded in agreement deposit payment step and available for standalone invoices
+- **Processing fee:** 2.9% + $0.30 (client responsibility, transparent in UI)
+- See [EMBEDDED_PAYMENTS.md](./EMBEDDED_PAYMENTS.md) for full documentation
+
+### Meeting Requests (Phase 2B)
+
+Client-initiated meeting scheduling with admin confirmation.
+
+- **Route:** `/meetings`
+- **Components:** `MeetingRequestForm` (submit), `MeetingRequestsList` (track)
+- **Flow:** Client proposes up to 3 time slots, admin confirms or declines
+- See [MEETING_REQUESTS.md](./MEETING_REQUESTS.md) for full documentation
+
+---
+
 ## Related Documentation
 
 - [Messages](./MESSAGING.md) - Messaging system details
 - [Files](./FILES.md) - File upload and management
 - [Invoices](./INVOICES.md) - Invoice system
 - [Settings](./SETTINGS.md) - User settings
+- [Agreements](./AGREEMENTS.md) - Unified agreement flow (Phase 1C)
+- [Onboarding Checklist](./ONBOARDING_CHECKLIST.md) - Post-agreement onboarding (Phase 1D)
+- [Embedded Payments](./EMBEDDED_PAYMENTS.md) - Stripe Elements payment (Phase 1B)
+- [Meeting Requests](./MEETING_REQUESTS.md) - Meeting scheduling (Phase 2B)
 - [CSS Architecture](../design/CSS_ARCHITECTURE.md) - Styling system
 - [Architecture Overview](../architecture/ARCHITECTURE.md) - System design
 
 ## Change Log
+
+### 2026-03-17 - Phase 1 and Phase 2 features
+
+- Added Phase 1 + Phase 2 features section documenting agreements, onboarding, payments, meetings
+- Updated routing table with 6 new routes (proposals/:id, agreements, meetings, payment-schedule, requests-hub, content-requests)
+- Added Related Documentation links for all new feature docs
 
 ### 2026-03-08 - Full rewrite to React architecture
 

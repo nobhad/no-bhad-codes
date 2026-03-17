@@ -1,7 +1,7 @@
 # State of the Art Roadmap
 
-**Status:** Planning
-**Last Updated:** 2026-03-16
+**Status:** In Progress — Phase 1 + Phase 2 Complete
+**Last Updated:** 2026-03-17
 **Goal:** Close every meaningful gap between this platform and the best-in-class tools (HoneyBook, Dubsado, Moxie, Plutio, Bloom, Productive)
 
 ---
@@ -879,9 +879,29 @@ LOW (documentation):
 
 ---
 
-## Phase 1: Unified Client Experience
+## Phase 1: Unified Client Experience — COMPLETE (core)
 
 The single biggest differentiator in the space. HoneyBook's "Smart Files" combine proposal + contract + payment into one flow. Right now our pipeline requires 4 separate client actions across 4 separate screens. Phase 1 eliminates that friction.
+
+**Status:** Core implementation complete (March 17, 2026). Phase 1.5 deferred items tracked below.
+
+**Implemented:**
+
+- 1-Pre: Idempotency guards (milestone check before generation)
+- 1A: In-portal contract signing (verified working — ContractSignModal + POST /sign)
+- 1B: Embedded Stripe Payments (migration 119, StripePaymentService, PaymentElement, processing fee)
+- 1C: Unified Project Agreement Flow (migration 120, vertical card stack, GSAP transitions, auto-complete)
+- 1D: Onboarding Checklist (migration 121, dashboard widget, seeded templates, workflow auto-complete)
+
+**Deferred to Phase 1.5:**
+
+- Auto-pay (cron + retry + saved payment methods management UI)
+- Agreement admin drag-to-reorder builder (templates only for now)
+- Onboarding admin template CRUD UI (seeded via migration)
+- Upload mode for signature (draw + type cover 99% of cases)
+- Agreement expiration cron
+
+**Feature docs:** [Embedded Payments](features/EMBEDDED_PAYMENTS.md) | [Agreements](features/AGREEMENTS.md) | [Onboarding Checklist](features/ONBOARDING_CHECKLIST.md)
 
 **Dependency chain:** 1-Pre must be done first (trivial). Then 1A and 1B are prerequisites for 1C. 1D can be built in parallel with 1C.
 
@@ -2463,9 +2483,18 @@ const DEFAULT_TEMPLATES = [
 
 ---
 
-## Phase 2: Lead Nurture and Follow-Up
+## Phase 2: Lead Nurture and Follow-Up — COMPLETE
 
 Right now leads enter the system and sit there until manually contacted. Every competitor has automated follow-up sequences.
+
+**Status:** Complete (March 17, 2026)
+
+**Implemented:**
+
+- 2A: Email Drip Sequences (migration 122, sequenceService, scheduler cron every 30 min, workflow auto-enrollment, admin CRUD + table UI, 3 seeded sequences)
+- 2B: Meeting Request System (migration 123, meetingRequestService, ICS generation, daily reminder cron, portal form + list, admin table with confirm/decline/reschedule)
+
+**Feature docs:** [Email Sequences](features/EMAIL_SEQUENCES.md) | [Meeting Requests](features/MEETING_REQUESTS.md)
 
 ---
 
@@ -5335,6 +5364,63 @@ Phase 7 (International — Do Last)
 ---
 
 ## Change Log
+
+### 2026-03-17 — Phase 2 Lead Nurture Complete
+
+**2A: Email Drip Sequences (Migration 122)**
+
+- sequence-service.ts: CRUD, step management, enrollment, processQueue (batch 50, bounce after 3 fails), handleEvent for auto-enrollment, analytics
+- Routes: 15 admin endpoints (sequences + steps + enrollments)
+- React: SequencesTable with create, toggle, detail
+- 3 seeded sequences: New Lead Welcome, Proposal Follow-Up, Post-Consultation
+- Scheduler cron: */30 * * * * (every 30 minutes)
+- Workflow integration: 7 events auto-enroll (lead.created, lead.stage_changed, lead.converted, proposal.sent/accepted/rejected, client.created)
+
+**2B: Meeting Request System (Migration 123)**
+
+- meeting-request-service.ts: CRUD, confirm, decline, reschedule, ICS generation, sendUpcomingReminders
+- Routes: 3 portal + 7 admin endpoints (including .ics download)
+- React: MeetingRequestForm (portal), MeetingRequestsList (portal), MeetingRequestsTable (admin)
+- Scheduler cron: 0 9 * * * (daily 9AM reminders for meetings in next 24h)
+- ICS generation with valid VCALENDAR format
+
+**Files created:** ~20 (2 migrations, 4 services/types, 5 routes, 8 React components, 2 feature docs)
+**Files modified:** ~6 (app.ts, api-endpoints.ts, PortalRoutes.tsx, workflow-automations.ts, scheduler-service.ts)
+
+### 2026-03-17 — Phase 1 Core Implementation Complete
+
+All 4 Phase 1 items implemented (1A verified already working from Phase 0):
+
+**1-Pre: Idempotency Guards**
+
+- Added milestone existence check before generateTierMilestones() in workflow-automations.ts
+
+**1B: Embedded Stripe Payments (Migration 119)**
+
+- stripe-payment-service.ts: getOrCreateCustomer, createPaymentIntent (with processing fee), handlePaymentSuccess/Failure
+- Routes: POST /payments/create-intent (requireClient), POST /payments/webhook (signature verification)
+- React: StripeProvider, StripePaymentForm with fee breakdown and client responsibility notice
+- Processing fee: 2.9% + $0.30 calculated server-side, displayed in form
+- CSP updated for Stripe domains, raw body skip for webhook
+
+**1C: Unified Project Agreement Flow (Migration 120)**
+
+- agreement-service.ts: CRUD, template creation (auto-detects entities), step completion, auto-complete
+- Routes: 5 admin + 4 portal endpoints
+- React: AgreementFlow (vertical card stack, GSAP transitions), 5 step components, AgreementsList
+- Workflow integration: contract.signed, invoice.paid, questionnaire.completed auto-complete steps
+
+**1D: Onboarding Checklist (Migration 121)**
+
+- onboarding-checklist-service.ts: template-based creation, auto-complete, dismiss
+- Routes: 3 portal + 4 admin endpoints
+- React: OnboardingCard dashboard widget with progress bar and step navigation
+- 2 seeded templates (Standard Website, Simple Project)
+- Workflow integration: same 3 events auto-complete onboarding steps
+
+**Files created:** 35 (3 migrations, 6 services/types, 6 routes, 11 React components, 1 constants, 3 feature docs, 5 doc updates)
+**Files modified:** 8 (app.ts, api-endpoints.ts, PortalRoutes.tsx, PortalDashboard.tsx, workflow-automations.ts, workflow-trigger-service.ts, constants.ts, package.json)
+**New npm deps:** 2 (@stripe/react-stripe-js, @stripe/stripe-js)
 
 ### 2026-03-17 — Phase 0 Implementation Complete
 

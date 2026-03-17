@@ -214,7 +214,23 @@ await fetch('/api/payment-schedules/42/mark-paid', {
 - `src/react/features/admin/types.ts` — added status config and labels
 - `src/react/features/admin/shared/filterConfigs.ts` — added filter config
 
+## Embedded Stripe Payments (Phase 1B)
+
+Installments can be paid directly in the portal via Stripe Elements. The `StripePaymentForm` accepts an `installmentId` parameter and creates a PaymentIntent for the installment amount plus processing fee (2.9% + $0.30).
+
+When payment succeeds, the Stripe webhook auto-marks the installment as paid via `stripePaymentService.handlePaymentSuccess()`.
+
+See [EMBEDDED_PAYMENTS.md](./EMBEDDED_PAYMENTS.md) for complete technical documentation.
+
+---
+
 ## Change Log
+
+### March 17, 2026 — Embedded Stripe Payment Integration
+
+- Installments can now be paid via embedded Stripe Elements in the portal
+- Processing fee (2.9% + $0.30) added and shown to client
+- Webhook auto-marks installment as paid on payment_intent.succeeded
 
 ### March 17, 2026 — Added Installment-to-Invoice Auto-Generation Cascade
 

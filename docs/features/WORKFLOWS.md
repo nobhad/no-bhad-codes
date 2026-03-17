@@ -496,10 +496,26 @@ POST /api/email-templates/:id/test
 - [Contracts](./CONTRACTS.md) - Contract approval workflows
 - [Invoices](./INVOICES.md) - Invoice approval workflows
 - [Projects](./PROJECTS.md) - Project entity context
+- [Agreements](./AGREEMENTS.md) - Agreement step auto-completion via workflow events (Phase 1C)
+- [Onboarding Checklist](./ONBOARDING_CHECKLIST.md) - Onboarding step auto-completion via workflow events (Phase 1D)
+- [Email Sequences](./EMAIL_SEQUENCES.md) - Auto-enrollment from workflow events (Phase 2A)
+- [Meeting Requests](./MEETING_REQUESTS.md) - Meeting scheduling system (Phase 2B)
 
 ---
 
 ## Change Log
+
+### March 17, 2026 - Phase 1 and Phase 2 Automation Handlers
+
+- **6 new agreement/onboarding auto-complete handlers** registered in `registerWorkflowAutomations()`:
+  - `contract.signed` / `invoice.paid` / `questionnaire.completed` each auto-complete matching agreement steps via `agreementService.autoCompleteByEntity()`
+  - `contract.signed` / `invoice.paid` / `questionnaire.completed` each auto-complete matching onboarding steps via `onboardingChecklistService.autoCompleteByEntity()`
+- **7 new sequence auto-enrollment handlers** for email drip sequences:
+  - `lead.created`, `lead.stage_changed`, `lead.converted`, `proposal.sent`, `proposal.accepted`, `proposal.rejected`, `client.created`
+  - Each resolves entity info (email, name, type) and calls `sequenceService.handleEvent()`
+- **Idempotency guard** added to milestone generation in `handleProposalAccepted()` — checks for existing milestones before generating
+- **New event type** added to `EventType` union: `agreement.completed`
+- Total registered handlers: 25 (up from 12)
 
 ### March 17, 2026 - Maintenance Activation, Webhook Dispatch, Email Templates, Workflow Creation Endpoint
 

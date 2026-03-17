@@ -1,7 +1,7 @@
 # External Integrations
 
 **Status:** Complete
-**Last Updated:** February 10, 2026
+**Last Updated:** 2026-03-17
 
 ## Overview
 
@@ -9,7 +9,7 @@ The External Integrations system provides connectivity with third-party services
 
 **Supported Integrations:**
 
-1. **Stripe** - Invoice payment links and payment processing
+1. **Stripe** - Invoice payment links, embedded payments (PaymentIntent), and payment processing
 2. **Google Calendar** - Milestone and task date synchronization
 3. **Slack** - Team notifications via webhooks
 4. **Discord** - Team notifications via webhooks
@@ -75,6 +75,60 @@ APP_URL=https://yourdomain.com
 - `checkout.session.expired` - Update payment link status
 - `payment_intent.payment_failed` - Log failed payment attempt
 - `charge.refunded` - Update invoice refund status
+
+---
+
+## Embedded Stripe Payments (Phase 1B)
+
+In addition to the redirect-based Checkout flow above, clients can pay directly within the portal using Stripe Elements (no redirect).
+
+### Features
+
+- Client enters card details directly in the portal
+- Processing fee (2.9% + $0.30) transparently shown before payment
+- Works for invoices and payment schedule installments
+- Embedded in the project agreement flow as a "Deposit Payment" step
+- Auto-marks invoice/installment as paid via webhook
+
+### Additional Configuration
+
+```bash
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_... # Client-side publishable key (in addition to existing STRIPE_SECRET_KEY)
+```
+
+### Embedded Payment Flow
+
+```text
+1. Client opens invoice or agreement deposit step
+   |
+2. Frontend calls POST /api/payments/create-intent
+   |
+3. Server calculates processing fee, creates Stripe PaymentIntent
+   |
+4. Client sees fee breakdown (subtotal + fee + total)
+   |
+5. Client enters card details in <PaymentElement>
+   |
+6. Stripe.js confirms payment client-side
+   |
+7. Stripe sends payment_intent.succeeded webhook to POST /api/payments/webhook
+   |
+8. Server marks invoice/installment as paid, emits invoice.paid event
+```
+
+### Embedded Payment Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/payments/create-intent` | Create PaymentIntent (requireClient) |
+| POST | `/api/payments/webhook` | PaymentIntent webhook (signature verification) |
+
+### Webhook Events Handled (Embedded)
+
+- `payment_intent.succeeded` — Mark invoice/installment as paid
+- `payment_intent.payment_failed` — Log failure reason
+
+See [EMBEDDED_PAYMENTS.md](./EMBEDDED_PAYMENTS.md) for complete technical documentation.
 
 ---
 

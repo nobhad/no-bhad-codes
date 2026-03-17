@@ -150,6 +150,64 @@ properties and the JWT payload structure.
 - `GET /admin/config/tier-tasks` — Export tier-tasks.json
 - `POST /admin/config/tier-tasks` — Update tier-tasks.json
 
+### Embedded Payments (Phase 1B)
+
+- `POST /payments/create-intent` — Create PaymentIntent for invoice/installment (requireClient, returns clientSecret + fee breakdown)
+- `POST /payments/webhook` — Stripe webhook for PaymentIntent events (no JWT, signature verification)
+
+### Project Agreements (Phase 1C)
+
+- `GET /agreements` — List agreements (admin, filter by ?projectId=)
+- `POST /agreements` — Create agreement with custom steps (admin)
+- `POST /agreements/from-template` — Create from template with auto-entity detection (admin)
+- `POST /agreements/:id/send` — Send agreement to client (admin)
+- `POST /agreements/:id/cancel` — Cancel agreement (admin)
+- `GET /agreements/my` — Client's agreements (requireClient)
+- `GET /agreements/:id` — Enriched agreement with step entity data
+- `POST /agreements/:id/view` — Record client view (requireClient)
+- `POST /agreements/steps/:stepId/complete` — Complete a step (requireClient)
+
+### Onboarding Checklist (Phase 1D)
+
+- `GET /onboarding-checklist/my` — Active checklist with steps and progress (requireClient)
+- `POST /onboarding-checklist/dismiss` — Dismiss checklist (requireClient)
+- `POST /onboarding-checklist/steps/:id/complete` — Complete a step (requireClient)
+- `GET /onboarding-checklist/admin/all` — List all checklists (requireAdmin)
+- `GET /onboarding-checklist/admin/templates` — List templates (requireAdmin)
+- `POST /onboarding-checklist/admin/create` — Create for a project (requireAdmin)
+- `GET /onboarding-checklist/admin/:id` — Checklist detail (requireAdmin)
+
+### Email Sequences (Phase 2A)
+
+- `GET /sequences` — List all sequences with enrollment stats (requireAdmin)
+- `POST /sequences` — Create sequence with steps (requireAdmin)
+- `GET /sequences/:id` — Get with full steps (requireAdmin)
+- `PUT /sequences/:id` — Update sequence (requireAdmin)
+- `DELETE /sequences/:id` — Delete sequence (requireAdmin)
+- `POST /sequences/:id/steps` — Add step (requireAdmin)
+- `PUT /sequences/:id/steps/:stepId` — Update step (requireAdmin)
+- `DELETE /sequences/:id/steps/:stepId` — Delete step (requireAdmin)
+- `PUT /sequences/:id/steps/reorder` — Reorder steps (requireAdmin)
+- `GET /sequences/:id/enrollments` — List enrollments (requireAdmin)
+- `POST /sequences/:id/enroll` — Manual enroll (requireAdmin)
+- `POST /sequences/enrollments/:id/stop` — Stop enrollment (requireAdmin)
+- `POST /sequences/enrollments/:id/pause` — Pause enrollment (requireAdmin)
+- `POST /sequences/enrollments/:id/resume` — Resume enrollment (requireAdmin)
+- `GET /sequences/:id/analytics` — Step metrics (requireAdmin)
+
+### Meeting Requests (Phase 2B)
+
+- `POST /meeting-requests` — Submit request (requireClient)
+- `GET /meeting-requests/my` — Client's requests (requireClient)
+- `POST /meeting-requests/:id/cancel` — Cancel request (requireClient)
+- `GET /meeting-requests` — All requests (requireAdmin, filter by ?status=)
+- `GET /meeting-requests/:id` — Single request (requireAdmin)
+- `POST /meeting-requests/:id/confirm` — Confirm meeting (requireAdmin)
+- `POST /meeting-requests/:id/decline` — Decline with reason (requireAdmin)
+- `POST /meeting-requests/:id/reschedule` — Counter-propose times (requireAdmin)
+- `POST /meeting-requests/:id/complete` — Mark completed (requireAdmin)
+- `GET /meeting-requests/:id/ics` — Download .ics file (requireAdmin)
+
 ### Other Feature Areas
 
 - Questionnaires: `GET/POST /questionnaires`

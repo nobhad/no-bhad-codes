@@ -1,9 +1,9 @@
 # Database Schema Documentation
 
-**Last Updated:** March 16, 2026
+**Last Updated:** March 17, 2026
 **Database:** SQLite (`data/client_portal.db`)
-**Total Tables:** 129 (includes new `users` table and consolidated messaging/intake)
-**Total Migrations:** 117
+**Total Tables:** 141 (includes Phase 1 + Phase 2 tables)
+**Total Migrations:** 123
 
 ## Table of Contents
 
@@ -442,8 +442,47 @@ See [DATABASE_NORMALIZATION_PLAN.md](../archive/DATABASE_NORMALIZATION_PLAN.md) 
 
 ---
 
+## Phase 1 Tables (Migrations 119-121)
+
+### Stripe Embedded Payments (Migration 119)
+
+- `clients.stripe_customer_id` — Cached Stripe Customer ID (added column)
+- `client_payment_methods` — Saved payment methods per client (stripe_payment_method_id, type, brand, last_four, exp_month, exp_year, is_default)
+- `stripe_payment_intents` — PaymentIntent tracking (stripe_intent_id, client_id, invoice_id, installment_id, amount_cents, currency, status, failure_reason, metadata)
+
+### Project Agreements (Migration 120)
+
+- `project_agreements` — Agreement metadata (project_id, client_id, name, status, proposal_id, contract_id, questionnaire_id, steps_config, welcome_message, current_step, sent_at, viewed_at, completed_at, expires_at)
+- `agreement_steps` — Individual steps (agreement_id, step_type, step_order, status, entity_id, custom_title, custom_content, started_at, completed_at, metadata)
+
+### Onboarding Checklists (Migration 121)
+
+- `onboarding_checklists` — Checklist per project (project_id, client_id, status, welcome_text, completed_at, dismissed_at)
+- `onboarding_steps` — Steps with entity refs (checklist_id, step_type, label, description, step_order, status, entity_type, entity_id, auto_detect, navigate_tab, navigate_entity_id)
+- `onboarding_templates` — Seeded templates (name, project_type, steps_config, is_default)
+
+## Phase 2 Tables (Migrations 122-123)
+
+### Email Sequences (Migration 122)
+
+- `email_sequences` — Sequence definitions (name, trigger_event, trigger_conditions, is_active)
+- `sequence_steps` — Ordered steps (sequence_id, step_order, delay_hours, email_template_id, subject_override, body_override, stop_conditions)
+- `sequence_enrollments` — Active enrollments (sequence_id, entity_type, entity_id, entity_email, entity_name, current_step_order, status, next_send_at)
+- `sequence_send_logs` — Per-step send history (enrollment_id, step_id, email_status, error_message)
+
+### Meeting Requests (Migration 123)
+
+- `meeting_requests` — Full meeting lifecycle (client_id, project_id, meeting_type, status, preferred_slot_1/2/3, confirmed_datetime, duration_minutes, location_type, location_details, client_notes, admin_notes, decline_reason, calendar_event_id)
+
+---
+
 ## Related Documentation
 
 - [API Documentation](../API_DOCUMENTATION.md)
 - [Database Normalization Plan](../archive/DATABASE_NORMALIZATION_PLAN.md)
 - [Data Quality Features](../features/DATA_QUALITY.md)
+- [Embedded Payments](../features/EMBEDDED_PAYMENTS.md)
+- [Project Agreements](../features/AGREEMENTS.md)
+- [Onboarding Checklist](../features/ONBOARDING_CHECKLIST.md)
+- [Email Sequences](../features/EMAIL_SEQUENCES.md)
+- [Meeting Requests](../features/MEETING_REQUESTS.md)
