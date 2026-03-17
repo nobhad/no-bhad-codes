@@ -236,6 +236,10 @@ router.post(
       return errorResponse(res, 'isHelpful must be a boolean', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
+    if (comment && comment.length > 2000) {
+      return errorResponse(res, 'Comment too long', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
     await knowledgeBaseService.submitFeedback({
       articleId,
       isHelpful,

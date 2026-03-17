@@ -105,6 +105,19 @@ router.post(
       return;
     }
 
+    // Validate URL formats if provided
+    const isValidUrl = (url: string): boolean => {
+      try { new URL(url); return true; } catch { return false; }
+    };
+    if (successUrl && !isValidUrl(successUrl)) {
+      errorResponse(res, 'Invalid success URL', 400, ErrorCodes.VALIDATION_ERROR);
+      return;
+    }
+    if (cancelUrl && !isValidUrl(cancelUrl)) {
+      errorResponse(res, 'Invalid cancel URL', 400, ErrorCodes.VALIDATION_ERROR);
+      return;
+    }
+
     const invoice = await integrationStatusService.getInvoiceForPaymentLink(invoiceId);
 
     if (!invoice) {
