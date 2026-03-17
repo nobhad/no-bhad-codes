@@ -331,6 +331,27 @@ export type {
 } from './createTabs';
 
 // ============================================
+// DETAIL PANEL
+// ============================================
+
+export {
+  DetailPanel,
+  MetaItem,
+  MetaGrid,
+  Timeline
+} from './createDetailPanel';
+
+export type {
+  PanelStatusOption,
+  PanelMetaField,
+  PanelDescriptionField,
+  PanelTab,
+  DetailPanelConfig,
+  DetailPanelProps,
+  TimelineEvent
+} from './createDetailPanel';
+
+// ============================================
 // ACCORDION
 // ============================================
 
