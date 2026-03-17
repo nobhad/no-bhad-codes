@@ -80,10 +80,16 @@ export const PDF_COLORS = {
   /** Section title underline (pricing divider) */
   pricingDivider: c(0, 0, 0),
 
+  // --- Table header (dark background, white text — invoice style) ---
+  /** Table/section header background — dark (matches invoice table header) */
+  tableHeaderBg: c(0, 0, 0),
+  /** Table/section header text — white on dark background */
+  tableHeaderText: c(1, 1, 1),
+
   // --- Backgrounds & borders ---
-  /** Receipt details box header background — white (no tint) */
-  boxHeaderBg: c(1, 1, 1),
-  /** Signature box background — white (no tint) */
+  /** Receipt details box header background — dark (matches table header) */
+  boxHeaderBg: c(0, 0, 0),
+  /** Signature box background — white */
   signatureBoxBg: c(1, 1, 1),
   /** Receipt box border */
   boxBorder: c(0, 0, 0),

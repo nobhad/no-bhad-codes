@@ -12,13 +12,14 @@
  * - Financial summary
  */
 
-import { PDFDocument, rgb } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
 import { getDatabase } from '../database/init.js';
-import { BUSINESS_INFO, getPdfLogoBytes } from '../config/business.js';
-import { PDF_COLORS } from '../config/pdf-styles.js';
+import { BUSINESS_INFO } from '../config/business.js';
+import { PDF_COLORS, PDF_TYPOGRAPHY } from '../config/pdf-styles.js';
 import {
   createPdfContext,
   drawPdfDocumentHeader,
+  drawPdfFooter,
   drawWrappedText,
   ensureSpace,
   addPageNumbers,
@@ -349,6 +350,17 @@ export async function generateProjectReportPdf(data: ProjectReportData): Promise
   ctx.y -= 5;
   drawFinancialSummary(ctx, data.financial, onNewPage);
 
+  // === FOOTER — on all pages ===
+  for (const footerPage of pdfDoc.getPages()) {
+    drawPdfFooter(footerPage, {
+      leftMargin: ctx.leftMargin,
+      rightMargin: ctx.rightMargin,
+      width: ctx.width,
+      fonts: ctx.fonts,
+      thankYouText: 'Thank you for your business!'
+    });
+  }
+
   // Add page numbers
   await addPageNumbers(pdfDoc);
 
@@ -383,17 +395,15 @@ async function drawReportHeader(ctx: PdfPageContext, data: ProjectReportData): P
     rightMargin: ctx.rightMargin,
     title: 'PROJECT REPORT'
   });
-  ctx.y -= 15;
-
   // Project name
   currentPage.drawText(data.project.name, {
     x: leftMargin,
     y: ctx.y,
-    size: 16,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: fonts.bold,
     color: PDF_COLORS.black
   });
-  ctx.y -= 20;
+  ctx.y -= 14;
 
   // Client
   currentPage.drawText(
@@ -401,57 +411,49 @@ async function drawReportHeader(ctx: PdfPageContext, data: ProjectReportData): P
     {
       x: leftMargin,
       y: ctx.y,
-      size: 11,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: fonts.regular,
       color: PDF_COLORS.black
     }
   );
-  ctx.y -= 15;
+  ctx.y -= 14;
 
   // Generated date
   currentPage.drawText(`Generated: ${formatDate(new Date().toISOString())}`, {
     x: leftMargin,
     y: ctx.y,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: fonts.regular,
     color: PDF_COLORS.black
   });
   ctx.y -= 20;
-
-  // Divider
-  currentPage.drawLine({
-    start: { x: leftMargin, y: ctx.y },
-    end: { x: ctx.rightMargin, y: ctx.y },
-    thickness: 1,
-    color: PDF_COLORS.divider
-  });
-
-  ctx.y -= 10;
 }
 
 function drawSectionTitle(ctx: PdfPageContext, title: string): void {
+  const size = PDF_TYPOGRAPHY.bodySize;
   ctx.currentPage.drawText(title, {
     x: ctx.leftMargin,
     y: ctx.y,
-    size: 14,
+    size,
     font: ctx.fonts.bold,
     color: PDF_COLORS.black
   });
-  ctx.y -= 5;
+  const textWidth = ctx.fonts.bold.widthOfTextAtSize(title, size);
+  ctx.y -= 4;
 
-  // Underline
+  // Underline — matches text width exactly
   ctx.currentPage.drawLine({
     start: { x: ctx.leftMargin, y: ctx.y },
-    end: { x: ctx.leftMargin + 150, y: ctx.y },
-    thickness: 2,
+    end: { x: ctx.leftMargin + textWidth, y: ctx.y },
+    thickness: 0.5,
     color: PDF_COLORS.black
   });
   ctx.y -= 15;
 }
 
 function drawProjectOverview(ctx: PdfPageContext, data: ProjectReportData): void {
-  const labelWidth = 100;
-  const lineHeight = 16;
+  const labelWidth = 120;
+  const lineHeight = 14;
 
   const fields = [
     ['Status', formatStatus(data.project.status)],
