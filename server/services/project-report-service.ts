@@ -141,13 +141,15 @@ export async function fetchProjectReportData(projectId: number): Promise<Project
   const project = (await db.get(
     `
     SELECT
-      p.id, p.name, p.status, p.priority,
+      p.id, p.project_name as name, p.status, p.priority,
       p.created_at, p.start_date, p.deadline, p.completed_date,
       p.description, p.project_type, p.budget,
-      c.name as client_name, c.email as client_email, c.company as client_company
+      COALESCE(c.billing_name, c.contact_name) as client_name,
+      COALESCE(c.billing_email, c.email) as client_email,
+      COALESCE(c.billing_company, c.company_name) as client_company
     FROM projects p
     LEFT JOIN clients c ON p.client_id = c.id
-    WHERE p.id = ?
+    WHERE p.id = ? AND p.deleted_at IS NULL
   `,
     [projectId]
   )) as unknown as ProjectRow | undefined;
