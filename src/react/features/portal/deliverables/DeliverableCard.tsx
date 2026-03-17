@@ -81,7 +81,7 @@ export const DeliverableCard = React.memo(({ deliverable, onNavigate }: Delivera
 
       {/* Actions */}
       {onNavigate && (
-        <div className="portal-card-actions">
+        <div className="action-group">
           <button className="btn-ghost" onClick={handleClick}>
             View Deliverable
             <ChevronRight className="icon-xs" />

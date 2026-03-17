@@ -84,7 +84,7 @@ export const ContractCard = React.memo(({ contract, onNavigate, onSign }: Contra
       </div>
 
       {/* Actions */}
-      <div className="portal-card-actions">
+      <div className="action-group">
         {canSign && onSign && (
           <button className="btn-primary" onClick={handleSignClick}>
             <PenTool />

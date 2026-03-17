@@ -81,24 +81,24 @@ export function PaymentScheduleView(_props: PaymentScheduleViewProps) {
     <div ref={containerRef}>
       {/* Summary Card */}
       {summary && (
-        <div className="card payment-summary-card">
-          <div className="payment-summary-grid">
-            <div>
-              <span className="payment-stat-label">Total</span>
-              <div className="payment-stat-value">{formatCurrency(summary.totalAmount)}</div>
+        <div className="panel">
+          <div className="stats-row">
+            <div className="stat-card">
+              <span className="stat-label">Total</span>
+              <span className="stat-value">{formatCurrency(summary.totalAmount)}</span>
             </div>
-            <div>
-              <span className="payment-stat-label">Paid</span>
-              <div className="payment-stat-value payment-stat-value--success">{formatCurrency(summary.paidAmount)}</div>
+            <div className="stat-card stat-card--success">
+              <span className="stat-label">Paid</span>
+              <span className="stat-value">{formatCurrency(summary.paidAmount)}</span>
             </div>
-            <div>
-              <span className="payment-stat-label">Remaining</span>
-              <div className="payment-stat-value">{formatCurrency(summary.pendingAmount)}</div>
+            <div className="stat-card">
+              <span className="stat-label">Remaining</span>
+              <span className="stat-value">{formatCurrency(summary.pendingAmount)}</span>
             </div>
             {summary.overdueAmount > 0 && (
-              <div>
-                <span className="payment-stat-label">Overdue</span>
-                <div className="payment-stat-value payment-stat-value--danger">{formatCurrency(summary.overdueAmount)}</div>
+              <div className="stat-card stat-card--alert">
+                <span className="stat-label">Overdue</span>
+                <span className="stat-value">{formatCurrency(summary.overdueAmount)}</span>
               </div>
             )}
           </div>
@@ -106,20 +106,18 @@ export function PaymentScheduleView(_props: PaymentScheduleViewProps) {
       )}
 
       {/* Installments List */}
-      <div className="card">
+      <div className="panel">
         {installments.map((inst) => (
-          <div key={inst.id} className="payment-item-row">
+          <div key={inst.id} className="list-item">
             <div>
-              <div className="payment-item-label">
-                {inst.label || `Payment ${inst.installmentNumber}`}
-              </div>
-              <span className="payment-item-meta">
+              <div className="field-label">{inst.label || `Payment ${inst.installmentNumber}`}</div>
+              <span className="text-secondary">
                 Due {formatDate(inst.dueDate)}
                 {inst.paidDate && ` - Paid ${formatDate(inst.paidDate)}`}
               </span>
             </div>
-            <div className="payment-item-actions">
-              <span className="payment-item-amount">{formatCurrency(inst.amount)}</span>
+            <div className="action-group">
+              <span className="stat-value">{formatCurrency(inst.amount)}</span>
               <StatusBadge status={getStatusVariant(inst.status)}>
                 {STATUS_LABELS[inst.status] || inst.status}
               </StatusBadge>
