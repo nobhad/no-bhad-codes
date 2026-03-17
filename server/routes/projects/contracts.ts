@@ -24,7 +24,8 @@ import {
   drawWrappedText,
   addPageNumbers,
   PAGE_MARGINS,
-  drawPdfDocumentHeader
+  drawPdfDocumentHeader,
+  drawPdfFooter
 } from '../../utils/pdf-utils.js';
 import { invalidateCache } from '../../middleware/cache.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
@@ -148,7 +149,8 @@ router.get(
         y: height / 2,
         size: fontSize,
         font: helveticaBold,
-        color: rgb(0.88, 0.88, 0.88),
+        color: PDF_COLORS.black,
+        opacity: 0.08,
         rotate: degrees(-20)
       });
     };
@@ -466,26 +468,14 @@ router.get(
       color: PDF_COLORS.black
     });
 
-    // === FOOTERS ===
-    const footerTerms = 'Standard terms and conditions apply.';
-    const footerContact = `Questions? Contact us at ${BUSINESS_INFO.email}`;
+    // === FOOTERS — shared pattern on all pages ===
     for (const footerPage of pdfDoc.getPages()) {
-      const { width: footerWidth } = footerPage.getSize();
-      const termsWidth = helvetica.widthOfTextAtSize(footerTerms, 8);
-      const contactWidth = helvetica.widthOfTextAtSize(footerContact, 9);
-      footerPage.drawText(footerTerms, {
-        x: (footerWidth - termsWidth) / 2,
-        y: 52,
-        size: 8,
-        font: helvetica,
-        color: PDF_COLORS.black
-      });
-      footerPage.drawText(footerContact, {
-        x: (footerWidth - contactWidth) / 2,
-        y: 40,
-        size: 9,
-        font: helvetica,
-        color: PDF_COLORS.black
+      drawPdfFooter(footerPage, {
+        leftMargin,
+        rightMargin,
+        width,
+        fonts: { regular: helvetica, bold: helveticaBold },
+        thankYouText: 'Thank you for your business!'
       });
     }
 

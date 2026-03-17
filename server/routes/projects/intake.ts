@@ -6,9 +6,9 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../utils/access-control.js';
 import { getString } from '../../database/row-helpers.js';
-import { BUSINESS_INFO, getPdfLogoBytes } from '../../config/business.js';
+import { BUSINESS_INFO } from '../../config/business.js';
 import { PDF_COLORS } from '../../config/pdf-styles.js';
-import { getPdfCacheKey, getCachedPdf, cachePdf } from '../../utils/pdf-utils.js';
+import { getPdfCacheKey, getCachedPdf, cachePdf, drawPdfFooter, drawPdfDocumentHeader } from '../../utils/pdf-utils.js';
 import { errorResponse, ErrorCodes } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import { intakeService } from '../../services/intake-service.js';
@@ -243,34 +243,18 @@ router.get(
     let y = PAGE_H - 43;
     let pageNumber = 1;
 
-    const drawFooter = (pg: PDFPage, pgNum: number) => {
-      pg.drawLine({
-        start: { x: LEFT, y: FOOTER_Y },
-        end: { x: RIGHT, y: FOOTER_Y },
-        thickness: 0.5,
-        color: lineGray
-      });
-      const footerText = `${BUSINESS_INFO.name} • ${BUSINESS_INFO.owner} • ${BUSINESS_INFO.email} • ${BUSINESS_INFO.website}`;
-      const footerWidth = helvetica.widthOfTextAtSize(footerText, 7);
-      pg.drawText(footerText, {
-        x: (PAGE_W - footerWidth) / 2,
-        y: 46,
-        size: 7,
-        font: helvetica,
-        color: lightGray
-      });
-      const pageLabel = `Page ${pgNum}`;
-      pg.drawText(pageLabel, {
-        x: RIGHT - helvetica.widthOfTextAtSize(pageLabel, 7),
-        y: 36,
-        size: 7,
-        font: helvetica,
-        color: lightGray
+    const drawFooterOnPage = (pg: PDFPage) => {
+      drawPdfFooter(pg, {
+        leftMargin: LEFT,
+        rightMargin: RIGHT,
+        width: PAGE_W,
+        fonts: { regular: helvetica, bold: helveticaBold },
+        thankYouText: 'Thank you for your business!'
       });
     };
 
     const addPage = () => {
-      drawFooter(currentPage, pageNumber);
+      drawFooterOnPage(currentPage);
       pageNumber += 1;
       currentPage = pdfDoc.addPage([PAGE_W, PAGE_H]);
       y = PAGE_H - 54;
@@ -288,12 +272,20 @@ router.get(
 
     const drawSectionHeading = (title: string) => {
       ensureSpace(30);
-      currentPage.drawText(title, {
+      const headingText = title.toUpperCase();
+      currentPage.drawText(headingText, {
         x: LEFT,
         y,
-        size: 12,
+        size: 10,
         font: helveticaBold,
         color: black
+      });
+      const headingW = helveticaBold.widthOfTextAtSize(headingText, 10);
+      currentPage.drawLine({
+        start: { x: LEFT, y: y - 4 },
+        end: { x: LEFT + headingW, y: y - 4 },
+        thickness: 0.5,
+        color: PDF_COLORS.black
       });
       y -= 20;
     };
@@ -400,79 +392,18 @@ router.get(
     };
 
     // =========================================================
-    // PAGE 1 HEADER
+    // PAGE 1 HEADER — shared across all PDF types
     // =========================================================
 
-    const logoHeight = 100;
-    let textStartX = RIGHT - 180;
-
-    currentPage.drawText('INTAKE', {
-      x: LEFT,
-      y: y - 20,
-      size: 28,
-      font: helveticaBold,
-      color: PDF_COLORS.black
+    y = await drawPdfDocumentHeader({
+      page: currentPage,
+      pdfDoc,
+      fonts: { regular: helvetica, bold: helveticaBold },
+      startY: y,
+      leftMargin: LEFT,
+      rightMargin: RIGHT,
+      title: 'INTAKE'
     });
-
-    const intakeLogoBytes = getPdfLogoBytes();
-    if (intakeLogoBytes) {
-      const logoImage = await pdfDoc.embedPng(intakeLogoBytes);
-      const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
-      const logoX = RIGHT - logoWidth - 150;
-      currentPage.drawImage(logoImage, {
-        x: logoX,
-        y: y - logoHeight + 10,
-        width: logoWidth,
-        height: logoHeight
-      });
-      textStartX = logoX + logoWidth + 18;
-    }
-
-    let infoY = y - 11;
-    currentPage.drawText(BUSINESS_INFO.name, {
-      x: textStartX, y: infoY,
-      size: 15, font: helveticaBold, color: PDF_COLORS.black
-    });
-    infoY -= 18;
-    if (BUSINESS_INFO.owner) {
-      currentPage.drawText(BUSINESS_INFO.owner, {
-        x: textStartX, y: infoY,
-        size: 10, font: helvetica, color: PDF_COLORS.black
-      });
-      infoY -= 16;
-    }
-    if (BUSINESS_INFO.tagline) {
-      currentPage.drawText(BUSINESS_INFO.tagline, {
-        x: textStartX, y: infoY,
-        size: 9, font: helvetica, color: PDF_COLORS.black
-      });
-      infoY -= 14;
-    }
-    if (BUSINESS_INFO.email) {
-      currentPage.drawText(BUSINESS_INFO.email, {
-        x: textStartX, y: infoY,
-        size: 9, font: helvetica, color: PDF_COLORS.black
-      });
-      infoY -= 14;
-    }
-    if (BUSINESS_INFO.website) {
-      currentPage.drawText(BUSINESS_INFO.website, {
-        x: textStartX, y: infoY,
-        size: 9, font: helvetica, color: PDF_COLORS.black
-      });
-      infoY -= 14;
-    }
-
-    y = Math.min(y - 120, infoY - 20);
-
-    // Header divider
-    currentPage.drawLine({
-      start: { x: LEFT, y },
-      end: { x: RIGHT, y },
-      thickness: 1,
-      color: lineGray
-    });
-    y -= 21;
 
     // =========================================================
     // PREPARED FOR + DATE/PROJECT #
@@ -480,9 +411,17 @@ router.get(
 
     const detailsX = PAGE_W / 2 + 36;
 
-    currentPage.drawText('PREPARED FOR:', {
+    const preparedForLabel = 'PREPARED FOR:';
+    currentPage.drawText(preparedForLabel, {
       x: LEFT, y,
-      size: 11, font: helveticaBold, color: PDF_COLORS.black
+      size: 10, font: helveticaBold, color: PDF_COLORS.black
+    });
+    const preparedForW = helveticaBold.widthOfTextAtSize(preparedForLabel, 10);
+    currentPage.drawLine({
+      start: { x: LEFT, y: y - 4 },
+      end: { x: LEFT + preparedForW, y: y - 4 },
+      thickness: 0.5,
+      color: PDF_COLORS.black
     });
 
     currentPage.drawText(clean(intakeData.clientInfo.name), {
@@ -720,7 +659,7 @@ router.get(
     // FOOTER ON LAST PAGE
     // =========================================================
 
-    drawFooter(currentPage, pageNumber);
+    drawFooterOnPage(currentPage);
 
     // =========================================================
     // GENERATE & SEND
