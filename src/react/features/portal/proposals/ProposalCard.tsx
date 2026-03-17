@@ -4,6 +4,7 @@
  */
 
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FileText, Calendar, DollarSign, Layers, ChevronRight } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { formatCardDate, isOverdue, getDueDaysText } from '@react/utils/cardFormatters';
@@ -16,18 +17,19 @@ interface ProposalCardProps {
   onNavigate?: (entityType: string, entityId: string) => void;
 }
 
-export const ProposalCard = React.memo(({ proposal, onNavigate }: ProposalCardProps) => {
+export const ProposalCard = React.memo(({ proposal }: ProposalCardProps) => {
+  const navigate = useNavigate();
   const overdue = isOverdue(proposal.validUntil ?? undefined);
   const dueDaysText = getDueDaysText(proposal.validUntil ?? undefined);
 
   const handleClick = () => {
-    onNavigate?.('proposal', String(proposal.id));
+    navigate(`/proposals/${proposal.id}`);
   };
 
   return (
     <div
-      className={cn('portal-card', onNavigate && 'card-clickable')}
-      onClick={onNavigate ? handleClick : undefined}
+      className={cn('portal-card', 'card-clickable')}
+      onClick={handleClick}
     >
       {/* Header */}
       <div className="portal-card-header">
@@ -77,14 +79,12 @@ export const ProposalCard = React.memo(({ proposal, onNavigate }: ProposalCardPr
       </div>
 
       {/* Actions */}
-      {onNavigate && (
-        <div className="portal-card-actions">
-          <button className="btn-ghost" onClick={handleClick}>
-            View Proposal
-            <ChevronRight className="icon-xs" />
-          </button>
-        </div>
-      )}
+      <div className="action-group">
+        <button className="btn-ghost" onClick={handleClick}>
+          View Proposal
+          <ChevronRight className="icon-xs" />
+        </button>
+      </div>
     </div>
   );
 });

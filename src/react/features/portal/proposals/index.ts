@@ -5,6 +5,8 @@
 
 export { PortalProposals } from './PortalProposals';
 export type { PortalProposalsProps } from './PortalProposals';
+export { PortalProposalDetail } from './PortalProposalDetail';
+export type { PortalProposalDetailProps } from './PortalProposalDetail';
 export { ProposalCard } from './ProposalCard';
 export {
   mountPortalProposals,
