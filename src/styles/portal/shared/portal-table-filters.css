@@ -62,7 +62,8 @@
 }
 
 /* Search input — absolutely positioned, expands left from the right edge.
-   React conditionally renders the dropdown (no CSS display toggle needed). */
+   React conditionally renders the dropdown (no CSS display toggle needed).
+   position: relative creates positioning context for the icon inside. */
 .filter-search-dropdown {
   display: flex;
   position: absolute;
@@ -74,10 +75,10 @@
   background-color: var(--color-bg-primary);
 }
 
-/* Search icon inside the input — left-aligned with proper padding */
+/* Search icon inside the input — left-aligned with explicit padding clearance */
 .filter-search-dropdown .search-bar-icon {
   position: absolute;
-  left: var(--space-2);
+  left: var(--space-1);
   top: 50%;
   transform: translateY(-50%);
   width: var(--icon-size-md);
@@ -85,9 +86,10 @@
   color: var(--color-text-tertiary);
   pointer-events: none;
   flex-shrink: 0;
+  z-index: 1;
 }
 
-/* Input padding + height to match adjacent icon buttons */
+/* Input height to match adjacent icon buttons (padding handled by portal-forms.css) */
 .filter-search-dropdown input.search-bar-input {
   height: var(--portal-btn-icon-size);
   min-height: var(--portal-btn-icon-size);

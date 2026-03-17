@@ -144,16 +144,16 @@
 
 /* Checklist card */
 .portal .checklist-card {
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--space-2);
 }
 
 /* Checklist card header row */
 .portal .checklist-card-header {
-  padding: var(--spacing-md);
+  padding: var(--space-1) var(--content-gutter);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--app-color-border);
+  border-bottom: var(--portal-border);
 }
 
 /* Checklist progress area (right side of header) */
@@ -165,28 +165,28 @@
 .portal .checklist-progress-bar {
   width: 120px;
   height: 8px;
-  background: var(--app-color-border);
-  border-radius: 4px;
+  background: var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
 }
 
 /* Progress bar fill */
 .portal .checklist-progress-fill {
   height: 100%;
-  background: var(--app-color-success);
-  border-radius: 4px;
-  transition: width 0.3s ease;
+  background: var(--status-completed);
+  border-radius: var(--border-radius-sm);
+  transition: width var(--transition-medium);
 }
 
 /* Progress count label */
 .portal .checklist-progress-label {
   font-size: var(--font-size-xs);
-  color: var(--app-color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 /* Content item row */
 .portal .content-item-row {
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-bottom: 1px solid var(--app-color-border);
+  padding: var(--space-1) var(--content-gutter);
+  border-bottom: var(--portal-border);
 }
 
 /* Content item header (title + badge) */
@@ -194,7 +194,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: var(--spacing-sm);
+  gap: var(--space-1);
 }
 
 /* Content item body (left side) */
@@ -206,39 +206,39 @@
 .portal .content-item-title {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--space-0-5);
 }
 
 /* Required field marker */
 .portal .content-item-required {
-  color: var(--app-color-danger);
+  color: var(--color-danger);
   font-size: var(--font-size-xs);
 }
 
 /* Content item description */
 .portal .content-item-description {
-  margin: 4px 0 0;
+  margin: var(--space-0-5) 0 0;
   font-size: var(--font-size-sm);
-  color: var(--app-color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 /* Admin revision notes callout */
 .portal .content-item-revision-notes {
   margin-top: var(--space-0-5);
   padding: var(--space-0-5) var(--space-1);
-  background: var(--app-color-warning-bg);
+  background: var(--color-bg-prominent);
   font-size: var(--font-size-sm);
 }
 
 /* Submission form area */
 .portal .content-item-submission {
-  margin-top: var(--spacing-sm);
+  margin-top: var(--space-1);
 }
 
 /* Submission form input row */
 .portal .content-submission-form {
   display: flex;
-  gap: var(--spacing-xs);
+  gap: var(--space-0-5);
   align-items: flex-start;
 }
 
@@ -267,13 +267,13 @@
 /* File upload hint */
 .portal .content-file-hint {
   font-size: var(--font-size-sm);
-  color: var(--app-color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 /* Project name subtitle */
 .portal .checklist-project-name {
   font-size: var(--font-size-sm);
-  color: var(--app-color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 /* Submitted file indicator */

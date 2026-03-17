@@ -364,16 +364,20 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
 /* Search icon — absolutely positioned inside the input */
 .search-bar .search-bar-icon {
   position: absolute;
-  left: var(--space-2);
+  left: var(--space-1);
   top: 50%;
   transform: translateY(-50%);
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
   color: var(--color-text-tertiary);
   pointer-events: none;
   flex-shrink: 0;
 }
 
-/* Search bar input — single source of truth for all search inputs */
+/* Search bar input — single source of truth for all search inputs.
+   Uses high specificity to override .portal input[type="text"] global padding. */
 .search-bar input.search-bar-input,
+.filter-search-dropdown input.search-bar-input,
 input.search-bar-input {
   width: 100%;
   height: var(--portal-btn-icon-size);
@@ -383,13 +387,20 @@ input.search-bar-input {
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   box-sizing: border-box;
-  /* Left padding clears the absolutely-positioned search icon */
-  padding-left: calc(var(--space-2) + 1em + var(--icon-gap));
+  /* Left padding MUST clear the absolutely-positioned search icon.
+     icon-left (8px) + icon-width (16px) + breathing room (12px) = 36px */
+  padding: 0 calc(var(--icon-size-xl) + var(--space-1)) 0 calc(var(--space-1) + var(--icon-size-md) + var(--space-1-5));
+  /* Prevent placeholder from being cut off */
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .search-bar .search-bar-input::placeholder,
 .search-bar-input::placeholder {
   color: var(--color-text-tertiary);
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .search-bar .search-bar-input:focus,
