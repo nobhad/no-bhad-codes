@@ -153,3 +153,18 @@ export function normalizeEmail(email: string): string {
 export function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
+
+/** Normalize phone: strip non-numeric except leading + */
+export function normalizePhone(phone: string): string {
+  const trimmed = phone.trim();
+  if (trimmed.startsWith('+')) {
+    return '+' + trimmed.slice(1).replace(/[^\d]/g, '');
+  }
+  return trimmed.replace(/[^\d]/g, '');
+}
+
+/** Basic phone format validation (at least 7 digits, max 15) */
+export function isValidPhone(phone: string): boolean {
+  const digits = phone.replace(/[^\d]/g, '');
+  return digits.length >= 7 && digits.length <= 15;
+}
