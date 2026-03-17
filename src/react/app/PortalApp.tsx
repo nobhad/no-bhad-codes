@@ -16,6 +16,7 @@
  */
 
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PortalProviders } from './PortalProviders';
 import { PortalRoutes } from './PortalRoutes';
 import { ErrorBoundary } from '../components/portal/ErrorBoundary';
@@ -56,6 +57,7 @@ function AdminKeyboardShortcuts() {
   const role = usePortalStore((s) => s.role);
   const navItems = usePortalStore((s) => s.navItems);
   const switchTab = usePortalStore((s) => s.switchTab);
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     if (role !== 'admin') return;
@@ -76,15 +78,14 @@ function AdminKeyboardShortcuts() {
         if (item) {
           e.preventDefault();
           switchTab(item.id);
-          // Update URL hash
-          window.location.hash = `/${usePortalStore.getState().currentTab}`;
+          navigate(`/${usePortalStore.getState().currentTab}`);
         }
       }
     }
 
     document.addEventListener('keydown', handleKeydown);
     return () => document.removeEventListener('keydown', handleKeydown);
-  }, [role, navItems, switchTab]);
+  }, [role, navItems, switchTab, navigate]);
 
   return null;
 }
@@ -103,6 +104,7 @@ function AdminKeyboardShortcuts() {
  */
 function GlobalKeyboardShortcuts() {
   const switchTab = usePortalStore((s) => s.switchTab);
+  const navigate = useNavigate();
   const pendingGRef = React.useRef(false);
   const gTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -141,7 +143,7 @@ function GlobalKeyboardShortcuts() {
         if (goToMap[key]) {
           e.preventDefault();
           switchTab(goToMap[key]);
-          window.location.hash = `/${usePortalStore.getState().currentTab}`;
+          navigate(`/${usePortalStore.getState().currentTab}`);
           return;
         }
       }
@@ -157,9 +159,12 @@ function GlobalKeyboardShortcuts() {
       }
 
       // "/" focuses the first search input on the page
+      // Uses a stable data attribute rather than fragile class/title selectors,
+      // since global keyboard shortcuts must find the active search/refresh
+      // regardless of which component rendered them.
       if (key === '/') {
         const searchInput = document.querySelector<HTMLInputElement>(
-          '.search-bar-input, .search-filter-input, [data-search-input]'
+          '[data-shortcut="search"]'
         );
         if (searchInput) {
           e.preventDefault();
@@ -171,13 +176,12 @@ function GlobalKeyboardShortcuts() {
       // "r" clicks the refresh button
       if (key === 'r') {
         const refreshBtn = document.querySelector<HTMLButtonElement>(
-          '[title="Refresh"], [aria-label="Refresh"]'
+          '[data-shortcut="refresh"]'
         );
         if (refreshBtn) {
           e.preventDefault();
           refreshBtn.click();
         }
-
       }
     }
 
@@ -186,7 +190,7 @@ function GlobalKeyboardShortcuts() {
       document.removeEventListener('keydown', handleKeydown);
       if (gTimerRef.current) clearTimeout(gTimerRef.current);
     };
-  }, [switchTab]);
+  }, [switchTab, navigate]);
 
   return null;
 }

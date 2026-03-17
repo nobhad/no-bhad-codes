@@ -337,6 +337,9 @@ export function IconButton({
     className
   );
 
+  // Auto-add data-shortcut for global keyboard shortcut targeting
+  const shortcutAttr = action === 'refresh' ? 'refresh' : undefined;
+
   return (
     <button
       type="button"
@@ -346,6 +349,7 @@ export function IconButton({
       disabled={disabled || loading}
       data-action={action}
       data-id={dataId}
+      data-shortcut={shortcutAttr}
       {...props}
     >
       {/* Don't pass size for table context - let CSS control icon size */}
