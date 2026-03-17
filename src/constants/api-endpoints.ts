@@ -71,6 +71,13 @@ export const API_ENDPOINTS = {
   ONBOARDING_CHECKLIST: '/api/onboarding-checklist',
   ONBOARDING_CHECKLIST_MY: '/api/onboarding-checklist/my',
 
+  // Email Sequences (admin)
+  SEQUENCES: '/api/sequences',
+
+  // Meeting Requests
+  MEETING_REQUESTS: '/api/meeting-requests',
+  MEETING_REQUESTS_MY: '/api/meeting-requests/my',
+
   // Content requests
   CONTENT_REQUESTS: '/api/content-requests',
   CONTENT_REQUESTS_MY: '/api/content-requests/my',

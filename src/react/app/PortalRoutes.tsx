@@ -117,6 +117,13 @@ const PortalProposalDetailView = lazyNamed(() => import('../features/portal/prop
 const AgreementsList = lazyNamed(() => import('../features/portal/agreements').then(m => ({ AgreementsList: m.AgreementsList })));
 const AgreementFlowLazy = React.lazy(() => import('../features/portal/agreements').then(m => ({ default: m.AgreementFlow })));
 
+// Meetings (Portal)
+const MeetingRequestsList = lazyNamed(() => import('../features/portal/meetings').then(m => ({ MeetingRequestsList: m.MeetingRequestsList })));
+
+// Admin: Sequences & Meetings
+const SequencesTable = lazyNamed(() => import('../features/admin/sequences').then(m => ({ SequencesTable: m.SequencesTable })));
+const MeetingRequestsTable = lazyNamed(() => import('../features/admin/meetings').then(m => ({ MeetingRequestsTable: m.MeetingRequestsTable })));
+
 // ============================================
 // DETAIL VIEW WRAPPERS
 // ============================================
@@ -393,6 +400,20 @@ export function PortalRoutes() {
           <LazyTabRoute tabId="payment-schedule">
             <PaymentScheduleView />
           </LazyTabRoute>
+        } />
+
+        {/* ========== MEETINGS ========== */}
+        <Route path="/meetings" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="meetings"><MeetingRequestsTable /></LazyTabRoute>
+          ) : (
+            <LazyTabRoute tabId="meetings"><MeetingRequestsList /></LazyTabRoute>
+          )
+        } />
+
+        {/* ========== ADMIN: SEQUENCES ========== */}
+        <Route path="/sequences" element={
+          <LazyTabRoute tabId="sequences"><SequencesTable /></LazyTabRoute>
         } />
 
         {/* ========== AGREEMENTS ========== */}
