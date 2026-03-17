@@ -700,7 +700,7 @@ export class DeliverableService {
         d.created_at as createdAt,
         d.updated_at as updatedAt,
         p.project_name as projectName,
-        c.company_name as clientName
+        COALESCE(c.billing_company, c.company_name) as clientName
       FROM deliverables d
       LEFT JOIN projects p ON d.project_id = p.id
       LEFT JOIN clients c ON p.client_id = c.id
@@ -794,7 +794,7 @@ export class DeliverableService {
         d.created_at as createdAt,
         d.updated_at as updatedAt,
         p.project_name as projectName,
-        c.company_name as clientName
+        COALESCE(c.billing_company, c.company_name) as clientName
       FROM deliverables d
       LEFT JOIN projects p ON d.project_id = p.id
       LEFT JOIN clients c ON p.client_id = c.id

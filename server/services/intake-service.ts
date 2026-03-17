@@ -247,11 +247,12 @@ class IntakeService {
   }> {
     const db = getDatabase();
     const { intakeData, companyName, clientType, hashedPassword, features, projectName, milestones, systemUserId } = params;
+    const normalizedEmail = intakeData.email.trim().toLowerCase();
 
     return db.transaction(async (ctx) => {
       // Check if client already exists
       const existingClient = await ctx.get('SELECT id, email FROM clients WHERE email = ?', [
-        intakeData.email
+        normalizedEmail
       ]) as { id: number; email: string } | undefined;
 
       let clientId: number;
@@ -268,7 +269,7 @@ class IntakeService {
         const clientResult = await ctx.run(
           `INSERT INTO clients (company_name, contact_name, email, phone, password_hash, status, client_type, created_at, updated_at)
            VALUES (?, ?, ?, ?, ?, 'pending', ?, datetime('now'), datetime('now'))`,
-          [companyName, intakeData.name, intakeData.email, intakePhone ?? '', hashedPassword, clientType]
+          [companyName, intakeData.name, normalizedEmail, intakePhone ?? '', hashedPassword, clientType]
         );
         clientId = clientResult.lastID!;
       }
@@ -287,7 +288,7 @@ class IntakeService {
         await ctx.run(
           `INSERT INTO client_contacts (client_id, first_name, last_name, email, phone, role, is_primary, created_at, updated_at)
            VALUES (?, ?, ?, ?, ?, 'primary', 1, datetime('now'), datetime('now'))`,
-          [clientId, firstName, lastName, intakeData.email, intakePhone]
+          [clientId, firstName, lastName, normalizedEmail, intakePhone]
         );
       }
 

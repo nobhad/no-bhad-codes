@@ -75,12 +75,14 @@ export async function fetchSowData(projectId: number): Promise<SowData | null> {
   const project = (await db.get(
     `
     SELECT
-      p.id, p.name, p.project_type, p.description,
+      p.id, p.project_name as name, p.project_type, p.description,
       p.start_date, p.deadline,
-      c.name as client_name, c.email as client_email, c.company as client_company
+      COALESCE(c.billing_name, c.contact_name) as client_name,
+      COALESCE(c.billing_email, c.email) as client_email,
+      COALESCE(c.billing_company, c.company_name) as client_company
     FROM projects p
     LEFT JOIN clients c ON p.client_id = c.id
-    WHERE p.id = ?
+    WHERE p.id = ? AND p.deleted_at IS NULL
   `,
     [projectId]
   )) as unknown as
