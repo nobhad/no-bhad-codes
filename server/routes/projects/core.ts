@@ -131,6 +131,24 @@ router.post(
       // Non-critical - don't fail the request
     }
 
+    // Auto-generate custom questionnaire for missing info
+    try {
+      const { generateDynamicQuestionnaire } = await import('../../services/dynamic-questionnaire-service.js');
+      const questionnaireResult = await generateDynamicQuestionnaire(lastID);
+      if (questionnaireResult) {
+        await logger.info(
+          `[Projects] Auto-generated questionnaire with ${questionnaireResult.questionCount} questions for project ${lastID}`,
+          { category: 'PROJECTS' }
+        );
+      }
+    } catch (qError) {
+      await logger.error('[Projects] Failed to auto-generate questionnaire:', {
+        error: qError instanceof Error ? qError : undefined,
+        category: 'PROJECTS'
+      });
+      // Non-critical - don't fail the request
+    }
+
     // Get client info for notification
     const client = await projectService.getClientInfo(req.user!.id);
 
@@ -213,6 +231,24 @@ router.post(
     } catch (milestoneError) {
       await logger.error('[Projects] Failed to generate milestones:', {
         error: milestoneError instanceof Error ? milestoneError : undefined,
+        category: 'PROJECTS'
+      });
+      // Non-critical - don't fail the request
+    }
+
+    // Auto-generate custom questionnaire for missing info
+    try {
+      const { generateDynamicQuestionnaire } = await import('../../services/dynamic-questionnaire-service.js');
+      const questionnaireResult = await generateDynamicQuestionnaire(lastID);
+      if (questionnaireResult) {
+        await logger.info(
+          `[Projects] Auto-generated questionnaire with ${questionnaireResult.questionCount} questions for project ${lastID}`,
+          { category: 'PROJECTS' }
+        );
+      }
+    } catch (qError) {
+      await logger.error('[Projects] Failed to auto-generate questionnaire:', {
+        error: qError instanceof Error ? qError : undefined,
         category: 'PROJECTS'
       });
       // Non-critical - don't fail the request
@@ -711,6 +747,161 @@ router.post(
         size: pdfBytes.length
       }
     }, 'Statement of Work saved to files');
+  })
+);
+
+// =====================================================
+// INTAKE CHECKLIST (Missing Info Tracker)
+// =====================================================
+
+/**
+ * GET /api/projects/:id/intake-checklist
+ * Get the intake information checklist -- what's collected vs missing
+ */
+router.get(
+  '/:id/intake-checklist',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const { getIntakeChecklist } = await import('../../services/intake-checklist-service.js');
+    const checklist = await getIntakeChecklist(projectId);
+
+    if (!checklist) {
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
+    }
+
+    sendSuccess(res, checklist);
+  })
+);
+
+/**
+ * POST /api/projects/:id/request-info
+ * Send an email to the client requesting missing information
+ */
+router.post(
+  '/:id/request-info',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const { fields, message } = req.body;
+
+    if (!fields || !Array.isArray(fields) || fields.length === 0) {
+      return errorResponse(res, 'fields array is required', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const { sendInfoRequestEmail } = await import('../../services/intake-checklist-service.js');
+    const result = await sendInfoRequestEmail(projectId, fields, message);
+
+    if (!result.success) {
+      return errorResponse(res, result.message, 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    sendSuccess(res, result, result.message);
+  })
+);
+
+// =====================================================
+// DYNAMIC QUESTIONNAIRE
+// =====================================================
+
+/**
+ * POST /api/projects/:id/generate-questionnaire
+ * Generate a custom questionnaire based on missing project information
+ */
+router.post(
+  '/:id/generate-questionnaire',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const { generateDynamicQuestionnaire } = await import('../../services/dynamic-questionnaire-service.js');
+    const result = await generateDynamicQuestionnaire(projectId);
+
+    if (!result) {
+      return errorResponse(res, 'Project not found or no missing information', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+    }
+
+    sendCreated(res, result, `Generated custom questionnaire with ${result.questionCount} questions`);
+  })
+);
+
+// =====================================================
+// PROJECT COMPLETION
+// =====================================================
+
+/**
+ * GET /api/projects/:id/completion-status
+ * Check if a project is ready for completion
+ */
+router.get(
+  '/:id/completion-status',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const { checkProjectCompletion } = await import('../../services/project-completion-service.js');
+    const status = await checkProjectCompletion(projectId);
+
+    sendSuccess(res, status);
+  })
+);
+
+/**
+ * POST /api/projects/:id/complete
+ * Mark a project as completed (with pre-flight checks)
+ */
+router.post(
+  '/:id/complete',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['projects']),
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const { checkProjectCompletion, completeProject } = await import('../../services/project-completion-service.js');
+
+    // Check completion status first
+    const status = await checkProjectCompletion(projectId);
+
+    // Allow force-complete even with blockers (admin override)
+    const { force } = req.body;
+    if (!status.canAutoComplete && !force) {
+      return errorResponse(
+        res,
+        `Project cannot be auto-completed: ${status.blockers.join(', ')}. Send { "force": true } to override.`,
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
+    }
+
+    const result = await completeProject(projectId, req.user?.email || 'admin');
+
+    if (!result.success) {
+      return errorResponse(res, result.message, 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    sendSuccess(res, { ...status, completed: true }, result.message);
   })
 );
 

@@ -442,6 +442,146 @@ router.get(
   })
 );
 
+// =====================================================
+// PROPOSAL PREFILL FROM QUESTIONNAIRES
+// =====================================================
+
+/**
+ * @swagger
+ * /api/proposals/prefill/{projectId}:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: GET /api/proposals/prefill/:projectId
+ *     description: Get proposal prefill data from questionnaire responses.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
+router.get(
+  '/prefill/:projectId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.projectId, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const { generateProposalPrefill } = await import('../../services/proposal-prefill-service.js');
+    const prefill = await generateProposalPrefill(projectId);
+
+    if (!prefill) {
+      return errorResponse(res, 'Project not found or no questionnaire data available', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+    }
+
+    sendSuccess(res, prefill);
+  })
+);
+
+// =====================================================
+// CLIENT PROPOSAL ACCEPTANCE
+// =====================================================
+
+/**
+ * @swagger
+ * /api/proposals/{id}/accept:
+ *   post:
+ *     tags: [Proposals]
+ *     summary: POST /api/proposals/:id/accept
+ *     description: Client accepts a proposal (selects a tier).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Proposal accepted
+ *       400:
+ *         description: Cannot accept proposal in current status
+ *       404:
+ *         description: Proposal not found
+ */
+router.post(
+  '/:id/accept',
+  authenticateToken,
+  invalidateCache(['proposals']),
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id, 10);
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    // Verify client can access this proposal
+    if (!(await canAccessProposal(req, proposalId))) {
+      return errorResponse(res, 'Proposal not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+    }
+
+    // Get proposal
+    const proposal = await proposalService.getProposalWithJoins(proposalId);
+    if (!proposal) {
+      return errorResponse(res, 'Proposal not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+    }
+
+    const p = proposal as unknown as Record<string, unknown>;
+    const currentStatus = getString(p, 'status');
+
+    // Can only accept proposals that are in 'sent' or 'pending' or 'reviewed' status
+    const acceptableStatuses = ['sent', 'pending', 'reviewed'];
+    if (!acceptableStatuses.includes(currentStatus)) {
+      return errorResponse(
+        res,
+        `Cannot accept proposal in '${currentStatus}' status`,
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
+    }
+
+    // Update proposal status to accepted
+    await proposalService.updateProposal(proposalId, {
+      status: 'accepted',
+      reviewerEmail: req.user?.email || 'client',
+      reviewedByUserId: null
+    });
+
+    // Log activity
+    try {
+      await proposalService.logActivity(
+        proposalId,
+        'status_changed',
+        req.user?.email || 'client',
+        'client',
+        { previousStatus: currentStatus, newStatus: 'accepted' }
+      );
+    } catch {
+      // Non-critical — activity logging should not block acceptance
+    }
+
+    // Emit workflow event — triggers project creation, milestones, contract, payment schedule
+    await workflowTriggerService.emit('proposal.accepted', {
+      entityId: proposalId,
+      triggeredBy: req.user?.email || 'client'
+    });
+
+    await logger.info(`[Proposals] Client accepted proposal ${proposalId}`, {
+      category: 'PROPOSALS'
+    });
+
+    sendSuccess(res, { proposalId, status: 'accepted' }, 'Proposal accepted successfully');
+  })
+);
+
 /**
  * @swagger
  * /api/proposals/{id}:
