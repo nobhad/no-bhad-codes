@@ -77,6 +77,13 @@ export const API_ENDPOINTS = {
   // Custom Automations (admin)
   AUTOMATIONS: '/api/automations',
 
+  // Expenses (admin)
+  EXPENSES: '/api/expenses',
+
+  // Retainers
+  RETAINERS: '/api/retainers',
+  RETAINERS_MY: '/api/retainers/my',
+
   // Meeting Requests
   MEETING_REQUESTS: '/api/meeting-requests',
   MEETING_REQUESTS_MY: '/api/meeting-requests/my',

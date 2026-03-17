@@ -126,6 +126,13 @@ const MeetingRequestsTable = lazyNamed(() => import('../features/admin/meetings'
 const AutomationsTable = lazyNamed(() => import('../features/admin/automations').then(m => ({ AutomationsTable: m.AutomationsTable })));
 const AutomationDetailLazy = React.lazy(() => import('../features/admin/automations').then(m => ({ default: m.AutomationDetailPanel })));
 
+// Admin: Expenses & Retainers
+const ExpensesTable = lazyNamed(() => import('../features/admin/expenses').then(m => ({ ExpensesTable: m.ExpensesTable })));
+const RetainersTable = lazyNamed(() => import('../features/admin/retainers').then(m => ({ RetainersTable: m.RetainersTable })));
+
+// Portal: Retainers
+const PortalRetainers = lazyNamed(() => import('../features/portal/retainers').then(m => ({ PortalRetainers: m.PortalRetainers })));
+
 // ============================================
 // DETAIL VIEW WRAPPERS
 // ============================================
@@ -432,6 +439,18 @@ export function PortalRoutes() {
         } />
         <Route path="/automation-detail/:automationId" element={
           <LazyTabRoute tabId="automations"><AutomationDetailRoute /></LazyTabRoute>
+        } />
+
+        {/* ========== ADMIN: EXPENSES & RETAINERS ========== */}
+        <Route path="/expenses" element={
+          <LazyTabRoute tabId="expenses"><ExpensesTable /></LazyTabRoute>
+        } />
+        <Route path="/retainers" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="retainers"><RetainersTable /></LazyTabRoute>
+          ) : (
+            <LazyTabRoute tabId="retainers"><PortalRetainers /></LazyTabRoute>
+          )
         } />
 
         {/* ========== AGREEMENTS ========== */}
