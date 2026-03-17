@@ -42,7 +42,7 @@ export function SubtabProvider({ children }: { children: React.ReactNode }) {
 
   const value = React.useMemo(
     () => ({ activeSubtab, setSubtab, actions, setActions }),
-    [activeSubtab, setSubtab, actions]
+    [activeSubtab, setSubtab, actions, setActions]
   );
 
   return (
@@ -52,9 +52,9 @@ export function SubtabProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Read the active subtab */
-export function useActiveSubtab(): string {
-  return React.useContext(SubtabContext).activeSubtab;
+/** Read the active subtab (accepts generic for type-safe subtab IDs) */
+export function useActiveSubtab<T extends string = string>(): T {
+  return React.useContext(SubtabContext).activeSubtab as T;
 }
 
 /** Set the active subtab */
