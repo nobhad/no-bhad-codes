@@ -1,6 +1,6 @@
 # Invoice System
 
-**Last Updated:** February 11, 2026 (Added Receipts and Project Details Invoices Tab planned features)
+**Last Updated:** March 16, 2026
 
 ## Table of Contents
 
@@ -1586,6 +1586,27 @@ Full invoice management within project details view.
 - Edit invoice modal (drafts only)
 - Record payment modal
 - Payment history panel
+
+---
+
+## Change Log
+
+### March 16, 2026 - Billing Field COALESCE + Invoice Number Safety
+
+- All invoice queries now use COALESCE(billing_name, contact_name), COALESCE(billing_email, email), COALESCE(billing_company, company_name)
+- Invoice number generation: added random component to prevent same-millisecond collisions
+- Files modified: `server/services/invoice-service.ts`
+
+### February 11, 2026 - Receipts and Project Details Invoices Tab
+
+- Added Receipts (planned) and Project Details Invoices Tab (planned) sections
+
+### February 6, 2026 - Soft Delete System
+
+- Converted hard delete to soft delete with 30-day recovery window
+- Paid invoices now blocked from deletion
+- Added `deleted_at` and `deleted_by` columns
+- All queries now filter out soft-deleted invoices
 
 ---
 

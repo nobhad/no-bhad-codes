@@ -1,6 +1,6 @@
 # API Documentation
 
-**Last Updated:** February 27, 2026
+**Last Updated:** March 16, 2026
 
 ## Overview
 
@@ -1199,6 +1199,100 @@ Delete project (admin only).
   "message": "Project deleted successfully"
 }
 ```
+
+### GET `/projects/:id/export-milestones`
+
+Export all milestones and their tasks for a project. Useful for creating templates or migrating milestone structures between projects.
+
+**Auth:** Admin only
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "projectType": "business-site",
+    "projectName": "Example Project",
+    "exportedAt": "2026-03-16T12:00:00.000Z",
+    "milestones": [
+      {
+        "title": "Discovery",
+        "description": "Initial research and requirements gathering",
+        "order": 1,
+        "estimatedDays": null,
+        "deliverables": ["Requirements document", "Sitemap"],
+        "tasks": [
+          {
+            "title": "Stakeholder interviews",
+            "description": "Interview key stakeholders",
+            "order": 1,
+            "estimatedHours": 2
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Error Responses:**
+
+- `404` - Project not found
+
+### POST `/projects/:id/import-milestones`
+
+Import milestones and tasks into a project from an export payload.
+
+**Auth:** Admin only
+
+**Request:**
+
+```json
+{
+  "milestones": [
+    {
+      "title": "Discovery",
+      "description": "Initial research and requirements gathering",
+      "order": 1,
+      "estimatedDays": 5,
+      "deliverables": ["Requirements document"],
+      "tasks": [
+        {
+          "title": "Stakeholder interviews",
+          "description": "Interview key stakeholders",
+          "order": 1,
+          "estimatedHours": 2
+        }
+      ]
+    }
+  ],
+  "clearExisting": false
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Imported 3 milestones with 15 tasks",
+  "data": {
+    "milestonesCreated": 3,
+    "tasksCreated": 15
+  }
+}
+```
+
+**Notes:**
+
+- When `clearExisting` is `true`, all existing milestones and tasks for the project are deleted before import
+- When `clearExisting` is `false` (default), imported milestones are appended to existing ones
+
+**Error Responses:**
+
+- `400` - Invalid payload or missing milestones array
+- `404` - Project not found
 
 ## Milestone Management Endpoints
 
@@ -3942,6 +4036,189 @@ Get tier configuration for a specific project type.
 ```
 
 **Note:** Tier configurations are defined on the frontend in `proposal-builder-data.ts`. This endpoint is available for future server-side configuration if needed.
+
+### GET `/proposals/:id/export`
+
+Export full proposal data including features, client/project info, pricing, and status.
+
+**Auth:** Admin only
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 12,
+    "projectId": 1,
+    "clientId": 5,
+    "projectType": "business-site",
+    "selectedTier": "better",
+    "basePrice": 3500,
+    "finalPrice": 4200,
+    "maintenanceOption": "essential",
+    "status": "accepted",
+    "clientNotes": "Looking for clean, modern design",
+    "adminNotes": null,
+    "features": [
+      {
+        "featureId": "responsive-design",
+        "featureName": "Responsive Design",
+        "featurePrice": 0,
+        "featureCategory": "design",
+        "isIncludedInTier": true,
+        "isAddon": false
+      }
+    ],
+    "clientName": "John Doe",
+    "clientEmail": "john@example.com",
+    "projectName": "Corporate Website",
+    "createdAt": "2026-03-01T10:00:00Z",
+    "updatedAt": "2026-03-05T14:30:00Z"
+  }
+}
+```
+
+**Error Responses:**
+
+- `404` - Proposal not found
+
+---
+
+## Contracts API
+
+### GET `/contracts/:contractId/export`
+
+Export full contract data including content, status, project/client info, and signature log.
+
+**Auth:** Admin only
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 7,
+    "projectId": 1,
+    "clientId": 5,
+    "title": "Web Development Contract",
+    "content": "Full contract markdown content...",
+    "status": "signed",
+    "sentAt": "2026-03-01T10:00:00Z",
+    "signedAt": "2026-03-02T15:30:00Z",
+    "clientName": "John Doe",
+    "clientEmail": "john@example.com",
+    "projectName": "Corporate Website",
+    "signatureLog": {
+      "signedBy": "john@example.com",
+      "signedAt": "2026-03-02T15:30:00Z",
+      "ipAddress": "192.168.1.1"
+    },
+    "createdAt": "2026-03-01T09:00:00Z",
+    "updatedAt": "2026-03-02T15:30:00Z"
+  }
+}
+```
+
+**Error Responses:**
+
+- `404` - Contract not found
+
+---
+
+## Admin Configuration Endpoints
+
+Endpoints for managing milestone/task template configurations.
+
+**Auth:** Admin only for all endpoints.
+
+### GET `/admin/config/tier-milestones`
+
+Export the tier milestone configuration used by the milestone backfill system.
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": { ... }
+}
+```
+
+### GET `/admin/config/default-tasks`
+
+Export the current `default-tasks.json` configuration.
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": { ... }
+}
+```
+
+### POST `/admin/config/default-tasks`
+
+Update the `default-tasks.json` configuration file. Requires a server restart for changes to take effect.
+
+**Request:**
+
+```json
+{
+  "config": { ... }
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "default-tasks.json updated. Server restart required."
+}
+```
+
+### GET `/admin/config/tier-tasks`
+
+Export the current `tier-tasks.json` configuration.
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": { ... }
+}
+```
+
+### POST `/admin/config/tier-tasks`
+
+Update the `tier-tasks.json` configuration file. Requires a server restart for changes to take effect.
+
+**Request:**
+
+```json
+{
+  "config": { ... }
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "tier-tasks.json updated. Server restart required."
+}
+```
+
+**Notes:**
+
+- All config GET endpoints return the raw JSON configuration objects
+- POST endpoints overwrite the entire configuration file
+- Server must be restarted after POST updates for changes to take effect in the milestone/task generation system
 
 ---
 

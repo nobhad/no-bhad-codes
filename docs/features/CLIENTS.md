@@ -1,7 +1,7 @@
 # Client Management System
 
 **Status:** Complete
-**Last Updated:** February 6, 2026
+**Last Updated:** March 16, 2026
 
 ## Overview
 
@@ -432,6 +432,15 @@ When a client is deleted via `DELETE /api/clients/:id`:
 - `POST /api/admin/deleted-items/client/:id/restore` - Restore a client
 
 ## Change Log
+
+### March 16, 2026 - Billing Field Preferences + Validation Hardening
+
+- All client-facing queries across invoices, proposals, contracts, receipts, and workflows now prefer billing fields (billing_name, billing_email, billing_company) via COALESCE, falling back to contact_name/email/company_name
+- Added `validateRequest()` to PUT /me/billing with field length limits
+- Added `validateRequest()` to POST/PUT /me/contacts with field length limits
+- Email normalization (trim + lowercase) on all billing and contact endpoints
+- Phone normalization on all billing and contact endpoints
+- HTML escaping applied to contact form admin notification emails
 
 ### February 6, 2026 - Soft Delete System
 
