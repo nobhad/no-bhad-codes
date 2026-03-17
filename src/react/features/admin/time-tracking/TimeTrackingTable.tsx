@@ -397,7 +397,7 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
                   </PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-group">
-                      <IconButton action="edit" title="Edit entry" />
+                      <IconButton action="view" title="View entry" onClick={() => onNavigate?.('time-entry', String(entry.id))} />
                     </div>
                   </PortalTableCell>
                 </PortalTableRow>

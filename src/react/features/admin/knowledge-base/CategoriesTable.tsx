@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { useListFetch } from '@react/factories/useDataFetch';
+import { InlineEdit } from '@react/components/portal/InlineEdit';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter } from '@react/components/portal/TableFilters';
@@ -27,8 +28,11 @@ import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { apiPost } from '@/utils/api-client';
+import { apiPost, apiFetch } from '@/utils/api-client';
+import { createLogger } from '@/utils/logger';
 import { CreateKBCategoryModal } from '../modals/CreateEntityModals';
+
+const logger = createLogger('CategoriesTable');
 
 interface Category {
   id: number;
@@ -88,12 +92,43 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
 
-  const { data, isLoading, error, refetch } = useListFetch<Category>({
+  const { data, isLoading, error, refetch, setData } = useListFetch<Category>({
     endpoint: API_ENDPOINTS.ADMIN.KB_CATEGORIES,
     getAuthToken,
     itemsKey: 'categories'
   });
   const categories = useMemo(() => data?.items ?? [], [data]);
+
+  // Generic field update handler for inline editing
+  const handleFieldUpdate = useCallback(async (
+    categoryId: number,
+    updates: Partial<Record<string, unknown>>
+  ): Promise<boolean> => {
+    try {
+      const response = await apiFetch(`${API_ENDPOINTS.ADMIN.KB_CATEGORIES}/${categoryId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+
+      if (!response.ok) throw new Error('Failed to update category');
+
+      setData((prev) => prev ? {
+        ...prev,
+        items: prev.items.map((cat) =>
+          cat.id === categoryId
+            ? { ...cat, ...updates }
+            : cat
+        )
+      } : prev);
+      showNotification?.('Category updated', 'success');
+      return true;
+    } catch (err) {
+      logger.error('Failed to update category:', err);
+      showNotification?.('Failed to update category', 'error');
+      return false;
+    }
+  }, [showNotification, setData]);
 
   const {
     search,
@@ -227,10 +262,24 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
                     <div className="cell-with-icon">
                       <Folder className="icon-sm" />
                       <div className="cell-content">
-                        <span className="cell-title">{category.name}</span>
-                        {category.description && (
-                          <span className="cell-subtitle">{category.description}</span>
-                        )}
+                        <span className="cell-title">
+                          <InlineEdit
+                            value={category.name}
+                            placeholder="Enter name"
+                            onSave={async (value) =>
+                              handleFieldUpdate(category.id, { name: value.trim() })
+                            }
+                          />
+                        </span>
+                        <span className="cell-subtitle">
+                          <InlineEdit
+                            value={category.description || ''}
+                            placeholder="Add description"
+                            onSave={async (value) =>
+                              handleFieldUpdate(category.id, { description: value.trim() })
+                            }
+                          />
+                        </span>
                       </div>
                     </div>
                   </PortalTableCell>
@@ -247,7 +296,6 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
                   </PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-group">
-                      <IconButton action="edit" title="Edit" />
                       <IconButton action="delete" title="Delete" />
                     </div>
                   </PortalTableCell>

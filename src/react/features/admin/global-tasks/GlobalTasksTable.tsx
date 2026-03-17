@@ -21,6 +21,7 @@ import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar'
 import { formatDateShort } from '@react/utils/formatDate';
 import { cn } from '@react/lib/utils';
 import { StatusDropdownCell } from '@react/components/portal/StatusDropdownCell';
+import { InlineEdit, InlineSelect } from '@react/components/portal/InlineEdit';
 import {
   PortalTable,
   PortalTableHeader,
@@ -84,6 +85,11 @@ const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
   medium: { label: 'Medium', color: 'var(--status-active)' },
   low: { label: 'Low', color: 'var(--color-text-tertiary)' }
 };
+
+const PRIORITY_OPTIONS = Object.entries(PRIORITY_CONFIG).map(([value, config]) => ({
+  value,
+  label: config.label
+}));
 
 interface GlobalTasksTableProps {
   /** Auth token getter for API calls */
@@ -251,6 +257,31 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
     } catch (err) {
       logger.error('Failed to update task status:', err);
       showNotification?.('Failed to update task status', 'error');
+    }
+  }, [showNotification]);
+
+  // Generic field update handler for inline editing
+  const handleFieldUpdate = useCallback(async (taskId: number, field: string, value: string): Promise<boolean> => {
+    try {
+      const response = await apiFetch(buildEndpoint.adminTask(taskId), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [field]: value })
+      });
+
+      if (!response.ok) throw new Error(`Failed to update task ${field}`);
+
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === taskId ? { ...task, [field]: value } : task
+        )
+      );
+      showNotification?.(`Task ${field} updated`, 'success');
+      return true;
+    } catch (err) {
+      logger.error(`Failed to update task ${field}:`, err);
+      showNotification?.(`Failed to update task ${field}`, 'error');
+      return false;
     }
   }, [showNotification]);
 
@@ -483,7 +514,12 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
                         {task.projectName && (
                           <span className="project-stacked">{task.projectName}</span>
                         )}
-                        <span className="cell-title">{task.title}</span>
+                        <InlineEdit
+                          value={task.title}
+                          onSave={(newValue) => handleFieldUpdate(task.id, 'title', newValue)}
+                          placeholder="Untitled task"
+                          className="cell-title"
+                        />
                         {task.description && (
                           <span className="cell-subtitle">{task.description}</span>
                         )}
@@ -517,7 +553,12 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
                           data-priority={task.priority}
                           style={{ backgroundColor: PRIORITY_CONFIG[task.priority]?.color }}
                         />
-                        <span>{PRIORITY_CONFIG[task.priority]?.label}</span>
+                        <InlineSelect
+                          value={task.priority}
+                          onSave={(newValue) => handleFieldUpdate(task.id, 'priority', newValue)}
+                          options={PRIORITY_OPTIONS}
+                          showEditIcon={false}
+                        />
                       </div>
                     </PortalTableCell>
                     <StatusDropdownCell
@@ -527,23 +568,21 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
                       ariaLabel="Change task status"
                     />
                     <PortalTableCell className="date-col">
-                      {task.dueDate && (
-                        <span
-                          className={cn(
-                            'date-value',
-                            new Date(task.dueDate) < new Date() && task.status !== 'completed'
-                              ? 'overdue'
-                              : ''
-                          )}
-                        >
-                          {formatDateShort(task.dueDate)}
-                        </span>
-                      )}
+                      <InlineEdit
+                        value={task.dueDate || ''}
+                        onSave={(newValue) => handleFieldUpdate(task.id, 'dueDate', newValue)}
+                        type="date"
+                        placeholder="Set date"
+                        className={cn(
+                          task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed'
+                            ? 'overdue'
+                            : ''
+                        )}
+                      />
                     </PortalTableCell>
                     <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                       <div className="action-group">
                         <IconButton action="view" title="View" />
-                        <IconButton action="edit" title="Edit" />
                       </div>
                     </PortalTableCell>
                   </PortalTableRow>

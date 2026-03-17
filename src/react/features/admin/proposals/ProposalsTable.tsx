@@ -490,16 +490,13 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
                 </PortalTableCell>
                 <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="action-group">
-                    <IconButton action="view" title="View" />
+                    <IconButton action="view" title="View" onClick={() => onNavigate?.('proposal-detail', String(proposal.id))} />
                     {proposal.status === 'draft' && (
-                      <>
-                        <IconButton
-                          action="send"
-                          title="Send"
-                          onClick={() => handleSendProposal(proposal.id)}
-                        />
-                        <IconButton action="edit" title="Edit" />
-                      </>
+                      <IconButton
+                        action="send"
+                        title="Send"
+                        onClick={() => handleSendProposal(proposal.id)}
+                      />
                     )}
                     <IconButton action="duplicate" title="Duplicate" onClick={() => handleDuplicate(proposal.id)} />
                     <IconButton action="delete" title="Delete" />

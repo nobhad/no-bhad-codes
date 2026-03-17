@@ -123,7 +123,7 @@ function sortArticles(a: Article, b: Article, sort: SortConfig): number {
   }
 }
 
-export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken: _getAuthToken, showNotification, defaultPageSize = 25, overviewMode = false }: ArticlesTableProps) {
+export function ArticlesTable({ onNavigate, getAuthToken: _getAuthToken, showNotification, defaultPageSize = 25, overviewMode = false }: ArticlesTableProps) {
   const containerRef = useFadeIn();
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
@@ -368,8 +368,7 @@ export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken: _getAuthT
                   <PortalTableCell className="date-col">{formatDate(article.updated_at)}</PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-group">
-                      <IconButton action="view" title="View" />
-                      <IconButton action="edit" title="Edit" />
+                      <IconButton action="view" title="View" onClick={() => onNavigate?.('kb-article', String(article.id))} />
                       <IconButton action="delete" title="Delete" />
                     </div>
                   </PortalTableCell>
