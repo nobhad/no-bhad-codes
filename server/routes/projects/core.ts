@@ -28,10 +28,11 @@ router.get(
   }),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const isAdmin = await isUserAdmin(req);
+    const limit = req.query.limit ? Math.min(parseInt(req.query.limit as string, 10), 500) : 200;
 
     const projects = isAdmin
-      ? await projectService.listProjectsAdmin()
-      : await projectService.listProjectsForClient(req.user!.id);
+      ? await projectService.listProjectsAdmin(limit)
+      : await projectService.listProjectsForClient(req.user!.id, limit);
 
     // Format stats as nested object for API consistency
     for (const project of projects) {
@@ -771,14 +772,26 @@ router.get(
       }>
     };
 
+    // Batch fetch all tasks for the project at once (avoids N+1 query)
+    const allTasks = await db.all(
+      `SELECT milestone_id, title, description, sort_order, estimated_hours
+       FROM project_tasks
+       WHERE project_id = ? AND deleted_at IS NULL
+       ORDER BY milestone_id, sort_order, due_date`,
+      [projectId]
+    ) as Array<Record<string, unknown>>;
+
+    const tasksByMilestone = new Map<number, Array<Record<string, unknown>>>();
+    for (const task of allTasks) {
+      const msId = task.milestone_id as number;
+      if (!tasksByMilestone.has(msId)) {
+        tasksByMilestone.set(msId, []);
+      }
+      tasksByMilestone.get(msId)!.push(task);
+    }
+
     for (const milestone of milestones) {
-      const tasks = await db.all(
-        `SELECT title, description, sort_order, estimated_hours
-         FROM project_tasks
-         WHERE milestone_id = ? AND deleted_at IS NULL
-         ORDER BY sort_order, due_date`,
-        [Number(milestone.id)]
-      ) as Array<Record<string, unknown>>;
+      const tasks = tasksByMilestone.get(Number(milestone.id)) || [];
 
       let deliverables: string[] = [];
       try {

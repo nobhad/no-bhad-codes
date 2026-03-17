@@ -243,4 +243,101 @@ router.post(
   })
 );
 
+// =====================================================
+// PROPOSAL TEMPLATE CONFIG
+// =====================================================
+
+/**
+ * GET /api/admin/config/proposal-templates
+ * Export the full proposal template configuration
+ */
+router.get(
+  '/config/proposal-templates',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { PROPOSAL_TEMPLATES } = await import('../../config/proposal-templates.js');
+      sendSuccess(res, {
+        config: PROPOSAL_TEMPLATES,
+        exportedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      logger.error('[AdminConfig] Failed to export proposal templates:', {
+        error: error instanceof Error ? error : undefined
+      });
+      return errorResponse(res, 'Failed to export proposal templates', 500, ErrorCodes.INTERNAL_ERROR);
+    }
+  })
+);
+
+/**
+ * GET /api/admin/config/proposal-templates/:projectType
+ * Get template for a specific project type
+ */
+router.get(
+  '/config/proposal-templates/:projectType',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { getProjectTypeTemplate } = await import('../../config/proposal-templates.js');
+      const template = getProjectTypeTemplate(req.params.projectType);
+      if (!template) {
+        return errorResponse(res, 'Project type not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+      }
+      sendSuccess(res, { projectType: req.params.projectType, template });
+    } catch (error) {
+      logger.error('[AdminConfig] Failed to get proposal template:', {
+        error: error instanceof Error ? error : undefined
+      });
+      return errorResponse(res, 'Failed to get proposal template', 500, ErrorCodes.INTERNAL_ERROR);
+    }
+  })
+);
+
+/**
+ * POST /api/admin/config/proposal-templates
+ * Update the proposal template configuration
+ */
+router.post(
+  '/config/proposal-templates',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { config } = req.body;
+
+    if (!config || typeof config !== 'object' || !config.projectTypes) {
+      return errorResponse(res, 'config object with projectTypes is required', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    try {
+      const jsonPath = resolve(__dirname, '../../config/proposal-templates.json');
+
+      // Backup current file
+      const backupPath = resolve(__dirname, `../../config/proposal-templates.backup-${Date.now()}.json`);
+      try {
+        const currentData = await readFile(jsonPath, 'utf-8');
+        await writeFile(backupPath, currentData);
+      } catch {
+        // No existing file to backup
+      }
+
+      await writeFile(jsonPath, JSON.stringify(config, null, 2));
+
+      logger.info('[AdminConfig] Updated proposal-templates.json', {
+        category: 'admin',
+        metadata: { updatedBy: req.user?.email }
+      });
+
+      sendSuccess(res, { updated: true }, 'Proposal templates config updated. Note: Server restart required for changes to take effect.');
+    } catch (error) {
+      logger.error('[AdminConfig] Failed to update proposal templates:', {
+        error: error instanceof Error ? error : undefined
+      });
+      return errorResponse(res, 'Failed to update proposal templates', 500, ErrorCodes.INTERNAL_ERROR);
+    }
+  })
+);
+
 export default router;

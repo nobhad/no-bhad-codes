@@ -10,6 +10,7 @@
 
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
+import { generateProjectCode } from '../utils/project-code.js';
 
 // =====================================================
 // TYPES
@@ -228,7 +229,7 @@ class IntakeService {
       };
     };
     companyName: string | null;
-    clientType: 'personal' | 'business';
+    clientType: 'individual' | 'company';
     hashedPassword: string;
     features: string[];
     projectName: string;
@@ -301,10 +302,12 @@ class IntakeService {
       if (intakeData.additionalInfo) extraNotes.push(`Additional info: ${intakeData.additionalInfo}`);
       const notes = extraNotes.length ? extraNotes.join('\n') : null;
 
+      const projectCode = await generateProjectCode(companyName || intakeData.name);
+
       const projectResult = await ctx.run(
-        `INSERT INTO projects (client_id, project_name, description, status, priority, project_type, budget_range, timeline, notes, source_type, created_at, updated_at)
-         VALUES (?, ?, ?, 'pending', 'medium', ?, ?, ?, ?, 'intake_form', datetime('now'), datetime('now'))`,
-        [clientId, projectName, intakeData.projectDescription, intakeData.projectType, intakeData.budget, intakeData.timeline, notes]
+        `INSERT INTO projects (client_id, project_name, description, status, priority, project_type, budget_range, timeline, notes, source_type, project_code, created_at, updated_at)
+         VALUES (?, ?, ?, 'pending', 'medium', ?, ?, ?, ?, 'intake_form', ?, datetime('now'), datetime('now'))`,
+        [clientId, projectName, intakeData.projectDescription, intakeData.projectType, intakeData.budget, intakeData.timeline, notes, projectCode]
       );
       const projectId = projectResult.lastID!;
 

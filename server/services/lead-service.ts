@@ -127,14 +127,14 @@ export const leadService = {
   getSourcePerformance: analytics.getSourcePerformance,
 
   // ── Lead Sources (inline — trivially small) ─────
-  async getLeadSources(includeInactive: boolean = false): Promise<LeadSource[]> {
+  async getLeadSources(includeInactive: boolean = false, limit = 200): Promise<LeadSource[]> {
     const db = getDatabase();
     let query = `SELECT ${LEAD_SOURCE_COLUMNS} FROM lead_sources`;
     if (!includeInactive) {
       query += ' WHERE is_active = 1';
     }
-    query += ' ORDER BY name ASC';
-    const rows = (await db.all(query)) as unknown as LeadSourceRow[];
+    query += ' ORDER BY name ASC LIMIT ?';
+    const rows = (await db.all(query, [limit])) as unknown as LeadSourceRow[];
     return rows.map(toLeadSource);
   },
 
@@ -155,27 +155,30 @@ export const leadService = {
     );
   },
 
-  async getMyLeads(assignee: string): Promise<LeadSummary[]> {
+  async getMyLeads(assignee: string, limit = 100): Promise<LeadSummary[]> {
     const db = getDatabase();
     const rows = (await db.all(
       `SELECT p.*, c.contact_name, c.company_name
        FROM active_projects p
        LEFT JOIN active_clients c ON p.client_id = c.id
        WHERE p.assigned_to = ? AND p.status = 'pending'
-       ORDER BY p.lead_score DESC`,
-      [assignee]
+       ORDER BY p.lead_score DESC
+       LIMIT ?`,
+      [assignee, limit]
     )) as unknown as ProjectRow[];
     return rows.map(toLeadSummary);
   },
 
-  async getUnassignedLeads(): Promise<LeadSummary[]> {
+  async getUnassignedLeads(limit = 100): Promise<LeadSummary[]> {
     const db = getDatabase();
     const rows = (await db.all(
       `SELECT p.*, c.contact_name, c.company_name
        FROM active_projects p
        LEFT JOIN active_clients c ON p.client_id = c.id
        WHERE (p.assigned_to IS NULL OR p.assigned_to = '') AND p.status = 'pending'
-       ORDER BY p.lead_score DESC`
+       ORDER BY p.lead_score DESC
+       LIMIT ?`,
+      [limit]
     )) as unknown as ProjectRow[];
     return rows.map(toLeadSummary);
   },
