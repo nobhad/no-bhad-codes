@@ -1617,3 +1617,5 @@ Full invoice management within project details view.
 - [API Reference](../API_DOCUMENTATION.md) - Complete API documentation
 - [Settings](./SETTINGS.md) - Billing information
 - [CSS Architecture](../design/DESIGN_SYSTEM.md) - Styling system
+- [Embedded Payments](./EMBEDDED_PAYMENTS.md) - Clients can pay invoices inline via Stripe Elements (Phase 1B)
+- [Agreements](./AGREEMENTS.md) - Invoice deposit payment is a step in the agreement flow (Phase 1C)

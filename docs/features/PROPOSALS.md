@@ -632,6 +632,8 @@ When a proposal is deleted via `DELETE /api/proposals/:id`:
 - [Contracts](./CONTRACTS.md) - Contract generation and signing (similar e-signature pattern)
 - [Invoices](./INVOICES.md) - Proposals convert to invoices
 - [PDF Generation](./PDF_GENERATION.md) - PDF generation standards
+- [Agreements](./AGREEMENTS.md) - Proposal review is a step in the unified agreement flow (Phase 1C)
+- [Email Sequences](./EMAIL_SEQUENCES.md) - Auto-enrollment on proposal.sent/accepted/rejected events (Phase 2A)
 
 ---
 

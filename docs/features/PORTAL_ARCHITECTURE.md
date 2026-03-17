@@ -1,7 +1,7 @@
 # Portal Architecture
 
 **Status:** Complete
-**Last Updated:** 2026-03-16
+**Last Updated:** 2026-03-17
 
 ## Overview
 
@@ -102,9 +102,22 @@ Rendered differently per role via `role === 'admin'` check:
 
 ### Client-Only Routes
 
-- `/approvals`
-- `/review`
-- `/help`
+- `/agreements` — Project agreement list (Phase 1C)
+- `/agreements/:id` — Step-by-step agreement flow (Phase 1C)
+- `/meetings` — Meeting request submission and tracking (Phase 2B)
+- `/proposals/:id` — Proposal detail view with accept/decline (Phase 0B)
+- `/requests-hub` — Ad hoc requests, questionnaires, document requests
+- `/content-requests` — Content request checklists
+- `/payment-schedule` — Payment installment tracking
+- `/deliverables` — Deliverables hub
+- `/approvals` — Redirects to `/deliverables`
+- `/review` — Redirects to `/dashboard`
+- `/help` — Knowledge base
+
+### Admin-Only Routes (Phase 2)
+
+- `/sequences` — Email drip sequence management (Phase 2A)
+- `/meetings` — Meeting requests admin table (Phase 2B, role-gated)
 
 ## Code Splitting
 

@@ -546,7 +546,24 @@ When a lead is deleted:
 - `GET /api/admin/deleted-items?type=lead` - List deleted leads
 - `POST /api/admin/deleted-items/lead/:id/restore` - Restore a lead
 
+## Email Sequence Auto-Enrollment (Phase 2A)
+
+When leads are created or their status changes, they can be automatically enrolled in email drip sequences:
+
+- `lead.created` event triggers enrollment in matching sequences (e.g., "New Lead Welcome")
+- `lead.stage_changed` event can trigger context-specific sequences (e.g., "Post-Consultation" when stage becomes "qualified")
+- `lead.converted` event stops all active sequences for that lead
+
+Sequence enrollment is handled by `handleSequenceEvent` in `workflow-automations.ts`. See [Email Sequences](./EMAIL_SEQUENCES.md) for full documentation.
+
+---
+
 ## Change Log
+
+### March 17, 2026 - Email Sequence Integration
+
+- Leads now auto-enroll in email drip sequences on creation and stage changes
+- Sequences stopped when lead is converted to client
 
 ### February 9, 2026 - Section Toggle UI Enhancement
 

@@ -523,6 +523,7 @@ When both parties have signed:
 - [Projects](./PROJECTS.md) - Project system overview
 - [Proposals](./PROPOSALS.md) - Similar e-signature pattern
 - [Workflows](./WORKFLOWS.md) - Approval workflow integration
+- [Agreements](./AGREEMENTS.md) - Contract signing is a step in the unified agreement flow (Phase 1C)
 
 ---
 
