@@ -14,6 +14,7 @@ import { contentRequestService } from '../../services/content-request-service.js
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { validateRequest } from '../../middleware/validation.js';
+import { invalidateCache } from '../../middleware/cache.js';
 import { ContentRequestValidationSchemas } from './shared.js';
 
 const router = express.Router();
@@ -77,6 +78,7 @@ router.post(
   '/items/:itemId/submit-text',
   authenticateToken,
   validateRequest(ContentRequestValidationSchemas.submitText),
+  invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const item = await contentRequestService.submitText(
       Number(req.params.itemId),
@@ -101,6 +103,7 @@ router.post(
 router.post(
   '/items/:itemId/submit-file',
   authenticateToken,
+  invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { file_id } = req.body;
     if (!file_id) {
@@ -132,6 +135,7 @@ router.post(
   '/items/:itemId/submit-url',
   authenticateToken,
   validateRequest(ContentRequestValidationSchemas.submitUrl),
+  invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const item = await contentRequestService.submitUrl(
       Number(req.params.itemId),
@@ -156,6 +160,7 @@ router.post(
 router.post(
   '/items/:itemId/submit-data',
   authenticateToken,
+  invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { data } = req.body;
     if (!data || typeof data !== 'object') {

@@ -69,6 +69,7 @@ router.post(
   '/custom-fields',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const {
       fieldName,
@@ -128,6 +129,7 @@ router.put(
   '/custom-fields/:fieldId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const fieldId = parseInt(req.params.fieldId, 10);
 
@@ -163,6 +165,7 @@ router.delete(
   '/custom-fields/:fieldId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const fieldId = parseInt(req.params.fieldId, 10);
 

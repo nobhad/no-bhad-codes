@@ -287,6 +287,7 @@ router.get(
 router.put(
   '/me/notifications',
   authenticateToken,
+  invalidateCache(['notifications']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
       return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
@@ -354,6 +355,7 @@ router.put(
   '/me/notifications/:id/read',
   authenticateToken,
   requireClient,
+  invalidateCache(['notifications']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const notificationId = parseInt(req.params.id, 10);
     if (isNaN(notificationId) || notificationId <= 0) {
@@ -386,6 +388,7 @@ router.put(
   '/me/notifications/mark-all-read',
   authenticateToken,
   requireClient,
+  invalidateCache(['notifications']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     await clientService.markAllClientNotificationsRead(req.user!.id);
 

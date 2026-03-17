@@ -89,6 +89,7 @@ router.post(
   '/templates',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { name, description, items, project_type } = req.body;
     if (!name || !items) {
@@ -112,6 +113,7 @@ router.put(
   '/templates/:id',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const template = await contentRequestService.updateTemplate(Number(req.params.id), {
       name: req.body.name,
@@ -132,6 +134,7 @@ router.delete(
   '/templates/:id',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     await contentRequestService.deleteTemplate(Number(req.params.id));
     sendSuccess(res, null, 'Template deleted');
@@ -311,6 +314,7 @@ router.post(
   '/items/:itemId/accept',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const item = await contentRequestService.acceptItem(Number(req.params.itemId));
 
@@ -335,6 +339,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   validateRequest(ContentRequestValidationSchemas.requestRevision),
+  invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const item = await contentRequestService.requestRevision(
       Number(req.params.itemId),

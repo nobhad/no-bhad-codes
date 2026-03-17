@@ -148,6 +148,7 @@ router.post(
   '/tags',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { name, color, description, tagType } = req.body;
 
@@ -183,6 +184,7 @@ router.put(
   '/tags/:tagId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const tagId = parseInt(req.params.tagId, 10);
     if (isNaN(tagId) || tagId <= 0) {
@@ -216,6 +218,7 @@ router.delete(
   '/tags/:tagId',
   authenticateToken,
   requireAdmin,
+  invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const tagId = parseInt(req.params.tagId, 10);
     if (isNaN(tagId) || tagId <= 0) {
