@@ -113,6 +113,10 @@ const PaymentScheduleView = lazyNamed(() => import('../features/portal/payment-s
 const PortalProposals = lazyNamed(() => import('../features/portal/proposals').then(m => ({ PortalProposals: m.PortalProposals })));
 const PortalProposalDetailView = lazyNamed(() => import('../features/portal/proposals').then(m => ({ PortalProposalDetail: m.PortalProposalDetail })));
 
+// Agreements
+const AgreementsList = lazyNamed(() => import('../features/portal/agreements').then(m => ({ AgreementsList: m.AgreementsList })));
+const AgreementFlowLazy = React.lazy(() => import('../features/portal/agreements').then(m => ({ default: m.AgreementFlow })));
+
 // ============================================
 // DETAIL VIEW WRAPPERS
 // ============================================
@@ -136,6 +140,15 @@ function ClientDetailRoute(props: Record<string, unknown>) {
       {...props}
     />
   );
+}
+
+function AgreementFlowRoute() {
+  const params = useParams();
+  const agreementId = params.id ? parseInt(params.id, 10) : 0;
+
+  if (!agreementId) return <Navigate to="/agreements" replace />;
+
+  return <AgreementFlowLazy agreementId={agreementId} />;
 }
 
 function ProjectDetailRoute(props: Record<string, unknown>) {
@@ -379,6 +392,18 @@ export function PortalRoutes() {
         <Route path="/payment-schedule" element={
           <LazyTabRoute tabId="payment-schedule">
             <PaymentScheduleView />
+          </LazyTabRoute>
+        } />
+
+        {/* ========== AGREEMENTS ========== */}
+        <Route path="/agreements" element={
+          <LazyTabRoute tabId="agreements">
+            <AgreementsList />
+          </LazyTabRoute>
+        } />
+        <Route path="/agreements/:id" element={
+          <LazyTabRoute tabId="agreements">
+            <AgreementFlowRoute />
           </LazyTabRoute>
         } />
 
