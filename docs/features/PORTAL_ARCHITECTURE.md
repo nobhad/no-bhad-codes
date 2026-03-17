@@ -112,9 +112,10 @@ Rendered differently per role via `role === 'admin'` check:
 - `/deliverables` — Deliverables hub
 - `/approvals` — Redirects to `/deliverables`
 - `/review` — Redirects to `/dashboard`
+- `/feedback` — Feedback surveys (Phase 5A, role-gated — clients see PortalFeedback)
 - `/help` — Knowledge base
 
-### Admin-Only Routes (Phase 2-4)
+### Admin-Only Routes (Phase 2-5B)
 
 - `/sequences` — Email drip sequence management (Phase 2A)
 - `/meetings` — Meeting requests admin table (Phase 2B, role-gated)
@@ -122,6 +123,10 @@ Rendered differently per role via `role === 'admin'` check:
 - `/automation-detail/:id` — Automation detail panel with run history (Phase 3B)
 - `/expenses` — Expense tracking and profitability (Phase 4A)
 - `/retainers` — Retainer management (Phase 4B, role-gated — clients see PortalRetainers)
+- `/feedback` — Feedback surveys (Phase 5A, role-gated — admin sees FeedbackTable, clients see PortalFeedback)
+- `/feedback-analytics` — Feedback analytics dashboard (Phase 5A)
+- `/testimonials` — Testimonial management (Phase 5A)
+- `/embed-widgets` — Embeddable widget configuration manager (Phase 5B)
 
 ## Code Splitting
 
@@ -169,6 +174,15 @@ Portal subtabs use `SubtabContext` (React context) for state management:
 This replaced the previous DOM custom event system (`document.dispatchEvent`/`addEventListener`).
 
 ## Change Log
+
+### 2026-03-17 — Phase 5B embed widgets route
+
+- Added /embed-widgets to admin-only routes (EmbedWidgetsManager)
+
+### 2026-03-17 — Phase 5A feedback routes
+
+- Added /feedback to client-only routes (PortalFeedback)
+- Added /feedback, /feedback-analytics, /testimonials to admin-only routes (Phase 5A)
 
 ### 2026-03-16 — Subtab system refactor
 

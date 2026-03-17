@@ -120,6 +120,7 @@ All routes are hash-based (e.g., `/#/dashboard`). `PortalRoutes.tsx` renders cli
 | `/agreements/:id` | `AgreementFlow` | Step-by-step agreement flow (Phase 1C) |
 | `/meetings` | `MeetingRequestsList` | Meeting request submission and tracking (Phase 2B) |
 | `/retainers` | `PortalRetainers` | Active retainer agreements with utilization (Phase 4B) |
+| `/feedback` | `PortalFeedback` | Pending and completed feedback surveys (Phase 5A) |
 | `/payment-schedule` | `PaymentScheduleView` | Payment installment tracking |
 | `/requests-hub` | `PortalRequestsHub` | Ad hoc requests, questionnaires, document requests |
 | `/content-requests` | `ContentChecklistView` | Content request checklists |
@@ -398,7 +399,7 @@ Do not dynamically change `autocomplete` attributes in JavaScript — browsers m
 
 ---
 
-## Phase 1 and Phase 2 Features
+## Roadmap Features (Phase 1-5A)
 
 ### Project Agreements (Phase 1C)
 
@@ -445,6 +446,15 @@ Client view of active retainer agreements with utilization tracking.
 - **Component:** `PortalRetainers` — Card per retainer with utilization bar, period info, rollover
 - See [RETAINERS.md](./RETAINERS.md) for full documentation
 
+### Feedback Surveys (Phase 5A)
+
+Client view of pending and completed feedback surveys with star ratings.
+
+- **Route:** `/feedback`
+- **Component:** `PortalFeedback` — Card view showing survey status, project name, and completion state
+- Surveys are also accessible via unauthenticated email link using a unique token
+- See [FEEDBACK.md](./FEEDBACK.md) for full documentation
+
 ---
 
 ## Related Documentation
@@ -458,10 +468,17 @@ Client view of active retainer agreements with utilization tracking.
 - [Embedded Payments](./EMBEDDED_PAYMENTS.md) - Stripe Elements payment (Phase 1B)
 - [Meeting Requests](./MEETING_REQUESTS.md) - Meeting scheduling (Phase 2B)
 - [Retainers](./RETAINERS.md) - Retainer utilization tracking (Phase 4B)
+- [Feedback Surveys](./FEEDBACK.md) - Feedback surveys and testimonials (Phase 5A)
 - [CSS Architecture](../design/CSS_ARCHITECTURE.md) - Styling system
 - [Architecture Overview](../architecture/ARCHITECTURE.md) - System design
 
 ## Change Log
+
+### 2026-03-17 - Phase 5A feedback surveys
+
+- Added /feedback route to routing table (PortalFeedback component)
+- Added Phase 5A Feedback Surveys section documenting client survey view
+- Added Related Documentation link for FEEDBACK.md
 
 ### 2026-03-17 - Phase 1-4 features
 

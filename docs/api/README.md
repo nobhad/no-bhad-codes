@@ -253,6 +253,50 @@ properties and the JWT payload structure.
 - `GET /retainers/my` — Client's retainers (requireClient)
 - `GET /retainers/my/:id` — Single retainer (requireClient)
 
+### Feedback Surveys and Testimonials (Phase 5A)
+
+**Admin:**
+
+- `POST /feedback` — Send survey to client (requireAdmin)
+- `GET /feedback/surveys` — List surveys with filters (requireAdmin)
+- `GET /feedback/analytics` — NPS score, avg ratings, trends (requireAdmin)
+- `GET /feedback/testimonials` — List testimonials (requireAdmin)
+- `POST /feedback/testimonials` — Create testimonial manually (requireAdmin)
+- `PUT /feedback/testimonials/:id` — Update testimonial (requireAdmin)
+- `DELETE /feedback/testimonials/:id` — Delete testimonial (requireAdmin)
+- `PUT /feedback/testimonials/:id/publish` — Publish testimonial (requireAdmin)
+- `PUT /feedback/testimonials/:id/feature` — Toggle featured (requireAdmin)
+
+**Client Portal:**
+
+- `GET /feedback/my` — Client's pending/completed surveys (requireClient)
+
+**Public (no auth, CSRF-exempt):**
+
+- `GET /feedback/survey/:token` — Survey form data for email-link access
+- `POST /feedback/survey/:token/submit` — Submit survey response
+- `GET /feedback/testimonials/public` — Published testimonials
+- `GET /feedback/testimonials/featured` — Featured testimonials only
+
+### Embeddable Widgets (Phase 5B)
+
+**Admin (requireAdmin):**
+
+- `GET /api/embed` — List all widget configurations
+- `POST /api/embed` — Create widget configuration
+- `GET /api/embed/:id` — Get single config with embed code
+- `PUT /api/embed/:id` — Update config (name, config, allowed domains, active)
+- `DELETE /api/embed/:id` — Deactivate widget
+- `POST /api/embed/:id/regenerate-token` — Regenerate widget token
+- `GET /api/embed/:id/embed-code` — Get embed code HTML snippet
+
+**Public (no auth, CSRF-exempt):**
+
+- `GET /api/embed/contact-form.js` — Self-contained contact form widget JavaScript
+- `GET /api/embed/testimonials.js` — Testimonial display widget JavaScript
+- `GET /api/embed/status-badge.js` — Project status badge widget JavaScript
+- `GET /api/embed/status/:token` — Project status JSON (name, status, completion %, milestones)
+
 ### Other Feature Areas
 
 - Questionnaires: `GET/POST /questionnaires`

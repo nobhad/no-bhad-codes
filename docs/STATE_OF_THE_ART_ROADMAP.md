@@ -1,6 +1,6 @@
 # State of the Art Roadmap
 
-**Status:** In Progress — Phase 1-4 Complete
+**Status:** In Progress — Phase 1-5 Complete
 **Last Updated:** 2026-03-17
 **Goal:** Close every meaningful gap between this platform and the best-in-class tools (HoneyBook, Dubsado, Moxie, Plutio, Bloom, Productive)
 
@@ -4556,30 +4556,76 @@ Standalone feedback page for unauthenticated email-link access. Minimal layout, 
 
 ---
 
-### 5B. Embeddable Widgets
+### 5B. Embeddable Widgets --- COMPLETE
 
 **Problem:** No way to embed contact forms, testimonials, or project status on external sites.
 
+**Status:** COMPLETE (March 17, 2026) -- Migration 128
+
+#### Database Changes
+
+**Migration: `128_embed_configurations.sql`**
+
+Two tables:
+
+- `embed_configurations` — Widget configs with unique token, allowed_domains (comma-separated), JSON config, is_active flag
+- `project_status_tokens` — Public tokens for project status badges, linked to project_id
+
 #### Implementation
 
-**File: `server/routes/embed.ts`**
+**Types:** `server/services/embed-types.ts` — WidgetType ('contact_form' | 'testimonials' | 'status_badge'), EmbedConfigRow, EmbedConfiguration, widget config interfaces (ContactFormWidgetConfig, TestimonialWidgetConfig, StatusBadgeWidgetConfig)
+
+**Service:** `server/services/embed-service.ts` — CRUD for embed configurations, token generation/regeneration, project status resolution (completion % from milestones), embed code generation
+
+**Admin routes:** `server/routes/embed/admin.ts` — 7 endpoints (requireAdmin):
 
 ```text
-GET /api/embed/contact-form.js                   — JavaScript widget for contact form
-GET /api/embed/testimonials.js                    — JavaScript widget for testimonial carousel
-GET /api/embed/status/:token                      — Public project status badge (JSON)
+GET    /api/embed                          — List all widget configs
+POST   /api/embed                          — Create widget config
+GET    /api/embed/:id                      — Get single config with embed code
+PUT    /api/embed/:id                      — Update config
+DELETE /api/embed/:id                      — Deactivate widget
+POST   /api/embed/:id/regenerate-token     — Regenerate token
+GET    /api/embed/:id/embed-code           — Get embed code HTML
+```
+
+**Public routes:** `server/routes/embed/public.ts` — 4 endpoints (no auth, CSRF-exempt):
+
+```text
+GET /api/embed/contact-form.js             — Self-contained contact form widget JS
+GET /api/embed/testimonials.js             — Testimonial carousel/grid/list widget JS
+GET /api/embed/status-badge.js             — Status badge widget JS
+GET /api/embed/status/:token               — Project status JSON (name, status, completion %, milestones)
 ```
 
 Each widget endpoint returns a self-contained JavaScript snippet that:
 
-1. Creates an iframe or injects DOM elements
-2. Handles its own styling (isolated)
-3. Communicates with the API via `fetch`
-4. Supports configuration via `data-` attributes on the `<script>` tag
+1. Injects DOM elements with isolated styling
+2. Communicates with the API via `fetch`
+3. Supports configuration via `data-` attributes on the `<script>` tag
 
-**CORS:** Configure allowed embed domains in business config or `.env`.
+**CSRF:** All embed public endpoints are CSRF-exempt.
 
-**Rate limiting:** Public embed endpoints get stricter rate limits (60 requests/minute per IP).
+**Caching:** Public widget JS responses include 5-minute cache headers.
+
+#### Widget Types
+
+- **Contact Form** — Injects a styled form that POSTs to `/api/intake`. Configurable: brand color, max message length, success message, show/hide company and subject fields.
+- **Testimonials** — Renders published testimonials in carousel, grid, or list layout. Configurable: max items, show rating, show project name, auto-rotate interval.
+- **Status Badge** — Compact project status display with completion percentage from milestones. Configurable: show percentage, show milestones, light/dark theme.
+
+#### React Components
+
+**Admin:** `src/react/features/admin/embed/EmbedWidgetsManager.tsx` — Table of widget configs with create form, copy embed code to clipboard, regenerate token, deactivate toggle.
+
+**Route:** `/embed-widgets` (admin only)
+
+#### Frontend API Constants
+
+Constants defined in `api-endpoints.ts`:
+
+- `EMBED` — Base path '/api/embed'
+- `buildEndpoint`: embedWidget(id), embedWidgetCode(id), embedWidgetRegenerate(id)
 
 ---
 
@@ -5382,6 +5428,40 @@ Phase 7 (International — Do Last)
 ---
 
 ## Change Log
+
+### 2026-03-17 — Phase 5B Embeddable Widgets Complete
+
+**5B: Embeddable Widgets (Migration 128)**
+
+- embed-service.ts: CRUD for widget configurations, token generation/regeneration, project status resolution (completion % from milestones), embed code generation
+- embed-types.ts: WidgetType, EmbedConfigRow, EmbedConfiguration, widget config interfaces (ContactForm, Testimonials, StatusBadge)
+- 2 tables: embed_configurations (token, allowed_domains, JSON config, is_active), project_status_tokens (project_id, token, is_active)
+- Admin routes (7 endpoints): GET /, POST /, GET /:id, PUT /:id, DELETE /:id, POST /:id/regenerate-token, GET /:id/embed-code
+- Public routes (4 endpoints, no auth, CSRF-exempt): GET /contact-form.js, GET /testimonials.js, GET /status-badge.js, GET /status/:token
+- React: EmbedWidgetsManager (admin widget config table with create, copy embed code, regenerate token, deactivate)
+- Portal route: /embed-widgets (admin only)
+- 3 widget types: Contact Form (posts to /api/intake), Testimonials (carousel/grid/list), Status Badge (completion %)
+
+**Files created:** ~5 (1 migration, 2 services/types, 2 route files, 1 React component)
+**Files modified:** ~4 (app.ts, api-endpoints.ts, PortalRoutes.tsx, csrf config)
+
+### 2026-03-17 — Phase 5A Feedback Surveys and Testimonial Collection Complete
+
+**5A: Feedback Surveys + Testimonials (Migration 127)**
+
+- feedback-service.ts: 16 methods — survey CRUD, token-based public access, response submission with auto-testimonial creation, analytics (NPS calculation, average ratings, monthly trends), reminder + expiration crons
+- feedback-types.ts: TypeScript interfaces and constants (SurveyType, SurveyStatus, TestimonialStatus, FeedbackAnalytics)
+- 3 tables: feedback_surveys (token-based email access), feedback_responses (1:1 with star ratings + NPS), testimonials (approval workflow with publish/feature toggles)
+- Admin routes (9 endpoints): POST /send survey, GET /surveys, GET /analytics, GET /testimonials, POST /testimonials, PUT /testimonials/:id, DELETE /testimonials/:id, PUT /testimonials/:id/publish, PUT /testimonials/:id/feature
+- Portal routes (1 endpoint): GET /my (client's surveys)
+- Public routes (4 endpoints, no auth): GET /survey/:token, POST /survey/:token/submit, GET /testimonials/public, GET /testimonials/featured
+- CSRF skip for public survey submission and public testimonial reads
+- React: FeedbackTable (admin survey list with send form), TestimonialsTable (admin testimonial management), FeedbackAnalytics (NPS gauge + ratings), PortalFeedback (client card view)
+- Scheduler: 2 crons — feedback reminders (daily 10 AM), survey expiration (daily midnight)
+- Portal routes: /feedback (admin/client), /feedback-analytics (admin), /testimonials (admin)
+
+**Files created:** ~8 (1 migration, 2 services/types, 3 routes, 4 React components)
+**Files modified:** ~5 (app.ts, api-endpoints.ts, PortalRoutes.tsx, scheduler-service.ts, csrf config)
 
 ### 2026-03-17 — Phase 4 Revenue Intelligence Complete
 
