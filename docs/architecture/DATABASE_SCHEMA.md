@@ -2,8 +2,8 @@
 
 **Last Updated:** March 17, 2026
 **Database:** SQLite (`data/client_portal.db`)
-**Total Tables:** 146 (includes Phase 1 + Phase 2 + Phase 3 tables)
-**Total Migrations:** 124
+**Total Tables:** 149 (includes Phase 1-4 tables)
+**Total Migrations:** 126
 
 ## Table of Contents
 
@@ -484,6 +484,17 @@ See [DATABASE_NORMALIZATION_PLAN.md](../archive/DATABASE_NORMALIZATION_PLAN.md) 
 - `automation_action_logs` — Per-action execution log (run_id, action_id, status, executed_at, result, error_message)
 - `automation_scheduled_actions` — Deferred wait-step execution (run_id, action_id, execute_at, status)
 
+## Phase 4 Tables (Migrations 125-126)
+
+### Expenses (Migration 125)
+
+- `expenses` — Expense records (project_id nullable, category CHECK 12 types, amount, vendor, date, billable, recurring, receipt FK, tax, soft delete)
+
+### Retainers (Migration 126)
+
+- `retainers` — Retainer definitions (client_id, project_id, type hourly/fixed_scope, status, monthly_hours, monthly_amount, rollover config, billing_day, auto_invoice)
+- `retainer_periods` — Period tracking (retainer_id, period dates, allocated/used/rollover hours, invoice_id, status)
+
 ---
 
 ## Related Documentation
@@ -497,3 +508,5 @@ See [DATABASE_NORMALIZATION_PLAN.md](../archive/DATABASE_NORMALIZATION_PLAN.md) 
 - [Email Sequences](../features/EMAIL_SEQUENCES.md)
 - [Meeting Requests](../features/MEETING_REQUESTS.md)
 - [Custom Automations](../features/CUSTOM_AUTOMATIONS.md)
+- [Expenses](../features/EXPENSES.md)
+- [Retainers](../features/RETAINERS.md)
