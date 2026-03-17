@@ -191,10 +191,47 @@ export async function regenerateMilestones(
   const db = getDatabase();
 
   try {
+    // Check if project has a linked proposal with tier info
+    const proposal = await db.get(
+      `SELECT selected_tier FROM proposal_requests
+       WHERE project_id = ? AND deleted_at IS NULL
+       ORDER BY created_at DESC LIMIT 1`,
+      [projectId]
+    ) as { selected_tier: string | null } | undefined;
+
     // Delete existing milestones (tasks will cascade delete due to FK constraint)
     await db.run('DELETE FROM milestones WHERE project_id = ?', [projectId]);
 
-    // Generate new milestones and tasks
+    // Use tier-aware generation if proposal exists with a tier
+    if (proposal?.selected_tier) {
+      const { generateTierMilestones } = await import('./tier-milestone-generator.js');
+
+      // Also fetch proposal features for addon tasks
+      let features: Array<{ feature_name: string; is_addon?: number | boolean }> = [];
+      try {
+        const { proposalService } = await import('./proposal-service.js');
+        const proposalRow = await db.get(
+          'SELECT id FROM proposal_requests WHERE project_id = ? AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 1',
+          [projectId]
+        ) as { id: number } | undefined;
+        if (proposalRow) {
+          const rawFeatures = await proposalService.getProposalFeatures(proposalRow.id);
+          features = rawFeatures as Array<{ feature_name: string; is_addon?: number | boolean }>;
+        }
+      } catch {
+        // Non-critical — proceed without features
+      }
+
+      return generateTierMilestones(
+        projectId,
+        projectType || 'other',
+        proposal.selected_tier,
+        features,
+        { startDate: startDate || new Date(), skipIfExists: false }
+      );
+    }
+
+    // Default: generate standard milestones
     return generateDefaultMilestones(projectId, projectType, {
       startDate: startDate || new Date(),
       skipIfExists: false
