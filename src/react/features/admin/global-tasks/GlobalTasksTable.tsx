@@ -582,7 +582,7 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
                     </PortalTableCell>
                     <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                       <div className="action-group">
-                        <IconButton action="view" title="View" />
+                        <IconButton action="view" title="View" onClick={() => onNavigate?.('task-detail', String(task.id))} />
                       </div>
                     </PortalTableCell>
                   </PortalTableRow>

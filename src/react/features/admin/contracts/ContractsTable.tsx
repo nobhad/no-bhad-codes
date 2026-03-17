@@ -533,7 +533,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                 <PortalTableCell className="date-col">{formatDate(contract.createdAt)}</PortalTableCell>
                 <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="action-group">
-                    <IconButton action="view" title="View" />
+                    <IconButton action="view" title="View" onClick={() => setSelectedContract(contract)} />
                     {contract.status === 'draft' && (
                       <IconButton
                         action="send"

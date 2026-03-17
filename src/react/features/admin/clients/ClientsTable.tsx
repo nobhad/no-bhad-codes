@@ -378,7 +378,11 @@ export function ClientsTable({
           statusOptions={bulkStatusOptions}
           onStatusChange={handleBulkStatusChange}
           actions={bulkActions}
-          onDelete={deleteDialog.open}
+          onDelete={
+            filterValues.status?.some((s: string) => ['inactive'].includes(s))
+              ? deleteDialog.open
+              : undefined
+          }
           deleteLoading={deleteDialog.isLoading}
         />
       }

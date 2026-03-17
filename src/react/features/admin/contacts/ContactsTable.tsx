@@ -557,7 +557,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
                   />
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-group">
-                      <IconButton action="view" title="View" />
+                      <IconButton action="view" title="View" onClick={() => setSelectedContact(contact)} />
                     </div>
                   </PortalTableCell>
                 </PortalTableRow>

@@ -31,6 +31,8 @@ import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { apiFetch, apiPost } from '@/utils/api-client';
 import { formatErrorMessage } from '@/utils/error-utils';
+import { useExport } from '@react/hooks/useExport';
+import { KNOWLEDGE_BASE_EXPORT_CONFIG } from '@/utils/table-export';
 import { CreateKBArticleModal } from '../modals/CreateEntityModals';
 
 interface Article {
@@ -206,6 +208,19 @@ export function ArticlesTable({ onNavigate, getAuthToken: _getAuthToken, showNot
     })),
   [categories]);
 
+  // Single delete handler
+  const handleDeleteArticle = useCallback(async (articleId: number) => {
+    if (!window.confirm('Are you sure you want to delete this article?')) return;
+    try {
+      const res = await apiFetch(`${API_ENDPOINTS.ADMIN.KB_ARTICLES}/${articleId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete article');
+      showNotification?.('Article deleted', 'success');
+      loadData();
+    } catch {
+      showNotification?.('Failed to delete article', 'error');
+    }
+  }, [showNotification, loadData]);
+
   const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
     setCreateLoading(true);
     try {
@@ -223,6 +238,13 @@ export function ArticlesTable({ onNavigate, getAuthToken: _getAuthToken, showNot
       setCreateLoading(false);
     }
   }, [showNotification, loadData]);
+
+  // Export functionality
+  const { exportCsv, isExporting } = useExport({
+    config: KNOWLEDGE_BASE_EXPORT_CONFIG,
+    data: articles,
+    onExport: (count) => showNotification?.(`Exported ${count} articles`, 'success')
+  });
 
   const filteredArticles = useMemo(() => applyFilters(articles), [applyFilters, articles]);
 
@@ -267,7 +289,7 @@ export function ArticlesTable({ onNavigate, getAuthToken: _getAuthToken, showNot
               values={filterValues}
               onChange={setFilter}
             />
-            <IconButton action="download" title="Export" />
+            <IconButton action="download" title="Export" onClick={exportCsv} disabled={isExporting || articles.length === 0} />
             <IconButton action="refresh" onClick={loadData} disabled={isLoading} title="Refresh" />
             <IconButton action="add" onClick={() => setCreateOpen(true)} title="New Article" />
           </>
@@ -369,7 +391,7 @@ export function ArticlesTable({ onNavigate, getAuthToken: _getAuthToken, showNot
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-group">
                       <IconButton action="view" title="View" onClick={() => onNavigate?.('kb-article', String(article.id))} />
-                      <IconButton action="delete" title="Delete" />
+                      <IconButton action="delete" title="Delete" onClick={() => handleDeleteArticle(article.id)} />
                     </div>
                   </PortalTableCell>
                 </PortalTableRow>

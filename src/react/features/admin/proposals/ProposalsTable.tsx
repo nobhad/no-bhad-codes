@@ -234,6 +234,18 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
     );
   }, [refetch]);
 
+  // Single delete handler
+  const handleDeleteProposal = useCallback(async (proposalId: number) => {
+    if (!window.confirm('Are you sure you want to delete this proposal?')) return;
+    await executeWithToast(
+      () => apiFetch(buildEndpoint.adminProposal(proposalId), { method: 'DELETE' }),
+      { success: 'Proposal deleted', error: 'Failed to delete proposal' },
+      () => {
+        setData((prev) => prev ? { ...prev, items: prev.items.filter((p) => p.id !== proposalId) } : prev);
+      }
+    );
+  }, [setData]);
+
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
     if (selection.selectedCount === 0) return;
@@ -522,7 +534,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
                       />
                     )}
                     <IconButton action="duplicate" title="Duplicate" onClick={() => handleDuplicate(proposal.id)} />
-                    <IconButton action="delete" title="Delete" />
+                    <IconButton action="delete" title="Delete" onClick={() => handleDeleteProposal(proposal.id)} />
                   </div>
                 </PortalTableCell>
               </PortalTableRow>

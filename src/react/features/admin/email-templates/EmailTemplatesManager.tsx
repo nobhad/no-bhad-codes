@@ -30,7 +30,7 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { EMAIL_TEMPLATES_FILTER_CONFIG, EMAIL_TEMPLATE_STATUS_OPTIONS } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { apiPost } from '@/utils/api-client';
+import { apiPost, apiFetch } from '@/utils/api-client';
 import { CreateEmailTemplateModal } from '../modals/CreateEntityModals';
 import { EmailTemplateDetailPanel } from './EmailTemplateDetailPanel';
 
@@ -161,6 +161,19 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
     (pagination.page - 1) * pagination.pageSize,
     pagination.page * pagination.pageSize
   );
+
+  // Single delete handler
+  const handleDeleteTemplate = useCallback(async (templateId: number) => {
+    if (!window.confirm('Are you sure you want to delete this template?')) return;
+    try {
+      const response = await apiFetch(`${API_ENDPOINTS.ADMIN.EMAIL_TEMPLATES}/${templateId}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete template');
+      showNotification?.('Template deleted', 'success');
+      refetch();
+    } catch {
+      showNotification?.('Failed to delete template', 'error');
+    }
+  }, [showNotification, refetch]);
 
   const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
     setCreateLoading(true);
@@ -323,7 +336,7 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
                       <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                         <div className="action-group">
                           <IconButton action="edit" title="Edit" onClick={() => onNavigate?.('email-template', String(template.id))} />
-                          <IconButton action="delete" title="Delete" />
+                          <IconButton action="delete" title="Delete" onClick={() => handleDeleteTemplate(template.id)} />
                         </div>
                       </PortalTableCell>
                     </>

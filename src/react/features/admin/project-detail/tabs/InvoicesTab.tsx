@@ -217,12 +217,12 @@ export function InvoicesTab({
           {/* Status Filter */}
           <PortalDropdown>
             <PortalDropdownTrigger asChild>
-              <button className="btn-secondary dropdown-trigger invtab-filter" type="button">
+              <button className="dropdown-trigger--form invtab-filter" type="button">
                 {STATUS_FILTER_LABELS[statusFilter] || 'All Invoices'}
                 <ChevronDown className="dropdown-caret" />
               </button>
             </PortalDropdownTrigger>
-            <PortalDropdownContent align="start" sideOffset={-4}>
+            <PortalDropdownContent align="end" sideOffset={-4}>
               {STATUS_FILTER_OPTIONS.map((opt) => (
                 <PortalDropdownItem
                   key={opt.value}

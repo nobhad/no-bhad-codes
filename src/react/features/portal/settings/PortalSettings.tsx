@@ -94,7 +94,7 @@ export function PortalSettings({ getAuthToken, showNotification }: PortalSetting
   }
 
   return (
-    <div ref={containerRef} className="section">
+    <div ref={containerRef} className="subsection">
       <TabList
         tabs={SETTINGS_TABS}
         activeTab={activeTab}
