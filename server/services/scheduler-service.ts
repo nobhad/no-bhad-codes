@@ -177,6 +177,8 @@ export class SchedulerService {
   private automationScheduledJob: SimpleTask | null = null;
   private retainerBillingJob: SimpleTask | null = null;
   private retainerUsageAlertJob: SimpleTask | null = null;
+  private feedbackReminderJob: SimpleTask | null = null;
+  private feedbackExpirationJob: SimpleTask | null = null;
   private isRunning = false;
 
   private constructor(config: Partial<SchedulerConfig> = {}) {
@@ -247,6 +249,10 @@ export class SchedulerService {
     this.scheduleRetainerBilling();
     this.scheduleRetainerUsageAlerts();
 
+    // Schedule feedback survey reminders (daily at 10:00 AM) and expiration (daily at midnight)
+    this.scheduleFeedbackReminders();
+    this.scheduleFeedbackExpiration();
+
     // Start all scheduled jobs
     const jobs = [
       this.reminderJob,
@@ -258,7 +264,9 @@ export class SchedulerService {
       this.meetingReminderJob,
       this.automationScheduledJob,
       this.retainerBillingJob,
-      this.retainerUsageAlertJob
+      this.retainerUsageAlertJob,
+      this.feedbackReminderJob,
+      this.feedbackExpirationJob
     ].filter(Boolean);
 
     for (const job of jobs) {
@@ -323,6 +331,16 @@ export class SchedulerService {
     if (this.retainerUsageAlertJob) {
       this.retainerUsageAlertJob.stop();
       this.retainerUsageAlertJob = null;
+    }
+
+    if (this.feedbackReminderJob) {
+      this.feedbackReminderJob.stop();
+      this.feedbackReminderJob = null;
+    }
+
+    if (this.feedbackExpirationJob) {
+      this.feedbackExpirationJob.stop();
+      this.feedbackExpirationJob = null;
     }
 
     this.isRunning = false;
@@ -566,6 +584,52 @@ export class SchedulerService {
         }
       } catch (error) {
         logger.error('[Scheduler] Error during retainer usage alerts:', {
+          error: error instanceof Error ? error : undefined
+        });
+      }
+    });
+  }
+
+  /**
+   * Schedule feedback survey reminders — daily at 10:00 AM
+   */
+  private scheduleFeedbackReminders(): void {
+    const FEEDBACK_REMINDER_CRON = '0 10 * * *';
+    logger.info(`[Scheduler] Scheduling feedback reminders: ${FEEDBACK_REMINDER_CRON}`);
+
+    this.feedbackReminderJob = createSimpleTask(FEEDBACK_REMINDER_CRON, async () => {
+      try {
+        const { feedbackService } = await import('./feedback-service.js');
+        const result = await feedbackService.sendReminders();
+
+        if (result.sent > 0) {
+          logger.info(`[Scheduler] Feedback reminders sent: ${result.sent}`);
+        }
+      } catch (error) {
+        logger.error('[Scheduler] Error during feedback reminders:', {
+          error: error instanceof Error ? error : undefined
+        });
+      }
+    });
+  }
+
+  /**
+   * Schedule feedback survey expiration — daily at midnight
+   */
+  private scheduleFeedbackExpiration(): void {
+    const FEEDBACK_EXPIRY_CRON = '0 0 * * *';
+    logger.info(`[Scheduler] Scheduling feedback expiration: ${FEEDBACK_EXPIRY_CRON}`);
+
+    this.feedbackExpirationJob = createSimpleTask(FEEDBACK_EXPIRY_CRON, async () => {
+      try {
+        const { feedbackService } = await import('./feedback-service.js');
+        const result = await feedbackService.expireOverdue();
+
+        if (result.expired > 0) {
+          logger.info(`[Scheduler] Expired ${result.expired} overdue surveys`);
+        }
+      } catch (error) {
+        logger.error('[Scheduler] Error during feedback expiration:', {
           error: error instanceof Error ? error : undefined
         });
       }
