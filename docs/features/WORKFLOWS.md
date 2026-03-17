@@ -500,6 +500,7 @@ POST /api/email-templates/:id/test
 - [Onboarding Checklist](./ONBOARDING_CHECKLIST.md) - Onboarding step auto-completion via workflow events (Phase 1D)
 - [Email Sequences](./EMAIL_SEQUENCES.md) - Auto-enrollment from workflow events (Phase 2A)
 - [Meeting Requests](./MEETING_REQUESTS.md) - Meeting scheduling system (Phase 2B)
+- [Custom Automations](./CUSTOM_AUTOMATIONS.md) - Admin self-service automation engine (Phase 3)
 
 ---
 

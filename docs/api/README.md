@@ -208,6 +208,24 @@ properties and the JWT payload structure.
 - `POST /meeting-requests/:id/complete` — Mark completed (requireAdmin)
 - `GET /meeting-requests/:id/ics` — Download .ics file (requireAdmin)
 
+### Custom Automations (Phase 3)
+
+- `GET /automations` — List automations with run stats (requireAdmin)
+- `POST /automations` — Create automation with actions (requireAdmin)
+- `GET /automations/:id` — Get with full actions (requireAdmin)
+- `PUT /automations/:id` — Update automation (requireAdmin)
+- `DELETE /automations/:id` — Delete automation (requireAdmin)
+- `PUT /automations/:id/activate` — Activate (requireAdmin)
+- `PUT /automations/:id/deactivate` — Deactivate (requireAdmin)
+- `POST /automations/:id/actions` — Add action (requireAdmin)
+- `PUT /automations/:id/actions/:actionId` — Update action (requireAdmin)
+- `DELETE /automations/:id/actions/:actionId` — Delete action (requireAdmin)
+- `PUT /automations/:id/actions/reorder` — Reorder actions (requireAdmin)
+- `GET /automations/:id/runs` — Execution history (requireAdmin)
+- `GET /automations/runs/:runId/logs` — Per-action logs (requireAdmin)
+- `POST /automations/:id/dry-run` — Test without executing (requireAdmin)
+- `POST /automations/:id/run-now` — Manual trigger (requireAdmin)
+
 ### Other Feature Areas
 
 - Questionnaires: `GET/POST /questionnaires`

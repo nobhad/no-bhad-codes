@@ -13,6 +13,7 @@ This folder contains feature-level documentation. Use this index to jump to the 
 - [CLIENT_PORTAL.md](CLIENT_PORTAL.md)
 - [CONTACTS.md](CONTACTS.md)
 - [CONTRACTS.md](CONTRACTS.md)
+- [CUSTOM_AUTOMATIONS.md](CUSTOM_AUTOMATIONS.md)
 - [DATA_QUALITY.md](DATA_QUALITY.md)
 - [DELIVERABLES.md](DELIVERABLES.md)
 - [DOCUMENT_REQUESTS.md](DOCUMENT_REQUESTS.md)

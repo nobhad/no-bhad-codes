@@ -1,6 +1,6 @@
 # State of the Art Roadmap
 
-**Status:** In Progress — Phase 1 + Phase 2 Complete
+**Status:** In Progress — Phase 1 + Phase 2 + Phase 3 Complete
 **Last Updated:** 2026-03-17
 **Goal:** Close every meaningful gap between this platform and the best-in-class tools (HoneyBook, Dubsado, Moxie, Plutio, Bloom, Productive)
 
@@ -3159,11 +3159,20 @@ cron.schedule('0 9 * * *', async () => {
 
 ---
 
-## Phase 3: Admin Self-Service Automations
+## Phase 3: Admin Self-Service Automations — COMPLETE
 
-Split into two sub-phases: 3A builds the backend engine (can run automations via API/seed data), 3B builds the visual admin UI. This split lets you start using automations immediately via API while the complex builder UI is developed separately.
+Split into two sub-phases: 3A builds the backend engine (can run automations via API/seed data), 3B builds the visual admin UI.
 
-**Important:** This does NOT replace the existing `workflow-automations.ts` handlers. Custom automations run alongside them. Built-in automations (proposal accepted → generate milestones, contract signed → activate project) remain in code because they're core business logic. Custom automations handle the flexible stuff (send follow-up email 3 days after X, create task when Y happens).
+**Status:** Complete (March 17, 2026)
+
+**Implemented:**
+
+- 3A: Automation Engine (migration 124, 5 tables, 11 action types, condition evaluation, wait-step scheduling, variable substitution, dry-run, execution history)
+- 3B: Automation Builder (AutomationsTable with create/toggle/delete, AutomationBuilder with grouped triggers + action config forms, AutomationDetailPanel with run history)
+
+**Feature docs:** [Custom Automations](features/CUSTOM_AUTOMATIONS.md)
+
+**Important:** This does NOT replace the existing `workflow-automations.ts` handlers. Custom automations run alongside them. Built-in automations (proposal accepted -> milestones, contract signed -> activate project) remain in code because they're core business logic. Custom automations handle the flexible stuff (send follow-up email 3 days after X, create task when Y happens).
 
 **Competitors:** Dubsado's "Workflows" and HoneyBook's "Automations" are visual drag-and-drop builders. Moxie has "Automation Rules."
 
@@ -5364,6 +5373,26 @@ Phase 7 (International — Do Last)
 ---
 
 ## Change Log
+
+### 2026-03-17 — Phase 3 Admin Self-Service Automations Complete
+
+**3A: Automation Engine (Migration 124)**
+
+- automation-engine.ts: Full execution engine with 11 action executors, condition evaluation, wait-step scheduling, variable substitution, dry-run mode
+- 5 tables: custom_automations, automation_actions, automation_runs, automation_action_logs, automation_scheduled_actions
+- Routes: 16 admin endpoints (CRUD + actions + runs + dry-run + run-now)
+- Workflow integration: ALL event types routed to automation engine via handleCustomAutomationEvent
+- Scheduler: */5 * * * * cron processes scheduled wait-step actions
+- 2 seeded templates: New Project Setup, Invoice Follow-Up
+
+**3B: Automation Builder (React)**
+
+- AutomationsTable: Admin table with create form, toggle active, delete, search
+- AutomationBuilder: Visual builder with grouped trigger events, condition rows, 11 action config forms
+- AutomationDetailPanel: Overview, status toggle, recent runs table, edit/run-now/delete actions
+
+**Files created:** ~10 (1 migration, 2 services/types, 2 routes, 5 React components)
+**Files modified:** ~5 (app.ts, api-endpoints.ts, PortalRoutes.tsx, workflow-automations.ts, scheduler-service.ts)
 
 ### 2026-03-17 — Phase 2 Lead Nurture Complete
 
