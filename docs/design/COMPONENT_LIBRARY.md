@@ -215,6 +215,22 @@ Located in `src/react/hooks/`.
 | `useEventSource` | `useEventSource.ts` | SSE connection management. |
 | `useLogger` | `useLogger.ts` | Logging utility. |
 
+### Subtab Context Hooks
+
+Located in `src/react/contexts/SubtabContext.tsx`. Provide subtab state management via React context, replacing the previous DOM custom event system.
+
+| Hook | Purpose |
+|------|---------|
+| `useActiveSubtab<T>()` | Read the active subtab with generic type safety (e.g., `useActiveSubtab<AnalyticsSubtab>()`) |
+| `useSetSubtab()` | Change the active subtab programmatically |
+| `useSetSubtabActions()` | Inject page-specific action buttons into the subtab row (right side) |
+
+### UI Utility Hooks
+
+| Hook | File | Purpose |
+|------|------|---------|
+| `useClickOutside(ref, onClose, isOpen)` | `useClickOutside.ts` | Close dropdowns/modals on outside click. Only attaches listener when `isOpen` is true. Accepts single `RefObject` or `RefObject[]` for portaled elements (e.g., trigger + menu in separate DOM trees). Used by: FormDropdown, TableFilters, ModalDropdown, NotificationBell, TablePagination, PortalHeader. |
+
 ### Animation Hooks
 
 | Hook | File | Purpose |
@@ -293,6 +309,19 @@ Quick reference for the most-used portal CSS classes. For full details see [Port
 ```css
 .section, .subsection, .panel, .table-layout, .data-table-card, .portal-card
 ```
+
+### Shared Classes (Use Instead of One-Off Variants)
+
+Always use these shared classes instead of creating component-prefixed duplicates:
+
+| Shared Class | Use For | Do NOT Create |
+|---|---|---|
+| `portal-card-header` | Any card/panel header row | `note-card-header`, `project-card-header`, `requests-card-header` |
+| `action-group` | Any row of action buttons | `portal-card-actions`, `form-actions`, `payment-item-actions` |
+| `empty-state` | Any empty content message | `kanban-empty-state`, `messaging-empty-state` |
+| `stat-label` / `stat-value` | Stat display labels and values | `payment-stat-label`, `payment-stat-value` |
+| `list-item` | Any list row with flex layout | `payment-item-row`, `content-item-row` |
+| `task-meta-item` | Any metadata flex row in task context | `task-due-date`, `task-assignee` |
 
 ---
 

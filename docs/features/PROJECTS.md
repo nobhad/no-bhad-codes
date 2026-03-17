@@ -598,6 +598,10 @@ All project creation paths auto-generate codes:
 
 ## Change Log
 
+### March 16, 2026 - Delete Button Conditional
+
+- Projects table: delete button now only appears in bulk toolbar when status filter includes completed/cancelled/on-hold
+
 ### March 16, 2026 - Project Code System
 
 - Added `project_code` column (TEXT UNIQUE) to projects table via migration 117

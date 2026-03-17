@@ -130,6 +130,93 @@ This file contains completed work from March 2026. Items are moved here from `..
 - `ANIMATIONS.md` — corrected duration token names and values to match actual code
 - `animations.css` — added missing `--duration-normal: 0.3s` token (was referenced by 8 animation composites but never defined)
 
+### 14. CSS Class Consolidation — ~20 Duplicates Eliminated - COMPLETE
+
+**Status:** COMPLETE
+**Implementation:** Audited entire portal for one-off CSS classes that duplicate shared patterns. Replaced with canonical shared classes, removed ~180 lines of dead CSS.
+
+#### Classes Consolidated
+
+- `payment-stat-label/value`, `payment-summary-card/grid` → `stat-label`, `stat-value`, `panel`, `stats-row`
+- `payment-item-row/label/meta/actions/amount` → `list-item`, `field-label`, `text-secondary`, `action-group`, `stat-value`
+- `invtab-stats`, `invtab-header-row` → `detail-meta`, removed
+- `empty-state-small` → `empty-state--compact`
+- `kanban-empty-state` → `empty-state--compact`
+- `messaging-empty-state-full` → `empty-state--full`
+- `portal-card-actions` → `action-group`
+- `checklist-card/header` → `portal-card`, `portal-card-header`
+- `contact-card-header` → `portal-card-header`
+- `tasks-stat-card--alert` → `stat-card--warning`
+
+#### Files Modified
+
+- PaymentScheduleView.tsx, InvoicesTab.tsx, ContentChecklistView.tsx
+- OverviewDashboard.tsx, GlobalTasksTable.tsx, MessageView.tsx
+- payments.css (gutted), project-detail.css, dashboard-layout.css, tasks.css, portal-messages.css, portal-stat-cards.css, portal-cards.css, client-detail.css
+- loading.css (added shared `empty-state--compact`, `empty-state--full` variants)
+
+### 15. DetailHeader Reusable Component - COMPLETE
+
+**Status:** COMPLETE
+**Implementation:** Created `DetailHeader` component replacing 5 instances of duplicate detail-title-row HTML. Moved shared CSS from admin-only to `portal-detail-header.css`.
+
+#### Files Created
+
+- `src/react/components/portal/DetailHeader.tsx`
+- `src/styles/portal/shared/portal-detail-header.css`
+
+#### Files Refactored
+
+- ClientDetail.tsx, ProjectDetail.tsx, LeadDetailPanel.tsx, ProjectSnapshot.tsx, createDetailPanel.tsx
+
+### 16. Portal CSS Fixes (Gutter, Dropdowns, Text Clipping) - COMPLETE
+
+**Status:** COMPLETE
+**Implementation:** Fixed gutter inconsistencies, dropdown shadows/borders, text clipping, action button alignment.
+
+#### Fixes
+
+- Table inline-edit text clipping: removed negative margin inside `.data-table`
+- Detail title clipping: added 2px padding for serif font glyph overhang
+- Contact info alignment: `meta-value-with-copy` changed to `align-items: center`
+- Dropdown shadows: `--shadow-dropdown: none` in portal-theme.css (shared)
+- Dropdown borders: only `--status` triggers get transparent border; all others get visible border
+- Activity list: removed gap rule, items use narrow vertical padding only
+- Milestone actions: replaced `.milestone-actions` with `.action-group`, right-aligned
+- Deliverables page: added `.progress-field` to gutter rules
+- Milestone accordion content: gutter on children not wrapper
+- Help page: removed border-bottom from "Still Need Help?" header
+- `payments.css` and `requests.css`: replaced all `--spacing-*` / `--app-color-*` with portal tokens
+- `settings.css`: replaced hardcoded `margin: 1px` with `var(--border-width)`
+
+### 17. Documentation Audit & Deviations - COMPLETE
+
+**Status:** COMPLETE
+**Implementation:** Full portal documentation audit. Fixed inaccuracies, added deviations #11-12 to CSS_ARCHITECTURE.md.
+
+#### Items Fixed
+
+- `DATABASE_SCHEMA.md` — migration count 103 → 117
+- `LEADS.md` — last updated date
+- `WORKFLOWS.md` — handler count phrasing
+- `CSS_ARCHITECTURE.md` — file listing accuracy, added deviations #11 (unlayered portal-theme) and #12 (typography wide-tracking overrides)
+- `PORTAL_DESIGN.md` — password field class names
+- `ANIMATIONS.md` — duration token values corrected
+- `animations.css` — added missing `--duration-normal: 0.3s`
+- `shadows.css` — removed stale override comments
+
+### 18. Portal React Refactor + UI Fixes - COMPLETE
+
+**Status:** COMPLETE
+**Implementation:** Converted vanilla JS patterns to React (SubtabContext, useClickOutside), fixed 20 broken buttons, added delete conditionals, fixed search input CSS.
+
+#### Key Changes
+
+- SubtabContext replaced all custom DOM events
+- 20 broken buttons wired (delete, view, export, design review)
+- Projects/Clients delete button conditional on status filter
+- Search input placeholder fix + text-overflow
+
 ---
 
 ## Completed - March 2, 2026

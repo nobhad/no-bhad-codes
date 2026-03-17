@@ -446,6 +446,10 @@ Display name logic uses `COALESCE(billing_name, contact_name, company_name)`. Fo
 
 ## Change Log
 
+### March 16, 2026 - Delete Button Conditional
+
+- Clients table: delete button now only appears in bulk toolbar when status filter includes inactive
+
 ### March 16, 2026 - Client Type Standardization
 
 - Updated `client_type` values from `personal`/`business` to `individual`/`company`

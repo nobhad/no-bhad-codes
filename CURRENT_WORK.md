@@ -1,8 +1,8 @@
-# Current Work - March 16, 2026
+# Current Work - March 17, 2026
 
 ## Current System Status
 
-**Last Updated**: March 16, 2026
+**Last Updated**: March 17, 2026
 
 ### Server
 
@@ -13,16 +13,16 @@
 
 - TypeScript: 0 errors
 - ESLint: 0 errors, 0 warnings
-- Vite build: passing (166 chunks)
+- Vite build: passing (168 chunks)
 
 ---
 
 ## State of the Art Roadmap
 
-**Status:** PLANNING
+**Status:** IN PROGRESS — Phase 0 COMPLETE
 **Full plan:** [docs/STATE_OF_THE_ART_ROADMAP.md](./docs/STATE_OF_THE_ART_ROADMAP.md)
 
-Gap analysis + codebase audit. 8 phases, 13 migrations (118-130).
+Gap analysis + codebase audit. 8 phases, 13 migrations (118-130). Phase 0 foundation fixes complete.
 
 ### Phase 0: Foundation Fixes (MUST DO FIRST)
 
@@ -30,28 +30,28 @@ All items verified against actual code. ~~0A~~, ~~0H~~, ~~0I~~ removed (proved f
 
 **Critical (blocks Phase 1):**
 
-- [ ] 0B. Client proposal detail view + acceptance UI (route redirects to /documents, no ProposalDetail.tsx)
-- [ ] 0C. Maintenance tier activation (4 tiers stored then ignored — no recurring billing, no post-project automation)
-- [ ] 0D. Portal contract signing missing event emission (saves signature but never emits `contract.signed` — 1-line fix)
-- [ ] 0G. Payment schedule installments auto-generate invoices when due (no cascade exists)
+- [x] 0B. Client proposal detail view + acceptance UI — DONE (PortalProposalDetail.tsx, route /proposals/:id, accept flow with confirmation)
+- [x] 0C. Maintenance tier activation — DONE (migration 118, `handleMaintenanceActivation` handler, recurring invoice on project completion, `GET /projects/:id/maintenance` endpoint)
+- [x] 0D. Portal contract signing — FIXED (added `workflowTriggerService.emit('contract.signed')` to `contracts/client.ts`)
+- [x] 0G. Installment → invoice cascade — FIXED (added `generateDueInvoices()` + scheduler hook)
 
 **High (broken integrations):**
 
-- [ ] 0E. Webhook dispatch for Slack/Discord (send functions exist in slack-service.ts but never called from automations)
-- [ ] 0F. Automations use DB email templates (7 notification handlers hardcode HTML, ignore email_templates table)
-- [ ] 0K. Admin invoice management endpoint (/api/admin/invoices missing, no admin barrel mount)
-- [ ] 0L. Create modal backends — Design Reviews (no POST endpoint) + Workflows (no POST endpoint)
+- [x] 0E. Webhook dispatch — DONE (dispatchWebhooks() queries notification_integrations, sends to Slack/Discord, logs to delivery_logs)
+- [x] 0F. Email templates — DONE (loadEmailTemplate() checks DB by slug first, falls back to hardcoded; all 7 handlers pass templateSlug)
+- [x] 0K. Admin invoices — DONE (server/routes/admin/invoices.ts: GET list+stats, POST bulk-delete, POST bulk-status)
+- [x] 0L. Create backends — DONE (POST /api/admin/design-reviews + POST /api/admin/workflows)
 
 **Medium (UI completeness):**
 
-- [ ] 0J. Export/CSV missing onClick on ~15 admin tables (InvoicesTable works, others don't)
-- [ ] 0M. LeadDetailPanel built but not imported by LeadsTable
-- [ ] 0P. Add proposal prefill endpoint to frontend constants + builder integration
+- [x] 0J. Export/CSV — DONE (wired useExport to 9 tables, added 6 new export configs)
+- [x] ~~0M. LeadDetailPanel~~ — already wired
+- [x] 0P. Prefill + admin invoices in frontend constants — DONE (PROPOSALS_PREFILL, ADMIN.INVOICES added to api-endpoints.ts)
 
 **Low (docs + security):**
 
-- [ ] 0N. Create CSS_ARCHITECTURE.md + UX_GUIDELINES.md (mandated by CLAUDE.md, missing)
-- [ ] 0O. Security hardening (remove demo scripts, standardize bcrypt rounds, form label a11y)
+- [x] ~~0N. Design docs~~ — already exist (CSS_ARCHITECTURE.md: 836 lines, UX_GUIDELINES.md: 69 lines)
+- [x] 0O. Security hardening — DONE (demo/test scripts require env vars, bcrypt standardized to 12 rounds in intake.ts)
 
 ### Phase 1: Unified Client Experience
 
@@ -140,6 +140,37 @@ Mixed default/named imports for route mounting. Zero runtime impact.
 - [ ] Docker setup for deployment
 - [ ] RBAC (granular admin permissions beyond binary requireAdmin)
 - [ ] **Frontend**: proposal builder reads prefill data and pre-checks features, suggests tier, shows recommendations
+
+---
+
+## Completed - CSS Bloat Cleanup + Layout Spacing (March 17, 2026)
+
+**Status:** COMPLETE
+
+Two rounds of CSS class consolidation plus layout spacing fixes.
+
+### Classes Eliminated (~40 total, ~300 lines removed)
+
+- [x] Payment stat classes → shared `stat-label`/`stat-value`
+- [x] Invoice tab classes (`invtab-*`) → shared patterns + `pd-clickable-row`
+- [x] Content checklist classes → `portal-card-header`, `<ProgressBar>`
+- [x] Empty state variants → `empty-state--compact`, `empty-state--full`
+- [x] `portal-card-actions` → `action-group` (7 components)
+- [x] `note-card-header`, `project-card-header` → `portal-card-header`
+- [x] `form-actions` → `action-group`
+- [x] `note-meta` duplicate definition → merged
+- [x] `kanban-column-title-wrapper` → `kanban-column-header`
+- [x] `task-due-date` + `task-assignee` → `task-meta-item`
+- [x] 18 dead classes in requests.css (131 lines)
+- [x] detail-list variants consolidated via CSS variable
+
+### Layout Fixes
+
+- [x] `.section` owned exclusively by `PortalLayout.tsx` — route components use `.subsection`
+- [x] Fixed double-nesting: PortalSettings, ProjectDetail, ClientDetail, DataQualityDashboard
+- [x] `.section` top padding: `var(--portal-section-gap)` (24px uniform)
+- [x] `.section` bottom padding: `var(--space-8)` (64px)
+- [x] Dropdown shadows removed in admin portal (`--shadow-dropdown: none`)
 
 ---
 
