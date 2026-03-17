@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useMemo } from 'react';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { useActiveSubtab, useSetSubtab } from '@react/contexts/SubtabContext';
 import { LoadingState } from '@react/factories';
 
 // Lazy load child components
@@ -21,29 +22,10 @@ type SettingsSubtab = 'overview' | 'configuration' | 'workflows' | 'email-templa
 
 export function SettingsManager({ getAuthToken, showNotification, onNavigate }: SettingsManagerProps) {
   const containerRef = useFadeIn();
-  const [activeSubtab, setActiveSubtab] = useState<SettingsSubtab>('overview');
-
-  // Listen for subtab change events from header
-  useEffect(() => {
-    function handleSubtabChange(e: CustomEvent<{ subtab: string }>) {
-      const subtab = e.detail.subtab as SettingsSubtab;
-      const validSubtabs: SettingsSubtab[] = ['overview', 'configuration', 'workflows', 'email-templates', 'audit-log', 'system-health'];
-      if (validSubtabs.includes(subtab)) {
-        setActiveSubtab(subtab);
-      }
-    }
-
-    document.addEventListener('systemSubtabChange', handleSubtabChange as EventListener);
-    return () => {
-      document.removeEventListener('systemSubtabChange', handleSubtabChange as EventListener);
-    };
-  }, []);
+  const activeSubtab = useActiveSubtab() as SettingsSubtab;
+  const setSubtab = useSetSubtab();
 
   const sharedProps = useMemo(() => ({ onNavigate, getAuthToken, showNotification }), [onNavigate, getAuthToken, showNotification]);
-
-  const handleSubtabNavigate = useCallback((subtab: string) => {
-    document.dispatchEvent(new CustomEvent('systemSubtabChange', { detail: { subtab } }));
-  }, []);
 
   // Configuration subtab
   if (activeSubtab === 'configuration') {
@@ -94,7 +76,7 @@ export function SettingsManager({ getAuthToken, showNotification, onNavigate }: 
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">
       <React.Suspense fallback={<LoadingState message="Loading settings overview..." />}>
-        <SettingsOverview getAuthToken={getAuthToken} onSubtabNavigate={handleSubtabNavigate} />
+        <SettingsOverview getAuthToken={getAuthToken} onSubtabNavigate={setSubtab} />
       </React.Suspense>
     </div>
   );

@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { useActiveSubtab, useSetSubtab } from '@react/contexts/SubtabContext';
 import { LoadingState } from '@react/factories';
 
 // Lazy load child components
@@ -20,28 +20,16 @@ type WorkSubtab = 'overview' | 'projects' | 'tasks' | 'ad-hoc-requests';
 export function WorkDashboard({ onNavigate, getAuthToken, showNotification }: WorkDashboardProps) {
   const containerRef = useFadeIn();
   const location = useLocation();
-  const [activeSubtab, setActiveSubtab] = useState<WorkSubtab>(() => {
+  const activeSubtab = useActiveSubtab() as WorkSubtab;
+  const setSubtab = useSetSubtab();
+
+  // Honor location.state subtab when navigated from other pages (e.g., overview "View All Tasks")
+  React.useEffect(() => {
     const state = location.state as { subtab?: WorkSubtab } | null;
     if (state?.subtab && ['overview', 'projects', 'tasks', 'ad-hoc-requests'].includes(state.subtab)) {
-      return state.subtab;
+      setSubtab(state.subtab);
     }
-    return 'overview';
-  });
-
-  // Listen for subtab change events from header
-  useEffect(() => {
-    function handleSubtabChange(e: CustomEvent<{ subtab: string }>) {
-      const subtab = e.detail.subtab as WorkSubtab;
-      if (['overview', 'projects', 'tasks', 'ad-hoc-requests'].includes(subtab)) {
-        setActiveSubtab(subtab);
-      }
-    }
-
-    document.addEventListener('workSubtabChange', handleSubtabChange as EventListener);
-    return () => {
-      document.removeEventListener('workSubtabChange', handleSubtabChange as EventListener);
-    };
-  }, []);
+  }, [location.state, setSubtab]);
 
   // Render individual views for specific subtabs
   if (activeSubtab === 'projects') {

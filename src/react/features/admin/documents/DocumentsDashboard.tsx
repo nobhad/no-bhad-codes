@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { useActiveSubtab } from '@react/contexts/SubtabContext';
 import { LoadingState } from '@react/factories';
 
 // Lazy load child components
@@ -19,22 +19,7 @@ type DocumentsSubtab = 'overview' | 'invoices' | 'contracts' | 'document-request
 
 export function DocumentsDashboard({ onNavigate, getAuthToken, showNotification }: DocumentsDashboardProps) {
   const containerRef = useFadeIn();
-  const [activeSubtab, setActiveSubtab] = useState<DocumentsSubtab>('overview');
-
-  // Listen for subtab change events from header
-  useEffect(() => {
-    function handleSubtabChange(e: CustomEvent<{ subtab: string }>) {
-      const subtab = e.detail.subtab as DocumentsSubtab;
-      if (['overview', 'invoices', 'contracts', 'document-requests', 'questionnaires'].includes(subtab)) {
-        setActiveSubtab(subtab);
-      }
-    }
-
-    document.addEventListener('documentsSubtabChange', handleSubtabChange as EventListener);
-    return () => {
-      document.removeEventListener('documentsSubtabChange', handleSubtabChange as EventListener);
-    };
-  }, []);
+  const activeSubtab = useActiveSubtab() as DocumentsSubtab;
 
   // Render individual views for specific subtabs
   if (activeSubtab === 'invoices') {
