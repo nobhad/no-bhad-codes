@@ -220,6 +220,13 @@ export const API_ENDPOINTS = {
     // Webhooks
     WEBHOOKS: '/api/v1/webhooks',
 
+    // AI Features
+    AI_DRAFT_PROPOSAL: '/api/admin/ai/draft-proposal',
+    AI_DRAFT_EMAIL: '/api/admin/ai/draft-email',
+    AI_USAGE: '/api/admin/ai/usage',
+    AI_USAGE_HISTORY: '/api/admin/ai/usage/history',
+    AI_STATUS: '/api/admin/ai/status',
+
     // Data Quality
     DATA_QUALITY: '/api/data-quality',
     DATA_QUALITY_DUPLICATES_SCAN: '/api/data-quality/duplicates/scan',
