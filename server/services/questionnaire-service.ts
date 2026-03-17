@@ -10,8 +10,10 @@
 
 import { getDatabase } from '../database/init.js';
 import { userService } from './user-service.js';
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument, rgb } from 'pdf-lib';
 import { BUSINESS_INFO, getPdfLogoBytes } from '../config/business.js';
+import { PDF_SPACING } from '../config/pdf-styles.js';
+import { getRegularFontBytes, getBoldFontBytes, registerFontkit } from '../utils/pdf-utils.js';
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import { parseIfString } from '../utils/safe-json.js';
@@ -645,9 +647,10 @@ class QuestionnaireService {
     let page = pdfDoc.addPage([612, 792]); // LETTER size
     const { width, height } = page.getSize();
 
-    // Embed fonts
-    const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    // Register fontkit and embed Inconsolata
+    registerFontkit(pdfDoc);
+    const helvetica = await pdfDoc.embedFont(getRegularFontBytes());
+    const helveticaBold = await pdfDoc.embedFont(getBoldFontBytes());
 
     // Colors
     const black = rgb(0, 0, 0);
@@ -822,7 +825,7 @@ class QuestionnaireService {
     page.drawLine({
       start: { x: leftMargin, y: y },
       end: { x: rightMargin, y: y },
-      thickness: 0.5,
+      thickness: PDF_SPACING.underlineThickness,
       color: rgb(0.9, 0.9, 0.9)
     });
     y -= 25;
@@ -929,7 +932,7 @@ class QuestionnaireService {
       p.drawLine({
         start: { x: leftMargin, y: bottomMargin },
         end: { x: rightMargin, y: bottomMargin },
-        thickness: 0.5,
+        thickness: PDF_SPACING.underlineThickness,
         color: rgb(0.8, 0.8, 0.8)
       });
 
