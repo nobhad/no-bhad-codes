@@ -168,8 +168,19 @@ async function handleProposalAccepted(data: {
       metadata: { projectId, proposalId }
     });
 
-    // Generate tier-aware milestones and tasks
+    // Generate tier-aware milestones and tasks (idempotent — skip if milestones already exist)
     try {
+      const existingMilestone = await db.get(
+        'SELECT id FROM milestones WHERE project_id = ? LIMIT 1',
+        [projectId]
+      ) as { id: number } | undefined;
+
+      if (existingMilestone) {
+        logger.info('proposal.accepted: Milestones already exist, skipping generation', {
+          category: 'workflow',
+          metadata: { projectId, existingMilestoneId: existingMilestone.id }
+        });
+      } else {
       // Fetch proposal features for tier-aware generation
       const { proposalService } = await import('./proposal-service.js');
       const features = await proposalService.getProposalFeatures(proposalId);
@@ -194,6 +205,7 @@ async function handleProposalAccepted(data: {
           tasksCreated: milestoneResult.tasksCreated
         }
       });
+      } // end else (no existing milestones)
     } catch (milestoneError) {
       logger.error('[WorkflowAutomation] proposal.accepted: Failed to generate milestones', {
         error: milestoneError instanceof Error ? milestoneError : undefined
@@ -1315,6 +1327,68 @@ async function handleMaintenanceActivation(data: {
 // Registration
 // ============================================
 
+// ============================================
+// Agreement & Onboarding Auto-Complete
+// ============================================
+
+/**
+ * Map workflow event types to entity types used by agreement/onboarding steps.
+ */
+const EVENT_TO_ENTITY_TYPE: Record<string, string> = {
+  'contract.signed': 'contract',
+  'invoice.paid': 'invoice',
+  'questionnaire.completed': 'questionnaire',
+  'proposal.accepted': 'proposal'
+};
+
+/**
+ * Handler: Auto-complete agreement steps when matching entities complete.
+ */
+async function handleAutoCompleteAgreementStep(data: {
+  entityId?: number | null;
+  triggeredBy?: string;
+}): Promise<void> {
+  if (!data.entityId || !data.triggeredBy) return;
+
+  const entityType = EVENT_TO_ENTITY_TYPE[data.triggeredBy];
+  if (!entityType) return;
+
+  try {
+    const { agreementService } = await import('./agreement-service.js');
+    await agreementService.autoCompleteByEntity(entityType, data.entityId);
+  } catch (error) {
+    logger.error('[WorkflowAutomation] Failed to auto-complete agreement step', {
+      error: error instanceof Error ? error : undefined
+    });
+  }
+}
+
+/**
+ * Handler: Auto-complete onboarding steps when matching entities complete.
+ */
+async function handleAutoCompleteOnboardingStep(data: {
+  entityId?: number | null;
+  triggeredBy?: string;
+}): Promise<void> {
+  if (!data.entityId || !data.triggeredBy) return;
+
+  const entityType = EVENT_TO_ENTITY_TYPE[data.triggeredBy];
+  if (!entityType) return;
+
+  try {
+    const { onboardingChecklistService } = await import('./onboarding-checklist-service.js');
+    await onboardingChecklistService.autoCompleteByEntity(entityType, data.entityId);
+  } catch (error) {
+    logger.error('[WorkflowAutomation] Failed to auto-complete onboarding step', {
+      error: error instanceof Error ? error : undefined
+    });
+  }
+}
+
+// ============================================
+// Registration
+// ============================================
+
 /**
  * Register all workflow automation handlers
  * Call this function during server startup
@@ -1338,6 +1412,15 @@ export function registerWorkflowAutomations(): void {
   // Project completed -> Activate maintenance tier
   workflowTriggerService.on('project.status_changed', handleMaintenanceActivation);
 
+  // Agreement & Onboarding Auto-Complete Handlers
+  workflowTriggerService.on('contract.signed', handleAutoCompleteAgreementStep);
+  workflowTriggerService.on('invoice.paid', handleAutoCompleteAgreementStep);
+  workflowTriggerService.on('questionnaire.completed', handleAutoCompleteAgreementStep);
+
+  workflowTriggerService.on('contract.signed', handleAutoCompleteOnboardingStep);
+  workflowTriggerService.on('invoice.paid', handleAutoCompleteOnboardingStep);
+  workflowTriggerService.on('questionnaire.completed', handleAutoCompleteOnboardingStep);
+
   // Client Notification Handlers
   workflowTriggerService.on('proposal.accepted', notifyProposalAccepted);
   workflowTriggerService.on('contract.signed', notifyContractSigned);
@@ -1347,7 +1430,7 @@ export function registerWorkflowAutomations(): void {
   workflowTriggerService.on('invoice.paid', notifyInvoicePaid);
   workflowTriggerService.on('project.milestone_completed', notifyMilestoneCompleted);
 
-  logger.info('Registered 12 automation handlers', {
+  logger.info('Registered 18 automation handlers', {
     category: 'workflow',
     metadata: {
       handlers: [
@@ -1362,7 +1445,13 @@ export function registerWorkflowAutomations(): void {
         'deliverable.approved -> Notify client',
         'questionnaire.completed -> Notify client',
         'document_request.approved -> Notify client',
-        'invoice.paid -> Notify client'
+        'invoice.paid -> Notify client',
+        'contract.signed -> Auto-complete agreement step',
+        'invoice.paid -> Auto-complete agreement step',
+        'questionnaire.completed -> Auto-complete agreement step',
+        'contract.signed -> Auto-complete onboarding step',
+        'invoice.paid -> Auto-complete onboarding step',
+        'questionnaire.completed -> Auto-complete onboarding step'
       ]
     }
   });
