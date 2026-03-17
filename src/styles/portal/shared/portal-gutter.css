@@ -27,7 +27,13 @@
    Only .subsection is excluded (pure layout wrapper).
    ===================================================== */
 
-.portal .portal-global-header,
+/* Header: gutter on row children, not wrapper (borders span full width) */
+.portal .portal-global-header > * {
+  padding-left: var(--content-gutter);
+  padding-right: var(--content-gutter);
+  box-sizing: border-box;
+}
+
 .portal .sidebar-content,
 .portal .dashboard-content > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content):not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(.data-table-card):not(.project-overview-grid):not(.overview-grid):not(.client-overview-grid):not(.analytics-card-grid):not(.kpi-cards-row):not(button),
 .portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > *:not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(.data-table-card):not(.project-overview-grid):not(.overview-grid):not(.client-overview-grid):not(.analytics-card-grid):not(.kpi-cards-row):not(button) {

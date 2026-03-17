@@ -94,11 +94,36 @@
   border-right: var(--border-width-thick) solid var(--color-border-primary);
 }
 
-/* Gutter on panel children — even padding on all direct children */
-.details-panel > * {
+/* Gutter on panel children, not wrappers.
+   Headers (.details-header, .detail-title-row) push gutter to their children.
+   Other direct children get gutter directly. */
+.details-panel > *:not(.details-header):not(.detail-title-row) {
   padding-left: var(--content-gutter);
   padding-right: var(--content-gutter);
   box-sizing: border-box;
+}
+
+/* Header-type rows: gutter on children so borders span full width */
+.details-panel > :is(.details-header, .detail-title-row) {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.details-panel > :is(.details-header, .detail-title-row) > *:first-child {
+  padding-left: var(--content-gutter);
+}
+
+.details-panel > :is(.details-header, .detail-title-row) > *:last-child {
+  padding-right: var(--content-gutter);
+}
+
+/* Top/bottom breathing room */
+.details-panel > *:first-child {
+  padding-top: var(--space-3);
+}
+
+.details-panel > *:last-child {
+  padding-bottom: var(--space-3);
 }
 
 /* Headings inside panel use portal serif font, not global Acme */
@@ -142,11 +167,26 @@
   display: none;
 }
 
+/* Panel uses flex column with gap for consistent vertical spacing */
+.details-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
 .details-panel .details-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-4);
+}
+
+/* Content area fills remaining space and scrolls */
+.details-panel .details-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1;
+  overflow-y: auto;
 }
 
 .details-panel .close-btn {
