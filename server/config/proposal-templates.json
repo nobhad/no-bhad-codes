@@ -1,0 +1,802 @@
+{
+  "version": "3.0.0",
+  "lastUpdated": "2026-03-16",
+  "description": "Proposal template system. Tiers are built around the client's stated budget — Good uses the low end, Better the middle, Best the high end. AI generates pricing by fitting features to budget.",
+  "budgetGuidance": {
+    "good": {
+      "budgetPosition": "below",
+      "singleBudgetMultiplier": "45% of stated budget",
+      "rangeBudgetMultiplier": "35% of max budget (floored at min)",
+      "description": "Well under budget. Uses existing tools/templates where possible. Essential features only. Client saves money while getting a solid foundation.",
+      "positioning": "The practical choice — saves money, delivers core value. For clients who want to start lean.",
+      "example": "Client says $5,000 → Good tier = ~$2,250"
+    },
+    "better": {
+      "budgetPosition": "at-budget",
+      "singleBudgetMultiplier": "80% of stated budget",
+      "rangeBudgetMultiplier": "60% of max budget",
+      "description": "At or near the stated budget. Custom build with meaningful differentiators. This is the recommended tier — best value for investment.",
+      "positioning": "The recommended choice — this is what the budget was made for. Custom quality, best ROI.",
+      "example": "Client says $5,000 → Better tier = ~$4,000"
+    },
+    "best": {
+      "budgetPosition": "above",
+      "singleBudgetMultiplier": "130% of stated budget",
+      "rangeBudgetMultiplier": "95% of max budget",
+      "description": "Above the stated budget — a stretch option. Everything in Better plus premium tools, extended support, and features that create ongoing value. Justified by the extra value, not pressure. Includes 3 months of Standard maintenance in the tier price.",
+      "positioning": "The complete package — for clients who see the value and want to invest in the full vision.",
+      "example": "Client says $5,000 → Best tier = ~$6,500"
+    }
+  },
+  "projectTypes": {
+    "simple-site": {
+      "displayName": "Simple Website",
+      "description": "Landing pages, single-page sites, personal sites",
+      "typicalBudgetRange": "$500 - $3,000",
+      "estimatedTimeline": "2-4 weeks",
+      "tiers": {
+        "good": {
+          "name": "Good",
+          "displayName": "Essential",
+          "scope": "Template-based or minimal custom design. 1-3 pages. Essential functionality only. Clean, professional, and functional.",
+          "estimatedWeeks": "1-2",
+          "deliverables": ["Responsive website (1-3 pages)", "Contact form", "Basic SEO setup", "User guide document"],
+          "maintenanceInclusion": {
+            "included": "none",
+            "description": "No maintenance included. Optional add-on available.",
+            "recommendedOption": "diy",
+            "availableOptions": ["diy", "essential"]
+          },
+          "features": [
+            { "id": "responsive-design", "name": "Responsive Design", "category": "design" },
+            { "id": "template-based-design", "name": "Template-Based Design", "category": "design" },
+            { "id": "mobile-optimization", "name": "Mobile Optimization (Touch Targets, Tappable Links)", "category": "design" },
+            { "id": "contact-form", "name": "Contact Form", "category": "development" },
+            { "id": "ssl-setup", "name": "SSL Certificate & HTTPS", "category": "development" },
+            { "id": "hosting-deployment", "name": "Hosting & Deployment", "category": "development" },
+            { "id": "basic-seo", "name": "Basic SEO (Meta Tags, H1s, Alt Text)", "category": "marketing" },
+            { "id": "analytics-setup", "name": "Analytics Setup", "category": "marketing" },
+            { "id": "user-guide", "name": "User Guide Document", "category": "support" },
+            { "id": "30min-training", "name": "30-Minute Training Call", "category": "support" }
+          ]
+        },
+        "better": {
+          "name": "Better",
+          "displayName": "Custom",
+          "scope": "Fully custom design with no template constraints. 3-5 pages. Custom animations, simple content management, enhanced SEO. The sweet spot.",
+          "estimatedWeeks": "2-3",
+          "includesAllFrom": "good",
+          "deliverables": ["Custom responsive website (3-5 pages)", "GSAP scroll animations", "Simple content management", "Enhanced SEO setup", "Training session", "30-day post-launch support"],
+          "maintenanceInclusion": {
+            "included": "none",
+            "description": "Maintenance not included in project price. Optional plans available.",
+            "recommendedOption": "essential",
+            "availableOptions": ["diy", "essential", "standard"]
+          },
+          "features": [
+            { "id": "custom-design", "name": "Fully Custom Design (No Templates)", "category": "design" },
+            { "id": "gsap-animations", "name": "Custom GSAP Scroll Animations", "category": "design" },
+            { "id": "design-revisions-1", "name": "1 Round of Design Revisions", "category": "design" },
+            { "id": "content-management", "name": "Simple Content Management (Edit Without Code)", "category": "development" },
+            { "id": "performance-optimization", "name": "Performance Optimization (Core Web Vitals)", "category": "development" },
+            { "id": "free-hosting", "name": "Free Hosting Setup (Netlify/Vercel)", "category": "development" },
+            { "id": "enhanced-seo", "name": "Enhanced SEO (Schema Markup, Search Console)", "category": "marketing" },
+            { "id": "social-media-integration", "name": "Social Media Integration", "category": "marketing" },
+            { "id": "code-ownership", "name": "Full Source Code Ownership", "category": "support" },
+            { "id": "45min-training", "name": "45-Minute Training Session", "category": "support" },
+            { "id": "30day-support", "name": "30-Day Post-Launch Bug Fixes", "category": "support" }
+          ]
+        },
+        "best": {
+          "name": "Best",
+          "displayName": "Premium",
+          "scope": "Everything in Custom plus premium animations, blog, advanced analytics, and extended support. For clients who want the complete package.",
+          "estimatedWeeks": "3-4",
+          "includesAllFrom": "better",
+          "deliverables": ["Premium custom website (5-8 pages)", "Advanced GSAP animations", "Blog with scheduling", "Custom analytics dashboard", "Extended support package", "Brand guidelines document"],
+          "maintenanceInclusion": {
+            "included": "standard",
+            "includedDuration": "3 months",
+            "description": "3 months of Standard maintenance included (security updates, content updates, performance monitoring). After 3 months, client can renew or downgrade.",
+            "recommendedOption": "standard",
+            "availableOptions": ["diy", "essential", "standard", "premium"]
+          },
+          "features": [
+            { "id": "advanced-gsap-animations", "name": "Advanced GSAP Animations (Parallax, Page Transitions, Interactive Elements)", "category": "design" },
+            { "id": "design-revisions-2", "name": "2 Rounds of Design Revisions (Instead of 1)", "category": "design" },
+            { "id": "brand-guidelines", "name": "Brand Guidelines Document", "category": "design" },
+            { "id": "blog-setup", "name": "Blog with Scheduling, Categories, Tags, Drafts", "category": "development" },
+            { "id": "newsletter-integration", "name": "Newsletter Signup Integration", "category": "development" },
+            { "id": "custom-analytics", "name": "Custom Analytics Dashboard (No Third-Party Dependency)", "category": "marketing" },
+            { "id": "60min-training", "name": "60-Minute Training Session", "category": "support" },
+            { "id": "extended-support-3mo", "name": "3 Months Priority Support (24hr Response) + Quarterly Check-Ins", "category": "support" }
+          ]
+        }
+      },
+      "addons": [
+        { "id": "logo-design", "name": "Logo Design", "description": "Custom logo with 2-3 concept options and revisions", "price": 500, "category": "design" },
+        { "id": "professional-copywriting", "name": "Professional Copywriting", "description": "SEO-optimized copy for all pages", "price": 400, "category": "marketing" },
+        { "id": "cookie-consent", "name": "Cookie Consent Banner", "description": "GDPR-compliant cookie consent with preferences", "price": 100, "category": "development" },
+        { "id": "domain-hosting-setup", "name": "Domain & Hosting Setup", "description": "Domain registration, DNS configuration, and hosting setup", "price": 100, "category": "development" },
+        { "id": "video-backgrounds", "name": "Video Backgrounds", "description": "Hero sections with optimized video backgrounds", "price": 250, "category": "design" },
+        { "id": "booking-system", "name": "Booking/Scheduling System", "description": "Online appointment booking with calendar integration", "price": 400, "category": "development" },
+        { "id": "custom-forms", "name": "Custom Forms", "description": "Quote request, surveys, or intake forms beyond contact", "price": 200, "category": "development" },
+        { "id": "pdf-generator", "name": "PDF Generator System", "description": "Branded PDF generation for proposals, assessments, or reports", "price": 500, "category": "development" }
+      ]
+    },
+    "business-site": {
+      "displayName": "Business Website",
+      "description": "Professional business websites with multiple pages, service showcase, and lead generation",
+      "typicalBudgetRange": "$2,000 - $8,000",
+      "estimatedTimeline": "3-8 weeks",
+      "tiers": {
+        "good": {
+          "name": "Good",
+          "displayName": "Essential",
+          "scope": "Polished template refresh or minimal custom build. Fix what's broken, make it professional. Essential pages, accessibility fixes, mobile optimization. Gets the business online properly.",
+          "estimatedWeeks": "2-3",
+          "deliverables": ["Responsive business website (5-8 pages)", "Accessibility fixes (WCAG AA)", "Mobile optimization", "Basic SEO setup", "User guide + training call"],
+          "maintenanceInclusion": {
+            "included": "none",
+            "description": "No maintenance included. Optional add-on available.",
+            "recommendedOption": "diy",
+            "availableOptions": ["diy", "essential"]
+          },
+          "features": [
+            { "id": "responsive-design", "name": "Responsive Design", "category": "design" },
+            { "id": "template-based-design", "name": "Template-Based or Light Custom Design", "category": "design" },
+            { "id": "mobile-optimization", "name": "Mobile Optimization (Touch Targets, Tappable Links)", "category": "design" },
+            { "id": "accessibility-fixes", "name": "Accessibility Fixes (WCAG AA Compliance)", "category": "development" },
+            { "id": "broken-link-fixes", "name": "Fix Broken Links & Navigation Consistency", "category": "development" },
+            { "id": "contact-form", "name": "Contact Form", "category": "development" },
+            { "id": "ssl-setup", "name": "SSL Certificate & HTTPS", "category": "development" },
+            { "id": "hosting-deployment", "name": "Hosting & Deployment", "category": "development" },
+            { "id": "basic-seo", "name": "Basic SEO (H1s, Meta Descriptions, Alt Text, Image Optimization)", "category": "marketing" },
+            { "id": "analytics-setup", "name": "Analytics Setup", "category": "marketing" },
+            { "id": "basic-animations", "name": "Basic Animations (Fade-in, Hover States)", "category": "design" },
+            { "id": "user-guide", "name": "User Guide Document", "category": "support" },
+            { "id": "30min-training", "name": "30-Minute Training Call", "category": "support" }
+          ]
+        },
+        "better": {
+          "name": "Better",
+          "displayName": "Custom",
+          "scope": "Fully custom website built from scratch. No templates, no theme constraints. Custom GSAP animations, simplified logo variant for mobile, responsive images, gallery, enhanced SEO, simple CMS, blog, free hosting, full code ownership. This is the recommended tier.",
+          "estimatedWeeks": "4-6",
+          "includesAllFrom": "good",
+          "deliverables": ["Fully custom responsive website (8-12 pages)", "Custom GSAP scroll animations", "Simple CMS (edit without code)", "Blog with scheduling and categories", "Gallery with swipe gestures", "Enhanced SEO + Search Console", "Free hosting setup", "Full source code ownership", "Training session + 30-day bug fixes"],
+          "maintenanceInclusion": {
+            "included": "none",
+            "description": "Maintenance not included in project price. Optional plans available.",
+            "recommendedOption": "essential",
+            "availableOptions": ["diy", "essential", "standard"]
+          },
+          "features": [
+            { "id": "custom-design", "name": "Fully Custom Design (No Templates or Theme Constraints)", "category": "design" },
+            { "id": "gsap-animations", "name": "Custom GSAP Animations (Scroll-Triggered, Parallax, Nature-Inspired Transitions)", "category": "design" },
+            { "id": "simplified-logo-mobile", "name": "Simplified Logo Variant for Mobile", "category": "design" },
+            { "id": "design-revisions-1", "name": "1 Round of Design Revisions", "category": "design" },
+            { "id": "responsive-images", "name": "Responsive Images with Lazy Loading", "category": "development" },
+            { "id": "gallery-swipe", "name": "Gallery with Swipe Gestures", "category": "development" },
+            { "id": "simple-cms", "name": "Simple CMS (Edit Text and Images Without Code)", "category": "development" },
+            { "id": "blog-setup", "name": "Blog with Scheduling, Categories, Tags, Drafts", "category": "development" },
+            { "id": "performance-optimization", "name": "Performance Optimization (Page Speed, Core Web Vitals)", "category": "development" },
+            { "id": "free-hosting", "name": "Free Hosting (Netlify/Vercel) — No Monthly Platform Fees", "category": "development" },
+            { "id": "enhanced-seo", "name": "Enhanced SEO (Schema Markup, Google Search Console, Page Speed Optimization)", "category": "marketing" },
+            { "id": "custom-analytics", "name": "Custom Analytics Dashboard (No Third-Party Dependency)", "category": "marketing" },
+            { "id": "social-media-integration", "name": "Social Media Integration", "category": "marketing" },
+            { "id": "code-ownership", "name": "Full Source Code Ownership", "category": "support" },
+            { "id": "45min-training", "name": "45-Minute Training Session", "category": "support" },
+            { "id": "30day-support", "name": "30-Day Post-Launch Bug Fixes", "category": "support" }
+          ]
+        },
+        "best": {
+          "name": "Best",
+          "displayName": "Premium",
+          "scope": "Everything in Custom plus PDF generators (proposals, invoices, contracts), email signature templates, gallery filtering, contact form with service selection, newsletter integration, enhanced animations with seasonal variations, enhanced analytics with form tracking, extended 3-month support, and brand guidelines. The complete package.",
+          "estimatedWeeks": "6-8",
+          "includesAllFrom": "better",
+          "deliverables": ["Everything in Custom tier", "PDF generator system (proposals, invoices, contracts)", "Email signature templates", "Enhanced analytics with email summaries", "Newsletter integration", "Brand guidelines document", "Extended 3-month priority support"],
+          "maintenanceInclusion": {
+            "included": "standard",
+            "includedDuration": "3 months",
+            "description": "3 months of Standard maintenance included (security updates, content updates, performance monitoring). After 3 months, client can renew or downgrade.",
+            "recommendedOption": "standard",
+            "availableOptions": ["diy", "essential", "standard", "premium"]
+          },
+          "features": [
+            { "id": "pdf-generator", "name": "PDF Generator System (Branded Proposals, Assessments, Packages)", "category": "development" },
+            { "id": "invoice-generator", "name": "Invoice Generator", "category": "development" },
+            { "id": "contract-generator", "name": "Contract Generator (Editable Signature Fields)", "category": "development" },
+            { "id": "email-signature-templates", "name": "Email Signature Templates", "category": "development" },
+            { "id": "gallery-filtering", "name": "Gallery Filtering by Project Type", "category": "development" },
+            { "id": "contact-form-service-selection", "name": "Contact Form with Service Selection", "category": "development" },
+            { "id": "newsletter-integration", "name": "Newsletter Signup Integration", "category": "marketing" },
+            { "id": "design-revisions-2", "name": "2 Rounds of Design Revisions (Instead of 1)", "category": "design" },
+            { "id": "enhanced-animations", "name": "Enhanced Animations (Seasonal Variations, Interactive Elements)", "category": "design" },
+            { "id": "enhanced-analytics", "name": "Enhanced Analytics (Form Tracking, Service Interest, Referral Breakdown, Email Summaries)", "category": "marketing" },
+            { "id": "brand-guidelines", "name": "Brand Guidelines Document", "category": "design" },
+            { "id": "60min-training", "name": "60-Minute Training Session", "category": "support" },
+            { "id": "extended-support-3mo", "name": "3 Months Priority Support (24hr Response) + Quarterly Check-Ins", "category": "support" }
+          ]
+        }
+      },
+      "addons": [
+        { "id": "logo-design", "name": "Logo Design", "description": "Custom logo with 2-3 concept options and revisions", "price": 700, "category": "design" },
+        { "id": "professional-copywriting", "name": "Professional Copywriting", "description": "SEO-optimized copy for all pages and service descriptions", "price": 600, "category": "marketing" },
+        { "id": "multi-language", "name": "Multi-Language Support", "description": "Full site translation with language switcher", "price": 500, "category": "development" },
+        { "id": "live-chat", "name": "Live Chat Widget", "description": "Real-time customer support chat integration", "price": 200, "category": "development" },
+        { "id": "cookie-consent", "name": "Cookie Consent Banner", "description": "GDPR-compliant cookie consent with preferences", "price": 125, "category": "development" },
+        { "id": "booking-system", "name": "Booking/Scheduling System", "description": "Online appointment booking with calendar integration", "price": 500, "category": "development" },
+        { "id": "custom-forms", "name": "Custom Forms", "description": "Quote request, wholesale inquiry, or intake forms", "price": 300, "category": "development" },
+        { "id": "video-backgrounds", "name": "Video Backgrounds", "description": "Hero sections with optimized video backgrounds or showreels", "price": 300, "category": "design" },
+        { "id": "testimonials-section", "name": "Testimonials Section", "description": "Client testimonials with carousel or grid layout", "price": 150, "category": "development" },
+        { "id": "domain-hosting-setup", "name": "Domain & Hosting Setup", "description": "Domain registration, DNS configuration, and hosting setup", "price": 150, "category": "development" }
+      ]
+    },
+    "ecommerce-site": {
+      "displayName": "E-Commerce Website",
+      "description": "Online stores with product management and payment processing",
+      "typicalBudgetRange": "$3,000 - $15,000",
+      "estimatedTimeline": "4-10 weeks",
+      "tiers": {
+        "good": {
+          "name": "Good",
+          "displayName": "Essential",
+          "scope": "Basic online store with essential e-commerce functionality. Template-based design, 10-20 products, single payment gateway. Gets you selling online quickly.",
+          "estimatedWeeks": "3-4",
+          "deliverables": ["Responsive online store (5-8 pages)", "Product catalog (10-20 products)", "Shopping cart & checkout", "Stripe payment integration", "Order management", "User guide + training call"],
+          "maintenanceInclusion": {
+            "included": "none",
+            "description": "No maintenance included. Optional add-on available.",
+            "recommendedOption": "diy",
+            "availableOptions": ["diy", "essential"]
+          },
+          "features": [
+            { "id": "responsive-design", "name": "Responsive Design", "category": "design" },
+            { "id": "template-based-design", "name": "Template-Based Store Design", "category": "design" },
+            { "id": "mobile-optimization", "name": "Mobile Optimization (Touch Targets, Tappable Links)", "category": "design" },
+            { "id": "product-catalog", "name": "Product Catalog (10-20 Products)", "category": "development" },
+            { "id": "shopping-cart", "name": "Shopping Cart", "category": "development" },
+            { "id": "payment-gateway", "name": "Payment Gateway (Stripe)", "category": "development" },
+            { "id": "order-management", "name": "Basic Order Management", "category": "development" },
+            { "id": "contact-form", "name": "Contact Form", "category": "development" },
+            { "id": "ssl-setup", "name": "SSL Certificate & HTTPS", "category": "development" },
+            { "id": "hosting-deployment", "name": "Hosting & Deployment", "category": "development" },
+            { "id": "basic-seo", "name": "Basic SEO (Meta Tags, Product Descriptions, Alt Text)", "category": "marketing" },
+            { "id": "analytics-setup", "name": "Analytics Setup", "category": "marketing" },
+            { "id": "user-guide", "name": "User Guide Document", "category": "support" },
+            { "id": "30min-training", "name": "30-Minute Training Call", "category": "support" }
+          ]
+        },
+        "better": {
+          "name": "Better",
+          "displayName": "Custom",
+          "scope": "Full-featured custom store. Unlimited products, inventory management, multiple payment options, discount codes, product reviews, automated emails. Custom design with GSAP animations. The recommended e-commerce tier.",
+          "estimatedWeeks": "5-7",
+          "includesAllFrom": "good",
+          "deliverables": ["Custom responsive store (8-15 pages)", "Unlimited product catalog", "Inventory management", "Multiple payment gateways", "Discount codes & promotions", "Product reviews & ratings", "Automated email notifications", "Training session + 30-day support"],
+          "maintenanceInclusion": {
+            "included": "none",
+            "description": "Maintenance not included in project price. Optional plans available.",
+            "recommendedOption": "essential",
+            "availableOptions": ["diy", "essential", "standard"]
+          },
+          "features": [
+            { "id": "custom-design", "name": "Custom Store Design (No Templates)", "category": "design" },
+            { "id": "gsap-animations", "name": "Custom GSAP Product Animations", "category": "design" },
+            { "id": "design-revisions-1", "name": "1-2 Rounds of Design Revisions", "category": "design" },
+            { "id": "product-catalog-unlimited", "name": "Full Product Catalog (Unlimited Products)", "category": "development" },
+            { "id": "shopping-cart-saved", "name": "Shopping Cart with Saved Items", "category": "development" },
+            { "id": "multiple-payment-gateways", "name": "Multiple Payment Gateways (Stripe, PayPal)", "category": "development" },
+            { "id": "inventory-management", "name": "Inventory Management & Low Stock Alerts", "category": "development" },
+            { "id": "order-management-full", "name": "Full Order Management & Status Tracking", "category": "development" },
+            { "id": "discount-codes", "name": "Discount Codes & Promotions", "category": "development" },
+            { "id": "product-reviews", "name": "Product Reviews & Ratings", "category": "development" },
+            { "id": "accessibility-compliance", "name": "Accessibility Compliance (WCAG AA)", "category": "development" },
+            { "id": "performance-optimization", "name": "Performance Optimization (Core Web Vitals)", "category": "development" },
+            { "id": "free-hosting", "name": "Free Hosting (Netlify/Vercel)", "category": "development" },
+            { "id": "enhanced-seo", "name": "Enhanced SEO (Product Schema, Rich Snippets)", "category": "marketing" },
+            { "id": "ecommerce-analytics", "name": "Analytics with E-Commerce Tracking", "category": "marketing" },
+            { "id": "email-notifications", "name": "Automated Email Notifications (Order Confirmation, Shipping)", "category": "marketing" },
+            { "id": "social-meta-tags", "name": "Social Media Meta Tags (Open Graph)", "category": "marketing" },
+            { "id": "code-ownership", "name": "Full Source Code Ownership", "category": "support" },
+            { "id": "45min-training", "name": "45-Minute Training Session", "category": "support" },
+            { "id": "30day-support", "name": "30-Day Post-Launch Bug Fixes", "category": "support" }
+          ]
+        },
+        "best": {
+          "name": "Best",
+          "displayName": "Premium",
+          "scope": "Enterprise-grade store. Everything in Custom plus subscriptions, customer accounts, shipping calculator, tax automation, marketing automation, custom analytics, advanced animations. The complete e-commerce solution.",
+          "estimatedWeeks": "8-10",
+          "includesAllFrom": "better",
+          "deliverables": ["Everything in Custom tier", "Subscription & recurring billing", "Customer accounts & order history", "Shipping calculator & tax automation", "Marketing automation (abandoned cart, win-back)", "Custom analytics dashboard", "Brand guidelines document", "Extended 3-month priority support"],
+          "maintenanceInclusion": {
+            "included": "standard",
+            "includedDuration": "3 months",
+            "description": "3 months of Standard maintenance included (security updates, content updates, performance monitoring). After 3 months, client can renew or downgrade.",
+            "recommendedOption": "standard",
+            "availableOptions": ["diy", "essential", "standard", "premium"]
+          },
+          "features": [
+            { "id": "advanced-gsap-animations", "name": "Advanced GSAP Animations (Product Showcases, Scroll Effects)", "category": "design" },
+            { "id": "design-revisions-3", "name": "3 Rounds of Design Revisions", "category": "design" },
+            { "id": "brand-guidelines", "name": "Brand Guidelines Document", "category": "design" },
+            { "id": "product-variants", "name": "Product Variants (Size, Color, Material)", "category": "development" },
+            { "id": "shopping-cart-wishlists", "name": "Shopping Cart with Wishlists", "category": "development" },
+            { "id": "apple-pay", "name": "Apple Pay Integration", "category": "development" },
+            { "id": "subscription-billing", "name": "Subscription & Recurring Billing", "category": "development" },
+            { "id": "customer-accounts", "name": "Customer Accounts & Order History", "category": "development" },
+            { "id": "shipping-calculator", "name": "Shipping Calculator & Multiple Shipping Options", "category": "development" },
+            { "id": "tax-calculation", "name": "Automated Tax Calculation", "category": "development" },
+            { "id": "discount-gift-cards", "name": "Gift Cards", "category": "development" },
+            { "id": "marketing-automation", "name": "Marketing Automation (Abandoned Cart, Win-Back Emails)", "category": "marketing" },
+            { "id": "custom-analytics-dashboard", "name": "Custom Analytics Dashboard (Sales, Revenue, Conversion)", "category": "marketing" },
+            { "id": "email-notification-suite", "name": "Full Email Notification Suite", "category": "marketing" },
+            { "id": "60min-training", "name": "60-Minute Training Session", "category": "support" },
+            { "id": "extended-support-3mo", "name": "3 Months Priority Support (24hr Response) + Quarterly Check-Ins", "category": "support" }
+          ]
+        }
+      },
+      "addons": [
+        { "id": "newsletter-integration", "name": "Newsletter Integration", "description": "Mailchimp, ConvertKit, or similar for product announcements", "price": 300, "category": "marketing" },
+        { "id": "logo-design", "name": "Logo Design", "description": "Custom logo with 2-3 concept options and revisions", "price": 700, "category": "design" },
+        { "id": "professional-copywriting", "name": "Professional Copywriting", "description": "Product descriptions and page copy", "price": 600, "category": "marketing" },
+        { "id": "multi-language", "name": "Multi-Language Support", "description": "Full site and product translation with language switcher", "price": 600, "category": "development" },
+        { "id": "live-chat", "name": "Live Chat Widget", "description": "Real-time customer support chat", "price": 200, "category": "development" },
+        { "id": "cookie-consent", "name": "Cookie Consent Banner", "description": "GDPR-compliant cookie consent with preferences", "price": 125, "category": "development" },
+        { "id": "social-media-integration", "name": "Social Media Integration", "description": "Instagram shop feed, social sharing, and profile links", "price": 200, "category": "marketing" },
+        { "id": "product-photography", "name": "Product Photography Guide", "description": "Photography guidelines, image specs, and optimization workflow", "price": 200, "category": "design" },
+        { "id": "custom-forms", "name": "Custom Forms", "description": "Quote request, wholesale inquiry, or custom order forms", "price": 300, "category": "development" },
+        { "id": "loyalty-program", "name": "Loyalty/Rewards Program", "description": "Points-based rewards system for repeat customers", "price": 500, "category": "development" },
+        { "id": "inventory-import", "name": "Bulk Product Import", "description": "CSV/spreadsheet import tool for products and inventory", "price": 300, "category": "development" }
+      ]
+    },
+    "web-app": {
+      "displayName": "Web Application",
+      "description": "Custom web applications with user authentication and complex functionality",
+      "typicalBudgetRange": "$5,000 - $25,000",
+      "estimatedTimeline": "6-16 weeks",
+      "tiers": {
+        "good": {
+          "name": "Good",
+          "displayName": "Essential",
+          "scope": "Simple web application with basic CRUD operations. User authentication, form validation, database setup, REST API. Gets a functional MVP launched.",
+          "estimatedWeeks": "5-7",
+          "deliverables": ["Responsive web application (5-10 views)", "User authentication system", "Database setup & schema", "REST API", "User guide + training call"],
+          "maintenanceInclusion": {
+            "included": "none",
+            "description": "No maintenance included. Optional add-on available.",
+            "recommendedOption": "diy",
+            "availableOptions": ["diy", "essential"]
+          },
+          "features": [
+            { "id": "responsive-design", "name": "Responsive Design", "category": "design" },
+            { "id": "mobile-optimization", "name": "Mobile Optimization", "category": "design" },
+            { "id": "clean-ui", "name": "Clean, Functional UI Design", "category": "design" },
+            { "id": "user-authentication", "name": "User Authentication (Login, Register, Password Reset)", "category": "development" },
+            { "id": "basic-crud", "name": "Basic CRUD Operations (Create, Read, Update, Delete)", "category": "development" },
+            { "id": "database-setup", "name": "Database Setup & Schema Design", "category": "development" },
+            { "id": "rest-api", "name": "REST API", "category": "development" },
+            { "id": "form-validation", "name": "Form Validation & Error Handling", "category": "development" },
+            { "id": "ssl-setup", "name": "SSL Certificate & HTTPS", "category": "development" },
+            { "id": "hosting-deployment", "name": "Hosting & Deployment", "category": "development" },
+            { "id": "basic-seo", "name": "Basic SEO Setup", "category": "marketing" },
+            { "id": "analytics-setup", "name": "Analytics Setup", "category": "marketing" },
+            { "id": "user-guide", "name": "User Guide Document", "category": "support" },
+            { "id": "30min-training", "name": "30-Minute Training Call", "category": "support" }
+          ]
+        },
+        "better": {
+          "name": "Better",
+          "displayName": "Custom",
+          "scope": "Full-featured application with role-based access, third-party API integrations, file upload, automated emails, custom analytics. Custom UI with GSAP animations. The recommended app tier.",
+          "estimatedWeeks": "8-12",
+          "includesAllFrom": "good",
+          "deliverables": ["Custom web application (10-20 views)", "Role-based access control", "Third-party API integrations (2-3 services)", "File upload & management", "Custom analytics dashboard", "Training session + 30-day support"],
+          "maintenanceInclusion": {
+            "included": "none",
+            "description": "Maintenance not included in project price. Optional plans available.",
+            "recommendedOption": "essential",
+            "availableOptions": ["diy", "essential", "standard"]
+          },
+          "features": [
+            { "id": "custom-design", "name": "Custom UI Design", "category": "design" },
+            { "id": "gsap-animations", "name": "UI Animations (GSAP)", "category": "design" },
+            { "id": "design-revisions-2", "name": "2 Rounds of Design Revisions", "category": "design" },
+            { "id": "user-auth-oauth", "name": "OAuth Social Login Integration", "category": "development" },
+            { "id": "role-based-access", "name": "Role-Based Access Control (Admin, User, etc.)", "category": "development" },
+            { "id": "full-crud", "name": "Full CRUD Operations with Search & Filtering", "category": "development" },
+            { "id": "database-optimization", "name": "Database Optimization & Indexing", "category": "development" },
+            { "id": "api-documentation", "name": "REST API with Documentation", "category": "development" },
+            { "id": "third-party-integrations", "name": "Third-Party API Integrations (2-3 Services)", "category": "development" },
+            { "id": "file-upload", "name": "File Upload & Management", "category": "development" },
+            { "id": "email-notifications", "name": "Automated Email Notifications", "category": "development" },
+            { "id": "accessibility-compliance", "name": "Accessibility Compliance (WCAG AA)", "category": "development" },
+            { "id": "performance-optimization", "name": "Performance Optimization", "category": "development" },
+            { "id": "free-hosting", "name": "Free Hosting (Netlify/Vercel)", "category": "development" },
+            { "id": "custom-analytics-dashboard", "name": "Custom Analytics Dashboard", "category": "marketing" },
+            { "id": "code-ownership", "name": "Full Source Code Ownership", "category": "support" },
+            { "id": "45min-training", "name": "45-Minute Training Session", "category": "support" },
+            { "id": "30day-support", "name": "30-Day Post-Launch Bug Fixes", "category": "support" }
+          ]
+        },
+        "best": {
+          "name": "Best",
+          "displayName": "Premium",
+          "scope": "Enterprise-grade application. Everything in Custom plus real-time features, 2FA, PDF generation, data export, security audit, automated testing, component design system. The complete web application.",
+          "estimatedWeeks": "12-16",
+          "includesAllFrom": "better",
+          "deliverables": ["Everything in Custom tier", "Real-time features (WebSockets/SSE)", "PDF generator & data export", "Security audit & hardening", "Automated testing suite", "Component design system", "Admin guide + extended support"],
+          "maintenanceInclusion": {
+            "included": "standard",
+            "includedDuration": "3 months",
+            "description": "3 months of Standard maintenance included (security updates, content updates, performance monitoring). After 3 months, client can renew or downgrade.",
+            "recommendedOption": "standard",
+            "availableOptions": ["diy", "essential", "standard", "premium"]
+          },
+          "features": [
+            { "id": "advanced-gsap-animations", "name": "Advanced UI Animations (GSAP Micro-Interactions, Page Transitions)", "category": "design" },
+            { "id": "design-revisions-3", "name": "3 Rounds of Design Revisions", "category": "design" },
+            { "id": "design-system", "name": "Component Design System & Style Guide", "category": "design" },
+            { "id": "2fa-auth", "name": "Two-Factor Authentication (2FA)", "category": "development" },
+            { "id": "advanced-rbac", "name": "Advanced Role-Based Access Control", "category": "development" },
+            { "id": "full-crud-pagination", "name": "Full CRUD with Advanced Search, Filtering & Pagination", "category": "development" },
+            { "id": "database-migrations", "name": "Database Migrations System", "category": "development" },
+            { "id": "api-full-docs", "name": "REST API with Full Documentation", "category": "development" },
+            { "id": "real-time-features", "name": "Real-Time Features (WebSockets/SSE)", "category": "development" },
+            { "id": "third-party-integrations-5", "name": "Third-Party API Integrations (5+ Services)", "category": "development" },
+            { "id": "file-upload-cdn", "name": "File Upload, Management & CDN", "category": "development" },
+            { "id": "email-suite", "name": "Full Email Notification Suite (Transactional + Marketing)", "category": "development" },
+            { "id": "pdf-generator", "name": "PDF Generator System (Reports, Invoices)", "category": "development" },
+            { "id": "data-export", "name": "Data Export (CSV, PDF, Excel)", "category": "development" },
+            { "id": "security-audit", "name": "Security Audit & Hardening", "category": "development" },
+            { "id": "automated-testing", "name": "Automated Testing Suite", "category": "development" },
+            { "id": "custom-analytics-reporting", "name": "Custom Analytics Dashboard with Reporting", "category": "marketing" },
+            { "id": "brand-guidelines", "name": "Brand Guidelines Document", "category": "design" },
+            { "id": "admin-guide", "name": "Admin Guide Document", "category": "support" },
+            { "id": "90min-training", "name": "90-Minute Training Session", "category": "support" },
+            { "id": "extended-support-3mo", "name": "3 Months Priority Support (24hr Response) + Quarterly Check-Ins", "category": "support" }
+          ]
+        }
+      },
+      "addons": [
+        { "id": "newsletter-integration", "name": "Newsletter Integration", "description": "Mailchimp, ConvertKit, or similar integration", "price": 300, "category": "marketing" },
+        { "id": "logo-design", "name": "Logo Design", "description": "Custom logo with 2-3 concept options and revisions", "price": 800, "category": "design" },
+        { "id": "professional-copywriting", "name": "Professional Copywriting", "description": "App copy, onboarding flows, and help documentation", "price": 600, "category": "marketing" },
+        { "id": "multi-language", "name": "Multi-Language Support", "description": "Full app localization with language switcher", "price": 600, "category": "development" },
+        { "id": "live-chat", "name": "Live Chat Widget", "description": "Real-time support chat integration", "price": 200, "category": "development" },
+        { "id": "cookie-consent", "name": "Cookie Consent Banner", "description": "GDPR-compliant cookie consent with preferences", "price": 150, "category": "development" },
+        { "id": "social-media-integration", "name": "Social Media Integration", "description": "OAuth social login and social sharing", "price": 200, "category": "development" },
+        { "id": "booking-system", "name": "Booking/Scheduling System", "description": "Online appointment booking with calendar integration", "price": 500, "category": "development" },
+        { "id": "custom-forms", "name": "Custom Forms", "description": "Complex multi-step forms, conditional logic, file uploads", "price": 300, "category": "development" },
+        { "id": "payment-integration", "name": "Payment Integration", "description": "Stripe, PayPal, or other payment processor setup", "price": 400, "category": "development" },
+        { "id": "ci-cd-pipeline", "name": "CI/CD Pipeline Setup", "description": "Automated testing and deployment pipeline", "price": 500, "category": "development" },
+        { "id": "monitoring-setup", "name": "Error Monitoring & Alerting", "description": "Sentry, LogRocket, or similar error tracking setup", "price": 300, "category": "development" }
+      ]
+    },
+    "portfolio": {
+      "displayName": "Portfolio Website",
+      "description": "Creative and professional portfolio sites for showcasing work",
+      "typicalBudgetRange": "$1,000 - $5,000",
+      "estimatedTimeline": "2-5 weeks",
+      "tiers": {
+        "good": {
+          "name": "Good",
+          "displayName": "Essential",
+          "scope": "Clean, minimal portfolio with gallery and project showcase. Template-based with professional polish. Gets your work visible online.",
+          "estimatedWeeks": "1-2",
+          "deliverables": ["Responsive portfolio (3-5 pages)", "Project gallery with lightbox", "Contact form", "Social media links", "Basic SEO setup"],
+          "maintenanceInclusion": {
+            "included": "none",
+            "description": "No maintenance included. Optional add-on available.",
+            "recommendedOption": "diy",
+            "availableOptions": ["diy", "essential"]
+          },
+          "features": [
+            { "id": "responsive-design", "name": "Responsive Design", "category": "design" },
+            { "id": "clean-layout", "name": "Clean Minimal Layout", "category": "design" },
+            { "id": "mobile-optimization", "name": "Mobile Optimization (Touch Targets, Tappable Links)", "category": "design" },
+            { "id": "project-gallery", "name": "Project Gallery with Lightbox", "category": "development" },
+            { "id": "contact-form", "name": "Contact Form", "category": "development" },
+            { "id": "ssl-setup", "name": "SSL Certificate & HTTPS", "category": "development" },
+            { "id": "hosting-deployment", "name": "Hosting & Deployment", "category": "development" },
+            { "id": "basic-seo", "name": "Basic SEO (Meta Tags, Alt Text)", "category": "marketing" },
+            { "id": "analytics-setup", "name": "Analytics Setup", "category": "marketing" },
+            { "id": "social-links", "name": "Social Media Profile Links", "category": "marketing" },
+            { "id": "user-guide", "name": "User Guide Document", "category": "support" }
+          ]
+        },
+        "better": {
+          "name": "Better",
+          "displayName": "Custom",
+          "scope": "Custom-designed portfolio with filterable gallery, GSAP scroll animations, project case studies, enhanced SEO. Full code ownership and free hosting.",
+          "estimatedWeeks": "2-3",
+          "includesAllFrom": "good",
+          "deliverables": ["Custom responsive portfolio (5-8 pages)", "Filterable project gallery", "GSAP scroll animations", "Case study templates", "Enhanced SEO + social meta tags", "Free hosting + full code ownership"],
+          "maintenanceInclusion": {
+            "included": "none",
+            "description": "Maintenance not included in project price. Optional plans available.",
+            "recommendedOption": "essential",
+            "availableOptions": ["diy", "essential", "standard"]
+          },
+          "features": [
+            { "id": "custom-design", "name": "Custom Design (No Templates)", "category": "design" },
+            { "id": "gsap-animations", "name": "Custom GSAP Animations (Scroll-Triggered, Parallax)", "category": "design" },
+            { "id": "design-revisions-1", "name": "1 Round of Design Revisions", "category": "design" },
+            { "id": "filterable-gallery", "name": "Filterable Project Gallery", "category": "development" },
+            { "id": "case-study-template", "name": "Project Case Study Template", "category": "development" },
+            { "id": "accessibility-compliance", "name": "Accessibility Compliance (WCAG AA)", "category": "development" },
+            { "id": "performance-optimization", "name": "Performance Optimization (Core Web Vitals)", "category": "development" },
+            { "id": "free-hosting", "name": "Free Hosting (Netlify/Vercel)", "category": "development" },
+            { "id": "enhanced-seo", "name": "Enhanced SEO (Schema Markup, Sitemap)", "category": "marketing" },
+            { "id": "social-meta-tags", "name": "Social Media Meta Tags (Open Graph)", "category": "marketing" },
+            { "id": "code-ownership", "name": "Full Source Code Ownership", "category": "support" },
+            { "id": "user-guide", "name": "User Guide Document", "category": "support" }
+          ]
+        },
+        "best": {
+          "name": "Best",
+          "displayName": "Premium",
+          "scope": "Full brand integration with detailed case study pages, video support, advanced animations, simple CMS, and premium support. The showpiece portfolio.",
+          "estimatedWeeks": "3-5",
+          "includesAllFrom": "better",
+          "deliverables": ["Everything in Custom tier", "Detailed case study pages", "Video integration (backgrounds, embeds, showreels)", "Simple content management", "Brand integration + guidelines document", "Training + 1 month priority support"],
+          "maintenanceInclusion": {
+            "included": "standard",
+            "includedDuration": "3 months",
+            "description": "3 months of Standard maintenance included (security updates, content updates, performance monitoring). After 3 months, client can renew or downgrade.",
+            "recommendedOption": "standard",
+            "availableOptions": ["diy", "essential", "standard", "premium"]
+          },
+          "features": [
+            { "id": "brand-integration", "name": "Full Brand Integration", "category": "design" },
+            { "id": "advanced-gsap-animations", "name": "Advanced GSAP Animations (Page Transitions, Parallax, Interactive Elements)", "category": "design" },
+            { "id": "design-revisions-2", "name": "2 Rounds of Design Revisions", "category": "design" },
+            { "id": "brand-guidelines", "name": "Brand Guidelines Document", "category": "design" },
+            { "id": "interactive-elements", "name": "Interactive UI Elements", "category": "design" },
+            { "id": "case-study-pages", "name": "Detailed Case Study Pages", "category": "development" },
+            { "id": "video-integration", "name": "Video Integration (Backgrounds, Embeds, Showreels)", "category": "development" },
+            { "id": "simple-cms", "name": "Simple Content Management (Edit Without Code)", "category": "development" },
+            { "id": "advanced-gallery", "name": "Advanced Filterable Gallery with Categories", "category": "development" },
+            { "id": "30min-training", "name": "30-Minute Training Call", "category": "support" },
+            { "id": "extended-support-1mo", "name": "1 Month Priority Support", "category": "support" }
+          ]
+        }
+      },
+      "addons": [
+        { "id": "blog-setup", "name": "Blog Setup", "description": "Blog for sharing insights, process, and industry thoughts", "price": 350, "category": "development" },
+        { "id": "newsletter-integration", "name": "Newsletter Integration", "description": "Email subscription for portfolio updates and new work", "price": 200, "category": "marketing" },
+        { "id": "logo-design", "name": "Logo Design", "description": "Custom logo with 2-3 concept options and revisions", "price": 500, "category": "design" },
+        { "id": "professional-copywriting", "name": "Professional Copywriting", "description": "Bio, project descriptions, and case study writing", "price": 400, "category": "marketing" },
+        { "id": "cookie-consent", "name": "Cookie Consent Banner", "description": "GDPR-compliant cookie consent with preferences", "price": 100, "category": "development" },
+        { "id": "domain-hosting-setup", "name": "Domain & Hosting Setup", "description": "Domain registration, DNS configuration, and hosting setup", "price": 100, "category": "development" },
+        { "id": "social-media-integration", "name": "Social Media Integration", "description": "Instagram/Dribbble/Behance feed integration", "price": 175, "category": "marketing" },
+        { "id": "video-backgrounds", "name": "Video Backgrounds", "description": "Hero sections with optimized video backgrounds or showreels", "price": 250, "category": "design" },
+        { "id": "testimonials-section", "name": "Testimonials Section", "description": "Client testimonials with carousel or grid layout", "price": 150, "category": "development" },
+        { "id": "resume-download", "name": "Downloadable Resume/CV", "description": "Branded PDF resume with download link", "price": 100, "category": "development" }
+      ]
+    }
+  },
+  "maintenance": {
+    "displayName": "Ongoing Maintenance",
+    "description": "Monthly retainer for website maintenance, updates, and support",
+    "options": {
+      "diy": {
+        "name": "DIY",
+        "displayName": "Self-Managed",
+        "description": "You handle all updates and maintenance yourself",
+        "monthlyPrice": 0,
+        "annualPrice": 0,
+        "features": [
+          { "id": "code-ownership", "name": "Full Code Ownership" },
+          { "id": "documentation", "name": "Technical Documentation" },
+          { "id": "deployment-guide", "name": "Deployment Guide" }
+        ]
+      },
+      "essential": {
+        "name": "Essential",
+        "displayName": "Essential Care",
+        "description": "Security updates, backups, and uptime monitoring",
+        "monthlyPrice": 50,
+        "annualPrice": 500,
+        "features": [
+          { "id": "security-updates", "name": "Security Patches & Dependency Updates" },
+          { "id": "weekly-backups", "name": "Weekly Automated Backups" },
+          { "id": "uptime-monitoring", "name": "Uptime Monitoring & Alerts" },
+          { "id": "ssl-renewal", "name": "SSL Certificate Renewal" },
+          { "id": "monthly-report", "name": "Monthly Status Report" }
+        ]
+      },
+      "standard": {
+        "name": "Standard",
+        "displayName": "Standard Care",
+        "description": "Everything in Essential plus content updates and performance monitoring",
+        "monthlyPrice": 150,
+        "annualPrice": 1500,
+        "features": [
+          { "id": "security-updates", "name": "Security Patches & Dependency Updates" },
+          { "id": "weekly-backups", "name": "Weekly Automated Backups" },
+          { "id": "uptime-monitoring", "name": "Uptime Monitoring & Alerts" },
+          { "id": "ssl-renewal", "name": "SSL Certificate Renewal" },
+          { "id": "content-updates", "name": "Content Updates (2 Hours/Month)" },
+          { "id": "performance-monitoring", "name": "Performance Monitoring & Optimization" },
+          { "id": "analytics-review", "name": "Monthly Analytics Review" },
+          { "id": "email-support", "name": "Email Support (48-Hour Response)" },
+          { "id": "monthly-report", "name": "Monthly Performance Report" }
+        ]
+      },
+      "premium": {
+        "name": "Premium",
+        "displayName": "Premium Care",
+        "description": "Full-service support with priority response, strategic guidance, and dedicated hours",
+        "monthlyPrice": 300,
+        "annualPrice": 3000,
+        "features": [
+          { "id": "security-updates", "name": "Security Patches & Dependency Updates" },
+          { "id": "daily-backups", "name": "Daily Automated Backups" },
+          { "id": "uptime-monitoring", "name": "Uptime Monitoring & Alerts" },
+          { "id": "ssl-renewal", "name": "SSL Certificate Renewal" },
+          { "id": "priority-support", "name": "Priority Support (5 Hours/Month)" },
+          { "id": "content-updates", "name": "Content Updates (5 Hours/Month)" },
+          { "id": "performance-monitoring", "name": "Performance Monitoring & Optimization" },
+          { "id": "analytics-review", "name": "Monthly Analytics Review with Insights" },
+          { "id": "quarterly-strategy", "name": "Quarterly Strategy Call" },
+          { "id": "priority-response", "name": "Priority Email/Chat Support (24-Hour Response)" },
+          { "id": "seo-monitoring", "name": "SEO Performance Monitoring" },
+          { "id": "monthly-report", "name": "Comprehensive Monthly Report" }
+        ]
+      }
+    }
+  },
+  "globalAddons": [
+    { "id": "blog-setup", "name": "Blog Setup", "description": "Blog with categories, tags, and scheduling", "priceRange": { "min": 300, "max": 500 }, "category": "development" },
+    { "id": "newsletter-integration", "name": "Newsletter Integration", "description": "Mailchimp, ConvertKit, or similar email service integration", "priceRange": { "min": 200, "max": 300 }, "category": "marketing" },
+    { "id": "custom-gsap-animations", "name": "Custom GSAP Animations", "description": "Scroll-triggered, parallax, and interactive animations", "priceRange": { "min": 300, "max": 500 }, "category": "design" },
+    { "id": "logo-design", "name": "Logo Design", "description": "Custom logo with 2-3 concept options and revisions", "priceRange": { "min": 500, "max": 800 }, "category": "design" },
+    { "id": "professional-copywriting", "name": "Professional Copywriting", "description": "SEO-optimized copy for all pages", "priceRange": { "min": 400, "max": 600 }, "category": "marketing" },
+    { "id": "multi-language", "name": "Multi-Language Support", "description": "Full site translation with language switcher", "priceRange": { "min": 400, "max": 600 }, "category": "development" },
+    { "id": "live-chat", "name": "Live Chat Widget", "description": "Real-time chat integration (Intercom, Crisp, or custom)", "priceRange": { "min": 150, "max": 200 }, "category": "development" },
+    { "id": "cookie-consent", "name": "Cookie Consent Banner", "description": "GDPR-compliant cookie consent with preferences", "priceRange": { "min": 100, "max": 150 }, "category": "development" },
+    { "id": "domain-hosting-setup", "name": "Domain & Hosting Setup", "description": "Domain registration, DNS configuration, and hosting setup", "priceRange": { "min": 100, "max": 200 }, "category": "development" },
+    { "id": "social-media-integration", "name": "Social Media Integration", "description": "Social feeds, share buttons, and profile links", "priceRange": { "min": 150, "max": 200 }, "category": "marketing" },
+    { "id": "booking-system", "name": "Booking/Scheduling System", "description": "Online appointment booking with calendar integration", "priceRange": { "min": 300, "max": 500 }, "category": "development" },
+    { "id": "custom-forms", "name": "Custom Forms", "description": "Additional forms beyond contact (quote request, surveys, intake forms)", "priceRange": { "min": 200, "max": 300 }, "category": "development" },
+    { "id": "video-backgrounds", "name": "Video Backgrounds", "description": "Hero sections with optimized video backgrounds", "priceRange": { "min": 200, "max": 300 }, "category": "design" }
+  ],
+  "featureCategories": {
+    "design": {
+      "displayName": "Design & Branding",
+      "description": "Visual design, animations, brand identity, and UI elements"
+    },
+    "development": {
+      "displayName": "Development & Infrastructure",
+      "description": "Core functionality, hosting, databases, APIs, and integrations"
+    },
+    "marketing": {
+      "displayName": "Marketing & Analytics",
+      "description": "SEO, analytics, social media, email marketing, and growth tools"
+    },
+    "support": {
+      "displayName": "Training & Support",
+      "description": "Documentation, training sessions, ongoing support, and maintenance"
+    }
+  },
+  "discountRules": {
+    "upfront-payment": {
+      "type": "percentage",
+      "value": 5,
+      "reason": "Full payment upfront"
+    },
+    "returning-client": {
+      "type": "percentage",
+      "value": 10,
+      "reason": "Returning client discount"
+    },
+    "referral": {
+      "type": "percentage",
+      "value": 5,
+      "reason": "Referral discount"
+    },
+    "bundle-maintenance": {
+      "type": "percentage",
+      "value": 10,
+      "reason": "Bundled with annual maintenance plan"
+    }
+  },
+  "paymentSchedules": {
+    "under-2000": {
+      "label": "Projects Under $2,000",
+      "options": [
+        { "name": "full-upfront", "label": "Full Payment Upfront", "discount": "5% discount", "splits": [{ "percent": 100, "milestone": "Project Start" }] },
+        { "name": "two-payments", "label": "Two Payments", "splits": [{ "percent": 50, "milestone": "Project Start" }, { "percent": 50, "milestone": "Project Completion" }] }
+      ]
+    },
+    "2000-5000": {
+      "label": "Projects $2,000-$5,000",
+      "options": [
+        { "name": "full-upfront", "label": "Full Payment Upfront", "discount": "5% discount", "splits": [{ "percent": 100, "milestone": "Project Start" }] },
+        { "name": "two-payments", "label": "Two Payments", "splits": [{ "percent": 50, "milestone": "Project Start" }, { "percent": 50, "milestone": "Project Completion" }] },
+        { "name": "three-payments", "label": "Three Payments", "splits": [{ "percent": 40, "milestone": "Project Start" }, { "percent": 30, "milestone": "Design Approval" }, { "percent": 30, "milestone": "Project Completion" }] }
+      ]
+    },
+    "5000-10000": {
+      "label": "Projects $5,000-$10,000",
+      "options": [
+        { "name": "full-upfront", "label": "Full Payment Upfront", "discount": "5% discount", "splits": [{ "percent": 100, "milestone": "Project Start" }] },
+        { "name": "three-payments", "label": "Three Payments", "splits": [{ "percent": 40, "milestone": "Project Start" }, { "percent": 30, "milestone": "Design Approval" }, { "percent": 30, "milestone": "Project Completion" }] },
+        { "name": "four-payments", "label": "Four Payments", "splits": [{ "percent": 30, "milestone": "Project Start" }, { "percent": 25, "milestone": "Design Approval" }, { "percent": 25, "milestone": "Development Complete" }, { "percent": 20, "milestone": "Project Launch" }] }
+      ]
+    },
+    "over-10000": {
+      "label": "Projects Over $10,000",
+      "options": [
+        { "name": "three-payments", "label": "Three Payments", "splits": [{ "percent": 40, "milestone": "Project Start" }, { "percent": 30, "milestone": "Design Approval" }, { "percent": 30, "milestone": "Project Completion" }] },
+        { "name": "four-payments", "label": "Four Payments", "splits": [{ "percent": 30, "milestone": "Project Start" }, { "percent": 25, "milestone": "Design Approval" }, { "percent": 25, "milestone": "Development Complete" }, { "percent": 20, "milestone": "Project Launch" }] },
+        { "name": "monthly", "label": "Monthly Payments", "description": "Split evenly across project duration" }
+      ]
+    }
+  },
+  "paymentMethods": [
+    { "id": "bank-transfer", "name": "Bank Transfer (ACH)", "description": "Direct bank transfer", "preferred": true },
+    { "id": "credit-card", "name": "Credit/Debit Card", "description": "Via Stripe", "surcharge": "3% processing fee" },
+    { "id": "paypal", "name": "PayPal", "description": "PayPal invoice", "surcharge": "3% processing fee" },
+    { "id": "check", "name": "Check", "description": "Mailed check (US only)" },
+    { "id": "zelle", "name": "Zelle", "description": "Bank-to-bank transfer" }
+  ],
+  "aiInstructions": {
+    "overview": "When generating a proposal, use the client's stated budget range to set tier prices. Good = low end, Better = ~60% of max, Best = near max. Features don't change — only the price mapping changes based on budget. Tiers are cumulative: Better includes everything in Good, Best includes everything in Better.",
+    "pricingRules": [
+      "If client gives a SINGLE budget number (e.g. '$5,000'): Good = 45% of budget, Better = 80% of budget, Best = 130% of budget. Example: $5,000 budget → Good=$2,250, Better=$4,000, Best=$6,500",
+      "If client gives a RANGE (e.g. '$2,000-$6,500'): Good = 35% of max (floored at min), Better = 60% of max, Best = 95% of max",
+      "Good should feel like a savings — well under budget, the practical choice",
+      "Better should feel like the sweet spot — at or near what they expected to spend, the recommended option",
+      "Best should feel like a stretch — above stated budget, but justified by premium features and ongoing value",
+      "Good tier price should never be below the client's stated minimum budget",
+      "Round prices to nearest $50 for amounts under $5,000, nearest $100 for $5,000-$20,000, nearest $500 above $20,000",
+      "Addon prices are fixed and added on top of tier price regardless of budget"
+    ],
+    "proposalStructure": [
+      "Page 1: Header + Client Info (bill-to block) + Project Audit/Assessment (what's wrong with current site or what they need)",
+      "Page 2: Three-tier pricing table with feature comparison matrix",
+      "Page 3: Detailed feature breakdown per tier + ongoing costs (maintenance options)",
+      "Page 4: Timeline + Content/Asset requirements from client + Decisions needed before starting",
+      "Page 5: Terms & Conditions + Agreement/Signature section"
+    ],
+    "toneGuidance": "Professional but warm. Explain WHY each tier exists — Good is practical, Better is the sweet spot, Best is for clients who want everything. Never pressure toward Best. Position Better as the recommended option. Use 'we recommend' language for the Better tier. When discussing Best tier, emphasize that maintenance is INCLUDED — this is a major selling point. Frame it as 'you're covered for 3 months after launch' rather than listing it as a line item.",
+    "maintenanceRules": [
+      "Good tier: No maintenance included. Mention that optional plans are available if they want ongoing support.",
+      "Better tier: Maintenance is NOT included in the project price but should be offered as a recommended add-on. Present Essential ($50/mo or $500/yr) as the suggested option.",
+      "Best tier: 3 months of Standard maintenance IS INCLUDED in the tier price. After 3 months, client can choose to renew at $150/mo, downgrade to Essential ($50/mo), or go DIY.",
+      "The maintenance inclusion in Best tier is a KEY differentiator that justifies the higher price — emphasize the ongoing value.",
+      "Always present maintenance as annual when possible ($500/yr vs $50/mo) — annual feels like a deal and locks in recurring revenue.",
+      "For Best tier pricing calculation: the 3 months included maintenance ($450 value at Standard rate) should be factored into why Best costs more, but it's NOT added on top — it's included."
+    ],
+    "featureDescriptions": "Describe features in client-friendly language, not tech jargon. Instead of 'GSAP ScrollTrigger integration' say 'Custom scroll animations — elements that come alive as you scroll, like growing ferns and floating leaves'. Instead of 'WCAG AA compliance' say 'Accessibility improvements so everyone can use your site, including people using screen readers'. Instead of 'Schema markup' say 'Rich search results — your site shows extra info (hours, reviews, services) right in Google'.",
+    "tierCumulativeRule": "Features are cumulative across tiers. When listing Better tier features in a proposal, include ALL Good features plus the Better-specific additions. When listing Best, include ALL Good + Better features plus Best-specific additions. The 'includesAllFrom' field indicates which lower tier's features are inherited.",
+    "budgetExamples": [
+      {
+        "clientBudget": "$2,000 - $6,500",
+        "projectType": "business-site",
+        "good": "$2,000-$2,500 — Polished template refresh, accessibility fixes, mobile optimization, basic SEO",
+        "better": "$4,000 — Fully custom site, GSAP animations, CMS, blog, enhanced SEO, free hosting",
+        "best": "$6,500 — Custom + PDF generators, invoice system, enhanced analytics, 3-month support"
+      },
+      {
+        "clientBudget": "$5,000 - $15,000",
+        "projectType": "ecommerce-site",
+        "good": "$5,000 — Template store, 10-20 products, Stripe, basic order management",
+        "better": "$9,000 — Custom store, unlimited products, inventory management, discount codes",
+        "best": "$14,500 — Enterprise store with subscriptions, customer accounts, marketing automation"
+      },
+      {
+        "clientBudget": "$1,000 - $3,000",
+        "projectType": "simple-site",
+        "good": "$1,000 — Template-based, 1-3 pages, contact form, basic SEO",
+        "better": "$1,800 — Fully custom, 3-5 pages, GSAP animations, CMS, enhanced SEO",
+        "best": "$2,850 — Premium custom, blog, newsletter, custom analytics, 3-month support"
+      }
+    ]
+  }
+}
