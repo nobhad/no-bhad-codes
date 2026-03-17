@@ -224,49 +224,69 @@ export function LeadDetailPanel({
 
       {/* Panel */}
       <div ref={panelRef} id="lead-details-panel" className="details-panel" role="dialog" aria-label="Lead details">
-        {/* Header */}
+        {/* Close button */}
         <div className="details-header">
-          <h3><span className="title-full">{decodedName}</span></h3>
+          <h3>Lead</h3>
           <button className="close-btn" onClick={onClose} aria-label="Close panel">
             <X />
           </button>
         </div>
 
-        {/* Created date */}
-        <div className="field-label field-label--spaced">
-          Created {formatDate(lead.created_at)}
-        </div>
+        {/* Title row — matches ClientDetail/ProjectDetail pattern */}
+        <div className="detail-title-row">
+          <div className="detail-title-group">
+            <div className="detail-info">
+              <div className="detail-name-row">
+                <h1 className="detail-title">{decodedName}</h1>
+                <StatusDropdown
+                  status={lead.status}
+                  statusConfig={LEAD_STATUS_CONFIG}
+                  onStatusChange={(newStatus) => onStatusChange?.(lead.id, newStatus as LeadStatus)}
+                  ariaLabel="Change lead status"
+                />
+              </div>
 
-        {/* Actions row */}
-        <div className="details-actions">
-          {canActivate && (
-            <button
-              className="icon-btn icon-btn-outline"
-              onClick={activateDialog.open}
-              title="Activate as Project"
-              aria-label="Activate as Project"
-            >
-              <Rocket className="icon-sm" />
-            </button>
-          )}
-          {lead.email && (
-            <IconButton
-              action="email"
-              onClick={() => window.location.href = `mailto:${lead.email}`}
-              title="Send email"
-            />
-          )}
-        </div>
+              <div className="detail-meta">
+                {decodedCompany && (
+                  <span className="meta-item">
+                    <span className="field-label">Company:</span>{' '}
+                    <span className="meta-value">{decodedCompany}</span>
+                  </span>
+                )}
+                {lead.source && (
+                  <span className="meta-item">
+                    <span className="field-label">Source:</span>{' '}
+                    <span className="meta-value">{LEAD_SOURCE_LABELS[lead.source] || lead.source}</span>
+                  </span>
+                )}
+                <span className="meta-item">
+                  <span className="field-label">Created:</span>{' '}
+                  <span className="meta-value">{formatDate(lead.created_at)}</span>
+                </span>
+              </div>
+            </div>
+          </div>
 
-        {/* Status row */}
-        <div className="panel-status-row">
-          <span className="field-label">Status</span>
-          <StatusDropdown
-            status={lead.status}
-            statusConfig={LEAD_STATUS_CONFIG}
-            onStatusChange={(newStatus) => onStatusChange?.(lead.id, newStatus as LeadStatus)}
-            ariaLabel="Change lead status"
-          />
+          {/* Actions — right-aligned */}
+          <div className="detail-actions">
+            {canActivate && (
+              <button
+                className="icon-btn"
+                onClick={activateDialog.open}
+                title="Activate as Project"
+                aria-label="Activate as Project"
+              >
+                <Rocket />
+              </button>
+            )}
+            {lead.email && (
+              <IconButton
+                action="email"
+                onClick={() => window.location.href = `mailto:${lead.email}`}
+                title="Send email"
+              />
+            )}
+          </div>
         </div>
 
         {/* Tabs */}
@@ -296,25 +316,6 @@ export function LeadDetailPanel({
           {activeTab === 'overview' && (
             <div className="lead-tab-content section is-active">
               <div className="project-detail-meta">
-                {lead.project_name && (
-                  <MetaItem
-                    label="Project"
-                    value={decodeHtmlEntities(lead.project_name)}
-                    onClick={() => { onClose(); onNavigate?.('project-detail', String(lead.id)); }}
-                  />
-                )}
-                {decodedCompany && (
-                  <MetaItem
-                    label="Company"
-                    value={decodedCompany}
-                    onClick={lead.client_id ? () => { onClose(); onNavigate?.('client-detail', String(lead.client_id)); } : undefined}
-                  />
-                )}
-                <MetaItem
-                  label="Name"
-                  value={decodedName}
-                  onClick={lead.client_id ? () => { onClose(); onNavigate?.('client-detail', String(lead.client_id)); } : undefined}
-                />
                 <MetaItem label="Email">
                   <span className="meta-value meta-value-with-copy">
                     {lead.email}
@@ -324,8 +325,12 @@ export function LeadDetailPanel({
                   </span>
                 </MetaItem>
                 {lead.phone && <MetaItem label="Phone" value={lead.phone} />}
-                {lead.source && (
-                  <MetaItem label="Source" value={LEAD_SOURCE_LABELS[lead.source] || lead.source} />
+                {lead.project_name && (
+                  <MetaItem
+                    label="Project"
+                    value={decodeHtmlEntities(lead.project_name)}
+                    onClick={() => { onClose(); onNavigate?.('project-detail', String(lead.id)); }}
+                  />
                 )}
                 {lead.project_type && (
                   <MetaItem label="Project Type" value={PROJECT_TYPE_LABELS[lead.project_type] || lead.project_type} />

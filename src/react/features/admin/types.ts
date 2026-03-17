@@ -217,6 +217,8 @@ export type LeadStatus =
   | 'pending'
   | 'contacted'
   | 'qualified'
+  | 'unqualified'
+  | 'active'
   | 'in-progress'
   | 'converted'
   | 'lost'
@@ -268,6 +270,8 @@ export const LEAD_STATUS_CONFIG: Record<LeadStatus, { label: string; variant: st
   pending: { label: 'Pending', variant: 'pending' },
   contacted: { label: 'Contacted', variant: 'active' },
   qualified: { label: 'Qualified', variant: 'warning' },
+  unqualified: { label: 'Unqualified', variant: 'cancelled' },
+  active: { label: 'Active', variant: 'active' },
   'in-progress': { label: 'In Progress', variant: 'active' },
   converted: { label: 'Converted', variant: 'completed' },
   lost: { label: 'Lost', variant: 'cancelled' },

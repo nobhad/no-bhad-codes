@@ -10,6 +10,14 @@ import {
   PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
 
+/** Title-case fallback for statuses not in config (e.g., "in-progress" → "In Progress") */
+function formatStatusFallback(status: string): string {
+  return status
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 /** Minimal shape required from status config objects */
 interface StatusConfigEntry {
   label: string;
@@ -54,7 +62,7 @@ export function StatusDropdown({
 }: StatusDropdownProps) {
   const triggerLabel = renderTriggerLabel
     ? renderTriggerLabel(status)
-    : statusConfig[status]?.label || status;
+    : statusConfig[status]?.label || formatStatusFallback(status);
 
   return (
     <PortalDropdown>
