@@ -172,6 +172,8 @@ export class SchedulerService {
   private softDeleteCleanupJob: SimpleTask | null = null;
   private analyticsCleanupJob: SimpleTask | null = null;
   private priorityEscalationJob: SimpleTask | null = null;
+  private sequenceProcessingJob: SimpleTask | null = null;
+  private meetingReminderJob: SimpleTask | null = null;
   private isRunning = false;
 
   private constructor(config: Partial<SchedulerConfig> = {}) {
@@ -229,13 +231,21 @@ export class SchedulerService {
       this.schedulePriorityEscalation();
     }
 
+    // Schedule email sequence queue processing (every 30 minutes)
+    this.scheduleSequenceProcessing();
+
+    // Schedule meeting reminders (daily at 9:00 AM)
+    this.scheduleMeetingReminders();
+
     // Start all scheduled jobs
     const jobs = [
       this.reminderJob,
       this.invoiceGenerationJob,
       this.softDeleteCleanupJob,
       this.analyticsCleanupJob,
-      this.priorityEscalationJob
+      this.priorityEscalationJob,
+      this.sequenceProcessingJob,
+      this.meetingReminderJob
     ].filter(Boolean);
 
     for (const job of jobs) {
@@ -275,6 +285,16 @@ export class SchedulerService {
     if (this.priorityEscalationJob) {
       this.priorityEscalationJob.stop();
       this.priorityEscalationJob = null;
+    }
+
+    if (this.sequenceProcessingJob) {
+      this.sequenceProcessingJob.stop();
+      this.sequenceProcessingJob = null;
+    }
+
+    if (this.meetingReminderJob) {
+      this.meetingReminderJob.stop();
+      this.meetingReminderJob = null;
     }
 
     this.isRunning = false;
@@ -422,6 +442,54 @@ export class SchedulerService {
         }
       } catch (error) {
         logger.error('[Scheduler] Error during priority escalation:', {
+          error: error instanceof Error ? error : undefined
+        });
+      }
+    });
+  }
+
+  /**
+   * Schedule email sequence queue processing — every 30 minutes
+   */
+  private scheduleSequenceProcessing(): void {
+    const SEQUENCE_CRON = '*/30 * * * *'; // Every 30 minutes
+    logger.info(`[Scheduler] Scheduling sequence processing: ${SEQUENCE_CRON}`);
+
+    this.sequenceProcessingJob = createSimpleTask(SEQUENCE_CRON, async () => {
+      try {
+        const { sequenceService } = await import('./sequence-service.js');
+        const result = await sequenceService.processQueue();
+
+        if (result.sent > 0 || result.failed > 0 || result.completed > 0) {
+          logger.info(
+            `[Scheduler] Sequences: sent=${result.sent}, failed=${result.failed}, stopped=${result.stopped}, completed=${result.completed}`
+          );
+        }
+      } catch (error) {
+        logger.error('[Scheduler] Error during sequence processing:', {
+          error: error instanceof Error ? error : undefined
+        });
+      }
+    });
+  }
+
+  /**
+   * Schedule meeting reminders — daily at 9:00 AM
+   */
+  private scheduleMeetingReminders(): void {
+    const MEETING_REMINDER_CRON = '0 9 * * *'; // 9:00 AM daily
+    logger.info(`[Scheduler] Scheduling meeting reminders: ${MEETING_REMINDER_CRON}`);
+
+    this.meetingReminderJob = createSimpleTask(MEETING_REMINDER_CRON, async () => {
+      try {
+        const { meetingRequestService } = await import('./meeting-request-service.js');
+        const sent = await meetingRequestService.sendUpcomingReminders();
+
+        if (sent > 0) {
+          logger.info(`[Scheduler] Meeting reminders sent: ${sent}`);
+        }
+      } catch (error) {
+        logger.error('[Scheduler] Error during meeting reminders:', {
           error: error instanceof Error ? error : undefined
         });
       }

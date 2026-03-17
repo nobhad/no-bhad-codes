@@ -67,6 +67,8 @@ import receiptsRouter from './routes/receipts.js';
 import paymentsRouter from './routes/payments/index.js';
 import agreementsRouter from './routes/agreements/index.js';
 import onboardingChecklistRouter from './routes/onboarding-checklist/index.js';
+import sequencesRouter from './routes/sequences/index.js';
+import meetingRequestsRouter from './routes/meeting-requests/index.js';
 import { eventsRouter } from './routes/events.js';
 import { searchRouter } from './routes/search.js';
 import healthRouter from './routes/health.js';
@@ -386,7 +388,9 @@ const apiRouters = [
   { path: '/content-requests', router: contentRequestsRouter },
   { path: '/payments', router: paymentsRouter },
   { path: '/agreements', router: agreementsRouter },
-  { path: '/onboarding-checklist', router: onboardingChecklistRouter }
+  { path: '/onboarding-checklist', router: onboardingChecklistRouter },
+  { path: '/sequences', router: sequencesRouter },
+  { path: '/meeting-requests', router: meetingRequestsRouter }
 ];
 
 // Mount all routers at both /api and /api/v1
