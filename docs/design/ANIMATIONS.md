@@ -48,6 +48,7 @@ Defined in `src/design-system/tokens/animations.css`.
 --duration-faster: 0.15s;     /* Micro-interactions */
 --duration-fast: 0.2s;        /* Quick transitions */
 --duration-medium: 0.3s;      /* Standard transitions */
+--duration-normal: 0.3s;      /* Alias for medium (used by animation composites) */
 --duration-slow: 0.4s;        /* Emphasis animations */
 --duration-slower: 0.5s;      /* Page transitions */
 ```

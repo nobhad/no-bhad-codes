@@ -95,6 +95,41 @@ This file contains completed work from March 2026. Items are moved here from `..
 **Status:** COMPLETE
 **Implementation:** Payment Schedule System, Content Request System, Lead Scoring, Project Templates.
 
+### 11. Detail Panel Factory + 8 Entity Panels - COMPLETE
+
+**Status:** COMPLETE
+**Implementation:** Built reusable `DetailPanel` factory (`createDetailPanel.tsx`) and 8 entity-specific slide-in panels. All admin tables with clickable rows now open detail panels.
+
+#### Panels Built
+
+- `ContractDetailPanel`, `ProposalDetailPanel`, `DocumentRequestDetailPanel`, `ContactDetailPanel`
+- `QuestionnaireDetailPanel`, `DesignReviewDetailPanel`, `WorkflowDetailPanel`, `EmailTemplateDetailPanel`
+
+### 12. Full Project Pipeline Implementation - COMPLETE
+
+**Status:** COMPLETE
+**Implementation:** Complete project lifecycle pipeline from contact through completion. Includes proposal prefill service, budget-relative templates, feature catalog (155 features + 63 addons), auto-contract/payment generation, project completion detection, intake checklist, dynamic questionnaire generation.
+
+#### New Services
+
+- `proposal-prefill-service.ts`, `project-completion-service.ts`, `intake-checklist-service.ts`, `dynamic-questionnaire-service.ts`
+- `server/config/proposal-templates.json` + `.ts`
+
+### 13. Documentation Audit & Fixes - COMPLETE
+
+**Status:** COMPLETE
+**Implementation:** Full audit of all portal documentation against codebase. Fixed 7 inaccuracies.
+
+#### Fixes Applied
+
+- `DATABASE_SCHEMA.md` — migration count 103 → 117
+- `LEADS.md` — last updated date corrected
+- `WORKFLOWS.md` — removed misleading handler count phrasing
+- `CSS_ARCHITECTURE.md` — removed 6 non-existent CSS files, added 2 missing ones, corrected file count
+- `PORTAL_DESIGN.md` — corrected password field class names (`cp-*` → actual `password-*` classes)
+- `ANIMATIONS.md` — corrected duration token names and values to match actual code
+- `animations.css` — added missing `--duration-normal: 0.3s` token (was referenced by 8 animation composites but never defined)
+
 ---
 
 ## Completed - March 2, 2026
