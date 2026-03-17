@@ -1,7 +1,7 @@
 import express, { Response } from 'express';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { PDFDocument as PDFLibDocument, StandardFonts } from 'pdf-lib';
+import { PDFDocument as PDFLibDocument } from 'pdf-lib';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../utils/access-control.js';
@@ -21,6 +21,9 @@ import {
   PAGE_MARGINS,
   ensureSpace,
   drawWrappedText,
+  getRegularFontBytes,
+  getBoldFontBytes,
+  registerFontkit,
   type PdfPageContext
 } from '../../utils/pdf-utils.js';
 import { errorResponse, ErrorCodes } from '../../utils/api-response.js';
@@ -233,8 +236,9 @@ router.get(
     pdfDoc.setSubject('Project Intake Form');
     pdfDoc.setCreator('NoBhadCodes');
 
-    const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    registerFontkit(pdfDoc);
+    const helvetica = await pdfDoc.embedFont(getRegularFontBytes());
+    const helveticaBold = await pdfDoc.embedFont(getBoldFontBytes());
 
     const PAGE_W = 612;
     const PAGE_H = 792;
@@ -280,16 +284,17 @@ router.get(
       const cleanVal = clean(value);
       if (!cleanVal) return;
 
+      const upperLabel = label.toUpperCase() + ':';
       const valueX = LEFT + labelWidth;
       const valueMaxW = RIGHT - valueX;
 
       if (fonts.regular.widthOfTextAtSize(cleanVal, PDF_TYPOGRAPHY.bodySize) <= valueMaxW) {
-        ctx.y = drawLabelValue(ctx.currentPage, label + ':', cleanVal, {
+        ctx.y = drawLabelValue(ctx.currentPage, upperLabel, cleanVal, {
           x: LEFT, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
         });
       } else {
         // Value too long — use drawLabelValue for label, then wrap value below
-        ctx.y = drawLabelValue(ctx.currentPage, label + ':', '', {
+        ctx.y = drawLabelValue(ctx.currentPage, upperLabel, '', {
           x: LEFT, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
         });
         drawWrappedText(ctx, cleanVal, {
@@ -321,7 +326,7 @@ router.get(
     const drawBoolField = (label: string, value: boolean | undefined) => {
       if (value === undefined || value === null) return;
       const indicator = value ? 'Yes' : 'No';
-      ctx.y = drawLabelValue(ctx.currentPage, label + ':', indicator, {
+      ctx.y = drawLabelValue(ctx.currentPage, label.toUpperCase() + ':', indicator, {
         x: LEFT, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
       });
     };
@@ -345,9 +350,11 @@ router.get(
     // =========================================================
 
     const leftLines: Array<{ text: string; bold?: boolean }> = [];
-    leftLines.push({ text: clean(intakeData.clientInfo.name), bold: true });
     if (intakeData.clientInfo.companyName) {
-      leftLines.push({ text: clean(intakeData.clientInfo.companyName) });
+      leftLines.push({ text: clean(intakeData.clientInfo.companyName), bold: true });
+      leftLines.push({ text: clean(intakeData.clientInfo.name) });
+    } else {
+      leftLines.push({ text: clean(intakeData.clientInfo.name), bold: true });
     }
     leftLines.push({ text: intakeData.clientInfo.email });
     if (intakeData.clientInfo.phone) {
@@ -392,7 +399,7 @@ router.get(
 
     // Description
     if (intakeData.projectDetails.description) {
-      ctx.y = drawLabelValue(ctx.currentPage, 'Description:', '', {
+      ctx.y = drawLabelValue(ctx.currentPage, 'DESCRIPTION:', '', {
         x: LEFT, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
       });
       drawWrappedText(ctx, clean(intakeData.projectDetails.description), {
@@ -410,7 +417,7 @@ router.get(
 
     if (features && features.length > 0) {
       ctx.y -= 8;
-      ctx.y = drawLabelValue(ctx.currentPage, 'Requested Features:', '', {
+      ctx.y = drawLabelValue(ctx.currentPage, 'REQUESTED FEATURES:', '', {
         x: LEFT, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
       });
       drawBulletList(features);

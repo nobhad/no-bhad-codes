@@ -8,7 +8,7 @@
  * Generates PDF receipts for payments using pdf-lib.
  */
 
-import { PDFDocument, StandardFonts } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import { getDatabase } from '../database/init.js';
@@ -20,7 +20,10 @@ import {
   PAGE_MARGINS,
   drawPdfDocumentHeader,
   drawPdfFooter,
-  drawTwoColumnInfo
+  drawTwoColumnInfo,
+  getRegularFontBytes,
+  getBoldFontBytes,
+  registerFontkit
 } from '../utils/pdf-utils.js';
 import { logger } from './logger.js';
 
@@ -88,8 +91,9 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
   pdfDoc.setSubject('Payment Receipt');
   pdfDoc.setCreator('NoBhadCodes');
 
-  const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  registerFontkit(pdfDoc);
+  const helvetica = await pdfDoc.embedFont(getRegularFontBytes());
+  const helveticaBold = await pdfDoc.embedFont(getBoldFontBytes());
 
   const pageWidth = 612;
   const pageHeight = 792;
@@ -158,7 +162,7 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
   page.drawLine({
     start: { x: totalsX - 14, y: y + 18 },
     end: { x: rightMargin, y: y + 18 },
-    thickness: 2,
+    thickness: PDF_SPACING.underlineThickness,
     color: PDF_COLORS.divider
   });
 

@@ -10,9 +10,48 @@
  * - PDF/A compliance helpers
  */
 
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import fontkit from '@pdf-lib/fontkit';
 import { PDFDocument, PDFPage, PDFFont, rgb } from 'pdf-lib';
 import { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } from '../config/pdf-styles.js';
 import { BUSINESS_INFO, getPdfLogoBytes } from '../config/business.js';
+
+// ============================================
+// FONT LOADING — Inconsolata (portal monospace)
+// ============================================
+
+/** Cached font bytes to avoid repeated disk reads */
+let _regularFontBytes: Buffer | null = null;
+let _boldFontBytes: Buffer | null = null;
+
+/**
+ * Get Inconsolata Regular font bytes (cached after first read)
+ */
+export function getRegularFontBytes(): Buffer {
+  if (!_regularFontBytes) {
+    _regularFontBytes = readFileSync(join(process.cwd(), 'public/fonts/Inconsolata/Inconsolata-Regular.ttf'));
+  }
+  return _regularFontBytes;
+}
+
+/**
+ * Get Inconsolata Bold font bytes (cached after first read)
+ */
+export function getBoldFontBytes(): Buffer {
+  if (!_boldFontBytes) {
+    _boldFontBytes = readFileSync(join(process.cwd(), 'public/fonts/Inconsolata/Inconsolata-Bold.ttf'));
+  }
+  return _boldFontBytes;
+}
+
+/**
+ * Register fontkit on a PDFDocument (required before embedding custom fonts).
+ * Safe to call multiple times — pdf-lib ignores duplicate registrations.
+ */
+export function registerFontkit(pdfDoc: PDFDocument): void {
+  pdfDoc.registerFontkit(fontkit);
+}
 
 // ============================================
 // PDF CACHING
@@ -176,10 +215,12 @@ export async function createPdfContext(
 
   const page = pdfDoc.addPage([pageSize.width, pageSize.height]);
 
-  // Import standard fonts
-  const { StandardFonts } = await import('pdf-lib');
-  const regular = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  // Register fontkit for custom font embedding
+  pdfDoc.registerFontkit(fontkit);
+
+  // Embed Inconsolata (portal monospace font)
+  const regular = await pdfDoc.embedFont(getRegularFontBytes());
+  const bold = await pdfDoc.embedFont(getBoldFontBytes());
 
   return {
     pdfDoc,
@@ -309,8 +350,8 @@ export async function addPageNumbers(
     marginBottom?: number;
   }
 ): Promise<void> {
-  const { StandardFonts } = await import('pdf-lib');
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  pdfDoc.registerFontkit(fontkit);
+  const font = await pdfDoc.embedFont(getRegularFontBytes());
   const pages = pdfDoc.getPages();
   const totalPages = pages.length;
 
