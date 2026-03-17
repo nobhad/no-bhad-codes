@@ -26,26 +26,25 @@ Gap analysis + codebase audit. 8 phases, 13 migrations (118-130).
 
 ### Phase 0: Foundation Fixes (MUST DO FIRST)
 
+All items verified against actual code. ~~0A~~, ~~0H~~, ~~0I~~ removed (proved false on re-audit).
+
 **Critical (blocks Phase 1):**
 
-- [ ] 0A. Wire 4 orphaned services to API routes (prefill, dynamic questionnaire, intake checklist, project completion)
-- [ ] 0B. Client proposal detail view + acceptance UI (backend exists, zero frontend)
-- [ ] 0C. Maintenance tier activation (4 tiers stored but never acted on — no recurring billing, no contracts, no post-project automation)
-- [ ] 0D. Contract signing flow verification (ContractSignModal exists — verify end-to-end)
-- [ ] 0G. Payment schedule installments auto-generate invoices when due
+- [ ] 0B. Client proposal detail view + acceptance UI (route redirects to /documents, no ProposalDetail.tsx)
+- [ ] 0C. Maintenance tier activation (4 tiers stored then ignored — no recurring billing, no post-project automation)
+- [ ] 0D. Portal contract signing missing event emission (saves signature but never emits `contract.signed` — 1-line fix)
+- [ ] 0G. Payment schedule installments auto-generate invoices when due (no cascade exists)
 
 **High (broken integrations):**
 
-- [ ] 0E. Webhook dispatch for Slack/Discord (configs stored, messages never sent)
-- [ ] 0F. Automations use DB email templates instead of hardcoded HTML
-- [ ] 0K. Admin invoice management endpoint (frontend expects /api/admin/invoices, doesn't exist)
-- [ ] 0L. Create modal backend gaps (Design Review, Questionnaire, Workflow, Deliverable — verify endpoints)
+- [ ] 0E. Webhook dispatch for Slack/Discord (send functions exist in slack-service.ts but never called from automations)
+- [ ] 0F. Automations use DB email templates (7 notification handlers hardcode HTML, ignore email_templates table)
+- [ ] 0K. Admin invoice management endpoint (/api/admin/invoices missing, no admin barrel mount)
+- [ ] 0L. Create modal backends — Design Reviews (no POST endpoint) + Workflows (no POST endpoint)
 
-**Medium (UI fixes):**
+**Medium (UI completeness):**
 
-- [ ] 0H. Admin delete button wiring (verify which are actually broken)
-- [ ] 0I. Portal prop passing fixes + console cleanup
-- [ ] 0J. Export/CSV buttons on ALL 22 admin tables (none functional)
+- [ ] 0J. Export/CSV missing onClick on ~15 admin tables (InvoicesTable works, others don't)
 - [ ] 0M. LeadDetailPanel built but not imported by LeadsTable
 - [ ] 0P. Add proposal prefill endpoint to frontend constants + builder integration
 
