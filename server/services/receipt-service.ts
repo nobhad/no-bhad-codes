@@ -544,7 +544,8 @@ class ReceiptService {
     const db = getDatabase();
     const row = await db.get(
       `SELECT r.*, i.invoice_number,
-              c.contact_name as client_name, c.email as client_email,
+              COALESCE(c.billing_name, c.contact_name) as client_name,
+              COALESCE(c.billing_email, c.email) as client_email,
               p.project_name
        FROM receipts r
        JOIN invoices i ON r.invoice_id = i.id
@@ -568,7 +569,8 @@ class ReceiptService {
     const db = getDatabase();
     const row = await db.get(
       `SELECT r.*, i.invoice_number,
-              c.contact_name as client_name, c.email as client_email,
+              COALESCE(c.billing_name, c.contact_name) as client_name,
+              COALESCE(c.billing_email, c.email) as client_email,
               p.project_name
        FROM receipts r
        JOIN invoices i ON r.invoice_id = i.id
@@ -592,7 +594,8 @@ class ReceiptService {
     const db = getDatabase();
     const rows = await db.all(
       `SELECT r.*, i.invoice_number,
-              c.contact_name as client_name, c.email as client_email,
+              COALESCE(c.billing_name, c.contact_name) as client_name,
+              COALESCE(c.billing_email, c.email) as client_email,
               p.project_name
        FROM receipts r
        JOIN invoices i ON r.invoice_id = i.id
@@ -613,7 +616,8 @@ class ReceiptService {
     const db = getDatabase();
     const rows = await db.all(
       `SELECT r.*, i.invoice_number,
-              c.contact_name as client_name, c.email as client_email,
+              COALESCE(c.billing_name, c.contact_name) as client_name,
+              COALESCE(c.billing_email, c.email) as client_email,
               p.project_name
        FROM receipts r
        JOIN invoices i ON r.invoice_id = i.id
@@ -635,7 +639,8 @@ class ReceiptService {
     const ALL_RECEIPTS_LIMIT = 100;
     const rows = await db.all(
       `SELECT r.*, i.invoice_number,
-              c.contact_name as client_name, c.email as client_email,
+              COALESCE(c.billing_name, c.contact_name) as client_name,
+              COALESCE(c.billing_email, c.email) as client_email,
               p.project_name
        FROM receipts r
        JOIN invoices i ON r.invoice_id = i.id

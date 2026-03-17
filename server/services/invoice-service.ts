@@ -202,7 +202,9 @@ export class InvoiceService {
    */
   async getInvoiceById(id: number): Promise<Invoice> {
     const sql = `
-      SELECT i.*, c.company_name, c.contact_name, c.email as client_email,
+      SELECT i.*, COALESCE(c.billing_company, c.company_name) as company_name,
+             COALESCE(c.billing_name, c.contact_name) as contact_name,
+             COALESCE(c.billing_email, c.email) as client_email,
              p.project_name, p.description as project_description
       FROM active_invoices i
       JOIN active_clients c ON i.client_id = c.id
@@ -226,7 +228,9 @@ export class InvoiceService {
    */
   async getInvoiceByNumber(invoiceNumber: string): Promise<Invoice> {
     const sql = `
-      SELECT i.*, c.company_name, c.contact_name, c.email as client_email,
+      SELECT i.*, COALESCE(c.billing_company, c.company_name) as company_name,
+             COALESCE(c.billing_name, c.contact_name) as contact_name,
+             COALESCE(c.billing_email, c.email) as client_email,
              p.project_name, p.description as project_description
       FROM active_invoices i
       JOIN active_clients c ON i.client_id = c.id
@@ -250,7 +254,9 @@ export class InvoiceService {
    */
   async getClientInvoices(clientId: number): Promise<Invoice[]> {
     const sql = `
-      SELECT i.*, c.company_name, c.contact_name, c.email as client_email,
+      SELECT i.*, COALESCE(c.billing_company, c.company_name) as company_name,
+             COALESCE(c.billing_name, c.contact_name) as contact_name,
+             COALESCE(c.billing_email, c.email) as client_email,
              p.project_name, p.description as project_description
       FROM active_invoices i
       JOIN active_clients c ON i.client_id = c.id
@@ -273,7 +279,9 @@ export class InvoiceService {
    */
   async getProjectInvoices(projectId: number): Promise<Invoice[]> {
     const sql = `
-      SELECT i.*, c.company_name, c.contact_name, c.email as client_email,
+      SELECT i.*, COALESCE(c.billing_company, c.company_name) as company_name,
+             COALESCE(c.billing_name, c.contact_name) as contact_name,
+             COALESCE(c.billing_email, c.email) as client_email,
              p.project_name, p.description as project_description
       FROM active_invoices i
       JOIN active_clients c ON i.client_id = c.id
@@ -1209,7 +1217,9 @@ export class InvoiceService {
    */
   async getInvoicesByMilestone(milestoneId: number): Promise<Invoice[]> {
     const sql = `
-      SELECT i.*, c.company_name, c.contact_name, c.email as client_email,
+      SELECT i.*, COALESCE(c.billing_company, c.company_name) as company_name,
+             COALESCE(c.billing_name, c.contact_name) as contact_name,
+             COALESCE(c.billing_email, c.email) as client_email,
              p.project_name, p.description as project_description
       FROM active_invoices i
       JOIN active_clients c ON i.client_id = c.id
@@ -1609,7 +1619,9 @@ export class InvoiceService {
     const offset = filters.offset || 0;
 
     const sql = `
-      SELECT i.*, c.company_name, c.contact_name, c.email as client_email,
+      SELECT i.*, COALESCE(c.billing_company, c.company_name) as company_name,
+             COALESCE(c.billing_name, c.contact_name) as contact_name,
+             COALESCE(c.billing_email, c.email) as client_email,
              p.project_name, p.description as project_description
       FROM active_invoices i
       JOIN active_clients c ON i.client_id = c.id
@@ -1637,7 +1649,9 @@ export class InvoiceService {
    */
   async getAllInvoices(limit = 100, offset = 0): Promise<Invoice[]> {
     const sql = `
-      SELECT i.*, c.company_name, c.contact_name, c.email as client_email,
+      SELECT i.*, COALESCE(c.billing_company, c.company_name) as company_name,
+             COALESCE(c.billing_name, c.contact_name) as contact_name,
+             COALESCE(c.billing_email, c.email) as client_email,
              p.project_name, p.description as project_description
       FROM active_invoices i
       JOIN active_clients c ON i.client_id = c.id
@@ -1956,7 +1970,9 @@ export class InvoiceService {
 
     // Get overdue invoices with late fee settings but no fee applied yet
     const sql = `
-      SELECT i.*, c.company_name, c.contact_name, c.email as client_email,
+      SELECT i.*, COALESCE(c.billing_company, c.company_name) as company_name,
+             COALESCE(c.billing_name, c.contact_name) as contact_name,
+             COALESCE(c.billing_email, c.email) as client_email,
              p.project_name, p.description as project_description
       FROM active_invoices i
       JOIN active_clients c ON i.client_id = c.id

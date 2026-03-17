@@ -85,9 +85,9 @@ class ContractService {
         p.due_date,
         p.price,
         p.deposit_amount,
-        c.contact_name,
-        c.email,
-        c.company_name
+        COALESCE(c.billing_name, c.contact_name) as contact_name,
+        COALESCE(c.billing_email, c.email) as email,
+        COALESCE(c.billing_company, c.company_name) as company_name
       FROM active_projects p
       JOIN active_clients c ON p.client_id = c.id
       WHERE p.id = ? AND c.id = ?`,
@@ -234,8 +234,8 @@ class ContractService {
       SELECT
         contracts.*,
         p.project_name as project_name,
-        c.contact_name as client_name,
-        c.email as client_email,
+        COALESCE(c.billing_name, c.contact_name) as client_name,
+        COALESCE(c.billing_email, c.email) as client_email,
         t.name as template_name,
         t.type as template_type
       FROM active_contracts contracts
@@ -276,8 +276,8 @@ class ContractService {
       `SELECT
         contracts.*,
         p.project_name as project_name,
-        c.contact_name as client_name,
-        c.email as client_email,
+        COALESCE(c.billing_name, c.contact_name) as client_name,
+        COALESCE(c.billing_email, c.email) as client_email,
         t.name as template_name,
         t.type as template_type
        FROM active_contracts contracts
@@ -477,8 +477,8 @@ class ContractService {
       `SELECT
         contracts.*,
         p.project_name as project_name,
-        c.contact_name as client_name,
-        c.email as client_email,
+        COALESCE(c.billing_name, c.contact_name) as client_name,
+        COALESCE(c.billing_email, c.email) as client_email,
         t.name as template_name,
         t.type as template_type
        FROM active_contracts contracts
@@ -592,8 +592,11 @@ class ContractService {
   async getProjectWithClientForPdf(projectId: number): Promise<Record<string, unknown> | null> {
     const db = getDatabase();
     const row = await db.get(
-      `SELECT p.*, c.contact_name as client_name, c.email as client_email,
-              c.company_name, c.phone as client_phone, c.address as client_address
+      `SELECT p.*, COALESCE(c.billing_name, c.contact_name) as client_name,
+              COALESCE(c.billing_email, c.email) as client_email,
+              COALESCE(c.billing_company, c.company_name) as company_name,
+              COALESCE(c.billing_phone, c.phone) as client_phone,
+              c.address as client_address
        FROM projects p
        JOIN clients c ON p.client_id = c.id
        WHERE p.id = ?`,
@@ -683,7 +686,8 @@ class ContractService {
   async getProjectWithClientForSignature(projectId: number): Promise<Record<string, unknown> | null> {
     const db = getDatabase();
     const row = await db.get(
-      `SELECT p.*, c.email as client_email, COALESCE(c.contact_name, c.company_name) as client_name
+      `SELECT p.*, COALESCE(c.billing_email, c.email) as client_email,
+              COALESCE(c.billing_name, c.contact_name, c.company_name) as client_name
        FROM projects p
        LEFT JOIN clients c ON p.client_id = c.id
        WHERE p.id = ?`,
@@ -782,7 +786,8 @@ class ContractService {
     const db = getDatabase();
     const row = await db.get(
       `SELECT p.id, p.project_name, p.price, p.contract_signature_expires_at,
-              p.contract_signed_at, COALESCE(c.contact_name, c.company_name) as client_name, c.email as client_email
+              p.contract_signed_at, COALESCE(c.billing_name, c.contact_name, c.company_name) as client_name,
+              COALESCE(c.billing_email, c.email) as client_email
        FROM projects p
        LEFT JOIN clients c ON p.client_id = c.id
        WHERE p.contract_signature_token = ?`,
@@ -821,7 +826,8 @@ class ContractService {
     const db = getDatabase();
     const row = await db.get(
       `SELECT p.id, p.project_name, p.contract_signature_expires_at, p.contract_signed_at,
-              COALESCE(c.contact_name, c.company_name) as client_name, c.email as client_email
+              COALESCE(c.billing_name, c.contact_name, c.company_name) as client_name,
+              COALESCE(c.billing_email, c.email) as client_email
        FROM projects p
        LEFT JOIN clients c ON p.client_id = c.id
        WHERE p.contract_signature_token = ?`,
@@ -1003,7 +1009,8 @@ class ContractService {
     const db = getDatabase();
     const row = await db.get(
       `SELECT p.id, p.project_name, p.contract_signature_token, p.contract_signature_expires_at,
-              c.contact_name, c.email
+              COALESCE(c.billing_name, c.contact_name) as contact_name,
+              COALESCE(c.billing_email, c.email) as email
        FROM projects p
        LEFT JOIN clients c ON p.client_id = c.id
        WHERE p.id = ?`,
@@ -1018,7 +1025,9 @@ class ContractService {
   async getProjectWithClientForRenewal(projectId: number): Promise<Record<string, unknown> | null> {
     const db = getDatabase();
     const row = await db.get(
-      `SELECT p.project_name, c.contact_name, c.email
+      `SELECT p.project_name,
+              COALESCE(c.billing_name, c.contact_name) as contact_name,
+              COALESCE(c.billing_email, c.email) as email
        FROM projects p
        LEFT JOIN clients c ON p.client_id = c.id
        WHERE p.id = ?`,

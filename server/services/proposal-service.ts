@@ -794,9 +794,9 @@ class ProposalService {
           pr.*,
           p.project_name as project_name,
           p.project_type,
-          COALESCE(c.contact_name, c.company_name) as client_name,
-          c.company_name,
-          c.email as client_email
+          COALESCE(c.billing_name, c.contact_name, c.company_name) as client_name,
+          COALESCE(c.billing_company, c.company_name) as company_name,
+          COALESCE(c.billing_email, c.email) as client_email
         FROM proposal_requests pr
         LEFT JOIN projects p ON pr.project_id = p.id
         LEFT JOIN clients c ON pr.client_id = c.id
@@ -1592,7 +1592,7 @@ class ProposalService {
         pr.id,
         COALESCE(p.project_name, 'Proposal #' || pr.id) as title,
         pr.client_id as clientId,
-        COALESCE(c.company_name, c.contact_name) as clientName,
+        COALESCE(c.billing_company, c.company_name, c.billing_name, c.contact_name) as clientName,
         pr.project_type as projectType,
         pr.status,
         pr.final_price as amount,
@@ -1773,7 +1773,9 @@ class ProposalService {
     const row = await db.get(
       `SELECT pr.*, p.project_name, p.description as project_description,
               p.default_deposit_percentage,
-              c.contact_name as client_name, c.email as client_email, c.company_name
+              COALESCE(c.billing_name, c.contact_name) as client_name,
+              COALESCE(c.billing_email, c.email) as client_email,
+              COALESCE(c.billing_company, c.company_name) as company_name
        FROM proposal_requests pr
        JOIN projects p ON pr.project_id = p.id
        JOIN clients c ON pr.client_id = c.id
@@ -1894,7 +1896,10 @@ class ProposalService {
   async getProposalWithJoins(proposalId: number): Promise<ProposalPdfRow | null> {
     const db = getDatabase();
     const row = await db.get(
-      `SELECT pr.*, p.project_name, c.contact_name as client_name, c.email as client_email, c.company_name
+      `SELECT pr.*, p.project_name,
+              COALESCE(c.billing_name, c.contact_name) as client_name,
+              COALESCE(c.billing_email, c.email) as client_email,
+              COALESCE(c.billing_company, c.company_name) as company_name
        FROM proposal_requests pr
        JOIN projects p ON pr.project_id = p.id AND ${notDeleted('p')}
        JOIN clients c ON pr.client_id = c.id AND ${notDeleted('c')}
@@ -1923,7 +1928,10 @@ class ProposalService {
     const db = getDatabase();
 
     let query = `
-      SELECT pr.*, p.project_name, c.contact_name as client_name, c.email as client_email, c.company_name
+      SELECT pr.*, p.project_name,
+             COALESCE(c.billing_name, c.contact_name) as client_name,
+             COALESCE(c.billing_email, c.email) as client_email,
+             COALESCE(c.billing_company, c.company_name) as company_name
       FROM proposal_requests pr
       JOIN projects p ON pr.project_id = p.id AND ${notDeleted('p')}
       JOIN clients c ON pr.client_id = c.id AND ${notDeleted('c')}
