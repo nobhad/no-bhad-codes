@@ -35,6 +35,7 @@ import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
+import { useExport, DELIVERABLES_EXPORT_CONFIG } from '@react/hooks/useExport';
 import { CreateDeliverableModal } from '../modals/CreateEntityModals';
 
 const logger = createLogger('DeliverablesTable');
@@ -180,6 +181,14 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
 
   // Apply filters
   const filteredDeliverables = useMemo(() => applyFilters(deliverables), [applyFilters, deliverables]);
+
+  const { exportCsv, isExporting } = useExport({
+    config: DELIVERABLES_EXPORT_CONFIG,
+    data: filteredDeliverables,
+    onExport: (count) => {
+      showNotification?.(`Exported ${count} item${count !== 1 ? 's' : ''} to CSV`, 'success');
+    }
+  });
 
   // Pagination
   const pagination = usePagination({
@@ -383,7 +392,8 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
           />
           <IconButton
             action="download"
-            disabled={filteredDeliverables.length === 0}
+            onClick={exportCsv}
+            disabled={isExporting || filteredDeliverables.length === 0}
             title="Export to CSV"
           />
           <IconButton action="add" onClick={() => setCreateOpen(true)} title="New Deliverable" />

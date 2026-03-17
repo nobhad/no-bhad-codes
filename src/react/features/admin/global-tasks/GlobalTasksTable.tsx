@@ -44,6 +44,7 @@ import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { unwrapApiData, apiFetch, apiPost } from '@/utils/api-client';
 import { formatErrorMessage } from '@/utils/error-utils';
+import { useExport, GLOBAL_TASKS_EXPORT_CONFIG } from '@react/hooks/useExport';
 import { CreateTaskModal } from '../modals/CreateEntityModals';
 
 const logger = createLogger('GlobalTasksTable');
@@ -190,6 +191,14 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
 
   // Apply filters
   const filteredTasks = useMemo(() => applyFilters(tasks), [applyFilters, tasks]);
+
+  const { exportCsv, isExporting } = useExport({
+    config: GLOBAL_TASKS_EXPORT_CONFIG,
+    data: filteredTasks,
+    onExport: (count) => {
+      showNotification?.(`Exported ${count} item${count !== 1 ? 's' : ''} to CSV`, 'success');
+    }
+  });
 
   // Pagination - overview mode disables persistence
   const pagination = usePagination({
@@ -400,7 +409,8 @@ export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification
             />
             <IconButton
               action="download"
-              disabled={filteredTasks.length === 0}
+              onClick={exportCsv}
+              disabled={isExporting || filteredTasks.length === 0}
               title="Export to CSV"
             />
             <IconButton action="add" onClick={() => setCreateOpen(true)} title="Add Task" />
@@ -650,23 +660,21 @@ function TasksKanbanView({
             data-status={column.id}
           >
             <div className="kanban-column-header">
-              <div className="kanban-column-title-wrapper">
+              <span className="kanban-column-title">
                 <span
                   className="status-dot"
                   data-status={column.id}
                   style={{ backgroundColor: column.color }}
                 />
-                <span className="kanban-column-title">
-                  {column.label}
-                </span>
-                <span className="kanban-column-count">
-                  {columnTasks.length}
-                </span>
-              </div>
+                {column.label}
+              </span>
+              <span className="kanban-column-count">
+                {columnTasks.length}
+              </span>
             </div>
             <div className="kanban-column-content">
               {columnTasks.length === 0 ? (
-                <EmptyState message="No tasks" className="kanban-empty-state" />
+                <EmptyState message="No tasks" className="empty-state--compact" />
               ) : (
                 columnTasks.map((task) => (
                   <div
@@ -691,13 +699,13 @@ function TasksKanbanView({
                     )}
                     <div className="task-meta">
                       {task.dueDate && (
-                        <span className="task-due-date">
+                        <span className="task-meta-item">
                           <Calendar className="icon-xs" />
                           {formatDateShort(task.dueDate)}
                         </span>
                       )}
                       {task.assignedToName && (
-                        <span className="task-assignee">
+                        <span className="task-meta-item">
                           <User className="icon-xs" />
                           {task.assignedToName}
                         </span>

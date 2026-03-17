@@ -27,6 +27,7 @@ export const API_ENDPOINTS = {
   CONTRACTS_BULK_DELETE: '/api/contracts/bulk-delete',
   PROPOSALS: '/api/proposals',
   PROPOSALS_MY: '/api/proposals/my',
+  PROPOSALS_PREFILL: (projectId: number) => `/api/proposals/prefill/${projectId}`,
   QUESTIONNAIRES: '/api/questionnaires',
   QUESTIONNAIRES_RESPONSES: '/api/questionnaires/responses',
   QUESTIONNAIRES_BULK_DELETE: '/api/questionnaires/bulk-delete',
@@ -115,6 +116,11 @@ export const API_ENDPOINTS = {
     // Proposals & Contracts
     PROPOSALS: '/api/admin/proposals',
     PROPOSALS_BULK_DELETE: '/api/admin/proposals/bulk-delete',
+
+    // Invoices
+    INVOICES: '/api/admin/invoices',
+    INVOICES_BULK_DELETE: '/api/admin/invoices/bulk-delete',
+    INVOICES_BULK_STATUS: '/api/admin/invoices/bulk-status',
 
     // Time Tracking
     TIME_ENTRIES: '/api/admin/time-entries',

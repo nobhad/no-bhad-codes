@@ -59,7 +59,7 @@ export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTab
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleCardClick(project); }}
       >
-        <div className="project-card-header">
+        <div className="portal-card-header">
           <div className="project-card-info">
             <div className="project-title-row">
               <h4 className="heading truncate">

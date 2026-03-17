@@ -162,7 +162,7 @@ export function NotesTab({
         autoFocus
       />
 
-      <div className="form-actions--compact">
+      <div className="action-group" style={{ marginTop: 'var(--space-3)' }}>
         <PortalButton variant="ghost" onClick={handleCancel}>
           Cancel
         </PortalButton>
@@ -187,7 +187,7 @@ export function NotesTab({
       )}
     >
       {/* Note header */}
-      <div className="note-card-header">
+      <div className="portal-card-header">
         <div className="note-meta">
           {note.is_pinned && (
             <Pin className="icon-xs is-active-primary" />
