@@ -252,7 +252,7 @@ html[data-theme="light"] .portal :is(
 }
 
 /* Action buttons in card headers — always right-aligned */
-.portal .portal-card-header .portal-card-actions,
+.portal .portal-card-header .action-group,
 .portal .portal-card-header .panel-actions,
 .portal .portal-card-header .icon-btn {
   margin-left: auto;
@@ -311,13 +311,7 @@ html[data-theme="light"] .portal :is(
   color: var(--color-text-secondary);
 }
 
-/* Card actions row -- right-aligned action buttons */
-.portal .portal-card-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--space-2);
-}
+/* Card actions row — consolidated into .action-group (portal-tables.css) */
 
 /* Detail list -- stacked key-value rows (integrations, quotes) */
 .portal .portal-card-detail-list {

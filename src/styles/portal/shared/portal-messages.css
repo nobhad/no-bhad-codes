@@ -890,14 +890,7 @@
   height: 1rem;
 }
 
-/* Empty state variations */
-.messaging-empty-state-full {
-  flex: 1;
-}
-
-.messaging-empty-state-message {
-  font-size: var(--font-size-base);
-}
+/* Empty state variations — uses shared .empty-state--full */
 
 /* =====================================================
    MESSAGE THREAD COMPONENT - MessageThread.tsx

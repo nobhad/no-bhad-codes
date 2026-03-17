@@ -60,9 +60,7 @@
   /* Modal shadows */
   --shadow-modal: var(--shadow-2xl);
 
-  /* Dropdown shadow — multi-directional (top tabs / portal context menus)
-   * NOTE: variables.css previously overrode this with a 4-stop multi-directional
-   * value. That override has been removed; this custom value is now canonical. */
+  /* Dropdown shadow — main site only; portal overrides to none in portal-theme.css */
   --shadow-dropdown:
     4px 0 12px rgba(0, 0, 0, 0.3), -4px 0 12px rgba(0, 0, 0, 0.3),
     0 -4px 12px rgba(0, 0, 0, 0.3);
@@ -122,9 +120,7 @@
   /* Dark mode elevated shadow — stronger for contrast */
   --shadow-elevated-dark: 0 8px 32px rgba(0, 0, 0, 0.75);
 
-  /* Large dropdown shadow — for modal-like dropdowns
-   * NOTE: --shadow-dropdown (without -xl) is defined above as var(--shadow-lg).
-   * variables.css overrides it with a custom multi-stop value for the main site. */
+  /* Large dropdown shadow — main site only; portal overrides to none */
   --shadow-dropdown-xl: 0 20px 60px rgba(0, 0, 0, 0.5);
 
   /* Terminal/modal shadows — layered depth effect */

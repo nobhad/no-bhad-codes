@@ -419,8 +419,8 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   text-overflow: ellipsis;
 }
 
+/* File actions — extends .action-group; override gap only */
 #pd-files-list .file-actions {
-  display: flex;
   gap: var(--space-1);
 }
 
@@ -929,44 +929,20 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 
 /* --- Invoices Tab --- */
 
-/* Invoice header stat row */
-.invtab-stats {
-  display: flex;
-  align-items: center;
-  gap: var(--space-6);
-  font-size: var(--font-size-sm);
-}
-
 /* Invoice filter — min-width matches dropdown content */
 .invtab-filter {
   min-width: var(--status-dropdown-width);
 }
 
-/* Invoice table panel (no extra padding) */
-.invtab-panel {
-  padding: 0;
-  overflow: hidden;
-}
-
-/* Invoice table header row */
-.invtab-header-row {
-  border-bottom: var(--portal-border);
-}
-
-/* Invoice table row - clickable, ensure table-row display */
-.invtab-row {
+/* Clickable table row — reusable for any table inside a panel */
+.pd-clickable-row {
   display: table-row;
   cursor: pointer;
   transition: background-color var(--transition-fast);
 }
 
-.invtab-row:hover {
+.pd-clickable-row:hover {
   background: var(--portal-alpha-white-05);
-}
-
-/* Invoice dropdown icon margin */
-.invtab-dropdown-icon {
-  margin-right: var(--space-2);
 }
 
 /* --- Notes Tab --- */

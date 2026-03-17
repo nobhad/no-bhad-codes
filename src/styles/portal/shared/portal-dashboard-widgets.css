@@ -211,7 +211,7 @@
 }
 
 
-.portal .dashboard-tasks-kanban .task-due-date {
+.portal .dashboard-tasks-kanban .task-meta-item {
   display: flex;
   align-items: center;
   gap: var(--icon-gap-xs);
@@ -219,7 +219,7 @@
   color: var(--color-text-tertiary);
 }
 
-.portal .dashboard-tasks-kanban .task-due-date.overdue {
+.portal .dashboard-tasks-kanban .task-meta-item.overdue {
   color: var(--status-cancelled);
 }
 

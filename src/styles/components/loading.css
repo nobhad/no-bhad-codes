@@ -291,8 +291,22 @@ td.empty-row {
   padding: clamp(var(--space-3), 3vw, var(--space-5));
 }
 
+/* Compact variant — reduced padding/min-height for kanban columns and inline contexts */
+.empty-state--compact {
+  min-height: auto;
+  padding: var(--space-2);
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary, inherit);
+}
+
+/* Full variant — fills available flex space (messages panel, etc.) */
+.empty-state--full {
+  flex: 1;
+}
+
 /* Small variant icon - 16px - uses mask-image so color inherits */
-.empty-state-small::before {
+.empty-state--compact::before {
   content: "";
   display: block;
   width: 16px;

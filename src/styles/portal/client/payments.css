@@ -4,67 +4,10 @@
  * ===============================================
  * @file src/styles/portal/client/payments.css
  *
- * Styles for the client payment schedule view,
- * including summary stats grid and installment list.
+ * Payment schedule view uses shared classes:
+ * - .panel, .stats-row, .stat-card (summary)
+ * - .list-item, .field-label, .text-secondary (installments)
+ * - .action-group, .stat-value (amount + status)
+ *
+ * No custom payment-specific classes needed.
  */
-
-/* --- Summary Card --- */
-
-.payment-summary-card {
-  margin-bottom: var(--space-2);
-}
-
-.payment-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: var(--space-2);
-}
-
-/* --- Stat Labels & Values --- */
-
-.payment-stat-label {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-}
-
-.payment-stat-value {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-}
-
-.payment-stat-value--success {
-  color: var(--status-completed);
-}
-
-.payment-stat-value--danger {
-  color: var(--color-danger);
-}
-
-/* --- Installment List Items --- */
-
-.payment-item-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-1) var(--content-gutter);
-  border-bottom: var(--portal-border);
-}
-
-.payment-item-label {
-  font-weight: var(--font-weight-medium);
-}
-
-.payment-item-meta {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.payment-item-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.payment-item-amount {
-  font-weight: var(--font-weight-semibold);
-}

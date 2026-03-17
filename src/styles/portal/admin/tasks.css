@@ -115,24 +115,19 @@
   height: 1em;
 }
 
-.task-due-date {
+/* Shared meta item: icon + label inline */
+.task-meta-item {
   display: flex;
   align-items: center;
   gap: var(--space-0-5);
 }
 
-.task-due-date.overdue {
+.task-meta-item.overdue {
   color: var(--status-cancelled);
 }
 
-.task-due-date.overdue svg {
+.task-meta-item.overdue svg {
   opacity: 1;
-}
-
-.task-assignee {
-  display: flex;
-  align-items: center;
-  gap: var(--space-0-5);
 }
 
 /* ============================================
@@ -209,12 +204,7 @@
 }
 
 
-/* Kanban empty state */
-.kanban-empty-state {
-  text-align: center;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
+/* Kanban empty state — uses shared .empty-state--compact */
 
 /* Kanban card header */
 .kanban-card-header {
@@ -230,11 +220,7 @@
 
 /* .kanban-card-title defined in shared/portal-kanban.css */
 
-/* Kanban column title wrapper */
-.kanban-column-title-wrapper {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
+/* .kanban-column-title-wrapper removed — use .kanban-column-header directly
+   (shared layout in portal-kanban.css already provides flex + align) */
 
 /* Board view uses shared .kanban-* classes from portal-components.css */

@@ -155,8 +155,8 @@
 
 /* Warning state for stat values */
 .portal .stat-value-warning,
-.portal :is(.stat-card--warning, .tasks-stat-card--alert) .stat-value,
-.portal :is(.stat-card--warning, .tasks-stat-card--alert).has-items .stat-value {
+.portal .stat-card--warning .stat-value,
+.portal .stat-card--warning.has-items .stat-value {
   color: var(--color-warning-500);
 }
 

@@ -296,13 +296,9 @@
    Tables are transparent - container provides the visual boundary
    ===================================================== */
 
-/* File actions container */
+/* File actions in table — only overrides beyond .action-group base */
 .portal .data-table .file-actions {
-  display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-  justify-content: flex-end;
 }
 
 /* Table action buttons should use .btn-xs class */
@@ -384,11 +380,10 @@
 
 /* =====================================================
    FILE ACTIONS
-   Action buttons for files
+   Extends .action-group layout — only file-specific overrides here.
+   Use class="action-group file-actions" on the element.
    ===================================================== */
 .portal .file-actions {
-  display: flex;
-  flex-direction: row;
   gap: var(--space-1);
   flex-shrink: 0;
   margin-left: auto;
