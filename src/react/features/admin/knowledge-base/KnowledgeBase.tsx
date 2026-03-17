@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { useActiveSubtab } from '@react/contexts/SubtabContext';
 import { LoadingState } from '@react/factories';
 
 // Lazy load child components
@@ -17,22 +17,7 @@ type KBSubtab = 'overview' | 'categories' | 'articles';
 
 export function KnowledgeBase({ onNavigate, getAuthToken, showNotification }: KnowledgeBaseProps) {
   const containerRef = useFadeIn();
-  const [activeSubtab, setActiveSubtab] = useState<KBSubtab>('overview');
-
-  // Listen for subtab change events from header
-  useEffect(() => {
-    function handleSubtabChange(e: CustomEvent<{ subtab: string }>) {
-      const subtab = e.detail.subtab as KBSubtab;
-      if (['overview', 'categories', 'articles'].includes(subtab)) {
-        setActiveSubtab(subtab);
-      }
-    }
-
-    document.addEventListener('knowledgeBaseSubtabChange', handleSubtabChange as EventListener);
-    return () => {
-      document.removeEventListener('knowledgeBaseSubtabChange', handleSubtabChange as EventListener);
-    };
-  }, []);
+  const activeSubtab = useActiveSubtab() as KBSubtab;
 
   // Individual subtab views
   if (activeSubtab === 'categories') {

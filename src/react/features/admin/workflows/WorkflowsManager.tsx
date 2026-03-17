@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { useActiveSubtab } from '@react/contexts/SubtabContext';
 import { LoadingState } from '@react/factories';
 
 // Lazy load child components
@@ -17,22 +17,7 @@ type WorkflowsSubtab = 'overview' | 'approvals' | 'triggers' | 'email-templates'
 
 export function WorkflowsManager({ getAuthToken, showNotification, onNavigate }: WorkflowsManagerProps) {
   const containerRef = useFadeIn();
-  const [activeSubtab, setActiveSubtab] = useState<WorkflowsSubtab>('overview');
-
-  // Listen for subtab change events from header
-  useEffect(() => {
-    function handleSubtabChange(e: CustomEvent<{ subtab: string }>) {
-      const subtab = e.detail.subtab as WorkflowsSubtab;
-      if (['overview', 'approvals', 'triggers', 'email-templates'].includes(subtab)) {
-        setActiveSubtab(subtab);
-      }
-    }
-
-    document.addEventListener('workflowsSubtabChange', handleSubtabChange as EventListener);
-    return () => {
-      document.removeEventListener('workflowsSubtabChange', handleSubtabChange as EventListener);
-    };
-  }, []);
+  const activeSubtab = useActiveSubtab() as WorkflowsSubtab;
 
   // Individual subtab views
   if (activeSubtab === 'approvals' || activeSubtab === 'triggers') {

@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { useActiveSubtab } from '@react/contexts/SubtabContext';
 import { LoadingState } from '@react/factories';
 
 // Lazy load child components
@@ -20,22 +20,7 @@ type CRMSubtab = 'overview' | 'leads' | 'contacts' | 'messages' | 'clients';
 
 export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRMDashboardProps) {
   const containerRef = useFadeIn();
-  const [activeSubtab, setActiveSubtab] = useState<CRMSubtab>('overview');
-
-  // Listen for subtab change events from header
-  useEffect(() => {
-    function handleSubtabChange(e: CustomEvent<{ subtab: string }>) {
-      const subtab = e.detail.subtab as CRMSubtab;
-      if (['overview', 'leads', 'contacts', 'messages', 'clients'].includes(subtab)) {
-        setActiveSubtab(subtab);
-      }
-    }
-
-    document.addEventListener('crmSubtabChange', handleSubtabChange as EventListener);
-    return () => {
-      document.removeEventListener('crmSubtabChange', handleSubtabChange as EventListener);
-    };
-  }, []);
+  const activeSubtab = useActiveSubtab() as CRMSubtab;
 
   // Render individual views for specific subtabs
   if (activeSubtab === 'leads') {
