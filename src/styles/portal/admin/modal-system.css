@@ -94,6 +94,13 @@
   border-right: var(--border-width-thick) solid var(--color-border-primary);
 }
 
+/* Gutter on panel children — even padding on all direct children */
+.details-panel > * {
+  padding-left: var(--content-gutter);
+  padding-right: var(--content-gutter);
+  box-sizing: border-box;
+}
+
 /* Headings inside panel use portal serif font, not global Acme */
 .details-panel h1,
 .details-panel h2,
@@ -123,7 +130,7 @@
 
 .details-panel .dropdown-trigger--status {
   background: transparent;
-  border: var(--portal-input-border);
+  border: var(--border-width-px) solid var(--color-bg-secondary);
 }
 
 /* Radix popper wrappers must sit above the details-panel (z-index 9600) */
