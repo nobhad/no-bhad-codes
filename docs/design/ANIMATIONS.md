@@ -45,12 +45,11 @@ Defined in `src/design-system/tokens/animations.css`.
 ### Duration Tokens
 
 ```css
---duration-instant: 0ms;      /* No animation */
---duration-fast: 150ms;       /* Micro-interactions */
---duration-normal: 250ms;     /* Standard transitions */
---duration-slow: 400ms;       /* Emphasis animations */
---duration-slower: 600ms;     /* Page transitions */
---duration-slowest: 800ms;    /* Complex sequences */
+--duration-faster: 0.15s;     /* Micro-interactions */
+--duration-fast: 0.2s;        /* Quick transitions */
+--duration-medium: 0.3s;      /* Standard transitions */
+--duration-slow: 0.4s;        /* Emphasis animations */
+--duration-slower: 0.5s;      /* Page transitions */
 ```
 
 ### Easing Tokens

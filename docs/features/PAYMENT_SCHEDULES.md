@@ -206,12 +206,16 @@ await fetch('/api/payment-schedules/42/mark-paid', {
 
 ## Change Log
 
-### March 16, 2026 — Receipt Auto-Generation on Mark-Paid
+### March 16, 2026 — Receipt Auto-Generation + Auto-Creation on Proposal Acceptance
 
 - `POST /:id/mark-paid` now auto-generates a receipt PDF when installment has a linked `invoice_id`
 - Receipt includes billing address and uses billing-preferred fields (COALESCE)
 - Email notification sent to client with receipt summary
 - Non-critical: receipt/email failures don't block the mark-paid operation
+- Auto-payment schedule creation when proposal is accepted (tier-based splits)
+  - Good/small projects: 50/50 (deposit + final)
+  - Better/mid projects: 40/30/30 (3 payments)
+  - Best/large projects: 25/25/25/25 (4 quarterly payments)
 
 ### March 13, 2026 — Initial Implementation
 

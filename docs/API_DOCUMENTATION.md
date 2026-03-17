@@ -1294,6 +1294,180 @@ Import milestones and tasks into a project from an export payload.
 - `400` - Invalid payload or missing milestones array
 - `404` - Project not found
 
+### GET `/projects/:id/completion-status`
+
+Check whether a project is ready for completion. Returns blockers (incomplete milestones, open tasks, unpaid invoices).
+
+**Auth:** Admin only
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "ready": false,
+    "blockers": [
+      { "type": "milestone", "message": "2 milestones incomplete" },
+      { "type": "task", "message": "5 tasks still open" },
+      { "type": "invoice", "message": "1 invoice unpaid" }
+    ],
+    "summary": {
+      "totalMilestones": 4,
+      "completedMilestones": 2,
+      "totalTasks": 12,
+      "completedTasks": 7,
+      "unpaidInvoices": 1
+    }
+  }
+}
+```
+
+**Error Responses:**
+
+- `404` - Project not found
+
+### POST `/projects/:id/complete`
+
+Mark a project as completed. Runs pre-flight checks for blockers. Admin can force-override with `force: true`.
+
+**Auth:** Admin only
+
+**Request:**
+
+```json
+{
+  "force": false
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Project marked as completed",
+  "data": {
+    "projectId": 1,
+    "completedAt": "2026-03-16T14:00:00Z",
+    "emailSent": true
+  }
+}
+```
+
+**Error Responses:**
+
+- `400` - Project has blockers (when `force` is false). Returns blocker details.
+- `404` - Project not found
+
+### GET `/projects/:id/intake-checklist`
+
+Get the intake information checklist for a project. Tracks which fields have been collected and which are still missing.
+
+**Auth:** Admin only
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "projectId": 1,
+    "collected": [
+      { "field": "budget", "value": "$3,000-$5,000", "priority": "essential" },
+      { "field": "project_type", "value": "business-site", "priority": "essential" }
+    ],
+    "missing": [
+      { "field": "timeline", "priority": "essential", "label": "Project Timeline" },
+      { "field": "brand_colors", "priority": "nice-to-have", "label": "Brand Colors" }
+    ],
+    "completionPercent": 65
+  }
+}
+```
+
+**Error Responses:**
+
+- `404` - Project not found
+
+### POST `/projects/:id/request-info`
+
+Send an email to the client requesting specific missing information fields.
+
+**Auth:** Admin only
+
+**Request:**
+
+```json
+{
+  "fields": ["timeline", "brand_colors", "content_pages"],
+  "customMessage": "We need a few more details to get started on your project."
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Info request email sent to client@example.com",
+  "data": {
+    "fieldsRequested": 3,
+    "recipientEmail": "client@example.com"
+  }
+}
+```
+
+**Error Responses:**
+
+- `400` - No fields specified
+- `404` - Project not found
+
+### POST `/projects/:id/generate-questionnaire`
+
+Generates a personalized questionnaire based on what project information is missing. All questions are included — fields with existing data are pre-filled so the client can review and edit. Only missing essential fields are marked as required.
+
+**Auth:** Admin only
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "questionnaireId": 42,
+    "responseId": 88,
+    "questionCount": 21,
+    "prefilledCount": 8,
+    "missingCount": 13,
+    "categories": ["about_you", "project_details", "design", "content", "technical", "billing"]
+  },
+  "message": "Generated custom questionnaire with 21 questions"
+}
+```
+
+**Question Categories:**
+
+- `about_you` — Business name, phone, billing info
+- `project_details` — Type, description, budget, timeline, features, current site
+- `design` — Design level, brand assets, inspiration
+- `content` — Content status (copy, photos, videos)
+- `technical` — Tech comfort, hosting, integrations
+- `billing` — Billing name, address
+
+**Behavior:**
+
+- Questions for fields that already have data are pre-filled and marked as editable
+- Only essential fields that are truly missing are required
+- Questionnaire auto-assigned to the project's client
+- Auto-triggered on project creation (admin and client routes)
+
+**Error Responses:**
+
+- `404` - Project not found
+
+---
+
 ## Milestone Management Endpoints
 
 ### GET `/projects/:id/milestones`
@@ -4082,6 +4256,107 @@ Export full proposal data including features, client/project info, pricing, and 
 **Error Responses:**
 
 - `404` - Proposal not found
+
+### GET `/proposals/prefill/:projectId`
+
+Get proposal prefill data by mapping completed questionnaire responses to suggested tier, features, and maintenance recommendation.
+
+**Auth:** Admin only
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "suggestedTier": "better",
+    "suggestedFeatures": ["responsive-design", "contact-form", "blog-setup"],
+    "suggestedAddons": ["seo-optimization", "analytics-setup"],
+    "maintenanceRecommendation": "standard",
+    "estimatedBudget": 4500,
+    "customItems": [
+      { "description": "Logo Design", "reason": "Client indicated they need a logo" }
+    ],
+    "adminNotes": "Client prefers modern, minimal design. Inspiration: example.com",
+    "validityDays": 30,
+    "questionnairesCompleted": 3,
+    "questionnairesTotal": 3
+  }
+}
+```
+
+**Error Responses:**
+
+- `404` - Project not found
+- `400` - No completed questionnaires found
+
+### POST `/proposals/:id/accept`
+
+Client accepts a proposal. Triggers auto-cascade: tier-aware milestones, draft contract, payment schedule.
+
+**Auth:** Client (must own the proposal's project)
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Proposal accepted",
+  "data": {
+    "proposalId": 12,
+    "projectId": 1,
+    "acceptedAt": "2026-03-16T10:00:00Z",
+    "contractCreated": true,
+    "paymentScheduleCreated": true,
+    "milestonesGenerated": 5
+  }
+}
+```
+
+**Error Responses:**
+
+- `400` - Proposal already accepted or not in acceptable state
+- `403` - Client does not own this proposal
+- `404` - Proposal not found
+
+### POST `/proposals/from-template`
+
+Create a proposal from the template system using a client budget. Generates Good/Better/Best tiers relative to the budget.
+
+**Auth:** Admin only
+
+**Request:**
+
+```json
+{
+  "projectId": 1,
+  "projectType": "business-site",
+  "budget": 5000,
+  "includeAddons": true
+}
+```
+
+**Response (201 Created):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "proposalId": 15,
+    "tiers": {
+      "good": { "price": 2250, "features": 12 },
+      "better": { "price": 4000, "features": 18 },
+      "best": { "price": 6500, "features": 24, "maintenanceIncluded": "3 months Standard" }
+    }
+  }
+}
+```
+
+**Error Responses:**
+
+- `400` - Missing required fields or invalid project type
+- `404` - Project not found
+- `409` - Active proposal already exists for this project
 
 ---
 

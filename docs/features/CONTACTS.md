@@ -1,7 +1,7 @@
 # Contact Form Submissions
 
 **Status:** Complete
-**Last Updated:** February 8, 2026
+**Last Updated:** March 16, 2026
 
 ## Overview
 
@@ -137,3 +137,12 @@ POST /api/contacts (public)
 | `src/utils/table-filter.ts` | Filter configuration |
 | `src/utils/table-dropdown.ts` | Status dropdown |
 | `src/modules/ui/contact-form.ts` | Public contact form |
+| `src/react/features/admin/contacts/ContactDetailPanel.tsx` | Slide-in detail panel (Overview) |
+
+## Change Log
+
+### March 16, 2026 - Auto-Response + Validation
+
+- Contact form now sends auto-response email to submitter confirming receipt
+- HTML escaping applied to all user content in admin notification emails (XSS prevention)
+- File modified: `server/routes/api.ts`

@@ -117,6 +117,10 @@ Located in `src/react/factories/`. Reusable building blocks shared across featur
 |-----------|------|---------|
 | `MessageThread` | `MessageThread.tsx` | Chat thread rendering (send, edit, react, receipts) |
 | `IconButton` / `TableActions` | `IconButton.tsx` | Icon button primitives and table action wrapper |
+| `DetailPanel` | `createDetailPanel.tsx` | Reusable slide-in detail panel factory (portal, overlay, keyboard, tabs) |
+| `MetaItem` | `createDetailPanel.tsx` | Label/value metadata field for detail panel overview tabs |
+| `MetaGrid` | `createDetailPanel.tsx` | Grid of MetaItem fields with optional description blocks |
+| `Timeline` | `createDetailPanel.tsx` | Date event timeline list for detail panel history tabs |
 | `DataTable` | `DataTable/` | Generic sortable/filterable data table |
 | `InlineEdit` | `InlineEdit.tsx` | Click-to-edit inline field |
 | `SearchFilter` / `TableFilters` | `TableFilters.tsx` | Table filter bar components |
@@ -174,6 +178,15 @@ Organized by feature in `src/react/features/`.
 | `SystemStatusDashboard` | `system-status/SystemStatusDashboard.tsx` | System status dashboard |
 | `WorkDashboard` | `work/WorkDashboard.tsx` | Work management dashboard |
 | `LeadScoringRuleForm` | `leads/LeadScoringRuleForm.tsx` | Lead scoring rule config |
+| `LeadDetailPanel` | `leads/LeadDetailPanel.tsx` | Slide-in lead detail panel (Overview, Tasks, Notes) |
+| `ContractDetailPanel` | `contracts/ContractDetailPanel.tsx` | Slide-in contract detail panel (Overview, Timeline) |
+| `ProposalDetailPanel` | `proposals/ProposalDetailPanel.tsx` | Slide-in proposal detail panel (Overview, Timeline) |
+| `DocumentRequestDetailPanel` | `document-requests/DocumentRequestDetailPanel.tsx` | Slide-in document request detail panel (Overview, Timeline) |
+| `ContactDetailPanel` | `contacts/ContactDetailPanel.tsx` | Slide-in contact detail panel (Overview) |
+| `QuestionnaireDetailPanel` | `questionnaires/QuestionnaireDetailPanel.tsx` | Slide-in questionnaire detail panel (Overview, Progress) |
+| `DesignReviewDetailPanel` | `design-review/DesignReviewDetailPanel.tsx` | Slide-in design review detail panel (Overview, Timeline) |
+| `WorkflowDetailPanel` | `workflows/WorkflowDetailPanel.tsx` | Slide-in workflow detail panel (Overview, Stats) |
+| `EmailTemplateDetailPanel` | `email-templates/EmailTemplateDetailPanel.tsx` | Slide-in email template detail panel (Overview, Variables) |
 
 ### Auth (`src/react/features/auth/`)
 

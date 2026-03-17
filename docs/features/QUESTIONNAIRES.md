@@ -120,6 +120,12 @@ Questions are stored as JSON arrays with the following structure:
 - Progress tracking
 - Submit confirmation
 
+### Admin Detail Panel
+
+**File:** `src/react/features/admin/questionnaires/QuestionnaireDetailPanel.tsx`
+
+- Slide-in detail panel (Overview, Progress)
+
 ## Styles
 
 - `src/styles/admin/questionnaires.css` - Admin portal styles

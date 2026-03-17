@@ -223,3 +223,4 @@ Add to `document_requests` table:
 | `server/routes/document-requests.ts` | API endpoints |
 | `src/utils/table-filter.ts` | Filter configuration |
 | `src/utils/table-bulk-actions.ts` | Bulk action utilities |
+| `src/react/features/admin/document-requests/DocumentRequestDetailPanel.tsx` | Slide-in detail panel (Overview, Timeline) |

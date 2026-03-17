@@ -1,9 +1,9 @@
 # Database Schema Documentation
 
-**Last Updated:** March 9, 2026
+**Last Updated:** March 16, 2026
 **Database:** SQLite (`data/client_portal.db`)
 **Total Tables:** 129 (includes new `users` table and consolidated messaging/intake)
-**Total Migrations:** 103
+**Total Migrations:** 117
 
 ## Table of Contents
 
