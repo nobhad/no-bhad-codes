@@ -1385,6 +1385,72 @@ async function handleAutoCompleteOnboardingStep(data: {
   }
 }
 
+/**
+ * Handler: Route workflow events to the email sequence service for auto-enrollment.
+ * Resolves entity info (type, email, name) from the event context before calling the service.
+ */
+async function handleSequenceEvent(data: {
+  entityId?: number | null;
+  triggeredBy?: string;
+  clientId?: number;
+  [key: string]: unknown;
+}): Promise<void> {
+  if (!data.triggeredBy || !data.entityId) return;
+
+  const db = getDatabase();
+
+  try {
+    // Determine entity type and resolve email/name
+    let entityType: string;
+    let entityEmail: string | undefined;
+    let entityName: string | undefined;
+
+    const event = data.triggeredBy;
+
+    if (event.startsWith('lead.')) {
+      entityType = 'lead';
+      const lead = (await db.get(
+        'SELECT email, COALESCE(contact_name, company_name) as name FROM projects WHERE id = ? AND source_type = \'lead\'',
+        [data.entityId]
+      )) as { email: string; name: string } | undefined;
+      entityEmail = lead?.email;
+      entityName = lead?.name;
+    } else if (event.startsWith('client.')) {
+      entityType = 'client';
+      const client = (await db.get(
+        'SELECT email, COALESCE(contact_name, company_name) as name FROM clients WHERE id = ?',
+        [data.clientId || data.entityId]
+      )) as { email: string; name: string } | undefined;
+      entityEmail = client?.email;
+      entityName = client?.name;
+    } else if (event.startsWith('proposal.')) {
+      entityType = 'lead';
+      const proposal = (await db.get(
+        'SELECT c.email, COALESCE(c.contact_name, c.company_name) as name, pr.client_id FROM proposal_requests pr JOIN clients c ON pr.client_id = c.id WHERE pr.id = ?',
+        [data.entityId]
+      )) as { email: string; name: string; client_id: number } | undefined;
+      entityEmail = proposal?.email;
+      entityName = proposal?.name;
+    } else {
+      return; // Unknown event prefix
+    }
+
+    if (!entityEmail) return; // Can't enroll without email
+
+    const { sequenceService } = await import('./sequence-service.js');
+    await sequenceService.handleEvent(data.triggeredBy, {
+      entityType,
+      entityId: data.entityId,
+      entityEmail,
+      entityName
+    });
+  } catch (error) {
+    logger.error('[WorkflowAutomation] Failed to handle sequence event', {
+      error: error instanceof Error ? error : undefined
+    });
+  }
+}
+
 // ============================================
 // Registration
 // ============================================
@@ -1421,6 +1487,17 @@ export function registerWorkflowAutomations(): void {
   workflowTriggerService.on('invoice.paid', handleAutoCompleteOnboardingStep);
   workflowTriggerService.on('questionnaire.completed', handleAutoCompleteOnboardingStep);
 
+  // Email Sequence Auto-Enrollment (route events to sequence service)
+  const SEQUENCE_TRIGGER_EVENTS = [
+    'lead.created', 'lead.stage_changed', 'lead.converted',
+    'proposal.sent', 'proposal.accepted', 'proposal.rejected',
+    'client.created'
+  ] as const;
+
+  for (const event of SEQUENCE_TRIGGER_EVENTS) {
+    workflowTriggerService.on(event, handleSequenceEvent);
+  }
+
   // Client Notification Handlers
   workflowTriggerService.on('proposal.accepted', notifyProposalAccepted);
   workflowTriggerService.on('contract.signed', notifyContractSigned);
@@ -1430,7 +1507,7 @@ export function registerWorkflowAutomations(): void {
   workflowTriggerService.on('invoice.paid', notifyInvoicePaid);
   workflowTriggerService.on('project.milestone_completed', notifyMilestoneCompleted);
 
-  logger.info('Registered 18 automation handlers', {
+  logger.info('Registered 25 automation handlers', {
     category: 'workflow',
     metadata: {
       handlers: [
@@ -1451,7 +1528,14 @@ export function registerWorkflowAutomations(): void {
         'questionnaire.completed -> Auto-complete agreement step',
         'contract.signed -> Auto-complete onboarding step',
         'invoice.paid -> Auto-complete onboarding step',
-        'questionnaire.completed -> Auto-complete onboarding step'
+        'questionnaire.completed -> Auto-complete onboarding step',
+        'lead.created -> Sequence auto-enroll',
+        'lead.stage_changed -> Sequence auto-enroll',
+        'lead.converted -> Sequence auto-enroll',
+        'proposal.sent -> Sequence auto-enroll',
+        'proposal.accepted -> Sequence auto-enroll',
+        'proposal.rejected -> Sequence auto-enroll',
+        'client.created -> Sequence auto-enroll'
       ]
     }
   });
