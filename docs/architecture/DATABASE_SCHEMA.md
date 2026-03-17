@@ -2,8 +2,8 @@
 
 **Last Updated:** March 17, 2026
 **Database:** SQLite (`data/client_portal.db`)
-**Total Tables:** 149 (includes Phase 1-4 tables)
-**Total Migrations:** 126
+**Total Tables:** 154 (includes Phase 1-5B tables)
+**Total Migrations:** 128
 
 ## Table of Contents
 
@@ -497,6 +497,23 @@ See [DATABASE_NORMALIZATION_PLAN.md](../archive/DATABASE_NORMALIZATION_PLAN.md) 
 
 ---
 
+## Phase 5A Tables (Migration 127)
+
+### Feedback and Testimonials (Migration 127)
+
+- `feedback_surveys` — Survey instances (project_id nullable, client_id, survey_type CHECK 3 types, status CHECK 4 states, token UNIQUE for unauthenticated email-link access, sent_at, completed_at, expires_at, reminder_sent)
+- `feedback_responses` — 1:1 response per survey (survey_id UNIQUE, overall_rating 1-5, nps_score 0-10, communication_rating 1-5, quality_rating 1-5, timeliness_rating 1-5, highlights, improvements, testimonial_text, testimonial_approved, allow_name_use)
+- `testimonials` — Curated testimonials with approval workflow (feedback_response_id nullable, client_id, project_id nullable, text, client_name, company_name, rating 1-5, status CHECK 4 states: pending_review/approved/published/rejected, featured, published_at)
+
+## Phase 5B Tables (Migration 128)
+
+### Embeddable Widgets (Migration 128)
+
+- `embed_configurations` — Widget configuration records (widget_type CHECK 3 types: contact_form/testimonials/status_badge, name, token UNIQUE, config JSON, allowed_domains TEXT, is_active, created_at, updated_at)
+- `project_status_tokens` — Public tokens for project status badge widgets (project_id FK, token UNIQUE, is_active, created_at)
+
+---
+
 ## Related Documentation
 
 - [API Documentation](../API_DOCUMENTATION.md)
@@ -510,3 +527,5 @@ See [DATABASE_NORMALIZATION_PLAN.md](../archive/DATABASE_NORMALIZATION_PLAN.md) 
 - [Custom Automations](../features/CUSTOM_AUTOMATIONS.md)
 - [Expenses](../features/EXPENSES.md)
 - [Retainers](../features/RETAINERS.md)
+- [Feedback Surveys](../features/FEEDBACK.md)
+- [Embeddable Widgets](../features/EMBED_WIDGETS.md)
