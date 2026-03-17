@@ -1386,6 +1386,26 @@ async function handleAutoCompleteOnboardingStep(data: {
 }
 
 /**
+ * Handler: Route ALL workflow events to the custom automation engine.
+ */
+async function handleCustomAutomationEvent(data: {
+  entityId?: number | null;
+  triggeredBy?: string;
+  [key: string]: unknown;
+}): Promise<void> {
+  if (!data.triggeredBy) return;
+
+  try {
+    const { automationEngine } = await import('./automation-engine.js');
+    await automationEngine.handleEvent(data.triggeredBy, data);
+  } catch (error) {
+    logger.error('[WorkflowAutomation] Failed to handle custom automation event', {
+      error: error instanceof Error ? error : undefined
+    });
+  }
+}
+
+/**
  * Handler: Route workflow events to the email sequence service for auto-enrollment.
  * Resolves entity info (type, email, name) from the event context before calling the service.
  */
@@ -1486,6 +1506,24 @@ export function registerWorkflowAutomations(): void {
   workflowTriggerService.on('contract.signed', handleAutoCompleteOnboardingStep);
   workflowTriggerService.on('invoice.paid', handleAutoCompleteOnboardingStep);
   workflowTriggerService.on('questionnaire.completed', handleAutoCompleteOnboardingStep);
+
+  // Custom Automation Engine (route ALL events)
+  const ALL_AUTOMATION_EVENTS = [
+    'lead.created', 'lead.stage_changed', 'lead.converted',
+    'proposal.created', 'proposal.sent', 'proposal.accepted', 'proposal.rejected',
+    'contract.created', 'contract.sent', 'contract.signed', 'contract.expired',
+    'project.created', 'project.started', 'project.completed', 'project.status_changed',
+    'project.milestone_completed',
+    'invoice.created', 'invoice.sent', 'invoice.paid', 'invoice.overdue', 'invoice.cancelled',
+    'task.created', 'task.completed', 'task.overdue',
+    'client.created', 'client.activated',
+    'deliverable.approved', 'questionnaire.completed',
+    'agreement.completed'
+  ] as const;
+
+  for (const event of ALL_AUTOMATION_EVENTS) {
+    workflowTriggerService.on(event, handleCustomAutomationEvent);
+  }
 
   // Email Sequence Auto-Enrollment (route events to sequence service)
   const SEQUENCE_TRIGGER_EVENTS = [

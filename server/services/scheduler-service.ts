@@ -174,6 +174,7 @@ export class SchedulerService {
   private priorityEscalationJob: SimpleTask | null = null;
   private sequenceProcessingJob: SimpleTask | null = null;
   private meetingReminderJob: SimpleTask | null = null;
+  private automationScheduledJob: SimpleTask | null = null;
   private isRunning = false;
 
   private constructor(config: Partial<SchedulerConfig> = {}) {
@@ -237,6 +238,9 @@ export class SchedulerService {
     // Schedule meeting reminders (daily at 9:00 AM)
     this.scheduleMeetingReminders();
 
+    // Schedule automation wait-step processing (every 5 minutes)
+    this.scheduleAutomationProcessing();
+
     // Start all scheduled jobs
     const jobs = [
       this.reminderJob,
@@ -245,7 +249,8 @@ export class SchedulerService {
       this.analyticsCleanupJob,
       this.priorityEscalationJob,
       this.sequenceProcessingJob,
-      this.meetingReminderJob
+      this.meetingReminderJob,
+      this.automationScheduledJob
     ].filter(Boolean);
 
     for (const job of jobs) {
@@ -295,6 +300,11 @@ export class SchedulerService {
     if (this.meetingReminderJob) {
       this.meetingReminderJob.stop();
       this.meetingReminderJob = null;
+    }
+
+    if (this.automationScheduledJob) {
+      this.automationScheduledJob.stop();
+      this.automationScheduledJob = null;
     }
 
     this.isRunning = false;
@@ -490,6 +500,31 @@ export class SchedulerService {
         }
       } catch (error) {
         logger.error('[Scheduler] Error during meeting reminders:', {
+          error: error instanceof Error ? error : undefined
+        });
+      }
+    });
+  }
+
+  /**
+   * Schedule custom automation wait-step processing — every 5 minutes
+   */
+  private scheduleAutomationProcessing(): void {
+    const AUTOMATION_CRON = '*/5 * * * *'; // Every 5 minutes
+    logger.info(`[Scheduler] Scheduling automation processing: ${AUTOMATION_CRON}`);
+
+    this.automationScheduledJob = createSimpleTask(AUTOMATION_CRON, async () => {
+      try {
+        const { automationEngine } = await import('./automation-engine.js');
+        const result = await automationEngine.processScheduledActions();
+
+        if (result.executed > 0 || result.failed > 0) {
+          logger.info(
+            `[Scheduler] Automation scheduled actions: executed=${result.executed}, failed=${result.failed}`
+          );
+        }
+      } catch (error) {
+        logger.error('[Scheduler] Error during automation processing:', {
           error: error instanceof Error ? error : undefined
         });
       }
