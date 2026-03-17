@@ -34,6 +34,7 @@ import emailRouter from './email.js';
 import filesRouter from './files.js';
 import tasksRouter from './tasks.js';
 import configRouter from './config.js';
+import invoicesRouter from './invoices.js';
 
 const router = express.Router();
 router.use(dashboardRouter);
@@ -62,5 +63,6 @@ router.use(emailRouter);
 router.use(filesRouter);
 router.use(tasksRouter);
 router.use(configRouter);
+router.use(invoicesRouter);
 export { router as adminRouter };
 export default router;

@@ -159,6 +159,28 @@ class DesignReviewService {
   }
 
   /**
+   * Create a new design review (deliverable)
+   */
+  async create(data: {
+    projectId: number;
+    title: string;
+    description?: string | null;
+    type?: string;
+    reviewDeadline?: string | null;
+  }): Promise<Record<string, unknown> | undefined> {
+    const db = getDatabase();
+    const result = await db.run(`
+      INSERT INTO deliverables (project_id, title, description, type, status, review_deadline)
+      VALUES (?, ?, ?, ?, 'pending', ?)
+    `, [data.projectId, data.title, data.description || null, data.type || 'design', data.reviewDeadline || null]);
+
+    return db.get(
+      `SELECT ${DELIVERABLE_COLUMNS} FROM deliverables WHERE id = ?`,
+      [result.lastID]
+    ) as Promise<Record<string, unknown> | undefined>;
+  }
+
+  /**
    * Update the status of a design review
    * Maps frontend status strings to database status values
    */

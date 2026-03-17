@@ -26,6 +26,36 @@ router.get(
 );
 
 /**
+ * POST /api/admin/workflows - Create a new workflow trigger
+ */
+router.post(
+  '/workflows',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['workflows']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { name, description, eventType, conditions, actionType, actionConfig, isActive, priority } = req.body;
+
+    if (!name || !eventType || !actionType) {
+      return errorResponse(res, 'Name, event type, and action type are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+    }
+
+    const workflow = await workflowTriggerService.createTrigger({
+      name,
+      description: description || undefined,
+      event_type: eventType,
+      conditions: conditions || undefined,
+      action_type: actionType,
+      action_config: actionConfig || {},
+      is_active: isActive !== false,
+      priority: priority || 0
+    });
+
+    sendSuccess(res, { workflow }, 'Workflow created');
+  })
+);
+
+/**
  * POST /api/admin/workflows/bulk-delete - Bulk delete workflow triggers
  */
 router.post(

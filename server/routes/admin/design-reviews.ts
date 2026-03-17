@@ -44,6 +44,33 @@ router.get(
 );
 
 /**
+ * POST /api/admin/design-reviews - Create a new design review
+ */
+router.post(
+  '/design-reviews',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['design-reviews']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { projectId, title, description, type, reviewDeadline } = req.body;
+
+    if (!projectId || !title) {
+      return errorResponse(res, 'Project ID and title are required', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const review = await designReviewService.create({
+      projectId: parseInt(projectId, 10),
+      title,
+      description: description || null,
+      type: type || 'design',
+      reviewDeadline: reviewDeadline || null
+    });
+
+    sendSuccess(res, { review }, 'Design review created');
+  })
+);
+
+/**
  * GET /api/admin/design-reviews/:reviewId - Get a specific design review
  */
 router.get(
