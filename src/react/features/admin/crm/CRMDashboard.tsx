@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useFadeIn } from '@react/hooks/useGsap';
-import { useActiveSubtab } from '@react/contexts/SubtabContext';
+import { useActiveSubtab, useSetSubtabActions } from '@react/contexts/SubtabContext';
 import { LoadingState } from '@react/factories';
 
 // Lazy load child components
@@ -20,7 +20,14 @@ type CRMSubtab = 'overview' | 'leads' | 'contacts' | 'messages' | 'clients';
 
 export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRMDashboardProps) {
   const containerRef = useFadeIn();
-  const activeSubtab = useActiveSubtab() as CRMSubtab;
+  const activeSubtab = useActiveSubtab<CRMSubtab>();
+  const setSubtabActions = useSetSubtabActions();
+
+  // Clear stale subtab actions on mount — child tables manage their own actions
+  React.useEffect(() => {
+    setSubtabActions(null);
+    return () => setSubtabActions(null);
+  }, [setSubtabActions]);
 
   // Render individual views for specific subtabs
   if (activeSubtab === 'leads') {

@@ -34,6 +34,7 @@ export function PortalSubtabs() {
   const navigate = useNavigate();
   const location = useLocation();
   const { activeSubtab, setSubtab, actions } = useSubtabContext();
+  const pendingSubtab = React.useRef<string | null>(null);
 
   const activeGroup = currentGroup || currentTab;
 
@@ -47,18 +48,24 @@ export function PortalSubtabs() {
 
     const currentPath = location.pathname.replace(/^\//, '');
     if (currentPath !== groupForTab) {
+      // Navigation will change pathname, triggering the useEffect below.
+      // Store the intended subtab so the effect applies it instead of resetting.
+      pendingSubtab.current = subtabId;
       switchTab(groupForTab);
       navigate(`/${groupForTab}`);
-      // Set after a tick so the component has mounted
-      setTimeout(() => setSubtab(subtabId), 0);
     } else {
       setSubtab(subtabId);
     }
   }, [switchTab, navigate, location.pathname, setSubtab]);
 
-  // Reset to overview when navigating away
+  // Reset to overview on pathname change, but apply pending subtab if set
   React.useEffect(() => {
-    setSubtab('overview');
+    if (pendingSubtab.current) {
+      setSubtab(pendingSubtab.current);
+      pendingSubtab.current = null;
+    } else {
+      setSubtab('overview');
+    }
   }, [location.pathname, setSubtab]);
 
   // Find the subtab group that matches the current active group
