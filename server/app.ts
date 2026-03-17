@@ -70,6 +70,8 @@ import onboardingChecklistRouter from './routes/onboarding-checklist/index.js';
 import sequencesRouter from './routes/sequences/index.js';
 import meetingRequestsRouter from './routes/meeting-requests/index.js';
 import automationsRouter from './routes/automations/index.js';
+import expensesRouter from './routes/expenses/index.js';
+import retainersRouter from './routes/retainers/index.js';
 import { eventsRouter } from './routes/events.js';
 import { searchRouter } from './routes/search.js';
 import healthRouter from './routes/health.js';
@@ -392,7 +394,9 @@ const apiRouters = [
   { path: '/onboarding-checklist', router: onboardingChecklistRouter },
   { path: '/sequences', router: sequencesRouter },
   { path: '/meeting-requests', router: meetingRequestsRouter },
-  { path: '/automations', router: automationsRouter }
+  { path: '/automations', router: automationsRouter },
+  { path: '/expenses', router: expensesRouter },
+  { path: '/retainers', router: retainersRouter }
 ];
 
 // Mount all routers at both /api and /api/v1

@@ -175,6 +175,8 @@ export class SchedulerService {
   private sequenceProcessingJob: SimpleTask | null = null;
   private meetingReminderJob: SimpleTask | null = null;
   private automationScheduledJob: SimpleTask | null = null;
+  private retainerBillingJob: SimpleTask | null = null;
+  private retainerUsageAlertJob: SimpleTask | null = null;
   private isRunning = false;
 
   private constructor(config: Partial<SchedulerConfig> = {}) {
@@ -241,6 +243,10 @@ export class SchedulerService {
     // Schedule automation wait-step processing (every 5 minutes)
     this.scheduleAutomationProcessing();
 
+    // Schedule retainer billing (daily at 7:00 AM) and usage alerts (daily at 8:00 AM)
+    this.scheduleRetainerBilling();
+    this.scheduleRetainerUsageAlerts();
+
     // Start all scheduled jobs
     const jobs = [
       this.reminderJob,
@@ -250,7 +256,9 @@ export class SchedulerService {
       this.priorityEscalationJob,
       this.sequenceProcessingJob,
       this.meetingReminderJob,
-      this.automationScheduledJob
+      this.automationScheduledJob,
+      this.retainerBillingJob,
+      this.retainerUsageAlertJob
     ].filter(Boolean);
 
     for (const job of jobs) {
@@ -305,6 +313,16 @@ export class SchedulerService {
     if (this.automationScheduledJob) {
       this.automationScheduledJob.stop();
       this.automationScheduledJob = null;
+    }
+
+    if (this.retainerBillingJob) {
+      this.retainerBillingJob.stop();
+      this.retainerBillingJob = null;
+    }
+
+    if (this.retainerUsageAlertJob) {
+      this.retainerUsageAlertJob.stop();
+      this.retainerUsageAlertJob = null;
     }
 
     this.isRunning = false;
@@ -500,6 +518,54 @@ export class SchedulerService {
         }
       } catch (error) {
         logger.error('[Scheduler] Error during meeting reminders:', {
+          error: error instanceof Error ? error : undefined
+        });
+      }
+    });
+  }
+
+  /**
+   * Schedule retainer auto-invoicing — daily at 7:00 AM
+   */
+  private scheduleRetainerBilling(): void {
+    const RETAINER_BILLING_CRON = '0 7 * * *';
+    logger.info(`[Scheduler] Scheduling retainer billing: ${RETAINER_BILLING_CRON}`);
+
+    this.retainerBillingJob = createSimpleTask(RETAINER_BILLING_CRON, async () => {
+      try {
+        const { retainerService } = await import('./retainer-service.js');
+        const result = await retainerService.processMonthlyBilling();
+
+        if (result.invoiced > 0 || result.errors.length > 0) {
+          logger.info(
+            `[Scheduler] Retainer billing: invoiced=${result.invoiced}, skipped=${result.skipped}, errors=${result.errors.length}`
+          );
+        }
+      } catch (error) {
+        logger.error('[Scheduler] Error during retainer billing:', {
+          error: error instanceof Error ? error : undefined
+        });
+      }
+    });
+  }
+
+  /**
+   * Schedule retainer usage alerts — daily at 8:00 AM
+   */
+  private scheduleRetainerUsageAlerts(): void {
+    const RETAINER_ALERTS_CRON = '0 8 * * *';
+    logger.info(`[Scheduler] Scheduling retainer usage alerts: ${RETAINER_ALERTS_CRON}`);
+
+    this.retainerUsageAlertJob = createSimpleTask(RETAINER_ALERTS_CRON, async () => {
+      try {
+        const { retainerService } = await import('./retainer-service.js');
+        const result = await retainerService.sendUsageAlerts();
+
+        if (result.sent > 0) {
+          logger.info(`[Scheduler] Retainer usage alerts sent: ${result.sent}`);
+        }
+      } catch (error) {
+        logger.error('[Scheduler] Error during retainer usage alerts:', {
           error: error instanceof Error ? error : undefined
         });
       }
