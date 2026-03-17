@@ -193,6 +193,11 @@ router.post(
 
       const intakeData: IntakeFormData = req.body;
 
+      // Normalize email before processing
+      if (intakeData.email) {
+        intakeData.email = intakeData.email.trim().toLowerCase();
+      }
+
       // Process features array outside transaction
       const features = Array.isArray(intakeData.features)
         ? intakeData.features

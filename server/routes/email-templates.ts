@@ -18,8 +18,48 @@ import {
   type UpdateTemplateData
 } from '../services/email-template-service.js';
 import { sendSuccess, sendCreated, errorResponse, ErrorCodes } from '../utils/api-response.js';
+import { validateRequest, ValidationSchema } from '../middleware/validation.js';
 
 const router = express.Router();
+
+// =====================================================
+// VALIDATION SCHEMAS
+// =====================================================
+
+const NAME_MAX_LENGTH = 200;
+const DESCRIPTION_MAX_LENGTH = 500;
+const CATEGORY_MAX_LENGTH = 50;
+const SUBJECT_MAX_LENGTH = 200;
+const BODY_MAX_LENGTH = 50000;
+
+const EmailTemplateValidationSchemas = {
+  createTemplate: {
+    name: [
+      { type: 'required' as const },
+      { type: 'string' as const, maxLength: NAME_MAX_LENGTH }
+    ],
+    description: { type: 'string' as const, maxLength: DESCRIPTION_MAX_LENGTH },
+    category: { type: 'string' as const, maxLength: CATEGORY_MAX_LENGTH },
+    subject: [
+      { type: 'required' as const },
+      { type: 'string' as const, maxLength: SUBJECT_MAX_LENGTH }
+    ],
+    body_html: [
+      { type: 'required' as const },
+      { type: 'string' as const, maxLength: BODY_MAX_LENGTH }
+    ],
+    body_text: { type: 'string' as const, maxLength: BODY_MAX_LENGTH }
+  } as ValidationSchema,
+
+  updateTemplate: {
+    name: { type: 'string' as const, maxLength: NAME_MAX_LENGTH },
+    description: { type: 'string' as const, maxLength: DESCRIPTION_MAX_LENGTH },
+    category: { type: 'string' as const, maxLength: CATEGORY_MAX_LENGTH },
+    subject: { type: 'string' as const, maxLength: SUBJECT_MAX_LENGTH },
+    body_html: { type: 'string' as const, maxLength: BODY_MAX_LENGTH },
+    body_text: { type: 'string' as const, maxLength: BODY_MAX_LENGTH }
+  } as ValidationSchema
+};
 
 // =====================================================
 // TEMPLATE MANAGEMENT
@@ -163,6 +203,7 @@ router.post(
   '/',
   authenticateToken,
   requireAdmin,
+  validateRequest(EmailTemplateValidationSchemas.createTemplate, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { name, description, category, subject, body_html, body_text, variables, is_active } =
       req.body;
@@ -215,6 +256,7 @@ router.put(
   '/:id',
   authenticateToken,
   requireAdmin,
+  validateRequest(EmailTemplateValidationSchemas.updateTemplate, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id) || id <= 0) {

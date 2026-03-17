@@ -180,6 +180,11 @@ router.put(
   requireAdmin,
   validateRequest(SettingsValidationSchemas.updateBusinessInfo, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    // Normalize email before saving
+    if (req.body.email) {
+      req.body.email = req.body.email.trim().toLowerCase();
+    }
+
     const businessInfo = await settingsService.updateBusinessInfo(req.body);
 
     await auditLogger.log({
@@ -249,6 +254,14 @@ router.put(
   requireAdmin,
   validateRequest(SettingsValidationSchemas.updatePaymentSettings, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    // Normalize email fields before saving
+    if (req.body.zelleEmail) {
+      req.body.zelleEmail = req.body.zelleEmail.trim().toLowerCase();
+    }
+    if (req.body.paypalEmail) {
+      req.body.paypalEmail = req.body.paypalEmail.trim().toLowerCase();
+    }
+
     const paymentSettings = await settingsService.updatePaymentSettings(req.body);
 
     await auditLogger.log({
