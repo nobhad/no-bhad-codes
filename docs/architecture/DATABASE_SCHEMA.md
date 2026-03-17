@@ -2,8 +2,8 @@
 
 **Last Updated:** March 17, 2026
 **Database:** SQLite (`data/client_portal.db`)
-**Total Tables:** 141 (includes Phase 1 + Phase 2 tables)
-**Total Migrations:** 123
+**Total Tables:** 146 (includes Phase 1 + Phase 2 + Phase 3 tables)
+**Total Migrations:** 124
 
 ## Table of Contents
 
@@ -474,6 +474,16 @@ See [DATABASE_NORMALIZATION_PLAN.md](../archive/DATABASE_NORMALIZATION_PLAN.md) 
 
 - `meeting_requests` — Full meeting lifecycle (client_id, project_id, meeting_type, status, preferred_slot_1/2/3, confirmed_datetime, duration_minutes, location_type, location_details, client_notes, admin_notes, decline_reason, calendar_event_id)
 
+## Phase 3 Tables (Migration 124)
+
+### Custom Automations (Migration 124)
+
+- `custom_automations` — Automation definitions (name, trigger_event, trigger_conditions, is_active, stop_on_error, max_runs_per_entity)
+- `automation_actions` — Ordered actions (automation_id, action_order, action_type, action_config JSON, condition JSON)
+- `automation_runs` — Execution history (automation_id, trigger_event, trigger_entity_type/id, status, started_at, completed_at, error_message)
+- `automation_action_logs` — Per-action execution log (run_id, action_id, status, executed_at, result, error_message)
+- `automation_scheduled_actions` — Deferred wait-step execution (run_id, action_id, execute_at, status)
+
 ---
 
 ## Related Documentation
@@ -486,3 +496,4 @@ See [DATABASE_NORMALIZATION_PLAN.md](../archive/DATABASE_NORMALIZATION_PLAN.md) 
 - [Onboarding Checklist](../features/ONBOARDING_CHECKLIST.md)
 - [Email Sequences](../features/EMAIL_SEQUENCES.md)
 - [Meeting Requests](../features/MEETING_REQUESTS.md)
+- [Custom Automations](../features/CUSTOM_AUTOMATIONS.md)
