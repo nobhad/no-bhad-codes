@@ -11,6 +11,7 @@
 import * as React from 'react';
 import { Bell } from 'lucide-react';
 import { usePortalAuth } from '../../hooks/usePortalAuth';
+import { useClickOutside } from '../../hooks/useClickOutside';
 import { apiGet, apiPut } from '../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../constants/api-endpoints';
 import { KEYS } from '../../../constants/keyboard';
@@ -81,18 +82,7 @@ export function NotificationBell() {
   }, [fetchNotifications, isAuthenticated]);
 
   // Close dropdown on outside click
-  React.useEffect(() => {
-    if (!open) return;
-
-    function handleClick(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [open]);
+  useClickOutside(containerRef, () => setOpen(false), open);
 
   // Close on Escape
   React.useEffect(() => {

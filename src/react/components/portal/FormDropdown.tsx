@@ -13,6 +13,7 @@ import * as React from 'react';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { useClickOutside } from '@react/hooks/useClickOutside';
 import { KEYS } from '../../../constants/keyboard';
 
 // ============================================================================
@@ -78,18 +79,7 @@ export function FormDropdown({
   );
 
   // Close on outside click
-  useEffect(() => {
-    if (!isOpen) return;
-
-    function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
+  useClickOutside(containerRef, () => setIsOpen(false), isOpen);
 
   // Close on Escape
   useEffect(() => {

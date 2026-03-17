@@ -34,5 +34,8 @@ export { usePagination } from './usePagination';
 export { useSelection } from './useSelection';
 export { useExport } from './useExport';
 
+// UI utility hooks
+export { useClickOutside } from './useClickOutside';
+
 // Portal SPA hooks
 export { usePortalAuth } from './usePortalAuth';
