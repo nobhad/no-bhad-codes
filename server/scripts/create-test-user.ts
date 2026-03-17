@@ -8,9 +8,14 @@ import * as sqlite3 from 'sqlite3';
 import { BUSINESS_INFO } from '../config/business.js';
 
 async function createTestUser() {
-  const email = `test@${BUSINESS_INFO.website}`;
-  const password = 'Test!1234';
-  const hash = await bcrypt.hash(password, 10);
+  const email = process.env.TEST_USER_EMAIL || `test@${BUSINESS_INFO.website}`;
+  const password = process.env.TEST_USER_PASSWORD;
+  if (!password) {
+    console.error('Error: TEST_USER_PASSWORD environment variable is required');
+    process.exit(1);
+  }
+  const BCRYPT_ROUNDS = 12;
+  const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
   const db = new sqlite3.Database('./data/client_portal.db');
 
