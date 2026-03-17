@@ -150,6 +150,11 @@
   transition: background-color var(--transition-faster) ease;
 }
 
+/* Inside table cells, remove negative margin that causes text clipping */
+.data-table .inline-edit-display {
+  margin: 0;
+}
+
 .portal .inline-edit-display:hover {
   background-color: var(--color-bg-hover);
 }

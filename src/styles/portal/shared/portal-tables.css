@@ -296,12 +296,10 @@
 .data-table-actions {
   order: 2;
   display: flex;
-  gap: var(--space-1);
+  gap: var(--action-btn-gap);
   align-items: center;
   margin-left: auto;
   flex-shrink: 0;
-  /* Scope icon-btn size to match icon — gap controls all visual spacing */
-  --portal-btn-icon-size: var(--icon-size-sm);
 }
 
 .data-table-actions .icon-btn {

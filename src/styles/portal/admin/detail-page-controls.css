@@ -34,6 +34,7 @@
 
 .detail-title {
   margin: 0;
+  padding: 2px;
   font-size: clamp(1.5rem, 4vw, 2rem);
   white-space: nowrap;
   overflow: hidden;
@@ -58,7 +59,6 @@
   flex-direction: column;
   gap: var(--space-1);
   min-width: 0;
-  overflow: hidden;
 }
 
 .detail-name-row {
