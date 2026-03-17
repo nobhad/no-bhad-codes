@@ -145,11 +145,13 @@ router.post(
 
     const normalizedEmail = email.trim().toLowerCase();
 
+    const normalizedPhone = phone ? phone.trim().replace(/[^\d+\-() ]/g, '') : '';
+
     const contact = await clientService.createContact(parsedClientId, {
       firstName,
       lastName,
       email: normalizedEmail,
-      phone: phone || '',
+      phone: normalizedPhone,
       title: title || '',
       role: 'general',
       isPrimary: isPrimary || false
@@ -178,6 +180,11 @@ router.put(
 
     // Normalize email if provided
     const normalizedEmail = (email !== undefined && email) ? email.trim().toLowerCase() : email;
+
+    // Normalize phone if provided
+    if (phone !== undefined && phone) {
+      req.body.phone = phone.trim().replace(/[^\d+\-() ]/g, '');
+    }
 
     // Check if there are any fields to update
     if (isPrimary === undefined && firstName === undefined && lastName === undefined &&

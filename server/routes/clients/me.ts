@@ -27,7 +27,8 @@ import {
   softDeleteService,
   clientService,
   ClientValidationSchemas,
-  normalizeEmail
+  normalizeEmail,
+  normalizePhone
 } from './helpers.js';
 
 const router = express.Router();
@@ -379,8 +380,9 @@ router.put(
 
     const { billing_name, company, address, address2, city, state, zip, country, phone, email } = req.body;
 
-    // Normalize email if provided
+    // Normalize email and phone if provided
     const normalizedEmail = email ? normalizeEmail(email) : email;
+    const normalizedPhone = phone ? normalizePhone(phone) : phone;
 
     await clientService.updateClientBilling(req.user!.id, {
       billing_name,
@@ -391,7 +393,7 @@ router.put(
       state,
       zip,
       country,
-      phone,
+      phone: normalizedPhone,
       email: normalizedEmail
     });
 
@@ -558,12 +560,13 @@ router.post(
     }
 
     const normalizedEmail = email ? normalizeEmail(email) : email;
+    const normalizedPhone = phone ? normalizePhone(phone) : phone;
 
     const contact = await clientService.insertClientContact(clientId, {
       first_name,
       last_name,
       email: normalizedEmail,
-      phone,
+      phone: normalizedPhone,
       title,
       department,
       role,
@@ -622,7 +625,7 @@ router.put(
     if (first_name !== undefined) fields.first_name = first_name;
     if (last_name !== undefined) fields.last_name = last_name;
     if (email !== undefined) fields.email = email ? normalizeEmail(email) : null;
-    if (phone !== undefined) fields.phone = phone || null;
+    if (phone !== undefined) fields.phone = phone ? normalizePhone(phone) : null;
     if (title !== undefined) fields.title = title || null;
     if (department !== undefined) fields.department = department || null;
     if (role !== undefined) fields.role = role;

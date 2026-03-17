@@ -23,7 +23,8 @@ import {
   clientService,
   toApiNote,
   validateRequest,
-  normalizeEmail
+  normalizeEmail,
+  normalizePhone
 } from './helpers.js';
 
 const router = express.Router();
@@ -141,12 +142,13 @@ router.post(
     }
 
     const normalizedEmail = email ? normalizeEmail(email) : email;
+    const normalizedPhone = phone ? normalizePhone(phone) : phone;
 
     const contact = await clientService.createContact(clientId, {
       firstName,
       lastName,
       email: normalizedEmail,
-      phone,
+      phone: normalizedPhone,
       title,
       department,
       role,
@@ -193,6 +195,11 @@ router.put(
     // Normalize email if provided
     if (req.body.email) {
       req.body.email = normalizeEmail(req.body.email);
+    }
+
+    // Normalize phone if provided
+    if (req.body.phone) {
+      req.body.phone = normalizePhone(req.body.phone);
     }
 
     const contact = await clientService.updateContact(contactId, req.body);
