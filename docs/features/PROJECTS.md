@@ -1,7 +1,7 @@
 # Project Management System
 
 **Status:** Complete
-**Last Updated:** March 9, 2026
+**Last Updated:** March 16, 2026
 
 ## Overview
 
@@ -566,6 +566,14 @@ When a project is deleted via `DELETE /api/projects/:id`:
 - `POST /api/admin/deleted-items/project/:id/restore` - Restore a project
 
 ## Change Log
+
+### March 16, 2026 - Export/Import + Performance
+
+- Added `GET /api/projects/:id/export-milestones` — export milestones + tasks as JSON
+- Added `POST /api/projects/:id/import-milestones` — import milestones from JSON
+- Project detail endpoint: parallelized file/message/update fetches with Promise.all()
+- Rate limiting added to POST `/request` (5/hour per client)
+- Files modified: `server/routes/projects/core.ts`
 
 ### March 9, 2026 - Status Values Corrected
 

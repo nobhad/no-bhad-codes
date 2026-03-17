@@ -12,7 +12,7 @@
     "tailwind:watch": "tailwindcss -i ./src/react/styles/globals.css -o ./src/react/styles/tailwind-generated.css --config ./tailwind.config.js --watch",
     "dev:quiet": "concurrently --kill-others -r \"npm run dev 2>/dev/null\" \"npm run dev:server\"",
     "build": "npm run tailwind:build && DISABLE_PROMO=true vite build",
-    "build:server": "tsc --project server/tsconfig.json",
+    "build:server": "tsc --project server/tsconfig.json && mkdir -p dist/server/server/config && cp server/config/*.json dist/server/server/config/",
     "preview": "vite preview",
     "lint": "eslint 'src/**/*.{js,ts}'",
     "format": "prettier --write \"**/*.{js,ts,json,css,html}\"",

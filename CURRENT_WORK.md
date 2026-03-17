@@ -60,6 +60,68 @@ Four interconnected improvements to proposals, receipts, validation, and admin t
 
 ---
 
+## Completed - Comprehensive Backend Audit & Hardening (March 16, 2026)
+
+**Status:** COMPLETE
+
+Full audit of data integrity, security, performance, and consistency across the entire backend. Four rounds of fixes.
+
+### COALESCE Billing Fields (26+ queries)
+
+- [x] All client name/email/company queries now prefer billing fields via COALESCE
+- [x] Fixed in: invoice-service (8), proposal-service (5), contract-service (8+), workflow-automations (1), receipt-service (5), deliverable-service (2), project-report-service (1), sow-service (1)
+
+### Input Validation & Normalization
+
+- [x] Added `validateRequest()` to email-templates POST/PUT (length limits on name, subject, body)
+- [x] Email normalization (trim + lowercase) added to intake, settings, all contact endpoints
+- [x] Phone normalization added to all billing/contact endpoints (me, admin, CRM)
+- [x] HTML escaping added to contact form email notifications (XSS prevention)
+- [x] KB feedback comment capped at 2000 chars
+- [x] Stripe payment-link URL validation added
+- [x] Questionnaire answer size capped at 100KB
+- [x] Proposal pricing validation (non-negative, sanity bound)
+- [x] Duplicate active proposal prevention (409 on same project)
+- [x] Rate limiting added to project request endpoint (5/hour)
+
+### Cache Invalidation (18 mutation routes)
+
+- [x] Content request routes: 9 routes (templates CRUD, item accept/revision, client submissions)
+- [x] Client tags: 3 routes (create, update, delete)
+- [x] Client custom fields: 3 routes (create, update, delete)
+- [x] Client notifications: 3 routes (update, mark read, mark all read)
+
+### Soft Delete Consistency (36+ queries)
+
+- [x] contract-service: 12 queries switched to active_* views
+- [x] receipt-service: 9 queries added deleted_at filters on JOINs
+- [x] upload-service: 5 queries switched to active_* views
+- [x] metrics-service: 5 COUNT queries switched to active_* views
+- [x] user-service: 7 client queries added deleted_at filters
+- [x] activity-service: 3 subqueries added deleted_at filters
+- [x] design-review-service: getAll() added deleted_at filters
+- [x] project-report-service: soft delete filter + column name fixes
+- [x] sow-service: soft delete filter + column name fixes
+
+### Race Conditions & Performance
+
+- [x] Receipt number generation: retry loop with collision detection (was read-then-write race)
+- [x] Invoice number generation: added random component (was same-millisecond collision risk)
+- [x] Project detail: parallelized 3 sequential fetches with Promise.all()
+- [x] Sync file I/O replaced with async in intake route and admin config routes
+- [x] Receipt PDF writeFileSync replaced with async writeFile
+
+### Tier-Aware Milestone Regeneration
+
+- [x] `regenerateMilestones()` now checks for linked proposal tier before regenerating
+- [x] Added `other` project type to tier-milestones.ts and tier-tasks.json
+
+### Build Pipeline
+
+- [x] `build:server` script now copies JSON config files to dist output directory
+
+---
+
 ## Completed - Design System Audit and Documentation Restructure (March 16, 2026)
 
 **Status:** COMPLETE
