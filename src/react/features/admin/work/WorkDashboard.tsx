@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useFadeIn } from '@react/hooks/useGsap';
-import { useActiveSubtab, useSetSubtab } from '@react/contexts/SubtabContext';
+import { useActiveSubtab, useSetSubtab, useSetSubtabActions } from '@react/contexts/SubtabContext';
 import { LoadingState } from '@react/factories';
 
 // Lazy load child components
@@ -20,8 +20,15 @@ type WorkSubtab = 'overview' | 'projects' | 'tasks' | 'ad-hoc-requests';
 export function WorkDashboard({ onNavigate, getAuthToken, showNotification }: WorkDashboardProps) {
   const containerRef = useFadeIn();
   const location = useLocation();
-  const activeSubtab = useActiveSubtab() as WorkSubtab;
+  const activeSubtab = useActiveSubtab<WorkSubtab>();
   const setSubtab = useSetSubtab();
+  const setSubtabActions = useSetSubtabActions();
+
+  // Clear stale subtab actions on mount — child tables manage their own actions
+  React.useEffect(() => {
+    setSubtabActions(null);
+    return () => setSubtabActions(null);
+  }, [setSubtabActions]);
 
   // Honor location.state subtab when navigated from other pages (e.g., overview "View All Tasks")
   React.useEffect(() => {

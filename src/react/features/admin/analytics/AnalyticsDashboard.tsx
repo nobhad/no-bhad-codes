@@ -316,7 +316,7 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
-  const activeSubtab = useActiveSubtab() as AnalyticsSubtab;
+  const activeSubtab = useActiveSubtab<AnalyticsSubtab>();
   const setSubtabActions = useSetSubtabActions();
 
   const MAX_RETRIES = 3;

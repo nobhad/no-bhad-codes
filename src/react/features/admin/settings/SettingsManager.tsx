@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useMemo } from 'react';
 import { useFadeIn } from '@react/hooks/useGsap';
-import { useActiveSubtab, useSetSubtab } from '@react/contexts/SubtabContext';
+import { useActiveSubtab, useSetSubtab, useSetSubtabActions } from '@react/contexts/SubtabContext';
 import { LoadingState } from '@react/factories';
 
 // Lazy load child components
@@ -22,8 +22,15 @@ type SettingsSubtab = 'overview' | 'configuration' | 'workflows' | 'email-templa
 
 export function SettingsManager({ getAuthToken, showNotification, onNavigate }: SettingsManagerProps) {
   const containerRef = useFadeIn();
-  const activeSubtab = useActiveSubtab() as SettingsSubtab;
+  const activeSubtab = useActiveSubtab<SettingsSubtab>();
   const setSubtab = useSetSubtab();
+  const setSubtabActions = useSetSubtabActions();
+
+  // Clear stale subtab actions on mount — child components manage their own actions
+  React.useEffect(() => {
+    setSubtabActions(null);
+    return () => setSubtabActions(null);
+  }, [setSubtabActions]);
 
   const sharedProps = useMemo(() => ({ onNavigate, getAuthToken, showNotification }), [onNavigate, getAuthToken, showNotification]);
 

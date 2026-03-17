@@ -28,8 +28,12 @@ export function PortalLayout() {
   const currentTab = useCurrentTab();
   const currentGroup = useCurrentGroup();
 
-  // Sync sidebar-collapsed class on the mount container
-  // (the .portal div is owned by EJS, not React)
+  // Sync sidebar-collapsed class on the mount container.
+  // classList is intentional here: the .portal container is rendered by the
+  // EJS server template (not React), so we cannot control its attributes via
+  // JSX. This is the standard bridge pattern for syncing React state to a
+  // server-rendered DOM node. The CSS selector `.sidebar-collapsed` is used
+  // across portal layout stylesheets for grid/width adjustments.
   React.useEffect(() => {
     const container = document.querySelector(PORTAL_SELECTORS.PORTAL_CONTAINER) as HTMLElement | null;
     if (container) {
