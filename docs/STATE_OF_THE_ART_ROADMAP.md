@@ -8,19 +8,16 @@
 
 ## Table of Contents
 
-- [Phase 0: Foundation Fixes (Existing Gaps)](#phase-0-foundation-fixes-existing-gaps)
-  - [0A. Wire Orphaned Services to API Routes](#0a-wire-orphaned-services-to-api-routes)
+- [Phase 0: Foundation Fixes (Verified Gaps)](#phase-0-foundation-fixes-verified-gaps)
   - [0B. Client Proposal Experience (View + Accept)](#0b-client-proposal-experience-view--accept)
   - [0C. Maintenance Tier Activation System](#0c-maintenance-tier-activation-system)
-  - [0D. Contract Signing Flow Verification](#0d-contract-signing-flow-verification)
+  - [0D. Portal Contract Signing Bug](#0d-portal-contract-signing--missing-event-emission-verified-bug)
   - [0E. Webhook Dispatch for Slack/Discord](#0e-webhook-dispatch-for-slackdiscord)
   - [0F. Automations Use DB Email Templates](#0f-automations-use-db-email-templates)
   - [0G. Payment Schedule to Invoice Cascade](#0g-payment-schedule-to-invoice-cascade)
-  - [0H. Admin Table Delete Button Wiring](#0h-admin-table-delete-button-wiring)
-  - [0I. Portal Prop Passing and Minor Fixes](#0i-portal-prop-passing-and-minor-fixes)
-  - [0J. Export/CSV Buttons (All 22 Tables)](#0j-exportcsv-buttons-all-22-admin-tables)
+  - [0J. Export/CSV Missing onClick](#0j-exportcsv-buttons-most-admin-tables)
   - [0K. Admin Invoice Management Endpoint](#0k-admin-invoice-management-endpoint)
-  - [0L. Create Modal Backend Gaps](#0l-create-modal-backend-gaps-4-entities)
+  - [0L. Create Modal Backend Gaps (2 Entities)](#0l-create-modal-backend-gaps-2-entities--verified)
   - [0M. LeadDetailPanel Not Wired](#0m-leaddetailpanel-not-wired)
   - [0N. Missing Design Documentation](#0n-missing-design-documentation)
   - [0O. Security Hardening](#0o-security-hardening)
@@ -59,86 +56,17 @@
 
 ---
 
-## Phase 0: Foundation Fixes (Existing Gaps)
+## Phase 0: Foundation Fixes (Verified Gaps)
 
-**These must be completed before any new feature work.** The codebase audit revealed services that are fully built but never wired, UI elements that render but don't function, and entire subsystems (maintenance tiers, webhook dispatch) that store configuration but never act on it. Building new features on top of this foundation would compound the gaps.
+**Every item below has been verified against the actual codebase with file paths and line numbers. Items from earlier audits that proved false (orphaned services, broken delete buttons, prop passing issues, console.log) have been removed.**
 
 **All Phase 0 items are fixes/completions of EXISTING code, not new features.**
 
 ---
 
-### 0A. Wire Orphaned Services to API Routes
+### ~~0A. Wire Orphaned Services to API Routes~~ — REMOVED (Verified FALSE)
 
-**Problem:** Four services were built as part of the pipeline work but have zero API endpoints calling them. The code is complete and exported — it just needs routes.
-
-#### `proposal-prefill-service.ts` — COMPLETE, NO ROUTES
-
-**What it does:** Analyzes questionnaire responses to suggest tier, auto-select features, recommend maintenance, generate custom items.
-
-**Routes to add (file: `server/routes/proposals/prefill.ts`):**
-
-```text
-GET /api/proposals/prefill/:projectId             — Generate prefill data for a project
-```
-
-**Middleware:** `authenticateToken → requireAdmin → asyncHandler`
-
-**Implementation:** Thin route that calls `generateProposalPrefill(projectId)` and returns the result. The service already does all the work.
-
-```typescript
-router.get('/prefill/:projectId', authenticateToken, requireAdmin, asyncHandler(async (req, res) => {
-  const projectId = parseInt(req.params.projectId, 10);
-  const prefillData = await generateProposalPrefill(projectId);
-  sendSuccess(res, prefillData);
-}));
-```
-
-**Mount in:** `server/routes/proposals/index.ts` (barrel file)
-
-#### `dynamic-questionnaire-service.ts` — COMPLETE, NO ROUTES
-
-**What it does:** Auto-generates personalized questionnaires based on missing project information.
-
-**Routes to add (file: `server/routes/questionnaires/dynamic.ts`):**
-
-```text
-POST /api/questionnaires/generate/:projectId      — Generate dynamic questionnaire for project
-GET  /api/questionnaires/dynamic/:projectId        — Get generated questionnaire (if exists)
-```
-
-#### `intake-checklist-service.ts` — COMPLETE, NO ROUTES
-
-**What it does:** Tracks collected vs missing project info, sends info request emails.
-
-**Routes to add (file: `server/routes/projects/intake.ts`):**
-
-```text
-GET  /api/projects/:id/intake-checklist            — Get intake checklist status
-POST /api/projects/:id/request-info                — Send email requesting missing info
-```
-
-**Note:** These endpoints were listed in the "Completed" section of CURRENT_WORK.md but the routes were never actually created.
-
-#### `project-completion-service.ts` — `checkProjectCompletion()` NEVER CALLED
-
-**What it does:** Checks if project milestones, tasks, and invoices are all complete. Returns blockers if not.
-
-**Routes to add:** Already documented as:
-
-```text
-GET  /api/projects/:id/completion-status           — Check completion readiness
-POST /api/projects/:id/complete                    — Mark project complete
-```
-
-The `completeProject()` function may be partially wired but `checkProjectCompletion()` (the detection/readiness check) is not.
-
-**Wire it:** Create route file `server/routes/projects/completion.ts`, mount in projects barrel.
-
-#### Testing (0A)
-
-- Integration test per endpoint: call route → verify service is invoked → verify response shape
-- Test auth: unauthenticated calls → 401
-- Test not found: invalid projectId → 404
+**Audit correction:** All 4 services (proposal-prefill, dynamic-questionnaire, intake-checklist, project-completion) DO have API routes registered in `server/routes/projects/core.ts` (lines 468-906) and `server/routes/proposals/core.ts` (line 468). They use dynamic `import()` to lazy-load the services. This was incorrectly flagged as missing.
 
 ---
 
@@ -482,24 +410,38 @@ POST /api/admin/projects/:id/maintenance/cancel    — Cancel maintenance
 
 ---
 
-### 0D. Contract Signing Flow Verification
+### 0D. Portal Contract Signing — Missing Event Emission (VERIFIED BUG)
 
-**Problem:** The audit couldn't confirm the email-link signature capture endpoint is complete. `sign-contract.html` sends contracts, but the handler that captures the signature, updates status to 'signed', and emits `contract.signed` may have gaps.
+**Problem:** Portal contract signing saves to DB but **never emits `contract.signed` event**, so the project never transitions to 'active' status.
 
-#### Action Items
+**Verified:** Two signing paths exist:
 
-1. **Verify `sign-contract.html` submission handler exists** — trace the form POST destination
-2. **Verify signature capture saves to `contracts.signature_data`**
-3. **Verify `contract.signed` event is emitted** after signature
-4. **Verify `handleContractSigned` fires** and sets project to `active`
-5. If any step is broken: fix it
+1. **Email-link signing** (`POST /api/projects/contract/sign-by-token/:token` in `server/routes/projects/contracts.ts` line 740-942) — **WORKS FULLY.** Saves signature, emits `contract.signed` event (line 918), triggers `handleContractSigned()` which sets project to 'active', sends notification emails.
 
-This is a verification task, not a build task. If the flow works end-to-end, mark complete. If not, fix the specific broken step.
+2. **Portal in-app signing** (`POST /api/contracts/sign` in `server/routes/contracts/client.ts` line 191-273) — **BROKEN.** Saves signature data to DB via `contractService.signContractFromPortal()`, creates audit log entry, but **does NOT emit `contract.signed` event**. Zero references to `workflowTriggerService.emit()` in the handler. Project stays 'pending' forever.
+
+#### Fix (1 line + import)
+
+**File: `server/routes/contracts/client.ts`** — add after line 272 (after signature is saved):
+
+```typescript
+// Emit event to trigger project activation + notifications
+await workflowTriggerService.emit('contract.signed', {
+  entityId: contractId,
+  projectId,
+  signerName,
+  signerEmail: clientEmail,
+  triggeredBy: clientEmail
+});
+```
+
+**Import at top of file:** `import { workflowTriggerService } from '../../services/workflow-trigger-service.js';`
 
 #### Testing (0D)
 
-- E2E test: send contract → open email link → sign → verify contract status='signed', project status='active'
-- If flow is broken: write the fix, then write the test
+- Unit test: portal sign → verify `contract.signed` event emitted
+- Integration test: portal sign → verify project status changes to 'active'
+- Regression test: email-link signing still works after change
 
 ---
 
@@ -731,93 +673,21 @@ async createFromInstallment(installment: PaymentInstallment): Promise<Invoice> {
 
 ---
 
-### 0H. Admin Table Delete Button Wiring
+### ~~0H. Admin Table Delete Button Wiring~~ — REMOVED (Verified FALSE)
 
-**Problem:** 7 admin tables render `<IconButton action="delete" />` with no `onClick` handler. Users see a delete button that does nothing.
-
-**Tables affected:**
-
-1. `ProposalsTable.tsx`
-2. `EmailTemplatesManager.tsx`
-3. `AdHocRequestsTable.tsx`
-4. `DeliverablesTable.tsx`
-5. `DocumentRequestsTable.tsx`
-6. `ArticlesTable.tsx` (Knowledge Base)
-7. `CategoriesTable.tsx` (Knowledge Base)
-
-#### Implementation Pattern
-
-Each table already has the `useCrud` or `useActionHandlers` hook. Add delete handler:
-
-```typescript
-// Pattern for each table:
-const handleDelete = useCallback(async (id: number) => {
-  if (!confirm('Are you sure you want to delete this item?')) return;
-  await executeWithToast(
-    () => fetch(`${API_ENDPOINT}/${id}`, { method: 'DELETE', credentials: 'include' }),
-    'Deleted successfully',
-    'Failed to delete'
-  );
-  refetch();
-}, [executeWithToast, refetch]);
-
-// Wire to button:
-<IconButton action="delete" title="Delete" onClick={() => handleDelete(item.id)} />
-```
-
-**Also fix:** `CreateEntityModals.tsx` line 49 — cancel button with empty `onClick`:
-
-```typescript
-// Before:
-onClick={() => {}}
-// After:
-onClick={() => onOpenChange(false)}
-```
-
-#### Testing (0H)
-
-- Component test per table: click delete → confirm → API called → table refreshes
+**Audit correction:** All 7 tables (Proposals, Email Templates, Ad-Hoc Requests, Deliverables, Document Requests, KB Articles, KB Categories) have fully functional delete buttons with `onClick` handlers, API calls, and `window.confirm()` dialogs. Verified at ProposalsTable.tsx:537, EmailTemplatesManager.tsx:339, DocumentRequestsTable.tsx:550, AdHocRequestsTable.tsx:591, DeliverablesTable.tsx:551, ArticlesTable.tsx:394, CategoriesTable.tsx:313. CreateEntityModals.tsx cancel buttons also work correctly via `handleCancel()` → `reset()` → `onOpenChange(false)`.
 
 ---
 
-### 0I. Portal Prop Passing and Minor Fixes
+### ~~0I. Portal Prop Passing and Minor Fixes~~ — REMOVED (Verified FALSE)
 
-**Problem:** Several portal components don't receive required props, have debug code, or have minor integration issues.
-
-#### Fixes
-
-1. **`PortalRequestsHub.tsx`** — pass props to child components:
-
-   ```typescript
-   // Before:
-   <PortalQuestionnairesView />
-   // After:
-   <PortalQuestionnairesView getAuthToken={getAuthToken} showNotification={showNotification} />
-   ```
-
-   Same for `<PortalDocumentRequests />` and `<ContentChecklistView />`.
-
-2. **`PaymentScheduleView.tsx`** — use `getAuthToken` from props:
-
-   ```typescript
-   // Fix: accept and use the prop
-   export function PaymentScheduleView({ getAuthToken, showNotification }: PaymentScheduleViewProps) {
-   ```
-
-3. **Remove `console.log` from production:**
-   - `createTabs.tsx:636` — remove debug logging in JSDoc example
-   - Error boundaries — route errors to logging service instead of `console.error`
-
-#### Testing (0I)
-
-- Component test: `PortalRequestsHub` child components receive props
-- Component test: `PaymentScheduleView` authenticates API calls
+**Audit correction:** `PortalRequestsHub` doesn't explicitly pass props to children, but `LazyTabRoute` injects `getAuthToken` and `showNotification` via `React.cloneElement()` at the TabPanel level. Child components receive props correctly through this mechanism. `PaymentScheduleView` uses `usePortalData` hook which gets auth from React context, not from props. The `console.log` at `createTabs.tsx:636` is inside a JSDoc comment, not executable code. No production console.log statements found.
 
 ---
 
-### 0J. Export/CSV Buttons (All 22 Admin Tables)
+### 0J. Export/CSV Buttons (Most Admin Tables)
 
-**Problem:** Every admin table has an "Export to CSV" button. None of them work. The `useExport` hook exists but is never called. Clicking export does nothing.
+**Problem:** Most admin tables have an "Export to CSV" button but many are missing the `onClick` binding. The `useExport` hook and `table-export` utility exist and work — InvoicesTable.tsx (line 357) correctly uses `onClick={exportCsv}`. But other tables like ContactsTable.tsx (line 389) render the button without an onClick handler.
 
 **Affected:** ALL 22 admin tables (Clients, Contacts, Contracts, Proposals, Invoices, Projects, Leads, Deliverables, Document Requests, Questionnaires, Email Templates, Workflows, Ad-Hoc Requests, Approvals, Deleted Items, Knowledge Base Articles, KB Categories, Global Tasks, Time Tracking, Design Reviews, Messaging, Files).
 
@@ -890,22 +760,21 @@ The existing `/api/invoices` routes handle individual invoice CRUD. The admin ro
 
 ---
 
-### 0L. Create Modal Backend Gaps (4 Entities)
+### 0L. Create Modal Backend Gaps (2 Entities — Verified)
 
-**Problem:** Admin UI has create modals for Design Reviews, Questionnaires, Workflows, and Deliverables, but the modals submit to backend endpoints that either don't exist or are incomplete.
+**Problem:** 2 admin entities have broken create flows. (Original claim of 4 was partially false — Deliverables and Questionnaires work.)
 
-**Entities affected:**
+**Verified status:**
 
-1. **Design Reviews** — `POST /api/admin/design-reviews` may not exist
-2. **Questionnaires** — `POST /api/questionnaires` may not support admin creation (only client submission)
-3. **Workflows** — `POST /api/admin/workflows` may not exist
-4. **Deliverables** — `POST /api/v1/deliverables` may not support admin creation outside of project context
+1. **Design Reviews** — DesignReviewTable uses `CreateDeliverableModal` (wrong modal!) and posts to `/api/admin/deliverables` (wrong endpoint). `server/routes/admin/design-reviews.ts` only has GET and PATCH — **no POST endpoint**. **BROKEN.**
+2. **Workflows** — WorkflowsTable has no create modal. `server/routes/admin/workflows.ts` only has GET, bulk-status, bulk-delete — **no POST endpoint for creating individual workflows**. **BROKEN.**
+3. ~~**Questionnaires**~~ — Uses a dedicated create page (not modal) that navigates to `questionnaire-create`. `POST /api/questionnaires` exists at `server/routes/questionnaires/admin.ts` lines 193-228. **WORKS.**
+4. ~~**Deliverables**~~ — `CreateDeliverableModal` posts to `POST /api/admin/deliverables` which exists at `server/routes/admin/deliverables.ts` lines 42-71. **WORKS.**
 
 #### Action Items
 
-1. Verify each POST endpoint exists and accepts the modal's payload
-2. If missing: create the endpoint following existing patterns
-3. If payload mismatch: fix the modal form to match the API
+1. **Design Reviews:** Create `POST /api/admin/design-reviews` endpoint. Fix DesignReviewTable to use correct modal (or create a `CreateDesignReviewModal`).
+2. **Workflows:** Create `POST /api/admin/workflows` endpoint for individual workflow creation. Add a create modal or navigation to a workflow builder.
 
 ---
 
@@ -977,33 +846,36 @@ Then integrate into the admin proposal builder UI to auto-populate fields.
 
 ---
 
-## Phase 0 Summary
+## Phase 0 Summary (After Verification)
+
+**Removed (verified false):** ~~0A (orphaned services)~~, ~~0H (delete buttons)~~, ~~0I (portal prop passing)~~
+
+**12 verified items remain:**
 
 ```text
-EXISTING GAPS (fix/complete existing code):
-0A. Wire 4 Orphaned Services            4 route files, ~40 lines each
-0B. Client Proposal View + Accept        3 React components + 1 route
-0C. Maintenance Tier Activation          1 migration + workflow handler + React + API
-0D. Contract Signing Verification        Verify end-to-end (portal audit found ContractSignModal exists — may work)
-0E. Webhook Dispatch (Slack/Discord)     1 new service + event integration
-0F. Email Templates in Automations       1 seed migration + refactor workflow-automations.ts
+CRITICAL (blocks Phase 1):
+0B. Client Proposal View + Accept        3 React components + 1 route registration
+0C. Maintenance Tier Activation          1 migration + workflow handler + React component + API
+0D. Portal Signing Event Bug             1 line fix + import (missing workflowTriggerService.emit)
 0G. Installment → Invoice Cascade        1 service method + 1 cron job
 
-UI FIXES (broken/nonfunctional UI elements):
-0H. Admin Delete Button Wiring           Verify which are actually broken (audit conflicting)
-0I. Portal Prop Passing Fixes            3 prop fixes + console cleanup
-0J. Export/CSV for All 22 Tables         1 hook + 22 table column configs
-0K. Admin Invoice Endpoint               1 route file + mount
-0L. Create Modal Backend Gaps            4 endpoint verifications/fixes
-0M. LeadDetailPanel Wiring               1 import + state in LeadsTable
+HIGH (broken integrations):
+0E. Webhook Dispatch (Slack/Discord)     1 new dispatch service + event hooks
+0F. Email Templates in Automations       1 seed migration + refactor 7 notification handlers
+0K. Admin Invoice Endpoint               1 route file + mount in admin barrel
+0L. Create Modal Backends (2 entities)   Design Reviews POST + Workflows POST
 
-DOCUMENTATION & SECURITY:
+MEDIUM (UI completeness):
+0J. Export/CSV Missing onClick           Wire useExport hook to ~15 tables (some already work)
+0M. LeadDetailPanel Not Wired            1 import + useState in LeadsTable.tsx
+0P. Prefill in Frontend Constants        1 constant + admin proposal builder integration
+
+LOW (documentation):
 0N. Missing Design Docs                  Create CSS_ARCHITECTURE.md + UX_GUIDELINES.md
-0O. Security Hardening                   Remove demo scripts + bcrypt standardization + a11y
-0P. Prefill Endpoint in Constants        1 line in api-endpoints.ts + builder integration
+0O. Security Hardening                   Demo scripts + bcrypt rounds + form labels
 ```
 
-**Phase 0 must complete before Phase 1 begins.** Everything in Phase 1 depends on proposals being viewable/acceptable (0B), contracts being signable (0D), and the payment cascade working (0G).
+**Phase 0 must complete before Phase 1.** Proposals must be viewable/acceptable (0B), portal signing must emit events (0D), and installments must cascade to invoices (0G).
 
 ---
 
@@ -5337,27 +5209,24 @@ TOTAL    | ~94 tests      | ~33 tests         | ~40 tests       | 167 total
 
 ```text
 Phase 0 (Foundation Fixes — MUST DO BEFORE ANYTHING ELSE)
+│   Items removed after verification: 0A, 0H, 0I (proved false)
 │
 ├── CRITICAL (blocks Phase 1):
-│   ├── 0A. Wire Orphaned Services            ← 4 route files, ~30 min each
-│   ├── 0B. Client Proposal View + Accept     ← PREREQUISITE for Phase 1C
+│   ├── 0B. Client Proposal View + Accept     ← No detail view, no accept UI
 │   │   New files: 3 React + 1 route
 │   ├── 0C. Maintenance Tier Activation       ← Biggest functional gap
 │   │   Migration: 118
-│   │   New files: 1 migration + workflow changes + 1 React + API routes
-│   ├── 0D. Contract Signing Verification     ← Verify end-to-end (ContractSignModal exists, may work)
+│   ├── 0D. Portal Signing Event Bug          ← 1 line fix (missing emit)
 │   └── 0G. Installment → Invoice Cascade     ← 1 service method + 1 cron
 │
 ├── HIGH (broken integrations):
 │   ├── 0E. Webhook Dispatch (Slack/Discord)  ← 1 new service + event hooks
 │   ├── 0F. Email Templates in Automations    ← 1 seed migration + refactor
 │   ├── 0K. Admin Invoice Endpoint            ← 1 route file
-│   └── 0L. Create Modal Backend Gaps         ← 4 endpoint verifications
+│   └── 0L. Create Backends (2 entities)      ← Design Reviews POST + Workflows POST
 │
-├── MEDIUM (UI fixes):
-│   ├── 0H. Delete Button Wiring              ← Verify which actually broken
-│   ├── 0I. Portal Prop Fixes                 ← 3 fixes + cleanup
-│   ├── 0J. Export/CSV All 22 Tables          ← 1 hook + 22 column configs
+├── MEDIUM (UI completeness):
+│   ├── 0J. Export/CSV Missing onClick        ← Wire ~15 tables
 │   ├── 0M. LeadDetailPanel Wiring            ← 1 import
 │   └── 0P. Prefill in Frontend Constants     ← 1 line + builder integration
 │
@@ -5466,6 +5335,29 @@ Phase 7 (International — Do Last)
 ---
 
 ## Change Log
+
+### 2026-03-16 — Verification Pass (Plan vs Actual Code)
+
+Audited every Phase 0 claim against actual code with file paths and line numbers.
+
+**Removed (proved false):**
+- ~~0A: "4 orphaned services with no routes"~~ — All 4 have routes in projects/core.ts (lines 468-906) and proposals/core.ts (line 468). Services use dynamic import() and are fully wired.
+- ~~0H: "7 broken delete buttons"~~ — All 7 work. Verified onClick handlers with API calls and confirm dialogs at: ProposalsTable:537, EmailTemplatesManager:339, DocumentRequestsTable:550, AdHocRequestsTable:591, DeliverablesTable:551, ArticlesTable:394, CategoriesTable:313.
+- ~~0I: "Portal prop passing broken"~~ — LazyTabRoute injects props via React.cloneElement(). PaymentScheduleView uses context-based auth. console.log is in JSDoc comment only.
+
+**Corrected:**
+- 0D: Upgraded from "verify" to **confirmed bug** — portal signing at contracts/client.ts:191-273 saves signature but missing `workflowTriggerService.emit('contract.signed')`. Email-link signing at projects/contracts.ts:918 works fully. 1-line fix identified.
+- 0L: Reduced from 4 broken to **2 broken** — Deliverables (admin/deliverables.ts:42-71) and Questionnaires (questionnaires/admin.ts:193-228) work. Only Design Reviews (no POST endpoint) and Workflows (no POST endpoint) are actually broken.
+- 0J: Corrected from "all 22 broken" to **mixed** — InvoicesTable:357 has working `onClick={exportCsv}`. ContactsTable:389 missing onClick. ~15 tables need wiring.
+
+**Confirmed (unchanged):**
+- 0B: Client proposal route redirects to /documents (PortalRoutes.tsx:325-330). No ProposalDetail.tsx exists. No accept UI.
+- 0C: maintenance_option read at workflow-automations.ts:105-107 then discarded. Not stored in projects table. No recurring invoices created.
+- 0E: slack-service.ts has sendSlackNotification() and sendDiscordNotification() (lines 409-458) but workflow-automations.ts never calls them.
+- 0F: All 7 notification handlers (lines 722-941) use hardcoded HTML. Zero queries to email_templates table.
+- 0G: No generateDueInvoices() or createFromInstallment() exists anywhere. Payment schedule service only creates/marks installments.
+
+Phase 0 reduced from 16 items to **12 verified items**.
 
 ### 2026-03-16 — Deep Audit Pass (5 parallel audits)
 
