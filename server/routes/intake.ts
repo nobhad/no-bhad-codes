@@ -13,7 +13,7 @@ import crypto from 'crypto';
 import express, { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { writeFileSync } from 'fs';
+import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import { generateProjectPlan, ProjectPlan } from '../services/project-generator.js';
 import { generateInvoice } from '../services/invoice-generator.js';
@@ -83,7 +83,7 @@ async function saveIntakeAsFile(
   const relativePath = getRelativePath(UPLOAD_DIRS.INTAKE, filename);
 
   // Write JSON source file (used by PDF generation endpoint)
-  writeFileSync(filePath, JSON.stringify(intakeDocument, null, 2), 'utf-8');
+  await writeFile(filePath, JSON.stringify(intakeDocument, null, 2), 'utf-8');
 
   // Get file size
   const fileSize = Buffer.byteLength(JSON.stringify(intakeDocument, null, 2), 'utf-8');
