@@ -107,11 +107,6 @@
   background: var(--color-bg-tertiary);
 }
 
-.note-meta {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-}
-
 .note-content {
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);

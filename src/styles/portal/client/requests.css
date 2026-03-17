@@ -1,186 +1,18 @@
 /* =====================================================
    CLIENT PORTAL - AD HOC REQUESTS
+   All card/list classes removed — components use shared
+   portal-card, portal-card-header, portal-card-meta,
+   portal-card-detail-list, action-group, text-secondary.
    ===================================================== */
-
-.portal .requests-grid {
-  display: grid;
-}
-
-@media (--tablet-wide-up) {
-  .portal .requests-grid {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: start;
-  }
-}
-
-/* h3 styling comes from shared .section-header-with-actions */
-
-.portal .requests-intro {
-  margin: 0 0 var(--space-2) 0;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-}
-
-.portal .requests-form-body .form-field {
-  margin-bottom: var(--space-1-5);
-}
-
-.portal .requests-attachment-note {
-  margin: var(--space-0-5) 0 0 0;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
-}
-
-.portal .requests-list-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-1);
-  margin-bottom: var(--space-1-5);
-}
-
-.portal .requests-list-body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-/* Request cards use shared list item styling */
-.portal .requests-card.portal-list-item {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-1);
-  margin-bottom: 0;
-}
-
-.portal .requests-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-1);
-  margin-bottom: var(--space-0-5);
-}
-
-.portal .requests-card-title {
-  font-weight: var(--font-weight-semibold);
-}
-
-.portal .requests-card-status {
-  flex-shrink: 0;
-}
-
-.portal .requests-card-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-0-5);
-}
-
-.portal .requests-card-description {
-  margin: 0 0 var(--space-1) 0;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-}
-
-.portal .requests-quote {
-  display: grid;
-  gap: var(--space-0-5);
-  margin: 0 0 var(--space-1) 0;
-  border: var(--portal-border);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-xs);
-}
-
-.portal .requests-quote-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-  margin-bottom: var(--space-1);
-}
-
-.portal .requests-quote-modal .requests-quote-modal-body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-}
-
-.portal .requests-quote-modal-summary {
-  display: grid;
-  gap: var(--space-0-5);
-  border: var(--portal-border);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-xs);
-}
-
-.portal .requests-quote-modal-note {
-  margin: 0;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
-}
-
-.portal .requests-card-footer {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
-}
-
-.portal .requests-empty,
-.portal .requests-error {
-  margin: 0;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.portal .requests-error {
-  color: var(--color-error-500);
-}
 
 /* =====================================================
    CONTENT CHECKLIST VIEW
+   Uses shared: .portal-card, .portal-card-header, ProgressBar component
    ===================================================== */
 
-/* Checklist card */
+/* Checklist card — spacing override only */
 .portal .checklist-card {
   margin-bottom: var(--space-2);
-}
-
-/* Checklist card header row */
-.portal .checklist-card-header {
-  padding: var(--space-1) var(--content-gutter);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: var(--portal-border);
-}
-
-/* Checklist progress area (right side of header) */
-.portal .checklist-progress {
-  text-align: right;
-}
-
-/* Progress bar track */
-.portal .checklist-progress-bar {
-  width: 120px;
-  height: 8px;
-  background: var(--color-border-primary);
-  border-radius: var(--border-radius-sm);
-}
-
-/* Progress bar fill */
-.portal .checklist-progress-fill {
-  height: 100%;
-  background: var(--status-completed);
-  border-radius: var(--border-radius-sm);
-  transition: width var(--transition-medium);
-}
-
-/* Progress count label */
-.portal .checklist-progress-label {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
 }
 
 /* Content item row */
@@ -279,35 +111,4 @@
 /* Submitted file indicator */
 .portal .content-item-submitted span {
   font-size: var(--font-size-sm);
-}
-
-/* =====================================================
-   MOBILE RESPONSIVE STYLES
-   ===================================================== */
-
-@media (--mobile) {
-  .portal .requests-card-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-1);
-  }
-
-  .portal .requests-quote-actions {
-    flex-direction: column;
-  }
-
-  .portal .requests-quote-actions button {
-    width: 100%;
-  }
-}
-
-@media (--compact-mobile) {
-  .portal .requests-grid {
-    gap: var(--space-2);
-  }
-
-  .portal .requests-card-meta {
-    flex-direction: column;
-    gap: var(--space-0-5);
-  }
 }

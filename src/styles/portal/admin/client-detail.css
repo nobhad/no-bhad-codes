@@ -114,28 +114,22 @@
 
 /* --- Shared Tab Layout --- */
 
-/* Form actions row: buttons aligned right */
-.form-actions,
-.form-actions--compact {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-2);
-}
+/* Form actions — removed: use shared .action-group + inline margin-top instead */
 
-.form-actions { margin-top: var(--space-4); }
-.form-actions--compact { margin-top: var(--space-3); }
-
-/* Vertical list (flex column with gap) */
+/* Vertical list (flex column with gap)
+   Base:     --detail-list-gap defaults to --space-2
+   --spaced: larger gap for looser layouts (notes, timeline events)
+   --section: largest gap for top-level date/section groups */
 .detail-list,
 .detail-list--spaced,
 .detail-list--section {
   display: flex;
   flex-direction: column;
+  gap: var(--detail-list-gap, var(--space-2));
 }
 
-.detail-list { gap: var(--space-2); }
-.detail-list--spaced { gap: var(--space-4); }
-.detail-list--section { gap: var(--space-6); }
+.detail-list--spaced { --detail-list-gap: var(--space-4); }
+.detail-list--section { --detail-list-gap: var(--space-6); }
 
 /* Contact detail row: icon + text inline */
 .contact-detail-row {
@@ -146,13 +140,8 @@
 
 /* --- Contacts Tab --- */
 
-/* Contact card header */
-.contact-card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: var(--space-3);
-}
+/* Contact card header — removed: unused (.contact-card-header)
+   Use shared .portal-card-header instead */
 
 /* Contact identity: avatar + name/title */
 .contact-identity {
@@ -281,20 +270,15 @@
 
 /* --- Notes Tab --- */
 
-/* Note card header: metadata + actions */
-.note-card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
-}
+/* Note card header — removed: use shared .portal-card-header instead */
 
 /* Note metadata (date, pin icon) */
 .note-meta {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
 }
 
 /* Hover-reveal opacity — shared pattern for card action buttons and .hover-reveal */
@@ -329,13 +313,7 @@
 
 /* --- Projects Tab --- */
 
-/* Project card header: title area + action */
-.project-card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
+/* Project card header — removed: use shared .portal-card-header instead */
 
 /* Project card title area */
 .project-card-info {

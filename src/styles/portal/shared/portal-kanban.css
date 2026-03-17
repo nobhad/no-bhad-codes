@@ -63,6 +63,9 @@
 }
 
 .kanban-column-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap-xs);
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
