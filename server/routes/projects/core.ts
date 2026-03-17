@@ -12,6 +12,7 @@ import { generateDefaultMilestones } from '../../services/milestone-generator.js
 import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
+import { rateLimit } from '../../middleware/security.js';
 import { BUSINESS_INFO } from '../../config/business.js';
 import { getDatabase } from '../../database/init.js';
 
@@ -69,10 +70,12 @@ router.get(
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
-    // Get project files, messages, and updates
-    const files = await projectService.getProjectFiles(projectId);
-    const messages = await projectService.getProjectMessages(projectId);
-    const updates = await projectService.getProjectUpdates(projectId);
+    // Get project files, messages, and updates in parallel
+    const [files, messages, updates] = await Promise.all([
+      projectService.getProjectFiles(projectId),
+      projectService.getProjectMessages(projectId),
+      projectService.getProjectUpdates(projectId)
+    ]);
 
     sendSuccess(res, {
       project,
@@ -87,6 +90,12 @@ router.get(
 router.post(
   '/request',
   authenticateToken,
+  rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    maxRequests: 5,
+    message: 'Too many project requests. Please try again later.',
+    keyGenerator: (req) => `project-request:${(req as AuthenticatedRequest).user?.id || req.ip}`
+  }),
   validateRequest(ValidationSchemas.projectRequest),
   invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
