@@ -7,9 +7,14 @@ import * as bcrypt from 'bcryptjs';
 import * as sqlite3 from 'sqlite3';
 
 async function createDemoUser() {
-  const email = 'demo@example.com';
-  const password = 'nobhadDemo123';
-  const hash = await bcrypt.hash(password, 10);
+  const email = process.env.DEMO_USER_EMAIL || 'demo@example.com';
+  const password = process.env.DEMO_USER_PASSWORD;
+  if (!password) {
+    console.error('Error: DEMO_USER_PASSWORD environment variable is required');
+    process.exit(1);
+  }
+  const BCRYPT_ROUNDS = 12;
+  const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
   const db = new sqlite3.Database('./data/client_portal.db');
 
