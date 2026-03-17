@@ -597,8 +597,8 @@ class ContractService {
               COALESCE(c.billing_company, c.company_name) as company_name,
               COALESCE(c.billing_phone, c.phone) as client_phone,
               c.address as client_address
-       FROM projects p
-       JOIN clients c ON p.client_id = c.id
+       FROM active_projects p
+       JOIN active_clients c ON p.client_id = c.id
        WHERE p.id = ?`,
       [projectId]
     );
@@ -622,7 +622,7 @@ class ContractService {
     `.replace(/\s+/g, ' ').trim();
 
     const row = await db.get(
-      `SELECT ${CONTRACT_COLUMNS} FROM contracts WHERE project_id = ? AND status != 'cancelled'
+      `SELECT ${CONTRACT_COLUMNS} FROM active_contracts WHERE project_id = ? AND status != 'cancelled'
        ORDER BY created_at DESC LIMIT 1`,
       [projectId]
     );
@@ -635,7 +635,7 @@ class ContractService {
   async getLatestActiveContractId(projectId: number): Promise<number | null> {
     const db = getDatabase();
     const row = await db.get(
-      `SELECT id FROM contracts WHERE project_id = ? AND status != 'cancelled'
+      `SELECT id FROM active_contracts WHERE project_id = ? AND status != 'cancelled'
        ORDER BY created_at DESC LIMIT 1`,
       [projectId]
     );
@@ -649,7 +649,7 @@ class ContractService {
   async getLatestActiveContractIdAndStatus(projectId: number): Promise<{ id: number; status: string } | null> {
     const db = getDatabase();
     const row = await db.get(
-      `SELECT id, status FROM contracts WHERE project_id = ? AND status != 'cancelled'
+      `SELECT id, status FROM active_contracts WHERE project_id = ? AND status != 'cancelled'
        ORDER BY created_at DESC LIMIT 1`,
       [projectId]
     );
@@ -688,8 +688,8 @@ class ContractService {
     const row = await db.get(
       `SELECT p.*, COALESCE(c.billing_email, c.email) as client_email,
               COALESCE(c.billing_name, c.contact_name, c.company_name) as client_name
-       FROM projects p
-       LEFT JOIN clients c ON p.client_id = c.id
+       FROM active_projects p
+       LEFT JOIN active_clients c ON p.client_id = c.id
        WHERE p.id = ?`,
       [projectId]
     );
@@ -905,7 +905,7 @@ class ContractService {
     const db = getDatabase();
     const row = await db.get(
       `SELECT id, project_name, contract_signed_at
-       FROM projects
+       FROM active_projects
        WHERE id = ?`,
       [projectId]
     );
@@ -996,7 +996,7 @@ class ContractService {
               contract_signer_name, contract_signer_email, contract_signer_ip,
               contract_countersigned_at, contract_countersigner_name, contract_countersigner_email,
               contract_countersigner_ip, contract_signed_pdf_path
-       FROM projects WHERE id = ?`,
+       FROM active_projects WHERE id = ?`,
       [projectId]
     );
     return (row as Record<string, unknown>) || null;
@@ -1011,8 +1011,8 @@ class ContractService {
       `SELECT p.id, p.project_name, p.contract_signature_token, p.contract_signature_expires_at,
               COALESCE(c.billing_name, c.contact_name) as contact_name,
               COALESCE(c.billing_email, c.email) as email
-       FROM projects p
-       LEFT JOIN clients c ON p.client_id = c.id
+       FROM active_projects p
+       LEFT JOIN active_clients c ON p.client_id = c.id
        WHERE p.id = ?`,
       [projectId]
     );
@@ -1028,8 +1028,8 @@ class ContractService {
       `SELECT p.project_name,
               COALESCE(c.billing_name, c.contact_name) as contact_name,
               COALESCE(c.billing_email, c.email) as email
-       FROM projects p
-       LEFT JOIN clients c ON p.client_id = c.id
+       FROM active_projects p
+       LEFT JOIN active_clients c ON p.client_id = c.id
        WHERE p.id = ?`,
       [projectId]
     );
@@ -1156,8 +1156,8 @@ class ContractService {
         c.signed_at as signedAt,
         c.created_at as createdAt,
         c.expires_at as expiresAt
-      FROM contracts c
-      LEFT JOIN projects p ON c.project_id = p.id
+      FROM active_contracts c
+      LEFT JOIN active_projects p ON c.project_id = p.id
       WHERE c.client_id = ?
         AND c.status != 'cancelled'
       ORDER BY c.created_at DESC
@@ -1169,7 +1169,7 @@ class ContractService {
    */
   async getContractProjectId(contractId: number): Promise<number | null> {
     const db = getDatabase();
-    const row = await db.get('SELECT project_id FROM contracts WHERE id = ?', [contractId]);
+    const row = await db.get('SELECT project_id FROM active_contracts WHERE id = ?', [contractId]);
     if (!row) return null;
     return (row as Record<string, unknown>).project_id as number | null;
   }
@@ -1197,8 +1197,8 @@ class ContractService {
     const row = await db.get(
       `SELECT c.id, c.project_id, c.client_id, c.status, c.signed_at,
               p.project_name
-       FROM contracts c
-       LEFT JOIN projects p ON c.project_id = p.id
+       FROM active_contracts c
+       LEFT JOIN active_projects p ON c.project_id = p.id
        WHERE c.id = ?`,
       [contractId]
     );

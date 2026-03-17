@@ -147,7 +147,8 @@ export class InvoiceService {
     const year = new Date().getFullYear();
     const month = String(new Date().getMonth() + 1).padStart(2, '0');
     const timestamp = Date.now().toString().slice(-6);
-    return `INV-${year}${month}-${timestamp}`;
+    const random = String(Math.floor(Math.random() * 100)).padStart(2, '0');
+    return `INV-${year}${month}-${timestamp}${random}`;
   }
 
   /**

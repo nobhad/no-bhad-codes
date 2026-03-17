@@ -9,7 +9,7 @@
  */
 
 import { PDFDocument, StandardFonts } from 'pdf-lib';
-import { writeFileSync } from 'fs';
+import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import { getDatabase } from '../database/init.js';
 import { getFloat } from '../database/row-helpers.js';
@@ -314,29 +314,53 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
 
 class ReceiptService {
   /**
-   * Generate next receipt number
+   * Generate next receipt number with collision-safe retry loop
    */
   private async generateReceiptNumber(): Promise<string> {
     const db = getDatabase();
     const year = new Date().getFullYear();
     const prefix = `RCP-${year}-`;
+    const MAX_RETRIES = 5;
 
-    const result = await db.get(
-      `SELECT receipt_number FROM receipts
-       WHERE receipt_number LIKE ?
-       ORDER BY id DESC LIMIT 1`,
-      [`${prefix}%`]
-    );
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      const result = await db.get(
+        `SELECT receipt_number FROM receipts
+         WHERE receipt_number LIKE ?
+         ORDER BY id DESC LIMIT 1`,
+        [`${prefix}%`]
+      );
 
-    let sequence = 1;
-    if (result && result.receipt_number) {
-      const match = String(result.receipt_number).match(/RCP-\d{4}-(\d+)/);
-      if (match) {
-        sequence = parseInt(match[1], 10) + 1;
+      let sequence = 1;
+      if (result && result.receipt_number) {
+        const match = String(result.receipt_number).match(/RCP-\d{4}-(\d+)/);
+        if (match) {
+          sequence = parseInt(match[1], 10) + 1;
+        }
       }
+
+      // Add random offset on retry to avoid repeated collisions
+      if (attempt > 0) {
+        sequence += attempt;
+      }
+
+      const receiptNumber = `${prefix}${String(sequence).padStart(4, '0')}`;
+
+      // Check if this number already exists before returning
+      const existing = await db.get(
+        'SELECT 1 FROM receipts WHERE receipt_number = ?',
+        [receiptNumber]
+      );
+
+      if (!existing) {
+        return receiptNumber;
+      }
+
+      logger.warn(`[ReceiptService] Receipt number collision on ${receiptNumber}, retrying (attempt ${attempt + 1})`);
     }
 
-    return `${prefix}${String(sequence).padStart(4, '0')}`;
+    // Final fallback: use timestamp-based unique number
+    const timestamp = Date.now().toString().slice(-6);
+    return `${prefix}${timestamp}`;
   }
 
   /**
@@ -384,9 +408,9 @@ class ReceiptService {
               c.billing_city, c.billing_state, c.billing_zip, c.billing_country,
               p.project_name
        FROM invoices i
-       JOIN clients c ON i.client_id = c.id
-       LEFT JOIN projects p ON i.project_id = p.id
-       WHERE i.id = ?`,
+       JOIN clients c ON i.client_id = c.id AND c.deleted_at IS NULL
+       LEFT JOIN projects p ON i.project_id = p.id AND p.deleted_at IS NULL
+       WHERE i.id = ? AND i.deleted_at IS NULL`,
       [invoiceId]
     );
 
@@ -446,7 +470,7 @@ class ReceiptService {
         const filePath = join(receiptsDir, filename);
 
         // Write PDF to disk
-        writeFileSync(filePath, Buffer.from(pdfBytes));
+        await writeFile(filePath, Buffer.from(pdfBytes));
 
         // Create file record in database
         const relativePath = getRelativePath('receipts', filename);
@@ -548,9 +572,9 @@ class ReceiptService {
               COALESCE(c.billing_email, c.email) as client_email,
               p.project_name
        FROM receipts r
-       JOIN invoices i ON r.invoice_id = i.id
-       JOIN clients c ON i.client_id = c.id
-       LEFT JOIN projects p ON i.project_id = p.id
+       JOIN invoices i ON r.invoice_id = i.id AND i.deleted_at IS NULL
+       JOIN clients c ON i.client_id = c.id AND c.deleted_at IS NULL
+       LEFT JOIN projects p ON i.project_id = p.id AND p.deleted_at IS NULL
        WHERE r.id = ?`,
       [id]
     );
@@ -573,9 +597,9 @@ class ReceiptService {
               COALESCE(c.billing_email, c.email) as client_email,
               p.project_name
        FROM receipts r
-       JOIN invoices i ON r.invoice_id = i.id
-       JOIN clients c ON i.client_id = c.id
-       LEFT JOIN projects p ON i.project_id = p.id
+       JOIN invoices i ON r.invoice_id = i.id AND i.deleted_at IS NULL
+       JOIN clients c ON i.client_id = c.id AND c.deleted_at IS NULL
+       LEFT JOIN projects p ON i.project_id = p.id AND p.deleted_at IS NULL
        WHERE r.receipt_number = ?`,
       [receiptNumber]
     );
@@ -598,9 +622,9 @@ class ReceiptService {
               COALESCE(c.billing_email, c.email) as client_email,
               p.project_name
        FROM receipts r
-       JOIN invoices i ON r.invoice_id = i.id
-       JOIN clients c ON i.client_id = c.id
-       LEFT JOIN projects p ON i.project_id = p.id
+       JOIN invoices i ON r.invoice_id = i.id AND i.deleted_at IS NULL
+       JOIN clients c ON i.client_id = c.id AND c.deleted_at IS NULL
+       LEFT JOIN projects p ON i.project_id = p.id AND p.deleted_at IS NULL
        WHERE r.invoice_id = ?
        ORDER BY r.created_at DESC`,
       [invoiceId]
@@ -620,9 +644,9 @@ class ReceiptService {
               COALESCE(c.billing_email, c.email) as client_email,
               p.project_name
        FROM receipts r
-       JOIN invoices i ON r.invoice_id = i.id
-       JOIN clients c ON i.client_id = c.id
-       LEFT JOIN projects p ON i.project_id = p.id
+       JOIN invoices i ON r.invoice_id = i.id AND i.deleted_at IS NULL
+       JOIN clients c ON i.client_id = c.id AND c.deleted_at IS NULL
+       LEFT JOIN projects p ON i.project_id = p.id AND p.deleted_at IS NULL
        WHERE i.client_id = ?
        ORDER BY r.created_at DESC`,
       [clientId]
@@ -643,9 +667,9 @@ class ReceiptService {
               COALESCE(c.billing_email, c.email) as client_email,
               p.project_name
        FROM receipts r
-       JOIN invoices i ON r.invoice_id = i.id
-       JOIN clients c ON i.client_id = c.id
-       LEFT JOIN projects p ON i.project_id = p.id
+       JOIN invoices i ON r.invoice_id = i.id AND i.deleted_at IS NULL
+       JOIN clients c ON i.client_id = c.id AND c.deleted_at IS NULL
+       LEFT JOIN projects p ON i.project_id = p.id AND p.deleted_at IS NULL
        ORDER BY r.created_at DESC
        LIMIT ?`,
       [ALL_RECEIPTS_LIMIT]
@@ -661,7 +685,7 @@ class ReceiptService {
     const db = getDatabase();
     const row = await db.get(
       `SELECT 1 FROM receipts r
-       JOIN invoices i ON r.invoice_id = i.id
+       JOIN invoices i ON r.invoice_id = i.id AND i.deleted_at IS NULL
        WHERE r.id = ? AND i.client_id = ?`,
       [receiptId, clientId]
     );
@@ -674,7 +698,7 @@ class ReceiptService {
   async canClientAccessInvoiceReceipts(clientId: number, invoiceId: number): Promise<boolean> {
     const db = getDatabase();
     const row = await db.get(
-      'SELECT 1 FROM invoices WHERE id = ? AND client_id = ?',
+      'SELECT 1 FROM invoices WHERE id = ? AND client_id = ? AND deleted_at IS NULL',
       [invoiceId, clientId]
     );
     return !!row;
@@ -698,9 +722,9 @@ class ReceiptService {
               p.project_name,
               ip.payment_method, ip.payment_reference, ip.payment_date
        FROM receipts r
-       JOIN invoices i ON r.invoice_id = i.id
-       JOIN clients c ON i.client_id = c.id
-       LEFT JOIN projects p ON i.project_id = p.id
+       JOIN invoices i ON r.invoice_id = i.id AND i.deleted_at IS NULL
+       JOIN clients c ON i.client_id = c.id AND c.deleted_at IS NULL
+       LEFT JOIN projects p ON i.project_id = p.id AND p.deleted_at IS NULL
        LEFT JOIN invoice_payments ip ON r.payment_id = ip.id
        WHERE r.id = ?`,
       [receiptId]
