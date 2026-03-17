@@ -7,6 +7,7 @@ import {
   StarOff
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
+import { InlineEdit } from '@react/components/portal/InlineEdit';
 import { useListFetch } from '@react/factories/useDataFetch';
 import { Checkbox } from '@react/components/ui/checkbox';
 import { TablePagination } from '@react/components/portal/TablePagination';
@@ -208,6 +209,37 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
     } catch (err) {
       logger.error('Failed to update contact status:', err);
       showNotification?.('Failed to update contact status', 'error');
+    }
+  }, [showNotification, setData]);
+
+  // Generic field update handler for inline editing
+  const handleFieldUpdate = useCallback(async (
+    contactId: number,
+    updates: Partial<Record<string, unknown>>
+  ): Promise<boolean> => {
+    try {
+      const response = await apiFetch(buildEndpoint.adminContact(contactId), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+
+      if (!response.ok) throw new Error('Failed to update contact');
+
+      setData((prev) => prev ? {
+        ...prev,
+        items: prev.items.map((contact) =>
+          contact.id === contactId
+            ? { ...contact, ...updates }
+            : contact
+        )
+      } : prev);
+      showNotification?.('Contact updated', 'success');
+      return true;
+    } catch (err) {
+      logger.error('Failed to update contact:', err);
+      showNotification?.('Failed to update contact', 'error');
+      return false;
     }
   }, [showNotification, setData]);
 
@@ -439,13 +471,37 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
                         <span className="identity-company">{contact.company}</span>
                       )}
                       <span className="cell-title identity-name">
-                        {contact.firstName} {contact.lastName}
+                        <InlineEdit
+                          value={`${contact.firstName} ${contact.lastName}`}
+                          placeholder="Enter name"
+                          onSave={async (value) => {
+                            const trimmed = value.trim();
+                            const spaceIndex = trimmed.indexOf(' ');
+                            const firstName = spaceIndex > -1 ? trimmed.slice(0, spaceIndex) : trimmed;
+                            const lastName = spaceIndex > -1 ? trimmed.slice(spaceIndex + 1) : '';
+                            return handleFieldUpdate(contact.id, { firstName, lastName });
+                          }}
+                        />
                       </span>
-                      <span className="cell-subtitle identity-email">{contact.email}</span>
-                      {contact.phone && (
-                        <span className="cell-subtitle identity-phone">{contact.phone}</span>
-                      )}
-                      {contact.role && contact.role !== 'client' && (
+                      <span className="cell-subtitle identity-email">
+                        <InlineEdit
+                          value={contact.email}
+                          placeholder="Enter email"
+                          onSave={async (value) =>
+                            handleFieldUpdate(contact.id, { email: value.trim() })
+                          }
+                        />
+                      </span>
+                      <span className="cell-subtitle identity-phone">
+                        <InlineEdit
+                          value={contact.phone || ''}
+                          placeholder="Add phone"
+                          onSave={async (value) =>
+                            handleFieldUpdate(contact.id, { phone: value.trim() })
+                          }
+                        />
+                      </span>
+                      {contact.role && contact.role !== 'client' && contact.role !== 'primary' && (
                         <span className="cell-subtitle">{contact.role}</span>
                       )}
                       {contact.clientName && (
@@ -477,7 +533,6 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-group">
                       <IconButton action="view" title="View" />
-                      <IconButton action="edit" title="Edit" />
                     </div>
                   </PortalTableCell>
                 </PortalTableRow>

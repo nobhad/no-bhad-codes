@@ -2,7 +2,6 @@ import * as React from 'react';
 import { useState, useMemo, useCallback } from 'react';
 import {
   Package,
-  AlertCircle,
   Inbox
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
@@ -11,9 +10,9 @@ import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
-import { formatDate } from '@react/utils/formatDate';
 import { cn } from '@react/lib/utils';
 import { StatusDropdownCell } from '@react/components/portal/StatusDropdownCell';
+import { InlineEdit } from '@react/components/portal/InlineEdit';
 import {
   PortalTable,
   PortalTableHeader,
@@ -223,6 +222,36 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
     } catch (err) {
       logger.error('Failed to update deliverable status:', err);
       showNotification?.('Failed to update deliverable status', 'error');
+    }
+  }, [setData, showNotification]);
+
+  // Generic field update handler for inline editing
+  const handleFieldUpdate = useCallback(async (
+    deliverableId: number,
+    field: keyof Deliverable,
+    value: string
+  ): Promise<boolean> => {
+    try {
+      const response = await apiFetch(buildEndpoint.adminDeliverable(deliverableId), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [field]: value })
+      });
+
+      if (!response.ok) throw new Error(`Failed to update deliverable ${field}`);
+
+      setData((prev) => prev ? {
+        ...prev,
+        items: prev.items.map((d) =>
+          d.id === deliverableId ? { ...d, [field]: value } : d
+        )
+      } : prev);
+      showNotification?.(`Deliverable ${field} updated`, 'success');
+      return true;
+    } catch (err) {
+      logger.error(`Failed to update deliverable ${field}:`, err);
+      showNotification?.(`Failed to update deliverable ${field}`, 'error');
+      return false;
     }
   }, [setData, showNotification]);
 
@@ -446,7 +475,12 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                   <div className="cell-with-icon">
                     <Package className="icon-sm" />
                     <div className="cell-content">
-                      <span className="cell-title">{deliverable.title}</span>
+                      <InlineEdit
+                        value={deliverable.title}
+                        onSave={(value) => handleFieldUpdate(deliverable.id, 'title', value)}
+                        placeholder="Untitled"
+                        className="cell-title"
+                      />
                       {deliverable.clientId && onNavigate ? (
                         <button
                           onClick={(e) => {
@@ -482,25 +516,20 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                 />
                 <PortalTableCell>v{deliverable.version}</PortalTableCell>
                 <PortalTableCell>{deliverable.files}</PortalTableCell>
-                <PortalTableCell className="date-col">
-                  {deliverable.dueDate && (
-                    <span
-                      className={cn(
-                        'due-date',
-                        isOverdue(deliverable.dueDate, deliverable.status) && 'overdue'
-                      )}
-                    >
-                      {isOverdue(deliverable.dueDate, deliverable.status) && (
-                        <AlertCircle className="overdue-icon" />
-                      )}
-                      {formatDate(deliverable.dueDate)}
-                    </span>
-                  )}
+                <PortalTableCell className={cn(
+                  'date-col',
+                  isOverdue(deliverable.dueDate, deliverable.status) && 'overdue'
+                )}>
+                  <InlineEdit
+                    value={deliverable.dueDate || ''}
+                    type="date"
+                    onSave={(value) => handleFieldUpdate(deliverable.id, 'dueDate', value)}
+                    placeholder="Set date"
+                  />
                 </PortalTableCell>
                 <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="action-group">
                     <IconButton action="view" title="View" />
-                    <IconButton action="edit" title="Edit" />
                     {deliverable.files > 0 && (
                       <IconButton action="download" title="Download" />
                     )}

@@ -11,9 +11,9 @@ import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
-import { formatDate } from '@react/utils/formatDate';
 import { formatCurrency } from '@/utils/format-utils';
 import { StatusDropdownCell } from '@react/components/portal/StatusDropdownCell';
+import { InlineEdit } from '@react/components/portal/InlineEdit';
 import {
   PortalTable,
   PortalTableHeader,
@@ -230,6 +230,31 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
         )
       } : prev)
     );
+  }, [setData]);
+
+  // Generic field update handler
+  const handleFieldUpdate = useCallback(async (requestId: number, field: string, value: string): Promise<boolean> => {
+    let success = false;
+    await executeUpdateWithToast(
+      field,
+      () => apiFetch(buildEndpoint.adHocRequest(requestId), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [field]: value })
+      }),
+      () => {
+        setData((prev) => prev ? {
+          ...prev,
+          items: prev.items.map((request) =>
+            request.id === requestId
+              ? { ...request, [field]: value }
+              : request
+          )
+        } : prev);
+        success = true;
+      }
+    );
+    return success;
   }, [setData]);
 
   // Bulk delete handler
@@ -458,7 +483,12 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                   <div className="cell-with-icon">
                     <Zap className="icon-sm" />
                     <div className="cell-content">
-                      <span className="cell-title">{request.title}</span>
+                      <InlineEdit
+                        value={request.title}
+                        type="text"
+                        placeholder="Untitled request"
+                        onSave={(value) => handleFieldUpdate(request.id, 'title', value)}
+                      />
                       {request.projectName && (
                         <span className="cell-subtitle">
                           {request.projectId && onNavigate ? (
@@ -518,24 +548,28 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                   ariaLabel="Change request status"
                 />
                 <PortalTableCell className="text-right">
-                  {request.actualHours !== undefined ? (
-                    <span>
-                      {request.actualHours}
-                      {request.estimatedHours && (
-                        <span className="text-secondary">/{request.estimatedHours}h</span>
-                      )}
-                    </span>
-                  ) : request.estimatedHours ? (
-                    <span className="text-secondary">{request.estimatedHours}h est</span>
-                  ) : null}
+                  {request.actualHours !== undefined && (
+                    <span>{request.actualHours}/</span>
+                  )}
+                  <InlineEdit
+                    value={String(request.estimatedHours ?? '')}
+                    type="number"
+                    placeholder="0h"
+                    formatDisplay={(val) => val ? `${val}h` : '0h'}
+                    onSave={(value) => handleFieldUpdate(request.id, 'estimatedHours', value)}
+                  />
                 </PortalTableCell>
                 <PortalTableCell className="date-col">
-                  {request.dueDate && formatDate(request.dueDate)}
+                  <InlineEdit
+                    value={request.dueDate || ''}
+                    type="date"
+                    placeholder="Set due date"
+                    onSave={(value) => handleFieldUpdate(request.id, 'dueDate', value)}
+                  />
                 </PortalTableCell>
                 <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="action-group">
                     <IconButton action="view" title="View" />
-                    <IconButton action="edit" title="Edit" />
                     {request.status === 'pending' && (
                       <IconButton action="start" title="Start" onClick={() => handleStatusChange(request.id, 'in-progress')} />
                     )}

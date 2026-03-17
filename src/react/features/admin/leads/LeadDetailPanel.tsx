@@ -232,12 +232,12 @@ export function LeadDetailPanel({
           </button>
         </div>
 
-        {/* Title row — matches ClientDetail/ProjectDetail pattern */}
+        {/* Title row — company is primary, contact name is secondary */}
         <div className="detail-title-row">
           <div className="detail-title-group">
             <div className="detail-info">
               <div className="detail-name-row">
-                <h1 className="detail-title">{decodedName}</h1>
+                <h1 className="detail-title">{decodedCompany || decodedName}</h1>
                 <StatusDropdown
                   status={lead.status}
                   statusConfig={LEAD_STATUS_CONFIG}
@@ -246,13 +246,11 @@ export function LeadDetailPanel({
                 />
               </div>
 
+              {decodedCompany && (
+                <div className="detail-subtitle">{decodedName}</div>
+              )}
+
               <div className="detail-meta">
-                {decodedCompany && (
-                  <span className="meta-item">
-                    <span className="field-label">Company:</span>{' '}
-                    <span className="meta-value">{decodedCompany}</span>
-                  </span>
-                )}
                 {lead.source && (
                   <span className="meta-item">
                     <span className="field-label">Source:</span>{' '}

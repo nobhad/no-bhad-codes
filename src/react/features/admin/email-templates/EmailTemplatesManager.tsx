@@ -116,7 +116,7 @@ function sortTemplates(a: EmailTemplate, b: EmailTemplate, sort: SortConfig): nu
   }
 }
 
-export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, showNotification, defaultPageSize = 25, overviewMode = false }: EmailTemplatesManagerProps) {
+export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotification, defaultPageSize = 25, overviewMode = false }: EmailTemplatesManagerProps) {
   const containerRef = useFadeIn();
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
@@ -307,7 +307,7 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
                       <PortalTableCell className="date-col">{formatDate(template.updated_at)}</PortalTableCell>
                       <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                         <div className="action-group">
-                          <IconButton action="edit" title="Edit" />
+                          <IconButton action="edit" title="Edit" onClick={() => onNavigate?.('email-template', String(template.id))} />
                           <IconButton action="delete" title="Delete" />
                         </div>
                       </PortalTableCell>
