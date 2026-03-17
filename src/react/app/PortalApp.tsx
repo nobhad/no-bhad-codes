@@ -23,6 +23,7 @@ import { CommandPalette, useCommandPalette } from '../components/portal/CommandP
 import { KeyboardShortcutsOverlay, useKeyboardShortcuts } from '../components/portal/KeyboardShortcutsOverlay';
 import { usePortalStore } from '../stores/portal-store';
 import { usePortalAuth } from '../hooks/usePortalAuth';
+import { SubtabProvider } from '../contexts/SubtabContext';
 import type { UserRole } from '../../../server/config/unified-navigation';
 
 // ============================================
@@ -200,11 +201,13 @@ function PortalAppInner() {
 
   return (
     <AuthInitializer>
-      <AdminKeyboardShortcuts />
-      <GlobalKeyboardShortcuts />
-      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
-      <KeyboardShortcutsOverlay open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
-      <PortalRoutes />
+      <SubtabProvider>
+        <AdminKeyboardShortcuts />
+        <GlobalKeyboardShortcuts />
+        <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+        <KeyboardShortcutsOverlay open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+        <PortalRoutes />
+      </SubtabProvider>
     </AuthInitializer>
   );
 }

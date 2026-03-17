@@ -5,11 +5,14 @@
  * @file src/react/app/PortalSubtabs.tsx
  *
  * Renders the header subtab groups based on current
- * active group. Replaces the EJS subtab rendering.
+ * active group. Uses SubtabContext for state management.
  *
- * All subtab groups use the container pattern: clicking a subtab
- * dispatches a custom DOM event so the parent component switches
- * its internal view. The URL stays on the group route (e.g. /work).
+ * All subtab groups use the context pattern: clicking a subtab
+ * calls setSubtab() so the parent component switches its internal
+ * view. The URL stays on the group route (e.g. /work).
+ *
+ * Dashboard components can inject page-specific actions (date range,
+ * refresh, export) into the subtab row via setActions().
  */
 
 import * as React from 'react';
@@ -20,21 +23,8 @@ import {
   useCurrentGroup,
   useSwitchTab
 } from '../stores/portal-store';
+import { useSubtabContext } from '../contexts/SubtabContext';
 import { DETAIL_VIEW_TABS } from '../../../server/config/unified-navigation';
-
-/**
- * Every subtab group dispatches a custom DOM event so the parent
- * component can switch its internal view. The parent stays mounted
- * on its own route (e.g. /work, /analytics) — no per-subtab routes.
- */
-const GROUP_EVENTS: Record<string, string> = {
-  work: 'workSubtabChange',
-  crm: 'crmSubtabChange',
-  documents: 'documentsSubtabChange',
-  analytics: 'analyticsSubtabChange',
-  system: 'systemSubtabChange',
-  support: 'knowledgeBaseSubtabChange'
-};
 
 export function PortalSubtabs() {
   const subtabGroups = useSubtabGroups();
@@ -43,53 +33,33 @@ export function PortalSubtabs() {
   const switchTab = useSwitchTab();
   const navigate = useNavigate();
   const location = useLocation();
+  const { activeSubtab, setSubtab, actions } = useSubtabContext();
 
   const activeGroup = currentGroup || currentTab;
 
-  // Track which container-group subtab is active (not in the URL)
-  const [containerSubtab, setContainerSubtab] = React.useState<string | null>(null);
-
-  // Reset container subtab when navigating away from a container group
-  React.useEffect(() => {
-    setContainerSubtab(null);
-  }, [location.pathname]);
-
   const handleSubtabClick = React.useCallback((subtabId: string, groupForTab: string) => {
-    const eventName = GROUP_EVENTS[groupForTab];
-
     if (subtabId === 'overview') {
-      // Overview navigates to the parent group route and resets sub-view
       switchTab(groupForTab);
       navigate(`/${groupForTab}`);
-      if (eventName) {
-        document.dispatchEvent(
-          new CustomEvent(eventName, { detail: { subtab: 'overview' } })
-        );
-      }
-      setContainerSubtab(null);
+      setSubtab('overview');
       return;
     }
 
-    // Stay on parent group route, dispatch event so the parent switches view
     const currentPath = location.pathname.replace(/^\//, '');
     if (currentPath !== groupForTab) {
       switchTab(groupForTab);
       navigate(`/${groupForTab}`);
-      // Dispatch after a tick so the component has mounted
-      if (eventName) {
-        setTimeout(() => {
-          document.dispatchEvent(
-            new CustomEvent(eventName, { detail: { subtab: subtabId } })
-          );
-        }, 0);
-      }
-    } else if (eventName) {
-      document.dispatchEvent(
-        new CustomEvent(eventName, { detail: { subtab: subtabId } })
-      );
+      // Set after a tick so the component has mounted
+      setTimeout(() => setSubtab(subtabId), 0);
+    } else {
+      setSubtab(subtabId);
     }
-    setContainerSubtab(subtabId);
-  }, [switchTab, navigate, location.pathname]);
+  }, [switchTab, navigate, location.pathname, setSubtab]);
+
+  // Reset to overview when navigating away
+  React.useEffect(() => {
+    setSubtab('overview');
+  }, [location.pathname, setSubtab]);
 
   // Find the subtab group that matches the current active group
   const activeSubtabGroup = subtabGroups.find(
@@ -109,9 +79,7 @@ export function PortalSubtabs() {
           data-for-tab={activeSubtabGroup.forTab}
         >
           {activeSubtabGroup.subtabs.map((subtab) => {
-            const isActive = subtab.id === 'overview'
-              ? currentTab === activeSubtabGroup.forTab && !containerSubtab
-              : containerSubtab === subtab.id;
+            const isActive = subtab.id === activeSubtab;
 
             return (
               <button
@@ -126,6 +94,12 @@ export function PortalSubtabs() {
           })}
         </div>
       </div>
+      {/* Page-specific actions rendered inline on the right */}
+      {actions && (
+        <div className="header-subtab-actions">
+          {actions}
+        </div>
+      )}
     </div>
   );
 }
