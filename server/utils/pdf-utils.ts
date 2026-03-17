@@ -486,6 +486,144 @@ export async function drawPdfDocumentHeader(params: {
 }
 
 /**
+ * Draw a two-column info section — matches the invoice BILL TO / INVOICE DETAILS layout.
+ *
+ * Left column: section label (bold uppercase + underline) + stacked values.
+ * Right column: label:value pairs with right-aligned values.
+ *
+ * @returns Updated Y position (below whichever column is tallest).
+ */
+export function drawTwoColumnInfo(
+  page: PDFPage,
+  opts: {
+    leftMargin: number;
+    rightMargin: number;
+    width: number;
+    y: number;
+    fonts: { regular: PDFFont; bold: PDFFont };
+    left: {
+      /** Bold uppercase label with underline (e.g. "BILL TO:") */
+      label: string;
+      /** Lines to draw below the label — first line is bold, rest are regular */
+      lines: Array<{ text: string; bold?: boolean }>;
+    };
+    right: {
+      /** label:value pairs drawn in the right column */
+      pairs: Array<{ label: string; value: string }>;
+    };
+  }
+): number {
+  const { leftMargin, rightMargin, width, fonts } = opts;
+  const size = PDF_TYPOGRAPHY.bodySize;
+  const lineHeight = PDF_SPACING.lineHeight;
+  const detailsX = width / 2 + 36;
+  let y = opts.y;
+
+  // --- LEFT COLUMN: section label + client lines ---
+  const labelText = opts.left.label.toUpperCase();
+  page.drawText(labelText, {
+    x: leftMargin,
+    y,
+    size,
+    font: fonts.bold,
+    color: PDF_COLORS.black
+  });
+  const labelW = fonts.bold.widthOfTextAtSize(labelText, size);
+  page.drawLine({
+    start: { x: leftMargin, y: y - 4 },
+    end: { x: leftMargin + labelW, y: y - 4 },
+    thickness: PDF_SPACING.dividerThin,
+    color: PDF_COLORS.black
+  });
+
+  let leftY = y - 20;
+  for (const line of opts.left.lines) {
+    if (!line.text) continue;
+    page.drawText(line.text, {
+      x: leftMargin,
+      y: leftY,
+      size,
+      font: line.bold ? fonts.bold : fonts.regular,
+      color: PDF_COLORS.black
+    });
+    leftY -= 11;
+  }
+
+  // --- RIGHT COLUMN: label:value pairs (value right-aligned) ---
+  // Minimum gap between label and value to prevent overlap
+  const MIN_LABEL_VALUE_GAP = 8;
+
+  const drawRightAligned = (text: string, yPos: number, font: PDFFont, labelEndX: number) => {
+    const maxValueWidth = rightMargin - labelEndX - MIN_LABEL_VALUE_GAP;
+    let displayText = text;
+    // Truncate with ellipsis if value is too wide
+    if (font.widthOfTextAtSize(displayText, size) > maxValueWidth) {
+      while (displayText.length > 1 && font.widthOfTextAtSize(displayText + '...', size) > maxValueWidth) {
+        displayText = displayText.slice(0, -1);
+      }
+      displayText = displayText.trimEnd() + '...';
+    }
+    const w = font.widthOfTextAtSize(displayText, size);
+    page.drawText(displayText, { x: rightMargin - w, y: yPos, size, font, color: PDF_COLORS.black });
+  };
+
+  let rightY = y;
+  for (const pair of opts.right.pairs) {
+    page.drawText(pair.label, {
+      x: detailsX,
+      y: rightY,
+      size,
+      font: fonts.bold,
+      color: PDF_COLORS.black
+    });
+    const labelEndX = detailsX + fonts.bold.widthOfTextAtSize(pair.label, size);
+    drawRightAligned(pair.value, rightY, fonts.regular, labelEndX);
+    rightY -= lineHeight;
+  }
+
+  // Return the lower of the two columns, plus a gap
+  return Math.min(leftY, rightY) - 14;
+}
+
+/**
+ * Draw a section label with text-width underline.
+ * Matches invoice "BILL TO:" and "PAYMENT INSTRUCTIONS" exactly.
+ * Bold uppercase, bodySize, 0.5pt underline 4px below, sectionGap gap after.
+ *
+ * @returns Updated Y position (ready for content below the label).
+ */
+export function drawSectionLabel(
+  page: PDFPage,
+  label: string,
+  opts: {
+    x: number;
+    y: number;
+    font: PDFFont;
+  }
+): number {
+  const size = PDF_TYPOGRAPHY.bodySize;
+  const text = label.toUpperCase();
+
+  page.drawText(text, {
+    x: opts.x,
+    y: opts.y,
+    size,
+    font: opts.font,
+    color: PDF_COLORS.black
+  });
+
+  const textW = opts.font.widthOfTextAtSize(text, size);
+  page.drawLine({
+    start: { x: opts.x, y: opts.y - 4 },
+    end: { x: opts.x + textW, y: opts.y - 4 },
+    thickness: PDF_SPACING.dividerThin,
+    color: PDF_COLORS.black
+  });
+
+  return opts.y - PDF_SPACING.sectionGap;
+}
+
+/**
  * Draw a section heading — consistent across all PDF types.
  * Renders bold uppercase text with an underline, matching the invoice table heading style.
  */

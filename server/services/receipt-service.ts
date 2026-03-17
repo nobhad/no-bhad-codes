@@ -14,9 +14,14 @@ import { join } from 'path';
 import { getDatabase } from '../database/init.js';
 import { getFloat } from '../database/row-helpers.js';
 import { BUSINESS_INFO } from '../config/business.js';
-import { PDF_COLORS, PDF_TYPOGRAPHY } from '../config/pdf-styles.js';
+import { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } from '../config/pdf-styles.js';
 import { getUploadsSubdir, getRelativePath, sanitizeFilename } from '../config/uploads.js';
-import { PAGE_MARGINS, drawPdfDocumentHeader, drawPdfFooter } from '../utils/pdf-utils.js';
+import {
+  PAGE_MARGINS,
+  drawPdfDocumentHeader,
+  drawPdfFooter,
+  drawTwoColumnInfo
+} from '../utils/pdf-utils.js';
 import { logger } from './logger.js';
 
 // ============================================
@@ -94,156 +99,61 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
   const leftMargin = PAGE_MARGINS.left;
   const rightMargin = width - PAGE_MARGINS.right;
   let y = height - 43;
+  const fonts = { regular: helvetica, bold: helveticaBold };
 
   // === HEADER ===
   y = await drawPdfDocumentHeader({
     page,
     pdfDoc,
-    fonts: { regular: helvetica, bold: helveticaBold },
+    fonts,
     startY: y,
     leftMargin,
     rightMargin,
     title: 'RECEIPT'
   });
-  // === PAYMENT RECEIVED — section label with underline ===
-  const paymentReceivedLabel = 'PAYMENT RECEIVED';
-  page.drawText(paymentReceivedLabel, {
-    x: leftMargin,
-    y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: helveticaBold,
-    color: PDF_COLORS.black
-  });
-  const paymentReceivedW = helveticaBold.widthOfTextAtSize(paymentReceivedLabel, PDF_TYPOGRAPHY.bodySize);
-  page.drawLine({
-    start: { x: leftMargin, y: y - 4 },
-    end: { x: leftMargin + paymentReceivedW, y: y - 4 },
-    thickness: 0.5,
-    color: PDF_COLORS.black
-  });
-  y -= 20;
 
-  // === CLIENT INFO — section label with underline ===
-  const receivedFromLabel = 'RECEIVED FROM:';
-  page.drawText(receivedFromLabel, {
-    x: leftMargin,
-    y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: helveticaBold,
-    color: PDF_COLORS.black
-  });
-  const receivedFromW = helveticaBold.widthOfTextAtSize(receivedFromLabel, PDF_TYPOGRAPHY.bodySize);
-  page.drawLine({
-    start: { x: leftMargin, y: y - 4 },
-    end: { x: leftMargin + receivedFromW, y: y - 4 },
-    thickness: 0.5,
-    color: PDF_COLORS.black
-  });
-  y -= 20;
-
-  page.drawText(data.clientName, {
-    x: leftMargin,
-    y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: helveticaBold,
-    color: PDF_COLORS.black
-  });
-  y -= 12;
+  // === TWO-COLUMN INFO: RECEIVED FROM / RECEIPT DETAILS ===
+  const leftLines: Array<{ text: string; bold?: boolean }> = [];
   if (data.clientCompany) {
-    page.drawText(data.clientCompany, {
-      x: leftMargin,
-      y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: helvetica,
-      color: PDF_COLORS.black
-    });
-    y -= 12;
+    leftLines.push({ text: data.clientCompany, bold: true });
+    leftLines.push({ text: data.clientName });
+  } else {
+    leftLines.push({ text: data.clientName, bold: true });
   }
-  page.drawText(data.clientEmail, {
-    x: leftMargin,
-    y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: helvetica,
-    color: PDF_COLORS.black
-  });
-  y -= 12;
-  if (data.clientPhone) {
-    page.drawText(data.clientPhone, {
-      x: leftMargin,
-      y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: helvetica,
-      color: PDF_COLORS.black
-    });
-    y -= 12;
-  }
+  leftLines.push({ text: data.clientEmail });
+  if (data.clientPhone) leftLines.push({ text: data.clientPhone });
   if (data.clientAddress) {
-    const addressLines = data.clientAddress.split('\n');
-    for (const line of addressLines) {
-      page.drawText(line, {
-        x: leftMargin,
-        y,
-        size: PDF_TYPOGRAPHY.bodySize,
-        font: helvetica,
-        color: PDF_COLORS.black
-      });
-      y -= 12;
+    for (const line of data.clientAddress.split('\n')) {
+      leftLines.push({ text: line });
     }
   }
-  y -= 18;
 
-  // === PAYMENT DETAILS — table header bar (matches invoice table header) ===
-  page.drawRectangle({
-    x: leftMargin,
-    y: y - 2,
-    width: rightMargin - leftMargin,
-    height: 18,
-    color: PDF_COLORS.tableHeaderBg
-  });
-  page.drawText('PAYMENT DETAILS', {
-    x: leftMargin + 7,
-    y: y + 4,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: helveticaBold,
-    color: PDF_COLORS.tableHeaderText
-  });
-  y -= 22;
-
-  // Detail rows — label bold, value regular, 14px line height
-  const detailValueX = leftMargin + 150;
-  const drawDetailRow = (label: string, value: string) => {
-    page.drawText(label, {
-      x: leftMargin + 7,
-      y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: helveticaBold,
-      color: PDF_COLORS.black
-    });
-    page.drawText(value, {
-      x: detailValueX,
-      y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: helvetica,
-      color: PDF_COLORS.black
-    });
-    y -= 14;
-  };
-
-  drawDetailRow('Receipt Number:', data.receiptNumber);
-  drawDetailRow('Invoice Number:', data.invoiceNumber);
-  drawDetailRow('Payment Date:', data.paymentDate);
-  drawDetailRow('Payment Method:', data.paymentMethod);
+  const rightPairs: Array<{ label: string; value: string }> = [
+    { label: 'RECEIPT #:', value: data.receiptNumber },
+    { label: 'INVOICE #:', value: data.invoiceNumber },
+    { label: 'DATE:', value: data.paymentDate },
+    { label: 'METHOD:', value: data.paymentMethod }
+  ];
   if (data.paymentReference) {
-    drawDetailRow('Reference:', data.paymentReference);
+    rightPairs.push({ label: 'REFERENCE:', value: data.paymentReference });
   }
   if (data.projectName) {
-    drawDetailRow('Project:', data.projectName);
+    rightPairs.push({ label: 'PROJECT:', value: data.projectName });
   }
 
-  y -= 24;
+  y = drawTwoColumnInfo(page, {
+    leftMargin,
+    rightMargin,
+    width,
+    y,
+    fonts,
+    left: { label: 'RECEIVED FROM:', lines: leftLines },
+    right: { pairs: rightPairs }
+  });
 
-  // === AMOUNT PAID — right-aligned label:value (matches invoice totals pattern) ===
+  // === AMOUNT PAID (matches invoice totals pattern) ===
   const totalsX = rightMargin - 144;
+  y -= PDF_SPACING.sectionSpacing;
 
   page.drawLine({
     start: { x: totalsX - 14, y: y + 18 },
@@ -252,6 +162,8 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     color: PDF_COLORS.divider
   });
 
+  const amountText = `$${data.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
   page.drawText('AMOUNT PAID:', {
     x: totalsX,
     y,
@@ -259,22 +171,21 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     font: helveticaBold,
     color: PDF_COLORS.black
   });
-  const amountText = `$${data.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  const amountWidth = helveticaBold.widthOfTextAtSize(amountText, PDF_TYPOGRAPHY.bodySize);
+  const totalW = helveticaBold.widthOfTextAtSize(amountText, PDF_TYPOGRAPHY.bodySize);
   page.drawText(amountText, {
-    x: rightMargin - amountWidth,
+    x: rightMargin - totalW,
     y,
     size: PDF_TYPOGRAPHY.bodySize,
     font: helveticaBold,
     color: PDF_COLORS.black
   });
 
-  // === FOOTER — shared pattern (HR + thank you + business info) ===
+  // === FOOTER ===
   drawPdfFooter(page, {
     leftMargin,
     rightMargin,
     width,
-    fonts: { regular: helvetica, bold: helveticaBold },
+    fonts,
     thankYouText: 'Thank you for your payment!'
   });
 

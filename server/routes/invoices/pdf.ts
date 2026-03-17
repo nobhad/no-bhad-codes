@@ -393,7 +393,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     color: PDF_COLORS.divider
   });
 
-  page().drawText('Subtotal:', {
+  page().drawText('SUBTOTAL:', {
     x: totalsX,
     y: ctx.y,
     size: PDF_TYPOGRAPHY.bodySize,
@@ -412,7 +412,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
 
   if (data.discount && data.discount > 0) {
     ctx.y -= 16;
-    page().drawText('Discount:', {
+    page().drawText('DISCOUNT:', {
       x: totalsX,
       y: ctx.y,
       size: PDF_TYPOGRAPHY.bodySize,
@@ -432,7 +432,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
 
   if (data.tax && data.tax > 0) {
     ctx.y -= 16;
-    page().drawText('Tax:', {
+    page().drawText('TAX:', {
       x: totalsX,
       y: ctx.y,
       size: PDF_TYPOGRAPHY.bodySize,
@@ -511,7 +511,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     color: PDF_COLORS.black
   });
 
-  const amtDueText = 'Amount Due (USD)';
+  const amtDueText = 'AMOUNT DUE (USD)';
   const amtDueW = helvetica.widthOfTextAtSize(amtDueText, PDF_TYPOGRAPHY.bodySize);
   page().drawText(amtDueText, {
     x: rightMargin - amtDueW,

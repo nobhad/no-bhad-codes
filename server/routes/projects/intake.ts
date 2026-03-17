@@ -1,14 +1,28 @@
 import express, { Response } from 'express';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { PDFDocument as PDFLibDocument, PDFPage, StandardFonts } from 'pdf-lib';
+import { PDFDocument as PDFLibDocument, StandardFonts } from 'pdf-lib';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../utils/access-control.js';
 import { getString } from '../../database/row-helpers.js';
 import { BUSINESS_INFO } from '../../config/business.js';
-import { PDF_COLORS } from '../../config/pdf-styles.js';
-import { getPdfCacheKey, getCachedPdf, cachePdf, drawPdfFooter, drawPdfDocumentHeader } from '../../utils/pdf-utils.js';
+import { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } from '../../config/pdf-styles.js';
+import {
+  getPdfCacheKey,
+  getCachedPdf,
+  cachePdf,
+  drawPdfFooter,
+  drawPdfDocumentHeader,
+  drawTwoColumnInfo,
+  drawSectionLabel,
+  drawLabelValue,
+  addPageNumbers,
+  PAGE_MARGINS,
+  ensureSpace,
+  drawWrappedText,
+  type PdfPageContext
+} from '../../utils/pdf-utils.js';
 import { errorResponse, ErrorCodes } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import { intakeService } from '../../services/intake-service.js';
@@ -219,338 +233,186 @@ router.get(
     pdfDoc.setSubject('Project Intake Form');
     pdfDoc.setCreator('NoBhadCodes');
 
-    const PAGE_W = 612;
-    const PAGE_H = 792;
-    const LEFT = 54;
-    const RIGHT = PAGE_W - 54;
-    const CONTENT_W = RIGHT - LEFT;
-    const FOOTER_Y = 72;
-    const BODY_BOTTOM = FOOTER_Y + 20; // minimum y before needing a new page
-
     const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    const black = PDF_COLORS.black;
-    const dimGray = PDF_COLORS.black;
-    const lightGray = PDF_COLORS.black;
-    const lineGray = PDF_COLORS.dividerLight;
+    const PAGE_W = 612;
+    const PAGE_H = 792;
+    const LEFT = PAGE_MARGINS.left;
+    const RIGHT = PAGE_W - PAGE_MARGINS.right;
 
-    // =========================================================
-    // MULTI-PAGE STATE
-    // =========================================================
+    const page = pdfDoc.addPage([PAGE_W, PAGE_H]);
 
-    let currentPage: PDFPage = pdfDoc.addPage([PAGE_W, PAGE_H]);
-    let y = PAGE_H - 43;
-    let pageNumber = 1;
-
-    const drawFooterOnPage = (pg: PDFPage) => {
-      drawPdfFooter(pg, {
-        leftMargin: LEFT,
-        rightMargin: RIGHT,
-        width: PAGE_W,
-        fonts: { regular: helvetica, bold: helveticaBold },
-        thankYouText: 'Thank you for your business!'
-      });
+    const ctx: PdfPageContext = {
+      pdfDoc,
+      currentPage: page,
+      pageNumber: 1,
+      y: PAGE_H - 43,
+      width: PAGE_W,
+      height: PAGE_H,
+      leftMargin: LEFT,
+      rightMargin: RIGHT,
+      topMargin: PAGE_MARGINS.top,
+      bottomMargin: PAGE_MARGINS.bottom,
+      contentWidth: RIGHT - LEFT,
+      fonts: { regular: helvetica, bold: helveticaBold }
     };
 
-    const addPage = () => {
-      drawFooterOnPage(currentPage);
-      pageNumber += 1;
-      currentPage = pdfDoc.addPage([PAGE_W, PAGE_H]);
-      y = PAGE_H - 54;
-    };
+    const fonts = ctx.fonts;
+    const labelWidth = 120;
+    const lineHeight = PDF_SPACING.lineHeight;
 
-    const ensureSpace = (needed: number) => {
-      if (y - needed < BODY_BOTTOM) {
-        addPage();
-      }
-    };
-
-    // =========================================================
-    // DRAW HELPERS
-    // =========================================================
-
-    const drawSectionHeading = (title: string) => {
-      ensureSpace(30);
-      const headingText = title.toUpperCase();
-      currentPage.drawText(headingText, {
-        x: LEFT,
-        y,
-        size: 10,
-        font: helveticaBold,
-        color: black
-      });
-      const headingW = helveticaBold.widthOfTextAtSize(headingText, 10);
-      currentPage.drawLine({
-        start: { x: LEFT, y: y - 4 },
-        end: { x: LEFT + headingW, y: y - 4 },
-        thickness: 0.5,
+    // Continuation header on new pages
+    const onNewPage = (pageCtx: PdfPageContext) => {
+      pageCtx.currentPage.drawText(`Intake: ${pdfClientName} (continued)`, {
+        x: pageCtx.leftMargin,
+        y: pageCtx.height - 30,
+        size: PDF_TYPOGRAPHY.bodySize,
+        font: fonts.regular,
         color: PDF_COLORS.black
       });
-      y -= 20;
+      pageCtx.y = pageCtx.height - pageCtx.topMargin - 20;
     };
 
-    const drawDivider = (gap = 18) => {
-      ensureSpace(gap + 4);
-      currentPage.drawLine({
-        start: { x: LEFT, y: y + gap / 2 },
-        end: { x: RIGHT, y: y + gap / 2 },
-        thickness: 0.5,
-        color: PDF_COLORS.dividerVeryLight
-      });
-      y -= gap;
-    };
-
-    // Draws "Label: " bold + value normal on one line; wraps long values
-    const drawField = (label: string, value: string | null | undefined, gap = 16) => {
+    // Helper: draw a drawLabelValue that wraps long values
+    const drawFieldWrapped = (label: string, value: string | null | undefined) => {
       if (!value) return;
       const cleanVal = clean(value);
       if (!cleanVal) return;
 
-      const labelText = `${label}: `;
-      const labelW = helveticaBold.widthOfTextAtSize(labelText, 10);
-      const valueX = LEFT + labelW;
+      const valueX = LEFT + labelWidth;
       const valueMaxW = RIGHT - valueX;
 
-      if (helvetica.widthOfTextAtSize(cleanVal, 10) <= valueMaxW) {
-        ensureSpace(gap);
-        currentPage.drawText(labelText, { x: LEFT, y, size: 10, font: helveticaBold, color: black });
-        currentPage.drawText(cleanVal, { x: valueX, y, size: 10, font: helvetica, color: black });
-        y -= gap;
+      if (fonts.regular.widthOfTextAtSize(cleanVal, PDF_TYPOGRAPHY.bodySize) <= valueMaxW) {
+        ctx.y = drawLabelValue(ctx.currentPage, label + ':', cleanVal, {
+          x: LEFT, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+        });
       } else {
-        // Value too long — put label on its own line, value indented below
-        ensureSpace(gap);
-        currentPage.drawText(labelText, { x: LEFT, y, size: 10, font: helveticaBold, color: black });
-        y -= 14;
-        // Wrap the value
-        const words = cleanVal.split(' ');
-        let line = '';
-        for (const word of words) {
-          const test = line + (line ? ' ' : '') + word;
-          if (helvetica.widthOfTextAtSize(test, 10) > CONTENT_W - 8 && line) {
-            ensureSpace(14);
-            currentPage.drawText(line, { x: LEFT + 8, y, size: 10, font: helvetica, color: black });
-            y -= 14;
-            line = word;
-          } else {
-            line = test;
-          }
-        }
-        if (line) {
-          ensureSpace(14);
-          currentPage.drawText(line, { x: LEFT + 8, y, size: 10, font: helvetica, color: black });
-          y -= 14;
-        }
-        y -= 2;
+        // Value too long — use drawLabelValue for label, then wrap value below
+        ctx.y = drawLabelValue(ctx.currentPage, label + ':', '', {
+          x: LEFT, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+        });
+        drawWrappedText(ctx, cleanVal, {
+          fontSize: PDF_TYPOGRAPHY.bodySize,
+          color: PDF_COLORS.black,
+          lineHeight,
+          onNewPage
+        });
       }
     };
 
-    // Draws wrapped body text (no label)
-    const drawWrappedText = (text: string, afterGap = 15) => {
-      const words = clean(text).split(' ');
-      let line = '';
-      for (const word of words) {
-        const test = line + (line ? ' ' : '') + word;
-        if (helvetica.widthOfTextAtSize(test, 10) > CONTENT_W && line) {
-          ensureSpace(14);
-          currentPage.drawText(line, { x: LEFT, y, size: 10, font: helvetica, color: black });
-          y -= 14;
-          line = word;
-        } else {
-          line = test;
-        }
-      }
-      if (line) {
-        ensureSpace(14);
-        currentPage.drawText(line, { x: LEFT, y, size: 10, font: helvetica, color: black });
-        y -= 14;
-      }
-      y -= afterGap;
-    };
-
-    // Draws a bullet list
-    const drawBulletList = (items: string[], afterGap = 10) => {
+    // Helper: draw a bullet list
+    const drawBulletList = (items: string[]) => {
       for (const item of items) {
-        const text = sanitize(`•  ${item.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}`);
-        ensureSpace(14);
-        currentPage.drawText(text, { x: LEFT, y, size: 10, font: helvetica, color: black });
-        y -= 14;
+        const text = sanitize(`- ${item.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}`);
+        ensureSpace(ctx, lineHeight, onNewPage);
+        ctx.currentPage.drawText(text, {
+          x: LEFT + PDF_SPACING.indent,
+          y: ctx.y,
+          size: PDF_TYPOGRAPHY.bodySize,
+          font: fonts.regular,
+          color: PDF_COLORS.black
+        });
+        ctx.y -= lineHeight;
       }
-      y -= afterGap;
     };
 
-    // Draws a Yes/No checkbox-style indicator
+    // Helper: draw Yes/No field
     const drawBoolField = (label: string, value: boolean | undefined) => {
       if (value === undefined || value === null) return;
-      ensureSpace(16);
       const indicator = value ? 'Yes' : 'No';
-      const labelText = `${label}: `;
-      const labelW = helveticaBold.widthOfTextAtSize(labelText, 10);
-      currentPage.drawText(labelText, { x: LEFT, y, size: 10, font: helveticaBold, color: black });
-      currentPage.drawText(indicator, { x: LEFT + labelW, y, size: 10, font: helvetica, color: black });
-      y -= 16;
+      ctx.y = drawLabelValue(ctx.currentPage, label + ':', indicator, {
+        x: LEFT, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+      });
     };
 
     // =========================================================
-    // PAGE 1 HEADER — shared across all PDF types
+    // HEADER
     // =========================================================
 
-    y = await drawPdfDocumentHeader({
-      page: currentPage,
+    ctx.y = await drawPdfDocumentHeader({
+      page: ctx.currentPage,
       pdfDoc,
-      fonts: { regular: helvetica, bold: helveticaBold },
-      startY: y,
+      fonts,
+      startY: ctx.y,
       leftMargin: LEFT,
       rightMargin: RIGHT,
       title: 'INTAKE'
     });
 
     // =========================================================
-    // PREPARED FOR + DATE/PROJECT #
+    // TWO-COLUMN INFO: PREPARED FOR / INTAKE DETAILS
     // =========================================================
 
-    const detailsX = PAGE_W / 2 + 36;
-
-    const preparedForLabel = 'PREPARED FOR:';
-    currentPage.drawText(preparedForLabel, {
-      x: LEFT, y,
-      size: 10, font: helveticaBold, color: PDF_COLORS.black
-    });
-    const preparedForW = helveticaBold.widthOfTextAtSize(preparedForLabel, 10);
-    currentPage.drawLine({
-      start: { x: LEFT, y: y - 4 },
-      end: { x: LEFT + preparedForW, y: y - 4 },
-      thickness: 0.5,
-      color: PDF_COLORS.black
-    });
-
-    currentPage.drawText(clean(intakeData.clientInfo.name), {
-      x: LEFT, y: y - 14,
-      size: 10, font: helveticaBold, color: black
-    });
-
-    let clientLineY = y - 25;
+    const leftLines: Array<{ text: string; bold?: boolean }> = [];
+    leftLines.push({ text: clean(intakeData.clientInfo.name), bold: true });
     if (intakeData.clientInfo.companyName) {
-      currentPage.drawText(clean(intakeData.clientInfo.companyName), {
-        x: LEFT, y: clientLineY,
-        size: 10, font: helvetica, color: black
-      });
-      clientLineY -= 12;
+      leftLines.push({ text: clean(intakeData.clientInfo.companyName) });
     }
-
-    currentPage.drawText(intakeData.clientInfo.email, {
-      x: LEFT, y: clientLineY,
-      size: 10, font: helvetica, color: dimGray
-    });
-    clientLineY -= 12;
-
+    leftLines.push({ text: intakeData.clientInfo.email });
     if (intakeData.clientInfo.phone) {
-      currentPage.drawText(clean(intakeData.clientInfo.phone), {
-        x: LEFT, y: clientLineY,
-        size: 10, font: helvetica, color: dimGray
-      });
-      clientLineY -= 12;
+      leftLines.push({ text: clean(intakeData.clientInfo.phone) });
     }
 
-    const preferredContact = intakeData.clientInfo.preferredContact
-      || intakeData.clientInfo.preferredContactMethod;
-    if (preferredContact) {
-      const contactLabel = `Preferred: ${formatContact(preferredContact)}`;
-      currentPage.drawText(contactLabel, {
-        x: LEFT, y: clientLineY,
-        size: 9, font: helvetica, color: lightGray
-      });
-      clientLineY -= 12;
-    }
+    const rightPairs: Array<{ label: string; value: string }> = [
+      { label: 'PROJECT TYPE:', value: formatProjectType(intakeData.projectDetails.type) },
+      { label: 'BUDGET:', value: formatBudget(intakeData.projectDetails.budget) },
+      { label: 'TIMELINE:', value: formatTimeline(intakeData.projectDetails.targetLaunchDate || intakeData.projectDetails.timeline) },
+      { label: 'DATE:', value: formatDate(intakeData.submittedAt) }
+    ];
 
-    if (intakeData.clientInfo.companyWebsite) {
-      currentPage.drawText(clean(intakeData.clientInfo.companyWebsite), {
-        x: LEFT, y: clientLineY,
-        size: 9, font: helvetica, color: lightGray
-      });
-      clientLineY -= 12;
-    }
-
-    if (intakeData.clientInfo.timezone) {
-      currentPage.drawText(clean(intakeData.clientInfo.timezone), {
-        x: LEFT, y: clientLineY,
-        size: 9, font: helvetica, color: lightGray
-      });
-    }
-
-    // Right side — DATE + PROJECT #
-    currentPage.drawText('DATE:', {
-      x: detailsX, y,
-      size: 9, font: helveticaBold, color: dimGray
+    ctx.y = drawTwoColumnInfo(ctx.currentPage, {
+      leftMargin: LEFT,
+      rightMargin: RIGHT,
+      width: PAGE_W,
+      y: ctx.y,
+      fonts,
+      left: { label: 'PREPARED FOR:', lines: leftLines },
+      right: { pairs: rightPairs }
     });
-    const dateVal = formatDate(intakeData.submittedAt);
-    currentPage.drawText(dateVal, {
-      x: RIGHT - helvetica.widthOfTextAtSize(dateVal, 9),
-      y,
-      size: 9, font: helvetica, color: black
-    });
-
-    currentPage.drawText('PROJECT #:', {
-      x: detailsX, y: y - 14,
-      size: 9, font: helveticaBold, color: dimGray
-    });
-    const projIdText = `#${intakeData.projectId}`;
-    currentPage.drawText(projIdText, {
-      x: RIGHT - helvetica.widthOfTextAtSize(projIdText, 9),
-      y: y - 14,
-      size: 9, font: helvetica, color: black
-    });
-
-    // Advance past the tallest possible client block
-    y = Math.min(y - 72, clientLineY - 20);
-    drawDivider(18);
 
     // =========================================================
     // PROJECT DETAILS
     // =========================================================
 
-    drawSectionHeading('Project Details');
+    ctx.y -= PDF_SPACING.sectionSpacing;
+    ensureSpace(ctx, 100, onNewPage);
+    ctx.y = drawSectionLabel(ctx.currentPage, 'PROJECT DETAILS', {
+      x: LEFT, y: ctx.y, font: fonts.bold
+    });
 
-    drawField('Project Name', intakeData.projectName);
-    drawField('Project Type', formatProjectType(intakeData.projectDetails.type));
-
-    const timeline = intakeData.projectDetails.targetLaunchDate
-      || intakeData.projectDetails.timeline;
-    if (timeline) drawField('Timeline', formatTimeline(timeline));
-
-    const budget = intakeData.projectDetails.budget;
-    if (budget) drawField('Budget', formatBudget(budget));
+    drawFieldWrapped('Project Name', intakeData.projectName);
 
     if (intakeData.projectDetails.targetAudience) {
-      drawField('Target Audience', intakeData.projectDetails.targetAudience);
+      drawFieldWrapped('Target Audience', intakeData.projectDetails.targetAudience);
     }
-
     if (intakeData.projectDetails.designLevel) {
-      drawField('Design Level', intakeData.projectDetails.designLevel);
+      drawFieldWrapped('Design Level', intakeData.projectDetails.designLevel);
     }
 
-    y -= 10;
+    // Description
+    if (intakeData.projectDetails.description) {
+      ctx.y = drawLabelValue(ctx.currentPage, 'Description:', '', {
+        x: LEFT, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+      });
+      drawWrappedText(ctx, clean(intakeData.projectDetails.description), {
+        fontSize: PDF_TYPOGRAPHY.bodySize,
+        color: PDF_COLORS.black,
+        lineHeight,
+        onNewPage
+      });
+    }
 
-    // =========================================================
-    // PROJECT DESCRIPTION
-    // =========================================================
-
-    drawSectionHeading('Project Description');
-    drawWrappedText(
-      intakeData.projectDetails.description || 'No description provided',
-      15
-    );
-
-    // =========================================================
-    // REQUESTED FEATURES (from projectDetails or requirements)
-    // =========================================================
-
+    // Requested features
     const features = intakeData.requirements?.features?.length
       ? intakeData.requirements.features
       : intakeData.projectDetails.features;
 
     if (features && features.length > 0) {
-      drawSectionHeading('Requested Features');
+      ctx.y -= 8;
+      ctx.y = drawLabelValue(ctx.currentPage, 'Requested Features:', '', {
+        x: LEFT, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+      });
       drawBulletList(features);
     }
 
@@ -566,16 +428,20 @@ router.get(
     );
 
     if (hasDesignInfo) {
-      drawSectionHeading('Design Preferences');
-      drawField('Design Style', intakeData.requirements!.designStyle);
-      drawField('Color Preferences', intakeData.requirements!.colorPreferences);
+      ctx.y -= PDF_SPACING.sectionSpacing;
+      ensureSpace(ctx, 80, onNewPage);
+      ctx.y = drawSectionLabel(ctx.currentPage, 'DESIGN PREFERENCES', {
+        x: LEFT, y: ctx.y, font: fonts.bold
+      });
+
+      drawFieldWrapped('Design Style', intakeData.requirements!.designStyle);
+      drawFieldWrapped('Color Preferences', intakeData.requirements!.colorPreferences);
       drawBoolField('Brand Guidelines Provided', intakeData.requirements!.brandGuidelines);
       drawBoolField('Content Ready', intakeData.requirements!.contentReady);
-      y -= 6;
     }
 
     // =========================================================
-    // TECHNICAL INFORMATION
+    // TECHNICAL DETAILS
     // =========================================================
 
     const hasTechInfo = intakeData.technicalInfo && (
@@ -584,14 +450,18 @@ router.get(
     );
 
     if (hasTechInfo) {
-      drawSectionHeading('Technical Information');
-      drawField('Technical Comfort', intakeData.technicalInfo!.techComfort);
-      drawField('Domain / Hosting', intakeData.technicalInfo!.domainHosting);
-      y -= 6;
+      ctx.y -= PDF_SPACING.sectionSpacing;
+      ensureSpace(ctx, 80, onNewPage);
+      ctx.y = drawSectionLabel(ctx.currentPage, 'TECHNICAL DETAILS', {
+        x: LEFT, y: ctx.y, font: fonts.bold
+      });
+
+      drawFieldWrapped('Technical Comfort', intakeData.technicalInfo!.techComfort);
+      drawFieldWrapped('Domain / Hosting', intakeData.technicalInfo!.domainHosting);
     }
 
     // =========================================================
-    // INTEGRATIONS & ADDITIONAL NOTES
+    // INTEGRATIONS & NOTES
     // =========================================================
 
     const hasReqExtras = intakeData.requirements && (
@@ -600,28 +470,29 @@ router.get(
     );
 
     if (hasReqExtras) {
-      drawSectionHeading('Requirements & Notes');
-      if (intakeData.requirements!.integrations) {
-        ensureSpace(16);
-        currentPage.drawText('Third-party Integrations: ', {
-          x: LEFT, y, size: 10, font: helveticaBold, color: black
-        });
-        y -= 14;
-        drawWrappedText(intakeData.requirements!.integrations, 10);
-      }
-      if (intakeData.requirements!.additionalNotes) {
-        ensureSpace(16);
-        currentPage.drawText('Additional Notes: ', {
-          x: LEFT, y, size: 10, font: helveticaBold, color: black
-        });
-        y -= 14;
-        drawWrappedText(intakeData.requirements!.additionalNotes, 10);
-      }
+      ctx.y -= PDF_SPACING.sectionSpacing;
+      ensureSpace(ctx, 80, onNewPage);
+      ctx.y = drawSectionLabel(ctx.currentPage, 'REQUIREMENTS & NOTES', {
+        x: LEFT, y: ctx.y, font: fonts.bold
+      });
+
+      drawFieldWrapped('Integrations', intakeData.requirements!.integrations);
+      drawFieldWrapped('Additional Notes', intakeData.requirements!.additionalNotes);
     }
 
     if (intakeData.additionalInfo) {
-      drawSectionHeading('Additional Information');
-      drawWrappedText(intakeData.additionalInfo);
+      ctx.y -= PDF_SPACING.sectionSpacing;
+      ensureSpace(ctx, 80, onNewPage);
+      ctx.y = drawSectionLabel(ctx.currentPage, 'ADDITIONAL INFORMATION', {
+        x: LEFT, y: ctx.y, font: fonts.bold
+      });
+
+      drawWrappedText(ctx, clean(intakeData.additionalInfo), {
+        fontSize: PDF_TYPOGRAPHY.bodySize,
+        color: PDF_COLORS.black,
+        lineHeight,
+        onNewPage
+      });
     }
 
     // =========================================================
@@ -635,31 +506,32 @@ router.get(
     );
 
     if (hasAssets) {
-      drawSectionHeading('Assets & Resources');
+      ctx.y -= PDF_SPACING.sectionSpacing;
+      ensureSpace(ctx, 80, onNewPage);
+      ctx.y = drawSectionLabel(ctx.currentPage, 'ASSETS & RESOURCES', {
+        x: LEFT, y: ctx.y, font: fonts.bold
+      });
+
       drawBoolField('Logo Provided', intakeData.assets!.logoProvided);
-      if (intakeData.assets!.existingAssets) {
-        ensureSpace(16);
-        currentPage.drawText('Existing Assets: ', {
-          x: LEFT, y, size: 10, font: helveticaBold, color: black
-        });
-        y -= 14;
-        drawWrappedText(intakeData.assets!.existingAssets, 10);
-      }
-      if (intakeData.assets!.contentAccess) {
-        ensureSpace(16);
-        currentPage.drawText('Content & Access Details: ', {
-          x: LEFT, y, size: 10, font: helveticaBold, color: black
-        });
-        y -= 14;
-        drawWrappedText(intakeData.assets!.contentAccess, 10);
-      }
+      drawFieldWrapped('Existing Assets', intakeData.assets!.existingAssets);
+      drawFieldWrapped('Content Access', intakeData.assets!.contentAccess);
     }
 
     // =========================================================
-    // FOOTER ON LAST PAGE
+    // FOOTER ON ALL PAGES + PAGE NUMBERS
     // =========================================================
 
-    drawFooterOnPage(currentPage);
+    for (const footerPage of pdfDoc.getPages()) {
+      drawPdfFooter(footerPage, {
+        leftMargin: LEFT,
+        rightMargin: RIGHT,
+        width: PAGE_W,
+        fonts,
+        thankYouText: 'Thank you for your business!'
+      });
+    }
+
+    await addPageNumbers(pdfDoc);
 
     // =========================================================
     // GENERATE & SEND
