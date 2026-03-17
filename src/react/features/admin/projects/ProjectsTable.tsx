@@ -380,7 +380,11 @@ export function ProjectsTable({
             allSelected={selection.allSelected && selection.selectedCount === filteredProjects.length}
             statusOptions={bulkStatusOptions}
             onStatusChange={handleBulkStatusChange}
-            onDelete={deleteDialog.open}
+            onDelete={
+              filterValues.status?.some((s: string) => ['completed', 'cancelled', 'on-hold'].includes(s))
+                ? deleteDialog.open
+                : undefined
+            }
             deleteLoading={deleteDialog.isLoading}
           />
         }

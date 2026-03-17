@@ -257,6 +257,18 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
     return success;
   }, [setData]);
 
+  // Single delete handler
+  const handleDeleteRequest = useCallback(async (requestId: number) => {
+    if (!window.confirm('Are you sure you want to delete this request?')) return;
+    await executeWithToast(
+      () => apiFetch(buildEndpoint.adHocRequest(requestId), { method: 'DELETE' }),
+      { success: 'Request deleted', error: 'Failed to delete request' },
+      () => {
+        setData((prev) => prev ? { ...prev, items: prev.items.filter((r) => r.id !== requestId) } : prev);
+      }
+    );
+  }, [setData]);
+
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
     if (selection.selectedCount === 0) return;
@@ -569,14 +581,14 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                 </PortalTableCell>
                 <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="action-group">
-                    <IconButton action="view" title="View" />
+                    <IconButton action="view" title="View" onClick={() => onNavigate?.('adhoc-request-detail', String(request.id))} />
                     {request.status === 'pending' && (
                       <IconButton action="start" title="Start" onClick={() => handleStatusChange(request.id, 'in-progress')} />
                     )}
                     {request.status === 'in-progress' && (
                       <IconButton action="pause" title="Put On Hold" onClick={() => handleStatusChange(request.id, 'on-hold')} />
                     )}
-                    <IconButton action="delete" title="Delete" />
+                    <IconButton action="delete" title="Delete" onClick={() => handleDeleteRequest(request.id)} />
                   </div>
                 </PortalTableCell>
               </PortalTableRow>

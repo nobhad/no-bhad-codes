@@ -210,6 +210,21 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
     [handlePanelStatusChange]
   );
 
+  const handleCopyLink = useCallback((review: DesignReview) => {
+    const url = `${window.location.origin}/dashboard#/design-reviews/${review.id}`;
+    navigator.clipboard.writeText(url).then(() => {
+      showNotification?.('Share link copied to clipboard', 'success');
+    }).catch(() => {
+      showNotification?.('Failed to copy link', 'error');
+    });
+  }, [showNotification]);
+
+  const handleAddComment = useCallback((reviewId: number) => {
+    // Open the detail panel where comments can be added
+    const review = reviews.find((r) => r.id === reviewId);
+    if (review) setSelectedReview(review);
+  }, [reviews]);
+
   const filteredReviews = useMemo(() => applyFilters(reviews), [applyFilters, reviews]);
 
   const pagination = usePagination({ storageKey: 'admin_design_review_pagination', totalItems: filteredReviews.length });
@@ -353,16 +368,15 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
                   <PortalTableCell className="date-col">{formatDate(review.submittedAt)}</PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-group">
-                      <IconButton action="view" title="View" />
+                      <IconButton action="view" title="View" onClick={() => setSelectedReview(review)} />
                       {review.status === 'in-review' && (
                         <>
-                          <IconButton action="approve" title="Approve" />
-                          <IconButton action="reject" title="Request Revision" />
+                          <IconButton action="approve" title="Approve" onClick={() => handleApprove(review.id)} />
+                          <IconButton action="reject" title="Request Revision" onClick={() => handleRequestRevision(review.id)} />
                         </>
                       )}
-                      <IconButton icon="image" title="View Files" />
-                      <IconButton action="copy-link" title="Share Link" />
-                      <IconButton action="message" title="Add Comment" />
+                      <IconButton action="copy-link" title="Share Link" onClick={() => handleCopyLink(review)} />
+                      <IconButton action="message" title="Add Comment" onClick={() => handleAddComment(review.id)} />
                     </div>
                   </PortalTableCell>
                 </PortalTableRow>

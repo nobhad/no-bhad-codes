@@ -200,6 +200,20 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
     items: paginatedRequests
   });
 
+  // Single delete handler
+  const handleDeleteRequest = useCallback(async (requestId: number) => {
+    if (!window.confirm('Are you sure you want to delete this document request?')) return;
+    try {
+      const response = await apiFetch(buildEndpoint.documentRequest(requestId), { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete request');
+      setData((prev) => prev ? { ...prev, items: prev.items.filter((r) => r.id !== requestId) } : prev);
+      showNotification?.('Document request deleted', 'success');
+    } catch (err) {
+      logger.error('Failed to delete document request:', err);
+      showNotification?.('Failed to delete document request', 'error');
+    }
+  }, [setData, showNotification]);
+
   // Status change handler
   const handleStatusChange = useCallback(async (requestId: number, newStatus: string) => {
     try {
@@ -526,14 +540,14 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
                 </PortalTableCell>
                 <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="action-group">
-                    <IconButton action="view" title="View" />
+                    <IconButton action="view" title="View" onClick={() => setSelectedRequest(request)} />
                     {request.status === 'pending' && (
                       <IconButton action="remind" title="Send Reminder" />
                     )}
                     {request.documents > 0 && (
                       <IconButton action="download" title="Download All" />
                     )}
-                    <IconButton action="delete" title="Delete" />
+                    <IconButton action="delete" title="Delete" onClick={() => handleDeleteRequest(request.id)} />
                   </div>
                 </PortalTableCell>
               </PortalTableRow>

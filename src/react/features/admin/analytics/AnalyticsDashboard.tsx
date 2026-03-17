@@ -39,11 +39,13 @@ import {
 import { IconButton } from '@react/factories';
 import { StatCard } from '@react/components/portal/StatCard';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { useActiveSubtab, useSetSubtabActions } from '@react/contexts/SubtabContext';
 import { EmptyState, ErrorState, LoadingState } from '@react/factories';
 import { formatCurrencyCompact as formatCurrency } from '@/utils/format-utils';
 import { apiFetch, unwrapApiData } from '@/utils/api-client';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { formatErrorMessage } from '@/utils/error-utils';
+import { exportDataToCsv, type ExportConfig } from '@/utils/table-export';
 
 // Register Chart.js components + controllers
 ChartJS.register(
@@ -314,20 +316,8 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
-  const [activeSubtab, setActiveSubtab] = useState<AnalyticsSubtab>('overview');
-
-  useEffect(() => {
-    function handleSubtabChange(e: CustomEvent<{ subtab: string }>) {
-      const subtab = e.detail.subtab as AnalyticsSubtab;
-      if (['overview', 'revenue', 'leads', 'projects'].includes(subtab)) {
-        setActiveSubtab(subtab);
-      }
-    }
-    document.addEventListener('analyticsSubtabChange', handleSubtabChange as EventListener);
-    return () => {
-      document.removeEventListener('analyticsSubtabChange', handleSubtabChange as EventListener);
-    };
-  }, []);
+  const activeSubtab = useActiveSubtab() as AnalyticsSubtab;
+  const setSubtabActions = useSetSubtabActions();
 
   const MAX_RETRIES = 3;
   const RETRY_DELAY_MS = 2000;
@@ -414,6 +404,25 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
     ]
     : [], [data]);
 
+  // Export analytics data as CSV
+  const handleExport = useCallback(() => {
+    if (!data) return;
+    const exportRows = kpis.map((kpi) => ({
+      metric: kpi.label,
+      value: String(kpi.value),
+      change: kpi.change !== undefined ? `${kpi.change}%` : ''
+    }));
+    const config: ExportConfig = {
+      filename: `analytics_${dateRange}`,
+      columns: [
+        { key: 'metric', label: 'Metric' },
+        { key: 'value', label: 'Value' },
+        { key: 'change', label: 'Change' }
+      ]
+    };
+    exportDataToCsv(exportRows, config);
+  }, [data, kpis, dateRange]);
+
   const dateRangeOptions = [
     { value: '7d', label: 'Last 7 days' },
     { value: '30d', label: 'Last 30 days' },
@@ -421,34 +430,39 @@ export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDas
     { value: '1y', label: 'Last year' }
   ];
 
+  // Inject actions into the subtab row via context
+  useEffect(() => {
+    setSubtabActions(
+      <div className="data-table-actions">
+        <PortalDropdown>
+          <PortalDropdownTrigger asChild>
+            <button className="dropdown-trigger date-range-trigger">
+              {dateRangeOptions.find((o) => o.value === dateRange)?.label}
+              <ChevronDown className="dropdown-caret" />
+            </button>
+          </PortalDropdownTrigger>
+          <PortalDropdownContent align="start" sideOffset={0}>
+            {dateRangeOptions.map((option) => (
+              <PortalDropdownItem
+                key={option.value}
+                className={cn(dateRange === option.value && 'is-active')}
+                onSelect={() => setDateRange(option.value as typeof dateRange)}
+              >
+                {option.label}
+              </PortalDropdownItem>
+            ))}
+          </PortalDropdownContent>
+        </PortalDropdown>
+        <IconButton action="refresh" title="Refresh analytics" onClick={() => loadAnalytics()} disabled={isLoading} />
+        <IconButton action="download" title="Export analytics" onClick={handleExport} disabled={!data} />
+      </div>
+    );
+
+    return () => setSubtabActions(null);
+  }, [dateRange, isLoading, data, setSubtabActions, handleExport, loadAnalytics]);
+
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subsection">
-      {/* Actions Bar */}
-      <div className="layout-row-end">
-        <div className="data-table-actions">
-          <PortalDropdown>
-            <PortalDropdownTrigger asChild>
-              <button className="dropdown-trigger date-range-trigger">
-                {dateRangeOptions.find((o) => o.value === dateRange)?.label}
-                <ChevronDown className="dropdown-caret" />
-              </button>
-            </PortalDropdownTrigger>
-            <PortalDropdownContent align="start" sideOffset={0}>
-              {dateRangeOptions.map((option) => (
-                <PortalDropdownItem
-                  key={option.value}
-                  className={cn(dateRange === option.value && 'is-active')}
-                  onSelect={() => setDateRange(option.value as typeof dateRange)}
-                >
-                  {option.label}
-                </PortalDropdownItem>
-              ))}
-            </PortalDropdownContent>
-          </PortalDropdown>
-          <IconButton action="refresh" title="Refresh analytics" onClick={() => loadAnalytics()} disabled={isLoading} />
-          <IconButton action="download" title="Export analytics" />
-        </div>
-      </div>
 
       {error && (
         <div className="data-table-card">

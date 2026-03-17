@@ -43,10 +43,10 @@ interface BaseModalProps {
 // SHARED HELPERS
 // ============================================
 
-function ModalFooter({ loading, submitLabel }: { loading: boolean; submitLabel: string }) {
+function ModalFooter({ loading, submitLabel, onCancel }: { loading: boolean; submitLabel: string; onCancel: () => void }) {
   return (
     <>
-      <button type="button" className="btn btn-secondary" onClick={() => {}} disabled={loading}>
+      <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={loading}>
         Cancel
       </button>
       <button type="submit" className="btn btn-primary" disabled={loading}>

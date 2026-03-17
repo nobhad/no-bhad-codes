@@ -159,6 +159,20 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
 
   const activeCount = categories.filter(c => c.is_active !== false).length;
 
+  // Single delete handler
+  const handleDeleteCategory = useCallback(async (categoryId: number) => {
+    if (!window.confirm('Are you sure you want to delete this category?')) return;
+    try {
+      const response = await apiFetch(`${API_ENDPOINTS.ADMIN.KB_CATEGORIES}/${categoryId}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete category');
+      setData((prev) => prev ? { ...prev, items: prev.items.filter((c) => c.id !== categoryId) } : prev);
+      showNotification?.('Category deleted', 'success');
+    } catch (err) {
+      logger.error('Failed to delete category:', err);
+      showNotification?.('Failed to delete category', 'error');
+    }
+  }, [showNotification, setData]);
+
   const handleCreate = useCallback(async (formData: Record<string, unknown>) => {
     setCreateLoading(true);
     try {
@@ -296,7 +310,7 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
                   </PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-group">
-                      <IconButton action="delete" title="Delete" />
+                      <IconButton action="delete" title="Delete" onClick={() => handleDeleteCategory(category.id)} />
                     </div>
                   </PortalTableCell>
                 </PortalTableRow>

@@ -258,16 +258,17 @@ export function MilestonesList({
                         </ul>
                       )}
 
-                      <div className="milestone-actions">
+                      <div className="action-group">
                         <button
                           className="icon-btn"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleStartEdit(milestone);
                           }}
+                          title="Edit milestone"
                           aria-label="Edit milestone"
                         >
-                          <Pencil className="icon-md" />
+                          <Pencil className="icon-sm" />
                         </button>
                         <button
                           className="icon-btn"
@@ -276,9 +277,10 @@ export function MilestonesList({
                             setDeletingMilestoneId(milestone.id);
                             deleteDialog.open();
                           }}
+                          title="Delete milestone"
                           aria-label="Delete milestone"
                         >
-                          <Trash2 className="icon-md" />
+                          <Trash2 className="icon-sm" />
                         </button>
                       </div>
                     </>

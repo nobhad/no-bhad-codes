@@ -255,6 +255,20 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
     }
   }, [setData, showNotification]);
 
+  // Single delete handler
+  const handleDeleteDeliverable = useCallback(async (deliverableId: number) => {
+    if (!window.confirm('Are you sure you want to delete this deliverable?')) return;
+    try {
+      const response = await apiFetch(buildEndpoint.adminDeliverable(deliverableId), { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete deliverable');
+      setData((prev) => prev ? { ...prev, items: prev.items.filter((d) => d.id !== deliverableId) } : prev);
+      showNotification?.('Deliverable deleted', 'success');
+    } catch (err) {
+      logger.error('Failed to delete deliverable:', err);
+      showNotification?.('Failed to delete deliverable', 'error');
+    }
+  }, [setData, showNotification]);
+
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
     if (selection.selectedCount === 0) return;
@@ -529,12 +543,12 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                 </PortalTableCell>
                 <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="action-group">
-                    <IconButton action="view" title="View" />
+                    <IconButton action="view" title="View" onClick={() => onNavigate?.('deliverable-detail', String(deliverable.id))} />
                     {deliverable.files > 0 && (
                       <IconButton action="download" title="Download" />
                     )}
                     <IconButton action="copy-link" title="Share Link" />
-                    <IconButton action="delete" title="Delete" />
+                    <IconButton action="delete" title="Delete" onClick={() => handleDeleteDeliverable(deliverable.id)} />
                   </div>
                 </PortalTableCell>
               </PortalTableRow>
