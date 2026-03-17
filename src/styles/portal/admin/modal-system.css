@@ -89,7 +89,7 @@
   line-height: var(--line-height-normal);
   box-shadow: var(--shadow-2xl);
   z-index: var(--z-index-portal-modal);
-  overflow-y: auto;
+  overflow: hidden;
   border-left: var(--border-width-thick) solid var(--color-border-primary);
   border-right: var(--border-width-thick) solid var(--color-border-primary);
 }
