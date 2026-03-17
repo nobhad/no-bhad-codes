@@ -229,6 +229,148 @@ router.post(
 );
 
 // =====================================================
+// CREATE FROM TEMPLATE
+// =====================================================
+
+/**
+ * @swagger
+ * /api/proposals/from-template:
+ *   post:
+ *     tags: [Proposals]
+ *     summary: POST /api/proposals/from-template
+ *     description: Create a proposal from the template configuration.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
+router.post(
+  '/from-template',
+  authenticateToken,
+  invalidateCache(['proposals']),
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { projectId, clientId, projectType, selectedTier, selectedAddonIds, maintenanceOption, clientNotes, budget } = req.body;
+
+    if (!projectId || !clientId || !projectType || !selectedTier || !budget) {
+      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.VALIDATION_ERROR, {
+        required: ['projectId', 'clientId', 'projectType', 'selectedTier', 'budget']
+      });
+    }
+
+    // Validate budget object
+    if (typeof budget.min !== 'number' || typeof budget.max !== 'number' || budget.min < 0 || budget.max < budget.min) {
+      return errorResponse(res, 'Budget must have valid min and max numbers (min >= 0, max >= min)', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    // Validate project type
+    if (!VALID_PROJECT_TYPES.includes(projectType)) {
+      return errorResponseWithPayload(res, 'Invalid project type', 400, ErrorCodes.VALIDATION_ERROR, {
+        validTypes: VALID_PROJECT_TYPES
+      });
+    }
+
+    // Validate tier
+    if (!VALID_TIERS.includes(selectedTier)) {
+      return errorResponse(res, 'Invalid tier selection', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    // Validate maintenance option if provided
+    if (maintenanceOption && !VALID_MAINTENANCE.includes(maintenanceOption)) {
+      return errorResponse(res, 'Invalid maintenance option', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    // Verify project exists and user has access
+    const project = await proposalService.getProjectForProposal(projectId);
+    if (!project) {
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+    }
+    if (!(await canAccessProject(req, projectId))) {
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+    }
+
+    // Verify client exists
+    if (!(await proposalService.clientExists(clientId))) {
+      return errorResponse(res, 'Client not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+    }
+
+    // Check for existing active proposal on same project
+    const { getDatabase } = await import('../../database/init.js');
+    const db = getDatabase();
+    const existingProposal = await db.get(
+      `SELECT id FROM proposal_requests
+       WHERE project_id = ? AND status NOT IN ('rejected', 'expired') AND deleted_at IS NULL
+       LIMIT 1`,
+      [projectId]
+    );
+    if (existingProposal) {
+      return errorResponse(
+        res,
+        'An active proposal already exists for this project',
+        409,
+        ErrorCodes.DUPLICATE_RESOURCE
+      );
+    }
+
+    // Build proposal from template
+    const { buildProposalFromTemplate } = await import('../../config/proposal-templates.js');
+    const templateResult = buildProposalFromTemplate({
+      projectType,
+      tier: selectedTier,
+      budget: { min: budget.min, max: budget.max },
+      selectedAddonIds: selectedAddonIds || [],
+      maintenanceOption
+    });
+
+    if (!templateResult) {
+      return errorResponse(res, 'Invalid project type or tier for template', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    // Create proposal
+    const result = await proposalService.createProposal({
+      projectId,
+      clientId,
+      projectType,
+      selectedTier,
+      basePrice: templateResult.tierPrice,
+      finalPrice: templateResult.finalPrice,
+      maintenanceOption: templateResult.maintenanceOption,
+      clientNotes: clientNotes || null,
+      features: templateResult.features
+    });
+
+    await logger.info(
+      `[Proposals] Created proposal from template ${result} for project ${projectId} (${projectType}/${selectedTier})`,
+      { category: 'PROPOSALS' }
+    );
+
+    // Emit workflow event for proposal creation
+    await workflowTriggerService.emit('proposal.created', {
+      entityId: result,
+      triggeredBy: 'admin',
+      projectId,
+      clientId,
+      selectedTier,
+      finalPrice: templateResult.finalPrice
+    });
+
+    sendCreated(
+      res,
+      {
+        proposalId: result,
+        projectId,
+        selectedTier,
+        tierPrice: templateResult.tierPrice,
+        finalPrice: templateResult.finalPrice,
+        allTierPrices: templateResult.allTierPrices,
+        featuresCount: templateResult.features.length
+      },
+      'Proposal created from template'
+    );
+  })
+);
+
+// =====================================================
 // PROPOSAL EXPORT
 // =====================================================
 
