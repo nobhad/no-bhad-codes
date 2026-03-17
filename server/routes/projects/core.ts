@@ -906,6 +906,74 @@ router.post(
 );
 
 // =====================================================
+// MAINTENANCE PLAN
+// =====================================================
+
+/**
+ * GET /api/projects/:id/maintenance
+ * Get maintenance plan status for a project.
+ * Accessible by admin or owning client.
+ */
+router.get(
+  '/:id/maintenance',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const isAdmin = await isUserAdmin(req);
+    const db = getDatabase();
+
+    // Authorization: admin can see any project, client only their own
+    const project = isAdmin
+      ? await db.get(
+        `SELECT client_id, maintenance_tier, maintenance_status, maintenance_start_date,
+                  maintenance_recurring_invoice_id, maintenance_included_months,
+                  maintenance_included_until
+           FROM projects WHERE id = ?`,
+        [projectId]
+      ) as Record<string, unknown> | undefined
+      : await db.get(
+        `SELECT client_id, maintenance_tier, maintenance_status, maintenance_start_date,
+                  maintenance_recurring_invoice_id, maintenance_included_months,
+                  maintenance_included_until
+           FROM projects WHERE id = ? AND client_id = ?`,
+        [projectId, req.user!.id]
+      ) as Record<string, unknown> | undefined;
+
+    if (!project || !project.maintenance_tier) {
+      return sendSuccess(res, { hasMaintenance: false });
+    }
+
+    // Look up tier config for display
+    let tierConfig: { displayName: string; monthlyPrice: number; annualPrice: number; features: Array<{ name: string }> } | null = null;
+    try {
+      const { getMaintenanceOptions } = await import('../../config/proposal-templates.js');
+      const options = getMaintenanceOptions();
+      tierConfig = options[project.maintenance_tier as string] || null;
+    } catch {
+      // Config not available
+    }
+
+    sendSuccess(res, {
+      hasMaintenance: true,
+      tier: project.maintenance_tier,
+      status: project.maintenance_status,
+      startDate: project.maintenance_start_date,
+      includedMonths: project.maintenance_included_months || 0,
+      includedUntil: project.maintenance_included_until,
+      recurringInvoiceId: project.maintenance_recurring_invoice_id,
+      displayName: tierConfig?.displayName || project.maintenance_tier,
+      monthlyPrice: tierConfig?.monthlyPrice || 0,
+      annualPrice: tierConfig?.annualPrice || 0,
+      features: tierConfig?.features?.map(f => f.name) || []
+    });
+  })
+);
+
+// =====================================================
 // MILESTONE JSON EXPORT / IMPORT
 // =====================================================
 
