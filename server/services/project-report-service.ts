@@ -15,8 +15,10 @@
 import { PDFDocument, rgb } from 'pdf-lib';
 import { getDatabase } from '../database/init.js';
 import { BUSINESS_INFO, getPdfLogoBytes } from '../config/business.js';
+import { PDF_COLORS } from '../config/pdf-styles.js';
 import {
   createPdfContext,
+  drawPdfDocumentHeader,
   drawWrappedText,
   ensureSpace,
   addPageNumbers,
@@ -142,8 +144,8 @@ export async function fetchProjectReportData(projectId: number): Promise<Project
     `
     SELECT
       p.id, p.project_name as name, p.status, p.priority,
-      p.created_at, p.start_date, p.deadline, p.completed_date,
-      p.description, p.project_type, p.budget,
+      p.created_at, p.start_date, p.estimated_end_date as deadline, p.actual_end_date as completed_date,
+      p.description, p.project_type, p.budget_range as budget,
       COALESCE(c.billing_name, c.contact_name) as client_name,
       COALESCE(c.billing_email, c.email) as client_email,
       COALESCE(c.billing_company, c.company_name) as client_company
@@ -193,7 +195,7 @@ export async function fetchProjectReportData(projectId: number): Promise<Project
   // Fetch deliverables
   const deliverablesRaw = await db.all(
     `
-    SELECT name, status, submitted_at, approved_at
+    SELECT title as name, status, created_at as submitted_at, approved_at
     FROM deliverables
     WHERE project_id = ?
     ORDER BY created_at ASC
@@ -205,7 +207,7 @@ export async function fetchProjectReportData(projectId: number): Promise<Project
   // Fetch financial summary
   const invoicesRaw = await db.all(
     `
-    SELECT invoice_number, total_amount, status, due_date
+    SELECT invoice_number, amount_total as total_amount, status, due_date
     FROM invoices
     WHERE project_id = ?
     ORDER BY created_at DESC
@@ -217,8 +219,8 @@ export async function fetchProjectReportData(projectId: number): Promise<Project
   const financialSummary = (await db.get(
     `
     SELECT
-      COALESCE(SUM(total_amount), 0) as total_invoiced,
-      COALESCE(SUM(CASE WHEN status = 'paid' THEN total_amount ELSE 0 END), 0) as total_paid
+      COALESCE(SUM(amount_total), 0) as total_invoiced,
+      COALESCE(SUM(CASE WHEN status = 'paid' THEN amount_total ELSE 0 END), 0) as total_paid
     FROM invoices
     WHERE project_id = ?
   `,
@@ -363,81 +365,68 @@ function drawPageHeader(ctx: PdfPageContext, projectName: string): void {
     y: ctx.height - 30,
     size: 10,
     font: ctx.fonts.regular,
-    color: rgb(0.5, 0.5, 0.5)
+    color: PDF_COLORS.black
   });
   ctx.y = ctx.height - ctx.topMargin - 20;
 }
 
 async function drawReportHeader(ctx: PdfPageContext, data: ProjectReportData): Promise<void> {
-  const { currentPage, leftMargin, fonts, y: startY } = ctx;
-  let y = startY;
+  const { currentPage, leftMargin, fonts } = ctx;
 
-  // Logo
-  const logoBytes = getPdfLogoBytes();
-  if (logoBytes) {
-    const logoImage = await ctx.pdfDoc.embedPng(logoBytes);
-    const logoHeight = 60;
-    const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
-    currentPage.drawImage(logoImage, {
-      x: ctx.rightMargin - logoWidth,
-      y: y - logoHeight + 10,
-      width: logoWidth,
-      height: logoHeight
-    });
-  }
-
-  // Title
-  currentPage.drawText('PROJECT REPORT', {
-    x: leftMargin,
-    y,
-    size: 24,
-    font: fonts.bold,
-    color: rgb(0.1, 0.1, 0.1)
+  // Shared header (logo + business info + title) — same as all other PDFs
+  ctx.y = await drawPdfDocumentHeader({
+    page: currentPage,
+    pdfDoc: ctx.pdfDoc,
+    fonts: { regular: fonts.regular, bold: fonts.bold },
+    startY: ctx.y,
+    leftMargin: ctx.leftMargin,
+    rightMargin: ctx.rightMargin,
+    title: 'PROJECT REPORT'
   });
-  y -= 30;
+  ctx.y -= 15;
 
   // Project name
   currentPage.drawText(data.project.name, {
     x: leftMargin,
-    y,
+    y: ctx.y,
     size: 16,
     font: fonts.bold,
-    color: rgb(0.2, 0.2, 0.2)
+    color: PDF_COLORS.black
   });
-  y -= 20;
+  ctx.y -= 20;
 
   // Client
   currentPage.drawText(
     `Client: ${data.client.name}${data.client.company ? ` (${data.client.company})` : ''}`,
     {
       x: leftMargin,
-      y,
+      y: ctx.y,
       size: 11,
       font: fonts.regular,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.black
     }
   );
-  y -= 15;
+  ctx.y -= 15;
 
   // Generated date
   currentPage.drawText(`Generated: ${formatDate(new Date().toISOString())}`, {
     x: leftMargin,
-    y,
+    y: ctx.y,
     size: 10,
     font: fonts.regular,
-    color: rgb(0.5, 0.5, 0.5)
+    color: PDF_COLORS.black
   });
-  y -= 20;
+  ctx.y -= 20;
 
   // Divider
   currentPage.drawLine({
-    start: { x: leftMargin, y },
-    end: { x: ctx.rightMargin, y },
+    start: { x: leftMargin, y: ctx.y },
+    end: { x: ctx.rightMargin, y: ctx.y },
     thickness: 1,
-    color: rgb(0.8, 0.8, 0.8)
+    color: PDF_COLORS.divider
   });
 
-  ctx.y = y - 10;
+  ctx.y -= 10;
 }
 
 function drawSectionTitle(ctx: PdfPageContext, title: string): void {
@@ -446,7 +435,7 @@ function drawSectionTitle(ctx: PdfPageContext, title: string): void {
     y: ctx.y,
     size: 14,
     font: ctx.fonts.bold,
-    color: rgb(0.15, 0.15, 0.15)
+    color: PDF_COLORS.black
   });
   ctx.y -= 5;
 
@@ -455,7 +444,7 @@ function drawSectionTitle(ctx: PdfPageContext, title: string): void {
     start: { x: ctx.leftMargin, y: ctx.y },
     end: { x: ctx.leftMargin + 150, y: ctx.y },
     thickness: 2,
-    color: rgb(0.5, 0.99, 0.04) // Brand green
+    color: PDF_COLORS.black
   });
   ctx.y -= 15;
 }
@@ -479,14 +468,14 @@ function drawProjectOverview(ctx: PdfPageContext, data: ProjectReportData): void
       y: ctx.y,
       size: 10,
       font: ctx.fonts.bold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.black
     });
     ctx.currentPage.drawText(value, {
       x: ctx.leftMargin + labelWidth,
       y: ctx.y,
       size: 10,
       font: ctx.fonts.regular,
-      color: rgb(0.1, 0.1, 0.1)
+      color: PDF_COLORS.black
     });
     ctx.y -= lineHeight;
   }
@@ -499,12 +488,12 @@ function drawProjectOverview(ctx: PdfPageContext, data: ProjectReportData): void
       y: ctx.y,
       size: 10,
       font: ctx.fonts.bold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.black
     });
     ctx.y -= 14;
     drawWrappedText(ctx, data.project.description, {
       fontSize: 10,
-      color: rgb(0.2, 0.2, 0.2),
+      color: PDF_COLORS.black,
       lineHeight: 14
     });
   }
@@ -526,7 +515,7 @@ function drawMilestones(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.bold,
-      color: rgb(0.2, 0.2, 0.2)
+      color: PDF_COLORS.black
     }
   );
   ctx.y -= 18;
@@ -536,7 +525,7 @@ function drawMilestones(
     ensureSpace(ctx, 40, onNewPage);
 
     const checkmark = milestone.isCompleted ? '[x]' : '[ ]';
-    const statusColor = milestone.isCompleted ? rgb(0.13, 0.55, 0.13) : rgb(0.3, 0.3, 0.3);
+    const statusColor = milestone.isCompleted ? PDF_COLORS.black : PDF_COLORS.black;
 
     ctx.currentPage.drawText(checkmark, {
       x: ctx.leftMargin,
@@ -551,7 +540,7 @@ function drawMilestones(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.bold,
-      color: rgb(0.1, 0.1, 0.1)
+      color: PDF_COLORS.black
     });
 
     if (milestone.dueDate) {
@@ -560,7 +549,7 @@ function drawMilestones(
         y: ctx.y,
         size: 9,
         font: ctx.fonts.regular,
-        color: rgb(0.5, 0.5, 0.5)
+        color: PDF_COLORS.black
       });
     }
 
@@ -581,15 +570,15 @@ function drawDeliverables(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.regular,
-      color: rgb(0.1, 0.1, 0.1)
+      color: PDF_COLORS.black
     });
 
     const statusColor =
       deliverable.status === 'approved'
-        ? rgb(0.13, 0.55, 0.13)
+        ? PDF_COLORS.black
         : deliverable.status === 'rejected'
-          ? rgb(0.8, 0.2, 0.2)
-          : rgb(0.5, 0.5, 0.5);
+          ? PDF_COLORS.black
+          : PDF_COLORS.black;
 
     ctx.currentPage.drawText(formatStatus(deliverable.status), {
       x: ctx.rightMargin - 80,
@@ -614,7 +603,7 @@ function drawTimeTracking(
     y: ctx.y,
     size: 11,
     font: ctx.fonts.bold,
-    color: rgb(0.1, 0.1, 0.1)
+    color: PDF_COLORS.black
   });
   ctx.y -= 20;
 
@@ -625,7 +614,7 @@ function drawTimeTracking(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.bold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.black
     });
     ctx.y -= 14;
 
@@ -638,7 +627,7 @@ function drawTimeTracking(
         y: ctx.y,
         size: 9,
         font: ctx.fonts.regular,
-        color: rgb(0.4, 0.4, 0.4)
+        color: PDF_COLORS.black
       });
 
       const desc =
@@ -651,7 +640,7 @@ function drawTimeTracking(
         y: ctx.y,
         size: 9,
         font: ctx.fonts.regular,
-        color: rgb(0.2, 0.2, 0.2)
+        color: PDF_COLORS.black
       });
 
       ctx.y -= 14;
@@ -663,7 +652,7 @@ function drawTimeTracking(
         y: ctx.y,
         size: 9,
         font: ctx.fonts.regular,
-        color: rgb(0.5, 0.5, 0.5)
+        color: PDF_COLORS.black
       });
       ctx.y -= 14;
     }
@@ -690,14 +679,14 @@ function drawFinancialSummary(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.bold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.black
     });
     ctx.currentPage.drawText(value, {
       x: ctx.leftMargin + 120,
       y: ctx.y,
       size: 10,
       font: ctx.fonts.regular,
-      color: rgb(0.1, 0.1, 0.1)
+      color: PDF_COLORS.black
     });
     ctx.y -= lineHeight;
   }
@@ -712,7 +701,7 @@ function drawFinancialSummary(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.bold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.black
     });
     ctx.y -= 16;
 
@@ -724,7 +713,7 @@ function drawFinancialSummary(
         y: ctx.y,
         size: 9,
         font: ctx.fonts.regular,
-        color: rgb(0.2, 0.2, 0.2)
+        color: PDF_COLORS.black
       });
 
       ctx.currentPage.drawText(formatCurrency(invoice.amount), {
@@ -732,15 +721,15 @@ function drawFinancialSummary(
         y: ctx.y,
         size: 9,
         font: ctx.fonts.regular,
-        color: rgb(0.2, 0.2, 0.2)
+        color: PDF_COLORS.black
       });
 
       const statusColor =
         invoice.status === 'paid'
-          ? rgb(0.13, 0.55, 0.13)
+          ? PDF_COLORS.black
           : invoice.status === 'overdue'
-            ? rgb(0.8, 0.2, 0.2)
-            : rgb(0.5, 0.5, 0.5);
+            ? PDF_COLORS.black
+            : PDF_COLORS.black;
 
       ctx.currentPage.drawText(formatStatus(invoice.status), {
         x: ctx.rightMargin - 80,

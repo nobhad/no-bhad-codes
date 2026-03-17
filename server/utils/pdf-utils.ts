@@ -505,6 +505,81 @@ export async function drawPdfDocumentHeader(params: {
 }
 
 /**
+ * Draw a section heading — consistent across all PDF types.
+ * Renders bold uppercase text with an underline, matching the invoice table heading style.
+ */
+export function drawSectionHeading(
+  page: PDFPage,
+  text: string,
+  opts: {
+    x: number;
+    y: number;
+    font: PDFFont;
+    width?: number;
+  }
+): number {
+  const { x, y, font } = opts;
+  const size = PDF_TYPOGRAPHY.sectionHeadingSize;
+
+  page.drawText(text.toUpperCase(), {
+    x,
+    y,
+    size,
+    font,
+    color: PDF_COLORS.black
+  });
+
+  const lineY = y - 4;
+  const lineEnd = opts.width ? x + opts.width : x + font.widthOfTextAtSize(text.toUpperCase(), size) + 2;
+
+  page.drawLine({
+    start: { x, y: lineY },
+    end: { x: lineEnd, y: lineY },
+    thickness: PDF_SPACING.underlineThickness,
+    color: PDF_COLORS.black
+  });
+
+  return y - PDF_SPACING.sectionGap;
+}
+
+/**
+ * Draw a label: value pair on one line — consistent across all PDF types.
+ */
+export function drawLabelValue(
+  page: PDFPage,
+  label: string,
+  value: string,
+  opts: {
+    x: number;
+    y: number;
+    labelFont: PDFFont;
+    valueFont: PDFFont;
+    labelWidth?: number;
+  }
+): number {
+  const size = PDF_TYPOGRAPHY.bodySize;
+  const labelW = opts.labelWidth || 120;
+
+  page.drawText(label, {
+    x: opts.x,
+    y: opts.y,
+    size,
+    font: opts.labelFont,
+    color: PDF_COLORS.black
+  });
+
+  page.drawText(value, {
+    x: opts.x + labelW,
+    y: opts.y,
+    size,
+    font: opts.valueFont,
+    color: PDF_COLORS.black
+  });
+
+  return opts.y - PDF_SPACING.lineHeight;
+}
+
+/**
  * PDF/A compliance checklist (for documentation)
  * Full PDF/A-1b compliance requires:
  * 1. All fonts embedded (pdf-lib does this automatically for standard fonts)
