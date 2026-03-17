@@ -1,6 +1,6 @@
 # State of the Art Roadmap
 
-**Status:** In Progress — Phase 1 + Phase 2 + Phase 3 Complete
+**Status:** In Progress — Phase 1-4 Complete
 **Last Updated:** 2026-03-17
 **Goal:** Close every meaningful gap between this platform and the best-in-class tools (HoneyBook, Dubsado, Moxie, Plutio, Bloom, Productive)
 
@@ -3682,7 +3682,16 @@ const AUTOMATION_TEMPLATES = [
 
 ---
 
-## Phase 4: Revenue Intelligence
+## Phase 4: Revenue Intelligence — COMPLETE
+
+**Status:** Complete (March 17, 2026)
+
+**Implemented:**
+
+- 4A: Expense Tracking (migration 125, expenseService, 12 categories, profitability calculation, CSV export, admin table)
+- 4B: Retainer Management (migration 126, retainerService, period lifecycle with rollover, auto-invoicing cron, usage alert cron, admin table + portal view)
+
+**Feature docs:** [Expenses](features/EXPENSES.md) | [Retainers](features/RETAINERS.md)
 
 ### 4A. Expense Tracking and Profitability
 
@@ -5373,6 +5382,28 @@ Phase 7 (International — Do Last)
 ---
 
 ## Change Log
+
+### 2026-03-17 — Phase 4 Revenue Intelligence Complete
+
+**4A: Expense Tracking (Migration 125)**
+
+- expense-service.ts: CRUD, soft delete, profitability calculation (invoices + installments - expenses - time cost), analytics by category/month, CSV export
+- 9 admin endpoints including profitability and analytics
+- ExpensesTable React component with inline create form and filters
+- 12 expense categories with labels
+
+**4B: Retainer Management (Migration 126)**
+
+- retainer-service.ts: CRUD, period lifecycle (create -> close -> rollover -> new), auto-invoicing, usage alerts
+- Period rollover: unused hours clamped to maxRolloverHours
+- Auto-invoicing cron: daily 7AM, creates invoice for retainers where billing_day = today
+- Usage alerts cron: daily 8AM, emails admin for retainers >= 80% utilization
+- Admin: RetainersTable with utilization bars (green/yellow/red)
+- Portal: PortalRetainers card view with utilization + period info
+- 10 admin + 2 portal endpoints
+
+**Files created:** ~17 (2 migrations, 4 services/types, 5 routes, 4 React components, 2 feature docs)
+**Files modified:** ~5 (app.ts, api-endpoints.ts, PortalRoutes.tsx, scheduler-service.ts)
 
 ### 2026-03-17 — Phase 3 Admin Self-Service Automations Complete
 

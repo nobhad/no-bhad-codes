@@ -114,10 +114,14 @@ Rendered differently per role via `role === 'admin'` check:
 - `/review` — Redirects to `/dashboard`
 - `/help` — Knowledge base
 
-### Admin-Only Routes (Phase 2)
+### Admin-Only Routes (Phase 2-4)
 
 - `/sequences` — Email drip sequence management (Phase 2A)
 - `/meetings` — Meeting requests admin table (Phase 2B, role-gated)
+- `/automations` — Custom automation engine (Phase 3A/3B)
+- `/automation-detail/:id` — Automation detail panel with run history (Phase 3B)
+- `/expenses` — Expense tracking and profitability (Phase 4A)
+- `/retainers` — Retainer management (Phase 4B, role-gated — clients see PortalRetainers)
 
 ## Code Splitting
 

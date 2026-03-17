@@ -226,6 +226,33 @@ properties and the JWT payload structure.
 - `POST /automations/:id/dry-run` — Test without executing (requireAdmin)
 - `POST /automations/:id/run-now` — Manual trigger (requireAdmin)
 
+### Expenses (Phase 4A)
+
+- `GET /expenses` — List expenses (requireAdmin, filter by project/category/date)
+- `POST /expenses` — Create expense (requireAdmin)
+- `GET /expenses/:id` — Single expense (requireAdmin)
+- `PUT /expenses/:id` — Update expense (requireAdmin)
+- `DELETE /expenses/:id` — Soft delete (requireAdmin)
+- `GET /expenses/profitability/:projectId` — Project profitability (requireAdmin)
+- `GET /expenses/profitability` — All projects profitability (requireAdmin)
+- `GET /expenses/analytics` — Expense breakdown (requireAdmin)
+- `GET /expenses/analytics/export` — CSV download (requireAdmin)
+
+### Retainers (Phase 4B)
+
+- `GET /retainers` — List all retainers (requireAdmin)
+- `POST /retainers` — Create retainer (requireAdmin)
+- `GET /retainers/summary` — Aggregate stats (requireAdmin)
+- `GET /retainers/:id` — Single with current period (requireAdmin)
+- `PUT /retainers/:id` — Update (requireAdmin)
+- `DELETE /retainers/:id` — Cancel (requireAdmin)
+- `GET /retainers/:id/periods` — Period history (requireAdmin)
+- `POST /retainers/:id/close-period` — Close + create next (requireAdmin)
+- `POST /retainers/:id/pause` — Pause (requireAdmin)
+- `POST /retainers/:id/resume` — Resume (requireAdmin)
+- `GET /retainers/my` — Client's retainers (requireClient)
+- `GET /retainers/my/:id` — Single retainer (requireClient)
+
 ### Other Feature Areas
 
 - Questionnaires: `GET/POST /questionnaires`
