@@ -23,6 +23,7 @@ import { generalUploadService } from '../services/general-upload-service.js';
 import { dataQueryService } from '../services/data-query-service.js';
 import { metricsService } from '../services/metrics-service.js';
 import { errorResponse, errorResponseWithPayload, sanitizeErrorMessage, sendSuccess, sendCreated, ErrorCodes } from '../utils/api-response.js';
+import { BUSINESS_INFO } from '../config/business.js';
 
 const router = Router();
 
@@ -225,6 +226,31 @@ Received: ${new Date().toISOString()}
             `Failed to send contact form email - messageId: ${messageId}, error: ${emailError}`
           );
         }
+      }
+
+      // Send confirmation auto-reply to submitter
+      try {
+        await emailService.sendEmail({
+          to: email,
+          subject: `We received your message - ${BUSINESS_INFO.name}`,
+          text: `Hi ${name},\n\nThank you for reaching out! We've received your message and will get back to you within 1-2 business days.\n\nIn the meantime, feel free to browse our portfolio at ${BUSINESS_INFO.website}.\n\nBest,\n${BUSINESS_INFO.owner}\n${BUSINESS_INFO.name}`,
+          html: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Thank you for reaching out!</h2>
+          <p>Hi ${escapeHtml(name)},</p>
+          <p>We've received your message and will get back to you within <strong>1-2 business days</strong>.</p>
+          <p>In the meantime, feel free to browse our work at <a href="https://${BUSINESS_INFO.website}">${BUSINESS_INFO.website}</a>.</p>
+          <p style="margin-top: 30px;">Best,<br>${escapeHtml(BUSINESS_INFO.owner)}<br><em>${escapeHtml(BUSINESS_INFO.name)}</em></p>
+        </div>`
+        });
+
+        await logger.info(
+          `Contact form auto-reply sent - messageId: ${messageId}, to: ${email}`
+        );
+      } catch (autoReplyError) {
+        await logger.error('[Contact] Failed to send auto-reply:', {
+          error: autoReplyError instanceof Error ? autoReplyError : undefined
+        });
+        // Non-critical — form submission still recorded
       }
 
       await logger.info(

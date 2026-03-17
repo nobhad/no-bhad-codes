@@ -6,8 +6,9 @@
  *
  * Business logic handlers for workflow events.
  * Implements automations that execute when specific events occur:
- * - Proposal accepted -> Create project
+ * - Proposal accepted -> Create project + auto-generate contract + auto-create payment schedule
  * - Contract signed -> Update project status to active
+ * - Project created -> Auto-assign questionnaires
  * - Milestone completed -> Create draft invoice (if payment milestone)
  */
 
@@ -198,6 +199,159 @@ async function handleProposalAccepted(data: {
         error: milestoneError instanceof Error ? milestoneError : undefined
       });
       // Don't fail the automation if milestone generation fails
+    }
+
+    // Auto-generate contract from proposal
+    try {
+      if (!projectId) throw new Error('No projectId after project creation');
+
+      const { contractService } = await import('./contract-service.js');
+
+      // Check if contract already exists for this project
+      const existingContract = await db.get(
+        `SELECT id FROM contracts WHERE project_id = ? AND status != 'cancelled' AND deleted_at IS NULL LIMIT 1`,
+        [projectId]
+      );
+
+      if (!existingContract) {
+        // Get the default contract template
+        const template = (await db.get(
+          `SELECT id, content FROM contract_templates WHERE is_default = 1 AND is_active = 1 LIMIT 1`
+        )) as { id: number; content: string } | undefined;
+
+        if (template) {
+          // Get client info for variable substitution
+          const clientInfo = (await db.get(
+            `SELECT COALESCE(billing_name, contact_name) as contact_name,
+                    COALESCE(billing_email, email) as email,
+                    COALESCE(billing_company, company_name) as company_name
+             FROM active_clients WHERE id = ?`,
+            [proposal.client_id]
+          )) as Record<string, unknown> | undefined;
+
+          // Substitute variables in template content
+          let content = template.content || '';
+          const today = new Date().toISOString().split('T')[0];
+          content = content
+            .replace(/\{\{client_name\}\}/g, String(clientInfo?.contact_name || ''))
+            .replace(/\{\{client_email\}\}/g, String(clientInfo?.email || ''))
+            .replace(/\{\{company_name\}\}/g, String(clientInfo?.company_name || ''))
+            .replace(/\{\{project_name\}\}/g, projectName)
+            .replace(/\{\{project_type\}\}/g, proposal.project_type || '')
+            .replace(
+              /\{\{price\}\}/g,
+              proposal.final_price ? `$${Number(proposal.final_price).toLocaleString()}` : ''
+            )
+            .replace(/\{\{date\}\}/g, today)
+            .replace(/\{\{start_date\}\}/g, today);
+
+          const contract = await contractService.createContract({
+            projectId,
+            clientId: proposal.client_id,
+            content,
+            status: 'draft',
+            templateId: template.id
+          });
+
+          logger.info('proposal.accepted: Auto-generated draft contract', {
+            category: 'workflow',
+            metadata: { projectId, contractId: contract.id, templateId: template.id }
+          });
+
+          // Emit contract.created event
+          await workflowTriggerService.emit('contract.created', {
+            entityId: contract.id,
+            triggeredBy: 'workflow-automation',
+            projectId,
+            clientId: proposal.client_id
+          });
+        } else {
+          logger.info(
+            'proposal.accepted: No default contract template found, skipping auto-generation',
+            {
+              category: 'workflow'
+            }
+          );
+        }
+      }
+    } catch (contractError) {
+      logger.error('[WorkflowAutomation] proposal.accepted: Failed to auto-generate contract', {
+        error: contractError instanceof Error ? contractError : undefined
+      });
+      // Non-critical — don't fail the automation
+    }
+
+    // Auto-create payment schedule from proposal pricing
+    try {
+      if (proposal.final_price && Number(proposal.final_price) > 0) {
+        const { paymentScheduleService } = await import('./payment-schedule-service.js');
+
+        // Check if payment schedule already exists
+        const existingSchedule = (await db.get(
+          'SELECT id FROM payment_schedule_installments WHERE project_id = ? LIMIT 1',
+          [projectId]
+        )) as { id: number } | undefined;
+
+        if (!existingSchedule) {
+          const totalPrice = Number(proposal.final_price);
+          const tier = proposal.selected_tier || 'good';
+          const today = new Date();
+
+          // Determine split based on tier and total price
+          let splits: Array<{ label: string; percent: number; offsetDays: number }>;
+
+          if (tier === 'good' || totalPrice <= 2000) {
+            // Good tier or small projects: 50/50 split
+            splits = [
+              { label: 'Deposit (50%)', percent: 50, offsetDays: 0 },
+              { label: 'Final Payment (50%)', percent: 50, offsetDays: 30 }
+            ];
+          } else if (tier === 'better' || totalPrice <= 6000) {
+            // Better tier: 3 payments (40/30/30)
+            splits = [
+              { label: 'Deposit (40%)', percent: 40, offsetDays: 0 },
+              { label: 'Midpoint Payment (30%)', percent: 30, offsetDays: 30 },
+              { label: 'Final Payment (30%)', percent: 30, offsetDays: 60 }
+            ];
+          } else {
+            // Best tier or large projects: 4 quarterly payments (25% each)
+            splits = [
+              { label: 'Deposit (25%)', percent: 25, offsetDays: 0 },
+              { label: 'Q2 Payment (25%)', percent: 25, offsetDays: 30 },
+              { label: 'Q3 Payment (25%)', percent: 25, offsetDays: 60 },
+              { label: 'Final Payment (25%)', percent: 25, offsetDays: 90 }
+            ];
+          }
+
+          const startDate = today.toISOString().split('T')[0];
+
+          await paymentScheduleService.createFromSplit(
+            projectId!,
+            proposal.client_id,
+            totalPrice,
+            splits,
+            startDate
+          );
+
+          logger.info('proposal.accepted: Auto-created payment schedule', {
+            category: 'workflow',
+            metadata: {
+              projectId,
+              totalPrice,
+              tier,
+              installments: splits.length
+            }
+          });
+        }
+      }
+    } catch (scheduleError) {
+      logger.error(
+        '[WorkflowAutomation] proposal.accepted: Failed to auto-create payment schedule',
+        {
+          error: scheduleError instanceof Error ? scheduleError : undefined
+        }
+      );
+      // Non-critical — don't fail the automation
     }
 
     // Emit project.created event
@@ -787,6 +941,76 @@ async function notifyMilestoneCompleted(data: {
 }
 
 // ============================================
+// Questionnaire Auto-Assignment
+// ============================================
+
+/**
+ * Handler: Project Created -> Auto-Assign Questionnaires
+ *
+ * When a new project is created from intake, auto-assign the appropriate
+ * questionnaires based on project type.
+ */
+async function handleAutoAssignQuestionnaires(data: {
+  entityId?: number | null;
+  triggeredBy?: string;
+  clientId?: number;
+  projectType?: string;
+}): Promise<void> {
+  const projectId = data.entityId;
+  if (!projectId || !data.clientId) return;
+
+  const db = getDatabase();
+
+  try {
+    // Check if questionnaires already assigned
+    const existing = (await db.get(
+      'SELECT id FROM questionnaire_responses WHERE project_id = ? LIMIT 1',
+      [projectId]
+    )) as { id: number } | undefined;
+
+    if (existing) return; // Already has questionnaires
+
+    // Find active questionnaires that match the project type or are universal
+    const questionnaires = (await db.all(
+      `SELECT id, name, project_type FROM questionnaires
+       WHERE is_active = 1
+       AND (project_type IS NULL OR project_type = '' OR project_type = ?)
+       ORDER BY display_order, id`,
+      [data.projectType || '']
+    )) as Array<{ id: number; name: string; project_type: string | null }>;
+
+    if (questionnaires.length === 0) return;
+
+    let assigned = 0;
+    for (const q of questionnaires) {
+      try {
+        await db.run(
+          `INSERT INTO questionnaire_responses (
+            questionnaire_id, project_id, client_id, status, created_at, updated_at
+          ) VALUES (?, ?, ?, 'pending', datetime('now'), datetime('now'))`,
+          [q.id, projectId, data.clientId]
+        );
+        assigned++;
+      } catch {
+        // Skip duplicates or errors
+      }
+    }
+
+    if (assigned > 0) {
+      logger.info(`project.created: Auto-assigned ${assigned} questionnaires`, {
+        category: 'workflow',
+        metadata: { projectId, clientId: data.clientId, assigned }
+      });
+    }
+  } catch (error) {
+    logger.error('[WorkflowAutomation] project.created: Failed to auto-assign questionnaires', {
+      error: error instanceof Error ? error : undefined
+    });
+    // Non-critical
+  }
+}
+
+// ============================================
 // Registration
 // ============================================
 
@@ -807,6 +1031,9 @@ export function registerWorkflowAutomations(): void {
   // Milestone completed -> Create draft invoice (if payment milestone)
   workflowTriggerService.on('project.milestone_completed', handleMilestoneCompleted);
 
+  // Project created -> Auto-assign questionnaires
+  workflowTriggerService.on('project.created', handleAutoAssignQuestionnaires);
+
   // Client Notification Handlers
   workflowTriggerService.on('proposal.accepted', notifyProposalAccepted);
   workflowTriggerService.on('contract.signed', notifyContractSigned);
@@ -816,14 +1043,15 @@ export function registerWorkflowAutomations(): void {
   workflowTriggerService.on('invoice.paid', notifyInvoicePaid);
   workflowTriggerService.on('project.milestone_completed', notifyMilestoneCompleted);
 
-  logger.info('Registered 10 automation handlers', {
+  logger.info('Registered 11 automation handlers', {
     category: 'workflow',
     metadata: {
       handlers: [
-        'proposal.accepted -> Create project',
+        'proposal.accepted -> Create project + contract + payment schedule',
         'proposal.accepted -> Notify client',
         'contract.signed -> Update project status',
         'contract.signed -> Notify client',
+        'project.created -> Auto-assign questionnaires',
         'project.milestone_completed -> Create invoice',
         'project.milestone_completed -> Notify client',
         'deliverable.approved -> Notify client',
@@ -836,4 +1064,9 @@ export function registerWorkflowAutomations(): void {
 }
 
 // Export handlers for testing
-export { handleProposalAccepted, handleContractSigned, handleMilestoneCompleted };
+export {
+  handleProposalAccepted,
+  handleContractSigned,
+  handleMilestoneCompleted,
+  handleAutoAssignQuestionnaires
+};

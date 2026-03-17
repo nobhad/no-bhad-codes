@@ -217,6 +217,22 @@ router.post(
         // Non-critical - don't fail the request
       }
 
+      // Auto-generate custom questionnaire for missing info
+      try {
+        const { generateDynamicQuestionnaire } = await import('../../services/dynamic-questionnaire-service.js');
+        const questionnaireResult = await generateDynamicQuestionnaire(projectId);
+        if (questionnaireResult) {
+          logger.info(
+            `[AdminProjects] Auto-generated questionnaire with ${questionnaireResult.questionCount} questions for project ${projectId}`
+          );
+        }
+      } catch (qError) {
+        logger.error('[AdminProjects] Failed to auto-generate questionnaire:', {
+          error: qError instanceof Error ? qError : undefined
+        });
+        // Non-critical - don't fail the request
+      }
+
       // Log the action
       errorTracker.captureMessage('Admin created project manually', 'info', {
         tags: { component: 'admin-projects' },
