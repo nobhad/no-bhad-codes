@@ -1,0 +1,146 @@
+/**
+ * ===============================================
+ * DETAIL HEADER — SHARED STYLES
+ * ===============================================
+ * @file src/styles/portal/shared/portal-detail-header.css
+ *
+ * Shared header pattern for detail pages and panels.
+ * Used by DetailHeader component across admin and client portals.
+ *
+ * Structure:
+ *   .detail-title-row
+ *     .detail-title-group
+ *       .detail-info
+ *         .detail-name-row > h1.detail-title + StatusDropdown/Badge
+ *         .detail-subtitle (optional)
+ *         .detail-meta > .meta-item > .field-label + .meta-value
+ *     .detail-actions (optional)
+ */
+
+/* ===============================================
+   DETAIL TITLE ROW
+   Name + Status + Actions in a single row
+   =============================================== */
+
+.detail-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+  overflow: visible;
+  position: relative;
+  z-index: var(--z-index-10);
+}
+
+.detail-title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  min-width: 0;
+  flex: 1;
+}
+
+.detail-title {
+  margin: 0;
+  padding: 2px;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.detail-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--table-actions-gap);
+  flex-shrink: 0;
+  overflow: visible;
+  position: relative;
+  --portal-btn-icon-size: var(--icon-size-sm);
+}
+
+.detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.detail-name-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+/* Name always visible — shrinks but never collapses */
+.detail-name-row h1 {
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+/* Status dropdown in header — auto-width to fit content, never shrinks */
+.detail-name-row .dropdown-trigger--status {
+  flex-shrink: 0;
+  width: auto;
+  min-width: auto;
+  max-width: none;
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: var(--font-size-sm);
+}
+
+.detail-meta .meta-item {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.detail-meta .field-label {
+  display: inline;
+  margin-bottom: 0;
+}
+
+/* ===============================================
+   RESPONSIVE
+   =============================================== */
+
+@media (--mobile) {
+  .detail-title-row {
+    align-items: flex-start;
+    gap: var(--space-1-5);
+  }
+
+  .detail-title-group {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .detail-title {
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* Stack name + status vertically */
+  .detail-name-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .detail-actions {
+    flex-shrink: 0;
+  }
+}
+
+@media (--small-mobile) {
+  .detail-actions .btn span {
+    display: none;
+  }
+}

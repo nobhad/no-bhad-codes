@@ -42,3 +42,6 @@
 
 /* Keyboard shortcuts overlay */
 @import "./portal-keyboard-shortcuts.css";
+
+/* Detail header (shared across admin + client portals) */
+@import "./portal-detail-header.css";

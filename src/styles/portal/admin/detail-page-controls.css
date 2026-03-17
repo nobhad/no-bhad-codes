@@ -1,105 +1,12 @@
 /**
  * ===============================================
- * ADMIN - DETAIL HEADER STYLES
+ * ADMIN - DETAIL PAGE CONTROLS
  * ===============================================
  * @file src/styles/portal/admin/detail-page-controls.css
  *
- * Unified header styles for Client Details and Project Details views.
- * Provides consistent title row with actions and More Menu dropdown.
+ * Admin-specific overrides and dropdown menus for detail pages.
+ * Base detail header styles are in shared/portal-detail-header.css.
  */
-
-/* ===============================================
-   DETAIL TITLE ROW
-   Name + Status + Actions in a single row
-   =============================================== */
-
-.detail-title-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
-  margin-bottom: var(--space-2);
-  overflow: visible;
-  position: relative;
-  z-index: var(--z-index-10);
-}
-
-.detail-title-group {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1-5);
-  min-width: 0;
-  flex: 1;
-}
-
-.detail-title {
-  margin: 0;
-  padding: 2px;
-  font-size: clamp(1.5rem, 4vw, 2rem);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.detail-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--table-actions-gap);
-  flex-shrink: 0;
-  overflow: visible;
-  position: relative;
-  /* Scope icon-btn size to match icon — gap variable controls all visual spacing */
-  --portal-btn-icon-size: var(--icon-size-sm);
-}
-
-/* Detail view container: base layout in shared/portal-layout.css */
-
-.detail-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  min-width: 0;
-}
-
-.detail-name-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex-wrap: wrap;
-  min-width: 0;
-}
-
-/* Name always visible — shrinks but never collapses */
-.detail-name-row h1 {
-  min-width: 0;
-  flex-shrink: 1;
-}
-
-/* Status dropdown in header — auto-width to fit content, never shrinks */
-.detail-name-row .dropdown-trigger--status {
-  flex-shrink: 0;
-  width: auto;
-  min-width: auto;
-  max-width: none;
-}
-
-.detail-meta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  font-size: var(--font-size-sm);
-}
-
-.detail-meta .meta-item {
-  flex-direction: row;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.detail-meta .field-label {
-  display: inline;
-  margin-bottom: 0;
-}
 
 /* ===============================================
    MORE MENU DROPDOWN
@@ -322,46 +229,6 @@
 }
 
 /* ===============================================
-   RESPONSIVE STYLES
-   =============================================== */
-
-@media (--mobile) {
-  /* Title + actions stay on same row */
-  .detail-title-row {
-    align-items: flex-start;
-    gap: var(--space-1-5);
-  }
-
-  .detail-title-group {
-    min-width: 0;
-    flex: 1;
-  }
-
-  .detail-title {
-    white-space: normal;
-    word-break: break-word;
-  }
-
-  /* Stack name + status vertically */
-  .detail-name-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-1);
-  }
-
-  .detail-actions {
-    flex-shrink: 0;
-  }
-}
-
-@media (--small-mobile) {
-  /* On small mobile, buttons become icon-only - use .icon-btn or .btn-xs classes */
-  .detail-actions .btn span {
-    display: none;
-  }
-}
-
-/* ===============================================
    DETAIL ACTIONS DROPDOWN MENU
    Full bordered dropdown for project/client actions
    =============================================== */
@@ -384,5 +251,3 @@
   justify-content: flex-end;
   color: var(--color-text-primary);
 }
-
-/* Detail action buttons follow universal .icon-btn sizing (--portal-btn-icon-size) */
