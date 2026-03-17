@@ -14,10 +14,12 @@ import { BUSINESS_INFO, getPdfLogoBytes, CONTRACT_TERMS } from '../config/busine
 import { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } from '../config/pdf-styles.js';
 import {
   createPdfContext,
+  drawPdfDocumentHeader,
   drawWrappedText,
   ensureSpace,
   addPageNumbers,
   setPdfMetadata,
+  PAGE_MARGINS,
   type PdfPageContext
 } from '../utils/pdf-utils.js';
 
@@ -76,7 +78,7 @@ export async function fetchSowData(projectId: number): Promise<SowData | null> {
     `
     SELECT
       p.id, p.project_name as name, p.project_type, p.description,
-      p.start_date, p.deadline,
+      p.start_date, p.estimated_end_date as deadline,
       COALESCE(c.billing_name, c.contact_name) as client_name,
       COALESCE(c.billing_email, c.email) as client_email,
       COALESCE(c.billing_company, c.company_name) as client_company
@@ -107,8 +109,8 @@ export async function fetchSowData(projectId: number): Promise<SowData | null> {
     SELECT
       id, selected_tier, base_price, final_price,
       maintenance_option, created_at
-    FROM proposals
-    WHERE project_id = ?
+    FROM proposal_requests
+    WHERE project_id = ? AND deleted_at IS NULL
     ORDER BY created_at DESC
     LIMIT 1
   `,
@@ -221,8 +223,16 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
     drawPageHeader(pageCtx, data.project.name);
   };
 
-  // === HEADER ===
-  await drawSowHeader(ctx, data);
+  // === HEADER (shared across all PDF types) ===
+  ctx.y = await drawPdfDocumentHeader({
+    page: ctx.currentPage,
+    pdfDoc,
+    fonts: { regular: ctx.fonts.regular, bold: ctx.fonts.bold },
+    startY: ctx.y,
+    leftMargin: ctx.leftMargin,
+    rightMargin: ctx.rightMargin,
+    title: 'STATEMENT OF WORK'
+  });
 
   // === PARTIES ===
   ctx.y -= 25;

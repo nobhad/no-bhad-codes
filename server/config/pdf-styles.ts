@@ -38,63 +38,63 @@ const c = (r: number, g: number, b: number) => rgb(r, g, b);
  * page.drawText('Title', { color: PDF_COLORS.title });
  */
 export const PDF_COLORS = {
-  // --- Text hierarchy ---
-  /** Main title text — near-black */
-  title: c(0.1, 0.1, 0.1),
+  // --- Text hierarchy (all black — no grays) ---
+  /** Main title text */
+  title: c(0, 0, 0),
   /** Secondary title / project name */
-  subtitle: c(0.2, 0.2, 0.2),
-  /** Standard body text — near-black */
-  body: c(0.1, 0.1, 0.1),
+  subtitle: c(0, 0, 0),
+  /** Standard body text */
+  body: c(0, 0, 0),
   /** Secondary body text (descriptions, emails) */
-  bodyLight: c(0.3, 0.3, 0.3),
+  bodyLight: c(0, 0, 0),
   /** Muted text (dates, fine print) */
-  muted: c(0.4, 0.4, 0.4),
+  muted: c(0, 0, 0),
   /** Very muted text (page numbers, legal) */
-  faint: c(0.5, 0.5, 0.5),
+  faint: c(0, 0, 0),
   /** Lightest text (watermarks, IP addresses) */
-  whisper: c(0.6, 0.6, 0.6),
+  whisper: c(0, 0, 0),
   /** Pure black */
   black: c(0, 0, 0),
 
-  // --- Section headings (proposals) ---
-  /** Blue section heading color used in proposals */
-  sectionHeading: c(0, 0.4, 0.8),
+  // --- Section headings ---
+  /** Section heading color */
+  sectionHeading: c(0, 0, 0),
 
   // --- Branding ---
-  /** Brand green accent (underlines, highlights) */
-  brandGreen: c(0.5, 0.99, 0.04),
-  /** Signed watermark green */
-  watermarkGreen: c(0, 0.6, 0.2),
-  /** Typed signature blue */
-  signatureBlue: c(0, 0, 0.6),
-  /** Payment confirmed green */
-  paymentGreen: c(0.13, 0.55, 0.13),
+  /** Brand accent (underlines, highlights) */
+  brandGreen: c(0, 0, 0),
+  /** Signed watermark */
+  watermarkGreen: c(0, 0, 0),
+  /** Typed signature */
+  signatureBlue: c(0, 0, 0),
+  /** Payment confirmed */
+  paymentGreen: c(0, 0, 0),
 
-  // --- Lines & borders ---
+  // --- Lines & borders (all black) ---
   /** Standard divider line */
-  divider: c(0.7, 0.7, 0.7),
+  divider: c(0, 0, 0),
   /** Light divider (between table rows) */
-  dividerLight: c(0.8, 0.8, 0.8),
+  dividerLight: c(0, 0, 0),
   /** Very light divider (row separators) */
-  dividerVeryLight: c(0.85, 0.85, 0.85),
+  dividerVeryLight: c(0, 0, 0),
   /** Section title underline (pricing divider) */
-  pricingDivider: c(0.7, 0.7, 0.7),
+  pricingDivider: c(0, 0, 0),
 
-  // --- Backgrounds ---
+  // --- Backgrounds & borders (all black) ---
   /** Receipt details box header background */
-  boxHeaderBg: c(0.95, 0.95, 0.95),
+  boxHeaderBg: c(0, 0, 0),
   /** Signature box background */
-  signatureBoxBg: c(0.98, 0.98, 0.98),
+  signatureBoxBg: c(0, 0, 0),
   /** Receipt box border */
-  boxBorder: c(0.8, 0.8, 0.8),
+  boxBorder: c(0, 0, 0),
   /** Signature box border */
-  signatureBoxBorder: c(0.7, 0.7, 0.7),
+  signatureBoxBorder: c(0, 0, 0),
 
   // --- Continuation header ---
   /** Continuation header on subsequent pages */
-  continuationHeader: c(0.5, 0.5, 0.5),
+  continuationHeader: c(0, 0, 0),
   /** Page header on subsequent pages (SOW) */
-  pageHeader: c(0.5, 0.5, 0.5)
+  pageHeader: c(0, 0, 0)
 } as const;
 
 // ============================================
@@ -114,8 +114,8 @@ export const PDF_TYPOGRAPHY = {
   sectionHeadingSize: 14,
   /** Sub-section heading size */
   subHeadingSize: 12,
-  /** Section heading (SOW numbered sections) */
-  sowSectionSize: 12,
+  /** Section heading (SOW numbered sections) — matches sectionHeadingSize */
+  sowSectionSize: 14,
   /** Label/field name size */
   labelSize: 11,
   /** Standard body text */
