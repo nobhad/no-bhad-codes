@@ -64,6 +64,7 @@ export function SearchFilter({ value, onChange, placeholder = 'Search...' }: Sea
             value={value}
             onChange={(e) => onChange(e.target.value)}
             className="search-bar-input"
+            data-shortcut="search"
             aria-label={placeholder || 'Search'}
             onKeyDown={(e) => {
               if (e.key === KEYS.ESCAPE) setIsOpen(false);
