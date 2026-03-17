@@ -679,5 +679,97 @@
         { "title": "Quarterly client review call", "description": "Present report, strategy, and discuss next quarter", "order": 9, "estimatedHours": 1 }
       ]
     }
+  },
+  "other": {
+    "good": {
+      "phase 1 planning": [
+        { "title": "Schedule kickoff call", "description": "Set up initial consultation with client", "order": 1, "estimatedHours": 0.5 },
+        { "title": "Gather requirements", "description": "Document client needs, goals, and project scope", "order": 2, "estimatedHours": 2 },
+        { "title": "Create project plan", "description": "Define milestones, timeline, and deliverables", "order": 3, "estimatedHours": 2 }
+      ],
+      "phase 2 execution": [
+        { "title": "Set up project environment", "description": "Initialize tools, repositories, and workspace", "order": 1, "estimatedHours": 1 },
+        { "title": "Create design deliverables", "description": "Produce primary design assets and mockups", "order": 2, "estimatedHours": 6 },
+        { "title": "Development work", "description": "Build core project deliverables", "order": 3, "estimatedHours": 8 },
+        { "title": "Client progress review", "description": "Present work-in-progress for client feedback", "order": 4, "estimatedHours": 1 }
+      ],
+      "phase 3 completion": [
+        { "title": "Internal review and QA", "description": "Review all deliverables for quality and completeness", "order": 1, "estimatedHours": 2 },
+        { "title": "Client final review", "description": "Walk through completed deliverables with client", "order": 2, "estimatedHours": 1 },
+        { "title": "Apply final revisions", "description": "Implement any last client feedback", "order": 3, "estimatedHours": 2 }
+      ]
+    },
+    "better": {
+      "phase 1 planning": [
+        { "title": "Schedule kickoff call", "description": "Set up initial consultation with client", "order": 1, "estimatedHours": 0.5 },
+        { "title": "Gather requirements", "description": "Document client needs, goals, and project scope", "order": 2, "estimatedHours": 2 },
+        { "title": "Conduct research", "description": "Research relevant industry standards and best practices", "order": 3, "estimatedHours": 3 },
+        { "title": "Create project plan", "description": "Define milestones, timeline, and deliverables", "order": 4, "estimatedHours": 2 },
+        { "title": "Review project plan with client", "description": "Present and approve project scope and timeline", "order": 5, "estimatedHours": 1 }
+      ],
+      "phase 2 design": [
+        { "title": "Create design concepts", "description": "Develop initial design options and approaches", "order": 1, "estimatedHours": 6 },
+        { "title": "Client review of designs", "description": "Present concepts and gather feedback", "order": 2, "estimatedHours": 1 },
+        { "title": "Revise designs based on feedback", "description": "Implement requested design changes", "order": 3, "estimatedHours": 4 },
+        { "title": "Finalize approved designs", "description": "Prepare final design assets for execution phase", "order": 4, "estimatedHours": 2 }
+      ],
+      "phase 3 execution": [
+        { "title": "Set up project environment", "description": "Initialize tools, repositories, and workspace", "order": 1, "estimatedHours": 1 },
+        { "title": "Core development work", "description": "Build primary project deliverables", "order": 2, "estimatedHours": 10 },
+        { "title": "Integration and content", "description": "Integrate components and add content", "order": 3, "estimatedHours": 4 },
+        { "title": "Client progress review", "description": "Present work-in-progress for client feedback", "order": 4, "estimatedHours": 1 },
+        { "title": "Implement feedback", "description": "Apply client feedback from progress review", "order": 5, "estimatedHours": 3 }
+      ],
+      "phase 4 completion": [
+        { "title": "Internal review and QA", "description": "Review all deliverables for quality and completeness", "order": 1, "estimatedHours": 3 },
+        { "title": "Create documentation", "description": "Write user guides or project documentation", "order": 2, "estimatedHours": 3 },
+        { "title": "Client training session", "description": "Walk client through deliverables and usage", "order": 3, "estimatedHours": 1.5 },
+        { "title": "Client final review", "description": "Present completed project for sign-off", "order": 4, "estimatedHours": 1 },
+        { "title": "Apply final revisions", "description": "Implement any last client feedback", "order": 5, "estimatedHours": 2 },
+        { "title": "Project handoff", "description": "Transfer all assets and close out project", "order": 6, "estimatedHours": 1 }
+      ]
+    },
+    "best": {
+      "phase 1 discovery planning": [
+        { "title": "Schedule kickoff call", "description": "Set up initial consultation with client and stakeholders", "order": 1, "estimatedHours": 0.5 },
+        { "title": "Gather comprehensive requirements", "description": "Document detailed client needs, goals, and constraints", "order": 2, "estimatedHours": 3 },
+        { "title": "Conduct research and analysis", "description": "Research industry standards, competitors, and best practices", "order": 3, "estimatedHours": 4 },
+        { "title": "Develop project strategy", "description": "Create strategic approach based on research findings", "order": 4, "estimatedHours": 3 },
+        { "title": "Create detailed project plan", "description": "Define milestones, timeline, resources, and deliverables", "order": 5, "estimatedHours": 2 },
+        { "title": "Review plan with client", "description": "Present and approve project scope, strategy, and timeline", "order": 6, "estimatedHours": 1 }
+      ],
+      "phase 2 design": [
+        { "title": "Create design concepts", "description": "Develop multiple design options and approaches", "order": 1, "estimatedHours": 8 },
+        { "title": "Client review of concepts", "description": "Present concepts and gather detailed feedback", "order": 2, "estimatedHours": 1.5 },
+        { "title": "First round of revisions", "description": "Implement feedback and refine chosen direction", "order": 3, "estimatedHours": 4 },
+        { "title": "Create style guide", "description": "Document design standards and patterns", "order": 4, "estimatedHours": 3 },
+        { "title": "Second round of revisions", "description": "Fine-tune designs based on additional feedback", "order": 5, "estimatedHours": 3 },
+        { "title": "Finalize approved designs", "description": "Prepare final design assets for execution", "order": 6, "estimatedHours": 2 }
+      ],
+      "phase 3 execution": [
+        { "title": "Set up project environment", "description": "Initialize tools, repositories, and workspace", "order": 1, "estimatedHours": 1.5 },
+        { "title": "Core development", "description": "Build primary project deliverables", "order": 2, "estimatedHours": 12 },
+        { "title": "Advanced features", "description": "Implement additional features and enhancements", "order": 3, "estimatedHours": 8 },
+        { "title": "Third-party integrations", "description": "Set up and configure external service integrations", "order": 4, "estimatedHours": 4 },
+        { "title": "Content integration", "description": "Add and format all project content", "order": 5, "estimatedHours": 4 },
+        { "title": "Client progress review", "description": "Present work-in-progress for feedback", "order": 6, "estimatedHours": 1 },
+        { "title": "Implement feedback", "description": "Apply client feedback from progress review", "order": 7, "estimatedHours": 3 }
+      ],
+      "phase 4 quality assurance": [
+        { "title": "Comprehensive testing", "description": "Test all functionality and deliverables thoroughly", "order": 1, "estimatedHours": 4 },
+        { "title": "Accessibility audit", "description": "Verify compliance with accessibility standards", "order": 2, "estimatedHours": 3 },
+        { "title": "Performance optimization", "description": "Optimize for speed, efficiency, and best practices", "order": 3, "estimatedHours": 3 },
+        { "title": "Bug fixes and polish", "description": "Address issues found during testing", "order": 4, "estimatedHours": 4 },
+        { "title": "Client QA review", "description": "Client walkthrough of completed deliverables", "order": 5, "estimatedHours": 1.5 }
+      ],
+      "phase 5 launch support": [
+        { "title": "Prepare deployment", "description": "Set up production environment and deployment plan", "order": 1, "estimatedHours": 2 },
+        { "title": "Deploy to production", "description": "Launch project to production environment", "order": 2, "estimatedHours": 1.5 },
+        { "title": "Create documentation", "description": "Write comprehensive user and technical documentation", "order": 3, "estimatedHours": 4 },
+        { "title": "Client training session", "description": "Train client on deliverables and ongoing usage", "order": 4, "estimatedHours": 2 },
+        { "title": "Post-launch monitoring", "description": "Monitor for issues during initial launch period", "order": 5, "estimatedHours": 2 },
+        { "title": "Project closeout", "description": "Final handoff, asset transfer, and project wrap-up", "order": 6, "estimatedHours": 1 }
+      ]
+    }
   }
 }

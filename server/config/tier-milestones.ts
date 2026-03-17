@@ -771,6 +771,99 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
         ]
       }
     ]
+  },
+
+  other: {
+    good: [
+      {
+        name: 'Phase 1 - Planning',
+        description: 'Requirements gathering and project planning',
+        estimatedDays: 7,
+        order: 1,
+        deliverables: ['Project plan', 'Requirements document']
+      },
+      {
+        name: 'Phase 2 - Execution',
+        description: 'Primary work phase - design and development',
+        estimatedDays: 21,
+        order: 2,
+        deliverables: ['Design deliverables', 'Development work']
+      },
+      {
+        name: 'Phase 3 - Completion',
+        description: 'Final review, testing, and project handoff',
+        estimatedDays: 28,
+        order: 3,
+        deliverables: ['Final deliverables', 'Testing', 'Project handoff']
+      }
+    ],
+    better: [
+      {
+        name: 'Phase 1 - Planning',
+        description: 'Requirements gathering, research, and detailed project planning',
+        estimatedDays: 10,
+        order: 1,
+        deliverables: ['Project plan', 'Requirements document', 'Research findings']
+      },
+      {
+        name: 'Phase 2 - Design',
+        description: 'Design phase with client review and revisions',
+        estimatedDays: 18,
+        order: 2,
+        deliverables: ['Design concepts', 'Design revisions', 'Approved designs']
+      },
+      {
+        name: 'Phase 3 - Execution',
+        description: 'Development and implementation',
+        estimatedDays: 30,
+        order: 3,
+        deliverables: ['Development work', 'Integration', 'Content']
+      },
+      {
+        name: 'Phase 4 - Completion',
+        description: 'Testing, review, and project handoff with documentation',
+        estimatedDays: 35,
+        order: 4,
+        deliverables: ['Testing', 'Documentation', 'Training', 'Project handoff']
+      }
+    ],
+    best: [
+      {
+        name: 'Phase 1 - Discovery & Planning',
+        description: 'Comprehensive requirements, research, strategy, and detailed planning',
+        estimatedDays: 12,
+        order: 1,
+        deliverables: ['Project plan', 'Requirements document', 'Research findings', 'Strategy document']
+      },
+      {
+        name: 'Phase 2 - Design',
+        description: 'Full design phase with multiple rounds and client collaboration',
+        estimatedDays: 22,
+        order: 2,
+        deliverables: ['Design concepts', 'Design revisions', 'Style guide', 'Approved designs']
+      },
+      {
+        name: 'Phase 3 - Execution',
+        description: 'Full development with advanced features and integrations',
+        estimatedDays: 38,
+        order: 3,
+        deliverables: ['Core development', 'Advanced features', 'Integrations', 'Content']
+      },
+      {
+        name: 'Phase 4 - Quality Assurance',
+        description: 'Comprehensive testing, accessibility audit, and performance optimization',
+        estimatedDays: 45,
+        order: 4,
+        deliverables: ['Testing', 'Accessibility audit', 'Performance optimization']
+      },
+      {
+        name: 'Phase 5 - Launch & Support',
+        description: 'Deployment, documentation, training, and post-launch support',
+        estimatedDays: 52,
+        order: 5,
+        deliverables: ['Deployment', 'Documentation', 'Training', 'Post-launch support']
+      }
+    ]
   }
 };
 

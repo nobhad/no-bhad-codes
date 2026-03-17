@@ -118,11 +118,16 @@ export type TaskPriority = (typeof TASK_PRIORITIES)[number];
 
 export const LEAD_STATUSES = [
   'new',
+  'pending',
   'contacted',
   'qualified',
   'unqualified',
+  'active',
+  'in-progress',
   'converted',
-  'lost'
+  'lost',
+  'on-hold',
+  'cancelled'
 ] as const;
 
 export type LeadStatus = (typeof LEAD_STATUSES)[number];

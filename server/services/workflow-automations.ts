@@ -472,7 +472,7 @@ async function handleMilestoneCompleted(data: {
 async function getClientEmail(clientId: number): Promise<{ email: string; name: string } | null> {
   const db = getDatabase();
   const client = (await db.get(
-    'SELECT email, contact_name, company_name FROM active_clients WHERE id = ?',
+    'SELECT COALESCE(billing_email, email) as email, COALESCE(billing_name, contact_name) as contact_name, COALESCE(billing_company, company_name) as company_name FROM active_clients WHERE id = ?',
     [clientId]
   )) as Record<string, unknown> | undefined;
 
