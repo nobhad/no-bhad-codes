@@ -143,6 +143,35 @@ router.post(
       return errorResponse(res, 'Client not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
+    // Validate pricing
+    if (typeof submission.basePrice !== 'number' || submission.basePrice < 0) {
+      return errorResponse(res, 'Base price must be a non-negative number', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+    if (typeof submission.finalPrice !== 'number' || submission.finalPrice < 0) {
+      return errorResponse(res, 'Final price must be a non-negative number', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+    if (submission.finalPrice > submission.basePrice * 10) {
+      return errorResponse(res, 'Final price seems unreasonably high', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    // Check for existing active proposal on same project
+    const { getDatabase } = await import('../../database/init.js');
+    const db = getDatabase();
+    const existingProposal = await db.get(
+      `SELECT id FROM proposal_requests
+       WHERE project_id = ? AND status NOT IN ('rejected', 'expired') AND deleted_at IS NULL
+       LIMIT 1`,
+      [submission.projectId]
+    );
+    if (existingProposal) {
+      return errorResponse(
+        res,
+        'An active proposal already exists for this project',
+        409,
+        ErrorCodes.DUPLICATE_RESOURCE
+      );
+    }
+
     // Validate project type
     if (!VALID_PROJECT_TYPES.includes(submission.projectType)) {
       return errorResponse(res, 'Invalid project type', 400, ErrorCodes.VALIDATION_ERROR);

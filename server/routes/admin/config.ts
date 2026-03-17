@@ -9,7 +9,7 @@
  */
 
 import express, { Response } from 'express';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFile, writeFile } from 'fs/promises';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { asyncHandler } from '../../middleware/errorHandler.js';
@@ -60,7 +60,7 @@ router.get(
   asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
     try {
       const jsonPath = resolve(__dirname, '../../config/default-tasks.json');
-      const data = JSON.parse(readFileSync(jsonPath, 'utf-8'));
+      const data = JSON.parse(await readFile(jsonPath, 'utf-8'));
       sendSuccess(res, {
         config: data,
         exportedAt: new Date().toISOString()
@@ -117,21 +117,21 @@ router.post(
       // Backup current file
       const backupPath = resolve(__dirname, `../../config/default-tasks.backup-${Date.now()}.json`);
       try {
-        const currentData = readFileSync(jsonPath, 'utf-8');
-        writeFileSync(backupPath, currentData);
+        const currentData = await readFile(jsonPath, 'utf-8');
+        await writeFile(backupPath, currentData);
       } catch {
         // No existing file to backup
       }
 
       // Write new config
-      writeFileSync(jsonPath, JSON.stringify(config, null, 2));
+      await writeFile(jsonPath, JSON.stringify(config, null, 2));
 
       logger.info('[AdminConfig] Updated default-tasks.json', {
         category: 'admin',
         metadata: { updatedBy: req.user?.email }
       });
 
-      sendSuccess(res, { updated: true, backupPath }, 'Default tasks config updated');
+      sendSuccess(res, { updated: true, backupPath }, 'Config file updated. Note: Server restart required for changes to take effect.');
     } catch (error) {
       logger.error('[AdminConfig] Failed to update default-tasks config:', {
         error: error instanceof Error ? error : undefined
@@ -152,7 +152,7 @@ router.get(
   asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
     try {
       const jsonPath = resolve(__dirname, '../../config/tier-tasks.json');
-      const data = JSON.parse(readFileSync(jsonPath, 'utf-8'));
+      const data = JSON.parse(await readFile(jsonPath, 'utf-8'));
       sendSuccess(res, {
         config: data,
         exportedAt: new Date().toISOString()
@@ -219,21 +219,21 @@ router.post(
       // Backup current file
       const backupPath = resolve(__dirname, `../../config/tier-tasks.backup-${Date.now()}.json`);
       try {
-        const currentData = readFileSync(jsonPath, 'utf-8');
-        writeFileSync(backupPath, currentData);
+        const currentData = await readFile(jsonPath, 'utf-8');
+        await writeFile(backupPath, currentData);
       } catch {
         // No existing file to backup
       }
 
       // Write new config
-      writeFileSync(jsonPath, JSON.stringify(config, null, 2));
+      await writeFile(jsonPath, JSON.stringify(config, null, 2));
 
       logger.info('[AdminConfig] Updated tier-tasks.json', {
         category: 'admin',
         metadata: { updatedBy: req.user?.email }
       });
 
-      sendSuccess(res, { updated: true, backupPath }, 'Tier tasks config updated');
+      sendSuccess(res, { updated: true, backupPath }, 'Config file updated. Note: Server restart required for changes to take effect.');
     } catch (error) {
       logger.error('[AdminConfig] Failed to update tier-tasks config:', {
         error: error instanceof Error ? error : undefined

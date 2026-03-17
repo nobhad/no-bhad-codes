@@ -26,6 +26,16 @@ import { errorResponse, errorResponseWithPayload, sanitizeErrorMessage, sendSucc
 
 const router = Router();
 
+/** Escape HTML special characters to prevent XSS in email templates */
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 // Configure multer for file uploads
 const uploadDir = resolve(process.cwd(), 'uploads', 'general');
 if (!existsSync(uploadDir)) {
@@ -171,29 +181,29 @@ Received: ${new Date().toISOString()}
   <table style="width: 100%; border-collapse: collapse;">
     <tr>
       <td style="padding: 8px; background: #f5f5f5; font-weight: bold;">From:</td>
-      <td style="padding: 8px;">${name}</td>
+      <td style="padding: 8px;">${escapeHtml(name)}</td>
     </tr>
     <tr>
       <td style="padding: 8px; background: #f5f5f5; font-weight: bold;">Email:</td>
-      <td style="padding: 8px;"><a href="mailto:${email}">${email}</a></td>
+      <td style="padding: 8px;"><a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></td>
     </tr>
     ${
   companyName
     ? `<tr>
       <td style="padding: 8px; background: #f5f5f5; font-weight: bold;">Company:</td>
-      <td style="padding: 8px;">${companyName}</td>
+      <td style="padding: 8px;">${escapeHtml(companyName)}</td>
     </tr>`
     : ''
 }
     <tr>
       <td style="padding: 8px; background: #f5f5f5; font-weight: bold;">Subject:</td>
-      <td style="padding: 8px;">${subjectLine}</td>
+      <td style="padding: 8px;">${escapeHtml(subjectLine)}</td>
     </tr>
   </table>
 
   <h3 style="color: #333; margin-top: 20px;">Message:</h3>
   <div style="padding: 15px; background: #f9f9f9; border-left: 4px solid #0066cc;">
-    ${message.replace(/\n/g, '<br>')}
+    ${escapeHtml(message).replace(/\n/g, '<br>')}
   </div>
 
   <hr style="margin-top: 30px; border: none; border-top: 1px solid #ddd;">
