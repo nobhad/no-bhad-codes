@@ -19,12 +19,14 @@ import { PortalSidebar } from './PortalSidebar';
 import { PortalHeader } from './PortalHeader';
 import { PortalSubtabs } from './PortalSubtabs';
 import { RouteErrorBoundary } from '../components/portal/RouteErrorBoundary';
-import { useSidebarCollapsed, usePortalRole } from '../stores/portal-store';
+import { useSidebarCollapsed, usePortalRole, useCurrentTab, useCurrentGroup } from '../stores/portal-store';
 import { PORTAL_SELECTORS } from '../config/portal-constants';
 
 export function PortalLayout() {
   const collapsed = useSidebarCollapsed();
   const role = usePortalRole();
+  const currentTab = useCurrentTab();
+  const currentGroup = useCurrentGroup();
 
   // Sync sidebar-collapsed class on the mount container
   // (the .portal div is owned by EJS, not React)
@@ -42,6 +44,14 @@ export function PortalLayout() {
       container.id = role === 'admin' ? 'admin-dashboard' : 'client-dashboard';
     }
   }, [role]);
+
+  // Sync data attributes for CSS visibility rules
+  // portal-layout.css uses [data-active-group] and [data-active-tab] on body
+  // to show/hide subtab groups and header controls
+  React.useEffect(() => {
+    document.body.setAttribute('data-active-group', currentGroup || currentTab || '');
+    document.body.setAttribute('data-active-tab', currentTab || '');
+  }, [currentGroup, currentTab]);
 
   return (
     <>
