@@ -84,6 +84,16 @@ export const API_ENDPOINTS = {
   RETAINERS: '/api/retainers',
   RETAINERS_MY: '/api/retainers/my',
 
+  // Feedback & Testimonials
+  FEEDBACK: '/api/feedback',
+  FEEDBACK_SURVEYS: '/api/feedback/surveys',
+  FEEDBACK_MY: '/api/feedback/my',
+  FEEDBACK_ANALYTICS: '/api/feedback/analytics',
+  FEEDBACK_TESTIMONIALS: '/api/feedback/testimonials',
+
+  // Embed Widgets (admin)
+  EMBED: '/api/embed',
+
   // Meeting Requests
   MEETING_REQUESTS: '/api/meeting-requests',
   MEETING_REQUESTS_MY: '/api/meeting-requests/my',
@@ -391,7 +401,19 @@ export const buildEndpoint = {
   agreementView: (id: number | string) => `${API_ENDPOINTS.AGREEMENTS}/${id}/view`,
 
   // Onboarding Checklist
-  onboardingStepComplete: (stepId: number | string) => `${API_ENDPOINTS.ONBOARDING_CHECKLIST}/steps/${stepId}/complete`
+  onboardingStepComplete: (stepId: number | string) => `${API_ENDPOINTS.ONBOARDING_CHECKLIST}/steps/${stepId}/complete`,
+
+  // Embed Widgets
+  embedWidget: (id: number | string) => `${API_ENDPOINTS.EMBED}/${id}`,
+  embedWidgetCode: (id: number | string) => `${API_ENDPOINTS.EMBED}/${id}/embed-code`,
+  embedWidgetRegenerate: (id: number | string) => `${API_ENDPOINTS.EMBED}/${id}/regenerate-token`,
+
+  // Feedback & Testimonials
+  feedbackSurveyPublic: (token: string) => `/api/feedback/survey/${token}`,
+  feedbackSurveySubmit: (token: string) => `/api/feedback/survey/${token}/submit`,
+  testimonial: (id: number | string) => `${API_ENDPOINTS.FEEDBACK_TESTIMONIALS}/${id}`,
+  testimonialPublish: (id: number | string) => `${API_ENDPOINTS.FEEDBACK_TESTIMONIALS}/${id}/publish`,
+  testimonialFeature: (id: number | string) => `${API_ENDPOINTS.FEEDBACK_TESTIMONIALS}/${id}/feature`
 
 } as const;
 
