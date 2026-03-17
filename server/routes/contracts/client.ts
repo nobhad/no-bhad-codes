@@ -16,6 +16,7 @@ import { getNumber, getString } from '../../database/row-helpers.js';
 import { sendSuccess, errorResponse, ErrorCodes } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 import { invalidateCache } from '../../middleware/cache.js';
+import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 
 const router = express.Router();
 
@@ -262,6 +263,17 @@ router.post(
     logger.info(
       `[Contract] Contract ${contractId} signed in-portal by ${signerName} (${clientEmail}) for project ${projectId || 'N/A'}`
     );
+
+    // Emit event to trigger project activation + client notifications
+    if (projectId) {
+      await workflowTriggerService.emit('contract.signed', {
+        entityId: contractId,
+        projectId,
+        signerName,
+        signerEmail: clientEmail,
+        triggeredBy: clientEmail
+      });
+    }
 
     sendSuccess(res, {
       signedAt,
