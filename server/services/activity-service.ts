@@ -55,7 +55,7 @@ const RECENT_ACTIVITY_QUERY = `SELECT * FROM (
     p.client_id as client_id
   FROM projects p
   LEFT JOIN clients c ON p.client_id = c.id
-  WHERE p.status IN ('pending', 'new') AND p.created_at IS NOT NULL
+  WHERE p.status IN ('pending', 'new') AND p.created_at IS NOT NULL AND p.deleted_at IS NULL
 
   UNION ALL
 
@@ -142,7 +142,7 @@ const RECENT_ACTIVITY_QUERY = `SELECT * FROM (
     p.client_id
   FROM project_updates pu
   JOIN projects p ON pu.project_id = p.id
-  WHERE pu.created_at IS NOT NULL
+  WHERE pu.created_at IS NOT NULL AND p.deleted_at IS NULL
 
   UNION ALL
 
@@ -156,7 +156,7 @@ const RECENT_ACTIVITY_QUERY = `SELECT * FROM (
     p.client_id
   FROM files f
   JOIN projects p ON f.project_id = p.id
-  WHERE f.created_at IS NOT NULL AND f.deleted_at IS NULL
+  WHERE f.created_at IS NOT NULL AND f.deleted_at IS NULL AND p.deleted_at IS NULL
 )
 ORDER BY date DESC
 LIMIT ?`;

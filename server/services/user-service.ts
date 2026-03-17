@@ -370,7 +370,7 @@ class UserService {
   async findActiveClientByEmail(email: string): Promise<ClientMagicLinkRow | null> {
     const db = await getDatabase();
     const row = await db.get(
-      'SELECT id, email, contact_name FROM clients WHERE email = ? AND status = "active"',
+      'SELECT id, email, contact_name FROM clients WHERE email = ? AND status = "active" AND deleted_at IS NULL',
       [email.toLowerCase()]
     ) as DatabaseRow | undefined;
 
@@ -391,7 +391,7 @@ class UserService {
     const row = await db.get(
       `SELECT id, email, contact_name, company_name, status, is_admin, magic_link_expires_at
        FROM clients
-       WHERE magic_link_token = ?`,
+       WHERE magic_link_token = ? AND deleted_at IS NULL`,
       [token]
     ) as DatabaseRow | undefined;
 
@@ -495,7 +495,7 @@ class UserService {
   async findActiveClientForReset(email: string): Promise<ClientResetRow | null> {
     const db = await getDatabase();
     const row = await db.get(
-      'SELECT id, email, contact_name FROM clients WHERE email = ? AND status = "active"',
+      'SELECT id, email, contact_name FROM clients WHERE email = ? AND status = "active" AND deleted_at IS NULL',
       [email.toLowerCase()]
     ) as DatabaseRow | undefined;
 
@@ -527,7 +527,7 @@ class UserService {
     const row = await db.get(
       `SELECT id, email, contact_name, company_name, reset_token_expiry
        FROM clients
-       WHERE reset_token = ? AND status = "active"`,
+       WHERE reset_token = ? AND status = "active" AND deleted_at IS NULL`,
       [token]
     ) as DatabaseRow | undefined;
 
@@ -561,7 +561,7 @@ class UserService {
     const row = await db.get(
       `SELECT id, email, contact_name, company_name, invitation_expires_at
        FROM clients
-       WHERE invitation_token = ?`,
+       WHERE invitation_token = ? AND deleted_at IS NULL`,
       [token]
     ) as DatabaseRow | undefined;
 
@@ -595,7 +595,7 @@ class UserService {
   async getClientNameById(clientId: number): Promise<ClientNameRow | null> {
     const db = await getDatabase();
     const row = await db.get(
-      'SELECT contact_name, company_name FROM clients WHERE id = ?',
+      'SELECT contact_name, company_name FROM clients WHERE id = ? AND deleted_at IS NULL',
       [clientId]
     ) as DatabaseRow | undefined;
 
@@ -796,7 +796,7 @@ class UserService {
   async getClientProfile(clientId: number): Promise<Record<string, unknown> | null> {
     const db = await getDatabase();
     const row = await db.get(
-      'SELECT id, email, company_name, contact_name, phone, status, is_admin, created_at FROM clients WHERE id = ?',
+      'SELECT id, email, company_name, contact_name, phone, status, is_admin, created_at FROM clients WHERE id = ? AND deleted_at IS NULL',
       [clientId]
     );
     return (row as Record<string, unknown>) || null;

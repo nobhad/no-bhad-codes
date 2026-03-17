@@ -53,7 +53,7 @@ interface ClientFileFilters {
 async function findDefaultProjectForClient(clientId: number | string): Promise<number | null> {
   const db = getDatabase();
   const project = await db.get<{ id: number }>(
-    'SELECT id FROM projects WHERE client_id = ? ORDER BY created_at DESC LIMIT 1',
+    'SELECT id FROM active_projects WHERE client_id = ? ORDER BY created_at DESC LIMIT 1',
     [clientId]
   );
   return project?.id ?? null;
@@ -113,7 +113,7 @@ async function getClientFiles(
            f.shared_with_client, f.shared_at,
            p.project_name as project_name
     FROM files f
-    LEFT JOIN projects p ON f.project_id = p.id
+    LEFT JOIN active_projects p ON f.project_id = p.id
     WHERE f.deleted_at IS NULL
       AND (f.uploaded_by = ? OR (p.client_id = ? AND f.shared_with_client = TRUE))
   `;
@@ -150,7 +150,7 @@ async function getClientFiles(
 
   const projects = await db.all<ProjectRow>(
     `SELECT DISTINCT p.id, p.project_name
-     FROM projects p
+     FROM active_projects p
      WHERE p.client_id = ?
      ORDER BY p.project_name`,
     [clientId]
@@ -165,7 +165,7 @@ async function getFileWithClient(fileId: number): Promise<FileWithClientRow | un
   const file = await db.get<FileWithClientRow>(
     `SELECT f.*, p.client_id
      FROM files f
-     LEFT JOIN projects p ON f.project_id = p.id
+     LEFT JOIN active_projects p ON f.project_id = p.id
      WHERE f.id = ? AND f.deleted_at IS NULL`,
     [fileId]
   );
@@ -212,7 +212,7 @@ async function unshareFileWithClient(fileId: number): Promise<void> {
 async function isProjectOwnedByClient(projectId: number, clientId: number | string): Promise<boolean> {
   const db = getDatabase();
   const row = await db.get<{ '1': number }>(
-    'SELECT 1 FROM projects WHERE id = ? AND client_id = ?',
+    'SELECT 1 FROM active_projects WHERE id = ? AND client_id = ?',
     [projectId, clientId]
   );
   return !!row;
@@ -228,7 +228,7 @@ async function canClientAccessFile(
   const row = await db.get<{ '1': number }>(
     `SELECT 1
      FROM files f
-     LEFT JOIN projects p ON f.project_id = p.id
+     LEFT JOIN active_projects p ON f.project_id = p.id
      WHERE f.id = ? AND f.deleted_at IS NULL
        AND (
          f.uploaded_by = ?
