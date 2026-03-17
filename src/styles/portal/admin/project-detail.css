@@ -342,14 +342,6 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   flex-shrink: 0;
 }
 
-.milestone-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--space-1);
-  --portal-btn-icon-inner-size: var(--icon-size-md);
-}
-
 /* Project Description Row - description and preview URL on same line */
 .project-description-row {
   display: flex;
@@ -945,9 +937,8 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   font-size: var(--font-size-sm);
 }
 
-/* Invoice filter select — matches dropdown content min-width so trigger = content width */
+/* Invoice filter — min-width matches dropdown content */
 .invtab-filter {
-  height: var(--portal-btn-icon-size);
   min-width: var(--status-dropdown-width);
 }
 

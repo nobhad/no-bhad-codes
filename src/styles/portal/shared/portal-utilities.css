@@ -97,8 +97,9 @@ svg.lucide {
    Lists ending in -list with children ending in -item
    ===================================================== */
 
-/* Universal list containers with -item children: flex-column gap-1-5 */
-.portal [class$="-list"]:has(> [class$="-item"]) {
+/* Universal list containers with -item children: flex-column gap-1-5.
+   Excludes activity-list (uses padding for separation, no gap). */
+.portal [class$="-list"]:not(.activity-list):has(> [class$="-item"]) {
   display: flex;
   flex-direction: column;
   gap: var(--space-1-5);
@@ -111,12 +112,17 @@ svg.lucide {
     .help-featured-list,
     .help-results-list,
     .notes-list,
-    .tasks-list,
-    .activity-list
+    .tasks-list
   ) {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+}
+
+/* Activity list — no gap; items use padding for separation */
+.portal .activity-list {
+  display: flex;
+  flex-direction: column;
 }
 
 /* Containers with -card children: flex-column gap-2 */
@@ -186,11 +192,6 @@ svg.lucide {
 .portal :is(.activity-list, .notes-list, .files-list, .tasks-list) > li {
   background: transparent;
   color: var(--color-text-primary);
-  margin-bottom: var(--space-0-5);
-}
-
-.portal :is(.activity-list, .notes-list, .files-list, .tasks-list) > li:last-child {
-  margin-bottom: 0;
 }
 
 /* Clickable list items */

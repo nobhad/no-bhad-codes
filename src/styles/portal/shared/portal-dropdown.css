@@ -204,25 +204,35 @@ td:has(.dropdown-trigger--status) .portal-dropdown-content,
 }
 
 /* ================================================
-   DROPDOWN TRIGGER BORDER — UNIFIED RULE
-   Closed: border matches background (invisible but preserves layout).
-   Hover + Open: border uses --color-border-primary.
+   DROPDOWN TRIGGER BORDER
+   Status triggers: transparent border (borderless look).
+   All others: visible border matching portal border style.
    ================================================ */
+
+/* Status dropdown — transparent border (invisible, preserves layout) */
+.dropdown-trigger--status {
+  border-color: transparent;
+  transition: border-color var(--transition-fast);
+}
+
+.dropdown-trigger--status:hover,
+.dropdown-trigger--status[data-state="open"] {
+  border-color: var(--color-border-primary);
+}
+
+/* All other dropdowns — visible border */
 .dropdown-trigger,
 .dropdown-trigger--custom,
-.dropdown-trigger--status,
 .dropdown-trigger--form {
-  border-color: var(--color-bg-primary);
+  border-color: var(--color-border-primary);
   transition: border-color var(--transition-fast);
 }
 
 .dropdown-trigger:hover,
 .dropdown-trigger--custom:hover,
-.dropdown-trigger--status:hover,
 .dropdown-trigger--form:hover,
 .dropdown-trigger[data-state="open"],
 .dropdown-trigger--custom.open,
-.dropdown-trigger--status[data-state="open"],
 .dropdown-trigger--form[data-state="open"] {
   border-color: var(--color-border-primary);
 }

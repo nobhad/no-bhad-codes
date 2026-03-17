@@ -308,6 +308,10 @@ body[data-page="client"] {
   --status-dropdown-width: var(--space-20); /* 160px */
   --portal-dropdown-min-width: var(--status-dropdown-width); /* default trigger min-width */
 
+  /* Portal dropdowns have no shadow — flat, border-only aesthetic */
+  --shadow-dropdown: none;
+  --shadow-dropdown-xl: none;
+
   /* ----------------------------------------
    * OPACITY TOKENS
    * ---------------------------------------- */

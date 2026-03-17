@@ -128,6 +128,10 @@
   border-top: var(--portal-border);
 }
 
+.help-contact-section .data-table-header {
+  border-bottom: none;
+}
+
 .help-contact-content {
   display: flex;
   flex-wrap: wrap;

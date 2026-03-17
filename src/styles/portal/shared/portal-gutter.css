@@ -51,6 +51,22 @@
   padding: 0;
 }
 
+/* Milestone accordion content: gutter on children, not wrapper.
+   Action buttons align right via full-width flex. */
+.portal .dashboard-content .milestone-expanded-content {
+  padding: 0;
+}
+
+.portal .dashboard-content .milestone-expanded-content > * {
+  padding: var(--space-1) var(--content-gutter);
+  box-sizing: border-box;
+}
+
+.portal .dashboard-content .milestone-expanded-content > .action-group {
+  display: flex;
+  width: 100%;
+}
+
 .portal .dashboard-content .help-accordion-article {
   padding: var(--content-gutter);
 }
@@ -134,10 +150,11 @@
 .portal .dashboard-content .data-table-card > *:not(.data-table-header):not(.section-header):not(.data-table-scroll-wrapper):not(.data-table-container):not(.msgtab-container):not(button),
 .portal .dashboard-content .config-content > *:not(button),
 .portal .dashboard-content .milestone-list,
+.portal .dashboard-content .progress-field,
 /* Cards — gutter on children, not card wrapper (matches .panel pattern) */
 .portal .dashboard-content .portal-card > *:not(.data-table-header):not(.section-header):not(.portal-card-header):not(.panel-header-row):not(.panel-header-row--compact):not(button),
 .portal .dashboard-content .stat-card,
-/* Activity and detail list items */
+/* Activity and detail list items — narrow vertical padding, full horizontal gutter */
 .portal .dashboard-content .activity-list > li,
 .portal .dashboard-content .activity-feed > li,
 .portal .dashboard-content .detail-list > li,
@@ -152,6 +169,13 @@
 .portal .dashboard-content .help-contact-actions {
   padding: var(--content-gutter);
   box-sizing: border-box;
+}
+
+/* Activity/detail list items — narrow vertical, full horizontal */
+.portal .dashboard-content .activity-list > li,
+.portal .dashboard-content .activity-feed > li,
+.portal .dashboard-content .detail-list > li {
+  padding: var(--space-1) var(--content-gutter);
 }
 
 /* =====================================================

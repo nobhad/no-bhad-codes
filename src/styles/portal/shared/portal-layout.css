@@ -400,7 +400,6 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 .portal .dashboard-content {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-section-gap);
   flex: 1;
   min-width: 0;
   overflow-y: auto;
@@ -408,6 +407,8 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   background-color: var(--color-bg-primary);
   box-sizing: border-box;
 }
+
+
 
 /* Tab section — bordered panel for simple header+list tabs. */
 .portal .tab-section {
@@ -497,11 +498,21 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   gap: 0;
 }
 
-/* Header subtabs container - row layout for mobile toggle + subtab groups */
+/* Header subtabs container - row layout for subtab groups + actions slot */
 .portal .portal-header-subtabs {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
+}
+
+/* Actions slot rendered inline with subtabs -- flexbox pushes to right */
+.portal .header-subtab-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 /* Header subtabs - align with table content (14px padding to match table cells) */
@@ -691,13 +702,14 @@ td {
 
 /* Section layout — top-level page wrapper.
    Excluded from gutter Tier 1 — manages its own padding.
-   Top/sides: --space-2, bottom: double for visual breathing room. */
+   Top: --portal-section-gap for uniform header-to-content spacing.
+   Sides: --space-2, bottom: --space-4 for visual breathing room. */
 .section {
   display: flex;
   flex-direction: column;
   gap: var(--portal-section-gap);
   background-color: inherit;
-  padding: var(--space-2) var(--space-2) var(--space-4);
+  padding: var(--portal-section-gap) var(--space-2) var(--space-8);
   box-sizing: border-box;
   min-width: 0;
 }
@@ -1418,6 +1430,11 @@ td {
   }
 
   /* Header subtabs wrap on mobile */
+  .portal .portal-header-subtabs {
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+
   .portal .portal-header-subtabs .header-subtab-group {
     flex-wrap: wrap;
   }

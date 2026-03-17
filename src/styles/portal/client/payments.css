@@ -11,34 +11,33 @@
 /* --- Summary Card --- */
 
 .payment-summary-card {
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--space-2);
 }
 
 .payment-summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: var(--spacing-md);
-  padding: var(--spacing-md);
+  gap: var(--space-2);
 }
 
 /* --- Stat Labels & Values --- */
 
 .payment-stat-label {
   font-size: var(--font-size-xs);
-  color: var(--app-color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 .payment-stat-value {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .payment-stat-value--success {
-  color: var(--app-color-success);
+  color: var(--status-completed);
 }
 
 .payment-stat-value--danger {
-  color: var(--app-color-danger);
+  color: var(--color-danger);
 }
 
 /* --- Installment List Items --- */
@@ -47,25 +46,25 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-bottom: 1px solid var(--app-color-border);
+  padding: var(--space-1) var(--content-gutter);
+  border-bottom: var(--portal-border);
 }
 
 .payment-item-label {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .payment-item-meta {
   font-size: var(--font-size-sm);
-  color: var(--app-color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 .payment-item-actions {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--space-1);
 }
 
 .payment-item-amount {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }

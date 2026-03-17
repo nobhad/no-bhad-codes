@@ -200,7 +200,7 @@
   background: var(--color-text-primary);
   transform: translateX(0);
   transition: transform var(--transition-fast);
-  margin: 1px;
+  margin: var(--border-width);
 }
 
 .portal .notification-toggle.is-checked .toggle-thumb {
