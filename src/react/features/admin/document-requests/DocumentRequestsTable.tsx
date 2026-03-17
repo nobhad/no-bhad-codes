@@ -37,6 +37,7 @@ import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
 import { CreateDocumentRequestModal } from '../modals/CreateEntityModals';
+import { DocumentRequestDetailPanel } from './DocumentRequestDetailPanel';
 
 const logger = createLogger('DocumentRequestsTable');
 
@@ -315,7 +316,31 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
     return new Date(dueDate) < new Date();
   }
 
+  // Detail panel state
+  const [selectedRequest, setSelectedRequest] = useState<DocumentRequest | null>(null);
+
+  const handleRowClick = useCallback((request: DocumentRequest) => {
+    setSelectedRequest(request);
+  }, []);
+
+  const handleClosePanel = useCallback(() => {
+    setSelectedRequest(null);
+  }, []);
+
+  const handlePanelStatusChange = useCallback(
+    async (requestId: number, newStatus: string) => {
+      await handleStatusChange(requestId, newStatus);
+      setSelectedRequest((prev) =>
+        prev && prev.id === requestId
+          ? { ...prev, status: newStatus as DocumentRequest['status'] }
+          : prev
+      );
+    },
+    [handleStatusChange]
+  );
+
   return (
+    <>
     <TableLayout
       containerRef={containerRef as React.RefObject<HTMLDivElement>}
       title="DOCUMENT REQUESTS"
@@ -431,6 +456,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
                 key={request.id}
                 clickable
                 selected={selection.isSelected(request)}
+                onClick={() => handleRowClick(request)}
               >
                 <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
@@ -524,5 +550,14 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
         projectOptions={projectOptions}
       />
     </TableLayout>
+
+    <DocumentRequestDetailPanel
+      request={selectedRequest}
+      onClose={handleClosePanel}
+      onStatusChange={handlePanelStatusChange}
+      onNavigate={onNavigate}
+      showNotification={showNotification}
+    />
+    </>
   );
 }

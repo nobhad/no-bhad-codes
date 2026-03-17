@@ -32,6 +32,7 @@ import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { apiPost } from '@/utils/api-client';
 import { CreateDeliverableModal } from '@react/features/admin/modals/CreateEntityModals';
 import { useEntityOptions } from '@react/hooks/useEntityOptions';
+import { DesignReviewDetailPanel } from './DesignReviewDetailPanel';
 
 interface DesignReview {
   id: number;
@@ -170,6 +171,45 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
     }
   }, [showNotification, refetch]);
 
+  // Detail panel state
+  const [selectedReview, setSelectedReview] = useState<DesignReview | null>(null);
+
+  const handleRowClick = useCallback((review: DesignReview) => {
+    setSelectedReview(review);
+  }, []);
+
+  const handleClosePanel = useCallback(() => {
+    setSelectedReview(null);
+  }, []);
+
+  const handlePanelStatusChange = useCallback(
+    async (reviewId: number, newStatus: string) => {
+      // Update via API would go here; for now refresh list
+      showNotification?.(`Status updated to ${newStatus}`, 'success');
+      setSelectedReview((prev) =>
+        prev && prev.id === reviewId
+          ? { ...prev, status: newStatus as DesignReview['status'] }
+          : prev
+      );
+      refetch();
+    },
+    [showNotification, refetch]
+  );
+
+  const handleApprove = useCallback(
+    async (reviewId: number) => {
+      await handlePanelStatusChange(reviewId, 'approved');
+    },
+    [handlePanelStatusChange]
+  );
+
+  const handleRequestRevision = useCallback(
+    async (reviewId: number) => {
+      await handlePanelStatusChange(reviewId, 'revision-requested');
+    },
+    [handlePanelStatusChange]
+  );
+
   const filteredReviews = useMemo(() => applyFilters(reviews), [applyFilters, reviews]);
 
   const pagination = usePagination({ storageKey: 'admin_design_review_pagination', totalItems: filteredReviews.length });
@@ -273,7 +313,7 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
               />
             ) : (
               paginatedReviews.map((review) => (
-                <PortalTableRow key={review.id} clickable>
+                <PortalTableRow key={review.id} clickable onClick={() => handleRowClick(review)}>
                   <PortalTableCell className="primary-cell">
                     <div className="cell-with-icon">
                       <Palette className="icon-sm" />
@@ -337,6 +377,15 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
         onSubmit={handleCreate}
         loading={createLoading}
         projectOptions={entityProjects}
+      />
+      <DesignReviewDetailPanel
+        review={selectedReview}
+        onClose={handleClosePanel}
+        onStatusChange={handlePanelStatusChange}
+        onNavigate={onNavigate}
+        onApprove={handleApprove}
+        onRequestRevision={handleRequestRevision}
+        showNotification={showNotification}
       />
     </div>
   );
