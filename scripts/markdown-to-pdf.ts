@@ -160,6 +160,71 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
     });
   };
 
+  /**
+   * Parse text into segments with bold/regular runs.
+   * Handles both **explicit bold** markdown and label patterns (Text:).
+   * A "label" is word(s) ending with : at the START of a string,
+   * e.g. "Payment Schedule:" or "Deposit (40%):".
+   */
+  type TextSegment = { text: string; bold: boolean };
+
+  const parseInlineBold = (raw: string): TextSegment[] => {
+    const segments: TextSegment[] = [];
+
+    // First pass: split on **bold** markers
+    const boldRegex = /\*\*([^*]+)\*\*/g;
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = boldRegex.exec(raw)) !== null) {
+      if (match.index > lastIndex) {
+        segments.push({ text: raw.slice(lastIndex, match.index), bold: false });
+      }
+      segments.push({ text: match[1], bold: true });
+      lastIndex = boldRegex.lastIndex;
+    }
+
+    if (lastIndex < raw.length) {
+      segments.push({ text: raw.slice(lastIndex), bold: false });
+    }
+
+    // If no explicit bold found, check for label pattern at start
+    // Matches: "SomeLabel:" or "Some Label (40%):" at beginning of text
+    if (segments.length === 1 && !segments[0].bold) {
+      const labelMatch = raw.match(/^([A-Za-z][A-Za-z0-9 ()/%,.'&-]*:)\s*/);
+      if (labelMatch) {
+        const labelText = labelMatch[1];
+        const rest = raw.slice(labelMatch[0].length);
+        const result: TextSegment[] = [{ text: labelText, bold: true }];
+        if (rest) result.push({ text: ' ' + rest, bold: false });
+        return result;
+      }
+    }
+
+    return segments.length > 0 ? segments : [{ text: raw, bold: false }];
+  };
+
+  /**
+   * Draw text with inline bold segments on one line.
+   * Returns the total width drawn.
+   */
+  const drawInlineBoldText = (
+    segments: TextSegment[],
+    startX: number,
+    yPos: number,
+    size: number
+  ): number => {
+    let x = startX;
+    for (const seg of segments) {
+      const font = seg.bold ? helveticaBold : helvetica;
+      const cleanText = seg.bold ? seg.text : stripMarkdownFormatting(seg.text);
+      if (!cleanText) continue;
+      drawText(cleanText, x, yPos, { font, size });
+      x += font.widthOfTextAtSize(cleanText, size);
+    }
+    return x - startX;
+  };
+
   // Helper to calculate smart column widths based on content
   const calculateColumnWidths = (data: string[][]): number[] => {
     const numCols = data[0].length;
@@ -793,19 +858,65 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
       continue;
     }
 
-    // Bullet point
+    // Bullet point — with inline bold for labels (e.g. "Milestones: ...")
     if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
       checkPageBreak(15);
-      const content = stripMarkdownFormatting(trimmed.slice(2));
+      const rawContent = trimmed.slice(2);
       const indent = line.search(/\S/);
       const indentPx = Math.min(indent * 4, 30);
+      const bulletX = PAGE_MARGIN + 10 + indentPx;
+      const textX = PAGE_MARGIN + 20 + indentPx;
+      const maxWidth = CONTENT_WIDTH - 28 - indentPx;
 
-      drawText('•', PAGE_MARGIN + 10 + indentPx, y, { size: FONT_SIZE_BODY });
-      drawText(content, PAGE_MARGIN + 20 + indentPx, y, {
-        size: FONT_SIZE_BODY,
-        maxWidth: CONTENT_WIDTH - 28 - indentPx
-      });
-      y -= LINE_HEIGHT; // Consistent line spacing
+      drawText('•', bulletX, y, { size: FONT_SIZE_BODY });
+
+      const segments = parseInlineBold(rawContent);
+      const hasBold = segments.some(s => s.bold);
+
+      if (hasBold) {
+        // Render with inline bold segments — word wrap manually
+        const allText = segments.map(s => s.bold ? s.text : stripMarkdownFormatting(s.text)).join('');
+        const totalWidth = helvetica.widthOfTextAtSize(allText, FONT_SIZE_BODY);
+
+        if (totalWidth <= maxWidth) {
+          // Fits on one line
+          drawInlineBoldText(segments, textX, y, FONT_SIZE_BODY);
+        } else {
+          // Needs wrapping — render bold label on first line, rest wraps
+          let x = textX;
+          for (const seg of segments) {
+            const font = seg.bold ? helveticaBold : helvetica;
+            const cleanText = seg.bold ? seg.text : stripMarkdownFormatting(seg.text);
+            if (!cleanText) continue;
+
+            const words = cleanText.split(' ');
+            for (const word of words) {
+              const wordText = x > textX ? ` ${word}` : word;
+              const wordWidth = font.widthOfTextAtSize(wordText, FONT_SIZE_BODY);
+
+              if (x + wordWidth > PAGE_MARGIN + CONTENT_WIDTH && x > textX) {
+                y -= LINE_HEIGHT;
+                checkPageBreak(15);
+                x = PAGE_MARGIN;
+                drawText(word, x, y, { font, size: FONT_SIZE_BODY });
+                x += font.widthOfTextAtSize(word, FONT_SIZE_BODY);
+              } else {
+                drawText(wordText, x, y, { font, size: FONT_SIZE_BODY });
+                x += wordWidth;
+              }
+            }
+          }
+        }
+      } else {
+        // No bold — render as before
+        const content = stripMarkdownFormatting(rawContent);
+        drawText(content, textX, y, {
+          size: FONT_SIZE_BODY,
+          maxWidth
+        });
+      }
+
+      y -= LINE_HEIGHT;
       continue;
     }
 
@@ -822,32 +933,63 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
       continue;
     }
 
-    // Regular paragraph
+    // Regular paragraph — with inline bold for labels
     checkPageBreak(15);
-    const text = stripMarkdownFormatting(trimmed);
-    if (text) {
-      // Simple word wrap
-      const words = text.split(' ');
-      let currentLine = '';
-      const maxWidth = CONTENT_WIDTH;
+    const segments = parseInlineBold(trimmed);
+    const hasBoldSegments = segments.some(s => s.bold);
 
-      for (const word of words) {
-        const testLine = currentLine ? `${currentLine} ${word}` : word;
-        const testWidth = helvetica.widthOfTextAtSize(testLine, FONT_SIZE_BODY);
+    if (hasBoldSegments) {
+      // Render with inline bold segments and word wrapping
+      let x = PAGE_MARGIN;
+      for (const seg of segments) {
+        const font = seg.bold ? helveticaBold : helvetica;
+        const cleanText = seg.bold ? seg.text : stripMarkdownFormatting(seg.text);
+        if (!cleanText) continue;
 
-        if (testWidth > maxWidth && currentLine) {
-          drawText(currentLine, PAGE_MARGIN, y, { size: FONT_SIZE_BODY });
-          y -= LINE_HEIGHT;
-          checkPageBreak(15);
-          currentLine = word;
-        } else {
-          currentLine = testLine;
+        const words = cleanText.split(' ');
+        for (const word of words) {
+          const wordText = x > PAGE_MARGIN ? ` ${word}` : word;
+          const wordWidth = font.widthOfTextAtSize(wordText, FONT_SIZE_BODY);
+
+          if (x + wordWidth > PAGE_MARGIN + CONTENT_WIDTH && x > PAGE_MARGIN) {
+            y -= LINE_HEIGHT;
+            checkPageBreak(15);
+            x = PAGE_MARGIN;
+            drawText(word, x, y, { font, size: FONT_SIZE_BODY });
+            x += font.widthOfTextAtSize(word, FONT_SIZE_BODY);
+          } else {
+            drawText(wordText, x, y, { font, size: FONT_SIZE_BODY });
+            x += wordWidth;
+          }
         }
       }
+      y -= LINE_HEIGHT;
+    } else {
+      const text = stripMarkdownFormatting(trimmed);
+      if (text) {
+        // Simple word wrap (no bold)
+        const words = text.split(' ');
+        let currentLine = '';
+        const maxWidth = CONTENT_WIDTH;
 
-      if (currentLine) {
-        drawText(currentLine, PAGE_MARGIN, y, { size: FONT_SIZE_BODY });
-        y -= LINE_HEIGHT;
+        for (const word of words) {
+          const testLine = currentLine ? `${currentLine} ${word}` : word;
+          const testWidth = helvetica.widthOfTextAtSize(testLine, FONT_SIZE_BODY);
+
+          if (testWidth > maxWidth && currentLine) {
+            drawText(currentLine, PAGE_MARGIN, y, { size: FONT_SIZE_BODY });
+            y -= LINE_HEIGHT;
+            checkPageBreak(15);
+            currentLine = word;
+          } else {
+            currentLine = testLine;
+          }
+        }
+
+        if (currentLine) {
+          drawText(currentLine, PAGE_MARGIN, y, { size: FONT_SIZE_BODY });
+          y -= LINE_HEIGHT;
+        }
       }
     }
   }
