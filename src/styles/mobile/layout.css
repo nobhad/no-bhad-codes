@@ -179,7 +179,7 @@
   /* Ensure children don't block touch */
   .about-section .about-content *,
   .about-section .about-layout,
-  .about-section .tech-stack-desktop {
+  .about-section .tech-marquee {
     touch-action: pan-y;
     pointer-events: auto;
   }
@@ -257,55 +257,34 @@
     margin-bottom: 1rem;
   }
 
-  /* Tech stack heading inside about section */
-  .tech-stack-desktop h3 {
-    font-size: clamp(1.25rem, 5vw, 1.75rem);
-    font-family: var(--font-family-acme);
-    font-weight: var(--font-weight-bold);
-    text-transform: uppercase;
-    margin: 0;
-    letter-spacing: var(--letter-spacing-widest);
-  }
-
-  /* Hide separate mobile tech-stack section - show inside about like desktop */
+  /* Hide separate mobile tech-stack section */
   .tech-stack-section {
     display: none;
   }
 
-  /* Show tech-stack-desktop on mobile (matching desktop layout) */
-  .tech-stack-desktop {
-    display: block;
+  /* Tech Stack Marquee - full width at bottom of about on mobile */
+  .about-section .tech-marquee {
     width: 100%;
-    margin-top: 1rem;
+    overflow: hidden;
+    pointer-events: none;
+    padding: 1.5rem 0;
   }
 
-  /* Tech stack box styling on mobile - inside about section */
-  .tech-stack-desktop .tech-stack {
-    background-color: var(--color-neutral-100);
-    padding: 2rem;
-    border-radius: var(--border-radius-md, 8px);
-    border: var(--border-width) solid var(--color-neutral-600);
+  .tech-marquee-track {
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    width: max-content;
+    will-change: transform;
   }
 
-  .tech-stack-desktop .tech-stack h3,
-  .tech-stack-desktop .tech-stack .tech-list {
-    margin: 0;
+  .tech-marquee-item {
+    font-size: var(--font-size-base, 1rem);
+    padding: 0 1rem;
   }
 
-  /* Dark theme: lighter border for contrast */
-  html[data-theme="dark"] .tech-stack-desktop .tech-stack {
-    border-color: var(--color-neutral-400);
-  }
-
-  /* Tech list styling on mobile */
-  .about-section .tech-list,
-  .tech-stack-desktop .tech-list {
-    max-width: 100%;
-    text-align: justify;
-    font-size: var(--font-size-sm);
+  .tech-marquee-item::after {
+    content: '\00B7';
+    padding-left: 1rem;
+    opacity: 0.4;
   }
 
   /* Contact section - auto height to fit form + business card (matching desktop layout) */

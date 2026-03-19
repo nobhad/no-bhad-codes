@@ -183,6 +183,23 @@ export function registerModules(debug: boolean = false): void {
       }
     },
     {
+      name: 'TechMarqueeModule',
+      type: 'dom',
+      factory: async () => {
+        const currentPath = window.location.pathname;
+        if (currentPath === '/' || currentPath === '/index.html') {
+          const { TechMarqueeModule } = await import('../modules/animation/tech-marquee');
+          return new TechMarqueeModule({ debug });
+        }
+        return {
+          init: async () => {},
+          destroy: () => {},
+          isInitialized: true,
+          name: 'TechMarqueeModule'
+        };
+      }
+    },
+    {
       name: 'PageTransitionModule',
       type: 'dom',
       factory: async () => {
@@ -287,6 +304,7 @@ export function getMainSiteModules(): string[] {
     'ContactFormModule',
     'TextAnimationModule',
     'ContactAnimationModule',
+    'TechMarqueeModule',
     'PageTransitionModule',
     'ProjectsModule'
   ];
