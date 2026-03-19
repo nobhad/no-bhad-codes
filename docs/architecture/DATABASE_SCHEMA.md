@@ -2,8 +2,8 @@
 
 **Last Updated:** March 17, 2026
 **Database:** SQLite (`data/client_portal.db`)
-**Total Tables:** 154 (includes Phase 1-5B tables)
-**Total Migrations:** 128
+**Total Tables:** 156 (includes Phase 1-6 tables)
+**Total Migrations:** 129
 
 ## Table of Contents
 
@@ -512,6 +512,13 @@ See [DATABASE_NORMALIZATION_PLAN.md](../archive/DATABASE_NORMALIZATION_PLAN.md) 
 - `embed_configurations` — Widget configuration records (widget_type CHECK 3 types: contact_form/testimonials/status_badge, name, token UNIQUE, config JSON, allowed_domains TEXT, is_active, created_at, updated_at)
 - `project_status_tokens` — Public tokens for project status badge widgets (project_id FK, token UNIQUE, is_active, created_at)
 
+## Phase 6 Tables (Migration 129)
+
+### AI Usage Tracking and Response Cache (Migration 129)
+
+- `ai_usage_log` -- Tracks every AI API call (request_type, model, input_tokens, output_tokens, cost_cents, cache_hit, entity_type, entity_id, created_at). Indexed on created_at for budget queries.
+- `ai_response_cache` -- Caches AI responses by SHA-256 context hash (context_hash UNIQUE, request_type, response_data JSON, expires_at, created_at). TTL-based expiry cleaned up by daily cron.
+
 ---
 
 ## Related Documentation
@@ -529,3 +536,4 @@ See [DATABASE_NORMALIZATION_PLAN.md](../archive/DATABASE_NORMALIZATION_PLAN.md) 
 - [Retainers](../features/RETAINERS.md)
 - [Feedback Surveys](../features/FEEDBACK.md)
 - [Embeddable Widgets](../features/EMBED_WIDGETS.md)
+- [AI Features](../features/AI_FEATURES.md)

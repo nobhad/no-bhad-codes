@@ -1,6 +1,6 @@
 # State of the Art Roadmap
 
-**Status:** In Progress — Phase 1-5 Complete
+**Status:** In Progress — Phase 1-6 Complete
 **Last Updated:** 2026-03-17
 **Goal:** Close every meaningful gap between this platform and the best-in-class tools (HoneyBook, Dubsado, Moxie, Plutio, Bloom, Productive)
 
@@ -4629,9 +4629,9 @@ Constants defined in `api-endpoints.ts`:
 
 ---
 
-## Phase 6: AI-Powered Features
+## Phase 6: AI-Powered Features — COMPLETE
 
-### 6A. AI Proposal Drafting
+### 6A. AI Proposal Drafting --- COMPLETE
 
 **Problem:** Even with prefill, admin manually writes scope descriptions, feature explanations, and timeline narratives.
 
@@ -4817,7 +4817,7 @@ const handleAiDraft = async (section: 'scope' | 'features' | 'timeline') => {
 
 ---
 
-### 6B. AI Email Response Drafting
+### 6B. AI Email Response Drafting --- COMPLETE
 
 Same `ai-service.ts`, different method. Same cost controls apply.
 
@@ -4875,7 +4875,7 @@ MessageThread
 
 ---
 
-### 6C. Semantic Search
+### 6C. Semantic Search --- COMPLETE
 
 **Problem:** Current search is basic text matching across limited fields. Finding "that invoice for the website project from January" requires knowing exact terms.
 
@@ -5245,6 +5245,9 @@ taskRunner.register({ name: 'retainer-expiration', schedule: '0 0 * * *', handle
 taskRunner.register({ name: 'feedback-reminders', schedule: '0 10 * * *', handler: () => feedbackService.sendReminders(), enabled: true });
 taskRunner.register({ name: 'feedback-expiration', schedule: '0 0 * * *', handler: () => feedbackService.expireOverdue(), enabled: true });
 
+// Phase 6
+taskRunner.register({ name: 'ai-cache-cleanup', schedule: '30 3 * * *', handler: () => aiService.cleanupExpiredCache(), enabled: true });
+
 // Phase 7
 taskRunner.register({ name: 'exchange-rates', schedule: '0 6 * * *', handler: () => currencyService.fetchRates(), enabled: true });
 
@@ -5385,9 +5388,9 @@ Phase 5 (Post-Project)
 └── 5B. Embeddable Widgets
     New files: 2 server + 3 embed scripts
 
-Phase 6 (AI)
+Phase 6 (AI) — COMPLETE
 ├── 6A. AI Proposal Drafting
-│   Migration: 130 (ai_usage_tracking)
+│   Migration: 129 (ai_usage_tracking)
 │   New files: 3 server + 1 React integration
 │   New deps: @anthropic-ai/sdk
 │
@@ -5428,6 +5431,29 @@ Phase 7 (International — Do Last)
 ---
 
 ## Change Log
+
+### 2026-03-17 — Phase 6 AI-Powered Features Complete
+
+**6A: AI Proposal Drafting + 6B: AI Email Drafting (Migration 129)**
+
+- ai-config.ts: Model selection, monthly budget cap (configurable via env), daily rate limiting, pricing per model, temperature per request type, cache TTL
+- ai-types.ts: DraftProposalContext/Result, DraftEmailContext/Result, AiUsageSummary types
+- ai-service.ts: Core service with draftProposalScope, draftEmail, getUsageSummary, getUsageHistory, cleanupExpiredCache, isAvailable. SHA-256 response caching, budget enforcement, daily rate limiting
+- 2 tables: ai_usage_log (request_type, model, tokens, cost_cents, cache_hit), ai_response_cache (context hash, TTL expiry)
+- Admin routes (5 endpoints): POST /api/admin/ai/draft-proposal, POST /api/admin/ai/draft-email, GET /api/admin/ai/usage, GET /api/admin/ai/usage/history, GET /api/admin/ai/status
+- Scheduler: 1 cron — AI cache cleanup (daily 3:30 AM)
+- New npm dep: @anthropic-ai/sdk
+
+**6C: Enhanced Search + Cmd+K Modal**
+
+- search-service.ts: ENHANCED from 4 to 9 entity types (added proposals, contracts, leads, tasks, files). Relevance scoring algorithm, Promise.allSettled for parallel queries, results sorted by relevance
+- SearchModal.tsx: Global Cmd+K search modal with debounced input, keyboard navigation (arrow keys, Enter, Escape), grouped results by entity type, recent searches in localStorage
+- PortalLayout.tsx: Integrated SearchModal with useSearchModal hook
+- Frontend API constants: AI_DRAFT_PROPOSAL, AI_DRAFT_EMAIL, AI_USAGE, AI_USAGE_HISTORY, AI_STATUS
+
+**Files created:** ~7 (1 migration, 3 server config/services/types, 1 route, 1 React component)
+**Files modified:** ~5 (app.ts, api-endpoints.ts, PortalLayout.tsx, search-service.ts, scheduler-service.ts)
+**New npm deps:** 1 (@anthropic-ai/sdk)
 
 ### 2026-03-17 — Phase 5B Embeddable Widgets Complete
 

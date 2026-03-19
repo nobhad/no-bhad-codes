@@ -6,6 +6,7 @@ This folder contains feature-level documentation. Use this index to jump to the 
 
 - [ADMIN_DASHBOARD.md](ADMIN_DASHBOARD.md)
 - [AD_HOC_REQUESTS.md](AD_HOC_REQUESTS.md)
+- [AI_FEATURES.md](AI_FEATURES.md)
 - [AGREEMENTS.md](AGREEMENTS.md)
 - [ANALYTICS.md](ANALYTICS.md)
 - [CLIENTS.md](CLIENTS.md)

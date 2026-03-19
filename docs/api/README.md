@@ -297,6 +297,14 @@ properties and the JWT payload structure.
 - `GET /api/embed/status-badge.js` — Project status badge widget JavaScript
 - `GET /api/embed/status/:token` — Project status JSON (name, status, completion %, milestones)
 
+### AI Features (Phase 6)
+
+- `POST /api/admin/ai/draft-proposal` -- Draft proposal scope from project context (requireAdmin)
+- `POST /api/admin/ai/draft-email` -- Draft email from thread/project context (requireAdmin)
+- `GET /api/admin/ai/usage` -- Current month usage summary: total cost, request count, by-type breakdown (requireAdmin)
+- `GET /api/admin/ai/usage/history` -- Monthly usage history (requireAdmin)
+- `GET /api/admin/ai/status` -- AI service availability and budget status (requireAdmin)
+
 ### Other Feature Areas
 
 - Questionnaires: `GET/POST /questionnaires`

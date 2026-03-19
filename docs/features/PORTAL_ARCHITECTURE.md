@@ -29,12 +29,13 @@ Both portals mount into `.dashboard-container.portal` via `src/react/app/mount-p
 | `src/react/app/PortalApp.tsx` | Root component. Wraps with providers (Router, store, error boundaries). |
 | `src/react/app/PortalProviders.tsx` | Context providers composition |
 | `src/react/app/PortalRoutes.tsx` | All routes, role-based rendering, auth guard |
-| `src/react/app/PortalLayout.tsx` | Shell: sidebar + header + `<Outlet />` content |
+| `src/react/app/PortalLayout.tsx` | Shell: sidebar + header + `<Outlet />` content + SearchModal (Cmd+K) |
 | `src/react/app/PortalSidebar.tsx` | Left navigation (collapsed/expanded state, nav items from store) |
 | `src/react/app/PortalHeader.tsx` | Top header: logo, sidebar toggle, page title, notification bell, theme toggle |
 | `src/react/app/PortalSubtabs.tsx` | Subtab group navigation (Work, CRM, Documents groups). Renders page-specific actions on right side. |
 | `src/react/contexts/SubtabContext.tsx` | Subtab state context: active subtab, set subtab, page-specific actions |
 | `src/react/app/LazyTabRoute.tsx` | Suspense wrapper for lazy-loaded route components |
+| `src/react/components/SearchModal.tsx` | Global Cmd+K search overlay with keyboard navigation, grouped results, debounced search |
 | `src/react/app/mount-portal.tsx` | React SPA mount factory (called once on page load) |
 | `src/react/stores/portal-store.ts` | Zustand store |
 | `src/react/hooks/usePortalAuth.ts` | Auth hook |
@@ -174,6 +175,12 @@ Portal subtabs use `SubtabContext` (React context) for state management:
 This replaced the previous DOM custom event system (`document.dispatchEvent`/`addEventListener`).
 
 ## Change Log
+
+### 2026-03-17 — Phase 6 SearchModal integration
+
+- Added SearchModal (Cmd+K / Ctrl+K) to PortalLayout via useSearchModal hook
+- SearchModal is a portal-rendered overlay, not a route -- available from any page
+- Searches 9 entity types with relevance scoring and grouped results
 
 ### 2026-03-17 — Phase 5B embed widgets route
 
