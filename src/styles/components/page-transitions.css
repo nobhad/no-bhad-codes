@@ -205,7 +205,7 @@ section.business-card-section.page-hidden .intro-nav {
 
   /* Other virtual page sections - centered */
   main[data-virtual-pages]
-    > section[data-page]:not(.tech-stack-section):not(.contact-section):not(.about-section):not(
+    > section[data-page]:not(.contact-section):not(.about-section):not(
       .business-card-section
     ):not(.projects-section):not(.project-detail-section) {
     position: absolute;
@@ -320,11 +320,6 @@ section.business-card-section.page-hidden .intro-nav {
     padding: clamp(1rem, 4vw, 2rem);
     /* visibility controlled by GSAP autoAlpha */
     pointer-events: auto;
-  }
-
-  /* Tech stack section is mobile-only - keep hidden on desktop */
-  main[data-virtual-pages] > .tech-stack-section {
-    display: none;
   }
 
   /* Hero section with text animation - handled separately, not a virtual page */
