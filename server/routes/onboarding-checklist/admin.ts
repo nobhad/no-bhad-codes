@@ -97,4 +97,69 @@ router.get(
   })
 );
 
+/**
+ * POST /api/onboarding-checklist/admin/templates
+ * Create a new onboarding template.
+ */
+router.post(
+  '/admin/templates',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: JWTAuthRequest, res: Response) => {
+    const { name, projectType, isDefault, stepsConfig } = req.body;
+
+    if (!name || !stepsConfig || !Array.isArray(stepsConfig)) {
+      errorResponse(res, 'name and stepsConfig are required', 400, ErrorCodes.VALIDATION_ERROR);
+      return;
+    }
+
+    const templateId = await onboardingChecklistService.createTemplate({
+      name,
+      projectType,
+      isDefault,
+      stepsConfig
+    });
+
+    sendCreated(res, { templateId }, 'Template created');
+  })
+);
+
+/**
+ * PUT /api/onboarding-checklist/admin/templates/:id
+ * Update an onboarding template.
+ */
+router.put(
+  '/admin/templates/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: JWTAuthRequest, res: Response) => {
+    const templateId = Number(req.params.id);
+    const { name, projectType, isDefault, stepsConfig } = req.body;
+
+    await onboardingChecklistService.updateTemplate(templateId, {
+      name,
+      projectType,
+      isDefault,
+      stepsConfig
+    });
+
+    sendSuccess(res, undefined, 'Template updated');
+  })
+);
+
+/**
+ * DELETE /api/onboarding-checklist/admin/templates/:id
+ * Delete an onboarding template.
+ */
+router.delete(
+  '/admin/templates/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: JWTAuthRequest, res: Response) => {
+    const templateId = Number(req.params.id);
+    await onboardingChecklistService.deleteTemplate(templateId);
+    sendSuccess(res, undefined, 'Template deleted');
+  })
+);
+
 export default router;

@@ -180,6 +180,9 @@ export class SchedulerService {
   private feedbackReminderJob: SimpleTask | null = null;
   private feedbackExpirationJob: SimpleTask | null = null;
   private aiCacheCleanupJob: SimpleTask | null = null;
+  private agreementExpirationJob: SimpleTask | null = null;
+  private autoPayJob: SimpleTask | null = null;
+  private autoPayRetryJob: SimpleTask | null = null;
   private isRunning = false;
 
   private constructor(config: Partial<SchedulerConfig> = {}) {
@@ -257,6 +260,13 @@ export class SchedulerService {
     // Schedule AI cache cleanup (daily at 3:30 AM)
     this.scheduleAiCacheCleanup();
 
+    // Schedule agreement expiration processing (daily at 9:30 AM)
+    this.scheduleAgreementExpiration();
+
+    // Schedule auto-pay processing (daily at 6:00 AM) and retry queue (hourly)
+    this.scheduleAutoPay();
+    this.scheduleAutoPayRetry();
+
     // Start all scheduled jobs
     const jobs = [
       this.reminderJob,
@@ -271,7 +281,10 @@ export class SchedulerService {
       this.retainerUsageAlertJob,
       this.feedbackReminderJob,
       this.feedbackExpirationJob,
-      this.aiCacheCleanupJob
+      this.aiCacheCleanupJob,
+      this.agreementExpirationJob,
+      this.autoPayJob,
+      this.autoPayRetryJob
     ].filter(Boolean);
 
     for (const job of jobs) {
@@ -351,6 +364,21 @@ export class SchedulerService {
     if (this.aiCacheCleanupJob) {
       this.aiCacheCleanupJob.stop();
       this.aiCacheCleanupJob = null;
+    }
+
+    if (this.agreementExpirationJob) {
+      this.agreementExpirationJob.stop();
+      this.agreementExpirationJob = null;
+    }
+
+    if (this.autoPayJob) {
+      this.autoPayJob.stop();
+      this.autoPayJob = null;
+    }
+
+    if (this.autoPayRetryJob) {
+      this.autoPayRetryJob.stop();
+      this.autoPayRetryJob = null;
     }
 
     this.isRunning = false;
@@ -663,6 +691,84 @@ export class SchedulerService {
         }
       } catch (error) {
         logger.error('[Scheduler] Error during AI cache cleanup:', {
+          error: error instanceof Error ? error : undefined
+        });
+      }
+    });
+  }
+
+  /**
+   * Schedule agreement expiration processing — daily at 9:30 AM
+   * Sends 7-day and 3-day reminders, auto-expires past-due agreements.
+   */
+  private scheduleAgreementExpiration(): void {
+    const AGREEMENT_EXPIRY_CRON = '30 9 * * *';
+    logger.info(`[Scheduler] Scheduling agreement expiration: ${AGREEMENT_EXPIRY_CRON}`);
+
+    this.agreementExpirationJob = createSimpleTask(AGREEMENT_EXPIRY_CRON, async () => {
+      try {
+        const { agreementService } = await import('./agreement-service.js');
+        const result = await agreementService.processExpirations();
+
+        if (result.reminded7d > 0 || result.reminded3d > 0 || result.expired > 0) {
+          logger.info(
+            `[Scheduler] Agreement expirations: reminded7d=${result.reminded7d}, reminded3d=${result.reminded3d}, expired=${result.expired}`
+          );
+        }
+      } catch (error) {
+        logger.error('[Scheduler] Error during agreement expiration:', {
+          error: error instanceof Error ? error : undefined
+        });
+      }
+    });
+  }
+
+  /**
+   * Schedule auto-pay processing — daily at 6:00 AM
+   * Charges due invoices for clients with auto-pay enabled.
+   */
+  private scheduleAutoPay(): void {
+    const AUTO_PAY_CRON = '0 6 * * *';
+    logger.info(`[Scheduler] Scheduling auto-pay processing: ${AUTO_PAY_CRON}`);
+
+    this.autoPayJob = createSimpleTask(AUTO_PAY_CRON, async () => {
+      try {
+        const { autoPayService } = await import('./auto-pay-service.js');
+        const result = await autoPayService.processAutoPay();
+
+        if (result.charged > 0 || result.failed > 0) {
+          logger.info(
+            `[Scheduler] Auto-pay: charged=${result.charged}, failed=${result.failed}, retried=${result.retried}, skipped=${result.skipped}`
+          );
+        }
+      } catch (error) {
+        logger.error('[Scheduler] Error during auto-pay processing:', {
+          error: error instanceof Error ? error : undefined
+        });
+      }
+    });
+  }
+
+  /**
+   * Schedule auto-pay retry queue — hourly at :45
+   * Retries failed auto-pay charges whose retry time has passed.
+   */
+  private scheduleAutoPayRetry(): void {
+    const AUTO_PAY_RETRY_CRON = '45 * * * *';
+    logger.info(`[Scheduler] Scheduling auto-pay retry: ${AUTO_PAY_RETRY_CRON}`);
+
+    this.autoPayRetryJob = createSimpleTask(AUTO_PAY_RETRY_CRON, async () => {
+      try {
+        const { autoPayService } = await import('./auto-pay-service.js');
+        const result = await autoPayService.processRetryQueue();
+
+        if (result.retried > 0) {
+          logger.info(
+            `[Scheduler] Auto-pay retry: retried=${result.retried}, succeeded=${result.succeeded}, failed=${result.failed}`
+          );
+        }
+      } catch (error) {
+        logger.error('[Scheduler] Error during auto-pay retry:', {
           error: error instanceof Error ? error : undefined
         });
       }

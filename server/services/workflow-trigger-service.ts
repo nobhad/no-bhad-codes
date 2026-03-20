@@ -91,7 +91,8 @@ export type EventType =
   | 'content_request.accepted'
   | 'content_request.revision_needed'
   // Agreement events
-  | 'agreement.completed';
+  | 'agreement.completed'
+  | 'agreement.expired';
 
 export type ActionType = 'send_email' | 'create_task' | 'update_status' | 'webhook' | 'notify';
 

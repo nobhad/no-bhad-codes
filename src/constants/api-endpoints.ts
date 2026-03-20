@@ -62,14 +62,20 @@ export const API_ENDPOINTS = {
   // Payments (embedded Stripe)
   PAYMENTS: '/api/payments',
   PAYMENTS_CREATE_INTENT: '/api/payments/create-intent',
+  PAYMENTS_METHODS: '/api/payments/methods',
+  PAYMENTS_METHODS_SETUP: '/api/payments/methods/setup-intent',
+  PAYMENTS_AUTO_PAY: '/api/payments/auto-pay',
 
   // Agreements
   AGREEMENTS: '/api/agreements',
   AGREEMENTS_MY: '/api/agreements/my',
+  AGREEMENTS_FROM_TEMPLATE: '/api/agreements/from-template',
 
   // Onboarding Checklist
   ONBOARDING_CHECKLIST: '/api/onboarding-checklist',
   ONBOARDING_CHECKLIST_MY: '/api/onboarding-checklist/my',
+  ONBOARDING_CHECKLIST_TEMPLATES: '/api/onboarding-checklist/admin/templates',
+  ONBOARDING_CHECKLIST_ALL: '/api/onboarding-checklist/admin/all',
 
   // Email Sequences (admin)
   SEQUENCES: '/api/sequences',
@@ -400,15 +406,22 @@ export const buildEndpoint = {
   webhookToggle: (id: number | string) => `${API_ENDPOINTS.ADMIN.WEBHOOKS}/${id}/toggle`,
   webhookSecret: (id: number | string) => `${API_ENDPOINTS.ADMIN.WEBHOOKS}/${id}/secret/regenerate`,
 
+  // Payment Methods
+  paymentMethod: (id: number | string) => `${API_ENDPOINTS.PAYMENTS_METHODS}/${id}`,
+  paymentMethodDefault: (id: number | string) => `${API_ENDPOINTS.PAYMENTS_METHODS}/${id}/default`,
+
   // Agreements
   agreement: (id: number | string) => `${API_ENDPOINTS.AGREEMENTS}/${id}`,
   agreementSend: (id: number | string) => `${API_ENDPOINTS.AGREEMENTS}/${id}/send`,
   agreementCancel: (id: number | string) => `${API_ENDPOINTS.AGREEMENTS}/${id}/cancel`,
   agreementStepComplete: (stepId: number | string) => `${API_ENDPOINTS.AGREEMENTS}/steps/${stepId}/complete`,
   agreementView: (id: number | string) => `${API_ENDPOINTS.AGREEMENTS}/${id}/view`,
+  agreementStepsReorder: (id: number | string) => `${API_ENDPOINTS.AGREEMENTS}/${id}/steps/reorder`,
+  agreementExpiration: (id: number | string) => `${API_ENDPOINTS.AGREEMENTS}/${id}/expiration`,
 
   // Onboarding Checklist
   onboardingStepComplete: (stepId: number | string) => `${API_ENDPOINTS.ONBOARDING_CHECKLIST}/steps/${stepId}/complete`,
+  onboardingTemplate: (id: number | string) => `${API_ENDPOINTS.ONBOARDING_CHECKLIST}/admin/templates/${id}`,
 
   // Embed Widgets
   embedWidget: (id: number | string) => `${API_ENDPOINTS.EMBED}/${id}`,

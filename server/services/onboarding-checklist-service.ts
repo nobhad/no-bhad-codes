@@ -355,6 +355,108 @@ async function getTemplates(): Promise<OnboardingTemplateRow[]> {
 }
 
 // ============================================
+// Template CRUD (Admin)
+// ============================================
+
+/**
+ * Create a new onboarding template.
+ */
+async function createTemplate(params: {
+  name: string;
+  projectType?: string;
+  isDefault?: boolean;
+  stepsConfig: TemplateStepConfig[];
+}): Promise<number> {
+  const db = getDatabase();
+
+  // If setting as default, unset other defaults
+  if (params.isDefault) {
+    await db.run('UPDATE onboarding_templates SET is_default = 0');
+  }
+
+  const result = await db.run(
+    `INSERT INTO onboarding_templates (name, project_type, steps_config, is_default)
+     VALUES (?, ?, ?, ?)`,
+    [
+      params.name,
+      params.projectType || null,
+      JSON.stringify(params.stepsConfig),
+      params.isDefault ? 1 : 0
+    ]
+  );
+
+  logger.info('Created onboarding template', {
+    category: 'onboarding',
+    metadata: { templateId: result.lastID, name: params.name }
+  });
+
+  return result.lastID!;
+}
+
+/**
+ * Update an existing onboarding template.
+ */
+async function updateTemplate(templateId: number, params: {
+  name?: string;
+  projectType?: string | null;
+  isDefault?: boolean;
+  stepsConfig?: TemplateStepConfig[];
+}): Promise<void> {
+  const db = getDatabase();
+
+  // If setting as default, unset other defaults
+  if (params.isDefault) {
+    await db.run('UPDATE onboarding_templates SET is_default = 0');
+  }
+
+  const setClauses: string[] = [];
+  const values: (string | number | null)[] = [];
+
+  if (params.name !== undefined) {
+    setClauses.push('name = ?');
+    values.push(params.name);
+  }
+  if (params.projectType !== undefined) {
+    setClauses.push('project_type = ?');
+    values.push(params.projectType);
+  }
+  if (params.isDefault !== undefined) {
+    setClauses.push('is_default = ?');
+    values.push(params.isDefault ? 1 : 0);
+  }
+  if (params.stepsConfig !== undefined) {
+    setClauses.push('steps_config = ?');
+    values.push(JSON.stringify(params.stepsConfig));
+  }
+
+  if (setClauses.length === 0) return;
+
+  values.push(templateId);
+  await db.run(
+    `UPDATE onboarding_templates SET ${setClauses.join(', ')} WHERE id = ?`,
+    values
+  );
+
+  logger.info('Updated onboarding template', {
+    category: 'onboarding',
+    metadata: { templateId }
+  });
+}
+
+/**
+ * Delete an onboarding template.
+ */
+async function deleteTemplate(templateId: number): Promise<void> {
+  const db = getDatabase();
+  await db.run('DELETE FROM onboarding_templates WHERE id = ?', [templateId]);
+
+  logger.info('Deleted onboarding template', {
+    category: 'onboarding',
+    metadata: { templateId }
+  });
+}
+
+// ============================================
 // Singleton Export
 // ============================================
 
@@ -366,5 +468,8 @@ export const onboardingChecklistService = {
   getTemplates,
   completeStep,
   autoCompleteByEntity,
-  dismissChecklist
+  dismissChecklist,
+  createTemplate,
+  updateTemplate,
+  deleteTemplate
 };

@@ -151,7 +151,6 @@ export const PDF_SPACING = {
   logoHeight: 100,
 
   // --- Legacy (kept for backward compat) ---
-  sowLogoHeight: 50,
   maxSignatureWidth: 200,
   maxSignatureHeight: 50,
   pricingValueOffset: 180,

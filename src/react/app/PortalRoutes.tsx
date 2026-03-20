@@ -137,6 +137,13 @@ const PortalFeedback = lazyNamed(() => import('../features/portal/feedback').the
 // Admin: Embed Widgets
 const EmbedWidgetsManager = lazyNamed(() => import('../features/admin/embed').then(m => ({ EmbedWidgetsManager: m.EmbedWidgetsManager })));
 
+// Admin: Agreement Builder & Onboarding Templates
+const AgreementBuilder = lazyNamed(() => import('../features/admin/agreements').then(m => ({ AgreementBuilder: m.AgreementBuilder })));
+const OnboardingTemplatesManager = lazyNamed(() => import('../features/admin/onboarding-templates').then(m => ({ OnboardingTemplatesManager: m.OnboardingTemplatesManager })));
+
+// Portal: Auto-Pay
+const AutoPaySettings = lazyNamed(() => import('../features/portal/auto-pay').then(m => ({ AutoPaySettings: m.AutoPaySettings })));
+
 // Admin: Expenses & Retainers
 const ExpensesTable = lazyNamed(() => import('../features/admin/expenses').then(m => ({ ExpensesTable: m.ExpensesTable })));
 const RetainersTable = lazyNamed(() => import('../features/admin/retainers').then(m => ({ RetainersTable: m.RetainersTable })));
@@ -486,14 +493,26 @@ export function PortalRoutes() {
 
         {/* ========== AGREEMENTS ========== */}
         <Route path="/agreements" element={
-          <LazyTabRoute tabId="agreements">
-            <AgreementsList />
-          </LazyTabRoute>
+          role === 'admin' ? (
+            <LazyTabRoute tabId="agreements"><AgreementBuilder /></LazyTabRoute>
+          ) : (
+            <LazyTabRoute tabId="agreements"><AgreementsList /></LazyTabRoute>
+          )
         } />
         <Route path="/agreements/:id" element={
           <LazyTabRoute tabId="agreements">
             <AgreementFlowRoute />
           </LazyTabRoute>
+        } />
+
+        {/* ========== ONBOARDING TEMPLATES (Admin) ========== */}
+        <Route path="/onboarding-templates" element={
+          <LazyTabRoute tabId="onboarding-templates"><OnboardingTemplatesManager /></LazyTabRoute>
+        } />
+
+        {/* ========== AUTO-PAY (Client) ========== */}
+        <Route path="/auto-pay" element={
+          <LazyTabRoute tabId="auto-pay"><AutoPaySettings /></LazyTabRoute>
         } />
 
         {/* Catch-all */}
