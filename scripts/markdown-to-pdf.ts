@@ -55,10 +55,10 @@ const BUSINESS_INFO = {
   website: process.env.BUSINESS_WEBSITE || 'nobhad.codes'
 };
 
-// Page settings
+// Page settings — matches standard PDF margins (server/config/pdf-styles.ts)
 const PAGE_WIDTH = 612; // Letter size
 const PAGE_HEIGHT = 792;
-const PAGE_MARGIN = 45; // Slightly smaller margins
+const PAGE_MARGIN = 54; // Standard 0.75in margins (matches all other PDF generators)
 const CONTENT_WIDTH = PAGE_WIDTH - PAGE_MARGIN * 2;
 
 // Font sizes

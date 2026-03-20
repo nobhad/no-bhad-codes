@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import { useRef, useEffect, useCallback, useState } from 'react';
-import { Eraser, Pencil, Type } from 'lucide-react';
+import { Eraser, Pencil, Type, Upload } from 'lucide-react';
 
 // ============================================
 // CONSTANTS
@@ -18,12 +18,14 @@ const LINE_WIDTH = 2;
 const SIGNATURE_FONT_FAMILY = '\'Allura\', \'Segoe Script\', cursive';
 const TYPED_FONT_SIZE = 40;
 const TYPED_CANVAS_FONT = `${TYPED_FONT_SIZE}px ${SIGNATURE_FONT_FAMILY}`;
+const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+const ACCEPTED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 
 // ============================================
 // TYPES
 // ============================================
 
-export type SignatureMode = 'draw' | 'type';
+export type SignatureMode = 'draw' | 'type' | 'upload';
 
 interface SignatureCanvasProps {
   /** Called when signature data changes (base64 PNG or null) */
@@ -72,6 +74,9 @@ export function SignatureCanvas({ onSignatureChange, mode, onModeChange }: Signa
   const hasStrokesRef = useRef(false);
 
   const [typedValue, setTypedValue] = useState('');
+  const [uploadPreview, setUploadPreview] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ------- Canvas drawing setup -------
 
@@ -168,13 +173,53 @@ export function SignatureCanvas({ onSignatureChange, mode, onModeChange }: Signa
     }
   }, [onSignatureChange]);
 
+  // ------- Upload handler -------
+
+  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setUploadError(null);
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      setUploadError('Please upload a PNG, JPEG, or WebP image.');
+      return;
+    }
+
+    if (file.size > MAX_UPLOAD_SIZE_BYTES) {
+      setUploadError('File must be under 5 MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setUploadPreview(dataUrl);
+      onSignatureChange(dataUrl);
+    };
+    reader.readAsDataURL(file);
+  }, [onSignatureChange]);
+
+  const clearUpload = useCallback(() => {
+    setUploadPreview(null);
+    setUploadError(null);
+    onSignatureChange(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }, [onSignatureChange]);
+
   // Clear state when switching modes
   useEffect(() => {
     if (mode === 'draw') {
       setTypedValue('');
+      setUploadPreview(null);
+      setUploadError(null);
       onSignatureChange(null);
+    } else if (mode === 'type') {
+      clearCanvas();
+      setUploadPreview(null);
+      setUploadError(null);
     } else {
       clearCanvas();
+      setTypedValue('');
     }
     // Only run on mode change — not on every onSignatureChange ref change
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -199,6 +244,14 @@ export function SignatureCanvas({ onSignatureChange, mode, onModeChange }: Signa
         >
           <Type />
           Type
+        </button>
+        <button
+          type="button"
+          className={`btn-outline-sm ${mode === 'upload' ? 'is-active' : ''}`}
+          onClick={() => onModeChange('upload')}
+        >
+          <Upload />
+          Upload
         </button>
       </div>
 
@@ -243,6 +296,40 @@ export function SignatureCanvas({ onSignatureChange, mode, onModeChange }: Signa
           <div className="signature-type-preview" style={{ fontFamily: SIGNATURE_FONT_FAMILY }}>
             {typedValue || 'Your Name'}
           </div>
+        </div>
+      )}
+
+      {/* Upload mode */}
+      {mode === 'upload' && (
+        <div className="signature-upload-area">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={ACCEPTED_IMAGE_TYPES.join(',')}
+            onChange={handleFileUpload}
+            className="signature-upload-input"
+          />
+          {uploadError && (
+            <p className="form-error-message">{uploadError}</p>
+          )}
+          {uploadPreview && (
+            <div className="signature-upload-preview">
+              <img
+                src={uploadPreview}
+                alt="Signature preview"
+                style={{ maxWidth: CANVAS_WIDTH, maxHeight: CANVAS_HEIGHT, objectFit: 'contain' }}
+              />
+              <div className="signature-actions">
+                <button type="button" className="btn-outline-sm" onClick={clearUpload}>
+                  <Eraser />
+                  Clear
+                </button>
+              </div>
+            </div>
+          )}
+          {!uploadPreview && !uploadError && (
+            <p className="signature-hint">Upload a PNG, JPEG, or WebP image of your signature</p>
+          )}
         </div>
       )}
     </div>

@@ -11,6 +11,16 @@
 
 import { getDatabase } from '../database/init.js';
 import { logger } from './logger.js';
+
+// ============================================
+// Constants
+// ============================================
+
+/** Default agreement expiry: 30 days from send */
+const DEFAULT_EXPIRY_DAYS = 30;
+const REMINDER_7D_THRESHOLD_DAYS = 7;
+const REMINDER_3D_THRESHOLD_DAYS = 3;
+
 import type {
   AgreementRow,
   AgreementStepRow,
@@ -290,8 +300,17 @@ async function completeStep(agreementId: number, stepId: number, clientId?: numb
   )) as AgreementRow | undefined;
 
   if (!agreement) throw new Error('Agreement not found');
-  if (['completed', 'cancelled'].includes(agreement.status)) {
+  if (['completed', 'cancelled', 'expired'].includes(agreement.status)) {
     throw new Error(`Agreement is already ${agreement.status}`);
+  }
+
+  // Check expiration
+  if (agreement.expires_at && new Date(agreement.expires_at) < new Date()) {
+    await db.run(
+      'UPDATE project_agreements SET status = \'expired\', updated_at = datetime(\'now\') WHERE id = ?',
+      [agreementId]
+    );
+    throw new Error('Agreement has expired');
   }
 
   // Validate and complete the step
@@ -361,12 +380,18 @@ async function completeStep(agreementId: number, stepId: number, clientId?: numb
 /**
  * Send agreement to client (updates status and sent_at).
  */
-async function sendAgreement(agreementId: number): Promise<void> {
+async function sendAgreement(agreementId: number, expiresInDays?: number): Promise<void> {
   const db = getDatabase();
+  const expiryDays = expiresInDays ?? DEFAULT_EXPIRY_DAYS;
+  const expiresAt = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000).toISOString();
 
   await db.run(
-    'UPDATE project_agreements SET status = \'sent\', sent_at = datetime(\'now\'), updated_at = datetime(\'now\') WHERE id = ? AND status = \'draft\'',
-    [agreementId]
+    `UPDATE project_agreements
+     SET status = 'sent', sent_at = datetime('now'),
+         expires_at = COALESCE(expires_at, ?),
+         updated_at = datetime('now')
+     WHERE id = ? AND status = 'draft'`,
+    [expiresAt, agreementId]
   );
 
   // Mark first step as active
@@ -444,6 +469,184 @@ async function autoCompleteByEntity(entityType: string, entityId: number): Promi
 }
 
 // ============================================
+// Expiration & Reminders
+// ============================================
+
+/**
+ * Set expiration on an agreement (admin action).
+ * Defaults to DEFAULT_EXPIRY_DAYS from now if no date provided.
+ */
+async function setExpiration(agreementId: number, expiresAt?: string): Promise<void> {
+  const db = getDatabase();
+  const expiry = expiresAt || new Date(Date.now() + DEFAULT_EXPIRY_DAYS * 24 * 60 * 60 * 1000).toISOString();
+
+  await db.run(
+    'UPDATE project_agreements SET expires_at = ?, updated_at = datetime(\'now\') WHERE id = ?',
+    [expiry, agreementId]
+  );
+}
+
+/**
+ * Reorder steps within an agreement (admin action for drag-to-reorder).
+ * Accepts an array of step IDs in the desired order.
+ */
+async function reorderSteps(agreementId: number, stepIds: number[]): Promise<void> {
+  const db = getDatabase();
+
+  // Validate all steps belong to this agreement
+  const existing = (await db.all(
+    'SELECT id FROM agreement_steps WHERE agreement_id = ? ORDER BY step_order ASC',
+    [agreementId]
+  )) as Array<{ id: number }>;
+
+  const existingIds = new Set(existing.map(s => s.id));
+  for (const id of stepIds) {
+    if (!existingIds.has(id)) throw new Error(`Step ${id} does not belong to agreement ${agreementId}`);
+  }
+
+  // Update step_order for each step
+  for (let i = 0; i < stepIds.length; i++) {
+    await db.run(
+      'UPDATE agreement_steps SET step_order = ?, updated_at = datetime(\'now\') WHERE id = ?',
+      [i, stepIds[i]]
+    );
+  }
+
+  logger.info('Reordered agreement steps', {
+    category: 'agreements',
+    metadata: { agreementId, stepCount: stepIds.length }
+  });
+}
+
+/**
+ * Process agreement expiration reminders and auto-expire.
+ * Called by scheduler cron job.
+ */
+async function processExpirations(): Promise<{ reminded7d: number; reminded3d: number; expired: number }> {
+  const db = getDatabase();
+  const now = new Date();
+  let reminded7d = 0;
+  let reminded3d = 0;
+  let expired = 0;
+
+  // Find active agreements with expiration set
+  const agreements = (await db.all(
+    `SELECT pa.*, c.email as client_email, COALESCE(c.contact_name, c.company_name) as client_name
+     FROM project_agreements pa
+     JOIN clients c ON pa.client_id = c.id
+     WHERE pa.expires_at IS NOT NULL
+       AND pa.status IN ('sent', 'viewed', 'in_progress')
+     ORDER BY pa.expires_at ASC`
+  )) as Array<AgreementRow & { client_email: string; client_name: string }>;
+
+  for (const agreement of agreements) {
+    const expiresAt = new Date(agreement.expires_at!);
+    const daysUntilExpiry = (expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+
+    // Already expired
+    if (daysUntilExpiry <= 0) {
+      await db.run(
+        'UPDATE project_agreements SET status = \'expired\', updated_at = datetime(\'now\') WHERE id = ?',
+        [agreement.id]
+      );
+      expired++;
+
+      logger.info('Agreement expired', {
+        category: 'agreements',
+        metadata: { agreementId: agreement.id, clientId: agreement.client_id }
+      });
+
+      // Send expiration notification
+      try {
+        const { emailService } = await import('./email-service.js');
+        const { getPortalUrl } = await import('../config/environment.js');
+        const { BUSINESS_INFO } = await import('../config/business.js');
+
+        await emailService.sendEmail({
+          to: agreement.client_email,
+          subject: `Your agreement "${agreement.name}" has expired - ${BUSINESS_INFO.name}`,
+          text: `Hi ${agreement.client_name},\n\nYour agreement "${agreement.name}" has expired. Please contact us if you'd like to discuss next steps.\n\nBest regards,\n${BUSINESS_INFO.name}`,
+          html: `<p>Hi ${agreement.client_name},</p><p>Your agreement "<strong>${agreement.name}</strong>" has expired.</p><p>Please <a href="${getPortalUrl()}/agreements">log in to your portal</a> or contact us if you'd like to discuss next steps.</p><p>Best regards,<br>${BUSINESS_INFO.name}</p>`
+        });
+      } catch {
+        // Non-critical
+      }
+
+      // Emit workflow event
+      try {
+        const { workflowTriggerService } = await import('./workflow-trigger-service.js');
+        await workflowTriggerService.emit('agreement.expired', {
+          entityId: agreement.id,
+          triggeredBy: 'agreement-expiration-cron',
+          clientId: agreement.client_id,
+          projectId: agreement.project_id
+        });
+      } catch {
+        // Non-critical
+      }
+      continue;
+    }
+
+    // 7-day reminder
+    if (daysUntilExpiry <= REMINDER_7D_THRESHOLD_DAYS && !agreement.reminder_sent_7d) {
+      try {
+        const { emailService } = await import('./email-service.js');
+        const { getPortalUrl } = await import('../config/environment.js');
+        const { BUSINESS_INFO } = await import('../config/business.js');
+
+        await emailService.sendEmail({
+          to: agreement.client_email,
+          subject: `Reminder: Your agreement expires in ${Math.ceil(daysUntilExpiry)} days - ${BUSINESS_INFO.name}`,
+          text: `Hi ${agreement.client_name},\n\nYour agreement "${agreement.name}" will expire in ${Math.ceil(daysUntilExpiry)} days. Please complete the remaining steps before it expires.\n\nBest regards,\n${BUSINESS_INFO.name}`,
+          html: `<p>Hi ${agreement.client_name},</p><p>Your agreement "<strong>${agreement.name}</strong>" will expire in <strong>${Math.ceil(daysUntilExpiry)} days</strong>.</p><p>Please <a href="${getPortalUrl()}/agreements">complete the remaining steps</a> before it expires.</p><p>Best regards,<br>${BUSINESS_INFO.name}</p>`
+        });
+
+        await db.run(
+          'UPDATE project_agreements SET reminder_sent_7d = 1, updated_at = datetime(\'now\') WHERE id = ?',
+          [agreement.id]
+        );
+        reminded7d++;
+      } catch {
+        // Non-critical
+      }
+    }
+
+    // 3-day reminder
+    if (daysUntilExpiry <= REMINDER_3D_THRESHOLD_DAYS && !agreement.reminder_sent_3d) {
+      try {
+        const { emailService } = await import('./email-service.js');
+        const { getPortalUrl } = await import('../config/environment.js');
+        const { BUSINESS_INFO } = await import('../config/business.js');
+
+        await emailService.sendEmail({
+          to: agreement.client_email,
+          subject: `Urgent: Your agreement expires in ${Math.ceil(daysUntilExpiry)} days - ${BUSINESS_INFO.name}`,
+          text: `Hi ${agreement.client_name},\n\nYour agreement "${agreement.name}" will expire in ${Math.ceil(daysUntilExpiry)} days. Please complete the remaining steps as soon as possible.\n\nBest regards,\n${BUSINESS_INFO.name}`,
+          html: `<p>Hi ${agreement.client_name},</p><p>Your agreement "<strong>${agreement.name}</strong>" will expire in <strong>${Math.ceil(daysUntilExpiry)} days</strong>.</p><p>Please <a href="${getPortalUrl()}/agreements">complete the remaining steps</a> as soon as possible.</p><p>Best regards,<br>${BUSINESS_INFO.name}</p>`
+        });
+
+        await db.run(
+          'UPDATE project_agreements SET reminder_sent_3d = 1, updated_at = datetime(\'now\') WHERE id = ?',
+          [agreement.id]
+        );
+        reminded3d++;
+      } catch {
+        // Non-critical
+      }
+    }
+  }
+
+  if (reminded7d > 0 || reminded3d > 0 || expired > 0) {
+    logger.info('Processed agreement expirations', {
+      category: 'agreements',
+      metadata: { reminded7d, reminded3d, expired }
+    });
+  }
+
+  return { reminded7d, reminded3d, expired };
+}
+
+// ============================================
 // Singleton Export
 // ============================================
 
@@ -457,5 +660,8 @@ export const agreementService = {
   sendAgreement,
   recordView,
   cancelAgreement,
-  autoCompleteByEntity
+  autoCompleteByEntity,
+  setExpiration,
+  reorderSteps,
+  processExpirations
 };

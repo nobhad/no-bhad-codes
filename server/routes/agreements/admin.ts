@@ -124,4 +124,65 @@ router.post(
   })
 );
 
+/**
+ * PUT /api/agreements/:id/steps/reorder
+ * Reorder agreement steps (drag-to-reorder).
+ * Body: { stepIds: number[] }
+ */
+router.put(
+  '/:id/steps/reorder',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: JWTAuthRequest, res: Response) => {
+    const agreementId = Number(req.params.id);
+    const { stepIds } = req.body;
+
+    if (!Array.isArray(stepIds) || stepIds.length === 0) {
+      errorResponse(res, 'stepIds array is required', 400, ErrorCodes.VALIDATION_ERROR);
+      return;
+    }
+
+    await agreementService.reorderSteps(agreementId, stepIds);
+    sendSuccess(res, undefined, 'Steps reordered');
+  })
+);
+
+/**
+ * PUT /api/agreements/:id/expiration
+ * Set or update agreement expiration date.
+ * Body: { expiresAt?: string } — ISO date string, or omit for default (30 days)
+ */
+router.put(
+  '/:id/expiration',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: JWTAuthRequest, res: Response) => {
+    const agreementId = Number(req.params.id);
+    const { expiresAt } = req.body;
+    await agreementService.setExpiration(agreementId, expiresAt);
+    sendSuccess(res, undefined, 'Expiration updated');
+  })
+);
+
+/**
+ * GET /api/agreements/:id
+ * Get enriched agreement (admin).
+ */
+router.get(
+  '/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: JWTAuthRequest, res: Response) => {
+    const agreementId = Number(req.params.id);
+    const agreement = await agreementService.getEnrichedAgreement(agreementId);
+
+    if (!agreement) {
+      errorResponse(res, 'Agreement not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+      return;
+    }
+
+    sendSuccess(res, { agreement });
+  })
+);
+
 export default router;

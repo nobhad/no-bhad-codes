@@ -1,8 +1,8 @@
-# Current Work - March 17, 2026
+# Current Work - March 20, 2026
 
 ## Current System Status
 
-**Last Updated**: March 17, 2026
+**Last Updated**: March 20, 2026
 
 ### Server
 
@@ -13,164 +13,103 @@
 
 - TypeScript: 0 errors
 - ESLint: 0 errors, 0 warnings
-- Vite build: passing (168 chunks)
+- Vite build: passing (193 chunks)
 
 ---
 
 ## State of the Art Roadmap
 
-**Status:** IN PROGRESS — Phase 0 COMPLETE
+**Status:** COMPLETE — Phase 0-6 DONE, Phase 1.5 DONE, Phase 7 deferred
 **Full plan:** [docs/STATE_OF_THE_ART_ROADMAP.md](./docs/STATE_OF_THE_ART_ROADMAP.md)
 
-Gap analysis + codebase audit. 8 phases, 13 migrations (118-130). Phase 0 foundation fixes complete.
+Gap analysis + codebase audit. 8 phases, 14 migrations (118-130). All phases complete.
 
-### Phase 0: Foundation Fixes (MUST DO FIRST)
+### Phase 0: Foundation Fixes (MUST DO FIRST) — COMPLETE
 
 All items verified against actual code. ~~0A~~, ~~0H~~, ~~0I~~ removed (proved false on re-audit).
 
 **Critical (blocks Phase 1):**
 
-- [x] 0B. Client proposal detail view + acceptance UI — DONE (PortalProposalDetail.tsx, route /proposals/:id, accept flow with confirmation)
-- [x] 0C. Maintenance tier activation — DONE (migration 118, `handleMaintenanceActivation` handler, recurring invoice on project completion, `GET /projects/:id/maintenance` endpoint)
-- [x] 0D. Portal contract signing — FIXED (added `workflowTriggerService.emit('contract.signed')` to `contracts/client.ts`)
-- [x] 0G. Installment → invoice cascade — FIXED (added `generateDueInvoices()` + scheduler hook)
+- [x] 0B. Client proposal detail view + acceptance UI
+- [x] 0C. Maintenance tier activation
+- [x] 0D. Portal contract signing
+- [x] 0G. Installment to invoice cascade
 
 **High (broken integrations):**
 
-- [x] 0E. Webhook dispatch — DONE (dispatchWebhooks() queries notification_integrations, sends to Slack/Discord, logs to delivery_logs)
-- [x] 0F. Email templates — DONE (loadEmailTemplate() checks DB by slug first, falls back to hardcoded; all 7 handlers pass templateSlug)
-- [x] 0K. Admin invoices — DONE (server/routes/admin/invoices.ts: GET list+stats, POST bulk-delete, POST bulk-status)
-- [x] 0L. Create backends — DONE (POST /api/admin/design-reviews + POST /api/admin/workflows)
+- [x] 0E. Webhook dispatch
+- [x] 0F. Email templates
+- [x] 0K. Admin invoices
+- [x] 0L. Create backends
 
 **Medium (UI completeness):**
 
-- [x] 0J. Export/CSV — DONE (wired useExport to 9 tables, added 6 new export configs)
+- [x] 0J. Export/CSV
 - [x] ~~0M. LeadDetailPanel~~ — already wired
-- [x] 0P. Prefill + admin invoices in frontend constants — DONE (PROPOSALS_PREFILL, ADMIN.INVOICES added to api-endpoints.ts)
+- [x] 0P. Prefill + admin invoices in frontend constants
 
 **Low (docs + security):**
 
-- [x] ~~0N. Design docs~~ — already exist (CSS_ARCHITECTURE.md: 836 lines, UX_GUIDELINES.md: 69 lines)
-- [x] 0O. Security hardening — DONE (demo/test scripts require env vars, bcrypt standardized to 12 rounds in intake.ts)
+- [x] ~~0N. Design docs~~ — already exist
+- [x] 0O. Security hardening
 
-### Phase 1: Unified Client Experience
+### Phase 1: Unified Client Experience — COMPLETE (core)
 
-- [ ] 1A. In-Portal Contract Signing (prerequisite)
-- [ ] 1B. Embedded Stripe Payments (prerequisite)
-- [ ] 1C. Unified Project Agreement Flow (proposal + contract + payment in one step)
-- [ ] 1D. Guided Client Onboarding Checklist
+- [x] 1-Pre. Idempotency guards (milestone generation check in workflow-automations.ts)
+- [x] 1A. In-Portal Contract Signing (verified — ContractSignModal, POST /sign, PortalContracts all working)
+- [x] 1B. Embedded Stripe Payments (migration 119, StripePaymentService, PaymentElement, processing fee breakdown)
+- [x] 1C. Unified Project Agreement Flow (migration 120, AgreementService, AgreementFlow vertical card stack with GSAP)
+- [x] 1D. Guided Client Onboarding Checklist (migration 121, OnboardingChecklistService, OnboardingCard dashboard widget)
 
-### Phase 2: Lead Nurture
+### Phase 1.5: Deferred Enhancements — COMPLETE
 
-- [ ] 2A. Email Drip Sequences (auto follow-up)
-- [ ] 2B. Meeting Request System (client proposes times, admin confirms)
+- [x] Auto-pay (migration 130, autoPayService, saved methods CRUD, auto-charge cron at 6AM, retry queue hourly, 3 retries with 24/48/72h delays, client portal AutoPaySettings UI)
+- [x] Agreement admin drag-to-reorder builder (AgreementBuilder admin UI with step reorder via up/down arrows, create/send/cancel/set-expiration actions)
+- [x] Onboarding admin template CRUD UI (OnboardingTemplatesManager with create/edit/delete templates, step editor with reorder)
+- [x] Upload mode for signature (SignatureCanvas now supports draw/type/upload, accepts PNG/JPEG/WebP up to 5MB)
+- [x] Agreement expiration cron (30-day default expiry, 7d and 3d email reminders, auto-expire, scheduler at 9:30AM daily)
 
-### Phase 3: Admin Self-Service
+### Phase 2: Lead Nurture — COMPLETE
 
-- [ ] 3A. Automation Engine (backend — API + execution engine)
-- [ ] 3B. Automation Builder (frontend — visual drag-and-drop UI)
+- [x] 2A. Email Drip Sequences (migration 122, sequenceService with processQueue, scheduler cron, workflow auto-enrollment, admin UI)
+- [x] 2B. Meeting Request System (migration 123, meetingRequestService with ICS generation, reminders cron, portal + admin UI)
 
-### Phase 4: Revenue Intelligence
+### Phase 3: Admin Self-Service — COMPLETE
 
-- [ ] 4A. Expense Tracking + Project Profitability
-- [ ] 4B. Retainer / Recurring Project Management
+- [x] 3A. Automation Engine (migration 124, 11 action types, condition evaluation, wait-step scheduling, dry-run)
+- [x] 3B. Automation Builder (AutomationsTable, AutomationBuilder with action config forms, AutomationDetailPanel with run history)
 
-### Phase 5: Post-Project
+### Phase 4: Revenue Intelligence — COMPLETE
 
-- [ ] 5A. Feedback Surveys + Testimonial Collection
-- [ ] 5B. Embeddable Widgets (contact form, testimonials, status badge)
+- [x] 4A. Expense Tracking + Project Profitability (migration 125, expenseService, profitability calc, CSV export, admin table)
+- [x] 4B. Retainer / Recurring Project Management (migration 126, retainerService, period lifecycle, rollover, auto-invoicing + usage alert crons, admin + portal UI)
 
-### Phase 6: AI-Powered
+### Phase 5: Post-Project — COMPLETE
 
-- [ ] 6A. AI Proposal Drafting
-- [ ] 6B. AI Email Response Drafting
-- [ ] 6C. Semantic Search (Cmd+K)
+- [x] 5A. Feedback Surveys + Testimonial Collection (migration 127, feedbackService 16 methods, 9 admin + 1 portal + 4 public endpoints, 4 React components, 2 scheduler crons)
+- [x] 5B. Embeddable Widgets (migration 128, embedService, 7 admin + 4 public endpoints, widget JS generation for contact/testimonials/status, admin UI)
 
-### Phase 7: International
+### Phase 6: AI-Powered — COMPLETE
 
-- [ ] 7A. Multi-Currency Support
-- [ ] 7B. Tax Jurisdiction Handling
+- [x] 6A. AI Proposal Drafting (migration 129, aiService with budget/rate/cache, Anthropic SDK, admin draft endpoint)
+- [x] 6B. AI Email Response Drafting (draftEmail with thread/project context, admin endpoint)
+- [x] 6C. Semantic Search (enhanced search-service 9 entity types, relevance scoring, SearchModal Cmd+K)
 
----
+### Phase 7: International — DEFERRED
 
-## Upcoming - PDF Deep Dive
-
-**Status:** TODO
-
-- [ ] Formatting review (contracts, proposals, invoices, intake, receipts, SOW) — spacing, table layouts, typography consistency
-- [ ] SOW header — currently separate (`sowLogoHeight = 50`) — review if it should adopt the standard 100pt header or stay compact
-
----
-
-## Architecture Audit — Deferred Items
-
-**Status:** IN PROGRESS
-
-### Item 2: Business Logic in Routes (Highest Impact)
-
-64 route files bypass the services layer with direct DB queries (`db.get`, `db.all`, `db.run`).
-Worst offenders: `search.ts`, `clients/core.ts`, `projects/core.ts`, `contracts.ts`, `document-requests.ts`, `auth/login.ts`.
-
-- [ ] Extract DB queries to service layer, route files become thin controllers
-
-### Item 4: Route Pattern Standardization
-
-22 monolithic route files (1,000-1,468 lines) need barrel+sub-router split like `deliverables/`.
-Largest: `uploads.ts` (1,468), `contracts.ts` (1,345), `document-requests.ts` (1,297), `questionnaires.ts` (1,120), `integrations.ts` (1,095), `data-quality.ts` (1,040).
-
-- [ ] Split each into barrel + sub-routers + shared.ts
-
-### Item 5: Service Export Pattern (Cosmetic)
-
-4 different patterns across 45 service files (class singleton 47%, object literal 22%, pure functions 18%, default exports 18%).
-
-- [ ] Standardize to one pattern
-
-### Item 8: Mount/Export Consistency in app.ts (Cosmetic)
-
-Mixed default/named imports for route mounting. Zero runtime impact.
-
-- [ ] Standardize import style
+- [ ] ~~7A. Multi-Currency Support~~ — Not needed currently
+- [ ] ~~7B. Tax Jurisdiction Handling~~ — Not needed currently
 
 ---
 
-## Remaining (Future Enhancements)
+## PDF Deep Dive
 
-- [ ] Increase test coverage (~15% currently, target 70%)
-- [ ] Docker setup for deployment
-- [ ] RBAC (granular admin permissions beyond binary requireAdmin)
-- [ ] **Frontend**: proposal builder reads prefill data and pre-checks features, suggests tier, shows recommendations
+**Status:** PARTIALLY COMPLETE
 
----
-
-## Completed - CSS Bloat Cleanup + Layout Spacing (March 17, 2026)
-
-**Status:** COMPLETE
-
-Two rounds of CSS class consolidation plus layout spacing fixes.
-
-### Classes Eliminated (~40 total, ~300 lines removed)
-
-- [x] Payment stat classes → shared `stat-label`/`stat-value`
-- [x] Invoice tab classes (`invtab-*`) → shared patterns + `pd-clickable-row`
-- [x] Content checklist classes → `portal-card-header`, `<ProgressBar>`
-- [x] Empty state variants → `empty-state--compact`, `empty-state--full`
-- [x] `portal-card-actions` → `action-group` (7 components)
-- [x] `note-card-header`, `project-card-header` → `portal-card-header`
-- [x] `form-actions` → `action-group`
-- [x] `note-meta` duplicate definition → merged
-- [x] `kanban-column-title-wrapper` → `kanban-column-header`
-- [x] `task-due-date` + `task-assignee` → `task-meta-item`
-- [x] 18 dead classes in requests.css (131 lines)
-- [x] detail-list variants consolidated via CSS variable
-
-### Layout Fixes
-
-- [x] `.section` owned exclusively by `PortalLayout.tsx` — route components use `.subsection`
-- [x] Fixed double-nesting: PortalSettings, ProjectDetail, ClientDetail, DataQualityDashboard
-- [x] `.section` top padding: `var(--portal-section-gap)` (24px uniform)
-- [x] `.section` bottom padding: `var(--space-8)` (64px)
-- [x] Dropdown shadows removed in admin portal (`--shadow-dropdown: none`)
+- [x] Label bolding — parseInlineBold() + drawInlineBoldText() in markdown-to-pdf.ts
+- [x] SOW header — removed unused `sowLogoHeight: 50` constant, all generators use standard 100pt
+- [x] Margin alignment — markdown-to-pdf.ts margins updated from 45pt to 54pt (matches all other generators)
+- [ ] Full formatting review (spacing, table layouts, typography consistency across all 6 PDF types)
 
 ---
 
