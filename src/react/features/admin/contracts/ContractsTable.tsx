@@ -577,7 +577,10 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
         onStatusChange={handlePanelStatusChange}
         onNavigate={onNavigate}
         onSend={(id) => handleSendContract(id)}
-        onDownload={() => {}}
+        onDownload={(id) => {
+          const c = data?.items.find((item) => item.id === id);
+          if (c) downloadFromUrl(buildEndpoint.contractPdf(c.projectId), `contract-${c.projectName || c.id}.pdf`);
+        }}
         showNotification={showNotification}
       />
 

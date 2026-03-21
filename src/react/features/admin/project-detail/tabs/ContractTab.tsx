@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import {
   FileSignature,
   Check,
@@ -16,6 +16,9 @@ import { StatCard, StatsRow } from '@react/components/portal/StatCard';
 import type { Project, ProjectFile } from '../../types';
 import { formatCurrency, formatDate } from '@/utils/format-utils';
 import { NOTIFICATIONS } from '@/constants/notifications';
+import { downloadFromUrl } from '@/utils/file-download';
+import { buildEndpoint } from '@/constants/api-endpoints';
+import { apiPost } from '@/utils/api-client';
 
 interface ContractTabProps {
   project: Project;
@@ -77,13 +80,32 @@ export function ContractTab({
   };
 
   // Handle generate contract (placeholder)
-  const handleGenerateContract = () => {
-    showNotification?.(NOTIFICATIONS.contract.GENERATE_COMING_SOON, 'info');
+  const handleGenerateContract = async () => {
+    try {
+      await downloadFromUrl(buildEndpoint.contractPdf(project.id), `contract-${project.project_name || project.id}.pdf`);
+      showNotification?.('Contract PDF generated', 'success');
+    } catch {
+      showNotification?.('Failed to generate contract', 'error');
+    }
   };
 
-  // Handle send for signature (placeholder)
-  const handleSendForSignature = () => {
-    showNotification?.(NOTIFICATIONS.contract.SIGNATURE_COMING_SOON, 'info');
+  const handleSendForSignature = async () => {
+    try {
+      const res = await apiPost(`${buildEndpoint.contractPdf(project.id).replace('/pdf', '/request-signature')}`, {});
+      if (res.ok) {
+        showNotification?.('Contract sent for signature', 'success');
+      } else {
+        showNotification?.('Failed to send contract', 'error');
+      }
+    } catch {
+      showNotification?.('Failed to send contract', 'error');
+    }
+  };
+
+  const handleDownloadContract = () => {
+    downloadFromUrl(buildEndpoint.contractPdf(project.id), `contract-${project.project_name || project.id}.pdf`).catch(() => {
+      showNotification?.('Failed to download contract', 'error');
+    });
   };
 
   return (
@@ -123,12 +145,15 @@ export function ContractTab({
           </div>
 
           {/* Actions */}
-          {!isSigned && (
-            <div className="detail-actions">
-              <IconButton action="generate" onClick={handleGenerateContract} title="Generate Contract" />
-              <IconButton action="send" onClick={handleSendForSignature} title="Send for Signature" />
-            </div>
-          )}
+          <div className="detail-actions">
+            {!isSigned && (
+              <>
+                <IconButton action="send" onClick={handleSendForSignature} title="Send for Signature" />
+                <IconButton action="generate" onClick={handleGenerateContract} title="Generate Contract" />
+              </>
+            )}
+            <IconButton action="download" onClick={handleDownloadContract} title="Download PDF" />
+          </div>
         </div>
       </div>
 
