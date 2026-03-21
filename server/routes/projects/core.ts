@@ -343,7 +343,14 @@ router.put(
       production_url: 'production_url',
       deposit_amount: 'deposit_amount',
       contract_signed_at: 'contract_signed_at',
-      contract_signed_date: 'contract_signed_at' // Frontend sends contract_signed_date
+      contract_signed_date: 'contract_signed_at', // Frontend sends contract_signed_date
+      // Service credentials
+      netlify_url: 'netlify_url',
+      netlify_email: 'netlify_email',
+      netlify_password: 'netlify_password',
+      umami_url: 'umami_url',
+      umami_email: 'umami_email',
+      umami_password: 'umami_password'
     };
     const allowedUpdates = isAdmin
       ? [
@@ -385,7 +392,14 @@ router.put(
         'inspiration',
         'challenges',
         'additional_info',
-        'referral_source'
+        'referral_source',
+        // Service credentials
+        'netlify_url',
+        'netlify_email',
+        'netlify_password',
+        'umami_url',
+        'umami_email',
+        'umami_password'
       ]
       : ['description']; // Clients can only update description
 
