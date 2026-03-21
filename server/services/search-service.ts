@@ -17,6 +17,11 @@ import { getDatabase } from '../database/init.js';
 
 const MAX_RESULTS_PER_TYPE = 5;
 
+/** Strip LIKE special characters to prevent unintended wildcard matching */
+function sanitizeLikeQuery(str: string): string {
+  return str.replace(/[%_]/g, '');
+}
+
 /** Relevance scoring weights */
 const SCORE_EXACT_IDENTIFIER = 1.0;
 const SCORE_EXACT_NAME = 0.9;
@@ -335,7 +340,7 @@ async function globalSearch(
   user: { id: number; type: string }
 ): Promise<SearchResult[]> {
   const isAdmin = user.type === 'admin';
-  const searchPattern = `%${query}%`;
+  const searchPattern = `%${sanitizeLikeQuery(query)}%`;
   const ctx: SearchContext = { isAdmin, userId: user.id, searchPattern, query };
 
   // Run all searches in parallel

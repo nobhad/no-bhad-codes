@@ -44,8 +44,14 @@ router.post(
     }
 
     const event = req.body instanceof Buffer ? JSON.parse(rawBody) : req.body;
-    const eventType = (event as { type: string }).type;
-    const dataObject = (event as { data: { object: Record<string, unknown> } }).data.object;
+    const eventType = (event as { type?: string }).type;
+    const dataObject = (event as { data?: { object?: Record<string, unknown> } }).data?.object;
+
+    if (!eventType || !dataObject) {
+      errorResponse(res, 'Invalid webhook event structure', 400, ErrorCodes.VALIDATION_ERROR);
+      return;
+    }
+
     const intentId = dataObject.id as string;
 
     switch (eventType) {

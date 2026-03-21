@@ -1502,10 +1502,12 @@ export function registerWorkflowAutomations(): void {
   workflowTriggerService.on('contract.signed', handleAutoCompleteAgreementStep);
   workflowTriggerService.on('invoice.paid', handleAutoCompleteAgreementStep);
   workflowTriggerService.on('questionnaire.completed', handleAutoCompleteAgreementStep);
+  workflowTriggerService.on('proposal.accepted', handleAutoCompleteAgreementStep);
 
   workflowTriggerService.on('contract.signed', handleAutoCompleteOnboardingStep);
   workflowTriggerService.on('invoice.paid', handleAutoCompleteOnboardingStep);
   workflowTriggerService.on('questionnaire.completed', handleAutoCompleteOnboardingStep);
+  workflowTriggerService.on('proposal.accepted', handleAutoCompleteOnboardingStep);
 
   // Custom Automation Engine (route ALL events)
   const ALL_AUTOMATION_EVENTS = [

@@ -570,7 +570,7 @@ async function processRetryQueue(): Promise<{ retried: number; succeeded: number
   )) as Array<AutoPayAttemptRow & { auto_pay_default_method_id: number }>;
 
   for (const attempt of pendingRetries) {
-    const methodId = attempt.auto_pay_default_method_id || attempt.payment_method_id;
+    const methodId = attempt.auto_pay_default_method_id ?? attempt.payment_method_id;
     const result = await chargeInvoice(attempt.invoice_id, attempt.client_id, methodId);
     retriedCount++;
 
