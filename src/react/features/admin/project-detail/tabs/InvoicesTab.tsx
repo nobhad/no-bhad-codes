@@ -7,7 +7,7 @@ import {
   Check,
   Download,
   Trash2,
-  MoreHorizontal,
+  Pencil,
   Inbox,
   ChevronDown
 } from 'lucide-react';
@@ -17,10 +17,12 @@ import {
   PortalDropdown,
   PortalDropdownTrigger,
   PortalDropdownContent,
-  PortalDropdownItem,
-  PortalDropdownSeparator
+  PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
+import { PortalModal } from '@react/components/portal/PortalModal';
+import { InvoiceDetailPanel } from '../../invoices/InvoiceDetailPanel';
+import { buildEndpoint } from '@/constants/api-endpoints';
 import type { Invoice, InvoiceStatus } from '../../types';
 import { INVOICE_STATUS_CONFIG } from '../../types';
 import { formatCurrency, formatDate } from '@/utils/format-utils';
@@ -43,11 +45,15 @@ const STATUS_FILTER_LABELS: Record<string, string> = Object.fromEntries(
 interface InvoicesTabProps {
   invoices: Invoice[];
   onViewInvoice?: (invoiceId: number) => void;
+  onEditInvoice?: (invoiceId: number) => void;
   onCreateInvoice?: () => void;
   onSendInvoice?: (invoiceId: number) => Promise<boolean>;
   onMarkPaid?: (invoiceId: number) => Promise<boolean>;
   onDeleteInvoice?: (invoiceId: number) => Promise<boolean>;
   onDownloadPdf?: (invoiceId: number) => Promise<void>;
+  onStatusChange?: (invoiceId: number, status: string) => Promise<boolean>;
+  onNavigate?: (tab: string, entityId?: string) => void;
+  onRefresh?: () => void;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
@@ -81,16 +87,22 @@ function getDisplayStatus(invoice: Invoice): InvoiceStatus {
 export function InvoicesTab({
   invoices,
   onViewInvoice,
+  onEditInvoice,
   onCreateInvoice,
   onSendInvoice,
   onMarkPaid,
   onDeleteInvoice,
   onDownloadPdf,
+  onStatusChange,
+  onNavigate,
+  onRefresh,
   showNotification
 }: InvoicesTabProps) {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [actionLoading, setActionLoading] = useState<{ type: string; id: number } | null>(null);
   const [deletingInvoiceId, setDeletingInvoiceId] = useState<number | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
 
   const deleteDialog = useConfirmDialog();
   const markPaidDialog = useConfirmDialog();
@@ -285,10 +297,10 @@ export function InvoicesTab({
                   <tr
                     key={invoice.id}
                     className="pd-clickable-row"
-                    onClick={() => onViewInvoice?.(invoice.id)}
+                    onClick={() => setSelectedInvoice(invoice)}
                     role="button"
                     tabIndex={0}
-                    onKeyDown={(e) => { if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) { e.preventDefault(); onViewInvoice?.(invoice.id); } }}
+                    onKeyDown={(e) => { if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) { e.preventDefault(); setSelectedInvoice(invoice); } }}
                   >
                     <td className="pd-table-cell">
                       <span className="pd-highlight-value">
@@ -318,14 +330,16 @@ export function InvoicesTab({
                     </td>
                     <td className="pd-table-cell" onClick={(e) => e.stopPropagation()}>
                       <div className="action-group">
-                        <button
-                          className="icon-btn"
-                          onClick={() => onViewInvoice?.(invoice.id)}
-                          title="View invoice"
-                          aria-label="View invoice"
-                        >
-                          <Eye className="icon-md" />
-                        </button>
+                        {!isDraft && (
+                          <button
+                            className="icon-btn"
+                            onClick={() => setPreviewInvoice(invoice)}
+                            title="Preview PDF"
+                            aria-label="Preview invoice PDF"
+                          >
+                            <Eye className="icon-md" />
+                          </button>
+                        )}
 
                         {canSend && (
                           <button
@@ -365,32 +379,19 @@ export function InvoicesTab({
                           </button>
                         )}
 
-                        <PortalDropdown>
-                          <PortalDropdownTrigger asChild>
-                            <button className="icon-btn" aria-label="More actions">
-                              <MoreHorizontal className="icon-md" />
-                            </button>
-                          </PortalDropdownTrigger>
-                          <PortalDropdownContent align="end">
-                            <PortalDropdownItem onClick={() => onViewInvoice?.(invoice.id)}>
-                              View Details
-                            </PortalDropdownItem>
-                            {!isPaid && (
-                              <>
-                                <PortalDropdownSeparator />
-                                <PortalDropdownItem
-                                  onClick={() => {
-                                    setDeletingInvoiceId(invoice.id);
-                                    deleteDialog.open();
-                                  }}
-                                >
-                                  <Trash2 className="icon-md" />
-                                  Delete
-                                </PortalDropdownItem>
-                              </>
-                            )}
-                          </PortalDropdownContent>
-                        </PortalDropdown>
+                        {!isPaid && onDeleteInvoice && (
+                          <button
+                            className="icon-btn icon-btn--danger"
+                            onClick={() => {
+                              setDeletingInvoiceId(invoice.id);
+                              deleteDialog.open();
+                            }}
+                            title="Delete invoice"
+                            aria-label="Delete invoice"
+                          >
+                            <Trash2 className="icon-md" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -425,6 +426,45 @@ export function InvoicesTab({
         onConfirm={handleDelete}
         variant="danger"
         loading={deleteDialog.isLoading}
+      />
+
+      {/* PDF Preview Modal */}
+      <PortalModal
+        open={!!previewInvoice}
+        onOpenChange={(open) => { if (!open) setPreviewInvoice(null); }}
+        title={previewInvoice?.invoice_number || 'Invoice Preview'}
+        icon={<Eye />}
+        size="lg"
+        footer={
+          previewInvoice && onDownloadPdf ? (
+            <button className="btn-secondary" onClick={() => { handleDownloadPdf(previewInvoice.id); }}>
+              <Download className="icon-sm" /> Download
+            </button>
+          ) : undefined
+        }
+      >
+        {previewInvoice && (
+          <div style={{ minHeight: '200px' }}>
+            <iframe
+              src={buildEndpoint.invoicePdf(previewInvoice.id)}
+              title={`Preview ${previewInvoice.invoice_number}`}
+              style={{ width: '100%', height: '70vh', border: 'none' }}
+            />
+          </div>
+        )}
+      </PortalModal>
+
+      {/* Invoice Detail Panel */}
+      <InvoiceDetailPanel
+        invoice={selectedInvoice}
+        onClose={() => setSelectedInvoice(null)}
+        onStatusChange={onStatusChange ? async (id, status) => { await onStatusChange(id, status); onRefresh?.(); } : undefined}
+        onSend={onSendInvoice}
+        onMarkPaid={onMarkPaid}
+        onDownloadPdf={onDownloadPdf}
+        onNavigate={onNavigate}
+        onRefresh={onRefresh}
+        showNotification={showNotification}
       />
     </div>
   );
