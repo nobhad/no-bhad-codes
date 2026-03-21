@@ -158,7 +158,7 @@
 
 .details-panel .dropdown-trigger--status {
   background: transparent;
-  border: var(--border-width-px) solid var(--color-bg-secondary);
+  border: var(--border-width-thin) solid var(--color-bg-secondary);
 }
 
 /* Radix popper wrappers must sit above the details-panel (z-index 9600) */

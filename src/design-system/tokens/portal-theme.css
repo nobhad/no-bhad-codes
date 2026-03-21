@@ -81,7 +81,7 @@ body[data-page="client"] {
   /* Portal border shorthand — convenience alias */
   --portal-border: var(--border-width) solid var(--color-border-primary);
   /* Input border — 1px via root alias, since inputs are nested inside bordered panels */
-  --portal-input-border: var(--border-width-px) solid var(--color-border-primary);
+  --portal-input-border: var(--border-width-thin) solid var(--color-border-primary);
 
   /* Table border alias */
   --table-border-color: var(--color-border-primary);
@@ -659,7 +659,7 @@ html[data-theme="light"]:has(body[data-page="client"]) {
   min-width: var(--space-2);
   min-height: var(--space-2);
   flex-shrink: 0;
-  border: var(--border-width-px) solid var(--color-text-primary);
+  border: var(--border-width-thin) solid var(--color-text-primary);
   border-radius: 0;
   background: transparent;
   color: transparent;
