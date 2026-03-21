@@ -20,6 +20,7 @@ import type {
 import { formatDate } from '@react/utils/formatDate';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
 import { formatCurrency } from '@/utils/format-utils';
+import { downloadFromUrl } from '@/utils/file-download';
 
 // ============================================
 // TYPES
@@ -122,6 +123,11 @@ export function ProposalDetailPanel({
               title="Send Proposal"
             />
           )}
+          <IconButton
+            action="download"
+            onClick={() => downloadFromUrl(`/api/proposals/${p.id}/pdf`, `proposal-${p.id}.pdf`)}
+            title="Download PDF"
+          />
           {onDuplicate && (
             <IconButton
               action="copy"

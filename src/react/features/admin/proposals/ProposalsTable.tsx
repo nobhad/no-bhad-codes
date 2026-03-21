@@ -37,6 +37,7 @@ import { apiPost, apiFetch } from '@/utils/api-client';
 import { executeWithToast } from '@/utils/api-wrappers';
 import { CreateProposalModal } from '../modals/CreateEntityModals';
 import { useExport, PROPOSALS_EXPORT_CONFIG } from '@react/hooks/useExport';
+import { downloadFromUrl } from '@/utils/file-download';
 import { ProposalDetailPanel } from './ProposalDetailPanel';
 
 interface Proposal {
@@ -543,6 +544,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate, def
                         />
                       )}
                       <IconButton action="view" title="View" onClick={() => onNavigate?.('proposal-detail', String(proposal.id))} />
+                      <IconButton action="download" title="Download PDF" onClick={() => downloadFromUrl(`/api/proposals/${proposal.id}/pdf`, `proposal-${proposal.title || proposal.id}.pdf`)} />
                       <IconButton action="duplicate" title="Duplicate" onClick={() => handleDuplicate(proposal.id)} />
                       <IconButton action="delete" title="Delete" onClick={() => handleDeleteProposal(proposal.id)} />
                     </div>
