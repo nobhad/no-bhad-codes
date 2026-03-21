@@ -202,6 +202,7 @@ export function useInvoices({
     async (ids: number[]): Promise<{ success: number; failed: number }> => {
       let success = 0;
       let failed = 0;
+      const successIds: number[] = [];
 
       for (const id of ids) {
         try {
@@ -209,6 +210,7 @@ export function useInvoices({
 
           if (response.ok) {
             success++;
+            successIds.push(id);
           } else {
             failed++;
           }
@@ -217,9 +219,9 @@ export function useInvoices({
         }
       }
 
-      // Remove deleted invoices from local state
-      if (success > 0) {
-        setInvoices((prev) => prev.filter((invoice) => !ids.includes(invoice.id)));
+      // Remove only successfully deleted invoices from local state
+      if (successIds.length > 0) {
+        setInvoices((prev) => prev.filter((invoice) => !successIds.includes(invoice.id)));
       }
 
       return { success, failed };

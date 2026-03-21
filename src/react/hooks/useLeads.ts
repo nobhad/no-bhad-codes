@@ -183,17 +183,19 @@ export function useLeads({ autoFetch = true }: UseLeadsOptions = {}): UseLeadsRe
           setLeads((prev) => prev.filter((lead) => !ids.includes(lead.id)));
         } else {
           // Fallback to individual deletes
+          const successIds: number[] = [];
           for (const id of ids) {
             const deleteResponse = await apiDelete(`${API_ENDPOINTS.ADMIN.LEADS}/${id}`);
             if (deleteResponse.ok) {
               success++;
+              successIds.push(id);
             } else {
               failed++;
             }
           }
-          // Remove successful deletes from local state
-          if (success > 0) {
-            setLeads((prev) => prev.filter((lead) => !ids.includes(lead.id)));
+          // Remove only successfully deleted leads from local state
+          if (successIds.length > 0) {
+            setLeads((prev) => prev.filter((lead) => !successIds.includes(lead.id)));
           }
         }
       } catch (err) {
