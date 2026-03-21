@@ -67,6 +67,10 @@ export interface InvoicePdfData {
     amount: number;
   }>;
   totalCredits?: number;
+  /** Total value of all invoices on the project (context for payment schedules) */
+  projectTotal?: number;
+  /** Amount already paid by previous invoices on this project (not this invoice) */
+  previouslyPaid?: number;
 }
 
 // ============================================
@@ -386,10 +390,25 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   }
 
   // === TOTALS ===
-  ensureSpace(ctx, 150, drawContinuationHeader);
+  ensureSpace(ctx, 180, drawContinuationHeader);
   const totalsX = rightMargin - 144;
   ctx.y -= 24;
 
+  // Helper: draw a right-aligned value in the totals column
+  const drawTotalsRow = (
+    label: string,
+    value: string,
+    labelFont: typeof helveticaBold,
+    valueFont: typeof helvetica
+  ) => {
+    page().drawText(label, { x: totalsX, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: labelFont, color: PDF_COLORS.black });
+    const w = valueFont.widthOfTextAtSize(value, PDF_TYPOGRAPHY.bodySize);
+    page().drawText(value, { x: rightMargin - w, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: valueFont, color: PDF_COLORS.black });
+  };
+
+  const fmt = (n: number) => `$${n.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+
+  // Divider above subtotal
   page().drawLine({
     start: { x: leftMargin, y: ctx.y + 18 },
     end: { x: rightMargin, y: ctx.y + 18 },
@@ -397,98 +416,73 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     color: PDF_COLORS.divider
   });
 
-  page().drawText('SUBTOTAL:', {
-    x: totalsX,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: helveticaBold,
-    color: PDF_COLORS.black
-  });
-  const subtotalText = `$${data.subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-  const subtotalW = helvetica.widthOfTextAtSize(subtotalText, 10);
-  page().drawText(subtotalText, {
-    x: rightMargin - subtotalW,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: helvetica,
-    color: PDF_COLORS.black
-  });
+  // SUBTOTAL
+  drawTotalsRow('SUBTOTAL:', fmt(data.subtotal), helveticaBold, helvetica);
 
   if (data.discount && data.discount > 0) {
     ctx.y -= 16;
-    page().drawText('DISCOUNT:', {
-      x: totalsX,
-      y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: helveticaBold,
-      color: PDF_COLORS.black
-    });
-    const discountText = `-$${data.discount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-    const discountW = helvetica.widthOfTextAtSize(discountText, 10);
-    page().drawText(discountText, {
-      x: rightMargin - discountW,
-      y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: helvetica,
-      color: PDF_COLORS.black
-    });
+    drawTotalsRow('DISCOUNT:', `-${fmt(data.discount)}`, helveticaBold, helvetica);
   }
 
   if (data.tax && data.tax > 0) {
     ctx.y -= 16;
-    page().drawText('TAX:', {
-      x: totalsX,
-      y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: helveticaBold,
-      color: PDF_COLORS.black
-    });
-    const taxText = `$${data.tax.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-    const taxW = helvetica.widthOfTextAtSize(taxText, 10);
-    page().drawText(taxText, {
-      x: rightMargin - taxW,
-      y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: helvetica,
-      color: PDF_COLORS.black
-    });
+    drawTotalsRow('TAX:', fmt(data.tax), helveticaBold, helvetica);
   }
 
   if (data.credits && data.credits.length > 0) {
     ctx.y -= 24;
     page().drawText('DEPOSIT CREDITS APPLIED:', {
-      x: totalsX - 40,
-      y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: helveticaBold,
-      color: PDF_COLORS.black
+      x: totalsX - 40, y: ctx.y,
+      size: PDF_TYPOGRAPHY.bodySize, font: helveticaBold, color: PDF_COLORS.black
     });
     ctx.y -= 14;
-
     for (const credit of data.credits) {
-      const creditLabel = `Deposit ${credit.depositInvoiceNumber}`;
-      page().drawText(creditLabel, {
-        x: totalsX,
-        y: ctx.y,
-        size: PDF_TYPOGRAPHY.bodySize,
-        font: helvetica,
-        color: PDF_COLORS.black
+      page().drawText(`Deposit ${credit.depositInvoiceNumber}`, {
+        x: totalsX, y: ctx.y,
+        size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black
       });
-      const creditText = `-$${credit.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-      const creditW = helvetica.widthOfTextAtSize(creditText, 9);
-      page().drawText(creditText, {
-        x: rightMargin - creditW,
-        y: ctx.y,
-        size: PDF_TYPOGRAPHY.bodySize,
-        font: helvetica,
-        color: PDF_COLORS.black
-      });
+      const creditText = `-${fmt(credit.amount)}`;
+      const cw = helvetica.widthOfTextAtSize(creditText, PDF_TYPOGRAPHY.bodySize);
+      page().drawText(creditText, { x: rightMargin - cw, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
       ctx.y -= 12;
     }
   }
 
-  ctx.y -= 32;
+  // PROJECT CONTEXT — project total, previously paid, remaining balance
+  const hasProjectContext = data.projectTotal && data.projectTotal > 0;
+  const hasPreviouslyPaid = data.previouslyPaid && data.previouslyPaid > 0;
 
+  if (hasProjectContext || hasPreviouslyPaid) {
+    ctx.y -= 20;
+    page().drawLine({
+      start: { x: totalsX - 14, y: ctx.y + 14 },
+      end: { x: rightMargin, y: ctx.y + 14 },
+      thickness: PDF_SPACING.underlineThickness,
+      color: PDF_COLORS.divider
+    });
+
+    if (hasProjectContext) {
+      drawTotalsRow('PROJECT TOTAL:', fmt(data.projectTotal!), helveticaBold, helvetica);
+      ctx.y -= 14;
+    }
+
+    if (hasPreviouslyPaid) {
+      drawTotalsRow('PAID TO DATE:', `-${fmt(data.previouslyPaid!)}`, helveticaBold, helvetica);
+      ctx.y -= 14;
+
+      // Remaining balance on the project after this invoice is paid
+      const remainingAfterThis = (data.projectTotal ?? 0) - (data.previouslyPaid ?? 0) - data.total;
+      if (remainingAfterThis > 0.005) {
+        drawTotalsRow('REMAINING BALANCE:', fmt(remainingAfterThis), helveticaBold, helvetica);
+        ctx.y -= 14;
+      }
+    }
+
+    ctx.y += 14; // align next divider correctly
+  }
+
+  // Divider above AMOUNT DUE
+  ctx.y -= 18;
   page().drawLine({
     start: { x: totalsX - 14, y: ctx.y + 18 },
     end: { x: rightMargin, y: ctx.y + 18 },
@@ -496,52 +490,40 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     color: PDF_COLORS.divider
   });
 
-  const finalTotal = data.totalCredits ? data.total - data.totalCredits : data.total;
-  const totalLabel = data.totalCredits && data.totalCredits > 0 ? 'AMOUNT DUE:' : 'TOTAL:';
-  page().drawText(totalLabel, {
-    x: totalsX,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: helveticaBold,
-    color: PDF_COLORS.black
-  });
-  const totalText = `$${finalTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+  const amountDue = data.totalCredits ? data.total - data.totalCredits : data.total;
+  const totalText = fmt(amountDue);
   const totalW = helveticaBold.widthOfTextAtSize(totalText, PDF_TYPOGRAPHY.bodySize);
-  page().drawText(totalText, {
-    x: rightMargin - totalW,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: helveticaBold,
-    color: PDF_COLORS.black
-  });
+  page().drawText('TOTAL:', { x: totalsX, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: helveticaBold, color: PDF_COLORS.black });
+  page().drawText(totalText, { x: rightMargin - totalW, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: helveticaBold, color: PDF_COLORS.black });
 
   const amtDueText = 'AMOUNT DUE (USD)';
   const amtDueW = helvetica.widthOfTextAtSize(amtDueText, PDF_TYPOGRAPHY.bodySize);
   page().drawText(amtDueText, {
-    x: rightMargin - amtDueW,
-    y: ctx.y - 16,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font: helvetica,
-    color: PDF_COLORS.black
+    x: rightMargin - amtDueW, y: ctx.y - 14,
+    size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black
   });
 
   ctx.y -= 50;
 
   // === PAYMENT INSTRUCTIONS (boxed) ===
-  ensureSpace(ctx, 80, drawContinuationHeader);
+  ensureSpace(ctx, 100, drawContinuationHeader);
 
   const BOX_PADDING = 10;
-  const boxTop = ctx.y + 4;
 
+  // Label sits ABOVE the box border — no overlap
   const paymentHeading = 'PAYMENT INSTRUCTIONS';
   page().drawText(paymentHeading, {
-    x: leftMargin + BOX_PADDING,
+    x: leftMargin,
     y: ctx.y,
     size: PDF_TYPOGRAPHY.sectionHeadingSize,
     font: helveticaBold,
     color: PDF_COLORS.black
   });
-  ctx.y -= 18;
+  ctx.y -= (PDF_TYPOGRAPHY.sectionHeadingSize + 6); // label height + gap before box top
+
+  // Box starts here — below the label
+  const boxTop = ctx.y + 2;
+  ctx.y -= BOX_PADDING; // inner top padding
 
   const paymentInstructions = [
     '• Payment due within 30 days of invoice date',
@@ -558,10 +540,10 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
       font: helvetica,
       color: PDF_COLORS.black
     });
-    ctx.y -= 11;
+    ctx.y -= 14;
   }
 
-  const boxBottom = ctx.y - BOX_PADDING + 4;
+  const boxBottom = ctx.y - BOX_PADDING + 6;
   page().drawRectangle({
     x: leftMargin,
     y: boxBottom,
