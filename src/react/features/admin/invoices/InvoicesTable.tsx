@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { Inbox, Receipt } from 'lucide-react';
+import { Inbox, Receipt, Eye, Check, Download } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import {
@@ -17,6 +17,8 @@ import {
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
+import { PortalModal, useModal } from '@react/components/portal/PortalModal';
+import { InvoiceDetailPanel } from './InvoiceDetailPanel';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -27,6 +29,7 @@ import { useSelection } from '@react/hooks/useSelection';
 import { useExport } from '@react/hooks/useExport';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { INVOICES_EXPORT_CONFIG } from '@/utils/table-export';
+import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import type { Invoice, InvoiceStatus, SortConfig } from '../types';
 import { INVOICE_STATUS_CONFIG } from '../types';
 import { formatDate } from '@react/utils/formatDate';
@@ -216,6 +219,17 @@ export function InvoicesTable({
 
   // Action loading states
   const [actionLoading, setActionLoading] = useState<{ type: string; id: number } | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
+
+  // Payment recording state
+  const [paymentInvoice, setPaymentInvoice] = useState<Invoice | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState('check');
+  const [paymentReference, setPaymentReference] = useState('');
+  const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [paymentNotes, setPaymentNotes] = useState('');
+  const [isRecordingPayment, setIsRecordingPayment] = useState(false);
+  const paymentModal = useModal();
 
   // Handle bulk mark paid
   const handleBulkMarkPaid = useCallback(async () => {
@@ -300,13 +314,53 @@ export function InvoicesTable({
     [onViewInvoice, onNavigate]
   );
 
-  // Handle row click
+  // Handle row click — opens detail panel
   const handleRowClick = useCallback(
     (invoice: Invoice) => {
-      handleViewInvoice(invoice.id);
+      setSelectedInvoice(invoice);
     },
-    [handleViewInvoice]
+    []
   );
+
+  // Open payment recording modal
+  const handleOpenPaymentModal = useCallback((invoice: Invoice) => {
+    const amount = typeof invoice.amount_total === 'string' ? parseFloat(invoice.amount_total) : invoice.amount_total || 0;
+    const paid = typeof invoice.amount_paid === 'string' ? parseFloat(invoice.amount_paid) : invoice.amount_paid || 0;
+    setPaymentInvoice({ ...invoice, amount_total: amount - paid } as Invoice);
+    setPaymentMethod('check');
+    setPaymentReference('');
+    setPaymentDate(new Date().toISOString().split('T')[0]);
+    setPaymentNotes('');
+    paymentModal.open();
+  }, [paymentModal]);
+
+  // Record payment via API
+  const handleRecordPayment = useCallback(async () => {
+    if (!paymentInvoice) return;
+    setIsRecordingPayment(true);
+    try {
+      const amount = typeof paymentInvoice.amount_total === 'string'
+        ? parseFloat(paymentInvoice.amount_total) : paymentInvoice.amount_total || 0;
+      const refWithDate = paymentReference ? `${paymentReference} (${paymentDate})` : paymentDate;
+      const { apiPost: post } = await import('@/utils/api-client');
+      const res = await post(
+        `${API_ENDPOINTS.INVOICES}/${paymentInvoice.id}/record-payment-with-history`,
+        { amount, paymentMethod, paymentReference: refWithDate, notes: paymentNotes || undefined }
+      );
+      if (res.ok) {
+        showToast('Payment recorded', 'success');
+        paymentModal.close();
+        setPaymentInvoice(null);
+        refetch();
+      } else {
+        showToast('Failed to record payment', 'error');
+      }
+    } catch {
+      showToast('Failed to record payment', 'error');
+    } finally {
+      setIsRecordingPayment(false);
+    }
+  }, [paymentInvoice, paymentMethod, paymentReference, paymentDate, paymentNotes, paymentModal, refetch]);
 
   // Custom bulk actions
   const bulkActions = useMemo(
@@ -554,19 +608,26 @@ export function InvoicesTable({
                           />
                         )}
 
-                        <IconButton
-                          action="view"
-                          onClick={() => handleViewInvoice(invoice.id)}
-                          title="View invoice"
-                        />
+                        {!isDraft && (
+                          <button
+                            className="icon-btn"
+                            onClick={() => setPreviewInvoice(invoice)}
+                            title="Preview PDF"
+                            aria-label="Preview invoice PDF"
+                          >
+                            <Eye className="icon-sm" />
+                          </button>
+                        )}
 
                         {canMarkPaid && (
-                          <IconButton
-                            action="markPaid"
-                            onClick={() => handleMarkPaid(invoice.id)}
-                            disabled={actionLoading?.type === 'markPaid' && actionLoading?.id === invoice.id}
-                            title="Mark as paid"
-                          />
+                          <button
+                            className="icon-btn"
+                            onClick={() => handleOpenPaymentModal(invoice)}
+                            title="Record payment"
+                            aria-label="Record payment"
+                          >
+                            <Check className="icon-sm" />
+                          </button>
                         )}
 
                         {canDownload && (
@@ -624,6 +685,92 @@ export function InvoicesTable({
         onConfirm={handleBulkSend}
         variant="info"
         loading={sendDialog.isLoading}
+      />
+
+      {/* PDF Preview Modal */}
+      <PortalModal
+        open={!!previewInvoice}
+        onOpenChange={(open) => { if (!open) setPreviewInvoice(null); }}
+        title={previewInvoice?.invoice_number || 'Invoice Preview'}
+        icon={<Eye />}
+        size="lg"
+        footer={
+          previewInvoice ? (
+            <button className="btn-secondary" onClick={() => { handleDownloadPdf(previewInvoice.id); }}>
+              <Download className="icon-sm" /> Download
+            </button>
+          ) : undefined
+        }
+      >
+        {previewInvoice && (
+          <div style={{ minHeight: '200px' }}>
+            <iframe
+              src={buildEndpoint.invoicePdf(previewInvoice.id)}
+              title={`Preview ${previewInvoice.invoice_number}`}
+              style={{ width: '100%', height: '70vh', border: 'none' }}
+            />
+          </div>
+        )}
+      </PortalModal>
+
+      {/* Payment Recording Modal */}
+      <PortalModal
+        open={paymentModal.isOpen}
+        onOpenChange={(open) => { if (!open) { paymentModal.close(); setPaymentInvoice(null); } }}
+        title="Record Payment"
+        icon={<Check />}
+        footer={
+          <div className="action-group">
+            <button className="btn-secondary" onClick={() => { paymentModal.close(); setPaymentInvoice(null); }}>
+              Cancel
+            </button>
+            <button className="btn-primary" onClick={handleRecordPayment} disabled={isRecordingPayment || !paymentMethod}>
+              {isRecordingPayment ? 'Recording...' : 'Record Payment'}
+            </button>
+          </div>
+        }
+      >
+        {paymentInvoice && (
+          <div className="form-stack">
+            <p className="text-secondary">
+              Recording payment of {formatCurrency(paymentInvoice.amount_total)} for {paymentInvoice.invoice_number}
+            </p>
+            <div className="form-field">
+              <label className="form-label">Payment Method</label>
+              <select className="form-input" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+                <option value="check">Check</option>
+                <option value="venmo">Venmo</option>
+                <option value="paypal">PayPal</option>
+                <option value="zelle">Zelle</option>
+                <option value="stripe">Credit Card (Stripe)</option>
+                <option value="cash">Cash</option>
+                <option value="wire">Wire Transfer</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div className="form-field">
+              <label className="form-label">Reference / Check Number</label>
+              <input className="form-input" type="text" value={paymentReference} onChange={(e) => setPaymentReference(e.target.value)} placeholder={paymentMethod === 'check' ? 'Check #1234' : 'Transaction ID'} />
+            </div>
+            <div className="form-field">
+              <label className="form-label">Payment Date</label>
+              <input className="form-input" type="date" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
+            </div>
+            <div className="form-field">
+              <label className="form-label">Notes (optional)</label>
+              <textarea className="form-input" value={paymentNotes} onChange={(e) => setPaymentNotes(e.target.value)} placeholder="Additional notes" rows={2} />
+            </div>
+          </div>
+        )}
+      </PortalModal>
+
+      {/* Invoice Detail Panel */}
+      <InvoiceDetailPanel
+        invoice={selectedInvoice}
+        onClose={() => setSelectedInvoice(null)}
+        onNavigate={onNavigate}
+        onRefresh={refetch}
+        showNotification={_showNotification}
       />
     </>
   );
