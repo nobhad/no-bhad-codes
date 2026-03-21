@@ -56,13 +56,25 @@ function ModalFooter({ loading, submitLabel, onCancel }: { loading: boolean; sub
   );
 }
 
+function FieldError({ error }: { error?: string }) {
+  if (!error) return null;
+  return <span className="form-error-message">{error}</span>;
+}
+
 function useFormState<T extends Record<string, unknown>>(initial: T) {
   const [form, setForm] = useState<T>(initial);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleText = useCallback(
     (field: keyof T) =>
       (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setForm((prev) => ({ ...prev, [field]: e.target.value }));
+        setErrors((prev) => {
+          if (!prev[field as string]) return prev;
+          const next = { ...prev };
+          delete next[field as string];
+          return next;
+        });
       },
     []
   );
@@ -71,6 +83,12 @@ function useFormState<T extends Record<string, unknown>>(initial: T) {
     (field: keyof T) =>
       (value: string) => {
         setForm((prev) => ({ ...prev, [field]: value }));
+        setErrors((prev) => {
+          if (!prev[field as string]) return prev;
+          const next = { ...prev };
+          delete next[field as string];
+          return next;
+        });
       },
     []
   );
@@ -83,9 +101,22 @@ function useFormState<T extends Record<string, unknown>>(initial: T) {
     []
   );
 
-  const reset = useCallback(() => setForm(initial), [initial]);
+  /** Validate that required fields are non-empty strings. Returns true if valid. */
+  const validate = useCallback((requiredFields: Array<{ field: keyof T; label: string }>): boolean => {
+    const newErrors: Record<string, string> = {};
+    for (const { field, label } of requiredFields) {
+      const value = form[field];
+      if (typeof value === 'string' && !value.trim()) {
+        newErrors[field as string] = `${label} is required`;
+      }
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [form]);
 
-  return { form, setForm, handleText, handleDropdown, handleCheckbox, reset };
+  const reset = useCallback(() => { setForm(initial); setErrors({}); }, [initial]);
+
+  return { form, setForm, errors, handleText, handleDropdown, handleCheckbox, validate, reset };
 }
 
 // ============================================
@@ -99,16 +130,17 @@ export interface CreateContactModalProps extends BaseModalProps {
 }
 
 export function CreateContactModal({ open, onOpenChange, onSubmit, loading = false, clientOptions }: CreateContactModalProps) {
-  const { form, handleText, handleDropdown, reset } = useFormState({
+  const { form, errors, handleText, handleDropdown, validate, reset } = useFormState({
     ...INITIAL_CONTACT,
     clientId: ''
   });
 
   const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate([{ field: 'name', label: 'Name' }, { field: 'email', label: 'Email' }])) return;
     await onSubmit(form);
     reset();
-  }, [form, onSubmit, reset]);
+  }, [form, onSubmit, validate, reset]);
 
   const handleCancel = useCallback(() => { reset(); onOpenChange(false); }, [reset, onOpenChange]);
 
@@ -121,8 +153,8 @@ export function CreateContactModal({ open, onOpenChange, onSubmit, loading = fal
           <FormDropdown options={clientOptions} value={form.clientId as string} onChange={handleDropdown('clientId')} placeholder="Select client" />
         </div>
       )}
-      <div className="form-field"><PortalInput type="text" label="Name *" placeholder="Contact name" value={form.name as string} onChange={handleText('name')} required /></div>
-      <div className="form-field"><PortalInput type="email" label="Email *" placeholder="email@example.com" value={form.email as string} onChange={handleText('email')} required /></div>
+      <div className="form-field"><PortalInput type="text" label="Name *" placeholder="Contact name" value={form.name as string} onChange={handleText('name')} required /><FieldError error={errors.name} /></div>
+      <div className="form-field"><PortalInput type="email" label="Email *" placeholder="email@example.com" value={form.email as string} onChange={handleText('email')} required /><FieldError error={errors.email} /></div>
       <div className="form-field"><PortalInput type="tel" label="Phone" placeholder="(555) 123-4567" value={form.phone as string} onChange={handleText('phone')} /></div>
       <div className="form-field"><PortalInput type="text" label="Title" placeholder="Job title" value={form.title as string} onChange={handleText('title')} /></div>
       <div className="form-field"><PortalInput type="text" label="Company" placeholder="Company name" value={form.company as string} onChange={handleText('company')} /></div>
@@ -148,16 +180,17 @@ export interface CreateTaskModalProps extends BaseModalProps {
 }
 
 export function CreateTaskModal({ open, onOpenChange, onSubmit, loading = false, projectOptions }: CreateTaskModalProps) {
-  const { form, handleText, handleDropdown, reset } = useFormState({
+  const { form, errors, handleText, handleDropdown, validate, reset } = useFormState({
     ...INITIAL_TASK,
     projectId: ''
   });
 
   const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate([{ field: 'title', label: 'Title' }])) return;
     await onSubmit(form);
     reset();
-  }, [form, onSubmit, reset]);
+  }, [form, onSubmit, validate, reset]);
 
   const handleCancel = useCallback(() => { reset(); onOpenChange(false); }, [reset, onOpenChange]);
 
@@ -324,13 +357,14 @@ export interface CreateContractModalProps extends BaseModalProps {
 }
 
 export function CreateContractModal({ open, onOpenChange, onSubmit, loading = false, clientOptions, projectOptions }: CreateContractModalProps) {
-  const { form, handleText, handleDropdown, reset } = useFormState(INITIAL_CONTRACT);
+  const { form, errors, handleText, handleDropdown, validate, reset } = useFormState(INITIAL_CONTRACT);
 
   const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate([{ field: 'clientId', label: 'Client' }, { field: 'projectId', label: 'Project' }])) return;
     await onSubmit(form);
     reset();
-  }, [form, onSubmit, reset]);
+  }, [form, onSubmit, validate, reset]);
 
   const handleCancel = useCallback(() => { reset(); onOpenChange(false); }, [reset, onOpenChange]);
 
@@ -340,10 +374,12 @@ export function CreateContractModal({ open, onOpenChange, onSubmit, loading = fa
       <div className="form-field">
         <label className="field-label">Client *</label>
         <FormDropdown options={clientOptions} value={form.clientId as string} onChange={handleDropdown('clientId')} placeholder="Select client" />
+        <FieldError error={errors.clientId} />
       </div>
       <div className="form-field">
         <label className="field-label">Project *</label>
         <FormDropdown options={projectOptions} value={form.projectId as string} onChange={handleDropdown('projectId')} placeholder="Select project" />
+        <FieldError error={errors.projectId} />
       </div>
       <div className="form-field">
         <label className="field-label" htmlFor="contract-content">Contract Content *</label>
@@ -372,13 +408,14 @@ export interface CreateDocumentRequestModalProps extends BaseModalProps {
 }
 
 export function CreateDocumentRequestModal({ open, onOpenChange, onSubmit, loading = false, clientOptions, projectOptions }: CreateDocumentRequestModalProps) {
-  const { form, handleText, handleDropdown, reset } = useFormState(INITIAL_DOC_REQUEST);
+  const { form, errors, handleText, handleDropdown, validate, reset } = useFormState(INITIAL_DOC_REQUEST);
 
   const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate([{ field: 'title', label: 'Title' }, { field: 'client_id', label: 'Client' }])) return;
     await onSubmit(form);
     reset();
-  }, [form, onSubmit, reset]);
+  }, [form, onSubmit, validate, reset]);
 
   const handleCancel = useCallback(() => { reset(); onOpenChange(false); }, [reset, onOpenChange]);
 
@@ -431,31 +468,40 @@ export interface CreateAdHocRequestModalProps extends BaseModalProps {
 }
 
 export function CreateAdHocRequestModal({ open, onOpenChange, onSubmit, loading = false, clientOptions, projectOptions }: CreateAdHocRequestModalProps) {
-  const { form, handleText, handleDropdown, reset } = useFormState(INITIAL_AD_HOC);
+  const { form, errors, handleText, handleDropdown, validate, reset } = useFormState(INITIAL_AD_HOC);
 
   const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate([
+      { field: 'title', label: 'Title' },
+      { field: 'clientId', label: 'Client' },
+      { field: 'projectId', label: 'Project' },
+      { field: 'requestType', label: 'Request Type' }
+    ])) return;
     await onSubmit(form);
     reset();
-  }, [form, onSubmit, reset]);
+  }, [form, onSubmit, validate, reset]);
 
   const handleCancel = useCallback(() => { reset(); onOpenChange(false); }, [reset, onOpenChange]);
 
   return (
     <PortalModal open={open} onOpenChange={onOpenChange} title="New Ad-Hoc Request" icon={<Send />} onSubmit={handleFormSubmit}
       footer={<><button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={loading}>Cancel</button><button type="submit" className="btn btn-primary" disabled={loading}>{loading ? 'Creating...' : 'Create Request'}</button></>}>
-      <div className="form-field"><PortalInput type="text" label="Title *" placeholder="Request title" value={form.title as string} onChange={handleText('title')} required /></div>
+      <div className="form-field"><PortalInput type="text" label="Title *" placeholder="Request title" value={form.title as string} onChange={handleText('title')} required /><FieldError error={errors.title} /></div>
       <div className="form-field">
         <label className="field-label">Client *</label>
         <FormDropdown options={clientOptions} value={form.clientId as string} onChange={handleDropdown('clientId')} placeholder="Select client" />
+        <FieldError error={errors.clientId} />
       </div>
       <div className="form-field">
         <label className="field-label">Project *</label>
         <FormDropdown options={projectOptions} value={form.projectId as string} onChange={handleDropdown('projectId')} placeholder="Select project" />
+        <FieldError error={errors.projectId} />
       </div>
       <div className="form-field">
         <label className="field-label">Request Type *</label>
         <FormDropdown options={REQUEST_TYPE_OPTIONS} value={form.requestType as string} onChange={handleDropdown('requestType')} placeholder="Select type" />
+        <FieldError error={errors.requestType} />
       </div>
       <div className="form-field">
         <label className="field-label">Priority</label>
@@ -530,13 +576,14 @@ export interface CreateTimeEntryModalProps extends BaseModalProps {
 }
 
 export function CreateTimeEntryModal({ open, onOpenChange, onSubmit, loading = false, projectOptions }: CreateTimeEntryModalProps) {
-  const { form, handleText, handleDropdown, handleCheckbox, reset } = useFormState(INITIAL_TIME_ENTRY);
+  const { form, errors, handleText, handleDropdown, handleCheckbox, validate, reset } = useFormState(INITIAL_TIME_ENTRY);
 
   const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate([{ field: 'projectId', label: 'Project' }, { field: 'hours', label: 'Hours' }])) return;
     await onSubmit(form);
     reset();
-  }, [form, onSubmit, reset]);
+  }, [form, onSubmit, validate, reset]);
 
   const handleCancel = useCallback(() => { reset(); onOpenChange(false); }, [reset, onOpenChange]);
 
@@ -546,8 +593,9 @@ export function CreateTimeEntryModal({ open, onOpenChange, onSubmit, loading = f
       <div className="form-field">
         <label className="field-label">Project *</label>
         <FormDropdown options={projectOptions} value={form.projectId as string} onChange={handleDropdown('projectId')} placeholder="Select project" />
+        <FieldError error={errors.projectId} />
       </div>
-      <div className="form-field"><PortalInput type="number" label="Hours *" placeholder="0.0" value={form.hours as string} onChange={handleText('hours')} required /></div>
+      <div className="form-field"><PortalInput type="number" label="Hours *" placeholder="0.0" value={form.hours as string} onChange={handleText('hours')} required /><FieldError error={errors.hours} /></div>
       <div className="form-field"><PortalInput type="date" label="Date *" value={form.date as string} onChange={handleText('date')} required /></div>
       <div className="form-field">
         <label className="field-label" htmlFor="time-desc">Description</label>
@@ -580,13 +628,19 @@ export interface CreateProposalModalProps extends BaseModalProps {
 }
 
 export function CreateProposalModal({ open, onOpenChange, onSubmit, loading = false, clientOptions, projectOptions, projectTypeOptions }: CreateProposalModalProps) {
-  const { form, handleText, handleDropdown, reset } = useFormState(INITIAL_PROPOSAL);
+  const { form, errors, handleText, handleDropdown, validate, reset } = useFormState(INITIAL_PROPOSAL);
 
   const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate([
+      { field: 'clientId', label: 'Client' },
+      { field: 'projectId', label: 'Project' },
+      { field: 'projectType', label: 'Project Type' },
+      { field: 'selectedTier', label: 'Tier' }
+    ])) return;
     await onSubmit(form);
     reset();
-  }, [form, onSubmit, reset]);
+  }, [form, onSubmit, validate, reset]);
 
   const handleCancel = useCallback(() => { reset(); onOpenChange(false); }, [reset, onOpenChange]);
 
@@ -596,18 +650,22 @@ export function CreateProposalModal({ open, onOpenChange, onSubmit, loading = fa
       <div className="form-field">
         <label className="field-label">Client *</label>
         <FormDropdown options={clientOptions} value={form.clientId as string} onChange={handleDropdown('clientId')} placeholder="Select client" />
+        <FieldError error={errors.clientId} />
       </div>
       <div className="form-field">
         <label className="field-label">Project *</label>
         <FormDropdown options={projectOptions} value={form.projectId as string} onChange={handleDropdown('projectId')} placeholder="Select project" />
+        <FieldError error={errors.projectId} />
       </div>
       <div className="form-field">
         <label className="field-label">Project Type *</label>
         <FormDropdown options={projectTypeOptions} value={form.projectType as string} onChange={handleDropdown('projectType')} placeholder="Select type" />
+        <FieldError error={errors.projectType} />
       </div>
       <div className="form-field">
         <label className="field-label">Tier *</label>
         <FormDropdown options={TIER_OPTIONS} value={form.selectedTier as string} onChange={handleDropdown('selectedTier')} placeholder="Select tier" />
+        <FieldError error={errors.selectedTier} />
       </div>
       <div className="form-field"><PortalInput type="number" label="Base Price *" placeholder="0.00" value={form.basePrice as string} onChange={handleText('basePrice')} required /></div>
       <div className="form-field"><PortalInput type="number" label="Final Price *" placeholder="0.00" value={form.finalPrice as string} onChange={handleText('finalPrice')} required /></div>
