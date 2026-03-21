@@ -20,6 +20,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--portal-section-gap);
+  padding: 0 var(--content-gutter);
 }
 
 @media (--laptop-up) {
@@ -33,6 +34,28 @@
 .contract-stats-grid .stat-value {
   font-size: var(--font-size-sm);
   font-family: inherit;
+}
+
+/* Service credential group header */
+.credential-group-header {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  margin-bottom: var(--space-2);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.credential-group-header .field-label {
+  margin-bottom: 0;
+}
+
+.credential-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
 /* Field label with inline icon (e.g. Links section) */
@@ -447,12 +470,22 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   margin-left: var(--space-3);
 }
 
-.milestone-deliverables {
+.milestone-deliverables,
+.milestone-task-list {
+  list-style: none;
+  padding: 0;
   margin: var(--space-2) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
-.milestone-deliverables li {
-  margin: var(--space-0-5) 0;
+.milestone-deliverables li,
+.milestone-task-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
 }
 
 .milestone-item .btn-danger {
@@ -696,10 +729,7 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   font-weight: var(--font-weight-semibold);
 }
 
-/* Completed / strikethrough text */
-.pd-completed-text {
-  text-decoration: line-through;
-}
+/* Completed task text — muted color only, no strikethrough */
 
 /* Truncated text with max-width */
 .pd-truncate-filename {
@@ -802,12 +832,12 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   background: var(--portal-alpha-white-05);
 }
 
-/* Category dropdown trigger — absolute caret, symmetric padding */
+/* Category dropdown trigger — thin border inside tables */
 .files-category-trigger {
   height: var(--space-4);
   position: relative;
   background: transparent;
-  border: var(--portal-border);
+  border: var(--border-width-px) solid var(--color-border-primary);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   font-family: inherit;
@@ -822,6 +852,11 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 .files-category-trigger[data-state="open"] {
   border-color: var(--color-accent);
   border-bottom-color: transparent;
+}
+
+body:has(.portal-dropdown-content[data-side="top"]) .files-category-trigger[data-state="open"] {
+  border-bottom-color: var(--color-accent);
+  border-top-color: transparent;
 }
 
 /* --- Tasks Tab --- */

@@ -267,3 +267,19 @@
   padding: var(--content-gutter);
   box-sizing: border-box;
 }
+
+/* =====================================================
+   DROPDOWN SEAMLESS BORDER — UPWARD OPENING OVERRIDE
+   Unlayered so it beats @layer pages rules.
+   When content opens above trigger, flip which border is hidden.
+   ===================================================== */
+
+body:has(.portal-dropdown-content[data-side="top"]) .dropdown-trigger[data-state="open"] {
+  border-bottom-color: var(--color-border-primary) !important;
+  border-top-color: transparent !important;
+}
+
+body:has(.portal-dropdown-content[data-side="top"]) .files-category-trigger[data-state="open"] {
+  border-bottom-color: var(--color-accent) !important;
+  border-top-color: transparent !important;
+}

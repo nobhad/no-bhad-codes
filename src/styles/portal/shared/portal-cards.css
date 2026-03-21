@@ -483,9 +483,7 @@ html[data-theme="light"] .portal :is(
 .portal
   :is(.milestone-item, .milestone-task-item).completed
   :is(.milestone-title, .milestone-task-title) {
-  text-decoration: line-through;
   color: var(--color-text-secondary);
-  opacity: var(--opacity-subtle);
 }
 
 /* =====================================================

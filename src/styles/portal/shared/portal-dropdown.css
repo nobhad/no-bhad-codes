@@ -145,11 +145,22 @@ td:has(.dropdown-trigger--status) .portal-dropdown-content,
   letter-spacing: inherit;
 }
 
-/* Remove bottom border on trigger when open - seamless connection.
-   Only hide color — do NOT change border-bottom-width (would cause layout shift). */
+/* Remove adjacent border on trigger when open — seamless connection.
+   Which border to hide depends on whether content opens above or below.
+   Since Radix portals content to body with data-side attribute, we use
+   :has() on body to detect direction. Only one dropdown is open at a time. */
+
+/* Default: content opens BELOW — hide trigger bottom border */
 .dropdown-trigger[data-state="open"],
 :is(.btn, .btn-secondary, .btn-primary, .btn-outline).dropdown-trigger[data-state="open"] {
   border-bottom-color: transparent;
+}
+
+/* Override: content opens ABOVE — restore bottom border, hide top border */
+body:has(.portal-dropdown-content[data-side="top"]) .dropdown-trigger[data-state="open"],
+body:has(.portal-dropdown-content[data-side="top"]) :is(.btn, .btn-secondary, .btn-primary, .btn-outline).dropdown-trigger[data-state="open"] {
+  border-bottom-color: var(--color-border-primary);
+  border-top-color: transparent;
 }
 
 /* Hover state for button dropdown triggers - ensure text visible */
@@ -167,12 +178,12 @@ td:has(.dropdown-trigger--status) .portal-dropdown-content,
 /* Seamless connection: remove border between trigger and menu.
    margin compensates for trigger's border width so menu sits flush. */
 .portal-dropdown-content[data-side="bottom"] {
-  border-top: none;
+  border-top-color: transparent;
   margin-top: calc(-1 * var(--border-width-px));
 }
 
 .portal-dropdown-content[data-side="top"] {
-  border-bottom: none;
+  border-bottom-color: transparent;
   margin-bottom: calc(-1 * var(--border-width-px));
 }
 

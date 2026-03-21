@@ -85,6 +85,16 @@ export interface UseProjectDetailReturn {
   deleteFile: (id: number) => Promise<boolean>;
   /** Toggle file sharing */
   toggleFileSharing: (id: number) => Promise<boolean>;
+  /** Update file category */
+  updateCategory: (id: number, category: string) => Promise<boolean>;
+  /** Send invoice */
+  sendInvoice: (id: number) => Promise<boolean>;
+  /** Mark invoice as paid */
+  markAsPaid: (id: number) => Promise<boolean>;
+  /** Delete invoice */
+  deleteInvoice: (id: number) => Promise<boolean>;
+  /** Download invoice PDF */
+  downloadPdf: (id: number) => Promise<void>;
   /** Load messages */
   loadMessages: () => Promise<void>;
   /** Send message */

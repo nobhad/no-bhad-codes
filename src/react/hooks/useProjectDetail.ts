@@ -65,7 +65,8 @@ export function useProjectDetail({
     fetchFiles,
     uploadFile,
     deleteFile,
-    toggleFileSharing
+    toggleFileSharing,
+    updateCategory
   } = useProjectFiles(hookOptions);
 
   const {
@@ -73,7 +74,11 @@ export function useProjectDetail({
     setInvoices,
     outstandingBalance,
     totalPaid,
-    fetchInvoices
+    fetchInvoices,
+    sendInvoice,
+    markAsPaid,
+    deleteInvoice,
+    downloadPdf
   } = useProjectInvoices(hookOptions);
 
   const {
@@ -164,6 +169,11 @@ export function useProjectDetail({
     uploadFile,
     deleteFile,
     toggleFileSharing,
+    updateCategory,
+    sendInvoice,
+    markAsPaid,
+    deleteInvoice,
+    downloadPdf,
     loadMessages,
     sendMessage,
     editMessage,
