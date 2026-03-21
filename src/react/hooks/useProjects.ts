@@ -180,17 +180,19 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
           setProjects((prev) => prev.filter((p) => !ids.includes(p.id)));
         } else {
           // Fallback to individual deletes
+          const successIds: number[] = [];
           for (const id of ids) {
             const deleteResponse = await apiDelete(`${API_ENDPOINTS.PROJECTS}/${id}`);
             if (deleteResponse.ok) {
               success++;
+              successIds.push(id);
             } else {
               failed++;
             }
           }
-          // Remove successful deletes from local state
-          if (success > 0) {
-            setProjects((prev) => prev.filter((p) => !ids.includes(p.id)));
+          // Remove only successfully deleted projects from local state
+          if (successIds.length > 0) {
+            setProjects((prev) => prev.filter((p) => !successIds.includes(p.id)));
           }
         }
       } catch (err) {
