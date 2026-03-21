@@ -10,11 +10,13 @@
  * Extracted from server/views/partials/head.ejs
  */
 
-const AUTH_STORAGE_KEYS = [
-  'nbw_auth_user',
-  'nbw_auth_expiry',
-  'nbw_auth_role',
-  'nbw_auth_session_id'
+import { AUTH_STORAGE_KEYS } from '../../auth/auth-constants';
+
+const SESSION_KEYS = [
+  AUTH_STORAGE_KEYS.SESSION.USER,
+  AUTH_STORAGE_KEYS.SESSION.EXPIRY,
+  AUTH_STORAGE_KEYS.SESSION.ROLE,
+  AUTH_STORAGE_KEYS.SESSION.SESSION_ID
 ] as const;
 
 const SESSION_EXPIRED_MESSAGE = 'Your session has expired. Please sign in again.';
@@ -30,7 +32,7 @@ export function handleSessionExpiry(): boolean {
   if (!sessionExpired) return false;
 
   // Clear stale auth data
-  for (const key of AUTH_STORAGE_KEYS) {
+  for (const key of SESSION_KEYS) {
     sessionStorage.removeItem(key);
   }
 
@@ -56,8 +58,8 @@ export function handleSessionExpiry(): boolean {
  * Adds 'auth-checked' class to html element if authenticated.
  */
 export function checkAuthSession(): boolean {
-  const authUser = sessionStorage.getItem('nbw_auth_user');
-  const authExpiry = sessionStorage.getItem('nbw_auth_expiry');
+  const authUser = sessionStorage.getItem(AUTH_STORAGE_KEYS.SESSION.USER);
+  const authExpiry = sessionStorage.getItem(AUTH_STORAGE_KEYS.SESSION.EXPIRY);
   const isAuthenticated = !!(authUser && authExpiry && Date.now() < parseInt(authExpiry, 10));
 
   if (isAuthenticated) {

@@ -53,6 +53,9 @@ export class PageTransitionModule extends BaseModule {
   // Debounced resize handler
   private debouncedHandleResize: (() => void) | null = null;
 
+  // Bound handler for proper cleanup
+  private boundHandleHashChange: (() => void) | null = null;
+
   constructor(options: PageTransitionOptions = {}) {
     super('PageTransitionModule', { debug: false, ...options });
 
@@ -230,8 +233,9 @@ export class PageTransitionModule extends BaseModule {
       }
     }) as EventListener);
 
-    // Listen for hash changes
-    window.addEventListener('hashchange', this.handleHashChange.bind(this));
+    // Listen for hash changes (store bound reference for cleanup)
+    this.boundHandleHashChange = this.handleHashChange.bind(this);
+    window.addEventListener('hashchange', this.boundHandleHashChange);
 
     // Listen for resize to toggle mobile behavior (debounced for performance)
     if (this.debouncedHandleResize) {
@@ -726,7 +730,10 @@ export class PageTransitionModule extends BaseModule {
    * Cleanup on destroy
    */
   override async destroy(): Promise<void> {
-    window.removeEventListener('hashchange', this.handleHashChange.bind(this));
+    if (this.boundHandleHashChange) {
+      window.removeEventListener('hashchange', this.boundHandleHashChange);
+      this.boundHandleHashChange = null;
+    }
     if (this.debouncedHandleResize) {
       window.removeEventListener('resize', this.debouncedHandleResize);
     }

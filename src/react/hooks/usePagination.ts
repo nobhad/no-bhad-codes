@@ -100,10 +100,10 @@ export function usePagination(options: UsePaginationOptions): UsePaginationRetur
     [totalItems, pageSize]
   );
 
-  // Adjust page if it exceeds total pages
+  // Adjust page if it exceeds total pages (clamp to at least 1)
   useEffect(() => {
     if (page > totalPages) {
-      setPage(totalPages);
+      setPage(Math.max(1, totalPages));
     }
   }, [page, totalPages]);
 

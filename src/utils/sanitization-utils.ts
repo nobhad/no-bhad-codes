@@ -320,6 +320,16 @@ export class SanitizationUtils {
 
   static checkRateLimit(identifier: string, maxAttempts = 5, windowMs = 300000): boolean {
     const now = Date.now();
+
+    // Periodically clean up expired entries to prevent unbounded growth
+    if (SanitizationUtils.submissionAttempts.size > 50) {
+      for (const [key, entry] of SanitizationUtils.submissionAttempts) {
+        if (now - entry.firstAttempt > windowMs) {
+          SanitizationUtils.submissionAttempts.delete(key);
+        }
+      }
+    }
+
     const attempts = SanitizationUtils.submissionAttempts.get(identifier);
 
     if (!attempts) {
