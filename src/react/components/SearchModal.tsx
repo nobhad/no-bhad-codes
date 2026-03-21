@@ -282,6 +282,7 @@ export function useSearchModal() {
 
   return {
     open,
+    onOpen: () => setOpen(true),
     onClose: () => setOpen(false)
   };
 }
