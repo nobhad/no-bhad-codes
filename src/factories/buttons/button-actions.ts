@@ -73,7 +73,7 @@ export const BUTTON_ACTIONS: Record<string, ButtonActionDefinition> = {
   // ============================================
   download: { icon: 'download', title: 'Download', ariaLabel: 'Download' },
   export: { icon: 'download', title: 'Export', ariaLabel: 'Export' },
-  pdf: { icon: 'file-text', title: 'Download PDF', ariaLabel: 'Download PDF' },
+  pdf: { icon: 'download', title: 'Download PDF', ariaLabel: 'Download PDF' },
   copy: { icon: 'copy', title: 'Copy', ariaLabel: 'Copy to clipboard' },
   'copy-link': { icon: 'copy', title: 'Copy Link', ariaLabel: 'Copy link to clipboard' },
   duplicate: { icon: 'copy', title: 'Duplicate', ariaLabel: 'Duplicate' },

@@ -12,6 +12,7 @@ import {
 import { IconButton } from '@react/factories';
 import { useListFetch } from '@react/factories/useDataFetch';
 import { Checkbox } from '@react/components/ui/checkbox';
+import { PortalModal } from '@react/components/portal/PortalModal';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -147,6 +148,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
+  const [previewContract, setPreviewContract] = useState<Contract | null>(null);
   const { clientOptions: entityClients, projectOptions: entityProjects } = useEntityOptions(createOpen);
 
   const { data, isLoading, error, refetch, setData } = useListFetch<Contract, ContractStats>({
@@ -543,7 +545,6 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                   <PortalTableCell className="date-col">{formatDate(contract.createdAt)}</PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-group">
-                      <IconButton action="view" title="View" onClick={() => setSelectedContract(contract)} />
                       {contract.status === 'draft' && (
                         <IconButton
                           action="send"
@@ -551,6 +552,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                           onClick={() => handleSendContract(contract.id)}
                         />
                       )}
+                      <IconButton action="view" title="Preview PDF" onClick={() => setPreviewContract(contract)} />
                       <IconButton action="download" title="Download" />
                     </div>
                   </PortalTableCell>
