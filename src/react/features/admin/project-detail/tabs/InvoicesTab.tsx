@@ -7,7 +7,6 @@ import {
   Check,
   Download,
   Trash2,
-  Pencil,
   Inbox,
   ChevronDown
 } from 'lucide-react';
@@ -20,14 +19,26 @@ import {
   PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
-import { PortalModal } from '@react/components/portal/PortalModal';
+import { PortalModal, useModal } from '@react/components/portal/PortalModal';
 import { InvoiceDetailPanel } from '../../invoices/InvoiceDetailPanel';
-import { buildEndpoint } from '@/constants/api-endpoints';
+import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
+import { apiPost } from '@/utils/api-client';
 import type { Invoice, InvoiceStatus } from '../../types';
 import { INVOICE_STATUS_CONFIG } from '../../types';
 import { formatCurrency, formatDate } from '@/utils/format-utils';
 import { NOTIFICATIONS } from '@/constants/notifications';
 import { KEYS } from '@/constants/keyboard';
+
+const PAYMENT_METHODS = [
+  { value: 'check', label: 'Check' },
+  { value: 'venmo', label: 'Venmo' },
+  { value: 'paypal', label: 'PayPal' },
+  { value: 'zelle', label: 'Zelle' },
+  { value: 'stripe', label: 'Credit Card (Stripe)' },
+  { value: 'cash', label: 'Cash' },
+  { value: 'wire', label: 'Wire Transfer' },
+  { value: 'other', label: 'Other' }
+] as const;
 
 const STATUS_FILTER_OPTIONS = [
   { value: 'all', label: 'All Invoices' },
@@ -44,8 +55,6 @@ const STATUS_FILTER_LABELS: Record<string, string> = Object.fromEntries(
 
 interface InvoicesTabProps {
   invoices: Invoice[];
-  onViewInvoice?: (invoiceId: number) => void;
-  onEditInvoice?: (invoiceId: number) => void;
   onCreateInvoice?: () => void;
   onSendInvoice?: (invoiceId: number) => Promise<boolean>;
   onMarkPaid?: (invoiceId: number) => Promise<boolean>;
@@ -86,8 +95,6 @@ function getDisplayStatus(invoice: Invoice): InvoiceStatus {
  */
 export function InvoicesTab({
   invoices,
-  onViewInvoice,
-  onEditInvoice,
   onCreateInvoice,
   onSendInvoice,
   onMarkPaid,
@@ -103,9 +110,15 @@ export function InvoicesTab({
   const [deletingInvoiceId, setDeletingInvoiceId] = useState<number | null>(null);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
+  const [paymentInvoice, setPaymentInvoice] = useState<Invoice | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState('check');
+  const [paymentReference, setPaymentReference] = useState('');
+  const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [paymentNotes, setPaymentNotes] = useState('');
+  const [isRecordingPayment, setIsRecordingPayment] = useState(false);
+  const paymentModal = useModal();
 
   const deleteDialog = useConfirmDialog();
-  const markPaidDialog = useConfirmDialog();
 
   // Filter invoices
   const filteredInvoices = useMemo(() => {
@@ -159,18 +172,58 @@ export function InvoicesTab({
     [onSendInvoice, showNotification]
   );
 
-  // Handle mark paid
-  const handleMarkPaid = useCallback(async () => {
-    if (!onMarkPaid || deletingInvoiceId === null) return;
-    const success = await onMarkPaid(deletingInvoiceId);
+  // Open payment recording modal
+  const handleOpenPaymentModal = useCallback((invoice: Invoice) => {
+    setPaymentInvoice(invoice);
+    const amount = typeof invoice.amount_total === 'string' ? parseFloat(invoice.amount_total) : invoice.amount_total || 0;
+    const paid = typeof invoice.amount_paid === 'string' ? parseFloat(invoice.amount_paid) : invoice.amount_paid || 0;
+    setPaymentMethod('check');
+    setPaymentReference('');
+    setPaymentDate(new Date().toISOString().split('T')[0]);
+    setPaymentNotes('');
+    // Store remaining amount for the form (used by label)
+    setPaymentInvoice({ ...invoice, amount_total: amount - paid } as Invoice);
+    paymentModal.open();
+  }, [paymentModal]);
 
-    if (success) {
-      showNotification?.(NOTIFICATIONS.invoice.MARKED_PAID, 'success');
-    } else {
-      showNotification?.(NOTIFICATIONS.invoice.MARK_PAID_FAILED, 'error');
+  // Record payment via API
+  const handleRecordPayment = useCallback(async () => {
+    if (!paymentInvoice) return;
+    setIsRecordingPayment(true);
+
+    try {
+      const amount = typeof paymentInvoice.amount_total === 'string'
+        ? parseFloat(paymentInvoice.amount_total)
+        : paymentInvoice.amount_total || 0;
+
+      const refWithDate = paymentReference
+        ? `${paymentReference} (${paymentDate})`
+        : paymentDate;
+
+      const res = await apiPost(
+        `${API_ENDPOINTS.INVOICES}/${paymentInvoice.id}/record-payment-with-history`,
+        {
+          amount,
+          paymentMethod,
+          paymentReference: refWithDate,
+          notes: paymentNotes || undefined
+        }
+      );
+
+      if (res.ok) {
+        showNotification?.('Payment recorded successfully', 'success');
+        paymentModal.close();
+        setPaymentInvoice(null);
+        onRefresh?.();
+      } else {
+        showNotification?.('Failed to record payment', 'error');
+      }
+    } catch {
+      showNotification?.('Failed to record payment', 'error');
+    } finally {
+      setIsRecordingPayment(false);
     }
-    setDeletingInvoiceId(null);
-  }, [onMarkPaid, deletingInvoiceId, showNotification]);
+  }, [paymentInvoice, paymentMethod, paymentReference, paymentDate, paymentNotes, paymentModal, showNotification, onRefresh]);
 
   // Handle delete
   const handleDelete = useCallback(async () => {
@@ -328,19 +381,8 @@ export function InvoicesTab({
                         {formatDate(invoice.due_date)}
                       </span>
                     </td>
-                    <td className="pd-table-cell" onClick={(e) => e.stopPropagation()}>
+                    <td className="pd-table-cell pd-cell-right" onClick={(e) => e.stopPropagation()}>
                       <div className="action-group">
-                        {!isDraft && (
-                          <button
-                            className="icon-btn"
-                            onClick={() => setPreviewInvoice(invoice)}
-                            title="Preview PDF"
-                            aria-label="Preview invoice PDF"
-                          >
-                            <Eye className="icon-md" />
-                          </button>
-                        )}
-
                         {canSend && (
                           <button
                             className="icon-btn"
@@ -353,15 +395,23 @@ export function InvoicesTab({
                           </button>
                         )}
 
+                        {!isDraft && (
+                          <button
+                            className="icon-btn"
+                            onClick={() => setPreviewInvoice(invoice)}
+                            title="Preview PDF"
+                            aria-label="Preview invoice PDF"
+                          >
+                            <Eye className="icon-md" />
+                          </button>
+                        )}
+
                         {canMarkPaid && (
                           <button
                             className="icon-btn"
-                            onClick={() => {
-                              setDeletingInvoiceId(invoice.id);
-                              markPaidDialog.open();
-                            }}
-                            title="Mark as paid"
-                            aria-label="Mark as paid"
+                            onClick={() => handleOpenPaymentModal(invoice)}
+                            title="Record payment"
+                            aria-label="Record payment"
                           >
                             <Check className="icon-md" />
                           </button>
@@ -402,18 +452,80 @@ export function InvoicesTab({
         </div>
       )}
 
-      {/* Mark Paid Confirmation */}
-      <ConfirmDialog
-        open={markPaidDialog.isOpen}
-        onOpenChange={markPaidDialog.setIsOpen}
-        title="Mark as Paid"
-        description="Mark this invoice as paid?"
-        confirmText="Mark Paid"
-        cancelText="Cancel"
-        onConfirm={handleMarkPaid}
-        variant="info"
-        loading={markPaidDialog.isLoading}
-      />
+      {/* Record Payment Modal */}
+      <PortalModal
+        open={paymentModal.isOpen}
+        onOpenChange={(open) => { if (!open) { paymentModal.close(); setPaymentInvoice(null); } }}
+        title="Record Payment"
+        icon={<Check />}
+        footer={
+          <div className="action-group">
+            <button className="btn-secondary" onClick={() => { paymentModal.close(); setPaymentInvoice(null); }}>
+              Cancel
+            </button>
+            <button
+              className="btn-primary"
+              onClick={handleRecordPayment}
+              disabled={isRecordingPayment || !paymentMethod}
+            >
+              {isRecordingPayment ? 'Recording...' : 'Record Payment'}
+            </button>
+          </div>
+        }
+      >
+        {paymentInvoice && (
+          <div className="form-stack">
+            <p className="text-secondary">
+              Recording payment of {formatCurrency(paymentInvoice.amount_total)} for {paymentInvoice.invoice_number}
+            </p>
+
+            <div className="form-field">
+              <label className="form-label">Payment Method</label>
+              <select
+                className="form-input"
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+              >
+                {PAYMENT_METHODS.map((m) => (
+                  <option key={m.value} value={m.value}>{m.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-field">
+              <label className="form-label">Reference / Check Number</label>
+              <input
+                className="form-input"
+                type="text"
+                value={paymentReference}
+                onChange={(e) => setPaymentReference(e.target.value)}
+                placeholder={paymentMethod === 'check' ? 'Check #1234' : 'Transaction ID or reference'}
+              />
+            </div>
+
+            <div className="form-field">
+              <label className="form-label">Payment Date</label>
+              <input
+                className="form-input"
+                type="date"
+                value={paymentDate}
+                onChange={(e) => setPaymentDate(e.target.value)}
+              />
+            </div>
+
+            <div className="form-field">
+              <label className="form-label">Notes (optional)</label>
+              <textarea
+                className="form-input"
+                value={paymentNotes}
+                onChange={(e) => setPaymentNotes(e.target.value)}
+                placeholder="Any additional notes about this payment"
+                rows={2}
+              />
+            </div>
+          </div>
+        )}
+      </PortalModal>
 
       {/* Delete Confirmation */}
       <ConfirmDialog

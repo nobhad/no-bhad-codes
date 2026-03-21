@@ -993,7 +993,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   position: relative;
   padding: 0 var(--dropdown-padding-x);
   padding-right: var(--dropdown-padding-x);
-  border: var(--border-width-px) solid var(--color-bg-primary);
+  border: var(--border-width-px) solid var(--color-border-primary);
   background-color: var(--color-bg-primary);
   color: var(--color-text-secondary);
   font-size: inherit;
