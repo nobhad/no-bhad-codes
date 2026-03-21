@@ -1485,7 +1485,8 @@ class FileService {
     const db = getDatabase();
     const rows = await db.all(
       `SELECT id, filename, original_filename, file_size, mime_type, file_type,
-              file_path, description, uploaded_by, created_at
+              file_path, description, uploaded_by, created_at,
+              category, shared_with_client
        FROM files
        WHERE project_id = ? AND deleted_at IS NULL
        ORDER BY created_at DESC`,
@@ -1502,6 +1503,8 @@ class FileService {
       description: string | null;
       uploaded_by: string;
       created_at: string;
+      category: string | null;
+      shared_with_client: number;
     }[];
   }
 

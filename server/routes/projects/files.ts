@@ -32,9 +32,18 @@ router.get(
     const files = await fileService.getProjectFilesList(projectId);
 
     sendSuccess(res, {
-      files: files.map((f) => ({
-        ...f,
-        size: f.file_size
+      files: files.map((f: Record<string, unknown>) => ({
+        id: f.id,
+        project_id: projectId,
+        filename: f.filename,
+        original_name: f.original_filename,
+        file_type: f.mime_type || f.file_type || '',
+        file_size: f.file_size,
+        category: f.category || null,
+        is_shared: !!f.shared_with_client,
+        uploaded_by: f.uploaded_by,
+        created_at: f.created_at,
+        download_url: `/api/uploads/file/${f.id}`
       }))
     });
   })

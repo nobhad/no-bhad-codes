@@ -9,6 +9,32 @@ import {
 import { projectService } from '../../services/project-service.js';
 import { invalidateCache } from '../../middleware/cache.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
+import type { ProjectTask } from '../../services/project/types.js';
+
+// Convert camelCase ProjectTask → snake_case ProjectTaskResponse for API
+function serializeTask(task: ProjectTask): Record<string, unknown> {
+  return {
+    id: task.id,
+    project_id: task.projectId,
+    milestone_id: task.milestoneId ?? null,
+    title: task.title,
+    description: task.description,
+    status: task.status,
+    priority: task.priority,
+    assigned_to: task.assignedTo,
+    due_date: task.dueDate,
+    estimated_hours: task.estimatedHours,
+    actual_hours: task.actualHours,
+    sort_order: task.sortOrder,
+    parent_task_id: task.parentTaskId,
+    completed_at: task.completedAt,
+    created_at: task.createdAt,
+    updated_at: task.updatedAt,
+    subtasks: task.subtasks?.map(serializeTask),
+    dependencies: task.dependencies,
+    checklist_items: task.checklistItems
+  };
+}
 
 const router = express.Router();
 
@@ -55,7 +81,7 @@ router.get(
       includeSubtasks: includeSubtasks === 'true'
     });
 
-    sendSuccess(res, { tasks });
+    sendSuccess(res, { tasks: tasks.map(serializeTask) });
   })
 );
 
@@ -77,7 +103,7 @@ router.post(
     }
 
     const task = await projectService.createTask(projectId, req.body);
-    sendCreated(res, { task }, 'Task created successfully');
+    sendCreated(res, { task: serializeTask(task) }, 'Task created successfully');
   })
 );
 
@@ -100,7 +126,7 @@ router.get(
       return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
-    sendSuccess(res, { task });
+    sendSuccess(res, { task: serializeTask(task) });
   })
 );
 
@@ -116,7 +142,7 @@ router.put(
       return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const task = await projectService.updateTask(taskId, req.body);
-    sendSuccess(res, { task }, 'Task updated successfully');
+    sendSuccess(res, { task: serializeTask(task) }, 'Task updated successfully');
   })
 );
 
@@ -148,7 +174,7 @@ router.post(
       return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const task = await projectService.completeTask(taskId);
-    sendSuccess(res, { task }, 'Task completed successfully');
+    sendSuccess(res, { task: serializeTask(task) }, 'Task completed successfully');
   })
 );
 
@@ -229,7 +255,7 @@ router.get(
     }
 
     const tasks = await projectService.getBlockedTasks(projectId);
-    sendSuccess(res, { tasks });
+    sendSuccess(res, { tasks: tasks.map(serializeTask) });
   })
 );
 
