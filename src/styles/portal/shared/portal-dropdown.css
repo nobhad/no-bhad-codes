@@ -179,12 +179,12 @@ body:has(.portal-dropdown-content[data-side="top"]) :is(.btn, .btn-secondary, .b
    margin compensates for trigger's border width so menu sits flush. */
 .portal-dropdown-content[data-side="bottom"] {
   border-top-color: transparent;
-  margin-top: calc(-1 * var(--border-width-px));
+  margin-top: calc(-1 * var(--border-width-thin));
 }
 
 .portal-dropdown-content[data-side="top"] {
   border-bottom-color: transparent;
-  margin-bottom: calc(-1 * var(--border-width-px));
+  margin-bottom: calc(-1 * var(--border-width-thin));
 }
 
 /* Sub content - same styling as main content */
@@ -482,7 +482,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
 
   --dropdown-bg: var(--color-bg-primary);
   --dropdown-border-color: var(--color-border-primary);
-  --dropdown-border-width: var(--border-width-px);
+  --dropdown-border-width: var(--border-width-thin);
   --dropdown-radius: 0;
 }
 
@@ -758,7 +758,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   position: relative;
   padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
   padding-right: var(--dropdown-padding-x);
-  border: var(--border-width-px) solid var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-bg-primary);
   background-color: transparent;
   color: inherit;
   font-size: inherit;
@@ -993,7 +993,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   position: relative;
   padding: 0 var(--dropdown-padding-x);
   padding-right: var(--dropdown-padding-x);
-  border: var(--border-width-px) solid var(--color-border-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
   background-color: var(--color-bg-primary);
   color: var(--color-text-secondary);
   font-size: inherit;
@@ -1238,7 +1238,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   height: var(--modal-input-height);
   padding: 0 var(--space-4);
   background-color: var(--color-bg-primary);
-  border: var(--border-width-px) solid transparent;
+  border: var(--border-width-thin) solid transparent;
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   font-family: var(--font-family-mono);
@@ -1305,7 +1305,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   padding: 0;
   list-style: none;
   background-color: var(--color-bg-primary);
-  border: var(--border-width-px) solid var(--color-accent);
+  border: var(--border-width-thin) solid var(--color-accent);
   border-top: none;
   border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
   max-height: 240px;
@@ -1387,7 +1387,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   padding: var(--space-1-5) var(--space-2);
   text-align: left;
   background: transparent;
-  border: var(--border-width-px) solid var(--color-border-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
   color: inherit;
   font: inherit;
   cursor: pointer;
@@ -1424,7 +1424,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   max-width: 28rem;
   margin: 0 var(--space-3);
   background: var(--color-bg-tertiary);
-  border: var(--border-width-px) solid var(--color-border-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
   max-height: 80vh;
   display: flex;
   flex-direction: column;
@@ -1435,12 +1435,12 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   align-items: center;
   justify-content: space-between;
   padding: var(--space-2);
-  border-bottom: var(--border-width-px) solid var(--color-border-primary);
+  border-bottom: var(--border-width-thin) solid var(--color-border-primary);
 }
 
 .modal-dropdown-search-section {
   padding: var(--space-2);
-  border-bottom: var(--border-width-px) solid var(--color-border-primary);
+  border-bottom: var(--border-width-thin) solid var(--color-border-primary);
 }
 
 .modal-dropdown-search-wrapper {
@@ -1504,7 +1504,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
 .modal-dropdown-checkbox {
   width: 1.25rem;
   height: 1.25rem;
-  border: var(--border-width-px) solid var(--color-border-secondary);
+  border: var(--border-width-thin) solid var(--color-border-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1546,7 +1546,7 @@ td:has(.dropdown-trigger--status) .portal-dropdown-item .status-indicator,
   justify-content: flex-end;
   gap: var(--space-2);
   padding: var(--space-2);
-  border-top: var(--border-width-px) solid var(--color-border-primary);
+  border-top: var(--border-width-thin) solid var(--color-border-primary);
 }
 
 .text-truncate {

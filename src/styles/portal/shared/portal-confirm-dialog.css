@@ -9,7 +9,7 @@
 
 .confirm-dialog {
   background: var(--color-bg-secondary);
-  border: var(--portal-border);
+  border: var(--border-width-heavy) solid var(--color-border-primary);
   box-shadow: none;
   width: 100%;
   max-width: var(--modal-width-sm);

@@ -327,7 +327,7 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   height: 1em;
   cursor: pointer;
   background: transparent;
-  border: var(--border-width-px) solid var(--color-border-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
   position: relative;
   display: flex;
   align-items: center;
@@ -837,7 +837,7 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   height: var(--space-4);
   position: relative;
   background: transparent;
-  border: var(--border-width-px) solid var(--color-border-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   font-family: inherit;

@@ -29,6 +29,14 @@ body:has(.portal) {
   /* --content-gutter defined in unlayered block at end of file */
 }
 
+/* Root icon sizing: all portal SVGs match context text size by default.
+   Zero-specificity (:where) so any explicit size class overrides naturally. */
+:where(.portal) :where(svg) {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
 /* ================================================
    PORTAL COLOR HIERARCHY
    Defined in: src/design-system/tokens/portal-theme.css
@@ -130,8 +138,8 @@ html[data-theme="light"] .portal .funnel-value {
   border-bottom: none;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: var(--space-1);
+  justify-content: space-evenly;
+  gap: 0;
   box-sizing: border-box;
   z-index: var(--z-index-nav);
   box-shadow: none;
@@ -149,8 +157,8 @@ html[data-theme="light"] .portal .funnel-value {
   min-height: var(--space-5);
   padding-top: var(--space-2);
   padding-bottom: var(--space-2);
-  border-top: var(--border-width) solid var(--color-border-primary);
-  border-bottom: var(--border-width) solid var(--color-border-primary);
+  border-top: var(--border-width-thick) solid var(--color-border-primary);
+  border-bottom: var(--border-width-thick) solid var(--color-border-primary);
 }
 
 .portal-global-header-left {
@@ -177,7 +185,48 @@ html[data-theme="light"] .portal .funnel-value {
   align-items: center;
   gap: var(--icon-gap-md);
   min-height: var(--space-5);
+  padding: var(--space-2) 0;
   margin: 0;
+}
+
+/* --- Header Search Trigger --- */
+
+.header-search-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+  padding: 1px var(--space-2);
+  border: var(--border-width) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm, 4px);
+  background: transparent;
+  color: var(--color-text-tertiary);
+  font-family: var(--font-family-mono, monospace);
+  font-size: var(--font-size-xs, 0.75rem);
+  cursor: pointer;
+  transition: border-color var(--transition-faster) ease, color var(--transition-faster) ease;
+  white-space: nowrap;
+  min-width: 160px;
+}
+
+.header-search-trigger:hover {
+  border-color: var(--color-border-primary);
+  color: var(--color-text-primary);
+}
+
+.header-search-placeholder {
+  flex: 1;
+  text-align: left;
+}
+
+.header-search-shortcut {
+  font-family: var(--font-family-mono, monospace);
+  font-size: var(--font-size-2xs, 0.65rem);
+  padding: 1px 4px;
+  border: var(--border-width-thin) solid var(--color-text-tertiary);
+  border-radius: 3px;
+  color: var(--color-text-primary);
+  line-height: 1;
 }
 
 /* --- Header Branding: Avatar + Text --- */
@@ -739,7 +788,7 @@ td {
 .portal .panel .stat-card,
 .portal .panel .card,
 .portal .panel .accordion-item-wrapper {
-  border-width: var(--border-width-px);
+  border-width: var(--border-width-thin);
 }
 
 /* --- Portal Section Title --- */

@@ -157,7 +157,7 @@
 .msgtab-date-sep::after {
   content: '';
   flex: 1;
-  height: var(--border-width-px);
+  height: var(--border-width-thin);
   background: var(--color-border-primary);
 }
 

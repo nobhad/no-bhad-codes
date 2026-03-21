@@ -20,9 +20,10 @@
 
   /* Semantic aliases (migrated from variables.css)
    * DISCOTHÈQUE uses 2px borders consistently */
+  --border-width-thin: 1px;    /* Subtle borders, kbd badges, dividers */
   --border-width: 2px;         /* Default border width */
-  --border-width-thick: 3px;   /* Focus states, emphasized borders */
-  --border-width-heavy: 4px;   /* Strong visual emphasis */
+  --border-width-thick: 3px;   /* Header branding row, emphasized borders */
+  --border-width-heavy: 4px;   /* Dialog/modal borders, strong visual emphasis */
 
   /* ============================================
    * SVG STROKE WIDTH (migrated from variables.css)

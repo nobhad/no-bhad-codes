@@ -323,7 +323,7 @@
   align-items: center;
   gap: var(--space-1-5);
   background: transparent;
-  border: var(--border-width-px) solid transparent;
+  border: var(--border-width-thin) solid transparent;
   color: var(--color-text-primary);
   transition: border-color var(--transition-fast) ease;
 }
@@ -410,7 +410,7 @@
   color: var(--color-accent);
   text-decoration: none;
   font-weight: var(--font-weight-semibold);
-  border: var(--border-width-px) solid var(--color-accent);
+  border: var(--border-width-thin) solid var(--color-accent);
   transition: all var(--transition-fast);
 }
 
@@ -492,7 +492,7 @@
 
 .portal .files-list-section .file-item:hover {
   border-color: var(--color-accent);
-  border: var(--border-width-px) solid var(--color-accent);
+  border: var(--border-width-thin) solid var(--color-accent);
 }
 
 /* =====================================================

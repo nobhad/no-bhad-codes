@@ -19,7 +19,7 @@
   inset: 0;
   z-index: var(--z-index-portal-modal);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   background: var(--portal-alpha-black-50);
   backdrop-filter: blur(var(--blur-backdrop));
@@ -30,14 +30,15 @@
  * ============================================ */
 
 .command-palette {
+  position: relative;
   width: min(var(--cmd-palette-max-width), calc(100vw - var(--space-4)));
   max-height: 70vh;
   display: flex;
   flex-direction: column;
-  background: var(--color-bg-secondary);
-  border: var(--border-width) solid var(--color-text-primary);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-lg);
+  background: var(--color-bg-primary);
+  border: var(--border-width-heavy) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   overflow: hidden;
 }
 
@@ -45,51 +46,64 @@
  * SEARCH INPUT
  * ============================================ */
 
-.command-palette-input-wrapper {
+/* Close button — top right */
+.command-palette-close {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 2;
+  background: none;
+  border: none;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: var(--space-1);
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  justify-content: center;
 }
 
-.command-palette-search-icon {
-  width: var(--cmd-palette-search-icon-size);
-  height: var(--cmd-palette-search-icon-size);
-  flex-shrink: 0;
+.command-palette-close:hover {
   color: var(--color-text-primary);
 }
 
-.command-palette-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  box-shadow: none;
-  font-size: var(--font-size-base);
-  color: var(--color-text-primary);
-  font-family: inherit;
+.command-palette-close svg {
+  width: 16px;
+  height: 16px;
 }
 
-/* Suppress the portal-wide input focus ring — palette has its own focus treatment */
-.command-palette-input:focus,
-.command-palette-input:focus-visible {
-  border-color: transparent;
-  box-shadow: none;
-  outline: none;
+/* Input wrapper — uses shared .filter-search-dropdown + .search-bar-icon + .search-bar-input */
+.command-palette-input-wrapper {
+  position: relative;
+  margin: var(--space-3);
 }
 
-.command-palette-input::placeholder {
-  color: var(--color-text-primary);
-  opacity: var(--opacity-disabled);
+/* Override: filter-search-dropdown is normally absolute-positioned in tables.
+   Inside the command palette it should be static/relative and full width. */
+.command-palette .command-palette-input-wrapper.filter-search-dropdown {
+  position: relative;
+  top: auto;
+  right: auto;
+  transform: none;
+  width: 100%;
+}
+
+.command-palette .search-bar-input {
+  width: 100%;
 }
 
 .command-palette-kbd {
-  flex-shrink: 0;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
   font-size: var(--font-size-xs);
   font-family: inherit;
-  color: var(--color-text-primary);
-  background: var(--color-bg-secondary);
-  border: var(--border-width) solid var(--color-text-primary);
+  color: var(--color-text-tertiary);
+  background: transparent;
+  border: var(--border-width-thin) solid var(--color-text-tertiary);
   border-radius: var(--border-radius-sm);
+  padding: 1px 4px;
   line-height: 1.4;
 }
 
@@ -99,7 +113,7 @@
 
 .command-palette-divider {
   height: var(--border-width);
-  background: var(--color-text-primary);
+  background: var(--color-border-primary);
 }
 
 /* ============================================
@@ -109,14 +123,16 @@
 .command-palette-list {
   list-style: none;
   margin: 0;
+  padding: var(--space-2) 0;
   overflow-y: auto;
   max-height: 50vh;
 }
 
 .command-palette-empty {
   text-align: center;
-  color: var(--color-text-primary);
+  color: var(--color-text-tertiary);
   font-size: var(--font-size-sm);
+  padding: var(--space-4);
 }
 
 /* ============================================
@@ -127,10 +143,12 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  border-radius: var(--border-radius-md);
+  padding: var(--space-2) var(--space-4);
+  border-radius: 0;
   cursor: pointer;
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
+  font-family: var(--font-family-mono, monospace);
   transition: background-color 0.1s ease, color 0.1s ease;
 }
 
@@ -170,10 +188,11 @@
   flex-shrink: 0;
   font-size: var(--font-size-xs);
   font-family: inherit;
-  color: var(--color-text-primary);
-  background: var(--color-bg-secondary);
-  border: var(--border-width) solid var(--color-text-primary);
+  color: var(--color-text-tertiary);
+  background: transparent;
+  border: var(--border-width-thin) solid var(--color-text-tertiary);
   border-radius: var(--border-radius-sm);
+  padding: 1px 4px;
   min-width: var(--cmd-palette-item-icon-size);
   text-align: center;
   line-height: 1.4;
@@ -186,6 +205,12 @@
 /* Typography from shared/portal-cards.css — .portal .command-palette-section-label */
 .command-palette-section-label {
   list-style: none;
+  padding: var(--space-2) var(--space-4) var(--space-1);
+  font-size: var(--font-size-2xs, 0.65rem);
+  font-weight: var(--font-weight-bold, 700);
+  text-transform: uppercase;
+  letter-spacing: var(--heading-letter-spacing, 0.08em);
+  color: var(--color-text-tertiary);
 }
 
 /* ============================================
@@ -195,7 +220,8 @@
 .command-palette-footer {
   display: flex;
   gap: var(--space-4);
-  border-top: var(--border-width) solid var(--color-text-primary);
+  padding: var(--space-2) var(--space-4);
+  border-top: var(--border-width-thin) solid var(--color-border-primary);
   background: var(--color-bg-secondary);
 }
 
@@ -210,10 +236,11 @@
 .command-palette-hint kbd {
   font-family: inherit;
   font-size: var(--font-size-xs);
-  color: var(--color-text-primary);
-  background: var(--color-bg-secondary);
-  border: var(--border-width) solid var(--color-text-primary);
+  color: var(--color-text-tertiary);
+  background: transparent;
+  border: var(--border-width-thin) solid var(--color-text-tertiary);
   border-radius: var(--border-radius-sm);
+  padding: 1px 4px;
   min-width: var(--cmd-palette-item-icon-size);
   text-align: center;
   line-height: 1.6;

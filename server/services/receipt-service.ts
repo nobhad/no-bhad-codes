@@ -63,9 +63,11 @@ interface ReceiptRow {
 export interface ReceiptPdfData {
   receiptNumber: string;
   invoiceNumber: string;
-  paymentDate: string;
+  datePaid: string;
+  dateGenerated: string;
   paymentMethod: string;
   paymentReference?: string;
+  paymentLabel?: string; // e.g. "Payment 1 of 3"
   amount: number;
   clientName: string;
   clientEmail: string;
@@ -73,6 +75,10 @@ export interface ReceiptPdfData {
   clientPhone?: string;
   clientAddress?: string; // Pre-formatted address string
   projectName?: string;
+  lineItems?: Array<{
+    description: string;
+    amount: number;
+  }>;
 }
 
 // ============================================
@@ -135,14 +141,15 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
   const rightPairs: Array<{ label: string; value: string }> = [
     { label: 'RECEIPT #:', value: data.receiptNumber },
     { label: 'INVOICE #:', value: data.invoiceNumber },
-    { label: 'DATE:', value: data.paymentDate },
+    { label: 'DATE PAID:', value: data.datePaid },
+    { label: 'DATE GENERATED:', value: data.dateGenerated },
     { label: 'METHOD:', value: data.paymentMethod }
   ];
   if (data.paymentReference) {
     rightPairs.push({ label: 'REFERENCE:', value: data.paymentReference });
   }
-  if (data.projectName) {
-    rightPairs.push({ label: 'PROJECT:', value: data.projectName });
+  if (data.paymentLabel) {
+    rightPairs.push({ label: 'PAYMENT:', value: data.paymentLabel });
   }
 
   y = drawTwoColumnInfo(page, {
@@ -155,13 +162,95 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     right: { pairs: rightPairs }
   });
 
-  // HR separating detail section from content (no table header follows)
+  // === PROJECT NAME (full width, no truncation) ===
+  if (data.projectName) {
+    y -= 4;
+    page.drawText('PROJECT:', {
+      x: leftMargin,
+      y,
+      size: PDF_TYPOGRAPHY.bodySize,
+      font: helveticaBold,
+      color: PDF_COLORS.black
+    });
+    const projectLabelW = helveticaBold.widthOfTextAtSize('PROJECT:  ', PDF_TYPOGRAPHY.bodySize);
+    page.drawText(data.projectName, {
+      x: leftMargin + projectLabelW,
+      y,
+      size: PDF_TYPOGRAPHY.bodySize,
+      font: helvetica,
+      color: PDF_COLORS.black
+    });
+    y -= 18;
+  }
+
+  // HR separating detail section from content
   page.drawLine({
     start: { x: leftMargin, y: y + 10 },
     end: { x: rightMargin, y: y + 10 },
     thickness: PDF_SPACING.underlineThickness,
     color: PDF_COLORS.black
   });
+
+  // === LINE ITEMS TABLE (matches invoice pattern) ===
+  if (data.lineItems && data.lineItems.length > 0) {
+    y -= 6;
+
+    // Table header
+    page.drawRectangle({
+      x: leftMargin,
+      y: y - 2,
+      width: rightMargin - leftMargin,
+      height: 18,
+      color: PDF_COLORS.tableHeaderBg
+    });
+    page.drawText('DESCRIPTION', {
+      x: leftMargin + 7,
+      y: y + 4,
+      size: PDF_TYPOGRAPHY.bodySize,
+      font: helveticaBold,
+      color: PDF_COLORS.tableHeaderText
+    });
+    const amountHeader = 'AMOUNT';
+    const amountHeaderW = helveticaBold.widthOfTextAtSize(amountHeader, PDF_TYPOGRAPHY.bodySize);
+    page.drawText(amountHeader, {
+      x: rightMargin - 7 - amountHeaderW,
+      y: y + 4,
+      size: PDF_TYPOGRAPHY.bodySize,
+      font: helveticaBold,
+      color: PDF_COLORS.tableHeaderText
+    });
+    y -= 22;
+
+    // Table rows
+    for (const item of data.lineItems) {
+      page.drawText(item.description, {
+        x: leftMargin + 7,
+        y,
+        size: PDF_TYPOGRAPHY.bodySize,
+        font: helvetica,
+        color: PDF_COLORS.black
+      });
+      const itemAmountText = `$${item.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      const itemAmountW = helvetica.widthOfTextAtSize(itemAmountText, PDF_TYPOGRAPHY.bodySize);
+      page.drawText(itemAmountText, {
+        x: rightMargin - itemAmountW,
+        y,
+        size: PDF_TYPOGRAPHY.bodySize,
+        font: helvetica,
+        color: PDF_COLORS.black
+      });
+      y -= 14;
+
+      // Row divider
+      page.drawLine({
+        start: { x: leftMargin, y: y + 4 },
+        end: { x: rightMargin, y: y + 4 },
+        thickness: 0.5,
+        color: PDF_COLORS.divider
+      });
+      y -= 4;
+    }
+  }
 
   // === AMOUNT PAID (matches invoice totals pattern) ===
   const totalsX = rightMargin - 144;
@@ -210,12 +299,26 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
 
 class ReceiptService {
   /**
-   * Generate next receipt number with collision-safe retry loop
+   * Extract client identifier from invoice number.
+   * e.g. "INV-202603-HH001" → "HH", fallback to "XX"
    */
-  private async generateReceiptNumber(): Promise<string> {
+  private extractClientId(invoiceNumber: string): string {
+    // Match patterns like INV-YYYYMM-XX### where XX is the client identifier
+    const match = invoiceNumber.match(/INV-\d{6}-([A-Z]+)\d+/i);
+    return match ? match[1].toUpperCase() : 'XX';
+  }
+
+  /**
+   * Generate next receipt number with collision-safe retry loop.
+   * Format: REC-YYYYMM-CC### (matches invoice format INV-YYYYMM-CC###).
+   */
+  private async generateReceiptNumber(invoiceNumber: string): Promise<string> {
     const db = getDatabase();
-    const year = new Date().getFullYear();
-    const prefix = `RCP-${year}-`;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const clientId = this.extractClientId(invoiceNumber);
+    const prefix = `REC-${year}${month}-${clientId}`;
     const MAX_RETRIES = 5;
 
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
@@ -228,7 +331,7 @@ class ReceiptService {
 
       let sequence = 1;
       if (result && result.receipt_number) {
-        const match = String(result.receipt_number).match(/RCP-\d{4}-(\d+)/);
+        const match = String(result.receipt_number).match(new RegExp(`REC-\\d{6}-${clientId}(\\d+)`));
         if (match) {
           sequence = parseInt(match[1], 10) + 1;
         }
@@ -239,7 +342,7 @@ class ReceiptService {
         sequence += attempt;
       }
 
-      const receiptNumber = `${prefix}${String(sequence).padStart(4, '0')}`;
+      const receiptNumber = `${prefix}${String(sequence).padStart(3, '0')}`;
 
       // Check if this number already exists before returning
       const existing = await db.get(
@@ -314,7 +417,8 @@ class ReceiptService {
       throw new Error('Invoice not found');
     }
 
-    const receiptNumber = await this.generateReceiptNumber();
+    const invoiceNumber = String(invoiceRow.invoice_number || `INV-${invoiceId}`);
+    const receiptNumber = await this.generateReceiptNumber(invoiceNumber);
     const paymentDate = paymentData.paymentDate || new Date().toISOString().split('T')[0];
 
     // Build formatted billing address
@@ -332,24 +436,55 @@ class ReceiptService {
     }
     const formattedAddress = addressParts.length > 0 ? addressParts.join('\n') : undefined;
 
+    // Get payment count for "Payment X of Y" label
+    const paymentCountRow = await db.get(
+      'SELECT COUNT(*) as total FROM invoice_payments WHERE invoice_id = ?',
+      [invoiceId]
+    ) as { total: number } | undefined;
+    const totalPayments = paymentCountRow?.total || 1;
+    const paymentLabel = `Payment ${totalPayments} of ${totalPayments}`;
+
+    // Get line items from invoice for the table
+    const lineItemRows = await db.all(
+      `SELECT description, amount FROM invoice_line_items
+       WHERE invoice_id = ? ORDER BY sort_order ASC, id ASC`,
+      [invoiceId]
+    ) as Array<{ description: string; amount: number | string }>;
+
+    const lineItems = lineItemRows.map(row => ({
+      description: String(row.description),
+      amount: typeof row.amount === 'string' ? parseFloat(row.amount) : row.amount
+    }));
+
+    // Normalize payment method — strip embedded reference from method display
+    const rawMethod = paymentData.paymentMethod;
+    const normalizedMethod = rawMethod.replace(/#\S+/g, '').trim();
+    // Capitalize first letter
+    const displayMethod = normalizedMethod.charAt(0).toUpperCase() + normalizedMethod.slice(1);
+
+    const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
     // Generate PDF
     const pdfData: ReceiptPdfData = {
       receiptNumber,
-      invoiceNumber: String(invoiceRow.invoice_number || `INV-${invoiceId}`),
-      paymentDate: new Date(paymentDate).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }),
-      paymentMethod: paymentData.paymentMethod,
+      invoiceNumber,
+      datePaid: formatDate(paymentDate),
+      dateGenerated: formatDate(new Date().toISOString()),
+      paymentMethod: displayMethod,
       paymentReference: paymentData.paymentReference,
+      paymentLabel,
       amount,
       clientName: String(invoiceRow.client_name || 'Client'),
       clientEmail: String(invoiceRow.client_email || ''),
       clientCompany: invoiceRow.company_name ? String(invoiceRow.company_name) : undefined,
       clientPhone: invoiceRow.client_phone ? String(invoiceRow.client_phone) : undefined,
       clientAddress: formattedAddress,
-      projectName: invoiceRow.project_name ? String(invoiceRow.project_name) : undefined
+      projectName: invoiceRow.project_name ? String(invoiceRow.project_name) : undefined,
+      lineItems: lineItems.length > 0 ? lineItems : undefined
     };
 
     const pdfBytes = await generateReceiptPdf(pdfData);
@@ -430,7 +565,7 @@ class ReceiptService {
         await emailService.sendEmail({
           to: pdfData.clientEmail,
           subject: `Payment Receipt ${receiptNumber} - ${BUSINESS_INFO.name}`,
-          text: `Thank you for your payment of $${amount.toFixed(2)}.\n\nReceipt Number: ${receiptNumber}\nInvoice: ${pdfData.invoiceNumber}\nDate: ${pdfData.paymentDate}\nMethod: ${pdfData.paymentMethod}\n\nThis receipt confirms your payment has been received. Please retain for your records.\n\n${BUSINESS_INFO.name}`,
+          text: `Thank you for your payment of $${amount.toFixed(2)}.\n\nReceipt Number: ${receiptNumber}\nInvoice: ${pdfData.invoiceNumber}\nDate Paid: ${pdfData.datePaid}\nMethod: ${pdfData.paymentMethod}\n\nThis receipt confirms your payment has been received. Please retain for your records.\n\n${BUSINESS_INFO.name}`,
           html: `
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
               <h2 style="color: #333;">Payment Receipt</h2>
@@ -438,7 +573,7 @@ class ReceiptService {
               <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
                 <tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Receipt Number</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${receiptNumber}</td></tr>
                 <tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Invoice</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${pdfData.invoiceNumber}</td></tr>
-                <tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Payment Date</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${pdfData.paymentDate}</td></tr>
+                <tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Date Paid</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${pdfData.datePaid}</td></tr>
                 <tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Payment Method</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${pdfData.paymentMethod}</td></tr>
                 ${pdfData.projectName ? `<tr><td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Project</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${pdfData.projectName}</td></tr>` : ''}
               </table>
@@ -633,6 +768,7 @@ class ReceiptService {
 
     // Regenerate PDF (in case original file is missing)
     const paymentDateStr = row.payment_date || row.created_at;
+    const invoiceNumber = String(row.invoice_number || `INV-${row.invoice_id}`);
 
     // Build address
     const addressParts: string[] = [];
@@ -644,23 +780,64 @@ class ReceiptService {
       addressParts.push(String(row.billing_country));
     }
 
+    // Get payment count for "Payment X of Y"
+    const invoiceId = row.invoice_id as number;
+    const paymentCountRow = await db.get(
+      'SELECT COUNT(*) as total FROM invoice_payments WHERE invoice_id = ?',
+      [invoiceId]
+    ) as { total: number } | undefined;
+    const totalPayments = paymentCountRow?.total || 1;
+
+    // Determine this payment's position
+    let paymentPosition = totalPayments;
+    if (row.payment_id) {
+      const posRow = await db.get(
+        `SELECT COUNT(*) as pos FROM invoice_payments
+         WHERE invoice_id = ? AND id <= ?`,
+        [invoiceId, row.payment_id as number]
+      ) as { pos: number } | undefined;
+      paymentPosition = posRow?.pos || totalPayments;
+    }
+
+    // Get line items from invoice
+    const lineItemRows = await db.all(
+      `SELECT description, amount FROM invoice_line_items
+       WHERE invoice_id = ? ORDER BY sort_order ASC, id ASC`,
+      [invoiceId]
+    ) as Array<{ description: string; amount: number | string }>;
+
+    const lineItems = lineItemRows.map(r => ({
+      description: String(r.description),
+      amount: typeof r.amount === 'string' ? parseFloat(r.amount) : r.amount
+    }));
+
+    // Normalize payment method
+    const rawMethod = String(row.payment_method || 'Unknown');
+    const normalizedMethod = rawMethod.replace(/#\S+/g, '').trim();
+    const displayMethod = normalizedMethod.charAt(0).toUpperCase() + normalizedMethod.slice(1);
+
+    const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
     const pdfData: ReceiptPdfData = {
       receiptNumber: String(row.receipt_number),
-      invoiceNumber: String(row.invoice_number || `INV-${row.invoice_id}`),
-      paymentDate: new Date(paymentDateStr as string).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }),
-      paymentMethod: String(row.payment_method || 'Unknown'),
+      invoiceNumber,
+      datePaid: formatDate(paymentDateStr as string),
+      dateGenerated: formatDate(String(row.created_at)),
+      paymentMethod: displayMethod,
       paymentReference: row.payment_reference ? String(row.payment_reference) : undefined,
+      paymentLabel: `Payment ${paymentPosition} of ${totalPayments}`,
       amount: getFloat(row as unknown as Record<string, unknown>, 'amount'),
       clientName: String(row.client_name || 'Client'),
       clientEmail: String(row.client_email || ''),
       clientCompany: row.company_name ? String(row.company_name) : undefined,
       clientPhone: row.client_phone ? String(row.client_phone) : undefined,
       clientAddress: addressParts.length > 0 ? addressParts.join('\n') : undefined,
-      projectName: row.project_name ? String(row.project_name) : undefined
+      projectName: row.project_name ? String(row.project_name) : undefined,
+      lineItems: lineItems.length > 0 ? lineItems : undefined
     };
 
     const pdfBytes = await generateReceiptPdf(pdfData);

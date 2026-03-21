@@ -369,12 +369,12 @@ a.text-danger:hover {
    ===================================================== */
 
 .icon-xs {
-  width: var(--icon-size-xs);
-  height: var(--icon-size-xs);
+  width: 0.85em;
+  height: 0.85em;
 }
 .icon-sm {
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
+  width: 1em;
+  height: 1em;
 }
 .icon-md {
   width: var(--icon-size-md);
