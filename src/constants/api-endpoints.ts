@@ -305,6 +305,7 @@ export const buildEndpoint = {
   // Contracts
   contract: (id: number | string) => `${API_ENDPOINTS.CONTRACTS}/${id}`,
   contractSend: (id: number | string) => `${API_ENDPOINTS.CONTRACTS}/${id}/send`,
+  contractPdf: (projectId: number | string) => `${API_ENDPOINTS.PROJECTS}/${projectId}/contract/pdf`,
 
   // Proposals
   adminProposal: (id: number | string) => `${API_ENDPOINTS.ADMIN.PROPOSALS}/${id}`,
