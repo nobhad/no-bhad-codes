@@ -61,7 +61,7 @@ export function PortalLayout() {
 
   return (
     <>
-      <PortalHeader />
+      <PortalHeader onSearchOpen={searchModal.onOpen} />
       <SearchModal open={searchModal.open} onClose={searchModal.onClose} />
 
       <div className="portal-body">
