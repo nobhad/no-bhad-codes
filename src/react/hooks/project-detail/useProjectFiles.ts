@@ -19,6 +19,7 @@ interface UseProjectFilesReturn {
   uploadFile: (file: File, category?: string) => Promise<boolean>;
   deleteFile: (id: number) => Promise<boolean>;
   toggleFileSharing: (id: number) => Promise<boolean>;
+  updateCategory: (id: number, category: string) => Promise<boolean>;
 }
 
 export function useProjectFiles({
@@ -125,12 +126,28 @@ export function useProjectFiles({
     [files]
   );
 
+  const updateCategory = useCallback(
+    async (id: number, category: string): Promise<boolean> => {
+      try {
+        const response = await apiPut(`${API_ENDPOINTS.FILES}/${id}`, { category });
+        if (!response.ok) return false;
+        setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, category } : f)));
+        return true;
+      } catch (err) {
+        logger.error('Update category error:', err);
+        return false;
+      }
+    },
+    []
+  );
+
   return {
     files,
     setFiles,
     fetchFiles,
     uploadFile,
     deleteFile,
-    toggleFileSharing
+    toggleFileSharing,
+    updateCategory
   };
 }
