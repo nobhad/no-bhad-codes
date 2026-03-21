@@ -348,6 +348,7 @@ router.get(
 
     // === SIGNATURES ===
     const rightCol = width / 2 + PDF_SPACING.rightColumnOffset;
+    ctx.y -= PDF_SPACING.sectionSpacing;
     ensureSpace(ctx, 120, onNewPage);
     ctx.y = drawSectionLabel(ctx.currentPage, 'SIGNATURES', {
       x: leftMargin, y: ctx.y, font: helveticaBold

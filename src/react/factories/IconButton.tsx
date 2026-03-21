@@ -65,6 +65,7 @@ import {
   Rocket,
   GitBranch,
   Package,
+  PackagePlus,
   BookOpen,
   Zap,
   LogOut,
@@ -97,6 +98,7 @@ import {
   Unlock,
   Share2,
   UserX,
+  FilePlus,
   type LucideIcon
 } from 'lucide-react';
 // Icon/button sizes controlled by CSS variables - no JS constants needed
@@ -150,6 +152,7 @@ const ICON_COMPONENTS: Record<string, LucideIcon> = {
   file: File,
   'file-text': FileText,
   'file-signature': FileSignature,
+  'file-plus': FilePlus,
   contract: FileSignature,
   folder: Folder,
   image: Image,
@@ -190,6 +193,8 @@ const ICON_COMPONENTS: Record<string, LucideIcon> = {
   workflow: GitBranch,
   'git-branch': GitBranch,
   package: Package,
+  'package-plus': PackagePlus,
+  'add-milestone': PackagePlus,
   'book-open': BookOpen,
   knowledge: BookOpen,
   zap: Zap,

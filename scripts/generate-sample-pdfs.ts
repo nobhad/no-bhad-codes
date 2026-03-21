@@ -14,18 +14,24 @@ async function main() {
   // 1. Receipt PDF (standalone — no DB needed)
   try {
     const pdfBytes = await generateReceiptPdf({
-      receiptNumber: 'RCP-2026-0001',
-      invoiceNumber: 'INV-202603-000001',
-      paymentDate: 'March 17, 2026',
-      paymentMethod: 'Credit Card (Stripe)',
-      paymentReference: 'ch_3PqR7x2eZvKYlo2C',
-      amount: 4000,
+      receiptNumber: 'REC-202603-HH001',
+      invoiceNumber: 'INV-202603-HH001',
+      datePaid: 'March 8, 2026',
+      dateGenerated: 'March 17, 2026',
+      paymentMethod: 'Check',
+      paymentReference: '1230',
+      paymentLabel: 'Payment 1 of 3',
+      amount: 1125,
       clientName: 'Emily Gold',
       clientEmail: 'offerings@hedgewitchhorticulture.com',
       clientCompany: 'Hedgewitch Horticulture LLC',
       clientPhone: '(508) 555-0123',
       clientAddress: '24 Crescent Heights\nFitchburg, MA 01420',
-      projectName: 'Hedgewitch Horticulture — Business Website'
+      projectName: 'Custom Website Development (Better Tier)',
+      lineItems: [
+        { description: 'Custom Website Development (Better Tier)', amount: 4000 },
+        { description: 'Deposit Payment (40%)', amount: -2875 }
+      ]
     });
     writeFileSync(join(DESKTOP, 'SAMPLE-receipt.pdf'), Buffer.from(pdfBytes));
     console.log('✓ Receipt PDF → ~/Desktop/SAMPLE-receipt.pdf');
@@ -439,6 +445,7 @@ Date: _______________                     Date: _______________`;
         }
 
         // Signatures
+        ctx.y -= PDF_SPACING.sectionSpacing;
         ensureSpace(ctx, 120, onNewPage);
         ctx.y = drawSectionLabel(ctx.currentPage, 'SIGNATURES', { x: leftMargin, y: ctx.y, font: helveticaBold });
 

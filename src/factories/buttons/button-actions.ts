@@ -37,6 +37,8 @@ export const BUTTON_ACTIONS: Record<string, ButtonActionDefinition> = {
   // ============================================
   add: { icon: 'plus', title: 'Add', ariaLabel: 'Add' },
   create: { icon: 'plus', title: 'Create', ariaLabel: 'Create' },
+  'add-milestone': { icon: 'package-plus', title: 'Add Milestone', ariaLabel: 'Add milestone' },
+  generate: { icon: 'file-plus', title: 'Generate', ariaLabel: 'Generate document' },
   delete: { icon: 'trash', title: 'Delete', ariaLabel: 'Delete' },
   remove: { icon: 'x', title: 'Remove', ariaLabel: 'Remove' },
 
@@ -138,8 +140,7 @@ export const BUTTON_ACTIONS: Record<string, ButtonActionDefinition> = {
   help: { icon: 'help-circle', title: 'Help', ariaLabel: 'Help' },
   test: { icon: 'send', title: 'Send Test', ariaLabel: 'Send test' },
   upload: { icon: 'upload', title: 'Upload', ariaLabel: 'Upload file' },
-  attach: { icon: 'paperclip', title: 'Attach', ariaLabel: 'Attach file' },
-  generate: { icon: 'file-text', title: 'Generate', ariaLabel: 'Generate document' }
+  attach: { icon: 'paperclip', title: 'Attach', ariaLabel: 'Attach file' }
 } as const;
 
 export type ButtonActionType = keyof typeof BUTTON_ACTIONS;

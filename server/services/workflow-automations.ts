@@ -309,29 +309,22 @@ async function handleProposalAccepted(data: {
           const tier = proposal.selected_tier || 'good';
           const today = new Date();
 
-          // Determine split based on tier and total price
+          // Default payment split: 50/50 (deposit + final)
+          // Larger projects (best tier or >$5000): 50/25/25 (deposit + midpoint + final)
           let splits: Array<{ label: string; percent: number; offsetDays: number }>;
 
-          if (tier === 'good' || totalPrice <= 2000) {
-            // Good tier or small projects: 50/50 split
+          if (tier === 'best' || totalPrice > 5000) {
+            // 50/25/25 split for premium projects
+            splits = [
+              { label: 'Deposit (50%)', percent: 50, offsetDays: 0 },
+              { label: 'Midpoint Payment (25%)', percent: 25, offsetDays: 30 },
+              { label: 'Final Payment (25%)', percent: 25, offsetDays: 60 }
+            ];
+          } else {
+            // Default: 50/50 split
             splits = [
               { label: 'Deposit (50%)', percent: 50, offsetDays: 0 },
               { label: 'Final Payment (50%)', percent: 50, offsetDays: 30 }
-            ];
-          } else if (tier === 'better' || totalPrice <= 6000) {
-            // Better tier: 3 payments (40/30/30)
-            splits = [
-              { label: 'Deposit (40%)', percent: 40, offsetDays: 0 },
-              { label: 'Midpoint Payment (30%)', percent: 30, offsetDays: 30 },
-              { label: 'Final Payment (30%)', percent: 30, offsetDays: 60 }
-            ];
-          } else {
-            // Best tier or large projects: 4 quarterly payments (25% each)
-            splits = [
-              { label: 'Deposit (25%)', percent: 25, offsetDays: 0 },
-              { label: 'Q2 Payment (25%)', percent: 25, offsetDays: 30 },
-              { label: 'Q3 Payment (25%)', percent: 25, offsetDays: 60 },
-              { label: 'Final Payment (25%)', percent: 25, offsetDays: 90 }
             ];
           }
 

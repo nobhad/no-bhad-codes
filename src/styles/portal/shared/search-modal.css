@@ -1,0 +1,183 @@
+/* =====================================================
+   SEARCH MODAL (Cmd+K)
+   Fullscreen overlay with centered search dialog.
+   Matches portal theme: dark bg, monospace font, flat borders.
+   ===================================================== */
+
+.search-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-portal-modal, 9999);
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 15vh;
+}
+
+.search-modal {
+  width: 100%;
+  max-width: 560px;
+  background: var(--color-bg-primary);
+  border: var(--portal-border);
+  border-radius: var(--border-radius-sm, 4px);
+  display: flex;
+  flex-direction: column;
+  max-height: 60vh;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* --- Input Row --- */
+
+.search-modal-input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--portal-border);
+}
+
+.search-modal-icon {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.search-modal-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono, monospace);
+  font-size: var(--font-size-sm, 0.875rem);
+  padding: 0;
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search-modal-input:focus {
+  outline: none;
+  box-shadow: none;
+  border: none;
+}
+
+.search-modal-input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.search-modal-close {
+  background: none;
+  border: none;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: var(--space-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-modal-close:hover {
+  color: var(--color-text-primary);
+}
+
+/* --- Results Area --- */
+
+.search-modal-results {
+  overflow-y: auto;
+  flex: 1;
+  padding: var(--space-2) 0;
+}
+
+.search-modal-loading,
+.search-modal-empty,
+.search-modal-hint {
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--color-text-tertiary);
+  font-family: var(--font-family-mono, monospace);
+  font-size: var(--font-size-xs, 0.75rem);
+}
+
+/* --- Result Groups --- */
+
+.search-modal-group {
+  padding: var(--space-1) 0;
+}
+
+.search-modal-group-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-4);
+  font-family: var(--font-family-mono, monospace);
+  font-size: var(--font-size-2xs, 0.65rem);
+  font-weight: var(--font-weight-bold, 700);
+  text-transform: uppercase;
+  letter-spacing: var(--heading-letter-spacing, 0.08em);
+  color: var(--color-text-tertiary);
+}
+
+.search-modal-group-label svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* --- Individual Results --- */
+
+.search-modal-result {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-family-mono, monospace);
+  color: var(--color-text-primary);
+  transition: background var(--transition-faster) ease;
+}
+
+.search-modal-result:hover,
+.search-modal-result.is-selected {
+  background: var(--color-bg-secondary, rgba(255, 255, 255, 0.05));
+}
+
+.search-modal-result-title {
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: var(--font-weight-semibold, 600);
+}
+
+.search-modal-result-subtitle {
+  font-size: var(--font-size-2xs, 0.65rem);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* --- Footer (keyboard hints) --- */
+
+.search-modal-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  border-top: var(--portal-border);
+  font-family: var(--font-family-mono, monospace);
+  font-size: var(--font-size-2xs, 0.65rem);
+  color: var(--color-text-tertiary);
+}
+
+.search-modal-shortcut {
+  font-family: var(--font-family-mono, monospace);
+  padding: 1px 4px;
+  border: var(--portal-border);
+  border-radius: 3px;
+  font-size: var(--font-size-2xs, 0.65rem);
+  margin-right: var(--space-1);
+}

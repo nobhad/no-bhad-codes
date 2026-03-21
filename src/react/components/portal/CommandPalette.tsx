@@ -11,7 +11,7 @@
 
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Folder, MessageSquare, Receipt, Users } from 'lucide-react';
+import { Search, Folder, MessageSquare, Receipt, Users, X } from 'lucide-react';
 import { SIDEBAR_ICONS } from '../../app/portal-icons';
 import {
   useNavItems,
@@ -287,13 +287,23 @@ function CommandPaletteInner({ onClose }: CommandPaletteInnerProps) {
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
-        {/* Search input */}
-        <div className="command-palette-input-wrapper">
-          <Search className="command-palette-search-icon" aria-hidden="true" />
+        {/* Close button */}
+        <button
+          className="command-palette-close"
+          onClick={onClose}
+          aria-label="Close"
+          type="button"
+        >
+          <X />
+        </button>
+
+        {/* Search input — uses shared search-bar pattern */}
+        <div className="command-palette-input-wrapper filter-search-dropdown">
+          <Search className="search-bar-icon" aria-hidden="true" />
           <input
             ref={inputRef}
             type="text"
-            className="command-palette-input"
+            className="search-bar-input command-palette-input"
             placeholder={INPUT_PLACEHOLDER}
             value={query}
             onChange={(e) => {

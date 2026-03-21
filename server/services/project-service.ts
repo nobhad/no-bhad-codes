@@ -114,6 +114,7 @@ export const projectService = {
   // ── Global Tasks ──────────────────────────────
   getAllTasks: tasks.getAllTasks,
   updateTaskAdmin: tasks.updateTaskAdmin,
+  recalculateTaskDueDates: tasks.recalculateTaskDueDates,
 
   // ── Time Tracking ─────────────────────────────
   logTime: timeTracking.logTime,

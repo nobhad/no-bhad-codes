@@ -19,14 +19,14 @@ import { PortalSidebar } from './PortalSidebar';
 import { PortalHeader } from './PortalHeader';
 import { PortalSubtabs } from './PortalSubtabs';
 import { RouteErrorBoundary } from '../components/portal/RouteErrorBoundary';
-import { SearchModal, useSearchModal } from '../components/SearchModal';
+import { useOpenSearch } from './PortalApp';
 import { useSidebarCollapsed, usePortalRole, useCurrentTab, useCurrentGroup } from '../stores/portal-store';
 import { PORTAL_SELECTORS } from '../config/portal-constants';
 
 export function PortalLayout() {
   const collapsed = useSidebarCollapsed();
   const role = usePortalRole();
-  const searchModal = useSearchModal();
+  const openSearch = useOpenSearch();
   const currentTab = useCurrentTab();
   const currentGroup = useCurrentGroup();
 
@@ -61,8 +61,7 @@ export function PortalLayout() {
 
   return (
     <>
-      <PortalHeader onSearchOpen={searchModal.onOpen} />
-      <SearchModal open={searchModal.open} onClose={searchModal.onClose} />
+      <PortalHeader onSearchOpen={openSearch ?? undefined} />
 
       <div className="portal-body">
         <PortalSidebar />
