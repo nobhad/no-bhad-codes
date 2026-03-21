@@ -11,7 +11,7 @@
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Sun, Moon, PanelLeft, ChevronDown, ChevronRight } from 'lucide-react';
+import { Sun, Moon, PanelLeft, ChevronDown, ChevronRight, Search } from 'lucide-react';
 import {
   usePageTitle,
   usePortalTheme,
@@ -142,7 +142,11 @@ function HeaderBreadcrumbs() {
 // COMPONENT
 // ============================================
 
-export function PortalHeader() {
+interface PortalHeaderProps {
+  onSearchOpen?: () => void;
+}
+
+export function PortalHeader({ onSearchOpen }: PortalHeaderProps = {}) {
   const role = usePortalRole();
   const theme = usePortalTheme();
   const toggleTheme = useToggleTheme();
@@ -165,6 +169,18 @@ export function PortalHeader() {
           </button>
 
           <HeaderBreadcrumbs />
+
+          {/* Search trigger — always visible */}
+          <button
+            type="button"
+            className="header-search-trigger"
+            onClick={onSearchOpen}
+            aria-label="Open search"
+          >
+            <Search className="icon-xs" aria-hidden="true" />
+            <span className="header-search-placeholder">Search...</span>
+            <kbd className="header-search-shortcut">&#8984;K</kbd>
+          </button>
 
           <div className="portal-global-header-right">
             <NotificationBell />
