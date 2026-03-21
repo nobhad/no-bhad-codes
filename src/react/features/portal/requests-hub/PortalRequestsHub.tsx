@@ -32,7 +32,7 @@ const TABS = [
   { id: 'content' as RequestTab, label: 'Content' }
 ];
 
-export function PortalRequestsHub(_props: PortalRequestsHubProps) {
+export function PortalRequestsHub(props: PortalRequestsHubProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const { activeTab, setActiveTab, isActive } = useTabs<RequestTab>({
     initialTab: 'questionnaires'
@@ -48,15 +48,15 @@ export function PortalRequestsHub(_props: PortalRequestsHubProps) {
 
       <Suspense fallback={<LoadingState message="Loading..." />}>
         <TabPanel tabId="questionnaires" isActive={isActive('questionnaires')}>
-          <PortalQuestionnairesView />
+          <PortalQuestionnairesView {...props} />
         </TabPanel>
 
         <TabPanel tabId="documents" isActive={isActive('documents')}>
-          <PortalDocumentRequests />
+          <PortalDocumentRequests {...props} />
         </TabPanel>
 
         <TabPanel tabId="content" isActive={isActive('content')}>
-          <ContentChecklistView />
+          <ContentChecklistView {...props} />
         </TabPanel>
       </Suspense>
     </div>
