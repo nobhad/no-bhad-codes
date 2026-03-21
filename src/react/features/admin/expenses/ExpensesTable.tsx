@@ -35,12 +35,13 @@ import { formatDate } from '@react/utils/formatDate';
 import { formatCurrency } from '@/utils/format-utils';
 import { apiFetch, apiPost, apiDelete } from '@/utils/api-client';
 import { showToast } from '@/utils/toast-notifications';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
 
 // ============================================
 // Constants
 // ============================================
 
-const EXPENSES_API = '/api/expenses';
+const EXPENSES_API = API_ENDPOINTS.EXPENSES;
 
 const EXPENSE_CATEGORY_LABELS: Record<string, string> = {
   software: 'Software',

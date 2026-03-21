@@ -163,9 +163,10 @@ function ItemSubmissionForm({
 // MAIN COMPONENT
 // ============================================
 
-export function ContentChecklistView(_props: ContentChecklistViewProps) {
+export function ContentChecklistView({ getAuthToken }: ContentChecklistViewProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const { data, isLoading, error, refetch } = usePortalData<{ checklists: ContentChecklist[] }>({
+    getAuthToken,
     url: API_ENDPOINTS.CONTENT_REQUESTS_MY
   });
 

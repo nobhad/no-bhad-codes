@@ -43,19 +43,19 @@ interface RetainersTableProps {
 // ============================================================================
 
 const STATUS_COLORS: Record<string, string> = {
-  active: 'var(--app-color-success)',
-  paused: 'var(--app-color-warning, #f59e0b)',
-  cancelled: 'var(--app-color-danger)',
-  expired: 'var(--app-color-text-muted)'
+  active: 'var(--status-success)',
+  paused: 'var(--status-warning)',
+  cancelled: 'var(--status-danger)',
+  expired: 'var(--color-text-tertiary)'
 };
 
 const UTILIZATION_THRESHOLD_WARNING = 0.6;
 const UTILIZATION_THRESHOLD_DANGER = 0.8;
 
 function getUtilizationColor(percent: number): string {
-  if (percent >= UTILIZATION_THRESHOLD_DANGER) return 'var(--app-color-danger)';
-  if (percent >= UTILIZATION_THRESHOLD_WARNING) return 'var(--app-color-warning, #f59e0b)';
-  return 'var(--app-color-success)';
+  if (percent >= UTILIZATION_THRESHOLD_DANGER) return 'var(--status-danger)';
+  if (percent >= UTILIZATION_THRESHOLD_WARNING) return 'var(--status-warning)';
+  return 'var(--status-success)';
 }
 
 function formatCurrency(amount: number): string {

@@ -58,13 +58,15 @@ const STATUS_LABELS: Record<string, string> = {
 // MAIN COMPONENT
 // ============================================
 
-export function PaymentScheduleView(_props: PaymentScheduleViewProps) {
+export function PaymentScheduleView({ getAuthToken }: PaymentScheduleViewProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const { data: installmentData, isLoading: loadingInstallments, error: installmentError, refetch } = usePortalData<{ installments: PaymentInstallment[] }>({
+    getAuthToken,
     url: API_ENDPOINTS.PAYMENT_SCHEDULES_MY
   });
 
   const { data: summaryData } = usePortalData<{ summary: PaymentSummary }>({
+    getAuthToken,
     url: API_ENDPOINTS.PAYMENT_SCHEDULES_MY_SUMMARY
   });
 
