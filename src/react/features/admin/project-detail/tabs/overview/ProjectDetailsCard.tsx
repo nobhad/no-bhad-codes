@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { DollarSign } from 'lucide-react';
 import { InlineEdit, InlineSelect, InlineTextarea, formatCurrencyDisplay, parseCurrencyInput } from '@react/components/portal/InlineEdit';
 import type { Project } from '../../../types';
 import { PROJECT_TYPE_LABELS } from '../../../types';
@@ -75,32 +74,26 @@ export function ProjectDetailsCard({ project, onSaveField }: ProjectDetailsCardP
 
         <div className="layout-form-field">
           <span className="field-label">Budget</span>
-          <div className="project-info-field-value">
-            <DollarSign className="icon-sm" />
-            <InlineEdit
-              value={String(project.budget || '')}
-              type="currency"
-              placeholder="Set budget"
-              formatDisplay={formatCurrencyDisplay}
-              parseInput={parseCurrencyInput}
-              onSave={(value) => onSaveField('budget', value)}
-            />
-          </div>
+          <InlineEdit
+            value={String(project.budget || '')}
+            type="currency"
+            placeholder="Set budget"
+            formatDisplay={formatCurrencyDisplay}
+            parseInput={parseCurrencyInput}
+            onSave={(value) => onSaveField('budget', value)}
+          />
         </div>
 
         <div className="layout-form-field">
           <span className="field-label">Quoted Price</span>
-          <div className="project-info-field-value">
-            <DollarSign className="icon-sm" />
-            <InlineEdit
-              value={String(project.price || '')}
-              type="currency"
-              placeholder="Set price"
-              formatDisplay={formatCurrencyDisplay}
-              parseInput={parseCurrencyInput}
-              onSave={(value) => onSaveField('price', value)}
-            />
-          </div>
+          <InlineEdit
+            value={String(project.price || '')}
+            type="currency"
+            placeholder="Set price"
+            formatDisplay={formatCurrencyDisplay}
+            parseInput={parseCurrencyInput}
+            onSave={(value) => onSaveField('price', value)}
+          />
         </div>
       </div>
 

@@ -6,6 +6,8 @@ import {
   Inbox,
   AlertCircle,
   Calendar,
+  CheckCircle,
+  Clock,
   Box
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
@@ -61,9 +63,18 @@ export function DeliverablesTab({
   onDeleteMilestone,
   showNotification
 }: DeliverablesTabProps) {
-  const [expandedIds, setExpandedIds] = useState<Set<number>>(
-    () => new Set(milestones.map((m) => m.id))
-  );
+  // Auto-collapse completed milestones on initial load
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(() => {
+    const ids = new Set<number>();
+    for (const m of milestones) {
+      // Check if all tasks for this milestone are completed
+      const mTasks = tasks.filter(t => t.milestone_id === m.id);
+      const allDone = mTasks.length > 0 && mTasks.every(t => t.status === 'completed');
+      // Only expand if milestone is not fully completed
+      if (!m.is_completed && !allDone) ids.add(m.id);
+    }
+    return ids;
+  });
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingMilestoneId, setEditingMilestoneId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -208,7 +219,13 @@ export function DeliverablesTab({
               const header = (
                 <>
                   <div className="flex-fill milestone-content">
-                    <Box className="icon-xs" />
+                    {allCompleted ? (
+                      <CheckCircle className="icon-sm" style={{ color: 'var(--color-success)', flexShrink: 0 }} />
+                    ) : completedTasks > 0 ? (
+                      <Clock className="icon-sm" style={{ color: 'var(--color-text-tertiary)', flexShrink: 0 }} />
+                    ) : (
+                      <Box className="icon-sm" style={{ color: 'var(--color-text-tertiary)', flexShrink: 0 }} />
+                    )}
                     <span
                       className={cn(
                         'milestone-title',
@@ -217,12 +234,17 @@ export function DeliverablesTab({
                     >
                       {decodeHtmlEntities(milestone.title)}
                     </span>
-                    {milestone.due_date && (
+                    {allCompleted && milestone.completed_date ? (
+                      <span className="milestone-due">
+                        <Calendar className="icon-xs" />
+                        Completed {formatDate(milestone.completed_date)}
+                      </span>
+                    ) : milestone.due_date ? (
                       <span className="milestone-due">
                         <Calendar className="icon-xs" />
                         {formatDate(milestone.due_date)}
                       </span>
-                    )}
+                    ) : null}
                   </div>
                   <span className="text-secondary">
                     {completedTasks}/{milestoneTasks.length}
@@ -261,7 +283,7 @@ export function DeliverablesTab({
                           />
                           <span
                             className={cn(
-                              task.status === 'completed' && 'text-secondary pd-completed-text'
+                              task.status === 'completed' && 'text-secondary'
                             )}
                           >
                             {task.title}
@@ -345,7 +367,7 @@ export function DeliverablesTab({
                       <span
                         className={cn(
                           'flex-fill',
-                          task.status === 'completed' && 'text-secondary pd-completed-text'
+                          task.status === 'completed' && 'text-secondary'
                         )}
                       >
                         {task.title}

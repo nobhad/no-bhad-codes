@@ -131,6 +131,12 @@ export function ProjectDetail({
     uploadFile,
     deleteFile,
     toggleFileSharing,
+    updateCategory,
+    sendInvoice,
+    markAsPaid,
+    deleteInvoice,
+    downloadPdf,
+    refetch: refreshAll,
     loadMessages,
     sendMessage,
     editMessage,
@@ -302,15 +308,13 @@ export function ProjectDetail({
         <OverviewTab
           project={project}
           milestones={milestones}
+          tasks={tasks}
           progress={progress}
           outstandingBalance={outstandingBalance}
           totalPaid={totalPaid}
           onUpdateProject={updateProject}
-          onAddMilestone={addMilestone}
-          onUpdateMilestone={updateMilestone}
-          onToggleMilestone={toggleMilestoneComplete}
-          onDeleteMilestone={deleteMilestone}
           onNavigate={onNavigate}
+          onSwitchTab={(tab) => setActiveTab(tab as ProjectDetailTab)}
           showNotification={showNotification}
         />
       </TabPanel>
@@ -321,6 +325,7 @@ export function ProjectDetail({
           onUploadFile={uploadFile}
           onDeleteFile={deleteFile}
           onToggleSharing={toggleFileSharing}
+          onUpdateCategory={updateCategory}
           showNotification={showNotification}
         />
       </TabPanel>
@@ -355,7 +360,13 @@ export function ProjectDetail({
       <TabPanel tabId="invoices" isActive={activeTab === 'invoices'}>
         <InvoicesTab
           invoices={invoices}
-          onViewInvoice={onNavigate ? (invoiceId) => onNavigate('invoice-detail', String(invoiceId)) : undefined}
+          onCreateInvoice={onNavigate ? () => onNavigate('invoices') : undefined}
+          onSendInvoice={sendInvoice}
+          onMarkPaid={markAsPaid}
+          onDeleteInvoice={deleteInvoice}
+          onDownloadPdf={downloadPdf}
+          onNavigate={onNavigate}
+          onRefresh={refreshAll}
           showNotification={showNotification}
         />
       </TabPanel>

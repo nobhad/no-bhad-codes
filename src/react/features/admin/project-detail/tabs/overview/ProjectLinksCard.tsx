@@ -1,11 +1,47 @@
 import * as React from 'react';
-import { Link as LinkIcon, ExternalLink } from 'lucide-react';
+import { Link as LinkIcon, ExternalLink, Pencil } from 'lucide-react';
 import { InlineEdit } from '@react/components/portal/InlineEdit';
 import type { Project } from '../../../types';
 
 interface ProjectLinksCardProps {
   project: Project;
   onSaveField: (field: keyof Project, value: string) => Promise<boolean>;
+}
+
+/** Single link field: [pencil] value [external-link] */
+function LinkField({
+  label,
+  value,
+  placeholder,
+  onSave
+}: {
+  label: string;
+  value: string;
+  placeholder: string;
+  onSave: (value: string) => Promise<boolean>;
+}) {
+  return (
+    <div className="layout-form-field">
+      <div className="field-label">
+        <LinkIcon className="icon-sm" /> {label}
+      </div>
+      <div className="project-info-field-value">
+        <Pencil className="icon-sm inline-edit-icon" />
+        <InlineEdit
+          value={value}
+          type="text"
+          placeholder={placeholder}
+          showEditIcon={false}
+          onSave={onSave}
+        />
+        {value && (
+          <a href={value} target="_blank" rel="noopener noreferrer" className="inline-link-external" aria-label={`Open ${label}`}>
+            <ExternalLink className="icon-sm" />
+          </a>
+        )}
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -17,57 +53,25 @@ export function ProjectLinksCard({ project, onSaveField }: ProjectLinksCardProps
   return (
     <div className="panel">
       <div className="data-table-header"><h3><span className="title-full">Links</span></h3></div>
-      <div className="grid-2col">
-        <div className="layout-form-field">
-          <div className="field-label">
-            <LinkIcon className="icon-sm" /> Preview URL
-            {project.preview_url && (
-              <a href={project.preview_url} target="_blank" rel="noopener noreferrer" className="inline-link-external" aria-label="Open preview URL">
-                <ExternalLink className="icon-sm" />
-              </a>
-            )}
-          </div>
-          <InlineEdit
-            value={project.preview_url || ''}
-            type="text"
-            placeholder="Set preview URL"
-            onSave={(value) => onSaveField('preview_url', value)}
-          />
-        </div>
-
-        <div className="layout-form-field">
-          <div className="field-label">
-            <LinkIcon className="icon-sm" /> Repository
-            {project.repo_url && (
-              <a href={project.repo_url} target="_blank" rel="noopener noreferrer" className="inline-link-external" aria-label="Open repository URL">
-                <ExternalLink className="icon-sm" />
-              </a>
-            )}
-          </div>
-          <InlineEdit
-            value={project.repo_url || ''}
-            type="text"
-            placeholder="Set repository URL"
-            onSave={(value) => onSaveField('repo_url', value)}
-          />
-        </div>
-
-        <div className="layout-form-field">
-          <div className="field-label">
-            <LinkIcon className="icon-sm" /> Production URL
-            {project.production_url && (
-              <a href={project.production_url} target="_blank" rel="noopener noreferrer" className="inline-link-external" aria-label="Open production URL">
-                <ExternalLink className="icon-sm" />
-              </a>
-            )}
-          </div>
-          <InlineEdit
-            value={project.production_url || ''}
-            type="text"
-            placeholder="Set production URL"
-            onSave={(value) => onSaveField('production_url', value)}
-          />
-        </div>
+      <div className="link-list">
+        <LinkField
+          label="Preview URL"
+          value={project.preview_url || ''}
+          placeholder="Set preview URL"
+          onSave={(value) => onSaveField('preview_url', value)}
+        />
+        <LinkField
+          label="Repository"
+          value={project.repo_url || ''}
+          placeholder="Set repository URL"
+          onSave={(value) => onSaveField('repo_url', value)}
+        />
+        <LinkField
+          label="Production URL"
+          value={project.production_url || ''}
+          placeholder="Set production URL"
+          onSave={(value) => onSaveField('production_url', value)}
+        />
       </div>
     </div>
   );

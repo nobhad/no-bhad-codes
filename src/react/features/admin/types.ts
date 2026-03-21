@@ -96,6 +96,13 @@ export interface Project {
   preview_url?: string;
   repo_url?: string;
   production_url?: string;
+  // Service credentials (migration 131)
+  netlify_url?: string;
+  netlify_email?: string;
+  netlify_password?: string;
+  umami_url?: string;
+  umami_email?: string;
+  umami_password?: string;
   // Intake fields (migration 008)
   design_level?: string;
   content_status?: string;
@@ -593,6 +600,7 @@ export interface ProjectFile {
  * File category options
  */
 export const FILE_CATEGORY_OPTIONS = [
+  { value: 'general', label: 'General' },
   { value: 'proposal', label: 'Project Proposal' },
   { value: 'contract', label: 'Contract' },
   { value: 'intake', label: 'Intake Form' },
