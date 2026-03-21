@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useEffect, useState } from 'react';
 import { exportToCsv, type ExportConfig } from '../../utils/table-export';
 
 interface UseExportOptions<T> {
@@ -27,6 +27,14 @@ export function useExport<T extends object>({
   onExport
 }: UseExportOptions<T>): UseExportReturn {
   const [isExporting, setIsExporting] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   const exportCsv = useCallback(() => {
     if (data.length === 0) return;
@@ -34,13 +42,14 @@ export function useExport<T extends object>({
     setIsExporting(true);
 
     // Use setTimeout to allow UI to update
-    setTimeout(() => {
+    timerRef.current = setTimeout(() => {
       try {
         // Cast to Record<string, unknown>[] since exportToCsv expects that type
         exportToCsv(data as unknown as Record<string, unknown>[], config);
         onExport?.(data.length);
       } finally {
         setIsExporting(false);
+        timerRef.current = null;
       }
     }, 100);
   }, [data, config, onExport]);

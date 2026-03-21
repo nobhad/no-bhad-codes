@@ -51,6 +51,7 @@ export class Application {
   private services = new Map<string, ServiceInstance>();
   private isInitialized = false;
   private debug = isDev();
+  private scrollCleanup: (() => void) | null = null;
 
   private log(...args: unknown[]): void {
     if (this.debug) {
@@ -372,6 +373,9 @@ export class Application {
       }
     }
 
+    this.scrollCleanup?.();
+    this.scrollCleanup = null;
+
     this.modules.clear();
     this.services.clear();
     container.clear();
@@ -403,6 +407,7 @@ export class Application {
     };
 
     window.addEventListener('scroll', checkScrollPosition, { passive: true });
+    this.scrollCleanup = () => window.removeEventListener('scroll', checkScrollPosition);
     checkScrollPosition();
   }
 
