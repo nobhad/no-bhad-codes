@@ -1,24 +1,24 @@
 import * as React from 'react';
 import { useCallback } from 'react';
 import type { Project, ProjectMilestone } from '../../types';
+import type { ProjectTaskResponse } from '@/types/api';
 import { NOTIFICATIONS } from '@/constants/notifications';
 import { ProjectDetailsCard } from './overview/ProjectDetailsCard';
 import { ProjectLinksCard } from './overview/ProjectLinksCard';
+import { ServiceCredentialsCard } from './overview/ServiceCredentialsCard';
 import { MilestonesList } from './overview/MilestonesList';
 import { SidebarInfo } from './overview/SidebarInfo';
 
 interface OverviewTabProps {
   project: Project;
   milestones: ProjectMilestone[];
+  tasks?: ProjectTaskResponse[];
   progress: number;
   outstandingBalance: number;
   totalPaid: number;
   onUpdateProject: (updates: Partial<Project>) => Promise<boolean>;
-  onAddMilestone: (milestone: Omit<ProjectMilestone, 'id' | 'project_id'>) => Promise<boolean>;
-  onUpdateMilestone: (id: number, updates: Partial<ProjectMilestone>) => Promise<boolean>;
-  onToggleMilestone: (id: number) => Promise<boolean>;
-  onDeleteMilestone: (id: number) => Promise<boolean>;
   onNavigate?: (tab: string, entityId?: string) => void;
+  onSwitchTab?: (tab: string) => void;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
@@ -30,15 +30,13 @@ interface OverviewTabProps {
 export function OverviewTab({
   project,
   milestones,
+  tasks = [],
   progress,
   outstandingBalance,
   totalPaid,
   onUpdateProject,
-  onAddMilestone,
-  onUpdateMilestone,
-  onToggleMilestone,
-  onDeleteMilestone,
   onNavigate,
+  onSwitchTab,
   showNotification
 }: OverviewTabProps) {
   const handleSaveField = useCallback(
@@ -60,14 +58,12 @@ export function OverviewTab({
       <div className="layout-stack">
         <ProjectDetailsCard project={project} onSaveField={handleSaveField} />
         <ProjectLinksCard project={project} onSaveField={handleSaveField} />
+        <ServiceCredentialsCard project={project} onSaveField={handleSaveField} />
         <MilestonesList
           milestones={milestones}
+          tasks={tasks}
           progress={progress}
-          onAddMilestone={onAddMilestone}
-          onUpdateMilestone={onUpdateMilestone}
-          onToggleMilestone={onToggleMilestone}
-          onDeleteMilestone={onDeleteMilestone}
-          showNotification={showNotification}
+          onNavigateToDeliverables={onSwitchTab ? () => onSwitchTab('deliverables') : undefined}
         />
       </div>
 
