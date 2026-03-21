@@ -111,7 +111,11 @@ export function RetainersTable({
     <div className="subsection">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h2 style={{ margin: 0 }}>Retainers</h2>
-        <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <button
+          className="btn-primary"
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          onClick={() => showNotification?.('Create retainer from the project detail page', 'info')}
+        >
           <Plus size={16} /> New Retainer
         </button>
       </div>

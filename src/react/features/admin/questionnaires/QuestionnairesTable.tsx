@@ -515,16 +515,16 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                   </PortalTableCell>
                   <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-group">
-                      <IconButton
-                        action="view"
-                        onClick={() => onNavigate?.('questionnaire-detail', String(questionnaire.id))}
-                      />
                       {questionnaire.status === 'draft' && (
                         <IconButton
                           action="send"
                           onClick={() => handleSendQuestionnaire(questionnaire.id)}
                         />
                       )}
+                      <IconButton
+                        action="view"
+                        onClick={() => onNavigate?.('questionnaire-detail', String(questionnaire.id))}
+                      />
                     </div>
                   </PortalTableCell>
                 </PortalTableRow>

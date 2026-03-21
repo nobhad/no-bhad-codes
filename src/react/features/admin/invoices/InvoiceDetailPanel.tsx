@@ -22,7 +22,7 @@ import { formatDate } from '@react/utils/formatDate';
 import { formatCurrency } from '@/utils/format-utils';
 import { apiPut } from '@/utils/api-client';
 import { buildEndpoint } from '@/constants/api-endpoints';
-import type { Invoice, InvoiceStatus } from '../types';
+import type { Invoice } from '../types';
 import { INVOICE_STATUS_CONFIG } from '../types';
 
 // ============================================
@@ -71,8 +71,6 @@ export function InvoiceDetailPanel({
   showNotification
 }: InvoiceDetailPanelProps) {
   const [isSending, setIsSending] = useState(false);
-
-  const isDraft = invoice?.status === 'draft';
 
   const handleNavigateToProject = useCallback(
     (projectId: number) => {
@@ -267,7 +265,7 @@ export function InvoiceDetailPanel({
         return tabs;
       }
     }),
-    [onStatusChange, onSend, onMarkPaid, onDownloadPdf, handleSend, isSending, handleSaveField, handleNavigateToProject, isDraft]
+    [onStatusChange, onSend, onMarkPaid, onDownloadPdf, handleSend, isSending, handleSaveField, handleNavigateToProject]
   );
 
   return <DetailPanel entity={invoice} onClose={onClose} config={config} />;

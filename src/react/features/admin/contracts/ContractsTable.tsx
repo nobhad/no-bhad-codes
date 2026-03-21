@@ -40,6 +40,7 @@ import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost, apiFetch } from '@/utils/api-client';
+import { downloadFromUrl } from '@/utils/file-download';
 import { CreateContractModal } from '../modals/CreateEntityModals';
 import { useExport, CONTRACTS_EXPORT_CONFIG } from '@react/hooks/useExport';
 import { ContractDetailPanel } from './ContractDetailPanel';
@@ -553,7 +554,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                         />
                       )}
                       <IconButton action="view" title="Preview PDF" onClick={() => setPreviewContract(contract)} />
-                      <IconButton action="download" title="Download" />
+                      <IconButton action="download" title="Download" onClick={() => downloadFromUrl(buildEndpoint.contractPdf(contract.projectId), `contract-${contract.projectName || contract.id}.pdf`)} />
                     </div>
                   </PortalTableCell>
                 </PortalTableRow>
@@ -579,6 +580,25 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
         onDownload={() => {}}
         showNotification={showNotification}
       />
+
+      {/* PDF Preview Modal */}
+      <PortalModal
+        open={!!previewContract}
+        onOpenChange={(open) => { if (!open) setPreviewContract(null); }}
+        title={previewContract?.templateName || 'Contract Preview'}
+        icon={<Eye />}
+        size="lg"
+      >
+        {previewContract && (
+          <div style={{ minHeight: '200px' }}>
+            <iframe
+              src={buildEndpoint.contractPdf(previewContract.projectId)}
+              title={`Preview contract for ${previewContract.clientName || 'client'}`}
+              style={{ width: '100%', height: '70vh', border: 'none' }}
+            />
+          </div>
+        )}
+      </PortalModal>
     </>
   );
 }

@@ -228,6 +228,50 @@ Icons use `1em` sizing by default -- parent font-size controls the icon size. Wi
 
 ## Action Buttons
 
+### Action Icon Rules (Portal-Wide)
+
+Every table and detail view MUST follow these rules for action icons:
+
+| Icon | Action | When to Show | Behavior |
+|------|--------|-------------|----------|
+| **Eye** | Preview content | Only on entities with visual content (PDFs, images): invoices, contracts, proposals, receipts, files | Opens `PortalModal` with iframe/image viewer |
+| **Pencil** | Edit | Only on editable/draft items | Opens detail panel with inline editing |
+| **Download** | Download file | On entities with downloadable content | Triggers file download |
+| **Send** | Send document | Only on draft documents | Sends via API |
+| **Trash** | Delete | On deletable items | Opens `ConfirmDialog` first |
+| **Row click** | View details | All tables with detail panels | Opens slide-in `DetailPanel` |
+
+**Key distinctions:**
+
+- **Eye = visual preview** (PDF/image in a modal). NEVER use Eye to open a detail panel or navigate.
+- **Row click = detail panel** (metadata, status, editing). This is the primary way to inspect an entity.
+- **Eye is NOT shown** on data-only entities (leads, tasks, contacts, expenses, etc.) that have no visual content.
+- **Pencil is NOT needed** when row click already opens an editable detail panel. Only use Pencil as an explicit "this is editable" signal on draft items in tables.
+
+**Entity types:**
+
+- **Data records** (leads, clients, tasks, expenses): Row click only. No Eye icon.
+- **Documents** (invoices, contracts, proposals): Row click + Eye (PDF preview) + Download.
+- **Files** (uploads, images): Eye only (preview IS the content). No detail panel.
+
+### Row Action Button Order
+
+In table rows, action buttons MUST follow this order (left to right):
+
+1. **Send** (conditional -- only when item is a draft that can be sent)
+2. **View/Preview** (Eye icon -- always present for documents/files)
+3. **Download** (when file/PDF is available)
+4. **Delete** (destructive -- always rightmost)
+
+This ensures the primary action (sending) is the first thing the user sees.
+
+### Action Button Alignment
+
+- Action buttons MUST be **right-aligned** in their column
+- Use `.pd-cell-right` class on the `<td>` element
+- The `.action-group` class already sets `justify-content: flex-end`
+- The Actions column header must also use right alignment
+
 ### Universal Icon Button Rules
 
 All icon-only action buttons must use `.icon-btn` class or `<IconButton>` factory component. This ensures:
