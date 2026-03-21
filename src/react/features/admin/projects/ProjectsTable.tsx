@@ -125,7 +125,7 @@ function sortProjects(a: Project, b: Project, sort: SortConfig): number {
   case 'type':
     return multiplier * (a.project_type || '').localeCompare(b.project_type || '');
   case 'budget':
-    return multiplier * (a.budget || '').localeCompare(b.budget || '');
+    return multiplier * ((parseFloat(a.budget || '0') || 0) - (parseFloat(b.budget || '0') || 0));
   case 'start_date':
     return (
       multiplier *
