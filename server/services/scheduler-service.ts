@@ -31,22 +31,40 @@ interface SimpleTask {
   stop(): void;
 }
 
-function parseCronExpression(expression: string): { minute: number; hour: number; isHourly: boolean } {
+function parseCronExpression(expression: string): { minute: number; hour: number; isHourly: boolean; minuteInterval: number | null } {
   const parts = expression.split(' ');
   // Format: minute hour day-of-month month day-of-week
-  const minute = parseInt(parts[0], 10);
+  const minutePart = parts[0];
   const hourPart = parts[1];
   const isHourly = hourPart === '*';
+
+  // Handle */N interval syntax (e.g., */5 = every 5 minutes)
+  const intervalMatch = minutePart.match(/^\*\/(\d+)$/);
+  if (intervalMatch) {
+    return { minute: 0, hour: 0, isHourly: true, minuteInterval: parseInt(intervalMatch[1], 10) };
+  }
+
+  const minute = parseInt(minutePart, 10);
   const hour = isHourly ? 0 : parseInt(hourPart, 10);
-  return { minute, hour, isHourly };
+  return { minute, hour, isHourly, minuteInterval: null };
 }
 
 function getNextRunTime(expression: string): Date {
-  const { minute, hour, isHourly } = parseCronExpression(expression);
+  const { minute, hour, isHourly, minuteInterval } = parseCronExpression(expression);
   const now = new Date();
   const next = new Date(now);
 
-  if (isHourly) {
+  if (minuteInterval) {
+    // Runs every N minutes (e.g., */5)
+    const currentMinute = now.getMinutes();
+    const nextMinute = Math.ceil((currentMinute + 1) / minuteInterval) * minuteInterval;
+    if (nextMinute >= 60) {
+      next.setHours(next.getHours() + 1);
+      next.setMinutes(nextMinute % 60, 0, 0);
+    } else {
+      next.setMinutes(nextMinute, 0, 0);
+    }
+  } else if (isHourly) {
     // Runs at :minute every hour
     next.setMinutes(minute, 0, 0);
     if (next <= now) {
