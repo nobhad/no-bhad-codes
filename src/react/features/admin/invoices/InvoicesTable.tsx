@@ -545,12 +545,6 @@ export function InvoicesTable({
                     {/* Actions */}
                     <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                       <div className="action-group">
-                        <IconButton
-                          action="view"
-                          onClick={() => handleViewInvoice(invoice.id)}
-                          title="View invoice"
-                        />
-
                         {canSend && (
                           <IconButton
                             action="send"
@@ -559,6 +553,12 @@ export function InvoicesTable({
                             title="Send invoice"
                           />
                         )}
+
+                        <IconButton
+                          action="view"
+                          onClick={() => handleViewInvoice(invoice.id)}
+                          title="View invoice"
+                        />
 
                         {canMarkPaid && (
                           <IconButton
