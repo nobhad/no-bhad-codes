@@ -48,7 +48,7 @@ export interface UseDataFetchOptions<T, P = void> {
   /** Function to get auth token */
   getAuthToken?: () => string | null;
   /** The fetch function */
-  fetchFn: (params: P, headers: HeadersInit) => Promise<T>;
+  fetchFn: (params: P, headers: HeadersInit, signal?: AbortSignal) => Promise<T>;
   /** Fetch parameters */
   params?: P;
   /** Whether to fetch on mount */
@@ -156,7 +156,8 @@ export function useDataFetch<T, P = void>(
 
     try {
       const headers = getHeaders();
-      const fetchedData = await fetchFn(params as P, headers);
+      const signal = abortControllerRef.current?.signal;
+      const fetchedData = await fetchFn(params as P, headers, signal);
 
       // Apply transform if provided
       const result: T = transform ? transform(fetchedData) : fetchedData;
@@ -295,8 +296,8 @@ export function useListFetch<T, S = Record<string, unknown>>(options: {
 
   return useDataFetch<ListFetchResult<T, S>>({
     getAuthToken,
-    fetchFn: async () => {
-      const response = await apiFetch(endpoint);
+    fetchFn: async (_params, _headers, signal) => {
+      const response = await apiFetch(endpoint, { signal });
       if (!response.ok) {
         throw new Error(`Failed to fetch ${endpoint}`);
       }

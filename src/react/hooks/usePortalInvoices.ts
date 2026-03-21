@@ -39,12 +39,12 @@ export function usePortalInvoices(_options: UsePortalInvoicesOptions = {}): UseP
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchInvoices = useCallback(async () => {
+  const fetchInvoices = useCallback(async (signal?: AbortSignal) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await apiFetch(`${API_ENDPOINTS.INVOICES}/me`);
+      const response = await apiFetch(`${API_ENDPOINTS.INVOICES}/me`, { signal });
 
       if (!response.ok) {
         throw new Error('Failed to fetch invoices');
@@ -60,6 +60,7 @@ export function usePortalInvoices(_options: UsePortalInvoicesOptions = {}): UseP
         setSummary(payload.summary);
       }
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return;
       logger.error('[usePortalInvoices] Error:', err);
       setError(formatErrorMessage(err, 'Failed to load invoices'));
     } finally {
@@ -68,7 +69,9 @@ export function usePortalInvoices(_options: UsePortalInvoicesOptions = {}): UseP
   }, []);
 
   useEffect(() => {
-    fetchInvoices();
+    const controller = new AbortController();
+    fetchInvoices(controller.signal);
+    return () => controller.abort();
   }, [fetchInvoices]);
 
   return {

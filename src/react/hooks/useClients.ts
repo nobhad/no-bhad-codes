@@ -154,24 +154,27 @@ export function useClients({
       let success = 0;
       let failed = 0;
 
+      const successIds: number[] = [];
+
       try {
         for (const id of ids) {
           const response = await apiDelete(`${API_ENDPOINTS.CLIENTS}/${id}`);
 
           if (response.ok) {
             success++;
+            successIds.push(id);
           } else {
             failed++;
           }
         }
-
-        // Remove deleted clients from local state
-        if (success > 0) {
-          setClients((prev) => prev.filter((client) => !ids.includes(client.id)));
-        }
       } catch (err) {
         logger.error('[useClients] Bulk delete error:', err);
         failed = ids.length - success;
+      }
+
+      // Remove only successfully deleted clients from local state
+      if (successIds.length > 0) {
+        setClients((prev) => prev.filter((client) => !successIds.includes(client.id)));
       }
 
       return { success, failed };
