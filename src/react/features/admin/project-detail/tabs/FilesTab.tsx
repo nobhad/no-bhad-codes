@@ -11,9 +11,11 @@ import {
   File,
   FileArchive,
   Inbox,
-  ChevronDown
+  ChevronDown,
+  Eye
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { PortalModal } from '@react/components/portal/PortalModal';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import {
   PortalDropdown,
@@ -25,6 +27,8 @@ import { EmptyState } from '@react/components/portal/EmptyState';
 import type { ProjectFile } from '../../types';
 import { FILE_CATEGORY_OPTIONS } from '../../types';
 import { formatDate, formatFileSize } from '@/utils/format-utils';
+import { downloadFile } from '@/utils/file-download';
+import { buildEndpoint } from '@/constants/api-endpoints';
 import { NOTIFICATIONS, fileUploadMessage } from '@/constants/notifications';
 import { KEYS } from '@/constants/keyboard';
 
@@ -33,6 +37,7 @@ interface FilesTabProps {
   onUploadFile: (file: File, category?: string) => Promise<boolean>;
   onDeleteFile: (id: number) => Promise<boolean>;
   onToggleSharing: (id: number) => Promise<boolean>;
+  onUpdateCategory?: (id: number, category: string) => Promise<boolean>;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
@@ -61,6 +66,7 @@ export function FilesTab({
   onUploadFile,
   onDeleteFile,
   onToggleSharing,
+  onUpdateCategory,
   showNotification
 }: FilesTabProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -69,6 +75,8 @@ export function FilesTab({
   const [isUploading, setIsUploading] = useState(false);
   const [deletingFileId, setDeletingFileId] = useState<number | null>(null);
   const [togglingFileId, setTogglingFileId] = useState<number | null>(null);
+  const [previewFile, setPreviewFile] = useState<ProjectFile | null>(null);
+  const [previewContent, setPreviewContent] = useState<string | null>(null);
 
   const deleteDialog = useConfirmDialog();
 
@@ -156,12 +164,39 @@ export function FilesTab({
     [files, onToggleSharing, showNotification]
   );
 
-  // Handle download
+  // Handle download — uses shared utility for consistent authenticated downloads
   const handleDownload = useCallback((file: ProjectFile) => {
-    if (file.download_url) {
-      window.open(file.download_url, '_blank');
-    }
+    downloadFile(file.id, file.original_name).catch(() => {
+      showNotification?.('Failed to download file', 'error');
+    });
+  }, [showNotification]);
+
+  // Text-previewable MIME types and extensions
+  const isTextFile = useCallback((file: ProjectFile): boolean => {
+    const textMimes = ['text/', 'application/json', 'application/xml', 'application/javascript', 'application/x-yaml'];
+    const textExts = ['.md', '.txt', '.json', '.js', '.ts', '.tsx', '.jsx', '.css', '.html', '.xml', '.yaml', '.yml', '.csv', '.svg', '.sql', '.sh', '.env', '.log'];
+    if (textMimes.some((m) => file.file_type.startsWith(m))) return true;
+    return textExts.some((ext) => file.original_name.toLowerCase().endsWith(ext));
   }, []);
+
+  // Handle preview — fetches text content for text files, uses iframe for others
+  const handlePreview = useCallback(async (file: ProjectFile) => {
+    setPreviewFile(file);
+    setPreviewContent(null);
+
+    const fileUrl = buildEndpoint.fileDownload(file.id).replace('?download=true', '');
+
+    if (isTextFile(file)) {
+      try {
+        const response = await fetch(fileUrl, { credentials: 'include' });
+        if (response.ok) {
+          setPreviewContent(await response.text());
+        }
+      } catch {
+        // Failed to fetch text — will show iframe fallback
+      }
+    }
+  }, [isTextFile]);
 
   return (
     <div className="subsection">
@@ -220,21 +255,19 @@ export function FilesTab({
                 <button className="files-category-trigger dropdown-trigger" type="button">
                   {selectedCategory
                     ? FILE_CATEGORY_OPTIONS.find((o) => o.value === selectedCategory)?.label || selectedCategory
-                    : 'None'}
+                    : 'Select type'}
                   <ChevronDown className="dropdown-caret" />
                 </button>
               </PortalDropdownTrigger>
               <PortalDropdownContent align="start">
-                <PortalDropdownItem
-                  className={cn(!selectedCategory && 'is-active')}
-                  onSelect={() => setSelectedCategory('')}
-                >
-                  None
-                </PortalDropdownItem>
-                {FILE_CATEGORY_OPTIONS.map((opt) => (
+                {selectedCategory && (
+                  <PortalDropdownItem onSelect={() => setSelectedCategory('')}>
+                    None
+                  </PortalDropdownItem>
+                )}
+                {FILE_CATEGORY_OPTIONS.filter((opt) => opt.value !== selectedCategory).map((opt) => (
                   <PortalDropdownItem
                     key={opt.value}
-                    className={cn(selectedCategory === opt.value && 'is-active')}
                     onSelect={() => setSelectedCategory(opt.value)}
                   >
                     {opt.label}
@@ -264,6 +297,7 @@ export function FilesTab({
           <table className="pd-full-width">
             <colgroup>
               <col className="files-col-name" />
+              <col style={{ width: '140px' }} />
               <col className="files-col-size" />
               <col className="files-col-date" />
               <col className="files-col-shared" />
@@ -273,6 +307,9 @@ export function FilesTab({
               <tr className="files-table-header">
                 <th scope="col" className="label pd-table-cell pd-cell-left">
                   File
+                </th>
+                <th scope="col" className="label pd-table-cell pd-cell-left">
+                  Category
                 </th>
                 <th scope="col" className="label pd-table-cell pd-cell-left">
                   Size
@@ -295,19 +332,41 @@ export function FilesTab({
                   className="files-table-row"
                 >
                   <td className="pd-table-cell">
-                    <div className="layout-row">
-                      {getFileIcon(file.file_type)}
-                      <div className="layout-stack gap-1">
-                        <span className="pd-highlight-value pd-truncate-filename">
-                          {file.original_name}
-                        </span>
-                        {file.category && (
-                          <span className="text-secondary pd-hint">
-                            {FILE_CATEGORY_OPTIONS.find((c) => c.value === file.category)?.label || file.category}
-                          </span>
-                        )}
-                      </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                      <span style={{ flexShrink: 0 }}>{getFileIcon(file.file_type)}</span>
+                      <span className="pd-highlight-value pd-truncate-filename">
+                        {file.original_name}
+                      </span>
                     </div>
+                  </td>
+                  <td className="pd-table-cell">
+                    {onUpdateCategory ? (
+                      <PortalDropdown>
+                        <PortalDropdownTrigger asChild>
+                          <button type="button" className="files-category-trigger dropdown-trigger" title="Change category">
+                            {FILE_CATEGORY_OPTIONS.find((c) => c.value === file.category)?.label || file.category || 'Set category'}
+                            <ChevronDown className="dropdown-caret" />
+                          </button>
+                        </PortalDropdownTrigger>
+                        <PortalDropdownContent align="start">
+                          {FILE_CATEGORY_OPTIONS.filter((opt) => opt.value !== file.category).map((opt) => (
+                            <PortalDropdownItem
+                              key={opt.value}
+                              onSelect={async () => {
+                                const success = await onUpdateCategory(file.id, opt.value);
+                                if (success) showNotification?.('Category updated', 'success');
+                              }}
+                            >
+                              {opt.label}
+                            </PortalDropdownItem>
+                          ))}
+                        </PortalDropdownContent>
+                      </PortalDropdown>
+                    ) : (
+                      <span className="text-secondary">
+                        {FILE_CATEGORY_OPTIONS.find((c) => c.value === file.category)?.label || file.category || '-'}
+                      </span>
+                    )}
                   </td>
                   <td className="pd-table-cell text-secondary">
                     {formatFileSize(file.file_size)}
@@ -332,16 +391,22 @@ export function FilesTab({
                   </td>
                   <td className="pd-table-cell pd-cell-right">
                     <div className="action-group">
-                      {file.download_url && (
-                        <button
-                          className="icon-btn"
-                          onClick={() => handleDownload(file)}
-                          title="Download"
-                          aria-label="Download file"
-                        >
-                          <Download className="icon-md" />
-                        </button>
-                      )}
+                      <button
+                        className="icon-btn"
+                        onClick={() => handlePreview(file)}
+                        title="Preview"
+                        aria-label="Preview file"
+                      >
+                        <Eye className="icon-md" />
+                      </button>
+                      <button
+                        className="icon-btn"
+                        onClick={() => handleDownload(file)}
+                        title="Download"
+                        aria-label="Download file"
+                      >
+                        <Download className="icon-md" />
+                      </button>
                       <button
                         className="icon-btn"
                         onClick={() => {
@@ -374,6 +439,61 @@ export function FilesTab({
         variant="danger"
         loading={deleteDialog.isLoading}
       />
+
+      {/* File Preview Modal */}
+      <PortalModal
+        open={!!previewFile}
+        onOpenChange={(open) => { if (!open) { setPreviewFile(null); setPreviewContent(null); } }}
+        title={previewFile?.original_name || 'File Preview'}
+        icon={<Eye />}
+        size="lg"
+        footer={
+          previewFile ? (
+            <button className="btn-secondary" onClick={() => handleDownload(previewFile)}>
+              <Download className="icon-sm" /> Download
+            </button>
+          ) : undefined
+        }
+      >
+        {previewFile && (() => {
+          const fileUrl = buildEndpoint.fileDownload(previewFile.id).replace('?download=true', '');
+          return (
+            <div style={{ minHeight: '200px' }}>
+              {previewFile.file_type.startsWith('image/') ? (
+                <img
+                  src={fileUrl}
+                  alt={previewFile.original_name}
+                  style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain', display: 'block', margin: '0 auto' }}
+                />
+              ) : previewFile.file_type === 'application/pdf' ? (
+                <iframe
+                  src={fileUrl}
+                  title={previewFile.original_name}
+                  style={{ width: '100%', height: '70vh', border: 'none' }}
+                />
+              ) : previewContent !== null ? (
+                <pre style={{
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  fontSize: 'var(--font-size-sm)',
+                  fontFamily: 'var(--font-family-mono, monospace)',
+                  maxHeight: '70vh',
+                  overflow: 'auto',
+                  margin: 0
+                }}>
+                  {previewContent}
+                </pre>
+              ) : (
+                <iframe
+                  src={fileUrl}
+                  title={previewFile.original_name}
+                  style={{ width: '100%', height: '70vh', border: 'none' }}
+                />
+              )}
+            </div>
+          );
+        })()}
+      </PortalModal>
     </div>
   );
 }
