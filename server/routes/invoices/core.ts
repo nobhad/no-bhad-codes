@@ -765,6 +765,25 @@ router.get(
       const invoiceCredits = await getInvoiceService().getInvoiceCredits(invoiceId);
       const totalCredits = await getInvoiceService().getTotalCredits(invoiceId);
 
+      // Project-level context: total and previously paid (for payment schedule invoices)
+      let projectTotal: number | undefined;
+      let previouslyPaid: number | undefined;
+      if (invoice.projectId) {
+        const projectInvoices = await getInvoiceService().getProjectInvoices(invoice.projectId);
+        const activeInvoices = projectInvoices.filter(
+          (inv) => inv.status !== 'cancelled' && inv.status !== 'draft'
+        );
+        if (activeInvoices.length > 1) {
+          projectTotal = activeInvoices.reduce((sum, inv) => sum + (inv.amountTotal ?? 0), 0);
+          // Previously paid = paid amounts on OTHER invoices (not this one)
+          previouslyPaid = activeInvoices
+            .filter((inv) => inv.id !== invoiceId && inv.status === 'paid')
+            .reduce((sum, inv) => sum + (inv.amountTotal ?? 0), 0);
+          // Only show if there's meaningful context
+          if (previouslyPaid === 0) previouslyPaid = undefined;
+        }
+      }
+
       const formatDate = (dateStr?: string): string => {
         if (!dateStr) {
           return new Date().toLocaleDateString('en-US', {
@@ -803,7 +822,9 @@ router.get(
           depositInvoiceNumber: credit.depositInvoiceNumber || `INV-${credit.depositInvoiceId}`,
           amount: credit.amount
         })),
-        totalCredits
+        totalCredits,
+        projectTotal,
+        previouslyPaid
       };
 
       const pdfBytes = await generateInvoicePdf(pdfData);
