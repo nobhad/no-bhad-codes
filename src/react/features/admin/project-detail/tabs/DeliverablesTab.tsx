@@ -177,7 +177,7 @@ export function DeliverablesTab({
         <div className="data-table-header">
           <h3><span className="title-full">Deliverables</span></h3>
           <div className="data-table-actions">
-            <IconButton action="add" onClick={() => setShowAddForm(true)} title="Add Milestone" />
+            <IconButton action="add-milestone" onClick={() => setShowAddForm(true)} />
           </div>
         </div>
 

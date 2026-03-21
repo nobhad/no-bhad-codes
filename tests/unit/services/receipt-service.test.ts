@@ -107,7 +107,7 @@ import type { ReceiptPdfData } from '../../../server/services/receipt-service';
 
 const mockReceiptRow = {
   id: 1,
-  receipt_number: 'RCP-2026-0001',
+  receipt_number: 'REC-202601-XX001',
   invoice_id: 10,
   payment_id: 5,
   amount: 1500,
@@ -131,9 +131,10 @@ const mockInvoiceRow = {
 describe('generateReceiptPdf (standalone export)', () => {
   it('generates a PDF and returns Uint8Array', async () => {
     const data: ReceiptPdfData = {
-      receiptNumber: 'RCP-2026-0001',
+      receiptNumber: 'REC-202601-XX001',
       invoiceNumber: 'INV-0010',
-      paymentDate: 'January 15, 2026',
+      datePaid: 'January 15, 2026',
+      dateGenerated: 'January 15, 2026',
       paymentMethod: 'Venmo',
       amount: 1500,
       clientName: 'Alice Smith',
@@ -147,16 +148,22 @@ describe('generateReceiptPdf (standalone export)', () => {
 
   it('handles optional fields like paymentReference and projectName', async () => {
     const data: ReceiptPdfData = {
-      receiptNumber: 'RCP-2026-0002',
+      receiptNumber: 'REC-202601-XX002',
       invoiceNumber: 'INV-0011',
-      paymentDate: 'February 1, 2026',
+      datePaid: 'February 1, 2026',
+      dateGenerated: 'February 1, 2026',
       paymentMethod: 'Zelle',
       paymentReference: 'ref-abc',
+      paymentLabel: 'Payment 1 of 2',
       amount: 250,
       clientName: 'Bob Jones',
       clientEmail: 'bob@example.com',
       clientCompany: 'Jones LLC',
-      projectName: 'Side Project'
+      projectName: 'Side Project',
+      lineItems: [
+        { description: 'Web Development', amount: 500 },
+        { description: 'Deposit Credit', amount: -250 }
+      ]
     };
 
     const result = await generateReceiptPdf(data);
@@ -179,7 +186,7 @@ describe('ReceiptService - getReceiptById', () => {
 
     expect(result).toMatchObject({
       id: 1,
-      receiptNumber: 'RCP-2026-0001',
+      receiptNumber: 'REC-202601-XX001',
       invoiceId: 10,
       amount: 1500,
       clientName: 'Alice Smith'
@@ -203,12 +210,12 @@ describe('ReceiptService - getReceiptByNumber', () => {
   it('returns a receipt for a valid receipt number', async () => {
     mockDb.get.mockResolvedValueOnce(mockReceiptRow);
 
-    const result = await receiptService.getReceiptByNumber('RCP-2026-0001');
+    const result = await receiptService.getReceiptByNumber('REC-202601-XX001');
 
-    expect(result).toMatchObject({ receiptNumber: 'RCP-2026-0001' });
+    expect(result).toMatchObject({ receiptNumber: 'REC-202601-XX001' });
     expect(mockDb.get).toHaveBeenCalledWith(
       expect.stringContaining('WHERE r.receipt_number = ?'),
-      ['RCP-2026-0001']
+      ['REC-202601-XX001']
     );
   });
 
@@ -299,7 +306,7 @@ describe('ReceiptService - getReceiptPdf', () => {
 
     expect(result).toHaveProperty('pdfBytes');
     expect(result).toHaveProperty('filename');
-    expect(result.filename).toBe('RCP-2026-0001.pdf');
+    expect(result.filename).toBe('REC-202601-XX001.pdf');
     expect(result.pdfBytes).toBeInstanceOf(Uint8Array);
   });
 
@@ -358,10 +365,10 @@ describe('ReceiptService - createReceipt', () => {
       paymentDate: '2026-01-15'
     });
 
-    expect(result).toMatchObject({ receiptNumber: 'RCP-2026-0001' });
+    expect(result).toMatchObject({ receiptNumber: 'REC-202601-XX001' });
     expect(mockDb.run).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO receipts'),
-      expect.arrayContaining(['RCP-2026-0001', 10, 5, 1500])
+      expect.arrayContaining(['REC-202601-XX001', 10, 5, 1500])
     );
   });
 
@@ -369,17 +376,17 @@ describe('ReceiptService - createReceipt', () => {
     // Invoice lookup
     mockDb.get.mockResolvedValueOnce(mockInvoiceRow);
     // Last receipt number returns existing
-    mockDb.get.mockResolvedValueOnce({ receipt_number: 'RCP-2026-0003' });
+    mockDb.get.mockResolvedValueOnce({ receipt_number: 'REC-202601-XX003' });
     // Insert receipt
     mockDb.run.mockResolvedValueOnce({ lastID: 2 });
     // getReceiptById
-    mockDb.get.mockResolvedValueOnce({ ...mockReceiptRow, receipt_number: 'RCP-2026-0004' });
+    mockDb.get.mockResolvedValueOnce({ ...mockReceiptRow, receipt_number: 'REC-202601-XX004' });
 
     const result = await receiptService.createReceipt(10, null, 500, { paymentMethod: 'Zelle' });
 
-    expect(result.receiptNumber).toBe('RCP-2026-0004');
+    expect(result.receiptNumber).toBe('REC-202601-XX004');
     const insertArgs = mockDb.run.mock.calls[0][1] as unknown[];
-    expect(insertArgs[0]).toBe('RCP-2026-0004');
+    expect(insertArgs[0]).toBe('REC-202601-XX004');
   });
 
   it('creates a receipt with a project and saves PDF file', async () => {

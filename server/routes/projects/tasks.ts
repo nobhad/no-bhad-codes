@@ -196,6 +196,29 @@ router.post(
   })
 );
 
+// Recalculate task due dates from milestone timeline
+router.post(
+  '/:id/tasks/recalculate-dates',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['projects']),
+  asyncHandler(async (req: express.Request, res: Response) => {
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const exists = await projectService.projectExists(projectId);
+    if (!exists) {
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
+    }
+
+    const overwriteExisting = req.body.overwriteExisting === true;
+    const result = await projectService.recalculateTaskDueDates(projectId, { overwriteExisting });
+    sendSuccess(res, result, `Updated ${result.updatedCount} task due dates`);
+  })
+);
+
 // ===================================
 // TASK DEPENDENCIES ENDPOINTS
 // ===================================

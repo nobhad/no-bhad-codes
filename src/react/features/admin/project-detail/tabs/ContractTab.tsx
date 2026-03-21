@@ -24,6 +24,7 @@ interface ContractTabProps {
   project: Project;
   files: ProjectFile[];
   onDownloadFile?: (file: ProjectFile) => void;
+  onUpdateProject?: (updates: Partial<Project>) => Promise<boolean>;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
@@ -55,6 +56,7 @@ export function ContractTab({
   project,
   files,
   onDownloadFile,
+  onUpdateProject,
   showNotification
 }: ContractTabProps) {
   // Filter for contract-related files
@@ -102,6 +104,16 @@ export function ContractTab({
     }
   };
 
+  const handleClearSignedDate = useCallback(async () => {
+    if (!onUpdateProject) return;
+    const success = await onUpdateProject({ contract_signed_date: '' });
+    if (success) {
+      showNotification?.('Contract status reset', 'success');
+    } else {
+      showNotification?.('Failed to update contract status', 'error');
+    }
+  }, [onUpdateProject, showNotification]);
+
   const handleDownloadContract = () => {
     downloadFromUrl(buildEndpoint.contractPdf(project.id), `contract-${project.project_name || project.id}.pdf`).catch(() => {
       showNotification?.('Failed to download contract', 'error');
@@ -147,11 +159,12 @@ export function ContractTab({
           {/* Actions */}
           <div className="detail-actions">
             {!isSigned && (
-              <>
-                <IconButton action="send" onClick={handleSendForSignature} title="Send for Signature" />
-                <IconButton action="generate" onClick={handleGenerateContract} title="Generate Contract" />
-              </>
+              <IconButton action="send" onClick={handleSendForSignature} title="Send for Signature" />
             )}
+            {isSigned && onUpdateProject && (
+              <IconButton action="restore" onClick={handleClearSignedDate} title="Reset signed status" />
+            )}
+            <IconButton action="generate" onClick={handleGenerateContract} title="Generate Contract" />
             <IconButton action="download" onClick={handleDownloadContract} title="Download PDF" />
           </div>
         </div>

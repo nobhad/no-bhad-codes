@@ -34,6 +34,164 @@ import {
 } from './types.js';
 
 // ============================================
+// TASK DUE DATE CALCULATION
+// ============================================
+
+/**
+ * Calculate a due date for a task based on its milestone timeline.
+ *
+ * Uses the milestone's due_date and the previous milestone's due_date (or project start_date)
+ * to distribute the new task evenly among existing tasks in the milestone.
+ */
+async function calculateDueDateForTask(
+  projectId: number,
+  milestoneId: number
+): Promise<string | null> {
+  const db = getDatabase();
+
+  // Get milestone due_date and project start_date
+  const milestone = await db.get(
+    `SELECT m.due_date, p.start_date
+     FROM milestones m
+     JOIN projects p ON m.project_id = p.id
+     WHERE m.id = ? AND m.project_id = ?`,
+    [milestoneId, projectId]
+  ) as { due_date: string | null; start_date: string | null } | undefined;
+
+  if (!milestone?.due_date) return null;
+
+  // Get the previous milestone's due_date as the start boundary
+  const prevMilestone = await db.get(
+    `SELECT due_date FROM milestones
+     WHERE project_id = ? AND due_date < ? AND id != ?
+     ORDER BY due_date DESC LIMIT 1`,
+    [projectId, milestone.due_date, milestoneId]
+  ) as { due_date: string } | undefined;
+
+  const startDateStr = prevMilestone?.due_date || milestone.start_date;
+  const start = startDateStr ? new Date(startDateStr) : new Date();
+  start.setHours(0, 0, 0, 0);
+
+  const end = new Date(milestone.due_date);
+  end.setHours(0, 0, 0, 0);
+
+  // Count existing tasks in this milestone (new task will be +1)
+  const countRow = await db.get(
+    'SELECT COUNT(*) as count FROM project_tasks WHERE milestone_id = ? AND deleted_at IS NULL',
+    [milestoneId]
+  ) as { count: number };
+  const totalTasks = (countRow?.count || 0) + 1; // +1 for the new task being created
+
+  // Position the new task at the end (last slot)
+  const daysUntilMilestone = Math.max(
+    1,
+    Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+  );
+
+  const interval = daysUntilMilestone / totalTasks;
+  const daysOffset = Math.floor(interval * totalTasks);
+  const taskDueDate = new Date(start);
+  taskDueDate.setDate(taskDueDate.getDate() + daysOffset);
+
+  return taskDueDate.toISOString().split('T')[0];
+}
+
+/**
+ * Recalculate due dates for all tasks in a project that belong to milestones.
+ *
+ * Distributes task due dates evenly between the milestone start boundary
+ * (previous milestone due_date or project start_date) and the milestone due_date.
+ * Only updates tasks that currently have no due_date set.
+ */
+export async function recalculateTaskDueDates(
+  projectId: number,
+  options: { overwriteExisting?: boolean } = {}
+): Promise<{ updatedCount: number }> {
+  const db = getDatabase();
+  let updatedCount = 0;
+
+  // Get all milestones for this project, ordered by due_date
+  const projectMilestones = await db.all(
+    `SELECT m.id, m.due_date, p.start_date
+     FROM milestones m
+     JOIN projects p ON m.project_id = p.id
+     WHERE m.project_id = ? AND m.due_date IS NOT NULL
+     ORDER BY m.due_date ASC`,
+    [projectId]
+  ) as Array<{ id: number; due_date: string; start_date: string | null }>;
+
+  let previousMilestoneDueDate: string | null = null;
+
+  for (const milestone of projectMilestones) {
+    // Determine start boundary for this milestone's tasks
+    const startDateStr = previousMilestoneDueDate || milestone.start_date;
+    const start = startDateStr ? new Date(startDateStr) : new Date();
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(milestone.due_date);
+    end.setHours(0, 0, 0, 0);
+
+    const daysUntilMilestone = Math.max(
+      1,
+      Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+    );
+
+    // Get tasks for this milestone
+    const dueDateFilter = options.overwriteExisting ? '' : ' AND t.due_date IS NULL';
+    const milestoneTasks = await db.all(
+      `SELECT t.id FROM project_tasks t
+       WHERE t.milestone_id = ? AND t.deleted_at IS NULL${dueDateFilter}
+       ORDER BY t.sort_order ASC, t.created_at ASC`,
+      [milestone.id]
+    ) as Array<{ id: number }>;
+
+    if (milestoneTasks.length === 0) {
+      previousMilestoneDueDate = milestone.due_date;
+      continue;
+    }
+
+    // Count ALL tasks in milestone (for even distribution regardless of filter)
+    const totalRow = await db.get(
+      'SELECT COUNT(*) as count FROM project_tasks WHERE milestone_id = ? AND deleted_at IS NULL',
+      [milestone.id]
+    ) as { count: number };
+    const totalTaskCount = totalRow?.count || milestoneTasks.length;
+
+    const interval = daysUntilMilestone / totalTaskCount;
+
+    // Get all tasks with their sort position to calculate correct offset
+    const allTasks = await db.all(
+      `SELECT id FROM project_tasks
+       WHERE milestone_id = ? AND deleted_at IS NULL
+       ORDER BY sort_order ASC, created_at ASC`,
+      [milestone.id]
+    ) as Array<{ id: number }>;
+
+    const taskIdsToUpdate = new Set(milestoneTasks.map(t => t.id));
+
+    for (let i = 0; i < allTasks.length; i++) {
+      if (!taskIdsToUpdate.has(allTasks[i].id)) continue;
+
+      const daysOffset = Math.floor(interval * (i + 1));
+      const taskDueDate = new Date(start);
+      taskDueDate.setDate(taskDueDate.getDate() + daysOffset);
+      const dueDateStr = taskDueDate.toISOString().split('T')[0];
+
+      await db.run(
+        'UPDATE project_tasks SET due_date = ?, updated_at = datetime(\'now\') WHERE id = ?',
+        [dueDateStr, allTasks[i].id]
+      );
+      updatedCount++;
+    }
+
+    previousMilestoneDueDate = milestone.due_date;
+  }
+
+  logger.info(`[Tasks] Recalculated due dates for ${updatedCount} tasks in project ${projectId}`);
+  return { updatedCount };
+}
+
+// ============================================
 // TASK CRUD
 // ============================================
 
@@ -51,6 +209,12 @@ export async function createTask(projectId: number, data: TaskCreateData): Promi
 
   const assignedToUserId = await userService.getUserIdByEmail(data.assignedTo);
 
+  // Auto-calculate due date from milestone timeline if not explicitly provided
+  let dueDate = data.dueDate || null;
+  if (!dueDate && data.milestoneId) {
+    dueDate = await calculateDueDateForTask(projectId, data.milestoneId);
+  }
+
   const result = await db.run(
     `INSERT INTO project_tasks (
       project_id, milestone_id, title, description, status, priority,
@@ -64,7 +228,7 @@ export async function createTask(projectId: number, data: TaskCreateData): Promi
       data.status || 'pending',
       data.priority || 'medium',
       assignedToUserId,
-      data.dueDate || null,
+      dueDate,
       data.estimatedHours || null,
       sortOrder,
       data.parentTaskId || null

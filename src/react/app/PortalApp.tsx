@@ -199,6 +199,12 @@ function GlobalKeyboardShortcuts() {
 // ROOT COMPONENT
 // ============================================
 
+// Search context — allows header trigger to open command palette
+const SearchContext = React.createContext<(() => void) | null>(null);
+export function useOpenSearch() {
+  return React.useContext(SearchContext);
+}
+
 function PortalAppInner() {
   const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette();
   const { open: shortcutsOpen, setOpen: setShortcutsOpen } = useKeyboardShortcuts();
@@ -210,7 +216,9 @@ function PortalAppInner() {
         <GlobalKeyboardShortcuts />
         <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
         <KeyboardShortcutsOverlay open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
-        <PortalRoutes />
+        <SearchContext.Provider value={() => setPaletteOpen(true)}>
+          <PortalRoutes />
+        </SearchContext.Provider>
       </SubtabProvider>
     </AuthInitializer>
   );

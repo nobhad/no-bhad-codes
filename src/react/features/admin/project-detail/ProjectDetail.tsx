@@ -376,6 +376,7 @@ export function ProjectDetail({
         <ContractTab
           project={project}
           files={files}
+          onUpdateProject={updateProject}
           showNotification={showNotification}
         />
       </TabPanel>

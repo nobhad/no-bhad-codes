@@ -345,7 +345,8 @@ describe('PDF Generation', () => {
       const receiptData = {
         receiptNumber: 'REC-2026-001',
         invoiceNumber: 'INV-2026-001',
-        paymentDate: '2026-02-12',
+        datePaid: 'February 12, 2026',
+        dateGenerated: 'February 12, 2026',
         paymentMethod: 'Credit Card',
         amount: 1500,
         clientName: 'John Doe',
@@ -366,7 +367,8 @@ describe('PDF Generation', () => {
       const receiptData = {
         receiptNumber: 'REC-2026-002',
         invoiceNumber: 'INV-2026-002',
-        paymentDate: '2026-02-12',
+        datePaid: 'February 12, 2026',
+        dateGenerated: 'February 12, 2026',
         paymentMethod: 'Bank Transfer',
         paymentReference: 'TXN-123456789',
         amount: 2500,
@@ -385,7 +387,8 @@ describe('PDF Generation', () => {
       const receiptData = {
         receiptNumber: 'REC-2026-003',
         invoiceNumber: 'INV-2026-003',
-        paymentDate: '2026-02-12',
+        datePaid: 'February 12, 2026',
+        dateGenerated: 'February 12, 2026',
         paymentMethod: 'Zelle',
         amount: 3000,
         clientName: 'Bob Wilson',
@@ -416,7 +419,8 @@ describe('PDF Generation', () => {
         const receiptData = {
           receiptNumber: `REC-${method.replace(/\s/g, '')}`,
           invoiceNumber: 'INV-TEST',
-          paymentDate: '2026-02-12',
+          datePaid: 'February 12, 2026',
+          dateGenerated: 'February 12, 2026',
           paymentMethod: method,
           amount: 100,
           clientName: 'Test Client',
@@ -434,7 +438,8 @@ describe('PDF Generation', () => {
       const receiptData = {
         receiptNumber: 'REC-2026-004',
         invoiceNumber: 'INV-2026-004',
-        paymentDate: '2026-02-12',
+        datePaid: 'February 12, 2026',
+        dateGenerated: 'February 12, 2026',
         paymentMethod: 'Credit Card',
         amount: 12345.67,
         clientName: 'Currency Client',
