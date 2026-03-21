@@ -60,7 +60,7 @@ export function TablePagination({
                   <ChevronDown className="dropdown-caret--custom" />
                 </button>
                 <ul className="custom-dropdown-menu">
-                  {pageSizeOptions.map((size) => (
+                  {pageSizeOptions.filter((size) => size !== pageSize).map((size) => (
                     <li
                       key={size}
                       className="custom-dropdown-item"

@@ -1,6 +1,6 @@
 # UX Guidelines
 
-**Last Updated:** March 17, 2026
+**Last Updated:** March 21, 2026
 
 User experience rules and patterns for the portal. These are mandatory and must be followed in all implementations. For CSS implementation details, see [Portal Design](./PORTAL_DESIGN.md). For component API reference, see [Component Library](./COMPONENT_LIBRARY.md).
 
@@ -185,18 +185,32 @@ Every panel follows the same layout:
 
 ## Dropdowns
 
-### Border Behavior
+### Seamless Border Behavior
+
+The trigger and dropdown content must look like ONE continuous bordered box when open. No visible gap or double border at the join edge.
 
 - **Default (closed)**: Border color matches background (`--color-bg-primary`) -- visually borderless
 - **Hover**: Border becomes visible (`--color-border-primary`)
-- **Open/Active**: Border visible, seamless join with dropdown content
+- **Open/Active**: Full border around combined trigger+content shape
+- **Opens downward**: Trigger hides bottom border, content hides top border (join is seamless)
+- **Opens upward**: Trigger hides top border, content hides bottom border (join is seamless)
+- **CSS implementation**: Uses `body:has(.portal-dropdown-content[data-side="top"])` to detect upward opening and flip which trigger border is hidden. Content uses `[data-side]` attribute from Radix.
+- **Inside tables/panels**: Use thin `1px` border (`--border-width-px`), not the default thicker portal border
 
-### Rules
+### Selection Rules
+
+- **No double representation**: The currently selected value must NEVER appear both in the trigger AND in the dropdown list. Filter it out of the list.
+- **Default text**: When no selection is made, show a descriptive placeholder (e.g., "Select type", "Select status") -- never show "None" as the default unless "None" is a meaningful choice the user can toggle back to.
+- **"None" option**: Only show a "None" item in the list when a selection exists and the user needs a way to clear it.
+
+### General Rules
 
 - **No shadows** on any portal dropdown -- flat design
 - Dropdown content width matches trigger width (seamless connection)
-- Caret rotates on open
+- Caret rotates on open (use `.dropdown-caret` class)
 - Content aligns flush with trigger (no gap)
+- All selection-style triggers must use `.dropdown-trigger` CSS class
+- All selection-style triggers must include a `ChevronDown` caret icon
 
 ---
 
@@ -382,6 +396,42 @@ Only for **destructive or irreversible actions**:
 - Client portal pages do not have subtabs
 - Subtabs rendered by `PortalLayout.tsx` via `<PortalSubtabs>`
 - Route components with internal tabs (Settings, Detail pages) use `<TabList>` inside their `.subsection`
+
+### View All Links
+
+When an overview/summary section links to a full detail tab, use the established "View All" pattern:
+
+- **Class**: `panel-action` on a `<button>` element
+- **Icon**: `ArrowRight` with `className="panel-icon"` after the text
+- **Placement**: Right side of `data-table-header` or `panel-header-row`, inside `data-table-actions`
+- **Text**: "View All" (always these exact words)
+
+```tsx
+<button className="panel-action" onClick={onNavigateToTab}>
+  View All <ArrowRight className="panel-icon" />
+</button>
+```
+
+Do NOT use `btn-secondary`, `btn-sm`, `table-link`, or any other button class for View All links. The `panel-action` class provides the correct subtle text-link style with hover accent color.
+
+**Used in**: OverviewDashboard (Active Projects), ClientDetail OverviewTab (Contacts), ProjectDetail OverviewTab (Milestones)
+
+### Milestone & Task Status Icons
+
+Consistent icon pattern across Overview and Deliverables views:
+
+| Element | Not Started | In Progress | Completed |
+|---------|-------------|-------------|-----------|
+| **Milestone header** | `Box` (gray) | `Clock` (gray) | `CheckCircle` (green) |
+| **Task (Overview tab)** | `Clock` (gray) | — | `CheckCircle` (green) |
+| **Task (Deliverables tab)** | `Checkbox` (unchecked) | — | `Checkbox` (checked) |
+
+- Gray color: `var(--color-text-tertiary)`
+- Green color: `var(--color-success)`
+- Milestone state is derived from task completion: 0 done = Not Started, some done = In Progress, all done = Completed
+- Completed milestones load collapsed, show completion date in header
+- Overview tab: read-only (no editing), links to Deliverables via "View All"
+- Deliverables tab: checkboxes toggle task completion status
 
 ---
 
