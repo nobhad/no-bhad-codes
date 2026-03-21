@@ -20,6 +20,7 @@ const TYPED_FONT_SIZE = 40;
 const TYPED_CANVAS_FONT = `${TYPED_FONT_SIZE}px ${SIGNATURE_FONT_FAMILY}`;
 const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 const ACCEPTED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+const INK_COLOR_FALLBACK = '#23324a';
 
 // ============================================
 // TYPES
@@ -50,7 +51,7 @@ function renderTypedSignature(text: string): string {
 
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
   ctx.fillStyle = getComputedStyle(document.documentElement)
-    .getPropertyValue('--app-color-text-primary').trim() || '#23324a';
+    .getPropertyValue('--app-color-text-primary').trim() || INK_COLOR_FALLBACK;
   ctx.font = TYPED_CANVAS_FONT;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -61,7 +62,7 @@ function renderTypedSignature(text: string): string {
 /** Get the ink color from CSS variables */
 function getInkColor(): string {
   return getComputedStyle(document.documentElement)
-    .getPropertyValue('--app-color-text-primary').trim() || '#23324a';
+    .getPropertyValue('--app-color-text-primary').trim() || INK_COLOR_FALLBACK;
 }
 
 // ============================================
