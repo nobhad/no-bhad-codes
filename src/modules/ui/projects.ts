@@ -566,22 +566,10 @@ export class ProjectsModule extends BaseModule {
     // Update case study sections
     this.renderCaseStudySections(project);
 
-    // Update screenshots
+    // Clear screenshots section (temporarily removed pending layout redesign)
     const infoEl = this.projectDetailSection.querySelector('#project-info');
     if (infoEl) {
-      if (project.screenshots && project.screenshots.length > 0) {
-        infoEl.innerHTML = project.screenshots
-          .map(
-            (screenshot, index) => `
-            <figure>
-              <img src="${screenshot}" alt="${project.title} screenshot ${index + 1}" />
-            </figure>
-          `
-          )
-          .join('');
-      } else {
-        infoEl.innerHTML = '';
-      }
+      infoEl.innerHTML = '';
     }
 
     // Update links

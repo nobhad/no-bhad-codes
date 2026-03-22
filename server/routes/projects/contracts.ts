@@ -241,6 +241,7 @@ router.get(
       thickness: PDF_SPACING.underlineThickness,
       color: PDF_COLORS.black
     });
+    y -= PDF_SPACING.sectionSpacing;
 
     const fallbackContent = [
       'CONTRACT AGREEMENT',

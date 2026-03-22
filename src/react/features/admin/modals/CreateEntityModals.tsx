@@ -43,7 +43,7 @@ interface BaseModalProps {
 // SHARED HELPERS
 // ============================================
 
-function ModalFooter({ loading, submitLabel, onCancel }: { loading: boolean; submitLabel: string; onCancel: () => void }) {
+function _ModalFooter({ loading, submitLabel, onCancel }: { loading: boolean; submitLabel: string; onCancel: () => void }) {
   return (
     <>
       <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={loading}>
@@ -180,7 +180,7 @@ export interface CreateTaskModalProps extends BaseModalProps {
 }
 
 export function CreateTaskModal({ open, onOpenChange, onSubmit, loading = false, projectOptions }: CreateTaskModalProps) {
-  const { form, errors, handleText, handleDropdown, validate, reset } = useFormState({
+  const { form, errors: _taskErrors, handleText, handleDropdown, validate, reset } = useFormState({
     ...INITIAL_TASK,
     projectId: ''
   });
@@ -408,7 +408,7 @@ export interface CreateDocumentRequestModalProps extends BaseModalProps {
 }
 
 export function CreateDocumentRequestModal({ open, onOpenChange, onSubmit, loading = false, clientOptions, projectOptions }: CreateDocumentRequestModalProps) {
-  const { form, errors, handleText, handleDropdown, validate, reset } = useFormState(INITIAL_DOC_REQUEST);
+  const { form, errors: _docErrors, handleText, handleDropdown, validate, reset } = useFormState(INITIAL_DOC_REQUEST);
 
   const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -673,5 +673,3 @@ export function CreateProposalModal({ open, onOpenChange, onSubmit, loading = fa
   );
 }
 
-// Suppress unused import warning — ModalFooter kept for future use
-void ModalFooter;

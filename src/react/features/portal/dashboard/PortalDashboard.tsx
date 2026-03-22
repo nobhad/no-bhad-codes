@@ -235,7 +235,7 @@ export function PortalDashboard({
   const recentActivity = data?.recentActivity ?? [];
 
   // Submit Request modal
-  const [showRequestForm, setShowRequestForm] = useState(false);
+  const [_showRequestForm, _setShowRequestForm] = useState(false);
 
   // Get the active project info for the snapshot
   const activeProject: ProjectInfo | null = React.useMemo(() => {
@@ -266,10 +266,6 @@ export function PortalDashboard({
       pendingDocRequests: stats.pendingDocRequests
     };
   }, [stats]);
-
-  void showNotification;
-  void showRequestForm;
-  void setShowRequestForm;
 
   const handleStatClick = useCallback(
     (tab: string) => {
