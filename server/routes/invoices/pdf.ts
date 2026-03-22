@@ -408,34 +408,46 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
 
   const fmt = (n: number) => `$${n.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
 
+  // Consistent spacing constants for totals section
+  const TOTALS_ROW_GAP = 16;   // between text rows
+  const TOTALS_LINE_PAD = 10;  // padding above/below divider lines
+  const lineStartX = totalsX - 14;
+
+  /** Draw a right-aligned divider line with consistent padding */
+  const drawTotalsDivider = () => {
+    ctx.y -= TOTALS_LINE_PAD;
+    page().drawLine({
+      start: { x: lineStartX, y: ctx.y },
+      end: { x: rightMargin, y: ctx.y },
+      thickness: PDF_SPACING.underlineThickness,
+      color: PDF_COLORS.divider
+    });
+    ctx.y -= TOTALS_LINE_PAD;
+  };
+
   // Divider above subtotal
-  page().drawLine({
-    start: { x: leftMargin, y: ctx.y + 18 },
-    end: { x: rightMargin, y: ctx.y + 18 },
-    thickness: PDF_SPACING.underlineThickness,
-    color: PDF_COLORS.divider
-  });
+  drawTotalsDivider();
 
   // SUBTOTAL
   drawTotalsRow('SUBTOTAL:', fmt(data.subtotal), helveticaBold, helvetica);
 
   if (data.discount && data.discount > 0) {
-    ctx.y -= 16;
+    ctx.y -= TOTALS_ROW_GAP;
     drawTotalsRow('DISCOUNT:', `-${fmt(data.discount)}`, helveticaBold, helvetica);
   }
 
   if (data.tax && data.tax > 0) {
-    ctx.y -= 16;
+    ctx.y -= TOTALS_ROW_GAP;
     drawTotalsRow('TAX:', fmt(data.tax), helveticaBold, helvetica);
   }
 
   if (data.credits && data.credits.length > 0) {
-    ctx.y -= 24;
+    ctx.y -= TOTALS_ROW_GAP * 1.5;
     page().drawText('DEPOSIT CREDITS APPLIED:', {
       x: totalsX - 40, y: ctx.y,
       size: PDF_TYPOGRAPHY.bodySize, font: helveticaBold, color: PDF_COLORS.black
     });
-    ctx.y -= 14;
+    ctx.y -= TOTALS_ROW_GAP;
     for (const credit of data.credits) {
       page().drawText(`Deposit ${credit.depositInvoiceNumber}`, {
         x: totalsX, y: ctx.y,
@@ -444,7 +456,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
       const creditText = `-${fmt(credit.amount)}`;
       const cw = helvetica.widthOfTextAtSize(creditText, PDF_TYPOGRAPHY.bodySize);
       page().drawText(creditText, { x: rightMargin - cw, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
-      ctx.y -= 12;
+      ctx.y -= TOTALS_ROW_GAP;
     }
   }
 
@@ -453,42 +465,27 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   const hasPreviouslyPaid = data.previouslyPaid && data.previouslyPaid > 0;
 
   if (hasProjectContext || hasPreviouslyPaid) {
-    ctx.y -= 20;
-    page().drawLine({
-      start: { x: totalsX - 14, y: ctx.y + 14 },
-      end: { x: rightMargin, y: ctx.y + 14 },
-      thickness: PDF_SPACING.underlineThickness,
-      color: PDF_COLORS.divider
-    });
+    drawTotalsDivider();
 
     if (hasProjectContext) {
       drawTotalsRow('PROJECT TOTAL:', fmt(data.projectTotal!), helveticaBold, helvetica);
-      ctx.y -= 14;
+      ctx.y -= TOTALS_ROW_GAP;
     }
 
     if (hasPreviouslyPaid) {
       drawTotalsRow('PAID TO DATE:', `-${fmt(data.previouslyPaid!)}`, helveticaBold, helvetica);
-      ctx.y -= 14;
+      ctx.y -= TOTALS_ROW_GAP;
 
       // Remaining balance on the project after this invoice is paid
       const remainingAfterThis = (data.projectTotal ?? 0) - (data.previouslyPaid ?? 0) - data.total;
       if (remainingAfterThis > 0.005) {
         drawTotalsRow('REMAINING BALANCE:', fmt(remainingAfterThis), helveticaBold, helvetica);
-        ctx.y -= 14;
       }
     }
-
-    ctx.y += 14; // align next divider correctly
   }
 
   // Divider above AMOUNT DUE
-  ctx.y -= 18;
-  page().drawLine({
-    start: { x: totalsX - 14, y: ctx.y + 18 },
-    end: { x: rightMargin, y: ctx.y + 18 },
-    thickness: PDF_SPACING.underlineThickness,
-    color: PDF_COLORS.divider
-  });
+  drawTotalsDivider();
 
   const amountDue = data.totalCredits ? data.total - data.totalCredits : data.total;
   const totalText = fmt(amountDue);
@@ -503,27 +500,26 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black
   });
 
-  ctx.y -= 50;
+  ctx.y -= 30;
 
-  // === PAYMENT INSTRUCTIONS (boxed) ===
+  // === PAYMENT INSTRUCTIONS (boxed, heading inside) ===
   ensureSpace(ctx, 100, drawContinuationHeader);
 
   const BOX_PADDING = 10;
 
-  // Label sits ABOVE the box border — no overlap
-  const paymentHeading = 'PAYMENT INSTRUCTIONS';
-  page().drawText(paymentHeading, {
-    x: leftMargin,
+  // Box starts here — heading is inside the box
+  const boxTop = ctx.y + 2;
+  ctx.y -= BOX_PADDING;
+
+  // Heading inside box
+  page().drawText('PAYMENT INSTRUCTIONS', {
+    x: leftMargin + BOX_PADDING,
     y: ctx.y,
     size: PDF_TYPOGRAPHY.sectionHeadingSize,
     font: helveticaBold,
     color: PDF_COLORS.black
   });
-  ctx.y -= (PDF_TYPOGRAPHY.sectionHeadingSize + 6); // label height + gap before box top
-
-  // Box starts here — below the label
-  const boxTop = ctx.y + 2;
-  ctx.y -= BOX_PADDING; // inner top padding
+  ctx.y -= (PDF_TYPOGRAPHY.sectionHeadingSize + 4);
 
   const paymentInstructions = [
     '• Payment due within 30 days of invoice date',

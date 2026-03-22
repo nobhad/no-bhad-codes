@@ -11,39 +11,58 @@ import * as React from 'react';
 import { useCallback } from 'react';
 import { FileCheck, ArrowRight, Check, Clock, Loader2 } from 'lucide-react';
 import { usePortalData } from '../../../hooks/usePortalFetch';
+import { useFadeIn } from '../../../hooks/useGsap';
+import { LoadingState, EmptyState, ErrorState } from '../../../components/portal/EmptyState';
+import { StatusBadge } from '../../../components/portal/StatusBadge';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 import type { Agreement, AgreementsListProps } from './types';
+import type { StatusVariant } from '../../../components/portal/StatusBadge';
+
+// ============================================
+// HELPERS
+// ============================================
+
+const STATUS_VARIANT_MAP: Record<string, StatusVariant> = {
+  completed: 'completed',
+  in_progress: 'active',
+  viewed: 'active',
+  sent: 'pending',
+  draft: 'pending',
+  cancelled: 'cancelled',
+  expired: 'inactive'
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  completed: 'Completed',
+  in_progress: 'In Progress',
+  sent: 'Awaiting Review',
+  viewed: 'In Progress',
+  draft: 'Draft',
+  cancelled: 'Cancelled',
+  expired: 'Expired'
+};
 
 function getStatusIcon(status: string) {
   switch (status) {
   case 'completed':
-    return <Check size={16} style={{ color: 'var(--app-color-success)' }} />;
+    return <Check className="icon-xs" />;
   case 'in_progress':
   case 'viewed':
-    return <Loader2 size={16} style={{ color: 'var(--app-color-primary)' }} />;
+    return <Loader2 className="icon-xs" />;
   default:
-    return <Clock size={16} style={{ color: 'var(--app-color-text-muted)' }} />;
+    return <Clock className="icon-xs" />;
   }
 }
 
-function getStatusLabel(status: string): string {
-  switch (status) {
-  case 'completed': return 'Completed';
-  case 'in_progress': return 'In Progress';
-  case 'sent': return 'Awaiting Review';
-  case 'viewed': return 'In Progress';
-  case 'draft': return 'Draft';
-  case 'cancelled': return 'Cancelled';
-  case 'expired': return 'Expired';
-  default: return status;
-  }
-}
+// ============================================
+// COMPONENT
+// ============================================
 
 export function AgreementsList({
   getAuthToken,
-  showNotification: _showNotification,
   onNavigate
 }: AgreementsListProps) {
+  const containerRef = useFadeIn<HTMLDivElement>();
   const { data, isLoading, error } = usePortalData<{ agreements: Agreement[] }>({
     getAuthToken,
     url: API_ENDPOINTS.AGREEMENTS_MY,
@@ -57,75 +76,72 @@ export function AgreementsList({
   }, [onNavigate]);
 
   if (isLoading) {
-    return (
-      <div className="portal-card" style={{ textAlign: 'center', padding: '2rem' }}>
-        <Loader2 size={24} className="animate-spin" style={{ margin: '0 auto' }} />
-      </div>
-    );
+    return <div ref={containerRef}><LoadingState message="Loading agreements..." /></div>;
   }
 
   if (error) {
-    return (
-      <div className="portal-card">
-        <p className="form-error-message">{error}</p>
-      </div>
-    );
+    return <div ref={containerRef}><ErrorState message={error} /></div>;
   }
 
   if (agreements.length === 0) {
     return (
-      <div className="portal-card" style={{ textAlign: 'center', padding: '2rem' }}>
-        <FileCheck size={32} style={{ color: 'var(--app-color-text-muted)', margin: '0 auto' }} />
-        <p className="text-muted" style={{ marginTop: '0.5rem' }}>No agreements yet</p>
+      <div ref={containerRef}>
+        <EmptyState
+          icon={<FileCheck className="icon-lg" />}
+          message="No agreements yet"
+        />
       </div>
     );
   }
 
   return (
-    <div className="portal-cards-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+    <div ref={containerRef} className="card-list">
       {agreements.map((agreement) => {
         const completedSteps = agreement.steps?.filter((s) => s.status === 'completed').length || 0;
         const totalSteps = agreement.steps?.length || 0;
+        const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
         const isActionable = ['sent', 'viewed', 'in_progress'].includes(agreement.status);
+        const variant = STATUS_VARIANT_MAP[agreement.status] || 'pending';
 
         return (
-          <div key={agreement.id} className="portal-card card-clickable" onClick={() => handleOpen(agreement.id)}>
-            <div className="portal-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0 }}>{agreement.name}</h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div
+            key={agreement.id}
+            className="portal-card clickable"
+            onClick={() => handleOpen(agreement.id)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleOpen(agreement.id); }}
+          >
+            <div className="portal-card-header">
+              <span>{agreement.name}</span>
+              <div className="action-group">
                 {getStatusIcon(agreement.status)}
-                <span className="text-muted" style={{ fontSize: '0.85rem' }}>
-                  {getStatusLabel(agreement.status)}
-                </span>
+                <StatusBadge status={variant} size="sm">
+                  {STATUS_LABELS[agreement.status] || agreement.status}
+                </StatusBadge>
               </div>
             </div>
 
             {totalSteps > 0 && (
-              <div style={{ marginTop: '0.75rem' }}>
-                <div style={{
-                  height: 4,
-                  borderRadius: 2,
-                  backgroundColor: 'var(--app-color-border)',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
-                    height: '100%',
-                    width: `${(completedSteps / totalSteps) * 100}%`,
-                    backgroundColor: 'var(--app-color-success)',
-                    borderRadius: 2,
-                    transition: 'width 0.3s ease'
-                  }} />
+              <div className="portal-card-body">
+                <div className="progress-bar-track">
+                  <div
+                    className="progress-bar-fill"
+                    style={{ width: `${progressPercent}%` }}
+                  />
                 </div>
-                <span className="text-muted" style={{ fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>
+                <span className="text-muted text-sm">
                   {completedSteps} of {totalSteps} steps
                 </span>
               </div>
             )}
 
             {isActionable && (
-              <button className="btn-primary" style={{ marginTop: '0.75rem' }}>
-                Continue <ArrowRight size={14} />
-              </button>
+              <div className="portal-card-body">
+                <button className="btn-primary btn-sm" type="button">
+                  Continue <ArrowRight className="icon-xs" />
+                </button>
+              </div>
             )}
           </div>
         );

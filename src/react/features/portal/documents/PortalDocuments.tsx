@@ -337,8 +337,6 @@ export function PortalDocuments({ getAuthToken, showNotification }: PortalViewPr
     }
   }, [showNotification]);
 
-  void 0; // Contract and proposal views are informational (no PDF preview yet)
-
   const handleViewIntake = useCallback((intake: IntakeFile) => {
     window.open(buildEndpoint.fileView(intake.id), '_blank');
   }, []);

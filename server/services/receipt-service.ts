@@ -180,7 +180,7 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
       font: helvetica,
       color: PDF_COLORS.black
     });
-    y -= 18;
+    y -= 28;
   }
 
   // HR separating detail section from content
@@ -240,15 +240,6 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
         color: PDF_COLORS.black
       });
       y -= 14;
-
-      // Row divider
-      page.drawLine({
-        start: { x: leftMargin, y: y + 4 },
-        end: { x: rightMargin, y: y + 4 },
-        thickness: 0.5,
-        color: PDF_COLORS.divider
-      });
-      y -= 4;
     }
   }
 
