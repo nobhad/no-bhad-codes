@@ -49,7 +49,7 @@ export const ProposalReviewStep = React.memo(({
   if (status === 'accepted') {
     return (
       <div className="agreement-step-content">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--app-color-success)' }}>
+        <div className="layout-row text-success" style={{ gap: 'var(--space-1)' }}>
           <Check size={20} />
           <span>Proposal approved</span>
         </div>
@@ -62,7 +62,7 @@ export const ProposalReviewStep = React.memo(({
       <h3>Review Your Proposal</h3>
 
       {entityData && (
-        <div className="portal-card" style={{ marginBottom: '1rem' }}>
+        <div className="portal-card" style={{ marginBottom: 'var(--space-2)' }}>
           {entityData.project_type != null && entityData.project_type !== '' && (
             <div className="portal-detail-item">
               <span className="label">Project Type</span>
@@ -78,7 +78,7 @@ export const ProposalReviewStep = React.memo(({
           {entityData.final_price != null && (
             <div className="portal-detail-item">
               <span className="label">Total</span>
-              <span className="text-primary" style={{ fontWeight: 600 }}>
+              <span className="text-primary font-semibold">
                 {formatCurrency(entityData.final_price)}
               </span>
             </div>
@@ -90,7 +90,7 @@ export const ProposalReviewStep = React.memo(({
         className="btn-primary"
         onClick={handleApprove}
         disabled={isSubmitting}
-        style={{ marginTop: '0.5rem' }}
+        style={{ marginTop: 'var(--space-1)' }}
       >
         {isSubmitting ? (
           <><Loader2 size={16} className="animate-spin" /> Approving...</>

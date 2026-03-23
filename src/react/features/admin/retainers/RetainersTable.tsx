@@ -51,6 +51,9 @@ const STATUS_COLORS: Record<string, string> = {
 
 const UTILIZATION_THRESHOLD_WARNING = 0.6;
 const UTILIZATION_THRESHOLD_DANGER = 0.8;
+const UTILIZATION_BAR_HEIGHT = 6;
+const UTILIZATION_BAR_RADIUS = 3;
+const UTILIZATION_MIN_WIDTH = 120;
 
 function getUtilizationColor(percent: number): string {
   if (percent >= UTILIZATION_THRESHOLD_DANGER) return 'var(--status-danger)';
@@ -96,9 +99,9 @@ export function RetainersTable({
 
   if (isLoading) {
     return (
-      <div className="portal-card" style={{ textAlign: 'center', padding: '3rem' }}>
+      <div className="portal-card text-center" style={{ padding: 'var(--spacing-6)' }}>
         <Loader2 size={24} className="animate-spin" style={{ margin: '0 auto' }} />
-        <p className="text-muted" style={{ marginTop: '0.5rem' }}>Loading retainers...</p>
+        <p className="text-muted" style={{ marginTop: 'var(--space-1)' }}>Loading retainers...</p>
       </div>
     );
   }
@@ -109,11 +112,10 @@ export function RetainersTable({
 
   return (
     <div className="subsection">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+      <div className="data-table-header">
         <h2 style={{ margin: 0 }}>Retainers</h2>
         <button
           className="btn-primary"
-          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           onClick={() => showNotification?.('Create retainer from the project detail page', 'info')}
         >
           <Plus size={16} /> New Retainer
@@ -121,21 +123,21 @@ export function RetainersTable({
       </div>
 
       {retainers.length === 0 ? (
-        <div className="portal-card" style={{ textAlign: 'center', padding: '2rem' }}>
+        <div className="portal-card text-center" style={{ padding: 'var(--space-4)' }}>
           <p className="text-muted">No retainers yet</p>
         </div>
       ) : (
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table className="data-table">
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--app-color-border)', textAlign: 'left' }}>
-                <th style={{ padding: '0.75rem 0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>Client</th>
-                <th style={{ padding: '0.75rem 0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>Project</th>
-                <th style={{ padding: '0.75rem 0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>Type</th>
-                <th style={{ padding: '0.75rem 0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>Monthly</th>
-                <th style={{ padding: '0.75rem 0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>Status</th>
-                <th style={{ padding: '0.75rem 0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>Utilization</th>
-                <th style={{ padding: '0.75rem 0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>Actions</th>
+              <tr>
+                <th>Client</th>
+                <th>Project</th>
+                <th>Type</th>
+                <th>Monthly</th>
+                <th>Status</th>
+                <th>Utilization</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -145,26 +147,25 @@ export function RetainersTable({
                   : 0;
 
                 return (
-                  <tr key={r.id} style={{ borderBottom: '1px solid var(--app-color-border)' }}>
-                    <td style={{ padding: '0.75rem 0.5rem' }}>{r.clientName}</td>
-                    <td style={{ padding: '0.75rem 0.5rem' }}>{r.projectName}</td>
-                    <td style={{ padding: '0.75rem 0.5rem', textTransform: 'capitalize' }}>{r.retainerType.replace('_', ' ')}</td>
-                    <td style={{ padding: '0.75rem 0.5rem', fontWeight: 500 }}>{formatCurrency(r.monthlyAmount)}</td>
-                    <td style={{ padding: '0.75rem 0.5rem' }}>
+                  <tr key={r.id}>
+                    <td>{r.clientName}</td>
+                    <td>{r.projectName}</td>
+                    <td style={{ textTransform: 'capitalize' }}>{r.retainerType.replace('_', ' ')}</td>
+                    <td className="font-medium">{formatCurrency(r.monthlyAmount)}</td>
+                    <td>
                       <span style={{
                         color: STATUS_COLORS[r.status] || 'var(--app-color-text-muted)',
-                        fontWeight: 500,
                         textTransform: 'capitalize'
-                      }}>
+                      }} className="font-medium">
                         {r.status}
                       </span>
                     </td>
-                    <td style={{ padding: '0.75rem 0.5rem', minWidth: 120 }}>
+                    <td style={{ minWidth: UTILIZATION_MIN_WIDTH }}>
                       {r.currentPeriod?.totalAvailable ? (
                         <div>
                           <div style={{
-                            height: 6,
-                            borderRadius: 3,
+                            height: UTILIZATION_BAR_HEIGHT,
+                            borderRadius: UTILIZATION_BAR_RADIUS,
                             backgroundColor: 'var(--app-color-border)',
                             overflow: 'hidden'
                           }}>
@@ -172,10 +173,10 @@ export function RetainersTable({
                               height: '100%',
                               width: `${Math.min(utilPercent * 100, 100)}%`,
                               backgroundColor: getUtilizationColor(utilPercent),
-                              borderRadius: 3
+                              borderRadius: UTILIZATION_BAR_RADIUS
                             }} />
                           </div>
-                          <span className="text-muted" style={{ fontSize: '0.75rem' }}>
+                          <span className="text-muted text-xs">
                             {r.currentPeriod.usedHours}h / {r.currentPeriod.totalAvailable}h
                           </span>
                         </div>
@@ -183,12 +184,11 @@ export function RetainersTable({
                         <span className="text-muted">--</span>
                       )}
                     </td>
-                    <td style={{ padding: '0.75rem 0.5rem' }}>
-                      <div style={{ display: 'flex', gap: '0.25rem' }}>
+                    <td>
+                      <div className="action-group">
                         {r.status === 'active' && (
                           <button
-                            className="btn-secondary"
-                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                            className="btn-secondary btn-sm"
                             onClick={() => handleAction(r.id, 'pause')}
                             disabled={actionLoading === r.id}
                           >
@@ -197,8 +197,7 @@ export function RetainersTable({
                         )}
                         {r.status === 'paused' && (
                           <button
-                            className="btn-secondary"
-                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                            className="btn-secondary btn-sm"
                             onClick={() => handleAction(r.id, 'resume')}
                             disabled={actionLoading === r.id}
                           >
@@ -207,8 +206,7 @@ export function RetainersTable({
                         )}
                         {['active', 'paused'].includes(r.status) && (
                           <button
-                            className="btn-danger"
-                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                            className="btn-danger btn-sm"
                             onClick={() => handleAction(r.id, 'cancel')}
                             disabled={actionLoading === r.id}
                           >

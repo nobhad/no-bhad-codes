@@ -348,7 +348,7 @@ export function SequencesTable({
                   <PortalTableCell>{seq.steps?.length ?? 0}</PortalTableCell>
                   <PortalTableCell>
                     <div className="flex items-center gap-1">
-                      <Users className="icon-xs" style={{ color: 'var(--app-color-text-muted)' }} />
+                      <Users className="icon-xs text-muted" />
                       <span>{seq.enrollmentCount}</span>
                     </div>
                   </PortalTableCell>
@@ -359,10 +359,10 @@ export function SequencesTable({
                       </StatusBadge>
                       <button
                         type="button"
-                        className="btn-secondary flex items-center gap-1"
+                        className="btn-secondary flex items-center gap-1 text-xs"
                         onClick={() => handleToggleActive(seq)}
                         title={seq.is_active ? 'Deactivate' : 'Activate'}
-                        style={{ padding: '2px 8px', fontSize: 'var(--font-size-xs)' }}
+                        style={{ padding: 'var(--space-0-25) var(--space-1)' }}
                       >
                         {seq.is_active ? (
                           <PowerOff className="icon-xs" />
@@ -381,27 +381,27 @@ export function SequencesTable({
                       <div className="flex flex-col gap-1 py-2 px-4" style={{ background: 'var(--app-color-bg-secondary)' }}>
                         <div className="flex items-center gap-2">
                           {expandedId === seq.id ? (
-                            <ChevronUp className="icon-xs" style={{ color: 'var(--app-color-text-muted)' }} />
+                            <ChevronUp className="icon-xs text-muted" />
                           ) : (
-                            <ChevronDown className="icon-xs" style={{ color: 'var(--app-color-text-muted)' }} />
+                            <ChevronDown className="icon-xs text-muted" />
                           )}
                           <span className="text-muted">Details</span>
                         </div>
                         <div className="flex gap-6 ml-5">
                           <div>
-                            <span className="text-muted" style={{ fontSize: 'var(--font-size-xs)' }}>
+                            <span className="text-muted text-xs">
                               Active Enrollments
                             </span>
                             <p>{seq.enrollmentCount}</p>
                           </div>
                           <div>
-                            <span className="text-muted" style={{ fontSize: 'var(--font-size-xs)' }}>
+                            <span className="text-muted text-xs">
                               Completion Rate
                             </span>
                             <p>{Math.round(seq.completionRate * 100)}%</p>
                           </div>
                           <div>
-                            <span className="text-muted" style={{ fontSize: 'var(--font-size-xs)' }}>
+                            <span className="text-muted text-xs">
                               Created
                             </span>
                             <p>{formatDate(seq.created_at)}</p>

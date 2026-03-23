@@ -424,7 +424,7 @@ export function MeetingRequestsTable({
                     </StatusBadge>
                   </PortalTableCell>
                   <PortalTableCell>
-                    <span style={{ fontSize: 'var(--font-size-sm)' }}>
+                    <span className="text-sm">
                       {formatSlots(meeting) || '--'}
                     </span>
                   </PortalTableCell>
@@ -476,7 +476,7 @@ export function MeetingRequestsTable({
                         style={{ background: 'var(--app-color-bg-secondary)' }}
                       >
                         <span className="cell-title flex items-center gap-1.5">
-                          <Check className="icon-xs" style={{ color: 'var(--app-color-success)' }} />
+                          <Check className="icon-xs text-success" />
                           Confirm Meeting
                         </span>
                         <div className="flex gap-3 flex-wrap">
@@ -559,7 +559,7 @@ export function MeetingRequestsTable({
                         style={{ background: 'var(--app-color-bg-secondary)' }}
                       >
                         <span className="cell-title flex items-center gap-1.5">
-                          <X className="icon-xs" style={{ color: 'var(--app-color-danger)' }} />
+                          <X className="icon-xs text-danger" />
                           Decline Meeting
                         </span>
                         <div className="flex flex-col gap-1">
