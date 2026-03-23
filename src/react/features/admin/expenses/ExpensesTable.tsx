@@ -24,7 +24,8 @@ import {
   PortalTableError
 } from '@react/components/portal/PortalTable';
 import { StatusBadge } from '@react/components/portal/StatusBadge';
-import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
+import { ConfirmDialog } from '@react/components/portal/ConfirmDialog';
+import { useDeleteConfirm } from '@react/hooks/useDeleteConfirm';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -354,8 +355,17 @@ export function ExpensesTable({
   const fetchedProjects = useRef(false);
 
   // Delete confirmation
-  const deleteDialog = useConfirmDialog();
-  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const deleteConfirm = useDeleteConfirm<Expense>({
+    onDelete: async (expense) => {
+      const res = await apiDelete(`${EXPENSES_API}/${expense.id}`);
+      if (!res.ok) throw new Error('Failed to delete expense');
+      showToast('Expense deleted', 'success');
+      fetchExpenses();
+      return true;
+    },
+    entityLabel: 'expense',
+    getDescription: (expense) => expense.description
+  });
 
   // Stats
   const stats = useMemo(() => {
@@ -437,24 +447,7 @@ export function ExpensesTable({
     }
   }, [fetchExpenses]);
 
-  // Delete expense
-  const handleDeleteConfirm = useCallback(async () => {
-    if (pendingDeleteId == null) return;
-    try {
-      const res = await apiDelete(`${EXPENSES_API}/${pendingDeleteId}`);
-      if (!res.ok) throw new Error('Failed to delete expense');
-      showToast('Expense deleted', 'success');
-      setPendingDeleteId(null);
-      fetchExpenses();
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Failed to delete expense', 'error');
-    }
-  }, [pendingDeleteId, fetchExpenses]);
-
-  const openDeleteConfirm = useCallback((id: number) => {
-    setPendingDeleteId(id);
-    deleteDialog.open();
-  }, [deleteDialog]);
+  // Delete expense handled by useDeleteConfirm hook
 
   // Filtering and sorting
   const {
@@ -677,7 +670,7 @@ export function ExpensesTable({
                       <div className="action-group">
                         <IconButton
                           action="delete"
-                          onClick={() => openDeleteConfirm(expense.id)}
+                          onClick={() => deleteConfirm.openConfirm(expense)}
                           title="Delete expense"
                         />
                       </div>
@@ -691,17 +684,7 @@ export function ExpensesTable({
       </TableLayout>
 
       {/* Delete Confirmation Dialog */}
-      <ConfirmDialog
-        open={deleteDialog.isOpen}
-        onOpenChange={deleteDialog.setIsOpen}
-        title="Delete Expense"
-        description="Are you sure you want to delete this expense? This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
-        onConfirm={handleDeleteConfirm}
-        variant="danger"
-        loading={deleteDialog.isLoading}
-      />
+      <ConfirmDialog {...deleteConfirm.dialogProps} />
     </>
   );
 }

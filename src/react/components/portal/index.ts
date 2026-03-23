@@ -159,3 +159,15 @@ export {
 } from './EmptyState';
 export { StatusIcon } from './StatusIcon';
 export { DateWithIcon } from './DateWithIcon';
+
+// Payment Card Display
+export {
+  PaymentCardDisplay,
+  getBrandLabel,
+  formatExpiration,
+  BRAND_LABELS,
+  type PaymentCardDisplayProps
+} from './PaymentCardDisplay';
+
+// PDF Preview
+export { PDFPreview, type PDFPreviewProps } from './PDFPreview';

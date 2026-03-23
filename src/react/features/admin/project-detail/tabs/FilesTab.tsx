@@ -16,7 +16,9 @@ import {
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { PortalModal } from '@react/components/portal/PortalModal';
-import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
+import { ConfirmDialog } from '@react/components/portal/ConfirmDialog';
+import { PDFPreview } from '@react/components/portal/PDFPreview';
+import { useDeleteConfirm } from '@react/hooks/useDeleteConfirm';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
@@ -73,12 +75,23 @@ export function FilesTab({
   const [isDragging, setIsDragging] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
-  const [deletingFileId, setDeletingFileId] = useState<number | null>(null);
   const [togglingFileId, setTogglingFileId] = useState<number | null>(null);
   const [previewFile, setPreviewFile] = useState<ProjectFile | null>(null);
   const [previewContent, setPreviewContent] = useState<string | null>(null);
 
-  const deleteDialog = useConfirmDialog();
+  const deleteConfirm = useDeleteConfirm<ProjectFile>({
+    onDelete: async (file) => {
+      const success = await onDeleteFile(file.id);
+      if (success) {
+        showNotification?.(NOTIFICATIONS.file.DELETED, 'success');
+      } else {
+        showNotification?.(NOTIFICATIONS.file.DELETE_FAILED, 'error');
+      }
+      return success;
+    },
+    entityLabel: 'file',
+    getDescription: (file) => file.original_name
+  });
 
   // Handle file selection
   const handleFileSelect = useCallback(
@@ -130,19 +143,6 @@ export function FilesTab({
     },
     [handleFileSelect]
   );
-
-  // Handle delete
-  const handleDelete = useCallback(async () => {
-    if (deletingFileId === null) return;
-
-    const success = await onDeleteFile(deletingFileId);
-    if (success) {
-      showNotification?.(NOTIFICATIONS.file.DELETED, 'success');
-    } else {
-      showNotification?.(NOTIFICATIONS.file.DELETE_FAILED, 'error');
-    }
-    setDeletingFileId(null);
-  }, [deletingFileId, onDeleteFile, showNotification]);
 
   // Handle toggle sharing
   const handleToggleSharing = useCallback(
@@ -409,10 +409,7 @@ export function FilesTab({
                       </button>
                       <button
                         className="icon-btn"
-                        onClick={() => {
-                          setDeletingFileId(file.id);
-                          deleteDialog.open();
-                        }}
+                        onClick={() => deleteConfirm.openConfirm(file)}
                         title="Delete"
                         aria-label="Delete file"
                       >
@@ -428,17 +425,7 @@ export function FilesTab({
       )}
 
       {/* Delete Confirmation */}
-      <ConfirmDialog
-        open={deleteDialog.isOpen}
-        onOpenChange={deleteDialog.setIsOpen}
-        title="Delete File"
-        description="Are you sure you want to delete this file? This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
-        onConfirm={handleDelete}
-        variant="danger"
-        loading={deleteDialog.isLoading}
-      />
+      <ConfirmDialog {...deleteConfirm.dialogProps} />
 
       {/* File Preview Modal */}
       <PortalModal
@@ -466,11 +453,7 @@ export function FilesTab({
                   style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain', display: 'block', margin: '0 auto' }}
                 />
               ) : previewFile.file_type === 'application/pdf' ? (
-                <iframe
-                  src={fileUrl}
-                  title={previewFile.original_name}
-                  style={{ width: '100%', height: '70vh', border: 'none' }}
-                />
+                <PDFPreview url={fileUrl} title={previewFile.original_name} />
               ) : previewContent !== null ? (
                 <pre className="text-sm" style={{
                   whiteSpace: 'pre-wrap',
@@ -483,11 +466,7 @@ export function FilesTab({
                   {previewContent}
                 </pre>
               ) : (
-                <iframe
-                  src={fileUrl}
-                  title={previewFile.original_name}
-                  style={{ width: '100%', height: '70vh', border: 'none' }}
-                />
+                <PDFPreview url={fileUrl} title={previewFile.original_name} />
               )}
             </div>
           );
