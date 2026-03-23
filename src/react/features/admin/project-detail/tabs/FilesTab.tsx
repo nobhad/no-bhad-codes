@@ -332,7 +332,7 @@ export function FilesTab({
                   className="files-table-row"
                 >
                   <td className="pd-table-cell">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                    <div className="cell-with-icon">
                       <span style={{ flexShrink: 0 }}>{getFileIcon(file.file_type)}</span>
                       <span className="pd-highlight-value pd-truncate-filename">
                         {file.original_name}
@@ -472,10 +472,9 @@ export function FilesTab({
                   style={{ width: '100%', height: '70vh', border: 'none' }}
                 />
               ) : previewContent !== null ? (
-                <pre style={{
+                <pre className="text-sm" style={{
                   whiteSpace: 'pre-wrap',
                   wordBreak: 'break-word',
-                  fontSize: 'var(--font-size-sm)',
                   fontFamily: 'var(--font-family-mono, monospace)',
                   maxHeight: '70vh',
                   overflow: 'auto',

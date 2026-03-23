@@ -85,11 +85,11 @@ export function MilestonesList({
             const header = (
               <>
                 {isComplete ? (
-                  <CheckCircle className="icon-sm" style={{ color: 'var(--color-success)', flexShrink: 0 }} aria-label="Completed" />
+                  <CheckCircle className="icon-sm text-success" style={{ flexShrink: 0 }} aria-label="Completed" />
                 ) : completedTaskCount > 0 ? (
-                  <Clock className="icon-sm" style={{ color: 'var(--color-text-tertiary)', flexShrink: 0 }} aria-label="In Progress" />
+                  <Clock className="icon-sm text-muted" style={{ flexShrink: 0 }} aria-label="In Progress" />
                 ) : (
-                  <Box className="icon-sm" style={{ color: 'var(--color-text-tertiary)', flexShrink: 0 }} aria-label="Not Started" />
+                  <Box className="icon-sm text-muted" style={{ flexShrink: 0 }} aria-label="Not Started" />
                 )}
                 <div className="flex-fill milestone-content">
                   <span className={cn('milestone-title', isComplete && 'completed')}>
@@ -131,9 +131,9 @@ export function MilestonesList({
                     {milestoneTasks.map((task) => (
                       <li key={task.id} className="milestone-task-item">
                         {task.status === 'completed' ? (
-                          <CheckCircle className="icon-xs" style={{ color: 'var(--color-success)', flexShrink: 0 }} />
+                          <CheckCircle className="icon-xs text-success" style={{ flexShrink: 0 }} />
                         ) : (
-                          <Clock className="icon-xs" style={{ color: 'var(--color-text-tertiary)', flexShrink: 0 }} />
+                          <Clock className="icon-xs text-muted" style={{ flexShrink: 0 }} />
                         )}
                         <span className={cn(task.status === 'completed' && 'text-secondary')}>
                           {task.title}

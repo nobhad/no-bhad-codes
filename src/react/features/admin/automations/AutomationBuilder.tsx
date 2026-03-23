@@ -94,6 +94,10 @@ const HTTP_METHODS = [
   { value: 'DELETE', label: 'DELETE' }
 ];
 
+const ACTION_NUMBER_MIN_WIDTH = '20px';
+const CONDITION_OPERATOR_MAX_WIDTH = '160px';
+const ACTION_TYPE_SELECT_MAX_WIDTH = '220px';
+
 /** Maps action types to their lucide icon component */
 const ACTION_ICON_MAP: Record<ActionType, React.ComponentType<{ className?: string }>> = {
   send_email: Mail,
@@ -374,7 +378,7 @@ const ActionConfigForm = React.memo(({
   case 'create_invoice':
   case 'assign_questionnaire':
     return (
-      <p className="text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>
+      <p className="text-muted text-sm">
         Configuration will use trigger context data automatically.
       </p>
     );
@@ -638,13 +642,10 @@ export function AutomationBuilder({
   // ---- Loading state ----
   if (isLoadingExisting) {
     return (
-      <div
-        className="portal-card"
-        style={{ padding: 'var(--spacing-6)', textAlign: 'center' }}
-      >
+      <div className="portal-card text-center" style={{ padding: 'var(--spacing-6)' }}>
         <RefreshCw
-          className="icon-md loading-spin"
-          style={{ color: 'var(--app-color-text-muted)', marginBottom: 'var(--spacing-2)' }}
+          className="icon-md loading-spin text-muted"
+          style={{ marginBottom: 'var(--spacing-2)' }}
         />
         <p className="text-muted">Loading automation...</p>
       </div>
@@ -724,9 +725,8 @@ export function AutomationBuilder({
               <span className="field-label">Conditions (optional)</span>
               <button
                 type="button"
-                className="btn-secondary flex items-center gap-1"
+                className="btn-secondary btn-sm flex items-center gap-1"
                 onClick={handleAddCondition}
-                style={{ fontSize: 'var(--font-size-xs)' }}
               >
                 <Plus className="icon-xs" />
                 Add Condition
@@ -734,7 +734,7 @@ export function AutomationBuilder({
             </div>
 
             {conditions.length === 0 && (
-              <p className="text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>
+              <p className="text-muted text-sm">
                 No conditions - automation will run for every {triggerEventLabel} event.
               </p>
             )}
@@ -752,7 +752,7 @@ export function AutomationBuilder({
                   className="form-input"
                   value={cond.operator}
                   onChange={(e) => handleConditionChange(cond.key, 'operator', e.target.value)}
-                  style={{ maxWidth: '160px' }}
+                  style={{ maxWidth: CONDITION_OPERATOR_MAX_WIDTH }}
                 >
                   {CONDITION_OPERATORS.map((op) => (
                     <option key={op.value} value={op.value}>{op.label}</option>
@@ -767,10 +767,9 @@ export function AutomationBuilder({
                 />
                 <button
                   type="button"
-                  className="btn-danger"
+                  className="btn-danger btn-sm"
                   onClick={() => handleRemoveCondition(cond.key)}
                   title="Remove condition"
-                  style={{ padding: '4px 8px' }}
                 >
                   <X className="icon-xs" />
                 </button>
@@ -787,10 +786,7 @@ export function AutomationBuilder({
         </div>
         <div className="card-body flex flex-col gap-3">
           {actions.length === 0 && (
-            <div
-              className="flex flex-col items-center gap-2 py-4"
-              style={{ color: 'var(--app-color-text-muted)' }}
-            >
+            <div className="flex flex-col items-center gap-2 py-4 text-muted">
               <Inbox className="icon-md" />
               <p className="text-muted">No actions added yet. Add your first action below.</p>
             </div>
@@ -812,17 +808,10 @@ export function AutomationBuilder({
                   style={{ padding: 'var(--spacing-2) var(--spacing-3)' }}
                 >
                   <div className="flex items-center gap-2">
-                    <GripVertical
-                      className="icon-xs"
-                      style={{ color: 'var(--app-color-text-muted)' }}
-                    />
+                    <GripVertical className="icon-xs text-muted" />
                     <span
-                      className="text-muted"
-                      style={{
-                        fontSize: 'var(--font-size-xs)',
-                        fontWeight: 600,
-                        minWidth: '20px'
-                      }}
+                      className="text-muted text-xs font-semibold"
+                      style={{ minWidth: ACTION_NUMBER_MIN_WIDTH }}
                     >
                       {index + 1}.
                     </span>
@@ -831,7 +820,7 @@ export function AutomationBuilder({
                       className="form-input"
                       value={action.actionType}
                       onChange={(e) => handleActionTypeChange(action.key, e.target.value as ActionType)}
-                      style={{ maxWidth: '220px' }}
+                      style={{ maxWidth: ACTION_TYPE_SELECT_MAX_WIDTH }}
                     >
                       {ALL_ACTION_TYPES.map((type) => (
                         <option key={type} value={type}>
@@ -842,10 +831,9 @@ export function AutomationBuilder({
                   </div>
                   <button
                     type="button"
-                    className="btn-danger"
+                    className="btn-danger btn-sm"
                     onClick={() => handleRemoveAction(action.key)}
                     title="Remove action"
-                    style={{ padding: '4px 8px' }}
                   >
                     <Trash2 className="icon-xs" />
                   </button>
@@ -862,9 +850,9 @@ export function AutomationBuilder({
 
           <button
             type="button"
-            className="btn-secondary flex items-center justify-center gap-1.5"
+            className="btn-secondary btn-full flex items-center justify-center gap-1.5"
             onClick={handleAddAction}
-            style={{ width: '100%', padding: 'var(--spacing-2)' }}
+            style={{ padding: 'var(--spacing-2)' }}
           >
             <Plus className="icon-xs" />
             Add Action

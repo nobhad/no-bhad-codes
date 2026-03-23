@@ -47,6 +47,7 @@ const logger = createLogger('AutomationDetailPanel');
 // ============================================================================
 
 const RECENT_RUNS_LIMIT = 20;
+const ACTION_NUMBER_MIN_WIDTH = '20px';
 
 const RUN_STATUS_CONFIG: Record<string, { label: string; variant: string; icon: React.ComponentType<{ className?: string }> }> = {
   running: { label: 'Running', variant: 'active', icon: RefreshCw },
@@ -240,13 +241,10 @@ export function AutomationDetailPanel({
   // ---- Loading state ----
   if (isLoading) {
     return (
-      <div
-        className="portal-card"
-        style={{ padding: 'var(--spacing-6)', textAlign: 'center' }}
-      >
+      <div className="portal-card text-center" style={{ padding: 'var(--spacing-6)' }}>
         <RefreshCw
-          className="icon-md loading-spin"
-          style={{ color: 'var(--app-color-text-muted)', marginBottom: 'var(--spacing-2)' }}
+          className="icon-md loading-spin text-muted"
+          style={{ marginBottom: 'var(--spacing-2)' }}
         />
         <p className="text-muted">Loading automation...</p>
       </div>
@@ -258,7 +256,7 @@ export function AutomationDetailPanel({
     return (
       <div className="portal-card" style={{ padding: 'var(--spacing-6)' }}>
         <div className="flex flex-col items-center gap-2">
-          <AlertCircle className="icon-md" style={{ color: 'var(--app-color-danger)' }} />
+          <AlertCircle className="icon-md text-danger" />
           <p>{error || 'Automation not found'}</p>
           <button type="button" className="btn-secondary" onClick={onBack}>
             <ArrowLeft className="icon-xs" /> Back
@@ -280,20 +278,19 @@ export function AutomationDetailPanel({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            className="btn-secondary"
+            className="btn-secondary btn-sm"
             onClick={onBack}
             title="Back to list"
-            style={{ padding: '4px 8px' }}
           >
             <ArrowLeft className="icon-xs" />
           </button>
-          <Zap className="icon-sm" style={{ color: 'var(--app-color-primary)' }} />
+          <Zap className="icon-sm text-accent" />
           <div>
-            <h2 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, margin: 0 }}>
+            <h2 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-semibold)', margin: 0 }}>
               {automation.name}
             </h2>
             {automation.description && (
-              <p className="text-muted" style={{ fontSize: 'var(--font-size-sm)', margin: 0 }}>
+              <p className="text-muted text-sm" style={{ margin: 0 }}>
                 {automation.description}
               </p>
             )}
@@ -353,11 +350,10 @@ export function AutomationDetailPanel({
             </StatusBadge>
             <button
               type="button"
-              className="btn-secondary flex items-center gap-1"
+              className="btn-secondary btn-sm flex items-center gap-1"
               onClick={handleToggleActive}
               disabled={isToggling}
               title={automation.isActive ? 'Deactivate' : 'Activate'}
-              style={{ padding: '2px 8px', fontSize: 'var(--font-size-xs)' }}
             >
               {isToggling ? (
                 <RefreshCw className="icon-xs loading-spin" />
@@ -383,7 +379,7 @@ export function AutomationDetailPanel({
               <div className="flex flex-col gap-1">
                 <span className="field-label">Conditions</span>
                 {automation.triggerConditions.map((cond, idx) => (
-                  <span key={idx} className="text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>
+                  <span key={idx} className="text-muted text-sm">
                     {(cond.field as string)} {(cond.operator as string)} {String(cond.value)}
                   </span>
                 ))}
@@ -396,7 +392,7 @@ export function AutomationDetailPanel({
                 Actions ({automation.actions.length})
               </span>
               {automation.actions.length === 0 ? (
-                <span className="text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>
+                <span className="text-muted text-sm">
                   No actions configured
                 </span>
               ) : (
@@ -406,12 +402,11 @@ export function AutomationDetailPanel({
                     .map((action, idx) => (
                       <div
                         key={action.id}
-                        className="flex items-center gap-2"
-                        style={{ fontSize: 'var(--font-size-sm)' }}
+                        className="flex items-center gap-2 text-sm"
                       >
                         <span
-                          className="text-muted"
-                          style={{ fontWeight: 600, minWidth: '20px' }}
+                          className="text-muted font-semibold"
+                          style={{ minWidth: ACTION_NUMBER_MIN_WIDTH }}
                         >
                           {idx + 1}.
                         </span>
@@ -447,10 +442,9 @@ export function AutomationDetailPanel({
           <span className="cell-title">Recent Runs</span>
           <button
             type="button"
-            className="btn-secondary flex items-center gap-1"
+            className="btn-secondary btn-sm flex items-center gap-1"
             onClick={loadRuns}
             disabled={runsLoading}
-            style={{ fontSize: 'var(--font-size-xs)', padding: '2px 8px' }}
           >
             <RefreshCw className={`icon-xs${runsLoading ? ' loading-spin' : ''}`} />
             Refresh
@@ -458,16 +452,13 @@ export function AutomationDetailPanel({
         </div>
         <div className="card-body">
           {runsLoading ? (
-            <div style={{ textAlign: 'center', padding: 'var(--spacing-4)' }}>
-              <RefreshCw
-                className="icon-sm loading-spin"
-                style={{ color: 'var(--app-color-text-muted)' }}
-              />
+            <div className="text-center" style={{ padding: 'var(--spacing-4)' }}>
+              <RefreshCw className="icon-sm loading-spin text-muted" />
             </div>
           ) : runs.length === 0 ? (
             <div
-              className="flex flex-col items-center gap-2"
-              style={{ padding: 'var(--spacing-4)', color: 'var(--app-color-text-muted)' }}
+              className="flex flex-col items-center gap-2 text-muted"
+              style={{ padding: 'var(--spacing-4)' }}
             >
               <Inbox className="icon-md" />
               <p className="text-muted">No runs yet</p>
@@ -476,15 +467,8 @@ export function AutomationDetailPanel({
             <div className="flex flex-col gap-1">
               {/* Table header */}
               <div
-                className="flex items-center gap-3"
-                style={{
-                  padding: 'var(--spacing-1) var(--spacing-2)',
-                  borderBottom: '1px solid var(--app-color-border)',
-                  fontWeight: 600,
-                  fontSize: 'var(--font-size-xs)',
-                  color: 'var(--app-color-text-muted)',
-                  textTransform: 'uppercase'
-                }}
+                className="flex items-center gap-3 field-label border-bottom"
+                style={{ padding: 'var(--spacing-1) var(--spacing-2)' }}
               >
                 <span style={{ flex: 1 }}>Status</span>
                 <span style={{ flex: 2 }}>Trigger Entity</span>
@@ -498,12 +482,8 @@ export function AutomationDetailPanel({
                 return (
                   <div
                     key={run.id}
-                    className="flex items-center gap-3"
-                    style={{
-                      padding: 'var(--spacing-1) var(--spacing-2)',
-                      borderBottom: '1px solid var(--app-color-border)',
-                      fontSize: 'var(--font-size-sm)'
-                    }}
+                    className="flex items-center gap-3 text-sm border-bottom"
+                    style={{ padding: 'var(--spacing-1) var(--spacing-2)' }}
                   >
                     <span style={{ flex: 1 }}>
                       <StatusBadge
@@ -518,10 +498,7 @@ export function AutomationDetailPanel({
                     </span>
                     <span style={{ flex: 2 }}>
                       <div className="flex items-center gap-1">
-                        <Clock
-                          className="icon-xs"
-                          style={{ color: 'var(--app-color-text-muted)' }}
-                        />
+                        <Clock className="icon-xs text-muted" />
                         {formatDate(run.startedAt)}
                       </div>
                     </span>
