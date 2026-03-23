@@ -13,6 +13,7 @@ import { IconButton } from '@react/factories';
 import { useListFetch } from '@react/factories/useDataFetch';
 import { Checkbox } from '@react/components/ui/checkbox';
 import { PortalModal } from '@react/components/portal/PortalModal';
+import { PDFPreview } from '@react/components/portal/PDFPreview';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -593,13 +594,10 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
         size="lg"
       >
         {previewContract && (
-          <div style={{ minHeight: '200px' }}>
-            <iframe
-              src={buildEndpoint.contractPdf(previewContract.projectId)}
-              title={`Preview contract for ${previewContract.clientName || 'client'}`}
-              style={{ width: '100%', height: '70vh', border: 'none' }}
-            />
-          </div>
+          <PDFPreview
+            url={buildEndpoint.contractPdf(previewContract.projectId)}
+            title={`Preview contract for ${previewContract.clientName || 'client'}`}
+          />
         )}
       </PortalModal>
     </>

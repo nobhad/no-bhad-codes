@@ -18,6 +18,7 @@ import { usePortalData } from '@react/hooks/usePortalFetch';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { formatCurrency } from '@react/factories/formatters';
+import { getUtilizationColorClass } from '@react/utils/utilization';
 import type { PortalViewProps } from '../types';
 
 // ============================================
@@ -67,9 +68,6 @@ const STATUS_LABELS: Record<string, string> = {
   expired: 'Expired'
 };
 
-const UTILIZATION_GREEN_MAX = 0.6;
-const UTILIZATION_YELLOW_MAX = 0.8;
-
 // ============================================
 // HELPERS
 // ============================================
@@ -84,12 +82,6 @@ function getDaysRemaining(periodEnd: string): number {
 // ============================================
 // UTILIZATION BAR
 // ============================================
-
-function getUtilizationColorClass(ratio: number): string {
-  if (ratio >= UTILIZATION_YELLOW_MAX) return 'progress-danger';
-  if (ratio >= UTILIZATION_GREEN_MAX) return 'progress-warning';
-  return 'progress-success';
-}
 
 function UtilizationBar({ used, total }: { used: number; total: number | null }) {
   if (total === null || total === 0) {

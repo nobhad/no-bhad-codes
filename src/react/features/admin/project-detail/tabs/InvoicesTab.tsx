@@ -18,8 +18,10 @@ import {
   PortalDropdownContent,
   PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
-import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
+import { ConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import { PortalModal, useModal } from '@react/components/portal/PortalModal';
+import { PDFPreview } from '@react/components/portal/PDFPreview';
+import { useDeleteConfirm } from '@react/hooks/useDeleteConfirm';
 import { InvoiceDetailPanel } from '../../invoices/InvoiceDetailPanel';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { apiPost } from '@/utils/api-client';
@@ -107,7 +109,6 @@ export function InvoicesTab({
 }: InvoicesTabProps) {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [actionLoading, setActionLoading] = useState<{ type: string; id: number } | null>(null);
-  const [deletingInvoiceId, setDeletingInvoiceId] = useState<number | null>(null);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
   const [paymentInvoice, setPaymentInvoice] = useState<Invoice | null>(null);
@@ -118,7 +119,20 @@ export function InvoicesTab({
   const [isRecordingPayment, setIsRecordingPayment] = useState(false);
   const paymentModal = useModal();
 
-  const deleteDialog = useConfirmDialog();
+  const deleteConfirm = useDeleteConfirm<Invoice>({
+    onDelete: async (invoice) => {
+      if (!onDeleteInvoice) return false;
+      const success = await onDeleteInvoice(invoice.id);
+      if (success) {
+        showNotification?.(NOTIFICATIONS.invoice.DELETED, 'success');
+      } else {
+        showNotification?.(NOTIFICATIONS.invoice.DELETE_FAILED, 'error');
+      }
+      return success;
+    },
+    entityLabel: 'invoice',
+    getDescription: (invoice) => invoice.invoice_number
+  });
 
   // Filter invoices
   const filteredInvoices = useMemo(() => {
@@ -224,19 +238,6 @@ export function InvoicesTab({
       setIsRecordingPayment(false);
     }
   }, [paymentInvoice, paymentMethod, paymentReference, paymentDate, paymentNotes, paymentModal, showNotification, onRefresh]);
-
-  // Handle delete
-  const handleDelete = useCallback(async () => {
-    if (!onDeleteInvoice || deletingInvoiceId === null) return;
-    const success = await onDeleteInvoice(deletingInvoiceId);
-
-    if (success) {
-      showNotification?.(NOTIFICATIONS.invoice.DELETED, 'success');
-    } else {
-      showNotification?.(NOTIFICATIONS.invoice.DELETE_FAILED, 'error');
-    }
-    setDeletingInvoiceId(null);
-  }, [onDeleteInvoice, deletingInvoiceId, showNotification]);
 
   // Handle download PDF
   const handleDownloadPdf = useCallback(
@@ -432,10 +433,7 @@ export function InvoicesTab({
                         {!isPaid && onDeleteInvoice && (
                           <button
                             className="icon-btn icon-btn--danger"
-                            onClick={() => {
-                              setDeletingInvoiceId(invoice.id);
-                              deleteDialog.open();
-                            }}
+                            onClick={() => deleteConfirm.openConfirm(invoice)}
                             title="Delete invoice"
                             aria-label="Delete invoice"
                           >
@@ -528,17 +526,7 @@ export function InvoicesTab({
       </PortalModal>
 
       {/* Delete Confirmation */}
-      <ConfirmDialog
-        open={deleteDialog.isOpen}
-        onOpenChange={deleteDialog.setIsOpen}
-        title="Delete Invoice"
-        description="Are you sure you want to delete this invoice? This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
-        onConfirm={handleDelete}
-        variant="danger"
-        loading={deleteDialog.isLoading}
-      />
+      <ConfirmDialog {...deleteConfirm.dialogProps} />
 
       {/* PDF Preview Modal */}
       <PortalModal
@@ -556,13 +544,10 @@ export function InvoicesTab({
         }
       >
         {previewInvoice && (
-          <div style={{ minHeight: '200px' }}>
-            <iframe
-              src={buildEndpoint.invoicePdf(previewInvoice.id)}
-              title={`Preview ${previewInvoice.invoice_number}`}
-              style={{ width: '100%', height: '70vh', border: 'none' }}
-            />
-          </div>
+          <PDFPreview
+            url={buildEndpoint.invoicePdf(previewInvoice.id)}
+            title={`Preview ${previewInvoice.invoice_number}`}
+          />
         )}
       </PortalModal>
 

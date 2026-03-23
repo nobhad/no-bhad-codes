@@ -12,6 +12,8 @@ import { useState, useCallback } from 'react';
 import { Plus, Pause, Play, XCircle, Loader2 } from 'lucide-react';
 import { usePortalData, usePortalFetch } from '../../../hooks/usePortalFetch';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { formatCurrency } from '@/utils/format-utils';
+import { getUtilizationColor } from '@react/utils/utilization';
 
 // ============================================================================
 // TYPES
@@ -49,21 +51,9 @@ const STATUS_COLORS: Record<string, string> = {
   expired: 'var(--color-text-tertiary)'
 };
 
-const UTILIZATION_THRESHOLD_WARNING = 0.6;
-const UTILIZATION_THRESHOLD_DANGER = 0.8;
 const UTILIZATION_BAR_HEIGHT = 6;
 const UTILIZATION_BAR_RADIUS = 3;
 const UTILIZATION_MIN_WIDTH = 120;
-
-function getUtilizationColor(percent: number): string {
-  if (percent >= UTILIZATION_THRESHOLD_DANGER) return 'var(--status-danger)';
-  if (percent >= UTILIZATION_THRESHOLD_WARNING) return 'var(--status-warning)';
-  return 'var(--status-success)';
-}
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
-}
 
 // ============================================================================
 // COMPONENT
@@ -151,7 +141,7 @@ export function RetainersTable({
                     <td>{r.clientName}</td>
                     <td>{r.projectName}</td>
                     <td style={{ textTransform: 'capitalize' }}>{r.retainerType.replace('_', ' ')}</td>
-                    <td className="font-medium">{formatCurrency(r.monthlyAmount)}</td>
+                    <td className="font-medium">{formatCurrency(r.monthlyAmount, { showCents: true })}</td>
                     <td>
                       <span style={{
                         color: STATUS_COLORS[r.status] || 'var(--app-color-text-muted)',

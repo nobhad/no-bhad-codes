@@ -24,6 +24,7 @@ import {
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { StatusBadge } from '@react/components/portal/StatusBadge';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
+import { getBrandLabel, formatExpiration } from '@react/components/portal/PaymentCardDisplay';
 import { usePortalData } from '@react/hooks/usePortalFetch';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
@@ -58,35 +59,7 @@ interface AutoPayStatus {
 
 export interface AutoPaySettingsProps extends PortalViewProps {}
 
-// ============================================
-// CONSTANTS
-// ============================================
-
-const BRAND_LABELS: Record<string, string> = {
-  visa: 'Visa',
-  mastercard: 'Mastercard',
-  amex: 'American Express',
-  discover: 'Discover',
-  diners: 'Diners Club',
-  jcb: 'JCB',
-  unionpay: 'UnionPay'
-};
-
-// ============================================
-// HELPERS
-// ============================================
-
-function getBrandLabel(brand: string | null): string {
-  if (!brand) return 'Card';
-  return BRAND_LABELS[brand.toLowerCase()] ?? brand;
-}
-
-function formatExpiration(month: number | null, year: number | null): string {
-  if (month === null || year === null) return '--';
-  const paddedMonth = String(month).padStart(2, '0');
-  const shortYear = String(year).slice(-2);
-  return `${paddedMonth}/${shortYear}`;
-}
+// BRAND_LABELS, getBrandLabel, and formatExpiration imported from PaymentCardDisplay
 
 // ============================================
 // PAYMENT METHOD CARD
