@@ -75,7 +75,7 @@ const MeetingCard = React.memo(({
     <div className="portal-card">
       <div className="portal-card-header">
         <div className="flex items-center gap-2">
-          <Calendar className="icon-sm" style={{ color: 'var(--app-color-primary)' }} />
+          <Calendar className="icon-sm text-accent" />
           <span className="cell-title">{typeLabel}</span>
         </div>
         <span
@@ -93,16 +93,16 @@ const MeetingCard = React.memo(({
         {isConfirmed && meeting.confirmedDatetime && (
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
-              <CalendarCheck className="icon-xs" style={{ color: 'var(--app-color-success)' }} />
+              <CalendarCheck className="icon-xs text-success" />
               <span>{formatDatetime(meeting.confirmedDatetime)}</span>
             </div>
             <div className="flex items-center gap-2">
-              <Clock className="icon-xs" style={{ color: 'var(--app-color-text-muted)' }} />
+              <Clock className="icon-xs text-muted" />
               <span>{meeting.durationMinutes} minutes</span>
             </div>
             {meeting.locationType && (
               <div className="flex items-center gap-2">
-                <MapPin className="icon-xs" style={{ color: 'var(--app-color-text-muted)' }} />
+                <MapPin className="icon-xs text-muted" />
                 <span>
                   {LOCATION_TYPE_LABELS[meeting.locationType] || meeting.locationType}
                   {meeting.locationDetails ? ` - ${meeting.locationDetails}` : ''}
@@ -115,31 +115,31 @@ const MeetingCard = React.memo(({
         {!isConfirmed && (
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
-              <CalendarClock className="icon-xs" style={{ color: 'var(--app-color-text-muted)' }} />
+              <CalendarClock className="icon-xs text-muted" />
               <span className="text-muted">Awaiting confirmation</span>
             </div>
             <div className="flex flex-col gap-1 ml-5">
-              <span className="text-muted" style={{ fontSize: 'var(--font-size-xs)' }}>
+              <span className="text-muted text-xs">
                 Preferred times:
               </span>
               {meeting.preferredSlot1 && (
-                <span style={{ fontSize: 'var(--font-size-sm)' }}>
+                <span className="text-sm">
                   1. {formatDatetime(meeting.preferredSlot1)}
                 </span>
               )}
               {meeting.preferredSlot2 && (
-                <span style={{ fontSize: 'var(--font-size-sm)' }}>
+                <span className="text-sm">
                   2. {formatDatetime(meeting.preferredSlot2)}
                 </span>
               )}
               {meeting.preferredSlot3 && (
-                <span style={{ fontSize: 'var(--font-size-sm)' }}>
+                <span className="text-sm">
                   3. {formatDatetime(meeting.preferredSlot3)}
                 </span>
               )}
             </div>
             <div className="flex items-center gap-2">
-              <Clock className="icon-xs" style={{ color: 'var(--app-color-text-muted)' }} />
+              <Clock className="icon-xs text-muted" />
               <span>{meeting.durationMinutes} minutes</span>
             </div>
           </div>
@@ -147,19 +147,19 @@ const MeetingCard = React.memo(({
 
         {meeting.status === 'declined' && meeting.declineReason && (
           <div className="flex items-start gap-2 mt-2">
-            <XCircle className="icon-xs flex-shrink-0" style={{ color: 'var(--app-color-danger)' }} />
+            <XCircle className="icon-xs flex-shrink-0 text-danger" />
             <span className="text-muted">{meeting.declineReason}</span>
           </div>
         )}
 
         {meeting.clientNotes && (
-          <p className="text-muted mt-2" style={{ fontSize: 'var(--font-size-sm)' }}>
+          <p className="text-muted text-sm mt-2">
             {meeting.clientNotes}
           </p>
         )}
 
         {meeting.projectName && (
-          <p className="text-muted mt-1" style={{ fontSize: 'var(--font-size-xs)' }}>
+          <p className="text-muted text-xs mt-1">
             Project: {meeting.projectName}
           </p>
         )}

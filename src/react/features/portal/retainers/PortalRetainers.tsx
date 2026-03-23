@@ -85,48 +85,35 @@ function getDaysRemaining(periodEnd: string): number {
 // UTILIZATION BAR
 // ============================================
 
+function getUtilizationColorClass(ratio: number): string {
+  if (ratio >= UTILIZATION_YELLOW_MAX) return 'progress-danger';
+  if (ratio >= UTILIZATION_GREEN_MAX) return 'progress-warning';
+  return 'progress-success';
+}
+
 function UtilizationBar({ used, total }: { used: number; total: number | null }) {
   if (total === null || total === 0) {
-    return <span style={{ color: 'var(--app-color-text-muted)', fontSize: '0.85rem' }}>N/A</span>;
+    return <span className="text-muted text-sm">N/A</span>;
   }
 
   const ratio = used / total;
   const pct = Math.min(ratio * 100, 100);
-
-  let barColor = 'var(--app-color-success)';
-  if (ratio >= UTILIZATION_YELLOW_MAX) {
-    barColor = 'var(--app-color-danger)';
-  } else if (ratio >= UTILIZATION_GREEN_MAX) {
-    barColor = 'var(--app-color-warning)';
-  }
+  const fillClass = getUtilizationColorClass(ratio);
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-        <span style={{ fontSize: '0.85rem' }}>
+      <div className="flex justify-between mb-1">
+        <span className="text-sm">
           {used.toFixed(1)} of {total.toFixed(1)} hours used
         </span>
-        <span style={{ fontSize: '0.85rem', color: 'var(--app-color-text-muted)' }}>
+        <span className="text-sm text-muted">
           {Math.round(pct)}%
         </span>
       </div>
-      <div
-        style={{
-          width: '100%',
-          height: 10,
-          borderRadius: 5,
-          backgroundColor: 'var(--app-color-border)',
-          overflow: 'hidden'
-        }}
-      >
+      <div className="progress-bar progress-sm">
         <div
-          style={{
-            width: `${pct}%`,
-            height: '100%',
-            borderRadius: 5,
-            backgroundColor: barColor,
-            transition: 'width 0.3s ease'
-          }}
+          className={`progress-fill ${fillClass}`}
+          style={{ width: `${pct}%` }}
         />
       </div>
     </div>
@@ -142,12 +129,12 @@ function RetainerCard({ retainer }: { retainer: Retainer }) {
   const daysRemaining = period ? getDaysRemaining(period.period_end) : 0;
 
   return (
-    <div className="portal-card" style={{ padding: '1.25rem' }}>
+    <div className="portal-card p-3">
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+      <div className="portal-card-header">
         <div>
-          <h3 style={{ margin: '0 0 0.25rem' }}>{retainer.projectName}</h3>
-          <span style={{ fontSize: '0.85rem', color: 'var(--app-color-text-muted)' }}>
+          <h3>{retainer.projectName}</h3>
+          <span className="text-sm text-muted">
             {TYPE_LABELS[retainer.retainer_type] ?? retainer.retainer_type}
           </span>
         </div>
@@ -157,23 +144,23 @@ function RetainerCard({ retainer }: { retainer: Retainer }) {
       </div>
 
       {/* Monthly Amount */}
-      <div className="stat-card" style={{ marginBottom: '1rem' }}>
+      <div className="stat-card mb-4">
         <span className="stat-label">Monthly Amount</span>
         <span className="stat-value">{formatCurrency(retainer.monthly_amount)}</span>
       </div>
 
       {/* Utilization */}
       {period && (
-        <div style={{ marginBottom: '1rem' }}>
+        <div className="mb-4">
           <UtilizationBar used={period.used_hours} total={period.total_available} />
         </div>
       )}
 
       {/* Meta info row */}
-      <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', fontSize: '0.85rem', color: 'var(--app-color-text-muted)' }}>
+      <div className="portal-card-meta text-sm">
         {/* Rollover */}
         {retainer.rollover_enabled === 1 && period && period.rollover_hours > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          <div className="portal-card-meta-item">
             <RefreshCw size={14} />
             <span>{period.rollover_hours.toFixed(1)}h rollover</span>
           </div>
@@ -181,14 +168,14 @@ function RetainerCard({ retainer }: { retainer: Retainer }) {
 
         {/* Days remaining */}
         {period && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          <div className="portal-card-meta-item">
             <Calendar size={14} />
             <span>{daysRemaining} day{daysRemaining !== 1 ? 's' : ''} remaining</span>
           </div>
         )}
 
         {/* Billing day */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+        <div className="portal-card-meta-item">
           <Clock size={14} />
           <span>Bills on day {retainer.billing_day}</span>
         </div>
@@ -218,7 +205,7 @@ export function PortalRetainers(_props: PortalRetainersProps) {
   }
 
   return (
-    <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <div ref={containerRef} className="portal-cards-list">
       {retainers.map((retainer) => (
         <RetainerCard key={retainer.id} retainer={retainer} />
       ))}
