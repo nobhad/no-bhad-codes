@@ -9,11 +9,12 @@
 
 import * as React from 'react';
 import { useCallback } from 'react';
-import { FileCheck, ArrowRight, Check, Clock, Loader2 } from 'lucide-react';
+import { FileCheck, ArrowRight } from 'lucide-react';
 import { usePortalData } from '../../../hooks/usePortalFetch';
 import { useFadeIn } from '../../../hooks/useGsap';
 import { LoadingState, EmptyState, ErrorState } from '../../../components/portal/EmptyState';
 import { StatusBadge } from '../../../components/portal/StatusBadge';
+import { StatusIcon } from '../../../components/portal/StatusIcon';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 import type { Agreement, AgreementsListProps } from './types';
 import type { StatusVariant } from '../../../components/portal/StatusBadge';
@@ -41,18 +42,6 @@ const STATUS_LABELS: Record<string, string> = {
   cancelled: 'Cancelled',
   expired: 'Expired'
 };
-
-function getStatusIcon(status: string) {
-  switch (status) {
-  case 'completed':
-    return <Check className="icon-xs" />;
-  case 'in_progress':
-  case 'viewed':
-    return <Loader2 className="icon-xs" />;
-  default:
-    return <Clock className="icon-xs" />;
-  }
-}
 
 // ============================================
 // COMPONENT
@@ -115,7 +104,7 @@ export function AgreementsList({
             <div className="portal-card-header">
               <span>{agreement.name}</span>
               <div className="action-group">
-                {getStatusIcon(agreement.status)}
+                {<StatusIcon status={agreement.status} />}
                 <StatusBadge status={variant} size="sm">
                   {STATUS_LABELS[agreement.status] || agreement.status}
                 </StatusBadge>

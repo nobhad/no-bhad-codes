@@ -6,7 +6,8 @@
 
 import * as React from 'react';
 import { useState, useMemo, useCallback } from 'react';
-import { Check, Clock, AlertCircle, Send } from 'lucide-react';
+import { Send } from 'lucide-react';
+import { StatusIcon } from '@react/components/portal/StatusIcon';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { ProgressBar } from '@react/components/portal/ProgressBar';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
@@ -69,16 +70,6 @@ const STATUS_LABELS: Record<string, string> = {
   accepted: 'Accepted',
   rejected: 'Rejected'
 };
-
-function getStatusIcon(status: string) {
-  switch (status) {
-  case 'accepted': return <Check />;
-  case 'submitted': return <Clock />;
-  case 'revision_needed': return <AlertCircle />;
-  case 'rejected': return <AlertCircle />;
-  default: return <Clock />;
-  }
-}
 
 // ============================================
 // SUBMISSION FORM
@@ -238,7 +229,7 @@ export function ContentChecklistView({ getAuthToken }: ContentChecklistViewProps
                     <div className="content-item-header">
                       <div className="content-item-body">
                         <div className="content-item-title">
-                          {getStatusIcon(item.status)}
+                          {<StatusIcon status={item.status} />}
                           <strong>{item.title}</strong>
                           {item.isRequired && <span className="content-item-required">*</span>}
                         </div>

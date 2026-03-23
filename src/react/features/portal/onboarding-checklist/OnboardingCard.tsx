@@ -94,84 +94,63 @@ export function OnboardingCard({
   const { progress, steps } = checklist;
 
   return (
-    <div className="portal-card onboarding-card" style={{ position: 'relative' }}>
+    <div className="portal-card onboarding-card relative">
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div className="layout-row-top justify-between">
         <div>
-          <h3 style={{ margin: '0 0 0.25rem 0' }}>Getting Started</h3>
-          <span className="text-muted" style={{ fontSize: '0.85rem' }}>
+          <h3>Getting Started</h3>
+          <span className="text-muted text-sm">
             {progress.completed} of {progress.total} steps completed
           </span>
         </div>
         <button
+          className="icon-btn icon-btn-sm text-muted"
           onClick={handleDismiss}
           disabled={dismissing}
           title="Dismiss checklist"
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '0.25rem',
-            color: 'var(--app-color-text-muted)'
-          }}
         >
           <X size={16} />
         </button>
       </div>
 
       {/* Progress bar */}
-      <div style={{
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: 'var(--app-color-border)',
-        overflow: 'hidden',
-        margin: '0.75rem 0'
-      }}>
-        <div style={{
-          height: '100%',
-          width: `${progress.percentage}%`,
-          backgroundColor: 'var(--app-color-success)',
-          borderRadius: 3,
-          transition: 'width 0.4s ease'
-        }} />
+      <div className="progress-bar progress-sm">
+        <div
+          className="progress-fill progress-success"
+          style={{ width: `${progress.percentage}%` }}
+        />
       </div>
 
       {/* Steps */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <div className="flex flex-col gap-1">
         {steps.map((step) => {
           const isComplete = step.status === 'completed';
 
           return (
             <div
               key={step.id}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                padding: '0.5rem 0',
-                opacity: isComplete ? 0.6 : 1
-              }}
+              className="flex items-center gap-2 py-1"
+              style={{ opacity: isComplete ? 0.6 : 1 }}
             >
               {/* Status icon */}
               {isComplete ? (
-                <CheckCircle size={18} style={{ color: 'var(--app-color-success)', flexShrink: 0 }} />
+                <CheckCircle size={18} className="text-success shrink-0" />
               ) : (
-                <Circle size={18} style={{ color: 'var(--app-color-text-muted)', flexShrink: 0 }} />
+                <Circle size={18} className="text-muted shrink-0" />
               )}
 
               {/* Step icon + label */}
-              <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div className="flex-1 flex items-center gap-1">
                 {getStepIcon(step.stepType)}
                 <div>
-                  <span style={{
-                    fontWeight: 500,
-                    textDecoration: isComplete ? 'line-through' : 'none',
-                    fontSize: '0.9rem'
-                  }}>
+                  <span
+                    className="font-medium text-sm"
+                    style={{ textDecoration: isComplete ? 'line-through' : 'none' }}
+                  >
                     {step.label}
                   </span>
                   {step.description && !isComplete && (
-                    <p className="text-muted" style={{ fontSize: '0.8rem', margin: '0.1rem 0 0' }}>
+                    <p className="text-muted text-xs mt-0\.5">
                       {step.description}
                     </p>
                   )}
@@ -180,21 +159,19 @@ export function OnboardingCard({
 
               {/* Action */}
               {!isComplete && (
-                <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                <div className="flex gap-1 shrink-0">
                   {step.navigateTab && (
                     <button
-                      className="btn-secondary"
+                      className="btn-secondary btn-sm"
                       onClick={() => handleStepNavigate(step)}
-                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
                     >
                       Go <ChevronRight size={12} />
                     </button>
                   )}
                   {!step.autoDetect && (
                     <button
-                      className="btn-secondary"
+                      className="btn-secondary btn-sm"
                       onClick={() => handleStepComplete(step.id)}
-                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
                     >
                       Done
                     </button>

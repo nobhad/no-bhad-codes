@@ -5,7 +5,8 @@
 
 import * as React from 'react';
 import { useState, useMemo } from 'react';
-import { FileText, ChevronRight, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { FileText, ChevronRight } from 'lucide-react';
+import { StatusIcon } from '@react/components/portal/StatusIcon';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { ProgressBar } from '@react/components/portal';
 import { IconButton } from '@react/factories';
@@ -25,23 +26,6 @@ import type {
 import { formatCardDate } from '@react/utils/cardFormatters';
 import { usePortalData } from '@react/hooks/usePortalFetch';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-
-/**
- * Get status icon based on questionnaire status
- */
-function getStatusIcon(status: QuestionnaireStatus): React.ReactNode {
-  switch (status) {
-  case 'submitted':
-  case 'approved':
-    return <CheckCircle className="icon-sm text-status-completed" />;
-  case 'in_progress':
-    return <Clock className="icon-sm text-status-active" />;
-  case 'rejected':
-    return <AlertCircle className="icon-sm text-status-cancelled" />;
-  default:
-    return <FileText className="icon-sm" />;
-  }
-}
 
 /**
  * Filter questionnaire by search and status
@@ -203,7 +187,7 @@ export function PortalQuestionnairesView({
                 {/* Header: Icon, title, status */}
                 <div className="portal-card-header">
                   <div className="portal-card-title-group">
-                    {getStatusIcon(response.status)}
+                    {<StatusIcon status={response.status} className="icon-sm" />}
                     <div className="portal-card-title-group flex-col">
                       <span className="text-primary">
                         {response.questionnaire.title}

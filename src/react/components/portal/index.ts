@@ -157,3 +157,5 @@ export {
   EmptyStateError,
   type EmptyStateProps
 } from './EmptyState';
+export { StatusIcon } from './StatusIcon';
+export { DateWithIcon } from './DateWithIcon';
