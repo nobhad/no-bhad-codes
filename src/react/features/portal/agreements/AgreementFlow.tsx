@@ -96,9 +96,9 @@ export function AgreementFlow({
 
   if (isLoading) {
     return (
-      <div className="portal-card" style={{ textAlign: 'center', padding: '3rem' }}>
+      <div className="portal-card text-center p-4">
         <Loader2 size={32} className="animate-spin" style={{ margin: '0 auto' }} />
-        <p className="text-muted" style={{ marginTop: '1rem' }}>Loading agreement...</p>
+        <p className="text-muted mt-2">Loading agreement...</p>
       </div>
     );
   }
@@ -113,9 +113,9 @@ export function AgreementFlow({
 
   if (agreement.status === 'completed') {
     return (
-      <div className="portal-card" style={{ textAlign: 'center', padding: '3rem' }}>
-        <Check size={48} style={{ color: 'var(--app-color-success)', margin: '0 auto' }} />
-        <h3 style={{ marginTop: '1rem' }}>Agreement Complete</h3>
+      <div className="portal-card text-center p-4">
+        <Check size={48} className="text-success" style={{ margin: '0 auto' }} />
+        <h3 className="mt-2">Agreement Complete</h3>
         <p className="text-muted">All steps have been completed. Your project is ready to begin!</p>
       </div>
     );
@@ -129,7 +129,7 @@ export function AgreementFlow({
         currentStepOrder={agreement.currentStep}
       />
 
-      <div className="agreement-steps" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1.5rem' }}>
+      <div className="agreement-steps layout-stack mt-3">
         {agreement.steps.map((step) => {
           const isExpanded = expandedStep === step.id;
           const isCompleted = step.status === 'completed';
@@ -140,48 +140,26 @@ export function AgreementFlow({
             <div
               key={step.id}
               ref={(el) => { if (el) stepRefs.current.set(step.id, el); }}
-              className={`portal-card agreement-step ${isCompleted ? 'agreement-step--completed' : ''} ${isLocked ? 'agreement-step--locked' : ''}`}
-              style={{ opacity: isLocked ? 0.5 : 1 }}
+              className={`portal-card agreement-step ${isCompleted ? 'agreement-step--completed' : ''} ${isLocked ? 'agreement-step--locked opacity-50' : ''}`}
             >
               {/* Step header */}
               <button
-                className="agreement-step__header"
+                className="agreement-step__header layout-row-between w-full text-left btn-unstyled"
                 onClick={() => !isLocked && handleToggleStep(step.id)}
                 disabled={isLocked}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  width: '100%',
-                  background: 'none',
-                  border: 'none',
-                  padding: '0.75rem 0',
-                  cursor: isLocked ? 'not-allowed' : 'pointer',
-                  textAlign: 'left'
-                }}
+                style={{ padding: 'var(--space-1-5) 0', cursor: isLocked ? 'not-allowed' : 'pointer' }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div className="layout-row gap-2">
                   {isCompleted ? (
-                    <Check size={18} style={{ color: 'var(--app-color-success)' }} />
+                    <Check size={18} className="text-success" />
                   ) : isLocked ? (
-                    <Lock size={18} style={{ color: 'var(--app-color-text-muted)' }} />
+                    <Lock size={18} className="text-muted" />
                   ) : (
-                    <div style={{
-                      width: 18,
-                      height: 18,
-                      borderRadius: '50%',
-                      border: '2px solid var(--app-color-primary)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '0.7rem',
-                      fontWeight: 600,
-                      color: 'var(--app-color-primary)'
-                    }}>
+                    <div className="flex items-center justify-center font-semibold text-accent" style={{ width: '1.125rem', height: '1.125rem', borderRadius: '50%', border: 'var(--border-width) solid var(--color-accent)', fontSize: 'var(--font-size-xs)' }}>
                       {step.stepOrder + 1}
                     </div>
                   )}
-                  <span style={{ fontWeight: 500 }}>{label}</span>
+                  <span className="font-medium">{label}</span>
                 </div>
 
                 {!isLocked && (
@@ -191,7 +169,7 @@ export function AgreementFlow({
 
               {/* Step body */}
               {isExpanded && !isLocked && (
-                <div className="agreement-step__body" style={{ paddingBottom: '0.75rem' }}>
+                <div className="agreement-step__body" style={{ paddingBottom: 'var(--space-1-5)' }}>
                   {renderStepContent(step, () => handleStepComplete(step), getAuthToken)}
                 </div>
               )}
