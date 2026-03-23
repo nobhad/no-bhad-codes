@@ -110,7 +110,7 @@ export function PortalProposalDetail({
   return (
     <div ref={containerRef} className="section">
       {/* Back button */}
-      <button className="btn-ghost" onClick={() => navigate('/documents')} style={{ marginBottom: 'var(--spacing-md)' }}>
+      <button className="btn-ghost mb-2" onClick={() => navigate('/documents')}>
         <ArrowLeft className="icon-xs" />
         Back to Documents
       </button>
@@ -138,7 +138,7 @@ export function PortalProposalDetail({
       </div>
 
       {/* Pricing card */}
-      <div className="portal-card" style={{ marginTop: 'var(--spacing-md)' }}>
+      <div className="portal-card mt-2">
         <div className="portal-card-header">
           <h3 className="text-primary">
             <DollarSign className="icon-xs" /> Pricing
@@ -155,7 +155,7 @@ export function PortalProposalDetail({
           </div>
           <div className="portal-detail-item">
             <span className="label">Total Price</span>
-            <span className="text-primary" style={{ fontSize: 'var(--font-size-lg)' }}>
+            <span className="text-primary text-lg">
               {formatCurrency(proposal.finalPrice)}
             </span>
           </div>
@@ -170,7 +170,7 @@ export function PortalProposalDetail({
 
       {/* Features */}
       {proposal.features.length > 0 && (
-        <div className="portal-card" style={{ marginTop: 'var(--spacing-md)' }}>
+        <div className="portal-card mt-2">
           <div className="portal-card-header">
             <h3 className="text-primary">
               <Check className="icon-xs" /> Included Features ({includedFeatures.length})
@@ -194,7 +194,7 @@ export function PortalProposalDetail({
                     <ul className="portal-feature-items">
                       {included.map(f => (
                         <li key={f.featureId} className="portal-feature-item">
-                          <Check className="icon-xs" style={{ color: 'var(--status-completed)' }} />
+                          <Check className="icon-xs text-status-completed" />
                           <span>{f.featureName}</span>
                         </li>
                       ))}
@@ -209,7 +209,7 @@ export function PortalProposalDetail({
 
       {/* Addon features */}
       {addonFeatures.length > 0 && (
-        <div className="portal-card" style={{ marginTop: 'var(--spacing-md)' }}>
+        <div className="portal-card mt-2">
           <div className="portal-card-header">
             <h3 className="text-primary">Add-On Features ({addonFeatures.length})</h3>
           </div>
@@ -228,7 +228,7 @@ export function PortalProposalDetail({
 
       {/* Maintenance plan */}
       {maintenanceLabel && (
-        <div className="portal-card" style={{ marginTop: 'var(--spacing-md)' }}>
+        <div className="portal-card mt-2">
           <div className="portal-card-header">
             <h3 className="text-primary">
               <Wrench className="icon-xs" /> Maintenance Plan
@@ -243,7 +243,7 @@ export function PortalProposalDetail({
               <div className="portal-detail-item">
                 <span className="label">Included</span>
                 <span className="text-primary">
-                  <Shield className="icon-xs" style={{ color: 'var(--status-completed)' }} /> 3 months included with Best tier
+                  <Shield className="icon-xs text-status-completed" /> 3 months included with Best tier
                 </span>
               </div>
             )}
@@ -253,17 +253,17 @@ export function PortalProposalDetail({
 
       {/* Client notes */}
       {proposal.clientNotes && (
-        <div className="portal-card" style={{ marginTop: 'var(--spacing-md)' }}>
+        <div className="portal-card mt-2">
           <div className="portal-card-header">
             <h3 className="text-primary">Notes</h3>
           </div>
-          <p className="text-secondary" style={{ whiteSpace: 'pre-wrap' }}>{proposal.clientNotes}</p>
+          <p className="text-secondary whitespace-pre-wrap">{proposal.clientNotes}</p>
         </div>
       )}
 
       {/* Accept/Decline actions */}
       {canAccept && !showConfirm && (
-        <div className="portal-detail-actions" style={{ marginTop: 'var(--spacing-lg)' }}>
+        <div className="portal-detail-actions mt-lg">
           <button className="btn btn-primary" onClick={() => setShowConfirm(true)}>
             <Check className="icon-xs" />
             Accept Proposal
@@ -273,7 +273,7 @@ export function PortalProposalDetail({
 
       {/* Confirmation */}
       {showConfirm && (
-        <div className="portal-card portal-card--highlight" style={{ marginTop: 'var(--spacing-lg)' }}>
+        <div className="portal-card portal-card--highlight mt-lg">
           <div className="portal-card-header">
             <h3 className="text-primary">Confirm Acceptance</h3>
           </div>
@@ -281,7 +281,7 @@ export function PortalProposalDetail({
             By accepting this proposal, you agree to the scope and pricing described above.
             Your project will be set up and you will be guided through the next steps.
           </p>
-          <div className="portal-detail-actions" style={{ marginTop: 'var(--spacing-md)' }}>
+          <div className="portal-detail-actions mt-2">
             <button className="btn btn-primary" onClick={handleAccept} disabled={accepting}>
               {accepting ? 'Accepting...' : 'Confirm Acceptance'}
             </button>
@@ -295,9 +295,9 @@ export function PortalProposalDetail({
 
       {/* Already accepted message */}
       {proposal.status === 'accepted' && (
-        <div className="portal-card" style={{ marginTop: 'var(--spacing-lg)', borderColor: 'var(--status-completed)' }}>
+        <div className="portal-card mt-lg" style={{ borderColor: 'var(--status-completed)' }}>
           <p className="text-primary">
-            <Check className="icon-xs" style={{ color: 'var(--status-completed)' }} />{' '}
+            <Check className="icon-xs text-status-completed" />{' '}
             You accepted this proposal{proposal.reviewedAt ? ` on ${formatCardDate(proposal.reviewedAt)}` : ''}.
           </p>
         </div>

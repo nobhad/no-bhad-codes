@@ -145,6 +145,57 @@
       ]
     },
     {
+      "id": "hedgewitch-horticulture",
+      "title": "Hedgewitch Horticulture",
+      "slug": "hedgewitch-horticulture",
+      "tagline": "Custom website for a sustainable garden design studio",
+      "description": "A custom-designed website for Hedgewitch Horticulture, a sustainable garden design and maintenance studio serving Greater Boston. Replaced their existing Squarespace site with a performance-optimized static build featuring scroll-driven animations, a 49-item portfolio gallery with lightbox, blog system, admin CMS, and an earthy Art Nouveau-inspired aesthetic that reflects the brand's earth-centered philosophy.",
+      "category": "websites",
+      "role": "Designer & Developer",
+      "tools": [
+        "Astro",
+        "TypeScript",
+        "GSAP",
+        "Three.js",
+        "Netlify",
+        "CSS"
+      ],
+      "year": 2026,
+      "technologies": [
+        "Astro",
+        "TypeScript",
+        "GSAP",
+        "Three.js",
+        "Netlify",
+        "CSS"
+      ],
+      "date": "2026-01-01",
+      "status": "in-progress",
+      "featured": true,
+      "heroImage": "",
+      "screenshots": [],
+      "isDocumented": true,
+      "titleCard": "",
+      "duration": "2 months",
+      "challenge": "The client's existing Squarespace site couldn't capture the earthy, witchy identity of their brand. They needed a site that felt handcrafted and organic\u2014not a cookie-cutter template\u2014while still being easy to maintain and performant on mobile for clients browsing from the garden.",
+      "approach": "Built a static site with Astro for near-instant load times and strong SEO. Designed a custom Art Nouveau-inspired visual system with corner frames, wavy SVG text paths, and GSAP scroll-driven animations including character-by-character reveals and parallax effects. Created a full gallery system with lightbox, blog with content collections, and an admin dashboard for self-service content management.",
+      "results": [
+        "26 custom pages built from scratch",
+        "49-item portfolio gallery with lightbox and filtering",
+        "Full admin CMS for blog posts, job listings, and messages",
+        "WCAG AA accessibility compliance throughout"
+      ],
+      "keyFeatures": [
+        "GSAP scroll-driven animations with pinned character reveals",
+        "Art Nouveau corner frames and wavy SVG text dividers",
+        "Three.js star field background effect",
+        "49-item gallery with lightbox and category filtering",
+        "Blog system powered by Astro Content Collections",
+        "Admin dashboard with Netlify Identity authentication",
+        "Netlify Forms with honeypot spam protection"
+      ]
+    },
+    {
       "id": "recycle-content",
       "title": "Recycle Content",
       "slug": "recycle-content",
@@ -237,7 +288,7 @@
       "id": "websites",
       "name": "Websites",
       "description": "Custom websites and landing pages",
-      "count": 2
+      "count": 3
     },
     {
       "id": "applications",

@@ -35,30 +35,18 @@ interface FeeBreakdownProps {
 
 function FeeBreakdown({ baseAmount, processingFee, totalAmount, currency }: FeeBreakdownProps) {
   return (
-    <div className="stripe-payment-form__breakdown" style={{
-      borderRadius: 6,
-      border: '1px solid var(--app-color-border)',
-      padding: '0.75rem 1rem',
-      marginBottom: '1rem'
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
+    <div className="stripe-payment-form__breakdown portal-card mb-2 py-1 px-3">
+      <div className="layout-row-between mb-1">
         <span>Subtotal</span>
         <span>{formatCentsAsDollars(baseAmount, currency)}</span>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem', fontSize: '0.9rem', color: 'var(--app-color-text-muted)' }}>
+      <div className="layout-row-between mb-1 text-sm text-muted">
         <span>Processing fee</span>
         <span>{formatCentsAsDollars(processingFee, currency)}</span>
       </div>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        borderTop: '1px solid var(--app-color-border)',
-        paddingTop: '0.5rem',
-        marginTop: '0.25rem',
-        fontWeight: 600
-      }}>
+      <div className="layout-row-between border-top font-semibold" style={{ paddingTop: 'var(--space-1)', marginTop: 'var(--space-0-5)' }}>
         <span>Total</span>
-        <span style={{ color: 'var(--app-color-primary)' }}>
+        <span className="text-accent">
           {formatCentsAsDollars(totalAmount, currency)}
         </span>
       </div>
@@ -72,19 +60,8 @@ function FeeBreakdown({ baseAmount, processingFee, totalAmount, currency }: FeeB
 
 function ProcessingFeeNotice() {
   return (
-    <div style={{
-      display: 'flex',
-      gap: '0.5rem',
-      alignItems: 'flex-start',
-      padding: '0.6rem 0.75rem',
-      borderRadius: 6,
-      backgroundColor: 'var(--app-color-bg-muted, #f5f5f5)',
-      fontSize: '0.8rem',
-      color: 'var(--app-color-text-muted)',
-      marginBottom: '1rem',
-      lineHeight: 1.45
-    }}>
-      <Info size={14} style={{ flexShrink: 0, marginTop: 2 }} />
+    <div className="layout-row-top text-xs text-muted mb-2" style={{ padding: 'var(--space-1) var(--space-1-5)', backgroundColor: 'var(--color-bg-raised)', lineHeight: 1.45 }}>
+      <Info size={14} className="shrink-0" style={{ marginTop: 'var(--space-0-25)' }} />
       <span>
         A processing fee is added to cover card payment costs. This fee is
         non-refundable and is the responsibility of the client.
@@ -146,8 +123,8 @@ function PaymentFormInner({
 
   if (state === 'success') {
     return (
-      <div className="portal-card" style={{ textAlign: 'center', padding: '2rem' }}>
-        <CheckCircle size={48} style={{ color: 'var(--app-color-success)', margin: '0 auto 1rem' }} />
+      <div className="portal-card text-center p-4">
+        <CheckCircle size={48} className="text-success" style={{ margin: '0 auto var(--space-2)' }} />
         <h3>Payment Successful</h3>
         <p className="text-muted">
           Your payment of {formatCentsAsDollars(totalCents, currency)} has been processed.
@@ -175,7 +152,7 @@ function PaymentFormInner({
       </div>
 
       {errorMessage && (
-        <div className="form-error-message" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.75rem' }}>
+        <div className="form-error-message layout-row gap-1 mt-2">
           <AlertCircle size={16} />
           {errorMessage}
         </div>
@@ -183,9 +160,8 @@ function PaymentFormInner({
 
       <button
         type="submit"
-        className="btn-primary"
+        className="btn-primary btn-full mt-2"
         disabled={!stripe || state === 'processing'}
-        style={{ width: '100%', marginTop: '1rem' }}
       >
         {state === 'processing' ? (
           <>
@@ -258,18 +234,18 @@ export function StripePaymentForm({
 
   if (loading) {
     return (
-      <div className="portal-card" style={{ textAlign: 'center', padding: '2rem' }}>
+      <div className="portal-card text-center p-4">
         <Loader2 size={24} className="animate-spin" style={{ margin: '0 auto' }} />
-        <p className="text-muted" style={{ marginTop: '0.5rem' }}>Initializing payment...</p>
+        <p className="text-muted mt-1">Initializing payment...</p>
       </div>
     );
   }
 
   if (error || !intentData) {
     return (
-      <div className="portal-card" style={{ textAlign: 'center', padding: '2rem' }}>
-        <AlertCircle size={24} style={{ color: 'var(--app-color-danger)', margin: '0 auto' }} />
-        <p className="form-error-message" style={{ marginTop: '0.5rem' }}>
+      <div className="portal-card text-center p-4">
+        <AlertCircle size={24} className="text-danger" style={{ margin: '0 auto' }} />
+        <p className="form-error-message mt-1">
           {error || 'Unable to initialize payment'}
         </p>
       </div>
