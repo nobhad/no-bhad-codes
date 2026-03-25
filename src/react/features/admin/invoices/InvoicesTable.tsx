@@ -140,7 +140,7 @@ function sortInvoices(a: Invoice, b: Invoice, sort: SortConfig): number {
  */
 export function InvoicesTable({
   getAuthToken,
-  onViewInvoice,
+  onViewInvoice: _onViewInvoice,
   onNavigate,
   showNotification: _showNotification,
   defaultPageSize = 25,
@@ -300,18 +300,6 @@ export function InvoicesTable({
       setActionLoading(null);
     },
     [downloadPdf]
-  );
-
-  // Handle view invoice
-  const handleViewInvoice = useCallback(
-    (invoiceId: number) => {
-      if (onViewInvoice) {
-        onViewInvoice(invoiceId);
-      } else if (onNavigate) {
-        onNavigate('invoice-detail', String(invoiceId));
-      }
-    },
-    [onViewInvoice, onNavigate]
   );
 
   // Handle row click — opens detail panel
