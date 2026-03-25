@@ -404,7 +404,7 @@ export function ExpensesTable({
     if (fetchedProjects.current) return;
     fetchedProjects.current = true;
     try {
-      const res = await apiFetch('/api/admin/projects');
+      const res = await apiFetch(API_ENDPOINTS.ADMIN.PROJECTS);
       if (res.ok) {
         const json = await res.json();
         const projects = (json.data?.projects || json.projects || []) as Array<{ id: number; name?: string; project_name?: string }>;

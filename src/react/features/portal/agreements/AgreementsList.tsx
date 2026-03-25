@@ -127,7 +127,7 @@ export function AgreementsList({
 
             {isActionable && (
               <div className="portal-card-body">
-                <button className="btn-primary btn-sm" type="button">
+                <button className="btn-primary btn-sm" type="button" onClick={(e) => { e.stopPropagation(); handleOpen(agreement.id); }}>
                   Continue <ArrowRight className="icon-xs" />
                 </button>
               </div>

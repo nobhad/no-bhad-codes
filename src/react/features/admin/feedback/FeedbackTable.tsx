@@ -214,7 +214,7 @@ export function FeedbackTable() {
     if (fetchedClients.current) return;
     fetchedClients.current = true;
     try {
-      const res = await apiFetch('/api/clients');
+      const res = await apiFetch(API_ENDPOINTS.CLIENTS);
       if (res.ok) {
         const json = await res.json();
         const list = (json.data?.clients || json.clients || []) as Array<{ id: number; name: string }>;
