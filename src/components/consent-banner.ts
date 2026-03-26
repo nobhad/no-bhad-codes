@@ -227,17 +227,6 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
         color: var(--color-text-primary);
       }
 
-      .consent-banner--dark .consent-banner__btn--secondary {
-        background: var(--color-bg-tertiary);
-        color: var(--color-text-primary);
-        border-color: var(--color-text-primary);
-      }
-
-      .consent-banner--dark .consent-banner__btn--secondary:hover {
-        background: var(--color-text-primary);
-        color: var(--color-bg-primary);
-        border-color: var(--color-text-primary);
-      }
 
       .consent-banner__content {
         display: flex;
@@ -335,15 +324,15 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
         gap: var(--icon-gap-md);
       }
 
-      /* Match portal button system: same padding, border, font, and text-transform.
-         Fallbacks ensure buttons render correctly on main site (no --portal-btn-* tokens). */
+      /* Consent banner buttons — uses the site's brutalist button tokens
+         but overrides border-bottom-width for a flatter look suited to the banner. */
       .consent-banner__btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         padding: var(--portal-btn-padding, var(--space-2, 8px) var(--space-4, 18px));
-        border: var(--portal-btn-border-width, 2px) solid var(--portal-btn-border-color, var(--color-text-primary));
-        border-bottom-width: var(--portal-btn-border-bottom-width, 6px);
+        border: var(--portal-btn-border-width, 2px) solid var(--color-text-primary);
+        border-bottom-width: var(--portal-btn-border-width, 2px);
         border-radius: var(--portal-btn-border-radius, 0);
         font-size: var(--portal-btn-font-size, var(--font-size-sm, 0.875rem));
         font-weight: var(--portal-btn-font-weight, 500);
@@ -357,33 +346,33 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
       }
 
       .consent-banner__btn:focus {
-        outline: var(--portal-btn-border-width, 2px) solid var(--color-text-secondary);
-        outline-offset: var(--portal-btn-border-width, 2px);
+        outline: 2px solid var(--color-text-secondary);
+        outline-offset: 2px;
         box-shadow: none;
       }
 
       .consent-banner__btn--primary {
-        background: var(--portal-btn-bg, inherit);
-        color: var(--portal-btn-color, var(--color-text-primary));
-        border-color: var(--portal-btn-border-color, var(--color-text-primary));
+        background: var(--color-text-primary);
+        color: var(--color-bg-primary);
+        border-color: var(--color-text-primary);
       }
 
       .consent-banner__btn--primary:hover {
-        background: var(--portal-btn-hover-bg, var(--color-text-primary));
-        color: var(--portal-btn-hover-color, var(--color-bg-primary));
-        border-color: var(--portal-btn-hover-border, var(--color-text-primary));
+        background: transparent;
+        color: var(--color-text-primary);
+        border-color: var(--color-text-primary);
       }
 
       .consent-banner__btn--secondary {
-        background: inherit;
-        color: var(--portal-btn-color, var(--color-text-primary));
-        border-color: var(--portal-btn-border-color, var(--color-text-primary));
+        background: transparent;
+        color: var(--color-text-primary);
+        border-color: var(--color-text-primary);
       }
 
       .consent-banner__btn--secondary:hover {
-        background: var(--portal-btn-hover-bg, var(--color-text-primary));
-        color: var(--portal-btn-hover-color, var(--color-bg-primary));
-        border-color: var(--portal-btn-hover-border, var(--color-text-primary));
+        background: var(--color-text-primary);
+        color: var(--color-bg-primary);
+        border-color: var(--color-text-primary);
       }
 
       .consent-banner__links {
