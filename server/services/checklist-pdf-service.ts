@@ -237,6 +237,36 @@ async function generateChecklistPdf(data: ChecklistPdfData): Promise<Uint8Array>
 // DRAWING HELPERS
 // ============================================
 
+/**
+ * Render text with inline **bold** segments.
+ * Splits on ** markers and alternates between regular and bold fonts.
+ */
+function drawInlineBoldText(
+  ctx: PdfPageContext,
+  text: string,
+  startX: number,
+  y: number,
+  size: number
+): void {
+  const parts = text.split(/\*\*/);
+  let curX = startX;
+
+  for (let i = 0; i < parts.length; i++) {
+    if (!parts[i]) continue;
+    const isBold = i % 2 === 1; // odd indices are inside ** markers
+    const font = isBold ? ctx.fonts.bold : ctx.fonts.regular;
+
+    ctx.currentPage.drawText(parts[i], {
+      x: curX,
+      y,
+      size,
+      font,
+      color: PDF_COLORS.black
+    });
+    curX += font.widthOfTextAtSize(parts[i], size);
+  }
+}
+
 function drawChecklistItem(ctx: PdfPageContext, item: ChecklistItem): void {
   const x = ctx.leftMargin;
 
@@ -264,7 +294,6 @@ function drawChecklistItem(ctx: PdfPageContext, item: ChecklistItem): void {
 
   // Label
   const labelX = x + CHECKBOX_SIZE + 6;
-  const font = item.required === false ? ctx.fonts.regular : ctx.fonts.regular;
   let labelText = item.label;
 
   // Priority tag
@@ -283,13 +312,8 @@ function drawChecklistItem(ctx: PdfPageContext, item: ChecklistItem): void {
     labelText += ` — due ${item.dueDate}`;
   }
 
-  ctx.currentPage.drawText(labelText, {
-    x: labelX,
-    y: ctx.y,
-    size: PDF_TYPOGRAPHY.bodySize,
-    font,
-    color: PDF_COLORS.black
-  });
+  // Render label with inline **bold** segments
+  drawInlineBoldText(ctx, labelText, labelX, ctx.y, PDF_TYPOGRAPHY.bodySize);
   ctx.y -= ITEM_LINE_HEIGHT;
 
   // Description (indented, smaller)
