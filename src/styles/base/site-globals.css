@@ -14,6 +14,40 @@ body {
   color: var(--color-dark);
 }
 
+/* Parchment texture overlay — subtle paper grain across the full site.
+   No z-index: overlay paints above static backgrounds but below any positioned
+   UI chrome (nav, modals, consent banner), which is the intended layering for
+   a texture. `pointer-events: none` keeps it click-through regardless. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--parchment-opacity, 0.06);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      color-mix(in srgb, var(--color-dark) 12%, transparent) 2px,
+      color-mix(in srgb, var(--color-dark) 12%, transparent) 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 4px,
+      color-mix(in srgb, var(--color-dark) 8%, transparent) 4px,
+      color-mix(in srgb, var(--color-dark) 8%, transparent) 5px
+    ),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 6px,
+      color-mix(in srgb, var(--color-dark) 4%, transparent) 6px,
+      color-mix(in srgb, var(--color-dark) 4%, transparent) 7px
+    );
+}
+
 /* Footer integration with theme */
 .footer .footer-text {
   opacity: 1;
