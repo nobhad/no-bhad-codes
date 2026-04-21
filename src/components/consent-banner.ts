@@ -107,10 +107,12 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
           <div class="consent-banner__text">
             <h3 class="consent-banner__title">I respect your privacy</h3>
             <p class="consent-banner__message">
-              ${companyName} uses cookies and similar technologies to enhance your browsing experience,
-              analyze site traffic, and understand visitor behavior. Your privacy is important to me.
+              ${companyName} uses cookies and similar technologies to analyze site traffic
+              and understand visitor behavior &mdash; so I can improve what I build.
+              <strong>I will never sell or share your data with anyone.</strong>
+              This is non-negotiable.
             </p>
-            
+
             ${showDetails ? this.renderDetails() : ''}
           </div>
           
@@ -175,15 +177,16 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
           <li><strong>Technical Info:</strong> Your browser type and screen size</li>
         </ul>
         
-        <h4>What I don't track:</h4>
+        <h4>What I will never do:</h4>
         <ul>
-          <li>Personal information without consent</li>
-          <li>Your identity across other websites</li>
-          <li>Sensitive personal data</li>
+          <li><strong>Sell or share your data</strong> &mdash; ever, with anyone</li>
+          <li>Track your identity across other websites</li>
+          <li>Collect sensitive personal data</li>
+          <li>Use dark patterns to harvest information</li>
         </ul>
-        
+
         <p class="consent-banner__note">
-          You can change your mind anytime by clearing your browser cookies or 
+          You can change your mind anytime by clearing your browser cookies or
           contacting me. Declining won't affect your ability to use the website.
         </p>
       </div>
@@ -192,14 +195,25 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
 
   private getStyles(): string {
     return ComponentUtils.css`
+      /* color-mix() requires Safari 16.3+. Each color-mix line is preceded by
+         a solid-token fallback — older browsers skip the invalid color-mix
+         declaration and use the preceding line. */
       .consent-banner {
         position: fixed;
         left: 0;
         right: 0;
-        background: var(--color-bg-secondary, #e0e0e0);
-        backdrop-filter: blur(10px);
-        border: var(--border-width, 2px) solid var(--color-border-primary);
-        box-shadow: var(--shadow-lg, 0 4px 20px rgba(0, 0, 0, 0.15));
+        overflow: hidden;
+        background: var(--color-bg-primary);
+        background: color-mix(in srgb, var(--color-bg-primary) 30%, transparent);
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+        border: none;
+        border-top: 1px solid var(--color-border-primary);
+        border-top: 1px solid color-mix(in srgb, white 20%, transparent);
+        border-left: 1px solid var(--color-border-primary);
+        border-left: 1px solid color-mix(in srgb, white 20%, transparent);
+        box-shadow: 0 -1px 24px var(--color-shadow);
+        box-shadow: 0 -1px 24px color-mix(in srgb, var(--color-text-primary) 8%, transparent);
         z-index: ${Z_INDEX_CONSENT_BANNER};
         font-family: var(--font-family-sans, system-ui, -apple-system, sans-serif);
         animation: slideIn var(--transition-fast, 0.2s) ease-out;
@@ -209,22 +223,37 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
         color: var(--color-text-primary, #171717);
       }
 
+      .consent-banner::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: transparent;
+        background: linear-gradient(
+          135deg,
+          color-mix(in srgb, white 15%, transparent),
+          color-mix(in srgb, white 5%, transparent)
+        );
+        border-radius: inherit;
+        pointer-events: none;
+      }
+
       .consent-banner--top {
         top: 0;
-        border-bottom: var(--border-width, 2px) solid var(--color-border-primary);
-        border-radius: 0 0 var(--border-radius-lg, 8px) var(--border-radius-lg, 8px);
       }
 
       .consent-banner--bottom {
         bottom: 0;
-        border-top: var(--border-width, 2px) solid var(--color-border-primary);
-        border-radius: var(--border-radius-lg, 8px) var(--border-radius-lg, 8px) 0 0;
       }
 
+      /* Dark mode: push more of the dark theme color into the mix so bright
+         backdrop content (title card, hero imagery) can't wash out the banner.
+         Light mode stays at 30% for a more translucent glass look. */
       .consent-banner--dark {
         background: var(--color-bg-primary);
-        border-color: var(--color-border-secondary);
-        color: var(--color-text-primary);
+        background: color-mix(in srgb, var(--color-bg-primary) 65%, transparent);
       }
 
 
@@ -240,10 +269,6 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
       .consent-banner__icon {
         flex-shrink: 0;
         margin-top: var(--space-0-5);
-        color: var(--color-text-primary);
-      }
-
-      .consent-banner--dark .consent-banner__icon {
         color: var(--color-text-primary);
       }
 
@@ -282,11 +307,6 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
         font-size: var(--font-size-xs);
         line-height: var(--line-height-normal);
         border: var(--border-width) solid var(--color-border-secondary);
-      }
-
-      .consent-banner--dark .consent-banner__details {
-        background: var(--color-bg-tertiary);
-        border-color: var(--color-border-secondary);
       }
 
       .consent-banner__details h4 {
@@ -394,14 +414,6 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
       }
 
       .consent-banner__link:hover {
-        color: var(--color-accent);
-      }
-
-      .consent-banner--dark .consent-banner__link {
-        color: var(--color-text-tertiary);
-      }
-
-      .consent-banner--dark .consent-banner__link:hover {
         color: var(--color-accent);
       }
 
