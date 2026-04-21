@@ -9,6 +9,21 @@
  */
 
 /* ===============================================
+   PAGE-LEVEL DIMENSION TOKENS
+   One-off dimensions specific to this page. Kept
+   local (not promoted to the global design system)
+   because they're single-use.
+   =============================================== */
+:root {
+  --project-detail-content-max-width: 1000px;
+  --project-detail-back-btn-size: 80px;
+  --project-detail-image-phone-max: 300px;
+  --project-detail-image-phone-max-xs: 250px;
+  --project-detail-image-app-icon-max: 200px;
+  --project-detail-image-medium-max: 640px;
+}
+
+/* ===============================================
    PROJECT DETAIL PAGE
    =============================================== */
 
@@ -26,7 +41,7 @@
 /* Worksub wrapper - main content container, centered */
 .worksub-wrapper {
   width: 100%;
-  max-width: 1000px;
+  max-width: var(--project-detail-content-max-width);
   margin: 0 auto;
   padding-top: var(--space-8);
   display: flex;
@@ -40,7 +55,7 @@
   }
 
   .worksub-wrapper {
-    padding-top: 60px;
+    padding-top: var(--header-height);
   }
 }
 
@@ -52,8 +67,8 @@
   position: fixed;
   left: 3%;
   top: 50%;
-  width: 80px;
-  height: 80px;
+  width: var(--project-detail-back-btn-size);
+  height: var(--project-detail-back-btn-size);
   border-radius: 50%;
   background-color: var(--color-dark);
   box-shadow: var(--shadow-elevated-sm);
@@ -70,8 +85,8 @@
 }
 
 .back-button svg {
-  width: 40px;
-  height: 40px;
+  width: var(--icon-btn-size-lg);
+  height: var(--icon-btn-size-lg);
   stroke: var(--color-light);
   transform: rotate(9deg);
   transition:
@@ -120,8 +135,8 @@
 }
 
 .back-link svg {
-  width: 16px;
-  height: 16px;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
   stroke: currentColor;
   transition: transform var(--transition-mouse, 0.2s);
 }
@@ -233,7 +248,7 @@
 @media (--desktop) {
   .intro-left {
     flex-direction: column;
-    width: 240px;
+    width: var(--aside-width-narrow);
     flex-shrink: 0;
   }
 }
@@ -387,8 +402,8 @@
 }
 
 .section-heading-wrapper svg {
-  width: 24px;
-  height: 24px;
+  width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
   stroke: var(--color-dark);
   flex-shrink: 0;
   transition: stroke var(--transition-theme, 0.4s);
@@ -417,20 +432,20 @@
 /* Phone/mobile screenshots */
 .worksub-info figure img.phone-screen,
 .worksub-info figure img.mobile-page {
-  max-width: 300px;
+  max-width: var(--project-detail-image-phone-max);
   margin: 0 auto;
   border-radius: var(--border-radius-xl, 16px);
 }
 
 /* App icons */
 .worksub-info figure img.app-icon {
-  max-width: 200px;
+  max-width: var(--project-detail-image-app-icon-max);
   margin: 0 auto;
 }
 
 /* Medium size images */
 .worksub-info figure img.medium-image {
-  max-width: 640px;
+  max-width: var(--project-detail-image-medium-max);
   margin: 0 auto;
 }
 
@@ -469,8 +484,8 @@
 }
 
 .worksub-links a svg {
-  width: 20px;
-  height: 20px;
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
   stroke: currentColor;
 }
 
@@ -669,7 +684,7 @@
 
   .worksub-info figure img.phone-screen,
   .worksub-info figure img.mobile-page {
-    max-width: 250px;
+    max-width: var(--project-detail-image-phone-max-xs);
   }
 }
 
@@ -783,8 +798,8 @@
   position: absolute;
   left: 0;
   top: 0.5em;
-  width: 6px;
-  height: 6px;
+  width: var(--indicator-dot-sm);
+  height: var(--indicator-dot-sm);
   background-color: var(--color-dark);
   border-radius: var(--border-radius-full, 50%);
   transition: background-color var(--transition-theme, 0.4s);
@@ -797,8 +812,8 @@
 /* Results list uses same bullet style */
 .results-list li::before {
   content: "";
-  width: 6px;
-  height: 6px;
+  width: var(--indicator-dot-sm);
+  height: var(--indicator-dot-sm);
   background-color: var(--color-dark);
   border-radius: var(--border-radius-full, 50%);
 }
@@ -922,8 +937,8 @@
 }
 
 .project-nav-link svg {
-  width: 20px;
-  height: 20px;
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
   stroke: currentColor;
   flex-shrink: 0;
 }
@@ -1005,8 +1020,8 @@
   }
 
   .project-nav-link svg {
-    width: 14px;
-    height: 14px;
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
     margin-bottom: 0;
   }
 
