@@ -90,6 +90,7 @@
 
 /* About page */
 @import "./pages/about.css" layer(pages);
+@import "./pages/about-ink.css" layer(pages);
 
 /* Contact page */
 @import "./pages/contact.css" layer(pages);

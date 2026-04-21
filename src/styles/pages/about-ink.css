@@ -1,0 +1,153 @@
+/**
+ * ===============================================
+ * ABOUT PAGE - INK TREATMENT
+ * ===============================================
+ * @file src/styles/pages/about-ink.css
+ *
+ * Classic Looney Tunes ink-on-parchment aesthetic, scoped to the
+ * About section for the first pass. Applies shared SVG turbulence
+ * filters (defined once in index.html as #ink-wobble / #ink-wobble-bold)
+ * to give borders and key display elements organic, hand-inked edges
+ * — confident strokes with subtle weight variation, not scratchy.
+ *
+ * Rollout plan: once dialed in, promote the filter URLs + tuning tokens
+ * to a shared components/ink.css so other pages can opt in by
+ * targeting their own elements with the same filter references.
+ */
+
+/* ============================================
+ * INK TUNING TOKENS
+ * ============================================
+ * Scoped to about so tweaks here do not leak to other pages until
+ * we explicitly promote them. Values are named for intent, not size.
+ */
+.about-section {
+  --ink-divider-weight: 4px;
+  --ink-pool-radius: 5px;
+}
+
+/* ============================================
+ * ABOUT PHOTO - bold ink-wobble on the border
+ * ============================================
+ * The GIF's pixels stay readable (low-frequency turbulence = gentle
+ * displacement); the existing heavy border gains the hand-drawn edge
+ * that sells the ink feel. Border width is left to about.css /
+ * mobile/layout.css so desktop + mobile stay in sync.
+ */
+.about-section .about-photo {
+  filter: url(#ink-wobble-bold);
+}
+
+/* ============================================
+ * SECTION HEADING - inked letterforms
+ * ============================================
+ * Acme is already a bold display face. Large display sizes (4-6rem)
+ * tolerate the heavy filter and gain clear brush-pen edge variation.
+ * Large display sizes only — never apply to body text (readability).
+ */
+.about-section .section-heading {
+  filter: url(#ink-wobble-heavy);
+}
+
+/* ============================================
+ * PHOTO INK POOLS - corner junction dots
+ * ============================================
+ * Classic pen-ink touch: small dark "pools" where two strokes
+ * converge. Applied via four radial-gradients on a pseudo-element
+ * covering .about-image-column, then passed through the same wobble
+ * filter so the pools match the border's irregular ink character
+ * rather than reading as perfect CSS circles.
+ *
+ * Desktop only: .about-image-column hugs the photo on desktop
+ * (flex-shrink: 0), so the pseudo's corners land on the photo's
+ * corners. On mobile the column is width: 100% to center the photo,
+ * so corner pooling via this approach would sit on the viewport
+ * edges instead. Mobile treatment can be added later by wrapping
+ * the photo in an inline-block container.
+ */
+@media (--tablet) {
+  .about-section .about-image-column {
+    position: relative;
+  }
+
+  .about-section .about-image-column::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background:
+      radial-gradient(
+        circle at 0 0,
+        var(--color-dark) 0,
+        var(--color-dark) var(--ink-pool-radius),
+        transparent calc(var(--ink-pool-radius) + 1px)
+      ),
+      radial-gradient(
+        circle at 100% 0,
+        var(--color-dark) 0,
+        var(--color-dark) var(--ink-pool-radius),
+        transparent calc(var(--ink-pool-radius) + 1px)
+      ),
+      radial-gradient(
+        circle at 0 100%,
+        var(--color-dark) 0,
+        var(--color-dark) var(--ink-pool-radius),
+        transparent calc(var(--ink-pool-radius) + 1px)
+      ),
+      radial-gradient(
+        circle at 100% 100%,
+        var(--color-dark) 0,
+        var(--color-dark) var(--ink-pool-radius),
+        transparent calc(var(--ink-pool-radius) + 1px)
+      );
+    background-repeat: no-repeat;
+    filter: url(#ink-wobble-bold);
+  }
+}
+
+/* ============================================
+ * DIVIDER - thick brush stroke
+ * ============================================
+ * Replace the hairline hr with a bolder bar and let the filter give
+ * it organic taper at the ends.
+ */
+.about-section .section-divider,
+.about-section .about-divider {
+  border: none;
+  height: var(--ink-divider-weight);
+  background: var(--color-dark);
+  filter: url(#ink-wobble-bold);
+}
+
+/* ============================================
+ * ACCESSIBILITY - reduced motion + forced colors
+ * ============================================
+ * SVG filters are static here (no animation), but users who opt out
+ * of non-essential effects or rely on forced-colors mode get clean
+ * geometry instead of the displacement.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .about-section .about-photo,
+  .about-section .section-heading,
+  .about-section .section-divider,
+  .about-section .about-divider,
+  .about-section .about-image-column::before {
+    filter: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .about-section .about-photo,
+  .about-section .section-heading,
+  .about-section .section-divider,
+  .about-section .about-divider {
+    filter: none;
+  }
+
+  /* Hide purely decorative ink pools in forced-colors mode — they
+     do not carry information and can clash with user color schemes. */
+  .about-section .about-image-column::before {
+    display: none;
+  }
+}
