@@ -31,7 +31,7 @@
   padding-top: var(--space-8);
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
+  gap: var(--space-6);
 }
 
 @media (--tablet) {
@@ -342,7 +342,7 @@
   height: var(--space-0-5);
   border: none;
   background-color: var(--color-dark);
-  margin: var(--space-8) 0 0;
+  margin: var(--space-4) 0 0;
   border-radius: var(--border-radius-xs, 2px) 0 var(--border-radius-xs, 2px) var(--border-radius-xs, 2px);
   transition: background-color var(--transition-theme, 0.4s);
 }
@@ -357,7 +357,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-12);
-  margin: var(--space-8) 0;
+  margin: 0;
 }
 
 .worksub-info section {
@@ -444,7 +444,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-4);
-  padding: var(--space-8) 0;
+  padding: var(--space-4) 0;
   border-top: var(--border-width) solid var(--color-dark);
 }
 
@@ -723,7 +723,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-10);
-  margin: var(--space-8) 0;
+  margin: 0;
 }
 
 .case-study-section {
@@ -889,7 +889,7 @@
   justify-content: space-between;
   align-items: stretch;
   gap: var(--space-4);
-  padding-top: var(--space-8);
+  padding-top: var(--space-4);
   border-top: var(--border-width) solid var(--color-dark);
 }
 
