@@ -164,7 +164,7 @@ export const ANIMATION_SEQUENCES = {
   },
 
   TECH_MARQUEE: {
-    DURATION: 60, // seconds for one full loop — slow, smooth scroll
+    DURATION: 120, // seconds for one full loop — slow, readable strolling pace
     DUPLICATE_COUNT: 2 // number of content duplicates for seamless loop
   }
 } as const;
