@@ -221,6 +221,7 @@ export class SchedulerService {
   private autoPayRetryJob: SimpleTask | null = null;
   private asyncTaskDrainJob: SimpleTask | null = null;
   private asyncTaskPurgeJob: SimpleTask | null = null;
+  private idempotencyPurgeJob: SimpleTask | null = null;
   private isRunning = false;
 
   private constructor(config: Partial<SchedulerConfig> = {}) {
@@ -313,6 +314,10 @@ export class SchedulerService {
     // retention of anything that slipped through payload/error redaction.
     this.scheduleAsyncTaskPurge();
 
+    // Purge expired idempotency-key rows (7-day retention) alongside
+    // the async-task purge so both TTLs run in the same daily window.
+    this.scheduleIdempotencyPurge();
+
     // Start all scheduled jobs
     const jobs = [
       this.reminderJob,
@@ -332,7 +337,8 @@ export class SchedulerService {
       this.autoPayJob,
       this.autoPayRetryJob,
       this.asyncTaskDrainJob,
-      this.asyncTaskPurgeJob
+      this.asyncTaskPurgeJob,
+      this.idempotencyPurgeJob
     ].filter(Boolean);
 
     for (const job of jobs) {
@@ -437,6 +443,11 @@ export class SchedulerService {
     if (this.asyncTaskPurgeJob) {
       this.asyncTaskPurgeJob.stop();
       this.asyncTaskPurgeJob = null;
+    }
+
+    if (this.idempotencyPurgeJob) {
+      this.idempotencyPurgeJob.stop();
+      this.idempotencyPurgeJob = null;
     }
 
     this.isRunning = false;
@@ -887,6 +898,30 @@ export class SchedulerService {
         }
       } catch (error) {
         logger.error('[Scheduler] Error purging async_tasks:', {
+          error: error instanceof Error ? error : undefined
+        });
+      }
+    });
+  }
+
+  /**
+   * Purge expired idempotency_keys rows once a day (4:05 AM) — same
+   * retention philosophy as async_tasks, offset slightly so both
+   * DELETE scans don't contend for the same lock window.
+   */
+  private scheduleIdempotencyPurge(): void {
+    const IDEMPOTENCY_PURGE_CRON = '5 4 * * *'; // Daily at 4:05 AM
+    logger.info(`[Scheduler] Scheduling idempotency purge: ${IDEMPOTENCY_PURGE_CRON}`);
+
+    this.idempotencyPurgeJob = createSimpleTask(IDEMPOTENCY_PURGE_CRON, async () => {
+      try {
+        const { purgeIdempotencyKeys } = await import('../middleware/idempotency-key.js');
+        const deleted = await purgeIdempotencyKeys();
+        if (deleted > 0) {
+          logger.info(`[Scheduler] Idempotency keys purged: ${deleted}`);
+        }
+      } catch (error) {
+        logger.error('[Scheduler] Error purging idempotency_keys:', {
           error: error instanceof Error ? error : undefined
         });
       }

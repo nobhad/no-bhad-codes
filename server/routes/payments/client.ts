@@ -12,6 +12,7 @@
 import { Router, Response } from 'express';
 import { authenticateToken, requireClient } from '../../middleware/auth.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
+import { withIdempotencyKey } from '../../middleware/idempotency-key.js';
 import { stripePaymentService } from '../../services/stripe-payment-service.js';
 import { autoPayService } from '../../services/auto-pay-service.js';
 import { isStripeConfigured } from '../../services/integrations/stripe-service.js';
@@ -29,6 +30,11 @@ router.post(
   '/create-intent',
   authenticateToken,
   requireClient,
+  // Clients can opt into retry-safety by sending an Idempotency-Key.
+  // Without it, behaviour is unchanged. With it, a network retry
+  // returns the exact same PaymentIntent instead of risking a second
+  // Stripe round-trip.
+  withIdempotencyKey(),
   asyncHandler(async (req: JWTAuthRequest, res: Response) => {
     if (!isStripeConfigured()) {
       errorResponse(res, 'Stripe is not configured', 400, ErrorCodes.STRIPE_NOT_CONFIGURED);

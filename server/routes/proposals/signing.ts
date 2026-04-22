@@ -22,6 +22,7 @@ import {
   SignatureAuthorizationError
 } from './helpers.js';
 import { invalidateCache } from '../../middleware/cache.js';
+import { withIdempotencyKey } from '../../middleware/idempotency-key.js';
 import type { AuthenticatedRequest, SignatureAuthorizationReason } from './helpers.js';
 
 const SIGNATURE_TOKEN_REGEX = /^[a-f0-9]{32,64}$/i;
@@ -217,6 +218,11 @@ async function handleTokenSign(
 router.post(
   '/:id/sign',
   signatureRateLimiter,
+  // Optional Idempotency-Key — lets a signing client safely retry the
+  // POST without fear of recording two signature rows for the same
+  // token. Required for robust mobile clients whose network can drop
+  // partway through the request.
+  withIdempotencyKey(),
   invalidateCache(['proposals']),
   asyncHandler(async (req: Request, res: Response) => {
     const proposalId = parseInt(req.params.id, 10);
@@ -242,6 +248,7 @@ router.post(
 router.post(
   '/sign/:token',
   signatureRateLimiter,
+  withIdempotencyKey(),
   invalidateCache(['proposals']),
   asyncHandler(async (req: Request, res: Response) => {
     await handleTokenSign(req.params.token, null, req, res);
