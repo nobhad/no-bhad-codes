@@ -90,22 +90,21 @@ setInterval(() => {
 }, CLEANUP_INTERVAL);
 
 /**
- * Get client IP address from request
+ * Get client IP address from request.
+ *
+ * Uses req.ip, which is populated by Express using the trust-proxy
+ * setting (`app.set('trust proxy', 1)` in server/app.ts). That makes
+ * the read:
+ *   - correct behind our one known proxy (returns the real client IP)
+ *   - resistant to X-Forwarded-For spoofing from untrusted clients
+ *     (Express parses the header from the right based on the hop count)
+ *
+ * Previously this function read x-forwarded-for directly and took the
+ * leftmost entry, which a client could set themselves to shift their
+ * rate-limit bucket — collapsing all rate limits to ineffective.
  */
 function getClientIP(req: Request): string {
-  // Check for forwarded headers (common with proxies/load balancers)
-  const forwarded = req.headers['x-forwarded-for'];
-  if (forwarded) {
-    const ips = (typeof forwarded === 'string' ? forwarded : forwarded[0]).split(',');
-    return ips[0].trim();
-  }
-
-  const realIP = req.headers['x-real-ip'];
-  if (realIP) {
-    return typeof realIP === 'string' ? realIP : realIP[0];
-  }
-
-  return req.ip || req.socket.remoteAddress || 'unknown';
+  return req.ip || req.socket?.remoteAddress || 'unknown';
 }
 
 /**
