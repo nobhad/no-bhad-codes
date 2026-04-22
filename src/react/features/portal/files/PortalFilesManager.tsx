@@ -36,7 +36,7 @@ import type { PortalViewProps } from '../types';
 import { formatCardDate, formatFileSize } from '@react/utils/cardFormatters';
 import { usePortalData } from '@react/hooks/usePortalFetch';
 import { createLogger } from '@/utils/logger';
-import { getCsrfToken, CSRF_HEADER_NAME } from '@/utils/api-client';
+import { getCsrfToken, CSRF_HEADER_NAME, toFriendlyError } from '@/utils/api-client';
 import { downloadFile } from '@/utils/file-download';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { formatErrorMessage } from '@/utils/error-utils';
@@ -407,8 +407,13 @@ export function PortalFilesManager({
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Upload failed');
+          throw new Error(
+            await toFriendlyError(response, {
+              rateLimited: "You've uploaded a lot of files recently — please wait a moment.",
+              unavailable: 'File uploads are temporarily unavailable. Please try again shortly.',
+              fallback: 'Upload failed'
+            })
+          );
         }
 
         setUploadProgress(100);

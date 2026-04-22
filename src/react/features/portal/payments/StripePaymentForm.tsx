@@ -15,6 +15,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { Loader2, CreditCard, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { usePortalFetch } from '../../../hooks/usePortalFetch';
+import { isHttpApiError } from '@/utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 import { formatCentsAsDollars } from '../../../../constants/payments';
 import { StripeProvider } from './StripeProvider';
@@ -234,7 +235,19 @@ export function StripePaymentForm({
         }
       } catch (err) {
         if (!cancelled) {
-          const message = err instanceof Error ? err.message : 'Failed to initialize payment';
+          const message = isHttpApiError(err)
+            ? err.toFriendly({
+              unavailable:
+                  'Payments are temporarily unavailable. Please try again in a moment.',
+              rateLimited:
+                  'Too many payment attempts — please wait a moment and try again.',
+              conflict:
+                  "We're still processing your last attempt. Hang tight and try again shortly.",
+              fallback: 'Failed to initialize payment'
+            })
+            : err instanceof Error
+              ? err.message
+              : 'Failed to initialize payment';
           setError(message);
           setLoading(false);
           onError?.(message);

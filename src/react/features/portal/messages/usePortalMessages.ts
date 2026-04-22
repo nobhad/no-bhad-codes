@@ -12,7 +12,14 @@ import type {
   UpdateMessageResponse
 } from './types';
 import { createLogger } from '@/utils/logger';
-import { apiFetch, unwrapApiData, getCsrfToken, CSRF_HEADER_NAME, apiPost } from '@/utils/api-client';
+import {
+  apiFetch,
+  unwrapApiData,
+  getCsrfToken,
+  CSRF_HEADER_NAME,
+  apiPost,
+  toFriendlyError
+} from '@/utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { usePortalFetch } from '@react/hooks/usePortalFetch';
 import { TIMING } from '@/constants/timing';
@@ -222,7 +229,13 @@ export function usePortalMessages({
           });
 
           if (!response.ok) {
-            throw new Error('Failed to send message');
+            throw new Error(
+              await toFriendlyError(response, {
+                rateLimited: "You're sending messages a bit fast — please wait a moment.",
+                unavailable: 'Messaging is temporarily unavailable. Please try again shortly.',
+                fallback: 'Failed to send message'
+              })
+            );
           }
 
           data = unwrapApiData<SendMessageResponse>(await response.json());

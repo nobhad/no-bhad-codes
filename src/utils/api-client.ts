@@ -119,6 +119,116 @@ interface ApiErrorResponse {
 }
 
 /**
+ * Thrown by portalFetch / parseApiResponse when a call fails. Carries
+ * the HTTP status + the parsed error body so the catch site can
+ * branch on status (describeApiError / friendly messaging, special
+ * 409 handling, etc.) without having to hold onto the raw Response.
+ */
+export class HttpApiError extends Error {
+  readonly name = 'HttpApiError';
+  constructor(
+    public readonly status: number,
+    public readonly body: Partial<ApiErrorResponse>,
+    message?: string
+  ) {
+    super(message ?? body.message ?? body.error ?? `Request failed: ${status}`);
+    Object.setPrototypeOf(this, HttpApiError.prototype);
+  }
+
+  /** Convenience: turn this error into a user-facing string. */
+  toFriendly(options: FriendlyApiErrorOptions = {}): string {
+    // Synthesize a minimal Response-like for describeApiError.
+    const fakeResponse = { status: this.status } as Response;
+    return describeApiError(fakeResponse, this.body, options);
+  }
+}
+
+export function isHttpApiError(err: unknown): err is HttpApiError {
+  return err instanceof HttpApiError;
+}
+
+/**
+ * Per-callsite overrides for describeApiError. Most callers only need
+ * `fallback`; payment/signature flows that can hit 409 from the server's
+ * idempotency middleware often want to override `conflict` too.
+ */
+export interface FriendlyApiErrorOptions {
+  /** Shown when the error isn't one of the known status cases. */
+  fallback?: string;
+  /** Override the generic 429 message. */
+  rateLimited?: string;
+  /** Override the generic 503 (service-unavailable / circuit-open) message. */
+  unavailable?: string;
+  /** Override the 409 (conflict / idempotency-in-flight) message. */
+  conflict?: string;
+}
+
+/**
+ * Read the error body without consuming the response — safe to call
+ * even when a caller still needs the raw response object afterwards.
+ */
+export async function readApiErrorBody(
+  response: Response
+): Promise<Partial<ApiErrorResponse>> {
+  try {
+    return (await response.clone().json()) as Partial<ApiErrorResponse>;
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Map a non-OK Response (plus its parsed error body) to a user-facing
+ * string. Treats the resilience-layer status codes — 429 from the rate
+ * limiter, 503 from the circuit breaker / ServiceUnavailableError, 409
+ * from the idempotency middleware — as first-class signals so callers
+ * don't have to memorise the mapping.
+ */
+export function describeApiError(
+  response: Response,
+  errorPayload: Partial<ApiErrorResponse> | null | undefined,
+  options: FriendlyApiErrorOptions = {}
+): string {
+  const serverMessage = errorPayload?.message ?? errorPayload?.error;
+  switch (response.status) {
+  case 429:
+    return options.rateLimited
+        ?? 'Too many requests — please wait a moment and try again.';
+  case 503:
+    return options.unavailable
+        ?? 'This service is temporarily unavailable. Please try again shortly.';
+  case 409:
+    return options.conflict ?? serverMessage
+        ?? 'That action conflicts with the current state. Refresh and try again.';
+  case 413:
+    return 'That upload is too large. Please choose a smaller file.';
+  case 422:
+    return serverMessage ?? 'The request contained invalid data.';
+  case 401:
+    return 'Your session has expired. Please sign in again.';
+  case 403:
+    return serverMessage ?? "You don't have permission to do that.";
+  case 404:
+    return serverMessage ?? 'We couldn’t find what you were looking for.';
+  default:
+    return serverMessage ?? options.fallback ?? 'Something went wrong. Please try again.';
+  }
+}
+
+/**
+ * Convenience: read the body + describe in one await. Most callers
+ * want this in a catch path:
+ *   if (!response.ok) throw new Error(await toFriendlyError(response));
+ */
+export async function toFriendlyError(
+  response: Response,
+  options: FriendlyApiErrorOptions = {}
+): Promise<string> {
+  const body = await readApiErrorBody(response);
+  return describeApiError(response, body, options);
+}
+
+/**
  * Configuration for the API client
  */
 interface ApiClientConfig {

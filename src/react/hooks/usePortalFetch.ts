@@ -10,7 +10,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { unwrapApiData, apiFetch } from '../../utils/api-client';
+import { unwrapApiData, apiFetch, HttpApiError } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
 import { formatErrorMessage } from '@/utils/error-utils';
 
@@ -106,8 +106,10 @@ export function usePortalFetch({ getAuthToken }: UsePortalFetchOptions): UsePort
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const message = (errorData as { error?: string }).error || `Request failed: ${response.status}`;
-      throw new Error(message);
+      // Throw a rich error so the catch site can branch on status
+      // (rate-limited, circuit-open, idempotency-conflict) instead of
+      // string-matching a generic message.
+      throw new HttpApiError(response.status, errorData as Record<string, unknown>);
     }
 
     const json = await response.json();
