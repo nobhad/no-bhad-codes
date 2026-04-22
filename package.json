@@ -8,6 +8,8 @@
     "dev": "vite",
     "dev:server": "tsx watch server/app.ts",
     "dev:full": "concurrently --kill-others \"npm run dev\" \"npm run dev:server\" \"npm run tailwind:watch\"",
+    "start": "tsx server/app.ts",
+    "start:server": "tsx server/app.ts",
     "tailwind:build": "tailwindcss -i ./src/react/styles/globals.css -o ./src/react/styles/tailwind-generated.css --config ./tailwind.config.js",
     "tailwind:watch": "tailwindcss -i ./src/react/styles/globals.css -o ./src/react/styles/tailwind-generated.css --config ./tailwind.config.js --watch",
     "dev:quiet": "concurrently --kill-others -r \"npm run dev 2>/dev/null\" \"npm run dev:server\"",
