@@ -204,6 +204,19 @@ export class ProjectsModule extends BaseModule {
 
     // Update page title
     document.title = `${project.title} - No Bhad Codes`;
+
+    // Sync the TV channel index to the current detail slug so returning
+    // to the projects tile (via vertical scroll, compass, back button,
+    // or deep-link) shows the card the user was just reading. Fires a
+    // CustomEvent on window that PageTransitionModule picks up to keep
+    // its currentTvIndex in sync.
+    const documented = this.portfolioData.projects.filter((p) => p.isDocumented);
+    const idx = documented.findIndex((p) => p.slug === slug);
+    if (idx >= 0) {
+      window.dispatchEvent(
+        new CustomEvent('projects:active-slug-changed', { detail: { index: idx } })
+      );
+    }
   }
 
   /**
