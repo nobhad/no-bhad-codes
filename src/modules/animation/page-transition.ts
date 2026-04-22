@@ -116,6 +116,14 @@ const WHEEL_DELTA_THRESHOLD = 12;
  */
 const WHEEL_COOLDOWN_MS = 250;
 
+/**
+ * How many recent hashes to remember for back/forward direction inference.
+ * Two is enough to detect the most common case (user clicks back to the
+ * previous page); the cap stops the stack from growing unbounded across
+ * a long session.
+ */
+const NAV_HISTORY_CAP = 8;
+
 export class PageTransitionModule extends BaseModule {
   private container: HTMLElement | null = null;
   private siteMap: HTMLElement | null = null;
@@ -156,6 +164,22 @@ export class PageTransitionModule extends BaseModule {
    * mode (no blur — pan effect, like dragging an interactive map).
    */
   private pendingSlideDirection: Direction | null = null;
+
+  /**
+   * Stack of recent navigation hashes so we can tell user-initiated browser
+   * back/forward apart from programmatic hash changes — and infer a slide
+   * direction when popstate fires without a wheel-set pendingSlideDirection.
+   * Trimmed to last NAV_HISTORY_CAP entries to avoid unbounded growth.
+   */
+  private navHistory: string[] = [];
+
+  /**
+   * One-shot flag set by the popstate listener and consumed by the very
+   * next handleHashChange. Lets us infer a backward slide direction for
+   * user-initiated browser back/forward without affecting programmatic
+   * hash changes (which never fire popstate).
+   */
+  private popstateInFlight: boolean = false;
 
   /**
    * Index of the project channel currently shown on the CRT TV when the
@@ -549,6 +573,13 @@ export class PageTransitionModule extends BaseModule {
 
     this.boundHandleKeydown = this.handleKeydown.bind(this);
     window.addEventListener('keydown', this.boundHandleKeydown);
+
+    // popstate fires for browser back/forward (but not programmatic
+    // hash changes). Mark the next handleHashChange so it can infer a
+    // slide direction from history instead of falling through to blur.
+    window.addEventListener('popstate', () => {
+      this.popstateInFlight = true;
+    });
   }
 
   /**
@@ -568,16 +599,30 @@ export class PageTransitionModule extends BaseModule {
       pageId === 'project-detail' && this.currentPageId === 'project-detail';
 
     if (pageId && (pageId !== this.currentPageId || isCarousel)) {
-      // Consume any pending slide direction set by the wheel/keyboard handler.
-      // Slide mode pans without blur for the interactive-map feel.
-      let slideDir = this.pendingSlideDirection;
+      // Race protection: a stale pendingSlideDirection from a navigation
+      // that got dropped (e.g., wheel set direction → second wheel set a
+      // new direction → old hash fires) would slide the wrong way. Clear
+      // it if the popstate flag is set OR if the pending nav target
+      // doesn't match this hash. Wheel-set directions are consumed by
+      // the very next hash-change in the same tick, so any pending
+      // direction surviving past that is suspect.
+      const fromPopstate = this.popstateInFlight;
+      this.popstateInFlight = false;
+
+      let slideDir = fromPopstate ? null : this.pendingSlideDirection;
       this.pendingSlideDirection = null;
 
-      // Fallback: if no explicit slide direction was set but the transition
-      // involves project-detail (card click, browser back, etc.), infer one
-      // so the gallery feel is consistent across all entry points instead of
-      // sometimes blurring and sometimes sliding.
+      // Fallback inference. For popstate (browser back/forward), check
+      // history first to figure out direction; otherwise fall back to the
+      // project-detail-aware default.
+      if (!slideDir && fromPopstate) slideDir = this.inferDirectionFromHistory(hash);
       if (!slideDir) slideDir = this.inferSlideDirection(pageId);
+
+      // Push current hash to nav history so future popstates have context.
+      this.navHistory.push(hash);
+      if (this.navHistory.length > NAV_HISTORY_CAP) {
+        this.navHistory.splice(0, this.navHistory.length - NAV_HISTORY_CAP);
+      }
 
       if (slideDir) {
         void this.transitionTo(pageId, 'slide', slideDir);
@@ -585,6 +630,26 @@ export class PageTransitionModule extends BaseModule {
         void this.transitionTo(pageId);
       }
     }
+  }
+
+  /**
+   * Try to infer a slide direction from recent navigation history. If the
+   * new hash matches the entry just before the most recent one, the user
+   * went back — slide in the direction opposite to the one we'd pick going
+   * forward. Returns null if history doesn't help.
+   */
+  private inferDirectionFromHistory(newHash: string): Direction | null {
+    if (this.navHistory.length < 2) return null;
+    const prev = this.navHistory[this.navHistory.length - 2];
+    if (prev !== newHash) return null;
+    // User navigated back to the prior hash. Slide opposite of the
+    // entering-direction default (which is 'right' for project-detail
+    // entry, 'down' for forward map navigation). We don't know the exact
+    // pair, so default to 'left' for horizontal contexts and 'up' for
+    // vertical ones based on the destination.
+    const verticalTargets = new Set(['intro', 'about', 'contact']);
+    const targetPageId = this.getPageIdFromHash(newHash);
+    return targetPageId && verticalTargets.has(targetPageId) ? 'up' : 'left';
   }
 
   /**
@@ -1054,17 +1119,14 @@ export class PageTransitionModule extends BaseModule {
    * - 'blur' (default — used by nav menu, hash change, programmatic
    *   navigateTo): paw exit plays on intro exit, blur fades for everything
    *   else. This matches the pre-scroll-map navigation feel.
-   * - 'camera' (used only by the wheel + keyboard scroll-map handlers):
-   *   pure camera tween. NEVER plays the paw — scrolling around the map
-   *   should feel like camera panning, not a slow morph animation.
-   * - 'slide' (wheel/keyboard nav involving project-detail): pans
-   *   `.site-map` and `project-detail` as siblings — the entire detail card
-   *   slides off one side while the next page slides in from the opposite
-   *   side. NEVER plays the paw. Requires `slideDirection`.
+   * - 'slide' (all wheel/keyboard/pointer nav): pans `.site-map` and
+   *   off-map pages as siblings — the outgoing card slides off one side
+   *   while the incoming slides in from the opposite side. NEVER plays
+   *   the paw. Requires `slideDirection`.
    */
   async transitionTo(
     pageId: string,
-    mode: 'blur' | 'camera' | 'slide' = 'blur',
+    mode: 'blur' | 'slide' = 'blur',
     slideDirection: Direction | null = null
   ): Promise<void> {
     this.log('[PageTransitionModule] transitionTo called:', pageId, 'mode:', mode);
@@ -1097,26 +1159,12 @@ export class PageTransitionModule extends BaseModule {
     this.log(`Transitioning: ${this.currentPageId} -> ${pageId}`);
 
     try {
-      const fromIsMap = this.isMapPage(this.currentPageId);
       const toIsMap = this.isMapPage(pageId);
       const fromIsIntro = this.currentPageId === 'intro';
 
-      if (mode === 'camera' && fromIsMap && toIsMap && this.siteMap) {
+      if (mode === 'slide' && slideDirection && this.siteMap) {
         // ============================================
-        // MAP → MAP, CAMERA MODE (wheel/keyboard) — no paw, no blur
-        // ============================================
-        // When camera returns to intro from another map tile, the previous
-        // paw exit (if any) may have left the card translated off-screen.
-        // Snap it back to visible state BEFORE the camera tween starts so
-        // the card is already in place when the intro tile slides into view.
-        const toIsIntro = pageId === 'intro';
-        if (toIsIntro && !fromIsIntro) {
-          this.restoreIntroCardState();
-        }
-        await this.moveCamera(MAP_TILES[pageId as keyof typeof MAP_TILES], true);
-      } else if (mode === 'slide' && slideDirection && this.siteMap) {
-        // ============================================
-        // SLIDE MODE (project-detail nav) — full-card pan, no paw, no blur
+        // SLIDE MODE (all wheel/keyboard/pointer nav) — pan, no paw, no blur
         // ============================================
         await this.runSlideTransition(currentPage, targetPage, slideDirection);
       } else {
