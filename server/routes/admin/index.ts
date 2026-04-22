@@ -39,6 +39,7 @@ import aiRouter from './ai.js';
 import checklistPdfRouter from './checklist-pdf.js';
 import asyncTasksRouter from './async-tasks.js';
 import auditChainRouter from './audit-chain.js';
+import circuitBreakersRouter from './circuit-breakers.js';
 
 const router = express.Router();
 router.use(dashboardRouter);
@@ -72,5 +73,6 @@ router.use(aiRouter);
 router.use('/checklist-pdf', checklistPdfRouter);
 router.use(asyncTasksRouter);
 router.use(auditChainRouter);
+router.use(circuitBreakersRouter);
 export { router as adminRouter };
 export default router;
