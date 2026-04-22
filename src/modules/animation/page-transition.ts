@@ -78,19 +78,21 @@ const CAMERA_POSITIONS: Record<MapTile, { x: number; y: number }> = {
 type Direction = 'up' | 'down' | 'left' | 'right';
 
 const NEIGHBORS: Record<string, Partial<Record<Direction, string>>> = {
-  // From intro, ANY horizontal scroll (left or right) goes to projects.
-  // Hero stays reachable via direct link / nav menu but isn't on the
-  // wheel-driven path because scrolling for projects is the primary intent.
-  intro: { up: 'about', down: 'contact', left: 'projects', right: 'projects' },
+  // Vertical chain: intro → projects (down) → contact (down past last
+  // project channel). Up reverses. Horizontal from intro also enters
+  // projects so the carousel is reachable from any swipe direction.
+  intro: { up: 'about', down: 'projects', left: 'projects', right: 'projects' },
   about: { down: 'intro' },
-  contact: { up: 'intro' },
+  // contact returns up the chain to projects (lands on the LAST project
+  // channel — handled in tryNavigateDirection).
+  contact: { up: 'projects' },
   hero: { right: 'intro' },
-  // projects connects to about/contact vertically (skipping center) so users
-  // can hop sideways between the four cardinal map tiles. BOTH left and
-  // right scroll forward into project-detail (mirroring the intro tile,
-  // where both horizontal directions go to projects) — keeps the
-  // "scroll horizontally to dig deeper" gesture consistent.
-  projects: { left: 'project-detail', up: 'about', down: 'contact', right: 'project-detail' }
+  // projects: left/right enter the project-detail carousel; up/down do NOT
+  // exit immediately — they channel-surf the CRT TV through the project
+  // list, and only navigate to contact / intro when the user scrolls
+  // PAST the boundaries (down past last, up past first). All of that is
+  // resolved dynamically in tryNavigateDirection.
+  projects: { left: 'project-detail', right: 'project-detail' }
   // project-detail navigation is handled dynamically in tryNavigateDirection
   // because the previous/next neighbor depends on which slug is active.
 };
@@ -147,6 +149,15 @@ export class PageTransitionModule extends BaseModule {
    * mode (no blur — pan effect, like dragging an interactive map).
    */
   private pendingSlideDirection: Direction | null = null;
+
+  /**
+   * Index of the project channel currently shown on the CRT TV when the
+   * projects tile is active. Tracked here (not in ProjectsModule) because
+   * vertical scroll on projects is gated through tryNavigateDirection,
+   * which needs to know whether scrolling past the boundary should exit
+   * the tile or just cycle the TV.
+   */
+  private currentTvIndex: number = 0;
 
   /**
    * Snapshot of the project-detail element captured before content swap, used
@@ -571,18 +582,27 @@ export class PageTransitionModule extends BaseModule {
 
   /**
    * Infer a slide direction for hash-driven / router-driven navigation
-   * involving project-detail. Card clicks, browser back, and exit-to-home
-   * paths don't carry an explicit direction, but we still want the gallery
-   * pan to play instead of the blur swap.
+   * involving project-detail. Card clicks, browser back, and direct links
+   * don't carry an explicit direction, but we still want the gallery pan
+   * to play instead of the blur swap.
+   *
+   * Convention:
+   * - Going INTO the carousel (toward project-detail) defaults to 'right'
+   *   so the new card slides in from the right (forward feel).
+   * - Going OUT of the carousel (away from project-detail) defaults to
+   *   'left' so the next page slides in from the left (backward feel).
+   *   This makes browser back from a detail page visually flow backward
+   *   instead of jarringly sliding forward.
    */
   private inferSlideDirection(pageId: string): Direction | null {
-    // Anything ENTERING or LEAVING project-detail should slide.
-    if (this.currentPageId === 'projects' && pageId === 'project-detail') return 'right';
-    if (this.currentPageId === 'project-detail' && pageId === 'projects') return 'left';
-    if (this.currentPageId === 'project-detail' && pageId === 'project-detail') return 'right';
-    // project-detail exits: right past last project goes home, etc. Default
-    // to 'right' since that's the carousel-forward direction.
-    if (this.currentPageId === 'project-detail') return 'right';
+    // Carousel between detail pages — direction is ambiguous via hash;
+    // default to forward.
+    if (this.currentPageId === 'project-detail' && pageId === 'project-detail') {
+      return 'right';
+    }
+    // Leaving project-detail to anywhere → backward.
+    if (this.currentPageId === 'project-detail') return 'left';
+    // Entering project-detail from anywhere → forward.
     if (pageId === 'project-detail') return 'right';
     return null;
   }
@@ -835,19 +855,49 @@ export class PageTransitionModule extends BaseModule {
    */
   private tryNavigateDirection(direction: Direction): void {
     // Special case: on the projects tile, up/down channel-surfs the CRT TV
-    // preview through the project list instead of jumping to about/contact.
-    // Lets the user browse projects without leaving the page; left/right
-    // still nav (intro / first project-detail).
+    // preview through the project list. Only EXITS the tile when the user
+    // scrolls past the end (down at last channel → contact) or before the
+    // start (up at first channel → intro). Lets users browse the carousel
+    // without accidentally jumping off it. Left/right still enter the
+    // project-detail page directly.
     if (
       this.currentPageId === 'projects' &&
       (direction === 'up' || direction === 'down')
     ) {
+      const total = this.getProjectSlugs().length;
+      const delta = direction === 'down' ? 1 : -1;
+      const next = this.currentTvIndex + delta;
+
+      // Boundary: scroll past the end → exit the tile via the map.
+      if (total === 0 || next < 0 || next >= total) {
+        const targetPageId = direction === 'down' ? 'contact' : 'intro';
+        this.wheelCooldownUntil =
+          performance.now() + PAGE_ANIMATION.DURATION * 1000 + WHEEL_COOLDOWN_MS;
+        this.pendingSlideDirection = direction;
+        // Reset TV index when leaving so the next entry starts fresh.
+        // Going DOWN to contact means we'll come back UP onto last channel;
+        // going UP to intro means we'll come back DOWN onto first channel.
+        this.currentTvIndex = direction === 'down' ? total - 1 : 0;
+        void this.transitionTo(targetPageId, 'slide', direction);
+        return;
+      }
+
+      // Within bounds: just change the channel.
+      this.currentTvIndex = next;
       document.dispatchEvent(
-        new CustomEvent('projects:cycle-tv', { detail: { direction } })
+        new CustomEvent('projects:set-tv-channel', {
+          detail: { index: next, direction }
+        })
       );
       this.wheelCooldownUntil = performance.now() + WHEEL_COOLDOWN_MS + 200;
       return;
     }
+
+    // Special case: arriving on projects from contact (scrolled up) lands on
+    // the LAST project channel; arriving from intro (scrolled down) lands on
+    // the FIRST. The actual landing is handled below in transitionTo, but the
+    // index is set here in tryNavigateDirection's contact branch via the
+    // landing-side bookkeeping (see contact entry).
 
     // Dynamic case: scrolling on project-detail walks through the project
     // list. left/right cycle between projects (left-from-first → projects,
@@ -877,6 +927,31 @@ export class PageTransitionModule extends BaseModule {
     if (!targetPageId) return;
 
     this.wheelCooldownUntil = performance.now() + PAGE_ANIMATION.DURATION * 1000 + WHEEL_COOLDOWN_MS;
+
+    // Entering projects from outside: pre-set the TV channel index so the
+    // user lands on the natural starting channel for their direction.
+    //   down from intro  → first channel (start of carousel)
+    //   up from contact  → last channel  (end of carousel)
+    //   horizontal       → keep current index
+    if (targetPageId === 'projects') {
+      const slugs = this.getProjectSlugs();
+      if (slugs.length > 0) {
+        if (this.currentPageId === 'intro' && direction === 'down') {
+          this.currentTvIndex = 0;
+        } else if (this.currentPageId === 'contact' && direction === 'up') {
+          this.currentTvIndex = slugs.length - 1;
+        }
+        // Defer the channel-set until projects has actually mounted, so
+        // ProjectsModule's listener picks it up after its own render.
+        requestAnimationFrame(() => {
+          document.dispatchEvent(
+            new CustomEvent('projects:set-tv-channel', {
+              detail: { index: this.currentTvIndex, direction }
+            })
+          );
+        });
+      }
+    }
 
     // Special case: project-detail isn't a static route — it needs a slug.
     // Pick FIRST slug going right (forward) and LAST slug going left
@@ -1160,6 +1235,29 @@ export class PageTransitionModule extends BaseModule {
   }
 
   /**
+   * Defensive fallback when slide mode is requested but a required element
+   * (.site-map for map-tile transitions) isn't available. Behaves like the
+   * old blur-swap path so navigation still works on stripped-down pages.
+   */
+  private async runBlurFallback(
+    currentPage: PageConfig | undefined,
+    targetPage: PageConfig
+  ): Promise<void> {
+    if (currentPage?.element) await this.animateOut(currentPage);
+    this.hideOffMapPages();
+    if (targetPage.element) {
+      targetPage.element.classList.remove('page-hidden');
+      targetPage.element.classList.add('page-active');
+      gsap.set(targetPage.element, {
+        opacity: 0,
+        visibility: 'hidden',
+        filter: `blur(${PAGE_ANIMATION.BLUR_AMOUNT}px)`
+      });
+      await this.animateIn(targetPage);
+    }
+  }
+
+  /**
    * ============================================
    * SLIDE TRANSITION
    * ============================================
@@ -1198,12 +1296,21 @@ export class PageTransitionModule extends BaseModule {
     const fromIsMap = currentPage ? this.isMapPage(currentPage.id) : false;
     const toIsMap = this.isMapPage(targetPage.id);
 
+    // Defensive: if a map tile is involved but .site-map isn't in the DOM
+    // (shouldn't happen in production, but possible in stripped-down tests
+    // or if the page hasn't been migrated to the scroll-map structure),
+    // fall back to a plain blur transition rather than crashing.
+    if ((fromIsMap || toIsMap) && !this.siteMap) {
+      this.warn('runSlideTransition: site-map missing, falling back to blur');
+      return this.runBlurFallback(currentPage, targetPage);
+    }
+
     // Resolve the visual element to translate for each side. Map tiles share
     // a single .site-map container that holds the camera transform.
     const fromElement: HTMLElement | null = fromIsMap
       ? this.siteMap
       : currentPage?.element ?? null;
-    const toElement: HTMLElement = toIsMap ? this.siteMap! : targetPage.element;
+    const toElement: HTMLElement = (toIsMap ? this.siteMap : targetPage.element) as HTMLElement;
 
     // Baselines: a map element's resting transform IS its camera position;
     // off-map elements rest at 0.
@@ -1274,8 +1381,8 @@ export class PageTransitionModule extends BaseModule {
           gsap.set(ghost, { [axisProp]: 0 });
           gsap.to(ghost, {
             [axisProp]: outSign * 100,
-            duration: PAGE_ANIMATION.DURATION,
-            ease: PAGE_ANIMATION.EASE_OUT,
+            duration: PAGE_ANIMATION.SLIDE_DURATION,
+            ease: PAGE_ANIMATION.SLIDE_EASE,
             onComplete: () => {
               ghost.remove();
               resolve();
@@ -1287,8 +1394,8 @@ export class PageTransitionModule extends BaseModule {
       const realTween = new Promise<void>((resolve) => {
         gsap.to(toElement, {
           [axisProp]: inFinal,
-          duration: PAGE_ANIMATION.DURATION,
-          ease: PAGE_ANIMATION.EASE_OUT,
+          duration: PAGE_ANIMATION.SLIDE_DURATION,
+          ease: PAGE_ANIMATION.SLIDE_EASE,
           onComplete: resolve
         });
       });
@@ -1310,8 +1417,8 @@ export class PageTransitionModule extends BaseModule {
         new Promise<void>((resolve) => {
           gsap.to(fromElement, {
             [axisProp]: outFinal,
-            duration: PAGE_ANIMATION.DURATION,
-            ease: PAGE_ANIMATION.EASE_OUT,
+            duration: PAGE_ANIMATION.SLIDE_DURATION,
+            ease: PAGE_ANIMATION.SLIDE_EASE,
             onComplete: resolve
           });
         })
@@ -1321,8 +1428,8 @@ export class PageTransitionModule extends BaseModule {
       new Promise<void>((resolve) => {
         gsap.to(toElement, {
           [axisProp]: inFinal,
-          duration: PAGE_ANIMATION.DURATION,
-          ease: PAGE_ANIMATION.EASE_OUT,
+          duration: PAGE_ANIMATION.SLIDE_DURATION,
+          ease: PAGE_ANIMATION.SLIDE_EASE,
           onComplete: resolve
         });
       })
