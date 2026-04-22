@@ -86,9 +86,11 @@ const NEIGHBORS: Record<string, Partial<Record<Direction, string>>> = {
   contact: { up: 'intro' },
   hero: { right: 'intro' },
   // projects connects to about/contact vertically (skipping center) so users
-  // can hop sideways between the four cardinal map tiles, and right exits
-  // into the project-detail off-map page (slug resolved at navigation time).
-  projects: { left: 'intro', up: 'about', down: 'contact', right: 'project-detail' }
+  // can hop sideways between the four cardinal map tiles. BOTH left and
+  // right scroll forward into project-detail (mirroring the intro tile,
+  // where both horizontal directions go to projects) — keeps the
+  // "scroll horizontally to dig deeper" gesture consistent.
+  projects: { left: 'project-detail', up: 'about', down: 'contact', right: 'project-detail' }
   // project-detail navigation is handled dynamically in tryNavigateDirection
   // because the previous/next neighbor depends on which slug is active.
 };
