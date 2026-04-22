@@ -5,22 +5,18 @@
  * Centralized API configuration to avoid hardcoding
  */
 
+/**
+ * Runtime API configuration. Mirrors the `APIConfig` type used for
+ * `window.API_CONFIG` in src/types/global.d.ts so the window value is
+ * structurally assignable with no cast needed. The previous `endpoints`
+ * field was dead — the actual paths live in `authEndpoints` /
+ * `adminAuthEndpoints` below, and no caller read `apiConfig.endpoints`
+ * anywhere in the codebase.
+ */
 interface ApiConfig {
   baseUrl: string;
-  endpoints: {
-    auth: {
-      login: string;
-      logout: string;
-      refresh: string;
-      validate: string;
-      profile: string;
-      magicLink: string;
-      verifyMagicLink: string;
-    };
-    clients: string;
-    projects: string;
-    intake: string;
-  };
+  timeout?: number;
+  headers?: Record<string, string>;
 }
 
 /**
@@ -28,10 +24,8 @@ interface ApiConfig {
  */
 function getApiConfig(): ApiConfig {
   // Check if running in browser and get from window globals first
-  if (typeof window !== 'undefined') {
-    if (window.API_CONFIG) {
-      return window.API_CONFIG as unknown as ApiConfig;
-    }
+  if (typeof window !== 'undefined' && window.API_CONFIG) {
+    return window.API_CONFIG;
   }
 
   // Environment-based configuration
@@ -66,23 +60,7 @@ function getApiConfig(): ApiConfig {
     }
   }
 
-  return {
-    baseUrl,
-    endpoints: {
-      auth: {
-        login: '/api/auth/login',
-        logout: '/api/auth/logout',
-        refresh: '/api/auth/refresh',
-        validate: '/api/auth/validate',
-        profile: '/api/auth/profile',
-        magicLink: '/api/auth/magic-link',
-        verifyMagicLink: '/api/auth/verify-magic-link'
-      },
-      clients: '/api/clients',
-      projects: '/api/projects',
-      intake: '/api/intake'
-    }
-  };
+  return { baseUrl };
 }
 
 export const apiConfig = getApiConfig();
