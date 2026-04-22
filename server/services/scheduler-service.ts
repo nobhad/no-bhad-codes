@@ -821,7 +821,12 @@ export class SchedulerService {
         const result = await drainAsyncTasks();
         if (result.processed > 0 || result.failed > 0) {
           logger.info(
-            `[Scheduler] Async tasks drained: processed=${result.processed}, failed=${result.failed}`
+            `[Scheduler] Async tasks drained: processed=${result.processed}, failed=${result.failed}, dead=${result.dead}`
+          );
+        }
+        if (result.dead > 0) {
+          logger.warn(
+            `[Scheduler] ${result.dead} async task(s) moved to dead-letter state this tick — inspect /api/admin/async-tasks`
           );
         }
       } catch (error) {

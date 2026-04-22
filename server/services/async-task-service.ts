@@ -74,10 +74,12 @@ function backoffSeconds(attempt: number): number {
 export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
   processed: number;
   failed: number;
+  dead: number;
 }> {
   const db = getDatabase();
   let processed = 0;
   let failed = 0;
+  let dead = 0;
 
   for (let i = 0; i < batchSize; i++) {
     const candidate = await db.get<AsyncTaskRow>(
@@ -104,15 +106,21 @@ export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
 
     const handler = handlers.get(candidate.task_type);
     if (!handler) {
+      const reason = `No handler registered for task type: ${candidate.task_type}`;
       await db.run(
         `UPDATE async_tasks
             SET status = 'dead',
                 last_error = ?,
                 completed_at = datetime('now')
           WHERE id = ?`,
-        [`No handler registered for task type: ${candidate.task_type}`, candidate.id]
+        [reason, candidate.id]
       );
+      await logger.error('[AsyncTasks] Dead-lettered: no handler', {
+        category: 'ASYNC_TASKS',
+        metadata: { id: candidate.id, taskType: candidate.task_type }
+      });
       failed += 1;
+      dead += 1;
       continue;
     }
 
@@ -120,15 +128,21 @@ export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
     try {
       parsedPayload = JSON.parse(candidate.payload);
     } catch (parseErr) {
+      const reason = `Payload parse error: ${(parseErr as Error).message}`;
       await db.run(
         `UPDATE async_tasks
             SET status = 'dead',
                 last_error = ?,
                 completed_at = datetime('now')
           WHERE id = ?`,
-        [`Payload parse error: ${(parseErr as Error).message}`, candidate.id]
+        [reason, candidate.id]
       );
+      await logger.error('[AsyncTasks] Dead-lettered: payload parse error', {
+        category: 'ASYNC_TASKS',
+        metadata: { id: candidate.id, taskType: candidate.task_type, reason }
+      });
       failed += 1;
+      dead += 1;
       continue;
     }
 
@@ -157,10 +171,16 @@ export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
             WHERE id = ?`,
           [message, candidate.id]
         );
-        await logger.error('[AsyncTasks] Task exhausted retries', {
+        await logger.error('[AsyncTasks] Dead-lettered: retries exhausted', {
           category: 'ASYNC_TASKS',
-          metadata: { id: candidate.id, taskType: candidate.task_type, attempts: attemptsUsed }
+          metadata: {
+            id: candidate.id,
+            taskType: candidate.task_type,
+            attempts: attemptsUsed,
+            lastError: message
+          }
         });
+        dead += 1;
       } else {
         await db.run(
           `UPDATE async_tasks
@@ -175,5 +195,69 @@ export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
     }
   }
 
-  return { processed, failed };
+  return { processed, failed, dead };
+}
+
+export interface AsyncTaskStatusCounts {
+  pending: number;
+  running: number;
+  completed: number;
+  failed: number;
+  dead: number;
+}
+
+/**
+ * Count tasks grouped by status. Intended for an ops dashboard or
+ * admin health endpoint; a non-zero `dead` count means human attention
+ * is needed.
+ */
+export async function getAsyncTaskCounts(): Promise<AsyncTaskStatusCounts> {
+  const db = getDatabase();
+  const rows = await db.all<{ status: string; n: number }>(
+    'SELECT status, COUNT(*) AS n FROM async_tasks GROUP BY status'
+  );
+  const counts: AsyncTaskStatusCounts = {
+    pending: 0,
+    running: 0,
+    completed: 0,
+    failed: 0,
+    dead: 0
+  };
+  for (const row of rows) {
+    if (row.status in counts) {
+      counts[row.status as keyof AsyncTaskStatusCounts] = row.n;
+    }
+  }
+  return counts;
+}
+
+export interface AsyncTaskListItem {
+  id: number;
+  task_type: string;
+  status: string;
+  attempts: number;
+  max_attempts: number;
+  last_error: string | null;
+  next_attempt_at: string;
+  created_at: string;
+  completed_at: string | null;
+}
+
+export type AsyncTaskStatus = keyof AsyncTaskStatusCounts;
+
+export async function listAsyncTasks(
+  status: AsyncTaskStatus,
+  limit = 50
+): Promise<AsyncTaskListItem[]> {
+  const db = getDatabase();
+  const safeLimit = Math.min(Math.max(limit, 1), 500);
+  return db.all<AsyncTaskListItem>(
+    `SELECT id, task_type, status, attempts, max_attempts, last_error,
+            next_attempt_at, created_at, completed_at
+       FROM async_tasks
+      WHERE status = ?
+      ORDER BY COALESCE(completed_at, next_attempt_at) DESC
+      LIMIT ?`,
+    [status, safeLimit]
+  );
 }

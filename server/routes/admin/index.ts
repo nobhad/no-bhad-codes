@@ -37,6 +37,7 @@ import configRouter from './config.js';
 import invoicesRouter from './invoices.js';
 import aiRouter from './ai.js';
 import checklistPdfRouter from './checklist-pdf.js';
+import asyncTasksRouter from './async-tasks.js';
 
 const router = express.Router();
 router.use(dashboardRouter);
@@ -68,5 +69,6 @@ router.use(configRouter);
 router.use(invoicesRouter);
 router.use(aiRouter);
 router.use('/checklist-pdf', checklistPdfRouter);
+router.use(asyncTasksRouter);
 export { router as adminRouter };
 export default router;
