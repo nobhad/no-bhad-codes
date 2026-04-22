@@ -27,9 +27,12 @@
    PROJECT DETAIL PAGE
    =============================================== */
 
-/* Project detail section - full page layout */
+/* Project detail section - full page layout.
+   Forces display: flex over the page-active grid !important from
+   critical CSS so the wrapper inside gets centered horizontally
+   instead of stretching to fill the grid cell at the left edge. */
 .project-detail-section {
-  display: flex;
+  display: flex !important;
   flex-direction: column;
   align-items: center;
   padding: var(--space-4);
@@ -174,7 +177,7 @@
   .worksub-header {
     flex-direction: row;
     align-items: flex-start;
-    gap: var(--space-6);
+    gap: var(--space-8);
   }
 }
 
