@@ -82,7 +82,13 @@ const NEIGHBORS: Record<string, Partial<Record<Direction, string>>> = {
   about: { down: 'intro' },
   contact: { up: 'intro' },
   hero: { right: 'intro' },
-  projects: { left: 'intro' }
+  // projects connects to about/contact vertically (skipping center) so users
+  // can hop sideways between the four cardinal map tiles, and right exits
+  // into the project-detail off-map page (slug resolved at navigation time).
+  projects: { left: 'intro', up: 'about', down: 'contact', right: 'project-detail' },
+  // project-detail is off-map but receives left-arrow / wheel-left to bounce
+  // back to the projects tile (the input gates allow it as a special case).
+  'project-detail': { left: 'projects' }
 };
 
 /**
@@ -615,7 +621,10 @@ export class PageTransitionModule extends BaseModule {
     if (this.isTransitioning) return;
     if (performance.now() < this.wheelCooldownUntil) return;
     if (!this.introComplete) return;
-    if (!this.isMapPage(this.currentPageId)) return;
+    // Allow input on map tiles AND on project-detail (so users can scroll
+    // back left to projects). Other off-map pages (portal-login, admin)
+    // still keep their normal scroll-only behavior.
+    if (!this.isMapPage(this.currentPageId) && this.currentPageId !== 'project-detail') return;
 
     const dx = event.deltaX;
     const dy = event.deltaY;
@@ -658,7 +667,7 @@ export class PageTransitionModule extends BaseModule {
     if (this.isMobile && !this.enableOnMobile) return;
     if (this.isTransitioning) return;
     if (!this.introComplete) return;
-    if (!this.isMapPage(this.currentPageId)) return;
+    if (!this.isMapPage(this.currentPageId) && this.currentPageId !== 'project-detail') return;
 
     const target = event.target as HTMLElement | null;
     if (target) {
@@ -701,9 +710,24 @@ export class PageTransitionModule extends BaseModule {
     if (!targetPageId) return;
 
     this.wheelCooldownUntil = performance.now() + PAGE_ANIMATION.DURATION * 1000 + WHEEL_COOLDOWN_MS;
-    // Wheel/keyboard input passes mode='camera' so the paw exit animation
-    // never plays — only nav-menu link clicks trigger the paw.
-    void this.transitionTo(targetPageId, 'camera');
+
+    // Special case: project-detail isn't a static route — it needs a slug.
+    // Pull the first project's slug from the rendered projects list and set
+    // the hash; the existing hashchange handler will run the transition.
+    if (targetPageId === 'project-detail') {
+      const firstLink = document.querySelector(
+        '#projects a[href^="#/projects/"]'
+      ) as HTMLAnchorElement | null;
+      const slug = firstLink?.getAttribute('href')?.replace('#/projects/', '');
+      if (!slug) return;
+      window.location.hash = `#/projects/${slug}`;
+      return;
+    }
+
+    // Going FROM project-detail back to a map tile uses blur (off-map →
+    // map). Other map → map navigation uses camera mode.
+    const mode = this.currentPageId === 'project-detail' ? 'blur' : 'camera';
+    void this.transitionTo(targetPageId, mode);
   }
 
   /**
