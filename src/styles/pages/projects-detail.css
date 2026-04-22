@@ -740,22 +740,22 @@
 .worksub-case-study {
   display: flex;
   flex-direction: column;
-  gap: var(--space-10);
+  gap: var(--space-5);
   margin: 0;
 }
 
 .case-study-section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-2);
 }
 
 .case-study-heading {
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--color-dark);
   margin: 0;
-  padding-bottom: var(--space-2);
+  padding-bottom: var(--space-1);
   border-bottom: var(--border-width) solid var(--color-dark);
 }
 
@@ -765,8 +765,8 @@
 }
 
 .case-study-text {
-  font-size: var(--font-size-lg);
-  line-height: 1.7;
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
   color: var(--color-dark);
   margin: 0;
 }
@@ -781,14 +781,14 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-1);
 }
 
 .case-study-list li {
   position: relative;
-  padding-left: var(--space-6);
-  font-size: var(--font-size-md);
-  line-height: var(--line-height-relaxed);
+  padding-left: var(--space-4);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
   color: var(--color-dark);
 }
 
