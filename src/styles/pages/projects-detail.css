@@ -164,6 +164,10 @@
 .worksub-header figure {
   margin: 0;
   aspect-ratio: 12 / 7;
+  /* Cap hero height so the intro section fits in the initial viewport
+     even on tall desktops. The aspect-ratio still drives shape on
+     narrower screens where the cap doesn't apply. */
+  max-height: 32vh;
   overflow: hidden;
   border-radius: 12px;
   box-shadow: var(--shadow-elevated-md);
