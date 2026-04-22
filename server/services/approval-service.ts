@@ -7,6 +7,7 @@
  */
 
 import { getDatabase } from '../database/init.js';
+import { NotFoundError, ValidationError } from '../utils/app-errors.js';
 
 // ============================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -241,7 +242,7 @@ class ApprovalService {
     }
 
     if (!definition) {
-      throw new Error(`No workflow definition found for entity type: ${entityType}`);
+      throw new NotFoundError(`workflow definition for ${entityType}`);
     }
 
     // Create workflow instance
@@ -344,9 +345,9 @@ class ApprovalService {
 
     // Get request and verify
     const requestRow = await db.get(`SELECT ${APPROVAL_REQUEST_COLUMNS} FROM approval_requests WHERE id = ?`, [requestId]);
-    if (!requestRow) throw new Error('Approval request not found');
+    if (!requestRow) throw new NotFoundError('approval request');
     const request = requestRow as unknown as ApprovalRequest;
-    if (request.status !== 'pending') throw new Error('Request already processed');
+    if (request.status !== 'pending') throw new ValidationError('Request already processed');
 
     // Update request
     await db.run(
@@ -381,9 +382,9 @@ class ApprovalService {
 
     // Get request and verify
     const requestRow = await db.get(`SELECT ${APPROVAL_REQUEST_COLUMNS} FROM approval_requests WHERE id = ?`, [requestId]);
-    if (!requestRow) throw new Error('Approval request not found');
+    if (!requestRow) throw new NotFoundError('approval request');
     const request = requestRow as unknown as ApprovalRequest;
-    if (request.status !== 'pending') throw new Error('Request already processed');
+    if (request.status !== 'pending') throw new ValidationError('Request already processed');
 
     // Update request
     await db.run(

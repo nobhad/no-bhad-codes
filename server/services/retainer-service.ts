@@ -25,6 +25,7 @@ import type {
   BillingResult,
   UsageAlertResult
 } from './retainer-types.js';
+import { NotFoundError } from '../utils/app-errors.js';
 
 // ============================================
 // Date Helpers
@@ -440,10 +441,10 @@ async function closePeriod(retainerId: number): Promise<void> {
     [retainerId]
   )) as RetainerRow | undefined;
 
-  if (!retainer) throw new Error('Retainer not found');
+  if (!retainer) throw new NotFoundError('retainer');
 
   const currentPeriod = await getCurrentPeriod(retainerId);
-  if (!currentPeriod) throw new Error('No active period found');
+  if (!currentPeriod) throw new NotFoundError('active retainer period');
 
   // Close current period
   await db.run(
@@ -657,7 +658,7 @@ async function recalculateUsedHours(periodId: number): Promise<void> {
     [periodId]
   )) as (RetainerPeriodRow & { project_id: number }) | undefined;
 
-  if (!period) throw new Error('Period not found');
+  if (!period) throw new NotFoundError('retainer period');
 
   const result = (await db.get(
     `SELECT COALESCE(SUM(hours), 0) AS total_hours
