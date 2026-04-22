@@ -510,13 +510,20 @@ export class IntroAnimationModule extends BaseModule {
       businessCard.style.opacity = '1';
     }
 
-    // Then hide the overlay after a brief delay so both cards overlap
+    // Fade the morph overlay out so the static card underneath is revealed
+    // smoothly instead of snap-replacing. playExitAnimation re-shows the
+    // overlay (sets visibility:visible) when needed, so we can safely
+    // tween opacity here and finish with visibility:hidden.
     if (this.morphOverlay) {
-      // The cardLayer in the overlay is now covered by the static card
-      // Use a tiny delay to ensure the static card is fully rendered
-      gsap.delayedCall(0.05, () => {
-        if (this.morphOverlay) {
-          this.morphOverlay.style.visibility = 'hidden';
+      gsap.to(this.morphOverlay, {
+        opacity: 0,
+        duration: 0.6,
+        ease: 'power2.out',
+        onComplete: () => {
+          if (this.morphOverlay) {
+            this.morphOverlay.style.visibility = 'hidden';
+            this.morphOverlay.style.opacity = '';
+          }
         }
       });
     }
