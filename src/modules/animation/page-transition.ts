@@ -809,11 +809,12 @@ export class PageTransitionModule extends BaseModule {
 
     // Only preventDefault if this direction actually navigates somewhere.
     // - Map tiles: check the static NEIGHBORS graph
-    // - project-detail: only left/right navigate (carousel); up/down fall
-    //   through to native scroll so users can read tall case studies
+    // - project-detail: only left/right navigate (carousel between projects);
+    //   up/down fall through to native scroll so users can read tall case
+    //   studies. Vertical scroll on project-detail must NOT exit to the map.
     const willNavigate =
       this.currentPageId === 'project-detail'
-        ? direction === 'left' || direction === 'right' || direction === 'up'
+        ? direction === 'left' || direction === 'right'
         : NEIGHBORS[this.currentPageId]?.[direction] != null;
     if (!willNavigate) return;
 
@@ -920,13 +921,12 @@ export class PageTransitionModule extends BaseModule {
    * - left from first project → back to projects tile
    * - left from other project → previous project
    * - right from non-last project → next project
-   * - right from last project → contact (carousel exits onward to contact)
-   * - up → home (handleWheel gates this on scrollTop===0 so internal scroll works)
-   * - down → null (let native scroll handle reaching the bottom)
+   * - right from last project → home (carousel wraps back to intro)
+   * - up/down → null (vertical scroll stays on the page so users can
+   *   read tall case studies; never exits to the map)
    */
   private resolveProjectDetailNeighbor(direction: Direction): string | null {
-    if (direction === 'down') return null;
-    if (direction === 'up') return '#/';
+    if (direction === 'down' || direction === 'up') return null;
 
     const slugs = this.getProjectSlugs();
     if (slugs.length === 0) return null;
