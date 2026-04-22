@@ -14,7 +14,7 @@ import {
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePortalData } from '@react/hooks/usePortalFetch';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
-import { apiPost } from '@/utils/api-client';
+import { apiPost, toFriendlyError } from '@/utils/api-client';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { formatCurrency } from '@react/factories';
 import { formatCardDate } from '@react/utils/cardFormatters';
@@ -85,9 +85,18 @@ export function PortalProposalDetail({
         showNotification?.('Proposal accepted! Your project is being set up.', 'success');
         setShowConfirm(false);
         refetch();
+      } else if (response.status === 409) {
+        // 409 from the server is "this proposal is already in the
+        // target state" — treat as success-equivalent UX so a
+        // double-click or network-retry doesn't look like a failure.
+        showNotification?.('This proposal has already been accepted.', 'info');
+        setShowConfirm(false);
+        refetch();
       } else {
-        const data = await response.json().catch(() => ({}));
-        showNotification?.((data as { message?: string }).message || 'Failed to accept proposal', 'error');
+        showNotification?.(
+          await toFriendlyError(response, { fallback: 'Failed to accept proposal' }),
+          'error'
+        );
       }
     } catch {
       showNotification?.('Failed to accept proposal. Please try again.', 'error');
