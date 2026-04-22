@@ -300,7 +300,10 @@ export class ProjectsModule extends BaseModule {
   }
 
   /**
-   * Render CRT TV component using actual PNG image
+   * Render CRT TV component using actual PNG image. The TV is centered
+   * in a single column and its screen displays the project list as a
+   * channel-guide style text overlay (project title / category / year),
+   * with the active channel highlighted.
    */
   private renderCrtTv(): void {
     if (!this.projectsContent) return;
@@ -309,36 +312,26 @@ export class ProjectsModule extends BaseModule {
     if (this.projectsContent.querySelector('.crt-tv')) return;
 
     const workWrapper = this.projectsContent.querySelector('.work-half-wrapper');
-    const heading = this.projectsContent.querySelector('h2');
-    const hr = this.projectsContent.querySelector('hr, .heading-divider');
     if (!workWrapper) return;
 
-    // Create a column wrapper for heading + hr + cards
-    const listColumn = document.createElement('div');
-    listColumn.className = 'projects-list-column';
+    // Hide the cards work wrapper — its content is now expressed as the
+    // channel-list text inside the TV screen. Kept in DOM (display:none)
+    // so the existing card click handlers still resolve a target slug
+    // when keyboard/screen-reader users tab through them.
+    (workWrapper as HTMLElement).style.display = 'none';
 
-    // Create the flex row container
-    const flexRow = document.createElement('div');
-    flexRow.className = 'projects-flex-row';
+    // Centered TV container. Single child of projects-content (heading +
+    // hr stay above) so the TV lands in the middle of the section.
+    const tvWrap = document.createElement('div');
+    tvWrap.className = 'projects-tv-wrap';
 
-    // Insert flex row where work wrapper was
-    workWrapper.parentNode?.insertBefore(flexRow, workWrapper);
-
-    // Move heading and hr into list column
-    if (heading) listColumn.appendChild(heading);
-    if (hr) listColumn.appendChild(hr);
-    listColumn.appendChild(workWrapper);
-
-    // Add list column to flex row
-    flexRow.appendChild(listColumn);
-
-    // Add the TV to the flex row
     const tvHtml = `
       <div class="crt-tv">
         <div class="crt-tv__wrapper">
           <img class="crt-tv__screen-bg" src="/images/crt-tv-screen.png" alt="" />
           <div class="crt-tv__screen">
             <img class="crt-tv__image" src="" alt="Project preview" />
+            <div class="crt-tv__channel-list" data-channel-list></div>
             <div class="crt-tv__static"></div>
             <div class="crt-tv__scanlines"></div>
             <div class="crt-tv__glare"></div>
@@ -347,8 +340,39 @@ export class ProjectsModule extends BaseModule {
         </div>
       </div>
     `;
+    tvWrap.insertAdjacentHTML('beforeend', tvHtml);
 
-    flexRow.insertAdjacentHTML('beforeend', tvHtml);
+    workWrapper.parentNode?.insertBefore(tvWrap, workWrapper);
+
+    // Populate the channel list with one row per documented project.
+    this.renderChannelList();
+  }
+
+  /**
+   * Build the channel-guide text inside the TV screen. Each documented
+   * project gets a row showing title / category / year. Sets data-index
+   * so setTvChannel can highlight the active row.
+   */
+  private renderChannelList(): void {
+    const container = document.querySelector('[data-channel-list]') as HTMLElement | null;
+    if (!container || !this.portfolioData) return;
+
+    const documented = this.portfolioData.projects.filter((p) => p.isDocumented);
+    const rows = documented
+      .map(
+        (p, i) => `
+        <li class="crt-tv__channel-row" data-index="${i}" data-slug="${p.slug}">
+          <span class="crt-tv__channel-title">${p.title}</span>
+          <span class="crt-tv__channel-meta">${p.category}</span>
+          <span class="crt-tv__channel-meta">${p.year}</span>
+        </li>`
+      )
+      .join('');
+
+    container.innerHTML = `
+      <h3 class="crt-tv__channel-heading">Projects</h3>
+      <ul class="crt-tv__channel-rows">${rows}</ul>
+    `;
   }
 
   /**
@@ -392,7 +416,15 @@ export class ProjectsModule extends BaseModule {
 
     if (project.titleCard) this.changeTvChannel(project.titleCard);
 
-    // Highlight the matching card so list and TV stay in sync.
+    // Highlight the matching channel-list row inside the TV screen so
+    // the user sees which project is "tuned in".
+    const rows = document.querySelectorAll<HTMLElement>('.crt-tv__channel-row');
+    rows.forEach((row) => {
+      row.classList.toggle('is-active', Number(row.dataset.index) === safeIndex);
+    });
+
+    // Keep the (now-hidden) work-card list in sync too — preserves the
+    // existing card click handlers for keyboard / screen-reader users.
     const cards = this.projectsContent?.querySelectorAll('.work-card');
     cards?.forEach((card) => {
       card.classList.toggle(
@@ -415,34 +447,29 @@ export class ProjectsModule extends BaseModule {
     gsap.killTweensOf([image, staticOverlay]);
 
     // CRT channel change effect
+    // Channel-change effect — flash the static overlay then fade it back
+    // down. The TV screen now shows the channel-list text underneath
+    // (not the title-card image), so we just paint the static layer
+    // over the list briefly to sell the channel-flip without ever
+    // bringing the image to opacity 1.
     const tl = gsap.timeline();
-
     const STATIC_FLASH_OPACITY = 0.8;
-    const STATIC_GRAIN_OPACITY = 0.25;
+    const STATIC_GRAIN_OPACITY = 0.18;
 
-    tl.to(image, { opacity: 0, duration: 0.05 })
-      .to(staticOverlay, { opacity: STATIC_FLASH_OPACITY, duration: 0.05 }, '<')
-      .call(() => {
-        image.src = imageSrc;
-      })
-      .to(
-        staticOverlay,
-        {
-          opacity: STATIC_GRAIN_OPACITY,
-          duration: 0.3,
-          ease: 'power2.out'
-        },
-        '+=0.1'
-      )
-      .to(
-        image,
-        {
-          opacity: 1,
-          duration: 0.2,
-          ease: 'power2.out'
-        },
-        '<'
-      );
+    // Keep image src updated in case anything else reads it, but it
+    // stays at opacity 0 — the channel list owns the visual surface.
+    image.src = imageSrc;
+    gsap.set(image, { opacity: 0 });
+
+    tl.to(staticOverlay, { opacity: STATIC_FLASH_OPACITY, duration: 0.05 }).to(
+      staticOverlay,
+      {
+        opacity: STATIC_GRAIN_OPACITY,
+        duration: 0.3,
+        ease: 'power2.out'
+      },
+      '+=0.05'
+    );
   }
 
   /**

@@ -858,4 +858,96 @@ div.page-hero-desktop {
   pointer-events: none;
 }
 
+/* ============================================
+ * CENTERED TV CONTAINER
+ * ============================================
+ * Replaces the old two-column TV+list layout — TV is centered as a
+ * single column under the heading, and the project list is rendered as
+ * a channel guide INSIDE the TV screen.
+ */
+.projects-tv-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+.projects-tv-wrap .crt-tv {
+  width: min(100%, 720px);
+}
+
+/* ============================================
+ * CRT TV CHANNEL LIST (TEXT OVERLAY ON SCREEN)
+ * ============================================
+ * Lives inside .crt-tv__screen. Shows project list as channel guide
+ * rows, with the active channel highlighted.
+ */
+.crt-tv__channel-list {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(0.5rem, 2cqw, 1.25rem) clamp(0.75rem, 3cqw, 1.5rem);
+  color: var(--color-light, #fff);
+  font-family: var(--font-family-mono, monospace);
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+  background: var(--color-neutral-900, #1a1a1a);
+  z-index: 1;
+}
+
+.crt-tv__channel-heading {
+  margin: 0 0 0.5rem 0;
+  font-family: var(--font-family-acme, sans-serif);
+  font-size: clamp(0.875rem, 2.2cqw, 1.25rem);
+  font-weight: var(--font-weight-bold, 700);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-light, #fff);
+}
+
+.crt-tv__channel-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  overflow: hidden;
+}
+
+.crt-tv__channel-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: clamp(0.5rem, 2cqw, 1rem);
+  align-items: baseline;
+  padding: 0.25rem 0.5rem;
+  font-size: clamp(0.625rem, 1.6cqw, 0.95rem);
+  line-height: 1.2;
+  border-radius: 2px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  opacity: 0.65;
+}
+
+.crt-tv__channel-row.is-active {
+  background-color: var(--color-light, #fff);
+  color: var(--color-neutral-900, #1a1a1a);
+  text-shadow: none;
+  opacity: 1;
+}
+
+.crt-tv__channel-title {
+  font-weight: var(--font-weight-semibold, 600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.crt-tv__channel-meta {
+  font-size: 0.85em;
+  opacity: 0.85;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 /* Project detail styles moved to projects-detail.css */
