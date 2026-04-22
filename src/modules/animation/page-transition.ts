@@ -177,19 +177,44 @@ export class PageTransitionModule extends BaseModule {
 
   /**
    * Direction of the next hash-driven navigation when triggered by wheel or
-   * keyboard input on/from project-detail. Set right before changing the hash
-   * and consumed by handleHashChange so the resulting transitionTo uses slide
-   * mode (no blur — pan effect, like dragging an interactive map).
+   * keyboard input. Pinned to the target hash that set it so handleHashChange
+   * can recognize a stale direction (set, then overwritten by a different
+   * navigation, then the original hash event finally fires) and refuse to
+   * use it. The freshness check is what makes rapid double-input safe.
    */
   private pendingSlideDirection: Direction | null = null;
+  private pendingSlideForHash: string | null = null;
 
   /**
-   * Stack of recent navigation hashes so we can tell user-initiated browser
-   * back/forward apart from programmatic hash changes — and infer a slide
-   * direction when popstate fires without a wheel-set pendingSlideDirection.
-   * Trimmed to last NAV_HISTORY_CAP entries to avoid unbounded growth.
+   * False until the user has navigated at least once after intro completes.
+   * Used to scope the compass first-paint hint to a single forward cue
+   * (so the affordance is "scroll DOWN to start" instead of a confusing
+   * four-arrow puzzle). Flipped to true at the start of the first
+   * transitionTo call.
    */
-  private navHistory: string[] = [];
+  private hasNavigated: boolean = false;
+
+  /**
+   * Set the pending slide direction together with the target hash it was
+   * intended for. handleHashChange uses both fields to verify the direction
+   * is fresh (matches the hash that just fired) before applying it. Any
+   * mismatch means a newer navigation overwrote the field after the
+   * original was set, so we discard the stale value.
+   */
+  private setPendingSlide(direction: Direction, targetHash: string): void {
+    this.pendingSlideDirection = direction;
+    this.pendingSlideForHash = targetHash;
+  }
+
+  /**
+   * Recent navigation entries — each remembers the hash AND the direction
+   * we slid in to reach it. On popstate (browser back/forward) we look up
+   * the LEAVING entry's arrival direction and slide the OPPOSITE way, so
+   * "back" always feels like a backward swipe. Without this, back from a
+   * detail page would slide forward — exactly the gesture the user is
+   * trying to undo.
+   */
+  private navHistory: { hash: string; arrivedVia: Direction | null }[] = [];
 
   /**
    * One-shot flag set by the popstate listener and consumed by the very
@@ -477,6 +502,13 @@ export class PageTransitionModule extends BaseModule {
    * gets data-can="true" if scrolling that direction would lead somewhere.
    * Reads the same NEIGHBORS graph the input handlers use, plus the
    * dynamic project-detail / projects-tile rules so the cues don't lie.
+   *
+   * First-paint refinement: until the user has navigated once, we only
+   * surface the FORWARD cue from the landing page. The full vertical
+   * loop means intro.up technically navigates (to about, going backward
+   * around the loop), but on first arrival that cue would distract from
+   * the intended "scroll down to start" gesture. After any navigation
+   * the constraint drops and all valid cues light up normally.
    */
   private updateCompass(): void {
     const compass = document.querySelector('[data-map-compass]') as HTMLElement | null;
@@ -489,10 +521,43 @@ export class PageTransitionModule extends BaseModule {
       if (this.canNavigate(dir)) navigable.add(dir);
     }
 
+    // Until the user has scrolled / navigated once, narrow the cue set
+    // to the forward direction(s) of the current page so the affordance
+    // reads as a single "go this way to start" hint instead of a four-
+    // arrow puzzle. After first navigation, show every valid direction.
+    if (!this.hasNavigated) {
+      const forward = this.forwardDirectionsForFirstPaint(this.currentPageId);
+      navigable.forEach((dir) => {
+        if (!forward.has(dir)) navigable.delete(dir);
+      });
+    }
+
     compass.querySelectorAll<HTMLElement>('.map-compass__cue').forEach((cue) => {
       const dir = cue.dataset.cue as Direction | undefined;
       cue.dataset.can = dir && navigable.has(dir) ? 'true' : 'false';
     });
+  }
+
+  /**
+   * The "natural forward" direction(s) from a given page on first paint.
+   * Used to filter compass cues so the user sees only the intended entry
+   * gesture before they've scrolled. For most pages this is one direction;
+   * the projects tile gets two (down to cycle TV, right to enter carousel).
+   */
+  private forwardDirectionsForFirstPaint(pageId: string): Set<Direction> {
+    switch (pageId) {
+    case 'intro':
+      return new Set(['down']);
+    case 'projects':
+      return new Set(['down', 'right']);
+    case 'project-detail':
+      return new Set(['right']);
+    case 'about':
+    case 'contact':
+      return new Set(['down']);
+    default:
+      return new Set(['up', 'down', 'left', 'right']);
+    }
   }
 
   /**
@@ -623,6 +688,7 @@ export class PageTransitionModule extends BaseModule {
         // transitions involving project-detail fall back to blur.
         let slideDir = this.pendingSlideDirection;
         this.pendingSlideDirection = null;
+        this.pendingSlideForHash = null;
         if (!slideDir) slideDir = this.inferSlideDirection(pageId);
         if (slideDir) {
           void this.transitionTo(pageId, 'slide', slideDir);
@@ -713,16 +779,23 @@ export class PageTransitionModule extends BaseModule {
     if (pageId && (pageId !== this.currentPageId || isCarousel)) {
       // Race protection: a stale pendingSlideDirection from a navigation
       // that got dropped (e.g., wheel set direction → second wheel set a
-      // new direction → old hash fires) would slide the wrong way. Clear
-      // it if the popstate flag is set OR if the pending nav target
-      // doesn't match this hash. Wheel-set directions are consumed by
-      // the very next hash-change in the same tick, so any pending
-      // direction surviving past that is suspect.
+      // new direction → old hash fires) would slide the wrong way. We
+      // pin the direction to its target hash at set-time and only honour
+      // it here if (a) it's not from popstate AND (b) the pinned hash
+      // matches the hash that just fired. Anything else gets dropped to
+      // inference.
       const fromPopstate = this.popstateInFlight;
       this.popstateInFlight = false;
 
-      let slideDir = fromPopstate ? null : this.pendingSlideDirection;
+      const pinnedHash = this.pendingSlideForHash;
+      const pinnedDir = this.pendingSlideDirection;
       this.pendingSlideDirection = null;
+      this.pendingSlideForHash = null;
+
+      let slideDir: Direction | null = null;
+      if (!fromPopstate && pinnedDir && pinnedHash === hash) {
+        slideDir = pinnedDir;
+      }
 
       // Fallback inference. For popstate (browser back/forward), check
       // history first to figure out direction; otherwise fall back to the
@@ -730,8 +803,10 @@ export class PageTransitionModule extends BaseModule {
       if (!slideDir && fromPopstate) slideDir = this.inferDirectionFromHistory(hash);
       if (!slideDir) slideDir = this.inferSlideDirection(pageId);
 
-      // Push current hash to nav history so future popstates have context.
-      this.navHistory.push(hash);
+      // Push current hash + arrival direction to nav history so a future
+      // popstate can look up "how did the user reach this page?" and slide
+      // the opposite way to reverse it.
+      this.navHistory.push({ hash, arrivedVia: slideDir });
       if (this.navHistory.length > NAV_HISTORY_CAP) {
         this.navHistory.splice(0, this.navHistory.length - NAV_HISTORY_CAP);
       }
@@ -745,20 +820,39 @@ export class PageTransitionModule extends BaseModule {
   }
 
   /**
-   * Try to infer a slide direction from recent navigation history. If the
-   * new hash matches the entry just before the most recent one, the user
-   * went back — slide in the direction opposite to the one we'd pick going
-   * forward. Returns null if history doesn't help.
+   * Infer a slide direction for a popstate-driven navigation by reversing
+   * the direction the user originally came IN to the leaving page.
+   *
+   * Example: user on intro swiped DOWN to reach projects (that recorded
+   * arrivedVia='down' for projects). They click browser back. Popstate
+   * fires with intro as the new hash. We look at the LEAVING entry
+   * (projects with arrivedVia='down'), reverse it, and slide 'up' — the
+   * back gesture visually undoes the forward swipe.
+   *
+   * Falls back to a vertical/horizontal heuristic only if the recorded
+   * direction isn't usable (e.g., entry came in via a programmatic
+   * navigation that didn't record a direction).
    */
   private inferDirectionFromHistory(newHash: string): Direction | null {
     if (this.navHistory.length < 2) return null;
-    const prev = this.navHistory[this.navHistory.length - 2];
-    if (prev !== newHash) return null;
-    // User navigated back to the prior hash. Slide opposite of the
-    // entering-direction default (which is 'right' for project-detail
-    // entry, 'down' for forward map navigation). We don't know the exact
-    // pair, so default to 'left' for horizontal contexts and 'up' for
-    // vertical ones based on the destination.
+    const last = this.navHistory.length - 1;
+    const prev = this.navHistory[last - 1];
+    if (prev.hash !== newHash) return null;
+
+    // Recorded direction we used to enter the page we're leaving — the
+    // last entry in history is the page about to be unmounted by popstate.
+    const leaving = this.navHistory[last];
+    if (leaving.arrivedVia) {
+      const reverse: Record<Direction, Direction> = {
+        up: 'down',
+        down: 'up',
+        left: 'right',
+        right: 'left'
+      };
+      return reverse[leaving.arrivedVia];
+    }
+
+    // No recorded direction — fall back to axis-based heuristic.
     const verticalTargets = new Set(['intro', 'about', 'contact']);
     const targetPageId = this.getPageIdFromHash(newHash);
     return targetPageId && verticalTargets.has(targetPageId) ? 'up' : 'left';
@@ -1138,11 +1232,12 @@ export class PageTransitionModule extends BaseModule {
       const next = this.currentTvIndex + delta;
 
       // Boundary: scroll past the end → exit the tile via the map.
+      // Direct transitionTo call (no hash change here), so we don't pin
+      // pendingSlideDirection — the direction is passed inline.
       if (total === 0 || next < 0 || next >= total) {
         const targetPageId = direction === 'down' ? 'contact' : 'intro';
         this.wheelCooldownUntil =
           performance.now() + PAGE_ANIMATION.DURATION * 1000 + WHEEL_COOLDOWN_MS;
-        this.pendingSlideDirection = direction;
         // Reset TV index when leaving so the next entry starts fresh.
         // Going DOWN to contact means we'll come back UP onto last channel;
         // going UP to intro means we'll come back DOWN onto first channel.
@@ -1187,7 +1282,7 @@ export class PageTransitionModule extends BaseModule {
       if (goingToAnotherDetail) {
         this.captureDetailGhost();
       }
-      this.pendingSlideDirection = direction;
+      this.setPendingSlide(direction, targetHash);
       window.location.hash = targetHash;
       return;
     }
@@ -1237,17 +1332,16 @@ export class PageTransitionModule extends BaseModule {
         // First-time entry from anywhere else — pick by direction.
         slug = direction === 'left' ? slugs[slugs.length - 1] : slugs[0];
       }
-      this.pendingSlideDirection = direction;
-      window.location.hash = `#/projects/${slug}`;
+      const targetHashStr = `#/projects/${slug}`;
+      this.setPendingSlide(direction, targetHashStr);
+      window.location.hash = targetHashStr;
       return;
     }
 
-    // Map → map: use slide mode so the visual pan ALWAYS matches the
-    // scroll direction. Camera mode tweened toward the target's natural
-    // map position, which felt wrong when both left and right wheel from
-    // intro now lead to projects (right side spatially) — left scroll
-    // should still slide projects in from the LEFT, not the right.
-    this.pendingSlideDirection = direction;
+    // Map → map: direct transitionTo call (no hash change here), so we
+    // don't pin pendingSlideDirection — the direction is passed inline.
+    // Slide mode ensures the visual pan ALWAYS matches the scroll direction
+    // regardless of where the target sits on the spatial map.
     void this.transitionTo(targetPageId, 'slide', direction);
   }
 
@@ -1444,6 +1538,9 @@ export class PageTransitionModule extends BaseModule {
       // Update state
       this.currentPageId = pageId;
       this.updateActivePageAttribute(pageId);
+      // Mark first navigation done so the compass drops the first-paint
+      // single-cue restriction and starts surfacing every valid direction.
+      this.hasNavigated = true;
       this.updateCompass();
 
       // Card morph overlay should never be visible outside the intro page;
