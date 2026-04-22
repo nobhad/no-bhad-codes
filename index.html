@@ -1035,21 +1035,23 @@
         data-page="project-detail"
       >
         <div class="worksub-wrapper">
-          <!-- Hero header: image + description side-by-side -->
+          <!-- Hero header: image + title/tagline/description side-by-side -->
           <div class="worksub-header">
             <figure>
               <img id="project-hero-img" src="" alt="" class="worksub-hero-img" />
             </figure>
-            <p id="project-description" class="worksub-header-description text-medium"></p>
+            <div class="worksub-header-info">
+              <div class="title-row">
+                <h1 id="project-title"></h1>
+                <span id="project-status" class="project-status-badge"></span>
+              </div>
+              <p id="project-tagline" class="project-tagline"></p>
+              <p id="project-description" class="worksub-header-description text-medium"></p>
+            </div>
           </div>
 
           <!-- Intro section with metadata -->
           <div class="worksub-intro">
-            <div class="title-row">
-              <h1 id="project-title"></h1>
-              <span id="project-status" class="project-status-badge"></span>
-            </div>
-            <p id="project-tagline" class="project-tagline"></p>
             <div class="intro-content">
               <!-- Metadata column -->
               <div class="intro-left">

@@ -178,9 +178,8 @@
 
 .worksub-header figure {
   margin: 0;
+  /* Mobile (image stacks above description): keep the wide hero shape */
   aspect-ratio: 12 / 7;
-  /* Aggressive cap so the entire intro section (hero + title + metadata
-     + description + tools) fits in the initial viewport on a desktop. */
   max-height: 22vh;
   overflow: hidden;
   border-radius: 12px;
@@ -190,9 +189,49 @@
 
 @media (--tablet) {
   .worksub-header figure {
-    /* Constrain image width so the description column has real estate */
-    width: 40%;
-    max-width: 440px;
+    /* Side-by-side mode: drop the forced aspect ratio so the image keeps
+       its own proportions. Width capped at 55% so the description column
+       still has real estate; height capped so the rest of the intro
+       (title, metadata, tools) still fits in viewport. */
+    aspect-ratio: auto;
+    width: auto;
+    max-width: 55%;
+    max-height: 38vh;
+  }
+}
+
+.worksub-hero-img {
+  width: 100%;
+  height: 100%;
+  /* Cover-crop on mobile (full-bleed cinematic hero). Tablet+ overrides
+     below: figure drops aspect-ratio and image goes to natural-ratio
+     contained sizing so the title-card design isn't cropped. */
+  object-fit: cover;
+  display: block;
+  border-radius: inherit;
+}
+
+@media (--tablet) {
+  .worksub-hero-img {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 22vh;
+    object-fit: contain;
+  }
+}
+
+/* Right column of the hero row — title + tagline + description */
+.worksub-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+@media (--tablet) {
+  .worksub-header-info {
+    flex: 1;
+    align-self: center;
   }
 }
 
@@ -202,21 +241,6 @@
   font-size: var(--font-size-md);
   line-height: 1.5;
   color: var(--color-dark);
-}
-
-@media (--tablet) {
-  .worksub-header-description {
-    flex: 1;
-    align-self: center;
-  }
-}
-
-.worksub-hero-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  border-radius: inherit;
 }
 
 /* Placeholder for missing hero images */
