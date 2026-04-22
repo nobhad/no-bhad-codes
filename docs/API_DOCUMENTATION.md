@@ -2428,8 +2428,10 @@ const files = await client.files.upload(projectId, fileArray);
 ### cURL Examples
 
 ```bash
-# Login
-curl -X POST https://nobhad.codes/api/auth/login \
+# Login (unified endpoint — works for both client and admin; server routes
+# by email). The legacy /api/auth/login and /api/auth/admin/login endpoints
+# still work for backward compatibility.
+curl -X POST https://nobhad.codes/api/auth/portal-login \
   -H "Content-Type: application/json" \
   -d '{"email":"client@example.com","password":"password123"}'
 

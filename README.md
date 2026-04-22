@@ -420,9 +420,15 @@ The project uses strict TypeScript configuration with:
 
 ### Authentication Endpoints
 
-#### POST `/api/auth/login`
+#### POST `/api/auth/portal-login` (recommended)
 
-Authenticate client credentials and return JWT token.
+Unified login endpoint. The server inspects the submitted email and routes
+to the admin or client authentication path internally, so callers don't
+branch. This is the canonical endpoint for new integrations.
+
+The role-specific endpoints `POST /api/auth/login` (client) and
+`POST /api/auth/admin/login` (admin, password-only) are kept for backward
+compatibility.
 
 **Request Body:**
 
@@ -433,7 +439,8 @@ Authenticate client credentials and return JWT token.
 }
 ```
 
-**Response:** JWT is set in an HttpOnly cookie; the body does not include the token.
+**Response:** JWT is set in an HttpOnly `auth_token` cookie; the body does not
+include the token. Cookie lifetime is 1 day for clients and 1 hour for admin.
 
 ```json
 {
@@ -447,9 +454,10 @@ Authenticate client credentials and return JWT token.
       "companyName": "Example Corp",
       "contactName": "John Doe",
       "status": "active",
-      "isAdmin": false
+      "isAdmin": false,
+      "role": "client"
     },
-    "expiresIn": "7d"
+    "expiresIn": "1d"
   }
 }
 ```
