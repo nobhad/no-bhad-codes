@@ -76,6 +76,15 @@ export class PageTransitionModule extends BaseModule {
   private isTransitioning: boolean = false;
   private introComplete: boolean = false;
 
+  /**
+   * Phase D — paw plays only on the very first intro exit per session.
+   * Initialized in initializePageStates: false if landing on intro (paw
+   * entry will play and first exit gets paw), true if deep-linking to
+   * any other page (no paw context exists, skip paw on intro exits).
+   * Flipped to true after the first paw exit completes.
+   */
+  private hasPawHandoffOccurred: boolean = false;
+
   // Configuration
   private containerSelector: string;
   private enableOnMobile: boolean;
@@ -353,6 +362,11 @@ export class PageTransitionModule extends BaseModule {
 
     this.currentPageId = initialPageId;
 
+    // Phase D: deep-links skip the intro animation entirely, so the paw
+    // handoff is considered already done — no paw plays on any subsequent
+    // intro exit. Only landing on intro arms the first paw exit.
+    this.hasPawHandoffOccurred = initialPageId !== 'intro';
+
     // Position the scroll-map camera + show/hide .site-map based on initial
     if (this.isMapPage(initialPageId)) {
       this.setSiteMapVisibility(true);
@@ -564,9 +578,11 @@ export class PageTransitionModule extends BaseModule {
         // ============================================
         // MAP → MAP — pure camera tween
         // ============================================
-        // Intro exits still play paw (Phase D will gate to first-load only).
-        if (fromIsIntro) {
+        // Intro exits get the paw ONLY on the first time per session
+        // (Phase D handoff). Subsequent intro exits camera-tween directly.
+        if (fromIsIntro && !this.hasPawHandoffOccurred) {
           await this.playIntroExitAnimation();
+          this.hasPawHandoffOccurred = true;
         }
         // When camera returns to intro from another map tile, the previous
         // paw exit left the card translated off-screen. Snap it back to
@@ -582,13 +598,12 @@ export class PageTransitionModule extends BaseModule {
         // OFF-MAP INVOLVED — blur model + site-map show/hide
         // ============================================
 
-        // Exit current page: paw if leaving intro, blur otherwise
-        if (fromIsIntro) {
+        // Exit current page: paw if leaving intro for the first time this
+        // session, blur otherwise.
+        if (fromIsIntro && !this.hasPawHandoffOccurred) {
           await this.playIntroExitAnimation();
-        } else if (currentPage && currentPage.element && !this.isMapPage(this.currentPageId)) {
-          await this.animateOut(currentPage);
-        } else if (currentPage && currentPage.element && this.isMapPage(this.currentPageId)) {
-          // Leaving a map tile to off-map: blur out the visible tile
+          this.hasPawHandoffOccurred = true;
+        } else if (currentPage && currentPage.element) {
           await this.animateOut(currentPage);
         }
 
