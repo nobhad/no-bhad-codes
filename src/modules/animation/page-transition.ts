@@ -668,6 +668,15 @@ export class PageTransitionModule extends BaseModule {
       this.popstateInFlight = true;
     });
 
+    // Keep our TV index in sync with whatever project-detail slug is
+    // actually rendered. ProjectsModule dispatches this whenever it
+    // populates the detail page — covers direct hash changes, deep
+    // links, and browser history that bypass tryNavigateDirection.
+    window.addEventListener('projects:active-slug-changed', ((event: CustomEvent) => {
+      const idx = event.detail?.index;
+      if (typeof idx === 'number') this.currentTvIndex = idx;
+    }) as EventListener);
+
     // Compass arrow clicks act as a touch-friendly nav fallback —
     // delegated so we don't have to re-bind on each navigation. The CSS
     // disables pointer-events on non-navigable cues so this only fires
@@ -960,13 +969,16 @@ export class PageTransitionModule extends BaseModule {
     if (absY >= absX) {
       // Vertical intent — only navigate if the tile can't scroll further
       // in that direction. Otherwise let the browser handle in-tile scroll.
+      // Uses >= 1 (not > 1) so a 1px scroll still counts as "scrolled",
+      // and treats non-scrollable tiles (scrollHeight === clientHeight)
+      // as "always at edge" so they navigate immediately.
       if (dy > 0) {
         const canScrollDown =
-          currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight > 1;
+          currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >= 1;
         if (canScrollDown) return;
         direction = 'down';
       } else {
-        if (currentTile.scrollTop > 1) return;
+        if (currentTile.scrollTop >= 1) return;
         direction = 'up';
       }
     } else {
@@ -1094,9 +1106,9 @@ export class PageTransitionModule extends BaseModule {
     if (currentTile && (direction === 'up' || direction === 'down')) {
       if (direction === 'down') {
         const canScrollDown =
-          currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight > 1;
+          currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >= 1;
         if (canScrollDown) return;
-      } else if (currentTile.scrollTop > 1) {
+      } else if (currentTile.scrollTop >= 1) {
         return;
       }
     }
@@ -1185,21 +1197,19 @@ export class PageTransitionModule extends BaseModule {
 
     this.wheelCooldownUntil = performance.now() + PAGE_ANIMATION.DURATION * 1000 + WHEEL_COOLDOWN_MS;
 
-    // Entering projects from outside: pre-set the TV channel index so the
-    // user lands on the natural starting channel for their direction.
-    //   down from intro  → first channel (start of carousel)
-    //   up from contact  → last channel  (end of carousel)
-    //   horizontal       → keep current index
+    // Entering projects from outside: only RESET the TV channel on the
+    // very first arrival (currentTvIndex still 0 and we never touched it).
+    // After that, preserve whatever channel the user was last viewing so
+    // returning to projects lands on the same one — this is what the
+    // audit found broken: every entry from contact reset to last,
+    // every entry from intro reset to first.
     if (targetPageId === 'projects') {
       const slugs = this.getProjectSlugs();
       if (slugs.length > 0) {
-        if (this.currentPageId === 'intro' && direction === 'down') {
-          this.currentTvIndex = 0;
-        } else if (this.currentPageId === 'contact' && direction === 'up') {
-          this.currentTvIndex = slugs.length - 1;
-        }
-        // Defer the channel-set until projects has actually mounted, so
-        // ProjectsModule's listener picks it up after its own render.
+        // Clamp in case the project list shrank since last visit.
+        if (this.currentTvIndex >= slugs.length) this.currentTvIndex = slugs.length - 1;
+        if (this.currentTvIndex < 0) this.currentTvIndex = 0;
+        // Sync the TV display to whatever channel we're remembering.
         requestAnimationFrame(() => {
           document.dispatchEvent(
             new CustomEvent('projects:set-tv-channel', {
@@ -1211,15 +1221,22 @@ export class PageTransitionModule extends BaseModule {
     }
 
     // Special case: project-detail isn't a static route — it needs a slug.
-    // Pick FIRST slug going right (forward) and LAST slug going left
-    // (backward). Together with the wrap-to-intro at both carousel ends,
-    // this gives infinite scroll loops in BOTH directions:
-    //   right:  intro → projects → detail[0] → detail[1] → ... → detail[N] → intro
-    //   left:   intro → projects → detail[N] → detail[N-1] → ... → detail[0] → intro
+    // Use the SAME channel the projects-tile TV is showing so the slide
+    // visually continues from what the user was just looking at, instead
+    // of jumping to first/last regardless of TV state. Direction is only
+    // a tiebreaker for fresh-from-elsewhere entry.
     if (targetPageId === 'project-detail') {
       const slugs = this.getProjectSlugs();
       if (slugs.length === 0) return;
-      const slug = direction === 'left' ? slugs[slugs.length - 1] : slugs[0];
+      const fromProjects = this.currentPageId === 'projects';
+      let slug: string;
+      if (fromProjects) {
+        // Carousel continues from current TV channel.
+        slug = slugs[this.currentTvIndex] ?? slugs[0];
+      } else {
+        // First-time entry from anywhere else — pick by direction.
+        slug = direction === 'left' ? slugs[slugs.length - 1] : slugs[0];
+      }
       this.pendingSlideDirection = direction;
       window.location.hash = `#/projects/${slug}`;
       return;
@@ -1285,16 +1302,29 @@ export class PageTransitionModule extends BaseModule {
     // Infinite horizontal loop INCLUDING the projects tile as a stop in
     // the chain. The full forward gallery ring is:
     //   projects → detail[0] → detail[1] → ... → detail[N-1] → projects → ...
-    // Boundary exits return to the projects (TV) tile, and the existing
-    // projects.left/right entries (last-slug / first-slug) feed back into
-    // the carousel. So scrolling right from any detail eventually cycles
-    // through projects, then back into detail[0], forever.
+    // Boundary exits return to the projects (TV) tile, and on the way
+    // back through projects the TV remembers which channel to show.
+    let nextIndex: number;
     if (direction === 'left') {
-      if (currentIndex === 0) return '#/projects';
-      return `#/projects/${slugs[currentIndex - 1]}`;
+      if (currentIndex === 0) {
+        // Crossing back into projects from the first card — keep the TV
+        // showing this card so re-entering carousel feels continuous.
+        this.currentTvIndex = 0;
+        return '#/projects';
+      }
+      nextIndex = currentIndex - 1;
+    } else {
+      if (currentIndex >= slugs.length - 1) {
+        this.currentTvIndex = slugs.length - 1;
+        return '#/projects';
+      }
+      nextIndex = currentIndex + 1;
     }
-    if (currentIndex >= slugs.length - 1) return '#/projects';
-    return `#/projects/${slugs[currentIndex + 1]}`;
+    // Within the carousel: keep TV index synced to the active slug so
+    // jumping back to projects via vertical or compass shows the right
+    // channel waiting on the screen.
+    this.currentTvIndex = nextIndex;
+    return `#/projects/${slugs[nextIndex]}`;
   }
 
   /**
