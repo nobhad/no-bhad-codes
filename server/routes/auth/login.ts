@@ -106,7 +106,7 @@ const LoginValidationSchemas = {
 };
 
 // ============================================
-// CLIENT LOGIN
+// CLIENT LOGIN (legacy — prefer /api/auth/portal-login)
 // ============================================
 
 /**
@@ -115,8 +115,12 @@ const LoginValidationSchemas = {
  *   post:
  *     tags:
  *       - Authentication
- *     summary: User login
- *     description: Authenticate client credentials and return JWT token
+ *     summary: User login (legacy)
+ *     description: |
+ *       Authenticate client credentials and return a JWT auth cookie.
+ *       New integrations should use POST /api/auth/portal-login, which is the
+ *       unified entry point for both client and admin credentials and branches
+ *       server-side by email. This endpoint is kept for backward compatibility.
  *     requestBody:
  *       required: true
  *       content:
@@ -326,7 +330,7 @@ router.post(
 );
 
 // ============================================
-// ADMIN LOGIN
+// ADMIN LOGIN (legacy — prefer /api/auth/portal-login)
 // ============================================
 
 /**
@@ -335,8 +339,13 @@ router.post(
  *   post:
  *     tags:
  *       - Authentication
- *     summary: Admin login
- *     description: Authenticate admin credentials and return JWT token
+ *     summary: Admin login (legacy)
+ *     description: |
+ *       Authenticate admin credentials (password-only) and return a JWT auth
+ *       cookie. Also supports the 2FA TOTP handoff when admin 2FA is enabled.
+ *       New integrations should use POST /api/auth/portal-login, which handles
+ *       both admin and client login via a single call. This endpoint is kept
+ *       for backward compatibility.
  *     requestBody:
  *       required: true
  *       content:
@@ -760,15 +769,63 @@ router.post(
  *   post:
  *     tags:
  *       - Authentication
- *     summary: POST /api/auth/portal-login
- *     description: Unified login endpoint for the portal login page.
+ *     summary: Portal login (unified, recommended)
+ *     description: |
+ *       Unified login entry point. The server inspects the submitted email
+ *       and routes to the admin or client authentication path internally, so
+ *       callers do not branch. Returns the same JWT HttpOnly auth cookie that
+ *       /api/auth/login and /api/auth/admin/login set, and the same response
+ *       envelope shape.
+ *
+ *       This is the canonical endpoint for new integrations. The role-specific
+ *       endpoints are kept for backward compatibility.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Client email, or the admin email (ADMIN_EMAIL env var).
+ *               password:
+ *                 type: string
+ *                 description: Account password.
  *     responses:
  *       200:
- *         description: Login successful
+ *         description: Login successful. Sets `auth_token` HttpOnly cookie.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Login successful"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       type: object
+ *                       properties:
+ *                         id: { type: integer }
+ *                         email: { type: string, format: email }
+ *                         name: { type: string }
+ *                         role: { type: string, enum: [admin, client] }
+ *                         isAdmin: { type: boolean }
+ *                     expiresIn:
+ *                       type: string
+ *                       description: JWT lifetime (e.g. "1d" for clients, "1h" for admin).
  *       401:
  *         description: Invalid credentials
  *       429:
- *         description: Too many attempts
+ *         description: Too many attempts (rate-limited)
  */
 router.post(
   '/portal-login',
