@@ -259,6 +259,10 @@ async function deleteAutomation(id: number): Promise<void> {
 
 /**
  * List all automations with action counts and run statistics.
+ *
+ * Previously N+1: two queries per automation (actions + run stats).
+ * Now two prefetch queries with IN-lists, grouped client-side —
+ * constant-time regardless of automation count.
  */
 async function list(): Promise<AutomationWithActions[]> {
   const db = getDatabase();
@@ -267,32 +271,51 @@ async function list(): Promise<AutomationWithActions[]> {
     `SELECT ${AUTOMATION_COLUMNS} FROM custom_automations ORDER BY created_at DESC`
   );
 
-  const enriched: AutomationWithActions[] = [];
+  if (automations.length === 0) return [];
 
-  for (const auto of automations) {
-    const actions = await db.all<AutomationActionRow>(
-      `SELECT ${ACTION_COLUMNS} FROM automation_actions WHERE automation_id = ? ORDER BY action_order`,
-      [auto.id]
-    );
+  const ids = automations.map((a) => a.id);
+  const placeholders = ids.map(() => '?').join(',');
 
-    const runStats = await db.get<{ run_count: number; last_run_at: string | null }>(
-      `SELECT
-         COUNT(*) as run_count,
-         MAX(started_at) as last_run_at
-       FROM automation_runs
-       WHERE automation_id = ?`,
-      [auto.id]
-    );
+  const [allActions, allStats] = await Promise.all([
+    db.all<AutomationActionRow>(
+      `SELECT ${ACTION_COLUMNS}
+         FROM automation_actions
+        WHERE automation_id IN (${placeholders})
+        ORDER BY automation_id, action_order`,
+      ids
+    ),
+    db.all<{ automation_id: number; run_count: number; last_run_at: string | null }>(
+      `SELECT automation_id,
+              COUNT(*) AS run_count,
+              MAX(started_at) AS last_run_at
+         FROM automation_runs
+        WHERE automation_id IN (${placeholders})
+        GROUP BY automation_id`,
+      ids
+    )
+  ]);
 
-    enriched.push({
-      ...auto,
-      actions,
-      runCount: runStats?.run_count || 0,
-      lastRunAt: runStats?.last_run_at || null
+  const actionsByAutomation = new Map<number, AutomationActionRow[]>();
+  for (const action of allActions) {
+    const bucket = actionsByAutomation.get(action.automation_id);
+    if (bucket) bucket.push(action);
+    else actionsByAutomation.set(action.automation_id, [action]);
+  }
+
+  const statsByAutomation = new Map<number, { run_count: number; last_run_at: string | null }>();
+  for (const row of allStats) {
+    statsByAutomation.set(row.automation_id, {
+      run_count: row.run_count,
+      last_run_at: row.last_run_at
     });
   }
 
-  return enriched;
+  return automations.map((auto) => ({
+    ...auto,
+    actions: actionsByAutomation.get(auto.id) ?? [],
+    runCount: statsByAutomation.get(auto.id)?.run_count ?? 0,
+    lastRunAt: statsByAutomation.get(auto.id)?.last_run_at ?? null
+  }));
 }
 
 /**

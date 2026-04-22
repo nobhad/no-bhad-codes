@@ -277,14 +277,35 @@ async function list(filters?: { status?: string; clientId?: number }): Promise<R
     params
   )) as Array<RetainerRow & { client_name: string; project_name: string }>;
 
-  return Promise.all(retainers.map(async (row) => {
-    const currentPeriod = await getCurrentPeriod(row.id);
-    return {
-      ...row,
-      clientName: row.client_name,
-      projectName: row.project_name,
-      currentPeriod: currentPeriod ?? undefined
-    };
+  if (retainers.length === 0) return [];
+
+  // Previously: one getCurrentPeriod query per retainer (N+1).
+  // Now: pull every active period for this retainer set in one query
+  // and group client-side. The inner ORDER BY keeps the newest per
+  // retainer first so the first insertion into the map wins.
+  const retainerIds = retainers.map((r) => r.id);
+  const placeholders = retainerIds.map(() => '?').join(',');
+  const periods = (await db.all(
+    `SELECT *
+       FROM retainer_periods
+      WHERE retainer_id IN (${placeholders})
+        AND status = 'active'
+      ORDER BY period_start DESC`,
+    retainerIds
+  )) as RetainerPeriodRow[];
+
+  const periodByRetainer = new Map<number, RetainerPeriodRow>();
+  for (const p of periods) {
+    if (!periodByRetainer.has(p.retainer_id)) {
+      periodByRetainer.set(p.retainer_id, p);
+    }
+  }
+
+  return retainers.map((row) => ({
+    ...row,
+    clientName: row.client_name,
+    projectName: row.project_name,
+    currentPeriod: periodByRetainer.get(row.id) ?? undefined
   }));
 }
 
