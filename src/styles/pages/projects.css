@@ -806,13 +806,23 @@ div.page-hero-desktop {
   z-index: var(--z-index-content);
 }
 
-/* The TV frame PNG - goes on top */
+/* The TV frame PNG - goes on top visually but doesn't block clicks
+   to the channel list inside the screen. The frame image's
+   bounding box covers the screen area; without pointer-events:none
+   it intercepts every click and the channel rows can't be activated. */
 .crt-tv__frame {
   position: relative;
   width: 100%;
   height: auto;
   display: block;
   z-index: var(--z-index-content);
+  pointer-events: none;
+}
+
+/* Same for the screen-bg image. Anything decorative on top of the
+   channel list must not eat clicks. */
+.crt-tv__screen-bg {
+  pointer-events: none;
 }
 
 /* Title card image displayed on screen */
@@ -856,6 +866,15 @@ div.page-hero-desktop {
   inset: 0;
   background: radial-gradient(ellipse at 30% 30%, var(--portal-alpha-white-08, rgba(255, 255, 255, 0.08)) 0%, transparent 50%);
   pointer-events: none;
+}
+
+/* The "PROJECTS" heading + divider above the TV are redundant — the
+   channel guide on the TV screen already shows the heading. Hidden
+   via display:none so the section flexbox centers the TV cleanly. */
+.projects-section .projects-content > .section-heading,
+.projects-section .projects-content > .section-divider,
+.projects-section .projects-content > hr {
+  display: none;
 }
 
 /* ============================================
@@ -914,7 +933,10 @@ div.page-hero-desktop {
   font-family: var(--font-family-mono, monospace);
   text-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
   background: var(--color-neutral-900, #1a1a1a);
-  z-index: 1;
+  z-index: 2;
+  /* Explicit pointer-events so the channel rows below can be clicked
+     even if a parent rule disables them. */
+  pointer-events: auto;
 }
 
 .crt-tv__channel-heading {
@@ -938,17 +960,44 @@ div.page-hero-desktop {
   overflow: hidden;
 }
 
+.crt-tv__channel-row-item {
+  list-style: none;
+}
+
+/* Each row is a real <button> so it's clickable, focusable, and shows
+   a pointer cursor. Inherits the dark TV background by default and
+   inverts to highlight when active. */
 .crt-tv__channel-row {
   display: grid;
   grid-template-columns: 1fr auto auto;
   gap: clamp(0.5rem, 2cqw, 1rem);
   align-items: baseline;
-  padding: 0.25rem 0.5rem;
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   font-size: clamp(0.625rem, 1.6cqw, 0.95rem);
   line-height: 1.2;
   border-radius: 2px;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
   opacity: 0.65;
+}
+
+.crt-tv__channel-row:hover,
+.crt-tv__channel-row:focus-visible {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.crt-tv__channel-row:focus-visible {
+  outline: 2px solid var(--color-light, #fff);
+  outline-offset: -2px;
 }
 
 .crt-tv__channel-row.is-active {
