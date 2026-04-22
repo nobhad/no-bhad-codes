@@ -9,6 +9,19 @@ import { WebhookConfig, WebhookDelivery, WebhookPayload } from '../models/webhoo
 import type { Database } from '../database/init.js';
 import { logger } from './logger.js';
 import { fetchWithTimeout } from '../utils/fetch-with-timeout.js';
+import { getCircuitBreaker } from '../utils/circuit-breaker.js';
+
+// Shared breaker across every user-configured webhook target. A
+// single dead endpoint shouldn't trip every tenant's webhooks, but
+// a sustained broadside of failures (bad network, DNS outage) is
+// exactly the kind of thing we want to stop pounding on. Trades
+// per-endpoint isolation for simpler state; per-URL breakers can
+// replace this if it proves too coarse in practice.
+const userWebhookBreaker = getCircuitBreaker({
+  name: 'tenant-webhook',
+  failureThreshold: 10,
+  cooldownMs: 60_000
+});
 
 // ============================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -224,12 +237,15 @@ export class WebhookService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      const response = await fetchWithTimeout(webhook.url, { timeoutMs: 10000,
-        method: webhook.method,
-        headers,
-        body: JSON.stringify(payload),
-        signal: controller.signal
-      });
+      const response = await userWebhookBreaker.execute(() =>
+        fetchWithTimeout(webhook.url, {
+          timeoutMs: 10000,
+          method: webhook.method,
+          headers,
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        })
+      );
 
       clearTimeout(timeoutId);
       const responseBody = await response.text();

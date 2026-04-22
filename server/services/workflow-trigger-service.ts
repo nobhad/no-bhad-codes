@@ -16,6 +16,16 @@ import { logger } from './logger.js';
 import { parseIfString } from '../utils/safe-json.js';
 import { BUSINESS_INFO } from '../config/business.js';
 import { fetchWithTimeout } from '../utils/fetch-with-timeout.js';
+import { getCircuitBreaker } from '../utils/circuit-breaker.js';
+
+// Shares the tenant-webhook breaker with webhook-service and
+// automation-engine — all three dispatch to user-configured URLs,
+// so a sustained run of failures should trip them together.
+const userWebhookBreaker = getCircuitBreaker({
+  name: 'tenant-webhook',
+  failureThreshold: 10,
+  cooldownMs: 60_000
+});
 
 // ============================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -788,14 +798,17 @@ class WorkflowTriggerService {
     context: EventContext
   ): Promise<void> {
     try {
-      const response = await fetchWithTimeout(config.url, { timeoutMs: 10000,
-        method: config.method || 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...config.headers
-        },
-        body: JSON.stringify(context)
-      });
+      const response = await userWebhookBreaker.execute(() =>
+        fetchWithTimeout(config.url, {
+          timeoutMs: 10000,
+          method: config.method || 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...config.headers
+          },
+          body: JSON.stringify(context)
+        })
+      );
 
       logger.info(`[WorkflowTrigger] Webhook ${config.url} returned ${response.status}`);
     } catch (error) {

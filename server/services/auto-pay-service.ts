@@ -15,6 +15,16 @@ import { getDatabase } from '../database/init.js';
 import { logger } from './logger.js';
 import { calculateAmountWithProcessingFee } from '../config/constants.js';
 import { fetchWithTimeout } from '../utils/fetch-with-timeout.js';
+import { getCircuitBreaker } from '../utils/circuit-breaker.js';
+
+// Share the Stripe API breaker with stripe-payment-service so a run
+// of upstream failures trips both paths together instead of each
+// module racking up its own stack of pending retries.
+const stripeBreaker = getCircuitBreaker({
+  name: 'stripe-api',
+  failureThreshold: 5,
+  cooldownMs: 30_000
+});
 import type {
   SavedPaymentMethod,
   SavedPaymentMethodRow,
@@ -65,15 +75,18 @@ async function stripeRequest(
     ? `${STRIPE_API_BASE}${endpoint}?${params.toString()}`
     : `${STRIPE_API_BASE}${endpoint}`;
 
-  const response = await fetchWithTimeout(url, { ...options, timeoutMs: 10_000 });
-  const data = (await response.json()) as Record<string, unknown>;
+  return stripeBreaker.execute(async () => {
+    const response = await fetchWithTimeout(url, { ...options, timeoutMs: 10_000 });
+    const data = (await response.json()) as Record<string, unknown>;
 
-  if (!response.ok) {
-    const error = data.error as { message?: string } | undefined;
-    throw new Error(`Stripe API error: ${error?.message || response.statusText}`);
-  }
-
-  return data;
+    if (!response.ok) {
+      const error = data.error as { message?: string } | undefined;
+      const wrapped = new Error(`Stripe API error: ${error?.message || response.statusText}`);
+      (wrapped as Error & { status?: number }).status = response.status;
+      throw wrapped;
+    }
+    return data;
+  });
 }
 
 // ============================================
