@@ -878,15 +878,23 @@ div.page-hero-desktop {
 }
 
 .projects-tv-wrap .crt-tv {
-  /* Cap the TV by both an absolute and a viewport-derived limit. The
-     viewport calc takes "available vertical space between header and
-     footer minus a safety margin" and multiplies by aspect ratio to
-     get the matching width. Frame keeps width:100% / height:auto so
-     it scales as a single unit. */
-  width: min(
-    720px,
-    calc((100dvh - var(--header-height) - var(--footer-height) - 6rem) * 1.3)
-  );
+  /* Auto-detect the viewport: dvh tracks the visible viewport height
+     in real time (responds to browser resize, zoom, and iOS Safari URL
+     bar). The TV width is the smallest of three caps so it always fits
+     without overflowing:
+       - 720px absolute, so it doesn't get huge on ultra-wide displays
+       - (available vertical space) × 1.3 aspect ratio, where 1.3 is
+         the CRT frame's natural width-to-height ratio
+       - 90vw, so it keeps margin from the viewport edges
+     ESTIMATED_CHROME_PX accounts for the page header, the section
+     heading + hr above the TV, and the footer combined — sized by
+     observation since --footer-height is referenced elsewhere but
+     never actually defined in the design tokens.
+
+     Caching the calc value as a custom prop lets us reuse it for the
+     channel-list font sizing further down. */
+  --tv-available-height: calc(100dvh - 190px);
+  width: min(720px, calc(var(--tv-available-height) * 1.3), 90vw);
   max-width: 100%;
 }
 

@@ -358,13 +358,22 @@ export class ProjectsModule extends BaseModule {
     if (!container || !this.portfolioData) return;
 
     const documented = this.portfolioData.projects.filter((p) => p.isDocumented);
+    // Each row is a real <button> so it's keyboard-focusable, screen-reader
+    // friendly, and clickable to jump straight to the matching detail
+    // page. data-index lets setTvChannel highlight the active one.
     const rows = documented
       .map(
         (p, i) => `
-        <li class="crt-tv__channel-row" data-index="${i}" data-slug="${p.slug}">
-          <span class="crt-tv__channel-title">${p.title}</span>
-          <span class="crt-tv__channel-meta">${p.category}</span>
-          <span class="crt-tv__channel-meta">${p.year}</span>
+        <li class="crt-tv__channel-row-item">
+          <button type="button"
+                  class="crt-tv__channel-row"
+                  data-index="${i}"
+                  data-slug="${p.slug}"
+                  aria-label="Open ${p.title} project details">
+            <span class="crt-tv__channel-title">${p.title}</span>
+            <span class="crt-tv__channel-meta">${p.category}</span>
+            <span class="crt-tv__channel-meta">${p.year}</span>
+          </button>
         </li>`
       )
       .join('');
@@ -373,6 +382,18 @@ export class ProjectsModule extends BaseModule {
       <h3 class="crt-tv__channel-heading">Projects</h3>
       <ul class="crt-tv__channel-rows">${rows}</ul>
     `;
+
+    // Delegated click → navigate to the project-detail hash. Reuses the
+    // existing renderProjectDetailForSlug flow via the hashchange path,
+    // so the slide transition + TV index sync all behave the same as
+    // the carousel/swipe entry.
+    container.addEventListener('click', (event: Event) => {
+      const target = event.target as HTMLElement | null;
+      const row = target?.closest('.crt-tv__channel-row') as HTMLElement | null;
+      const slug = row?.dataset.slug;
+      if (!slug) return;
+      window.location.hash = `#/projects/${slug}`;
+    });
   }
 
   /**
