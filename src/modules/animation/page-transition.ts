@@ -124,6 +124,15 @@ const WHEEL_COOLDOWN_MS = 250;
  */
 const NAV_HISTORY_CAP = 8;
 
+/**
+ * Swipe gesture thresholds. A finger has to travel at least this many
+ * pixels in one direction AND complete the gesture within this many ms
+ * for it to count as a navigation swipe. Slower or shorter gestures fall
+ * through to native scrolling so users can still pan tile content.
+ */
+const SWIPE_DISTANCE_MIN_PX = 50;
+const SWIPE_TIME_MAX_MS = 600;
+
 export class PageTransitionModule extends BaseModule {
   private container: HTMLElement | null = null;
   private siteMap: HTMLElement | null = null;
@@ -153,6 +162,15 @@ export class PageTransitionModule extends BaseModule {
   private boundHandleHashChange: (() => void) | null = null;
   private boundHandleWheel: ((event: WheelEvent) => void) | null = null;
   private boundHandleKeydown: ((event: KeyboardEvent) => void) | null = null;
+  private boundHandleTouchStart: ((event: TouchEvent) => void) | null = null;
+  private boundHandleTouchEnd: ((event: TouchEvent) => void) | null = null;
+
+  /**
+   * Touch tracking for swipe gesture recognition. Tracks start position
+   * and time so handleTouchEnd can decide if the gesture was a real swipe
+   * (fast enough + far enough in one direction) vs. a tap or slow drag.
+   */
+  private touchStart: { x: number; y: number; t: number } | null = null;
 
   /** Phase C: cooldown timestamp — wheel events before this are ignored. */
   private wheelCooldownUntil: number = 0;
@@ -574,6 +592,15 @@ export class PageTransitionModule extends BaseModule {
     this.boundHandleKeydown = this.handleKeydown.bind(this);
     window.addEventListener('keydown', this.boundHandleKeydown);
 
+    // Touch / swipe support — picks up the same map navigation as the
+    // wheel handler on tablet (iPad) and other touch devices. Passive
+    // listeners so we never block native scroll on tile content; the
+    // navigation only fires when the gesture meets the swipe threshold.
+    this.boundHandleTouchStart = this.handleTouchStart.bind(this);
+    this.boundHandleTouchEnd = this.handleTouchEnd.bind(this);
+    window.addEventListener('touchstart', this.boundHandleTouchStart, { passive: true });
+    window.addEventListener('touchend', this.boundHandleTouchEnd, { passive: true });
+
     // popstate fires for browser back/forward (but not programmatic
     // hash changes). Mark the next handleHashChange so it can infer a
     // slide direction from history instead of falling through to blur.
@@ -916,6 +943,76 @@ export class PageTransitionModule extends BaseModule {
     if (!willNavigate) return;
 
     event.preventDefault();
+    this.tryNavigateDirection(direction);
+  }
+
+  /**
+   * Touch start — capture the gesture origin so handleTouchEnd can decide
+   * if the swipe was decisive enough to count as a navigation.
+   */
+  private handleTouchStart(event: TouchEvent): void {
+    if (this.isMobile && !this.enableOnMobile) return;
+    if (this.isTransitioning) return;
+    if (!this.introComplete) return;
+    if (event.touches.length !== 1) {
+      this.touchStart = null;
+      return;
+    }
+    const t = event.touches[0];
+    this.touchStart = { x: t.clientX, y: t.clientY, t: performance.now() };
+  }
+
+  /**
+   * Touch end — compute swipe direction. Distance must beat
+   * SWIPE_DISTANCE_MIN_PX in the dominant axis AND the gesture must
+   * complete within SWIPE_TIME_MAX_MS, or it falls through (so slow
+   * pans through tile content still feel like native scroll).
+   */
+  private handleTouchEnd(event: TouchEvent): void {
+    const start = this.touchStart;
+    this.touchStart = null;
+    if (!start) return;
+    if (this.isTransitioning) return;
+    if (performance.now() < this.wheelCooldownUntil) return;
+    if (!this.isMapPage(this.currentPageId) && this.currentPageId !== 'project-detail') return;
+
+    // changedTouches has the just-released finger.
+    const t = event.changedTouches[0];
+    if (!t) return;
+
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    const elapsed = performance.now() - start.t;
+    if (elapsed > SWIPE_TIME_MAX_MS) return;
+
+    const absX = Math.abs(dx);
+    const absY = Math.abs(dy);
+    if (Math.max(absX, absY) < SWIPE_DISTANCE_MIN_PX) return;
+
+    // Convert to the same Direction as wheel/keyboard. Note the inversion:
+    // a finger swiping LEFT means the user wants to go RIGHT (content
+    // follows the finger off-screen), same as scroll convention.
+    let direction: Direction;
+    if (absX >= absY) {
+      direction = dx < 0 ? 'right' : 'left';
+    } else {
+      direction = dy < 0 ? 'down' : 'up';
+    }
+
+    // Mirror handleWheel's edge-of-scroll guard for vertical swipes so
+    // tall tiles (project-detail case studies) still scroll natively
+    // until the user hits the boundary.
+    const currentTile = this.pages.get(this.currentPageId)?.element;
+    if (currentTile && (direction === 'up' || direction === 'down')) {
+      if (direction === 'down') {
+        const canScrollDown =
+          currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight > 1;
+        if (canScrollDown) return;
+      } else if (currentTile.scrollTop > 1) {
+        return;
+      }
+    }
+
     this.tryNavigateDirection(direction);
   }
 
@@ -1702,6 +1799,14 @@ export class PageTransitionModule extends BaseModule {
     if (this.boundHandleKeydown) {
       window.removeEventListener('keydown', this.boundHandleKeydown);
       this.boundHandleKeydown = null;
+    }
+    if (this.boundHandleTouchStart) {
+      window.removeEventListener('touchstart', this.boundHandleTouchStart);
+      this.boundHandleTouchStart = null;
+    }
+    if (this.boundHandleTouchEnd) {
+      window.removeEventListener('touchend', this.boundHandleTouchEnd);
+      this.boundHandleTouchEnd = null;
     }
     if (this.debouncedHandleResize) {
       window.removeEventListener('resize', this.debouncedHandleResize);
