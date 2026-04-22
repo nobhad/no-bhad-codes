@@ -264,12 +264,23 @@ async function handlePaymentSuccess(stripeIntentId: string): Promise<void> {
       [stripeIntentId, record.invoice_id]
     );
 
-    // Record in invoice_payments
+    // Defence-in-depth against duplicate delivery: even if the outer webhook
+    // idempotency layer fails, we won't insert two succeeded payments for
+    // the same PaymentIntent.
     await db.run(
       `INSERT INTO invoice_payments
-       (invoice_id, amount, payment_method, stripe_payment_intent_id, status, paid_at, created_at)
-       VALUES (?, ?, 'stripe', ?, 'succeeded', datetime('now'), datetime('now'))`,
-      [record.invoice_id, record.amount_cents / 100, stripeIntentId]
+         (invoice_id, amount, payment_method, stripe_payment_intent_id, status, paid_at, created_at)
+       SELECT ?, ?, 'stripe', ?, 'succeeded', datetime('now'), datetime('now')
+       WHERE NOT EXISTS (
+         SELECT 1 FROM invoice_payments
+         WHERE stripe_payment_intent_id = ? AND status = 'succeeded'
+       )`,
+      [
+        record.invoice_id,
+        record.amount_cents / 100,
+        stripeIntentId,
+        stripeIntentId
+      ]
     );
 
     logger.info('Invoice marked paid via embedded Stripe payment', {

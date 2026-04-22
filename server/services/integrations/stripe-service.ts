@@ -44,48 +44,64 @@ const STRIPE_API_BASE = 'https://api.stripe.com/v1';
 const processedWebhookEvents = new Map<string, number>();
 
 /**
- * Check if a webhook event has already been processed.
- * Uses in-memory cache as fast path, falls back to database for persistence.
+ * Release a previously-claimed event so the next retry can pick it up.
+ * Used when the handler threw mid-processing and we need Stripe's retry
+ * machinery to redo the work instead of silently swallowing it.
  */
-async function isEventAlreadyProcessed(eventId: string): Promise<boolean> {
-  // Fast path: check in-memory cache
-  if (processedWebhookEvents.has(eventId)) {
-    return true;
-  }
+export async function releaseStripeEventClaim(eventId: string): Promise<void> {
+  if (!eventId) return;
 
-  // Slow path: check database for persistence across restarts
+  processedWebhookEvents.delete(eventId);
   try {
     const db = getDatabase();
-    const row = await db.get(
-      'SELECT event_id FROM webhook_processed_events WHERE event_id = ?',
-      [eventId]
-    );
-    if (row) {
-      // Populate cache for future fast-path hits
-      processedWebhookEvents.set(eventId, Date.now());
-      return true;
-    }
-  } catch {
-    // If table doesn't exist yet (pre-migration), fall back to cache-only
+    await db.run('DELETE FROM webhook_processed_events WHERE event_id = ?', [eventId]);
+  } catch (err) {
+    logger.error('[Stripe] Failed to release webhook claim', {
+      error: err instanceof Error ? err : undefined,
+      metadata: { eventId }
+    });
   }
-
-  return false;
 }
 
 /**
- * Mark a webhook event as processed in both cache and database.
+ * Atomically claim a Stripe event for processing. Returns true only for
+ * the first caller to see this event.id; subsequent calls (Stripe retries,
+ * duplicate deliveries) return false so handlers can bail out before
+ * running side effects.
+ *
+ * Why atomic: INSERT OR IGNORE on the unique event_id column collapses the
+ * check/mark pair into a single SQL round-trip, so two concurrent webhook
+ * deliveries can't both "win" the idempotency check.
  */
-async function markEventProcessed(eventId: string): Promise<void> {
-  processedWebhookEvents.set(eventId, Date.now());
+export async function claimStripeEvent(eventId: string): Promise<boolean> {
+  if (!eventId) return false;
+
+  if (processedWebhookEvents.has(eventId)) {
+    return false;
+  }
 
   try {
     const db = getDatabase();
-    await db.run(
-      'INSERT OR IGNORE INTO webhook_processed_events (event_id, source, processed_at) VALUES (?, ?, datetime(\'now\'))',
-      [eventId, 'stripe']
+    const result = await db.run(
+      `INSERT OR IGNORE INTO webhook_processed_events (event_id, source, processed_at)
+       VALUES (?, 'stripe', datetime('now'))`,
+      [eventId]
     );
-  } catch {
-    // Pre-migration graceful degradation: cache-only is still functional
+
+    if (!result.changes) {
+      processedWebhookEvents.set(eventId, Date.now());
+      return false;
+    }
+
+    processedWebhookEvents.set(eventId, Date.now());
+    return true;
+  } catch (err) {
+    logger.error('[Stripe] claimStripeEvent DB error — falling back to cache-only', {
+      error: err instanceof Error ? err : undefined
+    });
+    if (processedWebhookEvents.has(eventId)) return false;
+    processedWebhookEvents.set(eventId, Date.now());
+    return true;
   }
 }
 
@@ -385,14 +401,31 @@ export function verifyWebhookSignature(payload: string, signature: string): bool
  * Handle Stripe webhook event
  */
 export async function handleWebhookEvent(event: StripeWebhookEvent): Promise<{ alreadyProcessed: boolean }> {
-  // Idempotency check: skip events that have already been processed
-  if (await isEventAlreadyProcessed(event.id)) {
+  // Atomic claim: only the first delivery for this event.id proceeds.
+  // Concurrent retries and replays short-circuit here.
+  const fresh = await claimStripeEvent(event.id);
+  if (!fresh) {
     logger.info(`Stripe webhook event ${event.id} already processed, skipping`);
     return { alreadyProcessed: true };
   }
 
   const db = getDatabase();
 
+  try {
+    const result = await handleWebhookEventBody(event, db);
+    return result;
+  } catch (err) {
+    // Release the claim so Stripe's retry can reprocess instead of
+    // hitting the idempotency short-circuit.
+    await releaseStripeEventClaim(event.id);
+    throw err;
+  }
+}
+
+async function handleWebhookEventBody(
+  event: StripeWebhookEvent,
+  db: ReturnType<typeof getDatabase>
+): Promise<{ alreadyProcessed: boolean }> {
   switch (event.type) {
   case 'checkout.session.completed': {
     const session = event.data.object;
@@ -504,8 +537,7 @@ export async function handleWebhookEvent(event: StripeWebhookEvent): Promise<{ a
     logger.info(`Unhandled Stripe event type: ${event.type}`);
   }
 
-  // Mark event as processed after successful handling
-  await markEventProcessed(event.id);
+  // Event was already claimed at the top of handleWebhookEvent.
   return { alreadyProcessed: false };
 }
 
