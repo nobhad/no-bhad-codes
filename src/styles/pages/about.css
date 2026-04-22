@@ -85,39 +85,6 @@
   .about-text-column p:last-child {
     margin-bottom: 0;
   }
-
-  /* Tech Stack Marquee - full viewport width, between content bottom and footer */
-  .about-section .tech-marquee {
-    position: absolute;
-    bottom: 12%;
-    left: 0;
-    width: 100%;
-    overflow: hidden;
-    pointer-events: none;
-    background-color: var(--color-dark);
-    padding: 0.75rem 0;
-  }
-
-  .tech-marquee-track {
-    display: flex;
-    width: max-content;
-    will-change: transform;
-  }
-
-  .tech-marquee-item {
-    white-space: nowrap;
-    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
-    text-transform: uppercase;
-    color: var(--color-light, #ffffff);
-    font-family: var(--font-family-acme);
-    padding: 0 1.25rem;
-  }
-
-  .tech-marquee-item::after {
-    content: '\00B7';
-    padding-left: 1.25rem;
-    color: var(--color-light, #ffffff);
-  }
 }
 
 /* ==========================================
