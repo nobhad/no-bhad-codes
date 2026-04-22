@@ -18,9 +18,14 @@ import {
   SEMRESATTRS_DEPLOYMENT_ENVIRONMENT
 } from '@opentelemetry/semantic-conventions';
 import { ConsoleSpanExporter } from '@opentelemetry/sdk-trace-node';
-import { ConsoleMetricExporter, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
+import {
+  ConsoleMetricExporter,
+  PeriodicExportingMetricReader,
+  type MetricReader
+} from '@opentelemetry/sdk-metrics';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
+import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import {
   trace,
   metrics,
@@ -37,6 +42,31 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const OTEL_ENABLED = process.env.OTEL_ENABLED !== 'false';
 const OTEL_EXPORTER_ENDPOINT = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
 const OTEL_DEBUG = process.env.OTEL_DEBUG === 'true';
+
+// Metrics exporter selection.
+//
+// Default is Prometheus: starts an HTTP endpoint on PROMETHEUS_PORT
+// (9464 by default) that scrapers can pull from, so latency and
+// error-rate histograms survive restarts instead of living only in
+// process memory. Set METRICS_EXPORTER=otlp to push to an OTel
+// collector instead (requires OTEL_EXPORTER_OTLP_ENDPOINT), =console
+// for stdout, =none to disable.
+type MetricsExporterKind = 'prometheus' | 'otlp' | 'console' | 'none';
+
+function resolveMetricsExporterKind(): MetricsExporterKind {
+  const raw = (process.env.METRICS_EXPORTER || '').toLowerCase();
+  if (raw === 'prometheus' || raw === 'otlp' || raw === 'console' || raw === 'none') {
+    return raw;
+  }
+  // No explicit choice: prefer OTLP if an endpoint is configured,
+  // otherwise Prometheus. Keeps existing OTLP-based deploys working
+  // by default.
+  return OTEL_EXPORTER_ENDPOINT ? 'otlp' : 'prometheus';
+}
+
+const PROMETHEUS_PORT = parseInt(process.env.PROMETHEUS_PORT || '9464', 10);
+const PROMETHEUS_HOST = process.env.PROMETHEUS_HOST || '0.0.0.0';
+const PROMETHEUS_ENDPOINT = process.env.PROMETHEUS_ENDPOINT || '/metrics';
 
 // Enable debug logging if requested
 if (OTEL_DEBUG) {
@@ -65,17 +95,40 @@ function getTraceExporter() {
   return undefined;
 }
 
-function getMetricExporter() {
-  if (NODE_ENV === 'production' && OTEL_EXPORTER_ENDPOINT) {
-    return new OTLPMetricExporter({
-      url: OTEL_EXPORTER_ENDPOINT
+function getMetricReader(): MetricReader | undefined {
+  const kind = resolveMetricsExporterKind();
+
+  switch (kind) {
+  case 'none':
+    return undefined;
+
+  case 'prometheus':
+    // PrometheusExporter *is* a MetricReader and manages its own
+    // HTTP listener — scrapers pull from http://host:port/metrics.
+    return new PrometheusExporter({
+      port: PROMETHEUS_PORT,
+      host: PROMETHEUS_HOST,
+      endpoint: PROMETHEUS_ENDPOINT
+    });
+
+  case 'otlp':
+    if (!OTEL_EXPORTER_ENDPOINT) {
+      console.warn(
+        '⚠️ METRICS_EXPORTER=otlp but OTEL_EXPORTER_OTLP_ENDPOINT is not set — disabling metrics export'
+      );
+      return undefined;
+    }
+    return new PeriodicExportingMetricReader({
+      exporter: new OTLPMetricExporter({ url: OTEL_EXPORTER_ENDPOINT }),
+      exportIntervalMillis: 60000
+    });
+
+  case 'console':
+    return new PeriodicExportingMetricReader({
+      exporter: new ConsoleMetricExporter(),
+      exportIntervalMillis: 60000
     });
   }
-  // Use console exporter for development (only if debug enabled)
-  if (OTEL_DEBUG) {
-    return new ConsoleMetricExporter();
-  }
-  return undefined;
 }
 
 // SDK instance
@@ -99,14 +152,7 @@ export function initOpenTelemetry(): void {
 
   try {
     const traceExporter = getTraceExporter();
-    const metricExporter = getMetricExporter();
-
-    const metricReader = metricExporter
-      ? new PeriodicExportingMetricReader({
-        exporter: metricExporter,
-        exportIntervalMillis: 60000 // Export every minute
-      })
-      : undefined;
+    const metricReader = getMetricReader();
 
     // Paths to ignore for tracing
     const ignorePaths = ['/health', '/health/live', '/health/ready', '/health/db', '/favicon.ico'];
@@ -143,15 +189,27 @@ export function initOpenTelemetry(): void {
     sdk.start();
     isInitialized = true;
 
-    const exporterInfo = OTEL_EXPORTER_ENDPOINT
+    const tracesInfo = OTEL_EXPORTER_ENDPOINT
       ? `OTLP → ${OTEL_EXPORTER_ENDPOINT}`
       : OTEL_DEBUG
         ? 'Console (debug mode)'
         : 'Disabled (no endpoint)';
 
+    const metricsKind = resolveMetricsExporterKind();
+    const metricsInfo =
+      metricsKind === 'prometheus'
+        ? `Prometheus scrape → http://${PROMETHEUS_HOST}:${PROMETHEUS_PORT}${PROMETHEUS_ENDPOINT}`
+        : metricsKind === 'otlp'
+          ? OTEL_EXPORTER_ENDPOINT
+            ? `OTLP → ${OTEL_EXPORTER_ENDPOINT}`
+            : 'Disabled (OTLP selected but no endpoint)'
+          : metricsKind === 'console'
+            ? 'Console'
+            : 'Disabled';
+
     console.log(`✅ OpenTelemetry initialized for ${SERVICE_NAME} (${NODE_ENV})`);
-    console.log(`   Traces: ${exporterInfo}`);
-    console.log(`   Metrics: ${exporterInfo}`);
+    console.log(`   Traces:  ${tracesInfo}`);
+    console.log(`   Metrics: ${metricsInfo}`);
   } catch (error) {
     console.error('❌ Failed to initialize OpenTelemetry:', error);
     // Don't throw - observability failure shouldn't crash the app
