@@ -239,28 +239,14 @@ export class NavigationModule extends BaseModule {
       }
     });
 
-    // Logo link - navigate to home using hash for consistent transitions (tracked for cleanup)
+    // Logo link - always force a fresh load so the intro animation
+    // (coyote paw entrance) replays. In-page hash-change wouldn't replay
+    // the intro because the SPA stays mounted; only a full reload triggers
+    // the first-paint inline script that resets intro-loading state.
     if (this.logoLink) {
       this.addEventListener(this.logoLink, 'click', (event: Event) => {
         event.preventDefault();
-
-        // Check if we're on the home page
-        const currentPath = window.location.pathname;
-        const isHomePage =
-          currentPath === '/' || currentPath === '/index.html' || currentPath === '';
-
-        if (isHomePage) {
-          // If already on home page, navigate to intro section via router
-          if (this.routerService) {
-            this.routerService.navigate('#/', { smooth: true });
-          } else {
-            // Fallback: update hash directly
-            window.location.hash = '#/';
-          }
-        } else {
-          // If on another page, navigate to home page
-          window.location.href = '/#/';
-        }
+        window.location.href = '/#/';
       });
     }
   }
