@@ -160,7 +160,9 @@ export function initOpenTelemetry(): void {
     sdk = new NodeSDK({
       resource,
       traceExporter,
-      metricReader,
+      // metricReaders (plural) is the supported API; the old singular
+      // `metricReader` is deprecated and prints a warning at startup.
+      metricReaders: metricReader ? [metricReader] : [],
       instrumentations: [
         getNodeAutoInstrumentations({
           // Disable noisy instrumentations in development
