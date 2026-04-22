@@ -129,7 +129,8 @@ export const authEndpoints = {
   validate: '/api/auth/validate',
   profile: '/api/auth/profile',
   magicLink: '/api/auth/magic-link',
-  verifyMagicLink: '/api/auth/verify-magic-link'
+  verifyMagicLink: '/api/auth/verify-magic-link',
+  forgotPassword: '/api/auth/forgot-password'
 };
 
 /**

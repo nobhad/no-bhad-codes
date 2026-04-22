@@ -557,6 +557,24 @@ function createAuthStore(): AuthStore {
       }
     },
 
+    // ----------------------------------------
+    // Password Reset
+    // ----------------------------------------
+
+    async requestPasswordReset(email: string): Promise<AuthResult> {
+      try {
+        await fetchWithAuth(authEndpoints.forgotPassword, {
+          method: 'POST',
+          body: JSON.stringify({ email })
+        });
+
+        return { success: true };
+      } catch (error) {
+        const message = formatErrorMessage(error, 'Failed to send password reset email');
+        return { success: false, error: message };
+      }
+    },
+
     async verifyMagicLink(token: string): Promise<LoginResult> {
       setState({ isProcessing: true, error: null });
 

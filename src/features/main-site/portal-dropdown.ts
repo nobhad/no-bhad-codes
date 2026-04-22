@@ -279,21 +279,39 @@ export function initPortalDropdown(): void {
     input.addEventListener('input', validateForgotForm);
   });
 
-  forgotForm.addEventListener('submit', (e) => {
+  forgotForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const emailInput = forgotForm.querySelector<HTMLInputElement>('#portal-forgot-email');
     const submitBtn = forgotForm.querySelector<HTMLButtonElement>('.dropdown-submit');
     if (!emailInput || !submitBtn) return;
 
-    if (isValidEmail(emailInput.value.trim())) {
-      setInlineError(forgotError, '');
-      hideAllForms();
-      resetSent.classList.add('form-active');
-      emailInput.value = '';
-      submitBtn.classList.remove('valid');
-    } else {
+    const email = emailInput.value.trim();
+    if (!isValidEmail(email)) {
       setInlineError(forgotError, 'Please enter a valid email address.');
+      return;
     }
+
+    setInlineError(forgotError, '');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+
+    // Server returns success regardless of whether the email exists
+    // (email enumeration protection). The only failures surfaced here are
+    // network/validation errors — everything else shows the success screen.
+    const result = await authStore.requestPasswordReset(email);
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Send Reset Link';
+
+    if (!result.success) {
+      setInlineError(forgotError, result.error || 'Failed to send reset link. Please try again.');
+      return;
+    }
+
+    hideAllForms();
+    resetSent.classList.add('form-active');
+    emailInput.value = '';
+    submitBtn.classList.remove('valid');
   });
 
   passwordForm.addEventListener('submit', async (e) => {
