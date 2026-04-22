@@ -102,13 +102,12 @@ All items verified against actual code. ~~0A~~, ~~0H~~, ~~0I~~ removed (proved f
 
 ---
 
-## Main Site Cartoon / Ink Direction
+## Main Site Navigation Direction
 
 **Status:** IN PROGRESS
 
 - [ ] Horizontal scroll-map nav model — pages arranged as a 2D scroll map around the intro center; replaces the current blur-based transition for nav menu / intro-nav / all non-paw transitions. Paw stays sovereign for intro ↔ any.
 - [ ] **Reincorporate tech-stack content somewhere on the site** — the tech-marquee transition bumper was removed during the scroll-map pivot; the 43-item tech list should land somewhere meaningful (dedicated "kit" page, project-detail sidebar, footer panel, or new home for it). Content list preserved in git history at `index.html` lines 876–920 of commit prior to marquee removal.
-- [ ] Roll ink treatment out to other main-site pages once scroll map is in (contact, projects, hero)
 
 ---
 
