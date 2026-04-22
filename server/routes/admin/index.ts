@@ -40,6 +40,7 @@ import checklistPdfRouter from './checklist-pdf.js';
 import asyncTasksRouter from './async-tasks.js';
 import auditChainRouter from './audit-chain.js';
 import circuitBreakersRouter from './circuit-breakers.js';
+import schemaDriftRouter from './schema-drift.js';
 
 const router = express.Router();
 router.use(dashboardRouter);
@@ -74,5 +75,6 @@ router.use('/checklist-pdf', checklistPdfRouter);
 router.use(asyncTasksRouter);
 router.use(auditChainRouter);
 router.use(circuitBreakersRouter);
+router.use(schemaDriftRouter);
 export { router as adminRouter };
 export default router;
