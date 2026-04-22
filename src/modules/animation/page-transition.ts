@@ -667,6 +667,22 @@ export class PageTransitionModule extends BaseModule {
     window.addEventListener('popstate', () => {
       this.popstateInFlight = true;
     });
+
+    // Compass arrow clicks act as a touch-friendly nav fallback —
+    // delegated so we don't have to re-bind on each navigation. The CSS
+    // disables pointer-events on non-navigable cues so this only fires
+    // for arrows that actually lead somewhere.
+    const compass = document.querySelector('[data-map-compass]') as HTMLElement | null;
+    if (compass) {
+      compass.addEventListener('click', (event: Event) => {
+        const target = event.target as HTMLElement | null;
+        const cue = target?.closest('.map-compass__cue') as HTMLElement | null;
+        const dir = cue?.dataset.cue as Direction | undefined;
+        if (!dir || !this.canNavigate(dir)) return;
+        if (this.isTransitioning) return;
+        this.tryNavigateDirection(dir);
+      });
+    }
   }
 
   /**

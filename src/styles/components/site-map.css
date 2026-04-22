@@ -220,15 +220,30 @@ html[data-initial-page="portal-login"]:not(.js-ready) main#main-content {
 }
 
 .map-compass__cue {
+  /* Reset button defaults so cues look like minimal text glyphs */
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: var(--space-2);
+  margin: 0;
+  cursor: pointer;
   font-family: var(--font-family-mono, monospace);
   font-size: clamp(1rem, 1.5vw, 1.25rem);
   line-height: 1;
   color: var(--color-dark);
   opacity: 0;
+  /* Disabled (non-navigable) cues opt out of pointer events */
+  pointer-events: none;
   transition:
     opacity 0.3s ease,
     transform 0.3s ease;
   user-select: none;
+}
+
+.map-compass__cue:focus-visible {
+  outline: 2px solid var(--color-accent, var(--color-dark));
+  outline-offset: 4px;
+  border-radius: 4px;
 }
 
 .map-compass__cue--up { grid-area: up; align-self: start; justify-self: center; }
@@ -239,10 +254,11 @@ html[data-initial-page="portal-login"]:not(.js-ready) main#main-content {
 /* Active when JS marks the direction as navigable */
 .map-compass__cue[data-can="true"] {
   opacity: 0.4;
+  pointer-events: auto;
 }
 
 .map-compass__cue[data-can="true"]:hover {
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 /* First-paint pulse: draws attention to the available scroll directions
