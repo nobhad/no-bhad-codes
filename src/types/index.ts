@@ -22,7 +22,6 @@ export {
   type AnyUser,
   type AuthState,
   type LoginCredentials,
-  type AdminLoginCredentials,
   type AuthResult,
   type LoginResult,
   type SessionData,

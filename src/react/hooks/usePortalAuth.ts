@@ -66,11 +66,6 @@ export function usePortalAuth() {
     []
   );
 
-  const adminLogin = useCallback(
-    (credentials: { password: string; totpCode?: string }) => authStore.adminLogin(credentials),
-    []
-  );
-
   const logout = useCallback(() => authStore.logout(), []);
 
   const refreshSession = useCallback(() => authStore.refreshSession(), []);
@@ -91,7 +86,6 @@ export function usePortalAuth() {
 
     // Actions
     login,
-    adminLogin,
     logout,
     refreshSession,
     clearError: authStore.clearError

@@ -21,7 +21,6 @@ import {
   type AuthStore,
   type AnyUser,
   type LoginCredentials,
-  type AdminLoginCredentials,
   type AuthResult,
   type LoginResult,
   type SessionData,
@@ -360,7 +359,12 @@ function createAuthStore(): AuthStore {
           body: JSON.stringify(credentials)
         });
 
-        const expiresAt = Date.now() + AUTH_TIMING.CLIENT_SESSION_TIMEOUT_MS;
+        // Session lifetime tracks the server JWT: admin = 1h, client = 1d.
+        const timeoutMs =
+          data.user.role === 'admin'
+            ? AUTH_TIMING.ADMIN_SESSION_TIMEOUT_MS
+            : AUTH_TIMING.CLIENT_SESSION_TIMEOUT_MS;
+        const expiresAt = Date.now() + timeoutMs;
         const sessionId = crypto.randomUUID();
         const isFirstLogin = data.isFirstLogin ?? false;
 
@@ -392,53 +396,6 @@ function createAuthStore(): AuthStore {
         };
       } catch (error) {
         const message = formatErrorMessage(error, 'Login failed');
-        setState({ isProcessing: false, error: message });
-        return { success: false, error: message };
-      }
-    },
-
-    // ----------------------------------------
-    // Admin Login
-    // ----------------------------------------
-
-    async adminLogin(credentials: AdminLoginCredentials): Promise<LoginResult> {
-      setState({ isProcessing: true, error: null });
-
-      try {
-        const data = await fetchWithAuth<{
-          message: string;
-          user: AnyUser;
-        }>(adminAuthEndpoints.login, {
-          method: 'POST',
-          body: JSON.stringify(credentials)
-        });
-
-        const expiresAt = Date.now() + AUTH_TIMING.ADMIN_SESSION_TIMEOUT_MS;
-        const sessionId = crypto.randomUUID();
-
-        saveSession(data.user, expiresAt, sessionId);
-
-        setState({
-          isAuthenticated: true,
-          isProcessing: false,
-          user: data.user,
-          role: 'admin',
-          expiresAt,
-          sessionId,
-          error: null,
-          isFirstLogin: false
-        });
-
-        startRefreshTimer();
-        emitEvent(AUTH_EVENTS.LOGIN, { user: data.user });
-
-        return {
-          success: true,
-          data: data.user,
-          sessionId
-        };
-      } catch (error) {
-        const message = formatErrorMessage(error, 'Admin login failed');
         setState({ isProcessing: false, error: message });
         return { success: false, error: message };
       }

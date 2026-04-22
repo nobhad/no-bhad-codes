@@ -109,13 +109,6 @@ export interface LoginCredentials {
 }
 
 /**
- * Admin login credentials
- */
-export interface AdminLoginCredentials {
-  password: string;
-}
-
-/**
  * Magic link request
  */
 export interface MagicLinkRequest {
@@ -180,7 +173,6 @@ export interface AuthStore {
 
   // Session Management
   login(credentials: LoginCredentials): Promise<LoginResult>;
-  adminLogin(credentials: AdminLoginCredentials): Promise<LoginResult>;
   logout(): Promise<void>;
   refreshSession(): Promise<boolean>;
   validateSession(): Promise<boolean>;

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { authStore } from '../../../auth/auth-store';
+import { APP_CONSTANTS } from '../../../config/constants';
 import { ROUTES } from '../../../constants/api-endpoints';
 
 type AuthGatePortalType = 'admin' | 'client';
@@ -54,7 +55,11 @@ export function AuthGate(props: AuthGateProps) {
 
     setIsSubmitting(true);
     try {
-      const result = await authStore.adminLogin({ password });
+      // Unified login: server detects admin by email and branches internally.
+      const result = await authStore.login({
+        email: APP_CONSTANTS.SECURITY.ADMIN_EMAIL,
+        password
+      });
       if (result.success) {
         window.location.href = ROUTES.PORTAL.DASHBOARD;
       } else {
