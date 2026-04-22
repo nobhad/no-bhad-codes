@@ -367,26 +367,99 @@ async function getProjectProfitability(projectId: number): Promise<ProjectProfit
 
 /**
  * Calculate profitability for all active projects.
+ *
+ * Previously N+1: fetched the id list, then ran five sub-queries per
+ * project inside getProjectProfitability — 50 projects produced 250
+ * queries on an admin dashboard load.
+ *
+ * Now: a single pre-aggregated query joins the four cost/revenue
+ * subtotals by project_id. We still call getHourlyRate once (one
+ * setting lookup), and the JS side only does arithmetic.
  */
 async function getAllProjectProfitability(): Promise<ProjectProfitability[]> {
   const db = getDatabase();
 
-  const projects = await db.all(
-    `SELECT id FROM projects
-     WHERE deleted_at IS NULL AND status IN ('active', 'in-progress', 'in-review')
-     ORDER BY project_name ASC`
-  ) as Array<{ id: number }>;
+  const rows = await db.all(
+    `SELECT
+       p.id,
+       p.project_name,
+       p.price,
+       COALESCE(c.contact_name, c.company_name) AS client_name,
+       COALESCE(inv_rev.total, 0)       AS invoices_paid,
+       COALESCE(inst_rev.total, 0)      AS installments_paid,
+       COALESCE(exp_total.total, 0)     AS expenses,
+       COALESCE(time_total.total_hours, 0) AS total_hours
+     FROM projects p
+     LEFT JOIN clients c
+       ON p.client_id = c.id AND c.deleted_at IS NULL
+     LEFT JOIN (
+       SELECT i.project_id, SUM(ip.amount) AS total
+       FROM invoice_payments ip
+       JOIN invoices i ON ip.invoice_id = i.id AND i.deleted_at IS NULL
+       GROUP BY i.project_id
+     ) inv_rev ON p.id = inv_rev.project_id
+     LEFT JOIN (
+       SELECT project_id, SUM(paid_amount) AS total
+       FROM payment_schedule_installments
+       WHERE status = 'paid'
+       GROUP BY project_id
+     ) inst_rev ON p.id = inst_rev.project_id
+     LEFT JOIN (
+       SELECT project_id, SUM(amount) AS total
+       FROM expenses
+       WHERE deleted_at IS NULL
+       GROUP BY project_id
+     ) exp_total ON p.id = exp_total.project_id
+     LEFT JOIN (
+       SELECT project_id, SUM(hours) AS total_hours
+       FROM time_entries
+       WHERE billable = 1
+       GROUP BY project_id
+     ) time_total ON p.id = time_total.project_id
+     WHERE p.deleted_at IS NULL
+       AND p.status IN ('active', 'in-progress', 'in-review')
+     ORDER BY p.project_name ASC`
+  ) as Array<{
+    id: number;
+    project_name: string;
+    price: string | null;
+    client_name: string | null;
+    invoices_paid: number | string;
+    installments_paid: number | string;
+    expenses: number | string;
+    total_hours: number | string;
+  }>;
 
-  const results: ProjectProfitability[] = [];
+  const hourlyRate = await getHourlyRate();
 
-  for (const project of projects) {
-    const profitability = await getProjectProfitability(project.id);
-    if (profitability) {
-      results.push(profitability);
-    }
-  }
+  return rows.map((row) => {
+    const invoicesPaid = parseFloat(String(row.invoices_paid)) || 0;
+    const installmentsPaid = parseFloat(String(row.installments_paid)) || 0;
+    const totalRevenue = invoicesPaid + installmentsPaid;
 
-  return results;
+    const expenses = parseFloat(String(row.expenses)) || 0;
+    const totalHours = parseFloat(String(row.total_hours)) || 0;
+    const timeCost = totalHours * hourlyRate;
+    const totalCosts = expenses + timeCost;
+
+    const profit = totalRevenue - totalCosts;
+    const margin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
+
+    const budget = row.price ? parseFloat(row.price) || null : null;
+    const budgetRemaining = budget != null ? budget - totalCosts : null;
+
+    return {
+      projectId: row.id,
+      projectName: row.project_name,
+      clientName: row.client_name || 'Unknown',
+      revenue: { invoicesPaid, installmentsPaid, totalRevenue },
+      costs: { expenses, timeCost, totalCosts },
+      profit,
+      margin: Math.round(margin * 100) / 100,
+      budget,
+      budgetRemaining
+    };
+  });
 }
 
 // ============================================
