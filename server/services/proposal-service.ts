@@ -57,6 +57,23 @@ import {
   toSignatureRequest
 } from '../database/entities/index.js';
 
+export type SignatureAuthorizationReason =
+  | 'NOT_FOUND'
+  | 'EXPIRED'
+  | 'ALREADY_SIGNED'
+  | 'DECLINED'
+  | 'EMAIL_MISMATCH';
+
+export class SignatureAuthorizationError extends Error {
+  constructor(
+    public readonly reason: SignatureAuthorizationReason,
+    message: string
+  ) {
+    super(message);
+    this.name = 'SignatureAuthorizationError';
+  }
+}
+
 interface TemplateCreateData {
   name: string;
   description?: string;
@@ -712,6 +729,43 @@ class ProposalService {
     }
 
     return toSignatureRequest(row as SignatureRequestRow);
+  }
+
+  /**
+   * Record a signature against a signature-request token.
+   *
+   * Why: the ID-only sign endpoint cannot verify that the caller is the
+   * authorized signer. Requiring a server-issued token bound to a proposal +
+   * signer email ensures only the intended party can sign, and only once.
+   */
+  async recordSignatureByToken(
+    token: string,
+    data: SignatureData
+  ): Promise<ProposalSignature> {
+    const request = await this.getSignatureRequestByToken(token);
+    if (!request) {
+      throw new SignatureAuthorizationError('NOT_FOUND', 'Invalid signature request');
+    }
+    if (request.expiresAt && new Date(request.expiresAt) < new Date()) {
+      throw new SignatureAuthorizationError('EXPIRED', 'Signature request has expired');
+    }
+    if (request.status === 'signed') {
+      throw new SignatureAuthorizationError('ALREADY_SIGNED', 'This proposal has already been signed');
+    }
+    if (request.status === 'declined') {
+      throw new SignatureAuthorizationError('DECLINED', 'This signature request was declined');
+    }
+
+    const requestEmail = (request.signerEmail || '').trim().toLowerCase();
+    const submittedEmail = (data.signerEmail || '').trim().toLowerCase();
+    if (!requestEmail || requestEmail !== submittedEmail) {
+      throw new SignatureAuthorizationError(
+        'EMAIL_MISMATCH',
+        'Signer email does not match the signature request'
+      );
+    }
+
+    return this.recordSignature(request.proposalId, { ...data, signerEmail: requestEmail });
   }
 
   /**

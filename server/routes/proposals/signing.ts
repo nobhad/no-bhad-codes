@@ -18,10 +18,31 @@ import {
   ErrorCodes,
   errorResponse,
   sendSuccess,
-  sendCreated
+  sendCreated,
+  SignatureAuthorizationError
 } from './helpers.js';
 import { invalidateCache } from '../../middleware/cache.js';
-import type { AuthenticatedRequest } from './helpers.js';
+import type { AuthenticatedRequest, SignatureAuthorizationReason } from './helpers.js';
+
+const SIGNATURE_TOKEN_REGEX = /^[a-f0-9]{32,64}$/i;
+
+function mapSignatureAuthError(
+  reason: SignatureAuthorizationReason
+): { status: number; code: string } {
+  switch (reason) {
+    case 'EXPIRED':
+      return { status: 410, code: ErrorCodes.SIGNATURE_EXPIRED };
+    case 'ALREADY_SIGNED':
+      return { status: 400, code: ErrorCodes.ALREADY_SIGNED };
+    case 'DECLINED':
+      return { status: 400, code: ErrorCodes.SIGNATURE_DECLINED };
+    case 'EMAIL_MISMATCH':
+      return { status: 403, code: ErrorCodes.UNAUTHORIZED };
+    case 'NOT_FOUND':
+    default:
+      return { status: 404, code: ErrorCodes.RESOURCE_NOT_FOUND };
+  }
+}
 
 const router = express.Router();
 
@@ -132,6 +153,67 @@ router.post(
  *       201:
  *         description: Created successfully
  */
+async function handleTokenSign(
+  token: string,
+  proposalId: number | null,
+  req: Request,
+  res: Response
+): Promise<void> {
+  if (!SIGNATURE_TOKEN_REGEX.test(token)) {
+    errorResponse(res, 'Invalid signature request', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+    return;
+  }
+
+  const signatureData = req.body ?? {};
+  if (
+    !signatureData.signerName ||
+    !signatureData.signerEmail ||
+    !signatureData.signatureData ||
+    !signatureData.signatureMethod
+  ) {
+    errorResponse(
+      res,
+      'signerName, signerEmail, signatureMethod, and signatureData are required',
+      400,
+      ErrorCodes.VALIDATION_ERROR
+    );
+    return;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(signatureData.signerEmail)) {
+    errorResponse(res, 'Invalid email format', 400, ErrorCodes.VALIDATION_ERROR);
+    return;
+  }
+
+  signatureData.ipAddress = req.ip;
+  const userAgent = req.get('User-Agent') || '';
+  signatureData.userAgent = userAgent.substring(0, 500);
+
+  try {
+    const signature = await proposalService.recordSignatureByToken(token, signatureData);
+
+    if (proposalId !== null && signature.proposalId !== proposalId) {
+      errorResponse(
+        res,
+        'Signature request does not match proposal',
+        403,
+        ErrorCodes.UNAUTHORIZED
+      );
+      return;
+    }
+
+    sendCreated(res, { signature }, 'Proposal signed successfully');
+  } catch (err) {
+    if (err instanceof SignatureAuthorizationError) {
+      const { status, code } = mapSignatureAuthError(err.reason);
+      errorResponse(res, err.message, status, code);
+      return;
+    }
+    throw err;
+  }
+}
+
 router.post(
   '/:id/sign',
   signatureRateLimiter,
@@ -139,34 +221,30 @@ router.post(
   asyncHandler(async (req: Request, res: Response) => {
     const proposalId = parseInt(req.params.id, 10);
 
-    // Validate proposal ID
     if (isNaN(proposalId) || proposalId <= 0) {
       return errorResponse(res, 'Invalid proposal ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const signatureData = req.body;
-    if (!signatureData.signerName || !signatureData.signerEmail || !signatureData.signatureData) {
+    const token = typeof req.body?.token === 'string' ? req.body.token : null;
+    if (!token) {
       return errorResponse(
         res,
-        'signerName, signerEmail, and signatureData are required',
-        400,
-        ErrorCodes.VALIDATION_ERROR
+        'A valid signature request token is required',
+        401,
+        ErrorCodes.UNAUTHORIZED
       );
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(signatureData.signerEmail)) {
-      return errorResponse(res, 'Invalid email format', 400, ErrorCodes.VALIDATION_ERROR);
-    }
+    await handleTokenSign(token, proposalId, req, res);
+  })
+);
 
-    // Add IP and user agent (truncate user agent to prevent log bloat)
-    signatureData.ipAddress = req.ip;
-    const userAgent = req.get('User-Agent') || '';
-    signatureData.userAgent = userAgent.substring(0, 500);
-
-    const signature = await proposalService.recordSignature(proposalId, signatureData);
-    sendCreated(res, { signature }, 'Proposal signed successfully');
+router.post(
+  '/sign/:token',
+  signatureRateLimiter,
+  invalidateCache(['proposals']),
+  asyncHandler(async (req: Request, res: Response) => {
+    await handleTokenSign(req.params.token, null, req, res);
   })
 );
 
