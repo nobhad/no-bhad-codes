@@ -213,7 +213,6 @@ router.post(
       status: clientStatus,
       isAdmin: clientIsAdmin,
       passwordHash,
-      failedLoginAttempts,
       lockedUntil: lockedUntilStr
     } = client;
 
@@ -247,13 +246,15 @@ router.post(
     // Verify password
     const isValidPassword = await bcrypt.compare(password, passwordHash);
     if (!isValidPassword) {
-      // Increment failed login attempts
-      const newFailedAttempts = failedLoginAttempts + 1;
+      // Atomically increment + maybe-lock. Serializes concurrent
+      // attempts so a brute-force attacker can't race past the
+      // lockout threshold with parallel requests.
+      const { lockedUntil } = await userService.recordClientFailedAttempt(clientId, {
+        lockThreshold: ACCOUNT_LOCKOUT_CONFIG.MAX_FAILED_ATTEMPTS,
+        lockDurationMs: ACCOUNT_LOCKOUT_CONFIG.LOCKOUT_DURATION_MS
+      });
 
-      if (newFailedAttempts >= ACCOUNT_LOCKOUT_CONFIG.MAX_FAILED_ATTEMPTS) {
-        // Lock the account
-        const lockUntil = new Date(Date.now() + ACCOUNT_LOCKOUT_CONFIG.LOCKOUT_DURATION_MS);
-        await userService.lockClientAccount(clientId, newFailedAttempts, lockUntil);
+      if (lockedUntil) {
         await auditLogger.logLoginFailed(
           email,
           req,
@@ -265,9 +266,6 @@ router.post(
           ErrorCodes.ACCOUNT_LOCKED
         );
       }
-
-      // Just increment the counter
-      await userService.incrementClientFailedAttempts(clientId, newFailedAttempts);
 
       await auditLogger.logLoginFailed(email, req, 'Invalid password');
       return sendUnauthorized(res, 'Invalid credentials', ErrorCodes.INVALID_CREDENTIALS);
@@ -422,14 +420,14 @@ router.post(
     // Verify password using bcrypt
     const isValidPassword = await bcrypt.compare(password, adminPasswordHash);
     if (!isValidPassword) {
-      // Get current failed attempts
-      const currentAttempts = await userService.getAdminFailedAttempts();
-      const newAttempts = currentAttempts + 1;
+      // Atomic increment + maybe-lock inside a transaction so concurrent
+      // admin login attempts can't race past the lockout threshold.
+      const { lockedUntil } = await userService.recordAdminFailedAttempt({
+        lockThreshold: ACCOUNT_LOCKOUT_CONFIG.MAX_FAILED_ATTEMPTS,
+        lockDurationMs: ACCOUNT_LOCKOUT_CONFIG.LOCKOUT_DURATION_MS
+      });
 
-      if (newAttempts >= ACCOUNT_LOCKOUT_CONFIG.MAX_FAILED_ATTEMPTS) {
-        // Lock the admin account
-        const lockUntil = new Date(Date.now() + ACCOUNT_LOCKOUT_CONFIG.LOCKOUT_DURATION_MS);
-        await userService.lockAdminAccount(newAttempts, lockUntil);
+      if (lockedUntil) {
         await auditLogger.logLoginFailed(
           process.env.ADMIN_EMAIL || 'admin',
           req,
@@ -442,8 +440,6 @@ router.post(
         );
       }
 
-      // Increment failed attempts
-      await userService.incrementAdminFailedAttempts(newAttempts);
       await auditLogger.logLoginFailed(
         process.env.ADMIN_EMAIL || 'admin',
         req,
@@ -871,12 +867,12 @@ router.post(
 
       const isValidPassword = await bcrypt.compare(password, adminPasswordHash);
       if (!isValidPassword) {
-        const currentAttempts = await userService.getAdminFailedAttempts();
-        const newAttempts = currentAttempts + 1;
+        const { lockedUntil: newLockedUntil } = await userService.recordAdminFailedAttempt({
+          lockThreshold: ACCOUNT_LOCKOUT_CONFIG.MAX_FAILED_ATTEMPTS,
+          lockDurationMs: ACCOUNT_LOCKOUT_CONFIG.LOCKOUT_DURATION_MS
+        });
 
-        if (newAttempts >= ACCOUNT_LOCKOUT_CONFIG.MAX_FAILED_ATTEMPTS) {
-          const lockUntil = new Date(Date.now() + ACCOUNT_LOCKOUT_CONFIG.LOCKOUT_DURATION_MS);
-          await userService.lockAdminAccount(newAttempts, lockUntil);
+        if (newLockedUntil) {
           await auditLogger.logLoginFailed(normalizedEmail, req, 'Admin account locked');
           return sendUnauthorized(
             res,
@@ -885,7 +881,6 @@ router.post(
           );
         }
 
-        await userService.incrementAdminFailedAttempts(newAttempts);
         await auditLogger.logLoginFailed(normalizedEmail, req, 'Invalid admin password');
         return sendUnauthorized(res, 'Invalid credentials', ErrorCodes.INVALID_CREDENTIALS);
       }
@@ -944,7 +939,6 @@ router.post(
       status: clientStatus,
       isAdmin: clientIsAdmin,
       passwordHash,
-      failedLoginAttempts,
       lockedUntil: lockedUntilStr
     } = client;
 
@@ -973,11 +967,12 @@ router.post(
 
     const isValidPassword = await bcrypt.compare(password, passwordHash);
     if (!isValidPassword) {
-      const newFailedAttempts = failedLoginAttempts + 1;
+      const { lockedUntil: newLockedUntil } = await userService.recordClientFailedAttempt(clientId, {
+        lockThreshold: ACCOUNT_LOCKOUT_CONFIG.MAX_FAILED_ATTEMPTS,
+        lockDurationMs: ACCOUNT_LOCKOUT_CONFIG.LOCKOUT_DURATION_MS
+      });
 
-      if (newFailedAttempts >= ACCOUNT_LOCKOUT_CONFIG.MAX_FAILED_ATTEMPTS) {
-        const lockUntil = new Date(Date.now() + ACCOUNT_LOCKOUT_CONFIG.LOCKOUT_DURATION_MS);
-        await userService.lockClientAccount(clientId, newFailedAttempts, lockUntil);
+      if (newLockedUntil) {
         await auditLogger.logLoginFailed(normalizedEmail, req, 'Account locked');
         return sendUnauthorized(
           res,
@@ -986,7 +981,6 @@ router.post(
         );
       }
 
-      await userService.incrementClientFailedAttempts(clientId, newFailedAttempts);
       await auditLogger.logLoginFailed(normalizedEmail, req, 'Invalid password');
       return sendUnauthorized(res, 'Invalid credentials', ErrorCodes.INVALID_CREDENTIALS);
     }
