@@ -79,13 +79,20 @@ type Direction = 'up' | 'down' | 'left' | 'right';
 
 const NEIGHBORS: Record<string, Partial<Record<Direction, string>>> = {
   // Vertical-only navigation from the landing page so horizontal scroll
-  // doesn't bounce the user away from the business card. Down enters the
-  // projects tile (start of the gallery chain); up goes to about.
+  // doesn't bounce the user away from the business card. The whole
+  // vertical map forms an infinite loop in both directions:
+  //
+  //   forward (down):  intro → projects → contact → about → intro → ...
+  //   backward (up):   intro → about → contact → projects → intro → ...
+  //
+  // No dead ends — scroll keeps going forever. about sits on the back
+  // side of the loop so up from intro still reaches it directly.
   intro: { up: 'about', down: 'projects' },
-  about: { down: 'intro' },
-  // contact returns up the chain to projects (lands on the LAST project
-  // channel — handled in tryNavigateDirection).
-  contact: { up: 'projects' },
+  about: { up: 'contact', down: 'intro' },
+  // contact closes the loop both ways: up returns to projects (lands on
+  // last channel — handled in tryNavigateDirection); down wraps forward
+  // to about, which then leads back to intro.
+  contact: { up: 'projects', down: 'about' },
   hero: { right: 'intro' },
   // projects: left/right enter the project-detail carousel; up/down do NOT
   // exit immediately — they channel-surf the CRT TV through the project
