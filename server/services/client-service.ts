@@ -954,37 +954,45 @@ class ClientService {
   // ===================================================
 
   /**
-   * Create a new contact for a client
+   * Create a new contact for a client.
+   *
+   * When the new contact is marked primary we first unset every other
+   * primary flag, then insert the new row. Wrapped in a transaction so
+   * a crash between the two can't leave the client with zero primary
+   * contacts (previous primary unset, new one never inserted).
    */
   async createContact(clientId: number, data: ContactCreateData): Promise<ClientContact> {
     const db = getDatabase();
 
-    // If this is marked as primary, unset other primary contacts
-    if (data.isPrimary) {
-      await db.run('UPDATE client_contacts SET is_primary = 0 WHERE client_id = ?', [clientId]);
-    }
+    const newContactId = await db.transaction(async (ctx) => {
+      if (data.isPrimary) {
+        await ctx.run('UPDATE client_contacts SET is_primary = 0 WHERE client_id = ?', [clientId]);
+      }
 
-    const result = await db.run(
-      `INSERT INTO client_contacts (
-        client_id, first_name, last_name, email, phone, title,
-        department, role, is_primary, notes
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        clientId,
-        data.firstName,
-        data.lastName,
-        data.email || null,
-        data.phone || null,
-        data.title || null,
-        data.department || null,
-        data.role || 'general',
-        data.isPrimary ? 1 : 0,
-        data.notes || null
-      ]
-    );
+      const result = await ctx.run(
+        `INSERT INTO client_contacts (
+          client_id, first_name, last_name, email, phone, title,
+          department, role, is_primary, notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          clientId,
+          data.firstName,
+          data.lastName,
+          data.email || null,
+          data.phone || null,
+          data.title || null,
+          data.department || null,
+          data.role || 'general',
+          data.isPrimary ? 1 : 0,
+          data.notes || null
+        ]
+      );
+
+      return result.lastID;
+    });
 
     const contact = (await db.get(`SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
-      result.lastID
+      newContactId
     ])) as unknown as ContactRow | undefined;
 
     if (!contact) {
@@ -995,7 +1003,7 @@ class ClientService {
     await this.logActivity(clientId, {
       activityType: 'contact_added',
       title: `Added contact: ${data.firstName} ${data.lastName}`,
-      metadata: { contactId: result.lastID },
+      metadata: { contactId: newContactId },
       createdBy: 'admin'
     });
 
@@ -1042,14 +1050,6 @@ class ClientService {
       throw new Error('Contact not found');
     }
 
-    // If setting as primary, unset other primary contacts
-    if (data.isPrimary) {
-      await db.run('UPDATE client_contacts SET is_primary = 0 WHERE client_id = ? AND id != ?', [
-        existing.client_id,
-        contactId
-      ]);
-    }
-
     const ALLOWED_FIELDS = [
       'first_name', 'last_name', 'email', 'phone', 'title',
       'department', 'role', 'is_primary', 'notes'
@@ -1068,12 +1068,23 @@ class ClientService {
 
     const { setClause, params } = buildSafeUpdate(fieldUpdates, ALLOWED_FIELDS);
 
-    if (setClause) {
-      await db.run(
-        `UPDATE client_contacts SET ${setClause} WHERE id = ?`,
-        [...params, contactId]
-      );
-    }
+    // Wrap the unset-others + update pair so a crash between them
+    // can't leave the client with no primary contact at all.
+    await db.transaction(async (ctx) => {
+      if (data.isPrimary) {
+        await ctx.run('UPDATE client_contacts SET is_primary = 0 WHERE client_id = ? AND id != ?', [
+          existing.client_id,
+          contactId
+        ]);
+      }
+
+      if (setClause) {
+        await ctx.run(
+          `UPDATE client_contacts SET ${setClause} WHERE id = ?`,
+          [...params, contactId]
+        );
+      }
+    });
 
     const updated = (await db.get(`SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
       contactId
@@ -1113,33 +1124,38 @@ class ClientService {
   }
 
   /**
-   * Set a contact as the primary contact for a client
+   * Set a contact as the primary contact for a client.
+   *
+   * Wrapped in a transaction so the unset-all, set-new, and sync to
+   * clients.contact_name either all happen or none do. A crash
+   * mid-flight would otherwise leave the client either with no
+   * primary contact or with clients.contact_name pointing to a
+   * different person than the actual primary row.
    */
   async setPrimaryContact(clientId: number, contactId: number): Promise<void> {
     const db = getDatabase();
 
-    // Unset all primary contacts for this client
-    await db.run('UPDATE client_contacts SET is_primary = 0 WHERE client_id = ?', [clientId]);
+    await db.transaction(async (ctx) => {
+      await ctx.run('UPDATE client_contacts SET is_primary = 0 WHERE client_id = ?', [clientId]);
 
-    // Set the specified contact as primary
-    await db.run(
-      'UPDATE client_contacts SET is_primary = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND client_id = ?',
-      [contactId, clientId]
-    );
-
-    // Sync primary contact name back to clients table
-    const contact = (await db.get(
-      'SELECT first_name, last_name FROM client_contacts WHERE id = ? AND client_id = ?',
-      [contactId, clientId]
-    )) as { first_name: string; last_name: string } | undefined;
-
-    if (contact) {
-      const fullName = `${contact.first_name} ${contact.last_name}`.trim();
-      await db.run(
-        'UPDATE clients SET contact_name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-        [fullName, clientId]
+      await ctx.run(
+        'UPDATE client_contacts SET is_primary = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND client_id = ?',
+        [contactId, clientId]
       );
-    }
+
+      const contact = (await ctx.get(
+        'SELECT first_name, last_name FROM client_contacts WHERE id = ? AND client_id = ?',
+        [contactId, clientId]
+      )) as { first_name: string; last_name: string } | undefined;
+
+      if (contact) {
+        const fullName = `${contact.first_name} ${contact.last_name}`.trim();
+        await ctx.run(
+          'UPDATE clients SET contact_name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+          [fullName, clientId]
+        );
+      }
+    });
   }
 
   // ===================================================
