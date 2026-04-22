@@ -15,7 +15,6 @@
 
 import { authStore } from '../../auth/auth-store';
 import { initPasswordToggle } from '../../components/password-toggle';
-import { APP_CONSTANTS } from '../../config/constants';
 import { ROUTES } from '../../constants/api-endpoints';
 import { createLogger } from '../../utils/logger';
 
@@ -80,13 +79,9 @@ export class PortalLoginOnMainSite {
       if (btnText) btnText.style.display = 'none';
       if (btnLoading) btnLoading.style.display = 'inline';
 
-      const isAdminLogin =
-        email.toLowerCase() === APP_CONSTANTS.SECURITY.ADMIN_EMAIL.toLowerCase();
-
       try {
-        const result = isAdminLogin
-          ? await authStore.adminLogin({ password })
-          : await authStore.login({ email, password });
+        // Unified login: server detects admin vs client by email and branches.
+        const result = await authStore.login({ email, password });
 
         if (result.success) {
           window.location.href = ROUTES.PORTAL.DASHBOARD;

@@ -139,11 +139,8 @@ export const authEndpoints = {
 export const adminAuthEndpoints = {
   // Use relative paths so requests go through the dev server proxy and
   // HttpOnly cookies are handled consistently across login and API calls.
-  // Using `buildApiUrl(...)` produces absolute URLs (e.g. http://localhost:4001),
-  // which can create cross-origin cookie issues in development when the
-  // frontend is served from a different origin. Relative `/api/...` paths
-  // will be proxied by Vite to the backend and preserve cookie behavior.
-  login: '/api/auth/admin/login',
+  // Login is unified through authEndpoints.login — server detects admin vs
+  // client by email. This object only holds admin-specific session routes.
   logout: '/api/auth/admin/logout',
   validate: '/api/auth/validate'
 };

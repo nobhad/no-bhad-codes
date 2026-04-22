@@ -14,7 +14,6 @@
  */
 
 import { authStore } from '../../auth/auth-store';
-import { APP_CONSTANTS } from '../../config/constants';
 import { ROUTES } from '../../constants/api-endpoints';
 import { createLogger } from '../../utils/logger';
 
@@ -335,12 +334,9 @@ export function initPortalDropdown(): void {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Signing in...';
 
-    const isAdminLogin = email.toLowerCase() === APP_CONSTANTS.SECURITY.ADMIN_EMAIL.toLowerCase();
-
     try {
-      const result = isAdminLogin
-        ? await authStore.adminLogin({ password })
-        : await authStore.login({ email, password });
+      // Unified login: server detects admin vs client by email and branches.
+      const result = await authStore.login({ email, password });
 
       if (result.success) {
         closeDropdown();

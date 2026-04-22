@@ -34,7 +34,6 @@ export {
   type AuthState,
   type AuthStore,
   type LoginCredentials,
-  type AdminLoginCredentials,
   type MagicLinkRequest,
   type AuthResult,
   type LoginResult,
@@ -59,23 +58,15 @@ import { authStore } from './auth-store';
 import type {
   AnyUser,
   LoginCredentials,
-  AdminLoginCredentials,
   LoginResult,
   AuthResult
 } from './auth-types';
 
 /**
- * Login a client user
+ * Login a user. Server detects admin vs client by email.
  */
 export async function login(credentials: LoginCredentials): Promise<LoginResult> {
   return authStore.login(credentials);
-}
-
-/**
- * Login an admin user
- */
-export async function adminLogin(credentials: AdminLoginCredentials): Promise<LoginResult> {
-  return authStore.adminLogin(credentials);
 }
 
 /**
