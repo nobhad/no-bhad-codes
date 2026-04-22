@@ -11,6 +11,7 @@
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { generateProjectCode } from '../utils/project-code.js';
+import { enqueueAsyncTask } from './async-task-service.js';
 
 // =====================================================
 // TYPES
@@ -327,6 +328,10 @@ class IntakeService {
         );
       }
 
+      // Enqueued at the end of the transaction so these tasks only exist
+      // if every write above committed. Handlers registered in the route.
+      const followUpTasks: Array<{ taskType: string; payload: Record<string, unknown> }> = [];
+
       // Create proposal if provided
       let proposalRequestId: number | null = null;
       if (intakeData.proposalSelection) {
@@ -361,6 +366,19 @@ class IntakeService {
             );
           }
         }
+      }
+
+      followUpTasks.push({
+        taskType: 'intake.admin-notification',
+        payload: { projectId, intakeData }
+      });
+      followUpTasks.push({
+        taskType: 'intake.lead-score',
+        payload: { projectId }
+      });
+
+      for (const task of followUpTasks) {
+        await enqueueAsyncTask(ctx, task.taskType, task.payload);
       }
 
       return { clientId, projectId, isNewClient, proposalRequestId };

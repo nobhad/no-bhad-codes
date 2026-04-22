@@ -201,6 +201,7 @@ export class SchedulerService {
   private agreementExpirationJob: SimpleTask | null = null;
   private autoPayJob: SimpleTask | null = null;
   private autoPayRetryJob: SimpleTask | null = null;
+  private asyncTaskDrainJob: SimpleTask | null = null;
   private isRunning = false;
 
   private constructor(config: Partial<SchedulerConfig> = {}) {
@@ -285,6 +286,10 @@ export class SchedulerService {
     this.scheduleAutoPay();
     this.scheduleAutoPayRetry();
 
+    // Drain the async_tasks outbox (every minute) — short interval because
+    // these tasks are latency-sensitive follow-ups to user-facing requests.
+    this.scheduleAsyncTaskDrain();
+
     // Start all scheduled jobs
     const jobs = [
       this.reminderJob,
@@ -302,7 +307,8 @@ export class SchedulerService {
       this.aiCacheCleanupJob,
       this.agreementExpirationJob,
       this.autoPayJob,
-      this.autoPayRetryJob
+      this.autoPayRetryJob,
+      this.asyncTaskDrainJob
     ].filter(Boolean);
 
     for (const job of jobs) {
@@ -397,6 +403,11 @@ export class SchedulerService {
     if (this.autoPayRetryJob) {
       this.autoPayRetryJob.stop();
       this.autoPayRetryJob = null;
+    }
+
+    if (this.asyncTaskDrainJob) {
+      this.asyncTaskDrainJob.stop();
+      this.asyncTaskDrainJob = null;
     }
 
     this.isRunning = false;
@@ -787,6 +798,34 @@ export class SchedulerService {
         }
       } catch (error) {
         logger.error('[Scheduler] Error during auto-pay retry:', {
+          error: error instanceof Error ? error : undefined
+        });
+      }
+    });
+  }
+
+  /**
+   * Drain the async_tasks outbox every minute.
+   *
+   * Keeps tail latency low for enqueued follow-ups (intake notifications,
+   * lead scoring, etc.) and ensures a crash mid-task leaves a retryable
+   * row instead of silently dropping the work.
+   */
+  private scheduleAsyncTaskDrain(): void {
+    const ASYNC_TASK_CRON = '* * * * *'; // Every minute
+    logger.info(`[Scheduler] Scheduling async task drain: ${ASYNC_TASK_CRON}`);
+
+    this.asyncTaskDrainJob = createSimpleTask(ASYNC_TASK_CRON, async () => {
+      try {
+        const { drainAsyncTasks } = await import('./async-task-service.js');
+        const result = await drainAsyncTasks();
+        if (result.processed > 0 || result.failed > 0) {
+          logger.info(
+            `[Scheduler] Async tasks drained: processed=${result.processed}, failed=${result.failed}`
+          );
+        }
+      } catch (error) {
+        logger.error('[Scheduler] Error draining async_tasks:', {
           error: error instanceof Error ? error : undefined
         });
       }
