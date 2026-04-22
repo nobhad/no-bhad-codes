@@ -135,6 +135,14 @@ export class PageTransitionModule extends BaseModule {
   /** Phase C: cooldown timestamp — wheel events before this are ignored. */
   private wheelCooldownUntil: number = 0;
 
+  /**
+   * Direction of the next hash-driven navigation when triggered by wheel or
+   * keyboard input on/from project-detail. Set right before changing the hash
+   * and consumed by handleHashChange so the resulting transitionTo uses slide
+   * mode (no blur — pan effect, like dragging an interactive map).
+   */
+  private pendingSlideDirection: Direction | null = null;
+
   constructor(options: PageTransitionOptions = {}) {
     super('PageTransitionModule', { debug: false, ...options });
 
@@ -331,6 +339,14 @@ export class PageTransitionModule extends BaseModule {
       gsap.set(businessCard, { opacity: 1, visibility: 'visible' });
     }
 
+    // The card-inner holds the actual front/back SVG images and starts with
+    // inline visibility:hidden;opacity:0. Without restoring it, the slide
+    // brings in an empty intro tile and reads as "just a fade-out".
+    const businessCardInner = document.getElementById('business-card-inner');
+    if (businessCardInner) {
+      gsap.set(businessCardInner, { opacity: 1, visibility: 'visible' });
+    }
+
     // Restore intro-nav visibility (exit animation faded the nav links out).
     const introNav = document.querySelector('.intro-nav') as HTMLElement | null;
     if (introNav) {
@@ -468,7 +484,18 @@ export class PageTransitionModule extends BaseModule {
           return;
         }
         this.log('[PageTransitionModule] Starting transition to:', pageId);
-        this.transitionTo(pageId);
+        // Consume pending slide direction (set by wheel/keyboard before hash
+        // change) OR infer one. Without this, when router:navigate fires
+        // BEFORE handleHashChange, the pending direction is dropped and
+        // transitions involving project-detail fall back to blur.
+        let slideDir = this.pendingSlideDirection;
+        this.pendingSlideDirection = null;
+        if (!slideDir) slideDir = this.inferSlideDirection(pageId);
+        if (slideDir) {
+          void this.transitionTo(pageId, 'slide', slideDir);
+        } else {
+          void this.transitionTo(pageId);
+        }
       } else if (!this.introComplete) {
         this.log('[PageTransitionModule] Blocked - intro not complete');
       }
@@ -503,8 +530,41 @@ export class PageTransitionModule extends BaseModule {
     const pageId = this.getPageIdFromHash(hash);
 
     if (pageId && pageId !== this.currentPageId) {
-      this.transitionTo(pageId);
+      // Consume any pending slide direction set by the wheel/keyboard handler.
+      // Slide mode pans without blur for the interactive-map feel.
+      let slideDir = this.pendingSlideDirection;
+      this.pendingSlideDirection = null;
+
+      // Fallback: if no explicit slide direction was set but the transition
+      // involves project-detail (card click, browser back, etc.), infer one
+      // so the gallery feel is consistent across all entry points instead of
+      // sometimes blurring and sometimes sliding.
+      if (!slideDir) slideDir = this.inferSlideDirection(pageId);
+
+      if (slideDir) {
+        void this.transitionTo(pageId, 'slide', slideDir);
+      } else {
+        void this.transitionTo(pageId);
+      }
     }
+  }
+
+  /**
+   * Infer a slide direction for hash-driven / router-driven navigation
+   * involving project-detail. Card clicks, browser back, and exit-to-home
+   * paths don't carry an explicit direction, but we still want the gallery
+   * pan to play instead of the blur swap.
+   */
+  private inferSlideDirection(pageId: string): Direction | null {
+    // Anything ENTERING or LEAVING project-detail should slide.
+    if (this.currentPageId === 'projects' && pageId === 'project-detail') return 'right';
+    if (this.currentPageId === 'project-detail' && pageId === 'projects') return 'left';
+    if (this.currentPageId === 'project-detail' && pageId === 'project-detail') return 'right';
+    // project-detail exits: right past last project goes home, etc. Default
+    // to 'right' since that's the carousel-forward direction.
+    if (this.currentPageId === 'project-detail') return 'right';
+    if (pageId === 'project-detail') return 'right';
+    return null;
   }
 
   /**
@@ -700,7 +760,7 @@ export class PageTransitionModule extends BaseModule {
     //   through to native scroll so users can read tall case studies
     const willNavigate =
       this.currentPageId === 'project-detail'
-        ? direction === 'left' || direction === 'right'
+        ? direction === 'left' || direction === 'right' || direction === 'up'
         : NEIGHBORS[this.currentPageId]?.[direction] != null;
     if (!willNavigate) return;
 
@@ -716,14 +776,16 @@ export class PageTransitionModule extends BaseModule {
    */
   private tryNavigateDirection(direction: Direction): void {
     // Dynamic case: scrolling on project-detail walks through the project
-    // list. left/right cycle between projects, with left from the FIRST
-    // project bouncing back to the projects tile. Other directions on
-    // project-detail are no-ops so they fall through to native scrolling.
+    // list. left/right cycle between projects (left-from-first → projects,
+    // right-from-last → contact). up exits to home. down falls through to
+    // native scrolling. Slide direction is set so the upcoming hash-driven
+    // transition pans instead of blurring.
     if (this.currentPageId === 'project-detail') {
       const targetHash = this.resolveProjectDetailNeighbor(direction);
       if (!targetHash) return;
       this.wheelCooldownUntil =
         performance.now() + PAGE_ANIMATION.DURATION * 1000 + WHEEL_COOLDOWN_MS;
+      this.pendingSlideDirection = direction;
       window.location.hash = targetHash;
       return;
     }
@@ -734,11 +796,11 @@ export class PageTransitionModule extends BaseModule {
     this.wheelCooldownUntil = performance.now() + PAGE_ANIMATION.DURATION * 1000 + WHEEL_COOLDOWN_MS;
 
     // Special case: project-detail isn't a static route — it needs a slug.
-    // Pull the first project's slug from the rendered projects list and set
-    // the hash; the existing hashchange handler will run the transition.
+    // Slide instead of blur so projects → first detail also pans.
     if (targetPageId === 'project-detail') {
       const slug = this.getProjectSlugAt(0);
       if (!slug) return;
+      this.pendingSlideDirection = direction;
       window.location.hash = `#/projects/${slug}`;
       return;
     }
@@ -781,11 +843,13 @@ export class PageTransitionModule extends BaseModule {
    * - left from first project → back to projects tile
    * - left from other project → previous project
    * - right from non-last project → next project
-   * - right from last project → null (stop at the end)
-   * - up/down → null (let native scroll handle case-study reading)
+   * - right from last project → contact (carousel exits onward to contact)
+   * - up → home (handleWheel gates this on scrollTop===0 so internal scroll works)
+   * - down → null (let native scroll handle reaching the bottom)
    */
   private resolveProjectDetailNeighbor(direction: Direction): string | null {
-    if (direction !== 'left' && direction !== 'right') return null;
+    if (direction === 'down') return null;
+    if (direction === 'up') return '#/';
 
     const slugs = this.getProjectSlugs();
     if (slugs.length === 0) return null;
@@ -798,8 +862,8 @@ export class PageTransitionModule extends BaseModule {
       if (currentIndex === 0) return '#/projects';
       return `#/projects/${slugs[currentIndex - 1]}`;
     }
-    // right
-    if (currentIndex >= slugs.length - 1) return null;
+    // right: walk forward, wrap back to home (intro) at end of carousel
+    if (currentIndex >= slugs.length - 1) return '#/';
     return `#/projects/${slugs[currentIndex + 1]}`;
   }
 
@@ -814,8 +878,16 @@ export class PageTransitionModule extends BaseModule {
    * - 'camera' (used only by the wheel + keyboard scroll-map handlers):
    *   pure camera tween. NEVER plays the paw — scrolling around the map
    *   should feel like camera panning, not a slow morph animation.
+   * - 'slide' (wheel/keyboard nav involving project-detail): pans
+   *   `.site-map` and `project-detail` as siblings — the entire detail card
+   *   slides off one side while the next page slides in from the opposite
+   *   side. NEVER plays the paw. Requires `slideDirection`.
    */
-  async transitionTo(pageId: string, mode: 'blur' | 'camera' = 'blur'): Promise<void> {
+  async transitionTo(
+    pageId: string,
+    mode: 'blur' | 'camera' | 'slide' = 'blur',
+    slideDirection: Direction | null = null
+  ): Promise<void> {
     this.log('[PageTransitionModule] transitionTo called:', pageId, 'mode:', mode);
 
     if (pageId === this.currentPageId || this.isTransitioning) {
@@ -856,6 +928,11 @@ export class PageTransitionModule extends BaseModule {
           this.restoreIntroCardState();
         }
         await this.moveCamera(MAP_TILES[pageId as keyof typeof MAP_TILES], true);
+      } else if (mode === 'slide' && slideDirection && this.siteMap) {
+        // ============================================
+        // SLIDE MODE (project-detail nav) — full-card pan, no paw, no blur
+        // ============================================
+        await this.runSlideTransition(currentPage, targetPage, slideDirection);
       } else {
         // ============================================
         // BLUR MODE (nav menu / hash / link click) — original-feel transitions
@@ -929,19 +1006,17 @@ export class PageTransitionModule extends BaseModule {
         document.title = targetPage.title;
       }
 
-      // Dispatch page changed event (both internally and as window event)
-      this.dispatchEvent('page-changed', {
-        from: currentPage?.id,
-        to: pageId
-      });
-      window.dispatchEvent(
-        new CustomEvent('page-changed', {
-          detail: { from: currentPage?.id, to: pageId }
-        })
-      );
+      // Dispatch page changed event (both internally and as window event).
+      // Include `mode` so listeners can distinguish direct navigation (blur)
+      // from camera/slide map panning, e.g., to skip intrusive entrance
+      // animations when the user is just scrolling around.
+      const eventDetail = { from: currentPage?.id, to: pageId, mode };
+      this.dispatchEvent('page-changed', eventDetail);
+      window.dispatchEvent(new CustomEvent('page-changed', { detail: eventDetail }));
 
-      // Dispatch contact-page-ready if needed
-      if (pageId === 'contact') {
+      // Dispatch contact-page-ready ONLY for direct navigation (blur). Map
+      // scroll arrivals (camera/slide) skip the form-grow animation.
+      if (pageId === 'contact' && mode === 'blur') {
         this.dispatchEvent('contact-page-ready', { pageId });
       }
 
@@ -978,6 +1053,164 @@ export class PageTransitionModule extends BaseModule {
         onComplete: resolve
       });
     });
+  }
+
+  /**
+   * ============================================
+   * SLIDE TRANSITION
+   * ============================================
+   * Full-card pan for project-detail navigation. The outgoing page slides
+   * off in the direction of travel and the incoming page slides in from the
+   * opposite side as siblings — no blur, no fade. Feels like dragging an
+   * interactive map.
+   *
+   * Implementation: for map-tile sources/targets we translate `.site-map`
+   * itself (since the tile lives inside the camera container); for off-map
+   * pages (project-detail) we translate the page element directly. The
+   * baseline xPercent of `.site-map` is its current camera position
+   * (e.g., -100 for projects), so slide offsets stack on top of it.
+   *
+   * Same-element edge case (project-detail → project-detail carousel): the
+   * rendered content is swapped by the projects module before this runs, so
+   * we just snap the element to off-screen and slide it back into place.
+   */
+  private async runSlideTransition(
+    currentPage: PageConfig | undefined,
+    targetPage: PageConfig,
+    direction: Direction
+  ): Promise<void> {
+    if (!targetPage.element) return;
+
+    const isHorizontal = direction === 'left' || direction === 'right';
+    const axisProp: 'xPercent' | 'yPercent' = isHorizontal ? 'xPercent' : 'yPercent';
+    // outSign: where outgoing exits relative to viewport.
+    // - right scroll → outgoing exits LEFT (-1)
+    // - left scroll  → outgoing exits RIGHT (+1)
+    // - down scroll  → outgoing exits UP (-1)
+    // - up scroll    → outgoing exits DOWN (+1)
+    const outSign = direction === 'right' || direction === 'down' ? -1 : 1;
+    const inSign = -outSign;
+
+    const fromIsMap = currentPage ? this.isMapPage(currentPage.id) : false;
+    const toIsMap = this.isMapPage(targetPage.id);
+
+    // Resolve the visual element to translate for each side. Map tiles share
+    // a single .site-map container that holds the camera transform.
+    const fromElement: HTMLElement | null = fromIsMap
+      ? this.siteMap
+      : currentPage?.element ?? null;
+    const toElement: HTMLElement = toIsMap ? this.siteMap! : targetPage.element;
+
+    // Baselines: a map element's resting transform IS its camera position;
+    // off-map elements rest at 0.
+    const toBaseline = toIsMap
+      ? CAMERA_POSITIONS[MAP_TILES[targetPage.id as keyof typeof MAP_TILES]]
+      : { x: 0, y: 0 };
+    const fromBaseline = fromIsMap && currentPage
+      ? CAMERA_POSITIONS[MAP_TILES[currentPage.id as keyof typeof MAP_TILES]]
+      : { x: 0, y: 0 };
+
+    const inFinal = isHorizontal ? toBaseline.x : toBaseline.y;
+    const inStart = inFinal + inSign * 100;
+    const outFinal = (isHorizontal ? fromBaseline.x : fromBaseline.y) + outSign * 100;
+
+    // Prep target visibility BEFORE the slide starts. Critical: when
+    // making the off-map target visible, set the off-screen transform BEFORE
+    // adding the page-active class — otherwise the element renders one frame
+    // at position 0 (full viewport) before snapping off-screen, which the
+    // user sees as a flash.
+    if (toIsMap && this.siteMap) {
+      this.pages.forEach((page) => {
+        if (page.element && this.isMapPage(page.id)) {
+          gsap.set(page.element, { clearProps: 'opacity,filter,visibility' });
+        }
+      });
+      // When sliding TO intro, the business card may have been left hidden by
+      // a previous paw exit. Restore it so the user sees the card slide into
+      // view — without this, the slide looks like just a fade because the
+      // tile arrives empty.
+      if (targetPage.id === 'intro') {
+        this.restoreIntroCardState();
+      }
+      this.setSiteMapVisibility(true);
+      this.moveCamera(MAP_TILES[targetPage.id as keyof typeof MAP_TILES], false);
+    } else if (!toIsMap) {
+      this.hideOffMapPages();
+      // Pre-position OFF-SCREEN before becoming visible.
+      gsap.killTweensOf(toElement);
+      gsap.set(toElement, {
+        [axisProp]: isHorizontal ? inSign * 100 : 0,
+        yPercent: !isHorizontal ? inSign * 100 : 0,
+        opacity: 1,
+        visibility: 'visible',
+        filter: 'none'
+      });
+      toElement.classList.remove('page-hidden');
+      toElement.classList.add('page-active');
+    }
+
+    const sameElement = fromElement === toElement;
+
+    // Same-element carousel: content has already swapped; slide it back in.
+    if (sameElement) {
+      gsap.killTweensOf(toElement);
+      gsap.set(toElement, { [axisProp]: inStart });
+      await new Promise<void>((resolve) => {
+        gsap.to(toElement, {
+          [axisProp]: inFinal,
+          duration: PAGE_ANIMATION.DURATION,
+          ease: PAGE_ANIMATION.EASE_OUT,
+          onComplete: resolve
+        });
+      });
+      return;
+    }
+
+    // For toIsMap case (off-map → map), position siteMap off-screen at start.
+    if (toIsMap) {
+      gsap.killTweensOf(toElement);
+      gsap.set(toElement, { [axisProp]: inStart });
+    }
+
+    const tweens: Promise<void>[] = [];
+    if (fromElement) {
+      gsap.killTweensOf(fromElement);
+      tweens.push(
+        new Promise<void>((resolve) => {
+          gsap.to(fromElement, {
+            [axisProp]: outFinal,
+            duration: PAGE_ANIMATION.DURATION,
+            ease: PAGE_ANIMATION.EASE_OUT,
+            onComplete: resolve
+          });
+        })
+      );
+    }
+    tweens.push(
+      new Promise<void>((resolve) => {
+        gsap.to(toElement, {
+          [axisProp]: inFinal,
+          duration: PAGE_ANIMATION.DURATION,
+          ease: PAGE_ANIMATION.EASE_OUT,
+          onComplete: resolve
+        });
+      })
+    );
+
+    await Promise.all(tweens);
+
+    // Cleanup outgoing once slide is done.
+    if (fromIsMap && !toIsMap && this.siteMap) {
+      // Map slid off, off-map is now visible. Hide site-map and reset its
+      // transform to its (previous) camera baseline.
+      this.setSiteMapVisibility(false);
+      gsap.set(this.siteMap, { xPercent: fromBaseline.x, yPercent: fromBaseline.y });
+    } else if (!fromIsMap && currentPage?.element && currentPage.element !== toElement) {
+      // Off-map slid off, hide it and clear inline transform.
+      gsap.set(currentPage.element, { clearProps: 'transform,opacity,visibility,filter' });
+      currentPage.element.classList.add('page-hidden');
+      currentPage.element.classList.remove('page-active');
+    }
   }
 
   /**
