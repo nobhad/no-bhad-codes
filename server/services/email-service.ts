@@ -691,7 +691,13 @@ export const emailService = {
     // Store config
     emailConfig = config;
 
-    // Create nodemailer transporter
+    // Create nodemailer transporter with explicit timeouts. Without
+    // these, a slow or unresponsive SMTP host can keep a sendMail()
+    // call pending for the lifetime of the TCP connection (often
+    // measured in minutes), pinning the request handler or async-task
+    // worker that invoked it. The values below are conservative —
+    // well above typical SMTP handshake + send latency, well below
+    // anything that would block a user-facing request.
     transporter = nodemailer.createTransport({
       host: config.host,
       port: config.port,
@@ -699,7 +705,10 @@ export const emailService = {
       auth: {
         user: config.auth.user,
         pass: config.auth.pass
-      }
+      },
+      connectionTimeout: 10_000, // handshake must complete within 10s
+      greetingTimeout: 10_000,   // server greeting after connect
+      socketTimeout: 30_000      // total socket inactivity budget
     });
 
     logger.info('[Email] Email service initialized successfully');
