@@ -330,7 +330,15 @@ class IntakeService {
 
       // Enqueued at the end of the transaction so these tasks only exist
       // if every write above committed. Handlers registered in the route.
-      const followUpTasks: Array<{ taskType: string; payload: Record<string, unknown> }> = [];
+      //
+      // dedupeKey prevents a second admin-notification / lead-score /
+      // save-file from piling up if the same project is re-submitted
+      // while the first task is still in flight.
+      const followUpTasks: Array<{
+        taskType: string;
+        payload: Record<string, unknown>;
+        dedupeKey: string;
+      }> = [];
 
       // Create proposal if provided
       let proposalRequestId: number | null = null;
@@ -370,19 +378,24 @@ class IntakeService {
 
       followUpTasks.push({
         taskType: 'intake.admin-notification',
-        payload: { projectId, intakeData }
+        payload: { projectId, intakeData },
+        dedupeKey: `intake.admin-notification:${projectId}`
       });
       followUpTasks.push({
         taskType: 'intake.lead-score',
-        payload: { projectId }
+        payload: { projectId },
+        dedupeKey: `intake.lead-score:${projectId}`
       });
       followUpTasks.push({
         taskType: 'intake.save-file',
-        payload: { intakeData, projectId, projectName: params.projectName }
+        payload: { intakeData, projectId, projectName: params.projectName },
+        dedupeKey: `intake.save-file:${projectId}`
       });
 
       for (const task of followUpTasks) {
-        await enqueueAsyncTask(ctx, task.taskType, task.payload);
+        await enqueueAsyncTask(ctx, task.taskType, task.payload, {
+          dedupeKey: task.dedupeKey
+        });
       }
 
       return { clientId, projectId, isNewClient, proposalRequestId };
