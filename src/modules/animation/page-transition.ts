@@ -143,6 +143,14 @@ export class PageTransitionModule extends BaseModule {
    */
   private pendingSlideDirection: Direction | null = null;
 
+  /**
+   * Snapshot of the project-detail element captured before content swap, used
+   * to slide the OLD card off-screen while the (re-rendered) real element
+   * slides the NEW card in. Without this, project-detail → project-detail
+   * navigation is single-element so you only see one card move at a time.
+   */
+  private outgoingDetailGhost: HTMLElement | null = null;
+
   constructor(options: PageTransitionOptions = {}) {
     super('PageTransitionModule', { debug: false, ...options });
 
@@ -568,6 +576,40 @@ export class PageTransitionModule extends BaseModule {
   }
 
   /**
+   * Snapshot the live project-detail element (with its current content) into
+   * a sibling clone, so the OLD card can slide off-screen while the same
+   * #project-detail element re-renders and slides the NEW card in. The ghost
+   * is removed by runSlideTransition once the slide completes.
+   */
+  private captureDetailGhost(): void {
+    if (this.outgoingDetailGhost) {
+      this.outgoingDetailGhost.remove();
+      this.outgoingDetailGhost = null;
+    }
+    const detail = this.pages.get('project-detail')?.element;
+    if (!detail || !detail.parentElement) return;
+
+    const ghost = detail.cloneNode(true) as HTMLElement;
+    ghost.id = 'project-detail-ghost';
+    ghost.removeAttribute('data-page');
+    ghost.classList.remove('page-hidden');
+    ghost.classList.add('page-active');
+    // Pin ghost to the same viewport box as the real element so they
+    // overlap perfectly until the slide separates them.
+    ghost.style.position = 'absolute';
+    ghost.style.top = '0';
+    ghost.style.left = '0';
+    ghost.style.width = '100%';
+    ghost.style.height = '100%';
+    ghost.style.display = 'flex';
+    ghost.style.zIndex = '5';
+    ghost.style.pointerEvents = 'none';
+
+    detail.parentElement.appendChild(ghost);
+    this.outgoingDetailGhost = ghost;
+  }
+
+  /**
    * Convert hash to page ID
    */
   private getPageIdFromHash(hash: string): string | null {
@@ -800,6 +842,15 @@ export class PageTransitionModule extends BaseModule {
       if (!targetHash) return;
       this.wheelCooldownUntil =
         performance.now() + PAGE_ANIMATION.DURATION * 1000 + WHEEL_COOLDOWN_MS;
+      // For project-detail → project-detail, snapshot the current rendered
+      // card BEFORE the projects module swaps content on hashchange. This
+      // ghost slides off while the real element (with new content) slides
+      // in, so the user actually sees both cards moving — without it, the
+      // single-element animation just snaps the old card off-screen.
+      const goingToAnotherDetail = targetHash.startsWith('#/projects/');
+      if (goingToAnotherDetail) {
+        this.captureDetailGhost();
+      }
       this.pendingSlideDirection = direction;
       window.location.hash = targetHash;
       return;
@@ -1166,11 +1217,36 @@ export class PageTransitionModule extends BaseModule {
 
     const sameElement = fromElement === toElement;
 
-    // Same-element carousel: content has already swapped; slide it back in.
+    // Same-element carousel (project-detail → project-detail). The element's
+    // content was already swapped by ProjectsModule on hashchange, so the
+    // real element shows the NEW card. We need to also see the OLD card
+    // sliding off — that's what the ghost (cloned before the swap) is for.
     if (sameElement) {
+      const ghost = this.outgoingDetailGhost;
+      this.outgoingDetailGhost = null;
+
+      // Position the (real) element off-screen at the incoming side and
+      // slide it back to 0.
       gsap.killTweensOf(toElement);
       gsap.set(toElement, { [axisProp]: inStart });
-      await new Promise<void>((resolve) => {
+
+      const ghostTween: Promise<void> = ghost
+        ? new Promise<void>((resolve) => {
+          gsap.killTweensOf(ghost);
+          gsap.set(ghost, { [axisProp]: 0 });
+          gsap.to(ghost, {
+            [axisProp]: outSign * 100,
+            duration: PAGE_ANIMATION.DURATION,
+            ease: PAGE_ANIMATION.EASE_OUT,
+            onComplete: () => {
+              ghost.remove();
+              resolve();
+            }
+          });
+        })
+        : Promise.resolve();
+
+      const realTween = new Promise<void>((resolve) => {
         gsap.to(toElement, {
           [axisProp]: inFinal,
           duration: PAGE_ANIMATION.DURATION,
@@ -1178,6 +1254,8 @@ export class PageTransitionModule extends BaseModule {
           onComplete: resolve
         });
       });
+
+      await Promise.all([ghostTween, realTween]);
       return;
     }
 
