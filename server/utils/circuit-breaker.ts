@@ -42,6 +42,7 @@
  */
 
 import { logger } from '../services/logger.js';
+import { errorTracker } from '../services/error-tracking.js';
 import { ServiceUnavailableError } from './app-errors.js';
 import { FetchTimeoutError } from './fetch-with-timeout.js';
 
@@ -169,6 +170,25 @@ export class CircuitBreaker {
           cooldownMs: this.cooldownMs
         }
       });
+      // Also page Sentry so on-call sees a breaker open in real time
+      // rather than waiting to grep logs. Warning level, not error —
+      // an open breaker IS the intended defence against a sustained
+      // upstream failure, not a code bug.
+      errorTracker.captureMessage(
+        `Circuit breaker opened: ${this.name}`,
+        'warning',
+        {
+          tags: {
+            resilience_event: 'circuit_breaker_open',
+            breaker: this.name
+          },
+          extra: {
+            consecutiveFailures: this.consecutiveFailures,
+            cooldownMs: this.cooldownMs,
+            previousState: prev
+          }
+        }
+      );
     } else if (next === 'half-open') {
       logger.info(`[CircuitBreaker] ${this.name} → half-open; probing`);
     } else {

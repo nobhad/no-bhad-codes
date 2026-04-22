@@ -11,12 +11,38 @@
 
 import { getDatabase, type TransactionContext } from '../database/init.js';
 import { logger } from './logger.js';
+import { errorTracker } from './error-tracking.js';
 import { runWithRequestContext } from '../observability/request-context.js';
 import { parseRow } from '../database/row-validator.js';
 import {
   asyncTaskClaimRowSchema,
   type AsyncTaskClaimRow
 } from '../database/row-schemas.js';
+
+/**
+ * Emit a dead-letter alert to Sentry so ops sees the event without
+ * tailing logs. Warning level — a dead-letter usually means ops
+ * attention, not a server bug per se.
+ */
+function alertDeadLetter(
+  kind: 'no_handler' | 'payload_parse_error' | 'retries_exhausted',
+  taskId: number,
+  taskType: string,
+  detail: Record<string, unknown>
+): void {
+  errorTracker.captureMessage(
+    `Async task dead-lettered (${kind}): ${taskType}#${taskId}`,
+    'warning',
+    {
+      tags: {
+        resilience_event: 'async_task_dead',
+        dead_letter_kind: kind,
+        task_type: taskType
+      },
+      extra: { taskId, ...detail }
+    }
+  );
+}
 
 export type AsyncTaskHandler = (payload: unknown) => Promise<void>;
 
@@ -193,6 +219,7 @@ export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
         category: 'ASYNC_TASKS',
         metadata: { id: candidate.id, taskType: candidate.task_type }
       });
+      alertDeadLetter('no_handler', candidate.id, candidate.task_type, {});
       failed += 1;
       dead += 1;
       continue;
@@ -215,6 +242,7 @@ export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
         category: 'ASYNC_TASKS',
         metadata: { id: candidate.id, taskType: candidate.task_type, reason }
       });
+      alertDeadLetter('payload_parse_error', candidate.id, candidate.task_type, { reason });
       failed += 1;
       dead += 1;
       continue;
@@ -275,6 +303,10 @@ export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
             attempts: attemptsUsed,
             lastError: safeMessage
           }
+        });
+        alertDeadLetter('retries_exhausted', candidate.id, candidate.task_type, {
+          attempts: attemptsUsed,
+          lastError: safeMessage
         });
         dead += 1;
       } else {
