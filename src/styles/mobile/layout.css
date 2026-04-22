@@ -178,8 +178,7 @@
 
   /* Ensure children don't block touch */
   .about-section .about-content *,
-  .about-section .about-layout,
-  .about-section .tech-marquee {
+  .about-section .about-layout {
     touch-action: pan-y;
     pointer-events: auto;
   }
@@ -260,31 +259,6 @@
   /* Hide separate mobile tech-stack section */
   .tech-stack-section {
     display: none;
-  }
-
-  /* Tech Stack Marquee - full width at bottom of about on mobile */
-  .about-section .tech-marquee {
-    width: 100%;
-    overflow: hidden;
-    pointer-events: none;
-    padding: 1.5rem 0;
-  }
-
-  .tech-marquee-track {
-    display: flex;
-    width: max-content;
-    will-change: transform;
-  }
-
-  .tech-marquee-item {
-    font-size: var(--font-size-base, 1rem);
-    padding: 0 1rem;
-  }
-
-  .tech-marquee-item::after {
-    content: '\00B7';
-    padding-left: 1rem;
-    opacity: 0.4;
   }
 
   /* Contact section - auto height to fit form + business card (matching desktop layout) */

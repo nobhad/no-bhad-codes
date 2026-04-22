@@ -161,11 +161,6 @@ export const ANIMATION_SEQUENCES = {
 
   HERO_ANIMATION: {
     DURATION: 2 // timeline units
-  },
-
-  TECH_MARQUEE: {
-    DURATION: 120, // seconds for one full loop — slow, readable strolling pace
-    DUPLICATE_COUNT: 2 // number of content duplicates for seamless loop
   }
 } as const;
 
