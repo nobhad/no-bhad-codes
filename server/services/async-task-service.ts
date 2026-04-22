@@ -24,6 +24,38 @@ const BACKOFF_BASE_SECONDS = 30;
 const BACKOFF_MAX_SECONDS = 60 * 60;
 const DEFAULT_BATCH_SIZE = 25;
 
+/**
+ * Retention windows for the async_tasks outbox. Tasks that ran to
+ * completion are cheap to keep but accumulate PII (payload snapshots of
+ * intake forms, error strings containing client emails) — shorter
+ * window. Dead-lettered tasks are kept longer because someone will
+ * want to inspect them.
+ */
+const COMPLETED_RETENTION_DAYS = 30;
+const DEAD_RETENTION_DAYS = 90;
+
+/**
+ * Redact common PII / secret patterns from error messages before they
+ * land in async_tasks.last_error. Narrow on purpose — noisy redaction
+ * makes errors unreadable. Covers the categories we've actually seen
+ * leak: email addresses from failed notifications, bearer/JWT/Stripe
+ * secrets from misconfigured callers.
+ */
+const PII_REDACTION_PATTERNS: Array<[RegExp, string]> = [
+  [/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '<email>'],
+  [/\b(?:sk|pk|whsec|rk)_(?:live|test)_[A-Za-z0-9]{8,}/g, '<secret>'],
+  [/\bBearer\s+[A-Za-z0-9._-]{8,}/g, 'Bearer <token>'],
+  [/\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, '<jwt>']
+];
+
+function redactErrorMessage(message: string): string {
+  let out = message;
+  for (const [pattern, replacement] of PII_REDACTION_PATTERNS) {
+    out = out.replace(pattern, replacement);
+  }
+  return out.length > 1000 ? out.slice(0, 1000) + '…' : out;
+}
+
 const handlers = new Map<string, AsyncTaskHandler>();
 
 /**
@@ -189,28 +221,37 @@ export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
 
     try {
       await handler(parsedPayload);
+      // Clear payload on completion — most task payloads snapshot user
+      // intake data (name, email, phone). The task is done; keeping
+      // the PII around buys us nothing but a retention headache.
       await db.run(
         `UPDATE async_tasks
             SET status = 'completed',
                 completed_at = datetime('now'),
-                last_error = NULL
+                last_error = NULL,
+                payload = NULL
           WHERE id = ?`,
         [candidate.id]
       );
       processed += 1;
     } catch (err) {
       const attemptsUsed = candidate.attempts + 1;
-      const message = err instanceof Error ? err.message : String(err);
+      const rawMessage = err instanceof Error ? err.message : String(err);
+      const safeMessage = redactErrorMessage(rawMessage);
       const isDead = attemptsUsed >= candidate.max_attempts;
 
       if (isDead) {
+        // Dead row is kept for ops inspection but the payload is
+        // dropped — if a handler needed to re-run from it, it wouldn't
+        // be retried anyway.
         await db.run(
           `UPDATE async_tasks
               SET status = 'dead',
                   last_error = ?,
-                  completed_at = datetime('now')
+                  completed_at = datetime('now'),
+                  payload = NULL
             WHERE id = ?`,
-          [message, candidate.id]
+          [safeMessage, candidate.id]
         );
         await logger.error('[AsyncTasks] Dead-lettered: retries exhausted', {
           category: 'ASYNC_TASKS',
@@ -218,7 +259,7 @@ export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
             id: candidate.id,
             taskType: candidate.task_type,
             attempts: attemptsUsed,
-            lastError: message
+            lastError: safeMessage
           }
         });
         dead += 1;
@@ -229,7 +270,7 @@ export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
                   last_error = ?,
                   next_attempt_at = datetime('now', ?)
             WHERE id = ?`,
-          [message, `+${backoffSeconds(attemptsUsed)} seconds`, candidate.id]
+          [safeMessage, `+${backoffSeconds(attemptsUsed)} seconds`, candidate.id]
         );
       }
       failed += 1;
@@ -301,4 +342,43 @@ export async function listAsyncTasks(
       LIMIT ?`,
     [status, safeLimit]
   );
+}
+
+/**
+ * Purge completed / dead-lettered rows past their retention window.
+ *
+ * Completed tasks are purged after 30 days; dead-lettered after 90.
+ * Pending/running rows are never touched here — they're still live
+ * work and the drain loop owns their lifecycle.
+ *
+ * Payload is already NULLed on completion/dead transitions so PII
+ * doesn't sit in the DB past the handler; this is the second cleanup
+ * tier that drops the row metadata entirely.
+ */
+export async function purgeOldAsyncTasks(): Promise<{
+  completedDeleted: number;
+  deadDeleted: number;
+}> {
+  const db = getDatabase();
+
+  const completedResult = await db.run(
+    `DELETE FROM async_tasks
+      WHERE status = 'completed'
+        AND completed_at IS NOT NULL
+        AND completed_at < datetime('now', ?)`,
+    [`-${COMPLETED_RETENTION_DAYS} days`]
+  );
+
+  const deadResult = await db.run(
+    `DELETE FROM async_tasks
+      WHERE status = 'dead'
+        AND completed_at IS NOT NULL
+        AND completed_at < datetime('now', ?)`,
+    [`-${DEAD_RETENTION_DAYS} days`]
+  );
+
+  return {
+    completedDeleted: completedResult.changes ?? 0,
+    deadDeleted: deadResult.changes ?? 0
+  };
 }

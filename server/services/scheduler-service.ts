@@ -202,6 +202,7 @@ export class SchedulerService {
   private autoPayJob: SimpleTask | null = null;
   private autoPayRetryJob: SimpleTask | null = null;
   private asyncTaskDrainJob: SimpleTask | null = null;
+  private asyncTaskPurgeJob: SimpleTask | null = null;
   private isRunning = false;
 
   private constructor(config: Partial<SchedulerConfig> = {}) {
@@ -290,6 +291,10 @@ export class SchedulerService {
     // these tasks are latency-sensitive follow-ups to user-facing requests.
     this.scheduleAsyncTaskDrain();
 
+    // Purge old completed/dead async_tasks rows once a day to cap
+    // retention of anything that slipped through payload/error redaction.
+    this.scheduleAsyncTaskPurge();
+
     // Start all scheduled jobs
     const jobs = [
       this.reminderJob,
@@ -308,7 +313,8 @@ export class SchedulerService {
       this.agreementExpirationJob,
       this.autoPayJob,
       this.autoPayRetryJob,
-      this.asyncTaskDrainJob
+      this.asyncTaskDrainJob,
+      this.asyncTaskPurgeJob
     ].filter(Boolean);
 
     for (const job of jobs) {
@@ -408,6 +414,11 @@ export class SchedulerService {
     if (this.asyncTaskDrainJob) {
       this.asyncTaskDrainJob.stop();
       this.asyncTaskDrainJob = null;
+    }
+
+    if (this.asyncTaskPurgeJob) {
+      this.asyncTaskPurgeJob.stop();
+      this.asyncTaskPurgeJob = null;
     }
 
     this.isRunning = false;
@@ -831,6 +842,33 @@ export class SchedulerService {
         }
       } catch (error) {
         logger.error('[Scheduler] Error draining async_tasks:', {
+          error: error instanceof Error ? error : undefined
+        });
+      }
+    });
+  }
+
+  /**
+   * Purge expired async_tasks rows once a day (4 AM local).
+   *
+   * Retention is already capped at 30 days for completed tasks and
+   * 90 days for dead-lettered ones; this job enforces that.
+   */
+  private scheduleAsyncTaskPurge(): void {
+    const ASYNC_TASK_PURGE_CRON = '0 4 * * *'; // Daily at 4:00 AM
+    logger.info(`[Scheduler] Scheduling async task purge: ${ASYNC_TASK_PURGE_CRON}`);
+
+    this.asyncTaskPurgeJob = createSimpleTask(ASYNC_TASK_PURGE_CRON, async () => {
+      try {
+        const { purgeOldAsyncTasks } = await import('./async-task-service.js');
+        const result = await purgeOldAsyncTasks();
+        if (result.completedDeleted > 0 || result.deadDeleted > 0) {
+          logger.info(
+            `[Scheduler] Async tasks purged: completed=${result.completedDeleted}, dead=${result.deadDeleted}`
+          );
+        }
+      } catch (error) {
+        logger.error('[Scheduler] Error purging async_tasks:', {
           error: error instanceof Error ? error : undefined
         });
       }
