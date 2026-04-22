@@ -1455,6 +1455,16 @@ export class PageTransitionModule extends BaseModule {
     this.isTransitioning = true;
     this.log(`Transitioning: ${this.currentPageId} -> ${pageId}`);
 
+    // Pre-transition signal — fires BEFORE any slide/blur animation runs,
+    // so listeners (e.g., contact-animation) can pre-set their content to
+    // the right state before it slides into view. Without this, contact
+    // would slide in showing its initial small form, then snap to full
+    // size after — which the user perceives as the form animating on
+    // every scroll arrival.
+    const preEventDetail = { from: currentPage?.id, to: pageId, mode };
+    this.dispatchEvent('page-entering', preEventDetail);
+    window.dispatchEvent(new CustomEvent('page-entering', { detail: preEventDetail }));
+
     try {
       const toIsMap = this.isMapPage(pageId);
       const fromIsIntro = this.currentPageId === 'intro';
