@@ -695,9 +695,14 @@ export class PageTransitionModule extends BaseModule {
     }
 
     // Only preventDefault if this direction actually navigates somewhere.
-    // On project-detail, ArrowUp/Down have no neighbor — they should fall
-    // through to native page scrolling so users can read tall case studies.
-    if (!NEIGHBORS[this.currentPageId]?.[direction]) return;
+    // - Map tiles: check the static NEIGHBORS graph
+    // - project-detail: only left/right navigate (carousel); up/down fall
+    //   through to native scroll so users can read tall case studies
+    const willNavigate =
+      this.currentPageId === 'project-detail'
+        ? direction === 'left' || direction === 'right'
+        : NEIGHBORS[this.currentPageId]?.[direction] != null;
+    if (!willNavigate) return;
 
     event.preventDefault();
     this.tryNavigateDirection(direction);
