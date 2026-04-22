@@ -262,6 +262,22 @@ export class PageTransitionModule extends BaseModule {
   }
 
   /**
+   * Hide the body-level intro morph overlay (the SVG that holds the
+   * card-to-paw morph). The overlay should only be visible while the
+   * intro animation is actively running — every other page state needs
+   * it dismissed, otherwise its card content bleeds through onto other
+   * tiles. Called from initializePageStates on deep-links and from
+   * transitionTo whenever we settle on a non-intro page.
+   */
+  private hideMorphOverlay(): void {
+    const morphOverlay = document.getElementById('intro-morph-overlay');
+    if (!morphOverlay) return;
+    morphOverlay.classList.add('hidden');
+    morphOverlay.style.visibility = 'hidden';
+    morphOverlay.style.pointerEvents = 'none';
+  }
+
+  /**
    * Move the scroll-map camera to a tile direction. When `animated` is false
    * (initial load, off-map → map snap, reduced-motion users), the position
    * is set instantly with no tween. The data-map-camera attribute is also
@@ -407,6 +423,15 @@ export class PageTransitionModule extends BaseModule {
       this.moveCamera(MAP_TILES[initialPageId as keyof typeof MAP_TILES], false);
     } else {
       this.setSiteMapVisibility(false);
+    }
+
+    // Card morph overlay is body-level + position:fixed. The pre-JS
+    // critical CSS hides it for non-intro pages but stops applying once
+    // .js-ready is set, and intro-animation only hides it after a played
+    // animation (skipped on deep-links). Force-hide here for any non-intro
+    // initial page so the morph card doesn't bleed onto other tiles.
+    if (initialPageId !== 'intro') {
+      this.hideMorphOverlay();
     }
 
     this.updateActivePageAttribute(initialPageId);
@@ -645,20 +670,20 @@ export class PageTransitionModule extends BaseModule {
 
     let direction: Direction | null = null;
     switch (event.key) {
-      case 'ArrowUp':
-        direction = 'up';
-        break;
-      case 'ArrowDown':
-        direction = 'down';
-        break;
-      case 'ArrowLeft':
-        direction = 'left';
-        break;
-      case 'ArrowRight':
-        direction = 'right';
-        break;
-      default:
-        return;
+    case 'ArrowUp':
+      direction = 'up';
+      break;
+    case 'ArrowDown':
+      direction = 'down';
+      break;
+    case 'ArrowLeft':
+      direction = 'left';
+      break;
+    case 'ArrowRight':
+      direction = 'right';
+      break;
+    default:
+      return;
     }
 
     event.preventDefault();
@@ -778,6 +803,12 @@ export class PageTransitionModule extends BaseModule {
       // Update state
       this.currentPageId = pageId;
       this.updateActivePageAttribute(pageId);
+
+      // Card morph overlay should never be visible outside the intro page;
+      // safety hide in case anything left it visible.
+      if (pageId !== 'intro') {
+        this.hideMorphOverlay();
+      }
 
       // Update document title
       if (targetPage.title) {
