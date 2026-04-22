@@ -376,6 +376,10 @@ class IntakeService {
         taskType: 'intake.lead-score',
         payload: { projectId }
       });
+      followUpTasks.push({
+        taskType: 'intake.save-file',
+        payload: { intakeData, projectId, projectName: params.projectName }
+      });
 
       for (const task of followUpTasks) {
         await enqueueAsyncTask(ctx, task.taskType, task.payload);
