@@ -11,6 +11,7 @@
 
 import { getDatabase, type TransactionContext } from '../database/init.js';
 import { logger } from './logger.js';
+import { runWithRequestContext } from '../observability/request-context.js';
 import { parseRow } from '../database/row-validator.js';
 import {
   asyncTaskClaimRowSchema,
@@ -220,7 +221,20 @@ export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
     }
 
     try {
-      await handler(parsedPayload);
+      // Run handler in its own ALS scope so logs emitted during the
+      // handler are attributable to the specific task (grep by
+      // requestId=task-<id>) rather than appearing context-less as
+      // scheduler-internal chatter.
+      await runWithRequestContext(
+        {
+          requestId: `task-${candidate.id}`,
+          method: 'ASYNC_TASK',
+          path: candidate.task_type,
+          userId: null,
+          userType: 'system'
+        },
+        () => handler(parsedPayload)
+      );
       // Clear payload on completion — most task payloads snapshot user
       // intake data (name, email, phone). The task is done; keeping
       // the PII around buys us nothing but a retention headache.
