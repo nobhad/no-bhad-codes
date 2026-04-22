@@ -775,6 +775,21 @@ export class PageTransitionModule extends BaseModule {
    * after this one finishes.
    */
   private tryNavigateDirection(direction: Direction): void {
+    // Special case: on the projects tile, up/down channel-surfs the CRT TV
+    // preview through the project list instead of jumping to about/contact.
+    // Lets the user browse projects without leaving the page; left/right
+    // still nav (intro / first project-detail).
+    if (
+      this.currentPageId === 'projects' &&
+      (direction === 'up' || direction === 'down')
+    ) {
+      document.dispatchEvent(
+        new CustomEvent('projects:cycle-tv', { detail: { direction } })
+      );
+      this.wheelCooldownUntil = performance.now() + WHEEL_COOLDOWN_MS + 200;
+      return;
+    }
+
     // Dynamic case: scrolling on project-detail walks through the project
     // list. left/right cycle between projects (left-from-first → projects,
     // right-from-last → contact). up exits to home. down falls through to
