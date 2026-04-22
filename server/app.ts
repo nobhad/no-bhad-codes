@@ -543,6 +543,19 @@ async function startServer() {
           category: 'SCHEMA_DRIFT',
           metadata: { report: driftReport }
         });
+        // Page Sentry so drift is visible on the on-call dashboard
+        // even when the process exits (production mode) or when a
+        // dev boots a box where someone hand-edited the schema.
+        errorTracker.captureMessage(`Schema drift detected: ${summary}`, 'error', {
+          tags: { resilience_event: 'schema_drift' },
+          extra: {
+            added: driftReport.added.length,
+            removed: driftReport.removed.length,
+            modified: driftReport.modified.length,
+            currentFingerprint: driftReport.currentFingerprint,
+            storedFingerprint: driftReport.storedFingerprint
+          }
+        });
         if (process.env.NODE_ENV === 'production') {
           throw new Error(
             `Schema drift detected (${summary}). Set ACCEPT_SCHEMA_DRIFT=true to accept, or investigate /api/admin/schema-drift.`
