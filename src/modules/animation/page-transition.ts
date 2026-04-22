@@ -695,6 +695,11 @@ export class PageTransitionModule extends BaseModule {
       return;
     }
 
+    // Only preventDefault if this direction actually navigates somewhere.
+    // On project-detail, ArrowUp/Down have no neighbor — they should fall
+    // through to native page scrolling so users can read tall case studies.
+    if (!NEIGHBORS[this.currentPageId]?.[direction]) return;
+
     event.preventDefault();
     this.tryNavigateDirection(direction);
   }
