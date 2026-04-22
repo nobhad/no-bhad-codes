@@ -45,6 +45,7 @@ function lazyNamed<T extends React.ComponentType<Record<string, unknown>>>(
 const OverviewDashboard = lazyNamed(() => import('../features/admin/overview').then(m => ({ OverviewDashboard: m.OverviewDashboard })));
 const AnalyticsDashboard = lazyNamed(() => import('../features/admin/analytics').then(m => ({ AnalyticsDashboard: m.AnalyticsDashboard })));
 const PerformanceMetrics = lazyNamed(() => import('../features/admin/performance').then(m => ({ PerformanceMetrics: m.PerformanceMetrics })));
+const SystemHealthDashboard = lazyNamed(() => import('../features/admin/system-health').then(m => ({ SystemHealthDashboard: m.SystemHealthDashboard })));
 
 // Admin Group Dashboards
 const WorkDashboard = lazyNamed(() => import('../features/admin/work').then(m => ({ WorkDashboard: m.WorkDashboard })));
@@ -353,6 +354,7 @@ export function PortalRoutes() {
         {/* ========== ADMIN-ONLY ROUTES ========== */}
         <Route path="/analytics" element={<LazyTabRoute tabId="analytics"><AnalyticsDashboard /></LazyTabRoute>} />
         <Route path="/performance" element={<LazyTabRoute tabId="performance"><PerformanceMetrics /></LazyTabRoute>} />
+        <Route path="/system-health" element={<LazyTabRoute tabId="system-health"><SystemHealthDashboard /></LazyTabRoute>} />
         <Route path="/work" element={<LazyTabRoute tabId="work"><WorkDashboard /></LazyTabRoute>} />
         <Route path="/crm" element={<LazyTabRoute tabId="crm"><CRMDashboard /></LazyTabRoute>} />
         <Route path="/documents" element={

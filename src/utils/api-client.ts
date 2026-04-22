@@ -207,7 +207,7 @@ export function describeApiError(
   case 401:
     return 'Your session has expired. Please sign in again.';
   case 403:
-    return serverMessage ?? "You don't have permission to do that.";
+    return serverMessage ?? 'You don\'t have permission to do that.';
   case 404:
     return serverMessage ?? 'We couldn’t find what you were looking for.';
   default:

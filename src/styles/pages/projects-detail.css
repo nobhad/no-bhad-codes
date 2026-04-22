@@ -41,15 +41,22 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* Worksub wrapper - main content container, centered */
+/* Worksub wrapper - main content container, centered, framed.
+   Black border wraps all project detail content as one card on the page. */
 .worksub-wrapper {
   width: 100%;
   max-width: var(--project-detail-content-max-width);
   margin: 0 auto;
-  padding-top: var(--space-2);
+  padding: var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-4);
+  border: var(--border-width) solid var(--color-dark);
+  border-radius: var(--border-radius-lg, 12px);
+}
+
+[data-theme="dark"] .worksub-wrapper {
+  border-color: var(--color-dark);
 }
 
 @media (--tablet) {
@@ -58,7 +65,7 @@
   }
 
   .worksub-wrapper {
-    padding-top: var(--space-3);
+    padding: var(--space-6);
   }
 }
 
@@ -280,6 +287,41 @@
   color: var(--color-dark);
   margin: 0 0 var(--space-2);
   line-height: var(--line-height-tight);
+}
+
+/* Title-as-link: inherits the h1 styling but acts as the live-site CTA.
+   Inline-flex keeps the external-link icon glued to the end of the title. */
+.project-title-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-mouse, 0.2s);
+}
+
+.project-title-link:hover,
+.project-title-link:focus-visible {
+  color: var(--color-accent, var(--color-dark));
+  text-decoration: none;
+}
+
+.project-title-link:focus-visible {
+  outline: 2px solid var(--color-accent, var(--color-dark));
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.project-title-icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.project-title-icon svg {
+  width: 0.6em;
+  height: 0.6em;
+  stroke: var(--color-dark);
+  stroke-width: 2.5;
 }
 
 /* Intro content - two column layout */
@@ -566,6 +608,43 @@
   stroke: currentColor;
 }
 
+/* Inline variant — sits inside the hero info column, no border, no pill,
+   left-aligned. Used when source-code link lives next to the title CTA.
+   Specificity bumped via double-class so it wins over the base rule. */
+.worksub-links.worksub-links--inline {
+  justify-content: flex-start;
+  padding: 0;
+  border-top: none;
+  margin-top: var(--space-3);
+  gap: var(--space-3);
+}
+
+.worksub-links.worksub-links--inline a {
+  padding: 0;
+  background-color: transparent;
+  color: var(--color-dark);
+  border-radius: 0;
+  border: none;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  gap: var(--space-1-5);
+}
+
+.worksub-links.worksub-links--inline a:hover {
+  transform: none;
+  color: var(--color-accent, var(--color-dark));
+  opacity: 0.7;
+}
+
+.worksub-links.worksub-links--inline a svg {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+
+[data-theme="dark"] .worksub-links.worksub-links--inline a {
+  color: var(--color-dark);
+}
+
 /* Empty state when no links */
 .worksub-links:empty {
   display: none;
@@ -582,7 +661,7 @@
   }
 
   .worksub-wrapper {
-    padding-top: var(--space-2);
+    padding: var(--space-4);
     gap: var(--space-4);
   }
 
@@ -688,18 +767,18 @@
 
   /* --- Case study --- */
   .worksub-case-study {
-    gap: var(--space-6);
+    gap: var(--space-3);
     margin: 0;
   }
 
-  .case-study-section { gap: var(--space-2); }
+  .case-study-section {
+    gap: var(--space-2);
+    padding: var(--space-4);
+  }
 
   .case-study-heading {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-bold);
-    text-transform: uppercase;
-    letter-spacing: var(--letter-spacing-label);
-    padding-bottom: var(--space-1);
+    font-size: var(--font-size-md);
+    padding-bottom: 0;
   }
 
   .case-study-text {
@@ -810,32 +889,52 @@
    CASE STUDY SECTIONS
    =============================================== */
 
-/* Worksub case study - grouped case study blocks */
+/* Worksub case study - 2x2 grid of cards on tablet+, stacked on mobile.
+   Each section (Challenge / Approach / Features / Results) is its own
+   bordered card so the eye groups heading + content together. */
 .worksub-case-study {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
   margin: 0;
+}
+
+@media (--tablet) {
+  .worksub-case-study {
+    grid-template-columns: repeat(2, 1fr);
+    align-items: start;
+  }
 }
 
 .case-study-section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background-color: var(--color-neutral-300);
+  border: var(--border-width) solid var(--color-dark);
+  border-radius: var(--border-radius-lg, 12px);
+}
+
+[data-theme="dark"] .case-study-section {
+  background-color: var(--color-neutral-200);
+  border-color: var(--color-dark);
 }
 
 .case-study-heading {
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family-acme);
+  font-weight: var(--font-weight-bold);
   color: var(--color-dark);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
   margin: 0;
-  padding-bottom: var(--space-1);
-  border-bottom: var(--border-width) solid var(--color-dark);
+  padding: 0;
+  border: none;
 }
 
 [data-theme="dark"] .case-study-heading {
   color: var(--color-dark);
-  border-bottom-color: var(--color-dark);
 }
 
 .case-study-text {

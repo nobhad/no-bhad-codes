@@ -129,8 +129,9 @@ export class ProjectsModule extends BaseModule {
 
     if (projectMatch) {
       const slug = projectMatch[1];
-      // Just render the content - PageTransitionModule handles visibility
-      this.renderProjectDetailForSlug(slug);
+      // Initial deep-link render — entrance animation runs because there's
+      // no slide transition to mask its absence.
+      this.renderProjectDetailForSlug(slug, { fromNavigation: false });
     }
   }
 
@@ -142,7 +143,9 @@ export class ProjectsModule extends BaseModule {
     const hash = window.location.hash;
     const projectMatch = hash.match(/^#\/projects\/(.+)$/);
     if (projectMatch) {
-      this.renderProjectDetailForSlug(projectMatch[1]);
+      // Hash-driven navigation always rides on a slide transition, so skip
+      // the inner-element fade-in entrance — the slide IS the entrance.
+      this.renderProjectDetailForSlug(projectMatch[1], { fromNavigation: true });
     }
   }
 
@@ -163,7 +166,10 @@ export class ProjectsModule extends BaseModule {
    * Render project detail content for a given slug
    * Does NOT manage page visibility - only content rendering
    */
-  private renderProjectDetailForSlug(slug: string): void {
+  private renderProjectDetailForSlug(
+    slug: string,
+    options: { fromNavigation?: boolean } = {}
+  ): void {
     if (!this.portfolioData || !this.projectDetailSection) return;
 
     const project = this.portfolioData.projects.find((p) => p.slug === slug);
@@ -174,17 +180,18 @@ export class ProjectsModule extends BaseModule {
       return;
     }
 
-    // Skip the drop-in entrance animation when carousel-navigating between
-    // two project detail slugs. The "drop from top" only makes sense when
-    // arriving at project-detail for the first time (from projects tile or
-    // a fresh deep-link), not when the user scrolls left/right between
-    // projects already on a detail page.
+    // Skip the drop-in entrance animation in two cases:
+    //  1. Carousel between two project detail slugs (no need to re-enter)
+    //  2. Any hash-driven navigation (the slide is the entrance — running
+    //     the fade-in on inner elements at the same time makes the whole
+    //     thing read as a fade rather than a slide)
     const isCarousel = this.currentProjectSlug !== null && this.currentProjectSlug !== slug;
+    const skipEntrance = isCarousel || options.fromNavigation === true;
 
     this.currentProjectSlug = slug;
 
     // Populate project detail content
-    this.renderProjectDetail(project, { skipEntrance: isCarousel });
+    this.renderProjectDetail(project, { skipEntrance });
 
     // Update page title
     document.title = `${project.title} - No Bhad Codes`;
@@ -515,10 +522,16 @@ export class ProjectsModule extends BaseModule {
       }
     }
 
-    // Update title
+    // Update title — wrap in anchor when liveUrl exists so the title itself
+    // is the primary CTA (opens live site in new tab). External icon appears
+    // after the text as a visual affordance.
     const titleEl = this.projectDetailSection.querySelector('#project-title');
     if (titleEl) {
-      titleEl.textContent = project.title;
+      if (project.liveUrl) {
+        titleEl.innerHTML = `<a href="${project.liveUrl}" target="_blank" rel="noopener noreferrer" class="project-title-link">${project.title}<span class="project-title-icon" aria-hidden="true">${EXTERNAL_LINK_SVG}</span><span class="sr-only"> (opens in new tab)</span></a>`;
+      } else {
+        titleEl.textContent = project.title;
+      }
     }
 
     // Update tagline
@@ -582,34 +595,14 @@ export class ProjectsModule extends BaseModule {
       infoEl.innerHTML = '';
     }
 
-    // Update links
+    // Update links — live URL is now the title itself, so only render the
+    // source code link here (when present).
     const linksEl = this.projectDetailSection.querySelector('#project-links');
     if (linksEl) {
-      const links: string[] = [];
-
-      if (project.liveUrl) {
-        links.push(`
-          <a href="${project.liveUrl}" target="_blank" rel="noopener noreferrer">
-            ${EXTERNAL_LINK_SVG}
-            View Live
-          </a>
-        `);
-      }
-
-      if (project.repoUrl) {
-        links.push(`
-          <a href="${project.repoUrl}" target="_blank" rel="noopener noreferrer">
-            ${GITHUB_SVG}
-            Source Code
-          </a>
-        `);
-      }
-
-      linksEl.innerHTML = links.join('');
+      linksEl.innerHTML = project.repoUrl
+        ? `<a href="${project.repoUrl}" target="_blank" rel="noopener noreferrer">${GITHUB_SVG}Source Code</a>`
+        : '';
     }
-
-    // Update next/prev navigation
-    this.renderProjectNavigation(project);
 
     // GSAP entrance animations for detail page elements — skipped on
     // carousel navigation between projects so left/right scrolling doesn't
@@ -683,65 +676,6 @@ export class ProjectsModule extends BaseModule {
       } else {
         (resultsSection as HTMLElement).style.display = 'none';
       }
-    }
-  }
-
-  /**
-   * Render next/previous project navigation
-   */
-  private renderProjectNavigation(currentProject: PortfolioProject): void {
-    if (!this.projectDetailSection || !this.portfolioData) return;
-
-    const documentedProjects = this.portfolioData.projects.filter((p) => p.isDocumented);
-    const currentIndex = documentedProjects.findIndex((p) => p.id === currentProject.id);
-
-    const prevLink = this.projectDetailSection.querySelector('#project-prev') as HTMLAnchorElement;
-    const nextLink = this.projectDetailSection.querySelector('#project-next') as HTMLAnchorElement;
-    const prevTitle = this.projectDetailSection.querySelector('#project-prev-title');
-    const nextTitle = this.projectDetailSection.querySelector('#project-next-title');
-
-    // Previous project (wrap around to end if at beginning)
-    const prevIndex = currentIndex > 0 ? currentIndex - 1 : documentedProjects.length - 1;
-    const prevProject = documentedProjects[prevIndex];
-
-    if (prevLink && prevTitle && prevProject && prevProject.id !== currentProject.id) {
-      prevLink.href = `#/projects/${prevProject.slug}`;
-      prevTitle.textContent = prevProject.title;
-      prevLink.style.visibility = 'visible';
-
-      // Add click handler to navigate without page reload
-      prevLink.onclick = (e) => {
-        e.preventDefault();
-        window.history.pushState(null, '', `#/projects/${prevProject.slug}`);
-        this.renderProjectDetailForSlug(prevProject.slug);
-        // Scroll to top of project detail
-        this.projectDetailSection?.scrollTo({ top: 0, behavior: 'smooth' });
-      };
-    } else if (prevLink) {
-      prevLink.style.visibility = 'hidden';
-      prevLink.onclick = null;
-    }
-
-    // Next project (wrap around to beginning if at end)
-    const nextIndex = currentIndex < documentedProjects.length - 1 ? currentIndex + 1 : 0;
-    const nextProject = documentedProjects[nextIndex];
-
-    if (nextLink && nextTitle && nextProject && nextProject.id !== currentProject.id) {
-      nextLink.href = `#/projects/${nextProject.slug}`;
-      nextTitle.textContent = nextProject.title;
-      nextLink.style.visibility = 'visible';
-
-      // Add click handler to navigate without page reload
-      nextLink.onclick = (e) => {
-        e.preventDefault();
-        window.history.pushState(null, '', `#/projects/${nextProject.slug}`);
-        this.renderProjectDetailForSlug(nextProject.slug);
-        // Scroll to top of project detail
-        this.projectDetailSection?.scrollTo({ top: 0, behavior: 'smooth' });
-      };
-    } else if (nextLink) {
-      nextLink.style.visibility = 'hidden';
-      nextLink.onclick = null;
     }
   }
 
