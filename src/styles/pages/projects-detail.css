@@ -43,20 +43,34 @@
 
 /* Worksub wrapper - main content container, centered in viewport, framed.
    Black border wraps all project detail content as one card on the page.
-   Uses both margin-inline:auto (flex/block centering) AND justify-self:center
-   (grid centering) so it lands at viewport center regardless of which
-   display mode the parent ends up in. */
+   NO width:100% — that would fill the parent (grid cell or flex item)
+   and leave nothing for margin/justify-self to center. Instead let the
+   wrapper size up to max-width and use the centering rules to land it
+   at viewport center, regardless of whether the parent is flex or grid. */
 .worksub-wrapper {
   width: 100%;
   max-width: var(--project-detail-content-max-width);
   margin-inline: auto;
   justify-self: center;
+  align-self: center;
   padding: var(--space-5);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
   border: var(--border-width) solid var(--color-dark);
   border-radius: var(--border-radius-lg, 12px);
+  box-sizing: border-box;
+}
+
+/* The page-active forced display:grid (from critical CSS !important) makes
+   the section a grid container with one column. The wrapper's width:100%
+   would normally fill the grid cell with no room for margin auto, but
+   constraining the GRID COLUMN itself to the wrapper's max-width pushes
+   the column to viewport center via the section's flex/grid centering.
+   Belt-and-suspenders for both display modes. */
+.project-detail-section.page-active {
+  grid-template-columns: minmax(0, var(--project-detail-content-max-width));
+  justify-content: center;
 }
 
 [data-theme="dark"] .worksub-wrapper {
