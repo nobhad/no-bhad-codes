@@ -11,6 +11,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import config from '../config/environment.js';
+import { getRequestContext } from '../observability/request-context.js';
 
 /**
  * Log levels with numeric values for filtering
@@ -329,18 +330,36 @@ export class LoggerService {
   }
 
   /**
-   * Create log entry
+   * Create log entry.
+   *
+   * Auto-injects the ambient request context (requestId, userId,
+   * traceId) so every log line downstream is attributed without the
+   * caller knowing about the context module. Explicit `options` wins
+   * over the ambient fields — callers can override a field by passing
+   * it in, but the default is to inherit the request's identity.
    */
   private createLogEntry(
     level: LogLevelType,
     message: string,
     options: Partial<LogEntry> = {}
   ): LogEntry {
+    const ctx = getRequestContext();
+    const metadata: Record<string, unknown> = {
+      ...(ctx?.traceId ? { traceId: ctx.traceId } : {}),
+      ...(ctx?.method ? { method: ctx.method } : {}),
+      ...(ctx?.path ? { path: ctx.path } : {}),
+      ...(options.metadata ?? {})
+    };
+
     return {
       timestamp: new Date().toISOString(),
       level,
       message,
-      ...options
+      ...(ctx?.requestId ? { requestId: ctx.requestId } : {}),
+      ...(ctx?.userId != null ? { userId: String(ctx.userId) } : {}),
+      ...(ctx?.ip ? { ip: ctx.ip } : {}),
+      ...options,
+      ...(Object.keys(metadata).length > 0 ? { metadata } : {})
     };
   }
 

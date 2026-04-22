@@ -16,6 +16,7 @@ import {
 } from '../utils/auth-constants.js';
 import { errorResponse } from '../utils/api-response.js';
 import { logger } from '../services/logger.js';
+import { updateRequestContext } from '../observability/request-context.js';
 import type { JWTAuthRequest } from '../types/request.js';
 
 /** JWT payload structure for user authentication tokens */
@@ -58,6 +59,14 @@ export const authenticateToken = (req: JWTAuthRequest, res: Response, next: Next
       email: decoded.email,
       type: decoded.type
     };
+
+    // Enrich the request-scoped context so every log line downstream
+    // (services, DB, scheduler callbacks started within this request)
+    // is attributed to the authenticated user automatically.
+    updateRequestContext({
+      userId: typeof userId === 'number' ? userId : Number(userId),
+      userType: decoded.type
+    });
 
     // Silent token rotation: if the token has passed the rotation threshold
     // of its total lifetime, issue a fresh token with the same payload.
