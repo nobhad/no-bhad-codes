@@ -16,6 +16,18 @@ import { calculateAmountWithProcessingFee } from '../config/constants.js';
 import { parseRow } from '../database/row-validator.js';
 import { stripePaymentIntentLookupRowSchema } from '../database/row-schemas.js';
 import { fetchWithTimeout } from '../utils/fetch-with-timeout.js';
+import { CircuitBreaker } from '../utils/circuit-breaker.js';
+
+// Single breaker shared across every Stripe HTTP call in this module.
+// When Stripe starts returning 5xx or timing out repeatedly, the
+// breaker trips and fast-fails the remaining calls for cooldownMs —
+// we'd rather return a 503 immediately than let 10s-per-call timeouts
+// stack up on the request handlers.
+const stripeBreaker = new CircuitBreaker({
+  name: 'stripe-api',
+  failureThreshold: 5,
+  cooldownMs: 30_000
+});
 import type {
   CreatePaymentIntentParams,
   PaymentIntentResult,
@@ -49,28 +61,35 @@ async function stripePost(
   params: URLSearchParams
 ): Promise<Record<string, unknown>> {
   const key = requireStripeKey();
-  const response = await fetchWithTimeout(`${STRIPE_API_BASE}${endpoint}`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${key}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Stripe-Version': STRIPE_API_VERSION
-    },
-    body: params.toString(),
-    // Stripe's published SLA p99 is under a second; 10s is enough
-    // headroom for transient slowness without letting a stalled
-    // connection pin a request handler indefinitely.
-    timeoutMs: 10_000
+  return stripeBreaker.execute(async () => {
+    const response = await fetchWithTimeout(`${STRIPE_API_BASE}${endpoint}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Stripe-Version': STRIPE_API_VERSION
+      },
+      body: params.toString(),
+      // Stripe's published SLA p99 is under a second; 10s is enough
+      // headroom for transient slowness without letting a stalled
+      // connection pin a request handler indefinitely.
+      timeoutMs: 10_000
+    });
+
+    const data = (await response.json()) as Record<string, unknown>;
+
+    if (!response.ok) {
+      const error = data.error as { message?: string } | undefined;
+      const wrapped = new Error(`Stripe API error: ${error?.message || response.statusText}`);
+      // Tag the HTTP status so the breaker's default isFailure
+      // predicate trips only on 5xx; 4xx is caller-fault and
+      // shouldn't open the circuit.
+      (wrapped as Error & { status?: number }).status = response.status;
+      throw wrapped;
+    }
+
+    return data;
   });
-
-  const data = (await response.json()) as Record<string, unknown>;
-
-  if (!response.ok) {
-    const error = data.error as { message?: string } | undefined;
-    throw new Error(`Stripe API error: ${error?.message || response.statusText}`);
-  }
-
-  return data;
 }
 
 // ============================================

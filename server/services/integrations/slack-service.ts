@@ -11,6 +11,18 @@
 import { getDatabase } from '../../database/init.js';
 import { BUSINESS_INFO } from '../../config/business.js';
 import { fetchWithTimeout } from '../../utils/fetch-with-timeout.js';
+import { CircuitBreaker } from '../../utils/circuit-breaker.js';
+
+// Shared breaker for both Slack and Discord webhook posts. If either
+// provider starts failing repeatedly we'd rather skip the optional
+// notification than pile up retry work against an outage — the user
+// cares about the authoritative state in their portal, not the
+// mirror in their chat tool.
+const chatWebhookBreaker = new CircuitBreaker({
+  name: 'chat-webhook',
+  failureThreshold: 3,
+  cooldownMs: 60_000
+});
 
 // =====================================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -412,17 +424,28 @@ export async function sendSlackNotification(
   message: SlackMessage
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const response = await fetchWithTimeout(webhookUrl, { timeoutMs: 5000,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(message)
-    });
+    const response = await chatWebhookBreaker.execute(() =>
+      fetchWithTimeout(webhookUrl, {
+        timeoutMs: 5000,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(message)
+      })
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
-      return { success: false, error: `Slack API error: ${response.status} - ${errorText}` };
+      const status = response.status;
+      // Tag 5xx so the breaker trips on server-side failures, not
+      // on user-misconfigured webhook URLs that respond 404.
+      if (status >= 500) {
+        const err = new Error(`Slack API error: ${status} - ${errorText}`);
+        (err as Error & { status?: number }).status = status;
+        throw err;
+      }
+      return { success: false, error: `Slack API error: ${status} - ${errorText}` };
     }
 
     return { success: true };
@@ -439,13 +462,16 @@ export async function sendDiscordNotification(
   message: DiscordMessage
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const response = await fetchWithTimeout(webhookUrl, { timeoutMs: 5000,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(message)
-    });
+    const response = await chatWebhookBreaker.execute(() =>
+      fetchWithTimeout(webhookUrl, {
+        timeoutMs: 5000,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(message)
+      })
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
