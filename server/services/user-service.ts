@@ -420,25 +420,46 @@ class UserService {
   }
 
   /**
-   * Lock a client account after too many failed attempts.
+   * Atomically record a failed client login.
+   *
+   * Replaces the old SELECT-then-UPDATE pattern which allowed concurrent
+   * failed attempts to clobber each other's increments, letting a
+   * brute-force attacker bypass the lockout by firing requests in
+   * parallel. The increment and the optional lock-until write are both
+   * expressed as a single UPDATE, so SQLite's write serialization
+   * guarantees every attempt is counted and the lock triggers on the
+   * correct Nth failure.
+   *
+   * Returns the post-update state so the caller can decide whether to
+   * surface "account locked" vs "invalid credentials" to the user.
    */
-  async lockClientAccount(clientId: number, failedAttempts: number, lockUntil: Date): Promise<void> {
+  async recordClientFailedAttempt(
+    clientId: number,
+    options: { lockThreshold: number; lockDurationMs: number }
+  ): Promise<{ attempts: number; lockedUntil: string | null }> {
     const db = await getDatabase();
-    await db.run(
-      'UPDATE clients SET failed_login_attempts = ?, locked_until = ? WHERE id = ?',
-      [failedAttempts, lockUntil.toISOString(), clientId]
-    );
-  }
+    const lockUntilIso = new Date(Date.now() + options.lockDurationMs).toISOString();
 
-  /**
-   * Increment failed login attempts for a client.
-   */
-  async incrementClientFailedAttempts(clientId: number, newCount: number): Promise<void> {
-    const db = await getDatabase();
     await db.run(
-      'UPDATE clients SET failed_login_attempts = ? WHERE id = ?',
-      [newCount, clientId]
+      `UPDATE clients
+          SET failed_login_attempts = failed_login_attempts + 1,
+              locked_until = CASE
+                WHEN failed_login_attempts + 1 >= ? THEN ?
+                ELSE locked_until
+              END
+        WHERE id = ?`,
+      [options.lockThreshold, lockUntilIso, clientId]
     );
+
+    const row = await db.get<{ failed_login_attempts: number; locked_until: string | null }>(
+      'SELECT failed_login_attempts, locked_until FROM clients WHERE id = ?',
+      [clientId]
+    );
+
+    return {
+      attempts: row?.failed_login_attempts ?? 0,
+      lockedUntil: row?.locked_until ?? null
+    };
   }
 
   /**
@@ -675,37 +696,48 @@ class UserService {
   }
 
   /**
-   * Get current admin failed login attempt count.
+   * Atomically record a failed admin login.
+   *
+   * Same rationale as recordClientFailedAttempt, but admin state lives
+   * in the system_settings KV table so the increment needs a
+   * transaction to serialize concurrent callers. Within the
+   * transaction we UPSERT the counter, read it back, and only write
+   * the lockout expiry row if the threshold is now met.
    */
-  async getAdminFailedAttempts(): Promise<number> {
-    const value = await this.getSystemSetting('admin.failed_login_attempts');
-    return value ? parseInt(value, 10) : 0;
-  }
-
-  /**
-   * Lock the admin account (set locked_until and failed attempts in system_settings).
-   */
-  async lockAdminAccount(failedAttempts: number, lockUntil: Date): Promise<void> {
+  async recordAdminFailedAttempt(
+    options: { lockThreshold: number; lockDurationMs: number }
+  ): Promise<{ attempts: number; lockedUntil: string | null }> {
     const db = await getDatabase();
-    await db.run(
-      'INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES (\'admin.locked_until\', ?, \'string\', \'Admin account lockout expiry\')',
-      [lockUntil.toISOString()]
-    );
-    await db.run(
-      'INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES (\'admin.failed_login_attempts\', ?, \'number\', \'Admin failed login attempts\')',
-      [failedAttempts.toString()]
-    );
-  }
+    const lockUntilIso = new Date(Date.now() + options.lockDurationMs).toISOString();
 
-  /**
-   * Increment admin failed login attempts in system_settings.
-   */
-  async incrementAdminFailedAttempts(newCount: number): Promise<void> {
-    const db = await getDatabase();
-    await db.run(
-      'INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES (\'admin.failed_login_attempts\', ?, \'number\', \'Admin failed login attempts\')',
-      [newCount.toString()]
-    );
+    return db.transaction(async (ctx) => {
+      await ctx.run(
+        `INSERT INTO system_settings (setting_key, setting_value, setting_type, description)
+         VALUES ('admin.failed_login_attempts', '1', 'number', 'Admin failed login attempts')
+         ON CONFLICT(setting_key) DO UPDATE
+           SET setting_value = CAST(
+                 (CAST(COALESCE(system_settings.setting_value, '0') AS INTEGER) + 1) AS TEXT
+               )`
+      );
+
+      const row = await ctx.get<{ setting_value: string }>(
+        'SELECT setting_value FROM system_settings WHERE setting_key = ?',
+        ['admin.failed_login_attempts']
+      );
+      const attempts = row ? parseInt(row.setting_value, 10) || 0 : 0;
+
+      let lockedUntil: string | null = null;
+      if (attempts >= options.lockThreshold) {
+        await ctx.run(
+          `INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description)
+           VALUES ('admin.locked_until', ?, 'string', 'Admin account lockout expiry')`,
+          [lockUntilIso]
+        );
+        lockedUntil = lockUntilIso;
+      }
+
+      return { attempts, lockedUntil };
+    });
   }
 
   /**
