@@ -26,6 +26,17 @@ import { rateLimiters } from '../middleware/rate-limiter.js';
 import { validateRequest, ValidationSchemas } from '../middleware/validation.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { leadService } from '../services/lead-service.js';
+import { registerAsyncTaskHandler } from '../services/async-task-service.js';
+
+registerAsyncTaskHandler('intake.admin-notification', async (payload) => {
+  const data = payload as { projectId: number; intakeData: IntakeFormData };
+  await sendNewIntakeNotification(data.intakeData, data.projectId);
+});
+
+registerAsyncTaskHandler('intake.lead-score', async (payload) => {
+  const { projectId } = payload as { projectId: number };
+  await leadService.calculateLeadScore(projectId);
+});
 
 const router = express.Router();
 
@@ -274,30 +285,10 @@ router.post(
         { expiresIn: '7d' }
       );
 
-      // Send notifications and calculate lead score (async, don't wait)
-      // NOTE: Welcome email is NOT sent here because new clients are in 'pending' status.
-      // They will receive an invitation email to activate their account, and welcome
-      // emails will be sent after account activation via the welcome sequence.
-      setTimeout(async () => {
-        try {
-          // Send new intake notification to admin only
-          await sendNewIntakeNotification(intakeData, projectId);
-        } catch (emailError) {
-          await logger.error('Failed to send emails:', {
-            error: emailError instanceof Error ? emailError : undefined,
-            category: 'INTAKE'
-          });
-        }
-        try {
-          // Auto-calculate lead score for the new project
-          await leadService.calculateLeadScore(projectId);
-        } catch (scoreError) {
-          await logger.error('Failed to calculate lead score:', {
-            error: scoreError instanceof Error ? scoreError : undefined,
-            category: 'INTAKE'
-          });
-        }
-      }, 100);
+      // Admin notification + lead scoring are enqueued inside the intake
+      // transaction (see intake-service.runIntakeTransaction) and picked up
+      // by the async_tasks worker, so they survive a crash between commit
+      // and handler execution.
 
       // Return success response
       sendCreated(res, {

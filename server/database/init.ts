@@ -21,7 +21,7 @@ export interface DatabaseRow {
 export type SqlParam = string | number | boolean | null | undefined;
 type SqlParams = SqlParam[];
 
-interface TransactionContext {
+export interface TransactionContext {
 
   get<T = any>(sql: string, params?: SqlParams): Promise<T | undefined>;
 
