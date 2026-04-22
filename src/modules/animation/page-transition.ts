@@ -78,19 +78,19 @@ const CAMERA_POSITIONS: Record<MapTile, { x: number; y: number }> = {
 type Direction = 'up' | 'down' | 'left' | 'right';
 
 const NEIGHBORS: Record<string, Partial<Record<Direction, string>>> = {
-  // New scroll model:
-  //   HORIZONTAL drives map navigation between about ↔ projects ↔ contact.
-  //   VERTICAL on projects cycles the CRT TV through the project list.
+  // New scroll model with INFINITE horizontal loop. No matter where the
+  // user is, scrolling left or right always lands on a neighbor — both
+  // ends of the horizontal chain wrap around so you can spin forever.
   //
-  // The horizontal chain is centered on projects:
-  //   about ←left/right→ projects ←left/right→ contact
+  //   forward (right):  intro → contact → about → projects → contact → ...
+  //   backward (left):  intro → about  → contact → projects → about  → ...
   //
-  // Intro sits above the chain — scroll DOWN from the landing page to
-  // enter projects. Going UP from projects returns to intro. Vertical
-  // from any other tile is no-op (native scroll for tall content).
-  intro: { down: 'projects' },
-  about: { right: 'projects' },
-  contact: { left: 'projects' },
+  // Vertical: intro DOWN enters projects (the center). Projects vertical
+  // channel-surfs the CRT TV through the project list (also wraps).
+  // Other tiles' vertical falls through to native scroll for tall content.
+  intro: { down: 'projects', left: 'about', right: 'contact' },
+  about: { left: 'contact', right: 'projects' },
+  contact: { left: 'projects', right: 'about' },
   hero: { right: 'intro' },
   // projects: horizontal exits left/right to about/contact (the new chain);
   // vertical channel-surfs the TV (handled dynamically in
