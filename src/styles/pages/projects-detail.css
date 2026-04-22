@@ -167,11 +167,13 @@
 
 /* Desktop: hero image on the left, description fills the deadspace on
    the right so the intro reads as one image+text "card" instead of a
-   stack with empty space next to the image. */
+   stack with empty space next to the image. align-items: flex-start
+   keeps the figure at its natural height (no stretching to match the
+   text column). */
 @media (--tablet) {
   .worksub-header {
     flex-direction: row;
-    align-items: stretch;
+    align-items: flex-start;
     gap: var(--space-6);
   }
 }
@@ -190,13 +192,13 @@
 @media (--tablet) {
   .worksub-header figure {
     /* Side-by-side mode: drop the forced aspect ratio so the image keeps
-       its own proportions. Width capped at 55% so the description column
-       still has real estate; height capped so the rest of the intro
-       (title, metadata, tools) still fits in viewport. */
+       its own proportions. Width capped so the description column still
+       has real estate; height capped to match the image cap below so the
+       figure tracks the image and doesn't leave empty space. */
     aspect-ratio: auto;
     width: auto;
-    max-width: 55%;
-    max-height: 38vh;
+    max-width: 50%;
+    max-height: 34vh;
   }
 }
 
@@ -216,7 +218,7 @@
     width: auto;
     height: auto;
     max-width: 100%;
-    max-height: 22vh;
+    max-height: 34vh;
     object-fit: contain;
   }
 }
@@ -225,14 +227,19 @@
 .worksub-header-info {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-1);
 }
 
 @media (--tablet) {
   .worksub-header-info {
     flex: 1;
-    align-self: center;
+    align-self: flex-start;
   }
+}
+
+/* Tagline directly under the title — keep it close */
+.worksub-header-info .project-tagline {
+  margin: 0;
 }
 
 /* Description text in the hero row */
@@ -261,7 +268,8 @@
   /* Entrance animated by GSAP in projects.ts */
 }
 
-.worksub-intro h1 {
+.worksub-intro h1,
+.worksub-header-info h1 {
   font-size: var(--font-size-2xl);
   font-family: var(--font-family-acme);
   font-weight: var(--font-weight-bold);
