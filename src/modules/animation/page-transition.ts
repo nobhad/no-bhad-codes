@@ -78,10 +78,10 @@ const CAMERA_POSITIONS: Record<MapTile, { x: number; y: number }> = {
 type Direction = 'up' | 'down' | 'left' | 'right';
 
 const NEIGHBORS: Record<string, Partial<Record<Direction, string>>> = {
-  // Vertical chain: intro → projects (down) → contact (down past last
-  // project channel). Up reverses. Horizontal from intro also enters
-  // projects so the carousel is reachable from any swipe direction.
-  intro: { up: 'about', down: 'projects', left: 'projects', right: 'projects' },
+  // Vertical-only navigation from the landing page so horizontal scroll
+  // doesn't bounce the user away from the business card. Down enters the
+  // projects tile (start of the gallery chain); up goes to about.
+  intro: { up: 'about', down: 'projects' },
   about: { down: 'intro' },
   // contact returns up the chain to projects (lands on the LAST project
   // channel — handled in tryNavigateDirection).
