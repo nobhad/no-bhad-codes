@@ -78,7 +78,10 @@ const CAMERA_POSITIONS: Record<MapTile, { x: number; y: number }> = {
 type Direction = 'up' | 'down' | 'left' | 'right';
 
 const NEIGHBORS: Record<string, Partial<Record<Direction, string>>> = {
-  intro: { up: 'about', down: 'contact', left: 'hero', right: 'projects' },
+  // From intro, ANY horizontal scroll (left or right) goes to projects.
+  // Hero stays reachable via direct link / nav menu but isn't on the
+  // wheel-driven path because scrolling for projects is the primary intent.
+  intro: { up: 'about', down: 'contact', left: 'projects', right: 'projects' },
   about: { down: 'intro' },
   contact: { up: 'intro' },
   hero: { right: 'intro' },
