@@ -158,7 +158,22 @@
 
 .worksub-header {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  align-items: stretch;
   /* Entrance animated by GSAP in projects.ts */
+}
+
+/* Desktop: hero image on the left, description fills the deadspace on
+   the right so the intro reads as one image+text "card" instead of a
+   stack with empty space next to the image. */
+@media (--tablet) {
+  .worksub-header {
+    flex-direction: row;
+    align-items: stretch;
+    gap: var(--space-6);
+  }
 }
 
 .worksub-header figure {
@@ -170,6 +185,30 @@
   overflow: hidden;
   border-radius: 12px;
   box-shadow: var(--shadow-elevated-md);
+  flex-shrink: 0;
+}
+
+@media (--tablet) {
+  .worksub-header figure {
+    /* Constrain image width so the description column has real estate */
+    width: 40%;
+    max-width: 440px;
+  }
+}
+
+/* Description text in the hero row */
+.worksub-header-description {
+  margin: 0;
+  font-size: var(--font-size-md);
+  line-height: 1.5;
+  color: var(--color-dark);
+}
+
+@media (--tablet) {
+  .worksub-header-description {
+    flex: 1;
+    align-self: center;
+  }
 }
 
 .worksub-hero-img {
