@@ -32,6 +32,7 @@ import { registerWorkflowAutomations } from './services/workflow-automations.js'
 import {
   initializeDatabase,
   closeDatabase,
+  drainDatabase,
   getDatabaseStats
 } from './database/init.js';
 import { MigrationManager } from './database/migrations.js';
@@ -588,11 +589,27 @@ async function startServer() {
     server.setTimeout(SERVER_TIMEOUT_MS);
     server.headersTimeout = HEADERS_TIMEOUT_MS;
 
-    // Graceful shutdown
+    // Graceful shutdown.
+    //
+    // Order matters:
+    //   1. Stop the scheduler so no new background work kicks off.
+    //   2. Stop accepting new HTTP connections (server.close starts the
+    //      listener shutdown; existing handlers keep running).
+    //   3. Drain the DB pool — wait for in-flight transactions to COMMIT
+    //      instead of closing connections mid-statement. This is the
+    //      window where intake/payment transactions finish.
+    //   4. Close the DB pool, flush Sentry, shutdown OTel, exit.
+    //
+    // Force-exit budget is set to `SHUTDOWN_FORCE_TIMEOUT_MS` so the DB
+    // drain has real time to finish. Railway/most PaaS send SIGKILL 30s
+    // after SIGTERM, so we pick a value that leaves a small buffer.
+    const DB_DRAIN_TIMEOUT_MS = 20_000;
+    const SHUTDOWN_FORCE_TIMEOUT_MS = 28_000;
+
     const shutdown = async (signal: string) => {
       logger.info(`${signal} received. Shutting down gracefully...`);
 
-      // Stop scheduler service
+      // Step 1: Stop the scheduler so no new background work kicks off.
       try {
         const scheduler = getSchedulerService();
         scheduler.stop();
@@ -603,11 +620,12 @@ async function startServer() {
         });
       }
 
-      // Close server
+      // Step 2: Stop accepting new HTTP connections. Existing handlers keep
+      // running — server.close's callback fires once they all return.
       server.close(async () => {
         logger.info('HTTP server closed');
 
-        // Close database pool
+        // Step 4: Close the DB pool now that everything has drained.
         try {
           await closeDatabase();
         } catch (dbErr) {
@@ -641,11 +659,28 @@ async function startServer() {
         process.exit(0);
       });
 
-      // Force shutdown after 10 seconds
+      // Step 3: Wait for in-flight DB work to finish in parallel with
+      // server.close. If there's a stuck transaction, log and continue
+      // — the force-exit timer below guarantees we don't hang forever.
+      try {
+        const drained = await drainDatabase(DB_DRAIN_TIMEOUT_MS);
+        if (drained) {
+          logger.info('Database pool drained');
+        }
+      } catch (drainErr) {
+        logger.error('Error draining database:', {
+          error: drainErr instanceof Error ? drainErr : undefined
+        });
+      }
+
       setTimeout(() => {
-        logger.error('Forced shutdown after timeout');
+        const stats = getDatabaseStats();
+        logger.error(
+          `Forced shutdown after ${SHUTDOWN_FORCE_TIMEOUT_MS}ms — ` +
+          `db active=${stats?.activeConnections ?? '?'}, queued=${stats?.queuedRequests ?? '?'}`
+        );
         process.exit(1);
-      }, 10000);
+      }, SHUTDOWN_FORCE_TIMEOUT_MS);
     };
 
     // Handle shutdown signals

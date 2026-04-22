@@ -86,6 +86,7 @@ class DatabaseConnectionPool implements Database {
     reject: (error: Error) => void;
   }> = [];
   private cleanupInterval: NodeJS.Timeout | null = null;
+  private draining = false;
 
   constructor(dbPath: string, maxConnections: number = 5) {
     this.dbPath = dbPath;
@@ -128,6 +129,10 @@ class DatabaseConnectionPool implements Database {
   }
 
   private async getConnection(): Promise<PooledConnection> {
+    if (this.draining) {
+      throw new Error('Database pool is draining; new queries are not accepted');
+    }
+
     // Look for an available connection
     const availableConnection = this.connections.find((conn) => !conn.inUse);
     if (availableConnection) {
@@ -292,6 +297,38 @@ class DatabaseConnectionPool implements Database {
     }
   }
 
+  /**
+   * Begin draining: reject new connection acquisitions so the pool can
+   * be shut down after in-flight work completes. Safe to call multiple times.
+   */
+  beginDraining(): void {
+    this.draining = true;
+    // Unblock anyone waiting — they can't complete during drain anyway.
+    this.waitingQueue.forEach((waiter) => {
+      waiter.reject(new Error('Database pool is draining'));
+    });
+    this.waitingQueue = [];
+  }
+
+  /**
+   * Wait until no connections are in use, or until `timeoutMs` elapses.
+   * Returns true if fully drained. Polls on a short interval — SQLite
+   * transactions are expected to be short, so this finishes quickly in
+   * the common case.
+   */
+  async waitForDrain(timeoutMs: number): Promise<boolean> {
+    const pollIntervalMs = 100;
+    const deadline = Date.now() + timeoutMs;
+
+    while (Date.now() < deadline) {
+      const inUse = this.connections.filter((c) => c.inUse).length;
+      if (inUse === 0) return true;
+      await new Promise((r) => setTimeout(r, pollIntervalMs));
+    }
+
+    return this.connections.filter((c) => c.inUse).length === 0;
+  }
+
   async close(): Promise<void> {
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval);
@@ -374,6 +411,25 @@ export async function initializeDatabase(): Promise<void> {
     });
     throw error;
   }
+}
+
+/**
+ * Drain the database pool: stop accepting new acquires and wait until
+ * in-flight queries finish (or `timeoutMs` elapses). Call this before
+ * closeDatabase() during graceful shutdown so mid-transaction writes
+ * aren't cut mid-flight.
+ */
+export async function drainDatabase(timeoutMs: number): Promise<boolean> {
+  if (!dbPool) return true;
+  dbPool.beginDraining();
+  const drained = await dbPool.waitForDrain(timeoutMs);
+  if (!drained) {
+    const stats = dbPool.getConnectionStats();
+    logger.warn(
+      `Database drain timed out after ${timeoutMs}ms with ${stats.activeConnections} connection(s) still in use`
+    );
+  }
+  return drained;
 }
 
 /**
