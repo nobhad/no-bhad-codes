@@ -189,6 +189,9 @@ export interface AuthStore {
   requestMagicLink(email: string): Promise<AuthResult>;
   verifyMagicLink(token: string): Promise<LoginResult>;
 
+  // Password Reset
+  requestPasswordReset(email: string): Promise<AuthResult>;
+
   // Getters
   isAuthenticated(): boolean;
   isAdmin(): boolean;
