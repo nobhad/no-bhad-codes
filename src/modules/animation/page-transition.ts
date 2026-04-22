@@ -85,10 +85,9 @@ const NEIGHBORS: Record<string, Partial<Record<Direction, string>>> = {
   // projects connects to about/contact vertically (skipping center) so users
   // can hop sideways between the four cardinal map tiles, and right exits
   // into the project-detail off-map page (slug resolved at navigation time).
-  projects: { left: 'intro', up: 'about', down: 'contact', right: 'project-detail' },
-  // project-detail is off-map but receives left-arrow / wheel-left to bounce
-  // back to the projects tile (the input gates allow it as a special case).
-  'project-detail': { left: 'projects' }
+  projects: { left: 'intro', up: 'about', down: 'contact', right: 'project-detail' }
+  // project-detail navigation is handled dynamically in tryNavigateDirection
+  // because the previous/next neighbor depends on which slug is active.
 };
 
 /**
@@ -711,6 +710,19 @@ export class PageTransitionModule extends BaseModule {
    * after this one finishes.
    */
   private tryNavigateDirection(direction: Direction): void {
+    // Dynamic case: scrolling on project-detail walks through the project
+    // list. left/right cycle between projects, with left from the FIRST
+    // project bouncing back to the projects tile. Other directions on
+    // project-detail are no-ops so they fall through to native scrolling.
+    if (this.currentPageId === 'project-detail') {
+      const targetHash = this.resolveProjectDetailNeighbor(direction);
+      if (!targetHash) return;
+      this.wheelCooldownUntil =
+        performance.now() + PAGE_ANIMATION.DURATION * 1000 + WHEEL_COOLDOWN_MS;
+      window.location.hash = targetHash;
+      return;
+    }
+
     const targetPageId = NEIGHBORS[this.currentPageId]?.[direction];
     if (!targetPageId) return;
 
@@ -720,19 +732,69 @@ export class PageTransitionModule extends BaseModule {
     // Pull the first project's slug from the rendered projects list and set
     // the hash; the existing hashchange handler will run the transition.
     if (targetPageId === 'project-detail') {
-      const firstLink = document.querySelector(
-        '#projects a[href^="#/projects/"]'
-      ) as HTMLAnchorElement | null;
-      const slug = firstLink?.getAttribute('href')?.replace('#/projects/', '');
+      const slug = this.getProjectSlugAt(0);
       if (!slug) return;
       window.location.hash = `#/projects/${slug}`;
       return;
     }
 
-    // Going FROM project-detail back to a map tile uses blur (off-map →
-    // map). Other map → map navigation uses camera mode.
-    const mode = this.currentPageId === 'project-detail' ? 'blur' : 'camera';
-    void this.transitionTo(targetPageId, mode);
+    // Map → map: camera tween (no paw, no blur)
+    void this.transitionTo(targetPageId, 'camera');
+  }
+
+  /**
+   * Read the rendered project list out of the DOM and return slugs in order.
+   * Source of truth for the carousel order — same as what the user sees in
+   * the projects tile.
+   */
+  private getProjectSlugs(): string[] {
+    const links = Array.from(
+      document.querySelectorAll<HTMLAnchorElement>('#projects a[href^="#/projects/"]')
+    );
+    return links
+      .map((a) => a.getAttribute('href')?.replace('#/projects/', '') ?? '')
+      .filter((slug) => slug.length > 0);
+  }
+
+  /** Slug at the given index in the rendered projects list, or null. */
+  private getProjectSlugAt(index: number): string | null {
+    const slugs = this.getProjectSlugs();
+    return slugs[index] ?? null;
+  }
+
+  /** Slug currently shown in the project-detail page (parsed from hash). */
+  private getCurrentProjectSlug(): string | null {
+    const hash = window.location.hash;
+    if (!hash.startsWith('#/projects/')) return null;
+    const slug = hash.replace('#/projects/', '').split('?')[0];
+    return slug.length > 0 ? slug : null;
+  }
+
+  /**
+   * Resolve the next hash for project-detail navigation given a direction.
+   * - left from first project → back to projects tile
+   * - left from other project → previous project
+   * - right from non-last project → next project
+   * - right from last project → null (stop at the end)
+   * - up/down → null (let native scroll handle case-study reading)
+   */
+  private resolveProjectDetailNeighbor(direction: Direction): string | null {
+    if (direction !== 'left' && direction !== 'right') return null;
+
+    const slugs = this.getProjectSlugs();
+    if (slugs.length === 0) return null;
+
+    const currentSlug = this.getCurrentProjectSlug();
+    const currentIndex = currentSlug ? slugs.indexOf(currentSlug) : -1;
+    if (currentIndex === -1) return null;
+
+    if (direction === 'left') {
+      if (currentIndex === 0) return '#/projects';
+      return `#/projects/${slugs[currentIndex - 1]}`;
+    }
+    // right
+    if (currentIndex >= slugs.length - 1) return null;
+    return `#/projects/${slugs[currentIndex + 1]}`;
   }
 
   /**
