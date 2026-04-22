@@ -114,6 +114,14 @@ export class ProjectsModule extends BaseModule {
     // Listen for page-changed events (back-navigation cleanup, title reset)
     window.addEventListener('page-changed', this.handlePageChanged.bind(this) as EventListener);
 
+    // Channel-surf the CRT TV via vertical scroll on the projects tile.
+    // PageTransitionModule dispatches this when up/down is wheeled or
+    // arrowed while the projects tile is active.
+    document.addEventListener('projects:cycle-tv', ((event: CustomEvent) => {
+      const direction = event.detail?.direction as 'up' | 'down' | undefined;
+      if (direction) this.cycleTvChannel(direction);
+    }) as EventListener);
+
     // Check initial hash for project detail (on page load only)
     this.checkInitialHash();
 
@@ -350,6 +358,41 @@ export class ProjectsModule extends BaseModule {
       card.addEventListener('mouseleave', () => {
         this.turnOffTv();
       });
+    });
+  }
+
+  /**
+   * Index of the project currently shown on the CRT TV. Driven by the
+   * scroll-map (up/down on the projects tile) via cycleTvChannel.
+   */
+  private currentTvIndex: number = 0;
+
+  /**
+   * Channel-surf one project up or down in the documented list. Called
+   * from page-transition.ts via the 'projects:cycle-tv' CustomEvent when
+   * the user wheels/arrows up/down on the projects tile. Wraps at both
+   * ends so the carousel is endless.
+   */
+  private cycleTvChannel(direction: 'up' | 'down'): void {
+    if (!this.portfolioData) return;
+    const documented = this.portfolioData.projects.filter((p) => p.isDocumented);
+    if (documented.length === 0) return;
+
+    const delta = direction === 'down' ? 1 : -1;
+    this.currentTvIndex =
+      (this.currentTvIndex + delta + documented.length) % documented.length;
+    const project = documented[this.currentTvIndex];
+
+    if (project.titleCard) this.changeTvChannel(project.titleCard);
+
+    // Highlight the matching card in the list so the user can see which
+    // project is currently on the TV.
+    const cards = this.projectsContent?.querySelectorAll('.work-card');
+    cards?.forEach((card) => {
+      card.classList.toggle(
+        'is-active',
+        (card as HTMLElement).dataset.projectId === project.id
+      );
     });
   }
 
