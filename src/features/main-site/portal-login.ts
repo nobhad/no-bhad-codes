@@ -7,14 +7,24 @@
  * Handles the portal login form on the main site (#/portal hash page).
  * Supports email + password and magic link login.
  * Redirects to /dashboard on successful authentication.
+ *
+ * Goes through authStore so the canonical session state (sessionStorage
+ * + in-memory auth state) is consistent with the dropdown login and the
+ * React SPA's RequireAuth guard.
  */
 
 import { authStore } from '../../auth/auth-store';
 import { initPasswordToggle } from '../../components/password-toggle';
-import { createLogger } from '../../utils/logger';
+import { APP_CONSTANTS } from '../../config/constants';
 import { ROUTES } from '../../constants/api-endpoints';
+import { createLogger } from '../../utils/logger';
 
 const logger = createLogger('PortalLogin');
+
+function extractQuery(hash: string): string {
+  const idx = hash.indexOf('?');
+  return idx >= 0 ? hash.slice(idx + 1) : '';
+}
 
 export class PortalLoginOnMainSite {
   private loginForm: HTMLFormElement | null = null;
@@ -23,23 +33,17 @@ export class PortalLoginOnMainSite {
   private passwordInput: HTMLInputElement | null = null;
   private authError: HTMLElement | null = null;
 
-  async init(): Promise<void> {
-    const hash = window.location.hash;
-    if (hash !== '#/portal' && !hash.startsWith('#/portal?')) return;
-
-    this.loginForm = document.getElementById('portal-page-login-form') as HTMLFormElement;
-    this.magicForm = document.getElementById('portal-page-magic-form') as HTMLFormElement;
-    this.emailInput = document.getElementById('portal-page-email') as HTMLInputElement;
-    this.passwordInput = document.getElementById('portal-page-password') as HTMLInputElement;
+  init(): void {
+    this.loginForm = document.getElementById('portal-page-login-form') as HTMLFormElement | null;
+    this.magicForm = document.getElementById('portal-page-magic-form') as HTMLFormElement | null;
+    this.emailInput = document.getElementById('portal-page-email') as HTMLInputElement | null;
+    this.passwordInput = document.getElementById('portal-page-password') as HTMLInputElement | null;
     this.authError = document.getElementById('portal-page-auth-error');
 
-    if (!this.loginForm) {
-      logger.warn('Portal login form not found');
-      return;
-    }
+    if (!this.loginForm) return;
 
-    // Show session-expired notice if redirected from an expired session
-    const hashQuery = hash.includes('?') ? hash.split('?')[1] : '';
+    // Show session-expired notice if redirected here from an expired session
+    const hashQuery = extractQuery(window.location.hash);
     if (new URLSearchParams(hashQuery).get('session') === 'expired' && this.authError) {
       this.authError.textContent = 'Your session has expired. Please sign in again.';
     }
@@ -68,25 +72,29 @@ export class PortalLoginOnMainSite {
       const password = this.passwordInput?.value;
       if (!email || !password) return;
 
-      const submitBtn = this.loginForm!.querySelector('.portal-page-submit') as HTMLButtonElement;
-      const btnText = submitBtn?.querySelector('.btn-text') as HTMLElement;
-      const btnLoading = submitBtn?.querySelector('.btn-loading') as HTMLElement;
+      const submitBtn = this.loginForm!.querySelector<HTMLButtonElement>('.portal-page-submit');
+      const btnText = submitBtn?.querySelector<HTMLElement>('.btn-text');
+      const btnLoading = submitBtn?.querySelector<HTMLElement>('.btn-loading');
 
       if (submitBtn) submitBtn.disabled = true;
       if (btnText) btnText.style.display = 'none';
       if (btnLoading) btnLoading.style.display = 'inline';
 
+      const isAdminLogin =
+        email.toLowerCase() === APP_CONSTANTS.SECURITY.ADMIN_EMAIL.toLowerCase();
+
       try {
-        // Use authStore.login() so session state is saved to sessionStorage before redirect.
-        // This ensures the dashboard loads directly without showing the auth gate again.
-        const result = await authStore.login({ email, password });
+        const result = isAdminLogin
+          ? await authStore.adminLogin({ password })
+          : await authStore.login({ email, password });
 
         if (result.success) {
           window.location.href = ROUTES.PORTAL.DASHBOARD;
-        } else {
-          if (this.authError) {
-            this.authError.textContent = result.error || 'Invalid email or password';
-          }
+          return;
+        }
+
+        if (this.authError) {
+          this.authError.textContent = result.error || 'Invalid email or password';
         }
       } catch (error) {
         logger.error('Login error:', error);
@@ -128,16 +136,19 @@ export class PortalLoginOnMainSite {
       e.preventDefault();
       if (errorEl) errorEl.textContent = '';
 
-      const emailInput = this.magicForm!.querySelector(
+      const emailInput = this.magicForm!.querySelector<HTMLInputElement>(
         '#portal-page-magic-email'
-      ) as HTMLInputElement;
-      const submitBtn = this.magicForm!.querySelector(
+      );
+      const submitBtn = this.magicForm!.querySelector<HTMLButtonElement>(
         '.portal-page-magic-submit'
-      ) as HTMLButtonElement;
+      );
 
       if (!emailInput) return;
       const email = emailInput.value.trim();
-      if (!email) return;
+      if (!email) {
+        if (errorEl) errorEl.textContent = 'Please enter your email address.';
+        return;
+      }
 
       if (submitBtn) submitBtn.disabled = true;
 
@@ -148,8 +159,8 @@ export class PortalLoginOnMainSite {
             successEl.style.display = 'block';
             this.magicForm!.style.display = 'none';
           }
-        } else {
-          if (errorEl) errorEl.textContent = result.error || 'Failed to send link. Please try again.';
+        } else if (errorEl) {
+          errorEl.textContent = result.error || 'Failed to send link. Please try again.';
         }
       } catch (error) {
         logger.error('Magic link error:', error);
