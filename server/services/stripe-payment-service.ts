@@ -248,57 +248,64 @@ async function handlePaymentSuccess(stripeIntentId: string): Promise<void> {
     return;
   }
 
-  // Update our record
-  await db.run(
-    'UPDATE stripe_payment_intents SET status = \'succeeded\', updated_at = datetime(\'now\') WHERE stripe_intent_id = ?',
-    [stripeIntentId]
-  );
+  // All financial writes land in one transaction so a crash between
+  // "invoice marked paid" and "payment row inserted" can't leave the
+  // invoice flagged paid with no corresponding payment record (or the
+  // reverse). Failure rolls everything back and Stripe will retry,
+  // where the outer idempotency layer kicks in.
+  await db.transaction(async (ctx) => {
+    await ctx.run(
+      'UPDATE stripe_payment_intents SET status = \'succeeded\', updated_at = datetime(\'now\') WHERE stripe_intent_id = ?',
+      [stripeIntentId]
+    );
 
-  // Mark invoice as paid
+    if (record.invoice_id) {
+      await ctx.run(
+        `UPDATE invoices
+         SET status = 'paid', paid_at = datetime('now'), payment_method = 'stripe',
+             stripe_payment_intent_id = ?, updated_at = datetime('now')
+         WHERE id = ? AND status != 'paid'`,
+        [stripeIntentId, record.invoice_id]
+      );
+
+      // Defence-in-depth against duplicate delivery: even if the outer webhook
+      // idempotency layer fails, we won't insert two succeeded payments for
+      // the same PaymentIntent.
+      await ctx.run(
+        `INSERT INTO invoice_payments
+           (invoice_id, amount, payment_method, stripe_payment_intent_id, status, paid_at, created_at)
+         SELECT ?, ?, 'stripe', ?, 'succeeded', datetime('now'), datetime('now')
+         WHERE NOT EXISTS (
+           SELECT 1 FROM invoice_payments
+           WHERE stripe_payment_intent_id = ? AND status = 'succeeded'
+         )`,
+        [
+          record.invoice_id,
+          record.amount_cents / 100,
+          stripeIntentId,
+          stripeIntentId
+        ]
+      );
+    }
+
+    if (record.installment_id) {
+      await ctx.run(
+        `UPDATE payment_schedule
+         SET status = 'paid', paid_date = date('now'), payment_method = 'stripe',
+             payment_reference = ?, updated_at = datetime('now')
+         WHERE id = ? AND status != 'paid'`,
+        [stripeIntentId, record.installment_id]
+      );
+    }
+  });
+
   if (record.invoice_id) {
-    await db.run(
-      `UPDATE invoices
-       SET status = 'paid', paid_at = datetime('now'), payment_method = 'stripe',
-           stripe_payment_intent_id = ?, updated_at = datetime('now')
-       WHERE id = ? AND status != 'paid'`,
-      [stripeIntentId, record.invoice_id]
-    );
-
-    // Defence-in-depth against duplicate delivery: even if the outer webhook
-    // idempotency layer fails, we won't insert two succeeded payments for
-    // the same PaymentIntent.
-    await db.run(
-      `INSERT INTO invoice_payments
-         (invoice_id, amount, payment_method, stripe_payment_intent_id, status, paid_at, created_at)
-       SELECT ?, ?, 'stripe', ?, 'succeeded', datetime('now'), datetime('now')
-       WHERE NOT EXISTS (
-         SELECT 1 FROM invoice_payments
-         WHERE stripe_payment_intent_id = ? AND status = 'succeeded'
-       )`,
-      [
-        record.invoice_id,
-        record.amount_cents / 100,
-        stripeIntentId,
-        stripeIntentId
-      ]
-    );
-
     logger.info('Invoice marked paid via embedded Stripe payment', {
       category: 'payments',
       metadata: { invoiceId: record.invoice_id, stripeIntentId }
     });
   }
-
-  // Mark installment as paid
   if (record.installment_id) {
-    await db.run(
-      `UPDATE payment_schedule
-       SET status = 'paid', paid_date = date('now'), payment_method = 'stripe',
-           payment_reference = ?, updated_at = datetime('now')
-       WHERE id = ? AND status != 'paid'`,
-      [stripeIntentId, record.installment_id]
-    );
-
     logger.info('Installment marked paid via embedded Stripe payment', {
       category: 'payments',
       metadata: { installmentId: record.installment_id, stripeIntentId }
