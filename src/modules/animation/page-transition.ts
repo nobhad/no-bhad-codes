@@ -472,6 +472,66 @@ export class PageTransitionModule extends BaseModule {
   }
 
   /**
+   * Reflect the current page's navigable directions in the compass cues
+   * (the corner arrows that hint at scroll-map navigation). Each cue
+   * gets data-can="true" if scrolling that direction would lead somewhere.
+   * Reads the same NEIGHBORS graph the input handlers use, plus the
+   * dynamic project-detail / projects-tile rules so the cues don't lie.
+   */
+  private updateCompass(): void {
+    const compass = document.querySelector('[data-map-compass]') as HTMLElement | null;
+    if (!compass) return;
+
+    const directions: Direction[] = ['up', 'down', 'left', 'right'];
+    const navigable = new Set<Direction>();
+
+    for (const dir of directions) {
+      if (this.canNavigate(dir)) navigable.add(dir);
+    }
+
+    compass.querySelectorAll<HTMLElement>('.map-compass__cue').forEach((cue) => {
+      const dir = cue.dataset.cue as Direction | undefined;
+      cue.dataset.can = dir && navigable.has(dir) ? 'true' : 'false';
+    });
+  }
+
+  /**
+   * Pure check: would scrolling in this direction from the current page
+   * navigate somewhere? Mirrors the gating logic in tryNavigateDirection
+   * without actually firing any navigation, so the compass UI stays in
+   * sync with reality.
+   */
+  private canNavigate(direction: Direction): boolean {
+    // Projects tile: vertical always works (cycles TV or exits at bound),
+    // horizontal works if there's a project-detail destination.
+    if (this.currentPageId === 'projects') {
+      if (direction === 'up' || direction === 'down') return true;
+      return NEIGHBORS.projects?.[direction] != null;
+    }
+    // Project-detail: only horizontal navigates (carousel); vertical falls
+    // through to native scroll on tall case studies.
+    if (this.currentPageId === 'project-detail') {
+      return direction === 'left' || direction === 'right';
+    }
+    // Map tiles: static graph.
+    return NEIGHBORS[this.currentPageId]?.[direction] != null;
+  }
+
+  /**
+   * Trigger the first-paint pulse on the compass — a subtle one-time
+   * animation that nudges each navigable arrow in its direction so the
+   * user notices the affordance. Auto-removes after the pulse cycles
+   * complete so the compass stays passive afterward.
+   */
+  private startCompassHint(): void {
+    const compass = document.querySelector('[data-map-compass]') as HTMLElement | null;
+    if (!compass) return;
+    compass.classList.add('is-hinting');
+    // Pulse plays 3 iterations × 1.6s = ~4.8s; clear class slightly after.
+    setTimeout(() => compass.classList.remove('is-hinting'), 5200);
+  }
+
+  /**
    * Initialize all pages based on current hash. Map tiles always render
    * (camera shows the right one); off-map pages display-swap.
    */
@@ -822,6 +882,11 @@ export class PageTransitionModule extends BaseModule {
       this.log('[PageTransitionModule] Intro complete event received!');
       this.introComplete = true;
       this.dispatchEvent('ready');
+      // First-paint affordance: pulse the compass arrows so the user
+      // notices the scroll-map is interactive. Update first so the cues
+      // reflect the actual landing page's navigable directions.
+      this.updateCompass();
+      this.startCompassHint();
     }) as EventListener;
 
     this.on('IntroAnimationModule:complete', handleIntroComplete);
@@ -835,6 +900,8 @@ export class PageTransitionModule extends BaseModule {
 
     if (alreadyComplete) {
       this.introComplete = true;
+      this.updateCompass();
+      this.startCompassHint();
     }
 
     // Fallback timeout
@@ -1325,6 +1392,7 @@ export class PageTransitionModule extends BaseModule {
       // Update state
       this.currentPageId = pageId;
       this.updateActivePageAttribute(pageId);
+      this.updateCompass();
 
       // Card morph overlay should never be visible outside the intro page;
       // safety hide in case anything left it visible.

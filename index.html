@@ -1230,6 +1230,17 @@
           </div>
         </div>
       </section>
+
+      <!-- Scroll-map navigation indicator: shows which directions can be
+           scrolled from the current tile. Updates via data-active-page on
+           main + JS-set data-can-* attributes. Pulses on first paint to
+           hint that the site is scrollable. -->
+      <nav class="map-compass" aria-label="Scroll navigation hints" data-map-compass>
+        <span class="map-compass__cue map-compass__cue--up" data-cue="up" aria-hidden="true">↑</span>
+        <span class="map-compass__cue map-compass__cue--right" data-cue="right" aria-hidden="true">→</span>
+        <span class="map-compass__cue map-compass__cue--down" data-cue="down" aria-hidden="true">↓</span>
+        <span class="map-compass__cue map-compass__cue--left" data-cue="left" aria-hidden="true">←</span>
+      </nav>
     </main>
 
     <!-- Footer -->

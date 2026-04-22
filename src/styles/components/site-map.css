@@ -194,3 +194,111 @@ html[data-initial-page="portal-login"]:not(.js-ready) main#main-content {
     will-change: auto;
   }
 }
+
+/* ============================================
+ * MAP COMPASS — SCROLL DIRECTION HINTS
+ * ============================================
+ * Subtle arrow indicators in the corners of the viewport that show
+ * which directions can be scrolled from the active tile. Pulses once
+ * on first paint to hint that the site is scrollable, then stays as a
+ * passive affordance. Each arrow lights up only when its direction
+ * actually leads somewhere (data-can-* attributes set by JS).
+ */
+.map-compass {
+  position: fixed;
+  inset: var(--header-height) 0 var(--footer-height) 0;
+  pointer-events: none;
+  z-index: var(--z-index-elevated);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: 1fr auto 1fr;
+  grid-template-areas:
+    ". up    ."
+    "left .  right"
+    ". down  .";
+  padding: clamp(0.5rem, 2vw, 1.5rem);
+}
+
+.map-compass__cue {
+  font-family: var(--font-family-mono, monospace);
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  line-height: 1;
+  color: var(--color-dark);
+  opacity: 0;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+  user-select: none;
+}
+
+.map-compass__cue--up { grid-area: up; align-self: start; justify-self: center; }
+.map-compass__cue--down { grid-area: down; align-self: end; justify-self: center; }
+.map-compass__cue--left { grid-area: left; align-self: center; justify-self: start; }
+.map-compass__cue--right { grid-area: right; align-self: center; justify-self: end; }
+
+/* Active when JS marks the direction as navigable */
+.map-compass__cue[data-can="true"] {
+  opacity: 0.4;
+}
+
+.map-compass__cue[data-can="true"]:hover {
+  opacity: 0.8;
+}
+
+/* First-paint pulse: draws attention to the available scroll directions
+   for ~5 seconds after intro completes, then fades back to passive. */
+.map-compass.is-hinting .map-compass__cue[data-can="true"] {
+  animation: map-compass-pulse 1.6s ease-in-out 3;
+}
+
+@keyframes map-compass-pulse {
+  0%, 100% { opacity: 0.4; transform: translate(0, 0); }
+  50% {
+    opacity: 0.85;
+    /* Each cue nudges in its direction during the pulse */
+  }
+}
+
+.map-compass.is-hinting .map-compass__cue--up {
+  animation-name: map-compass-pulse-up;
+}
+.map-compass.is-hinting .map-compass__cue--down {
+  animation-name: map-compass-pulse-down;
+}
+.map-compass.is-hinting .map-compass__cue--left {
+  animation-name: map-compass-pulse-left;
+}
+.map-compass.is-hinting .map-compass__cue--right {
+  animation-name: map-compass-pulse-right;
+}
+
+@keyframes map-compass-pulse-up {
+  0%, 100% { opacity: 0.4; transform: translateY(0); }
+  50% { opacity: 0.85; transform: translateY(-4px); }
+}
+@keyframes map-compass-pulse-down {
+  0%, 100% { opacity: 0.4; transform: translateY(0); }
+  50% { opacity: 0.85; transform: translateY(4px); }
+}
+@keyframes map-compass-pulse-left {
+  0%, 100% { opacity: 0.4; transform: translateX(0); }
+  50% { opacity: 0.85; transform: translateX(-4px); }
+}
+@keyframes map-compass-pulse-right {
+  0%, 100% { opacity: 0.4; transform: translateX(0); }
+  50% { opacity: 0.85; transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-compass.is-hinting .map-compass__cue[data-can="true"] {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+/* Mobile: hide the compass since touch scroll convention already
+   suggests vertical navigation, and the screen is too narrow for
+   horizontal cues to feel useful without crowding tile content. */
+@media (max-width: 767px) {
+  .map-compass { display: none; }
+}
