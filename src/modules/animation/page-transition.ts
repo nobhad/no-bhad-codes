@@ -1025,18 +1025,18 @@ export class PageTransitionModule extends BaseModule {
     const currentIndex = currentSlug ? slugs.indexOf(currentSlug) : -1;
     if (currentIndex === -1) return null;
 
-    // Both ends wrap to home (intro) so the carousel forms one continuous
-    // loop in either direction. With the projects tile entering the
-    // carousel from first (right) or last (left), every horizontal scroll
-    // chain is infinite:
-    //   ... → projects → detail[0] → ... → detail[N] → intro → projects → ...
+    // Self-contained carousel: both ends wrap WITHIN the project list
+    // instead of bouncing back to home. Horizontal scroll inside detail
+    // pages is now an infinite loop through projects only — home is
+    // reachable from the projects tile (scroll up past the first channel)
+    // but not from inside the gallery.
     if (direction === 'left') {
-      if (currentIndex === 0) return '#/';
-      return `#/projects/${slugs[currentIndex - 1]}`;
+      const prev = currentIndex === 0 ? slugs.length - 1 : currentIndex - 1;
+      return `#/projects/${slugs[prev]}`;
     }
-    // right: walk forward, wrap to home at end
-    if (currentIndex >= slugs.length - 1) return '#/';
-    return `#/projects/${slugs[currentIndex + 1]}`;
+    // right: walk forward, wrap to first project at end
+    const next = currentIndex >= slugs.length - 1 ? 0 : currentIndex + 1;
+    return `#/projects/${slugs[next]}`;
   }
 
   /**
