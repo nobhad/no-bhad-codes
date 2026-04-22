@@ -639,19 +639,10 @@ export class ContactAnimationModule extends BaseModule {
       this.playFormAnimation();
     }) as EventListener);
 
-    // Fallback listener
-    this.on('PageTransitionModule:page-changed', ((event: CustomEvent) => {
-      const { to } = event.detail || {};
-      if (to === 'contact' && !this.blurAnimationComplete) {
-        setTimeout(() => {
-          if (!this.blurAnimationComplete && !this.timeline?.isActive()) {
-            this.blurAnimationComplete = true;
-            this.playFormAnimation();
-          }
-        }, 600);
-      }
-    }) as EventListener);
-
+    // Single page-changed listener — handles enter, exit, and the safety-net
+    // fallback all in one place. Mode-gated: any non-blur arrival
+    // (camera/slide map scroll) skips the form-grow animation entirely;
+    // the form sits fully expanded.
     this.on('PageTransitionModule:page-changed', ((event: CustomEvent) => {
       const { to, from, mode } = event.detail || {};
 
@@ -660,18 +651,26 @@ export class ContactAnimationModule extends BaseModule {
         this.blurAnimationComplete = false;
       }
 
-      if (to === 'contact') {
-        if (mode === 'blur') {
-          // Direct navigation — reset to start so the play animation has
-          // somewhere to grow from.
-          this.resetAnimatedElements();
-          this.blurAnimationComplete = false;
-        } else {
-          // Camera/slide (map scroll) — user wants the form full-size with
-          // no animation. Skip the timeline straight to its end state.
-          this.skipToEndState();
-          this.blurAnimationComplete = true;
-        }
+      if (to !== 'contact') return;
+
+      if (mode === 'blur') {
+        // Direct nav: reset to start state, then let contact-page-ready
+        // play the animation. Fallback timer in case that event doesn't
+        // fire for some reason.
+        this.resetAnimatedElements();
+        this.blurAnimationComplete = false;
+        setTimeout(() => {
+          if (!this.blurAnimationComplete && !this.timeline?.isActive()) {
+            this.blurAnimationComplete = true;
+            this.playFormAnimation();
+          }
+        }, 600);
+      } else {
+        // Camera or slide (map scroll arrival). Snap the timeline to its
+        // end state — full-size form, no entrance choreography. Setting
+        // blurAnimationComplete=true also defangs any stale fallback timer.
+        this.skipToEndState();
+        this.blurAnimationComplete = true;
       }
     }) as EventListener);
 
