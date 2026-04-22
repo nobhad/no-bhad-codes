@@ -673,28 +673,25 @@ export class ProjectsModule extends BaseModule {
   private renderCaseStudySections(project: PortfolioProject): void {
     if (!this.projectDetailSection) return;
 
-    // Challenge section
-    const challengeSection = this.projectDetailSection.querySelector('#project-challenge-section');
+    // Overview section (Challenge + Approach combined)
+    const overviewSection = this.projectDetailSection.querySelector('#project-overview-section');
     const challengeEl = this.projectDetailSection.querySelector('#project-challenge');
-    if (challengeSection && challengeEl) {
+    const approachEl = this.projectDetailSection.querySelector('#project-approach');
+    if (overviewSection && challengeEl && approachEl) {
       if (project.challenge) {
         challengeEl.textContent = project.challenge;
-        (challengeSection as HTMLElement).style.display = '';
+        (challengeEl as HTMLElement).style.display = '';
       } else {
-        (challengeSection as HTMLElement).style.display = 'none';
+        (challengeEl as HTMLElement).style.display = 'none';
       }
-    }
-
-    // Approach section
-    const approachSection = this.projectDetailSection.querySelector('#project-approach-section');
-    const approachEl = this.projectDetailSection.querySelector('#project-approach');
-    if (approachSection && approachEl) {
       if (project.approach) {
         approachEl.textContent = project.approach;
-        (approachSection as HTMLElement).style.display = '';
+        (approachEl as HTMLElement).style.display = '';
       } else {
-        (approachSection as HTMLElement).style.display = 'none';
+        (approachEl as HTMLElement).style.display = 'none';
       }
+      (overviewSection as HTMLElement).style.display =
+        project.challenge || project.approach ? '' : 'none';
     }
 
     // Key Features section
