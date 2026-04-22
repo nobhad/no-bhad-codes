@@ -108,110 +108,66 @@
           visibility: visible !important;
         }
       }
-      /* Critical: Page visibility - hide non-active pages before external CSS loads */
-      section.page-hidden {
+      /* Critical: Page visibility - hide non-active pages before external CSS loads.
+         Scoped to :not([data-map-tile]) so map tiles render together inside
+         .site-map and the camera transform controls which tile is in view. */
+      section.page-hidden:not([data-map-tile]) {
         display: none !important;
         opacity: 0 !important;
         visibility: hidden !important;
       }
-      section.page-active {
+      section.page-active:not([data-map-tile]) {
         display: grid !important;
         opacity: 1 !important;
         visibility: visible !important;
       }
 
-      /* CRITICAL: Hash-based initial page visibility - prevents flash on refresh */
-      /* Only applies before JS initializes (html has data-initial-page but not .js-ready) */
-      /* When on intro page (default), show intro, hide others */
-      html[data-initial-page='intro']:not(.js-ready) #intro {
-        display: grid !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-      }
-      html[data-initial-page='intro']:not(.js-ready) #about,
-      html[data-initial-page='intro']:not(.js-ready) #contact,
-      html[data-initial-page='intro']:not(.js-ready) #projects,
-      html[data-initial-page='intro']:not(.js-ready) #project-detail {
+      /* CRITICAL: Hash-based initial visibility — prevents flash on refresh.
+         Only applies before JS initializes (html has data-initial-page but
+         not .js-ready).
+
+         For map-tile initial pages (intro/about/contact/projects), all five
+         map tiles render together inside .site-map; site-map.css positions
+         the camera. We only need to hide off-map sections here.
+
+         For off-map initial pages (project-detail, portal-login), hide the
+         entire .site-map so map content doesn't bleed through. */
+
+      /* Map-tile initial: hide off-map sections */
+      html[data-initial-page='intro']:not(.js-ready) #project-detail,
+      html[data-initial-page='intro']:not(.js-ready) #portal-login,
+      html[data-initial-page='about']:not(.js-ready) #project-detail,
+      html[data-initial-page='about']:not(.js-ready) #portal-login,
+      html[data-initial-page='contact']:not(.js-ready) #project-detail,
+      html[data-initial-page='contact']:not(.js-ready) #portal-login,
+      html[data-initial-page='projects']:not(.js-ready) #project-detail,
+      html[data-initial-page='projects']:not(.js-ready) #portal-login {
         display: none !important;
       }
 
-      /* When on about page, show about, hide others */
-      html[data-initial-page='about']:not(.js-ready) #about {
-        display: grid !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-      }
-      html[data-initial-page='about']:not(.js-ready) #intro,
-      html[data-initial-page='about']:not(.js-ready) #contact,
-      html[data-initial-page='about']:not(.js-ready) #projects,
-      html[data-initial-page='about']:not(.js-ready) #project-detail {
-        display: none !important;
-      }
-      html[data-initial-page='about']:not(.js-ready) .intro-morph-overlay {
-        display: none !important;
-      }
-
-      /* When on contact page, show contact, hide others */
-      html[data-initial-page='contact']:not(.js-ready) #contact {
-        display: grid !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-      }
-      html[data-initial-page='contact']:not(.js-ready) #intro,
-      html[data-initial-page='contact']:not(.js-ready) #about,
-      html[data-initial-page='contact']:not(.js-ready) #projects,
-      html[data-initial-page='contact']:not(.js-ready) #project-detail {
-        display: none !important;
-      }
-      html[data-initial-page='contact']:not(.js-ready) .intro-morph-overlay {
-        display: none !important;
-      }
-
-      /* When on projects page, show projects, hide others */
-      html[data-initial-page='projects']:not(.js-ready) #projects {
-        display: grid !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-      }
-      html[data-initial-page='projects']:not(.js-ready) #intro,
-      html[data-initial-page='projects']:not(.js-ready) #about,
-      html[data-initial-page='projects']:not(.js-ready) #contact,
-      html[data-initial-page='projects']:not(.js-ready) #project-detail {
-        display: none !important;
-      }
+      /* Map-tile initial (non-intro): hide intro morph overlay */
+      html[data-initial-page='about']:not(.js-ready) .intro-morph-overlay,
+      html[data-initial-page='contact']:not(.js-ready) .intro-morph-overlay,
       html[data-initial-page='projects']:not(.js-ready) .intro-morph-overlay {
         display: none !important;
       }
 
-      /* When on project detail page, show project-detail, hide others */
-      html[data-initial-page='project-detail']:not(.js-ready) #project-detail {
-        display: grid !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-      }
-      html[data-initial-page='project-detail']:not(.js-ready) #intro,
-      html[data-initial-page='project-detail']:not(.js-ready) #about,
-      html[data-initial-page='project-detail']:not(.js-ready) #contact,
-      html[data-initial-page='project-detail']:not(.js-ready) #projects {
-        display: none !important;
-      }
-      html[data-initial-page='project-detail']:not(.js-ready) .intro-morph-overlay {
-        display: none !important;
-      }
-
-      /* When on portal login page, show portal-login, hide others */
+      /* Off-map initial: show that page, hide .site-map and the other off-map */
+      html[data-initial-page='project-detail']:not(.js-ready) #project-detail,
       html[data-initial-page='portal-login']:not(.js-ready) #portal-login {
         display: grid !important;
         opacity: 1 !important;
         visibility: visible !important;
       }
-      html[data-initial-page='portal-login']:not(.js-ready) #intro,
-      html[data-initial-page='portal-login']:not(.js-ready) #about,
-      html[data-initial-page='portal-login']:not(.js-ready) #contact,
-      html[data-initial-page='portal-login']:not(.js-ready) #projects,
+      html[data-initial-page='project-detail']:not(.js-ready) .site-map,
+      html[data-initial-page='portal-login']:not(.js-ready) .site-map {
+        display: none !important;
+      }
+      html[data-initial-page='project-detail']:not(.js-ready) #portal-login,
       html[data-initial-page='portal-login']:not(.js-ready) #project-detail {
         display: none !important;
       }
+      html[data-initial-page='project-detail']:not(.js-ready) .intro-morph-overlay,
       html[data-initial-page='portal-login']:not(.js-ready) .intro-morph-overlay {
         display: none !important;
       }

@@ -117,6 +117,56 @@
 }
 
 /* ============================================
+ * INITIAL CAMERA FROM HASH ROUTE (PRE-JS)
+ * ============================================
+ * The inline head script sets data-initial-page on <html> from the URL
+ * hash before first paint. These rules drive the initial camera position
+ * from that attribute so refreshing on /#/about lands the camera on the
+ * about tile without flash. Once .js-ready is set, page-transition.ts
+ * takes over via inline GSAP transforms that override these.
+ *
+ * Intro is the default (no transform); only off-center tiles need rules.
+ */
+html[data-initial-page="hero"]:not(.js-ready) .site-map {
+  transform: translate(100%, 0);
+}
+
+html[data-initial-page="about"]:not(.js-ready) .site-map {
+  transform: translate(0, 100%);
+}
+
+html[data-initial-page="projects"]:not(.js-ready) .site-map {
+  transform: translate(-100%, 0);
+}
+
+html[data-initial-page="contact"]:not(.js-ready) .site-map {
+  transform: translate(0, -100%);
+}
+
+/* ============================================
+ * MAIN OVERFLOW (SCROLL-MAP MODE)
+ * ============================================
+ * When a map tile is the active page, lock vertical scroll on <main> so
+ * users can't scroll past the camera into off-screen tiles. Off-map pages
+ * (project-detail with case studies, portal-login) re-enable scroll via
+ * the data-active-page attribute that JS sets after each transition.
+ *
+ * Pre-JS off-map state is handled by html[data-initial-page='X'] selectors
+ * so deep-links to project-detail / portal-login can scroll immediately.
+ */
+main#main-content {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+main#main-content[data-active-page="project-detail"],
+main#main-content[data-active-page="portal-login"],
+html[data-initial-page="project-detail"]:not(.js-ready) main#main-content,
+html[data-initial-page="portal-login"]:not(.js-ready) main#main-content {
+  overflow-y: auto;
+}
+
+/* ============================================
  * REDUCED MOTION
  * ============================================
  * Static fallbacks above already give an instant snap when the

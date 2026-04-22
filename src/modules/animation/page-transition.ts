@@ -38,8 +38,39 @@ interface PageTransitionOptions extends ModuleOptions {
   enableOnMobile?: boolean;
 }
 
+/**
+ * Map-tile direction for each map page. Pages not in this map are
+ * "off-map" (project-detail, portal-login, admin-login) and use the
+ * existing blur-swap transition instead of camera tweens.
+ */
+const MAP_TILES = {
+  intro: 'center',
+  hero: 'left',
+  about: 'up',
+  projects: 'right',
+  contact: 'down'
+} as const;
+
+type MapTile = (typeof MAP_TILES)[keyof typeof MAP_TILES];
+
+/**
+ * Camera transform percentages per tile (xPercent, yPercent on .site-map).
+ * Translating the container moves whichever tile sits opposite the named
+ * direction into the viewport. E.g., camera="up" translates by yPercent: 100,
+ * which pushes the container down so the tile positioned at top:-100% becomes
+ * visible.
+ */
+const CAMERA_POSITIONS: Record<MapTile, { x: number; y: number }> = {
+  center: { x: 0, y: 0 },
+  up: { x: 0, y: 100 },
+  down: { x: 0, y: -100 },
+  left: { x: 100, y: 0 },
+  right: { x: -100, y: 0 }
+};
+
 export class PageTransitionModule extends BaseModule {
   private container: HTMLElement | null = null;
+  private siteMap: HTMLElement | null = null;
   private pages: Map<string, PageConfig> = new Map();
   private currentPageId: string = '';
   private isTransitioning: boolean = false;
@@ -112,6 +143,11 @@ export class PageTransitionModule extends BaseModule {
       return;
     }
 
+    // Cache scroll-map container (Phase B). May be null if the page hasn't
+    // been migrated to the scroll-map structure — in that case map-page
+    // transitions fall back to the existing blur-swap.
+    this.siteMap = this.container.querySelector('.site-map') as HTMLElement;
+
     // Define page configurations
     const pageConfigs: Omit<PageConfig, 'element'>[] = [
       {
@@ -174,7 +210,85 @@ export class PageTransitionModule extends BaseModule {
   }
 
   /**
-   * Initialize all pages - show page matching current hash, hide others
+   * Whether a page is part of the scroll-map (intro/hero/about/projects/contact).
+   * Off-map pages (project-detail, portal-login, admin-login) use the blur-swap
+   * transition.
+   */
+  private isMapPage(pageId: string): boolean {
+    return pageId in MAP_TILES;
+  }
+
+  /**
+   * Move the scroll-map camera to a tile direction. When `animated` is false
+   * (initial load, off-map → map snap, reduced-motion users), the position
+   * is set instantly with no tween. The data-map-camera attribute is also
+   * updated so the static CSS fallback stays in sync with the JS-driven state.
+   */
+  private async moveCamera(tile: MapTile, animated: boolean): Promise<void> {
+    if (!this.siteMap) return;
+
+    const pos = CAMERA_POSITIONS[tile];
+    this.siteMap.setAttribute('data-map-camera', tile);
+
+    if (!animated || this.reducedMotion) {
+      gsap.set(this.siteMap, { xPercent: pos.x, yPercent: pos.y });
+      return;
+    }
+
+    await new Promise<void>((resolve) => {
+      gsap.to(this.siteMap, {
+        xPercent: pos.x,
+        yPercent: pos.y,
+        duration: PAGE_ANIMATION.DURATION,
+        ease: PAGE_ANIMATION.EASE_OUT,
+        onComplete: resolve
+      });
+    });
+  }
+
+  /**
+   * Hide only the off-map pages (project-detail, portal-login). Map tiles
+   * stay rendered inside .site-map; the camera transform controls which
+   * one is in view.
+   */
+  private hideOffMapPages(): void {
+    this.pages.forEach((page) => {
+      if (!page.element || this.isMapPage(page.id)) return;
+      gsap.killTweensOf(page.element);
+      gsap.set(page.element, { clearProps: 'all' });
+      page.element.classList.add('page-hidden');
+      page.element.classList.remove('page-active');
+    });
+  }
+
+  /**
+   * Set the scroll-map container's display based on whether the active page
+   * is a map tile. When an off-map page is active, hide .site-map entirely
+   * so its content doesn't bleed through.
+   */
+  private setSiteMapVisibility(visible: boolean): void {
+    if (!this.siteMap) return;
+    if (visible) {
+      this.siteMap.style.removeProperty('display');
+    } else {
+      this.siteMap.style.display = 'none';
+    }
+  }
+
+  /**
+   * Update main's data-active-page attribute. CSS uses this to scope
+   * `overflow-y: auto` to off-map pages (map tiles lock vertical scroll
+   * because they're viewport-sized and the camera handles navigation).
+   */
+  private updateActivePageAttribute(pageId: string): void {
+    if (this.container) {
+      this.container.dataset.activePage = pageId;
+    }
+  }
+
+  /**
+   * Initialize all pages based on current hash. Map tiles always render
+   * (camera shows the right one); off-map pages display-swap.
    */
   private initializePageStates(): void {
     const hash = window.location.hash;
@@ -185,20 +299,37 @@ export class PageTransitionModule extends BaseModule {
     this.pages.forEach((page, id) => {
       if (!page.element) return;
 
-      if (id === initialPageId) {
-        // Show the initial page
+      if (this.isMapPage(id)) {
+        // Map tile: always rendered. Strip page-hidden/page-active so the
+        // critical CSS rules (which still apply to non-map sections) don't
+        // accidentally hide it via inheritance.
+        page.element.classList.remove('page-hidden');
+        page.element.classList.remove('page-active');
+        gsap.set(page.element, { clearProps: 'all' });
+      } else if (id === initialPageId) {
+        // Off-map page is the initial: show it
         page.element.classList.remove('page-hidden');
         page.element.classList.add('page-active');
         gsap.set(page.element, { opacity: 1, filter: 'none', visibility: 'visible' });
-        this.currentPageId = id;
-        this.log(`Showing initial page: ${id}`);
       } else {
-        // Hide all other pages
+        // Off-map page is not initial: hide it
         gsap.set(page.element, { clearProps: 'all' });
         page.element.classList.add('page-hidden');
         page.element.classList.remove('page-active');
       }
     });
+
+    this.currentPageId = initialPageId;
+
+    // Position the scroll-map camera + show/hide .site-map based on initial
+    if (this.isMapPage(initialPageId)) {
+      this.setSiteMapVisibility(true);
+      this.moveCamera(MAP_TILES[initialPageId as keyof typeof MAP_TILES], false);
+    } else {
+      this.setSiteMapVisibility(false);
+    }
+
+    this.updateActivePageAttribute(initialPageId);
 
     this.log(`Initial page set: ${this.currentPageId}`);
   }
@@ -361,7 +492,13 @@ export class PageTransitionModule extends BaseModule {
   }
 
   /**
-   * Transition to a page with blur animations
+   * Transition to a page. Branches on whether the from/to pages are part of
+   * the scroll-map (intro/hero/about/projects/contact) or off-map (project-
+   * detail, portal-login).
+   *
+   * - map → map: pure camera tween (no blur, no hide). Paw still plays on
+   *   intro exits (Phase D will refine this to first-load-only).
+   * - off-map involved: existing blur model + show/hide of .site-map.
    */
   async transitionTo(pageId: string): Promise<void> {
     this.log('[PageTransitionModule] transitionTo called:', pageId);
@@ -387,106 +524,63 @@ export class PageTransitionModule extends BaseModule {
     this.log(`Transitioning: ${this.currentPageId} -> ${pageId}`);
 
     try {
-      // Special handling for intro page
-      if (this.currentPageId === 'intro') {
-        // Exiting intro - play coyote paw exit animation
-        await this.playIntroExitAnimation();
-      } else if (currentPage && currentPage.element) {
-        // Regular page exit - blur out
-        await this.animateOut(currentPage);
-      }
+      const fromIsMap = this.isMapPage(this.currentPageId);
+      const toIsMap = this.isMapPage(pageId);
+      const fromIsIntro = this.currentPageId === 'intro';
 
-      // CRITICAL: Hide ALL pages before showing target
-      // This prevents any page (especially intro) from overlapping the target
-      this.hideAllPages();
-
-      // Show and animate in target page
-      if (pageId === 'intro') {
+      if (fromIsMap && toIsMap && this.siteMap) {
         // ============================================
-        // INTRO PAGE: Animation module controls everything
+        // MAP → MAP — pure camera tween
         // ============================================
-        // Don't make section visible yet - let intro animation module
-        // show elements at the right time during/after animation.
-
-        // First, clear inline styles that were set during hideAllPages
-        targetPage.element.style.removeProperty('display');
-        targetPage.element.style.removeProperty('visibility');
-        targetPage.element.style.removeProperty('opacity');
-        targetPage.element.style.removeProperty('pointer-events');
-        targetPage.element.style.removeProperty('z-index');
-
-        // Also clear intro children inline styles
-        const businessCardContainer = targetPage.element.querySelector(
-          '.business-card-container'
-        ) as HTMLElement;
-        const introNav = targetPage.element.querySelector('.intro-nav') as HTMLElement;
-        const businessCardEl = targetPage.element.querySelector('.business-card') as HTMLElement;
-
-        if (businessCardContainer) {
-          businessCardContainer.style.removeProperty('display');
-          businessCardContainer.style.removeProperty('visibility');
-          businessCardContainer.style.removeProperty('opacity');
+        // Intro exits still play paw (Phase D will gate to first-load only).
+        if (fromIsIntro) {
+          await this.playIntroExitAnimation();
         }
-        if (introNav) {
-          introNav.style.removeProperty('display');
-          introNav.style.removeProperty('visibility');
-          introNav.style.removeProperty('opacity');
-        }
-        if (businessCardEl) {
-          businessCardEl.style.removeProperty('display');
-          businessCardEl.style.removeProperty('visibility');
-          businessCardEl.style.removeProperty('opacity');
-        }
-
-        // Remove page-hidden but DON'T show content yet
-        targetPage.element.classList.remove('page-hidden');
-        targetPage.element.classList.add('page-active');
-
-        // Keep section invisible - animation module will reveal content
-        gsap.set(targetPage.element, {
-          opacity: 0,
-          visibility: 'hidden'
-        });
-
-        // Let intro animation module handle the coyote paw animation
-        // The module will make content visible when animation completes
-        await this.playIntroEntryAnimation();
-
-        // After animation completes, ensure section is visible
-        gsap.set(targetPage.element, {
-          opacity: 1,
-          visibility: 'visible'
-        });
+        await this.moveCamera(MAP_TILES[pageId as keyof typeof MAP_TILES], true);
       } else {
         // ============================================
-        // PAGE TRANSITION: Blur in from hidden state
+        // OFF-MAP INVOLVED — blur model + site-map show/hide
         // ============================================
-        // All content (including button) animates together as one unit.
 
-        // STEP 1: Add page-entering class FIRST (CSS !important keeps hidden)
-        targetPage.element.classList.add('page-entering');
+        // Exit current page: paw if leaving intro, blur otherwise
+        if (fromIsIntro) {
+          await this.playIntroExitAnimation();
+        } else if (currentPage && currentPage.element && !this.isMapPage(this.currentPageId)) {
+          await this.animateOut(currentPage);
+        } else if (currentPage && currentPage.element && this.isMapPage(this.currentPageId)) {
+          // Leaving a map tile to off-map: blur out the visible tile
+          await this.animateOut(currentPage);
+        }
 
-        // STEP 2: Remove page-hidden, add page-active
-        // Element stays hidden because page-entering has opacity: 0 !important
-        targetPage.element.classList.remove('page-hidden');
-        targetPage.element.classList.add('page-active');
+        // Hide all off-map pages so the target is the only off-map showing
+        this.hideOffMapPages();
 
-        // STEP 3: Set GSAP inline styles for animation start state
-        gsap.set(targetPage.element, {
-          opacity: 0,
-          visibility: 'hidden',
-          filter: `blur(${PAGE_ANIMATION.BLUR_AMOUNT}px)`
-        });
+        if (toIsMap && this.siteMap) {
+          // Going TO a map tile from off-map: show .site-map and snap camera
+          this.setSiteMapVisibility(true);
+          this.moveCamera(MAP_TILES[pageId as keyof typeof MAP_TILES], false);
+          // Map tile is already rendered; no animateIn needed.
+        } else {
+          // Going to off-map: hide .site-map so it doesn't bleed through
+          this.setSiteMapVisibility(false);
 
-        // STEP 4: Remove page-entering - GSAP inline styles take over
-        targetPage.element.classList.remove('page-entering');
-
-        // STEP 5: Animate in
-        await this.animateIn(targetPage);
+          // Standard off-map blur-in entry
+          targetPage.element.classList.add('page-entering');
+          targetPage.element.classList.remove('page-hidden');
+          targetPage.element.classList.add('page-active');
+          gsap.set(targetPage.element, {
+            opacity: 0,
+            visibility: 'hidden',
+            filter: `blur(${PAGE_ANIMATION.BLUR_AMOUNT}px)`
+          });
+          targetPage.element.classList.remove('page-entering');
+          await this.animateIn(targetPage);
+        }
       }
 
       // Update state
       this.currentPageId = pageId;
+      this.updateActivePageAttribute(pageId);
 
       // Update document title
       if (targetPage.title) {
@@ -494,7 +588,6 @@ export class PageTransitionModule extends BaseModule {
       }
 
       // Dispatch page changed event (both internally and as window event)
-      // Window event allows other modules like ProjectsModule to listen
       this.dispatchEvent('page-changed', {
         from: currentPage?.id,
         to: pageId
