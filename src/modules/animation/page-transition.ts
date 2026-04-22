@@ -581,11 +581,15 @@ export class PageTransitionModule extends BaseModule {
    * #project-detail element re-renders and slides the NEW card in. The ghost
    * is removed by runSlideTransition once the slide completes.
    */
-  private captureDetailGhost(): void {
+  private removeDetailGhost(): void {
     if (this.outgoingDetailGhost) {
       this.outgoingDetailGhost.remove();
       this.outgoingDetailGhost = null;
     }
+  }
+
+  private captureDetailGhost(): void {
+    this.removeDetailGhost();
     const detail = this.pages.get('project-detail')?.element;
     if (!detail || !detail.parentElement) return;
 
@@ -958,10 +962,13 @@ export class PageTransitionModule extends BaseModule {
 
     if (pageId === this.currentPageId || this.isTransitioning) {
       this.log('[PageTransitionModule] transitionTo blocked - same page or already transitioning');
+      // Drop any orphaned ghost so it doesn't sit on top of the page forever.
+      this.removeDetailGhost();
       return;
     }
     if (this.isMobile && !this.enableOnMobile) {
       this.log('[PageTransitionModule] transitionTo blocked - mobile');
+      this.removeDetailGhost();
       return;
     }
 
