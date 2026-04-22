@@ -20,10 +20,55 @@
  *   await auditLogger.logDelete('invoice', invoice.id, invoice.number, oldData, req);
  */
 
+import crypto from 'node:crypto';
 import { getDatabase } from '../database/init.js';
 import type { Request } from 'express';
 import { logger } from './logger.js';
 import { safeJsonParseOrNull } from '../utils/safe-json.js';
+
+/**
+ * Hash-chain helpers for the audit_logs table.
+ *
+ * `computeRowHash` returns the SHA-256 hex digest of a canonical
+ * representation of the row's content fields, concatenated with the
+ * previous row's hash. The canonicalization sorts keys so we're not
+ * at the mercy of JSON.stringify property order.
+ *
+ * The genesis row's prev_hash is the sentinel 'GENESIS' — writing
+ * empty-string would collide with a row whose content hashed to the
+ * literal empty string, which is extremely unlikely but free to
+ * sidestep.
+ */
+const CHAIN_GENESIS = 'GENESIS';
+
+export interface AuditChainContent {
+  user_id: number | null;
+  user_email: string | null;
+  user_type: string;
+  action: string;
+  entity_type: string;
+  entity_id: string | null;
+  entity_name: string | null;
+  old_value: string | null;
+  new_value: string | null;
+  changes: string | null;
+  ip_address: string | null;
+  user_agent: string | null;
+  request_path: string | null;
+  request_method: string | null;
+  metadata: string | null;
+  created_at: string;
+}
+
+function canonicalize(content: AuditChainContent): string {
+  const keys = Object.keys(content).sort() as Array<keyof AuditChainContent>;
+  const parts = keys.map((k) => `${k}=${content[k] ?? ''}`);
+  return parts.join(''); // unit separator, won't appear in content
+}
+
+export function computeRowHash(content: AuditChainContent, prevHash: string): string {
+  return crypto.createHash('sha256').update(`${canonicalize(content)}|${prevHash}`).digest('hex');
+}
 
 // =====================================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -239,29 +284,86 @@ async function createAuditLog(entry: AuditLogEntry): Promise<void> {
       metadata: entry.metadata ? JSON.stringify(entry.metadata) : null
     };
 
-    await db.run(
-      `INSERT INTO audit_logs (
-        user_id, user_email, user_type, action, entity_type, entity_id, entity_name,
-        old_value, new_value, changes, ip_address, user_agent, request_path, request_method, metadata
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        auditData.user_id,
-        auditData.user_email,
-        auditData.user_type,
-        auditData.action,
-        auditData.entity_type,
-        auditData.entity_id,
-        auditData.entity_name,
-        auditData.old_value,
-        auditData.new_value,
-        auditData.changes,
-        auditData.ip_address,
-        auditData.user_agent,
-        auditData.request_path,
-        auditData.request_method,
-        auditData.metadata
-      ]
-    );
+    // Insert-then-hash inside a transaction so concurrent audit writes
+    // serialize and each row's prev_hash reflects the actual preceding
+    // committed row. We can't include created_at in the hash until the
+    // DB assigns it on INSERT, so the flow is:
+    //   1. INSERT the content (SQLite sets id + created_at)
+    //   2. Read the previous row's hash (the most recent one *before*
+    //      our new id, so two concurrent writers don't link to each
+    //      other's pre-commit state)
+    //   3. Compute this row's hash over its content + prev_hash
+    //   4. UPDATE the row with prev_hash + hash
+    await db.transaction(async (ctx) => {
+      const insertResult = await ctx.run(
+        `INSERT INTO audit_logs (
+          user_id, user_email, user_type, action, entity_type, entity_id, entity_name,
+          old_value, new_value, changes, ip_address, user_agent, request_path, request_method, metadata
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          auditData.user_id,
+          auditData.user_email,
+          auditData.user_type,
+          auditData.action,
+          auditData.entity_type,
+          auditData.entity_id,
+          auditData.entity_name,
+          auditData.old_value,
+          auditData.new_value,
+          auditData.changes,
+          auditData.ip_address,
+          auditData.user_agent,
+          auditData.request_path,
+          auditData.request_method,
+          auditData.metadata
+        ]
+      );
+
+      const newId = insertResult.lastID;
+      if (!newId) {
+        throw new Error('Audit insert returned no lastID; cannot chain');
+      }
+
+      const inserted = (await ctx.get(
+        'SELECT created_at FROM audit_logs WHERE id = ?',
+        [newId]
+      )) as { created_at: string } | undefined;
+      const createdAt = inserted?.created_at ?? new Date().toISOString();
+
+      const prevRow = (await ctx.get(
+        `SELECT hash FROM audit_logs
+          WHERE id < ? AND hash IS NOT NULL
+          ORDER BY id DESC
+          LIMIT 1`,
+        [newId]
+      )) as { hash: string } | undefined;
+      const prevHash = prevRow?.hash ?? CHAIN_GENESIS;
+
+      const content: AuditChainContent = {
+        user_id: auditData.user_id,
+        user_email: auditData.user_email,
+        user_type: auditData.user_type,
+        action: auditData.action,
+        entity_type: auditData.entity_type,
+        entity_id: auditData.entity_id,
+        entity_name: auditData.entity_name,
+        old_value: auditData.old_value,
+        new_value: auditData.new_value,
+        changes: auditData.changes,
+        ip_address: auditData.ip_address,
+        user_agent: auditData.user_agent,
+        request_path: auditData.request_path,
+        request_method: auditData.request_method,
+        metadata: auditData.metadata,
+        created_at: createdAt
+      };
+      const hash = computeRowHash(content, prevHash);
+
+      await ctx.run(
+        'UPDATE audit_logs SET prev_hash = ?, hash = ? WHERE id = ?',
+        [prevHash, hash, newId]
+      );
+    });
 
     logger.info(
       `[Audit] ${entry.action.toUpperCase()} ${entry.entityType}${entry.entityId ? `:${entry.entityId}` : ''} by ${entry.userEmail || 'system'}`
@@ -286,6 +388,107 @@ async function createAuditLog(entry: AuditLogEntry): Promise<void> {
 
     throw auditError;
   }
+}
+
+export interface AuditChainBreak {
+  id: number;
+  kind: 'prev_hash_mismatch' | 'hash_mismatch' | 'missing_hash';
+  expected?: string;
+  actual?: string;
+  createdAt: string;
+}
+
+export interface AuditChainVerification {
+  total: number;
+  verified: number;
+  skipped: number;
+  breaks: AuditChainBreak[];
+}
+
+/**
+ * Walk the audit_logs chain in insertion order and verify each row's
+ * hash was produced by the documented recipe and correctly linked to
+ * its predecessor. Returns a list of breaks (if any) rather than
+ * throwing — caller decides whether to alert, page, or halt writes.
+ *
+ * Rows inserted before migration 135 have null hash / prev_hash;
+ * they're counted as `skipped`, not `breaks`.
+ */
+export async function verifyAuditChain(): Promise<AuditChainVerification> {
+  const db = getDatabase();
+  const rows = await db.all<AuditLogRow & { prev_hash: string | null; hash: string | null }>(
+    `SELECT id, user_id, user_email, user_type, action, entity_type, entity_id, entity_name,
+            old_value, new_value, changes, ip_address, user_agent, request_path, request_method,
+            metadata, created_at, prev_hash, hash
+       FROM audit_logs
+      ORDER BY id ASC`
+  );
+
+  const breaks: AuditChainBreak[] = [];
+  let verified = 0;
+  let skipped = 0;
+  let lastKnownHash = CHAIN_GENESIS;
+  let sawFirstHashedRow = false;
+
+  for (const row of rows) {
+    if (row.hash == null) {
+      skipped += 1;
+      continue;
+    }
+
+    const content: AuditChainContent = {
+      user_id: row.user_id,
+      user_email: row.user_email,
+      user_type: row.user_type,
+      action: row.action,
+      entity_type: row.entity_type,
+      entity_id: row.entity_id,
+      entity_name: row.entity_name,
+      old_value: row.old_value,
+      new_value: row.new_value,
+      changes: row.changes,
+      ip_address: row.ip_address,
+      user_agent: row.user_agent,
+      request_path: row.request_path,
+      request_method: row.request_method,
+      metadata: row.metadata,
+      created_at: row.created_at
+    };
+
+    const expectedPrev = sawFirstHashedRow ? lastKnownHash : row.prev_hash ?? CHAIN_GENESIS;
+    if (sawFirstHashedRow && row.prev_hash !== expectedPrev) {
+      breaks.push({
+        id: row.id,
+        kind: 'prev_hash_mismatch',
+        expected: expectedPrev,
+        actual: row.prev_hash ?? undefined,
+        createdAt: row.created_at
+      });
+    }
+
+    const recomputed = computeRowHash(content, row.prev_hash ?? CHAIN_GENESIS);
+    if (recomputed !== row.hash) {
+      breaks.push({
+        id: row.id,
+        kind: 'hash_mismatch',
+        expected: recomputed,
+        actual: row.hash,
+        createdAt: row.created_at
+      });
+    } else {
+      verified += 1;
+    }
+
+    lastKnownHash = row.hash;
+    sawFirstHashedRow = true;
+  }
+
+  return {
+    total: rows.length,
+    verified,
+    skipped,
+    breaks
+  };
 }
 
 /**
