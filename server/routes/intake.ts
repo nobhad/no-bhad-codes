@@ -27,10 +27,14 @@ import { validateRequest, ValidationSchemas } from '../middleware/validation.js'
 import { authenticateToken } from '../middleware/auth.js';
 import { leadService } from '../services/lead-service.js';
 import { registerAsyncTaskHandler } from '../services/async-task-service.js';
+import { sendEmailWithDedupe } from '../services/email-dedupe.js';
 
 registerAsyncTaskHandler('intake.admin-notification', async (payload) => {
   const data = payload as { projectId: number; intakeData: IntakeFormData };
-  await sendNewIntakeNotification(data.intakeData, data.projectId);
+  await sendEmailWithDedupe(
+    `intake.admin-notification:${data.projectId}`,
+    () => sendNewIntakeNotification(data.intakeData, data.projectId)
+  );
 });
 
 registerAsyncTaskHandler('intake.lead-score', async (payload) => {
