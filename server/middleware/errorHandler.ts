@@ -8,6 +8,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../services/logger.js';
+import { isAppError } from '../utils/app-errors.js';
 
 interface ApiError extends Error {
   statusCode?: number;
@@ -86,6 +87,17 @@ export const errorHandler = (
   let statusCode = error.statusCode || 500;
   let message = error.message || 'Internal server error';
   let code = error.code || 'INTERNAL_ERROR';
+  let details: Record<string, unknown> | undefined;
+
+  // Typed AppError instances carry their own status + code — honor them
+  // before the legacy string-matching branches so they're not clobbered
+  // by a message that happens to contain "CHECK" or similar.
+  if (isAppError(error)) {
+    statusCode = error.statusCode;
+    code = error.code;
+    message = error.message;
+    details = error.details;
+  }
 
   // Use request logger if available, otherwise use global logger
   const requestLogger = req.logger || logger;
@@ -108,8 +120,11 @@ export const errorHandler = (
     userAgent: req.get('user-agent')
   });
 
-  // Handle specific error types
-  if (error.name === 'ValidationError') {
+  // Handle specific error types (skip the string-match branches if we
+  // already classified the error as an AppError above).
+  if (isAppError(error)) {
+    // already set above
+  } else if (error.name === 'ValidationError') {
     statusCode = 400;
     code = 'VALIDATION_ERROR';
   } else if (error.name === 'CastError') {
@@ -148,6 +163,7 @@ export const errorHandler = (
     error: message,
     code,
     timestamp: new Date().toISOString(),
+    ...(details ? { details } : {}),
     ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
   });
 };
