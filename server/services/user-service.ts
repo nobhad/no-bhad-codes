@@ -15,6 +15,11 @@
 
 import { getDatabase, type DatabaseRow } from '../database/init.js';
 import { getString, getNumber, getBoolean } from '../database/row-helpers.js';
+import { parseRow } from '../database/row-validator.js';
+import {
+  clientLockoutRowSchema,
+  systemSettingValueRowSchema
+} from '../database/row-schemas.js';
 
 // =====================================================
 // TYPES
@@ -451,10 +456,15 @@ class UserService {
       [options.lockThreshold, lockUntilIso, clientId]
     );
 
-    const row = await db.get<{ failed_login_attempts: number; locked_until: string | null }>(
+    const rawRow = await db.get(
       'SELECT failed_login_attempts, locked_until FROM clients WHERE id = ?',
       [clientId]
     );
+
+    const row = parseRow(clientLockoutRowSchema, rawRow, {
+      op: 'clients.lockout.readback',
+      meta: { clientId }
+    });
 
     return {
       attempts: row?.failed_login_attempts ?? 0,
@@ -720,10 +730,13 @@ class UserService {
                )`
       );
 
-      const row = await ctx.get<{ setting_value: string }>(
+      const rawRow = await ctx.get(
         'SELECT setting_value FROM system_settings WHERE setting_key = ?',
         ['admin.failed_login_attempts']
       );
+      const row = parseRow(systemSettingValueRowSchema, rawRow, {
+        op: 'system_settings.admin_failed_attempts.readback'
+      });
       const attempts = row ? parseInt(row.setting_value, 10) || 0 : 0;
 
       let lockedUntil: string | null = null;

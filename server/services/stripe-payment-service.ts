@@ -13,13 +13,14 @@
 import { getDatabase } from '../database/init.js';
 import { logger } from './logger.js';
 import { calculateAmountWithProcessingFee } from '../config/constants.js';
+import { parseRow } from '../database/row-validator.js';
+import { stripePaymentIntentLookupRowSchema } from '../database/row-schemas.js';
 import type {
   CreatePaymentIntentParams,
   PaymentIntentResult,
   ClientRow,
   PayableInvoiceRow,
-  PayableInstallmentRow,
-  StripePaymentIntentRow
+  PayableInstallmentRow
 } from './stripe-payment-types.js';
 
 // ============================================
@@ -235,10 +236,15 @@ async function createPaymentIntent(
 async function handlePaymentSuccess(stripeIntentId: string): Promise<void> {
   const db = getDatabase();
 
-  const record = (await db.get(
+  const rawRecord = await db.get(
     'SELECT id, client_id, invoice_id, installment_id, amount_cents FROM stripe_payment_intents WHERE stripe_intent_id = ?',
     [stripeIntentId]
-  )) as StripePaymentIntentRow | undefined;
+  );
+
+  const record = parseRow(stripePaymentIntentLookupRowSchema, rawRecord, {
+    op: 'stripe_payment_intents.lookup',
+    meta: { stripeIntentId }
+  });
 
   if (!record) {
     logger.warn('PaymentIntent not found in local DB', {
