@@ -701,20 +701,25 @@ export class PageTransitionModule extends BaseModule {
     if (!targetPageId) return;
 
     this.wheelCooldownUntil = performance.now() + PAGE_ANIMATION.DURATION * 1000 + WHEEL_COOLDOWN_MS;
-    void this.transitionTo(targetPageId);
+    // Wheel/keyboard input passes mode='camera' so the paw exit animation
+    // never plays — only nav-menu link clicks trigger the paw.
+    void this.transitionTo(targetPageId, 'camera');
   }
 
   /**
-   * Transition to a page. Branches on whether the from/to pages are part of
-   * the scroll-map (intro/hero/about/projects/contact) or off-map (project-
-   * detail, portal-login).
+   * Transition to a page.
    *
-   * - map → map: pure camera tween (no blur, no hide). Paw still plays on
-   *   intro exits (Phase D will refine this to first-load-only).
-   * - off-map involved: existing blur model + show/hide of .site-map.
+   * `mode` controls the navigation feel and is the ONLY thing that gates
+   * the paw exit animation:
+   * - 'blur' (default — used by nav menu, hash change, programmatic
+   *   navigateTo): paw exit plays on intro exit, blur fades for everything
+   *   else. This matches the pre-scroll-map navigation feel.
+   * - 'camera' (used only by the wheel + keyboard scroll-map handlers):
+   *   pure camera tween. NEVER plays the paw — scrolling around the map
+   *   should feel like camera panning, not a slow morph animation.
    */
-  async transitionTo(pageId: string): Promise<void> {
-    this.log('[PageTransitionModule] transitionTo called:', pageId);
+  async transitionTo(pageId: string, mode: 'blur' | 'camera' = 'blur'): Promise<void> {
+    this.log('[PageTransitionModule] transitionTo called:', pageId, 'mode:', mode);
 
     if (pageId === this.currentPageId || this.isTransitioning) {
       this.log('[PageTransitionModule] transitionTo blocked - same page or already transitioning');
@@ -741,20 +746,14 @@ export class PageTransitionModule extends BaseModule {
       const toIsMap = this.isMapPage(pageId);
       const fromIsIntro = this.currentPageId === 'intro';
 
-      if (fromIsMap && toIsMap && this.siteMap) {
+      if (mode === 'camera' && fromIsMap && toIsMap && this.siteMap) {
         // ============================================
-        // MAP → MAP — pure camera tween
+        // MAP → MAP, CAMERA MODE (wheel/keyboard) — no paw, no blur
         // ============================================
-        // Intro exits get the paw ONLY on the first time per session
-        // (Phase D handoff). Subsequent intro exits camera-tween directly.
-        if (fromIsIntro && !this.hasPawHandoffOccurred) {
-          await this.playIntroExitAnimation();
-          this.hasPawHandoffOccurred = true;
-        }
         // When camera returns to intro from another map tile, the previous
-        // paw exit left the card translated off-screen. Snap it back to
-        // visible state BEFORE the camera tween starts so the card is
-        // already in place when the intro tile slides into view.
+        // paw exit (if any) may have left the card translated off-screen.
+        // Snap it back to visible state BEFORE the camera tween starts so
+        // the card is already in place when the intro tile slides into view.
         const toIsIntro = pageId === 'intro';
         if (toIsIntro && !fromIsIntro) {
           this.restoreIntroCardState();
@@ -762,11 +761,11 @@ export class PageTransitionModule extends BaseModule {
         await this.moveCamera(MAP_TILES[pageId as keyof typeof MAP_TILES], true);
       } else {
         // ============================================
-        // OFF-MAP INVOLVED — blur model + site-map show/hide
+        // BLUR MODE (nav menu / hash / link click) — original-feel transitions
         // ============================================
 
-        // Exit current page: paw if leaving intro for the first time this
-        // session, blur otherwise.
+        // Exit current page: paw on intro exit (first time per session,
+        // gated by Phase D handoff), blur otherwise.
         if (fromIsIntro && !this.hasPawHandoffOccurred) {
           await this.playIntroExitAnimation();
           this.hasPawHandoffOccurred = true;
