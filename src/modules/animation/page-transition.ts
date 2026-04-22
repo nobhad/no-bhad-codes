@@ -970,9 +970,14 @@ export class PageTransitionModule extends BaseModule {
         direction = 'up';
       }
     } else {
-      // Horizontal intent — tiles don't usually scroll horizontally, so we
-      // navigate immediately without an internal-scroll edge check.
-      direction = dx > 0 ? 'right' : 'left';
+      // Horizontal intent — match finger direction, not scroll-position
+      // direction. On macOS with natural scroll on (default), swiping
+      // two fingers RIGHT produces deltaX < 0 because the OS reports it
+      // as a "scroll left" signal. Users think in finger/gesture terms
+      // ("swipe right to go right"), so we invert: deltaX < 0 → 'right',
+      // deltaX > 0 → 'left'. Matches the touch handler convention so
+      // wheel and swipe both feel the same.
+      direction = dx < 0 ? 'right' : 'left';
     }
 
     this.tryNavigateDirection(direction);
@@ -1277,19 +1282,19 @@ export class PageTransitionModule extends BaseModule {
     const currentIndex = currentSlug ? slugs.indexOf(currentSlug) : -1;
     if (currentIndex === -1) return null;
 
-    // Infinite horizontal carousel — both ends wrap within the project
-    // list so the user can scroll left or right forever from the projects
-    // tile without ever dead-ending. Vertical scroll (up/down) is the
-    // way out: native scroll on project-detail handles tall content,
-    // and the compass / menu offer explicit escape hatches.
-    //   right past last  → first project  (wrap forward)
-    //   left from first  → last project   (wrap backward)
+    // Infinite horizontal loop INCLUDING the projects tile as a stop in
+    // the chain. The full forward gallery ring is:
+    //   projects → detail[0] → detail[1] → ... → detail[N-1] → projects → ...
+    // Boundary exits return to the projects (TV) tile, and the existing
+    // projects.left/right entries (last-slug / first-slug) feed back into
+    // the carousel. So scrolling right from any detail eventually cycles
+    // through projects, then back into detail[0], forever.
     if (direction === 'left') {
-      const prev = currentIndex === 0 ? slugs.length - 1 : currentIndex - 1;
-      return `#/projects/${slugs[prev]}`;
+      if (currentIndex === 0) return '#/projects';
+      return `#/projects/${slugs[currentIndex - 1]}`;
     }
-    const next = currentIndex >= slugs.length - 1 ? 0 : currentIndex + 1;
-    return `#/projects/${slugs[next]}`;
+    if (currentIndex >= slugs.length - 1) return '#/projects';
+    return `#/projects/${slugs[currentIndex + 1]}`;
   }
 
   /**
