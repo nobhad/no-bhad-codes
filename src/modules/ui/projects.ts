@@ -307,7 +307,7 @@ export class ProjectsModule extends BaseModule {
             <div class="crt-tv__scanlines"></div>
             <div class="crt-tv__glare"></div>
           </div>
-          <img class="crt-tv__frame" src="/images/crt-tv.png" alt="CRT Television" />
+          <img class="crt-tv__frame" src="/images/crt-tv.webp" alt="CRT Television" />
         </div>
       </div>
     `;
