@@ -8,6 +8,7 @@ import { getDatabase } from '../database/init.js';
 import { WebhookConfig, WebhookDelivery, WebhookPayload } from '../models/webhook.js';
 import type { Database } from '../database/init.js';
 import { logger } from './logger.js';
+import { fetchWithTimeout } from '../utils/fetch-with-timeout.js';
 
 // ============================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -223,7 +224,7 @@ export class WebhookService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      const response = await fetch(webhook.url, {
+      const response = await fetchWithTimeout(webhook.url, { timeoutMs: 10000,
         method: webhook.method,
         headers,
         body: JSON.stringify(payload),

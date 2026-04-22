@@ -15,6 +15,7 @@ import { logger } from './logger.js';
 import { calculateAmountWithProcessingFee } from '../config/constants.js';
 import { parseRow } from '../database/row-validator.js';
 import { stripePaymentIntentLookupRowSchema } from '../database/row-schemas.js';
+import { fetchWithTimeout } from '../utils/fetch-with-timeout.js';
 import type {
   CreatePaymentIntentParams,
   PaymentIntentResult,
@@ -48,14 +49,18 @@ async function stripePost(
   params: URLSearchParams
 ): Promise<Record<string, unknown>> {
   const key = requireStripeKey();
-  const response = await fetch(`${STRIPE_API_BASE}${endpoint}`, {
+  const response = await fetchWithTimeout(`${STRIPE_API_BASE}${endpoint}`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${key}`,
       'Content-Type': 'application/x-www-form-urlencoded',
       'Stripe-Version': STRIPE_API_VERSION
     },
-    body: params.toString()
+    body: params.toString(),
+    // Stripe's published SLA p99 is under a second; 10s is enough
+    // headroom for transient slowness without letting a stalled
+    // connection pin a request handler indefinitely.
+    timeoutMs: 10_000
   });
 
   const data = (await response.json()) as Record<string, unknown>;

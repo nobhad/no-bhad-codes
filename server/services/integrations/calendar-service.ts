@@ -17,6 +17,7 @@
 import { getDatabase } from '../../database/init.js';
 import { logger } from '../logger.js';
 import { BUSINESS_INFO } from '../../config/business.js';
+import { fetchWithTimeout } from '../../utils/fetch-with-timeout.js';
 
 // ============================================
 // Rate Limit & Retry Constants
@@ -271,7 +272,7 @@ export async function exchangeCodeForTokens(code: string): Promise<GoogleCalenda
     throw new Error('Google Calendar is not configured');
   }
 
-  const response = await fetch('https://oauth2.googleapis.com/token', {
+  const response = await fetchWithTimeout('https://oauth2.googleapis.com/token', { timeoutMs: 10000,
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -313,7 +314,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<GoogleCa
     throw new Error('Google Calendar is not configured');
   }
 
-  const response = await fetch('https://oauth2.googleapis.com/token', {
+  const response = await fetchWithTimeout('https://oauth2.googleapis.com/token', { timeoutMs: 10000,
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -354,9 +355,10 @@ export async function createGoogleCalendarEvent(
   event: CalendarEvent
 ): Promise<CalendarEvent> {
   const response = await executeWithRetry(() =>
-    fetch(
+    fetchWithTimeout(
       `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events`,
       {
+        timeoutMs: 10000,
         method: 'POST',
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -385,9 +387,10 @@ export async function updateGoogleCalendarEvent(
   event: Partial<CalendarEvent>
 ): Promise<CalendarEvent> {
   const response = await executeWithRetry(() =>
-    fetch(
+    fetchWithTimeout(
       `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events/${eventId}`,
       {
+        timeoutMs: 10000,
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -415,9 +418,10 @@ export async function deleteGoogleCalendarEvent(
   eventId: string
 ): Promise<void> {
   const response = await executeWithRetry(() =>
-    fetch(
+    fetchWithTimeout(
       `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events/${eventId}`,
       {
+        timeoutMs: 10000,
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${accessToken}`

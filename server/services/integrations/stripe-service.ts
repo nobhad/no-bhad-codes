@@ -17,6 +17,7 @@ import crypto from 'crypto';
 import { getDatabase } from '../../database/init.js';
 import { logger } from '../logger.js';
 import { getBaseUrl } from '../../config/environment.js';
+import { fetchWithTimeout } from '../../utils/fetch-with-timeout.js';
 import {
   STRIPE_IDEMPOTENCY_TTL_MS,
   STRIPE_IDEMPOTENCY_CLEANUP_INTERVAL_MS
@@ -291,7 +292,7 @@ export async function createPaymentLink(config: PaymentLinkConfig): Promise<Paym
       }
     }
 
-    const response = await fetch(`${STRIPE_API_BASE}/checkout/sessions`, {
+    const response = await fetchWithTimeout(`${STRIPE_API_BASE}/checkout/sessions`, { timeoutMs: 10000,
       method: 'POST',
       headers: {
         Authorization: `Bearer ${STRIPE_SECRET_KEY}`,

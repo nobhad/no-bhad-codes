@@ -14,6 +14,7 @@
 import { getDatabase } from '../database/init.js';
 import { logger } from './logger.js';
 import { calculateAmountWithProcessingFee } from '../config/constants.js';
+import { fetchWithTimeout } from '../utils/fetch-with-timeout.js';
 import type {
   SavedPaymentMethod,
   SavedPaymentMethodRow,
@@ -64,7 +65,7 @@ async function stripeRequest(
     ? `${STRIPE_API_BASE}${endpoint}?${params.toString()}`
     : `${STRIPE_API_BASE}${endpoint}`;
 
-  const response = await fetch(url, options);
+  const response = await fetchWithTimeout(url, { ...options, timeoutMs: 10_000 });
   const data = (await response.json()) as Record<string, unknown>;
 
   if (!response.ok) {
