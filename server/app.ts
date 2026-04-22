@@ -239,8 +239,15 @@ app.use(
 // Audit logging middleware - logs all POST, PUT, DELETE operations
 app.use(auditMiddleware());
 
-// Static file serving
-app.use('/uploads', express.static(resolve(__dirname, '../uploads')));
+// Uploaded files are only served through the authenticated ID-based
+// route at /api/uploads/file/:fileId, which enforces ownership checks.
+// Anyone hitting /uploads/* directly gets a 404 — never a file.
+app.use('/uploads', (_req, res) => {
+  res.status(404).json({
+    success: false,
+    error: 'Not found'
+  });
+});
 
 // Root endpoint
 app.get('/', (req, res) => {
