@@ -247,6 +247,38 @@ export class PageTransitionModule extends BaseModule {
   }
 
   /**
+   * Snap the intro tile's card + nav back to their visible center state
+   * without replaying the paw entry animation. Used when the camera tweens
+   * back to the intro tile from another map tile after a previous paw exit
+   * left the card translated off-screen.
+   */
+  private restoreIntroCardState(): void {
+    // Reset the morphing SVG card back to center (exit animation translated it
+    // off-screen with the paw at x: -1500, y: -1200).
+    const svgCard = document.getElementById('svg-business-card');
+    if (svgCard) {
+      gsap.set(svgCard, { x: 0, y: 0, opacity: 1, visibility: 'visible' });
+    }
+
+    // The host business-card element shouldn't have been transformed, but
+    // make sure it's visible in case any earlier code stashed it.
+    const businessCard = document.getElementById('business-card');
+    if (businessCard) {
+      gsap.set(businessCard, { opacity: 1, visibility: 'visible' });
+    }
+
+    // Restore intro-nav visibility (exit animation faded the nav links out).
+    const introNav = document.querySelector('.intro-nav') as HTMLElement | null;
+    if (introNav) {
+      gsap.set(introNav, { opacity: 1, visibility: 'visible', display: 'flex' });
+      const navLinks = introNav.querySelectorAll('.intro-nav-link');
+      if (navLinks.length > 0) {
+        gsap.set(navLinks, { opacity: 1 });
+      }
+    }
+  }
+
+  /**
    * Hide only the off-map pages (project-detail, portal-login). Map tiles
    * stay rendered inside .site-map; the camera transform controls which
    * one is in view.
@@ -535,6 +567,14 @@ export class PageTransitionModule extends BaseModule {
         // Intro exits still play paw (Phase D will gate to first-load only).
         if (fromIsIntro) {
           await this.playIntroExitAnimation();
+        }
+        // When camera returns to intro from another map tile, the previous
+        // paw exit left the card translated off-screen. Snap it back to
+        // visible state BEFORE the camera tween starts so the card is
+        // already in place when the intro tile slides into view.
+        const toIsIntro = pageId === 'intro';
+        if (toIsIntro && !fromIsIntro) {
+          this.restoreIntroCardState();
         }
         await this.moveCamera(MAP_TILES[pageId as keyof typeof MAP_TILES], true);
       } else {
