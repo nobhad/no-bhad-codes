@@ -653,7 +653,7 @@ export class ContactAnimationModule extends BaseModule {
     }) as EventListener);
 
     this.on('PageTransitionModule:page-changed', ((event: CustomEvent) => {
-      const { to, from } = event.detail || {};
+      const { to, from, mode } = event.detail || {};
 
       if (from === 'contact') {
         this.playOutAnimation();
@@ -661,8 +661,17 @@ export class ContactAnimationModule extends BaseModule {
       }
 
       if (to === 'contact') {
-        this.resetAnimatedElements();
-        this.blurAnimationComplete = false;
+        if (mode === 'blur') {
+          // Direct navigation — reset to start so the play animation has
+          // somewhere to grow from.
+          this.resetAnimatedElements();
+          this.blurAnimationComplete = false;
+        } else {
+          // Camera/slide (map scroll) — user wants the form full-size with
+          // no animation. Skip the timeline straight to its end state.
+          this.skipToEndState();
+          this.blurAnimationComplete = true;
+        }
       }
     }) as EventListener);
 
@@ -696,6 +705,25 @@ export class ContactAnimationModule extends BaseModule {
     requestAnimationFrame(() => {
       this.timeline?.restart();
     });
+  }
+
+  /**
+   * Snap the form straight to its end state (full size, all fields visible).
+   * Used when the user arrives at contact via map scroll — they don't want
+   * the cascading grow-in animation; they just want a usable form.
+   */
+  private skipToEndState(): void {
+    if (!this.container || !this.timeline) return;
+
+    const contactContent = this.container.querySelector('.contact-content');
+    if (contactContent) {
+      gsap.set(contactContent, { opacity: 1 });
+    }
+
+    // Jump the timeline to its very end so all the .to() tweens have already
+    // landed (heading visible, fields full-width, labels shown, etc).
+    this.timeline.progress(1);
+    this.timeline.pause();
   }
 
   /**
