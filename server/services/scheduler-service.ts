@@ -222,6 +222,7 @@ export class SchedulerService {
   private asyncTaskDrainJob: SimpleTask | null = null;
   private asyncTaskPurgeJob: SimpleTask | null = null;
   private idempotencyPurgeJob: SimpleTask | null = null;
+  private dbBackupJob: SimpleTask | null = null;
   private isRunning = false;
 
   private constructor(config: Partial<SchedulerConfig> = {}) {
@@ -318,6 +319,11 @@ export class SchedulerService {
     // the async-task purge so both TTLs run in the same daily window.
     this.scheduleIdempotencyPurge();
 
+    // Daily SQLite snapshot via the online backup API. Runs in a
+    // quieter window than the purge jobs to avoid contending on the
+    // filesystem.
+    this.scheduleDbBackup();
+
     // Start all scheduled jobs
     const jobs = [
       this.reminderJob,
@@ -338,7 +344,8 @@ export class SchedulerService {
       this.autoPayRetryJob,
       this.asyncTaskDrainJob,
       this.asyncTaskPurgeJob,
-      this.idempotencyPurgeJob
+      this.idempotencyPurgeJob,
+      this.dbBackupJob
     ].filter(Boolean);
 
     for (const job of jobs) {
@@ -448,6 +455,11 @@ export class SchedulerService {
     if (this.idempotencyPurgeJob) {
       this.idempotencyPurgeJob.stop();
       this.idempotencyPurgeJob = null;
+    }
+
+    if (this.dbBackupJob) {
+      this.dbBackupJob.stop();
+      this.dbBackupJob = null;
     }
 
     this.isRunning = false;
@@ -923,6 +935,35 @@ export class SchedulerService {
       } catch (error) {
         logger.error('[Scheduler] Error purging idempotency_keys:', {
           error: error instanceof Error ? error : undefined
+        });
+      }
+    });
+  }
+
+  /**
+   * Daily SQLite snapshot via the online backup API at 3:30 AM. Quiet
+   * hour, before the purge jobs at 4:00/4:05 so they operate on a
+   * snapshot-clean state. Retention is handled inside runDailyBackup.
+   */
+  private scheduleDbBackup(): void {
+    const DB_BACKUP_CRON = '30 3 * * *'; // Daily at 3:30 AM
+    logger.info(`[Scheduler] Scheduling DB backup: ${DB_BACKUP_CRON}`);
+
+    this.dbBackupJob = createSimpleTask(DB_BACKUP_CRON, async () => {
+      try {
+        const { runDailyBackup } = await import('./backup-service.js');
+        const result = await runDailyBackup();
+        logger.info(
+          `[Scheduler] DB backup complete: ${result.file} (${result.bytes} bytes, ${result.durationMs}ms, pruned ${result.prunedCount})`,
+          {
+            category: 'BACKUP',
+            metadata: { ...result }
+          }
+        );
+      } catch (error) {
+        logger.error('[Scheduler] DB backup failed:', {
+          error: error instanceof Error ? error : undefined,
+          category: 'BACKUP'
         });
       }
     });

@@ -41,6 +41,7 @@ import asyncTasksRouter from './async-tasks.js';
 import auditChainRouter from './audit-chain.js';
 import circuitBreakersRouter from './circuit-breakers.js';
 import schemaDriftRouter from './schema-drift.js';
+import backupsRouter from './backups.js';
 
 const router = express.Router();
 router.use(dashboardRouter);
@@ -76,5 +77,6 @@ router.use(asyncTasksRouter);
 router.use(auditChainRouter);
 router.use(circuitBreakersRouter);
 router.use(schemaDriftRouter);
+router.use(backupsRouter);
 export { router as adminRouter };
 export default router;
