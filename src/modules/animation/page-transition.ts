@@ -777,10 +777,28 @@ export class PageTransitionModule extends BaseModule {
         this.hideOffMapPages();
 
         if (toIsMap && this.siteMap) {
-          // Going TO a map tile from off-map: show .site-map and snap camera
+          // Going TO a map tile (from off-map OR from another map tile via
+          // blur). Reset all map tiles' inline opacity/filter/visibility so
+          // any tile that was previously animateOut'd to opacity:0 doesn't
+          // reappear invisible. Then set the target invisible specifically
+          // so the camera snap doesn't flash it at full opacity, snap the
+          // camera, and animate the target back in for a smooth blur fade.
+          this.pages.forEach((page) => {
+            if (page.element && this.isMapPage(page.id)) {
+              gsap.set(page.element, { clearProps: 'opacity,filter,visibility' });
+            }
+          });
+
+          gsap.set(targetPage.element, {
+            opacity: 0,
+            visibility: 'hidden',
+            filter: `blur(${PAGE_ANIMATION.BLUR_AMOUNT}px)`
+          });
+
           this.setSiteMapVisibility(true);
           this.moveCamera(MAP_TILES[pageId as keyof typeof MAP_TILES], false);
-          // Map tile is already rendered; no animateIn needed.
+
+          await this.animateIn(targetPage);
         } else {
           // Going to off-map: hide .site-map so it doesn't bleed through
           this.setSiteMapVisibility(false);
