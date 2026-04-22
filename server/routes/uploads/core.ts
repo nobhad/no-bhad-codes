@@ -30,6 +30,16 @@ import {
 
 const router = Router();
 
+/**
+ * Build the authenticated download URL for a stored file. Returns null
+ * if we don't have a DB id yet (caller should treat that as "not
+ * downloadable via API" rather than falling back to the now-removed
+ * public /uploads/* route).
+ */
+function buildFileDownloadUrl(fileId: number | null | undefined): string | null {
+  return fileId && fileId > 0 ? `/api/uploads/file/${fileId}` : null;
+}
+
 // ============================================
 // Upload Endpoints
 // ============================================
@@ -43,19 +53,51 @@ router.post(
       return errorResponse(res, 'No file uploaded', 400, ErrorCodes.NO_FILE);
     }
 
-    const fileInfo = {
-      id: Date.now().toString(),
-      filename: req.file.filename,
-      originalName: req.file.originalname,
-      mimetype: req.file.mimetype,
-      size: req.file.size,
-      path: req.file.path,
-      url: `/uploads/${req.file.filename}`,
-      uploadedBy: req.user?.id,
-      uploadedAt: new Date().toISOString()
-    };
+    const subDir = req.file.destination.includes('projects')
+      ? 'projects'
+      : req.file.destination.includes('avatars')
+        ? 'avatars'
+        : req.file.destination.includes('invoices')
+          ? 'invoices'
+          : req.file.destination.includes('messages')
+            ? 'messages'
+            : 'general';
+    const filePath = `uploads/${subDir}/${req.file.filename}`;
 
-    sendCreated(res, { file: fileInfo }, 'File uploaded successfully');
+    let fileId: number | undefined;
+    try {
+      fileId = await uploadService.insertFileRecord({
+        projectId: null,
+        filename: req.file.filename,
+        originalFilename: req.file.originalname,
+        mimeType: req.file.mimetype,
+        fileSize: req.file.size,
+        filePath,
+        uploadedBy: req.user?.email || `${req.user?.type || 'unknown'}`
+      });
+    } catch (dbError) {
+      await logger.error('Failed to save file info to database:', {
+        error: dbError instanceof Error ? dbError : undefined,
+        category: 'UPLOAD'
+      });
+    }
+
+    sendCreated(
+      res,
+      {
+        file: {
+          id: fileId ?? null,
+          filename: req.file.filename,
+          originalName: req.file.originalname,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          url: buildFileDownloadUrl(fileId),
+          uploadedBy: req.user?.id,
+          uploadedAt: new Date().toISOString()
+        }
+      },
+      'File uploaded successfully'
+    );
   })
 );
 
@@ -103,8 +145,7 @@ router.post(
         originalName: file.originalname,
         mimetype: file.mimetype,
         size: file.size,
-        path: file.path,
-        url: `/${filePath}`,
+        url: buildFileDownloadUrl(fileId),
         uploadedBy: req.user?.id,
         uploadedAt: new Date().toISOString()
       });
@@ -131,20 +172,31 @@ router.post(
       return errorResponse(res, 'Avatar must be an image file', 400, ErrorCodes.INVALID_AVATAR_TYPE);
     }
 
-    const avatarInfo = {
-      id: Date.now().toString(),
-      filename: req.file.filename,
-      originalName: req.file.originalname,
-      mimetype: req.file.mimetype,
-      size: req.file.size,
-      url: `/uploads/avatars/${req.file.filename}`,
-      uploadedBy: req.user?.id,
-      uploadedAt: new Date().toISOString()
-    };
+    const filePath = `uploads/avatars/${req.file.filename}`;
 
-    if (req.user?.id) {
+    let fileId: number | undefined;
+    try {
+      fileId = await uploadService.insertFileRecord({
+        projectId: null,
+        filename: req.file.filename,
+        originalFilename: req.file.originalname,
+        mimeType: req.file.mimetype,
+        fileSize: req.file.size,
+        filePath,
+        uploadedBy: req.user?.email || `${req.user?.type || 'unknown'}`
+      });
+    } catch (dbError) {
+      await logger.error('Failed to save avatar file record:', {
+        error: dbError instanceof Error ? dbError : undefined,
+        category: 'UPLOAD'
+      });
+    }
+
+    const avatarUrl = buildFileDownloadUrl(fileId);
+
+    if (req.user?.id && avatarUrl) {
       try {
-        await uploadService.updateClientAvatar(req.user.id, avatarInfo.url);
+        await uploadService.updateClientAvatar(req.user.id, avatarUrl);
       } catch (dbError) {
         await logger.error('Failed to update avatar in database:', {
           error: dbError instanceof Error ? dbError : undefined,
@@ -153,7 +205,22 @@ router.post(
       }
     }
 
-    sendCreated(res, { avatar: avatarInfo }, 'Avatar uploaded successfully');
+    sendCreated(
+      res,
+      {
+        avatar: {
+          id: fileId ?? null,
+          filename: req.file.filename,
+          originalName: req.file.originalname,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          url: avatarUrl,
+          uploadedBy: req.user?.id,
+          uploadedAt: new Date().toISOString()
+        }
+      },
+      'Avatar uploaded successfully'
+    );
   })
 );
 
@@ -172,17 +239,9 @@ router.post(
       return errorResponse(res, 'No project file uploaded', 400, ErrorCodes.NO_PROJECT_FILE);
     }
 
-    const projectFile = {
-      id: Date.now().toString(),
-      projectId,
-      filename: req.file.filename,
-      originalName: req.file.originalname,
-      mimetype: req.file.mimetype,
-      size: req.file.size,
-      url: `/uploads/projects/${req.file.filename}`,
-      uploadedBy: req.user?.id,
-      uploadedAt: new Date().toISOString()
-    };
+    // Store the filesystem-relative path (no leading slash) so the
+    // authenticated resolver in /api/uploads/file/:id can find it.
+    const filePath = `uploads/projects/${req.file.filename}`;
 
     let fileId: number | undefined;
     try {
@@ -192,7 +251,7 @@ router.post(
         originalFilename: req.file.originalname,
         mimeType: req.file.mimetype,
         fileSize: req.file.size,
-        filePath: projectFile.url,
+        filePath,
         uploadedBy: req.user?.email || `${req.user?.type || 'unknown'}`
       });
     } catch (dbError) {
@@ -204,7 +263,19 @@ router.post(
 
     sendCreated(
       res,
-      { file: { ...projectFile, id: fileId ?? projectFile.id } },
+      {
+        file: {
+          id: fileId ?? null,
+          projectId,
+          filename: req.file.filename,
+          originalName: req.file.originalname,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          url: buildFileDownloadUrl(fileId),
+          uploadedBy: req.user?.id,
+          uploadedAt: new Date().toISOString()
+        }
+      },
       'Project file uploaded successfully'
     );
   })
@@ -235,7 +306,7 @@ router.get(
           originalName: file.original_filename,
           mimetype: file.mime_type,
           size: file.file_size,
-          url: file.file_path,
+          url: buildFileDownloadUrl(file.id as number),
           uploadedBy: file.uploaded_by,
           uploadedAt: file.created_at,
           description: file.description,
@@ -288,7 +359,7 @@ router.get(
           originalName: file.original_filename,
           mimetype: file.mime_type,
           size: file.file_size,
-          url: file.file_path,
+          url: buildFileDownloadUrl(file.id as number),
           uploadedBy: file.uploaded_by,
           uploadedAt: file.created_at,
           fileType: file.file_type,
