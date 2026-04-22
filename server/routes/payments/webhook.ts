@@ -11,7 +11,11 @@
 import { Router, Response } from 'express';
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
-import { verifyWebhookSignature } from '../../services/integrations/stripe-service.js';
+import {
+  verifyWebhookSignature,
+  claimStripeEvent,
+  releaseStripeEventClaim
+} from '../../services/integrations/stripe-service.js';
 import { stripePaymentService } from '../../services/stripe-payment-service.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
@@ -44,30 +48,48 @@ router.post(
     }
 
     const event = req.body instanceof Buffer ? JSON.parse(rawBody) : req.body;
+    const eventId = (event as { id?: string }).id;
     const eventType = (event as { type?: string }).type;
     const dataObject = (event as { data?: { object?: Record<string, unknown> } }).data?.object;
 
-    if (!eventType || !dataObject) {
+    if (!eventId || !eventType || !dataObject) {
       errorResponse(res, 'Invalid webhook event structure', 400, ErrorCodes.VALIDATION_ERROR);
+      return;
+    }
+
+    // Stripe retries on non-2xx responses and can deliver duplicates even
+    // on success. Skip events we've already handled, but return 200 so
+    // Stripe stops retrying.
+    const fresh = await claimStripeEvent(eventId);
+    if (!fresh) {
+      logger.info(`[Webhook] Stripe event ${eventId} already processed, skipping`);
+      sendSuccess(res, { received: true, alreadyProcessed: true });
       return;
     }
 
     const intentId = dataObject.id as string;
 
-    switch (eventType) {
-    case 'payment_intent.succeeded':
-      await stripePaymentService.handlePaymentSuccess(intentId);
-      break;
+    try {
+      switch (eventType) {
+      case 'payment_intent.succeeded':
+        await stripePaymentService.handlePaymentSuccess(intentId);
+        break;
 
-    case 'payment_intent.payment_failed': {
-      const failureMessage =
-          (dataObject.last_payment_error as { message?: string } | undefined)?.message || 'Payment failed';
-      await stripePaymentService.handlePaymentFailure(intentId, failureMessage);
-      break;
-    }
+      case 'payment_intent.payment_failed': {
+        const failureMessage =
+            (dataObject.last_payment_error as { message?: string } | undefined)?.message || 'Payment failed';
+        await stripePaymentService.handlePaymentFailure(intentId, failureMessage);
+        break;
+      }
 
-    default:
-      logger.info(`Unhandled payment webhook event: ${eventType}`);
+      default:
+        logger.info(`Unhandled payment webhook event: ${eventType}`);
+      }
+    } catch (err) {
+      // Release the claim so Stripe's retry can reprocess the event
+      // instead of hitting the idempotency short-circuit next time.
+      await releaseStripeEventClaim(eventId);
+      throw err;
     }
 
     sendSuccess(res, { received: true });
