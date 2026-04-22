@@ -18,6 +18,8 @@ import { logger } from './logger.js';
 import { getBaseUrl, getAdminUrl, getPortalUrl } from '../config/environment.js';
 import { BUSINESS_INFO } from '../config/business.js';
 import { EMAIL_COLORS, EMAIL_TYPOGRAPHY } from '../config/email-styles.js';
+import { runWithRequestContext } from '../observability/request-context.js';
+import crypto from 'node:crypto';
 
 /**
  * Lightweight cron scheduler using setTimeout instead of node-cron.
@@ -90,13 +92,29 @@ function createSimpleTask(expression: string, callback: () => Promise<void>): Si
     const next = getNextRunTime(expression);
     const delay = next.getTime() - Date.now();
     timer = setTimeout(async () => {
-      try {
-        await callback();
-      } catch (error) {
-        logger.error('[Scheduler] Task execution error:', {
-          error: error instanceof Error ? error : undefined
-        });
-      }
+      // Every scheduler tick runs in its own ALS scope so logs emitted
+      // deep in the callback (DB errors, task failures, downstream
+      // service warnings) are attributable to a specific tick — grep
+      // for `requestId=sched-...` in the log stream to replay one run.
+      const schedulerRunId = `sched-${crypto.randomUUID()}`;
+      await runWithRequestContext(
+        {
+          requestId: schedulerRunId,
+          method: 'SCHEDULER',
+          path: expression,
+          userId: null,
+          userType: 'system'
+        },
+        async () => {
+          try {
+            await callback();
+          } catch (error) {
+            logger.error('[Scheduler] Task execution error:', {
+              error: error instanceof Error ? error : undefined
+            });
+          }
+        }
+      );
       scheduleNext();
     }, delay);
   };
