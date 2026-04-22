@@ -142,7 +142,10 @@ li {
 .nav {
   z-index: var(--z-index-nav-menu); /* Higher than header (110) so nav menu appears above */
   width: 100%;
-  height: 100vh;
+  /* dvh tracks the visible viewport on mobile so iOS Safari's URL bar
+     collapse doesn't bump menu content out of bounds. */
+  height: 100dvh;
+  max-height: 100dvh;
   margin-left: auto;
   margin-right: auto;
   display: none;
@@ -195,11 +198,16 @@ li {
   justify-content: flex-start;
   align-items: flex-start;
   position: relative;
-  overflow: auto;
+  /* Internal scroll if content somehow exceeds the viewport — pairs
+     with the menu-heading-size clamp so it normally fits without
+     scrolling, but never gets cut off when it doesn't. */
+  overflow-y: auto;
+  overflow-x: hidden;
   padding-top: calc(3 * var(--menu-padding));
   padding-bottom: var(--menu-padding);
   width: var(--menu-width-desktop);
   height: 100%;
+  max-height: 100dvh;
   margin-left: auto;
   transform: translateX(120%);
 }

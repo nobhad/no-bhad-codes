@@ -180,8 +180,12 @@
 @media (--wide) {
   :root {
     --nav-base-gap: 0.9rem;
-    --menu-padding: 2.5rem;
-    --menu-heading-size: 5.5rem;
+    /* Cap heading size by both viewport height and a max so a tall
+       menu with 5+ items always fits between header and footer. The
+       min(...) returns the smallest of the rem max and a vh-based
+       value, so on short viewports the heading shrinks proportionally. */
+    --menu-padding: clamp(1rem, 2.5vh, 2.5rem);
+    --menu-heading-size: min(5.5rem, 11dvh);
 
     --menu-multiplier: 0.12;
     --list-multiplier: 0.09;
@@ -199,8 +203,8 @@
 @media (--ultra-wide) {
   :root {
     --nav-base-gap: 1.1rem;
-    --menu-padding: 3rem;
-    --menu-heading-size: 6rem;
+    --menu-padding: clamp(1rem, 3vh, 3rem);
+    --menu-heading-size: min(6rem, 12dvh);
 
     --menu-multiplier: 0.13;
     --list-multiplier: 0.1;
