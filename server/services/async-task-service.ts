@@ -11,16 +11,13 @@
 
 import { getDatabase, type TransactionContext } from '../database/init.js';
 import { logger } from './logger.js';
+import { parseRow } from '../database/row-validator.js';
+import {
+  asyncTaskClaimRowSchema,
+  type AsyncTaskClaimRow
+} from '../database/row-schemas.js';
 
 export type AsyncTaskHandler = (payload: unknown) => Promise<void>;
-
-interface AsyncTaskRow {
-  id: number;
-  task_type: string;
-  payload: string;
-  attempts: number;
-  max_attempts: number;
-}
 
 const DEFAULT_MAX_ATTEMPTS = 5;
 const BACKOFF_BASE_SECONDS = 30;
@@ -115,7 +112,7 @@ export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
   let dead = 0;
 
   for (let i = 0; i < batchSize; i++) {
-    const candidate = await db.get<AsyncTaskRow>(
+    const rawCandidate = await db.get(
       `SELECT id, task_type, payload, attempts, max_attempts
          FROM async_tasks
         WHERE status = 'pending'
@@ -124,7 +121,18 @@ export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
         LIMIT 1`
     );
 
-    if (!candidate) break;
+    if (!rawCandidate) break;
+
+    const candidate: AsyncTaskClaimRow | null = parseRow(
+      asyncTaskClaimRowSchema,
+      rawCandidate,
+      { op: 'async_tasks.claim' }
+    );
+    if (!candidate) {
+      // Validation already logged; skip this row and move on so a
+      // single drifted column can't stall the whole drain.
+      continue;
+    }
 
     const claim = await db.run(
       `UPDATE async_tasks
