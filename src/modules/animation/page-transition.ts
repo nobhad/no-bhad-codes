@@ -78,30 +78,29 @@ const CAMERA_POSITIONS: Record<MapTile, { x: number; y: number }> = {
 type Direction = 'up' | 'down' | 'left' | 'right';
 
 const NEIGHBORS: Record<string, Partial<Record<Direction, string>>> = {
-  // Vertical-only navigation from the landing page so horizontal scroll
-  // doesn't bounce the user away from the business card. The whole
-  // vertical map forms an infinite loop in both directions:
+  // New scroll model:
+  //   HORIZONTAL drives map navigation between about ↔ projects ↔ contact.
+  //   VERTICAL on projects cycles the CRT TV through the project list.
   //
-  //   forward (down):  intro → projects → contact → about → intro → ...
-  //   backward (up):   intro → about → contact → projects → intro → ...
+  // The horizontal chain is centered on projects:
+  //   about ←left/right→ projects ←left/right→ contact
   //
-  // No dead ends — scroll keeps going forever. about sits on the back
-  // side of the loop so up from intro still reaches it directly.
-  intro: { up: 'about', down: 'projects' },
-  about: { up: 'contact', down: 'intro' },
-  // contact closes the loop both ways: up returns to projects (lands on
-  // last channel — handled in tryNavigateDirection); down wraps forward
-  // to about, which then leads back to intro.
-  contact: { up: 'projects', down: 'about' },
+  // Intro sits above the chain — scroll DOWN from the landing page to
+  // enter projects. Going UP from projects returns to intro. Vertical
+  // from any other tile is no-op (native scroll for tall content).
+  intro: { down: 'projects' },
+  about: { right: 'projects' },
+  contact: { left: 'projects' },
   hero: { right: 'intro' },
-  // projects: left/right enter the project-detail carousel; up/down do NOT
-  // exit immediately — they channel-surf the CRT TV through the project
-  // list, and only navigate to contact / intro when the user scrolls
-  // PAST the boundaries (down past last, up past first). All of that is
-  // resolved dynamically in tryNavigateDirection.
-  projects: { left: 'project-detail', right: 'project-detail' }
+  // projects: horizontal exits left/right to about/contact (the new chain);
+  // vertical channel-surfs the TV (handled dynamically in
+  // tryNavigateDirection). Up past the first channel exits back to intro;
+  // down past the last channel wraps around within the TV list.
+  projects: { left: 'about', right: 'contact' }
   // project-detail navigation is handled dynamically in tryNavigateDirection
   // because the previous/next neighbor depends on which slug is active.
+  // Project-detail is entered by clicking a project card on the TV; it
+  // isn't on the wheel/swipe path from projects anymore.
 };
 
 /**
@@ -1060,13 +1059,20 @@ export class PageTransitionModule extends BaseModule {
 
     let direction: Direction | null = null;
 
+    // Universal convention across wheel/touch/keyboard: FINGER direction
+    // (or arrow key direction) maps to navigation direction. On macOS
+    // with natural scroll on (default), swiping right gives deltaX < 0
+    // and swiping down gives deltaY < 0, so we read the OPPOSITE of the
+    // delta sign for both axes. Mouse-wheel users (rare in 2026) and
+    // non-natural-scroll trackpad users get one inverted axis; touch
+    // and natural-scroll trackpad users — the majority — get intuitive
+    // gestures across every input device.
     if (absY >= absX) {
-      // Vertical intent — only navigate if the tile can't scroll further
-      // in that direction. Otherwise let the browser handle in-tile scroll.
-      // Uses >= 1 (not > 1) so a 1px scroll still counts as "scrolled",
-      // and treats non-scrollable tiles (scrollHeight === clientHeight)
-      // as "always at edge" so they navigate immediately.
-      if (dy > 0) {
+      // Vertical: swipe DOWN (dy < 0 on natural scroll) → 'down'.
+      // Edge guards check scroll position so tall content (like
+      // project-detail case studies) still scrolls natively until the
+      // user hits the boundary.
+      if (dy < 0) {
         const canScrollDown =
           currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >= 1;
         if (canScrollDown) return;
@@ -1076,13 +1082,7 @@ export class PageTransitionModule extends BaseModule {
         direction = 'up';
       }
     } else {
-      // Horizontal intent — match finger direction, not scroll-position
-      // direction. On macOS with natural scroll on (default), swiping
-      // two fingers RIGHT produces deltaX < 0 because the OS reports it
-      // as a "scroll left" signal. Users think in finger/gesture terms
-      // ("swipe right to go right"), so we invert: deltaX < 0 → 'right',
-      // deltaX > 0 → 'left'. Matches the touch handler convention so
-      // wheel and swipe both feel the same.
+      // Horizontal: swipe RIGHT (dx < 0 on natural scroll) → 'right'.
       direction = dx < 0 ? 'right' : 'left';
     }
 
@@ -1183,14 +1183,17 @@ export class PageTransitionModule extends BaseModule {
     const absY = Math.abs(dy);
     if (Math.max(absX, absY) < SWIPE_DISTANCE_MIN_PX) return;
 
-    // Convert to the same Direction as wheel/keyboard. Note the inversion:
-    // a finger swiping LEFT means the user wants to go RIGHT (content
-    // follows the finger off-screen), same as scroll convention.
+    // Finger direction = nav direction. Same convention as the wheel
+    // handler (which inverts deltaX so swipe-right always navigates
+    // right on natural-scroll trackpads). Aligning these means a touch
+    // laptop where BOTH events fire for one gesture won't produce
+    // conflicting directions — the user gets the same result regardless
+    // of which handler runs first.
     let direction: Direction;
     if (absX >= absY) {
-      direction = dx < 0 ? 'right' : 'left';
+      direction = dx > 0 ? 'right' : 'left';
     } else {
-      direction = dy < 0 ? 'down' : 'up';
+      direction = dy > 0 ? 'down' : 'up';
     }
 
     // Mirror handleWheel's edge-of-scroll guard for vertical swipes so
@@ -1217,40 +1220,24 @@ export class PageTransitionModule extends BaseModule {
    * after this one finishes.
    */
   private tryNavigateDirection(direction: Direction): void {
-    // Special case: on the projects tile, up/down channel-surfs the CRT TV
-    // preview through the project list. Only EXITS the tile when the user
-    // scrolls past the end (down at last channel → contact) or before the
-    // start (up at first channel → intro). Lets users browse the carousel
-    // without accidentally jumping off it. Left/right still enter the
-    // project-detail page directly.
+    // Projects tile: vertical channel-surfs the CRT TV. Wraps at both
+    // ends since horizontal scroll now handles map navigation
+    // (about/contact) — there's no need to exit the projects tile via
+    // vertical anymore. Users cycle the TV forever in either direction
+    // and use left/right to leave for about/contact.
     if (
       this.currentPageId === 'projects' &&
       (direction === 'up' || direction === 'down')
     ) {
       const total = this.getProjectSlugs().length;
+      if (total === 0) return;
       const delta = direction === 'down' ? 1 : -1;
-      const next = this.currentTvIndex + delta;
-
-      // Boundary: scroll past the end → exit the tile via the map.
-      // Direct transitionTo call (no hash change here), so we don't pin
-      // pendingSlideDirection — the direction is passed inline.
-      if (total === 0 || next < 0 || next >= total) {
-        const targetPageId = direction === 'down' ? 'contact' : 'intro';
-        this.wheelCooldownUntil =
-          performance.now() + PAGE_ANIMATION.DURATION * 1000 + WHEEL_COOLDOWN_MS;
-        // Reset TV index when leaving so the next entry starts fresh.
-        // Going DOWN to contact means we'll come back UP onto last channel;
-        // going UP to intro means we'll come back DOWN onto first channel.
-        this.currentTvIndex = direction === 'down' ? total - 1 : 0;
-        void this.transitionTo(targetPageId, 'slide', direction);
-        return;
-      }
-
-      // Within bounds: just change the channel.
-      this.currentTvIndex = next;
+      // Modulo wrap so cycling down past last lands on first, and
+      // cycling up before first lands on last. Always within bounds.
+      this.currentTvIndex = (this.currentTvIndex + delta + total) % total;
       document.dispatchEvent(
         new CustomEvent('projects:set-tv-channel', {
-          detail: { index: next, direction }
+          detail: { index: this.currentTvIndex, direction }
         })
       );
       this.wheelCooldownUntil = performance.now() + WHEEL_COOLDOWN_MS + 200;
