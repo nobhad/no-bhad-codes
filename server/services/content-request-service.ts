@@ -235,6 +235,21 @@ class ContentRequestService {
     return (rows as unknown as ContentItemRow[]).map(toContentItem);
   }
 
+  /**
+   * Fetch a single item by id. Used by the client submit endpoints
+   * to verify ownership (item.client_id === req.user.id) before
+   * accepting a submission — without this check, any authenticated
+   * client could submit content for any other client's item.
+   */
+  async getItem(itemId: number): Promise<ContentItem | null> {
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT ${ITEM_COLUMNS} ${ITEM_FROM} WHERE cri.id = ?`,
+      [itemId]
+    );
+    return row ? toContentItem(row as unknown as ContentItemRow) : null;
+  }
+
   async addItem(checklistId: number, projectId: number, clientId: number, data: CreateItemData): Promise<ContentItem> {
     const db = getDatabase();
     const result = await db.run(

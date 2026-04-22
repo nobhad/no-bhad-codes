@@ -93,6 +93,14 @@ router.post(
       return errorResponse(res, 'Not authenticated', 401, ErrorCodes.NOT_AUTHENTICATED);
     }
 
+    // Ownership gate — without this, any authenticated client can mark
+    // any other client's request as viewed. Fetch first, 404 on mismatch
+    // so existence isn't leaked.
+    const existing = await documentRequestService.getRequest(id);
+    if (!existing || existing.client_id !== req.user?.id) {
+      return errorResponse(res, 'Request not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+    }
+
     const request = await documentRequestService.markViewed(id, clientEmail);
     sendSuccess(res, { request });
   })
@@ -148,6 +156,14 @@ router.post(
 
     if (!uploaderEmail) {
       return errorResponse(res, 'Not authenticated', 401, ErrorCodes.NOT_AUTHENTICATED);
+    }
+
+    // Ownership gate — without this, any authenticated client could
+    // attach files to any other client's request. 404 (not 403) so
+    // existence of unrelated requests isn't leaked.
+    const existing = await documentRequestService.getRequest(id);
+    if (!existing || existing.client_id !== req.user?.id) {
+      return errorResponse(res, 'Request not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const request = await documentRequestService.uploadDocument(id, fileId, uploaderEmail);
