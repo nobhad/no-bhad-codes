@@ -18,6 +18,11 @@
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { notDeleted } from '../database/query-helpers.js';
+import {
+  NotFoundError,
+  AuthorizationError,
+  ValidationError
+} from '../utils/app-errors.js';
 import * as crypto from 'crypto';
 import { logger } from './logger.js';
 import { getBaseUrl } from '../config/environment.js';
@@ -301,14 +306,14 @@ class ProposalService {
         'Tier structure'
       );
       if (!tierResult.isValid) {
-        throw new Error(tierResult.error);
+        throw new ValidationError(tierResult.error ?? 'Invalid tier');
       }
     }
 
     if (data.defaultLineItems) {
       const lineItemsResult = validateLineItems(data.defaultLineItems, 'Default line items');
       if (!lineItemsResult.isValid) {
-        throw new Error(lineItemsResult.error);
+        throw new ValidationError(lineItemsResult.error ?? 'Invalid line items');
       }
     }
 
@@ -367,7 +372,7 @@ class ProposalService {
     const row = await db.get(`SELECT ${PROPOSAL_TEMPLATE_COLUMNS} FROM proposal_templates WHERE id = ?`, [templateId]);
 
     if (!row) {
-      throw new Error('Template not found');
+      throw new NotFoundError('template');
     }
 
     return toProposalTemplate(row as ProposalTemplateRow);
@@ -461,7 +466,7 @@ class ProposalService {
     // Get current proposal data
     const proposal = await db.get(`SELECT ${PROPOSAL_REQUEST_COLUMNS} FROM proposal_requests WHERE id = ?`, [proposalId]);
     if (!proposal) {
-      throw new Error('Proposal not found');
+      throw new NotFoundError('proposal');
     }
 
     // Get current features
@@ -535,7 +540,7 @@ class ProposalService {
     const row = await db.get(`SELECT ${PROPOSAL_VERSION_COLUMNS} FROM proposal_versions WHERE id = ?`, [versionId]);
 
     if (!row) {
-      throw new Error('Version not found');
+      throw new NotFoundError('proposal version');
     }
 
     return toProposalVersion(row as ProposalVersionRow);
@@ -549,7 +554,7 @@ class ProposalService {
 
     const version = await this.getVersion(versionId);
     if (version.proposalId !== proposalId) {
-      throw new Error('Version does not belong to this proposal');
+      throw new AuthorizationError('Version does not belong to this proposal');
     }
 
     await db.transaction(async (ctx) => {
@@ -711,7 +716,7 @@ class ProposalService {
     const row = await db.get(`SELECT ${SIGNATURE_REQUEST_COLUMNS} FROM signature_requests WHERE id = ?`, [requestId]);
 
     if (!row) {
-      throw new Error('Signature request not found');
+      throw new NotFoundError('signature request');
     }
 
     return toSignatureRequest(row as SignatureRequestRow);
@@ -974,7 +979,7 @@ class ProposalService {
     const row = await db.get(`SELECT ${PROPOSAL_SIGNATURE_COLUMNS} FROM proposal_signatures WHERE id = ?`, [signatureId]);
 
     if (!row) {
-      throw new Error('Signature not found');
+      throw new NotFoundError('signature');
     }
 
     return toProposalSignature(row as ProposalSignatureRow);
@@ -1049,7 +1054,7 @@ class ProposalService {
 
     const request = await this.getSignatureRequestByToken(token);
     if (!request) {
-      throw new Error('Signature request not found');
+      throw new NotFoundError('signature request');
     }
 
     await db.run(
@@ -1122,7 +1127,7 @@ class ProposalService {
     const row = await db.get(`SELECT ${PROPOSAL_COMMENT_COLUMNS} FROM proposal_comments WHERE id = ?`, [commentId]);
 
     if (!row) {
-      throw new Error('Comment not found');
+      throw new NotFoundError('comment');
     }
 
     return toProposalComment(row as ProposalCommentRow);
@@ -1284,7 +1289,7 @@ class ProposalService {
     const row = await db.get(`SELECT ${PROPOSAL_CUSTOM_ITEM_COLUMNS} FROM proposal_custom_items WHERE id = ?`, [itemId]);
 
     if (!row) {
-      throw new Error('Custom item not found');
+      throw new NotFoundError('custom item');
     }
 
     return toProposalCustomItem(row as ProposalCustomItemRow);
