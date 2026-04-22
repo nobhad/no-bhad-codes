@@ -639,6 +639,21 @@ export class ContactAnimationModule extends BaseModule {
       this.playFormAnimation();
     }) as EventListener);
 
+    // Pre-transition signal — fires BEFORE the slide/blur animation runs.
+    // For slide arrivals (map scroll), pre-set the form to its end state
+    // NOW so the contact tile slides in showing a fully-grown form
+    // instead of the initial small one that snaps to full size after.
+    // Without this the user sees the form "grow" on every scroll arrival
+    // even though we're not playing the entrance animation.
+    this.on('PageTransitionModule:page-entering', ((event: CustomEvent) => {
+      const { to, mode } = event.detail || {};
+      if (to !== 'contact') return;
+      if (mode === 'slide' && this.timeline) {
+        this.skipToEndState();
+        this.blurAnimationComplete = true;
+      }
+    }) as EventListener);
+
     // Single page-changed listener — handles enter, exit, and the safety-net
     // fallback all in one place. Mode-gated: any non-blur arrival
     // (camera/slide map scroll) skips the form-grow animation entirely;
