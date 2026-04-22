@@ -537,7 +537,14 @@ export class PageTransitionModule extends BaseModule {
     const hash = window.location.hash;
     const pageId = this.getPageIdFromHash(hash);
 
-    if (pageId && pageId !== this.currentPageId) {
+    // Special case: project-detail → project-detail (carousel between slugs)
+    // has the same pageId but different content, so the standard
+    // pageId !== currentPageId check would skip it and the carousel slide
+    // would never run. Detect by comparing slugs.
+    const isCarousel =
+      pageId === 'project-detail' && this.currentPageId === 'project-detail';
+
+    if (pageId && (pageId !== this.currentPageId || isCarousel)) {
       // Consume any pending slide direction set by the wheel/keyboard handler.
       // Slide mode pans without blur for the interactive-map feel.
       let slideDir = this.pendingSlideDirection;
@@ -960,7 +967,11 @@ export class PageTransitionModule extends BaseModule {
   ): Promise<void> {
     this.log('[PageTransitionModule] transitionTo called:', pageId, 'mode:', mode);
 
-    if (pageId === this.currentPageId || this.isTransitioning) {
+    // Allow project-detail → project-detail self-transitions (carousel between
+    // slugs). They share the pageId but the slug — and the rendered card —
+    // is different, so the slide IS meaningful.
+    const isCarousel = pageId === 'project-detail' && this.currentPageId === 'project-detail';
+    if ((pageId === this.currentPageId && !isCarousel) || this.isTransitioning) {
       this.log('[PageTransitionModule] transitionTo blocked - same page or already transitioning');
       // Drop any orphaned ghost so it doesn't sit on top of the page forever.
       this.removeDetailGhost();
