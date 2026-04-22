@@ -68,6 +68,35 @@ const CAMERA_POSITIONS: Record<MapTile, { x: number; y: number }> = {
   right: { x: -100, y: 0 }
 };
 
+/**
+ * Neighbor graph for wheel + keyboard navigation. v1 keeps it simple:
+ * the center tile (intro) connects to all four outer tiles, and outer
+ * tiles only connect back to center. Diagonal hops (e.g., about → projects)
+ * have to route through center via two inputs. Adding lateral neighbors
+ * later is purely additive.
+ */
+type Direction = 'up' | 'down' | 'left' | 'right';
+
+const NEIGHBORS: Record<string, Partial<Record<Direction, string>>> = {
+  intro: { up: 'about', down: 'contact', left: 'hero', right: 'projects' },
+  about: { down: 'intro' },
+  contact: { up: 'intro' },
+  hero: { right: 'intro' },
+  projects: { left: 'intro' }
+};
+
+/**
+ * Minimum |delta| (px) on a wheel event before it counts as a navigation
+ * intent. Filters out tiny accidental trackpad twitches.
+ */
+const WHEEL_DELTA_THRESHOLD = 12;
+
+/**
+ * Cooldown (ms) after a transition before the next wheel event can fire
+ * another navigation. Prevents trackpad flicks from chaining transitions.
+ */
+const WHEEL_COOLDOWN_MS = 250;
+
 export class PageTransitionModule extends BaseModule {
   private container: HTMLElement | null = null;
   private siteMap: HTMLElement | null = null;
@@ -95,6 +124,11 @@ export class PageTransitionModule extends BaseModule {
 
   // Bound handler for proper cleanup
   private boundHandleHashChange: (() => void) | null = null;
+  private boundHandleWheel: ((event: WheelEvent) => void) | null = null;
+  private boundHandleKeydown: ((event: KeyboardEvent) => void) | null = null;
+
+  /** Phase C: cooldown timestamp — wheel events before this are ignored. */
+  private wheelCooldownUntil: number = 0;
 
   constructor(options: PageTransitionOptions = {}) {
     super('PageTransitionModule', { debug: false, ...options });
@@ -418,6 +452,15 @@ export class PageTransitionModule extends BaseModule {
     if (this.debouncedHandleResize) {
       window.addEventListener('resize', this.debouncedHandleResize);
     }
+
+    // Phase C: wheel + keyboard input drive the camera between map tiles.
+    // Both handlers gate themselves on isMapPage(currentPageId) so off-map
+    // pages keep their normal scrolling behavior.
+    this.boundHandleWheel = this.handleWheel.bind(this);
+    window.addEventListener('wheel', this.boundHandleWheel, { passive: true });
+
+    this.boundHandleKeydown = this.handleKeydown.bind(this);
+    window.addEventListener('keydown', this.boundHandleKeydown);
   }
 
   /**
@@ -535,6 +578,105 @@ export class PageTransitionModule extends BaseModule {
         this.dispatchEvent('ready');
       }
     }, 2000);
+  }
+
+  /**
+   * Wheel handler — turns vertical/horizontal scrolling into camera moves
+   * when the user is at the edge of the active tile's internal scroll.
+   * Lets the browser handle in-tile scrolling normally otherwise.
+   */
+  private handleWheel(event: WheelEvent): void {
+    if (this.isMobile && !this.enableOnMobile) return;
+    if (this.isTransitioning) return;
+    if (performance.now() < this.wheelCooldownUntil) return;
+    if (!this.introComplete) return;
+    if (!this.isMapPage(this.currentPageId)) return;
+
+    const dx = event.deltaX;
+    const dy = event.deltaY;
+    const absX = Math.abs(dx);
+    const absY = Math.abs(dy);
+
+    if (Math.max(absX, absY) < WHEEL_DELTA_THRESHOLD) return;
+
+    const currentTile = this.pages.get(this.currentPageId)?.element;
+    if (!currentTile) return;
+
+    let direction: Direction | null = null;
+
+    if (absY >= absX) {
+      // Vertical intent — only navigate if the tile can't scroll further
+      // in that direction. Otherwise let the browser handle in-tile scroll.
+      if (dy > 0) {
+        const canScrollDown =
+          currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight > 1;
+        if (canScrollDown) return;
+        direction = 'down';
+      } else {
+        if (currentTile.scrollTop > 1) return;
+        direction = 'up';
+      }
+    } else {
+      // Horizontal intent — tiles don't usually scroll horizontally, so we
+      // navigate immediately without an internal-scroll edge check.
+      direction = dx > 0 ? 'right' : 'left';
+    }
+
+    this.tryNavigateDirection(direction);
+  }
+
+  /**
+   * Keyboard handler — arrow keys drive the camera. Skips when the user is
+   * typing in a form input.
+   */
+  private handleKeydown(event: KeyboardEvent): void {
+    if (this.isMobile && !this.enableOnMobile) return;
+    if (this.isTransitioning) return;
+    if (!this.introComplete) return;
+    if (!this.isMapPage(this.currentPageId)) return;
+
+    const target = event.target as HTMLElement | null;
+    if (target) {
+      const tag = target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target.isContentEditable) {
+        return;
+      }
+    }
+
+    let direction: Direction | null = null;
+    switch (event.key) {
+      case 'ArrowUp':
+        direction = 'up';
+        break;
+      case 'ArrowDown':
+        direction = 'down';
+        break;
+      case 'ArrowLeft':
+        direction = 'left';
+        break;
+      case 'ArrowRight':
+        direction = 'right';
+        break;
+      default:
+        return;
+    }
+
+    event.preventDefault();
+    this.tryNavigateDirection(direction);
+  }
+
+  /**
+   * Resolve a direction against the neighbor graph and start a transition
+   * if a neighbor exists in that direction. Sets the wheel cooldown so a
+   * trailing trackpad flick doesn't immediately fire another transition
+   * after this one finishes.
+   */
+  private tryNavigateDirection(direction: Direction): void {
+    const targetPageId = NEIGHBORS[this.currentPageId]?.[direction];
+    if (!targetPageId) return;
+
+    this.wheelCooldownUntil = performance.now() + PAGE_ANIMATION.DURATION * 1000 + WHEEL_COOLDOWN_MS;
+    void this.transitionTo(targetPageId);
   }
 
   /**
@@ -881,6 +1023,14 @@ export class PageTransitionModule extends BaseModule {
     if (this.boundHandleHashChange) {
       window.removeEventListener('hashchange', this.boundHandleHashChange);
       this.boundHandleHashChange = null;
+    }
+    if (this.boundHandleWheel) {
+      window.removeEventListener('wheel', this.boundHandleWheel);
+      this.boundHandleWheel = null;
+    }
+    if (this.boundHandleKeydown) {
+      window.removeEventListener('keydown', this.boundHandleKeydown);
+      this.boundHandleKeydown = null;
     }
     if (this.debouncedHandleResize) {
       window.removeEventListener('resize', this.debouncedHandleResize);
