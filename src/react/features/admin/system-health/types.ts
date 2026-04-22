@@ -53,3 +53,23 @@ export interface AuditChainVerification {
   skipped: number;
   breaks: AuditChainBreak[];
 }
+
+export interface SchemaDriftObject {
+  type: string;
+  name: string;
+}
+
+export interface SchemaDriftModifiedObject extends SchemaDriftObject {
+  expectedSql: string;
+  actualSql: string;
+}
+
+export interface SchemaDriftReport {
+  ok: boolean;
+  currentFingerprint: string;
+  storedFingerprint: string | null;
+  added: SchemaDriftObject[];
+  removed: SchemaDriftObject[];
+  modified: SchemaDriftModifiedObject[];
+  firstBoot: boolean;
+}

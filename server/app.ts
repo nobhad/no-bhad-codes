@@ -33,9 +33,15 @@ import {
   initializeDatabase,
   closeDatabase,
   drainDatabase,
+  getDatabase,
   getDatabaseStats
 } from './database/init.js';
 import { MigrationManager } from './database/migrations.js';
+import {
+  detectSchemaDrift,
+  recordSchemaBaseline,
+  captureSchemaSnapshot
+} from './database/schema-drift.js';
 import sqlite3 from 'sqlite3';
 import authRouter from './routes/auth.js';
 import clientsRouter from './routes/clients.js';
@@ -499,6 +505,62 @@ async function startServer() {
       throw migrationError;
     } finally {
       db.close();
+    }
+
+    // Detect schema drift: after migrations, the current schema must
+    // match the snapshot recorded on the previous successful boot. A
+    // mismatch means something changed the schema OUTSIDE the
+    // migration path — manual ALTER in prod, partial migration, etc.
+    // First boot (no stored baseline) and clean boot (match) both
+    // record the current schema as the new baseline. Drift in
+    // production fails loud; drift in dev is a warning.
+    //
+    // Escape hatch: ACCEPT_SCHEMA_DRIFT=true treats the current
+    // schema as the new baseline regardless. Use this deliberately
+    // after an approved manual schema change, not to silence noise.
+    try {
+      const driftReport = await detectSchemaDrift(getDatabase());
+      const acceptDrift = process.env.ACCEPT_SCHEMA_DRIFT === 'true';
+
+      if (driftReport.firstBoot) {
+        logger.info(
+          `[Schema] First-boot baseline recorded (fingerprint ${driftReport.currentFingerprint.slice(0, 12)}…)`
+        );
+        await recordSchemaBaseline(getDatabase(), await captureSchemaSnapshot(getDatabase()));
+      } else if (driftReport.ok) {
+        // No drift — snapshot still matches, nothing to do.
+      } else if (acceptDrift) {
+        logger.warn(
+          `[Schema] DRIFT ACCEPTED via ACCEPT_SCHEMA_DRIFT — rewriting baseline. ` +
+            `added=${driftReport.added.length} removed=${driftReport.removed.length} modified=${driftReport.modified.length}`,
+          { category: 'SCHEMA_DRIFT', metadata: { report: driftReport } }
+        );
+        await recordSchemaBaseline(getDatabase(), await captureSchemaSnapshot(getDatabase()));
+      } else {
+        const summary =
+          `added=${driftReport.added.length} removed=${driftReport.removed.length} modified=${driftReport.modified.length}`;
+        logger.error(`[Schema] DRIFT DETECTED — ${summary}`, {
+          category: 'SCHEMA_DRIFT',
+          metadata: { report: driftReport }
+        });
+        if (process.env.NODE_ENV === 'production') {
+          throw new Error(
+            `Schema drift detected (${summary}). Set ACCEPT_SCHEMA_DRIFT=true to accept, or investigate /api/admin/schema-drift.`
+          );
+        }
+      }
+    } catch (driftErr) {
+      // Rethrow only the "detected in prod" error; swallow capture
+      // errors so drift detection itself can't brick startup.
+      if (
+        driftErr instanceof Error &&
+        driftErr.message.startsWith('Schema drift detected')
+      ) {
+        throw driftErr;
+      }
+      logger.error('[Schema] Drift detection failed (non-fatal):', {
+        error: driftErr instanceof Error ? driftErr : undefined
+      });
     }
 
     // Initialize email service
