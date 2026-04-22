@@ -29,6 +29,7 @@ import type {
   DryRunResult
 } from './automation-engine-types.js';
 import { ACTION_TYPE_LABELS } from './automation-engine-types.js';
+import { fetchWithTimeout } from '../utils/fetch-with-timeout.js';
 
 // ============================================
 // Constants
@@ -871,7 +872,7 @@ async function executeWebhook(
   const timeoutId = setTimeout(() => controller.abort(), WEBHOOK_TIMEOUT_MS);
 
   try {
-    const response = await fetch(url, {
+    const response = await fetchWithTimeout(url, { timeoutMs: 10000,
       method,
       headers: {
         'Content-Type': 'application/json',

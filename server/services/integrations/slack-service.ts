@@ -10,6 +10,7 @@
 
 import { getDatabase } from '../../database/init.js';
 import { BUSINESS_INFO } from '../../config/business.js';
+import { fetchWithTimeout } from '../../utils/fetch-with-timeout.js';
 
 // =====================================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -411,7 +412,7 @@ export async function sendSlackNotification(
   message: SlackMessage
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const response = await fetch(webhookUrl, {
+    const response = await fetchWithTimeout(webhookUrl, { timeoutMs: 5000,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -438,7 +439,7 @@ export async function sendDiscordNotification(
   message: DiscordMessage
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const response = await fetch(webhookUrl, {
+    const response = await fetchWithTimeout(webhookUrl, { timeoutMs: 5000,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

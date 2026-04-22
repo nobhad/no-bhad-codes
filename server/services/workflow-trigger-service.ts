@@ -15,6 +15,7 @@ import { userService } from './user-service.js';
 import { logger } from './logger.js';
 import { parseIfString } from '../utils/safe-json.js';
 import { BUSINESS_INFO } from '../config/business.js';
+import { fetchWithTimeout } from '../utils/fetch-with-timeout.js';
 
 // ============================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -787,7 +788,7 @@ class WorkflowTriggerService {
     context: EventContext
   ): Promise<void> {
     try {
-      const response = await fetch(config.url, {
+      const response = await fetchWithTimeout(config.url, { timeoutMs: 10000,
         method: config.method || 'POST',
         headers: {
           'Content-Type': 'application/json',

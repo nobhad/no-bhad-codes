@@ -23,6 +23,7 @@ import { isGoogleCalendarConfigured } from './calendar-service.js';
 import { getNotificationConfigs } from './slack-service.js';
 import { getDatabase } from '../../database/init.js';
 import { logger } from '../logger.js';
+import { fetchWithTimeout } from '../../utils/fetch-with-timeout.js';
 
 export { zapierService, slackService, stripeService, calendarService };
 
@@ -78,7 +79,7 @@ async function checkStripeHealth(): Promise<IntegrationHealthStatus> {
     const timeout = setTimeout(() => controller.abort(), HEALTH_CHECK_TIMEOUT_MS);
 
     try {
-      const response = await fetch('https://api.stripe.com/v1/balance', {
+      const response = await fetchWithTimeout('https://api.stripe.com/v1/balance', { timeoutMs: 5000,
         method: 'GET',
         headers: {
           Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
