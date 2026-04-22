@@ -231,7 +231,7 @@ export function usePortalMessages({
           if (!response.ok) {
             throw new Error(
               await toFriendlyError(response, {
-                rateLimited: "You're sending messages a bit fast — please wait a moment.",
+                rateLimited: 'You\'re sending messages a bit fast — please wait a moment.',
                 unavailable: 'Messaging is temporarily unavailable. Please try again shortly.',
                 fallback: 'Failed to send message'
               })
