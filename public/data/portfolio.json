@@ -175,7 +175,7 @@
       "heroImage": "",
       "screenshots": [],
       "isDocumented": true,
-      "titleCard": "",
+      "titleCard": "/images/title_card_hedgewitch.webp",
       "duration": "2 months",
       "challenge": "The client's existing Squarespace site couldn't capture the earthy, witchy identity of their brand. They needed a site that felt handcrafted and organic\u2014not a cookie-cutter template\u2014while still being easy to maintain and performant on mobile for clients browsing from the garden.",
       "approach": "Built a static site with Astro for near-instant load times and strong SEO. Designed a custom Art Nouveau-inspired visual system with corner frames, wavy SVG text paths, and GSAP scroll-driven animations including character-by-character reveals and parallax effects. Created a full gallery system with lightbox, blog with content collections, and an admin dashboard for self-service content management.",
