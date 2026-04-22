@@ -40,25 +40,58 @@ export function registerAsyncTaskHandler(
   handlers.set(taskType, handler);
 }
 
+export interface EnqueueAsyncTaskOptions {
+  maxAttempts?: number;
+  delaySeconds?: number;
+  /**
+   * Semantic dedupe key. If provided, any concurrently-pending or
+   * currently-running task with the same key is kept and this call
+   * becomes a no-op — which is what you want for "admin notification
+   * for project 42": one in flight is enough, duplicates are noise.
+   *
+   * Once a task reaches completed/failed/dead, its key frees up so a
+   * later legitimate enqueue (e.g. the project was resubmitted) isn't
+   * blocked by historical rows.
+   */
+  dedupeKey?: string;
+}
+
 /**
  * Enqueue a task inside an active transaction, so the task row is
  * committed atomically with the work that scheduled it. If the
  * transaction rolls back, the task disappears with it.
+ *
+ * Returns `true` if a new row was inserted, `false` if a dedupe key
+ * was provided and an active duplicate already exists.
  */
 export async function enqueueAsyncTask(
   ctx: Pick<TransactionContext, 'run'>,
   taskType: string,
   payload: unknown,
-  options: { maxAttempts?: number; delaySeconds?: number } = {}
-): Promise<void> {
+  options: EnqueueAsyncTaskOptions = {}
+): Promise<boolean> {
   const maxAttempts = options.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
   const delay = Math.max(0, options.delaySeconds ?? 0);
+  const dedupeKey = options.dedupeKey?.trim() || null;
 
-  await ctx.run(
-    `INSERT INTO async_tasks (task_type, payload, max_attempts, next_attempt_at)
-     VALUES (?, ?, ?, datetime('now', ?))`,
-    [taskType, JSON.stringify(payload ?? null), maxAttempts, `+${delay} seconds`]
+  // The partial unique index on (dedupe_key) WHERE status IN
+  // ('pending','running') makes INSERT OR IGNORE the atomic
+  // "insert-if-no-active-duplicate" primitive. `changes` tells us
+  // which path we took without a separate SELECT.
+  const result = await ctx.run(
+    `INSERT OR IGNORE INTO async_tasks
+       (task_type, payload, max_attempts, next_attempt_at, dedupe_key)
+     VALUES (?, ?, ?, datetime('now', ?), ?)`,
+    [
+      taskType,
+      JSON.stringify(payload ?? null),
+      maxAttempts,
+      `+${delay} seconds`,
+      dedupeKey
+    ]
   );
+
+  return (result.changes ?? 0) > 0;
 }
 
 function backoffSeconds(attempt: number): number {
