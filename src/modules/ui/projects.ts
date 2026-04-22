@@ -174,10 +174,17 @@ export class ProjectsModule extends BaseModule {
       return;
     }
 
+    // Skip the drop-in entrance animation when carousel-navigating between
+    // two project detail slugs. The "drop from top" only makes sense when
+    // arriving at project-detail for the first time (from projects tile or
+    // a fresh deep-link), not when the user scrolls left/right between
+    // projects already on a detail page.
+    const isCarousel = this.currentProjectSlug !== null && this.currentProjectSlug !== slug;
+
     this.currentProjectSlug = slug;
 
     // Populate project detail content
-    this.renderProjectDetail(project);
+    this.renderProjectDetail(project, { skipEntrance: isCarousel });
 
     // Update page title
     document.title = `${project.title} - No Bhad Codes`;
@@ -487,7 +494,10 @@ export class ProjectsModule extends BaseModule {
   /**
    * Render project detail content
    */
-  private renderProjectDetail(project: PortfolioProject): void {
+  private renderProjectDetail(
+    project: PortfolioProject,
+    options: { skipEntrance?: boolean } = {}
+  ): void {
     if (!this.projectDetailSection) return;
 
     // Update hero image — prefer heroImage, fall back to titleCard
@@ -601,8 +611,12 @@ export class ProjectsModule extends BaseModule {
     // Update next/prev navigation
     this.renderProjectNavigation(project);
 
-    // GSAP entrance animations for detail page elements
-    this.animateDetailEntrance();
+    // GSAP entrance animations for detail page elements — skipped on
+    // carousel navigation between projects so left/right scrolling doesn't
+    // re-play a top-down drop-in every time.
+    if (!options.skipEntrance) {
+      this.animateDetailEntrance();
+    }
   }
 
   /**
