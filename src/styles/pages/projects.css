@@ -770,7 +770,10 @@ div.page-hero-desktop {
 
 @media (--desktop-l) {
   .projects-flex-row {
-    flex-direction: row;
+    /* row-reverse: TV on the left, project list on the right.
+       DOM order is preserved (list first, then TV) for accessibility/screen
+       readers — only the visual layout flips. */
+    flex-direction: row-reverse;
     gap: 8rem;
     align-items: flex-start;
   }
