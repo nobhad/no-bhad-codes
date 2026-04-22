@@ -1,0 +1,133 @@
+/**
+ * ===============================================
+ * SITE SCROLL MAP
+ * ===============================================
+ * @file src/styles/components/site-map.css
+ *
+ * 2D spatial navigation for the main site. The five primary tiles
+ * (intro, hero, about, projects, contact) are laid out as a plus
+ * centered on intro. Non-map sections (project-detail, portal-login)
+ * live outside the .site-map wrapper and take over the viewport
+ * normally when active.
+ *
+ *                [about]     data-map-tile="up"
+ *                   │
+ *    [hero] ─── [intro] ─── [projects]
+ *    (left)     (center)    (right)
+ *                   │
+ *                [contact]   data-map-tile="down"
+ *
+ * Camera state is driven by data-map-camera on the .site-map
+ * container and is animated by PageTransitionModule via GSAP.
+ * This file only lays out tiles in their spatial positions — camera
+ * transforms are managed by JS.
+ *
+ * Loaded in the `states` layer so positioning wins over any
+ * per-page CSS opinions about the section's own position.
+ */
+
+/* ============================================
+ * SITE-MAP CONTAINER
+ * ============================================
+ * Fills its parent (main content area between header and footer).
+ * overflow:visible on the container itself; <main>'s own
+ * overflow:hidden clips the off-screen tiles so only the tile in
+ * view is painted.
+ */
+.site-map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+}
+
+/* ============================================
+ * TILE POSITIONING
+ * ============================================
+ * Each map tile is absolutely positioned at its map coordinate.
+ * All tiles share the same viewport-size box; off-center tiles
+ * are pushed ±100% so the container acts like a camera window.
+ *
+ * Note: this is scoped to direct children only (> combinator) so
+ * nested elements inside a tile that happen to use data attributes
+ * are not affected.
+ */
+.site-map > [data-map-tile] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.site-map > [data-map-tile="center"] {
+  top: 0;
+  left: 0;
+}
+
+.site-map > [data-map-tile="up"] {
+  top: -100%;
+  left: 0;
+}
+
+.site-map > [data-map-tile="down"] {
+  top: 100%;
+  left: 0;
+}
+
+.site-map > [data-map-tile="left"] {
+  top: 0;
+  left: -100%;
+}
+
+.site-map > [data-map-tile="right"] {
+  top: 0;
+  left: 100%;
+}
+
+/* ============================================
+ * CAMERA STATES (STATIC FALLBACKS)
+ * ============================================
+ * data-map-camera on .site-map determines which tile is in view.
+ * Transforms move the whole tile grid; the viewport sees whichever
+ * tile now sits at (0, 0).
+ *
+ * These rules are the no-JS / reduced-motion fallback. During
+ * normal JS-driven navigation, GSAP sets an inline transform that
+ * overrides these static values during the tween.
+ */
+.site-map[data-map-camera="center"] {
+  transform: translate(0, 0);
+}
+
+.site-map[data-map-camera="up"] {
+  transform: translate(0, 100%);
+}
+
+.site-map[data-map-camera="down"] {
+  transform: translate(0, -100%);
+}
+
+.site-map[data-map-camera="left"] {
+  transform: translate(100%, 0);
+}
+
+.site-map[data-map-camera="right"] {
+  transform: translate(-100%, 0);
+}
+
+/* ============================================
+ * REDUCED MOTION
+ * ============================================
+ * Static fallbacks above already give an instant snap when the
+ * data-map-camera attribute flips, which is what reduced-motion
+ * users need. JS uses gsap.set() rather than gsap.to() when
+ * reducedMotion is preferred, so no extra override is needed here.
+ * Just drop will-change to avoid promoting the container to its
+ * own layer when no animation is expected.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .site-map {
+    will-change: auto;
+  }
+}

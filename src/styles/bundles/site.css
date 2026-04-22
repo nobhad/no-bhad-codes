@@ -68,6 +68,7 @@
  * PAGE STATES (transitions, visibility)
  * ============================================ */
 @import "../components/page-transitions.css" layer(states);
+@import "../components/site-map.css" layer(states);
 
 /* ============================================
  * MOBILE OVERRIDES

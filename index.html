@@ -741,9 +741,10 @@
     <!-- SECTION ORDER: Business Card -> Hero -> About -> Tech Stack -> Contact -->
     <!-- data-virtual-pages enables desktop virtual page mode -->
     <main id="main-content" data-virtual-pages>
+      <div class="site-map" data-map-camera="center">
       <h1 class="sr-only">No Bhad Codes - Professional Web Development</h1>
       <!-- BUSINESS CARD INTRO SECTION (order: 1 - First on page load) -->
-      <section id="intro" class="business-card-section page-active" data-page="intro">
+      <section id="intro" class="business-card-section page-active" data-page="intro" data-map-tile="center">
         <div class="business-card-container">
           <div id="business-card" class="business-card">
             <div
@@ -784,7 +785,7 @@
       </section>
 
       <!-- HERO SECTION (order: 2) -->
-      <section id="hero" class="hero-section page-hidden" data-page="hero">
+      <section id="hero" class="hero-section page-hidden" data-page="hero" data-map-tile="left">
         <svg viewBox="0 0 1280 720" class="text-animation-svg">
           <defs>
             <mask id="maskLeft">
@@ -810,7 +811,7 @@
       </section>
 
       <!-- ABOUT SECTION (order: 3) -->
-      <section id="about" class="about-section page-hidden" data-page="about">
+      <section id="about" class="about-section page-hidden" data-page="about" data-map-tile="up">
         <div class="about-content">
           <div class="about-layout">
             <!-- Left column: Image -->
@@ -1359,6 +1360,7 @@
           </div>
         </div>
       </section>
+      </div>
     </main>
 
     <!-- Footer -->
