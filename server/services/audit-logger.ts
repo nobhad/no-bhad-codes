@@ -60,10 +60,29 @@ export interface AuditChainContent {
   created_at: string;
 }
 
+/**
+ * Canonical, collision-resistant serialisation of a row's content
+ * fields for the chain hash input. Length-prefixing each value makes
+ * the encoding injective — two rows whose concatenated content would
+ * otherwise align into the same byte stream are disambiguated by the
+ * value lengths. Keys are sorted so source-object property order
+ * doesn't perturb the hash.
+ *
+ * Previous implementation used ASCII Unit Separator (0x1F) as a
+ * delimiter; that's safe for well-behaved content but an attacker
+ * controlling a logged field (user_agent, metadata, request_path)
+ * could inject 0x1F to forge a canonical-form collision. Length
+ * prefixes close that gap regardless of content bytes.
+ */
 function canonicalize(content: AuditChainContent): string {
   const keys = Object.keys(content).sort() as Array<keyof AuditChainContent>;
-  const parts = keys.map((k) => `${k}=${content[k] ?? ''}`);
-  return parts.join(''); // unit separator, won't appear in content
+  return keys
+    .map((k) => {
+      const value = content[k] ?? '';
+      const valueStr = String(value);
+      return `${k}:${valueStr.length}:${valueStr}`;
+    })
+    .join('|');
 }
 
 export function computeRowHash(content: AuditChainContent, prevHash: string): string {
@@ -405,90 +424,125 @@ export interface AuditChainVerification {
   breaks: AuditChainBreak[];
 }
 
+export interface VerifyAuditChainOptions {
+  /** Page size — SELECT this many rows at a time. Default 5000. */
+  batchSize?: number;
+  /** Stop walking after this many breaks; default unlimited. */
+  maxBreaks?: number;
+}
+
 /**
  * Walk the audit_logs chain in insertion order and verify each row's
  * hash was produced by the documented recipe and correctly linked to
  * its predecessor. Returns a list of breaks (if any) rather than
  * throwing — caller decides whether to alert, page, or halt writes.
  *
+ * Streams rows in id-ordered batches so memory stays bounded even at
+ * a million-row audit history. Cross-batch continuity is preserved
+ * by carrying `lastKnownHash` and `sawFirstHashedRow` between pages.
+ *
  * Rows inserted before migration 135 have null hash / prev_hash;
  * they're counted as `skipped`, not `breaks`.
  */
-export async function verifyAuditChain(): Promise<AuditChainVerification> {
+export async function verifyAuditChain(
+  options: VerifyAuditChainOptions = {}
+): Promise<AuditChainVerification> {
+  const batchSize = Math.min(Math.max(options.batchSize ?? 5000, 100), 50_000);
+  const maxBreaks = options.maxBreaks ?? Number.POSITIVE_INFINITY;
+
   const db = getDatabase();
-  const rows = await db.all<AuditLogRow & { prev_hash: string | null; hash: string | null }>(
-    `SELECT id, user_id, user_email, user_type, action, entity_type, entity_id, entity_name,
-            old_value, new_value, changes, ip_address, user_agent, request_path, request_method,
-            metadata, created_at, prev_hash, hash
-       FROM audit_logs
-      ORDER BY id ASC`
-  );
 
   const breaks: AuditChainBreak[] = [];
   let verified = 0;
   let skipped = 0;
+  let total = 0;
   let lastKnownHash = CHAIN_GENESIS;
   let sawFirstHashedRow = false;
+  let cursor = 0;
 
-  for (const row of rows) {
-    if (row.hash == null) {
-      skipped += 1;
-      continue;
+  // Pull the table in id-ordered pages. Each page is self-contained,
+  // so the verifier's peak memory is ~batchSize rows rather than the
+  // full table.
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const rows = await db.all<AuditLogRow & { prev_hash: string | null; hash: string | null }>(
+      `SELECT id, user_id, user_email, user_type, action, entity_type, entity_id, entity_name,
+              old_value, new_value, changes, ip_address, user_agent, request_path, request_method,
+              metadata, created_at, prev_hash, hash
+         FROM audit_logs
+        WHERE id > ?
+        ORDER BY id ASC
+        LIMIT ?`,
+      [cursor, batchSize]
+    );
+
+    if (rows.length === 0) break;
+    total += rows.length;
+
+    for (const row of rows) {
+      cursor = row.id;
+
+      if (row.hash == null) {
+        skipped += 1;
+        continue;
+      }
+
+      const content: AuditChainContent = {
+        user_id: row.user_id,
+        user_email: row.user_email,
+        user_type: row.user_type,
+        action: row.action,
+        entity_type: row.entity_type,
+        entity_id: row.entity_id,
+        entity_name: row.entity_name,
+        old_value: row.old_value,
+        new_value: row.new_value,
+        changes: row.changes,
+        ip_address: row.ip_address,
+        user_agent: row.user_agent,
+        request_path: row.request_path,
+        request_method: row.request_method,
+        metadata: row.metadata,
+        created_at: row.created_at
+      };
+
+      const expectedPrev = sawFirstHashedRow ? lastKnownHash : row.prev_hash ?? CHAIN_GENESIS;
+      if (sawFirstHashedRow && row.prev_hash !== expectedPrev) {
+        breaks.push({
+          id: row.id,
+          kind: 'prev_hash_mismatch',
+          expected: expectedPrev,
+          actual: row.prev_hash ?? undefined,
+          createdAt: row.created_at
+        });
+      }
+
+      const recomputed = computeRowHash(content, row.prev_hash ?? CHAIN_GENESIS);
+      if (recomputed !== row.hash) {
+        breaks.push({
+          id: row.id,
+          kind: 'hash_mismatch',
+          expected: recomputed,
+          actual: row.hash,
+          createdAt: row.created_at
+        });
+      } else {
+        verified += 1;
+      }
+
+      lastKnownHash = row.hash;
+      sawFirstHashedRow = true;
+
+      if (breaks.length >= maxBreaks) {
+        return { total, verified, skipped, breaks };
+      }
     }
 
-    const content: AuditChainContent = {
-      user_id: row.user_id,
-      user_email: row.user_email,
-      user_type: row.user_type,
-      action: row.action,
-      entity_type: row.entity_type,
-      entity_id: row.entity_id,
-      entity_name: row.entity_name,
-      old_value: row.old_value,
-      new_value: row.new_value,
-      changes: row.changes,
-      ip_address: row.ip_address,
-      user_agent: row.user_agent,
-      request_path: row.request_path,
-      request_method: row.request_method,
-      metadata: row.metadata,
-      created_at: row.created_at
-    };
-
-    const expectedPrev = sawFirstHashedRow ? lastKnownHash : row.prev_hash ?? CHAIN_GENESIS;
-    if (sawFirstHashedRow && row.prev_hash !== expectedPrev) {
-      breaks.push({
-        id: row.id,
-        kind: 'prev_hash_mismatch',
-        expected: expectedPrev,
-        actual: row.prev_hash ?? undefined,
-        createdAt: row.created_at
-      });
-    }
-
-    const recomputed = computeRowHash(content, row.prev_hash ?? CHAIN_GENESIS);
-    if (recomputed !== row.hash) {
-      breaks.push({
-        id: row.id,
-        kind: 'hash_mismatch',
-        expected: recomputed,
-        actual: row.hash,
-        createdAt: row.created_at
-      });
-    } else {
-      verified += 1;
-    }
-
-    lastKnownHash = row.hash;
-    sawFirstHashedRow = true;
+    // If the batch was under-full we've hit the end of the table.
+    if (rows.length < batchSize) break;
   }
 
-  return {
-    total: rows.length,
-    verified,
-    skipped,
-    breaks
-  };
+  return { total, verified, skipped, breaks };
 }
 
 /**
