@@ -40,6 +40,8 @@ if (typeof window !== 'undefined') {
 
 // Import and initialize application
 import { app } from './core/app';
+import { initPortalDropdown } from './features/main-site/portal-dropdown';
+import { PortalLoginOnMainSite } from './features/main-site/portal-login';
 
 // Export for debugging
 export { app };
@@ -47,4 +49,16 @@ export { app };
 // Make available globally for debugging
 if (typeof window !== 'undefined') {
   window.NBW_APP = app;
+}
+
+// Portal login wiring (dropdown + #/portal hash page)
+function initMainSiteAuth(): void {
+  initPortalDropdown();
+  new PortalLoginOnMainSite().init();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initMainSiteAuth, { once: true });
+} else {
+  initMainSiteAuth();
 }
