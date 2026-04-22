@@ -547,6 +547,45 @@ async function handleWebhookEventBody(
 async function recordPayment(payment: InvoicePayment): Promise<void> {
   const db = getDatabase();
 
+  // Defence-in-depth dedupe: mirrors the guard in stripePaymentService so
+  // a slipped webhook retry on the checkout.session.completed path can't
+  // create a duplicate succeeded payment row. Dedupe key is whichever of
+  // payment_intent / checkout_session we have for this event.
+  const intentId = payment.stripePaymentIntentId || null;
+  const sessionId = payment.stripeCheckoutSessionId || null;
+  const dedupeSucceeded =
+    payment.status === 'succeeded' && (intentId || sessionId);
+
+  if (dedupeSucceeded) {
+    await db.run(
+      `INSERT INTO invoice_payments
+         (invoice_id, amount, payment_method, stripe_payment_intent_id, stripe_checkout_session_id, status, paid_at, created_at)
+       SELECT ?, ?, ?, ?, ?, ?, ?, datetime('now')
+       WHERE NOT EXISTS (
+         SELECT 1 FROM invoice_payments
+         WHERE status = 'succeeded'
+           AND (
+             (? IS NOT NULL AND stripe_payment_intent_id = ?)
+             OR (? IS NOT NULL AND stripe_checkout_session_id = ?)
+           )
+       )`,
+      [
+        payment.invoiceId,
+        payment.amount,
+        payment.paymentMethod,
+        intentId,
+        sessionId,
+        payment.status,
+        payment.paidAt || null,
+        intentId,
+        intentId,
+        sessionId,
+        sessionId
+      ]
+    );
+    return;
+  }
+
   await db.run(
     `INSERT INTO invoice_payments (invoice_id, amount, payment_method, stripe_payment_intent_id, stripe_checkout_session_id, status, paid_at, created_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
@@ -554,8 +593,8 @@ async function recordPayment(payment: InvoicePayment): Promise<void> {
       payment.invoiceId,
       payment.amount,
       payment.paymentMethod,
-      payment.stripePaymentIntentId || null,
-      payment.stripeCheckoutSessionId || null,
+      intentId,
+      sessionId,
       payment.status,
       payment.paidAt || null
     ]
