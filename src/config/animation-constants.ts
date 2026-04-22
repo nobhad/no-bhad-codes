@@ -207,7 +207,14 @@ export const PAGE_ANIMATION = {
   DURATION: 0.5,
   BLUR_AMOUNT: 12,
   EASE_IN: 'power2.in',
-  EASE_OUT: 'power2.out'
+  EASE_OUT: 'power2.out',
+  /**
+   * Slide transitions use a stronger out-curve so the pan decelerates
+   * like a flicked card settling — feels closer to a real swipe gesture
+   * than the gentler power2.out used for blur fades.
+   */
+  SLIDE_DURATION: 0.55,
+  SLIDE_EASE: 'power3.out'
 } as const;
 
 // ============================================

@@ -114,12 +114,13 @@ export class ProjectsModule extends BaseModule {
     // Listen for page-changed events (back-navigation cleanup, title reset)
     window.addEventListener('page-changed', this.handlePageChanged.bind(this) as EventListener);
 
-    // Channel-surf the CRT TV via vertical scroll on the projects tile.
-    // PageTransitionModule dispatches this when up/down is wheeled or
-    // arrowed while the projects tile is active.
-    document.addEventListener('projects:cycle-tv', ((event: CustomEvent) => {
-      const direction = event.detail?.direction as 'up' | 'down' | undefined;
-      if (direction) this.cycleTvChannel(direction);
+    // Channel-surf the CRT TV. PageTransitionModule owns the index and
+    // dispatches this with an explicit target channel so the TV display
+    // and the navigation gateway never disagree about which project is
+    // "current" for the boundary-exit logic.
+    document.addEventListener('projects:set-tv-channel', ((event: CustomEvent) => {
+      const index = event.detail?.index as number | undefined;
+      if (typeof index === 'number') this.setTvChannel(index);
     }) as EventListener);
 
     // Check initial hash for project detail (on page load only)
@@ -362,31 +363,23 @@ export class ProjectsModule extends BaseModule {
   }
 
   /**
-   * Index of the project currently shown on the CRT TV. Driven by the
-   * scroll-map (up/down on the projects tile) via cycleTvChannel.
+   * Show a specific project on the CRT TV by index in the documented list.
+   * Called from page-transition.ts via the 'projects:set-tv-channel' event
+   * — page-transition owns the index because it gates the boundary-exit
+   * navigation (scroll past last → contact, scroll above first → intro).
    */
-  private currentTvIndex: number = 0;
-
-  /**
-   * Channel-surf one project up or down in the documented list. Called
-   * from page-transition.ts via the 'projects:cycle-tv' CustomEvent when
-   * the user wheels/arrows up/down on the projects tile. Wraps at both
-   * ends so the carousel is endless.
-   */
-  private cycleTvChannel(direction: 'up' | 'down'): void {
+  private setTvChannel(index: number): void {
     if (!this.portfolioData) return;
     const documented = this.portfolioData.projects.filter((p) => p.isDocumented);
     if (documented.length === 0) return;
 
-    const delta = direction === 'down' ? 1 : -1;
-    this.currentTvIndex =
-      (this.currentTvIndex + delta + documented.length) % documented.length;
-    const project = documented[this.currentTvIndex];
+    const safeIndex = Math.max(0, Math.min(index, documented.length - 1));
+    const project = documented[safeIndex];
+    if (!project) return;
 
     if (project.titleCard) this.changeTvChannel(project.titleCard);
 
-    // Highlight the matching card in the list so the user can see which
-    // project is currently on the TV.
+    // Highlight the matching card so list and TV stay in sync.
     const cards = this.projectsContent?.querySelectorAll('.work-card');
     cards?.forEach((card) => {
       card.classList.toggle(
