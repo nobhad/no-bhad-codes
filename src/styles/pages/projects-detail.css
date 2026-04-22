@@ -43,10 +43,10 @@
   width: 100%;
   max-width: var(--project-detail-content-max-width);
   margin: 0 auto;
-  padding-top: var(--space-4);
+  padding-top: var(--space-2);
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 @media (--tablet) {
@@ -55,7 +55,7 @@
   }
 
   .worksub-wrapper {
-    padding-top: var(--space-6);
+    padding-top: var(--space-3);
   }
 }
 
@@ -164,10 +164,9 @@
 .worksub-header figure {
   margin: 0;
   aspect-ratio: 12 / 7;
-  /* Cap hero height so the intro section fits in the initial viewport
-     even on tall desktops. The aspect-ratio still drives shape on
-     narrower screens where the cap doesn't apply. */
-  max-height: 32vh;
+  /* Aggressive cap so the entire intro section (hero + title + metadata
+     + description + tools) fits in the initial viewport on a desktop. */
+  max-height: 22vh;
   overflow: hidden;
   border-radius: 12px;
   box-shadow: var(--shadow-elevated-md);
@@ -200,12 +199,12 @@
 }
 
 .worksub-intro h1 {
-  font-size: var(--font-size-3xl);
+  font-size: var(--font-size-2xl);
   font-family: var(--font-family-acme);
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   color: var(--color-dark);
-  margin: 0 0 var(--space-3);
+  margin: 0 0 var(--space-2);
   line-height: var(--line-height-tight);
 }
 
@@ -342,8 +341,8 @@
 /* Right column - description */
 .intro-content > p {
   color: var(--color-dark);
-  font-size: var(--font-size-lg);
-  line-height: 1.7;
+  font-size: var(--font-size-md);
+  line-height: 1.5;
   margin: 0;
   flex: 1;
 }
