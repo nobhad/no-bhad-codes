@@ -42,6 +42,15 @@ registerAsyncTaskHandler('intake.lead-score', async (payload) => {
   await leadService.calculateLeadScore(projectId);
 });
 
+registerAsyncTaskHandler('intake.save-file', async (payload) => {
+  const { intakeData, projectId, projectName } = payload as {
+    intakeData: IntakeFormData;
+    projectId: number;
+    projectName: string;
+  };
+  await saveIntakeAsFile(intakeData, projectId, projectName);
+});
+
 const router = express.Router();
 
 /**
@@ -256,22 +265,9 @@ router.post(
       // Generate initial invoice (outside transaction)
       await generateInvoice(intakeData, projectId, clientId);
 
-      // Save intake form as downloadable file
-      const projectName = generateProjectName(
-        intakeData.projectType,
-        clientType,
-        companyName,
-        intakeData.name
-      );
-      try {
-        await saveIntakeAsFile(intakeData, projectId, projectName);
-      } catch (fileError) {
-        await logger.error('[Intake] Failed to save intake file:', {
-          error: fileError instanceof Error ? fileError : undefined,
-          category: 'INTAKE'
-        });
-        // Non-critical error - don't fail the whole request
-      }
+      // Save-intake-as-file is enqueued inside the intake transaction
+      // (see intake-service.runIntakeTransaction -> intake.save-file)
+      // and handled by the async_tasks worker with retries.
 
       // Generate access token for client portal
       const jwtSecret = process.env.JWT_SECRET;
