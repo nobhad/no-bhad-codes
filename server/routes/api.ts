@@ -291,39 +291,42 @@ router.post(
         return errorResponse(res, 'No file uploaded', 400, ErrorCodes.NO_FILE);
       }
 
-      const fileInfo = {
-        id: Date.now().toString(),
-        filename: req.file.filename,
-        originalName: req.file.originalname,
-        mimetype: req.file.mimetype,
-        size: req.file.size,
-        url: `/uploads/general/${req.file.filename}`,
-        uploadedAt: new Date().toISOString()
-      };
+      const storedPath = `uploads/general/${req.file.filename}`;
 
-      // Save file metadata to database (optional)
+      // Save file metadata to database first so we can return an
+      // authenticated download URL keyed on the DB id.
       let fileId = 0;
       try {
         fileId = await generalUploadService.saveUploadMetadata({
-          filename: fileInfo.filename,
-          originalFilename: fileInfo.originalName,
-          filePath: fileInfo.url,
-          fileSize: fileInfo.size,
-          mimeType: fileInfo.mimetype
+          filename: req.file.filename,
+          originalFilename: req.file.originalname,
+          filePath: storedPath,
+          fileSize: req.file.size,
+          mimeType: req.file.mimetype
         });
       } catch (err) {
         await logger.error('Failed to save file metadata:', {
           error: err instanceof Error ? err : undefined,
           category: 'UPLOAD'
         });
-        // Don't fail - file is already uploaded
+        // Don't fail - file is already on disk and can be reconciled later.
       }
+
+      const fileInfo = {
+        id: fileId > 0 ? fileId : Date.now().toString(),
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        url: fileId > 0 ? `/api/uploads/file/${fileId}` : null,
+        uploadedAt: new Date().toISOString()
+      };
 
       await logger.info(
         `File uploaded successfully - filename: ${fileInfo.filename}, fileId: ${fileId}`
       );
 
-      sendCreated(res, { file: { ...fileInfo, id: fileId > 0 ? fileId : fileInfo.id } }, 'File uploaded successfully');
+      sendCreated(res, { file: fileInfo }, 'File uploaded successfully');
     } catch (_error) {
       await logger.error('File upload error');
       errorResponse(res, 'File upload failed', 500, ErrorCodes.UPLOAD_ERROR);
