@@ -879,10 +879,15 @@ export class PageTransitionModule extends BaseModule {
     this.wheelCooldownUntil = performance.now() + PAGE_ANIMATION.DURATION * 1000 + WHEEL_COOLDOWN_MS;
 
     // Special case: project-detail isn't a static route — it needs a slug.
-    // Slide instead of blur so projects → first detail also pans.
+    // Pick FIRST slug going right (forward) and LAST slug going left
+    // (backward). Together with the wrap-to-intro at both carousel ends,
+    // this gives infinite scroll loops in BOTH directions:
+    //   right:  intro → projects → detail[0] → detail[1] → ... → detail[N] → intro
+    //   left:   intro → projects → detail[N] → detail[N-1] → ... → detail[0] → intro
     if (targetPageId === 'project-detail') {
-      const slug = this.getProjectSlugAt(0);
-      if (!slug) return;
+      const slugs = this.getProjectSlugs();
+      if (slugs.length === 0) return;
+      const slug = direction === 'left' ? slugs[slugs.length - 1] : slugs[0];
       this.pendingSlideDirection = direction;
       window.location.hash = `#/projects/${slug}`;
       return;
@@ -945,11 +950,16 @@ export class PageTransitionModule extends BaseModule {
     const currentIndex = currentSlug ? slugs.indexOf(currentSlug) : -1;
     if (currentIndex === -1) return null;
 
+    // Both ends wrap to home (intro) so the carousel forms one continuous
+    // loop in either direction. With the projects tile entering the
+    // carousel from first (right) or last (left), every horizontal scroll
+    // chain is infinite:
+    //   ... → projects → detail[0] → ... → detail[N] → intro → projects → ...
     if (direction === 'left') {
-      if (currentIndex === 0) return '#/projects';
+      if (currentIndex === 0) return '#/';
       return `#/projects/${slugs[currentIndex - 1]}`;
     }
-    // right: walk forward, wrap back to home (intro) at end of carousel
+    // right: walk forward, wrap to home at end
     if (currentIndex >= slugs.length - 1) return '#/';
     return `#/projects/${slugs[currentIndex + 1]}`;
   }
