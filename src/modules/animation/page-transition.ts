@@ -886,8 +886,13 @@ export class PageTransitionModule extends BaseModule {
       return;
     }
 
-    // Map → map: camera tween (no paw, no blur)
-    void this.transitionTo(targetPageId, 'camera');
+    // Map → map: use slide mode so the visual pan ALWAYS matches the
+    // scroll direction. Camera mode tweened toward the target's natural
+    // map position, which felt wrong when both left and right wheel from
+    // intro now lead to projects (right side spatially) — left scroll
+    // should still slide projects in from the LEFT, not the right.
+    this.pendingSlideDirection = direction;
+    void this.transitionTo(targetPageId, 'slide', direction);
   }
 
   /**
