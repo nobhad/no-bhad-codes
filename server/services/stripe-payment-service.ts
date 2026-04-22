@@ -16,14 +16,14 @@ import { calculateAmountWithProcessingFee } from '../config/constants.js';
 import { parseRow } from '../database/row-validator.js';
 import { stripePaymentIntentLookupRowSchema } from '../database/row-schemas.js';
 import { fetchWithTimeout } from '../utils/fetch-with-timeout.js';
-import { CircuitBreaker } from '../utils/circuit-breaker.js';
+import { getCircuitBreaker } from '../utils/circuit-breaker.js';
 
-// Single breaker shared across every Stripe HTTP call in this module.
-// When Stripe starts returning 5xx or timing out repeatedly, the
-// breaker trips and fast-fails the remaining calls for cooldownMs —
-// we'd rather return a 503 immediately than let 10s-per-call timeouts
-// stack up on the request handlers.
-const stripeBreaker = new CircuitBreaker({
+// Single breaker shared across every Stripe HTTP call — here and in
+// auto-pay-service. When Stripe starts returning 5xx or timing out
+// repeatedly, the breaker trips and fast-fails the remaining calls
+// for cooldownMs; we'd rather return a 503 immediately than let
+// 10s-per-call timeouts stack up on the request handlers.
+const stripeBreaker = getCircuitBreaker({
   name: 'stripe-api',
   failureThreshold: 5,
   cooldownMs: 30_000

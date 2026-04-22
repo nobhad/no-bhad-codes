@@ -30,6 +30,13 @@ import type {
 } from './automation-engine-types.js';
 import { ACTION_TYPE_LABELS } from './automation-engine-types.js';
 import { fetchWithTimeout } from '../utils/fetch-with-timeout.js';
+import { getCircuitBreaker } from '../utils/circuit-breaker.js';
+
+const userWebhookBreaker = getCircuitBreaker({
+  name: 'tenant-webhook',
+  failureThreshold: 10,
+  cooldownMs: 60_000
+});
 
 // ============================================
 // Constants
@@ -872,15 +879,18 @@ async function executeWebhook(
   const timeoutId = setTimeout(() => controller.abort(), WEBHOOK_TIMEOUT_MS);
 
   try {
-    const response = await fetchWithTimeout(url, { timeoutMs: 10000,
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers
-      },
-      body: method !== 'GET' ? JSON.stringify(context) : undefined,
-      signal: controller.signal
-    });
+    const response = await userWebhookBreaker.execute(() =>
+      fetchWithTimeout(url, {
+        timeoutMs: 10000,
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          ...headers
+        },
+        body: method !== 'GET' ? JSON.stringify(context) : undefined,
+        signal: controller.signal
+      })
+    );
 
     clearTimeout(timeoutId);
 

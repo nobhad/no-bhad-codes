@@ -198,3 +198,16 @@ const registry = new Map<string, CircuitBreaker>();
 export function listCircuitBreakers(): CircuitBreakerSnapshot[] {
   return [...registry.values()].map((cb) => cb.snapshot());
 }
+
+/**
+ * Return the breaker named `options.name`, creating + registering one
+ * with the supplied options if it doesn't exist yet. Lets callers in
+ * different modules share a breaker (e.g. both stripePayment and
+ * autoPay hit the same Stripe API and should trip together) without
+ * manually plumbing the instance through shared state.
+ */
+export function getCircuitBreaker(options: CircuitBreakerOptions): CircuitBreaker {
+  const existing = registry.get(options.name);
+  if (existing) return existing;
+  return new CircuitBreaker(options);
+}
