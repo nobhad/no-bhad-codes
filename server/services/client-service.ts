@@ -10,6 +10,7 @@
 
 import { getDatabase } from '../database/init.js';
 import { userService } from './user-service.js';
+import { NotFoundError } from '../utils/app-errors.js';
 import {
   toContact,
   toActivity,
@@ -1047,7 +1048,7 @@ class ClientService {
     ])) as unknown as ContactRow | undefined;
 
     if (!existing) {
-      throw new Error('Contact not found');
+      throw new NotFoundError('contact', contactId);
     }
 
     const ALLOWED_FIELDS = [
@@ -1091,7 +1092,7 @@ class ClientService {
     ])) as unknown as ContactRow | undefined;
 
     if (!updated) {
-      throw new Error('Contact not found after update');
+      throw new NotFoundError('contact', contactId);
     }
 
     return toContact(updated);
@@ -1109,7 +1110,7 @@ class ClientService {
     ])) as unknown as ContactRow | undefined;
 
     if (!contact) {
-      throw new Error('Contact not found');
+      throw new NotFoundError('contact', contactId);
     }
 
     await db.run('DELETE FROM client_contacts WHERE id = ?', [contactId]);
@@ -1338,7 +1339,7 @@ class ClientService {
     )) as unknown as ClientNoteRow | undefined;
 
     if (!note) {
-      throw new Error('Note not found');
+      throw new NotFoundError('note', noteId);
     }
 
     return toClientNote(note);
@@ -1443,7 +1444,7 @@ class ClientService {
     ])) as unknown as CustomFieldRow | undefined;
 
     if (!field) {
-      throw new Error('Custom field not found');
+      throw new NotFoundError('custom field', fieldId);
     }
 
     return toCustomField(field);
@@ -1581,7 +1582,7 @@ class ClientService {
       | undefined;
 
     if (!tag) {
-      throw new Error('Tag not found');
+      throw new NotFoundError('tag', tagId);
     }
 
     return toTag(tag);
@@ -1692,7 +1693,7 @@ class ClientService {
       | undefined;
 
     if (!client) {
-      throw new Error('Client not found');
+      throw new NotFoundError('client', clientId);
     }
 
     // Calculate payment history score (0-25 points)
