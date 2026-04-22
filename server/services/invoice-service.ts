@@ -12,6 +12,11 @@ import { getFloat, getFloatOrNull, getString } from '../database/row-helpers.js'
 import { BUSINESS_INFO } from '../config/business.js';
 import { logger } from './logger.js';
 import { settingsService } from './settings-service.js';
+import {
+  NotFoundError,
+  ValidationError,
+  ConflictError
+} from '../utils/app-errors.js';
 import { safeJsonParseArray } from '../utils/safe-json.js';
 import { InvoicePaymentService } from './invoice/payment-service.js';
 import { InvoiceRecurringService } from './invoice/recurring-service.js';
@@ -216,7 +221,7 @@ export class InvoiceService {
     const row = await this.getDb().get(sql, [id]);
 
     if (!row) {
-      throw new Error(`Invoice with ID ${id} not found`);
+      throw new NotFoundError('invoice', id);
     }
 
     const invoice = this.mapRowToInvoice(row);
@@ -242,7 +247,7 @@ export class InvoiceService {
     const row = await this.getDb().get(sql, [invoiceNumber]);
 
     if (!row) {
-      throw new Error(`Invoice with number ${invoiceNumber} not found`);
+      throw new NotFoundError(`invoice ${invoiceNumber}`);
     }
 
     const invoice = this.mapRowToInvoice(row);
@@ -358,7 +363,7 @@ export class InvoiceService {
     const currentInvoice = await this.getInvoiceById(id);
 
     if (currentInvoice.status !== 'draft') {
-      throw new Error('Only draft invoices can be edited');
+      throw new ValidationError('Only draft invoices can be edited');
     }
 
     const updates: string[] = [];
@@ -447,11 +452,11 @@ export class InvoiceService {
     const intake = await this.getDb().get(intakeSql, [intakeId]);
 
     if (!intake) {
-      throw new Error(`Intake with ID ${intakeId} not found`);
+      throw new NotFoundError('intake', intakeId);
     }
 
     if (!intake.project_id || !intake.client_id) {
-      throw new Error('Intake must be converted to project and client first');
+      throw new ValidationError('Intake must be converted to project and client first');
     }
 
     // Generate line items based on project type and budget
@@ -971,7 +976,7 @@ export class InvoiceService {
     // Verify the deposit invoice exists and has available credit
     const depositInvoice = await this.getInvoiceById(depositInvoiceId);
     if (depositInvoice.invoiceType !== 'deposit' || depositInvoice.status !== 'paid') {
-      throw new Error('Invalid deposit invoice or deposit not paid');
+      throw new ValidationError('Invalid deposit invoice or deposit not paid');
     }
 
     // Get available amount for this deposit
@@ -985,13 +990,13 @@ export class InvoiceService {
     const availableAmount = depositInvoice.amountTotal - totalApplied;
 
     if (amount > availableAmount) {
-      throw new Error(`Insufficient deposit credit. Available: $${availableAmount.toFixed(2)}`);
+      throw new ValidationError(`Insufficient deposit credit. Available: $${availableAmount.toFixed(2)}`);
     }
 
     // Verify the target invoice exists
     const targetInvoice = await this.getInvoiceById(invoiceId);
     if (targetInvoice.invoiceType === 'deposit') {
-      throw new Error('Cannot apply credit to a deposit invoice');
+      throw new ValidationError('Cannot apply credit to a deposit invoice');
     }
 
     // Insert the credit record
@@ -1122,7 +1127,7 @@ export class InvoiceService {
     const row = await this.getDb().get(sql, [id]);
 
     if (!row) {
-      throw new Error(`Payment plan template with ID ${id} not found`);
+      throw new NotFoundError('payment plan template', id);
     }
 
     return {
@@ -1415,7 +1420,7 @@ export class InvoiceService {
     const invoice = await this.getInvoiceById(id);
 
     if (invoice.status === 'paid') {
-      throw new Error('Paid invoices cannot be deleted or voided');
+      throw new ConflictError('Paid invoices cannot be deleted or voided');
     }
 
     // Draft and cancelled invoices can be permanently deleted.
@@ -1725,7 +1730,7 @@ export class InvoiceService {
     const row = await this.getDb().get(sql, [id]);
 
     if (!row) {
-      throw new Error(`Payment terms preset with ID ${id} not found`);
+      throw new NotFoundError('payment terms preset', id);
     }
 
     return {
@@ -1881,7 +1886,7 @@ export class InvoiceService {
     const invoice = await this.getInvoiceById(invoiceId);
 
     if (invoice.status !== 'draft') {
-      throw new Error('Only draft invoices can have tax/discount modified');
+      throw new ValidationError('Only draft invoices can have tax/discount modified');
     }
 
     const totals = this.calculateInvoiceTotals(
@@ -1960,13 +1965,13 @@ export class InvoiceService {
     const invoice = await this.getInvoiceById(invoiceId);
 
     if (invoice.lateFeeAppliedAt) {
-      throw new Error('Late fee has already been applied to this invoice');
+      throw new ConflictError('Late fee has already been applied to this invoice');
     }
 
     const lateFee = this.calculateLateFee(invoice);
 
     if (lateFee <= 0) {
-      throw new Error('No late fee applicable for this invoice');
+      throw new ValidationError('No late fee applicable for this invoice');
     }
 
     const newTotal = invoice.amountTotal + lateFee;
