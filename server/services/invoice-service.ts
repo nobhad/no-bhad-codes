@@ -767,36 +767,41 @@ export class InvoiceService {
   }
 
   /**
-   * Save line items to the invoice_line_items table
+   * Save line items to the invoice_line_items table.
+   *
+   * Wrapped in a transaction so a crash between the DELETE and the
+   * INSERT loop can't leave the invoice with no line items at all —
+   * the original rows either survive completely (rollback) or are
+   * fully replaced (commit).
    */
   async saveLineItems(invoiceId: number, lineItems: InvoiceLineItem[]): Promise<void> {
-    // Delete existing line items for this invoice
-    await this.getDb().run('DELETE FROM invoice_line_items WHERE invoice_id = ?', [invoiceId]);
+    await this.getDb().transaction(async (ctx) => {
+      await ctx.run('DELETE FROM invoice_line_items WHERE invoice_id = ?', [invoiceId]);
 
-    // Insert new line items
-    for (let i = 0; i < lineItems.length; i++) {
-      const item = lineItems[i];
-      await this.getDb().run(
-        `INSERT INTO invoice_line_items (
-          invoice_id, description, quantity, unit_price, amount,
-          tax_rate, tax_amount, discount_type, discount_value, discount_amount,
-          sort_order
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          invoiceId,
-          item.description,
-          item.quantity,
-          item.rate,
-          item.amount,
-          item.taxRate ?? null,
-          item.taxAmount ?? null,
-          item.discountType ?? null,
-          item.discountValue ?? null,
-          item.discountAmount ?? null,
-          i
-        ]
-      );
-    }
+      for (let i = 0; i < lineItems.length; i++) {
+        const item = lineItems[i];
+        await ctx.run(
+          `INSERT INTO invoice_line_items (
+            invoice_id, description, quantity, unit_price, amount,
+            tax_rate, tax_amount, discount_type, discount_value, discount_amount,
+            sort_order
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            invoiceId,
+            item.description,
+            item.quantity,
+            item.rate,
+            item.amount,
+            item.taxRate ?? null,
+            item.taxAmount ?? null,
+            item.discountType ?? null,
+            item.discountValue ?? null,
+            item.discountAmount ?? null,
+            i
+          ]
+        );
+      }
+    });
   }
 
   /**
@@ -1413,26 +1418,31 @@ export class InvoiceService {
       throw new Error('Paid invoices cannot be deleted or voided');
     }
 
-    // Draft and cancelled invoices can be permanently deleted
+    // Draft and cancelled invoices can be permanently deleted.
+    // The three deletes must be atomic so a crash can't leave
+    // orphaned reminder/credit rows pointing at a deleted invoice id.
     if (invoice.status === 'draft' || invoice.status === 'cancelled') {
-      // Delete related records first
-      await this.getDb().run('DELETE FROM invoice_reminders WHERE invoice_id = ?', [id]);
-      await this.getDb().run('DELETE FROM invoice_credits WHERE invoice_id = ?', [id]);
-      await this.getDb().run('DELETE FROM invoices WHERE id = ?', [id]);
+      await this.getDb().transaction(async (ctx) => {
+        await ctx.run('DELETE FROM invoice_reminders WHERE invoice_id = ?', [id]);
+        await ctx.run('DELETE FROM invoice_credits WHERE invoice_id = ?', [id]);
+        await ctx.run('DELETE FROM invoices WHERE id = ?', [id]);
+      });
       return { action: 'deleted' };
     }
 
-    // Sent/Viewed/Partial/Overdue invoices are voided (soft delete)
-    await this.getDb().run(
-      'UPDATE invoices SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      ['cancelled', id]
-    );
-
-    // Cancel pending reminders
-    await this.getDb().run(
-      'UPDATE invoice_reminders SET status = ? WHERE invoice_id = ? AND status = ?',
-      ['skipped', id, 'pending']
-    );
+    // Sent/Viewed/Partial/Overdue invoices are voided (soft delete).
+    // Status change and reminder cancellation go together — we don't
+    // want a voided invoice to still fire reminders to the client.
+    await this.getDb().transaction(async (ctx) => {
+      await ctx.run(
+        'UPDATE invoices SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+        ['cancelled', id]
+      );
+      await ctx.run(
+        'UPDATE invoice_reminders SET status = ? WHERE invoice_id = ? AND status = ?',
+        ['skipped', id, 'pending']
+      );
+    });
 
     return { action: 'voided' };
   }
