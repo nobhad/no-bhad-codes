@@ -19,6 +19,31 @@ import { ContentRequestValidationSchemas } from './shared.js';
 
 const router = express.Router();
 
+/**
+ * Resolve the item and confirm it belongs to the authenticated
+ * client, returning null + writing the 404 when it doesn't. Every
+ * submit endpoint runs this first — without it, an authenticated
+ * client could submit text/files/URLs/data for any other client's
+ * item by guessing the id.
+ */
+async function requireOwnItem(
+  req: AuthenticatedRequest,
+  res: express.Response,
+  itemId: number
+) {
+  if (!Number.isInteger(itemId) || itemId <= 0) {
+    errorResponse(res, 'Invalid item ID', 400, ErrorCodes.VALIDATION_ERROR);
+    return null;
+  }
+  const item = await contentRequestService.getItem(itemId);
+  if (!item || item.clientId !== req.user?.id) {
+    // 404 not 403 — don't leak existence of other clients' items.
+    errorResponse(res, 'Item not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+    return null;
+  }
+  return item;
+}
+
 // =====================================================
 // CLIENT ENDPOINTS
 // =====================================================
@@ -80,10 +105,10 @@ router.post(
   validateRequest(ContentRequestValidationSchemas.submitText),
   invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const item = await contentRequestService.submitText(
-      Number(req.params.itemId),
-      req.body.text
-    );
+    const itemId = Number(req.params.itemId);
+    if (!(await requireOwnItem(req, res, itemId))) return;
+
+    const item = await contentRequestService.submitText(itemId, req.body.text);
 
     await workflowTriggerService.emit('content_request.submitted', {
       entityId: item.id,
@@ -111,10 +136,10 @@ router.post(
       return;
     }
 
-    const item = await contentRequestService.submitFile(
-      Number(req.params.itemId),
-      file_id
-    );
+    const itemId = Number(req.params.itemId);
+    if (!(await requireOwnItem(req, res, itemId))) return;
+
+    const item = await contentRequestService.submitFile(itemId, file_id);
 
     await workflowTriggerService.emit('content_request.submitted', {
       entityId: item.id,
@@ -137,10 +162,10 @@ router.post(
   validateRequest(ContentRequestValidationSchemas.submitUrl),
   invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const item = await contentRequestService.submitUrl(
-      Number(req.params.itemId),
-      req.body.url
-    );
+    const itemId = Number(req.params.itemId);
+    if (!(await requireOwnItem(req, res, itemId))) return;
+
+    const item = await contentRequestService.submitUrl(itemId, req.body.url);
 
     await workflowTriggerService.emit('content_request.submitted', {
       entityId: item.id,
@@ -168,10 +193,10 @@ router.post(
       return;
     }
 
-    const item = await contentRequestService.submitStructured(
-      Number(req.params.itemId),
-      data
-    );
+    const itemId = Number(req.params.itemId);
+    if (!(await requireOwnItem(req, res, itemId))) return;
+
+    const item = await contentRequestService.submitStructured(itemId, data);
 
     await workflowTriggerService.emit('content_request.submitted', {
       entityId: item.id,

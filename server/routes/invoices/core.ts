@@ -1117,10 +1117,23 @@ router.get(
   '/stats',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = req.query.clientId ? parseInt(req.query.clientId as string, 10) : undefined;
+    // Non-admins can only read their own stats. An authenticated
+    // client passing ?clientId=999 could otherwise enumerate the
+    // billing state of every other client on the platform.
+    const requestedClientId = req.query.clientId
+      ? parseInt(req.query.clientId as string, 10)
+      : undefined;
+    const isAdmin = req.user?.type === 'admin';
+    const effectiveClientId = isAdmin
+      ? requestedClientId
+      : (req.user?.id as number | undefined);
+
+    if (!isAdmin && requestedClientId !== undefined && requestedClientId !== req.user?.id) {
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
+    }
 
     try {
-      const stats = await getInvoiceService().getInvoiceStats(clientId);
+      const stats = await getInvoiceService().getInvoiceStats(effectiveClientId);
       sendSuccess(res, { stats });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve invoice statistics', 500, ErrorCodes.STATS_FAILED, {

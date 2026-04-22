@@ -1277,18 +1277,19 @@ export class PageTransitionModule extends BaseModule {
     const currentIndex = currentSlug ? slugs.indexOf(currentSlug) : -1;
     if (currentIndex === -1) return null;
 
-    // Carousel exits to the projects tile at both ends. The projects "TV"
-    // page acts as the gallery's home base — scroll past the last detail
-    // and you land back on projects (with the TV showing the last channel
-    // you came from); scroll left from the first and you go back to
-    // projects too. Home (intro) is no longer in the horizontal flow.
+    // Infinite horizontal carousel — both ends wrap within the project
+    // list so the user can scroll left or right forever from the projects
+    // tile without ever dead-ending. Vertical scroll (up/down) is the
+    // way out: native scroll on project-detail handles tall content,
+    // and the compass / menu offer explicit escape hatches.
+    //   right past last  → first project  (wrap forward)
+    //   left from first  → last project   (wrap backward)
     if (direction === 'left') {
-      if (currentIndex === 0) return '#/projects';
-      return `#/projects/${slugs[currentIndex - 1]}`;
+      const prev = currentIndex === 0 ? slugs.length - 1 : currentIndex - 1;
+      return `#/projects/${slugs[prev]}`;
     }
-    // right: walk forward, exit to projects at end
-    if (currentIndex >= slugs.length - 1) return '#/projects';
-    return `#/projects/${slugs[currentIndex + 1]}`;
+    const next = currentIndex >= slugs.length - 1 ? 0 : currentIndex + 1;
+    return `#/projects/${slugs[next]}`;
   }
 
   /**
