@@ -745,14 +745,15 @@ export class PageTransitionModule extends BaseModule {
   /**
    * Read the rendered project list out of the DOM and return slugs in order.
    * Source of truth for the carousel order — same as what the user sees in
-   * the projects tile.
+   * the projects tile. Project cards are .work-card divs (not anchor tags),
+   * so we read data-project-slug rather than href.
    */
   private getProjectSlugs(): string[] {
-    const links = Array.from(
-      document.querySelectorAll<HTMLAnchorElement>('#projects a[href^="#/projects/"]')
+    const cards = Array.from(
+      document.querySelectorAll<HTMLElement>('#projects .work-card[data-project-slug]')
     );
-    return links
-      .map((a) => a.getAttribute('href')?.replace('#/projects/', '') ?? '')
+    return cards
+      .map((card) => card.dataset.projectSlug ?? '')
       .filter((slug) => slug.length > 0);
   }
 
