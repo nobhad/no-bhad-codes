@@ -14,6 +14,7 @@ import { join } from 'path';
 import { getDatabase } from '../database/init.js';
 import { getFloat } from '../database/row-helpers.js';
 import { BUSINESS_INFO } from '../config/business.js';
+import { NotFoundError } from '../utils/app-errors.js';
 import { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } from '../config/pdf-styles.js';
 import { getUploadsSubdir, getRelativePath, sanitizeFilename } from '../config/uploads.js';
 import {
@@ -405,7 +406,7 @@ class ReceiptService {
     );
 
     if (!invoiceRow) {
-      throw new Error('Invoice not found');
+      throw new NotFoundError('invoice');
     }
 
     const invoiceNumber = String(invoiceRow.invoice_number || `INV-${invoiceId}`);
@@ -603,7 +604,7 @@ class ReceiptService {
     );
 
     if (!row) {
-      throw new Error('Receipt not found');
+      throw new NotFoundError('receipt');
     }
 
     return this.transformRow(row as unknown as ReceiptRow);
@@ -628,7 +629,7 @@ class ReceiptService {
     );
 
     if (!row) {
-      throw new Error('Receipt not found');
+      throw new NotFoundError('receipt');
     }
 
     return this.transformRow(row as unknown as ReceiptRow);
@@ -754,7 +755,7 @@ class ReceiptService {
     )) as Record<string, unknown> | null;
 
     if (!row) {
-      throw new Error('Receipt not found');
+      throw new NotFoundError('receipt');
     }
 
     // Regenerate PDF (in case original file is missing)

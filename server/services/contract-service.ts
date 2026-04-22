@@ -25,6 +25,7 @@ import {
   toContractTemplate,
   toContract
 } from '../database/entities/index.js';
+import { NotFoundError, ValidationError } from '../utils/app-errors.js';
 
 // =====================================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -95,7 +96,7 @@ class ContractService {
     );
 
     if (!row) {
-      throw new Error('Project or client not found');
+      throw new NotFoundError('project or client');
     }
 
     const data = row as Record<string, unknown>;
@@ -148,7 +149,7 @@ class ContractService {
     const row = await db.get(`SELECT ${CONTRACT_TEMPLATE_COLUMNS} FROM contract_templates WHERE id = ?`, [templateId]);
 
     if (!row) {
-      throw new Error('Template not found');
+      throw new NotFoundError('contract template');
     }
 
     return toContractTemplate(row as ContractTemplateRow);
@@ -289,7 +290,7 @@ class ContractService {
     );
 
     if (!row) {
-      throw new Error('Contract not found');
+      throw new NotFoundError('contract');
     }
 
     return toContract(row as ContractRow);
@@ -300,7 +301,7 @@ class ContractService {
     const status = data.status || 'draft';
 
     if (!CONTRACT_STATUSES.includes(status)) {
-      throw new Error('Invalid contract status');
+      throw new ValidationError('Invalid contract status');
     }
 
     const result = await db.run(
@@ -376,7 +377,7 @@ class ContractService {
     }
     if (data.status !== undefined) {
       if (!CONTRACT_STATUSES.includes(data.status)) {
-        throw new Error('Invalid contract status');
+        throw new ValidationError('Invalid contract status');
       }
       updates.push('status = ?');
       params.push(data.status);
