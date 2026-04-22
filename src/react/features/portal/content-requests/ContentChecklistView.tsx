@@ -14,6 +14,7 @@ import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBa
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { usePortalData } from '@react/hooks/usePortalFetch';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { apiPost } from '@/utils/api-client';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import type { PortalViewProps } from '../types';
 
@@ -173,12 +174,11 @@ export function ContentChecklistView({ getAuthToken }: ContentChecklistViewProps
         : type === 'structured' ? { data: value }
           : { file_id: value };
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(body)
-    });
+    // apiPost goes through the shared fetch wrapper that injects the
+    // CSRF header and credentials. A raw fetch here bypassed the
+    // x-csrf-token injection and would have been rejected 403 by the
+    // server's CSRF middleware on every submit.
+    const response = await apiPost(endpoint, body);
 
     if (!response.ok) throw new Error('Submission failed');
     refetch();

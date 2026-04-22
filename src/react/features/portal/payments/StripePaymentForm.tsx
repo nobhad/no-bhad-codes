@@ -11,7 +11,7 @@
  */
 
 import * as React from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { Loader2, CreditCard, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { usePortalFetch } from '../../../hooks/usePortalFetch';
@@ -201,6 +201,19 @@ export function StripePaymentForm({
   const [error, setError] = useState<string | null>(null);
   const { portalFetch } = usePortalFetch({ getAuthToken });
 
+  // Lock one Idempotency-Key per form mount. A StrictMode double-invoke
+  // or network retry of the createIntent POST re-uses the same key and
+  // hits the server's idempotency cache instead of minting a second
+  // PaymentIntent at Stripe. A fresh mount (user closes + reopens the
+  // form) gets a fresh key, which is the behaviour we want.
+  const idempotencyKeyRef = useRef<string>('');
+  if (!idempotencyKeyRef.current) {
+    idempotencyKeyRef.current =
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `pay-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
+
   useEffect(() => {
     let cancelled = false;
 
@@ -210,7 +223,8 @@ export function StripePaymentForm({
           API_ENDPOINTS.PAYMENTS_CREATE_INTENT,
           {
             method: 'POST',
-            body: { invoiceId, installmentId }
+            body: { invoiceId, installmentId },
+            headers: { 'Idempotency-Key': idempotencyKeyRef.current }
           }
         );
 
