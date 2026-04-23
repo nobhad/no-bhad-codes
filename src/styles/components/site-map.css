@@ -206,7 +206,11 @@ html[data-initial-page="portal-login"]:not(.js-ready) main#main-content {
  */
 .map-compass {
   position: fixed;
-  inset: var(--header-height) 0 var(--footer-height) 0;
+  /* --footer-height is referenced widely but never actually defined
+     anywhere in the design tokens. Using a hard-coded 40px estimate
+     here keeps the down arrow on screen instead of slipping behind
+     the footer. */
+  inset: var(--header-height, 50px) 0 40px 0;
   pointer-events: none;
   z-index: var(--z-index-elevated);
   display: grid;
