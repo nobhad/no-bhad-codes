@@ -545,14 +545,20 @@ export class PageTransitionModule extends BaseModule {
   private forwardDirectionsForFirstPaint(pageId: string): Set<Direction> {
     switch (pageId) {
     case 'intro':
-      return new Set(['down']);
+      // Landing page: down enters projects (primary), left/right enter
+      // about/contact (secondary horizontal-loop entries). Hide up
+      // initially so the affordance reads as "scroll down to start".
+      return new Set(['down', 'left', 'right']);
     case 'projects':
-      return new Set(['down', 'right']);
+      // All four directions are useful here: ↑↓ cycle the TV channel,
+      // ←→ navigate to about/contact. Showing all from the first paint
+      // tells the user "you can scroll any direction here."
+      return new Set(['up', 'down', 'left', 'right']);
     case 'project-detail':
-      return new Set(['right']);
+      return new Set(['left', 'right']);
     case 'about':
     case 'contact':
-      return new Set(['down']);
+      return new Set(['left', 'right']);
     default:
       return new Set(['up', 'down', 'left', 'right']);
     }
