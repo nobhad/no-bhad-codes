@@ -87,7 +87,10 @@ const NEIGHBORS: Record<string, Partial<Record<Direction, string>>> = {
   // Vertical from intro still enters projects directly (down) so users
   // who want the gallery without horizontal cycling can jump straight in.
   // Projects vertical channel-surfs the CRT TV (wraps within the list).
-  intro: { down: 'projects', left: 'contact', right: 'about' },
+  // Landing page: horizontal-only. No vertical exit — the user
+  // explicitly does NOT want scrolling down to drag them off the
+  // business card. Use left/right (or the menu) to leave the page.
+  intro: { left: 'contact', right: 'about' },
   about: { left: 'intro', right: 'projects' },
   contact: { left: 'projects', right: 'intro' },
   hero: { right: 'intro' },
@@ -717,7 +720,13 @@ export class PageTransitionModule extends BaseModule {
     // Both handlers gate themselves on isMapPage(currentPageId) so off-map
     // pages keep their normal scrolling behavior.
     this.boundHandleWheel = this.handleWheel.bind(this);
-    window.addEventListener('wheel', this.boundHandleWheel, { passive: true });
+    // Non-passive so the handler can preventDefault() when it navigates.
+    // Without this, the browser also scrolls in addition to firing the
+    // map navigation — user reports "the page is scrolling" while
+    // simultaneously seeing the slide. Native scroll inside scrollable
+    // tiles still works because the early-return paths (canScrollDown /
+    // scrollTop > 0) skip preventDefault.
+    window.addEventListener('wheel', this.boundHandleWheel, { passive: false });
 
     this.boundHandleKeydown = this.handleKeydown.bind(this);
     window.addEventListener('keydown', this.boundHandleKeydown);
@@ -1072,25 +1081,39 @@ export class PageTransitionModule extends BaseModule {
     // non-natural-scroll trackpad users get one inverted axis; touch
     // and natural-scroll trackpad users — the majority — get intuitive
     // gestures across every input device.
+    const onProjects = this.currentPageId === 'projects';
+
     if (absY >= absX) {
+      const dirIfDown = 'down' as Direction;
+      const dirIfUp = 'up' as Direction;
       // Vertical: swipe DOWN (dy < 0 on natural scroll) → 'down'.
-      // Edge guards check scroll position so tall content (like
-      // project-detail case studies) still scrolls natively until the
-      // user hits the boundary.
+      // For projects: ALWAYS navigate (TV channel cycle) — skip the
+      // edge-of-scroll guard since the projects tile shouldn't scroll
+      // natively at all.
+      // For everything else: edge guards check scroll position so tall
+      // content (project-detail case studies) still scrolls natively
+      // until the user hits the boundary.
       if (dy < 0) {
-        const canScrollDown =
-          currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >= 1;
-        if (canScrollDown) return;
-        direction = 'down';
+        if (!onProjects) {
+          const canScrollDown =
+            currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >= 1;
+          if (canScrollDown) return;
+        }
+        direction = dirIfDown;
       } else {
-        if (currentTile.scrollTop >= 1) return;
-        direction = 'up';
+        if (!onProjects && currentTile.scrollTop >= 1) return;
+        direction = dirIfUp;
       }
     } else {
       // Horizontal: swipe RIGHT (dx < 0 on natural scroll) → 'right'.
       direction = dx < 0 ? 'right' : 'left';
     }
 
+    // We're about to navigate (or cycle TV) — only consume the wheel
+    // event if there's actually a destination, otherwise let the
+    // browser scroll natively.
+    if (!this.canNavigate(direction)) return;
+    event.preventDefault();
     this.tryNavigateDirection(direction);
   }
 
@@ -1130,16 +1153,11 @@ export class PageTransitionModule extends BaseModule {
       return;
     }
 
-    // Only preventDefault if this direction actually navigates somewhere.
-    // - Map tiles: check the static NEIGHBORS graph
-    // - project-detail: only left/right navigate (carousel between projects);
-    //   up/down fall through to native scroll so users can read tall case
-    //   studies. Vertical scroll on project-detail must NOT exit to the map.
-    const willNavigate =
-      this.currentPageId === 'project-detail'
-        ? direction === 'left' || direction === 'right'
-        : NEIGHBORS[this.currentPageId]?.[direction] != null;
-    if (!willNavigate) return;
+    // Use canNavigate so this stays in lock-step with the wheel handler
+    // and the compass — handles dynamic cases (projects ↑↓ cycles TV,
+    // project-detail ←→ cycles carousel) that aren't in the static
+    // NEIGHBORS graph.
+    if (!this.canNavigate(direction)) return;
 
     event.preventDefault();
     this.tryNavigateDirection(direction);
