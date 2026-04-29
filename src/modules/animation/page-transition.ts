@@ -1153,6 +1153,24 @@ export class PageTransitionModule extends BaseModule {
       }
     }
 
+    // Enter on the projects tile opens the currently-highlighted TV
+    // channel — same as clicking the row. Lets keyboard users browse
+    // with ↑/↓ and "select" with Enter without having to tab through
+    // the list to focus an individual row first.
+    if (
+      (event.key === 'Enter' || event.key === ' ') &&
+      this.currentPageId === 'projects'
+    ) {
+      const slugs = this.getProjectSlugs();
+      const slug = slugs[this.currentTvIndex];
+      if (slug) {
+        event.preventDefault();
+        this.setPendingSlide('right', `#/projects/${slug}`);
+        window.location.hash = `#/projects/${slug}`;
+      }
+      return;
+    }
+
     let direction: Direction | null = null;
     switch (event.key) {
     case 'ArrowUp':
