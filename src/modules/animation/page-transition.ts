@@ -522,6 +522,15 @@ export class PageTransitionModule extends BaseModule {
       if (this.canNavigate(dir)) navigable.add(dir);
     }
 
+    // On the projects tile, vertical input cycles the TV channel — that
+    // gesture is communicated by the channel-list highlight on the
+    // screen, not by tiny ↑↓ arrows in the corners. Hide those cues so
+    // the compass only shows ←→ (the actual navigation exits).
+    if (this.currentPageId === 'projects') {
+      navigable.delete('up');
+      navigable.delete('down');
+    }
+
     // Until the user has scrolled / navigated once, narrow the cue set
     // to the forward direction(s) of the current page so the affordance
     // reads as a single "go this way to start" hint instead of a four-
@@ -1053,13 +1062,22 @@ export class PageTransitionModule extends BaseModule {
    */
   private handleWheel(event: WheelEvent): void {
     if (this.isMobile && !this.enableOnMobile) return;
-    if (this.isTransitioning) return;
-    if (performance.now() < this.wheelCooldownUntil) return;
     if (!this.introComplete) return;
     // Allow input on map tiles AND on project-detail (so users can scroll
     // back left to projects). Other off-map pages (portal-login, admin)
     // still keep their normal scroll-only behavior.
     if (!this.isMapPage(this.currentPageId) && this.currentPageId !== 'project-detail') return;
+
+    // Tiles that should NEVER scroll natively need to swallow every wheel
+    // event whether or not we end up navigating, otherwise cooldown /
+    // threshold / transition early-returns let the browser scroll the
+    // page underneath. project-detail is intentionally omitted — its
+    // case studies are tall and need native vertical scroll.
+    const consumesAllWheel = this.currentPageId !== 'project-detail';
+    if (consumesAllWheel) event.preventDefault();
+
+    if (this.isTransitioning) return;
+    if (performance.now() < this.wheelCooldownUntil) return;
 
     const dx = event.deltaX;
     const dy = event.deltaY;
