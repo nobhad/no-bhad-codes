@@ -123,6 +123,15 @@ export class ProjectsModule extends BaseModule {
       if (typeof index === 'number') this.setTvChannel(index);
     }) as EventListener);
 
+    // Tune-in: keyboard Enter on the projects tile triggers this so the
+    // TV's title-card pre-roll plays before navigation (matches the
+    // row-click flow that already calls playTitleCardThenNavigate
+    // directly).
+    document.addEventListener('projects:tune-in', ((event: CustomEvent) => {
+      const slug = event.detail?.slug as string | undefined;
+      if (slug) void this.playTitleCardThenNavigate(slug);
+    }) as EventListener);
+
     // Check initial hash for project detail (on page load only)
     this.checkInitialHash();
 
@@ -168,6 +177,16 @@ export class ProjectsModule extends BaseModule {
       // Returning to projects list - reset detail state
       this.currentProjectSlug = null;
       document.title = 'Projects - No Bhad Codes';
+      // Restore the channel-list view on the TV after a tune-in. The
+      // playTitleCardThenNavigate sequence faded the channel list to 0
+      // and the title-card image to 1; reset both so the user comes
+      // back to a "channel guide" view, not a frozen title card.
+      const image = document.querySelector('.crt-tv__image') as HTMLImageElement | null;
+      const channelList = document.querySelector('.crt-tv__channel-list') as HTMLElement | null;
+      const staticOverlay = document.querySelector('.crt-tv__static') as HTMLElement | null;
+      if (image) gsap.set(image, { opacity: 0 });
+      if (channelList) gsap.set(channelList, { opacity: 1 });
+      if (staticOverlay) gsap.set(staticOverlay, { opacity: 0 });
     }
   }
 
@@ -383,17 +402,68 @@ export class ProjectsModule extends BaseModule {
       <ul class="crt-tv__channel-rows">${rows}</ul>
     `;
 
-    // Delegated click → navigate to the project-detail hash. Reuses the
-    // existing renderProjectDetailForSlug flow via the hashchange path,
-    // so the slide transition + TV index sync all behave the same as
-    // the carousel/swipe entry.
+    // Delegated click → "tune in" to the channel: title card fills the
+    // TV screen briefly, THEN navigation to the project-detail page
+    // fires. The pre-roll plays the title-card image full-screen on
+    // the TV with a static flash, giving the channel-flip a satisfying
+    // beat before the slide transition takes over.
     container.addEventListener('click', (event: Event) => {
       const target = event.target as HTMLElement | null;
       const row = target?.closest('.crt-tv__channel-row') as HTMLElement | null;
       const slug = row?.dataset.slug;
       if (!slug) return;
-      window.location.hash = `#/projects/${slug}`;
+      void this.playTitleCardThenNavigate(slug);
     });
+  }
+
+  /**
+   * "Tune in" sequence — fade the channel list out, swap in the project's
+   * title card filling the TV screen with a CRT static flash, hold for a
+   * beat so the user sees what's loading, then trigger navigation to
+   * project-detail. Called from row clicks AND from the page-transition's
+   * Enter-on-projects handler.
+   */
+  private async playTitleCardThenNavigate(slug: string): Promise<void> {
+    if (!this.portfolioData) return;
+    const project = this.portfolioData.projects.find((p) => p.slug === slug);
+    if (!project) return;
+
+    const screen = document.querySelector('.crt-tv__screen') as HTMLElement | null;
+    const image = document.querySelector('.crt-tv__image') as HTMLImageElement | null;
+    const channelList = document.querySelector('.crt-tv__channel-list') as HTMLElement | null;
+    const staticOverlay = document.querySelector('.crt-tv__static') as HTMLElement | null;
+
+    // Fall back to plain navigation if the TV elements aren't in the DOM
+    // (e.g., on mobile where the centered TV layout doesn't render).
+    if (!screen || !image || !channelList || !project.titleCard) {
+      window.location.hash = `#/projects/${slug}`;
+      return;
+    }
+
+    gsap.killTweensOf([image, channelList, staticOverlay].filter(Boolean));
+
+    const STATIC_FLASH = 0.9;
+    const HOLD_MS = 700;
+
+    image.src = project.titleCard;
+    await new Promise<void>((resolve) => {
+      const tl = gsap.timeline({ onComplete: resolve });
+      // Static flash + channel-list fade out together
+      tl.to(staticOverlay, { opacity: STATIC_FLASH, duration: 0.06 }, 0);
+      tl.to(channelList, { opacity: 0, duration: 0.06 }, 0);
+      // Then static settles and image fades in beneath
+      tl.to(image, { opacity: 1, duration: 0.18, ease: 'power2.out' }, 0.08);
+      tl.to(staticOverlay, { opacity: 0.18, duration: 0.25, ease: 'power2.out' }, 0.08);
+    });
+
+    // Hold the title card on the screen for a beat so the user
+    // registers the channel they tuned into.
+    await new Promise<void>((resolve) => setTimeout(resolve, HOLD_MS));
+
+    // Now hand off to navigation. The slide transition takes over from
+    // here. After the user comes BACK to projects later, restore the
+    // channel-list view (handled in handlePageChanged below).
+    window.location.hash = `#/projects/${slug}`;
   }
 
   /**

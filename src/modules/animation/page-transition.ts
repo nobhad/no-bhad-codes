@@ -1157,6 +1157,11 @@ export class PageTransitionModule extends BaseModule {
     // channel — same as clicking the row. Lets keyboard users browse
     // with ↑/↓ and "select" with Enter without having to tab through
     // the list to focus an individual row first.
+    //
+    // Pin the slide direction here so the upcoming hashchange uses it,
+    // and dispatch a 'projects:tune-in' event so ProjectsModule can
+    // play the title-card-fills-screen pre-roll BEFORE navigating
+    // (matches the row-click flow).
     if (
       (event.key === 'Enter' || event.key === ' ') &&
       this.currentPageId === 'projects'
@@ -1166,7 +1171,9 @@ export class PageTransitionModule extends BaseModule {
       if (slug) {
         event.preventDefault();
         this.setPendingSlide('right', `#/projects/${slug}`);
-        window.location.hash = `#/projects/${slug}`;
+        document.dispatchEvent(
+          new CustomEvent('projects:tune-in', { detail: { slug } })
+        );
       }
       return;
     }
