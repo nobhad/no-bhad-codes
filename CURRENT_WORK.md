@@ -15,6 +15,18 @@
 - ESLint: 0 errors, 0 warnings
 - Vite build: passing (193 chunks)
 
+### Tests
+
+- Integration harness: `tests/integration/helpers.ts` — temp SQLite per test, schema dump, JWT minting
+- 6 integration test files passing (20 new tests, all green)
+  - `intake-outbox.test.ts` — transactional commit + dedupe-key (2)
+  - `idempotency-key.test.ts` — middleware contract: replay/422/length/skip (4)
+  - `stripe-webhook-idempotency.test.ts` — claim/release/restart (3)
+  - `circuit-breaker.test.ts` — open/4xx-skip/half-open close (3)
+  - `audit-chain.test.ts` — clean/tamper/delete detection (3)
+  - `system-health-endpoints.test.ts` — dashboard data sources gate + shape (5)
+- Pre-existing failures unchanged: `workflow-automations.test.ts` has 2 mock gaps (not introduced)
+
 ---
 
 ## State of the Art Roadmap

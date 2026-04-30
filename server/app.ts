@@ -777,26 +777,34 @@ async function startServer() {
   }
 }
 
-// Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
-  logger.error('Uncaught Exception:', { error });
-  errorTracker.captureException(error, {
-    tags: { type: 'uncaughtException' }
+// Handle uncaught exceptions / unhandled rejections in real runs.
+// Tests register their own handlers (and `process.exit(1)` here would
+// kill the vitest worker on a benign rejection from a single case).
+if (process.env.NODE_ENV !== 'test') {
+  process.on('uncaughtException', (error) => {
+    logger.error('Uncaught Exception:', { error });
+    errorTracker.captureException(error, {
+      tags: { type: 'uncaughtException' }
+    });
+    process.exit(1);
   });
-  process.exit(1);
-});
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection:', { metadata: { promise: promise.toString(), reason } });
-  errorTracker.captureException(new Error(`Unhandled Rejection: ${reason}`), {
-    tags: { type: 'unhandledRejection' },
-    extra: { promise: promise.toString(), reason }
+  process.on('unhandledRejection', (reason, promise) => {
+    logger.error('Unhandled Rejection:', { metadata: { promise: promise.toString(), reason } });
+    errorTracker.captureException(new Error(`Unhandled Rejection: ${reason}`), {
+      tags: { type: 'unhandledRejection' },
+      extra: { promise: promise.toString(), reason }
+    });
+    process.exit(1);
   });
-  process.exit(1);
-});
+}
 
-// Start the server
-startServer();
+// Start the server. Skipped in test runs — integration tests import
+// `app` to mount it under supertest and don't want a real listener
+// (or the uncaughtException → process.exit(1) hook below) to fight
+// with the runner's lifecycle.
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}
 
 export { app };
