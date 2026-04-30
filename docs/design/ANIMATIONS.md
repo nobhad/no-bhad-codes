@@ -1,6 +1,6 @@
 # Animations
 
-**Last Updated:** March 16, 2026
+**Last Updated:** April 30, 2026
 
 Animation standards for the project, separated by portal and main site. For shared design tokens see [CSS_ARCHITECTURE.md](./CSS_ARCHITECTURE.md).
 
@@ -145,7 +145,7 @@ Located in `src/modules/animation/`. These handle all complex main site animatio
 | `about-hero.ts` | Full viewport "NO BHAD CODES" text animation | Wheel-driven, SVG transforms |
 | `page-hero.ts` | Unified hero text for virtual pages | Wheel-driven SVG |
 | `base-hero-animation.ts` | Shared base class for hero animations | `gsap.timeline()`, `gsap.fromTo()` |
-| `page-transition.ts` | Virtual page blur in/out transitions | `gsap.to()`, `ScrollTrigger` |
+| `page-transition.ts` | 2D spatial scroll-map navigation (5 tiles in plus layout), slide transitions, project-detail carousel, channel cycling | `gsap.to()`, `gsap.timeline()` |
 | `contact-animation.ts` | Contact page cascading animations | `gsap.to()`, `gsap.context()` |
 | `avatar-intro.ts` | Avatar SVG fade-in for terminal intake | `gsap.to()`, `gsap.fromTo()` |
 | `text-animation.ts` | Scroll-driven split-text skew animation | `gsap.timeline()`, `ScrollTrigger` |
@@ -157,7 +157,7 @@ Located in `src/modules/ui/`:
 
 | File | Purpose |
 |------|---------|
-| `projects.ts` | Project card interactions |
+| `projects.ts` | TV channel guide rendering, channel cycling, Looney-Tunes-style title-card tune-in, panel cycle (heading flash + body fade), POWER/CHANNEL button wiring, project-detail page rendering |
 | `contact-form.ts` | Contact form field animations |
 | `business-card-interactions.ts` | Business card hover/interaction effects |
 | `navigation.ts` | Navigation animations and transitions |

@@ -1,7 +1,7 @@
 # Portfolio Projects
 
 **Status:** Complete
-**Last Updated:** February 8, 2026
+**Last Updated:** April 30, 2026
 
 ## Overview
 
@@ -87,7 +87,7 @@ Copy this template and fill in all fields:
 | `screenshots` | string[] | Array of screenshot paths |
 | `liveUrl` | string | URL to live project |
 | `repoUrl` | string | URL to source code |
-| `titleCard` | string | Image shown in CRT TV preview on hover |
+| `titleCard` | object | TV title-card data: `{ composed, bg, color, primary, primaryPt, secondary, secondaryPt }`. `composed` is the full title card with text baked in (shown during tune-in); `bg` is the bg-only version (shown beneath case-study panels); the rest is per-card text spec for future HTML-overlay rendering. |
 
 ### Case Study Fields
 
@@ -98,6 +98,34 @@ Copy this template and fill in all fields:
 | `approach` | string | Solution methodology - how did you solve it? |
 | `results` | string[] | Outcomes and metrics - what was achieved? |
 | `keyFeatures` | string[] | Feature highlights - what are the standout capabilities? |
+
+### TV Channel Preview Fields
+
+The TV channel preview on the projects page intentionally shows shorter copy than the full case-study page. Each project can supply a `tv` namespace with condensed versions of any case-study field. When a `tv.X` field is missing, the TV falls back to the full `X` field — so projects without curated TV copy still render.
+
+```json
+"tv": {
+  "description": "Shorter intro paragraph for the TV preview.",
+  "challenge": "One-or-two-sentence challenge.",
+  "approach": "One-or-two-sentence approach.",
+  "keyFeatures": ["Top 3 features for the TV"],
+  "results": ["Top 2-3 outcomes"]
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `tv.description` | string | TV-specific shorter description (falls back to full `description`) |
+| `tv.challenge` | string | TV-specific challenge (falls back to full `challenge`) |
+| `tv.approach` | string | TV-specific approach (falls back to full `approach`) |
+| `tv.keyFeatures` | string[] | TV-specific feature list (falls back to full `keyFeatures`) |
+| `tv.results` | string[] | TV-specific results list (falls back to full `results`) |
+
+### TV Channel-Display LED
+
+The vintage TV's "88" digital readout is wired to mirror the active channel. Channel 01 is the channel guide (the projects landing page itself); channels 02+ map to documented projects in order.
+
+LED images live at `public/images/channel_NN.webp` (zero-padded two digits). The LED swaps to channel 01 whenever the user returns to the guide and to the matching channel number when a project is tuned in.
 
 ## Category Options
 

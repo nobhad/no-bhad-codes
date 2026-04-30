@@ -1,6 +1,6 @@
 # Main Site Design System
 
-**Last Updated:** March 16, 2026
+**Last Updated:** April 30, 2026
 
 Design standards for the main marketing site (home, about, contact, projects portfolio). For shared design tokens see [CSS Architecture](./CSS_ARCHITECTURE.md). For portal design see [Portal Design](./PORTAL_DESIGN.md).
 
@@ -56,7 +56,7 @@ On mobile (`max-width: 767px`):
 
 - Pages stack vertically in normal document flow
 - Standard scroll behavior
-- No blur transitions
+- No scroll-map (single-column scrolling instead of spatial tiles)
 - Touch-optimized targets (44x44px minimum)
 
 ### Page State CSS Classes
@@ -112,7 +112,7 @@ Located in `src/styles/pages/`:
 |------|------|-------------|--------|
 | `about.css` | About section | `.about-section`, `.about-layout`, `.about-image-column`, `.about-text-column` | Two-column grid (image + text) |
 | `contact.css` | Contact form | `.contact-section`, `.portal-login-form` | Centered single column |
-| `projects.css` | Portfolio list | `.projects-section`, `.work-half-wrapper`, `.card-container`, `.crt-tv` | Flex row (card list + CRT TV preview) |
+| `projects.css` | Portfolio list | `.projects-section`, `.crt-tv`, `.crt-tv__channel-list`, `.crt-tv__panels` | Centered vintage TV with channel-guide screen + tune-in animation |
 | `projects-detail.css` | Project detail | `.project-detail-section`, `.worksub-wrapper`, `.worksub-header`, `.worksub-intro` | Scrollable column, max-width 1000px |
 | `terminal-intake.css` | AI intake form | `.terminal`, `.terminal-intake` | Terminal style (monospace, green-on-dark) |
 | `client-portal-section.css` | Portal login | `.portal-login-form` | Form states (password vs magic-link) |
@@ -254,7 +254,7 @@ Located in `src/modules/ui/`:
 
 | File | Purpose |
 |------|---------|
-| `projects.ts` | Card stagger entrance/exit, heading divider, project detail animations, CRT TV channel change |
+| `projects.ts` | TV channel guide rendering, channel cycling (wheel/keys/buttons), Looney-Tunes-style title-card tune-in animation, panel cycle (heading flash + body fade), POWER/CHANNEL button wiring, project-detail page rendering |
 | `contact-form.ts` | Contact form field cascade animations |
 | `business-card-interactions.ts` | Business card hover/interaction effects |
 | `navigation.ts` | Menu open/close, rolling text, theme transitions |
@@ -312,7 +312,7 @@ When active, each page uses a specific display mode:
 |------|---------|-------|
 | `.contact-section` | `grid` | Centered form |
 | `.about-section` | `grid` | Two-column layout |
-| `.projects-section` | `flex` | Card list + CRT TV |
+| `.projects-section` | `flex` | Centered vintage TV with on-screen channel guide |
 | `.project-detail-section` | `flex` | Scrollable column |
 | `.business-card-section` | `flex` | Centered card |
 
@@ -345,10 +345,10 @@ Located in `src/styles/mobile/`:
 
 | Breakpoint | Behavior |
 |------------|----------|
-| < 768px | Vertical scroll, no virtual pages, hamburger nav, touch targets |
-| >= 768px | Virtual pages, blur transitions, desktop nav |
+| < 768px | Vertical scroll, no scroll-map, hamburger nav, touch targets |
+| >= 768px | 2D spatial scroll-map (5 tiles in a plus layout), slide transitions, desktop nav |
 | < 1400px | Circular back button hidden on project detail, text link shown instead |
-| < 1100px | CRT TV hidden on projects page |
+| < 1100px | TV channel guide hidden on projects page (mobile fallback TBD) |
 
 ### Dynamic Heights
 

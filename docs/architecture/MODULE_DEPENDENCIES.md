@@ -30,7 +30,7 @@ src/modules/
 │   ├── base-hero-animation.ts  # Base class for hero animations
 │   ├── page-hero.ts            # Page hero section animations
 │   ├── contact-animation.ts    # Contact section animations
-│   ├── page-transition.ts      # Virtual page transitions
+│   ├── page-transition.ts      # Spatial scroll-map navigation + slide transitions
 │   └── text-animation.ts       # ScrollTrigger text effects
 └── utilities/
     └── theme.ts             # Dark/light theme toggle
@@ -126,7 +126,7 @@ business-card-interactions.ts
 |`base-hero-animation.ts`|Base class for hero animations|BaseModule, GSAP|
 |`page-hero.ts`|Page hero section animations|BaseModule, GSAP|
 |`contact-animation.ts`|Contact section animations|BaseModule, GSAP, ScrollTrigger|
-|`page-transition.ts`|Virtual page transitions|BaseModule, GSAP|
+|`page-transition.ts`|Spatial scroll-map navigation + slide transitions|BaseModule, GSAP|
 |`text-animation.ts`|Scroll-triggered text effects|BaseModule, GSAP, ScrollTrigger|
 
 ### Utility Modules
@@ -185,7 +185,7 @@ Some modules have platform-specific behavior:
 |`intro-animation-mobile.ts`|Skipped|Card flip animation|
 |`about-hero.ts`|Active|Active|
 |`page-hero.ts`|Active|Active|
-|`page-transition.ts`|Virtual page transitions|Disabled|
+|`page-transition.ts`|Spatial scroll-map navigation + slide transitions|Disabled|
 |`contact-animation.ts`|Active|Skipped|
 
 ## Indirect Dependencies
