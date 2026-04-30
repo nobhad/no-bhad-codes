@@ -53,8 +53,8 @@
       "repoUrl": "https://github.com/nobhad",
       "isDocumented": true,
       "titleCard": {
-        "composed": "/images/title_card_no-bhad-codes.webp",
-        "bg": "/images/title_card_no-bhad-codes_bg.webp",
+        "composed": "/images/title-card_no-bhad-codes.webp",
+        "bg": "/images/title-card_no-bhad-codes_bg.webp",
         "color": "#000000",
         "primary": [
           "NO BHAD",
@@ -157,8 +157,8 @@
       "liveUrl": "https://nobhad.codes/#/portal",
       "isDocumented": true,
       "titleCard": {
-        "composed": "/images/title_card_The-Backend.webp",
-        "bg": "/images/title_card_The-Backend_bg.webp",
+        "composed": "/images/title-card_the-backend.webp",
+        "bg": "/images/title-card_the-backend_bg.webp",
         "color": "#ffffff",
         "primary": [
           "THE BACKEND"
@@ -237,8 +237,8 @@
       "screenshots": [],
       "isDocumented": true,
       "titleCard": {
-        "composed": "/images/title_card_hedgewitch.webp",
-        "bg": "/images/title_card_hedgewitch_bg.webp",
+        "composed": "/images/title-card_hedgewitch.webp",
+        "bg": "/images/title-card_hedgewitch_bg.webp",
         "color": "#ffffff",
         "primary": [
           "HEDGEWITCH",
