@@ -984,12 +984,23 @@ div.page-hero-desktop {
   pointer-events: none;
 }
 
-/* Title card image displayed on screen */
+/* Composed title-card image (text baked in). Stacks ABOVE .crt-tv__screen-bg
+   at the same full TV-frame canvas. Both images share identical alpha
+   masks (only RGB differs in the text region), so rendering them at the
+   same box guarantees pixel-perfect alignment during the entrance
+   crossfade. Defaults to invisible — playTuneInSequence fades opacity
+   to 1 during the tune-in entry, then back to 0 to reveal the textless
+   bg underneath. */
 .crt-tv__image {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* Above screen-bg (z:1), below the screen aperture content (channel
+     list / panels at z:2 in their own .crt-tv__screen container). */
+  z-index: 1;
   opacity: 0;
+  pointer-events: none;
 }
 
 .crt-tv__image.is-visible {
