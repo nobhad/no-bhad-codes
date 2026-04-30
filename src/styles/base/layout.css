@@ -51,7 +51,15 @@ main {
   height: calc(100vh - var(--header-height) - var(--footer-height));
   padding: 0;
   margin: 0;
-  overflow-y: auto;
+  /* overflow-y:visible (NOT auto) so drop-shadows / box-shadows on
+     content inside main (TV, business card) can bleed past main's
+     bottom edge — that chop is what was creating a hard horizontal
+     line under shadowed objects. Header and footer are transparent,
+     so the shadow renders under them onto the page background.
+     overflow-x stays hidden so the spatial-map camera works (off-
+     screen tiles must not be visible during pans). Tiles or sections
+     that need their own scroll (project-detail) declare it themselves. */
+  overflow-y: visible;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;

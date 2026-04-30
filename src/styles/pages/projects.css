@@ -894,7 +894,19 @@ div.page-hero-desktop {
   display: block;
   z-index: 3;
   pointer-events: none;
+  /* Drop-shadow follows the frame's transparent silhouette (the wood
+     case + bezel), unlike box-shadow which would draw a rectangle
+     around the whole image bounds. Mirrors the business card's
+     0 10px 30px var(--color-shadow) treatment so the TV reads as a
+     physical object grounded in the section. The shadow extends past
+     main's bottom edge — main[data-active-page="projects"] below opens
+     overflow-y so it doesn't get clipped. */
+  filter: drop-shadow(0 10px 30px var(--color-shadow));
 }
+
+/* Map-tile vertical-overflow override moved to site-map.css and
+   layout.css so it applies to every tile (TV shadow, business-card
+   shadow, etc.) instead of being scoped per-tile. */
 
 /* LED channel readout — channel_NN.webp files are exported at the same
    1426×1093 canvas as the TV frame, with the lit digit baked in at the
@@ -1473,9 +1485,9 @@ div.page-hero-desktop {
      across viewport sizes without wrapping into the avatar column. */
   font-size: clamp(0.85rem, 2.6cqw, 1.55rem);
   font-style: italic;
-  /* Subtle yellow tint mimicking the original Prevue Guide title color
-     without locking the rest of the screen to a different palette. */
-  color: #ffe27a;
+  /* Greyscale palette — TV interior reads as a single monochrome
+     channel-guide, no Prevue-yellow accent. Inherits the parent
+     .crt-tv__guide-info color (white) by not setting one here. */
 }
 
 .crt-tv__guide-info-channel {
@@ -1500,7 +1512,11 @@ div.page-hero-desktop {
 }
 
 .crt-tv__guide-avatar-body {
-  opacity: 0.18;
+  /* Mid-dark grey silhouette against the TV's dark screen. Overrides
+     the parent SVG's white fill so the body reads as darker than the
+     screen background but still visible — the eye stays white and
+     pops via the glow filter. */
+  fill: #3a3a3a;
 }
 
 .crt-tv__guide-avatar-eye {
