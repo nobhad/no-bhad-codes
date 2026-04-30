@@ -47,14 +47,16 @@
   /* Virtual pages - positioned absolutely like desktop.
      Scoped to DIRECT children of main only — nested <section> elements
      inside project detail content (worksub-info, case-study) must NOT
-     be absolutely positioned or they will stack on top of each other. */
+     be absolutely positioned or they will stack on top of each other.
+     Horizontal padding matches the header's .container so content
+     aligns with the logo / menu button on every screen size. */
   main > section {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    padding: 1rem;
+    padding: 1rem var(--container-padding);
     box-sizing: border-box;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -132,8 +134,10 @@
     right: 0;
     bottom: 0;
     box-sizing: border-box;
-    /* Match contact/about sections: tighter vertical padding on mobile */
-    padding: 1.5rem 1rem 3rem;
+    /* Match contact/about sections: tighter vertical padding on mobile.
+       Horizontal padding matches the header's .container so content
+       aligns with the logo / menu on every screen size. */
+    padding: 1.5rem var(--container-padding) 3rem;
   }
 
   /* About section - SCROLLABLE SECTION
@@ -160,11 +164,13 @@
     box-sizing: border-box;
   }
 
-  /* About content wrapper - natural height, NO min-height constraint */
+  /* About content wrapper - natural height, NO min-height constraint.
+     Horizontal padding matches the header's .container so text aligns
+     with the logo / menu on every screen size. */
   .about-section .about-content {
     display: flex;
     flex-direction: column;
-    padding: 4rem 1rem 6rem 1rem;
+    padding: 4rem var(--container-padding) 6rem;
     gap: 1rem;
     max-width: 100%;
     width: 100%;
@@ -260,24 +266,32 @@
     display: none;
   }
 
-  /* Contact section - auto height to fit form + business card (matching desktop layout) */
+  /* Contact section — DO NOT set position here. The spatial map
+     (site-map.css) puts it at position: absolute; top: 100%; left: 0
+     as the data-map-tile="down" tile, and the camera transform on
+     .site-map is what brings it into view. Setting position: relative
+     pulls the section back into normal flow, which makes every map
+     tile render in a vertically stacked column inside .site-map and
+     causes intro's business card to bleed visibly over the form
+     during/after camera moves. */
   .contact-section {
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
     min-height: calc(100dvh - var(--header-height) - var(--footer-height));
     height: auto;
     max-height: none;
     flex: 0 0 auto;
-    padding: 1.5rem 1rem;
+    /* Horizontal padding matches the header's .container so the form
+       aligns with the logo / menu on every screen size. */
+    padding: 1.5rem var(--container-padding);
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
     overflow: visible;
     box-sizing: border-box;
-    position: relative;
-    /* Solid bg so the page doesn't read as transparent when the spatial-
-       map camera brings the contact tile in. Matches the body bg color. */
-    background-color: var(--color-neutral-300);
+    /* No background-color: keep transparent so body::before parchment
+       texture shows through. Off-map tiles are camera-translated out
+       and main has overflow:hidden, so nothing bleeds during transitions. */
   }
 
   .container,
@@ -344,12 +358,17 @@
     padding: 0;
   }
 
-  /* TV stays visible on mobile — its width: min(...) cap with 98vw lets
-     it scale down to fit narrow viewports. Disable the physical button
-     overlays since they're too small to hit reliably; touch users
-     interact with the channel rows directly instead. */
+  /* TV stays visible on mobile — width: min(...) cap with 98vw lets it
+     scale down to fit narrow viewports. Buttons remain active on touch:
+     the painted overlays are thin (~1.65% of TV height), so we extend
+     each button's hit area with vertical padding that stops short of
+     overlapping the next button. The painted position is unchanged —
+     padding only extends the click box (transparent). The vertical
+     gap between adjacent buttons is ~2.5%, so we use 1% top/bottom
+     padding (≈ half the gap, leaves a small dead-zone between). */
   .projects-section .crt-tv__btn {
-    display: none;
+    padding: 1% 0;
+    box-sizing: content-box;
   }
 
   /* Force single-column flex row */
@@ -385,7 +404,10 @@
 
 @media (--small-mobile) {
   main > section {
-    padding: 0.75rem;
+    /* Vertical drops to 0.75rem; horizontal stays on the
+       --container-padding token so content keeps aligning with the
+       header's .container on small phones. */
+    padding: 0.75rem var(--container-padding);
   }
 
   .section-content {
@@ -412,21 +434,25 @@
 
 @media (--xs-mobile) {
   main > section {
-    padding: 0.5rem;
+    /* Vertical drops to 0.5rem; horizontal stays on the
+       --container-padding token so content keeps aligning with the
+       header's .container on the smallest phones. */
+    padding: 0.5rem var(--container-padding);
   }
 
-  /* Extra-tight layout on the very smallest screens (e.g. iPhone SE) */
+  /* Extra-tight layout on the very smallest screens (e.g. iPhone SE).
+     Keep horizontal aligned with the header's XS rule below. */
   .project-detail-section {
-    /* Give more breathing room on XS (iPhone 12 Pro / SE) */
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+    padding-left: var(--container-padding);
+    padding-right: var(--container-padding);
   }
 
-  /* Match project detail edge-to-edge feel in header on XS */
+  /* Drop the header to the shared --container-padding token so it
+     matches every other section's horizontal inset on XS. */
   .header .container {
     max-width: 100%;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+    padding-left: var(--container-padding);
+    padding-right: var(--container-padding);
   }
 
   /* Section headings on XS — tighter than small-mobile */

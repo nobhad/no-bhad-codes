@@ -13,7 +13,7 @@
   left: 0;
   right: 0;
   height: var(--footer-height, 40px);
-  background: var(--color-neutral-300);
+  background: transparent;
   padding: var(--spacing-sm) 0;
   font-size: var(--font-size-sm);
   color: var(--color-dark);
@@ -42,7 +42,7 @@
 
 /* Footer in dark mode - use light text color */
 [data-theme="dark"] .footer {
-  background: var(--color-neutral-300);
+  background: transparent;
   color: var(--color-dark);
 }
 
@@ -54,6 +54,6 @@
     left: 0;
     right: 0;
     z-index: var(--z-index-footer); /* Below nav (100) so nav menu appears above footer */
-    background: var(--color-neutral-300);
+    background: transparent;
   }
 }
