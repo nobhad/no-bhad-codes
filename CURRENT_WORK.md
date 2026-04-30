@@ -1,8 +1,8 @@
-# Current Work - March 20, 2026
+# Current Work - April 30, 2026
 
 ## Current System Status
 
-**Last Updated**: March 20, 2026
+**Last Updated**: April 30, 2026
 
 ### Server
 
@@ -108,6 +108,41 @@ All items verified against actual code. ~~0A~~, ~~0H~~, ~~0I~~ removed (proved f
 
 - [ ] Horizontal scroll-map nav model — pages arranged as a 2D scroll map around the intro center; replaces the current blur-based transition for nav menu / intro-nav / all non-paw transitions. Paw stays sovereign for intro ↔ any.
 - [ ] **Reincorporate tech-stack content somewhere on the site** — the tech-marquee transition bumper was removed during the scroll-map pivot; the 43-item tech list should land somewhere meaningful (dedicated "kit" page, project-detail sidebar, footer panel, or new home for it). Content list preserved in git history at `index.html` lines 876–920 of commit prior to marquee removal.
+
+---
+
+## TV Channel System (Projects Page)
+
+**Status:** SHIPPED v1 — outstanding polish + features below
+
+The projects page renders a vintage TV with a channel-guide screen. Channel 01 is the guide itself; channels 02+ are individual project tune-ins. Selecting (Enter / click / wheel-cycle to a project channel) plays a static burst, fades the composed title card in, fades to the bg-only image, then auto-cycles through case-study panels (Details → Tagline → Intro → Challenge → Approach → Key Features → Results → Tools → Outro). Outro panel sticks with a click-through link to the existing project-detail page.
+
+### Outstanding TODOs
+
+- [x] **Wire up the TV's physical buttons** — POWER toggles screen on/off (off = title-card base shows, channel list + LED hidden); CHANNEL ▲▼ cycles channels mirroring wheel/arrow keys; VOLUME ▲▼ wired but no-op (reserved for future sound).
+- [ ] **Wire VOLUME ▼▲ buttons** to control something — TBD what (sound effects? panel hold-time multiplier? brightness?).
+- [ ] **Re-export the per-project `*_bg.webp` files at 1426×1093** (matching the new `title_card_base.webp` and `vintage_tv.webp`) so all bg layers stack at `top:0; left:0; width:100%; height:100%` without the percentage math. The new `title_card_base.webp` is already 1426×1093; the per-project bgs (`title_card_no-bhad-codes_bg.webp`, etc.) are still at 1037×769 — until they match, the centering math has to stay.
+- [x] **Update "No Bhad Codes" case study copy** — keyFeature `"CRT TV hover preview"` replaced, scroll-map + TV channel guide added, approach paragraph rewritten to mention signature features.
+- [x] **Verify Hedgewitch and The Backend case studies** — Backend feature claims verified against actual code (`013_magic_link.sql`, `message-service.ts`, Chart.js, node-cron, etc.). Hedgewitch is a separate project — copy reads accurately.
+- [x] **TV channel copy condensed** — added `tv` namespace per project (`description`, `challenge`, `approach`, `keyFeatures`, `results`). TV reads from `tv.X ?? X`. All three documented projects have curated TV copy now.
+- [ ] **Trace root cause of arrow keys triggering native page scroll** on the projects page. Currently mitigated with a backup `preventDefault` listener in `projects.ts`, but page-transition's keyboard handler should be catching them first — investigate why focus / canNavigate / event ordering isn't suppressing default in some cases.
+- [ ] **Add sound effects** (optional / future) — channel-change static crackle, channel-up beep, etc. Audio assets needed.
+- [ ] **Mobile fallback** — TV is currently desktop-only (`.crt-tv` is hidden on mobile). Need a mobile equivalent or revert to a card list on small screens.
+- [ ] **Documentation: refresh `MAIN_SITE_DESIGN.md` projects section** to reflect the new TV channel architecture in more depth (panel cycle, button wiring, channel index model). Currently only the table rows were updated.
+
+### Recent shipped (this session)
+
+- Vintage TV frame with transparent screen aperture (replaces previous CRT)
+- Per-project background images and structured `titleCard` data in portfolio.json
+- Title card composed → bg crossfade animation
+- Per-panel fade cycle with heading-flash treatment for "The Challenge" / "The Approach"
+- LED channel display overlay (channel_01.webp ... channel_10.webp) syncs with active channel
+- Channel-list in 4-column grid with category subtitles, "01 PROJECTS" highlighted by default
+- Per-card text colors (true black or true white) drive panel typography
+- Theme-independent TV interior (hardcoded #fff / #1a1a1a, no light/dark flipping)
+- Per-panel hold timing map (paragraphs 9s, lists 7s, tagline 4s, etc.)
+- Esc cancels active tune-in; click-through link in outro panel preserves detail-page navigation
+- First-person voice in approach sections; "magic links" parenthetical stripped from TV render only
 
 ---
 
