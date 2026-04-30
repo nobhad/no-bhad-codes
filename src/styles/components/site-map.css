@@ -65,18 +65,11 @@
   left: 0;
   width: 100%;
   height: 100%;
-  /* overflow-y:visible (NOT auto) so drop-shadows on tile contents (TV
-     drop-shadow, business-card box-shadow, etc.) can bleed past the
-     tile's bottom edge without being chopped by the tile's own clip
-     box — that chop reads as a hard horizontal line directly under
-     the shadowed object.
-
-     Tiles that genuinely need internal scroll (about on mobile) declare
-     overflow-y on their own selector to opt back in. Project-detail is
-     not a map tile and keeps its own overflow-y:scroll independently.
-
-     iOS momentum scroll prop kept for tiles that re-enable scrolling. */
-  overflow-y: visible;
+  /* Internal scroll for tiles taller than the viewport (projects list,
+     tall about content, contact form on small screens). Main has
+     overflow:hidden to lock the camera, so tile content needs its own
+     scroll container. iOS gets momentum scroll for free. */
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
