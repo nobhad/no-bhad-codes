@@ -1152,10 +1152,10 @@ export class PageTransitionModule extends BaseModule {
    */
   private handleKeydown(event: KeyboardEvent): void {
     if (this.isMobile && !this.enableOnMobile) return;
-    if (this.isTransitioning) return;
-    if (!this.introComplete) return;
-    if (!this.isMapPage(this.currentPageId) && this.currentPageId !== 'project-detail') return;
 
+    // Form inputs always opt out — arrow keys must move the caret /
+    // change select option / etc. Checked first so a focused input stays
+    // fully native regardless of which page is active.
     const target = event.target as HTMLElement | null;
     if (target) {
       const tag = target.tagName;
@@ -1163,6 +1163,29 @@ export class PageTransitionModule extends BaseModule {
         return;
       }
     }
+
+    // Suppress native arrow-key scrolling on every page this module
+    // manages, regardless of transition/intro state. Without this, the
+    // browser scrolls the underlying page during the brief windows when
+    // the navigation gates below cause an early return:
+    //   - isTransitioning: rapid presses during a tile transition
+    //   - !introComplete: presses before the coyote paw resolves
+    //   - canNavigate === false: edge of the spatial map (e.g. up/down
+    //     on about/contact, where NEIGHBORS has no vertical entry)
+    // ProjectsModule no longer needs its backup window-level listener
+    // because this preventDefault runs unconditionally for managed pages.
+    const isArrow =
+      event.key === 'ArrowUp' || event.key === 'ArrowDown' ||
+      event.key === 'ArrowLeft' || event.key === 'ArrowRight';
+    const isManagedPage =
+      this.isMapPage(this.currentPageId) || this.currentPageId === 'project-detail';
+    if (isArrow && isManagedPage) {
+      event.preventDefault();
+    }
+
+    if (this.isTransitioning) return;
+    if (!this.introComplete) return;
+    if (!this.isMapPage(this.currentPageId) && this.currentPageId !== 'project-detail') return;
 
     // Enter on the projects tile opens the currently-highlighted TV
     // channel — same as clicking the row. Lets keyboard users browse
