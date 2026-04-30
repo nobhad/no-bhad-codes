@@ -743,27 +743,16 @@ div.page-hero-desktop {
 }
 
 @media (max-width: 767px) {
-  /* TV takes the full available width on mobile so the screen content
-     reads at the largest possible scale. Explicit margin: 0 auto +
-     justify-content: center on the wrap forces horizontal centering
-     even if some ancestor is sneaking asymmetric padding in. */
+  /* On mobile the TV is the only thing in the section, so drop the
+     wrap's horizontal padding to let the frame paint to the viewport
+     edges. The .crt-tv max-width: 100% (set in the base rule) keeps it
+     inside the wrap's content box. */
   .projects-tv-wrap {
-    padding: 0 !important;
-    width: 100% !important;
-    margin: 0 !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-  }
-  .projects-tv-wrap .crt-tv {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 auto !important;
+    padding: 0;
   }
 
   /* Tighter typography across the TV's text content so it fits the
      much smaller mobile screen. */
-  .crt-tv__channel-heading,
   .crt-tv__channel-row {
     font-size: clamp(0.6rem, 3cqw, 0.9rem);
     padding: 0.3rem 0.4rem;
@@ -776,18 +765,38 @@ div.page-hero-desktop {
     display: none;
   }
 
-  /* On mobile the channel guide is reduced to ONLY the channel-01
-     heading: "Projects / toggle between channels ↑ ↓". Project rows
-     are hidden — the user cycles channels via swipes, and the LED
-     display + tune-in animation shows which channel is active. The
-     "01" number prefix on the heading is hidden too since the LED
-     already carries it. Selectors are nested under .crt-tv__channel-list
-     for higher specificity than the base rules below. */
-  .crt-tv__channel-list .crt-tv__channel-heading > .crt-tv__channel-number {
-    display: none;
+  /* TV-Guide top half on mobile: keep the split, tighten typography,
+     and let info-line text overflow visually past the info column into
+     the avatar pane rather than getting clipped. The info column sits
+     above the feature pane in source order — z-index promotion below
+     ensures the text reads on top of the avatar where they overlap. */
+  .crt-tv__guide-info-brand {
+    font-size: clamp(0.7rem, 3.4cqw, 1rem);
   }
-  .crt-tv__channel-list .crt-tv__channel-rows {
-    display: none;
+  .crt-tv__guide-info-show {
+    font-size: clamp(0.85rem, 4cqw, 1.2rem);
+  }
+  .crt-tv__guide-info-channel {
+    font-size: clamp(0.65rem, 2.8cqw, 0.9rem);
+  }
+  /* Let nowrap text bleed past the column edge instead of clipping —
+     desktop's overflow:hidden / clip rules aren't appropriate here
+     because the mobile column is much narrower and the user prefers
+     overlap to truncation. */
+  .crt-tv__guide-info-line {
+    overflow: visible;
+    text-overflow: clip;
+  }
+  .crt-tv__guide-info {
+    /* Sit above the avatar pane so overflowing text renders on top
+       (no stacking context fight — a positive z-index in a grid item
+       creates a stacking context relative to the parent grid). */
+    position: relative;
+    z-index: 2;
+  }
+  .crt-tv__guide-feature {
+    position: relative;
+    z-index: 1;
   }
 
   /* Allow titles to wrap if they're still too long after the font shrink
@@ -849,21 +858,15 @@ div.page-hero-desktop {
 }
 
 /* Title-card base image — sits BEHIND the TV frame, inside the screen
-   cutout. Box matches the title-card's NATIVE proportions (1037×769
-   within the 1424×1093 TV source) so it renders 1:1 with no scaling /
-   cropping. Centered on the screen aperture (computed from flood-filled
-   cutout center: x=618 / y=477 in source pixels). Update these together
-   with .crt-tv__screen so both layers stay aligned. */
+   cutout. All bg/composed images are exported at the full 1426×1093
+   canvas matching the TV frame, with the title-card painted in place
+   and transparent surroundings, so we just stack at full size — no
+   per-image positioning math. */
 .crt-tv__screen-bg {
   position: absolute;
-  /* (477 - 769/2) / 1093 */
-  top: 8.463%;
-  /* (618 - 1037/2) / 1424 */
-  left: 6.987%;
-  /* 1037 / 1424 */
-  width: 72.823%;
-  /* 769 / 1093 */
-  height: 70.357%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   z-index: 1;
 }
 
@@ -893,20 +896,15 @@ div.page-hero-desktop {
   pointer-events: none;
 }
 
-/* LED channel readout — overlays the vintage_tv frame's "88" digital
-   display panel. Coords measured against vintage_tv.webp (1424×1093) by
-   isolating the lit red segments of the digit display: x:1284-1340,
-   y:93-133. Translated to percentages of the wrapper, which sizes to
-   the frame image. */
+/* LED channel readout — channel_NN.webp files are exported at the same
+   1426×1093 canvas as the TV frame, with the lit digit baked in at the
+   correct position and the rest transparent. So we just stack them at
+   full size over the frame — no per-image positioning math needed. */
 .crt-tv__channel-display {
   position: absolute;
-  top: 8.509%;
-  left: 90.169%;
-  width: 4.003%;
-  height: 3.751%;
-  /* contain preserves the channel image's native aspect (1.58) inside
-     the slightly taller display panel (1.39); centers vertically. */
-  object-fit: contain;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   z-index: 4;
   pointer-events: none;
 }
@@ -1353,20 +1351,26 @@ div.page-hero-desktop {
 .projects-tv-wrap .crt-tv {
   /* Auto-detect the viewport: dvh tracks the visible viewport height
      in real time (responds to browser resize, zoom, and iOS Safari URL
-     bar). The TV width is the smallest of three caps so it always fits
+     bar). The TV width is the smallest of two caps so it always fits
      without overflowing:
-       - 1100px absolute, so it doesn't get absurd on ultra-wide displays
+       - 1240px absolute, so it doesn't get absurd on ultra-wide displays
        - (available vertical space) × 1.3 aspect ratio, where 1.3 is
          the CRT frame's natural width-to-height ratio
-       - 96vw, so it keeps a hair of margin from the viewport edges
      ESTIMATED_CHROME_PX accounts for the page header and footer combined —
      sized by observation since --footer-height is referenced elsewhere but
      never actually defined in the design tokens.
 
+     Width caps intentionally do NOT include a viewport-edge value (e.g.
+     98vw): on mobile the parent .projects-tv-wrap has horizontal padding
+     that reserves edge breathing room, and a vw cap larger than the
+     wrap's content box would overflow it and break flex centering.
+     max-width: 100% pins the TV inside the wrap's content box, which
+     handles the viewport edge spacing in one place.
+
      Caching the calc value as a custom prop lets us reuse it for the
      channel-list font sizing further down. */
   --tv-available-height: calc(100dvh - 110px);
-  width: min(1240px, calc(var(--tv-available-height) * 1.3), 98vw);
+  width: min(1240px, calc(var(--tv-available-height) * 1.3));
   max-width: 100%;
 }
 
@@ -1398,18 +1402,112 @@ div.page-hero-desktop {
    guide). Sized identically to channel rows so the whole list reads as
    one uniform column. Three-column grid (number | text-stack | year-
    placeholder) matching .crt-tv__channel-row exactly. */
-.crt-tv__channel-heading {
-  margin: 0;
+/* TV-GUIDE TOP HALF
+   Split into left info block + right feature pane (avatar). Takes the
+   upper portion of the channel-list. Mirrors the Prevue Guide layout
+   where the top half showed "now showing" info and the bottom half
+   scrolled through the channel grid. */
+.crt-tv__guide-top {
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: clamp(0.75rem, 2.4cqw, 1.25rem);
-  align-items: start;
-  padding: 0.5rem 0.6rem;
+  /* minmax(0, 1fr) instead of plain 1fr — without it, a long unbreakable
+     line in the info column (white-space:nowrap) could force the column
+     wider than its 1fr share and squeeze the avatar pane on the right.
+     minmax(0, 1fr) locks the split at 50/50 regardless of inner content. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(0.5rem, 2cqw, 1rem);
+  flex: 0 0 45%;
+  min-height: 0;
+  align-items: stretch;
+  padding-bottom: clamp(0.4rem, 1.6cqw, 0.8rem);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.crt-tv__guide-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(0.4rem, 1.4cqw, 0.9rem);
   font-family: var(--font-family-mono, monospace);
-  font-size: clamp(0.875rem, 2.3cqw, 1.35rem);
-  line-height: 1.2;
   color: #fff;
-  border-radius: 2px;
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.04em;
+  /* Slight inner padding so text doesn't crowd the divider edge. */
+  padding: 0 clamp(0.25rem, 1cqw, 0.6rem);
+  /* Allow children with nowrap to shrink within the column rather than
+     overflow into the avatar pane. */
+  min-width: 0;
+}
+
+.crt-tv__guide-info-line {
+  display: block;
+  line-height: 1.15;
+  /* Keep each info line on a single line — never wrap. Font-size below
+     is tuned with cqw clamps so long lines stay within the column width
+     across viewport sizes. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+.crt-tv__guide-info-brand {
+  font-size: clamp(0.7rem, 2.2cqw, 1.3rem);
+  font-weight: var(--font-weight-semibold, 600);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.crt-tv__guide-info-show {
+  /* Sized to fit "Portfolio Guide" on one line within ~half the screen
+     width. cqw scales with the TV's container size so it stays one line
+     across viewport sizes without wrapping into the avatar column. */
+  font-size: clamp(0.85rem, 2.6cqw, 1.55rem);
+  font-style: italic;
+  /* Subtle yellow tint mimicking the original Prevue Guide title color
+     without locking the rest of the screen to a different palette. */
+  color: #ffe27a;
+}
+
+.crt-tv__guide-info-channel {
+  font-size: clamp(0.75rem, 2.2cqw, 1.2rem);
+  opacity: 0.9;
+}
+
+.crt-tv__guide-feature {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+}
+
+.crt-tv__guide-avatar {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  fill: #fff;
+}
+
+.crt-tv__guide-avatar-body {
+  opacity: 0.18;
+}
+
+.crt-tv__guide-avatar-eye {
+  fill: #fff;
+  filter: url(#tv-guide-eye-glow);
+  opacity: 1;
+}
+
+/* TV-GUIDE BOTTOM HALF
+   Viewport for the channel-row ticker. Overflow hidden so rows that
+   scroll past the top/bottom are clipped. The inner ul (the track) is
+   tweened by GSAP via projects.ts:startChannelTicker(). */
+.crt-tv__guide-bottom {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  padding-top: clamp(0.4rem, 1.6cqw, 0.8rem);
 }
 
 .crt-tv__channel-rows {
@@ -1419,8 +1517,8 @@ div.page-hero-desktop {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  flex: 1;
-  overflow: hidden;
+  /* No flex / overflow here — the wrapper crops, GSAP translates. */
+  will-change: transform;
 }
 
 .crt-tv__channel-row-item {
