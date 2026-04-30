@@ -608,10 +608,13 @@ div.page-hero-desktop {
   .projects-content {
     flex-direction: column;
     gap: 0;
-    padding: 4rem 1rem 6rem;
-    align-items: stretch; /* Reset flex-start so children fill full width */
-    width: 100%; /* Explicit to work around align-items: flex-start on parent */
-    max-width: 100%; /* Override 90vw cap so content fills full padding box */
+    /* Zero horizontal padding so the TV can fill the full viewport
+       width on mobile. Top/bottom kept minimal since the section just
+       hosts the centered TV (no other content). */
+    padding: 0;
+    align-items: stretch;
+    width: 100%;
+    max-width: 100%;
   }
 
   /* Force single-column layout on mobile — prevents any tablet row rule bleed */
@@ -727,57 +730,117 @@ div.page-hero-desktop {
    CRT TV PREVIEW - DESKTOP ONLY
    =============================================== */
 
-/* CRT TV Container - Hidden on mobile */
+/* CRT TV container — block-level so the centered .projects-tv-wrap
+   sizing kicks in on every breakpoint (desktop, tablet, mobile). The
+   wrapper's `min(1240px, ..., 98vw)` width cap handles scale-down.
+
+   On narrow viewports the TV gets very small and channel-list text
+   would overflow at its desktop sizes. Mobile-specific overrides drop
+   the row font size, hide the year column, and let titles wrap so
+   nothing gets clipped on phone screens. */
 .crt-tv {
-  display: none;
+  display: block;
 }
 
-@media (--desktop-l) {
-  .crt-tv {
-    display: block;
-    position: sticky;
-    top: 120px;
-    width: 550px;
-    flex-shrink: 0;
-    align-self: flex-start;
+@media (max-width: 767px) {
+  /* TV takes the full available width on mobile so the screen content
+     reads at the largest possible scale. Explicit margin: 0 auto +
+     justify-content: center on the wrap forces horizontal centering
+     even if some ancestor is sneaking asymmetric padding in. */
+  .projects-tv-wrap {
+    padding: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+  .projects-tv-wrap .crt-tv {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+  }
+
+  /* Tighter typography across the TV's text content so it fits the
+     much smaller mobile screen. */
+  .crt-tv__channel-heading,
+  .crt-tv__channel-row {
+    font-size: clamp(0.6rem, 3cqw, 0.9rem);
+    padding: 0.3rem 0.4rem;
+    gap: clamp(0.4rem, 1.5cqw, 0.7rem);
+  }
+
+  /* Drop the year column on mobile — there isn't horizontal room for
+     all four columns, and year is the least important data. */
+  .crt-tv__channel-row > .crt-tv__channel-meta:last-child {
+    display: none;
+  }
+
+  /* On mobile the channel guide is reduced to ONLY the channel-01
+     heading: "Projects / toggle between channels ↑ ↓". Project rows
+     are hidden — the user cycles channels via swipes, and the LED
+     display + tune-in animation shows which channel is active. The
+     "01" number prefix on the heading is hidden too since the LED
+     already carries it. Selectors are nested under .crt-tv__channel-list
+     for higher specificity than the base rules below. */
+  .crt-tv__channel-list .crt-tv__channel-heading > .crt-tv__channel-number {
+    display: none;
+  }
+  .crt-tv__channel-list .crt-tv__channel-rows {
+    display: none;
+  }
+
+  /* Allow titles to wrap if they're still too long after the font shrink
+     (e.g., "Hedgewitch Horticulture"). */
+  .crt-tv__channel-title {
+    white-space: normal;
+  }
+
+  /* Tune-in panel typography — bumped on mobile so regular text reads
+     comfortably even on the smaller TV. Prose panels (intro, challenge,
+     approach) are the auto-scrolling ones; bigger body text means each
+     line is taller and the scroll moves at a more comfortable pace. */
+  .crt-tv__panel,
+  .crt-tv__panel-body {
+    font-size: clamp(1.05rem, 4.6cqw, 1.5rem);
+    line-height: 1.5;
+  }
+
+  .crt-tv__panel-tagline {
+    font-size: clamp(1.4rem, 7cqw, 2rem);
+  }
+
+  .crt-tv__panel-heading--stacked {
+    font-size: clamp(1.5rem, 8cqw, 2.4rem);
+  }
+
+  .crt-tv__panel-details dt,
+  .crt-tv__panel-details dd {
+    font-size: clamp(0.95rem, 4cqw, 1.3rem);
+  }
+
+  /* Allow the value column to wrap on mobile so long values like
+     "Full Stack Developer" break onto two lines instead of clipping. */
+  .crt-tv__panel-details {
+    grid-template-columns: max-content 1fr;
+    gap: 0.5em 1em;
+  }
+  .crt-tv__panel-details dd {
+    /* pre-line preserves the literal newline that JS injects before the
+       last word of multi-word role values, breaking "Full Stack\n
+       Developer" onto two lines. On desktop the dd uses white-space:
+       normal so the same newline collapses to a single space. */
+    white-space: pre-line;
+    word-break: normal;
+    overflow-wrap: break-word;
+    line-height: 1.15;
+  }
+
+  .crt-tv__panel-cta {
+    font-size: clamp(1.1rem, 5cqw, 1.7rem);
   }
 }
 
-/* Flex row container for project list + TV */
-.projects-flex-row {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  width: 100%;
-}
-
-/* Left column: heading + hr + project cards */
-.projects-list-column {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;
-}
-
-.projects-list-column h2 {
-  margin: 0 0 0.25rem 0;
-}
-
-.projects-list-column hr,
-.projects-list-column .heading-divider {
-  margin: 0 0 2rem 0;
-}
-
-@media (--desktop-l) {
-  .projects-flex-row {
-    /* row-reverse: TV on the left, project list on the right.
-       DOM order is preserved (list first, then TV) for accessibility/screen
-       readers — only the visual layout flips. */
-    flex-direction: row-reverse;
-    gap: 8rem;
-    align-items: flex-start;
-  }
-}
 
 /* TV wrapper - contains layered elements */
 .crt-tv__wrapper {

@@ -117,6 +117,13 @@ All items verified against actual code. ~~0A~~, ~~0H~~, ~~0I~~ removed (proved f
 
 The projects page renders a vintage TV with a channel-guide screen. Channel 01 is the guide itself; channels 02+ are individual project tune-ins. Selecting (Enter / click / wheel-cycle to a project channel) plays a static burst, fades the composed title card in, fades to the bg-only image, then auto-cycles through case-study panels (Details → Tagline → Intro → Challenge → Approach → Key Features → Results → Tools → Outro). Outro panel sticks with a click-through link to the existing project-detail page.
 
+### Open Mobile Bugs (paused at end of day, pick up next session)
+
+- [ ] **Business card hovers over every section after navigating left/right through all pages the first time.** Visible on about page and over the projects-page TV. The card showing is the styled `.business-card-section` card (white bg with "Noelle Bhaduri / GENIUS / HAVE BRAIN / WILL TRAVEL"), NOT the morph SVG. Suspect the intro tile (or its child) is getting fixed-position behavior or a high z-index after the user has cycled through the spatial map once. **Investigation needed:** check if `.business-card-section.page-active` z-index rule (in mobile/layout.css) is being applied erroneously after navigation, OR if the camera transform on `.site-map` isn't translating the intro tile off-screen on mobile re-entry.
+- [ ] **TV not horizontally centered on mobile.** Set `width: 100% !important; margin: 0 auto !important; justify-content: center !important;` on `.projects-tv-wrap` and `.crt-tv` but the TV is still right-offset. Probably an ancestor (main / .site-map / projects tile) has asymmetric padding or transform.
+- [ ] **Channel rows still showing on mobile** despite `.crt-tv__channel-list .crt-tv__channel-rows { display: none }` in the mobile media query. Likely a more specific rule overriding it later in the cascade, or the media query isn't matching as expected. Try `!important` or move the rule below the base.
+- [ ] **Contact page bg + avatar missing on mobile.** Earlier added `background-color: var(--color-neutral-300)` to `.contact-section` mobile rule which may be masking the body's parchment texture or hiding child elements. Try removing the bg-color override and verify body's parchment shows through.
+
 ### Outstanding TODOs
 
 - [x] **Wire up the TV's physical buttons** — POWER toggles screen on/off (off = title-card base shows, channel list + LED hidden); CHANNEL ▲▼ cycles channels mirroring wheel/arrow keys; VOLUME ▲▼ wired but no-op (reserved for future sound).
