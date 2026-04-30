@@ -107,12 +107,16 @@ html[data-theme="dark"] .morph-card-group {
   stroke-width: 5px;
 }
 
-/* Mobile: Overlay stays visible (same as desktop) to hide card until animation reveals it */
+/* Mobile: Overlay is visible ONLY while intro is loading. After completion
+   the .intro-complete / .intro-complete .intro-morph-overlay rules above
+   take over. Without the html.intro-loading scope, this rule would
+   unconditionally re-assert display:flex/opacity:1/visibility:visible at
+   mobile widths and override the hide rules — leaving only inline
+   visibility:hidden as the single thing keeping the overlay invisible
+   after the animation. That single point of failure is what let the
+   morph card leak onto other tiles after navigating back to intro. */
 @media (--mobile) {
-  .intro-morph-overlay {
-    /* Overlay is visible by default - matches desktop behavior */
-    /* This ensures user sees the background color, not a blank page */
-    /* Animation will reveal the card and then hide the overlay */
+  html.intro-loading .intro-morph-overlay {
     display: flex;
     opacity: 1;
     visibility: visible;
