@@ -14,6 +14,16 @@ body {
   color: var(--color-dark);
 }
 
+/* During the intro animation (before the coyote paw completes), lock the
+   page so wheel / trackpad / touch gestures can't scroll left/right or
+   up/down. .intro-complete is added to <html> by intro-animation when
+   the paw lands; this rule unlocks scrolling at that moment. */
+html:not(.intro-complete) body {
+  overflow: hidden;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
 /* Parchment texture overlay — subtle paper grain across the full site.
    No z-index: overlay paints above static backgrounds but below any positioned
    UI chrome (nav, modals, consent banner), which is the intended layering for

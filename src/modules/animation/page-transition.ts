@@ -1067,7 +1067,13 @@ export class PageTransitionModule extends BaseModule {
    */
   private handleWheel(event: WheelEvent): void {
     if (this.isMobile && !this.enableOnMobile) return;
-    if (!this.introComplete) return;
+    // During the intro animation, swallow ALL wheel events so the browser
+    // can't scroll the page horizontally or vertically before the user is
+    // released into the spatial map.
+    if (!this.introComplete) {
+      event.preventDefault();
+      return;
+    }
     // Allow input on map tiles AND on project-detail (so users can scroll
     // back left to projects). Other off-map pages (portal-login, admin)
     // still keep their normal scroll-only behavior.
@@ -1223,7 +1229,12 @@ export class PageTransitionModule extends BaseModule {
   private handleTouchStart(event: TouchEvent): void {
     if (this.isMobile && !this.enableOnMobile) return;
     if (this.isTransitioning) return;
-    if (!this.introComplete) return;
+    // During intro, swallow touch starts so swipes don't scroll the page.
+    if (!this.introComplete) {
+      this.touchStart = null;
+      event.preventDefault();
+      return;
+    }
     if (event.touches.length !== 1) {
       this.touchStart = null;
       return;
@@ -1315,7 +1326,10 @@ export class PageTransitionModule extends BaseModule {
       this.currentTvIndex = (this.currentTvIndex + delta + total) % total;
       document.dispatchEvent(
         new CustomEvent('projects:set-tv-channel', {
-          detail: { index: this.currentTvIndex, direction }
+          // cycle:true → user-initiated channel change, projects.ts
+          // plays the full tune-in. Page-entry and carousel back-nav
+          // dispatches omit cycle so they're treated as passive syncs.
+          detail: { index: this.currentTvIndex, direction, cycle: true }
         })
       );
       this.wheelCooldownUntil = performance.now() + WHEEL_COOLDOWN_MS + 200;
