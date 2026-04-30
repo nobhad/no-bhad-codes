@@ -81,7 +81,9 @@ vi.mock('../../server/services/invoice-service', () => ({
   invoiceService: mockInvoiceService
 }));
 
-// Mock milestone generator
+// Mock milestone generator (legacy entry-point — kept for tests
+// that still import the symbol; the proposal.accepted handler now
+// goes through tier-milestone-generator instead).
 vi.mock('../../server/services/milestone-generator', () => ({
   generateDefaultMilestones: vi.fn().mockResolvedValue([
     { id: 1, title: 'Project Kickoff', due_date: '2026-03-01' },
@@ -89,6 +91,30 @@ vi.mock('../../server/services/milestone-generator', () => ({
     { id: 3, title: 'Development Phase', due_date: '2026-04-01' },
     { id: 4, title: 'Final Delivery', due_date: '2026-04-15' }
   ])
+}));
+
+// The actual milestone path used by handleProposalAccepted.
+vi.mock('../../server/services/tier-milestone-generator', () => ({
+  generateTierMilestones: vi.fn().mockResolvedValue({
+    milestonesCreated: 4,
+    tasksCreated: 12
+  })
+}));
+
+// Proposal service is dynamic-imported by handleProposalAccepted
+// to fetch features for tier-aware milestone generation.
+vi.mock('../../server/services/proposal-service', () => ({
+  proposalService: {
+    getProposalFeatures: vi.fn().mockResolvedValue([])
+  }
+}));
+
+// Contract / project-code dynamic imports — stub to no-ops so the
+// tested code path doesn't hit real services.
+vi.mock('../../server/services/contract-service', () => ({
+  contractService: {
+    createContract: vi.fn().mockResolvedValue({ id: 1 })
+  }
 }));
 
 describe('Workflow Automations Integration', () => {
@@ -441,9 +467,34 @@ describe('Workflow Automations Integration', () => {
       );
     });
 
-    it('generates default milestones for new project', async () => {
-      const { generateDefaultMilestones } =
-        await import('../../server/services/milestone-generator');
+    it('generates tier-aware milestones for new project', async () => {
+      // Pattern-match on SQL so the test doesn't break every time the
+      // handler picks up an extra db.get along the path.
+      mockDb.get.mockImplementation(async (sql: string) => {
+        if (/FROM proposal_requests/i.test(sql)) {
+          return {
+            id: 1,
+            project_id: null,
+            client_id: 10,
+            project_type: 'website',
+            selected_tier: 'professional',
+            final_price: 5000,
+            description: 'E-commerce website development',
+            project_name: 'Online Store Project',
+            maintenance_option: 'standard'
+          };
+        }
+        if (/FROM clients|FROM active_clients/i.test(sql)) {
+          return { contact_name: 'Test Client', company_name: 'Test Co' };
+        }
+        if (/FROM milestones/i.test(sql)) {
+          return null; // no existing milestones → triggers generation
+        }
+        return null;
+      });
+
+      const { generateTierMilestones } =
+        await import('../../server/services/tier-milestone-generator');
       const { registerWorkflowAutomations } =
         await import('../../server/services/workflow-automations');
       const { workflowTriggerService } =
@@ -456,7 +507,7 @@ describe('Workflow Automations Integration', () => {
         triggeredBy: 'admin@example.com'
       });
 
-      expect(generateDefaultMilestones).toHaveBeenCalled();
+      expect(generateTierMilestones).toHaveBeenCalled();
     });
 
     it('handles missing proposal gracefully', async () => {
@@ -479,41 +530,52 @@ describe('Workflow Automations Integration', () => {
     });
 
     it('sends client notification email', async () => {
+      // Pattern-match SQL so the test stays correct as the handler
+      // accumulates more lookup queries (it currently does ≥6 db.get
+      // calls along this path; an ordered mockResolvedValueOnce chain
+      // becomes brittle).
+      mockDb.get.mockImplementation(async (sql: string) => {
+        if (/FROM proposal_requests p\s+JOIN active_clients/i.test(sql)) {
+          return {
+            project_name: 'Test Project',
+            client_id: 10,
+            email: 'john@client.com',
+            contact_name: 'John Client'
+          };
+        }
+        if (/FROM proposal_requests/i.test(sql)) {
+          return {
+            id: 1,
+            project_id: null,
+            client_id: 10,
+            project_type: 'website',
+            final_price: 5000,
+            project_name: 'Test Project',
+            description: 'Test description',
+            selected_tier: 'standard',
+            maintenance_option: null
+          };
+        }
+        if (/FROM active_clients/i.test(sql)) {
+          return {
+            email: 'john@client.com',
+            contact_name: 'John Client',
+            company_name: null
+          };
+        }
+        if (/FROM clients/i.test(sql)) {
+          return { contact_name: 'John Client', company_name: null };
+        }
+        if (/FROM milestones/i.test(sql)) {
+          return null;
+        }
+        return null;
+      });
+
       const { registerWorkflowAutomations } =
         await import('../../server/services/workflow-automations');
       const { workflowTriggerService } =
         await import('../../server/services/workflow-trigger-service');
-
-      // Three db.get calls happen:
-      // 1. handleProposalAccepted gets proposal data
-      // 2. notifyProposalAccepted gets proposal+client via JOIN
-      // 3. sendClientNotification -> getClientEmail gets client
-      mockDb.get
-        .mockResolvedValueOnce({
-          // handleProposalAccepted gets proposal
-          id: 1,
-          project_id: null,
-          client_id: 10,
-          project_type: 'website',
-          final_price: 5000,
-          project_name: 'Test Project',
-          description: 'Test description',
-          selected_tier: 'standard',
-          maintenance_option: null
-        })
-        .mockResolvedValueOnce({
-          // notifyProposalAccepted gets proposal+client via JOIN
-          project_name: 'Test Project',
-          client_id: 10,
-          email: 'john@client.com',
-          contact_name: 'John Client'
-        })
-        .mockResolvedValueOnce({
-          // getClientEmail gets client for sendClientNotification
-          email: 'john@client.com',
-          contact_name: 'John Client',
-          company_name: null
-        });
 
       registerWorkflowAutomations();
 
