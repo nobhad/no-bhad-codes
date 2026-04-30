@@ -427,15 +427,17 @@ export class PageTransitionModule extends BaseModule {
    * without replaying the paw entry animation. Used when the camera tweens
    * back to the intro tile from another map tile after a previous paw exit
    * left the card translated off-screen.
+   *
+   * IMPORTANT: do NOT touch `#svg-business-card` here. That element lives
+   * inside the body-level fixed `#intro-morph-overlay`, which is meant to
+   * be retired once the intro animation completes. Writing inline
+   * `visibility: visible` to that SVG would paint it through the hidden
+   * overlay (CSS spec: a child's `visibility: visible` overrides a parent's
+   * `visibility: hidden`), so it would float over every subsequent tile.
+   * Paw entry/exit animations set their own initial transforms before
+   * tweening, so resetting position here is also unnecessary.
    */
   private restoreIntroCardState(): void {
-    // Reset the morphing SVG card back to center (exit animation translated it
-    // off-screen with the paw at x: -1500, y: -1200).
-    const svgCard = document.getElementById('svg-business-card');
-    if (svgCard) {
-      gsap.set(svgCard, { x: 0, y: 0, opacity: 1, visibility: 'visible' });
-    }
-
     // The host business-card element shouldn't have been transformed, but
     // make sure it's visible in case any earlier code stashed it.
     const businessCard = document.getElementById('business-card');

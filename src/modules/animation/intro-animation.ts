@@ -1699,11 +1699,19 @@ export class IntroAnimationModule extends BaseModule {
           // Then hide overlay after a tiny delay so both cards overlap
           gsap.delayedCall(0.05, () => {
             if (this.morphOverlay) {
+              this.morphOverlay.classList.add('hidden');
               this.morphOverlay.style.visibility = 'hidden';
               this.morphOverlay.style.pointerEvents = 'none';
             }
-            // Remove paw-exit class
+            // Remove paw-exit and restore the completed-intro state classes.
+            // playEntryAnimation strips `intro-complete`/`intro-finished` at
+            // the start (line ~1483) so the paw can animate; without re-
+            // adding them here, `<html>` is left with neither class and the
+            // CSS rule that hides the overlay (.intro-complete
+            // .intro-morph-overlay) stops applying. playExitAnimation does
+            // the same thing in its onComplete; mirror it here.
             document.documentElement.classList.remove('paw-exit');
+            document.documentElement.classList.add('intro-complete', 'intro-finished');
             resolve();
           });
         }

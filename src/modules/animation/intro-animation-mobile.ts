@@ -592,7 +592,18 @@ export class MobileIntroAnimationModule extends BaseModule {
     }
 
     if (this.morphOverlay) {
+      // Clear ALL inline styles set at intro start (line ~179-181) so the
+      // overlay returns to a clean state. Leaving inline `display: flex`
+      // and `opacity: 1` behind would override the `.intro-complete
+      // .intro-morph-overlay { opacity: 0 }` CSS rule and leave the hide
+      // resting on a single inline `visibility: hidden` — fragile, since
+      // any later GSAP `clearProps` or descendant visibility:visible would
+      // unmask it. Add `.hidden` class as the canonical retired state.
+      this.morphOverlay.classList.add('hidden');
+      this.morphOverlay.style.removeProperty('display');
+      this.morphOverlay.style.removeProperty('opacity');
       this.morphOverlay.style.visibility = 'hidden';
+      this.morphOverlay.style.pointerEvents = 'none';
     }
     this.completeIntro();
   }
