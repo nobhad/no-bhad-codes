@@ -138,15 +138,16 @@ The projects page renders a vintage TV with a channel-guide screen. Channel 01 i
 
 ### Outstanding TODOs
 
-- [x] **Wire up the TV's physical buttons** — POWER toggles screen on/off (off = title-card base shows, channel list + LED hidden); CHANNEL ▲▼ cycles channels mirroring wheel/arrow keys; VOLUME ▲▼ wired but no-op (reserved for future sound).
-- [ ] **Wire VOLUME ▼▲ buttons** to control something — TBD what (sound effects? panel hold-time multiplier? brightness?).
-- [ ] **Re-export the per-project `*_bg.webp` files at 1426×1093** (matching the new `title_card_base.webp` and `vintage_tv.webp`) so all bg layers stack at `top:0; left:0; width:100%; height:100%` without the percentage math. The new `title_card_base.webp` is already 1426×1093; the per-project bgs (`title_card_no-bhad-codes_bg.webp`, etc.) are still at 1037×769 — until they match, the centering math has to stay.
+- [x] **Wire up the TV's physical buttons** — POWER toggles screen on/off; CHANNEL ▲▼ cycles channels mirroring wheel/arrow keys; VOLUME ▲▼ wired to tv-sfx (5-step volume, persisted to localStorage).
+- [x] **Re-export TV assets at 1426×1093** — all per-project bgs, composed title cards, channel digit overlays, and title-card base now exported at full TV-frame canvas with hyphenated filenames. Stacks at `inset:0; width/height:100%`, no centering math. Old underscored set deleted.
+- [ ] **Re-align `title-card_base.webp` artwork** — base bbox `(100, 95, 1137, 864)` is ~6px wider on each side than the per-project cards `(106, 95, 1131, 864)`. Causes a small visible jump when cycling between channel 01 and 02+. Re-export from same artboard origin as the project cards so artwork lands at x:106-1131.
 - [x] **Update "No Bhad Codes" case study copy** — keyFeature `"CRT TV hover preview"` replaced, scroll-map + TV channel guide added, approach paragraph rewritten to mention signature features.
 - [x] **Verify Hedgewitch and The Backend case studies** — Backend feature claims verified against actual code (`013_magic_link.sql`, `message-service.ts`, Chart.js, node-cron, etc.). Hedgewitch is a separate project — copy reads accurately.
-- [x] **TV channel copy condensed** — added `tv` namespace per project (`description`, `challenge`, `approach`, `keyFeatures`, `results`). TV reads from `tv.X ?? X`. All three documented projects have curated TV copy now.
-- [ ] **Trace root cause of arrow keys triggering native page scroll** on the projects page. Currently mitigated with a backup `preventDefault` listener in `projects.ts`, but page-transition's keyboard handler should be catching them first — investigate why focus / canNavigate / event ordering isn't suppressing default in some cases.
-- [ ] **Add sound effects** (optional / future) — channel-change static crackle, channel-up beep, etc. Audio assets needed.
-- [ ] **Mobile fallback** — TV is currently desktop-only (`.crt-tv` is hidden on mobile). Need a mobile equivalent or revert to a card list on small screens.
+- [x] **TV channel copy condensed** — added `tv` namespace per project. TV reads from `tv.X ?? X`. All three documented projects have curated TV copy.
+- [x] **Trace root cause of arrow-key native page scroll** — `page-transition.ts:handleKeydown` only called `preventDefault` after navigation gates (`isTransitioning`, `!introComplete`, `canNavigate`); during those windows the browser native-scrolled. Fix: moved `preventDefault` before the gates so any arrow key on a managed page is unconditionally swallowed (form inputs still opt out). Backup window-listener in `projects.ts` and the `isOnProjectsPage()` helper that supported it have been removed.
+- [x] **Channel-change static crackle + channel-up beep** — implemented as `src/modules/audio/tv-sfx.ts` (procedural WebAudio synthesis, no asset files). Static = filtered white-noise burst, beep = 880Hz sine. Master gain via 5-step volume tied to VOLUME ▲▼ buttons.
+- [x] **Mobile TV** — TV is fully responsive at all widths; channel-rows visible with smaller typography, button hit area extended, full-width on phones. No mobile fallback needed.
+- [x] **Channel 01 redesigned as Prevue Guide layout** — top split (brand info + glowing-eye avatar with inlined eye-glow filter); bottom slow ticker of project rows (rendered twice, GSAP translates the inner ul up at ~16 px/sec for a seamless loop).
 - [ ] **Documentation: refresh `MAIN_SITE_DESIGN.md` projects section** to reflect the new TV channel architecture in more depth (panel cycle, button wiring, channel index model). Currently only the table rows were updated.
 
 ### Recent shipped (this session)
