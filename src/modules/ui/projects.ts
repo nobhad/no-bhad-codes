@@ -128,6 +128,7 @@ const TV_PANEL_HOLD_S: Record<string, number> = {
   tools: 5.0
 };
 const TV_SECTION_PAUSE_S_DEFAULT = 6.0; // fallback for any unmapped panel key
+const TV_MOBILE_SCROLL_HOLD_MULTIPLIER = 2.2; // mobile prose panels hold 2.2× longer so the bottom-to-top scroll reads at a comfortable pace
 const TV_TEXT_SWAP_BEAT_S = 0.35;     // empty beat between title fade-out and first panel fade-in
 const TV_TEXT_FADE_S = 0.45;          // panel fade-in / fade-out duration
 const TV_HEADING_FLASH_S = 0.35;      // section heading scale-flash duration (no-span fallback)
@@ -858,7 +859,18 @@ export class ProjectsModule extends BaseModule {
     // two-column layout. Skips rows with empty data.
     const detailRows: string[] = [];
     if (project.role) {
-      detailRows.push(`<dt>Role</dt><dd>${escapeHtml(project.role)}</dd>`);
+      // Insert a literal newline between the role's leading words and
+      // its last word ("Full Stack\nDeveloper"). On desktop dd has
+      // white-space: normal so the newline collapses into a single
+      // space ("Full Stack Developer" on one line). On mobile dd uses
+      // white-space: pre-line so the newline becomes an actual break
+      // ("Full Stack" / "Developer" on two lines). Avoids orphaned
+      // characters when the column gets narrow.
+      const roleWords = project.role.trim().split(/\s+/);
+      const roleHtml = roleWords.length > 1
+        ? `${escapeHtml(roleWords.slice(0, -1).join(' '))}\n${escapeHtml(roleWords[roleWords.length - 1])}`
+        : escapeHtml(project.role);
+      detailRows.push(`<dt>Role</dt><dd>${roleHtml}</dd>`);
     }
     if (project.year) {
       detailRows.push(`<dt>Year</dt><dd>${escapeHtml(String(project.year))}</dd>`);
@@ -985,7 +997,9 @@ export class ProjectsModule extends BaseModule {
     panels.forEach((panel) => {
       panel.classList.remove('is-heading-only', 'is-body-only');
       gsap.set(panel, { opacity: 0 });
-      gsap.set(panel.children, { opacity: 0, scale: 1 });
+      // Reset transform too so the mobile auto-scroll doesn't carry over
+      // from a previous cycle (children would still be y:-300 etc).
+      gsap.set(panel.children, { opacity: 0, scale: 1, y: 0 });
     });
 
     // Panels whose headings get the "flash alone, fade out, body appears"
@@ -996,6 +1010,9 @@ export class ProjectsModule extends BaseModule {
     this.tuneInScrollTween = gsap.timeline();
     const tl = this.tuneInScrollTween;
 
+    const SCROLL_KEYS = new Set(['intro', 'challenge', 'approach']);
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+
     panels.forEach((panel, idx) => {
       const key = panel.dataset.panelKey ?? '';
       const isOutro = key === 'outro';
@@ -1003,6 +1020,10 @@ export class ProjectsModule extends BaseModule {
       const heading = panel.querySelector('.crt-tv__panel-heading') as HTMLElement | null;
       const body = Array.from(panel.children).filter((c) => c !== heading) as HTMLElement[];
       const useFlash = !!heading && FLASH_HEADING_KEYS.has(key);
+      // Mobile prose panels skip the fade-in entirely — content slides
+      // in from off-bottom at full opacity, scrolls past, and exits off-
+      // top. No "appear at center, jump to bottom, scroll up" flash.
+      const isScrollPanel = isMobile && SCROLL_KEYS.has(key);
 
       // Reveal the panel container (children remain at opacity 0).
       tl.set(panel, { opacity: 1 });
@@ -1046,10 +1067,22 @@ export class ProjectsModule extends BaseModule {
         });
         if (body.length > 0) {
           tl.set(body, { opacity: 0 });
-          tl.to(
-            body,
-            { opacity: 1, duration: TV_TEXT_FADE_S, stagger: 0.06, ease: 'power2.out' }
-          );
+          if (isScrollPanel) {
+            // Mobile prose: pre-position body off-bottom at full opacity
+            // so the auto-scroll below picks it up without a centered-
+            // flash beforehand.
+            tl.add(() => {
+              const screenH = panel.clientHeight;
+              const contentH = panel.scrollHeight;
+              const startY = (screenH + contentH) / 2;
+              gsap.set(body, { opacity: 1, y: startY });
+            });
+          } else {
+            tl.to(
+              body,
+              { opacity: 1, duration: TV_TEXT_FADE_S, stagger: 0.06, ease: 'power2.out' }
+            );
+          }
         }
       } else if (key === 'tagline') {
         // Tagline panel — each word in the tagline pops in with a pulse
@@ -1073,15 +1106,61 @@ export class ProjectsModule extends BaseModule {
         // Default: fade all children in together (heading + body, or
         // bodyless panels like intro/details/outro). Heading stays on
         // screen with the items for the duration of the section.
-        tl.to(
-          panel.children,
-          { opacity: 1, duration: TV_TEXT_FADE_S, stagger: 0.06, ease: 'power2.out' }
-        );
+        //
+        // EXCEPTION: on mobile prose panels, pre-position the children
+        // off-screen-bottom at full opacity instead of fading in at
+        // center — the auto-scroll tween below then moves them up into
+        // view with no "fade in at center, jump to bottom" flash.
+        if (isScrollPanel) {
+          tl.add(() => {
+            const screenH = panel.clientHeight;
+            const contentH = panel.scrollHeight;
+            const startY = (screenH + contentH) / 2;
+            gsap.set(panel.children, { opacity: 1, y: startY });
+          });
+        } else {
+          tl.to(
+            panel.children,
+            { opacity: 1, duration: TV_TEXT_FADE_S, stagger: 0.06, ease: 'power2.out' }
+          );
+        }
       }
 
       // Hold so the user can read it. Paragraphs get more time than
-      // short panels (tagline / details / lists).
-      const holdSeconds = TV_PANEL_HOLD_S[key] ?? TV_SECTION_PAUSE_S_DEFAULT;
+      // short panels (tagline / details / lists). Mobile scroll-prose
+      // panels get a longer hold so the auto-scroll reads comfortably.
+      const baseHold = TV_PANEL_HOLD_S[key] ?? TV_SECTION_PAUSE_S_DEFAULT;
+      const holdSeconds = isScrollPanel
+        ? baseHold * TV_MOBILE_SCROLL_HOLD_MULTIPLIER
+        : baseHold;
+      tl.add(() => {
+        if (!isMobile) return;
+        const screenH = panel.clientHeight;
+        const contentH = panel.scrollHeight;
+        const overflows = contentH > screenH;
+        if (!isScrollPanel && !overflows) return;
+
+        // Scroll content from off-screen-bottom to off-screen-top. For
+        // scroll-prose panels children are already pre-positioned at
+        // startY by the fade-in branch above, so this tween just moves
+        // them up. For non-prose panels with overflow, fromTo with the
+        // same startY ensures they jump to off-bottom first.
+        const startY = (screenH + contentH) / 2;
+        const endY = -(screenH + contentH) / 2;
+        if (isScrollPanel) {
+          gsap.to(panel.children, {
+            y: endY,
+            duration: holdSeconds,
+            ease: 'none'
+          });
+        } else {
+          gsap.fromTo(
+            panel.children,
+            { y: startY },
+            { y: endY, duration: holdSeconds, ease: 'none' }
+          );
+        }
+      });
       tl.to({}, { duration: holdSeconds });
 
       // Fade out — but not the outro (it sticks as the terminal frame)

@@ -137,7 +137,12 @@
   }
 
   /* About section - SCROLLABLE SECTION
-     The section itself scrolls, content inside grows naturally */
+     The section itself scrolls, content inside grows naturally.
+     NOTE: Don't set top/left/right/bottom positioning here — those
+     would override the site-map.css spatial positioning that places
+     the about tile at top:-100% (above the visible area). With the
+     overrides removed, the spatial map works on mobile too: only the
+     active tile sits at center, others are camera-translated off. */
   .about-section,
   section.about-section,
   section.about-section.page-active,
@@ -153,12 +158,6 @@
     overscroll-behavior-y: contain;
     touch-action: pan-y;
     box-sizing: border-box;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
   }
 
   /* About content wrapper - natural height, NO min-height constraint */
@@ -276,6 +275,9 @@
     overflow: visible;
     box-sizing: border-box;
     position: relative;
+    /* Solid bg so the page doesn't read as transparent when the spatial-
+       map camera brings the contact tile in. Matches the body bg color. */
+    background-color: var(--color-neutral-300);
   }
 
   .container,
@@ -325,8 +327,8 @@
 /* ============================================
  * PROJECTS SECTION — MOBILE LAYOUT FIX
  * Responsive layer (higher priority than pages/states).
- * Forces flex-column layout, hides CRT TV, centers
- * content vertically, and shows full card details.
+ * Forces flex-column layout, centers content vertically,
+ * and lets the TV scale down to fit narrow viewports.
  * ============================================ */
 
 @media (--mobile) {
@@ -336,11 +338,17 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 1.5rem 1rem;
+    /* Drop horizontal padding so the TV can fill the full viewport
+       width on mobile. Vertical padding also dropped — section centers
+       its content already. */
+    padding: 0;
   }
 
-  /* Hide CRT TV — definitive override */
-  .projects-section .crt-tv {
+  /* TV stays visible on mobile — its width: min(...) cap with 98vw lets
+     it scale down to fit narrow viewports. Disable the physical button
+     overlays since they're too small to hit reliably; touch users
+     interact with the channel rows directly instead. */
+  .projects-section .crt-tv__btn {
     display: none;
   }
 
