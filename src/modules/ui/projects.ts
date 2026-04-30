@@ -12,6 +12,7 @@
 import { BaseModule } from '../core/base';
 import { gsap } from 'gsap';
 import { formatTextWithLineBreaks, escapeHtml } from '../../utils/format-utils';
+import { tvSfx } from '../audio/tv-sfx';
 
 // escapeHtml already encodes & < > " ' ` so it's safe for both element
 // content and attribute values. Aliased for readability at call sites.
@@ -177,6 +178,12 @@ export class ProjectsModule extends BaseModule {
   private tuneInScrollTween: gsap.core.Timeline | null = null;
   private activeTuneInSlug: string | null = null;
 
+  // TV Guide channel-row ticker — slow continuous scroll of the rows in
+  // the bottom half of the channel-list, mirroring the Prevue Guide.
+  // Rows are rendered twice in the DOM; tween translates by exactly half
+  // the track height then snaps to 0 for a seamless loop.
+  private channelTickerTween: gsap.core.Tween | null = null;
+
   constructor() {
     super('ProjectsModule', { debug: false });
   }
@@ -223,6 +230,15 @@ export class ProjectsModule extends BaseModule {
       // carousel back-nav) that should only update the LED + row
       // highlight without flashing into a different channel.
       const cycle = event.detail?.cycle === true;
+      const direction = event.detail?.direction as 'up' | 'down' | undefined;
+      // SFX: channel-up beep on wheel/key cycling. page-transition uses
+      // `direction: 'down'` for "next channel number" (01 → 02 etc.), so
+      // that's the beep direction. The CHANNEL ▲ button path beeps in
+      // cycleTvChannel and dispatches a DIFFERENT event ('active-slug-
+      // changed'), so this listener won't double-fire on button presses.
+      if (cycle && direction === 'down') {
+        void tvSfx.beep();
+      }
       if (typeof index === 'number') this.setTvChannel(index, { cycle });
     }) as EventListener);
 
@@ -244,40 +260,10 @@ export class ProjectsModule extends BaseModule {
       }
     });
 
-    // Arrow keys must NEVER scroll the page on the projects tile — they
-    // cycle TV channels via page-transition's keyboard handler. Belt-and-
-    // suspenders preventDefault here so the browser's native scroll stays
-    // suppressed even if focus lands on a TV button/link/panel that
-    // wouldn't otherwise consume the event.
-    window.addEventListener('keydown', (event) => {
-      if (
-        (event.key === 'ArrowUp' || event.key === 'ArrowDown' ||
-         event.key === 'ArrowLeft' || event.key === 'ArrowRight') &&
-        this.isOnProjectsPage()
-      ) {
-        const target = event.target as HTMLElement | null;
-        const tag = target?.tagName;
-        // Don't interfere with form inputs.
-        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable) {
-          return;
-        }
-        event.preventDefault();
-      }
-    });
-
     // Check initial hash for project detail (on page load only)
     this.checkInitialHash();
 
     this.log('Initialized');
-  }
-
-  /**
-   * True when the projects map tile is the active page. Read from the
-   * data-active-page attribute that PageTransitionModule sets on <main>.
-   */
-  private isOnProjectsPage(): boolean {
-    const main = document.querySelector('main#main-content');
-    return main?.getAttribute('data-active-page') === 'projects';
   }
 
   /**
@@ -575,8 +561,15 @@ export class ProjectsModule extends BaseModule {
         this.cycleTvChannel(-1);
         break;
       case 'volume-up':
+        tvSfx.stepUp();
+        // Audible feedback for the new level (no on-screen indicator) —
+        // beep at the post-change volume so the user can tell when they
+        // hit max or min.
+        void tvSfx.beep();
+        break;
       case 'volume-down':
-        // Volume is a no-op for now — reserved for future sound effects.
+        tvSfx.stepDown();
+        void tvSfx.beep();
         break;
       }
     });
@@ -617,6 +610,13 @@ export class ProjectsModule extends BaseModule {
       : 0;
 
     const nextIdx = ((currentIdx + delta) % total + total) % total;
+    // SFX: short beep on channel-up (▲) only — matches the original
+    // direction-asymmetric channel-up beep on consumer TVs. The static
+    // crackle fires inside playTuneInSequence/transitionToGuide for both
+    // directions; the beep is the channel-up extra.
+    if (delta === 1) {
+      void tvSfx.beep();
+    }
     // Button press is a user-initiated cycle → trigger the tune-in.
     this.setTvChannel(nextIdx, { cycle: true });
 
@@ -643,14 +643,12 @@ export class ProjectsModule extends BaseModule {
     // Title + category stack vertically in the middle column; year sits
     // alone in the right column. Two-digit zero-padded numbers so the
     // left column stays visually aligned.
-    const rows = documented
-      .map(
-        (p, i) => `
-        <li class="crt-tv__channel-row-item">
+    const buildRow = (p: typeof documented[number], i: number, ariaHidden = false): string => `
+        <li class="crt-tv__channel-row-item"${ariaHidden ? ' aria-hidden="true"' : ''}>
           <button type="button"
                   class="crt-tv__channel-row"
                   data-index="${i}"
-                  data-slug="${p.slug}"
+                  data-slug="${p.slug}"${ariaHidden ? ' tabindex="-1"' : ''}
                   aria-label="Channel ${i + 2}: open ${p.title} project details">
             <span class="crt-tv__channel-number">${String(i + 2).padStart(2, '0')}</span>
             <span class="crt-tv__channel-text">
@@ -659,20 +657,50 @@ export class ProjectsModule extends BaseModule {
             </span>
             <span class="crt-tv__channel-meta">${p.year}</span>
           </button>
-        </li>`
-      )
-      .join('');
+        </li>`;
+    // Render rows TWICE so the GSAP ticker can translate the inner ul up
+    // by exactly one set's height and snap back to 0 for a seamless loop.
+    // The duplicate set is aria-hidden + non-tabbable so screen readers
+    // and keyboard users only encounter each project once.
+    const rows = documented.map((p, i) => buildRow(p, i, false)).join('');
+    const rowsClone = documented.map((p, i) => buildRow(p, i, true)).join('');
 
     container.innerHTML = `
-      <div class="crt-tv__channel-heading" role="heading" aria-level="3">
-        <span class="crt-tv__channel-number">01</span>
-        <span class="crt-tv__channel-text">
-          <span class="crt-tv__channel-title">Projects</span>
-          <span class="crt-tv__channel-category">Toggle between channels ↑ ↓</span>
-        </span>
+      <div class="crt-tv__guide-top">
+        <div class="crt-tv__guide-info">
+          <span class="crt-tv__guide-info-line crt-tv__guide-info-brand">No Bhad Codes</span>
+          <span class="crt-tv__guide-info-line crt-tv__guide-info-show">"Portfolio Guide"</span>
+          <span class="crt-tv__guide-info-line crt-tv__guide-info-channel">Channel 01</span>
+        </div>
+        <div class="crt-tv__guide-feature" aria-hidden="true">
+          <svg class="crt-tv__guide-avatar"
+               xmlns="http://www.w3.org/2000/svg"
+               viewBox="270 165 250 330"
+               preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <filter id="tv-guide-eye-glow">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                <feMerge>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            <g class="crt-tv__guide-avatar-body">
+              <path d="M483.84,302.88l-.11-.22c17.83-48.99,4.37-96.42-32.96-131.06l-21.19,96.19c-31.28,2.58-49.67,6.73-62.33,40.7l-61.66,21.19c2.58,17.83-1.35,26.35-15.02,35.76,18.05,12.89,43.5,12.33,55.16,9.87-2.47-1.57-10.43-6.73-12.67-10.65-8.18-14.46,5.94-35.32,28.03-.78,9.87,9.87,28.81,5.27,28.81,5.27-18.95,12.89-54.37,12.67-75.12,11.44,0,0,17.27,10.43,35.65,16.7,18.39,6.17,35.43-4.82,35.43-4.82,1.12,5.49-12.67,42.94-26.79,87.67,17.38,5.16,35.65,7.85,54.26,7.85,36.55,0,71.42-10.2,101.35-29.26-10.99-61.33-21.53-118.28-30.83-155.84Z"/>
+              <path d="M301.88,331.02l-28.7,9.87c3.25,10.99,7.06,17.04,14.46,22.53,13.01-9.08,16.7-15.02,14.24-32.4h0Z"/>
+              <path d="M408.16,171.04l-1.01,5.61c-2.47,21.97-1.68,41.59-1.01,63.9.34,4.26,1.68,22.31,2.02,26.35,2.02-.34,4.26-.67,6.39-.9h0c.67,0,1.46-.22,2.24-.22h0c1.46-.22,2.91-.34,4.48-.45h.22c.67,0,1.46-.11,2.13-.22h.34c.67,0,1.46-.11,2.24-.22l13.57-61.33c-9.19-10.99-26.46-29.49-31.5-32.29h0l-.11-.22Z"/>
+            </g>
+            <path class="crt-tv__guide-avatar-eye"
+                  d="M390.7,307.37c2.6-6.01,7.08-9.98,12.2-9.98,8.07,0,14.57,9.87,14.57,22.09s-6.5,22.09-14.57,22.09c-5.51,0-10.29-4.61-12.77-11.42,0,0,0,0,0,0l.02.03c2.47,3.74,6.17,6.09,10.3,6.03,7.29-.11,13.01-7.85,12.78-17.15-.01-.45-.05-.89-.08-1.33-6.2,1.12-7.43,3.16-8.44,11.76-1.57-7.51-1.68-10.09-8.97-11.44,7.62-2.35,8.52-3.14,8.52-11.77,1.45,8.59,2.46,10.52,8.88,11.42-.74-8.65-6.44-15.34-13.37-15.23-3.57.05-6.76,1.94-9.06,4.94v-.02Z"/>
+          </svg>
+        </div>
       </div>
-      <ul class="crt-tv__channel-rows">${rows}</ul>
+      <div class="crt-tv__guide-bottom" data-channel-ticker-viewport>
+        <ul class="crt-tv__channel-rows" data-channel-ticker-track>${rows}${rowsClone}</ul>
+      </div>
     `;
+    this.startChannelTicker();
 
     // Delegated click → "tune in" to the channel: title card fills the
     // TV screen briefly, THEN navigation to the project-detail page
@@ -685,6 +713,51 @@ export class ProjectsModule extends BaseModule {
       const slug = row?.dataset.slug;
       if (!slug) return;
       void this.playTuneInSequence(slug);
+    });
+  }
+
+  /**
+   * Continuous slow vertical scroll of the channel-row list — the Prevue
+   * Guide ticker effect. Rows are rendered twice in the DOM; we tween the
+   * track up by exactly the height of one set, then snap back to 0 for a
+   * seamless loop. Tick speed scales with row count so adding projects
+   * doesn't speed up the ticker.
+   */
+  private startChannelTicker(): void {
+    if (this.channelTickerTween) {
+      this.channelTickerTween.kill();
+      this.channelTickerTween = null;
+    }
+    const track = document.querySelector<HTMLElement>('[data-channel-ticker-track]');
+    const viewport = document.querySelector<HTMLElement>('[data-channel-ticker-viewport]');
+    if (!track || !viewport) return;
+    const documented = this.portfolioData?.projects.filter((p) => p.isDocumented) ?? [];
+    if (documented.length === 0) return;
+
+    // Wait a frame so the DOM has measured row heights at this viewport
+    // size. Without this the first measurement on initial render returns
+    // 0 because layout hasn't settled yet.
+    requestAnimationFrame(() => {
+      // The track contains 2× rows. Half its scrollHeight is the loop
+      // distance — translating up by that amount lands the second copy
+      // exactly where the first started.
+      const totalHeight = track.scrollHeight;
+      if (totalHeight <= 0) return;
+      const loopDistance = totalHeight / 2;
+      // If all rows fit in the viewport with no overflow, no need to
+      // ticker — leave the list static.
+      if (loopDistance <= viewport.clientHeight) return;
+      // Speed: ~16 px / second. Slow enough to read each row as it
+      // passes (matches the Prevue Guide pace).
+      const TICKER_SPEED_PX_PER_S = 16;
+      const duration = loopDistance / TICKER_SPEED_PX_PER_S;
+      gsap.set(track, { y: 0 });
+      this.channelTickerTween = gsap.to(track, {
+        y: -loopDistance,
+        duration,
+        ease: 'none',
+        repeat: -1
+      });
     });
   }
 
@@ -773,6 +846,11 @@ export class ProjectsModule extends BaseModule {
       onComplete: () => this.startPanelCycle()
     });
     const tl = this.tuneInTimeline;
+
+    // SFX: channel-change static crackle synchronized with the visual
+    // static-flash burst below. Fires fire-and-forget; if the user has
+    // volume at 0, the call no-ops.
+    void tvSfx.static();
 
     // 1) Static burst + channel list snaps off, bg flashes blank for a
     //    split second (the "between channels" void) before swapping to
@@ -1192,6 +1270,10 @@ export class ProjectsModule extends BaseModule {
 
     this.tuneInTimeline = gsap.timeline();
     const tl = this.tuneInTimeline;
+
+    // SFX: same channel-change crackle as the project tune-in, so cycling
+    // back to the guide reads the same audibly as cycling out.
+    void tvSfx.static();
 
     // Static peak + bg src swaps to the blank base.
     tl.to(staticOverlay, { opacity: TV_STATIC_FLASH_OPACITY, duration: 0.06 }, 0)

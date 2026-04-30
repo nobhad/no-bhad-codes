@@ -102,6 +102,11 @@ const commonGlobals = {
   AbortController: 'readonly',
   AbortSignal: 'readonly',
 
+  // WebAudio
+  AudioContext: 'readonly',
+  AudioBuffer: 'readonly',
+  GainNode: 'readonly',
+
   // Browser console and utils
   Console: 'readonly',
   btoa: 'readonly',
