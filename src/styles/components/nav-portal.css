@@ -192,11 +192,7 @@
   border-right: var(--border-width-thick) solid var(--color-dark);
 }
 
-.portal-dropdown .portal-toggle-btn:hover:not(.is-active) {
-  background: var(--color-neutral-400);
-}
-
-.portal-dropdown .portal-toggle-btn.is-active {
+.portal-dropdown .portal-toggle-btn.active {
   background: var(--color-dark);
   color: var(--color-light);
 }
