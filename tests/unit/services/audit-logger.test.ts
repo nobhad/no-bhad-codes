@@ -11,10 +11,20 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { Request } from 'express';
 import { auditLogger } from '../../../server/services/audit-logger';
 
-// Mock database
-const mockDb = {
+// Mock database. The audit-logger writes through db.transaction(cb)
+// where cb receives a ctx with run/get; the chain hash is computed
+// inside that transaction. The simplest mock is to make ctx === db
+// so the same vi.fn()s record everything.
+const mockDb: {
+  run: ReturnType<typeof vi.fn>;
+  get: ReturnType<typeof vi.fn>;
+  all: ReturnType<typeof vi.fn>;
+  transaction: (cb: (ctx: unknown) => Promise<unknown>) => Promise<unknown>;
+} = {
   run: vi.fn().mockResolvedValue({ lastID: 1 }),
-  all: vi.fn().mockResolvedValue([])
+  get: vi.fn().mockResolvedValue({ created_at: '2026-01-01T00:00:00.000Z' }),
+  all: vi.fn().mockResolvedValue([]),
+  transaction: async (cb) => cb(mockDb)
 };
 
 vi.mock('../../../server/database/init', () => ({
