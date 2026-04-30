@@ -269,7 +269,7 @@ The TV is composed of stacked transparent images sized to a single canvas (`1426
 
 | Layer | Source | Notes |
 |-------|--------|-------|
-| Frame | `vintage_tv.webp` (1424×1093) | The wood case + screen aperture + painted control labels |
+| Frame | `vintage_television.webp` (1426×1093) | The wood case + screen aperture + painted control labels |
 | Title-card base | `title-card_base.webp` (1426×1093) | Default screen contents on the guide channel |
 | Per-project bg | `title-card_[slug]_bg.webp` (1426×1093) | Used during a tune-in; stacks at `inset:0; width/height:100%` (full-canvas with transparent surroundings) |
 | Composed title card | `title-card_[slug].webp` (1426×1093) | Bg + baked text; fades on top during the tune-in entry beat then fades out |

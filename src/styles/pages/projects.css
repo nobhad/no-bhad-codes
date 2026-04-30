@@ -873,7 +873,7 @@ div.page-hero-desktop {
 /* Interactive screen overlay (channel list, title-card image, scanlines).
    Sized + positioned to the screen aperture (the area where the
    title-card content lives in the bg image), measured via flood-fill of
-   vintage_tv.webp's transparent cutout center. */
+   vintage_television.webp's transparent cutout center. */
 .crt-tv__screen {
   position: absolute;
   top: 8.463%;
@@ -910,7 +910,7 @@ div.page-hero-desktop {
 }
 
 /* TV control buttons — invisible click targets overlaying the painted
-   POWER / CHANNEL / VOLUME buttons in the vintage_tv frame. Coords
+   POWER / CHANNEL / VOLUME buttons in the vintage_television frame. Coords
    measured via flood-fill of the dark capsules in the source image:
      POWER:   y=282-299 (top:25.80%, height:1.65%)
      CHANNEL: y=327-344 (top:29.92%, height:1.65%)

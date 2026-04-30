@@ -483,10 +483,10 @@ export class ProjectsModule extends BaseModule {
             <div class="crt-tv__scanlines"></div>
             <div class="crt-tv__glare"></div>
           </div>
-          <img class="crt-tv__frame" src="/images/vintage_tv.webp" alt="Vintage Television" />
+          <img class="crt-tv__frame" src="/images/vintage_television.webp" alt="Vintage Television" />
           <!-- LED channel display — overlays the TV's "88" digital readout
                area (positioned via CSS at coords measured against the
-               vintage_tv source image). Defaults to channel 01 (the TV
+               vintage_television source image). Defaults to channel 01 (the TV
                guide); swapped to channel_NN.webp when a row highlights. -->
           <img class="crt-tv__channel-display"
                data-channel-display
@@ -494,7 +494,7 @@ export class ProjectsModule extends BaseModule {
                alt="" />
           <!-- Invisible button overlays positioned over the TV frame's
                POWER / CHANNEL ▼▲ / VOLUME ▼▲ controls. Coords measured
-               from vintage_tv.webp via flood-fill of the dark button
+               from vintage_television.webp via flood-fill of the dark button
                capsules. -->
           <button class="crt-tv__btn crt-tv__btn--power"
                   type="button"
@@ -533,7 +533,7 @@ export class ProjectsModule extends BaseModule {
   /**
    * Wire click handlers for the TV's POWER / CHANNEL / VOLUME buttons.
    * Buttons are positioned via CSS over the corresponding controls in
-   * the vintage_tv frame; clicking dispatches the same channel-cycle
+   * the vintage_television frame; clicking dispatches the same channel-cycle
    * events that wheel/keys use, so the LED + screen + tune-in stay in
    * lock-step regardless of input method.
    */
