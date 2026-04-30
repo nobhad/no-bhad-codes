@@ -1120,12 +1120,19 @@ export class ProjectsModule extends BaseModule {
         screenBg.src = '/images/title-card_base.webp';
       }, 0.05);
 
-    // Hold the blank for a beat (matches TV_BLANK_FLASH_S in tune-in).
+    // Hold the blank under the static peak (between-channels void beat).
     tl.to({}, { duration: TV_BLANK_FLASH_S });
 
-    // Static settles, channel list fades in.
-    tl.to(staticOverlay, { opacity: TV_STATIC_GRAIN_OPACITY, duration: 0.3, ease: 'power2.out' })
-      .to(channelList, { opacity: 1, duration: 0.3, ease: 'power2.out' }, '<');
+    // Static settles, revealing the base bg alone (no channel list yet).
+    tl.to(staticOverlay, { opacity: TV_STATIC_GRAIN_OPACITY, duration: 0.3, ease: 'power2.out' });
+
+    // Hold the base bg alone for TV_BG_FLASH_S — the same beat per-project
+    // bgs get on project channels before the composed title card lands.
+    // Keeps channel 01's transition shape consistent with the others.
+    tl.to({}, { duration: TV_BG_FLASH_S }, '>');
+
+    // Channel list fades in.
+    tl.to(channelList, { opacity: 1, duration: 0.3, ease: 'power2.out' }, '>');
 
     // LED shows channel 01.
     this.setChannelDisplay(1);
