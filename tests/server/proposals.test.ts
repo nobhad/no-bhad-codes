@@ -89,14 +89,18 @@ describe('Proposal Routes - Authentication', () => {
 
   describe('Signature endpoints', () => {
     it('allows public signature submission (rate limited)', async () => {
-      // Signature endpoint is public but rate limited
-      // With invalid proposal ID, should get 400 or 404
+      // Signature endpoint is public but rate limited. The handler
+      // now requires a `token` field in the body before it'll look
+      // up the proposal — without one it short-circuits to 401 for
+      // a missing token (not for missing JWT). Send a token so we
+      // exercise the actual proposal lookup path.
       const res = await request(app).post('/api/proposals/99999/sign').send({
+        token: 'invalid-token-not-in-db',
         signerName: 'John Doe',
         signerEmail: 'john@example.com',
         signatureData: 'base64signature'
       });
-      // Should return 400/404 for non-existent proposal, not 401 (it's public)
+      // Should return 400/404 for non-existent proposal, not 401.
       expect([400, 404, 500]).toContain(res.status);
     });
 

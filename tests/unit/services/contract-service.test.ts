@@ -227,7 +227,7 @@ describe('ContractService - Templates', () => {
     it('throws when template not found', async () => {
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(contractService.getTemplate(999)).rejects.toThrow('Template not found');
+      await expect(contractService.getTemplate(999)).rejects.toThrow(/template not found/i);
     });
   });
 
@@ -474,7 +474,7 @@ describe('ContractService - Contracts', () => {
     it('throws when contract not found', async () => {
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(contractService.getContract(999)).rejects.toThrow('Contract not found');
+      await expect(contractService.getContract(999)).rejects.toThrow(/contract not found/i);
     });
   });
 
@@ -599,7 +599,7 @@ describe('ContractService - Contracts', () => {
           projectId: 999,
           clientId: 999
         })
-      ).rejects.toThrow('Project or client not found');
+      ).rejects.toThrow(/project or client not found/i);
     });
   });
 
@@ -919,7 +919,7 @@ describe('ContractService - Signature Lifecycle', () => {
     it('throws when contract not found', async () => {
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(contractService.getSignatureInfo(999)).rejects.toThrow('Contract not found');
+      await expect(contractService.getSignatureInfo(999)).rejects.toThrow(/contract not found/i);
     });
   });
 });

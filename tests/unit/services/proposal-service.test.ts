@@ -389,7 +389,7 @@ describe('ProposalService - Templates', () => {
     it('throws when template not found', async () => {
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(proposalService.getTemplate(999)).rejects.toThrow('Template not found');
+      await expect(proposalService.getTemplate(999)).rejects.toThrow(/template.*not found/i);
     });
   });
 
@@ -491,7 +491,7 @@ describe('ProposalService - Versioning', () => {
     it('throws if proposal not found', async () => {
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(proposalService.createVersion(999)).rejects.toThrow('Proposal not found');
+      await expect(proposalService.createVersion(999)).rejects.toThrow(/proposal not found/i);
     });
 
     it('increments version number from existing max', async () => {
@@ -544,7 +544,7 @@ describe('ProposalService - Versioning', () => {
     it('throws when version not found', async () => {
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(proposalService.getVersion(999)).rejects.toThrow('Version not found');
+      await expect(proposalService.getVersion(999)).rejects.toThrow(/version not found/i);
     });
   });
 
@@ -697,7 +697,7 @@ describe('ProposalService - E-Signatures', () => {
       mockDb.get.mockResolvedValueOnce(null);
 
       await expect(proposalService.getSignatureRequest(999)).rejects.toThrow(
-        'Signature request not found'
+        /signature request not found/i
       );
     });
   });
@@ -901,7 +901,7 @@ describe('ProposalService - E-Signatures', () => {
     it('throws when signature not found', async () => {
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(proposalService.getSignature(999)).rejects.toThrow('Signature not found');
+      await expect(proposalService.getSignature(999)).rejects.toThrow(/signature not found/i);
     });
   });
 
@@ -957,7 +957,7 @@ describe('ProposalService - E-Signatures', () => {
       mockDb.get.mockResolvedValueOnce(null); // getSignatureRequestByToken returns null
 
       await expect(proposalService.declineSignature('bad-token')).rejects.toThrow(
-        'Signature request not found'
+        /signature request not found/i
       );
     });
 
@@ -1044,7 +1044,7 @@ describe('ProposalService - Comments', () => {
     it('throws when comment not found', async () => {
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(proposalService.getComment(999)).rejects.toThrow('Comment not found');
+      await expect(proposalService.getComment(999)).rejects.toThrow(/comment not found/i);
     });
   });
 
@@ -1231,7 +1231,7 @@ describe('ProposalService - Custom Items', () => {
     it('throws when item not found', async () => {
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(proposalService.getCustomItem(999)).rejects.toThrow('Custom item not found');
+      await expect(proposalService.getCustomItem(999)).rejects.toThrow(/custom item not found/i);
     });
   });
 

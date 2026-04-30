@@ -198,6 +198,14 @@ describe('ClientService - Contact Management', () => {
     mockDb.get.mockReset();
     mockDb.all.mockReset();
     mockDb.run.mockReset();
+    mockDb.transaction.mockReset();
+    // createContact and updateContact moved to db.transaction(cb).
+    // Run the callback with ctx === db so the per-test get/run mocks
+    // record calls; pass through the cb's return so newContactId is
+    // set from the mocked INSERT lastID.
+    mockDb.transaction.mockImplementation(async (cb: (ctx: typeof mockDb) => Promise<unknown>) =>
+      cb(mockDb)
+    );
   });
 
   describe('createContact', () => {
@@ -345,7 +353,7 @@ describe('ClientService - Contact Management', () => {
       mockDb.get.mockResolvedValueOnce(null);
 
       await expect(clientService.updateContact(999, { firstName: 'X' })).rejects.toThrow(
-        'Contact not found'
+        /contact .* not found/i
       );
     });
 
@@ -354,8 +362,11 @@ describe('ClientService - Contact Management', () => {
       mockDb.run.mockResolvedValueOnce({}); // UPDATE
       mockDb.get.mockResolvedValueOnce(null); // post-update SELECT returns null
 
+      // NotFoundError now formats as "contact <id> not found"; the
+      // separate "after update" wording was dropped when the typed
+      // error hierarchy landed.
       await expect(clientService.updateContact(1, { firstName: 'X' })).rejects.toThrow(
-        'Contact not found after update'
+        /contact .* not found/i
       );
     });
 
@@ -390,7 +401,7 @@ describe('ClientService - Contact Management', () => {
     it('throws when contact not found', async () => {
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(clientService.deleteContact(999)).rejects.toThrow('Contact not found');
+      await expect(clientService.deleteContact(999)).rejects.toThrow(/contact .* not found/i);
     });
   });
 
@@ -620,7 +631,7 @@ describe('ClientService - Notes', () => {
     it('throws when note is not found', async () => {
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(clientService.updateNote(999, {})).rejects.toThrow('Note not found');
+      await expect(clientService.updateNote(999, {})).rejects.toThrow(/note .* not found/i);
     });
   });
 
@@ -721,7 +732,7 @@ describe('ClientService - Custom Fields', () => {
       mockDb.get.mockResolvedValueOnce(null);
 
       await expect(clientService.updateCustomField(999, { isActive: false })).rejects.toThrow(
-        'Custom field not found'
+        /custom field .* not found/i
       );
     });
 
@@ -871,7 +882,7 @@ describe('ClientService - Tags & Segmentation', () => {
       mockDb.run.mockResolvedValueOnce({});
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(clientService.updateTag(999, { name: 'Ghost' })).rejects.toThrow('Tag not found');
+      await expect(clientService.updateTag(999, { name: 'Ghost' })).rejects.toThrow(/tag .* not found/i);
     });
 
     it('skips run when no fields provided', async () => {
@@ -975,7 +986,7 @@ describe('ClientService - Health Scoring', () => {
     it('throws when client is not found', async () => {
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(clientService.calculateHealthScore(999)).rejects.toThrow('Client not found');
+      await expect(clientService.calculateHealthScore(999)).rejects.toThrow(/client .* not found/i);
     });
 
     it('returns healthy status for a high-scoring client', async () => {

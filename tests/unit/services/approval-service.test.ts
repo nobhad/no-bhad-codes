@@ -427,7 +427,7 @@ describe('ApprovalService', () => {
 
       await expect(
         approvalService.startWorkflow('proposal', 55, 'user@example.com')
-      ).rejects.toThrow('No workflow definition found for entity type: proposal');
+      ).rejects.toThrow(/workflow definition.*proposal.*not found/i);
     });
 
     it('creates role-based approval request with role: prefix', async () => {
@@ -578,7 +578,7 @@ describe('ApprovalService', () => {
 
       await expect(
         approvalService.approve(999, 'manager@example.com')
-      ).rejects.toThrow('Approval request not found');
+      ).rejects.toThrow(/approval request not found/i);
     });
 
     it('throws when request is already processed', async () => {
@@ -734,7 +734,7 @@ describe('ApprovalService', () => {
 
       await expect(
         approvalService.reject(999, 'manager@example.com', 'Not acceptable')
-      ).rejects.toThrow('Approval request not found');
+      ).rejects.toThrow(/approval request not found/i);
     });
 
     it('throws when request is already processed', async () => {

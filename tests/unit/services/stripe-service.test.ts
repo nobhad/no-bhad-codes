@@ -275,7 +275,7 @@ describe('Stripe Service', () => {
 
   describe('expirePaymentLink', () => {
     it('updates payment link status to cancelled', async () => {
-      mockDb.run.mockResolvedValue({});
+      mockDb.run.mockResolvedValue({ changes: 1 });
       const { expirePaymentLink } =
         await import('../../../server/services/integrations/stripe-service');
 
@@ -323,7 +323,7 @@ describe('Stripe Service', () => {
 
   describe('handleWebhookEvent', () => {
     it('handles checkout.session.completed event', async () => {
-      mockDb.run.mockResolvedValue({});
+      mockDb.run.mockResolvedValue({ changes: 1 });
       const { handleWebhookEvent } =
         await import('../../../server/services/integrations/stripe-service');
 
@@ -355,7 +355,7 @@ describe('Stripe Service', () => {
     });
 
     it('handles checkout.session.expired event', async () => {
-      mockDb.run.mockResolvedValue({});
+      mockDb.run.mockResolvedValue({ changes: 1 });
       const { handleWebhookEvent } =
         await import('../../../server/services/integrations/stripe-service');
 
@@ -378,7 +378,7 @@ describe('Stripe Service', () => {
     });
 
     it('handles payment_intent.payment_failed event', async () => {
-      mockDb.run.mockResolvedValue({});
+      mockDb.run.mockResolvedValue({ changes: 1 });
       const { handleWebhookEvent } =
         await import('../../../server/services/integrations/stripe-service');
 
@@ -402,9 +402,10 @@ describe('Stripe Service', () => {
     });
 
     it('handles charge.refunded event for full refund', async () => {
-      // First get: idempotency check (not processed), second get: invoice lookup
-      mockDb.get.mockResolvedValueOnce(undefined).mockResolvedValueOnce({ id: 1 });
-      mockDb.run.mockResolvedValue({});
+      // Idempotency claim moved to db.run (INSERT OR IGNORE) so the
+      // first get is the invoice lookup keyed by payment intent.
+      mockDb.get.mockResolvedValueOnce({ id: 1 });
+      mockDb.run.mockResolvedValue({ changes: 1 });
       const { handleWebhookEvent } =
         await import('../../../server/services/integrations/stripe-service');
 
@@ -428,9 +429,10 @@ describe('Stripe Service', () => {
     });
 
     it('handles charge.refunded event for partial refund', async () => {
-      // First get: idempotency check (not processed), second get: invoice lookup
-      mockDb.get.mockResolvedValueOnce(undefined).mockResolvedValueOnce({ id: 1 });
-      mockDb.run.mockResolvedValue({});
+      // Idempotency claim moved to db.run (INSERT OR IGNORE) so the
+      // first get is the invoice lookup keyed by payment intent.
+      mockDb.get.mockResolvedValueOnce({ id: 1 });
+      mockDb.run.mockResolvedValue({ changes: 1 });
       const { handleWebhookEvent } =
         await import('../../../server/services/integrations/stripe-service');
 

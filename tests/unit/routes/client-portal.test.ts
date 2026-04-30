@@ -52,7 +52,16 @@ vi.mock('../../../server/services/email-service', () => ({
 vi.mock('../../../server/middleware/cache', () => ({
   cache: () => (_req: unknown, _res: unknown, next: () => void) => next(),
   invalidateCache: () => (_req: unknown, _res: unknown, next: () => void) => next(),
-  QueryCache: class { get() { return null; } set() {} invalidate() {} }
+  // Routes call QueryCache.invalidate as a static helper, not on an
+  // instance — expose both shapes.
+  QueryCache: Object.assign(
+    class { get() { return null; } set() {} invalidate() {} },
+    {
+      invalidate: vi.fn().mockResolvedValue(undefined),
+      get: vi.fn().mockReturnValue(null),
+      set: vi.fn()
+    }
+  )
 }));
 
 // Validation middleware mock — passthrough (we test handlers, not validation layer)
@@ -136,7 +145,11 @@ vi.mock('../../../server/services/client-service', () => ({
     insertClientContact: vi.fn(),
     verifyContactOwnership: vi.fn(),
     updateClientContact: vi.fn(),
-    verifyContactOwnershipActive: vi.fn()
+    verifyContactOwnershipActive: vi.fn(),
+    // PUT /me now syncs the profile name/phone into the primary
+    // client_contact row; without these stubs the handler throws and
+    // res.status is never reached.
+    getContacts: vi.fn().mockResolvedValue([])
   }
 }));
 

@@ -53,16 +53,10 @@ jobs:
 
       - run: npm run test:integration
 
-  # Unit suite has known-rotted mocks across ~15 files (audit-logger,
-  # sow-service, pdf-generation, etc.) that drifted from refactored
-  # services. Tracked for incremental cleanup; allowed-to-fail here
-  # so the integration gate still protects merges. Remove
-  # continue-on-error once the unit suite is green again.
   test-unit:
-    name: Test (unit, allowed-to-fail)
+    name: Test (unit)
     needs: [lint, typecheck]
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -77,7 +71,7 @@ jobs:
 
   build:
     name: Build
-    needs: [typecheck, test-integration]
+    needs: [typecheck, test-integration, test-unit]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
