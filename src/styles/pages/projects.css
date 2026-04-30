@@ -785,37 +785,61 @@ div.page-hero-desktop {
   width: 100%;
 }
 
-/* Screen background shape - goes behind everything */
+/* Title-card base image — sits BEHIND the TV frame, inside the screen
+   cutout. Coords were measured via flood-fill on vintage_tv.webp's
+   transparent screen aperture (1424×1093 source). Update these together
+   with .crt-tv__screen so both layers stay aligned. */
 .crt-tv__screen-bg {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: auto;
-  z-index: var(--z-index-content);
+  top: 8.6%;
+  left: 7.374%;
+  width: 72.121%;
+  height: 70.174%;
+  object-fit: cover;
+  z-index: 1;
 }
 
-/* Screen area - matches the screen-bg position */
+/* Interactive screen overlay (channel list, title-card image, scanlines).
+   Sits BEHIND the TV frame so the bezel naturally clips overflow at the
+   curved screen edges. Must match .crt-tv__screen-bg exactly so highlights
+   align with what's painted on the screen. */
 .crt-tv__screen {
   position: absolute;
-  top: 19.1%;
-  left: 9.2%;
-  width: 81.4%;
-  height: 59%;
+  top: 8.6%;
+  left: 7.374%;
+  width: 72.121%;
+  height: 70.174%;
   overflow: hidden;
-  z-index: var(--z-index-content);
+  z-index: 2;
 }
 
-/* The TV frame PNG - goes on top visually but doesn't block clicks
-   to the channel list inside the screen. The frame image's
-   bounding box covers the screen area; without pointer-events:none
-   it intercepts every click and the channel rows can't be activated. */
+/* The TV frame — must paint ON TOP of the title-card and channel list
+   so the bezel surrounds the screen content. pointer-events:none lets
+   clicks pass through to the channel rows behind it. */
 .crt-tv__frame {
   position: relative;
   width: 100%;
   height: auto;
   display: block;
-  z-index: var(--z-index-content);
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* LED channel readout — overlays the vintage_tv frame's "88" digital
+   display panel. Coords measured against vintage_tv.webp (1424×1093) by
+   isolating the lit red segments of the digit display: x:1284-1340,
+   y:93-133. Translated to percentages of the wrapper, which sizes to
+   the frame image. */
+.crt-tv__channel-display {
+  position: absolute;
+  top: 8.509%;
+  left: 90.169%;
+  width: 4.003%;
+  height: 3.751%;
+  /* contain preserves the channel image's native aspect (1.58) inside
+     the slightly taller display panel (1.39); centers vertically. */
+  object-fit: contain;
+  z-index: 4;
   pointer-events: none;
 }
 
@@ -868,6 +892,266 @@ div.page-hero-desktop {
   pointer-events: none;
 }
 
+/* ============================================
+ * TUNE-IN CASE-STUDY PANELS
+ * ============================================
+ * Lives inside .crt-tv__screen, layered ABOVE the composed title-card
+ * image and the channel list. After the title fades to bg, panels in
+ * here cycle through the project's case study (challenge → approach →
+ * features → results → built-with → outro). The bg-only image stays
+ * painted underneath so the case study reads as "this channel".
+ *
+ * Container queries scale typography off the TV screen size so panels
+ * stay readable at any TV width.
+ */
+.crt-tv__tunein {
+  position: absolute;
+  inset: 0;
+  display: block;
+  /* size (not inline-size) enables cqh so each panel can match the full
+     screen height — required for the "one section per screen" pause
+     where no other section's text is visible at the same time. */
+  container-type: size;
+  container-name: crt-screen;
+  /* Sit above .crt-tv__channel-list (z:2) so the case-study link can
+     receive clicks. Without this, the (opacity:0) channel-list lives on
+     top in the stacking context and silently eats every click. */
+  z-index: 3;
+}
+
+/* Channel list is the click surface only on the channel-guide screen.
+   When tune-in is active (aria-hidden removed from .crt-tv__tunein),
+   suppress the list's pointer events so its (now invisible) bounding
+   box doesn't compete with the panels for hit-testing. */
+.crt-tv:has(.crt-tv__tunein:not([aria-hidden="true"])) .crt-tv__channel-list {
+  pointer-events: none;
+}
+
+.crt-tv__tunein[aria-hidden="true"] {
+  pointer-events: none;
+}
+
+/* End-credits scroll: panels stack vertically in one tall column that
+   gets translated upward through the TV's clipped viewport by GSAP.
+   The column starts just below the visible screen and rolls past until
+   it sits just above, then loops. Padding & gaps create the breathing
+   room between sections so they read as distinct "cards" while the
+   scroll feels continuous. */
+.crt-tv__panels {
+  position: absolute;
+  inset: 0;
+  /* Panels are absolutely-positioned siblings that all fill this box —
+     only one is visible at a time, others sit at opacity 0. JS crossfades
+     between them like Looney Tunes credit cards. */
+}
+
+.crt-tv__panel {
+  /* Each section fills the screen entirely; they stack on top of each
+     other and crossfade. opacity:0 by default so JS can fade them in
+     one at a time. */
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6cqw 7cqw;
+  opacity: 0;
+  /* Per-card text color is set on .crt-tv__tunein from JS using
+     titleCard.color (designer-supplied hex matching the composed image's
+     text). No background veil — the title-card bg image is part of the
+     designed contrast story; the bg shows through unobstructed. */
+  color: var(--tunein-color, var(--color-light, #fff));
+  font-family: var(--font-family-mono, monospace);
+  font-size: clamp(0.9rem, 3.3cqw, 1.45rem);
+  line-height: 1.45;
+}
+
+/* Section heading — sits in the panel's flex-column flow above the body.
+   For Challenge and Approach panels, JS swaps display so the heading is
+   shown ALONE (centered), then display:none'd while the body shows
+   ALONE — no spatial overlap, sequential states only. */
+.crt-tv__panel-heading {
+  margin: 0 0 0.6em 0;
+  text-align: center;
+  font-family: var(--font-family-acme, sans-serif);
+  font-size: clamp(1.6rem, 7cqw, 3rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  /* Explicit color so global h3 styles don't override the per-card color
+     applied via --tunein-color on .crt-tv__tunein. */
+  color: var(--tunein-color, var(--color-light, #fff));
+}
+
+/* When a Challenge/Approach panel is in its "heading-alone" phase, only
+   the heading is in the layout — the body is removed via display:none
+   so the heading is true-centered with no body taking flex space. */
+.crt-tv__panel.is-heading-only .crt-tv__panel-body {
+  display: none;
+}
+
+/* Symmetrical: once the body takes over, the heading is fully removed
+   from layout so the body is the ONLY centered content on screen. */
+.crt-tv__panel.is-body-only .crt-tv__panel-heading {
+  display: none;
+}
+
+/* Stacked heading variant — Challenge / Approach. Two-line layout
+   ("The" / "Challenge") with a much larger type size for the dramatic
+   chyron-style entrance. Each word is its own span stacked vertically. */
+.crt-tv__panel-heading--stacked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(2.5rem, 11cqw, 5rem);
+  line-height: 0.95;
+  letter-spacing: 0.03em;
+}
+
+.crt-tv__panel-heading--stacked > span {
+  display: block;
+}
+
+.crt-tv__panel-tagline {
+  margin: 0 0 0.5em 0;
+  font-family: var(--font-family-acme, sans-serif);
+  font-size: clamp(1.1rem, 4.5cqw, 1.95rem);
+  font-style: italic;
+  opacity: 0.95;
+}
+
+.crt-tv__panel-body {
+  margin: 0;
+}
+
+.crt-tv__panel-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45em;
+}
+
+.crt-tv__panel-list li {
+  position: relative;
+  padding-left: 1.2em;
+}
+
+.crt-tv__panel-list li::before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  opacity: 0.7;
+}
+
+.crt-tv__panel-chips {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45em;
+}
+
+.crt-tv__panel-chips li {
+  padding: 0.25em 0.7em;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.9em;
+  opacity: 0.9;
+}
+
+/* Details panel — Looney-Tunes-credit-card layout: labels on the left in
+   the per-card color, values on the right. Two-column grid keeps rows
+   aligned regardless of label/value lengths. */
+.crt-tv__panel-details {
+  margin: 0;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.6em 1.5em;
+  align-items: baseline;
+}
+
+.crt-tv__panel-details dt {
+  margin: 0;
+  font-family: var(--font-family-acme, sans-serif);
+  font-size: clamp(1.5rem, 6cqw, 2.6rem);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--tunein-color, var(--color-light, #fff));
+}
+
+.crt-tv__panel-details dd {
+  margin: 0;
+  font-family: var(--font-family-mono, monospace);
+  font-size: clamp(1.5rem, 6cqw, 2.6rem);
+}
+
+/* Tools panel — matches the project-detail page's .tools-list tool-tag
+   pills (dark fill, light text) so the in-TV tools read identically to
+   the full case-study page. */
+.crt-tv__panel-tools {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+.crt-tv__panel-tools .tool-tag {
+  background: var(--color-dark, #1a1a1a);
+  color: var(--color-light, #fff);
+  padding: 0.3em 0.8em;
+  border-radius: var(--border-radius-sm, 4px);
+  font-family: var(--font-family-mono, monospace);
+  font-size: 0.85em;
+  font-weight: var(--font-weight-medium, 500);
+}
+
+/* Outro panel — vertical stack centered, with the case-study link as
+   the headline affordance. Hint text dims so it reads as instructional. */
+.crt-tv__panel--outro {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 1em;
+}
+
+.crt-tv__panel-cta {
+  font-family: var(--font-family-acme, sans-serif);
+  font-size: clamp(1.3rem, 5.7cqw, 2.4rem);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 2px solid currentColor;
+  padding-bottom: 0.15em;
+  transition: opacity 0.2s ease;
+}
+
+.crt-tv__panel-cta:hover,
+.crt-tv__panel-cta:focus-visible {
+  opacity: 0.7;
+}
+
+.crt-tv__panel-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  font-size: 0.95em;
+  opacity: 0.85;
+}
+
+.crt-tv__panel-hint {
+  margin: 0;
+  font-size: 0.8em;
+  opacity: 0.55;
+  letter-spacing: 0.02em;
+}
+
 /* The "PROJECTS" heading + divider above the TV are redundant — the
    channel guide on the TV screen already shows the heading. Hidden
    via display:none so the section flexbox centers the TV cleanly. */
@@ -893,7 +1177,7 @@ div.page-hero-desktop {
   justify-content: center;
   align-items: center;
   width: 100%;
-  padding: clamp(0.5rem, 1.5vh, 1.5rem) 1rem;
+  padding: clamp(0.25rem, 0.75vh, 0.75rem) 0.5rem;
 }
 
 .projects-tv-wrap .crt-tv {
@@ -901,19 +1185,18 @@ div.page-hero-desktop {
      in real time (responds to browser resize, zoom, and iOS Safari URL
      bar). The TV width is the smallest of three caps so it always fits
      without overflowing:
-       - 720px absolute, so it doesn't get huge on ultra-wide displays
+       - 1100px absolute, so it doesn't get absurd on ultra-wide displays
        - (available vertical space) × 1.3 aspect ratio, where 1.3 is
          the CRT frame's natural width-to-height ratio
-       - 90vw, so it keeps margin from the viewport edges
-     ESTIMATED_CHROME_PX accounts for the page header, the section
-     heading + hr above the TV, and the footer combined — sized by
-     observation since --footer-height is referenced elsewhere but
+       - 96vw, so it keeps a hair of margin from the viewport edges
+     ESTIMATED_CHROME_PX accounts for the page header and footer combined —
+     sized by observation since --footer-height is referenced elsewhere but
      never actually defined in the design tokens.
 
      Caching the calc value as a custom prop lets us reuse it for the
      channel-list font sizing further down. */
-  --tv-available-height: calc(100dvh - 190px);
-  width: min(720px, calc(var(--tv-available-height) * 1.3), 90vw);
+  --tv-available-height: calc(100dvh - 130px);
+  width: min(1100px, calc(var(--tv-available-height) * 1.3), 96vw);
   max-width: 100%;
 }
 
@@ -939,14 +1222,34 @@ div.page-hero-desktop {
   pointer-events: auto;
 }
 
+/* Heading is the "01 PROJECTS" entry — sized identically to rows so the
+   whole list reads as one column of channels. The heading represents
+   channel 01 (the TV guide); it's the default highlighted item and only
+   loses the highlight when the user actually cycles into a project row. */
 .crt-tv__channel-heading {
-  margin: 0 0 0.5rem 0;
-  font-family: var(--font-family-acme, sans-serif);
-  font-size: clamp(0.875rem, 2.2cqw, 1.25rem);
-  font-weight: var(--font-weight-bold, 700);
+  margin: 0 0 0.25rem 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: clamp(0.5rem, 2cqw, 1rem);
+  align-items: baseline;
+  padding: 0.4rem 0.6rem;
+  font-family: var(--font-family-mono, monospace);
+  font-size: clamp(0.625rem, 1.6cqw, 0.95rem);
+  font-weight: var(--font-weight-semibold, 600);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
   color: var(--color-light, #fff);
+  border-radius: 2px;
+}
+
+/* When NO row is highlighted, the heading is the "active" channel
+   (channel 01 / guide). Once the user cycles into a project row, the
+   row takes the highlight and the heading dims. */
+.crt-tv__channel-list:not(:has(.crt-tv__channel-row.is-active)) .crt-tv__channel-heading {
+  background-color: var(--color-light, #fff);
+  color: var(--color-neutral-900, #1a1a1a);
+  text-shadow: none;
 }
 
 .crt-tv__channel-rows {
@@ -965,11 +1268,11 @@ div.page-hero-desktop {
 }
 
 /* Each row is a real <button> so it's clickable, focusable, and shows
-   a pointer cursor. Inherits the dark TV background by default and
-   inverts to highlight when active. */
+   a pointer cursor. Four-column grid: channel number, title, category,
+   year. Single-line — overflowing titles get an ellipsis. */
 .crt-tv__channel-row {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: auto 1fr auto auto;
   gap: clamp(0.5rem, 2cqw, 1rem);
   align-items: baseline;
   width: 100%;
@@ -984,6 +1287,7 @@ div.page-hero-desktop {
   cursor: pointer;
   font-size: clamp(0.625rem, 1.6cqw, 0.95rem);
   line-height: 1.2;
+  white-space: nowrap;
   border-radius: 2px;
   transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
   opacity: 0.65;
@@ -1005,6 +1309,15 @@ div.page-hero-desktop {
   color: var(--color-neutral-900, #1a1a1a);
   text-shadow: none;
   opacity: 1;
+}
+
+/* Channel number column — fixed-width feel via tabular numerals so
+   "01" / "02" / "10" stay aligned regardless of digit shapes. */
+.crt-tv__channel-number {
+  font-family: var(--font-family-mono, monospace);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-semibold, 600);
+  letter-spacing: 0.05em;
 }
 
 .crt-tv__channel-title {
