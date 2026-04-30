@@ -85,6 +85,16 @@ interface PortfolioProject {
   approach?: string;
   results?: string[];
   keyFeatures?: string[];
+  // Optional TV-channel-preview overrides — condensed copy meant for the
+  // in-TV case study. Each field falls back to its full counterpart when
+  // not provided, so projects without curated TV copy still render.
+  tv?: {
+    description?: string;
+    challenge?: string;
+    approach?: string;
+    results?: string[];
+    keyFeatures?: string[];
+  };
 }
 
 interface PortfolioData {
@@ -101,6 +111,8 @@ const MIN_DOCUMENTED_PROJECTS = 2;
 // fades in (crossfade) — the outro panel is sticky as the terminal frame.
 const TV_STATIC_FLASH_OPACITY = 0.85; // peak of the channel-change burst
 const TV_STATIC_GRAIN_OPACITY = 0.18; // residual grain after the burst
+const TV_BG_FLASH_S = 0.2;            // beat per-project bg holds alone before composed card fades in
+const TV_BLANK_FLASH_S = 0.15;        // blank title-card flash between channels (the "between channels" void)
 const TV_TITLE_HOLD_S = 1.4;          // beat the composed title card holds
 const TV_DOCK_DURATION_S = 0.55;      // composed → bg crossfade duration
 // Per-panel hold time. Paragraphs need real read time; short panels
@@ -118,8 +130,10 @@ const TV_PANEL_HOLD_S: Record<string, number> = {
 const TV_SECTION_PAUSE_S_DEFAULT = 6.0; // fallback for any unmapped panel key
 const TV_TEXT_SWAP_BEAT_S = 0.35;     // empty beat between title fade-out and first panel fade-in
 const TV_TEXT_FADE_S = 0.45;          // panel fade-in / fade-out duration
-const TV_HEADING_FLASH_S = 0.35;      // section heading scale-flash duration
+const TV_HEADING_FLASH_S = 0.35;      // section heading scale-flash duration (no-span fallback)
 const TV_HEADING_HOLD_S = 2.0;        // beat heading sits alone before body fades in
+const TV_WORD_PULSE_S = 0.4;          // per-word pop-in duration (tagline + Challenge/Approach headings)
+const TV_WORD_STAGGER_S = 0.18;       // delay between each word's pop
 
 // Arrow SVG for project cards
 const ARROW_SVG = `
@@ -202,7 +216,13 @@ export class ProjectsModule extends BaseModule {
     // "current" for the boundary-exit logic.
     document.addEventListener('projects:set-tv-channel', ((event: CustomEvent) => {
       const index = event.detail?.index as number | undefined;
-      if (typeof index === 'number') this.setTvChannel(index);
+      // `cycle: true` means user-initiated channel change (wheel/keys/
+      // CHANNEL button) — triggers the full tune-in. `cycle: false` (or
+      // missing) means a passive sync (page entry, project-detail
+      // carousel back-nav) that should only update the LED + row
+      // highlight without flashing into a different channel.
+      const cycle = event.detail?.cycle === true;
+      if (typeof index === 'number') this.setTvChannel(index, { cycle });
     }) as EventListener);
 
     // Tune-in: keyboard Enter on the projects tile triggers this so the
@@ -223,10 +243,40 @@ export class ProjectsModule extends BaseModule {
       }
     });
 
+    // Arrow keys must NEVER scroll the page on the projects tile — they
+    // cycle TV channels via page-transition's keyboard handler. Belt-and-
+    // suspenders preventDefault here so the browser's native scroll stays
+    // suppressed even if focus lands on a TV button/link/panel that
+    // wouldn't otherwise consume the event.
+    window.addEventListener('keydown', (event) => {
+      if (
+        (event.key === 'ArrowUp' || event.key === 'ArrowDown' ||
+         event.key === 'ArrowLeft' || event.key === 'ArrowRight') &&
+        this.isOnProjectsPage()
+      ) {
+        const target = event.target as HTMLElement | null;
+        const tag = target?.tagName;
+        // Don't interfere with form inputs.
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable) {
+          return;
+        }
+        event.preventDefault();
+      }
+    });
+
     // Check initial hash for project detail (on page load only)
     this.checkInitialHash();
 
     this.log('Initialized');
+  }
+
+  /**
+   * True when the projects map tile is the active page. Read from the
+   * data-active-page attribute that PageTransitionModule sets on <main>.
+   */
+  private isOnProjectsPage(): boolean {
+    const main = document.querySelector('main#main-content');
+    return main?.getAttribute('data-active-page') === 'projects';
   }
 
   /**
@@ -455,6 +505,30 @@ export class ProjectsModule extends BaseModule {
                data-channel-display
                src="/images/channel_01.webp"
                alt="" />
+          <!-- Invisible button overlays positioned over the TV frame's
+               POWER / CHANNEL ▼▲ / VOLUME ▼▲ controls. Coords measured
+               from vintage_tv.webp via flood-fill of the dark button
+               capsules. -->
+          <button class="crt-tv__btn crt-tv__btn--power"
+                  type="button"
+                  data-tv-btn="power"
+                  aria-label="Power"></button>
+          <button class="crt-tv__btn crt-tv__btn--channel-down"
+                  type="button"
+                  data-tv-btn="channel-down"
+                  aria-label="Channel down"></button>
+          <button class="crt-tv__btn crt-tv__btn--channel-up"
+                  type="button"
+                  data-tv-btn="channel-up"
+                  aria-label="Channel up"></button>
+          <button class="crt-tv__btn crt-tv__btn--volume-down"
+                  type="button"
+                  data-tv-btn="volume-down"
+                  aria-label="Volume down"></button>
+          <button class="crt-tv__btn crt-tv__btn--volume-up"
+                  type="button"
+                  data-tv-btn="volume-up"
+                  aria-label="Volume up"></button>
         </div>
       </div>
     `;
@@ -464,6 +538,93 @@ export class ProjectsModule extends BaseModule {
 
     // Populate the channel list with one row per documented project.
     this.renderChannelList();
+
+    // Wire the physical TV button overlays.
+    this.wireTvButtons();
+  }
+
+  /**
+   * Wire click handlers for the TV's POWER / CHANNEL / VOLUME buttons.
+   * Buttons are positioned via CSS over the corresponding controls in
+   * the vintage_tv frame; clicking dispatches the same channel-cycle
+   * events that wheel/keys use, so the LED + screen + tune-in stay in
+   * lock-step regardless of input method.
+   */
+  private wireTvButtons(): void {
+    const tv = document.querySelector('.crt-tv') as HTMLElement | null;
+    if (!tv) return;
+
+    tv.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement | null;
+      const btn = target?.closest('[data-tv-btn]') as HTMLElement | null;
+      if (!btn) return;
+      const action = btn.dataset.tvBtn;
+
+      switch (action) {
+      case 'power':
+        this.toggleTvPower();
+        break;
+      case 'channel-up':
+        // CHANNEL UP = next higher channel number (down in the array
+        // direction the wheel/key handler uses, since "down" cycles to
+        // the next channel).
+        this.cycleTvChannel(+1);
+        break;
+      case 'channel-down':
+        this.cycleTvChannel(-1);
+        break;
+      case 'volume-up':
+      case 'volume-down':
+        // Volume is a no-op for now — reserved for future sound effects.
+        break;
+      }
+    });
+  }
+
+  /**
+   * Toggle the TV's "powered on/off" state. When off, the screen goes
+   * dark and the LED display blanks; the channel list / tune-in are
+   * hidden until the user powers it back on.
+   */
+  private toggleTvPower(): void {
+    const tv = document.querySelector('.crt-tv') as HTMLElement | null;
+    if (!tv) return;
+    const isOff = tv.classList.toggle('is-powered-off');
+    if (isOff) {
+      // Going off — cancel any tune-in so we come back cleanly.
+      this.cancelTuneIn();
+    }
+  }
+
+  /**
+   * Cycle the TV channel by ±1, wrapping through guide → projects → guide.
+   * Mirrors what wheel-up/down does so the buttons feel identical.
+   */
+  private cycleTvChannel(delta: 1 | -1): void {
+    if (!this.portfolioData) return;
+    const documented = this.portfolioData.projects.filter((p) => p.isDocumented);
+    if (documented.length === 0) return;
+
+    // Channel slot count: guide (0) + projects (1..N).
+    const total = documented.length + 1;
+
+    // Current channel: derive from active tune-in slug (if any) so the
+    // button matches what's actually on screen.
+    const currentSlug = this.activeTuneInSlug;
+    const currentIdx = currentSlug
+      ? documented.findIndex((p) => p.slug === currentSlug) + 1
+      : 0;
+
+    const nextIdx = ((currentIdx + delta) % total + total) % total;
+    // Button press is a user-initiated cycle → trigger the tune-in.
+    this.setTvChannel(nextIdx, { cycle: true });
+
+    // Notify page-transition so its internal currentTvIndex stays in
+    // sync — otherwise wheel/key cycling after a button press would
+    // start from a stale index.
+    window.dispatchEvent(
+      new CustomEvent('projects:active-slug-changed', { detail: { index: nextIdx } })
+    );
   }
 
   /**
@@ -502,10 +663,13 @@ export class ProjectsModule extends BaseModule {
       .join('');
 
     container.innerHTML = `
-      <h3 class="crt-tv__channel-heading">
+      <div class="crt-tv__channel-heading" role="heading" aria-level="3">
         <span class="crt-tv__channel-number">01</span>
-        <span class="crt-tv__channel-title">Projects</span>
-      </h3>
+        <span class="crt-tv__channel-text">
+          <span class="crt-tv__channel-title">Projects</span>
+          <span class="crt-tv__channel-category">Toggle between channels ↑ ↓</span>
+        </span>
+      </div>
       <ul class="crt-tv__channel-rows">${rows}</ul>
     `;
 
@@ -609,22 +773,32 @@ export class ProjectsModule extends BaseModule {
     });
     const tl = this.tuneInTimeline;
 
-    // 1) Static burst + channel list snaps off + bg swap (simultaneous).
+    // 1) Static burst + channel list snaps off, bg flashes blank for a
+    //    split second (the "between channels" void) before swapping to
+    //    the per-project bg.
     tl.to(staticOverlay, { opacity: TV_STATIC_FLASH_OPACITY, duration: 0.06 }, 0)
       .to(channelList, { opacity: 0, duration: 0.05 }, 0)
       .add(() => {
-        screenBg.src = card.bg;
+        screenBg.src = '/images/title-card_base.webp';
       }, 0.05);
 
-    // 2) Composed title card fades in while static settles.
-    tl.to(composedImg, { opacity: 1, duration: 0.25, ease: 'power2.out' }, 0.08)
-      .to(
-        staticOverlay,
-        { opacity: TV_STATIC_GRAIN_OPACITY, duration: 0.3, ease: 'power2.out' },
-        0.1
-      );
+    // 2) Hold the blank for a split second, then swap to per-project bg.
+    tl.to({}, { duration: TV_BLANK_FLASH_S });
+    tl.add(() => {
+      screenBg.src = card.bg;
+    });
 
-    // 3) Hold the title card so the user reads it before fading to bg.
+    // 3) Static settles to residual grain, revealing the new bg.
+    tl.to(staticOverlay, { opacity: TV_STATIC_GRAIN_OPACITY, duration: 0.3, ease: 'power2.out' });
+
+    // 4) Hold the bg alone for a beat so the user gets to see the
+    //    channel's bg image before the composed title card lands on top.
+    tl.to({}, { duration: TV_BG_FLASH_S }, '>');
+
+    // 5) Composed title card fades in over the bg.
+    tl.to(composedImg, { opacity: 1, duration: 0.3, ease: 'power2.out' }, '>');
+
+    // 6) Hold the title card so the user reads it before fading to bg.
     tl.to({}, { duration: TV_TITLE_HOLD_S }, '>');
 
     // 4) Crossfade composed → bg-only (composed fades out, bg already
@@ -649,18 +823,39 @@ export class ProjectsModule extends BaseModule {
    * Called once per channel-select; panels are appended in the order
    * they'll auto-advance through.
    *
-   * Each panel only renders if its source data exists — projects without
-   * a `liveUrl`, for example, get an outro panel without the "Live at"
-   * line.
+   * TV channel copy comes from the project's optional `tv` namespace —
+   * a separate, intentionally condensed set of fields for the channel
+   * preview. Falls back to the full case-study fields when a `tv` field
+   * is missing, so projects without curated TV copy still render.
    */
   private populateTuneIn(project: PortfolioProject, panelsEl: HTMLElement): void {
+    // Read from project.tv if present, else fall back to the full fields.
+    const tv = project.tv ?? {};
+    const tvDescription = tv.description ?? project.description;
+    const tvChallenge = tv.challenge ?? project.challenge;
+    const tvApproach = tv.approach ?? project.approach;
+    const tvKeyFeatures = tv.keyFeatures ?? project.keyFeatures;
+    const tvResults = tv.results ?? project.results;
     // Panel sequence — only include panels whose source data is non-empty.
     const panels: string[] = [];
 
-    // Details first — Role / Year / Duration plays right after the title
-    // card, like the credit card in a Looney Tunes opening. Two-column
-    // layout (label | value); skips empty rows so older projects don't
-    // show blanks.
+    // Tagline first — punchy one-liner gets a solo beat right after the
+    // title card. Each word wrapped in a span so the cycle animation
+    // can pop them in one at a time with a slight pulse.
+    if (project.tagline) {
+      const taglineWords = project.tagline
+        .split(/\s+/)
+        .map((w) => `<span>${escapeHtml(w)}</span>`)
+        .join(' ');
+      panels.push(`
+        <article class="crt-tv__panel" data-panel-key="tagline">
+          <p class="crt-tv__panel-tagline">${taglineWords}</p>
+        </article>
+      `);
+    }
+
+    // Details — Role / Year / Duration in a Looney-Tunes-credit-card
+    // two-column layout. Skips rows with empty data.
     const detailRows: string[] = [];
     if (project.role) {
       detailRows.push(`<dt>Role</dt><dd>${escapeHtml(project.role)}</dd>`);
@@ -679,45 +874,41 @@ export class ProjectsModule extends BaseModule {
       `);
     }
 
-    // Tagline gets its own card so the punchy one-liner has a beat —
-    // e.g. "You're looking at it!" for the portfolio site itself.
-    if (project.tagline) {
-      panels.push(`
-        <article class="crt-tv__panel" data-panel-key="tagline">
-          <p class="crt-tv__panel-tagline">${escapeHtml(project.tagline)}</p>
-        </article>
-      `);
-    }
-
     // Description: the longer intro paragraph.
-    if (project.description) {
+    if (tvDescription) {
       panels.push(`
         <article class="crt-tv__panel" data-panel-key="intro">
-          <p class="crt-tv__panel-body">${escapeHtml(project.description)}</p>
+          <p class="crt-tv__panel-body">${escapeHtml(tvDescription)}</p>
         </article>
       `);
     }
 
-    if (project.challenge) {
+    if (tvChallenge) {
       panels.push(`
         <article class="crt-tv__panel" data-panel-key="challenge">
           <h3 class="crt-tv__panel-heading crt-tv__panel-heading--stacked"><span>The</span><span>Challenge</span></h3>
-          <p class="crt-tv__panel-body">${escapeHtml(project.challenge)}</p>
+          <p class="crt-tv__panel-body">${escapeHtml(tvChallenge)}</p>
         </article>
       `);
     }
 
-    if (project.approach) {
+    if (tvApproach) {
       panels.push(`
         <article class="crt-tv__panel" data-panel-key="approach">
           <h3 class="crt-tv__panel-heading crt-tv__panel-heading--stacked"><span>The</span><span>Approach</span></h3>
-          <p class="crt-tv__panel-body">${escapeHtml(project.approach)}</p>
+          <p class="crt-tv__panel-body">${escapeHtml(tvApproach)}</p>
         </article>
       `);
     }
 
-    if (project.keyFeatures && project.keyFeatures.length > 0) {
-      const items = project.keyFeatures.map((f) => `<li>${escapeHtml(f)}</li>`).join('');
+    if (tvKeyFeatures && tvKeyFeatures.length > 0) {
+      // Strip trailing parenthetical explanations on the TV render so
+      // the channel preview reads cleanly. The full text (with the
+      // parenthetical) still shows on the project-detail page.
+      const items = tvKeyFeatures
+        .map((f) => f.replace(/\s*\([^)]*\)\s*$/, ''))
+        .map((f) => `<li>${escapeHtml(f)}</li>`)
+        .join('');
       panels.push(`
         <article class="crt-tv__panel" data-panel-key="features">
           <h3 class="crt-tv__panel-heading">Key Features</h3>
@@ -726,8 +917,8 @@ export class ProjectsModule extends BaseModule {
       `);
     }
 
-    if (project.results && project.results.length > 0) {
-      const items = project.results.map((r) => `<li>${escapeHtml(r)}</li>`).join('');
+    if (tvResults && tvResults.length > 0) {
+      const items = tvResults.map((r) => `<li>${escapeHtml(r)}</li>`).join('');
       panels.push(`
         <article class="crt-tv__panel" data-panel-key="results">
           <h3 class="crt-tv__panel-heading">Results</h3>
@@ -823,11 +1014,26 @@ export class ProjectsModule extends BaseModule {
           panel.classList.add('is-heading-only');
           panel.classList.remove('is-body-only');
         });
-        tl.fromTo(
-          heading,
-          { opacity: 0, scale: 0.9 },
-          { opacity: 1, scale: 1, duration: TV_HEADING_FLASH_S, ease: 'back.out(2)' }
-        );
+        // Each word in the heading pops in with an overshoot pulse,
+        // staggered ~0.18s apart. Heading itself starts visible so the
+        // word spans (which are at opacity 0 by default reset) drive
+        // the animation.
+        gsap.set(heading, { opacity: 1 });
+        const headingWords = heading.querySelectorAll('span');
+        if (headingWords.length > 0) {
+          tl.fromTo(
+            headingWords,
+            { opacity: 0, scale: 0.7 },
+            { opacity: 1, scale: 1, duration: TV_WORD_PULSE_S, ease: 'back.out(2.4)', stagger: TV_WORD_STAGGER_S }
+          );
+        } else {
+          // Fallback: heading without word spans — pop the whole thing.
+          tl.fromTo(
+            heading,
+            { opacity: 0, scale: 0.9 },
+            { opacity: 1, scale: 1, duration: TV_HEADING_FLASH_S, ease: 'back.out(2)' }
+          );
+        }
         tl.to({}, { duration: TV_HEADING_HOLD_S });
         tl.to(heading, { opacity: 0, duration: TV_TEXT_FADE_S, ease: 'power2.in' });
 
@@ -844,6 +1050,24 @@ export class ProjectsModule extends BaseModule {
             body,
             { opacity: 1, duration: TV_TEXT_FADE_S, stagger: 0.06, ease: 'power2.out' }
           );
+        }
+      } else if (key === 'tagline') {
+        // Tagline panel — each word in the tagline pops in with a pulse
+        // for a Looney-Tunes "ka-pow!" landing.
+        const tagline = panel.querySelector('.crt-tv__panel-tagline') as HTMLElement | null;
+        if (tagline) {
+          gsap.set(tagline, { opacity: 1 });
+          const words = tagline.querySelectorAll('span');
+          if (words.length > 0) {
+            gsap.set(words, { opacity: 0, scale: 0.7 });
+            tl.to(words, {
+              opacity: 1,
+              scale: 1,
+              duration: TV_WORD_PULSE_S,
+              ease: 'back.out(2.4)',
+              stagger: TV_WORD_STAGGER_S
+            });
+          }
         }
       } else {
         // Default: fade all children in together (heading + body, or
@@ -866,6 +1090,45 @@ export class ProjectsModule extends BaseModule {
         tl.to(panel, { opacity: 0, duration: TV_TEXT_FADE_S, ease: 'power2.in' });
       }
     });
+  }
+
+  /**
+   * Animated channel-flip back to channel 01 (the guide). Mirrors the
+   * project tune-in's static-burst + brightness-dim + bg-swap flow so
+   * cycling INTO the guide reads the same as cycling out of it. The
+   * destination state is the channel list visible over title-card_base.
+   */
+  private transitionToGuide(): void {
+    // Tear down any in-flight tune-in (timelines, panels, classes) but
+    // skip the instant visual reset — the animation below handles it.
+    this.cancelTuneIn();
+
+    const screenBg = document.querySelector('[data-screen-bg]') as HTMLImageElement | null;
+    const channelList = document.querySelector('.crt-tv__channel-list') as HTMLElement | null;
+    const staticOverlay = document.querySelector('.crt-tv__static') as HTMLElement | null;
+    if (!screenBg || !channelList || !staticOverlay) return;
+
+    // Channel list starts hidden and fades back in at the end.
+    gsap.set(channelList, { opacity: 0 });
+
+    this.tuneInTimeline = gsap.timeline();
+    const tl = this.tuneInTimeline;
+
+    // Static peak + bg src swaps to the blank base.
+    tl.to(staticOverlay, { opacity: TV_STATIC_FLASH_OPACITY, duration: 0.06 }, 0)
+      .add(() => {
+        screenBg.src = '/images/title-card_base.webp';
+      }, 0.05);
+
+    // Hold the blank for a beat (matches TV_BLANK_FLASH_S in tune-in).
+    tl.to({}, { duration: TV_BLANK_FLASH_S });
+
+    // Static settles, channel list fades in.
+    tl.to(staticOverlay, { opacity: TV_STATIC_GRAIN_OPACITY, duration: 0.3, ease: 'power2.out' })
+      .to(channelList, { opacity: 1, duration: 0.3, ease: 'power2.out' }, '<');
+
+    // LED shows channel 01.
+    this.setChannelDisplay(1);
   }
 
   /**
@@ -906,7 +1169,11 @@ export class ProjectsModule extends BaseModule {
 
     // Restore channel-guide state: blank-screen base, channel list visible,
     // composed title card hidden, panels emptied.
-    if (screenBg) screenBg.src = '/images/title-card_base.webp';
+    if (screenBg) {
+      gsap.killTweensOf(screenBg);
+      gsap.set(screenBg, { opacity: 1 });
+      screenBg.src = '/images/title-card_base.webp';
+    }
     if (channelList) gsap.set(channelList, { opacity: 1 });
     if (tunein) {
       gsap.set(tunein, { clearProps: 'all' });
@@ -945,7 +1212,7 @@ export class ProjectsModule extends BaseModule {
    * the actual title-card image is reserved for the tune-in sequence
    * triggered by Enter/click.
    */
-  private setTvChannel(index: number): void {
+  private setTvChannel(index: number, options: { cycle?: boolean } = {}): void {
     if (!this.portfolioData) return;
     const documented = this.portfolioData.projects.filter((p) => p.isDocumented);
     if (documented.length === 0) return;
@@ -965,10 +1232,25 @@ export class ProjectsModule extends BaseModule {
     // No-op if the channel didn't actually change.
     if (prevChannelIdx === safeIndex) return;
 
+    // Passive sync (page entry, carousel back-nav) — just highlight the
+    // matching row + update the LED. Don't fire tune-ins or transitions
+    // since the user didn't ask to switch channels; they just landed
+    // here. This prevents flashing the wrong bg when navigating between
+    // main tiles quickly.
+    if (!options.cycle) {
+      const rows = document.querySelectorAll<HTMLElement>('.crt-tv__channel-row');
+      rows.forEach((row) => {
+        const rowIdx = Number(row.dataset.index);
+        row.classList.toggle('is-active', safeIndex > 0 && rowIdx === safeIndex - 1);
+      });
+      this.setChannelDisplay(safeIndex + 1);
+      return;
+    }
+
     if (safeIndex === 0) {
-      // Channel 01: tear down any tune-in and return to the guide.
-      this.cancelTuneIn();
-      this.flashChannelStatic();
+      // Channel 01: animated transition back to the channel guide,
+      // mirroring the tune-in's static + brightness flow.
+      this.transitionToGuide();
       return;
     }
 
