@@ -4,7 +4,7 @@
       "id": "nobhad-codes",
       "title": "No Bhad Codes",
       "slug": "nobhad-codes",
-      "tagline": "You're looking at it",
+      "tagline": "You're looking at it!",
       "description": "A custom-built portfolio designed to showcase technical projects and professional expertise. Prioritizes performance, accessibility, and clean design over flashy gimmicks—demonstrating the same principles applied to client work. Design inspired by a mischievous coyote cartoon character.",
       "category": "websites",
       "role": "Full Stack Developer",
@@ -56,14 +56,20 @@
         "composed": "/images/title_card_no-bhad-codes.webp",
         "bg": "/images/title_card_no-bhad-codes_bg.webp",
         "color": "#000000",
-        "primary": ["NO BHAD", "CODES"],
+        "primary": [
+          "NO BHAD",
+          "CODES"
+        ],
         "primaryPt": 100,
-        "secondary": ["WEB DEVELOPMENT", "PORTFOLIO SITE"],
+        "secondary": [
+          "WEB DEVELOPMENT",
+          "PORTFOLIO SITE"
+        ],
         "secondaryPt": 38
       },
       "duration": "Ongoing",
       "challenge": "Most portfolio templates feel generic and fail to demonstrate actual development skills. I needed a site that would stand out while proving I could build production-ready applications—not just pretty mockups.",
-      "approach": "Built everything from scratch using vanilla TypeScript instead of React to demonstrate fundamental skills. Implemented a custom SPA router, GSAP-powered animations, and a full Express backend. The playful design draws inspiration from a mischievous coyote cartoon character—clever, resourceful, and a little unconventional. The interactive business card serves as both a memorable introduction and a showcase of animation capabilities.",
+      "approach": "I built everything from scratch using vanilla TypeScript instead of React to demonstrate fundamental skills. I implemented a custom SPA router, GSAP-powered animations, and a full Express backend. The playful design draws inspiration from a mischievous coyote cartoon character—clever, resourceful, and a little unconventional. The interactive business card serves as both a memorable introduction and a showcase of animation capabilities.",
       "results": [
         "Sub-2-second load times with optimized asset delivery",
         "100% Lighthouse accessibility score",
@@ -83,7 +89,7 @@
       "title": "The Backend",
       "slug": "the-backend",
       "tagline": "Client & project management system",
-      "description": "A full-stack dashboard and client portal for managing freelance projects. The developer side handles leads, project tracking, client invitations via magic links, messaging, file sharing, and invoice generation. The client side gives clients real-time project progress, file uploads, messaging, and invoice history—all without third-party platforms.",
+      "description": "I built a full-stack dashboard and client portal for managing freelance projects. The developer side handles leads, project tracking, client invitations, messaging, file sharing, and invoice generation. The client side gives clients real-time project progress, file uploads, messaging, and invoice history—all without third-party platforms.",
       "category": "applications",
       "role": "Full Stack Developer",
       "tools": [
@@ -135,14 +141,18 @@
         "composed": "/images/title_card_The-Backend.webp",
         "bg": "/images/title_card_The-Backend_bg.webp",
         "color": "#ffffff",
-        "primary": ["THE BACKEND"],
+        "primary": [
+          "THE BACKEND"
+        ],
         "primaryPt": 100,
-        "secondary": ["CLIENT & PROJECT MANAGEMENT SYSTEM"],
+        "secondary": [
+          "CLIENT & PROJECT MANAGEMENT SYSTEM"
+        ],
         "secondaryPt": 48
       },
       "duration": "Ongoing",
       "challenge": "Managing freelance projects meant juggling emails, spreadsheets, Dropbox, and invoicing apps. Clients had no visibility into project progress, and context was constantly lost across disconnected tools. I needed a unified system that would professionalize the client experience while streamlining my workflow.",
-      "approach": "Designed a dual-portal architecture: an admin dashboard for project management and a client portal for transparency. Built secure authentication with magic link invitations, real-time messaging, automated PDF invoice generation, and a visual Kanban board. Used SQLite for simplicity and portability, with a migration system for schema evolution.",
+      "approach": "I designed a dual-portal architecture: an admin dashboard for project management and a client portal for transparency. I built secure authentication, real-time messaging, automated PDF invoice generation, and a visual Kanban board. I used SQLite for simplicity and portability, with a migration system for schema evolution.",
       "results": [
         "Single platform replaces 4+ separate tools",
         "Clients can self-serve project status, files, and invoices",
@@ -195,14 +205,19 @@
         "composed": "/images/title_card_hedgewitch.webp",
         "bg": "/images/title_card_hedgewitch_bg.webp",
         "color": "#ffffff",
-        "primary": ["HEDGEWITCH", "HORTICULTURE"],
+        "primary": [
+          "HEDGEWITCH",
+          "HORTICULTURE"
+        ],
         "primaryPt": 90,
-        "secondary": ["BUSINESS WEBSITE"],
+        "secondary": [
+          "BUSINESS WEBSITE"
+        ],
         "secondaryPt": 38
       },
       "duration": "2 months",
-      "challenge": "The client's existing Squarespace site couldn't capture the earthy, witchy identity of their brand. They needed a site that felt handcrafted and organic\u2014not a cookie-cutter template\u2014while still being easy to maintain and performant on mobile for clients browsing from the garden.",
-      "approach": "Built a static site with Astro for near-instant load times and strong SEO. Designed a custom Art Nouveau-inspired visual system with corner frames, wavy SVG text paths, and GSAP scroll-driven animations including character-by-character reveals and parallax effects. Created a full gallery system with lightbox, blog with content collections, and an admin dashboard for self-service content management.",
+      "challenge": "The client's existing Squarespace site couldn't capture the earthy, witchy identity of their brand. They needed a site that felt handcrafted and organic—not a cookie-cutter template—while still being easy to maintain and performant on mobile for clients browsing from the garden.",
+      "approach": "I built a static site with Astro for near-instant load times and strong SEO. I designed a custom Art Nouveau-inspired visual system with corner frames, wavy SVG text paths, and GSAP scroll-driven animations including character-by-character reveals and parallax effects. I created a full gallery system with lightbox, blog with content collections, and an admin dashboard for self-service content management.",
       "results": [
         "26 custom pages built from scratch",
         "49-item portfolio gallery with lightbox and filtering",
@@ -280,9 +295,19 @@
       "description": "Custom-designed link-in-bio pages for social media profiles. Features animated backgrounds, theme customization, and analytics integration.",
       "category": "websites",
       "role": "Designer & Developer",
-      "tools": ["HTML", "CSS", "JavaScript", "GSAP"],
+      "tools": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "GSAP"
+      ],
       "year": 2024,
-      "technologies": ["HTML", "CSS", "JavaScript", "GSAP"],
+      "technologies": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "GSAP"
+      ],
       "date": "2024-09-01",
       "status": "completed",
       "featured": false,
@@ -329,8 +354,18 @@
   ],
   "navigation": {
     "main": [
-      { "id": "home", "title": "home", "path": "/", "eyebrow": "00" },
-      { "id": "about", "title": "about", "path": "#about", "eyebrow": "01" },
+      {
+        "id": "home",
+        "title": "home",
+        "path": "/",
+        "eyebrow": "00"
+      },
+      {
+        "id": "about",
+        "title": "about",
+        "path": "#about",
+        "eyebrow": "01"
+      },
       {
         "id": "contact",
         "title": "contact",

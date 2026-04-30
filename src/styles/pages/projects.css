@@ -786,16 +786,21 @@ div.page-hero-desktop {
 }
 
 /* Title-card base image — sits BEHIND the TV frame, inside the screen
-   cutout. Coords were measured via flood-fill on vintage_tv.webp's
-   transparent screen aperture (1424×1093 source). Update these together
+   cutout. Box matches the title-card's NATIVE proportions (1037×769
+   within the 1424×1093 TV source) so it renders 1:1 with no scaling /
+   cropping. Centered on the screen aperture (computed from flood-filled
+   cutout center: x=618 / y=477 in source pixels). Update these together
    with .crt-tv__screen so both layers stay aligned. */
 .crt-tv__screen-bg {
   position: absolute;
-  top: 8.6%;
-  left: 7.374%;
-  width: 72.121%;
-  height: 70.174%;
-  object-fit: cover;
+  /* (477 - 769/2) / 1093 */
+  top: 8.463%;
+  /* (618 - 1037/2) / 1424 */
+  left: 6.987%;
+  /* 1037 / 1424 */
+  width: 72.823%;
+  /* 769 / 1093 */
+  height: 70.357%;
   z-index: 1;
 }
 
@@ -805,10 +810,10 @@ div.page-hero-desktop {
    align with what's painted on the screen. */
 .crt-tv__screen {
   position: absolute;
-  top: 8.6%;
-  left: 7.374%;
-  width: 72.121%;
-  height: 70.174%;
+  top: 8.463%;
+  left: 6.987%;
+  width: 72.823%;
+  height: 70.357%;
   overflow: hidden;
   z-index: 2;
 }
@@ -958,9 +963,9 @@ div.page-hero-desktop {
   opacity: 0;
   /* Per-card text color is set on .crt-tv__tunein from JS using
      titleCard.color (designer-supplied hex matching the composed image's
-     text). No background veil — the title-card bg image is part of the
-     designed contrast story; the bg shows through unobstructed. */
-  color: var(--tunein-color, var(--color-light, #fff));
+     text). Fallback hardcoded #fff so the TV stays readable regardless
+     of site theme. */
+  color: var(--tunein-color, #fff);
   font-family: var(--font-family-mono, monospace);
   font-size: clamp(0.9rem, 3.3cqw, 1.45rem);
   line-height: 1.45;
@@ -978,8 +983,9 @@ div.page-hero-desktop {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   /* Explicit color so global h3 styles don't override the per-card color
-     applied via --tunein-color on .crt-tv__tunein. */
-  color: var(--tunein-color, var(--color-light, #fff));
+     applied via --tunein-color on .crt-tv__tunein. Fallback hardcoded
+     so TV interior stays consistent across light/dark site themes. */
+  color: var(--tunein-color, #fff);
 }
 
 /* When a Challenge/Approach panel is in its "heading-alone" phase, only
@@ -1013,11 +1019,13 @@ div.page-hero-desktop {
 }
 
 .crt-tv__panel-tagline {
-  margin: 0 0 0.5em 0;
+  margin: 0;
+  text-align: center;
   font-family: var(--font-family-acme, sans-serif);
-  font-size: clamp(1.1rem, 4.5cqw, 1.95rem);
+  font-size: clamp(2rem, 8.5cqw, 3.8rem);
   font-style: italic;
-  opacity: 0.95;
+  line-height: 1.05;
+  opacity: 1;
 }
 
 .crt-tv__panel-body {
@@ -1066,8 +1074,17 @@ div.page-hero-desktop {
    aligned regardless of label/value lengths. */
 .crt-tv__panel-details {
   margin: 0;
+  /* Centered as a block in the panel (align-self), but the grid columns
+     are content-sized so labels and values stay left-aligned within
+     their columns — not center-aligned text. max-width:100% prevents
+     overflow when the longest value would push the block past the
+     panel edges. */
+  align-self: center;
+  max-width: 100%;
   display: grid;
-  grid-template-columns: max-content 1fr;
+  grid-template-columns: max-content max-content;
+  /* row gap (between Role/Year/Duration entries) | column gap (between
+     label and value). 1.5em is comfortable without overflowing. */
   gap: 0.6em 1.5em;
   align-items: baseline;
 }
@@ -1075,16 +1092,24 @@ div.page-hero-desktop {
 .crt-tv__panel-details dt {
   margin: 0;
   font-family: var(--font-family-acme, sans-serif);
-  font-size: clamp(1.5rem, 6cqw, 2.6rem);
+  /* Sized so the longest expected value ("Full Stack Developer") + label
+     fits inside the panel at 1100px TV width without clipping. */
+  font-size: clamp(1.2rem, 4.5cqw, 1.9rem);
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--tunein-color, var(--color-light, #fff));
+  color: var(--tunein-color, #fff);
 }
 
 .crt-tv__panel-details dd {
   margin: 0;
   font-family: var(--font-family-mono, monospace);
-  font-size: clamp(1.5rem, 6cqw, 2.6rem);
+  font-size: clamp(1.2rem, 4.5cqw, 1.9rem);
+}
+
+/* Details panel uses tighter horizontal padding than other panels so the
+   two-column credit-card layout has more room before clipping. */
+.crt-tv__panel[data-panel-key="details"] {
+  padding: 6cqw 4cqw;
 }
 
 /* Tools panel — matches the project-detail page's .tools-list tool-tag
@@ -1100,8 +1125,10 @@ div.page-hero-desktop {
 }
 
 .crt-tv__panel-tools .tool-tag {
-  background: var(--color-dark, #1a1a1a);
-  color: var(--color-light, #fff);
+  /* Hardcoded so the TV pills stay readable in both light and dark site
+     themes — the screen represents a physical device, not a UI surface. */
+  background: #1a1a1a;
+  color: #fff;
   padding: 0.3em 0.8em;
   border-radius: var(--border-radius-sm, 4px);
   font-family: var(--font-family-mono, monospace);
@@ -1212,34 +1239,37 @@ div.page-hero-desktop {
   display: flex;
   flex-direction: column;
   padding: clamp(0.5rem, 2cqw, 1.25rem) clamp(0.75rem, 3cqw, 1.5rem);
-  color: var(--color-light, #fff);
+  /* Hardcoded colors so the TV interior stays the same in light/dark
+     site themes — the screen represents a physical TV, not a UI surface
+     that should re-theme with the site. */
+  color: #fff;
   font-family: var(--font-family-mono, monospace);
   text-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
-  background: var(--color-neutral-900, #1a1a1a);
+  background: #1a1a1a;
   z-index: 2;
   /* Explicit pointer-events so the channel rows below can be clicked
      even if a parent rule disables them. */
   pointer-events: auto;
 }
 
-/* Heading is the "01 PROJECTS" entry — sized identically to rows so the
-   whole list reads as one column of channels. The heading represents
-   channel 01 (the TV guide); it's the default highlighted item and only
-   loses the highlight when the user actually cycles into a project row. */
+/* Heading is the "01 PROJECTS" entry — represents channel 01 (the TV
+   guide). Sized larger than rows so it reads as the primary anchor of
+   the list. Highlighted by default (via the :has() rule below) and
+   loses the highlight only when the user cycles into a project row. */
 .crt-tv__channel-heading {
-  margin: 0 0 0.25rem 0;
+  margin: 0 0 0.5rem 0;
   display: grid;
   grid-template-columns: auto 1fr;
   gap: clamp(0.5rem, 2cqw, 1rem);
   align-items: baseline;
-  padding: 0.4rem 0.6rem;
+  padding: 0.5rem 0.6rem;
   font-family: var(--font-family-mono, monospace);
-  font-size: clamp(0.625rem, 1.6cqw, 0.95rem);
-  font-weight: var(--font-weight-semibold, 600);
+  font-size: clamp(0.95rem, 2.6cqw, 1.5rem);
+  font-weight: var(--font-weight-bold, 700);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  line-height: 1.2;
-  color: var(--color-light, #fff);
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+  color: #fff;
   border-radius: 2px;
 }
 
@@ -1247,8 +1277,8 @@ div.page-hero-desktop {
    (channel 01 / guide). Once the user cycles into a project row, the
    row takes the highlight and the heading dims. */
 .crt-tv__channel-list:not(:has(.crt-tv__channel-row.is-active)) .crt-tv__channel-heading {
-  background-color: var(--color-light, #fff);
-  color: var(--color-neutral-900, #1a1a1a);
+  background-color: #fff;
+  color: #1a1a1a;
   text-shadow: none;
 }
 
@@ -1268,15 +1298,15 @@ div.page-hero-desktop {
 }
 
 /* Each row is a real <button> so it's clickable, focusable, and shows
-   a pointer cursor. Four-column grid: channel number, title, category,
-   year. Single-line — overflowing titles get an ellipsis. */
+   a pointer cursor. Three-column grid: channel number, title-stack,
+   year. Title + category stack vertically in the middle column. */
 .crt-tv__channel-row {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
-  gap: clamp(0.5rem, 2cqw, 1rem);
-  align-items: baseline;
+  grid-template-columns: auto 1fr auto;
+  gap: clamp(0.75rem, 2.4cqw, 1.25rem);
+  align-items: start;
   width: 100%;
-  padding: 0.4rem 0.6rem;
+  padding: 0.5rem 0.6rem;
   margin: 0;
   appearance: none;
   background: transparent;
@@ -1285,11 +1315,27 @@ div.page-hero-desktop {
   font: inherit;
   text-align: left;
   cursor: pointer;
-  font-size: clamp(0.625rem, 1.6cqw, 0.95rem);
+  font-size: clamp(0.875rem, 2.3cqw, 1.35rem);
   line-height: 1.2;
   white-space: nowrap;
   border-radius: 2px;
   transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+  opacity: 0.65;
+}
+
+/* Stacked title + category in the middle column. Title on top, category
+   below in smaller dimmer text — like a TV guide row. */
+.crt-tv__channel-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15em;
+  min-width: 0;
+}
+
+.crt-tv__channel-category {
+  font-size: 0.85em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   opacity: 0.65;
 }
 
@@ -1300,13 +1346,13 @@ div.page-hero-desktop {
 }
 
 .crt-tv__channel-row:focus-visible {
-  outline: 2px solid var(--color-light, #fff);
+  outline: 2px solid #fff;
   outline-offset: -2px;
 }
 
 .crt-tv__channel-row.is-active {
-  background-color: var(--color-light, #fff);
-  color: var(--color-neutral-900, #1a1a1a);
+  background-color: #fff;
+  color: #1a1a1a;
   text-shadow: none;
   opacity: 1;
 }

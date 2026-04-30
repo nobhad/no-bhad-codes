@@ -103,7 +103,19 @@ const TV_STATIC_FLASH_OPACITY = 0.85; // peak of the channel-change burst
 const TV_STATIC_GRAIN_OPACITY = 0.18; // residual grain after the burst
 const TV_TITLE_HOLD_S = 1.4;          // beat the composed title card holds
 const TV_DOCK_DURATION_S = 0.55;      // composed → bg crossfade duration
-const TV_SECTION_PAUSE_S = 2.4;       // beat each section holds in view
+// Per-panel hold time. Paragraphs need real read time; short panels
+// (tagline, details, lists) feel sluggish if held that long.
+const TV_PANEL_HOLD_S: Record<string, number> = {
+  tagline: 4.0,
+  details: 5.0,
+  intro: 9.0,
+  challenge: 9.0,
+  approach: 9.0,
+  features: 7.0,
+  results: 7.0,
+  tools: 5.0
+};
+const TV_SECTION_PAUSE_S_DEFAULT = 6.0; // fallback for any unmapped panel key
 const TV_TEXT_SWAP_BEAT_S = 0.35;     // empty beat between title fade-out and first panel fade-in
 const TV_TEXT_FADE_S = 0.45;          // panel fade-in / fade-out duration
 const TV_HEADING_FLASH_S = 0.35;      // section heading scale-flash duration
@@ -466,7 +478,9 @@ export class ProjectsModule extends BaseModule {
     const documented = this.portfolioData.projects.filter((p) => p.isDocumented);
     // Channel numbers prefix each row to mirror the LED display: channel
     // 01 is the guide itself ("01 Projects"), and projects start at 02.
-    // Two-digit zero-padded so the column stays visually aligned.
+    // Title + category stack vertically in the middle column; year sits
+    // alone in the right column. Two-digit zero-padded numbers so the
+    // left column stays visually aligned.
     const rows = documented
       .map(
         (p, i) => `
@@ -477,8 +491,10 @@ export class ProjectsModule extends BaseModule {
                   data-slug="${p.slug}"
                   aria-label="Channel ${i + 2}: open ${p.title} project details">
             <span class="crt-tv__channel-number">${String(i + 2).padStart(2, '0')}</span>
-            <span class="crt-tv__channel-title">${p.title}</span>
-            <span class="crt-tv__channel-meta">${p.category}</span>
+            <span class="crt-tv__channel-text">
+              <span class="crt-tv__channel-title">${p.title}</span>
+              <span class="crt-tv__channel-category">${p.category}</span>
+            </span>
             <span class="crt-tv__channel-meta">${p.year}</span>
           </button>
         </li>`
@@ -663,13 +679,24 @@ export class ProjectsModule extends BaseModule {
       `);
     }
 
-    // Intro: tagline + description (always present for documented projects).
-    panels.push(`
-      <article class="crt-tv__panel" data-panel-key="intro">
-        <p class="crt-tv__panel-tagline">${escapeHtml(project.tagline)}</p>
-        <p class="crt-tv__panel-body">${escapeHtml(project.description)}</p>
-      </article>
-    `);
+    // Tagline gets its own card so the punchy one-liner has a beat —
+    // e.g. "You're looking at it!" for the portfolio site itself.
+    if (project.tagline) {
+      panels.push(`
+        <article class="crt-tv__panel" data-panel-key="tagline">
+          <p class="crt-tv__panel-tagline">${escapeHtml(project.tagline)}</p>
+        </article>
+      `);
+    }
+
+    // Description: the longer intro paragraph.
+    if (project.description) {
+      panels.push(`
+        <article class="crt-tv__panel" data-panel-key="intro">
+          <p class="crt-tv__panel-body">${escapeHtml(project.description)}</p>
+        </article>
+      `);
+    }
 
     if (project.challenge) {
       panels.push(`
@@ -733,7 +760,7 @@ export class ProjectsModule extends BaseModule {
       <article class="crt-tv__panel crt-tv__panel--outro" data-panel-key="outro">
         <a class="crt-tv__panel-cta" href="#/projects/${escapeAttr(project.slug)}">View full case study →</a>
         ${liveLink}
-        <p class="crt-tv__panel-hint">Press ← / → to change channel · Esc to exit</p>
+        <p class="crt-tv__panel-hint">Press ↑ / ↓ to change channel · Esc to exit</p>
       </article>
     `);
 
@@ -828,8 +855,10 @@ export class ProjectsModule extends BaseModule {
         );
       }
 
-      // Hold so the user can read it.
-      tl.to({}, { duration: TV_SECTION_PAUSE_S });
+      // Hold so the user can read it. Paragraphs get more time than
+      // short panels (tagline / details / lists).
+      const holdSeconds = TV_PANEL_HOLD_S[key] ?? TV_SECTION_PAUSE_S_DEFAULT;
+      tl.to({}, { duration: holdSeconds });
 
       // Fade out — but not the outro (it sticks as the terminal frame)
       // and not the last panel (no successor to cross into).
