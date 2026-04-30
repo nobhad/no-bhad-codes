@@ -10,7 +10,8 @@
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 
-// Mock pdf-lib
+// Mock pdf-lib. The PDF utility now also calls registerFontkit and
+// embedFont with custom-font bytes; both need to live on the doc.
 const mockPdfDoc = {
   setTitle: vi.fn(),
   setAuthor: vi.fn(),
@@ -18,6 +19,9 @@ const mockPdfDoc = {
   setCreator: vi.fn(),
   setProducer: vi.fn(),
   setKeywords: vi.fn(),
+  setCreationDate: vi.fn(),
+  setModificationDate: vi.fn(),
+  registerFontkit: vi.fn(),
   addPage: vi.fn().mockReturnValue({
     getSize: vi.fn().mockReturnValue({ width: 612, height: 792 }),
     drawText: vi.fn(),
@@ -30,6 +34,11 @@ const mockPdfDoc = {
     heightAtSize: vi.fn().mockReturnValue(12)
   }),
   embedPng: vi.fn().mockResolvedValue({
+    width: 200,
+    height: 100,
+    scale: vi.fn().mockReturnValue({ width: 100, height: 50 })
+  }),
+  embedJpg: vi.fn().mockResolvedValue({
     width: 200,
     height: 100,
     scale: vi.fn().mockReturnValue({ width: 100, height: 50 })

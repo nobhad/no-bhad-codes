@@ -58,7 +58,15 @@ vi.mock('../../../server/config/uploads', () => ({
 
 vi.mock('../../../server/utils/pdf-utils', () => ({
   PAGE_MARGINS: { left: 50, right: 50, top: 50, bottom: 50 },
-  drawPdfDocumentHeader: vi.fn().mockResolvedValue(700)
+  drawPdfDocumentHeader: vi.fn().mockResolvedValue(700),
+  drawPdfFooter: vi.fn(),
+  drawTwoColumnInfo: vi.fn().mockReturnValue(600),
+  // Custom-font path: receipt-service registers fontkit and embeds
+  // bytes for regular + bold so the rendered PDF gets the same brand
+  // font as everywhere else.
+  getRegularFontBytes: vi.fn().mockReturnValue(Buffer.from([])),
+  getBoldFontBytes: vi.fn().mockReturnValue(Buffer.from([])),
+  registerFontkit: vi.fn()
 }));
 
 vi.mock('fs', () => ({
@@ -196,7 +204,7 @@ describe('ReceiptService - getReceiptById', () => {
   it('throws when receipt not found', async () => {
     mockDb.get.mockResolvedValueOnce(null);
 
-    await expect(receiptService.getReceiptById(999)).rejects.toThrow('Receipt not found');
+    await expect(receiptService.getReceiptById(999)).rejects.toThrow(/receipt not found/i);
   });
 });
 
@@ -222,7 +230,7 @@ describe('ReceiptService - getReceiptByNumber', () => {
   it('throws when receipt number not found', async () => {
     mockDb.get.mockResolvedValueOnce(null);
 
-    await expect(receiptService.getReceiptByNumber('RCP-9999-9999')).rejects.toThrow('Receipt not found');
+    await expect(receiptService.getReceiptByNumber('RCP-9999-9999')).rejects.toThrow(/receipt not found/i);
   });
 });
 
@@ -301,6 +309,8 @@ describe('ReceiptService - getReceiptPdf', () => {
       payment_reference: null,
       payment_date: '2026-01-15'
     });
+    // getReceiptPdf also pulls invoice line items for the receipt body.
+    mockDb.all.mockResolvedValueOnce([]);
 
     const result = await receiptService.getReceiptPdf(1);
 
@@ -313,7 +323,7 @@ describe('ReceiptService - getReceiptPdf', () => {
   it('throws when receipt not found', async () => {
     mockDb.get.mockResolvedValueOnce(null);
 
-    await expect(receiptService.getReceiptPdf(999)).rejects.toThrow('Receipt not found');
+    await expect(receiptService.getReceiptPdf(999)).rejects.toThrow(/receipt not found/i);
   });
 
   it('handles missing payment_date by falling back to created_at', async () => {
@@ -327,6 +337,7 @@ describe('ReceiptService - getReceiptPdf', () => {
       payment_reference: null,
       payment_date: null
     });
+    mockDb.all.mockResolvedValueOnce([]);
 
     const result = await receiptService.getReceiptPdf(1);
 
@@ -339,6 +350,28 @@ describe('ReceiptService - createReceipt', () => {
     mockDb.get.mockReset();
     mockDb.all.mockReset();
     mockDb.run.mockReset();
+    mockDb.transaction.mockReset();
+    // createReceipt fetches invoice line items via db.all to embed
+    // them in the PDF body. Default to no items unless a test
+    // overrides — keeps the per-test mock chains terse.
+    mockDb.all.mockResolvedValue([]);
+    // The insert path moved into db.transaction(cb => ...) and
+    // destructures { receiptId, fileId } from its return. Run the cb
+    // with ctx === db so the per-test get/run mocks still record
+    // calls, then return whatever the cb produced (or a sane default).
+    mockDb.transaction.mockImplementation(async (cb: (ctx: typeof mockDb) => Promise<unknown>) => {
+      const result = await cb(mockDb);
+      return result ?? { receiptId: 1, fileId: null };
+    });
+    // Lock time so generateReceiptNumber's prefix is deterministic.
+    // Existing assertions compare against REC-202601-XX… so January is
+    // the simplest target.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-01-15T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('throws when invoice not found', async () => {
@@ -347,15 +380,19 @@ describe('ReceiptService - createReceipt', () => {
 
     await expect(
       receiptService.createReceipt(999, null, 100, { paymentMethod: 'Venmo' })
-    ).rejects.toThrow('Invoice not found');
+    ).rejects.toThrow(/invoice not found/i);
   });
 
   it('creates a receipt without a project (skips file creation)', async () => {
     // Invoice lookup
     mockDb.get.mockResolvedValueOnce(mockInvoiceRow);
-    // generateReceiptNumber: get last receipt number
+    // generateReceiptNumber: SELECT last receipt for prefix
     mockDb.get.mockResolvedValueOnce(null);
-    // Insert receipt record
+    // generateReceiptNumber: SELECT 1 to verify the new number is unique
+    mockDb.get.mockResolvedValueOnce(null);
+    // Payment count for "Payment X of Y" label
+    mockDb.get.mockResolvedValueOnce({ total: 1 });
+    // Insert receipt record (inside transaction)
     mockDb.run.mockResolvedValueOnce({ lastID: 1 });
     // getReceiptById: final return
     mockDb.get.mockResolvedValueOnce(mockReceiptRow);
@@ -375,8 +412,12 @@ describe('ReceiptService - createReceipt', () => {
   it('generates sequential receipt numbers', async () => {
     // Invoice lookup
     mockDb.get.mockResolvedValueOnce(mockInvoiceRow);
-    // Last receipt number returns existing
+    // generateReceiptNumber: last receipt for prefix
     mockDb.get.mockResolvedValueOnce({ receipt_number: 'REC-202601-XX003' });
+    // generateReceiptNumber: uniqueness check
+    mockDb.get.mockResolvedValueOnce(null);
+    // Payment count for "Payment X of Y" label
+    mockDb.get.mockResolvedValueOnce({ total: 1 });
     // Insert receipt
     mockDb.run.mockResolvedValueOnce({ lastID: 2 });
     // getReceiptById
@@ -393,9 +434,13 @@ describe('ReceiptService - createReceipt', () => {
     const invoiceWithProject = { ...mockInvoiceRow, project_id: 7, project_name: 'My Project' };
     // Invoice lookup
     mockDb.get.mockResolvedValueOnce(invoiceWithProject);
-    // generateReceiptNumber last receipt
+    // generateReceiptNumber: last receipt for prefix
     mockDb.get.mockResolvedValueOnce(null);
-    // Folder lookup (Documents)
+    // generateReceiptNumber: uniqueness check
+    mockDb.get.mockResolvedValueOnce(null);
+    // Payment count for "Payment X of Y" label
+    mockDb.get.mockResolvedValueOnce({ total: 1 });
+    // Folder lookup (Documents) — inside transaction
     mockDb.get.mockResolvedValueOnce({ id: 10 });
     // Insert file record
     mockDb.run.mockResolvedValueOnce({ lastID: 20 });
@@ -409,21 +454,23 @@ describe('ReceiptService - createReceipt', () => {
     expect(result).toBeDefined();
   });
 
-  it('continues without file when file save fails', async () => {
+  it('rolls back the receipt insert if the file/folder write fails inside the transaction', async () => {
+    // The folder lookup, file insert, and receipt insert are now
+    // wrapped in a single db.transaction. A folder-lookup failure
+    // must abort the receipt write — anything else would leak a
+    // receipt row pointing at a file that never existed. (PDF
+    // disk write happens after commit and is the only step that
+    // is allowed to fail non-fatally; that's a separate concern.)
     const invoiceWithProject = { ...mockInvoiceRow, project_id: 7 };
-    // Invoice lookup
     mockDb.get.mockResolvedValueOnce(invoiceWithProject);
-    // generateReceiptNumber
     mockDb.get.mockResolvedValueOnce(null);
-    // Folder lookup - throw to simulate file system error
+    mockDb.get.mockResolvedValueOnce(null);
+    mockDb.get.mockResolvedValueOnce({ total: 1 });
+    // Folder lookup inside the transaction throws.
     mockDb.get.mockRejectedValueOnce(new Error('DB error'));
-    // Insert receipt (still proceeds)
-    mockDb.run.mockResolvedValueOnce({ lastID: 1 });
-    // getReceiptById
-    mockDb.get.mockResolvedValueOnce(mockReceiptRow);
 
-    const result = await receiptService.createReceipt(10, null, 1500, { paymentMethod: 'Venmo' });
-
-    expect(result).toBeDefined();
+    await expect(
+      receiptService.createReceipt(10, 5, 1500, { paymentMethod: 'Venmo' })
+    ).rejects.toThrow(/DB error/);
   });
 });
