@@ -15,11 +15,12 @@ Design standards for the main marketing site (home, about, contact, projects por
 5. [Component Styles](#component-styles)
 6. [Typography](#typography)
 7. [Business Card and Intro](#business-card-and-intro)
-8. [Navigation](#navigation)
-9. [GSAP Animation Modules](#gsap-animation-modules)
-10. [Page Transitions](#page-transitions)
-11. [Mobile and Responsive](#mobile-and-responsive)
-12. [Theme System](#theme-system)
+8. [Projects: TV Channel System](#projects-tv-channel-system)
+9. [Navigation](#navigation)
+10. [GSAP Animation Modules](#gsap-animation-modules)
+11. [Page Transitions](#page-transitions)
+12. [Mobile and Responsive](#mobile-and-responsive)
+13. [Theme System](#theme-system)
 
 ---
 
@@ -112,7 +113,7 @@ Located in `src/styles/pages/`:
 |------|------|-------------|--------|
 | `about.css` | About section | `.about-section`, `.about-layout`, `.about-image-column`, `.about-text-column` | Two-column grid (image + text) |
 | `contact.css` | Contact form | `.contact-section`, `.portal-login-form` | Centered single column |
-| `projects.css` | Portfolio list | `.projects-section`, `.crt-tv`, `.crt-tv__channel-list`, `.crt-tv__panels` | Centered vintage TV with channel-guide screen + tune-in animation |
+| `projects.css` | Portfolio list | `.projects-section`, `.crt-tv`, `.crt-tv__channel-list`, `.crt-tv__guide-top` (info + avatar), `.crt-tv__guide-bottom` (ticker viewport), `.crt-tv__channel-rows`, `.crt-tv__panels` | Centered vintage TV with Prevue-Guide-style channel screen (top: brand info + glowing-eye avatar; bottom: slow auto-scroll ticker of project rows) and tune-in panel sequence |
 | `projects-detail.css` | Project detail | `.project-detail-section`, `.worksub-wrapper`, `.worksub-header`, `.worksub-intro` | Scrollable column, max-width 1000px |
 | `terminal-intake.css` | AI intake form | `.terminal`, `.terminal-intake` | Terminal style (monospace, green-on-dark) |
 | `client-portal-section.css` | Portal login | `.portal-login-form` | Form states (password vs magic-link) |
@@ -207,6 +208,101 @@ left: calc(50% - 262.5px);
 - HTML: `index.html` (`.business-card-section`)
 - CSS: `src/styles/components/business-card.css`, `intro-morph.css`, `intro-nav.css`
 - JS: `src/modules/animation/intro-animation.ts` (desktop), `intro-animation-mobile.ts` (mobile)
+
+---
+
+## Projects: TV Channel System
+
+The projects page renders a single vintage TV with a Looney-Tunes / Prevue-Guide-styled channel screen. There is no card list. Cycling channels surfs through projects; selecting a channel "tunes in" with a static-burst animation and auto-cycles a case-study panel sequence on the screen, with a click-through to the full project-detail page in the outro.
+
+### Channel Index Model
+
+| Channel | Slot | Behavior |
+|---------|------|----------|
+| `01` | TV Guide (default) | Brand info + avatar + slow ticker of project rows |
+| `02` ... `0N` | One per documented project | Tunes in to that project's panel sequence |
+
+`currentTvIndex` lives on `PageTransitionModule` (not `ProjectsModule`) because vertical input on the projects tile is gated through the same code path that handles tile-to-tile navigation. Conversion: `slug = slugs[currentTvIndex - 1]` for index >= 1, guide for `0`. Total channels = `slugs.length + 1`.
+
+### Channel 01: TV Guide Layout
+
+The guide screen mimics the late-90s Prevue Guide channel:
+
+- **Top half** (`.crt-tv__guide-top`, 45% of screen height) — split into two equal columns:
+  - Left: static brand info — `NO BHAD CODES` / *"Portfolio Guide"* / `Channel 01`. Mono font, white with subtle text-shadow, "Portfolio Guide" tinted Prevue-yellow (`#ffe27a`). Lines are `white-space: nowrap` and grid columns are `minmax(0, 1fr)` so a long line never squeezes the avatar pane.
+  - Right: avatar SVG with glowing eye. Inlined into the markup with a local `<filter id="tv-guide-eye-glow">` (Gaussian-blur-merge) so the eye filter resolves without depending on the contact page's `<defs>`. ViewBox cropped to `270 165 250 330` (the actual avatar bounds within the original 514.67×487.98 SVG, which reserved space for an unused speech-bubble) so `xMidYMid meet` centers the head in the pane. Body paths at 0.18 opacity, eye at full opacity through the glow filter.
+- **Bottom half** (`.crt-tv__guide-bottom`) — overflow-clipped viewport for `.crt-tv__channel-rows`. Rows are rendered twice in the DOM (the second copy is `aria-hidden="true"` and `tabindex="-1"`), and a GSAP tween translates the inner track up at `~16 px/sec`, snapping back to `0` after each loop for a seamless ticker. Row click / keyboard select still tunes in normally; the ticker keeps running underneath.
+
+### Channels 02+: Tune-In Sequence
+
+```text
+Static peak → screen-bg fades to black momentarily →
+swap screen-bg to per-project bg image → fade composed title-card on top →
+hold ~1.4s → fade composed card out, leaving textless bg →
+auto-cycle panels: details → tagline → intro → challenge → approach →
+                   key features → results → tools → outro
+```
+
+Per-panel hold timing (`TV_PANEL_HOLD_S` map in `projects.ts`):
+
+| Panel | Hold (s) | Treatment |
+|-------|----------|-----------|
+| `details` | 5.0 | Two-column Role / Year / Duration credits |
+| `tagline` | 4.0 | Word-by-word pulse animation |
+| `intro` | 9.0 | Scrolling paragraph |
+| `challenge` | 9.0 | Heading-flash + word-pulse + body |
+| `approach` | 9.0 | Heading-flash + word-pulse + body |
+| `features` | 7.0 | List |
+| `results` | 7.0 | List |
+| `tools` | 5.0 | Tag pills |
+| `outro` | sticky | Click-through link to `#/projects/[slug]` |
+
+Mobile prose panels (intro / challenge / approach) auto-scroll bottom-to-top instead of static fade so the full text is reachable on the smaller screen. Hold time is multiplied by `TV_MOBILE_SCROLL_HOLD_MULTIPLIER` (2.2) on mobile so the scroll has time to complete.
+
+### Per-Card Text Color
+
+Each project's `titleCard.color` (hex) drives panel typography via a CSS custom property `--tunein-color`. A `contrastVeil()` helper computes a per-card overlay opacity from luminance so paragraphs read against the bg image without per-card CSS overrides.
+
+### TV Frame and Overlays (image-based positioning)
+
+The TV is composed of stacked transparent images sized to a single canvas (`1426×1093` for newer exports, mostly):
+
+| Layer | Source | Notes |
+|-------|--------|-------|
+| Frame | `vintage_tv.webp` (1424×1093) | The wood case + screen aperture + painted control labels |
+| Title-card base | `title-card_base.webp` (1426×1093) | Default screen contents on the guide channel |
+| Per-project bg | `title-card_[slug]_bg.webp` (1426×1093) | Used during a tune-in; stacks at `inset:0; width/height:100%` (full-canvas with transparent surroundings) |
+| Composed title card | `title-card_[slug].webp` (1426×1093) | Bg + baked text; fades on top during the tune-in entry beat then fades out |
+| LED channel readout | `channel_NN.webp` (1426×1093) | Lit digit baked at the right spot on a transparent canvas — stacks at `inset:0; width/height:100%`, no per-image positioning |
+
+### Buttons
+
+Painted control labels (POWER / CHANNEL ▼▲ / VOLUME ▼▲) sit on the TV frame image. Invisible `<button>` overlays match the painted positions:
+
+| Button | Wired | Action |
+|--------|-------|--------|
+| POWER | yes | Toggles `.is-powered-off` on `.crt-tv` (off = title-card base shows, channel-list + LED hidden) |
+| CHANNEL ▲▼ | yes | Cycles channel forward/back, mirrors wheel/arrow keys |
+| VOLUME ▲▼ | placeholder | Wired but no-op — TBD: sound effects? hold-time multiplier? brightness? |
+
+On mobile the button hit area is extended by `padding: 1% 0` (about half the gap to the next button) so finger taps don't have to land precisely on the thin painted strip.
+
+### Vertical Channel-Surf and Arrow-Key Default-Suppress
+
+Vertical input on the projects tile cycles channels with modulo wrap (down-past-last → guide, up-before-guide → last project). It does NOT exit the tile vertically — horizontal `← →` exits to about / contact. `tryNavigateDirection` doesn't set `isTransitioning` for channel-surf since no tile transition runs.
+
+`page-transition.ts:handleKeydown` calls `event.preventDefault()` for arrow keys on managed pages (any map tile + project-detail) **before** the navigation gates run. This keeps the browser from native-scrolling during the brief windows when the gates would otherwise return early — `isTransitioning` mid-transition, `!introComplete` during the coyote-paw, or `canNavigate` returning false at the edge of the spatial graph.
+
+### Key Files
+
+- HTML: `index.html` (`.projects-section .projects-tv-wrap .crt-tv`)
+- CSS: `src/styles/pages/projects.css` (TV frame + channel-list + tune-in panels), `src/styles/mobile/layout.css` (mobile sizing + button hit area)
+- JS: `src/modules/ui/projects.ts` (channel list render, ticker, button wiring, tune-in sequence, panel cycle), `src/modules/animation/page-transition.ts` (channel index + ↑↓ cycling + arrow-key default-suppress)
+- Data: `public/data/portfolio.json` (per-project `titleCard.{composed,bg,color,primary,primaryPt,secondary,secondaryPt}` + optional `tv` namespace for condensed channel-preview copy that overrides `description`/`challenge`/`approach`/etc.)
+
+### Outstanding
+
+- Optional: channel-change static crackle / channel-up beep audio assets.
 
 ---
 
@@ -348,7 +444,7 @@ Located in `src/styles/mobile/`:
 | < 768px | Vertical scroll, no scroll-map, hamburger nav, touch targets |
 | >= 768px | 2D spatial scroll-map (5 tiles in a plus layout), slide transitions, desktop nav |
 | < 1400px | Circular back button hidden on project detail, text link shown instead |
-| < 1100px | TV channel guide hidden on projects page (mobile fallback TBD) |
+| All | TV channel guide is responsive — same layout on mobile (full-width, smaller typography, button hit area extended); rows and ticker stay active |
 
 ### Dynamic Heights
 
