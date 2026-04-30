@@ -229,8 +229,8 @@ The projects page renders a single vintage TV with a Looney-Tunes / Prevue-Guide
 The guide screen mimics the late-90s Prevue Guide channel:
 
 - **Top half** (`.crt-tv__guide-top`, 45% of screen height) — split into two equal columns:
-  - Left: static brand info — `NO BHAD CODES` / *"Portfolio Guide"* / `Channel 01`. Mono font, white with subtle text-shadow, "Portfolio Guide" tinted Prevue-yellow (`#ffe27a`). Lines are `white-space: nowrap` and grid columns are `minmax(0, 1fr)` so a long line never squeezes the avatar pane.
-  - Right: avatar SVG with glowing eye. Inlined into the markup with a local `<filter id="tv-guide-eye-glow">` (Gaussian-blur-merge) so the eye filter resolves without depending on the contact page's `<defs>`. ViewBox cropped to `270 165 250 330` (the actual avatar bounds within the original 514.67×487.98 SVG, which reserved space for an unused speech-bubble) so `xMidYMid meet` centers the head in the pane. Body paths at 0.18 opacity, eye at full opacity through the glow filter.
+  - Left: static brand info — `NO BHAD CODES` / *"Portfolio Guide"* / `Channel 01`. Mono font, all white (no Prevue-yellow accent — TV interior is monochrome greyscale by design). Lines are `white-space: nowrap` and grid columns are `minmax(0, 1fr)` so a long line never squeezes the avatar pane.
+  - Right: avatar SVG with glowing eye. Inlined into the markup with a local `<filter id="tv-guide-eye-glow">` (Gaussian-blur-merge) so the eye filter resolves without depending on the contact page's `<defs>`. ViewBox cropped to `270 165 250 330` (the actual avatar bounds within the original 514.67×487.98 SVG, which reserved space for an unused speech-bubble) so `xMidYMid meet` centers the head in the pane. Body paths fill `#3a3a3a` (mid-dark grey silhouette against the dark screen); eye stays white and pops via the glow filter.
 - **Bottom half** (`.crt-tv__guide-bottom`) — overflow-clipped viewport for `.crt-tv__channel-rows`. Rows are rendered twice in the DOM (the second copy is `aria-hidden="true"` and `tabindex="-1"`), and a GSAP tween translates the inner track up at `~16 px/sec`, snapping back to `0` after each loop for a seamless ticker. Row click / keyboard select still tunes in normally; the ticker keeps running underneath.
 
 ### Channels 02+: Tune-In Sequence
@@ -270,7 +270,8 @@ The TV is composed of stacked transparent images sized to a single canvas (`1426
 | Layer | Source | Notes |
 |-------|--------|-------|
 | Frame | `vintage_television.webp` (1426×1093) | The wood case + screen aperture + painted control labels |
-| Title-card base | `title-card_base.webp` (1426×1093) | Default screen contents on the guide channel |
+| Title-card base (on) | `title-card_base-on.webp` (1426×1093) | Lit base shown when the TV is powered on, between channels, and while the channel-list is visible |
+| Title-card base (off) | `title-card_base-off.webp` (1426×1093) | Dark/blank base shown when the TV is powered off (`.crt-tv.is-powered-off`) |
 | Per-project bg | `title-card_[slug]_bg.webp` (1426×1093) | Used during a tune-in; stacks at `inset:0; width/height:100%` (full-canvas with transparent surroundings) |
 | Composed title card | `title-card_[slug].webp` (1426×1093) | Bg + baked text; fades on top during the tune-in entry beat then fades out |
 | LED channel readout | `channel_NN.webp` (1426×1093) | Lit digit baked at the right spot on a transparent canvas — stacks at `inset:0; width/height:100%`, no per-image positioning |
@@ -281,11 +282,24 @@ Painted control labels (POWER / CHANNEL ▼▲ / VOLUME ▼▲) sit on the TV fr
 
 | Button | Wired | Action |
 |--------|-------|--------|
-| POWER | yes | Toggles `.is-powered-off` on `.crt-tv` (off = title-card base shows, channel-list + LED hidden) |
+| POWER | yes | Toggles `.is-powered-off` on `.crt-tv` (swaps `title-card_base-on.webp` ↔ `title-card_base-off.webp`, hides channel-list + LED). Going off → on plays the static SFX. |
 | CHANNEL ▲▼ | yes | Cycles channel forward/back, mirrors wheel/arrow keys |
-| VOLUME ▲▼ | placeholder | Wired but no-op — TBD: sound effects? hold-time multiplier? brightness? |
+| VOLUME ▲▼ | yes | Steps `tvSfx` master gain through 5 levels (0/0.25/0.5/0.75/1.0); persisted to localStorage. Affects the static SFX only — the click stays at fixed gain. |
 
-On mobile the button hit area is extended by `padding: 1% 0` (about half the gap to the next button) so finger taps don't have to land precisely on the thin painted strip.
+On mobile the button hit area is extended by `padding: 1% 0` (about half the gap to the next button) so finger taps don't have to land precisely on the thin painted strip. Every TV button click also fires the mechanical click SFX via a delegated listener scoped to `.crt-tv__btn`.
+
+### Sound Effects
+
+`src/modules/audio/tv-sfx.ts` — singleton with two independent gain stages:
+
+- **`click()`** — recorded button sample at fixed `clickGain: 0.22`. Fires on any `.crt-tv__btn` press (POWER / CHANNEL ▼▲ / VOLUME ▼▲) via a document-level delegated listener. Not affected by VOLUME ▼▲ — tactile feedback stays present even at volume:0.
+- **`static()`** — recorded TV-static sample with a configurable `ATTACK → HOLD → optional DROP → SUSTAIN → RELEASE` envelope. Routes through `masterGain` (the volume-controlled stage). Fires at the start of `playTuneInSequence` (channel tune-in) and `transitionToGuide` (back to channel 01) using a step-down shape (sharp attack, brief peak, drop to ~35% sustain, fade), and on POWER off → on using the default attack/hold/release shape (gentle ease, brief hold, long trail).
+
+Samples sourced from soundbible.com:
+- `/audio/channel-click.mp3` — "Button" by Mike Koenig (CC BY 3.0)
+- `/audio/tv-static.mp3` — "TV Static" by Mike Koenig (CC BY 3.0)
+
+ATTRIBUTION OWED for both: Mike Koenig under CC BY 3.0. Add credit somewhere user-visible (footer / about / credits).
 
 ### Vertical Channel-Surf and Arrow-Key Default-Suppress
 
@@ -302,7 +316,8 @@ Vertical input on the projects tile cycles channels with modulo wrap (down-past-
 
 ### Outstanding
 
-- Optional: channel-change static crackle / channel-up beep audio assets.
+- Add Mike Koenig CC BY 3.0 attribution somewhere user-visible (footer / about / credits) for `channel-click.mp3` and `tv-static.mp3`.
+- Investigate residual shadow-clipping on the TV frame's `filter: drop-shadow()` — addressed at the layout level by setting `main { overflow-y: visible }` and `.site-map > [data-map-tile] { overflow-y: visible }`, but a deep-dive audit of every potential clipping ancestor is still pending.
 
 ---
 

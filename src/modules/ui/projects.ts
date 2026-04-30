@@ -458,7 +458,7 @@ export class ProjectsModule extends BaseModule {
     const tvHtml = `
       <div class="crt-tv">
         <div class="crt-tv__wrapper">
-          <img class="crt-tv__screen-bg" src="/images/title-card_base.webp" alt="" data-screen-bg />
+          <img class="crt-tv__screen-bg" src="/images/title-card_base-on.webp" alt="" data-screen-bg />
           <!-- Composed title-card (text baked in) sits at the same full
                TV-frame canvas as the bg below. Lives outside .crt-tv__screen
                because .crt-tv__screen is sized to the screen aperture only
@@ -576,13 +576,18 @@ export class ProjectsModule extends BaseModule {
     const tv = document.querySelector('.crt-tv') as HTMLElement | null;
     if (!tv) return;
     const isOff = tv.classList.toggle('is-powered-off');
+    const screenBg = document.querySelector('[data-screen-bg]') as HTMLImageElement | null;
     if (isOff) {
-      // Going off — cancel any tune-in so we come back cleanly.
+      // Going off — cancel any tune-in so we come back cleanly, and
+      // swap the base image to the dark / off variant.
       this.cancelTuneIn();
+      if (screenBg) screenBg.src = '/images/title-card_base-off.webp';
     } else {
-      // Going from off → on: fire the static crackle (synced with the
-      // visual "screen lights up" moment). Power-off stays silent —
-      // CRTs were near-silent on shutdown, only the click remains.
+      // Going from off → on: swap to the lit base image and fire the
+      // static crackle synced with the visual "screen lights up"
+      // moment. Power-off stays silent — CRTs were near-silent on
+      // shutdown, only the button click remains.
+      if (screenBg) screenBg.src = '/images/title-card_base-on.webp';
       void tvSfx.static();
     }
   }
@@ -852,7 +857,7 @@ export class ProjectsModule extends BaseModule {
       dropToFraction: 0.35,
       dropDurationS: 0.12,
       sustainS: 0.18,
-      releaseS: 0.28,
+      releaseS: 0.28
     });
 
     // 1) Static burst + channel list snaps off, bg flashes blank for a
@@ -861,7 +866,7 @@ export class ProjectsModule extends BaseModule {
     tl.to(staticOverlay, { opacity: TV_STATIC_FLASH_OPACITY, duration: 0.06 }, 0)
       .to(channelList, { opacity: 0, duration: 0.05 }, 0)
       .add(() => {
-        screenBg.src = '/images/title-card_base.webp';
+        screenBg.src = '/images/title-card_base-on.webp';
       }, 0.05);
 
     // 2) Hold the blank for a split second, then swap to per-project bg.
@@ -1288,13 +1293,13 @@ export class ProjectsModule extends BaseModule {
       dropToFraction: 0.35,
       dropDurationS: 0.12,
       sustainS: 0.18,
-      releaseS: 0.28,
+      releaseS: 0.28
     });
 
     // Static peak + bg src swaps to the blank base.
     tl.to(staticOverlay, { opacity: TV_STATIC_FLASH_OPACITY, duration: 0.06 }, 0)
       .add(() => {
-        screenBg.src = '/images/title-card_base.webp';
+        screenBg.src = '/images/title-card_base-on.webp';
       }, 0.05);
 
     // Hold the blank under the static peak (between-channels void beat).
@@ -1356,7 +1361,7 @@ export class ProjectsModule extends BaseModule {
     if (screenBg) {
       gsap.killTweensOf(screenBg);
       gsap.set(screenBg, { opacity: 1 });
-      screenBg.src = '/images/title-card_base.webp';
+      screenBg.src = '/images/title-card_base-on.webp';
     }
     if (channelList) gsap.set(channelList, { opacity: 1 });
     if (tunein) {
