@@ -226,11 +226,16 @@ export class PageTransitionModule extends BaseModule {
   private popstateInFlight: boolean = false;
 
   /**
-   * Index of the project channel currently shown on the CRT TV when the
-   * projects tile is active. Tracked here (not in ProjectsModule) because
-   * vertical scroll on projects is gated through tryNavigateDirection,
-   * which needs to know whether scrolling past the boundary should exit
-   * the tile or just cycle the TV.
+   * Index of the channel currently shown on the CRT TV when the
+   * projects tile is active. Channel 01 is the TV guide itself
+   * (currentTvIndex === 0); projects start at channel 02 (index 1).
+   * Tracked here (not in ProjectsModule) because vertical scroll on
+   * projects is gated through tryNavigateDirection, which needs to know
+   * whether scrolling past the boundary should exit the tile or just
+   * cycle the TV.
+   *
+   * Conversion to project slug: slugs[currentTvIndex - 1] for 1+,
+   * null for 0 (guide). Total channels = slugs.length + 1.
    */
   private currentTvIndex: number = 0;
 
@@ -1166,14 +1171,19 @@ export class PageTransitionModule extends BaseModule {
       (event.key === 'Enter' || event.key === ' ') &&
       this.currentPageId === 'projects'
     ) {
-      const slugs = this.getProjectSlugs();
-      const slug = slugs[this.currentTvIndex];
-      if (slug) {
-        event.preventDefault();
-        this.setPendingSlide('right', `#/projects/${slug}`);
-        document.dispatchEvent(
-          new CustomEvent('projects:tune-in', { detail: { slug } })
-        );
+      // Channel 01 (currentTvIndex === 0) is the guide itself — pressing
+      // Enter on the guide is a no-op (you're already on it). Project
+      // channels start at currentTvIndex === 1.
+      if (this.currentTvIndex > 0) {
+        const slugs = this.getProjectSlugs();
+        const slug = slugs[this.currentTvIndex - 1];
+        if (slug) {
+          event.preventDefault();
+          this.setPendingSlide('right', `#/projects/${slug}`);
+          document.dispatchEvent(
+            new CustomEvent('projects:tune-in', { detail: { slug } })
+          );
+        }
       }
       return;
     }
@@ -1295,11 +1305,13 @@ export class PageTransitionModule extends BaseModule {
       this.currentPageId === 'projects' &&
       (direction === 'up' || direction === 'down')
     ) {
-      const total = this.getProjectSlugs().length;
-      if (total === 0) return;
+      // +1 to include the TV guide as channel 01 in the cycle. Total
+      // channel count = projects + guide. Index 0 = guide, 1+ = projects.
+      const total = this.getProjectSlugs().length + 1;
+      if (total <= 1) return;
       const delta = direction === 'down' ? 1 : -1;
-      // Modulo wrap so cycling down past last lands on first, and
-      // cycling up before first lands on last. Always within bounds.
+      // Modulo wrap so cycling down past last lands on guide, and
+      // cycling up before guide lands on last project. Always in bounds.
       this.currentTvIndex = (this.currentTvIndex + delta + total) % total;
       document.dispatchEvent(
         new CustomEvent('projects:set-tv-channel', {
@@ -1354,8 +1366,10 @@ export class PageTransitionModule extends BaseModule {
     if (targetPageId === 'projects') {
       const slugs = this.getProjectSlugs();
       if (slugs.length > 0) {
-        // Clamp in case the project list shrank since last visit.
-        if (this.currentTvIndex >= slugs.length) this.currentTvIndex = slugs.length - 1;
+        // Clamp to valid channel range. Index 0 = guide (channel 01),
+        // 1..N = projects. Max index is slugs.length.
+        const maxIdx = slugs.length;
+        if (this.currentTvIndex > maxIdx) this.currentTvIndex = maxIdx;
         if (this.currentTvIndex < 0) this.currentTvIndex = 0;
         // Sync the TV display to whatever channel we're remembering.
         requestAnimationFrame(() => {
@@ -1379,8 +1393,11 @@ export class PageTransitionModule extends BaseModule {
       const fromProjects = this.currentPageId === 'projects';
       let slug: string;
       if (fromProjects) {
-        // Carousel continues from current TV channel.
-        slug = slugs[this.currentTvIndex] ?? slugs[0];
+        // Carousel continues from current TV channel. If on guide
+        // (channel 01 / index 0), default to first project.
+        slug = this.currentTvIndex > 0
+          ? (slugs[this.currentTvIndex - 1] ?? slugs[0])
+          : slugs[0];
       } else {
         // First-time entry from anywhere else — pick by direction.
         slug = direction === 'left' ? slugs[slugs.length - 1] : slugs[0];
@@ -1454,23 +1471,23 @@ export class PageTransitionModule extends BaseModule {
     let nextIndex: number;
     if (direction === 'left') {
       if (currentIndex === 0) {
-        // Crossing back into projects from the first card — keep the TV
-        // showing this card so re-entering carousel feels continuous.
-        this.currentTvIndex = 0;
+        // Crossing back into projects from the first card — leave the TV
+        // showing this project's channel so re-entering feels continuous.
+        // Channel index = project index + 1 (0 = guide, 1+ = projects).
+        this.currentTvIndex = 1;
         return '#/projects';
       }
       nextIndex = currentIndex - 1;
     } else {
       if (currentIndex >= slugs.length - 1) {
-        this.currentTvIndex = slugs.length - 1;
+        this.currentTvIndex = slugs.length;
         return '#/projects';
       }
       nextIndex = currentIndex + 1;
     }
-    // Within the carousel: keep TV index synced to the active slug so
-    // jumping back to projects via vertical or compass shows the right
-    // channel waiting on the screen.
-    this.currentTvIndex = nextIndex;
+    // Within the carousel: keep TV channel index synced (offset +1 since
+    // channel 01 is the guide, projects start at channel 02).
+    this.currentTvIndex = nextIndex + 1;
     return `#/projects/${slugs[nextIndex]}`;
   }
 
