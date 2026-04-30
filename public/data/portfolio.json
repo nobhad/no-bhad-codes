@@ -69,7 +69,7 @@
       },
       "duration": "Ongoing",
       "challenge": "Most portfolio templates feel generic and fail to demonstrate actual development skills. I needed a site that would stand out while proving I could build production-ready applications—not just pretty mockups.",
-      "approach": "I built everything from scratch using vanilla TypeScript instead of React to demonstrate fundamental skills. I implemented a custom SPA router, GSAP-powered animations, and a full Express backend. The playful design draws inspiration from a mischievous coyote cartoon character—clever, resourceful, and a little unconventional. The interactive business card serves as both a memorable introduction and a showcase of animation capabilities.",
+      "approach": "I built everything from scratch using vanilla TypeScript instead of React to demonstrate fundamental skills. I implemented a custom hash-based SPA router, a 2D spatial scroll-map navigation system (five tiles in a plus layout — intro, hero, about, projects, contact), GSAP-powered animations, and a full Express backend. The projects page is structured as a vintage TV with a channel guide; selecting a channel plays a Looney-Tunes-style title-card tune-in followed by the case study. The playful design draws inspiration from a mischievous coyote cartoon character — clever, resourceful, and a little unconventional.",
       "results": [
         "Sub-2-second load times with optimized asset delivery",
         "100% Lighthouse accessibility score",
@@ -78,11 +78,30 @@
       ],
       "keyFeatures": [
         "Interactive 3D business card with flip animation",
-        "CRT TV hover preview for project cards",
+        "2D spatial scroll-map (five tiles in a plus layout) with wheel + arrow + swipe navigation",
+        "Vintage TV channel guide with Looney-Tunes-style title-card tune-in for project case studies",
+        "Hash-based deep linking with browser back/forward support",
         "Dark/light theme with system preference detection",
         "Terminal-style client intake form",
-        "Full test coverage with Vitest"
-      ]
+        "Integrated client portal and admin dashboard",
+        "Vitest unit + Playwright E2E test coverage"
+      ],
+      "tv": {
+        "description": "Custom-built portfolio that demonstrates the same craft I bring to client work — performance, accessibility, and a little coyote-coded mischief.",
+        "challenge": "Most portfolio templates feel generic. I needed a site that proves I can ship production-ready apps, not just pretty mockups.",
+        "approach": "Vanilla TypeScript, a custom hash-based SPA router, a 2D spatial scroll-map, and GSAP animations — all from scratch, no framework. The projects page is a vintage TV; selecting a channel plays a Looney-Tunes title-card tune-in.",
+        "keyFeatures": [
+          "2D spatial scroll-map navigation",
+          "Vintage TV channel guide with title-card tune-in",
+          "Interactive 3D business card",
+          "Integrated client portal and admin dashboard"
+        ],
+        "results": [
+          "Sub-2-second load times",
+          "100% Lighthouse accessibility",
+          "Seamless transitions, no framework overhead"
+        ]
+      }
     },
     {
       "id": "the-backend",
@@ -168,7 +187,23 @@
         "Analytics dashboard with Chart.js visualizations",
         "Scheduled tasks with node-cron",
         "Multi-step approval workflows"
-      ]
+      ],
+      "tv": {
+        "description": "Full-stack dashboard and client portal for freelance project management — admin tools on one side, transparent client view on the other, no third-party platforms.",
+        "challenge": "Juggling emails, spreadsheets, Dropbox, and invoicing apps. Clients had no visibility into project progress; context was lost across disconnected tools.",
+        "approach": "Dual-portal architecture: admin dashboard for me, client portal for transparency. Secure auth, real-time messaging, automated PDF invoices, and a Kanban lead pipeline. SQLite for portability with a migration system for schema evolution.",
+        "keyFeatures": [
+          "Magic link client invitations",
+          "Real-time messaging with file uploads",
+          "Automated PDF invoice generation",
+          "Lead pipeline Kanban + analytics"
+        ],
+        "results": [
+          "Single platform replaces 4+ separate tools",
+          "Clients self-serve project status and invoices",
+          "Automated invoicing saves hours per month"
+        ]
+      }
     },
     {
       "id": "hedgewitch-horticulture",
@@ -232,7 +267,23 @@
         "Blog system powered by Astro Content Collections",
         "Admin dashboard with Netlify Identity authentication",
         "Netlify Forms with honeypot spam protection"
-      ]
+      ],
+      "tv": {
+        "description": "Custom website for Hedgewitch Horticulture, a Greater Boston sustainable-garden studio — replaced their Squarespace with a performance-optimized static build and an earthy Art Nouveau aesthetic.",
+        "challenge": "Their Squarespace couldn't capture the earthy, witchy identity. They needed a handcrafted, organic feel — easy to maintain and fast on mobile.",
+        "approach": "Astro static site for near-instant load times. Custom Art Nouveau visual system with corner frames, wavy SVG text paths, and GSAP scroll-driven character reveals. Full gallery with lightbox, blog, and admin CMS for self-service updates.",
+        "keyFeatures": [
+          "GSAP scroll-driven character reveals",
+          "49-item gallery with lightbox + filtering",
+          "Astro Content Collections blog",
+          "Self-service admin dashboard"
+        ],
+        "results": [
+          "26 custom pages built from scratch",
+          "WCAG AA accessibility throughout",
+          "Self-service admin CMS"
+        ]
+      }
     },
     {
       "id": "recycle-content",

@@ -805,9 +805,9 @@ div.page-hero-desktop {
 }
 
 /* Interactive screen overlay (channel list, title-card image, scanlines).
-   Sits BEHIND the TV frame so the bezel naturally clips overflow at the
-   curved screen edges. Must match .crt-tv__screen-bg exactly so highlights
-   align with what's painted on the screen. */
+   Sized + positioned to the screen aperture (the area where the
+   title-card content lives in the bg image), measured via flood-fill of
+   vintage_tv.webp's transparent cutout center. */
 .crt-tv__screen {
   position: absolute;
   top: 8.463%;
@@ -848,6 +848,75 @@ div.page-hero-desktop {
   pointer-events: none;
 }
 
+/* TV control buttons — invisible click targets overlaying the painted
+   POWER / CHANNEL / VOLUME buttons in the vintage_tv frame. Coords
+   measured via flood-fill of the dark capsules in the source image:
+     POWER:   y=282-299 (top:25.80%, height:1.65%)
+     CHANNEL: y=327-344 (top:29.92%, height:1.65%)
+     VOLUME:  y=373-389 (top:34.13%, height:1.56%)
+   All share x=1242-1392 (left:87.22%, width:10.60%). CHANNEL and
+   VOLUME buttons split that width into two halves (▼ left, ▲ right). */
+.crt-tv__btn {
+  position: absolute;
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.crt-tv__btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.crt-tv__btn--power {
+  top: 25.80%;
+  left: 87.22%;
+  width: 10.60%;
+  height: 1.65%;
+}
+
+.crt-tv__btn--channel-down {
+  top: 29.92%;
+  left: 87.22%;
+  width: 5.30%;
+  height: 1.65%;
+}
+
+.crt-tv__btn--channel-up {
+  top: 29.92%;
+  left: 92.52%;
+  width: 5.30%;
+  height: 1.65%;
+}
+
+.crt-tv__btn--volume-down {
+  top: 34.13%;
+  left: 87.22%;
+  width: 5.30%;
+  height: 1.56%;
+}
+
+.crt-tv__btn--volume-up {
+  top: 34.13%;
+  left: 92.52%;
+  width: 5.30%;
+  height: 1.56%;
+}
+
+/* Powered-off state: hide the channel list / panels / LED but leave the
+   title-card base image showing — that's the dark vignetted "TV is off"
+   look the screen has by default. Buttons stay clickable so the user
+   can power back on. */
+.crt-tv.is-powered-off .crt-tv__screen,
+.crt-tv.is-powered-off .crt-tv__channel-display {
+  visibility: hidden;
+}
+
 /* Same for the screen-bg image. Anything decorative on top of the
    channel list must not eat clicks. */
 .crt-tv__screen-bg {
@@ -880,7 +949,10 @@ div.page-hero-desktop {
   pointer-events: none;
 }
 
-/* Static noise for channel change effect */
+/* Static noise for channel change effect — original subtle noise, no
+   color wash. The "screen goes darker for a beat" effect is handled
+   separately by the screen-void layer behind screen-bg, which the bg
+   fade-out reveals during a channel flip. */
 .crt-tv__static {
   position: absolute;
   inset: 0;
@@ -1026,6 +1098,14 @@ div.page-hero-desktop {
   font-style: italic;
   line-height: 1.05;
   opacity: 1;
+}
+
+/* Each word wrapped in a span so the cycle animation can pulse them in
+   one at a time. inline-block is required for scale transforms to take
+   effect on otherwise-inline content. */
+.crt-tv__panel-tagline > span {
+  display: inline-block;
+  transform-origin: center;
 }
 
 .crt-tv__panel-body {
@@ -1222,8 +1302,8 @@ div.page-hero-desktop {
 
      Caching the calc value as a custom prop lets us reuse it for the
      channel-list font sizing further down. */
-  --tv-available-height: calc(100dvh - 130px);
-  width: min(1100px, calc(var(--tv-available-height) * 1.3), 96vw);
+  --tv-available-height: calc(100dvh - 110px);
+  width: min(1240px, calc(var(--tv-available-height) * 1.3), 98vw);
   max-width: 100%;
 }
 
@@ -1239,13 +1319,12 @@ div.page-hero-desktop {
   display: flex;
   flex-direction: column;
   padding: clamp(0.5rem, 2cqw, 1.25rem) clamp(0.75rem, 3cqw, 1.5rem);
-  /* Hardcoded colors so the TV interior stays the same in light/dark
-     site themes — the screen represents a physical TV, not a UI surface
-     that should re-theme with the site. */
+  /* No background — the title-card base image (the dark vignetted
+     screen backdrop) shows through. Hardcoded text color so the TV
+     interior stays the same in light/dark site themes. */
   color: #fff;
   font-family: var(--font-family-mono, monospace);
   text-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
-  background: #1a1a1a;
   z-index: 2;
   /* Explicit pointer-events so the channel rows below can be clicked
      even if a parent rule disables them. */
@@ -1253,33 +1332,21 @@ div.page-hero-desktop {
 }
 
 /* Heading is the "01 PROJECTS" entry — represents channel 01 (the TV
-   guide). Sized larger than rows so it reads as the primary anchor of
-   the list. Highlighted by default (via the :has() rule below) and
-   loses the highlight only when the user cycles into a project row. */
+   guide). Sized identically to channel rows so the whole list reads as
+   one uniform column. Three-column grid (number | text-stack | year-
+   placeholder) matching .crt-tv__channel-row exactly. */
 .crt-tv__channel-heading {
-  margin: 0 0 0.5rem 0;
+  margin: 0;
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: clamp(0.5rem, 2cqw, 1rem);
-  align-items: baseline;
+  grid-template-columns: auto 1fr auto;
+  gap: clamp(0.75rem, 2.4cqw, 1.25rem);
+  align-items: start;
   padding: 0.5rem 0.6rem;
   font-family: var(--font-family-mono, monospace);
-  font-size: clamp(0.95rem, 2.6cqw, 1.5rem);
-  font-weight: var(--font-weight-bold, 700);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  line-height: 1.15;
+  font-size: clamp(0.875rem, 2.3cqw, 1.35rem);
+  line-height: 1.2;
   color: #fff;
   border-radius: 2px;
-}
-
-/* When NO row is highlighted, the heading is the "active" channel
-   (channel 01 / guide). Once the user cycles into a project row, the
-   row takes the highlight and the heading dims. */
-.crt-tv__channel-list:not(:has(.crt-tv__channel-row.is-active)) .crt-tv__channel-heading {
-  background-color: #fff;
-  color: #1a1a1a;
-  text-shadow: none;
 }
 
 .crt-tv__channel-rows {
@@ -1319,12 +1386,12 @@ div.page-hero-desktop {
   line-height: 1.2;
   white-space: nowrap;
   border-radius: 2px;
-  transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
-  opacity: 0.65;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 /* Stacked title + category in the middle column. Title on top, category
-   below in smaller dimmer text — like a TV guide row. */
+   below — both at full opacity so all text in the list reads as one
+   uniform color, with size as the only differentiator. */
 .crt-tv__channel-text {
   display: flex;
   flex-direction: column;
@@ -1336,12 +1403,10 @@ div.page-hero-desktop {
   font-size: 0.85em;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  opacity: 0.65;
 }
 
 .crt-tv__channel-row:hover,
 .crt-tv__channel-row:focus-visible {
-  opacity: 1;
   background-color: rgba(255, 255, 255, 0.1);
 }
 
