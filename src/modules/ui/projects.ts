@@ -106,6 +106,17 @@ interface PortfolioData {
 // Minimum documented projects required to show project list
 const MIN_DOCUMENTED_PROJECTS = 2;
 
+// View mode for the projects section. TV is the immersive default;
+// list is the cards-grid escape hatch for visitors who want to skip
+// the channel-guide flow. Persisted in localStorage so a returning
+// visitor's choice survives reloads.
+type ViewMode = 'tv' | 'list';
+const VIEW_MODE_STORAGE_KEY = 'nbc:projects:viewMode';
+const VIEW_MODE_DEFAULT: ViewMode = 'tv';
+// View-mode cross-fade between TV and list containers (slower so the
+// content swap feels like a real transition rather than a flicker).
+const VIEW_TOGGLE_FADE_S = 0.25;
+
 // Tune-in sequence timing & visual constants. Centralized so the pacing
 // of the title card → Looney-Tunes-credit-card panel cycle can be tuned
 // in one place. Each panel fades in, holds, then fades out as the next
@@ -162,6 +173,27 @@ const GITHUB_SVG = `
 </svg>
 `;
 
+// View-toggle icons — Lucide tv & list. Inline so they pick up
+// currentColor from the active/inactive button state without a
+// separate stylesheet for icon fills.
+const TV_ICON_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="m17 2-5 5-5-5"/>
+  <rect width="20" height="15" x="2" y="7" rx="2"/>
+</svg>
+`;
+
+const LIST_ICON_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M3 5h.01"/>
+  <path d="M3 12h.01"/>
+  <path d="M3 19h.01"/>
+  <path d="M8 5h13"/>
+  <path d="M8 12h13"/>
+  <path d="M8 19h13"/>
+</svg>
+`;
+
 export class ProjectsModule extends BaseModule {
   private projectsSection: HTMLElement | null = null;
   private projectsContent: HTMLElement | null = null;
@@ -184,6 +216,11 @@ export class ProjectsModule extends BaseModule {
   // the track height then snaps to 0 for a seamless loop.
   private channelTickerTween: gsap.core.Tween | null = null;
 
+  // User's chosen view mode for the projects section. Read from
+  // localStorage during onInit so the toggle paints with correct
+  // aria-pressed state and the matching view shows on first frame.
+  private viewMode: ViewMode = VIEW_MODE_DEFAULT;
+
   constructor() {
     super('ProjectsModule', { debug: false });
   }
@@ -205,6 +242,11 @@ export class ProjectsModule extends BaseModule {
 
     // Load portfolio data
     await this.loadPortfolioData();
+
+    // Restore the user's preferred view mode before first paint so
+    // the toggle buttons render with correct aria-pressed state and
+    // the matching view (TV or cards) is the one we show.
+    this.viewMode = this.readStoredViewMode();
 
     // Render projects or WIP sign
     this.render();
@@ -302,6 +344,17 @@ export class ProjectsModule extends BaseModule {
   }
 
   /**
+   * Set the toggle's display directly based on the active page id.
+   * 'flex' on projects, 'none' everywhere else. Uses inline style so
+   * it overrides the CSS default `display: none` baseline.
+   */
+  private syncToggleVisibility(activePage: string | null | undefined): void {
+    const toggle = this.projectsSection?.querySelector('.projects-view-toggle') as HTMLElement | null;
+    if (!toggle) return;
+    toggle.style.display = activePage === 'projects' ? 'flex' : 'none';
+  }
+
+  /**
    * Render project detail content for a given slug
    * Does NOT manage page visibility - only content rendering
    */
@@ -376,8 +429,191 @@ export class ProjectsModule extends BaseModule {
 
     if (hasEnoughDocumented) {
       this.renderProjectCards(documentedProjects);
+      this.renderViewToggle();
+      this.applyViewMode(this.viewMode);
     }
     // If not enough documented projects, keep the existing WIP sign
+  }
+
+  /**
+   * Read the stored view-mode preference. Returns the default if the
+   * value is missing, malformed, or storage is unavailable (private
+   * mode / quota errors). Non-fatal — the in-memory default still
+   * drives the current session.
+   */
+  private readStoredViewMode(): ViewMode {
+    try {
+      const stored = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+      if (stored === 'tv' || stored === 'list') return stored;
+    } catch {
+      // Storage may be unavailable (private mode, quota exceeded).
+    }
+    return VIEW_MODE_DEFAULT;
+  }
+
+  /**
+   * Persist the user's view-mode choice. Swallows storage errors so
+   * the toggle keeps working even when localStorage is blocked.
+   */
+  private persistViewMode(mode: ViewMode): void {
+    try {
+      localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
+    } catch {
+      // Same rationale as readStoredViewMode.
+    }
+  }
+
+  /**
+   * Build the segmented TV/list toggle and insert it as the first
+   * child of .projects-content. The toggle is positioned absolutely
+   * (CSS) at the section's top-right corner — visible only when the
+   * projects section itself is visible. No JS visibility plumbing
+   * required: section.page-hidden hides the section AND the toggle
+   * inside it in one step, eliminating the cross-page leak that the
+   * previous header-mounted approach suffered from. Idempotent:
+   * a no-op if already inserted.
+   */
+  private renderViewToggle(): void {
+    if (!this.projectsSection || !this.projectsContent) return;
+    if (this.projectsSection.querySelector('.projects-view-toggle')) return;
+
+    // Two-element structure: outer .projects-view-toggle is the
+    // absolute-positioned anchor; inner __group is the bordered
+    // segmented control. Mirrors the .portal-auth-toggle pattern in
+    // nav-portal.css so the visual language matches the login
+    // dropdown's segmented switch.
+    const toggle = document.createElement('div');
+    toggle.className = 'projects-view-toggle';
+    toggle.innerHTML = `
+      <div class="projects-view-toggle__group" role="group" aria-label="Project view mode">
+        <button type="button"
+                class="projects-view-toggle__btn"
+                data-view="tv"
+                aria-label="TV view"
+                aria-pressed="${this.viewMode === 'tv'}">
+          ${TV_ICON_SVG}
+        </button>
+        <button type="button"
+                class="projects-view-toggle__btn"
+                data-view="list"
+                aria-label="List view"
+                aria-pressed="${this.viewMode === 'list'}">
+          ${LIST_ICON_SVG}
+        </button>
+      </div>
+    `;
+
+    // Insert as a direct child of .projects-section (NOT .projects-content).
+    // page-transitions.css applies will-change to `section[data-page] > *`,
+    // which makes any section-direct-child a containing block for fixed-
+    // positioned descendants. Putting the toggle inside .projects-content
+    // would anchor its position:fixed to the content box (which shifts
+    // when view-mode swaps and isn't actually the viewport), causing the
+    // toggle to drift on TV ↔ list switches and to "touch" the TV instead
+    // of sitting at the viewport top. As a sibling of .projects-content,
+    // the toggle's fixed positioning resolves up to the viewport because
+    // no ancestor in its chain creates a fixed-containing-block.
+    this.projectsSection.insertBefore(toggle, this.projectsContent);
+
+    toggle.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement | null;
+      const btn = target?.closest('[data-view]') as HTMLButtonElement | null;
+      if (!btn) return;
+      const next = btn.dataset.view;
+      if (next !== 'tv' && next !== 'list') return;
+      if (next === this.viewMode) return;
+      this.setViewMode(next);
+    });
+  }
+
+  /**
+   * Switch view mode with a GSAP cross-fade between the outgoing and
+   * incoming containers. Class flip happens at the midpoint so the
+   * incoming element is still display:none during fade-out and the
+   * outgoing element is back to display:none before fade-in starts —
+   * prevents a brief frame where both would stack visually.
+   */
+  private setViewMode(mode: ViewMode): void {
+    if (!this.projectsContent) return;
+    if (mode === this.viewMode) return;
+
+    const outgoing = this.getViewElement(this.viewMode);
+    const incoming = this.getViewElementOrCreate(mode);
+
+    this.viewMode = mode;
+    this.persistViewMode(mode);
+
+    if (!outgoing || !incoming) {
+      this.applyViewMode(mode);
+      return;
+    }
+
+    gsap.to(outgoing, {
+      opacity: 0,
+      duration: VIEW_TOGGLE_FADE_S,
+      ease: 'power2.out',
+      onComplete: () => {
+        // Reset opacity on the now-hidden outgoing element so the
+        // next time it becomes visible it isn't stuck at 0.
+        gsap.set(outgoing, { clearProps: 'opacity' });
+        this.applyViewMode(mode);
+        gsap.fromTo(
+          incoming,
+          { opacity: 0 },
+          { opacity: 1, duration: VIEW_TOGGLE_FADE_S, ease: 'power2.in' }
+        );
+      }
+    });
+  }
+
+  /**
+   * Apply the view-mode class to .projects-content and sync the
+   * toggle's aria-pressed state. CSS class drives display of the TV
+   * vs cards container. TV is created lazily on first switch into
+   * tv mode if it isn't in the DOM yet.
+   */
+  private applyViewMode(mode: ViewMode): void {
+    if (!this.projectsContent) return;
+
+    if (mode === 'tv' && !this.projectsContent.querySelector('.crt-tv')) {
+      this.renderCrtTv();
+    }
+
+    this.projectsContent.classList.toggle('is-view-tv', mode === 'tv');
+    this.projectsContent.classList.toggle('is-view-list', mode === 'list');
+
+    // Toggle lives in .projects-section (sibling of .projects-content) so
+    // its position:fixed anchors to the viewport rather than to the
+    // content box's will-change containing block.
+    const toggle = this.projectsSection?.querySelector('.projects-view-toggle');
+    if (toggle) {
+      toggle.querySelectorAll<HTMLButtonElement>('[data-view]').forEach((btn) => {
+        btn.setAttribute('aria-pressed', btn.dataset.view === mode ? 'true' : 'false');
+      });
+    }
+  }
+
+  /**
+   * Resolve the container element for a given view mode. Used by
+   * setViewMode to pick the right node to fade.
+   */
+  private getViewElement(mode: ViewMode): HTMLElement | null {
+    if (!this.projectsContent) return null;
+    const selector = mode === 'tv' ? '.projects-tv-wrap' : '.work-half-wrapper';
+    return this.projectsContent.querySelector(selector);
+  }
+
+  /**
+   * Same as getViewElement but creates the TV first if switching to
+   * tv mode and the TV isn't in the DOM yet (cards always exist
+   * after renderProjectCards, so list mode never needs creation).
+   */
+  private getViewElementOrCreate(mode: ViewMode): HTMLElement | null {
+    if (!this.projectsContent) return null;
+    if (mode === 'tv' && !this.projectsContent.querySelector('.crt-tv')) {
+      this.renderCrtTv();
+    }
+    return this.getViewElement(mode);
   }
 
   /**
@@ -418,9 +654,11 @@ export class ProjectsModule extends BaseModule {
     // Add click handlers
     this.attachCardListeners();
 
-    // Render CRT TV. The old work-card hover preview is gone — cards are
-    // display:none and the channel guide on the TV is the primary nav.
-    this.renderCrtTv();
+    // TV creation is deferred to applyViewMode() so a returning visitor
+    // who chose list view doesn't pay for TV DOM/event setup until they
+    // actually switch back. The cards stay in the DOM either way; CSS
+    // (.is-view-tv / .is-view-list on .projects-content) decides which
+    // container is visible.
 
     // GSAP staggered entrance animation for cards
     this.animateCardEntrance();
@@ -444,11 +682,10 @@ export class ProjectsModule extends BaseModule {
     const workWrapper = this.projectsContent.querySelector('.work-half-wrapper');
     if (!workWrapper) return;
 
-    // Hide the cards work wrapper — its content is now expressed as the
-    // channel-list text inside the TV screen. Kept in DOM (display:none)
-    // so the existing card click handlers still resolve a target slug
-    // when keyboard/screen-reader users tab through them.
-    (workWrapper as HTMLElement).style.display = 'none';
+    // Card vs TV visibility is driven by .is-view-tv / .is-view-list
+    // on .projects-content (see applyViewMode + projects.css). Cards
+    // stay in the DOM either way so click handlers and tab order
+    // remain resolvable when the user toggles back to list view.
 
     // Centered TV container. Single child of projects-content (heading +
     // hr stay above) so the TV lands in the middle of the section.
@@ -1554,14 +1791,16 @@ export class ProjectsModule extends BaseModule {
   ): void {
     if (!this.projectDetailSection) return;
 
-    // Update hero image — prefer heroImage, fall back to the composed
-    // title card (string legacy form OR object.composed for new form).
+    // Update hero image — prefer heroImage, fall back to the first
+    // screenshot. The title-card is intentionally NOT used as a fallback
+    // anymore: the new full-canvas exports (1426×1093 with the actual
+    // title-card content occupying only the inner ~72% × 70%) include
+    // the transparent artboard around the artwork, which renders as
+    // empty space framing the image on the project-detail page.
+    // Screenshots show real product UI and read better as a hero anyway.
     const heroImg = this.projectDetailSection.querySelector<HTMLImageElement>('#project-hero-img');
     if (heroImg) {
-      const cardFallback = typeof project.titleCard === 'object'
-        ? project.titleCard.composed
-        : project.titleCard;
-      const heroSrc = project.heroImage || cardFallback || null;
+      const heroSrc = project.heroImage || project.screenshots?.[0] || null;
       if (heroSrc) {
         heroImg.src = heroSrc;
         heroImg.alt = `${project.title} hero image`;
