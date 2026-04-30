@@ -23,6 +23,8 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
+    "test:integration": "vitest run tests/integration",
+    "test:unit": "vitest run --exclude 'tests/integration/**'",
     "test:coverage": "vitest run --coverage",
     "test:coverage:watch": "vitest --coverage --watch",
     "test:coverage:report": "vitest run --coverage && open coverage/index.html",
