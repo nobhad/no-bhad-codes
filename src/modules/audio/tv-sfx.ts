@@ -4,40 +4,105 @@
  * ===============================================
  * @file src/modules/audio/tv-sfx.ts
  *
- * Procedural sound effects for the projects-page vintage TV. Uses
- * WebAudio synthesis (no asset files):
- *   - static(): white-noise burst with band-pass coloring + envelope,
- *     fired when a channel changes (matches the visual static flash).
- *   - beep(): short sine tone, fired on channel-up (▲) cycle.
+ * Two sounds on two independent gain stages:
  *
- * Volume is shared between both effects via a single master gain node.
- * Levels persist to localStorage so the next visit remembers. AudioContext
- * is lazily created on first use and resumed if suspended (modern browsers
- * require a user gesture to start audio).
+ *   - click(): mechanical click sample. Fires on any press of a TV
+ *     button (.crt-tv__btn — POWER, CHANNEL ▼▲, VOLUME ▼▲) via a
+ *     delegated document listener. Routes through a FIXED clickGain —
+ *     the VOLUME ▼▲ buttons do NOT change its level. Tactile feedback
+ *     should always be present and consistent regardless of the user's
+ *     volume preference. Sample: "Button" by Mike Koenig
+ *     (soundbible.com/772-Button.html), CC Attribution 3.0.
+ *   - static(): TV static sample. Fires on TV channel changes AND on
+ *     TV power-on (off → on). Plays a short slice from a 4s recording
+ *     with a fade-in/out envelope so the cut feels natural. Routes
+ *     through masterGain which IS governed by VOLUME ▼▲. Sample: "TV
+ *     Static" by Mike Koenig (soundbible.com/1611-TV-Static.html),
+ *     CC Attribution 3.0.
  *
- * Singleton because there's only ever one TV; multiple instances would
- * each pay the AudioContext setup cost and fight over the gain node.
+ * Both samples require ATTRIBUTION somewhere user-visible (footer /
+ * about / credits) — they're both Mike Koenig under CC BY 3.0.
+ *
+ * Volume persists to localStorage. AudioContext is lazily created on
+ * first use and resumed if suspended (browsers require a user gesture).
+ *
+ * Singleton — one TV, one of each gain stage.
  */
 
 const STORAGE_KEY = 'tv-sfx-volume';
 const VOLUME_STEPS = [0, 0.25, 0.5, 0.75, 1.0];
 const DEFAULT_VOLUME = 0.5;
 
-const STATIC_DURATION_S = 0.18;
-const BEEP_DURATION_S = 0.08;
-const BEEP_FREQUENCY_HZ = 880;
+const CLICK_SAMPLE_URL = '/audio/channel-click.mp3';
+const TV_BUTTON_SELECTOR = '.crt-tv__btn';
+
+// Fixed gain for the mechanical click. NOT controlled by VOLUME ▼▲ —
+// see the file header. Set well under 1.0 because the raw button
+// sample is loud and we want a soft tactile feel, not a clack.
+const CLICK_FIXED_GAIN = 0.22;
+
+// Debounce window — guards against double-fire if click() is called
+// twice in quick succession from the same gesture.
+const CLICK_DEBOUNCE_MS = 30;
+
+// TV static sample params. Plays a slice from the 4s recording (random
+// offset so each play differs slightly). Envelope = ATTACK → HOLD →
+// RELEASE; total duration is the sum. Tuned subtle — the static is an
+// ambient detail under the visual flash, not a foreground sound.
+//
+// Defaults below are the power-on shape (gentle ease, brief hold, long
+// trail). Channel-change callers pass a short / zero hold so the fade
+// starts right after the attack — a snappier "wipe" feel that matches
+// the faster visual flash on channel cycles.
+const STATIC_SAMPLE_URL = '/audio/tv-static.mp3';
+const STATIC_DEFAULT_ATTACK_S = 0.18;
+const STATIC_DEFAULT_HOLD_S = 0.27;
+const STATIC_DEFAULT_RELEASE_S = 0.55;
+const STATIC_DEFAULT_PEAK_GAIN = 0.05;
+
+interface StaticOptions {
+  attackS?: number;
+  holdS?: number;
+  releaseS?: number;
+  peakGain?: number;
+  // Optional "step-down" stage between hold and release: after the
+  // initial peak hold, drop to peakGain * dropToFraction over
+  // dropDurationS, then sustain at the quieter level for sustainS
+  // before the release fade. Used by channel-change to feel like
+  // "loud burst → quiet residual hiss → fade out". Omit for the
+  // simple attack/hold/release shape.
+  dropToFraction?: number;
+  dropDurationS?: number;
+  sustainS?: number;
+}
 
 class TvSfx {
   private ctx: AudioContext | null = null;
+  // Diegetic-TV-audio gain — controlled by VOLUME ▼▲ via setVolume().
+  // static() routes through this so the user can dial the channel
+  // crackle without affecting the button-click feedback.
   private masterGain: GainNode | null = null;
+  // Fixed-level gain for the mechanical click — not user-adjustable.
+  // click() routes through this directly to ctx.destination.
+  private clickGain: GainNode | null = null;
   private volume: number = DEFAULT_VOLUME;
-  // Cached noise buffer — reused for every static() call. ~1s of pink-ish
-  // noise at sample-rate; static() picks a random offset and slices a
-  // short window so each crackle sounds distinct.
-  private noiseBuffer: AudioBuffer | null = null;
+  // Decoded click sample — fetched + decoded once, reused on every play.
+  // Stays null until the first click() call (lazy load) so we don't pay
+  // the network/decode cost for visitors who never trigger SFX.
+  private clickBuffer: AudioBuffer | null = null;
+  private clickLoadPromise: Promise<AudioBuffer | null> | null = null;
+  private lastClickAt: number = -Infinity;
+  private globalListenerBound: boolean = false;
+  // Decoded TV-static sample (~4s). static() plays a short slice from
+  // a random offset so back-to-back channel changes don't sound identical.
+  private staticBuffer: AudioBuffer | null = null;
+  private staticLoadPromise: Promise<AudioBuffer | null> | null = null;
 
   constructor() {
     this.volume = this.loadVolume();
+    if (typeof document !== 'undefined') {
+      this.bindGlobalClickListener();
+    }
   }
 
   /** Current volume level (0..1). */
@@ -72,62 +137,84 @@ class TvSfx {
     this.saveVolume(snapped);
   }
 
-  /** Channel-change static crackle. Filtered white noise with fast attack
-      and slow release, ~180ms total. No-op when volume is 0. */
-  async static(): Promise<void> {
-    if (this.volume === 0) return;
-    const ctx = await this.ensureContext();
-    if (!ctx || !this.masterGain) return;
+  /** Tactile click — fired by the delegated TV-button listener. Routes
+      through the FIXED clickGain so the VOLUME ▼▲ buttons don't change
+      its level. Debounced so overlapping triggers can't double-fire.
+      Always plays regardless of volume setting (the click is also the
+      confirmation that VOLUME ▼▲ registered, so it can't be muted). */
+  async click(): Promise<void> {
+    const now = performance.now();
+    if (now - this.lastClickAt < CLICK_DEBOUNCE_MS) return;
+    this.lastClickAt = now;
 
-    const buffer = this.getNoiseBuffer(ctx);
+    const ctx = await this.ensureContext();
+    if (!ctx || !this.clickGain) return;
+    const buffer = await this.loadClickBuffer(ctx);
+    if (!buffer) return;
+
     const source = ctx.createBufferSource();
     source.buffer = buffer;
-    // Random start offset so each crackle differs.
-    const maxOffset = Math.max(0, buffer.duration - STATIC_DURATION_S);
-    source.start(0, Math.random() * maxOffset);
-
-    // Band-pass filter so the noise sounds like CRT static rather than
-    // pure white noise — center around 1.5kHz with moderate Q.
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.value = 1500;
-    filter.Q.value = 0.7;
-
-    // Per-shot envelope: very fast attack, gentle release.
-    const env = ctx.createGain();
-    const now = ctx.currentTime;
-    env.gain.setValueAtTime(0, now);
-    env.gain.linearRampToValueAtTime(0.6, now + 0.005);
-    env.gain.exponentialRampToValueAtTime(0.001, now + STATIC_DURATION_S);
-
-    source.connect(filter);
-    filter.connect(env);
-    env.connect(this.masterGain);
-
-    source.stop(now + STATIC_DURATION_S);
+    source.connect(this.clickGain);
+    source.start(0);
   }
 
-  /** Channel-up beep — short sine tone. No-op when volume is 0. */
-  async beep(): Promise<void> {
+  /** Channel-change / power-on TV static. Plays a slice from the 4s
+      sample with a configurable ATTACK → HOLD → RELEASE envelope.
+      Routes through masterGain so the user can dial it down (or mute
+      at volume:0) without losing the button click. No-op at volume:0. */
+  async static(opts: StaticOptions = {}): Promise<void> {
     if (this.volume === 0) return;
     const ctx = await this.ensureContext();
     if (!ctx || !this.masterGain) return;
+    const buffer = await this.loadStaticBuffer(ctx);
+    if (!buffer) return;
 
-    const osc = ctx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.value = BEEP_FREQUENCY_HZ;
+    const attackS = opts.attackS ?? STATIC_DEFAULT_ATTACK_S;
+    const holdS = opts.holdS ?? STATIC_DEFAULT_HOLD_S;
+    const releaseS = opts.releaseS ?? STATIC_DEFAULT_RELEASE_S;
+    const peakGain = opts.peakGain ?? STATIC_DEFAULT_PEAK_GAIN;
+    const dropDurationS = opts.dropDurationS ?? 0;
+    const sustainS = opts.sustainS ?? 0;
+    const dropFraction = opts.dropToFraction;
+    const usesDropStage = dropFraction !== undefined && dropFraction >= 0 && dropFraction < 1;
+    const sustainGain = usesDropStage ? peakGain * (dropFraction as number) : peakGain;
+    const totalS = attackS + holdS + (usesDropStage ? dropDurationS + sustainS : 0) + releaseS;
 
-    // Soft envelope so the tone doesn't click.
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    // Random offset — keep at least totalS of audio left so we don't
+    // run off the end of the buffer.
+    const maxOffset = Math.max(0, buffer.duration - totalS);
+    const offset = Math.random() * maxOffset;
+    source.start(0, offset);
+
+    // Envelope shape:
+    //   simple: attack → peak hold → linear release
+    //   with drop: attack → peak hold → drop ramp → sustain hold → release
     const env = ctx.createGain();
     const now = ctx.currentTime;
-    env.gain.setValueAtTime(0, now);
-    env.gain.linearRampToValueAtTime(0.4, now + 0.01);
-    env.gain.exponentialRampToValueAtTime(0.001, now + BEEP_DURATION_S);
+    let t = now;
+    env.gain.setValueAtTime(0, t);
+    t += attackS;
+    env.gain.linearRampToValueAtTime(peakGain, t);
+    if (holdS > 0) {
+      t += holdS;
+      env.gain.setValueAtTime(peakGain, t);
+    }
+    if (usesDropStage) {
+      t += dropDurationS;
+      env.gain.linearRampToValueAtTime(sustainGain, t);
+      if (sustainS > 0) {
+        t += sustainS;
+        env.gain.setValueAtTime(sustainGain, t);
+      }
+    }
+    t += releaseS;
+    env.gain.linearRampToValueAtTime(0, t);
 
-    osc.connect(env);
+    source.connect(env);
     env.connect(this.masterGain);
-    osc.start(now);
-    osc.stop(now + BEEP_DURATION_S);
+    source.stop(now + totalS);
   }
 
   // --------------------------------------------------------------------
@@ -153,11 +240,18 @@ class TvSfx {
         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!Ctor) return null;
       const ctx = new Ctor();
+      // masterGain — diegetic TV audio (static). Tracks VOLUME ▼▲.
       const masterGain = ctx.createGain();
       masterGain.gain.value = this.volume;
       masterGain.connect(ctx.destination);
+      // clickGain — fixed-level mechanical click. Independent of VOLUME
+      // so the button click stays present even at volume:0.
+      const clickGain = ctx.createGain();
+      clickGain.gain.value = CLICK_FIXED_GAIN;
+      clickGain.connect(ctx.destination);
       this.ctx = ctx;
       this.masterGain = masterGain;
+      this.clickGain = clickGain;
       // Some browsers create the context in 'suspended' state until the
       // first user gesture explicitly resumes it.
       if (ctx.state === 'suspended') {
@@ -175,16 +269,60 @@ class TvSfx {
     }
   }
 
-  private getNoiseBuffer(ctx: AudioContext): AudioBuffer {
-    if (this.noiseBuffer) return this.noiseBuffer;
-    const length = ctx.sampleRate; // 1 second of noise
-    const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < length; i++) {
-      data[i] = Math.random() * 2 - 1;
-    }
-    this.noiseBuffer = buffer;
-    return buffer;
+  private async loadClickBuffer(ctx: AudioContext): Promise<AudioBuffer | null> {
+    if (this.clickBuffer) return this.clickBuffer;
+    // Reuse an in-flight load promise if click() is called multiple times
+    // in rapid succession — without this, two simultaneous calls would
+    // both fetch + decode the same file.
+    if (this.clickLoadPromise) return this.clickLoadPromise;
+    this.clickLoadPromise = (async () => {
+      try {
+        const res = await fetch(CLICK_SAMPLE_URL);
+        if (!res.ok) return null;
+        const data = await res.arrayBuffer();
+        const decoded = await ctx.decodeAudioData(data);
+        this.clickBuffer = decoded;
+        return decoded;
+      } catch {
+        return null;
+      }
+    })();
+    return this.clickLoadPromise;
+  }
+
+  private async loadStaticBuffer(ctx: AudioContext): Promise<AudioBuffer | null> {
+    if (this.staticBuffer) return this.staticBuffer;
+    if (this.staticLoadPromise) return this.staticLoadPromise;
+    this.staticLoadPromise = (async () => {
+      try {
+        const res = await fetch(STATIC_SAMPLE_URL);
+        if (!res.ok) return null;
+        const data = await res.arrayBuffer();
+        const decoded = await ctx.decodeAudioData(data);
+        this.staticBuffer = decoded;
+        return decoded;
+      } catch {
+        return null;
+      }
+    })();
+    return this.staticLoadPromise;
+  }
+
+  /** Bind a delegated document-level click listener that fires the click
+      SFX on TV buttons only (.crt-tv__btn — POWER, CHANNEL ▼▲, VOLUME
+      ▼▲). Other <button> elements on the site are unaffected. The TV-
+      button selector keeps the sound scoped to the physical-feeling TV
+      controls without leaking into form submits, nav, etc. Idempotent. */
+  private bindGlobalClickListener(): void {
+    if (this.globalListenerBound) return;
+    this.globalListenerBound = true;
+    document.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+      const tvButton = target.closest(TV_BUTTON_SELECTOR);
+      if (!tvButton) return;
+      void this.click();
+    });
   }
 
   private snapToStep(level: number): number {

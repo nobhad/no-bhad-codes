@@ -230,15 +230,6 @@ export class ProjectsModule extends BaseModule {
       // carousel back-nav) that should only update the LED + row
       // highlight without flashing into a different channel.
       const cycle = event.detail?.cycle === true;
-      const direction = event.detail?.direction as 'up' | 'down' | undefined;
-      // SFX: channel-up beep on wheel/key cycling. page-transition uses
-      // `direction: 'down'` for "next channel number" (01 → 02 etc.), so
-      // that's the beep direction. The CHANNEL ▲ button path beeps in
-      // cycleTvChannel and dispatches a DIFFERENT event ('active-slug-
-      // changed'), so this listener won't double-fire on button presses.
-      if (cycle && direction === 'down') {
-        void tvSfx.beep();
-      }
       if (typeof index === 'number') this.setTvChannel(index, { cycle });
     }) as EventListener);
 
@@ -468,8 +459,14 @@ export class ProjectsModule extends BaseModule {
       <div class="crt-tv">
         <div class="crt-tv__wrapper">
           <img class="crt-tv__screen-bg" src="/images/title-card_base.webp" alt="" data-screen-bg />
+          <!-- Composed title-card (text baked in) sits at the same full
+               TV-frame canvas as the bg below. Lives outside .crt-tv__screen
+               because .crt-tv__screen is sized to the screen aperture only
+               (72.8% wide × 70.4% tall) for the channel list / panels —
+               putting the full-canvas composed image inside that box would
+               stretch it into the aperture and misalign with the bg. -->
+          <img class="crt-tv__image" src="" alt="Project preview" />
           <div class="crt-tv__screen">
-            <img class="crt-tv__image" src="" alt="Project preview" />
             <div class="crt-tv__channel-list" data-channel-list></div>
             <!-- Tune-in overlay — populated and animated on channel select.
                  Hidden until playTuneInSequence runs. The composed title
@@ -562,14 +559,9 @@ export class ProjectsModule extends BaseModule {
         break;
       case 'volume-up':
         tvSfx.stepUp();
-        // Audible feedback for the new level (no on-screen indicator) —
-        // beep at the post-change volume so the user can tell when they
-        // hit max or min.
-        void tvSfx.beep();
         break;
       case 'volume-down':
         tvSfx.stepDown();
-        void tvSfx.beep();
         break;
       }
     });
@@ -587,6 +579,11 @@ export class ProjectsModule extends BaseModule {
     if (isOff) {
       // Going off — cancel any tune-in so we come back cleanly.
       this.cancelTuneIn();
+    } else {
+      // Going from off → on: fire the static crackle (synced with the
+      // visual "screen lights up" moment). Power-off stays silent —
+      // CRTs were near-silent on shutdown, only the click remains.
+      void tvSfx.static();
     }
   }
 
@@ -610,14 +607,8 @@ export class ProjectsModule extends BaseModule {
       : 0;
 
     const nextIdx = ((currentIdx + delta) % total + total) % total;
-    // SFX: short beep on channel-up (▲) only — matches the original
-    // direction-asymmetric channel-up beep on consumer TVs. The static
-    // crackle fires inside playTuneInSequence/transitionToGuide for both
-    // directions; the beep is the channel-up extra.
-    if (delta === 1) {
-      void tvSfx.beep();
-    }
     // Button press is a user-initiated cycle → trigger the tune-in.
+    // (TV-button click sound is handled by tvSfx's delegated listener.)
     this.setTvChannel(nextIdx, { cycle: true });
 
     // Notify page-transition so its internal currentTvIndex stays in
@@ -847,10 +838,22 @@ export class ProjectsModule extends BaseModule {
     });
     const tl = this.tuneInTimeline;
 
-    // SFX: channel-change static crackle synchronized with the visual
-    // static-flash burst below. Fires fire-and-forget; if the user has
-    // volume at 0, the call no-ops.
-    void tvSfx.static();
+    // SFX: channel-change static. Skips the hold so the fade starts
+    // right after the attack — snappier than the power-on shape.
+    void tvSfx.static({
+      // Channel-change shape: snap onto the static at a lower peak than
+      // power-on (channel cycling happens often, so the initial burst
+      // stays subtle), hold briefly, drop to a quiet residual hiss,
+      // sustain that for a beat, then trail off. Mimics a CRT settling
+      // onto the new channel after the initial blip of noise.
+      peakGain: 0.028,
+      attackS: 0.02,
+      holdS: 0.07,
+      dropToFraction: 0.35,
+      dropDurationS: 0.12,
+      sustainS: 0.18,
+      releaseS: 0.28,
+    });
 
     // 1) Static burst + channel list snaps off, bg flashes blank for a
     //    split second (the "between channels" void) before swapping to
@@ -1271,9 +1274,22 @@ export class ProjectsModule extends BaseModule {
     this.tuneInTimeline = gsap.timeline();
     const tl = this.tuneInTimeline;
 
-    // SFX: same channel-change crackle as the project tune-in, so cycling
-    // back to the guide reads the same audibly as cycling out.
-    void tvSfx.static();
+    // SFX: same channel-change crackle as the project tune-in (no
+    // hold — fade starts right after attack).
+    void tvSfx.static({
+      // Channel-change shape: snap onto the static at a lower peak than
+      // power-on (channel cycling happens often, so the initial burst
+      // stays subtle), hold briefly, drop to a quiet residual hiss,
+      // sustain that for a beat, then trail off. Mimics a CRT settling
+      // onto the new channel after the initial blip of noise.
+      peakGain: 0.028,
+      attackS: 0.02,
+      holdS: 0.07,
+      dropToFraction: 0.35,
+      dropDurationS: 0.12,
+      sustainS: 0.18,
+      releaseS: 0.28,
+    });
 
     // Static peak + bg src swaps to the blank base.
     tl.to(staticOverlay, { opacity: TV_STATIC_FLASH_OPACITY, duration: 0.06 }, 0)
