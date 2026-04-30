@@ -271,6 +271,10 @@ describe('Contract Routes', () => {
     vi.clearAllMocks();
     mockIsValidContractStatus.mockReturnValue(true);
     mockDbRun.mockResolvedValue({ changes: 1 });
+    // The POST handler now does pre-flight project + client lookups
+    // before delegating to the service. Default to "found" so tests
+    // that don't care about those gates still get to the create path.
+    mockDbGet.mockResolvedValue({ id: 1 });
   });
 
   describe('POST / — Create Contract', () => {

@@ -114,7 +114,13 @@ vi.mock('../../../server/utils/pdf-utils', () => ({
   drawWrappedText: vi.fn(),
   ensureSpace: vi.fn(),
   addPageNumbers: vi.fn().mockResolvedValue(undefined),
-  setPdfMetadata: vi.fn()
+  setPdfMetadata: vi.fn(),
+  // High-level helpers added to pdf-utils after this test was written.
+  drawPdfDocumentHeader: vi.fn().mockResolvedValue(700),
+  drawPdfFooter: vi.fn(),
+  drawTwoColumnInfo: vi.fn().mockReturnValue(600),
+  drawSectionLabel: vi.fn().mockReturnValue(500),
+  drawLabelValue: vi.fn().mockReturnValue(480)
 }));
 
 import {

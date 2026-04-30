@@ -68,10 +68,14 @@ vi.mock('pdf-lib', () => ({
       setAuthor: vi.fn(),
       setSubject: vi.fn(),
       setCreator: vi.fn(),
+      // pdf-utils now installs fontkit and embeds JPG bytes too.
+      registerFontkit: vi.fn(),
       embedFont: vi.fn().mockResolvedValue({
-        widthOfTextAtSize: vi.fn().mockReturnValue(100)
+        widthOfTextAtSize: vi.fn().mockReturnValue(100),
+        heightAtSize: vi.fn().mockReturnValue(12)
       }),
       embedPng: vi.fn(),
+      embedJpg: vi.fn(),
       getPages: vi.fn().mockReturnValue([
         {
           drawLine: vi.fn(),
@@ -92,15 +96,21 @@ vi.mock('fs', () => {
   const writeFileSyncMock = vi.fn();
   const mkdirSyncMock = vi.fn();
   const existsSyncMock = vi.fn().mockReturnValue(true);
+  // pdf-utils calls readFileSync to load Inconsolata bytes; return an
+  // empty buffer (the embed call is mocked out, so contents don't
+  // matter — just needs to not throw).
+  const readFileSyncMock = vi.fn().mockReturnValue(Buffer.from([]));
   return {
     default: {
       writeFileSync: writeFileSyncMock,
       mkdirSync: mkdirSyncMock,
-      existsSync: existsSyncMock
+      existsSync: existsSyncMock,
+      readFileSync: readFileSyncMock
     },
     writeFileSync: writeFileSyncMock,
     mkdirSync: mkdirSyncMock,
-    existsSync: existsSyncMock
+    existsSync: existsSyncMock,
+    readFileSync: readFileSyncMock
   };
 });
 

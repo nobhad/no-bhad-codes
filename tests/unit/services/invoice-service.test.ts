@@ -1051,10 +1051,12 @@ describe('Invoice Service', () => {
         { id: 10, invoice_number: 'DEP-001', amount_total: 500, paid_date: '2026-01-15' },
         { id: 11, invoice_number: 'DEP-002', amount_total: 300, paid_date: '2026-02-01' }
       ]);
-      // Applied credits for first deposit
-      mockDb.get
-        .mockResolvedValueOnce({ total_applied: 200 })
-        .mockResolvedValueOnce({ total_applied: 0 });
+      // Credit lookup is now a single batched db.all keyed by
+      // deposit_invoice_id (was N db.get calls before).
+      mockDb.all.mockResolvedValueOnce([
+        { deposit_invoice_id: 10, total_applied: 200 },
+        { deposit_invoice_id: 11, total_applied: 0 }
+      ]);
 
       const result = await service.getAvailableDeposits(5);
 
@@ -1079,8 +1081,10 @@ describe('Invoice Service', () => {
       mockDb.all.mockResolvedValueOnce([
         { id: 12, invoice_number: 'DEP-003', amount_total: 500, paid_date: '2026-01-15' }
       ]);
-      // Fully applied
-      mockDb.get.mockResolvedValueOnce({ total_applied: 500 });
+      // Fully applied — single batched lookup.
+      mockDb.all.mockResolvedValueOnce([
+        { deposit_invoice_id: 12, total_applied: 500 }
+      ]);
 
       const result = await service.getAvailableDeposits(5);
 
@@ -1691,7 +1695,7 @@ describe('Invoice Service', () => {
     it('throws when invoice not found', async () => {
       mockDb.get.mockResolvedValueOnce(undefined);
 
-      await expect(service.getInvoiceById(9999)).rejects.toThrow('Invoice with ID 9999 not found');
+      await expect(service.getInvoiceById(9999)).rejects.toThrow(/invoice .*9999.* not found/i);
     });
   });
 
@@ -1724,7 +1728,7 @@ describe('Invoice Service', () => {
       mockDb.get.mockResolvedValueOnce(undefined);
 
       await expect(service.getInvoiceByNumber('INV-FAKE')).rejects.toThrow(
-        'Invoice with number INV-FAKE not found'
+        /invoice .*INV-FAKE.* not found/i
       );
     });
   });
@@ -2012,7 +2016,7 @@ describe('Invoice Service', () => {
       mockDb.get.mockResolvedValueOnce(undefined);
 
       await expect(service.getPaymentTermsPreset(999)).rejects.toThrow(
-        'Payment terms preset with ID 999 not found'
+        /payment terms preset .*999.* not found/i
       );
     });
   });
@@ -2175,7 +2179,7 @@ describe('Invoice Service', () => {
       mockDb.get.mockResolvedValueOnce(undefined);
 
       await expect(service.getPaymentPlanTemplate(999)).rejects.toThrow(
-        'Payment plan template with ID 999 not found'
+        /payment plan template .*999.* not found/i
       );
     });
   });
@@ -2542,7 +2546,7 @@ describe('Invoice Service', () => {
       mockDb.get.mockResolvedValueOnce(undefined);
 
       await expect(service.generateInvoiceFromIntake(999)).rejects.toThrow(
-        'Intake with ID 999 not found'
+        /intake .*999.* not found/i
       );
     });
 
