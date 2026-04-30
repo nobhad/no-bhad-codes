@@ -69,6 +69,21 @@ const CAMERA_POSITIONS: Record<MapTile, { x: number; y: number }> = {
 };
 
 /**
+ * Tile spatial positions (CSS top/left percents). Inverse of
+ * CAMERA_POSITIONS: camera "up" translates world down +100%, but the
+ * up-tile itself sits at css top:-100%. Used by the bridge slide path
+ * to compute per-tile transforms that fake an axis-locked pan between
+ * tiles that aren't on the same row/column of the spatial map.
+ */
+const TILE_CSS_POSITIONS: Record<MapTile, { x: number; y: number }> = {
+  center: { x: 0, y: 0 },
+  up: { x: 0, y: -100 },
+  down: { x: 0, y: 100 },
+  left: { x: -100, y: 0 },
+  right: { x: 100, y: 0 }
+};
+
+/**
  * Neighbor graph for wheel + keyboard navigation. v1 keeps it simple:
  * the center tile (intro) connects to all four outer tiles, and outer
  * tiles only connect back to center. Diagonal hops (e.g., about → projects)
@@ -596,10 +611,11 @@ export class PageTransitionModule extends BaseModule {
       if (direction === 'up' || direction === 'down') return true;
       return NEIGHBORS.projects?.[direction] != null;
     }
-    // Project-detail: only horizontal navigates (carousel); vertical falls
-    // through to native scroll on tall case studies.
+    // Project-detail: horizontal cycles between detail pages (looped,
+    // never exits to other main pages); up exits back to the projects
+    // TV; down falls through to native scroll on tall case studies.
     if (this.currentPageId === 'project-detail') {
-      return direction === 'left' || direction === 'right';
+      return direction === 'left' || direction === 'right' || direction === 'up';
     }
     // Map tiles: static graph.
     return NEIGHBORS[this.currentPageId]?.[direction] != null;
@@ -1190,14 +1206,12 @@ export class PageTransitionModule extends BaseModule {
     if (!this.isMapPage(this.currentPageId) && this.currentPageId !== 'project-detail') return;
 
     // Enter on the projects tile opens the currently-highlighted TV
-    // channel — same as clicking the row. Lets keyboard users browse
-    // with ↑/↓ and "select" with Enter without having to tab through
-    // the list to focus an individual row first.
-    //
-    // Pin the slide direction here so the upcoming hashchange uses it,
-    // and dispatch a 'projects:tune-in' event so ProjectsModule can
-    // play the title-card-fills-screen pre-roll BEFORE navigating
-    // (matches the row-click flow).
+    // channel — direct navigation to the project detail page with a
+    // vertical reveal: TV scrolls UP off the top of the viewport while
+    // the project detail page pushes UP from the bottom. Direction is
+    // 'down' in the slide convention here ('down scroll → outgoing
+    // exits UP', see runSlideTransition comment), which produces the
+    // TV-scrolls-up + detail-from-bottom effect.
     if (
       (event.key === 'Enter' || event.key === ' ') &&
       this.currentPageId === 'projects'
@@ -1210,10 +1224,8 @@ export class PageTransitionModule extends BaseModule {
         const slug = slugs[this.currentTvIndex - 1];
         if (slug) {
           event.preventDefault();
-          this.setPendingSlide('right', `#/projects/${slug}`);
-          document.dispatchEvent(
-            new CustomEvent('projects:tune-in', { detail: { slug } })
-          );
+          this.setPendingSlide('down', `#/projects/${slug}`);
+          window.location.hash = `#/projects/${slug}`;
         }
       }
       return;
@@ -1485,15 +1497,19 @@ export class PageTransitionModule extends BaseModule {
 
   /**
    * Resolve the next hash for project-detail navigation given a direction.
-   * - left from first project → back to projects tile
+   * - left from first project → wrap to last project
    * - left from other project → previous project
    * - right from non-last project → next project
-   * - right from last project → home (carousel wraps back to intro)
-   * - up/down → null (vertical scroll stays on the page so users can
-   *   read tall case studies; never exits to the map)
+   * - right from last project → wrap to first project
+   * - up → exit back to projects tile (TV)
+   * - down → null (native scroll stays on the page for tall case studies)
+   *
+   * Horizontal navigation is a closed loop within the detail pages — it
+   * never exits to other main pages. Use up to return to the TV; the
+   * TV remembers which channel to show via currentTvIndex.
    */
   private resolveProjectDetailNeighbor(direction: Direction): string | null {
-    if (direction === 'down' || direction === 'up') return null;
+    if (direction === 'down') return null;
 
     const slugs = this.getProjectSlugs();
     if (slugs.length === 0) return null;
@@ -1502,30 +1518,23 @@ export class PageTransitionModule extends BaseModule {
     const currentIndex = currentSlug ? slugs.indexOf(currentSlug) : -1;
     if (currentIndex === -1) return null;
 
-    // Infinite horizontal loop INCLUDING the projects tile as a stop in
-    // the chain. The full forward gallery ring is:
-    //   projects → detail[0] → detail[1] → ... → detail[N-1] → projects → ...
-    // Boundary exits return to the projects (TV) tile, and on the way
-    // back through projects the TV remembers which channel to show.
+    // Up: exit back to projects tile. Sync the TV channel to whichever
+    // detail the user was on so re-entering shows the same channel.
+    if (direction === 'up') {
+      this.currentTvIndex = currentIndex + 1;
+      return '#/projects';
+    }
+
+    // Horizontal: closed-loop carousel within the detail pages — never
+    // exits to projects/contact. Wraps at both ends.
     let nextIndex: number;
     if (direction === 'left') {
-      if (currentIndex === 0) {
-        // Crossing back into projects from the first card — leave the TV
-        // showing this project's channel so re-entering feels continuous.
-        // Channel index = project index + 1 (0 = guide, 1+ = projects).
-        this.currentTvIndex = 1;
-        return '#/projects';
-      }
-      nextIndex = currentIndex - 1;
+      nextIndex = currentIndex === 0 ? slugs.length - 1 : currentIndex - 1;
     } else {
-      if (currentIndex >= slugs.length - 1) {
-        this.currentTvIndex = slugs.length;
-        return '#/projects';
-      }
-      nextIndex = currentIndex + 1;
+      nextIndex = currentIndex >= slugs.length - 1 ? 0 : currentIndex + 1;
     }
-    // Within the carousel: keep TV channel index synced (offset +1 since
-    // channel 01 is the guide, projects start at channel 02).
+    // Keep TV channel index synced (offset +1 since channel 01 is the
+    // guide, projects start at channel 02).
     this.currentTvIndex = nextIndex + 1;
     return `#/projects/${slugs[nextIndex]}`;
   }
@@ -1846,6 +1855,130 @@ export class PageTransitionModule extends BaseModule {
       });
       toElement.classList.remove('page-hidden');
       toElement.classList.add('page-active');
+    }
+
+    // ============================================
+    // NON-ADJACENT MAP → MAP BRIDGE
+    // ============================================
+    // When source and target tiles aren't on the same row/column of the
+    // spatial map (e.g., about (0, -100%) → projects (100%, 0)), the
+    // existing siteMap-only slide path makes the camera jump through
+    // the intro tile — visible as the business card briefly flashing
+    // mid-slide. To match the user's mental model ("right-arrow always
+    // slides horizontally"), we bypass the siteMap animation entirely
+    // and translate the source + target tiles individually along the
+    // user's pressed axis. siteMap transform stays put during the
+    // animation, then snaps to target's camera baseline at the end.
+    if (
+      fromIsMap &&
+      toIsMap &&
+      currentPage?.element &&
+      this.siteMap &&
+      currentPage.id !== targetPage.id
+    ) {
+      const fromTile = MAP_TILES[currentPage.id as keyof typeof MAP_TILES];
+      const toTile = MAP_TILES[targetPage.id as keyof typeof MAP_TILES];
+      const fromCss = TILE_CSS_POSITIONS[fromTile];
+      const toCss = TILE_CSS_POSITIONS[toTile];
+      const isAdjacent = fromCss.x === toCss.x || fromCss.y === toCss.y;
+
+      if (!isAdjacent) {
+        const sourceEl = currentPage.element;
+        const targetEl = targetPage.element;
+
+        // Hide the other (non-source, non-target) map tiles for the
+        // duration of the slide so they can't flash into view as the
+        // camera-less individual-tile transforms move source/target.
+        const hiddenTiles: HTMLElement[] = [];
+        this.pages.forEach((page) => {
+          if (
+            page.element &&
+            this.isMapPage(page.id) &&
+            page.id !== currentPage.id &&
+            page.id !== targetPage.id
+          ) {
+            hiddenTiles.push(page.element);
+            gsap.set(page.element, { autoAlpha: 0 });
+          }
+        });
+
+        // siteMap stays at the SOURCE's camera position throughout. We
+        // animate source/target tiles individually rather than the
+        // camera, so the source naturally appears at viewport (0,0) at
+        // start and the target's natural viewport position is offset
+        // by (toCss - fromCss) from the source's viewport (0,0).
+        gsap.set(this.siteMap, {
+          xPercent: fromBaseline.x,
+          yPercent: fromBaseline.y
+        });
+
+        // Compute per-tile transforms.
+        // Source: at viewport (0,0) at start, slides to (outSign*100, 0)
+        //         on the user's axis at end. natural-viewport = (0,0)
+        //         since siteMap is at source's camera baseline.
+        const sourceStart = { x: 0, y: 0 };
+        const sourceEnd = {
+          x: isHorizontal ? outSign * 100 : 0,
+          y: !isHorizontal ? outSign * 100 : 0
+        };
+
+        // Target: starts at viewport (inSign*100, 0) on user's axis,
+        //         ends at viewport (0,0). Target's natural-viewport
+        //         (with siteMap at source's baseline) is (toCss.x -
+        //         fromCss.x, toCss.y - fromCss.y). Required transform
+        //         = desired-viewport - natural-viewport.
+        const naturalDx = toCss.x - fromCss.x;
+        const naturalDy = toCss.y - fromCss.y;
+        const targetStart = {
+          x: (isHorizontal ? inSign * 100 : 0) - naturalDx,
+          y: (!isHorizontal ? inSign * 100 : 0) - naturalDy
+        };
+        const targetEnd = { x: -naturalDx, y: -naturalDy };
+
+        // Pre-position both tiles before the tween so the first frame
+        // shows source at viewport center and target at incoming edge.
+        gsap.killTweensOf([sourceEl, targetEl]);
+        gsap.set(sourceEl, { xPercent: sourceStart.x, yPercent: sourceStart.y });
+        gsap.set(targetEl, {
+          xPercent: targetStart.x,
+          yPercent: targetStart.y,
+          autoAlpha: 1
+        });
+
+        // Run both tile slides in parallel.
+        await Promise.all([
+          new Promise<void>((resolve) => {
+            gsap.to(sourceEl, {
+              xPercent: sourceEnd.x,
+              yPercent: sourceEnd.y,
+              duration: PAGE_ANIMATION.SLIDE_DURATION,
+              ease: PAGE_ANIMATION.SLIDE_EASE,
+              onComplete: resolve
+            });
+          }),
+          new Promise<void>((resolve) => {
+            gsap.to(targetEl, {
+              xPercent: targetEnd.x,
+              yPercent: targetEnd.y,
+              duration: PAGE_ANIMATION.SLIDE_DURATION,
+              ease: PAGE_ANIMATION.SLIDE_EASE,
+              onComplete: resolve
+            });
+          })
+        ]);
+
+        // Cleanup: snap siteMap to target's real camera baseline,
+        // clear individual tile transforms, restore hidden tiles.
+        gsap.set(this.siteMap, {
+          xPercent: toBaseline.x,
+          yPercent: toBaseline.y
+        });
+        this.siteMap.setAttribute('data-map-camera', toTile);
+        gsap.set(sourceEl, { clearProps: 'xPercent,yPercent' });
+        gsap.set(targetEl, { clearProps: 'xPercent,yPercent' });
+        hiddenTiles.forEach((el) => gsap.set(el, { autoAlpha: 1 }));
+        return;
+      }
     }
 
     const sameElement = fromElement === toElement;
