@@ -903,6 +903,13 @@ div.page-hero-desktop {
   filter: drop-shadow(0 10px 30px var(--color-shadow));
 }
 
+/* Light mode reads softer against the page bg, so use a slightly heavier
+   single drop-shadow for grounding. Kept tight (no large blur) so the
+   cast doesn't reach the overflow:hidden clip on ancestor sections. */
+[data-theme="light"] .crt-tv__frame {
+  filter: drop-shadow(0 8px 16px var(--color-shadow-3xl));
+}
+
 /* LED channel readout — channel_NN.webp files are exported at the same
    1426×1093 canvas as the TV frame, with the lit digit baked in at the
    correct position and the rest transparent. So we just stack them at
