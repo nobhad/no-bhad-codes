@@ -1097,13 +1097,14 @@ export class PageTransitionModule extends BaseModule {
     // still keep their normal scroll-only behavior.
     if (!this.isMapPage(this.currentPageId) && this.currentPageId !== 'project-detail') return;
 
-    // Tiles that should NEVER scroll natively need to swallow every wheel
-    // event whether or not we end up navigating, otherwise cooldown /
-    // threshold / transition early-returns let the browser scroll the
-    // page underneath. project-detail is intentionally omitted — its
-    // case studies are tall and need native vertical scroll.
-    const consumesAllWheel = this.currentPageId !== 'project-detail';
-    if (consumesAllWheel) event.preventDefault();
+    // preventDefault is now scoped to cases where we WILL navigate
+    // (see the navigation block below). Letting the browser handle
+    // native scroll otherwise means tall content (project-detail case
+    // studies) scrolls naturally until a boundary is reached, and
+    // pages without scrollable content (intro/about/projects/contact —
+    // body+section both have overflow:hidden via virtual-pages layer)
+    // simply no-op when wheeled in a non-navigable direction. Mirrors
+    // the keyboard handler's approach.
 
     if (this.isTransitioning) return;
     if (performance.now() < this.wheelCooldownUntil) return;
@@ -1182,24 +1183,12 @@ export class PageTransitionModule extends BaseModule {
       }
     }
 
-    // Suppress native arrow-key scrolling on every page this module
-    // manages, regardless of transition/intro state. Without this, the
-    // browser scrolls the underlying page during the brief windows when
-    // the navigation gates below cause an early return:
-    //   - isTransitioning: rapid presses during a tile transition
-    //   - !introComplete: presses before the coyote paw resolves
-    //   - canNavigate === false: edge of the spatial map (e.g. up/down
-    //     on about/contact, where NEIGHBORS has no vertical entry)
-    // ProjectsModule no longer needs its backup window-level listener
-    // because this preventDefault runs unconditionally for managed pages.
-    const isArrow =
-      event.key === 'ArrowUp' || event.key === 'ArrowDown' ||
-      event.key === 'ArrowLeft' || event.key === 'ArrowRight';
-    const isManagedPage =
-      this.isMapPage(this.currentPageId) || this.currentPageId === 'project-detail';
-    if (isArrow && isManagedPage) {
-      event.preventDefault();
-    }
+    // preventDefault is now scoped to cases where we WILL navigate
+    // (see below — fired only when canNavigate + edge-guards pass).
+    // Letting native arrow-scroll work otherwise means tall content
+    // (project-detail case studies) can be read with ↑/↓ until the
+    // user reaches a scroll boundary, at which point arrows trigger
+    // page navigation. Mirrors the wheel handler's behavior.
 
     if (this.isTransitioning) return;
     if (!this.introComplete) return;
@@ -1216,17 +1205,23 @@ export class PageTransitionModule extends BaseModule {
       (event.key === 'Enter' || event.key === ' ') &&
       this.currentPageId === 'projects'
     ) {
-      // Channel 01 (currentTvIndex === 0) is the guide itself — pressing
-      // Enter on the guide is a no-op (you're already on it). Project
-      // channels start at currentTvIndex === 1.
-      if (this.currentTvIndex > 0) {
-        const slugs = this.getProjectSlugs();
-        const slug = slugs[this.currentTvIndex - 1];
-        if (slug) {
-          event.preventDefault();
-          this.setPendingSlide('down', `#/projects/${slug}`);
-          window.location.hash = `#/projects/${slug}`;
-        }
+      // Resolve the target slug from whichever channel is currently
+      // highlighted on the TV. Prefer the DOM's .is-active row (works
+      // for click + arrow + tune-in flows uniformly), fall back to
+      // currentTvIndex for keyboard-only nav before anything's been
+      // clicked. Channel 01 is the guide (no slug) — Enter on the
+      // guide is a no-op.
+      const slugs = this.getProjectSlugs();
+      const activeRow = document.querySelector<HTMLElement>(
+        '.crt-tv__channel-row.is-active:not([aria-hidden="true"])'
+      );
+      const slug =
+        activeRow?.dataset.slug ??
+        (this.currentTvIndex > 0 ? slugs[this.currentTvIndex - 1] : undefined);
+      if (slug) {
+        event.preventDefault();
+        this.setPendingSlide('down', `#/projects/${slug}`);
+        window.location.hash = `#/projects/${slug}`;
       }
       return;
     }
@@ -1247,6 +1242,46 @@ export class PageTransitionModule extends BaseModule {
       break;
     default:
       return;
+    }
+
+    // Project-detail vertical: explicitly drive scrolling on the
+    // section. Required because body has overflow:hidden under the
+    // virtual-pages layer, so the browser's default arrow-key scroll
+    // target is killed — without this, ↓/↑ would do nothing on the
+    // case study even though the section itself has overflow:auto.
+    //
+    // ↓: always scrolls the section; if already at the bottom, a
+    //    further ↓ is a no-op (no neighbor down — see canNavigate).
+    // ↑: scrolls upward when mid-read; only exits to the projects TV
+    //    when scrollTop is 0 (delegates to tryNavigateDirection).
+    if (
+      this.currentPageId === 'project-detail' &&
+      (direction === 'up' || direction === 'down')
+    ) {
+      const detailSection = this.pages.get('project-detail')?.element ?? null;
+      if (!detailSection) return;
+      const atTop = detailSection.scrollTop < 1;
+      const atBottom =
+        detailSection.scrollHeight - detailSection.scrollTop - detailSection.clientHeight < 1;
+
+      if (direction === 'down') {
+        // No exit-down on project-detail (canNavigate('down') is false).
+        // Scroll the section by ~one line. preventDefault stops the
+        // browser from also trying to scroll a different element.
+        if (!atBottom) {
+          event.preventDefault();
+          detailSection.scrollBy({ top: 40, behavior: 'smooth' });
+        }
+        return;
+      }
+
+      // direction === 'up'
+      if (!atTop) {
+        event.preventDefault();
+        detailSection.scrollBy({ top: -40, behavior: 'smooth' });
+        return;
+      }
+      // At top: fall through to navigation (back to projects TV).
     }
 
     // Use canNavigate so this stays in lock-step with the wheel handler
@@ -1880,9 +1915,14 @@ export class PageTransitionModule extends BaseModule {
       const toTile = MAP_TILES[targetPage.id as keyof typeof MAP_TILES];
       const fromCss = TILE_CSS_POSITIONS[fromTile];
       const toCss = TILE_CSS_POSITIONS[toTile];
-      const isAdjacent = fromCss.x === toCss.x || fromCss.y === toCss.y;
 
-      if (!isAdjacent) {
+      // Apply the bridge to ALL map → map slides — adjacent and
+      // non-adjacent. The previous siteMap-only path snapped the
+      // source instantly off-screen before sliding the target in, so
+      // adjacent slides like intro → about made the source appear to
+      // vanish rather than slide off. Bridge animates source AND
+      // target individually so both move together.
+      {
         const sourceEl = currentPage.element;
         const targetEl = targetPage.element;
 
