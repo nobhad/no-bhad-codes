@@ -137,11 +137,11 @@ Each entity type is queried in parallel using `Promise.allSettled()`. Results ar
 - Recency boost for entities created in last 30 days
 - Active/in-progress status boost
 
-### SearchModal Component
+### CommandPalette Component
 
-**File:** `src/react/components/SearchModal.tsx`
+**File:** `src/react/components/portal/CommandPalette.tsx`
 
-Global search overlay triggered by Cmd+K (Mac) / Ctrl+K (Windows). Integrated into `PortalLayout.tsx` via the `useSearchModal` hook.
+Global command palette / search overlay triggered by Cmd+K (Mac) / Ctrl+K (Windows). Integrated into `PortalApp.tsx` via the `useCommandPalette()` hook.
 
 Features:
 
@@ -165,7 +165,7 @@ This is a portal-rendered overlay, not a route. It is available from any page in
 - `server/services/ai-service.ts` -- Core AI service with drafting, caching, budget enforcement
 - `server/routes/admin/ai.ts` -- Admin API endpoints (5 routes)
 - `server/services/search-service.ts` -- Enhanced search with 9 entity types and relevance scoring
-- `src/react/components/SearchModal.tsx` -- Global Cmd+K search modal
+- `src/react/components/portal/CommandPalette.tsx` -- Global Cmd+K command palette
 
 ## Change Log
 
