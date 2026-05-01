@@ -6,12 +6,6 @@
 export { PortalDeliverables } from './PortalDeliverables';
 export type { PortalDeliverablesProps } from './PortalDeliverables';
 export { DeliverableCard } from './DeliverableCard';
-export {
-  mountPortalDeliverables,
-  unmountPortalDeliverables,
-  shouldUseReactPortalDeliverables
-} from './mount';
-export type { PortalDeliverablesMountOptions } from './mount';
 export type {
   PortalDeliverable,
   PortalDeliverableStatus,

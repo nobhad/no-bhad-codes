@@ -5,8 +5,3 @@
 
 export { PortalDocumentRequests } from './PortalDocumentRequests';
 export { DocumentRequestCard } from './DocumentRequestCard';
-export {
-  mountPortalDocumentRequests,
-  unmountPortalDocumentRequests,
-  shouldUseReactPortalDocumentRequests
-} from './mount';

@@ -4,4 +4,3 @@
  */
 
 export { ProjectsTable } from './ProjectsTable';
-export { mountProjectsTable, unmountProjectsTable } from './mount';

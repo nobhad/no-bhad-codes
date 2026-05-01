@@ -6,9 +6,6 @@
 // Main components
 export { PortalMessagesView } from './PortalMessagesView';
 
-// Mount functions
-export { mountPortalMessages, unmountPortalMessages, shouldUseReactPortalMessages } from './mount';
-
 // Hook
 export { usePortalMessages } from './usePortalMessages';
 

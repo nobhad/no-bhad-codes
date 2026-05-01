@@ -5,11 +5,6 @@
 
 export { PortalQuestionnairesView } from './PortalQuestionnairesView';
 export { QuestionnaireForm } from './QuestionnaireForm';
-export {
-  mountPortalQuestionnaires,
-  unmountPortalQuestionnaires,
-  shouldUseReactPortalQuestionnaires
-} from './mount';
 export type {
   PortalQuestionnaireResponse,
   PortalQuestionnaire,

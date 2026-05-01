@@ -389,7 +389,7 @@ export class InvoiceRecurringService {
 
     for (const reminder of reminderSchedule) {
       const scheduledDate = new Date(dueDate);
-      scheduledDate.setDate(scheduledDate.getDate() + reminder.daysFromDue);
+      scheduledDate.setUTCDate(scheduledDate.getUTCDate() + reminder.daysFromDue);
 
       if (scheduledDate >= now) {
         remindersToInsert.push({

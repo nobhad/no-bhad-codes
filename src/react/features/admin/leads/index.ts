@@ -5,4 +5,3 @@
 
 export { LeadsTable } from './LeadsTable';
 export { LeadScoringConfig } from './LeadScoringConfig';
-export { mountLeadsTable, unmountLeadsTable, shouldUseReactLeadsTable } from './mount';

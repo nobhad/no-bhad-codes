@@ -5,4 +5,3 @@
 
 export { PortalFilesManager } from './PortalFilesManager';
 export { FileUploadDropzone } from './FileUploadDropzone';
-export { mountPortalFiles, unmountPortalFiles, shouldUseReactPortalFiles } from './mount';
