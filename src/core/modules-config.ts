@@ -236,7 +236,6 @@ export function registerModules(debug: boolean = false): void {
               const dashboardContainer =
                 document.querySelector('.portal') as HTMLElement;
               if (dashboardContainer) {
-                dashboardContainer.innerHTML = '';
                 cleanup = mountPortalApp(dashboardContainer);
               }
             },

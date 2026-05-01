@@ -227,10 +227,14 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = usePortalAuth();
   const hasRendered = React.useRef(false);
 
-  // Track if we successfully rendered once (auth was valid from sessionStorage)
-  if (isAuthenticated) {
-    hasRendered.current = true;
-  }
+  // Track if we successfully rendered once (auth was valid from sessionStorage).
+  // Mutating refs during render fires twice under React 18 StrictMode, so do it
+  // in an effect after the authenticated render commits.
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      hasRendered.current = true;
+    }
+  }, [isAuthenticated]);
 
   // Auth loads synchronously from sessionStorage — typically instant
   if (isLoading) {
@@ -352,11 +356,41 @@ export function PortalRoutes() {
         } />
 
         {/* ========== ADMIN-ONLY ROUTES ========== */}
-        <Route path="/analytics" element={<LazyTabRoute tabId="analytics"><AnalyticsDashboard /></LazyTabRoute>} />
-        <Route path="/performance" element={<LazyTabRoute tabId="performance"><PerformanceMetrics /></LazyTabRoute>} />
-        <Route path="/system-health" element={<LazyTabRoute tabId="system-health"><SystemHealthDashboard /></LazyTabRoute>} />
-        <Route path="/work" element={<LazyTabRoute tabId="work"><WorkDashboard /></LazyTabRoute>} />
-        <Route path="/crm" element={<LazyTabRoute tabId="crm"><CRMDashboard /></LazyTabRoute>} />
+        <Route path="/analytics" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="analytics"><AnalyticsDashboard /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
+        <Route path="/performance" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="performance"><PerformanceMetrics /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
+        <Route path="/system-health" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="system-health"><SystemHealthDashboard /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
+        <Route path="/work" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="work"><WorkDashboard /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
+        <Route path="/crm" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="crm"><CRMDashboard /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
         <Route path="/documents" element={
           role === 'admin' ? (
             <LazyTabRoute tabId="documents"><DocumentsDashboard /></LazyTabRoute>
@@ -364,10 +398,34 @@ export function PortalRoutes() {
             <LazyTabRoute tabId="documents"><PortalDocuments /></LazyTabRoute>
           )
         } />
-        <Route path="/leads" element={<LazyTabRoute tabId="leads"><LeadsTable /></LazyTabRoute>} />
-        <Route path="/contacts" element={<LazyTabRoute tabId="contacts"><ContactsTable /></LazyTabRoute>} />
-        <Route path="/clients" element={<LazyTabRoute tabId="clients"><ClientsTable /></LazyTabRoute>} />
-        <Route path="/tasks" element={<LazyTabRoute tabId="tasks"><GlobalTasksTable /></LazyTabRoute>} />
+        <Route path="/leads" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="leads"><LeadsTable /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
+        <Route path="/contacts" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="contacts"><ContactsTable /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
+        <Route path="/clients" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="clients"><ClientsTable /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
+        <Route path="/tasks" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="tasks"><GlobalTasksTable /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
         <Route path="/requests" element={
           role === 'admin' ? (
             <LazyTabRoute tabId="requests"><AdHocRequestsTable /></LazyTabRoute>
@@ -395,23 +453,107 @@ export function PortalRoutes() {
         } />
         {/* document-requests now handled above with role-based routing */}
         <Route path="/support" element={<LazyTabRoute tabId="support"><KnowledgeBase /></LazyTabRoute>} />
-        <Route path="/system" element={<LazyTabRoute tabId="system"><SettingsManager /></LazyTabRoute>} />
-        <Route path="/email-templates" element={<LazyTabRoute tabId="email-templates"><EmailTemplatesManager /></LazyTabRoute>} />
+        <Route path="/system" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="system"><SettingsManager /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
+        <Route path="/email-templates" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="email-templates"><EmailTemplatesManager /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
         {/* Direct-access routes (reachable via command palette / deep link, not in sidebar or subtabs) */}
-        <Route path="/deleted-items" element={<LazyTabRoute tabId="deleted-items"><DeletedItemsTable /></LazyTabRoute>} />
-        <Route path="/time-tracking" element={<LazyTabRoute tabId="time-tracking"><TimeTrackingTable /></LazyTabRoute>} />
-        <Route path="/design-review" element={<LazyTabRoute tabId="design-review"><DesignReviewTable /></LazyTabRoute>} />
-        <Route path="/ad-hoc-analytics" element={<LazyTabRoute tabId="ad-hoc-analytics"><AdHocAnalytics /></LazyTabRoute>} />
-        <Route path="/data-quality" element={<LazyTabRoute tabId="data-quality"><DataQualityDashboard /></LazyTabRoute>} />
-        <Route path="/integrations" element={<LazyTabRoute tabId="integrations"><IntegrationsManager /></LazyTabRoute>} />
-        <Route path="/webhooks" element={<LazyTabRoute tabId="webhooks"><WebhooksManager /></LazyTabRoute>} />
-        <Route path="/workflows" element={<LazyTabRoute tabId="workflows"><WorkflowsManager /></LazyTabRoute>} />
+        <Route path="/deleted-items" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="deleted-items"><DeletedItemsTable /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
+        <Route path="/time-tracking" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="time-tracking"><TimeTrackingTable /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
+        <Route path="/design-review" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="design-review"><DesignReviewTable /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
+        <Route path="/ad-hoc-analytics" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="ad-hoc-analytics"><AdHocAnalytics /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
+        <Route path="/data-quality" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="data-quality"><DataQualityDashboard /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
+        <Route path="/integrations" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="integrations"><IntegrationsManager /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
+        <Route path="/webhooks" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="webhooks"><WebhooksManager /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
+        <Route path="/workflows" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="workflows"><WorkflowsManager /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
 
-        {/* Detail Views */}
-        <Route path="/client-detail" element={<LazyTabRoute tabId="client-detail"><ClientDetailRoute /></LazyTabRoute>} />
-        <Route path="/client-detail/:clientId" element={<LazyTabRoute tabId="client-detail"><ClientDetailRoute /></LazyTabRoute>} />
-        <Route path="/project-detail" element={<LazyTabRoute tabId="project-detail"><ProjectDetailRoute /></LazyTabRoute>} />
-        <Route path="/project-detail/:projectId" element={<LazyTabRoute tabId="project-detail"><ProjectDetailRoute /></LazyTabRoute>} />
+        {/* Detail Views (admin-only) */}
+        <Route path="/client-detail" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="client-detail"><ClientDetailRoute /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
+        <Route path="/client-detail/:clientId" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="client-detail"><ClientDetailRoute /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
+        <Route path="/project-detail" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="project-detail"><ProjectDetailRoute /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
+        <Route path="/project-detail/:projectId" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="project-detail"><ProjectDetailRoute /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
 
         {/* ========== CLIENT-ONLY REDIRECTS ========== */}
         <Route path="/approvals" element={
@@ -452,18 +594,34 @@ export function PortalRoutes() {
 
         {/* ========== ADMIN: SEQUENCES & AUTOMATIONS ========== */}
         <Route path="/sequences" element={
-          <LazyTabRoute tabId="sequences"><SequencesTable /></LazyTabRoute>
+          role === 'admin' ? (
+            <LazyTabRoute tabId="sequences"><SequencesTable /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
         } />
         <Route path="/automations" element={
-          <LazyTabRoute tabId="automations"><AutomationsTable /></LazyTabRoute>
+          role === 'admin' ? (
+            <LazyTabRoute tabId="automations"><AutomationsTable /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
         } />
         <Route path="/automation-detail/:automationId" element={
-          <LazyTabRoute tabId="automations"><AutomationDetailRoute /></LazyTabRoute>
+          role === 'admin' ? (
+            <LazyTabRoute tabId="automations"><AutomationDetailRoute /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
         } />
 
         {/* ========== ADMIN: EXPENSES & RETAINERS ========== */}
         <Route path="/expenses" element={
-          <LazyTabRoute tabId="expenses"><ExpensesTable /></LazyTabRoute>
+          role === 'admin' ? (
+            <LazyTabRoute tabId="expenses"><ExpensesTable /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
         } />
         <Route path="/retainers" element={
           role === 'admin' ? (
@@ -482,15 +640,27 @@ export function PortalRoutes() {
           )
         } />
         <Route path="/feedback-analytics" element={
-          <LazyTabRoute tabId="feedback"><FeedbackAnalytics /></LazyTabRoute>
+          role === 'admin' ? (
+            <LazyTabRoute tabId="feedback"><FeedbackAnalytics /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
         } />
         <Route path="/testimonials" element={
-          <LazyTabRoute tabId="testimonials"><TestimonialsTable /></LazyTabRoute>
+          role === 'admin' ? (
+            <LazyTabRoute tabId="testimonials"><TestimonialsTable /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
         } />
 
         {/* ========== EMBED WIDGETS ========== */}
         <Route path="/embed-widgets" element={
-          <LazyTabRoute tabId="embed-widgets"><EmbedWidgetsManager /></LazyTabRoute>
+          role === 'admin' ? (
+            <LazyTabRoute tabId="embed-widgets"><EmbedWidgetsManager /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
         } />
 
         {/* ========== AGREEMENTS ========== */}
@@ -509,7 +679,11 @@ export function PortalRoutes() {
 
         {/* ========== ONBOARDING TEMPLATES (Admin) ========== */}
         <Route path="/onboarding-templates" element={
-          <LazyTabRoute tabId="onboarding-templates"><OnboardingTemplatesManager /></LazyTabRoute>
+          role === 'admin' ? (
+            <LazyTabRoute tabId="onboarding-templates"><OnboardingTemplatesManager /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
         } />
 
         {/* ========== AUTO-PAY (Client) ========== */}

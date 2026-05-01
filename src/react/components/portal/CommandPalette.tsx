@@ -67,26 +67,26 @@ const ENTITY_ICONS: Record<string, React.ComponentType<{ className?: string }>> 
 // ============================================
 
 function buildCommandItems(navItems: UnifiedNavItem[]): CommandItem[] {
-  return navItems
-    .map((item) => ({
-      id: item.id,
-      label: item.label,
-      icon: item.icon,
-      shortcut: item.shortcut,
-      group: item.group,
-      path: `/${item.dataTab || item.id}`
-    }))
-    .slice(0, MAX_VISIBLE_ITEMS);
+  return navItems.map((item) => ({
+    id: item.id,
+    label: item.label,
+    icon: item.icon,
+    shortcut: item.shortcut,
+    group: item.group,
+    path: `/${item.dataTab || item.id}`
+  }));
 }
 
 function filterItems(items: CommandItem[], query: string): CommandItem[] {
-  if (!query.trim()) return items;
-  const lower = query.toLowerCase();
-  return items.filter(
-    (item) =>
-      item.label.toLowerCase().includes(lower) ||
-      item.id.toLowerCase().includes(lower)
-  );
+  const lower = query.trim().toLowerCase();
+  const matched = lower
+    ? items.filter(
+        (item) =>
+          item.label.toLowerCase().includes(lower) ||
+          item.id.toLowerCase().includes(lower)
+      )
+    : items;
+  return matched.slice(0, MAX_VISIBLE_ITEMS);
 }
 
 // ============================================
@@ -160,12 +160,14 @@ function CommandPaletteInner({ onClose }: CommandPaletteInnerProps) {
       return;
     }
 
+    const controller = new AbortController();
+
     setEntityLoading(true);
     searchTimerRef.current = setTimeout(async () => {
       try {
         const res = await fetch(
           `${API_ENDPOINTS.SEARCH}?q=${encodeURIComponent(query.trim())}`,
-          { credentials: 'include' }
+          { credentials: 'include', signal: controller.signal }
         );
         if (res.ok) {
           const data = await res.json();
@@ -174,15 +176,19 @@ function CommandPaletteInner({ onClose }: CommandPaletteInnerProps) {
         } else {
           setEntityResults([]);
         }
-      } catch {
+      } catch (err) {
+        if ((err as Error).name === 'AbortError') return;
         setEntityResults([]);
       } finally {
-        setEntityLoading(false);
+        if (!controller.signal.aborted) {
+          setEntityLoading(false);
+        }
       }
     }, TIMING.SEARCH_DEBOUNCE);
 
     return () => {
       if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+      controller.abort();
     };
   }, [query]);
 
