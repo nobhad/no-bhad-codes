@@ -119,7 +119,23 @@ All items verified against actual code. ~~0A~~, ~~0H~~, ~~0I~~ removed (proved f
 **Status:** IN PROGRESS
 
 - [ ] Horizontal scroll-map nav model — pages arranged as a 2D scroll map around the intro center; replaces the current blur-based transition for nav menu / intro-nav / all non-paw transitions. Paw stays sovereign for intro ↔ any.
-- [ ] **Reincorporate tech-stack content somewhere on the site** — the tech-marquee transition bumper was removed during the scroll-map pivot; the 43-item tech list should land somewhere meaningful (dedicated "kit" page, project-detail sidebar, footer panel, or new home for it). Content list preserved in git history at `index.html` lines 876–920 of commit prior to marquee removal.
+- [x] **Reincorporate tech-stack content** — direction locked: chunked GSAP "title-card runway" animation that fires during horizontal scroll-map transitions. Data shipped 2026-04-30: `Profile.techStack` is now a `TechStackChunk[]` (4 chunks of 8) in `public/data/portfolio.json:434-499`, type at `src/services/data-service.ts:42-58`. Chunks keyed to actual horizontal edges of the scroll-map: `intro-about` (Languages & Frameworks), `about-projects` (Styling, UI & Motion), `projects-contact` (Backend & Data), `contact-intro` (Tooling, Testing & Ship). Original 43-item marquee list reconciled against 2026-04-30 deps audit: 10 stale items dropped (PHP, Vue, jQuery, Bootstrap, Vuetify, Handlebars, MongoDB, MySQL, Mongoose, Jotai); 12 added (Astro, Three.js, OpenType.js, Lucide, Radix UI, Chart.js, Multer, Vercel, Netlify, Anthropic SDK, Stripe, Zod). Final count: 32 items.
+- [ ] **Implement tech-stack runway animation** — GSAP timeline on horizontal map→map transitions. Single integration point: `src/modules/animation/page-transition.ts:1985` inside the bridge-slide block (every horizontal map slide flows through there). Touch list:
+  - Create `src/modules/animation/tech-stack-runway.ts` (singleton, exposes `play(opts)` returning timeline promise; owns reverse/interrupt logic via `currentTimeline.reverse()` for inverse direction, `kill()` otherwise).
+  - Create `src/styles/components/tech-stack-runway.css` (overlay scaffolding only — `position: fixed; inset: 0; pointer-events: none`; structural sizing, will-change, mobile hide via `@media (max-width: 767px)`; all motion is GSAP).
+  - Modify `src/modules/animation/page-transition.ts` — single `await TechStackRunway.play({ fromId, toId, direction, sourceEl, targetEl })` between line 1985 and 2011, guarded by `isHorizontal && fromIsMap && toIsMap && !this.reducedMotion`.
+  - Modify `src/styles/bundles/site.css` — one `@import "../components/tech-stack-runway.css" layer(states);` between lines 70–71.
+  - Inject overlay markup via JS on first `play()` (vanilla TS, not React): `<div class="tech-runway"><div class="tech-runway__heading"><span class="tech-runway__heading-text"></span></div><ul class="tech-runway__items"><li>×8</li></ul></div>` appended to `#main-content`.
+  - **Timeline envelope: ~1.0s** total (`PAGE_ANIMATION.SLIDE_DURATION` is 0.55s, so first 0.55s races camera, trailing 0.45s settles+clears on destination):
+    - 0.00s — heading enters from leading edge oversized (`clamp(8rem, 16vw, 20rem)`, Acme, 900 weight, condensed), `xPercent: dir*-120 → 0`, `scaleX: 0.7 → 1`, blur 8 → 0, duration 0.18s, `power3.out`.
+    - 0.26s — heading explodes/fades: `xPercent: dir*30`, `scaleX: 1.4`, opacity → 0, blur → 12, duration 0.16s, `power2.in`.
+    - 0.16s — items fly in (slight overlap with heading-out), `xPercent: dir*-160 → 0`, `stagger: { each: 0.035, from: dir > 0 ? 'start' : 'end' }`, duration 0.42s.
+    - ~0.60s — items decelerate to thin ticker on destination's leading margin: `scale: 0.55, y: '38vh'`, duration 0.18s, `power2.out`.
+    - ~0.83s — fade overlay `opacity: 0`, duration 0.20s.
+  - Data wiring: `dataService.getProfile().techStack`, lookup chunk by sorted tile-pair key (`[fromId, toId].sort().join('|')`).
+  - Open risks: (1) z-index — runway must sit at `--z-index-overlay` *below* `#intro-morph-overlay` so the paw isn't covered (verify in `intro-morph.css`); (2) Acme font preload check in `templates/partials/head.ejs` to avoid FOUT on the oversized heading; (3) reverse during heading-explode window (~0.26s–0.42s) looks weird in v1 — accept as known trade-off, future polish via timeline labels.
+  - v1 scope: horizontal only. Vertical (`intro↔hero`, `intro↔contact` with `hero` as a separate up-arm) deferred — same pattern with axis swap.
+- [ ] **Pike portfolio entry** — Pike Powder Coating site (5,607 LOC, designed + built, client opted not to launch — personal preference, not work-related). Decide whether to: (a) finish polish + add as case study with `liveUrl` omitted, or (b) defer until other portfolio gaps are closed. Notes: project lives at `/Users/noellebhaduri/Projects/Development/Active/pike`, has design docs (ANIMATION_INTERACTION_PLAN.md, CONTENT_EDITING_GUIDE.md).
 
 ---
 
