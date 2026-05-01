@@ -4,6 +4,33 @@
 -- Created: 2026-02-01
 
 -- =====================================================
+-- BASE PROPOSAL REQUESTS TABLE (defensive create)
+-- =====================================================
+-- The full table is canonically defined in migration 047_proposal_requests.sql.
+-- Duplicated here with IF NOT EXISTS because 032 references proposal_requests
+-- via ALTER TABLE / CREATE INDEX statements below, and on fresh databases the
+-- numerically lower 032 runs before 047. The IF NOT EXISTS guard makes 047
+-- a no-op on fresh installs and leaves existing databases untouched.
+CREATE TABLE IF NOT EXISTS proposal_requests (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER NOT NULL,
+  client_id INTEGER NOT NULL,
+  project_type TEXT NOT NULL,
+  selected_tier TEXT NOT NULL CHECK (selected_tier IN ('good', 'better', 'best')),
+  base_price INTEGER NOT NULL,
+  final_price INTEGER NOT NULL,
+  maintenance_option TEXT CHECK (maintenance_option IN ('diy', 'essential', 'standard', 'premium')),
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'reviewed', 'accepted', 'rejected', 'converted')),
+  client_notes TEXT,
+  admin_notes TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  reviewed_at DATETIME,
+  reviewed_by TEXT,
+  FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+  FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
+);
+
+-- =====================================================
 -- PROPOSAL TEMPLATES
 -- =====================================================
 -- Reusable proposal templates for different project types
