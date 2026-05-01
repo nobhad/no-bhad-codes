@@ -23,7 +23,6 @@ function sanitizeLikeQuery(str: string): string {
 }
 
 /** Relevance scoring weights */
-const SCORE_EXACT_IDENTIFIER = 1.0;
 const SCORE_EXACT_NAME = 0.9;
 const SCORE_PARTIAL_NAME = 0.7;
 const SCORE_DESCRIPTION = 0.5;

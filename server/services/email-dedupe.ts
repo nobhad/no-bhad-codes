@@ -69,7 +69,7 @@ export async function sendEmailWithDedupe<T>(
 export async function pruneEmailDedupe(): Promise<number> {
   const db = getDatabase();
   const result = await db.run(
-    `DELETE FROM email_dedupe WHERE sent_at < datetime('now', ?)`,
+    'DELETE FROM email_dedupe WHERE sent_at < datetime(\'now\', ?)',
     [`-${DEDUPE_RETENTION_DAYS} days`]
   );
   return result.changes ?? 0;

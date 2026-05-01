@@ -84,6 +84,13 @@ export interface CircuitBreakerSnapshot {
   rejectedCount: number;
 }
 
+// Module-level registry of named breakers. Declared before CircuitBreaker
+// so the constructor's registry.set call doesn't trip
+// @typescript-eslint/no-use-before-define. Forward-references in class
+// bodies are safe at runtime (the constructor only runs after module
+// init), but the lint rule rejects the textual order.
+const registry = new Map<string, CircuitBreaker>();
+
 export class CircuitBreaker {
   readonly name: string;
   private readonly failureThreshold: number;
@@ -211,8 +218,6 @@ export class CircuitBreaker {
     };
   }
 }
-
-const registry = new Map<string, CircuitBreaker>();
 
 /** All registered breakers — used by the admin endpoint. */
 export function listCircuitBreakers(): CircuitBreakerSnapshot[] {

@@ -31,17 +31,17 @@ function mapSignatureAuthError(
   reason: SignatureAuthorizationReason
 ): { status: number; code: string } {
   switch (reason) {
-    case 'EXPIRED':
-      return { status: 410, code: ErrorCodes.SIGNATURE_EXPIRED };
-    case 'ALREADY_SIGNED':
-      return { status: 400, code: ErrorCodes.ALREADY_SIGNED };
-    case 'DECLINED':
-      return { status: 400, code: ErrorCodes.SIGNATURE_DECLINED };
-    case 'EMAIL_MISMATCH':
-      return { status: 403, code: ErrorCodes.UNAUTHORIZED };
-    case 'NOT_FOUND':
-    default:
-      return { status: 404, code: ErrorCodes.RESOURCE_NOT_FOUND };
+  case 'EXPIRED':
+    return { status: 410, code: ErrorCodes.SIGNATURE_EXPIRED };
+  case 'ALREADY_SIGNED':
+    return { status: 400, code: ErrorCodes.ALREADY_SIGNED };
+  case 'DECLINED':
+    return { status: 400, code: ErrorCodes.SIGNATURE_DECLINED };
+  case 'EMAIL_MISMATCH':
+    return { status: 403, code: ErrorCodes.UNAUTHORIZED };
+  case 'NOT_FOUND':
+  default:
+    return { status: 404, code: ErrorCodes.RESOURCE_NOT_FOUND };
   }
 }
 

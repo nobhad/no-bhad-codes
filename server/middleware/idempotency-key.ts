@@ -207,7 +207,7 @@ function interceptResponse(
 export async function purgeIdempotencyKeys(retentionDays = 7): Promise<number> {
   const db = getDatabase();
   const result = await db.run(
-    `DELETE FROM idempotency_keys WHERE created_at < datetime('now', ?)`,
+    'DELETE FROM idempotency_keys WHERE created_at < datetime(\'now\', ?)',
     [`-${retentionDays} days`]
   );
   return result.changes ?? 0;

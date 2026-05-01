@@ -80,7 +80,7 @@ function redactErrorMessage(message: string): string {
   for (const [pattern, replacement] of PII_REDACTION_PATTERNS) {
     out = out.replace(pattern, replacement);
   }
-  return out.length > 1000 ? out.slice(0, 1000) + '…' : out;
+  return out.length > 1000 ? `${out.slice(0, 1000)  }…` : out;
 }
 
 const handlers = new Map<string, AsyncTaskHandler>();
