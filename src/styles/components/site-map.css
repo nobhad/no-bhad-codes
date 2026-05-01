@@ -220,7 +220,9 @@ html[data-initial-page="portal-login"]:not(.js-ready) main#main-content {
     ". up    ."
     "left .  right"
     ". down  .";
-  padding: clamp(0.5rem, 2vw, 1.5rem);
+  /* Top padding zeroed so the up arrow sits flush against the header
+     bottom (the inset already places the compass top at header height). */
+  padding: 0 clamp(0.5rem, 2vw, 1.5rem) clamp(0.5rem, 2vw, 1.5rem);
 }
 
 .map-compass__cue {
@@ -250,10 +252,20 @@ html[data-initial-page="portal-login"]:not(.js-ready) main#main-content {
   border-radius: 4px;
 }
 
-.map-compass__cue--up { grid-area: up; align-self: start; justify-self: center; }
+.map-compass__cue--up { grid-area: up; align-self: start; justify-self: center; padding-top: 0; }
 .map-compass__cue--down { grid-area: down; align-self: end; justify-self: center; }
 .map-compass__cue--left { grid-area: left; align-self: center; justify-self: start; }
 .map-compass__cue--right { grid-area: right; align-self: center; justify-self: end; }
+
+/* Desktop only: float the compass over the fixed header so the up
+   arrow sits at the viewport top, overlapping the header chrome.
+   Mobile keeps the compass below the header (default inset above). */
+@media (--desktop) {
+  .map-compass {
+    inset: 0 0 40px 0;
+    z-index: var(--z-index-overlay);
+  }
+}
 
 /* Active when JS marks the direction as navigable */
 .map-compass__cue[data-can="true"] {
