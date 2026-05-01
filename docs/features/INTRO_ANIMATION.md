@@ -1,7 +1,7 @@
 # Intro Animation - Coyote Paw
 
 **Status:** Complete
-**Last Updated:** January 13, 2026
+**Last Updated:** 2026-04-30
 
 ## Overview
 
@@ -55,9 +55,9 @@ public/images/coyote_paw.svg
 
 |Property|Value|
 |----------|-------|
-|viewBox|`0 0 2316.99 1801.19`|
-|Width|2316.99|
-|Height|1801.19|
+|viewBox|`0 0 2331.1 1798.6`|
+|Width|2331.1|
+|Height|1798.6|
 
 ### CSS Classes
 
@@ -105,13 +105,20 @@ coyote_paw.svg
 
 ### Card Position Constants
 
+Defined in `src/config/intro-animation-config.ts`. Values represent the **visible** bounds of the card (rectangle position + stroke offset) so they line up pixel-for-pixel with `business-card_front.svg`.
+
 ```typescript
-const SVG_CARD_X = 1250.15;      // Card X position
-const SVG_CARD_Y = 1029.85;      // Card Y position
-const SVG_CARD_WIDTH = 1062.34;  // Card width
-const SVG_CARD_HEIGHT = 591.3;   // Card height
-const SVG_VIEWBOX_WIDTH = 2316.99;
-const SVG_VIEWBOX_HEIGHT = 1801.19;
+export const SVG_CARD = {
+  x: 1251.7,      // visible bounds (rect x - stroke/2)
+  y: 1027.3,      // visible bounds (rect y - stroke/2)
+  width: 1069.5,  // rect width + stroke
+  height: 599.3   // rect height + stroke
+} as const;
+
+export const SVG_VIEWBOX = {
+  width: 2331.1,
+  height: 1798.6
+} as const;
 ```
 
 ---
@@ -160,7 +167,7 @@ gsap.registerPlugin(MorphSVGPlugin);
 <!-- Intro Morph Animation Overlay -->
 <div id="intro-morph-overlay" class="intro-morph-overlay">
   <svg id="intro-morph-svg" class="intro-morph-svg"
-       viewBox="0 0 2316.99 1801.19"
+       viewBox="0 0 2331.1 1798.6"
        preserveAspectRatio="xMidYMid meet">
     <!-- Card group - content loaded dynamically from coyote_paw.svg -->
     <g id="morph-card-group" class="morph-card-group"></g>
@@ -177,11 +184,11 @@ gsap.registerPlugin(MorphSVGPlugin);
 
 .intro-morph-overlay {
   position: fixed;
-  top: 0;
+  top: var(--header-height);
   left: 0;
   width: 100vw;
-  height: 100vh;
-  z-index: 9999;
+  height: calc(100vh - var(--header-height) - var(--footer-height));
+  z-index: var(--z-index-50); /* above main content (1), below nav (100) */
   background-color: var(--color-neutral-300);
 }
 
@@ -258,7 +265,12 @@ this.timeline
 
 |File|Purpose|
 |------|---------|
-|`src/modules/animation/intro-animation.ts`|Main animation module (refactored Dec 19, 2025)|
+|`src/modules/animation/intro-animation.ts`|Main animation module|
+|`src/modules/animation/intro/svg-builder.ts`|SVG load + alignment math|
+|`src/modules/animation/intro/morph-timeline.ts`|GSAP timeline construction|
+|`src/modules/animation/intro/intro-types.ts`|Shared TypeScript types|
+|`src/modules/animation/intro-animation-mobile.ts`|Mobile card-flip fallback|
+|`src/config/intro-animation-config.ts`|SVG path, viewBox, card bounds, element IDs|
 |`src/styles/components/intro-morph.css`|Overlay and morph styles|
 |`public/images/coyote_paw.svg`|SVG asset with all paw variations|
 |`index.html`|HTML structure for overlay|
@@ -429,13 +441,15 @@ gsap.registerPlugin(MorphSVGPlugin);
 **Solutions:**
 
 ```typescript
-// Verify constants match SVG
-// In coyote_paw.svg, find:
-// <rect id="_Card_Outline_" x="1250.15" y="1029.85" ...
-
-// Update constants if needed:
-const SVG_CARD_X = 1250.15;
-const SVG_CARD_Y = 1029.85;
+// Verify constants in src/config/intro-animation-config.ts match the SVG.
+// Inspect coyote_paw.svg's card rect, then add stroke/2 offset on each side.
+// Current values:
+export const SVG_CARD = {
+  x: 1251.7,
+  y: 1027.3,
+  width: 1069.5,
+  height: 599.3
+} as const;
 ```
 
 #### 3. Morph Looks Wrong
@@ -502,6 +516,14 @@ constructor(options: ModuleOptions = {}) {
 
 ## Change Log
 
+### 2026-04-30 - Doc accuracy pass
+
+- Corrected viewBox to current SVG: `0 0 2331.1 1798.6`
+- Corrected card constants to visible-bounds values: `x=1251.7, y=1027.3, w=1069.5, h=599.3`
+- Updated constants location: `src/config/intro-animation-config.ts` (was inline in `intro-animation.ts`)
+- Corrected overlay CSS (header/footer offset, `z-index-50` token)
+- Added `intro/` subfolder helpers and `intro-animation-mobile.ts` to source-files list
+
 ### December 19, 2025
 
 - **Status: COMPLETE** - Animation feature fully implemented
@@ -522,5 +544,3 @@ constructor(options: ModuleOptions = {}) {
 
 - Switched from `intro_paw.svg` to `coyote_paw.svg`
 - Updated card position constants for new SVG
-- Updated viewBox dimensions: `2316.99 x 1801.19`
-- Card position: `x=1250.15, y=1029.85, w=1062.34, h=591.3`

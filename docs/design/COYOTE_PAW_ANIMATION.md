@@ -138,14 +138,16 @@ The animation assembles layers in this order (bottom to top):
 
 The SVG is scaled and positioned to align with the actual business card element.
 
-**Card Position in SVG**:
+**Card Position in SVG** (visible bounds — rectangle position offset by stroke/2):
 
 ```text
-x: 1256.15
-y: 1031.85
-width: 1062.34
-height: 591.3
+x: 1251.7
+y: 1027.3
+width: 1069.5
+height: 599.3
 ```
+
+These match `business-card_front.svg`'s viewBox so the morph SVG aligns pixel-for-pixel with the actual business-card element.
 
 **Alignment Formula**:
 
@@ -221,12 +223,15 @@ When updating `coyote_paw.svg`:
 2. Keep the card rectangle at the same position/dimensions
 3. Position 1 should have NO thumb (only fingers)
 4. Position 2 and 3 should have thumb behind card
-5. Update constants in `intro-animation.ts` if card position changes:
+5. Update constants in `src/config/intro-animation-config.ts` if card position changes (remember to add stroke/2 on each side to get the visible bounds):
 
 ```typescript
-const SVG_CARD_X = 1256.15;
-const SVG_CARD_Y = 1031.85;
-const SVG_CARD_WIDTH = 1062.34;
+export const SVG_CARD = {
+  x: 1251.7,
+  y: 1027.3,
+  width: 1069.5,
+  height: 599.3
+} as const;
 ```
 
 ## Important Implementation Notes

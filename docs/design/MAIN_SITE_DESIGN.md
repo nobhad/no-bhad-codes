@@ -146,7 +146,8 @@ Located in `src/styles/components/`:
 
 | File | Purpose |
 |------|---------|
-| `page-transitions.css` | Virtual page transition states and positioning (392 lines) |
+| `page-transitions.css` | Virtual page transition states and positioning |
+| `site-map.css` | 5-tile spatial map: per-tile positions and camera transform |
 | `footer.css` | Fixed footer (`.footer`, z-index below nav) |
 | `form-fields.css` | Form input styling (`.form-container`, `.form-input`, `.form-textarea`) |
 | `form-buttons.css` | Button system (`.btn`, `.btn-primary`, `.btn-secondary`, `.btn-outline`) |
@@ -350,6 +351,9 @@ Located in `src/modules/animation/`:
 | File | Purpose | GSAP Features |
 |------|---------|---------------|
 | `intro-animation.ts` | Coyote paw clutching business card with SVG morphing | `gsap.to()`, `gsap.set()`, `gsap.timeline()`, MorphSVG |
+| `intro/svg-builder.ts` | Loads `coyote_paw.svg`, computes alignment to the actual card | — |
+| `intro/morph-timeline.ts` | Builds the entry → clutch → release → retraction timeline | `gsap.timeline()` |
+| `intro/intro-types.ts` | Shared TypeScript types for the intro module | — |
 | `intro-animation-mobile.ts` | Mobile: simple card flip | `gsap.to()`, `gsap.timeline()` |
 | `about-hero.ts` | Full viewport "NO BHAD CODES" text animation | Wheel-driven, SVG transforms |
 | `page-hero.ts` | Unified hero text for virtual pages | Wheel-driven SVG |

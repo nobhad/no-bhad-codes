@@ -1,226 +1,89 @@
-# Terminal Intake Form
+# Client Intake (Onboarding Wizard)
 
 **Status:** Complete
-**Last Updated:** January 13, 2026
+**Last Updated:** 2026-04-30
 
 ## Overview
 
-The Terminal Intake Form is an AI chat-style project intake system that collects client information through a conversational terminal interface. It provides a unique, engaging experience that feels like chatting with an AI assistant.
+The client intake is a five-step React onboarding wizard mounted at `/client/intake`. It collects everything needed to scope and start a project: contact info, project overview, requirements, assets, and a final review.
+
+It is reached from the main site via the "intake form" link in the contact section (`#open-intake-link` in `index.html`), which redirects to `/client/intake` on click.
 
 ## Architecture
 
-### Components
+### Page
 
-- `src/features/client/terminal-intake.ts` - Main module (~1,450 lines)
-- `src/features/client/terminal-intake-types.ts` - TypeScript interfaces (~50 lines)
-- `src/features/client/terminal-intake-data.ts` - Question definitions (~470 lines)
-- `src/features/client/terminal-intake-ui.ts` - UI utilities and rendering (~500 lines)
-- `src/styles/pages/terminal-intake.css` - Terminal styling
+- Route: `/client/intake`
+- Server view: `server/views/pages/auth/intake.ejs`
+- The view ships an empty `<section class="terminal-intake-container">` and mounts the React wizard into it on `DOMContentLoaded`.
 
-### Key Interfaces
+### React Module
 
-```typescript
-interface IntakeQuestion {
-  id: string;
-  field: string;
-  question: string;
-  type: 'text' | 'email' | 'tel' | 'url' | 'select' | 'multiselect' | 'textarea';
-  options?: { value: string; label: string }[];
-  required: boolean;
-  validation?: (value: string) => string | null;
-  dependsOn?: { field: string; value: string | string[] };
-  placeholder?: string;
-}
+| File | Purpose |
+|------|---------|
+| `src/react/features/portal/onboarding/mount.tsx` | Island-mount wrapper (`mountOnboardingWizard`) built via `createMountWrapper` factory |
+| `src/react/features/portal/onboarding/OnboardingWizard.tsx` | Main wizard: state, validation, draft autosave, step navigation |
+| `src/react/features/portal/onboarding/StepIndicator.tsx` | Numbered progress indicator |
+| `src/react/features/portal/onboarding/types.ts` | Step config, form-data types, constants (project types, budgets, design styles, features, timezones) |
+| `src/react/features/portal/onboarding/steps/` | One component per step: `BasicInfoStep`, `ProjectOverviewStep`, `RequirementsStep`, `AssetsStep`, `ConfirmationStep` |
+| `src/styles/pages/terminal-intake.css` | Page styling (monospace, brutalist treatment) |
 
-interface IntakeData {
-  [key: string]: string | string[];
-}
+### Step Sequence
 
-interface ChatMessage {
-  type: 'ai' | 'user' | 'system' | 'error' | 'success';
-  content: string;
-  options?: { value: string; label: string }[];
-  multiSelect?: boolean;
-  questionIndex?: number;
-}
-```
+Defined by `ONBOARDING_STEPS` in `types.ts`:
 
-## Features
+1. **Basic Info** — contact name, email, phone, company, website, timezone, preferred contact method
+2. **Project Overview** — project name, project type, description, target launch date, budget, target audience
+3. **Requirements** — design style, color preferences, brand-guidelines flag, content-ready flag, feature multi-select, integrations, notes
+4. **Assets** — file uploads, logo flag, existing assets, content access
+5. **Confirmation** — review and submit
 
-### Conversational Flow
+Each step validates locally via `validateStep()` before the user can advance.
 
-Questions are asked sequentially with typing animation:
+## Persistence
 
-1. **Greeting** - Asks for name
-2. **Email** - With validation
-3. **Company** - Optional based on "Is this for a company?" question
-4. **Phone** - With US phone validation
-5. **Project Type** - Select from options
-6. **Features** - Multi-select with custom option
-7. **Budget** - Range selection
-8. **Timeline** - Urgency selection
-9. **Domain** - Has domain / needs advice
-10. **Hosting** - Hosting preference
-11. **Additional Info** - Textarea for details
+- **Draft autosave:** every `DRAFT_SAVE_INTERVAL` (5s) the in-progress form data is saved to `localStorage` under `DRAFT_STORAGE_KEY` (`onboarding_draft`) and posted to the server.
+- **Resume:** on mount, the wizard pulls existing progress from the API and falls back to the localStorage draft.
 
-### Conditional Questions
+## Validation
 
-Questions can depend on previous answers:
+`validateStep()` in `OnboardingWizard.tsx` runs per-step rules:
 
-```typescript
-{
-  id: 'domainName',
-  field: 'domainName',
-  question: "What's your domain name?",
-  type: 'text',
-  required: false,
-  dependsOn: { field: 'hasDomain', value: 'yes' }
-}
-```
+- **Basic Info:** contact name + valid email required
+- **Project Overview:** project name + project type + description required
+- **Requirements:** design style required
+- **Assets:** none (optional step)
+- **Confirmation:** submit-only
 
-### Navigation
+Email validation uses the shared `validateEmail` from `shared/validation/validators` (allows disposable addresses for the intake context).
 
-- **Click to Edit**: Click any previous answer to go back and edit
-- **Arrow Up**: Press up arrow to go back one question
-- **Review Summary**: All answers shown before final submission
+## API Surface
 
-### Validation
+API endpoints are referenced via `API_ENDPOINTS` from `src/constants/api-endpoints.ts`. The wizard uses:
 
-- Email format validation
-- US phone number validation (10-11 digits)
-- Rejects fake numbers (555-555-xxxx, all same digits, sequential)
-- Custom validators per question
+- `apiFetch` to load existing progress on mount
+- `apiPost` to save drafts and submit the final form
 
-### Visual Effects
+Submissions land in the `client_intakes` table (see `server/database/migrations/002_client_intakes.sql` and follow-on migrations).
 
-- Typing animation for AI messages
-- Blinking cursor effect
-- Smooth scroll to latest message
-- GSAP-powered option button animations
-- Terminal-style monospace font
+## Design Notes
 
-## API Endpoints
+The wizard follows a brutalist visual treatment (per the comment in `OnboardingWizard.tsx`): transparent backgrounds, no border-radius, monospace typography. GSAP handles step transitions and entrance animations via `useFadeIn` from `@react/hooks/useGsap`.
 
-### Submit Intake
+## Constants Reference
 
-```text
-POST /api/intake
-Content-Type: application/json
-Authorization: Bearer <token> (optional)
+Defined in `types.ts`:
 
-{
-  "name": "John Doe",
-  "email": "john@example.com",
-  "company": "Acme Inc",
-  "phone": "555-123-4567",
-  "projectType": "website",
-  "features": ["responsive", "cms", "seo"],
-  "budget": "5k-10k",
-  "timeline": "1-month",
-  "hasDomain": "yes",
-  "domainName": "acme.com",
-  "hosting": "managed",
-  "additionalInfo": "Looking for a modern design..."
-}
-```
-
-### Response
-
-```json
-{
-  "success": true,
-  "intake": {
-    "id": "INT-2025-001",
-    "projectType": "website"
-  }
-}
-```
-
-## Usage
-
-### In Modal (Main Page)
-
-The terminal intake opens in a modal when clicking "intake form" link:
-
-```html
-<a href="#" class="intake-modal-trigger">intake form</a>
-```
-
-### Standalone Page
-
-Direct access at `/client/intake`:
-
-```html
-<div class="terminal-intake-container">
-  <!-- Terminal content rendered by module -->
-</div>
-```
-
-### Module Initialization
-
-```typescript
-import { TerminalIntakeModule } from './features/client/terminal-intake';
-
-const intake = new TerminalIntakeModule();
-await intake.init();
-```
-
-## Styling
-
-### CSS Variables Used
-
-```css
---color-terminal-bg: #0a0a0a;
---color-terminal-green: #00ff00;
---color-terminal-text: #ffffff;
---color-terminal-text-muted: #888888;
---color-terminal-border: #3d3d3d;
-```
-
-### Key CSS Classes
-
-- `.terminal-container` - Main terminal wrapper
-- `.terminal-header` - macOS-style window buttons
-- `.terminal-output` - Chat message area
-- `.terminal-input-area` - Input field container
-- `.chat-message` - Individual message bubble
-- `.option-button` - Select/multiselect option buttons
-- `.clickable-message` - Editable previous answers
-
-## Testing
-
-Unit tests located at:
-
-- `tests/unit/` directory (terminal intake tests)
-
-### Manual Testing
-
-1. Open intake form modal on main page
-2. Complete all questions
-3. Verify validation errors appear for invalid inputs
-4. Test click-to-edit navigation
-5. Test arrow up navigation
-6. Verify review summary shows all answers
-7. Submit and verify success message
+- `PROJECT_TYPES` — Website Design, Web Application, E-commerce, Landing Page, Redesign, Brand Identity, Other
+- `BUDGET_RANGES` — Under $5K, $5–10K, $10–25K, $25–50K, $50K+, Not sure
+- `DESIGN_STYLES` — Modern & Minimal, Bold & Vibrant, Corporate & Professional, Creative & Artistic, Playful & Fun, Luxury & Elegant, Not sure
+- `FEATURE_OPTIONS` — auth, payments, CMS, blog, contact forms, newsletter, social, analytics, search, i18n, uploads, admin dashboard
+- `TIMEZONES` — common US/EU/APAC zones
 
 ## Change Log
 
-### 2025-12-03 - Initial Implementation
+### 2026-04-30 - Architecture rewrite
 
-- Created conversational intake form
-- Added typing animation
-- Implemented question flow with dependencies
-- Added click-to-edit navigation
-- Added review summary before submission
-
-### 2025-12-04 - Enhancements
-
-- Added arrow key navigation
-- Improved phone validation
-- Added conditional company question
-- Fixed multiselect edit loop bug
-
-### 2025-12-12 - CSS Variable Cleanup
-
-- Replaced 50+ hardcoded colors with CSS variables
-- Added terminal-specific color tokens to variables.css
+- Replaced the prior terminal/chat-style intake (`src/features/client/terminal-intake*.ts`) with a five-step React onboarding wizard (`src/react/features/portal/onboarding/`).
+- Intake now lives at `/client/intake` (server-rendered shell + React island), not in a modal on the main site.
+- Main-site contact link still says "intake form" but redirects to `/client/intake` rather than opening a modal.
