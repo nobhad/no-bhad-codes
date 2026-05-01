@@ -5,7 +5,7 @@
  */
 
 import * as React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
   FolderKanban,
   Receipt,
@@ -71,7 +71,6 @@ const ACTIVITY_TYPE_ICONS: Record<string, React.ComponentType<{ className?: stri
 const NAV_TAB_DOCUMENTS = 'documents';
 const NAV_TAB_MESSAGES = 'messages';
 const NAV_TAB_DELIVERABLES = 'deliverables';
-const _NAV_TAB_FILES = 'files';
 
 // ============================================================================
 // TYPES
@@ -233,9 +232,6 @@ export function PortalDashboard({
 
   const stats = data?.stats ?? null;
   const recentActivity = data?.recentActivity ?? [];
-
-  // Submit Request modal
-  const [_showRequestForm, _setShowRequestForm] = useState(false);
 
   // Get the active project info for the snapshot
   const activeProject: ProjectInfo | null = React.useMemo(() => {

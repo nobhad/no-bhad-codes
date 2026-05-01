@@ -6,12 +6,6 @@
 export { PortalApprovals } from './PortalApprovals';
 export type { PortalApprovalsProps } from './PortalApprovals';
 export { ApprovalCard } from './ApprovalCard';
-export {
-  mountPortalApprovals,
-  unmountPortalApprovals,
-  shouldUseReactPortalApprovals
-} from './mount';
-export type { PortalApprovalsMountOptions } from './mount';
 export type {
   ApprovalEntityType,
   ApprovalStatus,

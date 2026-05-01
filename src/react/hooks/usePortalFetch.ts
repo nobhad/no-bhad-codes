@@ -37,8 +37,6 @@ interface FetchOptions {
 }
 
 interface UsePortalFetchReturn {
-  /** Build auth headers for manual fetch calls */
-  buildHeaders: () => Record<string, string>;
   /** Perform an authenticated fetch, returning parsed JSON */
   portalFetch: <T>(url: string, options?: FetchOptions) => Promise<T>;
 }
@@ -52,16 +50,13 @@ interface UsePortalFetchReturn {
  *
  * Usage:
  * ```ts
- * const { portalFetch, buildHeaders } = usePortalFetch({ getAuthToken });
+ * const { portalFetch } = usePortalFetch({ getAuthToken });
  *
  * // Simple GET
  * const data = await portalFetch<MyType>(API_ENDPOINTS.SOME_ENDPOINT);
  *
  * // POST with body
  * const result = await portalFetch<MyType>(url, { method: 'POST', body: payload });
- *
- * // Raw headers for external libs
- * const headers = buildHeaders();
  * ```
  */
 export function usePortalFetch({ getAuthToken }: UsePortalFetchOptions): UsePortalFetchReturn {
@@ -70,17 +65,6 @@ export function usePortalFetch({ getAuthToken }: UsePortalFetchOptions): UsePort
   useEffect(() => {
     getAuthTokenRef.current = getAuthToken;
   }, [getAuthToken]);
-
-  const buildHeaders = useCallback((): Record<string, string> => {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    const token = getAuthTokenRef.current?.();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, []);
 
   const portalFetch = useCallback(async <T>(
     url: string,
@@ -116,7 +100,7 @@ export function usePortalFetch({ getAuthToken }: UsePortalFetchOptions): UsePort
     return (unwrap ? unwrapApiData<T>(json) : json) as T;
   }, []);
 
-  return { buildHeaders, portalFetch };
+  return { portalFetch };
 }
 
 // ============================================
@@ -139,8 +123,6 @@ interface UsePortalDataReturn<T> {
   isLoading: boolean;
   error: string | null;
   refetch: () => void;
-  /** Build auth headers for additional manual calls */
-  buildHeaders: () => Record<string, string>;
   /** Perform an authenticated fetch */
   portalFetch: <R>(url: string, options?: FetchOptions) => Promise<R>;
 }
@@ -167,7 +149,7 @@ export function usePortalData<T>({
   const [isLoading, setIsLoading] = useState(fetchOnMount);
   const [error, setError] = useState<string | null>(null);
 
-  const { buildHeaders, portalFetch } = usePortalFetch({ getAuthToken });
+  const { portalFetch } = usePortalFetch({ getAuthToken });
 
   // Store transform in a ref to avoid re-creating fetchData when
   // callers pass an unmemoized inline function. Without this,
@@ -214,5 +196,5 @@ export function usePortalData<T>({
     fetchData();
   }, [fetchData]);
 
-  return { data, isLoading, error, refetch, buildHeaders, portalFetch };
+  return { data, isLoading, error, refetch, portalFetch };
 }

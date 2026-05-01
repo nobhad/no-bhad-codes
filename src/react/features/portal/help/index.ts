@@ -4,9 +4,3 @@
  */
 
 export { PortalHelp } from './PortalHelp';
-export {
-  mountPortalHelp,
-  unmountPortalHelp,
-  shouldUseReactPortalHelp
-} from './mount';
-export type { PortalHelpMountOptions } from './mount';

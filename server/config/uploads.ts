@@ -18,9 +18,9 @@ import { logger } from '../services/logger.js';
  * In development, this uses ./uploads relative to project root
  */
 export function getUploadsDir(): string {
-  // Use UPLOADS_DIR env var, or default based on DATABASE_PATH location
-  if (process.env.UPLOADS_DIR) {
-    return resolve(process.env.UPLOADS_DIR);
+  // Use UPLOAD_DIR env var, or default based on DATABASE_PATH location
+  if (process.env.UPLOAD_DIR) {
+    return resolve(process.env.UPLOAD_DIR);
   }
 
   // If DATABASE_PATH starts with /app/data, we're on Railway - use persistent volume

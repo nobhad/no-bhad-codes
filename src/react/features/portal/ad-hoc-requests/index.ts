@@ -12,10 +12,4 @@ export type { AdHocRequestCardProps } from './AdHocRequestCard';
 export { NewRequestForm } from './NewRequestForm';
 export type { NewRequestFormProps } from './NewRequestForm';
 
-export {
-  mountPortalAdHocRequests,
-  unmountPortalAdHocRequests,
-  shouldUseReactPortalAdHocRequests
-} from './mount';
-
 export * from './types';

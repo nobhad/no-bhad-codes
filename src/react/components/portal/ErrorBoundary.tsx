@@ -100,29 +100,4 @@ export class ErrorBoundary extends React.Component<
   }
 }
 
-/**
- * withErrorBoundary - HOC to wrap a component with ErrorBoundary
- *
- * Usage:
- * ```tsx
- * const SafeFilesManager = withErrorBoundary(FilesManager, 'FilesManager');
- * ```
- */
-export function withErrorBoundary<P extends object>(
-  WrappedComponent: React.ComponentType<P>,
-  componentName?: string
-): React.FC<P> {
-  const WithErrorBoundary: React.FC<P> = (props) => (
-    <ErrorBoundary componentName={componentName}>
-      <WrappedComponent {...props} />
-    </ErrorBoundary>
-  );
-
-  WithErrorBoundary.displayName = `WithErrorBoundary(${
-    componentName || WrappedComponent.displayName || WrappedComponent.name || 'Component'
-  })`;
-
-  return WithErrorBoundary;
-}
-
 export default ErrorBoundary;

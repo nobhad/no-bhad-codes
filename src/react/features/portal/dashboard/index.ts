@@ -4,9 +4,3 @@
  */
 
 export { PortalDashboard } from './PortalDashboard';
-export {
-  mountPortalDashboard,
-  unmountPortalDashboard,
-  shouldUseReactPortalDashboard
-} from './mount';
-export type { PortalDashboardMountOptions } from './mount';

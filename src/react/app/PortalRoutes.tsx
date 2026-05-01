@@ -27,12 +27,11 @@ function lazyNamed<T extends React.ComponentType<Record<string, unknown>>>(
 ): React.LazyExoticComponent<T> {
   return React.lazy(() =>
     loader().then((mod) => {
-      // Find the first exported component (skip mount/unmount/types)
-      const key = Object.keys(mod).find(
-        (k) => typeof mod[k] === 'function' && /^[A-Z]/.test(k)
-      );
-      if (!key) throw new Error('No component export found');
-      return { default: mod[key] as T };
+      // Call sites map the named export into a single-key object,
+      // e.g. `.then(m => ({ MyComponent: m.MyComponent }))`.
+      // Pick that single value and present it as the default export.
+      const [component] = Object.values(mod);
+      return { default: component as T };
     })
   );
 }
@@ -166,13 +165,13 @@ function ClientDetailRoute(props: Record<string, unknown>) {
 
   return (
     <ClientDetailLazy
+      {...props}
       clientId={clientId}
       onBack={() => navigate('/clients')}
       onViewProject={(pid: number) => navigate(`/project-detail/${pid}`)}
       onNavigate={(tab: string, entityId?: string) => {
         navigate(entityId ? `/${tab}/${entityId}` : `/${tab}`);
       }}
-      {...props}
     />
   );
 }
@@ -208,13 +207,13 @@ function ProjectDetailRoute(props: Record<string, unknown>) {
 
   return (
     <ProjectDetailLazy
+      {...props}
       projectId={projectId}
       initialTab={initialTab}
       onBack={() => navigate('/projects')}
       onNavigate={(tab: string, entityId?: string) => {
         navigate(entityId ? `/${tab}/${entityId}` : `/${tab}`);
       }}
-      {...props}
     />
   );
 }

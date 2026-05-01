@@ -4,4 +4,3 @@
  */
 
 export { PortalInvoicesTable } from './PortalInvoicesTable';
-export { mountPortalInvoices, unmountPortalInvoices, shouldUseReactPortalInvoices } from './mount';
