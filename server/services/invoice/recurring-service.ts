@@ -538,43 +538,36 @@ export class InvoiceRecurringService {
     dayOfMonth?: number,
     dayOfWeek?: number
   ): string {
-    const from = new Date(fromDate);
-    const next = new Date(from);
+    const next = new Date(fromDate);
 
     switch (frequency) {
     case 'weekly':
-      next.setDate(next.getDate() + 7);
+      next.setUTCDate(next.getUTCDate() + 7);
       if (dayOfWeek !== undefined && dayOfWeek !== null) {
-        const currentDay = next.getDay();
+        const currentDay = next.getUTCDay();
         const diff = dayOfWeek - currentDay;
-        next.setDate(next.getDate() + (diff >= 0 ? diff : diff + 7));
+        next.setUTCDate(next.getUTCDate() + (diff >= 0 ? diff : diff + 7));
       }
       break;
 
     case 'monthly':
-      next.setMonth(next.getMonth() + 1);
+      next.setUTCMonth(next.getUTCMonth() + 1);
       if (dayOfMonth !== undefined && dayOfMonth !== null) {
-        const targetDay = Math.min(
-          dayOfMonth,
-          new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate()
-        );
-        next.setDate(targetDay);
+        const lastDay = new Date(Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1, 0)).getUTCDate();
+        next.setUTCDate(Math.min(dayOfMonth, lastDay));
       }
       break;
 
     case 'quarterly':
-      next.setMonth(next.getMonth() + 3);
+      next.setUTCMonth(next.getUTCMonth() + 3);
       if (dayOfMonth !== undefined && dayOfMonth !== null) {
-        const targetDay = Math.min(
-          dayOfMonth,
-          new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate()
-        );
-        next.setDate(targetDay);
+        const lastDay = new Date(Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1, 0)).getUTCDate();
+        next.setUTCDate(Math.min(dayOfMonth, lastDay));
       }
       break;
 
     default:
-      next.setMonth(next.getMonth() + 1);
+      next.setUTCMonth(next.getUTCMonth() + 1);
     }
 
     return next.toISOString().split('T')[0];
