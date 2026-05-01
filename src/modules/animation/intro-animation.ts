@@ -864,6 +864,15 @@ export class IntroAnimationModule extends BaseModule {
       // ========================================================================
       document.documentElement.classList.add('paw-exit');
 
+      // Restore overlay visibility — completeIntro hid the overlay after the
+      // entrance finished (visibility:hidden, opacity cleared). Without this
+      // reset, exit animates an invisible overlay and the paw never appears
+      // when leaving the landing page via burger menu / hash / direct link.
+      // The exit timeline's onComplete re-hides the overlay for the next run.
+      this.morphOverlay!.style.visibility = 'visible';
+      this.morphOverlay!.style.opacity = '1';
+      this.morphOverlay!.style.pointerEvents = '';
+
       // Kill any existing tweens on SVG elements BEFORE clearing innerHTML
       // This prevents GSAP from trying to animate elements that no longer exist
       gsap.killTweensOf('#svg-business-card');
