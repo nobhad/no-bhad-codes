@@ -2638,6 +2638,7 @@ describe('Invoice Service', () => {
       mockDb.all.mockResolvedValueOnce([]);
       mockDb.run.mockResolvedValue({ lastID: 1 });
 
+      vi.setSystemTime(new Date('2026-03-01T00:00:00Z'));
       await service.scheduleReminders(1);
 
       expect(mockDb.run).toHaveBeenCalledWith(
