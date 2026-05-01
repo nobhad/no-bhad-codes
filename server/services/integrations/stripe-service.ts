@@ -557,11 +557,19 @@ async function recordPayment(payment: InvoicePayment): Promise<void> {
   const dedupeSucceeded =
     payment.status === 'succeeded' && (intentId || sessionId);
 
+  // payment_date is NOT NULL on the legacy schema; derive it from paidAt
+  // when available, otherwise today. paid_at carries the precise timestamp.
+  const paymentDate = payment.paidAt
+    ? payment.paidAt.slice(0, 10)
+    : new Date().toISOString().slice(0, 10);
+
   if (dedupeSucceeded) {
     await db.run(
       `INSERT INTO invoice_payments
-         (invoice_id, amount, payment_method, stripe_payment_intent_id, stripe_checkout_session_id, status, paid_at, created_at)
-       SELECT ?, ?, ?, ?, ?, ?, ?, datetime('now')
+         (invoice_id, amount, payment_method, payment_date,
+          stripe_payment_intent_id, stripe_checkout_session_id,
+          status, paid_at, created_at)
+       SELECT ?, ?, ?, ?, ?, ?, ?, ?, datetime('now')
        WHERE NOT EXISTS (
          SELECT 1 FROM invoice_payments
          WHERE status = 'succeeded'
@@ -574,6 +582,7 @@ async function recordPayment(payment: InvoicePayment): Promise<void> {
         payment.invoiceId,
         payment.amount,
         payment.paymentMethod,
+        paymentDate,
         intentId,
         sessionId,
         payment.status,
@@ -588,12 +597,16 @@ async function recordPayment(payment: InvoicePayment): Promise<void> {
   }
 
   await db.run(
-    `INSERT INTO invoice_payments (invoice_id, amount, payment_method, stripe_payment_intent_id, stripe_checkout_session_id, status, paid_at, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
+    `INSERT INTO invoice_payments
+       (invoice_id, amount, payment_method, payment_date,
+        stripe_payment_intent_id, stripe_checkout_session_id,
+        status, paid_at, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
     [
       payment.invoiceId,
       payment.amount,
       payment.paymentMethod,
+      paymentDate,
       intentId,
       sessionId,
       payment.status,

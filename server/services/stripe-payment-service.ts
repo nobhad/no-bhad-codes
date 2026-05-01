@@ -300,11 +300,14 @@ async function handlePaymentSuccess(stripeIntentId: string): Promise<void> {
 
       // Defence-in-depth against duplicate delivery: even if the outer webhook
       // idempotency layer fails, we won't insert two succeeded payments for
-      // the same PaymentIntent.
+      // the same PaymentIntent. payment_date is NOT NULL so we set it to
+      // today; paid_at carries the precise timestamp for callers that need it.
       await ctx.run(
         `INSERT INTO invoice_payments
-           (invoice_id, amount, payment_method, stripe_payment_intent_id, status, paid_at, created_at)
-         SELECT ?, ?, 'stripe', ?, 'succeeded', datetime('now'), datetime('now')
+           (invoice_id, amount, payment_method, payment_date,
+            stripe_payment_intent_id, status, paid_at, created_at)
+         SELECT ?, ?, 'stripe', date('now'), ?, 'succeeded',
+                datetime('now'), datetime('now')
          WHERE NOT EXISTS (
            SELECT 1 FROM invoice_payments
            WHERE stripe_payment_intent_id = ? AND status = 'succeeded'
