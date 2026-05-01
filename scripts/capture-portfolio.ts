@@ -4,8 +4,18 @@
  * Also records video walkthroughs of the site.
  * No browser chrome — clean viewport-only captures.
  *
- * Usage: npx tsx scripts/take-screenshots.ts
+ * Usage:
+ *   npx tsx scripts/capture-portfolio.ts                  (defaults to --all)
+ *   npx tsx scripts/capture-portfolio.ts --screenshots    (screenshots only)
+ *   npx tsx scripts/capture-portfolio.ts --video          (videos only)
+ *   npx tsx scripts/capture-portfolio.ts --all            (both)
  */
+
+const MODE_SCREENSHOTS = '--screenshots';
+const MODE_VIDEO = '--video';
+const MODE_ALL = '--all';
+const VALID_MODES = [MODE_SCREENSHOTS, MODE_VIDEO, MODE_ALL] as const;
+type Mode = typeof VALID_MODES[number];
 
 import puppeteer from 'puppeteer';
 import path from 'path';
@@ -229,9 +239,23 @@ async function recordVideos() {
 // MAIN
 // ============================================
 
+function parseMode(argv: string[]): Mode {
+  const flag = argv.find((arg) => VALID_MODES.includes(arg as Mode));
+  if (!flag) return MODE_ALL;
+  return flag as Mode;
+}
+
 async function main() {
-  await takeScreenshots();
-  await recordVideos();
+  const mode = parseMode(process.argv.slice(2));
+  console.log(`Mode: ${mode}\n`);
+
+  if (mode === MODE_SCREENSHOTS || mode === MODE_ALL) {
+    await takeScreenshots();
+  }
+  if (mode === MODE_VIDEO || mode === MODE_ALL) {
+    await recordVideos();
+  }
+
   console.log('Done!');
 }
 
