@@ -280,11 +280,16 @@ CREATE TABLE invoice_payments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   invoice_id INTEGER NOT NULL,
   amount DECIMAL(10,2) NOT NULL,
-  payment_method TEXT NOT NULL,  -- 'venmo', 'paypal', 'bank_transfer', 'check', 'cash', 'credit_card', 'other'
+  payment_method TEXT NOT NULL,  -- 'venmo', 'paypal', 'bank_transfer', 'check', 'cash', 'credit_card', 'stripe', 'other'
   payment_reference TEXT,
   payment_date DATE NOT NULL,
   notes TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  -- Migration 137: align with Stripe handlers
+  status TEXT NOT NULL DEFAULT 'succeeded',
+  paid_at DATETIME,
+  stripe_payment_intent_id TEXT,
+  stripe_checkout_session_id TEXT,
   FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
 );
 CREATE TABLE payment_terms_presets (
@@ -1857,6 +1862,9 @@ CREATE TABLE IF NOT EXISTS "invoices" (
   -- Timestamps
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, deleted_at DATETIME, deleted_by TEXT, version INTEGER NOT NULL DEFAULT 1,
+  -- Migration 137: align with Stripe handlers
+  paid_at DATETIME,
+  stripe_payment_intent_id TEXT,
   -- Foreign keys
   FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
   FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
