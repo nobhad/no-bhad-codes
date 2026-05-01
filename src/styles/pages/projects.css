@@ -1338,134 +1338,13 @@ div.page-hero-desktop {
   letter-spacing: 0.02em;
 }
 
-/* In TV mode the channel guide on the TV screen already shows the
-   heading, so the page-level "PROJECTS" heading + divider above the
-   TV are redundant. List view doesn't have that in-screen heading,
-   so the page heading is shown there as the only label.
-   Scoped to .is-view-tv so the rule only applies in TV mode. */
-.projects-content.is-view-tv > .section-heading,
-.projects-content.is-view-tv > .section-divider,
-.projects-content.is-view-tv > hr {
+/* The "PROJECTS" heading + divider above the TV are redundant — the
+   channel guide on the TV screen already shows the heading. Hidden
+   via display:none so the section flexbox centers the TV cleanly. */
+.projects-section .projects-content > .section-heading,
+.projects-section .projects-content > .section-divider,
+.projects-section .projects-content > hr {
   display: none;
-}
-
-/* ============================================
- * VIEW TOGGLE — TV / LIST SEGMENTED CONTROL
- * ============================================
- * Lives inside .projects-content (inserted by renderViewToggle), but
- * position: absolute anchors it to .projects-section's top-right
- * corner, directly under the header's MENU button. Visibility follows
- * the section automatically: section.page-hidden hides the section
- * and the toggle inside it.
- *
- * Style mirrors the .portal-auth-toggle pattern in nav-portal.css:
- * thick dark border around the group, square corners, divider between
- * buttons, transparent default, active = filled --color-dark with
- * --color-light text. Theme tokens flip the fill so "selected" is dark
- * in light mode and light in dark mode automatically.
- *
- * Dimmed by default (opacity 0.35) so the toggle reads as a quiet
- * secondary control over the TV; lifts to full opacity on hover or
- * focus-within so it gets attention when the user reaches for it.
- */
-.projects-section {
-  /* Anchor for the absolute-positioned view toggle. */
-  position: relative;
-}
-
-/* Visible by default so it's never accidentally invisible. JS hides
-   it (style.display = 'none') when the active page is anything other
-   than projects. */
-.projects-view-toggle {
-  display: flex;
-  align-items: center;
-  /* Fixed (not absolute) so it sits at the viewport top regardless of
-     the section's internal layout. Toggle is a direct child of
-     .projects-section (not .projects-content) so no will-change
-     ancestor creates a containing block — fixed resolves to viewport. */
-  position: fixed;
-  /* Top-right under MENU. Right matches header's container padding so
-     it aligns with MENU horizontally. */
-  top: 72px;
-  right: var(--container-padding, 1rem);
-  z-index: 10;
-  opacity: 0.35;
-  transition: opacity 0.2s ease;
-}
-
-.projects-view-toggle:hover,
-.projects-view-toggle:focus-within {
-  opacity: 1;
-}
-
-.projects-view-toggle__group {
-  display: flex;
-  align-items: center;
-  height: 32px;
-  border: var(--border-width-thick) solid var(--color-dark);
-  border-radius: 0;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
-.projects-view-toggle__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 100%;
-  padding: 0;
-  background: transparent;
-  color: var(--color-dark);
-  border: none;
-  cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
-
-.projects-view-toggle__btn:first-child {
-  border-right: var(--border-width-thick) solid var(--color-dark);
-}
-
-.projects-view-toggle__btn[aria-pressed="true"] {
-  background: var(--color-dark);
-  color: var(--color-light);
-}
-
-.projects-view-toggle__btn:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: -2px;
-}
-
-.projects-view-toggle__btn svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* View-mode display routing. The class on .projects-content is the
-   single source of truth for which view (TV or cards) is visible —
-   replaces the previous inline display:none hack inside renderCrtTv. */
-.projects-content.is-view-tv .work-half-wrapper {
-  display: none;
-}
-
-.projects-content.is-view-tv .projects-tv-wrap {
-  display: flex;
-}
-
-.projects-content.is-view-list .projects-tv-wrap {
-  display: none;
-}
-
-.projects-content.is-view-list .work-half-wrapper {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(350px, 100%), 1fr));
-  gap: 2rem;
-  max-width: var(--container-max-width);
-  margin: 0 auto;
-  padding: var(--space-4, 1rem) var(--container-padding) 4rem;
-  width: 100%;
 }
 
 /* ============================================
@@ -1532,11 +1411,11 @@ div.page-hero-desktop {
   inset: 0;
   display: flex;
   flex-direction: column;
-  /* Inner breathing room so the brand info / avatar / row list never
-     touch the screen aperture's edge. Container queries (cqw/cqh)
-     scale with the TV's rendered size so the gap stays proportional
-     across viewports. */
-  padding: clamp(1rem, 3.5cqw, 2.25rem) clamp(1.25rem, 4.5cqw, 2.5rem);
+  /* Vertical padding gives the rows room from the screen aperture's
+     top + bottom edges. Horizontal padding kept tighter — info-line
+     has overflow:hidden + text-overflow:clip, so extra horizontal
+     padding eats into the column width and clips "Portfolio Guide". */
+  padding: clamp(1rem, 3.5cqw, 2.25rem) clamp(0.75rem, 2.4cqw, 1.4rem);
   /* No background — the title-card base image (the dark vignetted
      screen backdrop) shows through. Hardcoded text color so the TV
      interior stays the same in light/dark site themes. */
