@@ -6,12 +6,9 @@
 
 import * as React from 'react';
 import { useMemo } from 'react';
-import {
-  DetailPanel,
-  MetaGrid,
-  IconButton
-} from '@react/factories';
-import type { DetailPanelConfig, PanelMetaField } from '@react/factories';
+import { DetailPanel, MetaGrid } from '@react/factories/createDetailPanel';
+import type { DetailPanelConfig, PanelMetaField } from '@react/factories/createDetailPanel';
+import { IconButton } from '@react/factories';
 import { CopyEmailButton } from '@react/components/portal';
 import { formatDate } from '@react/utils/formatDate';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
