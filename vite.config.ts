@@ -24,7 +24,20 @@ export default defineConfig({
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]'
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+        // Split heavy vendor deps into separate chunks so the portal entry
+        // chunk stays small and vendor code is cached independently of app
+        // code. Each id is matched as a substring of the resolved module path.
+        manualChunks: (id) => {
+          if (!id.includes('node_modules')) return undefined;
+          if (id.includes('/react-router') || id.includes('/@remix-run/router')) return 'vendor-router';
+          if (id.includes('/react-dom/')) return 'vendor-react-dom';
+          if (id.includes('/react/') || id.includes('/scheduler/')) return 'vendor-react';
+          if (id.includes('/zustand/')) return 'vendor-zustand';
+          if (id.includes('/lucide-react/')) return 'vendor-lucide';
+          if (id.includes('/gsap/')) return 'vendor-gsap';
+          return undefined;
+        }
       }
     },
 
