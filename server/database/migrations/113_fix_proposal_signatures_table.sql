@@ -196,29 +196,16 @@ INSERT OR IGNORE INTO proposal_templates (name, description, project_type, tier_
 -- =====================================================
 -- ADD MISSING COLUMNS TO PROPOSAL_REQUESTS
 -- =====================================================
--- These columns were originally in migration 032 ALTER TABLEs that never ran.
--- proposal_requests table exists from migration 047.
-ALTER TABLE proposal_requests ADD COLUMN template_id INTEGER REFERENCES proposal_templates(id);
-ALTER TABLE proposal_requests ADD COLUMN expiration_date DATE;
-ALTER TABLE proposal_requests ADD COLUMN reminder_sent_at DATETIME;
-ALTER TABLE proposal_requests ADD COLUMN view_count INTEGER DEFAULT 0;
-ALTER TABLE proposal_requests ADD COLUMN last_viewed_at DATETIME;
-ALTER TABLE proposal_requests ADD COLUMN signed_at DATETIME;
-ALTER TABLE proposal_requests ADD COLUMN version_number INTEGER DEFAULT 1;
-ALTER TABLE proposal_requests ADD COLUMN discount_type TEXT;
-ALTER TABLE proposal_requests ADD COLUMN discount_value DECIMAL(10,2) DEFAULT 0;
-ALTER TABLE proposal_requests ADD COLUMN discount_reason TEXT;
-ALTER TABLE proposal_requests ADD COLUMN tax_rate DECIMAL(5,2) DEFAULT 0;
-ALTER TABLE proposal_requests ADD COLUMN subtotal DECIMAL(10,2);
-ALTER TABLE proposal_requests ADD COLUMN tax_amount DECIMAL(10,2) DEFAULT 0;
-ALTER TABLE proposal_requests ADD COLUMN sent_at DATETIME;
-ALTER TABLE proposal_requests ADD COLUMN sent_by TEXT;
-ALTER TABLE proposal_requests ADD COLUMN accepted_at DATETIME;
-ALTER TABLE proposal_requests ADD COLUMN rejected_at DATETIME;
-ALTER TABLE proposal_requests ADD COLUMN rejection_reason TEXT;
-ALTER TABLE proposal_requests ADD COLUMN validity_days INTEGER DEFAULT 30;
-ALTER TABLE proposal_requests ADD COLUMN requires_signature BOOLEAN DEFAULT FALSE;
-ALTER TABLE proposal_requests ADD COLUMN access_token TEXT;
+-- Originally these ALTERs were a workaround because migration 032's own
+-- ALTER TABLE statements never ran (it crashed before reaching them due
+-- to proposal_requests not existing until 047). Migration 032 has since
+-- been patched to defensively CREATE TABLE IF NOT EXISTS proposal_requests
+-- at its top, so 032's ALTERs now run successfully on fresh databases.
+-- Re-applying them here would fail with "duplicate column name", so the
+-- block is left intentionally empty for fresh installs. Existing
+-- databases that already applied this migration are unaffected — their
+-- migrations table already records 113 as executed and the file is not
+-- re-run.
 
 CREATE INDEX IF NOT EXISTS idx_proposals_template ON proposal_requests(template_id);
 CREATE INDEX IF NOT EXISTS idx_proposals_expiration ON proposal_requests(expiration_date);
