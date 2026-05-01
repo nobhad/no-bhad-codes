@@ -1,7 +1,7 @@
 # SEO Optimization
 
 **Status:** Complete
-**Last Updated:** February 2, 2026
+**Last Updated:** 2026-04-30
 
 ## Overview
 
@@ -24,7 +24,7 @@ Located in `/index.html` `<head>` section.
 
 #### Open Graph Tags
 
-For Facebook, LinkedIn, and general social sharing:
+For Facebook, LinkedIn, and general social sharing. The image is the business card front SVG (rendered as PNG by social platforms).
 
 ```html
 <meta property="og:type" content="website" />
@@ -33,6 +33,11 @@ For Facebook, LinkedIn, and general social sharing:
 <meta property="og:site_name" content="No Bhad Codes" />
 <meta property="og:url" content="https://nobhad.codes/" />
 <meta property="og:locale" content="en_US" />
+<meta property="og:image" content="https://nobhad.codes/images/business-card_front.png" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="4457" />
+<meta property="og:image:height" content="2498" />
+<meta property="og:image:alt" content="No Bhad Codes business card" />
 ```
 
 #### Twitter Card Tags
@@ -40,9 +45,11 @@ For Facebook, LinkedIn, and general social sharing:
 For Twitter/X sharing:
 
 ```html
-<meta name="twitter:card" content="summary" />
+<meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="No Bhad Codes - Professional Web Development" />
 <meta name="twitter:description" content="Professional web development services by Noelle Bhaduri" />
+<meta name="twitter:image" content="https://nobhad.codes/images/business-card_front.png" />
+<meta name="twitter:image:alt" content="No Bhad Codes business card" />
 ```
 
 ### JSON-LD Structured Data
@@ -129,21 +136,39 @@ Sitemap: https://nobhad.codes/sitemap.xml
 
 ### sitemap.xml
 
-Located at `/public/sitemap.xml`. Lists all crawlable pages.
+Located at `/public/sitemap.xml`. Lists crawlable pages.
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://nobhad.codes/</loc>
-    <lastmod>2026-02-02</lastmod>
+    <lastmod>2026-04-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://nobhad.codes/#/about</loc>
+    <lastmod>2026-04-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://nobhad.codes/#/projects</loc>
+    <lastmod>2026-04-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://nobhad.codes/#/contact</loc>
+    <lastmod>2026-04-21</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>
 ```
 
-**Note:** Hash-based routes (#/about, #/contact, #/projects) are not included because search engines do not follow hash fragments. All SPA content is accessible from the main URL.
+**Note:** Hash fragments are listed as a hint to crawlers that surface them (Google indexes the root URL regardless). All SPA content is accessible from the root URL because the page-detection script in `index.html` activates the right section based on the hash on first load.
 
 ## Files Modified/Created
 
@@ -152,27 +177,6 @@ Located at `/public/sitemap.xml`. Lists all crawlable pages.
 |`/index.html`|Modified|Added canonical, og:url, og:locale, Twitter Card, JSON-LD|
 |`/public/robots.txt`|Created|Crawler access rules|
 |`/public/sitemap.xml`|Created|Site map for search engines|
-
-## Pending: OG Image
-
-OG image tags are intentionally omitted until an image is created.
-
-**When ready:**
-
-1. Create a 1200x630 PNG image for social sharing previews
-2. Save to: `/public/images/og-image.png`
-3. Add to `/index.html`:
-
-```html
-<meta property="og:image" content="https://nobhad.codes/images/og-image.png" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="No Bhad Codes - Professional Web Development" />
-<meta name="twitter:image" content="https://nobhad.codes/images/og-image.png" />
-<meta name="twitter:card" content="summary_large_image" />
-```
-
-**Note:** When og:image is added, change `twitter:card` from `summary` to `summary_large_image` for better display.
 
 ## Verification Tools
 
@@ -207,6 +211,12 @@ If new public pages are added (not hash-based routes), add them to the sitemap:
 If contact information, social profiles, or service offerings change, update the JSON-LD in `/index.html`.
 
 ## Change Log
+
+### 2026-04-30 - Doc accuracy pass
+
+- Documented current OG/Twitter image (business card front) — was previously listed as pending
+- Updated Twitter card type to `summary_large_image` (matches `index.html`)
+- Updated sitemap example to include hash-route entries that exist in `public/sitemap.xml`
 
 ### February 2, 2026 - Initial Implementation
 
