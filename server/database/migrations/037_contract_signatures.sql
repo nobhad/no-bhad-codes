@@ -4,20 +4,12 @@
 -- Adds columns and tables for contract signature tracking
 -- =====================================================
 
--- Add signature columns to projects table
--- All columns already exist from prior schema changes
--- ALTER TABLE projects ADD COLUMN contract_signature_token TEXT;
--- ALTER TABLE projects ADD COLUMN contract_signature_requested_at TEXT;
--- ALTER TABLE projects ADD COLUMN contract_signature_expires_at TEXT;
--- ALTER TABLE projects ADD COLUMN contract_signer_name TEXT;
--- ALTER TABLE projects ADD COLUMN contract_signer_email TEXT;
--- ALTER TABLE projects ADD COLUMN contract_signer_ip TEXT;
--- ALTER TABLE projects ADD COLUMN contract_signer_user_agent TEXT;
--- ALTER TABLE projects ADD COLUMN contract_signature_data TEXT;
-
--- Create index for token lookups
-CREATE INDEX IF NOT EXISTS idx_projects_contract_signature_token
-ON projects(contract_signature_token) WHERE contract_signature_token IS NOT NULL;
+-- Note: signature columns on projects (contract_signature_token, etc.) are
+-- added in migration 087_add_project_signature_columns.sql. The original
+-- ALTER statements here were commented out under the (incorrect) assumption
+-- those columns already existed; the index that referenced them has moved
+-- to 087 alongside the column creation so this migration runs cleanly on
+-- fresh databases.
 
 -- Create contract signature audit log table
 CREATE TABLE IF NOT EXISTS contract_signature_log (
