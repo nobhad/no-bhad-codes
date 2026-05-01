@@ -211,10 +211,10 @@ Two-column layout redesigned for better UX:
 - Updated contact section language for single person ("Contact Noelle" not "Contact us")
 - Fixed container heights so accordion expansion doesn't change main div height
 
-**Files Modified:**
+**Files Modified (legacy vanilla TS — since rewritten as React):**
 
-- `src/features/client/modules/portal-views.ts` - Help view HTML structure
-- `src/features/client/modules/portal-help.ts` - Accordion logic, search suggestions
+- `src/features/client/modules/portal-views.ts` *(removed)* — replaced by `src/react/features/portal/help/PortalHelp.tsx`
+- `src/features/client/modules/portal-help.ts` *(removed)* — accordion/search logic now in `PortalHelp.tsx`
 - `src/styles/client-portal/help.css` - Two-column grid layout styles
 
 ### February 9, 2026 - Section Toggle UI Enhancement

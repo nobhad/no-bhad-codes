@@ -32,8 +32,8 @@ Enterprise-Level Client Management System with Portfolio
 
 ### Technology Stack
 
-- **Frontend**: TypeScript + React 18 + Zustand, Vite, GSAP
-- **Portal Architecture**: React SPA, React Router v6, Zustand state management
+- **Frontend**: TypeScript + React 19 + Zustand, Vite, GSAP
+- **Portal Architecture**: React SPA, React Router v7, Zustand state management
 - **Main Site Architecture**: Dependency Injection, Module Pattern, Service-Oriented
 - **Styling**: CSS Modules, Design System, Responsive Design
 - **Build**: Vite with advanced code splitting
@@ -512,19 +512,23 @@ export class MyNewModule extends BaseModule {
 ### Module Registration Patterns
 
 ```typescript
-// src/core/app.ts - Different registration patterns
+// src/core/modules-config.ts - Different registration patterns
 
 // 1. PAGE-SPECIFIC MODULE (only loads on certain pages)
+// The portal is a React SPA mounted into a server-rendered EJS shell.
 {
-  name: 'ClientPortalModule',
+  name: 'ReactPortalModule',
   type: 'dom',
   factory: async () => {
     const path = window.location.pathname;
-    if (path.includes('/client') && path.includes('/portal')) {
-      const { ClientPortalModule } = await import('../features/client/client-portal');
-      return new ClientPortalModule();
+    const isPortalPage = path.includes('/dashboard') || path.includes('/admin');
+    if (isPortalPage) {
+      const { mountPortalApp } = await import('../react/app/mount-portal');
+      const container = document.querySelector('.portal') as HTMLElement;
+      const cleanup = container ? mountPortalApp(container) : () => {};
+      return { init: () => {}, destroy: cleanup, name: 'ReactPortalModule' };
     }
-    return createDummyModule('ClientPortalModule');
+    return createDummyModule('ReactPortalModule');
   }
 }
 
@@ -1158,7 +1162,7 @@ test.describe('Client Portal', () => {
 ```bash
 # Modules (PascalCase classes, kebab-case files)
 src/modules/business-card-renderer.ts   → BusinessCardRenderer
-src/features/client/client-portal.ts    → ClientPortalModule
+src/react/app/mount-portal.tsx          → mountPortalApp (React SPA mount)
 
 # Services (PascalCase classes, kebab-case files)
 src/services/notification-service.ts    → NotificationService

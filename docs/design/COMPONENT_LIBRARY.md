@@ -133,25 +133,39 @@ Organized by feature in `src/react/features/`.
 
 ### Client Portal (`src/react/features/portal/`)
 
+Routed components are listed here. Components marked **(unrouted)** still exist on disk but are no longer reachable from the client portal — their feature was consolidated into a hub view (see `CLIENT_PORTAL.md` § Legacy / Non-routed Directories).
+
 | Component | Path | Purpose |
 |-----------|------|---------|
 | `ActionItems` | `dashboard/ActionItems.tsx` | "Needs Your Attention" section with pending action StatCards |
-| `PortalProjectsList` | `projects/PortalProjectsList.tsx` | Projects list with cards, search, and filter |
+| `PortalDashboard` | `dashboard/PortalDashboard.tsx` | Client dashboard root |
+| `PortalDocuments` | `documents/PortalDocuments.tsx` | Consolidated invoices + contracts + agreements view |
+| `PortalFilesHub` | `files-hub/PortalFilesHub.tsx` | Client-facing file hub |
+| `PortalDeliverablesHub` | `deliverables-hub/PortalDeliverablesHub.tsx` | Deliverables + approvals hub |
+| `PortalRequestsHub` | `requests-hub/PortalRequestsHub.tsx` | Ad hoc + questionnaires + document requests hub |
 | `PortalContracts` | `contracts/PortalContracts.tsx` | Contracts list with ContractSignModal |
 | `ContractCard` | `contracts/ContractCard.tsx` | Individual contract card |
 | `ContractSignModal` | `contracts/ContractSignModal.tsx` | Signature modal with SignatureCanvas |
-| `PortalApprovals` | `approvals/PortalApprovals.tsx` | Approvals list with filter/search |
-| `PortalAdHocRequests` | `ad-hoc-requests/PortalAdHocRequests.tsx` | Ad-hoc request list + new request form |
-| `PortalDocumentRequests` | `document-requests/PortalDocumentRequests.tsx` | Document request list |
-| `PortalQuestionnairesView` | `questionnaires/PortalQuestionnairesView.tsx` | Questionnaires list |
-| `QuestionnaireForm` | `questionnaires/QuestionnaireForm.tsx` | Questionnaire fill-out form |
 | `PortalProposals` | `proposals/PortalProposals.tsx` | Proposals list |
+| `PortalProposalDetail` | `proposals/PortalProposalDetail.tsx` | Proposal detail with accept/decline |
+| `AgreementsList` / `AgreementFlow` | `agreements/` | Step-by-step agreement flow |
+| `MeetingRequestsList` | `meetings/MeetingRequestsList.tsx` | Meeting request submission/tracking |
+| `PortalRetainers` | `retainers/PortalRetainers.tsx` | Active retainers with utilization |
+| `PortalFeedback` | `feedback/PortalFeedback.tsx` | Pending and completed feedback surveys |
+| `PaymentScheduleView` | `payment-schedule/PaymentScheduleView.tsx` | Installment tracking |
+| `AutoPaySettings` | `auto-pay/AutoPaySettings.tsx` | Auto-pay configuration |
+| `ContentChecklistView` | `content-requests/ContentChecklistView.tsx` | Content request checklist |
+| `QuestionnaireForm` | `questionnaires/QuestionnaireForm.tsx` | Questionnaire fill-out form (used inside Requests Hub) |
 | `DeliverableCard` | `deliverables/DeliverableCard.tsx` | Individual deliverable card |
 | `ProfileForm` | `settings/ProfileForm.tsx` | Contact info form with InlineEditField |
 | `NotificationsForm` | `settings/NotificationsForm.tsx` | Notification preferences |
 | `OnboardingWizard` | `onboarding/OnboardingWizard.tsx` | Multi-step onboarding with GSAP animations |
-| `PortalPreview` | `preview/PortalPreview.tsx` | Document/content preview |
-| `ContentChecklistView` | `content-requests/ContentChecklistView.tsx` | Content request checklist |
+| `PortalProjectsList` *(unrouted)* | `projects/PortalProjectsList.tsx` | Folded into dashboard |
+| `PortalApprovals` *(unrouted)* | `approvals/PortalApprovals.tsx` | Folded into Deliverables Hub |
+| `PortalAdHocRequests` *(unrouted)* | `ad-hoc-requests/PortalAdHocRequests.tsx` | Folded into Requests Hub |
+| `PortalDocumentRequests` *(unrouted)* | `document-requests/PortalDocumentRequests.tsx` | Folded into Requests Hub |
+| `PortalQuestionnairesView` *(unrouted)* | `questionnaires/PortalQuestionnairesView.tsx` | Folded into Requests Hub |
+| `PortalPreview` *(unrouted)* | `preview/PortalPreview.tsx` | No active route |
 
 ### Admin Portal (`src/react/features/admin/`)
 

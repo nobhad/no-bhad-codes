@@ -70,7 +70,7 @@ src/admin.ts  (Vite entry — registers the admin bundle)
 server/views/layouts/portal.ejs  (EJS shell rendered by server at GET /dashboard)
      |
      v
-src/react/app/mount-portal.tsx  (mounts React SPA into .dashboard-container.portal)
+src/react/app/mount-portal.tsx  (mounts React SPA into div.portal)
      |
      v
 PortalApp.tsx  (root component — wraps providers: Router, Zustand, Suspense)

@@ -320,10 +320,10 @@ if (newProjectForm) {
 
 ### Submit Handler
 
-**Status:** Complete
+**Status:** Legacy vanilla TS — the original handler lived in the now-removed `src/features/client/client-portal.ts`. The React portal does not currently expose a "New Project" form to clients; new projects are created by admin via `AddProjectModal` (`src/react/features/admin/modals/AddProjectModal.tsx`). The snippet below is preserved for historical reference.
 
 ```typescript
-// src/features/client/client-portal.ts
+// Legacy reference — src/features/client/client-portal.ts (removed)
 private async submitProjectRequest(): Promise<void> {
   const authMode = sessionStorage.getItem('client_auth_mode');
 
@@ -578,12 +578,14 @@ await emailService.sendAdminNotification({
 
 |File|Purpose|
 |------|---------|
-|`client/portal.html`|New Project form HTML (tab-new-project section)|
-|`src/features/client/client-portal.ts`|submitProjectRequest() method|
-|`src/features/client/modules/portal-projects.ts`|Project loading and display (~500 lines)|
-|`src/styles/shared/portal-forms.css`|Form styling|
-|`server/routes/projects.ts`|Project request API|
+|`client/portal.html` *(legacy)*|Vanilla EJS portal page — superseded by React SPA shell at `server/views/layouts/portal.ejs`|
+|`src/features/client/client-portal.ts` *(removed)*|`submitProjectRequest()` method — vanilla portal entry, no longer exists|
+|`src/features/client/modules/portal-projects.ts` *(removed)*|Vanilla project loading/display — replaced by React `PortalDashboard` and admin `ProjectsTable`|
+|`src/styles/shared/portal-forms.css`|Form styling (still used)|
+|`server/routes/projects.ts`|Project request API (verify path under `server/routes/projects/`)|
 |`server/services/email-service.ts`|Email notifications|
+
+> **Note:** This document describes a legacy vanilla-TS feature. The React portal currently has no client-facing "New Project" form — new projects originate via `AddProjectModal` in the admin React tree.
 
 ---
 
