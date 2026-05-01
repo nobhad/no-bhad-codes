@@ -4941,23 +4941,21 @@ interface SearchResponse {
 
 #### React Components
 
-**File: `src/react/components/SearchModal.tsx`**
+**File: `src/react/components/portal/CommandPalette.tsx`** *(shipped name; originally planned as `SearchModal`)*
 
-Global search modal triggered by `Cmd+K` (Mac) / `Ctrl+K` (Windows).
+Global command palette / search modal triggered by `Cmd+K` (Mac) / `Ctrl+K` (Windows).
 
 ```typescript
-interface SearchModalProps {
-  isOpen: boolean;
+interface CommandPaletteProps {
+  open: boolean;
   onClose: () => void;
-  onNavigate: (tab: string, entityId?: string) => void;
-  getAuthToken?: () => string | null;
 }
 ```
 
 **Component tree:**
 
 ```text
-SearchModal (portal-rendered overlay)
+CommandPalette (portal-rendered overlay)
 ├── SearchInput                    — Auto-focused text input with magnifying glass icon
 │   └── Keyboard hint              — "Cmd+K" badge
 ├── ResultsList                    — Grouped by entity type
@@ -5447,12 +5445,12 @@ Phase 7 (International — Do Last)
 **6C: Enhanced Search + Cmd+K Modal**
 
 - search-service.ts: ENHANCED from 4 to 9 entity types (added proposals, contracts, leads, tasks, files). Relevance scoring algorithm, Promise.allSettled for parallel queries, results sorted by relevance
-- SearchModal.tsx: Global Cmd+K search modal with debounced input, keyboard navigation (arrow keys, Enter, Escape), grouped results by entity type, recent searches in localStorage
-- PortalLayout.tsx: Integrated SearchModal with useSearchModal hook
+- CommandPalette.tsx (shipped name; planned as SearchModal): Global Cmd+K command palette with debounced input, keyboard navigation (arrow keys, Enter, Escape), grouped results by entity type, recent searches in localStorage
+- PortalApp.tsx: Integrated CommandPalette with useCommandPalette hook
 - Frontend API constants: AI_DRAFT_PROPOSAL, AI_DRAFT_EMAIL, AI_USAGE, AI_USAGE_HISTORY, AI_STATUS
 
 **Files created:** ~7 (1 migration, 3 server config/services/types, 1 route, 1 React component)
-**Files modified:** ~5 (app.ts, api-endpoints.ts, PortalLayout.tsx, search-service.ts, scheduler-service.ts)
+**Files modified:** ~5 (app.ts, api-endpoints.ts, PortalApp.tsx, search-service.ts, scheduler-service.ts)
 **New npm deps:** 1 (@anthropic-ai/sdk)
 
 ### 2026-03-17 — Phase 5B Embeddable Widgets Complete
