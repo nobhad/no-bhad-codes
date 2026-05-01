@@ -77,6 +77,56 @@
   border-color: var(--color-dark);
 }
 
+/* ===============================================
+   BREADCRUMBS
+   =============================================== */
+
+/* Sits above the .worksub-wrapper, aligned to its left edge so the
+   breadcrumb reads as the entry point into the wrapper card below. */
+.project-detail-breadcrumbs {
+  width: 100%;
+  max-width: var(--project-detail-content-max-width);
+  margin-inline: auto;
+  padding: 0 var(--space-5) var(--space-2);
+  box-sizing: border-box;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.project-detail-breadcrumbs ol {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2, 0.5rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.project-detail-breadcrumb-link {
+  color: inherit;
+  text-decoration: none;
+  font-family: var(--font-family-acme);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label, 0.04em);
+  transition: color 0.2s ease;
+}
+
+.project-detail-breadcrumb-link:hover,
+.project-detail-breadcrumb-link:focus-visible {
+  color: var(--color-accent);
+  outline: none;
+}
+
+.project-detail-breadcrumb-separator {
+  opacity: 0.5;
+}
+
+.project-detail-breadcrumb-current {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-dark);
+}
+
 @media (--tablet) {
   .project-detail-section {
     padding: clamp(0.5rem, 2vw, 1rem) clamp(2rem, 8vw, 8%);
