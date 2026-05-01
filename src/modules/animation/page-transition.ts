@@ -1134,14 +1134,32 @@ export class PageTransitionModule extends BaseModule {
     if (absY >= absX) {
       const dirIfDown = 'down' as Direction;
       const dirIfUp = 'up' as Direction;
-      // Vertical: swipe DOWN (dy < 0 on natural scroll) → 'down'.
-      // For projects: ALWAYS navigate (TV channel cycle) — skip the
-      // edge-of-scroll guard since the projects tile shouldn't scroll
-      // natively at all.
-      // For everything else: edge guards check scroll position so tall
-      // content (project-detail case studies) still scrolls natively
-      // until the user hits the boundary.
-      if (dy < 0) {
+      // Vertical wheel handling depends on which page is active:
+      //
+      //   - Map tiles (intro/about/contact/hero): NEIGHBORS only defines
+      //     horizontal entries, so vertical wheel would no-op via the
+      //     normal direction → navigation path. Mouse-wheel users only
+      //     have a vertical wheel, so we'd be locking them out of the
+      //     spatial map. REMAP vertical wheel → horizontal nav so they
+      //     get parity with trackpad / arrow-key / swipe users:
+      //       wheel-down (forward)  → 'right' (forward in chain)
+      //       wheel-up   (back)     → 'left'  (back in chain)
+      //
+      //   - Projects: vertical wheel cycles TV channels (handled in
+      //     tryNavigateDirection). Don't remap — keep the channel-surf
+      //     semantics. Skip the edge-of-scroll guard since projects
+      //     doesn't have native scroll.
+      //
+      //   - Project-detail: vertical wheel scrolls the case-study
+      //     content natively until the user hits the boundary, then
+      //     navigates between projects.
+      const isMapTile = this.isMapPage(this.currentPageId);
+      if (isMapTile && !onProjects) {
+        // Mouse-wheel parity remap: vertical wheel → horizontal nav.
+        // Reads the OPPOSITE of the deltaY sign so natural-scroll users
+        // (the majority on macOS) get intuitive forward/back.
+        direction = dy < 0 ? 'right' : 'left';
+      } else if (dy < 0) {
         if (!onProjects) {
           const canScrollDown =
             currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >= 1;
@@ -1922,6 +1940,19 @@ export class PageTransitionModule extends BaseModule {
       // adjacent slides like intro → about made the source appear to
       // vanish rather than slide off. Bridge animates source AND
       // target individually so both move together.
+      //
+      // prefers-reduced-motion: skip the slide entirely. Snap siteMap
+      // to the target's camera baseline and the new tile is visible
+      // without any animation — same accessibility short-circuit
+      // moveCamera() already uses for non-bridge paths.
+      if (this.reducedMotion) {
+        gsap.set(this.siteMap, {
+          xPercent: CAMERA_POSITIONS[toTile].x,
+          yPercent: CAMERA_POSITIONS[toTile].y
+        });
+        this.siteMap.setAttribute('data-map-camera', toTile);
+        return;
+      }
       {
         const sourceEl = currentPage.element;
         const targetEl = targetPage.element;
