@@ -39,12 +39,19 @@ export interface NavigationItem {
   eyebrow: string;
 }
 
+export interface TechStackChunk {
+  id: string;
+  theme: string;
+  transition: string;
+  items: string[];
+}
+
 export interface Profile {
   name: string;
   title: string;
   location: string;
   bio: string;
-  techStack: string[];
+  techStack: TechStackChunk[];
   tagline: string;
   social: {
     github?: string;

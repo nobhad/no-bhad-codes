@@ -476,7 +476,68 @@
     "title": "Web Developer",
     "location": "Boston, MA",
     "bio": "",
-    "techStack": [],
+    "techStack": [
+      {
+        "id": "languages-frameworks",
+        "theme": "Languages & Frameworks",
+        "transition": "intro-about",
+        "items": [
+          "TypeScript",
+          "JavaScript",
+          "HTML5",
+          "CSS3",
+          "React",
+          "Next.js",
+          "Astro",
+          "Node.js"
+        ]
+      },
+      {
+        "id": "styling-ui-motion",
+        "theme": "Styling, UI & Motion",
+        "transition": "about-projects",
+        "items": [
+          "Tailwind CSS",
+          "GSAP",
+          "Three.js",
+          "Lucide",
+          "Radix UI",
+          "OpenType.js",
+          "Chart.js",
+          "EJS"
+        ]
+      },
+      {
+        "id": "backend-data",
+        "theme": "Backend & Data",
+        "transition": "projects-contact",
+        "items": [
+          "Express",
+          "Supabase",
+          "PostgreSQL",
+          "SQLite",
+          "Redis",
+          "Zod",
+          "JWT",
+          "Multer"
+        ]
+      },
+      {
+        "id": "tooling-testing-ship",
+        "theme": "Tooling, Testing & Ship",
+        "transition": "contact-intro",
+        "items": [
+          "Vite",
+          "Vitest",
+          "Playwright",
+          "Sentry",
+          "Vercel",
+          "Netlify",
+          "Anthropic SDK",
+          "Stripe"
+        ]
+      }
+    ],
     "tagline": "no bhad codes",
     "social": {
       "email": "nobhaduri@gmail.com"
