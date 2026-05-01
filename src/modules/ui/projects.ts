@@ -1575,6 +1575,14 @@ export class ProjectsModule extends BaseModule {
       }
     }
 
+    // Update breadcrumb current-page label with the project title.
+    // Static "Projects /" segment is in the markup; only the trailing
+    // current title is dynamic.
+    const breadcrumbCurrent = this.projectDetailSection.querySelector('#project-breadcrumb-current');
+    if (breadcrumbCurrent) {
+      breadcrumbCurrent.textContent = project.title;
+    }
+
     // Update title — wrap in anchor when liveUrl exists so the title itself
     // is the primary CTA (opens live site in new tab). External icon appears
     // after the text as a visual affordance.
