@@ -6,17 +6,9 @@
 
 import * as React from 'react';
 import { useMemo, useCallback } from 'react';
-import {
-  DetailPanel,
-  MetaGrid,
-  Timeline,
-  IconButton
-} from '@react/factories';
-import type {
-  DetailPanelConfig,
-  PanelMetaField,
-  TimelineEvent
-} from '@react/factories';
+import { DetailPanel, MetaGrid, Timeline } from '@react/factories/createDetailPanel';
+import type { DetailPanelConfig, PanelMetaField, TimelineEvent } from '@react/factories/createDetailPanel';
+import { IconButton } from '@react/factories';
 import { formatDate } from '@react/utils/formatDate';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
 import { formatCurrency } from '@/utils/format-utils';
