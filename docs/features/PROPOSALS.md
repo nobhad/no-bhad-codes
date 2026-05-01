@@ -543,7 +543,7 @@ await fetch('/api/proposals/123/discount', {
 
 ### Related Files
 
-- `src/features/admin/modules/admin-proposals.ts` - Proposal management module
+- `src/react/features/admin/proposals/` - Proposal management module
 - `src/styles/admin/proposals.css` - Proposal styles
 - `src/react/features/admin/proposals/ProposalDetailPanel.tsx` - Slide-in detail panel (Overview, Timeline)
 

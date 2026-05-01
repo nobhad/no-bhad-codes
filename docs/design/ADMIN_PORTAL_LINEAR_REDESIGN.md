@@ -6,7 +6,7 @@
 
 **Last Updated:** 2026-02-17
 
-> **Architecture Note (March 2026):** The admin is now a React SPA. `src/features/admin/admin-dashboard.ts`
+> **Architecture Note (March 2026):** The admin is now a React SPA. `src/react/app/PortalApp.tsx (admin)`
 > was deleted on March 7, 2026. Tab navigation and keyboard shortcuts are handled by React Router
 > (`PortalRoutes.tsx`) and React components in `src/react/features/admin/`. The CSS implementation
 > (shadow removal, typography, spacing) documented below remains valid. The TypeScript file references
@@ -221,7 +221,7 @@ All tables (Clients, Projects, Invoices, Leads, Contracts):
 
 | File | Changes |
 |------|---------|
-| `src/features/admin/admin-dashboard.ts` | Keyboard nav, mobile drawer, help panel init — **deleted March 7, 2026; admin is now React SPA** |
+| `src/react/app/PortalApp.tsx (admin)` | Keyboard nav, mobile drawer, help panel init — **deleted March 7, 2026; admin is now React SPA** |
 | `src/components/command-palette.ts` | ⌘K palette |
 | `src/components/keyboard-help.ts` | `?` shortcut help panel |
 

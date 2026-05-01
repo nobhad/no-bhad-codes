@@ -2,7 +2,12 @@
 
 **Last Updated:** February 10, 2026
 
-> **Note:** This document covers the client-facing Proposal Builder (tier selection and customization). For advanced proposal management features (templates, versioning, e-signatures, comments, activity tracking), see [PROPOSALS.md](./PROPOSALS.md).
+> **⚠️ Outdated context (as of 2026-04-30):** This document describes a vanilla-TypeScript proposal builder (`src/features/client/proposal-builder.ts` and helpers) that no longer exists on disk. The current proposal flow lives in the React tree:
+>
+> - Client: `src/react/features/portal/proposals/` (`PortalProposals.tsx`, `PortalProposalDetail.tsx`)
+> - Admin: `src/react/features/admin/proposals/` (`ProposalsTable.tsx`, `ProposalDetailPanel.tsx`)
+>
+> File-structure references in this doc are historical. For advanced proposal management features (templates, versioning, e-signatures, comments, activity tracking), see [PROPOSALS.md](./PROPOSALS.md).
 
 ## Table of Contents
 
@@ -349,7 +354,7 @@ See [API Documentation](../API_DOCUMENTATION.md#proposal-builder-endpoints) for 
 |`src/features/client/proposal-builder-ui.ts`|UI rendering|
 |`src/features/client/proposal-builder-data.ts`|Tier configurations|
 |`src/features/client/proposal-builder-types.ts`|TypeScript types|
-|`src/features/admin/modules/admin-proposals.ts`|Admin management|
+|`src/react/features/admin/proposals/`|Admin management|
 |`server/routes/proposals.ts`|API endpoints|
 |`server/database/migrations/025_proposal_requests.sql`|DB schema|
 |`src/styles/pages/proposal-builder.css`|Styles|

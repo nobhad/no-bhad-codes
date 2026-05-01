@@ -8,7 +8,7 @@
 The Time Tracking System allows logging and managing time entries for projects. Each entry tracks duration, description, billable status, and can be linked to specific tasks.
 
 **Location:** Project Detail → Time tab
-**File:** `src/features/admin/modules/admin-time-tracking.ts`
+**File:** `src/react/features/admin/time-tracking/`
 
 ## Features
 
@@ -94,7 +94,7 @@ Multi-field dialog with:
 
 | File | Purpose |
 |------|---------|
-| `src/features/admin/modules/admin-time-tracking.ts` | Time tracking module |
+| `src/react/features/admin/time-tracking/` | Time tracking module |
 | `src/components/chart-simple.ts` | Bar chart component |
 | `src/utils/table-export.ts` | CSV export utility |
 | `server/routes/projects.ts` | Time entry endpoints |

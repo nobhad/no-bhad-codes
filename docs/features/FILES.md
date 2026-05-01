@@ -3,6 +3,8 @@
 **Status:** Complete
 **Last Updated:** February 11, 2026
 
+> **⚠️ Code samples are legacy (as of 2026-04-30):** The TypeScript snippets below are captured from the removed vanilla portal (`ClientPortalContext` pattern, `escapeHtml`, `formatDate` helpers). The current implementation lives under `src/react/features/portal/files/` and `src/react/features/portal/files-hub/` as React components and does not use `ClientPortalContext`. API endpoints, server routes, and CSS class names below remain accurate; treat the inline code as historical reference only.
+
 ## Table of Contents
 
 1. [Overview](#overview)
@@ -237,7 +239,7 @@ Upload multiple files (max 5).
 
 ### TypeScript Module
 
-Location: `src/features/client/modules/portal-files.ts`
+Location: `src/react/features/portal/files/`
 
 The file module uses the `ClientPortalContext` pattern for shared utilities like `escapeHtml()`, `formatDate()`, and `isDemo()`.
 
@@ -254,7 +256,7 @@ const FILES_API_BASE = '/api/uploads';
 Fetches files from the API and renders the list.
 
 ```typescript
-// src/features/client/modules/portal-files.ts
+// src/react/features/portal/files/
 export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
   const filesContainer = document.querySelector('.files-list-section');
   if (!filesContainer) return;
@@ -288,7 +290,7 @@ export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
 Renders the file list HTML with icons and action buttons.
 
 ```typescript
-// src/features/client/modules/portal-files.ts
+// src/react/features/portal/files/
 import { formatFileSize } from '../../../utils/format-utils';
 
 function renderFilesList(
@@ -346,7 +348,7 @@ function renderFilesList(
 Sets up drag & drop, browse button, and keyboard accessibility.
 
 ```typescript
-// src/features/client/modules/portal-files.ts
+// src/react/features/portal/files/
 export function setupFileUploadHandlers(ctx: ClientPortalContext): void {
   const dropzone = document.getElementById('upload-dropzone');
   const fileInput = document.getElementById('file-input') as HTMLInputElement;
@@ -419,7 +421,7 @@ export function setupFileUploadHandlers(ctx: ClientPortalContext): void {
 Uploads files to the server via FormData with progress feedback.
 
 ```typescript
-// src/features/client/modules/portal-files.ts
+// src/react/features/portal/files/
 async function uploadFiles(files: File[], ctx: ClientPortalContext): Promise<void> {
   if (ctx.isDemo()) {
     alert('File upload not available in demo mode. Please log in to upload files.');
@@ -483,7 +485,7 @@ async function uploadFiles(files: File[], ctx: ClientPortalContext): Promise<voi
 Opens files for preview in a new browser tab.
 
 ```typescript
-// src/features/client/modules/portal-files.ts
+// src/react/features/portal/files/
 function previewFile(fileId: number, mimetype: string, ctx: ClientPortalContext): void {
   if (ctx.isDemo()) {
     alert('Preview not available in demo mode. Please log in to preview files.');
@@ -505,7 +507,7 @@ function previewFile(fileId: number, mimetype: string, ctx: ClientPortalContext)
 Triggers file download.
 
 ```typescript
-// src/features/client/modules/portal-files.ts
+// src/react/features/portal/files/
 function downloadFile(fileId: number, filename: string, ctx: ClientPortalContext): void {
   if (ctx.isDemo()) {
     alert('Download not available in demo mode. Please log in to download files.');
@@ -528,7 +530,7 @@ function downloadFile(fileId: number, filename: string, ctx: ClientPortalContext
 Deletes a file with confirmation dialog.
 
 ```typescript
-// src/features/client/modules/portal-files.ts
+// src/react/features/portal/files/
 async function deleteFile(
   fileId: number,
   filename: string,
@@ -785,7 +787,7 @@ On mobile devices (screens under 768px), the Files section adapts for touch inte
 Clients can only delete files they uploaded themselves. Admin-uploaded files show no delete option:
 
 ```typescript
-// src/features/client/modules/portal-files.ts
+// src/react/features/portal/files/
 const clientEmail = sessionStorage.getItem('clientEmail') || '';
 
 // Check if current user can delete this file
@@ -829,7 +831,7 @@ const deleteIcon = canDelete
 |File|Purpose|
 |------|---------|
 |`server/routes/uploads.ts`|Backend API endpoints|
-|`src/features/client/modules/portal-files.ts`|Frontend file handling (~501 lines)|
+|`src/react/features/portal/files/`|Frontend file handling (~501 lines)|
 |`src/styles/client-portal/documents.css`|File section styling (consolidated)|
 |`client/portal.html`|Files tab HTML (tab-files section)|
 

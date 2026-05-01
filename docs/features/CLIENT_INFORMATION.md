@@ -295,9 +295,9 @@ CREATE TABLE document_template_categories (
 | `server/services/client-info-service.ts` | Client info business logic |
 | `server/database/migrations/057_questionnaires.sql` | Questionnaire schema |
 | `server/database/migrations/058_client_onboarding.sql` | Onboarding schema |
-| `src/features/admin/modules/admin-questionnaires.ts` | Admin questionnaire UI |
-| `src/features/client/modules/portal-onboarding-wizard.ts` | Client onboarding UI |
-| `src/features/client/modules/portal-questionnaires.ts` | Client questionnaire UI |
+| `src/react/features/admin/questionnaires/` | Admin questionnaire UI |
+| `src/react/features/portal/onboarding-wizard/` | Client onboarding UI |
+| `src/react/features/portal/questionnaires/` | Client questionnaire UI |
 | `src/styles/client-portal/onboarding.css` | Onboarding styles |
 | `src/styles/client-portal/questionnaires.css` | Questionnaire styles |
 

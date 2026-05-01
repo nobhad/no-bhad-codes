@@ -212,7 +212,7 @@ CREATE TABLE deliverable_approvals (
 
 ## Frontend Components
 
-### Admin UI (`src/features/admin/modules/admin-deliverables.ts`)
+### Admin UI (`src/react/features/admin/deliverables/`)
 
 - Deliverable list with filters (round, status, element)
 - Upload modal with drag-drop
@@ -283,9 +283,9 @@ pending → reviewing → approved
 |------|---------|
 | `server/services/deliverable-service.ts` | Backend service |
 | `server/routes/deliverables.ts` | API routes |
-| `src/features/admin/modules/admin-deliverables.ts` | Admin UI |
-| `src/features/admin/modules/admin-design-review.ts` | Review modal |
-| `src/features/client/modules/portal-files.ts` | Client files UI (includes deliverables) |
+| `src/react/features/admin/deliverables/` | Admin UI |
+| `src/react/features/admin/design-review/` | Review modal |
+| `src/react/features/portal/files/` | Client files UI (includes deliverables) |
 | `src/styles/admin/index.css` | Admin styling (includes deliverables) |
 | `src/styles/client-portal/documents.css` | Client styling (includes deliverables) |
 

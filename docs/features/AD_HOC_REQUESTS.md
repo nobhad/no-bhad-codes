@@ -236,8 +236,8 @@ Located on Analytics > Business tab:
 | `server/routes/ad-hoc-requests.ts` | API routes |
 | `server/services/ad-hoc-request-service.ts` | Business logic |
 | `server/database/migrations/056_ad_hoc_requests.sql` | Database schema |
-| `src/features/admin/modules/admin-ad-hoc-requests.ts` | Admin UI module |
-| `src/features/client/modules/portal-ad-hoc-requests.ts` | Client portal UI |
+| `src/react/features/admin/ad-hoc-requests/` | Admin UI module |
+| `src/react/features/portal/ad-hoc-requests/` | Client portal UI |
 | `src/styles/client-portal/requests.css` | Request styling |
 
 ---

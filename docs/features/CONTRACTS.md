@@ -439,7 +439,7 @@ When both parties have signed:
 | `server/database/migrations/052_contract_templates.sql` | Schema |
 | `server/database/migrations/053_contract_templates_seed.sql` | Default template |
 | `server/database/migrations/054_contract_countersign.sql` | Countersign fields |
-| `src/features/admin/admin-project-details.ts` | Contract tab UI |
+| `src/react/features/admin/project-detail/` | Contract tab UI |
 | `src/styles/admin/pd-contract.css` | Contract tab styles |
 | `src/react/features/admin/contracts/ContractsTable.tsx` | Admin contracts table (React) |
 | `src/react/features/admin/contracts/ContractDetailPanel.tsx` | Slide-in detail panel (Overview, Timeline) |

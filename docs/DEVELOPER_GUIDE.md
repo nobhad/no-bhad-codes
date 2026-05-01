@@ -610,7 +610,7 @@ The application includes a comprehensive messaging system for client-developer c
 
 #### Frontend Components
 
-1. **Messaging Module** (`src/features/client/modules/portal-messages.ts`)
+1. **Messaging Module** (`src/react/features/portal/messages/`)
 
    ```typescript
 

@@ -13,13 +13,13 @@ The Document Requests System allows administrators to request documents from cli
 
 - Sidebar: "Doc Requests" tab
 - Shows all requests with filtering and pagination
-- **File:** `src/features/admin/modules/admin-document-requests.ts`
+- **File:** `src/react/features/admin/document-requests/`
 
 ### Client Portal
 
 - Dashboard widget showing pending requests
 - Upload interface for each request
-- **File:** `src/features/client/modules/portal-document-requests.ts`
+- **File:** `src/react/features/portal/document-requests/`
 
 ## Request Statuses
 
@@ -217,8 +217,8 @@ Add to `document_requests` table:
 
 | File | Purpose |
 |------|---------|
-| `src/features/admin/modules/admin-document-requests.ts` | Admin module |
-| `src/features/client/modules/portal-document-requests.ts` | Client module |
+| `src/react/features/admin/document-requests/` | Admin module |
+| `src/react/features/portal/document-requests/` | Client module |
 | `src/features/admin/project-details/files.ts` | Files tab integration |
 | `server/routes/document-requests.ts` | API endpoints |
 | `src/utils/table-filter.ts` | Filter configuration |
