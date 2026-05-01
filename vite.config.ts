@@ -21,6 +21,14 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html')
       },
+      // Silence "use client" RSC-directive warnings from Radix/react-router.
+      // These directives are no-ops in a Vite SPA but Rollup warns on every build.
+      onwarn(warning, warn) {
+        if (warning.code === 'MODULE_LEVEL_DIRECTIVE' && warning.message.includes('use client')) {
+          return;
+        }
+        warn(warning);
+      },
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
