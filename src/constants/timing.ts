@@ -54,6 +54,9 @@ export const TIMING = {
   /** Long press detection threshold */
   LONG_PRESS_DURATION: 500,
 
+  /** Key sequence timeout for chord shortcuts (e.g., "g then X" navigation) */
+  KEY_SEQUENCE_TIMEOUT: 500,
+
   /** Message send debounce */
   MESSAGE_DEBOUNCE: 300,
 

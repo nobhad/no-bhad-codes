@@ -25,6 +25,7 @@ import { KeyboardShortcutsOverlay, useKeyboardShortcuts } from '../components/po
 import { usePortalStore } from '../stores/portal-store';
 import { usePortalAuth } from '../hooks/usePortalAuth';
 import { SubtabProvider } from '../contexts/SubtabContext';
+import { TIMING } from '../../constants/timing';
 import type { UserRole } from '../../../server/config/unified-navigation';
 
 // ============================================
@@ -154,7 +155,7 @@ function GlobalKeyboardShortcuts() {
         // Timeout to cancel if no follow-up key
         gTimerRef.current = setTimeout(() => {
           pendingGRef.current = false;
-        }, 500);
+        }, TIMING.KEY_SEQUENCE_TIMEOUT);
         return;
       }
 

@@ -31,6 +31,10 @@ export function LazyTabRoute({ tabId, children }: LazyTabRouteProps) {
   const params = useParams();
   const { showNotification, getAuthToken } = usePortalContext();
 
+  // Bumping this counter changes the wrapping element's `key`, forcing React
+  // to unmount the child subtree and remount it — which re-runs data hooks.
+  const [refreshKey, setRefreshKey] = React.useState(0);
+
   // Sync store on mount/tabId change
   React.useEffect(() => {
     switchTab(tabId);
@@ -49,8 +53,8 @@ export function LazyTabRoute({ tabId, children }: LazyTabRouteProps) {
     showNotification,
     getAuthToken,
     refreshData: () => {
-      // Trigger a re-mount by navigating to same route
-      navigate(0);
+      // Force a remount of the child so data-fetching hooks re-fire.
+      setRefreshKey((k) => k + 1);
     },
     // Pass URL params for detail views
     ...(params.clientId ? { clientId: parseInt(params.clientId, 10) } : {}),
@@ -62,17 +66,23 @@ export function LazyTabRoute({ tabId, children }: LazyTabRouteProps) {
 
   // Clone child element with injected props, wrapped in an error boundary
   // so a crash in one tab does not affect the portal layout or other tabs.
+  // The inner key={refreshKey} forces an unmount/remount when refreshData()
+  // is invoked by a child component.
   if (React.isValidElement(children)) {
     return (
       <ErrorBoundary componentName={tabId}>
-        {React.cloneElement(children, childProps)}
+        <React.Fragment key={refreshKey}>
+          {React.cloneElement(children, childProps)}
+        </React.Fragment>
       </ErrorBoundary>
     );
   }
 
   return (
     <ErrorBoundary componentName={tabId}>
-      {children}
+      <React.Fragment key={refreshKey}>
+        {children}
+      </React.Fragment>
     </ErrorBoundary>
   );
 }
