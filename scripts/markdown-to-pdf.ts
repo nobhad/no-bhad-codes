@@ -196,7 +196,7 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
         const labelText = labelMatch[1];
         const rest = raw.slice(labelMatch[0].length);
         const result: TextSegment[] = [{ text: labelText, bold: true }];
-        if (rest) result.push({ text: ' ' + rest, bold: false });
+        if (rest) result.push({ text: ` ${  rest}`, bold: false });
         return result;
       }
     }

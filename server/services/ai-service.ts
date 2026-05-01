@@ -39,7 +39,7 @@ function getClient(): import('@anthropic-ai/sdk').default {
   }
   if (!anthropicClient) {
     // Dynamic import is used in the route handler; here we use the sync constructor
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+
     const Anthropic = require('@anthropic-ai/sdk').default;
     anthropicClient = new Anthropic({ apiKey: AI_CONFIG.apiKey });
   }

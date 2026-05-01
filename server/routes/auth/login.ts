@@ -421,13 +421,15 @@ router.post(
     const isValidPassword = await bcrypt.compare(password, adminPasswordHash);
     if (!isValidPassword) {
       // Atomic increment + maybe-lock inside a transaction so concurrent
-      // admin login attempts can't race past the lockout threshold.
-      const { lockedUntil } = await userService.recordAdminFailedAttempt({
+      // admin login attempts can't race past the lockout threshold. The
+      // outer `lockedUntil` was already cleared above; this one is a
+      // fresh lockout returned by the increment if it tripped the threshold.
+      const { lockedUntil: newLockedUntil } = await userService.recordAdminFailedAttempt({
         lockThreshold: ACCOUNT_LOCKOUT_CONFIG.MAX_FAILED_ATTEMPTS,
         lockDurationMs: ACCOUNT_LOCKOUT_CONFIG.LOCKOUT_DURATION_MS
       });
 
-      if (lockedUntil) {
+      if (newLockedUntil) {
         await auditLogger.logLoginFailed(
           process.env.ADMIN_EMAIL || 'admin',
           req,

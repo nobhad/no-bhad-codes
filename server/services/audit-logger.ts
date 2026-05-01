@@ -463,7 +463,7 @@ export async function verifyAuditChain(
   // Pull the table in id-ordered pages. Each page is self-contained,
   // so the verifier's peak memory is ~batchSize rows rather than the
   // full table.
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     const rows = await db.all<AuditLogRow & { prev_hash: string | null; hash: string | null }>(
       `SELECT id, user_id, user_email, user_type, action, entity_type, entity_id, entity_name,

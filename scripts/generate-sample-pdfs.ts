@@ -169,27 +169,21 @@ async function main() {
       console.error('✗ Invoice failed:', (e as Error).message);
     }
 
-    // 5. Contract PDF — use DB data or fall back to dummy
+    // 5. Contract PDF — use DB data or fall back to dummy. Only the
+    // content flows to the PDF; project/client metadata on the row is
+    // ignored because the contract template embeds its own header.
     try {
       let contractContent: string;
-      let contractProject = 'Hedgewitch Horticulture — Business Website';
-      let contractClient = 'Emily Gold';
 
       const contractRow = await db.get(
-        `SELECT c.id, c.content, p.project_name,
-                COALESCE(cl.billing_name, cl.contact_name) as client_name,
-                COALESCE(cl.billing_company, cl.company_name) as company_name
+        `SELECT c.id, c.content
          FROM contracts c
-         LEFT JOIN projects p ON c.project_id = p.id
-         LEFT JOIN clients cl ON c.client_id = cl.id
          WHERE c.deleted_at IS NULL AND c.content IS NOT NULL
          ORDER BY c.id DESC LIMIT 1`
       ) as Record<string, unknown> | undefined;
 
       if (contractRow?.content) {
         contractContent = String(contractRow.content);
-        contractProject = String(contractRow.project_name || contractProject);
-        contractClient = String(contractRow.client_name || contractClient);
       } else {
         // Dummy contract content for preview
         contractContent = `WEB DEVELOPMENT AGREEMENT
@@ -364,7 +358,6 @@ Date: _______________                     Date: _______________`;
         });
 
         // === PARTIES — three columns: Developer | AND | Client ===
-        const partiesY = ctx.y;
         const colWidth = (contentWidth - 40) / 2; // two equal columns with 40px AND column
         const andX = leftMargin + colWidth;
         const clientX = leftMargin + colWidth + 40;
@@ -437,8 +430,7 @@ Date: _______________                     Date: _______________`;
           if (/^[-*]\s+/.test(text)) { indent = BULLET_INDENT; text = text.replace(/^[-*]\s+/, ''); }
           const isTitle = /^[A-Z][A-Z\s]{3,}$/.test(text);
           const isSection = /^\d+\.\s+/.test(text);
-          if (isTitle) { font = helveticaBold; fontSize = 14; }
-          else if (isSection) { font = helveticaBold; fontSize = 12; }
+          if (isTitle) { font = helveticaBold; fontSize = 14; } else if (isSection) { font = helveticaBold; fontSize = 12; }
 
           drawWrappedText(ctx, text, { x: leftMargin + indent, fontSize, font, maxWidth: contentWidth - indent, onNewPage });
           ctx.y -= isTitle || isSection ? 6 : 2;

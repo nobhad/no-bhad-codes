@@ -531,7 +531,7 @@ async function startServer() {
         // No drift — snapshot still matches, nothing to do.
       } else if (acceptDrift) {
         logger.warn(
-          `[Schema] DRIFT ACCEPTED via ACCEPT_SCHEMA_DRIFT — rewriting baseline. ` +
+          '[Schema] DRIFT ACCEPTED via ACCEPT_SCHEMA_DRIFT — rewriting baseline. ' +
             `added=${driftReport.added.length} removed=${driftReport.removed.length} modified=${driftReport.modified.length}`,
           { category: 'SCHEMA_DRIFT', metadata: { report: driftReport } }
         );

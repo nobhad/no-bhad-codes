@@ -47,12 +47,12 @@ const LOGIN_API_PATH = '/api/auth/portal-login';
 
 const VIEWPORTS = [
   { name: 'desktop', width: 1440, height: 900 },
-  { name: 'mobile', width: 390, height: 844 },
+  { name: 'mobile', width: 390, height: 844 }
 ];
 
 const THEMES = [
   { name: 'light', value: 'light' },
-  { name: 'dark', value: 'dark' },
+  { name: 'dark', value: 'dark' }
 ];
 
 const PAGES = [
@@ -65,7 +65,7 @@ const PAGES = [
   { name: 'project-linktrees', path: '/#/projects/linktrees' },
   { name: 'contact', path: '/#/contact' },
   { name: 'admin-login', path: '/admin/login' },
-  { name: 'portal-login', path: '/portal/login' },
+  { name: 'portal-login', path: '/portal/login' }
 ];
 
 // Pages for the video walkthrough (subset, in viewing order)
@@ -77,7 +77,7 @@ const VIDEO_WALKTHROUGH = [
   { name: 'project-the-backend', path: '/#/projects/the-backend' },
   { name: 'projects', path: '/#/projects' },
   { name: 'contact', path: '/#/contact' },
-  { name: 'home', path: '/' },
+  { name: 'home', path: '/' }
 ];
 
 // Authenticated pages — captured only when env credentials are set.
@@ -86,7 +86,7 @@ const AUTH_ADMIN_PAGES = [
   { name: 'admin-dashboard', path: '/dashboard#/dashboard' },
   { name: 'admin-work', path: '/dashboard#/work' },
   { name: 'admin-crm', path: '/dashboard#/crm' },
-  { name: 'admin-analytics', path: '/dashboard#/analytics' },
+  { name: 'admin-analytics', path: '/dashboard#/analytics' }
 ];
 
 const AUTH_CLIENT_PAGES = [
@@ -94,14 +94,17 @@ const AUTH_CLIENT_PAGES = [
   { name: 'portal-messages', path: '/dashboard#/messages' },
   { name: 'portal-invoices', path: '/dashboard#/invoices' },
   { name: 'portal-files', path: '/dashboard#/files' },
-  { name: 'portal-projects', path: '/dashboard#/projects' },
+  { name: 'portal-projects', path: '/dashboard#/projects' }
 ];
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 function setTheme(page: puppeteer.Page, themeValue: string) {
   return page.evaluate((tv: string) => {
-    localStorage.setItem('theme', tv);
+    // localStorage may be inaccessible during transitional/sandboxed
+    // states (e.g. mid-navigation, about:blank). The data-theme attribute
+    // alone is enough for visual theming.
+    try { localStorage.setItem('theme', tv); } catch { /* ignore */ }
     document.documentElement.setAttribute('data-theme', tv);
   }, themeValue);
 }
@@ -115,7 +118,7 @@ async function takeScreenshots() {
 
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
   const page = await browser.newPage();
@@ -165,7 +168,7 @@ async function takeScreenshots() {
               await page.click('[data-menu-toggle]');
               await wait(500);
             } catch {
-              console.error(`  Failed: nav-open`);
+              console.error('  Failed: nav-open');
             }
           }
         } catch (err) {
@@ -190,7 +193,7 @@ async function recordVideos() {
 
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
   for (const viewport of VIEWPORTS) {
@@ -292,7 +295,7 @@ function getClientCredentials(): { email: string; password: string } | null {
 async function loginAs(page: puppeteer.Page, email: string, password: string) {
   await page.goto(`${BASE_URL}${LOGIN_PATH}`, {
     waitUntil: 'networkidle2',
-    timeout: LOGIN_NAV_TIMEOUT_MS,
+    timeout: LOGIN_NAV_TIMEOUT_MS
   });
 
   await page.waitForSelector(LOGIN_TRIGGER_SELECTOR, { timeout: LOGIN_NAV_TIMEOUT_MS });
@@ -307,7 +310,7 @@ async function loginAs(page: puppeteer.Page, email: string, password: string) {
 
   const responsePromise = page.waitForResponse(
     (res) => res.url().includes(LOGIN_API_PATH) && res.request().method() === 'POST',
-    { timeout: LOGIN_NAV_TIMEOUT_MS },
+    { timeout: LOGIN_NAV_TIMEOUT_MS }
   );
   await page.click(LOGIN_SUBMIT_SELECTOR);
   const response = await responsePromise;
@@ -323,7 +326,7 @@ async function captureAuthenticatedPages(
   pages: typeof AUTH_ADMIN_PAGES,
   themeName: string,
   themeValue: string,
-  viewportName: string,
+  viewportName: string
 ) {
   for (const pageConfig of pages) {
     const filename = `${pageConfig.name}-${themeName}-${viewportName}.png`;
@@ -331,7 +334,7 @@ async function captureAuthenticatedPages(
     try {
       await page.goto(`${BASE_URL}${pageConfig.path}`, {
         waitUntil: 'networkidle2',
-        timeout: LOGIN_NAV_TIMEOUT_MS,
+        timeout: LOGIN_NAV_TIMEOUT_MS
       });
       await setTheme(page, themeValue);
       await wait(ANIMATION_WAIT_MS);
@@ -355,7 +358,7 @@ async function captureAuthenticatedScreenshotsForRole(
   browser: puppeteer.Browser,
   creds: { email: string; password: string },
   pages: typeof AUTH_ADMIN_PAGES,
-  roleLabel: string,
+  roleLabel: string
 ) {
   const context = await browser.createBrowserContext();
   const loginPage = await context.newPage();
@@ -392,7 +395,7 @@ async function takeAuthenticatedScreenshots() {
 
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
   if (adminCreds) {
@@ -413,13 +416,13 @@ async function takeAuthenticatedScreenshots() {
 async function recordAuthenticatedWalkthrough(
   page: puppeteer.Page,
   pages: typeof AUTH_ADMIN_PAGES,
-  themeValue: string,
+  themeValue: string
 ) {
   for (const pageConfig of pages) {
     try {
       await page.goto(`${BASE_URL}${pageConfig.path}`, {
         waitUntil: 'networkidle2',
-        timeout: LOGIN_NAV_TIMEOUT_MS,
+        timeout: LOGIN_NAV_TIMEOUT_MS
       });
       await setTheme(page, themeValue);
       await wait(VIDEO_TRANSITION_MS);
@@ -449,7 +452,7 @@ async function recordAuthenticatedVideosForRole(
   creds: { email: string; password: string },
   pages: typeof AUTH_ADMIN_PAGES,
   roleLabel: string,
-  fileSlug: string,
+  fileSlug: string
 ) {
   const context = await browser.createBrowserContext();
   const loginPage = await context.newPage();
@@ -497,7 +500,7 @@ async function recordAuthenticatedVideos() {
 
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
   if (adminCreds) {
