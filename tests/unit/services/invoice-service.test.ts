@@ -302,7 +302,7 @@ describe('Invoice Service', () => {
       terms: 'Net 10',
       start_date: '2024-01-10',
       end_date: null,
-      next_generation_date: '2024-03-01',
+      next_generation_date: '2024-02-29',
       last_generated_at: null,
       is_active: 1,
       created_at: '2024-01-10'
@@ -321,8 +321,8 @@ describe('Invoice Service', () => {
 
     const [, params] = mockDb.run.mock.calls[0];
 
-    expect(params[10]).toBe('2024-03-01');
-    expect(result.nextGenerationDate).toBe('2024-03-01');
+    expect(params[10]).toBe('2024-02-29');
+    expect(result.nextGenerationDate).toBe('2024-02-29');
   });
 
   it('uses the next matching weekday for weekly recurring invoices', async () => {
@@ -341,7 +341,7 @@ describe('Invoice Service', () => {
       terms: null,
       start_date: '2024-07-01',
       end_date: null,
-      next_generation_date: '2024-07-13',
+      next_generation_date: '2024-07-12',
       last_generated_at: null,
       is_active: 1,
       created_at: '2024-07-01'
@@ -359,8 +359,8 @@ describe('Invoice Service', () => {
 
     const [, params] = mockDb.run.mock.calls.at(-1)!;
 
-    expect(params[10]).toBe('2024-07-13');
-    expect(result.nextGenerationDate).toBe('2024-07-13');
+    expect(params[10]).toBe('2024-07-12');
+    expect(result.nextGenerationDate).toBe('2024-07-12');
   });
 
   it('filters recurring invoices by project', async () => {
