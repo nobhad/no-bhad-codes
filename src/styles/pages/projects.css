@@ -1610,12 +1610,9 @@ div.page-hero-desktop {
   outline-offset: -2px;
 }
 
-.crt-tv__channel-row.is-active {
-  background-color: #fff;
-  color: #1a1a1a;
-  text-shadow: none;
-  opacity: 1;
-}
+/* No visual active state on TV guide rows — channel selection is
+   communicated via the LED display + the tune-in animation, not via
+   a row highlight. */
 
 /* Channel number column — fixed-width feel via tabular numerals so
    "01" / "02" / "10" stay aligned regardless of digit shapes. */
