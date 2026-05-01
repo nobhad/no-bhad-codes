@@ -13,7 +13,7 @@ The Task Management System provides project-level and global task tracking with 
 
 Accessible from the Admin Dashboard sidebar under "Tasks". Shows all tasks across all active projects.
 
-- **File:** `src/features/admin/modules/admin-global-tasks.ts`
+- **File:** `src/react/features/admin/global-tasks/`
 - **API:** `GET /api/admin/tasks`
 - **Views:** Kanban board, List table
 
@@ -21,7 +21,7 @@ Accessible from the Admin Dashboard sidebar under "Tasks". Shows all tasks acros
 
 Accessible from Project Detail → Tasks tab. Shows tasks for a specific project.
 
-- **File:** `src/features/admin/modules/admin-tasks.ts`
+- **File:** `src/react/features/admin/tasks/`
 - **API:** `GET /api/projects/:id/tasks`
 - **Views:** Kanban board, List table
 
@@ -185,8 +185,8 @@ createViewToggle(mountElement, {
 
 | File | Purpose |
 |------|---------|
-| `src/features/admin/modules/admin-global-tasks.ts` | Global tasks module |
-| `src/features/admin/modules/admin-tasks.ts` | Project tasks module |
+| `src/react/features/admin/global-tasks/` | Global tasks module |
+| `src/react/features/admin/tasks/` | Project tasks module |
 | `src/components/kanban-board.ts` | Reusable Kanban component |
 | `src/components/view-toggle.ts` | View toggle component |
 | `server/routes/admin.ts` | Global tasks endpoint |

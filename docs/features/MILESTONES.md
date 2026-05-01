@@ -381,7 +381,7 @@ CREATE TABLE project_tasks (
 ### Frontend
 
 - `src/features/admin/project-details/milestones.ts` - Milestone view with expandable task lists
-- `src/features/admin/modules/admin-tasks.ts` - Task Kanban/List view with milestone tags
+- `src/react/features/admin/tasks/` - Task Kanban/List view with milestone tags
 - `src/styles/admin/project-detail.css` - Milestone and task UI styles
 - `src/styles/admin/tasks.css` - Task card and milestone tag styles
 

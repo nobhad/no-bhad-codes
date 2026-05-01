@@ -2,6 +2,8 @@
 
 **Last Updated:** March 16, 2026
 
+> **⚠️ Frontend code samples are legacy (as of 2026-04-30):** The portal-side TypeScript snippets and `ClientPortalContext` references in this doc come from the removed vanilla portal (`portal-invoices.ts`). The client portal no longer has a dedicated invoices view — it has been consolidated into `src/react/features/portal/documents/PortalDocuments.tsx`. Admin invoice management lives in `src/react/features/admin/invoices/`. Server routes, API endpoints, database schema, PDF generation, and Stripe integration documented below remain accurate.
+
 ## Table of Contents
 
 1. [Overview](#overview)
@@ -925,7 +927,7 @@ Manually send a payment reminder email.
 
 ### TypeScript Module
 
-Location: `src/features/client/modules/portal-invoices.ts`
+Location: `src/react/features/portal/invoices/`
 
 ### API Base URL
 
@@ -940,7 +942,7 @@ const INVOICES_API_BASE = '/api/invoices';
 Fetches invoices from the API and renders the list with summary stats.
 
 ```typescript
-// src/features/client/modules/portal-invoices.ts
+// src/react/features/portal/invoices/
 import { formatCurrency } from '../../../utils/format-utils';
 import { getContainerLoadingHTML } from '../../../utils/loading-utils';
 import { showToast } from '../../../utils/toast-notifications';
@@ -1004,7 +1006,7 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
 Renders invoice items with status badges and action buttons.
 
 ```typescript
-// src/features/client/modules/portal-invoices.ts
+// src/react/features/portal/invoices/
 function renderInvoicesList(
   container: HTMLElement,
   invoices: PortalInvoice[],
@@ -1067,7 +1069,7 @@ function renderInvoicesList(
 Downloads invoice as PDF via blob fetch.
 
 ```typescript
-// src/features/client/modules/portal-invoices.ts
+// src/react/features/portal/invoices/
 async function downloadInvoice(
   invoiceId: number,
   invoiceNumber: string,
@@ -1101,7 +1103,7 @@ async function downloadInvoice(
 #### Utility Methods
 
 ```typescript
-// src/features/client/modules/portal-invoices.ts
+// src/react/features/portal/invoices/
 
 // Get CSS class for status badge
 function getInvoiceStatusClass(status: string): string {
@@ -1349,7 +1351,7 @@ DEPOSIT CREDITS APPLIED:
 |`server/routes/invoices/*.ts`|Split invoice route modules (core, deposits, credits, etc.)|
 |`server/routes/invoices/pdf.ts`|PDF generation utilities (used by routes)|
 |`server/services/invoice-service.ts`|Invoice business logic|
-|`src/features/client/modules/portal-invoices.ts`|Frontend invoice handling (~250 lines)|
+|`src/react/features/portal/invoices/`|Frontend invoice handling (~250 lines)|
 |`src/styles/client-portal/documents.css`|Invoice styling (consolidated)|
 |`templates/pages/client-portal.ejs`|Invoices tab HTML (tab-invoices section)|
 
@@ -1471,7 +1473,7 @@ When an invoice is sent, reminders are automatically scheduled:
 |`server/services/invoice-service.ts`|Invoice business logic (~3000 lines)|
 |`server/services/scheduler-service.ts`|Automated task scheduling|
 |`server/database/migrations/028_invoice_enhancements.sql`|New tables migration|
-|`src/features/client/modules/portal-invoices.ts`|Frontend invoice handling (~250 lines)|
+|`src/react/features/portal/invoices/`|Frontend invoice handling (~250 lines)|
 |`src/styles/client-portal/documents.css`|Invoice styling (consolidated)|
 |`templates/pages/client-portal.ejs`|Invoices tab HTML (tab-invoices section)|
 

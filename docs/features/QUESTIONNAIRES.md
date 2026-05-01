@@ -104,7 +104,7 @@ Questions are stored as JSON arrays with the following structure:
 
 ### Admin Portal
 
-**File:** `src/features/admin/modules/admin-questionnaires.ts`
+**File:** `src/react/features/admin/questionnaires/`
 
 - Questionnaire management table
 - Create/edit questionnaire modal with question builder
@@ -113,7 +113,7 @@ Questions are stored as JSON arrays with the following structure:
 
 ### Client Portal
 
-**File:** `src/features/client/modules/portal-questionnaires.ts`
+**File:** `src/react/features/portal/questionnaires/`
 
 - Questionnaire list with status indicators
 - Questionnaire form with auto-save

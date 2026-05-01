@@ -8,7 +8,7 @@
 The Contacts module manages submissions from the main website's contact form. Admins can view, respond to, and convert submissions to clients or leads.
 
 **Location:** Admin Dashboard → Contacts tab
-**File:** `src/features/admin/modules/admin-contacts.ts`
+**File:** `src/react/features/admin/contacts/`
 
 ## Submission Statuses
 
@@ -131,7 +131,7 @@ POST /api/contacts (public)
 
 | File | Purpose |
 |------|---------|
-| `src/features/admin/modules/admin-contacts.ts` | Contacts module |
+| `src/react/features/admin/contacts/` | Contacts module |
 | `src/features/admin/renderers/admin-contacts.renderer.ts` | Detail modal renderer |
 | `server/routes/clients.ts` | API endpoints (contacts merged into clients) |
 | `src/utils/table-filter.ts` | Filter configuration |

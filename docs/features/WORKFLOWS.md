@@ -12,7 +12,7 @@ The Workflow Automation System provides three types of automation:
 3. **Email Templates**: Customizable email templates with variable substitution
 
 **Location:** Admin Dashboard → Settings → Workflows subtab
-**File:** `src/features/admin/modules/admin-workflows.ts`
+**File:** `src/react/features/admin/workflows/`
 
 ---
 
@@ -415,9 +415,8 @@ POST /api/email-templates/:id/test
 
 | File | Purpose |
 |------|---------|
-| `src/features/admin/modules/admin-workflows.ts` | Workflows module (approvals + triggers) |
-| `src/features/admin/modules/admin-email-templates.ts` | Email templates module |
-| `src/features/admin/modules/index.ts` | Module exports |
+| `src/react/features/admin/workflows/` | Workflows module (approvals + triggers) |
+| `src/react/features/admin/email-templates/` | Email templates module |
 | `server/routes/approvals.ts` | Approval endpoints |
 | `server/routes/triggers.ts` | Trigger endpoints |
 | `server/routes/email-templates.ts` | Email template endpoints |

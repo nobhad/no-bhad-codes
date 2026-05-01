@@ -316,7 +316,7 @@ Rename to "Debug" or "System Info" and keep as-is for developers. Hide in produc
 
 - `admin/index.html` - restructure Analytics section
 - `src/styles/admin/analytics.css` - tab styles
-- `src/features/admin/modules/admin-analytics.ts` - tab switching logic
+- `src/react/features/admin/analytics/` - tab switching logic
 
 ### Phase 2: System Tab Enhancement
 
@@ -330,7 +330,7 @@ Rename to "Debug" or "System Info" and keep as-is for developers. Hide in produc
 
 - `admin/index.html` - restructure System tab
 - `server/routes/admin.ts` - add health endpoint
-- `src/features/admin/modules/admin-system-status.ts` - health check UI
+- `src/react/features/admin/system-status/` - health check UI
 
 ---
 

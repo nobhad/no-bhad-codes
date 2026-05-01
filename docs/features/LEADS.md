@@ -526,7 +526,7 @@ Three-tab interface:
 
 ### Related Files
 
-- `src/features/admin/modules/admin-leads.ts` - Lead management module
+- `src/react/features/admin/leads/` - Lead management module
 - `src/styles/admin/leads-pipeline.css` - Lead pipeline and analytics styles
 - `admin/index.html` - Analytics section, scoring rules section
 
