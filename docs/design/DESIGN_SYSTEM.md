@@ -103,7 +103,7 @@ All tokens live in `src/design-system/tokens/` (11 files). See [CSS Architecture
 src/
   design-system/tokens/    # 11 token files (colors, typography, spacing, etc.)
   styles/
-    bundles/               # Entry points: site.css, portal.css, admin.css
+    bundles/               # Entry points: site.css, client.css, admin.css
     base/                  # Reset, fonts, typography, layout, utilities
     components/            # Shared components (forms, loading, nav)
     portal/

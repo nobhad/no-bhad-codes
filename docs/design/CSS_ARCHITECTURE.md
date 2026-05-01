@@ -235,7 +235,7 @@ src/
     bundles/
       foundation.css             # Shared foundation (layer-order + reset + tokens + base + forms)
       site.css                   # Main marketing site bundle
-      portal.css                 # Client portal bundle
+      client.css                 # Client portal bundle
       admin.css                  # Admin dashboard bundle
     portal/
       shared/                    # Shared portal components (33 files)
@@ -375,7 +375,7 @@ Shared by all three apps. Imports in order:
 
 Main marketing site. Adds navigation, business card, intro, portfolio, page styles, mobile overrides.
 
-### Portal Bundle (`portal.css`)
+### Client Bundle (`client.css`)
 
 Client portal. Adds navigation, footer, client styles, light mode overrides.
 
