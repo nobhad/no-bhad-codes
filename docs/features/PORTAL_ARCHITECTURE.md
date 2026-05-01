@@ -1,7 +1,7 @@
 # Portal Architecture
 
 **Status:** Complete
-**Last Updated:** 2026-03-17
+**Last Updated:** 2026-04-30
 
 ## Overview
 
@@ -9,7 +9,7 @@ Both the Admin Dashboard and Client Portal are served as a single React SPA. The
 
 ## Entry Points
 
-Both portals mount into `.dashboard-container.portal` via `src/react/app/mount-portal.tsx`.
+Both portals mount into the `<div class="portal">` element rendered by `server/views/layouts/portal.ejs`. The mount is performed by `mountPortalApp()` in `src/react/app/mount-portal.tsx`, invoked from the `ReactPortalModule` factory in `src/core/modules-config.ts`.
 
 - **Admin:** `src/admin.ts` (Vite entry) — server serves `/dashboard`
 - **Client:** `src/portal.ts` (Vite entry) — server serves `/dashboard`
@@ -78,56 +78,56 @@ Exported helpers:
 
 All routes are wrapped in a `RequireAuth > PortalLayout` guard. Route components are lazy-loaded via `LazyTabRoute`.
 
-### Shared Routes
+### Shared Routes (role-gated render)
 
-Rendered differently per role via `role === 'admin'` check:
+These paths render different components depending on `role`:
 
-- `/dashboard`
-- `/messages`
-- `/invoices`
-- `/files`
-- `/questionnaires`
-- `/projects`
-- `/contracts`
-- `/settings`
+- `/dashboard` — `OverviewDashboard` (admin) / `PortalDashboard` (client)
+- `/messages` — `MessageView` / `PortalMessagesView`
+- `/files` — `FilesManager` / `PortalFilesHub`
+- `/contracts` — `ContractsTable` / `PortalContracts`
+- `/deliverables` — `DeliverablesTable` / `PortalDeliverablesHub`
+- `/proposals` — `ProposalsTable` / `PortalProposals`
+- `/agreements` — `AgreementBuilder` / `AgreementsList`
+- `/meetings` — `MeetingRequestsTable` / `MeetingRequestsList`
+- `/retainers` — `RetainersTable` / `PortalRetainers`
+- `/feedback` — `FeedbackTable` / `PortalFeedback`
+- `/documents` — `DocumentsDashboard` / `PortalDocuments`
+- `/settings` — `PortalSettings` (shared component)
 
 ### Admin-Only Routes
 
-- `/analytics`, `/performance`, `/work`, `/crm`, `/documents`
-- `/leads`, `/contacts`, `/clients`, `/tasks`
-- `/requests`, `/deliverables`, `/proposals`, `/document-requests`
-- `/support`, `/system`, `/email-templates`
-- `/deleted-items`, `/time-tracking`, `/design-review`, `/ad-hoc-analytics`
-- `/data-quality`, `/integrations`, `/webhooks`, `/workflows`
-- `/client-detail/:clientId`, `/project-detail/:projectId`
+- Dashboards: `/analytics`, `/performance`, `/system-health`, `/work`, `/crm`
+- CRM: `/leads`, `/contacts`, `/clients`, `/tasks`
+- Work: `/requests`, `/document-requests`
+- System: `/support`, `/system`, `/email-templates`, `/deleted-items`
+- Advanced: `/time-tracking`, `/design-review`, `/ad-hoc-analytics`, `/data-quality`, `/integrations`, `/webhooks`, `/workflows`
+- Detail views: `/client-detail/:clientId`, `/project-detail/:projectId`
+- Sequences & Automations: `/sequences`, `/automations`, `/automation-detail/:automationId`
+- Finance: `/expenses`
+- Feedback: `/feedback-analytics`, `/testimonials`
+- Embed: `/embed-widgets`
+- Templates: `/onboarding-templates`
 
 ### Client-Only Routes
 
-- `/agreements` — Project agreement list (Phase 1C)
-- `/agreements/:id` — Step-by-step agreement flow (Phase 1C)
-- `/meetings` — Meeting request submission and tracking (Phase 2B)
-- `/proposals/:id` — Proposal detail view with accept/decline (Phase 0B)
-- `/requests-hub` — Ad hoc requests, questionnaires, document requests
+- `/agreements/:id` — Step-by-step agreement flow
+- `/proposals/:id` — Proposal detail view with accept/decline
+- `/requests-hub` — Unified hub: ad hoc requests, questionnaires, document requests
 - `/content-requests` — Content request checklists
 - `/payment-schedule` — Payment installment tracking
-- `/deliverables` — Deliverables hub
-- `/approvals` — Redirects to `/deliverables`
-- `/review` — Redirects to `/dashboard`
-- `/feedback` — Feedback surveys (Phase 5A, role-gated — clients see PortalFeedback)
+- `/auto-pay` — Auto-pay configuration
 - `/help` — Knowledge base
 
-### Admin-Only Routes (Phase 2-5B)
+### Client Redirects (legacy paths)
 
-- `/sequences` — Email drip sequence management (Phase 2A)
-- `/meetings` — Meeting requests admin table (Phase 2B, role-gated)
-- `/automations` — Custom automation engine (Phase 3A/3B)
-- `/automation-detail/:id` — Automation detail panel with run history (Phase 3B)
-- `/expenses` — Expense tracking and profitability (Phase 4A)
-- `/retainers` — Retainer management (Phase 4B, role-gated — clients see PortalRetainers)
-- `/feedback` — Feedback surveys (Phase 5A, role-gated — admin sees FeedbackTable, clients see PortalFeedback)
-- `/feedback-analytics` — Feedback analytics dashboard (Phase 5A)
-- `/testimonials` — Testimonial management (Phase 5A)
-- `/embed-widgets` — Embeddable widget configuration manager (Phase 5B)
+- `/invoices` → `/documents`
+- `/projects` → `/dashboard`
+- `/questionnaires` → `/requests-hub`
+- `/document-requests` → `/requests-hub`
+- `/requests` → `/requests-hub`
+- `/approvals` → `/deliverables`
+- `/review` → `/dashboard`
 
 ## Code Splitting
 
@@ -175,6 +175,13 @@ Portal subtabs use `SubtabContext` (React context) for state management:
 This replaced the previous DOM custom event system (`document.dispatchEvent`/`addEventListener`).
 
 ## Change Log
+
+### 2026-04-30 — Routing accuracy pass
+
+- Corrected mount target from `.dashboard-container.portal` to `.portal` (matches `server/views/layouts/portal.ejs` and `mount-portal.tsx`).
+- Rewrote routing section to reflect role-based branching: split into "Shared Routes (role-gated render)", "Admin-Only", "Client-Only", and "Client Redirects". Phase labels removed since features are shipped.
+- Added missing routes: `/auto-pay` (client), `/system-health`, `/onboarding-templates` (admin).
+- Documented that `/agreements`, `/meetings`, `/retainers`, `/feedback`, `/documents`, `/files`, `/contracts`, `/deliverables`, `/proposals` are role-gated shared paths (not admin-only).
 
 ### 2026-03-17 — Phase 6 SearchModal integration
 

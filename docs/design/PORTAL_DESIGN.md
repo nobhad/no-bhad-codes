@@ -1,6 +1,6 @@
 # Portal Design System
 
-**Last Updated:** March 16, 2026
+**Last Updated:** April 30, 2026
 
 Portal-specific design standards for the admin dashboard and client portal. For shared design tokens and CSS architecture, see [CSS_ARCHITECTURE.md](./CSS_ARCHITECTURE.md).
 
@@ -635,6 +635,9 @@ const config: DetailPanelConfig<MyEntity> = {
 | Design Review | `design-review/DesignReviewDetailPanel.tsx` | Overview, Timeline |
 | Workflow | `workflows/WorkflowDetailPanel.tsx` | Overview, Stats |
 | Email Template | `email-templates/EmailTemplateDetailPanel.tsx` | Overview, Variables |
+| Invoice | `invoices/InvoiceDetailPanel.tsx` | Details, Timeline |
+
+**Non-factory exception:** `automations/AutomationDetailPanel.tsx` is rendered as a full-page route (`/automation-detail/:automationId`), not a slide-in panel, and does not use the `DetailPanel` factory.
 
 #### Rules
 
@@ -949,6 +952,10 @@ Files with content in different cascade layers (e.g., `@layer components` + `@la
 ---
 
 ## Recent Changes
+
+### April 30, 2026 -- Detail Panel Catalog Update
+
+Added `InvoiceDetailPanel` to the entity panels table (uses `DetailPanel` factory; tabs: Details, Timeline). Documented `AutomationDetailPanel` as a non-factory exception rendered as a full-page route at `/automation-detail/:automationId`.
 
 ### March 17, 2026 -- CSS Class Bloat Cleanup + Layout Fix
 

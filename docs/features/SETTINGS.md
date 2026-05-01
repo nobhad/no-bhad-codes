@@ -276,8 +276,10 @@ Eye icon buttons to show/hide password fields.
 
 ### Password Toggle TypeScript Implementation
 
+> Legacy snippet from the removed vanilla portal (`src/features/client/client-portal.ts`). The React portal handles password toggles inside the relevant settings/auth components (e.g. `src/react/features/auth/AuthGate.tsx`).
+
 ```typescript
-// src/features/client/client-portal.ts:172-193
+// Legacy reference — vanilla TS implementation
 // Password toggle buttons
 const passwordToggles = document.querySelectorAll('.cp-password-toggle');
 const eyeIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';

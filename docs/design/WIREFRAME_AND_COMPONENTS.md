@@ -2,6 +2,8 @@
 
 **Last updated:** February 2, 2026 (full scan of admin + client portals for reusable-component candidates)
 
+> **⚠️ Outdated context (as of 2026-04-30):** This document was written when the client portal still ran on vanilla TypeScript modules (`portal-navigation.ts`, `client-portal.ts`, `portal-views.ts`, etc.). Those files have since been removed and the client portal is now a React SPA sharing the same component tree as the admin. References below to vanilla portal modules are historical — for current portal architecture see [PORTAL_ARCHITECTURE.md](../features/PORTAL_ARCHITECTURE.md) and [CLIENT_PORTAL.md](../features/CLIENT_PORTAL.md). Wireframe mode (`?wireframe=1`) and the reusable-component gap analysis remain valid in spirit; specific file paths in this doc may not.
+
 **This doc is not the site-feature wireframes doc.** For the **site feature** (client-facing wireframe previews: upload screenshots to project Files, clients view in Files tab), see [WIREFRAMES.md](../features/WIREFRAMES.md).
 
 Design and front-end changes are applied **directly to the main site** (admin and client portal). No separate wireframe build is required. This doc covers (1) **optional greyscale mode** (`?wireframe=1`) for ad-hoc layout review, and (2) what should be **reusable components** but currently is not.
