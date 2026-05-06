@@ -26,6 +26,18 @@ const escapeAttr = escapeHtml;
  * Light text (white-ish) → dark veil. Dark text (black-ish) → light veil.
  * Threshold uses sRGB luma since we're optimizing for human readability.
  */
+/**
+ * Per-channel background music — looping public-domain National Jukebox
+ * tracks (Library of Congress) keyed by project slug. Channel 01 (the
+ * guide) is intentionally silent. Adding a song to a future project =
+ * drop the mp3 in `public/audio/` and add the slug → URL row here.
+ */
+const CHANNEL_MUSIC: Readonly<Record<string, string>> = {
+  'nobhad-codes': '/audio/the-broken-hearted-sparrow.mp3',
+  'the-backend': '/audio/anvil-chorus.mp3',
+  'hedgewitch-horticulture': '/audio/roses-at-twilight.mp3'
+};
+
 function contrastVeil(hex: string): string {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.trim());
   if (!m) return 'rgba(0, 0, 0, 0.45)';
@@ -697,9 +709,11 @@ export class ProjectsModule extends BaseModule {
     const isOff = tv.classList.toggle('is-powered-off');
     const screenBg = document.querySelector('[data-screen-bg]') as HTMLImageElement | null;
     if (isOff) {
-      // Going off — cancel any tune-in so we come back cleanly, and
-      // swap the base image to the dark / off variant.
+      // Going off — cancel any tune-in so we come back cleanly, fade
+      // out whatever channel music was playing, and swap the base
+      // image to the dark / off variant.
       this.cancelTuneIn();
+      tvSfx.stopMusic();
       if (screenBg) screenBg.src = '/images/title-card_base-off.webp';
     } else {
       // Going from off → on: swap to the lit base image and fire the
@@ -997,6 +1011,14 @@ export class ProjectsModule extends BaseModule {
       sustainS: 0.18,
       releaseS: 0.28
     });
+
+    // Background music for this channel — playMusic auto-fades any
+    // previous track out before the new one fades in, and is a no-op
+    // when re-tuning to the same channel. Lazy-loaded per URL so the
+    // first cycle to a track pays fetch+decode (~200ms-1s depending on
+    // file size) and subsequent retunes are instant.
+    const musicUrl = CHANNEL_MUSIC[slug];
+    if (musicUrl) void tvSfx.playMusic(musicUrl);
 
     // 1) Static burst + channel list snaps off, bg flashes blank for a
     //    split second (the "between channels" void) before swapping to
@@ -1405,6 +1427,9 @@ export class ProjectsModule extends BaseModule {
     // Tear down any in-flight tune-in (timelines, panels, classes) but
     // skip the instant visual reset — the animation below handles it.
     this.cancelTuneIn();
+    // Channel 01 (the guide) is intentionally silent — no track maps
+    // to it. Fade out whatever project music was playing.
+    tvSfx.stopMusic();
 
     const screenBg = document.querySelector('[data-screen-bg]') as HTMLImageElement | null;
     const channelList = document.querySelector('.crt-tv__channel-list') as HTMLElement | null;

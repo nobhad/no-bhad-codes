@@ -70,6 +70,14 @@ const STATIC_DEFAULT_RELEASE_S = 0.55;
 // masterGain (default 0.5).
 const STATIC_DEFAULT_PEAK_GAIN = 0.18;
 
+// Per-track gain for channel music — multiplied by masterGain so the
+// final effective amplitude at default volume is 0.7 * 0.5 = 0.35.
+// Set under 1.0 so the music sits "behind" UI feedback (click 0.22 +
+// static crackle ~0.18) instead of competing with it on tune-in.
+const MUSIC_DEFAULT_GAIN = 0.7;
+const MUSIC_FADE_IN_S = 0.8;
+const MUSIC_FADE_OUT_S = 0.45;
+
 interface StaticOptions {
   attackS?: number;
   holdS?: number;
@@ -107,6 +115,21 @@ class TvSfx {
   // a random offset so back-to-back channel changes don't sound identical.
   private staticBuffer: AudioBuffer | null = null;
   private staticLoadPromise: Promise<AudioBuffer | null> | null = null;
+  // Currently-playing channel music: source + its envelope gain (used
+  // to fade the track in/out without affecting masterGain). musicCurrentUrl
+  // is the truth source for "which track is on" — also used to ignore
+  // late-arriving decode promises if the user has tuned away mid-load.
+  // ReturnType of createBufferSource avoids referencing the
+  // AudioBufferSourceNode global directly, which our eslint config
+  // doesn't include in its DOM globals list (other Web Audio types
+  // happen to be there but this one isn't).
+  private musicSource: ReturnType<AudioContext['createBufferSource']> | null = null;
+  private musicGain: GainNode | null = null;
+  private musicCurrentUrl: string | null = null;
+  // Decoded buffers per-URL — first play of a track pays fetch+decode,
+  // subsequent plays of the same track are instant.
+  private musicBufferCache: Map<string, AudioBuffer> = new Map();
+  private musicLoadPromises: Map<string, Promise<AudioBuffer | null>> = new Map();
   // Eagerly-fetched raw bytes for both samples. Decoding into an
   // AudioBuffer requires a live AudioContext (which we can't create
   // until the first user gesture), so we keep the encoded bytes around
@@ -267,6 +290,80 @@ class TvSfx {
     source.stop(now + totalS);
   }
 
+  /** Start looping background music for a channel. Idempotent on the
+      same URL — calling repeatedly with the same track is a no-op. A
+      different URL fades the current track out first. Routes through
+      masterGain so VOLUME ▼/▲ and the mute state already control it
+      (no separate volume slider needed). Lazy-loads + caches each
+      track on first play. */
+  async playMusic(url: string): Promise<void> {
+    if (this.musicCurrentUrl === url) return;
+
+    // Mark intent immediately so a re-entrant playMusic() (different
+    // URL) during the await chain knows we're switching, and so a
+    // simultaneous stopMusic() can clear it. Stopping any prior track
+    // first ensures only one is audible at a time.
+    if (this.musicSource) this.stopMusic();
+    this.musicCurrentUrl = url;
+
+    const ctx = await this.ensureContext();
+    if (!ctx || !this.masterGain) return;
+    // Bail if the user already tuned away (or hit POWER) during the
+    // ensureContext await.
+    if (this.musicCurrentUrl !== url) return;
+
+    const buffer = await this.loadMusicBuffer(ctx, url);
+    if (!buffer) return;
+    if (this.musicCurrentUrl !== url) return;
+
+    const gain = ctx.createGain();
+    const now = ctx.currentTime;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(MUSIC_DEFAULT_GAIN, now + MUSIC_FADE_IN_S);
+    gain.connect(this.masterGain);
+
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    source.connect(gain);
+    source.start(now);
+
+    this.musicSource = source;
+    this.musicGain = gain;
+  }
+
+  /** Fade the current music out + stop the source. No-op if no track
+      is playing. Safe to call from POWER off, channel-back-to-guide,
+      or anywhere else the music should end. */
+  stopMusic(): void {
+    const src = this.musicSource;
+    const gain = this.musicGain;
+    this.musicSource = null;
+    this.musicGain = null;
+    this.musicCurrentUrl = null;
+    if (!src || !gain || !this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const stopAt = now + MUSIC_FADE_OUT_S + 0.05;
+    // Capture the current envelope value so the fade-out starts from
+    // wherever we are (mid fade-in, full gain, etc.) instead of jumping.
+    gain.gain.cancelScheduledValues(now);
+    gain.gain.setValueAtTime(gain.gain.value, now);
+    gain.gain.linearRampToValueAtTime(0, now + MUSIC_FADE_OUT_S);
+    try {
+      src.stop(stopAt);
+    } catch {
+      // .stop() throws if the source already stopped — ignore.
+    }
+    // Disconnect after the source actually stops so we don't truncate
+    // the fade. Time-based since AudioBufferSourceNode has no clean
+    // 'ended' guarantee across browsers when stopped early.
+    setTimeout(() => {
+      try { src.disconnect(); } catch { /* already disconnected */ }
+      try { gain.disconnect(); } catch { /* already disconnected */ }
+    }, (MUSIC_FADE_OUT_S + 0.1) * 1000);
+  }
+
   // --------------------------------------------------------------------
   // internal helpers
   // --------------------------------------------------------------------
@@ -376,6 +473,35 @@ class TvSfx {
       }
     })();
     return this.staticLoadPromise;
+  }
+
+  /** Lazy fetch + decode a per-channel music track. Cached by URL —
+      re-tuning to the same channel within a session is instant. We do
+      NOT eager-prefetch like the click/static samples because music
+      files are 1-7 MB each and most visitors only listen to one
+      channel; paying the bandwidth up front for tracks they may never
+      hear isn't worth it. */
+  private async loadMusicBuffer(ctx: AudioContext, url: string): Promise<AudioBuffer | null> {
+    const cached = this.musicBufferCache.get(url);
+    if (cached) return cached;
+    const inFlight = this.musicLoadPromises.get(url);
+    if (inFlight) return inFlight;
+    const promise = (async () => {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const data = await res.arrayBuffer();
+        const decoded = await ctx.decodeAudioData(data);
+        this.musicBufferCache.set(url, decoded);
+        return decoded;
+      } catch {
+        return null;
+      } finally {
+        this.musicLoadPromises.delete(url);
+      }
+    })();
+    this.musicLoadPromises.set(url, promise);
+    return promise;
   }
 
   /** Bind a delegated document-level click listener that fires the click
