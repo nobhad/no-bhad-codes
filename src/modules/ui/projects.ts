@@ -38,6 +38,43 @@ const CHANNEL_MUSIC: Readonly<Record<string, string>> = {
   'hedgewitch-horticulture': '/audio/roses-at-twilight.mp3'
 };
 
+/**
+ * Build a Lucide square-chevron-{left|right} SVG icon as a real SVG
+ * element (not innerHTML) so the security-hook for stringified markup
+ * stays clean. Used for the small-mobile channel up/down buttons.
+ */
+function buildSquareChevronIcon(direction: 'left' | 'right'): SVGSVGElement {
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('width', '24');
+  svg.setAttribute('height', '24');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '2');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.classList.add('lucide', `lucide-square-chevron-${direction}`);
+
+  const rect = document.createElementNS(SVG_NS, 'rect');
+  rect.setAttribute('width', '18');
+  rect.setAttribute('height', '18');
+  rect.setAttribute('x', '3');
+  rect.setAttribute('y', '3');
+  rect.setAttribute('rx', '2');
+  svg.appendChild(rect);
+
+  const path = document.createElementNS(SVG_NS, 'path');
+  path.setAttribute(
+    'd',
+    direction === 'left' ? 'm14 16-4-4 4-4' : 'm10 8 4 4-4 4'
+  );
+  svg.appendChild(path);
+
+  return svg;
+}
+
 function contrastVeil(hex: string): string {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.trim());
   if (!m) return 'rgba(0, 0, 0, 0.45)';
@@ -563,13 +600,13 @@ export class ProjectsModule extends BaseModule {
     downBtn.className = 'projects-tv-channel-btn';
     downBtn.dataset.tvMobileBtn = 'channel-down';
     downBtn.setAttribute('aria-label', 'Previous channel');
-    downBtn.textContent = '◀ CH';
+    downBtn.appendChild(buildSquareChevronIcon('left'));
     const upBtn = document.createElement('button');
     upBtn.type = 'button';
     upBtn.className = 'projects-tv-channel-btn';
     upBtn.dataset.tvMobileBtn = 'channel-up';
     upBtn.setAttribute('aria-label', 'Next channel');
-    upBtn.textContent = 'CH ▶';
+    upBtn.appendChild(buildSquareChevronIcon('right'));
     channelControls.append(downBtn, upBtn);
     tvWrap.appendChild(channelControls);
 

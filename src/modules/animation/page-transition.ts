@@ -170,6 +170,12 @@ export class PageTransitionModule extends BaseModule {
   private containerSelector: string;
   private enableOnMobile: boolean;
   private isMobile: boolean = false;
+  // Small-mobile (<= 479px) skips the camera/wheel/touch interaction
+  // entirely — those phones use native vertical scroll between stacked
+  // sections (see mobile/layout.css small-mobile block). Module still
+  // initializes for hash routing, page-active class management, and
+  // project-detail overlay; only the gesture handlers no-op.
+  private isSmallMobile: boolean = false;
 
   // Debounced resize handler
   private debouncedHandleResize: (() => void) | null = null;
@@ -282,6 +288,7 @@ export class PageTransitionModule extends BaseModule {
 
     // Check if mobile
     this.isMobile = window.matchMedia('(max-width: 767px)').matches;
+    this.isSmallMobile = window.matchMedia('(max-width: 479px)').matches;
 
     // Skip on mobile unless explicitly enabled
     if (this.isMobile && !this.enableOnMobile) {
@@ -304,7 +311,31 @@ export class PageTransitionModule extends BaseModule {
     // Wait for intro animation to complete before enabling page transitions
     this.listenForIntroComplete();
 
+    if (this.isSmallMobile) this.setupContactInViewObserver();
+
     this.log('[PageTransitionModule] Init complete, pages:', this.pages.size);
+  }
+
+  /**
+   * Small-mobile only: watch the contact tile and toggle a body class
+   * when it's the section currently filling the viewport. The footer's
+   * CSS keys off this class so it only renders at the bottom of the
+   * scroll-snap stack, not on top of every other section.
+   */
+  private setupContactInViewObserver(): void {
+    const contact = document.getElementById('contact');
+    if (!contact || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          document.body.classList.toggle('at-contact', entry.isIntersecting);
+        }
+      },
+      // 0.5 threshold: footer appears once contact owns most of the
+      // viewport, hides as soon as the user scrolls back toward projects.
+      { threshold: 0.5 }
+    );
+    observer.observe(contact);
   }
 
   /**
@@ -694,6 +725,21 @@ export class PageTransitionModule extends BaseModule {
 
     this.updateActivePageAttribute(initialPageId);
 
+    // Small-mobile uses native scroll-snap, so a deep-link to a non-intro
+    // map tile needs an explicit scroll — the camera transform is
+    // suppressed on this breakpoint, so without scrolling the user
+    // would land at the top (intro) regardless of the hash they hit.
+    // Behavior 'auto' for first paint so the user lands on their target
+    // tile immediately, no smooth-scroll animation.
+    if (
+      this.isSmallMobile &&
+      this.isMapPage(initialPageId) &&
+      initialPageId !== 'intro'
+    ) {
+      const initialTarget = this.pages.get(initialPageId)?.element;
+      initialTarget?.scrollIntoView({ behavior: 'auto', block: 'start' });
+    }
+
     this.log(`Initial page set: ${this.currentPageId}`);
   }
 
@@ -861,6 +907,18 @@ export class PageTransitionModule extends BaseModule {
       } else {
         void this.transitionTo(pageId);
       }
+
+      // Small-mobile uses native scroll-snap rather than the camera, so
+      // hash-driven nav (hamburger menu, deep link) needs an explicit
+      // scrollIntoView — transitionTo only flips page-active, it doesn't
+      // move the viewport. requestAnimationFrame waits for the class
+      // flip so any layout-affecting state lands first.
+      if (this.isSmallMobile && this.isMapPage(pageId)) {
+        requestAnimationFrame(() => {
+          const target = this.pages.get(pageId)?.element;
+          target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
     }
   }
 
@@ -1005,6 +1063,7 @@ export class PageTransitionModule extends BaseModule {
   private handleResize(): void {
     const wasMobile = this.isMobile;
     this.isMobile = window.matchMedia('(max-width: 767px)').matches;
+    this.isSmallMobile = window.matchMedia('(max-width: 479px)').matches;
 
     if (wasMobile !== this.isMobile) {
       this.log(`Breakpoint crossed - now ${this.isMobile ? 'mobile' : 'desktop'}`);
@@ -1085,6 +1144,11 @@ export class PageTransitionModule extends BaseModule {
    */
   private handleWheel(event: WheelEvent): void {
     if (this.isMobile && !this.enableOnMobile) return;
+    // Small mobile uses native vertical scroll between stacked sections
+    // — gesture-driven camera nav is off so the body's natural scroll
+    // owns the experience and we don't pay the GSAP tween cost on every
+    // swipe.
+    if (this.isSmallMobile) return;
     // During the intro animation, swallow ALL wheel events so the browser
     // can't scroll the page horizontally or vertically before the user is
     // released into the spatial map.
@@ -1189,6 +1253,11 @@ export class PageTransitionModule extends BaseModule {
    */
   private handleKeydown(event: KeyboardEvent): void {
     if (this.isMobile && !this.enableOnMobile) return;
+    // Small mobile uses native vertical scroll between stacked sections
+    // — gesture-driven camera nav is off so the body's natural scroll
+    // owns the experience and we don't pay the GSAP tween cost on every
+    // swipe.
+    if (this.isSmallMobile) return;
 
     // Form inputs always opt out — arrow keys must move the caret /
     // change select option / etc. Checked first so a focused input stays
@@ -1318,6 +1387,11 @@ export class PageTransitionModule extends BaseModule {
    */
   private handleTouchStart(event: TouchEvent): void {
     if (this.isMobile && !this.enableOnMobile) return;
+    // Small mobile uses native vertical scroll between stacked sections
+    // — gesture-driven camera nav is off so the body's natural scroll
+    // owns the experience and we don't pay the GSAP tween cost on every
+    // swipe.
+    if (this.isSmallMobile) return;
     if (this.isTransitioning) return;
     // During intro, swallow touch starts so swipes don't scroll the page.
     if (!this.introComplete) {
@@ -1343,6 +1417,7 @@ export class PageTransitionModule extends BaseModule {
     const start = this.touchStart;
     this.touchStart = null;
     if (!start) return;
+    if (this.isSmallMobile) return;
     if (this.isTransitioning) return;
     if (performance.now() < this.wheelCooldownUntil) return;
     if (!this.isMapPage(this.currentPageId) && this.currentPageId !== 'project-detail') return;

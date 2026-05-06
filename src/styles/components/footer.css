@@ -46,8 +46,10 @@
   color: var(--color-dark);
 }
 
-/* Mobile: Footer stays fixed at bottom for scroll snap layout */
-@media (--mobile) {
+/* Mobile (480-767px): Footer stays fixed at bottom for scroll-snap layout
+   used by larger phones / small tablets that still get the camera nav.
+   Scoped via min-width so it doesn't apply to small-mobile below. */
+@media (min-width: 480px) and (max-width: 767px) {
   .footer {
     position: fixed;
     bottom: 0;
@@ -55,5 +57,37 @@
     right: 0;
     z-index: var(--z-index-footer); /* Below nav (100) so nav menu appears above footer */
     background: transparent;
+  }
+}
+
+/* Small mobile (<= 479px): each map tile fills the viewport via
+   scroll-snap, so the footer pins to the bottom of the viewport but
+   only when the user is on the contact section. PageTransitionModule
+   sets body.at-contact via IntersectionObserver when contact owns the
+   viewport; without that class the footer translates off-screen so
+   it doesn't sit on top of about/projects/etc. */
+@media (max-width: 479px) {
+  .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: auto;
+    z-index: var(--z-index-footer);
+    margin-top: 0;
+    background: transparent;
+    /* Inner padding clears the iOS home indicator / URL bar overlay
+       so the © text sits above them while the bar's outer edge still
+       extends to the absolute screen bottom. */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    transform: translateY(100%);
+    transition: transform 0.25s var(--ease-out, ease-out);
+    pointer-events: none;
+  }
+
+  body.at-contact .footer {
+    transform: translateY(0);
+    pointer-events: auto;
   }
 }

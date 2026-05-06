@@ -35,20 +35,20 @@
     display: block;
   }
 
-  /* Textarea scales: 120px at XS (375px) → 240px at mobile (750px+) */
-  :root {
-    --contact-textarea-height: clamp(120px, 32vw, 240px);
-  }
-
   /* Heading inherits shared section h2 styles from mobile/layout.css */
 
   /* Allow section to scroll vertically; block horizontal scroll.
      overflow-x must be explicitly hidden — setting overflow-y: auto
      forces overflow-x to compute as auto per CSS spec (visible/non-visible
-     mix is not allowed), which would create a horizontal scrollbar. */
+     mix is not allowed), which would create a horizontal scrollbar.
+
+     100dvh (dynamic viewport) instead of 100vh: prevents the iOS Safari
+     layout shift where 100vh is the LARGER viewport (sans address bar)
+     and content centered inside it visually drops down once the address
+     bar collapses on first scroll. */
   .contact-section {
     height: auto;
-    min-height: calc(100vh - var(--header-height) - var(--footer-height));
+    min-height: calc(100dvh - var(--header-height) - var(--footer-height));
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
@@ -77,6 +77,67 @@
     bottom: 0;
     right: 5%;
   }
+}
+
+/* ============================================
+ * SMALL MOBILE (max-width: 479px) — phones only.
+ * Form restructure: message textarea grows to fill remaining vertical
+ * space so the user gets a usable message field without scrolling, and
+ * the avatar drops back to act as a true background watermark instead
+ * of competing visually with the form.
+ * ============================================ */
+
+@media (--small-mobile) {
+  /* Form fills remaining vertical space below the heading + contact-options
+     so the message textarea grows to consume free room without forcing a
+     scroll. Submit button stays pinned at the bottom of the form column. */
+  .contact-content {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .contact-layout,
+  .contact-form-column {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .contact-form {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  /* Last input wrapper = message; let it consume free space. The first
+     three (name/company/email) keep their natural height. */
+  .contact-form .input-wrapper:last-of-type {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .contact-form .input-wrapper:last-of-type .input-item,
+  .contact-form .input-wrapper:last-of-type .input-item textarea {
+    flex: 1 1 auto;
+    height: 100%;
+    min-height: 0;
+  }
+
+  /* Avatar acts as a true background — pushed behind the form column
+     and dimmed so it stops fighting the textarea visually. The
+     pages/contact.css base sets z-index: var(--z-index-base) on the
+     container; .contact-form-column already sits at z-index-content,
+     so the form is above. Lowering opacity here brings the watermark
+     down to ambient. */
+  .contact-bg-avatar {
+    opacity: 0.4;
+  }
+
+  /* Eye + star stay at full opacity so the glow still reads against
+     the dimmed body-part watermark. The container's 0.4 opacity above
+     compounds with these — 0.18 multiplied with 0.4 produced an
+     effective ~0.07 (invisible on a phone). Letting these inherit
+     the base contact.css 0.5 keeps the glow as the focal point. */
 }
 
 /* ============================================

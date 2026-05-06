@@ -57,6 +57,12 @@ li {
   z-index: var(--z-index-nav-header); /* Above menu (125) so header buttons remain accessible when nav is open */
   font-family: var(--font-family-acme);
   padding: 0;
+  /* Push header content below the iOS status bar / Dynamic Island. With
+     viewport-fit=cover the page extends edge-to-edge, so the system
+     status bar would otherwise overlap the logo + MENU button. env()
+     resolves to 0 on devices/browsers without a safe area, so this is
+     a no-op everywhere it's not needed. */
+  padding-top: env(safe-area-inset-top, 0);
   position: fixed;
   top: 0;
   left: 0;
@@ -307,6 +313,19 @@ li {
   flex: 0 1 auto; /* Don't grow, allow shrink, auto basis */
   text-align: left;
   white-space: nowrap; /* Prevent text wrapping to multiple lines */
+}
+
+/* Small mobile: the rolling-text effect (text-shadow ghost + translateY)
+   relies on hover, which doesn't exist on touch devices. Without hover
+   the ghost text just sits below each menu item all the time — visible
+   as a doubled-up echo. Reset both properties so the menu reads as a
+   plain stacked list. */
+@media (max-width: 479px) {
+  .menu-link-heading {
+    text-shadow: none;
+    transform: none;
+    transition: none;
+  }
 }
 
 /* Rolling text effect uses text-shadow (0 1em 0) to create

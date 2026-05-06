@@ -1099,23 +1099,27 @@ div.page-hero-desktop {
     padding: 0 var(--container-padding);
   }
 
+  /* Lucide square-chevron icons carry their own framed look, so the
+     button itself stays bare — no border, no background. Padding +
+     min hit-target keep tap area finger-friendly. */
   .projects-tv-channel-btn {
     appearance: none;
     background: transparent;
-    border: 2px solid currentColor;
-    border-bottom-width: 5px;
+    border: none;
     border-radius: 0;
     color: var(--color-text-primary);
-    font-family: inherit;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
-    padding: 0.625rem 1.25rem;
+    padding: 0.5rem;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    min-width: 44%;
     justify-content: center;
+    min-width: 64px;
+    min-height: 64px;
+  }
+
+  .projects-tv-channel-btn svg {
+    width: 56px;
+    height: 56px;
   }
 
   .projects-tv-channel-btn:focus-visible {
