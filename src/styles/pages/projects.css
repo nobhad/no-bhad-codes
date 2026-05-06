@@ -924,11 +924,14 @@ div.page-hero-desktop {
 }
 
 /* TV control buttons — invisible click targets overlaying the painted
-   POWER / CHANNEL / VOLUME buttons in the vintage_television frame. Coords
-   measured via flood-fill of the dark capsules in the source image:
-     POWER:   y=282-299 (top:25.80%, height:1.65%)
-     CHANNEL: y=327-344 (top:29.92%, height:1.65%)
-     VOLUME:  y=373-389 (top:34.13%, height:1.56%)
+   POWER / CHANNEL / VOLUME capsules in the vintage_television frame.
+   Coords measured via per-row dark-pixel scan of the source image
+   (1500×1201), counting only rows where >55% of the button x-range is
+   dark — that excludes the painted LABEL TEXT above each capsule
+   (sparse strokes) and isolates the capsule body itself.
+     POWER:   y=332-353 (top:27.64%, height:1.83%)
+     CHANNEL: y=378-398 (top:31.47%, height:1.75%)
+     VOLUME:  y=423-444 (top:35.22%, height:1.83%)
    All share x=1242-1392 (left:87.22%, width:10.60%). CHANNEL and
    VOLUME buttons split that width into two halves (▼ left, ▲ right). */
 .crt-tv__btn {
@@ -949,38 +952,88 @@ div.page-hero-desktop {
 }
 
 .crt-tv__btn--power {
-  top: 25.80%;
+  top: 27.64%;
   left: 87.22%;
   width: 10.60%;
-  height: 1.65%;
+  height: 1.83%;
 }
 
 .crt-tv__btn--channel-down {
-  top: 29.92%;
+  top: 31.47%;
   left: 87.22%;
   width: 5.30%;
-  height: 1.65%;
+  height: 1.75%;
 }
 
 .crt-tv__btn--channel-up {
-  top: 29.92%;
+  top: 31.47%;
   left: 92.52%;
   width: 5.30%;
-  height: 1.65%;
+  height: 1.75%;
 }
 
 .crt-tv__btn--volume-down {
-  top: 34.13%;
+  top: 35.22%;
   left: 87.22%;
   width: 5.30%;
-  height: 1.56%;
+  height: 1.83%;
 }
 
 .crt-tv__btn--volume-up {
-  top: 34.13%;
+  top: 35.22%;
   left: 92.52%;
   width: 5.30%;
-  height: 1.56%;
+  height: 1.83%;
+}
+
+/* VOLUME ▼/▲ become non-clickable at the extremes (vol=0 or vol=max).
+   wireVolumeState() in projects.ts toggles these classes via the
+   tv-sfx:volume-change event so the disabled state always matches the
+   actual volume — the user can't keep clicking past the rail. */
+.crt-tv__btn--volume-down.is-at-min,
+.crt-tv__btn--volume-up.is-at-max {
+  pointer-events: none;
+  cursor: default;
+}
+
+/* Mute indicator — Lucide volume-x rendered top-right of the screen
+   aperture, mimicking the OSD badge a 90s CRT flashed when you muted.
+   Visible only when .crt-tv.is-muted (vol=0) AND the set is powered on
+   — when off the screen is dark and the icon would compete with the
+   dead-set look.
+
+   Position is in percent of the screen aperture so it scales with the
+   TV at every breakpoint AND lands well inside the painted CRT glass —
+   the bezel has a noticeable corner radius and a flush-to-corner icon
+   gets clipped by it. 8% top/right pulls the icon clear of that curve
+   while still reading as "screen corner". Size is a clamped % so it
+   stays a square legible badge from desktop down to small laptop. */
+.crt-tv__mute-indicator {
+  position: absolute;
+  top: 10%;
+  right: 7%;
+  width: clamp(16px, 5%, 28px);
+  aspect-ratio: 1;
+  /* Hardcoded white tint matches the channel-list text inside the
+     screen — they read as the same diegetic CRT layer regardless of
+     the page's light/dark theme. Translucent so it reads as a faint
+     OSD overlay rather than a solid badge sitting on top. */
+  color: rgba(255, 255, 255, 0.45);
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.18));
+  z-index: 5;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.crt-tv__mute-indicator > svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.crt-tv.is-muted:not(.is-powered-off) .crt-tv__mute-indicator {
+  opacity: 1;
 }
 
 /* Small-mobile (≤479px): channel + volume controls on the TV chassis are
@@ -1707,6 +1760,16 @@ div.page-hero-desktop {
 .crt-tv__channel-row:hover,
 .crt-tv__channel-row:focus-visible {
   background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Channel 01 (the guide itself) is purely informational — no hover, no
+   pointer cursor, since clicking it is a no-op. */
+.crt-tv__channel-row--guide {
+  cursor: default;
+}
+
+.crt-tv__channel-row--guide:hover {
+  background-color: transparent;
 }
 
 .crt-tv__channel-row:focus-visible {
