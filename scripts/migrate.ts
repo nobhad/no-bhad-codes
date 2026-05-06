@@ -5,8 +5,9 @@
  * Usage: node scripts/migrate.ts [command]
  */
 
-import { resolve, dirname } from 'path';
+import { resolve, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { copyFileSync, existsSync, mkdirSync } from 'fs';
 import Database from 'sqlite3';
 import { MigrationManager } from '../server/database/migrations.js';
 
@@ -17,6 +18,25 @@ const projectRoot = resolve(__dirname, '..');
 // Configuration
 const DATABASE_PATH = process.env.DATABASE_PATH || './data/client_portal.db';
 const MIGRATIONS_DIR = resolve(projectRoot, 'server/database/migrations');
+const PRE_MIGRATION_BACKUP_DIR = resolve(projectRoot, 'data/backups/pre-migration');
+
+/**
+ * Snapshot the database before any migration runs so a destructive migration
+ * can be rolled back via `cp <backup> <DATABASE_PATH>`. No-op (with warning)
+ * if the DB file does not yet exist (e.g. first-ever migration on a new env).
+ */
+function preMigrationBackup(): void {
+  const dbPath = resolve(DATABASE_PATH);
+  if (!existsSync(dbPath)) {
+    console.log(`⚠️  No DB at ${dbPath} yet — skipping pre-migration backup.`);
+    return;
+  }
+  mkdirSync(PRE_MIGRATION_BACKUP_DIR, { recursive: true });
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const backupPath = join(PRE_MIGRATION_BACKUP_DIR, `client_portal_pre-migrate_${stamp}.db`);
+  copyFileSync(dbPath, backupPath);
+  console.log(`💾 Pre-migration backup: ${backupPath}`);
+}
 
 interface MigrationStatus {
   total: number;
@@ -35,6 +55,7 @@ interface MigrationStatus {
 const commands = {
   async migrate(): Promise<void> {
     console.log('🚀 Running database migrations...');
+    preMigrationBackup();
     const db = new Database.Database(DATABASE_PATH);
     const migrator = new MigrationManager(db, MIGRATIONS_DIR);
 
