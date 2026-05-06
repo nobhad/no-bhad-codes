@@ -960,6 +960,27 @@ export class SchedulerService {
             metadata: { ...result }
           }
         );
+
+        // Off-server copy to Google Drive when configured. A Drive failure
+        // must not bury the local backup success — log and continue.
+        const { isDriveBackupConfigured, uploadBackupToDrive } = await import('./drive-backup-service.js');
+        if (isDriveBackupConfigured()) {
+          try {
+            const driveResult = await uploadBackupToDrive(result.file);
+            logger.info(
+              `[Scheduler] DB backup uploaded to Drive: ${driveResult.uploaded.name} (${driveResult.durationMs}ms, pruned ${driveResult.prunedCount})`,
+              {
+                category: 'BACKUP',
+                metadata: { driveFileId: driveResult.uploaded.id, prunedCount: driveResult.prunedCount }
+              }
+            );
+          } catch (driveError) {
+            logger.error('[Scheduler] DB backup Drive upload failed:', {
+              error: driveError instanceof Error ? driveError : undefined,
+              category: 'BACKUP'
+            });
+          }
+        }
       } catch (error) {
         logger.error('[Scheduler] DB backup failed:', {
           error: error instanceof Error ? error : undefined,
