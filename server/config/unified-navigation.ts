@@ -40,6 +40,8 @@ export interface UnifiedNavItem {
   ariaLabel?: string;
   /** Is this the default active item for the role */
   activeForRole?: UserRole;
+  /** Hide this item when PORTAL_MODE=solo (single-client install) */
+  hideInSolo?: boolean;
 }
 
 export interface UnifiedSubtab {
@@ -53,6 +55,8 @@ export interface UnifiedSubtab {
   active?: boolean;
   /** Custom data attribute (e.g., 'pd-tab' for project-detail) */
   dataAttr?: string;
+  /** Hide this subtab when PORTAL_MODE=solo (single-client install) */
+  hideInSolo?: boolean;
 }
 
 export interface UnifiedSubtabGroup {
@@ -217,7 +221,8 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     label: 'Requests',
     icon: 'clipboardList',
     roles: ['client'],
-    order: 4
+    order: 4,
+    hideInSolo: true
   },
   {
     id: 'deliverables',
@@ -339,7 +344,8 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     icon: 'barChart',
     roles: ['admin'],
     order: 14,
-    shortcut: '6'
+    shortcut: '6',
+    hideInSolo: true
   },
   {
     id: 'support',
@@ -348,7 +354,8 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     roles: ['admin'],
     order: 15,
     shortcut: '7',
-    ariaLabel: 'Knowledge Base'
+    ariaLabel: 'Knowledge Base',
+    hideInSolo: true
   },
   {
     id: 'system',
@@ -383,7 +390,7 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
       { id: 'overview', label: 'Overview', roles: ['admin'], active: true },
       { id: 'projects', label: 'Projects', roles: ['admin'] },
       { id: 'tasks', label: 'Tasks', roles: ['admin'] },
-      { id: 'ad-hoc-requests', label: 'Requests', roles: ['admin'] }
+      { id: 'ad-hoc-requests', label: 'Requests', roles: ['admin'], hideInSolo: true }
     ]
   },
   // Admin: CRM group subtabs
@@ -394,10 +401,10 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
     mode: 'primary',
     subtabs: [
       { id: 'overview', label: 'Overview', roles: ['admin'], active: true },
-      { id: 'leads', label: 'Leads', roles: ['admin'] },
+      { id: 'leads', label: 'Leads', roles: ['admin'], hideInSolo: true },
       { id: 'messages', label: 'Messages', roles: ['admin'] },
       { id: 'clients', label: 'Clients', roles: ['admin'] },
-      { id: 'contacts', label: 'Contacts', roles: ['admin'] }
+      { id: 'contacts', label: 'Contacts', roles: ['admin'], hideInSolo: true }
     ]
   },
   // Admin: Documents group subtabs
@@ -410,8 +417,8 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
       { id: 'overview', label: 'Overview', roles: ['admin'], active: true },
       { id: 'invoices', label: 'Invoices', roles: ['admin'] },
       { id: 'contracts', label: 'Contracts', roles: ['admin'] },
-      { id: 'document-requests', label: 'Document Requests', roles: ['admin'] },
-      { id: 'questionnaires', label: 'Questionnaires', roles: ['admin'] }
+      { id: 'document-requests', label: 'Document Requests', roles: ['admin'], hideInSolo: true },
+      { id: 'questionnaires', label: 'Questionnaires', roles: ['admin'], hideInSolo: true }
     ]
   },
   // Admin: Analytics subtabs
@@ -547,14 +554,21 @@ export const UNIFIED_TAB_GROUPS: Record<
 // RUNTIME FILTERING FUNCTIONS
 // ============================================
 
+/** When PORTAL_MODE=solo, items tagged hideInSolo are filtered out of navigation. */
+function isSoloMode(): boolean {
+  return (process.env.PORTAL_MODE ?? 'solo').toLowerCase() === 'solo';
+}
+
 /**
  * Get navigation items filtered for a specific role
  * Returns only the nav items that the role can access, sorted by order
  */
 export function getNavigationForRole(role: UserRole): UnifiedNavItem[] {
-  return UNIFIED_NAVIGATION.filter((item) => item.roles.includes(role)).sort(
-    (a, b) => a.order - b.order
-  );
+  const solo = isSoloMode();
+  return UNIFIED_NAVIGATION
+    .filter((item) => item.roles.includes(role))
+    .filter((item) => !(solo && item.hideInSolo))
+    .sort((a, b) => a.order - b.order);
 }
 
 /**
@@ -562,9 +576,12 @@ export function getNavigationForRole(role: UserRole): UnifiedNavItem[] {
  * Includes only groups and subtabs the role can access
  */
 export function getSubtabGroupsForRole(role: UserRole): UnifiedSubtabGroup[] {
+  const solo = isSoloMode();
   return UNIFIED_SUBTAB_GROUPS.filter((group) => group.roles.includes(role)).map((group) => ({
     ...group,
-    subtabs: group.subtabs.filter((subtab) => subtab.roles.includes(role))
+    subtabs: group.subtabs
+      .filter((subtab) => subtab.roles.includes(role))
+      .filter((subtab) => !(solo && subtab.hideInSolo))
   }));
 }
 
