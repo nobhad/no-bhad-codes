@@ -945,10 +945,19 @@ div.page-hero-desktop {
   z-index: 5;
 }
 
+/* Focus ring follows the painted capsule shape, not the bounding box.
+   border-radius:9999px makes outline a pill (modern browsers honor
+   border-radius on outline). outline-offset:0 keeps it pixel-flush
+   against the hitbox edge — the hitbox itself was measured to match
+   the painted dark capsule, so a flush outline traces the capsule's
+   visible silhouette. POWER's hitbox is the whole pill so it gets
+   a full pill outline; CHANNEL/VOLUME hitboxes are LEFT/RIGHT halves
+   of a split pill and get their outer edge rounded only — overrides
+   below switch off the inner-edge radius. */
 .crt-tv__btn:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
-  border-radius: 4px;
+  outline: 1.5px solid #fff;
+  outline-offset: 0;
+  border-radius: 9999px;
 }
 
 .crt-tv__btn--power {
@@ -984,6 +993,20 @@ div.page-hero-desktop {
   left: 92.52%;
   width: 5.30%;
   height: 1.83%;
+}
+
+/* CHANNEL ▼ + VOLUME ▼ are the LEFT half of a split capsule —
+   round only the outer (left) edge of the focus ring; the inner
+   edge sits flush against the ▲ button so it should stay square. */
+.crt-tv__btn--channel-down:focus-visible,
+.crt-tv__btn--volume-down:focus-visible {
+  border-radius: 9999px 0 0 9999px;
+}
+
+/* CHANNEL ▲ + VOLUME ▲ — mirror image: round only the right edge. */
+.crt-tv__btn--channel-up:focus-visible,
+.crt-tv__btn--volume-up:focus-visible {
+  border-radius: 0 9999px 9999px 0;
 }
 
 /* VOLUME ▼/▲ become non-clickable at the extremes (vol=0 or vol=max).
@@ -1100,12 +1123,17 @@ div.page-hero-desktop {
   }
 }
 
-/* Powered-off state: hide the channel list / panels / LED but leave the
-   title-card base image showing — that's the dark vignetted "TV is off"
-   look the screen has by default. Buttons stay clickable so the user
-   can power back on. */
+/* Powered-off state: hide the channel list / panels / LED / composed
+   title card but leave the title-card base image showing — that's the
+   dark vignetted "TV is off" look the screen has by default. Buttons
+   stay clickable so the user can power back on. .crt-tv__image
+   (composed title card) lives OUTSIDE .crt-tv__screen and so needs
+   its own selector — without this it leaks through when powering off
+   while tuned to a project channel (the title-card image stays
+   painted on the dark off-state bg). */
 .crt-tv.is-powered-off .crt-tv__screen,
-.crt-tv.is-powered-off .crt-tv__channel-display {
+.crt-tv.is-powered-off .crt-tv__channel-display,
+.crt-tv.is-powered-off .crt-tv__image {
   visibility: hidden;
 }
 
