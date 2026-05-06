@@ -42,6 +42,7 @@
     "migrate:create": "tsx scripts/migrate.ts create",
     "db:setup": "npm run migrate",
     "db:backup": "tsx scripts/backup-database.ts",
+    "backup:drive": "tsx scripts/backup-to-drive.ts",
     "docs:validate": "bash scripts/validate-docs.sh",
     "docs:fix": "bash scripts/validate-docs.sh --fix"
   },
