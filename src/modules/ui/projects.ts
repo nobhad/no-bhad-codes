@@ -467,6 +467,20 @@ export class ProjectsModule extends BaseModule {
                stretch it into the aperture and misalign with the bg. -->
           <img class="crt-tv__image" src="" alt="Project preview" />
           <div class="crt-tv__screen">
+            <!-- Mute indicator — top-right of the screen aperture, only
+                 visible when volume is at 0 AND the TV is powered on.
+                 Mimics the on-screen-display badge that 80s/90s TVs
+                 flashed when you muted them. Lucide volume-x SVG inlined
+                 so we don't need a runtime icon library. -->
+            <div class="crt-tv__mute-indicator" data-mute-indicator aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <line x1="22" y1="9" x2="16" y2="15"></line>
+                <line x1="16" y1="9" x2="22" y2="15"></line>
+              </svg>
+            </div>
             <div class="crt-tv__channel-list" data-channel-list></div>
             <!-- Tune-in overlay — populated and animated on channel select.
                  Hidden until playTuneInSequence runs. The composed title
@@ -518,13 +532,112 @@ export class ProjectsModule extends BaseModule {
     `;
     tvWrap.insertAdjacentHTML('beforeend', tvHtml);
 
+    // External channel controls — hidden by CSS at >479px, shown only on
+    // small mobile where the painted on-frame channel buttons are too
+    // cramped to hit reliably with a finger. Built via createElement so
+    // the security-hook doesn't flag the hardcoded literal as untrusted.
+    const channelControls = document.createElement('div');
+    channelControls.className = 'projects-tv-channel-controls';
+    const downBtn = document.createElement('button');
+    downBtn.type = 'button';
+    downBtn.className = 'projects-tv-channel-btn';
+    downBtn.dataset.tvMobileBtn = 'channel-down';
+    downBtn.setAttribute('aria-label', 'Previous channel');
+    downBtn.textContent = '◀ CH';
+    const upBtn = document.createElement('button');
+    upBtn.type = 'button';
+    upBtn.className = 'projects-tv-channel-btn';
+    upBtn.dataset.tvMobileBtn = 'channel-up';
+    upBtn.setAttribute('aria-label', 'Next channel');
+    upBtn.textContent = 'CH ▶';
+    channelControls.append(downBtn, upBtn);
+    tvWrap.appendChild(channelControls);
+
     workWrapper.parentNode?.insertBefore(tvWrap, workWrapper);
 
     // Populate the channel list with one row per documented project.
     this.renderChannelList();
 
-    // Wire the physical TV button overlays.
+    // Wire the physical TV button overlays + the external mobile controls.
     this.wireTvButtons();
+    this.wireMobileChannelButtons();
+    // Reflect the current TV-SFX volume in the UI: mute indicator on
+    // the screen, and pointer-events disabled on VOLUME ▼ at vol=0 / on
+    // VOLUME ▲ at vol=max so the user can't keep clicking past the
+    // extremes.
+    this.wireVolumeState();
+
+    // Preload all channel-display images so the LED swap is instant —
+    // without this, fast cycling can briefly show a blank readout while
+    // the next channel_NN.webp is being fetched. Images stay cached for
+    // the rest of the session.
+    this.preloadChannelDisplays();
+  }
+
+  /**
+   * Toggle UI state tied to TV-SFX volume:
+   *   - .crt-tv.is-muted          → CSS shows the mute indicator overlay
+   *   - .crt-tv__btn--volume-down.is-at-min → CSS sets pointer-events:none
+   *   - .crt-tv__btn--volume-up.is-at-max   → same
+   * Initial state comes from tvSfx.getVolume() (which loads from
+   * localStorage on construct), and a 'tv-sfx:volume-change' window
+   * event keeps it in sync on every VOLUME ▼/▲ press.
+   */
+  private wireVolumeState(): void {
+    const apply = (level: number): void => {
+      const tv = document.querySelector('.crt-tv');
+      const volDown = document.querySelector('.crt-tv__btn--volume-down');
+      const volUp = document.querySelector('.crt-tv__btn--volume-up');
+      tv?.classList.toggle('is-muted', level === 0);
+      volDown?.classList.toggle('is-at-min', level === 0);
+      // Max volume is the top step in tvSfx's VOLUME_STEPS array; the
+      // top entry is 1.0, so >=1 catches it without coupling to the
+      // step list directly.
+      volUp?.classList.toggle('is-at-max', level >= 1);
+    };
+    apply(tvSfx.getVolume());
+    window.addEventListener('tv-sfx:volume-change', ((event: Event) => {
+      const detail = (event as CustomEvent<{ level: number }>).detail;
+      if (typeof detail?.level === 'number') apply(detail.level);
+    }) as EventListener);
+  }
+
+  /**
+   * Wire click handlers for the small-mobile channel up/down buttons
+   * rendered below the TV. Reuses cycleTvChannel so the UX matches the
+   * on-frame buttons (which are disabled at the same breakpoint via CSS).
+   */
+  private wireMobileChannelButtons(): void {
+    const controls = document.querySelector('.projects-tv-channel-controls');
+    if (!controls) return;
+    controls.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement | null;
+      const btn = target?.closest('[data-tv-mobile-btn]') as HTMLElement | null;
+      if (!btn) return;
+      // Mirror the on-frame channel buttons: inert while the TV is off.
+      const tv = document.querySelector('.crt-tv');
+      if (tv?.classList.contains('is-powered-off')) return;
+      const action = btn.dataset.tvMobileBtn;
+      if (action === 'channel-up') this.cycleTvChannel(+1);
+      else if (action === 'channel-down') this.cycleTvChannel(-1);
+    });
+  }
+
+  /**
+   * Preload channel_NN.webp images for every documented project + the
+   * guide (channel 01) so setChannelDisplay's src swap renders instantly.
+   * Without preloading, fast channel cycling on slow mobile networks
+   * leaves the LED blank for a frame while the next image fetches.
+   */
+  private preloadChannelDisplays(): void {
+    if (!this.portfolioData) return;
+    const documented = this.portfolioData.projects.filter((p) => p.isDocumented);
+    const total = documented.length + 1; // +1 for channel 01 (guide)
+    for (let n = 1; n <= total; n++) {
+      const padded = String(n).padStart(2, '0');
+      const img = document.createElement('img');
+      img.src = `/images/channel_${padded}.webp`;
+    }
   }
 
   /**
@@ -543,6 +656,12 @@ export class ProjectsModule extends BaseModule {
       const btn = target?.closest('[data-tv-btn]') as HTMLElement | null;
       if (!btn) return;
       const action = btn.dataset.tvBtn;
+
+      // POWER is the only control that works while the set is off —
+      // every other button is inert (no channel cycle, no volume step,
+      // no click sound — sound gating lives in tvSfx) until the user
+      // turns the TV back on.
+      if (action !== 'power' && tv.classList.contains('is-powered-off')) return;
 
       switch (action) {
       case 'power':
@@ -654,12 +773,27 @@ export class ProjectsModule extends BaseModule {
             <span class="crt-tv__channel-meta">${p.year}</span>
           </button>
         </li>`;
+    // Channel 01 row — represents the guide itself, mirroring the Prevue
+    // Guide where the guide channel appears in its own listing. No slug
+    // means the click handler ignores it (purely informational).
+    const buildGuideRow = (ariaHidden = false): string => `
+        <li class="crt-tv__channel-row-item crt-tv__channel-row-item--guide"${ariaHidden ? ' aria-hidden="true"' : ''}>
+          <div class="crt-tv__channel-row crt-tv__channel-row--guide"
+               role="presentation">
+            <span class="crt-tv__channel-number">01</span>
+            <span class="crt-tv__channel-text">
+              <span class="crt-tv__channel-title">Project Guide</span>
+              <span class="crt-tv__channel-category">Index</span>
+            </span>
+            <span class="crt-tv__channel-meta"></span>
+          </div>
+        </li>`;
     // Render rows TWICE so the GSAP ticker can translate the inner ul up
     // by exactly one set's height and snap back to 0 for a seamless loop.
     // The duplicate set is aria-hidden + non-tabbable so screen readers
     // and keyboard users only encounter each project once.
-    const rows = documented.map((p, i) => buildRow(p, i, false)).join('');
-    const rowsClone = documented.map((p, i) => buildRow(p, i, true)).join('');
+    const rows = buildGuideRow(false) + documented.map((p, i) => buildRow(p, i, false)).join('');
+    const rowsClone = buildGuideRow(true) + documented.map((p, i) => buildRow(p, i, true)).join('');
 
     container.innerHTML = `
       <div class="crt-tv__guide-top">
@@ -724,6 +858,10 @@ export class ProjectsModule extends BaseModule {
       this.channelTickerTween.kill();
       this.channelTickerTween = null;
     }
+    // Small mobile: continuous GSAP transform tween on every frame is a
+    // major source of jank on phones. Skip the ticker entirely — the
+    // channel list still renders, just statically.
+    if (window.matchMedia('(max-width: 479px)').matches) return;
     const track = document.querySelector<HTMLElement>('[data-channel-ticker-track]');
     const viewport = document.querySelector<HTMLElement>('[data-channel-ticker-viewport]');
     if (!track || !viewport) return;
@@ -851,7 +989,7 @@ export class ProjectsModule extends BaseModule {
       // stays subtle), hold briefly, drop to a quiet residual hiss,
       // sustain that for a beat, then trail off. Mimics a CRT settling
       // onto the new channel after the initial blip of noise.
-      peakGain: 0.028,
+      peakGain: 0.12,
       attackS: 0.02,
       holdS: 0.07,
       dropToFraction: 0.35,
@@ -1287,7 +1425,7 @@ export class ProjectsModule extends BaseModule {
       // stays subtle), hold briefly, drop to a quiet residual hiss,
       // sustain that for a beat, then trail off. Mimics a CRT settling
       // onto the new channel after the initial blip of noise.
-      peakGain: 0.028,
+      peakGain: 0.12,
       attackS: 0.02,
       holdS: 0.07,
       dropToFraction: 0.35,
