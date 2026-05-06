@@ -874,7 +874,7 @@ div.page-hero-desktop {
 /* Interactive screen overlay (channel list, title-card image, scanlines).
    Sized + positioned to the screen aperture (the area where the
    title-card content lives in the bg image), measured via flood-fill of
-   vintage_television.webp's transparent cutout center. */
+   tv/chassis.webp's transparent cutout center. */
 .crt-tv__screen {
   position: absolute;
   top: 8.463%;
@@ -924,16 +924,17 @@ div.page-hero-desktop {
 }
 
 /* TV control buttons — invisible click targets overlaying the painted
-   POWER / CHANNEL / VOLUME capsules in the vintage_television frame.
-   Coords measured via per-row dark-pixel scan of the source image
-   (1500×1201), counting only rows where >55% of the button x-range is
-   dark — that excludes the painted LABEL TEXT above each capsule
-   (sparse strokes) and isolates the capsule body itself.
-     POWER:   y=332-353 (top:27.64%, height:1.83%)
-     CHANNEL: y=378-398 (top:31.47%, height:1.75%)
-     VOLUME:  y=423-444 (top:35.22%, height:1.83%)
-   All share x=1242-1392 (left:87.22%, width:10.60%). CHANNEL and
-   VOLUME buttons split that width into two halves (▼ left, ▲ right). */
+   POWER / CHANNEL / VOLUME capsules in tv/chassis.webp (2850×2186,
+   1.305 aspect). Coords measured from tv/buttons.webp (the alpha-only
+   buttons layer of the same chassis art) by reading the bounding box
+   of every non-transparent pixel per capsule — captures the FULL
+   capsule footprint including rounded ends.
+     POWER:   y=555-599 (top:25.39%, height:2.06%)
+     CHANNEL: y=645-689 (top:29.51%, height:2.06%)
+     VOLUME:  y=738-781 (top:33.76%, height:2.01%)
+   All share x=2483-2788 (left:87.12%, width:10.74%). CHANNEL and
+   VOLUME buttons split that width into two halves (▼ left, ▲ right);
+   each half = 5.37% wide, ▲ starts at left:92.49%. */
 .crt-tv__btn {
   position: absolute;
   appearance: none;
@@ -961,38 +962,38 @@ div.page-hero-desktop {
 }
 
 .crt-tv__btn--power {
-  top: 27.64%;
-  left: 87.22%;
-  width: 10.60%;
-  height: 1.83%;
+  top: 25.39%;
+  left: 87.12%;
+  width: 10.74%;
+  height: 2.06%;
 }
 
 .crt-tv__btn--channel-down {
-  top: 31.47%;
-  left: 87.22%;
-  width: 5.30%;
-  height: 1.75%;
+  top: 29.51%;
+  left: 87.12%;
+  width: 5.37%;
+  height: 2.06%;
 }
 
 .crt-tv__btn--channel-up {
-  top: 31.47%;
-  left: 92.52%;
-  width: 5.30%;
-  height: 1.75%;
+  top: 29.51%;
+  left: 92.49%;
+  width: 5.37%;
+  height: 2.06%;
 }
 
 .crt-tv__btn--volume-down {
-  top: 35.22%;
-  left: 87.22%;
-  width: 5.30%;
-  height: 1.83%;
+  top: 33.76%;
+  left: 87.12%;
+  width: 5.37%;
+  height: 2.01%;
 }
 
 .crt-tv__btn--volume-up {
-  top: 35.22%;
-  left: 92.52%;
-  width: 5.30%;
-  height: 1.83%;
+  top: 33.76%;
+  left: 92.49%;
+  width: 5.37%;
+  height: 2.01%;
 }
 
 /* CHANNEL ▼ + VOLUME ▼ are the LEFT half of a split capsule —
@@ -1540,15 +1541,20 @@ div.page-hero-desktop {
      Caching the calc value as a custom prop lets us reuse it for the
      channel-list font sizing further down.
 
-     ASPECT NOTE: vintage_television.webp is 1500×1201 (and shares its
-     canvas with every title-card), so its aspect ratio is
-     1500/1201 ≈ 1.249. */
-  /* The 170px reservation (was 110) adds modest headroom so the
-     TV's drop-shadow has space to render inside the section's
-     padding instead of crossing into the overflow:hidden chain.
-     Just enough to clear the ~40px shadow blur+offset on each side. */
+     ASPECT NOTE: --tv-aspect is set in JS from the chassis image's
+     naturalWidth/naturalHeight on load (see injectTvFrame), so swapping
+     in a re-exported chassis at any size or aspect ratio adjusts the
+     wrapper automatically. The fallback 1.249 matches the current
+     1500×1201 chassis and is what the wrapper renders at before the
+     image's load event fires (avoids layout shift on first paint). */
+  /* 170px reservation gives the TV's drop-shadow modest headroom to
+     render inside the section's padding rather than crossing into the
+     overflow:hidden chain. Sized by observation — the shadow blur +
+     offset clears within ~40px on each side, plus standard chrome.
+     This keeps the rendered TV at its established size rather than
+     scaling it up for the sake of pixel count. */
   --tv-available-height: calc(100dvh - 170px);
-  width: min(1240px, calc(var(--tv-available-height) * 1.249));
+  width: min(1240px, calc(var(--tv-available-height) * var(--tv-aspect, 1.249)));
   max-width: 100%;
 }
 
