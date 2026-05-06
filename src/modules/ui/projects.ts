@@ -478,7 +478,7 @@ export class ProjectsModule extends BaseModule {
     const tvHtml = `
       <div class="crt-tv">
         <div class="crt-tv__wrapper">
-          <img class="crt-tv__screen-bg" src="/images/title-card_base-on.webp" alt="" data-screen-bg />
+          <img class="crt-tv__screen-bg" src="/images/tv/base-on.webp" alt="" data-screen-bg />
           <!-- Composed title-card (text baked in) sits at the same full
                TV-frame canvas as the bg below. Lives outside .crt-tv__screen
                because .crt-tv__screen is sized to the screen aperture only
@@ -514,18 +514,18 @@ export class ProjectsModule extends BaseModule {
             <div class="crt-tv__scanlines"></div>
             <div class="crt-tv__glare"></div>
           </div>
-          <img class="crt-tv__frame" src="/images/vintage_television.webp" alt="Vintage Television" />
+          <img class="crt-tv__frame" src="/images/tv/chassis.webp" alt="Vintage Television" />
           <!-- LED channel display — overlays the TV's "88" digital readout
                area (positioned via CSS at coords measured against the
-               vintage_television source image). Defaults to channel 01 (the TV
+               tv/chassis.webp). Defaults to channel 01 (the TV
                guide); swapped to channel_NN.webp when a row highlights. -->
           <img class="crt-tv__channel-display"
                data-channel-display
-               src="/images/channel_01.webp"
+               src="/images/tv/led/01.webp"
                alt="" />
           <!-- Invisible button overlays positioned over the TV frame's
                POWER / CHANNEL ▼▲ / VOLUME ▼▲ controls. Coords measured
-               from vintage_television.webp via flood-fill of the dark button
+               from tv/chassis.webp via flood-fill of the dark button
                capsules. -->
           <button class="crt-tv__btn crt-tv__btn--power"
                   type="button"
@@ -574,6 +574,26 @@ export class ProjectsModule extends BaseModule {
     tvWrap.appendChild(channelControls);
 
     workWrapper.parentNode?.insertBefore(tvWrap, workWrapper);
+
+    // Set --tv-aspect from the chassis's natural dimensions so the
+    // wrapper width calc auto-adjusts when the chassis art is
+    // re-exported at any size or aspect ratio. Without this, swapping
+    // chassis art with a different aspect ratio (e.g. 1500×1201 →
+    // 1426×1093) would either render at the old aspect (squashing
+    // the new art) or require a manual CSS update.
+    const frameImg = tvWrap.querySelector<HTMLImageElement>('.crt-tv__frame');
+    if (frameImg) {
+      const setAspect = (): void => {
+        const w = frameImg.naturalWidth;
+        const h = frameImg.naturalHeight;
+        if (w && h) {
+          const tvEl = tvWrap.querySelector<HTMLElement>('.crt-tv');
+          tvEl?.style.setProperty('--tv-aspect', String(w / h));
+        }
+      };
+      if (frameImg.complete) setAspect();
+      else frameImg.addEventListener('load', setAspect, { once: true });
+    }
 
     // Populate the channel list with one row per documented project.
     this.renderChannelList();
@@ -701,14 +721,14 @@ export class ProjectsModule extends BaseModule {
     for (let n = 1; n <= total; n++) {
       const padded = String(n).padStart(2, '0');
       const img = document.createElement('img');
-      img.src = `/images/channel_${padded}.webp`;
+      img.src = `/images/tv/led/${padded}.webp`;
     }
   }
 
   /**
    * Wire click handlers for the TV's POWER / CHANNEL / VOLUME buttons.
    * Buttons are positioned via CSS over the corresponding controls in
-   * the vintage_television frame; clicking dispatches the same channel-cycle
+   * the chassis; clicking dispatches the same channel-cycle
    * events that wheel/keys use, so the LED + screen + tune-in stay in
    * lock-step regardless of input method.
    */
@@ -783,7 +803,7 @@ export class ProjectsModule extends BaseModule {
         // Save the per-card bg src so we can restore it on power-on;
         // the off-state base-off.webp would otherwise stomp it.
         this.screenBgBeforePowerOff = screenBg.src;
-        screenBg.src = '/images/title-card_base-off.webp';
+        screenBg.src = '/images/tv/base-off.webp';
       }
     } else {
       // Power on — restore the previous channel's bg if we saved one
@@ -793,7 +813,7 @@ export class ProjectsModule extends BaseModule {
       // whatever channel was tuned. Power-off stays silent — CRTs
       // were near-silent on shutdown, only the button click remains.
       if (screenBg) {
-        screenBg.src = this.screenBgBeforePowerOff || '/images/title-card_base-on.webp';
+        screenBg.src = this.screenBgBeforePowerOff || '/images/tv/base-on.webp';
         this.screenBgBeforePowerOff = null;
       }
       void tvSfx.static();
@@ -1105,7 +1125,7 @@ export class ProjectsModule extends BaseModule {
     tl.to(staticOverlay, { opacity: TV_STATIC_FLASH_OPACITY, duration: 0.06 }, 0)
       .to(channelList, { opacity: 0, duration: 0.05 }, 0)
       .add(() => {
-        screenBg.src = '/images/title-card_base-on.webp';
+        screenBg.src = '/images/tv/base-on.webp';
       }, 0.05);
 
     // 2) Hold the blank for a split second, then swap to per-project bg.
@@ -1500,7 +1520,7 @@ export class ProjectsModule extends BaseModule {
    * Animated channel-flip back to channel 01 (the guide). Mirrors the
    * project tune-in's static-burst + brightness-dim + bg-swap flow so
    * cycling INTO the guide reads the same as cycling out of it. The
-   * destination state is the channel list visible over title-card_base.
+   * destination state is the channel list visible over tv/base-on/off
    */
   private transitionToGuide(): void {
     // Tear down any in-flight tune-in (timelines, panels, classes) —
@@ -1539,7 +1559,7 @@ export class ProjectsModule extends BaseModule {
     // Static peak + bg src swaps to the blank base.
     tl.to(staticOverlay, { opacity: TV_STATIC_FLASH_OPACITY, duration: 0.06 }, 0)
       .add(() => {
-        screenBg.src = '/images/title-card_base-on.webp';
+        screenBg.src = '/images/tv/base-on.webp';
       }, 0.05);
 
     // Hold the blank under the static peak (between-channels void beat).
@@ -1607,7 +1627,7 @@ export class ProjectsModule extends BaseModule {
     if (screenBg) {
       gsap.killTweensOf(screenBg);
       gsap.set(screenBg, { opacity: 1 });
-      screenBg.src = '/images/title-card_base-on.webp';
+      screenBg.src = '/images/tv/base-on.webp';
     }
     if (channelList) gsap.set(channelList, { opacity: 1 });
     if (tunein) {
@@ -1707,7 +1727,7 @@ export class ProjectsModule extends BaseModule {
     const display = document.querySelector<HTMLImageElement>('[data-channel-display]');
     if (!display) return;
     const padded = String(channelNumber).padStart(2, '0');
-    const nextSrc = `/images/channel_${padded}.webp`;
+    const nextSrc = `/images/tv/led/${padded}.webp`;
     if (!display.src.endsWith(nextSrc)) {
       display.src = nextSrc;
     }
