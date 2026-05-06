@@ -189,6 +189,11 @@ export class ProjectsModule extends BaseModule {
   private tuneInTimeline: gsap.core.Timeline | null = null;
   private tuneInScrollTween: gsap.core.Timeline | null = null;
   private activeTuneInSlug: string | null = null;
+  // Saved screenBg.src across a power cycle. The off-state visual swap
+  // (base-off.webp) overwrites whatever the tuned channel set the bg
+  // to (per-card image), so we stash + restore it explicitly to keep
+  // channel state truly intact through POWER off → on.
+  private screenBgBeforePowerOff: string | null = null;
 
   // TV Guide channel-row ticker — slow continuous scroll of the rows in
   // the bottom half of the channel-list, mirroring the Prevue Guide.
@@ -299,17 +304,20 @@ export class ProjectsModule extends BaseModule {
   }
 
   /**
-   * Handle page-changed events from PageTransitionModule
+   * Handle page-changed events from PageTransitionModule.
+   *
+   * Returning to projects no longer cancels the tune-in — channel
+   * selection is meant to persist across navigation (the TV stays on
+   * the channel you left it on) so the music + channel state can
+   * resume coherently. wireChannelMusicLifecycle restarts the audio
+   * for the preserved activeTuneInSlug on the page-entering edge.
    */
   private handlePageChanged(event: CustomEvent): void {
     const { to } = event.detail || {};
 
     if (to === 'projects') {
-      // Returning to projects list — reset detail state and tear down any
-      // in-flight tune-in so the user lands back on the channel guide.
       this.currentProjectSlug = null;
       document.title = 'Projects - No Bhad Codes';
-      this.cancelTuneIn();
     }
   }
 
@@ -578,6 +586,10 @@ export class ProjectsModule extends BaseModule {
     // VOLUME ▲ at vol=max so the user can't keep clicking past the
     // extremes.
     this.wireVolumeState();
+    // Stop channel music whenever the user navigates off the projects
+    // page (about / contact / project-detail / etc.) — the TV is no
+    // longer on screen so its audio shouldn't keep playing.
+    this.wireChannelMusicLifecycle();
 
     // Preload all channel-display images so the LED swap is instant —
     // without this, fast cycling can briefly show a blank readout while
@@ -611,6 +623,47 @@ export class ProjectsModule extends BaseModule {
     window.addEventListener('tv-sfx:volume-change', ((event: Event) => {
       const detail = (event as CustomEvent<{ level: number }>).detail;
       if (typeof detail?.level === 'number') apply(detail.level);
+    }) as EventListener);
+  }
+
+  /**
+   * Drive channel-music play/stop off page-transition lifecycle so
+   * music feels coupled to TV visibility:
+   *
+   *   - Navigating AWAY from projects (to project-detail, about,
+   *     contact, anywhere) fades the music out the instant the next
+   *     page starts entering.
+   *   - Navigating BACK to projects resumes the music for whatever
+   *     project channel was tuned in — IF the TV is powered on. The
+   *     channel selection itself, the power state, and the LED/tune-in
+   *     panels persist naturally because the projects DOM stays
+   *     mounted across the spatial-map nav; only the audio source is
+   *     torn down on leave, so this hook just rebuilds it on return.
+   *
+   * Listening to 'page-entering' (start of transition) rather than
+   * 'page-changed' (after) avoids the perceived audio lag where music
+   * would keep playing through the entire camera pan before fading.
+   */
+  private wireChannelMusicLifecycle(): void {
+    window.addEventListener('page-entering', ((event: Event) => {
+      const detail = (event as CustomEvent<{ to?: string }>).detail;
+      const to = detail?.to;
+      if (!to) return;
+      if (to !== 'projects') {
+        tvSfx.stopMusic();
+        return;
+      }
+      // Returning to projects — restart music for the tuned channel
+      // only if the TV is on AND the user is on a project channel
+      // (channel 01 / guide has no track and leaves activeTuneInSlug
+      // null). Powered-off TV stays silent on return; the user has
+      // to POWER on themselves.
+      const tv = document.querySelector('.crt-tv');
+      if (!tv || tv.classList.contains('is-powered-off')) return;
+      const slug = this.activeTuneInSlug;
+      if (!slug) return;
+      const url = CHANNEL_MUSIC[slug];
+      if (url) void tvSfx.playMusic(url);
     }) as EventListener);
   }
 
@@ -709,19 +762,45 @@ export class ProjectsModule extends BaseModule {
     const isOff = tv.classList.toggle('is-powered-off');
     const screenBg = document.querySelector('[data-screen-bg]') as HTMLImageElement | null;
     if (isOff) {
-      // Going off — cancel any tune-in so we come back cleanly, fade
-      // out whatever channel music was playing, and swap the base
-      // image to the dark / off variant.
-      this.cancelTuneIn();
+      // Power off — kill in-flight tune-in animations and stop the
+      // music, but PRESERVE channel state (activeTuneInSlug + the
+      // populated tune-in DOM + the per-card bg) so the user lands
+      // back on the same channel when they power on. The
+      // is-powered-off CSS class hides the screen visually; the
+      // underlying state stays intact and is revealed verbatim when
+      // the class comes off. We do NOT call cancelTuneIn here
+      // because it wipes the state we need to keep.
+      if (this.tuneInTimeline) {
+        this.tuneInTimeline.kill();
+        this.tuneInTimeline = null;
+      }
+      if (this.tuneInScrollTween) {
+        this.tuneInScrollTween.kill();
+        this.tuneInScrollTween = null;
+      }
       tvSfx.stopMusic();
-      if (screenBg) screenBg.src = '/images/title-card_base-off.webp';
+      if (screenBg) {
+        // Save the per-card bg src so we can restore it on power-on;
+        // the off-state base-off.webp would otherwise stomp it.
+        this.screenBgBeforePowerOff = screenBg.src;
+        screenBg.src = '/images/title-card_base-off.webp';
+      }
     } else {
-      // Going from off → on: swap to the lit base image and fire the
-      // static crackle synced with the visual "screen lights up"
-      // moment. Power-off stays silent — CRTs were near-silent on
-      // shutdown, only the button click remains.
-      if (screenBg) screenBg.src = '/images/title-card_base-on.webp';
+      // Power on — restore the previous channel's bg if we saved one
+      // (the user was on a project channel before powering off),
+      // otherwise the lit base. Fire the static crackle synced with
+      // the visual "screen lights up" moment, then resume music for
+      // whatever channel was tuned. Power-off stays silent — CRTs
+      // were near-silent on shutdown, only the button click remains.
+      if (screenBg) {
+        screenBg.src = this.screenBgBeforePowerOff || '/images/title-card_base-on.webp';
+        this.screenBgBeforePowerOff = null;
+      }
       void tvSfx.static();
+      if (this.activeTuneInSlug) {
+        const url = CHANNEL_MUSIC[this.activeTuneInSlug];
+        if (url) void tvSfx.playMusic(url);
+      }
     }
   }
 
@@ -1424,12 +1503,10 @@ export class ProjectsModule extends BaseModule {
    * destination state is the channel list visible over title-card_base.
    */
   private transitionToGuide(): void {
-    // Tear down any in-flight tune-in (timelines, panels, classes) but
-    // skip the instant visual reset — the animation below handles it.
+    // Tear down any in-flight tune-in (timelines, panels, classes) —
+    // cancelTuneIn also stops the music, since channel and music are
+    // a single state. Channel 01 (the guide) is intentionally silent.
     this.cancelTuneIn();
-    // Channel 01 (the guide) is intentionally silent — no track maps
-    // to it. Fade out whatever project music was playing.
-    tvSfx.stopMusic();
 
     const screenBg = document.querySelector('[data-screen-bg]') as HTMLImageElement | null;
     const channelList = document.querySelector('.crt-tv__channel-list') as HTMLElement | null;
@@ -1511,6 +1588,12 @@ export class ProjectsModule extends BaseModule {
       this.tuneInScrollTween = null;
     }
     this.activeTuneInSlug = null;
+    // Music is tied to the channel — wherever channel state goes,
+    // music goes. Stopping it here means callers (Esc, POWER off,
+    // transitionToGuide, the start of a new playTuneInSequence) don't
+    // each have to remember to also call stopMusic. playMusic for the
+    // next channel will restart it via the standard tune-in path.
+    tvSfx.stopMusic();
 
     const screenBg = document.querySelector('[data-screen-bg]') as HTMLImageElement | null;
     const channelList = document.querySelector('.crt-tv__channel-list') as HTMLElement | null;
