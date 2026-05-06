@@ -123,6 +123,28 @@ html[data-theme="dark"] .morph-card-group {
   }
 }
 
+/* Small-mobile (snap-scroll layout): align the morph overlay's centered
+   region exactly with the intro tile's centered region so the business
+   card doesn't visibly jump when the overlay fades out and the real
+   business-card-section takes over. The base rule uses 100vh + footer
+   subtraction, which on iOS Safari with viewport-fit=cover doesn't
+   match the tile's 100dvh + header + safe-area-top math. */
+@media (--small-mobile) {
+  .intro-morph-overlay {
+    top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+    height: calc(
+      100dvh - var(--header-height) - env(safe-area-inset-top, 0px)
+    );
+  }
+
+  .paw-exit .intro-morph-overlay {
+    top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+    height: calc(
+      100dvh - var(--header-height) - env(safe-area-inset-top, 0px)
+    );
+  }
+}
+
 /* Reduced motion: Skip animation entirely */
 @media (prefers-reduced-motion: reduce) {
   .intro-morph-overlay {

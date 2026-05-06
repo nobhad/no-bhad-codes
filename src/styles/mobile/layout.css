@@ -110,15 +110,9 @@
     transform: translateX(-50%);
   }
 
-  /* Hero sections - hidden on mobile */
-  .hero-section,
-  .page-hero-desktop,
-  .about-hero-desktop,
-  .contact-hero-desktop,
-  .projects-hero-desktop,
-  .portfolio-hero-desktop {
-    display: none;
-  }
+  /* Hero sections are hidden globally by main.css (display:none !important
+     on .hero-section, .page-hero-desktop, etc.), so no per-breakpoint rule
+     is needed here. */
 
   /* Project detail section - SCROLLABLE SECTION
      Tall content (hero, metadata, case study, screenshots) — must scroll internally */
@@ -166,11 +160,13 @@
 
   /* About content wrapper - natural height, NO min-height constraint.
      Horizontal padding matches the header's .container so text aligns
-     with the logo / menu on every screen size. */
+     with the logo / menu on every screen size. Top padding is small —
+     just enough breathing room from the header — so the photo lands
+     near the top of the tile and the bio fits within the viewport. */
   .about-section .about-content {
     display: flex;
     flex-direction: column;
-    padding: 4rem var(--container-padding) 6rem;
+    padding: 0.5rem var(--container-padding);
     gap: 1rem;
     max-width: 100%;
     width: 100%;
@@ -202,7 +198,7 @@
     display: flex;
     justify-content: center;
     width: 100%;
-    margin-top: 1rem;
+    margin-top: 0;
   }
 
   /* About photo - mobile: centered, original proportions */
@@ -400,14 +396,225 @@
 
 /* ============================================
  * SMALL MOBILE (max-width: 479px)
+ *
+ * Architecture: drop the camera/site-map metaphor on phones and let
+ * each tile (intro → about → projects → contact) be its own viewport-
+ * height scroll-snap target. User scrolls (or taps a hamburger nav
+ * link, which triggers PageTransitionModule.scrollIntoView) to move
+ * between tiles. Each tile reads as one discrete page filling the
+ * screen — no horizontal slide, no plus-shape, no long flat scroll.
+ *
+ * The PageTransitionModule still runs (enableOnMobile: true) for
+ * hash routing, page-active class management, project-detail overlay,
+ * and the contact-in-view IntersectionObserver that gates the footer.
+ * Camera transforms are suppressed via transform: none on .site-map.
  * ============================================ */
 
 @media (--small-mobile) {
+  /* Body + main scroll natively with snap. Each map tile fills the
+     viewport (min-height: 100dvh) and snaps to the top — gives the
+     "one page at a time" feel without trapping the user behind a
+     hamburger menu. scroll-padding-top accounts for the fixed header
+     so a snapped tile sits below it, not under it. */
+  /* iOS Safari quirk: `overflow-x: hidden` on the same element as
+     `scroll-snap-type` silently breaks snapping. Keep the horizontal-
+     overflow guard on <html> instead, leave body free to snap. */
+  html {
+    overflow-x: hidden;
+  }
+
+  body {
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: var(--header-height);
+    /* Header is position:fixed and overlays the top of the document.
+       Without this padding, body content (and the first snap target,
+       intro) starts at y:0 under the header — leaving a header-tall
+       gap at the bottom of the viewport where the next tile peeks in.
+       Padding pushes the whole document down so each tile fills the
+       remaining viewport exactly. env(safe-area-inset-top) accounts
+       for the iOS status bar / Dynamic Island on iPhones with
+       viewport-fit=cover; resolves to 0 elsewhere. */
+    padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+  }
+
+  main {
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    width: 100%;
+    height: auto;
+    /* No subtraction for footer-height — footer is in document flow on
+       small mobile (see footer.css small-mobile block) so main owns its
+       full content height and the footer renders below it. */
+    min-height: calc(100dvh - var(--header-height));
+    overflow: visible;
+  }
+
+  /* Business-card section on small mobile: explicit transparent bg so
+     it inherits body's color and matches the rest of the stacked
+     sections. The base business-card.css rule that sets a bg is
+     scoped to @media (--tablet) so it doesn't apply here, but other
+     specificity (page-transitions.css, etc.) can leak — force it. */
+  .business-card-section {
+    background: transparent !important;
+  }
+
+  /* Map tiles: stop being absolute-positioned camera tiles and become
+     normal-flow stacked sections. Each one fills viewport height so the
+     user lands cleanly on each as they scroll. */
+  .site-map {
+    transform: none !important;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    will-change: auto;
+  }
+
+  /* Drop GPU-promoting hints across the page on small mobile — these
+     elements don't transform/blur on the vertical-scroll architecture,
+     so the layers they create only cost memory + composite time.
+     page-transitions.css's `section[data-page] > * { will-change }`
+     rule is already scoped to @media (--tablet), so no override needed
+     for that one. */
+  .business-card-section,
+  .business-card,
+  .intro-morph-overlay,
+  .nav-portal,
+  .nav-base {
+    will-change: auto !important;
+  }
+
+  /* Disable backdrop-filter blurs on small mobile — they're the single
+     most expensive paint operation on iOS and trigger full-screen
+     compositing on every frame. The visual loss is minimal at phone
+     size; the perf win is large. */
+  .nav-base,
+  .nav-portal {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Map tiles render in flow as stacked sections. position:relative
+     overrides site-map.css's absolute camera-tile positioning; the
+     top/left/right/bottom resets cancel the spatial offsets that
+     placed each tile at ±100% of the camera viewport. min-height:auto
+     lets each section size to its natural content — without this,
+     every tile took a full viewport regardless of how much copy it
+     held, forcing wasted scroll between sections. transform:none
+     overrides the GSAP-applied camera translate (the JS still tweens
+     it on hash navigation, but the visual is suppressed here).
+
+     page-transitions.css now excludes [data-map-tile] from the
+     page-hidden / page-active visibility rules, so no !important
+     overrides are needed for display. */
+  .site-map > [data-map-tile] {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    width: 100%;
+    height: auto;
+    /* Each tile fills the viewport so it reads as a discrete "page".
+       min-height (not height) so taller content can extend the tile
+       without clipping; the next tile snaps in after the user scrolls
+       past the bottom. 100dvh keeps the layout honest as iOS Safari's
+       URL bar collapses. Subtract header + safe-area-inset-top so
+       the tile sits below the fixed header without overlapping and
+       no neighbouring tile peeks in at the bottom edge. */
+    min-height: calc(
+      100dvh - var(--header-height) - env(safe-area-inset-top, 0px)
+    );
+    overflow-y: visible;
+    overflow-x: hidden;
+    transform: none;
+    scroll-snap-align: start;
+  }
+
+  /* Hero tile stays hidden (desktop-only transition affordance). */
+  .site-map > [data-map-tile="left"] {
+    display: none;
+  }
+
+  /* Sections inside main also flatten — overrides the @media (--mobile)
+     position:absolute rule that put each section on top of the previous.
+     The camera-translated tiles render in flow above, project-detail /
+     portal-login still get their normal page-active behavior (one
+     visible at a time, hash-routed). */
   main > section {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    width: 100%;
+    height: auto;
     /* Vertical drops to 0.75rem; horizontal stays on the
        --container-padding token so content keeps aligning with the
        header's .container on small phones. */
     padding: 0.75rem var(--container-padding);
+    overflow: visible;
+  }
+
+  /* Force inner-section scroll off on contact/about — their @media
+     (--mobile) blocks above set overflow-y:auto/scroll, which creates a
+     double-scroll trap on small mobile. Body owns the scroll here.
+     !important needed because the @media (--mobile) rules use higher
+     specificity (#about.about-section, etc.) than a plain class match. */
+  .about-section,
+  section.about-section,
+  .contact-section,
+  section.contact-section {
+    overflow-y: visible !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+    max-height: none !important;
+    -webkit-overflow-scrolling: auto;
+  }
+
+  /* Contact tile reserves space at the bottom so the form's last field
+     isn't covered by the fixed footer when it slides in or by the iOS
+     URL bar / home indicator (which overlays viewport bottom under
+     viewport-fit=cover). */
+  .contact-section,
+  section.contact-section {
+    padding-bottom: calc(
+      var(--footer-height) + env(safe-area-inset-bottom, 0px) + 1rem
+    ) !important;
+  }
+
+  /* Off-map overlay pages (project-detail, portal-login) — when
+     hash-routed to one of these, hide the entire site-map stack so
+     the overlay reads as a clean takeover instead of appearing below
+     a long scroll of the home pages. :has() check on body lets us
+     react to whichever overlay page is currently active. */
+  body:has(#project-detail.page-active) .site-map,
+  body:has(#portal-login.page-active) .site-map {
+    display: none;
+  }
+
+  /* Active overlay page takes the full viewport between header + footer
+     (footer is in flow on small mobile, so bottom: 0). Inactive overlays
+     stay hidden by page-transitions.css's page-hidden rule (they don't
+     carry data-map-tile, so the new exclusion doesn't show them). */
+  #project-detail.page-active,
+  #portal-login.page-active {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: auto;
+    width: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    z-index: var(--z-index-dropdown, 100);
+    transform: none !important;
   }
 
   .section-content {
