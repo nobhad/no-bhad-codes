@@ -983,6 +983,70 @@ div.page-hero-desktop {
   height: 1.56%;
 }
 
+/* Small-mobile (≤479px): channel + volume controls on the TV chassis are
+   too cramped to hit reliably with a finger, and channel cycling moves to
+   dedicated buttons rendered below the TV. Power stays — it's the only
+   on-frame control that still matters on phones. */
+@media (max-width: 479px) {
+  .crt-tv__btn--channel-down,
+  .crt-tv__btn--channel-up,
+  .crt-tv__btn--volume-down,
+  .crt-tv__btn--volume-up {
+    pointer-events: none;
+    cursor: default;
+  }
+}
+
+/* External channel controls — rendered below the TV on small-mobile only.
+   The base rule hides them everywhere; the @media block below shows them
+   on small phones. Inline display so they sit on a single row beneath the
+   TV. */
+.projects-tv-channel-controls {
+  display: none;
+}
+
+@media (max-width: 479px) {
+  /* Stack the TV + channel controls vertically. .projects-tv-wrap is
+     flex-row by default which puts the controls beside the TV; switch
+     to column so the controls land below where the user expects them. */
+  .projects-tv-wrap {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .projects-tv-channel-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    padding: 0 var(--container-padding);
+  }
+
+  .projects-tv-channel-btn {
+    appearance: none;
+    background: transparent;
+    border: 2px solid currentColor;
+    border-bottom-width: 5px;
+    border-radius: 0;
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    padding: 0.625rem 1.25rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 44%;
+    justify-content: center;
+  }
+
+  .projects-tv-channel-btn:focus-visible {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 2px;
+  }
+}
+
 /* Powered-off state: hide the channel list / panels / LED but leave the
    title-card base image showing — that's the dark vignetted "TV is off"
    look the screen has by default. Buttons stay clickable so the user
@@ -1486,6 +1550,35 @@ div.page-hero-desktop {
   text-overflow: clip;
 }
 
+/* Mobile (<= 767px): the info column is too narrow to fit the full show
+   title ("Portfolio Guide") at the column edge, so let the text bleed
+   across into the avatar pane on top of the SVG. The .crt-tv__guide-info
+   z-index promotion (set in the mobile block above) keeps the text
+   stacked above the avatar.
+
+   This override lives BELOW the base rule above so source-order cascade
+   wins — the earlier @media block at line ~787 is shadowed by the base
+   rule that follows it. */
+@media (max-width: 767px) {
+  .crt-tv__guide-top .crt-tv__guide-info-line {
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  /* Keep the avatar from painting on top of the bleeding title — drop
+     its opacity slightly so overlapping text reads cleanly. */
+  .crt-tv__guide-top .crt-tv__guide-avatar {
+    opacity: 0.55;
+  }
+
+  /* Add breathing room above the channel-row ticker so the first row
+     doesn't sit flush with the guide-top divider and get visually
+     bisected by it. */
+  .crt-tv__guide-bottom {
+    padding-top: clamp(0.7rem, 2.4cqw, 1.2rem);
+  }
+}
+
 .crt-tv__guide-info-brand {
   font-size: clamp(0.7rem, 2.2cqw, 1.3rem);
   font-weight: var(--font-weight-semibold, 600);
@@ -1557,13 +1650,17 @@ div.page-hero-desktop {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
   /* No flex / overflow here — the wrapper crops, GSAP translates. */
   will-change: transform;
 }
 
+/* Horizontal divider between every channel row, mirroring the Prevue
+   Guide's table-style rule lines. Top-border on each item means the
+   line scrolls with the ticker and there's no trailing border at the
+   bottom of the cloned set. */
 .crt-tv__channel-row-item {
   list-style: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 /* Each row is a real <button> so it's clickable, focusable, and shows
@@ -1622,12 +1719,27 @@ div.page-hero-desktop {
    a row highlight. */
 
 /* Channel number column — fixed-width feel via tabular numerals so
-   "01" / "02" / "10" stay aligned regardless of digit shapes. */
+   "01" / "02" / "10" stay aligned regardless of digit shapes. The
+   right-border + padding act as a vertical divider between the channel
+   number and the title-stack, mirroring the Prevue Guide's column rule. */
 .crt-tv__channel-number {
   font-family: var(--font-family-mono, monospace);
   font-variant-numeric: tabular-nums;
   font-weight: var(--font-weight-semibold, 600);
   letter-spacing: 0.05em;
+  padding-right: clamp(0.5rem, 1.6cqw, 0.9rem);
+  border-right: 1px solid rgba(255, 255, 255, 0.18);
+  align-self: stretch;
+}
+
+/* Desktop gets extra breathing room around the channel number so the
+   column rule sits comfortably away from the digits and the row reads
+   more like the Prevue Guide's spaced-out grid. */
+@media (--desktop) {
+  .crt-tv__channel-number {
+    padding-left: clamp(0.4rem, 1cqw, 0.75rem);
+    padding-right: clamp(0.9rem, 2cqw, 1.4rem);
+  }
 }
 
 .crt-tv__channel-title {
