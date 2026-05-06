@@ -20,10 +20,15 @@
  * PAGE STATE CLASSES (Mobile + Desktop)
  * ============================================ */
 
-/* Hidden page state - completely hide non-active pages */
-/* page-states layer ensures these override page-specific CSS */
-/* GSAP inline styles are cleared via clearProps before adding this class */
-section.page-hidden {
+/* Hidden page state - completely hide non-active pages.
+   :not([data-map-tile]) excludes the spatial-map sections (intro, about,
+   projects, contact, hero) — those live inside .site-map and their
+   visibility is controlled by the camera transform on desktop, and by
+   the vertical-scroll layout on small mobile. Hiding them here would
+   either fight the camera (desktop) or collapse the stacked layout
+   (small mobile). Off-map sections (project-detail, portal-login)
+   still get hidden correctly because they don't carry data-map-tile. */
+section.page-hidden:not([data-map-tile]) {
   display: none;
   opacity: 0;
   visibility: hidden;
