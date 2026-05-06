@@ -67,6 +67,18 @@ export class ContactAnimationModule extends BaseModule {
       return;
     }
 
+    // Small mobile: skip the GSAP entrance entirely. The cascading blur
+    // + filter tweens are the single biggest source of jank on phones,
+    // and on the new vertical-scroll mobile architecture the user just
+    // scrolls down to the form — they don't get the dramatic-entrance
+    // beat that the animation was designed to deliver. CSS already
+    // renders the form visible by default, so skipping leaves a fully
+    // usable form with no extra work.
+    if (window.matchMedia('(max-width: 479px)').matches) {
+      this.log('Small mobile - skipping contact form animation');
+      return;
+    }
+
     this.setupAnimation();
   }
 
