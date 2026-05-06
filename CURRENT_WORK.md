@@ -29,6 +29,53 @@
 
 ---
 
+## Portal Streamline + Hedgewitch Invite-Prep
+
+**Status:** SHIPPED, awaiting spot-check + one-time Drive setup
+
+### Done in code (2026-05-01)
+
+- [x] Nav streamline: `hideInSolo` flag + `PORTAL_MODE` env in `unified-navigation.ts`. Tagged `requests-hub` (client), `analytics`, `support` (admin), and subtabs `leads`, `contacts`, `ad-hoc-requests`, `document-requests`, `questionnaires`. Default mode is `solo` — items reappear when `PORTAL_MODE=multi`.
+- [x] Migration 138: replaced 10 stale generic checklist steps on Hedgewitch's checklist (id=1) with the curated 12 pre-launch deliverables. Backup at `data/backups/pre-migration/client_portal_pre-migrate_*.db` and `data/client_portal.db.bak.before138`.
+- [x] Pre-migration backup hook in `scripts/migrate.ts` — every `npm run migrate` snapshots to `data/backups/pre-migration/` first.
+- [x] Off-server backup service at `server/services/drive-backup-service.ts` + CLI `npm run backup:drive`. Wired into nightly scheduler in `scheduler-service.ts` — no-op when env vars unset.
+- [x] OPS_RUNBOOK updated with pre-migration backup + Google Drive offsite setup steps.
+- [x] Memory file updated: Hedgewitch portal IDs (client_id=6, project_id=7, checklist_id=1), bios-done state, and "no public street address on the site" preference.
+
+### Spot-check (Noelle, local)
+
+- [ ] `npm run dev:full`
+- [ ] Admin login — sidebar lost `Analytics` and `Knowledge`; CRM/Work/Documents subtabs trimmed
+- [ ] Client view (impersonate Hedgewitch or temp account) — sidebar lost `Requests`; dashboard onboarding card shows the new 12 items; pending invoice surfaces in `ActionItems` with red alert variant
+- [ ] If anything looks wrong: `cp data/client_portal.db.bak.before138 data/client_portal.db` to restore
+
+### Google Drive offsite-backup setup (one-time, ~5 min)
+
+- [ ] Google Cloud Console → enable **Google Drive API** in a project
+- [ ] IAM → Service Accounts → create + download JSON key
+- [ ] Drive → create a backup folder → share Editor permission with the service account's `client_email`
+- [ ] Set Railway env vars:
+  - `GOOGLE_SERVICE_ACCOUNT_EMAIL` = JSON `client_email`
+  - `GOOGLE_SERVICE_ACCOUNT_KEY` = JSON `private_key`
+  - `GOOGLE_DRIVE_FOLDER_ID` = ID from the folder's share URL
+- [ ] Local sanity test: `npm run db:backup && npm run backup:drive` — file lands in Drive
+- [ ] Confirm production: tail Railway logs for `DB backup uploaded to Drive` after 03:30 UTC
+
+### Then send the actual invite
+
+- [ ] Send invite email to `offerings@hedgewitchhorticulture.com` (Emily & Abby) from admin → Clients → Hedgewitch
+- [ ] Confirm invite arrives + magic link opens the portal
+- [ ] Walk the portal cold as them once before they get to it; fix anything jarring
+
+### Deferred / nice-to-have (not blocking)
+
+- [ ] Category headers on the OnboardingCard (Approvals / Team / Imagery / Business). Currently the 12 items render as a flat ordered list. Requires a `category` column migration + small `OnboardingCard.tsx` change.
+- [ ] Pre-filtered deep links from each upload row to the right Files folder (e.g., `?folder=headshots`). Today they land on Files generically.
+- [ ] Verify the `data/backups/weekly/` directory is empty by design or the Sunday-weekly path in `scripts/backup-database.ts` isn't firing — pick a behavior.
+- [ ] Drop the `LocalBusiness` schema street-address field on the Hedgewitch Astro site (locality-only Fitchburg, MA).
+
+---
+
 ## State of the Art Roadmap
 
 **Status:** COMPLETE — Phase 0-6 DONE, Phase 1.5 DONE, Phase 7 deferred
@@ -190,6 +237,34 @@ The projects page renders a vintage TV with a channel-guide screen. Channel 01 i
 - [x] SOW header — removed unused `sowLogoHeight: 50` constant, all generators use standard 100pt
 - [x] Margin alignment — markdown-to-pdf.ts margins updated from 45pt to 54pt (matches all other generators)
 - [ ] Full formatting review (spacing, table layouts, typography consistency across all 6 PDF types)
+
+---
+
+## Portfolio Capture Script
+
+**Status:** MOSTLY WORKING — one fix awaiting verification
+
+`scripts/capture-portfolio.ts` (renamed from `take-screenshots.ts`) captures public + authenticated screenshots and video walkthroughs of the site. Reads creds from `.env` (`ADMIN_EMAIL`/`ADMIN_PASSWORD` for admin, `PORTAL_EMAIL`/`PORTAL_PASSWORD` for client). Modes: `--screenshots`, `--video`, `--all` (default).
+
+### Done
+
+- [x] Renamed `take-screenshots.ts` → `capture-portfolio.ts`
+- [x] CLI mode flags (`--screenshots` / `--video` / `--all`)
+- [x] Unified login flow via `/#/portal` dropdown (`POST /api/auth/portal-login`); single helper `loginAs(email, password)` works for both roles
+- [x] Auth page paths corrected to `/dashboard#/<tab>` for both roles
+- [x] Login-once-per-role refactor: one login per role per run, browser context reused across all viewport+theme captures (was 8/role → caused rate-limit 429s and broke mobile login because `#portal-trigger` is hidden behind hamburger on mobile)
+- [x] Login always runs at desktop viewport before resizing — mobile auth now works
+- [x] `PORTAL_EMAIL` / `PORTAL_PASSWORD` placeholder keys added to `.env.example`; real values in local `.env` (gitignored)
+
+### Open
+
+- [ ] **Verify `setTheme` localStorage try/catch fix** — client video walkthroughs were dropping pages mid-sequence with `SecurityError: Failed to read the 'localStorage' property from 'Window'` during transitional/sandboxed states. Wrapped `localStorage.setItem` in try/catch (`scripts/capture-portfolio.ts:104`); `data-theme` attribute alone drives theming. Re-run `npx tsx scripts/capture-portfolio.ts --video` and confirm no SecurityErrors in client walkthroughs.
+- [ ] **Rotate the two account passwords that were pasted in chat on 2026-04-30** — admin `nobhaduri@gmail.com` and client `nmbhaduri@gmail.com`. After rotating, update `ADMIN_PASSWORD` and `PORTAL_PASSWORD` in local `.env`. Reminder routine `trig_014SxD3PRfVZcZUGwfA7Kz8y` fires 2026-05-01 at 9 PM EDT.
+
+### Notes
+
+- Auth API rate limit (`createRateLimiter` in `server/middleware/rate-limiter.ts`) is in-memory; restarting `npm run dev:full` clears any 429 block.
+- `/dashboard#/invoices` redirects to `/dashboard#/documents` on the client side — captured filename still says `portal-invoices`.
 
 ---
 

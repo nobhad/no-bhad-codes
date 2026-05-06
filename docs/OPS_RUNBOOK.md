@@ -239,12 +239,65 @@ Runs the same code path as the nightly job. Returns
      after a restore — accept via `ACCEPT_SCHEMA_DRIFT=true` for one
      boot, then unset.
 
-### Offsite backups
+### Pre-migration backup
 
-The current retention is local (same volume as the DB). A volume
-loss wipes both. If this matters to you, add an offsite copy step
-(rclone to S3 / similar) to `scheduleDbBackup` in
-`server/services/scheduler-service.ts`.
+`npm run migrate` snapshots the database to
+`data/backups/pre-migration/client_portal_pre-migrate_<timestamp>.db`
+before applying any migration. To roll back a destructive migration
+locally:
+
+```
+cp data/backups/pre-migration/client_portal_pre-migrate_<stamp>.db data/client_portal.db
+```
+
+Pre-migration backups are not pruned automatically — they accumulate
+until you delete them. Production runs migrations on deploy, so this
+gives you a per-deploy rollback point on the Railway volume.
+
+### Offsite backups (Google Drive)
+
+Each nightly snapshot is also pushed to a Google Drive folder via a
+service account, so a volume loss does not wipe the only copy. The
+upload is a no-op when env vars aren't set, so dev environments stay
+quiet without configuration.
+
+**One-time setup:**
+
+1. Google Cloud Console → pick or create a project.
+2. Enable the **Google Drive API** (APIs & Services → Library).
+3. IAM → **Service Accounts** → create one (any name). Generate a
+   JSON key and download it.
+4. From the JSON, copy:
+   - `client_email` → `GOOGLE_SERVICE_ACCOUNT_EMAIL`
+   - `private_key` → `GOOGLE_SERVICE_ACCOUNT_KEY`
+     (literal newlines and `\n` escapes both work)
+5. In Drive, create a folder for backups. Right-click → Share →
+   add the service account email with **Editor** permission.
+6. From the folder URL `.../folders/<ID>`, copy the ID →
+   `GOOGLE_DRIVE_FOLDER_ID`.
+7. Set those three env vars on Railway (and locally if you want
+   to test).
+
+**Verify locally:**
+
+```
+npm run db:backup        # produce a fresh local snapshot
+npm run backup:drive     # upload the newest snapshot to the Drive folder
+```
+
+Confirm the file appears in Drive.
+
+**On Railway:** the in-app scheduler runs the upload automatically
+right after every nightly snapshot at 03:30 UTC. No Railway cron
+service needed. Logs land in the `BACKUP` category — search the log
+stream for `DB backup uploaded to Drive` to confirm.
+
+**Retention:** 30 newest uploads are kept in the Drive folder
+(override with `DRIVE_RETENTION_COUNT`).
+
+**If the upload fails,** the local snapshot still succeeded — the
+scheduler logs the Drive error and continues. Manual retry:
+`npm run backup:drive`.
 
 ---
 
