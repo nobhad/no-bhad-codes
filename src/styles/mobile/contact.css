@@ -138,6 +138,17 @@
      compounds with these — 0.18 multiplied with 0.4 produced an
      effective ~0.07 (invisible on a phone). Letting these inherit
      the base contact.css 0.5 keeps the glow as the focal point. */
+
+  /* Placeholders default to opacity:0 in pages/contact.css because the
+     desktop GSAP entrance fades them in. Small-mobile skips that
+     entrance (contact-animation.ts), so the placeholders ("Name *",
+     "Email *", etc.) would stay invisible — the form reads as empty
+     boxes with no field names. Force the CSS var to 1 so placeholders
+     are visible by default here. */
+  .contact-form .input-item input,
+  .contact-form .input-item textarea {
+    --placeholder-opacity: 1;
+  }
 }
 
 /* ============================================
