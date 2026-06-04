@@ -8,16 +8,24 @@
  * for consistent page structure across the application.
  */
 
-/* Responsive header height adjustments */
+/* Responsive header height adjustments — add env(safe-area-inset-top)
+   so the header's box accounts for the iOS status bar / Dynamic Island
+   space its content already reserves via padding-top. Without this, the
+   header is set to a fixed height (45/50/60 px) but its border-box
+   padding-top pushes content past that height, so `main { top:
+   var(--header-height) }` underestimates where the header actually
+   ends. Net effect on iOS: content scrolls under the header bar AND
+   the home page shows a phantom gap above the header. env() resolves
+   to 0 on non-iOS / non-notched browsers — no-op everywhere else. */
 @media (--desktop-down) {
   :root {
-    --header-height: 50px;
+    --header-height: calc(50px + env(safe-area-inset-top, 0px));
   }
 }
 
 @media (--mobile) {
   :root {
-    --header-height: 45px;
+    --header-height: calc(45px + env(safe-area-inset-top, 0px));
   }
 }
 
