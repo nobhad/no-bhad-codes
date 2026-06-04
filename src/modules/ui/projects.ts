@@ -233,10 +233,27 @@ export class ProjectsModule extends BaseModule {
   private screenBgBeforePowerOff: string | null = null;
 
   // TV Guide channel-row ticker — slow continuous scroll of the rows in
-  // the bottom half of the channel-list, mirroring the Prevue Guide.
-  // Rows are rendered twice in the DOM; tween translates by exactly half
-  // the track height then snaps to 0 for a seamless loop.
+  // the bottom half of the channel-list, mirroring the Prevue Guide. One
+  // "set" of rows is stacked N times in the DOM; the tween translates up
+  // by exactly one set's height then snaps to 0 for a seamless loop.
   private channelTickerTween: gsap.core.Tween | null = null;
+  // The single real (tabbable) set of channel rows and an aria-hidden
+  // clone of it. startChannelTicker stacks as many clones as the viewport
+  // needs so the loop never shows a gap, even when one set is shorter than
+  // the screen (few projects). channelSetCount tracks how many are live.
+  private channelRealSet = '';
+  private channelCloneSet = '';
+  private channelSetCount = 0;
+  // Debounced (rAF) re-measure of the ticker when the viewport resizes —
+  // copy count + loop distance depend on viewport height.
+  private channelTickerResizeRaf = 0;
+  private handleChannelTickerResize = (): void => {
+    if (this.channelTickerResizeRaf) cancelAnimationFrame(this.channelTickerResizeRaf);
+    this.channelTickerResizeRaf = requestAnimationFrame(() => {
+      this.channelTickerResizeRaf = 0;
+      this.startChannelTicker();
+    });
+  };
 
   constructor() {
     super('ProjectsModule', { debug: false });
@@ -271,6 +288,10 @@ export class ProjectsModule extends BaseModule {
 
     // Listen for page-changed events (back-navigation cleanup, title reset)
     window.addEventListener('page-changed', this.handlePageChanged.bind(this) as EventListener);
+
+    // Re-measure the channel ticker on resize — copy count + loop distance
+    // depend on the viewport height of the TV's bottom guide area.
+    window.addEventListener('resize', this.handleChannelTickerResize);
 
     // Channel-surf the CRT TV. PageTransitionModule owns the index and
     // dispatches this with an explicit target channel so the TV display
@@ -355,6 +376,10 @@ export class ProjectsModule extends BaseModule {
     if (to === 'projects') {
       this.currentProjectSlug = null;
       document.title = 'Projects - No Bhad Codes';
+      // The channel list is measured 0-height while #projects is
+      // display:none, so the ticker started during init bails. Restart it
+      // now that the section is on screen and measurable.
+      this.startChannelTicker();
     }
   }
 
@@ -938,12 +963,17 @@ export class ProjectsModule extends BaseModule {
             <span class="crt-tv__channel-meta"></span>
           </div>
         </li>`;
-    // Render rows TWICE so the GSAP ticker can translate the inner ul up
-    // by exactly one set's height and snap back to 0 for a seamless loop.
-    // The duplicate set is aria-hidden + non-tabbable so screen readers
-    // and keyboard users only encounter each project once.
-    const rows = buildGuideRow(false) + documented.map((p, i) => buildRow(p, i, false)).join('');
-    const rowsClone = buildGuideRow(true) + documented.map((p, i) => buildRow(p, i, true)).join('');
+    // Render rows at least TWICE so the GSAP ticker can translate the inner
+    // ul up by exactly one set's height and snap back to 0 for a seamless
+    // loop. The duplicate set is aria-hidden + non-tabbable so screen
+    // readers and keyboard users only encounter each project once.
+    // startChannelTicker may stack additional clones when the viewport is
+    // taller than a single set (few projects) to keep the loop gap-free.
+    const realSet = buildGuideRow(false) + documented.map((p, i) => buildRow(p, i, false)).join('');
+    const cloneSet = buildGuideRow(true) + documented.map((p, i) => buildRow(p, i, true)).join('');
+    this.channelRealSet = realSet;
+    this.channelCloneSet = cloneSet;
+    this.channelSetCount = 2;
 
     container.innerHTML = `
       <div class="crt-tv__guide-top">
@@ -977,7 +1007,7 @@ export class ProjectsModule extends BaseModule {
         </div>
       </div>
       <div class="crt-tv__guide-bottom" data-channel-ticker-viewport>
-        <ul class="crt-tv__channel-rows" data-channel-ticker-track>${rows}${rowsClone}</ul>
+        <ul class="crt-tv__channel-rows" data-channel-ticker-track>${realSet}${cloneSet}</ul>
       </div>
     `;
     this.startChannelTicker();
@@ -1014,7 +1044,7 @@ export class ProjectsModule extends BaseModule {
     if (window.matchMedia('(max-width: 479px)').matches) return;
     const track = document.querySelector<HTMLElement>('[data-channel-ticker-track]');
     const viewport = document.querySelector<HTMLElement>('[data-channel-ticker-viewport]');
-    if (!track || !viewport) return;
+    if (!track || !viewport || this.channelSetCount === 0) return;
     const documented = this.portfolioData?.projects.filter((p) => p.isDocumented) ?? [];
     if (documented.length === 0) return;
 
@@ -1022,22 +1052,43 @@ export class ProjectsModule extends BaseModule {
     // size. Without this the first measurement on initial render returns
     // 0 because layout hasn't settled yet.
     requestAnimationFrame(() => {
-      // The track contains 2× rows. Half its scrollHeight is the loop
-      // distance — translating up by that amount lands the second copy
-      // exactly where the first started.
-      const totalHeight = track.scrollHeight;
-      if (totalHeight <= 0) return;
-      const loopDistance = totalHeight / 2;
-      // If all rows fit in the viewport with no overflow, no need to
-      // ticker — leave the list static.
-      if (loopDistance <= viewport.clientHeight) return;
-      // Speed: ~16 px / second. Slow enough to read each row as it
-      // passes (matches the Prevue Guide pace).
+      // Height of ONE set of rows. The track stacks channelSetCount equal
+      // sets, so divide. A hidden section (display:none) measures 0 — bail
+      // and let the next page-show / resize restart re-measure once it's
+      // on screen.
+      let setHeight = track.scrollHeight / this.channelSetCount;
+      if (setHeight <= 0) return;
+      // The loop translates up by exactly one set then snaps back. For no
+      // gap to appear at the bottom, the clones below the first set must
+      // cover the viewport: (copies - 1) * setHeight >= viewport. With few
+      // projects a single set is shorter than the screen, so stack extra
+      // clones until that holds. Unlike the previous build this ALWAYS
+      // scrolls — the Prevue Guide ticker never sat still, however short
+      // the listing.
+      const neededCopies = Math.max(2, Math.ceil(viewport.clientHeight / setHeight) + 1);
+      if (neededCopies !== this.channelSetCount) {
+        track.innerHTML = this.channelRealSet + this.channelCloneSet.repeat(neededCopies - 1);
+        this.channelSetCount = neededCopies;
+        setHeight = track.scrollHeight / this.channelSetCount;
+        if (setHeight <= 0) return;
+        // Rebuilding the rows drops the is-active highlight — reapply it
+        // from the parked channel (activeTuneInSlug; null = on the guide).
+        if (this.activeTuneInSlug) {
+          const activeIdx = documented.findIndex((p) => p.slug === this.activeTuneInSlug);
+          if (activeIdx >= 0) {
+            track.querySelectorAll<HTMLElement>('.crt-tv__channel-row').forEach((row) => {
+              row.classList.toggle('is-active', Number(row.dataset.index) === activeIdx);
+            });
+          }
+        }
+      }
+      // Speed: ~16 px / second. Slow enough to read each row as it passes
+      // (matches the Prevue Guide pace).
       const TICKER_SPEED_PX_PER_S = 16;
-      const duration = loopDistance / TICKER_SPEED_PX_PER_S;
+      const duration = setHeight / TICKER_SPEED_PX_PER_S;
       gsap.set(track, { y: 0 });
       this.channelTickerTween = gsap.to(track, {
-        y: -loopDistance,
+        y: -setHeight,
         duration,
         ease: 'none',
         repeat: -1
@@ -2162,6 +2213,12 @@ export class ProjectsModule extends BaseModule {
    */
   protected async onDestroy(): Promise<void> {
     window.removeEventListener('hashchange', this.handleHashChange.bind(this));
+    window.removeEventListener('resize', this.handleChannelTickerResize);
+    if (this.channelTickerResizeRaf) cancelAnimationFrame(this.channelTickerResizeRaf);
+    if (this.channelTickerTween) {
+      this.channelTickerTween.kill();
+      this.channelTickerTween = null;
+    }
     this.projectsSection = null;
     this.projectsContent = null;
     this.projectDetailSection = null;
