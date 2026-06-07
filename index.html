@@ -1278,17 +1278,17 @@
         let terminalModule = null;
 
         async function openIntakeModal() {
-          console.log(
-            '[IntakeModal] Opening modal, terminalModule:',
-            terminalModule ? 'exists' : 'null'
-          );
           intakeModal.classList.add('open');
           intakeBackdrop.classList.add('open');
           document.body.style.overflow = 'hidden';
 
-          // Redirect to standalone intake page
-          window.location.href = '/client/intake';
-          return;
+          if (!terminalModule && intakeContainer) {
+            const { TerminalIntakeModule } = await import(
+              '/src/features/client/terminal-intake.ts'
+            );
+            terminalModule = new TerminalIntakeModule(intakeContainer, { isModal: true });
+            await terminalModule.init();
+          }
         }
 
         function closeIntakeModal() {
