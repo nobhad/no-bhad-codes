@@ -23,6 +23,8 @@ export const QUESTIONS: IntakeQuestion[] = [
       'Hello, I\'m Arrow - Noelle\'s personal assistant. I\'m here to help you start your project. This will only take a few minutes. First, what\'s your name?',
     type: 'text',
     required: true,
+    validation: (value) =>
+      value.trim().length >= 2 ? null : 'Please enter your name (at least 2 characters).',
     placeholder: 'Enter your full name'
   },
   {
@@ -61,6 +63,10 @@ export const QUESTIONS: IntakeQuestion[] = [
     question: 'Tell me about your project. What are you trying to achieve?',
     type: 'textarea',
     required: true,
+    validation: (value) =>
+      value.trim().length >= 10
+        ? null
+        : 'Please add a little more detail (at least 10 characters).',
     placeholder: 'Describe your project goals, target audience, and vision...'
   },
   {
