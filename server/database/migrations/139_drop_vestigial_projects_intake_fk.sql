@@ -1,0 +1,22 @@
+-- Migration 139: Drop vestigial projects.intake_id foreign key
+--
+-- Migration 086 added `projects.intake_id INTEGER REFERENCES client_intakes(id)`,
+-- then renamed `client_intakes` -> `_client_intakes_archived_086`. Modern SQLite
+-- automatically rewrites foreign-key references on RENAME, so the projects FK
+-- silently repointed to the archived table name. Migration 093 then ran
+-- `DROP TABLE IF EXISTS _client_intakes_archived_086;` WITHOUT fixing the FK,
+-- leaving `projects.intake_id` pointing at a table that no longer exists.
+--
+-- With `PRAGMA foreign_keys=ON`, SQLite resolves the parent table whenever the
+-- child table is modified, so EVERY insert into `projects` failed with:
+--   SQLITE_ERROR: no such table: main._client_intakes_archived_086
+-- This blocked all public intake submissions (POST /api/intake -> 500).
+--
+-- The column is vestigial: it is never written or read in application code, is
+-- always NULL, is not part of any index, and `client_intakes` is now a VIEW
+-- derived from `projects` itself -- so there is nothing meaningful for it to
+-- reference. Dropping the column removes the dangling FK and unblocks intake
+-- submissions. (Validated on a copy: DROP COLUMN succeeds without a table
+-- rebuild, and an intake-style INSERT into projects then succeeds.)
+
+ALTER TABLE projects DROP COLUMN intake_id;
