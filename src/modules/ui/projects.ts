@@ -244,9 +244,14 @@ export class ProjectsModule extends BaseModule {
   private channelRealSet = '';
   private channelCloneSet = '';
   private channelSetCount = 0;
-  // Debounced (rAF) re-measure of the ticker when the viewport resizes —
-  // copy count + loop distance depend on viewport height.
+  // Debounced (rAF) re-measure of the ticker — copy count + loop distance
+  // depend on the viewport height of the TV's bottom guide area. Driven by
+  // a ResizeObserver on that viewport so it fires whenever the area gains
+  // size (e.g. the TV laying out from 0 height as the projects tile shows
+  // on mobile, or the TV scaling on window resize) — a window 'resize'
+  // listener misses the display:none → visible transition.
   private channelTickerResizeRaf = 0;
+  private channelTickerResizeObserver: ResizeObserver | null = null;
   private handleChannelTickerResize = (): void => {
     if (this.channelTickerResizeRaf) cancelAnimationFrame(this.channelTickerResizeRaf);
     this.channelTickerResizeRaf = requestAnimationFrame(() => {
@@ -288,10 +293,6 @@ export class ProjectsModule extends BaseModule {
 
     // Listen for page-changed events (back-navigation cleanup, title reset)
     window.addEventListener('page-changed', this.handlePageChanged.bind(this) as EventListener);
-
-    // Re-measure the channel ticker on resize — copy count + loop distance
-    // depend on the viewport height of the TV's bottom guide area.
-    window.addEventListener('resize', this.handleChannelTickerResize);
 
     // Channel-surf the CRT TV. PageTransitionModule owns the index and
     // dispatches this with an explicit target channel so the TV display
@@ -633,9 +634,13 @@ export class ProjectsModule extends BaseModule {
     upBtn.setAttribute('aria-label', 'Next channel');
     upBtn.appendChild(buildSquareChevronIcon('right'));
     channelControls.append(downBtn, upBtn);
-    tvWrap.appendChild(channelControls);
 
     workWrapper.parentNode?.insertBefore(tvWrap, workWrapper);
+    // Insert the chevrons as a SIBLING of the TV wrap (not a child) so the
+    // wrap's translate(-50%, -50%) centering transform doesn't drag them
+    // off-screen. The small-mobile CSS pins them to the tile bottom via
+    // position:absolute resolved against .projects-section.
+    workWrapper.parentNode?.insertBefore(channelControls, workWrapper);
 
     // Set --tv-aspect from the chassis's natural dimensions so the
     // wrapper width calc auto-adjusts when the chassis art is
@@ -1012,6 +1017,18 @@ export class ProjectsModule extends BaseModule {
     `;
     this.startChannelTicker();
 
+    // Observe the guide viewport so the ticker (re)starts the moment the
+    // area gains a measurable height — covers the projects tile showing on
+    // mobile (TV lays out from 0), TV scaling on resize, and image-load
+    // reflow. The viewport element is stable across ticker rebuilds (only
+    // the inner <ul> track is replaced), so observing it once is enough.
+    const tickerViewport = container.querySelector<HTMLElement>('[data-channel-ticker-viewport]');
+    if (tickerViewport && typeof ResizeObserver !== 'undefined') {
+      this.channelTickerResizeObserver?.disconnect();
+      this.channelTickerResizeObserver = new ResizeObserver(this.handleChannelTickerResize);
+      this.channelTickerResizeObserver.observe(tickerViewport);
+    }
+
     // Delegated click → "tune in" to the channel: title card fills the
     // TV screen briefly, THEN navigation to the project-detail page
     // fires. The pre-roll plays the title-card image full-screen on
@@ -1038,10 +1055,9 @@ export class ProjectsModule extends BaseModule {
       this.channelTickerTween.kill();
       this.channelTickerTween = null;
     }
-    // Small mobile: continuous GSAP transform tween on every frame is a
-    // major source of jank on phones. Skip the ticker entirely — the
-    // channel list still renders, just statically.
-    if (window.matchMedia('(max-width: 479px)').matches) return;
+    // Runs on every breakpoint, mobile included — the channel guide should
+    // scroll on phones too. The tween is a single GPU-composited transform
+    // (will-change: transform on the track), cheap enough for modern phones.
     const track = document.querySelector<HTMLElement>('[data-channel-ticker-track]');
     const viewport = document.querySelector<HTMLElement>('[data-channel-ticker-viewport]');
     if (!track || !viewport || this.channelSetCount === 0) return;
@@ -2213,7 +2229,8 @@ export class ProjectsModule extends BaseModule {
    */
   protected async onDestroy(): Promise<void> {
     window.removeEventListener('hashchange', this.handleHashChange.bind(this));
-    window.removeEventListener('resize', this.handleChannelTickerResize);
+    this.channelTickerResizeObserver?.disconnect();
+    this.channelTickerResizeObserver = null;
     if (this.channelTickerResizeRaf) cancelAnimationFrame(this.channelTickerResizeRaf);
     if (this.channelTickerTween) {
       this.channelTickerTween.kill();
