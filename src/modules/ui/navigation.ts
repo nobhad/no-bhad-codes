@@ -246,7 +246,12 @@ export class NavigationModule extends BaseModule {
     if (this.logoLink) {
       this.addEventListener(this.logoLink, 'click', (event: Event) => {
         event.preventDefault();
+        // Point at the intro route, then force a real reload. A hash-only
+        // change (e.g. from #/projects, where the path is already "/") keeps
+        // the SPA mounted and never re-runs the first-paint intro script, so
+        // the coyote-paw entrance wouldn't replay without this explicit reload.
         window.location.href = '/#/';
+        window.location.reload();
       });
     }
   }
