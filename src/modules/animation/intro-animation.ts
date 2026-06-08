@@ -836,6 +836,26 @@ export class IntroAnimationModule extends BaseModule {
       return;
     }
 
+    // The paw exit morphs FROM the on-screen business card. If the card was
+    // never rendered (deep-loaded straight to a non-intro page, or the intro
+    // tile is display:none on the spatial map), its rect is 0×0 and
+    // calculateSvgAlignment() divides 0/0 → NaN, which lands as
+    // transform="translate(NaN, NaN)" on the morph <g> and throws. There's
+    // nothing to morph from, so skip the paw exit and let navigation proceed.
+    // Measure the SAME element calculateSvgAlignment() divides by — the inner
+    // card SVG image (falling back to the card front, then the container). The
+    // container can report a non-zero size while the inner SVG image is still
+    // 0×0 (e.g. deep-loading straight to #/projects before the card SVG has
+    // rendered), which still yields NaN alignment and the thrown transform.
+    const cardFront = businessCard.querySelector('.business-card-front') as HTMLElement | null;
+    const cardSvgImage = cardFront?.querySelector('img.card-svg') as HTMLElement | null;
+    const measuredEl: HTMLElement = cardSvgImage ?? cardFront ?? businessCard;
+    const cardRect = measuredEl.getBoundingClientRect();
+    if (cardRect.width === 0 || cardRect.height === 0) {
+      this.log('Business card SVG not visible — skipping paw exit morph');
+      return;
+    }
+
     const svgText = await this.getSvgText();
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
@@ -899,6 +919,23 @@ export class IntroAnimationModule extends BaseModule {
       // CRITICAL: Pass overlay element so alignment uses its actual dimensions (affected by .paw-exit)
       const alignment = SvgBuilder.calculateSvgAlignment(businessCard, this.morphOverlay);
       const { scale, translateX, translateY } = alignment;
+
+      // Never write a NaN transform. If the card or the morph overlay
+      // measured 0 in any dimension — which happens on the small-mobile
+      // layout where the overlay/card can be collapsed at transition time —
+      // the alignment math divides 0/0 and yields NaN, producing
+      // transform="translate(NaN, NaN)" on the <g> (a thrown SVG error and a
+      // broken morph). Bail the morph cleanly and let the transition proceed
+      // without it rather than render garbage. On a normal intro the values
+      // are finite, so this is a no-op.
+      if (![scale, translateX, translateY].every((n) => Number.isFinite(n))) {
+        this.log('Paw morph alignment was NaN — skipping morph, continuing');
+        document.documentElement.classList.remove('paw-exit');
+        this.morphOverlay!.style.visibility = 'hidden';
+        this.morphOverlay!.style.opacity = '';
+        resolve();
+        return;
+      }
 
       // Add shadow filter
       const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
@@ -1524,6 +1561,23 @@ export class IntroAnimationModule extends BaseModule {
       // CRITICAL: Pass overlay element so alignment uses its actual dimensions (affected by .paw-exit)
       const alignment = SvgBuilder.calculateSvgAlignment(businessCard, this.morphOverlay);
       const { scale, translateX, translateY } = alignment;
+
+      // Never write a NaN transform. If the card or the morph overlay
+      // measured 0 in any dimension — which happens on the small-mobile
+      // layout where the overlay/card can be collapsed at transition time —
+      // the alignment math divides 0/0 and yields NaN, producing
+      // transform="translate(NaN, NaN)" on the <g> (a thrown SVG error and a
+      // broken morph). Bail the morph cleanly and let the transition proceed
+      // without it rather than render garbage. On a normal intro the values
+      // are finite, so this is a no-op.
+      if (![scale, translateX, translateY].every((n) => Number.isFinite(n))) {
+        this.log('Paw morph alignment was NaN — skipping morph, continuing');
+        document.documentElement.classList.remove('paw-exit');
+        this.morphOverlay!.style.visibility = 'hidden';
+        this.morphOverlay!.style.opacity = '';
+        resolve();
+        return;
+      }
 
       // Add shadow filter
       const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
