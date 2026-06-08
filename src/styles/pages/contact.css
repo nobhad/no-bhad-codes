@@ -328,7 +328,12 @@ p.contact-options {
   position: relative;
   z-index: var(--z-index-base);
   -webkit-appearance: none;
-  --placeholder-opacity: 0;
+  /* Placeholders are the field labels (real <label>s are display:none), so
+     they must be visible from first paint. This was 0 back when the contact
+     entrance animation faded placeholders in; that fade-in was removed, so
+     nothing set it to 1 on desktop and the fields rendered as empty boxes.
+     Default to 1 — mobile/contact.css already forces 1 for the same reason. */
+  --placeholder-opacity: 1;
 }
 
 /* Input field dimensions */
@@ -355,7 +360,7 @@ p.contact-options {
 .input-item input::placeholder,
 .input-item textarea::placeholder {
   color: var(--color-text-tertiary);
-  opacity: var(--placeholder-opacity, 0);
+  opacity: var(--placeholder-opacity, 1);
   font-style: normal;
 }
 
