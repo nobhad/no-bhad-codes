@@ -86,7 +86,11 @@
     pointer-events: none;
   }
 
-  body.at-contact .footer {
+  /* Footer reveals only when the contact tile is the active page.
+     :has() lets us key off the page-active class that PageTransition-
+     Module sets on the visible tile, so no IntersectionObserver / body
+     class is needed. */
+  body:has(#contact.page-active) .footer {
     transform: translateY(0);
     pointer-events: auto;
   }
