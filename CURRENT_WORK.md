@@ -182,7 +182,7 @@ All items verified against actual code. ~~0A~~, ~~0H~~, ~~0I~~ removed (proved f
   - Data wiring: `dataService.getProfile().techStack`, lookup chunk by sorted tile-pair key (`[fromId, toId].sort().join('|')`).
   - Open risks: (1) z-index — runway must sit at `--z-index-overlay` *below* `#intro-morph-overlay` so the paw isn't covered (verify in `intro-morph.css`); (2) Acme font preload check in `templates/partials/head.ejs` to avoid FOUT on the oversized heading; (3) reverse during heading-explode window (~0.26s–0.42s) looks weird in v1 — accept as known trade-off, future polish via timeline labels.
   - v1 scope: horizontal only. Vertical (`intro↔hero`, `intro↔contact` with `hero` as a separate up-arm) deferred — same pattern with axis swap.
-- [ ] **Pike portfolio entry** — Pike Powder Coating site (5,607 LOC, designed + built, client opted not to launch — personal preference, not work-related). Decide whether to: (a) finish polish + add as case study with `liveUrl` omitted, or (b) defer until other portfolio gaps are closed. Notes: project lives at `/Users/noellebhaduri/Projects/Development/Active/pike`, has design docs (ANIMATION_INTERACTION_PLAN.md, CONTENT_EDITING_GUIDE.md).
+- [x] **Pike portfolio entry — WON'T DO** (decided 2026-06-12). Not adding Pike Powder Coating to the portfolio. The project still lives at `/Users/noellebhaduri/Projects/Development/Active/pike` (5,607 LOC, designed + built, client opted not to launch) with its design docs, but it's not going on the No Bhad Codes site.
 
 ---
 
@@ -203,7 +203,7 @@ The projects page renders a vintage TV with a channel-guide screen. Channel 01 i
 
 - [x] **Wire up the TV's physical buttons** — POWER toggles screen on/off; CHANNEL ▲▼ cycles channels mirroring wheel/arrow keys; VOLUME ▲▼ wired to tv-sfx (5-step volume, persisted to localStorage).
 - [x] **Re-export TV assets at 1426×1093** — all per-project bgs, composed title cards, channel digit overlays, and title-card base now exported at full TV-frame canvas with hyphenated filenames. Stacks at `inset:0; width/height:100%`, no centering math. Old underscored set deleted.
-- [ ] **Re-align `title-card_base.webp` artwork** — base bbox `(100, 95, 1137, 864)` is ~6px wider on each side than the per-project cards `(106, 95, 1131, 864)`. Causes a small visible jump when cycling between channel 01 and 02+. Re-export from same artboard origin as the project cards so artwork lands at x:106-1131.
+- [ ] **Re-align the base screen artwork** — base bbox `(100, 95, 1137, 864)` is ~6px wider on each side than the per-project cards `(106, 95, 1131, 864)`. Causes a small visible jump when cycling between channel 01 and 02+. Re-export from the same artboard origin as the project cards so artwork lands at x:106-1131. NOTE: the old `title-card_base.webp` no longer exists — the base screen now lives as `public/images/tv/base-on.webp` / `base-off.webp` (introduced 2026-04-30, `76f66a37`); re-export targets those two files.
 - [x] **Update "No Bhad Codes" case study copy** — keyFeature `"CRT TV hover preview"` replaced, scroll-map + TV channel guide added, approach paragraph rewritten to mention signature features.
 - [x] **Verify Hedgewitch and The Backend case studies** — Backend feature claims verified against actual code (`013_magic_link.sql`, `message-service.ts`, Chart.js, node-cron, etc.). Hedgewitch is a separate project — copy reads accurately.
 - [x] **TV channel copy condensed** — added `tv` namespace per project. TV reads from `tv.X ?? X`. All three documented projects have curated TV copy.
@@ -226,6 +226,24 @@ The projects page renders a vintage TV with a channel-guide screen. Channel 01 i
 - Per-panel hold timing map (paragraphs 9s, lists 7s, tagline 4s, etc.)
 - Esc cancels active tune-in; click-through link in outro panel preserves detail-page navigation
 - First-person voice in approach sections; "magic links" parenthetical stripped from TV render only
+
+---
+
+## Session 2026-06-12 — Mobile / Contact / Intro / Audio fixes
+
+**Status:** SHIPPED (committed; two items await on-device confirmation)
+
+### Shipped
+
+- **Contact form placeholders visible** (`89364621`) — labels are `display:none` by design (the placeholders ARE the field names), but `--placeholder-opacity` defaulted to `0` from a removed fade-in animation, so desktop rendered empty field boxes. Defaulted to `1` in `src/styles/pages/contact.css` (mobile was already patched).
+- **Intro paw-morph NaN guard** (`89364621`) — `calculateSvgAlignment` divided `0/0` when the card/overlay measured 0 (deep-load to a non-intro page, or the collapsed small-mobile layout), writing `transform="translate(NaN, NaN)"` and throwing on navigation. Both morph builders in `intro-animation.ts` now skip the morph when alignment isn't finite. Verified 0 console errors, desktop + mobile.
+- **TV ticker on mobile + centering** (`5030e1b1`) — lifted the `<=479px` ticker guard and restart it from a `ResizeObserver` on the guide viewport (fires once the TV lays out from 0 height). Chevrons moved to a SIBLING of the TV wrap so the `translate(-50%,-50%)` centering no longer drags them off-screen.
+- **Small-mobile pivot + iOS overscroll + TV audio isolation** (`7a2b23ff`) — landed the discrete-tile small-mobile architecture; `overscroll-behavior: contain` on the tile scroller + `none` on `html`/`body` to stop iOS rubber-banding the fixed header; and `transitionTo` now syncs `currentPageId` in its `catch` so a thrown animation can't leave it stale on the source page.
+
+### Awaiting on-device confirmation
+
+- [ ] **Off-page channel cycling / audio bleed** — root cause: stale `currentPageId` from a thrown transition animation let the wheel cycle TV channels (and restart channel music) on other pages. Fixed in `7a2b23ff`. Confirm on device: trackpad on contact should NOT change channels or start music. If it recurs, check console for `[PageTransitionModule] Transition failed:` — present means the fix is firing, absent means a second desync path remains.
+- [ ] **iOS overscroll** — confirm the fixed header no longer rubber-bands on a real iPhone.
 
 ---
 
