@@ -1149,55 +1149,47 @@ export class PageTransitionModule extends BaseModule {
     // non-natural-scroll trackpad users get one inverted axis; touch
     // and natural-scroll trackpad users — the majority — get intuitive
     // gestures across every input device.
-    const onProjects = this.currentPageId === 'projects';
-
     if (absY >= absX) {
-      const dirIfDown = 'down' as Direction;
-      const dirIfUp = 'up' as Direction;
       // Vertical wheel handling depends on which page is active:
       //
-      //   - Map tiles (intro/about/contact/hero): NEIGHBORS only defines
-      //     horizontal entries, so vertical wheel would no-op via the
-      //     normal direction → navigation path. Mouse-wheel users only
-      //     have a vertical wheel, so we'd be locking them out of the
-      //     spatial map. REMAP vertical wheel → horizontal nav so they
-      //     get parity with trackpad / arrow-key / swipe users:
-      //       wheel-down (forward)  → 'right' (forward in chain)
-      //       wheel-up   (back)     → 'left'  (back in chain)
+      //   - Map tiles (intro/about/projects/contact/hero): NEIGHBORS only
+      //     defines horizontal entries, so vertical wheel is REMAPPED to
+      //     horizontal carousel nav. Every map tile behaves the same —
+      //     INCLUDING projects. Vertical scroll used to channel-surf the
+      //     TV here, but that hijacked page navigation (a vertical flick
+      //     meant to leave the tile cycled a channel instead), so the TV
+      //     channel-surf is now driven by the on-screen CHANNEL ▲▼
+      //     buttons / chevrons / arrow keys / row clicks — not scroll.
+      //       wheel-down (forward) → 'right' (forward in chain)
+      //       wheel-up   (back)    → 'left'  (back in chain)
       //
-      //   - Projects: vertical wheel cycles TV channels (handled in
-      //     tryNavigateDirection). Don't remap — keep the channel-surf
-      //     semantics. Skip the edge-of-scroll guard since projects
-      //     doesn't have native scroll.
-      //
-      //   - Project-detail: vertical wheel scrolls the case-study
-      //     content natively until the user hits the boundary, then
-      //     navigates between projects.
+      //   - Project-detail: vertical wheel scrolls the case-study content
+      //     natively until the user hits the boundary, then navigates.
       const isMapTile = this.isMapPage(this.currentPageId);
-      if (isMapTile && !onProjects) {
-        // Mouse-wheel parity remap: vertical wheel → horizontal nav.
-        // Reads the OPPOSITE of the deltaY sign so natural-scroll users
-        // (the majority on macOS) get intuitive forward/back.
+      if (isMapTile) {
+        // Mouse-wheel parity remap. Reads the OPPOSITE of the deltaY sign
+        // so natural-scroll users (the macOS majority) get intuitive
+        // forward/back.
         direction = dy < 0 ? 'right' : 'left';
       } else if (dy < 0) {
-        if (!onProjects) {
-          const canScrollDown =
-            currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >= 1;
-          if (canScrollDown) return;
-        }
-        direction = dirIfDown;
+        // Project-detail: native-scroll the tall case study down until the
+        // bottom boundary, then navigate.
+        const canScrollDown =
+          currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >= 1;
+        if (canScrollDown) return;
+        direction = 'down';
       } else {
-        if (!onProjects && currentTile.scrollTop >= 1) return;
-        direction = dirIfUp;
+        // Scrolling up: native-scroll to the top, then navigate up.
+        if (currentTile.scrollTop >= 1) return;
+        direction = 'up';
       }
     } else {
       // Horizontal: swipe RIGHT (dx < 0 on natural scroll) → 'right'.
       direction = dx < 0 ? 'right' : 'left';
     }
 
-    // We're about to navigate (or cycle TV) — only consume the wheel
-    // event if there's actually a destination, otherwise let the
-    // browser scroll natively.
+    // We're about to navigate — only consume the wheel event if there's
+    // actually a destination, otherwise let the browser scroll natively.
     if (!this.canNavigate(direction)) return;
     event.preventDefault();
     this.tryNavigateDirection(direction);
