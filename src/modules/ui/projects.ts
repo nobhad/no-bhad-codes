@@ -39,11 +39,11 @@ const CHANNEL_MUSIC: Readonly<Record<string, string>> = {
 };
 
 /**
- * Build a Lucide square-chevron-{left|right} SVG icon as a real SVG
+ * Build a Lucide square-chevron-{up|down} SVG icon as a real SVG
  * element (not innerHTML) so the security-hook for stringified markup
  * stays clean. Used for the small-mobile channel up/down buttons.
  */
-function buildSquareChevronIcon(direction: 'left' | 'right'): SVGSVGElement {
+function buildSquareChevronIcon(direction: 'up' | 'down'): SVGSVGElement {
   const SVG_NS = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('width', '24');
@@ -68,7 +68,7 @@ function buildSquareChevronIcon(direction: 'left' | 'right'): SVGSVGElement {
   const path = document.createElementNS(SVG_NS, 'path');
   path.setAttribute(
     'd',
-    direction === 'left' ? 'm14 16-4-4 4-4' : 'm10 8 4 4-4 4'
+    direction === 'up' ? 'm8 14 4-4 4 4' : 'm16 10-4 4-4-4'
   );
   svg.appendChild(path);
 
@@ -621,18 +621,29 @@ export class ProjectsModule extends BaseModule {
     // the security-hook doesn't flag the hardcoded literal as untrusted.
     const channelControls = document.createElement('div');
     channelControls.className = 'projects-tv-channel-controls';
+    // Each control is an up/down chevron with a "CH" label beneath it, so the
+    // pair reads as a channel selector (▲ CH / ▼ CH) rather than left/right
+    // seek. Label text is created via textContent so the security-hook
+    // doesn't flag stringified markup.
+    const buildChannelLabel = (): HTMLSpanElement => {
+      const label = document.createElement('span');
+      label.className = 'projects-tv-channel-label';
+      label.setAttribute('aria-hidden', 'true');
+      label.textContent = 'CH';
+      return label;
+    };
     const downBtn = document.createElement('button');
     downBtn.type = 'button';
     downBtn.className = 'projects-tv-channel-btn';
     downBtn.dataset.tvMobileBtn = 'channel-down';
     downBtn.setAttribute('aria-label', 'Previous channel');
-    downBtn.appendChild(buildSquareChevronIcon('left'));
+    downBtn.append(buildSquareChevronIcon('down'), buildChannelLabel());
     const upBtn = document.createElement('button');
     upBtn.type = 'button';
     upBtn.className = 'projects-tv-channel-btn';
     upBtn.dataset.tvMobileBtn = 'channel-up';
     upBtn.setAttribute('aria-label', 'Next channel');
-    upBtn.appendChild(buildSquareChevronIcon('right'));
+    upBtn.append(buildSquareChevronIcon('up'), buildChannelLabel());
     channelControls.append(downBtn, upBtn);
 
     workWrapper.parentNode?.insertBefore(tvWrap, workWrapper);
