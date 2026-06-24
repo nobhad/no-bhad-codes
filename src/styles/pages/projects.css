@@ -1101,7 +1101,8 @@ div.page-hero-desktop {
 
   /* Lucide square-chevron icons carry their own framed look, so the
      button itself stays bare — no border, no background. Padding +
-     min hit-target keep tap area finger-friendly. */
+     min hit-target keep tap area finger-friendly. The "CH" label stacks
+     above the chevron so each control reads as a channel selector. */
   .projects-tv-channel-btn {
     appearance: none;
     background: transparent;
@@ -1111,10 +1112,20 @@ div.page-hero-desktop {
     padding: 0.5rem;
     cursor: pointer;
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 0.25rem;
     min-width: 64px;
     min-height: 64px;
+  }
+
+  .projects-tv-channel-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
   }
 
   .projects-tv-channel-btn svg {

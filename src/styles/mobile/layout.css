@@ -158,11 +158,13 @@
     box-sizing: border-box;
   }
 
-  /* About content wrapper - natural height, NO min-height constraint.
-     Horizontal padding matches the header's .container so text aligns
-     with the logo / menu on every screen size. Top padding is small —
-     just enough breathing room from the header — so the photo lands
-     near the top of the tile and the bio fits within the viewport. */
+  /* About content wrapper. Horizontal padding matches the header's
+     .container so text aligns with the logo / menu on every screen size.
+     min-height:100% makes the content fill the tile so justify-content
+     can center the image + bio block vertically — equal space above the
+     image and below the bio. `safe center` falls back to top-alignment on
+     short screens where the bio would otherwise overflow and clip the top
+     out of reach in the scroll container. */
   .about-section .about-content {
     display: flex;
     flex-direction: column;
@@ -170,10 +172,11 @@
     gap: 1rem;
     max-width: 100%;
     width: 100%;
-    min-height: unset;
+    min-height: 100%;
     height: auto;
     box-sizing: border-box;
     align-items: center;
+    justify-content: safe center;
     pointer-events: auto;
   }
 

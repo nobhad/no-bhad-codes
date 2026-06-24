@@ -282,7 +282,9 @@ export function createShadowFilter(morphSvg: SVGSVGElement, scale: number): void
   dropShadow.setAttribute('dx', '0');
   dropShadow.setAttribute('dy', String(shadow.base));
   dropShadow.setAttribute('stdDeviation', String(shadow.blur));
-  dropShadow.setAttribute('flood-color', ANIMATION_CONSTANTS.COLORS.SHADOW_DEFAULT);
+  // SHADOW_LIGHT (rgba(0,0,0,0.3)) matches the real business card box-shadow
+  // so the shadow doesn't visibly darken/soften when the morph hands off.
+  dropShadow.setAttribute('flood-color', ANIMATION_CONSTANTS.COLORS.SHADOW_LIGHT);
 
   filter.appendChild(dropShadow);
   defs.appendChild(filter);

@@ -179,9 +179,16 @@ export const ANIMATION_POSITIONS = {
 // ============================================
 
 export const ANIMATION_SHADOWS = {
-  // Intro animation shadow values
-  SHADOW_BASE_OFFSET: 12,
-  SHADOW_BLUR_OFFSET: 18,
+  // Intro animation shadow values — matched to the real business card's
+  // resting box-shadow (0 10px 30px var(--color-shadow), see
+  // business-card.css). dy=10 mirrors the card's 10px offset; the SVG
+  // feGaussianBlur stdDeviation is ~half a CSS box-shadow blur radius, so
+  // 15 ≈ the card's 30px blur. Keeping these in lockstep with the card
+  // means no visible "shadow softening" when the morph overlay hands off
+  // to the real card, and a lighter filter to rasterize each frame on
+  // mobile (paired with the SHADOW_LIGHT flood-color at the filter sites).
+  SHADOW_BASE_OFFSET: 10,
+  SHADOW_BLUR_OFFSET: 15,
 
   // Card shadow presets
   CARD_REST: '0 10px 30px rgba(0,0,0,0.3)',
