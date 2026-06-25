@@ -29,6 +29,60 @@
 
 ---
 
+## Production 502 — Schema-Drift Boot Crash
+
+**Status:** Code fix committed (`4c114a3c`) — prod recovery steps still pending
+**Priority:** Critical
+
+### What happened
+
+`www.nobhad.codes/api/*` returned 502 ("Application failed to respond"). The
+Vercel frontend proxies `/api/*` to the Railway service `no-bhad-codes-production`,
+and that service was hard-down — `/health/live`, `/api/*`, and `/` all 502'd.
+Railway build succeeded but the healthcheck never passed, so the container was
+killed and retried until it gave up.
+
+### Root cause
+
+Boot sequence runs migrations, then schema-drift detection that throws in
+production on any mismatch with the recorded baseline (`server/app.ts`).
+Migration 139 (`drop projects.intake_id`) legitimately changed the `projects`
+table, but the drift baseline still held the pre-139 schema. The guard flagged
+the migration's own change as drift and threw **before** reaching
+`recordSchemaBaseline` — so the baseline never updated and every boot
+re-crashed. A permanent crash loop. Confirmed in the Railway runtime log:
+`Failed to start server: Error: Schema drift detected (... modified=1) at startServer (server/app.ts:560)`.
+
+This was a latent landmine: every schema-changing migration would brick prod the
+same way.
+
+### Fix (in code)
+
+- [x] `server/app.ts`: track whether THIS boot applied migrations; if so,
+  rebaseline to the post-migration schema instead of throwing. Out-of-band drift
+  (schema changed with no migration to explain it) still fails loud. Commit
+  `4c114a3c`.
+
+### Prod recovery (Noelle, Railway CLI) — pending
+
+The committed fix prevents recurrence but does NOT clear the existing stale
+baseline (a normal boot has no pending migrations, so the old baseline still
+trips the guard). Clear it once with the escape hatch:
+
+- [ ] `railway variables --set "ACCEPT_SCHEMA_DRIFT=true"`
+- [ ] `railway up` (ships the fix from the working dir) — wait for build + boot
+- [ ] Confirm 200: `curl -s -o /dev/null -w "%{http_code}\n" https://no-bhad-codes-production.up.railway.app/health/live`
+- [ ] `railway variables --set "ACCEPT_SCHEMA_DRIFT=false"`
+- [ ] `railway redeploy --yes` — should boot clean with drift protection restored
+
+### Loose ends
+
+- [ ] `git push` — local `main` is ahead with `4c114a3c` (drift fix) and
+  `8cf6a037` (contact arrow). `railway up` deploys the working dir directly,
+  bypassing git, so the repo must be pushed to match what's live.
+
+---
+
 ## Portal Streamline + Hedgewitch Invite-Prep
 
 **Status:** SHIPPED, awaiting spot-check + one-time Drive setup
