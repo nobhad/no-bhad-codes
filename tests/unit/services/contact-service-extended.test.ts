@@ -314,14 +314,16 @@ describe('ContactService — submitToCustom', () => {
     await svcWithKey.init();
     vi.mocked(fetch).mockResolvedValue(makeOkResponse());
     await svcWithKey.submitForm(VALID_DATA);
-    const [, opts] = (fetch as Mock).mock.calls[0];
+    // submitToCustom primes the CSRF cookie with a GET first, so the POST to
+    // the endpoint isn't necessarily calls[0] — match it by URL.
+    const [, opts] = (fetch as Mock).mock.calls.find(([url]) => url === '/api/contact')!;
     expect((opts.headers as Record<string, string>)['Authorization']).toContain('Bearer my-key');
   });
 
   it('does not include Authorization header when no apiKey', async () => {
     vi.mocked(fetch).mockResolvedValue(makeOkResponse());
     await svc.submitForm(VALID_DATA);
-    const [, opts] = (fetch as Mock).mock.calls[0];
+    const [, opts] = (fetch as Mock).mock.calls.find(([url]) => url === '/api/contact')!;
     expect((opts.headers as Record<string, string>)['Authorization']).toBeUndefined();
   });
 
