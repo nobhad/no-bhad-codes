@@ -378,7 +378,6 @@ Located in `src/modules/animation/`:
 | `intro-animation-mobile.ts` | Mobile: full coyote-paw morph (MorphSVG), scaled for mobile | `gsap.to()`, `gsap.timeline()`, MorphSVG |
 | `page-transition.ts` | Spatial scroll-map navigation (camera pan + bridge slides), blur transitions for direct links, project-detail carousel, projects channel cycling, wheel/keyboard input | `gsap.to()`, `gsap.timeline()`, `ScrollTrigger` |
 | `contact-animation.ts` | Contact entrance: heading blur-in, hr + options fade, submit-button pop, avatar star-glow pulse. Form FIELDS are NOT animated (render static); skipped entirely on small mobile and reduced-motion | `gsap.to()`, `gsap.context()` |
-| `text-animation.ts` | Scroll-driven split-text skew animation on the `#hero` `.text-animation-svg` ("NO BHAD CODES") | `gsap.timeline()`, `ScrollTrigger` |
 
 ### UI Module GSAP Usage
 
@@ -487,7 +486,7 @@ Located in `src/styles/mobile/`:
 | Breakpoint | Behavior |
 |------------|----------|
 | < 768px | Vertical scroll, no scroll-map, hamburger nav, touch targets |
-| >= 768px | 2D spatial scroll-map (5 tiles in a plus layout), slide transitions, desktop nav |
+| >= 768px | 2D spatial scroll-map (4 tiles: intro centre, about up, projects right, contact down), slide transitions, desktop nav |
 | < 1400px | Circular back button hidden on project detail, text link shown instead |
 | All | TV channel guide is responsive — same layout on mobile (full-width, smaller typography, button hit area extended); rows and ticker stay active |
 

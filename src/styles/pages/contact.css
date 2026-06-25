@@ -15,60 +15,6 @@
  **/
 
 /* ==========================================
-   CONTACT HERO - DISABLED
-   ========================================== */
-
-/* contact-hero-desktop - DISABLED - hero animations removed */
-section.contact-section .contact-hero-desktop {
-  display: none;
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  justify-content: center;
-  align-items: center;
-  background: var(--color-neutral-300);
-  z-index: var(--z-index-elevated);
-  cursor: default;
-}
-
-@media (--tablet) {
-  .contact-hero-desktop {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: var(--color-neutral-300);
-    z-index: var(--z-index-elevated);
-    cursor: default;
-    opacity: 0;
-    visibility: hidden;
-  }
-
-  .contact-hero-desktop.hero-revealed {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  .contact-hero-desktop .text-animation-svg {
-    width: 90%;
-    max-width: 1200px;
-    height: auto;
-    max-height: 80vh;
-    will-change: transform;
-  }
-}
-
-/* ==========================================
    CONTACT SECTION LAYOUT - BASE (all screens)
 
    .contact-content uses explicit max-width (not fit-content)

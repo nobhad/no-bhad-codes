@@ -14,18 +14,6 @@
    HERO SECTION
    =============================================== */
 
-/* projects-hero-desktop - DISABLED - hero animations removed */
-/* High specificity to ensure these elements stay hidden */
-section.projects-hero-desktop,
-section.page-hero-desktop[data-hero-page="projects"],
-div.projects-hero-desktop,
-div.page-hero-desktop[data-hero-page="projects"] {
-  display: none;
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
-}
-
 .projects-hero {
   padding: 4rem 0 2rem;
   text-align: center;
@@ -350,15 +338,6 @@ div.page-hero-desktop[data-hero-page="projects"] {
    RESPONSIVE DESIGN
    =============================================== */
 
-/* Hide all page-hero-desktop elements (hero text animations) */
-/* High specificity with element type prefix */
-section.page-hero-desktop,
-div.page-hero-desktop {
-  display: none;
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
-}
 
 @media (--mobile) {
   .projects-hero {
