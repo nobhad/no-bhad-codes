@@ -1,7 +1,7 @@
 # Task Management System
 
 **Status:** Complete
-**Last Updated:** February 9, 2026
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -147,50 +147,23 @@ POST /api/projects/:id/tasks/escalate-priorities
 
 ## Components
 
-### Kanban Board
+Task UI is implemented in React. The earlier vanilla
+`createKanbanBoard` / `createViewToggle` helpers have been removed.
 
-```typescript
-import { createKanbanBoard } from 'src/components/kanban-board';
-
-const board = createKanbanBoard({
-  containerId: 'tasks-kanban-container',
-  columns: [
-    { id: 'pending', title: 'To Do', items: [] },
-    { id: 'in_progress', title: 'In Progress', items: [] },
-    { id: 'blocked', title: 'Blocked', items: [] },
-    { id: 'completed', title: 'Done', items: [] }
-  ],
-  onItemMove: async (itemId, newStatus) => {
-    // Update task status via API
-  }
-});
-```
-
-### View Toggle
-
-```typescript
-import { createViewToggle } from 'src/components/view-toggle';
-
-createViewToggle(mountElement, {
-  options: [
-    { id: 'kanban', label: 'Board', icon: BOARD_ICON },
-    { id: 'list', label: 'List', icon: LIST_ICON }
-  ],
-  activeId: 'kanban',
-  onChange: (viewId) => renderView(viewId)
-});
-```
+- `src/react/features/admin/global-tasks/GlobalTasksTable.tsx` — cross-project
+  global tasks view.
+- `src/react/features/admin/tasks/TasksManager.tsx` — per-project task
+  management (board/list views).
 
 ## Files
 
 | File | Purpose |
 |------|---------|
-| `src/react/features/admin/global-tasks/` | Global tasks module |
-| `src/react/features/admin/tasks/` | Project tasks module |
-| `src/components/kanban-board.ts` | Reusable Kanban component |
-| `src/components/view-toggle.ts` | View toggle component |
-| `server/routes/admin.ts` | Global tasks endpoint |
-| `server/routes/projects.ts` | Project tasks endpoints |
+| `src/react/features/admin/global-tasks/GlobalTasksTable.tsx` | Global tasks UI |
+| `src/react/features/admin/tasks/TasksManager.tsx` | Project tasks UI |
+| `server/routes/admin/dashboard.ts` | Global tasks read endpoint (`GET /api/admin/tasks`) |
+| `server/routes/admin/tasks.ts` | Global tasks write endpoint (`POST /api/admin/tasks`) |
+| `server/routes/projects/tasks.ts` | Project tasks endpoints |
 | `server/services/project-service.ts` | Task service methods |
 | `server/services/priority-escalation-service.ts` | Priority auto-escalation logic |
 | `server/services/scheduler-service.ts` | Daily escalation job (6 AM) |

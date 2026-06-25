@@ -1,7 +1,7 @@
 # Contracts System
 
 **Status:** Complete (Backend + Admin UI + E-Signature UI)
-**Last Updated:** March 17, 2026
+**Last Updated:** 2026-06-25
 
 ## Table of Contents
 
@@ -435,7 +435,7 @@ When both parties have signed:
 
 | File | Purpose |
 |------|---------|
-| `server/routes/projects.ts` | Contract API endpoints (lines 1340-2100+) |
+| `server/routes/projects/contracts.ts` | Project-token contract API endpoints |
 | `server/database/migrations/052_contract_templates.sql` | Schema |
 | `server/database/migrations/053_contract_templates_seed.sql` | Default template |
 | `server/database/migrations/054_contract_countersign.sql` | Countersign fields |
@@ -443,7 +443,7 @@ When both parties have signed:
 | `src/styles/admin/pd-contract.css` | Contract tab styles |
 | `src/react/features/admin/contracts/ContractsTable.tsx` | Admin contracts table (React) |
 | `src/react/features/admin/contracts/ContractDetailPanel.tsx` | Slide-in detail panel (Overview, Timeline) |
-| `client/sign-contract.html` | Public signing page |
+| `public/sign-contract.html` | Public signing page |
 
 ---
 
@@ -549,7 +549,6 @@ When both parties have signed:
 ### February 15, 2026 - Rich Text Editor Added
 
 - Added Quill.js rich text editor to contract builder
-- Created reusable rich text editor component (`src/components/rich-text-editor.ts`)
 - Added variable insertion toolbar for contract placeholders
 - Editor converts HTML to plain text for PDF compatibility
 - Added CSS styles for dark theme integration

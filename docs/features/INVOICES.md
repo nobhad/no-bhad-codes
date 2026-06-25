@@ -1,6 +1,6 @@
 # Invoice System
 
-**Last Updated:** March 16, 2026
+**Last Updated:** 2026-06-25
 
 > **⚠️ Frontend code samples are legacy (as of 2026-04-30):** The portal-side TypeScript snippets and `ClientPortalContext` references in this doc come from the removed vanilla portal (`portal-invoices.ts`). The client portal no longer has a dedicated invoices view — it has been consolidated into `src/react/features/portal/documents/PortalDocuments.tsx`. Admin invoice management lives in `src/react/features/admin/invoices/`. Server routes, API endpoints, database schema, PDF generation, and Stripe integration documented below remain accurate.
 
@@ -1351,9 +1351,7 @@ DEPOSIT CREDITS APPLIED:
 |`server/routes/invoices/*.ts`|Split invoice route modules (core, deposits, credits, etc.)|
 |`server/routes/invoices/pdf.ts`|PDF generation utilities (used by routes)|
 |`server/services/invoice-service.ts`|Invoice business logic|
-|`src/react/features/portal/invoices/`|Frontend invoice handling (~250 lines)|
-|`src/styles/client-portal/documents.css`|Invoice styling (consolidated)|
-|`templates/pages/client-portal.ejs`|Invoices tab HTML (tab-invoices section)|
+|`src/react/features/portal/invoices/`|React invoice UI (`PortalInvoicesTable.tsx` + `index.ts`)|
 
 ---
 
@@ -1473,9 +1471,7 @@ When an invoice is sent, reminders are automatically scheduled:
 |`server/services/invoice-service.ts`|Invoice business logic (~3000 lines)|
 |`server/services/scheduler-service.ts`|Automated task scheduling|
 |`server/database/migrations/028_invoice_enhancements.sql`|New tables migration|
-|`src/react/features/portal/invoices/`|Frontend invoice handling (~250 lines)|
-|`src/styles/client-portal/documents.css`|Invoice styling (consolidated)|
-|`templates/pages/client-portal.ejs`|Invoices tab HTML (tab-invoices section)|
+|`src/react/features/portal/invoices/`|React invoice UI (`PortalInvoicesTable.tsx` + `index.ts`)|
 
 ---
 

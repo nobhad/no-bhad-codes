@@ -1,7 +1,7 @@
 # Proposal System Enhancement
 
 **Status:** Complete
-**Last Updated:** March 17, 2026
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -649,7 +649,7 @@ When a proposal is deleted via `DELETE /api/proposals/:id`:
 ### March 16, 2026 - Full Proposal Pipeline
 
 - **Budget-relative template system**: Tiers priced around client's budget (Good=45%, Better=80%, Best=130%)
-- **Feature catalog**: 155 features + 63 addons across 6 project types in `proposal-templates.json`
+- **Feature catalog**: tier features + add-ons across 5 project types (simple-site, business-site, ecommerce-site, web-app, portfolio) in `proposal-templates.json`
 - **Maintenance inclusion**: Good=none, Better=optional add-on, Best=3 months Standard included
 - **Proposal prefill service**: Maps questionnaire answers to suggested tier, features, and maintenance recommendation
 - **Client acceptance endpoint**: `POST /api/proposals/:id/accept` — clients can accept from portal

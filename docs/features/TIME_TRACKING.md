@@ -1,7 +1,7 @@
 # Time Tracking System
 
 **Status:** Complete
-**Last Updated:** February 8, 2026
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -20,11 +20,11 @@ The Time Tracking System allows logging and managing time entries for projects. 
 - Set hourly rates for billing calculations
 - Edit and delete existing entries
 
-### Weekly Chart
+### Summary Stats
 
-- Bar chart showing hours logged per day for the current week
-- Visual overview of time distribution
-- Uses `createBarChart` component
+- Stat tiles summarizing total, billable, unbilled hours, and total value
+- Rendered via the `TableStats` component
+- Filterable by date range (week / month / all)
 
 ### Export
 
@@ -38,15 +38,16 @@ The Time Tracking System allows logging and managing time entries for projects. 
 | `id` | INTEGER | Primary key |
 | `project_id` | INTEGER | FK to projects |
 | `task_id` | INTEGER | Optional FK to project_tasks |
-| `user_email` | TEXT | Who logged the time |
-| `user_name` | TEXT | Display name |
+| `user_id` | INTEGER | FK to users(id) — who logged the time |
 | `description` | TEXT | Work description |
-| `duration_minutes` | INTEGER | Duration in minutes |
-| `date` | TEXT | Date of work (ISO) |
-| `is_billable` | BOOLEAN | Billable flag |
-| `hourly_rate` | REAL | Rate for billing |
-| `created_at` | TEXT | Timestamp |
-| `updated_at` | TEXT | Timestamp |
+| `hours` | DECIMAL(5,2) | Duration in hours |
+| `date` | DATE | Date of work (ISO) |
+| `billable` | BOOLEAN | Billable flag |
+| `hourly_rate` | DECIMAL(10,2) | Rate for billing |
+| `created_at` | DATETIME | Timestamp |
+| `updated_at` | DATETIME | Timestamp |
+
+*The API accepts `duration_minutes` and `is_billable` as input aliases, but the underlying `time_entries` table stores `hours` and `billable`.*
 
 ## API Endpoints
 
@@ -58,11 +59,11 @@ POST /api/projects/:id/time-entries
   Body: { description, durationMinutes, date, isBillable, taskId?, hourlyRate? }
   Returns: created entry
 
-PUT /api/projects/:projectId/time-entries/:entryId
+PUT /api/projects/:id/time-entries/:entryId
   Body: { description, durationMinutes, date, isBillable, taskId?, hourlyRate? }
   Returns: updated entry
 
-DELETE /api/projects/:projectId/time-entries/:entryId
+DELETE /api/projects/:id/time-entries/:entryId
   Returns: success message
 ```
 
@@ -95,6 +96,5 @@ Multi-field dialog with:
 | File | Purpose |
 |------|---------|
 | `src/react/features/admin/time-tracking/` | Time tracking module |
-| `src/components/chart-simple.ts` | Bar chart component |
 | `src/utils/table-export.ts` | CSV export utility |
-| `server/routes/projects.ts` | Time entry endpoints |
+| `server/routes/projects/time-tracking.ts` | Time entry endpoints |

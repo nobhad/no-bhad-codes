@@ -1,6 +1,6 @@
 # Status System
 
-**Last Updated:** February 3, 2026
+**Last Updated:** 2026-06-25
 
 ---
 
@@ -12,8 +12,10 @@ All status colors are defined in `src/design-system/tokens/colors.css`.
 ┌────────┬─────────┬────────────────────────────────────────────┐
 │ Color  │ Hex     │ Meaning                                    │
 ├────────┼─────────┼────────────────────────────────────────────┤
+│ Cyan   │ #06b6d4 │ New                                        │
 │ Blue   │ #3b82f6 │ Active / In Progress / Contacted           │
-│ Yellow │ #fbbf24 │ Pending / New / On Hold                    │
+│ Yellow │ #fbbf24 │ Pending                                    │
+│ Orange │ #f97316 │ On Hold / Blocked                          │
 │ Green  │ #10b981 │ Completed / Converted / Success            │
 │ Red    │ #ef4444 │ Cancelled / Lost / Archived                │
 │ Purple │ #8b5cf6 │ Qualified / In Review                      │
@@ -107,11 +109,13 @@ Active work for clients.
 ┌─────────────────────────────────────────┬─────────────┐
 │ Scenario                                │ Status      │
 ├─────────────────────────────────────────┼─────────────┤
-│ Gathering requirements, scoping         │ planning    │
+│ Gathering requirements, scoping         │ pending     │
+│ Confirmed and starting development      │ active      │
 │ Active development work                 │ in-progress │
-│ Deliverables ready for client review    │ review      │
+│ Deliverables ready for client review    │ in-review   │
 │ Project delivered and accepted          │ completed   │
 │ Client requested work pause             │ on-hold     │
+│ Project cancelled                       │ cancelled   │
 └─────────────────────────────────────────┴─────────────┘
 ```
 
@@ -121,14 +125,16 @@ Active work for clients.
 ┌─────────────┬─────────────┬───────────────────┐
 │ From        │ To          │ Trigger           │
 ├─────────────┼─────────────┼───────────────────┤
-│ planning    │ in-progress │ Work begins       │
-│ in-progress │ review      │ Deliverables ready│
-│ review      │ completed   │ Client approves   │
-│ review      │ in-progress │ Revisions needed  │
+│ pending     │ active      │ Project confirmed │
+│ active      │ in-progress │ Work begins       │
+│ in-progress │ in-review   │ Deliverables ready│
+│ in-review   │ completed   │ Client approves   │
+│ in-review   │ in-progress │ Revisions needed  │
 │ Any         │ on-hold     │ Work paused       │
+│ Any         │ cancelled   │ Project cancelled │
 └─────────────┴─────────────┴───────────────────┘
 
-Flow: planning → in-progress → review → completed
+Flow: pending → active → in-progress → in-review → completed
 ```
 
 ---
@@ -334,8 +340,10 @@ Defined in `src/design-system/tokens/colors.css`:
 ┌────────────────────┬─────────┬────────────────────────────────────────┐
 │ Variable           │ Hex     │ Used For                               │
 ├────────────────────┼─────────┼────────────────────────────────────────┤
+│ --status-new       │ #06b6d4 │ new                                    │
 │ --status-active    │ #3b82f6 │ active, in-progress, contacted         │
-│ --status-pending   │ #fbbf24 │ pending, new, on-hold                  │
+│ --status-pending   │ #fbbf24 │ pending                                │
+│ --status-on-hold   │ #f97316 │ on-hold, blocked                       │
 │ --status-completed │ #10b981 │ completed, converted, replied, success │
 │ --status-cancelled │ #ef4444 │ cancelled, lost, archived              │
 │ --status-qualified │ #8b5cf6 │ qualified, in-review                   │
@@ -376,6 +384,14 @@ Each variable also has RGB and background variants:
   --status-inactive: #6b7280;            /* Gray - Inactive/Read */
   --status-inactive-rgb: 107, 114, 128;
   --status-inactive-bg: rgba(107, 114, 128, 0.15);
+
+  --status-new: #06b6d4;                 /* Cyan - New (distinct from pending) */
+  --status-new-rgb: 6, 182, 212;
+  --status-new-bg: rgba(6, 182, 212, 0.15);
+
+  --status-on-hold: #f97316;             /* Orange - On Hold/Blocked */
+  --status-on-hold-rgb: 249, 115, 22;
+  --status-on-hold-bg: rgba(249, 115, 22, 0.15);
 }
 ```
 
@@ -428,11 +444,13 @@ export type LeadStatus =
 
 // Project statuses - work lifecycle
 export type ProjectStatus =
-  | 'planning'
+  | 'pending'
+  | 'active'
   | 'in-progress'
-  | 'review'
+  | 'in-review'
   | 'completed'
-  | 'on-hold';
+  | 'on-hold'
+  | 'cancelled';
 
 // Client statuses - account state
 export type ClientStatus = 'active' | 'inactive' | 'pending';
@@ -444,11 +462,11 @@ export type ContactStatus = 'new' | 'read' | 'replied' | 'archived';
 export type InvoiceStatus =
   | 'draft'
   | 'sent'
-  | 'viewed'
-  | 'partial'
   | 'paid'
   | 'overdue'
-  | 'cancelled';
+  | 'cancelled'
+  | 'partial'
+  | 'viewed';
 
 // Message thread statuses
 export type ThreadStatus = 'active' | 'closed' | 'archived';
@@ -465,10 +483,8 @@ export type ThreadStatus = 'active' | 'closed' | 'archived';
 │ Status variables    │ src/design-system/tokens/colors.css    │
 │ Status badges       │ src/styles/shared/portal-badges.css    │
 │ Status dots         │ src/styles/admin/client-detail.css     │
-│ TypeScript types    │ src/types/api.ts                       │
+│ TypeScript types    │ src/types/api/*.ts (per-entity files)  │
 │ Server types        │ server/types/database.ts               │
-│ Dropdown options    │ src/utils/table-dropdown.ts            │
-│ Filter options      │ src/utils/table-filter.ts              │
 └─────────────────────┴────────────────────────────────────────┘
 ```
 

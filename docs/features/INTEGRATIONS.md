@@ -1,7 +1,7 @@
 # External Integrations
 
 **Status:** Complete
-**Last Updated:** 2026-03-17
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -178,7 +178,7 @@ GOOGLE_REDIRECT_URI=https://yourdomain.com/api/integrations/calendar/callback
 | GET | `/api/integrations/calendar/auth-url` | Get Google OAuth URL |
 | POST | `/api/integrations/calendar/callback` | Handle OAuth callback |
 | PUT | `/api/integrations/calendar/settings` | Update sync settings |
-| GET | `/api/integrations/calendar/export/project/:id` | Export project to iCal |
+| GET | `/api/integrations/calendar/export/project/:projectId` | Export project to iCal |
 | GET | `/api/integrations/calendar/export/upcoming` | Export upcoming items to iCal |
 
 ### iCal Export (No Google Required)
@@ -395,7 +395,7 @@ CREATE TABLE integration_status (
 
 | File | Purpose |
 |------|---------|
-| `server/routes/integrations.ts` | API routes |
+| `server/routes/integrations.ts` | API routes (barrel over `integrations/{status,zapier,notifications,stripe,calendar}.ts`) |
 | `server/services/integrations/index.ts` | Service exports |
 | `server/services/integrations/stripe-service.ts` | Stripe payment handling |
 | `server/services/integrations/calendar-service.ts` | Google Calendar + iCal |

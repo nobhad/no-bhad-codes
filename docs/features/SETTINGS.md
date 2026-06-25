@@ -71,7 +71,7 @@ Combined Profile and Password management in one section.
 ### Account HTML Implementation
 
 ```html
-<!-- templates/pages/client-portal.ejs:228-271 -->
+<!-- src/react/features/portal/settings/ProfileForm.tsx (illustrative markup) -->
 <div class="settings-section cp-shadow">
     <h3>Account</h3>
     <form class="settings-form" id="profile-form">
@@ -157,7 +157,7 @@ Email notification settings with checkbox options.
 ### Notification HTML Implementation
 
 ```html
-<!-- templates/pages/client-portal.ejs:273-297 -->
+<!-- src/react/features/portal/settings/NotificationsForm.tsx (illustrative markup) -->
 <div class="settings-section cp-shadow">
     <h3>Notification Preferences</h3>
     <form class="settings-form" id="notifications-form">
@@ -202,7 +202,7 @@ Company and address information for invoicing.
 ### Billing HTML Implementation
 
 ```html
-<!-- templates/pages/client-portal.ejs:299-333 -->
+<!-- src/react/features/portal/settings/BillingForm.tsx (illustrative markup) -->
 <div class="settings-section cp-shadow">
     <h3>Billing Information</h3>
     <form class="settings-form" id="billing-form">
@@ -312,7 +312,7 @@ passwordToggles.forEach((toggle) => {
 ### Form Save Methods
 
 ```typescript
-// src/features/client/modules/portal-settings.ts
+// src/react/features/portal/settings/ (illustrative logic)
 
 async function saveContactInfo(formData: FormData, ctx: ClientPortalContext): Promise<void> {
   const data = Object.fromEntries(formData);
@@ -345,7 +345,7 @@ async function saveNotificationPrefs(formData: FormData, ctx: ClientPortalContex
 ### Load Settings Methods
 
 ```typescript
-// src/features/client/modules/portal-settings.ts
+// src/react/features/portal/settings/ (illustrative logic)
 
 export function loadUserSettings(currentUser: string | null): void {
   const userData = {
@@ -398,7 +398,7 @@ export function loadNotificationSettings(): void {
 The settings module uses the `ClientPortalContext.showNotification()` method:
 
 ```typescript
-// src/features/client/modules/portal-settings.ts
+// src/react/features/portal/settings/ (illustrative logic)
 ctx.showNotification('Contact information saved successfully!', 'success');
 
 // ClientPortalContext provides this method:
@@ -640,11 +640,10 @@ billing_country TEXT
 
 |File|Purpose|
 |------|---------|
-|`client/portal.html`|Settings tab HTML (tab-settings section)|
-|`src/features/client/modules/portal-settings.ts`|Settings module (~260 lines)|
-|`src/styles/client-portal/settings.css`|Settings styling|
-|`server/routes/clients.ts`|Client profile API endpoints|
-|`server/routes/auth.ts`|Password change endpoint|
+|`src/react/features/portal/settings/PortalSettings.tsx`|Settings page (React SPA)|
+|`src/react/features/portal/settings/` (`ProfileForm`, `NotificationsForm`, `BillingForm`, `ContactsSection`)|Settings form components|
+|`src/styles/portal/client/settings.css`|Settings styling|
+|`server/routes/clients/me.ts`|Client profile + password API endpoints|
 
 ---
 

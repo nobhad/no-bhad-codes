@@ -1,7 +1,7 @@
 # Client Information Collection System
 
 **Status:** Complete
-**Last Updated:** February 10, 2026
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -125,19 +125,16 @@ Track overall information completeness:
 
 ## Database Schema
 
-### onboarding_sessions Table
+### client_onboarding Table
 
 ```sql
-CREATE TABLE onboarding_sessions (
+CREATE TABLE client_onboarding (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  client_id INTEGER NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+  client_id INTEGER NOT NULL UNIQUE REFERENCES clients(id) ON DELETE CASCADE,
   project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
   current_step INTEGER DEFAULT 1,
-  status TEXT DEFAULT 'step_1',
-  step_1_data JSON,
-  step_2_data JSON,
-  step_3_data JSON,
-  step_4_data JSON,
+  step_data JSON DEFAULT '{}',
+  status TEXT DEFAULT 'not_started',
   completed_at DATETIME,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -196,10 +193,10 @@ CREATE TABLE document_template_categories (
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/onboarding/:clientId` | Get onboarding session |
-| POST | `/api/onboarding/create` | Create new session |
-| PUT | `/api/onboarding/:sessionId/step/:step` | Save step data |
-| POST | `/api/onboarding/:sessionId/complete` | Complete onboarding |
+| GET | `/api/client-info/onboarding` | Get current client's onboarding session |
+| POST | `/api/client-info/onboarding/save` | Save step data |
+| POST | `/api/client-info/onboarding/complete` | Complete onboarding |
+| GET | `/api/client-info/onboarding/:clientId` | Get onboarding session (admin) |
 
 ### Questionnaires
 
@@ -215,18 +212,18 @@ CREATE TABLE document_template_categories (
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/questionnaires/:id/responses` | Get all responses |
-| GET | `/api/questionnaires/client/:clientId` | Get client's responses |
-| POST | `/api/questionnaires/:id/respond` | Submit response |
-| PUT | `/api/questionnaires/responses/:responseId` | Update response |
+| GET | `/api/questionnaires/responses` | Get all responses |
+| GET | `/api/questionnaires/client/:clientId/responses` | Get client's responses |
+| POST | `/api/questionnaires/responses/:id/submit` | Submit response |
+| POST | `/api/questionnaires/responses/:id/save` | Save response progress |
 
 ### Information Status
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/client-info/:clientId/status` | Get completeness status |
-| GET | `/api/client-info/dashboard` | Admin status dashboard |
-| POST | `/api/client-info/:clientId/remind` | Send reminder |
+| GET | `/api/client-info/status/:clientId` | Get completeness status |
+| GET | `/api/client-info/status` | Get current client's status |
+| POST | `/api/client-info/recalculate/:clientId` | Recalculate completeness |
 
 ---
 
@@ -306,16 +303,17 @@ CREATE TABLE document_template_categories (
 ## Test Coverage
 
 **Test File:** `tests/unit/server/client-information.test.ts`
-**Total Tests:** 40
+**Total Tests:** 42
 
 ### Coverage Areas
 
 | Area | Tests | Description |
 |------|-------|-------------|
-| Onboarding Wizard | 12 | Session creation, step saves, completion |
-| Document Collection | 10 | Upload, validation, categorization |
-| Questionnaires | 10 | CRUD, question types, conditional logic |
-| Status Tracking | 8 | Completeness calculation, reminders |
+| Onboarding Wizard | 11 | Session creation, step saves, completion |
+| Document Collection | 11 | Upload, validation, categorization |
+| Questionnaires | 12 | CRUD, question types, conditional logic |
+| Status Tracking | 4 | Completeness calculation, reminders |
+| Error Handling | 4 | Not-found, validation, duplicate handling |
 
 ### Test Categories
 

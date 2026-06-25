@@ -1,6 +1,6 @@
 # Module Dependencies
 
-Last Updated: February 2, 2026
+Last Updated: 2026-06-25
 
 ## Overview
 
@@ -26,12 +26,10 @@ src/modules/
 │   │   └── svg-builder.ts      # SVG path construction utilities
 │   ├── intro-animation.ts      # Desktop intro (GSAP MorphSVG)
 │   ├── intro-animation-mobile.ts # Mobile intro fallback
-│   ├── about-hero.ts           # About section hero animation
-│   ├── base-hero-animation.ts  # Base class for hero animations
-│   ├── page-hero.ts            # Page hero section animations
 │   ├── contact-animation.ts    # Contact section animations
-│   ├── page-transition.ts      # Spatial scroll-map navigation + slide transitions
-│   └── text-animation.ts       # ScrollTrigger text effects
+│   └── page-transition.ts      # Spatial scroll-map navigation + slide transitions
+├── audio/
+│   └── tv-sfx.ts            # TV sound-effect playback
 └── utilities/
     └── theme.ts             # Dark/light theme toggle
 ```
@@ -44,7 +42,7 @@ All modules extend `BaseModule` from `core/base.ts`:
 
 ```text
 BaseModule (core/base.ts)
-    └── Extended by all 13 other modules
+    └── Extended by all other modules
 ```
 
 ### External Service Dependencies
@@ -60,13 +58,10 @@ GSAP Library
     ├── business-card-interactions.ts
     ├── contact-animation.ts
     ├── page-transition.ts
-    ├── section-transitions.ts
-    ├── text-animation.ts
     └── navigation.ts
 
 GSAP ScrollTrigger
-    ├── contact-animation.ts
-    └── text-animation.ts
+    └── contact-animation.ts
 
 GSAP MorphSVGPlugin (premium)
     ├── intro-animation.ts
@@ -121,13 +116,9 @@ business-card-interactions.ts
 |Module|Purpose|Dependencies|
 |--------|---------|--------------|
 |`intro-animation.ts`|Desktop paw morph intro|BaseModule, GSAP, MorphSVGPlugin, intro/ submodules|
-|`intro-animation-mobile.ts`|Mobile card flip intro|BaseModule, GSAP, MorphSVGPlugin|
-|`about-hero.ts`|About section hero animation|BaseModule, GSAP|
-|`base-hero-animation.ts`|Base class for hero animations|BaseModule, GSAP|
-|`page-hero.ts`|Page hero section animations|BaseModule, GSAP|
+|`intro-animation-mobile.ts`|Mobile paw morph intro|BaseModule, GSAP, MorphSVGPlugin|
 |`contact-animation.ts`|Contact section animations|BaseModule, GSAP, ScrollTrigger|
 |`page-transition.ts`|Spatial scroll-map navigation + slide transitions|BaseModule, GSAP|
-|`text-animation.ts`|Scroll-triggered text effects|BaseModule, GSAP, ScrollTrigger|
 
 ### Utility Modules
 
@@ -182,10 +173,8 @@ Some modules have platform-specific behavior:
 |Module|Desktop|Mobile|
 |--------|---------|--------|
 |`intro-animation.ts`|Full morph animation|Skipped (uses mobile version)|
-|`intro-animation-mobile.ts`|Skipped|Card flip animation|
-|`about-hero.ts`|Active|Active|
-|`page-hero.ts`|Active|Active|
-|`page-transition.ts`|Spatial scroll-map navigation + slide transitions|Disabled|
+|`intro-animation-mobile.ts`|Skipped|Full paw morph animation|
+|`page-transition.ts`|Spatial scroll-map navigation + slide transitions|Discrete tile swaps|
 |`contact-animation.ts`|Active|Skipped|
 
 ## Indirect Dependencies
@@ -195,7 +184,6 @@ Modules that affect each other indirectly:
 1. **intro-animation.ts → intro-animation-mobile.ts**: Desktop determines when to use mobile fallback
 2. **intro-animation.ts → intro/ submodules**: Uses morph-timeline.ts and svg-builder.ts for SVG path construction
 3. **contact-animation.ts ↔ business-card-interactions.ts**: Both manage business cards in different sections
-4. **base-hero-animation.ts → about-hero.ts, page-hero.ts**: Base class provides common hero animation functionality
 
 ## Import Path Convention
 

@@ -1,7 +1,7 @@
 # Deliverables & Design Review System
 
 **Status:** Complete
-**Last Updated:** February 10, 2026
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -63,27 +63,33 @@ Deliverable locked on final approval
 
 ## Database Schema
 
+Source of truth: `server/database/migrations/073_deliverables.sql` (SQLite).
+
 ### deliverables
 
 ```sql
 CREATE TABLE deliverables (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   project_id INTEGER NOT NULL,
+  type TEXT NOT NULL DEFAULT 'design',
   title TEXT NOT NULL,
   description TEXT,
-  file_path TEXT NOT NULL,
-  file_type TEXT NOT NULL,
-  file_size INTEGER,
-  version INTEGER DEFAULT 1,
-  design_round TEXT DEFAULT 'round_1',
-  element_type TEXT, -- logo, homepage, inner_pages, etc.
-  status TEXT DEFAULT 'pending',
-  is_locked BOOLEAN DEFAULT FALSE,
-  uploaded_by TEXT,
+  status TEXT NOT NULL DEFAULT 'draft',
+  approval_status TEXT NOT NULL DEFAULT 'pending',
+  round_number INTEGER NOT NULL DEFAULT 1,
+  created_by_id INTEGER NOT NULL,
+  reviewed_by_id INTEGER,
+  review_deadline DATETIME,
+  approved_at DATETIME,
+  locked INTEGER NOT NULL DEFAULT 0,
+  tags TEXT DEFAULT '',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
 ```
+
+File metadata lives on `deliverable_versions`, not on `deliverables`.
 
 ### deliverable_versions
 
@@ -93,120 +99,121 @@ CREATE TABLE deliverable_versions (
   deliverable_id INTEGER NOT NULL,
   version_number INTEGER NOT NULL,
   file_path TEXT NOT NULL,
-  file_size INTEGER,
-  uploaded_by TEXT,
-  comment TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-### deliverable_annotations
-
-```sql
-CREATE TABLE deliverable_annotations (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  deliverable_id INTEGER NOT NULL,
-  version_id INTEGER,
-  annotation_type TEXT NOT NULL, -- draw, highlight, text
-  annotation_data TEXT NOT NULL, -- JSON with coordinates/content
-  author_email TEXT NOT NULL,
-  author_type TEXT NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  file_name TEXT NOT NULL,
+  file_size INTEGER NOT NULL,
+  file_type TEXT NOT NULL,
+  uploaded_by_id INTEGER NOT NULL,
+  change_notes TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (deliverable_id) REFERENCES deliverables(id) ON DELETE CASCADE,
+  UNIQUE(deliverable_id, version_number)
 );
 ```
 
 ### deliverable_comments
 
+Comments and annotations share one table. Positional fields
+(`x_position`, `y_position`, `annotation_type`, `element_id`) carry the
+annotation data; there is no separate annotations table.
+
 ```sql
 CREATE TABLE deliverable_comments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   deliverable_id INTEGER NOT NULL,
-  parent_id INTEGER,
-  author_email TEXT NOT NULL,
-  author_type TEXT NOT NULL,
-  content TEXT NOT NULL,
-  is_internal BOOLEAN DEFAULT FALSE,
+  author_id INTEGER NOT NULL,
+  comment_text TEXT NOT NULL,
+  x_position INTEGER,
+  y_position INTEGER,
+  annotation_type TEXT DEFAULT 'text',
+  element_id TEXT,
+  resolved INTEGER NOT NULL DEFAULT 0,
+  resolved_at DATETIME,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (deliverable_id) REFERENCES deliverables(id) ON DELETE CASCADE
 );
 ```
 
-### deliverable_approvals
+### design_elements
 
 ```sql
-CREATE TABLE deliverable_approvals (
+CREATE TABLE design_elements (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   deliverable_id INTEGER NOT NULL,
-  element_type TEXT,
-  status TEXT DEFAULT 'pending',
-  approved_by TEXT,
-  approved_at DATETIME,
-  comment TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  name TEXT NOT NULL,
+  description TEXT,
+  approval_status TEXT NOT NULL DEFAULT 'pending',
+  revision_count INTEGER NOT NULL DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (deliverable_id) REFERENCES deliverables(id) ON DELETE CASCADE,
+  UNIQUE(deliverable_id, name)
+);
+```
+
+### deliverable_reviews
+
+```sql
+CREATE TABLE deliverable_reviews (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  deliverable_id INTEGER NOT NULL,
+  reviewer_id INTEGER NOT NULL,
+  decision TEXT NOT NULL,
+  feedback TEXT,
+  design_elements_reviewed TEXT DEFAULT '[]',
+  review_duration_minutes INTEGER,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (deliverable_id) REFERENCES deliverables(id) ON DELETE CASCADE
 );
 ```
 
 ---
 
-## API Endpoints
+All routes mount under `/api/deliverables` (see `server/app.ts` and
+`server/routes/deliverables/{crud,comments,elements,reviews,versions}.ts`).
 
 ### Deliverable Management
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/projects/:id/deliverables` | List project deliverables |
-| POST | `/api/projects/:id/deliverables` | Upload new deliverable |
+| GET | `/api/deliverables/my` | List deliverables for the current user |
+| POST | `/api/deliverables` | Create a deliverable |
 | GET | `/api/deliverables/:id` | Get deliverable details |
+| GET | `/api/deliverables/projects/:projectId/list` | List a project's deliverables |
 | PUT | `/api/deliverables/:id` | Update deliverable metadata |
+| POST | `/api/deliverables/:id/lock` | Lock a deliverable |
+| POST | `/api/deliverables/:id/revision` | Request a revision |
 | DELETE | `/api/deliverables/:id` | Delete deliverable |
 
 ### Version Management
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/deliverables/:id/versions` | Get version history |
 | POST | `/api/deliverables/:id/versions` | Upload new version |
-| POST | `/api/deliverables/:id/versions/:versionId/rollback` | Rollback to version |
+| GET | `/api/deliverables/:id/versions` | Get version history |
+| GET | `/api/deliverables/:id/versions/latest` | Get the latest version |
 
-### Annotations
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/deliverables/:id/annotations` | Get annotations |
-| POST | `/api/deliverables/:id/annotations` | Create annotation |
-| DELETE | `/api/deliverables/annotations/:id` | Delete annotation |
-
-### Comments
+### Comments & Annotations
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/deliverables/:id/comments` | Get comments |
-| POST | `/api/deliverables/:id/comments` | Add comment |
-| PUT | `/api/deliverables/comments/:id` | Edit comment |
-| DELETE | `/api/deliverables/comments/:id` | Delete comment |
+| POST | `/api/deliverables/:id/comments` | Add comment/annotation |
+| GET | `/api/deliverables/:id/comments` | Get comments/annotations |
+| DELETE | `/api/deliverables/:deliverableId/comments/:commentId` | Delete comment |
 
-### Approval Workflow
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/deliverables/:id/submit-for-review` | Submit for client review |
-| POST | `/api/deliverables/:id/approve` | Approve deliverable |
-| POST | `/api/deliverables/:id/request-revisions` | Request revisions |
-| GET | `/api/deliverables/:id/approval-status` | Get approval status |
-| POST | `/api/deliverables/:id/elements/:element/approve` | Approve specific element |
-
-### Design Rounds
+### Design Elements
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/projects/:id/design-rounds` | Get round progress |
-| PUT | `/api/deliverables/:id/round` | Move to next round |
+| POST | `/api/deliverables/:id/elements` | Create a design element |
+| GET | `/api/deliverables/:id/elements` | List design elements |
 
-### Export
+### Reviews
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/deliverables/:id/export-feedback` | Export feedback as PDF |
+| POST | `/api/deliverables/:id/reviews` | Submit a review (decision + feedback) |
+| GET | `/api/deliverables/:id/reviews` | List reviews |
 
 ---
 
@@ -282,7 +289,8 @@ pending → reviewing → approved
 | File | Purpose |
 |------|---------|
 | `server/services/deliverable-service.ts` | Backend service |
-| `server/routes/deliverables.ts` | API routes |
+| `server/routes/deliverables.ts` | API route barrel (re-exports `deliverables/` modules) |
+| `server/routes/deliverables/{crud,comments,elements,reviews,versions}.ts` | Split route handlers |
 | `src/react/features/admin/deliverables/` | Admin UI |
 | `src/react/features/admin/design-review/` | Review modal |
 | `src/react/features/portal/files/` | Client files UI (includes deliverables) |

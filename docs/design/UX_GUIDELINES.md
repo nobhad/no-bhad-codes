@@ -1,6 +1,6 @@
 # UX Guidelines
 
-**Last Updated:** March 21, 2026
+**Last Updated:** 2026-06-25
 
 User experience rules and patterns for the portal. These are mandatory and must be followed in all implementations. For CSS implementation details, see [Portal Design](./PORTAL_DESIGN.md). For component API reference, see [Component Library](./COMPONENT_LIBRARY.md).
 
@@ -36,8 +36,8 @@ Portal headings follow a 4-tier hierarchy. Never skip tiers.
 
 | Tier | Use | Size | Weight | Example |
 |------|-----|------|--------|---------|
-| 1 | Page titles | `--font-size-xl` (18px) | Semibold | "PROJECTS", "SETTINGS" |
-| 2 | Card/entity titles | `--font-size-lg` (16px) | Regular | "PROJECT DETAILS", "CLIENT" |
+| 1 | Page titles | `--font-size-xl` (20px) | Semibold | "PROJECTS", "SETTINGS" |
+| 2 | Card/entity titles | `--font-size-lg` (18px) | Regular | "PROJECT DETAILS", "CLIENT" |
 | 3 | Section/table headers | `--font-size-base` (15px) | Medium | "RECENT ACTIVITY", "CONTACTS" |
 | 4 | Form labels | `--font-size-sm` (14px) | Medium | "EMAIL", "STATUS" |
 
@@ -118,7 +118,7 @@ This applies to: `.dashboard-content`, `.data-table-card`, `.panel`, `.portal-ca
 ### Rules
 
 - Status colors are semantic -- always use the variable, never hardcode hex values
-- Status dropdowns use `<StatusDropdown>` component -- never custom select elements
+- Status dropdowns use `<StatusDropdownCell>` component -- never custom select elements
 - All status configs must be defined as `Record<Status, { label: string }>` objects
 
 ---
@@ -504,13 +504,13 @@ All other colors are derived via `color-mix()` from these two values. Status col
 
 | Token | Width | Usage |
 |-------|-------|-------|
-| `--xs-mobile` | < 360px | Extra small phones |
-| `--small-mobile` | < 480px | Small phones |
-| `--narrow-mobile` | < 576px | Narrow layouts |
-| `--compact-mobile` | < 640px | Compact mobile |
-| `--mobile` | < 768px | Mobile |
+| `--xs-mobile` | <= 400px | Extra small phones |
+| `--small-mobile` | <= 479px | Small phones |
+| `--narrow-mobile` | <= 500px | Narrow layouts |
+| `--compact-mobile` | <= 600px | Compact mobile |
+| `--mobile` | <= 767px | Mobile |
 | `--tablet` | >= 768px | Tablet and up |
-| `--tablet-landscape` | >= 1024px | Tablet landscape and up |
+| `--tablet-landscape` | <= 900px | Tablet landscape and below |
 
 ### Rules
 

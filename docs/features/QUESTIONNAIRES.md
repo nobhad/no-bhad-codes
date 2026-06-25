@@ -1,7 +1,7 @@
 # Questionnaires
 
 **Status:** Complete
-**Last Updated:** February 11, 2026
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -94,7 +94,9 @@ Questions are stored as JSON arrays with the following structure:
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
+| GET | `/api/questionnaires/responses` | Get all responses |
 | GET | `/api/questionnaires/responses/pending` | Get all pending responses |
+| POST | `/api/questionnaires/bulk-delete` | Bulk-delete questionnaires |
 | POST | `/api/questionnaires/:id/send` | Send questionnaire to client |
 | GET | `/api/questionnaires/client/:clientId/responses` | Get responses for specific client |
 | POST | `/api/questionnaires/responses/:id/remind` | Send reminder for response |
@@ -128,16 +130,26 @@ Questions are stored as JSON arrays with the following structure:
 
 ## Styles
 
-- `src/styles/admin/questionnaires.css` - Admin portal styles
-- `src/styles/client-portal/questionnaires.css` - Client portal styles
+- `src/styles/portal/admin/questionnaires.css` - Admin portal styles
 
 ## Default Questionnaires
 
-Three default questionnaires are seeded on first migration:
+Migration 112 removes the older mismatched seeds (`website_discovery`, `branding_discovery`, `project_kickoff`) and seeds nine questionnaires: three shared (sent for all project types) plus six project-specific.
 
-1. **Website Discovery** - Goals, target audience, page count, features
-2. **Branding Discovery** - Brand values, emotions, competitors, style preferences
-3. **Project Kickoff** - Timeline, urgency, success criteria, communication preferences
+Shared (all types):
+
+1. `brand_design_discovery`
+2. `content_assets_planning`
+3. `technical_access`
+
+Project-specific:
+
+1. `simple_site_details`
+2. `business_site_details`
+3. `portfolio_details`
+4. `ecommerce_details`
+5. `web_app_details`
+6. `browser_extension_details`
 
 ## Workflow
 
@@ -148,10 +160,9 @@ Three default questionnaires are seeded on first migration:
 5. Client submits completed questionnaire
 6. Admin reviews responses in client detail view
 
-## Save to Files (Planned)
+## Save to Files
 
-**Status:** Planned
-**Priority:** Medium
+**Status:** Implemented
 
 Generate PDF and export raw data when questionnaire is completed.
 
@@ -171,12 +182,13 @@ Generate PDF and export raw data when questionnaire is completed.
 - Multi-select answers shown as bulleted list
 - Professional formatting matching other PDFs
 
-### API Endpoints (Planned)
+### API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/questionnaires/responses/:id/pdf` | Download response as PDF |
-| GET | `/api/questionnaires/responses/:id/json` | Download raw JSON data |
+| GET | `/api/questionnaires/responses/:id/export` | Download raw data export |
+| POST | `/api/questionnaires/responses/:id/regenerate-pdf` | Regenerate the response PDF |
 
 ### File Naming Convention
 

@@ -1,7 +1,7 @@
 # File Management System
 
 **Status:** Complete
-**Last Updated:** February 11, 2026
+**Last Updated:** 2026-06-25
 
 > **⚠️ Code samples are legacy (as of 2026-04-30):** The TypeScript snippets below are captured from the removed vanilla portal (`ClientPortalContext` pattern, `escapeHtml`, `formatDate` helpers). The current implementation lives under `src/react/features/portal/files/` and `src/react/features/portal/files-hub/` as React components and does not use `ClientPortalContext`. API endpoints, server routes, and CSS class names below remain accurate; treat the inline code as historical reference only.
 
@@ -76,7 +76,7 @@ The File Management system allows clients to upload, view, preview, and download
         │                       v                        │
         │               ┌──────────────────┐             │
         │               │  Database        │             │
-        └─────────────> │  (uploads table) │ <───────────┘
+        └─────────────> │  (files table)   │ <───────────┘
                         └──────────────────┘
 ```
 
@@ -172,7 +172,7 @@ Download or preview a specific file.
 
 #### DELETE `/api/uploads/file/:fileId`
 
-Delete a specific file.
+Soft-deletes a specific file via `softDeleteService` (sets `deleted_at`/`deleted_by`; the row and underlying file are retained for recovery). Returns `success` with message "File deleted successfully".
 
 **Authentication:** Required
 **Parameters:**
@@ -208,7 +208,8 @@ Upload a single file.
 **Form Data:**
 
 - `file` (file) - The file to upload
-- `category` (string, optional) - File category
+
+The storage subdirectory is derived from the multer destination (`req.file.destination`), not from a request field.
 
 ---
 
@@ -830,10 +831,12 @@ const deleteIcon = canDelete
 
 |File|Purpose|
 |------|---------|
-|`server/routes/uploads.ts`|Backend API endpoints|
+|`server/routes/uploads.ts`|Backend API barrel (mounts `uploads/core.ts` + sub-routers)|
+|`server/routes/uploads/core.ts`|Core upload/list/delete endpoints|
+|`server/routes/uploads/sharing.ts`|File sharing endpoints (`/share`, `/unshare`)|
 |`src/react/features/portal/files/`|Frontend file handling (~501 lines)|
 |`src/styles/client-portal/documents.css`|File section styling (consolidated)|
-|`client/portal.html`|Files tab HTML (tab-files section)|
+|`server/views/layouts/portal.ejs`|Portal shell; React SPA mounts the Files tab|
 
 ---
 
@@ -876,29 +879,27 @@ When uploading files in the admin project details Files tab, a confirmation moda
 ### Implementation
 
 - Uses `createModalDropdown` component for dropdowns
-- Modal structure in `admin/index.html` (`#file-upload-modal`)
-- Logic in `src/features/admin/project-details/files.ts`
+- Admin UI is a React SPA mounted into the portal shell (`server/views/layouts/portal.ejs`)
+- Logic lives under `src/react/features/admin/` (the legacy `src/features/admin/project-details/files.ts` no longer exists)
 
 ---
 
-## File Sharing Control (Planned)
+## File Sharing Control
 
-**Status:** Planned
-**Priority:** High
+**Status:** Implemented
 
-Control visibility of generated files to clients via "Share with Client" button.
+Controls visibility of files to clients via a "Share with Client" action. Files are not visible to clients by default; an admin shares a file to grant access.
 
-### Requirements
+### Behavior
 
-- All generated PDFs (proposals, contracts, receipts, reports, SOWs) auto-save to project files
-- Files are NOT visible to client by default
-- Admin clicks "Share with Client" button to make file visible
-- Shared status tracked in database
-- Client portal only shows files marked as shared
+- Files are NOT visible to the client by default
+- Admin shares a file to make it visible to the client
+- Shared status is tracked on the `files` table
+- Client access is enforced server-side: a client may view a file only when `shared_with_client` is set (`server/routes/uploads/core.ts`)
 
-### Database Changes (Planned)
+### Database Columns
 
-Add to `uploads` table:
+Added to the `files` table (migration `078_file_sharing.sql`):
 
 | Column | Type | Description |
 |--------|------|-------------|
@@ -906,18 +907,14 @@ Add to `uploads` table:
 | `shared_at` | DATETIME | When file was shared |
 | `shared_by` | TEXT | Admin who shared |
 
-### API Endpoints (Planned)
+### API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/uploads/:id/share` | Share file with client |
 | POST | `/api/uploads/:id/unshare` | Remove client access |
 
-### UI Changes (Planned)
-
-- Admin Files tab: "Share" / "Unshare" button on each file
-- Client Files tab: Only shows files where `shared_with_client = TRUE`
-- Visual indicator (icon/badge) showing shared status
+Implemented in `server/routes/uploads/sharing.ts`.
 
 ---
 
@@ -1127,7 +1124,7 @@ CREATE TABLE IF NOT EXISTS file_comments (
 
 ### Files Modified
 
-- `server/routes/projects.ts` - Added 30+ new endpoints
+- `server/routes/projects/{files,file-versions,file-folders,file-comments}.ts` - 30+ file endpoints (split across these sub-routers)
 - `src/types/api.ts` - Added TypeScript interfaces
 
 ### Change Log
@@ -1136,6 +1133,6 @@ CREATE TABLE IF NOT EXISTS file_comments (
 
 - Created database migration for file enhancement tables
 - Implemented file-service.ts with versioning, folders, tags, access, comments, archiving, locking
-- Added 30+ API endpoints to projects.ts
+- Added 30+ API endpoints across `server/routes/projects/{files,file-versions,file-folders,file-comments}.ts`
 - Added TypeScript interfaces for all types
 - Seeded 8 default file tags

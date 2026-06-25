@@ -3,6 +3,8 @@
 **Created:** February 2, 2026
 **Status:** Design Options for Review
 
+> **Note (2026-06-25):** This proposal was implemented — the recommended options now exist as `AnalyticsDashboard.tsx` and `SystemStatusDashboard.tsx` (under `src/react/features/admin/`). The "Files" lists below (`admin/index.html`, `server/routes/admin.ts`) reflect the pre-SPA architecture and no longer match the current React codebase.
+
 ---
 
 ## Problem Statement

@@ -1,7 +1,7 @@
 # Lead Management System
 
 **Status:** Complete
-**Last Updated:** March 16, 2026
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -370,7 +370,7 @@ ALTER TABLE projects ADD COLUMN next_follow_up_at DATETIME;
 
 ## Service Methods
 
-The `lead-service.ts` provides the following methods:
+The `lead-service.ts` barrel composes the following methods from `server/services/lead/{scoring,pipeline,tasks,notes,duplicates,analytics,core}.ts`:
 
 ### Scoring Methods
 
@@ -440,7 +440,7 @@ The `lead-service.ts` provides the following methods:
 
 ### Modified
 
-- `server/routes/admin.ts` - Added 35+ new endpoints
+- `server/routes/admin/leads/{scoring,pipeline,tasks,notes,operations,core}.ts` - Added 35+ new endpoints
 - `src/types/api.ts` - Added TypeScript interfaces
 
 ## Usage Examples
@@ -596,6 +596,6 @@ Sequence enrollment is handled by `handleSequenceEvent` in `workflow-automations
 
 - Created database migration for lead tables
 - Implemented lead-service.ts with all methods
-- Added 35+ API endpoints to admin.ts
+- Added 35+ API endpoints in server/routes/admin/leads/{scoring,pipeline,tasks,notes,operations,core}.ts
 - Added TypeScript interfaces for all types
 - Created feature documentation

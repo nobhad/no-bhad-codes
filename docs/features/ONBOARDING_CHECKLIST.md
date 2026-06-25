@@ -1,7 +1,7 @@
 # Onboarding Checklist
 
 **Status:** Complete
-**Last Updated:** 2026-03-17
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -55,6 +55,18 @@ This is handled by `handleAutoCompleteOnboardingStep` in `workflow-automations.t
 1. Sign Your Contract (auto-detect: contract)
 2. Pay Deposit (auto-detect: invoice)
 3. Complete Questionnaire (auto-detect: questionnaire)
+
+### Per-Client Overrides
+
+Beyond the seeded templates, a client's checklist can be replaced with a
+curated, hand-written step list via migration. Migration 138
+(`server/database/migrations/138_hedgewitch_onboarding_seed.sql`) replaces
+Hedgewitch's checklist (`checklist_id=1`, `client_id=6`) with a 12-item
+pre-launch deliverables list (font approval, headshots, bios, hero/gallery
+imagery, Resources URLs, blog dates).
+
+That migration also sets the `welcome_text` column on `onboarding_checklists`,
+a per-checklist intro message shown above the steps.
 
 ### API Endpoints
 

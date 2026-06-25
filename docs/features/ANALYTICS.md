@@ -1,7 +1,7 @@
 # Analytics & Reporting Feature
 
 **Status:** Complete
-**Last Updated:** 2026-02-02
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -92,10 +92,10 @@ createSavedReport(data: SavedReportData): Promise<SavedReport>
 updateSavedReport(id: number, data: Partial<SavedReportData>): Promise<SavedReport>
 deleteSavedReport(id: number): Promise<void>
 toggleReportFavorite(id: number): Promise<SavedReport>
-runReport(id: number, userEmail: string): Promise<ReportResult>
+runReport(reportId: number): Promise<ReportResult>
 
 // Report Schedules
-getReportSchedules(reportId: number): Promise<ReportSchedule[]>
+getReportSchedules(reportId?: number): Promise<ReportSchedule[]>
 createReportSchedule(data: ScheduleData): Promise<ReportSchedule>
 updateReportSchedule(id: number, data: Partial<ScheduleData>): Promise<ReportSchedule>
 deleteReportSchedule(id: number): Promise<void>
@@ -108,7 +108,7 @@ updateDashboardWidget(id: number, data: Partial<WidgetData>): Promise<DashboardW
 deleteDashboardWidget(id: number): Promise<void>
 updateWidgetLayout(userEmail: string, widgets: WidgetLayoutUpdate[]): Promise<void>
 getDashboardPresets(): Promise<DashboardPreset[]>
-applyDashboardPreset(presetId: number, userEmail: string): Promise<DashboardWidget[]>
+applyDashboardPreset(userEmail: string, presetId: number): Promise<DashboardWidget[]>
 
 // KPI Snapshots
 captureKPISnapshot(): Promise<void>

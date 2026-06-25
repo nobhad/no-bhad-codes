@@ -1,7 +1,7 @@
 # Data Quality & Cleanup
 
 **Status:** Complete
-**Last Updated:** 2026-02-10
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -14,7 +14,7 @@ The Data Quality system provides comprehensive tools for maintaining data integr
 - `duplicate-detection-service.ts` - Levenshtein-based similarity matching
 - `validation-service.ts` - Email, phone, URL, file validation
 - `rate-limiter.ts` - API rate limiting middleware
-- `data-quality.ts` - API routes for data quality operations
+- `data-quality.ts` - Barrel composing `data-quality/{duplicates,validation,metrics,rate-limits,errors,shared}.ts`
 
 ### Data Flow
 
@@ -310,7 +310,8 @@ const RATE_LIMIT_PRESETS = {
    - Database logging
    - Error handling
    - Concurrent requests
-**Total: 65 tests**
+
+**Total: 18 tests** (`tests/unit/routes/data-quality.test.ts`)
 
 ## Security Considerations
 
@@ -355,7 +356,7 @@ All detected threats are logged with:
 - Created rate-limiter.ts middleware
 - Created data-quality.ts API routes
 - Created 066_data_quality.sql migration
-- Added 22 API endpoints
+- Added 19 API endpoints
 - Files created:
   - `server/services/duplicate-detection-service.ts`
   - `server/services/validation-service.ts`
