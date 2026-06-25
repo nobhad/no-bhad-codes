@@ -103,41 +103,26 @@ export class ContactFormModule extends BaseModule {
         'input[required], select[required], textarea[required]'
       );
 
-      let firstInvalidField: HTMLElement | null = null;
-
       const isValid = Array.from(requiredFields).every((field) => {
         const input = field as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
         const value = input.value?.trim() || '';
 
-        let fieldValid = true;
-
         // Message field requires minimum 10 characters
         if (input.id === 'message' || input.name === 'Message') {
-          fieldValid = value.length >= 10;
-        } else {
-          fieldValid = value !== '';
+          return value.length >= 10;
         }
-
-        if (!fieldValid && !firstInvalidField) {
-          firstInvalidField = input;
-        }
-
-        return fieldValid;
+        return value !== '';
       });
-
-      // Check if message field has been touched
-      const messageTouched = touchedFields.has('message') || touchedFields.has('Message');
 
       this.log('Form validation:', {
         requiredFieldsCount: requiredFields.length,
         isValid,
-        messageTouched,
         touchedFields: Array.from(touchedFields),
         buttonElement: this.submitButton?.tagName
       });
 
       if (this.submitButton) {
-        // Remove all arrow direction classes
+        // Toggle valid state; arrow only flies off on send, never points at fields
         this.submitButton.classList.remove(
           'form-valid',
           'point-to-name',
@@ -148,22 +133,6 @@ export class ContactFormModule extends BaseModule {
         if (isValid) {
           this.submitButton.classList.add('form-valid');
           this.log('Added form-valid class');
-        } else if (messageTouched && firstInvalidField) {
-          // Only point to invalid field once message field has been touched
-          const fieldId =
-            (firstInvalidField as HTMLInputElement).id ||
-            (firstInvalidField as HTMLInputElement).name;
-          if (fieldId === 'name' || fieldId === 'Name') {
-            this.submitButton.classList.add('point-to-name');
-          } else if (fieldId === 'email' || fieldId === 'Email') {
-            this.submitButton.classList.add('point-to-email');
-          } else if (fieldId === 'message' || fieldId === 'Message') {
-            this.submitButton.classList.add('point-to-message');
-          }
-          this.log('Arrow pointing to:', fieldId);
-
-          // Focus on the invalid field
-          (firstInvalidField as HTMLInputElement).focus();
         }
       }
     };
