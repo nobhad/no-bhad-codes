@@ -1,6 +1,6 @@
 # Main Site Design System
 
-**Last Updated:** April 30, 2026
+**Last Updated:** June 25, 2026
 
 Design standards for the main marketing site (home, about, contact, projects portfolio). For shared design tokens see [CSS Architecture](./CSS_ARCHITECTURE.md). For portal design see [Portal Design](./PORTAL_DESIGN.md).
 
@@ -16,11 +16,12 @@ Design standards for the main marketing site (home, about, contact, projects por
 6. [Typography](#typography)
 7. [Business Card and Intro](#business-card-and-intro)
 8. [Projects: TV Channel System](#projects-tv-channel-system)
-9. [Navigation](#navigation)
-10. [GSAP Animation Modules](#gsap-animation-modules)
-11. [Page Transitions](#page-transitions)
-12. [Mobile and Responsive](#mobile-and-responsive)
-13. [Theme System](#theme-system)
+9. [Contact Form](#contact-form)
+10. [Navigation](#navigation)
+11. [GSAP Animation Modules](#gsap-animation-modules)
+12. [Page Transitions](#page-transitions)
+13. [Mobile and Responsive](#mobile-and-responsive)
+14. [Theme System](#theme-system)
 
 ---
 
@@ -28,8 +29,8 @@ Design standards for the main marketing site (home, about, contact, projects por
 
 The main site is a single-page portfolio/marketing site with:
 
-- **Virtual page architecture** -- hash-based routing with blur crossfade transitions (desktop)
-- **Vertical scroll mode** on mobile
+- **Spatial scroll-map navigation** (desktop) -- the tiles sit on a 2D map; scroll / two-finger swipe / arrow keys pan the camera between them with GSAP slide transitions. Nav-menu and direct hash links use a blur crossfade instead.
+- **Discrete one-tile-at-a-time pages** on small mobile (`max-width: 479px`) -- header stays fixed, the hamburger menu swaps the active tile, no camera/scroll-map
 - **GSAP-driven animations** throughout (intro, page transitions, scroll effects, SVG morphing)
 - **Business card component** with 3D perspective and hover interactions
 - **Terminal-inspired design elements** on the intake page
@@ -51,13 +52,13 @@ On desktop (`min-width: 768px`), the site operates as virtual pages:
 - Page transitions are GSAP blur crossfades (blur out current, blur in next)
 - Managed by `PageTransitionModule` in `src/modules/animation/page-transition.ts`
 
-### Mobile -- Vertical Scroll
+### Mobile -- Discrete Tiles
 
-On mobile (`max-width: 767px`):
+On small mobile (`max-width: 479px`):
 
-- Pages stack vertically in normal document flow
-- Standard scroll behavior
-- No scroll-map (single-column scrolling instead of spatial tiles)
+- One map tile fills the viewport at a time; the hamburger menu swaps the active tile via hash routing (no camera/scroll-map, no scroll-snap)
+- Header stays fixed at the top; `body` / `main` are `overflow: hidden` and each tile is its own scroll container with `overscroll-behavior: contain`, so the page doesn't rubber-band the header on iOS
+- The coyote-paw intro still plays
 - Touch-optimized targets (44x44px minimum)
 
 ### Page State CSS Classes
@@ -256,7 +257,7 @@ Per-panel hold timing (`TV_PANEL_HOLD_S` map in `projects.ts`):
 | `features` | 7.0 | List |
 | `results` | 7.0 | List |
 | `tools` | 5.0 | Tag pills |
-| `outro` | sticky | Click-through link to `#/projects/[slug]` |
+| `outro` | sticky | Click-through to `#/projects/[slug]`. Clicking anywhere on a playing screen also jumps to the detail page in the same tab (slides **down**); the explicit "Live: url" link still opens the live site in a new tab |
 
 Mobile prose panels (intro / challenge / approach) auto-scroll bottom-to-top instead of static fade so the full text is reachable on the smaller screen. Hold time is multiplied by `TV_MOBILE_SCROLL_HOLD_MULTIPLIER` (2.2) on mobile so the scroll has time to complete.
 
@@ -297,6 +298,7 @@ On mobile the button hit area is extended by `padding: 1% 0` (about half the gap
 - **`static()`** — recorded TV-static sample with a configurable `ATTACK → HOLD → optional DROP → SUSTAIN → RELEASE` envelope. Routes through `masterGain` (the volume-controlled stage). Fires at the start of `playTuneInSequence` (channel tune-in) and `transitionToGuide` (back to channel 01) using a step-down shape (sharp attack, brief peak, drop to ~35% sustain, fade), and on POWER off → on using the default attack/hold/release shape (gentle ease, brief hold, long trail).
 
 Samples sourced from soundbible.com:
+
 - `/audio/channel-click.mp3` — "Button" by Mike Koenig (CC BY 3.0)
 - `/audio/tv-static.mp3` — "TV Static" by Mike Koenig (CC BY 3.0)
 
@@ -319,6 +321,25 @@ Vertical input on the projects tile cycles channels with modulo wrap (down-past-
 
 - Add Mike Koenig CC BY 3.0 attribution somewhere user-visible (footer / about / credits) for `channel-click.mp3` and `tv-static.mp3`.
 - Investigate residual shadow-clipping on the TV frame's `filter: drop-shadow()` — addressed at the layout level by setting `main { overflow-y: visible }` and `.site-map > [data-map-tile] { overflow-y: visible }`, but a deep-dive audit of every potential clipping ancestor is still pending.
+
+---
+
+## Contact Form
+
+The `#contact` tile holds a four-field form (name, company, email, message) over the avatar watermark.
+
+### Field labels are the placeholders
+
+Each field's visible label IS its placeholder -- the real `<label>` elements are `display: none` and the placeholders (`Name *`, `Email *`, …) carry the field names. `--placeholder-opacity` defaults to `1` (in `contact.css`) so they show from first paint. It used to be `0` while an entrance animation faded the placeholders in; that animation was removed, so the default had to flip -- otherwise every field renders as an empty box.
+
+### Submission + CSRF
+
+`ContactService.submitToCustom` POSTs JSON to `/api/contact`. The server's CSRF middleware requires an `x-csrf-token` header that matches the JS-readable `csrf-token` cookie, so the client:
+
+1. **Ensures the cookie exists.** The public contact form is usually the first `/api` call of a session, so on a cold visit the cookie isn't set yet. `ensureCsrfToken()` primes it with a safe `GET /api/health` (the server sets the cookie on any request), then re-reads.
+2. **Sends the token.** Reads the cookie via the shared `getCsrfToken()` (`src/utils/api-client.ts`) and sends it as `x-csrf-token`, with `credentials: 'include'`.
+
+Without both steps the POST returns `403 CSRF_TOKEN_INVALID` ("Unable to send message"). On invalid input the client shows a validation arrow pointing at the first bad field.
 
 ---
 
@@ -358,8 +379,8 @@ Located in `src/modules/animation/`:
 | `about-hero.ts` | Full viewport "NO BHAD CODES" text animation | Wheel-driven, SVG transforms |
 | `page-hero.ts` | Unified hero text for virtual pages | Wheel-driven SVG |
 | `base-hero-animation.ts` | Shared base class for hero text animations | `gsap.timeline()`, `gsap.fromTo()` |
-| `page-transition.ts` | Virtual page blur in/out transitions | `gsap.to()`, `ScrollTrigger` |
-| `contact-animation.ts` | Contact page cascading form animations | `gsap.to()`, `gsap.context()` |
+| `page-transition.ts` | Spatial scroll-map navigation (camera pan + bridge slides), blur transitions for direct links, project-detail carousel, projects channel cycling, wheel/keyboard input | `gsap.to()`, `gsap.timeline()`, `ScrollTrigger` |
+| `contact-animation.ts` | Contact entrance: heading blur-in, hr + options fade, submit-button pop, avatar star-glow pulse. Form FIELDS are NOT animated (render static); skipped entirely on small mobile and reduced-motion | `gsap.to()`, `gsap.context()` |
 | `avatar-intro.ts` | Avatar SVG fade-in for terminal intake | `gsap.to()`, `gsap.fromTo()` |
 | `text-animation.ts` | Scroll-driven split-text skew animation | `gsap.timeline()`, `ScrollTrigger` |
 
@@ -370,7 +391,7 @@ Located in `src/modules/ui/`:
 | File | Purpose |
 |------|---------|
 | `projects.ts` | TV channel guide rendering, channel cycling (wheel/keys/buttons), Looney-Tunes-style title-card tune-in animation, panel cycle (heading flash + body fade), POWER/CHANNEL button wiring, project-detail page rendering |
-| `contact-form.ts` | Contact form field cascade animations |
+| `contact-form.ts` | Contact form validation + submission (no field-entrance animation; validation arrow points at the first invalid field) |
 | `business-card-interactions.ts` | Business card hover/interaction effects |
 | `navigation.ts` | Menu open/close, rolling text, theme transitions |
 
@@ -403,12 +424,30 @@ Managed by `PageTransitionModule` (`src/modules/animation/page-transition.ts`):
 
 ### Desktop Behavior
 
-- Pages stored in `Map<string, PageConfig>`
-- Current page blurs out (`opacity: 0`, `filter: blur(12px)`)
-- Next page blurs in (`opacity: 1`, `filter: blur(0px)`)
-- Duration and easing defined in `src/config/animation-constants.ts`
-- `gsap.killTweensOf()` used for cleanup
-- `gsap.set()` clears properties after animation
+Pages live on a 2D **spatial scroll-map** (`.site-map`): intro is centre, about is up, projects is right, contact is down, with `project-detail` as an off-map overlay. `PageTransitionModule` pans a GSAP "camera" between tiles. Two transition modes:
+
+- **Slide** (scroll / swipe / arrow-key nav) -- the camera + tiles translate along the gesture axis. Map→map slides use a "bridge" that animates the source and target tiles individually, so adjacent and diagonal hops both read as a clean axis-locked pan.
+- **Blur** (nav menu / direct hash link) -- current page blurs out (`opacity: 0`, `filter: blur(12px)`), next blurs in. Duration/easing in `src/config/animation-constants.ts`; `gsap.killTweensOf()` cleans up and `gsap.set()` clears props after.
+
+#### Carousel + input model
+
+Navigation is a **horizontal carousel**: `intro → about → projects → contact → intro …` (forward = right, back = left). Input handled by `handleWheel` / `handleKeydown` in `page-transition.ts`:
+
+| Surface | Vertical scroll / ↑↓ | Horizontal swipe / ←→ | Shift + wheel |
+|---------|----------------------|-----------------------|---------------|
+| intro / about / contact | navigate the carousel (vertical is remapped to horizontal) | navigate the carousel | navigate (mouse-wheel parity) |
+| **projects** | **channel-surf the TV** (down = next channel, up = prev) | navigate to about / contact | navigate (leave the tile) |
+| project-detail | native-scroll the case study, then navigate at the boundary | cycle prev / next project | cycle prev / next project |
+
+`Shift + wheel` gives a plain mouse (vertical wheel only) the same carousel access as a trackpad horizontal swipe; it navigates off whichever axis (`deltaX`/`deltaY`) the browser populates.
+
+#### Slide directions
+
+- **projects → project-detail** slides **down** -- the TV scrolls up and out while the detail page pushes up from the bottom (same reveal as the Enter key). Clicking a tuned-in TV screen, the outro CTA, or pressing Enter all use this.
+- **project-detail ↔ project-detail** cycles left / right through the project list.
+- Leaving project-detail back to a map tile slides left (backward).
+
+`transitionTo` syncs `currentPageId` in its `catch` as well as the success path, so a thrown animation can't leave the page state stale on the source tile (which would otherwise let the wheel keep channel-surfing / cycling on the wrong page).
 
 ### Animation Constants
 
@@ -441,7 +480,7 @@ Located in `src/styles/mobile/`:
 
 | File | Purpose |
 |------|---------|
-| `layout.css` | Vertical scroll mode, section positioning |
+| `layout.css` | Small-mobile discrete-tile layout (one tile fills the viewport, header fixed, tile-level scroll), section positioning |
 | `contact.css` | Avatar watermark scaling, textarea height (`clamp(120px, 30vh, 240px)`) |
 | `responsive-fixes.css` | Hover guards (`@media (hover: hover)`), touch targets (44x44px min), modal scaling, `100dvh` support |
 

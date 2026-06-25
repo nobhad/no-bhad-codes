@@ -165,7 +165,7 @@ All items verified against actual code. ~~0A~~, ~~0H~~, ~~0I~~ removed (proved f
 
 **Status:** IN PROGRESS
 
-- [ ] Horizontal scroll-map nav model — pages arranged as a 2D scroll map around the intro center; replaces the current blur-based transition for nav menu / intro-nav / all non-paw transitions. Paw stays sovereign for intro ↔ any.
+- [x] **Horizontal scroll-map nav model — SHIPPED.** Pages on a 2D map (intro centre, about up, projects right, contact down); scroll / two-finger swipe / arrow keys pan the camera with slide transitions, nav-menu + direct hash links use the blur crossfade, paw stays sovereign for intro entry. Carousel order: intro ↔ about ↔ projects ↔ contact. **Final input model (2026-06-25):** vertical OR horizontal scroll navigates on intro/about/contact; projects vertical = channel-surf (leave via horizontal swipe or Shift+wheel); Shift+wheel = mouse-wheel parity; project-detail vertical native-scrolls then navigates at the edge, left/right cycles projects; projects→detail slides DOWN. Full matrix in `docs/design/MAIN_SITE_DESIGN.md` › Page Transitions.
 - [x] **Reincorporate tech-stack content** — direction locked: chunked GSAP "title-card runway" animation that fires during horizontal scroll-map transitions. Data shipped 2026-04-30: `Profile.techStack` is now a `TechStackChunk[]` (4 chunks of 8) in `public/data/portfolio.json:434-499`, type at `src/services/data-service.ts:42-58`. Chunks keyed to actual horizontal edges of the scroll-map: `intro-about` (Languages & Frameworks), `about-projects` (Styling, UI & Motion), `projects-contact` (Backend & Data), `contact-intro` (Tooling, Testing & Ship). Original 43-item marquee list reconciled against 2026-04-30 deps audit: 10 stale items dropped (PHP, Vue, jQuery, Bootstrap, Vuetify, Handlebars, MongoDB, MySQL, Mongoose, Jotai); 12 added (Astro, Three.js, OpenType.js, Lucide, Radix UI, Chart.js, Multer, Vercel, Netlify, Anthropic SDK, Stripe, Zod). Final count: 32 items.
 - [ ] **Implement tech-stack runway animation** — GSAP timeline on horizontal map→map transitions. Single integration point: `src/modules/animation/page-transition.ts:1985` inside the bridge-slide block (every horizontal map slide flows through there). Touch list:
   - Create `src/modules/animation/tech-stack-runway.ts` (singleton, exposes `play(opts)` returning timeline promise; owns reverse/interrupt logic via `currentTimeline.reverse()` for inverse direction, `kill()` otherwise).
@@ -211,7 +211,7 @@ The projects page renders a vintage TV with a channel-guide screen. Channel 01 i
 - [x] **Channel-change static crackle + channel-up beep** — implemented as `src/modules/audio/tv-sfx.ts` (procedural WebAudio synthesis, no asset files). Static = filtered white-noise burst, beep = 880Hz sine. Master gain via 5-step volume tied to VOLUME ▲▼ buttons.
 - [x] **Mobile TV** — TV is fully responsive at all widths; channel-rows visible with smaller typography, button hit area extended, full-width on phones. No mobile fallback needed.
 - [x] **Channel 01 redesigned as Prevue Guide layout** — top split (brand info + glowing-eye avatar with inlined eye-glow filter); bottom slow ticker of project rows (rendered twice, GSAP translates the inner ul up at ~16 px/sec for a seamless loop).
-- [ ] **Documentation: refresh `MAIN_SITE_DESIGN.md` projects section** to reflect the new TV channel architecture in more depth (panel cycle, button wiring, channel index model). Currently only the table rows were updated.
+- [x] **Documentation: refreshed `MAIN_SITE_DESIGN.md`** (2026-06-25) — rewrote Page Transitions (scroll-map + input matrix + slide directions), added a Contact Form section (placeholders-as-labels + CSRF), updated the Page Architecture mobile section and the contact-animation module descriptions (here + `ANIMATIONS.md`).
 
 ### Recent shipped (this session)
 
@@ -244,6 +244,21 @@ The projects page renders a vintage TV with a channel-guide screen. Channel 01 i
 
 - [ ] **Off-page channel cycling / audio bleed** — root cause: stale `currentPageId` from a thrown transition animation let the wheel cycle TV channels (and restart channel music) on other pages. Fixed in `7a2b23ff`. Confirm on device: trackpad on contact should NOT change channels or start music. If it recurs, check console for `[PageTransitionModule] Transition failed:` — present means the fix is firing, absent means a second desync path remains.
 - [ ] **iOS overscroll** — confirm the fixed header no longer rubber-bands on a real iPhone.
+
+---
+
+## Session 2026-06-25 — Scroll/nav model + contact form
+
+### Shipped
+
+- **Contact form submits again** (`c2c95cfc`) — was failing with `403 CSRF_TOKEN_INVALID`. `ContactService.submitToCustom` never sent the `x-csrf-token` header, and on a cold visit the `csrf-token` cookie isn't set yet. Now sends the header (shared `getCsrfToken`) with `credentials:'include'` and primes the cookie via `GET /api/health` first. Verified end-to-end without sending a real email.
+- **Scroll/nav model finalised** (`0366358b`, `13b295e9`, `21c53175`) — vertical OR horizontal scroll navigates the carousel on intro/about/contact; projects vertical = channel-surf; `Shift+wheel` = mouse-wheel parity (reads whichever axis the browser populates); project-detail vertical scrolls then navigates at the edge, left/right cycles projects. (Went back and forth on this — current state is "any scroll navigates except projects = channel".)
+- **projects → project-detail slides DOWN** (`13b295e9`) — TV scrolls up and out, detail pushes up from the bottom (was sliding in from the right). Detail↔detail left/right carousel unchanged.
+- **Click a playing TV screen → project detail** (`16476f9b`) — same tab, instead of the live link opening a new tab. The explicit "Live: url" link still opens the live site.
+
+### Awaiting on-device confirmation (real mouse)
+
+- [ ] **Shift+wheel direction feel** — uses the app's natural-scroll sign convention; if Shift+wheel-up goes the "wrong way" on a physical mouse, it's a one-line sign flip.
 
 ---
 

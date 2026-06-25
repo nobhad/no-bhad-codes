@@ -1,7 +1,7 @@
 # Portfolio Projects
 
 **Status:** Complete
-**Last Updated:** 2026-05-06
+**Last Updated:** 2026-06-25
 
 The portfolio is a single feature with two halves: the **data side**
 (how a project is described in `portfolio.json`, what fields render
@@ -382,6 +382,11 @@ All cycling routes through `cycleTvChannel(±1)` or directly through
   `projects:set-tv-channel`.
 - **Click on a `.crt-tv__channel-row`** — calls `playTuneInSequence`
   directly.
+- **Click on a playing screen** (`wireTuneInScreenClick`) — while a
+  project channel is tuned in, clicking the TV screen navigates to that
+  project's detail page (`#/projects/[slug]`, same tab); the explicit
+  "Live: url" outro link still opens the live site in a new tab. Not a
+  channel change — it leaves the projects tile.
 
 #### Going back to the guide
 
