@@ -376,9 +376,9 @@ Located in `src/modules/animation/`:
 | `intro/morph-timeline.ts` | Builds the entry → clutch → release → retraction timeline | `gsap.timeline()` |
 | `intro/intro-types.ts` | Shared TypeScript types for the intro module | — |
 | `intro-animation-mobile.ts` | Mobile: full coyote-paw morph (MorphSVG), scaled for mobile | `gsap.to()`, `gsap.timeline()`, MorphSVG |
-| `about-hero.ts` | Full viewport "NO BHAD CODES" text animation | Wheel-driven, SVG transforms |
-| `page-hero.ts` | Unified hero text for virtual pages | Wheel-driven SVG |
-| `base-hero-animation.ts` | Shared base class for hero text animations | `gsap.timeline()`, `gsap.fromTo()` |
+| `about-hero.ts` ⚠️ LEGACY/UNWIRED | Old full-viewport "NO BHAD CODES" hero-text animation. `AboutHeroModule` is never instantiated or registered (not in `modules-config.ts`); the `#hero` tile it targets is an orphan (`page-hidden`, unreachable in the carousel). Superseded by `text-animation.ts`. Safe to delete. | — |
+| `page-hero.ts` ⚠️ LEGACY/UNWIRED | Old hero text for virtual pages; `PageHeroModule` never instantiated. Same status as `about-hero.ts`. | — |
+| `base-hero-animation.ts` ⚠️ LEGACY/UNWIRED | Shared base class for the two dead hero modules above; only imported by them. | — |
 | `page-transition.ts` | Spatial scroll-map navigation (camera pan + bridge slides), blur transitions for direct links, project-detail carousel, projects channel cycling, wheel/keyboard input | `gsap.to()`, `gsap.timeline()`, `ScrollTrigger` |
 | `contact-animation.ts` | Contact entrance: heading blur-in, hr + options fade, submit-button pop, avatar star-glow pulse. Form FIELDS are NOT animated (render static); skipped entirely on small mobile and reduced-motion | `gsap.to()`, `gsap.context()` |
 | `avatar-intro.ts` | Avatar SVG fade-in for terminal intake | `gsap.to()`, `gsap.fromTo()` |
@@ -407,7 +407,9 @@ Located in `src/modules/ui/`:
 - `pulseGlow()` -- Box-shadow pulse
 - `setWillChange()` / `clearWillChange()` / `withWillChange()` -- GPU acceleration
 
-### Hero Text Animation Pattern
+### Hero Text Animation Pattern (legacy)
+
+> ⚠️ This pattern lives in the unwired `base-hero-animation.ts` (see the LEGACY rows above) and does not run on the current site. Kept here for reference only.
 
 From `base-hero-animation.ts` -- the shared pattern for about/page hero text:
 

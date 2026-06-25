@@ -76,16 +76,16 @@ Constants defined in `api-endpoints.ts`:
 
 ### Configuration Methods
 
-- `listConfigs()` -- List all widget configurations, parsed from DB rows
-- `getConfig(id)` -- Get single configuration by ID
-- `createConfig(params)` -- Create new config with generated token
-- `updateConfig(id, params)` -- Update config fields
-- `deactivateConfig(id)` -- Set is_active = false
+- `list()` -- List all widget configurations, parsed from DB rows
+- `getById(id)` -- Get single configuration by ID
+- `create(params)` -- Create new config with generated token
+- `update(id, params)` -- Update config fields
+- `deactivate(id)` -- Set is_active = false
 - `regenerateToken(id)` -- Generate new token, invalidating previous embed codes
 
 ### Widget Methods
 
-- `getEmbedCode(id, baseUrl)` -- Generate HTML embed code for a configuration
+- `generateEmbedCode(config, baseUrl)` -- Generate HTML embed code for a configuration (takes the parsed config object, not an id)
 - `getProjectStatus(token)` -- Resolve project status from a status badge token (name, status, completion %, milestones summary)
 
 ## Types
