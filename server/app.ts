@@ -495,7 +495,15 @@ async function startServer() {
     const db = new sqlite3.Database(dbPath);
     const migrator = new MigrationManager(db);
 
+    // Track whether THIS boot applied any migrations. A migration that
+    // changes the schema legitimately moves it away from the recorded
+    // drift baseline — the drift check below uses this flag to treat
+    // that as an expected change (rebaseline) rather than out-of-band
+    // drift (crash). Without it, every schema-changing migration bricks
+    // production on the next boot.
+    let migrationsApplied = false;
     try {
+      migrationsApplied = (await migrator.getPendingMigrations()).length > 0;
       await migrator.migrate();
       logger.info('Database migrations complete');
     } catch (migrationError) {
@@ -515,6 +523,12 @@ async function startServer() {
     // record the current schema as the new baseline. Drift in
     // production fails loud; drift in dev is a warning.
     //
+    // When THIS boot applied migrations, any difference from the
+    // baseline is the expected result of those migrations, so we
+    // rebaseline instead of alarming. Drift only fails the boot when
+    // the schema changed with NO migration to explain it — the actual
+    // out-of-band-change signal the check exists to catch.
+    //
     // Escape hatch: ACCEPT_SCHEMA_DRIFT=true treats the current
     // schema as the new baseline regardless. Use this deliberately
     // after an approved manual schema change, not to silence noise.
@@ -529,9 +543,12 @@ async function startServer() {
         await recordSchemaBaseline(getDatabase(), await captureSchemaSnapshot(getDatabase()));
       } else if (driftReport.ok) {
         // No drift — snapshot still matches, nothing to do.
-      } else if (acceptDrift) {
+      } else if (acceptDrift || migrationsApplied) {
+        const reason = acceptDrift
+          ? 'ACCEPT_SCHEMA_DRIFT'
+          : 'migrations applied this boot';
         logger.warn(
-          '[Schema] DRIFT ACCEPTED via ACCEPT_SCHEMA_DRIFT — rewriting baseline. ' +
+          `[Schema] DRIFT ACCEPTED (${reason}) — rebaselining. ` +
             `added=${driftReport.added.length} removed=${driftReport.removed.length} modified=${driftReport.modified.length}`,
           { category: 'SCHEMA_DRIFT', metadata: { report: driftReport } }
         );
