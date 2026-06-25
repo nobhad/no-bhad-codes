@@ -61,9 +61,9 @@ This document is the index for the project's design system. Detailed specificati
 | Document | Purpose |
 |----------|---------|
 | [Admin Portal Linear Redesign](./ADMIN_PORTAL_LINEAR_REDESIGN.md) | Linear design system inspiration for admin portal |
-| [Analytics UI](./ANALYTICS_UI.md) | Analytics page UI documentation |
 | [Coyote Paw Animation](./COYOTE_PAW_ANIMATION.md) | Intro animation specification |
-| [Wireframe and Components](./WIREFRAME_AND_COMPONENTS.md) | Wireframe mode and reusable component audit |
+| [Analytics UI](../archive/design/ANALYTICS_UI.md) | **Archived** — analytics-page design proposal, since built (`AnalyticsDashboard.tsx`) |
+| [Wireframe and Components](../archive/design/WIREFRAME_AND_COMPONENTS.md) | **Archived** — pre-React vanilla-TS component audit; see [Component Library](./COMPONENT_LIBRARY.md) for current state |
 
 ---
 

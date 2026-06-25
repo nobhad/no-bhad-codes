@@ -1,7 +1,7 @@
 # Ad Hoc Requests System
 
 **Status:** Complete
-**Last Updated:** February 10, 2026
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -60,14 +60,6 @@ submitted → reviewing → quoted → approved → in_progress → completed
 | `completed` | Work finished |
 | `declined` | Request was declined |
 
-### 4. Pricing Strategies
-
-| Strategy | Description |
-|----------|-------------|
-| `flat_rate` | Fixed price for entire request |
-| `hourly_rate` | Per-hour billing |
-| `quoted_price` | Custom quoted amount |
-
 ---
 
 ## Database Schema
@@ -80,33 +72,38 @@ CREATE TABLE ad_hoc_requests (
   project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   client_id INTEGER NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
-  description TEXT,
-  request_type TEXT DEFAULT 'feature',
-  urgency TEXT DEFAULT 'normal',
-  status TEXT DEFAULT 'submitted',
-  estimated_hours DECIMAL(10,2),
-  flat_rate DECIMAL(10,2),
-  hourly_rate DECIMAL(10,2),
-  quoted_price DECIMAL(10,2),
-  pricing_strategy TEXT,
-  approved_at DATETIME,
-  completed_at DATETIME,
+  description TEXT NOT NULL,
+  status TEXT DEFAULT 'submitted' CHECK (status IN (
+    'submitted', 'reviewing', 'quoted', 'approved', 'in_progress', 'completed', 'declined'
+  )),
+  request_type TEXT NOT NULL CHECK (request_type IN (
+    'feature', 'change', 'bug_fix', 'enhancement', 'support'
+  )),
+  priority TEXT DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'urgent')),
+  urgency TEXT DEFAULT 'normal' CHECK (urgency IN ('normal', 'priority', 'urgent', 'emergency')),
+  estimated_hours REAL,
+  flat_rate REAL,
+  hourly_rate REAL,
+  quoted_price REAL,
+  attachment_file_id INTEGER,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  deleted_at DATETIME,
+  deleted_by TEXT
 );
 ```
 
-### ad_hoc_request_attachments Table
+*Attachments use the `attachment_file_id` column (migration 060), not a separate table.*
+
+### ad_hoc_request_invoices Table
 
 ```sql
-CREATE TABLE ad_hoc_request_attachments (
+CREATE TABLE ad_hoc_request_invoices (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   request_id INTEGER NOT NULL REFERENCES ad_hoc_requests(id) ON DELETE CASCADE,
-  file_name TEXT NOT NULL,
-  file_path TEXT NOT NULL,
-  file_type TEXT,
-  file_size INTEGER,
-  uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  invoice_id INTEGER NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
+  amount REAL NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
@@ -119,38 +116,40 @@ CREATE TABLE ad_hoc_request_attachments (
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/ad-hoc-requests` | List all requests (admin) |
-| GET | `/api/ad-hoc-requests/:id` | Get request details |
+| GET | `/api/ad-hoc-requests/:requestId` | Get request details |
 | POST | `/api/ad-hoc-requests` | Create new request |
-| PUT | `/api/ad-hoc-requests/:id` | Update request |
-| DELETE | `/api/ad-hoc-requests/:id` | Delete request |
+| PUT | `/api/ad-hoc-requests/:requestId` | Update request |
+| DELETE | `/api/ad-hoc-requests/:requestId` | Delete request |
+| POST | `/api/ad-hoc-requests/:requestId/convert-to-task` | Convert request to task |
+| POST | `/api/ad-hoc-requests/bulk-delete` | Bulk delete requests |
 
 ### Client Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/ad-hoc-requests/client/:clientId` | Get client's requests |
-| POST | `/api/ad-hoc-requests/submit` | Submit new request (client) |
+| GET | `/api/ad-hoc-requests/my-requests` | Get client's requests |
+| POST | `/api/ad-hoc-requests/my-requests` | Submit new request (client) |
+| POST | `/api/ad-hoc-requests/my-requests/:requestId/approve` | Approve quote |
+| POST | `/api/ad-hoc-requests/my-requests/:requestId/decline` | Decline request |
 
 ### Quote & Approval
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/ad-hoc-requests/:id/quote` | Send quote to client |
-| POST | `/api/ad-hoc-requests/:id/approve` | Approve quote |
-| POST | `/api/ad-hoc-requests/:id/decline` | Decline request |
+| POST | `/api/ad-hoc-requests/:requestId/send-quote` | Send quote to client |
 
 ### Time Tracking
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/ad-hoc-requests/:id/time-entries` | Get time entries for request |
-| POST | `/api/ad-hoc-requests/:id/time-entries` | Log time entry |
+| GET | `/api/ad-hoc-requests/:requestId/time-entries` | Get time entries for request |
+| POST | `/api/ad-hoc-requests/:requestId/time-entries` | Log time entry |
 
 ### Invoicing
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/ad-hoc-requests/:id/invoice` | Generate invoice for single request |
+| POST | `/api/ad-hoc-requests/:requestId/invoice` | Generate invoice for single request |
 | POST | `/api/ad-hoc-requests/invoice/bundle` | Generate bundled invoice for multiple requests |
 
 ### Analytics

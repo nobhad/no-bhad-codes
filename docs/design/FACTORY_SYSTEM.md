@@ -1,6 +1,6 @@
 # UI Factory System
 
-**Last Updated:** 2026-03-16
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -30,7 +30,7 @@ src/factories/
 src/react/factories/
 ├── index.ts                    # React factory exports (re-exports StatusBadge from components/portal)
 ├── IconButton.tsx              # React icon button component
-├── useFactory.ts               # React hooks
+├── useFactory.tsx              # React hooks
 ├── StateDisplay.tsx            # React state components
 ├── createDetailPanel.tsx       # Slide-in detail panel factory (DetailPanel, MetaItem, MetaGrid, Timeline)
 ├── createTabs.tsx              # Tab navigation factory (TabList, TabPanel, SubtabList, ViewToggle)
@@ -38,7 +38,7 @@ src/react/factories/
 ├── createStatusCell.tsx        # Status dropdown cell factory
 ├── createTableCells.tsx        # Table cell factory (DateCell, CurrencyCell, etc.)
 ├── createSection.tsx           # Layout section factory (Section, Panel, Grid, etc.)
-├── createNotification.tsx      # Notification message templates
+├── createNotification.ts       # Notification message templates
 ├── createAccordion.tsx         # Accordion component
 ├── MessageThread.tsx           # Chat thread component
 ├── useBulkAction.tsx           # Bulk action hook

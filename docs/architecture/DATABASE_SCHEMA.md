@@ -1,9 +1,9 @@
 # Database Schema Documentation
 
-**Last Updated:** 2026-04-30
+**Last Updated:** 2026-06-25
 **Database:** SQLite (`data/client_portal.db`)
 **Total Tables:** 159
-**Total Migrations:** 135
+**Total Migrations:** 139
 
 ## Table of Contents
 
@@ -36,7 +36,7 @@ This database supports a comprehensive freelance business management system incl
 | Metric | Value |
 |--------|-------|
 | Total Tables | 159 |
-| Total Migrations | 135 |
+| Total Migrations | 139 |
 | High-complexity tables (40+ cols) | 3 (invoices, clients, projects) |
 | Total Indexes | 150+ |
 | JSON fields | 30+ (templates, configs, metadata) |
@@ -519,6 +519,15 @@ See [DATABASE_NORMALIZATION_PLAN.md](../archive/DATABASE_NORMALIZATION_PLAN.md) 
 
 - `ai_usage_log` -- Tracks every AI API call (request_type, model, input_tokens, output_tokens, cost_cents, cache_hit, entity_type, entity_id, created_at). Indexed on created_at for budget queries.
 - `ai_response_cache` -- Caches AI responses by SHA-256 context hash (context_hash UNIQUE, request_type, response_data JSON, expires_at, created_at). TTL-based expiry cleaned up by daily cron.
+
+---
+
+## Recent Migrations (136-139)
+
+- **136 — Idempotency Keys** (`136_idempotency_keys.sql`): adds idempotency-key support for safe request retries.
+- **137 — Payment Columns Alignment** (`137_payment_columns_alignment.sql`): aligns payment-related columns across payment tables.
+- **138 — Hedgewitch Onboarding Seed** (`138_hedgewitch_onboarding_seed.sql`): seeds the Hedgewitch onboarding checklist data.
+- **139 — Drop Vestigial Projects Intake FK** (`139_drop_vestigial_projects_intake_fk.sql`): drops an unused intake foreign key from `projects`.
 
 ---
 

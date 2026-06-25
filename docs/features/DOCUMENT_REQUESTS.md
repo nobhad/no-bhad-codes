@@ -1,7 +1,7 @@
 # Document Requests System
 
 **Status:** Complete
-**Last Updated:** February 11, 2026
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -65,7 +65,7 @@ The Document Requests System allows administrators to request documents from cli
 | `title` | TEXT | Request title |
 | `description` | TEXT | Detailed description |
 | `document_type` | TEXT | Type category |
-| `priority` | TEXT | low, medium, high, urgent |
+| `priority` | TEXT | low, normal, high, urgent (default 'normal') |
 | `status` | TEXT | Request status |
 | `due_date` | TEXT | Due date (ISO) |
 | `file_id` | INTEGER | FK to uploaded file |
@@ -74,6 +74,10 @@ The Document Requests System allows administrators to request documents from cli
 | `reviewed_by` | TEXT | Admin who reviewed |
 | `reviewed_at` | TEXT | Review timestamp |
 | `review_notes` | TEXT | Approval/rejection notes |
+| `rejection_reason` | TEXT | Reason if rejected |
+| `is_required` | BOOLEAN | Whether this is a required document |
+| `reminder_sent_at` | TEXT | When last reminder was sent |
+| `reminder_count` | INTEGER | Number of reminders sent |
 | `created_at` | TEXT | Timestamp |
 | `updated_at` | TEXT | Timestamp |
 
@@ -82,11 +86,13 @@ The Document Requests System allows administrators to request documents from cli
 | Column | Type | Description |
 |--------|------|-------------|
 | `id` | INTEGER | Primary key |
-| `name` | TEXT | Template name |
+| `name` | TEXT | Template name (unique) |
+| `title` | TEXT | Request title |
 | `description` | TEXT | Template description |
 | `document_type` | TEXT | Default type |
-| `default_priority` | TEXT | Default priority |
-| `is_active` | BOOLEAN | Active flag |
+| `is_required` | BOOLEAN | Whether the document is required |
+| `days_until_due` | INTEGER | Default days until due from creation |
+| `created_by` | TEXT | Admin who created template |
 
 ## API Endpoints
 
@@ -101,7 +107,7 @@ POST /api/document-requests
   Body: { clientId, projectId?, title, description, documentType, priority, dueDate }
   Returns: created request
 
-POST /api/document-requests/from-template
+POST /api/document-requests/from-templates
   Body: { templateId, clientId, projectId?, dueDate }
   Returns: created request
 
@@ -112,12 +118,34 @@ PUT /api/document-requests/:id
 DELETE /api/document-requests/:id
   Returns: success message
 
-POST /api/document-requests/:id/review
-  Body: { action: 'approve' | 'reject', notes? }
+POST /api/document-requests/:id/start-review
+  Returns: updated request (status under_review)
+
+POST /api/document-requests/:id/approve
+  Body: { notes? }
+  Returns: updated request
+
+POST /api/document-requests/:id/reject
+  Body: { notes? }
   Returns: updated request
 
 POST /api/document-requests/:id/remind
   Returns: reminder sent confirmation
+
+GET /api/document-requests/pending
+  Returns: pending requests
+
+GET /api/document-requests/for-review
+  Returns: requests awaiting review
+
+GET /api/document-requests/overdue
+  Returns: overdue requests
+
+POST /api/document-requests/bulk-delete
+  Returns: success message
+
+POST /api/document-requests/bulk-request
+  Returns: created requests
 ```
 
 ### Client Endpoints
@@ -163,8 +191,8 @@ GET /api/document-requests/project/:projectId/pending
 
 ### Files Modified for Integration
 
-- `src/features/admin/project-details/files.ts` - Upload modal with request linking
-- `server/routes/document-requests.ts` - Added pending requests endpoint
+- `src/react/features/admin/document-requests/` - Upload modal with request linking
+- `server/routes/document-requests/admin.ts` - Pending requests endpoint
 
 ---
 
@@ -195,9 +223,9 @@ Automatically move approved documents to project Files tab.
 
 ### API Changes (Planned)
 
-Update `POST /api/document-requests/:id/review`:
+Update `POST /api/document-requests/:id/approve`:
 
-- When `action: 'approve'`:
+- On approval:
   - Move file from document_requests to uploads table
   - Set `folder_id` to Forms folder
   - Update `document_requests.status` to 'approved'
@@ -219,8 +247,10 @@ Add to `document_requests` table:
 |------|---------|
 | `src/react/features/admin/document-requests/` | Admin module |
 | `src/react/features/portal/document-requests/` | Client module |
-| `src/features/admin/project-details/files.ts` | Files tab integration |
-| `server/routes/document-requests.ts` | API endpoints |
+| `server/routes/document-requests.ts` | API barrel (mounts admin/client/templates sub-routers) |
+| `server/routes/document-requests/admin.ts` | Admin endpoints |
+| `server/routes/document-requests/client.ts` | Client endpoints |
+| `server/routes/document-requests/templates.ts` | Template endpoints |
 | `src/utils/table-filter.ts` | Filter configuration |
 | `src/utils/table-bulk-actions.ts` | Bulk action utilities |
 | `src/react/features/admin/document-requests/DocumentRequestDetailPanel.tsx` | Slide-in detail panel (Overview, Timeline) |

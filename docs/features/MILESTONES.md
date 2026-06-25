@@ -1,7 +1,7 @@
 # Milestones & Tasks Feature
 
 **Status:** Active
-**Last Updated:** 2026-03-16
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -376,11 +376,11 @@ CREATE TABLE project_tasks (
 
 - `server/routes/projects/milestones.ts` - Milestone CRUD endpoints
 - `server/routes/projects/tasks.ts` - Task CRUD endpoints (includes dependencies, checklist, comments)
-- `server/routes/admin/projects.ts` - Backfill endpoints for milestones and tasks
+- `server/routes/admin/workflows.ts` - Backfill endpoints for milestones and tasks (`POST /api/admin/milestones/backfill`, `POST /api/admin/tasks/backfill`)
 
 ### Frontend
 
-- `src/features/admin/project-details/milestones.ts` - Milestone view with expandable task lists
+- `src/react/features/admin/project-detail/tabs/overview/MilestonesList.tsx` - Milestone view with expandable task lists
 - `src/react/features/admin/tasks/` - Task Kanban/List view with milestone tags
 - `src/styles/admin/project-detail.css` - Milestone and task UI styles
 - `src/styles/admin/tasks.css` - Task card and milestone tag styles

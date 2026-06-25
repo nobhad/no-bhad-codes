@@ -1,7 +1,7 @@
 # Contact Form Submissions
 
 **Status:** Complete
-**Last Updated:** March 16, 2026
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -15,10 +15,9 @@ The Contacts module manages submissions from the main website's contact form. Ad
 | Status | Description | Color |
 |--------|-------------|-------|
 | `new` | Unread submission | Warning |
-| `read` | Viewed but not responded | Info |
-| `responded` | Reply sent | Success |
+| `read` | Viewed but not replied | Info |
+| `replied` | Reply sent | Success |
 | `archived` | Archived submission | Muted |
-| `spam` | Marked as spam | Danger |
 
 ## Features
 
@@ -34,10 +33,9 @@ The Contacts module manages submissions from the main website's contact form. Ad
 ### Actions
 
 - **Convert to Client**: Create client account from submission
-- **Convert to Lead**: Create lead from submission
-- **Reply**: Open email client with pre-filled recipient
+- **Reply**: Open email client with pre-filled recipient (client-side; no reply endpoint)
 - **Archive**: Move to archived status
-- **Delete**: Permanently remove
+- **Delete**: Bulk delete only (`POST /api/admin/contacts/bulk-delete`; no single-delete endpoint)
 
 ### Table Features
 
@@ -56,45 +54,45 @@ The Contacts module manages submissions from the main website's contact form. Ad
 | `id` | INTEGER | Primary key |
 | `name` | TEXT | Submitter name |
 | `email` | TEXT | Submitter email |
-| `phone` | TEXT | Phone number (optional) |
-| `company` | TEXT | Company name (optional) |
 | `subject` | TEXT | Message subject |
 | `message` | TEXT | Full message |
 | `status` | TEXT | Submission status |
-| `source` | TEXT | Form source (contact, intake) |
 | `ip_address` | TEXT | Submitter IP |
 | `user_agent` | TEXT | Browser info |
+| `message_id` | TEXT | Unique message identifier |
 | `read_at` | TEXT | When first viewed |
-| `responded_at` | TEXT | When responded |
+| `replied_at` | TEXT | When replied |
 | `created_at` | TEXT | Submission time |
 | `updated_at` | TEXT | Last update |
 
 ## API Endpoints
 
 ```text
-GET /api/contacts
-  Query: status, search, limit, offset
-  Returns: paginated submissions with stats
+GET /api/admin/contacts
+  Returns: contacts across all clients with stats
 
-GET /api/contacts/:id
-  Returns: single submission
+POST /api/admin/contacts
+  Body: { clientId, name, email, phone?, title?, isPrimary? }
+  Returns: created contact
 
-PUT /api/contacts/:id
+PUT /api/admin/contacts/:contactId
+  Body: { firstName?, lastName?, email?, phone?, role?, isPrimary? }
+  Returns: updated contact
+
+POST /api/admin/contacts/bulk-delete
+  Body: { contactIds }
+  Returns: { deleted }
+
+PUT /api/admin/contact-submissions/:id/status
   Body: { status }
-  Returns: updated submission
-
-POST /api/contacts/:id/convert-to-client
-  Body: { sendInvite?: boolean }
-  Returns: created client
-
-POST /api/contacts/:id/convert-to-lead
-  Returns: created lead
-
-DELETE /api/contacts/:id
   Returns: success message
 
-POST /api/contacts (public)
-  Body: { name, email, phone?, company?, subject, message }
+POST /api/admin/contact-submissions/:id/convert-to-client
+  Body: { sendInvitation?: boolean }
+  Returns: created client
+
+POST /api/contact (public)
+  Body: { name, email, subject, message }
   Returns: submission confirmation
 ```
 
@@ -132,10 +130,8 @@ POST /api/contacts (public)
 | File | Purpose |
 |------|---------|
 | `src/react/features/admin/contacts/` | Contacts module |
-| `src/features/admin/renderers/admin-contacts.renderer.ts` | Detail modal renderer |
-| `server/routes/clients.ts` | API endpoints (contacts merged into clients) |
-| `src/utils/table-filter.ts` | Filter configuration |
-| `src/utils/table-dropdown.ts` | Status dropdown |
+| `server/routes/admin/contacts.ts` | Admin contact endpoints |
+| `server/routes/admin/leads/core.ts` | Contact-submission status/convert endpoints |
 | `src/modules/ui/contact-form.ts` | Public contact form |
 | `src/react/features/admin/contacts/ContactDetailPanel.tsx` | Slide-in detail panel (Overview) |
 

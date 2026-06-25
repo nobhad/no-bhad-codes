@@ -1,6 +1,6 @@
 # New Project Creation
 
-**Last Updated:** March 9, 2026
+**Last Updated:** 2026-06-25
 
 ## Table of Contents
 
@@ -17,8 +17,8 @@ The admin can create projects directly from the Projects table via the **Add Pro
 
 ### Implementation
 
-- **Component:** `src/react/features/admin/projects/AddProjectModal.tsx`
-- **Hook:** `useProjects` from `src/react/features/admin/projects/useProjects.ts`
+- **Component:** `src/react/features/admin/modals/AddProjectModal.tsx`
+- **Hook:** `useProjects` from `src/react/hooks/useProjects.ts`
 - **API:** `POST /api/admin/projects`
 
 ### Form Fields

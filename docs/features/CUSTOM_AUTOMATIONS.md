@@ -1,7 +1,7 @@
 # Custom Automations
 
 **Status:** Complete
-**Last Updated:** 2026-03-17
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -80,7 +80,7 @@ Action configs support `{{variable}}` templates resolved at runtime:
 ### Portal Routes
 
 - `/automations` — Admin automation table
-- `/automation-detail/:id` — Detail panel with runs, actions, edit, run-now
+- `/automation-detail/:automationId` — Detail panel with runs, actions, edit, run-now
 
 ### Scheduler
 
@@ -90,7 +90,7 @@ Action configs support `{{variable}}` templates resolved at runtime:
 
 - `server/services/automation-engine.ts` — Full engine (CRUD, execution, scheduling, dry-run)
 - `server/services/automation-engine-types.ts` — TypeScript interfaces
-- `server/routes/automations/admin.ts` — 16 admin endpoints
+- `server/routes/automations/admin.ts` — 15 admin endpoints
 - `server/database/migrations/124_custom_automations.sql` — Schema + seed data
 - `src/react/features/admin/automations/AutomationsTable.tsx` — Admin table
 - `src/react/features/admin/automations/AutomationBuilder.tsx` — Visual builder

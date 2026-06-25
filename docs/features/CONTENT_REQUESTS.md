@@ -1,7 +1,7 @@
 # Content Request System
 
 **Status:** Complete
-**Last Updated:** March 13, 2026
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -25,6 +25,7 @@ The Content Request System manages per-project content gathering from clients. A
 |`submitted`|Client has submitted content, awaiting review|
 |`revision_needed`|Admin requested changes|
 |`accepted`|Admin accepted the submission|
+|`rejected`|Admin rejected the submission|
 
 ## Content Types
 
@@ -131,6 +132,7 @@ CREATE TABLE content_request_items (
   is_required BOOLEAN DEFAULT TRUE,
   due_date DATE,
   status TEXT DEFAULT 'pending',
+  priority TEXT DEFAULT 'normal',
   sort_order INTEGER DEFAULT 0,
   text_content TEXT,
   file_id INTEGER REFERENCES files(id) ON DELETE SET NULL,
@@ -319,13 +321,8 @@ await fetch('/api/content-requests/items/42/request-revision', {
 ### March 13, 2026 — Feature Parity & Portal UI
 
 - Added `content_request_history` audit trail table (migration 110)
-- Added `priority` column to items (migration 111, uses shared `PRIORITY_LEVELS`)
-- Added `rejected` status to item statuses
-- Added `rejectItem()` service method + `POST /items/:itemId/reject` endpoint
-- Added `getItemHistory()` + `GET /items/:itemId/history` endpoint
-- Added `bulkDeleteChecklists()` + `POST /bulk-delete` endpoint
-- Added `bulkCreateByProjectType()` + `POST /from-project-type` endpoint
-- All submission and review methods now log audit history with actor tracking
+- Added `priority` column to items (migration 111, default 'normal')
+- Added `rejected` status to item statuses (`server/config/constants.ts`)
 - Portal view: `ContentChecklistView.tsx` with type-specific submission UI
 - Portal route: `/content-requests` and `/requests-hub` (unified tab view)
 

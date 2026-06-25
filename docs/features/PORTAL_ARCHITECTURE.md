@@ -1,7 +1,7 @@
 # Portal Architecture
 
 **Status:** Complete
-**Last Updated:** 2026-04-30
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -18,7 +18,7 @@ Both portals mount into the `<div class="portal">` element rendered by `server/v
 
 - HttpOnly JWT cookies are used for all API calls (`credentials: 'include'`)
 - `getAuthToken()` always returns `null` — no bearer token is sent in headers
-- `usePortalAuth` reads/writes sessionStorage and validates the session against the server via `/api/clients/me` or `/api/admin/me`
+- `usePortalAuth` is a thin React wrapper over the `authStore` singleton (`src/auth/auth-store.ts`); sessionStorage reads/writes live in `authStore`, not in the hook. Both roles validate the session against the server via `GET /api/auth/validate`; the client refresh path uses `POST /api/auth/refresh`
 - `role` is set from the JWT payload: `'admin'` or `'client'`
 - `RequireAuth` guard in `PortalRoutes.tsx` redirects to `/#/portal` if the user is not authenticated
 
@@ -137,19 +137,17 @@ All feature components are lazy-loaded using `React.lazy()` via the `lazyNamed()
 function lazyNamed(loader) {
   return React.lazy(() =>
     loader().then(mod => {
-      const key = Object.keys(mod).find(
-        k => typeof mod[k] === 'function' && /^[A-Z]/.test(k)
-      );
-      return { default: mod[key] };
+      // Call sites map the named export into a single-key object,
+      // e.g. `.then(m => ({ MyComponent: m.MyComponent }))`.
+      // Pick that single value and present it as the default export.
+      const [component] = Object.values(mod);
+      return { default: component };
     })
   );
 }
 ```
 
-Each feature directory has:
-
-- `index.ts` — exports the component
-- `mount.tsx` — standalone mount entry (legacy support)
+Each feature directory has an `index.ts` that exports its component. A standalone `mount.tsx` entry exists in only one feature directory (`src/react/features/portal/onboarding/`); it is not a general convention.
 
 ## Theme System
 

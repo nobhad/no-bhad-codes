@@ -1,7 +1,7 @@
 # Knowledge Base System
 
 **Status:** Complete
-**Last Updated:** February 11, 2026
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -13,14 +13,14 @@ The Knowledge Base System provides a help center with categorized articles. Admi
 
 - Sidebar: "Knowledge Base" tab
 - Category and article management
-- **File:** `src/features/admin/modules/admin-knowledge-base.ts`
+- **Files:** `src/react/features/admin/knowledge-base/` (`KnowledgeBase.tsx`, `ArticlesTable.tsx`, `CategoriesTable.tsx`)
 
 ### Client Portal
 
 - Help section with searchable articles
 - Category browsing
 - Featured articles display
-- **File:** `src/features/client/modules/portal-help.ts`
+- **File:** `src/react/features/portal/help/PortalHelp.tsx`
 
 ## Features
 
@@ -47,6 +47,12 @@ The Knowledge Base System provides a help center with categorized articles. Admi
 - Browse by category
 - View featured articles
 - Read full article content
+
+### Article Feedback & Search Logging
+
+- "Was this helpful?" feedback per article (`POST /api/kb/articles/:id/feedback`), stored in `kb_article_feedback`
+- Search queries logged to `kb_search_log` for analytics
+- Admins can fetch a single article for editing (`GET /api/kb/admin/articles/:id`) and view aggregate stats (`GET /api/kb/admin/stats`)
 
 ## Database Schema
 
@@ -75,10 +81,17 @@ The Knowledge Base System provides a help center with categorized articles. Admi
 | `slug` | TEXT | URL-friendly slug |
 | `summary` | TEXT | Short description |
 | `content` | TEXT | Full article content |
+| `keywords` | TEXT | Search keywords (comma-separated) |
 | `is_featured` | BOOLEAN | Featured flag |
 | `is_published` | BOOLEAN | Published flag |
-| `created_at` | TEXT | Timestamp |
-| `updated_at` | TEXT | Timestamp |
+| `view_count` | INTEGER | View counter |
+| `helpful_count` | INTEGER | "Was this helpful?" yes count |
+| `not_helpful_count` | INTEGER | "Was this helpful?" no count |
+| `sort_order` | INTEGER | Display order |
+| `author_email` | TEXT | Article author |
+| `created_at` | DATETIME | Timestamp |
+| `updated_at` | DATETIME | Timestamp |
+| `published_at` | DATETIME | Publish timestamp |
 
 ## API Endpoints
 
@@ -100,8 +113,14 @@ DELETE /api/kb/admin/categories/:id
   Returns: success message
 
 GET /api/kb/admin/articles
-  Query: categoryId?, status?
+  Query: category?
   Returns: all articles
+
+GET /api/kb/admin/articles/:id
+  Returns: single article by ID (for editing)
+
+GET /api/kb/admin/stats
+  Returns: knowledge base statistics (article/category counts)
 
 POST /api/kb/admin/articles
   Body: { categoryId, title, summary?, content, isFeatured, isPublished }
@@ -127,11 +146,15 @@ GET /api/kb/featured
 GET /api/kb/search?q=query
   Returns: matching published articles
 
-GET /api/kb/articles/:slug
-  Returns: single article by slug
+GET /api/kb/articles/:categorySlug/:articleSlug
+  Returns: single article by category + article slug
 
-GET /api/kb/categories/:slug/articles
-  Returns: articles in category
+GET /api/kb/categories/:slug
+  Returns: category with its articles
+
+POST /api/kb/articles/:id/feedback
+  Body: { isHelpful, comment? }
+  Returns: feedback submitted
 ```
 
 ## UI Components
@@ -194,8 +217,8 @@ Two-column layout redesigned for better UX:
 
 | File | Purpose |
 |------|---------|
-| `src/features/admin/modules/admin-knowledge-base.ts` | Admin module |
-| `src/features/client/modules/portal-help.ts` | Client module |
+| `src/react/features/admin/knowledge-base/` | Admin React feature (KnowledgeBase, ArticlesTable, CategoriesTable) |
+| `src/react/features/portal/help/PortalHelp.tsx` | Client help React component |
 | `server/routes/knowledge-base.ts` | API endpoints |
 | `src/components/portal-modal.ts` | Modal component |
 

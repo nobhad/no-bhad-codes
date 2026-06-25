@@ -1,6 +1,6 @@
 # API Documentation
 
-**Last Updated:** March 16, 2026
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -2374,9 +2374,26 @@ X-RateLimit-Reset: 1643746800
 }
 ```
 
-## Webhooks (Future Enhancement)
+## Webhooks
 
-Webhook endpoints for real-time notifications:
+Webhooks are fully implemented and mounted at `/api/webhooks` (admin-only). The router supports full CRUD plus delivery management and testing:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/webhooks` | List configured webhooks |
+| POST | `/api/webhooks` | Create a webhook |
+| GET | `/api/webhooks/:id` | Get a single webhook |
+| PUT | `/api/webhooks/:id` | Update a webhook |
+| DELETE | `/api/webhooks/:id` | Delete a webhook |
+| PATCH | `/api/webhooks/:id/toggle` | Enable/disable a webhook |
+| POST | `/api/webhooks/:id/test` | Send a test delivery |
+| GET | `/api/webhooks/:id/deliveries` | List delivery attempts |
+| GET | `/api/webhooks/:id/stats` | Delivery statistics |
+| POST | `/api/webhooks/:id/retry` | Retry a failed delivery |
+| POST | `/api/webhooks/:id/secret/regenerate` | Regenerate signing secret |
+| POST | `/api/webhooks/events/trigger` | Manually trigger an event |
+
+See `server/routes/webhooks.ts` for full request/response shapes.
 
 ### Available Events
 
@@ -2401,6 +2418,34 @@ Webhook endpoints for real-time notifications:
   }
 }
 ```
+
+## Additional Mounted API Resources
+
+The following resources are mounted in `server/app.ts` and have dedicated feature docs under `docs/features/`. They are listed here for discoverability; see each linked doc for endpoint-level detail.
+
+| Base path | Feature doc |
+|-----------|-------------|
+| `/api/payments` | [Embedded Payments](features/EMBEDDED_PAYMENTS.md) |
+| `/api/agreements` | [Project Agreements](features/AGREEMENTS.md) |
+| `/api/onboarding-checklist` | [Onboarding Checklist](features/ONBOARDING_CHECKLIST.md) |
+| `/api/sequences` | [Email Sequences](features/EMAIL_SEQUENCES.md) |
+| `/api/meeting-requests` | [Meeting Requests](features/MEETING_REQUESTS.md) |
+| `/api/automations` | [Custom Automations](features/CUSTOM_AUTOMATIONS.md) |
+| `/api/expenses` | [Expenses](features/EXPENSES.md) |
+| `/api/retainers` | [Retainers](features/RETAINERS.md) |
+| `/api/feedback` | [Feedback Surveys](features/FEEDBACK.md) |
+| `/api/embed` | [Embeddable Widgets](features/EMBED_WIDGETS.md) |
+| `/api/payment-schedules` | [Payment Schedules](features/PAYMENT_SCHEDULES.md) |
+| `/api/content-requests` | [Content Requests](features/CONTENT_REQUESTS.md) |
+| `/api/deliverables` | [Deliverables](features/DELIVERABLES.md) |
+| `/api/integrations` | [Integrations](features/INTEGRATIONS.md) |
+| `/api/data-quality` | [Data Quality](features/DATA_QUALITY.md) |
+| `/api/settings` | [Settings](features/SETTINGS.md) |
+| `/api/search` | — (see `server/routes/search.ts`) |
+| `/api/events` | — (see `server/routes/events.ts`) |
+| `/api/client-info` | [Client Information](features/CLIENT_INFORMATION.md) |
+
+Each resource is dual-mounted under `/api` and `/api/v1`.
 
 ## SDK Examples
 

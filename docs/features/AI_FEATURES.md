@@ -1,7 +1,7 @@
 # AI Features
 
 **Status:** Complete
-**Last Updated:** 2026-03-17
+**Last Updated:** 2026-06-25
 
 ## Overview
 
@@ -115,7 +115,7 @@ Key types:
 
 **File:** `server/services/search-service.ts`
 
-Expanded from 4 entity types to 9:
+Expanded from 4 entity types to 8:
 
 1. clients -- email, contact_name, company_name
 2. projects -- project_name, project_code, project_type
@@ -125,7 +125,6 @@ Expanded from 4 entity types to 9:
 6. contracts -- content
 7. leads -- name, email, company
 8. tasks -- title, description
-9. files -- file_name, label
 
 Each entity type is queried in parallel using `Promise.allSettled()`. Results are merged and sorted by a relevance scoring algorithm:
 
@@ -164,7 +163,7 @@ This is a portal-rendered overlay, not a route. It is available from any page in
 - `server/services/ai-types.ts` -- TypeScript types for AI contexts and results
 - `server/services/ai-service.ts` -- Core AI service with drafting, caching, budget enforcement
 - `server/routes/admin/ai.ts` -- Admin API endpoints (5 routes)
-- `server/services/search-service.ts` -- Enhanced search with 9 entity types and relevance scoring
+- `server/services/search-service.ts` -- Enhanced search with 8 entity types and relevance scoring
 - `src/react/components/portal/CommandPalette.tsx` -- Global Cmd+K command palette
 
 ## Change Log
@@ -176,6 +175,6 @@ This is a portal-rendered overlay, not a route. It is available from any page in
 - Monthly budget enforcement and daily rate limiting
 - SHA-256 response caching with configurable TTL
 - Usage tracking and monitoring endpoints
-- Search service expanded from 4 to 9 entity types with relevance scoring
+- Search service expanded from 4 to 8 entity types with relevance scoring
 - Global Cmd+K search modal with keyboard navigation and grouped results
 - Daily cache cleanup cron job

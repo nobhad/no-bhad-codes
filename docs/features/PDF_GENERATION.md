@@ -1,6 +1,6 @@
 # PDF Generation System
 
-**Last Updated:** March 16, 2026
+**Last Updated:** 2026-06-25
 
 ## Table of Contents
 
@@ -11,7 +11,8 @@
 5. [File Locations](#file-locations)
 6. [API Endpoints](#api-endpoints)
 7. [Implementation Details](#implementation-details)
-8. [Styling Reference](#styling-reference)
+8. [Contract Generator (markdown-to-pdf)](#contract-generator-markdown-to-pdf)
+9. [Styling Reference](#styling-reference)
 
 ---
 
@@ -54,7 +55,7 @@ All PDF documents in the system are generated using **pdf-lib**, a pure JavaScri
 |Contract|`server/routes/projects.ts`|`GET /api/projects/:id/contract/pdf`|CONTRACT|
 |Intake|`server/routes/projects.ts`|`GET /api/projects/:id/intake/pdf`|INTAKE|
 |Proposal|`server/routes/proposals.ts`|`GET /api/proposals/:id/pdf`|PROPOSAL|
-|Receipt|`server/services/receipt-service.ts`|`GET /api/receipts/:id/pdf`|RECEIPT|
+|Receipt|`server/routes/receipts.ts`|`GET /api/receipts/:id/pdf`|RECEIPT|
 
 ---
 
@@ -134,6 +135,8 @@ if (existsSync(logoPath)) {
 |`server/routes/invoices.ts`|Invoice PDF generation|
 |`server/routes/projects.ts`|Contract and Intake PDF generation|
 |`server/routes/proposals.ts`|Proposal PDF generation|
+|`server/routes/receipts.ts`|Receipt PDF generation|
+|`scripts/markdown-to-pdf.ts`|Markdown-to-PDF contract generator|
 |`public/images/avatar_pdf.png`|Business logo for PDFs|
 
 ---
@@ -308,6 +311,51 @@ res.setHeader('Content-Disposition', `attachment; filename="${filename}.pdf"`);
 res.setHeader('Content-Length', pdfBytes.length);
 res.send(Buffer.from(pdfBytes));
 ```
+
+---
+
+## Contract Generator (markdown-to-pdf)
+
+In addition to the route-based PDF generators above, client contracts are
+produced from markdown by `scripts/markdown-to-pdf.ts`. This standalone script
+also uses **pdf-lib** on LETTER pages (612 × 792 points) and renders a fixed
+three-page contract layout.
+
+```bash
+npx ts-node scripts/markdown-to-pdf.ts <input.md> [output.pdf]
+```
+
+### Mandated Page Structure
+
+Every contract MUST follow this page breakdown:
+
+- **Page 1** — Branded header + Bill-To block + Scope of Work (features,
+  technical details, deliverables, maintenance plan)
+- **Page 2** — Pricing + Payment Schedule + Payment Methods + Timeline
+- **Page 3** — Terms & Conditions + Agreement/Signatures
+
+Page breaks are explicit: insert `<!-- pagebreak -->` before the `## Pricing`
+heading (page 2) and before the `## Terms & Conditions` heading (page 3). The
+script does not auto-break; it only breaks at these markers.
+
+### Heading Hierarchy
+
+|Markdown|Rendered As|
+|----------|-------------|
+|H2 (`##`)|Section heading — 13pt bold uppercase (SCOPE OF WORK, PRICING)|
+|H3 (`###`)|Sub-heading — 10pt bold uppercase (OWNERSHIP, REVISIONS)|
+
+### Special Markdown Blocks
+
+|Block|Purpose|
+|-------|---------|
+|`<!-- bill-to -->` … `<!-- /bill-to -->`|Two-column client/details layout (client info left, contract details right)|
+|`<!-- totals -->` … `<!-- /totals -->`|Right-aligned subtotal/total section|
+|`<!-- pagebreak -->`|Force a new page|
+|`*italic text*`|Renders as small (7pt) light-gray footnote text|
+
+All pages include the branded footer with business info and a "Page X of Y"
+indicator.
 
 ---
 

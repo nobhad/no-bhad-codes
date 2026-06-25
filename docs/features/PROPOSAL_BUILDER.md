@@ -1,6 +1,6 @@
 # Proposal Builder
 
-**Last Updated:** February 10, 2026
+**Last Updated:** 2026-06-25
 
 > **⚠️ Outdated context (as of 2026-04-30):** This document describes a vanilla-TypeScript proposal builder (`src/features/client/proposal-builder.ts` and helpers) that no longer exists on disk. The current proposal flow lives in the React tree:
 >
@@ -72,7 +72,7 @@ server/routes/
 └── proposals.ts                  # API endpoints (~830 lines)
 
 server/database/migrations/
-└── 025_proposal_requests.sql     # Database schema
+└── 047_proposal_requests.sql     # Database schema
 
 src/styles/pages/
 └── proposal-builder.css          # Proposal builder styles
@@ -168,11 +168,9 @@ Supported project types:
 
 - `simple-site` - Simple informational website
 - `business-site` - Business website with CMS
-- `portfolio` - Portfolio/showcase site
-- `ecommerce` - E-commerce with shopping cart
+- `ecommerce-site` - E-commerce with shopping cart
 - `web-app` - Custom web application
-- `browser-extension` - Browser extension
-- `other` - Custom/other project
+- `portfolio` - Portfolio/showcase site
 
 ---
 
@@ -356,7 +354,7 @@ See [API Documentation](../API_DOCUMENTATION.md#proposal-builder-endpoints) for 
 |`src/features/client/proposal-builder-types.ts`|TypeScript types|
 |`src/react/features/admin/proposals/`|Admin management|
 |`server/routes/proposals.ts`|API endpoints|
-|`server/database/migrations/025_proposal_requests.sql`|DB schema|
+|`server/database/migrations/047_proposal_requests.sql`|DB schema|
 |`src/styles/pages/proposal-builder.css`|Styles|
 
 ---
