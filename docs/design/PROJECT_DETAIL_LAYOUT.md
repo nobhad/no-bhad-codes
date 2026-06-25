@@ -7,15 +7,15 @@
 
 The project detail page currently displays:
 
-1. Title card as hero image (branded graphics per project)
-2. Title + status badge
+1. Hero image: `heroImage || screenshots[0] || placeholder SVG` (the title card is NO longer used as the hero fallback — `projects.ts` renderProjectDetail). Since `heroImage` is empty for every project, the hero is the first screenshot, or the placeholder SVG for projects with no screenshots.
+2. Title + status badge (title links to the live URL in a new tab when present)
 3. Tagline (italic)
 4. Metadata (Role, Year, Duration) + Description (two-column on desktop)
 5. Tools list (tag pills)
 6. Divider
 7. Case study sections: Challenge, Approach, Key Features, Results
 8. Action links (View Live, Source Code)
-9. Prev/Next navigation
+9. Prev/Next navigation — implemented as a left/right **carousel** between project-detail pages (horizontal swipe / ←→, via `resolveProjectDetailNeighbor`)
 
 ### Known Issues
 
@@ -24,7 +24,7 @@ The project detail page currently displays:
 - Massive dead space between action links and prev/next nav
 - Page is entirely text below the title card - no visual showcase of actual work
 - Prev/next shows same project when only 2 documented projects exist (fixed: added Hedgewitch as 3rd)
-- Hero image field empty for all projects (title card used as fallback)
+- `heroImage` field empty for all projects, so the hero falls back to the first screenshot (or the placeholder SVG for projects with no screenshots, e.g. Hedgewitch). The title card is no longer a hero fallback.
 
 ---
 

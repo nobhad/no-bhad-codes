@@ -163,9 +163,9 @@ Main site typography defined in `src/styles/base/typography.css`:
 
 | Element | Font | Size | Weight |
 |---------|------|------|--------|
-| h1 | Acme | `clamp(2rem, 6vw, 3rem)` | Bold |
-| h2 | Acme | `clamp(1.5rem, 5vw, 2rem)` | Bold |
-| h3 | Acme | `clamp(1.25rem, 4vw, 1.5rem)` | Bold |
+| h1 | Acme | `clamp(2rem, 5vw, 4rem)` | Bold |
+| h2 | Acme | `clamp(1.5rem, 4vw, 3rem)` | Bold |
+| h3 | Acme | `clamp(1.25rem, 3vw, 2rem)` | Bold |
 | Body text | System fonts | `clamp(1rem, 3vw, 1.125rem)` | Regular |
 
 - **Acme** font for all headings and card titles
@@ -184,7 +184,7 @@ Main site typography defined in `src/styles/base/typography.css`:
 2. Business card renders centered at fixed 525x294.19px (1.78423:1 ratio)
 3. Intro nav links appear below card (matching width)
 4. Paw morph overlay animates via GSAP MorphSVG (desktop only)
-5. On mobile: simple card flip animation instead
+5. On mobile: the full coyote-paw morph, scaled for mobile (`MobileIntroAnimationModule`) -- not a card flip
 6. `.intro-complete` / `.intro-finished` classes applied when done
 7. User navigates to other pages via hash links
 
@@ -360,7 +360,7 @@ Managed by `src/modules/ui/navigation.ts`:
 | Content | 1 |
 | Intro morph overlay | 50 |
 | Elevated | 100 |
-| Nav | 125 |
+| Nav | 100 (`--z-index-nav`; sub-layers header/overlay/menu at 110/115/120) |
 | Fixed elements | 300 |
 
 ---
@@ -375,7 +375,7 @@ Located in `src/modules/animation/`:
 | `intro/svg-builder.ts` | Loads `coyote_paw.svg`, computes alignment to the actual card | — |
 | `intro/morph-timeline.ts` | Builds the entry → clutch → release → retraction timeline | `gsap.timeline()` |
 | `intro/intro-types.ts` | Shared TypeScript types for the intro module | — |
-| `intro-animation-mobile.ts` | Mobile: simple card flip | `gsap.to()`, `gsap.timeline()` |
+| `intro-animation-mobile.ts` | Mobile: full coyote-paw morph (MorphSVG), scaled for mobile | `gsap.to()`, `gsap.timeline()`, MorphSVG |
 | `about-hero.ts` | Full viewport "NO BHAD CODES" text animation | Wheel-driven, SVG transforms |
 | `page-hero.ts` | Unified hero text for virtual pages | Wheel-driven SVG |
 | `base-hero-animation.ts` | Shared base class for hero text animations | `gsap.timeline()`, `gsap.fromTo()` |

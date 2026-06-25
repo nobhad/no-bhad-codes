@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** March 16, 2026
+**Last Updated:** June 25, 2026
 
 Shared CSS architecture, design tokens, naming conventions, and file organization used across both the main site and portals. For portal-specific design (theme, components, layout wrappers), see [Portal Design](./PORTAL_DESIGN.md).
 
@@ -22,7 +22,7 @@ All design tokens live in `src/design-system/tokens/`. The token index file (`sr
 10. `buttons.css` - Portal button tokens (sizing, typography, colors)
 11. `dimensions.css` - Sidebar widths, icon button sizes, content constraints
 
-Additional variables live in `src/styles/variables.css`, which extends tokens with custom media queries, fluid spacing, shadow presets, and responsive breakpoints.
+Additional variables live in `src/styles/variables.css` (fluid font-size and letter-spacing overrides). The `@custom-media` breakpoint queries live in `src/design-system/tokens/breakpoints.css`.
 
 ---
 
@@ -560,7 +560,7 @@ For the portal theme system (light/dark mode, color derivation, scoping), Tailwi
 
 ## Custom Media Queries
 
-Defined in `src/styles/variables.css`. Use these instead of hardcoded breakpoints:
+Defined in `src/design-system/tokens/breakpoints.css`. Use these instead of hardcoded breakpoints:
 
 ```css
 @media (--mobile) { }          /* max-width: 767px */

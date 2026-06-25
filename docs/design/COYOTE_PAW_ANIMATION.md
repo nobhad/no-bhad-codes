@@ -111,7 +111,7 @@ The paw fully exits off-screen with no fade - just pure movement. The actual bus
 - Finger A: `#_FInger_A_-_Above_Card_-3`
 - Finger B: `#_FInger_B-_Above_Card_-2`
 - Finger C: `#_FInger_C_-_Above_Card_-2`
-- Thumb: `#_Thumb_Behind_Card_-2`
+- Thumb: `#_Thumb_Behind_Card_-3`
 
 ### CSS Classes in SVG
 
@@ -187,31 +187,33 @@ The implementation file contains extensive documentation including:
 
 |Device|Animation|
 |--------|-----------|
-|Desktop|Full paw morph + entry + retraction|
-|Mobile|Simple card flip (no paw overlay)|
+|Desktop|Full paw morph + entry + retraction (`IntroAnimationModule`)|
+|Mobile|Full paw morph, scaled for mobile (`MobileIntroAnimationModule.runMorphAnimation`, MorphSVG) -- NOT a card flip|
+
+The card flip is only a fallback inside the desktop module's `runCardFlip()` when the required SVG elements aren't found.
 
 ## Skip Conditions
 
 The animation is skipped when:
 
-1. `sessionStorage.getItem('introShown') === 'true'` (already shown this session)
+1. Less than 20 minutes since it last played -- gated by a `localStorage` timestamp (`introAnimationTimestamp`, written in `intro-animation.ts`; window in `REPLAY_CONFIG`)
 2. `prefers-reduced-motion: reduce` is set
 3. Required SVG elements not found (falls back to card flip)
 4. User presses Enter key during animation
 
 ## Testing the Animation
 
-To see the animation again after it has played:
+To see the animation again before the 20-minute replay window elapses:
 
 1. Open browser DevTools
-2. Go to Application > Session Storage
-3. Delete the `introShown` key
+2. Go to Application > Local Storage
+3. Delete the `introAnimationTimestamp` key
 4. Refresh the page
 
 Or run in console:
 
 ```javascript
-sessionStorage.removeItem('introShown');
+localStorage.removeItem('introAnimationTimestamp');
 location.reload();
 ```
 
