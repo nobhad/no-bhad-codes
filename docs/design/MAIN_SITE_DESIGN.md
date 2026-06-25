@@ -376,13 +376,9 @@ Located in `src/modules/animation/`:
 | `intro/morph-timeline.ts` | Builds the entry → clutch → release → retraction timeline | `gsap.timeline()` |
 | `intro/intro-types.ts` | Shared TypeScript types for the intro module | — |
 | `intro-animation-mobile.ts` | Mobile: full coyote-paw morph (MorphSVG), scaled for mobile | `gsap.to()`, `gsap.timeline()`, MorphSVG |
-| `about-hero.ts` ⚠️ LEGACY/UNWIRED | Old full-viewport "NO BHAD CODES" hero-text animation. `AboutHeroModule` is never instantiated or registered (not in `modules-config.ts`); the `#hero` tile it targets is an orphan (`page-hidden`, unreachable in the carousel). Superseded by `text-animation.ts`. Safe to delete. | — |
-| `page-hero.ts` ⚠️ LEGACY/UNWIRED | Old hero text for virtual pages; `PageHeroModule` never instantiated. Same status as `about-hero.ts`. | — |
-| `base-hero-animation.ts` ⚠️ LEGACY/UNWIRED | Shared base class for the two dead hero modules above; only imported by them. | — |
 | `page-transition.ts` | Spatial scroll-map navigation (camera pan + bridge slides), blur transitions for direct links, project-detail carousel, projects channel cycling, wheel/keyboard input | `gsap.to()`, `gsap.timeline()`, `ScrollTrigger` |
 | `contact-animation.ts` | Contact entrance: heading blur-in, hr + options fade, submit-button pop, avatar star-glow pulse. Form FIELDS are NOT animated (render static); skipped entirely on small mobile and reduced-motion | `gsap.to()`, `gsap.context()` |
-| `avatar-intro.ts` | Avatar SVG fade-in for terminal intake | `gsap.to()`, `gsap.fromTo()` |
-| `text-animation.ts` | Scroll-driven split-text skew animation | `gsap.timeline()`, `ScrollTrigger` |
+| `text-animation.ts` | Scroll-driven split-text skew animation on the `#hero` `.text-animation-svg` ("NO BHAD CODES") | `gsap.timeline()`, `ScrollTrigger` |
 
 ### UI Module GSAP Usage
 
@@ -406,17 +402,6 @@ Located in `src/modules/ui/`:
 - `spin()` / `pulse()` / `bounce()` / `shake()` / `flip()` -- Effects
 - `pulseGlow()` -- Box-shadow pulse
 - `setWillChange()` / `clearWillChange()` / `withWillChange()` -- GPU acceleration
-
-### Hero Text Animation Pattern (legacy)
-
-> ⚠️ This pattern lives in the unwired `base-hero-animation.ts` (see the LEGACY rows above) and does not run on the current site. Kept here for reference only.
-
-From `base-hero-animation.ts` -- the shared pattern for about/page hero text:
-
-- Left group: skewY -30 to -15, scaleX 0.6 to 0.85
-- Right group: skewY 15 to 30, scaleX 0.85 to 0.6
-- Text elements: xPercent -100 to 0, slide in from left
-- Wheel-driven on desktop
 
 ---
 
