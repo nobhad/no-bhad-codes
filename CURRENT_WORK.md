@@ -31,7 +31,7 @@
 
 ## Production 502 — Schema-Drift Boot Crash
 
-**Status:** Code fix committed (`4c114a3c`) — prod recovery steps still pending
+**Status:** RECOVERED — prod boots clean with drift guard re-armed; code fix committed (`4c114a3c`)
 **Priority:** Critical
 
 ### What happened
@@ -63,17 +63,17 @@ same way.
   (schema changed with no migration to explain it) still fails loud. Commit
   `4c114a3c`.
 
-### Prod recovery (Noelle, Railway CLI) — pending
+### Prod recovery (Noelle, Railway CLI) — DONE 2026-06-25
 
-The committed fix prevents recurrence but does NOT clear the existing stale
+The committed fix prevents recurrence but did NOT clear the existing stale
 baseline (a normal boot has no pending migrations, so the old baseline still
-trips the guard). Clear it once with the escape hatch:
+trips the guard). Cleared it once with the escape hatch:
 
-- [ ] `railway variables --set "ACCEPT_SCHEMA_DRIFT=true"`
-- [ ] `railway up` (ships the fix from the working dir) — wait for build + boot
-- [ ] Confirm 200: `curl -s -o /dev/null -w "%{http_code}\n" https://no-bhad-codes-production.up.railway.app/health/live`
-- [ ] `railway variables --set "ACCEPT_SCHEMA_DRIFT=false"`
-- [ ] `railway redeploy --yes` — should boot clean with drift protection restored
+- [x] `railway variables --set "ACCEPT_SCHEMA_DRIFT=true"`
+- [x] `railway up` (shipped the fix from the working dir) — boot accepted drift + rebaselined (19:51 UTC log: `DRIFT ACCEPTED (ACCEPT_SCHEMA_DRIFT) — rebaselining`)
+- [x] Confirmed 200 on `/health/live`
+- [x] `railway variables --set "ACCEPT_SCHEMA_DRIFT=false"`
+- [x] `railway redeploy --yes` — booted clean (19:54 UTC log: migrations → scheduler with NO drift line), drift protection restored
 
 ### Loose ends
 
