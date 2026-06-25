@@ -939,8 +939,12 @@ export class PageTransitionModule extends BaseModule {
     }
     // Leaving project-detail to anywhere → backward.
     if (this.currentPageId === 'project-detail') return 'left';
-    // Entering project-detail from anywhere → forward.
-    if (pageId === 'project-detail') return 'right';
+    // Entering project-detail. From the projects TV it drops DOWN — the TV
+    // scrolls up and out while the detail page pushes up from the bottom
+    // (matches the Enter-key reveal). From anywhere else, default forward.
+    if (pageId === 'project-detail') {
+      return this.currentPageId === 'projects' ? 'down' : 'right';
+    }
     return null;
   }
 
@@ -1149,7 +1153,16 @@ export class PageTransitionModule extends BaseModule {
     // non-natural-scroll trackpad users get one inverted axis; touch
     // and natural-scroll trackpad users — the majority — get intuitive
     // gestures across every input device.
-    if (absY >= absX) {
+    if (event.shiftKey) {
+      // Shift + wheel = horizontal carousel navigation. A plain mouse has
+      // only a vertical wheel, so this is the mouse-user's equivalent of a
+      // trackpad horizontal swipe — holding Shift navigates the carousel.
+      // Browsers deliver shift-wheel as deltaX (most) or keep it on deltaY
+      // (some), so navigate off whichever axis carries the gesture, using
+      // the same natural-scroll sign convention as the horizontal branch.
+      const primary = absX >= absY ? dx : dy;
+      direction = primary < 0 ? 'right' : 'left';
+    } else if (absY >= absX) {
       // Vertical wheel — page-navigation is HORIZONTAL-only, so vertical
       // scroll stays "normal" (native page scroll) on every page EXCEPT:
       //
