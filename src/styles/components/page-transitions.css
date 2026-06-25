@@ -327,11 +327,6 @@ section.business-card-section.page-hidden .intro-nav {
     pointer-events: auto;
   }
 
-  /* Hero section with text animation - handled separately, not a virtual page */
-  /* It's tied to the intro and controlled by TextAnimationModule */
-  main[data-virtual-pages] > .hero-section {
-    display: none;
-  }
 
   /* Page content wrapper for animations */
   section[data-page] > * {

@@ -190,18 +190,6 @@ body {
   }
 }
 
-/* Hero text animations - DISABLED */
-.page-hero-desktop,
-.about-hero-desktop,
-.contact-hero-desktop,
-.projects-hero-desktop,
-.portfolio-hero-desktop {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
 /* Desktop-only section styles */
 @media (--tablet) {
   main section:not(.business-card-section) {

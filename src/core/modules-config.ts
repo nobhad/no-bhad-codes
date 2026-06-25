@@ -126,25 +126,6 @@ export function registerModules(debug: boolean = false): void {
       }
     },
     {
-      name: 'TextAnimationModule',
-      type: 'dom',
-      factory: async () => {
-        // Only load text animation on index/home page
-        const currentPath = window.location.pathname;
-        if (currentPath === '/' || currentPath === '/index.html') {
-          const { TextAnimationModule } = await import('../modules/animation/text-animation');
-          return new TextAnimationModule();
-        }
-        // Return a dummy module for other pages
-        return {
-          init: async () => {},
-          destroy: () => {},
-          isInitialized: true,
-          name: 'TextAnimationModule'
-        };
-      }
-    },
-    {
       name: 'ContactAnimationModule',
       type: 'dom',
       factory: async () => {
@@ -284,7 +265,6 @@ export function getMainSiteModules(): string[] {
     'SectionCardInteractions',
     'NavigationModule',
     'ContactFormModule',
-    'TextAnimationModule',
     'ContactAnimationModule',
     'PageTransitionModule',
     'ProjectsModule'

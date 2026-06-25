@@ -142,9 +142,8 @@ Located in `src/modules/animation/`. These handle all complex main site animatio
 |------|---------|-------------------|
 | `intro-animation.ts` | Coyote paw clutching business card with SVG morphing | `gsap.to()`, `gsap.set()`, `gsap.timeline()`, MorphSVG |
 | `intro-animation-mobile.ts` | Mobile: full coyote-paw morph (MorphSVG), scaled for mobile -- NOT a card flip | `gsap.to()`, `gsap.timeline()`, MorphSVG |
-| `page-transition.ts` | 2D spatial scroll-map navigation (5 tiles in plus layout), slide transitions, project-detail carousel, channel cycling | `gsap.to()`, `gsap.timeline()` |
+| `page-transition.ts` | 2D spatial scroll-map navigation (4-tile carousel: intro/about/projects/contact), slide transitions, project-detail carousel, channel cycling | `gsap.to()`, `gsap.timeline()` |
 | `contact-animation.ts` | Contact entrance: heading / hr / options / submit-button only -- form fields are NOT animated; skipped on small mobile | `gsap.to()`, `gsap.context()` |
-| `text-animation.ts` | Scroll-driven split-text skew animation on the `#hero` "NO BHAD CODES" SVG | `gsap.timeline()`, `ScrollTrigger` |
 | `intro/morph-timeline.ts` | SVG path morphing for intro | `gsap.to()` |
 
 ### GSAP UI Modules

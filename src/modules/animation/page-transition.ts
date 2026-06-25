@@ -45,7 +45,6 @@ interface PageTransitionOptions extends ModuleOptions {
  */
 const MAP_TILES = {
   intro: 'center',
-  hero: 'left',
   about: 'up',
   projects: 'right',
   contact: 'down'
@@ -64,7 +63,6 @@ const CAMERA_POSITIONS: Record<MapTile, { x: number; y: number }> = {
   center: { x: 0, y: 0 },
   up: { x: 0, y: 100 },
   down: { x: 0, y: -100 },
-  left: { x: 100, y: 0 },
   right: { x: -100, y: 0 }
 };
 
@@ -79,7 +77,6 @@ const TILE_CSS_POSITIONS: Record<MapTile, { x: number; y: number }> = {
   center: { x: 0, y: 0 },
   up: { x: 0, y: -100 },
   down: { x: 0, y: 100 },
-  left: { x: -100, y: 0 },
   right: { x: 100, y: 0 }
 };
 
@@ -108,7 +105,6 @@ const NEIGHBORS: Record<string, Partial<Record<Direction, string>>> = {
   intro: { left: 'contact', right: 'about' },
   about: { left: 'intro', right: 'projects' },
   contact: { left: 'projects', right: 'intro' },
-  hero: { right: 'intro' },
   // projects: horizontal exits left/right to about/contact (the new chain);
   // vertical channel-surfs the TV (handled dynamically in
   // tryNavigateDirection). Up past the first channel exits back to intro;
@@ -399,7 +395,7 @@ export class PageTransitionModule extends BaseModule {
   }
 
   /**
-   * Whether a page is part of the scroll-map (intro/hero/about/projects/contact).
+   * Whether a page is part of the scroll-map (intro/about/projects/contact).
    * Off-map pages (project-detail, portal-login, admin-login) use the blur-swap
    * transition.
    */

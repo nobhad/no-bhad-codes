@@ -88,11 +88,6 @@
   left: 0;
 }
 
-.site-map > [data-map-tile="left"] {
-  top: 0;
-  left: -100%;
-}
-
 .site-map > [data-map-tile="right"] {
   top: 0;
   left: 100%;
