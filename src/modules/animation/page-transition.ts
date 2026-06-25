@@ -1150,30 +1150,25 @@ export class PageTransitionModule extends BaseModule {
     // and natural-scroll trackpad users — the majority — get intuitive
     // gestures across every input device.
     if (absY >= absX) {
-      // Vertical wheel handling depends on which page is active:
+      // Vertical wheel — page-navigation is HORIZONTAL-only, so vertical
+      // scroll stays "normal" (native page scroll) on every page EXCEPT:
       //
-      //   - Map tiles (intro/about/projects/contact/hero): NEIGHBORS only
-      //     defines horizontal entries, so vertical wheel is REMAPPED to
-      //     horizontal carousel nav. Every map tile behaves the same —
-      //     INCLUDING projects. Vertical scroll used to channel-surf the
-      //     TV here, but that hijacked page navigation (a vertical flick
-      //     meant to leave the tile cycled a channel instead), so the TV
-      //     channel-surf is now driven by the on-screen CHANNEL ▲▼
-      //     buttons / chevrons / arrow keys / row clicks — not scroll.
-      //       wheel-down (forward) → 'right' (forward in chain)
-      //       wheel-up   (back)    → 'left'  (back in chain)
+      //   - Projects: vertical wheel channel-surfs the CRT TV (handled in
+      //     tryNavigateDirection). down/forward → next channel, up → prev.
       //
-      //   - Project-detail: vertical wheel scrolls the case-study content
-      //     natively until the user hits the boundary, then navigates.
-      const isMapTile = this.isMapPage(this.currentPageId);
-      if (isMapTile) {
-        // Mouse-wheel parity remap. Reads the OPPOSITE of the deltaY sign
-        // so natural-scroll users (the macOS majority) get intuitive
-        // forward/back.
-        direction = dy < 0 ? 'right' : 'left';
+      //   - Project-detail: vertical wheel native-scrolls the tall case
+      //     study until the boundary, then navigates between projects.
+      //
+      //   - All other map tiles (intro/about/contact/hero): vertical does
+      //     NOT navigate — let the browser scroll the tile content natively.
+      if (this.currentPageId === 'projects') {
+        // natural-scroll: dy < 0 is a downward finger swipe → next channel.
+        direction = dy < 0 ? 'down' : 'up';
+      } else if (this.isMapPage(this.currentPageId)) {
+        // Normal vertical scroll — not a navigation gesture.
+        return;
       } else if (dy < 0) {
-        // Project-detail: native-scroll the tall case study down until the
-        // bottom boundary, then navigate.
+        // Project-detail: native-scroll down until the bottom, then navigate.
         const canScrollDown =
           currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >= 1;
         if (canScrollDown) return;
