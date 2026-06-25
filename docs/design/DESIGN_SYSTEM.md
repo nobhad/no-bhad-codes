@@ -1,6 +1,6 @@
 # Design System
 
-**Last Updated:** March 16, 2026
+**Last Updated:** June 25, 2026
 
 This document is the index for the project's design system. Detailed specifications live in specialist documents linked below.
 
@@ -119,7 +119,7 @@ src/
 | Variable | Font | Usage |
 |----------|------|-------|
 | `--font--acme` | Acme | Headers, card titles, uppercase labels |
-| `--font-body` | System fonts | Body text, paragraphs, form inputs |
+| `--font-family-body` | System sans (Arial/Helvetica fallback) | Body text, paragraphs, form inputs |
 | Portal | Inconsolata (monospace) | All portal text |
 
 ### Icon Sizing

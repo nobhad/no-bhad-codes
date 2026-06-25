@@ -1,6 +1,6 @@
 # Animations
 
-**Last Updated:** April 30, 2026
+**Last Updated:** June 25, 2026
 
 Animation standards for the project, separated by portal and main site. For shared design tokens see [CSS_ARCHITECTURE.md](./CSS_ARCHITECTURE.md).
 
@@ -140,8 +140,8 @@ Located in `src/modules/animation/`. These handle all complex main site animatio
 
 | File | Purpose | GSAP Features Used |
 |------|---------|-------------------|
-| `intro-animation.ts` | Coyote paw clutching business card with SVG morphing | `gsap.to()`, `gsap.set()`, `gsap.timeline()` |
-| `intro-animation-mobile.ts` | Mobile: Simple card flip (no paw overlay) | `gsap.to()`, `gsap.timeline()` |
+| `intro-animation.ts` | Coyote paw clutching business card with SVG morphing | `gsap.to()`, `gsap.set()`, `gsap.timeline()`, MorphSVG |
+| `intro-animation-mobile.ts` | Mobile: full coyote-paw morph (MorphSVG), scaled for mobile -- NOT a card flip | `gsap.to()`, `gsap.timeline()`, MorphSVG |
 | `about-hero.ts` | Full viewport "NO BHAD CODES" text animation | Wheel-driven, SVG transforms |
 | `page-hero.ts` | Unified hero text for virtual pages | Wheel-driven SVG |
 | `base-hero-animation.ts` | Shared base class for hero animations | `gsap.timeline()`, `gsap.fromTo()` |
@@ -197,7 +197,7 @@ These were migrated from CSS @keyframes to GSAP on March 16, 2026:
 
 | Animation | File | Purpose |
 |-----------|------|---------|
-| `intro-fallback-show` | `base/layout.css:313` | Fallback intro display |
+| `intro-fallback-show` | `base/layout.css:321` | Fallback intro display |
 | `skeleton-loading` | `states/interactive.css:66` | Skeleton shimmer (utility) |
 
 ---

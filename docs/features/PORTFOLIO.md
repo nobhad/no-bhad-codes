@@ -49,7 +49,7 @@ Copy this template and fill in all fields:
   "isDocumented": true,
   "titleCard": {
     "composed": "/images/tv/title-cards/project-slug.webp",
-    "bg": "/images/tv/title-cards/project-slug-bg.webp",
+    "bg": "/images/tv/title-cards/project-slug_bg.webp",
     "color": "#ffffff",
     "primary": "Primary text",
     "primaryPt": 72,
@@ -108,8 +108,8 @@ Copy this template and fill in all fields:
 
 ```json
 "titleCard": {
-  "composed": "/images/tv/title-cards/<slug>.webp",
-  "bg":       "/images/tv/title-cards/<slug>-bg.webp",
+  "composed": "/images/tv/title-cards/<name>.webp",
+  "bg":       "/images/tv/title-cards/<name>_bg.webp",
   "color":    "#ffffff",
   "primary":  "Primary text",
   "primaryPt": 72,
@@ -197,7 +197,7 @@ curated TV copy still render.
 - Size: 1426×1093 (full chassis canvas, transparent surroundings)
 - Format: WebP
 - Location: `/public/images/tv/title-cards/`
-- Naming: `{slug}.webp` (composed) and `{slug}-bg.webp` (bg-only)
+- Naming: `<name>.webp` (composed) and `<name>_bg.webp` (bg-only, underscore). The `<name>` comes from the JSON `composed`/`bg` fields and doesn't always equal the slug (e.g. slug `nobhad-codes` → `no-bhad-codes`)
 
 #### Screenshots
 
@@ -295,18 +295,18 @@ handle their own clicks separately.
 The buttons are sized + positioned in **percentages of `.crt-tv__wrapper`**
 so they scale with the TV at every breakpoint. Coords measured by
 per-row dark-pixel bounding box on the right-side button column of
-`tv/chassis.webp` (1500×1201, 1.249 aspect) — any-dark-pixel-per-row,
+`tv/chassis.webp` (2850×2186, 1.304 aspect) — any-dark-pixel-per-row,
 NOT a coverage threshold (a coverage threshold drops the rounded tips
 of each capsule because at those rows the dark coverage falls below
 threshold).
 
 | Button | top | left | width | height |
 |---|---|---|---|---|
-| POWER | 27.64% | 85.27% | 10.20% | 1.83% |
-| CHANNEL ▼ | 31.47% | 85.27% | 5.10% | 1.75% |
-| CHANNEL ▲ | 31.47% | 90.37% | 5.10% | 1.75% |
-| VOLUME ▼ | 35.22% | 85.27% | 5.10% | 1.75% |
-| VOLUME ▲ | 35.22% | 90.37% | 5.10% | 1.75% |
+| POWER | 25.39% | 87.12% | 10.74% | 2.06% |
+| CHANNEL ▼ | 29.51% | 87.12% | 5.37% | 2.06% |
+| CHANNEL ▲ | 29.51% | 92.49% | 5.37% | 2.06% |
+| VOLUME ▼ | 33.76% | 87.12% | 5.37% | 2.01% |
+| VOLUME ▲ | 33.76% | 92.49% | 5.37% | 2.01% |
 
 CHANNEL and VOLUME's painted capsules are single pills; the hitbox is
 split into LEFT (▼) and RIGHT (▲) halves with no visible divider —
@@ -637,17 +637,19 @@ At `≤479px` (small mobile):
 
 - Chassis CHANNEL/VOLUME hitboxes get `pointer-events: none` because
   they're too cramped to hit with a finger.
-- `.projects-tv-channel-controls` (rendered below the TV in
-  `injectTvFrame` via `createElement`) becomes `display: flex`,
-  showing two large `◀ CH` / `CH ▶` buttons that route to the same
-  `cycleTvChannel`.
+- `.projects-tv-channel-controls` (rendered as a SIBLING of the TV wrap
+  via `createElement`) becomes `display: flex`, showing two large
+  up/down channel buttons — `buildSquareChevronIcon('up'|'down')` with a
+  stacked "CH" label, aria-labelled "Previous/Next channel" — that route
+  to the same `cycleTvChannel`. (Sibling, not child, so the TV wrap's
+  centering transform doesn't drag them off-screen.)
 - POWER stays on the chassis — it's the only on-frame control that
   still matters at that size.
-- `.projects-tv-wrap` becomes `flex-direction: column` so the
-  external controls land below the TV.
-- The channel-row ticker is skipped entirely — GSAP transform tweens
-  on every frame are a major source of jank on phones; the channel
-  list still renders, just statically.
+- `.projects-tv-wrap` is centered; the external controls are pinned to
+  the tile bottom.
+- The channel-row ticker **still runs on phones** — `startChannelTicker`
+  runs on every breakpoint, and a `ResizeObserver` on the guide viewport
+  restarts it once the TV lays out from 0 height on the projects tile.
 
 At `≤767px` (tablet/mobile general):
 
@@ -696,13 +698,13 @@ where `{id}` comes from the `resources[0].files[0]` array in
 | `src/styles/pages/projects.css` | All TV CSS — wrapper, screen, frame, buttons, hitboxes, focus rings, mute indicator, off-state, mobile breakpoints |
 | `src/styles/pages/projects-detail.css` | Project detail page styles |
 | `index.html` | Project detail HTML structure |
-| `public/images/tv/chassis.webp` | TV chassis bezel art (1500×1201) — the "real-TV" version with rounded screen aperture, integrated speaker grille, detailed bezel |
+| `public/images/tv/chassis.webp` | TV chassis bezel art (2850×2186) — the "real-TV" version with rounded screen aperture, integrated speaker grille, detailed bezel |
 | `public/images/tv/chassis-alt.webp` | Alternate chassis art (1426×1093, flatter / less detail) — kept around but not currently rendered |
 | `public/images/tv/chassis-buttons-ref.webp` | Alpha-only buttons layer of `chassis-alt.webp` for re-measuring hitboxes if we ever swap to it |
 | `public/images/tv/base-on.webp` | Lit screen base image |
 | `public/images/tv/base-off.webp` | Dark off-state base image |
-| `public/images/tv/title-cards/<slug>.webp` | Composed title card per channel |
-| `public/images/tv/title-cards/<slug>-bg.webp` | Bg-only title card per channel |
+| `public/images/tv/title-cards/<name>.webp` | Composed title card per channel — exact filename comes from the JSON `titleCard.composed` field, which doesn't always match the slug (e.g. slug `nobhad-codes` → `no-bhad-codes.webp`, `hedgewitch-horticulture` → `hedgewitch.webp`) |
+| `public/images/tv/title-cards/<name>_bg.webp` | Bg-only title card per channel (underscore: `no-bhad-codes_bg.webp`, `the-backend_bg.webp`, `hedgewitch_bg.webp`); path from the JSON `titleCard.bg` field |
 | `public/images/tv/led/NN.webp` | LED digit overlay for channel NN |
 | `public/audio/channel-click.mp3` | Mechanical click sample |
 | `public/audio/tv-static.mp3` | CRT noise sample |

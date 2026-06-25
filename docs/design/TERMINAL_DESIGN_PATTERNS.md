@@ -424,12 +424,21 @@ const rootPath = 'users/guest/nobhad';
 src/features/client/
   terminal-intake.ts        # Main module class
   terminal-intake-ui.ts     # UI rendering, animations
-  terminal-intake-data.ts   # Questions, options
+  terminal-intake-data.ts   # Questions, options, per-field validation()
   terminal-intake-types.ts  # TypeScript types
+  terminal-intake-commands.ts  # CLI slash commands (/help, /clear, /back)
+  intake/                   # Extracted flow logic (terminal-intake.ts imports these)
+    validation.ts           # validateAnswer (invokes per-question validation)
+    event-binding.ts        # keyboard: ArrowUp/Down history, Escape fullscreen
+    api-handler.ts          # submission
+    step-config.ts step-renderers.ts prompt-handlers.ts
+    terminal-effects.ts progress-store.ts index.ts
 
 src/styles/pages/
   terminal-intake.css       # All terminal styles
 ```
+
+> Status note (2026-06): several items the Phase 1/2/3 sections below list as "not built" are now implemented — ArrowUp/Down command history and Escape-to-fullscreen (`intake/event-binding.ts`), and the `/help` `/clear` `/back` slash commands (`terminal-intake-commands.ts`). Treat the gap analysis and keyboard-shortcut "Phase" labels as historical.
 
 ---
 
@@ -445,7 +454,7 @@ src/styles/pages/
 // In terminal-intake.ts bindEvents()
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
-    const modal = document.getElementById('intakeModal');
+    const modal = document.getElementById('intake-modal');
     modal?.classList.toggle('fullscreen');
   }
 });
