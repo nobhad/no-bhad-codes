@@ -679,6 +679,9 @@ export class ProjectsModule extends BaseModule {
     // Wire the physical TV button overlays + the external mobile controls.
     this.wireTvButtons();
     this.wireMobileChannelButtons();
+    // Clicking the screen while a project channel is playing jumps straight
+    // to that project's detail page.
+    this.wireTuneInScreenClick();
     // Reflect the current TV-SFX volume in the UI: mute indicator on
     // the screen, and pointer-events disabled on VOLUME ▼ at vol=0 / on
     // VOLUME ▲ at vol=max so the user can't keep clicking past the
@@ -801,6 +804,29 @@ export class ProjectsModule extends BaseModule {
       const img = document.createElement('img');
       img.src = `/images/tv/led/${padded}.webp`;
     }
+  }
+
+  /**
+   * Clicking the TV screen while a project channel is tuned in jumps
+   * straight to that project's detail page (same tab) — the headline
+   * affordance the outro panel already advertises. The explicit "Live: url"
+   * link keeps its own behavior (opens the live site in a new tab); every
+   * other spot on the playing screen routes to the case study. No-op on the
+   * channel-guide screen (channel 01), where row clicks tune a channel in.
+   */
+  private wireTuneInScreenClick(): void {
+    const screen = document.querySelector('.crt-tv__screen');
+    if (!screen) return;
+    screen.addEventListener('click', (event) => {
+      // Only when a project channel is actually playing.
+      const slug = this.activeTuneInSlug;
+      if (!slug) return;
+      const target = event.target as HTMLElement | null;
+      // Let the explicit live-site link do its own thing.
+      if (target?.closest('.crt-tv__panel-link')) return;
+      event.preventDefault();
+      window.location.hash = `#/projects/${slug}`;
+    });
   }
 
   /**
