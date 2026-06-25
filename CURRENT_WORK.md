@@ -309,6 +309,12 @@ The projects page renders a vintage TV with a channel-guide screen. Channel 01 i
 - **Scroll/nav model finalised** (`0366358b`, `13b295e9`, `21c53175`) — vertical OR horizontal scroll navigates the carousel on intro/about/contact; projects vertical = channel-surf; `Shift+wheel` = mouse-wheel parity (reads whichever axis the browser populates); project-detail vertical scrolls then navigates at the edge, left/right cycles projects. (Went back and forth on this — current state is "any scroll navigates except projects = channel".)
 - **projects → project-detail slides DOWN** (`13b295e9`) — TV scrolls up and out, detail pushes up from the bottom (was sliding in from the right). Detail↔detail left/right carousel unchanged.
 - **Click a playing TV screen → project detail** (`16476f9b`) — same tab, instead of the live link opening a new tab. The explicit "Live: url" link still opens the live site.
+- **Main-site doc sweep** (`d19ec5f4`, `f2cc340c`) — audited 12 main-site docs vs code (4 parallel agents); corrected mobile-intro-is-a-morph-not-a-flip, the localStorage replay gate, typography clamps, nav z-index, TV chassis dims + hitbox table, mobile ticker, projects→detail down, contact placeholders/CSRF, `@custom-media` location, `--font-family-body`, EMBED service method names.
+- **Deleted dead hero modules** — removed `about-hero.ts`, `page-hero.ts`, `base-hero-animation.ts`, and `avatar-intro.ts` (the module): none were instantiated/registered/imported by live code (only each other). Deep dive found the `#hero` section + its `.text-animation-svg` ARE still used by the live `text-animation.ts`, so `#hero` and the nav/CSS entries were left intact — only the dead JS modules were removed. tsc/lint/build clean, nav verified.
+
+### Flagged (not acted on)
+
+- `text-animation.ts` (registered, live) animates `.hero-section` (`#hero`), but `#hero` is `page-hidden` and not reachable in the carousel — so the effect may be dormant. Left as-is; worth deciding whether the hero tile should be reachable or the module retired.
 
 ### Awaiting on-device confirmation (real mouse)
 

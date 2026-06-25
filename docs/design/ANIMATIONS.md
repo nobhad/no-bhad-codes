@@ -142,13 +142,9 @@ Located in `src/modules/animation/`. These handle all complex main site animatio
 |------|---------|-------------------|
 | `intro-animation.ts` | Coyote paw clutching business card with SVG morphing | `gsap.to()`, `gsap.set()`, `gsap.timeline()`, MorphSVG |
 | `intro-animation-mobile.ts` | Mobile: full coyote-paw morph (MorphSVG), scaled for mobile -- NOT a card flip | `gsap.to()`, `gsap.timeline()`, MorphSVG |
-| `about-hero.ts` ⚠️ LEGACY/UNWIRED | Old full-viewport "NO BHAD CODES" hero-text animation — never instantiated/registered; `#hero` tile is an orphan. Superseded by `text-animation.ts`. Safe to delete. | — |
-| `page-hero.ts` ⚠️ LEGACY/UNWIRED | Old hero text for virtual pages — never instantiated. Same status. | — |
-| `base-hero-animation.ts` ⚠️ LEGACY/UNWIRED | Base class for the two dead hero modules; only imported by them. | — |
 | `page-transition.ts` | 2D spatial scroll-map navigation (5 tiles in plus layout), slide transitions, project-detail carousel, channel cycling | `gsap.to()`, `gsap.timeline()` |
 | `contact-animation.ts` | Contact entrance: heading / hr / options / submit-button only -- form fields are NOT animated; skipped on small mobile | `gsap.to()`, `gsap.context()` |
-| `avatar-intro.ts` | Avatar SVG fade-in for terminal intake | `gsap.to()`, `gsap.fromTo()` |
-| `text-animation.ts` | Scroll-driven split-text skew animation | `gsap.timeline()`, `ScrollTrigger` |
+| `text-animation.ts` | Scroll-driven split-text skew animation on the `#hero` "NO BHAD CODES" SVG | `gsap.timeline()`, `ScrollTrigger` |
 | `intro/morph-timeline.ts` | SVG path morphing for intro | `gsap.to()` |
 
 ### GSAP UI Modules
