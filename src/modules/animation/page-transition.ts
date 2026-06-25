@@ -1163,23 +1163,23 @@ export class PageTransitionModule extends BaseModule {
       const primary = absX >= absY ? dx : dy;
       direction = primary < 0 ? 'right' : 'left';
     } else if (absY >= absX) {
-      // Vertical wheel — page-navigation is HORIZONTAL-only, so vertical
-      // scroll stays "normal" (native page scroll) on every page EXCEPT:
+      // Vertical wheel — ANY scroll direction navigates the carousel
+      // (vertical or horizontal), so the trackpad and a plain mouse wheel
+      // both move between pages. Two exceptions:
       //
       //   - Projects: vertical wheel channel-surfs the CRT TV (handled in
       //     tryNavigateDirection). down/forward → next channel, up → prev.
+      //     (Leave projects with a horizontal swipe or Shift+wheel.)
       //
       //   - Project-detail: vertical wheel native-scrolls the tall case
       //     study until the boundary, then navigates between projects.
-      //
-      //   - All other map tiles (intro/about/contact/hero): vertical does
-      //     NOT navigate — let the browser scroll the tile content natively.
       if (this.currentPageId === 'projects') {
         // natural-scroll: dy < 0 is a downward finger swipe → next channel.
         direction = dy < 0 ? 'down' : 'up';
       } else if (this.isMapPage(this.currentPageId)) {
-        // Normal vertical scroll — not a navigation gesture.
-        return;
+        // Other map tiles: remap vertical wheel → horizontal carousel nav so
+        // up/down scroll moves between pages too. dy < 0 (down) → forward.
+        direction = dy < 0 ? 'right' : 'left';
       } else if (dy < 0) {
         // Project-detail: native-scroll down until the bottom, then navigate.
         const canScrollDown =
