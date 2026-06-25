@@ -15,6 +15,14 @@ import { getFormspreeUrl } from '../config/api';
 import { getContactEmail } from '../config/branding';
 import { APP_CONSTANTS } from '../config/constants';
 import { formatErrorMessage } from '../utils/error-utils';
+import { getCsrfToken, CSRF_HEADER_NAME } from '../utils/api-client';
+
+/**
+ * Safe GET used to prime the csrf-token cookie on a cold visit (the server
+ * sets the cookie on any request). The contact form is typically the first
+ * /api call of a public session, so without this the first POST 403s.
+ */
+const CSRF_PRIME_ENDPOINT = '/api/health';
 
 export interface ContactFormData {
   name: string;
@@ -289,10 +297,18 @@ export class ContactService extends BaseService {
       throw new Error('Custom endpoint not configured');
     }
 
+    // The server's CSRF middleware rejects the POST with 403
+    // CSRF_TOKEN_INVALID unless an x-csrf-token header matches the
+    // JS-readable csrf-token cookie it sets. Make sure that cookie exists,
+    // then echo it back in the header; credentials:'include' sends the
+    // cookie alongside (and stores any rotated one).
+    const csrfToken = await this.ensureCsrfToken();
     const response = await fetch(this.config.endpoint, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
+        ...(csrfToken && { [CSRF_HEADER_NAME]: csrfToken }),
         ...(this.config.apiKey && { Authorization: `Bearer ${this.config.apiKey}` })
       },
       body: JSON.stringify(formData)
@@ -308,6 +324,25 @@ export class ContactService extends BaseService {
     }
     const errorText = await response.text();
     throw new Error(`Custom endpoint submission failed: ${response.status} - ${errorText}`);
+  }
+
+  /**
+   * Ensure the JS-readable csrf-token cookie exists, then return it. The
+   * server sets the cookie on any request, but the public contact form is
+   * usually the first /api call of the session — so on a cold visit it isn't
+   * there yet and the POST would 403 ("Unable to send message"). Prime it
+   * with a safe GET, then read it via the shared api-client reader. Returns
+   * null only if priming fails (offline) — the POST then surfaces the error.
+   */
+  private async ensureCsrfToken(): Promise<string | null> {
+    const existing = getCsrfToken();
+    if (existing) return existing;
+    try {
+      await fetch(CSRF_PRIME_ENDPOINT, { method: 'GET', credentials: 'include' });
+    } catch {
+      // Network error while priming — let the POST surface the failure.
+    }
+    return getCsrfToken();
   }
 
   /**
