@@ -61,10 +61,22 @@ the inline-import modules were never emitted as assets. Regression from
   in prod. Registered as `app.locals` and used by every portal/auth EJS entry
   script, inline import, cssBundle, and initModule.
 
+### Second bug (same code path): `process is not defined`
+
+Once login worked, the React portal failed to mount with
+`ReferenceError: process is not defined` at `isSoloMode` in
+`server/config/unified-navigation.ts` (imported by the browser portal store).
+It read `process.env.PORTAL_MODE` directly; `process` doesn't exist in the
+browser and Vite only auto-replaces `process.env.NODE_ENV`, not custom vars.
+Fixed (`87c00ccf`) by guarding with `typeof process !== 'undefined'` and
+defaulting to solo. Swept the rest of the client→server import graph — no other
+throwing `process.env.*` remain.
+
 ### Deploy
 
 Vercel (serves assets) and Railway (server, reads `dist/.vite/manifest.json`)
 must build the **same commit** so hashes match. Push, then redeploy both.
+Both prod-blocking fixes (`8c734c32` assets, `87c00ccf` process) ship together.
 
 ---
 
