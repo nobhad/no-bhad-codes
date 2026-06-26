@@ -593,27 +593,38 @@ async function startServer() {
       });
     }
 
-    // Initialize email service
-    const emailConfig = {
-      host: process.env.SMTP_HOST || 'localhost',
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER || '',
-        pass: process.env.SMTP_PASS || ''
-      },
-      from: process.env.SMTP_FROM || BUSINESS_INFO.email,
-      replyTo: process.env.SMTP_REPLY_TO
-    };
+    // Initialize email service — only when explicitly enabled AND an SMTP
+    // host is configured (mirrors the REDIS_ENABLED gate below). Without
+    // this guard, init() builds a transporter against the localhost:587
+    // default, and every sendEmail() then blocks ~10s on the connection
+    // timeout before failing — which is what made the contact form hang.
+    // When email is off, sendEmail() short-circuits to a fast no-op.
+    if (process.env.EMAIL_ENABLED === 'true' && process.env.SMTP_HOST) {
+      const emailConfig = {
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT || '587'),
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+          user: process.env.SMTP_USER || '',
+          pass: process.env.SMTP_PASS || ''
+        },
+        from: process.env.SMTP_FROM || BUSINESS_INFO.email,
+        replyTo: process.env.SMTP_REPLY_TO
+      };
 
-    try {
-      await emailService.init(emailConfig);
-      logger.info('Email service initialized');
-    } catch (emailError) {
-      logger.warn('Email service initialization failed:', {
-        error: emailError instanceof Error ? emailError : undefined
-      });
-      logger.info('Server will continue without email functionality');
+      try {
+        await emailService.init(emailConfig);
+        logger.info('Email service initialized');
+      } catch (emailError) {
+        logger.warn('Email service initialization failed:', {
+          error: emailError instanceof Error ? emailError : undefined
+        });
+        logger.info('Server will continue without email functionality');
+      }
+    } else {
+      logger.info(
+        'Email service disabled (set EMAIL_ENABLED=true and SMTP_HOST to enable) — outgoing emails are logged, not sent'
+      );
     }
 
     // Initialize cache service (only if Redis is enabled)
