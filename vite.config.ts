@@ -16,10 +16,38 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: false, // Disable source maps in production for code protection
 
-    // Build all HTML entry points
+    // Emit `.vite/manifest.json` so the Express server can resolve the
+    // server-rendered EJS portal/auth entry scripts to their hashed build
+    // output in production (see server/utils/vite-assets.ts).
+    manifest: true,
+
+    // Build all entry points. `index.html` is the main site (MPA HTML entry).
+    // The remaining entries are the JS/TS modules that the server-rendered EJS
+    // portal and auth shells load — without them the build would not emit a
+    // hashed asset for `/src/admin.ts` etc., and production would 404.
     rollupOptions: {
+      // Keep every entry chunk's exports under their original names. Several
+      // entries (session-expiry-handler, set-copyright-year, branding, etc.) are
+      // imported by name only from server-rendered inline `<script type="module">`
+      // blocks, which Rollup can't see — without this it tree-shakes or renames
+      // those exports and the production `import { x } from '/assets/...'` breaks.
+      preserveEntrySignatures: 'strict',
       input: {
-        main: resolve(__dirname, 'index.html')
+        main: resolve(__dirname, 'index.html'),
+        // Portal / dashboard + login bootstrap entries
+        admin: resolve(__dirname, 'src/admin.ts'),
+        portal: resolve(__dirname, 'src/portal.ts'),
+        'main-site': resolve(__dirname, 'src/main-site.ts'),
+        // Inline-module imports used across portal/auth EJS templates
+        'session-expiry-handler': resolve(__dirname, 'src/features/auth/session-expiry-handler.ts'),
+        'set-copyright-year': resolve(__dirname, 'src/utils/set-copyright-year.ts'),
+        'mount-auth-gate': resolve(__dirname, 'src/react/features/auth/mount-auth-gate.tsx'),
+        'terminal-intake': resolve(__dirname, 'src/features/client/terminal-intake.ts'),
+        branding: resolve(__dirname, 'src/config/branding.ts'),
+        // Auth-page init modules (loaded via initModule in auth.ejs)
+        'set-password-handler': resolve(__dirname, 'src/features/auth/set-password-handler.ts'),
+        'forgot-password-handler': resolve(__dirname, 'src/features/auth/forgot-password-handler.ts'),
+        'reset-password-handler': resolve(__dirname, 'src/features/auth/reset-password-handler.ts')
       },
       // Silence "use client" RSC-directive warnings from Radix/react-router.
       // These directives are no-ops in a Vite SPA but Rollup warns on every build.

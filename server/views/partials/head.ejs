@@ -89,7 +89,7 @@
 </script>
 <!-- Module: session expiry handling (runs on DOMContentLoaded) -->
 <script type="module">
-  import { handleSessionExpiry } from '/src/features/auth/session-expiry-handler.ts';
+  import { handleSessionExpiry } from '<%- viteAsset('/src/features/auth/session-expiry-handler.ts') %>';
   document.addEventListener('DOMContentLoaded', function() { handleSessionExpiry(); });
 </script>
 <style>

@@ -8,8 +8,9 @@
   data-auth-description="<%= config.authDescription %>"
 ></div>
 
+<%- viteEntryCss('/src/react/features/auth/mount-auth-gate.tsx') %>
 <script type="module">
-  import { autoMountAuthGate } from '/src/react/features/auth/mount-auth-gate.tsx';
+  import { autoMountAuthGate } from '<%- viteAsset('/src/react/features/auth/mount-auth-gate.tsx') %>';
 
   document.addEventListener('DOMContentLoaded', function () {
     autoMountAuthGate();

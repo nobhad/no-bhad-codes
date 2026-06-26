@@ -5,6 +5,6 @@
   </div>
 </footer>
 <script type="module">
-  import { setCopyrightYear } from '/src/utils/set-copyright-year.ts';
+  import { setCopyrightYear } from '<%- viteAsset('/src/utils/set-copyright-year.ts') %>';
   setCopyrightYear('<%= portalType %>-copyright-year');
 </script>
