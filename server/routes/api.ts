@@ -154,6 +154,16 @@ router.post(
         await logger.error(`Failed to save contact form to database: ${dbError}`);
       }
 
+      // Acknowledge the submission immediately. The record is already
+      // persisted above, and email delivery must NOT gate the HTTP response:
+      // an unreachable SMTP host costs ~10s per message (connectionTimeout),
+      // and the admin notification + auto-reply below were awaited in series —
+      // hanging the endpoint ~20s, so the browser (and Vercel proxy) gave up
+      // before it returned and the form looked broken. Those sends now run
+      // after the response, in the background; their errors are already
+      // caught and logged, and the submission is safe in the DB regardless.
+      sendSuccess(res, { messageId }, 'Message received, thanks!');
+
       const adminEmail = process.env.ADMIN_EMAIL;
       if (!adminEmail) {
         await logger.warn('ADMIN_EMAIL not configured - skipping contact form email notification');
@@ -256,11 +266,13 @@ Received: ${new Date().toISOString()}
       await logger.info(
         `Contact form processed successfully - messageId: ${messageId}, from: ${email}`
       );
-
-      sendSuccess(res, { messageId }, 'Message received, thanks!');
     } catch (_error) {
+      // The response may already be sent (we acknowledge before emailing), so
+      // only emit an error response if headers haven't gone out yet.
       await logger.error('Contact form processing error');
-      errorResponse(res, 'Failed to process contact form', 500, ErrorCodes.CONTACT_PROCESSING_ERROR);
+      if (!res.headersSent) {
+        errorResponse(res, 'Failed to process contact form', 500, ErrorCodes.CONTACT_PROCESSING_ERROR);
+      }
     }
   }
 );
