@@ -3,10 +3,11 @@
     <!-- Terminal UI will be rendered by JavaScript -->
   </section>
 </main>
+<%- viteEntryCss('/src/features/client/terminal-intake.ts') %>
 <script type="module">
-  import { TerminalIntakeModule } from '/src/features/client/terminal-intake.ts';
-  import { BRANDING } from '/src/config/branding.ts';
-  import { setCopyrightYear } from '/src/utils/set-copyright-year.ts';
+  import { TerminalIntakeModule } from '<%- viteAsset('/src/features/client/terminal-intake.ts') %>';
+  import { BRANDING } from '<%- viteAsset('/src/config/branding.ts') %>';
+  import { setCopyrightYear } from '<%- viteAsset('/src/utils/set-copyright-year.ts') %>';
 
   setCopyrightYear('auth-copyright-year');
 

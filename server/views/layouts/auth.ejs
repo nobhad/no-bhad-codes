@@ -3,8 +3,10 @@
 <head>
   <%- include('../partials/head', { config, portalType: 'login' }) %>
   <% if (typeof cssBundle !== 'undefined' && cssBundle) { %>
-    <link rel="stylesheet" href="<%= cssBundle %>" />
+    <link rel="stylesheet" href="<%= viteAsset(cssBundle) %>" />
   <% } %>
+  <!-- Entry CSS (Vite injects this at runtime in dev; linked explicitly in prod) -->
+  <%- viteEntryCss(entryScript) %>
 </head>
 <body data-page="<%= bodyPage %>" data-view="<%= bodyView %>">
   <!-- Site Header -->
@@ -25,13 +27,14 @@
   <% } %>
 
   <!-- Entry script -->
-  <script type="module" src="<%= entryScript %>"></script>
+  <script type="module" src="<%= viteAsset(entryScript) %>"></script>
 
   <!-- Page init script -->
   <% if (typeof initModule !== 'undefined' && initModule) { %>
+    <%- viteEntryCss(initModule) %>
     <script type="module">
-      import { setCopyrightYear } from '/src/utils/set-copyright-year.ts';
-      import { <%- initFunction %> } from '<%- initModule %>';
+      import { setCopyrightYear } from '<%- viteAsset('/src/utils/set-copyright-year.ts') %>';
+      import { <%- initFunction %> } from '<%- viteAsset(initModule) %>';
       setCopyrightYear('auth-copyright-year');
       document.addEventListener('DOMContentLoaded', () => <%- initFunction %>());
     </script>

@@ -18,6 +18,7 @@ import {
 
 import express from 'express';
 import { i18nMiddleware } from './middleware/i18n-middleware.js';
+import { viteAsset, viteEntryCss } from './utils/vite-assets.js';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
@@ -119,6 +120,12 @@ const PORT = process.env.PORT || 4001;
 // Configure EJS view engine for server-side rendered portal shells
 app.set('view engine', 'ejs');
 app.set('views', resolve(__dirname, 'views'));
+
+// Expose Vite asset resolution to all EJS templates. Resolves server-rendered
+// entry scripts (`/src/admin.ts` etc.) to their hashed build output in
+// production, and to the raw source path in development.
+app.locals.viteAsset = viteAsset;
+app.locals.viteEntryCss = viteEntryCss;
 
 // Initialize Sentry for error tracking
 errorTracker.init({
