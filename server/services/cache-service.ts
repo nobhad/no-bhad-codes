@@ -39,6 +39,14 @@ export interface CacheStats {
   keyCount?: number;
 }
 
+// Cap Redis reconnection attempts. When Redis is enabled but unreachable
+// (e.g. REDIS_ENABLED=true with no Redis service provisioned), ioredis would
+// otherwise retry forever — logging ECONNREFUSED on an endless ~2s loop. After
+// this many failed attempts the client gives up and the app runs without cache.
+const REDIS_MAX_RECONNECT_ATTEMPTS = 5;
+const REDIS_RECONNECT_BASE_DELAY_MS = 200;
+const REDIS_RECONNECT_MAX_DELAY_MS = 2000;
+
 export class CacheService {
   private client: Redis | null = null;
   private isConnected = false;
@@ -59,7 +67,11 @@ export class CacheService {
     try {
       this.config = config;
 
-      // Create Redis client with configuration
+      // Create Redis client with configuration. retryStrategy caps
+      // reconnection so an unreachable Redis fails fast instead of looping
+      // ECONNREFUSED forever; enableOfflineQueue:false makes commands reject
+      // immediately (rather than queue) while disconnected, so callers fall
+      // through to the no-cache path without hanging.
       this.client = new Redis({
         host: config.host,
         port: config.port,
@@ -67,7 +79,12 @@ export class CacheService {
         db: config.db || 0,
         keyPrefix: config.keyPrefix || 'nbc:',
         maxRetriesPerRequest: config.maxRetriesPerRequest || 3,
-        lazyConnect: config.lazyConnect || true,
+        lazyConnect: true,
+        enableOfflineQueue: false,
+        retryStrategy: (times) =>
+          times > REDIS_MAX_RECONNECT_ATTEMPTS
+            ? null
+            : Math.min(times * REDIS_RECONNECT_BASE_DELAY_MS, REDIS_RECONNECT_MAX_DELAY_MS),
         reconnectOnError: (err) => {
           const targetError = 'READONLY';
           return err.message.includes(targetError);
@@ -93,7 +110,8 @@ export class CacheService {
 
         errorTracker.captureException(error, {
           tags: { component: 'redis-cache' },
-          extra: { config: this.config }
+          // Report host/port only — never the password.
+          extra: { host: this.config?.host, port: this.config?.port }
         });
       });
 
@@ -111,6 +129,17 @@ export class CacheService {
       logger.error('[Cache] Failed to initialize cache service:', {
         error: error instanceof Error ? error : undefined
       });
+      // Tear the client down so it doesn't keep reconnecting in the background
+      // (the source of the endless ECONNREFUSED log spam). With the client
+      // nulled, get/set short-circuit to the no-cache path.
+      try {
+        this.client?.disconnect();
+      } catch {
+        /* already down — ignore */
+      }
+      this.client = null;
+      this.isConnected = false;
+      this.stats.connected = false;
       throw new Error(`Cache service initialization failed: ${error}`);
     }
   }
