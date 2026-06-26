@@ -608,7 +608,10 @@ async function startServer() {
           user: process.env.SMTP_USER || '',
           pass: process.env.SMTP_PASS || ''
         },
-        from: process.env.SMTP_FROM || BUSINESS_INFO.email,
+        // FROM_EMAIL is the canonical name (schema + .env.example + the
+        // EMAIL_ENABLED validation in environment.ts); SMTP_FROM is kept as a
+        // legacy fallback so existing deploys don't break.
+        from: process.env.FROM_EMAIL || process.env.SMTP_FROM || BUSINESS_INFO.email,
         replyTo: process.env.SMTP_REPLY_TO
       };
 

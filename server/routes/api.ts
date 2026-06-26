@@ -164,7 +164,10 @@ router.post(
       // caught and logged, and the submission is safe in the DB regardless.
       sendSuccess(res, { messageId }, 'Message received, thanks!');
 
-      const adminEmail = process.env.ADMIN_EMAIL;
+      // ADMIN_NOTIFICATION_EMAIL is the dedicated notification address
+      // (schema + .env.example); fall back to the admin login email for
+      // backward compatibility with deploys that only set ADMIN_EMAIL.
+      const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.ADMIN_EMAIL;
       if (!adminEmail) {
         await logger.warn('ADMIN_EMAIL not configured - skipping contact form email notification');
       } else {
