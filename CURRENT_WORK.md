@@ -29,6 +29,45 @@
 
 ---
 
+## Production Portal — `/src/*.ts` 404s (dashboard JS never loaded)
+
+**Status:** FIXED in code (`8c734c32`) — needs deploy to Vercel + Railway from this commit
+**Priority:** Critical
+
+### What happened
+
+After login, `www.nobhad.codes/dashboard` loaded the EJS shell but the page
+"didn't look right" and the console showed `GET /src/admin.ts 404` and
+`GET /src/features/auth/session-expiry-handler.ts 404`. The portal React app
+never mounted.
+
+### Root cause
+
+The server-rendered portal/dashboard and auth EJS shells emitted raw
+`/src/*.ts` source paths for their entry scripts and inline module imports.
+Those paths only resolve while Vite's dev server is running. In production the
+frontend is a static Vite build served by Vercel, which has no `/src/*` — and
+the Vite build had a single entry (`index.html`), so admin.ts / portal.ts /
+the inline-import modules were never emitted as assets. Regression from
+`5967a1de` (removed the portal MPA build entries when the portal moved to EJS).
+
+### Fix
+
+- `vite.config.ts`: `manifest: true`, the 11 server-rendered entry modules
+  added as Rollup inputs, `preserveEntrySignatures: 'strict'` (keeps named
+  exports for modules imported only by runtime inline `<script>` blocks).
+- `server/utils/vite-assets.ts`: `viteAsset()` / `viteEntryCss()` resolve a
+  source entry to `/src/*` in dev and hashed `/assets/*` (from the manifest)
+  in prod. Registered as `app.locals` and used by every portal/auth EJS entry
+  script, inline import, cssBundle, and initModule.
+
+### Deploy
+
+Vercel (serves assets) and Railway (server, reads `dist/.vite/manifest.json`)
+must build the **same commit** so hashes match. Push, then redeploy both.
+
+---
+
 ## Production 502 — Schema-Drift Boot Crash
 
 **Status:** RECOVERED — prod boots clean with drift guard re-armed; code fix committed (`4c114a3c`)
