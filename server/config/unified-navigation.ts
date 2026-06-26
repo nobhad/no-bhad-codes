@@ -556,7 +556,11 @@ export const UNIFIED_TAB_GROUPS: Record<
 
 /** When PORTAL_MODE=solo, items tagged hideInSolo are filtered out of navigation. */
 function isSoloMode(): boolean {
-  return (process.env.PORTAL_MODE ?? 'solo').toLowerCase() === 'solo';
+  // This module is imported by both the Express server and the browser portal
+  // store. `process` only exists on the server; in the browser default to solo
+  // (the same fallback used when PORTAL_MODE is unset).
+  const mode = typeof process !== 'undefined' ? process.env.PORTAL_MODE ?? 'solo' : 'solo';
+  return mode.toLowerCase() === 'solo';
 }
 
 /**
