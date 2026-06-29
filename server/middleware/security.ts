@@ -97,18 +97,24 @@ export function csrfProtection(
         crypto.timingSafeEqual(tokenBuffer, cookieBuffer);
 
       if (!tokensMatch) {
-        await logger.logSecurity(
-          'csrf_token_mismatch',
-          {
-            ip: req.ip,
-            path: req.path,
-            method: req.method,
-            hasHeaderToken: !!token,
-            hasCookieToken: !!cookieToken,
-            userAgent: req.get('User-Agent')
-          },
-          req
-        );
+        // Best-effort audit log — must never turn the clean 403 CSRF
+        // rejection into a 500 if the security-log write fails.
+        try {
+          await logger.logSecurity(
+            'csrf_token_mismatch',
+            {
+              ip: req.ip,
+              path: req.path,
+              method: req.method,
+              hasHeaderToken: !!token,
+              hasCookieToken: !!cookieToken,
+              userAgent: req.get('User-Agent')
+            },
+            req
+          );
+        } catch (_logErr) {
+          await logger.error('CSRF: failed to write security log (non-fatal)');
+        }
 
         return errorResponse(res, 'Invalid CSRF token', 403, 'CSRF_TOKEN_INVALID');
       }
