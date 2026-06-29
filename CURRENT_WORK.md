@@ -72,11 +72,26 @@ Fixed (`87c00ccf`) by guarding with `typeof process !== 'undefined'` and
 defaulting to solo. Swept the rest of the client→server import graph — no other
 throwing `process.env.*` remain.
 
+### Third bug (surfaced on deploy): non-reproducible builds → hash mismatch
+
+After deploying the asset fix, the portal still 404'd its JS — but now on
+`/assets/<entry>-<hash>.js`, not `/src/*`. Cause: the obfuscation plugin used a
+random seed, so `npm run build` produced different content-hashed filenames
+every run. Railway and Vercel build **independently**, so Railway's manifest
+referenced hashes Vercel never built. Proven in prod: `/intake` emitted
+`main-site-ke9aY9db.js` / `terminal-intake-B30Cub4c.js` → 404 on Vercel, while
+CSS and tiny chunks matched (only the heavily-obfuscated chunks diverged).
+Fixed (`f5e94bac`) by pinning the obfuscator `seed`; two clean builds now
+produce byte-identical manifests.
+
 ### Deploy
 
 Vercel (serves assets) and Railway (server, reads `dist/.vite/manifest.json`)
-must build the **same commit** so hashes match. Push, then redeploy both.
-Both prod-blocking fixes (`8c734c32` assets, `87c00ccf` process) ship together.
+must build the **same commit** so hashes match — now safe because builds are
+reproducible. Push, then redeploy **both**. Prod-blocking fixes that must ship
+together: `8c734c32` (assets), `87c00ccf` (process), `f5e94bac` (reproducible
+build). Verify after: `curl -s https://www.nobhad.codes/intake` asset URLs all
+return 200.
 
 ---
 
