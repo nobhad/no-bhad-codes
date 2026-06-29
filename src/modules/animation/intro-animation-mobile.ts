@@ -351,11 +351,13 @@ export class MobileIntroAnimationModule extends BaseModule {
 
     const { header } = this.getCachedElements();
 
-    // Animation timing
-    const entryDuration = 0.8;
-    const clutchHold = 0.8;
-    const releaseDuration = 0.5;
-    const retractDuration = 1.6;
+    // Animation timing (mobile-only — desktop morph uses ANIMATION_CONSTANTS).
+    // Card enters faster; finger uncurl trimmed only slightly so it still reads
+    // as a deliberate release, not a snap.
+    const entryDuration = 0.5; // card comes in faster (was 0.8)
+    const clutchHold = 0.35; // shorter dead pause before fingers release (was 0.8)
+    const releaseDuration = 0.45; // uncurl a touch faster (was 0.5)
+    const retractDuration = 1.3; // card settles a little quicker (was 1.6)
 
     // ========================================================================
     // GET FINGER PATH REFERENCES

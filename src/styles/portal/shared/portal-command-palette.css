@@ -89,11 +89,16 @@
 
 .command-palette .search-bar-input {
   width: 100%;
+  /* Reserve room on the right for the kbd badge so the placeholder/typed
+     text never runs under it. */
+  padding-right: 3.5rem;
 }
 
 .command-palette-kbd {
   position: absolute;
-  right: 8px;
+  /* Sit clear of the absolutely-positioned close (X) button in the
+     palette's top-right corner instead of overlapping it. */
+  right: 2.5rem;
   top: 50%;
   transform: translateY(-50%);
   z-index: 1;
