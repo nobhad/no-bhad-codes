@@ -150,8 +150,8 @@ export const ANIMATION_SEQUENCES = {
 
   INTRO_MORPH: {
     ENTRY_DURATION: 0.8,
-    CLUTCH_HOLD: 0.8,
-    FINGER_RELEASE: 0.5,
+    CLUTCH_HOLD: 0.35, // shorter dead pause before fingers release (was 0.8)
+    FINGER_RELEASE: 0.45, // uncurl a touch faster (was 0.5)
     RETRACTION_DURATION: 1.6,
     RETRACTION_DELAY: 0.02,
     FINGER_MORPH_A: 0.08,

@@ -14,14 +14,14 @@
   right: 0;
   height: var(--footer-height, 40px);
   background: transparent;
-  padding: var(--spacing-sm) 0;
+  padding: 0 2rem;
   font-size: var(--font-size-sm);
   color: var(--color-dark);
-  text-align: center;
+  text-align: right;
   z-index: var(--z-index-footer); /* Below nav (100) so nav menu appears above footer */
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end; /* copyright sits in the bottom-right corner */
   /* Base visibility - always visible by default */
   opacity: 1;
   visibility: visible;

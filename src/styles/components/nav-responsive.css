@@ -119,12 +119,17 @@
     min-height: clamp(4rem, 10vw, 5.5rem);
   }
 
-  /* Menu link text on mobile - preserve rolling effect */
-  /* High specificity with element and class */
+  /* Menu link text on mobile. The rolling-text effect (a text-shadow ghost
+     1em below + translateY, rolled up on hover) has no hover on mobile, so the
+     ghost just sat there as a doubled echo behind every item. Drop the ghost +
+     transform here (this is the highest-specificity mobile rule, so it's what
+     was re-introducing it) and keep only the plain label. Desktop keeps the
+     rolling effect. */
   .menu .menu-link .menu-link-heading {
     font-size: clamp(3rem, 12vw, 4.5rem);
-    /* Keep the 1em offset for rolling duplicate text effect */
-    text-shadow: 0 1em 0 var(--color-neutral-100);
+    text-shadow: none;
+    transform: none;
+    transition: none;
   }
 
   .menu-link {

@@ -879,14 +879,17 @@
      overflow-bleed overrides in page-transitions.css (@media --tablet)
      open vertical bleed past main + section boxes so the shadow can
      extend below the TV silhouette without being clipped. */
-  filter: drop-shadow(0 10px 30px var(--color-shadow));
+  /* Offset (14px) ≥ blur (16px) keeps the halo from bleeding up past the
+     TV's top edge — the shadow now sits under the set, not around/above it,
+     while still grounding it. */
+  filter: drop-shadow(0 14px 16px var(--color-shadow));
 }
 
 /* Light mode reads softer against the page bg, so use a slightly heavier
    single drop-shadow for grounding. Kept tight (no large blur) so the
    cast doesn't reach the overflow:hidden clip on ancestor sections. */
 [data-theme="light"] .crt-tv__frame {
-  filter: drop-shadow(0 8px 16px var(--color-shadow-3xl));
+  filter: drop-shadow(0 12px 12px var(--color-shadow-3xl));
 }
 
 /* LED channel readout — channel_NN.webp files are exported at the same
