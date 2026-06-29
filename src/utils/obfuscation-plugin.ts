@@ -12,6 +12,12 @@ import type { Plugin } from 'vite';
 import type { OutputAsset } from 'rollup';
 import JavaScriptObfuscator from 'javascript-obfuscator';
 
+/**
+ * Fixed RNG seed for the obfuscator so builds are reproducible across hosts
+ * (Vercel serves the assets, Railway emits their hashed names — see baseOptions).
+ */
+const OBFUSCATION_SEED = 20260629;
+
 export interface ObfuscationPluginOptions {
   enabled: boolean;
   level: 'basic' | 'standard' | 'advanced' | 'maximum';
@@ -34,6 +40,14 @@ function getObfuscatorOptions(
   features: ObfuscationPluginOptions['features']
 ): JavaScriptObfuscator.ObfuscatorOptions {
   const baseOptions: JavaScriptObfuscator.ObfuscatorOptions = {
+    // Pin the RNG seed so obfuscation output is reproducible. Without this the
+    // obfuscator uses a random seed, producing different bytes — and therefore
+    // different content-hashed filenames — on every build. The portal's
+    // server-rendered EJS (Railway) references built assets by hashed name from
+    // the Vite manifest, while Vercel serves those files from its own
+    // independent build; non-reproducible hashes mean the two never match and
+    // the portal 404s its JS. A fixed seed keeps both builds byte-identical.
+    seed: OBFUSCATION_SEED,
     compact: true,
     controlFlowFlattening: false,
     deadCodeInjection: false,
