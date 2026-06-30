@@ -35,7 +35,9 @@ export interface ObfuscationPluginOptions {
 }
 
 // Map our levels to javascript-obfuscator presets
-function getObfuscatorOptions(
+// Exported for regression testing — controlFlowFlattening must stay disabled
+// (it miscompiles optional-call expressions). See obfuscation-plugin.test.ts.
+export function getObfuscatorOptions(
   level: ObfuscationPluginOptions['level'],
   features: ObfuscationPluginOptions['features']
 ): JavaScriptObfuscator.ObfuscatorOptions {
@@ -86,8 +88,14 @@ function getObfuscatorOptions(
   case 'standard':
     return {
       ...baseOptions,
-      controlFlowFlattening: true,
-      controlFlowFlatteningThreshold: 0.5,
+      // controlFlowFlattening MUST stay disabled. It miscompiles optional-call
+      // expressions: `fn?.(args)` is rewritten into an unconditional wrapped call
+      // `wrapper(fn, args)` that drops the `?.` nullish guard, so any optional
+      // callback that is undefined at runtime (e.g. `onSuccess?.()`,
+      // `showNotification?.()`, `transform?.()`) throws "X is not a function".
+      // This silently broke the entire admin dashboard in production (the error
+      // only appears in the obfuscated build, not dev). See CURRENT_WORK.md.
+      controlFlowFlattening: false,
       numbersToExpressions: true,
       splitStrings: true,
       splitStringsChunkLength: 10
@@ -96,8 +104,8 @@ function getObfuscatorOptions(
   case 'advanced':
     return {
       ...baseOptions,
-      controlFlowFlattening: true,
-      controlFlowFlatteningThreshold: 0.75,
+      // Disabled — miscompiles optional-call expressions (see 'standard' above).
+      controlFlowFlattening: false,
       deadCodeInjection: true,
       deadCodeInjectionThreshold: 0.3,
       numbersToExpressions: true,
@@ -110,8 +118,8 @@ function getObfuscatorOptions(
   case 'maximum':
     return {
       ...baseOptions,
-      controlFlowFlattening: true,
-      controlFlowFlatteningThreshold: 1,
+      // Disabled — miscompiles optional-call expressions (see 'standard' above).
+      controlFlowFlattening: false,
       deadCodeInjection: true,
       deadCodeInjectionThreshold: 0.4,
       identifierNamesGenerator: 'hexadecimal',
