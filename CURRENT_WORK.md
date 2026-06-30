@@ -122,6 +122,44 @@ same commit. Verify after:
 `curl -s https://www.nobhad.codes/intake` asset URLs all return 200, then log in
 and confirm the dashboard renders (admin/portal JS loads).
 
+### Fifth bug (surfaced once dashboard rendered): obfuscator breaks optional calls
+
+After the asset fixes, the admin dashboard rendered but every data panel
+(Contracts, Document Requests, Questionnaires, Invoices) showed
+`TypeError: e is not a function` and an error-boundary "Try Again". Reproduced
+only on the live site, never in local dev.
+
+Root cause (proven by reading the deployed bytes + controlled rebuilds): the
+`javascript-obfuscator` `controlFlowFlattening` transform — enabled at the
+`standard` level — **miscompiles optional-call expressions**. It rewrites
+`fn?.(args)` into an unconditional wrapped call `wrapper(fn, args)`, dropping the
+`?.` nullish guard. `useDataFetch` calls `onSuccess?.(result)` after a successful
+fetch; `useListFetch` passes no `onSuccess`, so the obfuscated build called
+`undefined(result)` → `TypeError`, caught and surfaced as the panel error. Dev
+isn't obfuscated, so `?.` survived there — hence prod-only. This silently broke
+**every** optional call app-wide (`showNotification?.`, `onError?.`, etc.).
+
+How it was isolated:
+
+- Executed the real obfuscated `api-client` chunk in Node — `apiFetch` /
+  `unwrapApiData` worked, ruling them out.
+- Read the deployed `createSection-*.js` at the throw offset: found
+  `i=function(e,n){return e(n)}` call-wrappers and `i(g,o)` where the source was
+  `onSuccess?.(result)` — guard gone.
+- Rebuilt with obfuscation off → `c?.(a)` intact. Rebuilt with only
+  `controlFlowFlattening:false` → `c?.(a)` intact. Confirmed CFF is the culprit.
+
+**Fix:** `src/utils/obfuscation-plugin.ts` — `controlFlowFlattening: false` at
+all levels (it was the only transform `standard` added that touches control
+flow). Identifier renaming, string splitting, `numbersToExpressions`, and
+`compact` stay on, so obfuscation is still meaningful. Regression guard:
+`tests/unit/utils/obfuscation-plugin.test.ts` fails if CFF is re-enabled.
+Verified in the rebuilt bundle: 0 app chunks contain the call-wrapper pattern
+(only 2 vendor libs have a benign native helper), 479 optional calls preserved.
+
+Needs the same push + redeploy-both as the fourth bug (prod still runs the
+CFF-on build).
+
 ---
 
 ## Production 502 — Schema-Drift Boot Crash
