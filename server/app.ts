@@ -18,7 +18,7 @@ import {
 
 import express from 'express';
 import { i18nMiddleware } from './middleware/i18n-middleware.js';
-import { viteAsset, viteEntryCss } from './utils/vite-assets.js';
+import { viteAsset, viteEntryCss, initViteAssets } from './utils/vite-assets.js';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
@@ -126,6 +126,12 @@ app.set('views', resolve(__dirname, 'views'));
 // production, and to the raw source path in development.
 app.locals.viteAsset = viteAsset;
 app.locals.viteEntryCss = viteEntryCss;
+
+// In production, resolve asset hashes from the authoritative manifest Vercel
+// serves (not this server's independently-built one) so emitted URLs always
+// match the files actually served. Fetches at boot, refreshes periodically,
+// falls back to the local manifest. No-op in development.
+void initViteAssets();
 
 // Initialize Sentry for error tracking
 errorTracker.init({

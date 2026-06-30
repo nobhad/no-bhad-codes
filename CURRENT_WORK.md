@@ -82,16 +82,45 @@ referenced hashes Vercel never built. Proven in prod: `/intake` emitted
 `main-site-ke9aY9db.js` / `terminal-intake-B30Cub4c.js` → 404 on Vercel, while
 CSS and tiny chunks matched (only the heavily-obfuscated chunks diverged).
 Fixed (`f5e94bac`) by pinning the obfuscator `seed`; two clean builds now
-produce byte-identical manifests.
+produce byte-identical manifests **on the same machine**.
+
+### Fourth bug (surfaced post-deploy): cross-host build drift → portal JS 404
+
+Seed-pinning made builds reproducible on one machine, but Railway and Vercel
+build on **different Node versions** (no pin; `engines` was `>=20.x`). The large
+obfuscated chunks (`admin`, `portal`, `main-site`) came out byte-different across
+hosts → different hashes; small chunks happened to match. Proven in prod: after
+the `railway up` redeploy, `/intake` still 404'd `main-site` on Vercel, and
+admin/portal (the authenticated dashboard's JS) diverged too — exactly the "I can
+log in but it doesn't look right" symptom, since post-login the dashboard is the
+Railway-rendered EJS shell loading `admin.ts`/`portal.ts`.
+
+Root design flaw: correctness depended on **two independent builds being
+byte-identical** — fragile (broke on obfuscator seed, then Node version).
+
+**Fix (defense in depth):**
+
+1. **Authoritative remote manifest** — `server/utils/vite-assets.ts` now resolves
+   hashes in prod from the manifest Vercel actually serves
+   (`${PUBLIC_ASSET_ORIGIN}/.vite/manifest.json`, default `https://www.nobhad.codes`),
+   fetched at boot (`initViteAssets()` in `server/app.ts`), cached, refreshed
+   every 5 min, with the local `dist` manifest as fallback. Railway now emits
+   exactly the hashes Vercel serves regardless of build drift. Verified at runtime
+   against live Vercel: `admin`/`portal`/`main-site` resolve to Vercel's served
+   hashes (`Dpjdcnfk` / `sY8-j2SG` / `CIqsMJfl`, all 200).
+2. **Node pin** — `.nvmrc` + `.node-version` = `22`, `engines.node` = `22.x`, so
+   Railway (Nixpacks) and Vercel build on the same Node major → reproducible by
+   construction. The remote manifest is the safety net for residual patch drift.
 
 ### Deploy
 
-Vercel (serves assets) and Railway (server, reads `dist/.vite/manifest.json`)
-must build the **same commit** so hashes match — now safe because builds are
-reproducible. Push, then redeploy **both**. Prod-blocking fixes that must ship
-together: `8c734c32` (assets), `87c00ccf` (process), `f5e94bac` (reproducible
-build). Verify after: `curl -s https://www.nobhad.codes/intake` asset URLs all
-return 200.
+Push, then redeploy **both** Vercel and Railway. Prod-blocking fixes that must
+ship together: `8c734c32` (assets), `87c00ccf` (process), `f5e94bac` (seed),
+plus this commit (remote manifest + Node pin). With the remote-manifest fix the
+two hosts no longer need byte-identical builds, but still deploy both from the
+same commit. Verify after:
+`curl -s https://www.nobhad.codes/intake` asset URLs all return 200, then log in
+and confirm the dashboard renders (admin/portal JS loads).
 
 ---
 
