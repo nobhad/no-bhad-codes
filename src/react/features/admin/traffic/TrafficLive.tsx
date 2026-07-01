@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useEffect } from 'react';
 import { LoadingState, ErrorState } from '@react/factories';
 import { StatCard } from '@react/components/portal/StatCard';
+import { TableLayout } from '@react/components/portal/TableLayout';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { useDataFetch } from '@react/factories/useDataFetch';
 import { apiFetch, unwrapApiData } from '@/utils/api-client';
@@ -59,83 +60,69 @@ export function TrafficLive(_props: TrafficViewProps) {
         <StatCard label="Recent views" value={recentPages.length} meta="Most recent pages" />
       </div>
 
-      <section className="panel">
-        <div className="panel-header">
-          <div className="panel-title">
-            <span className="field-label">Recent Page Views</span>
-          </div>
-        </div>
-        <div className="panel-body">
-          <PortalTable>
-            <PortalTableHeader>
-              <PortalTableRow>
-                <PortalTableHead>Page</PortalTableHead>
-                <PortalTableHead>Source</PortalTableHead>
-                <PortalTableHead>Device</PortalTableHead>
-                <PortalTableHead>When</PortalTableHead>
-              </PortalTableRow>
-            </PortalTableHeader>
-            <PortalTableBody>
-              {recentPages.length === 0 ? (
-                <PortalTableEmpty colSpan={4} message="No recent activity" />
-              ) : (
-                recentPages.map((view, index) => (
-                  <PortalTableRow key={`${view.url}-${view.timestamp}-${index}`}>
-                    <PortalTableCell className="traffic-cell-path">
-                      {view.title || urlPath(view.url)}
-                    </PortalTableCell>
-                    <PortalTableCell>
-                      <span
-                        className={`traffic-source-badge ${isPortalUrl(view.url) ? 'is-portal' : 'is-main'}`}
-                      >
-                        {trafficSource(view.url)}
-                      </span>
-                    </PortalTableCell>
-                    <PortalTableCell>{view.device_type || '—'}</PortalTableCell>
-                    <PortalTableCell>{formatRelativeTime(view.timestamp, nowMs)}</PortalTableCell>
-                  </PortalTableRow>
-                ))
-              )}
-            </PortalTableBody>
-          </PortalTable>
-        </div>
-      </section>
+      <TableLayout title="Recent Page Views" nested>
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead>Page</PortalTableHead>
+              <PortalTableHead>Source</PortalTableHead>
+              <PortalTableHead>Device</PortalTableHead>
+              <PortalTableHead>When</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
+          <PortalTableBody>
+            {recentPages.length === 0 ? (
+              <PortalTableEmpty colSpan={4} message="No recent activity" />
+            ) : (
+              recentPages.map((view, index) => (
+                <PortalTableRow key={`${view.url}-${view.timestamp}-${index}`}>
+                  <PortalTableCell className="traffic-cell-path">
+                    {view.title || urlPath(view.url)}
+                  </PortalTableCell>
+                  <PortalTableCell>
+                    <span
+                      className={`traffic-source-badge ${isPortalUrl(view.url) ? 'is-portal' : 'is-main'}`}
+                    >
+                      {trafficSource(view.url)}
+                    </span>
+                  </PortalTableCell>
+                  <PortalTableCell>{view.device_type || '—'}</PortalTableCell>
+                  <PortalTableCell>{formatRelativeTime(view.timestamp, nowMs)}</PortalTableCell>
+                </PortalTableRow>
+              ))
+            )}
+          </PortalTableBody>
+        </PortalTable>
+      </TableLayout>
 
-      <section className="panel">
-        <div className="panel-header">
-          <div className="panel-title">
-            <span className="field-label">Active Sessions</span>
-          </div>
-        </div>
-        <div className="panel-body">
-          <PortalTable>
-            <PortalTableHeader>
-              <PortalTableRow>
-                <PortalTableHead>Visitor</PortalTableHead>
-                <PortalTableHead>Device / Browser</PortalTableHead>
-                <PortalTableHead>Pages</PortalTableHead>
-                <PortalTableHead>Last Seen</PortalTableHead>
-              </PortalTableRow>
-            </PortalTableHeader>
-            <PortalTableBody>
-              {sessions.length === 0 ? (
-                <PortalTableEmpty colSpan={4} message="No one online right now" />
-              ) : (
-                sessions.map((session) => (
-                  <PortalTableRow key={session.session_id}>
-                    <PortalTableCell className="traffic-cell-path">{session.visitor_id}</PortalTableCell>
-                    <PortalTableCell>
-                      {session.device_type || '—'} · {session.browser || '—'}
-                    </PortalTableCell>
-                    <PortalTableCell>{session.page_views}</PortalTableCell>
-                    <PortalTableCell>{formatRelativeTime(session.last_activity, nowMs)}</PortalTableCell>
-                  </PortalTableRow>
-                ))
-              )}
-            </PortalTableBody>
-          </PortalTable>
-        </div>
-      </section>
+      <TableLayout title="Active Sessions" nested>
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead>Visitor</PortalTableHead>
+              <PortalTableHead>Device / Browser</PortalTableHead>
+              <PortalTableHead>Pages</PortalTableHead>
+              <PortalTableHead>Last Seen</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
+          <PortalTableBody>
+            {sessions.length === 0 ? (
+              <PortalTableEmpty colSpan={4} message="No one online right now" />
+            ) : (
+              sessions.map((session) => (
+                <PortalTableRow key={session.session_id}>
+                  <PortalTableCell className="traffic-cell-path">{session.visitor_id}</PortalTableCell>
+                  <PortalTableCell>
+                    {session.device_type || '—'} · {session.browser || '—'}
+                  </PortalTableCell>
+                  <PortalTableCell>{session.page_views}</PortalTableCell>
+                  <PortalTableCell>{formatRelativeTime(session.last_activity, nowMs)}</PortalTableCell>
+                </PortalTableRow>
+              ))
+            )}
+          </PortalTableBody>
+        </PortalTable>
+      </TableLayout>
     </div>
   );
 }
