@@ -30,6 +30,7 @@
 @import "./system-status.css";
 @import "./configuration.css";
 @import "./audit-log.css";
+@import "./traffic.css";
 
 /* Layout refinements */
 @import "./dashboard-layout.css";
