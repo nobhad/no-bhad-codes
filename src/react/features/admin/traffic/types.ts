@@ -22,6 +22,7 @@ export interface DailyBreakdown {
 export interface TopPage {
   url: string;
   views: number;
+  unique_views: number;
   avg_time: number;
 }
 

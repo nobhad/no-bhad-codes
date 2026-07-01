@@ -161,12 +161,13 @@ export function TrafficOverview({ showNotification }: TrafficViewProps) {
               <PortalTableHead>Page</PortalTableHead>
               <PortalTableHead>Source</PortalTableHead>
               <PortalTableHead>Views</PortalTableHead>
+              <PortalTableHead>Unique</PortalTableHead>
               <PortalTableHead>Avg. Time</PortalTableHead>
             </PortalTableRow>
           </PortalTableHeader>
           <PortalTableBody>
             {topPages.length === 0 ? (
-              <PortalTableEmpty colSpan={4} message="No page views yet" />
+              <PortalTableEmpty colSpan={5} message="No page views yet" />
             ) : (
               topPages.map((page) => (
                 <PortalTableRow key={page.url}>
@@ -179,6 +180,7 @@ export function TrafficOverview({ showNotification }: TrafficViewProps) {
                     </span>
                   </PortalTableCell>
                   <PortalTableCell>{page.views}</PortalTableCell>
+                  <PortalTableCell>{page.unique_views}</PortalTableCell>
                   <PortalTableCell>{formatDuration(page.avg_time)}</PortalTableCell>
                 </PortalTableRow>
               ))
