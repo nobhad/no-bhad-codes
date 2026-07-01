@@ -81,6 +81,7 @@ export interface DailyBreakdown {
 export interface TopPage {
   url: string;
   views: number;
+  unique_views: number;
   avg_time: number;
 }
 
@@ -302,6 +303,7 @@ export async function getTopPages(dateThreshold: string): Promise<TopPage[]> {
     `SELECT
       url,
       COUNT(*) as views,
+      COUNT(DISTINCT session_id) as unique_views,
       CAST(AVG(time_on_page) AS INTEGER) as avg_time
     FROM page_views
     WHERE timestamp >= ?
