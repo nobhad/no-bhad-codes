@@ -3,6 +3,7 @@ import { useMemo, useState, useCallback } from 'react';
 import { IconButton } from '@react/factories';
 import { LoadingState, ErrorState } from '@react/factories';
 import { StatCard } from '@react/components/portal/StatCard';
+import { TableLayout } from '@react/components/portal/TableLayout';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { useDataFetch } from '@react/factories/useDataFetch';
 import { apiFetch, unwrapApiData } from '@/utils/api-client';
@@ -153,45 +154,38 @@ export function TrafficOverview({ showNotification }: TrafficViewProps) {
       </section>
 
       {/* Top pages */}
-      <section className="panel">
-        <div className="panel-header">
-          <div className="panel-title">
-            <span className="field-label">Top Pages</span>
-          </div>
-        </div>
-        <div className="panel-body">
-          <PortalTable>
-            <PortalTableHeader>
-              <PortalTableRow>
-                <PortalTableHead>Page</PortalTableHead>
-                <PortalTableHead>Source</PortalTableHead>
-                <PortalTableHead>Views</PortalTableHead>
-                <PortalTableHead>Avg. Time</PortalTableHead>
-              </PortalTableRow>
-            </PortalTableHeader>
-            <PortalTableBody>
-              {topPages.length === 0 ? (
-                <PortalTableEmpty colSpan={4} message="No page views yet" />
-              ) : (
-                topPages.map((page) => (
-                  <PortalTableRow key={page.url}>
-                    <PortalTableCell className="traffic-cell-path">{urlPath(page.url)}</PortalTableCell>
-                    <PortalTableCell>
-                      <span
-                        className={`traffic-source-badge ${isPortalUrl(page.url) ? 'is-portal' : 'is-main'}`}
-                      >
-                        {trafficSource(page.url)}
-                      </span>
-                    </PortalTableCell>
-                    <PortalTableCell>{page.views}</PortalTableCell>
-                    <PortalTableCell>{formatDuration(page.avg_time)}</PortalTableCell>
-                  </PortalTableRow>
-                ))
-              )}
-            </PortalTableBody>
-          </PortalTable>
-        </div>
-      </section>
+      <TableLayout title="Top Pages" nested>
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead>Page</PortalTableHead>
+              <PortalTableHead>Source</PortalTableHead>
+              <PortalTableHead>Views</PortalTableHead>
+              <PortalTableHead>Avg. Time</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
+          <PortalTableBody>
+            {topPages.length === 0 ? (
+              <PortalTableEmpty colSpan={4} message="No page views yet" />
+            ) : (
+              topPages.map((page) => (
+                <PortalTableRow key={page.url}>
+                  <PortalTableCell className="traffic-cell-path">{urlPath(page.url)}</PortalTableCell>
+                  <PortalTableCell>
+                    <span
+                      className={`traffic-source-badge ${isPortalUrl(page.url) ? 'is-portal' : 'is-main'}`}
+                    >
+                      {trafficSource(page.url)}
+                    </span>
+                  </PortalTableCell>
+                  <PortalTableCell>{page.views}</PortalTableCell>
+                  <PortalTableCell>{formatDuration(page.avg_time)}</PortalTableCell>
+                </PortalTableRow>
+              ))
+            )}
+          </PortalTableBody>
+        </PortalTable>
+      </TableLayout>
     </div>
   );
 }
