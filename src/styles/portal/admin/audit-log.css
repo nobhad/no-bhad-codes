@@ -74,7 +74,6 @@
 .audit-td {
   font-size: var(--font-size-xs);
   color: var(--color-text-primary);
-  border-bottom: var(--portal-border);
   vertical-align: top;
 }
 
