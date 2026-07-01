@@ -405,8 +405,8 @@
 /* Quick actions grid - 2x2, collapses to single column on small screens */
 .ovdash-quick-actions {
   display: grid;
-  /* Responsive auto-fit so buttons never get clipped by panel width */
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  /* Fixed 2 columns so the four actions lay out as 2 rows of 2 */
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--space-1-5);
 }
 
