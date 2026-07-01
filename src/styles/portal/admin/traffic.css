@@ -1,0 +1,146 @@
+/**
+ * Traffic dashboard — main site & portal web traffic.
+ * Uses the shared portal token system (no hardcoded colors/sizes).
+ */
+
+/* Toolbar: date range + actions */
+.traffic-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--portal-section-gap);
+}
+
+.traffic-range {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.traffic-range-btn {
+  padding: var(--space-0-5) var(--space-2);
+  border: var(--portal-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.traffic-range-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.traffic-range-btn.is-active {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.traffic-toolbar-actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+/* Metric card grids */
+.traffic-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--portal-section-gap);
+}
+
+.traffic-stats--split {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Views-over-time bar chart */
+.traffic-trend {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-px);
+  height: 120px;
+  width: 100%;
+}
+
+.traffic-trend-bar {
+  flex: 1 1 0;
+  min-width: 2px;
+  min-height: 2px;
+  background: var(--color-accent);
+  transition: opacity var(--transition-fast);
+}
+
+.traffic-trend-bar:hover {
+  opacity: 0.7;
+}
+
+.traffic-empty-line {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  padding: var(--space-2) 0;
+}
+
+/* Source badge (Main Site vs Portal) */
+.traffic-source-badge {
+  display: inline-block;
+  padding: var(--space-0-25) var(--space-1);
+  border: var(--portal-border);
+  font-size: var(--font-size-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  color: var(--color-text-tertiary);
+}
+
+.traffic-source-badge.is-portal {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.traffic-source-badge.is-main {
+  color: var(--color-text-secondary);
+}
+
+/* Path cell — keep long URLs from blowing out the table */
+.traffic-cell-path {
+  max-width: 32ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Pagination */
+.traffic-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.traffic-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1);
+  border: var(--portal-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.traffic-page-btn:hover:not(:disabled) {
+  color: var(--color-text-primary);
+  border-color: var(--color-accent);
+}
+
+.traffic-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.traffic-page-info {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}

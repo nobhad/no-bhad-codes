@@ -225,7 +225,7 @@ export function getPortalConfig(portalType: 'admin' | 'client'): PortalConfig {
       ? navItems.filter(
         (item) =>
           !item.group ||
-            ['work', 'crm', 'documents', 'workflows', 'analytics', 'support', 'system'].includes(
+            ['work', 'crm', 'documents', 'traffic', 'workflows', 'analytics', 'support', 'system'].includes(
               item.id
             )
       )
@@ -266,6 +266,7 @@ export const ADMIN_TAB_IDS = [
   'work',
   'crm',
   'documents',
+  'traffic',
   'analytics',
   'workflows',
   'support',

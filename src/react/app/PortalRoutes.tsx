@@ -43,6 +43,7 @@ function lazyNamed<T extends React.ComponentType<Record<string, unknown>>>(
 // Admin Dashboards
 const OverviewDashboard = lazyNamed(() => import('../features/admin/overview').then(m => ({ OverviewDashboard: m.OverviewDashboard })));
 const AnalyticsDashboard = lazyNamed(() => import('../features/admin/analytics').then(m => ({ AnalyticsDashboard: m.AnalyticsDashboard })));
+const TrafficDashboard = lazyNamed(() => import('../features/admin/traffic').then(m => ({ TrafficDashboard: m.TrafficDashboard })));
 const PerformanceMetrics = lazyNamed(() => import('../features/admin/performance').then(m => ({ PerformanceMetrics: m.PerformanceMetrics })));
 const SystemHealthDashboard = lazyNamed(() => import('../features/admin/system-health').then(m => ({ SystemHealthDashboard: m.SystemHealthDashboard })));
 
@@ -355,6 +356,13 @@ export function PortalRoutes() {
         } />
 
         {/* ========== ADMIN-ONLY ROUTES ========== */}
+        <Route path="/traffic" element={
+          role === 'admin' ? (
+            <LazyTabRoute tabId="traffic"><TrafficDashboard /></LazyTabRoute>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        } />
         <Route path="/analytics" element={
           role === 'admin' ? (
             <LazyTabRoute tabId="analytics"><AnalyticsDashboard /></LazyTabRoute>

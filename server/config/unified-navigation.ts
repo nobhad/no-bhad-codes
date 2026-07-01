@@ -291,6 +291,16 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     shortcut: '5'
   },
   {
+    id: 'traffic',
+    label: 'Traffic',
+    icon: 'lineChart',
+    roles: ['admin'],
+    order: 6,
+    shortcut: '9',
+    ariaLabel: 'Main site & portal traffic'
+    // Intentionally NOT hideInSolo — traffic is useful in solo mode too.
+  },
+  {
     id: 'tasks',
     label: 'Tasks',
     icon: 'checkCircle',
@@ -421,6 +431,18 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
       { id: 'questionnaires', label: 'Questionnaires', roles: ['admin'], hideInSolo: true }
     ]
   },
+  // Admin: Traffic subtabs (main site & portal web traffic)
+  {
+    id: 'traffic-subtabs',
+    forTab: 'traffic',
+    roles: ['admin'],
+    mode: 'primary',
+    subtabs: [
+      { id: 'overview', label: 'Overview', roles: ['admin'], active: true },
+      { id: 'live', label: 'Live', roles: ['admin'] },
+      { id: 'sessions', label: 'Sessions', roles: ['admin'] }
+    ]
+  },
   // Admin: Analytics subtabs
   {
     id: 'analytics-subtabs',
@@ -491,6 +513,7 @@ export const UNIFIED_TAB_TITLES: Record<string, string> = {
   'document-requests': 'Document Requests',
   'ad-hoc-requests': 'Ad Hoc Requests',
   analytics: 'Analytics',
+  traffic: 'Traffic',
   workflows: 'Workflows',
   support: 'Knowledge Base',
   system: 'Settings',
