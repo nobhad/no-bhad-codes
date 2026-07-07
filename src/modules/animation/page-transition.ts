@@ -1683,6 +1683,18 @@ export class PageTransitionModule extends BaseModule {
     this.dispatchEvent('page-entering', preEventDetail);
     window.dispatchEvent(new CustomEvent('page-entering', { detail: preEventDetail }));
 
+    // Leaving an off-map page (project-detail/portal-login) for a map tile:
+    // drop main's data-active-page="project-detail" tag NOW, before the slide,
+    // instead of after (updateActivePageAttribute normally runs post-transition).
+    // That tag scopes `main { overflow-y: auto }`, which collapses .site-map's
+    // flex height to 0 — so if it lingers through the pull-down, the projects TV
+    // renders as a thin band pinned to the top and only settles once the
+    // attribute updates after the transition. Setting it early keeps the map
+    // layout (.site-map full height) correct as the TV pulls down.
+    if (!this.isMapPage(this.currentPageId) && this.isMapPage(pageId)) {
+      this.updateActivePageAttribute(pageId);
+    }
+
     try {
       const toIsMap = this.isMapPage(pageId);
       const fromIsIntro = this.currentPageId === 'intro';
