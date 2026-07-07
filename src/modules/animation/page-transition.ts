@@ -1484,18 +1484,6 @@ export class PageTransitionModule extends BaseModule {
       const goingToAnotherDetail = targetHash.startsWith('#/projects/');
       if (goingToAnotherDetail) {
         this.captureDetailGhost();
-      } else {
-        // Returning to the projects TV (the pull-down slide). Sync the TV
-        // display to the channel we're landing on NOW, before the slide runs,
-        // so the TV shows its content as it drops in from the top — otherwise
-        // the channel re-renders on 'page-changed' (after the slide) and the
-        // TV appears to load in late. `cycle` omitted → passive display sync,
-        // not the full tune-in animation (this is a back-nav).
-        document.dispatchEvent(
-          new CustomEvent('projects:set-tv-channel', {
-            detail: { index: this.currentTvIndex, direction }
-          })
-        );
       }
       this.setPendingSlide(direction, targetHash);
       window.location.hash = targetHash;
