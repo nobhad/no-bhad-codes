@@ -1176,14 +1176,21 @@ export class PageTransitionModule extends BaseModule {
         // Other map tiles: remap vertical wheel → horizontal carousel nav so
         // up/down scroll moves between pages too. dy < 0 (down) → forward.
         direction = dy < 0 ? 'right' : 'left';
-      } else if (dy < 0) {
-        // Project-detail: native-scroll down until the bottom, then navigate.
+      } else if (dy > 0) {
+        // Project-detail: native scroll follows the deltaY SIGN (not the
+        // finger-intent nav convention used by the carousel tiles above), so
+        // match the touch handler — deltaY>0 scrolls the content DOWN. Let it
+        // scroll natively until the bottom; only then set 'down', which isn't a
+        // navigable direction from project-detail, so it's a no-op (no jump).
+        // (Previously this branch keyed off finger-intent and jumped back to
+        // projects when scrolling down from the top — scrollTop was still 0.)
         const canScrollDown =
           currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >= 1;
         if (canScrollDown) return;
         direction = 'down';
       } else {
-        // Scrolling up: native-scroll to the top, then navigate up.
+        // deltaY<0 scrolls the content UP; native-scroll to the top, then
+        // navigate up (back to projects).
         if (currentTile.scrollTop >= 1) return;
         direction = 'up';
       }
