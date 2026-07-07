@@ -871,6 +871,12 @@
   position: relative;
   width: 100%;
   height: auto;
+  /* Reserve the frame's aspect ratio (chassis.webp is 2850×2186) so the box
+     keeps its height even when the browser hasn't decoded the image yet — the
+     projects section sits display:none while on a project-detail page, so on
+     the pull-down back the frame re-decodes and, without this, collapses to
+     0 height for a frame or two (TV snaps to the top, then settles late). */
+  aspect-ratio: 1426 / 1093;
   display: block;
   z-index: 3;
   pointer-events: none;
