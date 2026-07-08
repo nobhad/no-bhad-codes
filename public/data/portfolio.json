@@ -233,11 +233,13 @@
       "id": "hedgewitch-horticulture",
       "title": "Hedgewitch Horticulture",
       "slug": "hedgewitch-horticulture",
-      "tagline": "Custom website for a sustainable garden design studio",
-      "description": "A custom-designed website for Hedgewitch Horticulture, a sustainable garden design and maintenance studio serving Greater Boston. Replaced their existing Squarespace site with a performance-optimized static build featuring scroll-driven animations, a 49-item portfolio gallery with lightbox, blog system, admin CMS, and an earthy Art Nouveau-inspired aesthetic that reflects the brand's earth-centered philosophy.",
+      "tagline": "A hand-illustrated, walkable native garden for a sustainable garden studio",
+      "description": "A fully custom, hand-illustrated website for Hedgewitch Horticulture, a sustainable garden design and maintenance studio serving Greater Boston. I replaced their Squarespace with a performance-optimized Astro build and an earthy, handcrafted visual identity. At its center is an interactive walkable garden where native plants are drawn to scale and grouped into the ecological communities they actually form in the wild.",
       "category": "websites",
       "role": "Designer & Developer",
       "tools": [
+        "Illustrator",
+        "Photoshop",
         "Astro",
         "TypeScript",
         "GSAP",
@@ -248,6 +250,8 @@
       ],
       "year": 2026,
       "technologies": [
+        "Illustrator",
+        "Photoshop",
         "Astro",
         "TypeScript",
         "GSAP",
@@ -277,37 +281,38 @@
         "secondaryPt": 38
       },
       "duration": "2 months",
-      "challenge": "The client's existing Squarespace site couldn't capture the earthy, witchy identity of their brand. They needed a site that felt handcrafted and organic—not a cookie-cutter template—while still being easy to maintain and performant on mobile for clients browsing from the garden.",
-      "approach": "I built a static site with Astro for near-instant load times and strong SEO. I designed a custom Art Nouveau-inspired visual system with corner frames, wavy SVG text paths, and GSAP scroll-driven animations including character-by-character reveals and parallax effects. I created a full gallery system with lightbox, blog with content collections, and an admin dashboard for self-service content management.",
+      "challenge": "Their Squarespace site couldn't capture the earthy, witchy character of the brand, and off-the-shelf templates flatten a studio whose whole philosophy is that plants belong together in living communities. They needed something handcrafted and ecologically literate: organic in feel, easy to maintain, and fast on mobile for clients browsing from the garden.",
+      "approach": "I designed the entire visual system from scratch, with no theme or template: custom corner frames, wavy SVG text paths, and GSAP scroll-driven character reveals. The centerpiece is a walkable native-garden page. I researched native New England flora and the pollinators each species supports, then hand-illustrated every plant and pollinator in Adobe Illustrator and Photoshop and rendered them true-to-scale, grouped by real plant communities. Around it I built a static Astro site with a filterable gallery and lightbox, an Astro Content Collections blog, and a self-service admin CMS.",
       "results": [
-        "26 custom pages built from scratch",
-        "49-item portfolio gallery with lightbox and filtering",
-        "Full admin CMS for blog posts, job listings, and messages",
-        "WCAG AA accessibility compliance throughout"
+        "Bespoke, hand-illustrated design system with zero templates",
+        "Interactive to-scale native garden built from original ecological research",
+        "26 custom pages with a full self-service admin CMS",
+        "WCAG AA accessibility throughout"
       ],
       "keyFeatures": [
+        "Walkable native-garden page with plants drawn true-to-scale, grouped by real ecological community",
+        "Hand-illustrated plant & pollinator artwork (Adobe Illustrator + Photoshop)",
+        "Native flora & pollinator research behind every plant",
         "GSAP scroll-driven animations with pinned character reveals",
-        "Art Nouveau corner frames and wavy SVG text dividers",
+        "Custom corner frames and wavy SVG text dividers",
         "Three.js star field background effect",
         "49-item gallery with lightbox and category filtering",
-        "Blog system powered by Astro Content Collections",
-        "Admin dashboard with Netlify Identity authentication",
-        "Netlify Forms with honeypot spam protection"
+        "Astro Content Collections blog + self-service admin CMS (Netlify Identity)"
       ],
       "tv": {
-        "description": "Custom website for Hedgewitch Horticulture, a Greater Boston sustainable-garden studio — replaced their Squarespace with a performance-optimized static build and an earthy Art Nouveau aesthetic.",
-        "challenge": "Their Squarespace couldn't capture the earthy, witchy identity. They needed a handcrafted, organic feel — easy to maintain and fast on mobile.",
-        "approach": "Astro static site for near-instant load times. Custom Art Nouveau visual system with corner frames, wavy SVG text paths, and GSAP scroll-driven character reveals. Full gallery with lightbox, blog, and admin CMS for self-service updates.",
+        "description": "A fully custom, hand-illustrated site for a Greater Boston sustainable-garden studio, anchored by a walkable native garden where every plant is drawn to scale and grouped the way it grows in the wild.",
+        "challenge": "Their Squarespace couldn't capture the earthy, witchy identity, and templates flatten a studio built on the idea that plants belong together in living communities.",
+        "approach": "A bespoke, handcrafted design on a fast Astro build. Native flora and pollinators researched, then hand-illustrated in Illustrator & Photoshop and rendered to scale in a walkable garden, plus gallery, blog, and self-service CMS.",
         "keyFeatures": [
+          "Walkable to-scale native garden",
+          "Hand-illustrated plants & pollinators",
           "GSAP scroll-driven character reveals",
-          "49-item gallery with lightbox + filtering",
-          "Astro Content Collections blog",
           "Self-service admin dashboard"
         ],
         "results": [
-          "26 custom pages built from scratch",
-          "WCAG AA accessibility throughout",
-          "Self-service admin CMS"
+          "Bespoke hand-illustrated design, no templates",
+          "26 custom pages + self-service CMS",
+          "WCAG AA accessibility throughout"
         ]
       }
     },
