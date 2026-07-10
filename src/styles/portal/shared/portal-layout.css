@@ -154,9 +154,9 @@ html[data-theme="light"] .portal .funnel-value {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: var(--space-5);
-  padding-top: var(--space-2);
-  padding-bottom: var(--space-2);
+  min-height: var(--space-3);
+  padding-top: var(--space-1);
+  padding-bottom: var(--space-1);
   border-top: var(--border-width-thick) solid var(--color-border-primary);
   border-bottom: var(--border-width-thick) solid var(--color-border-primary);
 }
@@ -599,7 +599,8 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 [data-page="admin"][data-active-tab="project-detail"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="project-detail"],
 [data-page="admin"][data-active-tab="client-detail"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="client-detail"] {
   display: flex;
-  gap: var(--space-1);
+  /* Match Traffic's subtab spacing (base .portal-subtabs gap = --space-2). */
+  gap: var(--space-2);
   align-items: center;
 }
 
