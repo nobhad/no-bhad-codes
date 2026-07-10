@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import { Inbox } from 'lucide-react';
-import { IconButton } from '@react/factories';
+import { IconButton, formatPhone } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import {
   PortalTable,
@@ -503,7 +503,7 @@ export function ClientsTable({
                         </span>
                         <span className="cell-subtitle identity-email">{client.email}</span>
                         {client.phone && (
-                          <span className="cell-subtitle identity-phone">{client.phone}</span>
+                          <span className="cell-subtitle identity-phone">{formatPhone(client.phone)}</span>
                         )}
                         {/* Stacked content for responsive - hidden on desktop */}
                         <span className="type-stacked">{CLIENT_TYPE_LABELS[client.client_type]}</span>
