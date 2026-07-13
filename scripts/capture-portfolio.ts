@@ -86,7 +86,8 @@ const AUTH_ADMIN_PAGES = [
   { name: 'admin-dashboard', path: '/dashboard#/dashboard' },
   { name: 'admin-work', path: '/dashboard#/work' },
   { name: 'admin-crm', path: '/dashboard#/crm' },
-  { name: 'admin-analytics', path: '/dashboard#/analytics' }
+  { name: 'admin-documents', path: '/dashboard#/documents' },
+  { name: 'admin-traffic', path: '/dashboard#/traffic' }
 ];
 
 const AUTH_CLIENT_PAGES = [
@@ -98,6 +99,33 @@ const AUTH_CLIENT_PAGES = [
 ];
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// In-SPA navigation: change only the hash so the authenticated dashboard SPA
+// doesn't cold-reload. A cold /dashboard load fails the SPA's auth bootstrap
+// and redirects to the login screen, so authenticated captures MUST reuse the
+// post-login page and only change its hash. Assumes page is already on /dashboard.
+async function navigateInSpa(page: puppeteer.Page, fullPath: string) {
+  const hashIndex = fullPath.indexOf('#');
+  const hash = hashIndex >= 0 ? fullPath.slice(hashIndex) : '#/dashboard';
+  await page.evaluate((h: string) => {
+    window.location.hash = h;
+  }, hash);
+}
+
+// Dismiss the cookie-consent banner so it doesn't overlap captures. Sets the
+// tracking_consent cookie (so it won't re-render) and removes any already-
+// rendered .consent-banner element. Idempotent.
+async function dismissCookieBanner(page: puppeteer.Page) {
+  try {
+    await page.evaluate(() => {
+      document.cookie = 'tracking_consent=true; path=/; max-age=31536000';
+      document.querySelectorAll('.consent-banner').forEach((el) => el.remove());
+    });
+    await wait(200);
+  } catch {
+    /* no banner present */
+  }
+}
 
 function setTheme(page: puppeteer.Page, themeValue: string) {
   return page.evaluate((tv: string) => {
@@ -332,12 +360,10 @@ async function captureAuthenticatedPages(
     const filename = `${pageConfig.name}-${themeName}-${viewportName}.png`;
     const filepath = path.join(OUTPUT_DIR, filename);
     try {
-      await page.goto(`${BASE_URL}${pageConfig.path}`, {
-        waitUntil: 'networkidle2',
-        timeout: LOGIN_NAV_TIMEOUT_MS
-      });
+      await navigateInSpa(page, pageConfig.path);
       await setTheme(page, themeValue);
       await wait(ANIMATION_WAIT_MS);
+      await dismissCookieBanner(page);
       await page.screenshot({ path: filepath, fullPage: FULL_PAGE, type: 'png' });
       console.log(`  ${filename}`);
     } catch (err) {
@@ -361,25 +387,28 @@ async function captureAuthenticatedScreenshotsForRole(
   roleLabel: string
 ) {
   const context = await browser.createBrowserContext();
-  const loginPage = await context.newPage();
-  await loginPage.setViewport({ width: LOGIN_VIEWPORT.width, height: LOGIN_VIEWPORT.height });
+  // Log in once and reuse the authenticated page — a fresh page cold-loading
+  // /dashboard is bounced to the login screen by the SPA auth bootstrap.
+  const page = await context.newPage();
+  await page.setViewport({ width: LOGIN_VIEWPORT.width, height: LOGIN_VIEWPORT.height });
+  // Pre-set consent BEFORE any navigation so the shadow-DOM cookie banner
+  // (suppressed by an existing tracking_consent cookie) never renders in captures.
+  await page.setCookie({ name: 'tracking_consent', value: 'true', url: BASE_URL });
 
   try {
-    await loginAs(loginPage, creds.email, creds.password);
+    await loginAs(page, creds.email, creds.password);
   } catch (err) {
     console.error(`  ${roleLabel} login failed: ${err instanceof Error ? err.message : err}`);
     await context.close();
     return;
   }
-  await loginPage.close();
+  await dismissCookieBanner(page);
 
   for (const viewport of VIEWPORTS) {
     for (const theme of THEMES) {
       console.log(`--- ${roleLabel}: ${viewport.name} / ${theme.name} ---`);
-      const page = await context.newPage();
       await page.setViewport({ width: viewport.width, height: viewport.height });
       await captureAuthenticatedPages(page, pages, theme.name, theme.value, viewport.name);
-      await page.close();
     }
   }
 
@@ -420,10 +449,7 @@ async function recordAuthenticatedWalkthrough(
 ) {
   for (const pageConfig of pages) {
     try {
-      await page.goto(`${BASE_URL}${pageConfig.path}`, {
-        waitUntil: 'networkidle2',
-        timeout: LOGIN_NAV_TIMEOUT_MS
-      });
+      await navigateInSpa(page, pageConfig.path);
       await setTheme(page, themeValue);
       await wait(VIDEO_TRANSITION_MS);
 
@@ -455,24 +481,28 @@ async function recordAuthenticatedVideosForRole(
   fileSlug: string
 ) {
   const context = await browser.createBrowserContext();
-  const loginPage = await context.newPage();
-  await loginPage.setViewport({ width: LOGIN_VIEWPORT.width, height: LOGIN_VIEWPORT.height });
+  // Log in once and reuse the authenticated page for every video (a cold-loaded
+  // fresh page is bounced to the login screen by the SPA auth bootstrap).
+  const page = await context.newPage();
+  await page.setViewport({ width: LOGIN_VIEWPORT.width, height: LOGIN_VIEWPORT.height });
+  // Pre-set consent BEFORE any navigation so the shadow-DOM cookie banner
+  // (suppressed by an existing tracking_consent cookie) never renders in captures.
+  await page.setCookie({ name: 'tracking_consent', value: 'true', url: BASE_URL });
 
   try {
-    await loginAs(loginPage, creds.email, creds.password);
+    await loginAs(page, creds.email, creds.password);
   } catch (err) {
     console.error(`  ${roleLabel} login failed: ${err instanceof Error ? err.message : err}`);
     await context.close();
     return;
   }
-  await loginPage.close();
+  await dismissCookieBanner(page);
 
   for (const viewport of VIEWPORTS) {
     for (const theme of THEMES) {
       const label = `${viewport.name}-${theme.name}`;
       const videoPath = path.join(VIDEO_DIR, `walkthrough-${fileSlug}-${label}.webm`);
       console.log(`Recording ${roleLabel}: ${label}...`);
-      const page = await context.newPage();
       await page.setViewport({ width: viewport.width, height: viewport.height });
       try {
         const recorder = await page.screencast({ path: videoPath });
@@ -482,7 +512,6 @@ async function recordAuthenticatedVideosForRole(
       } catch (err) {
         console.error(`  ${roleLabel} video failed: ${err instanceof Error ? err.message : err}`);
       }
-      await page.close();
     }
   }
 
