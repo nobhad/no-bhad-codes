@@ -472,6 +472,37 @@ The projects page renders a vintage TV with a channel-guide screen. Channel 01 i
 
 ---
 
+## Branded 404 Page
+
+**Status:** DONE (2026-07-13)
+
+- [x] Standalone `public/404.html` using existing `wile_404_sign.svg` + coyote voice ("Wrong turn, genius.")
+- [x] In-SPA `#/404` / `#/not-found` off-map section matching the standalone composition
+- [x] Unknown hashes + missing project slugs route to the 404 section
+- [x] Express HTML Accept → branded 404.html (JSON preserved for API clients)
+- [ ] Visual check: `/404.html`, `#/404`, `#/this-is-fake`, hard refresh theme toggle
+
+---
+
+## Case Study Media + Hedgewitch Launch Prep
+
+**Status:** IN PROGRESS (2026-07-13)
+
+- [x] Copied curated Backend admin/portal screenshots + walkthrough videos into `public/portfolio/the-backend/`
+- [x] Wired `screenshots` + `videos` on The Backend entry in `portfolio.json`; hero uses admin dashboard
+- [x] The Backend case study status set to `completed` (live)
+- [x] No Bhad Codes case study status set to `completed` (live)
+- [x] Replaced cookie-bannered admin captures with clean light-desktop shots; dropped portal-login 404 image + duplicate portal-projects shot
+- [x] Re-captured No Bhad Codes public screenshots (cookie consent set pre-nav) into `public/portfolio/nobhad-codes/`; added light walkthrough videos
+- [x] Fixed `capture-portfolio.ts` screenshot path to pre-set `tracking_consent` like the video path already did
+- [x] Video walkthroughs now scroll every page to the bottom (shared `scrollPageToBottom` helper finds the real scroll root)
+- [x] Re-enabled project-detail media rendering (images + `<video controls>`)
+- [x] Hedgewitch case study: `testUrl` → https://hedgewitch.netlify.app/, `launchDate` → 2026-07-17
+- [ ] Visual check on `#/projects/the-backend` and `#/projects/hedgewitch-horticulture` (desktop + mobile)
+- [ ] Hedgewitch case study still needs site screenshots/recordings when ready
+
+---
+
 ## Portfolio Capture Script
 
 **Status:** MOSTLY WORKING — one fix awaiting verification

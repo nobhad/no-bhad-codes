@@ -572,6 +572,14 @@
   box-shadow: var(--shadow-elevated-sm);
 }
 
+.worksub-info figure video {
+  display: block;
+  width: 100%;
+  border-radius: var(--border-radius-lg, 12px);
+  box-shadow: var(--shadow-elevated-sm);
+  background: var(--color-dark);
+}
+
 /* Section heading with icon */
 .section-heading-wrapper {
   display: flex;
@@ -1127,6 +1135,11 @@
 }
 
 .project-status-badge.status-completed {
+  background-color: var(--color-success);
+  color: var(--color-off-white);
+}
+
+.project-status-badge.status-live {
   background-color: var(--color-success);
   color: var(--color-off-white);
 }

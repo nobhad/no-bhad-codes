@@ -30,24 +30,20 @@
         "Vitest"
       ],
       "date": "2026-01-01",
-      "status": "in-progress",
+      "status": "live",
       "featured": true,
-      "heroImage": "",
+      "heroImage": "/portfolio/nobhad-codes/home-light-desktop.png",
       "screenshots": [
-        "/portfolio/nobhad-codes/home-light-desktop.png",
-        "/portfolio/nobhad-codes/home-dark-desktop.png",
-        "/portfolio/nobhad-codes/about-light-desktop.png",
-        "/portfolio/nobhad-codes/about-dark-desktop.png",
-        "/portfolio/nobhad-codes/projects-light-desktop.png",
-        "/portfolio/nobhad-codes/projects-dark-desktop.png",
-        "/portfolio/nobhad-codes/project-nobhad-codes-light-desktop.png",
-        "/portfolio/nobhad-codes/contact-light-desktop.png",
-        "/portfolio/nobhad-codes/nav-open-dark-desktop.png",
         "/portfolio/nobhad-codes/home-light-mobile.png",
-        "/portfolio/nobhad-codes/home-dark-mobile.png",
         "/portfolio/nobhad-codes/about-light-mobile.png",
         "/portfolio/nobhad-codes/projects-light-mobile.png",
+        "/portfolio/nobhad-codes/project-nobhad-codes-light-mobile.png",
+        "/portfolio/nobhad-codes/contact-light-mobile.png",
         "/portfolio/nobhad-codes/nav-open-light-mobile.png"
+      ],
+      "videos": [
+        "/portfolio/nobhad-codes/videos/walkthrough-desktop-light.webm",
+        "/portfolio/nobhad-codes/videos/walkthrough-desktop-dark.webm"
       ],
       "liveUrl": "https://nobhad.codes",
       "repoUrl": "https://github.com/nobhad",
@@ -165,18 +161,23 @@
         "Playwright"
       ],
       "date": "2026-01-01",
-      "status": "in-progress",
+      "status": "live",
       "featured": true,
-      "heroImage": "",
+      "heroImage": "/portfolio/the-backend/admin-dashboard.png",
       "screenshots": [
-        "/portfolio/the-backend/admin-login-light-desktop.png",
-        "/portfolio/the-backend/admin-login-dark-desktop.png",
-        "/portfolio/the-backend/portal-login-light-desktop.png",
-        "/portfolio/the-backend/portal-login-dark-desktop.png",
-        "/portfolio/the-backend/admin-login-light-mobile.png",
-        "/portfolio/the-backend/admin-login-dark-mobile.png",
-        "/portfolio/the-backend/portal-login-light-mobile.png",
-        "/portfolio/the-backend/portal-login-dark-mobile.png"
+        "/portfolio/the-backend/admin-dashboard-light-mobile.png",
+        "/portfolio/the-backend/admin-work-light-mobile.png",
+        "/portfolio/the-backend/admin-crm-light-mobile.png",
+        "/portfolio/the-backend/admin-documents-light-mobile.png",
+        "/portfolio/the-backend/admin-traffic-light-mobile.png",
+        "/portfolio/the-backend/portal-dashboard-light-mobile.png",
+        "/portfolio/the-backend/portal-files-light-mobile.png",
+        "/portfolio/the-backend/portal-messages-light-mobile.png",
+        "/portfolio/the-backend/portal-invoices-light-mobile.png"
+      ],
+      "videos": [
+        "/portfolio/the-backend/videos/walkthrough-admin-desktop-light.webm",
+        "/portfolio/the-backend/videos/walkthrough-admin-desktop-dark.webm"
       ],
       "liveUrl": "https://nobhad.codes/#/portal",
       "isDocumented": true,
@@ -260,11 +261,13 @@
         "Netlify",
         "CSS"
       ],
-      "date": "2026-01-01",
+      "date": "2026-07-17",
       "status": "in-progress",
       "featured": true,
       "heroImage": "",
       "screenshots": [],
+      "testUrl": "https://hedgewitch.netlify.app/",
+      "launchDate": "2026-07-17",
       "isDocumented": true,
       "titleCard": {
         "composed": "/images/tv/title-cards/hedgewitch.webp",

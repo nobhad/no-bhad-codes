@@ -111,6 +111,9 @@
 /* Client portal section on main page */
 @import "./pages/client-portal-section.css" layer(pages);
 
+/* In-SPA 404 / lost-channel page */
+@import "./pages/not-found.css" layer(pages);
+
 /* ============================================
  * 5.5. PAGE STATES LAYER (overrides page-specific display)
  * ============================================

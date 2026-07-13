@@ -63,6 +63,7 @@
 
 @import "../pages/terminal-intake.css" layer(pages);
 @import "../pages/client-portal-section.css" layer(pages);
+@import "../pages/not-found.css" layer(pages);
 
 /* ============================================
  * PAGE STATES (transitions, visibility)

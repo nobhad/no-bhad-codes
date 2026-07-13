@@ -169,8 +169,10 @@ main#main-content {
 
 main#main-content[data-active-page="project-detail"],
 main#main-content[data-active-page="portal-login"],
+main#main-content[data-active-page="not-found"],
 html[data-initial-page="project-detail"]:not(.js-ready) main#main-content,
-html[data-initial-page="portal-login"]:not(.js-ready) main#main-content {
+html[data-initial-page="portal-login"]:not(.js-ready) main#main-content,
+html[data-initial-page="not-found"]:not(.js-ready) main#main-content {
   overflow-y: auto;
 }
 
