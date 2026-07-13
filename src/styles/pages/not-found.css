@@ -1,0 +1,141 @@
+/**
+ * ===============================================
+ * NOT FOUND (404) PAGE
+ * ===============================================
+ * @file src/styles/pages/not-found.css
+ *
+ * In-SPA 404 / lost-channel page. Mirrors the standalone public/404.html
+ * composition using main-site design tokens.
+ */
+
+.not-found-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: calc(100vh - var(--header-height, 50px) - 40px);
+  min-height: calc(100dvh - var(--header-height, 50px) - 40px);
+  padding: clamp(1.5rem, 5vw, 3rem);
+}
+
+.not-found-content {
+  width: min(100%, 40rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: clamp(1.25rem, 3vw, 2rem);
+}
+
+.not-found-sign {
+  width: min(100%, 22rem);
+  height: auto;
+  filter: drop-shadow(0.6rem 0.75rem 0 color-mix(in srgb, var(--color-dark) 18%, transparent));
+  transform-origin: 70% 100%;
+  animation: not-found-sway 5.5s ease-in-out infinite;
+}
+
+@keyframes not-found-sway {
+  0%,
+  100% {
+    transform: rotate(-1.6deg) translateY(0);
+  }
+  50% {
+    transform: rotate(1.8deg) translateY(-0.35rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .not-found-sign {
+    animation: none;
+  }
+}
+
+.not-found-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 0.75rem);
+  max-width: 28rem;
+}
+
+.not-found-eyebrow {
+  font-family: var(--font-family-acme, 'Acme', sans-serif);
+  font-size: var(--font-size-sm, 0.85rem);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-brand-primary, #dc2626);
+  margin: 0;
+}
+
+.not-found-title {
+  font-family: var(--font-family-acme, 'Acme', sans-serif);
+  font-size: clamp(2rem, 6vw, 3.25rem);
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-dark);
+  margin: 0;
+}
+
+.not-found-body {
+  font-size: clamp(0.95rem, 2.2vw, 1.1rem);
+  line-height: 1.55;
+  color: var(--color-dark);
+  opacity: 0.72;
+  margin: 0;
+}
+
+.not-found-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3, 0.75rem);
+  justify-content: center;
+}
+
+.not-found-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.65rem 1.35rem;
+  border: 1.5px solid var(--color-dark);
+  text-decoration: none;
+  font-family: var(--font-family-acme, 'Acme', sans-serif);
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition:
+    transform 0.18s ease,
+    background-color var(--transition-theme, 0.35s),
+    color var(--transition-theme, 0.35s),
+    border-color var(--transition-theme, 0.35s);
+}
+
+.not-found-btn--primary {
+  background: var(--color-dark);
+  color: var(--color-light);
+}
+
+.not-found-btn--ghost {
+  background: transparent;
+  color: var(--color-dark);
+}
+
+.not-found-btn:hover {
+  transform: translateY(-2px);
+}
+
+.not-found-btn--ghost:hover {
+  border-color: var(--color-brand-primary, #dc2626);
+  color: var(--color-brand-primary, #dc2626);
+}
+
+@media (--mobile) {
+  .not-found-section {
+    padding: 1.25rem 1rem 2rem;
+  }
+
+  .not-found-sign {
+    width: min(100%, 16rem);
+  }
+}

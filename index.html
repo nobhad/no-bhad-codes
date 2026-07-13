@@ -26,6 +26,8 @@
           else if (hash.startsWith('#/projects/')) pageId = 'project-detail';
           else if (hash === '#/admin-login' || hash === '#admin-login') pageId = 'admin-login';
           else if (hash === '#/portal' || hash.startsWith('#/portal?')) pageId = 'portal-login';
+          else if (hash === '#/404' || hash === '#/not-found') pageId = 'not-found';
+          else if (hash && hash !== '#' && hash !== '#/') pageId = 'not-found';
 
           // Store for CSS to use via data attribute
           document.documentElement.setAttribute('data-initial-page', pageId);
@@ -130,18 +132,22 @@
          map tiles render together inside .site-map; site-map.css positions
          the camera. We only need to hide off-map sections here.
 
-         For off-map initial pages (project-detail, portal-login), hide the
+         For off-map initial pages (project-detail, portal-login, not-found), hide the
          entire .site-map so map content doesn't bleed through. */
 
       /* Map-tile initial: hide off-map sections */
       html[data-initial-page='intro']:not(.js-ready) #project-detail,
       html[data-initial-page='intro']:not(.js-ready) #portal-login,
+      html[data-initial-page='intro']:not(.js-ready) #not-found,
       html[data-initial-page='about']:not(.js-ready) #project-detail,
       html[data-initial-page='about']:not(.js-ready) #portal-login,
+      html[data-initial-page='about']:not(.js-ready) #not-found,
       html[data-initial-page='contact']:not(.js-ready) #project-detail,
       html[data-initial-page='contact']:not(.js-ready) #portal-login,
+      html[data-initial-page='contact']:not(.js-ready) #not-found,
       html[data-initial-page='projects']:not(.js-ready) #project-detail,
-      html[data-initial-page='projects']:not(.js-ready) #portal-login {
+      html[data-initial-page='projects']:not(.js-ready) #portal-login,
+      html[data-initial-page='projects']:not(.js-ready) #not-found {
         display: none !important;
       }
 
@@ -154,21 +160,28 @@
 
       /* Off-map initial: show that page, hide .site-map and the other off-map */
       html[data-initial-page='project-detail']:not(.js-ready) #project-detail,
-      html[data-initial-page='portal-login']:not(.js-ready) #portal-login {
+      html[data-initial-page='portal-login']:not(.js-ready) #portal-login,
+      html[data-initial-page='not-found']:not(.js-ready) #not-found {
         display: grid !important;
         opacity: 1 !important;
         visibility: visible !important;
       }
       html[data-initial-page='project-detail']:not(.js-ready) .site-map,
-      html[data-initial-page='portal-login']:not(.js-ready) .site-map {
+      html[data-initial-page='portal-login']:not(.js-ready) .site-map,
+      html[data-initial-page='not-found']:not(.js-ready) .site-map {
         display: none !important;
       }
       html[data-initial-page='project-detail']:not(.js-ready) #portal-login,
-      html[data-initial-page='portal-login']:not(.js-ready) #project-detail {
+      html[data-initial-page='project-detail']:not(.js-ready) #not-found,
+      html[data-initial-page='portal-login']:not(.js-ready) #project-detail,
+      html[data-initial-page='portal-login']:not(.js-ready) #not-found,
+      html[data-initial-page='not-found']:not(.js-ready) #project-detail,
+      html[data-initial-page='not-found']:not(.js-ready) #portal-login {
         display: none !important;
       }
       html[data-initial-page='project-detail']:not(.js-ready) .intro-morph-overlay,
-      html[data-initial-page='portal-login']:not(.js-ready) .intro-morph-overlay {
+      html[data-initial-page='portal-login']:not(.js-ready) .intro-morph-overlay,
+      html[data-initial-page='not-found']:not(.js-ready) .intro-morph-overlay {
         display: none !important;
       }
     </style>
@@ -1053,6 +1066,10 @@
                     <span class="round-label">Duration</span>
                     <span id="project-duration" class="text-medium"></span>
                   </div>
+                  <div class="intro-left-group" id="project-launch-group" hidden>
+                    <span class="round-label">Launch</span>
+                    <span id="project-launch" class="text-medium"></span>
+                  </div>
                 </div>
               </div>
               <!-- Right column: tools -->
@@ -1214,6 +1231,36 @@
                 </a>
               </div>
             </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- NOT FOUND / 404 SECTION (off-map) -->
+      <section
+        id="not-found"
+        class="not-found-section page-hidden"
+        data-page="not-found"
+      >
+        <div class="not-found-content">
+          <img
+            class="not-found-sign"
+            src="/images/wile_404_sign.svg"
+            width="997"
+            height="919"
+            alt="Hand-painted Acme-style road sign reading 404 Work In Progress"
+          />
+          <div class="not-found-copy">
+            <p class="not-found-eyebrow">Channel lost</p>
+            <h1 class="not-found-title">That was a painted tunnel.</h1>
+            <p class="not-found-body">
+              You followed a link straight into a tunnel painted on a rock wall — no page behind it,
+              just the wall. Happens to the best of us. Take the scenic route back.
+            </p>
+          </div>
+          <div class="not-found-actions">
+            <a class="not-found-btn not-found-btn--primary" href="#/">Home</a>
+            <a class="not-found-btn not-found-btn--ghost" href="#/projects">Projects</a>
+            <a class="not-found-btn not-found-btn--ghost" href="#/contact">Contact</a>
           </div>
         </div>
       </section>

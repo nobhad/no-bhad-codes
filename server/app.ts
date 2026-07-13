@@ -24,6 +24,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import { existsSync } from 'fs';
 import dotenv from 'dotenv';
 import { errorTracker } from './services/error-tracking.js';
 import { emailService } from './services/email-service.js';
@@ -468,6 +469,20 @@ app.use((req, res) => {
       }
     }
   );
+
+  // Browser navigations get the branded HTML 404; API clients keep JSON.
+  const wantsHtml = req.accepts(['html', 'json']) === 'html';
+  if (wantsHtml) {
+    const candidates = [
+      resolve(__dirname, '../dist/404.html'),
+      resolve(__dirname, '../public/404.html')
+    ];
+    for (const candidate of candidates) {
+      if (existsSync(candidate)) {
+        return res.status(404).sendFile(candidate);
+      }
+    }
+  }
 
   errorResponseWithPayload(res, 'Route not found', 404, 'RESOURCE_NOT_FOUND', {
     message: `Cannot ${req.method} ${req.originalUrl}`

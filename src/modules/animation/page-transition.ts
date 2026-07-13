@@ -362,13 +362,18 @@ export class PageTransitionModule extends BaseModule {
         id: 'portal-login',
         route: '#/portal',
         title: 'Portal - No Bhad Codes'
+      },
+      {
+        id: 'not-found',
+        route: '#/404',
+        title: '404 - No Bhad Codes'
       }
     ];
 
     // Off-map pages render via the blur-swap fallback and have no element on
     // the spatial map, so a missing element is EXPECTED for them — log at debug
     // rather than warning. On-map pages with a missing element are real bugs.
-    const OFF_MAP_PAGES = new Set(['project-detail', 'admin-login', 'portal-login']);
+    const OFF_MAP_PAGES = new Set(['project-detail', 'admin-login', 'portal-login', 'not-found']);
 
     // Cache page elements
     pageConfigs.forEach((config) => {
@@ -1007,10 +1012,12 @@ export class PageTransitionModule extends BaseModule {
       projects: 'projects',
       contact: 'contact',
       'admin-login': 'admin-login',
-      'portal': 'portal-login'
+      'portal': 'portal-login',
+      '404': 'not-found',
+      'not-found': 'not-found'
     };
 
-    return hashToPage[cleanPath] || null;
+    return hashToPage[cleanPath] || 'not-found';
   }
 
   /**

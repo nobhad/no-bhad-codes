@@ -26,6 +26,9 @@ const BASE_URL = 'http://localhost:4000';
 const OUTPUT_DIR = path.resolve(import.meta.dirname, '..', 'screenshots');
 const VIDEO_DIR = path.join(OUTPUT_DIR, 'videos');
 const FULL_PAGE = true;
+const CHROME_PATH =
+  process.env.PUPPETEER_EXECUTABLE_PATH ||
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 const ANIMATION_WAIT_MS = 3000;
 const PAGE_LOAD_WAIT_MS = 2000;
@@ -100,6 +103,66 @@ const AUTH_CLIENT_PAGES = [
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+/**
+ * Slowly scroll the active page all the way to the bottom (then back up)
+ * so walkthrough videos show full-page content, not just the first fold.
+ * Picks the largest vertical scroll container — window, main#main-content,
+ * or portal/admin panes — because the SPA often scrolls those instead of
+ * document.body.
+ */
+async function scrollPageToBottom(page: puppeteer.Page): Promise<void> {
+  // Pass a STRING IIFE, not a function. Even with plain-JS syntax inside, tsx/
+  // esbuild runs with keep-names and wraps the named inner arrow (`pause`) with
+  // `__name(...)`; when Puppeteer serializes the callback into the page that
+  // reference throws "__name is not defined". A raw string is not transformed.
+  await page.evaluate(`(async () => {
+    const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+
+    const candidates = [
+      document.querySelector('main#main-content'),
+      document.querySelector('.portal-content-area'),
+      document.querySelector('.portal-main'),
+      document.querySelector('[data-scroll-container]'),
+      document.scrollingElement,
+      document.documentElement,
+      document.body
+    ].filter(Boolean);
+
+    const all = document.querySelectorAll('*');
+    for (let i = 0; i < all.length; i++) {
+      const el = all[i];
+      const style = getComputedStyle(el);
+      if (!/(auto|scroll)/.test(style.overflowY + style.overflow)) continue;
+      if (el.clientHeight < 120) continue;
+      candidates.push(el);
+    }
+
+    let root = candidates[0] || document.documentElement;
+    let bestOverflow = 0;
+    for (let i = 0; i < candidates.length; i++) {
+      const el = candidates[i];
+      const overflow = el.scrollHeight - el.clientHeight;
+      if (overflow > bestOverflow) {
+        bestOverflow = overflow;
+        root = el;
+      }
+    }
+
+    const maxScroll = Math.max(0, root.scrollHeight - root.clientHeight);
+    if (maxScroll <= 8) return;
+
+    const step = Math.max(140, Math.floor(root.clientHeight * 0.4));
+    for (let pos = 0; pos < maxScroll; pos += step) {
+      root.scrollTop = pos;
+      await pause(110);
+    }
+    root.scrollTop = maxScroll;
+    await pause(900);
+    root.scrollTop = 0;
+    await pause(500);
+  })()`);
+}
+
 // In-SPA navigation: change only the hash so the authenticated dashboard SPA
 // doesn't cold-reload. A cold /dashboard load fails the SPA's auth bootstrap
 // and redirects to the login screen, so authenticated captures MUST reuse the
@@ -146,10 +209,15 @@ async function takeScreenshots() {
 
   const browser = await puppeteer.launch({
     headless: true,
+    executablePath: CHROME_PATH,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
   const page = await browser.newPage();
+
+  // Pre-set consent BEFORE any navigation so the shadow-DOM cookie banner
+  // never renders in captures (same approach as the video walkthrough path).
+  await page.setCookie({ name: 'tracking_consent', value: 'accepted', url: BASE_URL });
 
   for (const viewport of VIEWPORTS) {
     for (const theme of THEMES) {
@@ -221,6 +289,7 @@ async function recordVideos() {
 
   const browser = await puppeteer.launch({
     headless: true,
+    executablePath: CHROME_PATH,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
@@ -232,6 +301,7 @@ async function recordVideos() {
 
       const page = await browser.newPage();
       await page.setViewport({ width: viewport.width, height: viewport.height });
+      await page.setCookie({ name: 'tracking_consent', value: 'accepted', url: BASE_URL });
 
       const recorder = await page.screencast({ path: videoPath });
 
@@ -247,6 +317,7 @@ async function recordVideos() {
         });
       } catch { /* fine */ }
       await wait(ANIMATION_WAIT_MS);
+      await scrollPageToBottom(page);
 
       // Show nav menu open/close
       try {
@@ -256,29 +327,13 @@ async function recordVideos() {
         await wait(VIDEO_TRANSITION_MS);
       } catch { /* nav toggle failed */ }
 
-      // Walk through pages
+      // Walk through pages — every stop scrolls to the bottom
       for (const pageConfig of VIDEO_WALKTHROUGH.slice(1)) {
         const url = `${BASE_URL}${pageConfig.path}`;
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 15000 });
         await setTheme(page, theme.value);
         await wait(VIDEO_TRANSITION_MS);
-
-        // Scroll down slowly on content-heavy pages
-        if (['about', 'project-nobhad-codes', 'project-the-backend'].includes(pageConfig.name)) {
-          await page.evaluate(async () => {
-            const scrollStep = 200;
-            const scrollDelay = 100;
-            const maxScroll = document.body.scrollHeight - window.innerHeight;
-            for (let pos = 0; pos < maxScroll; pos += scrollStep) {
-              window.scrollTo(0, pos);
-              await new Promise((r) => setTimeout(r, scrollDelay));
-            }
-            // Scroll back to top
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            await new Promise((r) => setTimeout(r, 500));
-          });
-        }
-
+        await scrollPageToBottom(page);
         await wait(VIDEO_PAGE_PAUSE_MS);
       }
 
@@ -424,6 +479,7 @@ async function takeAuthenticatedScreenshots() {
 
   const browser = await puppeteer.launch({
     headless: true,
+    executablePath: CHROME_PATH,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
@@ -453,18 +509,8 @@ async function recordAuthenticatedWalkthrough(
       await setTheme(page, themeValue);
       await wait(VIDEO_TRANSITION_MS);
 
-      // Slow scroll to show content
-      await page.evaluate(async () => {
-        const scrollStep = 200;
-        const scrollDelay = 100;
-        const maxScroll = document.body.scrollHeight - window.innerHeight;
-        for (let pos = 0; pos < maxScroll; pos += scrollStep) {
-          window.scrollTo(0, pos);
-          await new Promise((r) => setTimeout(r, scrollDelay));
-        }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        await new Promise((r) => setTimeout(r, 500));
-      });
+      // Slow scroll on every page so videos show full dashboard content
+      await scrollPageToBottom(page);
 
       await wait(VIDEO_PAGE_PAUSE_MS);
     } catch (err) {
@@ -529,6 +575,7 @@ async function recordAuthenticatedVideos() {
 
   const browser = await puppeteer.launch({
     headless: true,
+    executablePath: CHROME_PATH,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 

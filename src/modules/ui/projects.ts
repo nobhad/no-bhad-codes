@@ -123,11 +123,14 @@ interface PortfolioProject {
   tools: string[];
   technologies?: string[];
   year: number;
-  status: 'in-progress' | 'completed' | 'planned';
+  status: 'in-progress' | 'completed' | 'planned' | 'live';
   heroImage: string;
   screenshots: string[];
+  videos?: string[];
   liveUrl?: string;
+  testUrl?: string;
   repoUrl?: string;
+  launchDate?: string;
   isDocumented: boolean;
   titleCard?: string | TitleCardData;
   duration?: string;
@@ -397,8 +400,8 @@ export class ProjectsModule extends BaseModule {
     const project = this.portfolioData.projects.find((p) => p.slug === slug);
     if (!project) {
       this.warn(`Project not found: ${slug}`);
-      // Navigate back to projects list
-      window.location.hash = '#/projects';
+      // Navigate to branded 404 for unknown project slugs
+      window.location.hash = '#/404';
       return;
     }
 
@@ -1364,6 +1367,11 @@ export class ProjectsModule extends BaseModule {
     if (project.duration) {
       detailRows.push(`<dt>Duration</dt><dd>${escapeHtml(project.duration)}</dd>`);
     }
+    if (project.launchDate) {
+      detailRows.push(
+        `<dt>Launch</dt><dd>${escapeHtml(this.formatLaunchDate(project.launchDate))}</dd>`
+      );
+    }
     if (detailRows.length > 0) {
       panels.push(`
         <article class="crt-tv__panel" data-panel-key="details">
@@ -1440,10 +1448,12 @@ export class ProjectsModule extends BaseModule {
     }
 
     // Outro — always last. Click-through to detail page is the headline
-    // affordance; live URL secondary; hint about channel-changing
+    // affordance; live/test URL secondary; hint about channel-changing
     // tertiary so the user knows they can keep browsing.
-    const liveLink = project.liveUrl
-      ? `<a class="crt-tv__panel-link" href="${escapeAttr(project.liveUrl)}" target="_blank" rel="noopener">Live: ${escapeHtml(project.liveUrl)}</a>`
+    const primaryUrl = project.liveUrl || project.testUrl;
+    const primaryLabel = project.liveUrl ? 'Live' : project.testUrl ? 'Test' : '';
+    const liveLink = primaryUrl
+      ? `<a class="crt-tv__panel-link" href="${escapeAttr(primaryUrl)}" target="_blank" rel="noopener">${primaryLabel}: ${escapeHtml(primaryUrl)}</a>`
       : '';
     panels.push(`
       <article class="crt-tv__panel crt-tv__panel--outro" data-panel-key="outro">
@@ -1990,13 +2000,14 @@ export class ProjectsModule extends BaseModule {
       breadcrumbCurrent.textContent = project.title;
     }
 
-    // Update title — wrap in anchor when liveUrl exists so the title itself
-    // is the primary CTA (opens live site in new tab). External icon appears
-    // after the text as a visual affordance.
+    // Update title — wrap in anchor when a live or test URL exists so the
+    // title itself is the primary CTA (opens in a new tab). External icon
+    // appears after the text as a visual affordance.
     const titleEl = this.projectDetailSection.querySelector('#project-title');
     if (titleEl) {
-      if (project.liveUrl) {
-        titleEl.innerHTML = `<a href="${project.liveUrl}" target="_blank" rel="noopener noreferrer" class="project-title-link">${project.title}<span class="project-title-icon" aria-hidden="true">${EXTERNAL_LINK_SVG}</span><span class="sr-only"> (opens in new tab)</span></a>`;
+      const titleHref = project.liveUrl || project.testUrl;
+      if (titleHref) {
+        titleEl.innerHTML = `<a href="${escapeAttr(titleHref)}" target="_blank" rel="noopener noreferrer" class="project-title-link">${escapeHtml(project.title)}<span class="project-title-icon" aria-hidden="true">${EXTERNAL_LINK_SVG}</span><span class="sr-only"> (opens in new tab)</span></a>`;
       } else {
         titleEl.textContent = project.title;
       }
@@ -2034,9 +2045,21 @@ export class ProjectsModule extends BaseModule {
     if (durationEl && durationGroup) {
       if (project.duration) {
         durationEl.textContent = project.duration;
-        (durationGroup as HTMLElement).style.display = '';
+        (durationGroup as HTMLElement).hidden = false;
       } else {
-        (durationGroup as HTMLElement).style.display = 'none';
+        (durationGroup as HTMLElement).hidden = true;
+      }
+    }
+
+    // Update launch date
+    const launchEl = this.projectDetailSection.querySelector('#project-launch');
+    const launchGroup = this.projectDetailSection.querySelector('#project-launch-group');
+    if (launchEl && launchGroup) {
+      if (project.launchDate) {
+        launchEl.textContent = this.formatLaunchDate(project.launchDate);
+        (launchGroup as HTMLElement).hidden = false;
+      } else {
+        (launchGroup as HTMLElement).hidden = true;
       }
     }
 
@@ -2044,7 +2067,7 @@ export class ProjectsModule extends BaseModule {
     const toolsEl = this.projectDetailSection.querySelector('#project-tools');
     if (toolsEl) {
       toolsEl.innerHTML = project.tools
-        .map((tool) => `<span class="tool-tag">${tool}</span>`)
+        .map((tool) => `<span class="tool-tag">${escapeHtml(tool)}</span>`)
         .join('');
     }
 
@@ -2057,19 +2080,28 @@ export class ProjectsModule extends BaseModule {
     // Update case study sections
     this.renderCaseStudySections(project);
 
-    // Clear screenshots section (temporarily removed pending layout redesign)
+    // Screenshots + walkthrough videos
     const infoEl = this.projectDetailSection.querySelector('#project-info');
     if (infoEl) {
-      infoEl.innerHTML = '';
+      infoEl.innerHTML = this.buildProjectMediaHtml(project);
     }
 
-    // Update links — live URL is now the title itself, so only render the
-    // source code link here (when present).
+    // Update links — live URL is on the title when present; surface test/repo
+    // links here as secondary CTAs.
     const linksEl = this.projectDetailSection.querySelector('#project-links');
     if (linksEl) {
-      linksEl.innerHTML = project.repoUrl
-        ? `<a href="${project.repoUrl}" target="_blank" rel="noopener noreferrer">${GITHUB_SVG}Source Code</a>`
-        : '';
+      const links: string[] = [];
+      if (project.testUrl) {
+        links.push(
+          `<a href="${escapeAttr(project.testUrl)}" target="_blank" rel="noopener noreferrer">${EXTERNAL_LINK_SVG}Test Site</a>`
+        );
+      }
+      if (project.repoUrl) {
+        links.push(
+          `<a href="${escapeAttr(project.repoUrl)}" target="_blank" rel="noopener noreferrer">${GITHUB_SVG}Source Code</a>`
+        );
+      }
+      linksEl.innerHTML = links.join('');
     }
 
     // GSAP entrance animations for detail page elements — skipped on
@@ -2087,9 +2119,63 @@ export class ProjectsModule extends BaseModule {
     const statusMap: Record<string, string> = {
       'in-progress': 'In Progress',
       completed: 'Completed',
-      planned: 'Planned'
+      planned: 'Planned',
+      live: 'Live'
     };
     return statusMap[status] || status;
+  }
+
+  /**
+   * Format an ISO launch date for the metadata strip (e.g. "July 17, 2026").
+   */
+  private formatLaunchDate(dateString: string): string {
+    const date = new Date(`${dateString}T12:00:00`);
+    if (Number.isNaN(date.getTime())) return dateString;
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    }).format(date);
+  }
+
+  /**
+   * Build screenshots + walkthrough video markup for the project-info slot.
+   */
+  private buildProjectMediaHtml(project: PortfolioProject): string {
+    const parts: string[] = [];
+    const title = escapeHtml(project.title);
+
+    if (project.videos && project.videos.length > 0) {
+      parts.push(
+        ...project.videos.map((src, index) => {
+          const label =
+            project.videos!.length === 1
+              ? `${title} walkthrough`
+              : `${title} walkthrough ${index + 1}`;
+          return `
+            <figure class="project-media project-media--video">
+              <video src="${escapeAttr(src)}" controls playsinline preload="metadata" aria-label="${label}"></video>
+            </figure>
+          `;
+        })
+      );
+    }
+
+    if (project.screenshots && project.screenshots.length > 0) {
+      parts.push(
+        ...project.screenshots.map((src, index) => {
+          const isMobile = /mobile|phone/i.test(src);
+          const imgClass = isMobile ? ' class="phone-screen"' : '';
+          return `
+            <figure class="project-media project-media--image">
+              <img src="${escapeAttr(src)}" alt="${title} screenshot ${index + 1}"${imgClass} loading="lazy" />
+            </figure>
+          `;
+        })
+      );
+    }
+
+    return parts.join('');
   }
 
   /**
