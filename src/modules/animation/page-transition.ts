@@ -1491,6 +1491,12 @@ export class PageTransitionModule extends BaseModule {
       const goingToAnotherDetail = targetHash.startsWith('#/projects/');
       if (goingToAnotherDetail) {
         this.captureDetailGhost();
+        // Sync the TV channel to the project we're carouseling to, so
+        // returning to projects lands on the most-recently-viewed channel
+        // (index 0 is the guide, so project slug index i → channel i + 1).
+        const nextSlug = targetHash.replace('#/projects/', '');
+        const nextIdx = this.getProjectSlugs().indexOf(nextSlug);
+        if (nextIdx >= 0) this.currentTvIndex = nextIdx + 1;
       }
       this.setPendingSlide(direction, targetHash);
       window.location.hash = targetHash;

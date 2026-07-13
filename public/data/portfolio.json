@@ -42,8 +42,7 @@
         "/portfolio/nobhad-codes/nav-open-light-mobile.png"
       ],
       "videos": [
-        "/portfolio/nobhad-codes/videos/walkthrough-desktop-light.webm",
-        "/portfolio/nobhad-codes/videos/walkthrough-desktop-dark.webm"
+        "/portfolio/nobhad-codes/videos/walkthrough-desktop.webm"
       ],
       "liveUrl": "https://nobhad.codes",
       "repoUrl": "https://github.com/nobhad",
@@ -163,7 +162,7 @@
       "date": "2026-01-01",
       "status": "live",
       "featured": true,
-      "heroImage": "/portfolio/the-backend/admin-dashboard.png",
+      "heroImage": "/portfolio/the-backend/portal-login.png",
       "screenshots": [
         "/portfolio/the-backend/admin-dashboard-light-mobile.png",
         "/portfolio/the-backend/admin-work-light-mobile.png",
@@ -176,8 +175,7 @@
         "/portfolio/the-backend/portal-invoices-light-mobile.png"
       ],
       "videos": [
-        "/portfolio/the-backend/videos/walkthrough-admin-desktop-light.webm",
-        "/portfolio/the-backend/videos/walkthrough-admin-desktop-dark.webm"
+        "/portfolio/the-backend/videos/walkthrough-admin-desktop.webm"
       ],
       "liveUrl": "https://nobhad.codes/#/portal",
       "isDocumented": true,
