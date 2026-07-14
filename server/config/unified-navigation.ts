@@ -411,10 +411,10 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
     mode: 'primary',
     subtabs: [
       { id: 'overview', label: 'Overview', roles: ['admin'], active: true },
-      { id: 'leads', label: 'Leads', roles: ['admin'], hideInSolo: true },
+      { id: 'leads', label: 'Leads', roles: ['admin'] },
       { id: 'messages', label: 'Messages', roles: ['admin'] },
       { id: 'clients', label: 'Clients', roles: ['admin'] },
-      { id: 'contacts', label: 'Contacts', roles: ['admin'], hideInSolo: true }
+      { id: 'contacts', label: 'Contacts', roles: ['admin'] }
     ]
   },
   // Admin: Documents group subtabs
