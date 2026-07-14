@@ -129,6 +129,15 @@ const WHEEL_DELTA_THRESHOLD = 12;
 const WHEEL_COOLDOWN_MS = 250;
 
 /**
+ * Detent (ms) for leaving project-detail by scrolling up. Once the case study
+ * is scrolled to the very top, an up-scroll only navigates back to projects if
+ * it arrives after a pause this long — so the momentum of scrolling UP to the
+ * top doesn't bounce straight to projects. The user has to stop, then scroll
+ * up again to leave.
+ */
+const DETAIL_TOP_DETENT_MS = 450;
+
+/**
  * How many recent hashes to remember for back/forward direction inference.
  * Two is enough to detect the most common case (user clicks back to the
  * previous page); the cap stops the stack from growing unbounded across
@@ -192,6 +201,9 @@ export class PageTransitionModule extends BaseModule {
 
   /** Phase C: cooldown timestamp — wheel events before this are ignored. */
   private wheelCooldownUntil: number = 0;
+  // Timestamp of the last significant project-detail wheel event, used to
+  // require a pause before an at-top up-scroll navigates back to projects.
+  private detailWheelLastAt: number = 0;
 
   /**
    * Direction of the next hash-driven navigation when triggered by wheel or
@@ -437,7 +449,12 @@ export class PageTransitionModule extends BaseModule {
     this.siteMap.setAttribute('data-map-camera', tile);
 
     if (!animated || this.reducedMotion) {
-      gsap.set(this.siteMap, { xPercent: pos.x, yPercent: pos.y });
+      // x/y: 0 clears any residual px translate GSAP would otherwise inherit
+      // from the pre-JS CSS camera transform (the data-initial-page fallback).
+      // Without it, a deep-link/refresh onto a map tile applies GSAP's
+      // translate(-100%) ON TOP of the inherited translate(-Npx), doubling the
+      // pan and pushing the tile off-screen — the blank projects TV on refresh.
+      gsap.set(this.siteMap, { x: 0, y: 0, xPercent: pos.x, yPercent: pos.y });
       return;
     }
 
@@ -1191,14 +1208,21 @@ export class PageTransitionModule extends BaseModule {
         // navigable direction from project-detail, so it's a no-op (no jump).
         // (Previously this branch keyed off finger-intent and jumped back to
         // projects when scrolling down from the top — scrollTop was still 0.)
+        this.detailWheelLastAt = performance.now();
         const canScrollDown =
           currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >= 1;
         if (canScrollDown) return;
         direction = 'down';
       } else {
-        // deltaY<0 scrolls the content UP; native-scroll to the top, then
-        // navigate up (back to projects).
+        // deltaY<0 scrolls the content UP; native-scroll to the top. Once at
+        // the top, only navigate back to projects if this up-scroll arrives
+        // after a pause — so the momentum of scrolling UP to the top doesn't
+        // bounce straight back. Stop, then scroll up again to leave.
+        const now = performance.now();
+        const sinceLast = now - this.detailWheelLastAt;
+        this.detailWheelLastAt = now;
         if (currentTile.scrollTop >= 1) return;
+        if (sinceLast < DETAIL_TOP_DETENT_MS) return;
         direction = 'up';
       }
     } else {
