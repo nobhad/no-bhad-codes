@@ -263,15 +263,20 @@ export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
         },
         () => handler(parsedPayload)
       );
-      // Clear payload on completion — most task payloads snapshot user
+      // Scrub payload on completion — most task payloads snapshot user
       // intake data (name, email, phone). The task is done; keeping
       // the PII around buys us nothing but a retention headache.
+      // NOTE: payload is NOT NULL, so clear it to an empty JSON object
+      // rather than NULL — setting NULL throws a constraint error that
+      // gets caught as a "handler failure", so the task never completes
+      // and retries forever (the email already sent, but lead-score /
+      // save-file re-run and the queue fills with stuck rows).
       await db.run(
         `UPDATE async_tasks
             SET status = 'completed',
                 completed_at = datetime('now'),
                 last_error = NULL,
-                payload = NULL
+                payload = '{}'
           WHERE id = ?`,
         [candidate.id]
       );
@@ -285,13 +290,14 @@ export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
       if (isDead) {
         // Dead row is kept for ops inspection but the payload is
         // dropped — if a handler needed to re-run from it, it wouldn't
-        // be retried anyway.
+        // be retried anyway. Empty JSON object, not NULL (payload is
+        // NOT NULL — see the completion path above).
         await db.run(
           `UPDATE async_tasks
               SET status = 'dead',
                   last_error = ?,
                   completed_at = datetime('now'),
-                  payload = NULL
+                  payload = '{}'
             WHERE id = ?`,
           [safeMessage, candidate.id]
         );
