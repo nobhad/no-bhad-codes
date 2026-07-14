@@ -156,7 +156,7 @@ async function getDashboardSnapshot(): Promise<DashboardSnapshot> {
   const leadsStats = await db.get<LeadsStatsRow>(`
     SELECT
       COUNT(*) as total,
-      SUM(CASE WHEN status = 'converted' THEN 1 ELSE 0 END) as converted
+      SUM(CASE WHEN converted_at IS NOT NULL THEN 1 ELSE 0 END) as converted
     FROM contact_submissions
   `);
 
