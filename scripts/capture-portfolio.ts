@@ -39,6 +39,13 @@ const LOGIN_NAV_TIMEOUT_MS = 15000;
 const POST_LOGIN_SETTLE_MS = 2500;
 const DROPDOWN_OPEN_DELAY_MS = 1500;
 
+// Before recording, wait until the bundled CSS has actually applied. In dev,
+// Vite injects CSS via JS, so there is a brief unstyled flash (FOUC) on cold
+// load; starting the screencast before styles land bakes that flash into the
+// video. Poll for a :root variable that only exists once variables.css loads.
+const STYLES_READY_TIMEOUT_MS = 10000;
+const STYLES_READY_VAR = '--font-size-base';
+
 // Unified login lives in the main-site portal dropdown. Server detects
 // admin vs client by email and sets role-aware auth cookies.
 const LOGIN_PATH = '/#/portal';
@@ -156,6 +163,16 @@ function setTheme(page: puppeteer.Page, themeValue: string) {
   }, themeValue);
 }
 
+// Wait until the bundled CSS is applied so no unstyled frame is recorded.
+// Uses a string expression (not a function) to sidestep esbuild's __name
+// injection, which breaks function callbacks passed into the page context.
+function waitForStylesReady(page: puppeteer.Page) {
+  return page.waitForFunction(
+    `!!getComputedStyle(document.documentElement).getPropertyValue('${STYLES_READY_VAR}').trim()`,
+    { timeout: STYLES_READY_TIMEOUT_MS, polling: 100 }
+  );
+}
+
 // ============================================
 // SCREENSHOTS
 // ============================================
@@ -259,11 +276,14 @@ async function recordVideos() {
       await page.setViewport({ width: viewport.width, height: viewport.height });
       await page.setCookie({ name: 'tracking_consent', value: 'accepted', url: BASE_URL });
 
-      const recorder = await page.screencast({ path: videoPath });
-
-      // Navigate to home first and set theme
+      // Navigate + set theme + wait for the bundled CSS to apply BEFORE
+      // recording, so the screencast never captures the Vite-dev unstyled
+      // flash. The intro animation still plays on camera from its styled start.
       await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle2', timeout: 15000 });
       await setTheme(page, theme.value);
+      await waitForStylesReady(page);
+
+      const recorder = await page.screencast({ path: videoPath });
       await wait(PAGE_LOAD_WAIT_MS);
 
       // Skip intro
@@ -504,6 +524,7 @@ async function recordAuthenticatedVideosForRole(
       console.log(`Recording ${roleLabel}: ${label}...`);
       await page.setViewport({ width: viewport.width, height: viewport.height });
       try {
+        await waitForStylesReady(page);
         const recorder = await page.screencast({ path: videoPath });
         await recordAuthenticatedWalkthrough(page, pages, theme.value);
         await recorder.stop();
