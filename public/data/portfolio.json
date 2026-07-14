@@ -34,12 +34,7 @@
       "featured": true,
       "heroImage": "/portfolio/nobhad-codes/home-light-desktop.png",
       "screenshots": [
-        "/portfolio/nobhad-codes/home-light-mobile.png",
-        "/portfolio/nobhad-codes/about-light-mobile.png",
-        "/portfolio/nobhad-codes/projects-light-mobile.png",
-        "/portfolio/nobhad-codes/project-nobhad-codes-light-mobile.png",
-        "/portfolio/nobhad-codes/contact-light-mobile.png",
-        "/portfolio/nobhad-codes/nav-open-light-mobile.png"
+        "/portfolio/nobhad-codes/nobhad-screens.gif"
       ],
       "videos": [
         "/portfolio/nobhad-codes/videos/walkthrough-desktop.webm"
@@ -164,15 +159,7 @@
       "featured": true,
       "heroImage": "/portfolio/the-backend/portal-login.png",
       "screenshots": [
-        "/portfolio/the-backend/admin-dashboard-light-mobile.png",
-        "/portfolio/the-backend/admin-work-light-mobile.png",
-        "/portfolio/the-backend/admin-crm-light-mobile.png",
-        "/portfolio/the-backend/admin-documents-light-mobile.png",
-        "/portfolio/the-backend/admin-traffic-light-mobile.png",
-        "/portfolio/the-backend/portal-dashboard-light-mobile.png",
-        "/portfolio/the-backend/portal-files-light-mobile.png",
-        "/portfolio/the-backend/portal-messages-light-mobile.png",
-        "/portfolio/the-backend/portal-invoices-light-mobile.png"
+        "/portfolio/the-backend/backend-screens.gif"
       ],
       "videos": [
         "/portfolio/the-backend/videos/walkthrough-admin-desktop.webm"
