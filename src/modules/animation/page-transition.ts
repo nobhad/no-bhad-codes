@@ -269,6 +269,17 @@ export class PageTransitionModule extends BaseModule {
   private currentTvIndex: number = 0;
 
   /**
+   * Set when the user scrolls UP out of a project-detail back to the
+   * projects tile. On arrival, the TV plays (tunes in) the channel for the
+   * project they were just reading, so the set "resumes" that channel
+   * instead of landing on a static frame. Only this scroll-up return sets
+   * it — lateral entries (about/contact) and the intro→projects drop stay
+   * on the passive sync so they don't flash a tune-in the user didn't ask
+   * for. Cleared the moment it's consumed on the projects page-changed.
+   */
+  private playChannelOnProjectsArrival: boolean = false;
+
+  /**
    * Snapshot of the project-detail element captured before content swap, used
    * to slide the OLD card off-screen while the (re-rendered) real element
    * slides the NEW card in. Without this, project-detail → project-detail
@@ -1643,9 +1654,13 @@ export class PageTransitionModule extends BaseModule {
     if (currentIndex === -1) return null;
 
     // Up: exit back to projects tile. Sync the TV channel to whichever
-    // detail the user was on so re-entering shows the same channel.
+    // detail the user was on so re-entering shows the same channel, and
+    // flag the arrival to PLAY that channel (tune-in) rather than land on
+    // a static frame — this is the "scroll up to projects plays that
+    // channel" behavior.
     if (direction === 'up') {
       this.currentTvIndex = currentIndex + 1;
+      this.playChannelOnProjectsArrival = true;
       return '#/projects';
     }
 
@@ -1825,6 +1840,25 @@ export class PageTransitionModule extends BaseModule {
       const eventDetail = { from: currentPage?.id, to: pageId, mode };
       this.dispatchEvent('page-changed', eventDetail);
       window.dispatchEvent(new CustomEvent('page-changed', { detail: eventDetail }));
+
+      // Scroll-up return from a project detail: now that the tile has
+      // landed (pan complete), play the tune-in for the channel we synced
+      // to, so the TV "resumes" that project. Reuses projects:tune-in →
+      // playTuneInSequence, which force-replays without navigating. Desktop
+      // only — the scroll map is disabled on mobile, and the tune-in's
+      // mobile fallback would navigate back into the detail.
+      if (pageId === 'projects' && this.playChannelOnProjectsArrival) {
+        this.playChannelOnProjectsArrival = false;
+        if (!this.isMobile) {
+          const slugs = this.getProjectSlugs();
+          const slug = this.currentTvIndex > 0 ? slugs[this.currentTvIndex - 1] : undefined;
+          if (slug) {
+            document.dispatchEvent(
+              new CustomEvent('projects:tune-in', { detail: { slug } })
+            );
+          }
+        }
+      }
 
       // Dispatch contact-page-ready ONLY for direct navigation (blur). Map
       // scroll arrivals (camera/slide) skip the form-grow animation.
