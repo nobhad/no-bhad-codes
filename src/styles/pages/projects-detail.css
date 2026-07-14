@@ -636,6 +636,47 @@
 }
 
 /* ===============================================
+   CASE-STUDY MEDIA (walkthrough video + animated screenshot GIF)
+   ===============================================
+   Video spans the full content width; the screenshot GIF sits centered
+   at phone width. Each media item gets just a thin border — no framing
+   padding, background, or radius. */
+#project-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+#project-info .project-media {
+  margin: 0;
+  border: var(--border-width-thin, 1px) solid var(--color-dark);
+  overflow: hidden;
+}
+
+/* Walkthrough video: full content width. */
+#project-info .project-media--video {
+  width: 100%;
+}
+
+#project-info .project-media--video video {
+  display: block;
+  width: 100%;
+}
+
+/* Animated screenshot GIF: centered at phone width. */
+#project-info .project-media--image {
+  width: 100%;
+  max-width: var(--project-detail-image-phone-max, 320px);
+}
+
+#project-info .project-media--image img {
+  display: block;
+  width: 100%;
+  margin: 0;
+}
+
+/* ===============================================
    PROJECT DETAIL LINKS
    =============================================== */
 
