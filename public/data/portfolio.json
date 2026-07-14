@@ -33,9 +33,7 @@
       "status": "live",
       "featured": true,
       "heroImage": "/portfolio/nobhad-codes/home-light-desktop.png",
-      "screenshots": [
-        "/portfolio/nobhad-codes/nobhad-screens.gif"
-      ],
+      "screenshots": [],
       "videos": [
         "/portfolio/nobhad-codes/videos/walkthrough-desktop.webm"
       ],
@@ -158,9 +156,7 @@
       "status": "live",
       "featured": true,
       "heroImage": "/portfolio/the-backend/portal-login.png",
-      "screenshots": [
-        "/portfolio/the-backend/backend-screens.gif"
-      ],
+      "screenshots": [],
       "videos": [
         "/portfolio/the-backend/videos/walkthrough-admin-desktop.webm"
       ],
