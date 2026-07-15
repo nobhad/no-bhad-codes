@@ -129,14 +129,19 @@ const WHEEL_DELTA_THRESHOLD = 12;
 const WHEEL_COOLDOWN_MS = 250;
 
 /**
- * Gap (ms) that separates one wheel "gesture" from the next on project-detail.
- * Leaving to projects requires a scroll gesture that STARTS with the case study
- * already at the top; a gesture that merely scrolls UP to the top (and its
- * trackpad momentum) is absorbed and never carries back. Wheel events closer
- * together than this are the same gesture; a larger gap begins a new one, so a
- * deliberate second scroll after a brief pause reads as a fresh at-top gesture.
+ * Leaving project-detail by scrolling up requires a DELIBERATE up-scroll while
+ * the case study is at the top — not the trackpad momentum of having just
+ * scrolled up to reach it. Momentum only ever DECAYS, so a fresh finger push
+ * shows up as a re-acceleration: a wheel delta meaningfully larger than the
+ * decaying trend (REACCEL_FACTOR). A fresh scroll after DETAIL_GESTURE_GAP_MS of
+ * quiet also counts (covers a mouse wheel / a clearly separate pull), but only
+ * if its delta isn't smaller than the last — that filters out a lone momentum
+ * straggler arriving after a lull. DETAIL_TOP_SETTLE_MS ignores scrolls for a
+ * beat right after reaching the top, covering the tail of the reach-the-top swipe.
  */
-const DETAIL_GESTURE_GAP_MS = 500;
+const DETAIL_GESTURE_GAP_MS = 250;
+const DETAIL_REACCEL_FACTOR = 1.6;
+const DETAIL_TOP_SETTLE_MS = 150;
 
 /**
  * How many recent hashes to remember for back/forward direction inference.
@@ -202,13 +207,15 @@ export class PageTransitionModule extends BaseModule {
 
   /** Phase C: cooldown timestamp — wheel events before this are ignored. */
   private wheelCooldownUntil: number = 0;
-  // project-detail scroll-to-leave tracking. detailGestureFromTop records
-  // whether the current wheel gesture began with the case study already at the
-  // top; only such a gesture leaves for projects, so the momentum of scrolling
-  // UP to the top can't carry back by accident. detailLastWheelAt separates
-  // gestures (see DETAIL_GESTURE_GAP_MS).
+  // project-detail scroll-to-leave tracking (see DETAIL_GESTURE_GAP_MS et al).
+  // A deliberate up-scroll at the top leaves for projects; the decaying
+  // momentum of scrolling up TO the top does not. detailLastAbsDelta is the
+  // previous wheel-delta magnitude (to spot a re-acceleration), detailLastWheelAt
+  // the previous timestamp (to spot a fresh scroll after a lull), and
+  // detailReachedTopAt when the content last arrived at the top (settle window).
   private detailLastWheelAt: number = 0;
-  private detailGestureFromTop: boolean = false;
+  private detailLastAbsDelta: number = 0;
+  private detailReachedTopAt: number = 0;
 
   /**
    * Direction of the next hash-driven navigation when triggered by wheel or
@@ -1224,28 +1231,38 @@ export class PageTransitionModule extends BaseModule {
         // navigable direction from project-detail, so it's a no-op (no jump).
         // (Previously this branch keyed off finger-intent and jumped back to
         // projects when scrolling down from the top — scrollTop was still 0.)
-        // Scrolling down into the content — going deeper, not leaving. A
-        // downward move can never begin a "leave" gesture.
+        // Scrolling down into the content — going deeper, not leaving.
         this.detailLastWheelAt = performance.now();
-        this.detailGestureFromTop = false;
+        this.detailLastAbsDelta = absY;
+        this.detailReachedTopAt = 0; // content is below / leaving the top
         const canScrollDown =
           currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >= 1;
         if (canScrollDown) return;
         direction = 'down';
       } else {
-        // deltaY<0 scrolls the content UP toward the top. Distinguish a gesture
-        // that merely REACHES the top (absorb it — including trackpad momentum,
-        // so it can't fly back to projects) from one that starts with the case
-        // study ALREADY at the top (a deliberate second scroll → leave). A
-        // gesture is "new" when the wheel has been quiet for DETAIL_GESTURE_GAP_MS.
+        // deltaY<0 scrolls the content UP toward the top. Below the top it just
+        // native-scrolls; AT the top, leave for projects only on a DELIBERATE
+        // push — a re-acceleration of the wheel delta, or a fresh scroll after a
+        // lull — never on the decaying momentum of the swipe that reached the top.
         const now = performance.now();
-        const newGesture = now - this.detailLastWheelAt > DETAIL_GESTURE_GAP_MS;
-        this.detailLastWheelAt = now;
         const atTop = currentTile.scrollTop < 1;
-        if (newGesture) this.detailGestureFromTop = atTop;
-        if (!atTop) return; // still scrolling content up — native scroll
-        if (!this.detailGestureFromTop) return; // this gesture only reached the top
-        direction = 'up'; // gesture began at the top — deliberate leave
+        if (!atTop) {
+          this.detailLastWheelAt = now;
+          this.detailLastAbsDelta = absY;
+          this.detailReachedTopAt = 0;
+          return; // native scroll up through the content
+        }
+        if (this.detailReachedTopAt === 0) this.detailReachedTopAt = now;
+        const gap = now - this.detailLastWheelAt;
+        const prevAbs = this.detailLastAbsDelta;
+        const settled = now - this.detailReachedTopAt > DETAIL_TOP_SETTLE_MS;
+        this.detailLastWheelAt = now;
+        this.detailLastAbsDelta = absY;
+        if (!settled) return; // tail of the reach-the-top swipe — absorb
+        const reaccelerated = absY > prevAbs * DETAIL_REACCEL_FACTOR;
+        const freshDistinct = gap > DETAIL_GESTURE_GAP_MS && absY >= prevAbs;
+        if (!reaccelerated && !freshDistinct) return; // decaying momentum — absorb
+        direction = 'up'; // deliberate push at the top — leave
       }
     } else {
       // Horizontal: swipe RIGHT (dx < 0 on natural scroll) → 'right'.
@@ -1529,7 +1546,8 @@ export class PageTransitionModule extends BaseModule {
       if (!targetHash) return;
       // Leaving this detail (up-exit or carousel neighbor) — reset the
       // scroll-to-leave tracking so it can't linger into the next detail.
-      this.detailGestureFromTop = false;
+      this.detailReachedTopAt = 0;
+      this.detailLastAbsDelta = 0;
       this.detailLastWheelAt = performance.now();
       this.wheelCooldownUntil =
         performance.now() + PAGE_ANIMATION.DURATION * 1000 + WHEEL_COOLDOWN_MS;
