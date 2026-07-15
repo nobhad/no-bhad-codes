@@ -129,13 +129,14 @@ const WHEEL_DELTA_THRESHOLD = 12;
 const WHEEL_COOLDOWN_MS = 250;
 
 /**
- * Detent (ms) for leaving project-detail by scrolling up. Once the case study
- * is scrolled to the very top, an up-scroll only navigates back to projects if
- * it arrives after a pause this long — so the momentum of scrolling UP to the
- * top doesn't bounce straight to projects. The user has to stop, then scroll
- * up again to leave.
+ * Gap (ms) that separates one wheel "gesture" from the next on project-detail.
+ * Leaving to projects requires a scroll gesture that STARTS with the case study
+ * already at the top; a gesture that merely scrolls UP to the top (and its
+ * trackpad momentum) is absorbed and never carries back. Wheel events closer
+ * together than this are the same gesture; a larger gap begins a new one, so a
+ * deliberate second scroll after a brief pause reads as a fresh at-top gesture.
  */
-const DETAIL_TOP_DETENT_MS = 450;
+const DETAIL_GESTURE_GAP_MS = 500;
 
 /**
  * How many recent hashes to remember for back/forward direction inference.
@@ -201,9 +202,13 @@ export class PageTransitionModule extends BaseModule {
 
   /** Phase C: cooldown timestamp — wheel events before this are ignored. */
   private wheelCooldownUntil: number = 0;
-  // Timestamp of the last significant project-detail wheel event, used to
-  // require a pause before an at-top up-scroll navigates back to projects.
-  private detailWheelLastAt: number = 0;
+  // project-detail scroll-to-leave tracking. detailGestureFromTop records
+  // whether the current wheel gesture began with the case study already at the
+  // top; only such a gesture leaves for projects, so the momentum of scrolling
+  // UP to the top can't carry back by accident. detailLastWheelAt separates
+  // gestures (see DETAIL_GESTURE_GAP_MS).
+  private detailLastWheelAt: number = 0;
+  private detailGestureFromTop: boolean = false;
 
   /**
    * Direction of the next hash-driven navigation when triggered by wheel or
@@ -1219,22 +1224,28 @@ export class PageTransitionModule extends BaseModule {
         // navigable direction from project-detail, so it's a no-op (no jump).
         // (Previously this branch keyed off finger-intent and jumped back to
         // projects when scrolling down from the top — scrollTop was still 0.)
-        this.detailWheelLastAt = performance.now();
+        // Scrolling down into the content — going deeper, not leaving. A
+        // downward move can never begin a "leave" gesture.
+        this.detailLastWheelAt = performance.now();
+        this.detailGestureFromTop = false;
         const canScrollDown =
           currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >= 1;
         if (canScrollDown) return;
         direction = 'down';
       } else {
-        // deltaY<0 scrolls the content UP; native-scroll to the top. Once at
-        // the top, only navigate back to projects if this up-scroll arrives
-        // after a pause — so the momentum of scrolling UP to the top doesn't
-        // bounce straight back. Stop, then scroll up again to leave.
+        // deltaY<0 scrolls the content UP toward the top. Distinguish a gesture
+        // that merely REACHES the top (absorb it — including trackpad momentum,
+        // so it can't fly back to projects) from one that starts with the case
+        // study ALREADY at the top (a deliberate second scroll → leave). A
+        // gesture is "new" when the wheel has been quiet for DETAIL_GESTURE_GAP_MS.
         const now = performance.now();
-        const sinceLast = now - this.detailWheelLastAt;
-        this.detailWheelLastAt = now;
-        if (currentTile.scrollTop >= 1) return;
-        if (sinceLast < DETAIL_TOP_DETENT_MS) return;
-        direction = 'up';
+        const newGesture = now - this.detailLastWheelAt > DETAIL_GESTURE_GAP_MS;
+        this.detailLastWheelAt = now;
+        const atTop = currentTile.scrollTop < 1;
+        if (newGesture) this.detailGestureFromTop = atTop;
+        if (!atTop) return; // still scrolling content up — native scroll
+        if (!this.detailGestureFromTop) return; // this gesture only reached the top
+        direction = 'up'; // gesture began at the top — deliberate leave
       }
     } else {
       // Horizontal: swipe RIGHT (dx < 0 on natural scroll) → 'right'.
@@ -1516,6 +1527,10 @@ export class PageTransitionModule extends BaseModule {
     if (this.currentPageId === 'project-detail') {
       const targetHash = this.resolveProjectDetailNeighbor(direction);
       if (!targetHash) return;
+      // Leaving this detail (up-exit or carousel neighbor) — reset the
+      // scroll-to-leave tracking so it can't linger into the next detail.
+      this.detailGestureFromTop = false;
+      this.detailLastWheelAt = performance.now();
       this.wheelCooldownUntil =
         performance.now() + PAGE_ANIMATION.DURATION * 1000 + WHEEL_COOLDOWN_MS;
       // For project-detail → project-detail, snapshot the current rendered
