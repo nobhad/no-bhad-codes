@@ -115,6 +115,19 @@ if (process.env.TRUST_PROXY === 'true') {
   app.set('trust proxy', 1);
 }
 
+// The response object accumulates one 'finish' listener per instrumentation
+// layer on the request path — OTel HTTP, Sentry, the metrics recorder, plus
+// our own request logger and audit middleware. That legitimately exceeds
+// Node's default ceiling of 10 and prints a MaxListenersExceededWarning on
+// every response. These fire once and are released when the response ends, so
+// this is a ceiling to raise, not a leak to chase. Set before any middleware
+// attaches its listener.
+const RESPONSE_MAX_LISTENERS = 20;
+app.use((_req, res, next) => {
+  res.setMaxListeners(RESPONSE_MAX_LISTENERS);
+  next();
+});
+
 app.use(i18nMiddleware);
 const PORT = process.env.PORT || 4001;
 
