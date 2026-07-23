@@ -119,35 +119,12 @@
     min-height: clamp(4rem, 10vw, 5.5rem);
   }
 
-  /* Menu link text on mobile. The rolling-text effect (a text-shadow ghost
-     1em below + translateY, rolled up on hover) has no hover on mobile, so the
-     ghost just sat there as a doubled echo behind every item. Drop the ghost +
-     transform here (this is the highest-specificity mobile rule, so it's what
-     was re-introducing it) and keep only the plain label. Desktop keeps the
-     rolling effect. */
+  /* Menu link text sizing on mobile. The rolling-text effect itself is kept
+     here — whether it applies is decided by hover capability, not width, in
+     the `@media (--mobile) and (hover: none)` block below. A desktop browser
+     resized this narrow still has a mouse, so the effect should still work. */
   .menu .menu-link .menu-link-heading {
     font-size: clamp(3rem, 12vw, 4.5rem);
-    text-shadow: none;
-    transform: none;
-    transition: none;
-  }
-
-  /* A desktop browser resized below this breakpoint still reports
-     `hover: hover`, so the rolling-hover rules in nav-animations.css fire — but
-     the ghost text-shadow is removed just above, so the real label rolls up and
-     out on hover with nothing to replace it, leaving only the dark fill (the
-     "invisible PROJECTS" bug). Those hover rules carry the open-state prefix
-     (specificity 0,5,0) and outrank the plain-list reset, so neutralise them
-     here at matching-or-higher specificity: the label stays put and the fill
-     never covers it, keeping the mobile menu the plain list it's meant to be. */
-  .nav.nav[data-nav="open"] .menu-link:hover .menu-link-heading,
-  .menu .menu-link:hover .menu-link-heading {
-    transform: none;
-  }
-
-  .nav.nav[data-nav="open"] .menu-link:hover .menu-link-bg,
-  .menu .menu-link:hover .menu-link-bg {
-    transform: scale3d(1, 0, 1);
   }
 
   .menu-link {
@@ -165,6 +142,21 @@
 
   .p-large.text-link {
     font-size: clamp(0.9rem, 2vw, 1rem);
+  }
+}
+
+/* Plain-list treatment for TOUCH devices only (no hover). The rolling-text
+   effect needs a hover to roll the label up and swap in the light ghost; on a
+   touch device the ghost has nothing to trigger it and just sits 1em below each
+   item as a doubled echo. Gate the strip on `hover: none` rather than width, so
+   a hover-capable window resized this narrow keeps the working effect while a
+   real phone/tablet gets the clean static list. Mirrors the ≤479px rule in
+   nav-base.css, which is gated the same way. */
+@media (--mobile) and (hover: none) {
+  .menu .menu-link .menu-link-heading {
+    text-shadow: none;
+    transform: none;
+    transition: none;
   }
 }
 
