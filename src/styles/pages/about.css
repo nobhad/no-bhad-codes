@@ -11,12 +11,20 @@
    ========================================== */
 
 @media (--tablet) {
-  /* About Section - full viewport height, centered content */
+  /* About Section - full viewport height, centered content.
+     The padding is named so the full-bleed marquee can cancel it exactly
+     rather than repeating the clamp() as a magic number. */
   .about-section {
+    --about-section-padding: clamp(2rem, 4vw, 4rem);
+
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
     display: grid;
+    /* Definite column. Without this the implicit track is auto-sized, so the
+       marquee's nowrap track (wider than the viewport) would stretch the
+       column instead of being clipped by the marquee's own overflow. */
+    grid-template-columns: minmax(0, 1fr);
     place-items: center;
-    padding: clamp(2rem, 4vw, 4rem);
+    padding: var(--about-section-padding);
     box-sizing: border-box;
     width: 100%;
     position: relative;
@@ -94,5 +102,133 @@
 @media (--wide) {
   .about-layout {
     gap: 2rem;
+  }
+}
+
+/* ==========================================
+   TECH-STACK MARQUEE (all breakpoints)
+
+   Full-bleed band below the about columns. Ported from the Hedgewitch
+   offerings marquee (offerings.css .offering-marquee), set in Acme and
+   retimed against this site's token scale.
+
+   The markup repeats the stack list 4x and the scroll translates by -50%
+   (2 copies), so the loop seam is invisible and the travelled half stays
+   wider than any viewport.
+   ========================================== */
+
+.about-marquee {
+  --about-marquee-duration: 75s;
+  --about-marquee-glyph-duration: 9s;
+  /* Fraction of the band's width consumed by each fade-out edge. */
+  --about-marquee-fade: 6%;
+  /* Breathing room on each side of a sun glyph. The track's gap falls to the
+     glyph's left and the item's gap to its right, so both read from this one
+     value to keep the glyph optically centred between two words. */
+  --about-marquee-gap: var(--space-fluid-sm);
+
+  overflow: hidden;
+  padding-block: var(--space-fluid-md);
+
+  /* Mobile: cancel .about-content's horizontal padding so the band reaches
+     the viewport edge. .about-content is a centering flex column, so the
+     band has to opt out of the cross-axis centering to span full width. */
+  margin-inline: calc(-1 * var(--container-padding));
+  align-self: stretch;
+
+  /* Soft edges. The gradient colour here is an alpha stencil, not a design
+     colour — only the transparent-to-opaque ramp matters, so it is
+     deliberately not a theme token. */
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 var(--about-marquee-fade),
+    #000 calc(100% - var(--about-marquee-fade)),
+    transparent
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 var(--about-marquee-fade),
+    #000 calc(100% - var(--about-marquee-fade)),
+    transparent
+  );
+}
+
+.about-marquee__track {
+  display: inline-flex;
+  gap: var(--about-marquee-gap);
+  white-space: nowrap;
+  will-change: transform;
+  animation: about-marquee-scroll var(--about-marquee-duration) linear infinite;
+}
+
+.about-marquee__item {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--about-marquee-gap);
+  font-family: var(--font-family-acme);
+  text-transform: uppercase;
+  font-size: var(--font-size-2xl);
+  color: var(--color-dark);
+}
+
+/* Swirling sun separator before each item (same glyph as Hedgewitch). */
+.about-marquee__item::before {
+  content: "";
+  flex-shrink: 0;
+  width: 0.9em;
+  height: 0.9em;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 201 201'%3E%3Cpath d='M100.5 3L114.058 58.7724L157.809 21.6208L135.996 74.7109L193.228 70.3708L144.375 100.5L193.228 130.629L135.996 126.289L157.809 179.379L114.058 142.228L100.5 198L86.9419 142.228L43.1909 179.379L65.0044 126.289L7.77197 130.629L56.625 100.5L7.77197 70.3708L65.0044 74.7109L43.1909 21.6208L86.9419 58.7724L100.5 3Z'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 201 201'%3E%3Cpath d='M100.5 3L114.058 58.7724L157.809 21.6208L135.996 74.7109L193.228 70.3708L144.375 100.5L193.228 130.629L135.996 126.289L157.809 179.379L114.058 142.228L100.5 198L86.9419 142.228L43.1909 179.379L65.0044 126.289L7.77197 130.629L56.625 100.5L7.77197 70.3708L65.0044 74.7109L43.1909 21.6208L86.9419 58.7724L100.5 3Z'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  animation: about-marquee-glyph-spin var(--about-marquee-glyph-duration) linear infinite;
+}
+
+@keyframes about-marquee-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes about-marquee-glyph-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-marquee__track,
+  .about-marquee__item::before {
+    animation: none;
+  }
+}
+
+@media (--tablet) {
+  /* Desktop: fill the section's row and lay the children out as a column so
+     the band can be pushed to the bottom rather than riding along with the
+     vertically-centred content. */
+  .about-content {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+  }
+
+  /* Auto block margins absorb the free space, so the image + copy stay
+     optically centred in whatever room is left above the band. */
+  .about-layout {
+    margin-block: auto;
+  }
+
+  .about-marquee {
+    /* .about-content carries no padding of its own here, so the band cancels
+       the section's padding instead. */
+    margin-inline: calc(-1 * var(--about-section-padding));
+    /* Floor on the gap to the copy — the auto margins above hand over all
+       remaining space, but on short viewports there may be none to give. */
+    margin-top: var(--space-fluid-lg);
   }
 }

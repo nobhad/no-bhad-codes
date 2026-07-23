@@ -23,6 +23,28 @@
 /* Font defined in typography.css */
 
 /* =====================================================
+   1b. SKIP LINK (WCAG 2.4.1 Bypass Blocks)
+   Off-screen until focused, then pinned to the top-left
+   so keyboard users can jump past the header nav.
+   ===================================================== */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: var(--z-index-skip-link);
+  padding: var(--space-fluid-xs) var(--space-fluid-sm);
+  background-color: var(--color-dark);
+  color: var(--color-light);
+  font-family: var(--font-family-acme);
+  font-size: var(--font-size-sm);
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* =====================================================
    2. BASE LAYOUT & CONTAINER SYSTEM
    ===================================================== */
 * {

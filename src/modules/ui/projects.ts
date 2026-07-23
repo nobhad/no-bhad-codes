@@ -984,7 +984,7 @@ export class ProjectsModule extends BaseModule {
                   class="crt-tv__channel-row"
                   data-index="${i}"
                   data-slug="${p.slug}"${ariaHidden ? ' tabindex="-1"' : ''}
-                  aria-label="Channel ${i + 2}: open ${p.title} project details">
+                  aria-label="${String(i + 2).padStart(2, '0')} ${p.title}, ${p.category} — open project details">
             <span class="crt-tv__channel-number">${String(i + 2).padStart(2, '0')}</span>
             <span class="crt-tv__channel-text">
               <span class="crt-tv__channel-title">${p.title}</span>
