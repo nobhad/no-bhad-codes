@@ -132,6 +132,24 @@
     transition: none;
   }
 
+  /* A desktop browser resized below this breakpoint still reports
+     `hover: hover`, so the rolling-hover rules in nav-animations.css fire — but
+     the ghost text-shadow is removed just above, so the real label rolls up and
+     out on hover with nothing to replace it, leaving only the dark fill (the
+     "invisible PROJECTS" bug). Those hover rules carry the open-state prefix
+     (specificity 0,5,0) and outrank the plain-list reset, so neutralise them
+     here at matching-or-higher specificity: the label stays put and the fill
+     never covers it, keeping the mobile menu the plain list it's meant to be. */
+  .nav.nav[data-nav="open"] .menu-link:hover .menu-link-heading,
+  .menu .menu-link:hover .menu-link-heading {
+    transform: none;
+  }
+
+  .nav.nav[data-nav="open"] .menu-link:hover .menu-link-bg,
+  .menu .menu-link:hover .menu-link-bg {
+    transform: scale3d(1, 0, 1);
+  }
+
   .menu-link {
     padding-top: 1em;
     padding-bottom: 1em;
