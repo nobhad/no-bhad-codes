@@ -337,12 +337,14 @@ li {
   white-space: nowrap; /* Prevent text wrapping to multiple lines */
 }
 
-/* Small mobile: the rolling-text effect (text-shadow ghost + translateY)
-   relies on hover, which doesn't exist on touch devices. Without hover
-   the ghost text just sits below each menu item all the time — visible
-   as a doubled-up echo. Reset both properties so the menu reads as a
-   plain stacked list. */
-@media (max-width: 479px) {
+/* Small TOUCH devices: the rolling-text effect (text-shadow ghost + translateY)
+   relies on hover, which doesn't exist on touch devices. Without hover the ghost
+   text just sits below each menu item all the time — visible as a doubled-up
+   echo. Reset those properties so the menu reads as a plain stacked list. Gated
+   on `hover: none`, not width alone, so a hover-capable window this narrow keeps
+   the working rolling effect (see the matching --mobile block in
+   nav-responsive.css). */
+@media (max-width: 479px) and (hover: none) {
   .menu-link-heading {
     text-shadow: none;
     transform: none;
