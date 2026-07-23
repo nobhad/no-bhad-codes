@@ -28,6 +28,15 @@ export interface NavigationModuleOptions extends ModuleOptions {
   dataService?: DataService;
 }
 
+/**
+ * Accessible names for the menu toggle, keyed by open state. These must stay
+ * word-for-word identical to the visible label the button shows in each state
+ * (the "Menu" / "Close" pair in .menu-button-text) — WCAG 2.5.3 Label in Name
+ * requires the visible label to be contained in the accessible name, so speech
+ * input users can activate the control by saying what they see.
+ */
+const MENU_TOGGLE_LABELS = { closed: 'Menu', open: 'Close' } as const;
+
 interface NavigationItem {
   id: string;
   text?: string;
@@ -296,10 +305,15 @@ export class NavigationModule extends BaseModule {
     const newState = !currentState;
     appState.setState({ navOpen: newState });
 
-    // Update aria-expanded on all toggle buttons for accessibility
+    // Update aria-expanded on all toggle buttons for accessibility, and keep
+    // the accessible name in step with the visible "Menu" / "Close" label.
     if (this.menuToggles) {
       this.menuToggles.forEach((toggle) => {
         toggle.setAttribute('aria-expanded', String(newState));
+        toggle.setAttribute(
+          'aria-label',
+          newState ? MENU_TOGGLE_LABELS.open : MENU_TOGGLE_LABELS.closed
+        );
       });
     }
   }

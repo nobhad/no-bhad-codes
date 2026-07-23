@@ -1689,7 +1689,9 @@
 
 .crt-tv__guide-info-channel {
   font-size: clamp(0.75rem, 2.2cqw, 1.2rem);
-  opacity: 0.9;
+  /* Full opacity: at 0.9 this measured 3.39:1 against the CRT screen image,
+     under the 4.5:1 WCAG AA minimum for normal-size text. */
+  opacity: 1;
 }
 
 .crt-tv__guide-feature {
@@ -1851,7 +1853,9 @@
 
 .crt-tv__channel-meta {
   font-size: 0.85em;
-  opacity: 0.85;
+  /* Full opacity: at 0.85 the year measured 4.41:1 against the CRT screen
+     image, just under the 4.5:1 WCAG AA minimum for normal-size text. */
+  opacity: 1;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
