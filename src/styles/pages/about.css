@@ -170,7 +170,7 @@
   gap: var(--about-marquee-gap);
   font-family: var(--font-family-acme);
   text-transform: uppercase;
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-3xl);
   color: var(--color-dark);
 }
 
