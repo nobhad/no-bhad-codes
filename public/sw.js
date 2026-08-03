@@ -6,12 +6,14 @@
  *
  * Progressive Web App service worker.
  * Strategies:
- *   - Network-first for API requests (always fresh data)
- *   - Cache-first for static assets (fast loads)
+ *   - Network-first for API requests and /data/*.json (always fresh data)
+ *   - Cache-first for hashed/static assets (fast loads)
  *   - Offline fallback page when network unavailable
  */
 
-const CACHE_VERSION = 'v1';
+// Bump this whenever cached content can go stale in a way that breaks the
+// page (e.g. data files renaming assets). Activate purges older versions.
+const CACHE_VERSION = 'v2';
 const STATIC_CACHE = `nbc-static-${CACHE_VERSION}`;
 const API_CACHE = `nbc-api-${CACHE_VERSION}`;
 const OFFLINE_URL = '/offline.html';
@@ -37,8 +39,12 @@ const STATIC_EXTENSIONS = [
   '.css', '.js', '.mjs',
   '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.avif', '.ico',
   '.woff', '.woff2', '.ttf', '.eot',
-  '.json', '.webmanifest'
+  '.webmanifest'
 ];
+// NB: .json is intentionally NOT cache-first. Data files like
+// /data/portfolio.json have stable names but mutable content — caching
+// them first serves a stale copy indefinitely, which pins the page to
+// image paths that may since have been removed (→ broken images).
 
 // ============================================
 // INSTALL
@@ -85,8 +91,9 @@ self.addEventListener('fetch', (event) => {
   // Skip non-http(s) requests
   if (!url.protocol.startsWith('http')) return;
 
-  // API requests: network-first
-  if (url.pathname.startsWith('/api/')) {
+  // API requests and data files: network-first (always try fresh, fall
+  // back to cache offline). Data JSON must never be pinned to a stale copy.
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/data/') || url.pathname.endsWith('.json')) {
     event.respondWith(networkFirst(request, API_CACHE));
     return;
   }
