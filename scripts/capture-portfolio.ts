@@ -35,6 +35,14 @@ const PAGE_LOAD_WAIT_MS = 2000;
 const NAV_WAIT_MS = 1000;
 const VIDEO_PAGE_PAUSE_MS = 2500;
 const VIDEO_TRANSITION_MS = 1500;
+// Full intro coyote-paw run (entry + clutch + release + retraction + header
+// fade ≈ 4.2s per intro-animation-config.ts) plus buffer, so the recording
+// captures the paw at its true speed instead of an Escape-truncated flash.
+const INTRO_PLAY_MS = 4500;
+// Per-link dwell while hovering the open nav menu on camera.
+const NAV_HOVER_MS = 600;
+// Nav links inside the open menu (templates/partials/navigation.ejs).
+const NAV_LINK_SELECTOR = '.nav .menu-link';
 const LOGIN_NAV_TIMEOUT_MS = 15000;
 const POST_LOGIN_SETTLE_MS = 2500;
 const DROPDOWN_OPEN_DELAY_MS = 1500;
@@ -284,9 +292,12 @@ async function recordVideos() {
       await waitForStylesReady(page);
 
       const recorder = await page.screencast({ path: videoPath });
-      await wait(PAGE_LOAD_WAIT_MS);
 
-      // Skip intro
+      // Let the intro coyote-paw animation play through on camera. Previously
+      // an Escape fired after PAGE_LOAD_WAIT_MS truncated it mid-morph, which
+      // read as a sped-up paw in the recording. Wait the full intro duration,
+      // then Escape only as a fallback in case it didn't auto-hand off.
+      await wait(INTRO_PLAY_MS);
       try {
         await page.evaluate(() => {
           document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
@@ -294,10 +305,16 @@ async function recordVideos() {
       } catch { /* fine */ }
       await wait(ANIMATION_WAIT_MS);
 
-      // Show nav menu open/close
+      // Show nav menu open, hover each link so the recording captures the
+      // per-link hover states, then close.
       try {
         await page.click('[data-menu-toggle]');
         await wait(VIDEO_PAGE_PAUSE_MS);
+        const navLinks = await page.$$(NAV_LINK_SELECTOR);
+        for (const link of navLinks) {
+          await link.hover();
+          await wait(NAV_HOVER_MS);
+        }
         await page.click('[data-menu-toggle]');
         await wait(VIDEO_TRANSITION_MS);
       } catch { /* nav toggle failed */ }
