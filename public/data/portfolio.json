@@ -33,10 +33,10 @@
       "date": "2026-01-01",
       "status": "live",
       "featured": true,
-      "heroImage": "/portfolio/nobhad-codes/home-light-desktop.png",
+      "heroImage": "/portfolio/nobhad-codes/home-{theme}-desktop.png",
       "screenshots": [],
       "videos": [
-        "/portfolio/nobhad-codes/videos/walkthrough-desktop.webm"
+        "/portfolio/nobhad-codes/videos/walkthrough-desktop-{theme}.webm"
       ],
       "liveUrl": "https://nobhad.codes",
       "repoUrl": "https://github.com/nobhad",
@@ -157,10 +157,10 @@
       "date": "2026-01-01",
       "status": "live",
       "featured": true,
-      "heroImage": "/portfolio/the-backend/portal-login.png",
+      "heroImage": "/portfolio/the-backend/portal-login-{theme}.png",
       "screenshots": [],
       "videos": [
-        "/portfolio/the-backend/videos/walkthrough-admin-desktop.webm"
+        "/portfolio/the-backend/videos/walkthrough-admin-desktop-{theme}.webm"
       ],
       "liveUrl": "https://nobhad.codes/#/portal",
       "isDocumented": true,

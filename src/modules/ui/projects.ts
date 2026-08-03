@@ -162,6 +162,17 @@ interface PortfolioData {
 // Minimum documented projects required to show project list
 const MIN_DOCUMENTED_PROJECTS = 2;
 
+// Token in a media path (heroImage / videos) that the detail view swaps for
+// a theme name at render time. The media deliberately shows the OPPOSITE of
+// the viewer's current theme (a dark-mode viewer sees the site rendered in
+// light, and vice-versa) so hero + walkthrough showcase the other theme in
+// sync. Elements carrying `data-themed-src` are re-resolved on theme toggle.
+const MEDIA_THEME_TOKEN = '{theme}';
+
+// Fallback hero shown when a project has no image, or a themed variant fails
+// to load (e.g. before its light/dark file is produced).
+const HERO_PLACEHOLDER_SRC = '/images/project-placeholder.svg';
+
 // Tune-in sequence timing & visual constants. Centralized so the pacing
 // of the title card → Looney-Tunes-credit-card panel cycle can be tuned
 // in one place. Each panel fades in, holds, then fades out as the next
@@ -222,6 +233,9 @@ export class ProjectsModule extends BaseModule {
   private projectsSection: HTMLElement | null = null;
   private projectsContent: HTMLElement | null = null;
   private projectDetailSection: HTMLElement | null = null;
+  // Re-resolves theme-swapped detail media (hero + video) when the site
+  // theme flips. Set up once in onInit, disconnected on destroy.
+  private themeMediaObserver: MutationObserver | null = null;
   private portfolioData: PortfolioData | null = null;
   private currentProjectSlug: string | null = null;
 
@@ -300,6 +314,14 @@ export class ProjectsModule extends BaseModule {
 
     // Listen for page-changed events (back-navigation cleanup, title reset)
     window.addEventListener('page-changed', this.handlePageChanged.bind(this) as EventListener);
+
+    // Re-point theme-swapped detail media (hero + walkthrough) whenever the
+    // site theme flips, so they keep showing the opposite theme in sync.
+    this.themeMediaObserver = new MutationObserver(() => this.applyMediaTheme());
+    this.themeMediaObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    });
 
     // Channel-surf the CRT TV. PageTransitionModule owns the index and
     // dispatches this with an explicit target channel so the TV display
@@ -1967,6 +1989,70 @@ export class ProjectsModule extends BaseModule {
   }
 
   /**
+   * The theme the detail media should render in — deliberately the OPPOSITE
+   * of the viewer's current theme so the hero + walkthrough showcase the
+   * other look. Defaults to 'dark' media for a light (or unset) viewer.
+   */
+  private mediaTheme(): 'light' | 'dark' {
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  }
+
+  /**
+   * Resolve a media path template against the current media theme. Paths that
+   * contain the {theme} token get it swapped; plain paths pass through.
+   */
+  private resolveThemedPath(template: string): string {
+    return template.includes(MEDIA_THEME_TOKEN)
+      ? template.split(MEDIA_THEME_TOKEN).join(this.mediaTheme())
+      : template;
+  }
+
+  /**
+   * Re-resolve every theme-swapped media element in the detail view against
+   * the current theme. Called on theme toggle. Preserves video playback
+   * position + play state across the source swap.
+   */
+  private applyMediaTheme(): void {
+    if (!this.projectDetailSection) return;
+    const els = this.projectDetailSection.querySelectorAll<HTMLElement>('[data-themed-src]');
+    els.forEach((el) => {
+      const template = el.dataset.themedSrc;
+      if (!template) return;
+      const next = this.resolveThemedPath(template);
+      if (el.getAttribute('src') === next) return;
+
+      if (el.tagName === 'VIDEO') {
+        // Structural cast avoids naming the DOM lib type (eslint no-undef).
+        const video = el as HTMLElement & {
+          currentTime: number;
+          paused: boolean;
+          ended: boolean;
+          load(): void;
+          play(): Promise<void>;
+        };
+        const resumeAt = video.currentTime;
+        const wasPlaying = !video.paused && !video.ended;
+        video.setAttribute('src', next);
+        video.load();
+        video.addEventListener(
+          'loadedmetadata',
+          () => {
+            try {
+              video.currentTime = resumeAt;
+            } catch {
+              /* seek past duration — ignore */
+            }
+            if (wasPlaying) void video.play().catch(() => {});
+          },
+          { once: true }
+        );
+      } else {
+        el.setAttribute('src', next);
+      }
+    });
+  }
+
+  /**
    * Render project detail content
    */
   private renderProjectDetail(
@@ -1986,13 +2072,28 @@ export class ProjectsModule extends BaseModule {
     if (heroImg) {
       const heroSrc = project.heroImage || project.screenshots?.[0] || null;
       if (heroSrc) {
-        heroImg.src = heroSrc;
+        // Degrade a missing hero (e.g. a themed variant not yet produced) to
+        // the placeholder instead of a broken-image icon.
+        heroImg.onerror = () => {
+          if (heroImg.src.endsWith(HERO_PLACEHOLDER_SRC)) return;
+          heroImg.src = HERO_PLACEHOLDER_SRC;
+          heroImg.classList.add('placeholder');
+        };
+        heroImg.src = this.resolveThemedPath(heroSrc);
         heroImg.alt = `${project.title} hero image`;
         heroImg.classList.remove('placeholder');
+        // Tag (or clear) for theme-swap so the hero tracks the walkthrough.
+        if (heroSrc.includes(MEDIA_THEME_TOKEN)) {
+          heroImg.dataset.themedSrc = heroSrc;
+        } else {
+          delete heroImg.dataset.themedSrc;
+        }
       } else {
-        heroImg.src = '/images/project-placeholder.svg';
+        heroImg.onerror = null;
+        heroImg.src = HERO_PLACEHOLDER_SRC;
         heroImg.alt = `${project.title} - image coming soon`;
         heroImg.classList.add('placeholder');
+        delete heroImg.dataset.themedSrc;
       }
     }
 
@@ -2156,9 +2257,15 @@ export class ProjectsModule extends BaseModule {
             project.videos!.length === 1
               ? `${title} walkthrough`
               : `${title} walkthrough ${index + 1}`;
+          const resolved = this.resolveThemedPath(src);
+          // Tag theme-swappable sources so applyMediaTheme can re-point them
+          // when the viewer toggles theme.
+          const themedAttr = src.includes(MEDIA_THEME_TOKEN)
+            ? ` data-themed-src="${escapeAttr(src)}"`
+            : '';
           return `
             <figure class="project-media project-media--video">
-              <video src="${escapeAttr(src)}" controls playsinline preload="metadata" aria-label="${label}"></video>
+              <video src="${escapeAttr(resolved)}"${themedAttr} controls playsinline preload="metadata" aria-label="${label}"></video>
             </figure>
           `;
         })
@@ -2356,6 +2463,8 @@ export class ProjectsModule extends BaseModule {
    */
   protected async onDestroy(): Promise<void> {
     window.removeEventListener('hashchange', this.handleHashChange.bind(this));
+    this.themeMediaObserver?.disconnect();
+    this.themeMediaObserver = null;
     this.channelTickerResizeObserver?.disconnect();
     this.channelTickerResizeObserver = null;
     if (this.channelTickerResizeRaf) cancelAnimationFrame(this.channelTickerResizeRaf);
