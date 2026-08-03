@@ -123,6 +123,10 @@ interface PortfolioProject {
   tools: string[];
   technologies?: string[];
   year: number;
+  // Optional display override for the "Year" row (e.g. a start–launch
+  // range like "2025–2026"). `year` stays the numeric launch year used
+  // for sorting and the TV channel guide.
+  yearDisplay?: string;
   status: 'in-progress' | 'completed' | 'planned' | 'live';
   heroImage: string;
   screenshots: string[];
@@ -1362,7 +1366,7 @@ export class ProjectsModule extends BaseModule {
       detailRows.push(`<dt>Role</dt><dd>${roleHtml}</dd>`);
     }
     if (project.year) {
-      detailRows.push(`<dt>Year</dt><dd>${escapeHtml(String(project.year))}</dd>`);
+      detailRows.push(`<dt>Year</dt><dd>${escapeHtml(project.yearDisplay ?? String(project.year))}</dd>`);
     }
     if (project.duration) {
       detailRows.push(`<dt>Duration</dt><dd>${escapeHtml(project.duration)}</dd>`);
@@ -2036,7 +2040,7 @@ export class ProjectsModule extends BaseModule {
     // Update year
     const yearEl = this.projectDetailSection.querySelector('#project-year');
     if (yearEl) {
-      yearEl.textContent = project.year.toString();
+      yearEl.textContent = project.yearDisplay ?? project.year.toString();
     }
 
     // Update duration
