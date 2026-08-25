@@ -359,6 +359,14 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
       p.drawText(ln, { x: MARGIN, y: top - 18 - idx * (titleSize + 4), size: titleSize, font: bold, color: BLACK });
     });
 
+    // Business info, right of the logo. Offsets, sizes and the muted treatment
+    // match the header in scripts/markdown-to-pdf.ts — one house header, drawn
+    // here on every page rather than only the first.
+    p.drawText(BUSINESS_INFO.name, { x: textStartX, y: top - 11, size: 15, font: bold, color: BLACK });
+    p.drawText(BUSINESS_INFO.owner, { x: textStartX, y: top - 34, size: 10, font: regular, color: BLACK });
+    p.drawText(BUSINESS_INFO.email, { x: textStartX, y: top - 54, size: 9, font: regular, color: MUTED });
+    p.drawText(BUSINESS_INFO.website, { x: textStartX, y: top - 70, size: 9, font: regular, color: MUTED });
+
     top -= HEADER_HEIGHT;
     p.drawLine({ start: { x: MARGIN, y: top }, end: { x: RIGHT_EDGE, y: top }, thickness: 1, color: BLACK });
     return top - 21;
