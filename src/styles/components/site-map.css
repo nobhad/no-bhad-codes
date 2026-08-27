@@ -104,6 +104,13 @@
   left: 100%;
 }
 
+/* Directly below the projects tile: entering a case study is a one-viewport
+   vertical hop, the same set distance the horizontal carousel uses. */
+.site-map > [data-map-tile="detail"] {
+  top: 100%;
+  left: 100%;
+}
+
 /* ============================================
  * CAMERA STATES (STATIC FALLBACKS)
  * ============================================
@@ -125,6 +132,10 @@
 
 .site-map[data-map-camera="down"] {
   transform: translate(0, -100%);
+}
+
+.site-map[data-map-camera="detail"] {
+  transform: translate(-100%, -100%);
 }
 
 .site-map[data-map-camera="left"] {
@@ -214,10 +225,8 @@ main#main-content {
   background: var(--color-neutral-300);
 }
 
-main#main-content[data-active-page="project-detail"],
 main#main-content[data-active-page="portal-login"],
 main#main-content[data-active-page="not-found"],
-html[data-initial-page="project-detail"]:not(.js-ready) main#main-content,
 html[data-initial-page="portal-login"]:not(.js-ready) main#main-content,
 html[data-initial-page="not-found"]:not(.js-ready) main#main-content {
   overflow-y: auto;
@@ -250,11 +259,10 @@ html[data-initial-page="not-found"]:not(.js-ready) main#main-content {
  */
 .map-compass {
   position: fixed;
-  /* --footer-height is referenced widely but never actually defined
-     anywhere in the design tokens. Using a hard-coded 40px estimate
-     here keeps the down arrow on screen instead of slipping behind
-     the footer. */
-  inset: var(--header-height, 50px) 0 40px 0;
+  /* Spans the viewport. The old bottom inset reserved 40px for the copyright
+     bar the footer curtain replaced, which floated the arrows above the
+     vertical centre. */
+  inset: 0;
   pointer-events: none;
   z-index: var(--z-index-elevated);
   display: grid;

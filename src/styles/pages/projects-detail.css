@@ -35,6 +35,15 @@
   display: flex !important;
   flex-direction: column;
   align-items: center;
+  /* This is a flex COLUMN, so justify-content is the VERTICAL axis. Centring a
+     case study taller than the tile pushes its top above the scroll
+     container's origin, where it can never be scrolled back to — the
+     breadcrumbs measured at -1135px. It used to be held at flex-start by
+     `main[data-virtual-pages] > .project-detail-section…` in
+     components/page-transitions.css, which stopped matching when this became
+     a map tile inside .site-map. Declared here so it does not depend on the
+     section's parent or on a page-active class it does not carry. */
+  justify-content: flex-start;
   padding: var(--space-4);
   box-sizing: border-box;
   overflow-y: auto;
@@ -1387,36 +1396,16 @@
 }
 
 /* ============================================================
-   NATURAL SCROLL — PROJECT DETAIL PAGES
+   PROJECT DETAIL IS A MAP TILE
    ============================================================
-   Project-detail content is long, so instead of scrolling inside the
-   fixed `main` box with a pinned header/footer, the whole page scrolls
-   as one document: the header and footer are un-fixed and `main` grows
-   with its content. Scoped via :has() to the active project-detail page
-   so the spatial-map pages keep their fixed camera layout untouched. */
-html:has(main[data-active-page="project-detail"]) .header,
-html:has(main[data-active-page="project-detail"]) .footer {
-  position: static;
-}
+   The case study used to un-fix the header and footer and scroll the whole
+   document, which left the spatial map parked behind it — any camera movement
+   revealed the TV underneath, and the section sat outside .site-map entirely.
 
-main[data-active-page="project-detail"] {
-  /* `relative` with no offsets lays out identically to `static`, but z-index
-     is ignored on a static element — and the page needs its stacking order
-     here to stay above the footer curtain it slides up off. */
-  position: relative;
-  width: 100%;
-  height: auto;
-  overflow: visible;
-}
-
-main[data-active-page="project-detail"] > #project-detail.project-detail-section {
-  position: relative;
-  height: auto;
-  /* Fill at least the viewport (minus the now-in-flow header) so short
-     projects still push the footer to the bottom rather than riding up. */
-  min-height: calc(100vh - var(--header-height));
-  overflow: visible;
-}
+   It is a tile now, one viewport below projects, so it scrolls inside the
+   fixed camera like every other tile and the shared tile rules in
+   components/site-map.css give it its overflow and header inset. Nothing to
+   un-fix, and the camera position is always the page the user is on. */
 
 /* ===============================================
    FOOTER CLEARANCE
@@ -1434,6 +1423,12 @@ main[data-active-page="project-detail"] > #project-detail.project-detail-section
    inline style on top of this, so the value here reads as the visible gap
    and nothing else. */
 .project-detail-section {
+  /* This file is imported UNLAYERED (bundles/site.css), so it outranks the
+     shared `.site-map > [data-map-tile]` inset in layer(states) — the tile
+     has to opt into the header inset here or the case study starts under the
+     fixed header. Composed with the section's own top padding rather than
+     replacing it. */
+  padding-top: calc(var(--map-header-inset, 0px) + var(--space-2));
   padding-bottom: var(--project-detail-footer-clearance, var(--space-20));
 }
 

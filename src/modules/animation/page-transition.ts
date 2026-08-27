@@ -47,7 +47,11 @@ const MAP_TILES = {
   intro: 'center',
   about: 'up',
   projects: 'right',
-  contact: 'down'
+  contact: 'down',
+  // Directly below projects, so entering a case study is a vertical camera
+  // hop of exactly one viewport — the same set distance the horizontal
+  // carousel uses between tiles.
+  'project-detail': 'detail'
 } as const;
 
 type MapTile = (typeof MAP_TILES)[keyof typeof MAP_TILES];
@@ -63,7 +67,8 @@ const CAMERA_POSITIONS: Record<MapTile, { x: number; y: number }> = {
   center: { x: 0, y: 0 },
   up: { x: 0, y: 100 },
   down: { x: 0, y: -100 },
-  right: { x: -100, y: 0 }
+  right: { x: -100, y: 0 },
+  detail: { x: -100, y: -100 }
 };
 
 /**
@@ -77,7 +82,8 @@ const TILE_CSS_POSITIONS: Record<MapTile, { x: number; y: number }> = {
   center: { x: 0, y: 0 },
   up: { x: 0, y: -100 },
   down: { x: 0, y: 100 },
-  right: { x: 100, y: 0 }
+  right: { x: 100, y: 0 },
+  detail: { x: 100, y: 100 }
 };
 
 /**
@@ -709,7 +715,13 @@ export class PageTransitionModule extends BaseModule {
    * scrolls for real and scrubs the curtain from its own scroll position.
    */
   private curtainOwnsVertical(): boolean {
-    return this.isMapPage(this.currentPageId) && this.currentPageId !== 'projects';
+    return (
+      this.isMapPage(this.currentPageId) &&
+      this.currentPageId !== 'projects' &&
+      // project-detail is a map tile now, but it scrolls for real — its
+      // curtain is driven by scroll position, not by a gesture.
+      this.currentPageId !== 'project-detail'
+    );
   }
 
   /**
@@ -918,6 +930,11 @@ export class PageTransitionModule extends BaseModule {
         if (this.isTransitioning) return;
         // ↓ on a curtain tile isn't a navigation — it raises the footer, and
         // raises it the rest of the way if it's already part-open.
+        // Drop focus once the cue has done its job. These are real buttons,
+        // so a click leaves the focus ring sitting on whichever arrow was
+        // last pressed — which reads as "that direction is engaged" while
+        // the user is driving with the keyboard in a different direction.
+        cue?.blur();
         if (dir === 'down' && this.curtainOwnsVertical()) {
           this.driveCurtain(CURTAIN_TRAVEL_PX);
           return;
@@ -1287,6 +1304,39 @@ export class PageTransitionModule extends BaseModule {
       if (this.currentPageId === 'projects') {
         // natural-scroll: dy < 0 is a downward finger swipe → next channel.
         direction = dy < 0 ? 'down' : 'up';
+      } else if (this.currentPageId === 'project-detail') {
+        // Tested before the map-tile branches below: project-detail IS a map
+        // tile now, so isMapPage() is true for it and the carousel remap would
+        // swallow the vertical scroll the case study needs.
+        if (dy > 0) {
+          this.detailLastWheelAt = performance.now();
+          this.detailLastAbsDelta = absY;
+          this.detailReachedTopAt = 0;
+          const canScrollDown =
+            currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >= 1;
+          if (canScrollDown) return;
+          direction = 'down';
+        } else {
+          const now = performance.now();
+          const atTop = currentTile.scrollTop < 1;
+          if (!atTop) {
+            this.detailLastWheelAt = now;
+            this.detailLastAbsDelta = absY;
+            this.detailReachedTopAt = 0;
+            return;
+          }
+          if (this.detailReachedTopAt === 0) this.detailReachedTopAt = now;
+          const gap = now - this.detailLastWheelAt;
+          const prevAbs = this.detailLastAbsDelta;
+          const settled = now - this.detailReachedTopAt > DETAIL_TOP_SETTLE_MS;
+          this.detailLastWheelAt = now;
+          this.detailLastAbsDelta = absY;
+          if (!settled) return;
+          const reaccelerated = absY > prevAbs * DETAIL_REACCEL_FACTOR;
+          const freshDistinct = gap > DETAIL_GESTURE_GAP_MS && absY >= prevAbs;
+          if (!reaccelerated && !freshDistinct) return;
+          direction = 'up';
+        }
       } else if (this.curtainOwnsVertical()) {
         // Vertical is the footer's axis on these tiles. deltaY > 0 is toward
         // the bottom of the page on every input device, which is where the
@@ -1295,50 +1345,10 @@ export class PageTransitionModule extends BaseModule {
         event.preventDefault();
         this.driveCurtain(dy > 0 ? absY : -absY);
         return;
-      } else if (this.isMapPage(this.currentPageId)) {
+      } else {
         // Remaining map tiles: remap vertical wheel → horizontal carousel nav
         // so up/down scroll moves between pages too. dy < 0 (down) → forward.
         direction = dy < 0 ? 'right' : 'left';
-      } else if (dy > 0) {
-        // Project-detail: native scroll follows the deltaY SIGN (not the
-        // finger-intent nav convention used by the carousel tiles above), so
-        // match the touch handler — deltaY>0 scrolls the content DOWN. Let it
-        // scroll natively until the bottom; only then set 'down', which isn't a
-        // navigable direction from project-detail, so it's a no-op (no jump).
-        // (Previously this branch keyed off finger-intent and jumped back to
-        // projects when scrolling down from the top — scrollTop was still 0.)
-        // Scrolling down into the content — going deeper, not leaving.
-        this.detailLastWheelAt = performance.now();
-        this.detailLastAbsDelta = absY;
-        this.detailReachedTopAt = 0; // content is below / leaving the top
-        const canScrollDown =
-          currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >= 1;
-        if (canScrollDown) return;
-        direction = 'down';
-      } else {
-        // deltaY<0 scrolls the content UP toward the top. Below the top it just
-        // native-scrolls; AT the top, leave for projects only on a DELIBERATE
-        // push — a re-acceleration of the wheel delta, or a fresh scroll after a
-        // lull — never on the decaying momentum of the swipe that reached the top.
-        const now = performance.now();
-        const atTop = currentTile.scrollTop < 1;
-        if (!atTop) {
-          this.detailLastWheelAt = now;
-          this.detailLastAbsDelta = absY;
-          this.detailReachedTopAt = 0;
-          return; // native scroll up through the content
-        }
-        if (this.detailReachedTopAt === 0) this.detailReachedTopAt = now;
-        const gap = now - this.detailLastWheelAt;
-        const prevAbs = this.detailLastAbsDelta;
-        const settled = now - this.detailReachedTopAt > DETAIL_TOP_SETTLE_MS;
-        this.detailLastWheelAt = now;
-        this.detailLastAbsDelta = absY;
-        if (!settled) return; // tail of the reach-the-top swipe — absorb
-        const reaccelerated = absY > prevAbs * DETAIL_REACCEL_FACTOR;
-        const freshDistinct = gap > DETAIL_GESTURE_GAP_MS && absY >= prevAbs;
-        if (!reaccelerated && !freshDistinct) return; // decaying momentum — absorb
-        direction = 'up'; // deliberate push at the top — leave
       }
     } else {
       // Horizontal: swipe RIGHT (dx < 0 on natural scroll) → 'right'.
