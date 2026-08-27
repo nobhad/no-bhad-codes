@@ -12,7 +12,10 @@
  */
 
 // Bump this whenever cached content can go stale in a way that breaks the
-// page (e.g. data files renaming assets). Activate purges older versions.
+// page (e.g. data files renaming assets). Activate purges older versions --
+// the only way to evict entries a previous caching *rule* pinned. v1 -> v2
+// drops the /data/*.json copies the old cache-first rule stranded in
+// nbc-static-v1, which kept serving a long-dead portfolio.json.
 const CACHE_VERSION = 'v2';
 const STATIC_CACHE = `nbc-static-${CACHE_VERSION}`;
 const API_CACHE = `nbc-api-${CACHE_VERSION}`;

@@ -85,6 +85,15 @@ export class Application {
       // Initialize consent banner FIRST (non-blocking)
       this.initConsentBanner();
 
+      // Start every lazy chunk downloading in one wave. Each
+      // container.resolve() below fires a dynamic import(); awaiting them
+      // one at a time turns the module graph into a round-trip per module
+      // (~13 serial hops, ~4s on the projects page even with a warm
+      // cache). The container caches singletons and de-dupes concurrent
+      // resolutions, so the ordered loops below still init in the exact
+      // same order -- they just no longer wait on the network.
+      this.warmModuleGraph();
+
       // Initialize core services first
       await this.initializeServices();
 
@@ -228,9 +237,9 @@ export class Application {
   }
 
   /**
-   * Initialize core services
+   * Names of the core services this page needs, in init order.
    */
-  private async initializeServices(): Promise<void> {
+  private getBaseServiceList(): string[] {
     const currentPath = window.location.pathname;
     const isClientPage = currentPath.includes('/client/');
     const isAdminPage = currentPath.includes('/admin');
@@ -246,6 +255,26 @@ export class Application {
       services.push('DataService');
       services.push('ContactService');
     }
+
+    return services;
+  }
+
+  /**
+   * Kick off the dynamic import() behind every service and module this
+   * page will use, all at once, without awaiting them. Resolution errors
+   * are swallowed here on purpose: the ordered init loops re-resolve the
+   * same names and surface the real failure there. This call only exists
+   * to get the chunks off the network early.
+   */
+  private warmModuleGraph(): void {
+    const names = [...this.getBaseServiceList(), ...this.getCoreModuleList()];
+    for (const name of names) {
+      container.resolve(name).catch(() => {});
+    }
+  }
+
+  private async initializeServices(): Promise<void> {
+    const services = this.getBaseServiceList();
 
     const { isProtectionEnabled } = await import('../config/protection.config');
     if (isProtectionEnabled()) {
@@ -305,11 +334,11 @@ export class Application {
   }
 
   /**
-   * Initialize modules
+   * Names of the modules this page needs, in init order.
    */
-  private async initializeModules(): Promise<void> {
+  private getCoreModuleList(): string[] {
     const currentPath = window.location.pathname;
-    const pageType = document.body.getAttribute('data-page') || '';
+    const pageType = document.body?.getAttribute('data-page') || '';
     const isDashboard = currentPath === '/dashboard';
     const isClientPortal =
       (isDashboard && pageType === 'client') ||
@@ -333,6 +362,12 @@ export class Application {
     if (isHomePage) {
       coreModuleList.splice(1, 0, 'IntroAnimationModule');
     }
+
+    return coreModuleList;
+  }
+
+  private async initializeModules(): Promise<void> {
+    const coreModuleList = this.getCoreModuleList();
 
     for (const moduleName of coreModuleList) {
       try {
