@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" class="intro-complete intro-finished" data-theme="light" data-initial-page="design-system">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Design System — No Bhad Codes</title>
@@ -114,20 +114,27 @@ td{padding:7px 12px;vertical-align:middle}
 #main-content h1,#main-content h2,#main-content h3,#main-content p{text-transform:none;text-align:left;letter-spacing:normal}
 #main-content h1{font-family:var(--ds-serif);letter-spacing:-.01em}
 #main-content h2{font-family:var(--ds-serif);letter-spacing:-.01em}
-/* Same opening and closing gap the case study uses: the header's height
-   plus the tile pad (src/styles/pages/projects-detail.css composes the two
-   from --map-header-inset and --map-tile-pad-y). Those variables are scoped
-   to .site-map, which this page is not inside, so the underlying tokens are
-   composed directly and the mobile step-down from mobile/layout.css is
-   mirrored at the same breakpoint. */
-#main-content{background:var(--ds-paper);color:var(--ds-ink);--docs-tile-pad-y:var(--space-6);padding-top:calc(var(--header-height) + var(--docs-tile-pad-y));padding-bottom:calc(var(--header-height) + var(--docs-tile-pad-y))}
-@media (max-width:767px){#main-content{--docs-tile-pad-y:3rem}}
+/* Off-map page: it declares data-active-page, which is how the site lets a
+   page scroll for real instead of behaving as a map tile (see the rule in
+   components/site-map.css). Nothing here sets a height — main takes the
+   viewport from the shared rule and this content is free to be as long as
+   it is. */
+#main-content{background:var(--ds-paper);color:var(--ds-ink)}
+.docs-section{
+  /* The measure the case study opens and closes on: the header's height
+     plus the tile pad. --map-tile-pad-y resolves to --space-6 at every
+     width, so the token is composed directly rather than read through the
+     .site-map-scoped variable this page sits outside of. */
+  padding-top:calc(var(--header-height) + var(--space-6));
+  padding-bottom:calc(var(--header-height) + var(--space-6))}
 
 footer.docs-note{padding:44px 0 24px;color:var(--ds-muted);font-size:12.5px}
 footer.docs-note b{color:var(--ds-ink);font-weight:500}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 :focus-visible{outline:2px solid var(--ds-crimson);outline-offset:2px}
 </style>
+
+<body data-page="design-system">
 
     <header class="header">
       <div class="container is--full">
@@ -242,7 +249,8 @@ footer.docs-note b{color:var(--ds-ink);font-weight:500}
       </div>
     </header>
 
-<main id="main-content">
+<main id="main-content" data-active-page="design-system">
+<section class="docs-section">
 
 <header class="mast"><div class="mast-in">
   <h1>One design system,<br>two products</h1>
@@ -289,6 +297,7 @@ footer.docs-note b{color:var(--ds-ink);font-weight:500}
 <footer class="docs-note">This page is generated from <b>src/design-system/tokens/*.css</b> at build time &mdash; the token files are the single source of truth, and nothing here is written by hand. Hand-maintained documentation of a token layer is wrong within a month.</footer>
 </div>
 
+</section>
 </main>
 
     <footer class="footer">
@@ -319,3 +328,6 @@ footer.docs-note b{color:var(--ds-ink);font-weight:500}
     </footer>
 
 <script type="module" src="/src/utils/set-copyright-year.ts"></script>
+
+</body>
+</html>

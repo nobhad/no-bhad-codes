@@ -97,7 +97,7 @@ main {
  */
 .business-card-section,
 .about-section,
-main > section:not(.contact-section):not(.tech-stack-section) {
+body:not([data-page="design-system"]) main > section:not(.contact-section):not(.tech-stack-section) {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -121,9 +121,11 @@ main > section:not(.contact-section):not(.tech-stack-section) {
 
 /* Section base styles - fill main content area (marketing site).
    IMPORTANT: do not apply to portal/admin dashboards, which use <section>
-   as normal flow containers (tables, panels) and must NOT be centered. */
+   as normal flow containers (tables, panels) and must NOT be centered. The
+   generated design-system reference is the same case: it is a long document
+   whose sections are headings in a flow, not viewport-height map tiles. */
 /* Note: display is overridden by .page-active rules for contact/about sections */
-body:not([data-page="admin"]):not([data-page="client"]) section {
+body:not([data-page="admin"]):not([data-page="client"]):not([data-page="design-system"]) section {
   flex: 1 0 100%;
   width: 100%;
   display: flex;
