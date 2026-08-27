@@ -172,6 +172,8 @@
       ],
       "liveUrl": "https://nobhad.codes/#/portal",
       "repoUrl": "https://github.com/nobhad/no-bhad-codes",
+      "docsUrl": "/design-system",
+      "docsLabel": "Design System",
       "isDocumented": true,
       "titleCard": {
         "composed": "/images/tv/title-cards/the-backend.webp",

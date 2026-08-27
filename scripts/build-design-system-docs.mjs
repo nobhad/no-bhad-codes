@@ -16,7 +16,8 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const TOKENS_DIR = join(ROOT, 'src/design-system/tokens');
 // Written into public/ so Vercel copies it to the deploy root verbatim.
 // With cleanUrls enabled this serves at https://nobhad.codes/design-system
-const OUT_DIR = join(ROOT, 'public/design-system');
+const OUT_DIR = join(ROOT, 'public');
+const OUT_FILE = 'design-system.html';
 
 const FILE_ORDER = [
   'colors.css', 'typography.css', 'spacing.css', 'dimensions.css',
@@ -154,6 +155,25 @@ const html = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>No Bhad Codes Design System</title>
+<script>
+  // Same theme bootstrap the site uses, so this page opens in whatever
+  // theme the visitor last chose rather than its own default.
+  (function () {
+    try {
+      var saved = localStorage.getItem('theme');
+      var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-theme', saved || (systemDark ? 'dark' : 'light'));
+    } catch (e) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Acme&family=Cormorant+Garamond:wght@400;600;700&family=Inconsolata:wght@400;500;700&display=swap">
@@ -239,11 +259,54 @@ td{padding:7px 12px;vertical-align:middle}
 .sw-bar{display:block;height:8px;max-width:100%;background:var(--ds-crimson);border-radius:1px;min-width:2px}
 .sw-dur{font-size:11px;color:var(--ds-muted);font-variant-numeric:tabular-nums}
 
-footer{padding:44px 0 72px;color:var(--ds-muted);font-size:12.5px}
-footer b{color:var(--ds-ink);font-weight:500}
+/* Site chrome — header from src/styles/components/nav-base.css, footer from
+   src/styles/components/footer.css, so this page wears the same frame as
+   every other page. Values are copied because this file is generated
+   standalone and cannot import the hashed site bundle. */
+:root{--nbc-nav:#333333;--nbc-accent:#dc2626;--nbc-shadow:rgba(0,0,0,.2);--nbc-pad:clamp(1rem,4vw,2rem)}
+:root[data-theme="dark"]{--nbc-nav:#fafafa;--nbc-shadow:rgba(0,0,0,1)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--nbc-nav:#fafafa;--nbc-shadow:rgba(0,0,0,1)}}
+.site-header{position:sticky;top:0;left:0;right:0;width:100%;z-index:20;background:var(--ds-paper);font-family:var(--ds-display);padding:0;padding-top:env(safe-area-inset-top,0)}
+.site-header-in{padding:0 var(--nbc-pad)}
+.site-nav-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;width:100%;min-height:40px;flex-wrap:nowrap}
+.site-brand{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--nbc-nav);font-weight:600;font-size:20px;text-shadow:0 2px 4px var(--nbc-shadow);text-transform:uppercase;white-space:nowrap;flex-shrink:0;transition:color .3s ease}
+.site-brand:hover,.site-brand:active{color:var(--nbc-accent)}
+.site-nav-right{display:flex;align-items:center;gap:16px;flex-shrink:0;white-space:nowrap}
+.site-icon,.site-menu{display:flex;align-items:center;gap:12px;background:none;border:none;cursor:pointer;padding:8px 0;min-height:40px;color:var(--nbc-nav);text-transform:uppercase;flex-shrink:0;font-family:inherit;font-size:inherit;line-height:inherit;text-decoration:none;text-shadow:0 2px 4px var(--nbc-shadow);transition:color .3s ease}
+.site-icon:hover,.site-menu:hover{color:var(--nbc-accent)}
+.site-icon{justify-content:center;width:40px;height:40px;border-radius:9999px;padding:0}
+.site-icon svg{width:20px;height:20px}
+.site-menu{font-size:20px;font-weight:600}
+.site-menu svg{width:16px;height:16px}
+:root[data-theme="light"] .site-icon .icon-sun{display:none}
+:root[data-theme="dark"] .site-icon .icon-moon{display:none}
+.site-footer{display:flex;align-items:center;justify-content:flex-end;height:40px;padding:0 2rem;font-size:clamp(.875rem,.825rem + .25vw,1rem);color:var(--ds-ink);text-align:right}
+.site-footer p{margin:0}
+
+footer.docs-note{padding:44px 0 24px;color:var(--ds-muted);font-size:12.5px}
+footer.docs-note b{color:var(--ds-ink);font-weight:500}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 :focus-visible{outline:2px solid var(--ds-crimson);outline-offset:2px}
 </style>
+
+<header class="site-header"><div class="site-header-in">
+  <nav class="site-nav-row">
+    <a class="site-brand" href="/" aria-label="No Bhad Codes home">No Bhad Codes</a>
+    <div class="site-nav-right">
+      <a class="site-icon" href="/#/portal" aria-label="Client Portal Login">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg>
+      </a>
+      <button type="button" class="site-icon" id="ds-theme-toggle" aria-label="Toggle dark/light theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"/></svg>
+      </button>
+      <a class="site-menu" href="/" aria-label="Back to the site">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M7.33333 16L7.33333 0L8.66667 0L8.66667 16L7.33333 16Z" fill="currentColor"/><path d="M16 8.66667L0 8.66667L0 7.33333L16 7.33333L16 8.66667Z" fill="currentColor"/></svg>
+        Menu
+      </a>
+    </div>
+  </nav>
+</div></header>
 
 <header class="mast"><div class="mast-in">
   <div class="brand">No Bhad Codes</div>
@@ -270,10 +333,23 @@ footer b{color:var(--ds-ink);font-weight:500}
 
 <div class="wrap">
 ${parsed.map(renderFile).join('\n')}
-<footer>This page is generated from <b>src/design-system/tokens/*.css</b> at build time &mdash; the token files are the single source of truth, and nothing here is written by hand. Hand-maintained documentation of a token layer is wrong within a month.</footer>
-</div>`;
+<footer class="docs-note">This page is generated from <b>src/design-system/tokens/*.css</b> at build time &mdash; the token files are the single source of truth, and nothing here is written by hand. Hand-maintained documentation of a token layer is wrong within a month.</footer>
+</div>
+
+<footer class="site-footer">
+  <p>&copy; <span id="ds-year"></span> Made &amp; Designed by No Bhad Codes. All rights reserved.</p>
+</footer>
+
+<script>
+  document.getElementById('ds-year').textContent = new Date().getFullYear();
+  document.getElementById('ds-theme-toggle').addEventListener('click', function () {
+    var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+  });
+</script>`;
 
 mkdirSync(OUT_DIR, { recursive: true });
-writeFileSync(join(OUT_DIR, 'index.html'), html);
-console.log('design system docs → public/design-system/index.html  (serves at /design-system)');
+writeFileSync(join(OUT_DIR, OUT_FILE), html);
+console.log('design system docs → public/' + OUT_FILE + '  (serves at /design-system)');
 console.log('  ' + unique.size + ' unique tokens across ' + totals.files + ' files (' + totals.tokens + ' declarations)');
