@@ -325,8 +325,13 @@ export class FooterCurtainModule extends BaseModule {
     if (this.externalDrive) {
       const remaining = element.scrollHeight - element.scrollTop - element.clientHeight;
       if (remaining > 1) {
-        this.externalDrive = false;
-        this.setProgress(0);
+        // Follow the scroll rather than snapping shut. Scrolling back up off
+        // the end closes the curtain over the band's own height of travel, so
+        // it retracts at the speed the reader is moving — cutting straight to
+        // 0 here read as the band slamming closed.
+        const next = clamp01(1 - remaining / this.curtainHeight);
+        if (next < this.progress) this.setProgress(next);
+        if (next === 0) this.externalDrive = false;
       }
     }
 
@@ -345,12 +350,27 @@ export class FooterCurtainModule extends BaseModule {
 
   private setProgress(next: number): void {
     if (!this.timeline) return;
-    if (Math.abs(next - this.progress) < PROGRESS_EPSILON) return;
 
+    const changed = Math.abs(next - this.progress) >= PROGRESS_EPSILON;
     const retracting = next < this.progress;
 
     this.progress = next;
     this.applyOpenState(next);
+
+    // An unchanged value still has to be re-applied. A tween killed partway
+    // through leaves the timeline stranded — the page stuck half-raised with
+    // the band showing through — and every later call would take the early
+    // return and never correct it. This is what left content behind the footer
+    // after scrolling back to the top.
+    if (!changed) {
+      if (!this.scrubTween || !this.scrubTween.isActive()) {
+        const settled = this.externalDrive ? next : 0;
+        this.scrubState.value = settled;
+        this.timeline.progress(settled);
+        this.applyHeaderOffset(settled);
+      }
+      return;
+    }
 
     // Where the page scrolls for real, the reveal is already happening: the
     // content clears the viewport bottom and the band is uncovered, no
