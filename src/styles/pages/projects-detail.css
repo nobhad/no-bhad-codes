@@ -1459,8 +1459,15 @@
      fixed header. Composed with the section's own top padding rather than
      replacing it. */
   padding-top: calc(var(--map-header-inset, 0px) + var(--map-tile-pad-y, 0px));
-  /* The same distance below the content as above it — the full top inset, not
-     just the tile gap — so the case study sits the same distance from the
-     footer as it does from the top of the viewport. */
-  padding-bottom: calc(var(--map-header-inset, 0px) + var(--map-tile-pad-y, 0px));
+  /* Mirror of the top, and the mirror has to be exact to be right.
+     Above:  header height + gap, because the header covers that strip.
+     Below:  CURTAIN height + gap, because the curtain covers that strip when
+             the page slides up off it.
+
+     Using the header height on both ends is what put content behind the
+     footer: the band is 232px but the padding only reserved 108px, so the
+     reveal ate the gap and then ~124px of the case study with it. Reserving
+     the band's own height means the page slides up over empty space, and what
+     is left over is the same visible gap the header has above. */
+  padding-bottom: calc(var(--footer-curtain-height, 0px) + var(--map-tile-pad-y, 0px));
 }
