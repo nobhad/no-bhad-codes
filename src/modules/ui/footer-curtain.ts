@@ -235,11 +235,11 @@ export class FooterCurtainModule extends BaseModule {
     if (!element) return;
     // Scrolling inside the curtain itself must not drive the curtain.
     if (this.footer?.contains(element)) return;
-    // A gesture outranks a scroller. Without this a stray scroll event from
-    // anything still on the page would run update(), find that container at
-    // its top, and slam the curtain shut under the user's finger.
-    if (this.externalDrive) return;
-
+    // Scroll still reaches update() while a gesture owns the curtain — update()
+    // decides what to do with it. Returning early here meant the reader could
+    // scroll back up off the end of a case study with the band still raised,
+    // and update()'s retract check could never fire, so the last screenful of
+    // content sat behind the footer.
     this.scroller = element;
     this.requestUpdate();
   };
@@ -314,6 +314,20 @@ export class FooterCurtainModule extends BaseModule {
     if (!element || !element.isConnected) {
       this.setHeaderScrollAway(0);
       return;
+    }
+
+    // A revealed curtain is only ever allowed over the blank space reserved at
+    // the end of a scroller. The moment the user scrolls back up off that end,
+    // the strip the band occupies is content again — so the band goes away
+    // rather than sitting on top of it. Without this the curtain stays open
+    // while the reader scrolls back into the case study, and the last screenful
+    // of it is behind the footer.
+    if (this.externalDrive) {
+      const remaining = element.scrollHeight - element.scrollTop - element.clientHeight;
+      if (remaining > 1) {
+        this.externalDrive = false;
+        this.setProgress(0);
+      }
     }
 
     // Scroll only moves the header. The curtain itself is driven entirely by
