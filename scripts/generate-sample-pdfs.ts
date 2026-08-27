@@ -6,7 +6,9 @@ import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { generateReceiptPdf } from '../server/services/receipt-service.js';
 
-const DESKTOP = '/Users/noellebhaduri/Desktop';
+// Output directory. Defaults to the Desktop for quick eyeballing; override
+// with SAMPLE_PDF_OUT when generating into the repo (e.g. portfolio assets).
+const DESKTOP = process.env.SAMPLE_PDF_OUT || '/Users/noellebhaduri/Desktop';
 
 async function main() {
   console.log('Generating sample PDFs...\n');
@@ -14,19 +16,21 @@ async function main() {
   // 1. Receipt PDF (standalone — no DB needed)
   try {
     const pdfBytes = await generateReceiptPdf({
-      receiptNumber: 'REC-202603-HH001',
-      invoiceNumber: 'INV-202603-HH001',
+      // Demo client only — these samples get rendered into public
+      // portfolio assets, so never seed them with real client details.
+      receiptNumber: 'REC-202603-JB001',
+      invoiceNumber: 'INV-202603-JB001',
       datePaid: 'March 8, 2026',
       dateGenerated: 'March 17, 2026',
       paymentMethod: 'Check',
       paymentReference: '1230',
       paymentLabel: 'Payment 1 of 3',
       amount: 1125,
-      clientName: 'Emily Gold',
-      clientEmail: 'offerings@hedgewitchhorticulture.com',
-      clientCompany: 'Hedgewitch Horticulture LLC',
-      clientPhone: '(508) 555-0123',
-      clientAddress: '24 Crescent Heights\nFitchburg, MA 01420',
+      clientName: 'Juniper Bell',
+      clientEmail: 'juniper.bell@demo.nobhad.codes',
+      clientCompany: 'Juniper Bell Florals',
+      clientPhone: '(555) 010-0123',
+      clientAddress: '18 Wildflower Lane\nFitchburg, MA 01420',
       projectName: 'Custom Website Development (Better Tier)',
       lineItems: [
         { description: 'Custom Website Development (Better Tier)', amount: 4000 },
@@ -77,20 +81,21 @@ async function main() {
         await import('../server/services/sow-service.js');
       let sowData = await fetchSowData(project.id);
       if (!sowData) {
-        // Dummy data for preview
+        // Dummy data for preview — demo client only. These samples get
+        // rendered into public portfolio assets; never seed real clients.
         sowData = {
           project: {
             id: 7,
-            name: 'Hedgewitch Horticulture — Business Website',
+            name: 'Juniper Bell Florals — Business Website',
             projectType: 'business-site',
             description: 'Custom website redesign for sustainable garden design company. Migrating from Squarespace to a fully custom site with GSAP animations, CMS, blog, and custom analytics.',
             startDate: '2026-03-01',
             deadline: '2026-04-15'
           },
           client: {
-            name: 'Emily Gold',
-            email: 'offerings@hedgewitchhorticulture.com',
-            company: 'Hedgewitch Horticulture LLC'
+            name: 'Juniper Bell',
+            email: 'juniper.bell@demo.nobhad.codes',
+            company: 'Juniper Bell Florals'
           },
           proposal: {
             id: 1,
@@ -134,8 +139,15 @@ async function main() {
       const { invoiceService } = await import('../server/services/invoice-service.js');
       const { generateInvoicePdf } = await import('../server/routes/invoices/pdf.js');
 
+      // Restrict to seeded demo clients — the newest invoice overall belongs
+      // to a real client, and these samples get published as portfolio assets.
       const invoiceRow = await db.get(
-        'SELECT id FROM invoices WHERE deleted_at IS NULL ORDER BY id DESC LIMIT 1'
+        `SELECT i.id FROM invoices i
+           JOIN projects p ON p.id = i.project_id
+           JOIN clients c ON c.id = p.client_id
+          WHERE i.deleted_at IS NULL
+            AND c.email LIKE '%@demo.nobhad.codes'
+          ORDER BY i.id DESC LIMIT 1`
       ) as { id: number } | undefined;
 
       if (invoiceRow) {
@@ -197,10 +209,10 @@ nobhad.codes
 
 AND
 
-Hedgewitch Horticulture LLC ("Client")
-Emily Gold & Abigail Wolf
-offerings@hedgewitchhorticulture.com
-24 Crescent Heights, Fitchburg, MA 01420
+Juniper Bell Florals LLC ("Client")
+Juniper Bell & Rowan Ash
+juniper.bell@demo.nobhad.codes
+18 Wildflower Lane, Fitchburg, MA 01420
 
 
 1. SCOPE OF WORK
@@ -285,8 +297,8 @@ By signing below, both parties agree to the terms outlined in this agreement.
 
 
 _______________________________          _______________________________
-Emily Gold                                Noelle Bhaduri
-Hedgewitch Horticulture LLC               No Bhad Codes
+Juniper Bell                                Noelle Bhaduri
+Juniper Bell Florals LLC               No Bhad Codes
 Date: _______________                     Date: _______________`;
       }
 
@@ -332,10 +344,10 @@ Date: _______________                     Date: _______________`;
           left: {
             label: 'BILL TO:',
             lines: [
-              { text: 'Hedgewitch Horticulture LLC', bold: true },
-              { text: 'Emily Gold & Abigail Wolf' },
-              { text: 'offerings@hedgewitchhorticulture.com' },
-              { text: '24 Crescent Heights, Fitchburg, MA 01420' }
+              { text: 'Juniper Bell Florals LLC', bold: true },
+              { text: 'Juniper Bell & Rowan Ash' },
+              { text: 'juniper.bell@demo.nobhad.codes' },
+              { text: '18 Wildflower Lane, Fitchburg, MA 01420' }
             ]
           },
           right: {
@@ -394,10 +406,10 @@ Date: _______________                     Date: _______________`;
 
         // Client column (right)
         const clientLines = [
-          { text: 'Hedgewitch Horticulture LLC ("Client")', bold: true },
-          { text: 'Emily Gold & Abigail Wolf', bold: false },
-          { text: 'offerings@hedgewitchhorticulture.com', bold: false },
-          { text: '24 Crescent Heights, Fitchburg, MA 01420', bold: false }
+          { text: 'Juniper Bell Florals LLC ("Client")', bold: true },
+          { text: 'Juniper Bell & Rowan Ash', bold: false },
+          { text: 'juniper.bell@demo.nobhad.codes', bold: false },
+          { text: '18 Wildflower Lane, Fitchburg, MA 01420', bold: false }
         ];
         let cliY = ctx.y;
         for (const line of clientLines) {
@@ -447,7 +459,7 @@ Date: _______________                     Date: _______________`;
 
         ctx.currentPage.drawText('CLIENT:', { x: leftMargin, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: helveticaBold, color: PDF_COLORS.black });
         ctx.currentPage.drawLine({ start: { x: leftMargin, y: sigLineY }, end: { x: leftMargin + sigWidth, y: sigLineY }, thickness: PDF_SPACING.dividerThickness, color: PDF_COLORS.black });
-        ctx.currentPage.drawText('Emily Gold', { x: leftMargin, y: sigLineY - 15, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
+        ctx.currentPage.drawText('Juniper Bell', { x: leftMargin, y: sigLineY - 15, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
         ctx.currentPage.drawText('Date: _______________', { x: leftMargin, y: sigLineY - 30, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
 
         ctx.currentPage.drawText('SERVICE PROVIDER:', { x: rightCol, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: helveticaBold, color: PDF_COLORS.black });
@@ -485,7 +497,7 @@ Date: _______________                     Date: _______________`;
     const { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } = await import('../server/config/pdf-styles.js');
 
     const pdfDoc = await PDFDocument.create();
-    pdfDoc.setTitle('Client Intake — Hedgewitch Horticulture');
+    pdfDoc.setTitle('Client Intake — Juniper Bell Florals');
     regFontkit(pdfDoc);
     const helvetica = await pdfDoc.embedFont(getRegular());
     const helveticaBold = await pdfDoc.embedFont(getBold());
@@ -509,10 +521,10 @@ Date: _______________                     Date: _______________`;
       left: {
         label: 'PREPARED FOR:',
         lines: [
-          { text: 'Hedgewitch Horticulture LLC', bold: true },
-          { text: 'Emily Gold & Abigail Wolf' },
-          { text: 'offerings@hedgewitchhorticulture.com' },
-          { text: '(508) 555-0123' }
+          { text: 'Juniper Bell Florals LLC', bold: true },
+          { text: 'Juniper Bell & Rowan Ash' },
+          { text: 'juniper.bell@demo.nobhad.codes' },
+          { text: '(555) 010-0123' }
         ]
       },
       right: {
@@ -536,8 +548,8 @@ Date: _______________                     Date: _______________`;
     // Project Details
     y -= PDF_SPACING.sectionSpacing;
     y = drawSectionLabel(page, 'PROJECT DETAILS', { x: left, y, font: helveticaBold });
-    y = drawLabelValue(page, 'PROJECT NAME:', 'Hedgewitch Horticulture Website', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'CURRENT SITE:', 'hedgewitchhorticulture.com (Squarespace)', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'PROJECT NAME:', 'Juniper Bell Florals Website', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'CURRENT SITE:', 'juniperbellflorals.com (Squarespace)', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
     y = drawLabelValue(page, 'TARGET AUDIENCE:', 'Homeowners, garden enthusiasts', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
     y = drawLabelValue(page, 'DESCRIPTION:', '', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
     const descText = 'Website redesign for sustainable garden design company. Currently on Squarespace but hitting template limitations. Want earthy/witchy aesthetic with custom animations.';
@@ -566,7 +578,7 @@ Date: _______________                     Date: _______________`;
     y = drawSectionLabel(page, 'TECHNICAL DETAILS', { x: left, y, font: helveticaBold });
     y = drawLabelValue(page, 'TECH COMFORT:', 'Comfortable — can handle basic updates', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
     y = drawLabelValue(page, 'HOSTING:', 'Free hosting (Netlify/Vercel)', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'CONSTRAINTS:', 'Emily unavailable Feb 12-22', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'CONSTRAINTS:', 'Client unavailable Feb 12-22', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
     y = drawLabelValue(page, 'HOW FOUND US:', 'Referral from a friend', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
 
     // Footer + page numbers
