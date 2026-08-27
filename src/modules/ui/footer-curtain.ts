@@ -37,12 +37,6 @@
 import { gsap } from 'gsap';
 import { BaseModule } from '../core/base';
 
-/** Slop (px) for deciding a container genuinely overflows. */
-const OVERFLOW_EPSILON = 2;
-
-/** Floor (px) for the scrub distance so very short overflows still animate. */
-const MIN_REVEAL_DISTANCE = 96;
-
 /** Progress above which the curtain counts as open for a11y purposes. */
 const OPEN_THRESHOLD = 0.98;
 
@@ -75,8 +69,6 @@ export class FooterCurtainModule extends BaseModule {
   private progress = 0;
   private frame = 0;
 
-  /** Containers we've added bottom padding to, with their prior inline value. */
-  private padded = new Map<HTMLElement, string>();
   private pageObserver: MutationObserver | null = null;
 
   constructor() {
@@ -291,8 +283,6 @@ export class FooterCurtainModule extends BaseModule {
       this.timeline?.progress(target);
     }
 
-    // Padding is sized from the curtain height, so re-apply it at the new size.
-    this.padded.forEach((_original, element) => this.unpad(element));
     this.requestUpdate();
   };
 
@@ -309,7 +299,6 @@ export class FooterCurtainModule extends BaseModule {
     this.scroller = null;
     this.externalDrive = false;
     this.setHeaderScrollAway(0);
-    Array.from(this.padded.keys()).forEach((element) => this.unpad(element));
     this.setProgress(0);
   };
 
@@ -324,63 +313,21 @@ export class FooterCurtainModule extends BaseModule {
     const element = this.scroller;
     if (!element || !element.isConnected) {
       this.setHeaderScrollAway(0);
-      this.setProgress(0);
       return;
     }
 
-    // The header scrolls away with content wherever content scrolls at all —
-    // that has nothing to do with whether this container is long enough to
-    // reveal the curtain, so it is computed ahead of the bailouts below.
+    // Scroll only moves the header. The curtain itself is driven entirely by
+    // gesture — PageTransitionModule on the tiles that do not scroll, and the
+    // end of a case study on the one that does.
+    //
+    // It used to be scrubbed from scroll position here, which made sense when
+    // project-detail scrolled the whole document and clearing the viewport
+    // bottom genuinely uncovered the band. Inside the fixed camera main always
+    // covers it, so that path could only ever fight the gesture for control of
+    // the same timeline — and the bottom padding it needed as a runway pushed
+    // the footer a screen further down than the content warranted.
     this.setHeaderScrollAway(element.scrollTop);
-
-    if (!this.ensurePadding(element)) {
-      this.setProgress(0);
-      return;
-    }
-
-    const maxScroll = element.scrollHeight - element.clientHeight;
-    if (maxScroll <= OVERFLOW_EPSILON) {
-      this.setProgress(0);
-      return;
-    }
-
-    // Scrub across the last curtain-height of travel, but never demand more
-    // travel than the container actually has.
-    const distance = Math.max(MIN_REVEAL_DISTANCE, Math.min(this.curtainHeight, maxScroll));
-    const remaining = maxScroll - element.scrollTop;
-
-    this.setProgress(1 - clamp01(remaining / distance));
   };
-
-  /**
-   * Give a genuinely overflowing container room for the curtain to rise into.
-   *
-   * @returns whether the container overflows on its own content.
-   */
-  private ensurePadding(element: HTMLElement): boolean {
-    const isPadded = this.padded.has(element);
-    const naturalHeight = element.scrollHeight - (isPadded ? this.curtainHeight : 0);
-    const overflows = naturalHeight > element.clientHeight + OVERFLOW_EPSILON;
-
-    if (overflows && !isPadded) {
-      const existing = parseFloat(getComputedStyle(element).paddingBottom) || 0;
-      this.padded.set(element, element.style.paddingBottom);
-      // Inline so it wins over the layered/unlayered page rules that set
-      // padding on these sections.
-      element.style.paddingBottom = `${existing + this.curtainHeight}px`;
-    } else if (!overflows && isPadded) {
-      this.unpad(element);
-    }
-
-    return overflows;
-  }
-
-  private unpad(element: HTMLElement): void {
-    const original = this.padded.get(element);
-    if (original === undefined) return;
-    element.style.paddingBottom = original;
-    this.padded.delete(element);
-  }
 
   private setProgress(next: number): void {
     if (!this.timeline) return;
@@ -457,8 +404,6 @@ export class FooterCurtainModule extends BaseModule {
 
     this.scrubTween?.kill();
     this.scrubTween = null;
-
-    Array.from(this.padded.keys()).forEach((element) => this.unpad(element));
 
     // Never leave the page slid up — the module is gone, nothing would put
     // it back, and the user would be looking at a permanently shifted site.

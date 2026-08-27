@@ -450,6 +450,10 @@
   .tools-section {
     flex: 1 1 0;
     min-width: 0;
+    /* Sits beside the aside here, so its stacked-layout top margin would drop
+       the TOOLS label below ROLE even though .intro-content aligns both to
+       flex-start. Side by side, the two labels share a line. */
+    margin-top: 0;
   }
 }
 
@@ -1425,20 +1429,15 @@
    un-fix, and the camera position is always the page the user is on. */
 
 /* ===============================================
-   FOOTER CLEARANCE
+   VERTICAL RHYTHM
    =============================================== */
 
-/* Breathing room between the bottom of the content and the top edge of the
-   footer curtain, which rises to meet it at the end of the scroll.
+/* The case study's vertical breathing room, top and bottom.
 
    Declared last in the file on purpose: the responsive blocks above set
-   `padding` as a shorthand, so any earlier bottom value would be reset back
-   to their uniform edge. Equal specificity means this later rule wins while
-   still letting those blocks pick the horizontal padding.
-
-   FooterCurtainModule adds the curtain's own height to the scroller as an
-   inline style on top of this, so the value here reads as the visible gap
-   and nothing else. */
+   `padding` as a shorthand, so any earlier value would be reset back to their
+   uniform edge. Equal specificity means this later rule wins while still
+   letting those blocks pick the horizontal padding. */
 .project-detail-section {
   /* This file is imported UNLAYERED (bundles/site.css), so it outranks the
      shared `.site-map > [data-map-tile]` inset in layer(states) — the tile
@@ -1446,11 +1445,8 @@
      fixed header. Composed with the section's own top padding rather than
      replacing it. */
   padding-top: calc(var(--map-header-inset, 0px) + var(--map-tile-pad-y, 0px));
-  padding-bottom: var(--project-detail-footer-clearance, var(--space-10));
-}
-
-@media (--mobile) {
-  .project-detail-section {
-    --project-detail-footer-clearance: var(--space-6);
-  }
+  /* Same measure below the content as above it. Both read --map-tile-pad-y,
+     so the case study sits symmetrically between the header and the footer
+     curtain at every width instead of carrying a second, separate number. */
+  padding-bottom: var(--map-tile-pad-y, 0px);
 }
