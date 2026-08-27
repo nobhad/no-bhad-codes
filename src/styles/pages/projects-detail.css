@@ -1400,7 +1400,10 @@ html:has(main[data-active-page="project-detail"]) .footer {
 }
 
 main[data-active-page="project-detail"] {
-  position: static;
+  /* `relative` with no offsets lays out identically to `static`, but z-index
+     is ignored on a static element — and the page needs its stacking order
+     here to stay above the footer curtain it slides up off. */
+  position: relative;
   width: 100%;
   height: auto;
   overflow: visible;
@@ -1431,11 +1434,11 @@ main[data-active-page="project-detail"] > #project-detail.project-detail-section
    inline style on top of this, so the value here reads as the visible gap
    and nothing else. */
 .project-detail-section {
-  padding-bottom: var(--project-detail-footer-clearance, var(--space-12));
+  padding-bottom: var(--project-detail-footer-clearance, var(--space-20));
 }
 
 @media (--mobile) {
   .project-detail-section {
-    --project-detail-footer-clearance: var(--space-8);
+    --project-detail-footer-clearance: var(--space-12);
   }
 }
