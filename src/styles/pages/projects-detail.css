@@ -1457,10 +1457,10 @@
      fixed header. Composed with the section's own top padding rather than
      replacing it. */
   padding-top: calc(var(--map-header-inset, 0px) + var(--map-tile-pad-y, 0px));
-  /* The gap between the frame and the top of the footer band, matching the gap
-     above. Nothing is reserved for the band's height: the reveal slides the
-     whole page up, so content travels with it rather than being hidden behind
-     the band — the tail only ever looked covered because the curtain used to
-     stay open while the reader scrolled back into the case study. */
-  padding-bottom: var(--map-tile-pad-y, 0px);
+  /* Mirrors the top exactly: the tile gap plus the header's height. Nothing
+     extra is reserved for the band — FooterCurtainModule grows this padding in
+     step with the reveal, so the strip the page gives up is always blank
+     rather than the tail of the case study, and there is no dead space sitting
+     here before the band has been raised. */
+  padding-bottom: calc(var(--map-header-inset, 0px) + var(--map-tile-pad-y, 0px));
 }
