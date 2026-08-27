@@ -33,13 +33,25 @@
 
   main {
     position: fixed;
-    top: var(--header-height);
+    /* Header height reserved on the tiles — see components/site-map.css. */
+    top: 0;
+    /* Breathing room around tile content. One knob: the section shorthand
+       below uses it directly, and the tile's header inset composes with it. */
+    --map-tile-pad-y: 1.5rem;
     left: 0;
     right: 0;
-    bottom: var(--footer-height);
+    /* Reaches the true bottom edge. The old --footer-height inset reserved a
+       strip for the copyright bar the footer curtain replaced, and since the
+       curtain is pinned down there behind the page, that strip showed up as a
+       permanent sliver of the band at these widths. `auto` height lets top and
+       bottom resolve the box with no viewport-unit arithmetic to disagree with
+       the real window — same as the small-mobile rule further down.
+
+       This lives in layer(responsive), which outranks the layer(states) rule
+       in components/site-map.css, so that one cannot fix this for us. */
+    bottom: 0;
     width: 100%;
-    height: calc(100vh - var(--header-height) - var(--footer-height));
-    height: calc(100dvh - var(--header-height) - var(--footer-height));
+    height: auto;
     overflow: hidden;
     -webkit-overflow-scrolling: touch;
   }
@@ -56,11 +68,19 @@
     left: 0;
     width: 100%;
     height: 100%;
-    padding: 1rem var(--container-padding);
+    padding: var(--map-tile-pad-y, 1rem) var(--container-padding);
     box-sizing: border-box;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+  }
+
+  /* The header's height is reserved on the tile, composed with the padding
+     above rather than replacing it. It has to be declared in this layer:
+     layer(responsive) is ordered after layer(states), so the shorthand above
+     would otherwise reset the inset that components/site-map.css sets. */
+  .site-map > [data-map-tile] {
+    padding-top: calc(var(--map-header-inset, 0px) + var(--map-tile-pad-y, 1rem));
   }
 
   .section-content {
@@ -143,7 +163,14 @@
   .about-section.page-active,
   #about.about-section,
   section#about {
-    padding: 0;
+    /* Sides and bottom are deliberately zeroed — .about-content below owns
+       the horizontal padding so text lines up with the header's .container.
+       The TOP has to carry the header inset, composed the same way as the
+       shared tile rule above. This selector list is ID-weighted (1,1,0) to
+       win display/overflow fights, which means it also outranks that shared
+       rule — so it has to opt in explicitly or about ends up as the one tile
+       whose content sits under the header. */
+    padding: calc(var(--map-header-inset, 0px) + var(--map-tile-pad-y, 1rem)) 0 0;
     margin: 0;
     display: block;
     overflow-y: scroll;
@@ -164,8 +191,13 @@
   .about-section .about-content {
     display: flex;
     flex-direction: column;
-    padding: 0.5rem var(--container-padding);
-    gap: 1rem;
+    /* No top padding: the tile already carries the header inset plus
+       --map-tile-pad-y, and adding to it here made the gap above the photo
+       larger than the gap below it. */
+    padding: 0 var(--container-padding);
+    /* Same token again: the space between the bio and the marquee matches the
+       space above the photo and the photo-to-title gap. */
+    gap: var(--map-tile-pad-y, 1.5rem);
     max-width: 100%;
     width: 100%;
     min-height: 100%;
@@ -183,12 +215,15 @@
     pointer-events: auto;
   }
 
-  /* About layout - single column on mobile */
+  /* About layout - single column on mobile. The gap is the same token the
+     tile uses for its top inset, so the space above the photo and the space
+     between the photo and the ABOUT title stay equal by construction rather
+     than by two numbers that happen to agree. */
   .about-layout {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
+    gap: var(--map-tile-pad-y, 1.5rem);
     width: 100%;
   }
 
@@ -242,8 +277,13 @@
      Matches contact page: tight h2-to-hr gap
      ========================================== */
 
+  /* Override the TOKEN, not font-size — base/layout.css owns the single
+     `.section-heading { font-size }` declaration. */
+  :root {
+    --section-heading-size: clamp(2.5rem, 10vw, 4rem);
+  }
+
   .section-heading {
-    font-size: clamp(2.5rem, 10vw, 4rem);
     line-height: 1.1;
     margin-top: 1.5rem;
     margin-bottom: 0.25rem;
@@ -395,7 +435,11 @@
      room for the iOS URL bar / home indicator overlay. */
   main {
     position: fixed;
-    top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+    /* Header height reserved on the tiles — see components/site-map.css; the
+       safe-area inset rides along so the strip clears the notch too. */
+    top: 0;
+    --map-header-inset: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+    --map-tile-pad-y: 1rem;
     left: 0;
     right: 0;
     bottom: 0;
@@ -619,7 +663,12 @@
     /* Vertical drops to 0.5rem; horizontal stays on the
        --container-padding token so content keeps aligning with the
        header's .container on the smallest phones. */
-    padding: 0.5rem var(--container-padding);
+    padding: var(--map-tile-pad-y, 0.5rem) var(--container-padding);
+  }
+
+  /* Same composition as the wider mobile block above. */
+  .site-map > [data-map-tile] {
+    padding-top: calc(var(--map-header-inset, 0px) + var(--map-tile-pad-y, 0.5rem));
   }
 
   /* Extra-tight layout on the very smallest screens (e.g. iPhone SE).
@@ -638,8 +687,11 @@
   }
 
   /* Section headings on XS — tighter than small-mobile */
+  :root {
+    --section-heading-size: var(--font-size-2xl);
+  }
+
   .section-heading {
-    font-size: var(--font-size-2xl);
     margin-top: 1rem;
   }
 }
