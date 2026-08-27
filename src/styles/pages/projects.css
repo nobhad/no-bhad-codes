@@ -1485,6 +1485,14 @@
   text-underline-offset: 0.18em;
   font-size: 0.95em;
   opacity: 0.85;
+  /* Only as wide as its own text. It inherits display: block from the panel,
+     which made it a full-width band across the screen — clicking anywhere on
+     that row opened the live site in a new tab instead of routing to the case
+     study, even though the visible link is a short line of text. The screen's
+     click handler exempts this element by design (wireTuneInScreenClick), so
+     its hit area has to match what the user can actually see. */
+  display: inline-block;
+  max-width: 100%;
 }
 
 .crt-tv__panel-hint {
