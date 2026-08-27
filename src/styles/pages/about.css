@@ -45,7 +45,16 @@
     display: flex;
     gap: 1rem;
     align-items: flex-start;
-    width: 100%;
+    /* The two columns come to a fixed width (300px image + gap + the text
+       column's 700px cap), so a full-width row has nowhere to put its slack
+       but the right-hand end, and the block reads as left-hung in a wide
+       viewport. Sizing the row to its own content and auto-centring it sits
+       the pair in the middle of the screen instead — and unlike a hard
+       max-width it stays correct when the wide-screen rule below widens the
+       gap. Mobile sets width back to 100% for its stacked column. */
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
   }
 
   /* Left column: Image - fixed width */
@@ -71,9 +80,9 @@
     padding-top: 0;
   }
 
-  /* Section heading - extends .section-heading from layout.css */
+  /* Section heading - size comes from --section-heading-size in
+     base/layout.css so About and Contact match at every width. */
   .about-section .section-heading {
-    font-size: clamp(4rem, 9vw, 6rem);
     margin-bottom: 0.5rem;
   }
 
