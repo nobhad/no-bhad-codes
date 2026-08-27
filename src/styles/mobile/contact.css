@@ -18,13 +18,6 @@
  * Scale down avatar watermark
  * ============================================ */
 
-@media (--laptop-wide) {
-  .contact-bg-avatar {
-    width: min(40vw, 300px);
-    opacity: 0.06;
-  }
-}
-
 /* ============================================
  * MOBILE (max-width: 767px)
  * ============================================ */
@@ -56,28 +49,7 @@
     padding-top: 2rem;
   }
 
-  /* Larger avatar watermark on mobile for visual impact.
-     Reset opacity to 1 so the inner SVG paths (#MAIN/#NOSE/#EAR at
-     0.12, #EYE at 0.5) control the watermark fade alone. The
-     --laptop-wide rule above (max-width: 1100px) sets opacity: 0.06
-     and ALSO matches on mobile, so without this reset the container
-     stays at 0.06 and multiplies the inner opacities down to ~0.007
-     effective — invisible. */
-  .contact-bg-avatar {
-    /* Capped under viewport width so the SVG fits fully inside the
-       section's overflow-x: hidden clip box. 110vw made the avatar
-       wider than the section, so the left side got chopped and the
-       visible portion looked truncated on the right. */
-    width: min(90vw, 500px);
-    opacity: 1;
-    /* bottom: 0 sits flush with section bottom (just above footer);
-       main has overflow:hidden and ends at var(--footer-height), so
-       that's the lowest visible anchor. right: 5% keeps a small inset
-       from the viewport edge. */
-    bottom: 0;
-    right: 5%;
   }
-}
 
 /* ============================================
  * SMALL MOBILE (max-width: 479px) — phones only.
@@ -123,17 +95,7 @@
     min-height: 0;
   }
 
-  /* Avatar acts as a true background — pushed behind the form column
-     and dimmed so it stops fighting the textarea visually. The
-     pages/contact.css base sets z-index: var(--z-index-base) on the
-     container; .contact-form-column already sits at z-index-content,
-     so the form is above. Lowering opacity here brings the watermark
-     down to ambient. */
-  .contact-bg-avatar {
-    opacity: 0.4;
-  }
-
-  /* Eye + star stay at full opacity so the glow still reads against
+    /* Eye + star stay at full opacity so the glow still reads against
      the dimmed body-part watermark. The container's 0.4 opacity above
      compounds with these — 0.18 multiplied with 0.4 produced an
      effective ~0.07 (invisible on a phone). Letting these inherit

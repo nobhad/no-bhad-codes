@@ -81,37 +81,6 @@ p.contact-options {
   overflow-wrap: break-word; /* prevents long email/URLs from overflowing narrow containers */
 }
 
-/* Avatar SVG */
-.avatar-blurb-svg {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* Body parts - subtle watermark */
-.avatar-blurb-svg #MAIN,
-.avatar-blurb-svg #NOSE,
-.avatar-blurb-svg #EAR {
-  fill: var(--color-dark);
-  opacity: 0.12;
-}
-
-/* Eye - always light glow, never dark */
-.avatar-blurb-svg #EYE {
-  fill: var(--color-off-white);
-  filter: url(#eye-glow);
-  opacity: 0.5;
-}
-
-/* Star glow - always light, matches eye */
-.avatar-blurb-svg .star-glow,
-.avatar-blurb-svg #STAR_GLOW {
-  fill: var(--color-off-white);
-  stroke: none;
-  filter: url(#star-glow);
-  transform-origin: center center;
-}
-
 /* Form container */
 .contact-form {
   width: 100%;
@@ -408,24 +377,6 @@ html[data-theme="dark"] .input-item textarea {
   color: var(--color-text-primary);
   caret-color: var(--color-accent);
   -webkit-text-fill-color: var(--color-text-primary);
-}
-
-/* ==========================================
-   BACKGROUND AVATAR WATERMARK
-   ========================================== */
-
-.contact-bg-avatar {
-  position: absolute;
-  bottom: 6%;
-  right: 5%;
-  width: min(55vw, 520px);
-  /* opacity applied per-element so eye glow can be independent */
-  pointer-events: none;
-  z-index: var(--z-index-base);
-}
-
-.contact-bg-avatar .avatar-blurb-container {
-  width: 100%;
 }
 
 /* ==========================================
