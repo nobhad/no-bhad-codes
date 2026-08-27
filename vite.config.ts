@@ -21,8 +21,9 @@ function cleanUrlsMiddleware(
   // Leave anything already carrying an extension, and any nested path.
   if (pathname.includes('.') || pathname.lastIndexOf('/') !== 0) return next();
 
-  const candidate = resolve(__dirname, 'public', `${pathname.slice(1)}.html`);
-  if (existsSync(candidate)) {
+  const name = `${pathname.slice(1)}.html`;
+  const candidate = [resolve(__dirname, name), resolve(__dirname, 'public', name)].find(existsSync);
+  if (candidate) {
     req.url = `${pathname}.html${query ? `?${query}` : ''}`;
   }
   next();
@@ -59,6 +60,12 @@ export default defineConfig({
       preserveEntrySignatures: 'strict',
       input: {
         main: resolve(__dirname, 'index.html'),
+        // Standalone shells outside the SPA. Built as entries so they get the
+        // real stylesheet rather than restating its values: 404.html is what
+        // Vercel serves for unmatched routes, design-system.html is generated
+        // by scripts/build-design-system-docs.mjs.
+        '404': resolve(__dirname, '404.html'),
+        'design-system': resolve(__dirname, 'design-system.html'),
         // Portal / dashboard + login bootstrap entries
         admin: resolve(__dirname, 'src/admin.ts'),
         portal: resolve(__dirname, 'src/portal.ts'),

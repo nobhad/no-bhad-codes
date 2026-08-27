@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>No Bhad Codes Design System</title>
+<title>Design System — No Bhad Codes</title>
 <script>
   // Same theme bootstrap the site uses, so this page opens in whatever
   // theme the visitor last chose rather than its own default.
@@ -22,6 +22,7 @@
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
+<script type="module" src="/src/static-page.ts"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Acme&family=Cormorant+Garamond:wght@400;600;700&family=Inconsolata:wght@400;500;700&display=swap">
@@ -53,7 +54,6 @@ code{font-family:var(--ds-mono);font-size:.86em}
 /* masthead */
 .mast{border-bottom:1px solid var(--ds-line);background:var(--ds-surface)}
 .mast-in{display:flex;flex-direction:column;gap:28px;padding:56px 24px 40px;max-width:1180px;margin:0 auto}
-.brand{font-family:var(--ds-display);font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--ds-crimson)}
 h1{font-family:var(--ds-serif);font-weight:700;font-size:clamp(2.6rem,1.8rem+3vw,4.2rem);line-height:1.02;margin:0;text-wrap:balance;letter-spacing:-.01em}
 .lede{font-size:16px;color:var(--ds-ink-2);max-width:62ch;margin:0}
 .stats{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--ds-line);border-radius:2px;overflow:hidden}
@@ -107,29 +107,21 @@ td{padding:7px 12px;vertical-align:middle}
 .sw-bar{display:block;height:8px;max-width:100%;background:var(--ds-crimson);border-radius:1px;min-width:2px}
 .sw-dur{font-size:11px;color:var(--ds-muted);font-variant-numeric:tabular-nums}
 
-/* Site chrome — header from src/styles/components/nav-base.css, footer from
-   src/styles/components/footer.css, so this page wears the same frame as
-   every other page. Values are copied because this file is generated
-   standalone and cannot import the hashed site bundle. */
-:root{--nbc-nav:#333333;--nbc-accent:#dc2626;--nbc-shadow:rgba(0,0,0,.2);--nbc-pad:clamp(1rem,4vw,2rem)}
-:root[data-theme="dark"]{--nbc-nav:#fafafa;--nbc-shadow:rgba(0,0,0,1)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--nbc-nav:#fafafa;--nbc-shadow:rgba(0,0,0,1)}}
-.site-header{position:sticky;top:0;left:0;right:0;width:100%;z-index:20;background:var(--ds-paper);font-family:var(--ds-display);padding:0;padding-top:env(safe-area-inset-top,0)}
-.site-header-in{padding:0 var(--nbc-pad)}
-.site-nav-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;width:100%;min-height:40px;flex-wrap:nowrap}
-.site-brand{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--nbc-nav);font-weight:600;font-size:20px;text-shadow:0 2px 4px var(--nbc-shadow);text-transform:uppercase;white-space:nowrap;flex-shrink:0;transition:color .3s ease}
-.site-brand:hover,.site-brand:active{color:var(--nbc-accent)}
-.site-nav-right{display:flex;align-items:center;gap:16px;flex-shrink:0;white-space:nowrap}
-.site-icon,.site-menu{display:flex;align-items:center;gap:12px;background:none;border:none;cursor:pointer;padding:8px 0;min-height:40px;color:var(--nbc-nav);text-transform:uppercase;flex-shrink:0;font-family:inherit;font-size:inherit;line-height:inherit;text-decoration:none;text-shadow:0 2px 4px var(--nbc-shadow);transition:color .3s ease}
-.site-icon:hover,.site-menu:hover{color:var(--nbc-accent)}
-.site-icon{justify-content:center;width:40px;height:40px;border-radius:9999px;padding:0}
-.site-icon svg{width:20px;height:20px}
-.site-menu{font-size:20px;font-weight:600}
-.site-menu svg{width:16px;height:16px}
-:root[data-theme="light"] .site-icon .icon-sun{display:none}
-:root[data-theme="dark"] .site-icon .icon-moon{display:none}
-.site-footer{display:flex;align-items:center;justify-content:flex-end;height:40px;padding:0 2rem;font-size:clamp(.875rem,.825rem + .25vw,1rem);color:var(--ds-ink);text-align:right}
-.site-footer p{margin:0}
+/* The site stylesheet now supplies this page's chrome, and its heading
+   rules reach the docs body too — uppercasing and centring type this page
+   sets deliberately. Unlayered, so these win over the site's layered rules
+   without !important. Scoped to the document, never the chrome. */
+#main-content h1,#main-content h2,#main-content h3,#main-content p{text-transform:none;text-align:left;letter-spacing:normal}
+#main-content h1{font-family:var(--ds-serif);letter-spacing:-.01em}
+#main-content h2{font-family:var(--ds-serif);letter-spacing:-.01em}
+/* Same opening and closing gap the case study uses: the header's height
+   plus the tile pad (src/styles/pages/projects-detail.css composes the two
+   from --map-header-inset and --map-tile-pad-y). Those variables are scoped
+   to .site-map, which this page is not inside, so the underlying tokens are
+   composed directly and the mobile step-down from mobile/layout.css is
+   mirrored at the same breakpoint. */
+#main-content{background:var(--ds-paper);color:var(--ds-ink);--docs-tile-pad-y:var(--space-6);padding-top:calc(var(--header-height) + var(--docs-tile-pad-y));padding-bottom:calc(var(--header-height) + var(--docs-tile-pad-y))}
+@media (max-width:767px){#main-content{--docs-tile-pad-y:3rem}}
 
 footer.docs-note{padding:44px 0 24px;color:var(--ds-muted);font-size:12.5px}
 footer.docs-note b{color:var(--ds-ink);font-weight:500}
@@ -137,29 +129,124 @@ footer.docs-note b{color:var(--ds-ink);font-weight:500}
 :focus-visible{outline:2px solid var(--ds-crimson);outline-offset:2px}
 </style>
 
-<header class="site-header"><div class="site-header-in">
-  <nav class="site-nav-row">
-    <a class="site-brand" href="/" aria-label="No Bhad Codes home">No Bhad Codes</a>
-    <div class="site-nav-right">
-      <a class="site-icon" href="/#/portal" aria-label="Client Portal Login">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg>
-      </a>
-      <button type="button" class="site-icon" id="ds-theme-toggle" aria-label="Toggle dark/light theme">
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"/></svg>
-      </button>
-      <a class="site-menu" href="/" aria-label="Back to the site">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M7.33333 16L7.33333 0L8.66667 0L8.66667 16L7.33333 16Z" fill="currentColor"/><path d="M16 8.66667L0 8.66667L0 7.33333L16 7.33333L16 8.66667Z" fill="currentColor"/></svg>
-        Menu
-      </a>
-    </div>
-  </nav>
-</div></header>
+    <header class="header">
+      <div class="container is--full">
+        <nav class="nav-row">
+          <a href="/" aria-label="no bhad codes - Go to homepage" class="nav-logo-row">
+            no bhad codes
+          </a>
+          <div class="nav-row__right">
+            <!-- CLIENT PORTAL BUTTON -->
+            <button class="portal-button" aria-label="Client Portal Login" id="portal-trigger">
+              <div class="icon-wrap">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M18 20a6 6 0 0 0-12 0" />
+                  <circle cx="12" cy="10" r="4" />
+                  <circle cx="12" cy="12" r="10" />
+                </svg>
+              </div>
+            </button>
+
+            <button id="toggle-theme" class="theme-button" aria-label="Toggle dark/light theme">
+              <div class="icon-wrap">
+                <svg
+                  class="theme-icon sun-icon"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"></circle>
+                  <path
+                    d="M12 2V4M12 20V22M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  ></path>
+                </svg>
+                <svg
+                  class="theme-icon moon-icon"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79z"></path>
+                </svg>
+              </div>
+            </button>
+            <!-- aria-label mirrors the visible word ("Menu" / "Close") so the
+                 accessible name always contains it (WCAG 2.5.3 Label in Name);
+                 navigation.ts swaps it alongside aria-expanded. -->
+            <button
+              data-menu-toggle=""
+              class="menu-button"
+              aria-label="Menu"
+              aria-expanded="false"
+            >
+              <div class="icon-wrap">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="100%"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  class="menu-button-icon"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M7.33333 16L7.33333 -3.2055e-07L8.66667 -3.78832e-07L8.66667 16L7.33333 16Z"
+                    fill="currentColor"
+                  ></path>
+                  <path
+                    d="M16 8.66667L-2.62269e-07 8.66667L-3.78832e-07 7.33333L16 7.33333L16 8.66667Z"
+                    fill="currentColor"
+                  ></path>
+                  <path
+                    d="M6 7.33333L7.33333 7.33333L7.33333 6C7.33333 6.73637 6.73638 7.33333 6 7.33333Z"
+                    fill="currentColor"
+                  ></path>
+                  <path
+                    d="M10 7.33333L8.66667 7.33333L8.66667 6C8.66667 6.73638 9.26362 7.33333 10 7.33333Z"
+                    fill="currentColor"
+                  ></path>
+                  <path
+                    d="M6 8.66667L7.33333 8.66667L7.33333 10C7.33333 9.26362 6.73638 8.66667 6 8.66667Z"
+                    fill="currentColor"
+                  ></path>
+                  <path
+                    d="M10 8.66667L8.66667 8.66667L8.66667 10C8.66667 9.26362 9.26362 8.66667 10 8.66667Z"
+                    fill="currentColor"
+                  ></path>
+                </svg>
+              </div>
+              <div class="menu-button-text">
+                <p class="p-large">Menu</p>
+                <p class="p-large">Close</p>
+              </div>
+            </button>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+<main id="main-content">
 
 <header class="mast"><div class="mast-in">
-  <div class="brand">No Bhad Codes</div>
-  <h1>The design system<br>behind nobhad.codes</h1>
-  <p class="lede">Every colour, measurement, and duration on the site is a named token. Nothing is hardcoded in a component stylesheet, and this page is generated from the token files themselves &mdash; so it cannot drift from what actually ships.</p>
+  <h1>One design system,<br>two products</h1>
+  <p class="lede">The same token foundation serves <b>nobhad.codes</b>, the public site, and <b>The Backend</b>, the client and admin portal behind it. Every colour, measurement, and duration is a named token; nothing is hardcoded in a component stylesheet. The two do not look alike, and that is the point &mdash; the portal draws on this foundation and then overlays its own surface theme, so a shared vocabulary produces two deliberately different products. This page is generated from the token files themselves, so it cannot drift from what actually ships.</p>
   <div class="stats">
     <div class="stat"><b>944</b><span>unique tokens</span></div>
     <div class="stat"><b>11</b><span>token files</span></div>
@@ -182,7 +269,7 @@ footer.docs-note b{color:var(--ds-ink);font-weight:500}
     <div class="layer"><code>responsive</code></div>
     <div class="layer"><code>utilities</code></div>
   </div>
-  <p class="pull"><b>One deliberate exception.</b> <code>portal-theme.css</code> is not imported into the tokens layer. It is imported unlayered by the admin and client bundles, because unlayered styles beat every layered style &mdash; which is exactly what a surface theme needs to do. Three surfaces (main site, admin portal, client portal) draw on one token foundation, and the portal theme wins on the two that need it.</p>
+  <p class="pull"><b>How the portal looks different.</b> <code>portal-theme.css</code> is not imported into the tokens layer. The admin and client bundles import it unlayered, because unlayered styles beat every layered style &mdash; which is exactly what a surface theme needs to do. That single decision is what lets The Backend read as its own product while still spending the same tokens: three surfaces (main site, admin portal, client portal) on one foundation, with the portal theme winning on the two that need it.</p>
 </section></div>
 
 <nav class="nav"><div class="nav-in"><a href="#colors">colors<span>299</span></a><a href="#typography">typography<span>44</span></a><a href="#spacing">spacing<span>45</span></a><a href="#dimensions">dimensions<span>98</span></a><a href="#borders">borders<span>29</span></a><a href="#shadows">shadows<span>49</span></a><a href="#animations">animations<span>64</span></a><a href="#z-index">z index<span>47</span></a><a href="#buttons">buttons<span>47</span></a><a href="#breakpoints">breakpoints<span>38</span></a><a href="#portal-theme">portal theme<span>300</span></a></div></nav>
@@ -202,15 +289,33 @@ footer.docs-note b{color:var(--ds-ink);font-weight:500}
 <footer class="docs-note">This page is generated from <b>src/design-system/tokens/*.css</b> at build time &mdash; the token files are the single source of truth, and nothing here is written by hand. Hand-maintained documentation of a token layer is wrong within a month.</footer>
 </div>
 
-<footer class="site-footer">
-  <p>&copy; <span id="ds-year"></span> Made &amp; Designed by No Bhad Codes. All rights reserved.</p>
-</footer>
+</main>
 
-<script>
-  document.getElementById('ds-year').textContent = new Date().getFullYear();
-  document.getElementById('ds-theme-toggle').addEventListener('click', function () {
-    var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    try { localStorage.setItem('theme', next); } catch (e) {}
-  });
-</script>
+    <footer class="footer">
+      <!-- Black curtain. Sits below the viewport edge until the active page's
+           scroll container reaches its end; FooterCurtainModule drives the
+           reveal with GSAP, scrubbed against the last stretch of scroll. -->
+      <div class="footer-curtain" data-footer-curtain aria-hidden="true">
+        <div class="footer-curtain__inner" data-footer-curtain-inner>
+          <div class="footer-curtain__brand">
+            <img
+              class="footer-curtain__avatar"
+              src="/images/avatar.svg"
+              alt=""
+              width="288"
+              height="356"
+              loading="lazy"
+              decoding="async"
+            />
+            <p class="footer-curtain__wordmark">no bhad codes</p>
+          </div>
+
+          <p class="footer-curtain__copy">
+            &copy; <span class="js-copyright-year"></span> Made &amp; Designed by No Bhad Codes. All
+            rights reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+<script type="module" src="/src/utils/set-copyright-year.ts"></script>
