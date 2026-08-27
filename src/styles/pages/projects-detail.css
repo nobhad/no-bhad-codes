@@ -262,7 +262,9 @@
   aspect-ratio: 12 / 7;
   max-height: 22vh;
   overflow: hidden;
-  border-radius: 12px;
+  /* Square corners — media on this page is framed by a hairline border,
+     not a rounded card. Matches .project-media below. */
+  border-radius: 0;
   box-shadow: var(--shadow-elevated-md);
   flex-shrink: 0;
 }
@@ -568,14 +570,14 @@
 
 .worksub-info figure img {
   width: 100%;
-  border-radius: var(--border-radius-lg, 12px);
+  border-radius: 0;
   box-shadow: var(--shadow-elevated-sm);
 }
 
 .worksub-info figure video {
   display: block;
   width: 100%;
-  border-radius: var(--border-radius-lg, 12px);
+  border-radius: 0;
   box-shadow: var(--shadow-elevated-sm);
   background: var(--color-dark);
 }
@@ -620,7 +622,7 @@
 .worksub-info figure img.mobile-page {
   max-width: var(--project-detail-image-phone-max);
   margin: 0 auto;
-  border-radius: var(--border-radius-xl, 16px);
+  border-radius: 0;
 }
 
 /* App icons */
@@ -779,7 +781,7 @@
   /* Hero */
   .worksub-header figure {
     aspect-ratio: 2 / 1;
-    border-radius: 8px;
+    border-radius: 0;
     box-shadow: var(--shadow-elevated-sm);
   }
 
