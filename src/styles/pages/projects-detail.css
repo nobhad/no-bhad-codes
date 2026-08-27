@@ -1414,3 +1414,28 @@ main[data-active-page="project-detail"] > #project-detail.project-detail-section
   min-height: calc(100vh - var(--header-height));
   overflow: visible;
 }
+
+/* ===============================================
+   FOOTER CLEARANCE
+   =============================================== */
+
+/* Breathing room between the bottom of the content and the top edge of the
+   footer curtain, which rises to meet it at the end of the scroll.
+
+   Declared last in the file on purpose: the responsive blocks above set
+   `padding` as a shorthand, so any earlier bottom value would be reset back
+   to their uniform edge. Equal specificity means this later rule wins while
+   still letting those blocks pick the horizontal padding.
+
+   FooterCurtainModule adds the curtain's own height to the scroller as an
+   inline style on top of this, so the value here reads as the visible gap
+   and nothing else. */
+.project-detail-section {
+  padding-bottom: var(--project-detail-footer-clearance, var(--space-12));
+}
+
+@media (--mobile) {
+  .project-detail-section {
+    --project-detail-footer-clearance: var(--space-8);
+  }
+}
