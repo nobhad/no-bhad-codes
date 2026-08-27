@@ -46,6 +46,24 @@
   visibility: visible;
 }
 
+/* Section headings (<h2> on About / Contact / etc). The page stylesheets each
+   used to declare their own font-size here, which is how About drifted to
+   clamp(4rem, 9vw, 6rem) while Contact sat on --font-size-5xl — the same class
+   rendering at wildly different sizes on the same viewport. The size now comes
+   from one token; breakpoints override the TOKEN (see mobile/layout.css) so
+   there is still exactly one place that sets font-size. */
+.section-heading {
+  font-size: var(--section-heading-size);
+}
+
+/* Wide screens step the heading down a notch — previously a Contact-only rule,
+   now applied to every section heading so they stay in step. */
+@media (--laptop-wide) {
+  :root {
+    --section-heading-size: var(--font-size-4xl);
+  }
+}
+
 /* Footer styles defined in components/footer.css */
 
 /* Main content area - properly calculated between header and footer */

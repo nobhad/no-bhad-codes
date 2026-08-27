@@ -54,6 +54,12 @@
   --font-size-4xl: clamp(2.25rem, 1.75rem + 2.5vw, 3rem); /* 36px → 48px */
   --font-size-5xl: clamp(3rem, 2rem + 5vw, 4rem); /* 48px → 64px */
 
+  /* Size of a page's <h2> section heading (.section-heading). Single source of
+     truth: About, Contact and friends all render the same class and must match
+     at every width, so the size lives here and the breakpoints override this
+     token rather than each page re-declaring font-size. */
+  --section-heading-size: var(--font-size-5xl);
+
   /* Alias for backwards compatibility */
   --font-size-base: var(--font-size-md);
 

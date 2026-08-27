@@ -50,7 +50,7 @@
 
 /* Heading - extends .section-heading from layout.css */
 section.contact-section .section-heading {
-  font-size: var(--font-size-5xl);
+  /* Size comes from --section-heading-size in base/layout.css. */
   overflow: visible;
   position: relative;
 }
@@ -144,10 +144,8 @@ p.contact-options {
 /* Below large desktop (≤1099px): scale down heading, use medium padding.
    Mobile override (2.5rem) in mobile/contact.css (responsive layer) takes precedence. */
 @media (--laptop-wide) {
-  section.contact-section .section-heading {
-    font-size: var(--font-size-4xl);
-  }
-
+  /* The wide-screen step-down moved to base/layout.css as a token override so
+     every section heading steps together. */
   .contact-section {
     padding: 2rem;
   }
