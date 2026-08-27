@@ -39,66 +39,55 @@ Reworked the footer curtain and turned project-detail into a real map tile. Comm
 
 ---
 
-## OPEN BUG 1 — curtain reveal does not fire on project-detail
+## RESOLVED — curtain reveal never fired (was OPEN BUG 1)
 
-**Symptom:** at the end of a case study, scrolling further does nothing. The band never rises.
+**Root cause:** scroll heights are fractional. A tile visually at its end reports ~0.5-1px
+remaining and never reaches 0, so the `remaining >= 1` test read as "still scrollable" forever.
+The reveal only fires once the content is done, and by that test it never was — so pulling the
+page up at the end of a case study did nothing at all.
 
-**Evidence (decisive):**
+Fixed in `8c24a895`: one named `SCROLL_EDGE_EPSILON = 2` used by every scroll-edge test in
+`page-transition.ts`, replacing hard 1px comparisons.
+
+**Two hypotheses in the earlier draft of this file were wrong** — disregard them:
+- *"`currentPageId` is stale as 'projects'"* — disproved. ArrowUp at the top of a case study
+  correctly exits to `#/projects`, so the module knows which page it is on. Only the **compass
+  cues** were stale (`updateCompass` had not re-run), which is a separate cosmetic issue.
+- *"shrink the page from its bottom edge instead of translating it"* — do NOT do this. The user
+  has since specified the page height must not change. That stash has been dropped.
+
+## The intended mechanic (user's words)
+
+> "I WANT THE FOOTER TO BE A SET HEIGHT AND THE PAGE HEIGHT TO NOT CHANGE - I WANT PULLING THE
+> PAGE UP TO REVEAL THE FOOTER THAT IS BEHIND THE PAGE"
+
+That is the committed model: band fixed at 232px behind the page, page keeps its height and
+translates up to uncover it. **Do not change the spacing (108px top and bottom) and do not
+change `--footer-curtain-height`.** Both were reverted once already after being changed without
+being asked.
+
+## NEEDS VERIFICATION ON REAL HARDWARE
+
+The reveal could never be exercised in automation: the browser-automation `scroll` action
+produces **no wheel events** (`window.__wheels === 0` with a capture listener on window), and
+synthetic `WheelEvent` does not reach the handlers either. So `8c24a895` is reasoned from the
+measured boundary values, not observed working.
+
+To verify by hand: open a case study, scroll to the very end with a trackpad, keep scrolling.
+The band should rise. Scroll back up and it should retract in step. Instrument with:
 ```js
 window.__evts=[];
 window.addEventListener('footer-curtain:set-progress', e=>window.__evts.push(e.detail.progress));
-// scroll to end, then wheel down with REAL input (synthetic WheelEvent does NOT
-// reproduce — it never reaches the handler)
-window.__evts.length   // => 0
-```
-`driveCurtain()` never dispatches, so `PageTransitionModule.handleWheel` is not reaching the
-`else if (this.currentPageId === 'project-detail')` branch (page-transition.ts, in the
-`absY >= absX` block).
-
-**Prime suspect:** `this.currentPageId` is stale — `'projects'` rather than `'project-detail'` —
-so the projects channel-surf branch runs instead. There is a known staleness problem with
-`data-active-page` during transitions, observed earlier this session.
-
-**Next step:** log `this.currentPageId` at the top of `handleWheel` and confirm. If stale, fix
-where `currentPageId` is committed (page-transition.ts lines ~1851 and ~1915).
-
-## OPEN BUG 2 — content cropped when the band is revealed
-
-**This is NOT a z-index problem** — that was checked repeatedly and the stacking is correct.
-When the curtain opens, `main` translates up by the band's height (232px) and its
-`overflow: hidden` **crops** whatever is in that strip. The user reads the cut edge as
-"content behind the footer".
-
-**Hard constraint from the user:** do **not** change the spacing (108/108) and do **not**
-change the footer/band size (`--footer-curtain-height: clamp(200px, 30vh, 320px)`).
-
-That rules out both padding-reservation and shrinking the band. Approaches already tried and
-rejected/failed:
-
-- reserve band height as `padding-bottom` → works, but 280px of dead space at rest (rejected)
-- shrink `--footer-curtain-height` → rejected outright
-- grow padding dynamically as the band rises → **feedback loop**: growing padding restores
-  `canScrollDown`, which is the condition that triggers the reveal, so it can never finish
-
-### Recommended next step
-
-**Shrink the page from its bottom edge instead of translating it.** This changes neither the
-spacing nor the band size — only how the reveal happens — and removes the crop entirely,
-because the scroller's range grows by exactly the amount the window shrinks.
-
-Proven by hand in the console:
-```js
-main.style.setProperty('bottom','232px','important');
-// mainBottom 773 -> 541  (band revealed)
-// maxScroll  1111 -> 1343 (grew by the same 232 — nothing unreachable)
+// ...scroll...  window.__evts   // should be non-empty and climb toward 1
 ```
 
-The code for this is in **`stash@{0}`** (`git stash show -p stash@{0}`): the timeline tweens
-`bottom` instead of `y`, with a function value so the height is read at run time, and
-`applyHeaderOffset` drops the curtain term. It is **unverified** only because OPEN BUG 1 stops
-the reveal from firing at all. **Fix bug 1 first, then pop the stash and verify.**
+## Known remaining trade
 
----
+With the slide model, the band occupies the bottom 232px of the viewport when revealed, so that
+much less of the case study is visible at once. Content is not lost — the page moves up with it —
+but the cut edge at the band's top has repeatedly been read as "content behind the footer". The
+stacking is correct and was verified many times (`main` z-index 1, footer 0, hit-testing over the
+band returns page content).
 
 ## Also open
 
