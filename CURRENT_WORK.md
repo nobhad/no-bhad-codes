@@ -216,6 +216,189 @@ trips the guard). Cleared it once with the escape hatch:
 
 ---
 
+## Hedgewitch Portal Status Refresh — Migration 140
+
+**Status:** APPLIED locally (`npm run migrate`, 2026-08-26) — needs deploy to Railway
+**Backup:** `data/backups/pre-migration/client_portal_pre-migrate_2026-08-26T05-04-18.db`
+
+The portal was still showing the April picture four months after the fact.
+`140_hedgewitch_status_refresh.sql` brings client_id=6 / project_id=7 in line
+with the 2026-08-25 hand-off.
+
+### Done
+
+- [x] Project 7: `in-review`, 95%, est. end 2026-09-30, staging URL
+      `hedgewitch.netlify.app`, hourly rate $150, maintenance Essential/active
+      through 2027-07-24 (12 months), health notes describing the launch blockers.
+- [x] Milestones: Design + Content Integration closed at hand-off; Testing &
+      Launch moved to 2026-09-30 and `in_progress`; the three stale March/April
+      due dates re-dated.
+- [x] Checklist: headshots ×2, group shot, 9 heroes, gallery photos and the
+      Resources URLs marked complete against what actually shipped. The two PP
+      Cirka font steps and the blog "Coming Soon" step deleted — the type
+      direction moved to Otto Attack / Della Respira / Spectral / Manrope and
+      the home blog preview has no dated cards. Three bios still pending, plus a
+      new step for the two placeholder partner orgs on Resources.
+- [x] Payment schedule: installments 2–4 were `overdue` while their invoices
+      read `paid` — that mismatch is what auto-generated the six duplicate
+      drafts and what keeps the client scored `at_risk`. Synced to paid and
+      backfilled the missing `invoice_payments` rows.
+- [x] Deleted the six duplicate `$1,125` drafts (INV-202603-40029262 …
+      INV-202607-80027291) and their line items.
+- [x] Draft invoice `INV-202608-HH005` — hero plate redesign, 2 h @ $150 = $300,
+      billed as design work per the hand-off call. Left in draft to go out with
+      the follow-up email.
+- [x] Two client-visible project updates (hand-off, launch prep) — the timeline
+      had nothing since "Project Created" in January.
+- [x] Guides added to Files (2026-08-26, **local DB only**) — User Guide, Brand
+      Guide, hand-off checklist, email migration, plus the combined ALL_GUIDES,
+      in a new `Guides` folder on project 7, all flagged `shared_with_client`.
+      Bytes copied to `uploads/projects/`. A third project update announces them.
+
+### Open
+
+- [ ] Deploy to Railway so production runs migration 140.
+- [ ] The five guide PDFs exist only in the local DB and local `uploads/` — they
+      are not in migration 140 (SQL cannot carry the bytes). Re-upload them
+      through admin → Files → project 7 once production is deployed.
+- [ ] **Uploads are not on a persistent volume in production.** `railway.json`
+      mounts only `/app/data`, while `UPLOAD_DIR=./uploads` — anything uploaded
+      through the portal is lost on the next redeploy. Mount `/app/uploads` (or
+      move file storage onto the `/app/data` volume) before asking the client to
+      upload bios and photos.
+- [ ] Confirm 2026-09-30 is the launch date you want the client to see — it is a
+      placeholder chosen to cover the DNS repoint, noindex removal and form tests.
+- [ ] Invoices 5–7 are marked paid by check with no check numbers recorded; the
+      backfilled payment rows carry none either. Add them if you have them.
+- [ ] Client 6 is still `status = pending` / `health_status = at_risk` and has
+      never been invited — see the invite steps below.
+- [ ] Not billed yet, deliberately: gallery reordering ($1,800, awaiting
+      go-ahead) and the extra revision round ($1,500 or $150/hr, still unsettled).
+- [ ] Project code left unset — assigning one now would collide with the test
+      project holding `NBC-2026-001-test-subject`.
+
+---
+
+## Hedgewitch Add-Ons — Requests Tab + Specs and Estimates
+
+**Status:** Portal side APPLIED locally (migration 141 + code fixes) — needs deploy
+**Rate:** $150/hr, now recorded on project 7
+
+### Client-facing (migration 141)
+
+Three suggestions seeded as ad-hoc requests on project 7, status `reviewing`,
+**no prices attached** — export site data, blog comments, newsletter. The
+already-quoted work (folder upload, cover-variant add-on) is deliberately NOT
+in the portal yet, so the client does not meet a price here before the
+follow-up email.
+
+- [x] Requests tab unhidden in solo mode — `hideInSolo` dropped from the client
+      `requests-hub` and the admin Work → Requests subtab.
+- [ ] Add folder upload ($1,500) and the cover-variant add-on as live quotes
+      once the follow-up email has gone out.
+
+### Ad-hoc requests was broken client-side — fixed
+
+The feature had never worked from the client's side of the portal:
+
+- [x] The card read `request.quote`, `request.created_at`, `request.project_name`
+      and `request.attachments`. The API returns the camelCase entity from
+      `toAdHocRequest` and there is no quotes table — the quote is the flat
+      `estimatedHours` / `hourlyRate` / `flatRate` / `quotedPrice` columns. So
+      dates rendered blank, the quote panel never appeared, and **Approve /
+      Decline could never show**, because `canRespond` needs `request.quote`.
+- [x] The submit form posted `project_id` and no `requestType`; the server
+      requires `projectId` **and** `requestType` and 400s without them. It also
+      posted raw files as `multipart/form-data` to a JSON-only route with no
+      multer — so any submission with an attachment failed too. Attachments now
+      upload to the project first and travel as `attachmentFileId`, which is
+      what the column actually stores (one file per request).
+- [x] Status lists were `pending` / `cancelled`, neither of which the DB allows;
+      `submitted` and `reviewing` were missing, so seeded rows showed a raw
+      slug. Types, status config and filter options now match the CHECK
+      constraint.
+- [x] **Security, found on the way:** `POST /api/uploads/project/:projectId`
+      checked authentication but not ownership — any authenticated client could
+      upload into any project id. Guarded with `uploadService.clientOwnsProject`
+      (admins unaffected). This route is now on the client attachment path,
+      which is how it surfaced.
+
+### Billable — quoted or agreed
+
+| Item | Hours | Price | Status |
+| ---- | ----- | ----- | ------ |
+| Hero plate → deep rose | 2 h billed (ran over, absorbed) | $300 | Built, preview only, not pushed. Draft invoice `INV-202608-HH005` |
+| Folder upload | 8–11 h | $1,500 flat | Quoted in the draft email |
+| ↳ cover-variant generation add-on | +6–13 h | ~$1,200 suggested | Offered, unpriced to client |
+
+### Billable — scoped, not offered
+
+| Item | Hours | Notes |
+| ---- | ----- | ----- |
+| Move up / Move down buttons | 12 h min | $1,500 flat. Dropped from the email — folder naming makes it unnecessary |
+| Folder upload and buttons | 20–32 h | Covers the whole of their original complaint |
+| True drag-and-drop | 42–59 h | Steered away from; more than the site cost |
+
+### Not billable — absorb
+
+| Item | Hours | Why |
+| ---- | ----- | --- |
+| Consent banner (GA4) | 6–10 h | The cookie arrived with the Cloudflare → GA4 swap |
+| Cover-variant generator script | 1–1.5 h | `gallery-cover-widths.json` has no generator; do it regardless |
+| ↳ client-side 1440px upload cap | +3–4 h | Makes the admin resilient to oversized uploads |
+| SPF record | minutes | At launch, in the Squarespace DNS panel |
+| Missing pond-lily mobile cutout | minutes | `git show 5382a1d:…` restores it |
+
+### New suggestions — drafted estimates, NOT yet sent
+
+Drafted against the Hedgewitch codebase (Astro 7, six Netlify functions, admin
+content committed as git, forms and resumes held by Netlify Forms). Your call
+before any of it goes to the client.
+
+**1. Export all site data — recommend A**
+
+- Scope A: content JSON (`src/data/pages/*.json`, `gallery-items.json`,
+  `testimonials.json`, `jobs.json`, `site-settings.json`), blog markdown from
+  `src/content/blog`, contact + careers submissions as CSV, resume files pulled
+  from their Netlify submission URLs, all zipped and downloaded from `/admin`.
+  **8–10 h → $1,400 flat.**
+- The catch that shapes it: a Netlify function response is capped at 6 MB and a
+  synchronous one times out at 10 s, so the **64 MB in `public/images` cannot go
+  through a normal function**. Scope A excludes the image library and documents
+  where to get it instead.
+- Scope B adds images: a background function zipping to Netlify Blobs, a signed
+  download link and progress UI. **+8–12 h → ~$3,000 total.** Only worth it if
+  they specifically want the photos in the same file.
+- `admin-netlify-data.ts` already pulls submissions but caps at 50 — pagination
+  is part of the estimate.
+
+**2. Comments on blog posts — recommend only if they will moderate**
+
+- Custom and moderated: comments stored in Netlify Blobs, a POST function with
+  honeypot and rate limiting, a moderation queue in `/admin` reusing
+  `_admin-auth`, approved comments rendered client-side, email on each new one.
+  **14–18 h → $2,400 flat.**
+- A third-party embed (giscus, Disqus) is 2–3 h / **$400**, but it means reader
+  accounts, someone else's styling and, on the free tiers, ads. Off-brand for
+  this site.
+- Say plainly that comments are ongoing work for them: spam finds any open form,
+  and moderation is theirs. Also note it is the first place the site would hold
+  content written by the public.
+
+**3. Email newsletter — recommend A**
+
+- Scope A: sign-up on the site posting through a function that holds the
+  provider API key, with double opt-in, unsubscribe and compliance handled by
+  the provider (Buttondown ~$9/mo, Mailchimp free at their list size). They
+  write and send from the provider's own composer. **5–7 h → $900 flat**, plus
+  their subscription.
+- Scope B: compose and send from `/admin`, including a "send this post as an
+  email" button on a blog post. **12–16 h → $2,100** — and it moves
+  deliverability, bounce handling and unsubscribe compliance onto us. Not worth
+  it at their volume.
+
+---
+
 ## Portal Streamline + Hedgewitch Invite-Prep
 
 **Status:** SHIPPED, awaiting spot-check + one-time Drive setup
