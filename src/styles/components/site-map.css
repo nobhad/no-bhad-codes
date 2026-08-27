@@ -212,6 +212,13 @@ main#main-content {
      unchanged, but their boxes now reach y=0, so scrolled content rides up
      through the strip the way an in-flow header's content does. */
   --map-header-inset: var(--header-height);
+  /* Breathing room between the header and a tile's content, on top of the
+     header inset above. The mobile blocks in mobile/layout.css override it;
+     this is the desktop value. Tiles that centre their content vertically
+     (about) already read this far down the viewport naturally — this is what
+     lets a top-aligned tile like the case study match them instead of
+     starting hard under the header. */
+  --map-tile-pad-y: var(--space-12);
   bottom: 0;
   /* The base rule sizes to calc(100vh - header - footer), reserving a strip
      for the copyright bar the curtain replaced — that strip would leave the

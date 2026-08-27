@@ -1315,8 +1315,23 @@ export class PageTransitionModule extends BaseModule {
           const canScrollDown =
             currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >= 1;
           if (canScrollDown) return;
-          direction = 'down';
-        } else {
+          // Case study is read to the end — keep going and the page slides up
+          // off the footer curtain, the same as the tiles that never scroll.
+          // main is fixed and opaque, so scrolling alone can never uncover the
+          // band; the reveal has to be driven.
+          event.preventDefault();
+          this.driveCurtain(absY);
+          return;
+        }
+
+        {
+          // Pull the curtain back down before the content starts moving again,
+          // so the band retracts under the same gesture that raised it.
+          if (this.curtainProgress > 0) {
+            event.preventDefault();
+            this.driveCurtain(-absY);
+            return;
+          }
           const now = performance.now();
           const atTop = currentTile.scrollTop < 1;
           if (!atTop) {

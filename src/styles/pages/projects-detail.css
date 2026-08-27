@@ -16,6 +16,10 @@
    =============================================== */
 :root {
   --project-detail-content-max-width: 1000px;
+  /* Wide enough for YEAR / DURATION / LAUNCH to sit on ONE row without
+     spilling out of the aside — 240px was not, which is what pushed the row
+     into the tools column. Tools takes whatever is left. */
+  --project-detail-aside-width: 300px;
   --project-detail-back-btn-size: 80px;
   --project-detail-image-phone-max: 300px;
   --project-detail-image-phone-max-xs: 250px;
@@ -424,6 +428,11 @@
   .intro-left-row {
     flex: 1;
     justify-content: space-around;
+    /* One row, never wrapped: LAUNCH stays beside YEAR and DURATION. The
+       tighter gap plus the wider aside above is what makes the three fit
+       inside their own box instead of spilling into the tools column. */
+    gap: var(--space-5);
+    min-width: 0;
   }
 }
 
@@ -431,8 +440,16 @@
 @media (--desktop) {
   .intro-left {
     flex-direction: column;
-    width: var(--aside-width-narrow);
+    width: var(--project-detail-aside-width);
     flex-shrink: 0;
+  }
+
+  /* Tools takes the remainder and is allowed to shrink — min-width: 0 stops a
+     flex item from refusing to go below its content width, which is the usual
+     way a grid like this pushes itself out of the frame. */
+  .tools-section {
+    flex: 1 1 0;
+    min-width: 0;
   }
 }
 
@@ -1428,12 +1445,12 @@
      has to opt into the header inset here or the case study starts under the
      fixed header. Composed with the section's own top padding rather than
      replacing it. */
-  padding-top: calc(var(--map-header-inset, 0px) + var(--space-2));
-  padding-bottom: var(--project-detail-footer-clearance, var(--space-20));
+  padding-top: calc(var(--map-header-inset, 0px) + var(--map-tile-pad-y, 0px));
+  padding-bottom: var(--project-detail-footer-clearance, var(--space-10));
 }
 
 @media (--mobile) {
   .project-detail-section {
-    --project-detail-footer-clearance: var(--space-12);
+    --project-detail-footer-clearance: var(--space-6);
   }
 }
