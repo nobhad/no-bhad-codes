@@ -90,52 +90,15 @@
             <!-- aria-label mirrors the visible word ("Menu" / "Close") so the
                  accessible name always contains it (WCAG 2.5.3 Label in Name);
                  navigation.ts swaps it alongside aria-expanded. -->
-            <button
-              data-menu-toggle=""
-              class="menu-button"
-              aria-label="Menu"
-              aria-expanded="false"
-            >
-              <div class="icon-wrap">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="100%"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  class="menu-button-icon"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M7.33333 16L7.33333 -3.2055e-07L8.66667 -3.78832e-07L8.66667 16L7.33333 16Z"
-                    fill="currentColor"
-                  ></path>
-                  <path
-                    d="M16 8.66667L-2.62269e-07 8.66667L-3.78832e-07 7.33333L16 7.33333L16 8.66667Z"
-                    fill="currentColor"
-                  ></path>
-                  <path
-                    d="M6 7.33333L7.33333 7.33333L7.33333 6C7.33333 6.73637 6.73638 7.33333 6 7.33333Z"
-                    fill="currentColor"
-                  ></path>
-                  <path
-                    d="M10 7.33333L8.66667 7.33333L8.66667 6C8.66667 6.73638 9.26362 7.33333 10 7.33333Z"
-                    fill="currentColor"
-                  ></path>
-                  <path
-                    d="M6 8.66667L7.33333 8.66667L7.33333 10C7.33333 9.26362 6.73638 8.66667 6 8.66667Z"
-                    fill="currentColor"
-                  ></path>
-                  <path
-                    d="M10 8.66667L8.66667 8.66667L8.66667 10C8.66667 9.26362 9.26362 8.66667 10 8.66667Z"
-                    fill="currentColor"
-                  ></path>
-                </svg>
-              </div>
-              <div class="menu-button-text">
-                <p class="p-large">Menu</p>
-                <p class="p-large">Close</p>
-              </div>
-            </button>
+        <a href="/" class="menu-button" aria-label="Back to the site">
+          <div class="icon-wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 16 16" fill="none" class="menu-button-icon" aria-hidden="true">
+              <path d="M7.33333 16L7.33333 0L8.66667 0L8.66667 16L7.33333 16Z" fill="currentColor"></path>
+              <path d="M16 8.66667L0 8.66667L0 7.33333L16 7.33333L16 8.66667Z" fill="currentColor"></path>
+            </svg>
+          </div>
+          <div class="menu-button-text"><p class="p-large">Menu</p></div>
+        </a>
           </div>
         </nav>
       </div>

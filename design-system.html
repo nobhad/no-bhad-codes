@@ -53,7 +53,7 @@ code{font-family:var(--ds-mono);font-size:.86em}
 
 /* masthead */
 .mast{border-bottom:1px solid var(--ds-line);background:var(--ds-surface)}
-.mast-in{display:flex;flex-direction:column;gap:28px;padding:56px 24px 40px;max-width:1180px;margin:0 auto}
+.mast-in{display:flex;flex-direction:column;gap:28px;padding:var(--space-6) 24px 40px;max-width:1180px;margin:0 auto}
 h1{font-family:var(--ds-serif);font-weight:700;font-size:clamp(2.6rem,1.8rem+3vw,4.2rem);line-height:1.02;margin:0;text-wrap:balance;letter-spacing:-.01em}
 .lede{font-size:16px;color:var(--ds-ink-2);max-width:62ch;margin:0}
 .stats{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--ds-line);border-radius:2px;overflow:hidden}
@@ -121,11 +121,13 @@ td{padding:7px 12px;vertical-align:middle}
    it is. */
 #main-content{background:var(--ds-paper);color:var(--ds-ink)}
 .docs-section{
-  /* The measure the case study opens and closes on: the header's height
-     plus the tile pad. --map-tile-pad-y resolves to --space-6 at every
-     width, so the token is composed directly rather than read through the
-     .site-map-scoped variable this page sits outside of. */
-  padding-top:calc(var(--header-height) + var(--space-6));
+  /* Only the header's height up top: the masthead's surface starts flush
+     with the header's bottom edge rather than floating below it, and the
+     breathing room is carried inside .mast-in. Content still opens on the
+     case study's measure — header height plus --space-6 — because those two
+     paddings stack. The bottom keeps the whole measure, there being no
+     surface down there to align to. */
+  padding-top:var(--header-height);
   padding-bottom:calc(var(--header-height) + var(--space-6))}
 
 footer.docs-note{padding:44px 0 24px;color:var(--ds-muted);font-size:12.5px}
@@ -198,52 +200,15 @@ footer.docs-note b{color:var(--ds-ink);font-weight:500}
             <!-- aria-label mirrors the visible word ("Menu" / "Close") so the
                  accessible name always contains it (WCAG 2.5.3 Label in Name);
                  navigation.ts swaps it alongside aria-expanded. -->
-            <button
-              data-menu-toggle=""
-              class="menu-button"
-              aria-label="Menu"
-              aria-expanded="false"
-            >
-              <div class="icon-wrap">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="100%"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  class="menu-button-icon"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M7.33333 16L7.33333 -3.2055e-07L8.66667 -3.78832e-07L8.66667 16L7.33333 16Z"
-                    fill="currentColor"
-                  ></path>
-                  <path
-                    d="M16 8.66667L-2.62269e-07 8.66667L-3.78832e-07 7.33333L16 7.33333L16 8.66667Z"
-                    fill="currentColor"
-                  ></path>
-                  <path
-                    d="M6 7.33333L7.33333 7.33333L7.33333 6C7.33333 6.73637 6.73638 7.33333 6 7.33333Z"
-                    fill="currentColor"
-                  ></path>
-                  <path
-                    d="M10 7.33333L8.66667 7.33333L8.66667 6C8.66667 6.73638 9.26362 7.33333 10 7.33333Z"
-                    fill="currentColor"
-                  ></path>
-                  <path
-                    d="M6 8.66667L7.33333 8.66667L7.33333 10C7.33333 9.26362 6.73638 8.66667 6 8.66667Z"
-                    fill="currentColor"
-                  ></path>
-                  <path
-                    d="M10 8.66667L8.66667 8.66667L8.66667 10C8.66667 9.26362 9.26362 8.66667 10 8.66667Z"
-                    fill="currentColor"
-                  ></path>
-                </svg>
-              </div>
-              <div class="menu-button-text">
-                <p class="p-large">Menu</p>
-                <p class="p-large">Close</p>
-              </div>
-            </button>
+        <a href="/" class="menu-button" aria-label="Back to the site">
+          <div class="icon-wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 16 16" fill="none" class="menu-button-icon" aria-hidden="true">
+              <path d="M7.33333 16L7.33333 0L8.66667 0L8.66667 16L7.33333 16Z" fill="currentColor"></path>
+              <path d="M16 8.66667L0 8.66667L0 7.33333L16 7.33333L16 8.66667Z" fill="currentColor"></path>
+            </svg>
+          </div>
+          <div class="menu-button-text"><p class="p-large">Menu</p></div>
+        </a>
           </div>
         </nav>
       </div>

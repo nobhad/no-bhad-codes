@@ -33,10 +33,18 @@ async function boot(): Promise<void> {
     logger.error('Theme module failed to start:', error);
   }
 
-  // The curtain is revealed by the page sliding up off it, which needs a
-  // scrollable page behind it. A short document has nothing to slide, so the
-  // module is only worth booting once the content actually overflows.
-  const overflows = document.documentElement.scrollHeight > window.innerHeight + 1;
+  // The curtain is revealed by the page sliding up off it, and it also owns
+  // the header's scroll-away. Both need something that actually scrolls.
+  //
+  // On these pages that is #main-content, not the document: main is the fixed
+  // camera and overflow-y: auto is what off-map pages get. Measuring the
+  // document instead reports no overflow however long the content is, which
+  // is why the curtain and the header both sat still here.
+  const page = document.getElementById('main-content');
+  const overflows =
+    (page !== null && page.scrollHeight > page.clientHeight + 1) ||
+    document.documentElement.scrollHeight > window.innerHeight + 1;
+
   if (!overflows) {
     document.documentElement.setAttribute('data-curtain', 'static');
     return;
