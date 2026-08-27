@@ -1370,12 +1370,43 @@
 
     <!-- Footer -->
     <footer class="footer">
-      <div class="footer-content">
-        <p>&copy; <span id="copyright-year"></span> Made &amp; Designed by No Bhad Codes. All rights reserved.</p>
+      <!-- Thin always-on copyright strip. Fades out as the curtain rises. -->
+      <div class="footer-content footer-bar" data-footer-bar>
+        <p>&copy; <span class="js-copyright-year"></span> Made &amp; Designed by No Bhad Codes. All rights reserved.</p>
+      </div>
+
+      <!-- Black curtain. Sits below the viewport edge until the active page's
+           scroll container reaches its end; FooterCurtainModule drives the
+           reveal with GSAP, scrubbed against the last stretch of scroll. -->
+      <div class="footer-curtain" data-footer-curtain aria-hidden="true">
+        <div class="footer-curtain__inner" data-footer-curtain-inner>
+          <div class="footer-curtain__brand">
+            <img
+              class="footer-curtain__avatar"
+              src="/images/avatar.svg"
+              alt=""
+              width="288"
+              height="356"
+              loading="lazy"
+              decoding="async"
+            />
+            <p class="footer-curtain__wordmark">no bhad codes</p>
+          </div>
+
+          <p class="footer-curtain__copy">
+            &copy; <span class="js-copyright-year"></span> Made &amp; Designed by No Bhad Codes. All
+            rights reserved.
+          </p>
+        </div>
       </div>
     </footer>
     <script>
-      document.getElementById('copyright-year').textContent = new Date().getFullYear();
+      (function () {
+        var year = String(new Date().getFullYear());
+        document.querySelectorAll('.js-copyright-year').forEach(function (el) {
+          el.textContent = year;
+        });
+      })();
     </script>
     <script type="module">
       document.addEventListener('DOMContentLoaded', function () {

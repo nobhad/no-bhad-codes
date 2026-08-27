@@ -1,5 +1,145 @@
 # Current Work - April 30, 2026
 
+---
+
+## Scroll-reveal black footer curtain (Aug 27, 2026)
+
+**Status:** DONE — verified in the browser on project detail pages
+**Priority:** Medium
+
+A black footer band with the avatar that stays hidden until the active page
+runs out of scroll, then rises like a curtain.
+
+### Why it needed a module and not just CSS
+
+The site is a virtual-page map: `<main>` is fixed and each tile
+(`.site-map > [data-map-tile]`) owns its own overflow, while project-detail
+un-fixes the header/footer and scrolls the whole document. There is no single
+scroll container to hang a ScrollTrigger off, so `FooterCurtainModule`
+(`src/modules/ui/footer-curtain.ts`) listens for `scroll` in the **capture**
+phase on `document` — scroll doesn't bubble, but capture listeners on
+ancestors still fire — and treats whichever element scrolled as the scroller.
+
+### How the reveal works
+
+- One paused GSAP timeline (`ease: 'none'`, one unit long) holds the whole
+  reveal; a `power3.out` tween eases a plain number that is pushed into
+  `timeline.progress()` each tick. Scrubbed against the last curtain-height of
+  travel, so the panel rises *with* the scroll instead of popping in.
+- The thin `©` strip (`.footer-bar`) is the curtain's closed state and fades
+  out over the first 40% of the reveal, so the two copyright lines never
+  read as duplicates.
+- Scrollable containers get an inline `padding-bottom` equal to the curtain
+  height so the panel rises into empty space rather than covering the last of
+  the content. Containers that don't overflow never get it and never reveal —
+  which is why the intro business card and desktop about/contact tiles show
+  only the thin strip.
+- A `MutationObserver` on `main[data-active-page]` plus `hashchange` resets
+  progress and strips the padding on every route change. Leaving the padding
+  behind would keep the document overflowing at its old length with nothing
+  left to scroll, stranding the curtain open.
+
+### Gotchas hit along the way
+
+- `.footer-curtain` must be `position: fixed`, not `absolute`.
+  `pages/projects-detail.css` sets `.footer { position: static }` on detail
+  pages, which dragged an absolutely-positioned curtain up into the page flow.
+- `y: 0` is pinned on both ends of the curtain tween. `footer.css` parks the
+  panel with `transform: translateY(100%)` for the pre-JS frame, and GSAP
+  otherwise reads that as a ~232px `y` base and stacks `yPercent` on top of it.
+- The avatar art is a black silhouette built for light backgrounds, so it's
+  `filter: invert(1)` on the black band.
+
+### Files
+
+- `index.html` — footer markup: `.footer-bar` + `.footer-curtain`
+- `src/styles/components/footer.css` — curtain styles + `--footer-curtain-*`
+- `src/modules/ui/footer-curtain.ts` — new
+- `src/core/modules-config.ts` — registration (home page only)
+
+---
+
+## Projects page slow on live + stale/wrong portfolio media (Aug 27, 2026)
+
+**Status:** FIXED in code — needs deploy (live is 8 commits behind)
+**Priority:** High
+
+### Slow load — module-graph waterfall
+
+`Application.initializeServices()` / `initializeModules()` walked their name
+lists with a sequential `for … await`. Each iteration ran `container.resolve()`,
+which fires a dynamic `import()` — so the lazy chunks downloaded one
+round-trip at a time. Measured on the built site: **17 sequential waves**,
+last JS finishing ~4.0s after navigation *with a warm cache* on the live host.
+`/data/portfolio.json` didn't even start until ~1.95s because it sat behind
+eight of those hops.
+
+Fix: `warmModuleGraph()` in `src/core/app.ts` kicks off every service +
+module resolution at once before the ordered init loops run. The container
+already caches singletons and de-dupes concurrent resolutions, so init order
+is unchanged — the loops just stop waiting on the network.
+Measured after: **17 waves → 3**.
+
+### 13 broken screenshots on the project detail page
+
+The deployed `/sw.js` lists `.json` in `STATIC_EXTENSIONS` and has no
+`/data/` exemption, so `portfolio.json` was served **cache-first** and pinned
+forever. Browsers that had ever hit the portal (`server/views/partials/head.ejs`
+registers the SW at scope `/`) kept replaying an ancient copy whose
+`screenshots` array pointed at files that no longer exist → 13 broken images
+plus 13 failed requests. `612d6062` already made data JSON network-first but
+was never pushed; bumped `CACHE_VERSION` to `v2` so `activate()` actually
+evicts the stranded `nbc-static-v1` entries.
+
+### Media fixes
+
+- Screenshots now honour the `{theme}` token like hero + video already did
+  (`data-themed-src` + `resolveThemedPath`), so they show the opposite theme
+  and re-point on toggle.
+- Squared every corner on detail-page media (hero, screenshots, video).
+- Hero no longer cover-cropped: dropped the forced `aspect-ratio` and switched
+  to `object-fit: contain`, so full browser-window captures show whole.
+- Screenshots take full content width; only `.phone-screen` stays narrow.
+- `repoUrl` for nobhad-codes pointed at the GitHub *profile*
+  (`github.com/nobhad`), not the repo — now `github.com/nobhad/no-bhad-codes`.
+  Added the same repo for the-backend.
+- The Backend's hero was a screenshot of the **404 page**: `capture-portfolio.ts`
+  captured `/portal/login`, which is not a route. Real login lives at `/#/portal`
+  (`/portal` just redirects there). Route fixed and re-captured.
+- Added the terminal-style intake form (`/intake`) to the capture list and
+  surfaced it as The Backend's screenshot.
+- Durations corrected against each repo's real commit history: hedgewitch
+  2 months → 8, recycle-content "In Development" → 7 months, linktrees
+  2 weeks → 3 months and year 2024 → 2025.
+- About photo alt text: "Coyote the dog" → "Noelle & Arrow".
+
+### Showcase additions
+
+- Terminal intake form now records as a **video**, not a still:
+  `recordTerminalIntakeVideos()` in `capture-portfolio.ts` drives the real
+  form (types answers, clicks option chips, SEND) and captures the boot
+  sequence + progress bar. It clears `localStorage` first — the flow
+  persists answers, so a second run resumed mid-form and the scripted
+  answers landed on the wrong questions. Shown on **both** nobhad-codes
+  (front end) and the-backend.
+- PDF designs showcased on the-backend: SOW, contract, receipt rendered to
+  `public/portfolio/the-backend/pdfs/`. New `.doc-page` class caps portrait
+  document pages at 460px instead of stretching them to the content column.
+
+### ⚠ PII found and scrubbed in `scripts/generate-sample-pdfs.ts`
+
+The sample-PDF generator had a **real client's** details hardcoded
+throughout the contract and intake samples (name, both contacts, email,
+street address, phone) and the invoice sample selected `ORDER BY id DESC`,
+which picked that client's live invoice. These render into public portfolio
+assets. All of it now uses the seeded `@demo.nobhad.codes` client, and the
+invoice query is constrained to demo clients. Verified with a `pdftotext`
+grep over every generated PDF before publishing.
+
+**Not published** (render poorly, worth a separate look):
+- `SAMPLE-project-report.pdf` — shows `BUDGET: $NaN` and `START/DEADLINE: Not set`.
+- `SAMPLE-invoice.pdf` — demo invoices have zero line items, so the table is empty.
+
 ## Current System Status
 
 **Last Updated**: April 30, 2026

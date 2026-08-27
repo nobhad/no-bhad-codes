@@ -258,9 +258,8 @@
 
 .worksub-header figure {
   margin: 0;
-  /* Mobile (image stacks above description): keep the wide hero shape */
-  aspect-ratio: 12 / 7;
-  max-height: 22vh;
+  /* No forced ratio: these heroes are full browser-window captures, so
+     the box takes its height from the image and shows all of it. */
   overflow: hidden;
   /* Square corners — media on this page is framed by a hairline border,
      not a rounded card. Matches .project-media below. */
@@ -271,24 +270,19 @@
 
 @media (--tablet) {
   .worksub-header figure {
-    /* Lock to 4:3 across all projects so cards with different native
-       image proportions still display uniformly side-by-side. Image
-       fills the box via object-fit: cover (centered crop) — keeps the
-       hedgewitch 1.6:1 image visually consistent with the 4:3 title
-       cards for nobhad.codes and The Backend. */
-    aspect-ratio: 4 / 3;
+    /* Width is locked so the two-column hero row stays even across
+       projects; height still follows the image. */
     width: 40%;
     max-width: 40%;
-    max-height: 34vh;
   }
 }
 
 .worksub-hero-img {
   width: 100%;
-  height: 100%;
-  /* Cover-crop everywhere so all title cards present at the same
-     visual proportions regardless of the source image's native ratio. */
-  object-fit: cover;
+  /* Show the whole capture. `cover` used to crop these to the figure's
+     ratio, which lopped the edges off the browser window. */
+  height: auto;
+  object-fit: contain;
   object-position: center;
   display: block;
   border-radius: inherit;
@@ -666,10 +660,20 @@
   width: 100%;
 }
 
-/* Animated screenshot GIF: centered at phone width. */
+/* Screenshots: full content width, matching the walkthrough video.
+   Phone captures stay narrow — they'd be absurd stretched to full width. */
 #project-info .project-media--image {
   width: 100%;
+}
+
+#project-info .project-media--image:has(img.phone-screen) {
   max-width: var(--project-detail-image-phone-max, 320px);
+}
+
+/* Rendered PDF pages: portrait documents, capped at a readable page width
+   rather than stretched to the full content column. */
+#project-info .project-media--image:has(img.doc-page) {
+  max-width: 460px;
 }
 
 #project-info .project-media--image img {
@@ -780,7 +784,6 @@
 
   /* Hero */
   .worksub-header figure {
-    aspect-ratio: 2 / 1;
     border-radius: 0;
     box-shadow: var(--shadow-elevated-sm);
   }

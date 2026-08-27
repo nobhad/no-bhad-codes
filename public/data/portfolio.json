@@ -36,10 +36,11 @@
       "heroImage": "/portfolio/nobhad-codes/home-{theme}-desktop.png",
       "screenshots": [],
       "videos": [
-        "/portfolio/nobhad-codes/videos/walkthrough-desktop-{theme}.webm"
+        "/portfolio/nobhad-codes/videos/walkthrough-desktop-{theme}.webm",
+        "/portfolio/videos/terminal-intake-{theme}.webm"
       ],
       "liveUrl": "https://nobhad.codes",
-      "repoUrl": "https://github.com/nobhad",
+      "repoUrl": "https://github.com/nobhad/no-bhad-codes",
       "docsUrl": "https://nobhad.codes/design-system",
       "docsLabel": "Design System",
       "isDocumented": true,
@@ -160,11 +161,17 @@
       "status": "live",
       "featured": true,
       "heroImage": "/portfolio/the-backend/portal-login-{theme}.png",
-      "screenshots": [],
+      "screenshots": [
+        "/portfolio/the-backend/pdfs/sow.png",
+        "/portfolio/the-backend/pdfs/contract.png",
+        "/portfolio/the-backend/pdfs/receipt.png"
+      ],
       "videos": [
-        "/portfolio/the-backend/videos/walkthrough-admin-desktop-{theme}.webm"
+        "/portfolio/the-backend/videos/walkthrough-admin-desktop-{theme}.webm",
+        "/portfolio/videos/terminal-intake-{theme}.webm"
       ],
       "liveUrl": "https://nobhad.codes/#/portal",
+      "repoUrl": "https://github.com/nobhad/no-bhad-codes",
       "isDocumented": true,
       "titleCard": {
         "composed": "/images/tv/title-cards/the-backend.webp",
@@ -268,7 +275,7 @@
         ],
         "secondaryPt": 38
       },
-      "duration": "2 months",
+      "duration": "8 months",
       "challenge": "Their Squarespace site couldn't capture the earthy, witchy character of the brand, and off-the-shelf templates flatten a studio whose whole philosophy is that plants belong together in living communities. They needed something handcrafted and ecologically literate: organic in feel, easy to maintain, and fast on mobile for clients browsing from the garden.",
       "approach": "I designed the entire visual system from scratch, with no theme or template: custom corner frames, wavy SVG text paths, and GSAP scroll-driven character reveals. The centerpiece is a walkable native-garden page. I researched native New England flora and the pollinators each species supports, then hand-illustrated every plant and pollinator in Adobe Illustrator and Photoshop and rendered them true-to-scale, grouped by real plant communities. Around it I built a static Astro site with a filterable gallery and lightbox, an Astro Content Collections blog, and a self-service admin CMS.",
       "results": [
@@ -354,7 +361,7 @@
       "screenshots": [],
       "isDocumented": false,
       "titleCard": "/projects/recycle-content-title.png",
-      "duration": "In Development",
+      "duration": "7 months",
       "challenge": "Content creators on subscription platforms struggle to maximize revenue from their back catalog. Manually tracking which subscribers have purchased which content is tedious and error-prone, leading to missed sales opportunities or awkward duplicate offers.",
       "approach": "Building a SaaS platform with browser extension integration to automatically capture purchase data. The system tracks SKUs, maintains buyer exclusion lists, and enables targeted re-marketing to subscribers who haven't purchased specific content. Multi-tenant architecture supports agencies managing multiple creators.",
       "results": [
@@ -385,21 +392,21 @@
         "JavaScript",
         "GSAP"
       ],
-      "year": 2024,
+      "year": 2025,
       "technologies": [
         "HTML",
         "CSS",
         "JavaScript",
         "GSAP"
       ],
-      "date": "2024-09-01",
+      "date": "2025-08-28",
       "status": "completed",
       "featured": false,
       "heroImage": "",
       "screenshots": [],
       "isDocumented": false,
       "titleCard": "/projects/linktrees-title.png",
-      "duration": "2 weeks",
+      "duration": "1 week each",
       "challenge": "Standard Linktree pages look generic and don't reflect personal brand. Creators wanted unique link-in-bio pages that stood out from the sea of identical templates while remaining mobile-friendly and fast-loading.",
       "approach": "Designed custom themed pages with GSAP-powered animated backgrounds. Each page is hand-crafted with unique color schemes, typography, and micro-interactions. Kept the codebase lightweight (no frameworks) for optimal mobile performance.",
       "results": [

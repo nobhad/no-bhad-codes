@@ -2294,7 +2294,14 @@ export class ProjectsModule extends BaseModule {
       parts.push(
         ...project.screenshots.map((src, index) => {
           const isMobile = /mobile|phone/i.test(src);
-          const imgClass = isMobile ? ' class="phone-screen"' : '';
+          // Rendered PDF pages are portrait — they read as documents, not
+          // as full-bleed screenshots, so they get their own width cap.
+          const isDocPage = /\/pdfs\//.test(src);
+          const imgClass = isMobile
+            ? ' class="phone-screen"'
+            : isDocPage
+              ? ' class="doc-page"'
+              : '';
           const resolved = this.resolveThemedPath(src);
           // Same theme-swap contract as the hero + walkthrough above:
           // screenshots showcase the theme the viewer is NOT looking at,
