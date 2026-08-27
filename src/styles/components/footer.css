@@ -7,6 +7,20 @@
   display: none;
 }
 
+/* ===============================================
+   CURTAIN DIMENSIONS
+   Single source of truth for the black panel's
+   height. FooterCurtainModule measures the rendered
+   element rather than parsing this, so the clamp can
+   change freely without touching the JS.
+   =============================================== */
+:root {
+  --footer-curtain-height: clamp(200px, 30vh, 320px);
+  --footer-curtain-bg: #000000;
+  --footer-curtain-text: #f5f5f5;
+  --footer-curtain-text-muted: #8a8a8a;
+}
+
 .footer {
   position: fixed;
   bottom: 0;
@@ -21,7 +35,11 @@
   z-index: var(--z-index-footer); /* Below nav (100) so nav menu appears above footer */
   display: flex;
   align-items: center;
-  justify-content: flex-end; /* copyright sits in the bottom-right corner */
+  justify-content: flex-end;
+  /* The shell is now an empty positioning anchor for the curtain, so it must
+     not intercept clicks on the content sitting under the bottom strip of
+     the viewport. The curtain takes its own events back below. */
+  pointer-events: none;
   /* Base visibility - always visible by default */
   opacity: 1;
   visibility: visible;
@@ -46,6 +64,108 @@
   color: var(--color-dark);
 }
 
+/* ===============================================
+   CURTAIN
+   Black panel anchored to the footer's bottom edge,
+   i.e. the viewport bottom. Parked one full height
+   below that edge so the viewport clips it entirely;
+   GSAP scrubs yPercent 100 -> 0 as the active page's
+   scroll container runs out of content.
+   =============================================== */
+.footer-curtain {
+  /* Fixed to the viewport, not to .footer. Project-detail pages un-fix the
+     header/footer so the whole document scrolls (see pages/projects-detail.css),
+     which would drag an absolutely-positioned curtain up into the page flow.
+     The curtain always belongs to the bottom edge of the screen. */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--footer-curtain-height);
+  z-index: var(--z-index-footer);
+  background: var(--footer-curtain-bg);
+  color: var(--footer-curtain-text);
+  text-align: left;
+  pointer-events: auto;
+  /* Pre-JS / no-JS parking position. GSAP takes over from here. */
+  transform: translateY(100%);
+  will-change: transform;
+  /* The panel is a flat black band in both themes by design — no token
+     swap, so it reads the same against light and dark page backgrounds. */
+  overflow: hidden;
+}
+
+.footer-curtain__inner {
+  height: 100%;
+  max-width: var(--project-detail-content-max-width, 1000px);
+  margin-inline: auto;
+  padding: var(--space-3) var(--space-2);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-content: center;
+  align-items: end;
+  gap: var(--space-2);
+  will-change: transform;
+}
+
+/* Wordmark centred against the avatar rather than sharing its baseline —
+   bottom-aligning the three short lines to a tall silhouette reads as the
+   type sinking. */
+.footer-curtain__brand {
+  /* Shared by the art and the negative margin that trims its dead edge. */
+  --curtain-avatar-height: clamp(88px, 16vh, 150px);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* The avatar art is a solid black silhouette built for light backgrounds.
+   Inverting flips it to white on the black band and turns the punched-out
+   white eye black, which reads correctly as a negative. */
+.footer-curtain__avatar {
+  display: block;
+  height: var(--curtain-avatar-height);
+  width: auto;
+  /* The source art is a 288x356 viewBox with ~38 units of transparent
+     margin past the silhouette's right edge, which at this size adds a
+     second gap's worth of air before the wordmark. Pull that dead strip
+     back (38/356 of the rendered height) so `gap` above is the whole of
+     the space between the ear and the type. */
+  margin-right: calc(var(--curtain-avatar-height) * -0.107);
+  filter: invert(1);
+}
+
+/* Stacked as NO / BHAD / CODES. `width: min-content` sizes the box to the
+   longest word, so the text wraps one word per line on its own — no <span>
+   scaffolding or hard-coded breaks. */
+.footer-curtain__wordmark {
+  width: min-content;
+  /* Top margin is an optical nudge: the silhouette's ears carry weight up
+     top, so a mathematically centred wordmark reads as sitting high. */
+  margin: var(--space-1) 0 0;
+  /* Same face as the header logo (.nav-logo-row) so the two wordmarks match. */
+  font-family: var(--font-family-acme);
+  font-weight: 600;
+  font-size: clamp(1rem, 0.75rem + 1vw, 1.625rem);
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--footer-curtain-text);
+}
+
+.footer-curtain__copy {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  text-align: right;
+  color: var(--footer-curtain-text-muted);
+}
+
+/* ===============================================
+   RESPONSIVE
+   =============================================== */
+
 /* Mobile (480-767px): Footer stays fixed at bottom for scroll-snap layout
    used by larger phones / small tablets that still get the camera nav.
    Scoped via min-width so it doesn't apply to small-mobile below. */
@@ -61,11 +181,8 @@
 }
 
 /* Small mobile (<= 479px): each map tile fills the viewport via
-   scroll-snap, so the footer pins to the bottom of the viewport but
-   only when the user is on the contact section. PageTransitionModule
-   sets body.at-contact via IntersectionObserver when contact owns the
-   viewport; without that class the footer translates off-screen so
-   it doesn't sit on top of about/projects/etc. */
+   scroll-snap, so the footer shell pins to the bottom of the viewport and
+   only hosts the curtain, which drives its own transform. */
 @media (max-width: 479px) {
   .footer {
     position: fixed;
@@ -81,17 +198,29 @@
        so the © text sits above them while the bar's outer edge still
        extends to the absolute screen bottom. */
     padding-bottom: env(safe-area-inset-bottom, 0px);
-    transform: translateY(100%);
-    transition: transform 0.25s var(--ease-out, ease-out);
-    pointer-events: none;
   }
 
-  /* Footer reveals only when the contact tile is the active page.
-     :has() lets us key off the page-active class that PageTransition-
-     Module sets on the visible tile, so no IntersectionObserver / body
-     class is needed. */
-  body:has(#contact.page-active) .footer {
-    transform: translateY(0);
-    pointer-events: auto;
+  /* Clear the iOS home indicator without shortening the black band. */
+  .footer-curtain {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .footer-curtain__inner {
+    grid-template-columns: 1fr;
+    align-content: end;
+    gap: var(--space-1);
+  }
+
+  .footer-curtain__copy {
+    text-align: left;
+  }
+}
+
+/* Reduced motion: the module snaps the timeline instead of tweening it,
+   so only drop the layer promotion here. */
+@media (prefers-reduced-motion: reduce) {
+  .footer-curtain,
+  .footer-curtain__inner {
+    will-change: auto;
   }
 }

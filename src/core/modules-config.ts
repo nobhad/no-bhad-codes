@@ -126,6 +126,25 @@ export function registerModules(debug: boolean = false): void {
       }
     },
     {
+      name: 'FooterCurtainModule',
+      type: 'dom',
+      factory: async () => {
+        // Curtain markup only exists on the index/home page.
+        const currentPath = window.location.pathname;
+        if (currentPath === '/' || currentPath === '/index.html') {
+          const { FooterCurtainModule } = await import('../modules/ui/footer-curtain');
+          return new FooterCurtainModule();
+        }
+        // Return a dummy module for other pages
+        return {
+          init: async () => {},
+          destroy: () => {},
+          isInitialized: true,
+          name: 'FooterCurtainModule'
+        };
+      }
+    },
+    {
       name: 'ContactAnimationModule',
       type: 'dom',
       factory: async () => {
@@ -267,7 +286,8 @@ export function getMainSiteModules(): string[] {
     'ContactFormModule',
     'ContactAnimationModule',
     'PageTransitionModule',
-    'ProjectsModule'
+    'ProjectsModule',
+    'FooterCurtainModule'
   ];
 }
 
