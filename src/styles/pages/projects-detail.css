@@ -566,15 +566,13 @@
 
 /* Divider */
 .worksub-divider {
-  /* Runs the full width of the frame, not the padded content column — the
-     rule reads as part of the card's border rather than as content. Negating
-     the wrapper's own padding is what takes it out to the border; the padding
-     is a variable so this stays exact when the responsive blocks change it. */
-  width: auto;
-  height: var(--space-0-5);
+  /* Spans the content column, and drawn at the frame's own border weight so
+     the two read as the same line rather than one being heavier. */
+  width: 100%;
+  height: var(--border-width);
   border: none;
   background-color: var(--color-dark);
-  margin: var(--space-4) calc(-1 * var(--worksub-wrapper-pad, 0px)) 0;
+  margin: var(--space-4) 0 0;
   border-radius: var(--border-radius-xs, 2px) 0 var(--border-radius-xs, 2px) var(--border-radius-xs, 2px);
   transition: background-color var(--transition-theme, 0.4s);
 }
@@ -1459,15 +1457,10 @@
      fixed header. Composed with the section's own top padding rather than
      replacing it. */
   padding-top: calc(var(--map-header-inset, 0px) + var(--map-tile-pad-y, 0px));
-  /* Mirror of the top, and the mirror has to be exact to be right.
-     Above:  header height + gap, because the header covers that strip.
-     Below:  CURTAIN height + gap, because the curtain covers that strip when
-             the page slides up off it.
-
-     Using the header height on both ends is what put content behind the
-     footer: the band is 232px but the padding only reserved 108px, so the
-     reveal ate the gap and then ~124px of the case study with it. Reserving
-     the band's own height means the page slides up over empty space, and what
-     is left over is the same visible gap the header has above. */
+  /* Mirror of the top, but each end reserves what actually covers it:
+     above, the header's height plus the gap; below, the CURTAIN's height plus
+     the gap, because the page slides up off the band and the band occupies
+     that strip. Reserving only the header's height here is what put the tail
+     of a case study behind the footer. */
   padding-bottom: calc(var(--footer-curtain-height, 0px) + var(--map-tile-pad-y, 0px));
 }
