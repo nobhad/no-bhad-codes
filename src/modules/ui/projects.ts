@@ -2252,6 +2252,18 @@ export class ProjectsModule extends BaseModule {
    * Format an ISO launch date for the metadata strip (e.g. "July 17, 2026").
    */
   private formatLaunchDate(dateString: string): string {
+    // A launch that is still ahead is usually only known to the month, so
+    // YYYY-MM renders as "September 2026" rather than inventing a day.
+    const monthOnly = /^(\d{4})-(\d{2})$/.exec(dateString.trim());
+    if (monthOnly) {
+      const date = new Date(`${dateString}-01T12:00:00`);
+      if (Number.isNaN(date.getTime())) return dateString;
+      return new Intl.DateTimeFormat('en-US', {
+        month: 'long',
+        year: 'numeric'
+      }).format(date);
+    }
+
     const date = new Date(`${dateString}T12:00:00`);
     if (Number.isNaN(date.getTime())) return dateString;
     return new Intl.DateTimeFormat('en-US', {

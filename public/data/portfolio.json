@@ -7,7 +7,7 @@
       "tagline": "You're looking at it!",
       "description": "A custom-built portfolio designed to showcase technical projects and professional expertise. Prioritizes performance, accessibility, and clean design over flashy gimmicks—demonstrating the same principles applied to client work. Design inspired by a mischievous coyote cartoon character.",
       "category": "websites",
-      "role": "Full Stack Developer",
+      "role": "Full Stack Developer & Designer",
       "tools": [
         "TypeScript",
         "Node.js",
@@ -102,7 +102,7 @@
       "tagline": "Client & project management system",
       "description": "I built a full-stack dashboard and client portal for managing freelance projects. The developer side handles leads, project tracking, client invitations, messaging, file sharing, and invoice generation. The client side gives clients real-time project progress, file uploads, messaging, and invoice history—all without third-party platforms.",
       "category": "applications",
-      "role": "Full Stack Developer",
+      "role": "Full Stack Developer & Designer",
       "tools": [
         "TypeScript",
         "React",
@@ -229,7 +229,7 @@
       "tagline": "A hand-illustrated, walkable native garden for a sustainable garden studio",
       "description": "A fully custom, hand-illustrated website for Hedgewitch Horticulture, a sustainable garden design and maintenance studio serving Greater Boston. I replaced their Squarespace with a performance-optimized Astro build and an earthy, handcrafted visual identity. At its center is an interactive walkable garden where native plants are drawn to scale and grouped into the ecological communities they actually form in the wild.",
       "category": "websites",
-      "role": "Designer & Developer",
+      "role": "Full Stack Developer & Designer",
       "tools": [
         "Illustrator",
         "Photoshop",
@@ -253,13 +253,13 @@
         "Netlify",
         "CSS"
       ],
-      "date": "2026-07-17",
+      "date": "2026-09-01",
       "status": "in-progress",
       "featured": true,
       "heroImage": "",
       "screenshots": [],
       "testUrl": "https://hedgewitch.netlify.app/",
-      "launchDate": "2026-07-17",
+      "launchDate": "2026-09",
       "isDocumented": true,
       "titleCard": {
         "composed": "/images/tv/title-cards/hedgewitch.webp",
@@ -275,7 +275,7 @@
         ],
         "secondaryPt": 38
       },
-      "duration": "8 months",
+      "duration": "6 months",
       "challenge": "Their Squarespace site couldn't capture the earthy, witchy character of the brand, and off-the-shelf templates flatten a studio whose whole philosophy is that plants belong together in living communities. They needed something handcrafted and ecologically literate: organic in feel, easy to maintain, and fast on mobile for clients browsing from the garden.",
       "approach": "I designed the entire visual system from scratch, with no theme or template: custom corner frames, wavy SVG text paths, and GSAP scroll-driven character reveals. The centerpiece is a walkable native-garden page. I researched native New England flora and the pollinators each species supports, then hand-illustrated every plant and pollinator in Adobe Illustrator and Photoshop and rendered them true-to-scale, grouped by real plant communities. Around it I built a static Astro site with a filterable gallery and lightbox, an Astro Content Collections blog, and a self-service admin CMS.",
       "results": [
@@ -318,7 +318,7 @@
       "tagline": "Content recycling for creators",
       "description": "A tool for content creators and the agencies that manage them. Recycle content to subscribers who haven't purchased yet using SKU management and automatic buyer exclusion lists. Features a browser extension for data capture and multi-tenant architecture for agency-level operations.",
       "category": "applications",
-      "role": "Full Stack Developer",
+      "role": "Full Stack Developer & Designer",
       "tools": [
         "React",
         "TypeScript",
@@ -385,7 +385,7 @@
       "tagline": "Custom link-in-bio pages",
       "description": "Custom-designed link-in-bio pages for social media profiles. Features animated backgrounds, theme customization, and analytics integration.",
       "category": "websites",
-      "role": "Designer & Developer",
+      "role": "Full Stack Developer & Designer",
       "tools": [
         "HTML",
         "CSS",

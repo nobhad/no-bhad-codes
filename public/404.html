@@ -23,6 +23,11 @@
     <meta name="robots" content="noindex" />
     <title>404 — No Bhad Codes</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <style>
       @font-face {
         font-family: 'Acme';
@@ -34,24 +39,34 @@
         font-display: swap;
       }
 
+      /* Mirrors src/design-system/tokens/colors.css. This page is served
+         as a static file for unmatched routes, so it cannot import the
+         hashed site bundle — the values are copied rather than referenced.
+         Keep them in step with the token file. */
       :root {
-        --nf-bg: #e0e0e0;
-        --nf-fg: #1a1a1a;
+        --nf-bg: #e0e0e0; /* --color-neutral-300 */
+        --nf-fg: #333333; /* --color-dark */
+        --nf-nav: #333333; /* --color-nav-text */
         --nf-muted: #555555;
-        --nf-accent: #dc2626;
-        --nf-border: #1a1a1a;
-        --nf-btn-bg: #1a1a1a;
+        --nf-accent: #dc2626; /* --color-brand-accent */
+        --nf-border: #333333;
+        --nf-btn-bg: #333333;
         --nf-btn-fg: #e0e0e0;
+        --nf-shadow: rgba(0, 0, 0, 0.2);
+        --nf-container-padding: clamp(1rem, 4vw, 2rem);
+        --nf-footer-height: 40px;
       }
 
       html[data-theme='dark'] {
         --nf-bg: #333333;
-        --nf-fg: #f0f0f0;
+        --nf-fg: #e0e0e0;
+        --nf-nav: #fafafa; /* --color-gray-50 */
         --nf-muted: #b0b0b0;
-        --nf-accent: #ef4444;
-        --nf-border: #f0f0f0;
-        --nf-btn-bg: #f0f0f0;
-        --nf-btn-fg: #1a1a1a;
+        --nf-accent: #dc2626;
+        --nf-border: #e0e0e0;
+        --nf-btn-bg: #e0e0e0;
+        --nf-btn-fg: #333333;
+        --nf-shadow: rgba(0, 0, 0, 1);
       }
 
       * {
@@ -66,12 +81,10 @@
       }
 
       body {
-        font-family:
-          system-ui,
-          -apple-system,
-          BlinkMacSystemFont,
-          'Segoe UI',
-          sans-serif;
+        /* --font-family-body is never defined, so the site's body resolves
+           to this fallback. Matching it keeps the copy identical. */
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.6;
         background: var(--nf-bg);
         color: var(--nf-fg);
         display: flex;
@@ -83,44 +96,118 @@
           color 0.35s ease;
       }
 
+      /* Header frame copied from src/styles/components/nav-base.css so the
+         404 wears the same chrome as every other page: fixed, transparent,
+         Acme, brand left, theme toggle + menu right. */
       .nf-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        z-index: 110;
+        background-color: transparent;
+        font-family: 'Acme', sans-serif;
+        padding: 0;
+        padding-top: env(safe-area-inset-top, 0);
+      }
+
+      .nf-header-inner {
+        padding: 0 var(--nf-container-padding);
+      }
+
+      .nf-nav-row {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 1rem clamp(1rem, 4vw, 2rem);
-        border-bottom: 1px solid color-mix(in srgb, var(--nf-border) 18%, transparent);
+        padding: 10px 0;
+        width: 100%;
+        min-height: 40px;
+        flex-wrap: nowrap;
       }
 
       .nf-brand {
-        font-family: 'Acme', system-ui, sans-serif;
-        font-size: clamp(1.1rem, 2.5vw, 1.4rem);
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 8px;
         text-decoration: none;
-        color: var(--nf-fg);
+        color: var(--nf-nav);
+        font-weight: 600;
+        font-size: 20px;
+        text-shadow: 0 2px 4px var(--nf-shadow);
+        text-transform: uppercase;
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition: color 0.3s ease;
+        -webkit-tap-highlight-color: transparent;
       }
 
-      .nf-theme {
-        appearance: none;
-        background: transparent;
-        border: 1px solid color-mix(in srgb, var(--nf-border) 35%, transparent);
-        color: var(--nf-fg);
-        width: 2.5rem;
-        height: 2.5rem;
-        border-radius: 999px;
-        cursor: pointer;
-        display: grid;
-        place-items: center;
+      .nf-brand:visited {
+        color: var(--nf-nav);
       }
 
-      .nf-theme:hover {
-        border-color: var(--nf-accent);
+      .nf-brand:hover,
+      .nf-brand:active {
         color: var(--nf-accent);
       }
 
+      .nf-nav-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+
+      .nf-theme,
+      .nf-menu {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px 0;
+        min-height: 40px;
+        color: var(--nf-nav);
+        text-transform: uppercase;
+        flex-shrink: 0;
+        font-family: inherit;
+        font-size: inherit;
+        line-height: inherit;
+        text-shadow: 0 2px 4px var(--nf-shadow);
+        transition: color 0.3s ease;
+      }
+
+      .nf-theme:hover,
+      .nf-theme:active,
+      .nf-menu:hover,
+      .nf-menu:active {
+        color: var(--nf-accent);
+      }
+
+      .nf-theme {
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 9999px;
+        padding: 0;
+      }
+
+      .nf-menu {
+        font-size: 20px;
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .nf-menu .nf-menu-icon {
+        width: 16px;
+        height: 16px;
+      }
+
       .nf-theme svg {
-        width: 1.1rem;
-        height: 1.1rem;
+        width: 20px;
+        height: 20px;
         stroke: currentColor;
         fill: none;
         stroke-width: 2;
@@ -138,7 +225,9 @@
         flex: 1;
         display: grid;
         place-items: center;
-        padding: clamp(1.5rem, 5vw, 3rem);
+        /* Clear the fixed header and footer the way the site's tiles do. */
+        padding: calc(60px + clamp(1.5rem, 5vw, 3rem)) clamp(1.5rem, 5vw, 3rem)
+          calc(var(--nf-footer-height) + clamp(1.5rem, 5vw, 3rem));
       }
 
       .nf-card {
@@ -248,29 +337,70 @@
         color: var(--nf-accent);
       }
 
+      /* Footer frame copied from src/styles/components/footer.css. */
       .nf-footer {
-        padding: 1rem clamp(1rem, 4vw, 2rem);
-        text-align: center;
-        font-size: 0.8rem;
-        color: var(--nf-muted);
-        border-top: 1px solid color-mix(in srgb, var(--nf-border) 18%, transparent);
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: var(--nf-footer-height);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        background: transparent;
+        padding: 0 2rem;
+        font-size: clamp(0.875rem, 0.825rem + 0.25vw, 1rem);
+        color: var(--nf-fg);
+        text-align: right;
+      }
+
+      .nf-footer p {
+        margin: 0;
       }
     </style>
   </head>
   <body>
     <header class="nf-header">
-      <a class="nf-brand" href="/">No Bhad Codes</a>
-      <button type="button" class="nf-theme" id="nf-theme-toggle" aria-label="Toggle theme">
-        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="12" cy="12" r="4"></circle>
-          <path
-            d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
-          ></path>
-        </svg>
-        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"></path>
-        </svg>
-      </button>
+      <div class="nf-header-inner">
+        <nav class="nf-nav-row">
+          <a class="nf-brand" href="/" aria-label="No Bhad Codes home">No Bhad Codes</a>
+          <div class="nf-nav-right">
+            <a class="nf-theme" href="/#/portal" aria-label="Client Portal Login">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M18 20a6 6 0 0 0-12 0" />
+                <circle cx="12" cy="10" r="4" />
+                <circle cx="12" cy="12" r="10" />
+              </svg>
+            </a>
+            <button type="button" class="nf-theme" id="nf-theme-toggle" aria-label="Toggle dark/light theme">
+              <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="4"></circle>
+                <path
+                  d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+                ></path>
+              </svg>
+              <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"></path>
+              </svg>
+            </button>
+            <!-- The nav overlay lives in the SPA bundle, which this static
+                 page cannot load, so Menu links back to the site rather
+                 than opening a menu that would have nothing behind it. -->
+            <a class="nf-menu" href="/" aria-label="Back to the site">
+              <svg xmlns="http://www.w3.org/2000/svg" class="nf-menu-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M7.33333 16L7.33333 -3.2055e-07L8.66667 -3.78832e-07L8.66667 16L7.33333 16Z" fill="currentColor"></path>
+                <path d="M16 8.66667L-2.62269e-07 8.66667L-3.78832e-07 7.33333L16 7.33333L16 8.66667Z" fill="currentColor"></path>
+                <path d="M6 7.33333L7.33333 7.33333L7.33333 6C7.33333 6.73637 6.73638 7.33333 6 7.33333Z" fill="currentColor"></path>
+                <path d="M10 7.33333L8.66667 7.33333L8.66667 6C8.66667 6.73638 9.26362 7.33333 10 7.33333Z" fill="currentColor"></path>
+                <path d="M6 8.66667L7.33333 8.66667L7.33333 10C7.33333 9.26362 6.73638 8.66667 6 8.66667Z" fill="currentColor"></path>
+                <path d="M10 8.66667L8.66667 8.66667L8.66667 10C8.66667 9.26362 9.26362 8.66667 10 8.66667Z" fill="currentColor"></path>
+              </svg>
+              Menu
+            </a>
+          </div>
+        </nav>
+      </div>
     </header>
 
     <main class="nf-main">
@@ -299,7 +429,7 @@
     </main>
 
     <footer class="nf-footer">
-      <p>&copy; <span id="nf-year"></span> No Bhad Codes. All rights reserved.</p>
+      <p>&copy; <span id="nf-year"></span> Made &amp; Designed by No Bhad Codes. All rights reserved.</p>
     </footer>
 
     <script>
