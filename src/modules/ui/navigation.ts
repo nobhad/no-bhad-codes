@@ -35,6 +35,9 @@ export interface NavigationModuleOptions extends ModuleOptions {
  * requires the visible label to be contained in the accessible name, so speech
  * input users can activate the control by saying what they see.
  */
+// Slightly past the 0.3s exit tweens, so the timeline wins when it works.
+const CLOSE_SETTLE_MS = 400;
+
 const MENU_TOGGLE_LABELS = { closed: 'Menu', open: 'Close' } as const;
 
 interface NavigationItem {
@@ -66,6 +69,9 @@ export class NavigationModule extends BaseModule {
   private mainTimeline: gsap.core.Timeline | null = null;
 
   // State subscriptions
+  /** Timer that guarantees the closed state if the exit timeline stalls. */
+  private closeFallback: number | null = null;
+
   private unsubscribeNav?: () => void;
 
   // Touch device detection
@@ -287,8 +293,11 @@ export class NavigationModule extends BaseModule {
     // Create main timeline
     this.mainTimeline = gsap.timeline({ paused: true });
 
-    // Set initial states exactly like CodePen
-    gsap.set(this.nav, { display: 'none' });
+    // Visibility is owned by `.nav` / `.nav[data-nav="open"]` in nav-base.css.
+    // It used to also be set inline here and in both timelines, and the two
+    // disagreed: the opening timeline's write never landed, so the inline
+    // `none` from this line outlived every open and the menu toggled
+    // data-nav without ever appearing.
 
     // Set fade targets (social links) to hidden initially
     const fadeTargets = this.nav.querySelectorAll('[data-menu-fade]');
@@ -342,8 +351,7 @@ export class NavigationModule extends BaseModule {
     const tl = gsap.timeline();
 
     // Faster opening sequence
-    tl.set(this.nav, { display: 'block' })
-      .set(document.querySelector('.menu'), { xPercent: 0 }, '<')
+    tl.set(document.querySelector('.menu'), { xPercent: 0 })
       // Hide fade targets initially (social links container)
       .set(fadeTargets, { autoAlpha: 0 })
       .fromTo(
@@ -408,23 +416,32 @@ export class NavigationModule extends BaseModule {
     // Get fade targets (social links section)
     const fadeTargets = this.nav.querySelectorAll('[data-menu-fade]');
 
-    // Create closing animation matching working version 9.0
-    const tl = gsap.timeline({
-      onComplete: () => {
-        if (this.nav) {
-          this.nav.setAttribute('data-nav', 'closed');
-          document.body.style.overflow = '';
-        }
-      }
-    });
+    // Closing the menu is what returns data-nav to "closed", and that
+    // attribute is what CSS uses to hide it. Landing it only in onComplete
+    // makes the exit depend on the timeline finishing — and this one is not
+    // reliably completing, which leaves the menu open with no way to shut
+    // it. Guarded with a timer matching the animation so the attribute lands
+    // either way; whichever runs first wins and the other is a no-op.
+    const settle = (): void => {
+      if (!this.nav) return;
+      if (this.nav.getAttribute('data-nav') === 'closed') return;
+      this.nav.setAttribute('data-nav', 'closed');
+      document.body.style.overflow = '';
+    };
+
+    if (this.closeFallback !== null) {
+      clearTimeout(this.closeFallback);
+    }
+    this.closeFallback = window.setTimeout(settle, CLOSE_SETTLE_MS);
+
+    const tl = gsap.timeline({ onComplete: settle });
 
     // Faster closing sequence - hide fade targets immediately
     tl.to(fadeTargets, { autoAlpha: 0, duration: 0.15 }, 0)
       .to(this.overlay, { autoAlpha: 0, duration: 0.3 }, '<')
       .to(document.querySelector('.menu'), { xPercent: 120, duration: 0.3 }, '<')
       .to(this.menuButtonTexts, { yPercent: 0, duration: 0.3 }, '<')
-      .to(document.querySelector('.menu-button-icon'), { rotation: 0, duration: 0.3 }, '<')
-      .set(this.nav, { display: 'none' });
+      .to(document.querySelector('.menu-button-icon'), { rotation: 0, duration: 0.3 }, '<');
   }
 
   /**

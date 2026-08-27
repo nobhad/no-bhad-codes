@@ -39,7 +39,6 @@
        below uses it directly, the tile's header inset composes with it, and
        the about column/content gaps read from it — so header-to-photo,
        photo-to-title and bio-to-marquee are all the same measure. */
-    --map-tile-pad-y: 3rem;
     left: 0;
     right: 0;
     /* Reaches the true bottom edge. The old --footer-height inset reserved a

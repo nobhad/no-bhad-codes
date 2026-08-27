@@ -33,6 +33,15 @@ async function boot(): Promise<void> {
     logger.error('Theme module failed to start:', error);
   }
 
+  // These pages carry the site's header, so the menu button needs the module
+  // that drives the overlay it opens.
+  try {
+    const { NavigationModule } = await import('./modules/ui/navigation');
+    await new NavigationModule().init();
+  } catch (error) {
+    logger.error('Navigation module failed to start:', error);
+  }
+
   // The curtain is revealed by the page sliding up off it, and it also owns
   // the header's scroll-away. Both need something that actually scrolls.
   //

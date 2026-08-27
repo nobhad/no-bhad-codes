@@ -16,9 +16,14 @@ body {
 
 /* During the intro animation (before the coyote paw completes), lock the
    page so wheel / trackpad / touch gestures can't scroll left/right or
-   up/down. .intro-complete is added to <html> by intro-animation when
-   the paw lands; this rule unlocks scrolling at that moment. */
-html:not(.intro-complete) body {
+   up/down while the intro plays. .intro-loading is on <html> from the
+   markup and removed by intro-animation when the paw lands, which unlocks
+   scrolling at that moment.
+
+   Keyed to the intro RUNNING rather than to the absence of .intro-complete:
+   the old form locked any page that never played an intro at all, so a
+   standalone page silently could not scroll and the cause was invisible. */
+html.intro-loading body {
   overflow: hidden;
   touch-action: none;
   overscroll-behavior: none;
