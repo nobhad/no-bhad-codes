@@ -26,9 +26,11 @@ ancestors still fire — and treats whichever element scrolled as the scroller.
   reveal; a `power3.out` tween eases a plain number that is pushed into
   `timeline.progress()` each tick. Scrubbed against the last curtain-height of
   travel, so the panel rises *with* the scroll instead of popping in.
-- The thin `©` strip (`.footer-bar`) is the curtain's closed state and fades
-  out over the first 40% of the reveal, so the two copyright lines never
-  read as duplicates.
+- Retraction is **snapped, not tweened**. The padding below guarantees the
+  panel only ever covers empty space, but only while its position matches the
+  scroll exactly — a trailing `power3.out` on the way back up left the black
+  band sitting over content that had already scrolled into view. Opening keeps
+  the ease; there the lag plays out inside the padding where nobody sees it.
 - Scrollable containers get an inline `padding-bottom` equal to the curtain
   height so the panel rises into empty space rather than covering the last of
   the content. Containers that don't overflow never get it and never reveal —
@@ -49,11 +51,48 @@ ancestors still fire — and treats whichever element scrolled as the scroller.
   otherwise reads that as a ~232px `y` base and stacks `yPercent` on top of it.
 - The avatar art is a black silhouette built for light backgrounds, so it's
   `filter: invert(1)` on the black band.
+- `avatar.svg` is a 288x356 viewBox wrapping a PNG whose opaque bounds stop 38
+  units short of the right edge, so the wordmark sat a full extra gap away from
+  the ear. `.footer-curtain__avatar` pulls that dead strip back with a negative
+  margin of 38/356 of the rendered height, hoisted into
+  `--curtain-avatar-height` so both declarations read from one number. The SVG
+  itself is untouched — the portal login logo (`index.html:1208`) shares it.
+- The `.footer` shell is now an empty positioning anchor, so it needs
+  `pointer-events: none` (with `auto` back on the curtain) or it silently
+  blocks clicks across the bottom 40px of every page.
+- Detail-page bottom padding has to be declared at the **end** of
+  `pages/projects-detail.css`: the responsive blocks above set `padding` as a
+  shorthand, which resets any earlier bottom value. Equal specificity, later in
+  the file, so it wins the bottom edge and they keep the horizontal padding.
+
+### Follow-up (Aug 27, 2026)
+
+- [x] Dropped the thin always-on `.footer-bar` copyright strip — markup, its
+      CSS (including the mobile show-on-contact `:has()` block), and the fade
+      tween in the module. The curtain's own `©` line is the only one now.
+- [x] Fixed the content/footer overlap when scrolling back up (snapped retract
+      + `pointer-events: none` on the empty shell, both above).
+- [x] Tightened the avatar-to-wordmark gap in the curtain brand.
+- [x] More clearance below detail-page content: `--project-detail-footer-clearance`
+      is `--space-12` (96px) desktop / `--space-8` (64px) mobile, up from the
+      32px/24px the `padding` shorthands left. The static `.footer` shell adds
+      another 40px of flow on detail pages, so the visible gap to the top of
+      the curtain is ~136px, up from ~72px.
+- [ ] **The curtain is only reachable from project-detail pages.** By design,
+      not a bug: `ensurePadding()` only reveals on a container that genuinely
+      overflows, and no map tile sets `overflow-y: auto` — they're a
+      fixed-camera layout sized to the viewport, so no scroll event ever fires.
+      Detail pages are the one route that opts out (`projects-detail.css:1390`
+      un-fixes the header/footer so the document scrolls). Chosen fix: reveal
+      the curtain on an **over-scroll gesture at a tile's edge**, which means
+      hooking `PageTransitionModule.handleWheel` / the touch handlers without
+      fighting the existing carousel navigation. Not started.
 
 ### Files
 
-- `index.html` — footer markup: `.footer-bar` + `.footer-curtain`
+- `index.html` — footer markup: `.footer-curtain`
 - `src/styles/components/footer.css` — curtain styles + `--footer-curtain-*`
+- `src/styles/pages/projects-detail.css` — footer clearance below content
 - `src/modules/ui/footer-curtain.ts` — new
 - `src/core/modules-config.ts` — registration (home page only)
 
