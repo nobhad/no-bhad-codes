@@ -83,7 +83,12 @@ const PAGES = [
   { name: 'project-linktrees', path: '/#/projects/linktrees' },
   { name: 'contact', path: '/#/contact' },
   { name: 'admin-login', path: '/admin/login' },
-  { name: 'portal-login', path: '/portal/login' }
+  // The login form lives at the hash route; /portal/login is not a route
+  // at all and used to capture the 404 page, which then shipped as The
+  // Backend's hero. /portal just redirects here.
+  { name: 'portal-login', path: '/#/portal' },
+  // Terminal-style project intake form.
+  { name: 'intake', path: '/intake' }
 ];
 
 // Pages for the video walkthrough (subset, in viewing order)
@@ -340,6 +345,104 @@ async function recordVideos() {
 
   await browser.close();
   console.log(`\nVideos saved to: ${VIDEO_DIR}\n`);
+}
+
+// ============================================
+// TERMINAL INTAKE VIDEO
+// ============================================
+
+// Scripted answers for the terminal intake flow, in question order:
+// name -> email -> project type -> description -> timeline -> budget.
+// `select` steps are answered by clicking a .chat-option chip; the rest
+// are typed so the recording shows the per-character terminal effect.
+const INTAKE_SCRIPT: Array<{ kind: 'type' | 'choose'; value: string }> = [
+  { kind: 'type', value: 'Noelle' },
+  { kind: 'type', value: 'hello@nobhad.codes' },
+  { kind: 'choose', value: '1' },
+  { kind: 'type', value: 'A vintage-TV portfolio with a client portal behind it.' },
+  { kind: 'choose', value: '1' },
+  { kind: 'choose', value: '2' }
+];
+
+// Typing cadence — slow enough to read on camera, fast enough that the
+// whole flow fits in a short loop.
+const INTAKE_TYPE_DELAY_MS = 55;
+const INTAKE_ANSWER_PAUSE_MS = 1200;
+const INTAKE_BOOT_WAIT_MS = 6000;
+
+async function recordTerminalIntakeVideos() {
+  console.log('=== TERMINAL INTAKE VIDEO ===\n');
+
+  fs.mkdirSync(VIDEO_DIR, { recursive: true });
+
+  const browser = await puppeteer.launch({
+    headless: true,
+    executablePath: CHROME_PATH,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
+
+  for (const theme of THEMES) {
+    const label = `desktop-${theme.name}`;
+    const videoPath = path.join(VIDEO_DIR, `terminal-intake-${label}.webm`);
+    console.log(`Recording: ${label}...`);
+
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1440, height: 900 });
+    await page.setCookie({ name: 'tracking_consent', value: 'accepted', url: BASE_URL });
+
+    // The intake flow persists answers, so a second run resumes mid-form
+    // and the scripted answers land on the wrong questions. Wipe stored
+    // progress, then reload so the terminal boots from question one.
+    await page.goto(`${BASE_URL}/intake`, { waitUntil: 'networkidle2', timeout: 15000 });
+    await page.evaluate(() => {
+      try { localStorage.clear(); sessionStorage.clear(); } catch { /* blocked */ }
+    });
+    await page.goto(`${BASE_URL}/intake`, { waitUntil: 'networkidle2', timeout: 15000 });
+    await setTheme(page, theme.value);
+    await waitForStylesReady(page);
+    await page.waitForSelector('#terminalInput', { timeout: 15000 });
+
+    const recorder = await page.screencast({ path: videoPath });
+
+    // The boot sequence ("Bootstrapping..", module checks) plays itself —
+    // let it finish on camera before the first answer.
+    await wait(INTAKE_BOOT_WAIT_MS);
+
+    for (const step of INTAKE_SCRIPT) {
+      if (step.kind === 'choose') {
+        // Click the Nth option chip for select questions.
+        const index = Number(step.value) - 1;
+        const clicked = await page.evaluate((i: number) => {
+          const chips = document.querySelectorAll<HTMLElement>('.chat-option');
+          const chip = chips[i];
+          if (!chip) return false;
+          chip.click();
+          return true;
+        }, index);
+        if (!clicked) {
+          console.warn('  No .chat-option to click — flow may have diverged');
+          break;
+        }
+      } else {
+        await page.focus('#terminalInput');
+        await page.type('#terminalInput', step.value, { delay: INTAKE_TYPE_DELAY_MS });
+        await wait(400);
+        await page.click('#terminalSend');
+      }
+      await wait(INTAKE_ANSWER_PAUSE_MS);
+    }
+
+    // Hold on the final state so the loop does not cut abruptly.
+    await wait(VIDEO_PAGE_PAUSE_MS);
+
+    await recorder.stop();
+    await page.close();
+
+    console.log(`  Saved: terminal-intake-${label}.webm`);
+  }
+
+  await browser.close();
+  console.log(`\nTerminal intake videos saved to: ${VIDEO_DIR}\n`);
 }
 
 // ============================================
@@ -601,6 +704,7 @@ async function main() {
   }
   if (mode === MODE_VIDEO || mode === MODE_ALL) {
     await recordVideos();
+    await recordTerminalIntakeVideos();
     await recordAuthenticatedVideos();
   }
 
