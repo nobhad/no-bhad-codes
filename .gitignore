@@ -207,3 +207,6 @@ test-results/
 
 # Generated Tailwind CSS for React components
 src/react/styles/tailwind-generated.css
+
+# Playwright MCP scratch output (page snapshots, ~84MB)
+.playwright-mcp/
