@@ -59,6 +59,19 @@ async function findDefaultProjectForClient(clientId: number | string): Promise<n
   return project?.id ?? null;
 }
 
+/** Whether a project belongs to the given client */
+async function clientOwnsProject(
+  projectId: number,
+  clientId: number | string
+): Promise<boolean> {
+  const db = getDatabase();
+  const row = await db.get<{ id: number }>(
+    'SELECT id FROM active_projects WHERE id = ? AND client_id = ?',
+    [projectId, clientId]
+  );
+  return !!row;
+}
+
 /** Insert a file record and return its new row ID */
 async function insertFileRecord(params: InsertFileParams): Promise<number | undefined> {
   const db = getDatabase();
@@ -243,6 +256,7 @@ async function canClientAccessFile(
 
 export const uploadService = {
   findDefaultProjectForClient,
+  clientOwnsProject,
   insertFileRecord,
   updateClientAvatar,
   getFilesByProject,

@@ -143,7 +143,8 @@ export const PORTAL_QUESTIONNAIRES_FILTER_CONFIG: FilterConfig[] = [
 
 export const PORTAL_ADHOC_STATUS_OPTIONS = [
   STATUS_ALL_OPTION,
-  { value: 'pending', label: 'Pending' },
+  { value: 'submitted', label: 'Submitted' },
+  { value: 'reviewing', label: 'In Review' },
   { value: 'quoted', label: 'Quoted' },
   { value: 'approved', label: 'Approved' },
   { value: 'in_progress', label: 'In Progress' },

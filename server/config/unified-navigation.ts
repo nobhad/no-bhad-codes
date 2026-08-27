@@ -221,8 +221,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     label: 'Requests',
     icon: 'clipboardList',
     roles: ['client'],
-    order: 4,
-    hideInSolo: true
+    order: 4
   },
   {
     id: 'deliverables',
@@ -400,7 +399,7 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
       { id: 'overview', label: 'Overview', roles: ['admin'], active: true },
       { id: 'projects', label: 'Projects', roles: ['admin'] },
       { id: 'tasks', label: 'Tasks', roles: ['admin'] },
-      { id: 'ad-hoc-requests', label: 'Requests', roles: ['admin'], hideInSolo: true }
+      { id: 'ad-hoc-requests', label: 'Requests', roles: ['admin'] }
     ]
   },
   // Admin: CRM group subtabs

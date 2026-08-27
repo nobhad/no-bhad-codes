@@ -16,10 +16,15 @@ import {
   Paperclip,
   Download
 } from 'lucide-react';
-import { formatCardDate, formatCurrency, formatFileSize } from '@react/utils/cardFormatters';
+import { formatCardDate, formatCurrency } from '@react/utils/cardFormatters';
 import { ConfirmDialog } from '@react/components/portal/ConfirmDialog';
+import { buildEndpoint } from '@/constants/api-endpoints';
 import type { AdHocRequest } from './types';
-import { AD_HOC_REQUEST_STATUS_CONFIG, AD_HOC_REQUEST_PRIORITY_CONFIG } from './types';
+import {
+  AD_HOC_REQUEST_STATUS_CONFIG,
+  AD_HOC_REQUEST_PRIORITY_CONFIG,
+  AD_HOC_REQUEST_TYPE_CONFIG
+} from './types';
 
 export interface AdHocRequestCardProps {
   /** The ad-hoc request data */
@@ -46,9 +51,13 @@ export function AdHocRequestCard({
   const [showDeclineDialog, setShowDeclineDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const hasQuote = !!request.quote;
+  const quotedPrice = request.quotedPrice ?? null;
+  const hasQuote = quotedPrice !== null && quotedPrice > 0;
   const canRespond = request.status === 'quoted' && hasQuote;
-  const hasAttachments = request.attachments && request.attachments.length > 0;
+  const hasAttachment = !!request.attachmentFileId;
+  const estimatedHours = request.estimatedHours ?? 0;
+  const hourlyRate = request.hourlyRate ?? 0;
+  const flatRate = request.flatRate ?? 0;
 
   const handleApprove = async () => {
     if (!onApprove) return;
@@ -85,7 +94,7 @@ export function AdHocRequestCard({
               <h3 className="text-primary font-semibold">
                 {request.title}
               </h3>
-              {hasAttachments && (
+              {hasAttachment && (
                 <Paperclip className="icon-xs flex-shrink-0" />
               )}
             </div>
@@ -101,7 +110,7 @@ export function AdHocRequestCard({
                 {AD_HOC_REQUEST_PRIORITY_CONFIG[request.priority]?.label || request.priority}
               </span>
               <span className="text-secondary">
-                {formatCardDate(request.created_at)}
+                {formatCardDate(request.createdAt)}
               </span>
             </div>
           </div>
@@ -109,7 +118,7 @@ export function AdHocRequestCard({
           <div className="portal-card-status-group">
             {hasQuote && (
               <span className="text-primary font-semibold">
-                {formatCurrency(request.quote!.total_amount)}
+                {formatCurrency(quotedPrice!)}
               </span>
             )}
             <button
@@ -141,48 +150,40 @@ export function AdHocRequestCard({
               </p>
             </div>
 
+            {/* Type */}
+            <div className="portal-card-meta-item">
+              <span className="text-secondary">
+                {AD_HOC_REQUEST_TYPE_CONFIG[request.requestType]?.label || request.requestType}
+              </span>
+            </div>
+
             {/* Project */}
-            {request.project_name && (
+            {request.projectName && (
               <div className="portal-card-meta-item">
                 <FileText className="icon-xs" />
                 <span>
-                  Project: {request.project_name}
+                  Project: {request.projectName}
                 </span>
               </div>
             )}
 
-            {/* Attachments */}
-            {hasAttachments && (
+            {/* Attachment */}
+            {hasAttachment && (
               <div>
-                <label className="field-label">Attachments</label>
-                <div className="mt-1 portal-card-detail-list">
-                  {request.attachments!.map((attachment) => (
-                    <div
-                      key={attachment.id}
-                      className="list-item justify-between"
-                    >
-                      <div className="portal-card-meta-item card-content-truncate">
-                        <Paperclip className="icon-xs flex-shrink-0" />
-                        <span className="text-primary">
-                          {attachment.filename}
-                        </span>
-                        <span className="text-secondary">
-                          ({formatFileSize(attachment.file_size)})
-                        </span>
-                      </div>
-                      {attachment.download_url && (
-                        <a
-                          href={attachment.download_url}
-                          download={attachment.filename}
-                          className="icon-btn"
-                          onClick={(e) => e.stopPropagation()}
-                          aria-label={`Download ${attachment.filename}`}
-                        >
-                          <Download className="icon-xs" />
-                        </a>
-                      )}
-                    </div>
-                  ))}
+                <label className="field-label">Attachment</label>
+                <div className="mt-1 list-item justify-between">
+                  <div className="portal-card-meta-item card-content-truncate">
+                    <Paperclip className="icon-xs flex-shrink-0" />
+                    <span className="text-primary">Attached file</span>
+                  </div>
+                  <a
+                    href={buildEndpoint.fileDownload(request.attachmentFileId!)}
+                    className="icon-btn"
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label="Download attachment"
+                  >
+                    <Download className="icon-xs" />
+                  </a>
                 </div>
               </div>
             )}
@@ -193,7 +194,7 @@ export function AdHocRequestCard({
                 <label className="field-label">Quote Details</label>
                 <div className="mt-2 portal-card-detail-list">
                   {/* Hours and Rate */}
-                  {request.quote!.hours_estimated > 0 && (
+                  {estimatedHours > 0 && hourlyRate > 0 && (
                     <div className="portal-card-detail-row">
                       <div className="portal-card-meta-item">
                         <Clock className="icon-xs" />
@@ -202,13 +203,13 @@ export function AdHocRequestCard({
                         </span>
                       </div>
                       <span className="text-primary">
-                        {request.quote!.hours_estimated}h @ {formatCurrency(request.quote!.hourly_rate)}/hr
+                        {estimatedHours}h @ {formatCurrency(hourlyRate)}/hr
                       </span>
                     </div>
                   )}
 
                   {/* Flat Fee */}
-                  {request.quote!.flat_fee && request.quote!.flat_fee > 0 && (
+                  {flatRate > 0 && (
                     <div className="portal-card-detail-row">
                       <div className="portal-card-meta-item">
                         <DollarSign className="icon-xs" />
@@ -217,7 +218,7 @@ export function AdHocRequestCard({
                         </span>
                       </div>
                       <span className="text-primary">
-                        {formatCurrency(request.quote!.flat_fee)}
+                        {formatCurrency(flatRate)}
                       </span>
                     </div>
                   )}
@@ -228,27 +229,18 @@ export function AdHocRequestCard({
                       Total
                     </span>
                     <span className="text-primary font-bold">
-                      {formatCurrency(request.quote!.total_amount)}
+                      {formatCurrency(quotedPrice!)}
                     </span>
                   </div>
-
-                  {/* Notes */}
-                  {request.quote!.notes && (
-                    <div className="mt-2">
-                      <span className="text-secondary">Notes:</span>
-                      <p className="text-secondary mt-0.5">
-                        {request.quote!.notes}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Expiry */}
-                  {request.quote!.expires_at && (
-                    <div className="text-secondary">
-                      Quote valid until: {formatCardDate(request.quote!.expires_at)}
-                    </div>
-                  )}
                 </div>
+              </div>
+            )}
+
+            {/* Estimate pending — priced but not yet quoted */}
+            {!hasQuote && estimatedHours > 0 && (
+              <div className="portal-card-meta-item">
+                <Clock className="icon-xs" />
+                <span>Estimated at {estimatedHours}h — quote to follow</span>
               </div>
             )}
 
@@ -282,7 +274,7 @@ export function AdHocRequestCard({
         open={showApproveDialog}
         onOpenChange={setShowApproveDialog}
         title="Approve Quote"
-        description={`Are you sure you want to approve this quote${hasQuote ? ` for ${formatCurrency(request.quote!.total_amount)}` : ''}? Work will begin after approval.`}
+        description={`Are you sure you want to approve this quote${hasQuote ? ` for ${formatCurrency(quotedPrice!)}` : ''}? Work will begin after approval.`}
         confirmText="Approve"
         variant="info"
         loading={isLoading}

@@ -239,6 +239,16 @@ router.post(
       return errorResponse(res, 'No project file uploaded', 400, ErrorCodes.NO_PROJECT_FILE);
     }
 
+    // A client may only upload into their own project. Without this any
+    // authenticated client could drop files into anyone else's.
+    if (req.user?.type !== 'admin') {
+      const ownsProject =
+        !!req.user?.id && (await uploadService.clientOwnsProject(projectId, req.user.id));
+      if (!ownsProject) {
+        return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+      }
+    }
+
     // Store the filesystem-relative path (no leading slash) so the
     // authenticated resolver in /api/uploads/file/:id can find it.
     const filePath = `uploads/projects/${req.file.filename}`;

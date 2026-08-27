@@ -10,8 +10,8 @@ import { cn } from '@react/lib/utils';
 import { formatFileSize } from '@react/utils/cardFormatters';
 import { FormDropdown } from '@react/components/portal/FormDropdown';
 import { MAX_FILE_SIZE } from '@/utils/file-validation';
-import type { AdHocRequestPriority, NewAdHocRequestPayload } from './types';
-import { AD_HOC_REQUEST_PRIORITY_CONFIG } from './types';
+import type { AdHocRequestPriority, AdHocRequestType, NewAdHocRequestPayload } from './types';
+import { AD_HOC_REQUEST_PRIORITY_CONFIG, AD_HOC_REQUEST_TYPE_CONFIG } from './types';
 
 export interface NewRequestFormProps {
   /** Callback when form is submitted */
@@ -29,7 +29,15 @@ export interface NewRequestFormProps {
 }
 
 const PRIORITY_OPTIONS: AdHocRequestPriority[] = ['low', 'normal', 'high', 'urgent'];
-const DEFAULT_MAX_FILES = 5;
+const TYPE_OPTIONS: AdHocRequestType[] = [
+  'feature',
+  'change',
+  'enhancement',
+  'bug_fix',
+  'support'
+];
+/** The API accepts one attachment per request (ad_hoc_requests.attachment_file_id). */
+const DEFAULT_MAX_FILES = 1;
 
 /**
  * NewRequestForm Component
@@ -45,7 +53,10 @@ export function NewRequestForm({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<AdHocRequestPriority>('normal');
-  const [projectId, setProjectId] = useState<number | undefined>(undefined);
+  const [requestType, setRequestType] = useState<AdHocRequestType>('feature');
+  const [projectId, setProjectId] = useState<number | undefined>(
+    projects.length === 1 ? projects[0].id : undefined
+  );
   const [files, setFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [fileError, setFileError] = useState<string | null>(null);
@@ -67,6 +78,10 @@ export function NewRequestForm({
       newErrors.description = 'Description must be at least 10 characters';
     }
 
+    if (!projectId) {
+      newErrors.projectId = 'Choose which project this is for';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -80,8 +95,9 @@ export function NewRequestForm({
       title: title.trim(),
       description: description.trim(),
       priority,
-      project_id: projectId,
-      attachments: files.length > 0 ? files : undefined
+      requestType,
+      projectId: projectId!,
+      attachment: files[0]
     };
 
     await onSubmit(payload);
@@ -215,6 +231,21 @@ export function NewRequestForm({
         )}
       </div>
 
+      {/* Request type */}
+      <div className="flex flex-col gap-1">
+        <label className="field-label" htmlFor="request-type">What kind of request is this?</label>
+        <FormDropdown
+          id="request-type"
+          value={requestType}
+          onChange={(val) => setRequestType(val as AdHocRequestType)}
+          options={TYPE_OPTIONS.map((type) => ({
+            value: type,
+            label: AD_HOC_REQUEST_TYPE_CONFIG[type].label
+          }))}
+          disabled={loading}
+        />
+      </div>
+
       {/* Priority */}
       <div className="flex flex-col gap-1">
         <label className="field-label">Priority</label>
@@ -238,10 +269,13 @@ export function NewRequestForm({
         </div>
       </div>
 
-      {/* Project (Optional) */}
+      {/* Project */}
       {projects.length > 0 && (
         <div className="flex flex-col gap-1">
-          <label className="field-label" htmlFor="request-project">Related Project (Optional)</label>
+          <label className="field-label" htmlFor="request-project">
+            Project
+            <span className="form-required">*</span>
+          </label>
           <FormDropdown
             id="request-project"
             value={projectId ? String(projectId) : ''}
@@ -256,12 +290,15 @@ export function NewRequestForm({
             placeholder="Select a project..."
             disabled={loading}
           />
+          {errors.projectId && (
+            <span className="form-error-message">{errors.projectId}</span>
+          )}
         </div>
       )}
 
       {/* File Upload */}
       <div className="flex flex-col gap-1">
-        <label className="field-label">Attachments (Optional)</label>
+        <label className="field-label">Attachment (Optional)</label>
         <div
           onDrop={handleDrop}
           onDragOver={handleDragOver}
@@ -281,13 +318,13 @@ export function NewRequestForm({
               </button>
             </p>
             <p className="text-secondary mt-0.5">
-              Max {maxFiles} files, {formatFileSize(maxFileSize)} each
+              {maxFiles === 1 ? 'One file' : `Max ${maxFiles} files`}, up to {formatFileSize(maxFileSize)}
             </p>
           </div>
           <input
             ref={fileInputRef}
             type="file"
-            multiple
+            multiple={maxFiles > 1}
             onChange={handleFileSelect}
             className="hidden"
           />

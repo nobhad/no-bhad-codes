@@ -94,25 +94,20 @@ export function PortalAdHocRequests({
     setIsSubmitting(true);
 
     try {
-      // Use FormData if there are attachments
-      if (payload.attachments && payload.attachments.length > 0) {
+      // The request itself is JSON; an attachment has to exist as a project
+      // file first, since the API stores a file id, not the bytes.
+      let attachmentFileId: number | undefined;
+
+      if (payload.attachment) {
         const formData = new FormData();
-        formData.append('title', payload.title);
-        formData.append('description', payload.description);
-        formData.append('priority', payload.priority);
-        if (payload.project_id) {
-          formData.append('project_id', String(payload.project_id));
-        }
-        payload.attachments.forEach((file) => {
-          formData.append('attachments', file);
-        });
+        formData.append('project_file', payload.attachment);
 
         // Raw fetch for FormData — add CSRF protection manually
         const csrfToken = getCsrfToken();
         const requestHeaders: Record<string, string> = {};
         if (csrfToken) requestHeaders[CSRF_HEADER_NAME] = csrfToken;
 
-        const response = await fetch(API_ENDPOINTS.AD_HOC_REQUESTS_MY, {
+        const response = await fetch(buildEndpoint.projectUpload(payload.projectId), {
           method: 'POST',
           headers: requestHeaders,
           credentials: 'include',
@@ -121,19 +116,29 @@ export function PortalAdHocRequests({
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          throw new Error((errorData as { error?: string }).error || 'Failed to submit request');
+          throw new Error(
+            (errorData as { error?: string }).error || 'Failed to upload attachment'
+          );
         }
-      } else {
-        await portalFetch(API_ENDPOINTS.AD_HOC_REQUESTS_MY, {
-          method: 'POST',
-          body: {
-            title: payload.title,
-            description: payload.description,
-            priority: payload.priority,
-            project_id: payload.project_id
-          }
-        });
+
+        const uploaded = (await response.json()) as {
+          data?: { file?: { id?: number } };
+          file?: { id?: number };
+        };
+        attachmentFileId = uploaded.data?.file?.id ?? uploaded.file?.id;
       }
+
+      await portalFetch(API_ENDPOINTS.AD_HOC_REQUESTS_MY, {
+        method: 'POST',
+        body: {
+          projectId: payload.projectId,
+          title: payload.title,
+          description: payload.description,
+          requestType: payload.requestType,
+          priority: payload.priority,
+          ...(attachmentFileId ? { attachmentFileId } : {})
+        }
+      });
 
       showNotification?.('Request submitted successfully', 'success');
       setIsModalOpen(false);
