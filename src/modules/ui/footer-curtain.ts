@@ -4,8 +4,16 @@
  * ===============================================
  * @file src/modules/ui/footer-curtain.ts
  *
- * Reveals the black footer curtain as the active page reaches the end of
- * its scroll.
+ * Reveals the footer curtain as the active page reaches the end of its scroll.
+ *
+ * The curtain never moves. It is pinned to the bottom of the viewport and the
+ * PAGE slides up off it: main#main-content carries an opaque background and a
+ * higher z-index (see components/site-map.css), so the band is simply covered
+ * until the content clears it. On pages that scroll for real that happens on
+ * its own — content reaches the end, the viewport bottom is uncovered, no
+ * transform needed. Only the map tiles, a fixed camera with nothing to
+ * scroll, need this module to do the travelling, driven by the gestures
+ * PageTransitionModule forwards.
  *
  * The site is a virtual-page map: <main> is fixed and each tile
  * (.site-map > [data-map-tile]) owns its own overflow, while off-map pages
@@ -21,9 +29,9 @@
  * popping in at the bottom.
  *
  * Scrollable containers get a bottom padding equal to the curtain height so
- * the panel rises into empty space instead of covering the last of the
- * content. Non-scrolling tiles (the intro business card, about/contact on
- * desktop) never overflow, so they never get padding and never reveal.
+ * the content has somewhere to travel to instead of the band eating the last
+ * of it. Non-scrolling tiles never overflow, so they never get padding — the
+ * gesture supplies their travel instead.
  */
 
 import { gsap } from 'gsap';
@@ -47,6 +55,13 @@ export class FooterCurtainModule extends BaseModule {
   private footer: HTMLElement | null = null;
   private curtain: HTMLElement | null = null;
   private inner: HTMLElement | null = null;
+  /** The content slab that slides up off the curtain. */
+  private page: HTMLElement | null = null;
+  /** The header. Travels with the page, and scrolls away with content. */
+  private header: HTMLElement | null = null;
+  private headerHeight = 0;
+  /** How far the header has scrolled away, px, capped at its own height. */
+  private headerScrollAway = 0;
 
   private timeline: gsap.core.Timeline | null = null;
   private scrubTween: gsap.core.Tween | null = null;
@@ -54,6 +69,8 @@ export class FooterCurtainModule extends BaseModule {
   private readonly scrubState = { value: 0 };
 
   private scroller: HTMLElement | null = null;
+  /** True while a gesture is driving the reveal instead of a scroll container. */
+  private externalDrive = false;
   private curtainHeight = 0;
   private progress = 0;
   private frame = 0;
@@ -70,8 +87,10 @@ export class FooterCurtainModule extends BaseModule {
     this.footer = document.querySelector<HTMLElement>('.footer');
     this.curtain = document.querySelector<HTMLElement>('[data-footer-curtain]');
     this.inner = document.querySelector<HTMLElement>('[data-footer-curtain-inner]');
+    this.page = document.getElementById('main-content');
+    this.header = document.querySelector<HTMLElement>('.header');
 
-    if (!this.footer || !this.curtain || !this.inner) {
+    if (!this.footer || !this.curtain || !this.inner || !this.page) {
       this.log('Curtain markup not present on this page — skipping');
       return;
     }
@@ -83,6 +102,11 @@ export class FooterCurtainModule extends BaseModule {
     document.addEventListener('scroll', this.handleScroll, { capture: true, passive: true });
     window.addEventListener('resize', this.handleResize, { passive: true });
     window.addEventListener('hashchange', this.handleNavigation);
+
+    // The spatial-map tiles are a fixed camera sized to the viewport, so they
+    // never scroll and this module would never hear from them. PageTransition-
+    // Module owns the gestures there and hands us progress directly.
+    window.addEventListener('footer-curtain:set-progress', this.handleExternalProgress);
 
     // PageTransitionModule can swap pages from a wheel/arrow/swipe gesture as
     // well as from a hash change, and it always stamps the result on <main>.
@@ -104,6 +128,73 @@ export class FooterCurtainModule extends BaseModule {
   private measure(): void {
     if (!this.curtain) return;
     this.curtainHeight = Math.round(this.curtain.getBoundingClientRect().height);
+    // Read with the header at rest, or a header already translated up would
+    // measure short and cap its own travel below its real height.
+    this.headerHeight = this.header ? Math.round(this.header.offsetHeight) : 0;
+  }
+
+  /**
+   * The header's position, from its two independent sources: the curtain
+   * reveal carrying the whole page up, and the header scrolling away with
+   * content the way an in-flow header would.
+   *
+   * One writer on purpose. The two never overlap in practice — a tile that
+   * gesture-reveals the curtain has nothing to scroll, and a page that
+   * scrolls doesn't drive the curtain by gesture — but two GSAP setters on
+   * the same property would still fight on the frames where both ran.
+   */
+  private applyHeaderOffset(curtainProgress: number): void {
+    if (!this.header) return;
+
+    // Only the scroll-away half is ever skipped. The curtain half must always
+    // apply: a gesture reveal slides the whole page up off the band, and the
+    // header is part of that page — dropping it there left the header sitting
+    // at the top while the content moved out from under it.
+    //
+    // A static header covers its own scroll-away ONLY when the thing scrolling
+    // is the document it sits in — project-detail on desktop, where the header
+    // is un-fixed (pages/projects-detail.css) and the whole page scrolls.
+    // Inside the fixed-camera layout the scroller is a TILE and body/main
+    // carry overflow: hidden, so a static header outside that tile never moves
+    // on its own however far the tile scrolls.
+    const scrollAway = this.headerTravelsInFlow() ? 0 : this.headerScrollAway;
+
+    gsap.set(this.header, {
+      y: -(curtainProgress * this.curtainHeight) - scrollAway
+    });
+  }
+
+  /**
+   * Whether the header moves on its own with the content, so this module
+   * should keep its hands off it.
+   */
+  private headerTravelsInFlow(): boolean {
+    if (!this.header) return true;
+    if (getComputedStyle(this.header).position !== 'static') return false;
+
+    // No scroller at all means nothing is scrolling, so there is no
+    // scroll-away to skip — and answering "true" here would be read as
+    // "the header handles itself", which it does not.
+    const scroller = this.scroller;
+    if (scroller === null) return false;
+
+    return (
+      scroller === document.scrollingElement ||
+      scroller === document.documentElement ||
+      scroller === document.body
+    );
+  }
+
+  /** Track how far content has scrolled under the header, capped at its height. */
+  private setHeaderScrollAway(scrollTop: number): void {
+    this.headerScrollAway = Math.min(Math.max(0, scrollTop), this.headerHeight);
+    // Applied unconditionally rather than only on a changed value. Memoising
+    // this left the header stuck off-screen: any frame where the offset was
+    // already "correct" but the transform had been written by something else
+    // never got corrected, because the guard returned before re-applying.
+    // gsap.set is cheap enough that self-correcting every frame is the better
+    // trade than a desync that only a second scroll gesture can clear.
+    this.applyHeaderOffset(this.scrubState.value);
   }
 
   /**
@@ -112,26 +203,25 @@ export class FooterCurtainModule extends BaseModule {
    * from the tween that moves `progress`, not from the timeline itself.
    */
   private buildTimeline(): void {
-    if (!this.curtain || !this.inner) return;
+    if (!this.page || !this.inner) return;
 
     const tl = gsap.timeline({ paused: true });
 
-    // `y: 0` is pinned on both ends deliberately. footer.css parks the panel
-    // with transform: translateY(100%) for the pre-JS frame, and GSAP would
-    // otherwise read that as a 231px `y` base and stack yPercent on top of it,
-    // leaving the curtain a full height lower than intended.
+    // The PAGE travels up by exactly the curtain's height, uncovering the band
+    // that was underneath it all along. The curtain itself never moves —
+    // sliding the panel up over the content is the effect this is not.
     tl.fromTo(
-      this.curtain,
-      { y: 0, yPercent: 100 },
-      { y: 0, yPercent: 0, ease: 'none', duration: 1 },
+      this.page,
+      { y: 0 },
+      { y: -this.curtainHeight, ease: 'none', duration: 1 },
       0
     );
 
-    // Contents trail the panel edge so the curtain feels like it's rising
-    // over them rather than being one rigid block.
+    // Contents trail the page edge, so the band reads as settling into place
+    // as it's uncovered rather than arriving fully formed.
     tl.fromTo(
       this.inner,
-      { y: 0, yPercent: 40, opacity: 0 },
+      { y: 0, yPercent: 25, opacity: 0 },
       { y: 0, yPercent: 0, opacity: 1, ease: 'none', duration: 1 },
       0
     );
@@ -153,13 +243,54 @@ export class FooterCurtainModule extends BaseModule {
     if (!element) return;
     // Scrolling inside the curtain itself must not drive the curtain.
     if (this.footer?.contains(element)) return;
+    // A gesture outranks a scroller. Without this a stray scroll event from
+    // anything still on the page would run update(), find that container at
+    // its top, and slam the curtain shut under the user's finger.
+    if (this.externalDrive) return;
 
     this.scroller = element;
     this.requestUpdate();
   };
 
+  /**
+   * Progress handed in by PageTransitionModule for tiles that have no scroll
+   * of their own. Anything above 0 means a gesture owns the curtain.
+   */
+  private handleExternalProgress = (event: Event): void => {
+    const detail = (event as CustomEvent<{ progress?: number }>).detail;
+    const next = clamp01(typeof detail?.progress === 'number' ? detail.progress : 0);
+
+    this.externalDrive = next > 0;
+    // Forget the container we were tracking: it belongs to a page the user has
+    // gestured away from, and keeping it would let handleResize re-pad it.
+    if (this.externalDrive) this.scroller = null;
+
+    this.setProgress(next);
+  };
+
   private handleResize = (): void => {
+    const previous = this.curtainHeight;
     this.measure();
+
+    // The page's travel distance is baked into the tween as a pixel value, so
+    // a curtain that changed height needs the timeline rebuilt around the new
+    // one — otherwise the page stops short of the band or overshoots it.
+    if (this.curtainHeight !== previous) {
+      this.scrubTween?.kill();
+      this.scrubTween = null;
+      this.timeline?.kill();
+      if (this.page) gsap.set(this.page, { y: 0 });
+
+      // buildTimeline() overwrites this.timeline, so it is not cleared first:
+      // assigning null here would narrow the field and TS can't see the
+      // rebuild put a timeline back.
+      this.buildTimeline();
+
+      const target = this.externalDrive ? this.progress : 0;
+      this.scrubState.value = target;
+      this.timeline?.progress(target);
+    }
+
     // Padding is sized from the curtain height, so re-apply it at the new size.
     this.padded.forEach((_original, element) => this.unpad(element));
     this.requestUpdate();
@@ -176,6 +307,8 @@ export class FooterCurtainModule extends BaseModule {
    */
   private handleNavigation = (): void => {
     this.scroller = null;
+    this.externalDrive = false;
+    this.setHeaderScrollAway(0);
     Array.from(this.padded.keys()).forEach((element) => this.unpad(element));
     this.setProgress(0);
   };
@@ -190,9 +323,15 @@ export class FooterCurtainModule extends BaseModule {
 
     const element = this.scroller;
     if (!element || !element.isConnected) {
+      this.setHeaderScrollAway(0);
       this.setProgress(0);
       return;
     }
+
+    // The header scrolls away with content wherever content scrolls at all —
+    // that has nothing to do with whether this container is long enough to
+    // reveal the curtain, so it is computed ahead of the bailouts below.
+    this.setHeaderScrollAway(element.scrollTop);
 
     if (!this.ensurePadding(element)) {
       this.setProgress(0);
@@ -252,6 +391,13 @@ export class FooterCurtainModule extends BaseModule {
     this.progress = next;
     this.applyOpenState(next);
 
+    // Where the page scrolls for real, the reveal is already happening: the
+    // content clears the viewport bottom and the band is uncovered, no
+    // transform involved. Sliding the page as well would move it twice as far
+    // as the user scrolled. Only the gesture-driven tiles — a fixed camera
+    // with nothing to scroll — need the timeline to do the travelling.
+    const target = this.externalDrive ? next : 0;
+
     this.scrubTween?.kill();
 
     // Retracting is snapped, not tweened. The padding guarantees the panel
@@ -260,8 +406,9 @@ export class FooterCurtainModule extends BaseModule {
     // band sitting over content that has already scrolled back into view.
     // Opening keeps the ease: there the lag plays out inside the padding.
     if (retracting || this.reducedMotion) {
-      this.scrubState.value = next;
-      this.timeline.progress(next);
+      this.scrubState.value = target;
+      this.timeline.progress(target);
+      this.applyHeaderOffset(target);
       this.scrubTween = null;
       return;
     }
@@ -271,12 +418,13 @@ export class FooterCurtainModule extends BaseModule {
     // inspect when it misbehaves; this keeps the driver explicit.
     const timeline = this.timeline;
     this.scrubTween = gsap.to(this.scrubState, {
-      value: next,
+      value: target,
       duration: 0.4,
       ease: 'power3.out',
       overwrite: true,
       onUpdate: () => {
         timeline.progress(this.scrubState.value);
+        this.applyHeaderOffset(this.scrubState.value);
       }
     });
   }
@@ -297,6 +445,7 @@ export class FooterCurtainModule extends BaseModule {
     document.removeEventListener('scroll', this.handleScroll, { capture: true });
     window.removeEventListener('resize', this.handleResize);
     window.removeEventListener('hashchange', this.handleNavigation);
+    window.removeEventListener('footer-curtain:set-progress', this.handleExternalProgress);
 
     if (this.frame) {
       cancelAnimationFrame(this.frame);
@@ -311,9 +460,16 @@ export class FooterCurtainModule extends BaseModule {
 
     Array.from(this.padded.keys()).forEach((element) => this.unpad(element));
 
+    // Never leave the page slid up — the module is gone, nothing would put
+    // it back, and the user would be looking at a permanently shifted site.
+    if (this.page) gsap.set(this.page, { y: 0 });
+    if (this.header) gsap.set(this.header, { y: 0 });
+
     this.footer = null;
     this.curtain = null;
     this.inner = null;
+    this.page = null;
+    this.header = null;
     this.timeline = null;
     this.scroller = null;
 

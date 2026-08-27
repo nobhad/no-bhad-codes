@@ -16,9 +16,12 @@
    =============================================== */
 :root {
   --footer-curtain-height: clamp(200px, 30vh, 320px);
-  --footer-curtain-bg: #000000;
-  --footer-curtain-text: #f5f5f5;
-  --footer-curtain-text-muted: #8a8a8a;
+  /* The raw gray scale, not the --color-dark / --color-light aliases: those
+     flip with the theme, and the band is one fixed ink slab in both by
+     design. Ink rather than true black, off-white rather than true white. */
+  --footer-curtain-bg: var(--color-gray-900);
+  --footer-curtain-text: var(--color-off-white);
+  --footer-curtain-text-muted: var(--color-gray-400);
 }
 
 .footer {
@@ -32,7 +35,12 @@
   font-size: var(--font-size-sm);
   color: var(--color-dark);
   text-align: right;
-  z-index: var(--z-index-footer); /* Below nav (100) so nav menu appears above footer */
+  /* The footer sits BEHIND the page, which slides up off it. This has to be
+     the base layer, not --z-index-footer: .footer is a positioned element, so
+     any z-index here opens a stacking context that carries .footer-curtain up
+     with it — the curtain's own z-index: 0 is scoped inside this one and can
+     never get underneath main#main-content on its own. */
+  z-index: var(--z-index-base);
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -73,40 +81,58 @@
    scroll container runs out of content.
    =============================================== */
 .footer-curtain {
-  /* Fixed to the viewport, not to .footer. Project-detail pages un-fix the
-     header/footer so the whole document scrolls (see pages/projects-detail.css),
-     which would drag an absolutely-positioned curtain up into the page flow.
-     The curtain always belongs to the bottom edge of the screen. */
+  /* The curtain never moves. It is pinned to the bottom of the viewport and
+     the PAGE slides up off it — main#main-content carries an opaque
+     background and a higher z-index, so the band is simply covered until the
+     content clears it. Fixed rather than absolute because project-detail
+     un-fixes .footer to let the document scroll (pages/projects-detail.css),
+     which would drag an absolutely-positioned curtain into the page flow. */
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   height: var(--footer-curtain-height);
-  z-index: var(--z-index-footer);
+  /* Base layer: below the page, above the canvas background. */
+  z-index: var(--z-index-base);
   background: var(--footer-curtain-bg);
   color: var(--footer-curtain-text);
   text-align: left;
   pointer-events: auto;
-  /* Pre-JS / no-JS parking position. GSAP takes over from here. */
-  transform: translateY(100%);
-  will-change: transform;
-  /* The panel is a flat black band in both themes by design — no token
-     swap, so it reads the same against light and dark page backgrounds. */
   overflow: hidden;
 }
 
+/* The curtain sits BEHIND main, which is what hides it. During the intro main
+   is itself hidden (`.intro-loading main { visibility: hidden }` in index.html's
+   critical CSS), so the band would show against the bare page while the paw
+   animation plays. Keep it out of sight until the page that covers it exists. */
+.intro-loading .footer-curtain,
+.paw-exit .footer-curtain {
+  visibility: hidden;
+}
+
+/* Brand above, copyright as a full-width rule along the bottom — at every
+   width, not just narrow ones. `1fr auto` hands the brand row all the slack
+   so the copyright is pushed to the bottom edge instead of sharing a baseline
+   with the wordmark, and the shorter bottom padding sits it close to the edge
+   rather than floating above it. */
 .footer-curtain__inner {
   height: 100%;
-  max-width: var(--project-detail-content-max-width, 1000px);
-  margin-inline: auto;
-  padding: var(--space-3) var(--space-2);
+  /* Full-bleed. It used to borrow --project-detail-content-max-width (1000px),
+     which is a project-detail measure and has no business governing a
+     site-wide band — at 1512px it parked the wordmark ~288px from the edge.
+     Horizontal padding tracks the header's --container-padding, plus a step,
+     so the mark keeps the header's rhythm without sitting hard against the
+     edge — the band has no other content to hold it off. */
+  padding: var(--space-3) calc(var(--container-padding) + var(--space-2))
+    var(--space-1-5);
   display: grid;
-  grid-template-columns: 1fr auto;
-  align-content: center;
-  align-items: end;
-  gap: var(--space-2);
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr auto;
+  align-content: stretch;
+  gap: var(--space-1);
   will-change: transform;
 }
+
 
 /* Wordmark centred against the avatar rather than sharing its baseline —
    bottom-aligning the three short lines to a tall silhouette reads as the
@@ -114,15 +140,23 @@
 .footer-curtain__brand {
   /* Shared by the art and the negative margin that trims its dead edge. */
   --curtain-avatar-height: clamp(88px, 16vh, 150px);
+  /* Centred in the slack the copyright row leaves it, and pushed to the
+     right-hand edge of the band — the grid row is full-width, so without
+     justify-self the mark would sit hard against the left. */
+  align-self: center;
+  justify-self: end;
   display: flex;
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
 }
 
-/* The avatar art is a solid black silhouette built for light backgrounds.
-   Inverting flips it to white on the black band and turns the punched-out
-   white eye black, which reads correctly as a negative. */
+/* The avatar art is a solid black silhouette built for light backgrounds, so
+   it has to be inverted onto the band. A partial invert lands it on the same
+   palette as the type instead of blowing out: 0.878 maps the silhouette to
+   #e0e0e0 (--color-off-white) and the punched-out white eye to #1f1f1f, a
+   hair off the ink behind it. A full invert(1) would give true white on
+   true black, which is what the rest of the site avoids. */
 .footer-curtain__avatar {
   display: block;
   height: var(--curtain-avatar-height);
@@ -133,7 +167,7 @@
      back (38/356 of the rendered height) so `gap` above is the whole of
      the space between the ear and the type. */
   margin-right: calc(var(--curtain-avatar-height) * -0.107);
-  filter: invert(1);
+  filter: invert(0.878);
 }
 
 /* Stacked as NO / BHAD / CODES. `width: min-content` sizes the box to the
@@ -158,7 +192,8 @@
   margin: 0;
   font-size: var(--font-size-xs);
   line-height: 1.4;
-  text-align: right;
+  align-self: end;
+  text-align: center;
   color: var(--footer-curtain-text-muted);
 }
 
@@ -175,7 +210,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    z-index: var(--z-index-footer); /* Below nav (100) so nav menu appears above footer */
+    z-index: var(--z-index-base); /* Behind the page — see the base rule above */
     background: transparent;
   }
 }
@@ -191,7 +226,7 @@
     right: 0;
     width: 100%;
     height: auto;
-    z-index: var(--z-index-footer);
+    z-index: var(--z-index-base); /* Behind the page — see the base rule above */
     margin-top: 0;
     background: transparent;
     /* Inner padding clears the iOS home indicator / URL bar overlay
@@ -205,15 +240,6 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
-  .footer-curtain__inner {
-    grid-template-columns: 1fr;
-    align-content: end;
-    gap: var(--space-1);
-  }
-
-  .footer-curtain__copy {
-    text-align: left;
-  }
 }
 
 /* Reduced motion: the module snaps the timeline instead of tweening it,

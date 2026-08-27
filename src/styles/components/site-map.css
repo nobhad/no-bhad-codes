@@ -71,11 +71,22 @@
      scroll container. iOS gets momentum scroll for free. */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  /* Clears the header while the tile's box still spans the full viewport.
+     Wins over the page stylesheets' own `padding` shorthands because
+     layer(states) is ordered after layer(pages). */
+  padding-top: var(--map-header-inset, 0px);
 }
 
 .site-map > [data-map-tile="center"] {
   top: 0;
   left: 0;
+  /* The business card is centred in the WHOLE viewport, not in the space below
+     the header — the header is transparent and floats over it. The inset the
+     other tiles need to keep scrolling content clear of the header would push
+     the card down by half of it. Declared on the element itself, which beats
+     the inherited value from main regardless of which layer set that. */
+  --map-header-inset: 0px;
+  --map-tile-pad-y: 0px;
 }
 
 .site-map > [data-map-tile="up"] {
@@ -165,6 +176,42 @@ html[data-initial-page="contact"]:not(.js-ready) .site-map {
 main#main-content {
   overflow-x: hidden;
   overflow-y: hidden;
+
+  /* The page is what hides the footer curtain. It has to be opaque, has to
+     paint above the band, and has to reach the actual bottom of the viewport
+     — the old `bottom: var(--footer-height)` inset was reserving 40px for the
+     copyright strip that the curtain replaced, and that gap would have left a
+     permanent sliver of the band on screen.
+
+     FooterCurtainModule slides this element up to reveal the curtain on tiles
+     that don't scroll; where the page scrolls for real, the content clearing
+     the viewport bottom does the same job with no JS at all. */
+  /* Reaches the top edge. The header's height is reserved on the TILES rather
+     than here: each tile owns its own overflow box, so padding on main would
+     clip a tile's content before it ever reached the strip and leave main's
+     own background painting there — a flat fill sitting where the header was.
+     Tiles consume this as padding, so their content boxes are unchanged and
+     scrolled content rides up into the strip instead. */
+  top: 0;
+  /* The header's height is reserved on the TILES, not here. Each tile is its
+     own scroll container and clips at its own box, so padding on main would
+     stop a tile's content before it reached the strip the header vacates —
+     leaving main's background painting a flat fill exactly where the header
+     was. Tiles consume this as padding instead: their content boxes are
+     unchanged, but their boxes now reach y=0, so scrolled content rides up
+     through the strip the way an in-flow header's content does. */
+  --map-header-inset: var(--header-height);
+  bottom: 0;
+  /* The base rule sizes to calc(100vh - header - footer), reserving a strip
+     for the copyright bar the curtain replaced — that strip would leave the
+     band permanently on screen. `auto` is deliberate rather than a new calc:
+     with top and bottom both set, the box resolves to exactly the space
+     between them, with no viewport-unit arithmetic to disagree with the real
+     window. A dvh calc here lands a pixel short mid-resize and flashes a
+     sliver of the curtain. Beats the layer-states attribute rules on ID. */
+  height: auto;
+  z-index: var(--z-index-content);
+  background: var(--color-neutral-300);
 }
 
 main#main-content[data-active-page="project-detail"],
