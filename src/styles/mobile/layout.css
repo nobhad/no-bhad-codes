@@ -36,8 +36,10 @@
     /* Header height reserved on the tiles — see components/site-map.css. */
     top: 0;
     /* Breathing room around tile content. One knob: the section shorthand
-       below uses it directly, and the tile's header inset composes with it. */
-    --map-tile-pad-y: 1.5rem;
+       below uses it directly, the tile's header inset composes with it, and
+       the about column/content gaps read from it — so header-to-photo,
+       photo-to-title and bio-to-marquee are all the same measure. */
+    --map-tile-pad-y: 3rem;
     left: 0;
     right: 0;
     /* Reaches the true bottom edge. The old --footer-height inset reserved a
@@ -255,6 +257,11 @@
   /* About heading - tighter letter-spacing on mobile */
   .about-text-column .section-heading {
     letter-spacing: 0.2em;
+    /* The stacked column's gap is the only thing that should space these.
+       The generic .section-heading margin-top below added a second 1.5rem on
+       top of it, which is why the photo-to-title gap came out at double every
+       other gap on the tile. */
+    margin-top: 0;
     margin-bottom: 0.25rem;
   }
 
@@ -439,7 +446,7 @@
        safe-area inset rides along so the strip clears the notch too. */
     top: 0;
     --map-header-inset: calc(var(--header-height) + env(safe-area-inset-top, 0px));
-    --map-tile-pad-y: 1rem;
+    --map-tile-pad-y: 2rem;
     left: 0;
     right: 0;
     bottom: 0;
