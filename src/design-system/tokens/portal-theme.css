@@ -50,7 +50,6 @@ body[data-page="client"] {
   --color-text-primary: #333333;
   --color-bg-primary: var(--color-off-white);
   --color-bg-hover:   var(--color-gray-100);
-  --form-btn-shadow: var(--color-text-primary);
 
   /* ----------------------------------------
    * TEXT COLORS — derived from primaries

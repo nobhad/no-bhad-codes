@@ -40,6 +40,8 @@
       ],
       "liveUrl": "https://nobhad.codes",
       "repoUrl": "https://github.com/nobhad",
+      "docsUrl": "https://nobhad.codes/design-system",
+      "docsLabel": "Design System",
       "isDocumented": true,
       "titleCard": {
         "composed": "/images/tv/title-cards/no-bhad-codes.webp",

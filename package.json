@@ -44,7 +44,8 @@
     "db:backup": "tsx scripts/backup-database.ts",
     "backup:drive": "tsx scripts/backup-to-drive.ts",
     "docs:validate": "bash scripts/validate-docs.sh",
-    "docs:fix": "bash scripts/validate-docs.sh --fix"
+    "docs:fix": "bash scripts/validate-docs.sh --fix",
+    "docs:design-system": "node scripts/build-design-system-docs.mjs"
   },
   "keywords": [
     "portfolio",
