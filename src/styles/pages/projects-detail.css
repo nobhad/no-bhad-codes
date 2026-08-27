@@ -670,10 +670,22 @@
   max-width: var(--project-detail-image-phone-max, 320px);
 }
 
-/* Rendered PDF pages: portrait documents, capped at a readable page width
-   rather than stretched to the full content column. */
-#project-info .project-media--image:has(img.doc-page) {
-  max-width: 460px;
+/* Rendered PDF pages sit side by side across the full content width —
+   they read as a set of documents, not one-per-screenful. Wraps to fewer
+   columns as the column narrows; each page keeps its portrait ratio. */
+#project-info .project-doc-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+#project-info .project-doc-row .project-media--image {
+  flex: 1 1 220px;
+  max-width: 300px;
+  width: auto;
 }
 
 #project-info .project-media--image img {

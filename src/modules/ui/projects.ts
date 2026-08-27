@@ -2291,31 +2291,46 @@ export class ProjectsModule extends BaseModule {
     }
 
     if (project.screenshots && project.screenshots.length > 0) {
-      parts.push(
-        ...project.screenshots.map((src, index) => {
-          const isMobile = /mobile|phone/i.test(src);
-          // Rendered PDF pages are portrait — they read as documents, not
-          // as full-bleed screenshots, so they get their own width cap.
-          const isDocPage = /\/pdfs\//.test(src);
-          const imgClass = isMobile
-            ? ' class="phone-screen"'
-            : isDocPage
-              ? ' class="doc-page"'
-              : '';
-          const resolved = this.resolveThemedPath(src);
-          // Same theme-swap contract as the hero + walkthrough above:
-          // screenshots showcase the theme the viewer is NOT looking at,
-          // and re-point when they toggle.
-          const themedAttr = src.includes(MEDIA_THEME_TOKEN)
-            ? ` data-themed-src="${escapeAttr(src)}"`
+      // Rendered PDF pages are portrait documents — they belong in a row
+      // together, not stacked one per screenful. Everything else stays in
+      // the single column. Runs of consecutive doc pages get wrapped so a
+      // mixed screenshots array still renders in source order.
+      let docRun: string[] = [];
+      const flushDocRun = () => {
+        if (!docRun.length) return;
+        parts.push(`<div class="project-doc-row">${docRun.join('')}</div>`);
+        docRun = [];
+      };
+
+      project.screenshots.forEach((src, index) => {
+        const isMobile = /mobile|phone/i.test(src);
+        const isDocPage = /\/pdfs\//.test(src);
+        const imgClass = isMobile
+          ? ' class="phone-screen"'
+          : isDocPage
+            ? ' class="doc-page"'
             : '';
-          return `
+        const resolved = this.resolveThemedPath(src);
+        // Same theme-swap contract as the hero + walkthrough above:
+        // screenshots showcase the theme the viewer is NOT looking at,
+        // and re-point when they toggle.
+        const themedAttr = src.includes(MEDIA_THEME_TOKEN)
+          ? ` data-themed-src="${escapeAttr(src)}"`
+          : '';
+        const figure = `
             <figure class="project-media project-media--image">
               <img src="${escapeAttr(resolved)}"${themedAttr} alt="${title} screenshot ${index + 1}"${imgClass} loading="lazy" />
             </figure>
           `;
-        })
-      );
+
+        if (isDocPage) {
+          docRun.push(figure);
+        } else {
+          flushDocRun();
+          parts.push(figure);
+        }
+      });
+      flushDocRun();
     }
 
     return parts.join('');
