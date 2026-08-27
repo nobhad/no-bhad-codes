@@ -157,6 +157,17 @@ const WHEEL_COOLDOWN_MS = 250;
  */
 const CURTAIN_TRAVEL_PX = 260;
 
+/**
+ * Slop (px) for deciding a scroller has reached an edge.
+ *
+ * Scroll heights are fractional — a tile that is visually at its end reports
+ * ~0.5-1px remaining and never reaches 0. A 1px test therefore reads as "still
+ * scrollable" forever, which is what stopped the footer curtain from ever
+ * revealing on a case study: the reveal only fires once the content is done,
+ * and by that test it never was.
+ */
+const SCROLL_EDGE_EPSILON = 2;
+
 const DETAIL_GESTURE_GAP_MS = 250;
 const DETAIL_REACCEL_FACTOR = 1.6;
 const DETAIL_TOP_SETTLE_MS = 150;
@@ -1313,7 +1324,8 @@ export class PageTransitionModule extends BaseModule {
           this.detailLastAbsDelta = absY;
           this.detailReachedTopAt = 0;
           const canScrollDown =
-            currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >= 1;
+            currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >
+            SCROLL_EDGE_EPSILON;
           if (canScrollDown) return;
           // Case study is read to the end — keep going and the page slides up
           // off the footer curtain, the same as the tiles that never scroll.
@@ -1333,7 +1345,7 @@ export class PageTransitionModule extends BaseModule {
             return;
           }
           const now = performance.now();
-          const atTop = currentTile.scrollTop < 1;
+          const atTop = currentTile.scrollTop <= SCROLL_EDGE_EPSILON;
           if (!atTop) {
             this.detailLastWheelAt = now;
             this.detailLastAbsDelta = absY;
@@ -1477,9 +1489,10 @@ export class PageTransitionModule extends BaseModule {
     ) {
       const detailSection = this.pages.get('project-detail')?.element ?? null;
       if (!detailSection) return;
-      const atTop = detailSection.scrollTop < 1;
+      const atTop = detailSection.scrollTop <= SCROLL_EDGE_EPSILON;
       const atBottom =
-        detailSection.scrollHeight - detailSection.scrollTop - detailSection.clientHeight < 1;
+        detailSection.scrollHeight - detailSection.scrollTop - detailSection.clientHeight <=
+        SCROLL_EDGE_EPSILON;
 
       if (direction === 'down') {
         // No exit-down on project-detail (canNavigate('down') is false).
@@ -1594,7 +1607,8 @@ export class PageTransitionModule extends BaseModule {
     if (currentTile && (direction === 'up' || direction === 'down')) {
       if (direction === 'down') {
         const canScrollDown =
-          currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >= 1;
+          currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >
+            SCROLL_EDGE_EPSILON;
         if (canScrollDown) return;
       } else if (currentTile.scrollTop >= 1) {
         return;
