@@ -139,6 +139,18 @@ const WHEEL_COOLDOWN_MS = 250;
  * straggler arriving after a lull. DETAIL_TOP_SETTLE_MS ignores scrolls for a
  * beat right after reaching the top, covering the tail of the reach-the-top swipe.
  */
+/**
+ * Footer curtain travel: px of vertical input that takes the panel from
+ * closed to fully open on a map tile.
+ *
+ * Project-detail scrubs the curtain against its own scroll position, but the
+ * map tiles are a fixed camera sized to the viewport — there is no scroll
+ * container to measure, so the gesture itself supplies the distance. Roughly
+ * one firm trackpad push, and it holds wherever the user lets go: the curtain
+ * only falls when they push back up or leave the page.
+ */
+const CURTAIN_TRAVEL_PX = 260;
+
 const DETAIL_GESTURE_GAP_MS = 250;
 const DETAIL_REACCEL_FACTOR = 1.6;
 const DETAIL_TOP_SETTLE_MS = 150;
@@ -207,6 +219,11 @@ export class PageTransitionModule extends BaseModule {
 
   /** Phase C: cooldown timestamp — wheel events before this are ignored. */
   private wheelCooldownUntil: number = 0;
+
+  /** Footer curtain reveal on map tiles, in px of banked vertical input. */
+  private curtainTravel = 0;
+  /** Last progress handed to FooterCurtainModule; keeps 0 from re-firing. */
+  private curtainProgress = 0;
   // project-detail scroll-to-leave tracking (see DETAIL_GESTURE_GAP_MS et al).
   // A deliberate up-scroll at the top leaves for projects; the decaying
   // momentum of scrolling up TO the top does not. detailLastAbsDelta is the
@@ -608,6 +625,10 @@ export class PageTransitionModule extends BaseModule {
       navigable.delete('down');
     }
 
+    // ↓ is a real destination on the curtain tiles even though the neighbor
+    // graph has nothing there — what's below them is the footer.
+    if (this.curtainOwnsVertical()) navigable.add('down');
+
     // Until the user has scrolled / navigated once, narrow the cue set
     // to the forward direction(s) of the current page so the affordance
     // reads as a single "go this way to start" hint instead of a four-
@@ -634,10 +655,11 @@ export class PageTransitionModule extends BaseModule {
   private forwardDirectionsForFirstPaint(pageId: string): Set<Direction> {
     switch (pageId) {
     case 'intro':
-      // Landing page: down enters projects (primary), left/right enter
-      // about/contact (secondary horizontal-loop entries). Hide up
-      // initially so the affordance reads as "scroll down to start".
-      return new Set(['down', 'left', 'right']);
+      // Landing page: left/right enter about/contact. Down is the footer
+      // curtain, not a way into the site, so it stays out of the opening
+      // hint — the first gesture the user is nudged toward should move them
+      // through the map, not raise the footer over the business card.
+      return new Set(['left', 'right']);
     case 'projects':
       // All four directions are useful here: ↑↓ cycle the TV channel,
       // ←→ navigate to about/contact. Showing all from the first paint
@@ -674,6 +696,45 @@ export class PageTransitionModule extends BaseModule {
     }
     // Map tiles: static graph.
     return NEIGHBORS[this.currentPageId]?.[direction] != null;
+  }
+
+  /**
+   * Tiles whose vertical axis belongs to the footer curtain.
+   *
+   * These are a fixed camera sized to the viewport: nothing scrolls, and the
+   * neighbor graph has no up/down exit, so vertical input had been remapped
+   * onto the horizontal carousel. The curtain is the one thing that genuinely
+   * lives below them, so it gets the axis back. Projects is excluded — its
+   * vertical input channel-surfs the CRT TV — and so is project-detail, which
+   * scrolls for real and scrubs the curtain from its own scroll position.
+   */
+  private curtainOwnsVertical(): boolean {
+    return this.isMapPage(this.currentPageId) && this.currentPageId !== 'projects';
+  }
+
+  /**
+   * Move the curtain by `delta` px of input; positive is toward the bottom of
+   * the page, where the panel waits. Holds wherever it lands.
+   */
+  private driveCurtain(delta: number): void {
+    const travel = Math.min(CURTAIN_TRAVEL_PX, Math.max(0, this.curtainTravel + delta));
+    if (travel === this.curtainTravel) return;
+    this.curtainTravel = travel;
+    this.setCurtainProgress(travel / CURTAIN_TRAVEL_PX);
+  }
+
+  private setCurtainProgress(progress: number): void {
+    if (progress === this.curtainProgress) return;
+    this.curtainProgress = progress;
+    window.dispatchEvent(
+      new CustomEvent('footer-curtain:set-progress', { detail: { progress } })
+    );
+  }
+
+  /** Drop the curtain — the page underneath it is about to change. */
+  private resetCurtain(): void {
+    this.curtainTravel = 0;
+    this.setCurtainProgress(0);
   }
 
   /**
@@ -853,8 +914,15 @@ export class PageTransitionModule extends BaseModule {
         const target = event.target as HTMLElement | null;
         const cue = target?.closest('.map-compass__cue') as HTMLElement | null;
         const dir = cue?.dataset.cue as Direction | undefined;
-        if (!dir || !this.canNavigate(dir)) return;
+        if (!dir) return;
         if (this.isTransitioning) return;
+        // ↓ on a curtain tile isn't a navigation — it raises the footer, and
+        // raises it the rest of the way if it's already part-open.
+        if (dir === 'down' && this.curtainOwnsVertical()) {
+          this.driveCurtain(CURTAIN_TRAVEL_PX);
+          return;
+        }
+        if (!this.canNavigate(dir)) return;
         this.tryNavigateDirection(dir);
       });
     }
@@ -1219,9 +1287,17 @@ export class PageTransitionModule extends BaseModule {
       if (this.currentPageId === 'projects') {
         // natural-scroll: dy < 0 is a downward finger swipe → next channel.
         direction = dy < 0 ? 'down' : 'up';
+      } else if (this.curtainOwnsVertical()) {
+        // Vertical is the footer's axis on these tiles. deltaY > 0 is toward
+        // the bottom of the page on every input device, which is where the
+        // curtain is parked. The carousel keeps the horizontal axis, plus
+        // Shift+wheel above for mice, the arrow keys and the compass.
+        event.preventDefault();
+        this.driveCurtain(dy > 0 ? absY : -absY);
+        return;
       } else if (this.isMapPage(this.currentPageId)) {
-        // Other map tiles: remap vertical wheel → horizontal carousel nav so
-        // up/down scroll moves between pages too. dy < 0 (down) → forward.
+        // Remaining map tiles: remap vertical wheel → horizontal carousel nav
+        // so up/down scroll moves between pages too. dy < 0 (down) → forward.
         direction = dy < 0 ? 'right' : 'left';
       } else if (dy > 0) {
         // Project-detail: native scroll follows the deltaY SIGN (not the
@@ -1470,6 +1546,15 @@ export class PageTransitionModule extends BaseModule {
     // laptop where BOTH events fire for one gesture won't produce
     // conflicting directions — the user gets the same result regardless
     // of which handler runs first.
+    // Same axis split as the wheel. A finger swiping UP drags the page toward
+    // its bottom, which is where the curtain is, so that's the opening
+    // direction — the inverse of the finger-direction convention below, which
+    // moves a camera rather than a page.
+    if (absY > absX && this.curtainOwnsVertical()) {
+      this.driveCurtain(dy < 0 ? absY : -absY);
+      return;
+    }
+
     let direction: Direction;
     if (absX >= absY) {
       direction = dx > 0 ? 'right' : 'left';
@@ -1849,6 +1934,10 @@ export class PageTransitionModule extends BaseModule {
 
       // Update state
       this.currentPageId = pageId;
+      // The curtain belongs to the page it was raised over, and the banked
+      // travel with it — leaving either behind would strand the panel open
+      // on a tile the user never pushed down on.
+      this.resetCurtain();
       this.updateActivePageAttribute(pageId);
       // Mark first navigation done so the compass drops the first-paint
       // single-cue restriction and starts surfacing every valid direction.
@@ -1913,6 +2002,7 @@ export class PageTransitionModule extends BaseModule {
       // and resume the channel music — while the user is on another page.
       if (this.currentPageId !== pageId) {
         this.currentPageId = pageId;
+        this.resetCurtain();
         this.updateActivePageAttribute(pageId);
       }
     } finally {
