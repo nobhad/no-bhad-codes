@@ -66,7 +66,8 @@
   margin-inline: auto;
   justify-self: center;
   align-self: center;
-  padding: var(--space-5);
+  --worksub-wrapper-pad: var(--space-5);
+  padding: var(--worksub-wrapper-pad);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -146,7 +147,8 @@
   }
 
   .worksub-wrapper {
-    padding: var(--space-6);
+    --worksub-wrapper-pad: var(--space-6);
+    padding: var(--worksub-wrapper-pad);
   }
 }
 
@@ -452,8 +454,13 @@
     min-width: 0;
     /* Sits beside the aside here, so its stacked-layout top margin would drop
        the TOOLS label below ROLE even though .intro-content aligns both to
-       flex-start. Side by side, the two labels share a line. */
-    margin-top: 0;
+       flex-start. Side by side, the two labels share a line.
+
+       Set as a custom property, not margin-top: the base .tools-section rule
+       is LATER in this file, and a media query adds no specificity, so a plain
+       margin-top here loses to it. A custom property only conflicts with
+       another declaration of the same property, and that rule declares none. */
+    --tools-section-offset: 0px;
   }
 }
 
@@ -501,7 +508,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  margin-top: var(--space-6);
+  /* Offset for the stacked layout; zeroed by the desktop block above, where
+     tools sits beside the aside and its label lines up with ROLE. */
+  margin-top: var(--tools-section-offset, var(--space-6));
 }
 
 /* Override pill styling for tools label - use smaller caps instead */
@@ -557,11 +566,15 @@
 
 /* Divider */
 .worksub-divider {
-  width: 100%;
+  /* Runs the full width of the frame, not the padded content column — the
+     rule reads as part of the card's border rather than as content. Negating
+     the wrapper's own padding is what takes it out to the border; the padding
+     is a variable so this stays exact when the responsive blocks change it. */
+  width: auto;
   height: var(--space-0-5);
   border: none;
   background-color: var(--color-dark);
-  margin: var(--space-4) 0 0;
+  margin: var(--space-4) calc(-1 * var(--worksub-wrapper-pad, 0px)) 0;
   border-radius: var(--border-radius-xs, 2px) 0 var(--border-radius-xs, 2px) var(--border-radius-xs, 2px);
   transition: background-color var(--transition-theme, 0.4s);
 }
@@ -817,7 +830,8 @@
   }
 
   .worksub-wrapper {
-    padding: var(--space-4);
+    --worksub-wrapper-pad: var(--space-4);
+    padding: var(--worksub-wrapper-pad);
     gap: var(--space-4);
   }
 
@@ -1445,8 +1459,8 @@
      fixed header. Composed with the section's own top padding rather than
      replacing it. */
   padding-top: calc(var(--map-header-inset, 0px) + var(--map-tile-pad-y, 0px));
-  /* Same measure below the content as above it. Both read --map-tile-pad-y,
-     so the case study sits symmetrically between the header and the footer
-     curtain at every width instead of carrying a second, separate number. */
-  padding-bottom: var(--map-tile-pad-y, 0px);
+  /* The same distance below the content as above it — the full top inset, not
+     just the tile gap — so the case study sits the same distance from the
+     footer as it does from the top of the viewport. */
+  padding-bottom: calc(var(--map-header-inset, 0px) + var(--map-tile-pad-y, 0px));
 }
