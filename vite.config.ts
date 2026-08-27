@@ -1,7 +1,32 @@
 import { defineConfig, type Terser } from 'vite';
 import { resolve } from 'path';
+import { existsSync } from 'fs';
 import { ViteEjsPlugin } from 'vite-plugin-ejs';
 import { createObfuscationPlugin } from './src/utils/obfuscation-plugin';
+
+/**
+ * Rewrite an extensionless URL onto its .html file when one exists in
+ * public/, mirroring Vercel's cleanUrls. Only rewrites when the file is
+ * actually there, so genuine 404s stay 404s.
+ */
+function cleanUrlsMiddleware(
+  req: { url?: string },
+  _res: unknown,
+  next: () => void
+): void {
+  const url = req.url;
+  if (!url || url === '/') return next();
+
+  const [pathname, query = ''] = url.split('?');
+  // Leave anything already carrying an extension, and any nested path.
+  if (pathname.includes('.') || pathname.lastIndexOf('/') !== 0) return next();
+
+  const candidate = resolve(__dirname, 'public', `${pathname.slice(1)}.html`);
+  if (existsSync(candidate)) {
+    req.url = `${pathname}.html${query ? `?${query}` : ''}`;
+  }
+  next();
+}
 
 export default defineConfig({
   // Root directory
@@ -232,6 +257,20 @@ export default defineConfig({
 
   // Plugin configuration
   plugins: [
+    // Vercel serves this site with cleanUrls, so /design-system resolves to
+    // design-system.html in production. Vite has no such rule, so an
+    // extensionless link that works when deployed 404s in dev and preview.
+    // This gives both servers the same resolution.
+    {
+      name: 'clean-urls',
+      configureServer(server) {
+        server.middlewares.use(cleanUrlsMiddleware);
+      },
+      configurePreviewServer(server) {
+        server.middlewares.use(cleanUrlsMiddleware);
+      }
+    },
+
     // NOTE: Not using @vitejs/plugin-react or @vitejs/plugin-react-swc
     // because their Fast Refresh preamble detection fails with island architecture
     // (mounting React components into vanilla TS pages via dynamic imports).
