@@ -242,6 +242,15 @@ html[data-initial-page="design-system"]:not(.js-ready) main#main-content {
   overflow-y: auto;
 }
 
+/* The standalone shells — the 404 and the generated design system — are
+   documents, not map cameras. main is a row of full-width tiles for the map,
+   which laid their footer out in a column beside the content instead of
+   below it. Block flow for these two, so content and footer stack. */
+body[data-page="not-found"] main#main-content,
+body[data-page="design-system"] main#main-content {
+  display: block;
+}
+
 /* ============================================
  * REDUCED MOTION
  * ============================================

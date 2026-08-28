@@ -7,6 +7,31 @@
   display: none;
 }
 
+/* Standalone pages — the 404 shell and the generated design system — scroll
+   a document rather than sliding a map tile off a fixed band. There is no
+   page to raise, so the curtain sits at the end of the scroll instead of
+   being pinned behind one, and the footer travels with the content. */
+body[data-page="not-found"] .footer,
+body[data-page="design-system"] .footer {
+  position: static;
+  height: auto;
+  padding: 0;
+  /* main is a flex container, so an in-flow footer would otherwise size to
+     its content and sit in a column beside the page. Block flow inside too,
+     or the band sizes to its own content rather than the page width. */
+  width: 100%;
+  flex: 0 0 auto;
+  display: block;
+}
+
+body[data-page="not-found"] .footer-curtain,
+body[data-page="design-system"] .footer-curtain {
+  position: static;
+  height: auto;
+  min-height: var(--footer-curtain-height);
+  transform: none;
+}
+
 /* ===============================================
    CURTAIN DIMENSIONS
    Single source of truth for the black panel's

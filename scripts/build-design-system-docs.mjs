@@ -690,8 +690,6 @@ ${parsed.map(renderFile).join('\n')}
 </div>
 
 </section>
-</main>
-
     <footer class="footer">
       <!-- Black curtain. Sits below the viewport edge until the active page's
            scroll container reaches its end; FooterCurtainModule drives the
@@ -718,6 +716,9 @@ ${parsed.map(renderFile).join('\n')}
         </div>
       </div>
     </footer>
+
+</main>
+
 
 <script type="module" src="/src/utils/set-copyright-year.ts"></script>
 
