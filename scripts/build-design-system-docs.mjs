@@ -228,11 +228,13 @@ h1{font-family:var(--ds-serif);font-weight:700;font-size:clamp(2.6rem,1.8rem+3vw
 .pull b{color:var(--ds-ink);font-weight:500}
 
 /* nav */
-.nav{position:sticky;top:0;z-index:10;background:var(--ds-paper);border-bottom:1px solid var(--ds-line)}
-.nav-in{display:flex;gap:2px;overflow-x:auto;padding:10px 24px;max-width:1180px;margin:0 auto}
-.nav a{flex:0 0 auto;display:flex;align-items:baseline;gap:6px;padding:5px 11px;border-radius:2px;text-decoration:none;font-size:12.5px;color:var(--ds-ink-2);white-space:nowrap;text-transform:capitalize}
-.nav a:hover,.nav a:focus-visible{background:var(--ds-surface);color:var(--ds-ink)}
-.nav a span{font-size:10.5px;color:var(--ds-muted);font-variant-numeric:tabular-nums}
+/* Section jump-links. Named for this page: .nav belongs to the site's menu
+   overlay, and sharing that class meant nav-base.css hid these entirely. */
+.docs-jump{position:sticky;top:0;z-index:10;background:var(--ds-paper);border-bottom:1px solid var(--ds-line)}
+.docs-jump-in{display:flex;gap:2px;overflow-x:auto;padding:10px 24px;max-width:1180px;margin:0 auto}
+.docs-jump a{flex:0 0 auto;display:flex;align-items:baseline;gap:6px;padding:5px 11px;border-radius:2px;text-decoration:none;font-size:12.5px;color:var(--ds-ink-2);white-space:nowrap;text-transform:capitalize}
+.docs-jump a:hover,.docs-jump a:focus-visible{background:var(--ds-surface);color:var(--ds-ink)}
+.docs-jump a span{font-size:10.5px;color:var(--ds-muted);font-variant-numeric:tabular-nums}
 
 /* files */
 .file{padding:52px 0;border-bottom:1px solid var(--ds-line);scroll-margin-top:52px}
@@ -680,7 +682,7 @@ footer.docs-note b{color:var(--ds-ink);font-weight:500}
   <p class="pull"><b>How the portal looks different.</b> <code>portal-theme.css</code> is not imported into the tokens layer. The admin and client bundles import it unlayered, because unlayered styles beat every layered style &mdash; which is exactly what a surface theme needs to do. That single decision is what lets The Backend read as its own product while still spending the same tokens: three surfaces (main site, admin portal, client portal) on one foundation, with the portal theme winning on the two that need it.</p>
 </section></div>
 
-<nav class="nav"><div class="nav-in">${nav}</div></nav>
+<nav class="docs-jump" aria-label="Token sections"><div class="docs-jump-in">${nav}</div></nav>
 
 <div class="wrap">
 ${parsed.map(renderFile).join('\n')}

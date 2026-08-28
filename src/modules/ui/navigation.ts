@@ -536,21 +536,18 @@ export class NavigationModule extends BaseModule {
         }
       }
 
-      // Ultimate fallback: use minimal hardcoded data (only if nothing else works)
-      // Using hash routing: #/, #/about, #/contact
+      // Ultimate fallback, used only when no navigation data could be loaded.
+      // It still described a site where the portfolio was unbuilt — disabled,
+      // badged "Coming Soon", pointing at '#', and with no portal at all — so
+      // any page that reached this path advertised work that has been live for
+      // months. Mirrors the menu in index.html.
       if (navigationItems.length === 0) {
         navigationItems = [
           { id: 'home', text: 'home', href: '#/', eyebrow: '00' },
           { id: 'about', text: 'about', href: '#/about', eyebrow: '01' },
           { id: 'contact', text: 'contact', href: '#/contact', eyebrow: '02' },
-          {
-            id: 'portfolio',
-            text: 'portfolio',
-            href: '#',
-            eyebrow: '03',
-            disabled: true,
-            comingSoon: true
-          }
+          { id: 'projects', text: 'projects', href: '#/projects', eyebrow: '03' },
+          { id: 'portal', text: 'portal', href: '#/portal', eyebrow: '04' }
         ];
       }
 
