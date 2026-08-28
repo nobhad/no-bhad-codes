@@ -33,6 +33,16 @@ async function boot(): Promise<void> {
     logger.error('Theme module failed to start:', error);
   }
 
+  // The header's portal button opens a login dropdown. Its panel markup is
+  // carried on these pages too, so the same initialiser the site uses drives
+  // it — otherwise the button is a control that does nothing.
+  try {
+    const { initPortalDropdown } = await import('./features/main-site/portal-dropdown');
+    initPortalDropdown();
+  } catch (error) {
+    logger.error('Portal dropdown failed to start:', error);
+  }
+
   // These pages carry the site's header, so the menu button needs the module
   // that drives the overlay it opens.
   try {
