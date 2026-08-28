@@ -65,6 +65,10 @@ export class FooterCurtainModule extends BaseModule {
   private scroller: HTMLElement | null = null;
   /** True while a gesture is driving the reveal instead of a scroll container. */
   private externalDrive = false;
+  /** Scroller whose bottom padding is currently growing with the reveal. */
+  private padded: HTMLElement | null = null;
+  private padBaseInline = '';
+  private padBasePx = 0;
   private curtainHeight = 0;
   private progress = 0;
   private frame = 0;
@@ -348,6 +352,38 @@ export class FooterCurtainModule extends BaseModule {
     this.setHeaderScrollAway(element.scrollTop);
   };
 
+  /**
+   * Grow the scroller's bottom padding in step with the reveal.
+   *
+   * The page slides up by the band's height, so without this the strip it
+   * gives up is whatever content happened to be there — the tail of a case
+   * study cut off at the band's edge. Growing the padding by the same amount
+   * keeps the content's end in place relative to the page, so the strip the
+   * band lands on is always blank.
+   *
+   * Dynamic rather than reserved in CSS on purpose: a permanent band-height of
+   * padding reads as a screenful of dead space at the end of the scroll,
+   * before the band has been raised at all.
+   */
+  private applyRevealPadding(progress: number): void {
+    const el = progress > 0 ? this.scroller : this.padded;
+    if (!el) return;
+
+    if (progress <= 0) {
+      el.style.paddingBottom = this.padBaseInline;
+      this.padded = null;
+      return;
+    }
+
+    if (this.padded !== el) {
+      this.padded = el;
+      this.padBaseInline = el.style.paddingBottom;
+      this.padBasePx = parseFloat(getComputedStyle(el).paddingBottom) || 0;
+    }
+
+    el.style.paddingBottom = `${this.padBasePx + progress * this.curtainHeight}px`;
+  }
+
   private setProgress(next: number): void {
     if (!this.timeline) return;
 
@@ -366,6 +402,7 @@ export class FooterCurtainModule extends BaseModule {
       if (!this.scrubTween || !this.scrubTween.isActive()) {
         const settled = this.externalDrive ? next : 0;
         this.scrubState.value = settled;
+        this.applyRevealPadding(settled);
         this.timeline.progress(settled);
         this.applyHeaderOffset(settled);
       }
@@ -388,6 +425,7 @@ export class FooterCurtainModule extends BaseModule {
     // Opening keeps the ease: there the lag plays out inside the padding.
     if (retracting || this.reducedMotion) {
       this.scrubState.value = target;
+      this.applyRevealPadding(target);
       this.timeline.progress(target);
       this.applyHeaderOffset(target);
       this.scrubTween = null;
@@ -404,6 +442,7 @@ export class FooterCurtainModule extends BaseModule {
       ease: 'power3.out',
       overwrite: true,
       onUpdate: () => {
+        this.applyRevealPadding(this.scrubState.value);
         timeline.progress(this.scrubState.value);
         this.applyHeaderOffset(this.scrubState.value);
       }
@@ -441,6 +480,7 @@ export class FooterCurtainModule extends BaseModule {
 
     // Never leave the page slid up — the module is gone, nothing would put
     // it back, and the user would be looking at a permanently shifted site.
+    this.applyRevealPadding(0);
     if (this.page) gsap.set(this.page, { y: 0 });
     if (this.header) gsap.set(this.header, { y: 0 });
 
