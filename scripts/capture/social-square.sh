@@ -1,6 +1,7 @@
 set -e
 SP="${CAPTURE_WORK:-/tmp/nbc-capture}"
-OUT=/Users/noellebhaduri/Projects/Development/Active/no-bhad-codes/public/portfolio/nobhad-codes
+# Social exports live outside public/ — they are for posting, not for the site.
+OUT=/Users/noellebhaduri/Projects/Development/Active/no-bhad-codes/social-media
 SIZE=1080
 
 for t in light dark; do
@@ -31,6 +32,6 @@ done
 # light first, then dark, as one file
 ffmpeg -y -loglevel error -i "$SP/social-light.mp4" -i "$SP/social-dark.mp4" \
   -filter_complex "[0:v][1:v]concat=n=2:v=1,format=yuv420p[v]" -map "[v]" \
-  -c:v libx264 -preset slow -crf 20 -movflags +faststart "$OUT/intro-social-square.mp4"
-echo "stitched: $(ffprobe -v error -show_entries format=duration -of csv=p=0 "$OUT/intro-social-square.mp4" | cut -d. -f1)s  $(( $(stat -f%z "$OUT/intro-social-square.mp4") / 1024 ))KB  $(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "$OUT/intro-social-square.mp4")"
+  -c:v libx264 -preset slow -crf 20 -movflags +faststart "$OUT/nobhad-codes-intro-square.mp4"
+echo "stitched: $(ffprobe -v error -show_entries format=duration -of csv=p=0 "$OUT/nobhad-codes-intro-square.mp4" | cut -d. -f1)s  $(( $(stat -f%z "$OUT/nobhad-codes-intro-square.mp4") / 1024 ))KB  $(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "$OUT/nobhad-codes-intro-square.mp4")"
 osascript -e 'display notification "Square social video ready (light then dark)" with title "Capture complete" sound name "Glass"' 2>/dev/null || true
