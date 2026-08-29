@@ -1054,10 +1054,19 @@ export class PageTransitionModule extends BaseModule {
     window.addEventListener('touchstart', this.boundHandleTouchStart, { passive: true });
     window.addEventListener('touchend', this.boundHandleTouchEnd, { passive: true });
 
-    // popstate fires for browser back/forward (but not programmatic
-    // hash changes). Mark the next handleHashChange so it can infer a
-    // slide direction from history instead of falling through to blur.
+    // Mark the next handleHashChange as history-driven so it infers a slide
+    // direction from history instead of trusting a pinned one.
+    //
+    // Assigning location.hash fires popstate here as well as hashchange, so
+    // the event alone does NOT mean back/forward — measured, one popstate per
+    // assignment. Taking it at face value marked every one of our own
+    // navigations as history-driven, which threw away the pinned direction:
+    // the project-detail carousel pinned 'left', this flag discarded it, and
+    // inferSlideDirection returned its forward default, so ← slid in from the
+    // right. Our own navigations pin the hash they are heading for, so if that
+    // is where we just landed, this popstate is ours.
     window.addEventListener('popstate', () => {
+      if (this.pendingSlideForHash && this.pendingSlideForHash === window.location.hash) return;
       this.popstateInFlight = true;
     });
 
