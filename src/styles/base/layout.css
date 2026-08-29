@@ -480,3 +480,17 @@ main {
     max-width: 98vw;
   }
 }
+
+/* Scrollbars stay out of page transitions. A tall case study leaves its bar
+   on screen as the tile slides, and the bar tracks across with it — visible
+   chrome from a page you are no longer on. Only the bar is hidden, never
+   overflow itself: switching overflow mid-slide reflows the content and the
+   text jumps as it moves. */
+[data-page-transitioning] *::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+[data-page-transitioning] * {
+  scrollbar-width: none;
+}

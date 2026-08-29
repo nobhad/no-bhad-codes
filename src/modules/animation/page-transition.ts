@@ -2098,6 +2098,11 @@ export class PageTransitionModule extends BaseModule {
     }
 
     this.isTransitioning = true;
+    // Marks the document for the duration of the move. The scrollers keep
+    // their overflow — changing it mid-slide would reflow the page — but
+    // their scrollbars are hidden, so a bar belonging to the page being left
+    // does not ride across the screen with it.
+    document.documentElement.dataset.pageTransitioning = 'true';
     this.log(`Transitioning: ${this.currentPageId} -> ${pageId}`);
 
     // Pre-transition signal — fires BEFORE any slide/blur animation runs,
@@ -2264,6 +2269,7 @@ export class PageTransitionModule extends BaseModule {
       }
     } finally {
       this.isTransitioning = false;
+      delete document.documentElement.dataset.pageTransitioning;
     }
   }
 
