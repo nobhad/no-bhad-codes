@@ -2,6 +2,48 @@
 
 ---
 
+## Aug 29 session (later) — scroll-map URL, TV guide clicks
+
+**Status:** DONE — verified in a real browser, all three committed
+
+- [x] **The URL never followed the scroll-map camera.** Sliding about → projects
+      moved `currentPageId`, the title and `data-active-page` while the address
+      bar still said `#/about`, so a reload put you back on the tile you had
+      scrolled away from. `tryNavigateDirection`'s map → map branch calls
+      `transitionTo` directly and deliberately changes no hash, and nothing
+      else synced it. Fix (`ad3774dc`): `syncUrlToPage` in
+      `page-transition.ts`, called from the completion block next to
+      `updateActivePageAttribute` and from the catch's state repair.
+      `history.replaceState`, not `location.hash =` — assigning fires
+      `hashchange`, which would re-enter `handleHashChange` and re-run the
+      transition that just finished, and it would stack a history entry on
+      every wheel flick. The tail of `navHistory` moves with it so popstate can
+      still reverse the slide.
+- [x] **Picking a channel from the TV guide left the TV.** The guide rows sit
+      inside `.crt-tv__screen`, so one click ran two handlers: the guide's
+      tuned the channel in and set `activeTuneInSlug`, then the same click
+      bubbled to the screen handler, which read that fresh slug and navigated
+      to the case study. Fix (`d83b704a`): the screen handler ignores anything
+      out of `[data-channel-list]`. Verified the other three rules still hold —
+      blank guide screen does nothing, any spot on a playing channel goes to
+      the detail page (checked at 1.2s/3s/8s/20s into the tune-in, top/middle/
+      bottom), and `Live: <url>` is still the only thing that opens the
+      project's own site, in a new tab.
+- [x] **Browserslist data refreshed** (`f76b72a6`) — every production build
+      opened with a six-month-stale `caniuse-lite` notice. No target browser
+      changes; data only.
+
+**A trap worth remembering.** The first diagnosis of the URL bug was wrong, and
+it cost a session. `isTransitioning` looked stuck true forever after a map → map
+slide, with the completion block apparently never running. It was an artifact of
+reading state through a Chrome-extension tab: those tabs are `document.hidden`,
+`requestAnimationFrame` never fires there, so GSAP's ticker never advances and
+every tween promise stays pending. Nothing was wrong with the code. Diagnose
+animation state in a real visible window — headed Playwright with
+`channel: 'chrome'` works and needs no browser download.
+
+---
+
 ## Open items from the Aug 29 session
 
 **Status:** OPEN
@@ -14,14 +56,14 @@ blocks anything; they are the loose ends that session left.
       single test: the runner wants Chromium build 1200 and the local cache
       holds 1234, so the binaries do not match. Either `npx playwright install`
       (a few hundred MB) or point the run at the installed Google Chrome with
-      `channel: 'chrome'`, which downloads nothing.
+      `channel: 'chrome'`, which downloads nothing — the Aug 29 session drove
+      the whole site that way, so that route is known to work.
       `tests/e2e/navigation.spec.ts` and `tests/e2e/business-card.spec.ts` are
       the two that cover what changed — page transitions and the business-card
       `calc()` tokens whose snapshot moved — so they are worth a pass before
       any deploy. Unit tests (4400) and the production build both pass.
-- [ ] **Nothing is pushed.** `main` is 15 commits ahead of `origin/main`: the
-      seven from this session plus eight that were already unpushed when it
-      started.
+- [ ] **One commit unpushed.** `origin/main` now sits at `d83b704a`; only
+      `f76b72a6` (browserslist data) is ahead of it.
 - [ ] **The curtain was only ever driven by synthetic and Playwright wheel
       events.** A real trackpad's momentum tail is the one input profile that
       was never exercised. `CURTAIN_SETTLE_MS` (120ms of quiet before the band
