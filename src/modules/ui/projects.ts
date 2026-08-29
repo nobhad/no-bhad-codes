@@ -141,7 +141,10 @@ interface PortfolioProject {
   titleCard?: string | TitleCardData;
   // Optional second write-up rendered below the case study, for one part of
   // the build that deserves its own section rather than a feature bullet.
-  deepDive?: { heading: string; body: string[]; bullets?: string[]; video?: string };
+  // `media` is a video or an image — a walkthrough where there is motion
+  // worth filming, a still or GIF where the subject is layout rather than
+  // movement, as with a CMS's screens.
+  deepDive?: { heading: string; body: string[]; bullets?: string[]; media?: string };
   duration?: string;
   challenge?: string;
   approach?: string;
@@ -2432,11 +2435,19 @@ export class ProjectsModule extends BaseModule {
         // public-site footage.
         const deepVideo = this.projectDetailSection.querySelector('#project-deepdive-video');
         if (deepVideo) {
-          deepVideo.innerHTML = deep.video
-            ? `<figure class="project-media project-media--video">
-                 <video src="${escapeAttr(this.resolveThemedPath(deep.video))}" controls playsinline preload="metadata" aria-label="${escapeAttr(project.title)} ${escapeAttr(deep.heading.toLowerCase())} walkthrough"></video>
-               </figure>`
-            : '';
+          const media = deep.media;
+          const label = `${escapeAttr(project.title)} ${escapeAttr(deep.heading.toLowerCase())}`;
+          if (!media) {
+            deepVideo.innerHTML = '';
+          } else if (/\.(gif|png|webp|jpe?g)$/i.test(media)) {
+            deepVideo.innerHTML = `<figure class="project-media project-media--image">
+                 <img src="${escapeAttr(this.resolveThemedPath(media))}" alt="${label}" loading="lazy" />
+               </figure>`;
+          } else {
+            deepVideo.innerHTML = `<figure class="project-media project-media--video">
+                 <video src="${escapeAttr(this.resolveThemedPath(media))}" controls playsinline preload="metadata" aria-label="${label} walkthrough"></video>
+               </figure>`;
+          }
         }
         (deepSection as HTMLElement).style.display = '';
       } else {

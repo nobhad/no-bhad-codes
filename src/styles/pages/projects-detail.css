@@ -1118,7 +1118,8 @@
 }
 
 #project-walkthrough video,
-#project-deepdive-video video {
+#project-deepdive-video video,
+#project-deepdive-video img {
   width: 100%;
   height: auto;
   display: block;
