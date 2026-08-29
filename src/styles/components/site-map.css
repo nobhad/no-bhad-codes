@@ -350,7 +350,11 @@ body[data-page="design-system"] main#main-content {
    Mobile keeps the compass below the header (default inset above). */
 @media (--desktop) {
   .map-compass {
-    inset: 0 0 40px 0;
+    /* Flush to the viewport. The 40px that used to sit here reserved room
+       for the copyright bar the footer curtain replaced, and outlived it —
+       it left ↓ sitting 64px off the bottom while ← and → sat 24px off
+       their edges, so the one arrow looked adrift from the other three. */
+    inset: 0;
     z-index: var(--z-index-overlay);
   }
 }
