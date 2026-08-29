@@ -1309,7 +1309,12 @@ export class ProjectsModule extends BaseModule {
       // stays subtle), hold briefly, drop to a quiet residual hiss,
       // sustain that for a beat, then trail off. Mimics a CRT settling
       // onto the new channel after the initial blip of noise.
-      peakGain: 0.12,
+      //
+      // 0.12 -> 0.05: this burst lands on top of the channel's music, and
+      // broadband noise reads much louder than a tonal track at the same
+      // amplitude. The power-on crackle keeps its own level — nothing is
+      // playing under that one.
+      peakGain: 0.05,
       attackS: 0.02,
       holdS: 0.07,
       dropToFraction: 0.35,
@@ -1776,7 +1781,12 @@ export class ProjectsModule extends BaseModule {
       // stays subtle), hold briefly, drop to a quiet residual hiss,
       // sustain that for a beat, then trail off. Mimics a CRT settling
       // onto the new channel after the initial blip of noise.
-      peakGain: 0.12,
+      //
+      // 0.12 -> 0.05: this burst lands on top of the channel's music, and
+      // broadband noise reads much louder than a tonal track at the same
+      // amplitude. The power-on crackle keeps its own level — nothing is
+      // playing under that one.
+      peakGain: 0.05,
       attackS: 0.02,
       holdS: 0.07,
       dropToFraction: 0.35,
