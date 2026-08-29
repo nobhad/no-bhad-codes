@@ -770,28 +770,38 @@
   transform: translateY(-2px);
 }
 
-.worksub-links a svg,
-.worksub-links .project-link--pending svg {
+.worksub-links a svg {
   width: var(--icon-size-lg);
   height: var(--icon-size-lg);
   stroke: currentColor;
 }
 
-/* A site that is built but not launched. It carries the same pill so it reads
-   as one of the links, greyed and inert so it is plainly not one yet — the
-   address is information, not an offer, until the client goes live. */
+/* A site that is built but not launched. It takes the same inline shape as
+   the real links beside it — same size, same icon, same spot in the row —
+   and only the colour says it is not ready: greyed, and not clickable. */
 .worksub-links .project-link--pending {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-6);
+  gap: var(--space-1-5);
+  padding: 0;
   background-color: transparent;
-  color: var(--color-text-muted, rgba(0, 0, 0, 0.45));
-  border: var(--border-width) dashed currentColor;
-  border-radius: var(--border-radius-full, 9999px);
-  font-weight: var(--font-weight-semibold);
+  border: none;
+  border-radius: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted, rgba(0, 0, 0, 0.4));
   cursor: default;
-  user-select: text;
+  position: relative;
+}
+
+.worksub-links .project-link--pending svg {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  stroke: currentColor;
+}
+
+[data-theme="dark"] .worksub-links .project-link--pending {
+  color: var(--color-neutral-600, rgba(255, 255, 255, 0.42));
 }
 
 /* The reason it is not a link yet, on hover and on focus. Focus matters as
