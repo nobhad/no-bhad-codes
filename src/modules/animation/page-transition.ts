@@ -1131,6 +1131,15 @@ export class PageTransitionModule extends BaseModule {
    * Handle hash changes for navigation
    */
   private handleHashChange(): void {
+    // Consume the popstate flag FIRST, before any early return can strand it.
+    // It used to be read further down, so a hashchange that arrived while a
+    // transition was running bailed out with the flag still true and poisoned
+    // the next navigation: entering a case study from the TV left it set, and
+    // the ← that followed had its pinned direction discarded and slid in from
+    // the right.
+    const fromPopstate = this.popstateInFlight;
+    this.popstateInFlight = false;
+
     if (!this.introComplete || this.isTransitioning) return;
 
     const hash = window.location.hash;
@@ -1150,9 +1159,6 @@ export class PageTransitionModule extends BaseModule {
       // it here if (a) it's not from popstate AND (b) the pinned hash
       // matches the hash that just fired. Anything else gets dropped to
       // inference.
-      const fromPopstate = this.popstateInFlight;
-      this.popstateInFlight = false;
-
       const pinnedHash = this.pendingSlideForHash;
       const pinnedDir = this.pendingSlideDirection;
       this.pendingSlideDirection = null;
@@ -1256,8 +1262,12 @@ export class PageTransitionModule extends BaseModule {
     if (this.currentPageId === 'project-detail' && pageId === 'project-detail') {
       return 'right';
     }
-    // Leaving project-detail to anywhere → backward.
-    if (this.currentPageId === 'project-detail') return 'left';
+    // Leaving project-detail. Back to the projects tile is the reverse of the
+    // way in — the case study drops DOWN from the TV, so returning to it lifts
+    // the tile back down over the top, which is what the breadcrumb, the back
+    // link and ArrowUp all mean by "back to projects". Anywhere else is just
+    // backward along the carousel.
+    if (this.currentPageId === 'project-detail') return pageId === 'projects' ? 'up' : 'left';
     // Entering project-detail. From the projects TV it drops DOWN — the TV
     // scrolls up and out while the detail page pushes up from the bottom
     // (matches the Enter-key reveal). From anywhere else, default forward.
