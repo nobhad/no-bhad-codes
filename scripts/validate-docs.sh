@@ -33,7 +33,7 @@ echo ""
 echo -e "${BLUE}1. Checking markdown lint...${NC}"
 if command -v npx &> /dev/null; then
   # Only check active docs, not archives
-  ACTIVE_DOCS="docs/*.md docs/architecture/*.md docs/features/*.md docs/design/*.md docs/api/*.md"
+  ACTIVE_DOCS="docs/*.md docs/architecture/*.md docs/features/*.md docs/design/*.md docs/design/typography/*.md docs/api/*.md docs/guides/*.md"
 
   if $FIX_MODE; then
     npx markdownlint-cli $ACTIVE_DOCS --config .markdownlint.json --fix 2>/dev/null || true
@@ -59,38 +59,63 @@ echo ""
 
 # 2. Check for broken file references in active docs only
 echo -e "${BLUE}2. Checking for broken file references in active docs...${NC}"
-BROKEN_REFS=0
-ACTIVE_DOC_DIRS="docs/*.md docs/architecture/*.md docs/features/*.md docs/design/*.md docs/api/*.md"
+ACTIVE_DOC_DIRS="docs/*.md docs/architecture/*.md docs/features/*.md docs/design/*.md docs/design/typography/*.md docs/api/*.md docs/guides/*.md README.md CONTRIBUTING.md HANDOFF.md"
 
-for doc in $ACTIVE_DOC_DIRS; do
-  if [ -f "$doc" ]; then
-    # Skip archived docs
-    if [[ "$doc" == *"archive"* ]] || [[ "$doc" == *"ARCHIVED"* ]]; then
-      continue
-    fi
+# A reference only counts as broken if the doc presents it as current. Lines that explicitly
+# mark a path as removed/legacy/replaced are accurate history, not errors. Build output
+# (dist/...) is generated rather than a source path, so it is stripped before matching.
+BROKEN_REFS=$(python3 - $ACTIVE_DOC_DIRS <<'PYEOF'
+import os, re, sys
 
-    # Extract file paths from markdown
-    while IFS= read -r filepath; do
-      if [ -n "$filepath" ] && [ ! -f "$filepath" ]; then
-        # Skip example/template paths used for documentation tutorials
-        # Also skip historical references to relocated/renamed files
-        if [[ "$filepath" == *"my-"* ]] || [[ "$filepath" == *"example"* ]] || \
-           [[ "$filepath" == *"invoicing"* ]] || [[ "$filepath" == *"data-table"* ]] || \
-           [[ "$filepath" == *"notification-service"* ]] || [[ "$filepath" == *"base.ts"* ]] || \
-           [[ "$filepath" == *"business-card"* ]] || [[ "$filepath" == *"admin-users"* ]] || \
-           [[ "$filepath" == *"invoice.ts"* ]] || [[ "$filepath" == *"navigation.ts"* ]] || \
-           [[ "$filepath" == *"e2e/"* ]] || [[ "$filepath" == *"data-service"* ]] || \
-           [[ "$filepath" == *"invoice-service"* ]] || [[ "$filepath" == *"src/modules/intro-animation"* ]]; then
-          continue
-        fi
-        echo -e "${RED}  Broken: $doc -> $filepath${NC}"
-        BROKEN_REFS=$((BROKEN_REFS + 1))
-      fi
-    done < <(grep -oE '(server|src|tests)/[a-zA-Z0-9_/.-]+\.(ts|tsx|js|css)' "$doc" 2>/dev/null | sort -u)
-  fi
-done
+# Longest extensions first, plus a boundary, so "tier-tasks.json" is not read as ".js"
+PATH_RE = re.compile(
+    r'(?:server|src|tests)/[A-Za-z0-9_/.-]+'
+    r'\.(?:tsx|jsx|json|html|mjs|sql|css|ts|js)(?![A-Za-z0-9])')
+DIST_RE = re.compile(r'dist/[A-Za-z0-9_/.-]+')
+# Lines that frame a path as gone are accurate history, not broken references
+REMOVED_RE = re.compile(
+    r'removed|deleted|legacy|no longer exist|does not exist|superseded'
+    r'|replaced by|historical|former|moved from|relocated',
+    re.I)
+# Placeholder paths used by the "how to add a feature" tutorials - never real files
+EXAMPLE_RE = re.compile(
+    r'/my-|/invoicing/|data-table|notification-service|admin-users'
+    r'|/example|invoice-service|src/types/invoice\.ts|src/styles/invoicing\.css'
+    r'|\.test\.ts$|^tests/e2e/|_add_new_table\.sql$')
+RED, NC = '\033[0;31m', '\033[0m'
 
-if [ $BROKEN_REFS -eq 0 ]; then
+# A design doc may deliberately name paths that do not exist yet. It opts out with
+# <!-- validate-docs: planned-paths --> near the top.
+OPT_OUT = '<!-- validate-docs: planned-paths -->'
+
+broken = 0
+skipped = []
+for doc in sys.argv[1:]:
+    if not os.path.isfile(doc) or 'archive' in doc or 'ARCHIVED' in doc:
+        continue
+    with open(doc, encoding='utf-8', errors='replace') as fh:
+        text = fh.read()
+    if OPT_OUT in text:
+        skipped.append(doc)
+        continue
+    seen = set()
+    if True:
+        for line in text.splitlines():
+            if REMOVED_RE.search(line):
+                continue
+            for m in PATH_RE.findall(DIST_RE.sub('', line)):
+                if m in seen or os.path.exists(m) or EXAMPLE_RE.search(m):
+                    continue
+                seen.add(m)
+                print(f'{RED}  Broken: {doc} -> {m}{NC}', file=sys.stderr)
+                broken += 1
+for doc in skipped:
+    print(f'  Skipped (planned-paths design doc): {doc}', file=sys.stderr)
+print(broken)
+PYEOF
+)
+
+if [ "$BROKEN_REFS" -eq 0 ]; then
   echo -e "${GREEN}No broken file references found in active docs${NC}"
 else
   echo -e "${YELLOW}Found $BROKEN_REFS broken references${NC}"
@@ -100,11 +125,13 @@ echo ""
 
 # 3. Check current_work.md status
 echo -e "${BLUE}3. Checking current_work.md...${NC}"
-if [ -f "docs/current_work.md" ]; then
-  COMPLETED_COUNT=$(grep -c "\- COMPLETE" docs/current_work.md 2>/dev/null || echo "0")
+if [ -f "CURRENT_WORK.md" ]; then
+  # grep -c already prints 0 on no match and exits 1, so swallow the status only
+  COMPLETED_COUNT=$(grep -c "\- COMPLETE" CURRENT_WORK.md 2>/dev/null || true)
+  COMPLETED_COUNT=${COMPLETED_COUNT:-0}
 
   # Check last updated date
-  LAST_UPDATED=$(grep -oE "Last Updated.*202[0-9]" docs/current_work.md | head -1 || echo "")
+  LAST_UPDATED=$(grep -oE "Last Updated.*202[0-9]" CURRENT_WORK.md | head -1 || echo "")
   if [ -n "$LAST_UPDATED" ]; then
     echo "  $LAST_UPDATED"
   fi
@@ -121,7 +148,7 @@ echo ""
 # 4. Check for missing required docs
 echo -e "${BLUE}4. Checking required documentation files...${NC}"
 REQUIRED_DOCS=(
-  "docs/current_work.md"
+  "CURRENT_WORK.md"
   "docs/architecture/DATABASE_SCHEMA.md"
   "docs/API_DOCUMENTATION.md"
   "docs/design/CSS_ARCHITECTURE.md"
@@ -143,8 +170,9 @@ echo ""
 
 # 5. Check for TODO/FIXME in active docs
 echo -e "${BLUE}5. Checking for TODO/FIXME markers...${NC}"
-TODO_OUTPUT=$(grep -ri "TODO\|FIXME" docs/*.md docs/architecture/*.md docs/features/*.md 2>/dev/null | grep -v "archive\|ARCHIVED" || true)
-TODO_COUNT=$(echo "$TODO_OUTPUT" | grep -c "TODO\|FIXME" 2>/dev/null || echo "0")
+TODO_OUTPUT=$(grep -rE "\b(TODO|FIXME)\b:?" docs/*.md docs/architecture/*.md docs/features/*.md docs/design/*.md docs/guides/*.md 2>/dev/null | grep -v "archive\|ARCHIVED\|TODO list" || true)
+TODO_COUNT=$(echo "$TODO_OUTPUT" | grep -cE "\b(TODO|FIXME)\b" 2>/dev/null || true)
+TODO_COUNT=${TODO_COUNT:-0}
 
 if [ "$TODO_COUNT" -gt 0 ] && [ -n "$TODO_OUTPUT" ]; then
   echo -e "${YELLOW}Found $TODO_COUNT TODO/FIXME markers:${NC}"
