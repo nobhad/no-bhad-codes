@@ -701,6 +701,26 @@
   min-height: 0;
   max-height: none;
   overflow-y: auto;
+  /* Keep the wheel inside the terminal. Without this, reaching either end of
+     the transcript hands the gesture to the tile behind the modal and the
+     page moves under an open dialog. */
+  overscroll-behavior: contain;
+}
+
+/* The tile behind the modal is the real scroller — body is not, so the
+   handler's `body { overflow: hidden }` never had anything to lock. main is
+   locked here; the tiles themselves are locked inline by the open handler,
+   because their overflow is set from a later cascade layer that a rule here
+   cannot outrank without !important. */
+html.intake-open main#main-content {
+  overflow: hidden;
+}
+
+/* Nothing scrollable is under the backdrop, so a wheel over it would still
+   reach the page. */
+.intake-modal-backdrop,
+.intake-modal {
+  overscroll-behavior: contain;
 }
 
 /* Ensure header and input area don't shrink */

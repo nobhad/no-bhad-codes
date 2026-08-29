@@ -972,9 +972,23 @@
         const openIntakeLink = document.getElementById('open-intake-link');
         let terminalModule = null;
 
+        var lockedTiles = [];
+
         async function openIntakeModal() {
           intakeModal.classList.add('open');
           intakeBackdrop.classList.add('open');
+          // body is not the scroller on this site — the map tiles are. The
+          // class freezes main; the tiles are frozen inline because their
+          // overflow comes from a later cascade layer, and an inline style is
+          // the only thing that reliably outranks it.
+          document.documentElement.classList.add('intake-open');
+          lockedTiles = Array.prototype.slice.call(
+            document.querySelectorAll('main#main-content section')
+          ).map(function (el) {
+            var prior = el.style.overflow;
+            el.style.overflow = 'hidden';
+            return { el: el, prior: prior };
+          });
           document.body.style.overflow = 'hidden';
 
           if (!terminalModule && intakeContainer) {
@@ -993,6 +1007,11 @@
           );
           intakeModal.classList.remove('open');
           intakeBackdrop.classList.remove('open');
+          document.documentElement.classList.remove('intake-open');
+          lockedTiles.forEach(function (t) {
+            t.el.style.overflow = t.prior;
+          });
+          lockedTiles = [];
           document.body.style.overflow = '';
           // Reset module so a fresh instance is created on next open
           // This ensures the resume prompt shows again if there's saved progress
