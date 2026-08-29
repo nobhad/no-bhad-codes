@@ -478,7 +478,6 @@
           "GSAP",
           "Three.js",
           "Radix UI",
-          "OpenType.js",
           "Chart.js",
           "EJS"
         ]
@@ -512,7 +511,8 @@
           "Anthropic SDK",
           "Stripe",
           "Photoshop",
-          "Illustrator"
+          "Illustrator",
+          "Adobe Creative Suite"
         ]
       }
     ],
