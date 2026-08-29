@@ -135,10 +135,51 @@ Verified at 1440x900 (curtain 270px), on `#/`, `#/about`, `#/contact` and
   snaps cleanly to both ends.
 - `tsc --noEmit` clean, `eslint` clean, 4400 tests pass, production build OK.
 
-Known, left alone (pre-existing, not part of this report): resizing the
-viewport while the band is open resets it to closed rather than re-fitting it
-to the new curtain height. It reopens and recloses correctly at the new height
-afterward, so there is no stuck state.
+### Follow-up (Aug 29, 2026) — resize keeps the band, re-fitted
+
+**Status:** DONE — measured across three viewport heights
+
+Resizing while the band was open dropped it to closed. This was first written
+up as pre-existing `handleResize` behaviour; that was wrong. `handleResize`
+re-fits correctly — a trace caught it setting `translate(0px, -210px)` for the
+new 210px curtain — and then the close-guard added earlier the same day fired
+and tweened it to 0. Two defects in that guard, both mine:
+
+- [x] **It tested "is there scroll left below" rather than "has the reader
+      moved".** Those agree while the viewport holds still and diverge the
+      moment it doesn't: shrinking the window leaves the scroller parked where
+      it was but gives it a shorter box, so `remaining > 0` read a resize as
+      scrolling away. It now compares against the position the band was raised
+      at, which ignores reshaping and catches only real movement. `handleResize`
+      re-anchors that position, since a viewport that GREW shrinks the maximum
+      scroll and lets the browser clamp `scrollTop` down — a clamp that would
+      otherwise read as scrolling back.
+- [x] **It trusted `this.scroller` to be the tile that owns the curtain.**
+      `handleScroll` listens on document in the capture phase, so it hears from
+      every scrollable box on the page. A `<label class="sr-only">` measures
+      22px in a 1px box and `.menu-button-text` 43 in 20, so both report a
+      permanent ~20px of "remaining scroll" from sub-pixel rounding. Adopting
+      one as the scroller also scrolled the header away for no reason — the
+      header sat at -330 while the page was at -270. `ownsCurtain()` now gates
+      it to a map tile or the document scroller, which fixes the guard and the
+      60px header desync at once.
+- [x] **`handleResize` never re-drove the header.** It rebuilt the timeline
+      around the new curtain height but left the header on the old one.
+
+Anchoring happens when the band is raised, not lazily on the first scroll —
+lazily meant the first scroll after opening was spent recording the anchor
+instead of being judged against it, so the one gesture the guard exists to
+catch (a scrollbar drag back into the page) was the one it always missed.
+
+Verified on the case study at 1440x900 / 1200x700 / 1600x1100: the band holds
+through both a shrink and a grow, landing at -270 / -210 / -320 against curtain
+heights of 270 / 210 / 320, with `main`'s bottom edge exactly on the band's top
+each time and the header tracking it to the pixel. A genuine scroll-back still
+closes it — before and after resizing — and the earlier checks all still hold:
+one notch opens and closes on all four pages, nothing is ever clipped
+(107.8px of clearance on every frame, both directions), `projects` never raises
+a band, reduced motion snaps, and the arrow keys read to the end before the
+band answers.
 
 ### Files
 

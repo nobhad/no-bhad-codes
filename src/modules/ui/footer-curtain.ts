@@ -85,6 +85,13 @@ export class FooterCurtainModule extends BaseModule {
   private scroller: HTMLElement | null = null;
   /** True while a gesture is driving the reveal instead of a scroll container. */
   private externalDrive = false;
+  /**
+   * Where the scroller sat when the band went up, so update() can tell the
+   * reader scrolling back into content from the viewport merely changing
+   * shape underneath a stationary page. Null until the band is raised over a
+   * scroller this module can see.
+   */
+  private openScrollTop: number | null = null;
   private curtainHeight = 0;
   private progress = 0;
   private frame = 0;
@@ -255,6 +262,7 @@ export class FooterCurtainModule extends BaseModule {
     if (!element) return;
     // Scrolling inside the curtain itself must not drive the curtain.
     if (this.footer?.contains(element)) return;
+    if (!this.ownsCurtain(element)) return;
     // Scroll still reaches update() while a gesture owns the curtain — update()
     // decides what to do with it. Returning early here meant the reader could
     // scroll back up off the end of a case study with the band still raised,
@@ -265,6 +273,29 @@ export class FooterCurtainModule extends BaseModule {
   };
 
   /**
+   * Whether a scrolling element is one the curtain actually belongs to.
+   *
+   * This listens on document in the CAPTURE phase, so it hears from every
+   * scrollable box on the page, not just the page's own scroller. Most of them
+   * are noise: a `<label class="sr-only">` measures 22px tall in a 1px box and
+   * a `.menu-button-text` 43 in 20, so both report a permanent ~20px of
+   * "remaining scroll" from sub-pixel rounding. Adopting one of those as the
+   * scroller scrolled the header away for no reason, and — once update() grew
+   * a close-guard — shut the curtain the moment anything asked for an update.
+   *
+   * The real candidates are a map tile (each owns its own overflow) or, on the
+   * standalone document-scrolling shells, the document itself.
+   */
+  private ownsCurtain(element: HTMLElement): boolean {
+    return (
+      element.hasAttribute('data-map-tile') ||
+      element === document.scrollingElement ||
+      element === document.documentElement ||
+      element === document.body
+    );
+  }
+
+  /**
    * Progress handed in by PageTransitionModule for tiles that have no scroll
    * of their own. Anything above 0 means a gesture owns the curtain.
    */
@@ -272,7 +303,19 @@ export class FooterCurtainModule extends BaseModule {
     const detail = (event as CustomEvent<{ progress?: number }>).detail;
     const next = clamp01(typeof detail?.progress === 'number' ? detail.progress : 0);
 
+    const wasDriving = this.externalDrive;
     this.externalDrive = next > 0;
+    // Anchor the moment the band goes up, while the scroller is still parked
+    // at the end the gesture raised it from. Leaving this to update()'s lazy
+    // branch meant the FIRST scroll after opening was spent recording the
+    // anchor instead of being judged against it, so the one gesture the guard
+    // exists to catch — a scrollbar drag back into the page — was the one it
+    // always missed.
+    if (!this.externalDrive) {
+      this.openScrollTop = null;
+    } else if (!wasDriving) {
+      this.openScrollTop = this.scroller ? this.scroller.scrollTop : null;
+    }
     this.setProgress(next);
   };
 
@@ -297,6 +340,15 @@ export class FooterCurtainModule extends BaseModule {
       const target = this.externalDrive ? this.progress : 0;
       this.scrubState.value = target;
       this.timeline?.progress(target);
+      this.applyHeaderOffset(target);
+    }
+
+    // A resize is not the reader moving. Re-anchor, or a viewport that GREW
+    // would shrink the scroller's maximum scroll, let the browser clamp
+    // scrollTop down to fit, and have the guard read that clamp as scrolling
+    // back into content — closing the band on a window drag.
+    if (this.externalDrive && this.scroller) {
+      this.openScrollTop = this.scroller.scrollTop;
     }
 
     this.requestUpdate();
@@ -314,6 +366,7 @@ export class FooterCurtainModule extends BaseModule {
   private handleNavigation = (): void => {
     this.scroller = null;
     this.externalDrive = false;
+    this.openScrollTop = null;
     this.setHeaderScrollAway(0);
     this.setProgress(0);
   };
@@ -339,14 +392,20 @@ export class FooterCurtainModule extends BaseModule {
     // itself, so in practice this only catches the routes it never sees —
     // keyboard, a scrollbar drag, an anchor jump.
     //
-    // Reading scrollHeight here is safe because nothing in this module writes
-    // layout any more. The version that grew the scroller's padding with the
-    // reveal made this test read back its own output, and the loop stalled the
-    // band part-way open.
+    // The test is "has the reader MOVED back up", not "is there scroll left
+    // below". Those are the same thing while the viewport holds still, and
+    // different the moment it doesn't: shrinking the window leaves the
+    // scroller parked exactly where it was but gives it a shorter box, so a
+    // plain `remaining > 0` test read a resize as the reader scrolling away
+    // and slammed the band shut every time the window changed size. Comparing
+    // against the position the band was raised at ignores reshaping and
+    // catches only real movement.
     if (this.externalDrive) {
-      const remaining = element.scrollHeight - element.scrollTop - element.clientHeight;
-      if (remaining > SCROLL_END_EPSILON) {
+      if (this.openScrollTop === null) {
+        this.openScrollTop = element.scrollTop;
+      } else if (element.scrollTop < this.openScrollTop - SCROLL_END_EPSILON) {
         this.externalDrive = false;
+        this.openScrollTop = null;
         this.setProgress(0);
         // Tell the gesture owner, or its banked travel would still read as
         // "open" and the next wheel up would spend itself closing a band that
