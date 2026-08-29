@@ -637,8 +637,11 @@ with the 2026-08-25 hand-off.
       upload bios and photos.
 - [ ] Confirm 2026-09-30 is the launch date you want the client to see — it is a
       placeholder chosen to cover the DNS repoint, noindex removal and form tests.
-- [ ] Invoices 5–7 are marked paid by check with no check numbers recorded; the
-      backfilled payment rows carry none either. Add them if you have them.
+- [x] Invoices 5–7 — **not a problem** (confirmed 2026-08-29). Everything was
+      paid within about a week of when it was due; only the most recent invoice
+      is outstanding, and it is not late. The missing check numbers on the
+      backfilled payment rows are a record-keeping detail, worth filling in if
+      the numbers are to hand but nothing is owed or chased.
 - [ ] Client 6 is still `status = pending` / `health_status = at_risk` and has
       never been invited — see the invite steps below.
 - [ ] Not billed yet, deliberately: gallery reordering ($1,800, awaiting
