@@ -2239,33 +2239,37 @@ export class ProjectsModule extends BaseModule {
     const linksEl = this.projectDetailSection.querySelector('#project-links');
     if (linksEl) {
       const links: string[] = [];
-      // A site that is built but not yet launched still belongs on the page —
-      // the client's real address is part of the work. It is shown as plain
-      // text rather than a link until launch: a dead link to a domain that
-      // has not gone live is worse than no link, and greying it out says
-      // "coming" where hiding it says nothing at all.
-      if (project.liveUrl) {
-        const launched = project.status === 'live' || project.status === 'completed';
+      // One entry for the project's site. Once it is launched that is the
+      // client's own address; until then the same address stands in for it,
+      // greyed and inert, because a dead link to a domain that is not serving
+      // yet is worse than no link. Projects with only a test build still show
+      // the test build.
+      const launched = project.status === 'live' || project.status === 'completed';
+      const launchWhen = project.launchDate ? this.formatLaunchDate(project.launchDate) : 'soon';
+      if (launched && project.liveUrl) {
         links.push(
-          launched
-            ? `<a href="${escapeAttr(project.liveUrl)}" target="_blank" rel="noopener noreferrer">${EXTERNAL_LINK_SVG}Live Site</a>`
-            : `<span class="project-link--pending" aria-disabled="true" title="Launches ${escapeAttr(
-                project.launchDate ? this.formatLaunchDate(project.launchDate) : 'soon'
-              )}">${EXTERNAL_LINK_SVG}${escapeHtml(
-                project.liveUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')
-              )} <em>(launching ${escapeHtml(
-                project.launchDate ? this.formatLaunchDate(project.launchDate) : 'soon'
-              )})</em></span>`
+          `<a href="${escapeAttr(project.liveUrl)}" target="_blank" rel="noopener noreferrer">${EXTERNAL_LINK_SVG}Live Site</a>`
+        );
+      } else if (project.liveUrl) {
+        // Reads "Live Site" like every other project, so the row is the same
+        // row everywhere; the tooltip carries the reason it is not clickable
+        // yet. tabindex makes it reachable, which also means a tap or a click
+        // focuses it and shows the tooltip on touch, not just on hover.
+        links.push(
+          `<span class="project-link--pending" tabindex="0" role="note" data-tip="Launching ${escapeAttr(
+            launchWhen
+          )}" aria-label="Live site, launching ${escapeAttr(
+            launchWhen
+          )}">${EXTERNAL_LINK_SVG}Live Site</span>`
+        );
+      } else if (project.testUrl) {
+        links.push(
+          `<a href="${escapeAttr(project.testUrl)}" target="_blank" rel="noopener noreferrer">${EXTERNAL_LINK_SVG}Test Site</a>`
         );
       }
       if (project.docsUrl) {
         links.push(
           `<a href="${escapeAttr(project.docsUrl)}" target="_blank" rel="noopener noreferrer">${DOCS_SVG}${escapeHtml(project.docsLabel ?? 'Documentation')}</a>`
-        );
-      }
-      if (project.testUrl) {
-        links.push(
-          `<a href="${escapeAttr(project.testUrl)}" target="_blank" rel="noopener noreferrer">${EXTERNAL_LINK_SVG}Test Site</a>`
         );
       }
       if (project.repoUrl) {

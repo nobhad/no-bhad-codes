@@ -794,9 +794,35 @@
   user-select: text;
 }
 
-.worksub-links .project-link--pending em {
-  font-style: normal;
-  opacity: 0.75;
+/* The reason it is not a link yet, on hover and on focus. Focus matters as
+   much as hover here: a tap has no hover state, and the span is focusable so
+   a click reaches the same explanation a pointer does. */
+.worksub-links .project-link--pending {
+  position: relative;
+}
+
+.worksub-links .project-link--pending::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + var(--space-2));
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-dark);
+  color: var(--color-light);
+  border-radius: var(--border-radius-sm, 4px);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.worksub-links .project-link--pending:hover::after,
+.worksub-links .project-link--pending:focus::after,
+.worksub-links .project-link--pending:focus-visible::after {
+  opacity: 1;
 }
 
 [data-theme="dark"] .worksub-links .project-link--pending {
