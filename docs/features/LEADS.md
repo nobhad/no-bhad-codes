@@ -441,7 +441,7 @@ The `lead-service.ts` barrel composes the following methods from `server/service
 ### Modified
 
 - `server/routes/admin/leads/{scoring,pipeline,tasks,notes,operations,core}.ts` - Added 35+ new endpoints
-- `src/types/api.ts` - Added TypeScript interfaces
+- `src/types/api/leads.ts` - Added TypeScript interfaces
 
 ## Usage Examples
 
@@ -527,7 +527,7 @@ Three-tab interface:
 ### Related Files
 
 - `src/react/features/admin/leads/` - Lead management module
-- `src/styles/admin/leads-pipeline.css` - Lead pipeline and analytics styles
+- `src/styles/portal/admin/leads-pipeline.css` - Lead pipeline and analytics styles
 - `admin/index.html` - Analytics section, scoring rules section
 
 ---

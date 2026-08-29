@@ -397,7 +397,7 @@ Each variable also has RGB and background variants:
 
 ### Usage in Components
 
-**Status Badges** (`src/styles/shared/portal-badges.css`):
+**Status Badges** (`src/styles/portal/shared/portal-badges.css`):
 
 ```css
 .status-badge.status-active { background: var(--status-active); }
@@ -405,7 +405,7 @@ Each variable also has RGB and background variants:
 .status-badge.status-completed { background: var(--status-completed); }
 ```
 
-**Status Dots** (`src/styles/admin/client-detail.css`):
+**Status Dots** (`src/styles/portal/admin/client-detail.css`):
 
 ```css
 .project-status.status-active::before { background: var(--status-active); }
@@ -481,8 +481,8 @@ export type ThreadStatus = 'active' | 'closed' | 'archived';
 │ Purpose             │ File                                   │
 ├─────────────────────┼────────────────────────────────────────┤
 │ Status variables    │ src/design-system/tokens/colors.css    │
-│ Status badges       │ src/styles/shared/portal-badges.css    │
-│ Status dots         │ src/styles/admin/client-detail.css     │
+│ Status badges       │ src/styles/portal/shared/portal-badges.css    │
+│ Status dots         │ src/styles/portal/admin/client-detail.css     │
 │ TypeScript types    │ src/types/api/*.ts (per-entity files)  │
 │ Server types        │ server/types/database.ts               │
 └─────────────────────┴────────────────────────────────────────┘

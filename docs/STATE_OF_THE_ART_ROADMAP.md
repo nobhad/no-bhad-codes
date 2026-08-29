@@ -1,13 +1,18 @@
 # State of the Art Roadmap
 
+<!-- validate-docs: planned-paths -->
+<!-- This is a design document: `**File:**` paths are as-designed and may not exist.
+     See the As-Built Path Map below for where shipped work actually lives. -->
+
 **Status:** In Progress — Phase 1-6 Complete
-**Last Updated:** 2026-03-17
+**Last Updated:** 2026-08-29
 **Goal:** Close every meaningful gap between this platform and the best-in-class tools (HoneyBook, Dubsado, Moxie, Plutio, Bloom, Productive)
 
 ---
 
 ## Table of Contents
 
+- [As-Built Path Map](#as-built-path-map)
 - [Phase 0: Foundation Fixes (Verified Gaps)](#phase-0-foundation-fixes-verified-gaps)
   - [0B. Client Proposal Experience (View + Accept)](#0b-client-proposal-experience-view--accept)
   - [0C. Maintenance Tier Activation System](#0c-maintenance-tier-activation-system)
@@ -53,6 +58,56 @@
 - [Implementation Priority and Dependencies](#implementation-priority-and-dependencies)
 - [Intentional Exclusions](#intentional-exclusions)
 - [Change Log](#change-log)
+
+---
+
+## As-Built Path Map
+
+The `**File:**` paths inside each phase below are the paths **as designed**. Where a phase
+shipped, the implementation often landed under a different name or directory. This table maps
+the planned path to what is actually in the tree today, so the spec blocks stay readable as a
+design record while the code remains findable.
+
+| Planned path | As built | Phase |
+|---|---|---|
+| `server/services/contract-signing-service.ts` | `server/services/contract-service.ts` | 1A |
+| `server/services/contract-signing-types.ts` | `server/database/entities/contract.ts` | 1A |
+| `server/routes/contracts/portal.ts` | `server/routes/contracts/client.ts` | 1A |
+| `src/react/features/portal/contracts/ContractViewer.tsx` | `src/react/features/portal/contracts/PortalContracts.tsx`, `ContractCard.tsx` | 1A |
+| `src/react/features/portal/contracts/SignaturePad.tsx` | `src/react/components/SignatureCanvas.tsx` | 1A |
+| `src/react/features/portal/contracts/SigningForm.tsx` | `src/react/features/portal/contracts/ContractSignModal.tsx` | 1A |
+| `server/routes/integrations/stripe-payments.ts` | `server/routes/integrations/stripe.ts`, `server/routes/payments/` | 1B |
+| `src/react/features/portal/payments/PaymentMethodsList.tsx` | `src/react/features/portal/payments/StripePaymentForm.tsx`, `StripeProvider.tsx` | 1B |
+| `src/react/features/portal/payments/AutoPayToggle.tsx` | `src/react/features/portal/auto-pay/AutoPaySettings.tsx` | 1B |
+| `src/react/features/portal/agreements/AgreementWizard.tsx` | `src/react/features/portal/agreements/AgreementFlow.tsx` | 1C |
+| `server/services/onboarding-service.ts` | `server/services/onboarding-checklist-service.ts` | 1D |
+| `server/services/onboarding-types.ts` | `server/services/onboarding-checklist-types.ts` | 1D |
+| `server/routes/onboarding/admin.ts` | `server/routes/onboarding-checklist/admin.ts` | 1D |
+| `server/routes/onboarding/portal.ts` | `server/routes/onboarding-checklist/portal.ts` | 1D |
+| `src/react/features/portal/onboarding/OnboardingCard.tsx` | `src/react/features/portal/onboarding-checklist/OnboardingCard.tsx` | 1D |
+| `src/react/features/admin/onboarding/OnboardingManager.tsx` | `src/react/features/admin/onboarding-templates/OnboardingTemplatesManager.tsx` | 1D |
+| `server/services/integrations/webhook-dispatch-service.ts` | `server/services/webhook-service.ts` | 0E |
+| `src/react/features/admin/sequences/SequenceBuilder.tsx` | `src/react/features/admin/sequences/SequencesTable.tsx` | 2A |
+| `src/react/features/admin/sequences/SequenceDetailPanel.tsx` | `src/react/features/admin/sequences/SequencesTable.tsx` | 2A |
+| `server/routes/meeting-requests.ts` | `server/routes/meeting-requests/` (`index.ts`, `admin.ts`, `portal.ts`) | 2B |
+| `src/react/features/admin/meetings/ConfirmMeetingModal.tsx` | `src/react/features/admin/meetings/MeetingRequestsTable.tsx` | 2B |
+| `server/services/automation-action-schemas.ts` | `server/services/automation-engine-types.ts` | 3A |
+| `src/react/features/admin/automations/AutomationRunsLog.tsx` | `src/react/features/admin/automations/AutomationDetailPanel.tsx` | 3B |
+| `src/react/features/admin/automations/components/ConditionBuilder.tsx` | `src/react/features/admin/automations/AutomationBuilder.tsx` | 3B |
+| `src/react/features/admin/automations/components/VariableHelper.tsx` | `src/react/features/admin/automations/AutomationBuilder.tsx` | 3B |
+| `src/react/features/admin/expenses/ExpenseForm.tsx` | `src/react/features/admin/expenses/ExpensesTable.tsx` | 4A |
+| `src/react/features/admin/retainers/RetainerDetailPanel.tsx` | `src/react/features/admin/retainers/RetainersTable.tsx` | 4B |
+| `src/react/features/admin/retainers/RetainerForm.tsx` | `src/react/features/admin/retainers/RetainersTable.tsx` | 4B |
+| `src/react/features/portal/feedback/SurveyForm.tsx` | `src/react/features/portal/feedback/PortalFeedback.tsx` | 5A |
+| `src/react/features/admin/proposals/ProposalBuilder.tsx` | `src/react/features/admin/proposals/ProposalDetailPanel.tsx` | 0B |
+| `src/react/features/portal/proposals/ProposalDetail.tsx` | `src/react/features/portal/proposals/PortalProposalDetail.tsx` | 0B |
+| `src/react/features/portal/proposals/ProposalFeatureList.tsx` | `src/react/features/portal/proposals/ProposalCard.tsx` | 0B |
+| `src/react/features/portal/proposals/MaintenancePlanCard.tsx` | `src/react/features/portal/proposals/ProposalCard.tsx` | 0C |
+| `src/react/features/portal/maintenance/MaintenancePlan.tsx` | No standalone component; maintenance tier renders inside `src/react/features/portal/proposals/PortalProposalDetail.tsx` | 0C |
+| `server/services/scheduled-task-runner.ts` | `server/services/scheduler-service.ts` | Cross-cutting |
+
+**Still unbuilt** — Phase 7 (Multi-Currency and Tax Compliance) has not shipped, so
+`server/services/currency-service.ts` and `server/services/currency-types.ts` do not exist yet.
 
 ---
 
@@ -5081,7 +5136,7 @@ export const currencyService = new CurrencyService();
 
 #### Implementation Notes
 
-- Default currency stored in `server/config/business.js` as `DEFAULT_CURRENCY`
+- Default currency stored in `server/config/business.ts` as `DEFAULT_CURRENCY`
 - Client table gets `preferred_currency` column (defaults to business default)
 - Invoice/proposal creation: currency defaults to client's preferred currency
 - All reporting converts to USD (or business default) for consistency

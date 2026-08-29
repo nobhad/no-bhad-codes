@@ -251,6 +251,6 @@ Add to `document_requests` table:
 | `server/routes/document-requests/admin.ts` | Admin endpoints |
 | `server/routes/document-requests/client.ts` | Client endpoints |
 | `server/routes/document-requests/templates.ts` | Template endpoints |
-| `src/utils/table-filter.ts` | Filter configuration |
-| `src/utils/table-bulk-actions.ts` | Bulk action utilities |
+| `src/react/components/portal/TableFilters.tsx` | Filter UI (config in `src/react/features/admin/shared/filterConfigs.ts`) |
+| `src/react/components/portal/BulkActionsToolbar.tsx` | Bulk action UI (`src/react/factories/useBulkAction.tsx`) |
 | `src/react/features/admin/document-requests/DocumentRequestDetailPanel.tsx` | Slide-in detail panel (Overview, Timeline) |

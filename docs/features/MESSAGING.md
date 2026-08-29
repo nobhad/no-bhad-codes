@@ -128,7 +128,7 @@ list sidebar. Uses `MessageThread` for the thread panel.
 
 ### CSS Classes
 
-Key CSS classes in `src/styles/shared/portal-messages.css` and `src/styles/admin/project-detail.css`:
+Key CSS classes in `src/styles/portal/shared/portal-messages.css` and `src/styles/portal/admin/project-detail.css`:
 
 ```css
 .msgtab-container        /* Outer panel wrapper */
@@ -799,8 +799,8 @@ await emailService.sendMessageNotification(clientEmail, {
 | `src/react/factories/index.ts` | Factory barrel export |
 | `src/react/features/admin/project-detail/tabs/MessagesTab.tsx` | Project-level thread (admin) |
 | `src/react/features/admin/messaging/MessageView.tsx` | Full conversation view (admin) |
-| `src/styles/shared/portal-messages.css` | Shared message component styles |
-| `src/styles/admin/project-detail.css` | Admin msgtab component styles |
+| `src/styles/portal/shared/portal-messages.css` | Shared message component styles |
+| `src/styles/portal/admin/project-detail.css` | Admin msgtab component styles |
 | `server/routes/messages.ts` | API endpoints |
 | `server/services/message-service.ts` | Message service (backend logic) |
 | `server/services/email-service.ts` | Email notifications |

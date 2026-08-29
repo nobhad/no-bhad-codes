@@ -20,7 +20,7 @@
 
 Ensure you have the following installed:
 
-- **Node.js** 20.x with npm 8+
+- **Node.js** 22.x with npm 8+
 - **Git** for version control
 - **VS Code** (recommended) with suggested extensions
 - **Modern browser** for testing (Chrome, Firefox, Safari, Edge)
@@ -564,7 +564,7 @@ The application includes a comprehensive messaging system for client-developer c
 
 #### Backend Components
 
-1. **Database Schema** (`server/database/migrations/003_messaging_enhancements.sql`)
+1. **Database Schema** (`server/database/migrations/005_messaging_enhancements.sql`)
    - `message_threads`: Conversation organization
    - `general_messages`: Non-project specific messages  
    - `messages`: Project-specific messages with enhanced features
@@ -834,7 +834,7 @@ try {
 
    ```sql
 
-   -- server/database/migrations/003_add_new_table.sql
+   -- server/database/migrations/142_add_new_table.sql (next sequential number)
    -- UP
    CREATE TABLE IF NOT EXISTS my_new_table (
      id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1360,9 +1360,9 @@ import { MyService } from '../../../services/my-service'; // Avoid
 ls -la data/
 chmod 644 data/development.db
 
-# Reset database
+# Reset database (no db:reset script - remove the file and re-migrate)
 
-npm run db:reset
+rm -f data/app.db
 npm run migrate
 
 ```text
@@ -1373,8 +1373,8 @@ npm run migrate
 
 # Find processes using ports
 
-lsof -i :3000
-lsof -i :3001
+lsof -i :4000
+lsof -i :4001
 
 # Kill processes
 
@@ -1382,7 +1382,7 @@ kill -9 <PID>
 
 # Or use different ports
 
-PORT=3002 npm run dev:server
+PORT=4002 npm run dev:server
 
 ```text
 
@@ -1553,7 +1553,7 @@ The codebase uses a centralized debug logger that automatically respects debug m
    ```bash
 
    npm run test
-   npm run test:e2e
+   npx playwright test
    npm run lint
    npm run typecheck
 

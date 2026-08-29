@@ -835,7 +835,7 @@ const deleteIcon = canDelete
 |`server/routes/uploads/core.ts`|Core upload/list/delete endpoints|
 |`server/routes/uploads/sharing.ts`|File sharing endpoints (`/share`, `/unshare`)|
 |`src/react/features/portal/files/`|Frontend file handling (~501 lines)|
-|`src/styles/client-portal/documents.css`|File section styling (consolidated)|
+|`src/styles/portal/client/documents.css`|File section styling (consolidated)|
 |`server/views/layouts/portal.ejs`|Portal shell; React SPA mounts the Files tab|
 
 ---
@@ -1125,7 +1125,7 @@ CREATE TABLE IF NOT EXISTS file_comments (
 ### Files Modified
 
 - `server/routes/projects/{files,file-versions,file-folders,file-comments}.ts` - 30+ file endpoints (split across these sub-routers)
-- `src/types/api.ts` - Added TypeScript interfaces
+- `src/types/api/files.ts` - Added TypeScript interfaces
 
 ### Change Log
 

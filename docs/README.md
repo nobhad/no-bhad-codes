@@ -19,6 +19,12 @@ The Backend refers to the complete portal system with two interfaces:
 |**[Settings](./features/SETTINGS.md)**|Account, notifications, billing information|
 |**[New Project](./features/NEW_PROJECT.md)**|Project request form, validation|
 |**[Terminal Intake](./features/TERMINAL_INTAKE.md)**|Terminal-style project intake form with conversational UI|
+|**[Agreements](./features/AGREEMENTS.md)**|Unified project agreement flow (contract + payment in one pass)|
+|**[Onboarding Checklist](./features/ONBOARDING_CHECKLIST.md)**|Guided client onboarding steps|
+|**[Embedded Payments](./features/EMBEDDED_PAYMENTS.md)**|In-portal Stripe payment and auto-pay|
+|**[Payment Schedules](./features/PAYMENT_SCHEDULES.md)**|Milestone-based payment schedules and invoice cascade|
+|**[Content Requests](./features/CONTENT_REQUESTS.md)**|Client content collection requests|
+|**[Feedback](./features/FEEDBACK.md)**|Satisfaction surveys and testimonial collection|
 
 **Admin Dashboard** - Administrative interface:
 
@@ -59,6 +65,15 @@ The Backend refers to the complete portal system with two interfaces:
 |**[Tasks](./features/TASKS.md)**|Task management within projects|
 |**[Time Tracking](./features/TIME_TRACKING.md)**|Time entry, reporting|
 |**[Workflows](./features/WORKFLOWS.md)**|Automation workflows, triggers, actions|
+|**[Custom Automations](./features/CUSTOM_AUTOMATIONS.md)**|Admin-built automation rules (triggers, conditions, actions)|
+|**[Email Sequences](./features/EMAIL_SEQUENCES.md)**|Lead nurture drip sequences|
+|**[Meeting Requests](./features/MEETING_REQUESTS.md)**|Meeting request and confirmation flow|
+|**[Retainers](./features/RETAINERS.md)**|Retainer and recurring project management|
+|**[Expenses](./features/EXPENSES.md)**|Expense tracking and project profitability|
+|**[Embed Widgets](./features/EMBED_WIDGETS.md)**|Embeddable public widgets|
+|**[AI Features](./features/AI_FEATURES.md)**|AI proposal drafting, email drafting, semantic search|
+|**[i18n / Localization](./features/i18n-localization.md)**|Translation and locale handling|
+|**[Wireframes](./features/WIREFRAMES.md)**|Wireframe reference for portal screens|
 
 **API Reference:** See [API Documentation](./API_DOCUMENTATION.md) for complete endpoint reference.
 
@@ -74,6 +89,18 @@ The Backend refers to the complete portal system with two interfaces:
 |----------|-------------|
 |**[Design System](./design/DESIGN_SYSTEM.md)**|Variables, themes, typography, icons, components|
 |**[Animations](./design/ANIMATIONS.md)**|GSAP usage, animation tokens, performance|
+|**[CSS Architecture](./design/CSS_ARCHITECTURE.md)**|Layer strategy, bundles, naming|
+|**[Component Library](./design/COMPONENT_LIBRARY.md)**|Shared component catalogue|
+|**[Factory System](./design/FACTORY_SYSTEM.md)**|Component/button/icon factories|
+|**[Status System](./design/STATUS_SYSTEM.md)**|Status badges and state vocabulary|
+|**[Portal Design](./design/PORTAL_DESIGN.md)**|Portal visual language|
+|**[Admin Portal Linear Redesign](./design/ADMIN_PORTAL_LINEAR_REDESIGN.md)**|Linear-inspired admin redesign|
+|**[Project Detail Layout](./design/PROJECT_DETAIL_LAYOUT.md)**|Project detail page structure|
+|**[Main Site Design](./design/MAIN_SITE_DESIGN.md)**|Marketing site design language|
+|**[Terminal Design Patterns](./design/TERMINAL_DESIGN_PATTERNS.md)**|Terminal UI conventions|
+|**[UX Guidelines](./design/UX_GUIDELINES.md)**|Interaction and accessibility guidance|
+|**[Golden Ratio Typography](./design/typography/GOLDEN_RATIO.md)**|Type scale derivation|
+|**[Coyote Paw Animation](./design/COYOTE_PAW_ANIMATION.md)**|Paw animation implementation notes|
 
 ### Architecture & Development
 
@@ -84,11 +111,20 @@ The Backend refers to the complete portal system with two interfaces:
 - **[Visitor Tracking System](./features/VISITOR-TRACKING.md)** - Privacy-compliant analytics, consent management, and engagement metrics
 - **[API Documentation](./API_DOCUMENTATION.md)** - Complete API reference with request/response examples
 - **[Code Protection Guide](./CODE_PROTECTION_GUIDE.md)** - Code obfuscation, source map protection, and security practices
+- **[Backend Patterns](./architecture/BACKEND_PATTERNS.md)** - Route, service, and middleware conventions
+- **[Database Schema](./architecture/DATABASE_SCHEMA.md)** - Tables, relationships, and migration history
+- **[Module Dependencies](./architecture/MODULE_DEPENDENCIES.md)** - Module and service dependency graph
+- **[API Reference Index](./api/README.md)** - Endpoint index by domain
+- **[Ops Runbook](./OPS_RUNBOOK.md)** - Operational procedures, backups, incident response
+- **[State of the Art Roadmap](./STATE_OF_THE_ART_ROADMAP.md)** - Phased feature roadmap and as-built path map
 
 ### Development & Maintenance
 
 - **[Current Work](../CURRENT_WORK.md)** - Active development tracking and TODO list
 - **[Development Guide](./guides/DEVELOPMENT.md)** - Development workflow, npm scripts, test coverage
+- **[Installation Guide](./guides/INSTALLATION.md)** - Local setup from scratch
+- **[Deployment Guide](./guides/DEPLOYMENT.md)** - Build and deploy steps
+- **[Features Index](./features/README.md)** - Full A-Z list of feature docs
 
 ### Audits & Post-Mortems
 
@@ -96,6 +132,9 @@ The Backend refers to the complete portal system with two interfaces:
 - **[Supplementary Audit](./audits/SUPPLEMENTARY_AUDIT.md)** - Additional audit notes and findings
 - **[Backend Audit Report](./audits/BACKEND_AUDIT_REPORT.md)** - Backend architecture audit
 - **[Claude Mistakes](./audits/CLAUDE_MISTAKES.md)** - Documented errors and lessons learned
+- **[Backend Splitting Plan](./audits/BACKEND_SPLITTING_PLAN.md)** - Route/service decomposition plan
+- **[Database Normalization Plan](./audits/DATABASE_NORMALIZATION_PLAN.md)** - Schema normalization remediation
+- **[Portal Unification Deep Dive](./audits/PORTAL_UNIFICATION_DEEP_DIVE.md)** - Admin/client portal unification analysis
 
 ### Archive
 
@@ -119,7 +158,7 @@ The Backend refers to the complete portal system with two interfaces:
 
 ### Prerequisites
 
-- Node.js 20.x
+- Node.js 22.x
 - npm 8+
 - Modern browser (Chrome 90+, Firefox 88+, Safari 14+)
 
@@ -166,25 +205,31 @@ src/
 │   ├── services-config.ts  # Service registrations
 │   └── modules-config.ts   # Module definitions
 ├── features/               # Feature modules (domain-driven)
-│   └── main-site/          # Main site features
+│   ├── auth/               # Auth gate / login flows
+│   ├── client/             # Terminal intake
+│   ├── main-site/          # Main site features
+│   └── shared/             # Cross-feature helpers
 ├── react/                  # React portal SPA
 │   ├── app/                # Root components (PortalApp, PortalRoutes, PortalLayout)
-│   ├── stores/             # Zustand stores (portal-store.ts)
+│   ├── stores/             # Zustand stores (portal-store.ts, admin.ts)
 │   ├── hooks/              # Auth hooks (usePortalAuth.ts)
 │   ├── features/
-│   │   ├── admin/          # Admin-only feature modules (25+)
-│   │   └── portal/         # Client-only feature modules (15+)
+│   │   ├── admin/          # Admin-only feature modules (50+)
+│   │   └── portal/         # Client-only feature modules (29+)
 │   └── components/         # Shared React components
+├── auth/                   # Client-side auth store and constants
 ├── modules/                # Reusable UI modules
-│   ├── base.ts            # Base module class
-│   ├── theme.ts           # Theme switching
-│   ├── navigation.ts      # Navigation
-│   └── animation/         # Animation modules
+│   ├── core/base.ts        # Base module class
+│   ├── utilities/theme.ts  # Theme switching
+│   ├── ui/navigation.ts    # Navigation
+│   └── animation/          # Animation modules
 ├── services/              # Service layer
 │   ├── performance-service.ts
 │   ├── visitor-tracking.ts
-│   └── auth-service.ts
+│   └── data-service.ts
 ├── components/            # Reusable UI components
+├── design-system/         # Design tokens
+├── styles/                # CSS (base, portal, bundles, pages)
 ├── utils/                 # Utility functions
 └── types/                 # TypeScript definitions
 ```

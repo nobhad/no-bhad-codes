@@ -2,12 +2,12 @@
 
 This guide covers setting up the no-bhad-codes project locally from scratch.
 
-For full system details see [`SYSTEM_DOCUMENTATION.md`](../SYSTEM_DOCUMENTATION.md) and
+For full system details see [`ARCHITECTURE.md`](../ARCHITECTURE.md) and
 [`DEVELOPER_GUIDE.md`](../DEVELOPER_GUIDE.md).
 
 ## Prerequisites
 
-- **Node.js** 20.x
+- **Node.js** 22.x
 - **npm** 8+
 - **Git**
 - Modern browser for testing (Chrome 90+, Firefox 88+, Safari 14+)

@@ -293,10 +293,11 @@ CREATE TABLE document_template_categories (
 | `server/database/migrations/057_questionnaires.sql` | Questionnaire schema |
 | `server/database/migrations/058_client_onboarding.sql` | Onboarding schema |
 | `src/react/features/admin/questionnaires/` | Admin questionnaire UI |
-| `src/react/features/portal/onboarding-wizard/` | Client onboarding UI |
+| `src/react/features/portal/onboarding/` | Client onboarding UI |
 | `src/react/features/portal/questionnaires/` | Client questionnaire UI |
-| `src/styles/client-portal/onboarding.css` | Onboarding styles |
-| `src/styles/client-portal/questionnaires.css` | Questionnaire styles |
+| `src/styles/portal/admin/questionnaires.css` | Admin questionnaire styles |
+
+> Client-side onboarding and questionnaire UI is styled with Tailwind inside the React components; the former `onboarding.css` / client `questionnaires.css` stylesheets no longer exist.
 
 ---
 

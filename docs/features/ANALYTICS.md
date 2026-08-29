@@ -344,7 +344,7 @@ Widgets: Active Projects, Due This Week, Overdue Tasks, Hours This Week, Project
 
 ## TypeScript Types
 
-See `src/types/api.ts` for complete type definitions:
+See `src/types/api/analytics.ts` for complete type definitions:
 
 - `SavedReport` / `SavedReportResponse`
 - `ReportSchedule` / `ReportScheduleResponse`

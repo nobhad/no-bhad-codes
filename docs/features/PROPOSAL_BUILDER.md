@@ -348,14 +348,15 @@ See [API Documentation](../API_DOCUMENTATION.md#proposal-builder-endpoints) for 
 
 |File|Purpose|
 |------|---------|
-|`src/features/client/proposal-builder.ts`|Main module class|
-|`src/features/client/proposal-builder-ui.ts`|UI rendering|
-|`src/features/client/proposal-builder-data.ts`|Tier configurations|
-|`src/features/client/proposal-builder-types.ts`|TypeScript types|
-|`src/react/features/admin/proposals/`|Admin management|
+|`src/react/features/portal/proposals/`|Client proposal view (`PortalProposals`, `PortalProposalDetail`, `ProposalCard`)|
+|`src/react/features/admin/proposals/`|Admin management (`ProposalsTable`, `ProposalDetailPanel`)|
+|`server/config/proposal-templates.ts`|Tier configurations|
+|`server/services/proposal-service.ts`|Proposal business logic|
+|`server/database/entities/proposal.ts`|Proposal entity and types|
 |`server/routes/proposals.ts`|API endpoints|
 |`server/database/migrations/047_proposal_requests.sql`|DB schema|
-|`src/styles/pages/proposal-builder.css`|Styles|
+
+> The original vanilla-TS builder (`src/features/client/proposal-builder*.ts` and `src/styles/pages/proposal-builder.css`) was removed in the React migration; proposals are now styled with Tailwind inside the React components.
 
 ---
 

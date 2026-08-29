@@ -382,8 +382,8 @@ CREATE TABLE project_tasks (
 
 - `src/react/features/admin/project-detail/tabs/overview/MilestonesList.tsx` - Milestone view with expandable task lists
 - `src/react/features/admin/tasks/` - Task Kanban/List view with milestone tags
-- `src/styles/admin/project-detail.css` - Milestone and task UI styles
-- `src/styles/admin/tasks.css` - Task card and milestone tag styles
+- `src/styles/portal/admin/project-detail.css` - Milestone and task UI styles
+- `src/styles/portal/admin/tasks.css` - Task card and milestone tag styles
 
 ### Router Structure
 

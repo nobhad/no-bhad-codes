@@ -57,7 +57,7 @@
 
 ### Prerequisites
 
-- **Node.js** 20.x and **npm** 8+
+- **Node.js** 22.x and **npm** 8+
 - **Git** for version control
 
 ### Installation
@@ -695,7 +695,7 @@ export class MyModule extends BaseModule {
 Centralized state management with pub-sub pattern:
 
 ```typescript
-import { StateManager } from '@/core/state.js';
+import { StateManager } from '@/core/state/state-manager.js';
 
 import { createLogger } from '../utils/logger';
 
@@ -714,9 +714,9 @@ StateManager.setState('user', { id: 1, name: 'John' });
 
 #### Communication & Messaging
 
-- **MessagingModule** (`src/modules/messaging.ts`): Complete messaging system
-  - Thread management with project association
-  - Real-time message sending and receiving
+- **Messaging** (`src/react/features/portal/messages/`, `src/react/features/admin/messaging/`): Complete messaging system
+  - Thread management with project association (`src/react/factories/MessageThread.tsx`)
+  - Message sending and receiving
   - File attachment handling up to 5MB
   - Priority levels and read status tracking
   - Email notification triggers
@@ -724,20 +724,24 @@ StateManager.setState('user', { id: 1, name: 'John' });
 
 #### Client Portal Features
 
-- **ClientPortalModule** (`src/features/client/client-portal.ts`): Main portal interface
+- **PortalApp** (`src/react/app/PortalApp.tsx`, mounted by `src/react/app/mount-portal.tsx`): Main portal interface
   - Secure authentication and session management
   - Project dashboard with progress tracking
   - Interactive project timeline and milestones
   - File management and downloads
 
-#### Core UI Components
+> The client portal and admin dashboard are React SPAs under `src/react/`. The vanilla-TS
+> modules that preceded them were removed during the React migration:
+> `src/features/client/client-portal.ts` and `src/modules/messaging.ts` no longer exist.
 
-- **ThemeModule**: Dark/light theme switching with localStorage persistence
-- **IntroAnimationModule**: CLS-safe intro animations using GSAP
-- **BusinessCardRenderer**: Manages business card animations and interactions
-- **NavigationModule**: Navigation with router service integration
-- **ContactFormModule**: Form handling with backend service integration
-- **FooterModule**: Footer interactions and visibility management
+#### Core UI Components (vanilla modules — marketing site)
+
+- **ThemeModule** (`src/modules/utilities/theme.ts`): Dark/light theme switching with localStorage persistence
+- **IntroAnimationModule** (`src/modules/animation/intro-animation.ts`): CLS-safe intro animations using GSAP
+- **BusinessCardRenderer** (`src/modules/ui/business-card-renderer.ts`): Manages business card animations and interactions
+- **NavigationModule** (`src/modules/ui/navigation.ts`): Navigation with router service integration
+- **ContactFormModule** (`src/modules/ui/contact-form.ts`): Form handling with backend service integration
+- **FooterModule** (`src/modules/ui/footer.ts`): Footer interactions and visibility management
 
 ### Service Layer
 
@@ -859,7 +863,7 @@ NODE_ENV=production tsx server/app.ts
 ### Docker Deployment (Optional)
 
 ```dockerfile
-FROM node:20-alpine
+FROM node:22-alpine
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev

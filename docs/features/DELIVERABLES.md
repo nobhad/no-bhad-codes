@@ -294,8 +294,8 @@ pending → reviewing → approved
 | `src/react/features/admin/deliverables/` | Admin UI |
 | `src/react/features/admin/design-review/` | Review modal |
 | `src/react/features/portal/files/` | Client files UI (includes deliverables) |
-| `src/styles/admin/index.css` | Admin styling (includes deliverables) |
-| `src/styles/client-portal/documents.css` | Client styling (includes deliverables) |
+| `src/styles/portal/admin/index.css` | Admin styling (includes deliverables) |
+| `src/styles/portal/client/documents.css` | Client styling (includes deliverables) |
 
 ---
 

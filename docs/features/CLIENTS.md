@@ -364,7 +364,7 @@ The `client-service.ts` provides the following methods:
 ### Modified
 
 - `server/routes/clients.ts` - Added 25+ new endpoints
-- `src/types/api.ts` - Added TypeScript interfaces
+- `src/types/api/clients.ts` - Added TypeScript interfaces
 
 ## Usage Examples
 

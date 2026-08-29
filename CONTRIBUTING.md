@@ -6,7 +6,7 @@ Thank you for your interest in contributing to No Bhad Codes! This document prov
 
 ### Prerequisites
 
-- Node.js 20.x
+- Node.js 22.x
 - npm 8+
 - Git
 - Basic knowledge of TypeScript, Express.js, and modern web development
@@ -51,8 +51,7 @@ Thank you for your interest in contributing to No Bhad Codes! This document prov
 
 ### Branch Strategy
 
-- **main**: Production-ready code
-- **develop**: Integration branch for features
+- **main**: Production-ready code, and the branch features merge into
 - **feature/***: Feature development branches
 - **bugfix/***: Bug fix branches
 - **hotfix/***: Critical production fixes
@@ -245,8 +244,8 @@ What actually happens
 ## Environment
 - OS: [e.g., macOS 14.0]
 - Browser: [e.g., Chrome 120.0]
-- Node.js: [e.g., 18.17.0]
-- npm: [e.g., 9.6.7]
+- Node.js: [e.g., 22.11.0]
+- npm: [e.g., 10.9.0]
 ```
 
 ## ✨ Feature Requests
@@ -361,11 +360,11 @@ Brief description of changes
 
 ### Technical Improvements
 
-- [ ] Database migration system
-- [ ] Redis caching integration
+- [x] Database migration system — `scripts/migrate.ts`, `npm run migrate`
+- [x] Redis caching integration — `server/services/cache-service.ts`
+- [x] CI/CD pipeline — `.github/workflows/ci.yml` (lint, typecheck, unit, integration, build)
 - [ ] Docker containerization
-- [ ] CI/CD pipeline setup
-- [ ] Automated security scanning
+- [ ] Automated security scanning in CI (`audit-ci.json` exists but is not wired into the workflow)
 
 ## 🤝 Community
 
@@ -395,7 +394,7 @@ Brief description of changes
 
 - **Issues**: Create a GitHub issue
 - **Questions**: Use GitHub Discussions
-- **Email**: nobhaduri@gmail.com (for security issues)
+- **Email**: noelle@nobhad.codes (for security issues)
 
 ## 📈 Recognition
 

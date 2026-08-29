@@ -440,7 +440,7 @@ When both parties have signed:
 | `server/database/migrations/053_contract_templates_seed.sql` | Default template |
 | `server/database/migrations/054_contract_countersign.sql` | Countersign fields |
 | `src/react/features/admin/project-detail/` | Contract tab UI |
-| `src/styles/admin/pd-contract.css` | Contract tab styles |
+| `src/styles/portal/admin/project-detail.css` | Contract tab styles (project-detail stylesheet) |
 | `src/react/features/admin/contracts/ContractsTable.tsx` | Admin contracts table (React) |
 | `src/react/features/admin/contracts/ContractDetailPanel.tsx` | Slide-in detail panel (Overview, Timeline) |
 | `public/sign-contract.html` | Public signing page |

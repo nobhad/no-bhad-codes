@@ -1,4 +1,4 @@
-# Current Work - April 30, 2026
+# Current Work - August 29, 2026
 
 ---
 
@@ -20,7 +20,7 @@ blocks anything; they are the loose ends that session left.
       the two that cover what changed — page transitions and the business-card
       `calc()` tokens whose snapshot moved — so they are worth a pass before
       any deploy. Unit tests (4400) and the production build both pass.
-- [ ] **Seven commits unpushed, and live is behind them.** Includes both TV
+- [ ] **Eleven commits unpushed, and live is behind them.** Includes both TV
       click fixes — the deployed site still opens a new tab when you click the
       title card. Push, then deploy; four older "fixed in code, needs deploy"
       items ride along (projects media, portal `/src/*.ts` 404s, and migrations
@@ -323,12 +323,12 @@ grep over every generated PDF before publishing.
 
 ## Current System Status
 
-**Last Updated**: April 30, 2026
+**Last Updated**: August 29, 2026
 
 ### Server
 
 - **Command**: `npm run dev:full`
-- **Local**: `http://localhost:3000`
+- **Local**: `http://localhost:4000` (frontend), `http://localhost:4001` (API)
 
 ### Build
 

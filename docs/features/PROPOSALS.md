@@ -495,7 +495,7 @@ await fetch('/api/proposals/123/discount', {
 ### Modified
 
 - `server/routes/proposals.ts` - Added 35+ new endpoints
-- `src/types/api.ts` - Added TypeScript interfaces
+- `server/database/entities/proposal.ts` - Proposal entity and TypeScript interfaces
 - `src/constants/api-endpoints.ts` - Added `PROPOSALS_PREFILL` constant
 
 ## Frontend UI
@@ -544,7 +544,7 @@ await fetch('/api/proposals/123/discount', {
 ### Related Files
 
 - `src/react/features/admin/proposals/` - Proposal management module
-- `src/styles/admin/proposals.css` - Proposal styles
+- `src/styles/portal/admin/proposals.css` - Proposal styles
 - `src/react/features/admin/proposals/ProposalDetailPanel.tsx` - Slide-in detail panel (Overview, Timeline)
 
 ---

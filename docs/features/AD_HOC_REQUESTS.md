@@ -237,7 +237,7 @@ Located on Analytics > Business tab:
 | `server/database/migrations/056_ad_hoc_requests.sql` | Database schema |
 | `src/react/features/admin/ad-hoc-requests/` | Admin UI module |
 | `src/react/features/portal/ad-hoc-requests/` | Client portal UI |
-| `src/styles/client-portal/requests.css` | Request styling |
+| `src/styles/portal/client/requests.css` | Request styling |
 
 ---
 

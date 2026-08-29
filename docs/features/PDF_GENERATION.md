@@ -52,8 +52,8 @@ All PDF documents in the system are generated using **pdf-lib**, a pure JavaScri
 |Document|Route|Endpoint|Title|
 |----------|-------|----------|-------|
 |Invoice|`server/routes/invoices.ts`|`GET /api/invoices/:id/pdf`|INVOICE|
-|Contract|`server/routes/projects.ts`|`GET /api/projects/:id/contract/pdf`|CONTRACT|
-|Intake|`server/routes/projects.ts`|`GET /api/projects/:id/intake/pdf`|INTAKE|
+|Contract|`server/routes/projects/contracts.ts`|`GET /api/projects/:id/contract/pdf`|CONTRACT|
+|Intake|`server/routes/projects/intake.ts`|`GET /api/projects/:id/intake/pdf`|INTAKE|
 |Proposal|`server/routes/proposals.ts`|`GET /api/proposals/:id/pdf`|PROPOSAL|
 |Receipt|`server/routes/receipts.ts`|`GET /api/receipts/:id/pdf`|RECEIPT|
 
@@ -133,7 +133,8 @@ if (existsSync(logoPath)) {
 |File|Purpose|
 |------|---------|
 |`server/routes/invoices.ts`|Invoice PDF generation|
-|`server/routes/projects.ts`|Contract and Intake PDF generation|
+|`server/routes/projects/contracts.ts`|Contract PDF generation|
+|`server/routes/projects/intake.ts`|Intake PDF generation|
 |`server/routes/proposals.ts`|Proposal PDF generation|
 |`server/routes/receipts.ts`|Receipt PDF generation|
 |`scripts/markdown-to-pdf.ts`|Markdown-to-PDF contract generator|

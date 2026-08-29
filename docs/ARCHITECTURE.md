@@ -1161,24 +1161,24 @@ test.describe('Client Portal', () => {
 
 ```bash
 # Modules (PascalCase classes, kebab-case files)
-src/modules/business-card-renderer.ts   → BusinessCardRenderer
-src/react/app/mount-portal.tsx          → mountPortalApp (React SPA mount)
+src/modules/ui/business-card-renderer.ts → BusinessCardRenderer
+src/react/app/mount-portal.tsx           → mountPortalApp (React SPA mount)
 
 # Services (PascalCase classes, kebab-case files)
-src/services/notification-service.ts    → NotificationService
-src/services/data-service.ts            → DataService
+src/services/contact-service.ts          → ContactService
+src/services/data-service.ts             → DataService
 
 # Components (PascalCase classes, kebab-case files)
-src/components/data-table.ts            → DataTable
-src/components/modal-component.ts       → ModalComponent
+src/components/base-component.ts         → BaseComponent
+src/components/consent-banner.ts         → ConsentBanner
 
 # Types (PascalCase interfaces, kebab-case files)
-src/types/client.ts                     → ClientProject, ClientMessage
-src/types/invoice.ts                    → Invoice, InvoiceItem
+src/types/client.ts                      → ClientProject, ClientMessage
+src/types/project.ts                     → Project, ProjectStatus
 
 # Styles (kebab-case)
 src/styles/portal/client/index.css   # Client portal styles entry point
-src/styles/pages/admin.css
+src/styles/bundles/admin.css
 ```
 
 ### 2. TypeScript Best Practices
@@ -1369,7 +1369,7 @@ npm run dev
 npm run test
 
 # 4. Check TypeScript types
-npm run type-check
+npm run typecheck
 
 # 5. Run linting
 npm run lint
@@ -1383,14 +1383,14 @@ npm run format
 ```bash
 # 1. Run all checks
 npm run lint
-npm run type-check
+npm run typecheck
 npm run test:run
 
 # 2. Build to ensure no issues
 npm run build
 
 # 3. Run E2E tests
-npm run test:e2e
+npx playwright test
 
 # 4. Commit with conventional commits
 git commit -m "feat: add invoicing system with PDF generation"
@@ -1431,8 +1431,8 @@ VITE_ADMIN_PASSWORD_HASH=<sha256-hash-of-admin-password>
 - `src/main.ts` - Application entry point
 - `src/core/app.ts` - Application controller
 - `src/core/container.ts` - Dependency injection
-- `src/modules/base.ts` - Base module class
-- `vite.config.js` - Build configuration
+- `src/modules/core/base.ts` - Base module class
+- `vite.config.ts` - Build configuration
 
 ### Useful Commands
 
@@ -1441,15 +1441,15 @@ VITE_ADMIN_PASSWORD_HASH=<sha256-hash-of-admin-password>
 npm run dev                 # Start dev server
 npm run build              # Production build
 npm run preview            # Preview build
-npm run type-check         # TypeScript check
+npm run typecheck          # TypeScript check
 npm run lint               # ESLint check
 npm run format             # Prettier format
 npm run test               # Run tests
-npm run test:e2e           # E2E tests
+npx playwright test        # E2E tests (tests/e2e)
 
 # Analysis
-npm run bundle-analyzer    # Analyze bundle size
-npm run audit              # Security audit
+npm run build:analyze      # Analyze bundle size
+npm audit                  # Security audit
 ```
 
 ---
@@ -1462,12 +1462,12 @@ npm run audit              # Security audit
 
 |File|Issue|Status|
 |------|-------|--------|
-|`src/modules/navigation.ts`|15+ console.log calls, untracked event listeners|FIXED|
+|`src/modules/ui/navigation.ts`|15+ console.log calls, untracked event listeners|FIXED|
 |Dead code cleanup|app.ts.backup, unused entry points|FIXED (Jan 15, 2026)|
 |Console logging|~80+ console.log statements in production code|FIXED (Jan 15, 2026 - refactored to debug logger)|
 |`src/modules/animation/intro-animation.ts`|400+ lines, hardcoded SVG paths|FIXED (refactored Dec 19, SVG paths in config)|
 |`src/services/code-protection-service.ts`|Event listener cleanup issues|FIXED|
-|`src/features/admin/admin-security.ts`|localStorage for auth data|FIXED (all modules migrated to HttpOnly cookies)|
+|`src/features/admin/admin-security.ts` *(removed)*|localStorage for auth data|FIXED (all modules migrated to HttpOnly cookies; file later deleted in the React migration)|
 |Animation CSS conflicts|CSS transitions conflicting with GSAP|FIXED (Dec 22)|
 |Font loading issues|Acme font not displaying|FIXED (Dec 22, fonts.css imported first)|
 
@@ -1475,14 +1475,14 @@ npm run audit              # Security audit
 
 |File|Lines|Status|
 |------|-------|--------|
-|`src/core/app.ts`|452|FIXED - Split Dec 19 (was 992 lines, now 4 files)|
+|`src/core/app.ts`|555|FIXED - Split Dec 19 (was 992 lines, now 4 files)|
 |`src/core/state/`|4 files|FIXED - Split Dec 19 (was 824 lines in state.ts)|
-|`src/services/visitor-tracking.ts`|730|Pending - Split by tracking concern|
-|`src/features/admin/admin-dashboard.ts`|~200|FIXED - Split Jan 20, 2026 (was 1886 lines)|
-|`src/features/admin/modules/`|28 files|FIXED - Extracted from admin-dashboard.ts|
+|`src/services/visitor-tracking.ts`|865|Pending - Split by tracking concern|
+|`src/features/admin/admin-dashboard.ts` *(removed)*|~200|FIXED - Split Jan 20, 2026 (was 1886 lines); file later deleted in the React migration|
+|`src/features/admin/modules/` *(removed)*|28 files|FIXED - Extracted from admin-dashboard.ts; superseded by `src/react/features/admin/`|
 |`src/styles/components/nav-*.css`|4 files|FIXED - Split Dec 19 (was 1792 lines)|
-|`src/styles/client-portal/`|10 files|FIXED - Split into modular directory|
-|`src/modules/animation/intro-animation.ts`|1569|Large but organized|
+|`src/styles/portal/client/`|8 files|FIXED - Split into modular directory|
+|`src/modules/animation/intro-animation.ts`|2020|Large but organized|
 
 #### December 22, 2025 Animation Improvements:
 
@@ -1552,7 +1552,7 @@ The system uses **HttpOnly cookies** for secure JWT token storage:
 |`server/utils/auth-constants.ts`|Cookie configuration (COOKIE_CONFIG)|
 |`server/middleware/auth.ts`|Token verification from cookie or header|
 |`server/routes/auth.ts`|Login/logout endpoints set/clear cookies|
-|`src/services/auth-service.ts`|Client-side auth state (no token access)|
+|`src/auth/auth-store.ts`|Client-side auth state (no token access)|
 
 #### Security Features:
 
@@ -1576,8 +1576,8 @@ Token system is excellent and now consistently used:
 - Form CSS split into 3 files (`form-fields`, `form-buttons`, `form-validation`)
 - Created `fonts.css` for proper font loading (imported first)
 - Client portal uses `.portal-` prefix for component classes
-- Client portal modularized into 10 files in `src/styles/client-portal/`
-- Shared portal components in `src/styles/shared/`
+- Client portal modularized into 10 files in `src/styles/portal/client/`
+- Shared portal components in `src/styles/portal/shared/`
 - See `/docs/design/DESIGN_SYSTEM.md` for detailed findings
 
 ---

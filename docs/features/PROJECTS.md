@@ -546,8 +546,8 @@ const { health } = await response.json();
 
 ### Modified
 
-- `server/routes/projects.ts` - Added 30+ new endpoints
-- `src/types/api.ts` - Added TypeScript interfaces
+- `server/routes/projects/` - Added 30+ new endpoints (split into `core.ts`, `tasks.ts`, `milestones.ts`, `files.ts`, and others)
+- `src/types/api/projects.ts` - Added TypeScript interfaces
 
 ## Soft Delete Behavior
 

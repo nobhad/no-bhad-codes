@@ -209,21 +209,21 @@ All tables (Clients, Projects, Invoices, Leads, Contracts):
 
 | File | Changes |
 |------|---------|
-| `src/styles/pages/admin.css` | Shadow removal, typography |
-| `src/styles/shared/portal-cards.css` | Stat label font |
-| `src/styles/shared/portal-layout.css` | Global header shadow |
-| `src/styles/client-portal/layout.css` | Page header shadow |
-| `src/styles/admin/index.css` | Layout imports |
-| `src/styles/admin/index.css` | Admin styles (keyboard help, sidebar, header consolidated) |
-| `src/styles/admin/overview-layout.css` | Dashboard grid |
+| `src/styles/bundles/admin.css` | Shadow removal, typography |
+| `src/styles/portal/shared/portal-cards.css` | Stat label font |
+| `src/styles/portal/shared/portal-layout.css` | Global header shadow |
+| `src/styles/portal/client/layout.css` | Page header shadow |
+| `src/styles/portal/admin/index.css` | Layout imports |
+| `src/styles/portal/admin/index.css` | Admin styles (keyboard help, sidebar, header consolidated) |
+| `src/styles/portal/admin/dashboard-layout.css` | Dashboard grid |
 
 ### TypeScript Files
 
 | File | Changes |
 |------|---------|
 | `src/react/app/PortalApp.tsx (admin)` | Keyboard nav, mobile drawer, help panel init — **deleted March 7, 2026; admin is now React SPA** |
-| `src/components/command-palette.ts` | ⌘K palette |
-| `src/components/keyboard-help.ts` | `?` shortcut help panel |
+| `src/react/components/portal/CommandPalette.tsx` | ⌘K palette |
+| `src/react/components/portal/KeyboardShortcutsOverlay.tsx` | `?` shortcut help panel |
 
 ---
 

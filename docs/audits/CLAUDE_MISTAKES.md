@@ -35,7 +35,7 @@ This file tracks instances where Claude did not follow clearly documented guidel
 **What I Should Have Done:**
 
 1. Check if a shared header component already exists (it does: `.admin-table-header` in admin.css)
-2. Either reuse that class directly OR add it to shared styles in `src/styles/shared/`
+2. Either reuse that class directly OR add it to shared styles in `src/styles/portal/shared/`
 3. NOT create duplicate component-specific styles in `client-portal/components.css`
 
 **The Rule I Ignored:**

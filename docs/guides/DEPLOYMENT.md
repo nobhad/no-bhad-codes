@@ -1,7 +1,7 @@
 # Deployment Guide
 
-This is a summary of deployment steps. Full details are in
-[`SYSTEM_DOCUMENTATION.md`](../SYSTEM_DOCUMENTATION.md#deployment-guide).
+This is a summary of deployment steps. Full details are in the
+[Ops Runbook](../OPS_RUNBOOK.md) and [Configuration](../CONFIGURATION.md) guides.
 
 ## Build
 

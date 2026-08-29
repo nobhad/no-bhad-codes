@@ -581,8 +581,8 @@ await emailService.sendAdminNotification({
 |`client/portal.html` *(legacy)*|Vanilla EJS portal page — superseded by React SPA shell at `server/views/layouts/portal.ejs`|
 |`src/features/client/client-portal.ts` *(removed)*|`submitProjectRequest()` method — vanilla portal entry, no longer exists|
 |`src/features/client/modules/portal-projects.ts` *(removed)*|Vanilla project loading/display — replaced by React `PortalDashboard` and admin `ProjectsTable`|
-|`src/styles/shared/portal-forms.css`|Form styling (still used)|
-|`server/routes/projects.ts`|Project request API (verify path under `server/routes/projects/`)|
+|`src/styles/portal/shared/portal-forms.css`|Form styling (still used)|
+|`server/routes/projects/core.ts`|Project CRUD API (mounted via `server/routes/projects/index.ts`)|
 |`server/services/email-service.ts`|Email notifications|
 
 > **Note:** This document describes a legacy vanilla-TS feature. The React portal currently has no client-facing "New Project" form — new projects originate via `AddProjectModal` in the admin React tree.

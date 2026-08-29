@@ -423,7 +423,7 @@ POST /api/email-templates/:id/test
 | `server/services/workflow-trigger-service.ts` | Trigger execution |
 | `server/services/email-template-service.ts` | Email template service |
 | `server/database/migrations/064_email_templates.sql` | Email templates schema |
-| `src/styles/admin/workflows.css` | Workflow styles (includes email templates) |
+| `src/styles/portal/admin/workflows.css` | Workflow styles (includes email templates) |
 
 ---
 

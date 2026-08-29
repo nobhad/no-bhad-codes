@@ -5152,7 +5152,7 @@ The following API sections require detailed documentation:
 - **Intake API** (`/api/intake`) - New project intake processing
 - **Client Info API** (`/api/client-info`) - Extended client information
 
-See [THE_BACKEND.md](./THE_BACKEND.md) for route overview.
+See [Backend Patterns](./architecture/BACKEND_PATTERNS.md) for route overview.
 
 ---
 

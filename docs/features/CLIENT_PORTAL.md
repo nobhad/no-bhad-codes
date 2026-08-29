@@ -529,7 +529,7 @@ Client view of pending and completed feedback surveys with star ratings.
 - [Retainers](./RETAINERS.md) - Retainer utilization tracking (Phase 4B)
 - [Feedback Surveys](./FEEDBACK.md) - Feedback surveys and testimonials (Phase 5A)
 - [CSS Architecture](../design/CSS_ARCHITECTURE.md) - Styling system
-- [Architecture Overview](../architecture/ARCHITECTURE.md) - System design
+- [Architecture Overview](../ARCHITECTURE.md) - System design
 
 ## Change Log
 

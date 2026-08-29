@@ -1,8 +1,14 @@
 # Handoff — footer curtain / project-detail map tile
 
-**Branch:** `main` · **HEAD:** `b7d2bdae` · **Working tree:** clean · **Nothing pushed** (ahead of origin)
+> **This handoff describes the session that ended at `b7d2bdae`.** The branch has moved on
+> substantially since (50+ commits, including the fixes noted inline below). Treat the commit
+> table as a record of that session, not as the current state of `main`. For live status see
+> [`CURRENT_WORK.md`](./CURRENT_WORK.md).
 
-`stash@{0}` holds an unverified experiment (see "Recommended next step"). Older stashes are unrelated/pre-existing.
+**Branch:** `main` · **Session HEAD:** `b7d2bdae` · **Working tree at handoff:** clean
+
+`stash@{0}` held an unverified experiment at the time of writing; the shrink-from-bottom stash
+referenced below has since been dropped.
 
 ---
 
@@ -74,6 +80,10 @@ produces **no wheel events** (`window.__wheels === 0` with a capture listener on
 synthetic `WheelEvent` does not reach the handlers either. So `8c24a895` is reasoned from the
 measured boundary values, not observed working.
 
+Still open: per `CURRENT_WORK.md`, a real trackpad's momentum tail remains the one input profile
+never exercised, and `CURTAIN_SETTLE_MS` is the constant most likely to need tuning against real
+hardware. Follow-up commits `77e39726` and `864486f7` refined the settle/resize behaviour.
+
 To verify by hand: open a case study, scroll to the very end with a trackpad, keep scrolling.
 The band should rise. Scroll back up and it should retract in step. Instrument with:
 
@@ -93,10 +103,11 @@ band returns page content).
 
 ## Also open
 
-- **TV title-card click** — user reports clicking the screen during the title card opens the
-  project's live site in a new tab. Never reproduced: sampling the screen every 260ms through a
-  tune-in never caught an anchor under the cursor, and a synthetic click always routed to
-  `#/projects/<slug>`. Handler is `wireTuneInScreenClick()` in `src/modules/ui/projects.ts`.
+- ~~**TV title-card click**~~ — **RESOLVED** in `c76f762d` ("invisible panels no longer swallow
+  clicks on the title card"). The cause was invisible case-study panels sitting over the screen
+  and capturing the click, not the handler `wireTuneInScreenClick()` in
+  `src/modules/ui/projects.ts`. Note the fix is committed but, per `CURRENT_WORK.md`, was still
+  unpushed at last check — the deployed site may lag.
 - **`_to_delete/`** is in git history from an early commit this session (320K stale generated
   design-system page). Removing it now needs a rebase or a delete commit.
 - Flaky entrance animation on project-detail: `worksub-header` / `worksub-intro` occasionally

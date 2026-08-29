@@ -47,13 +47,13 @@ Key capabilities:
 
 | Component | Technology |
 |-----------|------------|
-| Frontend | React 18 + TypeScript |
-| Routing | React Router v6 (hash-based) |
+| Frontend | React 19 + TypeScript |
+| Routing | React Router v7 (hash-based) |
 | State | Zustand |
 | Build | Vite with code splitting |
 | Authentication | HttpOnly cookies with JWT |
-| Charts | TBD — verify current usage in `AnalyticsDashboard.tsx` |
-| Backend | Express + SQLite (better-sqlite3) |
+| Charts | Chart.js via `chart.js` (see `src/react/features/admin/analytics/AnalyticsDashboard.tsx`) |
+| Backend | Express 5 + SQLite (`sqlite3`) |
 
 ### Shared SPA
 
@@ -401,5 +401,5 @@ All backend routes remain unchanged from the previous architecture.
 - [Client Portal](./CLIENT_PORTAL.md) — Client-facing portal
 - [Messaging](./MESSAGING.md) — Messaging system
 - [Files](./FILES.md) — File management
-- [API Documentation](../api/ENDPOINTS.md) — Full API reference
-- [Architecture](../architecture/ARCHITECTURE.md) — System design overview
+- [API Documentation](../API_DOCUMENTATION.md) — Full API reference
+- [Architecture](../ARCHITECTURE.md) — System design overview

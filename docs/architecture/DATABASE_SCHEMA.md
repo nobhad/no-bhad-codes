@@ -398,7 +398,7 @@ In `invoices` table:
 - author, sender_name, blocked_by
 
 **Status**: Migration 068 added `users` table and `*_user_id` INTEGER FK columns to 20+ tables.
-TEXT columns retained during transition period. See [DATABASE_NORMALIZATION_PLAN.md](../archive/DATABASE_NORMALIZATION_PLAN.md).
+TEXT columns retained during transition period. See [DATABASE_NORMALIZATION_PLAN.md](../audits/DATABASE_NORMALIZATION_PLAN.md).
 
 **Impact**: No referential integrity, no CASCADE deletes (being resolved)
 
@@ -416,7 +416,7 @@ Missing:
 
 ## Normalization Plan
 
-See [DATABASE_NORMALIZATION_PLAN.md](../archive/DATABASE_NORMALIZATION_PLAN.md) for detailed remediation plan.
+See [DATABASE_NORMALIZATION_PLAN.md](../audits/DATABASE_NORMALIZATION_PLAN.md) for detailed remediation plan.
 
 ### Phase 1 - Low Risk (Complete)
 
@@ -534,7 +534,7 @@ See [DATABASE_NORMALIZATION_PLAN.md](../archive/DATABASE_NORMALIZATION_PLAN.md) 
 ## Related Documentation
 
 - [API Documentation](../API_DOCUMENTATION.md)
-- [Database Normalization Plan](../archive/DATABASE_NORMALIZATION_PLAN.md)
+- [Database Normalization Plan](../audits/DATABASE_NORMALIZATION_PLAN.md)
 - [Data Quality Features](../features/DATA_QUALITY.md)
 - [Embedded Payments](../features/EMBEDDED_PAYMENTS.md)
 - [Project Agreements](../features/AGREEMENTS.md)

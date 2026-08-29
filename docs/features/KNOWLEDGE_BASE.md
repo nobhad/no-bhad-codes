@@ -220,7 +220,7 @@ Two-column layout redesigned for better UX:
 | `src/react/features/admin/knowledge-base/` | Admin React feature (KnowledgeBase, ArticlesTable, CategoriesTable) |
 | `src/react/features/portal/help/PortalHelp.tsx` | Client help React component |
 | `server/routes/knowledge-base.ts` | API endpoints |
-| `src/components/portal-modal.ts` | Modal component |
+| `src/react/components/portal/PortalModal.tsx` | Modal component |
 
 ## Change Log
 
@@ -238,7 +238,7 @@ Two-column layout redesigned for better UX:
 
 - `src/features/client/modules/portal-views.ts` *(removed)* — replaced by `src/react/features/portal/help/PortalHelp.tsx`
 - `src/features/client/modules/portal-help.ts` *(removed)* — accordion/search logic now in `PortalHelp.tsx`
-- `src/styles/client-portal/help.css` - Two-column grid layout styles
+- `src/styles/portal/client/help.css` - Two-column grid layout styles
 
 ### February 9, 2026 - Section Toggle UI Enhancement
 

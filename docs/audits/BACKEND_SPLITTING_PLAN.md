@@ -416,5 +416,5 @@ All checklist items verified February 11, 2026.
 
 ## Related Documentation
 
-- [Database Schema](./DATABASE_SCHEMA.md)
+- [Database Schema](../architecture/DATABASE_SCHEMA.md)
 - [API Documentation](../API_DOCUMENTATION.md)
