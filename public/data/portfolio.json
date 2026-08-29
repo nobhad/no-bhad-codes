@@ -161,8 +161,7 @@
         "/portfolio/the-backend/pdfs/receipt.png"
       ],
       "videos": [
-        "/portfolio/the-backend/videos/walkthrough-admin-desktop-{theme}.webm",
-        "/portfolio/videos/terminal-intake-{theme}.webm"
+        "/portfolio/the-backend/videos/walkthrough-admin-desktop-{theme}.webm"
       ],
       "liveUrl": "https://nobhad.codes/#/portal",
       "repoUrl": "https://github.com/nobhad/no-bhad-codes",
