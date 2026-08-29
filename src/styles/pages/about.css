@@ -127,7 +127,12 @@
    ========================================== */
 
 .about-marquee {
-  --about-marquee-duration: 75s;
+  /* Timed to the track, not picked by feel: the animation travels half the
+     track per cycle, so the duration has to grow with the list or the band
+     speeds up. 33 items per copy measure ~5900px at desktop, and 92s holds
+     the same ~64px/s the 13-item version scrolled at. Re-measure if the
+     list changes length. */
+  --about-marquee-duration: 92s;
   --about-marquee-glyph-duration: 9s;
   /* Fraction of the band's width consumed by each fade-out edge. */
   --about-marquee-fade: 6%;

@@ -477,7 +477,6 @@
           "Tailwind CSS",
           "GSAP",
           "Three.js",
-          "Lucide",
           "Radix UI",
           "OpenType.js",
           "Chart.js",
@@ -511,7 +510,9 @@
           "Vercel",
           "Netlify",
           "Anthropic SDK",
-          "Stripe"
+          "Stripe",
+          "Photoshop",
+          "Illustrator"
         ]
       }
     ],

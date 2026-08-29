@@ -432,69 +432,85 @@
               </div>
             </div>
             <!-- Toolkit marquee: full-bleed band under the two-column layout.
-               The track holds 4 copies of the list; the scroll animation
-               translates by -50% (2 copies), so the seam is invisible and the
-               half-width stays wider than any viewport. Track is aria-hidden —
-               the wrapper's label reads the list once instead of 52 times. -->
+               Membership mirrors profile.techStack in public/data/portfolio.json —
+               keep the two in step. The ORDER here is editorial, not the data's:
+               most-used and most-recognised first, niche libraries and design tools
+               last, so the first thing to scroll past is the strongest signal.
+               The track holds 2 copies; the scroll animation translates by -50%
+               (one copy), so the seam is invisible and the half-width stays wider
+               than any viewport. Track is aria-hidden — the wrapper's label reads
+               the list once instead of twice. -->
             <div
               class="about-marquee"
               role="img"
-              aria-label="Toolkit: TypeScript, React, Node.js, Express, GSAP, Vite, Tailwind CSS, SQLite, Redis, Stripe, Playwright, Photoshop, Illustrator"
+              aria-label="Toolkit: TypeScript, JavaScript, React, Node.js, Express, HTML5, CSS3, Tailwind CSS, GSAP, Vite, Next.js, Astro, PostgreSQL, SQLite, Redis, Supabase, Playwright, Vitest, Zod, JWT, Stripe, Anthropic SDK, Vercel, Netlify, Sentry, Three.js, Chart.js, EJS, Radix UI, Multer, OpenType.js, Photoshop, Illustrator"
             >
               <div class="about-marquee__track" aria-hidden="true">
                 <span class="about-marquee__item">TypeScript</span>
+                <span class="about-marquee__item">JavaScript</span>
                 <span class="about-marquee__item">React</span>
                 <span class="about-marquee__item">Node.js</span>
                 <span class="about-marquee__item">Express</span>
+                <span class="about-marquee__item">HTML5</span>
+                <span class="about-marquee__item">CSS3</span>
+                <span class="about-marquee__item">Tailwind CSS</span>
                 <span class="about-marquee__item">GSAP</span>
                 <span class="about-marquee__item">Vite</span>
-                <span class="about-marquee__item">Tailwind CSS</span>
+                <span class="about-marquee__item">Next.js</span>
+                <span class="about-marquee__item">Astro</span>
+                <span class="about-marquee__item">PostgreSQL</span>
                 <span class="about-marquee__item">SQLite</span>
                 <span class="about-marquee__item">Redis</span>
-                <span class="about-marquee__item">Stripe</span>
+                <span class="about-marquee__item">Supabase</span>
                 <span class="about-marquee__item">Playwright</span>
+                <span class="about-marquee__item">Vitest</span>
+                <span class="about-marquee__item">Zod</span>
+                <span class="about-marquee__item">JWT</span>
+                <span class="about-marquee__item">Stripe</span>
+                <span class="about-marquee__item">Anthropic SDK</span>
+                <span class="about-marquee__item">Vercel</span>
+                <span class="about-marquee__item">Netlify</span>
+                <span class="about-marquee__item">Sentry</span>
+                <span class="about-marquee__item">Three.js</span>
+                <span class="about-marquee__item">Chart.js</span>
+                <span class="about-marquee__item">EJS</span>
+                <span class="about-marquee__item">Radix UI</span>
+                <span class="about-marquee__item">Multer</span>
+                <span class="about-marquee__item">OpenType.js</span>
                 <span class="about-marquee__item">Photoshop</span>
                 <span class="about-marquee__item">Illustrator</span>
 
                 <span class="about-marquee__item">TypeScript</span>
+                <span class="about-marquee__item">JavaScript</span>
                 <span class="about-marquee__item">React</span>
                 <span class="about-marquee__item">Node.js</span>
                 <span class="about-marquee__item">Express</span>
+                <span class="about-marquee__item">HTML5</span>
+                <span class="about-marquee__item">CSS3</span>
+                <span class="about-marquee__item">Tailwind CSS</span>
                 <span class="about-marquee__item">GSAP</span>
                 <span class="about-marquee__item">Vite</span>
-                <span class="about-marquee__item">Tailwind CSS</span>
+                <span class="about-marquee__item">Next.js</span>
+                <span class="about-marquee__item">Astro</span>
+                <span class="about-marquee__item">PostgreSQL</span>
                 <span class="about-marquee__item">SQLite</span>
                 <span class="about-marquee__item">Redis</span>
-                <span class="about-marquee__item">Stripe</span>
+                <span class="about-marquee__item">Supabase</span>
                 <span class="about-marquee__item">Playwright</span>
-                <span class="about-marquee__item">Photoshop</span>
-                <span class="about-marquee__item">Illustrator</span>
-
-                <span class="about-marquee__item">TypeScript</span>
-                <span class="about-marquee__item">React</span>
-                <span class="about-marquee__item">Node.js</span>
-                <span class="about-marquee__item">Express</span>
-                <span class="about-marquee__item">GSAP</span>
-                <span class="about-marquee__item">Vite</span>
-                <span class="about-marquee__item">Tailwind CSS</span>
-                <span class="about-marquee__item">SQLite</span>
-                <span class="about-marquee__item">Redis</span>
+                <span class="about-marquee__item">Vitest</span>
+                <span class="about-marquee__item">Zod</span>
+                <span class="about-marquee__item">JWT</span>
                 <span class="about-marquee__item">Stripe</span>
-                <span class="about-marquee__item">Playwright</span>
-                <span class="about-marquee__item">Photoshop</span>
-                <span class="about-marquee__item">Illustrator</span>
-
-                <span class="about-marquee__item">TypeScript</span>
-                <span class="about-marquee__item">React</span>
-                <span class="about-marquee__item">Node.js</span>
-                <span class="about-marquee__item">Express</span>
-                <span class="about-marquee__item">GSAP</span>
-                <span class="about-marquee__item">Vite</span>
-                <span class="about-marquee__item">Tailwind CSS</span>
-                <span class="about-marquee__item">SQLite</span>
-                <span class="about-marquee__item">Redis</span>
-                <span class="about-marquee__item">Stripe</span>
-                <span class="about-marquee__item">Playwright</span>
+                <span class="about-marquee__item">Anthropic SDK</span>
+                <span class="about-marquee__item">Vercel</span>
+                <span class="about-marquee__item">Netlify</span>
+                <span class="about-marquee__item">Sentry</span>
+                <span class="about-marquee__item">Three.js</span>
+                <span class="about-marquee__item">Chart.js</span>
+                <span class="about-marquee__item">EJS</span>
+                <span class="about-marquee__item">Radix UI</span>
+                <span class="about-marquee__item">Multer</span>
+                <span class="about-marquee__item">OpenType.js</span>
                 <span class="about-marquee__item">Photoshop</span>
                 <span class="about-marquee__item">Illustrator</span>
               </div>
