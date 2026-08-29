@@ -139,6 +139,9 @@ interface PortfolioProject {
   launchDate?: string;
   isDocumented: boolean;
   titleCard?: string | TitleCardData;
+  // Optional second write-up rendered below the case study, for one part of
+  // the build that deserves its own section rather than a feature bullet.
+  deepDive?: { heading: string; body: string[]; bullets?: string[] };
   duration?: string;
   challenge?: string;
   approach?: string;
@@ -2400,6 +2403,33 @@ export class ProjectsModule extends BaseModule {
         (featuresSection as HTMLElement).style.display = '';
       } else {
         (featuresSection as HTMLElement).style.display = 'none';
+      }
+    }
+
+    // Deep-dive section — only the projects that define one show it.
+    const deepSection = this.projectDetailSection.querySelector('#project-deepdive-section');
+    const deepHeading = this.projectDetailSection.querySelector('#project-deepdive-heading');
+    const deepBody = this.projectDetailSection.querySelector('#project-deepdive-body');
+    const deepList = this.projectDetailSection.querySelector('#project-deepdive-list');
+    if (deepSection && deepHeading && deepBody && deepList) {
+      const deep = project.deepDive;
+      if (deep && deep.body.length > 0) {
+        deepHeading.textContent = deep.heading;
+        deepBody.innerHTML = deep.body
+          .map((para) => `<p class="case-study-text">${escapeHtml(para)}</p>`)
+          .join('');
+        deepList.innerHTML = (deep.bullets ?? [])
+          .map((item) => `<li>${escapeHtml(item)}</li>`)
+          .join('');
+        (deepSection as HTMLElement).style.display = '';
+      } else {
+        // Clear as well as hide — otherwise the previous project's write-up
+        // sits in the DOM behind display:none, waiting for a stylesheet
+        // change to leak it onto a page it was never about.
+        deepHeading.textContent = '';
+        deepBody.innerHTML = '';
+        deepList.innerHTML = '';
+        (deepSection as HTMLElement).style.display = 'none';
       }
     }
 

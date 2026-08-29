@@ -264,14 +264,29 @@
       },
       "duration": "6 months",
       "challenge": "Their Squarespace site couldn't capture the earthy, witchy character of the brand, and off-the-shelf templates flatten a studio whose whole philosophy is that plants belong together in living communities. They needed something handcrafted and ecologically literate: organic in feel, easy to maintain, and fast on mobile for clients browsing from the garden.",
-      "approach": "I designed the entire visual system from scratch, with no theme or template: custom corner frames, wavy SVG text paths, and GSAP scroll-driven character reveals. The centerpiece is a walkable native-garden page. I researched native New England flora and the pollinators each species supports, then hand-illustrated every plant and pollinator in Adobe Illustrator and Photoshop and rendered them true-to-scale, grouped by real plant communities. Around it I built a static Astro site with a filterable gallery and lightbox, an Astro Content Collections blog, and a CMS I designed and built myself \u2014 twelve admin screens with a rich-text editor and image uploads \u2014 so the studio edits every page, post and gallery item without a platform subscription.",
+      "approach": "I designed the entire visual system from scratch, with no theme or template: custom corner frames, wavy SVG text paths, and GSAP scroll-driven character reveals. The centerpiece is a walkable native-garden page. I researched native New England flora and the pollinators each species supports, then hand-illustrated every plant and pollinator in Adobe Illustrator and Photoshop and rendered them true-to-scale, grouped by real plant communities. Around it I built a static Astro site with a filterable gallery and lightbox, an Astro Content Collections blog, and a CMS I designed and built myself — twelve admin screens with a rich-text editor and image uploads — so the studio edits every page, post and gallery item without a platform subscription.",
       "results": [
         "Bespoke, hand-illustrated design system with zero templates",
         "Interactive to-scale native garden built from original ecological research",
-        "A CMS designed and built from scratch \u2014 12 admin screens covering posts, pages, gallery, messages and settings",
+        "A CMS designed and built from scratch — 12 admin screens covering posts, pages, gallery, messages and settings",
         "64 static pages across 29 routes, every one client-editable without a platform subscription",
         "WCAG AA accessibility throughout"
       ],
+      "deepDive": {
+        "heading": "Inside the CMS",
+        "body": [
+          "The studio needed to run the site themselves without paying for a platform, so the CMS is part of the build rather than a service bolted onto it. There is no database. Every edit is a git commit: the admin talks to Netlify's Git Gateway, which proxies the GitHub Contents API using the editor's own Netlify Identity token, so content lands in the repository as Markdown and images, beside the code that renders it.",
+          "Writing happens in a TipTap editor that shows formatted text rather than Markdown syntax, but stores Markdown underneath. The posts that already existed and the Astro Content Collections pipeline that renders them never had to change to accommodate the editor.",
+          "Saving and publishing are deliberately separate. Editing commits carry [skip ci] so a long session doesn't queue a Netlify build on every save; publishing is the explicit act that rebuilds the site. Auth refreshes itself too — tokens go through gotrue's user.jwt(), so an admin left open past the hour keeps working instead of failing on a stale hour-old JWT."
+        ],
+        "bullets": [
+          "12 screens: dashboard, posts, pages, gallery, projects, messages, analytics and settings, with their editors",
+          "TipTap rich-text editing (starter kit, links, images) that reads and writes Markdown",
+          "Content versioned as ordinary git history — every change is a commit, and reverting is a revert",
+          "GA4 traffic summarised in the dashboard through a Netlify Function, so the client never opens Google Analytics",
+          "Contact-form submissions collected in a Messages screen with email notification"
+        ]
+      },
       "keyFeatures": [
         "Walkable native-garden page with plants drawn true-to-scale, grouped by real ecological community",
         "Hand-illustrated plant & pollinator artwork (Adobe Illustrator + Photoshop)",
