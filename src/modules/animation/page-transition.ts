@@ -634,6 +634,55 @@ export class PageTransitionModule extends BaseModule {
   }
 
   /**
+   * Canonical hash for a page, or null for routes whose URL is already
+   * authoritative: project-detail carries a slug, and every off-map page is
+   * only ever reached BY setting the hash in the first place.
+   */
+  private canonicalHashFor(pageId: string): string | null {
+    switch (pageId) {
+      case 'intro':
+        return '#/';
+      case 'about':
+        return '#/about';
+      case 'projects':
+        return '#/projects';
+      case 'contact':
+        return '#/contact';
+      default:
+        return null;
+    }
+  }
+
+  /**
+   * Point the URL at the tile the camera actually landed on.
+   *
+   * Map → map slides call transitionTo directly and never touch the hash
+   * (see tryNavigateDirection), so without this the address bar keeps naming
+   * the tile the user scrolled away from — and a reload, a bookmark or a
+   * shared link takes them back to it.
+   *
+   * replaceState rather than assigning location.hash: assigning fires
+   * hashchange, which would re-enter handleHashChange and re-run the
+   * transition that just finished, and it would stack a history entry on
+   * every wheel flick.
+   */
+  private syncUrlToPage(pageId: string, arrivedVia: Direction | null): void {
+    const hash = this.canonicalHashFor(pageId);
+    if (!hash || window.location.hash === hash) return;
+
+    window.history.replaceState(window.history.state, '', hash);
+
+    // The tail of navHistory describes the entry the URL now points at, so
+    // keep it truthful — popstate reads it back to reverse the slide.
+    const entry = { hash, arrivedVia };
+    if (this.navHistory.length > 0) {
+      this.navHistory[this.navHistory.length - 1] = entry;
+    } else {
+      this.navHistory.push(entry);
+    }
+  }
+
+  /**
    * Reflect the current page's navigable directions in the compass cues
    * (the corner arrows that hint at scroll-map navigation). Each cue
    * gets data-can="true" if scrolling that direction would lead somewhere.
@@ -2094,6 +2143,7 @@ export class PageTransitionModule extends BaseModule {
       // on a tile the user never pushed down on.
       this.resetCurtain();
       this.updateActivePageAttribute(pageId);
+      this.syncUrlToPage(pageId, slideDirection);
       // Mark first navigation done so the compass drops the first-paint
       // single-cue restriction and starts surfacing every valid direction.
       this.hasNavigated = true;
@@ -2157,6 +2207,7 @@ export class PageTransitionModule extends BaseModule {
         this.currentPageId = pageId;
         this.resetCurtain();
         this.updateActivePageAttribute(pageId);
+        this.syncUrlToPage(pageId, slideDirection);
       }
     } finally {
       this.isTransitioning = false;
