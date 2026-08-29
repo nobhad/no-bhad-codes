@@ -323,11 +323,20 @@
 }
 
 /* Description text in the hero row */
-.worksub-header-description {
+.worksub-header-description,
+.worksub-description {
   margin: 0;
   font-size: var(--font-size-md);
   line-height: 1.5;
   color: var(--color-dark);
+}
+
+/* Full width under the hero. No margin of its own — the wrapper's own gap
+   already separates it from the header, and adding to it doubled the space
+   into a visible hole between the image and the text. */
+.worksub-description {
+  width: 100%;
+  margin-top: 0;
 }
 
 /* Placeholder for missing hero images */
@@ -1308,9 +1317,13 @@
 .title-row {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  /* Column gap holds the badge off the title; row gap only applies when a
+     long title pushes the badge onto its own line, and 24px there left it
+     floating away from the heading it belongs to. */
+  column-gap: var(--space-3);
+  row-gap: var(--space-2);
   flex-wrap: wrap;
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-3);
 }
 
 .title-row h1 {
