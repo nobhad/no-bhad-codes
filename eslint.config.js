@@ -2,6 +2,7 @@ import js from '@eslint/js';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
+import prettierConfig from 'eslint-config-prettier';
 
 // Common globals for both JS and TS
 const commonGlobals = {
@@ -207,7 +208,14 @@ export default [
     }
   },
   {
-    files: ['src/**/*.{ts,tsx}', 'server/**/*.ts', 'scripts/**/*.ts', 'tests/**/*.ts', 'shared/**/*.ts', '*.config.ts'],
+    files: [
+      'src/**/*.{ts,tsx}',
+      'server/**/*.ts',
+      'scripts/**/*.ts',
+      'tests/**/*.ts',
+      'shared/**/*.ts',
+      '*.config.ts'
+    ],
     plugins: {
       '@typescript-eslint': tsPlugin,
       'react-hooks': reactHooksPlugin
@@ -302,5 +310,12 @@ export default [
       'no-console': 'off', // Allow console in admin files
       'no-alert': 'off' // Allow alert in admin dashboard
     }
-  }
+  },
+  // MUST STAY LAST. Turns off every ESLint rule that argues with Prettier
+  // about layout — indent, quotes, brace-style, space-before-function-paren
+  // and friends. Without it the two tools undo each other: running Prettier
+  // produced 445 ESLint errors, and `eslint --fix` put the formatting back,
+  // which is why `npm run format` had gone unrun long enough for 784 files to
+  // drift. Prettier owns layout now; ESLint owns everything else.
+  prettierConfig
 ];

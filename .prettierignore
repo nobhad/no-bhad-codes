@@ -19,7 +19,6 @@ sw.js
 
 # Config files
 .eslintrc.json
-.prettierrc.json
 
 # Version control
 .git/
@@ -32,3 +31,14 @@ sw.js
 # Other
 *.md
 LICENSE
+
+# HTML email templates. Prettier rewrites the CSS inside <style> — it flips
+# "Inconsolata" to 'Inconsolata', because the *.css singleQuote override only
+# matches real .css files and embedded styles inherit singleQuote: true.
+# Single-quoted font names are spec-valid but unreliable in Outlook's Word
+# renderer, and email HTML depends on table layout and whitespace that a
+# general-purpose formatter has no reason to respect. No upside here.
+server/templates/email/
+
+# Named for deletion; not worth reformatting.
+_to_delete/
