@@ -696,7 +696,7 @@ ${parsed.map(renderFile).join('\n')}
            reveal with GSAP, scrubbed against the last stretch of scroll. -->
       <div class="footer-curtain" data-footer-curtain aria-hidden="true">
         <div class="footer-curtain__inner" data-footer-curtain-inner>
-          <div class="footer-curtain__brand">
+          <a class="footer-curtain__brand" href="/" aria-label="No Bhad Codes home">
             <img
               class="footer-curtain__avatar"
               src="/images/avatar.svg"
@@ -707,7 +707,7 @@ ${parsed.map(renderFile).join('\n')}
               decoding="async"
             />
             <p class="footer-curtain__wordmark">no bhad codes</p>
-          </div>
+          </a>
 
           <p class="footer-curtain__copy">
             &copy; <span class="js-copyright-year"></span> Made &amp; Designed by No Bhad Codes. All
