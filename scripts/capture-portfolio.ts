@@ -41,7 +41,7 @@ const VIDEO_TRANSITION_MS = 1500;
 const INTRO_PLAY_MS = 4500;
 // Per-link dwell while hovering the open nav menu on camera.
 const NAV_HOVER_MS = 600;
-// Nav links inside the open menu (templates/partials/navigation.ejs).
+// Nav links inside the open menu (templates/partials/shell/nav.ejs).
 const NAV_LINK_SELECTOR = '.nav .menu-link';
 const LOGIN_NAV_TIMEOUT_MS = 15000;
 const POST_LOGIN_SETTLE_MS = 2500;

@@ -716,6 +716,7 @@ exports[`design system tokens > exposes the expected token names 1`] = `
   "--ring",
   "--scrollbar-width",
   "--search-input-max-width",
+  "--section-heading-size",
   "--section-padding",
   "--select-caret",
   "--select-caret-light",
