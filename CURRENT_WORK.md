@@ -4,7 +4,7 @@
 
 ## Aug 29 session (later) — scroll-map URL, TV guide clicks
 
-**Status:** DONE — verified in a real browser, all three committed
+**Status:** DONE in code — verified in a real browser; NOT deployed
 
 - [x] **The URL never followed the scroll-map camera.** Sliding about → projects
       moved `currentPageId`, the title and `data-active-page` while the address
@@ -29,6 +29,24 @@
       the detail page (checked at 1.2s/3s/8s/20s into the tune-in, top/middle/
       bottom), and `Live: <url>` is still the only thing that opens the
       project's own site, in a new tab.
+- [x] **The title card hid a live link.** Every case-study panel is
+      `position:absolute; inset:0` over the whole screen, and the outro is last
+      in the DOM — so at `opacity:0` it still sat on top with its live-site
+      anchor armed, right where the title card's text lands. Clicking the title
+      card opened the project's own site in a new tab. Fix (`c76f762d`): panels
+      are `pointer-events:none` by default and the cycle arms only the panel it
+      is showing. Caught by sweeping a 20x20 grid of `elementFromPoint` over the
+      screen — a centre-point probe misses it, which is how the first pass
+      wrongly concluded nothing else opened an external URL.
+- [x] **The toolkit marquee carries the full stack** (`6ecc469c`, `71ece8b0`).
+      The About band listed 13 hardcoded items while `profile.techStack` held a
+      reconciled set nothing read. Now 33, membership matching the data, order
+      editorial: core languages, then Illustrator/Photoshop, then the rest, with
+      "Adobe Creative Suite" closing. Lucide dropped (an icon set), OpenType.js
+      dropped (one project's tool; the Hedgewitch page lists it). **Watch the
+      duration:** the animation travels half the track per cycle, so a longer
+      list scrolls faster at a fixed duration — `--about-marquee-duration` is
+      now 94s to hold the original ~64px/s. Re-measure if the list changes.
 - [x] **Browserslist data refreshed** (`f76b72a6`) — every production build
       opened with a six-month-stale `caniuse-lite` notice. No target browser
       changes; data only.
@@ -62,8 +80,11 @@ blocks anything; they are the loose ends that session left.
       the two that cover what changed — page transitions and the business-card
       `calc()` tokens whose snapshot moved — so they are worth a pass before
       any deploy. Unit tests (4400) and the production build both pass.
-- [ ] **One commit unpushed.** `origin/main` now sits at `d83b704a`; only
-      `f76b72a6` (browserslist data) is ahead of it.
+- [ ] **Seven commits unpushed, and live is behind them.** Includes both TV
+      click fixes — the deployed site still opens a new tab when you click the
+      title card. Push, then deploy; four older "fixed in code, needs deploy"
+      items ride along (projects media, portal `/src/*.ts` 404s, and migrations
+      140/141 which need Railway).
 - [ ] **The curtain was only ever driven by synthetic and Playwright wheel
       events.** A real trackpad's momentum tail is the one input profile that
       was never exercised. `CURTAIN_SETTLE_MS` (120ms of quiet before the band
