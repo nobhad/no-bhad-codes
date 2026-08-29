@@ -2,6 +2,50 @@
 
 ---
 
+## Open items from the Aug 29 session
+
+**Status:** OPEN
+**Priority:** Medium
+
+Carried out of the footer-curtain / lint / Prettier session. Nothing here
+blocks anything; they are the loose ends that session left.
+
+- [ ] **E2E tests never ran.** `npx playwright test` fails before executing a
+      single test: the runner wants Chromium build 1200 and the local cache
+      holds 1234, so the binaries do not match. Either `npx playwright install`
+      (a few hundred MB) or point the run at the installed Google Chrome with
+      `channel: 'chrome'`, which downloads nothing.
+      `tests/e2e/navigation.spec.ts` and `tests/e2e/business-card.spec.ts` are
+      the two that cover what changed — page transitions and the business-card
+      `calc()` tokens whose snapshot moved — so they are worth a pass before
+      any deploy. Unit tests (4400) and the production build both pass.
+- [ ] **Nothing is pushed.** `main` is 15 commits ahead of `origin/main`: the
+      seven from this session plus eight that were already unpushed when it
+      started.
+- [ ] **The curtain was only ever driven by synthetic and Playwright wheel
+      events.** A real trackpad's momentum tail is the one input profile that
+      was never exercised. `CURTAIN_SETTLE_MS` (120ms of quiet before the band
+      commits to an end) is the constant most likely to need tuning against
+      real hardware — momentum arrives as a long decaying burst, and if a gap
+      inside that burst exceeds 120ms the band would settle mid-gesture.
+- [ ] **`curly` is no longer enforced.** `eslint-config-prettier` switches it
+      off, because Prettier decides line breaking and `curly: multi-line` then
+      argues with the result. Restore it as `['error', 'all']` if the loss
+      matters; that requires adding braces at the handful of sites that
+      currently rely on the single-line form.
+- [ ] **`npm audit` reports vulnerabilities** in production dependencies. Not
+      looked at — a separate job with its own blast radius.
+
+Deliberate, recorded so they do not read as oversights:
+
+- `uploads/` is out of the markdownlint run. It holds client documents served
+  by the portal (the Hedgewitch proposal among them); reformatting one to
+  satisfy a linter edits a deliverable, not a doc.
+- `server/templates/email/` is out of the Prettier run — see the note in
+  `.prettierignore` for why.
+
+---
+
 ## Scroll-reveal black footer curtain (Aug 27, 2026)
 
 **Status:** DONE — verified in the browser on project detail pages
