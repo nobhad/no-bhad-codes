@@ -924,6 +924,13 @@ export class PageTransitionModule extends BaseModule {
 
     this.log(`Initializing page states, hash: ${hash}, initialPageId: ${initialPageId}`);
 
+    // Seed the nav stack with wherever the visitor landed. A direct load
+    // fires no hashchange, so without this the stack stays empty, the first
+    // navigation leaves exactly one entry, and the back button — which needs
+    // two, the page it is leaving and the page it is returning to — could
+    // never work out which way to slide.
+    this.navHistory.push({ hash: hash || '#/', arrivedVia: null });
+
     this.pages.forEach((page, id) => {
       if (!page.element) return;
 
@@ -1165,9 +1172,21 @@ export class PageTransitionModule extends BaseModule {
       // Push current hash + arrival direction to nav history so a future
       // popstate can look up "how did the user reach this page?" and slide
       // the opposite way to reverse it.
-      this.navHistory.push({ hash, arrivedVia: slideDir });
-      if (this.navHistory.length > NAV_HISTORY_CAP) {
-        this.navHistory.splice(0, this.navHistory.length - NAV_HISTORY_CAP);
+      if (fromPopstate) {
+        // Going back: drop the page being left so the stack mirrors the
+        // browser's own depth. Pushing here instead made every back look
+        // like another step forward, and the stack only ever grew.
+        if (
+          this.navHistory.length > 1 &&
+          this.navHistory[this.navHistory.length - 1].hash !== hash
+        ) {
+          this.navHistory.pop();
+        }
+      } else {
+        this.navHistory.push({ hash, arrivedVia: slideDir });
+        if (this.navHistory.length > NAV_HISTORY_CAP) {
+          this.navHistory.splice(0, this.navHistory.length - NAV_HISTORY_CAP);
+        }
       }
 
       if (slideDir) {

@@ -33,11 +33,10 @@
       "date": "2026-01-01",
       "status": "live",
       "featured": true,
-      "heroImage": "/portfolio/nobhad-codes/home-{theme}-desktop.png",
+      "heroImage": "/portfolio/nobhad-codes/intro-{theme}.gif",
       "screenshots": [],
       "videos": [
-        "/portfolio/nobhad-codes/videos/walkthrough-desktop-{theme}.webm",
-        "/portfolio/videos/terminal-intake-{theme}.webm"
+        "/portfolio/nobhad-codes/videos/walkthrough-desktop-{theme}.webm"
       ],
       "liveUrl": "https://nobhad.codes",
       "repoUrl": "https://github.com/nobhad/no-bhad-codes",
@@ -54,6 +53,7 @@
         "secondaryPt": 38
       },
       "duration": "Ongoing",
+      "launchDate": "2026-03",
       "challenge": "Most portfolio templates feel generic and fail to demonstrate actual development skills. I needed a site that would stand out while proving I could build production-ready applications—not just pretty mockups.",
       "approach": "I built everything from scratch using vanilla TypeScript instead of React to demonstrate fundamental skills. I implemented a custom hash-based SPA router, a 2D spatial scroll-map navigation system (five tiles in a plus layout — intro, hero, about, projects, contact), GSAP-powered animations, and a full Express backend. The projects page is structured as a vintage TV with a channel guide; selecting a channel plays a Looney-Tunes-style title-card tune-in followed by the case study. The playful design draws inspiration from a mischievous coyote cartoon character — clever, resourceful, and a little unconventional.",
       "results": [
