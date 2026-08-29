@@ -717,8 +717,16 @@ export class PageTransitionModule extends BaseModule {
     }
 
     // ↓ is a real destination on the curtain tiles even though the neighbor
-    // graph has nothing there — what's below them is the footer.
-    if (this.curtainOwnsVertical()) navigable.add('down');
+    // graph has nothing there — what's below them is the footer. It stays lit
+    // only while it still leads somewhere: once the tile is scrolled out AND
+    // the band is all the way up, ↓ does nothing, and an arrow that does
+    // nothing is worse than no arrow. setCurtainProgress re-runs this as the
+    // band moves, so the cue fades out as the footer arrives.
+    if (this.curtainOwnsVertical()) {
+      const moreTileBelow = this.tileScrollRemaining('down') > SCROLL_EDGE_EPSILON;
+      if (moreTileBelow || this.curtainProgress < 1) navigable.add('down');
+      else navigable.delete('down');
+    }
 
     // Until the user has scrolled / navigated once, narrow the cue set
     // to the forward direction(s) of the current page so the affordance
@@ -863,6 +871,8 @@ export class PageTransitionModule extends BaseModule {
     if (progress === this.curtainProgress) return;
     this.curtainProgress = progress;
     window.dispatchEvent(new CustomEvent('footer-curtain:set-progress', { detail: { progress } }));
+    // The ↓ cue is lit off this value — see updateCompass.
+    this.updateCompass();
   }
 
   /** Drop the curtain — the page underneath it is about to change. */
@@ -1428,14 +1438,17 @@ export class PageTransitionModule extends BaseModule {
 
     let direction: Direction | null = null;
 
-    // Universal convention across wheel/touch/keyboard: FINGER direction
-    // (or arrow key direction) maps to navigation direction. On macOS
-    // with natural scroll on (default), swiping right gives deltaX < 0
-    // and swiping down gives deltaY < 0, so we read the OPPOSITE of the
-    // delta sign for both axes. Mouse-wheel users (rare in 2026) and
-    // non-natural-scroll trackpad users get one inverted axis; touch
-    // and natural-scroll trackpad users — the majority — get intuitive
-    // gestures across every input device.
+    // Wheel navigation follows the SCROLL, not the finger: a scroll down
+    // or right goes to the next page, exactly as a scroll down moves you
+    // down an ordinary document. That is the same sense as ArrowDown /
+    // ArrowRight and as the ↓ / → compass cues, so every input agrees —
+    // reading the finger instead used to send the wheel one way and the
+    // arrow key the other from the same tile.
+    //
+    // It matches the platform, too. On a natural-scroll trackpad a swipe
+    // toward the left gives deltaX > 0, and that is the gesture that
+    // advances a carousel everywhere else on the machine; a mouse wheel
+    // or a tilt wheel reports the same signs for the same intent.
     if (event.shiftKey) {
       // Shift + wheel = horizontal carousel navigation. A plain mouse has
       // only a vertical wheel, so this is the mouse-user's equivalent of a
@@ -1444,7 +1457,7 @@ export class PageTransitionModule extends BaseModule {
       // (some), so navigate off whichever axis carries the gesture, using
       // the same natural-scroll sign convention as the horizontal branch.
       const primary = absX >= absY ? dx : dy;
-      direction = primary < 0 ? 'right' : 'left';
+      direction = primary > 0 ? 'right' : 'left';
     } else if (absY >= absX) {
       // Vertical wheel — ANY scroll direction navigates the carousel
       // (vertical or horizontal), so the trackpad and a plain mouse wheel
@@ -1457,8 +1470,9 @@ export class PageTransitionModule extends BaseModule {
       // Every other tile carries the footer, and on those the vertical axis
       // belongs to the curtain — see curtainOwnsVertical().
       if (this.currentPageId === 'projects') {
-        // natural-scroll: dy < 0 is a downward finger swipe → next channel.
-        direction = dy < 0 ? 'down' : 'up';
+        // Scrolling down goes down the channel list, like scrolling down
+        // any other list; ArrowDown does the same.
+        direction = dy > 0 ? 'down' : 'up';
       } else if (this.curtainOwnsVertical()) {
         // ONE rule for every page that has a footer: vertical input belongs to
         // the tile's own scroll until that scroll runs out, and past the end it
@@ -1524,12 +1538,13 @@ export class PageTransitionModule extends BaseModule {
         }
       } else {
         // Remaining map tiles: remap vertical wheel → horizontal carousel nav
-        // so up/down scroll moves between pages too. dy < 0 (down) → forward.
-        direction = dy < 0 ? 'right' : 'left';
+        // so up/down scroll moves between pages too. Scrolling down goes
+        // forward, the same way ArrowDown would.
+        direction = dy > 0 ? 'right' : 'left';
       }
     } else {
-      // Horizontal: swipe RIGHT (dx < 0 on natural scroll) → 'right'.
-      direction = dx < 0 ? 'right' : 'left';
+      // Horizontal: scrolling right goes right, matching ArrowRight.
+      direction = dx > 0 ? 'right' : 'left';
     }
 
     // We're about to navigate — only consume the wheel event if there's
