@@ -228,8 +228,8 @@
         "Astro",
         "TypeScript",
         "GSAP",
-        "Three.js",
-        "OpenType.js",
+        "TipTap",
+        "Netlify Identity",
         "Netlify",
         "CSS"
       ],
@@ -240,8 +240,8 @@
         "Astro",
         "TypeScript",
         "GSAP",
-        "Three.js",
-        "OpenType.js",
+        "TipTap",
+        "Netlify Identity",
         "Netlify",
         "CSS"
       ],
@@ -264,11 +264,12 @@
       },
       "duration": "6 months",
       "challenge": "Their Squarespace site couldn't capture the earthy, witchy character of the brand, and off-the-shelf templates flatten a studio whose whole philosophy is that plants belong together in living communities. They needed something handcrafted and ecologically literate: organic in feel, easy to maintain, and fast on mobile for clients browsing from the garden.",
-      "approach": "I designed the entire visual system from scratch, with no theme or template: custom corner frames, wavy SVG text paths, and GSAP scroll-driven character reveals. The centerpiece is a walkable native-garden page. I researched native New England flora and the pollinators each species supports, then hand-illustrated every plant and pollinator in Adobe Illustrator and Photoshop and rendered them true-to-scale, grouped by real plant communities. Around it I built a static Astro site with a filterable gallery and lightbox, an Astro Content Collections blog, and a self-service admin CMS.",
+      "approach": "I designed the entire visual system from scratch, with no theme or template: custom corner frames, wavy SVG text paths, and GSAP scroll-driven character reveals. The centerpiece is a walkable native-garden page. I researched native New England flora and the pollinators each species supports, then hand-illustrated every plant and pollinator in Adobe Illustrator and Photoshop and rendered them true-to-scale, grouped by real plant communities. Around it I built a static Astro site with a filterable gallery and lightbox, an Astro Content Collections blog, and a CMS I designed and built myself \u2014 twelve admin screens with a rich-text editor and image uploads \u2014 so the studio edits every page, post and gallery item without a platform subscription.",
       "results": [
         "Bespoke, hand-illustrated design system with zero templates",
         "Interactive to-scale native garden built from original ecological research",
-        "26 custom pages with a full self-service admin CMS",
+        "A CMS designed and built from scratch \u2014 12 admin screens covering posts, pages, gallery, messages and settings",
+        "64 static pages across 29 routes, every one client-editable without a platform subscription",
         "WCAG AA accessibility throughout"
       ],
       "keyFeatures": [
@@ -277,23 +278,24 @@
         "Native flora & pollinator research behind every plant",
         "GSAP scroll-driven animations with pinned character reveals",
         "Custom corner frames and wavy SVG text dividers",
-        "Three.js star field background effect",
-        "49-item gallery with lightbox and category filtering",
-        "Astro Content Collections blog + self-service admin CMS (Netlify Identity)"
+        "Hand-built star field scattering drifting points behind the forest sections",
+        "35-item gallery with lightbox and category filtering",
+        "Custom CMS: 12 admin screens with a TipTap rich-text editor for posts, pages, gallery and settings",
+        "Astro Content Collections blog, written and published from that CMS"
       ],
       "tv": {
         "description": "A fully custom, hand-illustrated site for a Greater Boston sustainable-garden studio, anchored by a walkable native garden where every plant is drawn to scale and grouped the way it grows in the wild.",
         "challenge": "Their Squarespace couldn't capture the earthy, witchy identity, and templates flatten a studio built on the idea that plants belong together in living communities.",
-        "approach": "A bespoke, handcrafted design on a fast Astro build. Native flora and pollinators researched, then hand-illustrated in Illustrator & Photoshop and rendered to scale in a walkable garden, plus gallery, blog, and self-service CMS.",
+        "approach": "A bespoke, handcrafted design on a fast Astro build. Native flora and pollinators researched, then hand-illustrated in Illustrator & Photoshop and rendered to scale in a walkable garden, plus gallery, blog, and a CMS built from scratch.",
         "keyFeatures": [
           "Walkable to-scale native garden",
           "Hand-illustrated plants & pollinators",
           "GSAP scroll-driven character reveals",
-          "Self-service admin dashboard"
+          "A CMS built from scratch"
         ],
         "results": [
           "Bespoke hand-illustrated design, no templates",
-          "26 custom pages + self-service CMS",
+          "64 pages, all client-editable, no platform fees",
           "WCAG AA accessibility throughout"
         ]
       }
