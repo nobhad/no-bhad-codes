@@ -1540,7 +1540,7 @@ export class ProjectsModule extends BaseModule {
     // start hidden so the heading-then-body sequence works per-panel.
     panels.forEach((panel) => {
       panel.classList.remove('is-heading-only', 'is-body-only');
-      gsap.set(panel, { opacity: 0 });
+      gsap.set(panel, { opacity: 0, pointerEvents: 'none' });
       // Reset transform too so the mobile auto-scroll doesn't carry over
       // from a previous cycle (children would still be y:-300 etc).
       gsap.set(panel.children, { opacity: 0, scale: 1, y: 0 });
@@ -1570,7 +1570,9 @@ export class ProjectsModule extends BaseModule {
       const isScrollPanel = isMobile && SCROLL_KEYS.has(key);
 
       // Reveal the panel container (children remain at opacity 0).
-      tl.set(panel, { opacity: 1 });
+      // Pointer events come back with it — see the CSS note on
+      // .crt-tv__panel for why they are off the rest of the time.
+      tl.set(panel, { opacity: 1, pointerEvents: 'auto' });
 
       if (useFlash && heading) {
         // Heading-only mode: body is display:none so the heading is the
@@ -1719,6 +1721,7 @@ export class ProjectsModule extends BaseModule {
       // and not the last panel (no successor to cross into).
       if (!isOutro && !isLast) {
         tl.to(panel, { opacity: 0, duration: TV_TEXT_FADE_S, ease: 'power2.in' });
+        tl.set(panel, { pointerEvents: 'none' });
       }
     });
   }

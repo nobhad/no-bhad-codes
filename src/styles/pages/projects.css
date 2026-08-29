@@ -1266,6 +1266,12 @@
   justify-content: center;
   padding: 6cqw 7cqw;
   opacity: 0;
+  /* Invisible is not the same as gone: these stack at inset:0 over the
+     whole screen, so at opacity:0 they still swallow clicks — and the
+     outro, last in the DOM, sits on top with its live-site link right
+     where the title card's text lands. JS turns pointer events back on
+     for whichever panel it is currently showing. */
+  pointer-events: none;
   /* Per-card text color is set on .crt-tv__tunein from JS using
      titleCard.color (designer-supplied hex matching the composed image's
      text). Fallback hardcoded #fff so the TV stays readable regardless
