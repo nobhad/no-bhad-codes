@@ -770,10 +770,37 @@
   transform: translateY(-2px);
 }
 
-.worksub-links a svg {
+.worksub-links a svg,
+.worksub-links .project-link--pending svg {
   width: var(--icon-size-lg);
   height: var(--icon-size-lg);
   stroke: currentColor;
+}
+
+/* A site that is built but not launched. It carries the same pill so it reads
+   as one of the links, greyed and inert so it is plainly not one yet — the
+   address is information, not an offer, until the client goes live. */
+.worksub-links .project-link--pending {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  background-color: transparent;
+  color: var(--color-text-muted, rgba(0, 0, 0, 0.45));
+  border: var(--border-width) dashed currentColor;
+  border-radius: var(--border-radius-full, 9999px);
+  font-weight: var(--font-weight-semibold);
+  cursor: default;
+  user-select: text;
+}
+
+.worksub-links .project-link--pending em {
+  font-style: normal;
+  opacity: 0.75;
+}
+
+[data-theme="dark"] .worksub-links .project-link--pending {
+  color: var(--color-neutral-600, rgba(255, 255, 255, 0.5));
 }
 
 /* Inline variant — sits inside the hero info column, no border, no pill,

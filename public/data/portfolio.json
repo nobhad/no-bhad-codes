@@ -249,6 +249,7 @@
       "featured": true,
       "heroImage": "/portfolio/hedgewitch-horticulture/home-hero.gif",
       "screenshots": [],
+      "liveUrl": "https://hedgewitchhorticulture.com/",
       "testUrl": "https://hedgewitch.netlify.app/",
       "launchDate": "2026-09",
       "isDocumented": true,

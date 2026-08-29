@@ -1504,8 +1504,11 @@ export class ProjectsModule extends BaseModule {
     // Outro — always last. Click-through to detail page is the headline
     // affordance; live/test URL secondary; hint about channel-changing
     // tertiary so the user knows they can keep browsing.
-    const primaryUrl = project.liveUrl || project.testUrl;
-    const primaryLabel = project.liveUrl ? 'Live' : project.testUrl ? 'Test' : '';
+    // Only link a live URL once the project is actually live; until then the
+    // test site is the one that answers.
+    const isLaunched = project.status === 'live' || project.status === 'completed';
+    const primaryUrl = (isLaunched && project.liveUrl) || project.testUrl || project.liveUrl;
+    const primaryLabel = isLaunched && project.liveUrl ? 'Live' : project.testUrl ? 'Test' : 'Live';
     const liveLink = primaryUrl
       ? `<a class="crt-tv__panel-link" href="${escapeAttr(primaryUrl)}" target="_blank" rel="noopener">${primaryLabel}: ${escapeHtml(primaryUrl)}</a>`
       : '';
@@ -2236,6 +2239,25 @@ export class ProjectsModule extends BaseModule {
     const linksEl = this.projectDetailSection.querySelector('#project-links');
     if (linksEl) {
       const links: string[] = [];
+      // A site that is built but not yet launched still belongs on the page —
+      // the client's real address is part of the work. It is shown as plain
+      // text rather than a link until launch: a dead link to a domain that
+      // has not gone live is worse than no link, and greying it out says
+      // "coming" where hiding it says nothing at all.
+      if (project.liveUrl) {
+        const launched = project.status === 'live' || project.status === 'completed';
+        links.push(
+          launched
+            ? `<a href="${escapeAttr(project.liveUrl)}" target="_blank" rel="noopener noreferrer">${EXTERNAL_LINK_SVG}Live Site</a>`
+            : `<span class="project-link--pending" aria-disabled="true" title="Launches ${escapeAttr(
+                project.launchDate ? this.formatLaunchDate(project.launchDate) : 'soon'
+              )}">${EXTERNAL_LINK_SVG}${escapeHtml(
+                project.liveUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')
+              )} <em>(launching ${escapeHtml(
+                project.launchDate ? this.formatLaunchDate(project.launchDate) : 'soon'
+              )})</em></span>`
+        );
+      }
       if (project.docsUrl) {
         links.push(
           `<a href="${escapeAttr(project.docsUrl)}" target="_blank" rel="noopener noreferrer">${DOCS_SVG}${escapeHtml(project.docsLabel ?? 'Documentation')}</a>`
