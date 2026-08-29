@@ -857,10 +857,17 @@ export class ProjectsModule extends BaseModule {
     const screen = document.querySelector('.crt-tv__screen');
     if (!screen) return;
     screen.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement | null;
+      // Guide rows sit inside the screen, and their own handler has
+      // already run by the time this one sees the click — it tuned the
+      // channel in and set activeTuneInSlug. Without this bail, the same
+      // click would read that fresh slug and carry straight on to the
+      // detail page, so picking a channel from the guide could never mean
+      // just "watch this channel".
+      if (target?.closest('[data-channel-list]')) return;
       // Only when a project channel is actually playing.
       const slug = this.activeTuneInSlug;
       if (!slug) return;
-      const target = event.target as HTMLElement | null;
       // Let the explicit live-site link do its own thing.
       if (target?.closest('.crt-tv__panel-link')) return;
       event.preventDefault();
@@ -1018,7 +1025,7 @@ export class ProjectsModule extends BaseModule {
                   class="crt-tv__channel-row"
                   data-index="${i}"
                   data-slug="${p.slug}"${ariaHidden ? ' tabindex="-1"' : ''}
-                  aria-label="${String(i + 2).padStart(2, '0')} ${p.title}, ${p.category} — open project details">
+                  aria-label="${String(i + 2).padStart(2, '0')} ${p.title}, ${p.category} — tune in to this channel">
             <span class="crt-tv__channel-number">${String(i + 2).padStart(2, '0')}</span>
             <span class="crt-tv__channel-text">
               <span class="crt-tv__channel-title">${p.title}</span>
