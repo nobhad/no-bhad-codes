@@ -1095,8 +1095,11 @@
   border-radius: 0;
 }
 
-/* Overview spans full width of the grid above the 2-col Features/Results. */
-#project-overview-section {
+/* Overview spans full width of the grid above the 2-col Features/Results,
+   and so does the deep dive below them — both are prose, and prose in one
+   half-width column next to empty space reads as a layout mistake. */
+#project-overview-section,
+#project-deepdive-section {
   grid-column: 1 / -1;
 }
 
