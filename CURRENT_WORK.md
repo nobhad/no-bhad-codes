@@ -897,7 +897,19 @@ All items verified against actual code. ~~0A~~, ~~0H~~, ~~0I~~ removed (proved f
 
 - [x] **Horizontal scroll-map nav model — SHIPPED.** Pages on a 2D map (intro centre, about up, projects right, contact down); scroll / two-finger swipe / arrow keys pan the camera with slide transitions, nav-menu + direct hash links use the blur crossfade, paw stays sovereign for intro entry. Carousel order: intro ↔ about ↔ projects ↔ contact. **Final input model (2026-06-25):** vertical OR horizontal scroll navigates on intro/about/contact; projects vertical = channel-surf (leave via horizontal swipe or Shift+wheel); Shift+wheel = mouse-wheel parity; project-detail vertical native-scrolls then navigates at the edge, left/right cycles projects; projects→detail slides DOWN. Full matrix in `docs/design/MAIN_SITE_DESIGN.md` › Page Transitions.
 - [x] **Reincorporate tech-stack content** — direction locked: chunked GSAP "title-card runway" animation that fires during horizontal scroll-map transitions. Data shipped 2026-04-30: `Profile.techStack` is now a `TechStackChunk[]` (4 chunks of 8) in `public/data/portfolio.json:434-499`, type at `src/services/data-service.ts:42-58`. Chunks keyed to actual horizontal edges of the scroll-map: `intro-about` (Languages & Frameworks), `about-projects` (Styling, UI & Motion), `projects-contact` (Backend & Data), `contact-intro` (Tooling, Testing & Ship). Original 43-item marquee list reconciled against 2026-04-30 deps audit: 10 stale items dropped (PHP, Vue, jQuery, Bootstrap, Vuetify, Handlebars, MongoDB, MySQL, Mongoose, Jotai); 12 added (Astro, Three.js, OpenType.js, Lucide, Radix UI, Chart.js, Multer, Vercel, Netlify, Anthropic SDK, Stripe, Zod). Final count: 32 items.
-- [ ] **Implement tech-stack runway animation** — GSAP timeline on horizontal map→map transitions. Single integration point: `src/modules/animation/page-transition.ts:1985` inside the bridge-slide block (every horizontal map slide flows through there). Touch list:
+- [ ] **Implement tech-stack runway animation — ON HOLD, premise gone (2026-08-29).**
+  The tech stack is already on the site: the About tile carries a full-bleed CSS
+  marquee (`index.html:440`, styles at `about.css:129`) — 13 hardcoded items,
+  repeated for the seamless loop, no JS and no data behind it. So the
+  "reincorporate tech-stack content" goal that motivated the runway is met.
+  Loose end either way: `Profile.techStack` (the 4 chunks of 8, added
+  2026-04-30 to `portfolio.json` and typed at `data-service.ts:42`) has **no
+  consumer anywhere in `src/`** — it exists only for this unbuilt animation.
+  Decide: drop the data, or point the marquee at it so the toolkit has one
+  source of truth (the marquee's 13 and the chunks' 32 currently disagree).
+  Build the runway only if it's wanted as a *transition effect* in its own
+  right, not as a way to surface the stack. Original spec kept below.
+- [ ] **(spec, if the runway is ever built)** — GSAP timeline on horizontal map→map transitions. Single integration point: `src/modules/animation/page-transition.ts:1985` inside the bridge-slide block (every horizontal map slide flows through there). Touch list:
   - Create `src/modules/animation/tech-stack-runway.ts` (singleton, exposes `play(opts)` returning timeline promise; owns reverse/interrupt logic via `currentTimeline.reverse()` for inverse direction, `kill()` otherwise).
   - Create `src/styles/components/tech-stack-runway.css` (overlay scaffolding only — `position: fixed; inset: 0; pointer-events: none`; structural sizing, will-change, mobile hide via `@media (max-width: 767px)`; all motion is GSAP).
   - Modify `src/modules/animation/page-transition.ts` — single `await TechStackRunway.play({ fromId, toId, direction, sourceEl, targetEl })` between line 1985 and 2011, guarded by `isHorizontal && fromIsMap && toIsMap && !this.reducedMotion`.
