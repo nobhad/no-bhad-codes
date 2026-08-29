@@ -52,29 +52,12 @@ async function boot(): Promise<void> {
     logger.error('Navigation module failed to start:', error);
   }
 
-  // The curtain is revealed by the page sliding up off it, and it also owns
-  // the header's scroll-away. Both need something that actually scrolls.
-  //
-  // On these pages that is #main-content, not the document: main is the fixed
-  // camera and overflow-y: auto is what off-map pages get. Measuring the
-  // document instead reports no overflow however long the content is, which
-  // is why the curtain and the header both sat still here.
-  const page = document.getElementById('main-content');
-  const overflows =
-    (page !== null && page.scrollHeight > page.clientHeight + 1) ||
-    document.documentElement.scrollHeight > window.innerHeight + 1;
-
-  if (!overflows) {
-    document.documentElement.setAttribute('data-curtain', 'static');
-    return;
-  }
-
-  try {
-    const { FooterCurtainModule } = await import('./modules/ui/footer-curtain');
-    await new FooterCurtainModule().init();
-  } catch (error) {
-    logger.error('Footer curtain failed to start:', error);
-  }
+  // FooterCurtainModule is deliberately not started here. It stages the band
+  // hidden and reveals it by sliding a fixed page up off it — a map-camera
+  // move these pages do not make. The curtain sits in the document's flow
+  // instead (see the standalone rules in components/footer.css), so running
+  // the module would only leave its inner content staged at opacity 0 with
+  // nothing to animate it back.
 }
 
 if (document.readyState === 'loading') {

@@ -586,7 +586,16 @@ footer.docs-note b{color:var(--ds-ink);font-weight:500}
 </main>
 
 
-<script type="module" src="/src/utils/set-copyright-year.ts"></script>
+    <script>
+      // Same inline fill index.html uses. The set-copyright-year module works
+      // by element id; the curtain's year is a class, so it needs this.
+      (function () {
+        var year = String(new Date().getFullYear());
+        document.querySelectorAll('.js-copyright-year').forEach(function (el) {
+          el.textContent = year;
+        });
+      })();
+    </script>
 
 </body>
 </html>
