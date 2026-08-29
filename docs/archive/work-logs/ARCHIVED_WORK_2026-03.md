@@ -620,3 +620,64 @@ All 70+ items resolved across 20 layers. Waves 1–10 complete.
 - Created `docs/api/`, `docs/guides/` directories
 - Merged `ERROR_HANDLING_STANDARD.md` into `DEVELOPER_GUIDE.md`
 - Merged `COVERAGE.md` into `guides/DEVELOPMENT.md`
+
+---
+
+### Aug 29, 2026 — scroll-map URL, TV screen clicks, toolkit marquee
+
+Verified in a real browser. Not deployed at time of writing — see the open
+deploy item in CURRENT_WORK.md.
+
+- [x] **The URL never followed the scroll-map camera.** Sliding about → projects
+      moved `currentPageId`, the title and `data-active-page` while the address
+      bar still said `#/about`, so a reload put you back on the tile you had
+      scrolled away from. `tryNavigateDirection`'s map → map branch calls
+      `transitionTo` directly and deliberately changes no hash, and nothing
+      else synced it. Fix (`ad3774dc`): `syncUrlToPage` in
+      `page-transition.ts`, called from the completion block next to
+      `updateActivePageAttribute` and from the catch's state repair.
+      `history.replaceState`, not `location.hash =` — assigning fires
+      `hashchange`, which would re-enter `handleHashChange` and re-run the
+      transition that just finished, and it would stack a history entry on
+      every wheel flick. The tail of `navHistory` moves with it so popstate can
+      still reverse the slide.
+- [x] **Picking a channel from the TV guide left the TV.** The guide rows sit
+      inside `.crt-tv__screen`, so one click ran two handlers: the guide's
+      tuned the channel in and set `activeTuneInSlug`, then the same click
+      bubbled to the screen handler, which read that fresh slug and navigated
+      to the case study. Fix (`d83b704a`): the screen handler ignores anything
+      out of `[data-channel-list]`. Verified the other three rules still hold —
+      blank guide screen does nothing, any spot on a playing channel goes to
+      the detail page (checked at 1.2s/3s/8s/20s into the tune-in, top/middle/
+      bottom), and `Live: <url>` is still the only thing that opens the
+      project's own site, in a new tab.
+- [x] **The title card hid a live link.** Every case-study panel is
+      `position:absolute; inset:0` over the whole screen, and the outro is last
+      in the DOM — so at `opacity:0` it still sat on top with its live-site
+      anchor armed, right where the title card's text lands. Clicking the title
+      card opened the project's own site in a new tab. Fix (`c76f762d`): panels
+      are `pointer-events:none` by default and the cycle arms only the panel it
+      is showing. Caught by sweeping a 20x20 grid of `elementFromPoint` over the
+      screen — a centre-point probe misses it, which is how the first pass
+      wrongly concluded nothing else opened an external URL.
+- [x] **The toolkit marquee carries the full stack** (`6ecc469c`, `71ece8b0`).
+      The About band listed 13 hardcoded items while `profile.techStack` held a
+      reconciled set nothing read. Now 33, membership matching the data, order
+      editorial: core languages, then Illustrator/Photoshop, then the rest, with
+      "Adobe Creative Suite" closing. Lucide dropped (an icon set), OpenType.js
+      dropped (one project's tool; the Hedgewitch page lists it). **Watch the
+      duration:** the animation travels half the track per cycle, so a longer
+      list scrolls faster at a fixed duration — `--about-marquee-duration` is
+      now 94s to hold the original ~64px/s. Re-measure if the list changes.
+- [x] **Browserslist data refreshed** (`f76b72a6`) — every production build
+      opened with a six-month-stale `caniuse-lite` notice. No target browser
+      changes; data only.
+
+**A trap worth remembering.** The first diagnosis of the URL bug was wrong, and
+it cost a session. `isTransitioning` looked stuck true forever after a map → map
+slide, with the completion block apparently never running. It was an artifact of
+reading state through a Chrome-extension tab: those tabs are `document.hidden`,
+`requestAnimationFrame` never fires there, so GSAP's ticker never advances and
+every tween promise stays pending. Nothing was wrong with the code. Diagnose
+animation state in a real visible window — headed Playwright with
+`channel: 'chrome'` works and needs no browser download.
