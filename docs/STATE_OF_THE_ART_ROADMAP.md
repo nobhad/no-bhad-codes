@@ -596,7 +596,7 @@ function substituteVariables(template: string, vars: Record<string, string>): st
 
 #### Implementation
 
-**Option A (Recommended): Auto-generate invoice when installment due date arrives**
+##### Option A (Recommended): Auto-generate invoice when installment due date arrives
 
 Add to scheduled task runner:
 
@@ -823,7 +823,7 @@ These are documentation tasks, not code tasks, but they're required by the proje
 
 #### Medium Priority
 
-3. **Form input accessibility** — ~10 form inputs in portal (settings, questionnaires, content-requests) lack explicit `<label>` associations. Add `htmlFor` and `id` attributes.
+1. **Form input accessibility** — ~10 form inputs in portal (settings, questionnaires, content-requests) lack explicit `<label>` associations. Add `htmlFor` and `id` attributes.
 
 ---
 
@@ -5432,7 +5432,7 @@ Phase 7 (International — Do Last)
 
 ### 2026-03-17 — Phase 6 AI-Powered Features Complete
 
-**6A: AI Proposal Drafting + 6B: AI Email Drafting (Migration 129)**
+#### 6A: AI Proposal Drafting + 6B: AI Email Drafting (Migration 129)
 
 - ai-config.ts: Model selection, monthly budget cap (configurable via env), daily rate limiting, pricing per model, temperature per request type, cache TTL
 - ai-types.ts: DraftProposalContext/Result, DraftEmailContext/Result, AiUsageSummary types
@@ -5442,7 +5442,7 @@ Phase 7 (International — Do Last)
 - Scheduler: 1 cron — AI cache cleanup (daily 3:30 AM)
 - New npm dep: @anthropic-ai/sdk
 
-**6C: Enhanced Search + Cmd+K Modal**
+#### 6C: Enhanced Search + Cmd+K Modal
 
 - search-service.ts: ENHANCED from 4 to 9 entity types (added proposals, contracts, leads, tasks, files). Relevance scoring algorithm, Promise.allSettled for parallel queries, results sorted by relevance
 - CommandPalette.tsx (shipped name; planned as SearchModal): Global Cmd+K command palette with debounced input, keyboard navigation (arrow keys, Enter, Escape), grouped results by entity type, recent searches in localStorage
@@ -5455,7 +5455,7 @@ Phase 7 (International — Do Last)
 
 ### 2026-03-17 — Phase 5B Embeddable Widgets Complete
 
-**5B: Embeddable Widgets (Migration 128)**
+#### 5B: Embeddable Widgets (Migration 128)
 
 - embed-service.ts: CRUD for widget configurations, token generation/regeneration, project status resolution (completion % from milestones), embed code generation
 - embed-types.ts: WidgetType, EmbedConfigRow, EmbedConfiguration, widget config interfaces (ContactForm, Testimonials, StatusBadge)
@@ -5471,7 +5471,7 @@ Phase 7 (International — Do Last)
 
 ### 2026-03-17 — Phase 5A Feedback Surveys and Testimonial Collection Complete
 
-**5A: Feedback Surveys + Testimonials (Migration 127)**
+#### 5A: Feedback Surveys + Testimonials (Migration 127)
 
 - feedback-service.ts: 16 methods — survey CRUD, token-based public access, response submission with auto-testimonial creation, analytics (NPS calculation, average ratings, monthly trends), reminder + expiration crons
 - feedback-types.ts: TypeScript interfaces and constants (SurveyType, SurveyStatus, TestimonialStatus, FeedbackAnalytics)
@@ -5489,14 +5489,14 @@ Phase 7 (International — Do Last)
 
 ### 2026-03-17 — Phase 4 Revenue Intelligence Complete
 
-**4A: Expense Tracking (Migration 125)**
+#### 4A: Expense Tracking (Migration 125)
 
 - expense-service.ts: CRUD, soft delete, profitability calculation (invoices + installments - expenses - time cost), analytics by category/month, CSV export
 - 9 admin endpoints including profitability and analytics
 - ExpensesTable React component with inline create form and filters
 - 12 expense categories with labels
 
-**4B: Retainer Management (Migration 126)**
+#### 4B: Retainer Management (Migration 126)
 
 - retainer-service.ts: CRUD, period lifecycle (create -> close -> rollover -> new), auto-invoicing, usage alerts
 - Period rollover: unused hours clamped to maxRolloverHours
@@ -5511,16 +5511,16 @@ Phase 7 (International — Do Last)
 
 ### 2026-03-17 — Phase 3 Admin Self-Service Automations Complete
 
-**3A: Automation Engine (Migration 124)**
+#### 3A: Automation Engine (Migration 124)
 
 - automation-engine.ts: Full execution engine with 11 action executors, condition evaluation, wait-step scheduling, variable substitution, dry-run mode
 - 5 tables: custom_automations, automation_actions, automation_runs, automation_action_logs, automation_scheduled_actions
 - Routes: 16 admin endpoints (CRUD + actions + runs + dry-run + run-now)
 - Workflow integration: ALL event types routed to automation engine via handleCustomAutomationEvent
-- Scheduler: */5 * * * * cron processes scheduled wait-step actions
+- Scheduler: `*/5 * * * *` cron processes scheduled wait-step actions
 - 2 seeded templates: New Project Setup, Invoice Follow-Up
 
-**3B: Automation Builder (React)**
+#### 3B: Automation Builder (React)
 
 - AutomationsTable: Admin table with create form, toggle active, delete, search
 - AutomationBuilder: Visual builder with grouped trigger events, condition rows, 11 action config forms
@@ -5531,21 +5531,21 @@ Phase 7 (International — Do Last)
 
 ### 2026-03-17 — Phase 2 Lead Nurture Complete
 
-**2A: Email Drip Sequences (Migration 122)**
+#### 2A: Email Drip Sequences (Migration 122)
 
 - sequence-service.ts: CRUD, step management, enrollment, processQueue (batch 50, bounce after 3 fails), handleEvent for auto-enrollment, analytics
 - Routes: 15 admin endpoints (sequences + steps + enrollments)
 - React: SequencesTable with create, toggle, detail
 - 3 seeded sequences: New Lead Welcome, Proposal Follow-Up, Post-Consultation
-- Scheduler cron: */30 * * * * (every 30 minutes)
+- Scheduler cron: `*/30 * * * *` (every 30 minutes)
 - Workflow integration: 7 events auto-enroll (lead.created, lead.stage_changed, lead.converted, proposal.sent/accepted/rejected, client.created)
 
-**2B: Meeting Request System (Migration 123)**
+#### 2B: Meeting Request System (Migration 123)
 
 - meeting-request-service.ts: CRUD, confirm, decline, reschedule, ICS generation, sendUpcomingReminders
 - Routes: 3 portal + 7 admin endpoints (including .ics download)
 - React: MeetingRequestForm (portal), MeetingRequestsList (portal), MeetingRequestsTable (admin)
-- Scheduler cron: 0 9 * * * (daily 9AM reminders for meetings in next 24h)
+- Scheduler cron: `0 9 * * *` (daily 9AM reminders for meetings in next 24h)
 - ICS generation with valid VCALENDAR format
 
 **Files created:** ~20 (2 migrations, 4 services/types, 5 routes, 8 React components, 2 feature docs)
@@ -5555,11 +5555,11 @@ Phase 7 (International — Do Last)
 
 All 4 Phase 1 items implemented (1A verified already working from Phase 0):
 
-**1-Pre: Idempotency Guards**
+#### 1-Pre: Idempotency Guards
 
 - Added milestone existence check before generateTierMilestones() in workflow-automations.ts
 
-**1B: Embedded Stripe Payments (Migration 119)**
+#### 1B: Embedded Stripe Payments (Migration 119)
 
 - stripe-payment-service.ts: getOrCreateCustomer, createPaymentIntent (with processing fee), handlePaymentSuccess/Failure
 - Routes: POST /payments/create-intent (requireClient), POST /payments/webhook (signature verification)
@@ -5567,14 +5567,14 @@ All 4 Phase 1 items implemented (1A verified already working from Phase 0):
 - Processing fee: 2.9% + $0.30 calculated server-side, displayed in form
 - CSP updated for Stripe domains, raw body skip for webhook
 
-**1C: Unified Project Agreement Flow (Migration 120)**
+#### 1C: Unified Project Agreement Flow (Migration 120)
 
 - agreement-service.ts: CRUD, template creation (auto-detects entities), step completion, auto-complete
 - Routes: 5 admin + 4 portal endpoints
 - React: AgreementFlow (vertical card stack, GSAP transitions), 5 step components, AgreementsList
 - Workflow integration: contract.signed, invoice.paid, questionnaire.completed auto-complete steps
 
-**1D: Onboarding Checklist (Migration 121)**
+#### 1D: Onboarding Checklist (Migration 121)
 
 - onboarding-checklist-service.ts: template-based creation, auto-complete, dismiss
 - Routes: 3 portal + 4 admin endpoints
@@ -5591,23 +5591,27 @@ All 4 Phase 1 items implemented (1A verified already working from Phase 0):
 All 12 verified Phase 0 items implemented (3 more proved false during implementation):
 
 **Critical (4/4):**
+
 - 0B: PortalProposalDetail.tsx + /proposals/:id route + accept flow with confirmation
 - 0C: Migration 118 + handleMaintenanceActivation handler + recurring invoice creation + GET /projects/:id/maintenance
 - 0D: Added workflowTriggerService.emit('contract.signed') to contracts/client.ts (1-line fix)
 - 0G: Added generateDueInvoices() to payment-schedule-service + hooked into scheduler
 
 **High (4/4):**
+
 - 0E: dispatchWebhooks() function queries notification_integrations, sends via slack-service.ts, logs delivery
 - 0F: loadEmailTemplate() + substituteVariables() — all 7 handlers pass templateSlug, falls back to hardcoded
 - 0K: server/routes/admin/invoices.ts (GET list+stats, POST bulk-delete, POST bulk-status) + mounted in admin barrel
 - 0L: POST /api/admin/design-reviews (+ create() on service) + POST /api/admin/workflows
 
 **Medium (3/3):**
+
 - 0J: Wired useExport to 9 tables, created 6 new export configs (Contracts, Questionnaires, Workflows, GlobalTasks, AdHocRequests, Deliverables)
 - 0M: Proved false — LeadDetailPanel already imported and rendered in LeadsTable
 - 0P: Added PROPOSALS_PREFILL + ADMIN.INVOICES to api-endpoints.ts
 
 **Low (2/2):**
+
 - 0N: Proved false — CSS_ARCHITECTURE.md (836 lines) and UX_GUIDELINES.md (69 lines) already exist
 - 0O: Demo/test scripts now require env vars for passwords, bcrypt standardized to 12 rounds in intake.ts
 
@@ -5619,16 +5623,19 @@ All 12 verified Phase 0 items implemented (3 more proved false during implementa
 Audited every Phase 0 claim against actual code with file paths and line numbers.
 
 **Removed (proved false):**
+
 - ~~0A: "4 orphaned services with no routes"~~ — All 4 have routes in projects/core.ts (lines 468-906) and proposals/core.ts (line 468). Services use dynamic import() and are fully wired.
 - ~~0H: "7 broken delete buttons"~~ — All 7 work. Verified onClick handlers with API calls and confirm dialogs at: ProposalsTable:537, EmailTemplatesManager:339, DocumentRequestsTable:550, AdHocRequestsTable:591, DeliverablesTable:551, ArticlesTable:394, CategoriesTable:313.
 - ~~0I: "Portal prop passing broken"~~ — LazyTabRoute injects props via React.cloneElement(). PaymentScheduleView uses context-based auth. console.log is in JSDoc comment only.
 
 **Corrected:**
+
 - 0D: Upgraded from "verify" to **confirmed bug** — portal signing at contracts/client.ts:191-273 saves signature but missing `workflowTriggerService.emit('contract.signed')`. Email-link signing at projects/contracts.ts:918 works fully. 1-line fix identified.
 - 0L: Reduced from 4 broken to **2 broken** — Deliverables (admin/deliverables.ts:42-71) and Questionnaires (questionnaires/admin.ts:193-228) work. Only Design Reviews (no POST endpoint) and Workflows (no POST endpoint) are actually broken.
 - 0J: Corrected from "all 22 broken" to **mixed** — InvoicesTable:357 has working `onClick={exportCsv}`. ContactsTable:389 missing onClick. ~15 tables need wiring.
 
 **Confirmed (unchanged):**
+
 - 0B: Client proposal route redirects to /documents (PortalRoutes.tsx:325-330). No ProposalDetail.tsx exists. No accept UI.
 - 0C: maintenance_option read at workflow-automations.ts:105-107 then discarded. Not stored in projects table. No recurring invoices created.
 - 0E: slack-service.ts has sendSlackNotification() and sendDiscordNotification() (lines 409-458) but workflow-automations.ts never calls them.

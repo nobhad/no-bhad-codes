@@ -9,7 +9,7 @@
 **Tech Stack:** Vanilla TypeScript modules (public site), Vite, EJS server views, existing `apiFetch` client, `BaseModule` lifecycle, Vitest for the guard test.
 
 > **Commit policy (project rule):** Do NOT auto-commit. Commit commands are provided as copy-paste for Noelle to run manually. Do not add Claude as author; no emoji in messages.
-
+>
 > **Reference commit:** `e9f9095e^` is the commit immediately before the deletion (`e9f9095e "remove 99 dead vanilla JS/TS files, React SPA approach"`). All `git show e9f9095e^:<path>` commands below recover the pre-deletion version.
 
 ---
@@ -89,12 +89,14 @@ git commit -m "restore(intake): recover terminal intake modules from e9f9095e^"
 The orchestrator and api-handler import the un-restored proposal-builder. Remove the proposal flow; the question flow submits directly on completion. (`/api/intake` treats `proposalSelection` as optional.)
 
 **Files:**
+
 - Modify: `src/features/client/terminal-intake.ts`
 - Modify: `src/features/client/intake/api-handler.ts`
 
 - [ ] **Step 1: api-handler — drop the `proposalSelection` parameter**
 
 In `src/features/client/intake/api-handler.ts`:
+
 - Remove `import type { ProposalSelection } from '../proposal-builder-types';`
 - Change `buildSubmitPayload(intakeData, proposalSelection)` to `buildSubmitPayload(intakeData)` and delete the line that spreads/sets `proposalSelection` into `submitData`.
 - Change `submitIntakeData(intakeData: IntakeData, proposalSelection: ProposalSelection | null)` to `submitIntakeData(intakeData: IntakeData)`; update its internal call to `buildSubmitPayload(intakeData)`.
@@ -103,6 +105,7 @@ In `src/features/client/intake/api-handler.ts`:
 - [ ] **Step 2: orchestrator — remove proposal imports, fields, methods**
 
 In `src/features/client/terminal-intake.ts` remove:
+
 - Imports: `import { ProposalBuilderModule } from './proposal-builder';` and `import type { ProposalSelection } from './proposal-builder-types';`
 - Fields: `private proposalSelection: ProposalSelection | null = null;` and `private proposalBuilderContainer: HTMLElement | null = null;`
 - Methods (whole bodies): `showProposalBuilder()`, `waitForProposalDecision()`, `cleanupProposalBuilder()`.
@@ -194,6 +197,7 @@ git commit -m "fix(intake): repair import drift in restored terminal intake"
 Missing classes (stripped by later dead-CSS passes): `terminal-title`, `terminal-prompt-line`, `terminal-typing-text`, `terminal-cursor`, `terminal-messages`, plus the full `terminal-window`/`terminal-header`/`intake-modal` chrome. Survivors are scattered in `nav-portal.css` and `client.css`.
 
 **Files:**
+
 - Modify: `src/styles/pages/terminal-intake.css`
 - Modify (only if duplicates collide): `src/styles/components/nav-portal.css`, `src/styles/pages/client.css`
 
@@ -236,6 +240,7 @@ git commit -m "style(intake): recover missing terminal CSS, consolidate into ter
 The modal chrome, `#open-intake-link`, `#card-intake-link`, close/backdrop/Escape handlers already exist. Only `openIntakeModal()` needs to instantiate the module instead of redirecting.
 
 **Files:**
+
 - Modify: `index.html:1278-1292`
 
 - [ ] **Step 1: Replace the redirect with module instantiation**
@@ -292,6 +297,7 @@ git commit -m "feat(intake): open terminal intake modal in-place instead of redi
 ## Task 6: Wire the standalone /intake page (intake.ejs)
 
 **Files:**
+
 - Modify: `server/views/pages/auth/intake.ejs`
 
 - [ ] **Step 1: Replace the wizard mount with the terminal module**
@@ -344,6 +350,7 @@ git commit -m "fix(intake): mount terminal intake on /intake instead of broken w
 Prevents the restored options from drifting out of sync with `ValidationSchemas.intakeSubmission`.
 
 **Files:**
+
 - Create: `src/features/client/intake/__tests__/schema-parity.test.ts`
 
 - [ ] **Step 1: Write the failing test**
@@ -406,6 +413,7 @@ Expected: both clean.
 - [ ] **Step 2: End-to-end manual repro (the original bug + the fix)**
 
 With `npm run dev:full` running, in the browser:
+
 1. Homepage → click contact "intake form" link → terminal modal opens in-place (no redirect). ✅
 2. `/intake` → terminal renders full-page, no login redirect. ✅
 3. Complete the chat flow → submit → terminal prints the success line (no 401, no bounce). ✅

@@ -50,6 +50,7 @@ Fixed in `8c24a895`: one named `SCROLL_EDGE_EPSILON = 2` used by every scroll-ed
 `page-transition.ts`, replacing hard 1px comparisons.
 
 **Two hypotheses in the earlier draft of this file were wrong** — disregard them:
+
 - *"`currentPageId` is stale as 'projects'"* — disproved. ArrowUp at the top of a case study
   correctly exits to `#/projects`, so the module knows which page it is on. Only the **compass
   cues** were stale (`updateCompass` had not re-run), which is a separate cosmetic issue.
@@ -75,6 +76,7 @@ measured boundary values, not observed working.
 
 To verify by hand: open a case study, scroll to the very end with a trackpad, keep scrolling.
 The band should rise. Scroll back up and it should retract in step. Instrument with:
+
 ```js
 window.__evts=[];
 window.addEventListener('footer-curtain:set-progress', e=>window.__evts.push(e.detail.progress));

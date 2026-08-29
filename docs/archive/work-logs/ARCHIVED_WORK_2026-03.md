@@ -299,7 +299,7 @@ Resolved all conflicts identified in deep dive audit across CSS, components, API
   - Removed redundant spacing variables (defined in `spacing.css`)
   - Removed redundant dashboard variables (defined in `spacing.css`)
 
-**Phase 1: CSS Variable Fixes**
+#### Phase 1: CSS Variable Fixes
 
 - [x] Added missing color variables to `src/design-system/tokens/colors.css`:
   - `--color-purple: #c084fc`
@@ -315,14 +315,14 @@ Resolved all conflicts identified in deep dive audit across CSS, components, API
   - `command-palette.css` (~8 fallbacks)
   - `loading.css` (~6 fallbacks)
 
-**Phase 2: Component Deduplication**
+#### Phase 2: Component Deduplication
 
 - [x] Deleted duplicate `src/react/factories/StatusBadge.tsx` (0 imports)
 - [x] Deleted orphaned `src/types/auth.ts` (0 imports)
 - [x] Updated `src/react/factories/index.ts` to re-export StatusBadge from canonical location
 - [x] Fixed `src/types/index.ts` to export from `src/auth/auth-types.ts` and `src/auth/auth-constants.ts`
 
-**Phase 3: API Endpoint Centralization**
+#### Phase 3: API Endpoint Centralization
 
 - [x] Added `ADMIN` namespace to `src/constants/api-endpoints.ts`:
   - `ADMIN.LEADS`, `ADMIN.LEADS_BULK_STATUS`, `ADMIN.LEADS_BULK_DELETE`
@@ -331,12 +331,12 @@ Resolved all conflicts identified in deep dive audit across CSS, components, API
 - [x] Refactored `src/react/hooks/useClients.ts` to use centralized endpoints
 - [x] Refactored `src/react/hooks/useProjects.ts` to use centralized endpoints
 
-**Phase 4: Utility Consolidation**
+#### Phase 4: Utility Consolidation
 
 - [x] Updated `src/react/utils/formatDate.ts` to re-export from canonical `src/utils/format-utils.ts`
 - [x] Updated `src/react/utils/cardFormatters.ts` to re-export `formatCurrency` and `formatFileSize` from canonical source
 
-**Phase 6: Timing Constants**
+#### Phase 6: Timing Constants
 
 - [x] Created `src/constants/timing.ts` with centralized timing constants:
   - `COPY_FEEDBACK`, `MODAL_ANIMATION`, `SEARCH_DEBOUNCE`, `STATUS_REFRESH`

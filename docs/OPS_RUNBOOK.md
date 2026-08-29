@@ -25,6 +25,7 @@ portal.
 `/api/admin/circuit-breakers` returns every registered breaker's state.
 
 States:
+
 - **closed** — normal. Traffic flows to the upstream.
 - **open** — threshold of failures crossed; we fast-fail for
   `cooldownMs` instead of calling the upstream. Callers see 503
@@ -70,6 +71,7 @@ is a code change, not a runtime control.
 `?status=dead&limit=50` to list offending rows.
 
 Statuses:
+
 - **pending** — waiting to run (or waiting out a backoff after
   a failed attempt).
 - **running** — currently executing. Counts should be near 0
@@ -180,6 +182,7 @@ container restarts** (unless `ACCEPT_SCHEMA_DRIFT=true` is set).
 ### Accepting drift (deliberate)
 
 You looked at the diff and the new state is correct:
+
 1. Set `ACCEPT_SCHEMA_DRIFT=true` in the environment.
 2. Restart. The current state is recorded as the new baseline.
 3. Remove the env var. Next restart validates against the new baseline.
@@ -198,7 +201,7 @@ Seven-day rolling retention.
 
 ### List backups
 
-```
+```text
 GET /api/admin/backups
 ```
 
@@ -208,7 +211,7 @@ Returns the on-disk set with sizes + timestamps.
 
 Before a risky op (manual data edit, major migration):
 
-```
+```text
 POST /api/admin/backups/run
 ```
 
@@ -219,19 +222,25 @@ Runs the same code path as the nightly job. Returns
 
 1. Stop the server. (Production: take the Railway service offline.)
 2. Copy the target backup to a working directory:
-   ```
+
+   ```bash
    cp backups/daily/client_portal-2026-04-21-033000.sqlite.gz /tmp/restore/
    gunzip /tmp/restore/client_portal-2026-04-21-033000.sqlite.gz
    ```
+
 3. Verify it opens:
-   ```
+
+   ```bash
    sqlite3 /tmp/restore/client_portal-2026-04-21-033000.sqlite '.schema'
    ```
+
 4. Move it to the live path:
-   ```
+
+   ```bash
    mv data/client_portal.db data/client_portal.db.preserve-$(date +%s)
    mv /tmp/restore/client_portal-2026-04-21-033000.sqlite data/client_portal.db
    ```
+
 5. Start the server. Startup will:
    - Run any pending migrations (safe; they're idempotent).
    - Detect schema drift (the fingerprint was for the snapshot, the
@@ -246,7 +255,7 @@ Runs the same code path as the nightly job. Returns
 before applying any migration. To roll back a destructive migration
 locally:
 
-```
+```bash
 cp data/backups/pre-migration/client_portal_pre-migrate_<stamp>.db data/client_portal.db
 ```
 
@@ -280,7 +289,7 @@ quiet without configuration.
 
 **Verify locally:**
 
-```
+```bash
 npm run db:backup        # produce a fresh local snapshot
 npm run backup:drive     # upload the newest snapshot to the Drive folder
 ```
@@ -341,7 +350,7 @@ failed during the cutover.
 
 ### ADMIN_PASSWORD_HASH
 
-```
+```bash
 node -e "console.log(require('bcryptjs').hashSync('NEW_PASSWORD', 12))"
 ```
 
@@ -355,7 +364,7 @@ until the cookie expires (typically 1 hour for admin).
 
 Normal boot order:
 
-```
+```text
 OpenTelemetry initialized for <service>
 Sentry instrumentation loaded
 Database initialized

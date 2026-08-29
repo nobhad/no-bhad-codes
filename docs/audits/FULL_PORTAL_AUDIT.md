@@ -121,8 +121,8 @@
 
 ### Remaining (Acceptable)
 
-5. Inline function props in `.map()` --- addressed where React.memo is applied; remaining are in non-memoized parents (low impact)
-6. 4 files 700-752 lines --- createTabs (752), QuestionnaireForm (739), PortalProjectDetail (739), GlobalTasksTable (687) --- all under 1,000 line threshold
+1. Inline function props in `.map()` --- addressed where React.memo is applied; remaining are in non-memoized parents (low impact)
+2. 4 files 700-752 lines --- createTabs (752), QuestionnaireForm (739), PortalProjectDetail (739), GlobalTasksTable (687) --- all under 1,000 line threshold
 
 ### Positive
 
@@ -145,8 +145,8 @@
 
 ### Remaining (Low Priority)
 
-6. 20+ inline hardcoded color styles (dynamic status colors) --- potential contrast issues, but values are functional
-7. Heading hierarchy mostly correct (95%), 1 minor violation in SystemStatusDashboard
+1. 20+ inline hardcoded color styles (dynamic status colors) --- potential contrast issues, but values are functional
+2. Heading hierarchy mostly correct (95%), 1 minor violation in SystemStatusDashboard
 
 ### Positive
 
@@ -167,7 +167,7 @@
 
 ### Remaining (Acceptable)
 
-4. **18 silent catch blocks** --- intentionally swallowed with `_error` prefix, all have comments explaining why
+1. **18 silent catch blocks** --- intentionally swallowed with `_error` prefix, all have comments explaining why
 
 ### Positive
 

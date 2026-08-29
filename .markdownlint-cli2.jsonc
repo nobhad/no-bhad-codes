@@ -1,0 +1,31 @@
+{
+  // Rules live in .markdownlint.json, which markdownlint-cli2 picks up on its
+  // own. This file only says WHICH files get linted.
+  //
+  // Run: npm run lint:md
+  //
+  // `npm run lint:md:fix` is safe for whitespace rules (MD022/MD031/MD032/
+  // MD047) but READ ITS DIFF BEFORE COMMITTING. Two of its fixes rewrite
+  // content rather than layout:
+  //
+  //   MD037 treats a bare `*` in prose as an emphasis marker, so it turns a
+  //   documented cron schedule `*/5 * * * *` into `*/5* ** *` and a glob like
+  //   tw-* into garbage. Wrap those in backticks instead — that is correct
+  //   markdown and the rule then leaves them alone.
+  //
+  //   MD029 renumbers ordered lists. A lone `2.` renders as "2.", so being
+  //   "fixed" to `1.` changes the output, not just the source.
+  "globs": ["**/*.md"],
+  "ignores": [
+    "node_modules/**",
+    "dist/**",
+    "build/**",
+    // Playwright's generated HTML report. Gitignored build output.
+    "test-results/**",
+    "playwright-report/**",
+    // Client-uploaded documents served by the portal. These are records, not
+    // project docs — reformatting one to satisfy a linter edits a deliverable.
+    "uploads/**",
+    ".claude/**"
+  ]
+}

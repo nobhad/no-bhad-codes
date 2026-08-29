@@ -381,32 +381,32 @@ Three overlapping systems for tracking prospects:
 
 1. **Define Clear Data Model:**
 
-```text
-Intake (website form)
-  → Lead (qualified prospect, in pipeline)
-    → Project (converted, work begins)
-```
+   ```text
+   Intake (website form)
+     → Lead (qualified prospect, in pipeline)
+       → Project (converted, work begins)
+   ```
 
 2. **Single Tasks Table:**
 
-- Merge `lead_tasks` into `project_tasks`
-- Add `task_context` column (lead/project/ad_hoc)
+   - Merge `lead_tasks` into `project_tasks`
+   - Add `task_context` column (lead/project/ad_hoc)
 
 3. **Single Notes Table:**
 
-- Merge `lead_notes`, `client_notes` into unified `notes` table
-- Add `entity_type`, `entity_id` columns
+   - Merge `lead_notes`, `client_notes` into unified `notes` table
+   - Add `entity_type`, `entity_id` columns
 
 4. **Clear Conversion Flow:**
 
-```sql
--- Intake to Lead conversion
-UPDATE client_intakes SET status = 'converted', project_id = ? WHERE id = ?;
-UPDATE projects SET status = 'pending', lead_source_id = ? WHERE id = ?;
+   ```sql
+   -- Intake to Lead conversion
+   UPDATE client_intakes SET status = 'converted', project_id = ? WHERE id = ?;
+   UPDATE projects SET status = 'pending', lead_source_id = ? WHERE id = ?;
 
--- Lead to Project conversion
-UPDATE projects SET status = 'active', won_at = CURRENT_TIMESTAMP WHERE id = ?;
-```
+   -- Lead to Project conversion
+   UPDATE projects SET status = 'active', won_at = CURRENT_TIMESTAMP WHERE id = ?;
+   ```
 
 ### Why Deferred
 

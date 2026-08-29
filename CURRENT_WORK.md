@@ -229,6 +229,7 @@ invoice query is constrained to demo clients. Verified with a `pdftotext`
 grep over every generated PDF before publishing.
 
 **Not published** (render poorly, worth a separate look):
+
 - `SAMPLE-project-report.pdf` — shows `BUDGET: $NaN` and `START/DEADLINE: Not set`.
 - `SAMPLE-invoice.pdf` — demo invoices have zero line items, so the table is empty.
 
@@ -587,7 +588,7 @@ Drafted against the Hedgewitch codebase (Astro 7, six Netlify functions, admin
 content committed as git, forms and resumes held by Netlify Forms). Your call
 before any of it goes to the client.
 
-**1. Export all site data — recommend A**
+#### 1. Export all site data — recommend A
 
 - Scope A: content JSON (`src/data/pages/*.json`, `gallery-items.json`,
   `testimonials.json`, `jobs.json`, `site-settings.json`), blog markdown from
@@ -604,7 +605,7 @@ before any of it goes to the client.
 - `admin-netlify-data.ts` already pulls submissions but caps at 50 — pagination
   is part of the estimate.
 
-**2. Comments on blog posts — recommend only if they will moderate**
+#### 2. Comments on blog posts — recommend only if they will moderate
 
 - Custom and moderated: comments stored in Netlify Blobs, a POST function with
   honeypot and rate limiting, a moderation queue in `/admin` reusing
@@ -617,7 +618,7 @@ before any of it goes to the client.
   and moderation is theirs. Also note it is the first place the site would hold
   content written by the public.
 
-**3. Email newsletter — recommend A**
+#### 3. Email newsletter — recommend A
 
 - Scope A: sign-up on the site posting through a function that holds the
   provider API key, with double opt-in, unsubscribe and compliance handled by

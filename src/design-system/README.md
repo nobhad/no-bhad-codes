@@ -47,7 +47,7 @@ it underneath the component layer and the portals would silently render in main-
 
 ## Naming
 
-```
+```text
 --color-brand-primary          primitive  · names a colour
 --color-text-primary           semantic   · names a job
 --portal-btn-hover-bg          component  · names a part

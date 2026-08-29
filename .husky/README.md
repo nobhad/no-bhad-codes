@@ -5,18 +5,24 @@ This directory contains automated quality checks that run at different stages of
 ## Available Hooks
 
 ### pre-commit
+
 Runs before each commit to ensure code quality:
+
 - **lint-staged**: Lints and formats only staged files for better performance
 - **TypeScript check**: Ensures all types are valid
 - **Unit tests**: Runs tests to catch regressions
 
 ### commit-msg
+
 Validates commit messages to follow conventional commit format:
+
 - Ensures commits follow the pattern: `type(scope): description`
 - Enforces consistent commit history for better changelog generation
 
 ### pre-push
+
 Comprehensive checks before pushing to remote:
+
 - **Full linting**: Checks all files in the project
 - **TypeScript compilation**: Full type checking
 - **All tests**: Runs complete test suite
@@ -25,7 +31,8 @@ Comprehensive checks before pushing to remote:
 ## Conventional Commit Format
 
 Commit messages should follow this pattern:
-```
+
+```text
 <type>(<scope>): <description>
 
 [optional body]
@@ -34,6 +41,7 @@ Commit messages should follow this pattern:
 ```
 
 ### Types:
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -47,6 +55,7 @@ Commit messages should follow this pattern:
 - `revert`: Reverting changes
 
 ### Examples:
+
 ```bash
 feat(business-card): add flip animation
 fix(contact-form): resolve validation issue
@@ -60,27 +69,32 @@ chore: update dependencies
 ## Quality Checks
 
 ### Code Quality
+
 - **ESLint**: JavaScript/TypeScript linting with automatic fixing
 - **Prettier**: Code formatting for consistent style
 - **TypeScript**: Type checking for type safety
 
 ### Testing
+
 - **Unit Tests**: Fast tests for individual components
 - **Integration Tests**: End-to-end testing with Playwright
 - **Coverage Reports**: Ensures adequate test coverage
 
 ### Security
+
 - **Dependency Audit**: Checks for known vulnerabilities
 - **Private Key Detection**: Prevents accidental key commits
 - **File Size Check**: Prevents large file commits
 
 ### Performance
+
 - **Bundle Analysis**: Monitors bundle size
 - **Build Verification**: Ensures optimized builds
 
 ## Bypassing Hooks (Use Sparingly)
 
 In rare cases, you can bypass hooks:
+
 ```bash
 # Skip pre-commit hooks (NOT RECOMMENDED)
 git commit --no-verify -m "emergency fix"
@@ -94,6 +108,7 @@ git push --no-verify
 ## Troubleshooting
 
 ### Hook not running?
+
 ```bash
 # Reinstall hooks
 npm run prepare
@@ -103,6 +118,7 @@ chmod +x .husky/pre-commit .husky/commit-msg .husky/pre-push
 ```
 
 ### Lint-staged failures?
+
 ```bash
 # Run manually to see specific issues
 npx lint-staged
@@ -113,6 +129,7 @@ npm run format
 ```
 
 ### Test failures?
+
 ```bash
 # Run tests manually
 npm run test
@@ -122,6 +139,7 @@ npm run test -- business-card.test.ts
 ```
 
 ### Type errors?
+
 ```bash
 # Run type checking
 npm run typecheck

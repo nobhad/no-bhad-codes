@@ -1159,12 +1159,12 @@ All backend database normalization phases now complete:
 
 **Objective:** Convert admin from pre-built HTML to dynamic JS rendering
 
-**Task 2.1: Strip admin/index.html to shell - COMPLETE**
+#### Task 2.1: Strip admin/index.html to shell - COMPLETE
 
 - [x] Keep: sidebar, header, main content container
 - [x] Removed all pre-built section HTML (all tabs converted)
 
-**Task 2.2: Convert admin modules (19/19 complete):**
+#### Task 2.2: Convert admin modules (19/19 complete):
 
 - [x] `admin-overview.ts` - `renderOverviewTab()` function
 - [x] `admin-leads.ts` - `renderLeadsTab()` function
@@ -1197,7 +1197,7 @@ All backend database normalization phases now complete:
 
 **Objective:** Client portal matches admin as much as possible
 
-**Task 3.1: Shared CSS architecture - COMPLETE**
+#### Task 3.1: Shared CSS architecture - COMPLETE
 
 - [x] Audit CSS variables for consistency
 - [x] Document shared component classes (19 shared files, 6,916 lines)
@@ -1252,13 +1252,13 @@ All backend database normalization phases now complete:
 
 **Total:** 165+ hardcoded values replaced with design tokens
 
-**Task 3.2: Update admin login - COMPLETE**
+#### Task 3.2: Update admin login - COMPLETE
 
 - [x] Match client login styling (4px border accent, double shadow)
 - [x] Consistent form styling
 - [x] Same visual polish
 
-**Task 3.3: Update client portal - COMPLETE**
+#### Task 3.3: Update client portal - COMPLETE
 
 - [x] Replace manual HTML with shared components (7 modules, 100% converted)
   - `portal-invoices.ts`: `getStatusBadgeHTML()`, `createEmptyState()`, `createErrorState()`
@@ -1270,7 +1270,7 @@ All backend database normalization phases now complete:
 - [x] Match admin layouts where appropriate
 - [x] Permission-based content hiding (server-side API filtering)
 
-**Task 3.4: Visual polish - COMPLETE**
+#### Task 3.4: Visual polish - COMPLETE
 
 - [x] Consistent hover/focus states (677 occurrences across 82 files)
 - [x] Mobile responsive verification (173 occurrences across 54 files)

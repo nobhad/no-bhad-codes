@@ -10,14 +10,14 @@ This file contains completed work from February 2026. Items are moved here from 
 
 Implemented 15 tasks from the 16-category system audit plan.
 
-**Phase 1: Security Critical**
+#### Phase 1: Security Critical
 
 - [x] Rate limiting added to `/api/intake` endpoints (`rateLimiters.publicForm`, `rateLimiters.standard`)
 - [x] Input validation middleware added with `ValidationSchemas.intakeSubmission` schema
 - [x] XSS prevention in `email-template-service.ts` - `escapeHtml()` method in `interpolate()`
 - [x] XSS prevention in `email-service.ts` - `escapeHtml()` for all user input in HTML emails
 
-**Phase 2: Workflow Integration**
+#### Phase 2: Workflow Integration
 
 - [x] Invoice events: `invoice.created`, `invoice.sent`, `invoice.paid` in `invoices/core.ts`
 - [x] Proposal events: `proposal.created`, `proposal.accepted`, `proposal.rejected` in `proposals.ts`
@@ -27,7 +27,7 @@ Implemented 15 tasks from the 16-category system audit plan.
 - [x] Milestone events: `project.milestone_completed` in `milestones.ts`
 - [x] File sharing infrastructure: Migration `078_file_sharing.sql`, `/api/uploads/:id/share` and `/unshare` endpoints
 
-**Phase 3: Code Quality**
+#### Phase 3: Code Quality
 
 - [x] Debug console.log removed from `admin-projects.ts` and `admin-analytics.ts`
 - [x] Database indexes added via `079_performance_indexes.sql`
@@ -4142,7 +4142,7 @@ The backend had 43 service files with ~30% duplicated boilerplate:
 - Services defined duplicate `type SqlValue` instead of importing shared types
 - Existing `row-helpers.ts` utilities were NOT being used
 
-**Solution: Entity Mapper Layer**
+#### Solution: Entity Mapper Layer
 
 Created a centralized entity mapper layer that:
 
@@ -5185,7 +5185,7 @@ Converted React tables to use vanilla CSS classes. Added all required tw-* utili
 
 **Completed:** February 28, 2026
 
-Consolidated all tw-* component classes from brutalist.css and globals.css into the main portal-*.css stylesheets.
+Consolidated all `tw-*` component classes from brutalist.css and globals.css into the main `portal-*.css` stylesheets.
 
 **Files Modified:**
 
