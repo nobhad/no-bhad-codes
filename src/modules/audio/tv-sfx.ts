@@ -137,6 +137,9 @@ class TvSfx {
   // never fight over the same nodes.
   private guideSource: ReturnType<AudioContext['createBufferSource']> | null = null;
   private guideGain: GainNode | null = null;
+  // Whether the guide hiss is wanted right now — checked across the awaits in
+  // playGuideStatic so a channel starting mid-load cancels it.
+  private guideWanted = false;
   private musicCurrentUrl: string | null = null;
   // Decoded buffers per-URL — first play of a track pays fetch+decode,
   // subsequent plays of the same track are instant.
@@ -350,13 +353,19 @@ class TvSfx {
    * No-op if it is already running.
    */
   async playGuideStatic(): Promise<void> {
-    if (this.guideSource) return;
+    if (this.guideSource || this.guideWanted) return;
+    // Intent is recorded before the awaits, and checked after each one.
+    // Without it, tuning into a channel while the context or the buffer was
+    // still loading left stopGuideStatic() with nothing to stop, and the
+    // hiss started afterwards — dead air running underneath a channel that
+    // was already playing.
+    this.guideWanted = true;
+
     const ctx = await this.ensureContext();
-    if (!ctx || !this.masterGain) return;
-    if (this.guideSource) return;
+    if (!ctx || !this.masterGain || !this.guideWanted) return;
 
     const buffer = await this.loadStaticBuffer(ctx);
-    if (!buffer || this.guideSource) return;
+    if (!buffer || !this.guideWanted || this.guideSource) return;
 
     const gain = ctx.createGain();
     const now = ctx.currentTime;
@@ -376,6 +385,7 @@ class TvSfx {
 
   /** Stop the guide hiss — tuning into a channel, POWER off, or leaving. */
   stopGuideStatic(): void {
+    this.guideWanted = false;
     const src = this.guideSource;
     const gain = this.guideGain;
     this.guideSource = null;
