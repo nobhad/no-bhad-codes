@@ -68,10 +68,13 @@ const STATIC_DEFAULT_RELEASE_S = 0.55;
 // audible on average laptop speakers. Earlier value (0.05) was inaudible
 // on anything quieter than studio monitors after passing through
 // masterGain (default 0.5).
-// Dropped from 0.18: broadband noise reads far louder than tonal music at
-// the same amplitude, so a burst calibrated against the click was drowning
-// the channel track it plays over.
-const STATIC_DEFAULT_PEAK_GAIN = 0.1;
+// Peak gain for the power-on crackle. Calibrated relative to
+// CLICK_FIXED_GAIN (0.22) — the click is the loudest reference the
+// user has, and the static should sit clearly below it but still be
+// audible on average laptop speakers. Earlier value (0.05) was inaudible
+// on anything quieter than studio monitors after passing through
+// masterGain (default 0.5).
+const STATIC_DEFAULT_PEAK_GAIN = 0.18;
 
 // Per-track gain for channel music — multiplied by masterGain so the
 // final effective amplitude at default volume is 0.7 * 0.5 = 0.35.
