@@ -475,14 +475,7 @@
         "id": "styling-ui-motion",
         "theme": "Styling, UI & Motion",
         "transition": "about-projects",
-        "items": [
-          "Tailwind CSS",
-          "GSAP",
-          "Three.js",
-          "Radix UI",
-          "Chart.js",
-          "EJS"
-        ]
+        "items": ["Tailwind CSS", "GSAP", "Radix UI", "Chart.js", "EJS"]
       },
       {
         "id": "backend-data",
