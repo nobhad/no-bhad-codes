@@ -2225,6 +2225,7 @@ export class ProjectsModule extends BaseModule {
     const infoEl = this.projectDetailSection.querySelector('#project-info');
     if (infoEl) {
       infoEl.innerHTML = this.buildProjectMediaHtml(project);
+      this.renderWalkthrough(project);
     }
 
     // Update links — live URL is on the title when present; surface test/repo
@@ -2297,33 +2298,38 @@ export class ProjectsModule extends BaseModule {
   }
 
   /**
-   * Build screenshots + walkthrough video markup for the project-info slot.
+   * Put the project's walkthrough video in the case study rather than the
+   * media run at the foot of the page — it reads as part of the write-up it
+   * illustrates, and stays above the rule that opens any deep-dive section.
+   */
+  private renderWalkthrough(project: PortfolioProject): void {
+    const slot = this.projectDetailSection?.querySelector('#project-walkthrough');
+    if (!slot) return;
+    const videos = project.videos ?? [];
+    slot.innerHTML = videos
+      .map((src, index) => {
+        const label =
+          videos.length === 1
+            ? `${escapeHtml(project.title)} walkthrough`
+            : `${escapeHtml(project.title)} walkthrough ${index + 1}`;
+        const themedAttr = src.includes(MEDIA_THEME_TOKEN)
+          ? ` data-themed-src="${escapeAttr(src)}"`
+          : '';
+        return `
+          <figure class="project-media project-media--video">
+            <video src="${escapeAttr(this.resolveThemedPath(src))}"${themedAttr} controls playsinline preload="metadata" aria-label="${label}"></video>
+          </figure>
+        `;
+      })
+      .join('');
+  }
+
+  /**
+   * Build screenshots markup for the project-info slot.
    */
   private buildProjectMediaHtml(project: PortfolioProject): string {
     const parts: string[] = [];
     const title = escapeHtml(project.title);
-
-    if (project.videos && project.videos.length > 0) {
-      parts.push(
-        ...project.videos.map((src, index) => {
-          const label =
-            project.videos!.length === 1
-              ? `${title} walkthrough`
-              : `${title} walkthrough ${index + 1}`;
-          const resolved = this.resolveThemedPath(src);
-          // Tag theme-swappable sources so applyMediaTheme can re-point them
-          // when the viewer toggles theme.
-          const themedAttr = src.includes(MEDIA_THEME_TOKEN)
-            ? ` data-themed-src="${escapeAttr(src)}"`
-            : '';
-          return `
-            <figure class="project-media project-media--video">
-              <video src="${escapeAttr(resolved)}"${themedAttr} controls playsinline preload="metadata" aria-label="${label}"></video>
-            </figure>
-          `;
-        })
-      );
-    }
 
     if (project.screenshots && project.screenshots.length > 0) {
       // Rendered PDF pages are portrait documents — they belong in a row

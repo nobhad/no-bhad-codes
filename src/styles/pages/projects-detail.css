@@ -1099,8 +1099,29 @@
    and so does the deep dive below them — both are prose, and prose in one
    half-width column next to empty space reads as a layout mistake. */
 #project-overview-section,
+#project-walkthrough,
 #project-deepdive-section {
   grid-column: 1 / -1;
+}
+
+/* The walkthrough is the widest thing in the case study — let it use the
+   whole column rather than sitting in one half of the Features/Results
+   split, and give the video the full width of that column. */
+#project-walkthrough:not(:empty) {
+  margin-top: var(--space-2);
+}
+
+#project-walkthrough .project-media,
+#project-deepdive-video .project-media {
+  width: 100%;
+  margin: 0;
+}
+
+#project-walkthrough video,
+#project-deepdive-video video {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 /* The deep dive is a separate piece of writing from the case study above
