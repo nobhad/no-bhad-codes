@@ -154,9 +154,11 @@ export const EMAIL_LAYOUT = {
  */
 export const EMAIL_TYPOGRAPHY = {
   /** Primary font stack — monospace (email-safe fallbacks) */
-  fontFamily: '"Inconsolata", "Cascadia Code", "Source Code Pro", Menlo, Consolas, "Courier New", monospace',
+  fontFamily:
+    '"Inconsolata", "Cascadia Code", "Source Code Pro", Menlo, Consolas, "Courier New", monospace',
   /** Enhanced font stack for modern clients */
-  fontFamilyFull: '"Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "Courier New", monospace',
+  fontFamilyFull:
+    '"Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "Courier New", monospace',
   /** Standard line height */
   lineHeight: '1.6',
   /** Body font size */

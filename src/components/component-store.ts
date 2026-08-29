@@ -38,14 +38,10 @@ class ComponentStore {
     this.definitions.set(definition.name, definition);
 
     // Also register in the main container for consistency
-    container.register(
-      definition.name,
-      definition.factory,
-      {
-        singleton: definition.singleton ?? false,
-        dependencies: []
-      }
-    );
+    container.register(definition.name, definition.factory, {
+      singleton: definition.singleton ?? false,
+      dependencies: []
+    });
   }
 
   /**
@@ -230,7 +226,7 @@ export class ComponentUtils {
   /**
    * Create a debounced function
    */
-  static debounce<T extends(...args: never[]) => unknown>(
+  static debounce<T extends (...args: never[]) => unknown>(
     func: T,
     wait: number
   ): (...args: Parameters<T>) => void {
@@ -244,7 +240,7 @@ export class ComponentUtils {
   /**
    * Create a throttled function
    */
-  static throttle<T extends(...args: never[]) => unknown>(
+  static throttle<T extends (...args: never[]) => unknown>(
     func: T,
     limit: number
   ): (...args: Parameters<T>) => void {

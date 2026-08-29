@@ -81,24 +81,21 @@ export function useClientContacts({ clientId }: ClientDetailHookOptions) {
     []
   );
 
-  const deleteContact = useCallback(
-    async (id: number): Promise<boolean> => {
-      try {
-        const response = await apiDelete(`${API_ENDPOINTS.CLIENT_CONTACTS}/${id}`);
+  const deleteContact = useCallback(async (id: number): Promise<boolean> => {
+    try {
+      const response = await apiDelete(`${API_ENDPOINTS.CLIENT_CONTACTS}/${id}`);
 
-        if (!response.ok) {
-          throw new Error(`Failed to delete contact: ${response.statusText}`);
-        }
-
-        setContacts((prev) => prev.filter((c) => c.id !== id));
-        return true;
-      } catch (err) {
-        logger.error('[useClientContacts] Delete contact error:', err);
-        return false;
+      if (!response.ok) {
+        throw new Error(`Failed to delete contact: ${response.statusText}`);
       }
-    },
-    []
-  );
+
+      setContacts((prev) => prev.filter((c) => c.id !== id));
+      return true;
+    } catch (err) {
+      logger.error('[useClientContacts] Delete contact error:', err);
+      return false;
+    }
+  }, []);
 
   return {
     contacts,

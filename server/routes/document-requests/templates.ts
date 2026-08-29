@@ -127,7 +127,12 @@ router.post(
     const { name, title, description, document_type, is_required, days_until_due } = req.body;
 
     if (!name || !title) {
-      return errorResponse(res, 'name and title are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'name and title are required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const createdBy = req.user?.email;

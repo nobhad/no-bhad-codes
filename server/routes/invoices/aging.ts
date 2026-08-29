@@ -10,7 +10,12 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { ErrorCodes, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
+import {
+  ErrorCodes,
+  errorResponseWithPayload,
+  sendSuccess,
+  sanitizeErrorMessage
+} from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseInvoice } from './helpers.js';
 
 const router = express.Router();
@@ -47,9 +52,15 @@ router.get(
 
       sendSuccess(res, { report: transformedReport });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to generate aging report', 500, ErrorCodes.REPORT_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to generate aging report')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to generate aging report',
+        500,
+        ErrorCodes.REPORT_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to generate aging report')
+        }
+      );
     }
   })
 );

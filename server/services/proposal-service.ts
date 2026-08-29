@@ -18,11 +18,7 @@
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { notDeleted } from '../database/query-helpers.js';
-import {
-  NotFoundError,
-  AuthorizationError,
-  ValidationError
-} from '../utils/app-errors.js';
+import { NotFoundError, AuthorizationError, ValidationError } from '../utils/app-errors.js';
 import * as crypto from 'crypto';
 import { logger } from './logger.js';
 import { getBaseUrl } from '../config/environment.js';
@@ -240,48 +236,66 @@ function generateToken(): string {
 const PROPOSAL_REQUEST_COLUMNS = `
   id, project_id, client_id, project_type, selected_tier, base_price, final_price,
   maintenance_option, status, client_notes, admin_notes, created_at, reviewed_at, reviewed_by
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const PROPOSAL_TEMPLATE_COLUMNS = `
   id, name, description, project_type, tier_structure, default_line_items,
   terms_and_conditions, validity_days, is_default, is_active, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const PROPOSAL_VERSION_COLUMNS = `
   id, proposal_id, version_number, tier_data, features_data, pricing_data,
   notes, created_by, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const PROPOSAL_SIGNATURE_COLUMNS = `
   id, proposal_id, signer_name, signer_email, signer_title, signer_company,
   signature_method, signature_data, ip_address, user_agent, signed_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const PROPOSAL_COMMENT_COLUMNS = `
   id, proposal_id, author_type, author_name, author_email, content, is_internal,
   parent_comment_id, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const PROPOSAL_ACTIVITY_COLUMNS = `
   id, proposal_id, activity_type, actor, actor_type, metadata, ip_address,
   user_agent, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const PROPOSAL_CUSTOM_ITEM_COLUMNS = `
   id, proposal_id, item_type, description, quantity, unit_price, unit_label,
   category, is_taxable, is_optional, sort_order, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const SIGNATURE_REQUEST_COLUMNS = `
   id, proposal_id, signer_email, signer_name, request_token, status, sent_at,
   viewed_at, signed_at, declined_at, decline_reason, expires_at, reminder_count,
   last_reminder_at, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const PROPOSAL_FEATURE_SELECTION_COLUMNS = `
   id, proposal_request_id, feature_id, feature_name, feature_price, feature_category,
   is_included_in_tier, is_addon, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // PROPOSAL SERVICE CLASS
@@ -369,7 +383,10 @@ class ProposalService {
    */
   async getTemplate(templateId: number): Promise<ProposalTemplate> {
     const db = getDatabase();
-    const row = await db.get(`SELECT ${PROPOSAL_TEMPLATE_COLUMNS} FROM proposal_templates WHERE id = ?`, [templateId]);
+    const row = await db.get(
+      `SELECT ${PROPOSAL_TEMPLATE_COLUMNS} FROM proposal_templates WHERE id = ?`,
+      [templateId]
+    );
 
     if (!row) {
       throw new NotFoundError('template');
@@ -430,7 +447,7 @@ class ProposalService {
       params.push(data.isDefault ? 1 : 0);
     }
 
-    updates.push('updated_at = datetime(\'now\')');
+    updates.push("updated_at = datetime('now')");
     params.push(templateId);
 
     await db.run(`UPDATE proposal_templates SET ${updates.join(', ')} WHERE id = ?`, params);
@@ -444,7 +461,7 @@ class ProposalService {
   async deleteTemplate(templateId: number): Promise<void> {
     const db = getDatabase();
     await db.run(
-      'UPDATE proposal_templates SET is_active = FALSE, updated_at = datetime(\'now\') WHERE id = ?',
+      "UPDATE proposal_templates SET is_active = FALSE, updated_at = datetime('now') WHERE id = ?",
       [templateId]
     );
   }
@@ -464,7 +481,10 @@ class ProposalService {
     const db = getDatabase();
 
     // Get current proposal data
-    const proposal = await db.get(`SELECT ${PROPOSAL_REQUEST_COLUMNS} FROM proposal_requests WHERE id = ?`, [proposalId]);
+    const proposal = await db.get(
+      `SELECT ${PROPOSAL_REQUEST_COLUMNS} FROM proposal_requests WHERE id = ?`,
+      [proposalId]
+    );
     if (!proposal) {
       throw new NotFoundError('proposal');
     }
@@ -537,7 +557,10 @@ class ProposalService {
    */
   async getVersion(versionId: number): Promise<ProposalVersion> {
     const db = getDatabase();
-    const row = await db.get(`SELECT ${PROPOSAL_VERSION_COLUMNS} FROM proposal_versions WHERE id = ?`, [versionId]);
+    const row = await db.get(
+      `SELECT ${PROPOSAL_VERSION_COLUMNS} FROM proposal_versions WHERE id = ?`,
+      [versionId]
+    );
 
     if (!row) {
       throw new NotFoundError('proposal version');
@@ -713,7 +736,10 @@ class ProposalService {
    */
   async getSignatureRequest(requestId: number): Promise<SignatureRequest> {
     const db = getDatabase();
-    const row = await db.get(`SELECT ${SIGNATURE_REQUEST_COLUMNS} FROM signature_requests WHERE id = ?`, [requestId]);
+    const row = await db.get(
+      `SELECT ${SIGNATURE_REQUEST_COLUMNS} FROM signature_requests WHERE id = ?`,
+      [requestId]
+    );
 
     if (!row) {
       throw new NotFoundError('signature request');
@@ -727,7 +753,10 @@ class ProposalService {
    */
   async getSignatureRequestByToken(token: string): Promise<SignatureRequest | null> {
     const db = getDatabase();
-    const row = await db.get(`SELECT ${SIGNATURE_REQUEST_COLUMNS} FROM signature_requests WHERE request_token = ?`, [token]);
+    const row = await db.get(
+      `SELECT ${SIGNATURE_REQUEST_COLUMNS} FROM signature_requests WHERE request_token = ?`,
+      [token]
+    );
 
     if (!row) {
       return null;
@@ -743,10 +772,7 @@ class ProposalService {
    * authorized signer. Requiring a server-issued token bound to a proposal +
    * signer email ensures only the intended party can sign, and only once.
    */
-  async recordSignatureByToken(
-    token: string,
-    data: SignatureData
-  ): Promise<ProposalSignature> {
+  async recordSignatureByToken(token: string, data: SignatureData): Promise<ProposalSignature> {
     const request = await this.getSignatureRequestByToken(token);
     if (!request) {
       throw new SignatureAuthorizationError('NOT_FOUND', 'Invalid signature request');
@@ -755,7 +781,10 @@ class ProposalService {
       throw new SignatureAuthorizationError('EXPIRED', 'Signature request has expired');
     }
     if (request.status === 'signed') {
-      throw new SignatureAuthorizationError('ALREADY_SIGNED', 'This proposal has already been signed');
+      throw new SignatureAuthorizationError(
+        'ALREADY_SIGNED',
+        'This proposal has already been signed'
+      );
     }
     if (request.status === 'declined') {
       throw new SignatureAuthorizationError('DECLINED', 'This signature request was declined');
@@ -948,8 +977,7 @@ class ProposalService {
         const clientData: ProposalSignedClientData = {
           ...notificationData,
           portalUrl: `${baseUrl}/client/portal`,
-          supportEmail:
-            process.env.SUPPORT_EMAIL || process.env.ADMIN_EMAIL || BUSINESS_INFO.email
+          supportEmail: process.env.SUPPORT_EMAIL || process.env.ADMIN_EMAIL || BUSINESS_INFO.email
         };
 
         const clientResult = await emailService.sendProposalSignedClientConfirmation(clientData);
@@ -976,7 +1004,10 @@ class ProposalService {
    */
   async getSignature(signatureId: number): Promise<ProposalSignature> {
     const db = getDatabase();
-    const row = await db.get(`SELECT ${PROPOSAL_SIGNATURE_COLUMNS} FROM proposal_signatures WHERE id = ?`, [signatureId]);
+    const row = await db.get(
+      `SELECT ${PROPOSAL_SIGNATURE_COLUMNS} FROM proposal_signatures WHERE id = ?`,
+      [signatureId]
+    );
 
     if (!row) {
       throw new NotFoundError('signature');
@@ -1017,7 +1048,7 @@ class ProposalService {
     const signatures = await this.getProposalSignatures(proposalId);
 
     const pendingRows = await db.all(
-      '`SELECT ${SIGNATURE_REQUEST_COLUMNS} FROM signature_requests WHERE proposal_id = ? AND status IN (\'pending\', \'viewed\')`',
+      "`SELECT ${SIGNATURE_REQUEST_COLUMNS} FROM signature_requests WHERE proposal_id = ? AND status IN ('pending', 'viewed')`",
       [proposalId]
     );
     const pendingRequests = pendingRows.map((row) =>
@@ -1124,7 +1155,10 @@ class ProposalService {
    */
   async getComment(commentId: number): Promise<ProposalComment> {
     const db = getDatabase();
-    const row = await db.get(`SELECT ${PROPOSAL_COMMENT_COLUMNS} FROM proposal_comments WHERE id = ?`, [commentId]);
+    const row = await db.get(
+      `SELECT ${PROPOSAL_COMMENT_COLUMNS} FROM proposal_comments WHERE id = ?`,
+      [commentId]
+    );
 
     if (!row) {
       throw new NotFoundError('comment');
@@ -1286,7 +1320,10 @@ class ProposalService {
    */
   async getCustomItem(itemId: number): Promise<ProposalCustomItem> {
     const db = getDatabase();
-    const row = await db.get(`SELECT ${PROPOSAL_CUSTOM_ITEM_COLUMNS} FROM proposal_custom_items WHERE id = ?`, [itemId]);
+    const row = await db.get(
+      `SELECT ${PROPOSAL_CUSTOM_ITEM_COLUMNS} FROM proposal_custom_items WHERE id = ?`,
+      [itemId]
+    );
 
     if (!row) {
       throw new NotFoundError('custom item');
@@ -1356,7 +1393,7 @@ class ProposalService {
       params.push(data.sortOrder);
     }
 
-    updates.push('updated_at = datetime(\'now\')');
+    updates.push("updated_at = datetime('now')");
     params.push(itemId);
 
     await db.run(`UPDATE proposal_custom_items SET ${updates.join(', ')} WHERE id = ?`, params);
@@ -1447,7 +1484,10 @@ class ProposalService {
     const db = getDatabase();
 
     // Get proposal
-    const proposal = await db.get(`SELECT ${PROPOSAL_REQUEST_COLUMNS} FROM proposal_requests WHERE id = ?`, [proposalId]);
+    const proposal = await db.get(
+      `SELECT ${PROPOSAL_REQUEST_COLUMNS} FROM proposal_requests WHERE id = ?`,
+      [proposalId]
+    );
     if (!proposal) return;
 
     const p = proposal as Record<string, unknown>;
@@ -1571,7 +1611,7 @@ class ProposalService {
   async markReminderSent(proposalId: number): Promise<void> {
     const db = getDatabase();
 
-    await db.run('UPDATE proposal_requests SET reminder_sent_at = datetime(\'now\') WHERE id = ?', [
+    await db.run("UPDATE proposal_requests SET reminder_sent_at = datetime('now') WHERE id = ?", [
       proposalId
     ]);
 
@@ -1640,7 +1680,9 @@ class ProposalService {
     id, project_id, client_id, project_type, selected_tier, base_price, final_price,
     maintenance_option, status, client_notes, admin_notes, created_at, reviewed_at, reviewed_by,
     sent_at, updated_at
-  `.replace(/\s+/g, ' ').trim();
+  `
+    .replace(/\s+/g, ' ')
+    .trim();
 
   /** Get all proposals for the admin listing view */
   async getAllProposalsForAdmin(): Promise<Record<string, unknown>[]> {
@@ -1682,11 +1724,14 @@ class ProposalService {
   async sendProposalToClient(proposalId: number): Promise<Record<string, unknown> | undefined> {
     const db = getDatabase();
 
-    await db.run(`
+    await db.run(
+      `
       UPDATE proposal_requests
       SET status = 'sent', sent_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
-    `, [proposalId]);
+    `,
+      [proposalId]
+    );
 
     return this.getAdminProposalById(proposalId);
   }
@@ -1703,7 +1748,8 @@ class ProposalService {
       return { original: undefined, duplicate: undefined };
     }
 
-    const result = await db.run(`
+    const result = await db.run(
+      `
       INSERT INTO proposal_requests (
         project_id, client_id, project_type, selected_tier,
         base_price, final_price, maintenance_option, client_notes,
@@ -1714,7 +1760,9 @@ class ProposalService {
         base_price, final_price, maintenance_option, client_notes,
         'pending', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
       FROM proposal_requests WHERE id = ?
-    `, [proposalId]);
+    `,
+      [proposalId]
+    );
 
     const duplicate = await this.getAdminProposalById(result.lastID!);
     return { original, duplicate };
@@ -1746,10 +1794,7 @@ class ProposalService {
 
     const db = getDatabase();
 
-    await db.run(
-      `UPDATE proposal_requests SET ${updates.join(', ')} WHERE id = ?`,
-      values
-    );
+    await db.run(`UPDATE proposal_requests SET ${updates.join(', ')} WHERE id = ?`, values);
 
     const proposal = await this.getAdminProposalById(proposalId);
     return { updated: true, proposal };
@@ -1759,11 +1804,14 @@ class ProposalService {
   async softDeleteProposal(proposalId: number): Promise<void> {
     const db = getDatabase();
 
-    await db.run(`
+    await db.run(
+      `
       UPDATE proposal_requests
       SET deleted_at = CURRENT_TIMESTAMP
       WHERE id = ?
-    `, [proposalId]);
+    `,
+      [proposalId]
+    );
   }
 
   /** Bulk soft-delete proposals, returning the count of affected rows */
@@ -1776,7 +1824,7 @@ class ProposalService {
       if (isNaN(id) || id <= 0) continue;
 
       const result = await db.run(
-        'UPDATE proposal_requests SET deleted_at = datetime(\'now\') WHERE id = ? AND deleted_at IS NULL',
+        "UPDATE proposal_requests SET deleted_at = datetime('now') WHERE id = ? AND deleted_at IS NULL",
         [id]
       );
       if (result.changes && result.changes > 0) {
@@ -1796,7 +1844,8 @@ class ProposalService {
    */
   async getClientProposalsList(clientId: number): Promise<ClientProposalSummary[]> {
     const db = getDatabase();
-    const rows = await db.all(`
+    const rows = await db.all(
+      `
       SELECT
         pr.id,
         COALESCE(p.project_name, 'Proposal #' || pr.id) as title,
@@ -1819,7 +1868,9 @@ class ProposalService {
         AND pr.deleted_at IS NULL
         AND pr.status != 'pending'
       ORDER BY pr.created_at DESC
-    `, [clientId]);
+    `,
+      [clientId]
+    );
 
     return rows as ClientProposalSummary[];
   }
@@ -1848,7 +1899,9 @@ class ProposalService {
   /**
    * Get feature selections for a proposal (used in PDF generation).
    */
-  async getProposalFeatureSelectionsForPdf(proposalId: number): Promise<ProposalFeatureSelectionRow[]> {
+  async getProposalFeatureSelectionsForPdf(
+    proposalId: number
+  ): Promise<ProposalFeatureSelectionRow[]> {
     const db = getDatabase();
     const rows = await db.all(
       `SELECT ${PROPOSAL_FEATURE_SELECTION_COLUMNS}
@@ -1862,7 +1915,9 @@ class ProposalService {
   /**
    * Get the latest signature for a proposal (used in PDF generation).
    */
-  async getProposalLatestSignatureForPdf(proposalId: number): Promise<ProposalSignatureForPdf | undefined> {
+  async getProposalLatestSignatureForPdf(
+    proposalId: number
+  ): Promise<ProposalSignatureForPdf | undefined> {
     const db = getDatabase();
     const row = await db.get(
       `SELECT ${PROPOSAL_SIGNATURE_COLUMNS}
@@ -1880,7 +1935,9 @@ class ProposalService {
   /**
    * Verify a project exists and is not deleted
    */
-  async getProjectForProposal(projectId: number): Promise<{ id: number; client_id: number } | null> {
+  async getProjectForProposal(
+    projectId: number
+  ): Promise<{ id: number; client_id: number } | null> {
     const db = getDatabase();
     const row = await db.get(
       'SELECT id, client_id FROM projects WHERE id = ? AND deleted_at IS NULL',
@@ -2040,7 +2097,7 @@ class ProposalService {
     if (data.status) {
       updates.push('status = ?');
       params.push(data.status);
-      updates.push('reviewed_at = datetime(\'now\')');
+      updates.push("reviewed_at = datetime('now')");
       updates.push('reviewed_by = ?');
       params.push(data.reviewerEmail || null);
       updates.push('reviewed_by_user_id = ?');
@@ -2112,7 +2169,7 @@ class ProposalService {
       );
 
       await ctx.run(
-        'UPDATE proposal_requests SET status = \'converted\', reviewed_at = datetime(\'now\') WHERE id = ?',
+        "UPDATE proposal_requests SET status = 'converted', reviewed_at = datetime('now') WHERE id = ?",
         [proposalId]
       );
 

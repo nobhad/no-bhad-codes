@@ -651,7 +651,7 @@
         const touch = e.touches[0];
         const mouseEvent = new MouseEvent('mousedown', {
           clientX: touch.clientX,
-          clientY: touch.clientY,
+          clientY: touch.clientY
         });
         canvas.dispatchEvent(mouseEvent);
       }
@@ -661,7 +661,7 @@
         const touch = e.touches[0];
         const mouseEvent = new MouseEvent('mousemove', {
           clientX: touch.clientX,
-          clientY: touch.clientY,
+          clientY: touch.clientY
         });
         canvas.dispatchEvent(mouseEvent);
       }
@@ -746,7 +746,7 @@
                 weekday: 'short',
                 month: 'short',
                 day: 'numeric',
-                year: 'numeric',
+                year: 'numeric'
               })
             : '-';
           if (signerEmailInput) signerEmailInput.value = data.clientEmail || '';
@@ -829,13 +829,13 @@
           const response = await fetch(`/api/projects/contract/sign-by-token/${token}`, {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
+              'Content-Type': 'application/json'
             },
             body: JSON.stringify({
               signerName,
               signatureData: getSignatureData(),
-              agreedToTerms,
-            }),
+              agreedToTerms
+            })
           });
 
           const data = await response.json();

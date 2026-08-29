@@ -215,12 +215,22 @@ router.post(
 
     const request = await adHocRequestService.getRequest(requestId);
     if (!request.taskId) {
-      return errorResponse(res, 'Request is not linked to a task yet', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'Request is not linked to a task yet',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     const { userName, hours, date, description, billable, hourlyRate } = req.body;
     if (!userName || !hours || !date) {
-      return errorResponse(res, 'userName, hours, and date are required', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'userName, hours, and date are required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     const entry = await projectService.logTime(request.projectId, {
@@ -480,7 +490,11 @@ router.put(
             notes: `Ad Hoc Work - Request #${request.id}: ${request.title}\n\n${request.description}`
           });
 
-          await adHocRequestService.linkRequestInvoice(request.id!, autoInvoice.id!, lineItem.amount);
+          await adHocRequestService.linkRequestInvoice(
+            request.id!,
+            autoInvoice.id!,
+            lineItem.amount
+          );
         }
       } catch (invoiceError) {
         // Log error but don't fail the request update
@@ -819,7 +833,11 @@ router.post(
     });
 
     for (let i = 0; i < requests.length; i += 1) {
-      await adHocRequestService.linkRequestInvoice(requests[i].id!, invoice.id!, lineItems[i].amount);
+      await adHocRequestService.linkRequestInvoice(
+        requests[i].id!,
+        invoice.id!,
+        lineItems[i].amount
+      );
     }
 
     sendCreated(res, { invoice, lineItems }, 'Invoice created');
@@ -955,21 +973,21 @@ router.post(
 
     const createdSubtasks = Array.isArray(subtasks)
       ? await Promise.all(
-        subtasks
-          .filter((item) => item && typeof item.title === 'string' && item.title.trim())
-          .map((item) =>
-            projectService.createTask(request.projectId, {
-              title: item.title,
-              description: item.description || undefined,
-              milestoneId: milestoneId ? Number(milestoneId) : undefined,
-              assignedTo: item.assignedTo || assignedTo || undefined,
-              dueDate: item.dueDate || dueDate || undefined,
-              estimatedHours: item.estimatedHours ?? undefined,
-              priority: mapTaskPriority(item.priority || priority || request.priority),
-              parentTaskId: task.id
-            })
-          )
-      )
+          subtasks
+            .filter((item) => item && typeof item.title === 'string' && item.title.trim())
+            .map((item) =>
+              projectService.createTask(request.projectId, {
+                title: item.title,
+                description: item.description || undefined,
+                milestoneId: milestoneId ? Number(milestoneId) : undefined,
+                assignedTo: item.assignedTo || assignedTo || undefined,
+                dueDate: item.dueDate || dueDate || undefined,
+                estimatedHours: item.estimatedHours ?? undefined,
+                priority: mapTaskPriority(item.priority || priority || request.priority),
+                parentTaskId: task.id
+              })
+            )
+        )
       : [];
 
     const updatedRequest = await adHocRequestService.updateRequest(requestId, {
@@ -1021,7 +1039,12 @@ router.post(
     const { requestIds } = req.body;
 
     if (!requestIds || !Array.isArray(requestIds) || requestIds.length === 0) {
-      return errorResponse(res, 'requestIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'requestIds array is required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const deletedBy = req.user?.email || String(req.user?.id || 'system');

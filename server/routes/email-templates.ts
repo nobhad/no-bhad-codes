@@ -34,10 +34,7 @@ const BODY_MAX_LENGTH = 50000;
 
 const EmailTemplateValidationSchemas = {
   createTemplate: {
-    name: [
-      { type: 'required' as const },
-      { type: 'string' as const, maxLength: NAME_MAX_LENGTH }
-    ],
+    name: [{ type: 'required' as const }, { type: 'string' as const, maxLength: NAME_MAX_LENGTH }],
     description: { type: 'string' as const, maxLength: DESCRIPTION_MAX_LENGTH },
     category: { type: 'string' as const, maxLength: CATEGORY_MAX_LENGTH },
     subject: [
@@ -209,7 +206,12 @@ router.post(
       req.body;
 
     if (!name || !subject || !body_html) {
-      return errorResponse(res, 'name, subject, and body_html are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'name, subject, and body_html are required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const data: CreateTemplateData = {
@@ -589,7 +591,12 @@ router.post(
     const { subject, body_html, body_text, variables, sample_data } = req.body;
 
     if (!subject || !body_html) {
-      return errorResponse(res, 'subject and body_html are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'subject and body_html are required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     // Generate sample data from variables if not provided
@@ -727,7 +734,9 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const templateId = req.query.templateId ? parseInt(req.query.templateId as string, 10) : undefined;
+    const templateId = req.query.templateId
+      ? parseInt(req.query.templateId as string, 10)
+      : undefined;
     const recipientEmail = req.query.recipientEmail as string | undefined;
     const status = req.query.status as string | undefined;
     const limitParam = req.query.limit ? parseInt(req.query.limit as string, 10) : 100;

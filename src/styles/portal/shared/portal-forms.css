@@ -148,10 +148,26 @@
 }
 
 /* Focus state - border shifts to primary, subtle ring for contrast */
-.portal :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(:focus, :focus-visible),
-.portal-modal :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(:focus, :focus-visible),
-.modal-overlay :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(:focus, :focus-visible),
-.auth-gate :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(:focus, :focus-visible) {
+.portal
+  :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(
+    :focus,
+    :focus-visible
+  ),
+.portal-modal
+  :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(
+    :focus,
+    :focus-visible
+  ),
+.modal-overlay
+  :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(
+    :focus,
+    :focus-visible
+  ),
+.auth-gate
+  :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(
+    :focus,
+    :focus-visible
+  ) {
   outline: none;
   outline-offset: 0;
   border-color: var(--color-accent);
@@ -252,7 +268,11 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
 
 /* Error state - .error is legacy, .form-field-input--error is factory,
    .form-input-error is used by PortalInput.tsx */
-:is(.form-input, .form-textarea, input, textarea, select):is(.error, .form-field-input--error, .form-input-error) {
+:is(.form-input, .form-textarea, input, textarea, select):is(
+  .error,
+  .form-field-input--error,
+  .form-input-error
+) {
   border-color: var(--color-danger);
 }
 /* Error message text */
@@ -389,7 +409,8 @@ input.search-bar-input {
   box-sizing: border-box;
   /* Left padding MUST clear the absolutely-positioned search icon.
      icon-left (8px) + icon-width (16px) + breathing room (12px) = 36px */
-  padding: 0 calc(var(--icon-size-xl) + var(--space-1)) 0 calc(var(--space-1) + var(--icon-size-md) + var(--space-1-5));
+  padding: 0 calc(var(--icon-size-xl) + var(--space-1)) 0
+    calc(var(--space-1) + var(--icon-size-md) + var(--space-1-5));
   /* Prevent placeholder from being cut off */
   text-overflow: ellipsis;
   overflow: hidden;
@@ -481,7 +502,6 @@ input.search-bar-input {
 .input-error {
   border-color: var(--color-error);
 }
-
 
 /* Select dropdown */
 .select {
@@ -1053,5 +1073,3 @@ input.search-bar-input {
 .file-upload-remove-btn:hover {
   color: var(--color-accent);
 }
-
-

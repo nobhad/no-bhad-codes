@@ -48,7 +48,7 @@ let skipped = 0;
 for (const project of projects) {
   // Check if file already exists for this project
   const existingFile = db
-    .prepare('SELECT id FROM files WHERE project_id = ? AND description LIKE \'%intake%\'')
+    .prepare("SELECT id FROM files WHERE project_id = ? AND description LIKE '%intake%'")
     .get(project.id);
 
   if (existingFile) {

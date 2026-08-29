@@ -79,24 +79,21 @@ export function useClientNotes({ clientId }: ClientDetailHookOptions) {
     []
   );
 
-  const deleteNote = useCallback(
-    async (id: number): Promise<boolean> => {
-      try {
-        const response = await apiDelete(`${API_ENDPOINTS.CLIENT_NOTES}/${id}`);
+  const deleteNote = useCallback(async (id: number): Promise<boolean> => {
+    try {
+      const response = await apiDelete(`${API_ENDPOINTS.CLIENT_NOTES}/${id}`);
 
-        if (!response.ok) {
-          throw new Error(`Failed to delete note: ${response.statusText}`);
-        }
-
-        setNotes((prev) => prev.filter((n) => n.id !== id));
-        return true;
-      } catch (err) {
-        logger.error('[useClientNotes] Delete note error:', err);
-        return false;
+      if (!response.ok) {
+        throw new Error(`Failed to delete note: ${response.statusText}`);
       }
-    },
-    []
-  );
+
+      setNotes((prev) => prev.filter((n) => n.id !== id));
+      return true;
+    } catch (err) {
+      logger.error('[useClientNotes] Delete note error:', err);
+      return false;
+    }
+  }, []);
 
   const toggleNotePin = useCallback(
     async (id: number): Promise<boolean> => {

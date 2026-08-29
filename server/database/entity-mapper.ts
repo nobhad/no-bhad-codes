@@ -84,70 +84,70 @@ function extractValue(row: DatabaseRow, mapping: FieldMapping): unknown {
   let value: unknown;
 
   switch (type) {
-  case 'string':
-    value = getString(row, column);
-    break;
-  case 'string?':
-    value = getStringOrNull(row, column);
-    break;
-  case 'number':
-    value = getNumber(row, column);
-    break;
-  case 'number?':
-    value = getNumberOrNull(row, column);
-    break;
-  case 'boolean':
-    value = getBoolean(row, column);
-    break;
-  case 'boolean?':
-    value = getBooleanOrNull(row, column);
-    break;
-  case 'float':
-    value = getFloat(row, column);
-    break;
-  case 'float?':
-    value = getFloatOrNull(row, column);
-    break;
-  case 'json':
-    {
-      const rawValue = row[column];
-      if (typeof rawValue === 'string') {
-        try {
-          value = JSON.parse(rawValue);
-        } catch {
+    case 'string':
+      value = getString(row, column);
+      break;
+    case 'string?':
+      value = getStringOrNull(row, column);
+      break;
+    case 'number':
+      value = getNumber(row, column);
+      break;
+    case 'number?':
+      value = getNumberOrNull(row, column);
+      break;
+    case 'boolean':
+      value = getBoolean(row, column);
+      break;
+    case 'boolean?':
+      value = getBooleanOrNull(row, column);
+      break;
+    case 'float':
+      value = getFloat(row, column);
+      break;
+    case 'float?':
+      value = getFloatOrNull(row, column);
+      break;
+    case 'json':
+      {
+        const rawValue = row[column];
+        if (typeof rawValue === 'string') {
+          try {
+            value = JSON.parse(rawValue);
+          } catch {
+            value = defaultValue ?? {};
+          }
+        } else if (rawValue != null) {
+          value = rawValue;
+        } else {
           value = defaultValue ?? {};
         }
-      } else if (rawValue != null) {
-        value = rawValue;
-      } else {
-        value = defaultValue ?? {};
       }
-    }
-    break;
-  case 'json?':
-    {
-      const rawValue = row[column];
-      if (typeof rawValue === 'string') {
-        try {
-          value = JSON.parse(rawValue);
-        } catch {
+      break;
+    case 'json?':
+      {
+        const rawValue = row[column];
+        if (typeof rawValue === 'string') {
+          try {
+            value = JSON.parse(rawValue);
+          } catch {
+            value = null;
+          }
+        } else if (rawValue != null) {
+          value = rawValue;
+        } else {
           value = null;
         }
-      } else if (rawValue != null) {
-        value = rawValue;
-      } else {
-        value = null;
       }
-    }
-    break;
-  case 'date':
-    value = getDate(row, column) ?? new Date();
-    break;
-  case 'date?':
-    value = getDate(row, column);
-    break;
-  default:
-    value = row[column];
+      break;
+    case 'date':
+      value = getDate(row, column) ?? new Date();
+      break;
+    case 'date?':
+      value = getDate(row, column);
+      break;
+    default:
+      value = row[column];
   }
 
   // Apply default if value is null/undefined
@@ -330,7 +330,7 @@ export function definePartialSchema<T>() {
 export function createPartialMapper<
   TRow extends DatabaseRow,
   TEntity,
-  TPartial extends Partial<TEntity>,
+  TPartial extends Partial<TEntity>
 >(schema: EntitySchema<TPartial>): (row: TRow) => TPartial {
   return (row: TRow) => transformRow<TPartial>(row, schema);
 }

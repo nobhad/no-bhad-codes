@@ -55,7 +55,12 @@ router.post(
     const { projectId, title, description, type, reviewDeadline } = req.body;
 
     if (!projectId || !title) {
-      return errorResponse(res, 'Project ID and title are required', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'Project ID and title are required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     const review = await designReviewService.create({

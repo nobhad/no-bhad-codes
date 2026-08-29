@@ -1082,9 +1082,7 @@ describe('Invoice Service', () => {
         { id: 12, invoice_number: 'DEP-003', amount_total: 500, paid_date: '2026-01-15' }
       ]);
       // Fully applied — single batched lookup.
-      mockDb.all.mockResolvedValueOnce([
-        { deposit_invoice_id: 12, total_applied: 500 }
-      ]);
+      mockDb.all.mockResolvedValueOnce([{ deposit_invoice_id: 12, total_applied: 500 }]);
 
       const result = await service.getAvailableDeposits(5);
 
@@ -1294,10 +1292,9 @@ describe('Invoice Service', () => {
       const result = await service.checkAndMarkOverdue();
 
       expect(result).toBe(5);
-      expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('SET status = \'overdue\''),
-        ['2026-03-01']
-      );
+      expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining("SET status = 'overdue'"), [
+        '2026-03-01'
+      ]);
     });
 
     it('returns 0 when no invoices to mark', async () => {
@@ -1931,10 +1928,7 @@ describe('Invoice Service', () => {
       const result = await service.getAllInvoices(10, 0);
 
       expect(result).toHaveLength(1);
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('LIMIT ? OFFSET ?'),
-        [10, 0]
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('LIMIT ? OFFSET ?'), [10, 0]);
     });
 
     it('uses default pagination values of 100 and 0', async () => {
@@ -2368,7 +2362,7 @@ describe('Invoice Service', () => {
       const result = await service.createDepositInvoice(1, 1, 500, 50, 'Project Deposit 50%');
 
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('\'deposit\''),
+        expect.stringContaining("'deposit'"),
         expect.arrayContaining([1, 1, 500])
       );
       expect(result.invoiceType).toBe('deposit');
@@ -2404,7 +2398,7 @@ describe('Invoice Service', () => {
       await service.createDepositInvoice(2, 3, 1000);
 
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('\'deposit\''),
+        expect.stringContaining("'deposit'"),
         expect.arrayContaining([2, 3, 1000])
       );
     });
@@ -2755,10 +2749,7 @@ describe('Invoice Service', () => {
 
       await service.deleteRecurringInvoice(7);
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        'DELETE FROM recurring_invoices WHERE id = ?',
-        [7]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith('DELETE FROM recurring_invoices WHERE id = ?', [7]);
     });
   });
 });

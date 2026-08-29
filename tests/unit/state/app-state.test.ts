@@ -56,7 +56,9 @@ import { appState, disposeAppStateListeners } from '../../../src/core/state/app-
 function patchEnv(val: string) {
   const original = process.env.NODE_ENV;
   process.env.NODE_ENV = val;
-  return () => { process.env.NODE_ENV = original; };
+  return () => {
+    process.env.NODE_ENV = original;
+  };
 }
 
 // ---------------------------------------------------------------------------

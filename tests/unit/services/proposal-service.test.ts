@@ -748,7 +748,9 @@ describe('ProposalService - E-Signatures', () => {
       });
       mockDb.all.mockResolvedValueOnce([]); // features for notification
 
-      vi.mocked(emailService.sendProposalSignedNotification).mockResolvedValueOnce({ success: true });
+      vi.mocked(emailService.sendProposalSignedNotification).mockResolvedValueOnce({
+        success: true
+      });
       vi.mocked(isClientActivated).mockResolvedValueOnce(false);
 
       mockDb.get.mockResolvedValueOnce(makeSignatureRow()); // getSignature
@@ -774,9 +776,13 @@ describe('ProposalService - E-Signatures', () => {
       });
       mockDb.all.mockResolvedValueOnce([]);
 
-      vi.mocked(emailService.sendProposalSignedNotification).mockResolvedValueOnce({ success: true });
+      vi.mocked(emailService.sendProposalSignedNotification).mockResolvedValueOnce({
+        success: true
+      });
       vi.mocked(isClientActivated).mockResolvedValueOnce(true);
-      vi.mocked(emailService.sendProposalSignedClientConfirmation).mockResolvedValueOnce({ success: true });
+      vi.mocked(emailService.sendProposalSignedClientConfirmation).mockResolvedValueOnce({
+        success: true
+      });
 
       mockDb.get.mockResolvedValueOnce(makeSignatureRow());
 
@@ -846,7 +852,9 @@ describe('ProposalService - E-Signatures', () => {
       });
       mockDb.all.mockResolvedValueOnce([]);
 
-      vi.mocked(emailService.sendProposalSignedNotification).mockResolvedValueOnce({ success: true });
+      vi.mocked(emailService.sendProposalSignedNotification).mockResolvedValueOnce({
+        success: true
+      });
       vi.mocked(isClientActivated).mockResolvedValueOnce(true);
       vi.mocked(emailService.sendProposalSignedClientConfirmation).mockResolvedValueOnce({
         success: false,
@@ -947,7 +955,7 @@ describe('ProposalService - E-Signatures', () => {
       await proposalService.markSignatureViewed('abc123token');
 
       const sql = mockDb.run.mock.calls[0][0] as string;
-      expect(sql).toContain('status = CASE WHEN status = \'pending\' THEN \'viewed\'');
+      expect(sql).toContain("status = CASE WHEN status = 'pending' THEN 'viewed'");
       expect(mockDb.run.mock.calls[0][1]).toContain('abc123token');
     });
   });
@@ -969,7 +977,7 @@ describe('ProposalService - E-Signatures', () => {
       await proposalService.declineSignature('abc123token', 'Not interested');
 
       const updateSql = mockDb.run.mock.calls[0][0] as string;
-      expect(updateSql).toContain('status = \'declined\'');
+      expect(updateSql).toContain("status = 'declined'");
     });
 
     it('uses signerEmail as actor when signerName is null', async () => {
@@ -1082,10 +1090,7 @@ describe('ProposalService - Comments', () => {
     });
 
     it('returns multiple root comments when none have parents', async () => {
-      mockDb.all.mockResolvedValueOnce([
-        makeCommentRow({ id: 40 }),
-        makeCommentRow({ id: 41 })
-      ]);
+      mockDb.all.mockResolvedValueOnce([makeCommentRow({ id: 40 }), makeCommentRow({ id: 41 })]);
 
       const result = await proposalService.getComments(5, true);
 
@@ -1327,7 +1332,9 @@ describe('ProposalService - Discounts', () => {
       mockDb.run.mockResolvedValueOnce({ changes: 1 }); // set discount
 
       // recalculateTotals
-      mockDb.get.mockResolvedValueOnce(makeProposalRow({ discount_type: 'percentage', discount_value: 10 }));
+      mockDb.get.mockResolvedValueOnce(
+        makeProposalRow({ discount_type: 'percentage', discount_value: 10 })
+      );
       mockDb.all.mockResolvedValueOnce([]);
       mockDb.all.mockResolvedValueOnce([]);
       mockDb.run.mockResolvedValueOnce({ changes: 1 }); // update totals
@@ -1342,7 +1349,9 @@ describe('ProposalService - Discounts', () => {
 
     it('applies a fixed discount and recalculates', async () => {
       mockDb.run.mockResolvedValueOnce({ changes: 1 });
-      mockDb.get.mockResolvedValueOnce(makeProposalRow({ discount_type: 'fixed', discount_value: 100 }));
+      mockDb.get.mockResolvedValueOnce(
+        makeProposalRow({ discount_type: 'fixed', discount_value: 100 })
+      );
       mockDb.all.mockResolvedValueOnce([]);
       mockDb.all.mockResolvedValueOnce([]);
       mockDb.run.mockResolvedValueOnce({ changes: 1 });
@@ -1385,12 +1394,14 @@ describe('ProposalService - Discounts', () => {
     });
 
     it('calculates final price with percentage discount and tax', async () => {
-      mockDb.get.mockResolvedValueOnce(makeProposalRow({
-        base_price: 1000,
-        discount_type: 'percentage',
-        discount_value: 10,
-        tax_rate: 5
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeProposalRow({
+          base_price: 1000,
+          discount_type: 'percentage',
+          discount_value: 10,
+          tax_rate: 5
+        })
+      );
       mockDb.all.mockResolvedValueOnce([]); // features
       mockDb.all.mockResolvedValueOnce([]); // custom items
       mockDb.run.mockResolvedValueOnce({ changes: 1 });
@@ -1405,12 +1416,14 @@ describe('ProposalService - Discounts', () => {
     });
 
     it('calculates final price with fixed discount', async () => {
-      mockDb.get.mockResolvedValueOnce(makeProposalRow({
-        base_price: 1000,
-        discount_type: 'fixed',
-        discount_value: 200,
-        tax_rate: 0
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeProposalRow({
+          base_price: 1000,
+          discount_type: 'fixed',
+          discount_value: 200,
+          tax_rate: 0
+        })
+      );
       mockDb.all.mockResolvedValueOnce([]);
       mockDb.all.mockResolvedValueOnce([]);
       mockDb.run.mockResolvedValueOnce({ changes: 1 });
@@ -1422,7 +1435,9 @@ describe('ProposalService - Discounts', () => {
     });
 
     it('includes feature prices in subtotal', async () => {
-      mockDb.get.mockResolvedValueOnce(makeProposalRow({ base_price: 1000, discount_type: null, tax_rate: 0 }));
+      mockDb.get.mockResolvedValueOnce(
+        makeProposalRow({ base_price: 1000, discount_type: null, tax_rate: 0 })
+      );
       mockDb.all.mockResolvedValueOnce([{ feature_price: 250 }, { feature_price: 150 }]); // features
       mockDb.all.mockResolvedValueOnce([]); // no custom items
       mockDb.run.mockResolvedValueOnce({ changes: 1 });
@@ -1434,7 +1449,9 @@ describe('ProposalService - Discounts', () => {
     });
 
     it('includes non-optional custom item totals in subtotal', async () => {
-      mockDb.get.mockResolvedValueOnce(makeProposalRow({ base_price: 500, discount_type: null, tax_rate: 0 }));
+      mockDb.get.mockResolvedValueOnce(
+        makeProposalRow({ base_price: 500, discount_type: null, tax_rate: 0 })
+      );
       mockDb.all.mockResolvedValueOnce([]); // no features
       mockDb.all.mockResolvedValueOnce([{ quantity: 3, unit_price: 100, is_taxable: 1 }]);
       mockDb.run.mockResolvedValueOnce({ changes: 1 });

@@ -490,7 +490,7 @@ export class PerformanceService {
     metrics: PerformanceMetrics;
     alerts: PerformanceAlert[];
     recommendations: string[];
-    } {
+  } {
     const recommendations: string[] = [];
 
     this.alerts.forEach((alert) => {

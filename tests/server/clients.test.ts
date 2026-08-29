@@ -315,7 +315,7 @@ describe('Client Routes - Input Sanitization', () => {
 
     const res = await request(app)
       .get('/api/clients')
-      .query({ search: '\'; DROP TABLE clients; --' })
+      .query({ search: "'; DROP TABLE clients; --" })
       .set('Authorization', `Bearer ${adminToken}`);
 
     // Should not crash

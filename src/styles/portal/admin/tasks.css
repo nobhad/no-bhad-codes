@@ -94,10 +94,18 @@
   background-color: var(--color-text-tertiary);
 }
 
-.priority-label[data-priority="urgent"] { color: var(--status-cancelled); }
-.priority-label[data-priority="high"] { color: var(--status-pending); }
-.priority-label[data-priority="medium"] { color: var(--status-active); }
-.priority-label[data-priority="low"] { color: var(--color-text-tertiary); }
+.priority-label[data-priority="urgent"] {
+  color: var(--status-cancelled);
+}
+.priority-label[data-priority="high"] {
+  color: var(--status-pending);
+}
+.priority-label[data-priority="medium"] {
+  color: var(--status-active);
+}
+.priority-label[data-priority="low"] {
+  color: var(--color-text-tertiary);
+}
 
 /* Dropdown styling: uses createModalDropdown from shared/modal-dropdown.ts */
 
@@ -202,7 +210,6 @@
   border: var(--portal-border);
   animation: pulse-skeleton var(--animation-pulse-skeleton);
 }
-
 
 /* Kanban empty state — uses shared .empty-state--compact */
 

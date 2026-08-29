@@ -258,8 +258,9 @@ describe('ProjectService - logTime', () => {
 
     // Should NOT update task actual hours
     const taskUpdateCall = mockDb.run.mock.calls.find(
-      (call) => String(call[0]).includes('actual_hours = COALESCE(actual_hours, 0) +') &&
-                String(call[0]).includes('project_tasks')
+      (call) =>
+        String(call[0]).includes('actual_hours = COALESCE(actual_hours, 0) +') &&
+        String(call[0]).includes('project_tasks')
     );
     expect(taskUpdateCall).toBeUndefined();
   });
@@ -368,12 +369,8 @@ describe('ProjectService - getTeamTimeReport', () => {
           total_amount: 2000
         }
       ])
-      .mockResolvedValueOnce([
-        { project_id: 10, project_name: 'Project A', hours: 40 }
-      ])
-      .mockResolvedValueOnce([
-        { project_id: 11, project_name: 'Project B', hours: 20 }
-      ]);
+      .mockResolvedValueOnce([{ project_id: 10, project_name: 'Project A', hours: 40 }])
+      .mockResolvedValueOnce([{ project_id: 11, project_name: 'Project B', hours: 20 }]);
 
     const result = await projectService.getTeamTimeReport('2026-03-01', '2026-03-31');
 
@@ -412,9 +409,7 @@ describe('ProjectService - createProjectFromTemplate', () => {
       id: 1,
       name: 'Web Template',
       project_type: 'web',
-      default_milestones: JSON.stringify([
-        { name: 'Design Phase', order: 0, estimatedDays: 7 }
-      ]),
+      default_milestones: JSON.stringify([{ name: 'Design Phase', order: 0, estimatedDays: 7 }]),
       default_tasks: JSON.stringify([
         { title: 'Create wireframes', milestoneIndex: 0, priority: 'high', estimatedHours: 8 }
       ]),
@@ -682,10 +677,7 @@ describe('ProjectService - archiveProject / unarchiveProject', () => {
 
     await expect(projectService.unarchiveProject(10)).resolves.not.toThrow();
 
-    expect(mockDb.run).toHaveBeenCalledWith(
-      expect.stringContaining('archived_at = NULL'),
-      [10]
-    );
+    expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('archived_at = NULL'), [10]);
   });
 });
 

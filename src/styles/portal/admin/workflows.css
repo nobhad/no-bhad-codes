@@ -36,7 +36,6 @@
   font-size: var(--table-cell-font-size);
 }
 
-
 #trigger-test-btn svg.spin {
   animation: spin var(--animation-spinner);
 }

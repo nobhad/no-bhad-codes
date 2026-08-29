@@ -98,7 +98,10 @@ function storeAuthSession(data: LoginResponseData): void {
   const sessionId = `sess_${Math.random().toString(36).substring(2)}`;
 
   sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.USER, JSON.stringify(user));
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.ROLE, user.role || (user.isAdmin ? 'admin' : 'client'));
+  sessionStorage.setItem(
+    AUTH_STORAGE_KEYS.SESSION.ROLE,
+    user.role || (user.isAdmin ? 'admin' : 'client')
+  );
   sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.EXPIRY, expiresAt.toString());
   sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.SESSION_ID, sessionId);
 }

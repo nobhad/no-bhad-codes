@@ -43,29 +43,25 @@ const router = express.Router();
 // VALIDATION SCHEMAS
 // =====================================================
 
-const INVOICE_STATUS_VALUES = ['draft', 'sent', 'viewed', 'partial', 'paid', 'overdue', 'cancelled'];
+const INVOICE_STATUS_VALUES = [
+  'draft',
+  'sent',
+  'viewed',
+  'partial',
+  'paid',
+  'overdue',
+  'cancelled'
+];
 
 const InvoiceParentValidationSchemas = {
   milestoneInvoice: {
-    projectId: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ],
-    clientId: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ],
-    lineItems: [
-      { type: 'required' as const },
-      { type: 'array' as const, minLength: 1 }
-    ]
+    projectId: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
+    clientId: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
+    lineItems: [{ type: 'required' as const }, { type: 'array' as const, minLength: 1 }]
   } as ValidationSchema,
 
   linkMilestone: {
-    milestoneId: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ]
+    milestoneId: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }]
   } as ValidationSchema,
 
   updateInvoice: {
@@ -114,9 +110,15 @@ router.post(
     const invoiceData: InvoiceCreateData = req.body;
 
     if (!invoiceData.projectId || !invoiceData.clientId || !invoiceData.lineItems?.length) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.MISSING_FIELDS, {
-        required: ['projectId', 'clientId', 'lineItems']
-      });
+      return errorResponseWithPayload(
+        res,
+        'Missing required fields',
+        400,
+        ErrorCodes.MISSING_FIELDS,
+        {
+          required: ['projectId', 'clientId', 'lineItems']
+        }
+      );
     }
 
     try {
@@ -263,9 +265,15 @@ router.put(
         if (rawMessage.includes('not found')) {
           return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
         }
-        return errorResponseWithPayload(res, 'Failed to update invoice', 500, ErrorCodes.UPDATE_FAILED, {
-          message: sanitizeErrorMessage(error, 'Failed to update invoice')
-        });
+        return errorResponseWithPayload(
+          res,
+          'Failed to update invoice',
+          500,
+          ErrorCodes.UPDATE_FAILED,
+          {
+            message: sanitizeErrorMessage(error, 'Failed to update invoice')
+          }
+        );
       }
       return;
     }
@@ -276,14 +284,25 @@ router.put(
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('Only draft invoices can be edited')) {
-        return errorResponse(res, 'Only draft invoices can be edited', 400, ErrorCodes.INVALID_STATUS);
+        return errorResponse(
+          res,
+          'Only draft invoices can be edited',
+          400,
+          ErrorCodes.INVALID_STATUS
+        );
       }
       if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      return errorResponseWithPayload(res, 'Failed to update invoice', 500, ErrorCodes.UPDATE_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to update invoice')
-      });
+      return errorResponseWithPayload(
+        res,
+        'Failed to update invoice',
+        500,
+        ErrorCodes.UPDATE_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to update invoice')
+        }
+      );
     }
   })
 );
@@ -446,9 +465,15 @@ router.post(
       if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to duplicate invoice', 500, ErrorCodes.DUPLICATE_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to duplicate invoice')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to duplicate invoice',
+        500,
+        ErrorCodes.DUPLICATE_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to duplicate invoice')
+        }
+      );
     }
   })
 );
@@ -509,7 +534,12 @@ router.post(
     }
 
     if (!paymentMethod) {
-      return errorResponse(res, 'Payment method is required', 400, ErrorCodes.MISSING_PAYMENT_METHOD);
+      return errorResponse(
+        res,
+        'Payment method is required',
+        400,
+        ErrorCodes.MISSING_PAYMENT_METHOD
+      );
     }
 
     try {
@@ -533,7 +563,12 @@ router.post(
       }
 
       if (rawMessage.includes('already fully paid') || rawMessage.includes('cancelled')) {
-        return errorResponse(res, sanitizeErrorMessage(error, 'Payment not allowed'), 400, ErrorCodes.PAYMENT_NOT_ALLOWED);
+        return errorResponse(
+          res,
+          sanitizeErrorMessage(error, 'Payment not allowed'),
+          400,
+          ErrorCodes.PAYMENT_NOT_ALLOWED
+        );
       }
       errorResponseWithPayload(res, 'Failed to record payment', 500, ErrorCodes.PAYMENT_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to record payment')
@@ -642,9 +677,15 @@ router.get(
       const terms = await getInvoiceService().getPaymentTermsPresets();
       sendSuccess(res, { terms: terms.map(toSnakeCasePaymentTerms) });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve payment terms', 500, ErrorCodes.RETRIEVAL_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to retrieve payment terms')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve payment terms',
+        500,
+        ErrorCodes.RETRIEVAL_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to retrieve payment terms')
+        }
+      );
     }
   })
 );
@@ -674,9 +715,15 @@ router.post(
     } = req.body;
 
     if (!name || daysUntilDue === undefined) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.MISSING_FIELDS, {
-        required: ['name', 'daysUntilDue']
-      });
+      return errorResponseWithPayload(
+        res,
+        'Missing required fields',
+        400,
+        ErrorCodes.MISSING_FIELDS,
+        {
+          required: ['name', 'daysUntilDue']
+        }
+      );
     }
 
     try {
@@ -693,9 +740,15 @@ router.post(
 
       sendCreated(res, { terms: toSnakeCasePaymentTerms(terms) }, 'Payment terms preset created');
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to create payment terms', 500, ErrorCodes.CREATION_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to create payment terms')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to create payment terms',
+        500,
+        ErrorCodes.CREATION_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to create payment terms')
+        }
+      );
     }
   })
 );
@@ -734,9 +787,15 @@ router.post(
       if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice or payment terms not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to apply payment terms', 500, ErrorCodes.UPDATE_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to apply payment terms')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to apply payment terms',
+        500,
+        ErrorCodes.UPDATE_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to apply payment terms')
+        }
+      );
     }
   })
 );
@@ -777,11 +836,22 @@ router.put(
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('draft')) {
-        return errorResponse(res, 'Only draft invoices can be modified', 400, ErrorCodes.INVALID_STATUS);
+        return errorResponse(
+          res,
+          'Only draft invoices can be modified',
+          400,
+          ErrorCodes.INVALID_STATUS
+        );
       }
-      errorResponseWithPayload(res, 'Failed to update tax/discount', 500, ErrorCodes.UPDATE_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to update tax/discount')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to update tax/discount',
+        500,
+        ErrorCodes.UPDATE_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to update tax/discount')
+        }
+      );
     }
   })
 );
@@ -823,9 +893,15 @@ router.get(
       if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to calculate late fee', 500, ErrorCodes.CALCULATION_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to calculate late fee')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to calculate late fee',
+        500,
+        ErrorCodes.CALCULATION_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to calculate late fee')
+        }
+      );
     }
   })
 );
@@ -917,9 +993,15 @@ router.get(
       const payments = await getInvoiceService().getPaymentHistory(invoiceId);
       sendSuccess(res, { payments: payments.map(toSnakeCasePayment) });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve payment history', 500, ErrorCodes.RETRIEVAL_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to retrieve payment history')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve payment history',
+        500,
+        ErrorCodes.RETRIEVAL_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to retrieve payment history')
+        }
+      );
     }
   })
 );
@@ -945,9 +1027,15 @@ router.post(
     }
 
     if (!amount || !paymentMethod) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.MISSING_FIELDS, {
-        required: ['amount', 'paymentMethod']
-      });
+      return errorResponseWithPayload(
+        res,
+        'Missing required fields',
+        400,
+        ErrorCodes.MISSING_FIELDS,
+        {
+          required: ['amount', 'paymentMethod']
+        }
+      );
     }
 
     try {
@@ -1007,9 +1095,15 @@ router.put(
       if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to update internal notes', 500, ErrorCodes.UPDATE_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to update internal notes')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to update internal notes',
+        500,
+        ErrorCodes.UPDATE_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to update internal notes')
+        }
+      );
     }
   })
 );
@@ -1077,9 +1171,15 @@ router.post(
     const { prefix, ...invoiceData } = req.body;
 
     if (!invoiceData.projectId || !invoiceData.clientId || !invoiceData.lineItems?.length) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.MISSING_FIELDS, {
-        required: ['projectId', 'clientId', 'lineItems']
-      });
+      return errorResponseWithPayload(
+        res,
+        'Missing required fields',
+        400,
+        ErrorCodes.MISSING_FIELDS,
+        {
+          required: ['projectId', 'clientId', 'lineItems']
+        }
+      );
     }
 
     try {

@@ -21,13 +21,7 @@ import {
 
 const router = express.Router();
 
-const ALLOWED_STATUSES = new Set([
-  'pending',
-  'running',
-  'completed',
-  'failed',
-  'dead'
-]);
+const ALLOWED_STATUSES = new Set(['pending', 'running', 'completed', 'failed', 'dead']);
 
 /**
  * @swagger
@@ -69,10 +63,7 @@ router.get(
       );
     }
 
-    const limit = Number.parseInt(
-      typeof req.query.limit === 'string' ? req.query.limit : '',
-      10
-    );
+    const limit = Number.parseInt(typeof req.query.limit === 'string' ? req.query.limit : '', 10);
 
     const tasks = statusParam
       ? await listAsyncTasks(statusParam as AsyncTaskStatus, Number.isFinite(limit) ? limit : 50)

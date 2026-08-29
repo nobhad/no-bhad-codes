@@ -57,12 +57,16 @@ export type { PdfPageContext } from '../../utils/pdf-utils.js';
 export const FEATURE_SELECTION_COLUMNS = `
   id, proposal_request_id, feature_id, feature_name, feature_price,
   feature_category, is_included_in_tier, is_addon, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const PROPOSAL_SIGNATURE_COLUMNS = `
   id, proposal_id, signer_name, signer_email, signer_title, signer_company,
   signature_method, signature_data, ip_address, user_agent, signed_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 /**
  * Project type constants (matches frontend)

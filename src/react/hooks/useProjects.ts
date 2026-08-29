@@ -170,7 +170,9 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
 
       try {
         // Try bulk endpoint first
-        const response = await apiPost(API_ENDPOINTS.ADMIN.PROJECTS_BULK_DELETE, { projectIds: ids });
+        const response = await apiPost(API_ENDPOINTS.ADMIN.PROJECTS_BULK_DELETE, {
+          projectIds: ids
+        });
 
         if (response.ok) {
           const json = await response.json();

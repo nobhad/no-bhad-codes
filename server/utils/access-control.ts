@@ -256,10 +256,7 @@ export async function canAccessDocumentRequest(
 /**
  * Check if user can access a specific contract
  */
-export async function canAccessContract(
-  req: JWTAuthRequest,
-  contractId: number
-): Promise<boolean> {
+export async function canAccessContract(req: JWTAuthRequest, contractId: number): Promise<boolean> {
   if (await isUserAdmin(req)) {
     return true;
   }
@@ -278,10 +275,7 @@ export async function canAccessContract(
 /**
  * Check if user can access a specific proposal
  */
-export async function canAccessProposal(
-  req: JWTAuthRequest,
-  proposalId: number
-): Promise<boolean> {
+export async function canAccessProposal(req: JWTAuthRequest, proposalId: number): Promise<boolean> {
   if (await isUserAdmin(req)) {
     return true;
   }

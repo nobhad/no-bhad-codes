@@ -147,7 +147,10 @@ export const errorHandler = (
     statusCode = 409;
     message = 'Resource conflicts with existing data';
     code = 'INDEX_CONSTRAINT_FAILED';
-  } else if (error.message.includes('COLLATE constraint failed') || error.message.includes('collation')) {
+  } else if (
+    error.message.includes('COLLATE constraint failed') ||
+    error.message.includes('collation')
+  ) {
     statusCode = 400;
     message = 'Invalid text encoding or collation';
     code = 'COLLATION_ERROR';
@@ -168,7 +171,9 @@ export const errorHandler = (
   });
 };
 
-export const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown> | unknown) => {
+export const asyncHandler = (
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown> | unknown
+) => {
   return (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };

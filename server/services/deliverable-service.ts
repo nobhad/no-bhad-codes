@@ -99,26 +99,36 @@ const DELIVERABLE_COLUMNS = `
   id, project_id, type, title, description, status, approval_status, round_number,
   created_by_id, reviewed_by_id, review_deadline, approved_at, locked, tags,
   archived_file_id, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const DELIVERABLE_VERSION_COLUMNS = `
   id, deliverable_id, version_number, file_path, file_name, file_size, file_type,
   uploaded_by_id, change_notes, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const DELIVERABLE_COMMENT_COLUMNS = `
   id, deliverable_id, author_id, comment_text, x_position, y_position, annotation_type,
   element_id, resolved, resolved_at, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const DESIGN_ELEMENT_COLUMNS = `
   id, deliverable_id, name, description, approval_status, revision_count, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const DELIVERABLE_REVIEW_COLUMNS = `
   id, deliverable_id, reviewer_id, decision, feedback, design_elements_reviewed,
   review_duration_minutes, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export class DeliverableService {
   private getDb(): Database {
@@ -165,7 +175,10 @@ export class DeliverableService {
    * Get deliverable by ID
    */
   async getDeliverableById(id: number): Promise<Deliverable | null> {
-    const row = await this.getDb().get(`SELECT ${DELIVERABLE_COLUMNS} FROM deliverables WHERE id = ?`, [id]);
+    const row = await this.getDb().get(
+      `SELECT ${DELIVERABLE_COLUMNS} FROM deliverables WHERE id = ?`,
+      [id]
+    );
     if (!row) return null;
     return this.formatDeliverable(row as DeliverableRow);
   }
@@ -351,7 +364,10 @@ export class DeliverableService {
    * Get version by ID
    */
   async getVersionById(id: number): Promise<DeliverableVersion | null> {
-    const row = await this.getDb().get(`SELECT ${DELIVERABLE_VERSION_COLUMNS} FROM deliverable_versions WHERE id = ?`, [id]);
+    const row = await this.getDb().get(
+      `SELECT ${DELIVERABLE_VERSION_COLUMNS} FROM deliverable_versions WHERE id = ?`,
+      [id]
+    );
     if (!row) return null;
     return row as unknown as DeliverableVersion;
   }
@@ -414,7 +430,10 @@ export class DeliverableService {
    * Get comment by ID
    */
   async getCommentById(id: number): Promise<DeliverableComment | null> {
-    const row = await this.getDb().get(`SELECT ${DELIVERABLE_COMMENT_COLUMNS} FROM deliverable_comments WHERE id = ?`, [id]);
+    const row = await this.getDb().get(
+      `SELECT ${DELIVERABLE_COMMENT_COLUMNS} FROM deliverable_comments WHERE id = ?`,
+      [id]
+    );
     if (!row) return null;
     return this.formatComment(row as CommentRow);
   }
@@ -492,7 +511,10 @@ export class DeliverableService {
    * Get design element by ID
    */
   async getDesignElementById(id: number): Promise<DesignElement | null> {
-    const row = await this.getDb().get(`SELECT ${DESIGN_ELEMENT_COLUMNS} FROM design_elements WHERE id = ?`, [id]);
+    const row = await this.getDb().get(
+      `SELECT ${DESIGN_ELEMENT_COLUMNS} FROM design_elements WHERE id = ?`,
+      [id]
+    );
     if (!row) return null;
     return row as unknown as DesignElement;
   }
@@ -566,7 +588,10 @@ export class DeliverableService {
    * Get review by ID
    */
   async getReviewById(id: number): Promise<DeliverableReview | null> {
-    const row = await this.getDb().get(`SELECT ${DELIVERABLE_REVIEW_COLUMNS} FROM deliverable_reviews WHERE id = ?`, [id]);
+    const row = await this.getDb().get(
+      `SELECT ${DELIVERABLE_REVIEW_COLUMNS} FROM deliverable_reviews WHERE id = ?`,
+      [id]
+    );
     if (!row) return null;
     return this.formatReview(row as ReviewRow);
   }
@@ -644,17 +669,19 @@ export class DeliverableService {
   /**
    * Get all deliverables for a client across all their projects
    */
-  async getClientDeliverables(clientId: number): Promise<{
-    id: number;
-    title: string;
-    type: string;
-    status: string;
-    approval_status: string;
-    review_deadline: string | null;
-    round_number: number;
-    created_at: string;
-    project_name: string;
-  }[]> {
+  async getClientDeliverables(clientId: number): Promise<
+    {
+      id: number;
+      title: string;
+      type: string;
+      status: string;
+      approval_status: string;
+      review_deadline: string | null;
+      round_number: number;
+      created_at: string;
+      project_name: string;
+    }[]
+  > {
     return this.getDb().all(
       `SELECT d.id, d.title, d.type, d.status, d.approval_status,
               d.review_deadline, d.round_number, d.created_at,
@@ -720,10 +747,7 @@ export class DeliverableService {
 
     query += ' ORDER BY d.due_date ASC, d.created_at DESC';
 
-    const deliverables = (await db.all(query, params)) as Record<
-      string,
-      unknown
-    >[];
+    const deliverables = (await db.all(query, params)) as Record<string, unknown>[];
 
     const stats = {
       total: deliverables.length,
@@ -776,10 +800,7 @@ export class DeliverableService {
     updates.push('updated_at = CURRENT_TIMESTAMP');
     values.push(id);
 
-    await db.run(
-      `UPDATE deliverables SET ${updates.join(', ')} WHERE id = ?`,
-      values
-    );
+    await db.run(`UPDATE deliverables SET ${updates.join(', ')} WHERE id = ?`, values);
 
     const updated = await db.get(
       `
@@ -809,10 +830,7 @@ export class DeliverableService {
   /**
    * Check if a client can access a specific deliverable
    */
-  async checkClientDeliverableAccess(
-    deliverableId: number,
-    clientId: number
-  ): Promise<boolean> {
+  async checkClientDeliverableAccess(deliverableId: number, clientId: number): Promise<boolean> {
     const row = await this.getDb().get<{ project_id: number }>(
       `SELECT d.project_id FROM deliverables d
        JOIN projects p ON d.project_id = p.id
@@ -876,8 +894,13 @@ export const deliverableService = {
   getDeliverableElements: (did: number) => getDeliverableService().getDeliverableElements(did),
   updateElementApprovalStatus: (eid: number, status: 'pending' | 'approved' | 'revision_needed') =>
     getDeliverableService().updateElementApprovalStatus(eid, status),
-  createReview: (did: number, rid: number, decision: 'approved' | 'revision_needed' | 'rejected', feedback?: string, elements?: number[]) =>
-    getDeliverableService().createReview(did, rid, decision, feedback, elements),
+  createReview: (
+    did: number,
+    rid: number,
+    decision: 'approved' | 'revision_needed' | 'rejected',
+    feedback?: string,
+    elements?: number[]
+  ) => getDeliverableService().createReview(did, rid, decision, feedback, elements),
   getReviewById: (id: number) => getDeliverableService().getReviewById(id),
   getDeliverableReviews: (did: number) => getDeliverableService().getDeliverableReviews(did),
   setArchivedFileId: (did: number, fid: number) =>

@@ -23,8 +23,12 @@
 }
 
 /* Used for in-panel forms (Add/Edit). Spacing handled by those panels. */
-.panel-header-row { margin-bottom: var(--space-4); }
-.panel-header-row--compact { margin-bottom: var(--space-3); }
+.panel-header-row {
+  margin-bottom: var(--space-4);
+}
+.panel-header-row--compact {
+  margin-bottom: var(--space-3);
+}
 
 /* Tab content headers use `.data-table-header` markup for single SoT. */
 
@@ -80,5 +84,3 @@
 .portal-card-progress {
   margin-bottom: 0.5rem;
 }
-
-

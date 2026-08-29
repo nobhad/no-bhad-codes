@@ -183,9 +183,8 @@ export class BaseModule {
     required = true
   ): NodeListOf<Element> | null {
     const cachedElements = this.elements.get(name);
-    let elements: NodeListOf<Element> | null = cachedElements instanceof NodeList
-      ? cachedElements as NodeListOf<Element>
-      : null;
+    let elements: NodeListOf<Element> | null =
+      cachedElements instanceof NodeList ? (cachedElements as NodeListOf<Element>) : null;
 
     if (!elements || elements.length === 0) {
       elements = document.querySelectorAll(selector);

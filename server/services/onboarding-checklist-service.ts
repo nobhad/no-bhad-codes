@@ -33,7 +33,7 @@ async function createChecklist(params: CreateChecklistParams): Promise<number> {
 
   // Check for existing active checklist
   const existing = (await db.get(
-    'SELECT id FROM onboarding_checklists WHERE project_id = ? AND status = \'active\' LIMIT 1',
+    "SELECT id FROM onboarding_checklists WHERE project_id = ? AND status = 'active' LIMIT 1",
     [projectId]
   )) as { id: number } | undefined;
 
@@ -42,18 +42,16 @@ async function createChecklist(params: CreateChecklistParams): Promise<number> {
   // Find template
   let template: OnboardingTemplateRow | undefined;
   if (templateId) {
-    template = (await db.get(
-      'SELECT * FROM onboarding_templates WHERE id = ?',
-      [templateId]
-    )) as OnboardingTemplateRow | undefined;
+    template = (await db.get('SELECT * FROM onboarding_templates WHERE id = ?', [templateId])) as
+      | OnboardingTemplateRow
+      | undefined;
   }
 
   if (!template) {
     // Get project type for template matching
-    const project = (await db.get(
-      'SELECT project_type FROM projects WHERE id = ?',
-      [projectId]
-    )) as { project_type: string | null } | undefined;
+    const project = (await db.get('SELECT project_type FROM projects WHERE id = ?', [
+      projectId
+    ])) as { project_type: string | null } | undefined;
 
     // Try to find a template matching project type
     if (project?.project_type) {
@@ -140,36 +138,36 @@ async function resolveEntityId(projectId: number, entityType: string): Promise<n
   const db = getDatabase();
 
   switch (entityType) {
-  case 'proposal': {
-    const row = (await db.get(
-      'SELECT id FROM proposal_requests WHERE project_id = ? ORDER BY created_at DESC LIMIT 1',
-      [projectId]
-    )) as { id: number } | undefined;
-    return row?.id ?? null;
-  }
-  case 'contract': {
-    const row = (await db.get(
-      'SELECT id FROM contracts WHERE project_id = ? AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 1',
-      [projectId]
-    )) as { id: number } | undefined;
-    return row?.id ?? null;
-  }
-  case 'invoice': {
-    const row = (await db.get(
-      'SELECT id FROM invoices WHERE project_id = ? AND deleted_at IS NULL ORDER BY created_at ASC LIMIT 1',
-      [projectId]
-    )) as { id: number } | undefined;
-    return row?.id ?? null;
-  }
-  case 'questionnaire': {
-    const row = (await db.get(
-      'SELECT id FROM questionnaire_responses WHERE project_id = ? ORDER BY created_at ASC LIMIT 1',
-      [projectId]
-    )) as { id: number } | undefined;
-    return row?.id ?? null;
-  }
-  default:
-    return null;
+    case 'proposal': {
+      const row = (await db.get(
+        'SELECT id FROM proposal_requests WHERE project_id = ? ORDER BY created_at DESC LIMIT 1',
+        [projectId]
+      )) as { id: number } | undefined;
+      return row?.id ?? null;
+    }
+    case 'contract': {
+      const row = (await db.get(
+        'SELECT id FROM contracts WHERE project_id = ? AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 1',
+        [projectId]
+      )) as { id: number } | undefined;
+      return row?.id ?? null;
+    }
+    case 'invoice': {
+      const row = (await db.get(
+        'SELECT id FROM invoices WHERE project_id = ? AND deleted_at IS NULL ORDER BY created_at ASC LIMIT 1',
+        [projectId]
+      )) as { id: number } | undefined;
+      return row?.id ?? null;
+    }
+    case 'questionnaire': {
+      const row = (await db.get(
+        'SELECT id FROM questionnaire_responses WHERE project_id = ? ORDER BY created_at ASC LIMIT 1',
+        [projectId]
+      )) as { id: number } | undefined;
+      return row?.id ?? null;
+    }
+    default:
+      return null;
   }
 }
 
@@ -184,7 +182,7 @@ async function getClientChecklist(clientId: number): Promise<ChecklistWithSteps 
   const db = getDatabase();
 
   const checklist = (await db.get(
-    'SELECT * FROM onboarding_checklists WHERE client_id = ? AND status = \'active\' ORDER BY created_at DESC LIMIT 1',
+    "SELECT * FROM onboarding_checklists WHERE client_id = ? AND status = 'active' ORDER BY created_at DESC LIMIT 1",
     [clientId]
   )) as OnboardingChecklistRow | undefined;
 
@@ -199,10 +197,9 @@ async function getClientChecklist(clientId: number): Promise<ChecklistWithSteps 
 async function getChecklist(checklistId: number): Promise<ChecklistWithSteps | null> {
   const db = getDatabase();
 
-  const checklist = (await db.get(
-    'SELECT * FROM onboarding_checklists WHERE id = ?',
-    [checklistId]
-  )) as OnboardingChecklistRow | undefined;
+  const checklist = (await db.get('SELECT * FROM onboarding_checklists WHERE id = ?', [
+    checklistId
+  ])) as OnboardingChecklistRow | undefined;
 
   if (!checklist) return null;
 
@@ -263,15 +260,14 @@ async function completeStep(stepId: number, clientId?: number): Promise<void> {
   }
 
   await db.run(
-    'UPDATE onboarding_steps SET status = \'completed\', completed_at = datetime(\'now\'), updated_at = datetime(\'now\') WHERE id = ? AND status != \'completed\'',
+    "UPDATE onboarding_steps SET status = 'completed', completed_at = datetime('now'), updated_at = datetime('now') WHERE id = ? AND status != 'completed'",
     [stepId]
   );
 
   // Check if all steps are completed
-  const step = (await db.get(
-    'SELECT checklist_id FROM onboarding_steps WHERE id = ?',
-    [stepId]
-  )) as { checklist_id: number } | undefined;
+  const step = (await db.get('SELECT checklist_id FROM onboarding_steps WHERE id = ?', [
+    stepId
+  ])) as { checklist_id: number } | undefined;
 
   if (step) {
     await checkChecklistCompletion(step.checklist_id);
@@ -294,7 +290,7 @@ async function autoCompleteByEntity(entityType: string, entityId: number): Promi
 
   for (const step of steps) {
     await db.run(
-      'UPDATE onboarding_steps SET status = \'completed\', completed_at = datetime(\'now\'), updated_at = datetime(\'now\') WHERE id = ?',
+      "UPDATE onboarding_steps SET status = 'completed', completed_at = datetime('now'), updated_at = datetime('now') WHERE id = ?",
       [step.id]
     );
     await checkChecklistCompletion(step.checklist_id);
@@ -315,13 +311,13 @@ async function checkChecklistCompletion(checklistId: number): Promise<void> {
   const db = getDatabase();
 
   const pending = (await db.get(
-    'SELECT COUNT(*) as count FROM onboarding_steps WHERE checklist_id = ? AND status = \'pending\'',
+    "SELECT COUNT(*) as count FROM onboarding_steps WHERE checklist_id = ? AND status = 'pending'",
     [checklistId]
   )) as { count: number };
 
   if (pending.count === 0) {
     await db.run(
-      'UPDATE onboarding_checklists SET status = \'completed\', completed_at = datetime(\'now\') WHERE id = ?',
+      "UPDATE onboarding_checklists SET status = 'completed', completed_at = datetime('now') WHERE id = ?",
       [checklistId]
     );
 
@@ -339,7 +335,7 @@ async function dismissChecklist(checklistId: number, clientId: number): Promise<
   const db = getDatabase();
 
   await db.run(
-    'UPDATE onboarding_checklists SET status = \'dismissed\', dismissed_at = datetime(\'now\') WHERE id = ? AND client_id = ?',
+    "UPDATE onboarding_checklists SET status = 'dismissed', dismissed_at = datetime('now') WHERE id = ? AND client_id = ?",
     [checklistId, clientId]
   );
 }
@@ -396,12 +392,15 @@ async function createTemplate(params: {
 /**
  * Update an existing onboarding template.
  */
-async function updateTemplate(templateId: number, params: {
-  name?: string;
-  projectType?: string | null;
-  isDefault?: boolean;
-  stepsConfig?: TemplateStepConfig[];
-}): Promise<void> {
+async function updateTemplate(
+  templateId: number,
+  params: {
+    name?: string;
+    projectType?: string | null;
+    isDefault?: boolean;
+    stepsConfig?: TemplateStepConfig[];
+  }
+): Promise<void> {
   const db = getDatabase();
 
   // If setting as default, unset other defaults
@@ -432,10 +431,7 @@ async function updateTemplate(templateId: number, params: {
   if (setClauses.length === 0) return;
 
   values.push(templateId);
-  await db.run(
-    `UPDATE onboarding_templates SET ${setClauses.join(', ')} WHERE id = ?`,
-    values
-  );
+  await db.run(`UPDATE onboarding_templates SET ${setClauses.join(', ')} WHERE id = ?`, values);
 
   logger.info('Updated onboarding template', {
     category: 'onboarding',

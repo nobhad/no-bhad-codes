@@ -147,7 +147,7 @@ export interface TypedRequest<T> extends Request {
  */
 export interface AuthenticatedTypedRequest<
   T,
-  U extends AnyUser = AnyUser,
+  U extends AnyUser = AnyUser
 > extends AuthenticatedRequest<U> {
   body: T;
 }
@@ -173,7 +173,7 @@ export interface FullyTypedRequest<
   Body = unknown,
   Query = unknown,
   Params extends Record<string, string> = Record<string, string>,
-  U extends AnyUser = AnyUser,
+  U extends AnyUser = AnyUser
 > extends AuthenticatedRequest<U> {
   body: Body;
   query: Query & Request['query'];

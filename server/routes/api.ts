@@ -22,7 +22,14 @@ import { contactService } from '../services/contact-service.js';
 import { generalUploadService } from '../services/general-upload-service.js';
 import { dataQueryService } from '../services/data-query-service.js';
 import { metricsService } from '../services/metrics-service.js';
-import { errorResponse, errorResponseWithPayload, sanitizeErrorMessage, sendSuccess, sendCreated, ErrorCodes } from '../utils/api-response.js';
+import {
+  errorResponse,
+  errorResponseWithPayload,
+  sanitizeErrorMessage,
+  sendSuccess,
+  sendCreated,
+  ErrorCodes
+} from '../utils/api-response.js';
 import { BUSINESS_INFO } from '../config/business.js';
 
 const router = Router();
@@ -202,13 +209,13 @@ Received: ${new Date().toISOString()}
       <td style="padding: 8px;"><a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></td>
     </tr>
     ${
-  companyName
-    ? `<tr>
+      companyName
+        ? `<tr>
       <td style="padding: 8px; background: #f5f5f5; font-weight: bold;">Company:</td>
       <td style="padding: 8px;">${escapeHtml(companyName)}</td>
     </tr>`
-    : ''
-}
+        : ''
+    }
     <tr>
       <td style="padding: 8px; background: #f5f5f5; font-weight: bold;">Subject:</td>
       <td style="padding: 8px;">${escapeHtml(subjectLine)}</td>
@@ -256,9 +263,7 @@ Received: ${new Date().toISOString()}
         </div>`
         });
 
-        await logger.info(
-          `Contact form auto-reply sent - messageId: ${messageId}, to: ${email}`
-        );
+        await logger.info(`Contact form auto-reply sent - messageId: ${messageId}, to: ${email}`);
       } catch (autoReplyError) {
         await logger.error('[Contact] Failed to send auto-reply:', {
           error: autoReplyError instanceof Error ? autoReplyError : undefined
@@ -274,7 +279,12 @@ Received: ${new Date().toISOString()}
       // only emit an error response if headers haven't gone out yet.
       await logger.error('Contact form processing error');
       if (!res.headersSent) {
-        errorResponse(res, 'Failed to process contact form', 500, ErrorCodes.CONTACT_PROCESSING_ERROR);
+        errorResponse(
+          res,
+          'Failed to process contact form',
+          500,
+          ErrorCodes.CONTACT_PROCESSING_ERROR
+        );
       }
     }
   }
@@ -441,7 +451,13 @@ router.get(
 
   async (req: AuthenticatedRequest, res) => {
     try {
-      let metrics = { totalUsers: 0, activeUsers: 0, totalProjects: 0, activeProjects: 0, totalInvoices: 0 };
+      let metrics = {
+        totalUsers: 0,
+        activeUsers: 0,
+        totalProjects: 0,
+        activeProjects: 0,
+        totalInvoices: 0
+      };
 
       try {
         metrics = await metricsService.getDatabaseMetrics();

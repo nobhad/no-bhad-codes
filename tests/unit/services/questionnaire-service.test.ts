@@ -125,7 +125,11 @@ vi.mock('path', () => {
 vi.mock('../../../server/utils/safe-json', () => ({
   parseIfString: vi.fn((val: unknown) => {
     if (typeof val === 'string') {
-      try { return JSON.parse(val); } catch { return val; }
+      try {
+        return JSON.parse(val);
+      } catch {
+        return val;
+      }
     }
     return val;
   })
@@ -227,7 +231,9 @@ describe('QuestionnaireService', () => {
 
     it('sets auto_send_on_project_create to 0 when not specified', async () => {
       mockDb.run.mockResolvedValueOnce({ lastID: 3 });
-      mockDb.get.mockResolvedValueOnce(makeQuestionnaireRow({ id: 3, auto_send_on_project_create: 0 }));
+      mockDb.get.mockResolvedValueOnce(
+        makeQuestionnaireRow({ id: 3, auto_send_on_project_create: 0 })
+      );
 
       await questionnaireService.createQuestionnaire({
         name: 'Survey',
@@ -289,10 +295,7 @@ describe('QuestionnaireService', () => {
 
       await questionnaireService.getQuestionnaires(undefined, true);
 
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('AND is_active = 1'),
-        []
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('AND is_active = 1'), []);
     });
 
     it('applies both project type and active filters', async () => {
@@ -300,10 +303,9 @@ describe('QuestionnaireService', () => {
 
       await questionnaireService.getQuestionnaires('ecommerce', true);
 
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('AND is_active = 1'),
-        ['ecommerce']
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('AND is_active = 1'), [
+        'ecommerce'
+      ]);
     });
 
     it('returns empty array when none found', async () => {
@@ -322,7 +324,9 @@ describe('QuestionnaireService', () => {
       // run update
       mockDb.run.mockResolvedValueOnce({ changes: 1 });
       // getQuestionnaire (after update)
-      mockDb.get.mockResolvedValueOnce(makeQuestionnaireRow({ name: 'Updated Name', is_active: 0 }));
+      mockDb.get.mockResolvedValueOnce(
+        makeQuestionnaireRow({ name: 'Updated Name', is_active: 0 })
+      );
 
       const result = await questionnaireService.updateQuestionnaire(1, {
         name: 'Updated Name',
@@ -364,10 +368,7 @@ describe('QuestionnaireService', () => {
 
       await questionnaireService.deleteQuestionnaire(1);
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        'DELETE FROM questionnaires WHERE id = ?',
-        [1]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith('DELETE FROM questionnaires WHERE id = ?', [1]);
     });
   });
 
@@ -396,7 +397,9 @@ describe('QuestionnaireService', () => {
 
     it('sends without project_id or due_date', async () => {
       mockDb.run.mockResolvedValueOnce({ lastID: 2 });
-      mockDb.get.mockResolvedValueOnce(makeResponseRow({ id: 2, project_id: null, due_date: null }));
+      mockDb.get.mockResolvedValueOnce(
+        makeResponseRow({ id: 2, project_id: null, due_date: null })
+      );
 
       await questionnaireService.sendQuestionnaire({
         questionnaire_id: 1,
@@ -435,9 +438,7 @@ describe('QuestionnaireService', () => {
     });
 
     it('returns empty array when no auto-send questionnaires', async () => {
-      mockDb.all.mockResolvedValueOnce([
-        makeQuestionnaireRow({ auto_send_on_project_create: 0 })
-      ]);
+      mockDb.all.mockResolvedValueOnce([makeQuestionnaireRow({ auto_send_on_project_create: 0 })]);
 
       const result = await questionnaireService.sendQuestionnaireForProjectType(5, 10, 'website');
 
@@ -473,7 +474,9 @@ describe('QuestionnaireService', () => {
     });
 
     it('parses answers from JSON string', async () => {
-      mockDb.get.mockResolvedValueOnce(makeResponseRow({ answers: JSON.stringify({ q1: 'Test' }) }));
+      mockDb.get.mockResolvedValueOnce(
+        makeResponseRow({ answers: JSON.stringify({ q1: 'Test' }) })
+      );
 
       const result = await questionnaireService.getResponse(1);
 
@@ -555,15 +558,19 @@ describe('QuestionnaireService', () => {
   describe('saveProgress', () => {
     it('saves partial answers and sets status to in_progress', async () => {
       // getResponse
-      mockDb.get.mockResolvedValueOnce(makeResponseRow({ answers: JSON.stringify({ q1: 'Acme' }) }));
+      mockDb.get.mockResolvedValueOnce(
+        makeResponseRow({ answers: JSON.stringify({ q1: 'Acme' }) })
+      );
       // run update
       mockDb.run.mockResolvedValueOnce({ changes: 1 });
       // getResponse after update
-      mockDb.get.mockResolvedValueOnce(makeResponseRow({
-        answers: JSON.stringify({ q1: 'Acme', q2: 'New York' }),
-        status: 'in_progress',
-        started_at: '2026-03-01T10:00:00Z'
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeResponseRow({
+          answers: JSON.stringify({ q1: 'Acme', q2: 'New York' }),
+          status: 'in_progress',
+          started_at: '2026-03-01T10:00:00Z'
+        })
+      );
 
       const result = await questionnaireService.saveProgress(1, { q2: 'New York' });
 
@@ -575,12 +582,16 @@ describe('QuestionnaireService', () => {
     });
 
     it('merges new answers with existing answers', async () => {
-      mockDb.get.mockResolvedValueOnce(makeResponseRow({ answers: JSON.stringify({ q1: 'Existing' }) }));
+      mockDb.get.mockResolvedValueOnce(
+        makeResponseRow({ answers: JSON.stringify({ q1: 'Existing' }) })
+      );
       mockDb.run.mockResolvedValueOnce({ changes: 1 });
-      mockDb.get.mockResolvedValueOnce(makeResponseRow({
-        answers: JSON.stringify({ q1: 'Existing', q2: 'New' }),
-        status: 'in_progress'
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeResponseRow({
+          answers: JSON.stringify({ q1: 'Existing', q2: 'New' }),
+          status: 'in_progress'
+        })
+      );
 
       await questionnaireService.saveProgress(1, { q2: 'New' });
 
@@ -593,31 +604,39 @@ describe('QuestionnaireService', () => {
     it('throws when response not found', async () => {
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(questionnaireService.saveProgress(999, {})).rejects.toThrow('Response not found');
+      await expect(questionnaireService.saveProgress(999, {})).rejects.toThrow(
+        'Response not found'
+      );
     });
   });
 
   describe('submitResponse', () => {
     it('submits answers and marks as completed', async () => {
-      mockDb.get.mockResolvedValueOnce(makeResponseRow({ status: 'in_progress', answers: JSON.stringify({ q1: 'Draft' }) }));
+      mockDb.get.mockResolvedValueOnce(
+        makeResponseRow({ status: 'in_progress', answers: JSON.stringify({ q1: 'Draft' }) })
+      );
       mockDb.run.mockResolvedValueOnce({ changes: 1 });
-      mockDb.get.mockResolvedValueOnce(makeResponseRow({
-        answers: JSON.stringify({ q1: 'Final Answer' }),
-        status: 'completed',
-        completed_at: '2026-03-01T11:00:00Z'
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeResponseRow({
+          answers: JSON.stringify({ q1: 'Final Answer' }),
+          status: 'completed',
+          completed_at: '2026-03-01T11:00:00Z'
+        })
+      );
 
       const result = await questionnaireService.submitResponse(1, { q1: 'Final Answer' });
 
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('status = \'completed\''),
+        expect.stringContaining("status = 'completed'"),
         expect.any(Array)
       );
       expect(result.status).toBe('completed');
     });
 
     it('merges submitted answers with existing ones', async () => {
-      mockDb.get.mockResolvedValueOnce(makeResponseRow({ answers: JSON.stringify({ q1: 'Existing' }) }));
+      mockDb.get.mockResolvedValueOnce(
+        makeResponseRow({ answers: JSON.stringify({ q1: 'Existing' }) })
+      );
       mockDb.run.mockResolvedValueOnce({ changes: 1 });
       mockDb.get.mockResolvedValueOnce(makeResponseRow({ status: 'completed' }));
 
@@ -632,7 +651,9 @@ describe('QuestionnaireService', () => {
     it('throws when response not found', async () => {
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(questionnaireService.submitResponse(999, {})).rejects.toThrow('Response not found');
+      await expect(questionnaireService.submitResponse(999, {})).rejects.toThrow(
+        'Response not found'
+      );
     });
   });
 
@@ -640,10 +661,12 @@ describe('QuestionnaireService', () => {
     it('increments reminder count and updates reminder_sent_at', async () => {
       mockDb.get.mockResolvedValueOnce(makeResponseRow({ reminder_count: 1 }));
       mockDb.run.mockResolvedValueOnce({ changes: 1 });
-      mockDb.get.mockResolvedValueOnce(makeResponseRow({
-        reminder_count: 2,
-        reminder_sent_at: '2026-03-01T09:00:00Z'
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeResponseRow({
+          reminder_count: 2,
+          reminder_sent_at: '2026-03-01T09:00:00Z'
+        })
+      );
 
       const result = await questionnaireService.sendReminder(1);
 
@@ -728,11 +751,13 @@ describe('QuestionnaireService', () => {
   describe('exportQuestionnaireJson', () => {
     it('exports response as structured JSON string', async () => {
       // getResponse
-      mockDb.get.mockResolvedValueOnce(makeResponseRow({
-        answers: JSON.stringify({ q1: 'Acme Corp' }),
-        status: 'completed',
-        completed_at: '2026-03-01T11:00:00Z'
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeResponseRow({
+          answers: JSON.stringify({ q1: 'Acme Corp' }),
+          status: 'completed',
+          completed_at: '2026-03-01T11:00:00Z'
+        })
+      );
 
       // getQuestionnaire
       mockDb.get.mockResolvedValueOnce(makeQuestionnaireRow());
@@ -782,11 +807,13 @@ describe('QuestionnaireService', () => {
   describe('generateQuestionnairePdf', () => {
     it('generates a PDF as Uint8Array', async () => {
       // getResponse
-      mockDb.get.mockResolvedValueOnce(makeResponseRow({
-        answers: JSON.stringify({ q1: 'Acme Corp' }),
-        status: 'completed',
-        completed_at: '2026-03-01T11:00:00Z'
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeResponseRow({
+          answers: JSON.stringify({ q1: 'Acme Corp' }),
+          status: 'completed',
+          completed_at: '2026-03-01T11:00:00Z'
+        })
+      );
       // getQuestionnaire
       mockDb.get.mockResolvedValueOnce(makeQuestionnaireRow());
 
@@ -813,10 +840,12 @@ describe('QuestionnaireService', () => {
     });
 
     it('handles array answers correctly', async () => {
-      mockDb.get.mockResolvedValueOnce(makeResponseRow({
-        answers: JSON.stringify({ q1: ['Option A', 'Option B'] }),
-        status: 'completed'
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeResponseRow({
+          answers: JSON.stringify({ q1: ['Option A', 'Option B'] }),
+          status: 'completed'
+        })
+      );
       mockDb.get.mockResolvedValueOnce(makeQuestionnaireRow());
 
       const result = await questionnaireService.generateQuestionnairePdf(1);
@@ -833,19 +862,23 @@ describe('QuestionnaireService', () => {
   describe('saveQuestionnairePdfToFiles', () => {
     it('generates PDF, saves to disk, and inserts file record', async () => {
       // getResponse (first call for saveQuestionnairePdfToFiles)
-      mockDb.get.mockResolvedValueOnce(makeResponseRow({
-        status: 'completed',
-        project_id: 10
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeResponseRow({
+          status: 'completed',
+          project_id: 10
+        })
+      );
       // getQuestionnaire (for saveQuestionnairePdfToFiles)
       mockDb.get.mockResolvedValueOnce(makeQuestionnaireRow());
 
       // generateQuestionnairePdf -> getResponse
-      mockDb.get.mockResolvedValueOnce(makeResponseRow({
-        answers: JSON.stringify({ q1: 'Answer' }),
-        status: 'completed',
-        project_id: 10
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeResponseRow({
+          answers: JSON.stringify({ q1: 'Answer' }),
+          status: 'completed',
+          project_id: 10
+        })
+      );
       // generateQuestionnairePdf -> getQuestionnaire
       mockDb.get.mockResolvedValueOnce(makeQuestionnaireRow());
 
@@ -874,7 +907,9 @@ describe('QuestionnaireService', () => {
       mockDb.get.mockResolvedValueOnce(makeQuestionnaireRow());
 
       // generateQuestionnairePdf calls
-      mockDb.get.mockResolvedValueOnce(makeResponseRow({ project_id: 10, status: 'completed', answers: JSON.stringify({}) }));
+      mockDb.get.mockResolvedValueOnce(
+        makeResponseRow({ project_id: 10, status: 'completed', answers: JSON.stringify({}) })
+      );
       mockDb.get.mockResolvedValueOnce(makeQuestionnaireRow());
 
       // Existing folder found

@@ -89,10 +89,9 @@ describe('generateMilestoneTasks', () => {
   it('does not check existing count when skipIfExists is false', async () => {
     mockDb.run.mockResolvedValue({ lastID: 1 });
 
-    await generateMilestoneTasks(
-      1, 10, DISCOVERY_TITLE, '2026-03-01', 'simple-site',
-      { skipIfExists: false }
-    );
+    await generateMilestoneTasks(1, 10, DISCOVERY_TITLE, '2026-03-01', 'simple-site', {
+      skipIfExists: false
+    });
 
     // db.get should not have been called for count check
     expect(mockDb.get).not.toHaveBeenCalled();
@@ -102,9 +101,7 @@ describe('generateMilestoneTasks', () => {
     mockDb.get.mockResolvedValueOnce({ count: 0 });
     mockDb.run.mockResolvedValue({ lastID: 1 });
 
-    const ids = await generateMilestoneTasks(
-      1, 10, DISCOVERY_TITLE, '2026-03-01', 'simple-site'
-    );
+    const ids = await generateMilestoneTasks(1, 10, DISCOVERY_TITLE, '2026-03-01', 'simple-site');
 
     expect(ids.length).toBeGreaterThan(0);
   });
@@ -115,7 +112,11 @@ describe('generateMilestoneTasks', () => {
     mockDb.get.mockResolvedValueOnce({ count: 0 });
 
     const ids = await generateMilestoneTasks(
-      1, 10, 'Completely Unknown Milestone', '2026-03-01', 'simple-site',
+      1,
+      10,
+      'Completely Unknown Milestone',
+      '2026-03-01',
+      'simple-site',
       { skipIfExists: true }
     );
 
@@ -127,10 +128,9 @@ describe('generateMilestoneTasks', () => {
     mockDb.get.mockResolvedValueOnce({ count: 0 });
     mockDb.run.mockResolvedValue({ lastID: 1 });
 
-    const ids = await generateMilestoneTasks(
-      1, 10, DISCOVERY_TITLE, '2026-03-01', 'simple-site',
-      { skipIfExists: true }
-    );
+    const ids = await generateMilestoneTasks(1, 10, DISCOVERY_TITLE, '2026-03-01', 'simple-site', {
+      skipIfExists: true
+    });
 
     expect(ids.length).toBeGreaterThan(0);
   });
@@ -139,10 +139,9 @@ describe('generateMilestoneTasks', () => {
     mockDb.get.mockResolvedValueOnce({ count: 0 });
     mockDb.run.mockResolvedValue({ lastID: 1 });
 
-    const ids = await generateMilestoneTasks(
-      1, 10, 'Discovery', '2026-03-01', 'business-site',
-      { skipIfExists: true }
-    );
+    const ids = await generateMilestoneTasks(1, 10, 'Discovery', '2026-03-01', 'business-site', {
+      skipIfExists: true
+    });
 
     expect(ids.length).toBeGreaterThan(0);
   });
@@ -152,7 +151,11 @@ describe('generateMilestoneTasks', () => {
     mockDb.run.mockResolvedValue({ lastID: 1 });
 
     const ids = await generateMilestoneTasks(
-      1, 10, DISCOVERY_TITLE, '2026-03-01', 'ecommerce-site',
+      1,
+      10,
+      DISCOVERY_TITLE,
+      '2026-03-01',
+      'ecommerce-site',
       { skipIfExists: true }
     );
 
@@ -164,7 +167,11 @@ describe('generateMilestoneTasks', () => {
     mockDb.run.mockResolvedValue({ lastID: 1 });
 
     const ids = await generateMilestoneTasks(
-      1, 10, 'Discovery & Architecture', '2026-03-01', 'web-app',
+      1,
+      10,
+      'Discovery & Architecture',
+      '2026-03-01',
+      'web-app',
       { skipIfExists: true }
     );
 
@@ -176,7 +183,11 @@ describe('generateMilestoneTasks', () => {
     mockDb.run.mockResolvedValue({ lastID: 1 });
 
     const ids = await generateMilestoneTasks(
-      1, 10, 'Month 1 - Setup', '2026-03-01', 'maintenance',
+      1,
+      10,
+      'Month 1 - Setup',
+      '2026-03-01',
+      'maintenance',
       { skipIfExists: true }
     );
 
@@ -189,13 +200,12 @@ describe('generateMilestoneTasks', () => {
     mockDb.get.mockResolvedValueOnce({ count: 0 });
     mockDb.run.mockResolvedValue({ lastID: 42 });
 
-    await generateMilestoneTasks(
-      7, 15, DISCOVERY_TITLE, '2026-03-20', 'simple-site',
-      { skipIfExists: true }
-    );
+    await generateMilestoneTasks(7, 15, DISCOVERY_TITLE, '2026-03-20', 'simple-site', {
+      skipIfExists: true
+    });
 
     const firstParams = mockDb.run.mock.calls[0][1];
-    expect(firstParams[0]).toBe(7);  // project_id
+    expect(firstParams[0]).toBe(7); // project_id
     expect(firstParams[1]).toBe(15); // milestone_id
   });
 
@@ -203,10 +213,9 @@ describe('generateMilestoneTasks', () => {
     mockDb.get.mockResolvedValueOnce({ count: 0 });
     mockDb.run.mockResolvedValue({ lastID: 1 });
 
-    await generateMilestoneTasks(
-      1, 10, DISCOVERY_TITLE, '2026-03-20', 'simple-site',
-      { skipIfExists: true }
-    );
+    await generateMilestoneTasks(1, 10, DISCOVERY_TITLE, '2026-03-20', 'simple-site', {
+      skipIfExists: true
+    });
 
     const firstParams = mockDb.run.mock.calls[0][1];
     // priority is at index 5
@@ -217,10 +226,10 @@ describe('generateMilestoneTasks', () => {
     mockDb.get.mockResolvedValueOnce({ count: 0 });
     mockDb.run.mockResolvedValue({ lastID: 1 });
 
-    await generateMilestoneTasks(
-      1, 10, DISCOVERY_TITLE, '2026-03-20', 'simple-site',
-      { skipIfExists: true, defaultPriority: 'high' }
-    );
+    await generateMilestoneTasks(1, 10, DISCOVERY_TITLE, '2026-03-20', 'simple-site', {
+      skipIfExists: true,
+      defaultPriority: 'high'
+    });
 
     const firstParams = mockDb.run.mock.calls[0][1];
     expect(firstParams[5]).toBe('high');
@@ -231,10 +240,10 @@ describe('generateMilestoneTasks', () => {
     mockDb.run.mockResolvedValue({ lastID: 1 });
     vi.mocked(userService.getUserIdByEmail).mockResolvedValueOnce(99);
 
-    await generateMilestoneTasks(
-      1, 10, DISCOVERY_TITLE, '2026-03-20', 'simple-site',
-      { skipIfExists: true, assignedTo: 'dev@example.com' }
-    );
+    await generateMilestoneTasks(1, 10, DISCOVERY_TITLE, '2026-03-20', 'simple-site', {
+      skipIfExists: true,
+      assignedTo: 'dev@example.com'
+    });
 
     const firstParams = mockDb.run.mock.calls[0][1];
     // assigned_to at index 9, assigned_to_user_id at index 10
@@ -246,10 +255,9 @@ describe('generateMilestoneTasks', () => {
     mockDb.get.mockResolvedValueOnce({ count: 0 });
     mockDb.run.mockResolvedValue({ lastID: 1 });
 
-    await generateMilestoneTasks(
-      1, 10, DISCOVERY_TITLE, '2026-03-20', 'simple-site',
-      { skipIfExists: true }
-    );
+    await generateMilestoneTasks(1, 10, DISCOVERY_TITLE, '2026-03-20', 'simple-site', {
+      skipIfExists: true
+    });
 
     const firstParams = mockDb.run.mock.calls[0][1];
     expect(firstParams[9]).toBeNull();
@@ -259,14 +267,11 @@ describe('generateMilestoneTasks', () => {
   it('only tracks task IDs when db.run returns a lastID', async () => {
     mockDb.get.mockResolvedValueOnce({ count: 0 });
     // First INSERT succeeds, subsequent ones return no lastID
-    mockDb.run
-      .mockResolvedValueOnce({ lastID: 5 })
-      .mockResolvedValue({});
+    mockDb.run.mockResolvedValueOnce({ lastID: 5 }).mockResolvedValue({});
 
-    const ids = await generateMilestoneTasks(
-      1, 10, DISCOVERY_TITLE, '2026-03-20', 'simple-site',
-      { skipIfExists: true }
-    );
+    const ids = await generateMilestoneTasks(1, 10, DISCOVERY_TITLE, '2026-03-20', 'simple-site', {
+      skipIfExists: true
+    });
 
     // Only first task ID tracked
     expect(ids).toContain(5);
@@ -279,10 +284,9 @@ describe('generateMilestoneTasks', () => {
     mockDb.get.mockResolvedValueOnce({ count: 0 });
     mockDb.run.mockResolvedValue({ lastID: 1 });
 
-    await generateMilestoneTasks(
-      1, 10, DISCOVERY_TITLE, null, 'simple-site',
-      { skipIfExists: true }
-    );
+    await generateMilestoneTasks(1, 10, DISCOVERY_TITLE, null, 'simple-site', {
+      skipIfExists: true
+    });
 
     // due_date is at index 6 in INSERT params
     const firstParams = mockDb.run.mock.calls[0][1];
@@ -293,10 +297,10 @@ describe('generateMilestoneTasks', () => {
     mockDb.get.mockResolvedValueOnce({ count: 0 });
     mockDb.run.mockResolvedValue({ lastID: 1 });
 
-    await generateMilestoneTasks(
-      1, 10, DISCOVERY_TITLE, '2026-06-30', 'simple-site',
-      { skipIfExists: true, startDate: '2026-01-01' }
-    );
+    await generateMilestoneTasks(1, 10, DISCOVERY_TITLE, '2026-06-30', 'simple-site', {
+      skipIfExists: true,
+      startDate: '2026-01-01'
+    });
 
     const dueDates = mockDb.run.mock.calls.map((call) => call[1][6]);
     // All due dates should be non-null strings
@@ -313,10 +317,10 @@ describe('generateMilestoneTasks', () => {
     mockDb.run.mockResolvedValue({ lastID: 1 });
 
     // milestone due date far in future, start date near future
-    await generateMilestoneTasks(
-      1, 10, DISCOVERY_TITLE, '2026-12-31', 'simple-site',
-      { skipIfExists: true, startDate: '2026-11-01' }
-    );
+    await generateMilestoneTasks(1, 10, DISCOVERY_TITLE, '2026-12-31', 'simple-site', {
+      skipIfExists: true,
+      startDate: '2026-11-01'
+    });
 
     const firstDueDate = mockDb.run.mock.calls[0][1][6] as string;
     // Due dates should all be after the start date
@@ -379,18 +383,13 @@ describe('generateAllMilestoneTasksForProject', () => {
 
     await generateAllMilestoneTasksForProject(42, 'web-app');
 
-    expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE project_id = ?'),
-      [42]
-    );
+    expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('WHERE project_id = ?'), [42]);
   });
 
   it('throws when db.all fails', async () => {
     mockDb.all.mockRejectedValueOnce(new Error('DB error'));
 
-    await expect(generateAllMilestoneTasksForProject(1, 'simple-site')).rejects.toThrow(
-      'DB error'
-    );
+    await expect(generateAllMilestoneTasksForProject(1, 'simple-site')).rejects.toThrow('DB error');
   });
 });
 

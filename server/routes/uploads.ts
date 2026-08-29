@@ -52,9 +52,15 @@ router.use(
 
     const rawMessage = error instanceof Error ? error.message : '';
     if (rawMessage.includes('File type not allowed')) {
-      return errorResponseWithPayload(res, 'File type not allowed', 400, ErrorCodes.INVALID_FILE_TYPE, {
-        message: sanitizeErrorMessage(error, 'File type not allowed')
-      });
+      return errorResponseWithPayload(
+        res,
+        'File type not allowed',
+        400,
+        ErrorCodes.INVALID_FILE_TYPE,
+        {
+          message: sanitizeErrorMessage(error, 'File type not allowed')
+        }
+      );
     }
 
     next(error);

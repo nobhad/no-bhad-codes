@@ -21,9 +21,9 @@ export function configToFilterOptions<K extends string>(
   const entries = keys
     ? keys.map((k) => ({ value: k, label: config[k].label }))
     : (Object.entries(config) as [string, { label: string }][]).map(([value, { label }]) => ({
-      value,
-      label
-    }));
+        value,
+        label
+      }));
   return entries;
 }
 

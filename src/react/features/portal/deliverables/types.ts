@@ -4,7 +4,12 @@
  */
 
 /** Deliverable statuses visible to clients */
-export type PortalDeliverableStatus = 'draft' | 'in_review' | 'approved' | 'revision_requested' | 'locked';
+export type PortalDeliverableStatus =
+  | 'draft'
+  | 'in_review'
+  | 'approved'
+  | 'revision_requested'
+  | 'locked';
 
 /** Client-facing deliverable from API */
 export interface PortalDeliverable {

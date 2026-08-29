@@ -31,7 +31,7 @@ describe('Sanitization Functions', () => {
 
     it('should handle quotes', () => {
       expect(sanitizeString('"quoted"')).toBe('&quot;quoted&quot;');
-      expect(sanitizeString('\'single\'')).toBe('&#x27;single&#x27;');
+      expect(sanitizeString("'single'")).toBe('&#x27;single&#x27;');
     });
 
     it('should handle equals signs', () => {

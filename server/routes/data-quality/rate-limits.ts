@@ -27,10 +27,13 @@ const router = Router();
  *       200:
  *         description: Rate limit stats
  */
-router.get('/rate-limits/stats', asyncHandler(async (_req: Request, res: Response) => {
-  const stats = await getRateLimitStats();
-  sendSuccess(res, stats);
-}));
+router.get(
+  '/rate-limits/stats',
+  asyncHandler(async (_req: Request, res: Response) => {
+    const stats = await getRateLimitStats();
+    sendSuccess(res, stats);
+  })
+);
 
 /**
  * @swagger
@@ -65,20 +68,23 @@ router.get('/rate-limits/stats', asyncHandler(async (_req: Request, res: Respons
  *       400:
  *         description: ip and reason required
  */
-router.post('/rate-limits/block', asyncHandler(async (req: Request, res: Response) => {
-  const { ip, reason, expiresAt, adminEmail } = req.body;
+router.post(
+  '/rate-limits/block',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { ip, reason, expiresAt, adminEmail } = req.body;
 
-  if (!ip || !reason) {
-    errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
-      message: 'ip and reason are required'
-    });
-    return;
-  }
+    if (!ip || !reason) {
+      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
+        message: 'ip and reason are required'
+      });
+      return;
+    }
 
-  await blockIP(ip, reason, adminEmail || 'admin', expiresAt ? new Date(expiresAt) : undefined);
+    await blockIP(ip, reason, adminEmail || 'admin', expiresAt ? new Date(expiresAt) : undefined);
 
-  sendSuccess(res, undefined, `IP ${ip} has been blocked`);
-}));
+    sendSuccess(res, undefined, `IP ${ip} has been blocked`);
+  })
+);
 
 /**
  * @swagger
@@ -107,19 +113,22 @@ router.post('/rate-limits/block', asyncHandler(async (req: Request, res: Respons
  *       400:
  *         description: ip is required
  */
-router.post('/rate-limits/unblock', asyncHandler(async (req: Request, res: Response) => {
-  const { ip } = req.body;
+router.post(
+  '/rate-limits/unblock',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { ip } = req.body;
 
-  if (!ip) {
-    errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
-      message: 'ip is required'
-    });
-    return;
-  }
+    if (!ip) {
+      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
+        message: 'ip is required'
+      });
+      return;
+    }
 
-  await unblockIP(ip);
+    await unblockIP(ip);
 
-  sendSuccess(res, undefined, `IP ${ip} has been unblocked`);
-}));
+    sendSuccess(res, undefined, `IP ${ip} has been unblocked`);
+  })
+);
 
 export default router;

@@ -172,7 +172,18 @@ export class LoggerService {
    * Format log entry as structured JSON (production)
    */
   private formatJsonEntry(entry: LogEntry): string {
-    const { timestamp, level, message, category, metadata, error, userId, requestId, ip, userAgent } = entry;
+    const {
+      timestamp,
+      level,
+      message,
+      category,
+      metadata,
+      error,
+      userId,
+      requestId,
+      ip,
+      userAgent
+    } = entry;
 
     const jsonObj: Record<string, unknown> = {
       timestamp,
@@ -372,9 +383,8 @@ export class LoggerService {
     // Console output
     if (this.config.console) {
       const formatted = this.formatEntry(entry);
-      const output = this.config.format === 'json'
-        ? formatted
-        : this.colorizeLevel(entry.level, formatted);
+      const output =
+        this.config.format === 'json' ? formatted : this.colorizeLevel(entry.level, formatted);
 
       if (entry.level === 'ERROR') {
         console.error(output);
@@ -463,7 +473,11 @@ export class LoggerService {
   /**
    * Log security event
    */
-  async logSecurity(event: string, details: Record<string, unknown> = {}, req?: LoggableRequest): Promise<void> {
+  async logSecurity(
+    event: string,
+    details: Record<string, unknown> = {},
+    req?: LoggableRequest
+  ): Promise<void> {
     await this.warn(`Security Event: ${event}`, {
       category: 'SECURITY',
       metadata: details,

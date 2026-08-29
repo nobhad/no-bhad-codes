@@ -190,15 +190,9 @@ class ActivityService {
   /**
    * Build a map of client IDs to display names for a set of activity rows.
    */
-  private async buildClientNameMap(
-    activities: RawActivityRow[]
-  ): Promise<Record<number, string>> {
+  private async buildClientNameMap(activities: RawActivityRow[]): Promise<Record<number, string>> {
     const clientIds = [
-      ...new Set(
-        activities
-          .filter((a) => a.client_id)
-          .map((a) => a.client_id as number)
-      )
+      ...new Set(activities.filter((a) => a.client_id).map((a) => a.client_id as number))
     ];
 
     const clientMap: Record<number, string> = {};

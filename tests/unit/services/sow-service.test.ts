@@ -542,7 +542,9 @@ describe('SowService - generateSowPdf', () => {
   });
 
   it('does not crash when client company is null', async () => {
-    const data = buildSowData({ client: { name: 'Solo Client', email: 'solo@test.com', company: null } });
+    const data = buildSowData({
+      client: { name: 'Solo Client', email: 'solo@test.com', company: null }
+    });
 
     const result = await generateSowPdf(data as never);
 
@@ -567,7 +569,14 @@ describe('SowService - generateSowPdf', () => {
 
   it('skips start date line when startDate is null', async () => {
     const data = buildSowData({
-      project: { id: 1, name: 'No Start', projectType: 'web-app', description: null, startDate: null, deadline: '2026-06-01' }
+      project: {
+        id: 1,
+        name: 'No Start',
+        projectType: 'web-app',
+        description: null,
+        startDate: null,
+        deadline: '2026-06-01'
+      }
     });
 
     await generateSowPdf(data as never);
@@ -585,7 +594,14 @@ describe('SowService - generateSowPdf', () => {
 
   it('skips deadline line when deadline is null', async () => {
     const data = buildSowData({
-      project: { id: 1, name: 'No Deadline', projectType: 'web-app', description: null, startDate: '2026-01-01', deadline: null }
+      project: {
+        id: 1,
+        name: 'No Deadline',
+        projectType: 'web-app',
+        description: null,
+        startDate: '2026-01-01',
+        deadline: null
+      }
     });
 
     await generateSowPdf(data as never);
@@ -597,9 +613,14 @@ describe('SowService - generateSowPdf', () => {
   it('includes maintenance plan line when option is not diy', async () => {
     const data = buildSowData({
       proposal: {
-        id: 10, selectedTier: 'better', tierName: 'Better Package',
-        basePrice: 5000, finalPrice: 5500, maintenanceOption: 'essential',
-        createdAt: '2026-01-01T00:00:00Z', features: []
+        id: 10,
+        selectedTier: 'better',
+        tierName: 'Better Package',
+        basePrice: 5000,
+        finalPrice: 5500,
+        maintenanceOption: 'essential',
+        createdAt: '2026-01-01T00:00:00Z',
+        features: []
       }
     });
 
@@ -612,9 +633,14 @@ describe('SowService - generateSowPdf', () => {
   it('skips maintenance plan line when option is diy', async () => {
     const data = buildSowData({
       proposal: {
-        id: 10, selectedTier: 'good', tierName: 'Good Package',
-        basePrice: 3000, finalPrice: 3000, maintenanceOption: 'diy',
-        createdAt: '2026-01-01T00:00:00Z', features: []
+        id: 10,
+        selectedTier: 'good',
+        tierName: 'Good Package',
+        basePrice: 3000,
+        finalPrice: 3000,
+        maintenanceOption: 'diy',
+        createdAt: '2026-01-01T00:00:00Z',
+        features: []
       }
     });
 
@@ -627,9 +653,14 @@ describe('SowService - generateSowPdf', () => {
   it('skips maintenance plan line when option is null', async () => {
     const data = buildSowData({
       proposal: {
-        id: 10, selectedTier: 'good', tierName: 'Good Package',
-        basePrice: 3000, finalPrice: 3000, maintenanceOption: null,
-        createdAt: '2026-01-01T00:00:00Z', features: []
+        id: 10,
+        selectedTier: 'good',
+        tierName: 'Good Package',
+        basePrice: 3000,
+        finalPrice: 3000,
+        maintenanceOption: null,
+        createdAt: '2026-01-01T00:00:00Z',
+        features: []
       }
     });
 
@@ -649,8 +680,12 @@ describe('SowService - generateSowPdf', () => {
   it('skips included features section when no included features', async () => {
     const data = buildSowData({
       proposal: {
-        id: 10, selectedTier: 'best', tierName: 'Best Package',
-        basePrice: 8000, finalPrice: 9000, maintenanceOption: 'premium',
+        id: 10,
+        selectedTier: 'best',
+        tierName: 'Best Package',
+        basePrice: 8000,
+        finalPrice: 9000,
+        maintenanceOption: 'premium',
         createdAt: '2026-01-01T00:00:00Z',
         features: [{ name: 'Custom Widget', price: 1000, isIncluded: false, isAddon: true }]
       }
@@ -672,8 +707,12 @@ describe('SowService - generateSowPdf', () => {
   it('skips additional features section when no addons', async () => {
     const data = buildSowData({
       proposal: {
-        id: 10, selectedTier: 'good', tierName: 'Good Package',
-        basePrice: 3000, finalPrice: 3000, maintenanceOption: null,
+        id: 10,
+        selectedTier: 'good',
+        tierName: 'Good Package',
+        basePrice: 3000,
+        finalPrice: 3000,
+        maintenanceOption: null,
         createdAt: '2026-01-01T00:00:00Z',
         features: [{ name: 'Basic Pages', price: 0, isIncluded: true, isAddon: false }]
       }
@@ -694,7 +733,14 @@ describe('SowService - generateSowPdf', () => {
 
   it('does not crash when project has no description', async () => {
     const data = buildSowData({
-      project: { id: 1, name: 'No Desc', projectType: 'portfolio', description: null, startDate: null, deadline: null }
+      project: {
+        id: 1,
+        name: 'No Desc',
+        projectType: 'portfolio',
+        description: null,
+        startDate: null,
+        deadline: null
+      }
     });
 
     const result = await generateSowPdf(data as never);

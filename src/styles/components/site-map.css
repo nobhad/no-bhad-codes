@@ -323,10 +323,27 @@ body[data-page="design-system"] main#main-content {
   border-radius: 4px;
 }
 
-.map-compass__cue--up { grid-area: up; align-self: start; justify-self: center; padding-top: 0; }
-.map-compass__cue--down { grid-area: down; align-self: end; justify-self: center; }
-.map-compass__cue--left { grid-area: left; align-self: center; justify-self: start; }
-.map-compass__cue--right { grid-area: right; align-self: center; justify-self: end; }
+.map-compass__cue--up {
+  grid-area: up;
+  align-self: start;
+  justify-self: center;
+  padding-top: 0;
+}
+.map-compass__cue--down {
+  grid-area: down;
+  align-self: end;
+  justify-self: center;
+}
+.map-compass__cue--left {
+  grid-area: left;
+  align-self: center;
+  justify-self: start;
+}
+.map-compass__cue--right {
+  grid-area: right;
+  align-self: center;
+  justify-self: end;
+}
 
 /* Desktop only: float the compass over the fixed header so the up
    arrow sits at the viewport top, overlapping the header chrome.
@@ -355,7 +372,11 @@ body[data-page="design-system"] main#main-content {
 }
 
 @keyframes map-compass-pulse {
-  0%, 100% { opacity: 0.4; transform: translate(0, 0); }
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: translate(0, 0);
+  }
   50% {
     opacity: 0.85;
     /* Each cue nudges in its direction during the pulse */
@@ -376,20 +397,48 @@ body[data-page="design-system"] main#main-content {
 }
 
 @keyframes map-compass-pulse-up {
-  0%, 100% { opacity: 0.4; transform: translateY(0); }
-  50% { opacity: 0.85; transform: translateY(-4px); }
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translateY(-4px);
+  }
 }
 @keyframes map-compass-pulse-down {
-  0%, 100% { opacity: 0.4; transform: translateY(0); }
-  50% { opacity: 0.85; transform: translateY(4px); }
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translateY(4px);
+  }
 }
 @keyframes map-compass-pulse-left {
-  0%, 100% { opacity: 0.4; transform: translateX(0); }
-  50% { opacity: 0.85; transform: translateX(-4px); }
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translateX(-4px);
+  }
 }
 @keyframes map-compass-pulse-right {
-  0%, 100% { opacity: 0.4; transform: translateX(0); }
-  50% { opacity: 0.85; transform: translateX(4px); }
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translateX(4px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -403,5 +452,7 @@ body[data-page="design-system"] main#main-content {
    suggests vertical navigation, and the screen is too narrow for
    horizontal cues to feel useful without crowding tile content. */
 @media (max-width: 767px) {
-  .map-compass { display: none; }
+  .map-compass {
+    display: none;
+  }
 }

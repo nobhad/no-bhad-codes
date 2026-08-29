@@ -20,12 +20,14 @@ export class StateManager<T = AppState> {
   private state: T;
   private listeners = new Map<string, StateListener<T>[]>();
 
-
   private selectors = new Map<
     string,
-    { selector: StateSelector<T, unknown>; lastValue: unknown; listeners: ((value: unknown) => void)[] }
+    {
+      selector: StateSelector<T, unknown>;
+      lastValue: unknown;
+      listeners: ((value: unknown) => void)[];
+    }
   >();
-
 
   private computed = new Map<string, ComputedProperty<T, unknown>>();
   private reducers = new Map<string, StateReducer<T>>();

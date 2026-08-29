@@ -109,7 +109,12 @@ router.get(
     const intakeFileRecord = await intakeService.getIntakeFileForProject(projectId);
 
     if (!intakeFileRecord) {
-      return errorResponse(res, 'Intake form not found for this project', 404, ErrorCodes.FILE_NOT_FOUND);
+      return errorResponse(
+        res,
+        'Intake form not found for this project',
+        404,
+        ErrorCodes.FILE_NOT_FOUND
+      );
     }
     const cacheKey = getPdfCacheKey(
       'intake',
@@ -215,11 +220,14 @@ router.get(
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
         .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, '\'');
+        .replace(/&#39;/g, "'");
     };
 
     const sanitize = (text: string): string => {
-      return text.replace(/[\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+      return text
+        .replace(/[\n\r\t]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
     };
 
     const clean = (text: string): string => sanitize(decodeHtml(text));
@@ -284,18 +292,26 @@ router.get(
       const cleanVal = clean(value);
       if (!cleanVal) return;
 
-      const upperLabel = `${label.toUpperCase()  }:`;
+      const upperLabel = `${label.toUpperCase()}:`;
       const valueX = LEFT + labelWidth;
       const valueMaxW = RIGHT - valueX;
 
       if (fonts.regular.widthOfTextAtSize(cleanVal, PDF_TYPOGRAPHY.bodySize) <= valueMaxW) {
         ctx.y = drawLabelValue(ctx.currentPage, upperLabel, cleanVal, {
-          x: LEFT, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+          x: LEFT,
+          y: ctx.y,
+          labelFont: fonts.bold,
+          valueFont: fonts.regular,
+          labelWidth
         });
       } else {
         // Value too long — use drawLabelValue for label, then wrap value below
         ctx.y = drawLabelValue(ctx.currentPage, upperLabel, '', {
-          x: LEFT, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+          x: LEFT,
+          y: ctx.y,
+          labelFont: fonts.bold,
+          valueFont: fonts.regular,
+          labelWidth
         });
         drawWrappedText(ctx, cleanVal, {
           fontSize: PDF_TYPOGRAPHY.bodySize,
@@ -309,7 +325,9 @@ router.get(
     // Helper: draw a bullet list
     const drawBulletList = (items: string[]) => {
       for (const item of items) {
-        const text = sanitize(`- ${item.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}`);
+        const text = sanitize(
+          `- ${item.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}`
+        );
         ensureSpace(ctx, lineHeight, onNewPage);
         ctx.currentPage.drawText(text, {
           x: LEFT + PDF_SPACING.indent,
@@ -326,8 +344,12 @@ router.get(
     const drawBoolField = (label: string, value: boolean | undefined) => {
       if (value === undefined || value === null) return;
       const indicator = value ? 'Yes' : 'No';
-      ctx.y = drawLabelValue(ctx.currentPage, `${label.toUpperCase()  }:`, indicator, {
-        x: LEFT, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+      ctx.y = drawLabelValue(ctx.currentPage, `${label.toUpperCase()}:`, indicator, {
+        x: LEFT,
+        y: ctx.y,
+        labelFont: fonts.bold,
+        valueFont: fonts.regular,
+        labelWidth
       });
     };
 
@@ -364,7 +386,12 @@ router.get(
     const rightPairs: Array<{ label: string; value: string }> = [
       { label: 'PROJECT TYPE:', value: formatProjectType(intakeData.projectDetails.type) },
       { label: 'BUDGET:', value: formatBudget(intakeData.projectDetails.budget) },
-      { label: 'TIMELINE:', value: formatTimeline(intakeData.projectDetails.targetLaunchDate || intakeData.projectDetails.timeline) },
+      {
+        label: 'TIMELINE:',
+        value: formatTimeline(
+          intakeData.projectDetails.targetLaunchDate || intakeData.projectDetails.timeline
+        )
+      },
       { label: 'DATE:', value: formatDate(intakeData.submittedAt) }
     ];
 
@@ -393,7 +420,9 @@ router.get(
     ctx.y -= PDF_SPACING.sectionSpacing;
     ensureSpace(ctx, 100, onNewPage);
     ctx.y = drawSectionLabel(ctx.currentPage, 'PROJECT DETAILS', {
-      x: LEFT, y: ctx.y, font: fonts.bold
+      x: LEFT,
+      y: ctx.y,
+      font: fonts.bold
     });
 
     drawFieldWrapped('Project Name', intakeData.projectName);
@@ -408,7 +437,11 @@ router.get(
     // Description
     if (intakeData.projectDetails.description) {
       ctx.y = drawLabelValue(ctx.currentPage, 'DESCRIPTION:', '', {
-        x: LEFT, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+        x: LEFT,
+        y: ctx.y,
+        labelFont: fonts.bold,
+        valueFont: fonts.regular,
+        labelWidth
       });
       drawWrappedText(ctx, clean(intakeData.projectDetails.description), {
         fontSize: PDF_TYPOGRAPHY.bodySize,
@@ -426,7 +459,11 @@ router.get(
     if (features && features.length > 0) {
       ctx.y -= 8;
       ctx.y = drawLabelValue(ctx.currentPage, 'REQUESTED FEATURES:', '', {
-        x: LEFT, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+        x: LEFT,
+        y: ctx.y,
+        labelFont: fonts.bold,
+        valueFont: fonts.regular,
+        labelWidth
       });
       drawBulletList(features);
     }
@@ -435,18 +472,20 @@ router.get(
     // DESIGN PREFERENCES
     // =========================================================
 
-    const hasDesignInfo = intakeData.requirements && (
-      intakeData.requirements.designStyle ||
-      intakeData.requirements.colorPreferences ||
-      intakeData.requirements.brandGuidelines !== undefined ||
-      intakeData.requirements.contentReady !== undefined
-    );
+    const hasDesignInfo =
+      intakeData.requirements &&
+      (intakeData.requirements.designStyle ||
+        intakeData.requirements.colorPreferences ||
+        intakeData.requirements.brandGuidelines !== undefined ||
+        intakeData.requirements.contentReady !== undefined);
 
     if (hasDesignInfo) {
       ctx.y -= PDF_SPACING.sectionSpacing;
       ensureSpace(ctx, 80, onNewPage);
       ctx.y = drawSectionLabel(ctx.currentPage, 'DESIGN PREFERENCES', {
-        x: LEFT, y: ctx.y, font: fonts.bold
+        x: LEFT,
+        y: ctx.y,
+        font: fonts.bold
       });
 
       drawFieldWrapped('Design Style', intakeData.requirements!.designStyle);
@@ -459,16 +498,17 @@ router.get(
     // TECHNICAL DETAILS
     // =========================================================
 
-    const hasTechInfo = intakeData.technicalInfo && (
-      intakeData.technicalInfo.techComfort ||
-      intakeData.technicalInfo.domainHosting
-    );
+    const hasTechInfo =
+      intakeData.technicalInfo &&
+      (intakeData.technicalInfo.techComfort || intakeData.technicalInfo.domainHosting);
 
     if (hasTechInfo) {
       ctx.y -= PDF_SPACING.sectionSpacing;
       ensureSpace(ctx, 80, onNewPage);
       ctx.y = drawSectionLabel(ctx.currentPage, 'TECHNICAL DETAILS', {
-        x: LEFT, y: ctx.y, font: fonts.bold
+        x: LEFT,
+        y: ctx.y,
+        font: fonts.bold
       });
 
       drawFieldWrapped('Technical Comfort', intakeData.technicalInfo!.techComfort);
@@ -479,16 +519,17 @@ router.get(
     // INTEGRATIONS & NOTES
     // =========================================================
 
-    const hasReqExtras = intakeData.requirements && (
-      intakeData.requirements.integrations ||
-      intakeData.requirements.additionalNotes
-    );
+    const hasReqExtras =
+      intakeData.requirements &&
+      (intakeData.requirements.integrations || intakeData.requirements.additionalNotes);
 
     if (hasReqExtras) {
       ctx.y -= PDF_SPACING.sectionSpacing;
       ensureSpace(ctx, 80, onNewPage);
       ctx.y = drawSectionLabel(ctx.currentPage, 'REQUIREMENTS & NOTES', {
-        x: LEFT, y: ctx.y, font: fonts.bold
+        x: LEFT,
+        y: ctx.y,
+        font: fonts.bold
       });
 
       drawFieldWrapped('Integrations', intakeData.requirements!.integrations);
@@ -499,7 +540,9 @@ router.get(
       ctx.y -= PDF_SPACING.sectionSpacing;
       ensureSpace(ctx, 80, onNewPage);
       ctx.y = drawSectionLabel(ctx.currentPage, 'ADDITIONAL INFORMATION', {
-        x: LEFT, y: ctx.y, font: fonts.bold
+        x: LEFT,
+        y: ctx.y,
+        font: fonts.bold
       });
 
       drawWrappedText(ctx, clean(intakeData.additionalInfo), {
@@ -514,17 +557,19 @@ router.get(
     // ASSETS
     // =========================================================
 
-    const hasAssets = intakeData.assets && (
-      intakeData.assets.logoProvided !== undefined ||
-      intakeData.assets.existingAssets ||
-      intakeData.assets.contentAccess
-    );
+    const hasAssets =
+      intakeData.assets &&
+      (intakeData.assets.logoProvided !== undefined ||
+        intakeData.assets.existingAssets ||
+        intakeData.assets.contentAccess);
 
     if (hasAssets) {
       ctx.y -= PDF_SPACING.sectionSpacing;
       ensureSpace(ctx, 80, onNewPage);
       ctx.y = drawSectionLabel(ctx.currentPage, 'ASSETS & RESOURCES', {
-        x: LEFT, y: ctx.y, font: fonts.bold
+        x: LEFT,
+        y: ctx.y,
+        font: fonts.bold
       });
 
       drawBoolField('Logo Provided', intakeData.assets!.logoProvided);

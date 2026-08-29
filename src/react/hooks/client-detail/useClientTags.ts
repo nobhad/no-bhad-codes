@@ -59,7 +59,9 @@ export function useClientTags({ clientId }: ClientDetailHookOptions) {
   const addTag = useCallback(
     async (tagId: number): Promise<boolean> => {
       try {
-        const response = await apiPost(`${API_ENDPOINTS.CLIENTS}/${clientId}/tags`, { tag_id: tagId });
+        const response = await apiPost(`${API_ENDPOINTS.CLIENTS}/${clientId}/tags`, {
+          tag_id: tagId
+        });
 
         if (!response.ok) {
           throw new Error(`Failed to add tag: ${response.statusText}`);

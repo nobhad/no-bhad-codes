@@ -64,7 +64,9 @@ async function checkBudget(): Promise<void> {
   )) as { total: number };
 
   if (result.total >= AI_CONFIG.monthlyBudgetCents) {
-    throw new Error(`Monthly AI budget exceeded ($${(result.total / 100).toFixed(2)} / $${(AI_CONFIG.monthlyBudgetCents / 100).toFixed(2)})`);
+    throw new Error(
+      `Monthly AI budget exceeded ($${(result.total / 100).toFixed(2)} / $${(AI_CONFIG.monthlyBudgetCents / 100).toFixed(2)})`
+    );
   }
 }
 
@@ -89,9 +91,7 @@ async function checkDailyLimit(): Promise<void> {
 // ============================================
 
 function hashContext(context: unknown): string {
-  return createHash('sha256')
-    .update(JSON.stringify(context))
-    .digest('hex');
+  return createHash('sha256').update(JSON.stringify(context)).digest('hex');
 }
 
 async function getCachedResponse(hash: string): Promise<AiResponseCacheRow | null> {
@@ -119,9 +119,7 @@ async function setCachedResponse(
   if (!AI_CONFIG.cacheEnabled) return;
 
   const db = getDatabase();
-  const expiresAt = new Date(
-    Date.now() + AI_CONFIG.cacheTtlSeconds * 1000
-  ).toISOString();
+  const expiresAt = new Date(Date.now() + AI_CONFIG.cacheTtlSeconds * 1000).toISOString();
 
   await db.run(
     `INSERT OR REPLACE INTO ai_response_cache
@@ -362,9 +360,10 @@ BODY:
     )) as Array<{ content: string; sender_type: string; created_at: string }>;
 
     if (messages.length > 0) {
-      const history = messages.reverse().map(m =>
-        `[${m.sender_type}]: ${m.content.substring(0, 200)}`
-      ).join('\n');
+      const history = messages
+        .reverse()
+        .map((m) => `[${m.sender_type}]: ${m.content.substring(0, 200)}`)
+        .join('\n');
       parts.push(`Recent conversation:\n${history}`);
     }
   }
@@ -490,10 +489,7 @@ async function cleanupExpiredCache(): Promise<number> {
   const db = getDatabase();
   const now = new Date().toISOString();
 
-  const result = await db.run(
-    'DELETE FROM ai_response_cache WHERE expires_at <= ?',
-    [now]
-  );
+  const result = await db.run('DELETE FROM ai_response_cache WHERE expires_at <= ?', [now]);
 
   const deleted = result.changes ?? 0;
   if (deleted > 0) {

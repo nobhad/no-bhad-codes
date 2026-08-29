@@ -35,8 +35,13 @@ const PERIOD_LABELS: Record<PerformancePeriod, string> = {
 
 const TREND_THRESHOLD = 0.01;
 
-interface ValueRow { value: number }
-interface OnTimeRow { total: number; on_time: number }
+interface ValueRow {
+  value: number;
+}
+interface OnTimeRow {
+  total: number;
+  on_time: number;
+}
 
 interface TeamMemberRow {
   name: string;
@@ -156,9 +161,7 @@ class PerformanceService {
    */
   async getPerformanceMetrics(periodParam: string): Promise<PerformanceData> {
     const db = getDatabase();
-    const period: PerformancePeriod = isValidPeriod(periodParam)
-      ? periodParam
-      : 'month';
+    const period: PerformancePeriod = isValidPeriod(periodParam) ? periodParam : 'month';
 
     const days = PERIOD_DAYS[period];
     const currentStartStr = new Date(Date.now() - days * 86400000).toISOString().split('T')[0];
@@ -285,12 +288,14 @@ class PerformanceService {
       { total: 0, on_time: 0 }
     );
 
-    const onTimeRate = onTimeDelivery.total > 0
-      ? Math.round((onTimeDelivery.on_time / onTimeDelivery.total) * 100)
-      : 0;
-    const previousOnTimeRate = previousOnTimeDelivery.total > 0
-      ? Math.round((previousOnTimeDelivery.on_time / previousOnTimeDelivery.total) * 100)
-      : 0;
+    const onTimeRate =
+      onTimeDelivery.total > 0
+        ? Math.round((onTimeDelivery.on_time / onTimeDelivery.total) * 100)
+        : 0;
+    const previousOnTimeRate =
+      previousOnTimeDelivery.total > 0
+        ? Math.round((previousOnTimeDelivery.on_time / previousOnTimeDelivery.total) * 100)
+        : 0;
 
     // Average project value
     const avgValue = await safeQuery<ValueRow>(
@@ -402,7 +407,7 @@ class PerformanceService {
        GROUP BY pt.assigned_to`
     );
 
-    const revenueMap = new Map(teamMemberRevenue.map(r => [r.name, r.revenue]));
+    const revenueMap = new Map(teamMemberRevenue.map((r) => [r.name, r.revenue]));
 
     return teamMembers.map((member, index) => ({
       id: `team-${index + 1}`,
@@ -411,12 +416,15 @@ class PerformanceService {
       projectsCompleted: member.projects_completed,
       revenueGenerated: revenueMap.get(member.name) || 0,
       tasksCompleted: member.tasks_completed,
-      avgResponseTime: member.total_hours > 0
-        ? `${Math.round(member.total_hours)}h logged`
-        : 'N/A',
-      rating: member.tasks_completed > 0
-        ? Math.min(5, Math.round((member.tasks_completed / Math.max(member.tasks_completed, 1)) * 5 * 10) / 10)
-        : 0
+      avgResponseTime: member.total_hours > 0 ? `${Math.round(member.total_hours)}h logged` : 'N/A',
+      rating:
+        member.tasks_completed > 0
+          ? Math.min(
+              5,
+              Math.round((member.tasks_completed / Math.max(member.tasks_completed, 1)) * 5 * 10) /
+                10
+            )
+          : 0
     }));
   }
 
@@ -444,7 +452,7 @@ class PerformanceService {
 
     const today = new Date().toISOString().split('T')[0];
 
-    return projectPerformance.map(project => ({
+    return projectPerformance.map((project) => ({
       id: project.id,
       name: project.name,
       clientName: project.client_name,

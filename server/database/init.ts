@@ -22,7 +22,6 @@ export type SqlParam = string | number | boolean | null | undefined;
 type SqlParams = SqlParam[];
 
 export interface TransactionContext {
-
   get<T = any>(sql: string, params?: SqlParams): Promise<T | undefined>;
 
   all<T = any>(sql: string, params?: SqlParams): Promise<T[]>;

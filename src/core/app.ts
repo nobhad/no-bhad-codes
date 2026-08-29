@@ -292,7 +292,11 @@ export class Application {
         this.log(`${serviceName} initialized`);
 
         if (serviceName === 'RouterService') {
-          this.registerHomePageRoutes(service as { addRoute: (route: { path: string; section: string; title: string }) => void });
+          this.registerHomePageRoutes(
+            service as {
+              addRoute: (route: { path: string; section: string; title: string }) => void;
+            }
+          );
         }
       } catch (error) {
         logger.error(`Failed to initialize ${serviceName}:`, error);
@@ -344,8 +348,7 @@ export class Application {
       (isDashboard && pageType === 'client') ||
       (currentPath.startsWith('/client') && !currentPath.includes('/client/intake'));
     const isClientIntake = currentPath.includes('/client/intake');
-    const isAdminPage =
-      currentPath.includes('/admin') || (isDashboard && pageType === 'admin');
+    const isAdminPage = currentPath.includes('/admin') || (isDashboard && pageType === 'admin');
     const isHomePage = currentPath === '/' || currentPath === '/index.html';
 
     let baseCoreModules: string[];

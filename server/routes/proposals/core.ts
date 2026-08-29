@@ -35,10 +35,7 @@ import {
   VALID_STATUSES
 } from './helpers.js';
 import { invalidateCache } from '../../middleware/cache.js';
-import type {
-  AuthenticatedRequest,
-  ProposalSubmission
-} from './helpers.js';
+import type { AuthenticatedRequest, ProposalSubmission } from './helpers.js';
 
 const router = express.Router();
 
@@ -67,9 +64,15 @@ router.get(
     const { projectType } = req.params;
 
     if (!VALID_PROJECT_TYPES.includes(projectType)) {
-      return errorResponseWithPayload(res, 'Invalid project type', 400, ErrorCodes.VALIDATION_ERROR, {
-        validTypes: VALID_PROJECT_TYPES
-      });
+      return errorResponseWithPayload(
+        res,
+        'Invalid project type',
+        400,
+        ErrorCodes.VALIDATION_ERROR,
+        {
+          validTypes: VALID_PROJECT_TYPES
+        }
+      );
     }
 
     // Configuration is handled on the frontend
@@ -110,9 +113,15 @@ router.post(
     const missingFields = requiredFields.filter((field) => !(field in submission));
 
     if (missingFields.length > 0) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.VALIDATION_ERROR, {
-        missingFields
-      });
+      return errorResponseWithPayload(
+        res,
+        'Missing required fields',
+        400,
+        ErrorCodes.VALIDATION_ERROR,
+        {
+          missingFields
+        }
+      );
     }
 
     // Verify project exists and get its client_id in one query
@@ -145,13 +154,28 @@ router.post(
 
     // Validate pricing
     if (typeof submission.basePrice !== 'number' || submission.basePrice < 0) {
-      return errorResponse(res, 'Base price must be a non-negative number', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'Base price must be a non-negative number',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
     if (typeof submission.finalPrice !== 'number' || submission.finalPrice < 0) {
-      return errorResponse(res, 'Final price must be a non-negative number', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'Final price must be a non-negative number',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
     if (submission.finalPrice > submission.basePrice * 10) {
-      return errorResponse(res, 'Final price seems unreasonably high', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'Final price seems unreasonably high',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     // Check for existing active proposal on same project
@@ -250,24 +274,55 @@ router.post(
   authenticateToken,
   invalidateCache(['proposals']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const { projectId, clientId, projectType, selectedTier, selectedAddonIds, maintenanceOption, clientNotes, budget } = req.body;
+    const {
+      projectId,
+      clientId,
+      projectType,
+      selectedTier,
+      selectedAddonIds,
+      maintenanceOption,
+      clientNotes,
+      budget
+    } = req.body;
 
     if (!projectId || !clientId || !projectType || !selectedTier || !budget) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.VALIDATION_ERROR, {
-        required: ['projectId', 'clientId', 'projectType', 'selectedTier', 'budget']
-      });
+      return errorResponseWithPayload(
+        res,
+        'Missing required fields',
+        400,
+        ErrorCodes.VALIDATION_ERROR,
+        {
+          required: ['projectId', 'clientId', 'projectType', 'selectedTier', 'budget']
+        }
+      );
     }
 
     // Validate budget object
-    if (typeof budget.min !== 'number' || typeof budget.max !== 'number' || budget.min < 0 || budget.max < budget.min) {
-      return errorResponse(res, 'Budget must have valid min and max numbers (min >= 0, max >= min)', 400, ErrorCodes.VALIDATION_ERROR);
+    if (
+      typeof budget.min !== 'number' ||
+      typeof budget.max !== 'number' ||
+      budget.min < 0 ||
+      budget.max < budget.min
+    ) {
+      return errorResponse(
+        res,
+        'Budget must have valid min and max numbers (min >= 0, max >= min)',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     // Validate project type
     if (!VALID_PROJECT_TYPES.includes(projectType)) {
-      return errorResponseWithPayload(res, 'Invalid project type', 400, ErrorCodes.VALIDATION_ERROR, {
-        validTypes: VALID_PROJECT_TYPES
-      });
+      return errorResponseWithPayload(
+        res,
+        'Invalid project type',
+        400,
+        ErrorCodes.VALIDATION_ERROR,
+        {
+          validTypes: VALID_PROJECT_TYPES
+        }
+      );
     }
 
     // Validate tier
@@ -323,7 +378,12 @@ router.post(
     });
 
     if (!templateResult) {
-      return errorResponse(res, 'Invalid project type or tier for template', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'Invalid project type or tier for template',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     // Create proposal
@@ -479,7 +539,12 @@ router.get(
     const prefill = await generateProposalPrefill(projectId);
 
     if (!prefill) {
-      return errorResponse(res, 'Project not found or no questionnaire data available', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+      return errorResponse(
+        res,
+        'Project not found or no questionnaire data available',
+        404,
+        ErrorCodes.RESOURCE_NOT_FOUND
+      );
     }
 
     sendSuccess(res, prefill);
@@ -718,9 +783,8 @@ const adminListHandler = asyncHandler(async (req: AuthenticatedRequest, res: Res
     req.query as Record<string, unknown>
   );
 
-  const validStatus = status && VALID_STATUSES.includes(status as string)
-    ? (status as string)
-    : undefined;
+  const validStatus =
+    status && VALID_STATUSES.includes(status as string) ? (status as string) : undefined;
 
   const { proposals, total } = await proposalService.listProposals({
     status: validStatus,

@@ -30,7 +30,9 @@ interface ApiResponsePayload {
   summary?: PortalInvoiceSummary;
 }
 
-export function usePortalInvoices(_options: UsePortalInvoicesOptions = {}): UsePortalInvoicesReturn {
+export function usePortalInvoices(
+  _options: UsePortalInvoicesOptions = {}
+): UsePortalInvoicesReturn {
   const [invoices, setInvoices] = useState<PortalInvoice[]>([]);
   const [summary, setSummary] = useState<PortalInvoiceSummary>({
     totalOutstanding: 0,

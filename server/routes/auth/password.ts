@@ -24,11 +24,7 @@ import {
 } from '../../utils/auth-constants.js';
 import { generateSecureToken } from '../../utils/token-utils.js';
 import { BUSINESS_INFO } from '../../config/business.js';
-import {
-  sendSuccess,
-  sendBadRequest,
-  ErrorCodes
-} from '../../utils/api-response.js';
+import { sendSuccess, sendBadRequest, ErrorCodes } from '../../utils/api-response.js';
 import { validateRequest } from '../../middleware/validation.js';
 
 const router = express.Router();
@@ -524,11 +520,7 @@ ${BUSINESS_INFO.name} Team`
       category: 'AUTH'
     });
 
-    return sendSuccess(
-      res,
-      { email: clientEmail, token: authToken },
-      'Password set successfully.'
-    );
+    return sendSuccess(res, { email: clientEmail, token: authToken }, 'Password set successfully.');
   })
 );
 

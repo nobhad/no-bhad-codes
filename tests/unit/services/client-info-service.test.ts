@@ -163,7 +163,9 @@ describe('ClientInfoService - calculateCompleteness', () => {
     mockDb.get.mockResolvedValueOnce(undefined); // no client profile
     mockDb.get.mockResolvedValueOnce(null); // no existing record
     mockDb.run.mockResolvedValueOnce({});
-    mockDb.get.mockResolvedValueOnce(makeCompletenessRow({ profile_complete: 0, overall_percentage: 20 }));
+    mockDb.get.mockResolvedValueOnce(
+      makeCompletenessRow({ profile_complete: 0, overall_percentage: 20 })
+    );
 
     const result = await clientInfoService.calculateCompleteness(10);
 
@@ -244,7 +246,9 @@ describe('ClientInfoService - getCompleteness', () => {
   });
 
   it('maps boolean fields correctly from SQLite integers', async () => {
-    mockDb.get.mockResolvedValueOnce(makeCompletenessRow({ profile_complete: 0, onboarding_complete: 0 }));
+    mockDb.get.mockResolvedValueOnce(
+      makeCompletenessRow({ profile_complete: 0, onboarding_complete: 0 })
+    );
 
     const result = await clientInfoService.getCompleteness(10);
 
@@ -273,7 +277,12 @@ describe('ClientInfoService - getClientInfoStatus', () => {
 
   it('returns full status object with company_name as client_name', async () => {
     // getClientInfoStatus fetches the client
-    mockDb.get.mockResolvedValueOnce({ id: 10, company_name: 'Acme Corp', contact_name: 'Jane', email: 'jane@acme.com' });
+    mockDb.get.mockResolvedValueOnce({
+      id: 10,
+      company_name: 'Acme Corp',
+      contact_name: 'Jane',
+      email: 'jane@acme.com'
+    });
 
     // calculateCompleteness internals:
     mockDb.get.mockResolvedValueOnce({ total: 0, pending: 0, approved: 0 }); // doc stats
@@ -297,13 +306,24 @@ describe('ClientInfoService - getClientInfoStatus', () => {
   });
 
   it('uses contact_name when company_name is absent', async () => {
-    mockDb.get.mockResolvedValueOnce({ id: 10, company_name: null, contact_name: 'Jane Doe', email: 'jane@acme.com' });
+    mockDb.get.mockResolvedValueOnce({
+      id: 10,
+      company_name: null,
+      contact_name: 'Jane Doe',
+      email: 'jane@acme.com'
+    });
 
     // calculateCompleteness
     mockDb.get.mockResolvedValueOnce({ total: 0, pending: 0, approved: 0 });
     mockDb.get.mockResolvedValueOnce({ total: 0, pending: 0, completed: 0 });
     mockDb.get.mockResolvedValueOnce(null); // no onboarding
-    mockDb.get.mockResolvedValueOnce({ company_name: null, contact_name: 'Jane Doe', email: 'jane@acme.com', phone: null, address: null });
+    mockDb.get.mockResolvedValueOnce({
+      company_name: null,
+      contact_name: 'Jane Doe',
+      email: 'jane@acme.com',
+      phone: null,
+      address: null
+    });
     mockDb.get.mockResolvedValueOnce(null); // no existing record
     mockDb.run.mockResolvedValueOnce({});
     mockDb.get.mockResolvedValueOnce(makeCompletenessRow({ overall_percentage: 40 }));
@@ -316,13 +336,24 @@ describe('ClientInfoService - getClientInfoStatus', () => {
   });
 
   it('uses "Unknown" when both company_name and contact_name are absent', async () => {
-    mockDb.get.mockResolvedValueOnce({ id: 10, company_name: null, contact_name: null, email: 'x@x.com' });
+    mockDb.get.mockResolvedValueOnce({
+      id: 10,
+      company_name: null,
+      contact_name: null,
+      email: 'x@x.com'
+    });
 
     // calculateCompleteness
     mockDb.get.mockResolvedValueOnce({ total: 0, pending: 0, approved: 0 });
     mockDb.get.mockResolvedValueOnce({ total: 0, pending: 0, completed: 0 });
     mockDb.get.mockResolvedValueOnce(null);
-    mockDb.get.mockResolvedValueOnce({ company_name: null, contact_name: null, email: 'x@x.com', phone: null, address: null });
+    mockDb.get.mockResolvedValueOnce({
+      company_name: null,
+      contact_name: null,
+      email: 'x@x.com',
+      phone: null,
+      address: null
+    });
     mockDb.get.mockResolvedValueOnce(null);
     mockDb.run.mockResolvedValueOnce({});
     mockDb.get.mockResolvedValueOnce(makeCompletenessRow());
@@ -347,24 +378,33 @@ describe('ClientInfoService - getAllClientsInfoStatus', () => {
 
   const setupClientStatus = (clientId: number, percentage: number, onboardingStatus: string) => {
     // getClientInfoStatus → client lookup
-    mockDb.get.mockResolvedValueOnce({ id: clientId, company_name: 'Corp', contact_name: null, email: `c${clientId}@x.com` });
+    mockDb.get.mockResolvedValueOnce({
+      id: clientId,
+      company_name: 'Corp',
+      contact_name: null,
+      email: `c${clientId}@x.com`
+    });
 
     // calculateCompleteness
     mockDb.get.mockResolvedValueOnce({ total: 0, pending: 0, approved: 0 });
     mockDb.get.mockResolvedValueOnce({ total: 0, pending: 0, completed: 0 });
-    mockDb.get.mockResolvedValueOnce(onboardingStatus === 'completed'
-      ? makeOnboardingRow({ client_id: clientId, status: 'completed', current_step: 5 })
-      : makeOnboardingRow({ client_id: clientId, status: onboardingStatus, current_step: 2 })
+    mockDb.get.mockResolvedValueOnce(
+      onboardingStatus === 'completed'
+        ? makeOnboardingRow({ client_id: clientId, status: 'completed', current_step: 5 })
+        : makeOnboardingRow({ client_id: clientId, status: onboardingStatus, current_step: 2 })
     );
     mockDb.get.mockResolvedValueOnce(makeClientRow({ id: clientId }));
     mockDb.get.mockResolvedValueOnce({ id: 99 }); // existing record
     mockDb.run.mockResolvedValueOnce({});
-    mockDb.get.mockResolvedValueOnce(makeCompletenessRow({ client_id: clientId, overall_percentage: percentage }));
+    mockDb.get.mockResolvedValueOnce(
+      makeCompletenessRow({ client_id: clientId, overall_percentage: percentage })
+    );
 
     // getOnboardingProgress inside getClientInfoStatus
-    mockDb.get.mockResolvedValueOnce(onboardingStatus === 'completed'
-      ? makeOnboardingRow({ client_id: clientId, status: 'completed', current_step: 5 })
-      : makeOnboardingRow({ client_id: clientId, status: onboardingStatus, current_step: 2 })
+    mockDb.get.mockResolvedValueOnce(
+      onboardingStatus === 'completed'
+        ? makeOnboardingRow({ client_id: clientId, status: 'completed', current_step: 5 })
+        : makeOnboardingRow({ client_id: clientId, status: onboardingStatus, current_step: 2 })
     );
   };
 
@@ -418,7 +458,9 @@ describe('ClientInfoService - getAllClientsInfoStatus', () => {
     setupClientStatus(10, 80, 'completed');
     setupClientStatus(11, 50, 'in_progress');
 
-    const result = await clientInfoService.getAllClientsInfoStatus({ onboardingStatus: 'completed' });
+    const result = await clientInfoService.getAllClientsInfoStatus({
+      onboardingStatus: 'completed'
+    });
     expect(result).toHaveLength(1);
     expect(result[0].client_id).toBe(10);
   });
@@ -457,7 +499,13 @@ describe('ClientInfoService - getMissingItems', () => {
 
   it('adds profile items for missing company_name, phone, and address', async () => {
     // Missing company_name, phone, address
-    mockDb.get.mockResolvedValueOnce({ company_name: null, contact_name: 'Jane', email: 'jane@x.com', phone: null, address: null });
+    mockDb.get.mockResolvedValueOnce({
+      company_name: null,
+      contact_name: 'Jane',
+      email: 'jane@x.com',
+      phone: null,
+      address: null
+    });
     mockDb.get.mockResolvedValueOnce(makeOnboardingRow({ status: 'completed' }));
     mockDb.all.mockResolvedValueOnce([]);
     mockDb.all.mockResolvedValueOnce([]);
@@ -496,7 +544,13 @@ describe('ClientInfoService - getMissingItems', () => {
     mockDb.get.mockResolvedValueOnce(makeClientRow());
     mockDb.get.mockResolvedValueOnce(makeOnboardingRow({ status: 'completed' }));
     mockDb.all.mockResolvedValueOnce([
-      { id: 5, title: 'NDA', description: 'Sign the NDA', due_date: '2026-04-01', priority: 'high' },
+      {
+        id: 5,
+        title: 'NDA',
+        description: 'Sign the NDA',
+        due_date: '2026-04-01',
+        priority: 'high'
+      },
       { id: 6, title: 'Tax Form', description: null, due_date: null, priority: 'low' }
     ]);
     mockDb.all.mockResolvedValueOnce([]);
@@ -515,7 +569,12 @@ describe('ClientInfoService - getMissingItems', () => {
     mockDb.get.mockResolvedValueOnce(makeOnboardingRow({ status: 'completed' }));
     mockDb.all.mockResolvedValueOnce([]);
     mockDb.all.mockResolvedValueOnce([
-      { id: 7, title: 'Brand Survey', description: 'Tell us about your brand', due_date: '2026-05-01' }
+      {
+        id: 7,
+        title: 'Brand Survey',
+        description: 'Tell us about your brand',
+        due_date: '2026-05-01'
+      }
     ]);
 
     const result = await clientInfoService.getMissingItems(10);
@@ -628,13 +687,18 @@ describe('ClientInfoService - saveOnboardingProgress', () => {
     mockDb.get.mockResolvedValueOnce(existingRow);
     mockDb.run.mockResolvedValueOnce({});
     // getOnboardingProgress at the end
-    mockDb.get.mockResolvedValueOnce(makeOnboardingRow({
-      current_step: 2,
-      step_data: JSON.stringify({ company_name: 'NewCorp', contact_name: 'Jane' }),
-      status: 'in_progress'
-    }));
+    mockDb.get.mockResolvedValueOnce(
+      makeOnboardingRow({
+        current_step: 2,
+        step_data: JSON.stringify({ company_name: 'NewCorp', contact_name: 'Jane' }),
+        status: 'in_progress'
+      })
+    );
 
-    const result = await clientInfoService.saveOnboardingProgress(10, 2, { contact_name: 'Jane', company_name: 'NewCorp' });
+    const result = await clientInfoService.saveOnboardingProgress(10, 2, {
+      contact_name: 'Jane',
+      company_name: 'NewCorp'
+    });
 
     expect(mockDb.run.mock.calls[0][0]).toContain('UPDATE client_onboarding');
     expect(result.current_step).toBe(2);
@@ -803,7 +867,9 @@ describe('ClientInfoService - resetOnboarding', () => {
 
     await expect(clientInfoService.resetOnboarding(10)).resolves.toBeUndefined();
 
-    expect(mockDb.run.mock.calls[0][0]).toContain('DELETE FROM client_onboarding WHERE client_id = ?');
+    expect(mockDb.run.mock.calls[0][0]).toContain(
+      'DELETE FROM client_onboarding WHERE client_id = ?'
+    );
     expect(mockDb.run.mock.calls[0][1]).toEqual([10]);
   });
 

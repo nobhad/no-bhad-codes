@@ -28,9 +28,19 @@ const DEFAULT_MONTHLY_HISTORY = 12;
 const ALL_EXPENSES_LIMIT = 500;
 
 const CSV_HEADERS = [
-  'ID', 'Date', 'Category', 'Description', 'Amount', 'Vendor',
-  'Project', 'Billable', 'Recurring', 'Interval', 'Tax Deductible',
-  'Tax Category', 'Notes'
+  'ID',
+  'Date',
+  'Category',
+  'Description',
+  'Amount',
+  'Vendor',
+  'Project',
+  'Billable',
+  'Recurring',
+  'Interval',
+  'Tax Deductible',
+  'Tax Category',
+  'Notes'
 ].join(',');
 
 // ============================================
@@ -161,7 +171,7 @@ async function update(id: number, params: Partial<CreateExpenseParams>): Promise
 
   if (updates.length === 0) return;
 
-  updates.push('updated_at = datetime(\'now\')');
+  updates.push("updated_at = datetime('now')");
   values.push(id);
 
   await db.run(
@@ -182,7 +192,7 @@ async function deleteExpense(id: number): Promise<void> {
   const db = getDatabase();
 
   await db.run(
-    'UPDATE expenses SET deleted_at = datetime(\'now\'), updated_at = datetime(\'now\') WHERE id = ? AND deleted_at IS NULL',
+    "UPDATE expenses SET deleted_at = datetime('now'), updated_at = datetime('now') WHERE id = ? AND deleted_at IS NULL",
     [id]
   );
 
@@ -270,10 +280,10 @@ async function getById(id: number): Promise<ExpenseWithProject | null> {
 async function getHourlyRate(): Promise<number> {
   const db = getDatabase();
 
-  const row = await db.get(
-    'SELECT setting_value FROM system_settings WHERE setting_key = \'default_hourly_rate\'',
+  const row = (await db.get(
+    "SELECT setting_value FROM system_settings WHERE setting_key = 'default_hourly_rate'",
     []
-  ) as { setting_value: string } | undefined;
+  )) as { setting_value: string } | undefined;
 
   if (row?.setting_value) {
     const parsed = parseFloat(row.setting_value);
@@ -290,49 +300,49 @@ async function getProjectProfitability(projectId: number): Promise<ProjectProfit
   const db = getDatabase();
 
   // Get project info
-  const project = await db.get(
+  const project = (await db.get(
     `SELECT p.id, p.project_name, p.price,
             COALESCE(c.contact_name, c.company_name) as client_name
      FROM projects p
      LEFT JOIN clients c ON p.client_id = c.id AND c.deleted_at IS NULL
      WHERE p.id = ? AND p.deleted_at IS NULL`,
     [projectId]
-  ) as { id: number; project_name: string; price: string | null; client_name: string } | undefined;
+  )) as { id: number; project_name: string; price: string | null; client_name: string } | undefined;
 
   if (!project) return null;
 
   // Revenue: invoices paid
-  const invoiceRevenue = await db.get(
+  const invoiceRevenue = (await db.get(
     `SELECT COALESCE(SUM(ip.amount), 0) as total
      FROM invoice_payments ip
      JOIN invoices i ON ip.invoice_id = i.id AND i.deleted_at IS NULL
      WHERE i.project_id = ?`,
     [projectId]
-  ) as { total: number | string };
+  )) as { total: number | string };
 
   // Revenue: installments paid
-  const installmentRevenue = await db.get(
+  const installmentRevenue = (await db.get(
     `SELECT COALESCE(SUM(psi.paid_amount), 0) as total
      FROM payment_schedule_installments psi
      WHERE psi.project_id = ? AND psi.status = 'paid'`,
     [projectId]
-  ) as { total: number | string };
+  )) as { total: number | string };
 
   // Costs: expenses
-  const expenseTotal = await db.get(
+  const expenseTotal = (await db.get(
     `SELECT COALESCE(SUM(amount), 0) as total
      FROM expenses
      WHERE project_id = ? AND deleted_at IS NULL`,
     [projectId]
-  ) as { total: number | string };
+  )) as { total: number | string };
 
   // Costs: billable time
-  const timeResult = await db.get(
+  const timeResult = (await db.get(
     `SELECT COALESCE(SUM(hours), 0) as total_hours
      FROM time_entries
      WHERE project_id = ? AND billable = 1`,
     [projectId]
-  ) as { total_hours: number | string };
+  )) as { total_hours: number | string };
 
   const hourlyRate = await getHourlyRate();
   const totalHours = parseFloat(String(timeResult.total_hours)) || 0;
@@ -379,7 +389,7 @@ async function getProjectProfitability(projectId: number): Promise<ProjectProfit
 async function getAllProjectProfitability(): Promise<ProjectProfitability[]> {
   const db = getDatabase();
 
-  const rows = await db.all(
+  const rows = (await db.all(
     `SELECT
        p.id,
        p.project_name,
@@ -419,7 +429,7 @@ async function getAllProjectProfitability(): Promise<ProjectProfitability[]> {
      WHERE p.deleted_at IS NULL
        AND p.status IN ('active', 'in-progress', 'in-review')
      ORDER BY p.project_name ASC`
-  ) as Array<{
+  )) as Array<{
     id: number;
     project_name: string;
     price: string | null;
@@ -487,14 +497,14 @@ async function getExpensesByCategory(dateRange?: {
     values.push(dateRange.endDate);
   }
 
-  const rows = await db.all(
+  const rows = (await db.all(
     `SELECT category, COALESCE(SUM(amount), 0) as total
      FROM expenses
      WHERE ${conditions.join(' AND ')}
      GROUP BY category
      ORDER BY total DESC`,
     values
-  ) as Array<{ category: string; total: number | string }>;
+  )) as Array<{ category: string; total: number | string }>;
 
   const result: Record<string, number> = {};
   for (const row of rows) {
@@ -506,11 +516,13 @@ async function getExpensesByCategory(dateRange?: {
 /**
  * Get monthly expense totals for the last N months.
  */
-async function getMonthlyExpenses(months?: number): Promise<Array<{ month: string; total: number }>> {
+async function getMonthlyExpenses(
+  months?: number
+): Promise<Array<{ month: string; total: number }>> {
   const db = getDatabase();
   const monthCount = months || DEFAULT_MONTHLY_HISTORY;
 
-  const rows = await db.all(
+  const rows = (await db.all(
     `SELECT strftime('%Y-%m', expense_date) as month,
             COALESCE(SUM(amount), 0) as total
      FROM expenses
@@ -519,7 +531,7 @@ async function getMonthlyExpenses(months?: number): Promise<Array<{ month: strin
      GROUP BY strftime('%Y-%m', expense_date)
      ORDER BY month ASC`,
     [monthCount]
-  ) as Array<{ month: string; total: number | string }>;
+  )) as Array<{ month: string; total: number | string }>;
 
   return rows.map((row) => ({
     month: row.month,

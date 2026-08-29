@@ -86,7 +86,10 @@ function canonicalize(content: AuditChainContent): string {
 }
 
 export function computeRowHash(content: AuditChainContent, prevHash: string): string {
-  return crypto.createHash('sha256').update(`${canonicalize(content)}|${prevHash}`).digest('hex');
+  return crypto
+    .createHash('sha256')
+    .update(`${canonicalize(content)}|${prevHash}`)
+    .digest('hex');
 }
 
 // =====================================================
@@ -97,7 +100,9 @@ const AUDIT_LOG_COLUMNS = `
   id, user_id, user_email, user_type, action, entity_type, entity_id, entity_name,
   old_value, new_value, changes, ip_address, user_agent, request_path, request_method,
   metadata, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // Database row returned from audit_logs table
 interface AuditLogRow {
@@ -121,7 +126,10 @@ interface AuditLogRow {
 }
 
 // Parsed audit log with JSON fields deserialized
-interface ParsedAuditLog extends Omit<AuditLogRow, 'old_value' | 'new_value' | 'changes' | 'metadata'> {
+interface ParsedAuditLog extends Omit<
+  AuditLogRow,
+  'old_value' | 'new_value' | 'changes' | 'metadata'
+> {
   old_value: Record<string, unknown> | null;
   new_value: Record<string, unknown> | null;
   changes: Record<string, unknown> | null;
@@ -343,10 +351,9 @@ async function createAuditLog(entry: AuditLogEntry): Promise<void> {
         throw new Error('Audit insert returned no lastID; cannot chain');
       }
 
-      const inserted = (await ctx.get(
-        'SELECT created_at FROM audit_logs WHERE id = ?',
-        [newId]
-      )) as { created_at: string } | undefined;
+      const inserted = (await ctx.get('SELECT created_at FROM audit_logs WHERE id = ?', [
+        newId
+      ])) as { created_at: string } | undefined;
       const createdAt = inserted?.created_at ?? new Date().toISOString();
 
       const prevRow = (await ctx.get(
@@ -378,10 +385,11 @@ async function createAuditLog(entry: AuditLogEntry): Promise<void> {
       };
       const hash = computeRowHash(content, prevHash);
 
-      await ctx.run(
-        'UPDATE audit_logs SET prev_hash = ?, hash = ? WHERE id = ?',
-        [prevHash, hash, newId]
-      );
+      await ctx.run('UPDATE audit_logs SET prev_hash = ?, hash = ? WHERE id = ?', [
+        prevHash,
+        hash,
+        newId
+      ]);
     });
 
     logger.info(
@@ -506,7 +514,7 @@ export async function verifyAuditChain(
         created_at: row.created_at
       };
 
-      const expectedPrev = sawFirstHashedRow ? lastKnownHash : row.prev_hash ?? CHAIN_GENESIS;
+      const expectedPrev = sawFirstHashedRow ? lastKnownHash : (row.prev_hash ?? CHAIN_GENESIS);
       if (sawFirstHashedRow && row.prev_hash !== expectedPrev) {
         breaks.push({
           id: row.id,

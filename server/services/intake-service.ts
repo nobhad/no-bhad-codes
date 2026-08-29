@@ -63,7 +63,9 @@ export interface IntakeStatusResult {
 
 const PROJECT_UPDATE_COLUMNS = `
   id, project_id, title, description, update_type, author_user_id, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // SERVICE
@@ -99,7 +101,7 @@ class IntakeService {
    */
   async getIntakeProjectStatus(projectId: string): Promise<IntakeStatusResult | null> {
     const db = getDatabase();
-    const project = await db.get(
+    const project = (await db.get(
       `
       SELECT p.*, c.company_name, c.contact_name, c.email
       FROM projects p
@@ -107,17 +109,17 @@ class IntakeService {
       WHERE p.id = ?
     `,
       [projectId]
-    ) as ProjectWithClientRow | undefined;
+    )) as ProjectWithClientRow | undefined;
 
     if (!project) {
       return null;
     }
 
-    const latestUpdate = await db.get(
+    const latestUpdate = (await db.get(
       `SELECT ${PROJECT_UPDATE_COLUMNS} FROM project_updates
        WHERE project_id = ? ORDER BY created_at DESC LIMIT 1`,
       [projectId]
-    ) as ProjectUpdateRow | undefined;
+    )) as ProjectUpdateRow | undefined;
 
     return {
       project: {
@@ -135,11 +137,11 @@ class IntakeService {
       },
       latestUpdate: latestUpdate
         ? {
-          title: getString(latestUpdate, 'title'),
-          description: getString(latestUpdate, 'description'),
-          date: getString(latestUpdate, 'created_at'),
-          type: getString(latestUpdate, 'type')
-        }
+            title: getString(latestUpdate, 'title'),
+            description: getString(latestUpdate, 'description'),
+            date: getString(latestUpdate, 'created_at'),
+            type: getString(latestUpdate, 'type')
+          }
         : null
     };
   }
@@ -167,14 +169,14 @@ class IntakeService {
    * Looks for files with intake-related categories or filename patterns.
    * Used by GET /api/projects/:id/intake/pdf
    */
-  async getIntakeFileForProject(
-    projectId: number
-  ): Promise<Record<string, unknown> | null> {
+  async getIntakeFileForProject(projectId: number): Promise<Record<string, unknown> | null> {
     const db = getDatabase();
     const INTAKE_FILE_COLUMNS = `
       id, project_id, filename, original_filename, file_path, file_size,
       mime_type, file_type, description, uploaded_by, created_at
-    `.replace(/\s+/g, ' ').trim();
+    `
+      .replace(/\s+/g, ' ')
+      .trim();
     const row = await db.get(
       `SELECT ${INTAKE_FILE_COLUMNS} FROM files
        WHERE project_id = ? AND deleted_at IS NULL
@@ -248,14 +250,23 @@ class IntakeService {
     proposalRequestId: number | null;
   }> {
     const db = getDatabase();
-    const { intakeData, companyName, clientType, hashedPassword, features, projectName, milestones, systemUserId } = params;
+    const {
+      intakeData,
+      companyName,
+      clientType,
+      hashedPassword,
+      features,
+      projectName,
+      milestones,
+      systemUserId
+    } = params;
     const normalizedEmail = intakeData.email.trim().toLowerCase();
 
     return db.transaction(async (ctx) => {
       // Check if client already exists
-      const existingClient = await ctx.get('SELECT id, email FROM clients WHERE email = ?', [
+      const existingClient = (await ctx.get('SELECT id, email FROM clients WHERE email = ?', [
         normalizedEmail
-      ]) as { id: number; email: string } | undefined;
+      ])) as { id: number; email: string } | undefined;
 
       let clientId: number;
       const isNewClient = !existingClient;
@@ -264,14 +275,21 @@ class IntakeService {
       if (existingClient) {
         clientId = getNumber(existingClient as unknown as { [key: string]: unknown }, 'id');
         await ctx.run(
-          'UPDATE clients SET contact_name = ?, company_name = ?, phone = COALESCE(?, phone), updated_at = datetime(\'now\') WHERE id = ?',
+          "UPDATE clients SET contact_name = ?, company_name = ?, phone = COALESCE(?, phone), updated_at = datetime('now') WHERE id = ?",
           [intakeData.name, companyName, intakePhone, clientId]
         );
       } else {
         const clientResult = await ctx.run(
           `INSERT INTO clients (company_name, contact_name, email, phone, password_hash, status, client_type, created_at, updated_at)
            VALUES (?, ?, ?, ?, ?, 'pending', ?, datetime('now'), datetime('now'))`,
-          [companyName, intakeData.name, normalizedEmail, intakePhone ?? '', hashedPassword, clientType]
+          [
+            companyName,
+            intakeData.name,
+            normalizedEmail,
+            intakePhone ?? '',
+            hashedPassword,
+            clientType
+          ]
         );
         clientId = clientResult.lastID!;
       }
@@ -300,7 +318,8 @@ class IntakeService {
       if (intakeData.designLevel) extraNotes.push(`Design level: ${intakeData.designLevel}`);
       if (intakeData.techComfort) extraNotes.push(`Tech comfort: ${intakeData.techComfort}`);
       if (intakeData.domainHosting) extraNotes.push(`Domain/hosting: ${intakeData.domainHosting}`);
-      if (intakeData.additionalInfo) extraNotes.push(`Additional info: ${intakeData.additionalInfo}`);
+      if (intakeData.additionalInfo)
+        extraNotes.push(`Additional info: ${intakeData.additionalInfo}`);
       const notes = extraNotes.length ? extraNotes.join('\n') : null;
 
       const projectCode = await generateProjectCode(companyName || intakeData.name);
@@ -308,7 +327,16 @@ class IntakeService {
       const projectResult = await ctx.run(
         `INSERT INTO projects (client_id, project_name, description, status, priority, project_type, budget_range, timeline, notes, source_type, project_code, created_at, updated_at)
          VALUES (?, ?, ?, 'pending', 'medium', ?, ?, ?, ?, 'intake_form', ?, datetime('now'), datetime('now'))`,
-        [clientId, projectName, intakeData.projectDescription, intakeData.projectType, intakeData.budget, intakeData.timeline, notes, projectCode]
+        [
+          clientId,
+          projectName,
+          intakeData.projectDescription,
+          intakeData.projectType,
+          intakeData.budget,
+          intakeData.timeline,
+          notes,
+          projectCode
+        ]
       );
       const projectId = projectResult.lastID!;
 
@@ -316,7 +344,12 @@ class IntakeService {
       await ctx.run(
         `INSERT INTO project_updates (project_id, title, description, update_type, author_user_id, created_at)
          VALUES (?, ?, ?, 'general', ?, datetime('now'))`,
-        [projectId, 'Project Intake Received', 'Thank you for submitting your project details! We\'re reviewing your requirements and will provide a detailed proposal within 24-48 hours.', systemUserId]
+        [
+          projectId,
+          'Project Intake Received',
+          "Thank you for submitting your project details! We're reviewing your requirements and will provide a detailed proposal within 24-48 hours.",
+          systemUserId
+        ]
       );
 
       // Create milestones
@@ -324,7 +357,13 @@ class IntakeService {
         await ctx.run(
           `INSERT INTO milestones (project_id, title, description, due_date, deliverables, is_completed, created_at)
            VALUES (?, ?, ?, ?, ?, 0, datetime('now'))`,
-          [projectId, milestone.title, milestone.description, milestone.dueDate, JSON.stringify(milestone.deliverables)]
+          [
+            projectId,
+            milestone.title,
+            milestone.description,
+            milestone.dueDate,
+            JSON.stringify(milestone.deliverables)
+          ]
         );
       }
 
@@ -361,7 +400,23 @@ class IntakeService {
         const proposalResult = await ctx.run(
           `INSERT INTO proposal_requests (project_id, client_id, project_type, selected_tier, base_price, final_price, maintenance_option, status, client_notes, created_at, subtotal, discount_type, discount_value, tax_rate, tax_amount, expiration_date, validity_days)
            VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, datetime('now'), ?, ?, ?, ?, ?, ?, ?)`,
-          [projectId, clientId, intakeData.projectType, proposal.selectedTier || 'better', basePrice, proposal.calculatedPrice || basePrice, proposal.maintenanceOption || null, proposal.notes || null, subtotal, discountType, discountValue, taxRate, taxAmount, expirationDate, validityDays]
+          [
+            projectId,
+            clientId,
+            intakeData.projectType,
+            proposal.selectedTier || 'better',
+            basePrice,
+            proposal.calculatedPrice || basePrice,
+            proposal.maintenanceOption || null,
+            proposal.notes || null,
+            subtotal,
+            discountType,
+            discountValue,
+            taxRate,
+            taxAmount,
+            expirationDate,
+            validityDays
+          ]
         );
         proposalRequestId = proposalResult.lastID!;
 
@@ -370,7 +425,17 @@ class IntakeService {
             await ctx.run(
               `INSERT INTO proposal_custom_items (proposal_id, item_type, description, quantity, unit_price, unit_label, is_taxable, is_optional, sort_order, created_at, updated_at)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-              [proposalRequestId, item.itemType || 'service', item.description, item.quantity ?? 1, item.unitPrice, item.unitLabel || null, item.isTaxable !== false ? 1 : 0, item.isOptional ? 1 : 0, index]
+              [
+                proposalRequestId,
+                item.itemType || 'service',
+                item.description,
+                item.quantity ?? 1,
+                item.unitPrice,
+                item.unitLabel || null,
+                item.isTaxable !== false ? 1 : 0,
+                item.isOptional ? 1 : 0,
+                index
+              ]
             );
           }
         }

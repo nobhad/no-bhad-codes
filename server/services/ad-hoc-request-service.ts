@@ -336,7 +336,7 @@ class AdHocRequestService {
       return this.getRequest(requestId);
     }
 
-    updates.push('updated_at = datetime(\'now\')');
+    updates.push("updated_at = datetime('now')");
     params.push(requestId);
 
     await db.run(`UPDATE ad_hoc_requests SET ${updates.join(', ')} WHERE id = ?`, params);
@@ -401,10 +401,10 @@ class AdHocRequestService {
     email?: string;
   }> {
     const db = getDatabase();
-    const clientInfo = await db.get(
+    const clientInfo = (await db.get(
       'SELECT contact_name, company_name, email FROM clients WHERE id = ?',
       [clientId]
-    ) as { contact_name?: string; company_name?: string; email?: string } | undefined;
+    )) as { contact_name?: string; company_name?: string; email?: string } | undefined;
 
     const displayName =
       clientInfo?.contact_name || clientInfo?.company_name || clientInfo?.email || 'Unknown client';
@@ -417,10 +417,9 @@ class AdHocRequestService {
    */
   async getProjectDisplayName(projectId: number): Promise<string> {
     const db = getDatabase();
-    const projectInfo = await db.get(
-      'SELECT project_name FROM projects WHERE id = ?',
-      [projectId]
-    ) as { project_name?: string } | undefined;
+    const projectInfo = (await db.get('SELECT project_name FROM projects WHERE id = ?', [
+      projectId
+    ])) as { project_name?: string } | undefined;
 
     return projectInfo?.project_name || `Project #${projectId}`;
   }
@@ -454,7 +453,7 @@ class AdHocRequestService {
       queryParams.push(params.clientId);
     }
 
-    where += ' AND i.issued_date >= date(\'now\', ?)';
+    where += " AND i.issued_date >= date('now', ?)";
     queryParams.push(`-${months} months`);
 
     return db.all(

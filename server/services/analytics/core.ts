@@ -177,10 +177,7 @@ export interface DeleteResult {
 /** Check whether a session already exists by session_id */
 export async function findSession(sessionId: string): Promise<DatabaseRow | undefined> {
   const db = getDatabase();
-  return db.get(
-    'SELECT session_id FROM visitor_sessions WHERE session_id = ?',
-    [sessionId]
-  );
+  return db.get('SELECT session_id FROM visitor_sessions WHERE session_id = ?', [sessionId]);
 }
 
 /** Update an existing visitor session with latest activity data */
@@ -240,7 +237,15 @@ export async function insertPageView(params: InsertPageViewParams): Promise<void
   await db.run(
     `INSERT INTO page_views (session_id, url, title, timestamp, time_on_page, scroll_depth, interactions)
      VALUES (?, ?, ?, datetime(?, 'unixepoch', 'subsec'), ?, ?, ?)`,
-    [params.sessionId, params.url, params.title, params.timestamp, params.timeOnPage, params.scrollDepth, params.interactions]
+    [
+      params.sessionId,
+      params.url,
+      params.title,
+      params.timestamp,
+      params.timeOnPage,
+      params.scrollDepth,
+      params.interactions
+    ]
   );
 }
 
@@ -276,7 +281,7 @@ export async function getSummaryMetrics(dateThreshold: string): Promise<SummaryM
     WHERE start_time >= ?`,
     [MAX_SESSION_MS, dateThreshold]
   );
-  return row || {} as SummaryMetrics;
+  return row || ({} as SummaryMetrics);
 }
 
 /** Get daily session/visitor/pageview breakdown */
@@ -428,20 +433,11 @@ export async function getRecentPageViews(): Promise<RecentPageView[]> {
 export async function deleteOldData(dateThreshold: string): Promise<DeleteResult> {
   const db = getDatabase();
 
-  await db.run(
-    'DELETE FROM interaction_events WHERE timestamp < ?',
-    [dateThreshold]
-  );
+  await db.run('DELETE FROM interaction_events WHERE timestamp < ?', [dateThreshold]);
 
-  await db.run(
-    'DELETE FROM page_views WHERE timestamp < ?',
-    [dateThreshold]
-  );
+  await db.run('DELETE FROM page_views WHERE timestamp < ?', [dateThreshold]);
 
-  const result = await db.run(
-    'DELETE FROM visitor_sessions WHERE start_time < ?',
-    [dateThreshold]
-  );
+  const result = await db.run('DELETE FROM visitor_sessions WHERE start_time < ?', [dateThreshold]);
 
   return { deletedSessions: result.changes };
 }
@@ -493,10 +489,9 @@ export async function getSessionList(
 /** Get full session detail by session_id */
 export async function getSessionById(sessionId: string): Promise<DatabaseRow | undefined> {
   const db = getDatabase();
-  return db.get(
-    `SELECT ${VISITOR_SESSION_COLUMNS} FROM visitor_sessions WHERE session_id = ?`,
-    [sessionId]
-  );
+  return db.get(`SELECT ${VISITOR_SESSION_COLUMNS} FROM visitor_sessions WHERE session_id = ?`, [
+    sessionId
+  ]);
 }
 
 /** Get page views for a given session */

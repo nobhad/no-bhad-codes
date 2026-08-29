@@ -59,7 +59,7 @@
 }
 
 .not-found-eyebrow {
-  font-family: var(--font-family-acme, 'Acme', sans-serif);
+  font-family: var(--font-family-acme, "Acme", sans-serif);
   font-size: var(--font-size-sm, 0.85rem);
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -68,7 +68,7 @@
 }
 
 .not-found-title {
-  font-family: var(--font-family-acme, 'Acme', sans-serif);
+  font-family: var(--font-family-acme, "Acme", sans-serif);
   font-size: clamp(2rem, 6vw, 3.25rem);
   line-height: 1.05;
   letter-spacing: 0.02em;
@@ -100,7 +100,7 @@
   padding: 0.65rem 1.35rem;
   border: 1.5px solid var(--color-dark);
   text-decoration: none;
-  font-family: var(--font-family-acme, 'Acme', sans-serif);
+  font-family: var(--font-family-acme, "Acme", sans-serif);
   font-size: 1rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;

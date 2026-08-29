@@ -47,25 +47,35 @@ const LOG_CATEGORY = 'automation-engine';
 const AUTOMATION_COLUMNS = `
   id, name, description, is_active, trigger_event, trigger_conditions,
   stop_on_error, max_runs_per_entity, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const ACTION_COLUMNS = `
   id, automation_id, action_order, action_type, action_config,
   condition, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const RUN_COLUMNS = `
   id, automation_id, trigger_event, trigger_entity_type, trigger_entity_id,
   status, started_at, completed_at, error_message
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const ACTION_LOG_COLUMNS = `
   id, run_id, action_id, status, executed_at, result, error_message
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const SCHEDULED_ACTION_COLUMNS = `
   id, run_id, action_id, execute_at, status, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const MILLISECONDS_PER_DAY = 86400000;
 const MILLISECONDS_PER_HOUR = 3600000;
@@ -121,10 +131,7 @@ function safeParseJson(raw: string | null | undefined): Record<string, unknown> 
  * Replace {{key}} patterns in a template string with values from context.
  * Supports flat keys only (no dot notation). Missing keys are left as-is.
  */
-function resolveVariables(
-  template: string,
-  context: Record<string, unknown>
-): string {
+function resolveVariables(template: string, context: Record<string, unknown>): string {
   return template.replace(/\{\{([^}]+)\}\}/g, (match, key) => {
     const trimmedKey = key.trim();
     const value = context[trimmedKey];
@@ -188,7 +195,17 @@ async function create(params: CreateAutomationParams): Promise<number> {
  */
 async function update(
   id: number,
-  params: Partial<Pick<CreateAutomationParams, 'name' | 'description' | 'triggerEvent' | 'triggerConditions' | 'stopOnError' | 'maxRunsPerEntity'>>
+  params: Partial<
+    Pick<
+      CreateAutomationParams,
+      | 'name'
+      | 'description'
+      | 'triggerEvent'
+      | 'triggerConditions'
+      | 'stopOnError'
+      | 'maxRunsPerEntity'
+    >
+  >
 ): Promise<void> {
   const db = getDatabase();
 
@@ -222,13 +239,10 @@ async function update(
 
   if (updates.length === 0) return;
 
-  updates.push('updated_at = datetime(\'now\')');
+  updates.push("updated_at = datetime('now')");
   values.push(id);
 
-  await db.run(
-    `UPDATE custom_automations SET ${updates.join(', ')} WHERE id = ?`,
-    values
-  );
+  await db.run(`UPDATE custom_automations SET ${updates.join(', ')} WHERE id = ?`, values);
 
   logger.info('Updated custom automation', {
     category: LOG_CATEGORY,
@@ -359,7 +373,7 @@ async function getById(id: number): Promise<AutomationWithActions | null> {
 async function activate(id: number): Promise<void> {
   const db = getDatabase();
   await db.run(
-    'UPDATE custom_automations SET is_active = 1, updated_at = datetime(\'now\') WHERE id = ?',
+    "UPDATE custom_automations SET is_active = 1, updated_at = datetime('now') WHERE id = ?",
     [id]
   );
   logger.info('Activated automation', { category: LOG_CATEGORY, metadata: { automationId: id } });
@@ -371,7 +385,7 @@ async function activate(id: number): Promise<void> {
 async function deactivate(id: number): Promise<void> {
   const db = getDatabase();
   await db.run(
-    'UPDATE custom_automations SET is_active = 0, updated_at = datetime(\'now\') WHERE id = ?',
+    "UPDATE custom_automations SET is_active = 0, updated_at = datetime('now') WHERE id = ?",
     [id]
   );
   logger.info('Deactivated automation', { category: LOG_CATEGORY, metadata: { automationId: id } });
@@ -435,10 +449,7 @@ async function updateAction(actionId: number, params: Partial<CreateActionParams
 
   values.push(String(actionId));
 
-  await db.run(
-    `UPDATE automation_actions SET ${updates.join(', ')} WHERE id = ?`,
-    values
-  );
+  await db.run(`UPDATE automation_actions SET ${updates.join(', ')} WHERE id = ?`, values);
 
   const action = await db.get<AutomationActionRow>(
     'SELECT automation_id FROM automation_actions WHERE id = ?',
@@ -491,10 +502,7 @@ async function reorderActions(automationId: number, actionIds: number[]): Promis
  * Handle a system event by finding all matching active automations
  * and executing their action chains.
  */
-async function handleEvent(
-  eventType: string,
-  context: Record<string, unknown>
-): Promise<void> {
+async function handleEvent(eventType: string, context: Record<string, unknown>): Promise<void> {
   const db = getDatabase();
 
   const matchingAutomations = await db.all<CustomAutomationRow>(
@@ -506,7 +514,10 @@ async function handleEvent(
   for (const automation of matchingAutomations) {
     const triggerConditions = safeParseJson(automation.trigger_conditions);
 
-    if (Object.keys(triggerConditions).length > 0 && !evaluateConditions(triggerConditions, context)) {
+    if (
+      Object.keys(triggerConditions).length > 0 &&
+      !evaluateConditions(triggerConditions, context)
+    ) {
       continue;
     }
 
@@ -581,12 +592,7 @@ async function executeAutomation(
   const runResult = await db.run(
     `INSERT INTO automation_runs (automation_id, trigger_event, trigger_entity_type, trigger_entity_id, status)
      VALUES (?, ?, ?, ?, 'running')`,
-    [
-      automationId,
-      automation.trigger_event,
-      triggerEntityType || null,
-      triggerEntityId || null
-    ]
+    [automationId, automation.trigger_event, triggerEntityType || null, triggerEntityId || null]
   );
 
   const runId = runResult.lastID!;
@@ -603,7 +609,10 @@ async function executeAutomation(
     // Evaluate action-level condition
     if (action.condition) {
       const actionConditions = safeParseJson(action.condition);
-      if (Object.keys(actionConditions).length > 0 && !evaluateConditions(actionConditions, context)) {
+      if (
+        Object.keys(actionConditions).length > 0 &&
+        !evaluateConditions(actionConditions, context)
+      ) {
         await logActionResult(runId, action.id, 'skipped', 'Condition not met', null);
         continue;
       }
@@ -612,11 +621,7 @@ async function executeAutomation(
     // Handle 'wait' action type — schedule and pause the run
     if (action.action_type === 'wait') {
       try {
-        const waitResult = await executeWait(
-          safeParseJson(action.action_config),
-          runId,
-          action.id
-        );
+        const waitResult = await executeWait(safeParseJson(action.action_config), runId, action.id);
         await logActionResult(runId, action.id, 'waiting', waitResult, null);
       } catch (waitError) {
         const errorMsg = waitError instanceof Error ? waitError.message : String(waitError);
@@ -663,28 +668,28 @@ async function executeAction(
   const config = safeParseJson(action.action_config);
 
   switch (action.action_type) {
-  case 'send_email':
-    return executeSendEmail(config, context);
-  case 'create_task':
-    return executeCreateTask(config, context);
-  case 'update_status':
-    return executeUpdateStatus(config, context);
-  case 'send_notification':
-    return executeSendNotification(config, context);
-  case 'enroll_sequence':
-    return executeEnrollSequence(config, context);
-  case 'webhook':
-    return executeWebhook(config, context);
-  case 'add_note':
-    return executeAddNote(config, context);
-  case 'add_tag':
-    return executeAddTag(config, context);
-  case 'create_invoice':
-    return executeCreateInvoice(config, context);
-  case 'assign_questionnaire':
-    return executeAssignQuestionnaire(config, context);
-  default:
-    return `Unsupported action type: ${action.action_type}`;
+    case 'send_email':
+      return executeSendEmail(config, context);
+    case 'create_task':
+      return executeCreateTask(config, context);
+    case 'update_status':
+      return executeUpdateStatus(config, context);
+    case 'send_notification':
+      return executeSendNotification(config, context);
+    case 'enroll_sequence':
+      return executeEnrollSequence(config, context);
+    case 'webhook':
+      return executeWebhook(config, context);
+    case 'add_note':
+      return executeAddNote(config, context);
+    case 'add_tag':
+      return executeAddTag(config, context);
+    case 'create_invoice':
+      return executeCreateInvoice(config, context);
+    case 'assign_questionnaire':
+      return executeAssignQuestionnaire(config, context);
+    default:
+      return `Unsupported action type: ${action.action_type}`;
   }
 }
 
@@ -738,8 +743,16 @@ async function executeCreateTask(
 
   const dueDate = new Date(Date.now() + dueDaysFromNow * MILLISECONDS_PER_DAY).toISOString();
 
-  const projectId = config.projectId ? Number(config.projectId) : (context.project_id ? Number(context.project_id) : null);
-  const clientId = config.clientId ? Number(config.clientId) : (context.client_id ? Number(context.client_id) : null);
+  const projectId = config.projectId
+    ? Number(config.projectId)
+    : context.project_id
+      ? Number(context.project_id)
+      : null;
+  const clientId = config.clientId
+    ? Number(config.clientId)
+    : context.client_id
+      ? Number(context.client_id)
+      : null;
 
   const result = await db.run(
     `INSERT INTO tasks (title, description, status, due_date, project_id, client_id, created_at)
@@ -772,10 +785,7 @@ async function executeUpdateStatus(
     throw new Error('entityId and status are required for update_status');
   }
 
-  await db.run(
-    `UPDATE ${tableName} SET status = ? WHERE id = ?`,
-    [newStatus, entityId]
-  );
+  await db.run(`UPDATE ${tableName} SET status = ? WHERE id = ?`, [newStatus, entityId]);
 
   return `Updated ${entityType} #${entityId} status to "${newStatus}"`;
 }
@@ -834,7 +844,7 @@ async function executeWait(
 
   const delayDays = Number(config.delayDays || 0);
   const delayHours = Number(config.delayHours || 0);
-  const totalDelayMs = (delayDays * MILLISECONDS_PER_DAY) + (delayHours * MILLISECONDS_PER_HOUR);
+  const totalDelayMs = delayDays * MILLISECONDS_PER_DAY + delayHours * MILLISECONDS_PER_HOUR;
 
   if (totalDelayMs <= 0) {
     throw new Error('Wait action requires delayDays or delayHours > 0');
@@ -982,14 +992,14 @@ async function executeAddTag(
     [entityId]
   );
 
-  const currentTags = entity?.tags ? entity.tags.split(',').map(t => t.trim()) : [];
+  const currentTags = entity?.tags ? entity.tags.split(',').map((t) => t.trim()) : [];
 
   if (!currentTags.includes(tag)) {
     currentTags.push(tag);
-    await db.run(
-      `UPDATE ${tableName} SET tags = ? WHERE id = ?`,
-      [currentTags.join(', '), entityId]
-    );
+    await db.run(`UPDATE ${tableName} SET tags = ? WHERE id = ?`, [
+      currentTags.join(', '),
+      entityId
+    ]);
   }
 
   return `Tag "${tag}" added to ${entityType} #${entityId}`;
@@ -1082,10 +1092,9 @@ async function processScheduledActions(): Promise<ProcessScheduledResult> {
     try {
       await resumeRunFromAction(scheduled);
 
-      await db.run(
-        'UPDATE automation_scheduled_actions SET status = \'executed\' WHERE id = ?',
-        [scheduled.id]
-      );
+      await db.run("UPDATE automation_scheduled_actions SET status = 'executed' WHERE id = ?", [
+        scheduled.id
+      ]);
 
       result.executed++;
     } catch (processError) {
@@ -1098,10 +1107,9 @@ async function processScheduledActions(): Promise<ProcessScheduledResult> {
         }
       });
 
-      await db.run(
-        'UPDATE automation_scheduled_actions SET status = \'failed\' WHERE id = ?',
-        [scheduled.id]
-      );
+      await db.run("UPDATE automation_scheduled_actions SET status = 'failed' WHERE id = ?", [
+        scheduled.id
+      ]);
 
       result.failed++;
     }
@@ -1143,10 +1151,7 @@ async function resumeRunFromAction(scheduled: AutomationScheduledActionRow): Pro
   await logActionResult(run.id, waitAction.id, 'executed', 'Wait completed', null);
 
   // Update run status back to running
-  await db.run(
-    'UPDATE automation_runs SET status = \'running\' WHERE id = ?',
-    [run.id]
-  );
+  await db.run("UPDATE automation_runs SET status = 'running' WHERE id = ?", [run.id]);
 
   // Get the automation for stop_on_error setting
   const automation = await db.get<CustomAutomationRow>(
@@ -1173,7 +1178,10 @@ async function resumeRunFromAction(scheduled: AutomationScheduledActionRow): Pro
     // Evaluate action condition
     if (action.condition) {
       const actionConditions = safeParseJson(action.condition);
-      if (Object.keys(actionConditions).length > 0 && !evaluateConditions(actionConditions, context)) {
+      if (
+        Object.keys(actionConditions).length > 0 &&
+        !evaluateConditions(actionConditions, context)
+      ) {
         await logActionResult(run.id, action.id, 'skipped', 'Condition not met', null);
         continue;
       }
@@ -1284,7 +1292,8 @@ async function dryRun(
 
   // Check trigger conditions
   const triggerConditions = safeParseJson(automation.trigger_conditions);
-  const conditionsMet = Object.keys(triggerConditions).length === 0 ||
+  const conditionsMet =
+    Object.keys(triggerConditions).length === 0 ||
     evaluateConditions(triggerConditions, sampleContext);
 
   if (!conditionsMet) {
@@ -1312,7 +1321,10 @@ async function dryRun(
 
     if (action.condition) {
       const actionConditions = safeParseJson(action.condition);
-      if (Object.keys(actionConditions).length > 0 && !evaluateConditions(actionConditions, sampleContext)) {
+      if (
+        Object.keys(actionConditions).length > 0 &&
+        !evaluateConditions(actionConditions, sampleContext)
+      ) {
         wouldSkip = true;
         skipReason = 'Action condition not met';
       }
@@ -1366,10 +1378,9 @@ async function dryRun(
  */
 async function touchAutomationUpdatedAt(automationId: number): Promise<void> {
   const db = getDatabase();
-  await db.run(
-    'UPDATE custom_automations SET updated_at = datetime(\'now\') WHERE id = ?',
-    [automationId]
-  );
+  await db.run("UPDATE custom_automations SET updated_at = datetime('now') WHERE id = ?", [
+    automationId
+  ]);
 }
 
 /**
@@ -1401,9 +1412,7 @@ async function markRunStatus(
 ): Promise<void> {
   const db = getDatabase();
 
-  const completedAt = status === 'completed' || status === 'failed'
-    ? 'datetime(\'now\')'
-    : 'NULL';
+  const completedAt = status === 'completed' || status === 'failed' ? "datetime('now')" : 'NULL';
 
   await db.run(
     `UPDATE automation_runs

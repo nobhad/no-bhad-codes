@@ -32,7 +32,9 @@ type GetInvoiceById = (id: number) => Promise<Invoice>;
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const INVOICE_PAYMENT_COLUMNS = `
   id, invoice_id, amount, payment_method, payment_reference, payment_date, notes, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export class InvoicePaymentService {
   private getInvoiceById: GetInvoiceById;

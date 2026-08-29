@@ -229,12 +229,7 @@ export class FooterCurtainModule extends BaseModule {
     // The PAGE travels up by exactly the curtain's height, uncovering the band
     // that was underneath it all along. The curtain itself never moves —
     // sliding the panel up over the content is the effect this is not.
-    tl.fromTo(
-      this.page,
-      { y: 0 },
-      { y: -this.curtainHeight, ease: 'none', duration: 1 },
-      0
-    );
+    tl.fromTo(this.page, { y: 0 }, { y: -this.curtainHeight, ease: 'none', duration: 1 }, 0);
 
     // Contents trail the page edge, so the band reads as settling into place
     // as it's uncovered rather than arriving fully formed.

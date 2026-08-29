@@ -11,7 +11,13 @@ import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { approvalService, EntityType, WorkflowType } from '../services/approval-service.js';
-import { errorResponse, sanitizeErrorMessage, sendSuccess, sendCreated, ErrorCodes } from '../utils/api-response.js';
+import {
+  errorResponse,
+  sanitizeErrorMessage,
+  sendSuccess,
+  sendCreated,
+  ErrorCodes
+} from '../utils/api-response.js';
 import { validateRequest, ValidationSchema } from '../middleware/validation.js';
 
 const router = express.Router();
@@ -72,10 +78,7 @@ const ApprovalValidationSchemas = {
       { type: 'required' as const },
       { type: 'string' as const, allowedValues: ENTITY_TYPE_VALUES }
     ],
-    entity_id: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ],
+    entity_id: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
     workflow_definition_id: { type: 'number' as const, min: 1 },
     notes: { type: 'string' as const, maxLength: NOTES_MAX_LENGTH }
   } as ValidationSchema,
@@ -312,7 +315,12 @@ router.post(
       req.body;
 
     if (!step_order || !approver_type || !approver_value) {
-      return errorResponse(res, 'step_order, approver_type, and approver_value are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'step_order, approver_type, and approver_value are required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const step = await approvalService.addWorkflowStep({
@@ -384,7 +392,12 @@ router.post(
 
       sendCreated(res, { instance }, 'Approval workflow started');
     } catch (error) {
-      return errorResponse(res, sanitizeErrorMessage(error, 'Failed to start workflow'), 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        sanitizeErrorMessage(error, 'Failed to start workflow'),
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
   })
 );
@@ -599,7 +612,12 @@ router.post(
       const instance = await approvalService.approve(requestId, approverEmail, comment);
       sendSuccess(res, { instance }, 'Approved');
     } catch (error) {
-      return errorResponse(res, sanitizeErrorMessage(error, 'Failed to approve'), 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        sanitizeErrorMessage(error, 'Failed to approve'),
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
   })
 );
@@ -650,7 +668,12 @@ router.post(
 
     const { reason } = req.body;
     if (!reason) {
-      return errorResponse(res, 'Reason is required when rejecting', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'Reason is required when rejecting',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const approverEmail = req.user?.email || 'unknown';
@@ -666,7 +689,12 @@ router.post(
       const instance = await approvalService.reject(requestId, approverEmail, reason);
       sendSuccess(res, { instance }, 'Rejected');
     } catch (error) {
-      return errorResponse(res, sanitizeErrorMessage(error, 'Failed to reject'), 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        sanitizeErrorMessage(error, 'Failed to reject'),
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
   })
 );
@@ -719,7 +747,12 @@ router.post(
       const instance = await approvalService.cancelWorkflow(instanceId, cancelledBy, reason);
       sendSuccess(res, { instance }, 'Workflow cancelled');
     } catch (error) {
-      return errorResponse(res, sanitizeErrorMessage(error, 'Failed to cancel workflow'), 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        sanitizeErrorMessage(error, 'Failed to cancel workflow'),
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
   })
 );

@@ -23,9 +23,7 @@ afterEach(async () => {
 
 describe('Audit chain verification', () => {
   it('clean chain: every row recomputes to its stored hash', async () => {
-    const { auditLogger, verifyAuditChain } = await import(
-      '../../server/services/audit-logger.js'
-    );
+    const { auditLogger, verifyAuditChain } = await import('../../server/services/audit-logger.js');
 
     await auditLogger.logCreate('client', '1', 'Acme Co', { email: 'a@a' });
     await auditLogger.logCreate('client', '2', 'Beta Co', { email: 'b@b' });
@@ -39,9 +37,7 @@ describe('Audit chain verification', () => {
   });
 
   it('detects a tampered row via hash mismatch', async () => {
-    const { auditLogger, verifyAuditChain } = await import(
-      '../../server/services/audit-logger.js'
-    );
+    const { auditLogger, verifyAuditChain } = await import('../../server/services/audit-logger.js');
     const { getDatabase } = await import('../../server/database/init.js');
 
     await auditLogger.logCreate('client', '10', 'Original', { email: 'before@x' });
@@ -67,9 +63,7 @@ describe('Audit chain verification', () => {
   });
 
   it('detects a deleted historical row via prev_hash gap', async () => {
-    const { auditLogger, verifyAuditChain } = await import(
-      '../../server/services/audit-logger.js'
-    );
+    const { auditLogger, verifyAuditChain } = await import('../../server/services/audit-logger.js');
     const { getDatabase } = await import('../../server/database/init.js');
 
     await auditLogger.logCreate('client', '100', 'A', { email: 'a@a' });

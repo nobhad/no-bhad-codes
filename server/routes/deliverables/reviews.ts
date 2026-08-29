@@ -54,41 +54,51 @@ const router = Router();
  *       201:
  *         description: Review created
  */
-router.post('/:id/reviews', validateRequest(DeliverableValidationSchemas.createReview, { allowUnknownFields: true }), invalidateCache(['deliverables']), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const { id } = req.params;
-    const deliverableId = parseInt(id, 10);
-    if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
+router.post(
+  '/:id/reviews',
+  validateRequest(DeliverableValidationSchemas.createReview, { allowUnknownFields: true }),
+  invalidateCache(['deliverables']),
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const deliverableId = parseInt(id, 10);
+      if (isNaN(deliverableId) || deliverableId <= 0) {
+        return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
+      }
+
+      // Check authorization
+      if (!(await canAccessDeliverable(req, deliverableId))) {
+        return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+      }
+
+      const { reviewerId, decision, feedback, elementsReviewed } = req.body;
+
+      if (!reviewerId || !decision) {
+        return errorResponse(
+          res,
+          'reviewerId and decision are required',
+          400,
+          ErrorCodes.VALIDATION_ERROR
+        );
+      }
+
+      const review = await deliverableService.createReview(
+        deliverableId,
+        reviewerId,
+        decision,
+        feedback,
+        elementsReviewed
+      );
+
+      sendCreated(res, { review });
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message.includes('not found')) {
+        return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+      }
+      throw error;
     }
-
-    // Check authorization
-    if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
-    }
-
-    const { reviewerId, decision, feedback, elementsReviewed } = req.body;
-
-    if (!reviewerId || !decision) {
-      return errorResponse(res, 'reviewerId and decision are required', 400, ErrorCodes.VALIDATION_ERROR);
-    }
-
-    const review = await deliverableService.createReview(
-      deliverableId,
-      reviewerId,
-      decision,
-      feedback,
-      elementsReviewed
-    );
-
-    sendCreated(res, { review });
-  } catch (error: unknown) {
-    if (error instanceof Error && error.message.includes('not found')) {
-      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
-    }
-    throw error;
-  }
-}));
+  })
+);
 
 /**
  * @swagger
@@ -109,20 +119,23 @@ router.post('/:id/reviews', validateRequest(DeliverableValidationSchemas.createR
  *       200:
  *         description: List of reviews
  */
-router.get('/:id/reviews', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const { id } = req.params;
-  const deliverableId = parseInt(id, 10);
-  if (isNaN(deliverableId) || deliverableId <= 0) {
-    return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
-  }
+router.get(
+  '/:id/reviews',
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { id } = req.params;
+    const deliverableId = parseInt(id, 10);
+    if (isNaN(deliverableId) || deliverableId <= 0) {
+      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
 
-  // Check authorization
-  if (!(await canAccessDeliverable(req, deliverableId))) {
-    return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
-  }
+    // Check authorization
+    if (!(await canAccessDeliverable(req, deliverableId))) {
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+    }
 
-  const reviews = await deliverableService.getDeliverableReviews(deliverableId);
-  sendSuccess(res, { reviews });
-}));
+    const reviews = await deliverableService.getDeliverableReviews(deliverableId);
+    sendSuccess(res, { reviews });
+  })
+);
 
 export default router;

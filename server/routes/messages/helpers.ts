@@ -20,33 +20,45 @@ export const MESSAGE_THREAD_COLUMNS = `
   id, project_id, client_id, subject, thread_type, status, priority,
   last_message_at, last_message_by, participant_count, created_at, updated_at,
   pinned_count, archived_at, archived_by
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const MESSAGE_COLUMNS = `
   id, project_id, client_id, thread_id, context_type, sender_type, sender_name,
   subject, message, message_type, priority, read_at, attachments,
   parent_message_id, is_internal, edited_at, deleted_at, deleted_by,
   reaction_count, reply_count, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const NOTIFICATION_PREF_COLUMNS = `
   id, client_id, email_enabled, sms_enabled, push_enabled,
   new_message_notifications, project_updates_notifications,
   invoice_notifications, marketing_notifications,
   quiet_hours_start, quiet_hours_end, timezone, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 /**
  * Check if the authenticated user can access a specific message
  */
-export async function canAccessMessage(req: AuthenticatedRequest, messageId: number): Promise<boolean> {
+export async function canAccessMessage(
+  req: AuthenticatedRequest,
+  messageId: number
+): Promise<boolean> {
   return messageService.canUserAccessMessage(req.user?.type || '', req.user?.id, messageId);
 }
 
 /**
  * Check if the authenticated user can access a specific project
  */
-export async function canAccessProject(req: AuthenticatedRequest, projectId: number): Promise<boolean> {
+export async function canAccessProject(
+  req: AuthenticatedRequest,
+  projectId: number
+): Promise<boolean> {
   return messageService.canUserAccessProject(req.user?.type || '', req.user?.id, projectId);
 }
 

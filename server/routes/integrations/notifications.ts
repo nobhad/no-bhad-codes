@@ -200,7 +200,12 @@ router.post(
     const config = configs.find((c) => c.id === parseInt(id, 10));
 
     if (!config) {
-      errorResponse(res, 'Notification configuration not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+      errorResponse(
+        res,
+        'Notification configuration not found',
+        404,
+        ErrorCodes.RESOURCE_NOT_FOUND
+      );
       return;
     }
 

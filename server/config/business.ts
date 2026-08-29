@@ -73,7 +73,7 @@ export function getFormattedBusinessInfo(): {
   fullAddress: string;
   contactLine: string;
   footerText: string;
-  } {
+} {
   return {
     fullAddress: `${BUSINESS_INFO.name} • ${BUSINESS_INFO.owner}`,
     contactLine: `${BUSINESS_INFO.email} • ${BUSINESS_INFO.website}`,
@@ -90,12 +90,12 @@ export default BUSINESS_INFO;
 export const CONTRACT_TERMS: string[] = process.env.CONTRACT_TERMS
   ? JSON.parse(process.env.CONTRACT_TERMS)
   : [
-    '1. All work will be performed in a professional manner and according to industry standards.',
-    '2. Client agrees to provide timely feedback and necessary materials to avoid project delays.',
-    '3. Changes to the scope of work may require additional time and cost adjustments.',
-    '4. Client retains ownership of all final deliverables upon full payment.',
-    '5. Service Provider retains the right to showcase the completed project in their portfolio.'
-  ];
+      '1. All work will be performed in a professional manner and according to industry standards.',
+      '2. Client agrees to provide timely feedback and necessary materials to avoid project delays.',
+      '3. Changes to the scope of work may require additional time and cost adjustments.',
+      '4. Client retains ownership of all final deliverables upon full payment.',
+      '5. Service Provider retains the right to showcase the completed project in their portfolio.'
+    ];
 
 /**
  * PDF Logo configuration

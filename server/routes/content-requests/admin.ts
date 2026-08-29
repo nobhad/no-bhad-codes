@@ -98,7 +98,10 @@ router.post(
     }
 
     const template = await contentRequestService.createTemplate({
-      name, description, items, projectType: project_type
+      name,
+      description,
+      items,
+      projectType: project_type
     });
 
     sendCreated(res, { template }, 'Template created');
@@ -175,21 +178,37 @@ router.post(
     let checklist;
     if (template_id) {
       checklist = await contentRequestService.createFromTemplate(
-        project_id, client_id, template_id, req.body.start_date
+        project_id,
+        client_id,
+        template_id,
+        req.body.start_date
       );
     } else {
       checklist = await contentRequestService.createChecklist(
-        project_id, client_id,
+        project_id,
+        client_id,
         { name, description },
-        items?.map((item: { title: string; description?: string; content_type: string; category?: string; is_required?: boolean; due_date?: string }, index: number) => ({
-          title: item.title,
-          description: item.description,
-          contentType: item.content_type,
-          category: item.category,
-          isRequired: item.is_required,
-          dueDate: item.due_date,
-          sortOrder: index
-        }))
+        items?.map(
+          (
+            item: {
+              title: string;
+              description?: string;
+              content_type: string;
+              category?: string;
+              is_required?: boolean;
+              due_date?: string;
+            },
+            index: number
+          ) => ({
+            title: item.title,
+            description: item.description,
+            contentType: item.content_type,
+            category: item.category,
+            isRequired: item.is_required,
+            dueDate: item.due_date,
+            sortOrder: index
+          })
+        )
       );
     }
 
@@ -254,7 +273,9 @@ router.post(
     }
 
     const item = await contentRequestService.addItem(
-      checklist.id, checklist.projectId, checklist.clientId,
+      checklist.id,
+      checklist.projectId,
+      checklist.clientId,
       {
         title: req.body.title,
         description: req.body.description,

@@ -209,13 +209,7 @@ class DataQualityService {
     await db.run(
       `INSERT INTO validation_error_log (entity_type, field_name, field_value, error_type, error_message, source_ip, user_agent)
        VALUES ('security_check', 'input', ?, ?, ?, ?, ?)`,
-      [
-        params.inputValue,
-        params.errorType,
-        params.errorMessage,
-        params.sourceIp,
-        params.userAgent
-      ]
+      [params.inputValue, params.errorType, params.errorMessage, params.sourceIp, params.userAgent]
     );
   }
 }

@@ -74,7 +74,12 @@ router.get(
     );
 
     if (!project) {
-      return errorResponse(res, 'Project not found or access denied', 404, ErrorCodes.PROJECT_NOT_FOUND);
+      return errorResponse(
+        res,
+        'Project not found or access denied',
+        404,
+        ErrorCodes.PROJECT_NOT_FOUND
+      );
     }
 
     // Try to find existing thread for this project
@@ -83,7 +88,9 @@ router.get(
     if (!thread) {
       // Get project details for thread creation
       const projectInfo = await messageService.getProjectInfo(projectId);
-      const clientId = String(projectInfo?.client_id ?? (req.user!.type === 'client' ? req.user!.id : 0));
+      const clientId = String(
+        projectInfo?.client_id ?? (req.user!.type === 'client' ? req.user!.id : 0)
+      );
 
       thread = await messageService.createThread(
         {
@@ -131,7 +138,12 @@ router.post(
       );
 
       if (!project) {
-        return errorResponse(res, 'Project not found or access denied', 404, ErrorCodes.PROJECT_NOT_FOUND);
+        return errorResponse(
+          res,
+          'Project not found or access denied',
+          404,
+          ErrorCodes.PROJECT_NOT_FOUND
+        );
       }
     }
 
@@ -234,7 +246,10 @@ router.post(
 
     // Safety check for message (validation should catch this, but just in case)
     if (!message || typeof message !== 'string') {
-      logger.error('Message validation failed', { category: 'messages', metadata: { message, type: typeof message } });
+      logger.error('Message validation failed', {
+        category: 'messages',
+        metadata: { message, type: typeof message }
+      });
       return errorResponse(res, 'Message content is required', 400, ErrorCodes.MESSAGE_REQUIRED);
     }
 

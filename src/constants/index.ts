@@ -18,8 +18,4 @@ export type { KeyValue } from './keyboard';
 export { HEALTH_SCORE, SUCCESS_RATE, TIME_MS, CURRENCY_COMPACT, INPUT_LIMITS } from './thresholds';
 export { TIMING } from './timing';
 export type { TimingKey } from './timing';
-export {
-  Z_INDEX_CONTACT_FORM,
-  Z_INDEX_CONSENT_BANNER,
-  Z_INDEX_ABOUT_HERO_AVATAR
-} from './z-index';
+export { Z_INDEX_CONTACT_FORM, Z_INDEX_CONSENT_BANNER, Z_INDEX_ABOUT_HERO_AVATAR } from './z-index';

@@ -10,7 +10,13 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
+import {
+  ErrorCodes,
+  errorResponse,
+  errorResponseWithPayload,
+  sendSuccess,
+  sanitizeErrorMessage
+} from '../../utils/api-response.js';
 import { invalidateCache } from '../../middleware/cache.js';
 import { emailService } from '../../services/email-service.js';
 import { BUSINESS_INFO } from '../../config/business.js';
@@ -45,9 +51,15 @@ router.get(
         count: reminders.length
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve reminders', 500, ErrorCodes.RETRIEVAL_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to retrieve invoice reminders')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve reminders',
+        500,
+        ErrorCodes.RETRIEVAL_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to retrieve invoice reminders')
+        }
+      );
     }
   })
 );
@@ -122,7 +134,12 @@ router.post(
       const invoice = await getInvoiceService().getInvoiceById(invoiceId);
 
       if (invoice.status === 'paid') {
-        return errorResponse(res, 'Cannot send reminder for a paid invoice', 400, ErrorCodes.INVOICE_PAID);
+        return errorResponse(
+          res,
+          'Cannot send reminder for a paid invoice',
+          400,
+          ErrorCodes.INVOICE_PAID
+        );
       }
 
       if (invoice.status === 'cancelled') {
@@ -227,18 +244,28 @@ ${BUSINESS_INFO.name}
         `
       });
 
-      sendSuccess(res, {
-        sentTo: clientEmail
-      }, 'Payment reminder sent successfully');
+      sendSuccess(
+        res,
+        {
+          sentTo: clientEmail
+        },
+        'Payment reminder sent successfully'
+      );
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
 
       if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to send reminder', 500, ErrorCodes.SEND_REMINDER_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to send payment reminder')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to send reminder',
+        500,
+        ErrorCodes.SEND_REMINDER_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to send payment reminder')
+        }
+      );
     }
   })
 );

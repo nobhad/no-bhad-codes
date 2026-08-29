@@ -339,7 +339,6 @@
   .page-content {
     max-width: 95vw;
   }
-
 }
 
 /* ============================================
@@ -569,9 +568,7 @@
      when contact is active + the iOS URL bar / home indicator overlay. */
   .contact-section,
   section.contact-section {
-    padding-bottom: calc(
-      var(--footer-height) + env(safe-area-inset-bottom, 0px) + 1rem
-    ) !important;
+    padding-bottom: calc(var(--footer-height) + env(safe-area-inset-bottom, 0px) + 1rem) !important;
   }
 
   /* Projects tile: pin the TV to dead-center via absolute positioning.

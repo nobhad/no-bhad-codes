@@ -33,11 +33,15 @@ const userWebhookBreaker = getCircuitBreaker({
 
 const WORKFLOW_TRIGGER_COLUMNS = `
   id, name, description, event_type, conditions, action_type, action_config, is_active, priority, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const SYSTEM_EVENT_COLUMNS = `
   id, event_type, entity_type, entity_id, event_data, triggered_by, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // ============================================
 // Types
@@ -295,7 +299,10 @@ class WorkflowTriggerService {
    */
   async getTrigger(id: number): Promise<WorkflowTrigger | null> {
     const db = getDatabase();
-    const result = await db.get(`SELECT ${WORKFLOW_TRIGGER_COLUMNS} FROM workflow_triggers WHERE id = ?`, [id]);
+    const result = await db.get(
+      `SELECT ${WORKFLOW_TRIGGER_COLUMNS} FROM workflow_triggers WHERE id = ?`,
+      [id]
+    );
     return (result as unknown as WorkflowTrigger) || null;
   }
 
@@ -453,9 +460,10 @@ class WorkflowTriggerService {
       active: triggers.filter((t) => t.status === 'active').length,
       inactive: triggers.filter((t) => t.status === 'inactive').length,
       totalRuns: triggers.reduce((sum, t) => sum + (t.runCount || 0), 0),
-      avgSuccessRate: triggers.length > 0
-        ? Math.round(triggers.reduce((sum, t) => sum + (t.successRate || 0), 0) / triggers.length)
-        : 0
+      avgSuccessRate:
+        triggers.length > 0
+          ? Math.round(triggers.reduce((sum, t) => sum + (t.successRate || 0), 0) / triggers.length)
+          : 0
     };
 
     return { workflows: triggers, stats };
@@ -499,7 +507,7 @@ class WorkflowTriggerService {
       if (isNaN(id) || id <= 0) continue;
 
       const result = await db.run(
-        'UPDATE workflow_triggers SET is_active = ?, updated_at = datetime(\'now\') WHERE id = ?',
+        "UPDATE workflow_triggers SET is_active = ?, updated_at = datetime('now') WHERE id = ?",
         [isActive, id]
       );
       if (result.changes && result.changes > 0) {
@@ -551,7 +559,10 @@ class WorkflowTriggerService {
         [eventType, limit]
       );
     }
-    return db.all(`SELECT ${SYSTEM_EVENT_COLUMNS} FROM system_events ORDER BY created_at DESC LIMIT ?`, [limit]);
+    return db.all(
+      `SELECT ${SYSTEM_EVENT_COLUMNS} FROM system_events ORDER BY created_at DESC LIMIT ?`,
+      [limit]
+    );
   }
 
   /**
@@ -630,43 +641,40 @@ class WorkflowTriggerService {
     );
 
     switch (trigger.action_type) {
-    case 'send_email':
-      await this.executeSendEmail(
+      case 'send_email':
+        await this.executeSendEmail(
           config as { template: string; to: string; subject?: string },
           context
-      );
-      break;
+        );
+        break;
 
-    case 'create_task':
-      await this.executeCreateTask(
+      case 'create_task':
+        await this.executeCreateTask(
           config as { title: string; description?: string; assignee?: string; due_days?: number },
           context
-      );
-      break;
+        );
+        break;
 
-    case 'update_status':
-      await this.executeUpdateStatus(
+      case 'update_status':
+        await this.executeUpdateStatus(
           config as { entity: string; status: string; field?: string },
           context
-      );
-      break;
+        );
+        break;
 
-    case 'webhook':
-      await this.executeWebhook(
+      case 'webhook':
+        await this.executeWebhook(
           config as { url: string; method?: string; headers?: Record<string, string> },
           context
-      );
-      break;
+        );
+        break;
 
-    case 'notify':
-      await this.executeNotify(
-          config as { channel: string; message: string },
-          context
-      );
-      break;
+      case 'notify':
+        await this.executeNotify(config as { channel: string; message: string }, context);
+        break;
 
-    default:
-      logger.warn(`[WorkflowTrigger] Unknown action type: ${trigger.action_type}`);
+      default:
+        logger.warn(`[WorkflowTrigger] Unknown action type: ${trigger.action_type}`);
     }
   }
 
@@ -755,24 +763,24 @@ class WorkflowTriggerService {
     let entityId: number | undefined;
 
     switch (config.entity) {
-    case 'project':
-      table = 'projects';
-      idField = 'id';
-      entityId = context.projectId as number;
-      break;
-    case 'invoice':
-      table = 'invoices';
-      idField = 'id';
-      entityId = context.invoiceId as number;
-      break;
-    case 'client':
-      table = 'clients';
-      idField = 'id';
-      entityId = context.clientId as number;
-      break;
-    default:
-      logger.warn(`[WorkflowTrigger] Unknown entity type for update_status: ${config.entity}`);
-      return;
+      case 'project':
+        table = 'projects';
+        idField = 'id';
+        entityId = context.projectId as number;
+        break;
+      case 'invoice':
+        table = 'invoices';
+        idField = 'id';
+        entityId = context.invoiceId as number;
+        break;
+      case 'client':
+        table = 'clients';
+        idField = 'id';
+        entityId = context.clientId as number;
+        break;
+      default:
+        logger.warn(`[WorkflowTrigger] Unknown entity type for update_status: ${config.entity}`);
+        return;
     }
 
     if (!entityId) {

@@ -36,7 +36,6 @@ export interface FileUploadResponse {
   mimeType: string;
 }
 
-
 // ============================================
 // File Management Enhancement API Types
 // ============================================

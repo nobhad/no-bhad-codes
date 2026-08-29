@@ -68,7 +68,7 @@ describe('validateEmail', () => {
     // local(64) + '@'(1) + domain-label(63) + '.'(1) + 'com'(3) = 132 chars without padding
     // Use a long domain label to push total well past 254
     const local = 'a'.repeat(64);
-    const domain = `${'b'.repeat(190)  }.com`; // 64 + 1 + 190 + 4 = 259 chars total
+    const domain = `${'b'.repeat(190)}.com`; // 64 + 1 + 190 + 4 = 259 chars total
     const email = `${local}@${domain}`;
     expect(email.length).toBeGreaterThan(254);
     const result = validateEmail(email);
@@ -257,7 +257,7 @@ describe('sanitizeText', () => {
   });
 
   it('encodes single quotes', () => {
-    const result = sanitizeText('It\'s fine');
+    const result = sanitizeText("It's fine");
     expect(result).toContain('&#x27;');
   });
 
@@ -366,7 +366,7 @@ describe('detectSQLInjection', () => {
   });
 
   it('detects comment sequences (--)', () => {
-    const result = detectSQLInjection('admin\'--');
+    const result = detectSQLInjection("admin'--");
     expect(result.detected).toBe(true);
   });
 
@@ -507,12 +507,16 @@ describe('validateFile', () => {
   });
 
   it('accepts archive up to max archive size', () => {
-    const result = validateFile('archive.zip', 'application/zip', MAX_FILE_SIZES.archive, ['archives']);
+    const result = validateFile('archive.zip', 'application/zip', MAX_FILE_SIZES.archive, [
+      'archives'
+    ]);
     expect(result.valid).toBe(true);
   });
 
   it('rejects archive exceeding archive size limit', () => {
-    const result = validateFile('archive.zip', 'application/zip', MAX_FILE_SIZES.archive + 1, ['archives']);
+    const result = validateFile('archive.zip', 'application/zip', MAX_FILE_SIZES.archive + 1, [
+      'archives'
+    ]);
     expect(result.valid).toBe(false);
   });
 
@@ -520,7 +524,10 @@ describe('validateFile', () => {
     // With both images and archives allowed, max size should be archive limit (50MB)
     const almostArchiveMax = MAX_FILE_SIZES.archive - 1;
     // Archive MIME type requires archive category
-    const result = validateFile('archive.zip', 'application/zip', almostArchiveMax, ['images', 'archives']);
+    const result = validateFile('archive.zip', 'application/zip', almostArchiveMax, [
+      'images',
+      'archives'
+    ]);
     expect(result.valid).toBe(true);
   });
 

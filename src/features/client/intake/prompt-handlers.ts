@@ -77,14 +77,25 @@ export function waitForTwoOptionChoice(
           const buttons = optionsContainer.querySelectorAll('.chat-option');
           const isFirstOption = buttons[0] === target;
 
-          if (isFirstOption || choice === 'yes' || choice === 'review' || choice === 'continue' || choice === 'resume') {
+          if (
+            isFirstOption ||
+            choice === 'yes' ||
+            choice === 'review' ||
+            choice === 'continue' ||
+            choice === 'resume'
+          ) {
             await config.onOption1();
           } else {
             await config.onOption2();
           }
         } else {
           // Fallback: if we can't determine position, use the value
-          if (choice === 'yes' || choice === 'review' || choice === 'continue' || choice === 'resume') {
+          if (
+            choice === 'yes' ||
+            choice === 'review' ||
+            choice === 'continue' ||
+            choice === 'resume'
+          ) {
             await config.onOption1();
           } else {
             await config.onOption2();
@@ -115,9 +126,7 @@ export interface ResumePromptElements {
   btn2: HTMLButtonElement;
 }
 
-export function createResumePromptUI(
-  name: string | undefined
-): ResumePromptElements {
+export function createResumePromptUI(name: string | undefined): ResumePromptElements {
   const messageEl = document.createElement('div');
   messageEl.className = 'chat-message ai';
 

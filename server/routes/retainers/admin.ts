@@ -68,7 +68,12 @@ router.post(
     } = req.body;
 
     if (!clientId || !projectId || !monthlyAmount || !startDate) {
-      errorResponse(res, 'clientId, projectId, monthlyAmount, and startDate are required', 400, ErrorCodes.VALIDATION_ERROR);
+      errorResponse(
+        res,
+        'clientId, projectId, monthlyAmount, and startDate are required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
       return;
     }
 

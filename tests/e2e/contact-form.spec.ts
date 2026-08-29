@@ -141,7 +141,7 @@ test.describe('Contact Form', () => {
 
     // Button should be re-enabled
     await expect(page.locator('.form-button')).not.toBeDisabled();
-    await expect(page.locator('.form-button')).toContainText('Let\'s Talk');
+    await expect(page.locator('.form-button')).toContainText("Let's Talk");
   });
 
   test('should be keyboard accessible', async ({ page }) => {

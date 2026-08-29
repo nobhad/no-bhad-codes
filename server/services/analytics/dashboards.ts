@@ -86,7 +86,10 @@ export async function createWidget(data: {
 
 export async function getWidget(widgetId: number): Promise<DashboardWidget> {
   const db = getDatabase();
-  const widget = await db.get(`SELECT ${DASHBOARD_WIDGET_COLUMNS} FROM dashboard_widgets WHERE id = ?`, [widgetId]);
+  const widget = await db.get(
+    `SELECT ${DASHBOARD_WIDGET_COLUMNS} FROM dashboard_widgets WHERE id = ?`,
+    [widgetId]
+  );
 
   if (!widget) {
     throw new Error('Widget not found');
@@ -182,7 +185,10 @@ export async function saveWidgetLayout(
 export async function applyPreset(userEmail: string, presetId: number): Promise<DashboardWidget[]> {
   const db = getDatabase();
 
-  const preset = await db.get(`SELECT ${DASHBOARD_PRESET_COLUMNS} FROM dashboard_presets WHERE id = ?`, [presetId]);
+  const preset = await db.get(
+    `SELECT ${DASHBOARD_PRESET_COLUMNS} FROM dashboard_presets WHERE id = ?`,
+    [presetId]
+  );
   if (!preset) {
     throw new Error('Preset not found');
   }
@@ -201,7 +207,10 @@ export async function applyPreset(userEmail: string, presetId: number): Promise<
     w: number;
     h: number;
   }
-  const widgetConfigs = safeJsonParseArray<PresetWidgetConfig>(preset.widgets as string, 'preset widgets');
+  const widgetConfigs = safeJsonParseArray<PresetWidgetConfig>(
+    preset.widgets as string,
+    'preset widgets'
+  );
   const widgets: DashboardWidget[] = [];
 
   for (const config of widgetConfigs) {
@@ -294,12 +303,12 @@ export async function captureSnapshot(): Promise<number> {
 
 async function calculateKPIs(): Promise<
   { type: string; value: number; metadata?: Record<string, unknown> }[]
-  > {
+> {
   const db = getDatabase();
   const kpis: { type: string; value: number; metadata?: Record<string, unknown> }[] = [];
 
   const revenue = await db.get(
-    'SELECT COALESCE(SUM(total_amount), 0) as total FROM active_invoices WHERE status = \'paid\''
+    "SELECT COALESCE(SUM(total_amount), 0) as total FROM active_invoices WHERE status = 'paid'"
   );
   kpis.push({ type: 'total_revenue', value: Number(revenue?.total ?? 0) });
 
@@ -310,12 +319,12 @@ async function calculateKPIs(): Promise<
   kpis.push({ type: 'monthly_revenue', value: Number(monthlyRevenue?.total ?? 0) });
 
   const activeClients = await db.get(
-    'SELECT COUNT(*) as count FROM active_clients WHERE status = \'active\''
+    "SELECT COUNT(*) as count FROM active_clients WHERE status = 'active'"
   );
   kpis.push({ type: 'active_clients', value: Number(activeClients?.count ?? 0) });
 
   const activeProjects = await db.get(
-    'SELECT COUNT(*) as count FROM active_projects WHERE status IN (\'in_progress\', \'active\')'
+    "SELECT COUNT(*) as count FROM active_projects WHERE status IN ('in_progress', 'active')"
   );
   kpis.push({ type: 'active_projects', value: Number(activeProjects?.count ?? 0) });
 
@@ -449,7 +458,9 @@ export async function getAlerts(): Promise<MetricAlert[]> {
 
 export async function getAlert(alertId: number): Promise<MetricAlert> {
   const db = getDatabase();
-  const alert = await db.get(`SELECT ${METRIC_ALERT_COLUMNS} FROM metric_alerts WHERE id = ?`, [alertId]);
+  const alert = await db.get(`SELECT ${METRIC_ALERT_COLUMNS} FROM metric_alerts WHERE id = ?`, [
+    alertId
+  ]);
 
   if (!alert) {
     throw new Error('Alert not found');
@@ -457,7 +468,10 @@ export async function getAlert(alertId: number): Promise<MetricAlert> {
 
   return {
     ...(alert as unknown as MetricAlert),
-    notification_emails: safeJsonParseArray<string>(alert.notification_emails as string, 'alert emails')
+    notification_emails: safeJsonParseArray<string>(
+      alert.notification_emails as string,
+      'alert emails'
+    )
   };
 }
 
@@ -515,7 +529,9 @@ export async function deleteAlert(alertId: number): Promise<void> {
   await db.run('DELETE FROM metric_alerts WHERE id = ?', [alertId]);
 }
 
-export async function checkAlerts(): Promise<{ alert: MetricAlert; currentValue: number; triggered: boolean }[]> {
+export async function checkAlerts(): Promise<
+  { alert: MetricAlert; currentValue: number; triggered: boolean }[]
+> {
   const alerts = await getAlerts();
   const latestKPIs = await getLatestKPIs();
   const results: { alert: MetricAlert; currentValue: number; triggered: boolean }[] = [];
@@ -530,21 +546,21 @@ export async function checkAlerts(): Promise<{ alert: MetricAlert; currentValue:
     const value = kpi.value;
 
     switch (alert.condition) {
-    case 'above':
-      triggered = value > alert.threshold_value;
-      break;
-    case 'below':
-      triggered = value < alert.threshold_value;
-      break;
-    case 'equals':
-      triggered = value === alert.threshold_value;
-      break;
-    case 'change_above':
-      triggered = (kpi.change_percent || 0) > alert.threshold_value;
-      break;
-    case 'change_below':
-      triggered = (kpi.change_percent || 0) < alert.threshold_value;
-      break;
+      case 'above':
+        triggered = value > alert.threshold_value;
+        break;
+      case 'below':
+        triggered = value < alert.threshold_value;
+        break;
+      case 'equals':
+        triggered = value === alert.threshold_value;
+        break;
+      case 'change_above':
+        triggered = (kpi.change_percent || 0) > alert.threshold_value;
+        break;
+      case 'change_below':
+        triggered = (kpi.change_percent || 0) < alert.threshold_value;
+        break;
     }
 
     results.push({ alert, currentValue: value, triggered });

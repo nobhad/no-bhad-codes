@@ -4,7 +4,6 @@
    Single source of truth for admin and client portal file components
    ===================================================== */
 
-
 /* =====================================================
    FILES SECTION CONTAINER
    Combined container for upload + files browser (matching admin)
@@ -506,7 +505,9 @@
   cursor: pointer;
   align-items: center;
   justify-content: center;
-  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
 }
 
 .dropzone {
@@ -730,4 +731,3 @@
     max-height: var(--files-folder-tree-max-height);
   }
 }
-

@@ -110,7 +110,7 @@ vi.mock('../../../server/database/query-helpers', () => ({
   buildSafeUpdate: vi.fn((updates, _allowed, _opts) => {
     const keys = Object.keys(updates);
     if (keys.length === 0) return { setClause: '', params: [] };
-    const setClause = `${keys.map((k) => `${k} = ?`).join(', ')  }, updated_at = CURRENT_TIMESTAMP`;
+    const setClause = `${keys.map((k) => `${k} = ?`).join(', ')}, updated_at = CURRENT_TIMESTAMP`;
     return { setClause, params: Object.values(updates) };
   })
 }));
@@ -269,8 +269,8 @@ describe('ClientService - Contact Management', () => {
       await clientService.createContact(10, {
         firstName: 'Jane',
         lastName: 'Doe',
-        email: '',    // should become null
-        phone: '',    // should become null
+        email: '', // should become null
+        phone: '', // should become null
         title: 'Manager',
         department: 'Sales',
         role: 'billing',
@@ -374,7 +374,10 @@ describe('ClientService - Contact Management', () => {
       mockDb.get.mockResolvedValueOnce(makeContactRow()); // existing
       // buildSafeUpdate returns empty setClause for empty updates
       const { buildSafeUpdate } = await import('../../../server/database/query-helpers');
-      (buildSafeUpdate as ReturnType<typeof vi.fn>).mockReturnValueOnce({ setClause: '', params: [] });
+      (buildSafeUpdate as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+        setClause: '',
+        params: []
+      });
 
       mockDb.get.mockResolvedValueOnce(makeContactRow()); // post-update fetch
 
@@ -674,7 +677,9 @@ describe('ClientService - Custom Fields', () => {
 
     it('serializes options array to JSON', async () => {
       mockDb.run.mockResolvedValueOnce({ lastID: 1 });
-      mockDb.get.mockResolvedValueOnce(makeCustomFieldRow({ field_type: 'select', options: '["a","b"]' }));
+      mockDb.get.mockResolvedValueOnce(
+        makeCustomFieldRow({ field_type: 'select', options: '["a","b"]' })
+      );
 
       await clientService.createCustomField({
         fieldName: 'tier',
@@ -707,7 +712,10 @@ describe('ClientService - Custom Fields', () => {
     });
 
     it('returns all fields when includeInactive is true', async () => {
-      mockDb.all.mockResolvedValueOnce([makeCustomFieldRow(), makeCustomFieldRow({ id: 2, is_active: 0 })]);
+      mockDb.all.mockResolvedValueOnce([
+        makeCustomFieldRow(),
+        makeCustomFieldRow({ id: 2, is_active: 0 })
+      ]);
 
       const result = await clientService.getCustomFields(true);
 
@@ -775,7 +783,17 @@ describe('ClientService - Custom Fields', () => {
   describe('getClientCustomFields', () => {
     it('returns mapped custom field values for a client', async () => {
       mockDb.all.mockResolvedValueOnce([
-        { id: 1, client_id: 10, field_id: 1, field_name: 'budget', field_label: 'Budget', field_type: 'number', field_value: '5000', created_at: '2026-01-01', updated_at: '2026-01-01' }
+        {
+          id: 1,
+          client_id: 10,
+          field_id: 1,
+          field_name: 'budget',
+          field_label: 'Budget',
+          field_type: 'number',
+          field_value: '5000',
+          created_at: '2026-01-01',
+          updated_at: '2026-01-01'
+        }
       ]);
 
       const result = await clientService.getClientCustomFields(10);
@@ -826,7 +844,7 @@ describe('ClientService - Tags & Segmentation', () => {
       expect(result.name).toBe('VIP');
       const insertParams = mockDb.run.mock.calls[0][1];
       expect(insertParams[1]).toBe('#6b7280'); // default color
-      expect(insertParams[3]).toBe('client');  // default tag_type
+      expect(insertParams[3]).toBe('client'); // default tag_type
     });
 
     it('creates a tag with custom color and type', async () => {
@@ -844,7 +862,9 @@ describe('ClientService - Tags & Segmentation', () => {
       mockDb.run.mockResolvedValueOnce({ lastID: 1 });
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(clientService.createTag({ name: 'Broken' })).rejects.toThrow('Failed to create tag');
+      await expect(clientService.createTag({ name: 'Broken' })).rejects.toThrow(
+        'Failed to create tag'
+      );
     });
   });
 
@@ -882,12 +902,17 @@ describe('ClientService - Tags & Segmentation', () => {
       mockDb.run.mockResolvedValueOnce({});
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(clientService.updateTag(999, { name: 'Ghost' })).rejects.toThrow(/tag .* not found/i);
+      await expect(clientService.updateTag(999, { name: 'Ghost' })).rejects.toThrow(
+        /tag .* not found/i
+      );
     });
 
     it('skips run when no fields provided', async () => {
       const { buildSafeUpdate } = await import('../../../server/database/query-helpers');
-      (buildSafeUpdate as ReturnType<typeof vi.fn>).mockReturnValueOnce({ setClause: '', params: [] });
+      (buildSafeUpdate as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+        setClause: '',
+        params: []
+      });
       mockDb.get.mockResolvedValueOnce(makeTagRow());
 
       const result = await clientService.updateTag(1, {});
@@ -960,7 +985,13 @@ describe('ClientService - Tags & Segmentation', () => {
 
   describe('getClientsByTag', () => {
     it('returns client rows associated with a tag', async () => {
-      const clientRow = { id: 10, email: 'x@x.com', status: 'active', created_at: '2026-01-01', updated_at: '2026-01-01' };
+      const clientRow = {
+        id: 10,
+        email: 'x@x.com',
+        status: 'active',
+        created_at: '2026-01-01',
+        updated_at: '2026-01-01'
+      };
       mockDb.all.mockResolvedValueOnce([clientRow]);
 
       const result = await clientService.getClientsByTag(1);
@@ -990,7 +1021,13 @@ describe('ClientService - Health Scoring', () => {
     });
 
     it('returns healthy status for a high-scoring client', async () => {
-      const clientRow = { id: 10, email: 'x@x.com', status: 'active', created_at: '2026-01-01', updated_at: '2026-01-01' };
+      const clientRow = {
+        id: 10,
+        email: 'x@x.com',
+        status: 'active',
+        created_at: '2026-01-01',
+        updated_at: '2026-01-01'
+      };
       mockDb.get.mockResolvedValueOnce(clientRow); // client
 
       // payment data — 100% on time, no overdue
@@ -1016,11 +1053,21 @@ describe('ClientService - Health Scoring', () => {
     });
 
     it('returns at_risk status for a medium-scoring client', async () => {
-      const clientRow = { id: 10, email: 'x@x.com', status: 'active', created_at: '2026-01-01', updated_at: '2026-01-01' };
+      const clientRow = {
+        id: 10,
+        email: 'x@x.com',
+        status: 'active',
+        created_at: '2026-01-01',
+        updated_at: '2026-01-01'
+      };
       mockDb.get.mockResolvedValueOnce(clientRow);
 
       // payment: 50% on time, 14 days overdue avg = lose 2 points
-      mockDb.get.mockResolvedValueOnce({ total_invoices: 2, paid_on_time: 1, avg_days_overdue: 14 });
+      mockDb.get.mockResolvedValueOnce({
+        total_invoices: 2,
+        paid_on_time: 1,
+        avg_days_overdue: 14
+      });
 
       // engagement: 5 messages, no recent activity
       mockDb.get.mockResolvedValueOnce({ message_count: 5, last_message: null });
@@ -1040,11 +1087,21 @@ describe('ClientService - Health Scoring', () => {
     });
 
     it('returns critical status for a zero-score client', async () => {
-      const clientRow = { id: 10, email: 'x@x.com', status: 'active', created_at: '2026-01-01', updated_at: '2026-01-01' };
+      const clientRow = {
+        id: 10,
+        email: 'x@x.com',
+        status: 'active',
+        created_at: '2026-01-01',
+        updated_at: '2026-01-01'
+      };
       mockDb.get.mockResolvedValueOnce(clientRow);
 
       // payment: 0 paid on time, 100 days overdue
-      mockDb.get.mockResolvedValueOnce({ total_invoices: 1, paid_on_time: 0, avg_days_overdue: 100 });
+      mockDb.get.mockResolvedValueOnce({
+        total_invoices: 1,
+        paid_on_time: 0,
+        avg_days_overdue: 100
+      });
 
       // engagement: 0 messages
       mockDb.get.mockResolvedValueOnce({ message_count: 0, last_message: null });
@@ -1064,7 +1121,13 @@ describe('ClientService - Health Scoring', () => {
     });
 
     it('uses fallback scores (25 each) when sub-queries throw', async () => {
-      const clientRow = { id: 10, email: 'x@x.com', status: 'active', created_at: '2026-01-01', updated_at: '2026-01-01' };
+      const clientRow = {
+        id: 10,
+        email: 'x@x.com',
+        status: 'active',
+        created_at: '2026-01-01',
+        updated_at: '2026-01-01'
+      };
       mockDb.get.mockResolvedValueOnce(clientRow);
 
       // All sub-queries throw
@@ -1083,7 +1146,13 @@ describe('ClientService - Health Scoring', () => {
     });
 
     it('handles no invoices (no payment data rows) gracefully', async () => {
-      const clientRow = { id: 10, email: 'x@x.com', status: 'active', created_at: '2026-01-01', updated_at: '2026-01-01' };
+      const clientRow = {
+        id: 10,
+        email: 'x@x.com',
+        status: 'active',
+        created_at: '2026-01-01',
+        updated_at: '2026-01-01'
+      };
       mockDb.get.mockResolvedValueOnce(clientRow);
       mockDb.get.mockResolvedValueOnce({ total_invoices: 0, paid_on_time: 0, avg_days_overdue: 0 });
       mockDb.get.mockResolvedValueOnce({ message_count: 0, last_message: null });
@@ -1098,7 +1167,13 @@ describe('ClientService - Health Scoring', () => {
 
   describe('updateHealthStatus', () => {
     it('delegates to calculateHealthScore', async () => {
-      const clientRow = { id: 10, email: 'x@x.com', status: 'active', created_at: '2026-01-01', updated_at: '2026-01-01' };
+      const clientRow = {
+        id: 10,
+        email: 'x@x.com',
+        status: 'active',
+        created_at: '2026-01-01',
+        updated_at: '2026-01-01'
+      };
       mockDb.get.mockResolvedValueOnce(clientRow);
       mockDb.get.mockResolvedValueOnce({ total_invoices: 0, paid_on_time: 0, avg_days_overdue: 0 });
       mockDb.get.mockResolvedValueOnce({ message_count: 0, last_message: null });
@@ -1115,14 +1190,21 @@ describe('ClientService - Health Scoring', () => {
   describe('getAtRiskClients', () => {
     it('returns clients with at_risk or critical health_status', async () => {
       const rows = [
-        { id: 1, email: 'a@a.com', health_status: 'at_risk', status: 'active', created_at: '2026-01-01', updated_at: '2026-01-01' }
+        {
+          id: 1,
+          email: 'a@a.com',
+          health_status: 'at_risk',
+          status: 'active',
+          created_at: '2026-01-01',
+          updated_at: '2026-01-01'
+        }
       ];
       mockDb.all.mockResolvedValueOnce(rows);
 
       const result = await clientService.getAtRiskClients();
 
       expect(result).toHaveLength(1);
-      expect(mockDb.all.mock.calls[0][0]).toContain('health_status IN (\'at_risk\', \'critical\')');
+      expect(mockDb.all.mock.calls[0][0]).toContain("health_status IN ('at_risk', 'critical')");
     });
   });
 });
@@ -1246,7 +1328,10 @@ describe('ClientService - CRM Fields', () => {
 
     it('skips update when no fields are provided', async () => {
       const { buildSafeUpdate } = await import('../../../server/database/query-helpers');
-      (buildSafeUpdate as ReturnType<typeof vi.fn>).mockReturnValueOnce({ setClause: '', params: [] });
+      (buildSafeUpdate as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+        setClause: '',
+        params: []
+      });
 
       await clientService.updateCRMFields(10, {});
 
@@ -1276,7 +1361,14 @@ describe('ClientService - CRM Fields', () => {
   describe('getClientsForFollowUp', () => {
     it('returns clients with upcoming follow-up dates', async () => {
       const rows = [
-        { id: 10, email: 'x@x.com', next_follow_up_date: '2026-03-01', status: 'active', created_at: '2026-01-01', updated_at: '2026-01-01' }
+        {
+          id: 10,
+          email: 'x@x.com',
+          next_follow_up_date: '2026-03-01',
+          status: 'active',
+          created_at: '2026-01-01',
+          updated_at: '2026-01-01'
+        }
       ];
       mockDb.all.mockResolvedValueOnce(rows);
 
@@ -1284,7 +1376,7 @@ describe('ClientService - CRM Fields', () => {
 
       expect(result).toHaveLength(1);
       expect(mockDb.all.mock.calls[0][0]).toContain('next_follow_up_date IS NOT NULL');
-      expect(mockDb.all.mock.calls[0][0]).toContain('next_follow_up_date <= DATE(\'now\')');
+      expect(mockDb.all.mock.calls[0][0]).toContain("next_follow_up_date <= DATE('now')");
     });
 
     it('returns empty array when no clients need follow-up', async () => {

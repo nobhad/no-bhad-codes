@@ -296,31 +296,31 @@ export function setupListKeyboardNav(
     const currentIndex = getCurrentIndex();
 
     switch (e.key) {
-    case 'ArrowDown':
-      e.preventDefault();
-      focusItem(currentIndex + 1);
-      break;
+      case 'ArrowDown':
+        e.preventDefault();
+        focusItem(currentIndex + 1);
+        break;
 
-    case 'ArrowUp':
-      e.preventDefault();
-      focusItem(currentIndex - 1);
-      break;
+      case 'ArrowUp':
+        e.preventDefault();
+        focusItem(currentIndex - 1);
+        break;
 
-    case 'Enter':
-    case ' ':
-      e.preventDefault();
-      selectItem(target);
-      break;
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        selectItem(target);
+        break;
 
-    case 'Home':
-      e.preventDefault();
-      focusItem(0);
-      break;
+      case 'Home':
+        e.preventDefault();
+        focusItem(0);
+        break;
 
-    case 'End':
-      e.preventDefault();
-      focusItem(getItems().length - 1);
-      break;
+      case 'End':
+        e.preventDefault();
+        focusItem(getItems().length - 1);
+        break;
     }
   };
 
@@ -370,16 +370,10 @@ export function setupSelectorHandler<T extends string>(
   buttonSelector: string,
   options: SelectorHandlerOptions<T> = {}
 ): () => void {
-  const {
-    activeClass = 'active',
-    onSelect,
-    dataAttribute = 'data-value'
-  } = options;
+  const { activeClass = 'active', onSelect, dataAttribute = 'data-value' } = options;
 
   // Extract the attribute name from data-* format
-  const attrName = dataAttribute.startsWith('data-')
-    ? dataAttribute.slice(5)
-    : dataAttribute;
+  const attrName = dataAttribute.startsWith('data-') ? dataAttribute.slice(5) : dataAttribute;
 
   const handlers: Array<{ element: HTMLElement; handler: (e: Event) => void }> = [];
 

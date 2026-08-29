@@ -55,40 +55,50 @@ const router = Router();
  *       201:
  *         description: Comment added
  */
-router.post('/:id/comments', validateRequest(DeliverableValidationSchemas.addComment, { allowUnknownFields: true }), invalidateCache(['deliverables']), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const { id } = req.params;
-    const deliverableId = parseInt(id, 10);
-    if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
+router.post(
+  '/:id/comments',
+  validateRequest(DeliverableValidationSchemas.addComment, { allowUnknownFields: true }),
+  invalidateCache(['deliverables']),
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const deliverableId = parseInt(id, 10);
+      if (isNaN(deliverableId) || deliverableId <= 0) {
+        return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
+      }
+
+      // Check authorization
+      if (!(await canAccessDeliverable(req, deliverableId))) {
+        return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+      }
+
+      const { authorId, text, x, y, annotationType, elementId } = req.body;
+
+      if (!authorId || !text) {
+        return errorResponse(
+          res,
+          'authorId and text are required',
+          400,
+          ErrorCodes.VALIDATION_ERROR
+        );
+      }
+
+      const comment = await deliverableService.addComment(deliverableId, authorId, text, {
+        x,
+        y,
+        annotationType,
+        elementId
+      });
+
+      sendCreated(res, { comment });
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message.includes('not found')) {
+        return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+      }
+      throw error;
     }
-
-    // Check authorization
-    if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
-    }
-
-    const { authorId, text, x, y, annotationType, elementId } = req.body;
-
-    if (!authorId || !text) {
-      return errorResponse(res, 'authorId and text are required', 400, ErrorCodes.VALIDATION_ERROR);
-    }
-
-    const comment = await deliverableService.addComment(deliverableId, authorId, text, {
-      x,
-      y,
-      annotationType,
-      elementId
-    });
-
-    sendCreated(res, { comment });
-  } catch (error: unknown) {
-    if (error instanceof Error && error.message.includes('not found')) {
-      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
-    }
-    throw error;
-  }
-}));
+  })
+);
 
 /**
  * @swagger
@@ -117,27 +127,30 @@ router.post('/:id/comments', validateRequest(DeliverableValidationSchemas.addCom
  *       200:
  *         description: List of comments
  */
-router.get('/:id/comments', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const { id } = req.params;
-  const deliverableId = parseInt(id, 10);
-  if (isNaN(deliverableId) || deliverableId <= 0) {
-    return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
-  }
+router.get(
+  '/:id/comments',
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { id } = req.params;
+    const deliverableId = parseInt(id, 10);
+    if (isNaN(deliverableId) || deliverableId <= 0) {
+      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
 
-  // Check authorization
-  if (!(await canAccessDeliverable(req, deliverableId))) {
-    return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
-  }
+    // Check authorization
+    if (!(await canAccessDeliverable(req, deliverableId))) {
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+    }
 
-  const { resolved, elementId } = req.query;
+    const { resolved, elementId } = req.query;
 
-  const comments = await deliverableService.getDeliverableComments(deliverableId, {
-    resolved: resolved === 'true',
-    elementId: elementId as string
-  });
+    const comments = await deliverableService.getDeliverableComments(deliverableId, {
+      resolved: resolved === 'true',
+      elementId: elementId as string
+    });
 
-  sendSuccess(res, { comments });
-}));
+    sendSuccess(res, { comments });
+  })
+);
 
 /**
  * @swagger

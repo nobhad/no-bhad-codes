@@ -36,9 +36,7 @@ const CURRENCY_CODE_LENGTH = 3;
 
 const SettingsValidationSchemas = {
   updateSetting: {
-    value: [
-      { type: 'required' as const }
-    ],
+    value: [{ type: 'required' as const }],
     type: {
       type: 'string' as const,
       allowedValues: ['string', 'number', 'boolean', 'json']
@@ -62,7 +60,11 @@ const SettingsValidationSchemas = {
   } as ValidationSchema,
 
   updateInvoiceSettings: {
-    defaultCurrency: { type: 'string' as const, minLength: CURRENCY_CODE_LENGTH, maxLength: CURRENCY_CODE_LENGTH },
+    defaultCurrency: {
+      type: 'string' as const,
+      minLength: CURRENCY_CODE_LENGTH,
+      maxLength: CURRENCY_CODE_LENGTH
+    },
     defaultTerms: { type: 'string' as const, maxLength: SETTING_VALUE_MAX_LENGTH },
     prefix: { type: 'string' as const, maxLength: INVOICE_PREFIX_MAX_LENGTH },
     nextSequence: { type: 'number' as const, min: 1, max: INVOICE_SEQUENCE_MAX }

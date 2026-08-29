@@ -94,23 +94,23 @@ async function createFromTemplate(params: CreateFromTemplateParams): Promise<num
 
   // Detect existing entities for the project
   const proposal = (await db.get(
-    'SELECT id FROM proposal_requests WHERE project_id = ? AND status IN (\'sent\', \'viewed\') ORDER BY created_at DESC LIMIT 1',
+    "SELECT id FROM proposal_requests WHERE project_id = ? AND status IN ('sent', 'viewed') ORDER BY created_at DESC LIMIT 1",
     [projectId]
   )) as { id: number } | undefined;
 
   const contract = (await db.get(
-    'SELECT id FROM contracts WHERE project_id = ? AND status IN (\'draft\', \'sent\', \'viewed\') AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 1',
+    "SELECT id FROM contracts WHERE project_id = ? AND status IN ('draft', 'sent', 'viewed') AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 1",
     [projectId]
   )) as { id: number } | undefined;
 
   const questionnaire = (await db.get(
-    'SELECT qr.questionnaire_id as id FROM questionnaire_responses qr WHERE qr.project_id = ? AND qr.status = \'pending\' ORDER BY qr.created_at ASC LIMIT 1',
+    "SELECT qr.questionnaire_id as id FROM questionnaire_responses qr WHERE qr.project_id = ? AND qr.status = 'pending' ORDER BY qr.created_at ASC LIMIT 1",
     [projectId]
   )) as { id: number } | undefined;
 
   // Find first unpaid invoice for deposit
   const depositInvoice = (await db.get(
-    'SELECT id FROM invoices WHERE project_id = ? AND status IN (\'draft\', \'sent\', \'pending\', \'overdue\') AND deleted_at IS NULL ORDER BY created_at ASC LIMIT 1',
+    "SELECT id FROM invoices WHERE project_id = ? AND status IN ('draft', 'sent', 'pending', 'overdue') AND deleted_at IS NULL ORDER BY created_at ASC LIMIT 1",
     [projectId]
   )) as { id: number } | undefined;
 
@@ -122,7 +122,8 @@ async function createFromTemplate(params: CreateFromTemplateParams): Promise<num
     steps.push({
       stepType: 'welcome',
       customTitle: 'Welcome',
-      customContent: 'Thank you for choosing to work with us! Please complete the following steps to get your project started.'
+      customContent:
+        'Thank you for choosing to work with us! Please complete the following steps to get your project started.'
     });
 
     // Proposal review (if exists)
@@ -193,7 +194,10 @@ async function getAgreements(projectId?: number): Promise<AgreementRow[]> {
 /**
  * Get a single agreement with enriched step data.
  */
-async function getEnrichedAgreement(agreementId: number, clientId?: number): Promise<EnrichedAgreement | null> {
+async function getEnrichedAgreement(
+  agreementId: number,
+  clientId?: number
+): Promise<EnrichedAgreement | null> {
   const db = getDatabase();
 
   let query = 'SELECT * FROM project_agreements WHERE id = ?';
@@ -213,10 +217,9 @@ async function getEnrichedAgreement(agreementId: number, clientId?: number): Pro
   )) as AgreementStepRow[];
 
   // Get project and client info
-  const project = (await db.get(
-    'SELECT project_name as name, status FROM projects WHERE id = ?',
-    [agreement.project_id]
-  )) as { name: string; status: string } | undefined;
+  const project = (await db.get('SELECT project_name as name, status FROM projects WHERE id = ?', [
+    agreement.project_id
+  ])) as { name: string; status: string } | undefined;
 
   const client = (await db.get(
     'SELECT COALESCE(contact_name, company_name) as name, email FROM clients WHERE id = ?',
@@ -231,38 +234,38 @@ async function getEnrichedAgreement(agreementId: number, clientId?: number): Pro
       if (step.entity_id) {
         try {
           switch (step.step_type) {
-          case 'proposal_review': {
-            const proposal = await db.get(
-              'SELECT id, project_type, selected_tier, final_price, status FROM proposal_requests WHERE id = ?',
-              [step.entity_id]
-            );
-            enriched.entityData = (proposal as Record<string, unknown>) || undefined;
-            break;
-          }
-          case 'contract_sign': {
-            const contract = await db.get(
-              'SELECT id, status, signed_at FROM contracts WHERE id = ?',
-              [step.entity_id]
-            );
-            enriched.entityData = (contract as Record<string, unknown>) || undefined;
-            break;
-          }
-          case 'deposit_payment': {
-            const invoice = await db.get(
-              'SELECT id, total_amount, status, invoice_number FROM invoices WHERE id = ?',
-              [step.entity_id]
-            );
-            enriched.entityData = (invoice as Record<string, unknown>) || undefined;
-            break;
-          }
-          case 'questionnaire': {
-            const qr = await db.get(
-              'SELECT qr.id, qr.status, q.name FROM questionnaire_responses qr JOIN questionnaires q ON qr.questionnaire_id = q.id WHERE qr.questionnaire_id = ?',
-              [step.entity_id]
-            );
-            enriched.entityData = (qr as Record<string, unknown>) || undefined;
-            break;
-          }
+            case 'proposal_review': {
+              const proposal = await db.get(
+                'SELECT id, project_type, selected_tier, final_price, status FROM proposal_requests WHERE id = ?',
+                [step.entity_id]
+              );
+              enriched.entityData = (proposal as Record<string, unknown>) || undefined;
+              break;
+            }
+            case 'contract_sign': {
+              const contract = await db.get(
+                'SELECT id, status, signed_at FROM contracts WHERE id = ?',
+                [step.entity_id]
+              );
+              enriched.entityData = (contract as Record<string, unknown>) || undefined;
+              break;
+            }
+            case 'deposit_payment': {
+              const invoice = await db.get(
+                'SELECT id, total_amount, status, invoice_number FROM invoices WHERE id = ?',
+                [step.entity_id]
+              );
+              enriched.entityData = (invoice as Record<string, unknown>) || undefined;
+              break;
+            }
+            case 'questionnaire': {
+              const qr = await db.get(
+                'SELECT qr.id, qr.status, q.name FROM questionnaire_responses qr JOIN questionnaires q ON qr.questionnaire_id = q.id WHERE qr.questionnaire_id = ?',
+                [step.entity_id]
+              );
+              enriched.entityData = (qr as Record<string, unknown>) || undefined;
+              break;
+            }
           }
         } catch {
           // Non-critical enrichment failure
@@ -307,36 +310,36 @@ async function completeStep(agreementId: number, stepId: number, clientId?: numb
   // Check expiration
   if (agreement.expires_at && new Date(agreement.expires_at) < new Date()) {
     await db.run(
-      'UPDATE project_agreements SET status = \'expired\', updated_at = datetime(\'now\') WHERE id = ?',
+      "UPDATE project_agreements SET status = 'expired', updated_at = datetime('now') WHERE id = ?",
       [agreementId]
     );
     throw new Error('Agreement has expired');
   }
 
   // Validate and complete the step
-  const step = (await db.get(
-    'SELECT * FROM agreement_steps WHERE id = ? AND agreement_id = ?',
-    [stepId, agreementId]
-  )) as AgreementStepRow | undefined;
+  const step = (await db.get('SELECT * FROM agreement_steps WHERE id = ? AND agreement_id = ?', [
+    stepId,
+    agreementId
+  ])) as AgreementStepRow | undefined;
 
   if (!step) throw new Error('Step not found');
   if (step.status === 'completed') return; // Idempotent
 
   await db.run(
-    'UPDATE agreement_steps SET status = \'completed\', completed_at = datetime(\'now\'), updated_at = datetime(\'now\') WHERE id = ?',
+    "UPDATE agreement_steps SET status = 'completed', completed_at = datetime('now'), updated_at = datetime('now') WHERE id = ?",
     [stepId]
   );
 
   // Check if all steps are completed
   const pendingSteps = (await db.get(
-    'SELECT COUNT(*) as count FROM agreement_steps WHERE agreement_id = ? AND status != \'completed\' AND status != \'skipped\'',
+    "SELECT COUNT(*) as count FROM agreement_steps WHERE agreement_id = ? AND status != 'completed' AND status != 'skipped'",
     [agreementId]
   )) as { count: number };
 
   if (pendingSteps.count === 0) {
     // All steps done — mark agreement as completed
     await db.run(
-      'UPDATE project_agreements SET status = \'completed\', completed_at = datetime(\'now\'), updated_at = datetime(\'now\') WHERE id = ?',
+      "UPDATE project_agreements SET status = 'completed', completed_at = datetime('now'), updated_at = datetime('now') WHERE id = ?",
       [agreementId]
     );
 
@@ -360,13 +363,13 @@ async function completeStep(agreementId: number, stepId: number, clientId?: numb
   } else {
     // Advance current_step to next pending step
     const nextStep = (await db.get(
-      'SELECT step_order FROM agreement_steps WHERE agreement_id = ? AND status = \'pending\' ORDER BY step_order ASC LIMIT 1',
+      "SELECT step_order FROM agreement_steps WHERE agreement_id = ? AND status = 'pending' ORDER BY step_order ASC LIMIT 1",
       [agreementId]
     )) as { step_order: number } | undefined;
 
     if (nextStep) {
       await db.run(
-        'UPDATE project_agreements SET current_step = ?, status = \'in_progress\', updated_at = datetime(\'now\') WHERE id = ?',
+        "UPDATE project_agreements SET current_step = ?, status = 'in_progress', updated_at = datetime('now') WHERE id = ?",
         [nextStep.step_order, agreementId]
       );
     }
@@ -402,7 +405,7 @@ async function sendAgreement(agreementId: number, expiresInDays?: number): Promi
 
   if (firstStep) {
     await db.run(
-      'UPDATE agreement_steps SET status = \'active\', started_at = datetime(\'now\'), updated_at = datetime(\'now\') WHERE id = ?',
+      "UPDATE agreement_steps SET status = 'active', started_at = datetime('now'), updated_at = datetime('now') WHERE id = ?",
       [firstStep.id]
     );
   }
@@ -433,7 +436,7 @@ async function cancelAgreement(agreementId: number): Promise<void> {
   const db = getDatabase();
 
   await db.run(
-    'UPDATE project_agreements SET status = \'cancelled\', updated_at = datetime(\'now\') WHERE id = ?',
+    "UPDATE project_agreements SET status = 'cancelled', updated_at = datetime('now') WHERE id = ?",
     [agreementId]
   );
 }
@@ -478,10 +481,11 @@ async function autoCompleteByEntity(entityType: string, entityId: number): Promi
  */
 async function setExpiration(agreementId: number, expiresAt?: string): Promise<void> {
   const db = getDatabase();
-  const expiry = expiresAt || new Date(Date.now() + DEFAULT_EXPIRY_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  const expiry =
+    expiresAt || new Date(Date.now() + DEFAULT_EXPIRY_DAYS * 24 * 60 * 60 * 1000).toISOString();
 
   await db.run(
-    'UPDATE project_agreements SET expires_at = ?, updated_at = datetime(\'now\') WHERE id = ?',
+    "UPDATE project_agreements SET expires_at = ?, updated_at = datetime('now') WHERE id = ?",
     [expiry, agreementId]
   );
 }
@@ -499,15 +503,16 @@ async function reorderSteps(agreementId: number, stepIds: number[]): Promise<voi
     [agreementId]
   )) as Array<{ id: number }>;
 
-  const existingIds = new Set(existing.map(s => s.id));
+  const existingIds = new Set(existing.map((s) => s.id));
   for (const id of stepIds) {
-    if (!existingIds.has(id)) throw new Error(`Step ${id} does not belong to agreement ${agreementId}`);
+    if (!existingIds.has(id))
+      throw new Error(`Step ${id} does not belong to agreement ${agreementId}`);
   }
 
   // Update step_order for each step
   for (let i = 0; i < stepIds.length; i++) {
     await db.run(
-      'UPDATE agreement_steps SET step_order = ?, updated_at = datetime(\'now\') WHERE id = ?',
+      "UPDATE agreement_steps SET step_order = ?, updated_at = datetime('now') WHERE id = ?",
       [i, stepIds[i]]
     );
   }
@@ -522,7 +527,11 @@ async function reorderSteps(agreementId: number, stepIds: number[]): Promise<voi
  * Process agreement expiration reminders and auto-expire.
  * Called by scheduler cron job.
  */
-async function processExpirations(): Promise<{ reminded7d: number; reminded3d: number; expired: number }> {
+async function processExpirations(): Promise<{
+  reminded7d: number;
+  reminded3d: number;
+  expired: number;
+}> {
   const db = getDatabase();
   const now = new Date();
   let reminded7d = 0;
@@ -546,7 +555,7 @@ async function processExpirations(): Promise<{ reminded7d: number; reminded3d: n
     // Already expired
     if (daysUntilExpiry <= 0) {
       await db.run(
-        'UPDATE project_agreements SET status = \'expired\', updated_at = datetime(\'now\') WHERE id = ?',
+        "UPDATE project_agreements SET status = 'expired', updated_at = datetime('now') WHERE id = ?",
         [agreement.id]
       );
       expired++;
@@ -602,7 +611,7 @@ async function processExpirations(): Promise<{ reminded7d: number; reminded3d: n
         });
 
         await db.run(
-          'UPDATE project_agreements SET reminder_sent_7d = 1, updated_at = datetime(\'now\') WHERE id = ?',
+          "UPDATE project_agreements SET reminder_sent_7d = 1, updated_at = datetime('now') WHERE id = ?",
           [agreement.id]
         );
         reminded7d++;
@@ -626,7 +635,7 @@ async function processExpirations(): Promise<{ reminded7d: number; reminded3d: n
         });
 
         await db.run(
-          'UPDATE project_agreements SET reminder_sent_3d = 1, updated_at = datetime(\'now\') WHERE id = ?',
+          "UPDATE project_agreements SET reminder_sent_3d = 1, updated_at = datetime('now') WHERE id = ?",
           [agreement.id]
         );
         reminded3d++;

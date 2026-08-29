@@ -21,7 +21,14 @@ import { sendNewIntakeNotification } from '../services/email-service.js';
 import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../config/uploads.js';
 import { userService } from '../services/user-service.js';
 import { intakeService } from '../services/intake-service.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, sanitizeErrorMessage, ErrorCodes } from '../utils/api-response.js';
+import {
+  errorResponse,
+  errorResponseWithPayload,
+  sendSuccess,
+  sendCreated,
+  sanitizeErrorMessage,
+  ErrorCodes
+} from '../utils/api-response.js';
 import { rateLimiters } from '../middleware/rate-limiter.js';
 import { validateRequest, ValidationSchemas } from '../middleware/validation.js';
 import { authenticateToken } from '../middleware/auth.js';
@@ -31,9 +38,8 @@ import { sendEmailWithDedupe } from '../services/email-dedupe.js';
 
 registerAsyncTaskHandler('intake.admin-notification', async (payload) => {
   const data = payload as { projectId: number; intakeData: IntakeFormData };
-  await sendEmailWithDedupe(
-    `intake.admin-notification:${data.projectId}`,
-    () => sendNewIntakeNotification(data.intakeData, data.projectId)
+  await sendEmailWithDedupe(`intake.admin-notification:${data.projectId}`, () =>
+    sendNewIntakeNotification(data.intakeData, data.projectId)
   );
 });
 
@@ -252,7 +258,12 @@ router.post(
         clientType,
         hashedPassword,
         features: features as string[],
-        projectName: generateProjectName(intakeData.projectType, clientType, companyName, intakeData.name),
+        projectName: generateProjectName(
+          intakeData.projectType,
+          clientType,
+          companyName,
+          intakeData.name
+        ),
         milestones,
         systemUserId
       });
@@ -291,42 +302,52 @@ router.post(
       // and handler execution.
 
       // Return success response
-      sendCreated(res, {
-        clientId,
-        projectId,
-        proposalRequestId,
-        projectName: generateProjectName(
-          intakeData.projectType,
-          clientType,
-          companyName,
-          intakeData.name
-        ),
-        accessToken,
-        isNewClient,
-        projectPlan: projectPlan.summary,
-        estimatedDelivery: projectPlan.estimatedDelivery,
-        nextSteps: proposalRequestId
-          ? [
-            'Review your proposal in the client portal',
-            'We\'ll finalize your quote within 24-48 hours',
-            'Schedule a call to discuss the details',
-            'Begin project development upon agreement'
-          ]
-          : [
-            'Review your project details in the client portal',
-            'We\'ll send a detailed proposal within 24-48 hours',
-            'Schedule a discovery call to discuss requirements',
-            'Begin project development upon agreement'
-          ]
-      }, 'Intake form processed successfully');
+      sendCreated(
+        res,
+        {
+          clientId,
+          projectId,
+          proposalRequestId,
+          projectName: generateProjectName(
+            intakeData.projectType,
+            clientType,
+            companyName,
+            intakeData.name
+          ),
+          accessToken,
+          isNewClient,
+          projectPlan: projectPlan.summary,
+          estimatedDelivery: projectPlan.estimatedDelivery,
+          nextSteps: proposalRequestId
+            ? [
+                'Review your proposal in the client portal',
+                "We'll finalize your quote within 24-48 hours",
+                'Schedule a call to discuss the details',
+                'Begin project development upon agreement'
+              ]
+            : [
+                'Review your project details in the client portal',
+                "We'll send a detailed proposal within 24-48 hours",
+                'Schedule a discovery call to discuss requirements',
+                'Begin project development upon agreement'
+              ]
+        },
+        'Intake form processed successfully'
+      );
     } catch (error: unknown) {
       await logger.error('Intake processing error:', {
         error: error instanceof Error ? error : undefined,
         category: 'INTAKE'
       });
-      errorResponseWithPayload(res, 'Failed to process intake form', 500, ErrorCodes.INTERNAL_ERROR, {
-        details: sanitizeErrorMessage(error, 'Failed to process intake submission')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to process intake form',
+        500,
+        ErrorCodes.INTERNAL_ERROR,
+        {
+          details: sanitizeErrorMessage(error, 'Failed to process intake submission')
+        }
+      );
     }
   }
 );
@@ -411,21 +432,21 @@ function generateProjectMilestones(projectType: string, timeline: string): Miles
   // Calculate timeline multiplier based on timeline selection
   let timelineWeeks = 4; // default
   switch (timeline) {
-  case 'asap':
-    timelineWeeks = 2;
-    break;
-  case '1-month':
-    timelineWeeks = 4;
-    break;
-  case '1-3-months':
-    timelineWeeks = 8;
-    break;
-  case '3-6-months':
-    timelineWeeks = 16;
-    break;
-  case 'flexible':
-    timelineWeeks = 6;
-    break;
+    case 'asap':
+      timelineWeeks = 2;
+      break;
+    case '1-month':
+      timelineWeeks = 4;
+      break;
+    case '1-3-months':
+      timelineWeeks = 8;
+      break;
+    case '3-6-months':
+      timelineWeeks = 16;
+      break;
+    case 'flexible':
+      timelineWeeks = 6;
+      break;
   }
 
   const addDays = (date: Date, days: number): string => {

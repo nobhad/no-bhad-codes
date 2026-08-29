@@ -80,12 +80,16 @@ export const INSTALLMENT_COLUMNS = `
   psi.payment_reference, psi.invoice_id, psi.notes,
   psi.reminder_sent_at, psi.reminder_count,
   psi.created_at, psi.updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const INSTALLMENT_COLUMNS_WITH_JOINS = `
   ${INSTALLMENT_COLUMNS},
   p.project_name, c.contact_name AS client_name
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // SCHEMA & MAPPER

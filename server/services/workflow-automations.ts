@@ -170,10 +170,10 @@ async function handleProposalAccepted(data: {
 
     // Generate tier-aware milestones and tasks (idempotent — skip if milestones already exist)
     try {
-      const existingMilestone = await db.get(
+      const existingMilestone = (await db.get(
         'SELECT id FROM milestones WHERE project_id = ? LIMIT 1',
         [projectId]
-      ) as { id: number } | undefined;
+      )) as { id: number } | undefined;
 
       if (existingMilestone) {
         logger.info('proposal.accepted: Milestones already exist, skipping generation', {
@@ -181,20 +181,20 @@ async function handleProposalAccepted(data: {
           metadata: { projectId, existingMilestoneId: existingMilestone.id }
         });
       } else {
-      // Fetch proposal features for tier-aware generation
+        // Fetch proposal features for tier-aware generation
         const { proposalService } = await import('./proposal-service.js');
         const features = await proposalService.getProposalFeatures(proposalId);
 
         const milestoneResult = await generateTierMilestones(
-        projectId!,
-        proposal.project_type || 'other',
-        proposal.selected_tier || 'good',
-        features as Array<{
-          feature_name: string;
-          feature_category?: string | null;
-          is_addon?: number | boolean;
-        }>,
-        { startDate: new Date() }
+          projectId!,
+          proposal.project_type || 'other',
+          proposal.selected_tier || 'good',
+          features as Array<{
+            feature_name: string;
+            feature_category?: string | null;
+            is_addon?: number | boolean;
+          }>,
+          { startDate: new Date() }
         );
         logger.info('proposal.accepted: Generated tier-aware milestones and tasks', {
           category: 'workflow',
@@ -221,7 +221,7 @@ async function handleProposalAccepted(data: {
 
       // Check if contract already exists for this project
       const existingContract = await db.get(
-        'SELECT id FROM contracts WHERE project_id = ? AND status != \'cancelled\' AND deleted_at IS NULL LIMIT 1',
+        "SELECT id FROM contracts WHERE project_id = ? AND status != 'cancelled' AND deleted_at IS NULL LIMIT 1",
         [projectId]
       );
 
@@ -423,7 +423,9 @@ async function handleContractSigned(data: {
 
   if (!projectId && data.entityId) {
     // entityId might be the contract ID, get the project from it
-    const contract = await db.get('SELECT project_id FROM active_contracts WHERE id = ?', [data.entityId]);
+    const contract = await db.get('SELECT project_id FROM active_contracts WHERE id = ?', [
+      data.entityId
+    ]);
     if (contract) {
       projectId = getNumber(contract as Record<string, unknown>, 'project_id');
     }
@@ -436,9 +438,10 @@ async function handleContractSigned(data: {
 
   try {
     // Get current project status
-    const project = await db.get('SELECT id, status, project_name FROM active_projects WHERE id = ?', [
-      projectId
-    ]);
+    const project = await db.get(
+      'SELECT id, status, project_name FROM active_projects WHERE id = ?',
+      [projectId]
+    );
 
     if (!project) {
       logger.warn('contract.signed: Project not found', {
@@ -726,10 +729,10 @@ async function loadEmailTemplate(
 async function dispatchWebhooks(eventType: string, data: Record<string, unknown>): Promise<void> {
   try {
     const db = getDatabase();
-    const configs = await db.all(
+    const configs = (await db.all(
       'SELECT id, platform, webhook_url, channel FROM notification_integrations WHERE is_active = 1 AND events LIKE ?',
       [`%${eventType}%`]
-    ) as Array<{ id: number; platform: string; webhook_url: string; channel: string | null }>;
+    )) as Array<{ id: number; platform: string; webhook_url: string; channel: string | null }>;
 
     if (configs.length === 0) return;
 
@@ -757,10 +760,14 @@ async function dispatchWebhooks(eventType: string, data: Record<string, unknown>
         );
       } catch (err) {
         // Log failure per webhook — don't stop processing others
-        await db.run(
-          'INSERT INTO notification_delivery_logs (integration_id, event_type, payload, status, error_message) VALUES (?, ?, ?, ?, ?)',
-          [config.id, eventType, JSON.stringify(data), 'failed', String(err)]
-        ).catch(() => { /* ignore logging failures */ });
+        await db
+          .run(
+            'INSERT INTO notification_delivery_logs (integration_id, event_type, payload, status, error_message) VALUES (?, ?, ?, ?, ?)',
+            [config.id, eventType, JSON.stringify(data), 'failed', String(err)]
+          )
+          .catch(() => {
+            /* ignore logging failures */
+          });
 
         logger.error(`Webhook dispatch failed for ${config.platform}`, {
           category: 'workflow',
@@ -886,7 +893,9 @@ async function sendClientNotification(
       subject,
       message,
       ...options?.eventData
-    }).catch(() => { /* non-blocking */ });
+    }).catch(() => {
+      /* non-blocking */
+    });
   }
 }
 
@@ -920,7 +929,12 @@ async function notifyProposalAccepted(data: {
     `Your proposal for "${projectName}" has been accepted! The next step is to review and sign the contract to get started.`,
     'View Your Portal',
     getPortalUrl(),
-    { templateSlug: 'Proposal Accepted', templateVars: { project_name: projectName }, eventType: 'proposal.accepted', eventData: { projectName } }
+    {
+      templateSlug: 'Proposal Accepted',
+      templateVars: { project_name: projectName },
+      eventType: 'proposal.accepted',
+      eventData: { projectName }
+    }
   );
 }
 
@@ -935,9 +949,10 @@ async function notifyContractSigned(data: {
   if (!projectId) return;
 
   const db = getDatabase();
-  const project = (await db.get('SELECT project_name, client_id FROM active_projects WHERE id = ?', [
-    projectId
-  ])) as Record<string, unknown> | undefined;
+  const project = (await db.get(
+    'SELECT project_name, client_id FROM active_projects WHERE id = ?',
+    [projectId]
+  )) as Record<string, unknown> | undefined;
 
   if (!project) return;
 
@@ -950,7 +965,12 @@ async function notifyContractSigned(data: {
     `The contract for "${projectName}" has been signed and your project is now active! You can track progress, view milestones, and communicate with us through your portal.`,
     'View Project Status',
     `${getPortalUrl()}#projects`,
-    { templateSlug: 'Contract Signed', templateVars: { project_name: projectName }, eventType: 'contract.signed', eventData: { projectName } }
+    {
+      templateSlug: 'Contract Signed',
+      templateVars: { project_name: projectName },
+      eventType: 'contract.signed',
+      eventData: { projectName }
+    }
   );
 }
 
@@ -985,7 +1005,12 @@ async function notifyDeliverableApproved(data: {
     `"${title}" for "${projectName}" has been approved and is now available in your Files. You can download it from your portal.`,
     'View Files',
     `${getPortalUrl()}#files`,
-    { templateSlug: 'Deliverable Approved', templateVars: { project_name: projectName, deliverable_title: title }, eventType: 'deliverable.approved', eventData: { projectName, title } }
+    {
+      templateSlug: 'Deliverable Approved',
+      templateVars: { project_name: projectName, deliverable_title: title },
+      eventType: 'deliverable.approved',
+      eventData: { projectName, title }
+    }
   );
 }
 
@@ -1017,7 +1042,12 @@ async function notifyQuestionnaireCompleted(data: { entityId?: number | null }):
     `Thank you for completing "${title}" for "${projectName}". Your responses have been received and a PDF summary has been added to your project files.`,
     'View Your Portal',
     getPortalUrl(),
-    { templateSlug: 'Questionnaire Completed', templateVars: { project_name: projectName, questionnaire_title: title }, eventType: 'questionnaire.completed', eventData: { projectName, title } }
+    {
+      templateSlug: 'Questionnaire Completed',
+      templateVars: { project_name: projectName, questionnaire_title: title },
+      eventType: 'questionnaire.completed',
+      eventData: { projectName, title }
+    }
   );
 }
 
@@ -1049,7 +1079,12 @@ async function notifyDocumentRequestApproved(data: { entityId?: number | null })
     `Your submitted document "${title}" for "${projectName}" has been approved. It has been added to your project files.`,
     'View Files',
     `${getPortalUrl()}#files`,
-    { templateSlug: 'Document Approved', templateVars: { project_name: projectName, document_title: title }, eventType: 'document_request.approved', eventData: { projectName, title } }
+    {
+      templateSlug: 'Document Approved',
+      templateVars: { project_name: projectName, document_title: title },
+      eventType: 'document_request.approved',
+      eventData: { projectName, title }
+    }
   );
 }
 
@@ -1082,7 +1117,16 @@ async function notifyInvoicePaid(data: { entityId?: number | null }): Promise<vo
     `We've received your payment of $${amount.toFixed(2)} for Invoice #${invoiceNumber} (${projectName}). A receipt has been generated and is available in your portal.`,
     'View Receipt',
     `${getPortalUrl()}#invoices`,
-    { templateSlug: 'Invoice Paid', templateVars: { project_name: projectName, invoice_number: invoiceNumber, amount: amount.toFixed(2) }, eventType: 'invoice.paid', eventData: { projectName, invoiceNumber, amount } }
+    {
+      templateSlug: 'Invoice Paid',
+      templateVars: {
+        project_name: projectName,
+        invoice_number: invoiceNumber,
+        amount: amount.toFixed(2)
+      },
+      eventType: 'invoice.paid',
+      eventData: { projectName, invoiceNumber, amount }
+    }
   );
 }
 
@@ -1117,7 +1161,12 @@ async function notifyMilestoneCompleted(data: {
     `Great news! The milestone "${title}" for "${projectName}" has been completed. Check your portal for updated project progress.`,
     'View Project Progress',
     `${getPortalUrl()}#projects`,
-    { templateSlug: 'Milestone Completed', templateVars: { project_name: projectName, milestone_title: title }, eventType: 'project.milestone_completed', eventData: { projectName, title } }
+    {
+      templateSlug: 'Milestone Completed',
+      templateVars: { project_name: projectName, milestone_title: title },
+      eventType: 'project.milestone_completed',
+      eventData: { projectName, title }
+    }
   );
 }
 
@@ -1222,11 +1271,17 @@ async function handleMaintenanceActivation(data: {
             maintenance_included_months, maintenance_recurring_invoice_id
      FROM projects WHERE id = ?`,
     [projectId]
-  )) as {
-    id: number; client_id: number; project_name: string;
-    maintenance_tier: string | null; maintenance_status: string;
-    maintenance_included_months: number; maintenance_recurring_invoice_id: number | null;
-  } | undefined;
+  )) as
+    | {
+        id: number;
+        client_id: number;
+        project_name: string;
+        maintenance_tier: string | null;
+        maintenance_status: string;
+        maintenance_included_months: number;
+        maintenance_recurring_invoice_id: number | null;
+      }
+    | undefined;
 
   if (!project) return;
   if (!project.maintenance_tier || project.maintenance_tier === 'diy') return;
@@ -1239,11 +1294,14 @@ async function handleMaintenanceActivation(data: {
     const allOptions = getMaintenanceOptions();
     const tierConfig = allOptions[project.maintenance_tier];
     if (!tierConfig || tierConfig.monthlyPrice <= 0) {
-      logger.info(`Maintenance tier '${project.maintenance_tier}' has no monthly price, skipping recurring invoice`, {
-        category: 'workflow'
-      });
+      logger.info(
+        `Maintenance tier '${project.maintenance_tier}' has no monthly price, skipping recurring invoice`,
+        {
+          category: 'workflow'
+        }
+      );
       await db.run(
-        'UPDATE projects SET maintenance_status = \'active\', maintenance_start_date = ? WHERE id = ?',
+        "UPDATE projects SET maintenance_status = 'active', maintenance_start_date = ? WHERE id = ?",
         [new Date().toISOString().split('T')[0], projectId]
       );
       return;
@@ -1259,10 +1317,10 @@ async function handleMaintenanceActivation(data: {
       billingStartDate = start.toISOString().split('T')[0];
 
       // Store when included period ends
-      await db.run(
-        'UPDATE projects SET maintenance_included_until = ? WHERE id = ?',
-        [billingStartDate, projectId]
-      );
+      await db.run('UPDATE projects SET maintenance_included_until = ? WHERE id = ?', [
+        billingStartDate,
+        projectId
+      ]);
     } else {
       // Billing starts next month (give 30 days grace after project completion)
       const start = new Date(now);
@@ -1277,12 +1335,14 @@ async function handleMaintenanceActivation(data: {
       clientId: project.client_id,
       frequency: 'monthly',
       dayOfMonth: 1,
-      lineItems: [{
-        description: `${tierConfig.displayName} — Monthly Maintenance`,
-        quantity: 1,
-        rate: tierConfig.monthlyPrice,
-        amount: tierConfig.monthlyPrice
-      }],
+      lineItems: [
+        {
+          description: `${tierConfig.displayName} — Monthly Maintenance`,
+          quantity: 1,
+          rate: tierConfig.monthlyPrice,
+          amount: tierConfig.monthlyPrice
+        }
+      ],
       notes: `Auto-generated maintenance plan for ${project.project_name}`,
       startDate: billingStartDate
     });
@@ -1423,7 +1483,7 @@ async function handleSequenceEvent(data: {
     if (event.startsWith('lead.')) {
       entityType = 'lead';
       const lead = (await db.get(
-        'SELECT email, COALESCE(contact_name, company_name) as name FROM projects WHERE id = ? AND source_type = \'lead\'',
+        "SELECT email, COALESCE(contact_name, company_name) as name FROM projects WHERE id = ? AND source_type = 'lead'",
         [data.entityId]
       )) as { email: string; name: string } | undefined;
       entityEmail = lead?.email;
@@ -1504,15 +1564,34 @@ export function registerWorkflowAutomations(): void {
 
   // Custom Automation Engine (route ALL events)
   const ALL_AUTOMATION_EVENTS = [
-    'lead.created', 'lead.stage_changed', 'lead.converted',
-    'proposal.created', 'proposal.sent', 'proposal.accepted', 'proposal.rejected',
-    'contract.created', 'contract.sent', 'contract.signed', 'contract.expired',
-    'project.created', 'project.started', 'project.completed', 'project.status_changed',
+    'lead.created',
+    'lead.stage_changed',
+    'lead.converted',
+    'proposal.created',
+    'proposal.sent',
+    'proposal.accepted',
+    'proposal.rejected',
+    'contract.created',
+    'contract.sent',
+    'contract.signed',
+    'contract.expired',
+    'project.created',
+    'project.started',
+    'project.completed',
+    'project.status_changed',
     'project.milestone_completed',
-    'invoice.created', 'invoice.sent', 'invoice.paid', 'invoice.overdue', 'invoice.cancelled',
-    'task.created', 'task.completed', 'task.overdue',
-    'client.created', 'client.activated',
-    'deliverable.approved', 'questionnaire.completed',
+    'invoice.created',
+    'invoice.sent',
+    'invoice.paid',
+    'invoice.overdue',
+    'invoice.cancelled',
+    'task.created',
+    'task.completed',
+    'task.overdue',
+    'client.created',
+    'client.activated',
+    'deliverable.approved',
+    'questionnaire.completed',
     'agreement.completed'
   ] as const;
 
@@ -1522,8 +1601,12 @@ export function registerWorkflowAutomations(): void {
 
   // Email Sequence Auto-Enrollment (route events to sequence service)
   const SEQUENCE_TRIGGER_EVENTS = [
-    'lead.created', 'lead.stage_changed', 'lead.converted',
-    'proposal.sent', 'proposal.accepted', 'proposal.rejected',
+    'lead.created',
+    'lead.stage_changed',
+    'lead.converted',
+    'proposal.sent',
+    'proposal.accepted',
+    'proposal.rejected',
     'client.created'
   ] as const;
 

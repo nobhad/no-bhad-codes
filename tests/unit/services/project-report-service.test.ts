@@ -485,7 +485,12 @@ describe('generateProjectReportPdf', () => {
     const dataWithDeliverables = {
       ...baseReportData,
       deliverables: [
-        { name: 'Wireframes', status: 'approved', submittedAt: '2026-02-01', approvedAt: '2026-02-05' },
+        {
+          name: 'Wireframes',
+          status: 'approved',
+          submittedAt: '2026-02-01',
+          approvedAt: '2026-02-05'
+        },
         { name: 'Mockups', status: 'rejected', submittedAt: '2026-02-10', approvedAt: null },
         { name: 'Final', status: 'pending', submittedAt: null, approvedAt: null }
       ]

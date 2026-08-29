@@ -111,7 +111,12 @@ router.post(
     const { clientId, projectId, text, clientName, companyName, rating } = req.body;
 
     if (!clientId || !text || !clientName) {
-      errorResponse(res, 'clientId, text, and clientName are required', 400, ErrorCodes.VALIDATION_ERROR);
+      errorResponse(
+        res,
+        'clientId, text, and clientName are required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
       return;
     }
 

@@ -63,7 +63,7 @@ function parseTokens(css: string): Token[] {
         tokens.push({
           name: decl[1],
           value: decl[2].trim().replace(/\s+/g, ' '),
-          scope: stack.join(' > ') || ':root',
+          scope: stack.join(' > ') || ':root'
         });
       }
       buf = '';
@@ -90,10 +90,8 @@ describe('design system tokens', () => {
     // Only literal values — aliases are already covered by the name snapshot.
     const literals = [
       ...new Set(
-        allTokens
-          .filter((t) => !t.value.startsWith('var('))
-          .map((t) => `${t.name}: ${t.value}`)
-      ),
+        allTokens.filter((t) => !t.value.startsWith('var(')).map((t) => `${t.name}: ${t.value}`)
+      )
     ].sort();
     expect(literals).toMatchSnapshot();
   });

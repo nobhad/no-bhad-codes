@@ -93,7 +93,14 @@ export function useDeleteConfirm<T>(
       variant: 'danger' as const,
       loading: dialog.isLoading
     }),
-    [dialog.isOpen, dialog.setIsOpen, dialog.isLoading, capitalizedLabel, description, handleConfirm]
+    [
+      dialog.isOpen,
+      dialog.setIsOpen,
+      dialog.isLoading,
+      capitalizedLabel,
+      description,
+      handleConfirm
+    ]
   );
 
   return { target, openConfirm, dialogProps };

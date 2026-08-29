@@ -66,10 +66,7 @@ function buildSquareChevronIcon(direction: 'up' | 'down'): SVGSVGElement {
   svg.appendChild(rect);
 
   const path = document.createElementNS(SVG_NS, 'path');
-  path.setAttribute(
-    'd',
-    direction === 'up' ? 'm8 14 4-4 4 4' : 'm16 10-4 4-4-4'
-  );
+  path.setAttribute('d', direction === 'up' ? 'm8 14 4-4 4 4' : 'm16 10-4 4-4-4');
   svg.appendChild(path);
 
   return svg;
@@ -184,10 +181,10 @@ const HERO_PLACEHOLDER_SRC = '/images/project-placeholder.svg';
 // fades in (crossfade) — the outro panel is sticky as the terminal frame.
 const TV_STATIC_FLASH_OPACITY = 0.85; // peak of the channel-change burst
 const TV_STATIC_GRAIN_OPACITY = 0.18; // residual grain after the burst
-const TV_BG_FLASH_S = 0.2;            // beat per-project bg holds alone before composed card fades in
-const TV_BLANK_FLASH_S = 0.15;        // blank title-card flash between channels (the "between channels" void)
-const TV_TITLE_HOLD_S = 1.4;          // beat the composed title card holds
-const TV_DOCK_DURATION_S = 0.55;      // composed → bg crossfade duration
+const TV_BG_FLASH_S = 0.2; // beat per-project bg holds alone before composed card fades in
+const TV_BLANK_FLASH_S = 0.15; // blank title-card flash between channels (the "between channels" void)
+const TV_TITLE_HOLD_S = 1.4; // beat the composed title card holds
+const TV_DOCK_DURATION_S = 0.55; // composed → bg crossfade duration
 // Per-panel hold time. Paragraphs need real read time; short panels
 // (tagline, details, lists) feel sluggish if held that long.
 const TV_PANEL_HOLD_S: Record<string, number> = {
@@ -202,12 +199,12 @@ const TV_PANEL_HOLD_S: Record<string, number> = {
 };
 const TV_SECTION_PAUSE_S_DEFAULT = 6.0; // fallback for any unmapped panel key
 const TV_MOBILE_SCROLL_HOLD_MULTIPLIER = 2.2; // mobile prose panels hold 2.2× longer so the bottom-to-top scroll reads at a comfortable pace
-const TV_TEXT_SWAP_BEAT_S = 0.35;     // empty beat between title fade-out and first panel fade-in
-const TV_TEXT_FADE_S = 0.45;          // panel fade-in / fade-out duration
-const TV_HEADING_FLASH_S = 0.35;      // section heading scale-flash duration (no-span fallback)
-const TV_HEADING_HOLD_S = 2.0;        // beat heading sits alone before body fades in
-const TV_WORD_PULSE_S = 0.4;          // per-word pop-in duration (tagline + Challenge/Approach headings)
-const TV_WORD_STAGGER_S = 0.18;       // delay between each word's pop
+const TV_TEXT_SWAP_BEAT_S = 0.35; // empty beat between title fade-out and first panel fade-in
+const TV_TEXT_FADE_S = 0.45; // panel fade-in / fade-out duration
+const TV_HEADING_FLASH_S = 0.35; // section heading scale-flash duration (no-span fallback)
+const TV_HEADING_HOLD_S = 2.0; // beat heading sits alone before body fades in
+const TV_WORD_PULSE_S = 0.4; // per-word pop-in duration (tagline + Challenge/Approach headings)
+const TV_WORD_STAGGER_S = 0.18; // delay between each word's pop
 
 // Arrow SVG for project cards
 const ARROW_SVG = `
@@ -895,24 +892,24 @@ export class ProjectsModule extends BaseModule {
       if (action !== 'power' && tv.classList.contains('is-powered-off')) return;
 
       switch (action) {
-      case 'power':
-        this.toggleTvPower();
-        break;
-      case 'channel-up':
-        // CHANNEL UP = next higher channel number (down in the array
-        // direction the wheel/key handler uses, since "down" cycles to
-        // the next channel).
-        this.cycleTvChannel(+1);
-        break;
-      case 'channel-down':
-        this.cycleTvChannel(-1);
-        break;
-      case 'volume-up':
-        tvSfx.stepUp();
-        break;
-      case 'volume-down':
-        tvSfx.stepDown();
-        break;
+        case 'power':
+          this.toggleTvPower();
+          break;
+        case 'channel-up':
+          // CHANNEL UP = next higher channel number (down in the array
+          // direction the wheel/key handler uses, since "down" cycles to
+          // the next channel).
+          this.cycleTvChannel(+1);
+          break;
+        case 'channel-down':
+          this.cycleTvChannel(-1);
+          break;
+        case 'volume-up':
+          tvSfx.stepUp();
+          break;
+        case 'volume-down':
+          tvSfx.stepDown();
+          break;
       }
     });
   }
@@ -985,11 +982,9 @@ export class ProjectsModule extends BaseModule {
     // Current channel: derive from active tune-in slug (if any) so the
     // button matches what's actually on screen.
     const currentSlug = this.activeTuneInSlug;
-    const currentIdx = currentSlug
-      ? documented.findIndex((p) => p.slug === currentSlug) + 1
-      : 0;
+    const currentIdx = currentSlug ? documented.findIndex((p) => p.slug === currentSlug) + 1 : 0;
 
-    const nextIdx = ((currentIdx + delta) % total + total) % total;
+    const nextIdx = (((currentIdx + delta) % total) + total) % total;
     // Button press is a user-initiated cycle → trigger the tune-in.
     // (TV-button click sound is handled by tvSfx's delegated listener.)
     this.setTvChannel(nextIdx, { cycle: true });
@@ -1017,7 +1012,7 @@ export class ProjectsModule extends BaseModule {
     // Title + category stack vertically in the middle column; year sits
     // alone in the right column. Two-digit zero-padded numbers so the
     // left column stays visually aligned.
-    const buildRow = (p: typeof documented[number], i: number, ariaHidden = false): string => `
+    const buildRow = (p: (typeof documented)[number], i: number, ariaHidden = false): string => `
         <li class="crt-tv__channel-row-item"${ariaHidden ? ' aria-hidden="true"' : ''}>
           <button type="button"
                   class="crt-tv__channel-row"
@@ -1221,7 +1216,15 @@ export class ProjectsModule extends BaseModule {
 
     // Fall back to plain navigation if the TV elements aren't present
     // (mobile, or anything that strips the centered TV layout).
-    if (!screen || !screenBg || !channelList || !staticOverlay || !tunein || !panelsEl || !composedImg) {
+    if (
+      !screen ||
+      !screenBg ||
+      !channelList ||
+      !staticOverlay ||
+      !tunein ||
+      !panelsEl ||
+      !composedImg
+    ) {
       window.location.hash = `#/projects/${slug}`;
       return;
     }
@@ -1332,11 +1335,7 @@ export class ProjectsModule extends BaseModule {
 
     // 4) Crossfade composed → bg-only (composed fades out, bg already
     //    sits underneath it from step 1).
-    tl.to(
-      composedImg,
-      { opacity: 0, duration: TV_DOCK_DURATION_S, ease: 'power2.inOut' },
-      '>'
-    );
+    tl.to(composedImg, { opacity: 0, duration: TV_DOCK_DURATION_S, ease: 'power2.inOut' }, '>');
 
     // 5) Beat between title-card text fading out and first section text
     //    fading in — distinct text states, not a crossfade.
@@ -1395,13 +1394,16 @@ export class ProjectsModule extends BaseModule {
       // ("Full Stack" / "Developer" on two lines). Avoids orphaned
       // characters when the column gets narrow.
       const roleWords = project.role.trim().split(/\s+/);
-      const roleHtml = roleWords.length > 1
-        ? `${escapeHtml(roleWords.slice(0, -1).join(' '))}\n${escapeHtml(roleWords[roleWords.length - 1])}`
-        : escapeHtml(project.role);
+      const roleHtml =
+        roleWords.length > 1
+          ? `${escapeHtml(roleWords.slice(0, -1).join(' '))}\n${escapeHtml(roleWords[roleWords.length - 1])}`
+          : escapeHtml(project.role);
       detailRows.push(`<dt>Role</dt><dd>${roleHtml}</dd>`);
     }
     if (project.year) {
-      detailRows.push(`<dt>Year</dt><dd>${escapeHtml(project.yearDisplay ?? String(project.year))}</dd>`);
+      detailRows.push(
+        `<dt>Year</dt><dd>${escapeHtml(project.yearDisplay ?? String(project.year))}</dd>`
+      );
     }
     if (project.duration) {
       detailRows.push(`<dt>Duration</dt><dd>${escapeHtml(project.duration)}</dd>`);
@@ -1580,7 +1582,13 @@ export class ProjectsModule extends BaseModule {
           tl.fromTo(
             headingWords,
             { opacity: 0, scale: 0.7 },
-            { opacity: 1, scale: 1, duration: TV_WORD_PULSE_S, ease: 'back.out(2.4)', stagger: TV_WORD_STAGGER_S }
+            {
+              opacity: 1,
+              scale: 1,
+              duration: TV_WORD_PULSE_S,
+              ease: 'back.out(2.4)',
+              stagger: TV_WORD_STAGGER_S
+            }
           );
         } else {
           // Fallback: heading without word spans — pop the whole thing.
@@ -1613,10 +1621,12 @@ export class ProjectsModule extends BaseModule {
               gsap.set(body, { opacity: 1, y: startY });
             });
           } else {
-            tl.to(
-              body,
-              { opacity: 1, duration: TV_TEXT_FADE_S, stagger: 0.06, ease: 'power2.out' }
-            );
+            tl.to(body, {
+              opacity: 1,
+              duration: TV_TEXT_FADE_S,
+              stagger: 0.06,
+              ease: 'power2.out'
+            });
           }
         }
       } else if (key === 'tagline') {
@@ -1654,10 +1664,12 @@ export class ProjectsModule extends BaseModule {
             gsap.set(panel.children, { opacity: 1, y: startY });
           });
         } else {
-          tl.to(
-            panel.children,
-            { opacity: 1, duration: TV_TEXT_FADE_S, stagger: 0.06, ease: 'power2.out' }
-          );
+          tl.to(panel.children, {
+            opacity: 1,
+            duration: TV_TEXT_FADE_S,
+            stagger: 0.06,
+            ease: 'power2.out'
+          });
         }
       }
 
@@ -1665,9 +1677,7 @@ export class ProjectsModule extends BaseModule {
       // short panels (tagline / details / lists). Mobile scroll-prose
       // panels get a longer hold so the auto-scroll reads comfortably.
       const baseHold = TV_PANEL_HOLD_S[key] ?? TV_SECTION_PAUSE_S_DEFAULT;
-      const holdSeconds = isScrollPanel
-        ? baseHold * TV_MOBILE_SCROLL_HOLD_MULTIPLIER
-        : baseHold;
+      const holdSeconds = isScrollPanel ? baseHold * TV_MOBILE_SCROLL_HOLD_MULTIPLIER : baseHold;
       tl.add(() => {
         if (!isMobile) return;
         const screenH = panel.clientHeight;
@@ -1747,10 +1757,9 @@ export class ProjectsModule extends BaseModule {
     });
 
     // Static peak + bg src swaps to the blank base.
-    tl.to(staticOverlay, { opacity: TV_STATIC_FLASH_OPACITY, duration: 0.06 }, 0)
-      .add(() => {
-        screenBg.src = '/images/tv/base-on.webp';
-      }, 0.05);
+    tl.to(staticOverlay, { opacity: TV_STATIC_FLASH_OPACITY, duration: 0.06 }, 0).add(() => {
+      screenBg.src = '/images/tv/base-on.webp';
+    }, 0.05);
 
     // Hold the blank under the static peak (between-channels void beat).
     tl.to({}, { duration: TV_BLANK_FLASH_S });
@@ -1779,7 +1788,8 @@ export class ProjectsModule extends BaseModule {
     const staticOverlay = document.querySelector('.crt-tv__static') as HTMLElement | null;
     if (!staticOverlay) return;
     gsap.killTweensOf(staticOverlay);
-    gsap.timeline()
+    gsap
+      .timeline()
       .to(staticOverlay, { opacity: TV_STATIC_FLASH_OPACITY, duration: 0.04 })
       .to(staticOverlay, { opacity: 0, duration: 0.22, ease: 'power2.out' });
   }
@@ -1870,9 +1880,7 @@ export class ProjectsModule extends BaseModule {
     // What's currently on screen? activeTuneInSlug is set when a project
     // tune-in is playing/parked; null means we're on the guide.
     const prevSlug = this.activeTuneInSlug;
-    const prevChannelIdx = prevSlug
-      ? documented.findIndex((p) => p.slug === prevSlug) + 1
-      : 0;
+    const prevChannelIdx = prevSlug ? documented.findIndex((p) => p.slug === prevSlug) + 1 : 0;
 
     // No-op if the channel didn't actually change.
     if (prevChannelIdx === safeIndex) return;
@@ -2113,7 +2121,9 @@ export class ProjectsModule extends BaseModule {
     // Update breadcrumb current-page label with the project title.
     // Static "Projects /" segment is in the markup; only the trailing
     // current title is dynamic.
-    const breadcrumbCurrent = this.projectDetailSection.querySelector('#project-breadcrumb-current');
+    const breadcrumbCurrent = this.projectDetailSection.querySelector(
+      '#project-breadcrumb-current'
+    );
     if (breadcrumbCurrent) {
       breadcrumbCurrent.textContent = project.title;
     }
@@ -2317,11 +2327,7 @@ export class ProjectsModule extends BaseModule {
       project.screenshots.forEach((src, index) => {
         const isMobile = /mobile|phone/i.test(src);
         const isDocPage = /\/pdfs\//.test(src);
-        const imgClass = isMobile
-          ? ' class="phone-screen"'
-          : isDocPage
-            ? ' class="doc-page"'
-            : '';
+        const imgClass = isMobile ? ' class="phone-screen"' : isDocPage ? ' class="doc-page"' : '';
         const resolved = this.resolveThemedPath(src);
         // Same theme-swap contract as the hero + walkthrough above:
         // screenshots showcase the theme the viewer is NOT looking at,
@@ -2466,7 +2472,14 @@ export class ProjectsModule extends BaseModule {
       gsap.fromTo(
         backButton,
         { opacity: 0, x: '-170%' },
-        { opacity: 1, x: 0, duration: 0.8, delay: 0.8, ease: 'power2.out', clearProps: 'transform,opacity' }
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.8,
+          delay: 0.8,
+          ease: 'power2.out',
+          clearProps: 'transform,opacity'
+        }
       );
     }
 
@@ -2475,7 +2488,14 @@ export class ProjectsModule extends BaseModule {
       gsap.fromTo(
         header,
         { opacity: 0, y: '-30%' },
-        { opacity: 1, y: 0, duration: 0.5, delay: 0.3, ease: 'power2.out', clearProps: 'transform,opacity' }
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          delay: 0.3,
+          ease: 'power2.out',
+          clearProps: 'transform,opacity'
+        }
       );
     }
 
@@ -2484,7 +2504,14 @@ export class ProjectsModule extends BaseModule {
       gsap.fromTo(
         intro,
         { opacity: 0, y: 100 },
-        { opacity: 1, y: 0, duration: 0.5, delay: 0.5, ease: 'power2.out', clearProps: 'transform,opacity' }
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          delay: 0.5,
+          ease: 'power2.out',
+          clearProps: 'transform,opacity'
+        }
       );
     }
   }

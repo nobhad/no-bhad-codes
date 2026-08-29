@@ -10,7 +10,13 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
+import {
+  ErrorCodes,
+  errorResponse,
+  errorResponseWithPayload,
+  sendSuccess,
+  sanitizeErrorMessage
+} from '../../utils/api-response.js';
 import { invalidateCache } from '../../middleware/cache.js';
 import { getInvoiceService, toSnakeCaseCredit } from './helpers.js';
 
@@ -39,9 +45,15 @@ router.post(
     }
 
     if (!depositInvoiceId || !amount) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.MISSING_FIELDS, {
-        required: ['depositInvoiceId', 'amount']
-      });
+      return errorResponseWithPayload(
+        res,
+        'Missing required fields',
+        400,
+        ErrorCodes.MISSING_FIELDS,
+        {
+          required: ['depositInvoiceId', 'amount']
+        }
+      );
     }
 
     try {
@@ -92,9 +104,15 @@ router.get(
         total_credits: totalCredits
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve credits', 500, ErrorCodes.RETRIEVAL_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to retrieve invoice credits')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve credits',
+        500,
+        ErrorCodes.RETRIEVAL_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to retrieve invoice credits')
+        }
+      );
     }
   })
 );

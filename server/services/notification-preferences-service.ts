@@ -22,17 +22,23 @@ const NOTIFICATION_PREFERENCES_COLUMNS = `
   notify_proposal_created, notify_contract_ready, notify_file_uploaded,
   quiet_hours_enabled, quiet_hours_start, quiet_hours_end,
   marketing_emails, newsletter_emails, product_updates, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const NOTIFICATION_LOG_COLUMNS = `
   id, user_id, user_type, notification_type, channel, subject, message_preview,
   status, error_message, sent_at, delivered_at, read_at, metadata, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const NOTIFICATION_DIGEST_QUEUE_COLUMNS = `
   id, user_id, user_type, notification_type, title, message, entity_type, entity_id,
   priority, processed, processed_at, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // TYPES

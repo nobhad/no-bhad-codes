@@ -207,26 +207,26 @@ describe('Admin Analytics Routes', () => {
 
     it('should return correct revenue values from DB', async () => {
       mockDbGet
-        .mockResolvedValueOnce({ value: 5000 })   // current revenue
-        .mockResolvedValueOnce({ value: 3000 })   // previous revenue
-        .mockResolvedValueOnce({ value: 10 })     // current clients
-        .mockResolvedValueOnce({ value: 3 })      // new clients current
-        .mockResolvedValueOnce({ value: 2 })      // new clients previous
-        .mockResolvedValueOnce({ value: 5 })      // active projects
-        .mockResolvedValueOnce({ value: 2 })      // new projects current
-        .mockResolvedValueOnce({ value: 1 })      // new projects previous
-        .mockResolvedValueOnce({ value: 8 })      // invoices sent
-        .mockResolvedValueOnce({ value: 4 })      // invoices sent previous
+        .mockResolvedValueOnce({ value: 5000 }) // current revenue
+        .mockResolvedValueOnce({ value: 3000 }) // previous revenue
+        .mockResolvedValueOnce({ value: 10 }) // current clients
+        .mockResolvedValueOnce({ value: 3 }) // new clients current
+        .mockResolvedValueOnce({ value: 2 }) // new clients previous
+        .mockResolvedValueOnce({ value: 5 }) // active projects
+        .mockResolvedValueOnce({ value: 2 }) // new projects current
+        .mockResolvedValueOnce({ value: 1 }) // new projects previous
+        .mockResolvedValueOnce({ value: 8 }) // invoices sent
+        .mockResolvedValueOnce({ value: 4 }) // invoices sent previous
         .mockResolvedValueOnce({ total: 10, converted: 7 }) // leads current
-        .mockResolvedValueOnce({ total: 8, converted: 5 })  // leads previous
-        .mockResolvedValueOnce({ value: 2500 })   // avg project value
-        .mockResolvedValueOnce({ value: 2000 });  // avg project value previous
+        .mockResolvedValueOnce({ total: 8, converted: 5 }) // leads previous
+        .mockResolvedValueOnce({ value: 2500 }) // avg project value
+        .mockResolvedValueOnce({ value: 2000 }); // avg project value previous
 
       mockDbAll
         .mockResolvedValueOnce([{ date: '2024-01-01', revenue: 5000 }]) // revenue chart
-        .mockResolvedValueOnce([{ status: 'active', count: 5 }])       // projects by status
-        .mockResolvedValueOnce([{ status: 'pending', count: 3 }])      // lead funnel
-        .mockResolvedValueOnce([{ source: 'Direct', count: 10 }]);     // source breakdown
+        .mockResolvedValueOnce([{ status: 'active', count: 5 }]) // projects by status
+        .mockResolvedValueOnce([{ status: 'pending', count: 3 }]) // lead funnel
+        .mockResolvedValueOnce([{ source: 'Direct', count: 10 }]); // source breakdown
 
       const routerModule = await import('../../../server/routes/admin/analytics');
       const router = routerModule.default;
@@ -283,10 +283,10 @@ describe('Admin Analytics Routes', () => {
     it('should calculate percentage change correctly', async () => {
       mockDbGet
         .mockResolvedValueOnce({ value: 10000 }) // current revenue
-        .mockResolvedValueOnce({ value: 5000 })  // previous revenue (100% increase)
+        .mockResolvedValueOnce({ value: 5000 }) // previous revenue (100% increase)
         .mockResolvedValueOnce({ value: 20 })
         .mockResolvedValueOnce({ value: 5 })
-        .mockResolvedValueOnce({ value: 0 })     // no previous clients = 100% change
+        .mockResolvedValueOnce({ value: 0 }) // no previous clients = 100% change
         .mockResolvedValueOnce({ value: 3 })
         .mockResolvedValueOnce({ value: 3 })
         .mockResolvedValueOnce({ value: 3 })
@@ -309,7 +309,7 @@ describe('Admin Analytics Routes', () => {
 
       const dataArg = mockSendSuccess.mock.calls[0][1];
       expect(dataArg.kpis.revenue.change).toBe(100); // (10000-5000)/5000*100 = 100%
-      expect(dataArg.kpis.clients.change).toBe(100);  // 5 from 0 = 100%
+      expect(dataArg.kpis.clients.change).toBe(100); // 5 from 0 = 100%
     });
 
     it('should return chart data with labels and datasets', async () => {
@@ -322,12 +322,8 @@ describe('Admin Analytics Routes', () => {
           { status: 'active', count: 3 },
           { status: 'completed', count: 5 }
         ])
-        .mockResolvedValueOnce([
-          { status: 'pending', count: 4 }
-        ])
-        .mockResolvedValueOnce([
-          { source: 'Direct', count: 10 }
-        ]);
+        .mockResolvedValueOnce([{ status: 'pending', count: 4 }])
+        .mockResolvedValueOnce([{ source: 'Direct', count: 10 }]);
 
       const routerModule = await import('../../../server/routes/admin/analytics');
       const router = routerModule.default;

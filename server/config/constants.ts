@@ -56,12 +56,7 @@ export const PROPOSAL_STATUSES = [
 ] as const;
 export type ProposalStatus = (typeof PROPOSAL_STATUSES)[number];
 
-export const MAINTENANCE_OPTIONS = [
-  'diy',
-  'essential',
-  'standard',
-  'premium'
-] as const;
+export const MAINTENANCE_OPTIONS = ['diy', 'essential', 'standard', 'premium'] as const;
 export type MaintenanceOption = (typeof MAINTENANCE_OPTIONS)[number];
 
 // ============================================
@@ -80,12 +75,7 @@ export const INVOICE_STATUSES = [
 
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 
-export const INVOICE_TYPES = [
-  'standard',
-  'recurring',
-  'milestone',
-  'retainer'
-] as const;
+export const INVOICE_TYPES = ['standard', 'recurring', 'milestone', 'retainer'] as const;
 
 export type InvoiceType = (typeof INVOICE_TYPES)[number];
 
@@ -103,12 +93,7 @@ export const TASK_STATUSES = [
 
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 
-export const TASK_PRIORITIES = [
-  'low',
-  'medium',
-  'high',
-  'urgent'
-] as const;
+export const TASK_PRIORITIES = ['low', 'medium', 'high', 'urgent'] as const;
 
 export type TaskPriority = (typeof TASK_PRIORITIES)[number];
 
@@ -147,30 +132,15 @@ export type LeadSource = (typeof LEAD_SOURCES)[number];
 // MESSAGE CONSTANTS
 // ============================================
 
-export const MESSAGE_STATUSES = [
-  'new',
-  'read',
-  'replied',
-  'archived'
-] as const;
+export const MESSAGE_STATUSES = ['new', 'read', 'replied', 'archived'] as const;
 
 export type MessageStatus = (typeof MESSAGE_STATUSES)[number];
 
-export const MESSAGE_PRIORITIES = [
-  'low',
-  'normal',
-  'high',
-  'urgent'
-] as const;
+export const MESSAGE_PRIORITIES = ['low', 'normal', 'high', 'urgent'] as const;
 
 export type MessagePriority = (typeof MESSAGE_PRIORITIES)[number];
 
-export const THREAD_TYPES = [
-  'general',
-  'project',
-  'support',
-  'billing'
-] as const;
+export const THREAD_TYPES = ['general', 'project', 'support', 'billing'] as const;
 
 export type ThreadType = (typeof THREAD_TYPES)[number];
 
@@ -223,12 +193,7 @@ export type DocumentRequestStatus = (typeof DOCUMENT_REQUEST_STATUSES)[number];
 // SHARED PRIORITY LEVELS
 // ============================================
 
-export const PRIORITY_LEVELS = [
-  'low',
-  'normal',
-  'high',
-  'urgent'
-] as const;
+export const PRIORITY_LEVELS = ['low', 'normal', 'high', 'urgent'] as const;
 
 export type PriorityLevel = (typeof PRIORITY_LEVELS)[number];
 
@@ -267,22 +232,11 @@ export type QuestionnaireResponseStatus = (typeof QUESTIONNAIRE_RESPONSE_STATUSE
 // PAYMENT INSTALLMENT CONSTANTS
 // ============================================
 
-export const PAYMENT_INSTALLMENT_STATUSES = [
-  'pending',
-  'paid',
-  'overdue',
-  'cancelled'
-] as const;
+export const PAYMENT_INSTALLMENT_STATUSES = ['pending', 'paid', 'overdue', 'cancelled'] as const;
 
 export type PaymentInstallmentStatus = (typeof PAYMENT_INSTALLMENT_STATUSES)[number];
 
-export const PAYMENT_METHODS = [
-  'check',
-  'card',
-  'ach',
-  'cash',
-  'other'
-] as const;
+export const PAYMENT_METHODS = ['check', 'card', 'ach', 'cash', 'other'] as const;
 
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
@@ -290,11 +244,7 @@ export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 // CONTENT REQUEST CONSTANTS
 // ============================================
 
-export const CONTENT_CHECKLIST_STATUSES = [
-  'active',
-  'completed',
-  'cancelled'
-] as const;
+export const CONTENT_CHECKLIST_STATUSES = ['active', 'completed', 'cancelled'] as const;
 
 export type ContentChecklistStatus = (typeof CONTENT_CHECKLIST_STATUSES)[number];
 
@@ -308,12 +258,7 @@ export const CONTENT_REQUEST_ITEM_STATUSES = [
 
 export type ContentRequestItemStatus = (typeof CONTENT_REQUEST_ITEM_STATUSES)[number];
 
-export const CONTENT_TYPES = [
-  'text',
-  'file',
-  'url',
-  'structured'
-] as const;
+export const CONTENT_TYPES = ['text', 'file', 'url', 'structured'] as const;
 
 export type ContentType = (typeof CONTENT_TYPES)[number];
 
@@ -393,13 +338,7 @@ export const FILE_UPLOAD = {
     'text/csv'
   ],
   /** Allowed MIME types for images */
-  ALLOWED_IMAGE_TYPES: [
-    'image/jpeg',
-    'image/png',
-    'image/gif',
-    'image/webp',
-    'image/svg+xml'
-  ]
+  ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
 } as const;
 
 // ============================================

@@ -52,7 +52,7 @@ export interface AddFilesResult {
 export const DEFAULT_MESSAGING_EXTENSIONS = [
   ...FILE_TYPE_CATEGORIES.documents,
   ...FILE_TYPE_CATEGORIES.spreadsheets,
-  ...FILE_TYPE_CATEGORIES.images.filter(ext => ext !== 'webp'),
+  ...FILE_TYPE_CATEGORIES.images.filter((ext) => ext !== 'webp'),
   'zip'
 ];
 
@@ -175,7 +175,7 @@ export class AttachmentManager {
    * Remove a file by ID
    */
   remove(id: string): void {
-    const index = this.files.findIndex(f => f.id === id);
+    const index = this.files.findIndex((f) => f.id === id);
     if (index === -1) return;
 
     const removed = this.files[index];
@@ -230,7 +230,7 @@ export class AttachmentManager {
    * Get raw File objects for FormData
    */
   getRawFiles(): File[] {
-    return this.files.map(f => f.file);
+    return this.files.map((f) => f.file);
   }
 
   /**
@@ -274,9 +274,7 @@ export class AttachmentManager {
       .map((attachment, index) => {
         const file = attachment.file;
         const size = formatFileSize(file.size);
-        const name = file.name.length > 20
-          ? `${file.name.substring(0, 17)}...`
-          : file.name;
+        const name = file.name.length > 20 ? `${file.name.substring(0, 17)}...` : file.name;
         const safeName = SanitizationUtils.escapeHtml(name);
         const safeFullName = SanitizationUtils.escapeHtml(file.name);
 
@@ -314,7 +312,7 @@ export class AttachmentManager {
    * Call this after rendering the preview HTML to the DOM
    */
   setupPreviewListeners(container: HTMLElement): void {
-    container.querySelectorAll('.attachment-chip-remove').forEach(btn => {
+    container.querySelectorAll('.attachment-chip-remove').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -352,7 +350,9 @@ export class AttachmentManager {
    */
   private isImageFile(file: File): boolean {
     const ext = getFileExtension(file.name);
-    return FILE_TYPE_CATEGORIES.images.includes(ext as typeof FILE_TYPE_CATEGORIES.images[number]);
+    return FILE_TYPE_CATEGORIES.images.includes(
+      ext as (typeof FILE_TYPE_CATEGORIES.images)[number]
+    );
   }
 
   /**

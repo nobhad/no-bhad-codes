@@ -155,7 +155,7 @@ export function escapeHtml(text: string): string {
     '<': '&lt;',
     '>': '&gt;',
     '"': '&quot;',
-    '\'': '&#x27;',
+    "'": '&#x27;',
     '`': '&#96;'
   };
   return text.replace(/[&<>"'`]/g, (match) => htmlEntities[match] || match);

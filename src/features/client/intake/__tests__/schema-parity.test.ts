@@ -41,7 +41,10 @@ describe('terminal intake question flow matches server schema', () => {
       const server = allowedValues(field);
 
       // Sanity: the server schema must actually define allowed values for this field
-      expect(server.length, `No allowedValues found on server schema for field '${field}'`).toBeGreaterThan(0);
+      expect(
+        server.length,
+        `No allowedValues found on server schema for field '${field}'`
+      ).toBeGreaterThan(0);
 
       const question = QUESTIONS.find((q) => q.field === field);
 

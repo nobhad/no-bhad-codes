@@ -26,11 +26,7 @@ const router = express.Router();
  * client could submit text/files/URLs/data for any other client's
  * item by guessing the id.
  */
-async function requireOwnItem(
-  req: AuthenticatedRequest,
-  res: express.Response,
-  itemId: number
-) {
+async function requireOwnItem(req: AuthenticatedRequest, res: express.Response, itemId: number) {
   if (!Number.isInteger(itemId) || itemId <= 0) {
     errorResponse(res, 'Invalid item ID', 400, ErrorCodes.VALIDATION_ERROR);
     return null;

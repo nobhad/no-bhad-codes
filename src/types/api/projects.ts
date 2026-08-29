@@ -138,7 +138,6 @@ export interface ProjectStats {
   on_hold: number;
 }
 
-
 // ============================================
 // Project Management API Types
 // ============================================

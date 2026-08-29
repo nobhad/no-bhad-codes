@@ -176,7 +176,10 @@ describe('Data Quality Routes', () => {
       handler(req, res);
 
       expect(mockValidateEmail).toHaveBeenCalledWith('user@example.com');
-      expect(mockSendSuccess).toHaveBeenCalledWith(res, { valid: true, normalized: 'user@example.com' });
+      expect(mockSendSuccess).toHaveBeenCalledWith(res, {
+        valid: true,
+        normalized: 'user@example.com'
+      });
     });
 
     it('should return validation error when email is missing', async () => {
@@ -189,7 +192,10 @@ describe('Data Quality Routes', () => {
       handler(req, res);
 
       expect(mockErrorResponseWithPayload).toHaveBeenCalledWith(
-        res, 'Validation error', 400, 'VALIDATION_ERROR',
+        res,
+        'Validation error',
+        400,
+        'VALIDATION_ERROR',
         { message: 'Email is required' }
       );
       expect(mockValidateEmail).not.toHaveBeenCalled();
@@ -211,7 +217,9 @@ describe('Data Quality Routes', () => {
     });
 
     it('should handle thrown errors in validation', async () => {
-      mockValidateEmail.mockImplementation(() => { throw new Error('Validation crashed'); });
+      mockValidateEmail.mockImplementation(() => {
+        throw new Error('Validation crashed');
+      });
 
       const routerModule = await import('../../../server/routes/data-quality/validation');
       const router = routerModule.default;
@@ -222,7 +230,10 @@ describe('Data Quality Routes', () => {
       handler(req, res);
 
       expect(mockErrorResponseWithPayload).toHaveBeenCalledWith(
-        res, 'Validation failed', 500, 'INTERNAL_ERROR',
+        res,
+        'Validation failed',
+        500,
+        'INTERNAL_ERROR',
         expect.objectContaining({ message: expect.any(String) })
       );
     });
@@ -230,9 +241,7 @@ describe('Data Quality Routes', () => {
 
   describe('POST /duplicates/scan', () => {
     it('should scan for duplicates and return results', async () => {
-      const mockResults = [
-        { id: 1, matchScore: 0.95, matchType: 'email' }
-      ];
+      const mockResults = [{ id: 1, matchScore: 0.95, matchType: 'email' }];
       mockCheckForDuplicates.mockResolvedValue(mockResults);
 
       const routerModule = await import('../../../server/routes/data-quality/duplicates');
@@ -306,10 +315,13 @@ describe('Data Quality Routes', () => {
       const res = createMockRes();
       await handler(req, res);
 
-      expect(mockSendSuccess).toHaveBeenCalledWith(res, expect.objectContaining({
-        hasDuplicates: false,
-        count: 0
-      }));
+      expect(mockSendSuccess).toHaveBeenCalledWith(
+        res,
+        expect.objectContaining({
+          hasDuplicates: false,
+          count: 0
+        })
+      );
     });
 
     it('should require at least email or name', async () => {
@@ -322,7 +334,10 @@ describe('Data Quality Routes', () => {
       await handler(req, res);
 
       expect(mockErrorResponseWithPayload).toHaveBeenCalledWith(
-        res, 'Validation error', 400, 'VALIDATION_ERROR',
+        res,
+        'Validation error',
+        400,
+        'VALIDATION_ERROR',
         { message: 'At least email or name is required' }
       );
     });
@@ -345,11 +360,13 @@ describe('Data Quality Routes', () => {
       const res = createMockRes();
       await handler(req, res);
 
-      expect(mockMergeDuplicates).toHaveBeenCalledWith(expect.objectContaining({
-        keepId: 1,
-        keepType: 'client',
-        mergeIds: [2, 3]
-      }));
+      expect(mockMergeDuplicates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          keepId: 1,
+          keepType: 'client',
+          mergeIds: [2, 3]
+        })
+      );
       expect(mockSendSuccess).toHaveBeenCalledWith(res, undefined, 'Records merged successfully');
     });
 
@@ -363,7 +380,10 @@ describe('Data Quality Routes', () => {
       await handler(req, res);
 
       expect(mockErrorResponseWithPayload).toHaveBeenCalledWith(
-        res, 'Validation error', 400, 'VALIDATION_ERROR',
+        res,
+        'Validation error',
+        400,
+        'VALIDATION_ERROR',
         { message: 'keepId, keepType, and mergeIds array are required' }
       );
     });
@@ -421,7 +441,10 @@ describe('Data Quality Routes', () => {
       await handler(req, res);
 
       expect(mockErrorResponseWithPayload).toHaveBeenCalledWith(
-        res, 'Validation error', 400, 'VALIDATION_ERROR',
+        res,
+        'Validation error',
+        400,
+        'VALIDATION_ERROR',
         { message: 'input is required' }
       );
     });
@@ -488,7 +511,10 @@ describe('Data Quality Routes', () => {
       handler(req, res);
 
       expect(mockErrorResponseWithPayload).toHaveBeenCalledWith(
-        res, 'Validation error', 400, 'VALIDATION_ERROR',
+        res,
+        'Validation error',
+        400,
+        'VALIDATION_ERROR',
         { message: 'input is required' }
       );
     });

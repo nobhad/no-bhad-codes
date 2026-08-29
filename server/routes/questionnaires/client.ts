@@ -13,11 +13,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { questionnaireService, ResponseStatus } from '../../services/questionnaire-service.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
-import {
-  errorResponse,
-  sendSuccess,
-  ErrorCodes
-} from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { validateRequest } from '../../middleware/validation.js';
 import { QuestionnaireValidationSchemas } from './shared.js';
 
@@ -251,7 +247,12 @@ router.post(
     }
 
     if (existing.status === 'completed') {
-      return errorResponse(res, 'Questionnaire already submitted', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'Questionnaire already submitted',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     // Validate answer payload size

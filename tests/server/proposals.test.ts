@@ -363,7 +363,7 @@ describe('Proposal Routes - Input Sanitization', () => {
 
     const res = await request(app)
       .get('/api/proposals')
-      .query({ search: '\'; DROP TABLE proposals; --' })
+      .query({ search: "'; DROP TABLE proposals; --" })
       .set('Authorization', `Bearer ${adminToken}`);
 
     // Should not crash - either return results or empty

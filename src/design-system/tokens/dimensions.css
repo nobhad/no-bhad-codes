@@ -109,15 +109,25 @@
   --business-card-height-svg: 599.3;
   --business-card-aspect-ratio: 1.784582;
   --business-card-base-width: 35vw;
-  --business-card-base-height: calc(var(--business-card-base-width) / var(--business-card-aspect-ratio));
+  --business-card-base-height: calc(
+    var(--business-card-base-width) / var(--business-card-aspect-ratio)
+  );
   --business-card-large-width: 525px;
-  --business-card-large-height: calc(var(--business-card-large-width) / var(--business-card-aspect-ratio));
+  --business-card-large-height: calc(
+    var(--business-card-large-width) / var(--business-card-aspect-ratio)
+  );
   --business-card-medium-width: 420px;
-  --business-card-medium-height: calc(var(--business-card-medium-width) / var(--business-card-aspect-ratio));
+  --business-card-medium-height: calc(
+    var(--business-card-medium-width) / var(--business-card-aspect-ratio)
+  );
   --business-card-small-width: 350px;
-  --business-card-small-height: calc(var(--business-card-small-width) / var(--business-card-aspect-ratio));
+  --business-card-small-height: calc(
+    var(--business-card-small-width) / var(--business-card-aspect-ratio)
+  );
   --business-card-tiny-width: 280px;
-  --business-card-tiny-height: calc(var(--business-card-tiny-width) / var(--business-card-aspect-ratio));
+  --business-card-tiny-height: calc(
+    var(--business-card-tiny-width) / var(--business-card-aspect-ratio)
+  );
 
   /* ============================================
    * CONTACT FORM DIMENSIONS (migrated from variables.css)
@@ -135,14 +145,15 @@
   /* ============================================
    * TERMINAL DIMENSIONS (migrated from variables.css)
    * ============================================ */
-  --terminal-font-family: "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
+  --terminal-font-family:
+    "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
   --terminal-line-height: 1.7;
 
   /* ============================================
    * SIDEBAR DIMENSIONS
    * ============================================ */
   --sidebar-width-open: 240px;
-  --sidebar-width-min: 200px;     /* minimum before collapse */
+  --sidebar-width-min: 200px; /* minimum before collapse */
   --sidebar-width-collapsed: 56px;
   --sidebar-width-default: 280px;
 

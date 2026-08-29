@@ -19,7 +19,6 @@
  * - Tag input (.tag-remove)
  */
 
-
 /* 1. Utilities first (foundational classes used everywhere) */
 @import "./portal-utilities.css";
 
@@ -54,4 +53,3 @@
 .tag-remove:hover {
   opacity: 1;
 }
-

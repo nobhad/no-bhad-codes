@@ -13,7 +13,6 @@
  *   3. Set password page (set-password, forgot-password, reset-password)
  */
 
-
 /* =====================================================
    AUTH GATE - Full Screen Login Overlay
    ===================================================== */
@@ -334,7 +333,6 @@
   }
 }
 
-
 /* =====================================================
    HEADER Z-INDEX - Must appear above auth gate overlay
    ===================================================== */
@@ -516,4 +514,3 @@ body.portal-logged-in[data-page="client"] .nav-overlay {
   background: rgba(var(--color-success-rgb), 0.1);
   color: var(--color-success);
 }
-

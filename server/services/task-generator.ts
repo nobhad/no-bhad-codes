@@ -9,10 +9,7 @@
  */
 
 import { getDatabase } from '../database/init.js';
-import {
-  getTaskTemplatesForMilestone,
-  TaskTemplate
-} from '../config/default-tasks.js';
+import { getTaskTemplatesForMilestone, TaskTemplate } from '../config/default-tasks.js';
 import { normalizeProjectType } from '../config/default-milestones.js';
 import { userService } from './user-service.js';
 import { logger } from './logger.js';

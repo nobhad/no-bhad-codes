@@ -556,7 +556,7 @@ describe('File Service', () => {
 
         expect(workflow.status).toBe('pending_review');
         expect(mockDb.run).toHaveBeenCalledWith(
-          expect.stringContaining('SET status = \'pending_review\''),
+          expect.stringContaining("SET status = 'pending_review'"),
           expect.any(Array)
         );
       });
@@ -644,7 +644,7 @@ describe('File Service', () => {
       expect(file.id).toBe(100);
       // The SQL uses 'deliverable' as a literal value and TRUE for shared_with_client
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('\'deliverable\''),
+        expect.stringContaining("'deliverable'"),
         expect.any(Array)
       );
     });

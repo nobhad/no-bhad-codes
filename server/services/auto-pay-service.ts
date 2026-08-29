@@ -71,9 +71,10 @@ async function stripeRequest(
     options.body = params.toString();
   }
 
-  const url = method === 'GET' && params
-    ? `${STRIPE_API_BASE}${endpoint}?${params.toString()}`
-    : `${STRIPE_API_BASE}${endpoint}`;
+  const url =
+    method === 'GET' && params
+      ? `${STRIPE_API_BASE}${endpoint}?${params.toString()}`
+      : `${STRIPE_API_BASE}${endpoint}`;
 
   return stripeBreaker.execute(async () => {
     const response = await fetchWithTimeout(url, { ...options, timeoutMs: 10_000 });
@@ -128,12 +129,17 @@ async function listPaymentMethods(clientId: number): Promise<SavedPaymentMethod[
  * Save a payment method from Stripe (after client adds card via SetupIntent).
  * Fetches method details from Stripe and stores locally.
  */
-async function savePaymentMethod(clientId: number, stripePaymentMethodId: string): Promise<SavedPaymentMethod> {
+async function savePaymentMethod(
+  clientId: number,
+  stripePaymentMethodId: string
+): Promise<SavedPaymentMethod> {
   const db = getDatabase();
 
   // Fetch payment method details from Stripe
   const pm = await stripeRequest(`/payment_methods/${stripePaymentMethodId}`);
-  const card = pm.card as { brand?: string; last4?: string; exp_month?: number; exp_year?: number } | undefined;
+  const card = pm.card as
+    | { brand?: string; last4?: string; exp_month?: number; exp_year?: number }
+    | undefined;
 
   // Check if already saved
   const existing = (await db.get(
@@ -142,10 +148,9 @@ async function savePaymentMethod(clientId: number, stripePaymentMethodId: string
   )) as { id: number } | undefined;
 
   if (existing) {
-    const row = (await db.get(
-      'SELECT * FROM client_payment_methods WHERE id = ?',
-      [existing.id]
-    )) as SavedPaymentMethodRow;
+    const row = (await db.get('SELECT * FROM client_payment_methods WHERE id = ?', [
+      existing.id
+    ])) as SavedPaymentMethodRow;
     return mapPaymentMethodRow(row);
   }
 
@@ -174,21 +179,25 @@ async function savePaymentMethod(clientId: number, stripePaymentMethodId: string
 
   // If default, also update client's auto_pay_default_method_id
   if (isDefault) {
-    await db.run(
-      'UPDATE clients SET auto_pay_default_method_id = ? WHERE id = ?',
-      [result.lastID, clientId]
-    );
+    await db.run('UPDATE clients SET auto_pay_default_method_id = ? WHERE id = ?', [
+      result.lastID,
+      clientId
+    ]);
   }
 
   logger.info('Saved payment method', {
     category: 'payments',
-    metadata: { clientId, paymentMethodId: result.lastID, brand: card?.brand, lastFour: card?.last4 }
+    metadata: {
+      clientId,
+      paymentMethodId: result.lastID,
+      brand: card?.brand,
+      lastFour: card?.last4
+    }
   });
 
-  const row = (await db.get(
-    'SELECT * FROM client_payment_methods WHERE id = ?',
-    [result.lastID]
-  )) as SavedPaymentMethodRow;
+  const row = (await db.get('SELECT * FROM client_payment_methods WHERE id = ?', [
+    result.lastID
+  ])) as SavedPaymentMethodRow;
   return mapPaymentMethodRow(row);
 }
 
@@ -199,22 +208,19 @@ async function setDefaultPaymentMethod(clientId: number, paymentMethodId: number
   const db = getDatabase();
 
   // Unset all defaults for this client
-  await db.run(
-    'UPDATE client_payment_methods SET is_default = 0 WHERE client_id = ?',
-    [clientId]
-  );
+  await db.run('UPDATE client_payment_methods SET is_default = 0 WHERE client_id = ?', [clientId]);
 
   // Set the new default
-  await db.run(
-    'UPDATE client_payment_methods SET is_default = 1 WHERE id = ? AND client_id = ?',
-    [paymentMethodId, clientId]
-  );
+  await db.run('UPDATE client_payment_methods SET is_default = 1 WHERE id = ? AND client_id = ?', [
+    paymentMethodId,
+    clientId
+  ]);
 
   // Update client record
-  await db.run(
-    'UPDATE clients SET auto_pay_default_method_id = ? WHERE id = ?',
-    [paymentMethodId, clientId]
-  );
+  await db.run('UPDATE clients SET auto_pay_default_method_id = ? WHERE id = ?', [
+    paymentMethodId,
+    clientId
+  ]);
 }
 
 /**
@@ -232,7 +238,11 @@ async function removePaymentMethod(clientId: number, paymentMethodId: number): P
 
   // Detach from Stripe customer
   try {
-    await stripeRequest(`/payment_methods/${method.stripe_payment_method_id}/detach`, 'POST', new URLSearchParams());
+    await stripeRequest(
+      `/payment_methods/${method.stripe_payment_method_id}/detach`,
+      'POST',
+      new URLSearchParams()
+    );
   } catch {
     // May already be detached — continue
   }
@@ -247,16 +257,13 @@ async function removePaymentMethod(clientId: number, paymentMethodId: number): P
       [clientId]
     )) as { id: number } | undefined;
 
-    await db.run(
-      'UPDATE clients SET auto_pay_default_method_id = ? WHERE id = ?',
-      [next?.id || null, clientId]
-    );
+    await db.run('UPDATE clients SET auto_pay_default_method_id = ? WHERE id = ?', [
+      next?.id || null,
+      clientId
+    ]);
 
     if (next) {
-      await db.run(
-        'UPDATE client_payment_methods SET is_default = 1 WHERE id = ?',
-        [next.id]
-      );
+      await db.run('UPDATE client_payment_methods SET is_default = 1 WHERE id = ?', [next.id]);
     }
   }
 
@@ -276,7 +283,7 @@ async function removePaymentMethod(clientId: number, paymentMethodId: number): P
 async function setAutoPay(clientId: number, enabled: boolean): Promise<void> {
   const db = getDatabase();
   await db.run(
-    'UPDATE clients SET auto_pay_enabled = ?, updated_at = datetime(\'now\') WHERE id = ?',
+    "UPDATE clients SET auto_pay_enabled = ?, updated_at = datetime('now') WHERE id = ?",
     [enabled ? 1 : 0, clientId]
   );
 
@@ -305,10 +312,9 @@ async function getAutoPayStatus(clientId: number): Promise<{
 
   let defaultMethod: SavedPaymentMethod | null = null;
   if (client.auto_pay_default_method_id) {
-    const row = (await db.get(
-      'SELECT * FROM client_payment_methods WHERE id = ?',
-      [client.auto_pay_default_method_id]
-    )) as SavedPaymentMethodRow | undefined;
+    const row = (await db.get('SELECT * FROM client_payment_methods WHERE id = ?', [
+      client.auto_pay_default_method_id
+    ])) as SavedPaymentMethodRow | undefined;
     if (row) defaultMethod = mapPaymentMethodRow(row);
   }
 
@@ -406,8 +412,15 @@ async function chargeInvoice(
       `INSERT INTO stripe_payment_intents
        (stripe_intent_id, client_id, invoice_id, amount_cents, currency, status, payment_method_id, metadata, created_at, updated_at)
        VALUES (?, ?, ?, ?, 'usd', ?, ?, ?, datetime('now'), datetime('now'))`,
-      [intentId, clientId, invoiceId, totalCents, status, paymentMethodId,
-        JSON.stringify({ customerId, baseCents: amountCents, feeCents, autoPay: true })]
+      [
+        intentId,
+        clientId,
+        invoiceId,
+        totalCents,
+        status,
+        paymentMethodId,
+        JSON.stringify({ customerId, baseCents: amountCents, feeCents, autoPay: true })
+      ]
     );
 
     if (status === 'succeeded') {
@@ -480,7 +493,7 @@ async function processAutoPay(): Promise<AutoPayResult> {
         // Mark as exhausted
         if (existing) {
           await db.run(
-            'UPDATE auto_pay_attempts SET status = \'exhausted\', updated_at = datetime(\'now\') WHERE id = ?',
+            "UPDATE auto_pay_attempts SET status = 'exhausted', updated_at = datetime('now') WHERE id = ?",
             [existing.id]
           );
         }
@@ -492,8 +505,11 @@ async function processAutoPay(): Promise<AutoPayResult> {
       const result = await chargeInvoice(invoice.id, client.id, client.auto_pay_default_method_id);
 
       // Record attempt
-      const nextRetryHours = RETRY_DELAY_HOURS[attemptNumber - 1] || RETRY_DELAY_HOURS[RETRY_DELAY_HOURS.length - 1];
-      const nextRetryAt = result.success ? null : new Date(Date.now() + nextRetryHours * 60 * 60 * 1000).toISOString();
+      const nextRetryHours =
+        RETRY_DELAY_HOURS[attemptNumber - 1] || RETRY_DELAY_HOURS[RETRY_DELAY_HOURS.length - 1];
+      const nextRetryAt = result.success
+        ? null
+        : new Date(Date.now() + nextRetryHours * 60 * 60 * 1000).toISOString();
 
       await db.run(
         `INSERT INTO auto_pay_attempts
@@ -522,7 +538,12 @@ async function processAutoPay(): Promise<AutoPayResult> {
         if (attemptNumber > 1) retried++;
         logger.warn('Auto-pay charge failed', {
           category: 'payments',
-          metadata: { clientId: client.id, invoiceId: invoice.id, error: result.error, attempt: attemptNumber }
+          metadata: {
+            clientId: client.id,
+            invoiceId: invoice.id,
+            error: result.error,
+            attempt: attemptNumber
+          }
         });
 
         // Send failure notification to client
@@ -564,7 +585,11 @@ async function processAutoPay(): Promise<AutoPayResult> {
  * Process retry queue — retries failed auto-pay attempts whose next_retry_at has passed.
  * Called by the scheduler cron job (every hour).
  */
-async function processRetryQueue(): Promise<{ retried: number; succeeded: number; failed: number }> {
+async function processRetryQueue(): Promise<{
+  retried: number;
+  succeeded: number;
+  failed: number;
+}> {
   const db = getDatabase();
   let retriedCount = 0;
   let succeeded = 0;
@@ -589,9 +614,16 @@ async function processRetryQueue(): Promise<{ retried: number; succeeded: number
     retriedCount++;
 
     const nextAttempt = attempt.attempt_number + 1;
-    const nextRetryHours = RETRY_DELAY_HOURS[nextAttempt - 1] || RETRY_DELAY_HOURS[RETRY_DELAY_HOURS.length - 1];
-    const nextRetryAt = result.success ? null : new Date(Date.now() + nextRetryHours * 60 * 60 * 1000).toISOString();
-    const newStatus = result.success ? 'succeeded' : (nextAttempt >= MAX_AUTO_PAY_RETRIES ? 'exhausted' : 'failed');
+    const nextRetryHours =
+      RETRY_DELAY_HOURS[nextAttempt - 1] || RETRY_DELAY_HOURS[RETRY_DELAY_HOURS.length - 1];
+    const nextRetryAt = result.success
+      ? null
+      : new Date(Date.now() + nextRetryHours * 60 * 60 * 1000).toISOString();
+    const newStatus = result.success
+      ? 'succeeded'
+      : nextAttempt >= MAX_AUTO_PAY_RETRIES
+        ? 'exhausted'
+        : 'failed';
 
     await db.run(
       `INSERT INTO auto_pay_attempts

@@ -216,7 +216,10 @@ router.get(
     const depositAmount = getString(p, 'deposit_amount');
 
     const rightPairs: Array<{ label: string; value: string }> = [
-      { label: 'DATE:', value: formatDate(getString(p, 'contract_signed_at') || getString(p, 'created_at')) }
+      {
+        label: 'DATE:',
+        value: formatDate(getString(p, 'contract_signed_at') || getString(p, 'created_at'))
+      }
     ];
     const selectedTier = getString(p, 'selected_tier');
     if (selectedTier) rightPairs.push({ label: 'PACKAGE:', value: selectedTier });
@@ -352,15 +355,17 @@ router.get(
     ctx.y -= PDF_SPACING.sectionSpacing;
     ensureSpace(ctx, 120, onNewPage);
     ctx.y = drawSectionLabel(ctx.currentPage, 'SIGNATURES', {
-      x: leftMargin, y: ctx.y, font: helveticaBold
+      x: leftMargin,
+      y: ctx.y,
+      font: helveticaBold
     });
 
     const signatureWidth = 200;
     const signatureLineY = ctx.y - 30;
     const signedDate = isSigned
       ? formatDate(
-        getString(p, 'contract_signed_at') || (contract?.signed_at as string | undefined)
-      )
+          getString(p, 'contract_signed_at') || (contract?.signed_at as string | undefined)
+        )
       : '______________';
     const countersignedAt =
       getString(p, 'contract_countersigned_at') ||
@@ -539,12 +544,20 @@ router.post(
     expiresAt.setDate(expiresAt.getDate() + 7); // Token valid for 7 days
 
     // Store the signature request (dual-write: projects + contracts for rollback)
-    await contractService.storeProjectSignatureRequest(projectId, signatureToken, expiresAt.toISOString());
+    await contractService.storeProjectSignatureRequest(
+      projectId,
+      signatureToken,
+      expiresAt.toISOString()
+    );
 
     const latestContractId = await contractService.getLatestActiveContractId(projectId);
     if (latestContractId) {
       // Write signature request to contracts table (Phase 3.3 normalization)
-      await contractService.updateContractSignatureRequest(latestContractId, signatureToken, expiresAt.toISOString());
+      await contractService.updateContractSignatureRequest(
+        latestContractId,
+        signatureToken,
+        expiresAt.toISOString()
+      );
     }
 
     // Log signature request to audit log
@@ -640,11 +653,15 @@ ${BUSINESS_INFO.email}
       // Continue - don't fail the request if reminder scheduling fails
     }
 
-    sendSuccess(res, {
-      clientEmail,
-      expiresAt: expiresAt.toISOString(),
-      emailSent: emailResult.success
-    }, 'Signature request sent');
+    sendSuccess(
+      res,
+      {
+        clientEmail,
+        expiresAt: expiresAt.toISOString(),
+        emailSent: emailResult.success
+      },
+      'Signature request sent'
+    );
   })
 );
 
@@ -660,7 +677,12 @@ router.get(
     const project = await contractService.getProjectBySignatureToken(token);
 
     if (!project) {
-      return errorResponse(res, 'Invalid or expired signature link', 404, ErrorCodes.INVALID_SIGNATURE_LINK);
+      return errorResponse(
+        res,
+        'Invalid or expired signature link',
+        404,
+        ErrorCodes.INVALID_SIGNATURE_LINK
+      );
     }
 
     const p = project as Record<string, unknown>;
@@ -721,18 +743,33 @@ router.post(
     const { signatureData, signerName, agreedToTerms } = req.body;
 
     if (!signatureData || !signerName) {
-      return errorResponse(res, 'Signature and name are required', 400, ErrorCodes.MISSING_SIGNATURE);
+      return errorResponse(
+        res,
+        'Signature and name are required',
+        400,
+        ErrorCodes.MISSING_SIGNATURE
+      );
     }
 
     if (!agreedToTerms) {
-      return errorResponse(res, 'You must agree to the terms to sign', 400, ErrorCodes.TERMS_NOT_ACCEPTED);
+      return errorResponse(
+        res,
+        'You must agree to the terms to sign',
+        400,
+        ErrorCodes.TERMS_NOT_ACCEPTED
+      );
     }
 
     // Get project by token
     const project = await contractService.getProjectByTokenForSigning(token);
 
     if (!project) {
-      return errorResponse(res, 'Invalid or expired signature link', 404, ErrorCodes.INVALID_SIGNATURE_LINK);
+      return errorResponse(
+        res,
+        'Invalid or expired signature link',
+        404,
+        ErrorCodes.INVALID_SIGNATURE_LINK
+      );
     }
 
     const p = project as Record<string, unknown>;
@@ -910,10 +947,14 @@ ${BUSINESS_INFO.email}
       // Continue - don't fail the signing if reminder cancellation fails
     }
 
-    sendSuccess(res, {
-      signedAt,
-      signerName
-    }, 'Contract signed successfully');
+    sendSuccess(
+      res,
+      {
+        signedAt,
+        signerName
+      },
+      'Contract signed successfully'
+    );
   })
 );
 
@@ -984,10 +1025,14 @@ router.post(
       details: JSON.stringify({ signerName, countersignedAt })
     });
 
-    sendSuccess(res, {
-      countersignedAt,
-      signerName
-    }, 'Contract countersigned successfully');
+    sendSuccess(
+      res,
+      {
+        countersignedAt,
+        signerName
+      },
+      'Contract countersigned successfully'
+    );
   })
 );
 

@@ -21,7 +21,8 @@ export const MAX_FILE_SIZE_DISPLAY = '10MB';
 /**
  * Allowed file extensions regex
  */
-export const ALLOWED_EXTENSIONS = /\.(jpeg|jpg|png|gif|pdf|doc|docx|txt|zip|rar|xls|xlsx|csv|ppt|pptx)$/i;
+export const ALLOWED_EXTENSIONS =
+  /\.(jpeg|jpg|png|gif|pdf|doc|docx|txt|zip|rar|xls|xlsx|csv|ppt|pptx)$/i;
 
 /**
  * Allowed MIME types
@@ -187,7 +188,7 @@ export { formatFileSize } from './format-utils';
  */
 export function isImageFile(filename: string): boolean {
   const ext = getFileExtension(filename);
-  return FILE_TYPE_CATEGORIES.images.includes(ext as typeof FILE_TYPE_CATEGORIES.images[number]);
+  return FILE_TYPE_CATEGORIES.images.includes(ext as (typeof FILE_TYPE_CATEGORIES.images)[number]);
 }
 
 /**

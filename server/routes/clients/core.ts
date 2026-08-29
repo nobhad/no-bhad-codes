@@ -527,7 +527,12 @@ router.put(
       const normalized = trimmed.toLowerCase();
       const emailTaken = await clientService.emailExists(normalized, clientId);
       if (emailTaken) {
-        return errorResponse(res, 'Email already in use by another client', 409, ErrorCodes.EMAIL_EXISTS);
+        return errorResponse(
+          res,
+          'Email already in use by another client',
+          409,
+          ErrorCodes.EMAIL_EXISTS
+        );
       }
       updates.push('email = ?');
       values.push(normalized);
@@ -777,7 +782,12 @@ router.delete(
     const result = await softDeleteService.softDeleteClient(clientId, deletedBy);
 
     if (!result.success) {
-      return errorResponse(res, result.message || 'Client not found', 404, ErrorCodes.CLIENT_NOT_FOUND);
+      return errorResponse(
+        res,
+        result.message || 'Client not found',
+        404,
+        ErrorCodes.CLIENT_NOT_FOUND
+      );
     }
 
     sendSuccess(res, { affectedItems: result.affectedItems }, result.message);

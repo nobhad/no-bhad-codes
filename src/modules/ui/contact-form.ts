@@ -179,18 +179,18 @@ export class ContactFormModule extends BaseModule {
       }
     } else {
       switch (inputField.type) {
-      case 'email':
-        if (value && !this.isValidEmail(value)) {
-          isValid = false;
-        } else if (isRequired && !value) {
-          isValid = false;
-        }
-        break;
-      case 'text':
-        if (isRequired && value.length < 2) {
-          isValid = false;
-        }
-        break;
+        case 'email':
+          if (value && !this.isValidEmail(value)) {
+            isValid = false;
+          } else if (isRequired && !value) {
+            isValid = false;
+          }
+          break;
+        case 'text':
+          if (isRequired && value.length < 2) {
+            isValid = false;
+          }
+          break;
       }
     }
 

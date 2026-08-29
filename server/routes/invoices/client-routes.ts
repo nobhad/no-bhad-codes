@@ -14,7 +14,13 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessInvoice } from '../../utils/access-control.js';
-import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
+import {
+  ErrorCodes,
+  errorResponse,
+  errorResponseWithPayload,
+  sendSuccess,
+  sanitizeErrorMessage
+} from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseInvoice } from './helpers.js';
 
 const router = express.Router();
@@ -75,9 +81,15 @@ router.get(
         }
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve invoices', 500, ErrorCodes.RETRIEVAL_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to retrieve client invoices')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve invoices',
+        500,
+        ErrorCodes.RETRIEVAL_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to retrieve client invoices')
+        }
+      );
     }
   })
 );
@@ -111,9 +123,15 @@ router.get(
       if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to retrieve invoice', 500, ErrorCodes.RETRIEVAL_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to retrieve invoice by number')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve invoice',
+        500,
+        ErrorCodes.RETRIEVAL_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to retrieve invoice by number')
+        }
+      );
     }
   })
 );
@@ -155,9 +173,15 @@ router.get(
       if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to retrieve invoice', 500, ErrorCodes.RETRIEVAL_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to retrieve invoice')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve invoice',
+        500,
+        ErrorCodes.RETRIEVAL_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to retrieve invoice')
+        }
+      );
     }
   })
 );

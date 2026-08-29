@@ -20,7 +20,7 @@ export const QUESTIONS: IntakeQuestion[] = [
     id: 'greeting',
     field: '',
     question:
-      'Hello, I\'m Arrow - Noelle\'s personal assistant. I\'m here to help you start your project. This will only take a few minutes. First, what\'s your name?',
+      "Hello, I'm Arrow - Noelle's personal assistant. I'm here to help you start your project. This will only take a few minutes. First, what's your name?",
     type: 'text',
     required: true,
     validation: (value) =>
@@ -30,7 +30,7 @@ export const QUESTIONS: IntakeQuestion[] = [
   {
     id: 'email',
     field: 'email',
-    question: 'Nice to meet you, {{name}}! What\'s your email address?',
+    question: "Nice to meet you, {{name}}! What's your email address?",
     type: 'email',
     required: true,
     validation: (value) => {
@@ -72,7 +72,7 @@ export const QUESTIONS: IntakeQuestion[] = [
   {
     id: 'timeline',
     field: 'timeline',
-    question: 'What\'s your ideal timeline?',
+    question: "What's your ideal timeline?",
     type: 'select',
     required: true,
     options: [
@@ -88,7 +88,7 @@ export const QUESTIONS: IntakeQuestion[] = [
   {
     id: 'budget',
     field: 'budget',
-    question: 'What\'s your budget range for this project?',
+    question: "What's your budget range for this project?",
     type: 'select',
     required: true,
     options: [
@@ -97,7 +97,7 @@ export const QUESTIONS: IntakeQuestion[] = [
       { value: '3k-5k', label: '$3,000 – $5,000' },
       { value: '5k-10k', label: '$5,000 – $10,000' },
       { value: '10k-plus', label: '$10,000+' },
-      { value: 'discuss', label: 'Let\'s discuss / not sure yet' }
+      { value: 'discuss', label: "Let's discuss / not sure yet" }
     ]
   }
 ];

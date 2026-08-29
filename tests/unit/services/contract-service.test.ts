@@ -84,7 +84,10 @@ vi.mock('../../../server/database/entities/index', () => ({
 // Mock contract variable utilities
 vi.mock('../../../server/utils/contract-variables', () => ({
   applyContractVariables: vi.fn((template: string, vars: Record<string, string>) => {
-    return template.replace(/{{\s*([\w.]+)\s*}}/g, (_match: string, key: string) => vars[key] ?? _match);
+    return template.replace(
+      /{{\s*([\w.]+)\s*}}/g,
+      (_match: string, key: string) => vars[key] ?? _match
+    );
   }),
   getDefaultContractVariables: vi.fn(() => ['client.name', 'project.name', 'date.today']),
   resolveContractVariables: vi.fn(() => ({
@@ -171,15 +174,15 @@ describe('ContractService - Templates', () => {
 
   describe('getTemplates', () => {
     it('returns all active templates when no type filter', async () => {
-      mockDb.all.mockResolvedValueOnce([makeTemplateRow(), makeTemplateRow({ id: 2, name: 'NDA' })]);
+      mockDb.all.mockResolvedValueOnce([
+        makeTemplateRow(),
+        makeTemplateRow({ id: 2, name: 'NDA' })
+      ]);
 
       const result = await contractService.getTemplates();
 
       expect(result).toHaveLength(2);
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('is_active = TRUE'),
-        []
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('is_active = TRUE'), []);
     });
 
     it('filters templates by type when provided', async () => {
@@ -188,10 +191,9 @@ describe('ContractService - Templates', () => {
       const result = await contractService.getTemplates('standard');
 
       expect(result).toHaveLength(1);
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('AND type = ?'),
-        ['standard']
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('AND type = ?'), [
+        'standard'
+      ]);
     });
 
     it('returns empty array when no templates found', async () => {
@@ -350,9 +352,7 @@ describe('ContractService - Templates', () => {
       await contractService.updateTemplate(1, { isDefault: false });
 
       const calls = mockDb.run.mock.calls;
-      const clearDefaultCall = calls.find(c =>
-        c[0].includes('is_default = FALSE WHERE type')
-      );
+      const clearDefaultCall = calls.find((c) => c[0].includes('is_default = FALSE WHERE type'));
       expect(clearDefaultCall).toBeUndefined();
     });
 
@@ -363,7 +363,7 @@ describe('ContractService - Templates', () => {
       await contractService.updateTemplate(1, { name: 'Changed' });
 
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('updated_at = datetime(\'now\')'),
+        expect.stringContaining("updated_at = datetime('now')"),
         expect.any(Array)
       );
     });
@@ -375,10 +375,7 @@ describe('ContractService - Templates', () => {
 
       await contractService.deleteTemplate(1);
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('is_active = FALSE'),
-        [1]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('is_active = FALSE'), [1]);
     });
   });
 });
@@ -401,10 +398,7 @@ describe('ContractService - Contracts', () => {
       const result = await contractService.getContracts();
 
       expect(result).toHaveLength(2);
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.not.stringContaining('WHERE'),
-        []
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.not.stringContaining('WHERE'), []);
     });
 
     it('filters by projectId', async () => {
@@ -413,10 +407,7 @@ describe('ContractService - Contracts', () => {
       const result = await contractService.getContracts({ projectId: 10 });
 
       expect(result).toHaveLength(1);
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('project_id = ?'),
-        [10]
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('project_id = ?'), [10]);
     });
 
     it('filters by clientId', async () => {
@@ -424,10 +415,7 @@ describe('ContractService - Contracts', () => {
 
       await contractService.getContracts({ clientId: 5 });
 
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('client_id = ?'),
-        [5]
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('client_id = ?'), [5]);
     });
 
     it('filters by status', async () => {
@@ -435,10 +423,7 @@ describe('ContractService - Contracts', () => {
 
       await contractService.getContracts({ status: 'signed' });
 
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('status = ?'),
-        ['signed']
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('status = ?'), ['signed']);
     });
 
     it('supports multiple filters combined', async () => {
@@ -446,10 +431,7 @@ describe('ContractService - Contracts', () => {
 
       await contractService.getContracts({ projectId: 10, clientId: 5, status: 'draft' });
 
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('WHERE'),
-        [10, 5, 'draft']
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('WHERE'), [10, 5, 'draft']);
     });
 
     it('returns empty array when no contracts', async () => {
@@ -507,10 +489,7 @@ describe('ContractService - Contracts', () => {
         status: 'sent'
       });
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.arrayContaining(['sent'])
-      );
+      expect(mockDb.run).toHaveBeenCalledWith(expect.any(String), expect.arrayContaining(['sent']));
     });
 
     it('throws for invalid status', async () => {
@@ -676,14 +655,16 @@ describe('ContractService - Contracts', () => {
 
     it('updates all date/reminder fields', async () => {
       mockDb.run.mockResolvedValueOnce(undefined);
-      mockDb.get.mockResolvedValueOnce(makeContractRow({
-        renewal_at: '2027-01-01',
-        last_reminder_at: '2026-06-01',
-        reminder_count: 2,
-        sent_at: '2026-01-15',
-        signed_at: '2026-01-20',
-        expires_at: '2027-01-01'
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeContractRow({
+          renewal_at: '2027-01-01',
+          last_reminder_at: '2026-06-01',
+          reminder_count: 2,
+          sent_at: '2026-01-15',
+          signed_at: '2026-01-20',
+          expires_at: '2027-01-01'
+        })
+      );
 
       await contractService.updateContract(1, {
         renewalAt: '2027-01-01',
@@ -719,7 +700,9 @@ describe('ContractService - Signature Lifecycle', () => {
   describe('requestSignature', () => {
     it('updates contract with signature token and status=sent', async () => {
       mockDb.run.mockResolvedValueOnce(undefined);
-      mockDb.get.mockResolvedValueOnce(makeContractRow({ status: 'sent', signature_token: 'token123' }));
+      mockDb.get.mockResolvedValueOnce(
+        makeContractRow({ status: 'sent', signature_token: 'token123' })
+      );
 
       const result = await contractService.requestSignature(1, {
         signatureToken: 'token123',
@@ -727,10 +710,11 @@ describe('ContractService - Signature Lifecycle', () => {
       });
 
       expect(result.status).toBe('sent');
-      expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('signature_token = ?'),
-        ['token123', '2026-02-01T00:00:00Z', 1]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('signature_token = ?'), [
+        'token123',
+        '2026-02-01T00:00:00Z',
+        1
+      ]);
     });
   });
 
@@ -741,10 +725,9 @@ describe('ContractService - Signature Lifecycle', () => {
       const result = await contractService.getContractBySignatureToken('token123');
 
       expect(result).not.toBeNull();
-      expect(mockDb.get).toHaveBeenCalledWith(
-        expect.stringContaining('signature_token = ?'),
-        ['token123']
-      );
+      expect(mockDb.get).toHaveBeenCalledWith(expect.stringContaining('signature_token = ?'), [
+        'token123'
+      ]);
     });
 
     it('returns null when no contract matches the token', async () => {
@@ -759,11 +742,13 @@ describe('ContractService - Signature Lifecycle', () => {
   describe('recordSignature', () => {
     it('records all signer details and sets status to signed', async () => {
       mockDb.run.mockResolvedValueOnce(undefined);
-      mockDb.get.mockResolvedValueOnce(makeContractRow({
-        status: 'signed',
-        signer_name: 'Alice Smith',
-        signer_email: 'alice@example.com'
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeContractRow({
+          status: 'signed',
+          signer_name: 'Alice Smith',
+          signer_email: 'alice@example.com'
+        })
+      );
 
       const result = await contractService.recordSignature(1, {
         signerName: 'Alice Smith',
@@ -776,7 +761,7 @@ describe('ContractService - Signature Lifecycle', () => {
       expect(result.status).toBe('signed');
       expect(result.signerName).toBe('Alice Smith');
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('status = \'signed\''),
+        expect.stringContaining("status = 'signed'"),
         expect.arrayContaining(['Alice Smith', 'alice@example.com', '127.0.0.1'])
       );
     });
@@ -803,11 +788,13 @@ describe('ContractService - Signature Lifecycle', () => {
   describe('recordCountersignature', () => {
     it('records countersigner details', async () => {
       mockDb.run.mockResolvedValueOnce(undefined);
-      mockDb.get.mockResolvedValueOnce(makeContractRow({
-        countersigned_at: '2026-01-02T00:00:00Z',
-        countersigner_name: 'Owner',
-        countersigner_email: 'owner@business.com'
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeContractRow({
+          countersigned_at: '2026-01-02T00:00:00Z',
+          countersigner_name: 'Owner',
+          countersigner_email: 'owner@business.com'
+        })
+      );
 
       const result = await contractService.recordCountersignature(1, {
         countersignerName: 'Owner',
@@ -865,15 +852,14 @@ describe('ContractService - Signature Lifecycle', () => {
   describe('expireSignatureRequest', () => {
     it('sets contract status to expired and clears token', async () => {
       mockDb.run.mockResolvedValueOnce(undefined);
-      mockDb.get.mockResolvedValueOnce(makeContractRow({ status: 'expired', signature_token: null }));
+      mockDb.get.mockResolvedValueOnce(
+        makeContractRow({ status: 'expired', signature_token: null })
+      );
 
       const result = await contractService.expireSignatureRequest(1);
 
       expect(result.status).toBe('expired');
-      expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('status = \'expired\''),
-        [1]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining("status = 'expired'"), [1]);
     });
   });
 
@@ -891,19 +877,21 @@ describe('ContractService - Signature Lifecycle', () => {
     });
 
     it('returns populated signature fields when signed', async () => {
-      mockDb.get.mockResolvedValueOnce(makeContractRow({
-        signed_at: '2026-01-05T00:00:00Z',
-        signer_name: 'Alice',
-        signer_email: 'alice@example.com',
-        signer_ip: '127.0.0.1',
-        countersigned_at: '2026-01-06T00:00:00Z',
-        countersigner_name: 'Owner',
-        countersigner_email: 'owner@biz.com',
-        countersigner_ip: '10.0.0.1',
-        signed_pdf_path: '/path/signed.pdf',
-        signature_requested_at: '2026-01-04T00:00:00Z',
-        signature_expires_at: '2026-02-04T00:00:00Z'
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeContractRow({
+          signed_at: '2026-01-05T00:00:00Z',
+          signer_name: 'Alice',
+          signer_email: 'alice@example.com',
+          signer_ip: '127.0.0.1',
+          countersigned_at: '2026-01-06T00:00:00Z',
+          countersigner_name: 'Owner',
+          countersigner_email: 'owner@biz.com',
+          countersigner_ip: '10.0.0.1',
+          signed_pdf_path: '/path/signed.pdf',
+          signature_requested_at: '2026-01-04T00:00:00Z',
+          signature_expires_at: '2026-02-04T00:00:00Z'
+        })
+      );
 
       const result = await contractService.getSignatureInfo(1);
 

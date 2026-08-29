@@ -9,7 +9,13 @@ import { emailService } from '../../services/email-service.js';
 import { getString, getNumber } from '../../database/row-helpers.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 import { generateDefaultMilestones } from '../../services/milestone-generator.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
+import {
+  errorResponse,
+  errorResponseWithPayload,
+  sendSuccess,
+  sendCreated,
+  ErrorCodes
+} from '../../utils/api-response.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
 import { rateLimit } from '../../middleware/security.js';
@@ -101,7 +107,12 @@ router.post(
   invalidateCache(['projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     if (req.user!.type !== 'client') {
-      return errorResponse(res, 'Only clients can submit project requests', 403, ErrorCodes.ACCESS_DENIED);
+      return errorResponse(
+        res,
+        'Only clients can submit project requests',
+        403,
+        ErrorCodes.ACCESS_DENIED
+      );
     }
 
     const { name, projectType, budget, timeline, description } = req.body;
@@ -133,7 +144,8 @@ router.post(
 
     // Auto-generate custom questionnaire for missing info
     try {
-      const { generateDynamicQuestionnaire } = await import('../../services/dynamic-questionnaire-service.js');
+      const { generateDynamicQuestionnaire } =
+        await import('../../services/dynamic-questionnaire-service.js');
       const questionnaireResult = await generateDynamicQuestionnaire(lastID);
       if (questionnaireResult) {
         await logger.info(
@@ -179,7 +191,11 @@ router.post(
       name
     });
 
-    sendCreated(res, { project: newProject }, 'Project request submitted successfully. We will review and get back to you soon!');
+    sendCreated(
+      res,
+      { project: newProject },
+      'Project request submitted successfully. We will review and get back to you soon!'
+    );
   })
 );
 
@@ -238,7 +254,8 @@ router.post(
 
     // Auto-generate custom questionnaire for missing info
     try {
-      const { generateDynamicQuestionnaire } = await import('../../services/dynamic-questionnaire-service.js');
+      const { generateDynamicQuestionnaire } =
+        await import('../../services/dynamic-questionnaire-service.js');
       const questionnaireResult = await generateDynamicQuestionnaire(lastID);
       if (questionnaireResult) {
         await logger.info(
@@ -354,53 +371,53 @@ router.put(
     };
     const allowedUpdates = isAdmin
       ? [
-        'name',
-        'project_name',
-        'project_type',
-        'description',
-        'status',
-        'priority',
-        'start_date',
-        'due_date',
-        'end_date',
-        'estimated_end_date',
-        'budget',
-        'price',
-        'timeline',
-        'preview_url',
-        'progress',
-        'notes',
-        'admin_notes',
-        'repository_url',
-        'repo_url',
-        'staging_url',
-        'production_url',
-        'deposit_amount',
-        'contract_signed_at',
-        'contract_signed_date',
-        // Intake fields
-        'features',
-        'page_count',
-        'integrations',
-        'addons',
-        'design_level',
-        'content_status',
-        'brand_assets',
-        'tech_comfort',
-        'hosting_preference',
-        'current_site',
-        'inspiration',
-        'challenges',
-        'additional_info',
-        'referral_source',
-        // Service credentials
-        'netlify_url',
-        'netlify_email',
-        'netlify_password',
-        'umami_url',
-        'umami_email',
-        'umami_password'
-      ]
+          'name',
+          'project_name',
+          'project_type',
+          'description',
+          'status',
+          'priority',
+          'start_date',
+          'due_date',
+          'end_date',
+          'estimated_end_date',
+          'budget',
+          'price',
+          'timeline',
+          'preview_url',
+          'progress',
+          'notes',
+          'admin_notes',
+          'repository_url',
+          'repo_url',
+          'staging_url',
+          'production_url',
+          'deposit_amount',
+          'contract_signed_at',
+          'contract_signed_date',
+          // Intake fields
+          'features',
+          'page_count',
+          'integrations',
+          'addons',
+          'design_level',
+          'content_status',
+          'brand_assets',
+          'tech_comfort',
+          'hosting_preference',
+          'current_site',
+          'inspiration',
+          'challenges',
+          'additional_info',
+          'referral_source',
+          // Service credentials
+          'netlify_url',
+          'netlify_email',
+          'netlify_password',
+          'umami_url',
+          'umami_email',
+          'umami_password'
+        ]
       : ['description']; // Clients can only update description
 
     for (const field of allowedUpdates) {
@@ -444,10 +461,10 @@ router.put(
           const statusDescriptions: { [key: string]: string } = {
             pending: 'Your project has been queued and will begin soon.',
             'in-progress': 'Work has begun on your project and is progressing well.',
-            'in-review': 'Your project is complete and under review. We\'ll have updates soon.',
+            'in-review': "Your project is complete and under review. We'll have updates soon.",
             completed: 'Congratulations! Your project has been completed successfully.',
             'on-hold':
-              'Your project has been temporarily paused. We\'ll keep you updated on next steps.'
+              "Your project has been temporarily paused. We'll keep you updated on next steps."
           };
 
           const clientEmail = getString(client, 'email');
@@ -463,15 +480,15 @@ router.put(
             nextSteps:
               req.body.status === 'completed'
                 ? [
-                  'Review the final deliverables',
-                  'Provide feedback',
-                  'Schedule follow-up if needed'
-                ]
+                    'Review the final deliverables',
+                    'Provide feedback',
+                    'Schedule follow-up if needed'
+                  ]
                 : req.body.status === 'in-review'
                   ? [
-                    'Review will be completed within 2 business days',
-                    'We may contact you for clarifications'
-                  ]
+                      'Review will be completed within 2 business days',
+                      'We may contact you for clarifications'
+                    ]
                   : []
           });
 
@@ -524,10 +541,14 @@ router.delete(
       return errorResponse(res, result.message, 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
-    sendSuccess(res, {
-      projectId,
-      affectedItems: result.affectedItems
-    }, result.message);
+    sendSuccess(
+      res,
+      {
+        projectId,
+        affectedItems: result.affectedItems
+      },
+      result.message
+    );
   })
 );
 
@@ -696,13 +717,17 @@ router.post(
       sharedWithClient: false
     });
 
-    sendSuccess(res, {
-      file: {
-        id: fileId,
-        filename,
-        size: pdfBytes.length
-      }
-    }, 'Project report saved to files');
+    sendSuccess(
+      res,
+      {
+        file: {
+          id: fileId,
+          filename,
+          size: pdfBytes.length
+        }
+      },
+      'Project report saved to files'
+    );
   })
 );
 
@@ -754,13 +779,17 @@ router.post(
       sharedWithClient: false
     });
 
-    sendSuccess(res, {
-      file: {
-        id: fileId,
-        filename,
-        size: pdfBytes.length
-      }
-    }, 'Statement of Work saved to files');
+    sendSuccess(
+      res,
+      {
+        file: {
+          id: fileId,
+          filename,
+          size: pdfBytes.length
+        }
+      },
+      'Statement of Work saved to files'
+    );
   })
 );
 
@@ -842,14 +871,24 @@ router.post(
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const { generateDynamicQuestionnaire } = await import('../../services/dynamic-questionnaire-service.js');
+    const { generateDynamicQuestionnaire } =
+      await import('../../services/dynamic-questionnaire-service.js');
     const result = await generateDynamicQuestionnaire(projectId);
 
     if (!result) {
-      return errorResponse(res, 'Project not found or no missing information', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+      return errorResponse(
+        res,
+        'Project not found or no missing information',
+        404,
+        ErrorCodes.RESOURCE_NOT_FOUND
+      );
     }
 
-    sendCreated(res, result, `Generated custom questionnaire with ${result.questionCount} questions`);
+    sendCreated(
+      res,
+      result,
+      `Generated custom questionnaire with ${result.questionCount} questions`
+    );
   })
 );
 
@@ -893,7 +932,8 @@ router.post(
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const { checkProjectCompletion, completeProject } = await import('../../services/project-completion-service.js');
+    const { checkProjectCompletion, completeProject } =
+      await import('../../services/project-completion-service.js');
 
     // Check completion status first
     const status = await checkProjectCompletion(projectId);
@@ -942,27 +982,32 @@ router.get(
 
     // Authorization: admin can see any project, client only their own
     const project = isAdmin
-      ? await db.get(
-        `SELECT client_id, maintenance_tier, maintenance_status, maintenance_start_date,
+      ? ((await db.get(
+          `SELECT client_id, maintenance_tier, maintenance_status, maintenance_start_date,
                   maintenance_recurring_invoice_id, maintenance_included_months,
                   maintenance_included_until
            FROM projects WHERE id = ?`,
-        [projectId]
-      ) as Record<string, unknown> | undefined
-      : await db.get(
-        `SELECT client_id, maintenance_tier, maintenance_status, maintenance_start_date,
+          [projectId]
+        )) as Record<string, unknown> | undefined)
+      : ((await db.get(
+          `SELECT client_id, maintenance_tier, maintenance_status, maintenance_start_date,
                   maintenance_recurring_invoice_id, maintenance_included_months,
                   maintenance_included_until
            FROM projects WHERE id = ? AND client_id = ?`,
-        [projectId, req.user!.id]
-      ) as Record<string, unknown> | undefined;
+          [projectId, req.user!.id]
+        )) as Record<string, unknown> | undefined);
 
     if (!project || !project.maintenance_tier) {
       return sendSuccess(res, { hasMaintenance: false });
     }
 
     // Look up tier config for display
-    let tierConfig: { displayName: string; monthlyPrice: number; annualPrice: number; features: Array<{ name: string }> } | null = null;
+    let tierConfig: {
+      displayName: string;
+      monthlyPrice: number;
+      annualPrice: number;
+      features: Array<{ name: string }>;
+    } | null = null;
     try {
       const { getMaintenanceOptions } = await import('../../config/proposal-templates.js');
       const options = getMaintenanceOptions();
@@ -982,7 +1027,7 @@ router.get(
       displayName: tierConfig?.displayName || project.maintenance_tier,
       monthlyPrice: tierConfig?.monthlyPrice || 0,
       annualPrice: tierConfig?.annualPrice || 0,
-      features: tierConfig?.features?.map(f => f.name) || []
+      features: tierConfig?.features?.map((f) => f.name) || []
     });
   })
 );
@@ -1018,13 +1063,13 @@ router.get(
     }
 
     // Get milestones with tasks
-    const milestones = await db.all(
+    const milestones = (await db.all(
       `SELECT id, title, description, due_date, deliverables, sort_order
        FROM milestones
        WHERE project_id = ?
        ORDER BY sort_order, due_date`,
       [projectId]
-    ) as Array<Record<string, unknown>>;
+    )) as Array<Record<string, unknown>>;
 
     const exportData = {
       projectType: project.project_type || null,
@@ -1046,13 +1091,13 @@ router.get(
     };
 
     // Batch fetch all tasks for the project at once (avoids N+1 query)
-    const allTasks = await db.all(
+    const allTasks = (await db.all(
       `SELECT milestone_id, title, description, sort_order, estimated_hours
        FROM project_tasks
        WHERE project_id = ? AND deleted_at IS NULL
        ORDER BY milestone_id, sort_order, due_date`,
       [projectId]
-    ) as Array<Record<string, unknown>>;
+    )) as Array<Record<string, unknown>>;
 
     const tasksByMilestone = new Map<number, Array<Record<string, unknown>>>();
     for (const task of allTasks) {
@@ -1112,10 +1157,10 @@ router.post(
     const db = getDatabase();
 
     // Verify project exists
-    const project = await db.get(
+    const project = (await db.get(
       'SELECT id, start_date FROM projects WHERE id = ? AND deleted_at IS NULL',
       [projectId]
-    ) as Record<string, unknown> | undefined;
+    )) as Record<string, unknown> | undefined;
 
     if (!project) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
@@ -1194,7 +1239,11 @@ router.post(
       }
     }
 
-    sendSuccess(res, { milestonesCreated, tasksCreated }, `Imported ${milestonesCreated} milestones and ${tasksCreated} tasks`);
+    sendSuccess(
+      res,
+      { milestonesCreated, tasksCreated },
+      `Imported ${milestonesCreated} milestones and ${tasksCreated} tasks`
+    );
   })
 );
 

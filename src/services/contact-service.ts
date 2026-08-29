@@ -64,26 +64,26 @@ export class ContactService extends BaseService {
    */
   private validateConfig(): void {
     switch (this.config.backend) {
-    case 'formspree':
-      if (!this.config.formId) {
-        throw new Error('Formspree backend requires formId in config');
-      }
-      break;
-    case 'custom':
-      if (!this.config.endpoint) {
-        throw new Error('Custom backend requires endpoint in config');
-      }
-      break;
-    case 'emailjs':
-      if (!this.config.apiKey) {
-        throw new Error('EmailJS backend requires apiKey in config');
-      }
-      break;
-    case 'netlify':
-      // No additional config needed for Netlify
-      break;
-    default:
-      throw new Error(`Unknown backend: ${this.config.backend}`);
+      case 'formspree':
+        if (!this.config.formId) {
+          throw new Error('Formspree backend requires formId in config');
+        }
+        break;
+      case 'custom':
+        if (!this.config.endpoint) {
+          throw new Error('Custom backend requires endpoint in config');
+        }
+        break;
+      case 'emailjs':
+        if (!this.config.apiKey) {
+          throw new Error('EmailJS backend requires apiKey in config');
+        }
+        break;
+      case 'netlify':
+        // No additional config needed for Netlify
+        break;
+      default:
+        throw new Error(`Unknown backend: ${this.config.backend}`);
     }
   }
 
@@ -111,7 +111,7 @@ export class ContactService extends BaseService {
         return {
           success: false,
           message:
-            'Whoa, slow down! You\'ve sent too many messages. Please wait 5 minutes before trying again.',
+            "Whoa, slow down! You've sent too many messages. Please wait 5 minutes before trying again.",
           error: 'rate_limit'
         };
       }
@@ -149,22 +149,22 @@ export class ContactService extends BaseService {
       }
 
       switch (this.config.backend) {
-      case 'netlify':
-        return await this.submitToNetlify(sanitizedData);
-      case 'formspree':
-        return await this.submitToFormspree(sanitizedData);
-      case 'emailjs':
-        return await this.submitToEmailJS(sanitizedData);
-      case 'custom':
-        return await this.submitToCustom(sanitizedData);
-      default:
-        // Gracefully handle unknown backend - should never happen due to TypeScript enforcement
-        this.error(`Unknown backend type: ${this.config.backend}`);
-        return {
-          success: false,
-          message: 'Contact form configuration error. Please try again later.',
-          error: `Unsupported backend: ${this.config.backend}`
-        };
+        case 'netlify':
+          return await this.submitToNetlify(sanitizedData);
+        case 'formspree':
+          return await this.submitToFormspree(sanitizedData);
+        case 'emailjs':
+          return await this.submitToEmailJS(sanitizedData);
+        case 'custom':
+          return await this.submitToCustom(sanitizedData);
+        default:
+          // Gracefully handle unknown backend - should never happen due to TypeScript enforcement
+          this.error(`Unknown backend type: ${this.config.backend}`);
+          return {
+            success: false,
+            message: 'Contact form configuration error. Please try again later.',
+            error: `Unsupported backend: ${this.config.backend}`
+          };
       }
     } catch (error) {
       this.error('Form submission failed:', error);
@@ -275,12 +275,7 @@ export class ContactService extends BaseService {
       throw new Error('EmailJS service ID or template ID not configured in environment variables');
     }
 
-    await window.emailjs.send(
-      serviceId,
-      templateId,
-      templateParams,
-      this.config.apiKey
-    );
+    await window.emailjs.send(serviceId, templateId, templateParams, this.config.apiKey);
 
     this.log('EmailJS submission successful');
     return {

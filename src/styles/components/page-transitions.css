@@ -210,9 +210,9 @@ section.business-card-section.page-hidden .intro-nav {
 
   /* Other virtual page sections - centered */
   main[data-virtual-pages]
-    > section[data-page]:not(.contact-section):not(.about-section):not(
-      .business-card-section
-    ):not(.projects-section):not(.project-detail-section) {
+    > section[data-page]:not(.contact-section):not(.about-section):not(.business-card-section):not(
+      .projects-section
+    ):not(.project-detail-section) {
     position: absolute;
     top: 0;
     left: 0;
@@ -326,7 +326,6 @@ section.business-card-section.page-hidden .intro-nav {
     /* visibility controlled by GSAP autoAlpha */
     pointer-events: auto;
   }
-
 
   /* Page content wrapper for animations */
   section[data-page] > * {

@@ -137,16 +137,20 @@ export const usePortalStore = create<PortalStoreState>()(
           const capabilities = getCapabilitiesForRole(role);
           const defaultTab = getDefaultTabForRole(role);
 
-          set({
-            role,
-            navItems,
-            subtabGroups,
-            features,
-            capabilities,
-            currentTab: defaultTab,
-            currentGroup: null,
-            pageTitle: getTabTitle(defaultTab)
-          }, false, 'setRole');
+          set(
+            {
+              role,
+              navItems,
+              subtabGroups,
+              features,
+              capabilities,
+              currentTab: defaultTab,
+              currentGroup: null,
+              pageTitle: getTabTitle(defaultTab)
+            },
+            false,
+            'setRole'
+          );
         },
 
         switchTab: (tabId) => {
@@ -159,11 +163,15 @@ export const usePortalStore = create<PortalStoreState>()(
 
           const { group, tab } = resolveTab(tabId, role);
 
-          set({
-            currentTab: tab,
-            currentGroup: group,
-            pageTitle: getTabTitle(tab)
-          }, false, 'switchTab');
+          set(
+            {
+              currentTab: tab,
+              currentGroup: group,
+              pageTitle: getTabTitle(tab)
+            },
+            false,
+            'switchTab'
+          );
         },
 
         setPageTitle: (title) => {
@@ -202,15 +210,20 @@ export const usePortalStore = create<PortalStoreState>()(
           const activeProjectId = get().activeProjectId;
           const firstProject = projects[0]?.id ?? null;
           // If no active project set, default to first project
-          const resolvedActiveId = activeProjectId && projects.some((p) => p.id === activeProjectId)
-            ? activeProjectId
-            : firstProject;
+          const resolvedActiveId =
+            activeProjectId && projects.some((p) => p.id === activeProjectId)
+              ? activeProjectId
+              : firstProject;
 
-          set({
-            projects,
-            projectCount: projects.length,
-            activeProjectId: resolvedActiveId
-          }, false, 'setProjects');
+          set(
+            {
+              projects,
+              projectCount: projects.length,
+              activeProjectId: resolvedActiveId
+            },
+            false,
+            'setProjects'
+          );
         }
       };
     },

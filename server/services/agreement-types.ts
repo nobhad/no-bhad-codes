@@ -11,7 +11,14 @@
 // Agreement Status
 // ============================================
 
-export type AgreementStatus = 'draft' | 'sent' | 'viewed' | 'in_progress' | 'completed' | 'cancelled' | 'expired';
+export type AgreementStatus =
+  | 'draft'
+  | 'sent'
+  | 'viewed'
+  | 'in_progress'
+  | 'completed'
+  | 'cancelled'
+  | 'expired';
 
 // ============================================
 // Step Types

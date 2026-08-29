@@ -30,7 +30,9 @@ const chatWebhookBreaker = new CircuitBreaker({
 
 const NOTIFICATION_INTEGRATION_COLUMNS = `
   id, name, platform, webhook_url, channel, events, is_active, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // Slack message block types
 export interface SlackBlock {
@@ -531,7 +533,9 @@ export async function saveNotificationConfig(
  */
 export async function getNotificationConfigs(): Promise<NotificationConfig[]> {
   const db = getDatabase();
-  const rows = await db.all(`SELECT ${NOTIFICATION_INTEGRATION_COLUMNS} FROM notification_integrations ORDER BY created_at DESC`);
+  const rows = await db.all(
+    `SELECT ${NOTIFICATION_INTEGRATION_COLUMNS} FROM notification_integrations ORDER BY created_at DESC`
+  );
 
   return rows.map((row: Record<string, unknown>) => ({
     id: row.id as number,

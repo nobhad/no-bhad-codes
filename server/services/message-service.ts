@@ -155,31 +155,43 @@ function parseMentions(content: string): { type: 'user' | 'team' | 'all'; id?: s
 
 const MESSAGE_MENTION_COLUMNS = `
   id, message_id, mentioned_type, mentioned_id, notified, notified_at, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const MESSAGE_REACTION_COLUMNS = `
   id, message_id, user_email, user_type, reaction, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const MESSAGE_SUBSCRIPTION_COLUMNS = `
   id, project_id, user_email, user_type, notify_all, notify_mentions,
   notify_replies, muted_until, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const MESSAGE_READ_RECEIPT_COLUMNS = `
   id, message_id, user_email, user_type, read_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const PINNED_MESSAGE_COLUMNS = `
   id, thread_id, message_id, pinned_by, pinned_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const MESSAGE_COLUMNS = `
   id, project_id, client_id, thread_id, context_type, sender_type, sender_name,
   subject, message, message_type, priority, read_at, attachments,
   parent_message_id, is_internal, edited_at, deleted_at, deleted_by,
   reaction_count, reply_count, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // MESSAGE SERVICE CLASS
@@ -206,7 +218,10 @@ class MessageService {
         [messageId, mention.type, mention.id || null]
       );
 
-      const row = await db.get(`SELECT ${MESSAGE_MENTION_COLUMNS} FROM message_mentions WHERE id = ?`, [result.lastID]);
+      const row = await db.get(
+        `SELECT ${MESSAGE_MENTION_COLUMNS} FROM message_mentions WHERE id = ?`,
+        [result.lastID]
+      );
       if (row) {
         savedMentions.push(toMention(row as MentionRow));
       }
@@ -226,7 +241,10 @@ class MessageService {
    */
   async getMentions(messageId: number): Promise<Mention[]> {
     const db = getDatabase();
-    const rows = await db.all(`SELECT ${MESSAGE_MENTION_COLUMNS} FROM message_mentions WHERE message_id = ?`, [messageId]);
+    const rows = await db.all(
+      `SELECT ${MESSAGE_MENTION_COLUMNS} FROM message_mentions WHERE message_id = ?`,
+      [messageId]
+    );
     return rows.map((row) => toMention(row as MentionRow));
   }
 
@@ -297,7 +315,10 @@ class MessageService {
       messageId
     ]);
 
-    const row = await db.get(`SELECT ${MESSAGE_REACTION_COLUMNS} FROM message_reactions WHERE id = ?`, [result.lastID]);
+    const row = await db.get(
+      `SELECT ${MESSAGE_REACTION_COLUMNS} FROM message_reactions WHERE id = ?`,
+      [result.lastID]
+    );
     return toReaction(row as ReactionRow);
   }
 
@@ -414,7 +435,7 @@ class MessageService {
     }
 
     if (updates.length > 0) {
-      updates.push('updated_at = datetime(\'now\')');
+      updates.push("updated_at = datetime('now')");
       params.push(projectId, userEmail);
 
       await db.run(
@@ -493,14 +514,14 @@ class MessageService {
     }
 
     switch (notificationType) {
-    case 'all':
-      return sub.notifyAll;
-    case 'mention':
-      return sub.notifyMentions;
-    case 'reply':
-      return sub.notifyReplies;
-    default:
-      return sub.notifyAll;
+      case 'all':
+        return sub.notifyAll;
+      case 'mention':
+        return sub.notifyMentions;
+      case 'reply':
+        return sub.notifyReplies;
+      default:
+        return sub.notifyAll;
     }
   }
 
@@ -675,7 +696,7 @@ class MessageService {
   async editMessage(messageId: number, newContent: string): Promise<void> {
     const db = getDatabase();
 
-    await db.run('UPDATE messages SET message = ?, edited_at = datetime(\'now\') WHERE id = ?', [
+    await db.run("UPDATE messages SET message = ?, edited_at = datetime('now') WHERE id = ?", [
       newContent,
       messageId
     ]);
@@ -691,7 +712,7 @@ class MessageService {
   async deleteMessage(messageId: number, deletedBy: string): Promise<void> {
     const db = getDatabase();
 
-    await db.run('UPDATE messages SET deleted_at = datetime(\'now\'), deleted_by = ? WHERE id = ?', [
+    await db.run("UPDATE messages SET deleted_at = datetime('now'), deleted_by = ? WHERE id = ?", [
       deletedBy,
       messageId
     ]);
@@ -719,7 +740,7 @@ class MessageService {
     const db = getDatabase();
 
     await db.run(
-      'UPDATE message_threads SET archived_at = datetime(\'now\'), archived_by = ?, status = \'archived\' WHERE id = ?',
+      "UPDATE message_threads SET archived_at = datetime('now'), archived_by = ?, status = 'archived' WHERE id = ?",
       [archivedBy, threadId]
     );
   }
@@ -731,7 +752,7 @@ class MessageService {
     const db = getDatabase();
 
     await db.run(
-      'UPDATE message_threads SET archived_at = NULL, archived_by = NULL, status = \'active\' WHERE id = ?',
+      "UPDATE message_threads SET archived_at = NULL, archived_by = NULL, status = 'active' WHERE id = ?",
       [threadId]
     );
   }
@@ -828,10 +849,7 @@ class MessageService {
   /**
    * Fetch all message threads — admin sees all, client sees own.
    */
-  async getThreads(
-    userType: UserType,
-    userId: string
-  ): Promise<Record<string, unknown>[]> {
+  async getThreads(userType: UserType, userId: string): Promise<Record<string, unknown>[]> {
     const db = getDatabase();
 
     if (userType === 'admin') {
@@ -905,10 +923,9 @@ class MessageService {
       [params.clientId, params.projectId, params.subject, params.threadType, params.priority]
     );
 
-    return db.get(
-      `SELECT ${threadColumns} FROM active_message_threads WHERE id = ?`,
-      [result.lastID]
-    );
+    return db.get(`SELECT ${threadColumns} FROM active_message_threads WHERE id = ?`, [
+      result.lastID
+    ]);
   }
 
   /**
@@ -923,10 +940,7 @@ class MessageService {
     const db = getDatabase();
 
     if (userType === 'admin') {
-      return db.get(
-        `SELECT ${threadColumns} FROM active_message_threads WHERE id = ?`,
-        [threadId]
-      );
+      return db.get(`SELECT ${threadColumns} FROM active_message_threads WHERE id = ?`, [threadId]);
     }
 
     return db.get(
@@ -976,10 +990,7 @@ class MessageService {
       ]
     );
 
-    return db.get(
-      `SELECT ${messageColumns} FROM active_messages WHERE id = ?`,
-      [result.lastID]
-    );
+    return db.get(`SELECT ${messageColumns} FROM active_messages WHERE id = ?`, [result.lastID]);
   }
 
   /**
@@ -998,9 +1009,7 @@ class MessageService {
   /**
    * Fetch client row by id (email + contact_name) — used for email notifications.
    */
-  async getClientById(
-    clientId: number
-  ): Promise<Record<string, unknown> | undefined> {
+  async getClientById(clientId: number): Promise<Record<string, unknown> | undefined> {
     const db = getDatabase();
     return db.get('SELECT email, contact_name FROM active_clients WHERE id = ?', [clientId]);
   }
@@ -1029,9 +1038,7 @@ class MessageService {
    * Batch-fetch reactions for a set of message ids.
    * Returns a Map keyed by message_id.
    */
-  async getReactionsByMessageIds(
-    messageIds: number[]
-  ): Promise<Map<number, ReactionRow_Core[]>> {
+  async getReactionsByMessageIds(messageIds: number[]): Promise<Map<number, ReactionRow_Core[]>> {
     const reactionsMap = new Map<number, ReactionRow_Core[]>();
     if (messageIds.length === 0) return reactionsMap;
 
@@ -1196,7 +1203,8 @@ class MessageService {
    */
   async getRecentMessageActivity(limit: number = 10): Promise<Record<string, unknown>[]> {
     const db = getDatabase();
-    const activity = await db.all(`
+    const activity = await db.all(
+      `
     SELECT
       mt.subject,
       mt.thread_type,
@@ -1209,7 +1217,9 @@ class MessageService {
     JOIN active_clients c ON mt.client_id = c.id
     ORDER BY mt.last_message_at DESC
     LIMIT ?
-    `, [limit]);
+    `,
+      [limit]
+    );
     return activity as Record<string, unknown>[];
   }
 
@@ -1224,15 +1234,17 @@ class MessageService {
   ): Promise<Record<string, unknown> | null> {
     const db = getDatabase();
 
-    const messageQuery = userType === 'admin'
-      ? 'SELECT m.id, m.attachments, m.thread_id FROM active_messages m WHERE m.attachments LIKE ? ESCAPE \'\\\''
-      : `SELECT m.id, m.attachments, m.thread_id FROM active_messages m
+    const messageQuery =
+      userType === 'admin'
+        ? "SELECT m.id, m.attachments, m.thread_id FROM active_messages m WHERE m.attachments LIKE ? ESCAPE '\\'"
+        : `SELECT m.id, m.attachments, m.thread_id FROM active_messages m
          JOIN active_message_threads mt ON m.thread_id = mt.id
          WHERE m.attachments LIKE ? ESCAPE '\\' AND mt.client_id = ?`;
 
-    const params = userType === 'admin'
-      ? [`%"filename":"${escapedFilename}"%`]
-      : [`%"filename":"${escapedFilename}"%`, clientId!];
+    const params =
+      userType === 'admin'
+        ? [`%"filename":"${escapedFilename}"%`]
+        : [`%"filename":"${escapedFilename}"%`, clientId!];
 
     const message = await db.get(messageQuery, params);
     return (message as Record<string, unknown>) ?? null;
@@ -1247,7 +1259,9 @@ class MessageService {
       id, project_id, client_id, subject, thread_type, status, priority,
       last_message_at, last_message_by, participant_count, created_at, updated_at,
       pinned_count, archived_at, archived_by
-    `.replace(/\s+/g, ' ').trim();
+    `
+      .replace(/\s+/g, ' ')
+      .trim();
     const thread = await db.get(
       `SELECT ${MESSAGE_THREAD_COLUMNS} FROM active_message_threads WHERE id = ?`,
       [threadId]
@@ -1271,7 +1285,9 @@ class MessageService {
       subject, message, message_type, priority, read_at, attachments,
       parent_message_id, is_internal, edited_at, deleted_at, deleted_by,
       reaction_count, reply_count, created_at, updated_at
-    `.replace(/\s+/g, ' ').trim();
+    `
+      .replace(/\s+/g, ' ')
+      .trim();
 
     const result = await db.run(
       `
@@ -1304,7 +1320,9 @@ class MessageService {
       subject, message, message_type, priority, read_at, attachments,
       parent_message_id, is_internal, edited_at, deleted_at, deleted_by,
       reaction_count, reply_count, created_at, updated_at
-    `.replace(/\s+/g, ' ').trim();
+    `
+      .replace(/\s+/g, ' ')
+      .trim();
 
     const messages = await db.all(
       `SELECT ${MSG_INTERNAL_COLUMNS} FROM active_messages
@@ -1318,7 +1336,11 @@ class MessageService {
   /**
    * Check if user can access a message (admin always yes, client checks ownership)
    */
-  async canUserAccessMessage(userType: string, userId: number | undefined, messageId: number): Promise<boolean> {
+  async canUserAccessMessage(
+    userType: string,
+    userId: number | undefined,
+    messageId: number
+  ): Promise<boolean> {
     if (userType === 'admin') return true;
     const db = getDatabase();
     const row = await db.get(
@@ -1334,13 +1356,17 @@ class MessageService {
   /**
    * Check if user can access a project
    */
-  async canUserAccessProject(userType: string, userId: number | undefined, projectId: number): Promise<boolean> {
+  async canUserAccessProject(
+    userType: string,
+    userId: number | undefined,
+    projectId: number
+  ): Promise<boolean> {
     if (userType === 'admin') return true;
     const db = getDatabase();
-    const row = await db.get(
-      'SELECT 1 FROM active_projects WHERE id = ? AND client_id = ?',
-      [projectId, userId]
-    );
+    const row = await db.get('SELECT 1 FROM active_projects WHERE id = ? AND client_id = ?', [
+      projectId,
+      userId
+    ]);
     return !!row;
   }
 
@@ -1396,10 +1422,9 @@ class MessageService {
    */
   async getClientSenderName(clientId: number): Promise<string> {
     const db = getDatabase();
-    const sender = await db.get(
-      'SELECT contact_name, email FROM active_clients WHERE id = ?',
-      [clientId]
-    ) as { contact_name?: string; email?: string } | undefined;
+    const sender = (await db.get('SELECT contact_name, email FROM active_clients WHERE id = ?', [
+      clientId
+    ])) as { contact_name?: string; email?: string } | undefined;
     return sender?.contact_name || sender?.email || 'Unknown';
   }
 
@@ -1413,7 +1438,9 @@ class MessageService {
       new_message_notifications, project_updates_notifications,
       invoice_notifications, marketing_notifications,
       quiet_hours_start, quiet_hours_end, timezone, created_at, updated_at
-    `.replace(/\s+/g, ' ').trim();
+    `
+      .replace(/\s+/g, ' ')
+      .trim();
 
     let preferences = await db.get(
       `SELECT ${NOTIFICATION_PREF_COLUMNS} FROM notification_preferences WHERE client_id = ?`,
@@ -1421,10 +1448,9 @@ class MessageService {
     );
 
     if (!preferences) {
-      const result = await db.run(
-        'INSERT INTO notification_preferences (client_id) VALUES (?)',
-        [clientId]
-      );
+      const result = await db.run('INSERT INTO notification_preferences (client_id) VALUES (?)', [
+        clientId
+      ]);
       preferences = await db.get(
         `SELECT ${NOTIFICATION_PREF_COLUMNS} FROM notification_preferences WHERE id = ?`,
         [result.lastID]
@@ -1447,7 +1473,9 @@ class MessageService {
       new_message_notifications, project_updates_notifications,
       invoice_notifications, marketing_notifications,
       quiet_hours_start, quiet_hours_end, timezone, created_at, updated_at
-    `.replace(/\s+/g, ' ').trim();
+    `
+      .replace(/\s+/g, ' ')
+      .trim();
 
     const setClauses: string[] = [];
     const values: (string | number | boolean | null)[] = [];
@@ -1543,14 +1571,18 @@ class MessageService {
   /**
    * Resolve the display name for a sender (admin user or client).
    */
-  async resolveSenderName(userId: number, userType: string, fallbackEmail: string): Promise<string> {
+  async resolveSenderName(
+    userId: number,
+    userType: string,
+    fallbackEmail: string
+  ): Promise<string> {
     const db = getDatabase();
     if (userType === 'admin') {
       const adminUser = await db.get('SELECT display_name FROM users WHERE id = ?', [userId]);
-      return (adminUser as Record<string, unknown>)?.display_name as string || 'Admin';
+      return ((adminUser as Record<string, unknown>)?.display_name as string) || 'Admin';
     }
     const client = await db.get('SELECT contact_name FROM clients WHERE id = ?', [userId]);
-    return (client as Record<string, unknown>)?.contact_name as string || fallbackEmail;
+    return ((client as Record<string, unknown>)?.contact_name as string) || fallbackEmail;
   }
 
   /**
@@ -1570,12 +1602,13 @@ class MessageService {
   /**
    * Get project name and client_id for thread creation.
    */
-  async getProjectInfo(projectId: number): Promise<{ project_name: string; client_id: number } | undefined> {
+  async getProjectInfo(
+    projectId: number
+  ): Promise<{ project_name: string; client_id: number } | undefined> {
     const db = getDatabase();
-    return db.get(
-      'SELECT project_name, client_id FROM active_projects WHERE id = ?',
-      [projectId]
-    ) as Promise<{ project_name: string; client_id: number } | undefined>;
+    return db.get('SELECT project_name, client_id FROM active_projects WHERE id = ?', [
+      projectId
+    ]) as Promise<{ project_name: string; client_id: number } | undefined>;
   }
 
   /**
@@ -1584,7 +1617,7 @@ class MessageService {
   async getProjectClientId(projectId: number): Promise<number | null> {
     const db = getDatabase();
     const row = await db.get('SELECT client_id FROM projects WHERE id = ?', [projectId]);
-    return (row as Record<string, unknown>)?.client_id as number | null ?? null;
+    return ((row as Record<string, unknown>)?.client_id as number | null) ?? null;
   }
 
   // =====================================================
@@ -1635,7 +1668,8 @@ class MessageService {
    */
   async getAdminConversation(conversationId: number): Promise<Record<string, unknown> | undefined> {
     const db = getDatabase();
-    return db.get(`
+    return db.get(
+      `
       SELECT
         mt.*,
         c.company_name,
@@ -1644,7 +1678,9 @@ class MessageService {
       FROM message_threads mt
       JOIN clients c ON mt.client_id = c.id
       WHERE mt.id = ?
-    `, [conversationId]) as Promise<Record<string, unknown> | undefined>;
+    `,
+      [conversationId]
+    ) as Promise<Record<string, unknown> | undefined>;
   }
 
   /**
@@ -1652,7 +1688,8 @@ class MessageService {
    */
   async getAdminConversationMessages(conversationId: number): Promise<Record<string, unknown>[]> {
     const db = getDatabase();
-    return db.all(`
+    return db.all(
+      `
       SELECT
         m.id,
         m.message as content,
@@ -1667,7 +1704,9 @@ class MessageService {
       WHERE m.thread_id = ?
         AND m.context_type = 'general'
       ORDER BY m.created_at ASC
-    `, [conversationId]) as Promise<Record<string, unknown>[]>;
+    `,
+      [conversationId]
+    ) as Promise<Record<string, unknown>[]>;
   }
 
   /**
@@ -1675,13 +1714,16 @@ class MessageService {
    */
   async markAdminConversationRead(conversationId: number): Promise<void> {
     const db = getDatabase();
-    await db.run(`
+    await db.run(
+      `
       UPDATE messages
       SET read_at = CURRENT_TIMESTAMP
       WHERE thread_id = ?
       AND sender_type != 'admin'
       AND read_at IS NULL
-    `, [conversationId]);
+    `,
+      [conversationId]
+    );
   }
 
   /**
@@ -1697,45 +1739,50 @@ class MessageService {
     const db = getDatabase();
 
     // Get thread info
-    const thread = await db.get(
-      'SELECT client_id, project_id FROM message_threads WHERE id = ?',
-      [params.conversationId]
-    );
+    const thread = await db.get('SELECT client_id, project_id FROM message_threads WHERE id = ?', [
+      params.conversationId
+    ]);
     if (!thread) return undefined;
     const t = thread as Record<string, unknown>;
 
     // Resolve admin display name
-    const adminUser = await db.get(
-      'SELECT display_name FROM users WHERE id = ?',
-      [params.adminUserId]
-    );
-    const senderName = (adminUser as Record<string, unknown>)?.display_name as string || 'Admin';
+    const adminUser = await db.get('SELECT display_name FROM users WHERE id = ?', [
+      params.adminUserId
+    ]);
+    const senderName = ((adminUser as Record<string, unknown>)?.display_name as string) || 'Admin';
 
     // Insert the message
-    const result = await db.run(`
+    const result = await db.run(
+      `
       INSERT INTO messages (
         thread_id, client_id, project_id, context_type,
         sender_type, sender_name, message, attachments,
         created_at, updated_at
       ) VALUES (?, ?, ?, 'general', 'admin', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    `, [
-      params.conversationId,
-      t.client_id as number,
-      t.project_id as number | null,
-      senderName,
-      params.content.trim(),
-      params.attachments ? JSON.stringify(params.attachments) : null
-    ]);
+    `,
+      [
+        params.conversationId,
+        t.client_id as number,
+        t.project_id as number | null,
+        senderName,
+        params.content.trim(),
+        params.attachments ? JSON.stringify(params.attachments) : null
+      ]
+    );
 
     // Update thread's last_message_at
-    await db.run(`
+    await db.run(
+      `
       UPDATE message_threads
       SET last_message_at = CURRENT_TIMESTAMP, last_message_by = 'admin'
       WHERE id = ?
-    `, [params.conversationId]);
+    `,
+      [params.conversationId]
+    );
 
     // Get the created message
-    return db.get(`
+    return db.get(
+      `
       SELECT
         id,
         message as content,
@@ -1745,7 +1792,9 @@ class MessageService {
         created_at as createdAt
       FROM messages
       WHERE id = ?
-    `, [result.lastID]) as Promise<Record<string, unknown> | undefined>;
+    `,
+      [result.lastID]
+    ) as Promise<Record<string, unknown> | undefined>;
   }
 
   /**
@@ -1753,11 +1802,14 @@ class MessageService {
    */
   async toggleConversationStar(conversationId: number, starred: boolean): Promise<void> {
     const db = getDatabase();
-    await db.run(`
+    await db.run(
+      `
       UPDATE message_threads
       SET pinned_count = ?
       WHERE id = ?
-    `, [starred ? 1 : 0, conversationId]);
+    `,
+      [starred ? 1 : 0, conversationId]
+    );
   }
 }
 

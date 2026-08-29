@@ -178,7 +178,8 @@ async function getDashboardSnapshot(): Promise<DashboardSnapshot> {
 async function getRecentActivity(limit: number = 10): Promise<ActivityRow[]> {
   const db = getDatabase();
 
-  const rows = await db.all<ActivityRow>(`
+  const rows = await db.all<ActivityRow>(
+    `
     SELECT
       'activity' || id as id,
       activity_type as type,
@@ -189,7 +190,9 @@ async function getRecentActivity(limit: number = 10): Promise<ActivityRow[]> {
     FROM client_activities
     ORDER BY created_at DESC
     LIMIT ?
-  `, [limit]);
+  `,
+    [limit]
+  );
 
   return rows || [];
 }
@@ -200,7 +203,8 @@ async function getRecentActivity(limit: number = 10): Promise<ActivityRow[]> {
 async function getActiveProjects(limit: number = 5): Promise<ActiveProjectRow[]> {
   const db = getDatabase();
 
-  const rows = await db.all<ActiveProjectRow>(`
+  const rows = await db.all<ActiveProjectRow>(
+    `
     SELECT
       p.id,
       p.project_name as name,
@@ -214,7 +218,9 @@ async function getActiveProjects(limit: number = 5): Promise<ActiveProjectRow[]>
     WHERE p.status IN ('active', 'in-progress', 'in_progress')
     ORDER BY p.estimated_end_date ASC NULLS LAST
     LIMIT ?
-  `, [limit]);
+  `,
+    [limit]
+  );
 
   return rows || [];
 }

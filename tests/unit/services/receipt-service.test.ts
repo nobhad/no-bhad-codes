@@ -221,16 +221,17 @@ describe('ReceiptService - getReceiptByNumber', () => {
     const result = await receiptService.getReceiptByNumber('REC-202601-XX001');
 
     expect(result).toMatchObject({ receiptNumber: 'REC-202601-XX001' });
-    expect(mockDb.get).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE r.receipt_number = ?'),
-      ['REC-202601-XX001']
-    );
+    expect(mockDb.get).toHaveBeenCalledWith(expect.stringContaining('WHERE r.receipt_number = ?'), [
+      'REC-202601-XX001'
+    ]);
   });
 
   it('throws when receipt number not found', async () => {
     mockDb.get.mockResolvedValueOnce(null);
 
-    await expect(receiptService.getReceiptByNumber('RCP-9999-9999')).rejects.toThrow(/receipt not found/i);
+    await expect(receiptService.getReceiptByNumber('RCP-9999-9999')).rejects.toThrow(
+      /receipt not found/i
+    );
   });
 });
 
@@ -276,10 +277,7 @@ describe('ReceiptService - getReceiptsByClient', () => {
     const result = await receiptService.getReceiptsByClient(3);
 
     expect(result).toHaveLength(1);
-    expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE i.client_id = ?'),
-      [3]
-    );
+    expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('WHERE i.client_id = ?'), [3]);
   });
 
   it('returns empty array when client has no receipts', async () => {

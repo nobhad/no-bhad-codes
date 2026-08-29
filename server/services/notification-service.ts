@@ -36,10 +36,7 @@ class NotificationService {
   /**
    * Get notification history for an admin user.
    */
-  async getAdminNotificationHistory(
-    userId: number,
-    limit: number
-  ): Promise<NotificationRow[]> {
+  async getAdminNotificationHistory(userId: number, limit: number): Promise<NotificationRow[]> {
     const db = getDatabase();
     return db.all<NotificationRow>(
       `SELECT id, type, title, message, is_read, created_at, data
@@ -55,17 +52,14 @@ class NotificationService {
    * Mark a single admin notification as read.
    * Returns the number of rows affected.
    */
-  async markAdminNotificationRead(
-    notificationId: number,
-    userId: number
-  ): Promise<number> {
+  async markAdminNotificationRead(notificationId: number, userId: number): Promise<number> {
     const db = getDatabase();
-    const result = await db.run(
+    const result = (await db.run(
       `UPDATE notification_history
        SET is_read = 1, read_at = CURRENT_TIMESTAMP
        WHERE id = ? AND user_id = ? AND user_type = 'admin'`,
       [notificationId, userId]
-    ) as UpdateResult;
+    )) as UpdateResult;
     return result.changes;
   }
 

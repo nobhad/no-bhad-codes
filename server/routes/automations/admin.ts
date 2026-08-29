@@ -64,7 +64,15 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: JWTAuthRequest, res: Response) => {
-    const { name, description, triggerEvent, triggerConditions, stopOnError, maxRunsPerEntity, actions } = req.body;
+    const {
+      name,
+      description,
+      triggerEvent,
+      triggerConditions,
+      stopOnError,
+      maxRunsPerEntity,
+      actions
+    } = req.body;
 
     if (!name || !triggerEvent) {
       errorResponse(res, 'name and triggerEvent are required', 400, ErrorCodes.VALIDATION_ERROR);
@@ -121,7 +129,8 @@ router.put(
   requireAdmin,
   asyncHandler(async (req: JWTAuthRequest, res: Response) => {
     const automationId = Number(req.params.id);
-    const { name, description, triggerEvent, triggerConditions, stopOnError, maxRunsPerEntity } = req.body;
+    const { name, description, triggerEvent, triggerConditions, stopOnError, maxRunsPerEntity } =
+      req.body;
 
     await automationEngine.update(automationId, {
       name,
@@ -198,7 +207,12 @@ router.post(
     const { actionType, actionConfig, condition } = req.body;
 
     if (!actionType || !actionConfig) {
-      errorResponse(res, 'actionType and actionConfig are required', 400, ErrorCodes.VALIDATION_ERROR);
+      errorResponse(
+        res,
+        'actionType and actionConfig are required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
       return;
     }
 

@@ -47,18 +47,18 @@
    * Many components reference these short names directly.
    * Kept as aliases pointing at the proper z-index scale.
    */
-  --z-header: var(--z-index-elevated);    /* Alias → --z-index-elevated (10) */
-  --z-nav: var(--z-index-nav);            /* Alias → --z-index-nav (100) */
+  --z-header: var(--z-index-elevated); /* Alias → --z-index-elevated (10) */
+  --z-nav: var(--z-index-nav); /* Alias → --z-index-nav (100) */
   --z-modal: var(--z-index-portal-modal); /* Alias → --z-index-portal-modal (9600) */
 
   /* Navigation layers */
   --z-index-nav-backdrop: 90;
   --z-index-nav: 100;
   --z-index-nav-dropdown: 110;
-  --z-index-nav-overlay: 115;   /* Blur overlay between header and nav menu */
-  --z-index-nav-menu: 120;      /* Nav menu above overlay */
+  --z-index-nav-overlay: 115; /* Blur overlay between header and nav menu */
+  --z-index-nav-menu: 120; /* Nav menu above overlay */
   --z-index-nav-menu-content: 125; /* Menu content above overlay */
-  --z-index-nav-header: 130;    /* Header above all nav layers */
+  --z-index-nav-header: 130; /* Header above all nav layers */
 
   /* Business card layers */
   --z-index-business-card: 50;

@@ -15,8 +15,22 @@ import { ValidationSchema } from '../../middleware/validation.js';
 
 export const CONTRACT_CONTENT_MAX_LENGTH = 100000;
 export const CONTRACT_NAME_MAX_LENGTH = 200;
-export const CONTRACT_STATUS_VALUES = ['draft', 'sent', 'signed', 'expired', 'cancelled', 'active', 'renewed'];
-export const TEMPLATE_TYPE_VALUES = ['service-agreement', 'nda', 'scope-of-work', 'maintenance', 'custom'];
+export const CONTRACT_STATUS_VALUES = [
+  'draft',
+  'sent',
+  'signed',
+  'expired',
+  'cancelled',
+  'active',
+  'renewed'
+];
+export const TEMPLATE_TYPE_VALUES = [
+  'service-agreement',
+  'nda',
+  'scope-of-work',
+  'maintenance',
+  'custom'
+];
 export const BULK_DELETE_MAX_IDS = 100;
 
 // =====================================================
@@ -25,14 +39,8 @@ export const BULK_DELETE_MAX_IDS = 100;
 
 export const ContractValidationSchemas = {
   create: {
-    projectId: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ],
-    clientId: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ],
+    projectId: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
+    clientId: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
     content: [
       { type: 'required' as const },
       { type: 'string' as const, minLength: 1, maxLength: CONTRACT_CONTENT_MAX_LENGTH }
@@ -52,18 +60,9 @@ export const ContractValidationSchemas = {
   } as ValidationSchema,
 
   fromTemplate: {
-    templateId: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ],
-    projectId: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ],
-    clientId: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ],
+    templateId: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
+    projectId: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
+    clientId: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
     status: {
       type: 'string' as const,
       allowedValues: CONTRACT_STATUS_VALUES

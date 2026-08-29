@@ -177,7 +177,7 @@ function hideFormError(el: HTMLElement): void {
  * Generate a random session ID
  */
 function generateSessionId(): string {
-  return `sess_${  Math.random().toString(36).substring(2)}`;
+  return `sess_${Math.random().toString(36).substring(2)}`;
 }
 
 /**
@@ -281,7 +281,7 @@ async function handleFormSubmit(
   // Validate password requirements
   const passwordErrors = validatePassword(password);
   if (passwordErrors.length > 0) {
-    showFormError(elements.formError, `Password must contain: ${  passwordErrors.join(', ')}`);
+    showFormError(elements.formError, `Password must contain: ${passwordErrors.join(', ')}`);
     return;
   }
 
@@ -299,10 +299,7 @@ async function handleFormSubmit(
     const data = await response.json();
 
     if (!response.ok || !data.success) {
-      showFormError(
-        elements.formError,
-        data.error || 'Failed to set password. Please try again.'
-      );
+      showFormError(elements.formError, data.error || 'Failed to set password. Please try again.');
       elements.submitBtn.disabled = false;
       elements.submitBtn.textContent = SUBMIT_TEXT;
       return;

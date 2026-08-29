@@ -12,7 +12,6 @@
   EXCEPTION: .slug-cell uses monospace font.
 */
 
-
 /* ═══════════════════════════════════════════════════════
    BASE TABLE
    Core table element, thead, tbody, th, td defaults
@@ -103,8 +102,9 @@
 
 .data-table tbody tr.row-focused td:first-child,
 .data-table tbody tr[data-focused="true"] td:first-child {
-  box-shadow: inset var(--space-px) 0 0 var(--color-accent),
-              inset calc(var(--space-px) * 2) 0 0 var(--color-accent);
+  box-shadow:
+    inset var(--space-px) 0 0 var(--color-accent),
+    inset calc(var(--space-px) * 2) 0 0 var(--color-accent);
 }
 
 .data-table tbody tr.row-selected td,
@@ -117,49 +117,47 @@
    Row action buttons, button groups, .col-actions cell
    ═══════════════════════════════════════════════════════ */
 
-
 /* Table actions - use utilities layer for override priority */
-  /* Button group - generic flex wrapper for icon buttons */
-  .button-group {
-    display: flex;
-    align-items: center;
-    gap: var(--space-0-5);
-    flex-wrap: nowrap;
-  }
+/* Button group - generic flex wrapper for icon buttons */
+.button-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+  flex-wrap: nowrap;
+}
 
-  /* Button group context modifiers — only variants that differ from base gap */
-  .button-group--modal {
-    gap: var(--space-1-5);
-  }
+/* Button group context modifiers — only variants that differ from base gap */
+.button-group--modal {
+  gap: var(--space-1-5);
+}
 
-  .button-group--toolbar,
-  .button-group--sidebar {
-    gap: var(--space-1);
-  }
+.button-group--toolbar,
+.button-group--sidebar {
+  gap: var(--space-1);
+}
 
-  .action-group {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--table-actions-gap);
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    /* Scope icon-btn size to match icon — gap variable controls all visual spacing */
-    --portal-btn-icon-size: var(--icon-size-sm);
-  }
+.action-group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--table-actions-gap);
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  /* Scope icon-btn size to match icon — gap variable controls all visual spacing */
+  --portal-btn-icon-size: var(--icon-size-sm);
+}
 
-  /* Actions cell - DO NOT use display:flex on td, it breaks table-cell behavior */
-  .col-actions {
-    /* Keep table-cell display for proper row background inheritance */
-    display: table-cell;
-    vertical-align: middle;
-    text-align: right;
-    /* Explicit reset - no margin, no border on desktop */
-    margin: 0;
-    border-top: none;
-    /* Ensure background is transparent so row hover shows through */
-    background: transparent;
-  }
-
+/* Actions cell - DO NOT use display:flex on td, it breaks table-cell behavior */
+.col-actions {
+  /* Keep table-cell display for proper row background inheritance */
+  display: table-cell;
+  vertical-align: middle;
+  text-align: right;
+  /* Explicit reset - no margin, no border on desktop */
+  margin: 0;
+  border-top: none;
+  /* Ensure background is transparent so row hover shows through */
+  background: transparent;
+}
 
 .data-table :is(th, td).col-actions,
 .data-table :is(th, td):last-child:has(.action-group) {
@@ -349,7 +347,6 @@
   padding: 0;
 }
 
-
 /* Hide card-mode ::before label on colspan cells */
 .data-table td[colspan]::before {
   display: none;
@@ -378,7 +375,6 @@
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
-
 
 /* ═══════════════════════════════════════════════════════
    PAGINATION
@@ -414,9 +410,15 @@
   align-items: center;
 }
 
-.pagination-controls { gap: var(--space-4); }
-.pagination-size { gap: var(--space-2); }
-.pagination-nav { gap: var(--space-1); }
+.pagination-controls {
+  gap: var(--space-4);
+}
+.pagination-size {
+  gap: var(--space-2);
+}
+.pagination-nav {
+  gap: var(--space-1);
+}
 
 .pagination-btn {
   display: flex;
@@ -570,7 +572,6 @@
   gap: var(--icon-gap);
 }
 
-
 /* Priority cell - center align dot with text */
 .data-table .priority-cell .cell-with-icon {
   display: inline-flex;
@@ -606,11 +607,18 @@
 
 /* Identity display order (SoT): company → contact → email → phone.
    Missing fields simply don't render; order stays consistent. */
-.data-table .cell-content > .identity-company { order: 0; }
-.data-table .cell-content > .identity-name { order: 1; }
-.data-table .cell-content > .identity-email { order: 2; }
-.data-table .cell-content > .identity-phone { order: 3; }
-
+.data-table .cell-content > .identity-company {
+  order: 0;
+}
+.data-table .cell-content > .identity-name {
+  order: 1;
+}
+.data-table .cell-content > .identity-email {
+  order: 2;
+}
+.data-table .cell-content > .identity-phone {
+  order: 3;
+}
 
 /* Stacked content hidden on desktop, shown responsively */
 .data-table .type-stacked,
@@ -738,15 +746,13 @@
    Width, min-width, max-width, and text-align per column
    ═══════════════════════════════════════════════════════ */
 
-
 /* Checkbox column - use utilities layer for padding override */
-  .data-table :is(td, th).col-checkbox {
-    width: var(--table-checkbox-width);
-    min-width: var(--table-checkbox-width);
-    max-width: var(--table-checkbox-width);
-    text-align: center;
-  }
-
+.data-table :is(td, th).col-checkbox {
+  width: var(--table-checkbox-width);
+  min-width: var(--table-checkbox-width);
+  max-width: var(--table-checkbox-width);
+  text-align: center;
+}
 
 .data-table th,
 .data-table td {
@@ -843,7 +849,7 @@
 
 /* Monospace text — invoice numbers, IDs, codes */
 .data-table .mono-text {
-  font-family: var(--font-family-mono, 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, monospace);
+  font-family: var(--font-family-mono, "SF Mono", "Fira Code", "Fira Mono", Menlo, monospace);
   font-size: var(--font-size-sm);
   letter-spacing: var(--letter-spacing-label);
 }
@@ -878,27 +884,42 @@
 }
 
 /* CENTER ALIGNED COLUMNS - status, articles, active, featured, views, runs, success, steps, counts, dates */
-.data-table :is(
-  .status-col,
-  .count-col, .count-cell,
-  .articles-col, .articles-cell,
-  .active-col, .active-cell,
-  .featured-col, .featured-cell,
-  .views-col, .views-cell,
-  .runs-col, .runs-cell,
-  .success-col, .success-cell,
-  .steps-col, .steps-cell,
-  .projects-col, .projects-cell,
-  .docs-col, .docs-cell,
-  .hours-col, .hours-cell,
-  .progress-col, .progress-cell,
-  .version-col, .version-cell,
-  .date-col,
-  .due-date-col, .due-date-cell,
-  .created-col,
-  .updated-col,
-  .text-center
-) {
+.data-table
+  :is(
+    .status-col,
+    .count-col,
+    .count-cell,
+    .articles-col,
+    .articles-cell,
+    .active-col,
+    .active-cell,
+    .featured-col,
+    .featured-cell,
+    .views-col,
+    .views-cell,
+    .runs-col,
+    .runs-cell,
+    .success-col,
+    .success-cell,
+    .steps-col,
+    .steps-cell,
+    .projects-col,
+    .projects-cell,
+    .docs-col,
+    .docs-cell,
+    .hours-col,
+    .hours-cell,
+    .progress-col,
+    .progress-cell,
+    .version-col,
+    .version-cell,
+    .date-col,
+    .due-date-col,
+    .due-date-cell,
+    .created-col,
+    .updated-col,
+    .text-center
+  ) {
   text-align: center;
 }
 
@@ -954,17 +975,15 @@
 
 /* --- Empty / Loading / Error States --- */
 
-
-  .data-table td[colspan],
-  .data-table :is(td.error-row, td.loading-row, td.empty-row) {
-    width: 100%;
-    max-width: none;
-    overflow: visible;
-    text-overflow: clip;
-    white-space: normal;
-    text-align: center;
-  }
-
+.data-table td[colspan],
+.data-table :is(td.error-row, td.loading-row, td.empty-row) {
+  width: 100%;
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  text-align: center;
+}
 
 /* --- Sortable Table Headers --- */
 
@@ -1047,12 +1066,10 @@
   text-decoration: underline;
 }
 
-
 /* ═══════════════════════════════════════════════════════
    RESPONSIVE - MOBILE & CARD LAYOUT
    Progressive column collapse and card-mode stacking
    ═══════════════════════════════════════════════════════ */
-
 
 @media (--mobile) {
   .data-table {
@@ -1076,7 +1093,8 @@
   }
 
   /* Hide less important columns on mobile */
-  .data-table :is(.source-col, .source-cell, .timeline-col, .timeline-cell, .budget-col, .budget-cell) {
+  .data-table
+    :is(.source-col, .source-cell, .timeline-col, .timeline-cell, .budget-col, .budget-cell) {
     display: none;
   }
 
@@ -1120,7 +1138,6 @@
 
 /* 1100px: Hide source, project, priority, date — combine into primary cell */
 @media (--laptop-wide) {
-
   .data-table :is(.source-col, .source-cell) {
     display: none;
   }
@@ -1130,12 +1147,10 @@
   }
 
   /* Combine project, priority, due date into primary cell */
-  .data-table :is(
-    .project-col, .project-cell,
-    .priority-col, .priority-cell,
-    .date-col,
-    .created-col
-  ):not(.primary-cell) {
+  .data-table
+    :is(.project-col, .project-cell, .priority-col, .priority-cell, .date-col, .created-col):not(
+      .primary-cell
+    ) {
     display: none;
   }
 
@@ -1158,11 +1173,26 @@
 
 /* 1000px: Hide date, timeline, assigned, company, project, type columns */
 @media (--laptop) {
-  .data-table :is(.date-col, .created-col, .timeline-col, .timeline-cell, .assigned-col, .assigned-cell) {
+  .data-table
+    :is(.date-col, .created-col, .timeline-col, .timeline-cell, .assigned-col, .assigned-cell) {
     display: none;
   }
 
-  .data-table :is(.company-col, .company-cell, .project-col, .project-cell, .type-col, .type-cell, .projects-col, .projects-cell, .count-col, .count-cell, .category-col, .category-cell):not(.primary-cell) {
+  .data-table
+    :is(
+      .company-col,
+      .company-cell,
+      .project-col,
+      .project-cell,
+      .type-col,
+      .type-cell,
+      .projects-col,
+      .projects-cell,
+      .count-col,
+      .count-cell,
+      .category-col,
+      .category-cell
+    ):not(.primary-cell) {
     display: none;
   }
 
@@ -1194,7 +1224,16 @@
 
 /* Hide budget, priority, invoice, amount, status columns on narrow viewports */
 @media (--tablet-landscape) {
-  .data-table :is(.budget-col, .budget-cell, .amount-col, .priority-col, .priority-cell, .invoice-col, .invoice-cell):not(.primary-cell) {
+  .data-table
+    :is(
+      .budget-col,
+      .budget-cell,
+      .amount-col,
+      .priority-col,
+      .priority-cell,
+      .invoice-col,
+      .invoice-cell
+    ):not(.primary-cell) {
     display: none;
   }
 
@@ -1255,24 +1294,37 @@
      Must match or exceed the specificity of hiding rules (which use :not(.primary-cell)).
      Using :where() on the exclusion keeps base specificity while the extra :is() on
      column classes gives this rule equal weight. */
-  .data-table :is(
-    .source-col, .source-cell,
-    .timeline-col, .timeline-cell,
-    .budget-col, .budget-cell,
-    .date-col,
-    .created-col,
-    .assigned-col, .assigned-cell,
-    .company-col, .company-cell,
-    .project-col, .project-cell,
-    .type-col, .type-cell,
-    .projects-col, .projects-cell,
-    .count-col, .count-cell,
-    .category-col, .category-cell,
-    .amount-col,
-    .priority-col, .priority-cell,
-    .invoice-col, .invoice-cell,
-    .status-col
-  ):not(.primary-cell) {
+  .data-table
+    :is(
+      .source-col,
+      .source-cell,
+      .timeline-col,
+      .timeline-cell,
+      .budget-col,
+      .budget-cell,
+      .date-col,
+      .created-col,
+      .assigned-col,
+      .assigned-cell,
+      .company-col,
+      .company-cell,
+      .project-col,
+      .project-cell,
+      .type-col,
+      .type-cell,
+      .projects-col,
+      .projects-cell,
+      .count-col,
+      .count-cell,
+      .category-col,
+      .category-cell,
+      .amount-col,
+      .priority-col,
+      .priority-cell,
+      .invoice-col,
+      .invoice-cell,
+      .status-col
+    ):not(.primary-cell) {
     display: flex;
   }
 
@@ -1429,45 +1481,89 @@
   /* CSS fallback labels for common column classes (when data-label not set).
      Canonical suffix is -col. */
   .data-table td.name-cell:not([data-label]):before,
-  .data-table td.name-col:not([data-label]):before { content: "Name"; }
-  .data-table td.primary-cell:not([data-label]):before { content: "Name"; }
+  .data-table td.name-col:not([data-label]):before {
+    content: "Name";
+  }
+  .data-table td.primary-cell:not([data-label]):before {
+    content: "Name";
+  }
   .data-table td.invoice-cell:not([data-label]):before,
-  .data-table td.invoice-col:not([data-label]):before { content: "Invoice"; }
+  .data-table td.invoice-col:not([data-label]):before {
+    content: "Invoice";
+  }
   .data-table td.project-cell:not([data-label]):before,
-  .data-table td.project-col:not([data-label]):before { content: "Project"; }
+  .data-table td.project-col:not([data-label]):before {
+    content: "Project";
+  }
   .data-table td.client-cell:not([data-label]):before,
-  .data-table td.client-col:not([data-label]):before { content: "Client"; }
-  .data-table td.date-col:not([data-label]):before { content: "Date"; }
-  .data-table td.amount-col:not([data-label]):before { content: "Amount"; }
-  .data-table td.status-col:not([data-label]):before { content: "Status"; }
+  .data-table td.client-col:not([data-label]):before {
+    content: "Client";
+  }
+  .data-table td.date-col:not([data-label]):before {
+    content: "Date";
+  }
+  .data-table td.amount-col:not([data-label]):before {
+    content: "Amount";
+  }
+  .data-table td.status-col:not([data-label]):before {
+    content: "Status";
+  }
   .data-table td.email-cell:not([data-label]):before,
-  .data-table td.email-col:not([data-label]):before { content: "Email"; }
+  .data-table td.email-col:not([data-label]):before {
+    content: "Email";
+  }
   .data-table td.phone-cell:not([data-label]):before,
-  .data-table td.phone-col:not([data-label]):before { content: "Phone"; }
+  .data-table td.phone-col:not([data-label]):before {
+    content: "Phone";
+  }
   .data-table td.type-cell:not([data-label]):before,
-  .data-table td.type-col:not([data-label]):before { content: "Type"; }
+  .data-table td.type-col:not([data-label]):before {
+    content: "Type";
+  }
   .data-table td.size-cell:not([data-label]):before,
-  .data-table td.size-col:not([data-label]):before { content: "Size"; }
+  .data-table td.size-col:not([data-label]):before {
+    content: "Size";
+  }
   .data-table td.priority-cell:not([data-label]):before,
-  .data-table td.priority-col:not([data-label]):before { content: "Priority"; }
+  .data-table td.priority-col:not([data-label]):before {
+    content: "Priority";
+  }
   .data-table td.count-cell:not([data-label]):before,
-  .data-table td.count-col:not([data-label]):before { content: "Count"; }
+  .data-table td.count-col:not([data-label]):before {
+    content: "Count";
+  }
   .data-table td.source-cell:not([data-label]):before,
-  .data-table td.source-col:not([data-label]):before { content: "Source"; }
+  .data-table td.source-col:not([data-label]):before {
+    content: "Source";
+  }
   .data-table td.assigned-cell:not([data-label]):before,
-  .data-table td.assigned-col:not([data-label]):before { content: "Assigned"; }
+  .data-table td.assigned-col:not([data-label]):before {
+    content: "Assigned";
+  }
   .data-table td.company-cell:not([data-label]):before,
-  .data-table td.company-col:not([data-label]):before { content: "Company"; }
+  .data-table td.company-col:not([data-label]):before {
+    content: "Company";
+  }
   .data-table td.budget-cell:not([data-label]):before,
-  .data-table td.budget-col:not([data-label]):before { content: "Budget"; }
+  .data-table td.budget-col:not([data-label]):before {
+    content: "Budget";
+  }
   .data-table td.timeline-cell:not([data-label]):before,
-  .data-table td.timeline-col:not([data-label]):before { content: "Timeline"; }
+  .data-table td.timeline-col:not([data-label]):before {
+    content: "Timeline";
+  }
   .data-table td.description-cell:not([data-label]):before,
-  .data-table td.description-col:not([data-label]):before { content: "Description"; }
+  .data-table td.description-col:not([data-label]):before {
+    content: "Description";
+  }
   .data-table td.category-cell:not([data-label]):before,
-  .data-table td.category-col:not([data-label]):before { content: "Category"; }
+  .data-table td.category-col:not([data-label]):before {
+    content: "Category";
+  }
   .data-table td.title-cell:not([data-label]):before,
-  .data-table td.title-col:not([data-label]):before { content: "Title"; }
+  .data-table td.title-col:not([data-label]):before {
+    content: "Title";
+  }
 
   /* Hide bulk-select cells on mobile card layout */
   .data-table td.col-checkbox,
@@ -1508,8 +1604,6 @@
   }
 }
 
-
-
 /* ═══════════════════════════════════════════════════════
    BULK ACTIONS & MISC
    Bulk selection count, stats badges, empty messages
@@ -1538,29 +1632,27 @@
   text-decoration: underline;
 }
 
-
 /* Small mobile layout overrides - utilities layer for override */
-  @media (--small-mobile) {
-    .data-table .col-checkbox,
-    .data-table th.col-checkbox {
-      display: none;
-    }
-
-    /* Mobile-only: Identity cell first, actions cell last */
-    .data-table tbody td.identity-cell {
-      order: -2;
-      margin-bottom: var(--space-1);
-    }
-
-    .data-table tbody td.col-actions {
-      order: 10;
-      display: flex;
-      justify-content: flex-end;
-      border-top: var(--portal-border);
-      margin-top: var(--space-2);
-    }
+@media (--small-mobile) {
+  .data-table .col-checkbox,
+  .data-table th.col-checkbox {
+    display: none;
   }
 
+  /* Mobile-only: Identity cell first, actions cell last */
+  .data-table tbody td.identity-cell {
+    order: -2;
+    margin-bottom: var(--space-1);
+  }
+
+  .data-table tbody td.col-actions {
+    order: 10;
+    display: flex;
+    justify-content: flex-end;
+    border-top: var(--portal-border);
+    margin-top: var(--space-2);
+  }
+}
 
 /* Stats badge — used by LeadScoringConfig and table headers */
 .table-stat {
@@ -1591,9 +1683,7 @@
   color: var(--color-accent);
 }
 
-
 /* Select column — see col-checkbox definition in utilities layer above (line ~807) */
-
 
 /* Row checkbox */
 .row-checkbox {
@@ -1644,7 +1734,9 @@
   color: var(--color-text-tertiary);
   cursor: pointer;
   opacity: 0;
-  transition: opacity var(--transition-fast), color var(--transition-fast);
+  transition:
+    opacity var(--transition-fast),
+    color var(--transition-fast);
 }
 
 /* Show copy button on row hover */
@@ -1737,7 +1829,6 @@
   color: var(--color-text-tertiary);
 }
 
-
 /* .data-table-checkbox — inherits all styles from .portal-checkbox
    (single source of truth in portal-react-components.css) */
 
@@ -1794,7 +1885,6 @@
   /* Scope icon-btn size to match icon — gap variable controls all visual spacing */
   --portal-btn-icon-size: var(--icon-size-sm);
 }
-
 
 /* ═══════════════════════════════════════════════════════
    TABLE ACTION BUTTON SIZES

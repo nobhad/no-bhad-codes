@@ -199,7 +199,8 @@ export class VisitorTrackingService {
   private scrollDepth = 0;
   private pageInteractions = 0;
   private pageStartTime = 0;
-  private boundListeners: Array<{ target: EventTarget; event: string; handler: EventListener }> = [];
+  private boundListeners: Array<{ target: EventTarget; event: string; handler: EventListener }> =
+    [];
 
   constructor(config: Partial<VisitorTrackingConfig> = {}) {
     this.config = {
@@ -854,7 +855,7 @@ export class VisitorTrackingService {
     session: VisitorSession | null;
     events: (PageView | InteractionEvent)[];
     metrics: EngagementMetrics;
-    } {
+  } {
     return {
       session: this.currentSession,
       events: this.getStoredEvents(),

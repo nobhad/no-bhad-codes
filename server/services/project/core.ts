@@ -25,7 +25,9 @@ const PROJECT_COLUMNS = `
   page_count, integrations, brand_assets, inspiration, current_site, challenges,
   additional_info, addons, referral_source, contract_reminders_enabled,
   deleted_at, deleted_by, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // INTERFACES
@@ -157,7 +159,10 @@ export async function listProjectsAdmin(limit = DEFAULT_PROJECT_LIMIT): Promise<
 }
 
 /** Fetch projects for a specific client (with stats). */
-export async function listProjectsForClient(clientId: number, limit = DEFAULT_PROJECT_LIMIT): Promise<ProjectRow[]> {
+export async function listProjectsForClient(
+  clientId: number,
+  limit = DEFAULT_PROJECT_LIMIT
+): Promise<ProjectRow[]> {
   const db = getDatabase();
   const safeLimit = Math.min(Math.max(1, limit), MAX_PROJECT_LIMIT);
   const query = `
@@ -289,7 +294,15 @@ export async function createProjectRequest(
   const result = await db.run(
     `INSERT INTO projects (client_id, name, description, status, priority, project_type, budget_range, timeline, project_code)
      VALUES (?, ?, ?, 'pending', 'medium', ?, ?, ?, ?)`,
-    [data.clientId, data.name, data.description, data.projectType, data.budget, data.timeline, projectCode]
+    [
+      data.clientId,
+      data.name,
+      data.description,
+      data.projectType,
+      data.budget,
+      data.timeline,
+      projectCode
+    ]
   );
   const project = await db.get(`SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ?`, [
     result.lastID
@@ -298,9 +311,7 @@ export async function createProjectRequest(
 }
 
 /** Verify a client exists. Returns the client row or undefined. */
-export async function getClientById(
-  clientId: number
-): Promise<{ id: number } | undefined> {
+export async function getClientById(clientId: number): Promise<{ id: number } | undefined> {
   const db = getDatabase();
   return (await db.get('SELECT id FROM clients WHERE id = ?', [clientId])) as
     | { id: number }
@@ -347,9 +358,9 @@ export async function createProjectAdmin(
 /** Fetch a project by ID (admin — no client scoping). */
 export async function getProjectByIdAdmin(projectId: number): Promise<ProjectRow | undefined> {
   const db = getDatabase();
-  return (await db.get(`SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ?`, [
-    projectId
-  ])) as ProjectRow | undefined;
+  return (await db.get(`SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ?`, [projectId])) as
+    | ProjectRow
+    | undefined;
 }
 
 /** Fetch a project by ID scoped to a client. */
@@ -358,10 +369,10 @@ export async function getProjectByIdForClient(
   clientId: number
 ): Promise<ProjectRow | undefined> {
   const db = getDatabase();
-  return (await db.get(
-    `SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ? AND client_id = ?`,
-    [projectId, clientId]
-  )) as ProjectRow | undefined;
+  return (await db.get(`SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ? AND client_id = ?`, [
+    projectId,
+    clientId
+  ])) as ProjectRow | undefined;
 }
 
 /** Check whether a project exists by ID. */
@@ -378,19 +389,13 @@ export async function updateProject(
   values: SqlParam[]
 ): Promise<void> {
   const db = getDatabase();
-  await db.run(
-    `UPDATE projects SET ${setClauses.join(', ')} WHERE id = ?`,
-    [...values, projectId]
-  );
+  await db.run(`UPDATE projects SET ${setClauses.join(', ')} WHERE id = ?`, [...values, projectId]);
 }
 
 /** Mark a project as completed (set actual_end_date). */
 export async function setProjectCompletedDate(projectId: number): Promise<void> {
   const db = getDatabase();
-  await db.run(
-    'UPDATE projects SET actual_end_date = CURRENT_TIMESTAMP WHERE id = ?',
-    [projectId]
-  );
+  await db.run('UPDATE projects SET actual_end_date = CURRENT_TIMESTAMP WHERE id = ?', [projectId]);
 }
 
 /** Fetch the updated project row with alias columns for API response. */
@@ -414,14 +419,11 @@ export async function getUpdatedProject(projectId: number): Promise<ProjectRow |
 // =====================================================
 
 /** Fetch client contact info by ID. */
-export async function getClientInfo(
-  clientId: number
-): Promise<ClientInfoRow | undefined> {
+export async function getClientInfo(clientId: number): Promise<ClientInfoRow | undefined> {
   const db = getDatabase();
-  return (await db.get(
-    'SELECT email, contact_name, company_name FROM clients WHERE id = ?',
-    [clientId]
-  )) as ClientInfoRow | undefined;
+  return (await db.get('SELECT email, contact_name, company_name FROM clients WHERE id = ?', [
+    clientId
+  ])) as ClientInfoRow | undefined;
 }
 
 // =====================================================
@@ -474,22 +476,25 @@ export async function getProjectDashboard(
   recentMessages: Record<string, unknown>[];
 } | null> {
   const db = getDatabase();
-  const projectCols = PROJECT_COLUMNS.split(', ').map(c => `p.${c}`).join(', ');
+  const projectCols = PROJECT_COLUMNS.split(', ')
+    .map((c) => `p.${c}`)
+    .join(', ');
 
   const project = isAdmin
     ? await db.get(
-      `SELECT ${projectCols}, c.company_name, c.contact_name, c.email as client_email
+        `SELECT ${projectCols}, c.company_name, c.contact_name, c.email as client_email
          FROM projects p JOIN clients c ON p.client_id = c.id WHERE p.id = ?`,
-      [projectId]
-    )
-    : await db.get(
-      `SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ? AND client_id = ?`,
-      [projectId, clientId]
-    );
+        [projectId]
+      )
+    : await db.get(`SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ? AND client_id = ?`, [
+        projectId,
+        clientId
+      ]);
 
   if (!project) return null;
 
-  const stats = await db.get(`
+  const stats = await db.get(
+    `
     SELECT
       COUNT(DISTINCT m.id) as total_milestones,
       COUNT(DISTINCT CASE WHEN m.is_completed = 1 THEN m.id END) as completed_milestones,
@@ -503,36 +508,48 @@ export async function getProjectDashboard(
     LEFT JOIN messages msg ON p.id = msg.project_id
     LEFT JOIN project_updates u ON p.id = u.project_id
     WHERE p.id = ?
-  `, [projectId]);
+  `,
+    [projectId]
+  );
 
-  const upcomingMilestones = await db.all(`
+  const upcomingMilestones = await db.all(
+    `
     SELECT id, title, description, due_date, is_completed
     FROM milestones
     WHERE project_id = ? AND is_completed = 0 AND deleted_at IS NULL
     ORDER BY due_date ASC LIMIT 3
-  `, [projectId]);
+  `,
+    [projectId]
+  );
 
-  const recentUpdates = await db.all(`
+  const recentUpdates = await db.all(
+    `
     SELECT pu.id, pu.title, pu.description, pu.update_type, u.display_name as author, pu.created_at
     FROM project_updates pu
     LEFT JOIN users u ON pu.author_user_id = u.id
     WHERE pu.project_id = ?
     ORDER BY pu.created_at DESC LIMIT 5
-  `, [projectId]);
+  `,
+    [projectId]
+  );
 
-  const recentMessages = await db.all(`
+  const recentMessages = await db.all(
+    `
     SELECT id, sender_type, sender_name, message, read_at, created_at
     FROM messages WHERE project_id = ?
     ORDER BY created_at DESC LIMIT 5
-  `, [projectId]);
+  `,
+    [projectId]
+  );
 
   const s = (stats || {}) as Record<string, unknown>;
   const totalMilestones = Number(s.total_milestones) || 0;
   const completedMilestones = Number(s.completed_milestones) || 0;
   const projectProgress = Number((project as Record<string, unknown>).progress) || 0;
-  const progressPercentage = totalMilestones > 0
-    ? Math.round((completedMilestones / totalMilestones) * 100)
-    : projectProgress || 0;
+  const progressPercentage =
+    totalMilestones > 0
+      ? Math.round((completedMilestones / totalMilestones) * 100)
+      : projectProgress || 0;
 
   return {
     project: project as Record<string, unknown>,

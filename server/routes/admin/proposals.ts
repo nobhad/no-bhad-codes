@@ -53,10 +53,24 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { projectId, clientId, projectType, selectedTier, basePrice, finalPrice, maintenanceOption, clientNotes } = req.body;
+    const {
+      projectId,
+      clientId,
+      projectType,
+      selectedTier,
+      basePrice,
+      finalPrice,
+      maintenanceOption,
+      clientNotes
+    } = req.body;
 
     if (!projectId || !clientId || !projectType || !selectedTier) {
-      return errorResponse(res, 'projectId, clientId, projectType, and selectedTier are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'projectId, clientId, projectType, and selectedTier are required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const proposalId = await proposalService.createProposal({
@@ -133,10 +147,10 @@ router.put(
 
     const { status, admin_notes } = req.body;
 
-    const { updated, proposal } = await proposalService.updateProposalFields(
-      proposalId,
-      { status, admin_notes }
-    );
+    const { updated, proposal } = await proposalService.updateProposalFields(proposalId, {
+      status,
+      admin_notes
+    });
 
     if (!updated) {
       return errorResponse(res, 'No fields to update', 400, ErrorCodes.NO_FIELDS);
@@ -177,7 +191,12 @@ router.post(
     const { proposalIds } = req.body;
 
     if (!proposalIds || !Array.isArray(proposalIds) || proposalIds.length === 0) {
-      return errorResponse(res, 'proposalIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'proposalIds array is required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const deleted = await proposalService.bulkSoftDeleteProposals(proposalIds);
@@ -191,16 +210,16 @@ router.post(
  */
 function mapStatus(dbStatus: string): string {
   const statusMap: Record<string, string> = {
-    'pending': 'draft',
-    'reviewed': 'viewed',
-    'accepted': 'accepted',
-    'rejected': 'declined',
-    'converted': 'accepted',
-    'sent': 'sent',
-    'viewed': 'viewed',
-    'draft': 'draft',
-    'declined': 'declined',
-    'expired': 'expired'
+    pending: 'draft',
+    reviewed: 'viewed',
+    accepted: 'accepted',
+    rejected: 'declined',
+    converted: 'accepted',
+    sent: 'sent',
+    viewed: 'viewed',
+    draft: 'draft',
+    declined: 'declined',
+    expired: 'expired'
   };
 
   return statusMap[dbStatus] || 'draft';

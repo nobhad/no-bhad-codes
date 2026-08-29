@@ -6,7 +6,6 @@
    Matches portal button styling for consistency.
    ================================================ */
 
-
 .confirm-dialog {
   background: var(--color-bg-secondary);
   border: var(--border-width-heavy) solid var(--color-border-primary);
@@ -241,4 +240,3 @@
   resize: vertical;
   min-height: var(--min-height-textarea-lg);
 }
-

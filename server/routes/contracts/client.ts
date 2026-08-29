@@ -275,12 +275,16 @@ router.post(
       });
     }
 
-    sendSuccess(res, {
-      signedAt,
-      signerName,
-      contractId,
-      projectName
-    }, 'Contract signed successfully');
+    sendSuccess(
+      res,
+      {
+        signedAt,
+        signerName,
+        contractId,
+        projectName
+      },
+      'Contract signed successfully'
+    );
   })
 );
 

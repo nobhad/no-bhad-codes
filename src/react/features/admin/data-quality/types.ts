@@ -4,12 +4,7 @@
  */
 
 import * as React from 'react';
-import {
-  Copy,
-  BarChart3,
-  AlertTriangle,
-  Shield
-} from 'lucide-react';
+import { Copy, BarChart3, AlertTriangle, Shield } from 'lucide-react';
 import { unwrapApiData, apiFetch } from '@/utils/api-client';
 
 // ============================================
@@ -83,9 +78,21 @@ export type TabProps = Pick<DataQualityDashboardProps, 'getAuthToken' | 'showNot
 // ============================================
 
 export const TAB_CONFIG: Array<{ key: DataQualityTab; label: string; icon: React.ReactNode }> = [
-  { key: 'duplicates', label: 'Duplicate Detection', icon: React.createElement(Copy, { size: 16 }) },
-  { key: 'metrics', label: 'Metrics & History', icon: React.createElement(BarChart3, { size: 16 }) },
-  { key: 'validation', label: 'Validation Errors', icon: React.createElement(AlertTriangle, { size: 16 }) },
+  {
+    key: 'duplicates',
+    label: 'Duplicate Detection',
+    icon: React.createElement(Copy, { size: 16 })
+  },
+  {
+    key: 'metrics',
+    label: 'Metrics & History',
+    icon: React.createElement(BarChart3, { size: 16 })
+  },
+  {
+    key: 'validation',
+    label: 'Validation Errors',
+    icon: React.createElement(AlertTriangle, { size: 16 })
+  },
   { key: 'rate-limits', label: 'Rate Limiting', icon: React.createElement(Shield, { size: 16 }) }
 ];
 

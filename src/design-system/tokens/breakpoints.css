@@ -29,8 +29,8 @@
 @custom-media --xs-mobile (max-width: 400px);
 @custom-media --small-mobile (max-width: 479px);
 @custom-media --narrow-mobile (max-width: 500px);
-@custom-media --sm-mobile (max-width: 576px);       /* Bootstrap sm equivalent */
-@custom-media --compact-mobile (max-width: 600px);  /* Portal sidebar collapse */
+@custom-media --sm-mobile (max-width: 576px); /* Bootstrap sm equivalent */
+@custom-media --compact-mobile (max-width: 600px); /* Portal sidebar collapse */
 @custom-media --mid-mobile (max-width: 700px);
 @custom-media --mobile (max-width: 767px);
 

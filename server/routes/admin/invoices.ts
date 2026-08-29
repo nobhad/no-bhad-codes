@@ -98,12 +98,22 @@ router.post(
     const { invoiceIds, status } = req.body;
 
     if (!Array.isArray(invoiceIds) || invoiceIds.length === 0 || !status) {
-      return errorResponse(res, 'Invoice IDs and status are required', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'Invoice IDs and status are required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     const validStatuses = ['draft', 'sent', 'paid', 'overdue', 'cancelled', 'void'];
     if (!validStatuses.includes(status)) {
-      return errorResponse(res, `Invalid status. Must be one of: ${validStatuses.join(', ')}`, 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        `Invalid status. Must be one of: ${validStatuses.join(', ')}`,
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     const db = getDatabase();
@@ -113,7 +123,11 @@ router.post(
       [status, ...invoiceIds]
     );
 
-    sendSuccess(res, { updated: result.changes || 0 }, `Updated ${result.changes || 0} invoices to '${status}'`);
+    sendSuccess(
+      res,
+      { updated: result.changes || 0 },
+      `Updated ${result.changes || 0} invoices to '${status}'`
+    );
   })
 );
 

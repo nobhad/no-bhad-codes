@@ -11,7 +11,11 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
-import { authenticateToken, requireAdmin, type AuthenticatedRequest } from '../../middleware/auth.js';
+import {
+  authenticateToken,
+  requireAdmin,
+  type AuthenticatedRequest
+} from '../../middleware/auth.js';
 import { notificationService } from '../../services/notification-service.js';
 
 const router = express.Router();

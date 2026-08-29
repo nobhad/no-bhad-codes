@@ -323,7 +323,9 @@ class ReceiptService {
 
       let sequence = 1;
       if (result && result.receipt_number) {
-        const match = String(result.receipt_number).match(new RegExp(`REC-\\d{6}-${clientId}(\\d+)`));
+        const match = String(result.receipt_number).match(
+          new RegExp(`REC-\\d{6}-${clientId}(\\d+)`)
+        );
         if (match) {
           sequence = parseInt(match[1], 10) + 1;
         }
@@ -337,16 +339,17 @@ class ReceiptService {
       const receiptNumber = `${prefix}${String(sequence).padStart(3, '0')}`;
 
       // Check if this number already exists before returning
-      const existing = await db.get(
-        'SELECT 1 FROM receipts WHERE receipt_number = ?',
-        [receiptNumber]
-      );
+      const existing = await db.get('SELECT 1 FROM receipts WHERE receipt_number = ?', [
+        receiptNumber
+      ]);
 
       if (!existing) {
         return receiptNumber;
       }
 
-      logger.warn(`[ReceiptService] Receipt number collision on ${receiptNumber}, retrying (attempt ${attempt + 1})`);
+      logger.warn(
+        `[ReceiptService] Receipt number collision on ${receiptNumber}, retrying (attempt ${attempt + 1})`
+      );
     }
 
     // Final fallback: use timestamp-based unique number
@@ -417,33 +420,35 @@ class ReceiptService {
     const addressParts: string[] = [];
     if (invoiceRow.billing_address) addressParts.push(String(invoiceRow.billing_address));
     if (invoiceRow.billing_address2) addressParts.push(String(invoiceRow.billing_address2));
-    const cityStateZip = [
-      invoiceRow.billing_city,
-      invoiceRow.billing_state,
-      invoiceRow.billing_zip
-    ].filter(Boolean).join(', ');
+    const cityStateZip = [invoiceRow.billing_city, invoiceRow.billing_state, invoiceRow.billing_zip]
+      .filter(Boolean)
+      .join(', ');
     if (cityStateZip) addressParts.push(cityStateZip);
-    if (invoiceRow.billing_country && String(invoiceRow.billing_country) !== 'US' && String(invoiceRow.billing_country) !== 'United States') {
+    if (
+      invoiceRow.billing_country &&
+      String(invoiceRow.billing_country) !== 'US' &&
+      String(invoiceRow.billing_country) !== 'United States'
+    ) {
       addressParts.push(String(invoiceRow.billing_country));
     }
     const formattedAddress = addressParts.length > 0 ? addressParts.join('\n') : undefined;
 
     // Get payment count for "Payment X of Y" label
-    const paymentCountRow = await db.get(
+    const paymentCountRow = (await db.get(
       'SELECT COUNT(*) as total FROM invoice_payments WHERE invoice_id = ?',
       [invoiceId]
-    ) as { total: number } | undefined;
+    )) as { total: number } | undefined;
     const totalPayments = paymentCountRow?.total || 1;
     const paymentLabel = `Payment ${totalPayments} of ${totalPayments}`;
 
     // Get line items from invoice for the table
-    const lineItemRows = await db.all(
+    const lineItemRows = (await db.all(
       `SELECT description, amount FROM invoice_line_items
        WHERE invoice_id = ? ORDER BY sort_order ASC, id ASC`,
       [invoiceId]
-    ) as Array<{ description: string; amount: number | string }>;
+    )) as Array<{ description: string; amount: number | string }>;
 
-    const lineItems = lineItemRows.map(row => ({
+    const lineItems = lineItemRows.map((row) => ({
       description: String(row.description),
       amount: typeof row.amount === 'string' ? parseFloat(row.amount) : row.amount
     }));
@@ -454,11 +459,12 @@ class ReceiptService {
     // Capitalize first letter
     const displayMethod = normalizedMethod.charAt(0).toUpperCase() + normalizedMethod.slice(1);
 
-    const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    const formatDate = (dateStr: string) =>
+      new Date(dateStr).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
 
     // Generate PDF
     const pdfData: ReceiptPdfData = {
@@ -492,7 +498,7 @@ class ReceiptService {
       if (projectId && relativePath) {
         // Get or create Documents folder for the project
         const folderRow = (await ctx.get(
-          'SELECT id FROM file_folders WHERE project_id = ? AND name = \'Documents\'',
+          "SELECT id FROM file_folders WHERE project_id = ? AND name = 'Documents'",
           [projectId as number]
         )) as { id: number } | undefined;
 
@@ -766,39 +772,45 @@ class ReceiptService {
     const addressParts: string[] = [];
     if (row.billing_address) addressParts.push(String(row.billing_address));
     if (row.billing_address2) addressParts.push(String(row.billing_address2));
-    const cityStateZip = [row.billing_city, row.billing_state, row.billing_zip].filter(Boolean).join(', ');
+    const cityStateZip = [row.billing_city, row.billing_state, row.billing_zip]
+      .filter(Boolean)
+      .join(', ');
     if (cityStateZip) addressParts.push(cityStateZip);
-    if (row.billing_country && String(row.billing_country) !== 'US' && String(row.billing_country) !== 'United States') {
+    if (
+      row.billing_country &&
+      String(row.billing_country) !== 'US' &&
+      String(row.billing_country) !== 'United States'
+    ) {
       addressParts.push(String(row.billing_country));
     }
 
     // Get payment count for "Payment X of Y"
     const invoiceId = row.invoice_id as number;
-    const paymentCountRow = await db.get(
+    const paymentCountRow = (await db.get(
       'SELECT COUNT(*) as total FROM invoice_payments WHERE invoice_id = ?',
       [invoiceId]
-    ) as { total: number } | undefined;
+    )) as { total: number } | undefined;
     const totalPayments = paymentCountRow?.total || 1;
 
     // Determine this payment's position
     let paymentPosition = totalPayments;
     if (row.payment_id) {
-      const posRow = await db.get(
+      const posRow = (await db.get(
         `SELECT COUNT(*) as pos FROM invoice_payments
          WHERE invoice_id = ? AND id <= ?`,
         [invoiceId, row.payment_id as number]
-      ) as { pos: number } | undefined;
+      )) as { pos: number } | undefined;
       paymentPosition = posRow?.pos || totalPayments;
     }
 
     // Get line items from invoice
-    const lineItemRows = await db.all(
+    const lineItemRows = (await db.all(
       `SELECT description, amount FROM invoice_line_items
        WHERE invoice_id = ? ORDER BY sort_order ASC, id ASC`,
       [invoiceId]
-    ) as Array<{ description: string; amount: number | string }>;
+    )) as Array<{ description: string; amount: number | string }>;
 
-    const lineItems = lineItemRows.map(r => ({
+    const lineItems = lineItemRows.map((r) => ({
       description: String(r.description),
       amount: typeof r.amount === 'string' ? parseFloat(r.amount) : r.amount
     }));
@@ -808,11 +820,12 @@ class ReceiptService {
     const normalizedMethod = rawMethod.replace(/#\S+/g, '').trim();
     const displayMethod = normalizedMethod.charAt(0).toUpperCase() + normalizedMethod.slice(1);
 
-    const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    const formatDate = (dateStr: string) =>
+      new Date(dateStr).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
 
     const pdfData: ReceiptPdfData = {
       receiptNumber: String(row.receipt_number),

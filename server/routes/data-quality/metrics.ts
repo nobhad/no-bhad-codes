@@ -28,10 +28,13 @@ const router = Router();
  *       200:
  *         description: Quality metrics
  */
-router.get('/metrics', asyncHandler(async (_req: Request, res: Response) => {
-  const metrics = await getDuplicateStats();
-  sendSuccess(res, metrics);
-}));
+router.get(
+  '/metrics',
+  asyncHandler(async (_req: Request, res: Response) => {
+    const metrics = await getDuplicateStats();
+    sendSuccess(res, metrics);
+  })
+);
 
 /**
  * @swagger
@@ -47,21 +50,24 @@ router.get('/metrics', asyncHandler(async (_req: Request, res: Response) => {
  *       200:
  *         description: Metrics calculated and stored
  */
-router.post('/metrics/calculate', asyncHandler(async (_req: Request, res: Response) => {
-  const metrics = await getDuplicateStats();
-  const today = new Date().toISOString().split('T')[0];
+router.post(
+  '/metrics/calculate',
+  asyncHandler(async (_req: Request, res: Response) => {
+    const metrics = await getDuplicateStats();
+    const today = new Date().toISOString().split('T')[0];
 
-  // Store metrics
-  await dataQualityService.storeMetrics({
-    metricDate: today,
-    totalRecords: metrics.totalChecks,
-    duplicateCount: metrics.duplicatesFound,
-    qualityScore: metrics.averageMatchScore * 100,
-    detailsJson: JSON.stringify(metrics)
-  });
+    // Store metrics
+    await dataQualityService.storeMetrics({
+      metricDate: today,
+      totalRecords: metrics.totalChecks,
+      duplicateCount: metrics.duplicatesFound,
+      qualityScore: metrics.averageMatchScore * 100,
+      detailsJson: JSON.stringify(metrics)
+    });
 
-  sendSuccess(res, metrics, 'Data quality metrics calculated and stored');
-}));
+    sendSuccess(res, metrics, 'Data quality metrics calculated and stored');
+  })
+);
 
 /**
  * @swagger
@@ -83,13 +89,16 @@ router.post('/metrics/calculate', asyncHandler(async (_req: Request, res: Respon
  *       200:
  *         description: Metrics history
  */
-router.get('/metrics/history', asyncHandler(async (req: Request, res: Response) => {
-  const daysParam = req.query.days;
-  const days = typeof daysParam === 'string' ? Number(daysParam) : 30;
+router.get(
+  '/metrics/history',
+  asyncHandler(async (req: Request, res: Response) => {
+    const daysParam = req.query.days;
+    const days = typeof daysParam === 'string' ? Number(daysParam) : 30;
 
-  const history = await dataQualityService.getMetricsHistory(days);
+    const history = await dataQualityService.getMetricsHistory(days);
 
-  sendSuccess(res, { history });
-}));
+    sendSuccess(res, { history });
+  })
+);
 
 export default router;

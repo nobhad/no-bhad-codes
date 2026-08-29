@@ -54,27 +54,30 @@ const router = Router();
  *       500:
  *         description: Scan failed
  */
-router.post('/duplicates/scan', asyncHandler(async (req: Request, res: Response) => {
-  const { email, firstName, lastName, company, phone, website } = req.body;
+router.post(
+  '/duplicates/scan',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { email, firstName, lastName, company, phone, website } = req.body;
 
-  const startTime = Date.now();
-  const checkData: DuplicateCheckRequest = {
-    email,
-    firstName,
-    lastName,
-    company,
-    phone,
-    website
-  };
-  const results = await checkForDuplicates(checkData);
-  const duration = Date.now() - startTime;
+    const startTime = Date.now();
+    const checkData: DuplicateCheckRequest = {
+      email,
+      firstName,
+      lastName,
+      company,
+      phone,
+      website
+    };
+    const results = await checkForDuplicates(checkData);
+    const duration = Date.now() - startTime;
 
-  sendSuccess(res, {
-    duplicates: results,
-    count: results.length,
-    scanDuration: duration
-  });
-}));
+    sendSuccess(res, {
+      duplicates: results,
+      count: results.length,
+      scanDuration: duration
+    });
+  })
+);
 
 /**
  * @swagger
@@ -104,35 +107,38 @@ router.post('/duplicates/scan', asyncHandler(async (req: Request, res: Response)
  *       400:
  *         description: At least email or name required
  */
-router.post('/duplicates/check', asyncHandler(async (req: Request, res: Response) => {
-  const { email, firstName, lastName, company, phone, website } = req.body;
+router.post(
+  '/duplicates/check',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { email, firstName, lastName, company, phone, website } = req.body;
 
-  if (!email && !firstName && !lastName) {
-    errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
-      message: 'At least email or name is required'
+    if (!email && !firstName && !lastName) {
+      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
+        message: 'At least email or name is required'
+      });
+      return;
+    }
+
+    const startTime = Date.now();
+    const checkData: DuplicateCheckRequest = {
+      email,
+      firstName,
+      lastName,
+      company,
+      phone,
+      website
+    };
+    const results = await checkForDuplicates(checkData);
+    const duration = Date.now() - startTime;
+
+    sendSuccess(res, {
+      hasDuplicates: results.length > 0,
+      duplicates: results,
+      count: results.length,
+      scanDuration: duration
     });
-    return;
-  }
-
-  const startTime = Date.now();
-  const checkData: DuplicateCheckRequest = {
-    email,
-    firstName,
-    lastName,
-    company,
-    phone,
-    website
-  };
-  const results = await checkForDuplicates(checkData);
-  const duration = Date.now() - startTime;
-
-  sendSuccess(res, {
-    hasDuplicates: results.length > 0,
-    duplicates: results,
-    count: results.length,
-    scanDuration: duration
-  });
-}));
+  })
+);
 
 /**
  * @swagger
@@ -171,27 +177,30 @@ router.post('/duplicates/check', asyncHandler(async (req: Request, res: Response
  *       400:
  *         description: Validation error
  */
-router.post('/duplicates/merge', asyncHandler(async (req: Request, res: Response) => {
-  const { keepId, keepType, mergeIds, fieldSelections } = req.body;
+router.post(
+  '/duplicates/merge',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { keepId, keepType, mergeIds, fieldSelections } = req.body;
 
-  if (!keepId || !keepType || !mergeIds || !Array.isArray(mergeIds)) {
-    errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
-      message: 'keepId, keepType, and mergeIds array are required'
-    });
-    return;
-  }
+    if (!keepId || !keepType || !mergeIds || !Array.isArray(mergeIds)) {
+      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
+        message: 'keepId, keepType, and mergeIds array are required'
+      });
+      return;
+    }
 
-  const mergeRequest: MergeRequest = {
-    keepId,
-    keepType,
-    mergeIds,
-    fieldSelections
-  };
+    const mergeRequest: MergeRequest = {
+      keepId,
+      keepType,
+      mergeIds,
+      fieldSelections
+    };
 
-  const result = await mergeDuplicates(mergeRequest);
+    const result = await mergeDuplicates(mergeRequest);
 
-  sendSuccess(res, undefined, result.message);
-}));
+    sendSuccess(res, undefined, result.message);
+  })
+);
 
 /**
  * @swagger
@@ -223,24 +232,27 @@ router.post('/duplicates/merge', asyncHandler(async (req: Request, res: Response
  *       200:
  *         description: Duplicate dismissed
  */
-router.post('/duplicates/dismiss', asyncHandler(async (req: Request, res: Response) => {
-  const { primaryId, primaryType, dismissedId, dismissedType, adminEmail, notes } = req.body;
+router.post(
+  '/duplicates/dismiss',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { primaryId, primaryType, dismissedId, dismissedType, adminEmail, notes } = req.body;
 
-  const resolvedBy = adminEmail || 'admin';
-  // Look up user ID for resolved_by during transition period
-  const resolvedByUserId = await userService.getUserIdByEmail(resolvedBy);
-  await dataQualityService.dismissDuplicate({
-    primaryId,
-    primaryType,
-    dismissedId,
-    dismissedType,
-    resolvedBy,
-    resolvedByUserId,
-    notes: notes || null
-  });
+    const resolvedBy = adminEmail || 'admin';
+    // Look up user ID for resolved_by during transition period
+    const resolvedByUserId = await userService.getUserIdByEmail(resolvedBy);
+    await dataQualityService.dismissDuplicate({
+      primaryId,
+      primaryType,
+      dismissedId,
+      dismissedType,
+      resolvedBy,
+      resolvedByUserId,
+      notes: notes || null
+    });
 
-  sendSuccess(res, undefined, 'Duplicate dismissed successfully');
-}));
+    sendSuccess(res, undefined, 'Duplicate dismissed successfully');
+  })
+);
 
 /**
  * @swagger
@@ -256,13 +268,16 @@ router.post('/duplicates/dismiss', asyncHandler(async (req: Request, res: Respon
  *       200:
  *         description: Detection and resolution logs
  */
-router.get('/duplicates/history', asyncHandler(async (_req: Request, res: Response) => {
-  const { detectionLogs, resolutionLogs } = await dataQualityService.getDuplicateHistory();
+router.get(
+  '/duplicates/history',
+  asyncHandler(async (_req: Request, res: Response) => {
+    const { detectionLogs, resolutionLogs } = await dataQualityService.getDuplicateHistory();
 
-  sendSuccess(res, {
-    detectionLogs,
-    resolutionLogs
-  });
-}));
+    sendSuccess(res, {
+      detectionLogs,
+      resolutionLogs
+    });
+  })
+);
 
 export default router;

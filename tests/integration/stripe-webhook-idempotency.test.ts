@@ -29,9 +29,8 @@ afterEach(async () => {
 
 describe('Stripe webhook idempotency claim/release', () => {
   it('first claim wins; duplicate claim short-circuits', async () => {
-    const { claimStripeEvent } = await import(
-      '../../server/services/integrations/stripe-service.js'
-    );
+    const { claimStripeEvent } =
+      await import('../../server/services/integrations/stripe-service.js');
     const eventId = 'evt_test_idempotency_001';
 
     expect(await claimStripeEvent(eventId)).toBe(true);
@@ -40,9 +39,8 @@ describe('Stripe webhook idempotency claim/release', () => {
   });
 
   it('release after a thrown handler lets the next delivery be processed', async () => {
-    const { claimStripeEvent, releaseStripeEventClaim } = await import(
-      '../../server/services/integrations/stripe-service.js'
-    );
+    const { claimStripeEvent, releaseStripeEventClaim } =
+      await import('../../server/services/integrations/stripe-service.js');
     const eventId = 'evt_test_idempotency_002';
 
     expect(await claimStripeEvent(eventId)).toBe(true);
@@ -55,9 +53,8 @@ describe('Stripe webhook idempotency claim/release', () => {
   });
 
   it('persists the claim through a process-restart simulation', async () => {
-    const { claimStripeEvent } = await import(
-      '../../server/services/integrations/stripe-service.js'
-    );
+    const { claimStripeEvent } =
+      await import('../../server/services/integrations/stripe-service.js');
     const eventId = 'evt_test_idempotency_003';
 
     expect(await claimStripeEvent(eventId)).toBe(true);

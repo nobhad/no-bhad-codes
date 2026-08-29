@@ -49,7 +49,7 @@ body[data-page="client"] {
    * ---------------------------------------- */
   --color-text-primary: #333333;
   --color-bg-primary: var(--color-off-white);
-  --color-bg-hover:   var(--color-gray-100);
+  --color-bg-hover: var(--color-gray-100);
 
   /* ----------------------------------------
    * TEXT COLORS — derived from primaries
@@ -63,11 +63,11 @@ body[data-page="client"] {
    * BACKGROUND RAMP — flat design: all steps equal bg-primary
    * ---------------------------------------- */
   --color-bg-secondary: var(--color-bg-primary);
-  --color-bg-tertiary:  var(--color-bg-primary);
-  --color-bg-raised:    var(--color-bg-primary);
-  --color-bg-elevated:  var(--color-bg-primary);
+  --color-bg-tertiary: var(--color-bg-primary);
+  --color-bg-raised: var(--color-bg-primary);
+  --color-bg-elevated: var(--color-bg-primary);
   --color-bg-prominent: var(--color-bg-primary);
-  --color-bg-readonly:  var(--color-bg-primary);
+  --color-bg-readonly: var(--color-bg-primary);
   /* Active/pressed state — slightly stronger than hover */
   --color-bg-active: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 15%);
 
@@ -177,7 +177,9 @@ body[data-page="client"] {
    * ---------------------------------------- */
   --field-label-value-gap: calc(var(--space-px) * 2); /* 2px */
   --field-group-gap: var(--space-1-5); /* 12px */
-  --portal-field-group-gap: var(--field-group-gap); /* alias — used in project-detail and modal layouts */
+  --portal-field-group-gap: var(
+    --field-group-gap
+  ); /* alias — used in project-detail and modal layouts */
   /* Left padding for inputs with a positioned icon inside */
   --input-icon-offset: calc(var(--icon-size-md) + var(--space-2-5)); /* icon + gap = ~36px */
 
@@ -240,9 +242,11 @@ body[data-page="client"] {
   /* ----------------------------------------
    * PORTAL HEADER / SIDEBAR LAYOUT TOKENS
    * ---------------------------------------- */
-  --portal-header-height: calc(2 * var(--space-5) + var(--space-1) + 2 * var(--space-2)); /* 2 rows (40px) + gap (8px) + branding row padding (32px) = 120px */
-  --portal-header-top: var(--space-2-5);         /* 20px */
-  --portal-header-height-line: var(--space-4);   /* 32px */
+  --portal-header-height: calc(
+    2 * var(--space-5) + var(--space-1) + 2 * var(--space-2)
+  ); /* 2 rows (40px) + gap (8px) + branding row padding (32px) = 120px */
+  --portal-header-top: var(--space-2-5); /* 20px */
+  --portal-header-height-line: var(--space-4); /* 32px */
   --portal-nav-gap: var(--space-6);
   --sidebar-icon-indent: calc(var(--space-base) * 2.25); /* 18px */
   --portal-page-top: var(--space-3);
@@ -286,7 +290,7 @@ body[data-page="client"] {
   --table-icon-size: var(--icon-size-md);
   --table-action-icon-size: var(--table-icon-size);
   --table-sort-indicator-size: calc(var(--icon-size-xs) - var(--border-width));
-  --table-pagination-btn-size: var(--space-3-5);                 /* 28px */
+  --table-pagination-btn-size: var(--space-3-5); /* 28px */
   --table-pagination-btn-size-touch: calc(var(--space-base) * 5.5); /* 44px — WCAG touch target */
   --table-mobile-label-width: 48%;
   --table-mobile-label-padding: var(--space-1-5);
@@ -303,7 +307,7 @@ body[data-page="client"] {
    * ---------------------------------------- */
   --dropdown-padding-x: var(--space-1-5);
   --dropdown-padding-y: var(--space-1);
-  --dropdown-item-height: var(--space-4);       /* 32px — fixed-height dropdown rows */
+  --dropdown-item-height: var(--space-4); /* 32px — fixed-height dropdown rows */
   --status-dropdown-width: var(--space-20); /* 160px */
   --portal-dropdown-min-width: var(--status-dropdown-width); /* default trigger min-width */
 
@@ -326,8 +330,8 @@ body[data-page="client"] {
   /* ----------------------------------------
    * BLUR TOKENS
    * ---------------------------------------- */
-  --blur-backdrop: 4px;  /* Overlay backdrops: keyboard shortcuts, command palette, confirm dialog */
-  --blur-modal: 8px;     /* Full modal overlays */
+  --blur-backdrop: 4px; /* Overlay backdrops: keyboard shortcuts, command palette, confirm dialog */
+  --blur-modal: 8px; /* Full modal overlays */
 
   /* ----------------------------------------
    * LAYOUT / ASIDE WIDTH TOKENS
@@ -339,7 +343,7 @@ body[data-page="client"] {
   /* ----------------------------------------
    * CONTROL HEIGHT TOKENS
    * ---------------------------------------- */
-  --min-height-textarea: 60px;    /* Min height for multiline inputs and reply boxes */
+  --min-height-textarea: 60px; /* Min height for multiline inputs and reply boxes */
   --min-height-textarea-lg: 80px; /* Tall textareas in prompt dialogs and resizable forms */
 
   /* ----------------------------------------
@@ -399,8 +403,8 @@ body[data-page="client"] {
   /* Group: Modal widths (portal additions) */
   --modal-width-xl: 1000px;
   /* Modal viewport constraints */
-  --modal-max-height: 90vh;         /* Default max-height for portal modals */
-  --modal-edge-padding: 2rem;       /* Horizontal edge clearance for modal calc() values */
+  --modal-max-height: 90vh; /* Default max-height for portal modals */
+  --modal-edge-padding: 2rem; /* Horizontal edge clearance for modal calc() values */
 
   /* Group: Files */
   --files-folder-panel-width: 220px;
@@ -416,22 +420,22 @@ body[data-page="client"] {
   /* Group: Inline Edit */
   --inline-edit-date-min-width: 130px;
   --inline-edit-label-min-width: 140px;
-  --inline-edit-icon-size: 10px;          /* Hover pencil edit icon — smaller than --icon-size-xs */
-  --inline-edit-date-icon-size: 13px;     /* Calendar icon inside compact date input */
-  --inline-edit-compact-padding-x: 6px;  /* Horizontal padding for compact row inputs */
-  --inline-edit-required-margin: 2px;    /* Left gap before required asterisk */
-  --inline-edit-compact-height: 22px;    /* Compact override height (page-layer) */
+  --inline-edit-icon-size: 10px; /* Hover pencil edit icon — smaller than --icon-size-xs */
+  --inline-edit-date-icon-size: 13px; /* Calendar icon inside compact date input */
+  --inline-edit-compact-padding-x: 6px; /* Horizontal padding for compact row inputs */
+  --inline-edit-required-margin: 2px; /* Left gap before required asterisk */
+  --inline-edit-compact-height: 22px; /* Compact override height (page-layer) */
 
   /* Group: Component Sizes */
-  --btn-size-sm: 28px;                   /* Small action/pagination buttons */
-  --icon-container-lg: var(--space-6);   /* 48px — large icon/status containers */
-  --modal-input-height: var(--space-6);  /* 48px — modal dropdown trigger height */
-  --modal-dropdown-item-height: 44px;    /* Modal dropdown list item height */
-  --inline-pill-height: 18px;            /* Inline badge/pill height */
+  --btn-size-sm: 28px; /* Small action/pagination buttons */
+  --icon-container-lg: var(--space-6); /* 48px — large icon/status containers */
+  --modal-input-height: var(--space-6); /* 48px — modal dropdown trigger height */
+  --modal-dropdown-item-height: 44px; /* Modal dropdown list item height */
+  --inline-pill-height: 18px; /* Inline badge/pill height */
 
   /* Group: Help Center */
   --help-right-column-min-height: 400px; /* Article column floor height */
-  --help-contact-min-width: 200px;       /* Contact card text block min-width */
+  --help-contact-min-width: 200px; /* Contact card text block min-width */
 
   /* Group: Toast Notifications */
   --toast-min-width: 250px;
@@ -439,26 +443,26 @@ body[data-page="client"] {
 
   /* Group: Progress / Indicators */
   --progress-track-height: var(--space-0-5); /* 4px — horizontal progress bars */
-  --status-dot-size: 6px;                    /* Inline status indicator dot */
+  --status-dot-size: 6px; /* Inline status indicator dot */
 
   /* ----------------------------------------
    * NOTIFICATION BELL TOKENS
    * ---------------------------------------- */
-  --notification-badge-size: var(--icon-size-md);         /* 16px — corner count badge */
-  --notification-badge-offset: 2px;                       /* tight corner offset */
-  --notification-unread-dot-size: var(--space-1);         /* 8px — inline unread dot */
-  --notification-dropdown-gap: var(--space-1);            /* 8px gap above dropdown */
+  --notification-badge-size: var(--icon-size-md); /* 16px — corner count badge */
+  --notification-badge-offset: 2px; /* tight corner offset */
+  --notification-unread-dot-size: var(--space-1); /* 8px — inline unread dot */
+  --notification-dropdown-gap: var(--space-1); /* 8px gap above dropdown */
   --notification-dropdown-width: 320px;
   --notification-dropdown-max-height: 420px;
-  --notification-list-max-height: 360px;                  /* inner scroll area */
-  --notification-dropdown-mobile-bleed: 10px;             /* overhang on xs screens */
+  --notification-list-max-height: 360px; /* inner scroll area */
+  --notification-dropdown-mobile-bleed: 10px; /* overhang on xs screens */
 
   /* ----------------------------------------
    * COMMAND PALETTE TOKENS
    * ---------------------------------------- */
   --cmd-palette-max-width: calc(var(--space-base) * 70); /* 560px */
-  --cmd-palette-search-icon-size: var(--icon-size-lg);   /* 20px */
-  --cmd-palette-item-icon-size: var(--icon-size-md);     /* 16px */
+  --cmd-palette-search-icon-size: var(--icon-size-lg); /* 20px */
+  --cmd-palette-item-icon-size: var(--icon-size-md); /* 16px */
 
   /* ----------------------------------------
    * SEMANTIC COLOR TOKENS — derived from primaries
@@ -530,10 +534,10 @@ body[data-page="client"] {
    * UTILITY ALIASES
    * Map non-standard token names used in component CSS.
    * ---------------------------------------- */
-  --portal-bg: var(--color-bg-primary);                  /* background context alias */
-  --ring: var(--focus-ring-color);                        /* Tailwind ring utility alias */
-  --font-mono: var(--font-family-mono);                   /* shorthand alias */
-  --card-grid-gap: var(--space-4);                        /* configurable grid gap default */
+  --portal-bg: var(--color-bg-primary); /* background context alias */
+  --ring: var(--focus-ring-color); /* Tailwind ring utility alias */
+  --font-mono: var(--font-family-mono); /* shorthand alias */
+  --card-grid-gap: var(--space-4); /* configurable grid gap default */
   --table-mobile-identity-tertiary-size: var(--font-size-2xs); /* compact mobile table text */
 }
 
@@ -545,7 +549,7 @@ html[data-theme="dark"] body[data-page="admin"],
 html[data-theme="dark"] body[data-page="client"] {
   --color-text-primary: #ffffff;
   --color-bg-primary: #171717;
-  --color-bg-hover:   color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 6%);
+  --color-bg-hover: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 6%);
   --form-btn-shadow: var(--portal-alpha-black-30);
   --filter-invert-controls: invert(1);
 }
@@ -717,7 +721,10 @@ html[data-theme="light"]:has(body[data-page="client"]) {
    a direct Lucide SVG child. Uses :where() for zero specificity
    so any component rule can override.
    ================================================================= */
-.portal :where(button, a, span, div, label, p, li, h1, h2, h3, h4, td):not(.portal-checkbox):not(.portal-checkbox-indicator):has(> svg.lucide) {
+.portal
+  :where(button, a, span, div, label, p, li, h1, h2, h3, h4, td):not(.portal-checkbox):not(
+    .portal-checkbox-indicator
+  ):has(> svg.lucide) {
   display: inline-flex;
   align-items: center;
   gap: var(--icon-gap);
@@ -764,7 +771,9 @@ html[data-theme="light"]:has(body[data-page="client"]) {
 }
 
 /* Badge child inside an open trigger also loses its bottom border */
-.portal [aria-haspopup="menu"][data-state="open"]:not(.icon-btn):not(.notification-bell-btn) .badge {
+.portal
+  [aria-haspopup="menu"][data-state="open"]:not(.icon-btn):not(.notification-bell-btn)
+  .badge {
   border-bottom-color: transparent;
 }
 

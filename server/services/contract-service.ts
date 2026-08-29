@@ -33,7 +33,9 @@ import { NotFoundError, ValidationError } from '../utils/app-errors.js';
 
 const CONTRACT_TEMPLATE_COLUMNS = `
   id, name, type, content, variables, is_default, is_active, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // Re-export types for external usage
 export type { ContractTemplateType, ContractStatus };
@@ -146,7 +148,10 @@ class ContractService {
 
   async getTemplate(templateId: number): Promise<ContractTemplate> {
     const db = getDatabase();
-    const row = await db.get(`SELECT ${CONTRACT_TEMPLATE_COLUMNS} FROM contract_templates WHERE id = ?`, [templateId]);
+    const row = await db.get(
+      `SELECT ${CONTRACT_TEMPLATE_COLUMNS} FROM contract_templates WHERE id = ?`,
+      [templateId]
+    );
 
     if (!row) {
       throw new NotFoundError('contract template');
@@ -209,7 +214,7 @@ class ContractService {
       params.push(data.isDefault ? 1 : 0);
     }
 
-    updates.push('updated_at = datetime(\'now\')');
+    updates.push("updated_at = datetime('now')");
     params.push(templateId);
 
     await db.run(`UPDATE contract_templates SET ${updates.join(', ')} WHERE id = ?`, params);
@@ -219,7 +224,7 @@ class ContractService {
   async deleteTemplate(templateId: number): Promise<void> {
     const db = getDatabase();
     await db.run(
-      'UPDATE contract_templates SET is_active = FALSE, updated_at = datetime(\'now\') WHERE id = ?',
+      "UPDATE contract_templates SET is_active = FALSE, updated_at = datetime('now') WHERE id = ?",
       [templateId]
     );
   }
@@ -423,7 +428,7 @@ class ContractService {
       return this.getContract(contractId);
     }
 
-    updates.push('updated_at = datetime(\'now\')');
+    updates.push("updated_at = datetime('now')");
     params.push(contractId);
 
     await db.run(`UPDATE contracts SET ${updates.join(', ')} WHERE id = ?`, params);
@@ -620,7 +625,9 @@ class ContractService {
       renewal_reminder_sent_at, last_reminder_at, reminder_count,
       signature_token, signature_requested_at, signature_expires_at,
       created_at, updated_at
-    `.replace(/\s+/g, ' ').trim();
+    `
+      .replace(/\s+/g, ' ')
+      .trim();
 
     const row = await db.get(
       `SELECT ${CONTRACT_COLUMNS} FROM active_contracts WHERE project_id = ? AND status != 'cancelled'
@@ -647,7 +654,9 @@ class ContractService {
   /**
    * Get latest active contract ID and status for a project
    */
-  async getLatestActiveContractIdAndStatus(projectId: number): Promise<{ id: number; status: string } | null> {
+  async getLatestActiveContractIdAndStatus(
+    projectId: number
+  ): Promise<{ id: number; status: string } | null> {
     const db = getDatabase();
     const row = await db.get(
       `SELECT id, status FROM active_contracts WHERE project_id = ? AND status != 'cancelled'
@@ -676,7 +685,7 @@ class ContractService {
   async updateContractSignedPdfPath(contractId: number, relativePath: string): Promise<void> {
     const db = getDatabase();
     await db.run(
-      'UPDATE contracts SET signed_pdf_path = ?, updated_at = datetime(\'now\') WHERE id = ?',
+      "UPDATE contracts SET signed_pdf_path = ?, updated_at = datetime('now') WHERE id = ?",
       [relativePath, contractId]
     );
   }
@@ -684,7 +693,9 @@ class ContractService {
   /**
    * Get project with client info for signature request
    */
-  async getProjectWithClientForSignature(projectId: number): Promise<Record<string, unknown> | null> {
+  async getProjectWithClientForSignature(
+    projectId: number
+  ): Promise<Record<string, unknown> | null> {
     const db = getDatabase();
     const row = await db.get(
       `SELECT p.*, COALESCE(c.billing_email, c.email) as client_email,
@@ -770,12 +781,7 @@ class ContractService {
       await db.run(
         `INSERT INTO contract_signature_log (project_id, action, actor_email, details)
          VALUES (?, ?, ?, ?)`,
-        [
-          params.projectId,
-          params.action,
-          params.actorEmail || null,
-          params.details || null
-        ]
+        [params.projectId, params.action, params.actorEmail || null, params.details || null]
       );
     }
   }
@@ -815,7 +821,7 @@ class ContractService {
   async markContractViewed(contractId: number): Promise<void> {
     const db = getDatabase();
     await db.run(
-      'UPDATE contracts SET status = \'viewed\', updated_at = datetime(\'now\') WHERE id = ?',
+      "UPDATE contracts SET status = 'viewed', updated_at = datetime('now') WHERE id = ?",
       [contractId]
     );
   }
@@ -863,7 +869,15 @@ class ContractService {
         contract_signer_user_agent = ?,
         contract_signature_data = ?
        WHERE id = ?`,
-      [data.signedAt, data.signerName, data.clientEmail, data.signerIp, data.signerUserAgent, data.signatureData, projectId]
+      [
+        data.signedAt,
+        data.signerName,
+        data.clientEmail,
+        data.signerIp,
+        data.signerUserAgent,
+        data.signatureData,
+        projectId
+      ]
     );
   }
 
@@ -895,7 +909,15 @@ class ContractService {
         signature_data = ?,
         updated_at = datetime('now')
        WHERE id = ?`,
-      [data.signedAt, data.signerName, data.clientEmail, data.signerIp, data.signerUserAgent, data.signatureData, contractId]
+      [
+        data.signedAt,
+        data.signerName,
+        data.clientEmail,
+        data.signerIp,
+        data.signerUserAgent,
+        data.signatureData,
+        contractId
+      ]
     );
   }
 
@@ -1006,7 +1028,9 @@ class ContractService {
   /**
    * Get project with client info for contract distribution emails
    */
-  async getProjectWithClientForDistribution(projectId: number): Promise<Record<string, unknown> | null> {
+  async getProjectWithClientForDistribution(
+    projectId: number
+  ): Promise<Record<string, unknown> | null> {
     const db = getDatabase();
     const row = await db.get(
       `SELECT p.id, p.project_name, p.contract_signature_token, p.contract_signature_expires_at,
@@ -1043,11 +1067,12 @@ class ContractService {
    */
   async ensureProjectSignatureToken(projectId: number): Promise<string> {
     const db = getDatabase();
-    const existing = await db.get(
-      'SELECT contract_signature_token FROM projects WHERE id = ?',
-      [projectId]
-    );
-    const existingToken = (existing as Record<string, unknown>)?.contract_signature_token as string | null;
+    const existing = await db.get('SELECT contract_signature_token FROM projects WHERE id = ?', [
+      projectId
+    ]);
+    const existingToken = (existing as Record<string, unknown>)?.contract_signature_token as
+      | string
+      | null;
 
     if (existingToken) return existingToken;
 
@@ -1148,7 +1173,8 @@ class ContractService {
    */
   async getClientContracts(clientId: number): Promise<Record<string, unknown>[]> {
     const db = getDatabase();
-    return db.all(`
+    return db.all(
+      `
       SELECT
         c.id,
         c.project_id as projectId,
@@ -1162,7 +1188,9 @@ class ContractService {
       WHERE c.client_id = ?
         AND c.status != 'cancelled'
       ORDER BY c.created_at DESC
-    `, [clientId]) as Promise<Record<string, unknown>[]>;
+    `,
+      [clientId]
+    ) as Promise<Record<string, unknown>[]>;
   }
 
   /**
@@ -1178,7 +1206,10 @@ class ContractService {
   /**
    * Get activity log entries for a contract, filtered by both project_id and contract_id.
    */
-  async getContractActivity(contractId: number, projectId: number | null): Promise<Record<string, unknown>[]> {
+  async getContractActivity(
+    contractId: number,
+    projectId: number | null
+  ): Promise<Record<string, unknown>[]> {
     const db = getDatabase();
     return db.all(
       `SELECT id, action, actor_email, actor_ip, actor_user_agent, details, created_at
@@ -1236,8 +1267,15 @@ class ContractService {
         signature_expires_at = NULL,
         updated_at = datetime('now')
        WHERE id = ?`,
-      [params.signedAt, params.signerName, params.clientEmail, params.signerIp,
-        params.signerUserAgent, params.signatureData, params.contractId]
+      [
+        params.signedAt,
+        params.signerName,
+        params.clientEmail,
+        params.signerIp,
+        params.signerUserAgent,
+        params.signatureData,
+        params.contractId
+      ]
     );
 
     // Dual-write: update projects table signature fields
@@ -1253,8 +1291,15 @@ class ContractService {
           contract_signer_user_agent = ?,
           contract_signature_data = ?
          WHERE id = ?`,
-        [params.signedAt, params.signerName, params.clientEmail, params.signerIp,
-          params.signerUserAgent, params.signatureData, params.projectId]
+        [
+          params.signedAt,
+          params.signerName,
+          params.clientEmail,
+          params.signerIp,
+          params.signerUserAgent,
+          params.signatureData,
+          params.projectId
+        ]
       );
     }
 
@@ -1268,7 +1313,11 @@ class ContractService {
         params.clientEmail,
         params.signerIp,
         params.signerUserAgent,
-        JSON.stringify({ signerName: params.signerName, signedAt: params.signedAt, method: 'portal' })
+        JSON.stringify({
+          signerName: params.signerName,
+          signedAt: params.signedAt,
+          method: 'portal'
+        })
       ]
     );
   }

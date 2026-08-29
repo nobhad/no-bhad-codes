@@ -30,7 +30,12 @@ router.post(
     const { projectId, title, description, priority, dueDate, milestoneId } = req.body;
 
     if (!projectId || !title) {
-      return errorResponse(res, 'projectId and title are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'projectId and title are required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const parsedProjectId = parseInt(projectId, 10);
@@ -62,16 +67,26 @@ router.post(
     const { taskIds } = req.body;
 
     if (!taskIds || !Array.isArray(taskIds) || taskIds.length === 0) {
-      return errorResponse(res, 'taskIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'taskIds array is required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const MAX_BATCH_SIZE = 100;
     if (taskIds.length > MAX_BATCH_SIZE) {
-      return errorResponse(res, `Cannot delete more than ${MAX_BATCH_SIZE} tasks at once`, 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        `Cannot delete more than ${MAX_BATCH_SIZE} tasks at once`,
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     const validIds = taskIds
-      .map((id: string | number) => typeof id === 'string' ? parseInt(id, 10) : id)
+      .map((id: string | number) => (typeof id === 'string' ? parseInt(id, 10) : id))
       .filter((id: number) => !isNaN(id) && id > 0);
 
     if (validIds.length === 0) {
@@ -102,13 +117,24 @@ router.put(
       return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.INVALID_ID);
     }
 
-    if (title === undefined && description === undefined && status === undefined &&
-        priority === undefined && dueDate === undefined && assignedTo === undefined) {
+    if (
+      title === undefined &&
+      description === undefined &&
+      status === undefined &&
+      priority === undefined &&
+      dueDate === undefined &&
+      assignedTo === undefined
+    ) {
       return errorResponse(res, 'No fields to update', 400, ErrorCodes.NO_FIELDS);
     }
 
     const updatedTask = await projectService.updateTaskAdmin(taskId, {
-      title, description, status, priority, dueDate, assignedTo
+      title,
+      description,
+      status,
+      priority,
+      dueDate,
+      assignedTo
     });
 
     sendSuccess(res, { task: updatedTask });

@@ -26,20 +26,15 @@ const router = Router();
  * GET /api/admin/checklist-pdf/templates
  * List available checklist templates.
  */
-router.get(
-  '/templates',
-  authenticateToken,
-  requireAdmin,
-  (_req: JWTAuthRequest, res: Response) => {
-    const templates = Object.entries(CHECKLIST_TEMPLATES).map(([key, t]) => ({
-      id: key,
-      name: t.name,
-      sectionCount: t.sections.length,
-      itemCount: t.sections.reduce((sum, s) => sum + s.items.length, 0)
-    }));
-    res.json({ data: { templates } });
-  }
-);
+router.get('/templates', authenticateToken, requireAdmin, (_req: JWTAuthRequest, res: Response) => {
+  const templates = Object.entries(CHECKLIST_TEMPLATES).map(([key, t]) => ({
+    id: key,
+    name: t.name,
+    sectionCount: t.sections.length,
+    itemCount: t.sections.reduce((sum, s) => sum + s.items.length, 0)
+  }));
+  res.json({ data: { templates } });
+});
 
 /**
  * GET /api/admin/checklist-pdf/:clientId
@@ -111,12 +106,21 @@ router.post(
     const { templateName, clientName, clientCompany, projectName, overrides } = req.body;
 
     if (!templateName || !clientName) {
-      errorResponse(res, 'templateName and clientName are required', 400, ErrorCodes.VALIDATION_ERROR);
+      errorResponse(
+        res,
+        'templateName and clientName are required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
       return;
     }
 
     const data = checklistPdfService.buildFromTemplate(
-      templateName, clientName, clientCompany, projectName, overrides
+      templateName,
+      clientName,
+      clientCompany,
+      projectName,
+      overrides
     );
     const pdfBytes = await checklistPdfService.generateChecklistPdf(data);
 

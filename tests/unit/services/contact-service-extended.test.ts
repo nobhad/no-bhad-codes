@@ -125,10 +125,7 @@ describe('ContactService — submitToNetlify', () => {
     vi.mocked(fetch).mockResolvedValue(makeOkResponse());
     await svc.submitForm(VALID_DATA);
 
-    expect(fetch).toHaveBeenCalledWith(
-      '/',
-      expect.objectContaining({ method: 'POST' })
-    );
+    expect(fetch).toHaveBeenCalledWith('/', expect.objectContaining({ method: 'POST' }));
     const [, opts] = (fetch as Mock).mock.calls[0];
     expect(opts.body).toContain('form-name=contact-form');
   });

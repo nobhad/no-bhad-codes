@@ -49,11 +49,7 @@ Object.defineProperty(window, 'localStorage', { value: localStorageMock, writabl
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-function makeMockResponse(
-  status: number,
-  jsonBody?: unknown,
-  ok?: boolean
-): Response {
+function makeMockResponse(status: number, jsonBody?: unknown, ok?: boolean): Response {
   const isOk = ok !== undefined ? ok : status >= 200 && status < 300;
   const response = {
     ok: isOk,

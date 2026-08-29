@@ -55,12 +55,7 @@ export { authStore } from './auth-store';
 // ============================================
 
 import { authStore } from './auth-store';
-import type {
-  AnyUser,
-  LoginCredentials,
-  LoginResult,
-  AuthResult
-} from './auth-types';
+import type { AnyUser, LoginCredentials, LoginResult, AuthResult } from './auth-types';
 
 /**
  * Login a user. Server detects admin vs client by email.

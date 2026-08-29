@@ -18,19 +18,27 @@ export type { SqlParam };
 
 export const SCORING_RULE_COLUMNS = `
   id, name, description, field_name, operator, threshold_value, points, is_active, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const PIPELINE_STAGE_COLUMNS = `
   id, name, description, color, sort_order, win_probability, is_won, is_lost, auto_convert_to_project, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const LEAD_SOURCE_COLUMNS = `
   id, name, description, is_active, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const LEAD_DUPLICATE_COLUMNS = `
   id, lead_id_1, lead_id_2, similarity_score, match_fields, status, resolved_at, resolved_by, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // Scoring Rules

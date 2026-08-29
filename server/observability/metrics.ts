@@ -191,7 +191,7 @@ export function getMetricsSummary(): {
     external: number;
   };
   uptime: number;
-  } {
+} {
   const memoryUsage = process.memoryUsage();
   const dbStats = dbStatsCallback ? dbStatsCallback() : { active: 0, idle: 0, queued: 0 };
 

@@ -45,7 +45,12 @@ router.post(
     const { invoiceId, installmentId } = req.body;
 
     if (!invoiceId && !installmentId) {
-      errorResponse(res, 'Either invoiceId or installmentId is required', 400, ErrorCodes.VALIDATION_ERROR);
+      errorResponse(
+        res,
+        'Either invoiceId or installmentId is required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
       return;
     }
 
@@ -187,7 +192,12 @@ router.put(
     if (enabled) {
       const status = await autoPayService.getAutoPayStatus(req.user!.id);
       if (status.methodCount === 0) {
-        errorResponse(res, 'Please add a payment method before enabling auto-pay', 400, ErrorCodes.VALIDATION_ERROR);
+        errorResponse(
+          res,
+          'Please add a payment method before enabling auto-pay',
+          400,
+          ErrorCodes.VALIDATION_ERROR
+        );
         return;
       }
     }

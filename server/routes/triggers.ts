@@ -196,32 +196,79 @@ router.post(
     const TRIGGER_NAME_MAX_LENGTH = 200;
     const TRIGGER_DESC_MAX_LENGTH = 1000;
     if (typeof name !== 'string' || name.length > TRIGGER_NAME_MAX_LENGTH) {
-      return errorResponse(res, `name must be a string of max ${TRIGGER_NAME_MAX_LENGTH} characters`, 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        `name must be a string of max ${TRIGGER_NAME_MAX_LENGTH} characters`,
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
     if (typeof event_type !== 'string' || typeof action_type !== 'string') {
-      return errorResponse(res, 'event_type and action_type must be strings', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'event_type and action_type must be strings',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
-    if (typeof action_config !== 'object' || action_config === null || Array.isArray(action_config)) {
-      return errorResponse(res, 'action_config must be a non-null object', 400, ErrorCodes.VALIDATION_ERROR);
+    if (
+      typeof action_config !== 'object' ||
+      action_config === null ||
+      Array.isArray(action_config)
+    ) {
+      return errorResponse(
+        res,
+        'action_config must be a non-null object',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
-    if (description !== undefined && (typeof description !== 'string' || description.length > TRIGGER_DESC_MAX_LENGTH)) {
-      return errorResponse(res, `description must be a string of max ${TRIGGER_DESC_MAX_LENGTH} characters`, 400, ErrorCodes.VALIDATION_ERROR);
+    if (
+      description !== undefined &&
+      (typeof description !== 'string' || description.length > TRIGGER_DESC_MAX_LENGTH)
+    ) {
+      return errorResponse(
+        res,
+        `description must be a string of max ${TRIGGER_DESC_MAX_LENGTH} characters`,
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
     if (conditions !== undefined && (typeof conditions !== 'object' || conditions === null)) {
       return errorResponse(res, 'conditions must be an object', 400, ErrorCodes.VALIDATION_ERROR);
     }
-    if (priority !== undefined && (typeof priority !== 'number' || priority < 0 || priority > 100)) {
-      return errorResponse(res, 'priority must be a number between 0 and 100', 400, ErrorCodes.VALIDATION_ERROR);
+    if (
+      priority !== undefined &&
+      (typeof priority !== 'number' || priority < 0 || priority > 100)
+    ) {
+      return errorResponse(
+        res,
+        'priority must be a number between 0 and 100',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     // Validate event_type and action_type are known values
     const validEventTypes = workflowTriggerService.getEventTypes();
-    const validActionTypeNames = workflowTriggerService.getActionTypes().map(a => a.type as string);
+    const validActionTypeNames = workflowTriggerService
+      .getActionTypes()
+      .map((a) => a.type as string);
     if (!(validEventTypes as string[]).includes(event_type)) {
-      return errorResponse(res, `Invalid event_type. Must be one of: ${validEventTypes.join(', ')}`, 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        `Invalid event_type. Must be one of: ${validEventTypes.join(', ')}`,
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
     if (!validActionTypeNames.includes(action_type)) {
-      return errorResponse(res, `Invalid action_type. Must be one of: ${validActionTypeNames.join(', ')}`, 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        `Invalid action_type. Must be one of: ${validActionTypeNames.join(', ')}`,
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     const trigger = await workflowTriggerService.createTrigger({

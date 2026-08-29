@@ -444,7 +444,12 @@ router.post(
     const { message_ids } = req.body;
 
     if (!message_ids || !Array.isArray(message_ids)) {
-      return errorResponse(res, 'message_ids array is required', 400, ErrorCodes.MISSING_MESSAGE_IDS);
+      return errorResponse(
+        res,
+        'message_ids array is required',
+        400,
+        ErrorCodes.MISSING_MESSAGE_IDS
+      );
     }
 
     await messageService.markMultipleAsRead(message_ids, req.user!.email, req.user!.type);
@@ -657,7 +662,12 @@ router.delete(
     const threadId = parseInt(req.query.thread_id as string);
 
     if (!threadId) {
-      return errorResponse(res, 'thread_id query parameter is required', 400, ErrorCodes.MISSING_THREAD_ID);
+      return errorResponse(
+        res,
+        'thread_id query parameter is required',
+        400,
+        ErrorCodes.MISSING_THREAD_ID
+      );
     }
 
     await messageService.unpinMessage(threadId, messageId);

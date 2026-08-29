@@ -35,8 +35,23 @@
 }
 
 .portal .sidebar-content,
-.portal .dashboard-content > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(.portal-subtab-content):not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(.data-table-card):not(.project-overview-grid):not(.overview-grid):not(.client-overview-grid):not(.analytics-card-grid):not(.kpi-cards-row):not(button),
-.portal .dashboard-content :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content) > *:not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(.data-table-card):not(.project-overview-grid):not(.overview-grid):not(.client-overview-grid):not(.analytics-card-grid):not(.kpi-cards-row):not(button) {
+.portal
+  .dashboard-content
+  > *:not(.tab-content):not(.tab-content-wrapper):not(.portal-tab-panel):not(
+    .portal-subtab-content
+  ):not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(.data-table-card):not(
+    .project-overview-grid
+  ):not(.overview-grid):not(.client-overview-grid):not(.analytics-card-grid):not(
+    .kpi-cards-row
+  ):not(button),
+.portal
+  .dashboard-content
+  :is(.tab-content, .tab-content-wrapper, .portal-tab-panel, .portal-subtab-content)
+  > *:not(.subsection):not(.section):not(.data-table-scroll-wrapper):not(.data-table-card):not(
+    .project-overview-grid
+  ):not(.overview-grid):not(.client-overview-grid):not(.analytics-card-grid):not(
+    .kpi-cards-row
+  ):not(button) {
   padding: var(--content-gutter);
   box-sizing: border-box;
 }
@@ -81,37 +96,45 @@
 /* ALL HEADERS: gutter on CHILDREN, not wrapper.
    Border on the wrapper spans full width; content is inset.
    Applies to: data-table-header, section-header, panel-header-row, portal-card-header, page-header */
-.portal .dashboard-content :is(
-  .data-table-header,
-  .section-header,
-  .panel-header-row,
-  .panel-header-row--compact,
-  .portal-card-header,
-  .page-header
-) {
+.portal
+  .dashboard-content
+  :is(
+    .data-table-header,
+    .section-header,
+    .panel-header-row,
+    .panel-header-row--compact,
+    .portal-card-header,
+    .page-header
+  ) {
   padding-left: 0;
   padding-right: 0;
 }
 
-.portal .dashboard-content :is(
-  .data-table-header,
-  .section-header,
-  .panel-header-row,
-  .panel-header-row--compact,
-  .portal-card-header,
-  .page-header
-) > *:first-child {
+.portal
+  .dashboard-content
+  :is(
+    .data-table-header,
+    .section-header,
+    .panel-header-row,
+    .panel-header-row--compact,
+    .portal-card-header,
+    .page-header
+  )
+  > *:first-child {
   padding-left: var(--content-gutter);
 }
 
-.portal .dashboard-content :is(
-  .data-table-header,
-  .section-header,
-  .panel-header-row,
-  .panel-header-row--compact,
-  .portal-card-header,
-  .page-header
-) > *:last-child {
+.portal
+  .dashboard-content
+  :is(
+    .data-table-header,
+    .section-header,
+    .panel-header-row,
+    .panel-header-row--compact,
+    .portal-card-header,
+    .page-header
+  )
+  > *:last-child {
   padding-right: var(--content-gutter);
 }
 
@@ -225,7 +248,6 @@
 .portal .dashboard-content .data-table-scroll-wrapper.data-table-scroll-wrapper {
   padding: 0;
 }
-
 
 /* Message containers — wrappers that never get gutter.
    Gutter applied to their children via Tier 5 below. */

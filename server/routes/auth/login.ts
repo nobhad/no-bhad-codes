@@ -31,10 +31,7 @@ import {
 } from '../../utils/api-response.js';
 import { validateRequest } from '../../middleware/validation.js';
 import { errorResponseWithPayload } from '../../utils/api-response.js';
-import {
-  TEMP_TOKEN_CONFIG,
-  TWO_FACTOR_SETTINGS_KEYS
-} from '../../utils/two-factor-constants.js';
+import { TEMP_TOKEN_CONFIG, TWO_FACTOR_SETTINGS_KEYS } from '../../utils/two-factor-constants.js';
 
 const router = express.Router();
 
@@ -67,11 +64,9 @@ async function handleAdmin2FACheck(
     return true;
   }
 
-  const tempToken = jwt.sign(
-    { email: adminEmail, sub: TEMP_TOKEN_CONFIG.SUBJECT },
-    jwtSecret,
-    { expiresIn: TEMP_TOKEN_CONFIG.EXPIRY_STRING } as SignOptions
-  );
+  const tempToken = jwt.sign({ email: adminEmail, sub: TEMP_TOKEN_CONFIG.SUBJECT }, jwtSecret, {
+    expiresIn: TEMP_TOKEN_CONFIG.EXPIRY_STRING
+  } as SignOptions);
 
   errorResponseWithPayload(
     res,
@@ -88,20 +83,32 @@ async function handleAdmin2FACheck(
 const LoginValidationSchemas = {
   clientLogin: {
     email: [{ type: 'required' as const }, { type: 'email' as const }],
-    password: [{ type: 'required' as const }, { type: 'string' as const, minLength: 1, maxLength: 128 }]
+    password: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: 128 }
+    ]
   },
   adminLogin: {
-    password: [{ type: 'required' as const }, { type: 'string' as const, minLength: 1, maxLength: 128 }]
+    password: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: 128 }
+    ]
   },
   portalLogin: {
     email: [{ type: 'required' as const }, { type: 'email' as const }],
-    password: [{ type: 'required' as const }, { type: 'string' as const, minLength: 1, maxLength: 128 }]
+    password: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: 128 }
+    ]
   },
   magicLink: {
     email: [{ type: 'required' as const }, { type: 'email' as const }]
   },
   verifyToken: {
-    token: [{ type: 'required' as const }, { type: 'string' as const, minLength: 32, maxLength: 256 }]
+    token: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 32, maxLength: 256 }
+    ]
   }
 };
 
@@ -901,11 +908,9 @@ router.post(
         return sendServerError(res, 'Server configuration error', ErrorCodes.CONFIG_ERROR);
       }
 
-      const token = jwt.sign(
-        { id: 0, email: adminEmail, type: 'admin' },
-        secret,
-        { expiresIn: JWT_CONFIG.ADMIN_TOKEN_EXPIRY } as SignOptions
-      );
+      const token = jwt.sign({ id: 0, email: adminEmail, type: 'admin' }, secret, {
+        expiresIn: JWT_CONFIG.ADMIN_TOKEN_EXPIRY
+      } as SignOptions);
 
       await auditLogger.logLogin(0, adminEmail, 'admin', req);
       res.cookie(COOKIE_CONFIG.AUTH_TOKEN_NAME, token, COOKIE_CONFIG.ADMIN_OPTIONS);
@@ -969,10 +974,13 @@ router.post(
 
     const isValidPassword = await bcrypt.compare(password, passwordHash);
     if (!isValidPassword) {
-      const { lockedUntil: newLockedUntil } = await userService.recordClientFailedAttempt(clientId, {
-        lockThreshold: ACCOUNT_LOCKOUT_CONFIG.MAX_FAILED_ATTEMPTS,
-        lockDurationMs: ACCOUNT_LOCKOUT_CONFIG.LOCKOUT_DURATION_MS
-      });
+      const { lockedUntil: newLockedUntil } = await userService.recordClientFailedAttempt(
+        clientId,
+        {
+          lockThreshold: ACCOUNT_LOCKOUT_CONFIG.MAX_FAILED_ATTEMPTS,
+          lockDurationMs: ACCOUNT_LOCKOUT_CONFIG.LOCKOUT_DURATION_MS
+        }
+      );
 
       if (newLockedUntil) {
         await auditLogger.logLoginFailed(normalizedEmail, req, 'Account locked');

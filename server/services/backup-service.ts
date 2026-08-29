@@ -97,12 +97,17 @@ async function createBackupFile(): Promise<string> {
 
       // sqlite3's TypeScript types don't expose .backup yet; it's
       // runtime-available on the underlying node binding.
-      const backup = (source as unknown as {
-        backup: (destPath: string, cb: (err: Error | null) => void) => {
-          step: (pages: number, cb: (err: Error | null) => void) => void;
-          finish: (cb: (err: Error | null) => void) => void;
-        };
-      }).backup(rawPath, (backupErr) => {
+      const backup = (
+        source as unknown as {
+          backup: (
+            destPath: string,
+            cb: (err: Error | null) => void
+          ) => {
+            step: (pages: number, cb: (err: Error | null) => void) => void;
+            finish: (cb: (err: Error | null) => void) => void;
+          };
+        }
+      ).backup(rawPath, (backupErr) => {
         if (backupErr) {
           source.close(() => reject(backupErr));
           return;

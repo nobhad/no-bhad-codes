@@ -398,7 +398,7 @@ describe('Contract System - E-Signature', () => {
     });
 
     it('should create unique signature token', async () => {
-      const token = `sig_${  Date.now()  }_${  Math.random().toString(36).substr(2, 9)}`;
+      const token = `sig_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
       expect(token).toMatch(/^sig_\d+_[a-z0-9]+$/);
     });

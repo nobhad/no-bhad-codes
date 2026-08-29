@@ -1,5 +1,10 @@
 <!doctype html>
-<html lang="en" class="intro-complete intro-finished" data-theme="light" data-initial-page="not-found">
+<html
+  lang="en"
+  class="intro-complete intro-finished"
+  data-theme="light"
+  data-initial-page="not-found"
+>
   <head>
     <meta charset="UTF-8" />
     <script>
@@ -10,7 +15,10 @@
           var saved = localStorage.getItem('theme');
           var systemDark =
             window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-          document.documentElement.setAttribute('data-theme', saved || (systemDark ? 'dark' : 'light'));
+          document.documentElement.setAttribute(
+            'data-theme',
+            saved || (systemDark ? 'dark' : 'light')
+          );
         } catch (e) {
           document.documentElement.setAttribute('data-theme', 'light');
         }
@@ -28,18 +36,12 @@
     <script type="module" src="/src/static-page.ts"></script>
   </head>
   <body data-page="not-found">
-    <%- include('templates/partials/shell/header.ejs') %>
-
-    <%- include('templates/partials/shell/portal-dropdown.ejs') %>
-
-    <%- include('templates/partials/shell/nav.ejs') %>
+    <%- include('templates/partials/shell/header.ejs') %> <%-
+    include('templates/partials/shell/portal-dropdown.ejs') %> <%-
+    include('templates/partials/shell/nav.ejs') %>
 
     <main id="main-content" data-active-page="not-found">
-      <section
-        id="not-found"
-        class="not-found-section"
-        data-page="not-found"
-      >
+      <section id="not-found" class="not-found-section" data-page="not-found">
         <div class="not-found-content">
           <img
             class="not-found-sign"
@@ -63,10 +65,8 @@
           </div>
         </div>
       </section>
-        <%- include('templates/partials/shell/footer.ejs') %>
-
-</main>
-
+      <%- include('templates/partials/shell/footer.ejs') %>
+    </main>
 
     <script>
       // Same inline fill index.html uses. The set-copyright-year module works

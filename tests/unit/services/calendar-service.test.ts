@@ -93,9 +93,11 @@ function makeRateLimitResponse(retryAfterSeconds?: number): Response {
     status: 429,
     statusText: 'Too Many Requests',
     headers: {
-      get: vi.fn().mockImplementation((header: string) =>
-        header === 'Retry-After' ? (retryAfterSeconds ? String(retryAfterSeconds) : null) : null
-      )
+      get: vi
+        .fn()
+        .mockImplementation((header: string) =>
+          header === 'Retry-After' ? (retryAfterSeconds ? String(retryAfterSeconds) : null) : null
+        )
     },
     json: vi.fn().mockResolvedValue({ error: { message: 'rate limited' } }),
     text: vi.fn().mockResolvedValue('rate limited')
@@ -328,9 +330,9 @@ describe('createGoogleCalendarEvent', () => {
       makeMockJsonResponse(false, { error: { message: 'Forbidden' } }, 403)
     );
 
-    await expect(
-      createGoogleCalendarEvent('bad-token', 'primary', sampleEvent)
-    ).rejects.toThrow('Google Calendar API error: Forbidden');
+    await expect(createGoogleCalendarEvent('bad-token', 'primary', sampleEvent)).rejects.toThrow(
+      'Google Calendar API error: Forbidden'
+    );
   });
 
   it('retries on 429 rate limit and succeeds on second attempt', async () => {
@@ -388,9 +390,9 @@ describe('updateGoogleCalendarEvent', () => {
       makeMockJsonResponse(false, { error: { message: 'Not Found' } }, 404)
     );
 
-    await expect(
-      updateGoogleCalendarEvent('token', 'primary', 'missing-id', {})
-    ).rejects.toThrow('Not Found');
+    await expect(updateGoogleCalendarEvent('token', 'primary', 'missing-id', {})).rejects.toThrow(
+      'Not Found'
+    );
   });
 });
 
@@ -404,9 +406,7 @@ describe('deleteGoogleCalendarEvent', () => {
   });
 
   it('resolves without throwing when deletion succeeds (204)', async () => {
-    mockFetch.mockResolvedValueOnce(
-      makeMockJsonResponse(true, null, 204)
-    );
+    mockFetch.mockResolvedValueOnce(makeMockJsonResponse(true, null, 204));
 
     await expect(
       deleteGoogleCalendarEvent('token', 'primary', 'evt-to-delete')
@@ -428,9 +428,9 @@ describe('deleteGoogleCalendarEvent', () => {
       makeMockJsonResponse(false, { error: { message: 'Permission denied' } }, 403)
     );
 
-    await expect(
-      deleteGoogleCalendarEvent('token', 'primary', 'evt-1')
-    ).rejects.toThrow('Permission denied');
+    await expect(deleteGoogleCalendarEvent('token', 'primary', 'evt-1')).rejects.toThrow(
+      'Permission denied'
+    );
   });
 
   it('sends DELETE to the correct endpoint', async () => {
@@ -867,20 +867,14 @@ describe('exportUpcomingToICal', () => {
   });
 
   it('uses default of 30 days when daysAhead not specified', async () => {
-    mockDb.all
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([]);
+    mockDb.all.mockResolvedValueOnce([]).mockResolvedValueOnce([]).mockResolvedValueOnce([]);
 
     const result = await exportUpcomingToICal();
     expect(result).toContain('BEGIN:VCALENDAR');
   });
 
   it('returns valid iCal when no upcoming items exist', async () => {
-    mockDb.all
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([]);
+    mockDb.all.mockResolvedValueOnce([]).mockResolvedValueOnce([]).mockResolvedValueOnce([]);
 
     const result = await exportUpcomingToICal(7);
 
@@ -1031,9 +1025,6 @@ describe('getCalendarSyncConfig', () => {
 
     await getCalendarSyncConfig(42);
 
-    expect(mockDb.get).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE user_id = ?'),
-      [42]
-    );
+    expect(mockDb.get).toHaveBeenCalledWith(expect.stringContaining('WHERE user_id = ?'), [42]);
   });
 });

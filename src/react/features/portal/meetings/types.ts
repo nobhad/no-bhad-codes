@@ -24,12 +24,7 @@ export type MeetingStatus =
   | 'completed'
   | 'cancelled';
 
-export type LocationType =
-  | 'zoom'
-  | 'google_meet'
-  | 'phone'
-  | 'in_person'
-  | 'other';
+export type LocationType = 'zoom' | 'google_meet' | 'phone' | 'in_person' | 'other';
 
 // ============================================================================
 // ENTITY TYPES
@@ -71,10 +66,7 @@ export const MEETING_TYPE_LABELS: Record<MeetingType, string> = {
   other: 'Other'
 };
 
-export const MEETING_STATUS_CONFIG: Record<
-  MeetingStatus,
-  { label: string; color: string }
-> = {
+export const MEETING_STATUS_CONFIG: Record<MeetingStatus, { label: string; color: string }> = {
   requested: { label: 'Requested', color: 'var(--status-pending)' },
   confirmed: { label: 'Confirmed', color: 'var(--status-active)' },
   declined: { label: 'Declined', color: 'var(--status-cancelled)' },

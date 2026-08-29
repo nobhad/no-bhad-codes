@@ -107,4 +107,10 @@ declare global {
   }
 }
 
-export type { NetworkInformation, PerformanceMemory, APIConfig, NavigatorWithConnection, PerformanceWithMemory };
+export type {
+  NetworkInformation,
+  PerformanceMemory,
+  APIConfig,
+  NavigatorWithConnection,
+  PerformanceWithMemory
+};

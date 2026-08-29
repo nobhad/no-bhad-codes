@@ -678,7 +678,7 @@ describe('Workflow Automations Integration', () => {
       // Should not update status since already active - check that no UPDATE with status='active' was called
       const runCalls = mockDb.run.mock.calls;
       const hasStatusUpdate = runCalls.some(
-        (call: unknown[]) => typeof call[0] === 'string' && call[0].includes('status = \'active\'')
+        (call: unknown[]) => typeof call[0] === 'string' && call[0].includes("status = 'active'")
       );
       expect(hasStatusUpdate).toBe(false);
     });

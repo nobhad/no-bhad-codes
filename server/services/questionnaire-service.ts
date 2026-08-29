@@ -25,7 +25,9 @@ import { parseIfString } from '../utils/safe-json.js';
 const QUESTIONNAIRE_COLUMNS = `
   id, name, description, project_type, questions, is_active, auto_send_on_project_create,
   display_order, created_by, created_by_user_id, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // TYPES
@@ -147,7 +149,9 @@ class QuestionnaireService {
   async getQuestionnaire(id: number): Promise<Questionnaire | null> {
     const db = await getDatabase();
 
-    const row = await db.get(`SELECT ${QUESTIONNAIRE_COLUMNS} FROM questionnaires WHERE id = ?`, [id]);
+    const row = await db.get(`SELECT ${QUESTIONNAIRE_COLUMNS} FROM questionnaires WHERE id = ?`, [
+      id
+    ]);
 
     if (!row) return null;
 
@@ -574,7 +578,11 @@ class QuestionnaireService {
       name: row.name as string,
       description: row.description as string | undefined,
       project_type: row.project_type as string | undefined,
-      questions: parseIfString<Question[]>(row.questions as string | Question[], [], 'questionnaire questions'),
+      questions: parseIfString<Question[]>(
+        row.questions as string | Question[],
+        [],
+        'questionnaire questions'
+      ),
       is_active: Boolean(row.is_active),
       auto_send_on_project_create: Boolean(row.auto_send_on_project_create),
       display_order: row.display_order as number,
@@ -795,10 +803,10 @@ class QuestionnaireService {
 
     const completedDate = response.completed_at
       ? new Date(response.completed_at).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
       : 'In Progress';
     page.drawText(`Completed: ${completedDate}`, {
       x: leftMargin + 200,
@@ -1011,7 +1019,7 @@ class QuestionnaireService {
 
     // Get or create Forms folder for the project
     const formsFolderRow = (await db.get(
-      'SELECT id FROM file_folders WHERE project_id = ? AND name = \'Forms\'',
+      "SELECT id FROM file_folders WHERE project_id = ? AND name = 'Forms'",
       [response.project_id]
     )) as { id: number } | undefined;
 

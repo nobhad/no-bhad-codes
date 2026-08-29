@@ -106,10 +106,7 @@ describe('File Service Extended', () => {
 
       expect(folder.id).toBe(3);
       expect(folder.name).toBe('Design Assets');
-      expect(mockDb.get).toHaveBeenCalledWith(
-        expect.stringContaining('FROM file_folders ff'),
-        [3]
-      );
+      expect(mockDb.get).toHaveBeenCalledWith(expect.stringContaining('FROM file_folders ff'), [3]);
     });
 
     it('throws when folder not found', async () => {
@@ -137,7 +134,10 @@ describe('File Service Extended', () => {
       });
 
       const { fileService } = await import('../../../server/services/file-service');
-      const folder = await fileService.updateFolder(3, { name: 'Updated Folder', color: '#ff0000' });
+      const folder = await fileService.updateFolder(3, {
+        name: 'Updated Folder',
+        color: '#ff0000'
+      });
 
       expect(folder.name).toBe('Updated Folder');
       expect(mockDb.run).toHaveBeenCalledWith(
@@ -182,8 +182,8 @@ describe('File Service Extended', () => {
       await fileService.deleteFolder(5);
 
       // Should NOT call the UPDATE for moving files
-      const updateFilesCall = mockDb.run.mock.calls.find(
-        (call) => String(call[0]).includes('UPDATE files SET folder_id')
+      const updateFilesCall = mockDb.run.mock.calls.find((call) =>
+        String(call[0]).includes('UPDATE files SET folder_id')
       );
       expect(updateFilesCall).toBeUndefined();
 
@@ -214,10 +214,10 @@ describe('File Service Extended', () => {
       const { fileService } = await import('../../../server/services/file-service');
       await fileService.moveFile(10, null);
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        'UPDATE files SET folder_id = ? WHERE id = ?',
-        [null, 10]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith('UPDATE files SET folder_id = ? WHERE id = ?', [
+        null,
+        10
+      ]);
     });
   });
 
@@ -236,10 +236,7 @@ describe('File Service Extended', () => {
       const files = await fileService.getFilesByTag(10, 7);
 
       expect(files).toHaveLength(2);
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('ft.tag_id = ?'),
-        [10, 7]
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('ft.tag_id = ?'), [10, 7]);
     });
   });
 
@@ -258,10 +255,7 @@ describe('File Service Extended', () => {
       const log = await fileService.getAccessLog(5);
 
       expect(log).toHaveLength(2);
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('LIMIT ?'),
-        [5, 50]
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('LIMIT ?'), [5, 50]);
     });
 
     it('accepts a custom limit', async () => {
@@ -270,10 +264,7 @@ describe('File Service Extended', () => {
       const { fileService } = await import('../../../server/services/file-service');
       await fileService.getAccessLog(5, 10);
 
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('LIMIT ?'),
-        [5, 10]
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('LIMIT ?'), [5, 10]);
     });
   });
 
@@ -322,7 +313,13 @@ describe('File Service Extended', () => {
 
       const { fileService } = await import('../../../server/services/file-service');
       const comment = await fileService.addComment(
-        1, 'admin@test.com', 'admin', 'Internal note', 'Admin', true, 5
+        1,
+        'admin@test.com',
+        'admin',
+        'Internal note',
+        'Admin',
+        true,
+        5
       );
 
       expect(comment.id).toBe(21);
@@ -340,23 +337,21 @@ describe('File Service Extended', () => {
   describe('getComments', () => {
     it('returns public comments by default', async () => {
       const parentComment = { id: 1, file_id: 5, content: 'Comment 1', is_internal: false };
-      mockDb.all
-        .mockResolvedValueOnce([parentComment])
-        .mockResolvedValueOnce([]);
+      mockDb.all.mockResolvedValueOnce([parentComment]).mockResolvedValueOnce([]);
 
       const { fileService } = await import('../../../server/services/file-service');
       const comments = await fileService.getComments(5);
 
       expect(comments).toHaveLength(1);
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('is_internal = FALSE'),
-        [5]
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('is_internal = FALSE'), [5]);
     });
 
     it('includes internal comments when requested', async () => {
       mockDb.all
-        .mockResolvedValueOnce([{ id: 1, content: 'Public' }, { id: 2, content: 'Internal' }])
+        .mockResolvedValueOnce([
+          { id: 1, content: 'Public' },
+          { id: 2, content: 'Internal' }
+        ])
         .mockResolvedValueOnce([])
         .mockResolvedValueOnce([]);
 
@@ -372,9 +367,7 @@ describe('File Service Extended', () => {
       const parentComment = { id: 10, file_id: 5, content: 'Parent', is_internal: false };
       const replyComment = { id: 11, file_id: 5, content: 'Reply', parent_comment_id: 10 };
 
-      mockDb.all
-        .mockResolvedValueOnce([parentComment])
-        .mockResolvedValueOnce([replyComment]);
+      mockDb.all.mockResolvedValueOnce([parentComment]).mockResolvedValueOnce([replyComment]);
 
       const { fileService } = await import('../../../server/services/file-service');
       const comments = await fileService.getComments(5);
@@ -418,10 +411,7 @@ describe('File Service Extended', () => {
       const { fileService } = await import('../../../server/services/file-service');
       await fileService.deleteComment(15);
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        'DELETE FROM file_comments WHERE id = ?',
-        [15]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith('DELETE FROM file_comments WHERE id = ?', [15]);
     });
   });
 
@@ -439,10 +429,7 @@ describe('File Service Extended', () => {
       const files = await fileService.getArchivedFiles(10);
 
       expect(files).toHaveLength(1);
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('is_archived = TRUE'),
-        [10]
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('is_archived = TRUE'), [10]);
     });
   });
 
@@ -457,10 +444,10 @@ describe('File Service Extended', () => {
       const { fileService } = await import('../../../server/services/file-service');
       await fileService.setExpiration(1, '2026-12-31');
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        'UPDATE files SET expires_at = ? WHERE id = ?',
-        ['2026-12-31', 1]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith('UPDATE files SET expires_at = ? WHERE id = ?', [
+        '2026-12-31',
+        1
+      ]);
     });
 
     it('clears an expiration date by passing null', async () => {
@@ -469,10 +456,10 @@ describe('File Service Extended', () => {
       const { fileService } = await import('../../../server/services/file-service');
       await fileService.setExpiration(1, null);
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        'UPDATE files SET expires_at = ? WHERE id = ?',
-        [null, 1]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith('UPDATE files SET expires_at = ? WHERE id = ?', [
+        null,
+        1
+      ]);
     });
   });
 
@@ -490,10 +477,7 @@ describe('File Service Extended', () => {
       const files = await fileService.getExpiringFiles();
 
       expect(files).toHaveLength(1);
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('expires_at'),
-        [7]
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('expires_at'), [7]);
     });
 
     it('accepts a custom days ahead value', async () => {
@@ -517,10 +501,10 @@ describe('File Service Extended', () => {
       const { fileService } = await import('../../../server/services/file-service');
       await fileService.setCategory(1, 'deliverable');
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        'UPDATE files SET category = ? WHERE id = ?',
-        ['deliverable', 1]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith('UPDATE files SET category = ? WHERE id = ?', [
+        'deliverable',
+        1
+      ]);
     });
   });
 
@@ -539,10 +523,10 @@ describe('File Service Extended', () => {
       const files = await fileService.getFilesByCategory(10, 'document');
 
       expect(files).toHaveLength(2);
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('category = ?'),
-        [10, 'document']
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('category = ?'), [
+        10,
+        'document'
+      ]);
     });
   });
 
@@ -665,7 +649,7 @@ describe('File Service Extended', () => {
 
       expect(workflow?.status).toBe('in_review');
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('SET status = \'in_review\''),
+        expect.stringContaining("SET status = 'in_review'"),
         expect.any(Array)
       );
     });
@@ -723,7 +707,11 @@ describe('File Service Extended', () => {
       mockDb.run.mockResolvedValue({ lastID: 50 });
 
       const { fileService } = await import('../../../server/services/file-service');
-      const workflow = await fileService.rejectDeliverable(5, 'reviewer@test.com', 'Does not meet requirements');
+      const workflow = await fileService.rejectDeliverable(
+        5,
+        'reviewer@test.com',
+        'Does not meet requirements'
+      );
 
       expect(workflow?.status).toBe('rejected');
     });
@@ -761,9 +749,9 @@ describe('File Service Extended', () => {
 
       const { fileService } = await import('../../../server/services/file-service');
 
-      await expect(
-        fileService.resubmitDeliverable(999, 'user@test.com')
-      ).rejects.toThrow('Deliverable workflow not found');
+      await expect(fileService.resubmitDeliverable(999, 'user@test.com')).rejects.toThrow(
+        'Deliverable workflow not found'
+      );
     });
   });
 
@@ -817,10 +805,7 @@ describe('File Service Extended', () => {
       const comments = await fileService.getReviewComments(5);
 
       expect(comments).toHaveLength(2);
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('dw.file_id = ?'),
-        [5]
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('dw.file_id = ?'), [5]);
     });
 
     it('returns empty array when no comments exist', async () => {
@@ -848,10 +833,7 @@ describe('File Service Extended', () => {
       const history = await fileService.getDeliverableHistory(5);
 
       expect(history).toHaveLength(2);
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('dw.file_id = ?'),
-        [5]
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('dw.file_id = ?'), [5]);
     });
 
     it('returns empty array when no history exists', async () => {
@@ -892,7 +874,7 @@ describe('File Service Extended', () => {
 
       expect(pending).toHaveLength(2);
       expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('dw.status IN (\'pending_review\', \'in_review\')')
+        expect.stringContaining("dw.status IN ('pending_review', 'in_review')")
       );
     });
 

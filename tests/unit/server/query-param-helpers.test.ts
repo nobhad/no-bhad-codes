@@ -151,11 +151,15 @@ describe('getStringParam', () => {
   });
 
   it('returns defaultValue when value is not in allowedValues', () => {
-    expect(getStringParam('invalid', 'active', { allowedValues: ['active', 'inactive'] })).toBe('active');
+    expect(getStringParam('invalid', 'active', { allowedValues: ['active', 'inactive'] })).toBe(
+      'active'
+    );
   });
 
   it('returns value when it is in allowedValues', () => {
-    expect(getStringParam('inactive', 'active', { allowedValues: ['active', 'inactive'] })).toBe('inactive');
+    expect(getStringParam('inactive', 'active', { allowedValues: ['active', 'inactive'] })).toBe(
+      'inactive'
+    );
   });
 
   it('lowercases the value when lowercase option is true', () => {
@@ -168,7 +172,10 @@ describe('getStringParam', () => {
 
   it('lowercase is applied before allowedValues check', () => {
     expect(
-      getStringParam('ACTIVE', 'default', { lowercase: true, allowedValues: ['active', 'inactive'] })
+      getStringParam('ACTIVE', 'default', {
+        lowercase: true,
+        allowedValues: ['active', 'inactive']
+      })
     ).toBe('active');
   });
 });
@@ -334,7 +341,12 @@ describe('getSortParams', () => {
   });
 
   it('prefers "sort" over "sortBy"', () => {
-    const result = getSortParams({ sort: 'name', sortBy: 'amount' }, allowedColumns, 'created_at', 'desc');
+    const result = getSortParams(
+      { sort: 'name', sortBy: 'amount' },
+      allowedColumns,
+      'created_at',
+      'desc'
+    );
     expect(result.sortBy).toBe('name');
   });
 

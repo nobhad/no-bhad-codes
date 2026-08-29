@@ -482,58 +482,58 @@ export function validateObject(
 
     // Type-specific validation
     switch (rules.type) {
-    case 'email': {
-      const result = validateEmail(String(value));
-      if (!result.valid) fieldErrors.push(...result.errors);
-      sanitized[field] = result.sanitized;
-      break;
-    }
-    case 'phone': {
-      const result = validatePhone(String(value));
-      if (!result.valid) fieldErrors.push(...result.errors);
-      sanitized[field] = result.sanitized;
-      break;
-    }
-    case 'url': {
-      const result = validateUrl(String(value));
-      if (!result.valid) fieldErrors.push(...result.errors);
-      sanitized[field] = result.sanitized;
-      break;
-    }
-    case 'text': {
-      const strValue = String(value);
-      const sanitizeResult = sanitizeInput(strValue, { maxLength: rules.maxLength });
-      if (rules.minLength && strValue.length < rules.minLength) {
-        fieldErrors.push(`${field} must be at least ${rules.minLength} characters`);
+      case 'email': {
+        const result = validateEmail(String(value));
+        if (!result.valid) fieldErrors.push(...result.errors);
+        sanitized[field] = result.sanitized;
+        break;
       }
-      if (rules.maxLength && strValue.length > rules.maxLength) {
-        fieldErrors.push(`${field} must be at most ${rules.maxLength} characters`);
+      case 'phone': {
+        const result = validatePhone(String(value));
+        if (!result.valid) fieldErrors.push(...result.errors);
+        sanitized[field] = result.sanitized;
+        break;
       }
-      if (rules.pattern && !rules.pattern.test(strValue)) {
-        fieldErrors.push(`${field} format is invalid`);
+      case 'url': {
+        const result = validateUrl(String(value));
+        if (!result.valid) fieldErrors.push(...result.errors);
+        sanitized[field] = result.sanitized;
+        break;
       }
-      sanitized[field] = sanitizeResult.value;
-      break;
-    }
-    case 'number': {
-      const numValue = Number(value);
-      if (isNaN(numValue)) {
-        fieldErrors.push(`${field} must be a number`);
-      } else {
-        if (rules.min !== undefined && numValue < rules.min) {
-          fieldErrors.push(`${field} must be at least ${rules.min}`);
+      case 'text': {
+        const strValue = String(value);
+        const sanitizeResult = sanitizeInput(strValue, { maxLength: rules.maxLength });
+        if (rules.minLength && strValue.length < rules.minLength) {
+          fieldErrors.push(`${field} must be at least ${rules.minLength} characters`);
         }
-        if (rules.max !== undefined && numValue > rules.max) {
-          fieldErrors.push(`${field} must be at most ${rules.max}`);
+        if (rules.maxLength && strValue.length > rules.maxLength) {
+          fieldErrors.push(`${field} must be at most ${rules.maxLength} characters`);
         }
-        sanitized[field] = numValue;
+        if (rules.pattern && !rules.pattern.test(strValue)) {
+          fieldErrors.push(`${field} format is invalid`);
+        }
+        sanitized[field] = sanitizeResult.value;
+        break;
       }
-      break;
-    }
-    case 'boolean': {
-      sanitized[field] = Boolean(value);
-      break;
-    }
+      case 'number': {
+        const numValue = Number(value);
+        if (isNaN(numValue)) {
+          fieldErrors.push(`${field} must be a number`);
+        } else {
+          if (rules.min !== undefined && numValue < rules.min) {
+            fieldErrors.push(`${field} must be at least ${rules.min}`);
+          }
+          if (rules.max !== undefined && numValue > rules.max) {
+            fieldErrors.push(`${field} must be at most ${rules.max}`);
+          }
+          sanitized[field] = numValue;
+        }
+        break;
+      }
+      case 'boolean': {
+        sanitized[field] = Boolean(value);
+        break;
+      }
     }
 
     if (fieldErrors.length > 0) {

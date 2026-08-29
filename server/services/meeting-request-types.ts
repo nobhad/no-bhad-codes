@@ -28,12 +28,7 @@ export type MeetingStatus =
   | 'completed'
   | 'cancelled';
 
-export type LocationType =
-  | 'zoom'
-  | 'google_meet'
-  | 'phone'
-  | 'in_person'
-  | 'other';
+export type LocationType = 'zoom' | 'google_meet' | 'phone' | 'in_person' | 'other';
 
 // ============================================
 // DATABASE ROW TYPE

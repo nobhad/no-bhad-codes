@@ -181,7 +181,12 @@ router.post(
 
     const signatureToken = project.contract_signature_token as string | null;
     if (!signatureToken) {
-      return errorResponse(res, 'No active signature token found', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'No active signature token found',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     const clientEmail = getString(project, 'email');

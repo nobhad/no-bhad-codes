@@ -16,10 +16,7 @@
 import { getDatabase, type DatabaseRow } from '../database/init.js';
 import { getString, getNumber, getBoolean } from '../database/row-helpers.js';
 import { parseRow } from '../database/row-validator.js';
-import {
-  clientLockoutRowSchema,
-  systemSettingValueRowSchema
-} from '../database/row-schemas.js';
+import { clientLockoutRowSchema, systemSettingValueRowSchema } from '../database/row-schemas.js';
 
 // =====================================================
 // TYPES
@@ -133,7 +130,9 @@ export interface CreateUserData {
 
 const USER_COLUMNS = `
   id, email, display_name, role, avatar_url, is_active, last_active_at, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // SERVICE CLASS
@@ -228,7 +227,9 @@ class UserService {
    */
   async getActiveUsers(): Promise<User[]> {
     const db = await getDatabase();
-    const users = await db.all(`SELECT ${USER_COLUMNS} FROM users WHERE is_active = 1 ORDER BY display_name`);
+    const users = await db.all(
+      `SELECT ${USER_COLUMNS} FROM users WHERE is_active = 1 ORDER BY display_name`
+    );
     return users.map((u: UserRow) => this.mapUser(u));
   }
 
@@ -348,10 +349,10 @@ class UserService {
    */
   async findClientByEmail(email: string): Promise<ClientLoginRow | null> {
     const db = await getDatabase();
-    const row = await db.get(
+    const row = (await db.get(
       'SELECT id, email, password_hash, company_name, contact_name, status, is_admin, last_login, failed_login_attempts, locked_until FROM clients WHERE email = ? AND deleted_at IS NULL',
       [email.toLowerCase()]
-    ) as DatabaseRow | undefined;
+    )) as DatabaseRow | undefined;
 
     if (!row) return null;
 
@@ -374,10 +375,10 @@ class UserService {
    */
   async findActiveClientByEmail(email: string): Promise<ClientMagicLinkRow | null> {
     const db = await getDatabase();
-    const row = await db.get(
+    const row = (await db.get(
       'SELECT id, email, contact_name FROM clients WHERE email = ? AND status = "active" AND deleted_at IS NULL',
       [email.toLowerCase()]
-    ) as DatabaseRow | undefined;
+    )) as DatabaseRow | undefined;
 
     if (!row) return null;
 
@@ -393,12 +394,12 @@ class UserService {
    */
   async findClientByMagicToken(token: string): Promise<ClientMagicTokenRow | null> {
     const db = await getDatabase();
-    const row = await db.get(
+    const row = (await db.get(
       `SELECT id, email, contact_name, company_name, status, is_admin, magic_link_expires_at
        FROM clients
        WHERE magic_link_token = ? AND deleted_at IS NULL`,
       [token]
-    ) as DatabaseRow | undefined;
+    )) as DatabaseRow | undefined;
 
     if (!row) return null;
 
@@ -418,10 +419,9 @@ class UserService {
    */
   async resetClientLockout(clientId: number): Promise<void> {
     const db = await getDatabase();
-    await db.run(
-      'UPDATE clients SET failed_login_attempts = 0, locked_until = NULL WHERE id = ?',
-      [clientId]
-    );
+    await db.run('UPDATE clients SET failed_login_attempts = 0, locked_until = NULL WHERE id = ?', [
+      clientId
+    ]);
   }
 
   /**
@@ -525,10 +525,10 @@ class UserService {
    */
   async findActiveClientForReset(email: string): Promise<ClientResetRow | null> {
     const db = await getDatabase();
-    const row = await db.get(
+    const row = (await db.get(
       'SELECT id, email, contact_name FROM clients WHERE email = ? AND status = "active" AND deleted_at IS NULL',
       [email.toLowerCase()]
-    ) as DatabaseRow | undefined;
+    )) as DatabaseRow | undefined;
 
     if (!row) return null;
 
@@ -544,10 +544,11 @@ class UserService {
    */
   async storeResetToken(clientId: number, token: string, expiry: Date): Promise<void> {
     const db = await getDatabase();
-    await db.run(
-      'UPDATE clients SET reset_token = ?, reset_token_expiry = ? WHERE id = ?',
-      [token, expiry.toISOString(), clientId]
-    );
+    await db.run('UPDATE clients SET reset_token = ?, reset_token_expiry = ? WHERE id = ?', [
+      token,
+      expiry.toISOString(),
+      clientId
+    ]);
   }
 
   /**
@@ -555,12 +556,12 @@ class UserService {
    */
   async findClientByResetToken(token: string): Promise<ClientResetTokenRow | null> {
     const db = await getDatabase();
-    const row = await db.get(
+    const row = (await db.get(
       `SELECT id, email, contact_name, company_name, reset_token_expiry
        FROM clients
        WHERE reset_token = ? AND status = "active" AND deleted_at IS NULL`,
       [token]
-    ) as DatabaseRow | undefined;
+    )) as DatabaseRow | undefined;
 
     if (!row) return null;
 
@@ -589,12 +590,12 @@ class UserService {
    */
   async findClientByInvitationToken(token: string): Promise<ClientInvitationRow | null> {
     const db = await getDatabase();
-    const row = await db.get(
+    const row = (await db.get(
       `SELECT id, email, contact_name, company_name, invitation_expires_at
        FROM clients
        WHERE invitation_token = ? AND deleted_at IS NULL`,
       [token]
-    ) as DatabaseRow | undefined;
+    )) as DatabaseRow | undefined;
 
     if (!row) return null;
 
@@ -625,10 +626,10 @@ class UserService {
    */
   async getClientNameById(clientId: number): Promise<ClientNameRow | null> {
     const db = await getDatabase();
-    const row = await db.get(
+    const row = (await db.get(
       'SELECT contact_name, company_name FROM clients WHERE id = ? AND deleted_at IS NULL',
       [clientId]
-    ) as DatabaseRow | undefined;
+    )) as DatabaseRow | undefined;
 
     if (!row) return null;
 
@@ -659,11 +660,7 @@ class UserService {
   /**
    * Store an email verification token for a client.
    */
-  async storeEmailVerificationToken(
-    clientId: number,
-    token: string,
-    sentAt: Date
-  ): Promise<void> {
+  async storeEmailVerificationToken(clientId: number, token: string, sentAt: Date): Promise<void> {
     const db = await getDatabase();
     await db.run(
       `UPDATE clients
@@ -682,10 +679,9 @@ class UserService {
    */
   async getSystemSetting(key: string): Promise<string | null> {
     const db = await getDatabase();
-    const row = await db.get(
-      'SELECT setting_value FROM system_settings WHERE setting_key = ?',
-      [key]
-    ) as DatabaseRow | undefined;
+    const row = (await db.get('SELECT setting_value FROM system_settings WHERE setting_key = ?', [
+      key
+    ])) as DatabaseRow | undefined;
 
     if (!row) return null;
     return getString(row, 'setting_value') || null;
@@ -714,9 +710,10 @@ class UserService {
    * transaction we UPSERT the counter, read it back, and only write
    * the lockout expiry row if the threshold is now met.
    */
-  async recordAdminFailedAttempt(
-    options: { lockThreshold: number; lockDurationMs: number }
-  ): Promise<{ attempts: number; lockedUntil: string | null }> {
+  async recordAdminFailedAttempt(options: {
+    lockThreshold: number;
+    lockDurationMs: number;
+  }): Promise<{ attempts: number; lockedUntil: string | null }> {
     const db = await getDatabase();
     const lockUntilIso = new Date(Date.now() + options.lockDurationMs).toISOString();
 
@@ -759,7 +756,7 @@ class UserService {
   async resetAdminLockout(): Promise<void> {
     const db = await getDatabase();
     await db.run(
-      'DELETE FROM system_settings WHERE setting_key IN (\'admin.locked_until\', \'admin.failed_login_attempts\')'
+      "DELETE FROM system_settings WHERE setting_key IN ('admin.locked_until', 'admin.failed_login_attempts')"
     );
   }
 

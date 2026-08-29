@@ -290,7 +290,9 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
   ctx.y -= PDF_SPACING.sectionSpacing;
   ensureSpace(ctx, 100, onNewPage);
   ctx.y = drawSectionLabel(ctx.currentPage, 'SCOPE OF WORK', {
-    x: leftMargin, y: ctx.y, font: fonts.bold
+    x: leftMargin,
+    y: ctx.y,
+    font: fonts.bold
   });
 
   if (data.project.description) {
@@ -306,7 +308,9 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
   ctx.y -= PDF_SPACING.sectionSpacing;
   ensureSpace(ctx, 100, onNewPage);
   ctx.y = drawSectionLabel(ctx.currentPage, 'DELIVERABLES', {
-    x: leftMargin, y: ctx.y, font: fonts.bold
+    x: leftMargin,
+    y: ctx.y,
+    font: fonts.bold
   });
 
   const includedFeatures = data.proposal.features.filter((f) => f.isIncluded && !f.isAddon);
@@ -314,7 +318,10 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
 
   if (includedFeatures.length > 0) {
     ctx.y = drawLabelValue(ctx.currentPage, 'INCLUDED IN PACKAGE:', '', {
-      x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular
+      x: leftMargin,
+      y: ctx.y,
+      labelFont: fonts.bold,
+      valueFont: fonts.regular
     });
     for (const feature of includedFeatures) {
       ensureSpace(ctx, 16, onNewPage);
@@ -332,7 +339,10 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
   if (addons.length > 0) {
     ctx.y -= 8;
     ctx.y = drawLabelValue(ctx.currentPage, 'ADDITIONAL FEATURES:', '', {
-      x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular
+      x: leftMargin,
+      y: ctx.y,
+      labelFont: fonts.bold,
+      valueFont: fonts.regular
     });
     for (const feature of addons) {
       ensureSpace(ctx, 16, onNewPage);
@@ -364,18 +374,31 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
   // === TIMELINE ===
   if (data.milestones.length > 0) {
     ctx.y = drawSectionLabel(ctx.currentPage, 'TIMELINE & MILESTONES', {
-      x: leftMargin, y: ctx.y, font: fonts.bold
+      x: leftMargin,
+      y: ctx.y,
+      font: fonts.bold
     });
 
     if (data.project.startDate) {
       ctx.y = drawLabelValue(ctx.currentPage, 'START DATE:', formatDate(data.project.startDate), {
-        x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular
+        x: leftMargin,
+        y: ctx.y,
+        labelFont: fonts.bold,
+        valueFont: fonts.regular
       });
     }
     if (data.project.deadline) {
-      ctx.y = drawLabelValue(ctx.currentPage, 'TARGET COMPLETION:', formatDate(data.project.deadline), {
-        x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular
-      });
+      ctx.y = drawLabelValue(
+        ctx.currentPage,
+        'TARGET COMPLETION:',
+        formatDate(data.project.deadline),
+        {
+          x: leftMargin,
+          y: ctx.y,
+          labelFont: fonts.bold,
+          valueFont: fonts.regular
+        }
+      );
     }
     ctx.y -= 8;
 
@@ -425,14 +448,25 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
 
   // === PRICING ===
   ctx.y = drawSectionLabel(ctx.currentPage, 'PRICING & PAYMENT', {
-    x: leftMargin, y: ctx.y, font: fonts.bold
+    x: leftMargin,
+    y: ctx.y,
+    font: fonts.bold
   });
 
   const labelWidth = 120;
 
-  ctx.y = drawLabelValue(ctx.currentPage, 'BASE PACKAGE:', formatCurrency(data.proposal.basePrice), {
-    x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
-  });
+  ctx.y = drawLabelValue(
+    ctx.currentPage,
+    'BASE PACKAGE:',
+    formatCurrency(data.proposal.basePrice),
+    {
+      x: leftMargin,
+      y: ctx.y,
+      labelFont: fonts.bold,
+      valueFont: fonts.regular,
+      labelWidth
+    }
+  );
 
   const addonsTotal = data.proposal.features
     .filter((f) => f.isAddon)
@@ -440,14 +474,27 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
 
   if (addonsTotal > 0) {
     ctx.y = drawLabelValue(ctx.currentPage, 'ADD-ONS:', formatCurrency(addonsTotal), {
-      x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+      x: leftMargin,
+      y: ctx.y,
+      labelFont: fonts.bold,
+      valueFont: fonts.regular,
+      labelWidth
     });
   }
 
   if (data.proposal.maintenanceOption && data.proposal.maintenanceOption !== 'diy') {
-    ctx.y = drawLabelValue(ctx.currentPage, 'MAINTENANCE:', formatMaintenanceOption(data.proposal.maintenanceOption), {
-      x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
-    });
+    ctx.y = drawLabelValue(
+      ctx.currentPage,
+      'MAINTENANCE:',
+      formatMaintenanceOption(data.proposal.maintenanceOption),
+      {
+        x: leftMargin,
+        y: ctx.y,
+        labelFont: fonts.bold,
+        valueFont: fonts.regular,
+        labelWidth
+      }
+    );
   }
 
   // Totals divider + total (matching invoice pattern)
@@ -481,7 +528,9 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
   // Payment terms
   ensureSpace(ctx, 60, onNewPage);
   ctx.y = drawSectionLabel(ctx.currentPage, 'PAYMENT TERMS', {
-    x: leftMargin, y: ctx.y, font: fonts.bold
+    x: leftMargin,
+    y: ctx.y,
+    font: fonts.bold
   });
 
   const paymentTerms = [
@@ -504,7 +553,9 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
   ctx.y -= PDF_SPACING.sectionSpacing;
   ensureSpace(ctx, 100, onNewPage);
   ctx.y = drawSectionLabel(ctx.currentPage, 'TERMS & CONDITIONS', {
-    x: leftMargin, y: ctx.y, font: fonts.bold
+    x: leftMargin,
+    y: ctx.y,
+    font: fonts.bold
   });
 
   const termsStrings = CONTRACT_TERMS && CONTRACT_TERMS.length > 0 ? CONTRACT_TERMS : [];
@@ -525,7 +576,10 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
     for (const term of structuredTerms.slice(0, 5)) {
       ensureSpace(ctx, 40, onNewPage);
       ctx.y = drawLabelValue(ctx.currentPage, `${term.title.toUpperCase()}:`, '', {
-        x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular
+        x: leftMargin,
+        y: ctx.y,
+        labelFont: fonts.bold,
+        valueFont: fonts.regular
       });
       drawWrappedText(ctx, term.content, {
         fontSize: PDF_TYPOGRAPHY.bodySize,

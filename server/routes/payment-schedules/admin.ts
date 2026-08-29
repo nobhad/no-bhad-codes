@@ -122,13 +122,18 @@ router.post(
     const created = await paymentScheduleService.createSchedule(
       project_id,
       client_id,
-      installments.map((inst: { label?: string; amount: number; due_date: string; notes?: string }, index: number) => ({
-        installmentNumber: index + 1,
-        label: inst.label,
-        amount: inst.amount,
-        dueDate: inst.due_date,
-        notes: inst.notes
-      })),
+      installments.map(
+        (
+          inst: { label?: string; amount: number; due_date: string; notes?: string },
+          index: number
+        ) => ({
+          installmentNumber: index + 1,
+          label: inst.label,
+          amount: inst.amount,
+          dueDate: inst.due_date,
+          notes: inst.notes
+        })
+      ),
       contract_id
     );
 
@@ -148,7 +153,12 @@ router.post(
     const { project_id, client_id, total_amount, splits, start_date, contract_id } = req.body;
 
     if (!project_id || !client_id || !total_amount || !splits || !start_date) {
-      errorResponse(res, 'project_id, client_id, total_amount, splits, and start_date are required', 400, ErrorCodes.VALIDATION_ERROR);
+      errorResponse(
+        res,
+        'project_id, client_id, total_amount, splits, and start_date are required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
       return;
     }
 

@@ -906,16 +906,16 @@ body.modal-open .dashboard-content {
 
 /* Table transparency */
 [data-page="admin"] .data-table-container,
-  [data-page="admin"] .data-table-scroll-wrapper,
-  [data-page="admin"] .data-table,
-  [data-page="admin"] .data-table thead,
-  [data-page="admin"] .data-table tbody,
-  [data-page="admin"] .data-table thead tr,
-  [data-page="admin"] .data-table tbody tr,
-  [data-page="admin"] .data-table thead th,
-  [data-page="admin"] .data-table tbody td {
-    background: transparent;
-  }
+[data-page="admin"] .data-table-scroll-wrapper,
+[data-page="admin"] .data-table,
+[data-page="admin"] .data-table thead,
+[data-page="admin"] .data-table tbody,
+[data-page="admin"] .data-table thead tr,
+[data-page="admin"] .data-table tbody tr,
+[data-page="admin"] .data-table thead th,
+[data-page="admin"] .data-table tbody td {
+  background: transparent;
+}
 
 [data-page="admin"] .table-pagination,
 [data-page="admin"] .pagination,
@@ -926,9 +926,9 @@ body.modal-open .dashboard-content {
 
 /* Modal z-index - overlay must sit above sidebar, panel above overlay */
 [data-page="admin"] .details-panel,
-  [data-page="admin"] .portal-modal-overlay,
-  [data-page="admin"] #lead-details-panel,
-  [data-page="admin"] #contact-details-panel {
+[data-page="admin"] .portal-modal-overlay,
+[data-page="admin"] #lead-details-panel,
+[data-page="admin"] #contact-details-panel {
   z-index: var(--z-index-portal-modal);
 }
 

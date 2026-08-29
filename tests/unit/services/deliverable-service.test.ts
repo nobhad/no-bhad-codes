@@ -122,7 +122,13 @@ describe('DeliverableService', () => {
       mockDb.run.mockResolvedValueOnce({ lastID: 1 });
       mockDb.get.mockResolvedValueOnce(makeDeliverableRow());
 
-      const result = await service.createDeliverable(10, 'Homepage Mockup', 'Full-page mockup', 'design', 5);
+      const result = await service.createDeliverable(
+        10,
+        'Homepage Mockup',
+        'Full-page mockup',
+        'design',
+        5
+      );
 
       expect(mockDb.run).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO deliverables'),
@@ -135,12 +141,14 @@ describe('DeliverableService', () => {
 
     it('creates deliverable with custom options', async () => {
       mockDb.run.mockResolvedValueOnce({ lastID: 2 });
-      mockDb.get.mockResolvedValueOnce(makeDeliverableRow({
-        id: 2,
-        round_number: 2,
-        tags: 'mobile',
-        review_deadline: '2026-03-15'
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeDeliverableRow({
+          id: 2,
+          round_number: 2,
+          tags: 'mobile',
+          review_deadline: '2026-03-15'
+        })
+      );
 
       const result = await service.createDeliverable(
         10,
@@ -158,18 +166,18 @@ describe('DeliverableService', () => {
     it('throws when insert fails to return lastID', async () => {
       mockDb.run.mockResolvedValueOnce({ lastID: undefined });
 
-      await expect(
-        service.createDeliverable(10, 'Title', 'Desc', 'design', 5)
-      ).rejects.toThrow('Failed to insert deliverable');
+      await expect(service.createDeliverable(10, 'Title', 'Desc', 'design', 5)).rejects.toThrow(
+        'Failed to insert deliverable'
+      );
     });
 
     it('throws when fetch after insert returns null', async () => {
       mockDb.run.mockResolvedValueOnce({ lastID: 99 });
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(
-        service.createDeliverable(10, 'Title', 'Desc', 'design', 5)
-      ).rejects.toThrow('Failed to create deliverable');
+      await expect(service.createDeliverable(10, 'Title', 'Desc', 'design', 5)).rejects.toThrow(
+        'Failed to create deliverable'
+      );
     });
   });
 
@@ -268,9 +276,14 @@ describe('DeliverableService', () => {
       // Run update
       mockDb.run.mockResolvedValueOnce({ changes: 1 });
       // Second call: getDeliverableById (updated)
-      mockDb.get.mockResolvedValueOnce(makeDeliverableRow({ title: 'Updated Title', status: 'pending_review' }));
+      mockDb.get.mockResolvedValueOnce(
+        makeDeliverableRow({ title: 'Updated Title', status: 'pending_review' })
+      );
 
-      const result = await service.updateDeliverable(1, { title: 'Updated Title', status: 'pending_review' });
+      const result = await service.updateDeliverable(1, {
+        title: 'Updated Title',
+        status: 'pending_review'
+      });
 
       expect(mockDb.run).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE deliverables SET'),
@@ -301,17 +314,19 @@ describe('DeliverableService', () => {
   describe('lockDeliverable', () => {
     it('locks deliverable and marks as approved', async () => {
       mockDb.run.mockResolvedValueOnce({ changes: 1 });
-      mockDb.get.mockResolvedValueOnce(makeDeliverableRow({
-        locked: 1,
-        status: 'approved',
-        approval_status: 'approved',
-        reviewed_by_id: 3
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeDeliverableRow({
+          locked: 1,
+          status: 'approved',
+          approval_status: 'approved',
+          reviewed_by_id: 3
+        })
+      );
 
       const result = await service.lockDeliverable(1, 3);
 
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('SET locked=1, status=\'approved\''),
+        expect.stringContaining("SET locked=1, status='approved'"),
         [3, 1]
       );
       expect(result.locked).toBe(true);
@@ -368,16 +383,18 @@ describe('DeliverableService', () => {
   describe('requestRevision', () => {
     it('sets deliverable to revision_requested status', async () => {
       mockDb.run.mockResolvedValueOnce({ changes: 1 });
-      mockDb.get.mockResolvedValueOnce(makeDeliverableRow({
-        status: 'revision_requested',
-        approval_status: 'revision_needed',
-        reviewed_by_id: 3
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeDeliverableRow({
+          status: 'revision_requested',
+          approval_status: 'revision_needed',
+          reviewed_by_id: 3
+        })
+      );
 
       const result = await service.requestRevision(1, 'Needs more color', 3);
 
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('status=\'revision_requested\''),
+        expect.stringContaining("status='revision_requested'"),
         [3, 1]
       );
       expect(result.status).toBe('revision_requested');
@@ -387,7 +404,9 @@ describe('DeliverableService', () => {
       mockDb.run.mockResolvedValueOnce({ changes: 1 });
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(service.requestRevision(999, 'Reason', 3)).rejects.toThrow('Deliverable not found');
+      await expect(service.requestRevision(999, 'Reason', 3)).rejects.toThrow(
+        'Deliverable not found'
+      );
     });
   });
 
@@ -397,10 +416,10 @@ describe('DeliverableService', () => {
 
       await service.deleteDeliverable(1);
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        'UPDATE deliverables SET status=? WHERE id=?',
-        ['archived', 1]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith('UPDATE deliverables SET status=? WHERE id=?', [
+        'archived',
+        1
+      ]);
     });
   });
 
@@ -419,7 +438,15 @@ describe('DeliverableService', () => {
       // getVersionById
       mockDb.get.mockResolvedValueOnce(makeVersionRow({ id: 5, version_number: 2 }));
 
-      const result = await service.uploadVersion(1, '/uploads/v2.pdf', 'v2.pdf', 2048, 'application/pdf', 5, 'Second revision');
+      const result = await service.uploadVersion(
+        1,
+        '/uploads/v2.pdf',
+        'v2.pdf',
+        2048,
+        'application/pdf',
+        5,
+        'Second revision'
+      );
 
       expect(mockDb.run).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO deliverable_versions'),
@@ -553,12 +580,14 @@ describe('DeliverableService', () => {
 
     it('adds an annotation with position', async () => {
       mockDb.run.mockResolvedValueOnce({ lastID: 2 });
-      mockDb.get.mockResolvedValueOnce(makeCommentRow({
-        id: 2,
-        x_position: 100,
-        y_position: 200,
-        annotation_type: 'arrow'
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeCommentRow({
+          id: 2,
+          x_position: 100,
+          y_position: 200,
+          annotation_type: 'arrow'
+        })
+      );
 
       const result = await service.addComment(1, 2, 'Fix this', {
         x: 100,
@@ -674,10 +703,7 @@ describe('DeliverableService', () => {
 
       await service.deleteComment(1);
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        'DELETE FROM deliverable_comments WHERE id=?',
-        [1]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith('DELETE FROM deliverable_comments WHERE id=?', [1]);
     });
   });
 
@@ -778,8 +804,26 @@ describe('DeliverableService', () => {
   describe('getDeliverableElements', () => {
     it('returns all design elements for a deliverable', async () => {
       mockDb.all.mockResolvedValueOnce([
-        { id: 1, deliverable_id: 1, name: 'Header', description: null, approval_status: 'pending', revision_count: 0, created_at: '2026-01-01', updated_at: '2026-01-01' },
-        { id: 2, deliverable_id: 1, name: 'Footer', description: null, approval_status: 'pending', revision_count: 0, created_at: '2026-01-01', updated_at: '2026-01-01' }
+        {
+          id: 1,
+          deliverable_id: 1,
+          name: 'Header',
+          description: null,
+          approval_status: 'pending',
+          revision_count: 0,
+          created_at: '2026-01-01',
+          updated_at: '2026-01-01'
+        },
+        {
+          id: 2,
+          deliverable_id: 1,
+          name: 'Footer',
+          description: null,
+          approval_status: 'pending',
+          revision_count: 0,
+          created_at: '2026-01-01',
+          updated_at: '2026-01-01'
+        }
       ]);
 
       const result = await service.getDeliverableElements(1);
@@ -870,7 +914,9 @@ describe('DeliverableService', () => {
 
     it('creates review without optional fields', async () => {
       mockDb.run.mockResolvedValueOnce({ lastID: 2 });
-      mockDb.get.mockResolvedValueOnce(makeReviewRow({ id: 2, feedback: null, design_elements_reviewed: JSON.stringify([]) }));
+      mockDb.get.mockResolvedValueOnce(
+        makeReviewRow({ id: 2, feedback: null, design_elements_reviewed: JSON.stringify([]) })
+      );
 
       await service.createReview(1, 3, 'revision_needed');
 
@@ -883,14 +929,18 @@ describe('DeliverableService', () => {
     it('throws when insert fails to return lastID', async () => {
       mockDb.run.mockResolvedValueOnce({ lastID: undefined });
 
-      await expect(service.createReview(1, 3, 'approved')).rejects.toThrow('Failed to insert review');
+      await expect(service.createReview(1, 3, 'approved')).rejects.toThrow(
+        'Failed to insert review'
+      );
     });
 
     it('throws when review not found after insert', async () => {
       mockDb.run.mockResolvedValueOnce({ lastID: 1 });
       mockDb.get.mockResolvedValueOnce(null);
 
-      await expect(service.createReview(1, 3, 'approved')).rejects.toThrow('Failed to create review');
+      await expect(service.createReview(1, 3, 'approved')).rejects.toThrow(
+        'Failed to create review'
+      );
     });
   });
 

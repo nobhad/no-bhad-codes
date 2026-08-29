@@ -98,7 +98,9 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = req.query.client_id ? parseInt(req.query.client_id as string, 10) : undefined;
-    const projectId = req.query.project_id ? parseInt(req.query.project_id as string, 10) : undefined;
+    const projectId = req.query.project_id
+      ? parseInt(req.query.project_id as string, 10)
+      : undefined;
     const status = req.query.status as string | undefined;
 
     const responses = await questionnaireService.getAllResponses({
@@ -207,7 +209,12 @@ router.post(
     } = req.body;
 
     if (!name || !questions || !Array.isArray(questions)) {
-      return errorResponse(res, 'name and questions array are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'name and questions array are required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const createdBy = req.user?.email;
@@ -339,13 +346,19 @@ router.post(
     const { questionnaireIds } = req.body;
 
     if (!questionnaireIds || !Array.isArray(questionnaireIds) || questionnaireIds.length === 0) {
-      return errorResponse(res, 'questionnaireIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'questionnaireIds array is required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     let deleted = 0;
 
     for (const questionnaireId of questionnaireIds) {
-      const id = typeof questionnaireId === 'string' ? parseInt(questionnaireId, 10) : questionnaireId;
+      const id =
+        typeof questionnaireId === 'string' ? parseInt(questionnaireId, 10) : questionnaireId;
       if (isNaN(id) || id <= 0) continue;
 
       try {

@@ -41,14 +41,12 @@ interface TestState {
 }
 
 function makeManager(initial?: Partial<TestState>): StateManager<TestState> {
-  return new StateManager<TestState>(
-    {
-      count: 0,
-      name: '',
-      active: false,
-      ...(initial ?? {})
-    }
-  );
+  return new StateManager<TestState>({
+    count: 0,
+    name: '',
+    active: false,
+    ...(initial ?? {})
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -57,8 +55,12 @@ function makeManager(initial?: Partial<TestState>): StateManager<TestState> {
 describe('StateManager — getState / setState', () => {
   let sm: StateManager<TestState>;
 
-  beforeEach(() => { sm = makeManager(); });
-  afterEach(() => { sm.destroy(); });
+  beforeEach(() => {
+    sm = makeManager();
+  });
+  afterEach(() => {
+    sm.destroy();
+  });
 
   it('getState() returns a copy of the full state', () => {
     sm.setState({ count: 5, name: 'Alice' });
@@ -97,8 +99,12 @@ describe('StateManager — getState / setState', () => {
 describe('StateManager — global subscribe', () => {
   let sm: StateManager<TestState>;
 
-  beforeEach(() => { sm = makeManager(); });
-  afterEach(() => { sm.destroy(); });
+  beforeEach(() => {
+    sm = makeManager();
+  });
+  afterEach(() => {
+    sm.destroy();
+  });
 
   it('global listener receives newState and previousState', () => {
     const listener = vi.fn();
@@ -131,8 +137,12 @@ describe('StateManager — global subscribe', () => {
 describe('StateManager — wildcard subscribe', () => {
   let sm: StateManager<TestState>;
 
-  beforeEach(() => { sm = makeManager(); });
-  afterEach(() => { sm.destroy(); });
+  beforeEach(() => {
+    sm = makeManager();
+  });
+  afterEach(() => {
+    sm.destroy();
+  });
 
   it('wildcard listener fires for every changed property', () => {
     const listener = vi.fn();
@@ -164,8 +174,12 @@ describe('StateManager — wildcard subscribe', () => {
 describe('StateManager — key-based subscribe', () => {
   let sm: StateManager<TestState>;
 
-  beforeEach(() => { sm = makeManager(); });
-  afterEach(() => { sm.destroy(); });
+  beforeEach(() => {
+    sm = makeManager();
+  });
+  afterEach(() => {
+    sm.destroy();
+  });
 
   it('key listener only fires when that key changes', () => {
     const countListener = vi.fn();
@@ -203,8 +217,12 @@ describe('StateManager — key-based subscribe', () => {
 describe('StateManager — subscribeToProperty', () => {
   let sm: StateManager<TestState>;
 
-  beforeEach(() => { sm = makeManager(); });
-  afterEach(() => { sm.destroy(); });
+  beforeEach(() => {
+    sm = makeManager();
+  });
+  afterEach(() => {
+    sm.destroy();
+  });
 
   it('calls listener when the property value changes', () => {
     const listener = vi.fn();
@@ -242,8 +260,12 @@ describe('StateManager — subscribeToProperty', () => {
 describe('StateManager — createSelector', () => {
   let sm: StateManager<TestState>;
 
-  beforeEach(() => { sm = makeManager({ count: 0 }); });
-  afterEach(() => { sm.destroy(); });
+  beforeEach(() => {
+    sm = makeManager({ count: 0 });
+  });
+  afterEach(() => {
+    sm.destroy();
+  });
 
   it('calls listener immediately with current derived value', () => {
     sm.setState('count', 4);
@@ -287,8 +309,12 @@ describe('StateManager — createSelector', () => {
 describe('StateManager — createComputed / getComputed / get', () => {
   let sm: StateManager<TestState>;
 
-  beforeEach(() => { sm = makeManager({ count: 2, name: 'test', active: false }); });
-  afterEach(() => { sm.destroy(); });
+  beforeEach(() => {
+    sm = makeManager({ count: 2, name: 'test', active: false });
+  });
+  afterEach(() => {
+    sm.destroy();
+  });
 
   it('creates a computed property and returns its value via getComputed', () => {
     sm.createComputed('doubled', (s) => s.count * 2, ['count']);
@@ -348,8 +374,12 @@ describe('StateManager — createComputed / getComputed / get', () => {
 describe('StateManager — setComputed', () => {
   let sm: StateManager<TestState>;
 
-  beforeEach(() => { sm = makeManager({ count: 5 }); });
-  afterEach(() => { sm.destroy(); });
+  beforeEach(() => {
+    sm = makeManager({ count: 5 });
+  });
+  afterEach(() => {
+    sm.destroy();
+  });
 
   it('registers a computed property accessible via getComputed', () => {
     sm.setComputed('x2', (s) => s.count * 2, ['count']);
@@ -363,8 +393,12 @@ describe('StateManager — setComputed', () => {
 describe('StateManager — dispatch / addReducer', () => {
   let sm: StateManager<TestState>;
 
-  beforeEach(() => { sm = makeManager({ count: 0 }); });
-  afterEach(() => { sm.destroy(); });
+  beforeEach(() => {
+    sm = makeManager({ count: 0 });
+  });
+  afterEach(() => {
+    sm.destroy();
+  });
 
   it('dispatches an action to a registered reducer', () => {
     sm.addReducer('INCREMENT', (state) => ({ count: state.count + 1 }));
@@ -403,8 +437,12 @@ describe('StateManager — dispatch / addReducer', () => {
 describe('StateManager — addMiddleware / use', () => {
   let sm: StateManager<TestState>;
 
-  beforeEach(() => { sm = makeManager({ count: 0 }); });
-  afterEach(() => { sm.destroy(); });
+  beforeEach(() => {
+    sm = makeManager({ count: 0 });
+  });
+  afterEach(() => {
+    sm.destroy();
+  });
 
   it('middleware intercepts dispatch calls', () => {
     const intercepted: string[] = [];
@@ -428,8 +466,14 @@ describe('StateManager — addMiddleware / use', () => {
 
   it('multiple middleware execute in correct order (reduceRight — first added runs first)', () => {
     const order: number[] = [];
-    sm.use((_store) => (next) => (action) => { order.push(1); next(action); });
-    sm.use((_store) => (next) => (action) => { order.push(2); next(action); });
+    sm.use((_store) => (next) => (action) => {
+      order.push(1);
+      next(action);
+    });
+    sm.use((_store) => (next) => (action) => {
+      order.push(2);
+      next(action);
+    });
     sm.addReducer('ORDER_TEST', () => ({}));
     sm.dispatch({ type: 'ORDER_TEST' });
     // reduceRight folds [mw1, mw2] from right: mw2 wraps the base, then mw1 wraps mw2.
@@ -444,8 +488,12 @@ describe('StateManager — addMiddleware / use', () => {
 describe('StateManager — undo / redo', () => {
   let sm: StateManager<TestState>;
 
-  beforeEach(() => { sm = makeManager({ count: 0 }); });
-  afterEach(() => { sm.destroy(); });
+  beforeEach(() => {
+    sm = makeManager({ count: 0 });
+  });
+  afterEach(() => {
+    sm.destroy();
+  });
 
   it('undo returns false when history has fewer than 2 entries', () => {
     expect(sm.undo()).toBe(false);
@@ -506,8 +554,12 @@ describe('StateManager — undo / redo', () => {
 describe('StateManager — getHistory / clearHistory', () => {
   let sm: StateManager<TestState>;
 
-  beforeEach(() => { sm = makeManager(); });
-  afterEach(() => { sm.destroy(); });
+  beforeEach(() => {
+    sm = makeManager();
+  });
+  afterEach(() => {
+    sm.destroy();
+  });
 
   it('getHistory returns array of history entries', () => {
     sm.setState('count', 1);
@@ -535,8 +587,12 @@ describe('StateManager — getHistory / clearHistory', () => {
 describe('StateManager — reset', () => {
   let sm: StateManager<TestState>;
 
-  beforeEach(() => { sm = makeManager({ count: 5, name: 'orig', active: true }); });
-  afterEach(() => { sm.destroy(); });
+  beforeEach(() => {
+    sm = makeManager({ count: 5, name: 'orig', active: true });
+  });
+  afterEach(() => {
+    sm.destroy();
+  });
 
   it('reset notifies global listeners', () => {
     const listener = vi.fn();
@@ -562,8 +618,12 @@ describe('StateManager — reset', () => {
 describe('StateManager — getDebugInfo', () => {
   let sm: StateManager<TestState>;
 
-  beforeEach(() => { sm = makeManager(); });
-  afterEach(() => { sm.destroy(); });
+  beforeEach(() => {
+    sm = makeManager();
+  });
+  afterEach(() => {
+    sm.destroy();
+  });
 
   it('returns an object with expected debug keys', () => {
     const info = sm.getDebugInfo();
@@ -604,8 +664,12 @@ describe('StateManager — getDebugInfo', () => {
 describe('StateManager — getListenerCount / clearListeners', () => {
   let sm: StateManager<TestState>;
 
-  beforeEach(() => { sm = makeManager(); });
-  afterEach(() => { sm.destroy(); });
+  beforeEach(() => {
+    sm = makeManager();
+  });
+  afterEach(() => {
+    sm.destroy();
+  });
 
   it('getListenerCount returns 0 initially', () => {
     expect(sm.getListenerCount()).toBe(0);
@@ -638,8 +702,12 @@ describe('StateManager — getListenerCount / clearListeners', () => {
 describe('StateManager — removeState', () => {
   let sm: StateManager<TestState>;
 
-  beforeEach(() => { sm = makeManager({ count: 5, name: 'test', active: true }); });
-  afterEach(() => { sm.destroy(); });
+  beforeEach(() => {
+    sm = makeManager({ count: 5, name: 'test', active: true });
+  });
+  afterEach(() => {
+    sm.destroy();
+  });
 
   it('removes the specified key from state', () => {
     sm.removeState('count');
@@ -659,8 +727,12 @@ describe('StateManager — removeState', () => {
 describe('StateManager — batch', () => {
   let sm: StateManager<TestState>;
 
-  beforeEach(() => { sm = makeManager({ count: 0, name: '', active: false }); });
-  afterEach(() => { sm.destroy(); });
+  beforeEach(() => {
+    sm = makeManager({ count: 0, name: '', active: false });
+  });
+  afterEach(() => {
+    sm.destroy();
+  });
 
   it('collects multiple updates and notifies once', () => {
     const listener = vi.fn();
@@ -708,8 +780,12 @@ describe('StateManager — batch', () => {
 describe('StateManager — setValidator', () => {
   let sm: StateManager<TestState>;
 
-  beforeEach(() => { sm = makeManager(); });
-  afterEach(() => { sm.destroy(); });
+  beforeEach(() => {
+    sm = makeManager();
+  });
+  afterEach(() => {
+    sm.destroy();
+  });
 
   it('setValidator stores the validator without throwing', () => {
     expect(() => {
@@ -787,10 +863,7 @@ describe('StateManager — localStorage persistence', () => {
     );
     sm.setState('count', 9);
     // Default key is 'app-state'
-    expect(localStorage.setItem).toHaveBeenCalledWith(
-      'app-state',
-      expect.any(String)
-    );
+    expect(localStorage.setItem).toHaveBeenCalledWith('app-state', expect.any(String));
     sm.destroy();
   });
 });

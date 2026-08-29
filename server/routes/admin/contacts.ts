@@ -50,9 +50,7 @@ router.get(
     const explicitContacts = await clientService.getAllExplicitContacts();
     const clientContacts = await clientService.getAllClientContactRecords();
 
-    const clientIdsWithContacts = new Set(
-      explicitContacts.map((c) => c.clientId as number)
-    );
+    const clientIdsWithContacts = new Set(explicitContacts.map((c) => c.clientId as number));
 
     type ContactRow = Record<string, unknown>;
     const allContacts: ContactRow[] = [];
@@ -131,7 +129,12 @@ router.post(
     const { clientId, name, email, phone, title, company: _company, isPrimary } = req.body;
 
     if (!clientId || !name || !email) {
-      return errorResponse(res, 'clientId, name, and email are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'clientId, name, and email are required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const parsedClientId = parseInt(clientId, 10);
@@ -179,7 +182,7 @@ router.put(
     }
 
     // Normalize email if provided
-    const normalizedEmail = (email !== undefined && email) ? email.trim().toLowerCase() : email;
+    const normalizedEmail = email !== undefined && email ? email.trim().toLowerCase() : email;
 
     // Normalize phone if provided
     if (phone !== undefined && phone) {
@@ -187,13 +190,24 @@ router.put(
     }
 
     // Check if there are any fields to update
-    if (isPrimary === undefined && firstName === undefined && lastName === undefined &&
-        email === undefined && phone === undefined && role === undefined) {
+    if (
+      isPrimary === undefined &&
+      firstName === undefined &&
+      lastName === undefined &&
+      email === undefined &&
+      phone === undefined &&
+      role === undefined
+    ) {
       return errorResponse(res, 'No fields to update', 400, ErrorCodes.NO_FIELDS);
     }
 
     const updatedContact = await clientService.updateContactAdmin(contactId, {
-      isPrimary, firstName, lastName, email: normalizedEmail, phone, role
+      isPrimary,
+      firstName,
+      lastName,
+      email: normalizedEmail,
+      phone,
+      role
     });
 
     if (updatedContact?.client_id) {
@@ -216,16 +230,26 @@ router.post(
     const { contactIds } = req.body;
 
     if (!contactIds || !Array.isArray(contactIds) || contactIds.length === 0) {
-      return errorResponse(res, 'contactIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'contactIds array is required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const MAX_BATCH_SIZE = 100;
     if (contactIds.length > MAX_BATCH_SIZE) {
-      return errorResponse(res, `Cannot delete more than ${MAX_BATCH_SIZE} contacts at once`, 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        `Cannot delete more than ${MAX_BATCH_SIZE} contacts at once`,
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     const validIds = contactIds
-      .map((id: string | number) => typeof id === 'string' ? parseInt(id, 10) : id)
+      .map((id: string | number) => (typeof id === 'string' ? parseInt(id, 10) : id))
       .filter((id: number) => !isNaN(id) && id > 0);
 
     if (validIds.length === 0) {

@@ -79,10 +79,7 @@ export function useProjectMessages({
       if (!threadId) return false;
 
       try {
-        const response = await apiPost(
-          buildEndpoint.messageThreadMessages(threadId),
-          { content }
-        );
+        const response = await apiPost(buildEndpoint.messageThreadMessages(threadId), { content });
 
         if (!response.ok) {
           throw new Error(`Failed to send message: ${response.statusText}`);
@@ -100,30 +97,25 @@ export function useProjectMessages({
     [resolveThreadId]
   );
 
-  const editMessage = useCallback(
-    async (messageId: number, content: string): Promise<boolean> => {
-      try {
-        const response = await apiPut(buildEndpoint.messageItem(messageId), { message: content });
+  const editMessage = useCallback(async (messageId: number, content: string): Promise<boolean> => {
+    try {
+      const response = await apiPut(buildEndpoint.messageItem(messageId), { message: content });
 
-        if (!response.ok) {
-          throw new Error(`Failed to edit message: ${response.statusText}`);
-        }
-
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === messageId
-              ? { ...m, content, edited_at: new Date().toISOString() }
-              : m
-          )
-        );
-        return true;
-      } catch (err) {
-        logger.error('Edit message error:', err);
-        return false;
+      if (!response.ok) {
+        throw new Error(`Failed to edit message: ${response.statusText}`);
       }
-    },
-    []
-  );
+
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId ? { ...m, content, edited_at: new Date().toISOString() } : m
+        )
+      );
+      return true;
+    } catch (err) {
+      logger.error('Edit message error:', err);
+      return false;
+    }
+  }, []);
 
   const toggleReaction = useCallback(
     async (messageId: number, emoji: string): Promise<boolean> => {
@@ -138,7 +130,7 @@ export function useProjectMessages({
           return {
             ...prev,
             [messageId]: prevList
-              .map((r) => r.emoji === emoji ? { ...r, count: r.count - 1, reacted: false } : r)
+              .map((r) => (r.emoji === emoji ? { ...r, count: r.count - 1, reacted: false } : r))
               .filter((r) => r.count > 0)
           };
         }
@@ -146,7 +138,9 @@ export function useProjectMessages({
         return {
           ...prev,
           [messageId]: found
-            ? prevList.map((r) => r.emoji === emoji ? { ...r, count: r.count + 1, reacted: true } : r)
+            ? prevList.map((r) =>
+                r.emoji === emoji ? { ...r, count: r.count + 1, reacted: true } : r
+              )
             : [...prevList, { emoji, count: 1, reacted: true }]
         };
       });
@@ -170,14 +164,16 @@ export function useProjectMessages({
             return {
               ...prev,
               [messageId]: found
-                ? prevList.map((r) => r.emoji === emoji ? { ...r, count: r.count + 1, reacted: true } : r)
+                ? prevList.map((r) =>
+                    r.emoji === emoji ? { ...r, count: r.count + 1, reacted: true } : r
+                  )
                 : [...prevList, { emoji, count: 1, reacted: true }]
             };
           }
           return {
             ...prev,
             [messageId]: prevList
-              .map((r) => r.emoji === emoji ? { ...r, count: r.count - 1, reacted: false } : r)
+              .map((r) => (r.emoji === emoji ? { ...r, count: r.count - 1, reacted: false } : r))
               .filter((r) => r.count > 0)
           };
         });

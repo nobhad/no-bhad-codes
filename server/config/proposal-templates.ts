@@ -25,7 +25,7 @@ import { fileURLToPath } from 'url';
 /** Budget percentage multipliers for each tier */
 const TIER_BUDGET_MULTIPLIERS = {
   good: { target: 0.35, floor: 'min' as const },
-  better: { target: 0.60, floor: null },
+  better: { target: 0.6, floor: null },
   best: { target: 0.95, floor: null }
 } as const;
 
@@ -45,8 +45,8 @@ const PRICE_ROUNDING_INCREMENT_HIGH = 500;
  *   Best  = ~130% of budget (above budget — the stretch/premium option)
  */
 const SINGLE_BUDGET_GOOD_MULTIPLIER = 0.45;
-const SINGLE_BUDGET_BETTER_MULTIPLIER = 0.80;
-const SINGLE_BUDGET_BEST_MULTIPLIER = 1.30;
+const SINGLE_BUDGET_BETTER_MULTIPLIER = 0.8;
+const SINGLE_BUDGET_BEST_MULTIPLIER = 1.3;
 
 // =====================================================
 // INTERFACES
@@ -67,8 +67,8 @@ export interface AddonDefinition {
 }
 
 export interface MaintenanceInclusion {
-  included: string;  // 'none' | 'essential' | 'standard' | 'premium'
-  includedDuration?: string;  // e.g., '3 months'
+  included: string; // 'none' | 'essential' | 'standard' | 'premium'
+  includedDuration?: string; // e.g., '3 months'
   description: string;
   recommendedOption: string;
   availableOptions: string[];
@@ -405,7 +405,7 @@ export function buildProposalFromTemplate(params: {
   let addonTotal = 0;
   if (params.selectedAddonIds) {
     for (const addonId of params.selectedAddonIds) {
-      const addon = projectConfig.addons.find(a => a.id === addonId);
+      const addon = projectConfig.addons.find((a) => a.id === addonId);
       if (addon) {
         features.push({
           featureId: addon.id,

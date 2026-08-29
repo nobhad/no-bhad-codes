@@ -254,11 +254,7 @@ function buildCustomItemSuggestions(
 ): Array<{ description: string; reason: string }> {
   const items: Array<{ description: string; reason: string }> = [];
 
-  if (
-    allAnswers.needs_logo === true ||
-    allAnswers.logo === 'no' ||
-    allAnswers.has_logo === false
-  ) {
+  if (allAnswers.needs_logo === true || allAnswers.logo === 'no' || allAnswers.has_logo === false) {
     items.push({
       description: 'Logo Design',
       reason: 'Client indicated they need a logo'
@@ -327,9 +323,7 @@ function extractInsights(
  * Merges all completed questionnaire response answers into
  * a single flat object. Later responses override earlier ones.
  */
-function mergeResponseAnswers(
-  responses: Array<{ answers: string }>
-): Record<string, unknown> {
+function mergeResponseAnswers(responses: Array<{ answers: string }>): Record<string, unknown> {
   const allAnswers: Record<string, unknown> = {};
 
   for (const response of responses) {
@@ -425,13 +419,7 @@ export async function generateProposalPrefill(
     String(allAnswers.update_frequency || allAnswers.updateFrequency || '')
   );
   const suggestedCustomItems = buildCustomItemSuggestions(allAnswers, techComfort);
-  const questionnaireInsights = extractInsights(
-    project,
-    allAnswers,
-    budget,
-    timeline,
-    techComfort
-  );
+  const questionnaireInsights = extractInsights(project, allAnswers, budget, timeline, techComfort);
 
   await logger.info(`[ProposalPrefill] Generated prefill for project ${projectId}`, {
     category: 'proposals',

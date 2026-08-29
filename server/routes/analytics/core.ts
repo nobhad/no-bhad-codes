@@ -53,96 +53,111 @@ const router = Router();
  *       200:
  *         description: Success
  */
-router.post('/track', trackingRateLimit, asyncHandler(async (req: Request, res: Response) => {
-  const payload: TrackingPayload = req.body;
+router.post(
+  '/track',
+  trackingRateLimit,
+  asyncHandler(async (req: Request, res: Response) => {
+    const payload: TrackingPayload = req.body;
 
-  if (!payload.session || !payload.events) {
-    return errorResponse(res, 'Invalid payload', 400, ErrorCodes.VALIDATION_ERROR);
-  }
-
-  const { session, events } = payload;
-
-  // Parse user agent for device info
-  const parser = new UAParser(session.userAgent);
-  const uaResult = parser.getResult();
-  const deviceType = uaResult.device.type || 'desktop';
-  const browser = uaResult.browser.name || 'unknown';
-  const os = uaResult.os.name || 'unknown';
-
-  // Get IP address (handle proxies)
-  const ipAddress =
-    (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-    req.socket.remoteAddress ||
-    'unknown';
-
-  const sessionParams = {
-    sessionId: session.sessionId,
-    visitorId: session.visitorId,
-    startTime: session.startTime,
-    lastActivity: session.lastActivity,
-    pageViews: session.pageViews,
-    totalTimeOnSite: session.totalTimeOnSite,
-    bounced: session.bounced,
-    referrer: session.referrer,
-    userAgent: session.userAgent,
-    screenResolution: session.screenResolution,
-    language: session.language,
-    timezone: session.timezone,
-    ipAddress,
-    deviceType,
-    browser,
-    os
-  };
-
-  // Check if session exists
-  const existingSession = await analyticsService.findSession(session.sessionId);
-
-  if (existingSession) {
-    await analyticsService.updateSession(sessionParams);
-  } else {
-    await analyticsService.insertSession(sessionParams);
-  }
-
-  // Insert events
-  for (const event of events) {
-    if ('title' in event) {
-      // Page view event
-      const sessionId = typeof event.sessionId === 'string' ? event.sessionId : null;
-      const url = typeof event.url === 'string' ? event.url : null;
-      const title = typeof event.title === 'string' ? event.title : null;
-      const timestamp = typeof event.timestamp === 'number' ? event.timestamp / 1000 : 0;
-      const timeOnPage = typeof event.timeOnPage === 'number' ? event.timeOnPage : 0;
-      const scrollDepth = typeof event.scrollDepth === 'number' ? event.scrollDepth : 0;
-      const interactions = typeof event.interactions === 'number' ? event.interactions : 0;
-
-      await analyticsService.insertPageView({
-        sessionId, url, title, timestamp, timeOnPage, scrollDepth, interactions
-      });
-    } else if ('type' in event) {
-      // Interaction event
-      const sessionId = typeof event.sessionId === 'string' ? event.sessionId : null;
-      const eventType = typeof event.type === 'string' ? event.type : null;
-      const element = typeof event.element === 'string' ? event.element : null;
-      const timestamp = typeof event.timestamp === 'number' ? event.timestamp / 1000 : 0;
-      const url = typeof event.url === 'string' ? event.url : null;
-      const data = event.data ? JSON.stringify(event.data) : null;
-
-      await analyticsService.insertInteraction({
-        sessionId, eventType, element, timestamp, url, data
-      });
+    if (!payload.session || !payload.events) {
+      return errorResponse(res, 'Invalid payload', 400, ErrorCodes.VALIDATION_ERROR);
     }
-  }
 
-  logger.info('Tracking events received', {
-    category: 'analytics',
-    metadata: {
+    const { session, events } = payload;
+
+    // Parse user agent for device info
+    const parser = new UAParser(session.userAgent);
+    const uaResult = parser.getResult();
+    const deviceType = uaResult.device.type || 'desktop';
+    const browser = uaResult.browser.name || 'unknown';
+    const os = uaResult.os.name || 'unknown';
+
+    // Get IP address (handle proxies)
+    const ipAddress =
+      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+      req.socket.remoteAddress ||
+      'unknown';
+
+    const sessionParams = {
       sessionId: session.sessionId,
-      eventCount: events.length
-    }
-  });
+      visitorId: session.visitorId,
+      startTime: session.startTime,
+      lastActivity: session.lastActivity,
+      pageViews: session.pageViews,
+      totalTimeOnSite: session.totalTimeOnSite,
+      bounced: session.bounced,
+      referrer: session.referrer,
+      userAgent: session.userAgent,
+      screenResolution: session.screenResolution,
+      language: session.language,
+      timezone: session.timezone,
+      ipAddress,
+      deviceType,
+      browser,
+      os
+    };
 
-  sendSuccess(res, undefined);
-}));
+    // Check if session exists
+    const existingSession = await analyticsService.findSession(session.sessionId);
+
+    if (existingSession) {
+      await analyticsService.updateSession(sessionParams);
+    } else {
+      await analyticsService.insertSession(sessionParams);
+    }
+
+    // Insert events
+    for (const event of events) {
+      if ('title' in event) {
+        // Page view event
+        const sessionId = typeof event.sessionId === 'string' ? event.sessionId : null;
+        const url = typeof event.url === 'string' ? event.url : null;
+        const title = typeof event.title === 'string' ? event.title : null;
+        const timestamp = typeof event.timestamp === 'number' ? event.timestamp / 1000 : 0;
+        const timeOnPage = typeof event.timeOnPage === 'number' ? event.timeOnPage : 0;
+        const scrollDepth = typeof event.scrollDepth === 'number' ? event.scrollDepth : 0;
+        const interactions = typeof event.interactions === 'number' ? event.interactions : 0;
+
+        await analyticsService.insertPageView({
+          sessionId,
+          url,
+          title,
+          timestamp,
+          timeOnPage,
+          scrollDepth,
+          interactions
+        });
+      } else if ('type' in event) {
+        // Interaction event
+        const sessionId = typeof event.sessionId === 'string' ? event.sessionId : null;
+        const eventType = typeof event.type === 'string' ? event.type : null;
+        const element = typeof event.element === 'string' ? event.element : null;
+        const timestamp = typeof event.timestamp === 'number' ? event.timestamp / 1000 : 0;
+        const url = typeof event.url === 'string' ? event.url : null;
+        const data = event.data ? JSON.stringify(event.data) : null;
+
+        await analyticsService.insertInteraction({
+          sessionId,
+          eventType,
+          element,
+          timestamp,
+          url,
+          data
+        });
+      }
+    }
+
+    logger.info('Tracking events received', {
+      category: 'analytics',
+      metadata: {
+        sessionId: session.sessionId,
+        eventCount: events.length
+      }
+    });
+
+    sendSuccess(res, undefined);
+  })
+);
 
 /**
  * @swagger

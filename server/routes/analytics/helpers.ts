@@ -22,18 +22,24 @@ export const VISITOR_SESSION_COLUMNS = `
   total_time_on_site, bounced, referrer, user_agent, screen_resolution,
   language, timezone, ip_address, country, city, device_type, browser, os,
   created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 /** Explicit column list for page_views SELECT queries */
 export const PAGE_VIEW_COLUMNS = `
   id, session_id, url, title, timestamp, time_on_page, scroll_depth,
   interactions, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 /** Explicit column list for interaction_events SELECT queries */
 export const INTERACTION_EVENT_COLUMNS = `
   id, session_id, event_type, element, timestamp, url, data, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // TYPES

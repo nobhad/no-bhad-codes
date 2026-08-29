@@ -10,7 +10,14 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, sanitizeErrorMessage } from '../../utils/api-response.js';
+import {
+  ErrorCodes,
+  errorResponse,
+  errorResponseWithPayload,
+  sendSuccess,
+  sendCreated,
+  sanitizeErrorMessage
+} from '../../utils/api-response.js';
 import { invalidateCache } from '../../middleware/cache.js';
 import { getInvoiceService, toSnakeCaseDeposit, toSnakeCaseInvoice } from './helpers.js';
 import { logger } from '../../services/logger.js';
@@ -35,9 +42,15 @@ router.post(
     const { projectId, clientId, amount, percentage, description } = req.body;
 
     if (!projectId || !clientId || !amount) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.MISSING_FIELDS, {
-        required: ['projectId', 'clientId', 'amount']
-      });
+      return errorResponseWithPayload(
+        res,
+        'Missing required fields',
+        400,
+        ErrorCodes.MISSING_FIELDS,
+        {
+          required: ['projectId', 'clientId', 'amount']
+        }
+      );
     }
 
     if (typeof amount !== 'number' || amount <= 0) {
@@ -55,14 +68,24 @@ router.post(
         description
       );
 
-      sendCreated(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Deposit invoice created successfully');
+      sendCreated(
+        res,
+        { invoice: toSnakeCaseInvoice(invoice) },
+        'Deposit invoice created successfully'
+      );
     } catch (error: unknown) {
       logger.error('[Invoices] Error creating deposit invoice:', {
         error: error instanceof Error ? error : undefined
       });
-      errorResponseWithPayload(res, 'Failed to create deposit invoice', 500, ErrorCodes.CREATION_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to create deposit invoice')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to create deposit invoice',
+        500,
+        ErrorCodes.CREATION_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to create deposit invoice')
+        }
+      );
     }
   })
 );

@@ -64,11 +64,16 @@ describe('Auth flow', () => {
     // GET seeds the csrf-token cookie and proves the JWT cookie is read.
     const seedRes = await request(app)
       .get('/api/clients/me')
-      .set('Cookie', authCookie(mintJwt({
-        id: clientId,
-        email: `client${clientId}@test.local`,
-        type: 'client'
-      })));
+      .set(
+        'Cookie',
+        authCookie(
+          mintJwt({
+            id: clientId,
+            email: `client${clientId}@test.local`,
+            type: 'client'
+          })
+        )
+      );
     expect(seedRes.status).toBe(200);
 
     const csrfToken = readCookie(seedRes.get('Set-Cookie'), 'csrf-token');
@@ -106,9 +111,7 @@ describe('Auth flow', () => {
     // Expired path: mint with a past expiry. jwt.verify treats negative
     // expiresIn as already-expired, which is exactly what we want.
     const expired = mintJwt({ id: clientId, email, type: 'client', expiresIn: -1 });
-    const expiredRes = await request(app)
-      .get('/api/clients/me')
-      .set('Cookie', authCookie(expired));
+    const expiredRes = await request(app).get('/api/clients/me').set('Cookie', authCookie(expired));
     expect(expiredRes.status).toBe(401);
     expect(expiredRes.body?.code ?? expiredRes.body?.error?.code).toBe('TOKEN_EXPIRED');
 

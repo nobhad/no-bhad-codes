@@ -37,9 +37,16 @@ router.post(
     }
 
     const {
-      projectId, projectName, projectType, tier,
-      features, budget, timeline, clientName,
-      questionnaireInsights, tone
+      projectId,
+      projectName,
+      projectType,
+      tier,
+      features,
+      budget,
+      timeline,
+      clientName,
+      questionnaireInsights,
+      tone
     } = req.body;
 
     if (!projectId) {

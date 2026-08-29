@@ -16,10 +16,7 @@ import { isDependencyMet } from './step-config';
 /**
  * Format a single field value for the review summary
  */
-export function formatFieldForReview(
-  field: string,
-  value: string | string[] | undefined
-): string {
+export function formatFieldForReview(field: string, value: string | string[] | undefined): string {
   if (!value) return 'Not provided';
 
   if (field === 'name' && typeof value === 'string') {
@@ -91,9 +88,7 @@ export function renderPreviousConversation(
     });
 
     // Mark selected option(s) for visual feedback
-    const questionEl = chatContainer.querySelector(
-      `.chat-message[data-question-index="${i}"]`
-    );
+    const questionEl = chatContainer.querySelector(`.chat-message[data-question-index="${i}"]`);
     if (questionEl && question.options) {
       if (Array.isArray(answer)) {
         answer.forEach((val) => {
@@ -177,9 +172,7 @@ export function removeElementsFromIndex(
   chatContainer: HTMLElement,
   fromQuestionIndex: number
 ): void {
-  const targetElement = chatContainer.querySelector(
-    `[data-question-index="${fromQuestionIndex}"]`
-  );
+  const targetElement = chatContainer.querySelector(`[data-question-index="${fromQuestionIndex}"]`);
 
   if (!targetElement) return;
 

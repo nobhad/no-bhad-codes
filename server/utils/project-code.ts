@@ -59,10 +59,7 @@ export async function getNextSequenceNumber(year: number): Promise<number> {
  * @param year - Optional year override (defaults to current year)
  * @returns Project code string like "NBC-2026-001-hedgewitch"
  */
-export async function generateProjectCode(
-  clientName: string,
-  year?: number
-): Promise<string> {
+export async function generateProjectCode(clientName: string, year?: number): Promise<string> {
   const projectYear = year ?? new Date().getFullYear();
   const seq = await getNextSequenceNumber(projectYear);
   const paddedSeq = String(seq).padStart(3, '0');

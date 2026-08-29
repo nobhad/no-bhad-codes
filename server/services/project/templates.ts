@@ -11,11 +11,7 @@ import {
   type TemplateRow
 } from '../../database/entities/index.js';
 import { generateProjectCode } from '../../utils/project-code.js';
-import type {
-  SqlValue,
-  ProjectTemplate,
-  TemplateData
-} from './types.js';
+import type { SqlValue, ProjectTemplate, TemplateData } from './types.js';
 import { PROJECT_TEMPLATE_COLUMNS } from './types.js';
 import { contentRequestService } from '../content-request-service.js';
 import { paymentScheduleService } from '../payment-schedule-service.js';
@@ -45,7 +41,10 @@ export async function createTemplate(data: TemplateData): Promise<ProjectTemplat
     ]
   );
 
-  const template = await db.get(`SELECT ${PROJECT_TEMPLATE_COLUMNS} FROM project_templates WHERE id = ?`, [result.lastID]);
+  const template = await db.get(
+    `SELECT ${PROJECT_TEMPLATE_COLUMNS} FROM project_templates WHERE id = ?`,
+    [result.lastID]
+  );
 
   if (!template) {
     throw new Error('Failed to create template');
@@ -54,7 +53,10 @@ export async function createTemplate(data: TemplateData): Promise<ProjectTemplat
   return toTemplate(template as unknown as TemplateRow);
 }
 
-export async function getTemplates(projectType?: string, includeInactive = false): Promise<ProjectTemplate[]> {
+export async function getTemplates(
+  projectType?: string,
+  includeInactive = false
+): Promise<ProjectTemplate[]> {
   const db = getDatabase();
 
   let query = `SELECT ${PROJECT_TEMPLATE_COLUMNS} FROM project_templates`;
@@ -82,19 +84,34 @@ export async function getTemplates(projectType?: string, includeInactive = false
 
 export async function getTemplate(templateId: number): Promise<ProjectTemplate | null> {
   const db = getDatabase();
-  const row = await db.get(`SELECT ${PROJECT_TEMPLATE_COLUMNS} FROM project_templates WHERE id = ?`, [templateId]);
+  const row = await db.get(
+    `SELECT ${PROJECT_TEMPLATE_COLUMNS} FROM project_templates WHERE id = ?`,
+    [templateId]
+  );
   return row ? toTemplate(row as unknown as TemplateRow) : null;
 }
 
-export async function updateTemplate(templateId: number, data: Partial<TemplateData>): Promise<ProjectTemplate> {
+export async function updateTemplate(
+  templateId: number,
+  data: Partial<TemplateData>
+): Promise<ProjectTemplate> {
   const db = getDatabase();
 
   const fields: string[] = [];
   const values: SqlValue[] = [];
 
-  if (data.name !== undefined) { fields.push('name = ?'); values.push(data.name); }
-  if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description || null); }
-  if (data.projectType !== undefined) { fields.push('project_type = ?'); values.push(data.projectType || null); }
+  if (data.name !== undefined) {
+    fields.push('name = ?');
+    values.push(data.name);
+  }
+  if (data.description !== undefined) {
+    fields.push('description = ?');
+    values.push(data.description || null);
+  }
+  if (data.projectType !== undefined) {
+    fields.push('project_type = ?');
+    values.push(data.projectType || null);
+  }
   if (data.defaultMilestones !== undefined) {
     fields.push('default_milestones = ?');
     values.push(data.defaultMilestones ? JSON.stringify(data.defaultMilestones) : null);
@@ -138,7 +155,10 @@ export async function updateTemplate(templateId: number, data: Partial<TemplateD
     await db.run(`UPDATE project_templates SET ${fields.join(', ')} WHERE id = ?`, values);
   }
 
-  const row = await db.get(`SELECT ${PROJECT_TEMPLATE_COLUMNS} FROM project_templates WHERE id = ?`, [templateId]);
+  const row = await db.get(
+    `SELECT ${PROJECT_TEMPLATE_COLUMNS} FROM project_templates WHERE id = ?`,
+    [templateId]
+  );
   if (!row) throw new Error('Template not found after update');
   return toTemplate(row as unknown as TemplateRow);
 }
@@ -252,7 +272,8 @@ export async function createProjectFromTemplate(
   let checklistId: number | undefined;
   if (template.defaultContentRequests && template.defaultContentRequests.length > 0) {
     const checklist = await contentRequestService.createChecklist(
-      projectId, clientId,
+      projectId,
+      clientId,
       { name: `${projectName} - Content`, description: 'Content items from project template' },
       template.defaultContentRequests.map((item, index) => ({
         title: item.title,
@@ -261,7 +282,9 @@ export async function createProjectFromTemplate(
         category: (item.category || 'other') as ContentCategory,
         isRequired: item.isRequired,
         dueDate: item.dueOffsetDays
-          ? new Date(new Date(startDate).getTime() + item.dueOffsetDays * 86400000).toISOString().split('T')[0]
+          ? new Date(new Date(startDate).getTime() + item.dueOffsetDays * 86400000)
+              .toISOString()
+              .split('T')[0]
           : undefined,
         sortOrder: index
       }))
@@ -271,13 +294,20 @@ export async function createProjectFromTemplate(
 
   // Auto-create payment schedule from template defaults
   let paymentInstallmentIds: number[] | undefined;
-  const totalAmount = options?.selectedTier && template.tierDefinitions
-    ? template.tierDefinitions.find((t) => t.tierName === options.selectedTier)?.price
-    : options?.totalAmount;
+  const totalAmount =
+    options?.selectedTier && template.tierDefinitions
+      ? template.tierDefinitions.find((t) => t.tierName === options.selectedTier)?.price
+      : options?.totalAmount;
 
-  if (template.defaultPaymentSchedule && template.defaultPaymentSchedule.length > 0 && totalAmount) {
+  if (
+    template.defaultPaymentSchedule &&
+    template.defaultPaymentSchedule.length > 0 &&
+    totalAmount
+  ) {
     const installments = await paymentScheduleService.createFromSplit(
-      projectId, clientId, totalAmount,
+      projectId,
+      clientId,
+      totalAmount,
       template.defaultPaymentSchedule.map((pm) => ({
         label: pm.label,
         percent: pm.percentageOfTotal,

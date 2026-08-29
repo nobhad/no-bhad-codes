@@ -10,7 +10,6 @@
  * Inlines: portal-progress.css (.progress-bar, .progress-fill)
  */
 
-
 /* =====================================================
    PROJECT SNAPSHOT
    Split into two parts:
@@ -80,7 +79,7 @@
 }
 
 .portal .activity-icon svg {
-  width: var(--icon-size-sm);  /* 14px - matches font-size-sm */
+  width: var(--icon-size-sm); /* 14px - matches font-size-sm */
   height: var(--icon-size-sm);
 }
 
@@ -169,7 +168,7 @@
 }
 
 .portal .dashboard-tasks-kanban .kanban-column-header {
-  font-size: var(--font-size-xs);  /* 12px */
+  font-size: var(--font-size-xs); /* 12px */
 }
 
 /* Mobile: Stack kanban columns vertically to prevent horizontal overflow */
@@ -209,7 +208,6 @@
   gap: var(--space-1);
   flex-wrap: wrap;
 }
-
 
 .portal .dashboard-tasks-kanban .task-meta-item {
   display: flex;
@@ -305,7 +303,7 @@
 .portal :is(.task-priority, .task-priority-badge) {
   display: inline-flex;
   align-items: center;
-  font-size: var(--font-size-xs);  /* 12px */
+  font-size: var(--font-size-xs); /* 12px */
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wider);
@@ -352,7 +350,7 @@
 
 .portal .dashboard-section-title {
   font-family: var(--font-family-sans);
-  font-size: var(--font-size-base);  /* 16px - matches h3 */
+  font-size: var(--font-size-base); /* 16px - matches h3 */
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
   text-transform: uppercase;
@@ -459,7 +457,6 @@
   .portal .dashboard-tasks-kanban .kanban-column {
     min-width: 140px;
   }
-
 }
 
 /* =====================================================
@@ -567,4 +564,3 @@
   align-items: center;
   gap: var(--space-3);
 }
-

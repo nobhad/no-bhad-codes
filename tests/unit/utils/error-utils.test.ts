@@ -118,7 +118,11 @@ describe('getContainerErrorHTML', () => {
   });
 
   it('uses custom retryLabel', () => {
-    const html = getContainerErrorHTML({ message: 'Err', onRetry: vi.fn(), retryLabel: 'Retry now' });
+    const html = getContainerErrorHTML({
+      message: 'Err',
+      onRetry: vi.fn(),
+      retryLabel: 'Retry now'
+    });
     expect(html).toContain('Retry now');
   });
 
@@ -145,9 +149,7 @@ describe('getInlineErrorHTML', () => {
 
   it('sanitizes the message via escapeHtml', async () => {
     // The mock returns the input unchanged — we just verify escapeHtml is called.
-    const { SanitizationUtils } = vi.mocked(
-      await import('../../../src/utils/sanitization-utils')
-    );
+    const { SanitizationUtils } = vi.mocked(await import('../../../src/utils/sanitization-utils'));
     getInlineErrorHTML('test message');
     expect(SanitizationUtils.escapeHtml).toHaveBeenCalledWith('test message');
   });

@@ -11,13 +11,15 @@
  * All classes prefixed msgtab- to avoid conflicts.
  */
 
-
 /* Messages container layout — fills available viewport, no page scroll */
 .msgtab-container {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  height: calc(100dvh - var(--portal-header-height) - var(--portal-page-top) - var(--portal-page-bottom) - 3.5rem);
+  height: calc(
+    100dvh - var(--portal-header-height) - var(--portal-page-top) - var(--portal-page-bottom) -
+      3.5rem
+  );
 }
 
 /* Admin project detail: flex chain from dashboard-content → section → tab-panel → card → container.
@@ -120,11 +122,11 @@
 /* Admin avatar — CSS mask matching header branding avatar */
 .msgtab-avatar.is-admin {
   background-color: var(--color-text-primary);
-  mask-image: url('/images/avatar_small_sidebar.svg');
+  mask-image: url("/images/avatar_small_sidebar.svg");
   mask-size: contain;
   mask-repeat: no-repeat;
   mask-position: center;
-  -webkit-mask-image: url('/images/avatar_small_sidebar.svg');
+  -webkit-mask-image: url("/images/avatar_small_sidebar.svg");
   -webkit-mask-size: contain;
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-position: center;
@@ -155,7 +157,7 @@
 
 .msgtab-date-sep::before,
 .msgtab-date-sep::after {
-  content: '';
+  content: "";
   flex: 1;
   height: var(--border-width-thin);
   background: var(--color-border-primary);
@@ -470,4 +472,3 @@ kbd.msgtab-kbd {
     display: none;
   }
 }
-

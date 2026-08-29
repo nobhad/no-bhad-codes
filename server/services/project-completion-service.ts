@@ -29,31 +29,31 @@ export async function checkProjectCompletion(projectId: number): Promise<Project
   const blockers: string[] = [];
 
   // Count milestones
-  const milestoneStats = await db.get(
+  const milestoneStats = (await db.get(
     `SELECT
        COUNT(*) as total,
        SUM(CASE WHEN is_completed = 1 THEN 1 ELSE 0 END) as completed
      FROM milestones WHERE project_id = ?`,
     [projectId]
-  ) as { total: number; completed: number };
+  )) as { total: number; completed: number };
 
   // Count tasks
-  const taskStats = await db.get(
+  const taskStats = (await db.get(
     `SELECT
        COUNT(*) as total,
        SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
      FROM project_tasks WHERE project_id = ? AND deleted_at IS NULL AND status != 'cancelled'`,
     [projectId]
-  ) as { total: number; completed: number };
+  )) as { total: number; completed: number };
 
   // Count invoices
-  const invoiceStats = await db.get(
+  const invoiceStats = (await db.get(
     `SELECT
        COUNT(*) as total,
        SUM(CASE WHEN status = 'paid' THEN 1 ELSE 0 END) as paid
      FROM invoices WHERE project_id = ? AND deleted_at IS NULL AND status != 'cancelled'`,
     [projectId]
-  ) as { total: number; paid: number };
+  )) as { total: number; paid: number };
 
   // Determine blockers
   if (milestoneStats.total > 0 && milestoneStats.completed < milestoneStats.total) {
@@ -82,17 +82,20 @@ export async function checkProjectCompletion(projectId: number): Promise<Project
 /**
  * Mark a project as completed and trigger completion workflows
  */
-export async function completeProject(projectId: number, completedBy: string): Promise<{
+export async function completeProject(
+  projectId: number,
+  completedBy: string
+): Promise<{
   success: boolean;
   message: string;
 }> {
   const db = getDatabase();
 
   // Verify project exists and is active
-  const project = await db.get(
+  const project = (await db.get(
     'SELECT id, status, project_name, client_id FROM active_projects WHERE id = ?',
     [projectId]
-  ) as Record<string, unknown> | undefined;
+  )) as Record<string, unknown> | undefined;
 
   if (!project) {
     return { success: false, message: 'Project not found' };
@@ -112,21 +115,24 @@ export async function completeProject(projectId: number, completedBy: string): P
     [projectId]
   );
 
-  await logger.info(`[ProjectCompletion] Project ${projectId} marked as completed by ${completedBy}`, {
-    category: 'projects'
-  });
+  await logger.info(
+    `[ProjectCompletion] Project ${projectId} marked as completed by ${completedBy}`,
+    {
+      category: 'projects'
+    }
+  );
 
   // Send completion notification to client
   try {
     const { emailService } = await import('./email-service.js');
     const { BUSINESS_INFO } = await import('../config/business.js');
 
-    const clientInfo = await db.get(
+    const clientInfo = (await db.get(
       `SELECT COALESCE(billing_name, contact_name) as name,
               COALESCE(billing_email, email) as email
        FROM active_clients WHERE id = ?`,
       [Number(project.client_id)]
-    ) as { name: string; email: string } | undefined;
+    )) as { name: string; email: string } | undefined;
 
     if (clientInfo?.email) {
       await emailService.sendEmail({
@@ -139,7 +145,7 @@ export async function completeProject(projectId: number, completedBy: string): P
           '',
           'All milestones have been delivered and approved. You can access all your project files and documentation through the client portal.',
           '',
-          'If you have any questions or need anything else, don\'t hesitate to reach out.',
+          "If you have any questions or need anything else, don't hesitate to reach out.",
           '',
           'Thank you for working with us!',
           '',
@@ -152,7 +158,7 @@ export async function completeProject(projectId: number, completedBy: string): P
           `<p>Hi ${clientInfo.name},</p>`,
           `<p>Great news! Your project <strong>"${project.project_name}"</strong> has been completed.</p>`,
           '<p>All milestones have been delivered and approved. You can access all your project files and documentation through the client portal.</p>',
-          '<p>If you have any questions or need anything else, don\'t hesitate to reach out.</p>',
+          "<p>If you have any questions or need anything else, don't hesitate to reach out.</p>",
           '<p style="margin-top: 30px;">Thank you for working with us!</p>',
           `<p>${BUSINESS_INFO.owner}<br><em>${BUSINESS_INFO.name}</em></p>`,
           '</div>'

@@ -65,7 +65,7 @@ function escapeHtml(text: string | undefined | null): string {
     '<': '&lt;',
     '>': '&gt;',
     '"': '&quot;',
-    '\'': '&#x27;'
+    "'": '&#x27;'
   };
   return String(text).replace(/[&<>"']/g, (m) => entities[m] || m);
 }
@@ -283,7 +283,11 @@ function enqueueForRetry(emailContent: EmailContent): void {
  * This function is safe to call from the scheduler/cron on any interval.
  * It prevents concurrent processing with an internal lock.
  */
-export async function processEmailRetryQueue(): Promise<{ retried: number; failed: number; remaining: number }> {
+export async function processEmailRetryQueue(): Promise<{
+  retried: number;
+  failed: number;
+  remaining: number;
+}> {
   if (isProcessingRetryQueue) {
     logger.info('[Email Retry] Queue processing already in progress, skipping');
     return { retried: 0, failed: 0, remaining: retryQueue.length };
@@ -632,8 +636,8 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
               </tr>
 
               ${
-  safeFeatures.length > 0
-    ? `
+                safeFeatures.length > 0
+                  ? `
               <!-- Features -->
               <tr>
                 <td style="padding: 15px 20px;">
@@ -644,8 +648,8 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
                 </td>
               </tr>
               `
-    : ''
-}
+                  : ''
+              }
 
               <!-- Design & Notes -->
               <tr>
@@ -655,15 +659,15 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
                     ${infoRow('Design Level', safeDesignLevel)}
                   </table>
                   ${
-  safeAdditionalInfo
-    ? `
+                    safeAdditionalInfo
+                      ? `
                   <div style="margin-top: 15px; padding: 15px; background: ${EMAIL_COLORS.contentBgAlt}; border-radius: 6px; border-left: 4px solid ${EMAIL_COLORS.sectionBorder};">
                     <strong style="display: block; margin-bottom: 8px; color: ${EMAIL_COLORS.bodyTextLight};">Additional Info:</strong>
                     <span style="color: ${EMAIL_COLORS.bodyTextDark};">${safeAdditionalInfo}</span>
                   </div>
                   `
-    : ''
-}
+                      : ''
+                  }
                 </td>
               </tr>
 
@@ -707,8 +711,8 @@ export const emailService = {
         pass: config.auth.pass
       },
       connectionTimeout: 10_000, // handshake must complete within 10s
-      greetingTimeout: 10_000,   // server greeting after connect
-      socketTimeout: 30_000      // total socket inactivity budget
+      greetingTimeout: 10_000, // server greeting after connect
+      socketTimeout: 30_000 // total socket inactivity budget
     });
 
     logger.info('[Email] Email service initialized successfully');
@@ -752,7 +756,11 @@ export const emailService = {
       return sendWelcomeEmail(email, nameOrData, accessTokenOrOptions ?? '');
     }
     // Object-based signature for compatibility
-    return sendWelcomeEmail(email, nameOrData.name || 'Valued Client', nameOrData.accessToken || '');
+    return sendWelcomeEmail(
+      email,
+      nameOrData.name || 'Valued Client',
+      nameOrData.accessToken || ''
+    );
   },
 
   async sendNewIntakeNotification(intakeData: IntakeData, projectId: number): Promise<EmailResult> {
@@ -819,7 +827,10 @@ export const emailService = {
     return sendEmail(emailContent);
   },
 
-  async sendAdminNotification(title: string | Record<string, unknown>, data?: Record<string, unknown>): Promise<EmailResult> {
+  async sendAdminNotification(
+    title: string | Record<string, unknown>,
+    data?: Record<string, unknown>
+  ): Promise<EmailResult> {
     if (typeof title === 'string') {
       logger.info(`Sending admin notification: ${title}`, { metadata: data });
     } else {
@@ -828,13 +839,23 @@ export const emailService = {
     return { success: true, message: 'Admin notification logged for development' };
   },
 
-  async sendMessageNotification(email: string, data?: Record<string, unknown>): Promise<EmailResult> {
-    logger.info(`[Email] Sending message notification to: ${sanitizeEmailForLog(email)}`, { metadata: data });
+  async sendMessageNotification(
+    email: string,
+    data?: Record<string, unknown>
+  ): Promise<EmailResult> {
+    logger.info(`[Email] Sending message notification to: ${sanitizeEmailForLog(email)}`, {
+      metadata: data
+    });
     return { success: true, message: 'Message notification logged for development' };
   },
 
-  async sendProjectUpdateEmail(email: string, data?: Record<string, unknown>): Promise<EmailResult> {
-    logger.info(`[Email] Sending project update email to: ${sanitizeEmailForLog(email)}`, { metadata: data });
+  async sendProjectUpdateEmail(
+    email: string,
+    data?: Record<string, unknown>
+  ): Promise<EmailResult> {
+    logger.info(`[Email] Sending project update email to: ${sanitizeEmailForLog(email)}`, {
+      metadata: data
+    });
     return { success: true, message: 'Project update email logged for development' };
   },
 
@@ -865,8 +886,7 @@ export const emailService = {
       `[Email] Preparing account activation welcome email for: ${sanitizeEmailForLog(email)}`
     );
 
-    const portalUrl =
-      data.portalUrl || getPortalUrl();
+    const portalUrl = data.portalUrl || getPortalUrl();
     const settingsUrl = `${portalUrl}#settings`;
     const name = data.name || 'there';
 
@@ -1077,8 +1097,7 @@ export const emailService = {
       return { success: false, message: 'Admin email not configured' };
     }
 
-    const adminUrl =
-      getAdminUrl();
+    const adminUrl = getAdminUrl();
     const timestamp = new Date().toLocaleString('en-US', {
       weekday: 'long',
       year: 'numeric',

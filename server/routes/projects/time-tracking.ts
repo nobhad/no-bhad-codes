@@ -4,7 +4,13 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import { canAccessProject } from '../../utils/access-control.js';
 import { projectService } from '../../services/project-service.js';
 import { invalidateCache } from '../../middleware/cache.js';
-import { errorResponse, sendSuccess, sendCreated, messageResponse, ErrorCodes } from '../../utils/api-response.js';
+import {
+  errorResponse,
+  sendSuccess,
+  sendCreated,
+  messageResponse,
+  ErrorCodes
+} from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -226,7 +232,12 @@ router.get(
     const { startDate, endDate } = req.query;
 
     if (!startDate || !endDate) {
-      return errorResponse(res, 'startDate and endDate are required', 400, ErrorCodes.MISSING_DATE_RANGE);
+      return errorResponse(
+        res,
+        'startDate and endDate are required',
+        400,
+        ErrorCodes.MISSING_DATE_RANGE
+      );
     }
 
     const report = await projectService.getTeamTimeReport(startDate as string, endDate as string);

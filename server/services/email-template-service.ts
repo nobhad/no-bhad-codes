@@ -17,15 +17,21 @@ import { safeJsonParseArray, safeJsonParseOrNull } from '../utils/safe-json.js';
 
 const EMAIL_TEMPLATE_COLUMNS = `
   id, name, description, category, subject, body_html, body_text, variables, is_active, is_system, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const EMAIL_TEMPLATE_VERSION_COLUMNS = `
   id, template_id, version, subject, body_html, body_text, changed_by, change_reason, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const EMAIL_SEND_LOG_COLUMNS = `
   id, template_id, template_name, recipient_email, recipient_name, subject, status, error_message, metadata, sent_at, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // ============================================
 // TYPES
@@ -147,9 +153,10 @@ class EmailTemplateService {
    */
   async getTemplate(id: number): Promise<EmailTemplate | null> {
     const db = getDatabase();
-    const template = (await db.get(`SELECT ${EMAIL_TEMPLATE_COLUMNS} FROM email_templates WHERE id = ?`, [id])) as
-      | Record<string, unknown>
-      | undefined;
+    const template = (await db.get(
+      `SELECT ${EMAIL_TEMPLATE_COLUMNS} FROM email_templates WHERE id = ?`,
+      [id]
+    )) as Record<string, unknown> | undefined;
 
     return template ? this.parseTemplate(template) : null;
   }
@@ -159,9 +166,10 @@ class EmailTemplateService {
    */
   async getTemplateByName(name: string): Promise<EmailTemplate | null> {
     const db = getDatabase();
-    const template = (await db.get(`SELECT ${EMAIL_TEMPLATE_COLUMNS} FROM email_templates WHERE name = ?`, [name])) as
-      | Record<string, unknown>
-      | undefined;
+    const template = (await db.get(
+      `SELECT ${EMAIL_TEMPLATE_COLUMNS} FROM email_templates WHERE name = ?`,
+      [name]
+    )) as Record<string, unknown> | undefined;
 
     return template ? this.parseTemplate(template) : null;
   }
@@ -433,7 +441,7 @@ class EmailTemplateService {
       '<': '&lt;',
       '>': '&gt;',
       '"': '&quot;',
-      '\'': '&#x27;'
+      "'": '&#x27;'
     };
     return text.replace(/[&<>"']/g, (m) => entities[m] || m);
   }
@@ -636,7 +644,10 @@ class EmailTemplateService {
       subject: row.subject as string,
       body_html: row.body_html as string,
       body_text: row.body_text as string | null,
-      variables: safeJsonParseArray<TemplateVariable>(row.variables as string, 'email template variables'),
+      variables: safeJsonParseArray<TemplateVariable>(
+        row.variables as string,
+        'email template variables'
+      ),
       is_active: Boolean(row.is_active),
       is_system: Boolean(row.is_system),
       created_at: row.created_at as string,

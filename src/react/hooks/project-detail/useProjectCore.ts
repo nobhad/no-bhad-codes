@@ -19,9 +19,7 @@ interface UseProjectCoreReturn {
   updateProject: (updates: Partial<Project>) => Promise<boolean>;
 }
 
-export function useProjectCore({
-  projectId
-}: ProjectDetailHookOptions): UseProjectCoreReturn {
+export function useProjectCore({ projectId }: ProjectDetailHookOptions): UseProjectCoreReturn {
   const [project, setProject] = useState<Project | null>(null);
 
   const fetchProject = useCallback(async (): Promise<Project> => {

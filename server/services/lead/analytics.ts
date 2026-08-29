@@ -7,17 +7,13 @@
 
 import { getDatabase } from '../../database/init.js';
 import { getPipelineStages } from './pipeline.js';
-import type {
-  LeadAnalytics,
-  FunnelData,
-  SourceStats
-} from './types.js';
+import type { LeadAnalytics, FunnelData, SourceStats } from './types.js';
 
 export async function getLeadAnalytics(): Promise<LeadAnalytics> {
   const db = getDatabase();
 
   const totalLeads = (await db.get(
-    'SELECT COUNT(*) as count FROM active_projects WHERE status = \'pending\''
+    "SELECT COUNT(*) as count FROM active_projects WHERE status = 'pending'"
   )) as { count: number } | undefined;
 
   const newLeadsThisMonth = (await db.get(
@@ -35,7 +31,7 @@ export async function getLeadAnalytics(): Promise<LeadAnalytics> {
   const conversionRate = totalClosed > 0 ? (wonCount?.count || 0) / totalClosed : 0;
 
   const avgScore = (await db.get(
-    'SELECT AVG(lead_score) as avg FROM active_projects WHERE status = \'pending\''
+    "SELECT AVG(lead_score) as avg FROM active_projects WHERE status = 'pending'"
   )) as { avg: number | null } | undefined;
 
   const avgDays = (await db.get(

@@ -59,7 +59,9 @@ describe('Portal Routes', () => {
 
   describe('GET /portal', () => {
     it('should redirect to /#/portal when no auth cookie', async () => {
-      mockVerify.mockImplementation(() => { throw new Error('invalid'); });
+      mockVerify.mockImplementation(() => {
+        throw new Error('invalid');
+      });
 
       const { portalRoutes } = await import('../../../server/routes/portal');
       const handler = getRouteHandler(portalRoutes, 'get', '/portal');
@@ -87,7 +89,9 @@ describe('Portal Routes', () => {
 
   describe('GET /dashboard', () => {
     it('should redirect to /#/portal when no auth', async () => {
-      mockVerify.mockImplementation(() => { throw new Error('invalid'); });
+      mockVerify.mockImplementation(() => {
+        throw new Error('invalid');
+      });
 
       const { portalRoutes } = await import('../../../server/routes/portal');
       const handler = getRouteHandler(portalRoutes, 'get', '/dashboard');
@@ -109,10 +113,13 @@ describe('Portal Routes', () => {
       const res = createMockRes();
       handler(req, res);
 
-      expect(res.render).toHaveBeenCalledWith('layouts/portal', expect.objectContaining({
-        portalType: 'admin',
-        bodyClass: 'admin'
-      }));
+      expect(res.render).toHaveBeenCalledWith(
+        'layouts/portal',
+        expect.objectContaining({
+          portalType: 'admin',
+          bodyClass: 'admin'
+        })
+      );
     });
 
     it('should render client portal for client users', async () => {
@@ -125,10 +132,13 @@ describe('Portal Routes', () => {
       const res = createMockRes();
       handler(req, res);
 
-      expect(res.render).toHaveBeenCalledWith('layouts/portal', expect.objectContaining({
-        portalType: 'client',
-        bodyClass: 'client'
-      }));
+      expect(res.render).toHaveBeenCalledWith(
+        'layouts/portal',
+        expect.objectContaining({
+          portalType: 'client',
+          bodyClass: 'client'
+        })
+      );
     });
   });
 
@@ -173,7 +183,6 @@ describe('Portal Routes', () => {
       expect(res.redirect).toHaveBeenCalledWith(301, '/dashboard');
     });
   });
-
 });
 
 /**

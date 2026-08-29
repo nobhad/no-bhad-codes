@@ -59,10 +59,7 @@ export const QuestionnaireValidationSchemas = {
   } as ValidationSchema,
 
   send: {
-    client_id: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ],
+    client_id: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
     project_id: { type: 'number' as const, min: 1 },
     due_date: { type: 'string' as const, maxLength: 30 }
   } as ValidationSchema,

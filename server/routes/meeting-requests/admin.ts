@@ -76,10 +76,22 @@ router.post(
   requireAdmin,
   asyncHandler(async (req: JWTAuthRequest, res: Response) => {
     const meetingRequestId = Number(req.params.id);
-    const { confirmedDatetime, durationMinutes, locationType, locationDetails, adminNotes, createCalendarEvent } = req.body;
+    const {
+      confirmedDatetime,
+      durationMinutes,
+      locationType,
+      locationDetails,
+      adminNotes,
+      createCalendarEvent
+    } = req.body;
 
     if (!confirmedDatetime || !locationType) {
-      errorResponse(res, 'confirmedDatetime and locationType are required', 400, ErrorCodes.VALIDATION_ERROR);
+      errorResponse(
+        res,
+        'confirmedDatetime and locationType are required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
       return;
     }
 
@@ -140,7 +152,12 @@ router.post(
     const { slots } = req.body;
 
     if (!slots || !Array.isArray(slots) || slots.length === 0) {
-      errorResponse(res, 'slots array with at least one entry is required', 400, ErrorCodes.VALIDATION_ERROR);
+      errorResponse(
+        res,
+        'slots array with at least one entry is required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
       return;
     }
 
@@ -148,7 +165,8 @@ router.post(
       await meetingRequestService.reschedule(meetingRequestId, slots);
       sendSuccess(res, undefined, 'Meeting request rescheduled');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to reschedule meeting request';
+      const message =
+        error instanceof Error ? error.message : 'Failed to reschedule meeting request';
       errorResponse(res, message, 400, ErrorCodes.VALIDATION_ERROR);
     }
   })

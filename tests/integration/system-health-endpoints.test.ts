@@ -31,9 +31,7 @@ afterEach(async () => {
 
 describe('System Health endpoints (dashboard data sources)', () => {
   it('GET /api/admin/circuit-breakers returns { breakers: [...] }', async () => {
-    const res = await request(app)
-      .get('/api/admin/circuit-breakers')
-      .set('Cookie', adminCookie());
+    const res = await request(app).get('/api/admin/circuit-breakers').set('Cookie', adminCookie());
 
     expect(res.status).toBe(200);
     expect(res.body?.success).toBe(true);
@@ -41,9 +39,7 @@ describe('System Health endpoints (dashboard data sources)', () => {
   });
 
   it('GET /api/admin/async-tasks returns counts by status', async () => {
-    const res = await request(app)
-      .get('/api/admin/async-tasks')
-      .set('Cookie', adminCookie());
+    const res = await request(app).get('/api/admin/async-tasks').set('Cookie', adminCookie());
 
     expect(res.status).toBe(200);
     expect(res.body?.success).toBe(true);
@@ -67,9 +63,7 @@ describe('System Health endpoints (dashboard data sources)', () => {
   });
 
   it('GET /api/admin/schema-drift returns a drift report', async () => {
-    const res = await request(app)
-      .get('/api/admin/schema-drift')
-      .set('Cookie', adminCookie());
+    const res = await request(app).get('/api/admin/schema-drift').set('Cookie', adminCookie());
 
     expect(res.status).toBe(200);
     expect(res.body?.success).toBe(true);

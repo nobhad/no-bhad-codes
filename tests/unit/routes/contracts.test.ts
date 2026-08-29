@@ -62,8 +62,10 @@ vi.mock('../../../server/services/contract-service', () => ({
     ensureProjectSignatureToken: (...args: unknown[]) => mockEnsureProjectSignatureToken(...args),
     logSignatureAction: (...args: unknown[]) => mockLogSignatureAction(...args),
     expireProjectSignatureToken: (...args: unknown[]) => mockExpireProjectSignatureToken(...args),
-    getProjectWithClientForDistribution: (...args: unknown[]) => mockGetProjectWithClientForDistribution(...args),
-    getProjectWithClientForRenewal: (...args: unknown[]) => mockGetProjectWithClientForRenewal(...args),
+    getProjectWithClientForDistribution: (...args: unknown[]) =>
+      mockGetProjectWithClientForDistribution(...args),
+    getProjectWithClientForRenewal: (...args: unknown[]) =>
+      mockGetProjectWithClientForRenewal(...args),
     updateContractReminder: (...args: unknown[]) => mockUpdateContractReminder(...args),
     getClientContracts: (...args: unknown[]) => mockGetClientContracts(...args),
     getContractProjectId: (...args: unknown[]) => mockGetContractProjectId(...args),
@@ -321,11 +323,14 @@ describe('Contract Routes', () => {
 
       await handler(req, res);
 
-      expect(mockEmit).toHaveBeenCalledWith('contract.created', expect.objectContaining({
-        entityId: 2,
-        projectId: 10,
-        clientId: 5
-      }));
+      expect(mockEmit).toHaveBeenCalledWith(
+        'contract.created',
+        expect.objectContaining({
+          entityId: 2,
+          projectId: 10,
+          clientId: 5
+        })
+      );
     });
 
     it('should return 400 when required fields are missing', async () => {
@@ -359,9 +364,7 @@ describe('Contract Routes', () => {
       await handler(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'VALIDATION_ERROR' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'VALIDATION_ERROR' }));
     });
   });
 
@@ -467,9 +470,7 @@ describe('Contract Routes', () => {
       await handler(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'VALIDATION_ERROR' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'VALIDATION_ERROR' }));
     });
 
     it('should return 404 when project not found', async () => {
@@ -509,9 +510,7 @@ describe('Contract Routes', () => {
       await handler(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'VALIDATION_ERROR' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'VALIDATION_ERROR' }));
     });
   });
 
@@ -533,9 +532,12 @@ describe('Contract Routes', () => {
 
       await handler(req, res);
 
-      expect(mockUpdateContract).toHaveBeenCalledWith(1, expect.objectContaining({
-        status: 'expired'
-      }));
+      expect(mockUpdateContract).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({
+          status: 'expired'
+        })
+      );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -731,7 +733,15 @@ describe('Contract Routes', () => {
 
   describe('Contract Status Validation', () => {
     it('should validate all supported contract statuses', () => {
-      const validStatuses = ['draft', 'sent', 'signed', 'expired', 'cancelled', 'active', 'renewed'];
+      const validStatuses = [
+        'draft',
+        'sent',
+        'signed',
+        'expired',
+        'cancelled',
+        'active',
+        'renewed'
+      ];
 
       for (const status of validStatuses) {
         expect(typeof status).toBe('string');

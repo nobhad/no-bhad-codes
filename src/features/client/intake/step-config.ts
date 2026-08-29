@@ -84,10 +84,7 @@ export function findFirstRelevantQuestionIndex(intakeData: IntakeData): number {
       continue;
     }
 
-    if (
-      fieldsToSkip.includes(question.field) &&
-      intakeData[question.field as keyof IntakeData]
-    ) {
+    if (fieldsToSkip.includes(question.field) && intakeData[question.field as keyof IntakeData]) {
       index++;
       continue;
     }
@@ -116,10 +113,7 @@ export function interpolateQuestionText(text: string, intakeData: IntakeData): s
 /**
  * Find the index of the first question that depends on a given field
  */
-export function findFirstDependentQuestionIndex(
-  changedField: string,
-  fromIndex: number
-): number {
+export function findFirstDependentQuestionIndex(changedField: string, fromIndex: number): number {
   for (let i = fromIndex + 1; i < QUESTIONS.length; i++) {
     const q = QUESTIONS[i];
     if (q.dependsOn && q.dependsOn.field === changedField) {

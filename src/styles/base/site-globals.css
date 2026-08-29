@@ -34,7 +34,7 @@ html.intro-loading body {
    UI chrome (nav, modals, consent banner), which is the intended layering for
    a texture. `pointer-events: none` keeps it click-through regardless. */
 body::before {
-  content: '';
+  content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;

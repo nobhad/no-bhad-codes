@@ -402,13 +402,14 @@ function generateDerivedConfig(): void {
       !configRecord.REFRESH_TOKEN_SECRET ||
       String(configRecord.REFRESH_TOKEN_SECRET).includes('change-this')
     ) {
-      configRecord.REFRESH_TOKEN_SECRET =
-        `dev-refresh-secret-${crypto.randomBytes(32).toString('hex')}`;
+      configRecord.REFRESH_TOKEN_SECRET = `dev-refresh-secret-${crypto.randomBytes(32).toString('hex')}`;
     }
 
-    if (!configRecord.SESSION_SECRET || String(configRecord.SESSION_SECRET).includes('change-this')) {
-      configRecord.SESSION_SECRET =
-        `dev-session-secret-${crypto.randomBytes(32).toString('hex')}`;
+    if (
+      !configRecord.SESSION_SECRET ||
+      String(configRecord.SESSION_SECRET).includes('change-this')
+    ) {
+      configRecord.SESSION_SECRET = `dev-session-secret-${crypto.randomBytes(32).toString('hex')}`;
     }
   }
 
@@ -419,7 +420,9 @@ function generateDerivedConfig(): void {
       console.warn('⚠️  ADMIN_PASSWORD_HASH does not appear to be a valid bcrypt hash');
     }
   } else if (configRecord.NODE_ENV === 'production') {
-    console.warn('⚠️  ADMIN_PASSWORD_HASH is not set. Admin login requires this environment variable.');
+    console.warn(
+      '⚠️  ADMIN_PASSWORD_HASH is not set. Admin login requires this environment variable.'
+    );
   }
 
   // Derive API base URL from port if not set

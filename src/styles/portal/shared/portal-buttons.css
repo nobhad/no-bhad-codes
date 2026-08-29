@@ -10,7 +10,6 @@
  * - Context-specific variants
  */
 
-
 /* ============================================
  * PORTAL BASE BUTTON SYSTEM
  * ============================================
@@ -20,13 +19,17 @@
  */
 
 /* Base layout for all portal text buttons */
-:is(.portal, .portal-modal) :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn) {
+:is(.portal, .portal-modal)
+  :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(
+    .icon-btn
+  ):not(.nav-btn) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--icon-gap-md, 0.5rem);
   padding: var(--portal-btn-padding, 8px 18px);
-  border: var(--portal-btn-border-width, 2px) solid var(--portal-btn-border-color, var(--color-dark));
+  border: var(--portal-btn-border-width, 2px) solid
+    var(--portal-btn-border-color, var(--color-dark));
   border-bottom-width: var(--portal-btn-border-bottom-width, 2px);
   border-radius: var(--portal-btn-border-radius, 0);
   font-size: var(--portal-btn-font-size, var(--font-size-sm));
@@ -46,12 +49,23 @@
 }
 
 /* SVG icons inherit button color */
-:is(.portal, .portal-modal) :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success, .form-button):not(.icon-btn):not(.nav-btn) > svg {
+:is(.portal, .portal-modal)
+  :is(
+    .btn,
+    .btn-primary,
+    .btn-secondary,
+    .btn-outline,
+    .btn-danger,
+    .btn-success,
+    .form-button
+  ):not(.icon-btn):not(.nav-btn)
+  > svg {
   color: inherit;
 }
 
 /* Default hover state */
-:is(.portal, .portal-modal) :is(.btn-primary, .btn-secondary, .btn-outline):not(.icon-btn):not(.nav-btn):hover {
+:is(.portal, .portal-modal)
+  :is(.btn-primary, .btn-secondary, .btn-outline):not(.icon-btn):not(.nav-btn):hover {
   background: var(--portal-btn-hover-bg, var(--color-dark));
   color: var(--portal-btn-hover-color, var(--color-light));
   border-color: var(--portal-btn-hover-border, var(--color-dark));
@@ -59,8 +73,14 @@
 }
 
 /* Focus state */
-:is(.portal, .portal-modal) :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn):focus,
-:is(.portal, .portal-modal) :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn):focus-visible {
+:is(.portal, .portal-modal)
+  :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(
+    .icon-btn
+  ):not(.nav-btn):focus,
+:is(.portal, .portal-modal)
+  :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(
+    .icon-btn
+  ):not(.nav-btn):focus-visible {
   outline: 2px solid var(--color-off-white);
   outline-offset: 2px;
   box-shadow: none;
@@ -76,9 +96,17 @@ button:has(> svg):not(.portal-checkbox) {
 
 /* Icon before text (default order).
    Exclude dropdown triggers — their SVG carets must stay AFTER text. */
-:is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.dropdown-trigger):not(.date-range-trigger) > :is(svg, .btn-icon),
+:is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(
+    .dropdown-trigger
+  ):not(.date-range-trigger)
+  > :is(svg, .btn-icon),
 .icon-btn > :is(svg, .icon-btn-svg),
-button:not(.portal-checkbox):not(.panel-action):not(.dropdown-trigger--custom):not(.dropdown-trigger):not(.dropdown-trigger--status):not(.dropdown-trigger--form):not(.modal-dropdown-trigger):not(.date-range-trigger) > :is(.icon-wrap, .tab-icon, svg) {
+button:not(.portal-checkbox):not(.panel-action):not(.dropdown-trigger--custom):not(
+    .dropdown-trigger
+  ):not(.dropdown-trigger--status):not(.dropdown-trigger--form):not(.modal-dropdown-trigger):not(
+    .date-range-trigger
+  )
+  > :is(.icon-wrap, .tab-icon, svg) {
   order: -1;
 }
 
@@ -417,31 +445,30 @@ button:not(.portal-checkbox):not(.panel-action):not(.dropdown-trigger--custom):n
   }
 }
 
-
 /* Table action buttons stay compact even on touch devices - UTILITIES LAYER for override priority */
-  @media (pointer: coarse) {
-    .data-table .icon-btn,
-    .data-table .action-group .icon-btn,
-    .data-table .col-actions .icon-btn,
-    .data-table td .icon-btn,
-    .action-group .icon-btn,
-    .col-actions .icon-btn {
-      width: var(--portal-btn-icon-size-xs);
-      height: var(--portal-btn-icon-size-xs);
-      min-width: var(--portal-btn-icon-size-xs);
-      min-height: var(--portal-btn-icon-size-xs);
-    }
-
-    .data-table .icon-btn svg,
-    .data-table .action-group .icon-btn svg,
-    .data-table .col-actions .icon-btn svg,
-    .data-table td .icon-btn svg,
-    .action-group .icon-btn svg,
-    .col-actions .icon-btn svg {
-      width: 1em;
-      height: 1em;
-    }
+@media (pointer: coarse) {
+  .data-table .icon-btn,
+  .data-table .action-group .icon-btn,
+  .data-table .col-actions .icon-btn,
+  .data-table td .icon-btn,
+  .action-group .icon-btn,
+  .col-actions .icon-btn {
+    width: var(--portal-btn-icon-size-xs);
+    height: var(--portal-btn-icon-size-xs);
+    min-width: var(--portal-btn-icon-size-xs);
+    min-height: var(--portal-btn-icon-size-xs);
   }
+
+  .data-table .icon-btn svg,
+  .data-table .action-group .icon-btn svg,
+  .data-table .col-actions .icon-btn svg,
+  .data-table td .icon-btn svg,
+  .action-group .icon-btn svg,
+  .col-actions .icon-btn svg {
+    width: 1em;
+    height: 1em;
+  }
+}
 
 /* ============================================
  * TABLE ACTION BUTTONS - UNIVERSAL RULE
@@ -464,47 +491,46 @@ button:not(.portal-checkbox):not(.panel-action):not(.dropdown-trigger--custom):n
  * ALL table action buttons are COLORLESS - neutral color only.
  * Uses :is() to consolidate all table context selectors.
  */
-  :is(td, .col-actions, .action-group, .data-table, table) .icon-btn {
-    width: var(--portal-btn-icon-size);
-    height: var(--portal-btn-icon-size);
-    min-width: var(--portal-btn-icon-size);
-    min-height: var(--portal-btn-icon-size);
-    max-width: var(--portal-btn-icon-size);
-    max-height: var(--portal-btn-icon-size);
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    color: var(--color-text-primary);
-    background: transparent;
-  }
+:is(td, .col-actions, .action-group, .data-table, table) .icon-btn {
+  width: var(--portal-btn-icon-size);
+  height: var(--portal-btn-icon-size);
+  min-width: var(--portal-btn-icon-size);
+  min-height: var(--portal-btn-icon-size);
+  max-width: var(--portal-btn-icon-size);
+  max-height: var(--portal-btn-icon-size);
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-text-primary);
+  background: transparent;
+}
 
-  /* All color variants are neutralized in table contexts */
-  :is(td, .col-actions, .action-group, .data-table, table)
-    .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary) {
-    color: var(--color-text-primary);
-    background: transparent;
-  }
+/* All color variants are neutralized in table contexts */
+:is(td, .col-actions, .action-group, .data-table, table)
+  .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary) {
+  color: var(--color-text-primary);
+  background: transparent;
+}
 
-  /* Hover — accent color, no background */
-  :is(td, .col-actions, .action-group, .data-table, table) .icon-btn:hover {
-    color: var(--color-accent);
-    background: transparent;
-    box-shadow: none;
-  }
+/* Hover — accent color, no background */
+:is(td, .col-actions, .action-group, .data-table, table) .icon-btn:hover {
+  color: var(--color-accent);
+  background: transparent;
+  box-shadow: none;
+}
 
-  /* SVG inside table icon buttons — follow cell text size */
-  :is(td, .col-actions, .action-group, .data-table, table) .icon-btn svg {
-    width: 1em;
-    height: 1em;
-    min-width: 1em;
-    min-height: 1em;
-    max-width: 1em;
-    max-height: 1em;
-    flex-shrink: 0;
-  }
-
+/* SVG inside table icon buttons — follow cell text size */
+:is(td, .col-actions, .action-group, .data-table, table) .icon-btn svg {
+  width: 1em;
+  height: 1em;
+  min-width: 1em;
+  min-height: 1em;
+  max-width: 1em;
+  max-height: 1em;
+  flex-shrink: 0;
+}
 
 /* ============================================
  * COLLAPSED SIDEBAR - Icon-only state
@@ -654,7 +680,9 @@ button:not(.portal-checkbox):not(.panel-action):not(.dropdown-trigger--custom):n
   color: var(--color-accent);
 }
 
-.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.nav-btn):disabled {
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(
+    .nav-btn
+  ):disabled {
   color: var(--color-text-tertiary);
   cursor: not-allowed;
 }
@@ -672,7 +700,18 @@ button:not(.portal-checkbox):not(.panel-action):not(.dropdown-trigger--custom):n
 }
 
 /* All actionable items in action bar - consistent height */
-.action-bar > :is(button, .btn, .btn-primary, .btn-secondary, .btn-outline, select, .form-select, [class*="dropdown-trigger"], [class*="date-selector"]) {
+.action-bar
+  > :is(
+    button,
+    .btn,
+    .btn-primary,
+    .btn-secondary,
+    .btn-outline,
+    select,
+    .form-select,
+    [class*="dropdown-trigger"],
+    [class*="date-selector"]
+  ) {
   height: var(--action-bar-item-height);
   min-height: var(--action-bar-item-height);
   box-sizing: border-box;
@@ -689,7 +728,10 @@ button:not(.portal-checkbox):not(.panel-action):not(.dropdown-trigger--custom):n
  * ============================================ */
 
 @media (--small-mobile) {
-  :is(.portal, .portal-modal) :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn) {
+  :is(.portal, .portal-modal)
+    :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(
+      .icon-btn
+    ):not(.nav-btn) {
     padding: clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 20px);
     font-size: clamp(0.7rem, 2.5vw, 0.9rem);
   }
@@ -701,15 +743,20 @@ button:not(.portal-checkbox):not(.panel-action):not(.dropdown-trigger--custom):n
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
-  :is(.portal, .portal-modal) :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn) {
+  :is(.portal, .portal-modal)
+    :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(
+      .icon-btn
+    ):not(.nav-btn) {
     border-width: var(--border-width-thick);
   }
 }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  :is(.portal, .portal-modal) :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(.icon-btn):not(.nav-btn) {
+  :is(.portal, .portal-modal)
+    :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .btn-success):not(
+      .icon-btn
+    ):not(.nav-btn) {
     transition: none;
   }
 }
-

@@ -163,9 +163,7 @@ vi.mock('../../../server/utils/two-factor-constants', () => ({
 // HELPERS
 // ============================================
 
-function createMockReq(
-  overrides: Record<string, unknown> = {}
-) {
+function createMockReq(overrides: Record<string, unknown> = {}) {
   return {
     body: {},
     cookies: {},
@@ -258,7 +256,11 @@ describe('Two-Factor Authentication Routes', () => {
       const res = createMockRes();
       await handler(req, res);
 
-      expect(mockSendUnauthorized).toHaveBeenCalledWith(res, 'Admin access required', 'ACCESS_DENIED');
+      expect(mockSendUnauthorized).toHaveBeenCalledWith(
+        res,
+        'Admin access required',
+        'ACCESS_DENIED'
+      );
       expect(mockGenerateTOTPSecret).not.toHaveBeenCalled();
     });
 
@@ -465,7 +467,10 @@ describe('Two-Factor Authentication Routes', () => {
       mockJwtVerify.mockReturnValue({ email: ADMIN_EMAIL, sub: '2fa-pending' });
       setupDbSettings({
         'admin.two_factor_secret': 'STORED_SECRET',
-        'admin.two_factor_backup_codes': JSON.stringify(['$2a$10$hashedcode1', '$2a$10$hashedcode2'])
+        'admin.two_factor_backup_codes': JSON.stringify([
+          '$2a$10$hashedcode1',
+          '$2a$10$hashedcode2'
+        ])
       });
       // TOTP fails but backup code matches
       mockVerifyTOTP.mockReturnValue(false);
@@ -560,7 +565,8 @@ describe('Two-Factor Authentication Routes', () => {
       );
       // Should have cleared enabled flag, secret, and backup codes (3 upsert calls)
       const upsertCalls = mockDbRun.mock.calls.filter(
-        (call: unknown[]) => typeof call[0] === 'string' && (call[0] as string).includes('INSERT OR REPLACE')
+        (call: unknown[]) =>
+          typeof call[0] === 'string' && (call[0] as string).includes('INSERT OR REPLACE')
       );
       expect(upsertCalls.length).toBeGreaterThanOrEqual(3);
     });
@@ -649,10 +655,7 @@ describe('Two-Factor Authentication Routes', () => {
       const res = createMockRes();
       await handler(req, res);
 
-      expect(mockSendSuccess).toHaveBeenCalledWith(
-        res,
-        { enabled: true, remainingBackupCodes: 3 }
-      );
+      expect(mockSendSuccess).toHaveBeenCalledWith(res, { enabled: true, remainingBackupCodes: 3 });
     });
 
     it('should reject non-admin from checking status', async () => {
@@ -665,7 +668,11 @@ describe('Two-Factor Authentication Routes', () => {
       const res = createMockRes();
       await handler(req, res);
 
-      expect(mockSendUnauthorized).toHaveBeenCalledWith(res, 'Admin access required', 'ACCESS_DENIED');
+      expect(mockSendUnauthorized).toHaveBeenCalledWith(
+        res,
+        'Admin access required',
+        'ACCESS_DENIED'
+      );
     });
   });
 });

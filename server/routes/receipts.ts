@@ -10,7 +10,13 @@
 import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
-import { sendSuccess, errorResponse, errorResponseWithPayload, sanitizeErrorMessage, ErrorCodes } from '../utils/api-response.js';
+import {
+  sendSuccess,
+  errorResponse,
+  errorResponseWithPayload,
+  sanitizeErrorMessage,
+  ErrorCodes
+} from '../utils/api-response.js';
 import { sendPdfResponse } from '../utils/pdf-generator.js';
 import { receiptService, Receipt } from '../services/receipt-service.js';
 
@@ -112,9 +118,15 @@ router.get(
         count: receipts.length
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve receipts', 500, ErrorCodes.RETRIEVAL_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to retrieve receipts')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve receipts',
+        500,
+        ErrorCodes.RETRIEVAL_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to retrieve receipts')
+        }
+      );
     }
   })
 );
@@ -162,9 +174,15 @@ router.get(
       if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Receipt not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to retrieve receipt', 500, ErrorCodes.RETRIEVAL_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to retrieve receipt')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve receipt',
+        500,
+        ErrorCodes.RETRIEVAL_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to retrieve receipt')
+        }
+      );
     }
   })
 );
@@ -209,9 +227,15 @@ router.get(
         count: receipts.length
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve receipts', 500, ErrorCodes.RETRIEVAL_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to retrieve receipts')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve receipts',
+        500,
+        ErrorCodes.RETRIEVAL_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to retrieve receipts')
+        }
+      );
     }
   })
 );
@@ -315,9 +339,15 @@ router.get(
         count: receipts.length
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve receipts', 500, ErrorCodes.RETRIEVAL_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to retrieve receipts')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve receipts',
+        500,
+        ErrorCodes.RETRIEVAL_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to retrieve receipts')
+        }
+      );
     }
   })
 );

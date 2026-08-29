@@ -20,11 +20,7 @@ import { rateLimit } from '../middleware/security.js';
 import { userService } from '../services/user-service.js';
 import { auditLogger } from '../services/audit-logger.js';
 import { logger } from '../services/logger.js';
-import {
-  JWT_CONFIG,
-  COOKIE_CONFIG,
-  PASSWORD_CONFIG
-} from '../utils/auth-constants.js';
+import { JWT_CONFIG, COOKIE_CONFIG, PASSWORD_CONFIG } from '../utils/auth-constants.js';
 import {
   sendSuccess,
   sendBadRequest,
@@ -377,21 +373,13 @@ router.post(
 
     // Ensure this is a 2FA temp token
     if (tempPayload.sub !== TEMP_TOKEN_CONFIG.SUBJECT) {
-      return sendUnauthorized(
-        res,
-        'Invalid verification session.',
-        ErrorCodes.INVALID_TOKEN
-      );
+      return sendUnauthorized(res, 'Invalid verification session.', ErrorCodes.INVALID_TOKEN);
     }
 
     // Retrieve the secret
     const secret = await getSettingValue(TWO_FACTOR_SETTINGS_KEYS.SECRET);
     if (!secret) {
-      return sendServerError(
-        res,
-        'Two-factor configuration error',
-        ErrorCodes.CONFIG_ERROR
-      );
+      return sendServerError(res, 'Two-factor configuration error', ErrorCodes.CONFIG_ERROR);
     }
 
     // Try TOTP verification first
@@ -426,11 +414,7 @@ router.post(
     }
 
     if (!codeValid) {
-      await auditLogger.logLoginFailed(
-        tempPayload.email,
-        req,
-        '2FA login verification failed'
-      );
+      await auditLogger.logLoginFailed(tempPayload.email, req, '2FA login verification failed');
       return sendUnauthorized(
         res,
         'Invalid verification code.',
@@ -440,11 +424,9 @@ router.post(
 
     // Issue the real admin JWT
     const adminEmail = tempPayload.email;
-    const token = jwt.sign(
-      { id: 0, email: adminEmail, type: 'admin' },
-      jwtSecret,
-      { expiresIn: JWT_CONFIG.ADMIN_TOKEN_EXPIRY } as SignOptions
-    );
+    const token = jwt.sign({ id: 0, email: adminEmail, type: 'admin' }, jwtSecret, {
+      expiresIn: JWT_CONFIG.ADMIN_TOKEN_EXPIRY
+    } as SignOptions);
 
     await auditLogger.logLogin(0, adminEmail, 'admin', req);
     res.cookie(COOKIE_CONFIG.AUTH_TOKEN_NAME, token, COOKIE_CONFIG.ADMIN_OPTIONS);
@@ -524,7 +506,11 @@ router.post(
 
     const { code } = req.body as { code?: string };
     if (!code || typeof code !== 'string') {
-      return sendBadRequest(res, 'Current TOTP code is required to disable 2FA', ErrorCodes.MISSING_FIELDS);
+      return sendBadRequest(
+        res,
+        'Current TOTP code is required to disable 2FA',
+        ErrorCodes.MISSING_FIELDS
+      );
     }
 
     const enabled = await isTwoFactorEnabled();
@@ -545,11 +531,7 @@ router.post(
     if (!isValid) {
       const adminEmail = process.env.ADMIN_EMAIL || 'admin';
       await auditLogger.logLoginFailed(adminEmail, req, '2FA disable verification failed');
-      return sendBadRequest(
-        res,
-        'Invalid verification code.',
-        ErrorCodes.TWO_FACTOR_INVALID_CODE
-      );
+      return sendBadRequest(res, 'Invalid verification code.', ErrorCodes.TWO_FACTOR_INVALID_CODE);
     }
 
     // Disable 2FA and clear stored data

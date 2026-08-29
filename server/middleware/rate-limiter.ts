@@ -114,9 +114,7 @@ function getClientIP(req: Request): string {
  */
 export function userKeyGenerator(req: Request): string {
   const authReq = req as JWTAuthRequest;
-  const identifier = authReq.user?.id
-    ? `user:${authReq.user.id}`
-    : `ip:${getClientIP(req)}`;
+  const identifier = authReq.user?.id ? `user:${authReq.user.id}` : `ip:${getClientIP(req)}`;
   return `${identifier}:${req.path}`;
 }
 
@@ -128,9 +126,7 @@ export function combinedKeyGenerator(req: Request): string {
   const authReq = req as JWTAuthRequest;
   const ip = getClientIP(req);
   const userId = authReq.user?.id;
-  return userId
-    ? `user:${userId}+ip:${ip}:${req.path}`
-    : `ip:${ip}:${req.path}`;
+  return userId ? `user:${userId}+ip:${ip}:${req.path}` : `ip:${ip}:${req.path}`;
 }
 
 /**
@@ -346,10 +342,10 @@ export async function getRateLimitStats(): Promise<{
 
   const [totalResult, blockedResult, topEndpoints, blockedIPs] = await Promise.all([
     db.get(
-      'SELECT COUNT(*) as count FROM rate_limit_log WHERE created_at > datetime(\'now\', \'-24 hours\')'
+      "SELECT COUNT(*) as count FROM rate_limit_log WHERE created_at > datetime('now', '-24 hours')"
     ) as Promise<{ count: number } | undefined>,
     db.get(
-      'SELECT COUNT(*) as count FROM rate_limit_log WHERE is_blocked = 1 AND created_at > datetime(\'now\', \'-24 hours\')'
+      "SELECT COUNT(*) as count FROM rate_limit_log WHERE is_blocked = 1 AND created_at > datetime('now', '-24 hours')"
     ) as Promise<{ count: number } | undefined>,
     db.all(
       `SELECT endpoint, SUM(request_count) as count

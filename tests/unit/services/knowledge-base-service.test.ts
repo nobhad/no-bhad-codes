@@ -126,7 +126,9 @@ describe('KnowledgeBaseService - Categories', () => {
       const result = await knowledgeBaseService.getCategoryBySlug('getting-started');
 
       expect(result).toMatchObject({ slug: 'getting-started' });
-      expect(mockDb.get).toHaveBeenCalledWith(expect.stringContaining('WHERE c.slug = ?'), ['getting-started']);
+      expect(mockDb.get).toHaveBeenCalledWith(expect.stringContaining('WHERE c.slug = ?'), [
+        'getting-started'
+      ]);
     });
 
     it('returns null when category not found', async () => {
@@ -145,7 +147,10 @@ describe('KnowledgeBaseService - Categories', () => {
       const result = await knowledgeBaseService.getCategoryById(1);
 
       expect(result).toMatchObject({ id: 1 });
-      expect(mockDb.get).toHaveBeenCalledWith(expect.stringContaining('kb_categories WHERE id = ?'), [1]);
+      expect(mockDb.get).toHaveBeenCalledWith(
+        expect.stringContaining('kb_categories WHERE id = ?'),
+        [1]
+      );
     });
 
     it('returns null when category not found', async () => {
@@ -182,9 +187,9 @@ describe('KnowledgeBaseService - Categories', () => {
       await knowledgeBaseService.createCategory({ name: 'FAQ', slug: 'faq' });
 
       const callArgs = mockDb.run.mock.calls[0][1] as unknown[];
-      expect(callArgs[3]).toBe('book');   // default icon
+      expect(callArgs[3]).toBe('book'); // default icon
       expect(callArgs[4]).toBe('#6b7280'); // default color
-      expect(callArgs[5]).toBe(0);         // default sort_order
+      expect(callArgs[5]).toBe(0); // default sort_order
     });
   });
 
@@ -263,10 +268,7 @@ describe('KnowledgeBaseService - Articles', () => {
       const result = await knowledgeBaseService.getFeaturedArticles();
 
       expect(result).toHaveLength(1);
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('is_featured = 1'),
-        [5]
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('is_featured = 1'), [5]);
     });
 
     it('respects custom limit', async () => {
@@ -496,10 +498,7 @@ describe('KnowledgeBaseService - Search', () => {
 
       await knowledgeBaseService.recordSearchClick(5);
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('UPDATE kb_search_log'),
-        [5]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('UPDATE kb_search_log'), [5]);
     });
   });
 });
@@ -524,11 +523,13 @@ describe('KnowledgeBaseService - Feedback', () => {
         comment: 'Great!'
       });
 
-      expect(mockDb.run).toHaveBeenNthCalledWith(1,
+      expect(mockDb.run).toHaveBeenNthCalledWith(
+        1,
         expect.stringContaining('INSERT INTO kb_article_feedback'),
         expect.arrayContaining([1, 10, 'client', 1, 'Great!'])
       );
-      expect(mockDb.run).toHaveBeenNthCalledWith(2,
+      expect(mockDb.run).toHaveBeenNthCalledWith(
+        2,
         expect.stringContaining('helpful_count = helpful_count + 1'),
         [1]
       );
@@ -543,7 +544,8 @@ describe('KnowledgeBaseService - Feedback', () => {
         isHelpful: false
       });
 
-      expect(mockDb.run).toHaveBeenNthCalledWith(2,
+      expect(mockDb.run).toHaveBeenNthCalledWith(
+        2,
         expect.stringContaining('not_helpful_count = not_helpful_count + 1'),
         [2]
       );
@@ -555,9 +557,9 @@ describe('KnowledgeBaseService - Feedback', () => {
       await knowledgeBaseService.submitFeedback({ articleId: 3, isHelpful: true });
 
       const insertArgs = mockDb.run.mock.calls[0][1] as unknown[];
-      expect(insertArgs[1]).toBeNull();       // userId defaults to null
+      expect(insertArgs[1]).toBeNull(); // userId defaults to null
       expect(insertArgs[2]).toBe('anonymous'); // userType defaults to 'anonymous'
-      expect(insertArgs[4]).toBeNull();       // comment defaults to null
+      expect(insertArgs[4]).toBeNull(); // comment defaults to null
     });
   });
 });
@@ -572,9 +574,9 @@ describe('KnowledgeBaseService - Stats', () => {
   describe('getStats', () => {
     it('returns aggregated knowledge base statistics', async () => {
       mockDb.get.mockResolvedValueOnce({ count: 12, views: 340 }); // articleStats
-      mockDb.get.mockResolvedValueOnce({ count: 4 });               // categoryCount
+      mockDb.get.mockResolvedValueOnce({ count: 4 }); // categoryCount
       mockDb.all.mockResolvedValueOnce([{ query: 'intro', count: 5 }]); // recentSearches
-      mockDb.all.mockResolvedValueOnce([mockArticle]);              // topArticles
+      mockDb.all.mockResolvedValueOnce([mockArticle]); // topArticles
 
       const result = await knowledgeBaseService.getStats();
 

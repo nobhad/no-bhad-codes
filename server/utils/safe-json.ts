@@ -72,10 +72,7 @@ export function safeJsonParseOrNull<T>(
  * @param context - Optional context for logging
  * @returns Parsed array or empty array
  */
-export function safeJsonParseArray<T>(
-  value: string | null | undefined,
-  context?: string
-): T[] {
+export function safeJsonParseArray<T>(value: string | null | undefined, context?: string): T[] {
   const result = safeJsonParse<T[]>(value, [], context);
   return Array.isArray(result) ? result : [];
 }

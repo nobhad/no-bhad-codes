@@ -87,7 +87,9 @@ const makeRequest = (overrides: Partial<DocumentRequest> = {}): DocumentRequest 
   ...overrides
 });
 
-const makeTemplate = (overrides: Partial<DocumentRequestTemplate> = {}): DocumentRequestTemplate => ({
+const makeTemplate = (
+  overrides: Partial<DocumentRequestTemplate> = {}
+): DocumentRequestTemplate => ({
   id: 1,
   name: 'Standard ID',
   title: 'Government-Issued ID',
@@ -316,7 +318,11 @@ describe('DocumentRequestService - createFromTemplates', () => {
     mockDb.run.mockResolvedValueOnce({});
     mockDb.get.mockResolvedValueOnce(makeRequest({ title: 'Doc B' }));
 
-    const result = await documentRequestService.createFromTemplates(10, [1, 2], 'admin@example.com');
+    const result = await documentRequestService.createFromTemplates(
+      10,
+      [1, 2],
+      'admin@example.com'
+    );
     expect(result).toHaveLength(2);
   });
 });
@@ -353,20 +359,17 @@ describe('DocumentRequestService - getClientRequests', () => {
     mockDb.all.mockResolvedValueOnce([makeRequest(), makeRequest({ id: 2 })]);
     const result = await documentRequestService.getClientRequests(10);
     expect(result).toHaveLength(2);
-    expect(mockDb.all).toHaveBeenCalledWith(
-      expect.not.stringContaining('dr.status = ?'),
-      [10]
-    );
+    expect(mockDb.all).toHaveBeenCalledWith(expect.not.stringContaining('dr.status = ?'), [10]);
   });
 
   it('filters by status when provided', async () => {
     mockDb.all.mockResolvedValueOnce([makeRequest()]);
     await documentRequestService.getClientRequests(10, 'uploaded');
 
-    expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining('dr.status = ?'),
-      [10, 'uploaded']
-    );
+    expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('dr.status = ?'), [
+      10,
+      'uploaded'
+    ]);
   });
 });
 
@@ -381,20 +384,16 @@ describe('DocumentRequestService - getAllRequests', () => {
     mockDb.all.mockResolvedValueOnce([makeRequest()]);
     const result = await documentRequestService.getAllRequests();
     expect(result).toHaveLength(1);
-    expect(mockDb.all).toHaveBeenCalledWith(
-      expect.not.stringContaining('WHERE dr.status = ?'),
-      []
-    );
+    expect(mockDb.all).toHaveBeenCalledWith(expect.not.stringContaining('WHERE dr.status = ?'), []);
   });
 
   it('filters by status when provided', async () => {
     mockDb.all.mockResolvedValueOnce([makeRequest({ status: 'approved' })]);
     await documentRequestService.getAllRequests('approved');
 
-    expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE dr.status = ?'),
-      ['approved']
-    );
+    expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('WHERE dr.status = ?'), [
+      'approved'
+    ]);
   });
 });
 
@@ -407,7 +406,11 @@ describe('DocumentRequestService - getAdminStats', () => {
 
   it('returns admin stats with all fields', async () => {
     mockDb.get.mockResolvedValueOnce({
-      total: 10, pending: 3, uploaded: 2, approved: 4, overdue: 1
+      total: 10,
+      pending: 3,
+      uploaded: 2,
+      approved: 4,
+      overdue: 1
     });
 
     const result = await documentRequestService.getAdminStats();
@@ -444,7 +447,7 @@ describe('DocumentRequestService - getPendingRequests', () => {
     const result = await documentRequestService.getPendingRequests();
     expect(result).toHaveLength(2);
     expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining('status IN (\'requested\', \'viewed\', \'uploaded\', \'under_review\')')
+      expect.stringContaining("status IN ('requested', 'viewed', 'uploaded', 'under_review')")
     );
   });
 });
@@ -460,9 +463,7 @@ describe('DocumentRequestService - getRequestsForReview', () => {
     mockDb.all.mockResolvedValueOnce([makeRequest({ status: 'uploaded' })]);
     const result = await documentRequestService.getRequestsForReview();
     expect(result).toHaveLength(1);
-    expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining('status = \'uploaded\'')
-    );
+    expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining("status = 'uploaded'"));
   });
 });
 
@@ -516,9 +517,9 @@ describe('DocumentRequestService - uploadDocument', () => {
 
   it('throws when request not found', async () => {
     mockDb.get.mockResolvedValueOnce(null);
-    await expect(documentRequestService.uploadDocument(999, 1, 'client@example.com')).rejects.toThrow(
-      'Document request not found'
-    );
+    await expect(
+      documentRequestService.uploadDocument(999, 1, 'client@example.com')
+    ).rejects.toThrow('Document request not found');
   });
 
   it('updates file_id, uploaded_by and status to uploaded', async () => {
@@ -604,7 +605,10 @@ describe('DocumentRequestService - approveRequest', () => {
     mockDb.run.mockResolvedValueOnce({}); // logHistory
     mockDb.get.mockResolvedValueOnce(makeRequest({ status: 'approved' }));
 
-    const { request, approvedFileId } = await documentRequestService.approveRequest(1, 'admin@example.com');
+    const { request, approvedFileId } = await documentRequestService.approveRequest(
+      1,
+      'admin@example.com'
+    );
     expect(request.status).toBe('approved');
     expect(approvedFileId).toBeNull();
   });
@@ -613,8 +617,14 @@ describe('DocumentRequestService - approveRequest', () => {
     mockDb.get.mockResolvedValueOnce(makeRequest({ file_id: 10, project_id: 5 }));
     // copyFileToFilesTab: db.get (original file)
     mockDb.get.mockResolvedValueOnce({
-      id: 10, project_id: 5, filename: 'doc.pdf', original_filename: 'Tax Return.pdf',
-      file_path: '/uploads/doc.pdf', file_size: 1024, mime_type: 'application/pdf', file_type: 'document'
+      id: 10,
+      project_id: 5,
+      filename: 'doc.pdf',
+      original_filename: 'Tax Return.pdf',
+      file_path: '/uploads/doc.pdf',
+      file_size: 1024,
+      mime_type: 'application/pdf',
+      file_type: 'document'
     });
     // copyFileToFilesTab: db.run (INSERT new file)
     mockDb.run.mockResolvedValueOnce({ lastID: 20 });
@@ -625,7 +635,11 @@ describe('DocumentRequestService - approveRequest', () => {
     // getRequest
     mockDb.get.mockResolvedValueOnce(makeRequest({ status: 'approved', approved_file_id: 20 }));
 
-    const { request, approvedFileId } = await documentRequestService.approveRequest(1, 'admin@example.com', 'Looks good');
+    const { request, approvedFileId } = await documentRequestService.approveRequest(
+      1,
+      'admin@example.com',
+      'Looks good'
+    );
     expect(approvedFileId).toBe(20);
     expect(request.status).toBe('approved');
     expect(logger.info).toHaveBeenCalled();
@@ -646,8 +660,13 @@ describe('DocumentRequestService - approveRequest', () => {
   it('returns null approvedFileId when no project_id on request', async () => {
     mockDb.get.mockResolvedValueOnce(makeRequest({ file_id: 10, project_id: undefined }));
     mockDb.get.mockResolvedValueOnce({
-      id: 10, filename: 'doc.pdf', original_filename: 'doc.pdf',
-      file_path: '/uploads/doc.pdf', file_size: 1024, mime_type: 'application/pdf', file_type: 'document'
+      id: 10,
+      filename: 'doc.pdf',
+      original_filename: 'doc.pdf',
+      file_path: '/uploads/doc.pdf',
+      file_size: 1024,
+      mime_type: 'application/pdf',
+      file_type: 'document'
     });
     mockDb.run.mockResolvedValueOnce({}); // UPDATE
     mockDb.run.mockResolvedValueOnce({}); // logHistory
@@ -679,9 +698,15 @@ describe('DocumentRequestService - rejectRequest', () => {
     mockDb.get.mockResolvedValueOnce(makeRequest({ status: 'uploaded' }));
     mockDb.run.mockResolvedValueOnce({}); // UPDATE
     mockDb.run.mockResolvedValueOnce({}); // logHistory
-    mockDb.get.mockResolvedValueOnce(makeRequest({ status: 'rejected', rejection_reason: 'Wrong document' }));
+    mockDb.get.mockResolvedValueOnce(
+      makeRequest({ status: 'rejected', rejection_reason: 'Wrong document' })
+    );
 
-    const result = await documentRequestService.rejectRequest(1, 'admin@example.com', 'Wrong document');
+    const result = await documentRequestService.rejectRequest(
+      1,
+      'admin@example.com',
+      'Wrong document'
+    );
     expect(result.status).toBe('rejected');
 
     const updateParams = mockDb.run.mock.calls[0][1];
@@ -773,9 +798,7 @@ describe('DocumentRequestService - getOverdueRequests', () => {
     mockDb.all.mockResolvedValueOnce(overdue);
     const result = await documentRequestService.getOverdueRequests();
     expect(result).toHaveLength(1);
-    expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining('due_date < date(\'now\')')
-    );
+    expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining("due_date < date('now')"));
   });
 });
 
@@ -791,7 +814,7 @@ describe('DocumentRequestService - getProjectPendingRequests', () => {
     const result = await documentRequestService.getProjectPendingRequests(5);
     expect(result).toHaveLength(1);
     expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining('status NOT IN (\'approved\', \'rejected\')'),
+      expect.stringContaining("status NOT IN ('approved', 'rejected')"),
       [5]
     );
   });
@@ -809,7 +832,7 @@ describe('DocumentRequestService - getClientPendingRequests', () => {
     const result = await documentRequestService.getClientPendingRequests(10);
     expect(result).toHaveLength(1);
     expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining('status IN (\'requested\', \'viewed\')'),
+      expect.stringContaining("status IN ('requested', 'viewed')"),
       [10]
     );
   });
@@ -1063,7 +1086,9 @@ describe('DocumentRequestService - bulkRequestByProjectType', () => {
     mockDb.get.mockResolvedValueOnce(makeRequest({ id: 2 }));
 
     const result = await documentRequestService.bulkRequestByProjectType(
-      10, 'onboarding', 'admin@example.com'
+      10,
+      'onboarding',
+      'admin@example.com'
     );
     expect(result).toHaveLength(2);
   });
@@ -1082,7 +1107,11 @@ describe('DocumentRequestService - bulkRequestByProjectType', () => {
     mockDb.get.mockResolvedValueOnce(makeRequest());
 
     const result = await documentRequestService.bulkRequestByProjectType(
-      10, 'onboarding', 'admin@example.com', undefined, true
+      10,
+      'onboarding',
+      'admin@example.com',
+      undefined,
+      true
     );
     expect(result).toHaveLength(1);
   });
@@ -1109,10 +1138,7 @@ describe('DocumentRequestService - getRequestHistory', () => {
     const result = await documentRequestService.getRequestHistory(1);
     expect(result).toHaveLength(2);
     expect(result[0].action).toBe('approved');
-    expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE request_id = ?'),
-      [1]
-    );
+    expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('WHERE request_id = ?'), [1]);
   });
 
   it('returns empty array when no history exists', async () => {
@@ -1135,7 +1161,12 @@ describe('DocumentRequestService - getClientStats', () => {
 
   it('returns client stats with all fields populated', async () => {
     mockDb.get.mockResolvedValueOnce({
-      total: 5, pending: 2, uploaded: 1, approved: 1, rejected: 1, overdue: 0
+      total: 5,
+      pending: 2,
+      uploaded: 1,
+      approved: 1,
+      rejected: 1,
+      overdue: 0
     });
 
     const result = await documentRequestService.getClientStats(10);
@@ -1145,10 +1176,7 @@ describe('DocumentRequestService - getClientStats', () => {
     expect(result.approved).toBe(1);
     expect(result.rejected).toBe(1);
     expect(result.overdue).toBe(0);
-    expect(mockDb.get).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE client_id = ?'),
-      [10]
-    );
+    expect(mockDb.get).toHaveBeenCalledWith(expect.stringContaining('WHERE client_id = ?'), [10]);
   });
 
   it('defaults all stats to 0 when result is null', async () => {

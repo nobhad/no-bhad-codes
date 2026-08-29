@@ -6,7 +6,10 @@
  */
 
 import { getDatabase } from '../../database/init.js';
-import { checkAndUpdateMilestoneCompletion, updateProjectProgress } from '../progress-calculator.js';
+import {
+  checkAndUpdateMilestoneCompletion,
+  updateProjectProgress
+} from '../progress-calculator.js';
 import { userService } from '../user-service.js';
 import { logger } from '../logger.js';
 import {
@@ -50,23 +53,23 @@ async function calculateDueDateForTask(
   const db = getDatabase();
 
   // Get milestone due_date and project start_date
-  const milestone = await db.get(
+  const milestone = (await db.get(
     `SELECT m.due_date, p.start_date
      FROM milestones m
      JOIN projects p ON m.project_id = p.id
      WHERE m.id = ? AND m.project_id = ?`,
     [milestoneId, projectId]
-  ) as { due_date: string | null; start_date: string | null } | undefined;
+  )) as { due_date: string | null; start_date: string | null } | undefined;
 
   if (!milestone?.due_date) return null;
 
   // Get the previous milestone's due_date as the start boundary
-  const prevMilestone = await db.get(
+  const prevMilestone = (await db.get(
     `SELECT due_date FROM milestones
      WHERE project_id = ? AND due_date < ? AND id != ?
      ORDER BY due_date DESC LIMIT 1`,
     [projectId, milestone.due_date, milestoneId]
-  ) as { due_date: string } | undefined;
+  )) as { due_date: string } | undefined;
 
   const startDateStr = prevMilestone?.due_date || milestone.start_date;
   const start = startDateStr ? new Date(startDateStr) : new Date();
@@ -76,10 +79,10 @@ async function calculateDueDateForTask(
   end.setHours(0, 0, 0, 0);
 
   // Count existing tasks in this milestone (new task will be +1)
-  const countRow = await db.get(
+  const countRow = (await db.get(
     'SELECT COUNT(*) as count FROM project_tasks WHERE milestone_id = ? AND deleted_at IS NULL',
     [milestoneId]
-  ) as { count: number };
+  )) as { count: number };
   const totalTasks = (countRow?.count || 0) + 1; // +1 for the new task being created
 
   // Position the new task at the end (last slot)
@@ -111,14 +114,14 @@ export async function recalculateTaskDueDates(
   let updatedCount = 0;
 
   // Get all milestones for this project, ordered by due_date
-  const projectMilestones = await db.all(
+  const projectMilestones = (await db.all(
     `SELECT m.id, m.due_date, p.start_date
      FROM milestones m
      JOIN projects p ON m.project_id = p.id
      WHERE m.project_id = ? AND m.due_date IS NOT NULL
      ORDER BY m.due_date ASC`,
     [projectId]
-  ) as Array<{ id: number; due_date: string; start_date: string | null }>;
+  )) as Array<{ id: number; due_date: string; start_date: string | null }>;
 
   let previousMilestoneDueDate: string | null = null;
 
@@ -138,12 +141,12 @@ export async function recalculateTaskDueDates(
 
     // Get tasks for this milestone
     const dueDateFilter = options.overwriteExisting ? '' : ' AND t.due_date IS NULL';
-    const milestoneTasks = await db.all(
+    const milestoneTasks = (await db.all(
       `SELECT t.id FROM project_tasks t
        WHERE t.milestone_id = ? AND t.deleted_at IS NULL${dueDateFilter}
        ORDER BY t.sort_order ASC, t.created_at ASC`,
       [milestone.id]
-    ) as Array<{ id: number }>;
+    )) as Array<{ id: number }>;
 
     if (milestoneTasks.length === 0) {
       previousMilestoneDueDate = milestone.due_date;
@@ -151,23 +154,23 @@ export async function recalculateTaskDueDates(
     }
 
     // Count ALL tasks in milestone (for even distribution regardless of filter)
-    const totalRow = await db.get(
+    const totalRow = (await db.get(
       'SELECT COUNT(*) as count FROM project_tasks WHERE milestone_id = ? AND deleted_at IS NULL',
       [milestone.id]
-    ) as { count: number };
+    )) as { count: number };
     const totalTaskCount = totalRow?.count || milestoneTasks.length;
 
     const interval = daysUntilMilestone / totalTaskCount;
 
     // Get all tasks with their sort position to calculate correct offset
-    const allTasks = await db.all(
+    const allTasks = (await db.all(
       `SELECT id FROM project_tasks
        WHERE milestone_id = ? AND deleted_at IS NULL
        ORDER BY sort_order ASC, created_at ASC`,
       [milestone.id]
-    ) as Array<{ id: number }>;
+    )) as Array<{ id: number }>;
 
-    const taskIdsToUpdate = new Set(milestoneTasks.map(t => t.id));
+    const taskIdsToUpdate = new Set(milestoneTasks.map((t) => t.id));
 
     for (let i = 0; i < allTasks.length; i++) {
       if (!taskIdsToUpdate.has(allTasks[i].id)) continue;
@@ -178,7 +181,7 @@ export async function recalculateTaskDueDates(
       const dueDateStr = taskDueDate.toISOString().split('T')[0];
 
       await db.run(
-        'UPDATE project_tasks SET due_date = ?, updated_at = datetime(\'now\') WHERE id = ?',
+        "UPDATE project_tasks SET due_date = ?, updated_at = datetime('now') WHERE id = ?",
         [dueDateStr, allTasks[i].id]
       );
       updatedCount++;
@@ -348,7 +351,10 @@ export async function getTask(taskId: number): Promise<ProjectTask | null> {
   );
   task.subtasks = (subtaskRows as unknown as TaskRow[]).map(toTask);
 
-  const depRows = await db.all(`SELECT ${TASK_DEPENDENCY_COLUMNS} FROM task_dependencies WHERE task_id = ?`, [taskId]);
+  const depRows = await db.all(
+    `SELECT ${TASK_DEPENDENCY_COLUMNS} FROM task_dependencies WHERE task_id = ?`,
+    [taskId]
+  );
   task.dependencies = (depRows as unknown as DependencyRow[]).map(toDependency);
 
   const checklistRows = await db.all(
@@ -461,18 +467,20 @@ export async function deleteTask(taskId: number): Promise<void> {
   const db = getDatabase();
   const now = new Date().toISOString();
 
-  const task = (await db.get('SELECT milestone_id, project_id FROM project_tasks WHERE id = ? AND deleted_at IS NULL', [
-    taskId
-  ])) as { milestone_id: number | null; project_id: number } | undefined;
+  const task = (await db.get(
+    'SELECT milestone_id, project_id FROM project_tasks WHERE id = ? AND deleted_at IS NULL',
+    [taskId]
+  )) as { milestone_id: number | null; project_id: number } | undefined;
 
   if (!task) {
     throw new Error('Task not found');
   }
 
-  await db.run(
-    'UPDATE project_tasks SET deleted_at = ?, deleted_by = ? WHERE id = ?',
-    [now, 'admin', taskId]
-  );
+  await db.run('UPDATE project_tasks SET deleted_at = ?, deleted_by = ? WHERE id = ?', [
+    now,
+    'admin',
+    taskId
+  ]);
 
   if (task.milestone_id) {
     try {
@@ -493,10 +501,16 @@ export async function deleteTask(taskId: number): Promise<void> {
   }
 }
 
-export async function moveTask(taskId: number, newPosition: number, milestoneId?: number): Promise<void> {
+export async function moveTask(
+  taskId: number,
+  newPosition: number,
+  milestoneId?: number
+): Promise<void> {
   const db = getDatabase();
 
-  const task = await db.get(`SELECT ${PROJECT_TASK_COLUMNS} FROM project_tasks WHERE id = ?`, [taskId]);
+  const task = await db.get(`SELECT ${PROJECT_TASK_COLUMNS} FROM project_tasks WHERE id = ?`, [
+    taskId
+  ]);
 
   if (!task) {
     throw new Error('Task not found');
@@ -552,7 +566,10 @@ export async function addDependency(
     [taskId, dependsOnTaskId, type]
   );
 
-  const dep = await db.get(`SELECT ${TASK_DEPENDENCY_COLUMNS} FROM task_dependencies WHERE id = ?`, [result.lastID]);
+  const dep = await db.get(
+    `SELECT ${TASK_DEPENDENCY_COLUMNS} FROM task_dependencies WHERE id = ?`,
+    [result.lastID]
+  );
 
   if (!dep) {
     throw new Error('Failed to create dependency');
@@ -619,7 +636,11 @@ export async function getBlockedTasks(projectId: number): Promise<ProjectTask[]>
 // TASK COMMENTS
 // ============================================
 
-export async function addTaskComment(taskId: number, author: string, content: string): Promise<TaskComment> {
+export async function addTaskComment(
+  taskId: number,
+  author: string,
+  content: string
+): Promise<TaskComment> {
   const db = getDatabase();
 
   const authorUserId = await userService.getUserIdByEmailOrName(author);
@@ -679,7 +700,10 @@ export async function addChecklistItem(taskId: number, content: string): Promise
     [taskId, content, (Number(maxOrder?.max_order) || 0) + 1]
   );
 
-  const item = await db.get(`SELECT ${TASK_CHECKLIST_ITEM_COLUMNS} FROM task_checklist_items WHERE id = ?`, [result.lastID]);
+  const item = await db.get(
+    `SELECT ${TASK_CHECKLIST_ITEM_COLUMNS} FROM task_checklist_items WHERE id = ?`,
+    [result.lastID]
+  );
 
   if (!item) {
     throw new Error('Failed to create checklist item');
@@ -699,7 +723,10 @@ export async function toggleChecklistItem(itemId: number): Promise<ChecklistItem
     [itemId]
   );
 
-  const item = await db.get(`SELECT ${TASK_CHECKLIST_ITEM_COLUMNS} FROM task_checklist_items WHERE id = ?`, [itemId]);
+  const item = await db.get(
+    `SELECT ${TASK_CHECKLIST_ITEM_COLUMNS} FROM task_checklist_items WHERE id = ?`,
+    [itemId]
+  );
 
   if (!item) {
     throw new Error('Checklist item not found');
@@ -801,18 +828,43 @@ export async function getAllTasks(options?: {
  */
 export async function updateTaskAdmin(
   taskId: number,
-  data: { title?: string; description?: string; status?: string; priority?: string; dueDate?: string; assignedTo?: string }
+  data: {
+    title?: string;
+    description?: string;
+    status?: string;
+    priority?: string;
+    dueDate?: string;
+    assignedTo?: string;
+  }
 ): Promise<Record<string, unknown> | undefined> {
   const db = getDatabase();
   const updates: string[] = [];
   const values: SqlValue[] = [];
 
-  if (data.title !== undefined) { updates.push('title = ?'); values.push(data.title); }
-  if (data.description !== undefined) { updates.push('description = ?'); values.push(data.description); }
-  if (data.status !== undefined) { updates.push('status = ?'); values.push(data.status); }
-  if (data.priority !== undefined) { updates.push('priority = ?'); values.push(data.priority); }
-  if (data.dueDate !== undefined) { updates.push('due_date = ?'); values.push(data.dueDate); }
-  if (data.assignedTo !== undefined) { updates.push('assigned_to = ?'); values.push(data.assignedTo); }
+  if (data.title !== undefined) {
+    updates.push('title = ?');
+    values.push(data.title);
+  }
+  if (data.description !== undefined) {
+    updates.push('description = ?');
+    values.push(data.description);
+  }
+  if (data.status !== undefined) {
+    updates.push('status = ?');
+    values.push(data.status);
+  }
+  if (data.priority !== undefined) {
+    updates.push('priority = ?');
+    values.push(data.priority);
+  }
+  if (data.dueDate !== undefined) {
+    updates.push('due_date = ?');
+    values.push(data.dueDate);
+  }
+  if (data.assignedTo !== undefined) {
+    updates.push('assigned_to = ?');
+    values.push(data.assignedTo);
+  }
 
   if (updates.length === 0) return undefined;
 
@@ -825,10 +877,11 @@ export async function updateTaskAdmin(
     id, project_id, milestone_id, title, description, status, priority, assigned_to,
     due_date, estimated_hours, actual_hours, sort_order, parent_task_id,
     created_at, updated_at, completed_at
-  `.replace(/\s+/g, ' ').trim();
+  `
+    .replace(/\s+/g, ' ')
+    .trim();
 
-  return db.get(
-    `SELECT ${TASK_UPDATE_COLUMNS} FROM project_tasks WHERE id = ?`,
-    [taskId]
-  ) as Promise<Record<string, unknown> | undefined>;
+  return db.get(`SELECT ${TASK_UPDATE_COLUMNS} FROM project_tasks WHERE id = ?`, [
+    taskId
+  ]) as Promise<Record<string, unknown> | undefined>;
 }

@@ -197,9 +197,7 @@ class TvSfx {
     // screen, disabled-state on VOLUME ▼/▲ at the extremes) can react
     // without polling.
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(
-        new CustomEvent('tv-sfx:volume-change', { detail: { level: snapped } })
-      );
+      window.dispatchEvent(new CustomEvent('tv-sfx:volume-change', { detail: { level: snapped } }));
     }
   }
 
@@ -358,10 +356,21 @@ class TvSfx {
     // Disconnect after the source actually stops so we don't truncate
     // the fade. Time-based since AudioBufferSourceNode has no clean
     // 'ended' guarantee across browsers when stopped early.
-    setTimeout(() => {
-      try { src.disconnect(); } catch { /* already disconnected */ }
-      try { gain.disconnect(); } catch { /* already disconnected */ }
-    }, (MUSIC_FADE_OUT_S + 0.1) * 1000);
+    setTimeout(
+      () => {
+        try {
+          src.disconnect();
+        } catch {
+          /* already disconnected */
+        }
+        try {
+          gain.disconnect();
+        } catch {
+          /* already disconnected */
+        }
+      },
+      (MUSIC_FADE_OUT_S + 0.1) * 1000
+    );
   }
 
   // --------------------------------------------------------------------
@@ -529,29 +538,33 @@ class TvSfx {
     // audio — net result: silent first-channel-change static. Capture
     // phase guarantees primeContextSync() lands first so the ctx is
     // alive and resumed by the time .crt-tv's handler runs.
-    document.addEventListener('click', (event) => {
-      const target = event.target as HTMLElement | null;
-      if (!target) return;
-      const tvButton = target.closest(TV_BUTTON_SELECTOR);
-      if (!tvButton) return;
-      // CHANNEL / VOLUME (and the external mobile channel buttons) stay
-      // silent when the TV is powered off — a real CRT's controls don't
-      // make their tactile click when the set is dead. POWER is the
-      // exception: its click is the audible feedback that the set just
-      // turned back on, so it always plays.
-      const isPowerBtn = tvButton.matches('.crt-tv__btn--power');
-      if (!isPowerBtn) {
-        const tv = document.querySelector('.crt-tv');
-        if (tv?.classList.contains('is-powered-off')) return;
-      }
-      // Sync prime — must happen before any await so iOS counts it as
-      // gesture-driven. If no ctx yet, create one now (sync) and resume
-      // sync. If one exists but is suspended, just resume sync. Either
-      // way, by the time click() runs its async chain, the ctx is in a
-      // resumed state from inside the gesture.
-      this.primeContextSync();
-      void this.click();
-    }, true);
+    document.addEventListener(
+      'click',
+      (event) => {
+        const target = event.target as HTMLElement | null;
+        if (!target) return;
+        const tvButton = target.closest(TV_BUTTON_SELECTOR);
+        if (!tvButton) return;
+        // CHANNEL / VOLUME (and the external mobile channel buttons) stay
+        // silent when the TV is powered off — a real CRT's controls don't
+        // make their tactile click when the set is dead. POWER is the
+        // exception: its click is the audible feedback that the set just
+        // turned back on, so it always plays.
+        const isPowerBtn = tvButton.matches('.crt-tv__btn--power');
+        if (!isPowerBtn) {
+          const tv = document.querySelector('.crt-tv');
+          if (tv?.classList.contains('is-powered-off')) return;
+        }
+        // Sync prime — must happen before any await so iOS counts it as
+        // gesture-driven. If no ctx yet, create one now (sync) and resume
+        // sync. If one exists but is suspended, just resume sync. Either
+        // way, by the time click() runs its async chain, the ctx is in a
+        // resumed state from inside the gesture.
+        this.primeContextSync();
+        void this.click();
+      },
+      true
+    );
   }
 
   /** Synchronously create + resume the AudioContext from inside a user

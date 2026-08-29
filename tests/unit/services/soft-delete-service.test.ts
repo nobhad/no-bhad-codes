@@ -83,7 +83,12 @@ describe('SoftDeleteService - softDeleteClient', () => {
   });
 
   it('soft deletes a client with no projects', async () => {
-    const mockClient = { id: 1, company_name: 'Acme Corp', contact_name: null, email: 'acme@test.com' };
+    const mockClient = {
+      id: 1,
+      company_name: 'Acme Corp',
+      contact_name: null,
+      email: 'acme@test.com'
+    };
     mockDb.get.mockResolvedValueOnce(mockClient);
     mockDb.all.mockResolvedValueOnce([]); // no projects
     mockDb.run.mockResolvedValue(makeRunResult(0));
@@ -98,7 +103,12 @@ describe('SoftDeleteService - softDeleteClient', () => {
   });
 
   it('soft deletes a client and cascades to projects and proposals', async () => {
-    const mockClient = { id: 1, company_name: null, contact_name: 'Jane Doe', email: 'jane@test.com' };
+    const mockClient = {
+      id: 1,
+      company_name: null,
+      contact_name: 'Jane Doe',
+      email: 'jane@test.com'
+    };
     const mockProjects = [{ id: 10 }, { id: 11 }];
 
     mockDb.get.mockResolvedValueOnce(mockClient);
@@ -125,7 +135,12 @@ describe('SoftDeleteService - softDeleteClient', () => {
   });
 
   it('uses contact_name when company_name is absent', async () => {
-    const mockClient = { id: 2, company_name: null, contact_name: 'Bob Smith', email: 'bob@test.com' };
+    const mockClient = {
+      id: 2,
+      company_name: null,
+      contact_name: 'Bob Smith',
+      email: 'bob@test.com'
+    };
     mockDb.get.mockResolvedValueOnce(mockClient);
     mockDb.all.mockResolvedValueOnce([]);
     mockDb.run.mockResolvedValue(makeRunResult(0));
@@ -151,7 +166,9 @@ describe('SoftDeleteService - softDeleteClient', () => {
   it('throws and logs on database error', async () => {
     mockDb.get.mockRejectedValueOnce(new Error('DB connection failed'));
 
-    await expect(softDeleteService.softDeleteClient(1, 'admin@test.com')).rejects.toThrow('DB connection failed');
+    await expect(softDeleteService.softDeleteClient(1, 'admin@test.com')).rejects.toThrow(
+      'DB connection failed'
+    );
   });
 });
 
@@ -221,7 +238,9 @@ describe('SoftDeleteService - softDeleteProject', () => {
   it('throws and logs on database error', async () => {
     mockDb.get.mockRejectedValueOnce(new Error('Project DB error'));
 
-    await expect(softDeleteService.softDeleteProject(1, 'admin@test.com')).rejects.toThrow('Project DB error');
+    await expect(softDeleteService.softDeleteProject(1, 'admin@test.com')).rejects.toThrow(
+      'Project DB error'
+    );
   });
 });
 
@@ -265,7 +284,7 @@ describe('SoftDeleteService - softDeleteInvoice', () => {
     // Should call run twice: void + soft delete
     expect(mockDb.run).toHaveBeenCalledTimes(2);
     expect(mockDb.run).toHaveBeenCalledWith(
-      expect.stringContaining('status = \'voided\''),
+      expect.stringContaining("status = 'voided'"),
       expect.anything()
     );
   });
@@ -303,7 +322,9 @@ describe('SoftDeleteService - softDeleteInvoice', () => {
   it('throws on database error', async () => {
     mockDb.get.mockRejectedValueOnce(new Error('Invoice DB error'));
 
-    await expect(softDeleteService.softDeleteInvoice(1, 'admin@test.com')).rejects.toThrow('Invoice DB error');
+    await expect(softDeleteService.softDeleteInvoice(1, 'admin@test.com')).rejects.toThrow(
+      'Invoice DB error'
+    );
   });
 });
 
@@ -328,7 +349,13 @@ describe('SoftDeleteService - softDeleteLead', () => {
   });
 
   it('soft deletes a lead using project_name', async () => {
-    const mockLead = { id: 7, project_name: 'New Client Lead', company_name: null, contact_name: null, email: null };
+    const mockLead = {
+      id: 7,
+      project_name: 'New Client Lead',
+      company_name: null,
+      contact_name: null,
+      email: null
+    };
     mockDb.get.mockResolvedValueOnce(mockLead);
 
     const result = await softDeleteService.softDeleteLead(7, 'admin@test.com');
@@ -338,7 +365,13 @@ describe('SoftDeleteService - softDeleteLead', () => {
   });
 
   it('falls back to company_name when project_name is missing', async () => {
-    const mockLead = { id: 8, project_name: null, company_name: 'Big Corp', contact_name: null, email: null };
+    const mockLead = {
+      id: 8,
+      project_name: null,
+      company_name: 'Big Corp',
+      contact_name: null,
+      email: null
+    };
     mockDb.get.mockResolvedValueOnce(mockLead);
 
     const result = await softDeleteService.softDeleteLead(8, 'admin@test.com');
@@ -348,7 +381,13 @@ describe('SoftDeleteService - softDeleteLead', () => {
   });
 
   it('falls back to contact_name when project_name and company_name are missing', async () => {
-    const mockLead = { id: 9, project_name: null, company_name: null, contact_name: 'Alice', email: null };
+    const mockLead = {
+      id: 9,
+      project_name: null,
+      company_name: null,
+      contact_name: 'Alice',
+      email: null
+    };
     mockDb.get.mockResolvedValueOnce(mockLead);
 
     const result = await softDeleteService.softDeleteLead(9, 'admin@test.com');
@@ -358,7 +397,13 @@ describe('SoftDeleteService - softDeleteLead', () => {
   });
 
   it('falls back to Lead #id when all name fields are missing', async () => {
-    const mockLead = { id: 10, project_name: null, company_name: null, contact_name: null, email: null };
+    const mockLead = {
+      id: 10,
+      project_name: null,
+      company_name: null,
+      contact_name: null,
+      email: null
+    };
     mockDb.get.mockResolvedValueOnce(mockLead);
 
     const result = await softDeleteService.softDeleteLead(10, 'admin@test.com');
@@ -370,7 +415,9 @@ describe('SoftDeleteService - softDeleteLead', () => {
   it('throws on database error', async () => {
     mockDb.get.mockRejectedValueOnce(new Error('Lead DB error'));
 
-    await expect(softDeleteService.softDeleteLead(1, 'admin@test.com')).rejects.toThrow('Lead DB error');
+    await expect(softDeleteService.softDeleteLead(1, 'admin@test.com')).rejects.toThrow(
+      'Lead DB error'
+    );
   });
 });
 
@@ -418,7 +465,9 @@ describe('SoftDeleteService - softDeleteProposal', () => {
   it('throws on database error', async () => {
     mockDb.get.mockRejectedValueOnce(new Error('Proposal DB error'));
 
-    await expect(softDeleteService.softDeleteProposal(1, 'admin@test.com')).rejects.toThrow('Proposal DB error');
+    await expect(softDeleteService.softDeleteProposal(1, 'admin@test.com')).rejects.toThrow(
+      'Proposal DB error'
+    );
   });
 });
 
@@ -483,7 +532,9 @@ describe('SoftDeleteService - softDelete (generic)', () => {
   it('throws on database error', async () => {
     mockDb.get.mockRejectedValueOnce(new Error('Generic DB error'));
 
-    await expect(softDeleteService.softDelete('task', 1, 'admin@test.com')).rejects.toThrow('Generic DB error');
+    await expect(softDeleteService.softDelete('task', 1, 'admin@test.com')).rejects.toThrow(
+      'Generic DB error'
+    );
   });
 });
 
@@ -591,7 +642,7 @@ describe('SoftDeleteService - restore', () => {
 
     expect(result.success).toBe(true);
     expect(mockDb.run).toHaveBeenCalledWith(
-      expect.stringContaining('status = \'draft\''),
+      expect.stringContaining("status = 'draft'"),
       expect.anything()
     );
   });
@@ -605,7 +656,7 @@ describe('SoftDeleteService - restore', () => {
     expect(result.success).toBe(true);
     // Should NOT set status to draft since it wasn't voided
     expect(mockDb.run).not.toHaveBeenCalledWith(
-      expect.stringContaining('status = \'draft\''),
+      expect.stringContaining("status = 'draft'"),
       expect.anything()
     );
   });
@@ -636,7 +687,13 @@ describe('SoftDeleteService - getDeletedItems', () => {
 
   it('returns deleted items for a specific entity type', async () => {
     mockDb.all.mockResolvedValueOnce([
-      { id: 1, name: 'Deleted Client', deleted_at: '2026-01-10T00:00:00Z', deleted_by: 'admin@test.com', days_remaining: 20 }
+      {
+        id: 1,
+        name: 'Deleted Client',
+        deleted_at: '2026-01-10T00:00:00Z',
+        deleted_by: 'admin@test.com',
+        days_remaining: 20
+      }
     ]);
 
     const result = await softDeleteService.getDeletedItems('client');
@@ -650,7 +707,13 @@ describe('SoftDeleteService - getDeletedItems', () => {
 
   it('sets canRestore=false when days_remaining is 0 or negative', async () => {
     mockDb.all.mockResolvedValueOnce([
-      { id: 2, name: 'Old Item', deleted_at: '2025-11-01T00:00:00Z', deleted_by: 'admin@test.com', days_remaining: -5 }
+      {
+        id: 2,
+        name: 'Old Item',
+        deleted_at: '2025-11-01T00:00:00Z',
+        deleted_by: 'admin@test.com',
+        days_remaining: -5
+      }
     ]);
 
     const result = await softDeleteService.getDeletedItems('project');
@@ -661,7 +724,13 @@ describe('SoftDeleteService - getDeletedItems', () => {
 
   it('defaults deletedBy to "system" when null', async () => {
     mockDb.all.mockResolvedValueOnce([
-      { id: 3, name: 'Auto-deleted', deleted_at: '2026-01-05T00:00:00Z', deleted_by: null, days_remaining: 10 }
+      {
+        id: 3,
+        name: 'Auto-deleted',
+        deleted_at: '2026-01-05T00:00:00Z',
+        deleted_by: null,
+        days_remaining: 10
+      }
     ]);
 
     const result = await softDeleteService.getDeletedItems('invoice');
@@ -683,8 +752,20 @@ describe('SoftDeleteService - getDeletedItems', () => {
     // Two calls for two entity types when filtering by 'client' only returns 1 call
     // Test with single type to keep it deterministic
     mockDb.all.mockResolvedValueOnce([
-      { id: 1, name: 'Older', deleted_at: '2026-01-01T00:00:00Z', deleted_by: 'a', days_remaining: 25 },
-      { id: 2, name: 'Newer', deleted_at: '2026-01-15T00:00:00Z', deleted_by: 'a', days_remaining: 10 }
+      {
+        id: 1,
+        name: 'Older',
+        deleted_at: '2026-01-01T00:00:00Z',
+        deleted_by: 'a',
+        days_remaining: 25
+      },
+      {
+        id: 2,
+        name: 'Newer',
+        deleted_at: '2026-01-15T00:00:00Z',
+        deleted_by: 'a',
+        days_remaining: 10
+      }
     ]);
 
     const result = await softDeleteService.getDeletedItems('client');

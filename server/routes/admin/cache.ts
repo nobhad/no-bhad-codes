@@ -73,9 +73,13 @@ router.post(
           user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' }
         });
 
-        sendSuccess(res, {
-          timestamp: new Date().toISOString()
-        }, 'Cache cleared successfully');
+        sendSuccess(
+          res,
+          {
+            timestamp: new Date().toISOString()
+          },
+          'Cache cleared successfully'
+        );
       } else {
         errorResponse(res, 'Failed to clear cache', 500, ErrorCodes.CACHE_CLEAR_FAILED);
       }
@@ -118,7 +122,12 @@ router.post(
     const { tag, pattern } = req.body;
 
     if (!tag && !pattern) {
-      return errorResponse(res, 'Either tag or pattern is required', 400, ErrorCodes.MISSING_PARAMETERS);
+      return errorResponse(
+        res,
+        'Either tag or pattern is required',
+        400,
+        ErrorCodes.MISSING_PARAMETERS
+      );
     }
 
     if (!cacheService.isAvailable()) {
@@ -141,12 +150,16 @@ router.post(
         extra: { tag, pattern, invalidatedCount: count }
       });
 
-      sendSuccess(res, {
-        count,
-        tag,
-        pattern,
-        timestamp: new Date().toISOString()
-      }, `Invalidated ${count} cache entries`);
+      sendSuccess(
+        res,
+        {
+          count,
+          tag,
+          pattern,
+          timestamp: new Date().toISOString()
+        },
+        `Invalidated ${count} cache entries`
+      );
     } catch (error) {
       logger.error('Error invalidating cache:', {
         error: error instanceof Error ? error : undefined

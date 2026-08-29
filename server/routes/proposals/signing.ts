@@ -27,21 +27,22 @@ import type { AuthenticatedRequest, SignatureAuthorizationReason } from './helpe
 
 const SIGNATURE_TOKEN_REGEX = /^[a-f0-9]{32,64}$/i;
 
-function mapSignatureAuthError(
-  reason: SignatureAuthorizationReason
-): { status: number; code: string } {
+function mapSignatureAuthError(reason: SignatureAuthorizationReason): {
+  status: number;
+  code: string;
+} {
   switch (reason) {
-  case 'EXPIRED':
-    return { status: 410, code: ErrorCodes.SIGNATURE_EXPIRED };
-  case 'ALREADY_SIGNED':
-    return { status: 400, code: ErrorCodes.ALREADY_SIGNED };
-  case 'DECLINED':
-    return { status: 400, code: ErrorCodes.SIGNATURE_DECLINED };
-  case 'EMAIL_MISMATCH':
-    return { status: 403, code: ErrorCodes.UNAUTHORIZED };
-  case 'NOT_FOUND':
-  default:
-    return { status: 404, code: ErrorCodes.RESOURCE_NOT_FOUND };
+    case 'EXPIRED':
+      return { status: 410, code: ErrorCodes.SIGNATURE_EXPIRED };
+    case 'ALREADY_SIGNED':
+      return { status: 400, code: ErrorCodes.ALREADY_SIGNED };
+    case 'DECLINED':
+      return { status: 400, code: ErrorCodes.SIGNATURE_DECLINED };
+    case 'EMAIL_MISMATCH':
+      return { status: 403, code: ErrorCodes.UNAUTHORIZED };
+    case 'NOT_FOUND':
+    default:
+      return { status: 404, code: ErrorCodes.RESOURCE_NOT_FOUND };
   }
 }
 
@@ -195,12 +196,7 @@ async function handleTokenSign(
     const signature = await proposalService.recordSignatureByToken(token, signatureData);
 
     if (proposalId !== null && signature.proposalId !== proposalId) {
-      errorResponse(
-        res,
-        'Signature request does not match proposal',
-        403,
-        ErrorCodes.UNAUTHORIZED
-      );
+      errorResponse(res, 'Signature request does not match proposal', 403, ErrorCodes.UNAUTHORIZED);
       return;
     }
 
@@ -326,7 +322,12 @@ router.get(
 
     const request = await proposalService.getSignatureRequestByToken(token);
     if (!request) {
-      return errorResponse(res, 'Invalid or expired signature request', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+      return errorResponse(
+        res,
+        'Invalid or expired signature request',
+        404,
+        ErrorCodes.RESOURCE_NOT_FOUND
+      );
     }
 
     // Check if token has expired
@@ -336,10 +337,20 @@ router.get(
 
     // Check if already signed or declined
     if (request.status === 'signed') {
-      return errorResponse(res, 'This proposal has already been signed', 400, ErrorCodes.ALREADY_SIGNED);
+      return errorResponse(
+        res,
+        'This proposal has already been signed',
+        400,
+        ErrorCodes.ALREADY_SIGNED
+      );
     }
     if (request.status === 'declined') {
-      return errorResponse(res, 'This signature request was declined', 400, ErrorCodes.SIGNATURE_DECLINED);
+      return errorResponse(
+        res,
+        'This signature request was declined',
+        400,
+        ErrorCodes.SIGNATURE_DECLINED
+      );
     }
 
     // Mark as viewed
@@ -383,7 +394,12 @@ router.post(
 
     // Validate reason length if provided
     if (reason && typeof reason === 'string' && reason.length > 2000) {
-      return errorResponse(res, 'Reason is too long (max 2000 characters)', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'Reason is too long (max 2000 characters)',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     await proposalService.declineSignature(token, reason);

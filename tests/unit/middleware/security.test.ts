@@ -428,7 +428,7 @@ describe('Security Middleware', () => {
 
     it('should detect SQL injection attempts', async () => {
       const middleware = suspiciousActivityDetector({ maxSqlInjectionAttempts: 2 });
-      mockReq.url = '/api/test?id=1\' OR \'1\'=\'1';
+      mockReq.url = "/api/test?id=1' OR '1'='1";
 
       await middleware(mockReq as Request, mockRes as Response, mockNext);
       await middleware(mockReq as Request, mockRes as Response, mockNext);

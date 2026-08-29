@@ -344,7 +344,7 @@ export const analyticsService = {
       safeQuery = `${safeQuery.replace(/;?\s*$/, '')} LIMIT 1000`;
     }
 
-    const rows = await db.all(safeQuery) as Record<string, unknown>[];
+    const rows = (await db.all(safeQuery)) as Record<string, unknown>[];
     const executionTime = Date.now() - startTime;
     const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
 
@@ -359,26 +359,29 @@ export const analyticsService = {
     const { getDatabase } = await import('../database/init.js');
     const db = getDatabase();
 
-    const result = await db.run(`
+    const result = await db.run(
+      `
       INSERT INTO saved_analytics_queries (name, description, query)
       VALUES (?, ?, ?)
-    `, [params.name.trim(), params.description?.trim() || null, params.query.trim()]);
+    `,
+      [params.name.trim(), params.description?.trim() || null, params.query.trim()]
+    );
 
-    return db.get(`
+    return db.get(
+      `
       SELECT id, name, description, query, created_at as createdAt
       FROM saved_analytics_queries
       WHERE id = ?
-    `, [result.lastID]) as Promise<Record<string, unknown> | undefined>;
+    `,
+      [result.lastID]
+    ) as Promise<Record<string, unknown> | undefined>;
   },
 
   async deleteAnalyticsQuery(queryId: number): Promise<boolean> {
     const { getDatabase } = await import('../database/init.js');
     const db = getDatabase();
 
-    const existing = await db.get(
-      'SELECT id FROM saved_analytics_queries WHERE id = ?',
-      [queryId]
-    );
+    const existing = await db.get('SELECT id FROM saved_analytics_queries WHERE id = ?', [queryId]);
     if (!existing) return false;
 
     await db.run('DELETE FROM saved_analytics_queries WHERE id = ?', [queryId]);

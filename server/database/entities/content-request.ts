@@ -153,12 +153,16 @@ export interface ContentRequestTemplateRow extends DatabaseRow {
 export const CHECKLIST_COLUMNS = `
   crc.id, crc.project_id, crc.client_id, crc.name, crc.description,
   crc.status, crc.completed_at, crc.created_at, crc.updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const CHECKLIST_COLUMNS_WITH_JOINS = `
   ${CHECKLIST_COLUMNS},
   p.project_name, c.contact_name AS client_name
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const ITEM_COLUMNS = `
   cri.id, cri.checklist_id, cri.project_id, cri.client_id,
@@ -168,17 +172,23 @@ export const ITEM_COLUMNS = `
   cri.admin_notes, cri.reviewed_at, cri.submitted_at,
   cri.reminder_sent_at, cri.reminder_count,
   cri.created_at, cri.updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const TEMPLATE_COLUMNS = `
   id, name, description, items, project_type, is_active, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // SCHEMAS & MAPPERS
 // =====================================================
 
-export const contentChecklistSchema = defineSchema<Omit<ContentChecklist, 'items' | 'completionStats'>>({
+export const contentChecklistSchema = defineSchema<
+  Omit<ContentChecklist, 'items' | 'completionStats'>
+>({
   id: 'number',
   projectId: { column: 'project_id', type: 'number' },
   clientId: { column: 'client_id', type: 'number' },
@@ -228,7 +238,11 @@ export const contentItemSchema = defineSchema<ContentItem>({
     type: 'string?',
     transform: (v) => {
       if (!v) return null;
-      try { return JSON.parse(v as string); } catch { return null; }
+      try {
+        return JSON.parse(v as string);
+      } catch {
+        return null;
+      }
     }
   },
   adminNotes: { column: 'admin_notes', type: 'string?' },
@@ -248,7 +262,11 @@ export const contentRequestTemplateSchema = defineSchema<ContentRequestTemplate>
     column: 'items',
     type: 'string',
     transform: (v) => {
-      try { return JSON.parse(v as string); } catch { return []; }
+      try {
+        return JSON.parse(v as string);
+      } catch {
+        return [];
+      }
     }
   },
   projectType: { column: 'project_type', type: 'string?' },
@@ -257,6 +275,11 @@ export const contentRequestTemplateSchema = defineSchema<ContentRequestTemplate>
   updatedAt: { column: 'updated_at', type: 'string' }
 });
 
-export const toContentChecklist = createMapper<ContentChecklistRow, ContentChecklist>(contentChecklistSchema);
+export const toContentChecklist = createMapper<ContentChecklistRow, ContentChecklist>(
+  contentChecklistSchema
+);
 export const toContentItem = createMapper<ContentItemRow, ContentItem>(contentItemSchema);
-export const toContentRequestTemplate = createMapper<ContentRequestTemplateRow, ContentRequestTemplate>(contentRequestTemplateSchema);
+export const toContentRequestTemplate = createMapper<
+  ContentRequestTemplateRow,
+  ContentRequestTemplate
+>(contentRequestTemplateSchema);

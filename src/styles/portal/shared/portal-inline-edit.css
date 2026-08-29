@@ -8,7 +8,6 @@
  * Used across both admin and client portals.
  */
 
-
 /* Editable cell indicator */
 [data-page="admin"] .inline-editable,
 [data-page="admin"] .inline-editable-cell {
@@ -202,7 +201,6 @@
   font-size: var(--font-size-xs);
   outline: none;
 }
-
 
 /* Date input wrapper — positions the Calendar icon as a left prefix inside the input border */
 .portal .inline-edit-date-wrapper {
@@ -504,4 +502,3 @@
     text-align: left;
   }
 }
-

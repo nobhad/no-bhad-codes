@@ -19,10 +19,7 @@ export interface NotificationMessage {
   type: NotificationType;
 }
 
-export type NotificationFunction = (
-  message: string,
-  type: NotificationType
-) => void;
+export type NotificationFunction = (message: string, type: NotificationType) => void;
 
 // ============================================
 // CRUD NOTIFICATIONS
@@ -70,10 +67,7 @@ export const notify = {
   ],
 
   // SEND
-  sent: (entity: string): [string, NotificationType] => [
-    `${entity} sent successfully`,
-    'success'
-  ],
+  sent: (entity: string): [string, NotificationType] => [`${entity} sent successfully`, 'success'],
 
   emailSent: (recipient?: string): [string, NotificationType] => [
     recipient ? `Email sent to ${recipient}` : 'Email sent successfully',
@@ -91,15 +85,9 @@ export const notify = {
     'success'
   ],
 
-  approved: (entity: string): [string, NotificationType] => [
-    `${entity} approved`,
-    'success'
-  ],
+  approved: (entity: string): [string, NotificationType] => [`${entity} approved`, 'success'],
 
-  rejected: (entity: string): [string, NotificationType] => [
-    `${entity} rejected`,
-    'success'
-  ],
+  rejected: (entity: string): [string, NotificationType] => [`${entity} rejected`, 'success'],
 
   completed: (entity: string): [string, NotificationType] => [
     `${entity} marked as complete`,
@@ -107,15 +95,9 @@ export const notify = {
   ],
 
   // COPY
-  copied: (what = 'Copied to clipboard'): [string, NotificationType] => [
-    what,
-    'success'
-  ],
+  copied: (what = 'Copied to clipboard'): [string, NotificationType] => [what, 'success'],
 
-  linkCopied: (): [string, NotificationType] => [
-    'Link copied to clipboard',
-    'success'
-  ],
+  linkCopied: (): [string, NotificationType] => ['Link copied to clipboard', 'success'],
 
   // UPLOAD/DOWNLOAD
   uploaded: (entity: string, count = 1): [string, NotificationType] => [
@@ -123,10 +105,7 @@ export const notify = {
     'success'
   ],
 
-  downloadStarted: (): [string, NotificationType] => [
-    'Download started',
-    'info'
-  ],
+  downloadStarted: (): [string, NotificationType] => ['Download started', 'info'],
 
   exported: (entity: string): [string, NotificationType] => [
     `${entity} exported successfully`,
@@ -184,10 +163,7 @@ export const notify = {
   // WARNINGS
   warning: (message: string): [string, NotificationType] => [message, 'warning'],
 
-  unsavedChanges: (): [string, NotificationType] => [
-    'You have unsaved changes',
-    'warning'
-  ],
+  unsavedChanges: (): [string, NotificationType] => ['You have unsaved changes', 'warning'],
 
   // INFO
   info: (message: string): [string, NotificationType] => [message, 'info'],
@@ -221,20 +197,12 @@ export const notify = {
       'success'
     ],
 
-    statusChanged: (
-      count: number,
-      entity: string,
-      status: string
-    ): [string, NotificationType] => [
+    statusChanged: (count: number, entity: string, status: string): [string, NotificationType] => [
       `${count} ${count === 1 ? entity : `${entity}s`} marked as ${status}`,
       'success'
     ],
 
-    failed: (
-      count: number,
-      entity: string,
-      action: string
-    ): [string, NotificationType] => [
+    failed: (count: number, entity: string, action: string): [string, NotificationType] => [
       `Failed to ${action} ${count} ${count === 1 ? entity : `${entity}s`}`,
       'error'
     ]
@@ -253,26 +221,17 @@ export const notify = {
  * clientNotify.created();
  * clientNotify.deleted(3);
  */
-export function createEntityNotifier(
-  entity: string,
-  showNotification: NotificationFunction
-) {
+export function createEntityNotifier(entity: string, showNotification: NotificationFunction) {
   return {
-    created: (count = 1) =>
-      showNotification(...notify.created(entity, count)),
-    updated: (count = 1) =>
-      showNotification(...notify.updated(entity, count)),
+    created: (count = 1) => showNotification(...notify.created(entity, count)),
+    updated: (count = 1) => showNotification(...notify.updated(entity, count)),
     saved: () => showNotification(...notify.saved(entity)),
-    deleted: (count = 1) =>
-      showNotification(...notify.deleted(entity, count)),
-    archived: (count = 1) =>
-      showNotification(...notify.archived(entity, count)),
-    restored: (count = 1) =>
-      showNotification(...notify.restored(entity, count)),
+    deleted: (count = 1) => showNotification(...notify.deleted(entity, count)),
+    archived: (count = 1) => showNotification(...notify.archived(entity, count)),
+    restored: (count = 1) => showNotification(...notify.restored(entity, count)),
     sent: () => showNotification(...notify.sent(entity)),
     reminderSent: () => showNotification(...notify.reminderSent(entity)),
-    statusChanged: (status: string) =>
-      showNotification(...notify.statusChanged(entity, status)),
+    statusChanged: (status: string) => showNotification(...notify.statusChanged(entity, status)),
     approved: () => showNotification(...notify.approved(entity)),
     rejected: () => showNotification(...notify.rejected(entity)),
     completed: () => showNotification(...notify.completed(entity)),
@@ -285,12 +244,9 @@ export function createEntityNotifier(
     sendFailed: () => showNotification(...notify.sendFailed(entity)),
 
     // Bulk
-    bulkDeleted: (count: number) =>
-      showNotification(...notify.bulk.deleted(count, entity)),
-    bulkArchived: (count: number) =>
-      showNotification(...notify.bulk.archived(count, entity)),
-    bulkRestored: (count: number) =>
-      showNotification(...notify.bulk.restored(count, entity)),
+    bulkDeleted: (count: number) => showNotification(...notify.bulk.deleted(count, entity)),
+    bulkArchived: (count: number) => showNotification(...notify.bulk.archived(count, entity)),
+    bulkRestored: (count: number) => showNotification(...notify.bulk.restored(count, entity)),
     bulkStatusChanged: (count: number, status: string) =>
       showNotification(...notify.bulk.statusChanged(count, entity, status)),
     bulkFailed: (count: number, action: string) =>
@@ -320,12 +276,10 @@ export const notifiers = {
   contact: (fn: NotificationFunction) => createEntityNotifier('Contact', fn),
   file: (fn: NotificationFunction) => createEntityNotifier('File', fn),
   message: (fn: NotificationFunction) => createEntityNotifier('Message', fn),
-  deliverable: (fn: NotificationFunction) =>
-    createEntityNotifier('Deliverable', fn),
+  deliverable: (fn: NotificationFunction) => createEntityNotifier('Deliverable', fn),
   contract: (fn: NotificationFunction) => createEntityNotifier('Contract', fn),
   proposal: (fn: NotificationFunction) => createEntityNotifier('Proposal', fn),
-  questionnaire: (fn: NotificationFunction) =>
-    createEntityNotifier('Questionnaire', fn),
+  questionnaire: (fn: NotificationFunction) => createEntityNotifier('Questionnaire', fn),
   template: (fn: NotificationFunction) => createEntityNotifier('Template', fn),
   workflow: (fn: NotificationFunction) => createEntityNotifier('Workflow', fn)
 };

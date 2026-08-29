@@ -127,12 +127,12 @@ export function renderLoadingState(config: LoadingStateConfig = {}): string {
  */
 function getSkeletonItem(type: 'list' | 'cards' | 'table'): string {
   switch (type) {
-  case 'cards':
-    return '<div class="skeleton-item"><div class="skeleton-line skeleton-line--title"></div><div class="skeleton-line skeleton-line--text"></div><div class="skeleton-line skeleton-line--text skeleton-line--short"></div></div>';
-  case 'table':
-    return '<div class="skeleton-item"><div class="skeleton-line skeleton-line--full"></div></div>';
-  default:
-    return '<div class="skeleton-item"><div class="skeleton-line skeleton-line--title"></div><div class="skeleton-line skeleton-line--text"></div></div>';
+    case 'cards':
+      return '<div class="skeleton-item"><div class="skeleton-line skeleton-line--title"></div><div class="skeleton-line skeleton-line--text"></div><div class="skeleton-line skeleton-line--text skeleton-line--short"></div></div>';
+    case 'table':
+      return '<div class="skeleton-item"><div class="skeleton-line skeleton-line--full"></div></div>';
+    default:
+      return '<div class="skeleton-item"><div class="skeleton-line skeleton-line--title"></div><div class="skeleton-line skeleton-line--text"></div></div>';
   }
 }
 

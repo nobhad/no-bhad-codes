@@ -11,10 +11,7 @@
 
 import { getDatabase } from '../database/init.js';
 import { logger } from './logger.js';
-import {
-  USAGE_ALERT_THRESHOLD,
-  ROLLOVER_CAP_DEFAULT
-} from './retainer-types.js';
+import { USAGE_ALERT_THRESHOLD, ROLLOVER_CAP_DEFAULT } from './retainer-types.js';
 import type {
   RetainerRow,
   RetainerPeriodRow,
@@ -173,13 +170,10 @@ async function update(id: number, params: UpdateRetainerParams): Promise<void> {
 
   if (setClauses.length === 0) return;
 
-  setClauses.push('updated_at = datetime(\'now\')');
+  setClauses.push("updated_at = datetime('now')");
   values.push(id);
 
-  await db.run(
-    `UPDATE retainers SET ${setClauses.join(', ')} WHERE id = ?`,
-    values
-  );
+  await db.run(`UPDATE retainers SET ${setClauses.join(', ')} WHERE id = ?`, values);
 
   logger.info('Updated retainer', {
     category: 'retainers',
@@ -194,12 +188,12 @@ async function cancel(id: number): Promise<void> {
   const db = getDatabase();
 
   await db.run(
-    'UPDATE retainers SET status = \'cancelled\', updated_at = datetime(\'now\') WHERE id = ?',
+    "UPDATE retainers SET status = 'cancelled', updated_at = datetime('now') WHERE id = ?",
     [id]
   );
 
   await db.run(
-    'UPDATE retainer_periods SET status = \'closed\' WHERE retainer_id = ? AND status = \'active\'',
+    "UPDATE retainer_periods SET status = 'closed' WHERE retainer_id = ? AND status = 'active'",
     [id]
   );
 
@@ -216,7 +210,7 @@ async function pause(id: number): Promise<void> {
   const db = getDatabase();
 
   await db.run(
-    'UPDATE retainers SET status = \'paused\', updated_at = datetime(\'now\') WHERE id = ? AND status = \'active\'',
+    "UPDATE retainers SET status = 'paused', updated_at = datetime('now') WHERE id = ? AND status = 'active'",
     [id]
   );
 
@@ -233,7 +227,7 @@ async function resume(id: number): Promise<void> {
   const db = getDatabase();
 
   await db.run(
-    'UPDATE retainers SET status = \'active\', updated_at = datetime(\'now\') WHERE id = ? AND status = \'paused\'',
+    "UPDATE retainers SET status = 'active', updated_at = datetime('now') WHERE id = ? AND status = 'paused'",
     [id]
   );
 
@@ -251,7 +245,10 @@ async function resume(id: number): Promise<void> {
  * List retainers with optional filters. Includes client/project
  * names and current period data.
  */
-async function list(filters?: { status?: string; clientId?: number }): Promise<RetainerWithDetails[]> {
+async function list(filters?: {
+  status?: string;
+  clientId?: number;
+}): Promise<RetainerWithDetails[]> {
   const db = getDatabase();
 
   let whereClause = 'WHERE 1=1';
@@ -374,14 +371,14 @@ async function getSummary(): Promise<RetainerSummary> {
   let avgUtilization = 0;
   if (utilizationData.length > 0) {
     const totalUtilization = utilizationData.reduce((sum, row) => {
-      return sum + (row.used_hours / row.total_available);
+      return sum + row.used_hours / row.total_available;
     }, 0);
     avgUtilization = totalUtilization / utilizationData.length;
   }
 
   // Count retainers near cap (>= 80% utilization)
   const nearCapCount = utilizationData.filter(
-    (row) => (row.used_hours / row.total_available) >= USAGE_ALERT_THRESHOLD
+    (row) => row.used_hours / row.total_available >= USAGE_ALERT_THRESHOLD
   ).length;
 
   return {
@@ -403,7 +400,7 @@ async function getCurrentPeriod(retainerId: number): Promise<RetainerPeriodRow |
   const db = getDatabase();
 
   const period = (await db.get(
-    'SELECT * FROM retainer_periods WHERE retainer_id = ? AND status = \'active\' ORDER BY period_start DESC LIMIT 1',
+    "SELECT * FROM retainer_periods WHERE retainer_id = ? AND status = 'active' ORDER BY period_start DESC LIMIT 1",
     [retainerId]
   )) as RetainerPeriodRow | undefined;
 
@@ -436,10 +433,9 @@ async function getPeriods(retainerId: number): Promise<RetainerPeriodRow[]> {
 async function closePeriod(retainerId: number): Promise<void> {
   const db = getDatabase();
 
-  const retainer = (await db.get(
-    'SELECT * FROM retainers WHERE id = ?',
-    [retainerId]
-  )) as RetainerRow | undefined;
+  const retainer = (await db.get('SELECT * FROM retainers WHERE id = ?', [retainerId])) as
+    | RetainerRow
+    | undefined;
 
   if (!retainer) throw new NotFoundError('retainer');
 
@@ -447,10 +443,7 @@ async function closePeriod(retainerId: number): Promise<void> {
   if (!currentPeriod) throw new NotFoundError('active retainer period');
 
   // Close current period
-  await db.run(
-    'UPDATE retainer_periods SET status = \'closed\' WHERE id = ?',
-    [currentPeriod.id]
-  );
+  await db.run("UPDATE retainer_periods SET status = 'closed' WHERE id = ?", [currentPeriod.id]);
 
   // Calculate rollover
   const totalAvailable = currentPeriod.total_available ?? 0;
@@ -458,17 +451,13 @@ async function closePeriod(retainerId: number): Promise<void> {
   const unused = totalAvailable - usedHours;
   const rolloverEnabled = retainer.rollover_enabled === 1;
   const maxRollover = retainer.max_rollover_hours ?? ROLLOVER_CAP_DEFAULT;
-  const rolloverHours = rolloverEnabled
-    ? Math.min(Math.max(unused, 0), maxRollover)
-    : 0;
+  const rolloverHours = rolloverEnabled ? Math.min(Math.max(unused, 0), maxRollover) : 0;
 
   // Create next period
   const nextStart = getDayAfter(currentPeriod.period_end);
   const nextEnd = getEndOfMonth(nextStart);
   const allocatedHours = retainer.monthly_hours ?? null;
-  const nextTotalAvailable = allocatedHours !== null
-    ? allocatedHours + rolloverHours
-    : null;
+  const nextTotalAvailable = allocatedHours !== null ? allocatedHours + rolloverHours : null;
 
   await db.run(
     `INSERT INTO retainer_periods
@@ -549,10 +538,10 @@ async function processMonthlyBilling(): Promise<BillingResult> {
       const invoiceId = invoiceResult.lastID!;
 
       // Link invoice to period
-      await db.run(
-        'UPDATE retainer_periods SET invoice_id = ? WHERE id = ?',
-        [invoiceId, currentPeriod.id]
-      );
+      await db.run('UPDATE retainer_periods SET invoice_id = ? WHERE id = ?', [
+        invoiceId,
+        currentPeriod.id
+      ]);
 
       invoiced++;
 
@@ -617,17 +606,14 @@ async function sendUsageAlerts(): Promise<UsageAlertResult> {
       const { emailService } = await import('./email-service.js');
       const utilPct = Math.round((entry.used_hours / entry.total_available) * 100);
 
-      await emailService.sendAdminNotification(
-        'Retainer Usage Alert',
-        {
-          retainerId: entry.id,
-          clientName: entry.client_name,
-          projectName: entry.project_name,
-          usedHours: entry.used_hours,
-          totalAvailable: entry.total_available,
-          utilizationPercent: utilPct
-        }
-      );
+      await emailService.sendAdminNotification('Retainer Usage Alert', {
+        retainerId: entry.id,
+        clientName: entry.client_name,
+        projectName: entry.project_name,
+        usedHours: entry.used_hours,
+        totalAvailable: entry.total_available,
+        utilizationPercent: utilPct
+      });
 
       sent++;
     } catch (err) {
@@ -670,10 +656,10 @@ async function recalculateUsedHours(periodId: number): Promise<void> {
     [period.project_id, period.period_start, period.period_end]
   )) as { total_hours: number };
 
-  await db.run(
-    'UPDATE retainer_periods SET used_hours = ? WHERE id = ?',
-    [result.total_hours, periodId]
-  );
+  await db.run('UPDATE retainer_periods SET used_hours = ? WHERE id = ?', [
+    result.total_hours,
+    periodId
+  ]);
 
   logger.info('Recalculated used hours', {
     category: 'retainers',

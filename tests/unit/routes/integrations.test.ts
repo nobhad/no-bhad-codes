@@ -132,9 +132,7 @@ vi.mock('../../../server/services/logger', () => ({
 // HELPERS
 // ============================================
 
-function createMockReq(
-  overrides: Record<string, unknown> = {}
-) {
+function createMockReq(overrides: Record<string, unknown> = {}) {
   return {
     query: {},
     params: {},
@@ -263,7 +261,13 @@ describe('Integrations Routes', () => {
       const mockReport = {
         overall: 'degraded',
         integrations: [
-          { name: 'stripe', configured: true, healthy: false, error: 'API key invalid', checkedAt: '2024-01-01' }
+          {
+            name: 'stripe',
+            configured: true,
+            healthy: false,
+            error: 'API key invalid',
+            checkedAt: '2024-01-01'
+          }
         ],
         checkedAt: '2024-01-01'
       };
@@ -520,11 +524,14 @@ describe('Integrations Routes', () => {
       const res = createMockRes();
       await handler(req, res);
 
-      expect(mockSendSuccess).toHaveBeenCalledWith(res, expect.objectContaining({
-        configured: false,
-        connected: false,
-        syncConfig: null
-      }));
+      expect(mockSendSuccess).toHaveBeenCalledWith(
+        res,
+        expect.objectContaining({
+          configured: false,
+          connected: false,
+          syncConfig: null
+        })
+      );
     });
 
     it('should return calendar status with sync config when connected', async () => {

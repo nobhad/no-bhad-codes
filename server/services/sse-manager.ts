@@ -58,7 +58,12 @@ class SSEManager {
   /**
    * Add a new SSE client connection
    */
-  addClient(res: Response, userId: number, userEmail: string, userType: 'admin' | 'client'): string {
+  addClient(
+    res: Response,
+    userId: number,
+    userEmail: string,
+    userType: 'admin' | 'client'
+  ): string {
     const clientId = `${userType}-${userId}-${++this.connectionCounter}`;
 
     // Enforce per-user connection limit
@@ -141,7 +146,11 @@ class SSEManager {
    * Send event to all users associated with a thread
    * (useful for typing indicators, read receipts)
    */
-  sendToThread(threadParticipants: Array<{ userId: number; userType: 'admin' | 'client' }>, event: SSEEvent, excludeUserId?: number): void {
+  sendToThread(
+    threadParticipants: Array<{ userId: number; userType: 'admin' | 'client' }>,
+    event: SSEEvent,
+    excludeUserId?: number
+  ): void {
     for (const participant of threadParticipants) {
       if (excludeUserId && participant.userId === excludeUserId) continue;
       this.sendToUser(participant.userId, participant.userType, event);

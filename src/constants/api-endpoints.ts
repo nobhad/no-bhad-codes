@@ -303,18 +303,21 @@ export const buildEndpoint = {
   invoicePdf: (id: number | string) => `${API_ENDPOINTS.INVOICES}/${id}/pdf`,
 
   // Receipts
-  receiptsByInvoice: (invoiceId: number | string) => `${API_ENDPOINTS.RECEIPTS}/invoice/${invoiceId}`,
+  receiptsByInvoice: (invoiceId: number | string) =>
+    `${API_ENDPOINTS.RECEIPTS}/invoice/${invoiceId}`,
   receiptPdf: (id: number | string) => `${API_ENDPOINTS.RECEIPTS}/${id}/pdf`,
 
   // Contracts
   contract: (id: number | string) => `${API_ENDPOINTS.CONTRACTS}/${id}`,
   contractSend: (id: number | string) => `${API_ENDPOINTS.CONTRACTS}/${id}/send`,
-  contractPdf: (projectId: number | string) => `${API_ENDPOINTS.PROJECTS}/${projectId}/contract/pdf`,
+  contractPdf: (projectId: number | string) =>
+    `${API_ENDPOINTS.PROJECTS}/${projectId}/contract/pdf`,
 
   // Proposals
   adminProposal: (id: number | string) => `${API_ENDPOINTS.ADMIN.PROPOSALS}/${id}`,
   adminProposalSend: (id: number | string) => `${API_ENDPOINTS.ADMIN.PROPOSALS}/${id}/send`,
-  adminProposalDuplicate: (id: number | string) => `${API_ENDPOINTS.ADMIN.PROPOSALS}/${id}/duplicate`,
+  adminProposalDuplicate: (id: number | string) =>
+    `${API_ENDPOINTS.ADMIN.PROPOSALS}/${id}/duplicate`,
 
   // Contacts
   adminContact: (id: number | string) => `${API_ENDPOINTS.ADMIN.CONTACTS}/${id}`,
@@ -336,28 +339,37 @@ export const buildEndpoint = {
   fileDelete: (id: number | string) => `${API_ENDPOINTS.FILES}/file/${id}`,
 
   // Deleted Items
-  adminDeletedItemRestore: (id: number | string) => `${API_ENDPOINTS.ADMIN.DELETED_ITEMS}/${id}/restore`,
+  adminDeletedItemRestore: (id: number | string) =>
+    `${API_ENDPOINTS.ADMIN.DELETED_ITEMS}/${id}/restore`,
   adminDeletedItem: (id: number | string) => `${API_ENDPOINTS.ADMIN.DELETED_ITEMS}/${id}`,
 
   // Messages
   adminConversation: (id: number | string) => `${API_ENDPOINTS.ADMIN.MESSAGES_CONVERSATIONS}/${id}`,
-  adminConversationRead: (id: number | string) => `${API_ENDPOINTS.ADMIN.MESSAGES_CONVERSATIONS}/${id}/read`,
-  adminConversationStar: (id: number | string) => `${API_ENDPOINTS.ADMIN.MESSAGES_CONVERSATIONS}/${id}/star`,
-  adminConversationMessages: (id: number | string) => `${API_ENDPOINTS.ADMIN.MESSAGES_CONVERSATIONS}/${id}/messages`,
+  adminConversationRead: (id: number | string) =>
+    `${API_ENDPOINTS.ADMIN.MESSAGES_CONVERSATIONS}/${id}/read`,
+  adminConversationStar: (id: number | string) =>
+    `${API_ENDPOINTS.ADMIN.MESSAGES_CONVERSATIONS}/${id}/star`,
+  adminConversationMessages: (id: number | string) =>
+    `${API_ENDPOINTS.ADMIN.MESSAGES_CONVERSATIONS}/${id}/messages`,
 
   // Message Threads (Portal)
   messageThread: (id: number | string) => `${API_ENDPOINTS.MESSAGES}/threads/${id}`,
-  messageThreadByProject: (projectId: number | string) => `${API_ENDPOINTS.MESSAGES}/threads/by-project/${projectId}`,
-  messageThreadMessages: (id: number | string) => `${API_ENDPOINTS.MESSAGES}/threads/${id}/messages`,
+  messageThreadByProject: (projectId: number | string) =>
+    `${API_ENDPOINTS.MESSAGES}/threads/by-project/${projectId}`,
+  messageThreadMessages: (id: number | string) =>
+    `${API_ENDPOINTS.MESSAGES}/threads/${id}/messages`,
   messageItem: (id: number | string) => `${API_ENDPOINTS.MESSAGES}/messages/${id}`,
   messageReactions: (id: number | string) => `${API_ENDPOINTS.MESSAGES}/messages/${id}/reactions`,
-  messageReaction: (id: number | string, emoji: string) => `${API_ENDPOINTS.MESSAGES}/messages/${id}/reactions/${encodeURIComponent(emoji)}`,
+  messageReaction: (id: number | string, emoji: string) =>
+    `${API_ENDPOINTS.MESSAGES}/messages/${id}/reactions/${encodeURIComponent(emoji)}`,
 
   // Questionnaires
   questionnaire: (id: number | string) => `${API_ENDPOINTS.QUESTIONNAIRES}/${id}`,
   questionnaireSend: (id: number | string) => `${API_ENDPOINTS.QUESTIONNAIRES}/${id}/send`,
-  questionnaireResponseSave: (id: number | string) => `${API_ENDPOINTS.QUESTIONNAIRES}/responses/${id}/save`,
-  questionnaireResponseSubmit: (id: number | string) => `${API_ENDPOINTS.QUESTIONNAIRES}/responses/${id}/submit`,
+  questionnaireResponseSave: (id: number | string) =>
+    `${API_ENDPOINTS.QUESTIONNAIRES}/responses/${id}/save`,
+  questionnaireResponseSubmit: (id: number | string) =>
+    `${API_ENDPOINTS.QUESTIONNAIRES}/responses/${id}/submit`,
 
   // Document Requests
   documentRequest: (id: number | string) => `${API_ENDPOINTS.DOCUMENT_REQUESTS}/${id}`,
@@ -378,11 +390,13 @@ export const buildEndpoint = {
   adminLead: (id: number | string) => `${API_ENDPOINTS.ADMIN.LEADS}/${id}`,
   adminLeadStatus: (id: number | string) => `${API_ENDPOINTS.ADMIN.LEADS}/${id}/status`,
   adminLeadInvite: (id: number | string) => `${API_ENDPOINTS.ADMIN.LEADS}/${id}/invite`,
-  adminLeadCalculateScore: (id: number | string) => `${API_ENDPOINTS.ADMIN.LEADS}/${id}/calculate-score`,
+  adminLeadCalculateScore: (id: number | string) =>
+    `${API_ENDPOINTS.ADMIN.LEADS}/${id}/calculate-score`,
   adminScoringRule: (id: number | string) => `${API_ENDPOINTS.ADMIN.LEADS_SCORING_RULES}/${id}`,
 
   // Contact Submissions
-  adminContactSubmissionStatus: (id: number | string) => `${API_ENDPOINTS.ADMIN.CONTACT_SUBMISSIONS}/${id}/status`,
+  adminContactSubmissionStatus: (id: number | string) =>
+    `${API_ENDPOINTS.ADMIN.CONTACT_SUBMISSIONS}/${id}/status`,
 
   // Projects (admin)
   adminProject: (id: number | string) => `${API_ENDPOINTS.PROJECTS}/${id}`,
@@ -391,13 +405,15 @@ export const buildEndpoint = {
   messageThreadRead: (id: number | string) => `${API_ENDPOINTS.MESSAGE_THREADS}/${id}/read`,
 
   // Invoice downloads
-  invoicePaymentReceipt: (id: number | string) => `${API_ENDPOINTS.INVOICES}/payments/${id}/receipt`,
+  invoicePaymentReceipt: (id: number | string) =>
+    `${API_ENDPOINTS.INVOICES}/payments/${id}/receipt`,
 
   // File operations
   filePreview: (id: number | string) => `${API_ENDPOINTS.FILES}/${id}/preview`,
 
   // Document request file downloads
-  documentRequestFileDownload: (documentId: number | string) => `${API_ENDPOINTS.DOCUMENT_REQUESTS}/files/${documentId}/download`,
+  documentRequestFileDownload: (documentId: number | string) =>
+    `${API_ENDPOINTS.DOCUMENT_REQUESTS}/files/${documentId}/download`,
 
   // Project Templates
   projectTemplate: (id: number | string) => `${API_ENDPOINTS.ADMIN.PROJECT_TEMPLATES}/${id}`,
@@ -419,14 +435,17 @@ export const buildEndpoint = {
   agreement: (id: number | string) => `${API_ENDPOINTS.AGREEMENTS}/${id}`,
   agreementSend: (id: number | string) => `${API_ENDPOINTS.AGREEMENTS}/${id}/send`,
   agreementCancel: (id: number | string) => `${API_ENDPOINTS.AGREEMENTS}/${id}/cancel`,
-  agreementStepComplete: (stepId: number | string) => `${API_ENDPOINTS.AGREEMENTS}/steps/${stepId}/complete`,
+  agreementStepComplete: (stepId: number | string) =>
+    `${API_ENDPOINTS.AGREEMENTS}/steps/${stepId}/complete`,
   agreementView: (id: number | string) => `${API_ENDPOINTS.AGREEMENTS}/${id}/view`,
   agreementStepsReorder: (id: number | string) => `${API_ENDPOINTS.AGREEMENTS}/${id}/steps/reorder`,
   agreementExpiration: (id: number | string) => `${API_ENDPOINTS.AGREEMENTS}/${id}/expiration`,
 
   // Onboarding Checklist
-  onboardingStepComplete: (stepId: number | string) => `${API_ENDPOINTS.ONBOARDING_CHECKLIST}/steps/${stepId}/complete`,
-  onboardingTemplate: (id: number | string) => `${API_ENDPOINTS.ONBOARDING_CHECKLIST}/admin/templates/${id}`,
+  onboardingStepComplete: (stepId: number | string) =>
+    `${API_ENDPOINTS.ONBOARDING_CHECKLIST}/steps/${stepId}/complete`,
+  onboardingTemplate: (id: number | string) =>
+    `${API_ENDPOINTS.ONBOARDING_CHECKLIST}/admin/templates/${id}`,
 
   // Embed Widgets
   embedWidget: (id: number | string) => `${API_ENDPOINTS.EMBED}/${id}`,
@@ -437,9 +456,10 @@ export const buildEndpoint = {
   feedbackSurveyPublic: (token: string) => `/api/feedback/survey/${token}`,
   feedbackSurveySubmit: (token: string) => `/api/feedback/survey/${token}/submit`,
   testimonial: (id: number | string) => `${API_ENDPOINTS.FEEDBACK_TESTIMONIALS}/${id}`,
-  testimonialPublish: (id: number | string) => `${API_ENDPOINTS.FEEDBACK_TESTIMONIALS}/${id}/publish`,
-  testimonialFeature: (id: number | string) => `${API_ENDPOINTS.FEEDBACK_TESTIMONIALS}/${id}/feature`
-
+  testimonialPublish: (id: number | string) =>
+    `${API_ENDPOINTS.FEEDBACK_TESTIMONIALS}/${id}/publish`,
+  testimonialFeature: (id: number | string) =>
+    `${API_ENDPOINTS.FEEDBACK_TESTIMONIALS}/${id}/feature`
 } as const;
 
 /**

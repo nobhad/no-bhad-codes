@@ -172,7 +172,11 @@ describe('formatSlackMessage', () => {
   });
 
   it('passes channel through to result', () => {
-    const result = formatSlackMessage('client.created', { client: { name: 'NewCo' } }, { channel: '#clients' });
+    const result = formatSlackMessage(
+      'client.created',
+      { client: { name: 'NewCo' } },
+      { channel: '#clients' }
+    );
     expect(result.channel).toBe('#clients');
   });
 
@@ -284,7 +288,9 @@ describe('formatDiscordMessage', () => {
   });
 
   it('uses warning color for invoice.overdue', () => {
-    const result = formatDiscordMessage('invoice.overdue', { invoice: { number: 'INV-001', amount: 500 } });
+    const result = formatDiscordMessage('invoice.overdue', {
+      invoice: { number: 'INV-001', amount: 500 }
+    });
     expect(result.embeds![0].color).toBe(0xf59e0b);
   });
 
@@ -346,10 +352,13 @@ describe('sendSlackNotification', () => {
 
     await sendSlackNotification('https://hooks.slack.com/abc', { text: 'Test' });
 
-    expect(mockFetch).toHaveBeenCalledWith('https://hooks.slack.com/abc', expect.objectContaining({
-      method: 'POST',
-      headers: expect.objectContaining({ 'Content-Type': 'application/json' })
-    }));
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://hooks.slack.com/abc',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({ 'Content-Type': 'application/json' })
+      })
+    );
   });
 
   it('returns failure with error message when response is not ok', async () => {
@@ -662,10 +671,7 @@ describe('deleteNotificationConfig', () => {
 
     await deleteNotificationConfig(42);
 
-    expect(mockDb.run).toHaveBeenCalledWith(
-      expect.stringContaining('DELETE'),
-      [42]
-    );
+    expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('DELETE'), [42]);
   });
 
   it('does not throw when id does not exist', async () => {

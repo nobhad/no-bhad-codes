@@ -4,12 +4,7 @@
  */
 
 import * as React from 'react';
-import {
-  CreditCard,
-  Calendar,
-  MessageSquare,
-  Zap
-} from 'lucide-react';
+import { CreditCard, Calendar, MessageSquare, Zap } from 'lucide-react';
 
 // ============================================
 // TYPES

@@ -32,10 +32,12 @@ export const AI_CONFIG = {
   maxTokensPerRequest: DEFAULT_MAX_TOKENS,
 
   /** Monthly spending limit in cents */
-  monthlyBudgetCents: parseInt(process.env.AI_MONTHLY_BUDGET_CENTS || '', 10) || DEFAULT_MONTHLY_BUDGET_CENTS,
+  monthlyBudgetCents:
+    parseInt(process.env.AI_MONTHLY_BUDGET_CENTS || '', 10) || DEFAULT_MONTHLY_BUDGET_CENTS,
 
   /** Maximum API calls per day (excludes cache hits) */
-  dailyRequestLimit: parseInt(process.env.AI_DAILY_REQUEST_LIMIT || '', 10) || DEFAULT_DAILY_REQUEST_LIMIT,
+  dailyRequestLimit:
+    parseInt(process.env.AI_DAILY_REQUEST_LIMIT || '', 10) || DEFAULT_DAILY_REQUEST_LIMIT,
 
   /** Whether to use response caching */
   cacheEnabled: true,
@@ -58,12 +60,12 @@ interface ModelPricing {
 /** Pricing in cents per million tokens */
 const MODEL_PRICING: Record<string, ModelPricing> = {
   'claude-sonnet-4-5-20250514': {
-    inputPerMillion: 3 * CENTS_PER_DOLLAR,   // $3/M input
-    outputPerMillion: 15 * CENTS_PER_DOLLAR   // $15/M output
+    inputPerMillion: 3 * CENTS_PER_DOLLAR, // $3/M input
+    outputPerMillion: 15 * CENTS_PER_DOLLAR // $15/M output
   },
   'claude-haiku-4-5-20251001': {
-    inputPerMillion: 0.80 * CENTS_PER_DOLLAR,  // $0.80/M input
-    outputPerMillion: 4 * CENTS_PER_DOLLAR     // $4/M output
+    inputPerMillion: 0.8 * CENTS_PER_DOLLAR, // $0.80/M input
+    outputPerMillion: 4 * CENTS_PER_DOLLAR // $4/M output
   }
 };
 

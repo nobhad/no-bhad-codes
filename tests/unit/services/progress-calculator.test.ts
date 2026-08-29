@@ -333,10 +333,11 @@ describe('checkAndUpdateMilestoneCompletion', () => {
     const changed = await checkAndUpdateMilestoneCompletion(1);
 
     expect(changed).toBe(true);
-    expect(mockDb.run).toHaveBeenCalledWith(
-      expect.stringContaining('UPDATE milestones'),
-      [true, true, 1]
-    );
+    expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('UPDATE milestones'), [
+      true,
+      true,
+      1
+    ]);
   });
 
   it('marks milestone as incomplete when tasks are not all done and it was complete', async () => {
@@ -348,10 +349,11 @@ describe('checkAndUpdateMilestoneCompletion', () => {
     const changed = await checkAndUpdateMilestoneCompletion(2);
 
     expect(changed).toBe(true);
-    expect(mockDb.run).toHaveBeenCalledWith(
-      expect.stringContaining('UPDATE milestones'),
-      [false, false, 2]
-    );
+    expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('UPDATE milestones'), [
+      false,
+      false,
+      2
+    ]);
   });
 
   it('returns false without updating when status has not changed (already complete)', async () => {
@@ -430,10 +432,7 @@ describe('updateProjectProgress', () => {
     const result = await updateProjectProgress(1);
 
     expect(result).toBe(50);
-    expect(mockDb.run).toHaveBeenCalledWith(
-      expect.stringContaining('UPDATE projects'),
-      [50, 1]
-    );
+    expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('UPDATE projects'), [50, 1]);
   });
 
   it('returns 100 when all tasks are completed', async () => {
@@ -454,10 +453,7 @@ describe('updateProjectProgress', () => {
     const result = await updateProjectProgress(3);
 
     expect(result).toBe(0);
-    expect(mockDb.run).toHaveBeenCalledWith(
-      expect.stringContaining('UPDATE projects'),
-      [0, 3]
-    );
+    expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('UPDATE projects'), [0, 3]);
   });
 
   it('throws when db.run fails', async () => {
@@ -556,10 +552,7 @@ describe('recalculateProjectProgress', () => {
 
     await recalculateProjectProgress(55);
 
-    expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE project_id = ?'),
-      [55]
-    );
+    expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('WHERE project_id = ?'), [55]);
   });
 
   it('throws when db.all fails', async () => {
@@ -664,16 +657,31 @@ describe('getMilestonesWithProgress', () => {
   it('returns multiple milestones with correct percentages', async () => {
     mockDb.all.mockResolvedValueOnce([
       {
-        id: 5, title: 'M1', description: '', due_date: null,
-        is_completed: true, total_tasks: 4, completed_tasks: 4
+        id: 5,
+        title: 'M1',
+        description: '',
+        due_date: null,
+        is_completed: true,
+        total_tasks: 4,
+        completed_tasks: 4
       },
       {
-        id: 6, title: 'M2', description: '', due_date: null,
-        is_completed: false, total_tasks: 4, completed_tasks: 2
+        id: 6,
+        title: 'M2',
+        description: '',
+        due_date: null,
+        is_completed: false,
+        total_tasks: 4,
+        completed_tasks: 2
       },
       {
-        id: 7, title: 'M3', description: '', due_date: null,
-        is_completed: false, total_tasks: 0, completed_tasks: 0
+        id: 7,
+        title: 'M3',
+        description: '',
+        due_date: null,
+        is_completed: false,
+        total_tasks: 0,
+        completed_tasks: 0
       }
     ]);
 

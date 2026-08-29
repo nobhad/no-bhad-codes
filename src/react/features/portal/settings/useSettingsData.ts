@@ -5,7 +5,14 @@
  * and tab management.
  */
 
-import { useState, useEffect, useCallback, useRef, type Dispatch, type SetStateAction } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  type Dispatch,
+  type SetStateAction
+} from 'react';
 import { unwrapApiData, apiFetch } from '@/utils/api-client';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { createLogger } from '@/utils/logger';
@@ -39,7 +46,15 @@ interface UseSettingsDataReturn {
   profile: ClientProfile | null;
   billing: BillingAddress;
   notifications: NotificationPreferences;
-  portalFetch: <T>(url: string, options?: { method?: string; body?: unknown; headers?: Record<string, string>; unwrap?: boolean }) => Promise<T>;
+  portalFetch: <T>(
+    url: string,
+    options?: {
+      method?: string;
+      body?: unknown;
+      headers?: Record<string, string>;
+      unwrap?: boolean;
+    }
+  ) => Promise<T>;
   fetchProfile: () => Promise<void>;
   handleProfileUpdate: (updates: Partial<ClientProfile>) => Promise<boolean>;
   handleBillingUpdate: (updates: BillingAddress) => Promise<boolean>;
@@ -54,7 +69,9 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<ClientProfile | null>(null);
   const [billing, setBilling] = useState<BillingAddress>({});
-  const [notifications, setNotifications] = useState<NotificationPreferences>(DEFAULT_NOTIFICATION_PREFS);
+  const [notifications, setNotifications] = useState<NotificationPreferences>(
+    DEFAULT_NOTIFICATION_PREFS
+  );
 
   const { portalFetch } = usePortalFetch({ getAuthToken });
 
@@ -83,23 +100,25 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
 
       // Billing address — server returns flat billing_* fields, map to BillingAddress shape
       const billingData: BillingAddress = {
-        billing_name: (rawClient.billing_name ?? '') as string || undefined,
-        billing_phone: (rawClient.billing_phone ?? rawClient.phone ?? '') as string || undefined,
-        billing_email: (rawClient.billing_email ?? rawClient.email ?? '') as string || undefined,
-        street_address: (rawClient.billing_address ?? rawClient.address ?? '') as string || undefined,
-        city: (rawClient.billing_city ?? rawClient.city ?? '') as string || undefined,
-        state: (rawClient.billing_state ?? rawClient.state ?? '') as string || undefined,
-        postal_code: (rawClient.billing_zip ?? rawClient.zip ?? '') as string || undefined,
-        country: (rawClient.billing_country ?? rawClient.country ?? '') as string || undefined
+        billing_name: ((rawClient.billing_name ?? '') as string) || undefined,
+        billing_phone: ((rawClient.billing_phone ?? rawClient.phone ?? '') as string) || undefined,
+        billing_email: ((rawClient.billing_email ?? rawClient.email ?? '') as string) || undefined,
+        street_address:
+          ((rawClient.billing_address ?? rawClient.address ?? '') as string) || undefined,
+        city: ((rawClient.billing_city ?? rawClient.city ?? '') as string) || undefined,
+        state: ((rawClient.billing_state ?? rawClient.state ?? '') as string) || undefined,
+        postal_code: ((rawClient.billing_zip ?? rawClient.zip ?? '') as string) || undefined,
+        country: ((rawClient.billing_country ?? rawClient.country ?? '') as string) || undefined
       };
       if (Object.values(billingData).some(Boolean)) {
         setBilling(billingData);
       }
 
       // Notification preferences
-      const notifPrefs = (rawClient.notification_preferences || payload.notification_preferences) as NotificationPreferences | undefined;
+      const notifPrefs = (rawClient.notification_preferences ||
+        payload.notification_preferences) as NotificationPreferences | undefined;
       if (notifPrefs) {
-        setNotifications(prev => ({ ...prev, ...notifPrefs }));
+        setNotifications((prev) => ({ ...prev, ...notifPrefs }));
       }
     } catch (err) {
       logger.error('Error fetching profile:', err);
@@ -115,61 +134,76 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
   }, [fetchProfile]);
 
   // --- Update handlers ---
-  const handleProfileUpdate = useCallback(async (updates: Partial<ClientProfile>): Promise<boolean> => {
-    try {
-      const response = await portalFetch(API_ENDPOINTS.CLIENTS_ME, { method: 'PUT', body: updates });
-      // Use server response if available, otherwise optimistic update
-      const serverProfile = (response as { client?: ClientProfile })?.client;
-      if (serverProfile) {
-        setProfile(serverProfile);
-      } else {
-        setProfile(prev => prev ? { ...prev, ...updates } : null);
+  const handleProfileUpdate = useCallback(
+    async (updates: Partial<ClientProfile>): Promise<boolean> => {
+      try {
+        const response = await portalFetch(API_ENDPOINTS.CLIENTS_ME, {
+          method: 'PUT',
+          body: updates
+        });
+        // Use server response if available, otherwise optimistic update
+        const serverProfile = (response as { client?: ClientProfile })?.client;
+        if (serverProfile) {
+          setProfile(serverProfile);
+        } else {
+          setProfile((prev) => (prev ? { ...prev, ...updates } : null));
+        }
+        showNotificationRef.current?.('Profile updated', 'success');
+        return true;
+      } catch (err) {
+        logger.error('Error updating profile:', err);
+        showNotificationRef.current?.('Failed to update profile', 'error');
+        return false;
       }
-      showNotificationRef.current?.('Profile updated', 'success');
-      return true;
-    } catch (err) {
-      logger.error('Error updating profile:', err);
-      showNotificationRef.current?.('Failed to update profile', 'error');
-      return false;
-    }
-  }, [portalFetch]);
+    },
+    [portalFetch]
+  );
 
-  const handleBillingUpdate = useCallback(async (updates: BillingAddress): Promise<boolean> => {
-    try {
-      // Map frontend field names to server field names
-      const serverPayload = {
-        billing_name: updates.billing_name,
-        phone: updates.billing_phone,
-        email: updates.billing_email,
-        address: updates.street_address,
-        city: updates.city,
-        state: updates.state,
-        zip: updates.postal_code,
-        country: updates.country
-      };
-      await portalFetch(API_ENDPOINTS.CLIENTS_ME_BILLING, { method: 'PUT', body: serverPayload });
-      setBilling(updates);
-      showNotificationRef.current?.('Billing address updated', 'success');
-      return true;
-    } catch (err) {
-      logger.error('Error updating billing:', err);
-      showNotificationRef.current?.('Failed to update billing address', 'error');
-      return false;
-    }
-  }, [portalFetch]);
+  const handleBillingUpdate = useCallback(
+    async (updates: BillingAddress): Promise<boolean> => {
+      try {
+        // Map frontend field names to server field names
+        const serverPayload = {
+          billing_name: updates.billing_name,
+          phone: updates.billing_phone,
+          email: updates.billing_email,
+          address: updates.street_address,
+          city: updates.city,
+          state: updates.state,
+          zip: updates.postal_code,
+          country: updates.country
+        };
+        await portalFetch(API_ENDPOINTS.CLIENTS_ME_BILLING, { method: 'PUT', body: serverPayload });
+        setBilling(updates);
+        showNotificationRef.current?.('Billing address updated', 'success');
+        return true;
+      } catch (err) {
+        logger.error('Error updating billing:', err);
+        showNotificationRef.current?.('Failed to update billing address', 'error');
+        return false;
+      }
+    },
+    [portalFetch]
+  );
 
-  const handleNotificationsUpdate = useCallback(async (updates: NotificationPreferences): Promise<boolean> => {
-    try {
-      await portalFetch(API_ENDPOINTS.CLIENTS_ME, { method: 'PUT', body: { notification_preferences: updates } });
-      setNotifications(updates);
-      showNotificationRef.current?.('Notification preferences updated', 'success');
-      return true;
-    } catch (err) {
-      logger.error('Error updating notifications:', err);
-      showNotificationRef.current?.('Failed to update notification preferences', 'error');
-      return false;
-    }
-  }, [portalFetch]);
+  const handleNotificationsUpdate = useCallback(
+    async (updates: NotificationPreferences): Promise<boolean> => {
+      try {
+        await portalFetch(API_ENDPOINTS.CLIENTS_ME, {
+          method: 'PUT',
+          body: { notification_preferences: updates }
+        });
+        setNotifications(updates);
+        showNotificationRef.current?.('Notification preferences updated', 'success');
+        return true;
+      } catch (err) {
+        logger.error('Error updating notifications:', err);
+        showNotificationRef.current?.('Failed to update notification preferences', 'error');
+        return false;
+      }
+    },
+    [portalFetch]
+  );
 
   return {
     activeTab,

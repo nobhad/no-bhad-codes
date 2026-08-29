@@ -48,15 +48,9 @@
         "composed": "/images/tv/title-cards/no-bhad-codes.webp",
         "bg": "/images/tv/title-cards/no-bhad-codes_bg.webp",
         "color": "#000000",
-        "primary": [
-          "NO BHAD",
-          "CODES"
-        ],
+        "primary": ["NO BHAD", "CODES"],
         "primaryPt": 100,
-        "secondary": [
-          "WEB DEVELOPMENT",
-          "PORTFOLIO SITE"
-        ],
+        "secondary": ["WEB DEVELOPMENT", "PORTFOLIO SITE"],
         "secondaryPt": 38
       },
       "duration": "Ongoing",
@@ -179,13 +173,9 @@
         "composed": "/images/tv/title-cards/the-backend.webp",
         "bg": "/images/tv/title-cards/the-backend_bg.webp",
         "color": "#ffffff",
-        "primary": [
-          "THE BACKEND"
-        ],
+        "primary": ["THE BACKEND"],
         "primaryPt": 100,
-        "secondary": [
-          "CLIENT & PROJECT MANAGEMENT SYSTEM"
-        ],
+        "secondary": ["CLIENT & PROJECT MANAGEMENT SYSTEM"],
         "secondaryPt": 48
       },
       "duration": "Ongoing",
@@ -267,14 +257,9 @@
         "composed": "/images/tv/title-cards/hedgewitch.webp",
         "bg": "/images/tv/title-cards/hedgewitch_bg.webp",
         "color": "#ffffff",
-        "primary": [
-          "HEDGEWITCH",
-          "HORTICULTURE"
-        ],
+        "primary": ["HEDGEWITCH", "HORTICULTURE"],
         "primaryPt": 90,
-        "secondary": [
-          "BUSINESS WEBSITE"
-        ],
+        "secondary": ["BUSINESS WEBSITE"],
         "secondaryPt": 38
       },
       "duration": "6 months",
@@ -388,19 +373,9 @@
       "description": "Custom-designed link-in-bio pages for social media profiles. Features animated backgrounds, theme customization, and analytics integration.",
       "category": "websites",
       "role": "Full Stack Developer & Designer",
-      "tools": [
-        "HTML",
-        "CSS",
-        "JavaScript",
-        "GSAP"
-      ],
+      "tools": ["HTML", "CSS", "JavaScript", "GSAP"],
       "year": 2025,
-      "technologies": [
-        "HTML",
-        "CSS",
-        "JavaScript",
-        "GSAP"
-      ],
+      "technologies": ["HTML", "CSS", "JavaScript", "GSAP"],
       "date": "2025-08-28",
       "status": "completed",
       "featured": false,

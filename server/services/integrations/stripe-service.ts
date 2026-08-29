@@ -29,7 +29,9 @@ import {
 
 const INVOICE_PAYMENT_LINK_COLUMNS = `
   id, invoice_id, stripe_session_id, payment_url, amount, currency, status, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // Stripe configuration
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
@@ -137,7 +139,9 @@ async function cleanupExpiredEvents(): Promise<void> {
 }
 
 // Schedule periodic cleanup of expired event IDs
-setInterval(() => { cleanupExpiredEvents().catch(() => {}); }, STRIPE_IDEMPOTENCY_CLEANUP_INTERVAL_MS);
+setInterval(() => {
+  cleanupExpiredEvents().catch(() => {});
+}, STRIPE_IDEMPOTENCY_CLEANUP_INTERVAL_MS);
 
 /**
  * Validate Stripe configuration before any operation
@@ -292,7 +296,8 @@ export async function createPaymentLink(config: PaymentLinkConfig): Promise<Paym
       }
     }
 
-    const response = await fetchWithTimeout(`${STRIPE_API_BASE}/checkout/sessions`, { timeoutMs: 10000,
+    const response = await fetchWithTimeout(`${STRIPE_API_BASE}/checkout/sessions`, {
+      timeoutMs: 10000,
       method: 'POST',
       headers: {
         Authorization: `Bearer ${STRIPE_SECRET_KEY}`,
@@ -401,7 +406,9 @@ export function verifyWebhookSignature(payload: string, signature: string): bool
 /**
  * Handle Stripe webhook event
  */
-export async function handleWebhookEvent(event: StripeWebhookEvent): Promise<{ alreadyProcessed: boolean }> {
+export async function handleWebhookEvent(
+  event: StripeWebhookEvent
+): Promise<{ alreadyProcessed: boolean }> {
   // Atomic claim: only the first delivery for this event.id proceeds.
   // Concurrent retries and replays short-circuit here.
   const fresh = await claimStripeEvent(event.id);
@@ -428,114 +435,114 @@ async function handleWebhookEventBody(
   db: ReturnType<typeof getDatabase>
 ): Promise<{ alreadyProcessed: boolean }> {
   switch (event.type) {
-  case 'checkout.session.completed': {
-    const session = event.data.object;
-    const metadata = (session as { metadata?: { invoice_id?: string } }).metadata;
-    const invoiceId = metadata?.invoice_id;
+    case 'checkout.session.completed': {
+      const session = event.data.object;
+      const metadata = (session as { metadata?: { invoice_id?: string } }).metadata;
+      const invoiceId = metadata?.invoice_id;
 
-    if (invoiceId) {
-      const sessionData = session as {
+      if (invoiceId) {
+        const sessionData = session as {
           payment_intent?: string;
           amount_total?: number;
           id?: string;
         };
         // Update invoice status to paid
-      await db.run(
-        `UPDATE invoices
+        await db.run(
+          `UPDATE invoices
            SET status = 'paid', paid_at = datetime('now'), payment_method = 'stripe',
                stripe_payment_intent_id = ?, updated_at = datetime('now')
            WHERE id = ?`,
-        [sessionData.payment_intent || '', invoiceId]
-      );
+          [sessionData.payment_intent || '', invoiceId]
+        );
 
-      // Record the payment
-      await recordPayment({
-        invoiceId: parseInt(invoiceId, 10),
-        amount: ((sessionData.amount_total as number) || 0) / 100, // Convert from cents
-        paymentMethod: 'stripe',
-        stripePaymentIntentId: sessionData.payment_intent || '',
-        stripeCheckoutSessionId: sessionData.id || '',
-        status: 'succeeded',
-        paidAt: new Date().toISOString()
-      });
+        // Record the payment
+        await recordPayment({
+          invoiceId: parseInt(invoiceId, 10),
+          amount: ((sessionData.amount_total as number) || 0) / 100, // Convert from cents
+          paymentMethod: 'stripe',
+          stripePaymentIntentId: sessionData.payment_intent || '',
+          stripeCheckoutSessionId: sessionData.id || '',
+          status: 'succeeded',
+          paidAt: new Date().toISOString()
+        });
 
-      // Update payment link status
-      await db.run(
-        'UPDATE invoice_payment_links SET status = \'completed\', completed_at = datetime(\'now\') WHERE stripe_session_id = ?',
-        [sessionData.id || '']
-      );
+        // Update payment link status
+        await db.run(
+          "UPDATE invoice_payment_links SET status = 'completed', completed_at = datetime('now') WHERE stripe_session_id = ?",
+          [sessionData.id || '']
+        );
 
-      logger.info(`Invoice ${invoiceId} marked as paid via Stripe`);
+        logger.info(`Invoice ${invoiceId} marked as paid via Stripe`);
+      }
+      break;
     }
-    break;
-  }
 
-  case 'checkout.session.expired': {
-    const session = event.data.object;
-    const metadata = (session as { metadata?: { invoice_id?: string } }).metadata;
-    const invoiceId = metadata?.invoice_id;
+    case 'checkout.session.expired': {
+      const session = event.data.object;
+      const metadata = (session as { metadata?: { invoice_id?: string } }).metadata;
+      const invoiceId = metadata?.invoice_id;
 
-    if (invoiceId) {
-      const sessionData = session as { id?: string };
-      // Update payment link status
-      await db.run(
-        'UPDATE invoice_payment_links SET status = \'expired\' WHERE stripe_session_id = ?',
-        [sessionData.id || '']
-      );
+      if (invoiceId) {
+        const sessionData = session as { id?: string };
+        // Update payment link status
+        await db.run(
+          "UPDATE invoice_payment_links SET status = 'expired' WHERE stripe_session_id = ?",
+          [sessionData.id || '']
+        );
+      }
+      break;
     }
-    break;
-  }
 
-  case 'payment_intent.payment_failed': {
-    const paymentIntent = event.data.object;
-    const metadata = (paymentIntent as { metadata?: { invoice_id?: string } }).metadata;
-    const invoiceId = metadata?.invoice_id;
+    case 'payment_intent.payment_failed': {
+      const paymentIntent = event.data.object;
+      const metadata = (paymentIntent as { metadata?: { invoice_id?: string } }).metadata;
+      const invoiceId = metadata?.invoice_id;
 
-    if (invoiceId) {
-      const piData = paymentIntent as { id?: string; last_payment_error?: { message?: string } };
-      // Log failed payment attempt
-      await db.run(
-        `INSERT INTO invoice_payment_attempts (invoice_id, stripe_payment_intent_id, status, error_message, created_at)
+      if (invoiceId) {
+        const piData = paymentIntent as { id?: string; last_payment_error?: { message?: string } };
+        // Log failed payment attempt
+        await db.run(
+          `INSERT INTO invoice_payment_attempts (invoice_id, stripe_payment_intent_id, status, error_message, created_at)
            VALUES (?, ?, 'failed', ?, datetime('now'))`,
-        [invoiceId, piData.id || '', piData.last_payment_error?.message || 'Payment failed']
-      );
+          [invoiceId, piData.id || '', piData.last_payment_error?.message || 'Payment failed']
+        );
+      }
+      break;
     }
-    break;
-  }
 
-  case 'charge.refunded': {
-    const charge = event.data.object as {
+    case 'charge.refunded': {
+      const charge = event.data.object as {
         payment_intent?: string;
         amount_refunded?: number;
         amount?: number;
       };
-    const paymentIntentId = charge.payment_intent;
+      const paymentIntentId = charge.payment_intent;
 
-    if (paymentIntentId) {
-      // Find invoice by payment intent and update status
-      const invoice = (await db.get(
-        'SELECT id FROM invoices WHERE stripe_payment_intent_id = ?',
-        [paymentIntentId]
-      )) as { id: number } | undefined;
+      if (paymentIntentId) {
+        // Find invoice by payment intent and update status
+        const invoice = (await db.get(
+          'SELECT id FROM invoices WHERE stripe_payment_intent_id = ?',
+          [paymentIntentId]
+        )) as { id: number } | undefined;
 
-      if (invoice) {
-        const refundAmount = ((charge.amount_refunded as number) || 0) / 100;
-        const totalAmount = ((charge.amount as number) || 0) / 100;
+        if (invoice) {
+          const refundAmount = ((charge.amount_refunded as number) || 0) / 100;
+          const totalAmount = ((charge.amount as number) || 0) / 100;
 
-        // Update invoice status based on refund amount
-        const newStatus = refundAmount >= totalAmount ? 'refunded' : 'partial_refund';
+          // Update invoice status based on refund amount
+          const newStatus = refundAmount >= totalAmount ? 'refunded' : 'partial_refund';
 
-        await db.run(
-          'UPDATE invoices SET status = ?, refund_amount = ?, updated_at = datetime(\'now\') WHERE id = ?',
-          [newStatus, refundAmount, invoice.id]
-        );
+          await db.run(
+            "UPDATE invoices SET status = ?, refund_amount = ?, updated_at = datetime('now') WHERE id = ?",
+            [newStatus, refundAmount, invoice.id]
+          );
+        }
       }
+      break;
     }
-    break;
-  }
 
-  default:
-    logger.info(`Unhandled Stripe event type: ${event.type}`);
+    default:
+      logger.info(`Unhandled Stripe event type: ${event.type}`);
   }
 
   // Event was already claimed at the top of handleWebhookEvent.
@@ -554,8 +561,7 @@ async function recordPayment(payment: InvoicePayment): Promise<void> {
   // payment_intent / checkout_session we have for this event.
   const intentId = payment.stripePaymentIntentId || null;
   const sessionId = payment.stripeCheckoutSessionId || null;
-  const dedupeSucceeded =
-    payment.status === 'succeeded' && (intentId || sessionId);
+  const dedupeSucceeded = payment.status === 'succeeded' && (intentId || sessionId);
 
   // payment_date is NOT NULL on the legacy schema; derive it from paidAt
   // when available, otherwise today. paid_at carries the precise timestamp.
@@ -647,7 +653,7 @@ export async function expirePaymentLink(invoiceId: number): Promise<void> {
   const db = getDatabase();
 
   await db.run(
-    'UPDATE invoice_payment_links SET status = \'cancelled\' WHERE invoice_id = ? AND status = \'active\'',
+    "UPDATE invoice_payment_links SET status = 'cancelled' WHERE invoice_id = ? AND status = 'active'",
     [invoiceId]
   );
 }
@@ -659,7 +665,7 @@ export function getStripeStatus(): {
   configured: boolean;
   mode: 'live' | 'test' | 'not_configured';
   webhookConfigured: boolean;
-  } {
+} {
   if (!STRIPE_SECRET_KEY) {
     return {
       configured: false,

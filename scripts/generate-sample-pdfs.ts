@@ -49,9 +49,9 @@ async function main() {
     await initializeDatabase();
     const db = getDatabase();
 
-    const project = await db.get(
+    const project = (await db.get(
       'SELECT id, project_name FROM projects WHERE deleted_at IS NULL ORDER BY id DESC LIMIT 1'
-    ) as { id: number; project_name: string } | undefined;
+    )) as { id: number; project_name: string } | undefined;
 
     if (!project) {
       console.log('⊘ No projects in database');
@@ -77,8 +77,7 @@ async function main() {
 
     // 3. SOW PDF — use DB data or fall back to dummy
     try {
-      const { fetchSowData, generateSowPdf } =
-        await import('../server/services/sow-service.js');
+      const { fetchSowData, generateSowPdf } = await import('../server/services/sow-service.js');
       let sowData = await fetchSowData(project.id);
       if (!sowData) {
         // Dummy data for preview — demo client only. These samples get
@@ -88,7 +87,8 @@ async function main() {
             id: 7,
             name: 'Juniper Bell Florals — Business Website',
             projectType: 'business-site',
-            description: 'Custom website redesign for sustainable garden design company. Migrating from Squarespace to a fully custom site with GSAP animations, CMS, blog, and custom analytics.',
+            description:
+              'Custom website redesign for sustainable garden design company. Migrating from Squarespace to a fully custom site with GSAP animations, CMS, blog, and custom analytics.',
             startDate: '2026-03-01',
             deadline: '2026-04-15'
           },
@@ -110,7 +110,12 @@ async function main() {
               { name: 'Mobile Optimization', price: 0, isIncluded: true, isAddon: false },
               { name: 'Custom GSAP Scroll Animations', price: 0, isIncluded: true, isAddon: false },
               { name: 'Simple Content Management', price: 0, isIncluded: true, isAddon: false },
-              { name: 'Blog with Scheduling & Categories', price: 0, isIncluded: true, isAddon: false },
+              {
+                name: 'Blog with Scheduling & Categories',
+                price: 0,
+                isIncluded: true,
+                isAddon: false
+              },
               { name: 'Enhanced SEO (Schema Markup)', price: 0, isIncluded: true, isAddon: false },
               { name: 'Custom Analytics Dashboard', price: 0, isIncluded: true, isAddon: false },
               { name: 'Free Hosting (Netlify)', price: 0, isIncluded: true, isAddon: false },
@@ -119,11 +124,31 @@ async function main() {
             ]
           },
           milestones: [
-            { title: 'Discovery & Planning', description: 'Requirements gathering, content strategy, SEO keyword research', dueDate: '2026-03-08' },
-            { title: 'Design', description: 'Custom design with brand integration and design revisions', dueDate: '2026-03-18' },
-            { title: 'Development', description: 'Full build with GSAP animations, CMS, blog, and integrations', dueDate: '2026-04-01' },
-            { title: 'Content & SEO', description: 'Content population, SEO optimization, analytics setup', dueDate: '2026-04-08' },
-            { title: 'Testing & Launch', description: 'QA testing, client training, and production deployment', dueDate: '2026-04-15' }
+            {
+              title: 'Discovery & Planning',
+              description: 'Requirements gathering, content strategy, SEO keyword research',
+              dueDate: '2026-03-08'
+            },
+            {
+              title: 'Design',
+              description: 'Custom design with brand integration and design revisions',
+              dueDate: '2026-03-18'
+            },
+            {
+              title: 'Development',
+              description: 'Full build with GSAP animations, CMS, blog, and integrations',
+              dueDate: '2026-04-01'
+            },
+            {
+              title: 'Content & SEO',
+              description: 'Content population, SEO optimization, analytics setup',
+              dueDate: '2026-04-08'
+            },
+            {
+              title: 'Testing & Launch',
+              description: 'QA testing, client training, and production deployment',
+              dueDate: '2026-04-15'
+            }
           ]
         };
       }
@@ -141,19 +166,19 @@ async function main() {
 
       // Restrict to seeded demo clients — the newest invoice overall belongs
       // to a real client, and these samples get published as portfolio assets.
-      const invoiceRow = await db.get(
+      const invoiceRow = (await db.get(
         `SELECT i.id FROM invoices i
            JOIN projects p ON p.id = i.project_id
            JOIN clients c ON c.id = p.client_id
           WHERE i.deleted_at IS NULL
             AND c.email LIKE '%@demo.nobhad.codes'
           ORDER BY i.id DESC LIMIT 1`
-      ) as { id: number } | undefined;
+      )) as { id: number } | undefined;
 
       if (invoiceRow) {
         const inv = await invoiceService.getInvoiceById(invoiceRow.id);
         if (inv) {
-          const lineItems = inv.lineItems || await invoiceService.getLineItems(invoiceRow.id);
+          const lineItems = inv.lineItems || (await invoiceService.getLineItems(invoiceRow.id));
           const pdfBytes = await generateInvoicePdf({
             invoiceNumber: inv.invoiceNumber || 'INV-SAMPLE',
             issuedDate: inv.issueDate || new Date().toISOString().split('T')[0],
@@ -161,12 +186,19 @@ async function main() {
             clientName: inv.clientName || 'Client',
             clientEmail: inv.clientEmail || '',
             clientCompany: inv.clientCompany || undefined,
-            lineItems: (lineItems || []).map((li: { description?: string; quantity?: number; unitPrice?: number; amount?: number }) => ({
-              description: li.description || '',
-              quantity: li.quantity || 1,
-              rate: li.unitPrice || 0,
-              amount: li.amount || 0
-            })),
+            lineItems: (lineItems || []).map(
+              (li: {
+                description?: string;
+                quantity?: number;
+                unitPrice?: number;
+                amount?: number;
+              }) => ({
+                description: li.description || '',
+                quantity: li.quantity || 1,
+                rate: li.unitPrice || 0,
+                amount: li.amount || 0
+              })
+            ),
             subtotal: inv.subtotal || inv.amount || 0,
             total: inv.amount || 0,
             notes: inv.notes || undefined
@@ -187,12 +219,12 @@ async function main() {
     try {
       let contractContent: string;
 
-      const contractRow = await db.get(
+      const contractRow = (await db.get(
         `SELECT c.id, c.content
          FROM contracts c
          WHERE c.deleted_at IS NULL AND c.content IS NOT NULL
          ORDER BY c.id DESC LIMIT 1`
-      ) as Record<string, unknown> | undefined;
+      )) as Record<string, unknown> | undefined;
 
       if (contractRow?.content) {
         contractContent = String(contractRow.content);
@@ -305,11 +337,20 @@ Date: _______________                     Date: _______________`;
       {
         const { PDFDocument } = await import('pdf-lib');
         const {
-          drawPdfDocumentHeader, drawTwoColumnInfo, drawPdfFooter,
-          drawWrappedText, drawSectionLabel, ensureSpace, addPageNumbers, PAGE_MARGINS,
-          getRegularFontBytes, getBoldFontBytes, registerFontkit
+          drawPdfDocumentHeader,
+          drawTwoColumnInfo,
+          drawPdfFooter,
+          drawWrappedText,
+          drawSectionLabel,
+          ensureSpace,
+          addPageNumbers,
+          PAGE_MARGINS,
+          getRegularFontBytes,
+          getBoldFontBytes,
+          registerFontkit
         } = await import('../server/utils/pdf-utils.js');
-        const { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } = await import('../server/config/pdf-styles.js');
+        const { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } =
+          await import('../server/config/pdf-styles.js');
 
         const pdfDoc = await PDFDocument.create();
         registerFontkit(pdfDoc);
@@ -324,23 +365,42 @@ Date: _______________                     Date: _______________`;
         const contentWidth = rightMargin - leftMargin;
 
         const ctx = {
-          pdfDoc, currentPage: page, pageNumber: 1,
-          y: height - 43, width: 612, height: 792,
-          leftMargin, rightMargin,
-          topMargin: PAGE_MARGINS.top, bottomMargin: PAGE_MARGINS.bottom,
-          contentWidth, fonts
+          pdfDoc,
+          currentPage: page,
+          pageNumber: 1,
+          y: height - 43,
+          width: 612,
+          height: 792,
+          leftMargin,
+          rightMargin,
+          topMargin: PAGE_MARGINS.top,
+          bottomMargin: PAGE_MARGINS.bottom,
+          contentWidth,
+          fonts
         };
 
-        const onNewPage = (nextCtx: typeof ctx) => { nextCtx.y = nextCtx.height - nextCtx.topMargin - 20; };
+        const onNewPage = (nextCtx: typeof ctx) => {
+          nextCtx.y = nextCtx.height - nextCtx.topMargin - 20;
+        };
 
         // Header
         ctx.y = await drawPdfDocumentHeader({
-          page, pdfDoc, fonts, startY: ctx.y, leftMargin, rightMargin, title: 'CONTRACT'
+          page,
+          pdfDoc,
+          fonts,
+          startY: ctx.y,
+          leftMargin,
+          rightMargin,
+          title: 'CONTRACT'
         });
 
         // Bill To two-column info
         ctx.y = drawTwoColumnInfo(page, {
-          leftMargin, rightMargin, width: 612, y: ctx.y, fonts,
+          leftMargin,
+          rightMargin,
+          width: 612,
+          y: ctx.y,
+          fonts,
           left: {
             label: 'BILL TO:',
             lines: [
@@ -378,7 +438,11 @@ Date: _______________                     Date: _______________`;
 
         // Intro line
         ctx.currentPage.drawText('This Agreement is entered into as of March 1, 2026 between:', {
-          x: leftMargin, y: ctx.y, size: bodySize, font: helvetica, color: PDF_COLORS.black
+          x: leftMargin,
+          y: ctx.y,
+          size: bodySize,
+          font: helvetica,
+          color: PDF_COLORS.black
         });
         ctx.y -= lh * 2;
 
@@ -392,8 +456,11 @@ Date: _______________                     Date: _______________`;
         let devY = ctx.y;
         for (const line of devLines) {
           ctx.currentPage.drawText(line.text, {
-            x: leftMargin, y: devY, size: bodySize,
-            font: line.bold ? helveticaBold : helvetica, color: PDF_COLORS.black
+            x: leftMargin,
+            y: devY,
+            size: bodySize,
+            font: line.bold ? helveticaBold : helvetica,
+            color: PDF_COLORS.black
           });
           devY -= lh;
         }
@@ -401,7 +468,11 @@ Date: _______________                     Date: _______________`;
         // AND column (center)
         const andY = ctx.y - lh; // vertically centered-ish
         ctx.currentPage.drawText('AND', {
-          x: andX + 8, y: andY, size: bodySize, font: helveticaBold, color: PDF_COLORS.black
+          x: andX + 8,
+          y: andY,
+          size: bodySize,
+          font: helveticaBold,
+          color: PDF_COLORS.black
         });
 
         // Client column (right)
@@ -414,8 +485,11 @@ Date: _______________                     Date: _______________`;
         let cliY = ctx.y;
         for (const line of clientLines) {
           ctx.currentPage.drawText(line.text, {
-            x: clientX, y: cliY, size: bodySize,
-            font: line.bold ? helveticaBold : helvetica, color: PDF_COLORS.black
+            x: clientX,
+            y: cliY,
+            size: bodySize,
+            font: line.bold ? helveticaBold : helvetica,
+            color: PDF_COLORS.black
           });
           cliY -= lh;
         }
@@ -426,12 +500,15 @@ Date: _______________                     Date: _______________`;
         const plainContent = contractContent.replace(/<[^>]+>/g, '');
         const allLines = plainContent.split('\n');
         // Find where "1. SCOPE OF WORK" starts and render from there
-        const scopeIndex = allLines.findIndex(l => l.trim().startsWith('1. SCOPE'));
+        const scopeIndex = allLines.findIndex((l) => l.trim().startsWith('1. SCOPE'));
         const contentLines = scopeIndex >= 0 ? allLines.slice(scopeIndex) : allLines;
 
         for (const rawLine of contentLines) {
           const trimmed = rawLine.trim();
-          if (!trimmed) { ctx.y -= 10; continue; }
+          if (!trimmed) {
+            ctx.y -= 10;
+            continue;
+          }
 
           let text = trimmed;
           let font = helvetica;
@@ -439,37 +516,108 @@ Date: _______________                     Date: _______________`;
           const BULLET_INDENT = 12;
           let indent = 0;
 
-          if (/^[-*]\s+/.test(text)) { indent = BULLET_INDENT; text = text.replace(/^[-*]\s+/, ''); }
+          if (/^[-*]\s+/.test(text)) {
+            indent = BULLET_INDENT;
+            text = text.replace(/^[-*]\s+/, '');
+          }
           const isTitle = /^[A-Z][A-Z\s]{3,}$/.test(text);
           const isSection = /^\d+\.\s+/.test(text);
-          if (isTitle) { font = helveticaBold; fontSize = 14; } else if (isSection) { font = helveticaBold; fontSize = 12; }
+          if (isTitle) {
+            font = helveticaBold;
+            fontSize = 14;
+          } else if (isSection) {
+            font = helveticaBold;
+            fontSize = 12;
+          }
 
-          drawWrappedText(ctx, text, { x: leftMargin + indent, fontSize, font, maxWidth: contentWidth - indent, onNewPage });
+          drawWrappedText(ctx, text, {
+            x: leftMargin + indent,
+            fontSize,
+            font,
+            maxWidth: contentWidth - indent,
+            onNewPage
+          });
           ctx.y -= isTitle || isSection ? 6 : 2;
         }
 
         // Signatures
         ctx.y -= PDF_SPACING.sectionSpacing;
         ensureSpace(ctx, 120, onNewPage);
-        ctx.y = drawSectionLabel(ctx.currentPage, 'SIGNATURES', { x: leftMargin, y: ctx.y, font: helveticaBold });
+        ctx.y = drawSectionLabel(ctx.currentPage, 'SIGNATURES', {
+          x: leftMargin,
+          y: ctx.y,
+          font: helveticaBold
+        });
 
         const sigLineY = ctx.y - 30;
         const sigWidth = 200;
         const rightCol = 612 / 2 + PDF_SPACING.rightColumnOffset;
 
-        ctx.currentPage.drawText('CLIENT:', { x: leftMargin, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: helveticaBold, color: PDF_COLORS.black });
-        ctx.currentPage.drawLine({ start: { x: leftMargin, y: sigLineY }, end: { x: leftMargin + sigWidth, y: sigLineY }, thickness: PDF_SPACING.dividerThickness, color: PDF_COLORS.black });
-        ctx.currentPage.drawText('Juniper Bell', { x: leftMargin, y: sigLineY - 15, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
-        ctx.currentPage.drawText('Date: _______________', { x: leftMargin, y: sigLineY - 30, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
+        ctx.currentPage.drawText('CLIENT:', {
+          x: leftMargin,
+          y: ctx.y,
+          size: PDF_TYPOGRAPHY.bodySize,
+          font: helveticaBold,
+          color: PDF_COLORS.black
+        });
+        ctx.currentPage.drawLine({
+          start: { x: leftMargin, y: sigLineY },
+          end: { x: leftMargin + sigWidth, y: sigLineY },
+          thickness: PDF_SPACING.dividerThickness,
+          color: PDF_COLORS.black
+        });
+        ctx.currentPage.drawText('Juniper Bell', {
+          x: leftMargin,
+          y: sigLineY - 15,
+          size: PDF_TYPOGRAPHY.bodySize,
+          font: helvetica,
+          color: PDF_COLORS.black
+        });
+        ctx.currentPage.drawText('Date: _______________', {
+          x: leftMargin,
+          y: sigLineY - 30,
+          size: PDF_TYPOGRAPHY.bodySize,
+          font: helvetica,
+          color: PDF_COLORS.black
+        });
 
-        ctx.currentPage.drawText('SERVICE PROVIDER:', { x: rightCol, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: helveticaBold, color: PDF_COLORS.black });
-        ctx.currentPage.drawLine({ start: { x: rightCol, y: sigLineY }, end: { x: rightCol + sigWidth, y: sigLineY }, thickness: PDF_SPACING.dividerThickness, color: PDF_COLORS.black });
-        ctx.currentPage.drawText('Noelle Bhaduri', { x: rightCol, y: sigLineY - 15, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
-        ctx.currentPage.drawText('Date: _______________', { x: rightCol, y: sigLineY - 30, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
+        ctx.currentPage.drawText('SERVICE PROVIDER:', {
+          x: rightCol,
+          y: ctx.y,
+          size: PDF_TYPOGRAPHY.bodySize,
+          font: helveticaBold,
+          color: PDF_COLORS.black
+        });
+        ctx.currentPage.drawLine({
+          start: { x: rightCol, y: sigLineY },
+          end: { x: rightCol + sigWidth, y: sigLineY },
+          thickness: PDF_SPACING.dividerThickness,
+          color: PDF_COLORS.black
+        });
+        ctx.currentPage.drawText('Noelle Bhaduri', {
+          x: rightCol,
+          y: sigLineY - 15,
+          size: PDF_TYPOGRAPHY.bodySize,
+          font: helvetica,
+          color: PDF_COLORS.black
+        });
+        ctx.currentPage.drawText('Date: _______________', {
+          x: rightCol,
+          y: sigLineY - 30,
+          size: PDF_TYPOGRAPHY.bodySize,
+          font: helvetica,
+          color: PDF_COLORS.black
+        });
 
         // Footer + page numbers
         for (const footerPage of pdfDoc.getPages()) {
-          drawPdfFooter(footerPage, { leftMargin, rightMargin, width: 612, fonts, thankYouText: 'Thank you for your business!' });
+          drawPdfFooter(footerPage, {
+            leftMargin,
+            rightMargin,
+            width: 612,
+            fonts,
+            thankYouText: 'Thank you for your business!'
+          });
         }
         await addPageNumbers(pdfDoc);
 
@@ -480,7 +628,6 @@ Date: _______________                     Date: _______________`;
     } catch (e) {
       console.error('✗ Contract failed:', (e as Error).message);
     }
-
   } catch (e) {
     console.error('✗ DB init failed:', (e as Error).message);
   }
@@ -489,12 +636,19 @@ Date: _______________                     Date: _______________`;
   try {
     const { PDFDocument } = await import('pdf-lib');
     const {
-      drawPdfDocumentHeader, drawTwoColumnInfo, drawSectionLabel,
-      drawLabelValue, drawPdfFooter, addPageNumbers, PAGE_MARGINS,
-      getRegularFontBytes: getRegular, getBoldFontBytes: getBold,
+      drawPdfDocumentHeader,
+      drawTwoColumnInfo,
+      drawSectionLabel,
+      drawLabelValue,
+      drawPdfFooter,
+      addPageNumbers,
+      PAGE_MARGINS,
+      getRegularFontBytes: getRegular,
+      getBoldFontBytes: getBold,
       registerFontkit: regFontkit
     } = await import('../server/utils/pdf-utils.js');
-    const { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } = await import('../server/config/pdf-styles.js');
+    const { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } =
+      await import('../server/config/pdf-styles.js');
 
     const pdfDoc = await PDFDocument.create();
     pdfDoc.setTitle('Client Intake — Juniper Bell Florals');
@@ -512,12 +666,22 @@ Date: _______________                     Date: _______________`;
 
     // Header
     y = await drawPdfDocumentHeader({
-      page, pdfDoc, fonts, startY: y, leftMargin: left, rightMargin: right, title: 'INTAKE'
+      page,
+      pdfDoc,
+      fonts,
+      startY: y,
+      leftMargin: left,
+      rightMargin: right,
+      title: 'INTAKE'
     });
 
     // Two-column info
     y = drawTwoColumnInfo(page, {
-      leftMargin: left, rightMargin: right, width: 612, y, fonts,
+      leftMargin: left,
+      rightMargin: right,
+      width: 612,
+      y,
+      fonts,
       left: {
         label: 'PREPARED FOR:',
         lines: [
@@ -548,41 +712,137 @@ Date: _______________                     Date: _______________`;
     // Project Details
     y -= PDF_SPACING.sectionSpacing;
     y = drawSectionLabel(page, 'PROJECT DETAILS', { x: left, y, font: helveticaBold });
-    y = drawLabelValue(page, 'PROJECT NAME:', 'Juniper Bell Florals Website', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'CURRENT SITE:', 'juniperbellflorals.com (Squarespace)', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'TARGET AUDIENCE:', 'Homeowners, garden enthusiasts', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'DESCRIPTION:', '', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    const descText = 'Website redesign for sustainable garden design company. Currently on Squarespace but hitting template limitations. Want earthy/witchy aesthetic with custom animations.';
+    y = drawLabelValue(page, 'PROJECT NAME:', 'Juniper Bell Florals Website', {
+      x: left,
+      y,
+      labelFont: helveticaBold,
+      valueFont: helvetica,
+      labelWidth
+    });
+    y = drawLabelValue(page, 'CURRENT SITE:', 'juniperbellflorals.com (Squarespace)', {
+      x: left,
+      y,
+      labelFont: helveticaBold,
+      valueFont: helvetica,
+      labelWidth
+    });
+    y = drawLabelValue(page, 'TARGET AUDIENCE:', 'Homeowners, garden enthusiasts', {
+      x: left,
+      y,
+      labelFont: helveticaBold,
+      valueFont: helvetica,
+      labelWidth
+    });
+    y = drawLabelValue(page, 'DESCRIPTION:', '', {
+      x: left,
+      y,
+      labelFont: helveticaBold,
+      valueFont: helvetica,
+      labelWidth
+    });
+    const descText =
+      'Website redesign for sustainable garden design company. Currently on Squarespace but hitting template limitations. Want earthy/witchy aesthetic with custom animations.';
     const descWords = descText.split(' ');
     let descLine = '';
     for (const word of descWords) {
       const test = descLine + (descLine ? ' ' : '') + word;
       if (helvetica.widthOfTextAtSize(test, PDF_TYPOGRAPHY.bodySize) > right - left && descLine) {
-        page.drawText(descLine, { x: left, y, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
+        page.drawText(descLine, {
+          x: left,
+          y,
+          size: PDF_TYPOGRAPHY.bodySize,
+          font: helvetica,
+          color: PDF_COLORS.black
+        });
         y -= PDF_SPACING.lineHeight;
         descLine = word;
-      } else { descLine = test; }
+      } else {
+        descLine = test;
+      }
     }
-    if (descLine) { page.drawText(descLine, { x: left, y, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black }); y -= PDF_SPACING.lineHeight; }
+    if (descLine) {
+      page.drawText(descLine, {
+        x: left,
+        y,
+        size: PDF_TYPOGRAPHY.bodySize,
+        font: helvetica,
+        color: PDF_COLORS.black
+      });
+      y -= PDF_SPACING.lineHeight;
+    }
 
     // Design Preferences
     y -= PDF_SPACING.sectionSpacing;
     y = drawSectionLabel(page, 'DESIGN PREFERENCES', { x: left, y, font: helveticaBold });
-    y = drawLabelValue(page, 'DESIGN LEVEL:', 'Custom — unique to brand, handcrafted feel', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'BRAND ASSETS:', 'Logo, brand colors', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'INSPIRATION:', 'Earthy/witchy aesthetic, nature feel', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'CONTENT STATUS:', 'Have some content, need help organizing', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'DESIGN LEVEL:', 'Custom — unique to brand, handcrafted feel', {
+      x: left,
+      y,
+      labelFont: helveticaBold,
+      valueFont: helvetica,
+      labelWidth
+    });
+    y = drawLabelValue(page, 'BRAND ASSETS:', 'Logo, brand colors', {
+      x: left,
+      y,
+      labelFont: helveticaBold,
+      valueFont: helvetica,
+      labelWidth
+    });
+    y = drawLabelValue(page, 'INSPIRATION:', 'Earthy/witchy aesthetic, nature feel', {
+      x: left,
+      y,
+      labelFont: helveticaBold,
+      valueFont: helvetica,
+      labelWidth
+    });
+    y = drawLabelValue(page, 'CONTENT STATUS:', 'Have some content, need help organizing', {
+      x: left,
+      y,
+      labelFont: helveticaBold,
+      valueFont: helvetica,
+      labelWidth
+    });
 
     // Technical Details
     y -= PDF_SPACING.sectionSpacing;
     y = drawSectionLabel(page, 'TECHNICAL DETAILS', { x: left, y, font: helveticaBold });
-    y = drawLabelValue(page, 'TECH COMFORT:', 'Comfortable — can handle basic updates', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'HOSTING:', 'Free hosting (Netlify/Vercel)', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'CONSTRAINTS:', 'Client unavailable Feb 12-22', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
-    y = drawLabelValue(page, 'HOW FOUND US:', 'Referral from a friend', { x: left, y, labelFont: helveticaBold, valueFont: helvetica, labelWidth });
+    y = drawLabelValue(page, 'TECH COMFORT:', 'Comfortable — can handle basic updates', {
+      x: left,
+      y,
+      labelFont: helveticaBold,
+      valueFont: helvetica,
+      labelWidth
+    });
+    y = drawLabelValue(page, 'HOSTING:', 'Free hosting (Netlify/Vercel)', {
+      x: left,
+      y,
+      labelFont: helveticaBold,
+      valueFont: helvetica,
+      labelWidth
+    });
+    y = drawLabelValue(page, 'CONSTRAINTS:', 'Client unavailable Feb 12-22', {
+      x: left,
+      y,
+      labelFont: helveticaBold,
+      valueFont: helvetica,
+      labelWidth
+    });
+    y = drawLabelValue(page, 'HOW FOUND US:', 'Referral from a friend', {
+      x: left,
+      y,
+      labelFont: helveticaBold,
+      valueFont: helvetica,
+      labelWidth
+    });
 
     // Footer + page numbers
-    drawPdfFooter(page, { leftMargin: left, rightMargin: right, width: 612, fonts, thankYouText: 'Thank you for your business!' });
+    drawPdfFooter(page, {
+      leftMargin: left,
+      rightMargin: right,
+      width: 612,
+      fonts,
+      thankYouText: 'Thank you for your business!'
+    });
     await addPageNumbers(pdfDoc);
 
     const pdfBytes = await pdfDoc.save();

@@ -95,9 +95,7 @@ export const authenticateToken = (req: JWTAuthRequest, res: Response, next: Next
         // fall back to the raw string with a cast (matching existing codebase pattern).
         const expirySeconds = parseExpiryToSeconds(expiry);
         const signOptions = (
-          expirySeconds !== undefined
-            ? { expiresIn: expirySeconds }
-            : { expiresIn: expiry }
+          expirySeconds !== undefined ? { expiresIn: expirySeconds } : { expiresIn: expiry }
         ) as SignOptions;
 
         try {

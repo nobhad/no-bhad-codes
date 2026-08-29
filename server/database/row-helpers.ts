@@ -352,7 +352,9 @@ function parseJsonValue(key: string, value: unknown): unknown {
  * - Convert 0/1 to boolean for known boolean fields
  * - Parse JSON strings for known JSON fields
  */
-export function transformRow<T extends Record<string, unknown>>(row: T | null | undefined): T | null {
+export function transformRow<T extends Record<string, unknown>>(
+  row: T | null | undefined
+): T | null {
   if (!row) return null;
 
   const result: Record<string, unknown> = {};
@@ -379,9 +381,11 @@ export function transformRow<T extends Record<string, unknown>>(row: T | null | 
 /**
  * Transform an array of database rows for API response
  */
-export function transformRows<T extends Record<string, unknown>>(rows: T[] | null | undefined): T[] {
+export function transformRows<T extends Record<string, unknown>>(
+  rows: T[] | null | undefined
+): T[] {
   if (!rows || !Array.isArray(rows)) return [];
-  return rows.map(row => transformRow(row)).filter((row): row is T => row !== null);
+  return rows.map((row) => transformRow(row)).filter((row): row is T => row !== null);
 }
 
 /**
@@ -394,7 +398,7 @@ export function transformData<T>(data: T): T {
   }
 
   if (Array.isArray(data)) {
-    return data.map(item => transformData(item)) as T;
+    return data.map((item) => transformData(item)) as T;
   }
 
   if (typeof data === 'object' && data !== null) {

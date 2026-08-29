@@ -73,35 +73,35 @@ describe('isRecoverable', () => {
   it('returns correct fragment without alias using default 30 days', () => {
     const result = isRecoverable();
     expect(result).toBe(
-      'deleted_at IS NOT NULL AND datetime(deleted_at, \'+30 days\') > datetime(\'now\')'
+      "deleted_at IS NOT NULL AND datetime(deleted_at, '+30 days') > datetime('now')"
     );
   });
 
   it('returns correct fragment with alias and default days', () => {
     const result = isRecoverable('c');
     expect(result).toBe(
-      'c.deleted_at IS NOT NULL AND datetime(c.deleted_at, \'+30 days\') > datetime(\'now\')'
+      "c.deleted_at IS NOT NULL AND datetime(c.deleted_at, '+30 days') > datetime('now')"
     );
   });
 
   it('uses custom days value', () => {
     const result = isRecoverable(undefined, 7);
     expect(result).toBe(
-      'deleted_at IS NOT NULL AND datetime(deleted_at, \'+7 days\') > datetime(\'now\')'
+      "deleted_at IS NOT NULL AND datetime(deleted_at, '+7 days') > datetime('now')"
     );
   });
 
   it('uses custom alias and custom days', () => {
     const result = isRecoverable('inv', 14);
     expect(result).toBe(
-      'inv.deleted_at IS NOT NULL AND datetime(inv.deleted_at, \'+14 days\') > datetime(\'now\')'
+      "inv.deleted_at IS NOT NULL AND datetime(inv.deleted_at, '+14 days') > datetime('now')"
     );
   });
 
   it('returns correct fragment for 1 day retention', () => {
     const result = isRecoverable(undefined, 1);
     expect(result).toBe(
-      'deleted_at IS NOT NULL AND datetime(deleted_at, \'+1 days\') > datetime(\'now\')'
+      "deleted_at IS NOT NULL AND datetime(deleted_at, '+1 days') > datetime('now')"
     );
   });
 });
@@ -114,28 +114,28 @@ describe('isExpired', () => {
   it('returns correct fragment without alias using default 30 days', () => {
     const result = isExpired();
     expect(result).toBe(
-      'deleted_at IS NOT NULL AND datetime(deleted_at, \'+30 days\') <= datetime(\'now\')'
+      "deleted_at IS NOT NULL AND datetime(deleted_at, '+30 days') <= datetime('now')"
     );
   });
 
   it('returns correct fragment with alias and default days', () => {
     const result = isExpired('r');
     expect(result).toBe(
-      'r.deleted_at IS NOT NULL AND datetime(r.deleted_at, \'+30 days\') <= datetime(\'now\')'
+      "r.deleted_at IS NOT NULL AND datetime(r.deleted_at, '+30 days') <= datetime('now')"
     );
   });
 
   it('uses custom days value', () => {
     const result = isExpired(undefined, 90);
     expect(result).toBe(
-      'deleted_at IS NOT NULL AND datetime(deleted_at, \'+90 days\') <= datetime(\'now\')'
+      "deleted_at IS NOT NULL AND datetime(deleted_at, '+90 days') <= datetime('now')"
     );
   });
 
   it('uses custom alias and custom days', () => {
     const result = isExpired('p', 60);
     expect(result).toBe(
-      'p.deleted_at IS NOT NULL AND datetime(p.deleted_at, \'+60 days\') <= datetime(\'now\')'
+      "p.deleted_at IS NOT NULL AND datetime(p.deleted_at, '+60 days') <= datetime('now')"
     );
   });
 
@@ -163,10 +163,7 @@ describe('buildSafeUpdate', () => {
   });
 
   it('builds a SET clause for multiple fields', () => {
-    const { setClause, params } = buildSafeUpdate(
-      { name: 'Bob', status: 'active' },
-      ALLOWED
-    );
+    const { setClause, params } = buildSafeUpdate({ name: 'Bob', status: 'active' }, ALLOWED);
     expect(setClause).toBe('name = ?, status = ?, updated_at = CURRENT_TIMESTAMP');
     expect(params).toEqual(['Bob', 'active']);
   });
@@ -183,16 +180,17 @@ describe('buildSafeUpdate', () => {
   });
 
   it('uses a custom timestamp field name', () => {
-    const { setClause } = buildSafeUpdate(
-      { name: 'Test' },
-      ALLOWED,
-      { addTimestamp: true, timestampField: 'modified_at' }
-    );
+    const { setClause } = buildSafeUpdate({ name: 'Test' }, ALLOWED, {
+      addTimestamp: true,
+      timestampField: 'modified_at'
+    });
     expect(setClause).toContain('modified_at = CURRENT_TIMESTAMP');
   });
 
   it('throws for an invalid field name not in allowedFields', () => {
-    expect(() => buildSafeUpdate({ hacked: 'value' }, ALLOWED)).toThrow('Invalid field name: hacked');
+    expect(() => buildSafeUpdate({ hacked: 'value' }, ALLOWED)).toThrow(
+      'Invalid field name: hacked'
+    );
   });
 
   it('throws and names the invalid field in the error message', () => {
@@ -234,10 +232,7 @@ describe('buildSafeUpdate', () => {
   });
 
   it('returns empty setClause when only undefined values are provided', () => {
-    const { setClause, params } = buildSafeUpdate(
-      { name: undefined as any },
-      ALLOWED
-    );
+    const { setClause, params } = buildSafeUpdate({ name: undefined as any }, ALLOWED);
     expect(setClause).toBe('');
     expect(params).toEqual([]);
   });
@@ -258,10 +253,7 @@ describe('buildSafeUpdate', () => {
   });
 
   it('processes fields in the order they appear in the updates object', () => {
-    const { setClause } = buildSafeUpdate(
-      { status: 'a', name: 'b', description: 'c' },
-      ALLOWED
-    );
+    const { setClause } = buildSafeUpdate({ status: 'a', name: 'b', description: 'c' }, ALLOWED);
     const statusIdx = setClause.indexOf('status');
     const nameIdx = setClause.indexOf('name');
     const descIdx = setClause.indexOf('description');
@@ -312,7 +304,7 @@ describe('isValidFieldName', () => {
   });
 
   it('returns false for name with SQL injection attempt', () => {
-    expect(isValidFieldName('name\'; DROP TABLE users--')).toBe(false);
+    expect(isValidFieldName("name'; DROP TABLE users--")).toBe(false);
   });
 
   it('returns false for empty string', () => {

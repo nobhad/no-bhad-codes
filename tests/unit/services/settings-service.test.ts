@@ -197,10 +197,7 @@ describe('SettingsService - getSettings', () => {
   });
 
   it('loads cache and returns all settings', async () => {
-    mockDb.all.mockResolvedValueOnce([
-      makeRow('a.one', '1'),
-      makeRow('b.two', '2')
-    ]);
+    mockDb.all.mockResolvedValueOnce([makeRow('a.one', '1'), makeRow('b.two', '2')]);
 
     const result = await settingsService.getSettings();
 
@@ -309,10 +306,9 @@ describe('SettingsService - deleteSetting', () => {
     const result = await settingsService.deleteSetting('my.key');
 
     expect(result).toBe(true);
-    expect(mockDb.run).toHaveBeenCalledWith(
-      'DELETE FROM system_settings WHERE setting_key = ?',
-      ['my.key']
-    );
+    expect(mockDb.run).toHaveBeenCalledWith('DELETE FROM system_settings WHERE setting_key = ?', [
+      'my.key'
+    ]);
   });
 
   it('returns false when no rows were affected', async () => {
@@ -461,7 +457,7 @@ describe('SettingsService - getNextInvoiceNumber', () => {
 
     expect(result).toBe('INV-0005');
     expect(mockDb.run).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE setting_key = \'invoice.next_sequence\''),
+      expect.stringContaining("WHERE setting_key = 'invoice.next_sequence'"),
       ['6']
     );
   });

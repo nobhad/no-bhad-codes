@@ -152,7 +152,10 @@ async function testCacheService(): Promise<void> {
     console.log('\n💡 Redis caching is ready for production use!');
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    const errorCode = error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined;
+    const errorCode =
+      error && typeof error === 'object' && 'code' in error
+        ? (error as { code: string }).code
+        : undefined;
     console.error('❌ Cache service test failed:', errorMessage);
 
     if (errorCode === 'ECONNREFUSED') {

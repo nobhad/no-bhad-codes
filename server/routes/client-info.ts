@@ -162,7 +162,12 @@ router.post(
     }
 
     if (typeof step !== 'number' || step < 1 || step > 5) {
-      return errorResponse(res, 'step must be a number between 1 and 5', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'step must be a number between 1 and 5',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     const progress = await clientInfoService.saveOnboardingProgress(

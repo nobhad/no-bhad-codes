@@ -36,10 +36,11 @@ export interface ComponentHooks {
 
 export abstract class BaseComponent<
   P extends ComponentProps = ComponentProps,
-  S extends ComponentState = ComponentState,
+  S extends ComponentState = ComponentState
 >
   extends BaseModule
-  implements ComponentHooks {
+  implements ComponentHooks
+{
   protected props: P;
   protected state: S;
   protected template: ComponentTemplate | null = null;
@@ -49,9 +50,7 @@ export abstract class BaseComponent<
 
   private stateUnsubscribe: (() => void) | null = null;
 
-
   private propWatchers: Map<keyof P, ((newVal: unknown, oldVal: unknown) => void)[]> = new Map();
-
 
   private stateWatchers: Map<keyof S, ((newVal: unknown, oldVal: unknown) => void)[]> = new Map();
 

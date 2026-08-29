@@ -48,7 +48,6 @@ export interface GeoAnalytics {
   percentage: number;
 }
 
-
 // ============================================
 // Analytics & Reporting Enhancement API Types
 // ============================================

@@ -401,16 +401,28 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     labelFont: typeof helveticaBold,
     valueFont: typeof helvetica
   ) => {
-    page().drawText(label, { x: totalsX, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: labelFont, color: PDF_COLORS.black });
+    page().drawText(label, {
+      x: totalsX,
+      y: ctx.y,
+      size: PDF_TYPOGRAPHY.bodySize,
+      font: labelFont,
+      color: PDF_COLORS.black
+    });
     const w = valueFont.widthOfTextAtSize(value, PDF_TYPOGRAPHY.bodySize);
-    page().drawText(value, { x: rightMargin - w, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: valueFont, color: PDF_COLORS.black });
+    page().drawText(value, {
+      x: rightMargin - w,
+      y: ctx.y,
+      size: PDF_TYPOGRAPHY.bodySize,
+      font: valueFont,
+      color: PDF_COLORS.black
+    });
   };
 
   const fmt = (n: number) => `$${n.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
 
   // Consistent spacing constants for totals section
-  const TOTALS_ROW_GAP = 16;   // between text rows
-  const TOTALS_LINE_PAD = 10;  // padding above/below divider lines
+  const TOTALS_ROW_GAP = 16; // between text rows
+  const TOTALS_LINE_PAD = 10; // padding above/below divider lines
   const lineStartX = totalsX - 14;
 
   /** Draw a right-aligned divider line with consistent padding */
@@ -444,18 +456,30 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   if (data.credits && data.credits.length > 0) {
     ctx.y -= TOTALS_ROW_GAP * 1.5;
     page().drawText('DEPOSIT CREDITS APPLIED:', {
-      x: totalsX - 40, y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize, font: helveticaBold, color: PDF_COLORS.black
+      x: totalsX - 40,
+      y: ctx.y,
+      size: PDF_TYPOGRAPHY.bodySize,
+      font: helveticaBold,
+      color: PDF_COLORS.black
     });
     ctx.y -= TOTALS_ROW_GAP;
     for (const credit of data.credits) {
       page().drawText(`Deposit ${credit.depositInvoiceNumber}`, {
-        x: totalsX, y: ctx.y,
-        size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black
+        x: totalsX,
+        y: ctx.y,
+        size: PDF_TYPOGRAPHY.bodySize,
+        font: helvetica,
+        color: PDF_COLORS.black
       });
       const creditText = `-${fmt(credit.amount)}`;
       const cw = helvetica.widthOfTextAtSize(creditText, PDF_TYPOGRAPHY.bodySize);
-      page().drawText(creditText, { x: rightMargin - cw, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black });
+      page().drawText(creditText, {
+        x: rightMargin - cw,
+        y: ctx.y,
+        size: PDF_TYPOGRAPHY.bodySize,
+        font: helvetica,
+        color: PDF_COLORS.black
+      });
       ctx.y -= TOTALS_ROW_GAP;
     }
   }
@@ -490,14 +514,29 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
   const amountDue = data.totalCredits ? data.total - data.totalCredits : data.total;
   const totalText = fmt(amountDue);
   const totalW = helveticaBold.widthOfTextAtSize(totalText, PDF_TYPOGRAPHY.bodySize);
-  page().drawText('TOTAL:', { x: totalsX, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: helveticaBold, color: PDF_COLORS.black });
-  page().drawText(totalText, { x: rightMargin - totalW, y: ctx.y, size: PDF_TYPOGRAPHY.bodySize, font: helveticaBold, color: PDF_COLORS.black });
+  page().drawText('TOTAL:', {
+    x: totalsX,
+    y: ctx.y,
+    size: PDF_TYPOGRAPHY.bodySize,
+    font: helveticaBold,
+    color: PDF_COLORS.black
+  });
+  page().drawText(totalText, {
+    x: rightMargin - totalW,
+    y: ctx.y,
+    size: PDF_TYPOGRAPHY.bodySize,
+    font: helveticaBold,
+    color: PDF_COLORS.black
+  });
 
   const amtDueText = 'AMOUNT DUE (USD)';
   const amtDueW = helvetica.widthOfTextAtSize(amtDueText, PDF_TYPOGRAPHY.bodySize);
   page().drawText(amtDueText, {
-    x: rightMargin - amtDueW, y: ctx.y - 14,
-    size: PDF_TYPOGRAPHY.bodySize, font: helvetica, color: PDF_COLORS.black
+    x: rightMargin - amtDueW,
+    y: ctx.y - 14,
+    size: PDF_TYPOGRAPHY.bodySize,
+    font: helvetica,
+    color: PDF_COLORS.black
   });
 
   ctx.y -= 30;
@@ -519,7 +558,7 @@ export async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Arr
     font: helveticaBold,
     color: PDF_COLORS.black
   });
-  ctx.y -= (PDF_TYPOGRAPHY.sectionHeadingSize + 4);
+  ctx.y -= PDF_TYPOGRAPHY.sectionHeadingSize + 4;
 
   const paymentInstructions = [
     '• Payment due within 30 days of invoice date',

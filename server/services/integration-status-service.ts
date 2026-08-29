@@ -18,14 +18,18 @@ import { getDatabase } from '../database/init.js';
 const INTEGRATION_STATUS_COLUMNS = `
   id, integration_type, is_configured, is_active, configuration,
   last_activity_at, error_message, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const INVOICE_COLUMNS = `
   id, client_id, project_id, invoice_number, description, status,
   amount_subtotal, amount_tax, amount_total, amount_paid, tax_rate,
   payment_method, payment_reference, paid_date, issued_date, due_date,
   notes, line_items, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // TYPES
@@ -71,10 +75,9 @@ class IntegrationStatusService {
    */
   async getInvoiceForPaymentLink(invoiceId: number): Promise<InvoiceRow | null> {
     const db = getDatabase();
-    const invoice = await db.get(
-      `SELECT ${INVOICE_COLUMNS} FROM invoices WHERE id = ?`,
-      [invoiceId]
-    );
+    const invoice = await db.get(`SELECT ${INVOICE_COLUMNS} FROM invoices WHERE id = ?`, [
+      invoiceId
+    ]);
     return (invoice as InvoiceRow) ?? null;
   }
 }

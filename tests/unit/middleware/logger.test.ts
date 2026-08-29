@@ -239,7 +239,10 @@ describe('Request Logger Middleware', () => {
 
     it('should calculate duration and include it in response log', () => {
       const startTime = 1000000;
-      Date.now = vi.fn().mockReturnValueOnce(startTime).mockReturnValueOnce(startTime + 250);
+      Date.now = vi
+        .fn()
+        .mockReturnValueOnce(startTime)
+        .mockReturnValueOnce(startTime + 250);
 
       mockRes.on = vi.fn((event: string, callback: () => void) => {
         if (event === 'finish') {

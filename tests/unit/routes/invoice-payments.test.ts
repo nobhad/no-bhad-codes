@@ -129,8 +129,13 @@ vi.mock('../../../server/utils/api-response', async (importOriginal) => {
     sendPaginated: vi.fn(),
     errorResponse: (res: any, message: string, status: number, code: string) =>
       res.status(status).json({ success: false, error: message, code }),
-    errorResponseWithPayload: (res: any, message: string, status: number, code: string, payload?: any) =>
-      res.status(status).json({ success: false, error: message, code, ...payload }),
+    errorResponseWithPayload: (
+      res: any,
+      message: string,
+      status: number,
+      code: string,
+      payload?: any
+    ) => res.status(status).json({ success: false, error: message, code, ...payload }),
     sanitizeErrorMessage: (error: unknown, fallback: string) =>
       error instanceof Error ? error.message : fallback,
     parsePaginationQuery: () => ({ page: 1, perPage: 50, limit: 50, offset: 0 })
@@ -261,9 +266,9 @@ describe('Invoice Payment Routes', () => {
       await handler(req, res);
 
       expect(mockCreateReceipt).toHaveBeenCalledWith(
-        1,     // invoiceId
-        null,  // paymentId
-        500,   // amount
+        1, // invoiceId
+        null, // paymentId
+        500, // amount
         expect.objectContaining({ paymentMethod: 'bank_transfer' })
       );
     });
@@ -285,17 +290,23 @@ describe('Invoice Payment Routes', () => {
 
       await handler(req, res);
 
-      expect(mockEmit).toHaveBeenCalledWith('invoice.paid', expect.objectContaining({
-        entityId: 1,
-        paymentMethod: 'stripe'
-      }));
+      expect(mockEmit).toHaveBeenCalledWith(
+        'invoice.paid',
+        expect.objectContaining({
+          entityId: 1,
+          paymentMethod: 'stripe'
+        })
+      );
     });
 
     it('should return 400 for invalid invoice ID', async () => {
       const { coreRouter } = await import('../../../server/routes/invoices/core');
       const handler = getRouteHandler(coreRouter, 'post', '/:id/pay');
 
-      const req = createMockReq({ params: { id: 'abc' }, body: { amountPaid: '100', paymentMethod: 'cash' } });
+      const req = createMockReq({
+        params: { id: 'abc' },
+        body: { amountPaid: '100', paymentMethod: 'cash' }
+      });
       const res = createMockRes();
 
       await handler(req, res);
@@ -321,9 +332,7 @@ describe('Invoice Payment Routes', () => {
       await handler(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'NOT_FOUND' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'NOT_FOUND' }));
     });
 
     it('should return 404 when user lacks access to invoice', async () => {
@@ -391,9 +400,7 @@ describe('Invoice Payment Routes', () => {
       await handler(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'PAYMENT_FAILED' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'PAYMENT_FAILED' }));
     });
   });
 
@@ -458,9 +465,7 @@ describe('Invoice Payment Routes', () => {
       await handler(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'INVALID_ID' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'INVALID_ID' }));
     });
 
     it('should return 404 when invoice not found during status update', async () => {
@@ -478,9 +483,7 @@ describe('Invoice Payment Routes', () => {
       await handler(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'NOT_FOUND' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'NOT_FOUND' }));
     });
 
     it('should return 500 on unexpected status update error', async () => {
@@ -498,9 +501,7 @@ describe('Invoice Payment Routes', () => {
       await handler(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'UPDATE_FAILED' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'UPDATE_FAILED' }));
     });
   });
 
@@ -517,7 +518,14 @@ describe('Invoice Payment Routes', () => {
       // The validation schema is defined at module level in core.ts
       // and enforced by validateRequest middleware.
       // We verify the schema allows only valid payment methods.
-      const validPaymentMethods = ['credit_card', 'bank_transfer', 'check', 'cash', 'stripe', 'other'];
+      const validPaymentMethods = [
+        'credit_card',
+        'bank_transfer',
+        'check',
+        'cash',
+        'stripe',
+        'other'
+      ];
 
       expect(validPaymentMethods).toContain('credit_card');
       expect(validPaymentMethods).toContain('stripe');

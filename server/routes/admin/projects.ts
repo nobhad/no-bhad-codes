@@ -9,7 +9,13 @@ import { generateDefaultMilestones } from '../../services/milestone-generator.js
 import { userService } from '../../services/user-service.js';
 import { projectService } from '../../services/project-service.js';
 import { invalidateCache } from '../../middleware/cache.js';
-import { errorResponse, sendSuccess, sendCreated, sanitizeErrorMessage, ErrorCodes } from '../../utils/api-response.js';
+import {
+  errorResponse,
+  sendSuccess,
+  sendCreated,
+  sanitizeErrorMessage,
+  ErrorCodes
+} from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 
@@ -84,7 +90,12 @@ router.post(
       if (newClient) {
         // Validate new client fields (accepts contactName for React modal compatibility)
         if (!newClient.contactName || !newClient.email) {
-          return errorResponse(res, 'Client name and email are required', 400, ErrorCodes.VALIDATION_ERROR);
+          return errorResponse(
+            res,
+            'Client name and email are required',
+            400,
+            ErrorCodes.VALIDATION_ERROR
+          );
         }
 
         // Check for existing client with same email
@@ -219,7 +230,8 @@ router.post(
 
       // Auto-generate custom questionnaire for missing info
       try {
-        const { generateDynamicQuestionnaire } = await import('../../services/dynamic-questionnaire-service.js');
+        const { generateDynamicQuestionnaire } =
+          await import('../../services/dynamic-questionnaire-service.js');
         const questionnaireResult = await generateDynamicQuestionnaire(projectId);
         if (questionnaireResult) {
           logger.info(
@@ -240,7 +252,11 @@ router.post(
         extra: { projectId, projectName, clientId: finalClientId }
       });
 
-      sendCreated(res, { projectId, projectName, clientId: finalClientId }, 'Project created successfully');
+      sendCreated(
+        res,
+        { projectId, projectName, clientId: finalClientId },
+        'Project created successfully'
+      );
     } catch (error) {
       logger.error('[AdminProjects] Error creating project:', {
         error: error instanceof Error ? error : undefined
@@ -312,9 +328,9 @@ async function saveAdminProjectAsFile(
   // Parse features string into array so intake PDF can iterate it
   const featuresArray: string[] = data.features
     ? data.features
-      .split(/[,\n]+/)
-      .map((f: string) => f.trim())
-      .filter(Boolean)
+        .split(/[,\n]+/)
+        .map((f: string) => f.trim())
+        .filter(Boolean)
     : [];
 
   // Mirror the structure used by the client intake form so the intake PDF
@@ -457,7 +473,11 @@ router.post(
       extra: { projectIds, deleted, errors }
     });
 
-    sendSuccess(res, { deleted, errors: errors.length > 0 ? errors : undefined }, `Deleted ${deleted} projects`);
+    sendSuccess(
+      res,
+      { deleted, errors: errors.length > 0 ? errors : undefined },
+      `Deleted ${deleted} projects`
+    );
   })
 );
 

@@ -9,11 +9,7 @@ import express, { Router } from 'express';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { uploadService } from '../../services/upload-service.js';
-import {
-  errorResponse,
-  sendSuccess,
-  ErrorCodes
-} from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 
 const router = Router();
 

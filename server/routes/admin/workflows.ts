@@ -34,10 +34,24 @@ router.post(
   requireAdmin,
   invalidateCache(['workflows']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { name, description, eventType, conditions, actionType, actionConfig, isActive, priority } = req.body;
+    const {
+      name,
+      description,
+      eventType,
+      conditions,
+      actionType,
+      actionConfig,
+      isActive,
+      priority
+    } = req.body;
 
     if (!name || !eventType || !actionType) {
-      return errorResponse(res, 'Name, event type, and action type are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'Name, event type, and action type are required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const workflow = await workflowTriggerService.createTrigger({
@@ -67,7 +81,12 @@ router.post(
     const { workflowIds } = req.body;
 
     if (!workflowIds || !Array.isArray(workflowIds) || workflowIds.length === 0) {
-      return errorResponse(res, 'workflowIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'workflowIds array is required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const deleted = await workflowTriggerService.bulkDeleteTriggers(workflowIds);
@@ -87,11 +106,21 @@ router.post(
     const { workflowIds, status } = req.body;
 
     if (!workflowIds || !Array.isArray(workflowIds) || workflowIds.length === 0) {
-      return errorResponse(res, 'workflowIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'workflowIds array is required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     if (!status || !['active', 'inactive'].includes(status)) {
-      return errorResponse(res, 'status must be "active" or "inactive"', 400, ErrorCodes.INVALID_STATUS);
+      return errorResponse(
+        res,
+        'status must be "active" or "inactive"',
+        400,
+        ErrorCodes.INVALID_STATUS
+      );
     }
 
     const updated = await workflowTriggerService.bulkUpdateTriggerStatus(workflowIds, status);
@@ -114,12 +143,16 @@ router.post(
     const remindersSent = await scheduler.triggerReminderProcessing();
     const { scheduled, recurring } = await scheduler.triggerInvoiceGeneration();
 
-    sendSuccess(res, {
-      reminders: remindersSent,
-      scheduledInvoices: scheduled,
-      recurringInvoices: recurring,
-      overdueMarked: overdueCount
-    }, 'Scheduler run completed');
+    sendSuccess(
+      res,
+      {
+        reminders: remindersSent,
+        scheduledInvoices: scheduled,
+        recurringInvoices: recurring,
+        overdueMarked: overdueCount
+      },
+      'Scheduler run completed'
+    );
   })
 );
 
@@ -139,12 +172,16 @@ router.post(
 
     const result = await backfillMilestones();
 
-    sendSuccess(res, {
-      projectsProcessed: result.projectsProcessed,
-      milestonesCreated: result.milestonesCreated,
-      tasksCreated: result.tasksCreated,
-      errors: result.errors
-    }, `Backfill complete: ${result.milestonesCreated} milestones and ${result.tasksCreated} tasks created for ${result.projectsProcessed} projects`);
+    sendSuccess(
+      res,
+      {
+        projectsProcessed: result.projectsProcessed,
+        milestonesCreated: result.milestonesCreated,
+        tasksCreated: result.tasksCreated,
+        errors: result.errors
+      },
+      `Backfill complete: ${result.milestonesCreated} milestones and ${result.tasksCreated} tasks created for ${result.projectsProcessed} projects`
+    );
   })
 );
 
@@ -164,11 +201,15 @@ router.post(
 
     const result = await backfillMilestoneTasks();
 
-    sendSuccess(res, {
-      milestonesProcessed: result.milestonesProcessed,
-      tasksCreated: result.tasksCreated,
-      errors: result.errors
-    }, `Backfill complete: ${result.tasksCreated} tasks created for ${result.milestonesProcessed} milestones`);
+    sendSuccess(
+      res,
+      {
+        milestonesProcessed: result.milestonesProcessed,
+        tasksCreated: result.tasksCreated,
+        errors: result.errors
+      },
+      `Backfill complete: ${result.tasksCreated} tasks created for ${result.milestonesProcessed} milestones`
+    );
   })
 );
 

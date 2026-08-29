@@ -51,9 +51,13 @@ router.post(
     // Execute escalation
     const result = await escalateTaskPriorities(projectId);
 
-    sendSuccess(res, {
-      ...result
-    }, `Escalated ${result.updatedCount} task(s)`);
+    sendSuccess(
+      res,
+      {
+        ...result
+      },
+      `Escalated ${result.updatedCount} task(s)`
+    );
   })
 );
 

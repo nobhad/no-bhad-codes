@@ -128,7 +128,7 @@ export function onClickOutside(
  *
  * input.addEventListener('input', () => debouncedSearch(input.value));
  */
-export function debounce<T extends(...args: Parameters<T>) => void>(
+export function debounce<T extends (...args: Parameters<T>) => void>(
   fn: T,
   delay: number
 ): (...args: Parameters<T>) => void {
@@ -155,7 +155,7 @@ export function debounce<T extends(...args: Parameters<T>) => void>(
  * // Later, if needed:
  * cancel();
  */
-export function debounceWithCancel<T extends(...args: Parameters<T>) => void>(
+export function debounceWithCancel<T extends (...args: Parameters<T>) => void>(
   fn: T,
   delay: number
 ): { fn: (...args: Parameters<T>) => void; cancel: () => void } {
@@ -192,7 +192,7 @@ export function debounceWithCancel<T extends(...args: Parameters<T>) => void>(
  *
  * window.addEventListener('scroll', throttledScroll);
  */
-export function throttle<T extends(...args: Parameters<T>) => void>(
+export function throttle<T extends (...args: Parameters<T>) => void>(
   fn: T,
   interval: number
 ): (...args: Parameters<T>) => void {
@@ -294,55 +294,55 @@ export function addKeyboardNav(container: HTMLElement, options: KeyboardNavOptio
     }
 
     switch (event.key) {
-    case 'ArrowDown':
-      if (orientation === 'vertical' || orientation === 'both') {
+      case 'ArrowDown':
+        if (orientation === 'vertical' || orientation === 'both') {
+          event.preventDefault();
+          focusItem(currentIndex + 1);
+        }
+        break;
+
+      case 'ArrowUp':
+        if (orientation === 'vertical' || orientation === 'both') {
+          event.preventDefault();
+          focusItem(currentIndex - 1);
+        }
+        break;
+
+      case 'ArrowRight':
+        if (orientation === 'horizontal' || orientation === 'both') {
+          event.preventDefault();
+          focusItem(currentIndex + 1);
+        }
+        break;
+
+      case 'ArrowLeft':
+        if (orientation === 'horizontal' || orientation === 'both') {
+          event.preventDefault();
+          focusItem(currentIndex - 1);
+        }
+        break;
+
+      case 'Home':
         event.preventDefault();
-        focusItem(currentIndex + 1);
-      }
-      break;
+        focusItem(0);
+        break;
 
-    case 'ArrowUp':
-      if (orientation === 'vertical' || orientation === 'both') {
+      case 'End':
         event.preventDefault();
-        focusItem(currentIndex - 1);
-      }
-      break;
+        focusItem(items.length - 1);
+        break;
 
-    case 'ArrowRight':
-      if (orientation === 'horizontal' || orientation === 'both') {
+      case 'Enter':
+      case ' ':
         event.preventDefault();
-        focusItem(currentIndex + 1);
-      }
-      break;
+        if (currentIndex >= 0 && currentIndex < items.length) {
+          onSelect?.(items[currentIndex], currentIndex);
+        }
+        break;
 
-    case 'ArrowLeft':
-      if (orientation === 'horizontal' || orientation === 'both') {
-        event.preventDefault();
-        focusItem(currentIndex - 1);
-      }
-      break;
-
-    case 'Home':
-      event.preventDefault();
-      focusItem(0);
-      break;
-
-    case 'End':
-      event.preventDefault();
-      focusItem(items.length - 1);
-      break;
-
-    case 'Enter':
-    case ' ':
-      event.preventDefault();
-      if (currentIndex >= 0 && currentIndex < items.length) {
-        onSelect?.(items[currentIndex], currentIndex);
-      }
-      break;
-
-    case 'Escape':
-      onEscape?.();
-      break;
+      case 'Escape':
+        onEscape?.();
+        break;
     }
   };
 

@@ -43,7 +43,11 @@
 import { PDFDocument, PDFFont, PDFPage, rgb } from 'pdf-lib';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
-import { getRegularFontBytes, getBoldFontBytes, registerFontkit } from '../server/utils/pdf-utils.js';
+import {
+  getRegularFontBytes,
+  getBoldFontBytes,
+  registerFontkit
+} from '../server/utils/pdf-utils.js';
 
 // Business info - matches server/config/business.ts defaults
 const BUSINESS_INFO = {
@@ -80,8 +84,8 @@ function stripMarkdownFormatting(text: string): string {
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
     .replace(/—/g, '-')
     .replace(/–/g, '-')
-    .replace(/'/g, '\'')
-    .replace(/'/g, '\'')
+    .replace(/'/g, "'")
+    .replace(/'/g, "'")
     .replace(/"/g, '"')
     .replace(/"/g, '"')
     .replace(/→/g, '->')
@@ -196,7 +200,7 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
         const labelText = labelMatch[1];
         const rest = raw.slice(labelMatch[0].length);
         const result: TextSegment[] = [{ text: labelText, bold: true }];
-        if (rest) result.push({ text: ` ${  rest}`, bold: false });
+        if (rest) result.push({ text: ` ${rest}`, bold: false });
         return result;
       }
     }
@@ -257,7 +261,7 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
     const otherColsWidth = maxWidths.slice(1).reduce((sum, w) => sum + w, 0);
     const firstColWidth = Math.max(CONTENT_WIDTH - otherColsWidth, CONTENT_WIDTH * 0.3);
     const scale = (CONTENT_WIDTH - firstColWidth) / (otherColsWidth || 1);
-    const widths = [firstColWidth, ...maxWidths.slice(1).map(w => w * scale)];
+    const widths = [firstColWidth, ...maxWidths.slice(1).map((w) => w * scale)];
     return widths;
   };
 
@@ -284,7 +288,7 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
 
       let cellX = startX;
       row.forEach((cell, colIndex) => {
-        const colWidth = colWidths[colIndex] || (CONTENT_WIDTH / numCols);
+        const colWidth = colWidths[colIndex] || CONTENT_WIDTH / numCols;
         const cellContent = stripMarkdownFormatting(cell);
 
         // Header row: dark background, white text
@@ -326,13 +330,16 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
         } else {
           const isHeader = rowIndex === 0;
           const isBoldCell = cell.includes('**');
-          const font = (isHeader || isBoldCell) ? helveticaBold : helvetica;
+          const font = isHeader || isBoldCell ? helveticaBold : helvetica;
           const textColor = isHeader ? { r: 1, g: 1, b: 1 } : { r: 0, g: 0, b: 0 };
           const maxTextWidth = colWidth - 10;
 
           // Truncate only if truly necessary
           let displayText = cellContent;
-          while (font.widthOfTextAtSize(displayText, FONT_SIZE_SMALL) > maxTextWidth && displayText.length > 3) {
+          while (
+            font.widthOfTextAtSize(displayText, FONT_SIZE_SMALL) > maxTextWidth &&
+            displayText.length > 3
+          ) {
             displayText = displayText.substring(0, displayText.length - 1);
           }
 
@@ -567,12 +574,15 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
           i++;
           continue;
         }
-        if (blockLine === '') { i++; continue; }
+        if (blockLine === '') {
+          i++;
+          continue;
+        }
 
         if (inDetails) {
           const labelMatch = blockLine.match(/^\*\*([^*]+):\*\*\s*(.*)$/);
           if (labelMatch) {
-            detailLines.push({ label: `${labelMatch[1]  }:`, value: labelMatch[2] });
+            detailLines.push({ label: `${labelMatch[1]}:`, value: labelMatch[2] });
           }
         } else {
           billToLines.push(blockLine);
@@ -687,7 +697,7 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
       // More padding for special headings
       if (
         text.toLowerCase().startsWith('everything in') ||
-        text.toLowerCase().includes('what\'s included')
+        text.toLowerCase().includes("what's included")
       ) {
         y -= 12;
       } else {
@@ -871,11 +881,13 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
       drawText('•', bulletX, y, { size: FONT_SIZE_BODY });
 
       const segments = parseInlineBold(rawContent);
-      const hasBold = segments.some(s => s.bold);
+      const hasBold = segments.some((s) => s.bold);
 
       if (hasBold) {
         // Render with inline bold segments — word wrap manually
-        const allText = segments.map(s => s.bold ? s.text : stripMarkdownFormatting(s.text)).join('');
+        const allText = segments
+          .map((s) => (s.bold ? s.text : stripMarkdownFormatting(s.text)))
+          .join('');
         const totalWidth = helvetica.widthOfTextAtSize(allText, FONT_SIZE_BODY);
 
         if (totalWidth <= maxWidth) {
@@ -936,7 +948,7 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
     // Regular paragraph — with inline bold for labels
     checkPageBreak(15);
     const segments = parseInlineBold(trimmed);
-    const hasBoldSegments = segments.some(s => s.bold);
+    const hasBoldSegments = segments.some((s) => s.bold);
 
     if (hasBoldSegments) {
       // Render with inline bold segments and word wrapping

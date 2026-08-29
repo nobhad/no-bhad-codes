@@ -60,9 +60,7 @@ function isOverdue(invoice: Invoice): boolean {
  * useInvoices
  * Hook for fetching and managing invoices data
  */
-export function useInvoices({
-  autoFetch = true
-}: UseInvoicesOptions = {}): UseInvoicesReturn {
+export function useInvoices({ autoFetch = true }: UseInvoicesOptions = {}): UseInvoicesReturn {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -162,40 +160,37 @@ export function useInvoices({
   );
 
   // Download invoice PDF
-  const downloadPdf = useCallback(
-    async (id: number): Promise<void> => {
-      try {
-        const response = await apiFetch(`${API_ENDPOINTS.INVOICES}/${id}/pdf`);
+  const downloadPdf = useCallback(async (id: number): Promise<void> => {
+    try {
+      const response = await apiFetch(`${API_ENDPOINTS.INVOICES}/${id}/pdf`);
 
-        if (!response.ok) {
-          throw new Error(`Failed to download PDF: ${response.statusText}`);
-        }
-
-        // Get filename from Content-Disposition header or use default
-        const contentDisposition = response.headers.get('Content-Disposition');
-        let filename = `invoice-${id}.pdf`;
-        if (contentDisposition) {
-          const match = contentDisposition.match(/filename="?([^"]+)"?/);
-          if (match) filename = match[1];
-        }
-
-        // Create blob and trigger download
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      } catch (err) {
-        logger.error('[useInvoices] Download PDF error:', err);
-        throw err;
+      if (!response.ok) {
+        throw new Error(`Failed to download PDF: ${response.statusText}`);
       }
-    },
-    []
-  );
+
+      // Get filename from Content-Disposition header or use default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = `invoice-${id}.pdf`;
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (match) filename = match[1];
+      }
+
+      // Create blob and trigger download
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      logger.error('[useInvoices] Download PDF error:', err);
+      throw err;
+    }
+  }, []);
 
   // Delete multiple invoices
   const bulkDelete = useCallback(

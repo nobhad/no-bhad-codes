@@ -142,7 +142,12 @@ router.post(
     const { name, type, content } = req.body;
 
     if (!name || !type || !content) {
-      return errorResponse(res, 'name, type, and content are required', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'name, type, and content are required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     if (!contractService.isValidTemplateType(type)) {

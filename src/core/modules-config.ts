@@ -225,7 +225,9 @@ export function registerModules(debug: boolean = false): void {
               // (site header, mobile nav) — React renders its own shell.
               const siteHeader = document.querySelector('body > header.header') as HTMLElement;
               const mobileNav = document.querySelector('body > nav.nav') as HTMLElement;
-              const siteFooter = document.querySelector('body > footer, body > .footer') as HTMLElement;
+              const siteFooter = document.querySelector(
+                'body > footer, body > .footer'
+              ) as HTMLElement;
               if (siteHeader) siteHeader.style.display = 'none';
               if (mobileNav) mobileNav.style.display = 'none';
               if (siteFooter) siteFooter.style.display = 'none';
@@ -233,8 +235,7 @@ export function registerModules(debug: boolean = false): void {
               // Mount React directly into the existing EJS container.
               // mountPortalApp uses flushSync so React paints in the same
               // frame as clearing — no visual flash.
-              const dashboardContainer =
-                document.querySelector('.portal') as HTMLElement;
+              const dashboardContainer = document.querySelector('.portal') as HTMLElement;
               if (dashboardContainer) {
                 cleanup = mountPortalApp(dashboardContainer);
               }
@@ -245,7 +246,9 @@ export function registerModules(debug: boolean = false): void {
               // Restore EJS elements if React is unmounted
               const siteHeader = document.querySelector('body > header.header') as HTMLElement;
               const mobileNav = document.querySelector('body > nav.nav') as HTMLElement;
-              const siteFooter = document.querySelector('body > footer, body > .footer') as HTMLElement;
+              const siteFooter = document.querySelector(
+                'body > footer, body > .footer'
+              ) as HTMLElement;
               if (siteHeader) siteHeader.style.display = '';
               if (mobileNav) mobileNav.style.display = '';
               if (siteFooter) siteFooter.style.display = '';
@@ -304,4 +307,3 @@ export function getReactPortalModules(): string[] {
 export function getClientIntakeModules(): string[] {
   return ['ThemeModule', 'NavigationModule', 'FooterModule'];
 }
-

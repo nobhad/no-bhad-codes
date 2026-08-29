@@ -133,8 +133,8 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
             </div>
             
             ${
-  showDetailsLink
-    ? `
+              showDetailsLink
+                ? `
               <div class="consent-banner__links">
                 <button 
                   class="consent-banner__link" 
@@ -143,8 +143,8 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
                   ${showDetails ? 'Hide Details' : 'Learn More'}
                 </button>
                 ${
-  privacyPolicyUrl
-    ? `
+                  privacyPolicyUrl
+                    ? `
                   <a 
                     href="${privacyPolicyUrl}" 
                     class="consent-banner__link"
@@ -154,12 +154,12 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
                     Privacy Policy
                   </a>
                 `
-    : ''
-}
+                    : ''
+                }
               </div>
             `
-    : ''
-}
+                : ''
+            }
           </div>
         </div>
       </div>

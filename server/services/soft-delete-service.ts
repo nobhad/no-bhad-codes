@@ -20,7 +20,21 @@ import { logger } from './logger.js';
 // TYPES
 // =====================================================
 
-export type SoftDeleteEntityType = 'client' | 'project' | 'invoice' | 'lead' | 'proposal' | 'message_thread' | 'document_request' | 'contract' | 'deliverable' | 'task' | 'milestone' | 'file' | 'time_entry' | 'contact';
+export type SoftDeleteEntityType =
+  | 'client'
+  | 'project'
+  | 'invoice'
+  | 'lead'
+  | 'proposal'
+  | 'message_thread'
+  | 'document_request'
+  | 'contract'
+  | 'deliverable'
+  | 'task'
+  | 'milestone'
+  | 'file'
+  | 'time_entry'
+  | 'contact';
 
 export interface DeletedItem {
   id: number;
@@ -335,7 +349,7 @@ class SoftDeleteService {
 
       // Void the invoice if it's not already voided/cancelled, then soft delete
       if (invoice.status !== 'voided' && invoice.status !== 'cancelled') {
-        await db.run('UPDATE invoices SET status = \'voided\' WHERE id = ?', [invoiceId]);
+        await db.run("UPDATE invoices SET status = 'voided' WHERE id = ?", [invoiceId]);
       }
 
       // Soft delete the invoice
@@ -525,19 +539,19 @@ class SoftDeleteService {
     const now = new Date().toISOString();
 
     try {
-      const entity = await db.get(
-        `SELECT id FROM ${table} WHERE id = ? AND deleted_at IS NULL`,
-        [entityId]
-      );
+      const entity = await db.get(`SELECT id FROM ${table} WHERE id = ? AND deleted_at IS NULL`, [
+        entityId
+      ]);
 
       if (!entity) {
         return { success: false, message: `${entityType} not found or already deleted` };
       }
 
-      await db.run(
-        `UPDATE ${table} SET deleted_at = ?, deleted_by = ? WHERE id = ?`,
-        [now, deletedBy, entityId]
-      );
+      await db.run(`UPDATE ${table} SET deleted_at = ?, deleted_by = ? WHERE id = ?`, [
+        now,
+        deletedBy,
+        entityId
+      ]);
 
       await auditLogger.log({
         action: `${entityType}_deleted`,
@@ -644,7 +658,7 @@ class SoftDeleteService {
         // If it was voided as part of deletion, set to draft
         if (invoice && invoice.status === 'voided') {
           await db.run(
-            'UPDATE invoices SET status = \'draft\', deleted_at = NULL, deleted_by = NULL WHERE id = ?',
+            "UPDATE invoices SET status = 'draft', deleted_at = NULL, deleted_by = NULL WHERE id = ?",
             [entityId]
           );
         } else {
@@ -698,7 +712,22 @@ class SoftDeleteService {
 
     const types = entityType
       ? [entityType]
-      : (['client', 'project', 'invoice', 'lead', 'proposal', 'message_thread', 'document_request', 'contract', 'deliverable', 'task', 'milestone', 'file', 'time_entry', 'contact'] as SoftDeleteEntityType[]);
+      : ([
+          'client',
+          'project',
+          'invoice',
+          'lead',
+          'proposal',
+          'message_thread',
+          'document_request',
+          'contract',
+          'deliverable',
+          'task',
+          'milestone',
+          'file',
+          'time_entry',
+          'contact'
+        ] as SoftDeleteEntityType[]);
 
     for (const type of types) {
       const table = TABLE_MAP[type];
@@ -706,50 +735,50 @@ class SoftDeleteService {
 
       // Determine the name column for each entity type
       switch (type) {
-      case 'client':
-        nameColumn = 'COALESCE(company_name, contact_name, email, \'Unknown Client\')';
-        break;
-      case 'project':
-        nameColumn = 'COALESCE(project_name, \'Unnamed Project\')';
-        break;
-      case 'invoice':
-        nameColumn = 'COALESCE(invoice_number, \'Unknown Invoice\')';
-        break;
-      case 'lead':
-        nameColumn = 'COALESCE(company_name, contact_name, contact_email, \'Unknown Lead\')';
-        break;
-      case 'proposal':
-        nameColumn = 'COALESCE(title, \'Unnamed Proposal\')';
-        break;
-      case 'message_thread':
-        nameColumn = 'COALESCE(subject, \'Thread #\' || id)';
-        break;
-      case 'document_request':
-        nameColumn = 'COALESCE(title, \'Document Request #\' || id)';
-        break;
-      case 'contract':
-        nameColumn = 'COALESCE(title, \'Contract #\' || id)';
-        break;
-      case 'deliverable':
-        nameColumn = 'COALESCE(title, name, \'Deliverable #\' || id)';
-        break;
-      case 'task':
-        nameColumn = 'COALESCE(title, \'Task #\' || id)';
-        break;
-      case 'milestone':
-        nameColumn = 'COALESCE(title, \'Milestone #\' || id)';
-        break;
-      case 'file':
-        nameColumn = 'COALESCE(original_filename, filename, \'File #\' || id)';
-        break;
-      case 'time_entry':
-        nameColumn = 'COALESCE(description, \'Time Entry #\' || id)';
-        break;
-      case 'contact':
-        nameColumn = 'COALESCE(first_name || \' \' || last_name, email, \'Contact #\' || id)';
-        break;
-      default:
-        nameColumn = '\'Unknown\'';
+        case 'client':
+          nameColumn = "COALESCE(company_name, contact_name, email, 'Unknown Client')";
+          break;
+        case 'project':
+          nameColumn = "COALESCE(project_name, 'Unnamed Project')";
+          break;
+        case 'invoice':
+          nameColumn = "COALESCE(invoice_number, 'Unknown Invoice')";
+          break;
+        case 'lead':
+          nameColumn = "COALESCE(company_name, contact_name, contact_email, 'Unknown Lead')";
+          break;
+        case 'proposal':
+          nameColumn = "COALESCE(title, 'Unnamed Proposal')";
+          break;
+        case 'message_thread':
+          nameColumn = "COALESCE(subject, 'Thread #' || id)";
+          break;
+        case 'document_request':
+          nameColumn = "COALESCE(title, 'Document Request #' || id)";
+          break;
+        case 'contract':
+          nameColumn = "COALESCE(title, 'Contract #' || id)";
+          break;
+        case 'deliverable':
+          nameColumn = "COALESCE(title, name, 'Deliverable #' || id)";
+          break;
+        case 'task':
+          nameColumn = "COALESCE(title, 'Task #' || id)";
+          break;
+        case 'milestone':
+          nameColumn = "COALESCE(title, 'Milestone #' || id)";
+          break;
+        case 'file':
+          nameColumn = "COALESCE(original_filename, filename, 'File #' || id)";
+          break;
+        case 'time_entry':
+          nameColumn = "COALESCE(description, 'Time Entry #' || id)";
+          break;
+        case 'contact':
+          nameColumn = "COALESCE(first_name || ' ' || last_name, email, 'Contact #' || id)";
+          break;
+        default:
+          nameColumn = "'Unknown'";
       }
 
       const rows = (await db.all(
@@ -886,9 +915,21 @@ class SoftDeleteService {
     )) as { count: number };
     stats.contacts = contactCount.count;
 
-    stats.total = stats.clients + stats.projects + stats.invoices + stats.leads + stats.proposals
-      + stats.message_threads + stats.document_requests + stats.contracts + stats.deliverables
-      + stats.tasks + stats.milestones + stats.files + stats.time_entries + stats.contacts;
+    stats.total =
+      stats.clients +
+      stats.projects +
+      stats.invoices +
+      stats.leads +
+      stats.proposals +
+      stats.message_threads +
+      stats.document_requests +
+      stats.contracts +
+      stats.deliverables +
+      stats.tasks +
+      stats.milestones +
+      stats.files +
+      stats.time_entries +
+      stats.contacts;
 
     return stats;
   }
@@ -1157,9 +1198,20 @@ class SoftDeleteService {
       deleted.clients = clientResult.changes || 0;
 
       deleted.total =
-        deleted.clients + deleted.projects + deleted.invoices + deleted.leads + deleted.proposals
-        + deleted.message_threads + deleted.document_requests + deleted.contracts + deleted.deliverables
-        + deleted.tasks + deleted.milestones + deleted.files + deleted.time_entries + deleted.contacts;
+        deleted.clients +
+        deleted.projects +
+        deleted.invoices +
+        deleted.leads +
+        deleted.proposals +
+        deleted.message_threads +
+        deleted.document_requests +
+        deleted.contracts +
+        deleted.deliverables +
+        deleted.tasks +
+        deleted.milestones +
+        deleted.files +
+        deleted.time_entries +
+        deleted.contacts;
 
       if (deleted.total > 0) {
         await auditLogger.log({

@@ -28,8 +28,17 @@ const BACKOFF_MULTIPLIER = 2;
 // ============================================
 
 export interface SSEEventHandlers {
-  onNewMessage?: (data: { threadId: number; message: Record<string, unknown>; senderType: string }) => void;
-  onTyping?: (data: { threadId: number; isTyping: boolean; senderName: string; senderType: string }) => void;
+  onNewMessage?: (data: {
+    threadId: number;
+    message: Record<string, unknown>;
+    senderType: string;
+  }) => void;
+  onTyping?: (data: {
+    threadId: number;
+    isTyping: boolean;
+    senderName: string;
+    senderType: string;
+  }) => void;
   onNotification?: (data: Record<string, unknown>) => void;
   onReadReceipt?: (data: { threadId: number; userId: number; readAt: string }) => void;
 }

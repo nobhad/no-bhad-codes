@@ -70,15 +70,15 @@ function getAction(method: string, path: string): AuditAction {
 
   // Default based on method
   switch (method) {
-  case 'POST':
-    return 'create';
-  case 'PUT':
-  case 'PATCH':
-    return 'update';
-  case 'DELETE':
-    return 'delete';
-  default:
-    return 'view';
+    case 'POST':
+      return 'create';
+    case 'PUT':
+    case 'PATCH':
+      return 'update';
+    case 'DELETE':
+      return 'delete';
+    default:
+      return 'view';
   }
 }
 
@@ -148,7 +148,9 @@ export function auditMiddleware() {
       const action = getAction(req.method, req.path);
       const entityType = getEntityType(req.path);
       const entityId =
-        getEntityId(req) || body?.id?.toString() || (body?.data as Record<string, unknown> | undefined)?.id?.toString();
+        getEntityId(req) ||
+        body?.id?.toString() ||
+        (body?.data as Record<string, unknown> | undefined)?.id?.toString();
 
       // Build the full audit entry before logging so it can be
       // captured in structured logs if DB persistence fails

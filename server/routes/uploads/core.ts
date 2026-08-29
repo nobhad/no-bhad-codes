@@ -11,22 +11,10 @@ import { logger } from '../../services/logger.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { getString } from '../../database/row-helpers.js';
-import {
-  errorResponse,
-  sendSuccess,
-  sendCreated,
-  ErrorCodes
-} from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 import { uploadService } from '../../services/upload-service.js';
-import {
-  FileRow,
-  ProjectRow,
-  upload,
-  uploadDir,
-  isPathSafe,
-  resolveFilePath
-} from './shared.js';
+import { FileRow, ProjectRow, upload, uploadDir, isPathSafe, resolveFilePath } from './shared.js';
 
 const router = Router();
 
@@ -169,7 +157,12 @@ router.post(
     }
 
     if (!req.file.mimetype.startsWith('image/')) {
-      return errorResponse(res, 'Avatar must be an image file', 400, ErrorCodes.INVALID_AVATAR_TYPE);
+      return errorResponse(
+        res,
+        'Avatar must be an image file',
+        400,
+        ErrorCodes.INVALID_AVATAR_TYPE
+      );
     }
 
     const filePath = `uploads/avatars/${req.file.filename}`;

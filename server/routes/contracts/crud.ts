@@ -194,24 +194,24 @@ router.get(
     const db = getDatabase();
 
     // Get contract with related data
-    const contract = await db.get(
+    const contract = (await db.get(
       `SELECT c.*, p.project_name, cl.contact_name as client_name, cl.email as client_email, cl.company_name
        FROM contracts c
        LEFT JOIN projects p ON c.project_id = p.id
        LEFT JOIN clients cl ON c.client_id = cl.id
        WHERE c.id = ?`,
       [contractId]
-    ) as Record<string, unknown> | undefined;
+    )) as Record<string, unknown> | undefined;
 
     if (!contract) {
       return errorResponse(res, 'Contract not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     // Get signature log
-    const signatures = await db.all(
+    const signatures = (await db.all(
       'SELECT * FROM contract_signature_log WHERE contract_id = ? ORDER BY created_at DESC',
       [contractId]
-    ) as Array<Record<string, unknown>>;
+    )) as Array<Record<string, unknown>>;
 
     const exportData = {
       exportedAt: new Date().toISOString(),
@@ -239,7 +239,15 @@ router.get(
         signerName: s.signer_name,
         signerEmail: s.signer_email,
         signedAt: s.created_at,
-        details: s.details ? (() => { try { return JSON.parse(String(s.details)); } catch { return s.details; } })() : null
+        details: s.details
+          ? (() => {
+              try {
+                return JSON.parse(String(s.details));
+              } catch {
+                return s.details;
+              }
+            })()
+          : null
       }))
     };
 
@@ -384,7 +392,12 @@ router.post(
     const { contractIds } = req.body;
 
     if (!contractIds || !Array.isArray(contractIds) || contractIds.length === 0) {
-      return errorResponse(res, 'contractIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'contractIds array is required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     let deleted = 0;

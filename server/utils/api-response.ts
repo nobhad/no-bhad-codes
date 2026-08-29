@@ -545,7 +545,10 @@ export function parsePaginationQuery(
     page = Math.max(DEFAULT_PAGE, parseInt(String(query.page), 10) || DEFAULT_PAGE);
     perPage = Math.min(
       MAX_PER_PAGE,
-      Math.max(1, parseInt(String(query.perPage ?? query.limit ?? defaultPerPage), 10) || defaultPerPage)
+      Math.max(
+        1,
+        parseInt(String(query.perPage ?? query.limit ?? defaultPerPage), 10) || defaultPerPage
+      )
     );
   } else if (hasOffsetParams) {
     const offset = Math.max(0, parseInt(String(query.offset), 10) || 0);
@@ -605,23 +608,23 @@ export function sanitizeErrorMessage(
  */
 function getErrorCode(status: number): ErrorCode | string {
   switch (status) {
-  case 400:
-    return ErrorCodes.BAD_REQUEST;
-  case 401:
-    return ErrorCodes.UNAUTHORIZED;
-  case 403:
-    return ErrorCodes.ACCESS_DENIED;
-  case 404:
-    return ErrorCodes.RESOURCE_NOT_FOUND;
-  case 409:
-    return ErrorCodes.DUPLICATE_RESOURCE;
-  case 422:
-    return ErrorCodes.VALIDATION_ERROR;
-  case 429:
-    return ErrorCodes.RATE_LIMIT_EXCEEDED;
-  case 500:
-    return ErrorCodes.INTERNAL_ERROR;
-  default:
-    return 'ERROR';
+    case 400:
+      return ErrorCodes.BAD_REQUEST;
+    case 401:
+      return ErrorCodes.UNAUTHORIZED;
+    case 403:
+      return ErrorCodes.ACCESS_DENIED;
+    case 404:
+      return ErrorCodes.RESOURCE_NOT_FOUND;
+    case 409:
+      return ErrorCodes.DUPLICATE_RESOURCE;
+    case 422:
+      return ErrorCodes.VALIDATION_ERROR;
+    case 429:
+      return ErrorCodes.RATE_LIMIT_EXCEEDED;
+    case 500:
+      return ErrorCodes.INTERNAL_ERROR;
+    default:
+      return 'ERROR';
   }
 }

@@ -10,11 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import {
-  canAccessInvoice,
-  canAccessProject,
-  isUserAdmin
-} from '../../utils/access-control.js';
+import { canAccessInvoice, canAccessProject, isUserAdmin } from '../../utils/access-control.js';
 import { InvoiceCreateData, InvoiceLineItem } from '../../services/invoice-service.js';
 import type { ClientContact } from '../../services/invoice-service.js';
 import type { InvoiceStatus } from '../../types/invoice-types.js';
@@ -57,7 +53,8 @@ const InvoiceValidationSchemas = {
         customValidator: (items: unknown) => {
           if (!Array.isArray(items)) return 'Line items must be an array';
           for (const item of items) {
-            if (typeof item !== 'object' || item === null) return 'Each line item must be an object';
+            if (typeof item !== 'object' || item === null)
+              return 'Each line item must be an object';
             const entry = item as Record<string, unknown>;
             if (!entry.description || typeof entry.description !== 'string') {
               return 'Each line item must have a description';
@@ -207,9 +204,15 @@ router.get(
       const invoices = await getInvoiceService().getAllInvoices(limit, offset);
       sendSuccess(res, { invoices: invoices.map(toSnakeCaseInvoice) });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve invoices', 500, ErrorCodes.RETRIEVAL_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to retrieve invoices')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve invoices',
+        500,
+        ErrorCodes.RETRIEVAL_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to retrieve invoices')
+        }
+      );
     }
   })
 );
@@ -297,9 +300,15 @@ if (process.env.NODE_ENV === 'development') {
         if (rawMessage.includes('not found')) {
           return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
         }
-        errorResponseWithPayload(res, 'Failed to retrieve invoice', 500, ErrorCodes.RETRIEVAL_FAILED, {
-          message: sanitizeErrorMessage(error, 'Failed to retrieve test invoice')
-        });
+        errorResponseWithPayload(
+          res,
+          'Failed to retrieve invoice',
+          500,
+          ErrorCodes.RETRIEVAL_FAILED,
+          {
+            message: sanitizeErrorMessage(error, 'Failed to retrieve test invoice')
+          }
+        );
       }
     })
   );
@@ -405,9 +414,15 @@ router.post(
     );
 
     if (invalidLineItems.length > 0) {
-      return errorResponseWithPayload(res, 'Invalid line items', 400, ErrorCodes.INVALID_LINE_ITEMS, {
-        message: 'Each line item must have description, quantity, rate, and amount'
-      });
+      return errorResponseWithPayload(
+        res,
+        'Invalid line items',
+        400,
+        ErrorCodes.INVALID_LINE_ITEMS,
+        {
+          message: 'Each line item must have description, quantity, rate, and amount'
+        }
+      );
     }
 
     try {
@@ -566,7 +581,14 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     // Define valid statuses for type checking
-    type SearchInvoiceStatus = 'draft' | 'sent' | 'viewed' | 'partial' | 'paid' | 'overdue' | 'cancelled';
+    type SearchInvoiceStatus =
+      | 'draft'
+      | 'sent'
+      | 'viewed'
+      | 'partial'
+      | 'paid'
+      | 'overdue'
+      | 'cancelled';
     const validStatuses: SearchInvoiceStatus[] = [
       'draft',
       'sent',
@@ -658,9 +680,15 @@ router.get(
         count: invoices.length
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve client invoices', 500, ErrorCodes.RETRIEVAL_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to retrieve client invoices')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve client invoices',
+        500,
+        ErrorCodes.RETRIEVAL_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to retrieve client invoices')
+        }
+      );
     }
   })
 );
@@ -751,15 +779,17 @@ router.get(
         return sendPdfResponse(res, cached, { filename, disposition, cacheStatus: 'HIT' });
       }
 
-      const clientContact: ClientContact | undefined = await getInvoiceService().getClientContact(invoice.clientId);
+      const clientContact: ClientContact | undefined = await getInvoiceService().getClientContact(
+        invoice.clientId
+      );
 
       const lineItems: InvoicePdfData['lineItems'] = Array.isArray(invoice.lineItems)
         ? invoice.lineItems.map((item: InvoiceLineItem) => ({
-          description: item.description || '',
-          quantity: item.quantity || 1,
-          rate: item.rate || item.amount || 0,
-          amount: item.amount || 0
-        }))
+            description: item.description || '',
+            quantity: item.quantity || 1,
+            rate: item.rate || item.amount || 0,
+            amount: item.amount || 0
+          }))
         : [];
 
       const invoiceCredits = await getInvoiceService().getInvoiceCredits(invoiceId);
@@ -874,9 +904,15 @@ router.put(
       if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to update invoice status', 500, ErrorCodes.UPDATE_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to update invoice status')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to update invoice status',
+        500,
+        ErrorCodes.UPDATE_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to update invoice status')
+        }
+      );
     }
   })
 );
@@ -1085,10 +1121,10 @@ router.post(
           invoice,
           receipt: receipt
             ? {
-              id: receipt.id,
-              receipt_number: receipt.receiptNumber,
-              amount: receipt.amount
-            }
+                id: receipt.id,
+                receipt_number: receipt.receiptNumber,
+                amount: receipt.amount
+              }
             : null
         },
         'Invoice marked as paid'
@@ -1124,9 +1160,7 @@ router.get(
       ? parseInt(req.query.clientId as string, 10)
       : undefined;
     const isAdmin = req.user?.type === 'admin';
-    const effectiveClientId = isAdmin
-      ? requestedClientId
-      : (req.user?.id as number | undefined);
+    const effectiveClientId = isAdmin ? requestedClientId : (req.user?.id as number | undefined);
 
     if (!isAdmin && requestedClientId !== undefined && requestedClientId !== req.user?.id) {
       return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
@@ -1136,9 +1170,15 @@ router.get(
       const stats = await getInvoiceService().getInvoiceStats(effectiveClientId);
       sendSuccess(res, { stats });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve invoice statistics', 500, ErrorCodes.STATS_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to retrieve invoice statistics')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve invoice statistics',
+        500,
+        ErrorCodes.STATS_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to retrieve invoice statistics')
+        }
+      );
     }
   })
 );

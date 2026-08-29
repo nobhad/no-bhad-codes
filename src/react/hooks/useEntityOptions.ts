@@ -41,7 +41,12 @@ export function useEntityOptions(enabled = true): EntityOptionsResult {
 
         if (clientsRes.ok) {
           const json = await clientsRes.json();
-          const clients = (json.data?.clients || json.clients || []) as Array<{ id: number; company_name?: string; contact_name?: string; email?: string }>;
+          const clients = (json.data?.clients || json.clients || []) as Array<{
+            id: number;
+            company_name?: string;
+            contact_name?: string;
+            email?: string;
+          }>;
           const opts = clients.map((c) => ({
             value: String(c.id),
             label: c.company_name || c.contact_name || c.email || `Client #${c.id}`
@@ -52,7 +57,11 @@ export function useEntityOptions(enabled = true): EntityOptionsResult {
 
         if (projectsRes.ok) {
           const json = await projectsRes.json();
-          const projects = (json.data?.projects || json.projects || []) as Array<{ id: number; name?: string; project_name?: string }>;
+          const projects = (json.data?.projects || json.projects || []) as Array<{
+            id: number;
+            name?: string;
+            project_name?: string;
+          }>;
           const opts = projects.map((p) => ({
             value: String(p.id),
             label: p.name || p.project_name || `Project #${p.id}`

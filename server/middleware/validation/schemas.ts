@@ -113,7 +113,9 @@ export const ValidationSchemas = {
           'booking'
         ];
         return (
-          features.every((feature: unknown) => typeof feature === 'string' && validFeatures.includes(feature)) || 'Invalid feature selected'
+          features.every(
+            (feature: unknown) => typeof feature === 'string' && validFeatures.includes(feature)
+          ) || 'Invalid feature selected'
         );
       }
     }
@@ -264,10 +266,7 @@ export const ValidationSchemas = {
 
   // Project creation (admin)
   projectCreate: {
-    client_id: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ],
+    client_id: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
     name: [
       { type: 'required' as const },
       { type: 'string' as const, minLength: 2, maxLength: 200 }
@@ -279,7 +278,15 @@ export const ValidationSchemas = {
     },
     status: {
       type: 'string' as const,
-      allowedValues: ['pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled']
+      allowedValues: [
+        'pending',
+        'active',
+        'in-progress',
+        'in-review',
+        'completed',
+        'on-hold',
+        'cancelled'
+      ]
     },
     project_type: { type: 'string' as const, maxLength: 50 },
     budget_range: { type: 'string' as const, maxLength: 50 },
@@ -299,7 +306,15 @@ export const ValidationSchemas = {
     },
     status: {
       type: 'string' as const,
-      allowedValues: ['pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled']
+      allowedValues: [
+        'pending',
+        'active',
+        'in-progress',
+        'in-review',
+        'completed',
+        'on-hold',
+        'cancelled'
+      ]
     },
     progress: { type: 'number' as const, min: 0, max: 100 }
   },
@@ -337,10 +352,7 @@ export const ValidationSchemas = {
 
   // Bulk delete operations
   bulkDelete: {
-    ids: [
-      { type: 'required' as const },
-      { type: 'array' as const, minLength: 1, maxLength: 100 }
-    ]
+    ids: [{ type: 'required' as const }, { type: 'array' as const, minLength: 1, maxLength: 100 }]
   },
 
   // Task creation/update (title required on create, optional on partial update)

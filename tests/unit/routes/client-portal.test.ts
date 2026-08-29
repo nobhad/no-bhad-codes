@@ -55,7 +55,13 @@ vi.mock('../../../server/middleware/cache', () => ({
   // Routes call QueryCache.invalidate as a static helper, not on an
   // instance — expose both shapes.
   QueryCache: Object.assign(
-    class { get() { return null; } set() {} invalidate() {} },
+    class {
+      get() {
+        return null;
+      }
+      set() {}
+      invalidate() {}
+    },
     {
       invalidate: vi.fn().mockResolvedValue(undefined),
       get: vi.fn().mockReturnValue(null),
@@ -235,15 +241,17 @@ vi.mock('crypto', () => ({
  * only the final handler (after middleware), so authenticateToken
  * never runs in these unit tests.
  */
-function createMockReq(options: {
-  user?: { id: number | undefined; email: string; type: 'admin' | 'client' };
-  body?: Record<string, unknown>;
-  params?: Record<string, string>;
-  query?: Record<string, string>;
-  cookies?: Record<string, string>;
-  ip?: string;
-  headers?: Record<string, string>;
-} = {}) {
+function createMockReq(
+  options: {
+    user?: { id: number | undefined; email: string; type: 'admin' | 'client' };
+    body?: Record<string, unknown>;
+    params?: Record<string, string>;
+    query?: Record<string, string>;
+    cookies?: Record<string, string>;
+    ip?: string;
+    headers?: Record<string, string>;
+  } = {}
+) {
   return {
     user: options.user,
     body: options.body || {},
@@ -514,9 +522,7 @@ describe('Client Portal Routes', () => {
       await flushPromises();
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'INVALID_PASSWORD' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'INVALID_PASSWORD' }));
     });
 
     it('should return 400 when new password is too short', async () => {
@@ -532,9 +538,7 @@ describe('Client Portal Routes', () => {
       await flushPromises();
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'WEAK_PASSWORD' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'WEAK_PASSWORD' }));
     });
 
     it('should return 400 when required password fields are missing', async () => {
@@ -550,9 +554,7 @@ describe('Client Portal Routes', () => {
       await flushPromises();
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'MISSING_FIELDS' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'MISSING_FIELDS' }));
     });
   });
 
@@ -562,8 +564,22 @@ describe('Client Portal Routes', () => {
   describe('Client Invoices -- GET /me (invoices)', () => {
     it('should return only the authenticated client invoices with summary', async () => {
       const invoices = [
-        { id: 1, invoiceNumber: 'INV-001', clientId: 42, amountTotal: 1000, amountPaid: 1000, status: 'paid' },
-        { id: 2, invoiceNumber: 'INV-002', clientId: 42, amountTotal: 500, amountPaid: 0, status: 'sent' }
+        {
+          id: 1,
+          invoiceNumber: 'INV-001',
+          clientId: 42,
+          amountTotal: 1000,
+          amountPaid: 1000,
+          status: 'paid'
+        },
+        {
+          id: 2,
+          invoiceNumber: 'INV-002',
+          clientId: 42,
+          amountTotal: 500,
+          amountPaid: 0,
+          status: 'sent'
+        }
       ];
       mockGetClientInvoices.mockResolvedValue(invoices);
 
@@ -605,9 +621,7 @@ describe('Client Portal Routes', () => {
       await flushPromises();
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'AUTH_REQUIRED' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'AUTH_REQUIRED' }));
     });
   });
 
@@ -654,9 +668,7 @@ describe('Client Portal Routes', () => {
 
       // Returns 404 (not 403) to prevent information disclosure
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'NOT_FOUND' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'NOT_FOUND' }));
     });
 
     it('should return 400 for non-numeric invoice ID', async () => {
@@ -672,9 +684,7 @@ describe('Client Portal Routes', () => {
       await flushPromises();
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'INVALID_ID' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'INVALID_ID' }));
     });
   });
 
@@ -708,9 +718,7 @@ describe('Client Portal Routes', () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           success: true,
-          data: expect.arrayContaining([
-            expect.objectContaining({ type: 'invoice_created' })
-          ]),
+          data: expect.arrayContaining([expect.objectContaining({ type: 'invoice_created' })]),
           pagination: expect.objectContaining({
             total: 2
           })
@@ -730,9 +738,7 @@ describe('Client Portal Routes', () => {
       await flushPromises();
 
       expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'ACCESS_DENIED' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'ACCESS_DENIED' }));
     });
 
     it('should return 400 for invalid projectId query parameter', async () => {
@@ -748,9 +754,7 @@ describe('Client Portal Routes', () => {
       await flushPromises();
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'VALIDATION_ERROR' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'VALIDATION_ERROR' }));
     });
   });
 
@@ -763,9 +767,7 @@ describe('Client Portal Routes', () => {
       const layer = findRouteLayer(router, 'get', '/me');
 
       expect(layer).toBeTruthy();
-      const middlewareNames = layer!.route.stack.map((s: any) =>
-        s.handle.name || 'anonymous'
-      );
+      const middlewareNames = layer!.route.stack.map((s: any) => s.handle.name || 'anonymous');
       expect(middlewareNames).toContain('authenticateToken');
     });
 
@@ -774,9 +776,7 @@ describe('Client Portal Routes', () => {
       const layer = findRouteLayer(router, 'put', '/me/password');
 
       expect(layer).toBeTruthy();
-      const middlewareNames = layer!.route.stack.map((s: any) =>
-        s.handle.name || 'anonymous'
-      );
+      const middlewareNames = layer!.route.stack.map((s: any) => s.handle.name || 'anonymous');
       expect(middlewareNames).toContain('authenticateToken');
     });
 
@@ -787,9 +787,7 @@ describe('Client Portal Routes', () => {
       });
 
       expect(layer).toBeTruthy();
-      const middlewareNames = layer!.route.stack.map((s: any) =>
-        s.handle.name || 'anonymous'
-      );
+      const middlewareNames = layer!.route.stack.map((s: any) => s.handle.name || 'anonymous');
       expect(middlewareNames).toContain('authenticateToken');
     });
 
@@ -800,9 +798,7 @@ describe('Client Portal Routes', () => {
       });
 
       expect(layer).toBeTruthy();
-      const middlewareNames = layer!.route.stack.map((s: any) =>
-        s.handle.name || 'anonymous'
-      );
+      const middlewareNames = layer!.route.stack.map((s: any) => s.handle.name || 'anonymous');
       expect(middlewareNames).toContain('authenticateToken');
     });
   });

@@ -146,7 +146,12 @@ router.post(
       const contact = await leadService.getContactSubmissionById(id);
 
       if (!contact) {
-        return errorResponse(res, 'Contact submission not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+        return errorResponse(
+          res,
+          'Contact submission not found',
+          404,
+          ErrorCodes.RESOURCE_NOT_FOUND
+        );
       }
 
       // Check if already converted
@@ -194,7 +199,7 @@ router.post(
             });
           } else {
             const baseUrl =
-            process.env.CLIENT_PORTAL_URL || process.env.FRONTEND_URL || 'http://localhost:4000';
+              process.env.CLIENT_PORTAL_URL || process.env.FRONTEND_URL || 'http://localhost:4000';
             const inviteLink = `${baseUrl}/set-password?token=${invitationToken}`;
 
             try {
@@ -215,7 +220,7 @@ router.post(
               logger.error('Failed to send invitation email:', {
                 error: emailError instanceof Error ? emailError : undefined
               });
-            // Don't fail the conversion if email fails
+              // Don't fail the conversion if email fails
             }
           }
         }
@@ -376,7 +381,12 @@ router.post(
       const leadPhone = typeof lead.phone === 'string' ? lead.phone : null;
 
       if (!leadEmail) {
-        return errorResponse(res, 'Lead does not have an email address', 400, ErrorCodes.VALIDATION_ERROR);
+        return errorResponse(
+          res,
+          'Lead does not have an email address',
+          400,
+          ErrorCodes.VALIDATION_ERROR
+        );
       }
 
       // Check if client already exists

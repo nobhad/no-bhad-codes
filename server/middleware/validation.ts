@@ -17,7 +17,12 @@ import { ApiValidator } from './validation/engine.js';
 import type { ValidationError, ValidationResult, ValidationSchema } from './validation/types.js';
 
 // Re-export everything for consumers
-export type { ValidationError, ValidationResult, ValidationRule, ValidationSchema } from './validation/types.js';
+export type {
+  ValidationError,
+  ValidationResult,
+  ValidationRule,
+  ValidationSchema
+} from './validation/types.js';
 export { ApiValidator } from './validation/engine.js';
 export { ValidationSchemas } from './validation/schemas.js';
 

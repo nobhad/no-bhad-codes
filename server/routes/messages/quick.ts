@@ -46,7 +46,12 @@ router.post(
     const attachments = req.files as Express.Multer.File[];
 
     if (!subject || !message) {
-      return errorResponse(res, 'Subject and message are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'Subject and message are required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     // Process attachments

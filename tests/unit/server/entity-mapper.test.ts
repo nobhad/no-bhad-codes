@@ -192,7 +192,9 @@ describe('transformRow - boolean? type', () => {
   });
 
   it('returns null when value is null and default is null', () => {
-    const schema = { isVerified: { column: 'is_verified', type: 'boolean?' as const, default: null } };
+    const schema = {
+      isVerified: { column: 'is_verified', type: 'boolean?' as const, default: null }
+    };
     expect(transformRow({ is_verified: null }, schema).isVerified).toBeNull();
   });
 
@@ -244,7 +246,9 @@ describe('transformRow - json type', () => {
   });
 
   it('uses default when JSON field is null', () => {
-    const schema = { metadata: { column: 'metadata', type: 'json' as const, default: { empty: true } } };
+    const schema = {
+      metadata: { column: 'metadata', type: 'json' as const, default: { empty: true } }
+    };
     const result = transformRow({ metadata: null }, schema);
     expect(result.metadata).toEqual({ empty: true });
   });
@@ -256,7 +260,9 @@ describe('transformRow - json type', () => {
   });
 
   it('uses default when JSON string is invalid', () => {
-    const schema = { metadata: { column: 'metadata', type: 'json' as const, default: { fallback: true } } };
+    const schema = {
+      metadata: { column: 'metadata', type: 'json' as const, default: { fallback: true } }
+    };
     const result = transformRow({ metadata: '{bad}' }, schema);
     expect(result.metadata).toEqual({ fallback: true });
   });
@@ -402,7 +408,9 @@ describe('createMapper', () => {
       id: { column: 'id', type: 'number' as const },
       name: { column: 'name', type: 'string' as const }
     };
-    const toEntity = createMapper<{ id: number; name: string }, { id: number; name: string }>(schema as any);
+    const toEntity = createMapper<{ id: number; name: string }, { id: number; name: string }>(
+      schema as any
+    );
     const result = toEntity({ id: 1, name: 'Test' });
     expect(result).toEqual({ id: 1, name: 'Test' });
   });
@@ -675,7 +683,9 @@ describe('createPartialMapper', () => {
       name: 'string'
     });
 
-    const mapper = createPartialMapper<{ id: number; name: string }, FullEntity, PartialEntity>(schema);
+    const mapper = createPartialMapper<{ id: number; name: string }, FullEntity, PartialEntity>(
+      schema
+    );
     const result = mapper({ id: 5, name: 'Alice' });
 
     expect(result.id).toBe(5);
@@ -694,7 +704,11 @@ describe('createPartialMapper', () => {
       title: 'string'
     });
 
-    const mapper = createPartialMapper<{ id: number; title: string }, Entity, Pick<Entity, 'id' | 'title'>>(schema);
+    const mapper = createPartialMapper<
+      { id: number; title: string },
+      Entity,
+      Pick<Entity, 'id' | 'title'>
+    >(schema);
 
     const rows = [
       { id: 1, title: 'First' },

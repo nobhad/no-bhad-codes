@@ -269,7 +269,10 @@ describe('LeadService - Scoring Rules', () => {
     });
 
     it('returns all rules when includeInactive is true', async () => {
-      mockDb.all.mockResolvedValueOnce([makeScoringRuleRow(), makeScoringRuleRow({ id: 2, is_active: 0 })]);
+      mockDb.all.mockResolvedValueOnce([
+        makeScoringRuleRow(),
+        makeScoringRuleRow({ id: 2, is_active: 0 })
+      ]);
 
       const result = await leadService.getScoringRules(true);
 
@@ -415,10 +418,7 @@ describe('LeadService - Scoring Rules', () => {
 
       await leadService.deleteScoringRule(1);
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        'DELETE FROM lead_scoring_rules WHERE id = ?',
-        [1]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith('DELETE FROM lead_scoring_rules WHERE id = ?', [1]);
     });
   });
 });
@@ -458,7 +458,12 @@ describe('LeadService - calculateLeadScore', () => {
     const project = makeProjectRow({ description: 'enterprise software solution' });
     mockDb.get.mockResolvedValueOnce(project);
     mockDb.all.mockResolvedValueOnce([
-      makeScoringRuleRow({ field_name: 'description', operator: 'contains', threshold_value: 'enterprise', points: 15 })
+      makeScoringRuleRow({
+        field_name: 'description',
+        operator: 'contains',
+        threshold_value: 'enterprise',
+        points: 15
+      })
     ]);
     mockDb.run.mockResolvedValueOnce({});
 
@@ -473,7 +478,12 @@ describe('LeadService - calculateLeadScore', () => {
     const project = makeProjectRow({ budget_range: '200' });
     mockDb.get.mockResolvedValueOnce(project);
     mockDb.all.mockResolvedValueOnce([
-      makeScoringRuleRow({ field_name: 'budget_range', operator: 'greater_than', threshold_value: '100', points: 10 })
+      makeScoringRuleRow({
+        field_name: 'budget_range',
+        operator: 'greater_than',
+        threshold_value: '100',
+        points: 10
+      })
     ]);
     mockDb.run.mockResolvedValueOnce({});
 
@@ -487,7 +497,12 @@ describe('LeadService - calculateLeadScore', () => {
     const project = makeProjectRow({ budget_range: '50' });
     mockDb.get.mockResolvedValueOnce(project);
     mockDb.all.mockResolvedValueOnce([
-      makeScoringRuleRow({ field_name: 'budget_range', operator: 'greater_than', threshold_value: '100', points: 10 })
+      makeScoringRuleRow({
+        field_name: 'budget_range',
+        operator: 'greater_than',
+        threshold_value: '100',
+        points: 10
+      })
     ]);
     mockDb.run.mockResolvedValueOnce({});
 
@@ -499,7 +514,12 @@ describe('LeadService - calculateLeadScore', () => {
     const project = makeProjectRow({ expected_close_date: '50' });
     mockDb.get.mockResolvedValueOnce(project);
     mockDb.all.mockResolvedValueOnce([
-      makeScoringRuleRow({ field_name: 'timeline', operator: 'less_than', threshold_value: '100', points: 10 })
+      makeScoringRuleRow({
+        field_name: 'timeline',
+        operator: 'less_than',
+        threshold_value: '100',
+        points: 10
+      })
     ]);
     mockDb.run.mockResolvedValueOnce({});
 
@@ -511,7 +531,12 @@ describe('LeadService - calculateLeadScore', () => {
     const project = makeProjectRow({ project_type: 'web' });
     mockDb.get.mockResolvedValueOnce(project);
     mockDb.all.mockResolvedValueOnce([
-      makeScoringRuleRow({ field_name: 'project_type', operator: 'in', threshold_value: 'web,mobile,api', points: 10 })
+      makeScoringRuleRow({
+        field_name: 'project_type',
+        operator: 'in',
+        threshold_value: 'web,mobile,api',
+        points: 10
+      })
     ]);
     mockDb.run.mockResolvedValueOnce({});
 
@@ -523,7 +548,12 @@ describe('LeadService - calculateLeadScore', () => {
     const project = makeProjectRow({ description: 'Has content' });
     mockDb.get.mockResolvedValueOnce(project);
     mockDb.all.mockResolvedValueOnce([
-      makeScoringRuleRow({ field_name: 'description', operator: 'not_empty', threshold_value: '', points: 5 })
+      makeScoringRuleRow({
+        field_name: 'description',
+        operator: 'not_empty',
+        threshold_value: '',
+        points: 5
+      })
     ]);
     mockDb.run.mockResolvedValueOnce({});
 
@@ -535,7 +565,12 @@ describe('LeadService - calculateLeadScore', () => {
     const project = makeProjectRow({ description: '   ' });
     mockDb.get.mockResolvedValueOnce(project);
     mockDb.all.mockResolvedValueOnce([
-      makeScoringRuleRow({ field_name: 'description', operator: 'not_empty', threshold_value: '', points: 5 })
+      makeScoringRuleRow({
+        field_name: 'description',
+        operator: 'not_empty',
+        threshold_value: '',
+        points: 5
+      })
     ]);
     mockDb.run.mockResolvedValueOnce({});
 
@@ -664,7 +699,9 @@ describe('LeadService - Pipeline Management', () => {
     });
 
     it('sets won_at when moving to a won stage', async () => {
-      mockDb.get.mockResolvedValueOnce(makePipelineStageRow({ is_won: 1, auto_convert_to_project: 0 }));
+      mockDb.get.mockResolvedValueOnce(
+        makePipelineStageRow({ is_won: 1, auto_convert_to_project: 0 })
+      );
       mockDb.run.mockResolvedValueOnce({});
 
       await leadService.moveToStage(10, 2);
@@ -674,13 +711,15 @@ describe('LeadService - Pipeline Management', () => {
     });
 
     it('sets status to in-progress when auto_convert_to_project is true', async () => {
-      mockDb.get.mockResolvedValueOnce(makePipelineStageRow({ is_won: 1, auto_convert_to_project: 1 }));
+      mockDb.get.mockResolvedValueOnce(
+        makePipelineStageRow({ is_won: 1, auto_convert_to_project: 1 })
+      );
       mockDb.run.mockResolvedValueOnce({});
 
       await leadService.moveToStage(10, 2);
 
       const sql: string = mockDb.run.mock.calls[0][0];
-      expect(sql).toContain('status = \'in-progress\'');
+      expect(sql).toContain("status = 'in-progress'");
     });
 
     it('sets lost_at and status on-hold when moving to a lost stage', async () => {
@@ -691,7 +730,7 @@ describe('LeadService - Pipeline Management', () => {
 
       const sql: string = mockDb.run.mock.calls[0][0];
       expect(sql).toContain('lost_at = CURRENT_TIMESTAMP');
-      expect(sql).toContain('status = \'on-hold\'');
+      expect(sql).toContain("status = 'on-hold'");
     });
   });
 
@@ -1136,7 +1175,10 @@ describe('LeadService - Lead Sources', () => {
     });
 
     it('returns all sources when includeInactive is true', async () => {
-      mockDb.all.mockResolvedValueOnce([makeLeadSourceRow(), makeLeadSourceRow({ id: 2, is_active: 0 })]);
+      mockDb.all.mockResolvedValueOnce([
+        makeLeadSourceRow(),
+        makeLeadSourceRow({ id: 2, is_active: 0 })
+      ]);
 
       const result = await leadService.getLeadSources(true);
 
@@ -1295,8 +1337,18 @@ describe('LeadService - Duplicate Detection', () => {
     });
 
     it('skips matches with score below 0.5', async () => {
-      const lead = makeProjectRow({ id: 10, client_email: null, company_name: null, contact_name: null });
-      const match = makeProjectRow({ id: 11, client_email: null, company_name: null, contact_name: null });
+      const lead = makeProjectRow({
+        id: 10,
+        client_email: null,
+        company_name: null,
+        contact_name: null
+      });
+      const match = makeProjectRow({
+        id: 11,
+        client_email: null,
+        company_name: null,
+        contact_name: null
+      });
 
       mockDb.get.mockResolvedValueOnce(lead);
       mockDb.all.mockResolvedValueOnce([match]);
@@ -1309,7 +1361,11 @@ describe('LeadService - Duplicate Detection', () => {
 
     it('detects company name similarity above 0.8', async () => {
       const lead = makeProjectRow({ id: 10, company_name: 'Acme Corporation', client_email: null });
-      const match = makeProjectRow({ id: 11, company_name: 'Acme Corporation', client_email: null });
+      const match = makeProjectRow({
+        id: 11,
+        company_name: 'Acme Corporation',
+        client_email: null
+      });
 
       mockDb.get.mockResolvedValueOnce(lead);
       mockDb.all.mockResolvedValueOnce([match]);
@@ -1331,7 +1387,7 @@ describe('LeadService - Duplicate Detection', () => {
 
       expect(result).toHaveLength(1);
       const sql: string = mockDb.all.mock.calls[0][0];
-      expect(sql).toContain('status = \'pending\'');
+      expect(sql).toContain("status = 'pending'");
     });
 
     it('returns empty array when no pending duplicates', async () => {
@@ -1448,9 +1504,9 @@ describe('LeadService - Analytics', () => {
   describe('getLeadAnalytics', () => {
     it('returns complete analytics with all data', async () => {
       mockDb.get.mockResolvedValueOnce({ count: 25 }); // totalLeads
-      mockDb.get.mockResolvedValueOnce({ count: 5 });  // newLeadsThisMonth
+      mockDb.get.mockResolvedValueOnce({ count: 5 }); // newLeadsThisMonth
       mockDb.get.mockResolvedValueOnce({ count: 10 }); // wonCount
-      mockDb.get.mockResolvedValueOnce({ count: 5 });  // lostCount
+      mockDb.get.mockResolvedValueOnce({ count: 5 }); // lostCount
       mockDb.get.mockResolvedValueOnce({ avg: 72.5 }); // avgScore
       mockDb.get.mockResolvedValueOnce({ avg: 21.3 }); // avgDays
       mockDb.all.mockResolvedValueOnce([
@@ -1517,7 +1573,7 @@ describe('LeadService - Analytics', () => {
 
       mockDb.all.mockResolvedValueOnce([stage1, stage2]); // getPipelineStages
       mockDb.get.mockResolvedValueOnce({ count: 10, value: '5000' }); // stage1 stats
-      mockDb.get.mockResolvedValueOnce({ count: 3, value: '1500' });  // stage2 stats
+      mockDb.get.mockResolvedValueOnce({ count: 3, value: '1500' }); // stage2 stats
 
       const result = await leadService.getConversionFunnel();
 

@@ -85,7 +85,8 @@ export interface ChecklistTemplate {
 export const CHECKLIST_TEMPLATES: Record<string, ChecklistTemplate> = {
   website: {
     name: 'Website Project Checklist',
-    introText: 'Here is a summary of outstanding items we need from you to keep your project on track. Please complete these at your earliest convenience.',
+    introText:
+      'Here is a summary of outstanding items we need from you to keep your project on track. Please complete these at your earliest convenience.',
     sections: [
       {
         title: 'Content & Copy',
@@ -109,7 +110,11 @@ export const CHECKLIST_TEMPLATES: Record<string, ChecklistTemplate> = {
       {
         title: 'Access & Accounts',
         items: [
-          { label: 'Domain registrar login or transfer authorization', required: true, priority: 'urgent' },
+          {
+            label: 'Domain registrar login or transfer authorization',
+            required: true,
+            priority: 'urgent'
+          },
           { label: 'Current hosting access (if migrating)', required: false },
           { label: 'Google Search Console / Analytics access', required: false },
           { label: 'Social media links', required: false }
@@ -149,7 +154,8 @@ export const CHECKLIST_TEMPLATES: Record<string, ChecklistTemplate> = {
   },
   general: {
     name: 'General Project Checklist',
-    introText: 'Here are the items we still need from you. Please review and complete at your earliest convenience.',
+    introText:
+      'Here are the items we still need from you. Please review and complete at your earliest convenience.',
     sections: [
       {
         title: 'Outstanding Items',

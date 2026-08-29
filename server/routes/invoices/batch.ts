@@ -11,7 +11,13 @@ import archiver from 'archiver';
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
+import {
+  ErrorCodes,
+  errorResponse,
+  errorResponseWithPayload,
+  sendSuccess,
+  sanitizeErrorMessage
+} from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCasePayment } from './helpers.js';
 import { generateInvoicePdf, InvoicePdfData } from './pdf.js';
 import { InvoiceLineItem } from '../../services/invoice-service.js';
@@ -42,9 +48,15 @@ router.get(
         count: payments.length
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve payments', 500, ErrorCodes.RETRIEVAL_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to retrieve payment records')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve payments',
+        500,
+        ErrorCodes.RETRIEVAL_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to retrieve payment records')
+        }
+      );
     }
   })
 );
@@ -71,7 +83,12 @@ router.post(
     const { invoiceIds } = req.body;
 
     if (!Array.isArray(invoiceIds) || invoiceIds.length === 0) {
-      return errorResponse(res, 'invoiceIds must be a non-empty array', 400, ErrorCodes.INVALID_INPUT);
+      return errorResponse(
+        res,
+        'invoiceIds must be a non-empty array',
+        400,
+        ErrorCodes.INVALID_INPUT
+      );
     }
 
     if (invoiceIds.length > 100) {
@@ -130,11 +147,11 @@ router.post(
         // Build line items
         const lineItems: InvoicePdfData['lineItems'] = Array.isArray(invoice.lineItems)
           ? invoice.lineItems.map((item: InvoiceLineItem) => ({
-            description: item.description || '',
-            quantity: item.quantity || 1,
-            rate: item.rate || item.amount || 0,
-            amount: item.amount || 0
-          }))
+              description: item.description || '',
+              quantity: item.quantity || 1,
+              rate: item.rate || item.amount || 0,
+              amount: item.amount || 0
+            }))
           : [];
 
         // Get credits
@@ -146,8 +163,7 @@ router.post(
           invoiceNumber: invoice.invoiceNumber,
           issuedDate: formatDate(invoice.issuedDate || invoice.createdAt),
           dueDate: 'Within 14 days',
-          clientName:
-            invoice.clientName || clientContact?.contactName || 'Client',
+          clientName: invoice.clientName || clientContact?.contactName || 'Client',
           clientCompany: clientContact?.companyName || '',
           clientEmail: invoice.clientEmail || clientContact?.email || '',
           projectId: invoice.projectId,

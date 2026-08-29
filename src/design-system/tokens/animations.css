@@ -147,7 +147,6 @@
   /* Business card specific */
   --animation-card-flip: 0.8s var(--easing-smooth);
   --animation-card-scale: var(--duration-normal) var(--easing-bounce);
-
 }
 
 /* ============================================

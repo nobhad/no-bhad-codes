@@ -11,12 +11,7 @@ import {
   type ScoringRuleRow,
   type ProjectRow
 } from '../../database/entities/index.js';
-import type {
-  SqlValue,
-  ScoringRule,
-  ScoringRuleData,
-  LeadScoreResult
-} from './types.js';
+import type { SqlValue, ScoringRule, ScoringRuleData, LeadScoreResult } from './types.js';
 import { SCORING_RULE_COLUMNS } from './types.js';
 
 export async function getScoringRules(includeInactive: boolean = false): Promise<ScoringRule[]> {
@@ -46,7 +41,9 @@ export async function createScoringRule(data: ScoringRuleData): Promise<ScoringR
     ]
   );
 
-  const rule = await db.get(`SELECT ${SCORING_RULE_COLUMNS} FROM lead_scoring_rules WHERE id = ?`, [result.lastID]);
+  const rule = await db.get(`SELECT ${SCORING_RULE_COLUMNS} FROM lead_scoring_rules WHERE id = ?`, [
+    result.lastID
+  ]);
 
   if (!rule) {
     throw new Error('Failed to create scoring rule');
@@ -55,7 +52,10 @@ export async function createScoringRule(data: ScoringRuleData): Promise<ScoringR
   return toScoringRule(rule as unknown as ScoringRuleRow);
 }
 
-export async function updateScoringRule(ruleId: number, data: Partial<ScoringRuleData>): Promise<ScoringRule> {
+export async function updateScoringRule(
+  ruleId: number,
+  data: Partial<ScoringRuleData>
+): Promise<ScoringRule> {
   const db = getDatabase();
 
   const updates: string[] = [];
@@ -96,7 +96,9 @@ export async function updateScoringRule(ruleId: number, data: Partial<ScoringRul
     await db.run(`UPDATE lead_scoring_rules SET ${updates.join(', ')} WHERE id = ?`, values);
   }
 
-  const rule = await db.get(`SELECT ${SCORING_RULE_COLUMNS} FROM lead_scoring_rules WHERE id = ?`, [ruleId]);
+  const rule = await db.get(`SELECT ${SCORING_RULE_COLUMNS} FROM lead_scoring_rules WHERE id = ?`, [
+    ruleId
+  ]);
 
   if (!rule) {
     throw new Error('Scoring rule not found');
@@ -125,10 +127,7 @@ interface ScoringProjectRow extends ProjectRow {
 /**
  * Get field value from project for scoring
  */
-function getFieldValue(
-  project: ScoringProjectRow,
-  fieldName: string
-): string | undefined {
+function getFieldValue(project: ScoringProjectRow, fieldName: string): string | undefined {
   const fieldMap: Record<string, string | undefined> = {
     budget_range: project.budget_range,
     project_type: project.project_type,
@@ -195,26 +194,26 @@ export async function calculateLeadScore(projectId: number): Promise<LeadScoreRe
     const fieldValue = getFieldValue(project, rule.fieldName);
 
     switch (rule.operator) {
-    case 'equals':
-      matched = fieldValue?.toLowerCase() === rule.thresholdValue.toLowerCase();
-      break;
-    case 'contains':
-      matched = fieldValue?.toLowerCase().includes(rule.thresholdValue.toLowerCase()) || false;
-      break;
-    case 'greater_than':
-      matched = parseFloat(fieldValue || '0') > parseFloat(rule.thresholdValue);
-      break;
-    case 'less_than':
-      matched = parseFloat(fieldValue || '0') < parseFloat(rule.thresholdValue);
-      break;
-    case 'in': {
-      const values = rule.thresholdValue.split(',').map((v) => v.trim().toLowerCase());
-      matched = values.includes(fieldValue?.toLowerCase() || '');
-      break;
-    }
-    case 'not_empty':
-      matched = !!fieldValue && fieldValue.trim() !== '';
-      break;
+      case 'equals':
+        matched = fieldValue?.toLowerCase() === rule.thresholdValue.toLowerCase();
+        break;
+      case 'contains':
+        matched = fieldValue?.toLowerCase().includes(rule.thresholdValue.toLowerCase()) || false;
+        break;
+      case 'greater_than':
+        matched = parseFloat(fieldValue || '0') > parseFloat(rule.thresholdValue);
+        break;
+      case 'less_than':
+        matched = parseFloat(fieldValue || '0') < parseFloat(rule.thresholdValue);
+        break;
+      case 'in': {
+        const values = rule.thresholdValue.split(',').map((v) => v.trim().toLowerCase());
+        matched = values.includes(fieldValue?.toLowerCase() || '');
+        break;
+      }
+      case 'not_empty':
+        matched = !!fieldValue && fieldValue.trim() !== '';
+        break;
     }
 
     if (matched) {
@@ -246,7 +245,9 @@ export async function calculateLeadScore(projectId: number): Promise<LeadScoreRe
 export async function updateAllLeadScores(): Promise<number> {
   const db = getDatabase();
 
-  const leads = (await db.all('SELECT id FROM active_projects WHERE status = \'pending\'')) as unknown as {
+  const leads = (await db.all(
+    "SELECT id FROM active_projects WHERE status = 'pending'"
+  )) as unknown as {
     id: number;
   }[];
 

@@ -116,14 +116,18 @@ export interface QuestionnaireResponseRow extends DatabaseRow {
 export const QUESTIONNAIRE_COLUMNS = `
   id, name, description, project_type, questions, is_active, auto_send_on_project_create,
   display_order, created_by, created_by_user_id, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const QUESTIONNAIRE_RESPONSE_COLUMNS = `
   qr.id, qr.questionnaire_id, qr.client_id, qr.project_id, qr.answers,
   qr.status, qr.started_at, qr.completed_at, qr.due_date,
   qr.reminder_count, qr.reminder_sent_at, qr.exported_file_id,
   qr.created_at, qr.updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // SCHEMAS & MAPPERS
@@ -169,4 +173,7 @@ export const questionnaireResponseSchema = defineSchema<QuestionnaireResponse>({
 });
 
 export const toQuestionnaire = createMapper<QuestionnaireRow, Questionnaire>(questionnaireSchema);
-export const toQuestionnaireResponse = createMapper<QuestionnaireResponseRow, QuestionnaireResponse>(questionnaireResponseSchema);
+export const toQuestionnaireResponse = createMapper<
+  QuestionnaireResponseRow,
+  QuestionnaireResponse
+>(questionnaireResponseSchema);

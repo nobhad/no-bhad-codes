@@ -8,7 +8,14 @@
 // Types
 // ============================================
 
-export type ReportType = 'revenue' | 'pipeline' | 'project' | 'client' | 'team' | 'lead' | 'invoice';
+export type ReportType =
+  | 'revenue'
+  | 'pipeline'
+  | 'project'
+  | 'client'
+  | 'team'
+  | 'lead'
+  | 'invoice';
 export type ChartType = 'bar' | 'line' | 'pie' | 'area' | 'table';
 export type WidgetType = 'metric' | 'chart' | 'list' | 'table' | 'progress' | 'calendar';
 export type DataSource =
@@ -175,33 +182,47 @@ export interface MetricAlertRow extends Omit<MetricAlert, 'notification_emails'>
 export const SAVED_REPORT_COLUMNS = `
   id, name, description, report_type, filters, columns, sort_by, sort_order,
   chart_type, is_favorite, is_shared, created_by, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const REPORT_SCHEDULE_COLUMNS = `
   id, report_id, name, frequency, day_of_week, day_of_month, time_of_day,
   timezone, recipients, format, include_charts, last_sent_at, next_send_at,
   is_active, created_by, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const DASHBOARD_WIDGET_COLUMNS = `
   id, user_email, widget_type, title, data_source, config, position_x, position_y,
   width, height, refresh_interval, is_visible, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const DASHBOARD_PRESET_COLUMNS = `
   id, name, description, widgets, is_default, is_active, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const KPI_SNAPSHOT_COLUMNS = `
   id, snapshot_date, kpi_type, value, previous_value, change_percent, metadata, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const METRIC_ALERT_COLUMNS = `
   id, name, kpi_type, condition, threshold_value, notification_emails, is_active,
   last_triggered_at, trigger_count, created_by, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const REPORT_RUN_COLUMNS = `
   id, report_id, schedule_id, run_type, status, started_at, completed_at,
   row_count, file_path, error_message, run_by, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();

@@ -188,11 +188,21 @@ router.put(
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
-      return errorResponse(res, 'Current and new passwords are required', 400, ErrorCodes.MISSING_FIELDS);
+      return errorResponse(
+        res,
+        'Current and new passwords are required',
+        400,
+        ErrorCodes.MISSING_FIELDS
+      );
     }
 
     if (newPassword.length < 8) {
-      return errorResponse(res, 'Password must be at least 8 characters', 400, ErrorCodes.WEAK_PASSWORD);
+      return errorResponse(
+        res,
+        'Password must be at least 8 characters',
+        400,
+        ErrorCodes.WEAK_PASSWORD
+      );
     }
 
     const client = await clientService.getClientPasswordHash(req.user!.id);
@@ -290,7 +300,9 @@ router.get(
 );
 
 // Alias: /me/notification-preferences → same handlers as /me/notifications
-router.get('/me/notification-preferences', authenticateToken,
+router.get(
+  '/me/notification-preferences',
+  authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
       return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
@@ -308,7 +320,9 @@ router.get('/me/notification-preferences', authenticateToken,
   })
 );
 
-router.put('/me/notification-preferences', authenticateToken,
+router.put(
+  '/me/notification-preferences',
+  authenticateToken,
   validateRequest(ClientValidationSchemas.updateNotifications, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
@@ -378,7 +392,8 @@ router.put(
       return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
-    const { billing_name, company, address, address2, city, state, zip, country, phone, email } = req.body;
+    const { billing_name, company, address, address2, city, state, zip, country, phone, email } =
+      req.body;
 
     // Normalize email and phone if provided
     const normalizedEmail = email ? normalizeEmail(email) : email;
@@ -433,8 +448,8 @@ router.get(
     const totalProjects = allProjects.length;
 
     // Get active projects count
-    const activeProjects = allProjects.filter(
-      (p) => ['pending', 'active', 'in-progress', 'in-review'].includes(p.status)
+    const activeProjects = allProjects.filter((p) =>
+      ['pending', 'active', 'in-progress', 'in-review'].includes(p.status)
     ).length;
 
     // Run independent dashboard queries in parallel
@@ -485,7 +500,13 @@ router.get(
         previewUrl: p.preview_url
       })),
       currentDeliverable: currentDeliverable
-        ? { id: currentDeliverable.id, title: currentDeliverable.title, status: currentDeliverable.status, type: currentDeliverable.type, projectId: currentDeliverable.project_id }
+        ? {
+            id: currentDeliverable.id,
+            title: currentDeliverable.title,
+            status: currentDeliverable.status,
+            type: currentDeliverable.type,
+            projectId: currentDeliverable.project_id
+          }
         : null,
       recentActivity: recentActivity.map((item) => ({
         type: item.type,
@@ -556,7 +577,12 @@ router.post(
     const { first_name, last_name, email, phone, title, department, role, notes } = req.body;
 
     if (!first_name || !last_name) {
-      return errorResponse(res, 'First name and last name are required', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'First name and last name are required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     const normalizedEmail = email ? normalizeEmail(email) : email;

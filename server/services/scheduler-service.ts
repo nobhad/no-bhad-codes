@@ -33,7 +33,12 @@ interface SimpleTask {
   stop(): void;
 }
 
-function parseCronExpression(expression: string): { minute: number; hour: number; isHourly: boolean; minuteInterval: number | null } {
+function parseCronExpression(expression: string): {
+  minute: number;
+  hour: number;
+  isHourly: boolean;
+  minuteInterval: number | null;
+} {
   const parts = expression.split(' ');
   // Format: minute hour day-of-month month day-of-week
   const minutePart = parts[0];
@@ -517,7 +522,9 @@ export class SchedulerService {
         // Auto-generate invoices from due payment schedule installments
         const installmentInvoices = await paymentScheduleService.generateDueInvoices();
         if (installmentInvoices.generated > 0) {
-          logger.info(`[Scheduler] Generated ${installmentInvoices.generated} invoices from payment schedule installments`);
+          logger.info(
+            `[Scheduler] Generated ${installmentInvoices.generated} invoices from payment schedule installments`
+          );
         }
 
         if (this.config.enableScheduledInvoices) {
@@ -963,7 +970,8 @@ export class SchedulerService {
 
         // Off-server copy to Google Drive when configured. A Drive failure
         // must not bury the local backup success — log and continue.
-        const { isDriveBackupConfigured, uploadBackupToDrive } = await import('./drive-backup-service.js');
+        const { isDriveBackupConfigured, uploadBackupToDrive } =
+          await import('./drive-backup-service.js');
         if (isDriveBackupConfigured()) {
           try {
             const driveResult = await uploadBackupToDrive(result.file);
@@ -971,7 +979,10 @@ export class SchedulerService {
               `[Scheduler] DB backup uploaded to Drive: ${driveResult.uploaded.name} (${driveResult.durationMs}ms, pruned ${driveResult.prunedCount})`,
               {
                 category: 'BACKUP',
-                metadata: { driveFileId: driveResult.uploaded.id, prunedCount: driveResult.prunedCount }
+                metadata: {
+                  driveFileId: driveResult.uploaded.id,
+                  prunedCount: driveResult.prunedCount
+                }
               }
             );
           } catch (driveError) {
@@ -1091,9 +1102,10 @@ export class SchedulerService {
         const invoice = await this.invoiceService.getInvoiceById(reminder.invoiceId);
 
         // Get client email from database
-        const client = (await this.getDb().get('SELECT email, contact_name FROM clients WHERE id = ?', [
-          invoice.clientId
-        ])) as ClientRow | undefined;
+        const client = (await this.getDb().get(
+          'SELECT email, contact_name FROM clients WHERE id = ?',
+          [invoice.clientId]
+        )) as ClientRow | undefined;
 
         if (!client || !client.email) {
           logger.warn(`[Scheduler] No email for client ${invoice.clientId}, skipping reminder`);
@@ -1311,28 +1323,28 @@ export class SchedulerService {
     let urgency = '';
 
     switch (reminderType) {
-    case 'initial':
-      subject = `Contract Ready for Signature: ${projectName}`;
-      message = `Your contract for "${projectName}" is ready for your signature.`;
-      break;
-    case 'followup_3':
-      subject = `Reminder: Contract Awaiting Signature - ${projectName}`;
-      message = `This is a friendly reminder that your contract for "${projectName}" is still awaiting your signature.`;
-      urgency = 'Please sign at your earliest convenience so we can get started on your project.';
-      break;
-    case 'followup_7':
-      subject = `Action Required: Contract Signature Needed - ${projectName}`;
-      message = `Your contract for "${projectName}" has been awaiting your signature for 7 days.`;
-      urgency = 'Please review and sign the contract to proceed with your project.';
-      break;
-    case 'final_14':
-      subject = `Final Reminder: Contract Signature Required - ${projectName}`;
-      message = `This is a final reminder that your contract for "${projectName}" needs to be signed.`;
-      urgency = 'The signature link will expire soon. Please sign today to avoid delays.';
-      break;
-    default:
-      subject = `Contract Awaiting Signature: ${projectName}`;
-      message = `Your contract for "${projectName}" is ready for your signature.`;
+      case 'initial':
+        subject = `Contract Ready for Signature: ${projectName}`;
+        message = `Your contract for "${projectName}" is ready for your signature.`;
+        break;
+      case 'followup_3':
+        subject = `Reminder: Contract Awaiting Signature - ${projectName}`;
+        message = `This is a friendly reminder that your contract for "${projectName}" is still awaiting your signature.`;
+        urgency = 'Please sign at your earliest convenience so we can get started on your project.';
+        break;
+      case 'followup_7':
+        subject = `Action Required: Contract Signature Needed - ${projectName}`;
+        message = `Your contract for "${projectName}" has been awaiting your signature for 7 days.`;
+        urgency = 'Please review and sign the contract to proceed with your project.';
+        break;
+      case 'final_14':
+        subject = `Final Reminder: Contract Signature Required - ${projectName}`;
+        message = `This is a final reminder that your contract for "${projectName}" needs to be signed.`;
+        urgency = 'The signature link will expire soon. Please sign today to avoid delays.';
+        break;
+      default:
+        subject = `Contract Awaiting Signature: ${projectName}`;
+        message = `Your contract for "${projectName}" is ready for your signature.`;
     }
 
     await emailService.sendEmail({
@@ -1430,38 +1442,38 @@ ${BUSINESS_INFO.name} Team
     let urgency = '';
 
     switch (reminderType) {
-    case 'upcoming':
-      subject = `Payment Reminder: Invoice #${invoiceNumber} Due Soon`;
-      message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is due on ${dueDate}.`;
-      break;
-    case 'due':
-      subject = `Payment Due Today: Invoice #${invoiceNumber}`;
-      message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is due today.`;
-      urgency = 'Please submit payment today to avoid late fees.';
-      break;
-    case 'overdue_3':
-      subject = `Payment Overdue: Invoice #${invoiceNumber}`;
-      message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is now 3 days overdue.`;
-      urgency = 'Please submit payment as soon as possible.';
-      break;
-    case 'overdue_7':
-      subject = `URGENT: Payment Overdue - Invoice #${invoiceNumber}`;
-      message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is now 7 days overdue.`;
-      urgency = 'Immediate payment is required to avoid service interruption.';
-      break;
-    case 'overdue_14':
-      subject = `FINAL NOTICE: Invoice #${invoiceNumber} Overdue`;
-      message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is now 14 days overdue.`;
-      urgency = 'This is a final reminder before collection action may be taken.';
-      break;
-    case 'overdue_30':
-      subject = `COLLECTION NOTICE: Invoice #${invoiceNumber}`;
-      message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is now 30 days overdue.`;
-      urgency = 'Please contact us immediately to discuss payment arrangements.';
-      break;
-    default:
-      subject = `Payment Reminder: Invoice #${invoiceNumber}`;
-      message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is pending payment.`;
+      case 'upcoming':
+        subject = `Payment Reminder: Invoice #${invoiceNumber} Due Soon`;
+        message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is due on ${dueDate}.`;
+        break;
+      case 'due':
+        subject = `Payment Due Today: Invoice #${invoiceNumber}`;
+        message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is due today.`;
+        urgency = 'Please submit payment today to avoid late fees.';
+        break;
+      case 'overdue_3':
+        subject = `Payment Overdue: Invoice #${invoiceNumber}`;
+        message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is now 3 days overdue.`;
+        urgency = 'Please submit payment as soon as possible.';
+        break;
+      case 'overdue_7':
+        subject = `URGENT: Payment Overdue - Invoice #${invoiceNumber}`;
+        message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is now 7 days overdue.`;
+        urgency = 'Immediate payment is required to avoid service interruption.';
+        break;
+      case 'overdue_14':
+        subject = `FINAL NOTICE: Invoice #${invoiceNumber} Overdue`;
+        message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is now 14 days overdue.`;
+        urgency = 'This is a final reminder before collection action may be taken.';
+        break;
+      case 'overdue_30':
+        subject = `COLLECTION NOTICE: Invoice #${invoiceNumber}`;
+        message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is now 30 days overdue.`;
+        urgency = 'Please contact us immediately to discuss payment arrangements.';
+        break;
+      default:
+        subject = `Payment Reminder: Invoice #${invoiceNumber}`;
+        message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is pending payment.`;
     }
 
     await emailService.sendEmail({
@@ -1565,8 +1577,8 @@ ${BUSINESS_INFO.name} Team
         );
         const lastReminderAge = request.reminder_sent_at
           ? Math.floor(
-            (now.getTime() - new Date(request.reminder_sent_at).getTime()) / (1000 * 60 * 60 * 24)
-          )
+              (now.getTime() - new Date(request.reminder_sent_at).getTime()) / (1000 * 60 * 60 * 24)
+            )
           : requestAge;
 
         // Check if we should send a reminder based on intervals
@@ -1603,9 +1615,9 @@ ${BUSINESS_INFO.name} Team
           // Only notify once when crossing threshold
           const lastNotifyAge = request.reminder_sent_at
             ? Math.floor(
-              (now.getTime() - new Date(request.reminder_sent_at).getTime()) /
+                (now.getTime() - new Date(request.reminder_sent_at).getTime()) /
                   (1000 * 60 * 60 * 24)
-            )
+              )
             : 0;
 
           if (lastNotifyAge >= 1) {
@@ -1618,10 +1630,10 @@ ${BUSINESS_INFO.name} Team
             });
 
             // Update to prevent repeated notifications
-            await this.getDb().run('UPDATE approval_requests SET reminder_sent_at = ? WHERE id = ?', [
-              now.toISOString(),
-              request.request_id
-            ]);
+            await this.getDb().run(
+              'UPDATE approval_requests SET reminder_sent_at = ? WHERE id = ?',
+              [now.toISOString(), request.request_id]
+            );
 
             logger.info(
               `[Scheduler] Sent stalled approval notification for ${request.entity_type} #${request.entity_id}`
@@ -1838,7 +1850,7 @@ This is an automated alert from the approval system.
       analyticsCleanup: boolean;
       priorityEscalation: boolean;
     };
-    } {
+  } {
     return {
       isRunning: this.isRunning,
       config: this.config,

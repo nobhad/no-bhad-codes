@@ -66,7 +66,7 @@
   /* Icon-text gaps - proportionate to icon size
    * Rule: icons next to text = 1em (same as text). Gap = one step larger.
    * Each value bumped one step up from previous defaults. */
-  --icon-gap-xs: 8px;  /* bumped from 6px */
+  --icon-gap-xs: 8px; /* bumped from 6px */
   --icon-gap-sm: 10px; /* bumped from 8px */
   --icon-gap-md: 12px; /* bumped from 10px */
   --icon-gap-lg: 16px; /* sidebar nav, loading states — unchanged */

@@ -43,9 +43,7 @@ interface UseClientsReturn {
  * useClients
  * Hook for fetching and managing clients data
  */
-export function useClients({
-  autoFetch = true
-}: UseClientsOptions = {}): UseClientsReturn {
+export function useClients({ autoFetch = true }: UseClientsOptions = {}): UseClientsReturn {
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,15 +59,15 @@ export function useClients({
 
     for (const client of clients) {
       switch (client.status) {
-      case 'active':
-        result.active++;
-        break;
-      case 'inactive':
-        result.inactive++;
-        break;
-      case 'pending':
-        result.pending++;
-        break;
+        case 'active':
+          result.active++;
+          break;
+        case 'inactive':
+          result.inactive++;
+          break;
+        case 'pending':
+          result.pending++;
+          break;
       }
     }
 
@@ -183,33 +181,28 @@ export function useClients({
   );
 
   // Send invitation to client
-  const sendInvite = useCallback(
-    async (id: number): Promise<boolean> => {
-      try {
-        const response = await apiPost(`${API_ENDPOINTS.CLIENTS}/${id}/send-invite`);
+  const sendInvite = useCallback(async (id: number): Promise<boolean> => {
+    try {
+      const response = await apiPost(`${API_ENDPOINTS.CLIENTS}/${id}/send-invite`);
 
-        if (!response.ok) {
-          throw new Error(`Failed to send invite: ${response.statusText}`);
-        }
-
-        const json = await response.json();
-        unwrapApiData<unknown>(json);
-        // Update local state with invitation timestamp
-        setClients((prev) =>
-          prev.map((client) =>
-            client.id === id
-              ? { ...client, invitation_sent_at: new Date().toISOString() }
-              : client
-          )
-        );
-        return true;
-      } catch (err) {
-        logger.error('[useClients] Send invite error:', err);
-        return false;
+      if (!response.ok) {
+        throw new Error(`Failed to send invite: ${response.statusText}`);
       }
-    },
-    []
-  );
+
+      const json = await response.json();
+      unwrapApiData<unknown>(json);
+      // Update local state with invitation timestamp
+      setClients((prev) =>
+        prev.map((client) =>
+          client.id === id ? { ...client, invitation_sent_at: new Date().toISOString() } : client
+        )
+      );
+      return true;
+    } catch (err) {
+      logger.error('[useClients] Send invite error:', err);
+      return false;
+    }
+  }, []);
 
   // Auto-fetch on mount with AbortController cleanup
   useEffect(() => {

@@ -89,7 +89,10 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
     setError(null);
     try {
       await Promise.all([
-        loadIntegrations(), loadNotifications(), loadStripeStatus(), loadCalendarStatus()
+        loadIntegrations(),
+        loadNotifications(),
+        loadStripeStatus(),
+        loadCalendarStatus()
       ]);
     } catch (err) {
       setError(formatErrorMessage(err, 'Failed to load integrations data'));
@@ -98,7 +101,9 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
     }
   }, [loadIntegrations, loadNotifications, loadStripeStatus, loadCalendarStatus]);
 
-  useEffect(() => { loadAllData(); }, [loadAllData]);
+  useEffect(() => {
+    loadAllData();
+  }, [loadAllData]);
 
   // ---- Notification CRUD ----
 
@@ -110,63 +115,64 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
     setEditingNotification(notification);
   }, []);
 
-  const handleSaveNotification = useCallback(async (data: NotificationFormData, onClose: () => void) => {
-    setIsSubmitting(true);
-    try {
-      const isEditing = editingNotification !== null;
-      const url = isEditing
-        ? `${API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS}/${editingNotification.id}`
-        : API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS;
+  const handleSaveNotification = useCallback(
+    async (data: NotificationFormData, onClose: () => void) => {
+      setIsSubmitting(true);
+      try {
+        const isEditing = editingNotification !== null;
+        const url = isEditing
+          ? `${API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS}/${editingNotification.id}`
+          : API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS;
 
-      const response = isEditing
-        ? await apiPut(url, data)
-        : await apiPost(url, data);
+        const response = isEditing ? await apiPut(url, data) : await apiPost(url, data);
 
-      if (!response.ok) throw new Error(`Failed to ${isEditing ? 'update' : 'create'} notification`);
+        if (!response.ok)
+          throw new Error(`Failed to ${isEditing ? 'update' : 'create'} notification`);
 
-      showNotification?.(`Notification ${isEditing ? 'updated' : 'created'} successfully`, 'success');
-      onClose();
-      await loadNotifications();
-    } catch (err) {
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to save notification'),
-        'error'
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [editingNotification, showNotification, loadNotifications]);
+        showNotification?.(
+          `Notification ${isEditing ? 'updated' : 'created'} successfully`,
+          'success'
+        );
+        onClose();
+        await loadNotifications();
+      } catch (err) {
+        showNotification?.(formatErrorMessage(err, 'Failed to save notification'), 'error');
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [editingNotification, showNotification, loadNotifications]
+  );
 
   const handleDeleteNotification = useCallback(async () => {
     if (deletingNotificationId === null) return;
     try {
-      const response = await apiDelete(`${API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS}/${deletingNotificationId}`);
+      const response = await apiDelete(
+        `${API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS}/${deletingNotificationId}`
+      );
       if (!response.ok) throw new Error('Failed to delete notification');
       showNotification?.('Notification deleted successfully', 'success');
       await loadNotifications();
     } catch (err) {
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to delete notification'),
-        'error'
-      );
+      showNotification?.(formatErrorMessage(err, 'Failed to delete notification'), 'error');
     }
   }, [deletingNotificationId, showNotification, loadNotifications]);
 
-  const handleTestNotification = useCallback(async (id: number) => {
-    setTestingId(id);
-    try {
-      const response = await apiPost(`${API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS}/${id}/test`);
-      if (!response.ok) throw new Error('Failed to send test notification');
-      showNotification?.('Test notification sent', 'success');
-    } catch (err) {
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to send test notification'),
-        'error'
-      );
-    } finally {
-      setTestingId(null);
-    }
-  }, [showNotification]);
+  const handleTestNotification = useCallback(
+    async (id: number) => {
+      setTestingId(id);
+      try {
+        const response = await apiPost(`${API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS}/${id}/test`);
+        if (!response.ok) throw new Error('Failed to send test notification');
+        showNotification?.('Test notification sent', 'success');
+      } catch (err) {
+        showNotification?.(formatErrorMessage(err, 'Failed to send test notification'), 'error');
+      } finally {
+        setTestingId(null);
+      }
+    },
+    [showNotification]
+  );
 
   const prepareDeleteNotification = useCallback((notification: NotificationConfig) => {
     setDeletingNotificationId(notification.id);
@@ -177,7 +183,9 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
   const handleToggleCalendarSync = useCallback(async () => {
     if (!calendarStatus) return;
     try {
-      const response = await apiPut(API_ENDPOINTS.INTEGRATIONS_CALENDAR_SETTINGS, { syncEnabled: !calendarStatus.syncEnabled });
+      const response = await apiPut(API_ENDPOINTS.INTEGRATIONS_CALENDAR_SETTINGS, {
+        syncEnabled: !calendarStatus.syncEnabled
+      });
       if (!response.ok) throw new Error('Failed to update calendar settings');
       showNotification?.(
         `Calendar sync ${calendarStatus.syncEnabled ? 'disabled' : 'enabled'}`,
@@ -185,10 +193,7 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
       );
       await loadCalendarStatus();
     } catch (err) {
-      showNotification?.(
-        formatErrorMessage(err, 'Failed to update calendar settings'),
-        'error'
-      );
+      showNotification?.(formatErrorMessage(err, 'Failed to update calendar settings'), 'error');
     }
   }, [calendarStatus, showNotification, loadCalendarStatus]);
 
@@ -199,27 +204,38 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
 
   const notificationFormData: NotificationFormData = editingNotification
     ? {
-      name: editingNotification.name,
-      channel: editingNotification.channel,
-      event: editingNotification.event,
-      enabled: editingNotification.enabled
-    }
+        name: editingNotification.name,
+        channel: editingNotification.channel,
+        event: editingNotification.event,
+        enabled: editingNotification.enabled
+      }
     : EMPTY_NOTIFICATION_FORM;
 
   return {
     // Data state
-    isLoading, error,
-    integrations, notifications, stripeStatus, calendarStatus,
+    isLoading,
+    error,
+    integrations,
+    notifications,
+    stripeStatus,
+    calendarStatus,
     // Derived
-    activeCount, configuredCount, notificationFormData,
+    activeCount,
+    configuredCount,
+    notificationFormData,
     // Modal state
-    isSubmitting, testingId, deletingNotificationId,
+    isSubmitting,
+    testingId,
+    deletingNotificationId,
     // Data fetching
     loadAllData,
     // Notification CRUD
-    prepareAddNotification, prepareEditNotification,
-    handleSaveNotification, handleDeleteNotification,
-    handleTestNotification, prepareDeleteNotification,
+    prepareAddNotification,
+    prepareEditNotification,
+    handleSaveNotification,
+    handleDeleteNotification,
+    handleTestNotification,
+    prepareDeleteNotification,
     // Calendar
     handleToggleCalendarSync
   };

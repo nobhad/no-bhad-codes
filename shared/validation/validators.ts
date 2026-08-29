@@ -346,7 +346,6 @@ export function validateUrl(
     };
   }
 
-
   return { isValid: true, sanitizedValue: trimmed };
 }
 
@@ -549,7 +548,7 @@ const HTML_ENTITIES: Record<string, string> = {
   '<': '&lt;',
   '>': '&gt;',
   '"': '&quot;',
-  '\'': '&#x27;',
+  "'": '&#x27;',
   '/': '&#x2F;',
   '`': '&#x60;',
   '=': '&#x3D;'
@@ -651,81 +650,81 @@ function validateJsonProperty(
 ): ValidationResult {
   // Check type
   switch (propDef.type) {
-  case 'string':
-    if (typeof value !== 'string') {
-      return { isValid: false, error: `${path} must be a string` };
-    }
-    if (propDef.minLength !== undefined && value.length < propDef.minLength) {
-      return {
-        isValid: false,
-        error: `${path} must be at least ${propDef.minLength} characters`
-      };
-    }
-    if (propDef.maxLength !== undefined && value.length > propDef.maxLength) {
-      return { isValid: false, error: `${path} must be at most ${propDef.maxLength} characters` };
-    }
-    break;
-
-  case 'number':
-    if (typeof value !== 'number' || isNaN(value)) {
-      return { isValid: false, error: `${path} must be a number` };
-    }
-    if (propDef.min !== undefined && value < propDef.min) {
-      return { isValid: false, error: `${path} must be at least ${propDef.min}` };
-    }
-    if (propDef.max !== undefined && value > propDef.max) {
-      return { isValid: false, error: `${path} must be at most ${propDef.max}` };
-    }
-    break;
-
-  case 'boolean':
-    if (typeof value !== 'boolean') {
-      return { isValid: false, error: `${path} must be a boolean` };
-    }
-    break;
-
-  case 'array':
-    if (!Array.isArray(value)) {
-      return { isValid: false, error: `${path} must be an array` };
-    }
-    if (propDef.minLength !== undefined && value.length < propDef.minLength) {
-      return { isValid: false, error: `${path} must have at least ${propDef.minLength} items` };
-    }
-    if (propDef.maxLength !== undefined && value.length > propDef.maxLength) {
-      return { isValid: false, error: `${path} must have at most ${propDef.maxLength} items` };
-    }
-    // Validate items if schema provided
-    if (propDef.items) {
-      for (let i = 0; i < value.length; i++) {
-        const itemResult = validateJsonProperty(value[i], propDef.items, `${path}[${i}]`);
-        if (!itemResult.isValid) {
-          return itemResult;
-        }
+    case 'string':
+      if (typeof value !== 'string') {
+        return { isValid: false, error: `${path} must be a string` };
       }
-    }
-    break;
+      if (propDef.minLength !== undefined && value.length < propDef.minLength) {
+        return {
+          isValid: false,
+          error: `${path} must be at least ${propDef.minLength} characters`
+        };
+      }
+      if (propDef.maxLength !== undefined && value.length > propDef.maxLength) {
+        return { isValid: false, error: `${path} must be at most ${propDef.maxLength} characters` };
+      }
+      break;
 
-  case 'object':
-    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-      return { isValid: false, error: `${path} must be an object` };
-    }
-    // Validate nested properties if schema provided
-    if (propDef.properties) {
-      for (const [key, nestedDef] of Object.entries(propDef.properties)) {
-        const nestedValue = (value as Record<string, unknown>)[key];
-        if (nestedValue === undefined) {
-          if (nestedDef.required) {
-            return { isValid: false, error: `${path}.${key} is required` };
+    case 'number':
+      if (typeof value !== 'number' || isNaN(value)) {
+        return { isValid: false, error: `${path} must be a number` };
+      }
+      if (propDef.min !== undefined && value < propDef.min) {
+        return { isValid: false, error: `${path} must be at least ${propDef.min}` };
+      }
+      if (propDef.max !== undefined && value > propDef.max) {
+        return { isValid: false, error: `${path} must be at most ${propDef.max}` };
+      }
+      break;
+
+    case 'boolean':
+      if (typeof value !== 'boolean') {
+        return { isValid: false, error: `${path} must be a boolean` };
+      }
+      break;
+
+    case 'array':
+      if (!Array.isArray(value)) {
+        return { isValid: false, error: `${path} must be an array` };
+      }
+      if (propDef.minLength !== undefined && value.length < propDef.minLength) {
+        return { isValid: false, error: `${path} must have at least ${propDef.minLength} items` };
+      }
+      if (propDef.maxLength !== undefined && value.length > propDef.maxLength) {
+        return { isValid: false, error: `${path} must have at most ${propDef.maxLength} items` };
+      }
+      // Validate items if schema provided
+      if (propDef.items) {
+        for (let i = 0; i < value.length; i++) {
+          const itemResult = validateJsonProperty(value[i], propDef.items, `${path}[${i}]`);
+          if (!itemResult.isValid) {
+            return itemResult;
           }
-          continue;
-        }
-        const nestedResult = validateJsonProperty(nestedValue, nestedDef, `${path}.${key}`);
-        if (!nestedResult.isValid) {
-          return nestedResult;
         }
       }
-    }
-    break;
+      break;
+
+    case 'object':
+      if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+        return { isValid: false, error: `${path} must be an object` };
+      }
+      // Validate nested properties if schema provided
+      if (propDef.properties) {
+        for (const [key, nestedDef] of Object.entries(propDef.properties)) {
+          const nestedValue = (value as Record<string, unknown>)[key];
+          if (nestedValue === undefined) {
+            if (nestedDef.required) {
+              return { isValid: false, error: `${path}.${key} is required` };
+            }
+            continue;
+          }
+          const nestedResult = validateJsonProperty(nestedValue, nestedDef, `${path}.${key}`);
+          if (!nestedResult.isValid) {
+            return nestedResult;
+          }
+        }
+      }
+      break;
   }
 
   // Check enum values

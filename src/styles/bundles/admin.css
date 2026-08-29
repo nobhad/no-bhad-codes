@@ -88,5 +88,3 @@ body.admin-logged-in[data-page="admin"] {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-neutral-500);
 }
-
-

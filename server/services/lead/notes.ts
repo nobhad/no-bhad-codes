@@ -13,7 +13,11 @@ import {
 } from '../../database/entities/index.js';
 import type { LeadNote } from './types.js';
 
-export async function addNote(projectId: number, author: string, content: string): Promise<LeadNote> {
+export async function addNote(
+  projectId: number,
+  author: string,
+  content: string
+): Promise<LeadNote> {
   const db = getDatabase();
 
   const authorUserId = await userService.getUserIdByEmailOrName(author);

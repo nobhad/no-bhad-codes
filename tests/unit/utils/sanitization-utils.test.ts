@@ -19,7 +19,6 @@ vi.mock('../../../src/utils/logger', () => ({
 // ============================================
 
 describe('SanitizationUtils', () => {
-
   // ----------------------------------------
   // escapeHtml
   // ----------------------------------------
@@ -48,7 +47,7 @@ describe('SanitizationUtils', () => {
     });
 
     it('escapes single quotes', () => {
-      expect(SanitizationUtils.escapeHtml('it\'s')).toBe('it&#x27;s');
+      expect(SanitizationUtils.escapeHtml("it's")).toBe('it&#x27;s');
     });
 
     it('escapes backticks', () => {
@@ -324,7 +323,9 @@ describe('SanitizationUtils', () => {
     });
 
     it('accepts a mailto URL', () => {
-      expect(SanitizationUtils.sanitizeUrl('mailto:test@example.com')).toBe('mailto:test@example.com');
+      expect(SanitizationUtils.sanitizeUrl('mailto:test@example.com')).toBe(
+        'mailto:test@example.com'
+      );
     });
 
     it('returns empty string for ftp:// protocol', () => {

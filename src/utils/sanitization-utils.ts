@@ -20,7 +20,7 @@ export class SanitizationUtils {
     '<': '&lt;',
     '>': '&gt;',
     '"': '&quot;',
-    '\'': '&#x27;',
+    "'": '&#x27;',
     '`': '&#96;'
   };
 
@@ -260,27 +260,27 @@ export class SanitizationUtils {
 
       // Apply specific sanitization based on field type/name
       switch (key.toLowerCase()) {
-      case 'email':
-        sanitized[sanitizedKey] = SanitizationUtils.sanitizeEmail(stringValue);
-        break;
-      case 'phone':
-      case 'telephone':
-      case 'mobile':
-        sanitized[sanitizedKey] = SanitizationUtils.sanitizePhone(stringValue);
-        break;
-      case 'website':
-      case 'url':
-      case 'link':
-        sanitized[sanitizedKey] = SanitizationUtils.sanitizeUrl(stringValue);
-        break;
-      case 'message':
-      case 'comment':
-      case 'description':
-      case 'notes':
-        sanitized[sanitizedKey] = SanitizationUtils.sanitizeMessage(stringValue);
-        break;
-      default:
-        sanitized[sanitizedKey] = SanitizationUtils.sanitizeText(stringValue);
+        case 'email':
+          sanitized[sanitizedKey] = SanitizationUtils.sanitizeEmail(stringValue);
+          break;
+        case 'phone':
+        case 'telephone':
+        case 'mobile':
+          sanitized[sanitizedKey] = SanitizationUtils.sanitizePhone(stringValue);
+          break;
+        case 'website':
+        case 'url':
+        case 'link':
+          sanitized[sanitizedKey] = SanitizationUtils.sanitizeUrl(stringValue);
+          break;
+        case 'message':
+        case 'comment':
+        case 'description':
+        case 'notes':
+          sanitized[sanitizedKey] = SanitizationUtils.sanitizeMessage(stringValue);
+          break;
+        default:
+          sanitized[sanitizedKey] = SanitizationUtils.sanitizeText(stringValue);
       }
     }
 

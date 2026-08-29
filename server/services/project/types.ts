@@ -259,19 +259,27 @@ export const PROJECT_TASK_COLUMNS = `
   id, project_id, milestone_id, title, description, status, priority, assigned_to,
   due_date, estimated_hours, actual_hours, sort_order, parent_task_id,
   created_at, updated_at, completed_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const TASK_DEPENDENCY_COLUMNS = `
   id, task_id, depends_on_task_id, dependency_type, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const TASK_CHECKLIST_ITEM_COLUMNS = `
   id, task_id, content, is_completed, completed_at, sort_order, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const PROJECT_TEMPLATE_COLUMNS = `
   id, name, description, project_type, default_milestones, default_tasks,
   estimated_duration_days, default_hourly_rate, is_active,
   default_content_requests, default_payment_schedule, contract_template_id, tier_definitions,
   created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();

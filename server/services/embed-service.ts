@@ -42,7 +42,10 @@ function parseRow(row: EmbedConfigRow): EmbedConfiguration {
     token: row.token,
     config,
     allowedDomains: row.allowed_domains
-      ? row.allowed_domains.split(',').map(d => d.trim()).filter(Boolean)
+      ? row.allowed_domains
+          .split(',')
+          .map((d) => d.trim())
+          .filter(Boolean)
       : [],
     isActive: row.is_active === 1,
     createdAt: row.created_at,
@@ -79,10 +82,9 @@ async function create(params: CreateEmbedParams): Promise<EmbedConfiguration> {
     metadata: { id: result.lastID, widgetType: params.widgetType }
   });
 
-  const row = (await db.get(
-    'SELECT * FROM embed_configurations WHERE id = ?',
-    [result.lastID]
-  )) as EmbedConfigRow;
+  const row = (await db.get('SELECT * FROM embed_configurations WHERE id = ?', [
+    result.lastID
+  ])) as EmbedConfigRow;
 
   return parseRow(row);
 }
@@ -106,10 +108,9 @@ async function list(): Promise<EmbedConfiguration[]> {
 async function getById(id: number): Promise<EmbedConfiguration | null> {
   const db = getDatabase();
 
-  const row = (await db.get(
-    'SELECT * FROM embed_configurations WHERE id = ?',
-    [id]
-  )) as EmbedConfigRow | undefined;
+  const row = (await db.get('SELECT * FROM embed_configurations WHERE id = ?', [id])) as
+    | EmbedConfigRow
+    | undefined;
 
   return row ? parseRow(row) : null;
 }
@@ -142,13 +143,10 @@ async function update(id: number, params: UpdateEmbedParams): Promise<void> {
 
   if (setClauses.length === 0) return;
 
-  setClauses.push('updated_at = datetime(\'now\')');
+  setClauses.push("updated_at = datetime('now')");
   values.push(id);
 
-  await db.run(
-    `UPDATE embed_configurations SET ${setClauses.join(', ')} WHERE id = ?`,
-    values
-  );
+  await db.run(`UPDATE embed_configurations SET ${setClauses.join(', ')} WHERE id = ?`, values);
 
   logger.info('Updated embed configuration', {
     category: 'embed',
@@ -163,7 +161,7 @@ async function deactivate(id: number): Promise<void> {
   const db = getDatabase();
 
   await db.run(
-    'UPDATE embed_configurations SET is_active = 0, updated_at = datetime(\'now\') WHERE id = ?',
+    "UPDATE embed_configurations SET is_active = 0, updated_at = datetime('now') WHERE id = ?",
     [id]
   );
 
@@ -181,7 +179,7 @@ async function regenerateToken(id: number): Promise<string> {
   const newToken = randomUUID();
 
   await db.run(
-    'UPDATE embed_configurations SET token = ?, updated_at = datetime(\'now\') WHERE id = ?',
+    "UPDATE embed_configurations SET token = ?, updated_at = datetime('now') WHERE id = ?",
     [newToken, id]
   );
 
@@ -229,22 +227,21 @@ async function getProjectStatus(token: string): Promise<ProjectStatusInfo | null
   if (!statusToken) return null;
 
   // Calculate completion from milestones
-  const milestones = (await db.all(
-    'SELECT status FROM milestones WHERE project_id = ?',
-    [statusToken.project_id]
-  )) as Array<{ status: string }>;
+  const milestones = (await db.all('SELECT status FROM milestones WHERE project_id = ?', [
+    statusToken.project_id
+  ])) as Array<{ status: string }>;
 
   const totalMilestones = milestones.length;
-  const completedMilestones = milestones.filter(m =>
-    m.status === 'completed' || m.status === 'done'
+  const completedMilestones = milestones.filter(
+    (m) => m.status === 'completed' || m.status === 'done'
   ).length;
-  const completionPercent = totalMilestones > 0
-    ? Math.round((completedMilestones / totalMilestones) * 100)
-    : 0;
+  const completionPercent =
+    totalMilestones > 0 ? Math.round((completedMilestones / totalMilestones) * 100) : 0;
 
-  const milestonesSummary = totalMilestones > 0
-    ? `${completedMilestones} of ${totalMilestones} milestones complete`
-    : 'No milestones';
+  const milestonesSummary =
+    totalMilestones > 0
+      ? `${completedMilestones} of ${totalMilestones} milestones complete`
+      : 'No milestones';
 
   return {
     projectName: statusToken.project_name,
@@ -287,14 +284,14 @@ function generateEmbedCode(config: EmbedConfiguration, baseUrl: string): string 
   const { widgetType, token } = config;
 
   switch (widgetType) {
-  case 'contact_form':
-    return `<script src="${baseUrl}/api/embed/contact-form.js?token=${token}" defer></script>`;
-  case 'testimonials':
-    return `<script src="${baseUrl}/api/embed/testimonials.js?token=${token}" defer></script>`;
-  case 'status_badge':
-    return `<script src="${baseUrl}/api/embed/status-badge.js?token=${token}" defer></script>`;
-  default:
-    return '';
+    case 'contact_form':
+      return `<script src="${baseUrl}/api/embed/contact-form.js?token=${token}" defer></script>`;
+    case 'testimonials':
+      return `<script src="${baseUrl}/api/embed/testimonials.js?token=${token}" defer></script>`;
+    case 'status_badge':
+      return `<script src="${baseUrl}/api/embed/status-badge.js?token=${token}" defer></script>`;
+    default:
+      return '';
   }
 }
 

@@ -439,7 +439,7 @@ html[data-theme="dark"] .input-item textarea {
 
 /* Tooltip caret pointing up toward form fields */
 .form-error-tooltip::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -6px;
   left: 50%;
@@ -462,7 +462,7 @@ html[data-theme="dark"] .input-item textarea {
 }
 
 .form-error-tooltip li::before {
-  content: '*';
+  content: "*";
   margin-right: 0.4rem;
   font-weight: var(--font-weight-bold);
   font-size: 1.2em;

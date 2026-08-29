@@ -11,7 +11,14 @@
  */
 
 // Environment configuration (validated env vars)
-export { default as environment, validateConfig, getConfigSummary, getBaseUrl, getAdminUrl, getPortalUrl } from './environment.js';
+export {
+  default as environment,
+  validateConfig,
+  getConfigSummary,
+  getBaseUrl,
+  getAdminUrl,
+  getPortalUrl
+} from './environment.js';
 export type { AppConfig } from './environment.js';
 
 // Business configuration (company info, branding)
@@ -31,7 +38,13 @@ export { DEFAULT_MILESTONES } from './default-milestones.js';
 export { DEFAULT_TASKS } from './default-tasks.js';
 
 // Navigation configuration
-export { getPortalConfig, PORTAL_CONFIGS, ICONS, ADMIN_TAB_IDS, CLIENT_TAB_IDS } from './navigation.js';
+export {
+  getPortalConfig,
+  PORTAL_CONFIGS,
+  ICONS,
+  ADMIN_TAB_IDS,
+  CLIENT_TAB_IDS
+} from './navigation.js';
 export type { NavItem, SubtabGroup, PortalConfig } from './navigation.js';
 
 // Swagger/API documentation configuration

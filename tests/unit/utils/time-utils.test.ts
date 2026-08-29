@@ -221,7 +221,7 @@ describe('formatDuration', () => {
 // ============================================
 
 describe('isToday', () => {
-  it('returns true for today\'s date', () => {
+  it("returns true for today's date", () => {
     expect(isToday(new Date())).toBe(true);
   });
 

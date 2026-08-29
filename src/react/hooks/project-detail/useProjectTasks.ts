@@ -21,9 +21,7 @@ export interface UseProjectTasksReturn {
   assignTaskToMilestone: (taskId: number, milestoneId: number) => Promise<boolean>;
 }
 
-export function useProjectTasks({
-  projectId
-}: ProjectDetailHookOptions): UseProjectTasksReturn {
+export function useProjectTasks({ projectId }: ProjectDetailHookOptions): UseProjectTasksReturn {
   const [tasks, setTasks] = useState<ProjectTaskResponse[]>([]);
 
   const fetchTasks = useCallback(async (): Promise<ProjectTaskResponse[]> => {
@@ -48,19 +46,16 @@ export function useProjectTasks({
       const newStatus = task.status === 'completed' ? 'pending' : 'completed';
 
       try {
-        const response = await apiPut(
-          `${API_ENDPOINTS.PROJECTS}/tasks/${taskId}`,
-          { status: newStatus }
-        );
+        const response = await apiPut(`${API_ENDPOINTS.PROJECTS}/tasks/${taskId}`, {
+          status: newStatus
+        });
 
         if (!response.ok) return false;
 
         const json = await response.json();
         const updated = unwrapApiData<{ task: ProjectTaskResponse }>(json);
 
-        setTasks((prev) =>
-          prev.map((t) => (t.id === taskId ? { ...t, ...updated.task } : t))
-        );
+        setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, ...updated.task } : t)));
         return true;
       } catch (err) {
         logger.error('Toggle task error:', err);
@@ -73,19 +68,14 @@ export function useProjectTasks({
   const assignTaskToMilestone = useCallback(
     async (taskId: number, milestoneId: number): Promise<boolean> => {
       try {
-        const response = await apiPut(
-          `${API_ENDPOINTS.PROJECTS}/tasks/${taskId}`,
-          { milestoneId }
-        );
+        const response = await apiPut(`${API_ENDPOINTS.PROJECTS}/tasks/${taskId}`, { milestoneId });
 
         if (!response.ok) return false;
 
         const json = await response.json();
         const updated = unwrapApiData<{ task: ProjectTaskResponse }>(json);
 
-        setTasks((prev) =>
-          prev.map((t) => (t.id === taskId ? { ...t, ...updated.task } : t))
-        );
+        setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, ...updated.task } : t)));
         return true;
       } catch (err) {
         logger.error('Assign task to milestone error:', err);

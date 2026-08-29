@@ -52,12 +52,7 @@ interface UsePaginationReturn {
  * Hook for managing table pagination
  */
 export function usePagination(options: UsePaginationOptions): UsePaginationReturn {
-  const {
-    storageKey,
-    pageSizeOptions = [10, 25, 50],
-    defaultPageSize = 25,
-    totalItems
-  } = options;
+  const { storageKey, pageSizeOptions = [10, 25, 50], defaultPageSize = 25, totalItems } = options;
 
   // Initialize from storage or defaults
   const getInitialPage = useCallback((): number => {

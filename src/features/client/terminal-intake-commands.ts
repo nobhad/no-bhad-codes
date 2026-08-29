@@ -162,22 +162,24 @@ export function resolveCommand(
   answeredFields: string[]
 ): CommandResult {
   switch (command) {
-  case 'help':
-    return { message: { type: 'system', content: formatHelpText() } };
-  case 'clear':
-    return { signal: COMMAND_SIGNALS.CLEAR };
-  case 'restart':
-    return { signal: COMMAND_SIGNALS.RESTART };
-  case 'back':
-    if (currentQuestionIndex > 0) return { signal: COMMAND_SIGNALS.BACK };
-    return { message: { type: 'error', content: 'Already at the first question.' } };
-  case 'skip':
-    return { message: { type: 'error', content: 'This question is required and cannot be skipped.' } };
-  case 'status': {
-    const content = formatStatusText(currentQuestionIndex, totalQuestions, answeredFields);
-    return { message: { type: 'system', content } };
-  }
-  default:
-    return { message: { type: 'error', content: `Unknown command: /${command}` } };
+    case 'help':
+      return { message: { type: 'system', content: formatHelpText() } };
+    case 'clear':
+      return { signal: COMMAND_SIGNALS.CLEAR };
+    case 'restart':
+      return { signal: COMMAND_SIGNALS.RESTART };
+    case 'back':
+      if (currentQuestionIndex > 0) return { signal: COMMAND_SIGNALS.BACK };
+      return { message: { type: 'error', content: 'Already at the first question.' } };
+    case 'skip':
+      return {
+        message: { type: 'error', content: 'This question is required and cannot be skipped.' }
+      };
+    case 'status': {
+      const content = formatStatusText(currentQuestionIndex, totalQuestions, answeredFields);
+      return { message: { type: 'system', content } };
+    }
+    default:
+      return { message: { type: 'error', content: `Unknown command: /${command}` } };
   }
 }

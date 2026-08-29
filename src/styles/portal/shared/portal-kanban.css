@@ -8,7 +8,6 @@
  * Used by admin tasks board view and leads pipeline.
  */
 
-
 .kanban-board {
   display: flex;
   flex-direction: row;
@@ -157,4 +156,3 @@
     max-height: none;
   }
 }
-

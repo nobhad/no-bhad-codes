@@ -52,9 +52,7 @@ function hashRequestBody(req: Request): string {
     .map((k) => `${k}=${JSON.stringify((req.body as Record<string, unknown>)[k])}`)
     .join('|');
   const queryKeys = Object.keys(req.query).sort();
-  const queryCanonical = queryKeys
-    .map((k) => `${k}=${JSON.stringify(req.query[k])}`)
-    .join('|');
+  const queryCanonical = queryKeys.map((k) => `${k}=${JSON.stringify(req.query[k])}`).join('|');
   return crypto.createHash('sha256').update(`${bodyCanonical}||${queryCanonical}`).digest('hex');
 }
 
@@ -207,7 +205,7 @@ function interceptResponse(
 export async function purgeIdempotencyKeys(retentionDays = 7): Promise<number> {
   const db = getDatabase();
   const result = await db.run(
-    'DELETE FROM idempotency_keys WHERE created_at < datetime(\'now\', ?)',
+    "DELETE FROM idempotency_keys WHERE created_at < datetime('now', ?)",
     [`-${retentionDays} days`]
   );
   return result.changes ?? 0;

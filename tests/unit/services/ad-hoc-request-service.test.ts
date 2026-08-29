@@ -210,7 +210,11 @@ describe('AdHocRequestService', () => {
     it('combines multiple filters', async () => {
       mockDb.all.mockResolvedValueOnce([]);
 
-      await adHocRequestService.getRequests({ projectId: 10, status: 'approved', priority: 'high' });
+      await adHocRequestService.getRequests({
+        projectId: 10,
+        status: 'approved',
+        priority: 'high'
+      });
 
       const [query, params] = mockDb.all.mock.calls[0];
       expect(query).toContain('project_id = ?');
@@ -289,8 +293,8 @@ describe('AdHocRequestService', () => {
 
       const [, params] = mockDb.run.mock.calls[0];
       expect(params).toContain('submitted'); // default status
-      expect(params).toContain('normal');    // priority
-      expect(params).toContain('normal');    // urgency
+      expect(params).toContain('normal'); // priority
+      expect(params).toContain('normal'); // urgency
     });
 
     it('uses provided status, priority, urgency when given', async () => {
@@ -350,7 +354,15 @@ describe('AdHocRequestService', () => {
     });
 
     it('accepts all valid status values', async () => {
-      const statuses = ['submitted', 'reviewing', 'quoted', 'approved', 'in_progress', 'completed', 'declined'] as const;
+      const statuses = [
+        'submitted',
+        'reviewing',
+        'quoted',
+        'approved',
+        'in_progress',
+        'completed',
+        'declined'
+      ] as const;
 
       for (const status of statuses) {
         mockDb.run.mockResolvedValueOnce({ lastID: 1 });
@@ -505,7 +517,7 @@ describe('AdHocRequestService', () => {
       await adHocRequestService.updateRequest(1, { title: 'X' });
 
       const [query] = mockDb.run.mock.calls[0];
-      expect(query).toContain('updated_at = datetime(\'now\')');
+      expect(query).toContain("updated_at = datetime('now')");
     });
   });
 
@@ -542,7 +554,15 @@ describe('AdHocRequestService', () => {
 
   describe('isValidStatus', () => {
     it('returns true for all valid statuses', () => {
-      const validStatuses = ['submitted', 'reviewing', 'quoted', 'approved', 'in_progress', 'completed', 'declined'];
+      const validStatuses = [
+        'submitted',
+        'reviewing',
+        'quoted',
+        'approved',
+        'in_progress',
+        'completed',
+        'declined'
+      ];
       for (const s of validStatuses) {
         expect(adHocRequestService.isValidStatus(s)).toBe(true);
       }

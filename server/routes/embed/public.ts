@@ -45,11 +45,18 @@ router.get(
     const apiUrl = getBaseUrl();
     const widgetConfig = config.config as Record<string, unknown>;
     const brandColor = (widgetConfig.brandColor as string) || '#1a1a2e';
-    const successMessage = (widgetConfig.successMessage as string) || 'Thank you! We will be in touch.';
+    const successMessage =
+      (widgetConfig.successMessage as string) || 'Thank you! We will be in touch.';
     const showCompany = widgetConfig.showCompanyField !== false;
     const showSubject = widgetConfig.showSubjectField !== false;
 
-    const script = buildContactFormScript(apiUrl, brandColor, successMessage, showCompany, showSubject);
+    const script = buildContactFormScript(
+      apiUrl,
+      brandColor,
+      successMessage,
+      showCompany,
+      showSubject
+    );
     res.set('Content-Type', 'application/javascript');
     res.set('Cache-Control', `public, max-age=${CACHE_MAX_AGE}`);
     res.send(script);
@@ -158,8 +165,8 @@ function buildContactFormScript(
     {n:'name',l:'Name',t:'text',r:true},
     {n:'email',l:'Email',t:'email',r:true}
   ];
-  ${showCompany ? 'fields.push({n:\'company\',l:\'Company\',t:\'text\',r:false});' : ''}
-  ${showSubject ? 'fields.push({n:\'subject\',l:\'Subject\',t:\'text\',r:false});' : ''}
+  ${showCompany ? "fields.push({n:'company',l:'Company',t:'text',r:false});" : ''}
+  ${showSubject ? "fields.push({n:'subject',l:'Subject',t:'text',r:false});" : ''}
   fields.push({n:'message',l:'Message',t:'textarea',r:true});
   var h='<form style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-width:500px;">';
   fields.forEach(function(f){
@@ -205,17 +212,24 @@ function buildContactFormScript(
 }
 
 function buildTestimonialScript(
-  testimonials: Array<{ client_name: string; text: string; rating: number | null; company_name: string | null }>,
+  testimonials: Array<{
+    client_name: string;
+    text: string;
+    rating: number | null;
+    company_name: string | null;
+  }>,
   layout: string,
   showRating: boolean,
   autoRotate: number
 ): string {
-  const items = JSON.stringify(testimonials.map(t => ({
-    n: t.client_name,
-    t: t.text,
-    r: t.rating,
-    c: t.company_name
-  })));
+  const items = JSON.stringify(
+    testimonials.map((t) => ({
+      n: t.client_name,
+      t: t.text,
+      r: t.rating,
+      c: t.company_name
+    }))
+  );
 
   return `(function(){
   var s=document.currentScript;
@@ -258,9 +272,12 @@ function buildTestimonialScript(
 })();`;
 }
 
-function buildStatusBadgeScript(
-  statusInfo: { projectName: string; status: string; completionPercent: number; milestonesSummary: string }
-): string {
+function buildStatusBadgeScript(statusInfo: {
+  projectName: string;
+  status: string;
+  completionPercent: number;
+  milestonesSummary: string;
+}): string {
   const statusColors: Record<string, string> = {
     active: '#3b82f6',
     'in-progress': '#8b5cf6',
@@ -278,7 +295,7 @@ function buildStatusBadgeScript(
   s.parentNode.insertBefore(c,s.nextSibling);
   c.innerHTML='<div style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid #e5e7eb;border-radius:20px;font-family:-apple-system,sans-serif;font-size:13px;background:#fff;">'
     +'<span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block;"></span>'
-    +'<span style="font-weight:600;color:#333;">${statusInfo.projectName.replace(/'/g, '\\\'')}</span>'
+    +'<span style="font-weight:600;color:#333;">${statusInfo.projectName.replace(/'/g, "\\'")}</span>'
     +'<span style="color:#888;">${statusInfo.status.replace(/-/g, ' ')}</span>'
     +'<span style="color:#555;">${statusInfo.completionPercent}%</span>'
     +'</div>';

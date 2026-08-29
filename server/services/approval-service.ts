@@ -15,26 +15,36 @@ import { NotFoundError, ValidationError } from '../utils/app-errors.js';
 
 const WORKFLOW_DEFINITION_COLUMNS = `
   id, name, description, entity_type, workflow_type, is_active, is_default, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const WORKFLOW_STEP_COLUMNS = `
   id, workflow_definition_id, step_order, approver_type, approver_value, is_optional,
   auto_approve_after_hours, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const WORKFLOW_INSTANCE_COLUMNS = `
   id, workflow_definition_id, entity_type, entity_id, status, current_step, initiated_by,
   initiated_at, completed_at, notes
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const APPROVAL_REQUEST_COLUMNS = `
   id, workflow_instance_id, step_id, approver_email, status, decision_at, decision_comment,
   reminder_sent_at, reminder_count, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const APPROVAL_HISTORY_COLUMNS = `
   id, workflow_instance_id, action, actor_email, step_id, comment, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // ============================================
 // Types
@@ -136,7 +146,10 @@ class ApprovalService {
    */
   async getWorkflowDefinition(id: number): Promise<WorkflowDefinition | null> {
     const db = getDatabase();
-    const result = await db.get(`SELECT ${WORKFLOW_DEFINITION_COLUMNS} FROM approval_workflow_definitions WHERE id = ?`, [id]);
+    const result = await db.get(
+      `SELECT ${WORKFLOW_DEFINITION_COLUMNS} FROM approval_workflow_definitions WHERE id = ?`,
+      [id]
+    );
     return (result as unknown as WorkflowDefinition) || null;
   }
 
@@ -211,9 +224,10 @@ class ApprovalService {
         data.auto_approve_after_hours || null
       ]
     );
-    const step = await db.get(`SELECT ${WORKFLOW_STEP_COLUMNS} FROM approval_workflow_steps WHERE id = ?`, [
-      result.lastID
-    ]);
+    const step = await db.get(
+      `SELECT ${WORKFLOW_STEP_COLUMNS} FROM approval_workflow_steps WHERE id = ?`,
+      [result.lastID]
+    );
     return step as unknown as WorkflowStep;
   }
 
@@ -280,7 +294,10 @@ class ApprovalService {
    */
   async getWorkflowInstance(id: number): Promise<WorkflowInstance | null> {
     const db = getDatabase();
-    const result = await db.get(`SELECT ${WORKFLOW_INSTANCE_COLUMNS} FROM approval_workflow_instances WHERE id = ?`, [id]);
+    const result = await db.get(
+      `SELECT ${WORKFLOW_INSTANCE_COLUMNS} FROM approval_workflow_instances WHERE id = ?`,
+      [id]
+    );
     return (result as unknown as WorkflowInstance) || null;
   }
 
@@ -302,7 +319,9 @@ class ApprovalService {
   /**
    * Get all active workflows (for admin dashboard)
    */
-  async getActiveWorkflows(): Promise<(WorkflowInstance & { workflow_name: string; workflow_type: WorkflowType })[]> {
+  async getActiveWorkflows(): Promise<
+    (WorkflowInstance & { workflow_name: string; workflow_type: WorkflowType })[]
+  > {
     const db = getDatabase();
     return db.all(
       `SELECT wi.*, wd.name as workflow_name, wd.workflow_type
@@ -310,13 +329,19 @@ class ApprovalService {
        JOIN approval_workflow_definitions wd ON wi.workflow_definition_id = wd.id
        WHERE wi.status IN ('pending', 'in_progress')
        ORDER BY wi.initiated_at DESC`
-    ) as unknown as Promise<(WorkflowInstance & { workflow_name: string; workflow_type: WorkflowType })[]>;
+    ) as unknown as Promise<
+      (WorkflowInstance & { workflow_name: string; workflow_type: WorkflowType })[]
+    >;
   }
 
   /**
    * Get pending approvals for a user
    */
-  async getPendingApprovalsForUser(email: string): Promise<(ApprovalRequest & { entity_type: EntityType; entity_id: number; workflow_name: string })[]> {
+  async getPendingApprovalsForUser(
+    email: string
+  ): Promise<
+    (ApprovalRequest & { entity_type: EntityType; entity_id: number; workflow_name: string })[]
+  > {
     const db = getDatabase();
     return db.all(
       `SELECT ar.*, wi.entity_type, wi.entity_id, wd.name as workflow_name
@@ -326,7 +351,9 @@ class ApprovalService {
        WHERE ar.approver_email = ? AND ar.status = 'pending' AND wi.status = 'in_progress'
        ORDER BY ar.created_at ASC`,
       [email]
-    ) as unknown as Promise<(ApprovalRequest & { entity_type: EntityType; entity_id: number; workflow_name: string })[]>;
+    ) as unknown as Promise<
+      (ApprovalRequest & { entity_type: EntityType; entity_id: number; workflow_name: string })[]
+    >;
   }
 
   // ============================================
@@ -344,7 +371,10 @@ class ApprovalService {
     const db = getDatabase();
 
     // Get request and verify
-    const requestRow = await db.get(`SELECT ${APPROVAL_REQUEST_COLUMNS} FROM approval_requests WHERE id = ?`, [requestId]);
+    const requestRow = await db.get(
+      `SELECT ${APPROVAL_REQUEST_COLUMNS} FROM approval_requests WHERE id = ?`,
+      [requestId]
+    );
     if (!requestRow) throw new NotFoundError('approval request');
     const request = requestRow as unknown as ApprovalRequest;
     if (request.status !== 'pending') throw new ValidationError('Request already processed');
@@ -381,7 +411,10 @@ class ApprovalService {
     const db = getDatabase();
 
     // Get request and verify
-    const requestRow = await db.get(`SELECT ${APPROVAL_REQUEST_COLUMNS} FROM approval_requests WHERE id = ?`, [requestId]);
+    const requestRow = await db.get(
+      `SELECT ${APPROVAL_REQUEST_COLUMNS} FROM approval_requests WHERE id = ?`,
+      [requestId]
+    );
     if (!requestRow) throw new NotFoundError('approval request');
     const request = requestRow as unknown as ApprovalRequest;
     if (request.status !== 'pending') throw new ValidationError('Request already processed');
@@ -426,7 +459,7 @@ class ApprovalService {
 
     // Update all pending requests to skipped
     await db.run(
-      'UPDATE approval_requests SET status = \'skipped\' WHERE workflow_instance_id = ? AND status = \'pending\'',
+      "UPDATE approval_requests SET status = 'skipped' WHERE workflow_instance_id = ? AND status = 'pending'",
       [instanceId]
     );
 
@@ -490,12 +523,12 @@ class ApprovalService {
       const hasApproval = requests.some((r) => r.status === 'approved');
       if (hasApproval) {
         await db.run(
-          'UPDATE approval_workflow_instances SET status = \'approved\', completed_at = CURRENT_TIMESTAMP WHERE id = ?',
+          "UPDATE approval_workflow_instances SET status = 'approved', completed_at = CURRENT_TIMESTAMP WHERE id = ?",
           [instanceId]
         );
         // Skip remaining pending requests
         await db.run(
-          'UPDATE approval_requests SET status = \'skipped\' WHERE workflow_instance_id = ? AND status = \'pending\'',
+          "UPDATE approval_requests SET status = 'skipped' WHERE workflow_instance_id = ? AND status = 'pending'",
           [instanceId]
         );
       }
@@ -512,7 +545,7 @@ class ApprovalService {
 
       if (pendingRequired.length === 0 && allApproved) {
         await db.run(
-          'UPDATE approval_workflow_instances SET status = \'approved\', completed_at = CURRENT_TIMESTAMP WHERE id = ?',
+          "UPDATE approval_workflow_instances SET status = 'approved', completed_at = CURRENT_TIMESTAMP WHERE id = ?",
           [instanceId]
         );
       }
@@ -535,7 +568,7 @@ class ApprovalService {
         } else {
           // All steps complete
           await db.run(
-            'UPDATE approval_workflow_instances SET status = \'approved\', completed_at = CURRENT_TIMESTAMP WHERE id = ?',
+            "UPDATE approval_workflow_instances SET status = 'approved', completed_at = CURRENT_TIMESTAMP WHERE id = ?",
             [instanceId]
           );
         }
@@ -566,12 +599,32 @@ class ApprovalService {
   /**
    * Get approval history for a workflow instance
    */
-  async getApprovalHistory(instanceId: number): Promise<{ id: number; workflow_instance_id: number; action: string; actor_email: string; step_id: number | null; comment: string | null; created_at: string }[]> {
+  async getApprovalHistory(instanceId: number): Promise<
+    {
+      id: number;
+      workflow_instance_id: number;
+      action: string;
+      actor_email: string;
+      step_id: number | null;
+      comment: string | null;
+      created_at: string;
+    }[]
+  > {
     const db = getDatabase();
     return db.all(
       `SELECT ${APPROVAL_HISTORY_COLUMNS} FROM approval_history WHERE workflow_instance_id = ? ORDER BY created_at DESC`,
       [instanceId]
-    ) as unknown as Promise<{ id: number; workflow_instance_id: number; action: string; actor_email: string; step_id: number | null; comment: string | null; created_at: string }[]>;
+    ) as unknown as Promise<
+      {
+        id: number;
+        workflow_instance_id: number;
+        action: string;
+        actor_email: string;
+        step_id: number | null;
+        comment: string | null;
+        created_at: string;
+      }[]
+    >;
   }
 
   /**

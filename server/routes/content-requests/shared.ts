@@ -32,14 +32,8 @@ const NAME_MAX_LENGTH = 200;
 
 export const ContentRequestValidationSchemas = {
   createChecklist: {
-    project_id: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ],
-    client_id: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ],
+    project_id: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
+    client_id: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
     name: [
       { type: 'required' as const },
       { type: 'string' as const, minLength: 1, maxLength: NAME_MAX_LENGTH }
@@ -77,10 +71,7 @@ export const ContentRequestValidationSchemas = {
   } as ValidationSchema,
 
   submitUrl: {
-    url: [
-      { type: 'required' as const },
-      { type: 'string' as const, minLength: 1, maxLength: 2000 }
-    ]
+    url: [{ type: 'required' as const }, { type: 'string' as const, minLength: 1, maxLength: 2000 }]
   } as ValidationSchema,
 
   acceptItem: {} as ValidationSchema,

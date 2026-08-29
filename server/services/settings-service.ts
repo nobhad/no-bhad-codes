@@ -26,7 +26,9 @@ import { BUSINESS_INFO } from '../config/business.js';
 
 const SYSTEM_SETTINGS_COLUMNS = `
   id, setting_key, setting_value, setting_type, description, is_sensitive, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export type { SettingType, SystemSetting };
 
@@ -57,19 +59,19 @@ export interface InvoiceSettings {
  */
 function parseSettingValue(value: string, type: SettingType): string | number | boolean | unknown {
   switch (type) {
-  case 'number':
-    return parseFloat(value) || 0;
-  case 'boolean':
-    return value.toLowerCase() === 'true' || value === '1';
-  case 'json':
-    try {
-      return JSON.parse(value);
-    } catch {
-      return null;
-    }
-  case 'string':
-  default:
-    return value;
+    case 'number':
+      return parseFloat(value) || 0;
+    case 'boolean':
+      return value.toLowerCase() === 'true' || value === '1';
+    case 'json':
+      try {
+        return JSON.parse(value);
+      } catch {
+        return null;
+      }
+    case 'string':
+    default:
+      return value;
   }
 }
 
@@ -78,15 +80,15 @@ function parseSettingValue(value: string, type: SettingType): string | number | 
  */
 function stringifySettingValue(value: unknown, type: SettingType): string {
   switch (type) {
-  case 'number':
-    return String(value);
-  case 'boolean':
-    return value ? 'true' : 'false';
-  case 'json':
-    return JSON.stringify(value);
-  case 'string':
-  default:
-    return String(value);
+    case 'number':
+      return String(value);
+    case 'boolean':
+      return value ? 'true' : 'false';
+    case 'json':
+      return JSON.stringify(value);
+    case 'string':
+    default:
+      return String(value);
   }
 }
 
@@ -134,7 +136,10 @@ class SettingsService {
     }
 
     const db = getDatabase();
-    const row = await db.get(`SELECT ${SYSTEM_SETTINGS_COLUMNS} FROM system_settings WHERE setting_key = ?`, [key]);
+    const row = await db.get(
+      `SELECT ${SYSTEM_SETTINGS_COLUMNS} FROM system_settings WHERE setting_key = ?`,
+      [key]
+    );
 
     if (!row) {
       return null;
@@ -326,7 +331,9 @@ class SettingsService {
       updates.push(this.setSetting('invoice.prefix', settings.prefix));
     }
     if (settings.nextSequence !== undefined) {
-      updates.push(this.setSetting('invoice.next_sequence', settings.nextSequence, { type: 'number' }));
+      updates.push(
+        this.setSetting('invoice.next_sequence', settings.nextSequence, { type: 'number' })
+      );
     }
 
     await Promise.all(updates);

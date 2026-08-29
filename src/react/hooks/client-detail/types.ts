@@ -67,7 +67,9 @@ export interface UseClientDetailReturn {
   /** Update client */
   updateClient: (updates: Partial<Client>) => Promise<boolean>;
   /** Add contact */
-  addContact: (contact: Omit<ClientContact, 'id' | 'clientId' | 'createdAt' | 'updatedAt'>) => Promise<boolean>;
+  addContact: (
+    contact: Omit<ClientContact, 'id' | 'clientId' | 'createdAt' | 'updatedAt'>
+  ) => Promise<boolean>;
   /** Update contact */
   updateContact: (id: number, updates: Partial<ClientContact>) => Promise<boolean>;
   /** Delete contact */

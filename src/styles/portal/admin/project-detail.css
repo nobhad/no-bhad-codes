@@ -346,7 +346,6 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   z-index: var(--z-index-content);
 }
 
-
 .milestone-content {
   flex: 1;
   display: flex;

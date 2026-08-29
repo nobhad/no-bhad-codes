@@ -8,11 +8,7 @@ import { createLogger } from '@/utils/logger';
 import { unwrapApiData, apiFetch, apiPost, apiPut, apiDelete } from '@/utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { formatErrorMessage } from '@/utils/error-utils';
-import {
-  EMPTY_FORM,
-  type ProjectTemplateItem,
-  type ProjectTemplateFormData
-} from './types';
+import { EMPTY_FORM, type ProjectTemplateItem, type ProjectTemplateFormData } from './types';
 
 const logger = createLogger('ProjectTemplatesManager');
 
@@ -54,7 +50,9 @@ export function useProjectTemplatesData({ showNotification }: UseProjectTemplate
     }
   }, []);
 
-  useEffect(() => { loadTemplates(); }, [loadTemplates]);
+  useEffect(() => {
+    loadTemplates();
+  }, [loadTemplates]);
 
   // ---- Form handlers ----
 
@@ -83,58 +81,62 @@ export function useProjectTemplatesData({ showNotification }: UseProjectTemplate
     setFormError(null);
   }, []);
 
-  const handleFormSubmit = useCallback(async (onClose: () => void) => {
-    setFormError(null);
-    if (!formData.name.trim()) { setFormError('Name is required'); return; }
-
-    setFormSaving(true);
-    try {
-      const body = {
-        name: formData.name.trim(),
-        description: formData.description.trim() || undefined,
-        projectType: formData.projectType || undefined,
-        estimatedDurationDays: formData.estimatedDurationDays || undefined,
-        defaultHourlyRate: formData.defaultHourlyRate || undefined,
-        isActive: formData.isActive,
-        defaultMilestones: formData.milestones,
-        defaultTasks: formData.tasks,
-        defaultContentRequests: formData.contentRequests.length > 0 ? formData.contentRequests : undefined,
-        defaultPaymentSchedule: formData.paymentSchedule.length > 0 ? formData.paymentSchedule : undefined,
-        contractTemplateId: formData.contractTemplateId || undefined,
-        tierDefinitions: formData.tierDefinitions.length > 0 ? formData.tierDefinitions : undefined
-      };
-
-      const isEditing = editingTemplate !== null;
-      const endpoint = isEditing
-        ? buildEndpoint.projectTemplate(editingTemplate.id)
-        : API_ENDPOINTS.ADMIN.PROJECT_TEMPLATES;
-
-      const response = isEditing
-        ? await apiPut(endpoint, body)
-        : await apiPost(endpoint, body);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(
-          (errorData as { message?: string } | null)?.message
-          || `Failed to ${isEditing ? 'update' : 'create'} template`
-        );
+  const handleFormSubmit = useCallback(
+    async (onClose: () => void) => {
+      setFormError(null);
+      if (!formData.name.trim()) {
+        setFormError('Name is required');
+        return;
       }
 
-      showNotification?.(
-        `Template ${isEditing ? 'updated' : 'created'} successfully`,
-        'success'
-      );
-      onClose();
-      loadTemplates();
-    } catch (err) {
-      const message = formatErrorMessage(err, 'Failed to save template');
-      setFormError(message);
-      logger.error('Failed to save template:', err);
-    } finally {
-      setFormSaving(false);
-    }
-  }, [formData, editingTemplate, showNotification, loadTemplates]);
+      setFormSaving(true);
+      try {
+        const body = {
+          name: formData.name.trim(),
+          description: formData.description.trim() || undefined,
+          projectType: formData.projectType || undefined,
+          estimatedDurationDays: formData.estimatedDurationDays || undefined,
+          defaultHourlyRate: formData.defaultHourlyRate || undefined,
+          isActive: formData.isActive,
+          defaultMilestones: formData.milestones,
+          defaultTasks: formData.tasks,
+          defaultContentRequests:
+            formData.contentRequests.length > 0 ? formData.contentRequests : undefined,
+          defaultPaymentSchedule:
+            formData.paymentSchedule.length > 0 ? formData.paymentSchedule : undefined,
+          contractTemplateId: formData.contractTemplateId || undefined,
+          tierDefinitions:
+            formData.tierDefinitions.length > 0 ? formData.tierDefinitions : undefined
+        };
+
+        const isEditing = editingTemplate !== null;
+        const endpoint = isEditing
+          ? buildEndpoint.projectTemplate(editingTemplate.id)
+          : API_ENDPOINTS.ADMIN.PROJECT_TEMPLATES;
+
+        const response = isEditing ? await apiPut(endpoint, body) : await apiPost(endpoint, body);
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          throw new Error(
+            (errorData as { message?: string } | null)?.message ||
+              `Failed to ${isEditing ? 'update' : 'create'} template`
+          );
+        }
+
+        showNotification?.(`Template ${isEditing ? 'updated' : 'created'} successfully`, 'success');
+        onClose();
+        loadTemplates();
+      } catch (err) {
+        const message = formatErrorMessage(err, 'Failed to save template');
+        setFormError(message);
+        logger.error('Failed to save template:', err);
+      } finally {
+        setFormSaving(false);
+      }
+    },
+    [formData, editingTemplate, showNotification, loadTemplates]
+  );
 
   // ---- Delete handler ----
 
@@ -153,37 +155,50 @@ export function useProjectTemplatesData({ showNotification }: UseProjectTemplate
 
   // ---- Toggle active ----
 
-  const handleToggleActive = useCallback(async (template: ProjectTemplateItem) => {
-    try {
-      const response = await apiPut(buildEndpoint.projectTemplate(template.id), {
-        isActive: !template.isActive
-      });
-      if (!response.ok) throw new Error('Failed to toggle template');
-      setTemplates((prev) =>
-        prev.map((t) => t.id === template.id ? { ...t, isActive: !t.isActive } : t)
-      );
-      showNotification?.(
-        `Template ${!template.isActive ? 'activated' : 'deactivated'}`,
-        'success'
-      );
-    } catch (err) {
-      logger.error('Failed to toggle template:', err);
-      showNotification?.('Failed to toggle template', 'error');
-    }
-  }, [showNotification]);
+  const handleToggleActive = useCallback(
+    async (template: ProjectTemplateItem) => {
+      try {
+        const response = await apiPut(buildEndpoint.projectTemplate(template.id), {
+          isActive: !template.isActive
+        });
+        if (!response.ok) throw new Error('Failed to toggle template');
+        setTemplates((prev) =>
+          prev.map((t) => (t.id === template.id ? { ...t, isActive: !t.isActive } : t))
+        );
+        showNotification?.(
+          `Template ${!template.isActive ? 'activated' : 'deactivated'}`,
+          'success'
+        );
+      } catch (err) {
+        logger.error('Failed to toggle template:', err);
+        showNotification?.('Failed to toggle template', 'error');
+      }
+    },
+    [showNotification]
+  );
 
   return {
     // List state
-    isLoading, error, templates,
+    isLoading,
+    error,
+    templates,
     // Form state
-    editingTemplate, formData, formSaving, formError, setFormData,
+    editingTemplate,
+    formData,
+    formSaving,
+    formError,
+    setFormData,
     // Delete state
-    deletingTemplate, setDeletingTemplate,
+    deletingTemplate,
+    setDeletingTemplate,
     // Data fetching
     loadTemplates,
     // Actions
-    handleToggleActive, handleDelete,
+    handleToggleActive,
+    handleDelete,
     // Form handlers
-    prepareAddForm, prepareEditForm, handleFormSubmit
+    prepareAddForm,
+    prepareEditForm,
+    handleFormSubmit
   };
 }

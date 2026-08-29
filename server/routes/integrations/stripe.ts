@@ -107,7 +107,12 @@ router.post(
 
     // Validate URL formats if provided
     const isValidUrl = (url: string): boolean => {
-      try { new URL(url); return true; } catch { return false; }
+      try {
+        new URL(url);
+        return true;
+      } catch {
+        return false;
+      }
     };
     if (successUrl && !isValidUrl(successUrl)) {
       errorResponse(res, 'Invalid success URL', 400, ErrorCodes.VALIDATION_ERROR);

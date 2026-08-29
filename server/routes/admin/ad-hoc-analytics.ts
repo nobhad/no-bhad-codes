@@ -28,9 +28,22 @@ function isQuerySafe(query: string): { safe: boolean; reason?: string } {
 
   // Block dangerous keywords
   const dangerousKeywords = [
-    'insert', 'update', 'delete', 'drop', 'truncate', 'alter',
-    'create', 'replace', 'grant', 'revoke', 'exec', 'execute',
-    'attach', 'detach', 'pragma', 'vacuum'
+    'insert',
+    'update',
+    'delete',
+    'drop',
+    'truncate',
+    'alter',
+    'create',
+    'replace',
+    'grant',
+    'revoke',
+    'exec',
+    'execute',
+    'attach',
+    'detach',
+    'pragma',
+    'vacuum'
   ];
 
   for (const keyword of dangerousKeywords) {
@@ -79,7 +92,12 @@ router.post(
     // Validate query safety
     const validation = isQuerySafe(query);
     if (!validation.safe) {
-      return errorResponse(res, validation.reason || 'Invalid query', 400, ErrorCodes.INVALID_QUERY);
+      return errorResponse(
+        res,
+        validation.reason || 'Invalid query',
+        400,
+        ErrorCodes.INVALID_QUERY
+      );
     }
 
     try {
@@ -134,7 +152,12 @@ router.post(
     // Validate query safety
     const validation = isQuerySafe(query);
     if (!validation.safe) {
-      return errorResponse(res, validation.reason || 'Invalid query', 400, ErrorCodes.INVALID_QUERY);
+      return errorResponse(
+        res,
+        validation.reason || 'Invalid query',
+        400,
+        ErrorCodes.INVALID_QUERY
+      );
     }
 
     const savedQuery = await analyticsService.saveAnalyticsQuery({

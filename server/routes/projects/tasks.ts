@@ -365,7 +365,12 @@ router.post(
     const { content } = req.body;
 
     if (!content) {
-      return errorResponse(res, 'Checklist item content is required', 400, ErrorCodes.MISSING_CONTENT);
+      return errorResponse(
+        res,
+        'Checklist item content is required',
+        400,
+        ErrorCodes.MISSING_CONTENT
+      );
     }
 
     const item = await projectService.addChecklistItem(taskId, content);

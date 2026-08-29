@@ -54,7 +54,11 @@ export function formatZapierPayload(
  * Flatten nested objects for Zapier compatibility
  * Zapier works better with flat structures
  */
-export function flattenObject(obj: Record<string, unknown>, prefix = '', depth = 0): Record<string, unknown> {
+export function flattenObject(
+  obj: Record<string, unknown>,
+  prefix = '',
+  depth = 0
+): Record<string, unknown> {
   const MAX_DEPTH = 10;
   const result: Record<string, unknown> = {};
 

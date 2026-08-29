@@ -78,7 +78,7 @@ export async function getIntakeChecklist(projectId: number): Promise<IntakeCheck
   const db = getDatabase();
 
   // Get project + client data
-  const row = await db.get(
+  const row = (await db.get(
     `SELECT p.id, p.project_name, p.project_type, p.description, p.budget_range,
             p.timeline, p.features, p.page_count, p.design_level, p.content_status,
             p.current_site, p.inspiration, p.tech_comfort, p.hosting_preference,
@@ -89,7 +89,7 @@ export async function getIntakeChecklist(projectId: number): Promise<IntakeCheck
      JOIN active_clients c ON p.client_id = c.id
      WHERE p.id = ?`,
     [projectId]
-  ) as Record<string, unknown> | undefined;
+  )) as Record<string, unknown> | undefined;
 
   if (!row) return null;
 
@@ -119,24 +119,29 @@ export async function getIntakeChecklist(projectId: number): Promise<IntakeCheck
   }
 
   // Also check questionnaire completion
-  const questionnaireCount = await db.get(
+  const questionnaireCount = (await db.get(
     `SELECT COUNT(*) as total,
             SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
      FROM questionnaire_responses WHERE project_id = ?`,
     [projectId]
-  ) as { total: number; completed: number };
+  )) as { total: number; completed: number };
 
   if (questionnaireCount.total > 0) {
     items.push({
       field: 'questionnaires',
       label: `Questionnaires (${questionnaireCount.completed}/${questionnaireCount.total} completed)`,
       category: 'important',
-      collected: questionnaireCount.completed === questionnaireCount.total && questionnaireCount.total > 0,
-      value: questionnaireCount.completed > 0 ? `${questionnaireCount.completed} of ${questionnaireCount.total} completed` : null,
+      collected:
+        questionnaireCount.completed === questionnaireCount.total && questionnaireCount.total > 0,
+      value:
+        questionnaireCount.completed > 0
+          ? `${questionnaireCount.completed} of ${questionnaireCount.total} completed`
+          : null,
       source: 'questionnaire'
     });
     if (questionnaireCount.completed < questionnaireCount.total) importantMissing++;
-    if (questionnaireCount.completed === questionnaireCount.total && questionnaireCount.total > 0) collected++;
+    if (questionnaireCount.completed === questionnaireCount.total && questionnaireCount.total > 0)
+      collected++;
   }
 
   const total = items.length;
@@ -174,7 +179,7 @@ export async function sendInfoRequestEmail(
 ): Promise<{ success: boolean; message: string }> {
   const db = getDatabase();
 
-  const row = await db.get(
+  const row = (await db.get(
     `SELECT p.project_name,
             COALESCE(c.billing_name, c.contact_name) as client_name,
             COALESCE(c.billing_email, c.email) as client_email
@@ -182,16 +187,20 @@ export async function sendInfoRequestEmail(
      JOIN active_clients c ON p.client_id = c.id
      WHERE p.id = ?`,
     [projectId]
-  ) as { project_name: string; client_name: string; client_email: string } | undefined;
+  )) as { project_name: string; client_name: string; client_email: string } | undefined;
 
   if (!row || !row.client_email) {
     return { success: false, message: 'Project or client email not found' };
   }
 
   // Map field names to friendly labels
-  const allFields = [...INTAKE_FIELDS.essential, ...INTAKE_FIELDS.important, ...INTAKE_FIELDS.niceToHave];
-  const fieldLabels = missingFields.map(f => {
-    const def = allFields.find(d => d.field === f);
+  const allFields = [
+    ...INTAKE_FIELDS.essential,
+    ...INTAKE_FIELDS.important,
+    ...INTAKE_FIELDS.niceToHave
+  ];
+  const fieldLabels = missingFields.map((f) => {
+    const def = allFields.find((d) => d.field === f);
     return def ? def.label : f;
   });
 
@@ -199,8 +208,8 @@ export async function sendInfoRequestEmail(
     const { emailService } = await import('./email-service.js');
     const { BUSINESS_INFO } = await import('../config/business.js');
 
-    const itemsList = fieldLabels.map(l => `- ${l}`).join('\n');
-    const htmlItemsList = fieldLabels.map(l => `<li>${escapeHtml(l)}</li>`).join('');
+    const itemsList = fieldLabels.map((l) => `- ${l}`).join('\n');
+    const htmlItemsList = fieldLabels.map((l) => `<li>${escapeHtml(l)}</li>`).join('');
 
     const safeClientName = escapeHtml(row.client_name);
     const safeProjectName = escapeHtml(row.project_name);
@@ -211,7 +220,7 @@ export async function sendInfoRequestEmail(
     await emailService.sendEmail({
       to: row.client_email,
       subject: `Information Needed for ${row.project_name} - ${BUSINESS_INFO.name}`,
-      text: `Hi ${row.client_name},\n\nTo keep your project "${row.project_name}" moving forward, we need a few more details from you:\n\n${itemsList}\n\n${customMessage ? `${customMessage  }\n\n` : ''}You can provide this information by logging into the client portal or replying to this email.\n\nThank you!\n${BUSINESS_INFO.owner}\n${BUSINESS_INFO.name}`,
+      text: `Hi ${row.client_name},\n\nTo keep your project "${row.project_name}" moving forward, we need a few more details from you:\n\n${itemsList}\n\n${customMessage ? `${customMessage}\n\n` : ''}You can provide this information by logging into the client portal or replying to this email.\n\nThank you!\n${BUSINESS_INFO.owner}\n${BUSINESS_INFO.name}`,
       html: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">Information Needed</h2>
         <p>Hi ${safeClientName},</p>

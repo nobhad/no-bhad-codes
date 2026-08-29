@@ -16,10 +16,7 @@ const EXPIRY_MS = 24 * 60 * 60 * 1000;
 /**
  * Save current intake progress to localStorage.
  */
-export function saveIntakeProgress(
-  currentQuestionIndex: number,
-  intakeData: IntakeData
-): void {
+export function saveIntakeProgress(currentQuestionIndex: number, intakeData: IntakeData): void {
   const progress: SavedProgress = {
     currentQuestionIndex,
     intakeData,

@@ -36,16 +36,19 @@ const router = Router();
  *       200:
  *         description: Validation error logs
  */
-router.get('/validation-errors', asyncHandler(async (req: Request, res: Response) => {
-  const limitParam = req.query.limit;
-  const errorTypeParam = req.query.errorType;
+router.get(
+  '/validation-errors',
+  asyncHandler(async (req: Request, res: Response) => {
+    const limitParam = req.query.limit;
+    const errorTypeParam = req.query.errorType;
 
-  const errors = await dataQualityService.getValidationErrors({
-    errorType: typeof errorTypeParam === 'string' ? errorTypeParam : undefined,
-    limit: typeof limitParam === 'string' ? Number(limitParam) : 100
-  });
+    const errors = await dataQualityService.getValidationErrors({
+      errorType: typeof errorTypeParam === 'string' ? errorTypeParam : undefined,
+      limit: typeof limitParam === 'string' ? Number(limitParam) : 100
+    });
 
-  sendSuccess(res, { errors });
-}));
+    sendSuccess(res, { errors });
+  })
+);
 
 export default router;

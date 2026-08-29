@@ -12,11 +12,7 @@ import { getFloat, getFloatOrNull, getString } from '../database/row-helpers.js'
 import { BUSINESS_INFO } from '../config/business.js';
 import { logger } from './logger.js';
 import { settingsService } from './settings-service.js';
-import {
-  NotFoundError,
-  ValidationError,
-  ConflictError
-} from '../utils/app-errors.js';
+import { NotFoundError, ValidationError, ConflictError } from '../utils/app-errors.js';
 import { safeJsonParseArray } from '../utils/safe-json.js';
 import { InvoicePaymentService } from './invoice/payment-service.js';
 import { InvoiceRecurringService } from './invoice/recurring-service.js';
@@ -94,16 +90,22 @@ type SqlValue = string | number | boolean | null;
 const INVOICE_LINE_ITEM_COLUMNS = `
   id, invoice_id, description, quantity, unit_price, amount, tax_rate, tax_amount,
   discount_type, discount_value, discount_amount, sort_order, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const PAYMENT_PLAN_TEMPLATE_COLUMNS = `
   id, name, description, payments, is_default, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const PAYMENT_TERMS_PRESET_COLUMNS = `
   id, name, days_until_due, description, late_fee_rate, late_fee_type,
   late_fee_flat_amount, grace_period_days, is_default, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 interface IntakeRecord {
   id: number;
@@ -494,127 +496,127 @@ export class InvoiceService {
 
     // Generate line items based on project type
     switch (projectType.toLowerCase()) {
-    case 'website':
-    case 'business site':
-      lineItems.push(
-        {
-          description: 'Website Design & Development',
-          quantity: 1,
-          rate: baseAmount * 0.7,
-          amount: baseAmount * 0.7
-        },
-        {
-          description: 'Content Management System Setup',
-          quantity: 1,
-          rate: baseAmount * 0.2,
-          amount: baseAmount * 0.2
-        },
-        {
-          description: 'SEO Optimization & Testing',
-          quantity: 1,
-          rate: baseAmount * 0.1,
-          amount: baseAmount * 0.1
-        }
-      );
-      break;
+      case 'website':
+      case 'business site':
+        lineItems.push(
+          {
+            description: 'Website Design & Development',
+            quantity: 1,
+            rate: baseAmount * 0.7,
+            amount: baseAmount * 0.7
+          },
+          {
+            description: 'Content Management System Setup',
+            quantity: 1,
+            rate: baseAmount * 0.2,
+            amount: baseAmount * 0.2
+          },
+          {
+            description: 'SEO Optimization & Testing',
+            quantity: 1,
+            rate: baseAmount * 0.1,
+            amount: baseAmount * 0.1
+          }
+        );
+        break;
 
-    case 'web app':
-    case 'application':
-      lineItems.push(
-        {
-          description: 'Application Development',
-          quantity: 1,
-          rate: baseAmount * 0.6,
-          amount: baseAmount * 0.6
-        },
-        {
-          description: 'Database Design & Setup',
-          quantity: 1,
-          rate: baseAmount * 0.2,
-          amount: baseAmount * 0.2
-        },
-        {
-          description: 'API Development',
-          quantity: 1,
-          rate: baseAmount * 0.1,
-          amount: baseAmount * 0.1
-        },
-        {
-          description: 'Testing & Deployment',
-          quantity: 1,
-          rate: baseAmount * 0.1,
-          amount: baseAmount * 0.1
-        }
-      );
-      break;
+      case 'web app':
+      case 'application':
+        lineItems.push(
+          {
+            description: 'Application Development',
+            quantity: 1,
+            rate: baseAmount * 0.6,
+            amount: baseAmount * 0.6
+          },
+          {
+            description: 'Database Design & Setup',
+            quantity: 1,
+            rate: baseAmount * 0.2,
+            amount: baseAmount * 0.2
+          },
+          {
+            description: 'API Development',
+            quantity: 1,
+            rate: baseAmount * 0.1,
+            amount: baseAmount * 0.1
+          },
+          {
+            description: 'Testing & Deployment',
+            quantity: 1,
+            rate: baseAmount * 0.1,
+            amount: baseAmount * 0.1
+          }
+        );
+        break;
 
-    case 'e-commerce':
-      lineItems.push(
-        {
-          description: 'E-commerce Platform Development',
-          quantity: 1,
-          rate: baseAmount * 0.5,
-          amount: baseAmount * 0.5
-        },
-        {
-          description: 'Payment Integration',
-          quantity: 1,
-          rate: baseAmount * 0.2,
-          amount: baseAmount * 0.2
-        },
-        {
-          description: 'Product Catalog Setup',
-          quantity: 1,
-          rate: baseAmount * 0.2,
-          amount: baseAmount * 0.2
-        },
-        {
-          description: 'Security & Testing',
-          quantity: 1,
-          rate: baseAmount * 0.1,
-          amount: baseAmount * 0.1
-        }
-      );
-      break;
+      case 'e-commerce':
+        lineItems.push(
+          {
+            description: 'E-commerce Platform Development',
+            quantity: 1,
+            rate: baseAmount * 0.5,
+            amount: baseAmount * 0.5
+          },
+          {
+            description: 'Payment Integration',
+            quantity: 1,
+            rate: baseAmount * 0.2,
+            amount: baseAmount * 0.2
+          },
+          {
+            description: 'Product Catalog Setup',
+            quantity: 1,
+            rate: baseAmount * 0.2,
+            amount: baseAmount * 0.2
+          },
+          {
+            description: 'Security & Testing',
+            quantity: 1,
+            rate: baseAmount * 0.1,
+            amount: baseAmount * 0.1
+          }
+        );
+        break;
 
-    case 'browser extension':
-      lineItems.push(
-        {
-          description: 'Browser Extension Development',
-          quantity: 1,
-          rate: baseAmount * 0.8,
-          amount: baseAmount * 0.8
-        },
-        {
-          description: 'Cross-browser Compatibility',
-          quantity: 1,
-          rate: baseAmount * 0.1,
-          amount: baseAmount * 0.1
-        },
-        {
-          description: 'Store Submission & Review',
-          quantity: 1,
-          rate: baseAmount * 0.1,
-          amount: baseAmount * 0.1
-        }
-      );
-      break;
+      case 'browser extension':
+        lineItems.push(
+          {
+            description: 'Browser Extension Development',
+            quantity: 1,
+            rate: baseAmount * 0.8,
+            amount: baseAmount * 0.8
+          },
+          {
+            description: 'Cross-browser Compatibility',
+            quantity: 1,
+            rate: baseAmount * 0.1,
+            amount: baseAmount * 0.1
+          },
+          {
+            description: 'Store Submission & Review',
+            quantity: 1,
+            rate: baseAmount * 0.1,
+            amount: baseAmount * 0.1
+          }
+        );
+        break;
 
-    default:
-      lineItems.push(
-        {
-          description: `${projectType} Development`,
-          quantity: 1,
-          rate: baseAmount * 0.8,
-          amount: baseAmount * 0.8
-        },
-        {
-          description: 'Testing & Deployment',
-          quantity: 1,
-          rate: baseAmount * 0.2,
-          amount: baseAmount * 0.2
-        }
-      );
+      default:
+        lineItems.push(
+          {
+            description: `${projectType} Development`,
+            quantity: 1,
+            rate: baseAmount * 0.8,
+            amount: baseAmount * 0.8
+          },
+          {
+            description: 'Testing & Deployment',
+            quantity: 1,
+            rate: baseAmount * 0.2,
+            amount: baseAmount * 0.2
+          }
+        );
     }
 
     return lineItems;
@@ -926,13 +928,13 @@ export class InvoiceService {
 
     if (depositIds.length > 0) {
       const placeholders = depositIds.map(() => '?').join(',');
-      const creditRows = await this.getDb().all(
+      const creditRows = (await this.getDb().all(
         `SELECT deposit_invoice_id, COALESCE(SUM(amount), 0) as total_applied
          FROM invoice_credits
          WHERE deposit_invoice_id IN (${placeholders})
          GROUP BY deposit_invoice_id`,
         depositIds
-      ) as Array<{ deposit_invoice_id: number; total_applied: number }>;
+      )) as Array<{ deposit_invoice_id: number; total_applied: number }>;
 
       for (const row of creditRows) {
         creditMap.set(row.deposit_invoice_id, row.total_applied);
@@ -990,7 +992,9 @@ export class InvoiceService {
     const availableAmount = depositInvoice.amountTotal - totalApplied;
 
     if (amount > availableAmount) {
-      throw new ValidationError(`Insufficient deposit credit. Available: $${availableAmount.toFixed(2)}`);
+      throw new ValidationError(
+        `Insufficient deposit credit. Available: $${availableAmount.toFixed(2)}`
+      );
     }
 
     // Verify the target invoice exists
@@ -1176,23 +1180,23 @@ export class InvoiceService {
       const today = new Date();
 
       switch (payment.trigger) {
-      case 'upfront':
-        dueDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        break;
-      case 'midpoint':
-        dueDate = new Date(today.getTime() + 45 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split('T')[0];
-        break;
-      case 'completion':
-        dueDate = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split('T')[0];
-        break;
-      default:
-        dueDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split('T')[0];
+        case 'upfront':
+          dueDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+          break;
+        case 'midpoint':
+          dueDate = new Date(today.getTime() + 45 * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split('T')[0];
+          break;
+        case 'completion':
+          dueDate = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split('T')[0];
+          break;
+        default:
+          dueDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split('T')[0];
       }
 
       const invoice = await this.createInvoice({
@@ -1439,14 +1443,15 @@ export class InvoiceService {
     // Status change and reminder cancellation go together — we don't
     // want a voided invoice to still fire reminders to the client.
     await this.getDb().transaction(async (ctx) => {
-      await ctx.run(
-        'UPDATE invoices SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-        ['cancelled', id]
-      );
-      await ctx.run(
-        'UPDATE invoice_reminders SET status = ? WHERE invoice_id = ? AND status = ?',
-        ['skipped', id, 'pending']
-      );
+      await ctx.run('UPDATE invoices SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [
+        'cancelled',
+        id
+      ]);
+      await ctx.run('UPDATE invoice_reminders SET status = ? WHERE invoice_id = ? AND status = ?', [
+        'skipped',
+        id,
+        'pending'
+      ]);
     });
 
     return { action: 'voided' };
@@ -1947,14 +1952,14 @@ export class InvoiceService {
     const feeType = invoice.lateFeeType || 'none';
 
     switch (feeType) {
-    case 'flat':
-      return feeRate; // Flat fee amount
-    case 'percentage':
-      return outstanding * (feeRate / 100);
-    case 'daily_percentage':
-      return outstanding * (feeRate / 100) * daysOverdue;
-    default:
-      return 0;
+      case 'flat':
+        return feeRate; // Flat fee amount
+      case 'percentage':
+        return outstanding * (feeRate / 100);
+      case 'daily_percentage':
+        return outstanding * (feeRate / 100) * daysOverdue;
+      default:
+        return 0;
     }
   }
 

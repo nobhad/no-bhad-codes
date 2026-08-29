@@ -55,7 +55,10 @@ vi.mock('../../../server/services/logger', () => ({
 
 // Import service after mocks
 import { emailTemplateService } from '../../../server/services/email-template-service';
-import type { EmailTemplate, EmailTemplateVersion } from '../../../server/services/email-template-service';
+import type {
+  EmailTemplate,
+  EmailTemplateVersion
+} from '../../../server/services/email-template-service';
 
 // ============================================
 // Shared Test Data
@@ -124,10 +127,7 @@ describe('EmailTemplateService - getTemplates', () => {
 
     expect(result).toHaveLength(2);
     expect(result[0].name).toBe('Welcome Email');
-    expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining('FROM email_templates'),
-      []
-    );
+    expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('FROM email_templates'), []);
   });
 
   it('filters templates by category when provided', async () => {
@@ -136,10 +136,9 @@ describe('EmailTemplateService - getTemplates', () => {
     const result = await emailTemplateService.getTemplates('notification');
 
     expect(result).toHaveLength(1);
-    expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE category = ?'),
-      ['notification']
-    );
+    expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('WHERE category = ?'), [
+      'notification'
+    ]);
   });
 
   it('returns empty array when no templates found', async () => {
@@ -197,10 +196,9 @@ describe('EmailTemplateService - getTemplateByName', () => {
     const result = await emailTemplateService.getTemplateByName('Welcome Email');
     expect(result).not.toBeNull();
     expect(result!.name).toBe('Welcome Email');
-    expect(mockDb.get).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE name = ?'),
-      ['Welcome Email']
-    );
+    expect(mockDb.get).toHaveBeenCalledWith(expect.stringContaining('WHERE name = ?'), [
+      'Welcome Email'
+    ]);
   });
 
   it('returns null when template not found by name', async () => {
@@ -357,9 +355,9 @@ describe('EmailTemplateService - updateTemplate', () => {
   it('throws when trying to rename a system template', async () => {
     mockDb.get.mockResolvedValueOnce(makeDbRow({ is_system: 1, name: 'System Template' }));
 
-    await expect(
-      emailTemplateService.updateTemplate(1, { name: 'New Name' })
-    ).rejects.toThrow('Cannot change the name of a system template');
+    await expect(emailTemplateService.updateTemplate(1, { name: 'New Name' })).rejects.toThrow(
+      'Cannot change the name of a system template'
+    );
   });
 
   it('allows updating system template name to the same name', async () => {
@@ -420,9 +418,7 @@ describe('EmailTemplateService - updateTemplate', () => {
   });
 
   it('updates all provided fields', async () => {
-    mockDb.get
-      .mockResolvedValueOnce(makeDbRow())
-      .mockResolvedValueOnce(makeDbRow());
+    mockDb.get.mockResolvedValueOnce(makeDbRow()).mockResolvedValueOnce(makeDbRow());
     mockDb.run.mockResolvedValueOnce({});
     mockDb.get.mockResolvedValueOnce({ max_version: 1 });
     mockDb.run.mockResolvedValueOnce({ lastID: 2 });
@@ -479,10 +475,7 @@ describe('EmailTemplateService - deleteTemplate', () => {
     const result = await emailTemplateService.deleteTemplate(1);
 
     expect(result).toBe(true);
-    expect(mockDb.run).toHaveBeenCalledWith(
-      'DELETE FROM email_templates WHERE id = ?',
-      [1]
-    );
+    expect(mockDb.run).toHaveBeenCalledWith('DELETE FROM email_templates WHERE id = ?', [1]);
   });
 });
 
@@ -505,10 +498,7 @@ describe('EmailTemplateService - getVersions', () => {
 
     expect(result).toHaveLength(2);
     expect(result[0].version).toBe(2);
-    expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE template_id = ?'),
-      [1]
-    );
+    expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('WHERE template_id = ?'), [1]);
   });
 
   it('returns empty array when no versions exist', async () => {
@@ -662,10 +652,9 @@ describe('EmailTemplateService - interpolate', () => {
   });
 
   it('replaces nested variable paths using dot notation', () => {
-    const result = emailTemplateService.interpolate(
-      '{{user.profile.email}}',
-      { user: { profile: { email: 'test@test.com' } } }
-    );
+    const result = emailTemplateService.interpolate('{{user.profile.email}}', {
+      user: { profile: { email: 'test@test.com' } }
+    });
     expect(result).toBe('test@test.com');
   });
 
@@ -687,10 +676,10 @@ describe('EmailTemplateService - interpolate', () => {
   });
 
   it('handles multiple placeholders in one string', () => {
-    const result = emailTemplateService.interpolate(
-      '{{first}} and {{second}}',
-      { first: 'Alpha', second: 'Beta' }
-    );
+    const result = emailTemplateService.interpolate('{{first}} and {{second}}', {
+      first: 'Alpha',
+      second: 'Beta'
+    });
     expect(result).toBe('Alpha and Beta');
   });
 
@@ -767,8 +756,8 @@ describe('EmailTemplateService - generateSampleData', () => {
     const result = emailTemplateService.generateSampleData([
       { name: 'a.b.c', description: 'Nested' }
     ]);
-    expect((result.a as Record<string, unknown>)).toBeDefined();
-    expect(((result.a as Record<string, unknown>).b as Record<string, unknown>)).toBeDefined();
+    expect(result.a as Record<string, unknown>).toBeDefined();
+    expect((result.a as Record<string, unknown>).b as Record<string, unknown>).toBeDefined();
   });
 });
 
@@ -821,13 +810,7 @@ describe('EmailTemplateService - logSend', () => {
     mockDb.get.mockResolvedValueOnce(undefined);
     mockDb.run.mockResolvedValueOnce({ lastID: 1 });
 
-    await emailTemplateService.logSend(
-      'Nonexistent Template',
-      'a@b.com',
-      null,
-      'Hi',
-      'failed'
-    );
+    await emailTemplateService.logSend('Nonexistent Template', 'a@b.com', null, 'Hi', 'failed');
 
     const insertParams = mockDb.run.mock.calls[0][1];
     expect(insertParams[0]).toBeNull(); // template_id is null
@@ -857,11 +840,9 @@ describe('EmailTemplateService - logSend', () => {
     mockDb.get.mockResolvedValueOnce(undefined);
     mockDb.run.mockResolvedValueOnce({ lastID: 1 });
 
-    await emailTemplateService.logSend(
-      null, 'a@b.com', null, 'Hi', 'sent',
-      undefined,
-      { projectId: 123 }
-    );
+    await emailTemplateService.logSend(null, 'a@b.com', null, 'Hi', 'sent', undefined, {
+      projectId: 123
+    });
 
     const insertParams = mockDb.run.mock.calls[0][1];
     expect(insertParams[7]).toBe(JSON.stringify({ projectId: 123 }));
@@ -871,9 +852,9 @@ describe('EmailTemplateService - logSend', () => {
     mockDb.get.mockResolvedValueOnce(undefined);
     mockDb.run.mockResolvedValueOnce({ lastID: 0 });
 
-    await expect(
-      emailTemplateService.logSend(null, 'a@b.com', null, 'Hi', 'sent')
-    ).rejects.toThrow('Failed to log email send');
+    await expect(emailTemplateService.logSend(null, 'a@b.com', null, 'Hi', 'sent')).rejects.toThrow(
+      'Failed to log email send'
+    );
   });
 
   it('includes errorMessage in insert when provided', async () => {
@@ -931,7 +912,9 @@ describe('EmailTemplateService - getSendLogs', () => {
     mockDb.run.mockReset();
   });
 
-  const makeLogRow = (overrides: Partial<Record<string, unknown>> = {}): Record<string, unknown> => ({
+  const makeLogRow = (
+    overrides: Partial<Record<string, unknown>> = {}
+  ): Record<string, unknown> => ({
     id: 1,
     template_id: 1,
     template_name: 'Welcome Email',

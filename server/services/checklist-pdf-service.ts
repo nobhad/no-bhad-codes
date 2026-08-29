@@ -23,11 +23,7 @@ import {
   ensureSpace,
   type PdfPageContext
 } from '../utils/pdf-utils.js';
-import type {
-  ChecklistPdfData,
-  ChecklistSection,
-  ChecklistItem
-} from './checklist-pdf-types.js';
+import type { ChecklistPdfData, ChecklistSection, ChecklistItem } from './checklist-pdf-types.js';
 import { CHECKLIST_TEMPLATES } from './checklist-pdf-types.js';
 
 // ============================================
@@ -107,7 +103,12 @@ async function generateChecklistPdf(data: ChecklistPdfData): Promise<Uint8Array>
 
   // --- Intro text ---
   if (data.introText) {
-    const introLines = wrapText(data.introText, ctx.fonts.regular, PDF_TYPOGRAPHY.bodySize, ctx.contentWidth);
+    const introLines = wrapText(
+      data.introText,
+      ctx.fonts.regular,
+      PDF_TYPOGRAPHY.bodySize,
+      ctx.contentWidth
+    );
     for (const line of introLines) {
       ctx.currentPage.drawText(line, {
         x: ctx.leftMargin,
@@ -184,7 +185,8 @@ async function generateChecklistPdf(data: ChecklistPdfData): Promise<Uint8Array>
   // --- Summary stats ---
   const totalItems = data.sections.reduce((sum, s) => sum + s.items.length, 0);
   const completedItems = data.sections.reduce(
-    (sum, s) => sum + s.items.filter(i => i.completed).length, 0
+    (sum, s) => sum + s.items.filter((i) => i.completed).length,
+    0
   );
   const pendingItems = totalItems - completedItems;
 
@@ -208,16 +210,13 @@ async function generateChecklistPdf(data: ChecklistPdfData): Promise<Uint8Array>
   ctx.y -= ITEM_LINE_HEIGHT;
 
   // Contact line
-  ctx.currentPage.drawText(
-    `Questions? Reach out to ${BUSINESS_INFO.email}`,
-    {
-      x: ctx.leftMargin,
-      y: ctx.y,
-      size: PDF_TYPOGRAPHY.bodySize,
-      font: ctx.fonts.regular,
-      color: PDF_COLORS.black
-    }
-  );
+  ctx.currentPage.drawText(`Questions? Reach out to ${BUSINESS_INFO.email}`, {
+    x: ctx.leftMargin,
+    y: ctx.y,
+    size: PDF_TYPOGRAPHY.bodySize,
+    font: ctx.fonts.regular,
+    color: PDF_COLORS.black
+  });
 
   // --- Footer on all pages ---
   const pages = pdfDoc.getPages();
@@ -339,7 +338,12 @@ function drawChecklistItem(ctx: PdfPageContext, item: ChecklistItem): void {
   ctx.y -= 2; // Small gap between items
 }
 
-function wrapText(text: string, font: { widthOfTextAtSize: (text: string, size: number) => number }, size: number, maxWidth: number): string[] {
+function wrapText(
+  text: string,
+  font: { widthOfTextAtSize: (text: string, size: number) => number },
+  size: number,
+  maxWidth: number
+): string[] {
   const words = text.split(' ');
   const lines: string[] = [];
   let current = '';
@@ -364,7 +368,10 @@ function wrapText(text: string, font: { widthOfTextAtSize: (text: string, size: 
 /**
  * Build checklist data by querying all 4 systems for a client's pending items.
  */
-async function buildChecklistFromDb(clientId: number, projectId?: number): Promise<ChecklistPdfData> {
+async function buildChecklistFromDb(
+  clientId: number,
+  projectId?: number
+): Promise<ChecklistPdfData> {
   const db = getDatabase();
 
   // Get client info
@@ -378,10 +385,9 @@ async function buildChecklistFromDb(clientId: number, projectId?: number): Promi
   // Get project info (optional)
   let projectName: string | undefined;
   if (projectId) {
-    const project = (await db.get(
-      'SELECT project_name FROM projects WHERE id = ?',
-      [projectId]
-    )) as { project_name: string } | undefined;
+    const project = (await db.get('SELECT project_name FROM projects WHERE id = ?', [
+      projectId
+    ])) as { project_name: string } | undefined;
     projectName = project?.project_name;
   }
 
@@ -400,7 +406,7 @@ async function buildChecklistFromDb(clientId: number, projectId?: number): Promi
   if (onboardingSteps.length > 0) {
     sections.push({
       title: 'Getting Started',
-      items: onboardingSteps.map(s => ({
+      items: onboardingSteps.map((s) => ({
         label: s.label,
         description: s.description || undefined,
         completed: s.status === 'completed',
@@ -411,19 +417,23 @@ async function buildChecklistFromDb(clientId: number, projectId?: number): Promi
 
   // 2. Document requests
   const docQuery = projectId
-    ? 'SELECT title, description, status, due_date, is_required, priority FROM document_requests WHERE client_id = ? AND project_id = ? AND status NOT IN (\'approved\', \'cancelled\') AND deleted_at IS NULL ORDER BY priority DESC, due_date ASC'
-    : 'SELECT title, description, status, due_date, is_required, priority FROM document_requests WHERE client_id = ? AND status NOT IN (\'approved\', \'cancelled\') AND deleted_at IS NULL ORDER BY priority DESC, due_date ASC';
+    ? "SELECT title, description, status, due_date, is_required, priority FROM document_requests WHERE client_id = ? AND project_id = ? AND status NOT IN ('approved', 'cancelled') AND deleted_at IS NULL ORDER BY priority DESC, due_date ASC"
+    : "SELECT title, description, status, due_date, is_required, priority FROM document_requests WHERE client_id = ? AND status NOT IN ('approved', 'cancelled') AND deleted_at IS NULL ORDER BY priority DESC, due_date ASC";
   const docParams = projectId ? [clientId, projectId] : [clientId];
 
   const docRequests = (await db.all(docQuery, docParams)) as Array<{
-    title: string; description: string | null; status: string;
-    due_date: string | null; is_required: number; priority: string;
+    title: string;
+    description: string | null;
+    status: string;
+    due_date: string | null;
+    is_required: number;
+    priority: string;
   }>;
 
   if (docRequests.length > 0) {
     sections.push({
       title: 'Documents Needed',
-      items: docRequests.map(d => ({
+      items: docRequests.map((d) => ({
         label: d.title,
         description: d.description || undefined,
         completed: d.status === 'uploaded' || d.status === 'approved',
@@ -447,13 +457,14 @@ async function buildChecklistFromDb(clientId: number, projectId?: number): Promi
   const qParams = projectId ? [clientId, projectId] : [clientId];
 
   const questionnaires = (await db.all(questionnaireQuery, qParams)) as Array<{
-    name: string; status: string;
+    name: string;
+    status: string;
   }>;
 
   if (questionnaires.length > 0) {
     sections.push({
       title: 'Questionnaires',
-      items: questionnaires.map(q => ({
+      items: questionnaires.map((q) => ({
         label: `Complete: ${q.name}`,
         completed: false,
         required: true,
@@ -477,14 +488,17 @@ async function buildChecklistFromDb(clientId: number, projectId?: number): Promi
   const contentParams = projectId ? [clientId, projectId] : [clientId];
 
   const contentItems = (await db.all(contentQuery, contentParams)) as Array<{
-    title: string; description: string | null; status: string;
-    due_date: string | null; checklist_name: string;
+    title: string;
+    description: string | null;
+    status: string;
+    due_date: string | null;
+    checklist_name: string;
   }>;
 
   if (contentItems.length > 0) {
     sections.push({
       title: 'Content & Assets Needed',
-      items: contentItems.map(c => ({
+      items: contentItems.map((c) => ({
         label: c.title,
         description: c.description || undefined,
         completed: false,
@@ -509,31 +523,39 @@ async function buildChecklistFromDb(clientId: number, projectId?: number): Promi
   const invParams = projectId ? [clientId, projectId] : [clientId];
 
   const invoices = (await db.all(invoiceQuery, invParams)) as Array<{
-    invoice_number: string; amount_total: number; due_date: string | null; status: string;
+    invoice_number: string;
+    amount_total: number;
+    due_date: string | null;
+    status: string;
   }>;
 
   if (invoices.length > 0) {
     sections.push({
       title: 'Payments Due',
-      items: invoices.map(inv => ({
+      items: invoices.map((inv) => ({
         label: `${inv.invoice_number} — $${inv.amount_total.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
         completed: false,
         dueDate: inv.due_date || undefined,
         required: true,
-        priority: inv.status === 'overdue' ? 'urgent' as const : 'normal' as const
+        priority: inv.status === 'overdue' ? ('urgent' as const) : ('normal' as const)
       }))
     });
   }
 
   const today = new Date();
-  const generatedDate = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const generatedDate = today.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
 
   return {
     clientName: client.name,
     clientCompany: client.company_name || undefined,
     projectName,
     generatedDate,
-    introText: 'Here is a summary of outstanding items we need from you to keep your project on track. Please complete these at your earliest convenience.',
+    introText:
+      'Here is a summary of outstanding items we need from you to keep your project on track. Please complete these at your earliest convenience.',
     sections
   };
 }
@@ -552,7 +574,12 @@ async function buildChecklistFromDb(clientId: number, projectId?: number): Promi
  *   - [ ] **[URGENT]** Item with priority
  *   - [ ] Item (optional)
  */
-function parseMarkdownChecklist(markdown: string, clientName: string, clientCompany?: string, projectName?: string): ChecklistPdfData {
+function parseMarkdownChecklist(
+  markdown: string,
+  clientName: string,
+  clientCompany?: string,
+  projectName?: string
+): ChecklistPdfData {
   const lines = markdown.split('\n');
   const sections: ChecklistSection[] = [];
   let introText = '';
@@ -613,7 +640,12 @@ function parseMarkdownChecklist(markdown: string, clientName: string, clientComp
     }
 
     // Regular bullet with description for previous item
-    if (trimmed.startsWith('- ') && currentSection && currentSection.items.length > 0 && !trimmed.match(/^-\s*\[/)) {
+    if (
+      trimmed.startsWith('- ') &&
+      currentSection &&
+      currentSection.items.length > 0 &&
+      !trimmed.match(/^-\s*\[/)
+    ) {
       const lastItem = currentSection.items[currentSection.items.length - 1];
       lastItem.description = trimmed.slice(2).trim();
     }
@@ -629,7 +661,11 @@ function parseMarkdownChecklist(markdown: string, clientName: string, clientComp
     clientName,
     clientCompany,
     projectName,
-    generatedDate: today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+    generatedDate: today.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }),
     introText: introText || undefined,
     sections
   };
@@ -650,11 +686,14 @@ function buildFromTemplate(
   overrides?: { introText?: string; additionalItems?: Record<string, ChecklistItem[]> }
 ): ChecklistPdfData {
   const template = CHECKLIST_TEMPLATES[templateName];
-  if (!template) throw new Error(`Template "${templateName}" not found. Available: ${Object.keys(CHECKLIST_TEMPLATES).join(', ')}`);
+  if (!template)
+    throw new Error(
+      `Template "${templateName}" not found. Available: ${Object.keys(CHECKLIST_TEMPLATES).join(', ')}`
+    );
 
-  const sections: ChecklistSection[] = template.sections.map(s => ({
+  const sections: ChecklistSection[] = template.sections.map((s) => ({
     title: s.title,
-    items: s.items.map(i => ({
+    items: s.items.map((i) => ({
       label: i.label,
       description: i.description,
       completed: false,
@@ -666,7 +705,7 @@ function buildFromTemplate(
   // Merge additional items into matching sections or create new ones
   if (overrides?.additionalItems) {
     for (const [sectionTitle, items] of Object.entries(overrides.additionalItems)) {
-      const existing = sections.find(s => s.title === sectionTitle);
+      const existing = sections.find((s) => s.title === sectionTitle);
       if (existing) {
         existing.items.push(...items);
       } else {
@@ -680,7 +719,11 @@ function buildFromTemplate(
     clientName,
     clientCompany,
     projectName,
-    generatedDate: today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+    generatedDate: today.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }),
     introText: overrides?.introText || template.introText,
     sections
   };
@@ -691,7 +734,11 @@ function buildFromTemplate(
  */
 function buildFromJson(json: ChecklistPdfData): ChecklistPdfData {
   if (!json.generatedDate) {
-    json.generatedDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    json.generatedDate = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   }
   return json;
 }

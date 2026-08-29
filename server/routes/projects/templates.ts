@@ -129,14 +129,18 @@ router.post(
       { selectedTier, totalAmount }
     );
 
-    sendCreated(res, {
-      projectId: result.projectId,
-      milestoneIds: result.milestoneIds,
-      taskIds: result.taskIds,
-      checklistId: result.checklistId,
-      paymentInstallmentIds: result.paymentInstallmentIds,
-      contractId: result.contractId
-    }, 'Project created from template successfully');
+    sendCreated(
+      res,
+      {
+        projectId: result.projectId,
+        milestoneIds: result.milestoneIds,
+        taskIds: result.taskIds,
+        checklistId: result.checklistId,
+        paymentInstallmentIds: result.paymentInstallmentIds,
+        contractId: result.contractId
+      },
+      'Project created from template successfully'
+    );
   })
 );
 

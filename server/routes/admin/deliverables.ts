@@ -48,7 +48,12 @@ router.post(
     const { projectId, title, description, type, reviewDeadline, tags } = req.body;
 
     if (!projectId || !title || !type) {
-      return errorResponse(res, 'projectId, title, and type are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'projectId, title, and type are required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const parsedProjectId = parseInt(projectId, 10);
@@ -87,8 +92,11 @@ router.put(
 
     const { status, title, description, due_date } = req.body;
 
-    const hasFields = status !== undefined || title !== undefined
-      || description !== undefined || due_date !== undefined;
+    const hasFields =
+      status !== undefined ||
+      title !== undefined ||
+      description !== undefined ||
+      due_date !== undefined;
 
     if (!hasFields) {
       return errorResponse(res, 'No fields to update', 400, ErrorCodes.NO_FIELDS);
@@ -117,12 +125,17 @@ router.post(
     const { deliverableIds } = req.body;
 
     if (!deliverableIds || !Array.isArray(deliverableIds) || deliverableIds.length === 0) {
-      return errorResponse(res, 'deliverableIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'deliverableIds array is required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const adminEmail = req.user?.email || 'admin';
     const validIds = deliverableIds
-      .map((id: string | number) => typeof id === 'string' ? parseInt(id, 10) : id)
+      .map((id: string | number) => (typeof id === 'string' ? parseInt(id, 10) : id))
       .filter((id: number) => !isNaN(id) && id > 0);
 
     const result = await softDeleteService.bulkSoftDelete('deliverable', validIds, adminEmail);

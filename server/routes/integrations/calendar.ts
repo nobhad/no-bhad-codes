@@ -61,11 +61,11 @@ router.get(
       lastSync: syncConfig?.lastSyncAt ?? null,
       syncConfig: syncConfig
         ? {
-          syncMilestones: syncConfig.syncMilestones,
-          syncTasks: syncConfig.syncTasks,
-          syncInvoiceDueDates: syncConfig.syncInvoiceDueDates,
-          lastSyncAt: syncConfig.lastSyncAt
-        }
+            syncMilestones: syncConfig.syncMilestones,
+            syncTasks: syncConfig.syncTasks,
+            syncInvoiceDueDates: syncConfig.syncInvoiceDueDates,
+            lastSyncAt: syncConfig.lastSyncAt
+          }
         : null
     });
   })

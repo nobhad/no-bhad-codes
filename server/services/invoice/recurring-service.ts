@@ -35,17 +35,23 @@ type GetInvoiceById = (id: number) => Promise<Invoice>;
 const SCHEDULED_INVOICE_COLUMNS = `
   id, project_id, client_id, scheduled_date, trigger_type, trigger_milestone_id,
   line_items, notes, terms, status, generated_invoice_id, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const RECURRING_INVOICE_COLUMNS = `
   id, project_id, client_id, frequency, day_of_month, day_of_week, line_items,
   notes, terms, start_date, end_date, next_generation_date, last_generated_at,
   is_active, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const INVOICE_REMINDER_COLUMNS = `
   id, invoice_id, reminder_type, scheduled_date, sent_at, status, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export class InvoiceRecurringService {
   private createInvoice: CreateInvoice;
@@ -107,7 +113,10 @@ export class InvoiceRecurringService {
    * Cancel a scheduled invoice
    */
   async cancelScheduledInvoice(id: number): Promise<void> {
-    await this.getDb().run('UPDATE scheduled_invoices SET status = ? WHERE id = ?', ['cancelled', id]);
+    await this.getDb().run('UPDATE scheduled_invoices SET status = ? WHERE id = ?', [
+      'cancelled',
+      id
+    ]);
   }
 
   /**
@@ -131,7 +140,10 @@ export class InvoiceRecurringService {
         const invoice = await this.createInvoice({
           projectId: scheduled.project_id,
           clientId: scheduled.client_id,
-          lineItems: safeJsonParseArray<InvoiceLineItem>(scheduled.line_items, 'scheduled invoice line_items'),
+          lineItems: safeJsonParseArray<InvoiceLineItem>(
+            scheduled.line_items,
+            'scheduled invoice line_items'
+          ),
           notes: scheduled.notes,
           terms: scheduled.terms
         });
@@ -318,7 +330,10 @@ export class InvoiceRecurringService {
         await this.createInvoice({
           projectId: recurring.project_id,
           clientId: recurring.client_id,
-          lineItems: safeJsonParseArray<InvoiceLineItem>(recurring.line_items, 'recurring invoice line_items'),
+          lineItems: safeJsonParseArray<InvoiceLineItem>(
+            recurring.line_items,
+            'recurring invoice line_items'
+          ),
           notes: recurring.notes,
           terms: recurring.terms
         });
@@ -511,7 +526,10 @@ export class InvoiceRecurringService {
       scheduledDate: row.scheduled_date,
       triggerType: row.trigger_type as ScheduledInvoice['triggerType'],
       triggerMilestoneId: row.trigger_milestone_id,
-      lineItems: safeJsonParseArray<InvoiceLineItem>(row.line_items, 'scheduled invoice line_items'),
+      lineItems: safeJsonParseArray<InvoiceLineItem>(
+        row.line_items,
+        'scheduled invoice line_items'
+      ),
       notes: row.notes,
       terms: row.terms,
       status: row.status as ScheduledInvoice['status'],
@@ -541,33 +559,37 @@ export class InvoiceRecurringService {
     const next = new Date(fromDate);
 
     switch (frequency) {
-    case 'weekly':
-      next.setUTCDate(next.getUTCDate() + 7);
-      if (dayOfWeek !== undefined && dayOfWeek !== null) {
-        const currentDay = next.getUTCDay();
-        const diff = dayOfWeek - currentDay;
-        next.setUTCDate(next.getUTCDate() + (diff >= 0 ? diff : diff + 7));
-      }
-      break;
+      case 'weekly':
+        next.setUTCDate(next.getUTCDate() + 7);
+        if (dayOfWeek !== undefined && dayOfWeek !== null) {
+          const currentDay = next.getUTCDay();
+          const diff = dayOfWeek - currentDay;
+          next.setUTCDate(next.getUTCDate() + (diff >= 0 ? diff : diff + 7));
+        }
+        break;
 
-    case 'monthly':
-      next.setUTCMonth(next.getUTCMonth() + 1);
-      if (dayOfMonth !== undefined && dayOfMonth !== null) {
-        const lastDay = new Date(Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1, 0)).getUTCDate();
-        next.setUTCDate(Math.min(dayOfMonth, lastDay));
-      }
-      break;
+      case 'monthly':
+        next.setUTCMonth(next.getUTCMonth() + 1);
+        if (dayOfMonth !== undefined && dayOfMonth !== null) {
+          const lastDay = new Date(
+            Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1, 0)
+          ).getUTCDate();
+          next.setUTCDate(Math.min(dayOfMonth, lastDay));
+        }
+        break;
 
-    case 'quarterly':
-      next.setUTCMonth(next.getUTCMonth() + 3);
-      if (dayOfMonth !== undefined && dayOfMonth !== null) {
-        const lastDay = new Date(Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1, 0)).getUTCDate();
-        next.setUTCDate(Math.min(dayOfMonth, lastDay));
-      }
-      break;
+      case 'quarterly':
+        next.setUTCMonth(next.getUTCMonth() + 3);
+        if (dayOfMonth !== undefined && dayOfMonth !== null) {
+          const lastDay = new Date(
+            Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1, 0)
+          ).getUTCDate();
+          next.setUTCDate(Math.min(dayOfMonth, lastDay));
+        }
+        break;
 
-    default:
-      next.setUTCMonth(next.getUTCMonth() + 1);
+      default:
+        next.setUTCMonth(next.getUTCMonth() + 1);
     }
 
     return next.toISOString().split('T')[0];
@@ -581,7 +603,10 @@ export class InvoiceRecurringService {
       frequency: row.frequency as RecurringInvoice['frequency'],
       dayOfMonth: row.day_of_month,
       dayOfWeek: row.day_of_week,
-      lineItems: safeJsonParseArray<InvoiceLineItem>(row.line_items, 'recurring invoice line_items'),
+      lineItems: safeJsonParseArray<InvoiceLineItem>(
+        row.line_items,
+        'recurring invoice line_items'
+      ),
       notes: row.notes,
       terms: row.terms,
       startDate: row.start_date,

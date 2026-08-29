@@ -336,9 +336,7 @@ export async function executeBulkWithToast(
     })
   );
 
-  const successCount = results.filter(
-    (r) => r.status === 'fulfilled' && r.value === true
-  ).length;
+  const successCount = results.filter((r) => r.status === 'fulfilled' && r.value === true).length;
   const failCount = operations.length - successCount;
 
   if (successCount === operations.length) {
@@ -383,12 +381,7 @@ export async function executeBulkWithToast(
 export async function executeSilent<T = unknown>(
   apiCall: () => Promise<Response>
 ): Promise<ApiResult<T>> {
-  return executeWithToast<T>(
-    apiCall,
-    { success: '', error: '' },
-    undefined,
-    { showToasts: false }
-  );
+  return executeWithToast<T>(apiCall, { success: '', error: '' }, undefined, { showToasts: false });
 }
 
 // ============================================================================
@@ -479,10 +472,7 @@ function extractErrorMessage(
  * @param success - Whether the action succeeded
  * @param messages - Success and error message strings
  */
-export function notifyResult(
-  success: boolean,
-  messages: { success: string; error: string }
-): void {
+export function notifyResult(success: boolean, messages: { success: string; error: string }): void {
   showToast(success ? messages.success : messages.error, success ? 'success' : 'error');
 }
 
@@ -506,11 +496,7 @@ export interface BulkResult {
  * @param entityName - Singular entity name (e.g. "invoice", "client")
  * @param verb - Past-tense verb (e.g. "Deleted", "Archived", "Sent")
  */
-export function notifyBulkResult(
-  result: BulkResult,
-  entityName: string,
-  verb: string
-): void {
+export function notifyBulkResult(result: BulkResult, entityName: string, verb: string): void {
   const { success: successCount, failed: failCount } = result;
 
   if (failCount === 0 && successCount > 0) {

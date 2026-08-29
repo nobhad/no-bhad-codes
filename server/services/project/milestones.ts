@@ -61,7 +61,9 @@ export interface MilestoneUpdateFields {
 const MILESTONE_COLUMNS = `
   id, project_id, title, description, due_date, completed_date,
   is_completed, deliverables, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // HELPERS
@@ -110,7 +112,9 @@ export function hydrateMilestoneDeliverables(milestone: MilestoneRow): void {
   const deliverablesList = milestone.deliverables as DeliverableEntry[];
   if (deliverablesList.length > 0) {
     const completedDeliverables = deliverablesList.filter((d) => d.completed).length;
-    milestone.progress_percentage = Math.round((completedDeliverables / deliverablesList.length) * 100);
+    milestone.progress_percentage = Math.round(
+      (completedDeliverables / deliverablesList.length) * 100
+    );
   } else {
     const taskCount = milestone.task_count || 0;
     const completedCount = milestone.completed_task_count || 0;
@@ -161,7 +165,9 @@ export async function getMilestones(projectId: number): Promise<MilestoneRow[]> 
 }
 
 /** Insert a new milestone and return the hydrated row */
-export async function createMilestone(data: MilestoneCreateData): Promise<MilestoneRow | undefined> {
+export async function createMilestone(
+  data: MilestoneCreateData
+): Promise<MilestoneRow | undefined> {
   const db = getDatabase();
   const result = await db.run(
     `

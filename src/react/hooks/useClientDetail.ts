@@ -44,12 +44,7 @@ export function useClientDetail({
     setError(null);
 
     try {
-      await Promise.all([
-        fetchCore(),
-        fetchContacts(),
-        fetchNotes(),
-        fetchTags()
-      ]);
+      await Promise.all([fetchCore(), fetchContacts(), fetchNotes(), fetchTags()]);
     } catch (err) {
       setError(formatErrorMessage(err, 'An error occurred'));
     } finally {

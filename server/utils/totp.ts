@@ -13,10 +13,7 @@
  */
 
 import crypto from 'crypto';
-import {
-  TOTP_CONFIG,
-  BACKUP_CODE_CONFIG
-} from './two-factor-constants.js';
+import { TOTP_CONFIG, BACKUP_CODE_CONFIG } from './two-factor-constants.js';
 
 /**
  * Base32 character set (RFC 4648)
@@ -155,10 +152,7 @@ export function verifyTOTP(base32Secret: string, code: string, timestampMs?: num
  * Build a provisioning URI for QR code generation.
  * Format: otpauth://totp/{issuer}:{account}?secret={secret}&issuer={issuer}&algorithm={algo}&digits={digits}&period={period}
  */
-export function buildProvisioningURI(
-  accountEmail: string,
-  base32Secret: string
-): string {
+export function buildProvisioningURI(accountEmail: string, base32Secret: string): string {
   const issuer = encodeURIComponent(TOTP_CONFIG.ISSUER);
   const account = encodeURIComponent(accountEmail);
   const params = new URLSearchParams({

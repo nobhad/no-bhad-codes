@@ -366,25 +366,43 @@ export async function generateProjectReportPdf(data: ProjectReportData): Promise
   ctx.y -= PDF_SPACING.sectionSpacing;
   ensureSpace(ctx, 100, onNewPage);
   ctx.y = drawSectionLabel(ctx.currentPage, 'PROJECT OVERVIEW', {
-    x: leftMargin, y: ctx.y, font: fonts.bold
+    x: leftMargin,
+    y: ctx.y,
+    font: fonts.bold
   });
 
   ctx.y = drawLabelValue(ctx.currentPage, 'START DATE:', formatDate(data.project.startDate), {
-    x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+    x: leftMargin,
+    y: ctx.y,
+    labelFont: fonts.bold,
+    valueFont: fonts.regular,
+    labelWidth
   });
   ctx.y = drawLabelValue(ctx.currentPage, 'DEADLINE:', formatDate(data.project.deadline), {
-    x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+    x: leftMargin,
+    y: ctx.y,
+    labelFont: fonts.bold,
+    valueFont: fonts.regular,
+    labelWidth
   });
   if (data.project.budget) {
     ctx.y = drawLabelValue(ctx.currentPage, 'BUDGET:', formatCurrency(data.project.budget), {
-      x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+      x: leftMargin,
+      y: ctx.y,
+      labelFont: fonts.bold,
+      valueFont: fonts.regular,
+      labelWidth
     });
   }
 
   if (data.project.description) {
     ctx.y -= 8;
     ctx.y = drawLabelValue(ctx.currentPage, 'DESCRIPTION:', '', {
-      x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+      x: leftMargin,
+      y: ctx.y,
+      labelFont: fonts.bold,
+      valueFont: fonts.regular,
+      labelWidth
     });
     drawWrappedText(ctx, data.project.description, {
       fontSize: PDF_TYPOGRAPHY.bodySize,
@@ -399,15 +417,26 @@ export async function generateProjectReportPdf(data: ProjectReportData): Promise
     ctx.y -= PDF_SPACING.sectionSpacing;
     ensureSpace(ctx, 100, onNewPage);
     ctx.y = drawSectionLabel(ctx.currentPage, 'MILESTONES', {
-      x: leftMargin, y: ctx.y, font: fonts.bold
+      x: leftMargin,
+      y: ctx.y,
+      font: fonts.bold
     });
 
     const completed = data.milestones.filter((m) => m.isCompleted).length;
     const total = data.milestones.length;
 
-    ctx.y = drawLabelValue(ctx.currentPage, 'PROGRESS:', `${completed}/${total} completed (${Math.round((completed / total) * 100)}%)`, {
-      x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
-    });
+    ctx.y = drawLabelValue(
+      ctx.currentPage,
+      'PROGRESS:',
+      `${completed}/${total} completed (${Math.round((completed / total) * 100)}%)`,
+      {
+        x: leftMargin,
+        y: ctx.y,
+        labelFont: fonts.bold,
+        valueFont: fonts.regular,
+        labelWidth
+      }
+    );
     ctx.y -= 8;
 
     for (const milestone of data.milestones) {
@@ -451,7 +480,9 @@ export async function generateProjectReportPdf(data: ProjectReportData): Promise
     ctx.y -= PDF_SPACING.sectionSpacing;
     ensureSpace(ctx, 100, onNewPage);
     ctx.y = drawSectionLabel(ctx.currentPage, 'DELIVERABLES', {
-      x: leftMargin, y: ctx.y, font: fonts.bold
+      x: leftMargin,
+      y: ctx.y,
+      font: fonts.bold
     });
 
     for (const deliverable of data.deliverables) {
@@ -484,17 +515,32 @@ export async function generateProjectReportPdf(data: ProjectReportData): Promise
     ctx.y -= PDF_SPACING.sectionSpacing;
     ensureSpace(ctx, 100, onNewPage);
     ctx.y = drawSectionLabel(ctx.currentPage, 'TIME TRACKING', {
-      x: leftMargin, y: ctx.y, font: fonts.bold
+      x: leftMargin,
+      y: ctx.y,
+      font: fonts.bold
     });
 
-    ctx.y = drawLabelValue(ctx.currentPage, 'TOTAL HOURS:', data.timeTracking.totalHours.toFixed(1), {
-      x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
-    });
+    ctx.y = drawLabelValue(
+      ctx.currentPage,
+      'TOTAL HOURS:',
+      data.timeTracking.totalHours.toFixed(1),
+      {
+        x: leftMargin,
+        y: ctx.y,
+        labelFont: fonts.bold,
+        valueFont: fonts.regular,
+        labelWidth
+      }
+    );
 
     if (data.timeTracking.entries.length > 0) {
       ctx.y -= 8;
       ctx.y = drawLabelValue(ctx.currentPage, 'RECENT ENTRIES:', '', {
-        x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+        x: leftMargin,
+        y: ctx.y,
+        labelFont: fonts.bold,
+        valueFont: fonts.regular,
+        labelWidth
       });
 
       const MAX_TIME_ENTRIES = 10;
@@ -512,9 +558,10 @@ export async function generateProjectReportPdf(data: ProjectReportData): Promise
 
         const MAX_DESC_LENGTH = 60;
         const TRUNCATED_DESC_LENGTH = 57;
-        const desc = entry.description.length > MAX_DESC_LENGTH
-          ? `${entry.description.substring(0, TRUNCATED_DESC_LENGTH)}...`
-          : entry.description;
+        const desc =
+          entry.description.length > MAX_DESC_LENGTH
+            ? `${entry.description.substring(0, TRUNCATED_DESC_LENGTH)}...`
+            : entry.description;
 
         ctx.currentPage.drawText(desc, {
           x: leftMargin + labelWidth,
@@ -528,13 +575,16 @@ export async function generateProjectReportPdf(data: ProjectReportData): Promise
       }
 
       if (data.timeTracking.entries.length > MAX_TIME_ENTRIES) {
-        ctx.currentPage.drawText(`... and ${data.timeTracking.entries.length - MAX_TIME_ENTRIES} more entries`, {
-          x: leftMargin + PDF_SPACING.indent,
-          y: ctx.y,
-          size: PDF_TYPOGRAPHY.bodySize,
-          font: fonts.regular,
-          color: PDF_COLORS.black
-        });
+        ctx.currentPage.drawText(
+          `... and ${data.timeTracking.entries.length - MAX_TIME_ENTRIES} more entries`,
+          {
+            x: leftMargin + PDF_SPACING.indent,
+            y: ctx.y,
+            size: PDF_TYPOGRAPHY.bodySize,
+            font: fonts.regular,
+            color: PDF_COLORS.black
+          }
+        );
         ctx.y -= lineHeight;
       }
     }
@@ -544,24 +594,52 @@ export async function generateProjectReportPdf(data: ProjectReportData): Promise
   ctx.y -= PDF_SPACING.sectionSpacing;
   ensureSpace(ctx, 150, onNewPage);
   ctx.y = drawSectionLabel(ctx.currentPage, 'FINANCIAL SUMMARY', {
-    x: leftMargin, y: ctx.y, font: fonts.bold
+    x: leftMargin,
+    y: ctx.y,
+    font: fonts.bold
   });
 
-  ctx.y = drawLabelValue(ctx.currentPage, 'TOTAL INVOICED:', formatCurrency(data.financial.totalInvoiced), {
-    x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
-  });
+  ctx.y = drawLabelValue(
+    ctx.currentPage,
+    'TOTAL INVOICED:',
+    formatCurrency(data.financial.totalInvoiced),
+    {
+      x: leftMargin,
+      y: ctx.y,
+      labelFont: fonts.bold,
+      valueFont: fonts.regular,
+      labelWidth
+    }
+  );
   ctx.y = drawLabelValue(ctx.currentPage, 'TOTAL PAID:', formatCurrency(data.financial.totalPaid), {
-    x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+    x: leftMargin,
+    y: ctx.y,
+    labelFont: fonts.bold,
+    valueFont: fonts.regular,
+    labelWidth
   });
-  ctx.y = drawLabelValue(ctx.currentPage, 'OUTSTANDING:', formatCurrency(data.financial.outstanding), {
-    x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
-  });
+  ctx.y = drawLabelValue(
+    ctx.currentPage,
+    'OUTSTANDING:',
+    formatCurrency(data.financial.outstanding),
+    {
+      x: leftMargin,
+      y: ctx.y,
+      labelFont: fonts.bold,
+      valueFont: fonts.regular,
+      labelWidth
+    }
+  );
 
   // Invoice list
   if (data.financial.invoices.length > 0) {
     ctx.y -= 8;
     ctx.y = drawLabelValue(ctx.currentPage, 'INVOICES:', '', {
-      x: leftMargin, y: ctx.y, labelFont: fonts.bold, valueFont: fonts.regular, labelWidth
+      x: leftMargin,
+      y: ctx.y,
+      labelFont: fonts.bold,
+      valueFont: fonts.regular,
+      labelWidth
     });
 
     const MAX_INVOICE_ENTRIES = 10;
@@ -585,7 +663,10 @@ export async function generateProjectReportPdf(data: ProjectReportData): Promise
       });
 
       const invoiceStatusText = formatStatus(invoice.status);
-      const invoiceStatusW = fonts.regular.widthOfTextAtSize(invoiceStatusText, PDF_TYPOGRAPHY.bodySize);
+      const invoiceStatusW = fonts.regular.widthOfTextAtSize(
+        invoiceStatusText,
+        PDF_TYPOGRAPHY.bodySize
+      );
       ctx.currentPage.drawText(invoiceStatusText, {
         x: rightMargin - invoiceStatusW,
         y: ctx.y,

@@ -62,14 +62,15 @@ const JOINS = `
   FROM payment_schedule_installments psi
   LEFT JOIN projects p ON psi.project_id = p.id
   LEFT JOIN clients c ON psi.client_id = c.id
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // SERVICE
 // =====================================================
 
 class PaymentScheduleService {
-
   // -----------------------------------------------
   // SCHEDULE CREATION
   // -----------------------------------------------
@@ -131,7 +132,7 @@ class PaymentScheduleService {
       return {
         installmentNumber: index + 1,
         label: split.label || `Payment ${index + 1}`,
-        amount: Math.round((totalAmount * split.percent) / 100 * 100) / 100,
+        amount: Math.round(((totalAmount * split.percent) / 100) * 100) / 100,
         dueDate: dueDate.toISOString().split('T')[0]
       };
     });
@@ -165,10 +166,9 @@ class PaymentScheduleService {
 
   async getInstallment(id: number): Promise<PaymentInstallment | null> {
     const db = getDatabase();
-    const row = await db.get(
-      `SELECT ${INSTALLMENT_COLUMNS_WITH_JOINS} ${JOINS} WHERE psi.id = ?`,
-      [id]
-    );
+    const row = await db.get(`SELECT ${INSTALLMENT_COLUMNS_WITH_JOINS} ${JOINS} WHERE psi.id = ?`, [
+      id
+    ]);
     if (!row) return null;
     return toPaymentInstallment(row as unknown as PaymentInstallmentRow);
   }
@@ -228,11 +228,26 @@ class PaymentScheduleService {
     const updates: string[] = [];
     const values: (string | number | null)[] = [];
 
-    if (data.label !== undefined) { updates.push('label = ?'); values.push(data.label); }
-    if (data.amount !== undefined) { updates.push('amount = ?'); values.push(data.amount); }
-    if (data.dueDate !== undefined) { updates.push('due_date = ?'); values.push(data.dueDate); }
-    if (data.status !== undefined) { updates.push('status = ?'); values.push(data.status); }
-    if (data.notes !== undefined) { updates.push('notes = ?'); values.push(data.notes); }
+    if (data.label !== undefined) {
+      updates.push('label = ?');
+      values.push(data.label);
+    }
+    if (data.amount !== undefined) {
+      updates.push('amount = ?');
+      values.push(data.amount);
+    }
+    if (data.dueDate !== undefined) {
+      updates.push('due_date = ?');
+      values.push(data.dueDate);
+    }
+    if (data.status !== undefined) {
+      updates.push('status = ?');
+      values.push(data.status);
+    }
+    if (data.notes !== undefined) {
+      updates.push('notes = ?');
+      values.push(data.notes);
+    }
 
     if (updates.length > 0) {
       updates.push('updated_at = CURRENT_TIMESTAMP');
@@ -264,7 +279,11 @@ class PaymentScheduleService {
       [clientId]
     );
 
-    const installments = rows as unknown as { status: string; amount: number; paid_amount: number | null }[];
+    const installments = rows as unknown as {
+      status: string;
+      amount: number;
+      paid_amount: number | null;
+    }[];
 
     const summary: PaymentSummary = {
       totalAmount: 0,
@@ -303,7 +322,9 @@ class PaymentScheduleService {
     );
     const count = result.changes || 0;
     if (count > 0) {
-      await logger.info(`Updated ${count} installments to overdue`, { category: 'PAYMENT_SCHEDULE' });
+      await logger.info(`Updated ${count} installments to overdue`, {
+        category: 'PAYMENT_SCHEDULE'
+      });
     }
     return count;
   }
@@ -321,7 +342,7 @@ class PaymentScheduleService {
     const db = getDatabase();
 
     // Find installments due within 3 days that have no linked invoice yet
-    const dueInstallments = await db.all(`
+    const dueInstallments = (await db.all(`
       SELECT
         psi.id, psi.project_id, psi.client_id, psi.installment_number,
         psi.label, psi.amount, psi.due_date, psi.status,
@@ -338,10 +359,15 @@ class PaymentScheduleService {
             AND abs(inv.amount_total - psi.amount) < 0.01
             AND inv.notes LIKE '%installment_id:' || psi.id || '%'
         )
-    `) as Array<{
-      id: number; project_id: number; client_id: number;
-      installment_number: number; label: string | null;
-      amount: number; due_date: string; status: string;
+    `)) as Array<{
+      id: number;
+      project_id: number;
+      client_id: number;
+      installment_number: number;
+      label: string | null;
+      amount: number;
+      due_date: string;
+      status: string;
       project_name: string | null;
     }>;
 
@@ -358,12 +384,14 @@ class PaymentScheduleService {
         const invoice = await invoiceService.createInvoice({
           projectId: inst.project_id,
           clientId: inst.client_id,
-          lineItems: [{
-            description,
-            quantity: 1,
-            rate: inst.amount,
-            amount: inst.amount
-          }],
+          lineItems: [
+            {
+              description,
+              quantity: 1,
+              rate: inst.amount,
+              amount: inst.amount
+            }
+          ],
           dueDate: inst.due_date,
           notes: `Auto-generated from payment schedule (installment_id:${inst.id})`
         });
@@ -382,10 +410,10 @@ class PaymentScheduleService {
         );
       } catch (error) {
         skipped++;
-        await logger.error(
-          `Failed to generate invoice for installment ${inst.id}`,
-          { error: error instanceof Error ? error : undefined, category: 'PAYMENT_SCHEDULE' }
-        );
+        await logger.error(`Failed to generate invoice for installment ${inst.id}`, {
+          error: error instanceof Error ? error : undefined,
+          category: 'PAYMENT_SCHEDULE'
+        });
       }
     }
 

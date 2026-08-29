@@ -53,17 +53,23 @@ const PROJECT_COLUMNS_MINIMAL = 'id, project_name';
 
 const MILESTONE_COLUMNS = `
   id, project_id, title, description, due_date, status, amount, is_billable, sort_order, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const PROJECT_TASK_COLUMNS = `
   id, project_id, milestone_id, title, description, status, priority, assigned_to, due_date,
   estimated_hours, actual_hours, sort_order, parent_task_id, created_at, updated_at, completed_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const CALENDAR_SYNC_CONFIG_COLUMNS = `
   id, user_id, calendar_id, access_token, refresh_token, expires_at, sync_milestones,
   sync_tasks, sync_invoice_due_dates, last_sync_at, is_active, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // Google Calendar configuration
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
@@ -139,7 +145,7 @@ const ICAL_VERSION = '2.0';
  * so a single-day event on 2026-03-13 must have end = 2026-03-14.
  */
 function getExclusiveEndDate(dateStr: string): string {
-  const date = new Date(`${dateStr.split('T')[0]  }T12:00:00Z`); // Noon UTC to avoid DST issues
+  const date = new Date(`${dateStr.split('T')[0]}T12:00:00Z`); // Noon UTC to avoid DST issues
   date.setUTCDate(date.getUTCDate() + 1);
   return date.toISOString().split('T')[0];
 }
@@ -371,18 +377,20 @@ export async function createGoogleCalendarEvent(
   event: CalendarEvent
 ): Promise<CalendarEvent> {
   const response = await executeWithRetry(() =>
-    googleCalendarBreaker.execute(() => fetchWithTimeout(
-      `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events`,
-      {
-        timeoutMs: 10000,
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(event)
-      }
-    ))
+    googleCalendarBreaker.execute(() =>
+      fetchWithTimeout(
+        `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events`,
+        {
+          timeoutMs: 10000,
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(event)
+        }
+      )
+    )
   );
 
   if (!response.ok) {
@@ -403,18 +411,20 @@ export async function updateGoogleCalendarEvent(
   event: Partial<CalendarEvent>
 ): Promise<CalendarEvent> {
   const response = await executeWithRetry(() =>
-    googleCalendarBreaker.execute(() => fetchWithTimeout(
-      `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events/${eventId}`,
-      {
-        timeoutMs: 10000,
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(event)
-      }
-    ))
+    googleCalendarBreaker.execute(() =>
+      fetchWithTimeout(
+        `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events/${eventId}`,
+        {
+          timeoutMs: 10000,
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(event)
+        }
+      )
+    )
   );
 
   if (!response.ok) {
@@ -434,16 +444,18 @@ export async function deleteGoogleCalendarEvent(
   eventId: string
 ): Promise<void> {
   const response = await executeWithRetry(() =>
-    googleCalendarBreaker.execute(() => fetchWithTimeout(
-      `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events/${eventId}`,
-      {
-        timeoutMs: 10000,
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${accessToken}`
+    googleCalendarBreaker.execute(() =>
+      fetchWithTimeout(
+        `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events/${eventId}`,
+        {
+          timeoutMs: 10000,
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
         }
-      }
-    ))
+      )
+    )
   );
 
   if (!response.ok && response.status !== 404) {
@@ -509,11 +521,11 @@ export function taskToCalendarEvent(
     },
     attendees: task.assigned_to
       ? [
-        {
-          email: task.assigned_to as string,
-          responseStatus: 'needsAction'
-        }
-      ]
+          {
+            email: task.assigned_to as string,
+            responseStatus: 'needsAction'
+          }
+        ]
       : undefined,
     colorId: getColorIdForPriority(task.priority as string),
     reminders: {
@@ -662,9 +674,9 @@ export async function exportProjectToICal(projectId: number): Promise<string> {
   const db = getDatabase();
 
   // Get project details
-  const project = (await db.get(`SELECT ${PROJECT_COLUMNS_MINIMAL} FROM projects WHERE id = ?`, [projectId])) as
-    | { project_name: string }
-    | undefined;
+  const project = (await db.get(`SELECT ${PROJECT_COLUMNS_MINIMAL} FROM projects WHERE id = ?`, [
+    projectId
+  ])) as { project_name: string } | undefined;
   if (!project) {
     throw new Error(`Project ${projectId} not found`);
   }
@@ -818,9 +830,10 @@ export async function saveCalendarSyncConfig(
  */
 export async function getCalendarSyncConfig(userId: number): Promise<CalendarSyncConfig | null> {
   const db = getDatabase();
-  const row = (await db.get(`SELECT ${CALENDAR_SYNC_CONFIG_COLUMNS} FROM calendar_sync_configs WHERE user_id = ?`, [userId])) as
-    | Record<string, unknown>
-    | undefined;
+  const row = (await db.get(
+    `SELECT ${CALENDAR_SYNC_CONFIG_COLUMNS} FROM calendar_sync_configs WHERE user_id = ?`,
+    [userId]
+  )) as Record<string, unknown> | undefined;
 
   if (!row) {
     return null;

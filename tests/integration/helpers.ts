@@ -32,16 +32,15 @@ const TEST_STRIPE_WEBHOOK_SECRET = 'whsec_test_integration_do_not_use_in_prod';
 // app module reads them.
 process.env.JWT_SECRET = TEST_JWT_SECRET;
 process.env.NODE_ENV = process.env.NODE_ENV ?? 'test';
-process.env.OTEL_ENABLED = 'false';        // skip OTel SDK init in tests
-process.env.SCHEDULER_ENABLED = 'false';   // tests drive the work directly
+process.env.OTEL_ENABLED = 'false'; // skip OTel SDK init in tests
+process.env.SCHEDULER_ENABLED = 'false'; // tests drive the work directly
 process.env.LOG_LEVEL = 'error';
 process.env.ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'admin@test.local';
 process.env.ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'integration-admin-pwd';
 // Webhook tests forge signatures against this secret. Production uses a
 // secret loaded from env; the verifier just calls HMAC against whatever
 // process.env.STRIPE_WEBHOOK_SECRET says, so a known test value is fine.
-process.env.STRIPE_WEBHOOK_SECRET =
-  process.env.STRIPE_WEBHOOK_SECRET ?? TEST_STRIPE_WEBHOOK_SECRET;
+process.env.STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? TEST_STRIPE_WEBHOOK_SECRET;
 
 export interface TestDbHandle {
   path: string;
@@ -70,10 +69,7 @@ export async function setupTestDb(): Promise<TestDbHandle> {
   // sqlite_sequence is managed by SQLite itself; AUTOINCREMENT tables
   // recreate it on demand. Trying to CREATE it directly throws
   // "object name reserved for internal use".
-  const schemaSql = schemaSqlRaw.replace(
-    /CREATE TABLE sqlite_sequence\([^)]*\);\s*/gi,
-    ''
-  );
+  const schemaSql = schemaSqlRaw.replace(/CREATE TABLE sqlite_sequence\([^)]*\);\s*/gi, '');
   // The live schema has projects.intake_id REFERENCES
   // "_client_intakes_archived_086"(id), but that archived table has
   // been dropped in production. With foreign_keys=ON, SQLite errors
@@ -158,13 +154,15 @@ export function clientCookie(clientId: number, email = `client${clientId}@test.l
  * their own JWT directly can omit it — any non-empty hash satisfies
  * NOT NULL.
  */
-export async function seedClient(overrides: Partial<{
-  email: string;
-  contact_name: string;
-  status: string;
-  client_type: string;
-  password: string;
-}> = {}): Promise<number> {
+export async function seedClient(
+  overrides: Partial<{
+    email: string;
+    contact_name: string;
+    status: string;
+    client_type: string;
+    password: string;
+  }> = {}
+): Promise<number> {
   const { getDatabase } = await import('../../server/database/init.js');
   const db = getDatabase();
   const passwordHash = overrides.password
@@ -188,10 +186,13 @@ export async function seedClient(overrides: Partial<{
 }
 
 /** Insert a minimal project owned by `clientId`; return the project id. */
-export async function seedProject(clientId: number, overrides: Partial<{
-  project_name: string;
-  status: string;
-}> = {}): Promise<number> {
+export async function seedProject(
+  clientId: number,
+  overrides: Partial<{
+    project_name: string;
+    status: string;
+  }> = {}
+): Promise<number> {
   const { getDatabase } = await import('../../server/database/init.js');
   const db = getDatabase();
   const result = await db.run(
@@ -247,11 +248,7 @@ export async function seedMessageThread(
     `INSERT INTO message_threads (
        client_id, subject, thread_type, created_at, updated_at
      ) VALUES (?, ?, ?, datetime('now'), datetime('now'))`,
-    [
-      clientId,
-      overrides.subject ?? 'Seed thread',
-      overrides.thread_type ?? 'general'
-    ]
+    [clientId, overrides.subject ?? 'Seed thread', overrides.thread_type ?? 'general']
   );
   if (!result.lastID) throw new Error('Failed to insert seed message thread');
   return result.lastID;
@@ -297,7 +294,10 @@ export function signStripeWebhook(payload: string, timestampSec?: number): strin
 }
 
 /** Convenience: parse a Set-Cookie value list and return the value of `name`. */
-export function readCookie(setCookieHeader: string | string[] | undefined, name: string): string | undefined {
+export function readCookie(
+  setCookieHeader: string | string[] | undefined,
+  name: string
+): string | undefined {
   if (!setCookieHeader) return undefined;
   const cookies = Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader];
   for (const raw of cookies) {

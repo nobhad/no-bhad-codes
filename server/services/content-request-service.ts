@@ -55,7 +55,9 @@ const CHECKLIST_JOINS = `
   FROM content_request_checklists crc
   LEFT JOIN projects p ON crc.project_id = p.id
   LEFT JOIN clients c ON crc.client_id = c.id
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const ITEM_FROM = 'FROM content_request_items cri';
 
@@ -64,7 +66,6 @@ const ITEM_FROM = 'FROM content_request_items cri';
 // =====================================================
 
 class ContentRequestService {
-
   // -----------------------------------------------
   // CHECKLIST CRUD
   // -----------------------------------------------
@@ -92,9 +93,13 @@ class ContentRequestService {
             (checklist_id, project_id, client_id, title, description, content_type, category, is_required, due_date, sort_order)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
-            checklistId, projectId, clientId,
-            item.title, item.description || null,
-            item.contentType, item.category || 'other',
+            checklistId,
+            projectId,
+            clientId,
+            item.title,
+            item.description || null,
+            item.contentType,
+            item.category || 'other',
             item.isRequired !== false ? 1 : 0,
             item.dueDate || null,
             item.sortOrder ?? index
@@ -121,29 +126,36 @@ class ContentRequestService {
 
     const baseDate = startDate ? new Date(startDate) : new Date();
 
-    const items: CreateItemData[] = template.items.map((item: ContentRequestTemplateItem, index: number) => {
-      let dueDate: string | undefined;
-      if (item.due_offset_days) {
-        const due = new Date(baseDate);
-        due.setDate(due.getDate() + item.due_offset_days);
-        dueDate = due.toISOString().split('T')[0];
+    const items: CreateItemData[] = template.items.map(
+      (item: ContentRequestTemplateItem, index: number) => {
+        let dueDate: string | undefined;
+        if (item.due_offset_days) {
+          const due = new Date(baseDate);
+          due.setDate(due.getDate() + item.due_offset_days);
+          dueDate = due.toISOString().split('T')[0];
+        }
+
+        return {
+          title: item.title,
+          description: item.description,
+          contentType: item.content_type,
+          category: item.category || 'other',
+          isRequired: item.is_required,
+          dueDate,
+          sortOrder: index
+        };
       }
+    );
 
-      return {
-        title: item.title,
-        description: item.description,
-        contentType: item.content_type,
-        category: item.category || 'other',
-        isRequired: item.is_required,
-        dueDate,
-        sortOrder: index
-      };
-    });
-
-    return this.createChecklist(projectId, clientId, {
-      name: template.name,
-      description: template.description || undefined
-    }, items);
+    return this.createChecklist(
+      projectId,
+      clientId,
+      {
+        name: template.name,
+        description: template.description || undefined
+      },
+      items
+    );
   }
 
   async getChecklist(id: number): Promise<ContentChecklist | null> {
@@ -200,8 +212,14 @@ class ContentRequestService {
     const updates: string[] = [];
     const values: (string | null)[] = [];
 
-    if (data.name !== undefined) { updates.push('name = ?'); values.push(data.name); }
-    if (data.description !== undefined) { updates.push('description = ?'); values.push(data.description); }
+    if (data.name !== undefined) {
+      updates.push('name = ?');
+      values.push(data.name);
+    }
+    if (data.description !== undefined) {
+      updates.push('description = ?');
+      values.push(data.description);
+    }
     if (data.status !== undefined) {
       updates.push('status = ?');
       values.push(data.status);
@@ -211,7 +229,10 @@ class ContentRequestService {
     if (updates.length > 0) {
       updates.push('updated_at = CURRENT_TIMESTAMP');
       values.push(String(id));
-      await db.run(`UPDATE content_request_checklists SET ${updates.join(', ')} WHERE id = ?`, values);
+      await db.run(
+        `UPDATE content_request_checklists SET ${updates.join(', ')} WHERE id = ?`,
+        values
+      );
     }
 
     return this.getChecklist(id) as Promise<ContentChecklist>;
@@ -243,47 +264,80 @@ class ContentRequestService {
    */
   async getItem(itemId: number): Promise<ContentItem | null> {
     const db = getDatabase();
-    const row = await db.get(
-      `SELECT ${ITEM_COLUMNS} ${ITEM_FROM} WHERE cri.id = ?`,
-      [itemId]
-    );
+    const row = await db.get(`SELECT ${ITEM_COLUMNS} ${ITEM_FROM} WHERE cri.id = ?`, [itemId]);
     return row ? toContentItem(row as unknown as ContentItemRow) : null;
   }
 
-  async addItem(checklistId: number, projectId: number, clientId: number, data: CreateItemData): Promise<ContentItem> {
+  async addItem(
+    checklistId: number,
+    projectId: number,
+    clientId: number,
+    data: CreateItemData
+  ): Promise<ContentItem> {
     const db = getDatabase();
     const result = await db.run(
       `INSERT INTO content_request_items
         (checklist_id, project_id, client_id, title, description, content_type, category, is_required, due_date, sort_order)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        checklistId, projectId, clientId,
-        data.title, data.description || null,
-        data.contentType, data.category || 'other',
+        checklistId,
+        projectId,
+        clientId,
+        data.title,
+        data.description || null,
+        data.contentType,
+        data.category || 'other',
         data.isRequired !== false ? 1 : 0,
         data.dueDate || null,
         data.sortOrder ?? 0
       ]
     );
 
-    const row = await db.get(`SELECT ${ITEM_COLUMNS} ${ITEM_FROM} WHERE cri.id = ?`, [result.lastID]);
+    const row = await db.get(`SELECT ${ITEM_COLUMNS} ${ITEM_FROM} WHERE cri.id = ?`, [
+      result.lastID
+    ]);
     return toContentItem(row as unknown as ContentItemRow);
   }
 
   async updateItem(
     itemId: number,
-    data: Partial<{ title: string; description: string; dueDate: string; isRequired: boolean; sortOrder: number; adminNotes: string }>
+    data: Partial<{
+      title: string;
+      description: string;
+      dueDate: string;
+      isRequired: boolean;
+      sortOrder: number;
+      adminNotes: string;
+    }>
   ): Promise<ContentItem> {
     const db = getDatabase();
     const updates: string[] = [];
     const values: (string | number | null)[] = [];
 
-    if (data.title !== undefined) { updates.push('title = ?'); values.push(data.title); }
-    if (data.description !== undefined) { updates.push('description = ?'); values.push(data.description); }
-    if (data.dueDate !== undefined) { updates.push('due_date = ?'); values.push(data.dueDate); }
-    if (data.isRequired !== undefined) { updates.push('is_required = ?'); values.push(data.isRequired ? 1 : 0); }
-    if (data.sortOrder !== undefined) { updates.push('sort_order = ?'); values.push(data.sortOrder); }
-    if (data.adminNotes !== undefined) { updates.push('admin_notes = ?'); values.push(data.adminNotes); }
+    if (data.title !== undefined) {
+      updates.push('title = ?');
+      values.push(data.title);
+    }
+    if (data.description !== undefined) {
+      updates.push('description = ?');
+      values.push(data.description);
+    }
+    if (data.dueDate !== undefined) {
+      updates.push('due_date = ?');
+      values.push(data.dueDate);
+    }
+    if (data.isRequired !== undefined) {
+      updates.push('is_required = ?');
+      values.push(data.isRequired ? 1 : 0);
+    }
+    if (data.sortOrder !== undefined) {
+      updates.push('sort_order = ?');
+      values.push(data.sortOrder);
+    }
+    if (data.adminNotes !== undefined) {
+      updates.push('admin_notes = ?');
+      values.push(data.adminNotes);
+    }
 
     if (updates.length > 0) {
       updates.push('updated_at = CURRENT_TIMESTAMP');
@@ -452,22 +506,46 @@ class ContentRequestService {
 
   async updateTemplate(
     id: number,
-    data: Partial<{ name: string; description: string; items: ContentRequestTemplateItem[]; projectType: string; isActive: boolean }>
+    data: Partial<{
+      name: string;
+      description: string;
+      items: ContentRequestTemplateItem[];
+      projectType: string;
+      isActive: boolean;
+    }>
   ): Promise<ContentRequestTemplate> {
     const db = getDatabase();
     const updates: string[] = [];
     const values: (string | number | null)[] = [];
 
-    if (data.name !== undefined) { updates.push('name = ?'); values.push(data.name); }
-    if (data.description !== undefined) { updates.push('description = ?'); values.push(data.description); }
-    if (data.items !== undefined) { updates.push('items = ?'); values.push(JSON.stringify(data.items)); }
-    if (data.projectType !== undefined) { updates.push('project_type = ?'); values.push(data.projectType); }
-    if (data.isActive !== undefined) { updates.push('is_active = ?'); values.push(data.isActive ? 1 : 0); }
+    if (data.name !== undefined) {
+      updates.push('name = ?');
+      values.push(data.name);
+    }
+    if (data.description !== undefined) {
+      updates.push('description = ?');
+      values.push(data.description);
+    }
+    if (data.items !== undefined) {
+      updates.push('items = ?');
+      values.push(JSON.stringify(data.items));
+    }
+    if (data.projectType !== undefined) {
+      updates.push('project_type = ?');
+      values.push(data.projectType);
+    }
+    if (data.isActive !== undefined) {
+      updates.push('is_active = ?');
+      values.push(data.isActive ? 1 : 0);
+    }
 
     if (updates.length > 0) {
       updates.push('updated_at = CURRENT_TIMESTAMP');
       values.push(id);
-      await db.run(`UPDATE content_request_templates SET ${updates.join(', ')} WHERE id = ?`, values);
+      await db.run(
+        `UPDATE content_request_templates SET ${updates.join(', ')} WHERE id = ?`,
+        values
+      );
     }
 
     return this.getTemplate(id) as Promise<ContentRequestTemplate>;

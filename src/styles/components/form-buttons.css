@@ -26,7 +26,8 @@
   justify-content: center;
   gap: var(--icon-gap-md, 0.5rem);
   padding: var(--portal-btn-padding, 8px 18px);
-  border: var(--portal-btn-border-width, 2px) solid var(--portal-btn-border-color, var(--color-dark));
+  border: var(--portal-btn-border-width, 2px) solid
+    var(--portal-btn-border-color, var(--color-dark));
   border-bottom-width: var(--portal-btn-border-bottom-width, 2px);
   border-radius: var(--portal-btn-border-radius, 0);
   font-size: var(--portal-btn-font-size, var(--font-size-sm));

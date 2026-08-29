@@ -30,10 +30,7 @@ const DAYS_UNTIL_DUE_MAX = 365;
 
 export const DocRequestValidationSchemas = {
   create: {
-    client_id: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ],
+    client_id: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
     title: [
       { type: 'required' as const },
       { type: 'string' as const, minLength: 1, maxLength: DOC_REQUEST_TITLE_MAX_LENGTH }
@@ -47,10 +44,7 @@ export const DocRequestValidationSchemas = {
   } as ValidationSchema,
 
   fromTemplates: {
-    client_id: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ],
+    client_id: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
     template_ids: [
       { type: 'required' as const },
       { type: 'array' as const, minLength: 1, maxLength: MAX_TEMPLATE_IDS }
@@ -59,10 +53,7 @@ export const DocRequestValidationSchemas = {
   } as ValidationSchema,
 
   upload: {
-    fileId: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ]
+    fileId: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }]
   } as ValidationSchema,
 
   approve: {

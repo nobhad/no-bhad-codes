@@ -284,11 +284,13 @@ describe('AnalyticsService - Saved Reports', () => {
 
     it('updates multiple fields at once', async () => {
       mockDb.run.mockResolvedValueOnce({ changes: 1 });
-      mockDb.get.mockResolvedValueOnce(makeReportRow({
-        is_favorite: true,
-        is_shared: true,
-        sort_order: 'ASC'
-      }));
+      mockDb.get.mockResolvedValueOnce(
+        makeReportRow({
+          is_favorite: true,
+          is_shared: true,
+          sort_order: 'ASC'
+        })
+      );
 
       const result = await analyticsService.updateReport(1, {
         is_favorite: true,
@@ -394,7 +396,9 @@ describe('AnalyticsService - Report Schedules', () => {
 
     it('creates a monthly schedule', async () => {
       mockDb.run.mockResolvedValueOnce({ lastID: 3 });
-      mockDb.get.mockResolvedValueOnce(makeScheduleRow({ frequency: 'monthly', day_of_month: 15, id: 3 }));
+      mockDb.get.mockResolvedValueOnce(
+        makeScheduleRow({ frequency: 'monthly', day_of_month: 15, id: 3 })
+      );
 
       const result = await analyticsService.createSchedule({
         report_id: 1,
@@ -680,7 +684,16 @@ describe('AnalyticsService - Dashboard Widgets', () => {
   describe('applyPreset', () => {
     it('clears existing widgets and creates preset widgets', async () => {
       const widgetConfig = JSON.stringify([
-        { type: 'metric', title: 'Revenue', data_source: 'revenue', config: {}, x: 0, y: 0, w: 2, h: 2 }
+        {
+          type: 'metric',
+          title: 'Revenue',
+          data_source: 'revenue',
+          config: {},
+          x: 0,
+          y: 0,
+          w: 2,
+          h: 2
+        }
       ]);
       mockDb.get.mockResolvedValueOnce({ id: 1, name: 'Default', widgets: widgetConfig });
       mockDb.run.mockResolvedValueOnce({ changes: 1 }); // delete existing
@@ -732,13 +745,13 @@ describe('AnalyticsService - KPI Snapshots', () => {
     it('inserts new snapshots when none exist for today', async () => {
       // calculateKPIs DB calls (9 metrics)
       const kpiDbReturns = [
-        { total: 50000 },     // total_revenue
-        { total: 10000 },     // monthly_revenue
-        { count: 25 },        // active_clients
-        { count: 10 },        // active_projects
-        { total: 75000 },     // pipeline_value
-        { count: 5 },         // new_leads_monthly
-        { total: 8000 },      // outstanding_invoices
+        { total: 50000 }, // total_revenue
+        { total: 10000 }, // monthly_revenue
+        { count: 25 }, // active_clients
+        { count: 10 }, // active_projects
+        { total: 75000 }, // pipeline_value
+        { count: 5 }, // new_leads_monthly
+        { total: 8000 }, // outstanding_invoices
         { count: 2, total: 3000 }, // overdue_invoices
         { won: 8, total_closed: 10 } // conversion_rate
       ];
@@ -748,13 +761,15 @@ describe('AnalyticsService - KPI Snapshots', () => {
       mockDb.get.mockResolvedValueOnce(null);
 
       // transaction mock - simulate ctx with get and run
-      mockDb.transaction.mockImplementationOnce(async (fn: (ctx: typeof mockDb) => Promise<void>) => {
-        const ctx = {
-          get: vi.fn().mockResolvedValue(null), // no previous value
-          run: vi.fn().mockResolvedValue({ changes: 1 })
-        };
-        await fn(ctx as unknown as typeof mockDb);
-      });
+      mockDb.transaction.mockImplementationOnce(
+        async (fn: (ctx: typeof mockDb) => Promise<void>) => {
+          const ctx = {
+            get: vi.fn().mockResolvedValue(null), // no previous value
+            run: vi.fn().mockResolvedValue({ changes: 1 })
+          };
+          await fn(ctx as unknown as typeof mockDb);
+        }
+      );
 
       const count = await analyticsService.captureSnapshot();
 
@@ -764,22 +779,30 @@ describe('AnalyticsService - KPI Snapshots', () => {
     it('updates existing snapshots when one exists for today', async () => {
       // calculateKPIs
       const kpiDbReturns = [
-        { total: 50000 }, { total: 10000 }, { count: 25 }, { count: 10 },
-        { total: 75000 }, { count: 5 }, { total: 8000 },
-        { count: 2, total: 3000 }, { won: 8, total_closed: 10 }
+        { total: 50000 },
+        { total: 10000 },
+        { count: 25 },
+        { count: 10 },
+        { total: 75000 },
+        { count: 5 },
+        { total: 8000 },
+        { count: 2, total: 3000 },
+        { won: 8, total_closed: 10 }
       ];
       kpiDbReturns.forEach((r) => mockDb.get.mockResolvedValueOnce(r));
 
       // idempotency check - existing snapshot found
       mockDb.get.mockResolvedValueOnce({ id: 5 });
 
-      mockDb.transaction.mockImplementationOnce(async (fn: (ctx: typeof mockDb) => Promise<void>) => {
-        const ctx = {
-          get: vi.fn().mockResolvedValue({ value: 45000 }),
-          run: vi.fn().mockResolvedValue({ changes: 1 })
-        };
-        await fn(ctx as unknown as typeof mockDb);
-      });
+      mockDb.transaction.mockImplementationOnce(
+        async (fn: (ctx: typeof mockDb) => Promise<void>) => {
+          const ctx = {
+            get: vi.fn().mockResolvedValue({ value: 45000 }),
+            run: vi.fn().mockResolvedValue({ changes: 1 })
+          };
+          await fn(ctx as unknown as typeof mockDb);
+        }
+      );
 
       const count = await analyticsService.captureSnapshot();
 
@@ -788,20 +811,28 @@ describe('AnalyticsService - KPI Snapshots', () => {
 
     it('handles zero conversion rate when no closed projects', async () => {
       const kpiDbReturns = [
-        { total: 0 }, { total: 0 }, { count: 0 }, { count: 0 },
-        { total: 0 }, { count: 0 }, { total: 0 },
-        { count: 0, total: 0 }, { won: 0, total_closed: 0 }
+        { total: 0 },
+        { total: 0 },
+        { count: 0 },
+        { count: 0 },
+        { total: 0 },
+        { count: 0 },
+        { total: 0 },
+        { count: 0, total: 0 },
+        { won: 0, total_closed: 0 }
       ];
       kpiDbReturns.forEach((r) => mockDb.get.mockResolvedValueOnce(r));
       mockDb.get.mockResolvedValueOnce(null);
 
-      mockDb.transaction.mockImplementationOnce(async (fn: (ctx: typeof mockDb) => Promise<void>) => {
-        const ctx = {
-          get: vi.fn().mockResolvedValue(null),
-          run: vi.fn().mockResolvedValue({ changes: 1 })
-        };
-        await fn(ctx as unknown as typeof mockDb);
-      });
+      mockDb.transaction.mockImplementationOnce(
+        async (fn: (ctx: typeof mockDb) => Promise<void>) => {
+          const ctx = {
+            get: vi.fn().mockResolvedValue(null),
+            run: vi.fn().mockResolvedValue({ changes: 1 })
+          };
+          await fn(ctx as unknown as typeof mockDb);
+        }
+      );
 
       const count = await analyticsService.captureSnapshot();
 
@@ -962,7 +993,9 @@ describe('AnalyticsService - Metric Alerts', () => {
   describe('checkAlerts', () => {
     it('triggers alert when condition is above and value exceeds threshold', async () => {
       // getAlerts
-      mockDb.all.mockResolvedValueOnce([makeAlertRow({ condition: 'above', threshold_value: 9000 })]);
+      mockDb.all.mockResolvedValueOnce([
+        makeAlertRow({ condition: 'above', threshold_value: 9000 })
+      ]);
       // getLatestKPIs
       mockDb.all.mockResolvedValueOnce([
         makeKPISnapshotRow({ kpi_type: 'total_revenue', value: 10000, change_percent: 5 })
@@ -977,7 +1010,9 @@ describe('AnalyticsService - Metric Alerts', () => {
     });
 
     it('does not trigger alert when value below threshold (condition: above)', async () => {
-      mockDb.all.mockResolvedValueOnce([makeAlertRow({ condition: 'above', threshold_value: 99999 })]);
+      mockDb.all.mockResolvedValueOnce([
+        makeAlertRow({ condition: 'above', threshold_value: 99999 })
+      ]);
       mockDb.all.mockResolvedValueOnce([
         makeKPISnapshotRow({ kpi_type: 'total_revenue', value: 1000 })
       ]);
@@ -988,7 +1023,9 @@ describe('AnalyticsService - Metric Alerts', () => {
     });
 
     it('triggers alert when condition is below and value is less than threshold', async () => {
-      mockDb.all.mockResolvedValueOnce([makeAlertRow({ condition: 'below', threshold_value: 5000 })]);
+      mockDb.all.mockResolvedValueOnce([
+        makeAlertRow({ condition: 'below', threshold_value: 5000 })
+      ]);
       mockDb.all.mockResolvedValueOnce([
         makeKPISnapshotRow({ kpi_type: 'total_revenue', value: 1000 })
       ]);
@@ -1000,7 +1037,9 @@ describe('AnalyticsService - Metric Alerts', () => {
     });
 
     it('triggers alert when condition is equals and value matches', async () => {
-      mockDb.all.mockResolvedValueOnce([makeAlertRow({ condition: 'equals', threshold_value: 50000 })]);
+      mockDb.all.mockResolvedValueOnce([
+        makeAlertRow({ condition: 'equals', threshold_value: 50000 })
+      ]);
       mockDb.all.mockResolvedValueOnce([
         makeKPISnapshotRow({ kpi_type: 'total_revenue', value: 50000 })
       ]);
@@ -1012,7 +1051,9 @@ describe('AnalyticsService - Metric Alerts', () => {
     });
 
     it('triggers alert when condition is change_above', async () => {
-      mockDb.all.mockResolvedValueOnce([makeAlertRow({ condition: 'change_above', threshold_value: 10 })]);
+      mockDb.all.mockResolvedValueOnce([
+        makeAlertRow({ condition: 'change_above', threshold_value: 10 })
+      ]);
       mockDb.all.mockResolvedValueOnce([
         makeKPISnapshotRow({ kpi_type: 'total_revenue', value: 50000, change_percent: 15 })
       ]);
@@ -1024,7 +1065,9 @@ describe('AnalyticsService - Metric Alerts', () => {
     });
 
     it('triggers alert when condition is change_below', async () => {
-      mockDb.all.mockResolvedValueOnce([makeAlertRow({ condition: 'change_below', threshold_value: 0 })]);
+      mockDb.all.mockResolvedValueOnce([
+        makeAlertRow({ condition: 'change_below', threshold_value: 0 })
+      ]);
       mockDb.all.mockResolvedValueOnce([
         makeKPISnapshotRow({ kpi_type: 'total_revenue', value: 50000, change_percent: -5 })
       ]);
@@ -1058,7 +1101,9 @@ describe('AnalyticsService - Metric Alerts', () => {
     });
 
     it('handles null change_percent for change_above condition', async () => {
-      mockDb.all.mockResolvedValueOnce([makeAlertRow({ condition: 'change_above', threshold_value: 5 })]);
+      mockDb.all.mockResolvedValueOnce([
+        makeAlertRow({ condition: 'change_above', threshold_value: 5 })
+      ]);
       mockDb.all.mockResolvedValueOnce([
         makeKPISnapshotRow({ kpi_type: 'total_revenue', value: 50000, change_percent: null })
       ]);
@@ -1083,8 +1128,14 @@ describe('AnalyticsService - Report Data Generation', () => {
 
   describe('generateReportData', () => {
     it('generates revenue report', async () => {
-      mockDb.all.mockResolvedValueOnce([{ month: '2026-01', total_revenue: 10000, invoice_count: 5, avg_invoice: 2000 }]);
-      mockDb.get.mockResolvedValueOnce({ total_revenue: 10000, total_invoices: 5, avg_invoice: 2000 });
+      mockDb.all.mockResolvedValueOnce([
+        { month: '2026-01', total_revenue: 10000, invoice_count: 5, avg_invoice: 2000 }
+      ]);
+      mockDb.get.mockResolvedValueOnce({
+        total_revenue: 10000,
+        total_invoices: 5,
+        avg_invoice: 2000
+      });
 
       const result = await analyticsService.generateReportData('revenue');
 
@@ -1104,8 +1155,14 @@ describe('AnalyticsService - Report Data Generation', () => {
     });
 
     it('generates pipeline report', async () => {
-      mockDb.all.mockResolvedValueOnce([{ stage_name: 'Discovery', project_count: 3, total_value: 15000, win_probability: 0.2 }]);
-      mockDb.get.mockResolvedValueOnce({ total_leads: 10, total_pipeline_value: 50000, won_count: 2 });
+      mockDb.all.mockResolvedValueOnce([
+        { stage_name: 'Discovery', project_count: 3, total_value: 15000, win_probability: 0.2 }
+      ]);
+      mockDb.get.mockResolvedValueOnce({
+        total_leads: 10,
+        total_pipeline_value: 50000,
+        won_count: 2
+      });
 
       const result = await analyticsService.generateReportData('pipeline');
 
@@ -1113,8 +1170,15 @@ describe('AnalyticsService - Report Data Generation', () => {
     });
 
     it('generates project report', async () => {
-      mockDb.all.mockResolvedValueOnce([{ id: 1, project_name: 'Website Redesign', company_name: 'ACME', status: 'active' }]);
-      mockDb.get.mockResolvedValueOnce({ total_projects: 1, active_projects: 1, completed_projects: 0, total_hours: 100 });
+      mockDb.all.mockResolvedValueOnce([
+        { id: 1, project_name: 'Website Redesign', company_name: 'ACME', status: 'active' }
+      ]);
+      mockDb.get.mockResolvedValueOnce({
+        total_projects: 1,
+        active_projects: 1,
+        completed_projects: 0,
+        total_hours: 100
+      });
 
       const result = await analyticsService.generateReportData('project');
 
@@ -1137,8 +1201,14 @@ describe('AnalyticsService - Report Data Generation', () => {
     });
 
     it('generates client report', async () => {
-      mockDb.all.mockResolvedValueOnce([{ id: 1, company_name: 'ACME', project_count: 3, total_revenue: 30000 }]);
-      mockDb.get.mockResolvedValueOnce({ total_clients: 1, active_clients: 1, avg_lifetime_value: 30000 });
+      mockDb.all.mockResolvedValueOnce([
+        { id: 1, company_name: 'ACME', project_count: 3, total_revenue: 30000 }
+      ]);
+      mockDb.get.mockResolvedValueOnce({
+        total_clients: 1,
+        active_clients: 1,
+        avg_lifetime_value: 30000
+      });
 
       const result = await analyticsService.generateReportData('client');
 
@@ -1146,7 +1216,9 @@ describe('AnalyticsService - Report Data Generation', () => {
     });
 
     it('generates team report', async () => {
-      mockDb.all.mockResolvedValueOnce([{ user_name: 'Alice', total_hours: 40, projects_worked: 2, billable_hours: 35 }]);
+      mockDb.all.mockResolvedValueOnce([
+        { user_name: 'Alice', total_hours: 40, projects_worked: 2, billable_hours: 35 }
+      ]);
       mockDb.get.mockResolvedValueOnce({ total_hours: 40, billable_hours: 35, team_members: 1 });
 
       const result = await analyticsService.generateReportData('team');
@@ -1155,7 +1227,9 @@ describe('AnalyticsService - Report Data Generation', () => {
     });
 
     it('generates lead report', async () => {
-      mockDb.all.mockResolvedValueOnce([{ id: 1, project_name: 'Lead A', stage_name: 'Proposal', source_name: 'Referral' }]);
+      mockDb.all.mockResolvedValueOnce([
+        { id: 1, project_name: 'Lead A', stage_name: 'Proposal', source_name: 'Referral' }
+      ]);
       mockDb.get.mockResolvedValueOnce({ total_leads: 1, avg_score: 75, total_value: 10000 });
 
       const result = await analyticsService.generateReportData('lead');
@@ -1164,8 +1238,15 @@ describe('AnalyticsService - Report Data Generation', () => {
     });
 
     it('generates invoice report', async () => {
-      mockDb.all.mockResolvedValueOnce([{ id: 1, invoice_number: 'INV-001', company_name: 'ACME', status: 'paid' }]);
-      mockDb.get.mockResolvedValueOnce({ total_invoices: 1, total_amount: 5000, paid_amount: 5000, outstanding_amount: 0 });
+      mockDb.all.mockResolvedValueOnce([
+        { id: 1, invoice_number: 'INV-001', company_name: 'ACME', status: 'paid' }
+      ]);
+      mockDb.get.mockResolvedValueOnce({
+        total_invoices: 1,
+        total_amount: 5000,
+        paid_amount: 5000,
+        outstanding_amount: 0
+      });
 
       const result = await analyticsService.generateReportData('invoice');
 
@@ -1184,9 +1265,9 @@ describe('AnalyticsService - Report Data Generation', () => {
     });
 
     it('throws for unknown report type', async () => {
-      await expect(
-        analyticsService.generateReportData('unknown' as never)
-      ).rejects.toThrow('Unknown report type');
+      await expect(analyticsService.generateReportData('unknown' as never)).rejects.toThrow(
+        'Unknown report type'
+      );
     });
 
     it('handles null summary from revenue DB query', async () => {
@@ -1277,7 +1358,11 @@ describe('AnalyticsService - Route-Compatible Wrappers', () => {
     mockDb.get.mockResolvedValueOnce(makeReportRow({ report_type: 'client', filters: '{}' }));
     // generateClientReport: db.all + db.get
     mockDb.all.mockResolvedValueOnce([]);
-    mockDb.get.mockResolvedValueOnce({ total_clients: 0, active_clients: 0, avg_lifetime_value: 0 });
+    mockDb.get.mockResolvedValueOnce({
+      total_clients: 0,
+      active_clients: 0,
+      avg_lifetime_value: 0
+    });
 
     const result = await analyticsService.runReport(1);
 
@@ -1408,7 +1493,9 @@ describe('AnalyticsService - Route-Compatible Wrappers', () => {
   });
 
   it('getDashboardPresets delegates to getPresets', async () => {
-    mockDb.all.mockResolvedValueOnce([{ id: 1, name: 'Default', description: null, is_default: true }]);
+    mockDb.all.mockResolvedValueOnce([
+      { id: 1, name: 'Default', description: null, is_default: true }
+    ]);
 
     const result = await analyticsService.getDashboardPresets();
 
@@ -1417,7 +1504,16 @@ describe('AnalyticsService - Route-Compatible Wrappers', () => {
 
   it('applyDashboardPreset delegates to applyPreset', async () => {
     const widgetConfig = JSON.stringify([
-      { type: 'metric', title: 'Revenue', data_source: 'revenue', config: {}, x: 0, y: 0, w: 2, h: 2 }
+      {
+        type: 'metric',
+        title: 'Revenue',
+        data_source: 'revenue',
+        config: {},
+        x: 0,
+        y: 0,
+        w: 2,
+        h: 2
+      }
     ]);
     mockDb.get.mockResolvedValueOnce({ id: 1, name: 'Default', widgets: widgetConfig });
     mockDb.run.mockResolvedValueOnce({ changes: 1 });
@@ -1431,9 +1527,15 @@ describe('AnalyticsService - Route-Compatible Wrappers', () => {
 
   it('captureKPISnapshot delegates to captureSnapshot', async () => {
     const kpiReturns = [
-      { total: 0 }, { total: 0 }, { count: 0 }, { count: 0 },
-      { total: 0 }, { count: 0 }, { total: 0 },
-      { count: 0, total: 0 }, { won: 0, total_closed: 0 }
+      { total: 0 },
+      { total: 0 },
+      { count: 0 },
+      { count: 0 },
+      { total: 0 },
+      { count: 0 },
+      { total: 0 },
+      { count: 0, total: 0 },
+      { won: 0, total_closed: 0 }
     ];
     kpiReturns.forEach((r) => mockDb.get.mockResolvedValueOnce(r));
     mockDb.get.mockResolvedValueOnce(null);
@@ -1712,9 +1814,7 @@ describe('AnalyticsService - Business Intelligence', () => {
     });
 
     it('handles null total_value in results', async () => {
-      mockDb.all.mockResolvedValueOnce([
-        { status: 'draft', count: 1, total_value: null }
-      ]);
+      mockDb.all.mockResolvedValueOnce([{ status: 'draft', count: 1, total_value: null }]);
 
       const result = await analyticsService.getProjectPipelineValue();
 
@@ -1727,8 +1827,8 @@ describe('AnalyticsService - Business Intelligence', () => {
     it('returns funnel metrics with conversion rates', async () => {
       mockDb.get
         .mockResolvedValueOnce({ count: 100 }) // contacts
-        .mockResolvedValueOnce({ count: 60 })  // leads
-        .mockResolvedValueOnce({ count: 30 })  // proposals
+        .mockResolvedValueOnce({ count: 60 }) // leads
+        .mockResolvedValueOnce({ count: 30 }) // proposals
         .mockResolvedValueOnce({ count: 20 }); // clients
 
       const result = await analyticsService.getAcquisitionFunnel();
@@ -1932,9 +2032,9 @@ describe('AnalyticsService - Client Insights', () => {
           client_id: 3,
           client_name: 'Great Client',
           last_activity: '2026-01-08',
-          recent_messages: 5,      // engagementScore = min(25, 5*5) = 25
+          recent_messages: 5, // engagementScore = min(25, 5*5) = 25
           paid_invoices: 10,
-          avg_payment_days: -10    // paymentScore = max(0, 25 - max(0, -10*1.5)) = 25
+          avg_payment_days: -10 // paymentScore = max(0, 25 - max(0, -10*1.5)) = 25
         }
       ]);
 
@@ -2317,19 +2417,40 @@ describe('AnalyticsService - Operational Reports', () => {
     it('handles multiple projects with mixed health statuses', async () => {
       mockDb.all.mockResolvedValueOnce([
         {
-          project_id: 1, project_name: 'Good', client_name: 'A',
-          status: 'active', due_date: '2027-01-01', created_at: '2026-01-01',
-          completed_tasks: 5, total_tasks: 5, overdue_tasks: 0, overdue_invoices: 0
+          project_id: 1,
+          project_name: 'Good',
+          client_name: 'A',
+          status: 'active',
+          due_date: '2027-01-01',
+          created_at: '2026-01-01',
+          completed_tasks: 5,
+          total_tasks: 5,
+          overdue_tasks: 0,
+          overdue_invoices: 0
         },
         {
-          project_id: 2, project_name: 'Risky', client_name: 'B',
-          status: 'active', due_date: '2027-01-01', created_at: '2026-01-01',
-          completed_tasks: 2, total_tasks: 10, overdue_tasks: 2, overdue_invoices: 0
+          project_id: 2,
+          project_name: 'Risky',
+          client_name: 'B',
+          status: 'active',
+          due_date: '2027-01-01',
+          created_at: '2026-01-01',
+          completed_tasks: 2,
+          total_tasks: 10,
+          overdue_tasks: 2,
+          overdue_invoices: 0
         },
         {
-          project_id: 3, project_name: 'Late', client_name: 'C',
-          status: 'active', due_date: '2020-01-01', created_at: '2019-01-01',
-          completed_tasks: 0, total_tasks: 10, overdue_tasks: 0, overdue_invoices: 0
+          project_id: 3,
+          project_name: 'Late',
+          client_name: 'C',
+          status: 'active',
+          due_date: '2020-01-01',
+          created_at: '2019-01-01',
+          completed_tasks: 0,
+          total_tasks: 10,
+          overdue_tasks: 0,
+          overdue_invoices: 0
         }
       ]);
 

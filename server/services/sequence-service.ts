@@ -34,22 +34,30 @@ import type {
 const SEQUENCE_COLUMNS = `
   id, name, description, trigger_event, trigger_conditions,
   is_active, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const STEP_COLUMNS = `
   id, sequence_id, step_order, delay_hours, email_template_id,
   subject_override, body_override, stop_conditions, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const ENROLLMENT_COLUMNS = `
   id, sequence_id, entity_type, entity_id, entity_email, entity_name,
   current_step_order, status, next_send_at, enrolled_at,
   completed_at, stopped_at, stopped_reason
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const _SEND_LOG_COLUMNS = `
   id, enrollment_id, step_id, sent_at, email_status, error_message
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const PROCESS_BATCH_SIZE = 50;
 const MAX_FAILURES_BEFORE_BOUNCE = 3;
@@ -69,12 +77,7 @@ async function create(params: CreateSequenceParams): Promise<number> {
   const result = await db.run(
     `INSERT INTO email_sequences (name, description, trigger_event, trigger_conditions, is_active)
      VALUES (?, ?, ?, ?, 1)`,
-    [
-      params.name,
-      params.description || null,
-      params.triggerEvent,
-      triggerConditionsJson
-    ]
+    [params.name, params.description || null, params.triggerEvent, triggerConditionsJson]
   );
 
   const sequenceId = result.lastID!;
@@ -97,7 +100,9 @@ async function create(params: CreateSequenceParams): Promise<number> {
  */
 async function update(
   id: number,
-  params: Partial<Pick<CreateSequenceParams, 'name' | 'description' | 'triggerEvent' | 'triggerConditions'>> & { isActive?: boolean }
+  params: Partial<
+    Pick<CreateSequenceParams, 'name' | 'description' | 'triggerEvent' | 'triggerConditions'>
+  > & { isActive?: boolean }
 ): Promise<void> {
   const db = getDatabase();
 
@@ -127,13 +132,10 @@ async function update(
 
   if (updates.length === 0) return;
 
-  updates.push('updated_at = datetime(\'now\')');
+  updates.push("updated_at = datetime('now')");
   values.push(id);
 
-  await db.run(
-    `UPDATE email_sequences SET ${updates.join(', ')} WHERE id = ?`,
-    values
-  );
+  await db.run(`UPDATE email_sequences SET ${updates.join(', ')} WHERE id = ?`, values);
 
   logger.info('Updated email sequence', {
     category: LOG_CATEGORY,
@@ -192,9 +194,8 @@ async function list(): Promise<SequenceWithSteps[]> {
 
     const totalEnrollments = enrollmentStats?.total || 0;
     const completedCount = enrollmentStats?.completed || 0;
-    const completionRate = totalEnrollments > 0
-      ? Math.round((completedCount / totalEnrollments) * 100) / 100
-      : 0;
+    const completionRate =
+      totalEnrollments > 0 ? Math.round((completedCount / totalEnrollments) * 100) / 100 : 0;
 
     enriched.push({
       ...seq,
@@ -236,9 +237,8 @@ async function getById(id: number): Promise<SequenceWithSteps | null> {
 
   const totalEnrollments = enrollmentStats?.total || 0;
   const completedCount = enrollmentStats?.completed || 0;
-  const completionRate = totalEnrollments > 0
-    ? Math.round((completedCount / totalEnrollments) * 100) / 100
-    : 0;
+  const completionRate =
+    totalEnrollments > 0 ? Math.round((completedCount / totalEnrollments) * 100) / 100 : 0;
 
   return {
     ...seq,
@@ -318,10 +318,7 @@ async function updateStep(stepId: number, params: Partial<CreateStepParams>): Pr
 
   values.push(stepId);
 
-  await db.run(
-    `UPDATE sequence_steps SET ${updates.join(', ')} WHERE id = ?`,
-    values
-  );
+  await db.run(`UPDATE sequence_steps SET ${updates.join(', ')} WHERE id = ?`, values);
 
   // Touch parent sequence
   const step = await db.get<SequenceStepRow>(
@@ -358,10 +355,11 @@ async function reorderSteps(sequenceId: number, stepIds: number[]): Promise<void
   const db = getDatabase();
 
   for (let i = 0; i < stepIds.length; i++) {
-    await db.run(
-      'UPDATE sequence_steps SET step_order = ? WHERE id = ? AND sequence_id = ?',
-      [i + 1, stepIds[i], sequenceId]
-    );
+    await db.run('UPDATE sequence_steps SET step_order = ? WHERE id = ? AND sequence_id = ?', [
+      i + 1,
+      stepIds[i],
+      sequenceId
+    ]);
   }
 
   await touchSequenceUpdatedAt(sequenceId);
@@ -524,7 +522,11 @@ async function resumeEnrollment(enrollmentId: number): Promise<void> {
  * Stop all active/paused enrollments for a specific entity.
  * Returns the number of enrollments stopped.
  */
-async function stopByEntity(entityType: string, entityId: number, reason?: string): Promise<number> {
+async function stopByEntity(
+  entityType: string,
+  entityId: number,
+  reason?: string
+): Promise<number> {
   const db = getDatabase();
   const stopReason = reason || 'Stopped by entity action';
 
@@ -595,7 +597,8 @@ async function processQueue(): Promise<ProcessQueueResult> {
         category: LOG_CATEGORY,
         metadata: {
           enrollmentId: enrollment.id,
-          error: processingError instanceof Error ? processingError.message : String(processingError)
+          error:
+            processingError instanceof Error ? processingError.message : String(processingError)
         }
       });
       result.failed++;
@@ -604,7 +607,12 @@ async function processQueue(): Promise<ProcessQueueResult> {
 
   logger.info('Sequence queue processing complete', {
     category: LOG_CATEGORY,
-    metadata: { sent: result.sent, failed: result.failed, stopped: result.stopped, completed: result.completed }
+    metadata: {
+      sent: result.sent,
+      failed: result.failed,
+      stopped: result.stopped,
+      completed: result.completed
+    }
   });
 
   return result;
@@ -712,7 +720,6 @@ async function processEnrollmentStep(
   }
   await logSend(db, enrollment.id, nextStep.id, 'failed', sendResult.message);
   return 'failed';
-
 }
 
 // ============================================
@@ -725,7 +732,13 @@ async function processEnrollmentStep(
  */
 async function handleEvent(
   eventType: string,
-  context: { entityType: string; entityId: number; entityEmail: string; entityName?: string; data?: Record<string, unknown> }
+  context: {
+    entityType: string;
+    entityId: number;
+    entityEmail: string;
+    entityName?: string;
+    data?: Record<string, unknown>;
+  }
 ): Promise<void> {
   const db = getDatabase();
 
@@ -884,10 +897,9 @@ async function insertStep(
  */
 async function touchSequenceUpdatedAt(sequenceId: number): Promise<void> {
   const db = getDatabase();
-  await db.run(
-    'UPDATE email_sequences SET updated_at = datetime(\'now\') WHERE id = ?',
-    [sequenceId]
-  );
+  await db.run("UPDATE email_sequences SET updated_at = datetime('now') WHERE id = ?", [
+    sequenceId
+  ]);
 }
 
 /**
@@ -1000,7 +1012,7 @@ function stripHtml(html: string): string {
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
-    .replace(/&#x27;/g, '\'')
+    .replace(/&#x27;/g, "'")
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }

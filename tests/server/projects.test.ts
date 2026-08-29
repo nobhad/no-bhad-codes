@@ -398,7 +398,7 @@ describe('Project Routes - Input Sanitization', () => {
 
     const res = await request(app)
       .get('/api/projects')
-      .query({ search: '\'; DROP TABLE projects; --' })
+      .query({ search: "'; DROP TABLE projects; --" })
       .set('Authorization', `Bearer ${adminToken}`);
 
     expect([200, 204, 400]).toContain(res.status);

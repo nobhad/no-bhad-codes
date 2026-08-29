@@ -84,7 +84,10 @@ describe('generateDefaultMilestones', () => {
     mockDb.get.mockResolvedValueOnce({ count: 0 });
     mockDb.run.mockResolvedValue({ lastID: 10 });
 
-    await generateDefaultMilestones(5, 'simple-site', { startDate: FIXED_START, skipIfExists: true });
+    await generateDefaultMilestones(5, 'simple-site', {
+      startDate: FIXED_START,
+      skipIfExists: true
+    });
 
     // The existence check should have been made
     expect(mockDb.get).toHaveBeenCalledWith(
@@ -159,7 +162,9 @@ describe('generateDefaultMilestones', () => {
     mockDb.get.mockResolvedValueOnce({ count: 0 });
     mockDb.run.mockResolvedValue({ lastID: 1 });
 
-    const result = await generateDefaultMilestones(1, 'totally-unknown-type', { startDate: FIXED_START });
+    const result = await generateDefaultMilestones(1, 'totally-unknown-type', {
+      startDate: FIXED_START
+    });
 
     // "other" has 3 milestone templates
     expect(result.milestonesCreated).toBe(3);
@@ -537,9 +542,7 @@ describe('backfillMilestones', () => {
   });
 
   it('uses project start_date when available', async () => {
-    mockDb.all.mockResolvedValueOnce([
-      { id: 5, project_type: 'other', start_date: '2025-06-15' }
-    ]);
+    mockDb.all.mockResolvedValueOnce([{ id: 5, project_type: 'other', start_date: '2025-06-15' }]);
     mockDb.get.mockResolvedValueOnce({ count: 0 });
     mockDb.run.mockResolvedValue({ lastID: 1 });
 
@@ -551,9 +554,7 @@ describe('backfillMilestones', () => {
   });
 
   it('uses today as start when project start_date is null', async () => {
-    mockDb.all.mockResolvedValueOnce([
-      { id: 6, project_type: 'other', start_date: null }
-    ]);
+    mockDb.all.mockResolvedValueOnce([{ id: 6, project_type: 'other', start_date: null }]);
     mockDb.get.mockResolvedValueOnce({ count: 0 });
     mockDb.run.mockResolvedValue({ lastID: 1 });
 

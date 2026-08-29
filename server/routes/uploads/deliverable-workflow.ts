@@ -11,18 +11,9 @@ import express, { Router } from 'express';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { validateRequest } from '../../middleware/validation.js';
-import {
-  errorResponse,
-  sendSuccess,
-  sendCreated,
-  ErrorCodes
-} from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 import { fileService } from '../../services/file-service.js';
-import {
-  UploadValidationSchemas,
-  canAccessProject,
-  canAccessFile
-} from './shared.js';
+import { UploadValidationSchemas, canAccessProject, canAccessFile } from './shared.js';
 
 const router = Router();
 
@@ -209,7 +200,12 @@ router.post(
     }
 
     if (!reason) {
-      return errorResponse(res, 'Reason is required when rejecting', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'Reason is required when rejecting',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     const reviewerEmail = req.user?.email || 'admin';
@@ -261,7 +257,12 @@ router.post(
 
     const workflow = await fileService.getDeliverableWorkflow(fileId);
     if (!workflow) {
-      return errorResponse(res, 'Deliverable workflow not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
+      return errorResponse(
+        res,
+        'Deliverable workflow not found',
+        404,
+        ErrorCodes.RESOURCE_NOT_FOUND
+      );
     }
 
     const authorEmail = req.user?.email || 'unknown';

@@ -144,9 +144,7 @@ describe('ApiValidator', () => {
       // HTML sanitization is NOT done here — it is handled by the global
       // sanitizeInputs middleware. The validator only trims the string.
       expect(result.isValid).toBe(true);
-      expect(result.sanitizedData.message).toBe(
-        '<script>alert("xss")</script>Hello world'
-      );
+      expect(result.sanitizedData.message).toBe('<script>alert("xss")</script>Hello world');
     });
   });
 

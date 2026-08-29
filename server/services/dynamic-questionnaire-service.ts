@@ -27,7 +27,13 @@ import { logger } from './logger.js';
 
 type QuestionType = 'text' | 'textarea' | 'select' | 'multiselect' | 'radio' | 'number' | 'url';
 type QuestionPriority = 'essential' | 'important' | 'nice_to_have';
-type QuestionCategory = 'about_you' | 'project_details' | 'design' | 'content' | 'technical' | 'billing';
+type QuestionCategory =
+  | 'about_you'
+  | 'project_details'
+  | 'design'
+  | 'content'
+  | 'technical'
+  | 'billing';
 
 interface QuestionBankEntry {
   field: string;
@@ -131,7 +137,8 @@ const QUESTION_BANK: QuestionBankEntry[] = [
   },
   {
     field: 'description',
-    question: 'Tell us about your project -- what do you need and what problem are you trying to solve?',
+    question:
+      'Tell us about your project -- what do you need and what problem are you trying to solve?',
     type: 'textarea',
     category: 'project_details',
     priority: 'essential',
@@ -250,7 +257,8 @@ const QUESTION_BANK: QuestionBankEntry[] = [
   },
   {
     field: 'inspiration',
-    question: 'Are there any websites you love the look and feel of? Share links or describe what you like.',
+    question:
+      'Are there any websites you love the look and feel of? Share links or describe what you like.',
     type: 'textarea',
     category: 'design',
     priority: 'nice_to_have',
@@ -296,7 +304,7 @@ const QUESTION_BANK: QuestionBankEntry[] = [
       'I want free hosting (Netlify/Vercel)',
       'I want managed hosting (we handle everything)',
       'No preference -- recommend something',
-      'I don\'t know what hosting is'
+      "I don't know what hosting is"
     ],
     category: 'technical',
     priority: 'nice_to_have'
@@ -346,12 +354,7 @@ const QUESTION_BANK: QuestionBankEntry[] = [
 // Fields prefixed with 'client.' come from the clients table;
 // all others come from the projects table.
 
-const _CLIENT_FIELDS = new Set([
-  'company_name',
-  'phone',
-  'billing_name',
-  'billing_address'
-]);
+const _CLIENT_FIELDS = new Set(['company_name', 'phone', 'billing_name', 'billing_address']);
 
 // =====================================================
 // CORE FUNCTION
@@ -373,7 +376,7 @@ export async function generateDynamicQuestionnaire(
   const db = getDatabase();
 
   // Fetch project + client data to determine what is already collected
-  const row = await db.get(
+  const row = (await db.get(
     `SELECT p.*, c.contact_name, c.email, c.phone, c.company_name,
             c.billing_name, c.billing_address, c.billing_city,
             c.billing_state, c.billing_zip
@@ -381,7 +384,7 @@ export async function generateDynamicQuestionnaire(
      JOIN active_clients c ON p.client_id = c.id
      WHERE p.id = ?`,
     [projectId]
-  ) as Record<string, unknown> | undefined;
+  )) as Record<string, unknown> | undefined;
 
   if (!row) {
     await logger.warn(`[DynamicQuestionnaire] Project ${projectId} not found`, {
@@ -454,10 +457,11 @@ export async function generateDynamicQuestionnaire(
   const projectName = String(row.project_name || 'Your Project');
   const _title = `Project Information - ${projectName}`;
   const missingCount = allQuestions.length - collectedFields.size;
-  const description = missingCount > 0
-    ? 'We have some of your project details already — please review what we have and fill in anything that\'s missing. ' +
-      'The more detail you provide, the better we can tailor our proposal to your needs.'
-    : 'We have your project details on file. Please review everything and make any corrections or updates.';
+  const description =
+    missingCount > 0
+      ? "We have some of your project details already — please review what we have and fill in anything that's missing. " +
+        'The more detail you provide, the better we can tailor our proposal to your needs.'
+      : 'We have your project details on file. Please review everything and make any corrections or updates.';
 
   const qResult = await db.run(
     `INSERT INTO questionnaires (
@@ -541,7 +545,7 @@ function resolveFieldValue(row: Record<string, unknown>, field: string): unknown
     const hasCity = isFieldPopulated(row.billing_city);
     const hasState = isFieldPopulated(row.billing_state);
     const hasZip = isFieldPopulated(row.billing_zip);
-    return (hasAddress || hasCity || hasState || hasZip) ? 'populated' : null;
+    return hasAddress || hasCity || hasState || hasZip ? 'populated' : null;
   }
 
   return row[field];

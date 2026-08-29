@@ -9,7 +9,6 @@
  * Tokens: --cmd-palette-* defined in portal-theme.css
  */
 
-
 /* ============================================
  * OVERLAY
  * ============================================ */
@@ -154,7 +153,9 @@
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   font-family: var(--font-family-mono, monospace);
-  transition: background-color 0.1s ease, color 0.1s ease;
+  transition:
+    background-color 0.1s ease,
+    color 0.1s ease;
 }
 
 .command-palette-item.selected,
@@ -265,4 +266,3 @@
     display: none;
   }
 }
-

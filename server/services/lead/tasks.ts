@@ -11,11 +11,7 @@ import {
   toLeadTask as toTask,
   type LeadTaskRow as TaskRow
 } from '../../database/entities/index.js';
-import type {
-  SqlValue,
-  LeadTask,
-  TaskData
-} from './types.js';
+import type { SqlValue, LeadTask, TaskData } from './types.js';
 
 export async function createTask(projectId: number, data: TaskData): Promise<LeadTask> {
   const db = getDatabase();
@@ -198,7 +194,9 @@ export async function getOverdueTasks(): Promise<(LeadTask & { projectName: stri
   }));
 }
 
-export async function getUpcomingTasks(days: number = 7): Promise<(LeadTask & { projectName: string })[]> {
+export async function getUpcomingTasks(
+  days: number = 7
+): Promise<(LeadTask & { projectName: string })[]> {
   const db = getDatabase();
 
   const rows = (await db.all(

@@ -432,7 +432,7 @@ html[data-theme="dark"] body[data-page="client-landing"] .login-form {
 }
 
 .requirement::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 50%;
@@ -453,10 +453,10 @@ html[data-theme="dark"] body[data-page="client-landing"] .login-form {
 }
 
 /* Dark mode support */
-[data-theme='dark'] .password-requirements {
+[data-theme="dark"] .password-requirements {
   background: var(--color-bg-secondary, #2a2a2a);
 }
 
-[data-theme='dark'] .requirements-title {
+[data-theme="dark"] .requirements-title {
   color: var(--color-text-primary, #e0e0e0);
 }

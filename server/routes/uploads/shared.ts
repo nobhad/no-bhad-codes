@@ -73,18 +73,29 @@ export const UploadValidationSchemas = {
       type: 'string' as const,
       maxLength: 100,
       allowedValues: [
-        'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
-        'application/pdf', 'application/msword',
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+        'image/svg+xml',
+        'application/pdf',
+        'application/msword',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'text/plain', 'application/rtf',
+        'text/plain',
+        'application/rtf',
         'application/vnd.ms-excel',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'text/csv',
         'application/vnd.ms-powerpoint',
         'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-        'application/zip', 'application/x-rar-compressed', 'application/x-tar',
-        'application/gzip', 'application/x-7z-compressed',
-        'application/json', 'text/xml', 'application/xml'
+        'application/zip',
+        'application/x-rar-compressed',
+        'application/x-tar',
+        'application/gzip',
+        'application/x-7z-compressed',
+        'application/json',
+        'text/xml',
+        'application/xml'
       ]
     },
     fileSize: {
@@ -95,7 +106,13 @@ export const UploadValidationSchemas = {
     description: { type: 'string' as const, maxLength: 1000 },
     category: {
       type: 'string' as const,
-      allowedValues: ['general', 'avatar', 'project_file', 'invoice_attachment', 'message_attachment']
+      allowedValues: [
+        'general',
+        'avatar',
+        'project_file',
+        'invoice_attachment',
+        'message_attachment'
+      ]
     }
   },
   deliverableAction: {
@@ -134,7 +151,10 @@ export function resolveFilePath(dbFilePath: string): string {
 // Access Control Helpers
 // ============================================
 
-export async function canAccessProject(req: AuthenticatedRequest, projectId: number): Promise<boolean> {
+export async function canAccessProject(
+  req: AuthenticatedRequest,
+  projectId: number
+): Promise<boolean> {
   if (req.user?.type === 'admin') {
     return true;
   }
@@ -206,7 +226,11 @@ const storage = multer.diskStorage({
   }
 });
 
-const fileFilter = (req: express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (
+  req: express.Request,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback
+) => {
   const allowedTypes = {
     images: /\.(jpg|jpeg|png|gif|webp|svg)$/i,
     documents: /\.(pdf|doc|docx|txt|md|rtf)$/i,

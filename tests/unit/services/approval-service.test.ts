@@ -350,7 +350,9 @@ describe('ApprovalService', () => {
       expect(instance.status).toBe('in_progress');
       // Only one approval request created (step 1 of sequential)
       const runCalls = mockDb.run.mock.calls;
-      const insertRequestCalls = runCalls.filter(([q]) => q.includes('INSERT INTO approval_requests'));
+      const insertRequestCalls = runCalls.filter(([q]) =>
+        q.includes('INSERT INTO approval_requests')
+      );
       expect(insertRequestCalls).toHaveLength(1);
     });
 
@@ -368,7 +370,9 @@ describe('ApprovalService', () => {
       await approvalService.startWorkflow('proposal', 51, 'user@example.com');
 
       const runCalls = mockDb.run.mock.calls;
-      const insertRequestCalls = runCalls.filter(([q]) => q.includes('INSERT INTO approval_requests'));
+      const insertRequestCalls = runCalls.filter(([q]) =>
+        q.includes('INSERT INTO approval_requests')
+      );
       expect(insertRequestCalls).toHaveLength(2);
     });
 
@@ -386,7 +390,9 @@ describe('ApprovalService', () => {
       await approvalService.startWorkflow('proposal', 52, 'user@example.com');
 
       const runCalls = mockDb.run.mock.calls;
-      const insertRequestCalls = runCalls.filter(([q]) => q.includes('INSERT INTO approval_requests'));
+      const insertRequestCalls = runCalls.filter(([q]) =>
+        q.includes('INSERT INTO approval_requests')
+      );
       expect(insertRequestCalls).toHaveLength(2);
     });
 
@@ -402,7 +408,9 @@ describe('ApprovalService', () => {
       expect(instance.id).toBe(103);
       // No approval requests created
       const runCalls = mockDb.run.mock.calls;
-      const insertRequestCalls = runCalls.filter(([q]) => q.includes('INSERT INTO approval_requests'));
+      const insertRequestCalls = runCalls.filter(([q]) =>
+        q.includes('INSERT INTO approval_requests')
+      );
       expect(insertRequestCalls).toHaveLength(0);
     });
 
@@ -461,7 +469,11 @@ describe('ApprovalService', () => {
       mockDb.all.mockResolvedValueOnce([]);
 
       const instance = await approvalService.startWorkflow(
-        'proposal', 57, 'user@example.com', undefined, 'Rush this one'
+        'proposal',
+        57,
+        'user@example.com',
+        undefined,
+        'Rush this one'
       );
 
       expect(instance.notes).toBe('Rush this one');
@@ -536,7 +548,7 @@ describe('ApprovalService', () => {
       expect(results).toHaveLength(1);
       expect(results[0].workflow_name).toBe('Proposal Approval');
       const [query] = mockDb.all.mock.calls[0];
-      expect(query).toContain('status IN (\'pending\', \'in_progress\')');
+      expect(query).toContain("status IN ('pending', 'in_progress')");
     });
   });
 
@@ -547,7 +559,12 @@ describe('ApprovalService', () => {
   describe('getPendingApprovalsForUser', () => {
     it('returns pending approvals for a given email', async () => {
       mockDb.all.mockResolvedValueOnce([
-        { ...mockApprovalRequest, entity_type: 'proposal', entity_id: 50, workflow_name: 'Proposal Approval' }
+        {
+          ...mockApprovalRequest,
+          entity_type: 'proposal',
+          entity_id: 50,
+          workflow_name: 'Proposal Approval'
+        }
       ]);
 
       const results = await approvalService.getPendingApprovalsForUser('manager@example.com');
@@ -555,7 +572,7 @@ describe('ApprovalService', () => {
       expect(results).toHaveLength(1);
       expect(results[0].approver_email).toBe('manager@example.com');
       const [query, params] = mockDb.all.mock.calls[0];
-      expect(query).toContain('ar.status = \'pending\'');
+      expect(query).toContain("ar.status = 'pending'");
       expect(params).toEqual(['manager@example.com']);
     });
 
@@ -576,17 +593,17 @@ describe('ApprovalService', () => {
     it('throws when approval request not found', async () => {
       mockDb.get.mockResolvedValueOnce(undefined);
 
-      await expect(
-        approvalService.approve(999, 'manager@example.com')
-      ).rejects.toThrow(/approval request not found/i);
+      await expect(approvalService.approve(999, 'manager@example.com')).rejects.toThrow(
+        /approval request not found/i
+      );
     });
 
     it('throws when request is already processed', async () => {
       mockDb.get.mockResolvedValueOnce({ ...mockApprovalRequest, status: 'approved' });
 
-      await expect(
-        approvalService.approve(200, 'manager@example.com')
-      ).rejects.toThrow('Request already processed');
+      await expect(approvalService.approve(200, 'manager@example.com')).rejects.toThrow(
+        'Request already processed'
+      );
     });
 
     it('approves a request and advances a sequential workflow to next step', async () => {
@@ -615,7 +632,7 @@ describe('ApprovalService', () => {
 
       expect(result.current_step).toBe(2);
       const updateRequestCall = mockDb.run.mock.calls[0];
-      expect(updateRequestCall[0]).toContain('status = \'approved\'');
+      expect(updateRequestCall[0]).toContain("status = 'approved'");
       expect(updateRequestCall[1]).toEqual(['LGTM', 200]);
     });
 
@@ -632,13 +649,17 @@ describe('ApprovalService', () => {
       mockDb.all.mockResolvedValueOnce([{ ...mockApprovalRequest, status: 'approved' }]);
       // No next step — should update status to approved
       mockDb.run.mockResolvedValueOnce({});
-      mockDb.get.mockResolvedValueOnce({ ...mockInstance, status: 'approved', completed_at: '2026-01-02T00:00:00Z' });
+      mockDb.get.mockResolvedValueOnce({
+        ...mockInstance,
+        status: 'approved',
+        completed_at: '2026-01-02T00:00:00Z'
+      });
 
       const result = await approvalService.approve(200, 'manager@example.com');
 
       expect(result.status).toBe('approved');
-      const completeCall = mockDb.run.mock.calls.find(([q]) =>
-        q.includes('status = \'approved\'') && q.includes('approval_workflow_instances')
+      const completeCall = mockDb.run.mock.calls.find(
+        ([q]) => q.includes("status = 'approved'") && q.includes('approval_workflow_instances')
       );
       expect(completeCall).toBeDefined();
     });
@@ -665,8 +686,8 @@ describe('ApprovalService', () => {
       expect(result.status).toBe('approved');
 
       // Verify "skip remaining" run call
-      const skipCall = mockDb.run.mock.calls.find(([q]) =>
-        q.includes('status = \'skipped\'') && q.includes('approval_requests')
+      const skipCall = mockDb.run.mock.calls.find(
+        ([q]) => q.includes("status = 'skipped'") && q.includes('approval_requests')
       );
       expect(skipCall).toBeDefined();
     });
@@ -717,8 +738,8 @@ describe('ApprovalService', () => {
 
       expect(result.status).toBe('in_progress');
       // No "approved" instance update
-      const approveInstanceCall = mockDb.run.mock.calls.find(([q]) =>
-        q.includes('status = \'approved\'') && q.includes('approval_workflow_instances')
+      const approveInstanceCall = mockDb.run.mock.calls.find(
+        ([q]) => q.includes("status = 'approved'") && q.includes('approval_workflow_instances')
       );
       expect(approveInstanceCall).toBeUndefined();
     });
@@ -740,9 +761,9 @@ describe('ApprovalService', () => {
     it('throws when request is already processed', async () => {
       mockDb.get.mockResolvedValueOnce({ ...mockApprovalRequest, status: 'rejected' });
 
-      await expect(
-        approvalService.reject(200, 'manager@example.com', 'No')
-      ).rejects.toThrow('Request already processed');
+      await expect(approvalService.reject(200, 'manager@example.com', 'No')).rejects.toThrow(
+        'Request already processed'
+      );
     });
 
     it('rejects a request and marks the workflow as rejected', async () => {
@@ -750,19 +771,23 @@ describe('ApprovalService', () => {
       mockDb.run.mockResolvedValueOnce({}); // update approval_requests
       mockDb.run.mockResolvedValueOnce({}); // update workflow_instances
       mockDb.run.mockResolvedValueOnce({}); // logHistory
-      mockDb.get.mockResolvedValueOnce({ ...mockInstance, status: 'rejected', completed_at: '2026-01-02T00:00:00Z' });
+      mockDb.get.mockResolvedValueOnce({
+        ...mockInstance,
+        status: 'rejected',
+        completed_at: '2026-01-02T00:00:00Z'
+      });
 
       const result = await approvalService.reject(200, 'manager@example.com', 'Budget too high');
 
       expect(result.status).toBe('rejected');
 
       const updateRequestCall = mockDb.run.mock.calls[0];
-      expect(updateRequestCall[0]).toContain('status = \'rejected\'');
+      expect(updateRequestCall[0]).toContain("status = 'rejected'");
       expect(updateRequestCall[1]).toEqual(['Budget too high', 200]);
 
       const updateInstanceCall = mockDb.run.mock.calls[1];
       expect(updateInstanceCall[0]).toContain('approval_workflow_instances');
-      expect(updateInstanceCall[0]).toContain('status = \'rejected\'');
+      expect(updateInstanceCall[0]).toContain("status = 'rejected'");
     });
   });
 
@@ -775,18 +800,26 @@ describe('ApprovalService', () => {
       mockDb.run.mockResolvedValueOnce({}); // skip pending requests
       mockDb.run.mockResolvedValueOnce({}); // update workflow status
       mockDb.run.mockResolvedValueOnce({}); // logHistory
-      mockDb.get.mockResolvedValueOnce({ ...mockInstance, status: 'cancelled', completed_at: '2026-01-02T00:00:00Z' });
+      mockDb.get.mockResolvedValueOnce({
+        ...mockInstance,
+        status: 'cancelled',
+        completed_at: '2026-01-02T00:00:00Z'
+      });
 
-      const result = await approvalService.cancelWorkflow(100, 'admin@example.com', 'No longer needed');
+      const result = await approvalService.cancelWorkflow(
+        100,
+        'admin@example.com',
+        'No longer needed'
+      );
 
       expect(result.status).toBe('cancelled');
 
       const skipCall = mockDb.run.mock.calls[0];
-      expect(skipCall[0]).toContain('status = \'skipped\'');
+      expect(skipCall[0]).toContain("status = 'skipped'");
       expect(skipCall[1]).toEqual([100]);
 
       const updateCall = mockDb.run.mock.calls[1];
-      expect(updateCall[0]).toContain('status = \'cancelled\'');
+      expect(updateCall[0]).toContain("status = 'cancelled'");
       expect(updateCall[1]).toContain('No longer needed');
     });
 

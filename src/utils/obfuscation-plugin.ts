@@ -79,61 +79,61 @@ export function getObfuscatorOptions(
   };
 
   switch (level) {
-  case 'basic':
-    return {
-      ...baseOptions,
-      identifierNamesGenerator: 'mangled'
-    };
+    case 'basic':
+      return {
+        ...baseOptions,
+        identifierNamesGenerator: 'mangled'
+      };
 
-  case 'standard':
-    return {
-      ...baseOptions,
-      // controlFlowFlattening MUST stay disabled. It miscompiles optional-call
-      // expressions: `fn?.(args)` is rewritten into an unconditional wrapped call
-      // `wrapper(fn, args)` that drops the `?.` nullish guard, so any optional
-      // callback that is undefined at runtime (e.g. `onSuccess?.()`,
-      // `showNotification?.()`, `transform?.()`) throws "X is not a function".
-      // This silently broke the entire admin dashboard in production (the error
-      // only appears in the obfuscated build, not dev). See CURRENT_WORK.md.
-      controlFlowFlattening: false,
-      numbersToExpressions: true,
-      splitStrings: true,
-      splitStringsChunkLength: 10
-    };
+    case 'standard':
+      return {
+        ...baseOptions,
+        // controlFlowFlattening MUST stay disabled. It miscompiles optional-call
+        // expressions: `fn?.(args)` is rewritten into an unconditional wrapped call
+        // `wrapper(fn, args)` that drops the `?.` nullish guard, so any optional
+        // callback that is undefined at runtime (e.g. `onSuccess?.()`,
+        // `showNotification?.()`, `transform?.()`) throws "X is not a function".
+        // This silently broke the entire admin dashboard in production (the error
+        // only appears in the obfuscated build, not dev). See CURRENT_WORK.md.
+        controlFlowFlattening: false,
+        numbersToExpressions: true,
+        splitStrings: true,
+        splitStringsChunkLength: 10
+      };
 
-  case 'advanced':
-    return {
-      ...baseOptions,
-      // Disabled — miscompiles optional-call expressions (see 'standard' above).
-      controlFlowFlattening: false,
-      deadCodeInjection: true,
-      deadCodeInjectionThreshold: 0.3,
-      numbersToExpressions: true,
-      selfDefending: true,
-      splitStrings: true,
-      splitStringsChunkLength: 5,
-      transformObjectKeys: true
-    };
+    case 'advanced':
+      return {
+        ...baseOptions,
+        // Disabled — miscompiles optional-call expressions (see 'standard' above).
+        controlFlowFlattening: false,
+        deadCodeInjection: true,
+        deadCodeInjectionThreshold: 0.3,
+        numbersToExpressions: true,
+        selfDefending: true,
+        splitStrings: true,
+        splitStringsChunkLength: 5,
+        transformObjectKeys: true
+      };
 
-  case 'maximum':
-    return {
-      ...baseOptions,
-      // Disabled — miscompiles optional-call expressions (see 'standard' above).
-      controlFlowFlattening: false,
-      deadCodeInjection: true,
-      deadCodeInjectionThreshold: 0.4,
-      identifierNamesGenerator: 'hexadecimal',
-      numbersToExpressions: true,
-      renameGlobals: false, // Keep false to avoid breaking imports
-      selfDefending: true,
-      splitStrings: true,
-      splitStringsChunkLength: 3,
-      transformObjectKeys: true,
-      unicodeEscapeSequence: true
-    };
+    case 'maximum':
+      return {
+        ...baseOptions,
+        // Disabled — miscompiles optional-call expressions (see 'standard' above).
+        controlFlowFlattening: false,
+        deadCodeInjection: true,
+        deadCodeInjectionThreshold: 0.4,
+        identifierNamesGenerator: 'hexadecimal',
+        numbersToExpressions: true,
+        renameGlobals: false, // Keep false to avoid breaking imports
+        selfDefending: true,
+        splitStrings: true,
+        splitStringsChunkLength: 3,
+        transformObjectKeys: true,
+        unicodeEscapeSequence: true
+      };
 
-  default:
-    return baseOptions;
+    default:
+      return baseOptions;
   }
 }
 

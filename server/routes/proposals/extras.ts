@@ -311,7 +311,12 @@ router.post(
 
     const { description, unitPrice } = req.body;
     if (!description || unitPrice === undefined) {
-      return errorResponse(res, 'description and unitPrice are required', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'description and unitPrice are required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
     const item = await proposalService.addCustomItem(proposalId, req.body);
     sendCreated(res, { item }, 'Custom item added successfully');
@@ -430,7 +435,12 @@ router.post(
       return errorResponse(res, 'type and value are required', 400, ErrorCodes.VALIDATION_ERROR);
     }
     if (!['percentage', 'fixed'].includes(type)) {
-      return errorResponse(res, 'type must be percentage or fixed', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'type must be percentage or fixed',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
     await proposalService.applyDiscount(proposalId, type, value, reason);
     sendSuccess(res, undefined, 'Discount applied successfully');
@@ -664,7 +674,8 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const daysOldParam = req.query.daysOld ? parseInt(req.query.daysOld as string, 10) : 7;
-    const daysOld = isNaN(daysOldParam) || daysOldParam < 1 || daysOldParam > 365 ? 7 : daysOldParam;
+    const daysOld =
+      isNaN(daysOldParam) || daysOldParam < 1 || daysOldParam > 365 ? 7 : daysOldParam;
     const proposalIds = await proposalService.getProposalsDueForReminder(daysOld);
     sendSuccess(res, { proposalIds });
   })

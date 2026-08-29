@@ -11,10 +11,7 @@
 import { Sentry, shutdownOpenTelemetry } from './instrument.js';
 
 // Import observability utilities after instrumentation
-import {
-  initMetrics,
-  registerDbStatsCallback
-} from './observability/metrics.js';
+import { initMetrics, registerDbStatsCallback } from './observability/metrics.js';
 
 import express from 'express';
 import { i18nMiddleware } from './middleware/i18n-middleware.js';
@@ -169,12 +166,12 @@ app.use(
     crossOriginResourcePolicy: { policy: 'cross-origin' },
     contentSecurityPolicy: {
       directives: {
-        defaultSrc: ['\'self\''],
-        scriptSrc: ['\'self\'', '\'unsafe-inline\'', 'https://js.stripe.com'], // GSAP does not require unsafe-eval; Stripe Elements SDK
-        styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
-        imgSrc: ['\'self\'', 'data:', 'https:', 'blob:'],
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", 'https://js.stripe.com'], // GSAP does not require unsafe-eval; Stripe Elements SDK
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
         connectSrc: [
-          '\'self\'',
+          "'self'",
           'https://api.sentry.io',
           'https://api.stripe.com',
           // Allow localhost API connections in development (Vite on 4000 -> Express on 4001)
@@ -182,12 +179,12 @@ app.use(
             ? ['http://localhost:4001', 'ws://localhost:4001']
             : [])
         ],
-        fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
-        mediaSrc: ['\'self\''],
-        objectSrc: ['\'none\''],
-        frameSrc: ['\'self\'', 'https://js.stripe.com'],
-        baseUri: ['\'self\''],
-        formAction: ['\'self\'']
+        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+        mediaSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        frameSrc: ["'self'", 'https://js.stripe.com'],
+        baseUri: ["'self'"],
+        formAction: ["'self'"]
       }
     },
     // Prevent clickjacking
@@ -202,9 +199,10 @@ app.use(
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     // HTTP Strict Transport Security - prevent SSL downgrade attacks
     // Only enabled in production where HTTPS is enforced
-    hsts: process.env.NODE_ENV === 'production'
-      ? { maxAge: 31536000, includeSubDomains: true, preload: true }
-      : false
+    hsts:
+      process.env.NODE_ENV === 'production'
+        ? { maxAge: 31536000, includeSubDomains: true, preload: true }
+        : false
   })
 );
 
@@ -386,15 +384,25 @@ app.use(
       // These endpoints have their own rate limiting and validation
       if (req.path.includes('/auth/')) return true;
       // Skip CSRF for public proposal signature endpoints
-      if (req.path.match(/\/proposals\/\d+\/sign/) || req.path.match(/\/proposals\/sign\//)) return true;
+      if (req.path.match(/\/proposals\/\d+\/sign/) || req.path.match(/\/proposals\/sign\//))
+        return true;
       // Skip CSRF for analytics tracking (public endpoint, uses rate limiting)
       if (req.path.includes('/analytics/track')) return true;
       // Skip CSRF for public feedback survey submission
       if (req.path.includes('/feedback/survey/') && req.method === 'POST') return true;
       // Skip CSRF for public testimonial reads
-      if (req.path.includes('/feedback/testimonials/public') || req.path.includes('/feedback/testimonials/featured')) return true;
+      if (
+        req.path.includes('/feedback/testimonials/public') ||
+        req.path.includes('/feedback/testimonials/featured')
+      )
+        return true;
       // Skip CSRF for public embed widget endpoints
-      if (req.path.includes('/embed/contact-form') || req.path.includes('/embed/testimonials') || req.path.includes('/embed/status')) return true;
+      if (
+        req.path.includes('/embed/contact-form') ||
+        req.path.includes('/embed/testimonials') ||
+        req.path.includes('/embed/status')
+      )
+        return true;
       return false;
     }
   })
@@ -476,7 +484,10 @@ app.use((req, res) => {
         url: req.originalUrl,
         headers: Object.fromEntries(
           Object.entries(req.headers).filter(
-            ([key]) => !['authorization', 'cookie', 'x-api-key', 'x-csrf-token', 'x-auth-token'].includes(key.toLowerCase())
+            ([key]) =>
+              !['authorization', 'cookie', 'x-api-key', 'x-csrf-token', 'x-auth-token'].includes(
+                key.toLowerCase()
+              )
           )
         ) as Record<string, string>
       }
@@ -523,10 +534,10 @@ async function startServer() {
       const stats = getDatabaseStats();
       return stats
         ? {
-          active: stats.activeConnections,
-          idle: stats.idleConnections,
-          queued: stats.queuedRequests
-        }
+            active: stats.activeConnections,
+            idle: stats.idleConnections,
+            queued: stats.queuedRequests
+          }
         : { active: 0, idle: 0, queued: 0 };
     });
     logger.info('Observability metrics initialized');
@@ -585,9 +596,7 @@ async function startServer() {
       } else if (driftReport.ok) {
         // No drift — snapshot still matches, nothing to do.
       } else if (acceptDrift || migrationsApplied) {
-        const reason = acceptDrift
-          ? 'ACCEPT_SCHEMA_DRIFT'
-          : 'migrations applied this boot';
+        const reason = acceptDrift ? 'ACCEPT_SCHEMA_DRIFT' : 'migrations applied this boot';
         logger.warn(
           `[Schema] DRIFT ACCEPTED (${reason}) — rebaselining. ` +
             `added=${driftReport.added.length} removed=${driftReport.removed.length} modified=${driftReport.modified.length}`,
@@ -595,8 +604,7 @@ async function startServer() {
         );
         await recordSchemaBaseline(getDatabase(), await captureSchemaSnapshot(getDatabase()));
       } else {
-        const summary =
-          `added=${driftReport.added.length} removed=${driftReport.removed.length} modified=${driftReport.modified.length}`;
+        const summary = `added=${driftReport.added.length} removed=${driftReport.removed.length} modified=${driftReport.modified.length}`;
         logger.error(`[Schema] DRIFT DETECTED — ${summary}`, {
           category: 'SCHEMA_DRIFT',
           metadata: { report: driftReport }
@@ -623,10 +631,7 @@ async function startServer() {
     } catch (driftErr) {
       // Rethrow only the "detected in prod" error; swallow capture
       // errors so drift detection itself can't brick startup.
-      if (
-        driftErr instanceof Error &&
-        driftErr.message.startsWith('Schema drift detected')
-      ) {
+      if (driftErr instanceof Error && driftErr.message.startsWith('Schema drift detected')) {
         throw driftErr;
       }
       logger.error('[Schema] Drift detection failed (non-fatal):', {
@@ -831,7 +836,7 @@ async function startServer() {
         const stats = getDatabaseStats();
         logger.error(
           `Forced shutdown after ${SHUTDOWN_FORCE_TIMEOUT_MS}ms — ` +
-          `db active=${stats?.activeConnections ?? '?'}, queued=${stats?.queuedRequests ?? '?'}`
+            `db active=${stats?.activeConnections ?? '?'}, queued=${stats?.queuedRequests ?? '?'}`
         );
         process.exit(1);
       }, SHUTDOWN_FORCE_TIMEOUT_MS);

@@ -223,12 +223,19 @@ export function getPortalConfig(portalType: 'admin' | 'client'): PortalConfig {
   const topLevelNavItems =
     role === 'admin'
       ? navItems.filter(
-        (item) =>
-          !item.group ||
-            ['work', 'crm', 'documents', 'traffic', 'workflows', 'analytics', 'support', 'system'].includes(
-              item.id
-            )
-      )
+          (item) =>
+            !item.group ||
+            [
+              'work',
+              'crm',
+              'documents',
+              'traffic',
+              'workflows',
+              'analytics',
+              'support',
+              'system'
+            ].includes(item.id)
+        )
       : navItems;
 
   return {

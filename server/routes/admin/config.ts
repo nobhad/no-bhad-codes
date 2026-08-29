@@ -44,7 +44,12 @@ router.get(
       logger.error('[AdminConfig] Failed to export tier-milestones config:', {
         error: error instanceof Error ? error : undefined
       });
-      return errorResponse(res, 'Failed to export tier milestones config', 500, ErrorCodes.INTERNAL_ERROR);
+      return errorResponse(
+        res,
+        'Failed to export tier milestones config',
+        500,
+        ErrorCodes.INTERNAL_ERROR
+      );
     }
   })
 );
@@ -69,7 +74,12 @@ router.get(
       logger.error('[AdminConfig] Failed to export default-tasks config:', {
         error: error instanceof Error ? error : undefined
       });
-      return errorResponse(res, 'Failed to export default tasks config', 500, ErrorCodes.INTERNAL_ERROR);
+      return errorResponse(
+        res,
+        'Failed to export default tasks config',
+        500,
+        ErrorCodes.INTERNAL_ERROR
+      );
     }
   })
 );
@@ -131,12 +141,21 @@ router.post(
         metadata: { updatedBy: req.user?.email }
       });
 
-      sendSuccess(res, { updated: true, backupPath }, 'Config file updated. Note: Server restart required for changes to take effect.');
+      sendSuccess(
+        res,
+        { updated: true, backupPath },
+        'Config file updated. Note: Server restart required for changes to take effect.'
+      );
     } catch (error) {
       logger.error('[AdminConfig] Failed to update default-tasks config:', {
         error: error instanceof Error ? error : undefined
       });
-      return errorResponse(res, 'Failed to update default tasks config', 500, ErrorCodes.INTERNAL_ERROR);
+      return errorResponse(
+        res,
+        'Failed to update default tasks config',
+        500,
+        ErrorCodes.INTERNAL_ERROR
+      );
     }
   })
 );
@@ -161,7 +180,12 @@ router.get(
       logger.error('[AdminConfig] Failed to export tier-tasks config:', {
         error: error instanceof Error ? error : undefined
       });
-      return errorResponse(res, 'Failed to export tier tasks config', 500, ErrorCodes.INTERNAL_ERROR);
+      return errorResponse(
+        res,
+        'Failed to export tier tasks config',
+        500,
+        ErrorCodes.INTERNAL_ERROR
+      );
     }
   })
 );
@@ -200,7 +224,9 @@ router.post(
             ErrorCodes.VALIDATION_ERROR
           );
         }
-        for (const [milestoneTitle, tasks] of Object.entries(milestones as Record<string, unknown>)) {
+        for (const [milestoneTitle, tasks] of Object.entries(
+          milestones as Record<string, unknown>
+        )) {
           if (!Array.isArray(tasks)) {
             return errorResponse(
               res,
@@ -233,12 +259,21 @@ router.post(
         metadata: { updatedBy: req.user?.email }
       });
 
-      sendSuccess(res, { updated: true, backupPath }, 'Config file updated. Note: Server restart required for changes to take effect.');
+      sendSuccess(
+        res,
+        { updated: true, backupPath },
+        'Config file updated. Note: Server restart required for changes to take effect.'
+      );
     } catch (error) {
       logger.error('[AdminConfig] Failed to update tier-tasks config:', {
         error: error instanceof Error ? error : undefined
       });
-      return errorResponse(res, 'Failed to update tier tasks config', 500, ErrorCodes.INTERNAL_ERROR);
+      return errorResponse(
+        res,
+        'Failed to update tier tasks config',
+        500,
+        ErrorCodes.INTERNAL_ERROR
+      );
     }
   })
 );
@@ -266,7 +301,12 @@ router.get(
       logger.error('[AdminConfig] Failed to export proposal templates:', {
         error: error instanceof Error ? error : undefined
       });
-      return errorResponse(res, 'Failed to export proposal templates', 500, ErrorCodes.INTERNAL_ERROR);
+      return errorResponse(
+        res,
+        'Failed to export proposal templates',
+        500,
+        ErrorCodes.INTERNAL_ERROR
+      );
     }
   })
 );
@@ -308,14 +348,22 @@ router.post(
     const { config } = req.body;
 
     if (!config || typeof config !== 'object' || !config.projectTypes) {
-      return errorResponse(res, 'config object with projectTypes is required', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'config object with projectTypes is required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     try {
       const jsonPath = resolve(__dirname, '../../config/proposal-templates.json');
 
       // Backup current file
-      const backupPath = resolve(__dirname, `../../config/proposal-templates.backup-${Date.now()}.json`);
+      const backupPath = resolve(
+        __dirname,
+        `../../config/proposal-templates.backup-${Date.now()}.json`
+      );
       try {
         const currentData = await readFile(jsonPath, 'utf-8');
         await writeFile(backupPath, currentData);
@@ -330,12 +378,21 @@ router.post(
         metadata: { updatedBy: req.user?.email }
       });
 
-      sendSuccess(res, { updated: true }, 'Proposal templates config updated. Note: Server restart required for changes to take effect.');
+      sendSuccess(
+        res,
+        { updated: true },
+        'Proposal templates config updated. Note: Server restart required for changes to take effect.'
+      );
     } catch (error) {
       logger.error('[AdminConfig] Failed to update proposal templates:', {
         error: error instanceof Error ? error : undefined
       });
-      return errorResponse(res, 'Failed to update proposal templates', 500, ErrorCodes.INTERNAL_ERROR);
+      return errorResponse(
+        res,
+        'Failed to update proposal templates',
+        500,
+        ErrorCodes.INTERNAL_ERROR
+      );
     }
   })
 );

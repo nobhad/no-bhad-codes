@@ -17,7 +17,14 @@ export function useFadeIn<T extends HTMLElement>(delay = 0) {
       gsap.fromTo(
         ref.current,
         { opacity: 0, y: GSAP.FADE_Y_OFFSET },
-        { opacity: 1, y: 0, duration: GSAP.DURATION_NORMAL, delay, ease: GSAP.EASE_DEFAULT, clearProps: 'all' }
+        {
+          opacity: 1,
+          y: 0,
+          duration: GSAP.DURATION_NORMAL,
+          delay,
+          ease: GSAP.EASE_DEFAULT,
+          clearProps: 'all'
+        }
       );
     });
 
@@ -50,7 +57,14 @@ export function useSlideIn<T extends HTMLElement>(
       gsap.fromTo(
         ref.current,
         { opacity: 0, [axis]: value },
-        { opacity: 1, [axis]: 0, duration: GSAP.DURATION_NORMAL, delay, ease: GSAP.EASE_DEFAULT, clearProps: 'all' }
+        {
+          opacity: 1,
+          [axis]: 0,
+          duration: GSAP.DURATION_NORMAL,
+          delay,
+          ease: GSAP.EASE_DEFAULT,
+          clearProps: 'all'
+        }
       );
     });
 
@@ -65,7 +79,10 @@ export function useSlideIn<T extends HTMLElement>(
  * @param stagger - Time between each child animation
  * @param delay - Initial delay before animation starts
  */
-export function useStaggerChildren<T extends HTMLElement>(stagger: number = GSAP.STAGGER_DEFAULT, delay: number = 0) {
+export function useStaggerChildren<T extends HTMLElement>(
+  stagger: number = GSAP.STAGGER_DEFAULT,
+  delay: number = 0
+) {
   const ref = useRef<T>(null);
 
   useEffect(() => {
@@ -110,7 +127,14 @@ export function useScaleIn<T extends HTMLElement>(delay = 0) {
       gsap.fromTo(
         ref.current,
         { opacity: 0, scale: GSAP.SCALE_START },
-        { opacity: 1, scale: 1, duration: GSAP.DURATION_FAST, delay, ease: GSAP.EASE_DEFAULT, clearProps: 'all' }
+        {
+          opacity: 1,
+          scale: 1,
+          duration: GSAP.DURATION_FAST,
+          delay,
+          ease: GSAP.EASE_DEFAULT,
+          clearProps: 'all'
+        }
       );
     });
 

@@ -13,19 +13,11 @@ import { rateLimit } from '../../middleware/security.js';
 import { auditLogger } from '../../services/audit-logger.js';
 import { logger } from '../../services/logger.js';
 import { userService } from '../../services/user-service.js';
-import {
-  RATE_LIMIT_CONFIG,
-  EMAIL_VERIFICATION_CONFIG
-} from '../../utils/auth-constants.js';
+import { RATE_LIMIT_CONFIG, EMAIL_VERIFICATION_CONFIG } from '../../utils/auth-constants.js';
 import { generateSecureToken } from '../../utils/token-utils.js';
 import { getBaseUrl } from '../../config/environment.js';
 import { getString, getNumber, getBoolean } from '../../database/row-helpers.js';
-import {
-  sendSuccess,
-  sendBadRequest,
-  sendNotFound,
-  ErrorCodes
-} from '../../utils/api-response.js';
+import { sendSuccess, sendBadRequest, sendNotFound, ErrorCodes } from '../../utils/api-response.js';
 import { validateRequest } from '../../middleware/validation.js';
 
 const router = express.Router();

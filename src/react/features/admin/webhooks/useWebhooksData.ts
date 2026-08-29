@@ -55,7 +55,10 @@ export function useWebhooksData({ showNotification }: UseWebhooksDataParams) {
 
   // ---- Stats state ----
   const [webhookStats, setWebhookStats] = useState<WebhookStats>({
-    total: 0, success: 0, failed: 0, pending: 0
+    total: 0,
+    success: 0,
+    failed: 0,
+    pending: 0
   });
 
   // ---- Data fetching ----
@@ -101,23 +104,33 @@ export function useWebhooksData({ showNotification }: UseWebhooksDataParams) {
     }
   }, []);
 
-  useEffect(() => { loadWebhooks(); }, [loadWebhooks]);
+  useEffect(() => {
+    loadWebhooks();
+  }, [loadWebhooks]);
 
   // ---- Actions ----
 
-  const handleToggleActive = useCallback(async (webhook: WebhookItem) => {
-    try {
-      const response = await apiFetch(buildEndpoint.webhookToggle(webhook.id), { method: 'PATCH' });
-      if (!response.ok) throw new Error('Failed to toggle webhook');
-      setWebhooks((prev) =>
-        prev.map((w) => w.id === webhook.id ? { ...w, is_active: !w.is_active } : w)
-      );
-      showNotification?.(`Webhook ${!webhook.is_active ? 'activated' : 'deactivated'}`, 'success');
-    } catch (err) {
-      logger.error('Failed to toggle webhook:', err);
-      showNotification?.('Failed to toggle webhook', 'error');
-    }
-  }, [showNotification]);
+  const handleToggleActive = useCallback(
+    async (webhook: WebhookItem) => {
+      try {
+        const response = await apiFetch(buildEndpoint.webhookToggle(webhook.id), {
+          method: 'PATCH'
+        });
+        if (!response.ok) throw new Error('Failed to toggle webhook');
+        setWebhooks((prev) =>
+          prev.map((w) => (w.id === webhook.id ? { ...w, is_active: !w.is_active } : w))
+        );
+        showNotification?.(
+          `Webhook ${!webhook.is_active ? 'activated' : 'deactivated'}`,
+          'success'
+        );
+      } catch (err) {
+        logger.error('Failed to toggle webhook:', err);
+        showNotification?.('Failed to toggle webhook', 'error');
+      }
+    },
+    [showNotification]
+  );
 
   const handleDelete = useCallback(async () => {
     if (!deletingWebhook) return;
@@ -132,17 +145,20 @@ export function useWebhooksData({ showNotification }: UseWebhooksDataParams) {
     }
   }, [deletingWebhook, showNotification]);
 
-  const handleRetryDelivery = useCallback(async (webhookId: number) => {
-    try {
-      const response = await apiPost(buildEndpoint.webhookRetry(webhookId));
-      if (!response.ok) throw new Error('Failed to retry delivery');
-      showNotification?.('Delivery retry queued', 'success');
-      if (selectedWebhook) loadDeliveries(selectedWebhook.id);
-    } catch (err) {
-      logger.error('Failed to retry delivery:', err);
-      showNotification?.('Failed to retry delivery', 'error');
-    }
-  }, [showNotification, selectedWebhook, loadDeliveries]);
+  const handleRetryDelivery = useCallback(
+    async (webhookId: number) => {
+      try {
+        const response = await apiPost(buildEndpoint.webhookRetry(webhookId));
+        if (!response.ok) throw new Error('Failed to retry delivery');
+        showNotification?.('Delivery retry queued', 'success');
+        if (selectedWebhook) loadDeliveries(selectedWebhook.id);
+      } catch (err) {
+        logger.error('Failed to retry delivery:', err);
+        showNotification?.('Failed to retry delivery', 'error');
+      }
+    },
+    [showNotification, selectedWebhook, loadDeliveries]
+  );
 
   // ---- Form handlers ----
 
@@ -166,44 +182,65 @@ export function useWebhooksData({ showNotification }: UseWebhooksDataParams) {
     setFormError(null);
   }, []);
 
-  const handleFormSubmit = useCallback(async (onClose: () => void) => {
-    setFormError(null);
-    if (!formData.name.trim()) { setFormError('Name is required'); return; }
-    if (!formData.url.trim()) { setFormError('URL is required'); return; }
-    if (formData.events.length === 0) { setFormError('At least one event is required'); return; }
-
-    let parsedHeaders: Record<string, string>;
-    try { parsedHeaders = JSON.parse(formData.headers); } catch { setFormError('Headers must be valid JSON'); return; }
-
-    setFormSaving(true);
-    try {
-      const body = {
-        name: formData.name.trim(),
-        url: formData.url.trim(),
-        events: formData.events,
-        method: formData.method,
-        headers: parsedHeaders,
-        retryMaxAttempts: formData.retryMaxAttempts,
-        retryBackoffSeconds: formData.retryBackoffSeconds
-      };
-      const isEditing = editingWebhook !== null;
-      const endpoint = isEditing ? buildEndpoint.webhook(editingWebhook.id) : API_ENDPOINTS.ADMIN.WEBHOOKS;
-      const response = await (isEditing ? apiPut(endpoint, body) : apiPost(endpoint, body));
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || `Failed to ${isEditing ? 'update' : 'create'} webhook`);
+  const handleFormSubmit = useCallback(
+    async (onClose: () => void) => {
+      setFormError(null);
+      if (!formData.name.trim()) {
+        setFormError('Name is required');
+        return;
       }
-      showNotification?.(`Webhook ${isEditing ? 'updated' : 'created'} successfully`, 'success');
-      onClose();
-      loadWebhooks();
-    } catch (err) {
-      const message = formatErrorMessage(err, 'Failed to save webhook');
-      setFormError(message);
-      logger.error('Failed to save webhook:', err);
-    } finally {
-      setFormSaving(false);
-    }
-  }, [formData, editingWebhook, showNotification, loadWebhooks]);
+      if (!formData.url.trim()) {
+        setFormError('URL is required');
+        return;
+      }
+      if (formData.events.length === 0) {
+        setFormError('At least one event is required');
+        return;
+      }
+
+      let parsedHeaders: Record<string, string>;
+      try {
+        parsedHeaders = JSON.parse(formData.headers);
+      } catch {
+        setFormError('Headers must be valid JSON');
+        return;
+      }
+
+      setFormSaving(true);
+      try {
+        const body = {
+          name: formData.name.trim(),
+          url: formData.url.trim(),
+          events: formData.events,
+          method: formData.method,
+          headers: parsedHeaders,
+          retryMaxAttempts: formData.retryMaxAttempts,
+          retryBackoffSeconds: formData.retryBackoffSeconds
+        };
+        const isEditing = editingWebhook !== null;
+        const endpoint = isEditing
+          ? buildEndpoint.webhook(editingWebhook.id)
+          : API_ENDPOINTS.ADMIN.WEBHOOKS;
+        const response = await (isEditing ? apiPut(endpoint, body) : apiPost(endpoint, body));
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          throw new Error(
+            errorData?.message || `Failed to ${isEditing ? 'update' : 'create'} webhook`
+          );
+        }
+        showNotification?.(`Webhook ${isEditing ? 'updated' : 'created'} successfully`, 'success');
+        onClose();
+        loadWebhooks();
+      } catch (err) {
+        const message = formatErrorMessage(err, 'Failed to save webhook');
+        setFormError(message);
+        logger.error('Failed to save webhook:', err);
+      } finally {
+        setFormSaving(false);
+      }
+    },
+    [formData, editingWebhook, showNotification, loadWebhooks]
+  );
 
   const handleEventToggle = useCallback((event: string) => {
     setFormData((prev) => ({
@@ -222,38 +259,55 @@ export function useWebhooksData({ showNotification }: UseWebhooksDataParams) {
     setTestSampleData('{}');
   }, []);
 
-  const handleTestSubmit = useCallback(async (onClose: () => void) => {
-    if (!testingWebhook || !testEventType) return;
-    let parsedData: Record<string, unknown>;
-    try { parsedData = JSON.parse(testSampleData); } catch { showNotification?.('Sample data must be valid JSON', 'error'); return; }
+  const handleTestSubmit = useCallback(
+    async (onClose: () => void) => {
+      if (!testingWebhook || !testEventType) return;
+      let parsedData: Record<string, unknown>;
+      try {
+        parsedData = JSON.parse(testSampleData);
+      } catch {
+        showNotification?.('Sample data must be valid JSON', 'error');
+        return;
+      }
 
-    setTestSending(true);
-    try {
-      const response = await apiPost(buildEndpoint.webhookTest(testingWebhook.id), { eventType: testEventType, sampleData: parsedData });
-      if (!response.ok) throw new Error('Failed to send test');
-      showNotification?.('Test webhook sent', 'success');
-      onClose();
-    } catch (err) {
-      logger.error('Failed to test webhook:', err);
-      showNotification?.('Failed to send test webhook', 'error');
-    } finally {
-      setTestSending(false);
-    }
-  }, [testingWebhook, testEventType, testSampleData, showNotification]);
+      setTestSending(true);
+      try {
+        const response = await apiPost(buildEndpoint.webhookTest(testingWebhook.id), {
+          eventType: testEventType,
+          sampleData: parsedData
+        });
+        if (!response.ok) throw new Error('Failed to send test');
+        showNotification?.('Test webhook sent', 'success');
+        onClose();
+      } catch (err) {
+        logger.error('Failed to test webhook:', err);
+        showNotification?.('Failed to send test webhook', 'error');
+      } finally {
+        setTestSending(false);
+      }
+    },
+    [testingWebhook, testEventType, testSampleData, showNotification]
+  );
 
   // ---- View navigation ----
 
-  const navigateToDeliveries = useCallback((webhook: WebhookItem) => {
-    setSelectedWebhook(webhook);
-    setView('deliveries');
-    loadDeliveries(webhook.id);
-  }, [loadDeliveries]);
+  const navigateToDeliveries = useCallback(
+    (webhook: WebhookItem) => {
+      setSelectedWebhook(webhook);
+      setView('deliveries');
+      loadDeliveries(webhook.id);
+    },
+    [loadDeliveries]
+  );
 
-  const navigateToStats = useCallback((webhook: WebhookItem) => {
-    setSelectedWebhook(webhook);
-    setView('stats');
-    loadStats(webhook.id);
-  }, [loadStats]);
+  const navigateToStats = useCallback(
+    (webhook: WebhookItem) => {
+      setSelectedWebhook(webhook);
+      setView('stats');
+      loadStats(webhook.id);
+    },
+    [loadStats]
+  );
 
   const navigateToList = useCallback(() => {
     setSelectedWebhook(null);
@@ -263,29 +317,53 @@ export function useWebhooksData({ showNotification }: UseWebhooksDataParams) {
 
   return {
     // View state
-    view, selectedWebhook,
+    view,
+    selectedWebhook,
     // List state
-    isLoading, error, webhooks,
+    isLoading,
+    error,
+    webhooks,
     // Form state
-    editingWebhook, formData, formSaving, formError, setFormData,
+    editingWebhook,
+    formData,
+    formSaving,
+    formError,
+    setFormData,
     // Delete state
-    deletingWebhook, setDeletingWebhook,
+    deletingWebhook,
+    setDeletingWebhook,
     // Test state
-    testingWebhook, testEventType, testSampleData, testSending,
-    setTestEventType, setTestSampleData,
+    testingWebhook,
+    testEventType,
+    testSampleData,
+    testSending,
+    setTestEventType,
+    setTestSampleData,
     // Deliveries state
-    deliveries, deliveriesLoading, deliveriesError,
+    deliveries,
+    deliveriesLoading,
+    deliveriesError,
     // Stats state
     webhookStats,
     // Data fetching
-    loadWebhooks, loadDeliveries, loadStats,
+    loadWebhooks,
+    loadDeliveries,
+    loadStats,
     // Actions
-    handleToggleActive, handleDelete, handleRetryDelivery,
+    handleToggleActive,
+    handleDelete,
+    handleRetryDelivery,
     // Form handlers
-    prepareAddForm, prepareEditForm, handleFormSubmit, handleEventToggle,
+    prepareAddForm,
+    prepareEditForm,
+    handleFormSubmit,
+    handleEventToggle,
     // Test handlers
-    prepareTest, handleTestSubmit,
+    prepareTest,
+    handleTestSubmit,
     // Navigation
-    navigateToDeliveries, navigateToStats, navigateToList
+    navigateToDeliveries,
+    navigateToStats,
+    navigateToList
   };
 }

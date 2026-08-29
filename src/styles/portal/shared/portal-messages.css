@@ -1,6 +1,5 @@
 /* PORTAL MESSAGES - Layout only, inherits all other styles from portal base */
 
-
 /* ===========================================
    FLEX COLUMN BASE - shared by all column containers
    =========================================== */
@@ -717,7 +716,7 @@
 .messaging-main-area .msgtab-container {
   height: auto;
   flex: 1;
-  min-height: 0;       /* Allow flex child to shrink below content size */
+  min-height: 0; /* Allow flex child to shrink below content size */
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -747,7 +746,6 @@
   margin-left: 0;
   margin-right: 0;
 }
-
 
 .messaging-conv-project-link {
   padding: 0;
@@ -1168,8 +1166,6 @@
   animation-delay: -0.16s;
 }
 
-
 .typing-indicator-text {
   font-style: italic;
 }
-

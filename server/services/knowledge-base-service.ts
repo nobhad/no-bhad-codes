@@ -16,7 +16,9 @@ import { userService } from './user-service.js';
 
 const KB_CATEGORIES_COLUMNS = `
   id, name, slug, description, icon, color, sort_order, is_active, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // TYPES
@@ -141,7 +143,10 @@ class KnowledgeBaseService {
    */
   async getCategoryById(id: number): Promise<KBCategory | null> {
     const db = await getDatabase();
-    const category = await db.get(`SELECT ${KB_CATEGORIES_COLUMNS} FROM kb_categories WHERE id = ?`, [id]);
+    const category = await db.get(
+      `SELECT ${KB_CATEGORIES_COLUMNS} FROM kb_categories WHERE id = ?`,
+      [id]
+    );
     return category as unknown as KBCategory | null;
   }
 
@@ -468,9 +473,10 @@ class KnowledgeBaseService {
         data.articleId
       ]);
     } else {
-      await db.run('UPDATE kb_articles SET not_helpful_count = not_helpful_count + 1 WHERE id = ?', [
-        data.articleId
-      ]);
+      await db.run(
+        'UPDATE kb_articles SET not_helpful_count = not_helpful_count + 1 WHERE id = ?',
+        [data.articleId]
+      );
     }
   }
 

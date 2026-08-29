@@ -84,7 +84,6 @@ export interface DepositSummaryResponse {
   paid_date?: string;
 }
 
-
 // ============================================
 // Payment Plan API Types
 // ============================================

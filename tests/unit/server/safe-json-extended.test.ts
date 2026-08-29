@@ -26,7 +26,11 @@ import {
 } from '../../../server/utils/safe-json';
 import { logger } from '../../../server/services/logger';
 
-const mockLogger = logger as { warn: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
+const mockLogger = logger as {
+  warn: ReturnType<typeof vi.fn>;
+  error: ReturnType<typeof vi.fn>;
+  info: ReturnType<typeof vi.fn>;
+};
 
 beforeEach(() => {
   vi.clearAllMocks();

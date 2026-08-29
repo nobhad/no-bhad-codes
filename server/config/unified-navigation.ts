@@ -581,7 +581,7 @@ function isSoloMode(): boolean {
   // This module is imported by both the Express server and the browser portal
   // store. `process` only exists on the server; in the browser default to solo
   // (the same fallback used when PORTAL_MODE is unset).
-  const mode = typeof process !== 'undefined' ? process.env.PORTAL_MODE ?? 'solo' : 'solo';
+  const mode = typeof process !== 'undefined' ? (process.env.PORTAL_MODE ?? 'solo') : 'solo';
   return mode.toLowerCase() === 'solo';
 }
 
@@ -591,8 +591,7 @@ function isSoloMode(): boolean {
  */
 export function getNavigationForRole(role: UserRole): UnifiedNavItem[] {
   const solo = isSoloMode();
-  return UNIFIED_NAVIGATION
-    .filter((item) => item.roles.includes(role))
+  return UNIFIED_NAVIGATION.filter((item) => item.roles.includes(role))
     .filter((item) => !(solo && item.hideInSolo))
     .sort((a, b) => a.order - b.order);
 }
@@ -657,20 +656,30 @@ export function getDefaultTabForRole(role: UserRole): string {
  * Resolve a tab name to its actual tab (handles group -> default tab resolution)
  */
 /** Detail view tabs and their parent groups + list pages */
-export const DETAIL_VIEW_TABS: Record<string, {
-  parentGroup: string;
-  parentTab: string;
-  parentLabel: string;
-  roles: UserRole[];
-}> = {
-  'client-detail': { parentGroup: 'crm', parentTab: 'clients', parentLabel: 'Clients', roles: ['admin'] },
-  'project-detail': { parentGroup: 'work', parentTab: 'projects', parentLabel: 'Projects', roles: ['admin'] }
+export const DETAIL_VIEW_TABS: Record<
+  string,
+  {
+    parentGroup: string;
+    parentTab: string;
+    parentLabel: string;
+    roles: UserRole[];
+  }
+> = {
+  'client-detail': {
+    parentGroup: 'crm',
+    parentTab: 'clients',
+    parentLabel: 'Clients',
+    roles: ['admin']
+  },
+  'project-detail': {
+    parentGroup: 'work',
+    parentTab: 'projects',
+    parentLabel: 'Projects',
+    roles: ['admin']
+  }
 };
 
-export function resolveTab(
-  tabName: string,
-  role: UserRole
-): { group: string | null; tab: string } {
+export function resolveTab(tabName: string, role: UserRole): { group: string | null; tab: string } {
   // Check if it's a group — tab stays as the group name (overview view)
   if (UNIFIED_TAB_GROUPS[tabName] && UNIFIED_TAB_GROUPS[tabName].roles.includes(role)) {
     return { group: tabName, tab: tabName };
@@ -704,8 +713,14 @@ export function getTabTitle(tabId: string): string {
  */
 /** Legacy client tab IDs that redirect to new consolidated tabs */
 const LEGACY_CLIENT_TABS = new Set([
-  'invoices', 'contracts', 'proposals', 'approvals',
-  'review', 'requests', 'questionnaires', 'projects'
+  'invoices',
+  'contracts',
+  'proposals',
+  'approvals',
+  'review',
+  'requests',
+  'questionnaires',
+  'projects'
 ]);
 
 export function canAccessTab(tabId: string, role: UserRole): boolean {

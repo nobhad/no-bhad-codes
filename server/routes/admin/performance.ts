@@ -30,7 +30,12 @@ router.get(
       sendSuccess(res, data);
     } catch (error) {
       console.error('[Performance Error]', error);
-      return errorResponse(res, 'Failed to load performance data', 500, ErrorCodes.PERFORMANCE_ERROR);
+      return errorResponse(
+        res,
+        'Failed to load performance data',
+        500,
+        ErrorCodes.PERFORMANCE_ERROR
+      );
     }
   })
 );

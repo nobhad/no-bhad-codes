@@ -7,7 +7,12 @@ import { errorTracker } from '../../services/error-tracking.js';
 import { auditLogger } from '../../services/audit-logger.js';
 import { projectService } from '../../services/project-service.js';
 import { dashboardService } from '../../services/dashboard-service.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
+import {
+  errorResponse,
+  errorResponseWithPayload,
+  sendSuccess,
+  ErrorCodes
+} from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 
 const router = express.Router();
@@ -79,10 +84,16 @@ router.get(
         user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' }
       });
 
-      errorResponseWithPayload(res, 'Failed to retrieve system status', 500, ErrorCodes.INTERNAL_ERROR, {
-        status: 'error',
-        timestamp
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve system status',
+        500,
+        ErrorCodes.INTERNAL_ERROR,
+        {
+          status: 'error',
+          timestamp
+        }
+      );
     }
   })
 );
@@ -205,8 +216,9 @@ router.get(
         pending: tasks.filter((t: { status: string }) => t.status === 'pending').length,
         inProgress: tasks.filter((t: { status: string }) => t.status === 'in_progress').length,
         completed: tasks.filter((t: { status: string }) => t.status === 'completed').length,
-        overdue: tasks.filter((t: { status: string; dueDate?: string }) =>
-          t.dueDate && t.dueDate < today && t.status !== 'completed'
+        overdue: tasks.filter(
+          (t: { status: string; dueDate?: string }) =>
+            t.dueDate && t.dueDate < today && t.status !== 'completed'
         ).length
       };
 

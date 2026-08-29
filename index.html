@@ -338,7 +338,6 @@
       </div>
     </div>
 
-
     <!-- Portal Dropdown -->
     <%- include('templates/partials/shell/portal-dropdown.ejs') %>
 
@@ -357,430 +356,448 @@
     <!-- data-virtual-pages enables desktop virtual page mode -->
     <main id="main-content" data-virtual-pages>
       <div class="site-map" data-map-camera="center">
-      <h1 class="sr-only">No Bhad Codes - Professional Web Development</h1>
-      <!-- BUSINESS CARD INTRO SECTION (order: 1 - First on page load) -->
-      <section id="intro" class="business-card-section page-active" data-page="intro" data-map-tile="center">
-        <div class="business-card-container">
-          <div id="business-card" class="business-card">
-            <div
-              id="business-card-inner"
-              class="business-card-inner"
-              style="visibility: hidden; opacity: 0"
-            >
-              <!-- FRONT OF CARD -->
-              <div class="business-card-front">
-                <img
-                  src="/images/business-card_front.svg"
-                  alt="Business Card Front"
-                  class="card-svg"
-                  width="525"
-                  height="294.19"
-                />
-              </div>
-              <!-- BACK OF CARD -->
-              <div class="business-card-back">
-                <img
-                  src="/images/business-card_back.svg"
-                  alt="Avatar"
-                  class="card-svg"
-                  width="525"
-                  height="294.19"
-                />
+        <h1 class="sr-only">No Bhad Codes - Professional Web Development</h1>
+        <!-- BUSINESS CARD INTRO SECTION (order: 1 - First on page load) -->
+        <section
+          id="intro"
+          class="business-card-section page-active"
+          data-page="intro"
+          data-map-tile="center"
+        >
+          <div class="business-card-container">
+            <div id="business-card" class="business-card">
+              <div
+                id="business-card-inner"
+                class="business-card-inner"
+                style="visibility: hidden; opacity: 0"
+              >
+                <!-- FRONT OF CARD -->
+                <div class="business-card-front">
+                  <img
+                    src="/images/business-card_front.svg"
+                    alt="Business Card Front"
+                    class="card-svg"
+                    width="525"
+                    height="294.19"
+                  />
+                </div>
+                <!-- BACK OF CARD -->
+                <div class="business-card-back">
+                  <img
+                    src="/images/business-card_back.svg"
+                    alt="Avatar"
+                    class="card-svg"
+                    width="525"
+                    height="294.19"
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-      </section>
-
-      <!-- ABOUT SECTION (order: 3) -->
-      <section id="about" class="about-section page-hidden" data-page="about" data-map-tile="up">
-        <div class="about-content">
-          <div class="about-layout">
-            <!-- Left column: Image -->
-            <div class="about-image-column">
-              <img
-                src="/images/photobooth_loop.gif"
-                alt="Coyote the dog"
-                class="about-photo"
-                loading="lazy"
-                decoding="async"
-              />
+        <!-- ABOUT SECTION (order: 3) -->
+        <section id="about" class="about-section page-hidden" data-page="about" data-map-tile="up">
+          <div class="about-content">
+            <div class="about-layout">
+              <!-- Left column: Image -->
+              <div class="about-image-column">
+                <img
+                  src="/images/photobooth_loop.gif"
+                  alt="Coyote the dog"
+                  class="about-photo"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <!-- Right column: Text -->
+              <div class="about-text-column">
+                <h2 class="section-heading">ABOUT</h2>
+                <hr class="section-divider about-divider" />
+                <p>
+                  Hi, I'm Noelle Bhaduri, a creative full-stack developer based in the Boston, MA
+                  area. Coding lets me utilize my love for tinkering and problem-solving by
+                  combining clean code with good design. I work with modern frameworks, build
+                  type-safe apps, set up scalable backends, and make sure the UI actually feels nice
+                  to use.
+                </p>
+                <p>
+                  When I'm not coding, I'm solving puzzles, treasure hunting, and engaging with art
+                  and nature. I draw inspiration from midcentury animation and children's book
+                  illustrations.
+                </p>
+                <p class="opportunities-text">
+                  I am actively seeking both local and remote web development opportunities.
+                </p>
+              </div>
             </div>
-            <!-- Right column: Text -->
-            <div class="about-text-column">
-              <h2 class="section-heading">ABOUT</h2>
-              <hr class="section-divider about-divider" />
-              <p>
-                Hi, I'm Noelle Bhaduri, a creative full-stack developer based in the Boston, MA
-                area. Coding lets me utilize my love for tinkering and problem-solving by combining
-                clean code with good design. I work with modern frameworks, build type-safe apps,
-                set up scalable backends, and make sure the UI actually feels nice to use.
-              </p>
-              <p>
-                When I'm not coding, I'm solving puzzles, treasure hunting, and engaging with art
-                and nature. I draw inspiration from midcentury animation and children's book
-                illustrations.
-              </p>
-              <p class="opportunities-text">
-                I am actively seeking both local and remote web development opportunities.
-              </p>
-            </div>
-          </div>
-          <!-- Toolkit marquee: full-bleed band under the two-column layout.
+            <!-- Toolkit marquee: full-bleed band under the two-column layout.
                The track holds 4 copies of the list; the scroll animation
                translates by -50% (2 copies), so the seam is invisible and the
                half-width stays wider than any viewport. Track is aria-hidden —
                the wrapper's label reads the list once instead of 52 times. -->
-          <div
-            class="about-marquee"
-            role="img"
-            aria-label="Toolkit: TypeScript, React, Node.js, Express, GSAP, Vite, Tailwind CSS, SQLite, Redis, Stripe, Playwright, Photoshop, Illustrator"
-          >
-            <div class="about-marquee__track" aria-hidden="true">
-              <span class="about-marquee__item">TypeScript</span>
-              <span class="about-marquee__item">React</span>
-              <span class="about-marquee__item">Node.js</span>
-              <span class="about-marquee__item">Express</span>
-              <span class="about-marquee__item">GSAP</span>
-              <span class="about-marquee__item">Vite</span>
-              <span class="about-marquee__item">Tailwind CSS</span>
-              <span class="about-marquee__item">SQLite</span>
-              <span class="about-marquee__item">Redis</span>
-              <span class="about-marquee__item">Stripe</span>
-              <span class="about-marquee__item">Playwright</span>
-              <span class="about-marquee__item">Photoshop</span>
-              <span class="about-marquee__item">Illustrator</span>
+            <div
+              class="about-marquee"
+              role="img"
+              aria-label="Toolkit: TypeScript, React, Node.js, Express, GSAP, Vite, Tailwind CSS, SQLite, Redis, Stripe, Playwright, Photoshop, Illustrator"
+            >
+              <div class="about-marquee__track" aria-hidden="true">
+                <span class="about-marquee__item">TypeScript</span>
+                <span class="about-marquee__item">React</span>
+                <span class="about-marquee__item">Node.js</span>
+                <span class="about-marquee__item">Express</span>
+                <span class="about-marquee__item">GSAP</span>
+                <span class="about-marquee__item">Vite</span>
+                <span class="about-marquee__item">Tailwind CSS</span>
+                <span class="about-marquee__item">SQLite</span>
+                <span class="about-marquee__item">Redis</span>
+                <span class="about-marquee__item">Stripe</span>
+                <span class="about-marquee__item">Playwright</span>
+                <span class="about-marquee__item">Photoshop</span>
+                <span class="about-marquee__item">Illustrator</span>
 
-              <span class="about-marquee__item">TypeScript</span>
-              <span class="about-marquee__item">React</span>
-              <span class="about-marquee__item">Node.js</span>
-              <span class="about-marquee__item">Express</span>
-              <span class="about-marquee__item">GSAP</span>
-              <span class="about-marquee__item">Vite</span>
-              <span class="about-marquee__item">Tailwind CSS</span>
-              <span class="about-marquee__item">SQLite</span>
-              <span class="about-marquee__item">Redis</span>
-              <span class="about-marquee__item">Stripe</span>
-              <span class="about-marquee__item">Playwright</span>
-              <span class="about-marquee__item">Photoshop</span>
-              <span class="about-marquee__item">Illustrator</span>
+                <span class="about-marquee__item">TypeScript</span>
+                <span class="about-marquee__item">React</span>
+                <span class="about-marquee__item">Node.js</span>
+                <span class="about-marquee__item">Express</span>
+                <span class="about-marquee__item">GSAP</span>
+                <span class="about-marquee__item">Vite</span>
+                <span class="about-marquee__item">Tailwind CSS</span>
+                <span class="about-marquee__item">SQLite</span>
+                <span class="about-marquee__item">Redis</span>
+                <span class="about-marquee__item">Stripe</span>
+                <span class="about-marquee__item">Playwright</span>
+                <span class="about-marquee__item">Photoshop</span>
+                <span class="about-marquee__item">Illustrator</span>
 
-              <span class="about-marquee__item">TypeScript</span>
-              <span class="about-marquee__item">React</span>
-              <span class="about-marquee__item">Node.js</span>
-              <span class="about-marquee__item">Express</span>
-              <span class="about-marquee__item">GSAP</span>
-              <span class="about-marquee__item">Vite</span>
-              <span class="about-marquee__item">Tailwind CSS</span>
-              <span class="about-marquee__item">SQLite</span>
-              <span class="about-marquee__item">Redis</span>
-              <span class="about-marquee__item">Stripe</span>
-              <span class="about-marquee__item">Playwright</span>
-              <span class="about-marquee__item">Photoshop</span>
-              <span class="about-marquee__item">Illustrator</span>
+                <span class="about-marquee__item">TypeScript</span>
+                <span class="about-marquee__item">React</span>
+                <span class="about-marquee__item">Node.js</span>
+                <span class="about-marquee__item">Express</span>
+                <span class="about-marquee__item">GSAP</span>
+                <span class="about-marquee__item">Vite</span>
+                <span class="about-marquee__item">Tailwind CSS</span>
+                <span class="about-marquee__item">SQLite</span>
+                <span class="about-marquee__item">Redis</span>
+                <span class="about-marquee__item">Stripe</span>
+                <span class="about-marquee__item">Playwright</span>
+                <span class="about-marquee__item">Photoshop</span>
+                <span class="about-marquee__item">Illustrator</span>
 
-              <span class="about-marquee__item">TypeScript</span>
-              <span class="about-marquee__item">React</span>
-              <span class="about-marquee__item">Node.js</span>
-              <span class="about-marquee__item">Express</span>
-              <span class="about-marquee__item">GSAP</span>
-              <span class="about-marquee__item">Vite</span>
-              <span class="about-marquee__item">Tailwind CSS</span>
-              <span class="about-marquee__item">SQLite</span>
-              <span class="about-marquee__item">Redis</span>
-              <span class="about-marquee__item">Stripe</span>
-              <span class="about-marquee__item">Playwright</span>
-              <span class="about-marquee__item">Photoshop</span>
-              <span class="about-marquee__item">Illustrator</span>
+                <span class="about-marquee__item">TypeScript</span>
+                <span class="about-marquee__item">React</span>
+                <span class="about-marquee__item">Node.js</span>
+                <span class="about-marquee__item">Express</span>
+                <span class="about-marquee__item">GSAP</span>
+                <span class="about-marquee__item">Vite</span>
+                <span class="about-marquee__item">Tailwind CSS</span>
+                <span class="about-marquee__item">SQLite</span>
+                <span class="about-marquee__item">Redis</span>
+                <span class="about-marquee__item">Stripe</span>
+                <span class="about-marquee__item">Playwright</span>
+                <span class="about-marquee__item">Photoshop</span>
+                <span class="about-marquee__item">Illustrator</span>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- PROJECTS SECTION (order: 4.5) -->
-      <section id="projects" class="projects-section page-hidden" data-page="projects" data-map-tile="right">
-        <div class="projects-content">
-          <h2 class="section-heading">projects</h2>
-          <hr class="section-divider" />
-          <div class="wip-sign-container">
-            <img src="/images/wile_404_sign.svg" alt="404 Work In Progress sign" class="wip-sign" />
+        <!-- PROJECTS SECTION (order: 4.5) -->
+        <section
+          id="projects"
+          class="projects-section page-hidden"
+          data-page="projects"
+          data-map-tile="right"
+        >
+          <div class="projects-content">
+            <h2 class="section-heading">projects</h2>
+            <hr class="section-divider" />
+            <div class="wip-sign-container">
+              <img
+                src="/images/wile_404_sign.svg"
+                alt="404 Work In Progress sign"
+                class="wip-sign"
+              />
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
+        <!-- CONTACT SECTION (order: 5) -->
+        <section
+          id="contact"
+          class="contact-section page-hidden"
+          data-page="contact"
+          data-map-tile="down"
+        >
+          <div class="contact-content">
+            <h2 class="section-heading">contact</h2>
+            <hr class="section-divider" />
 
-      <!-- CONTACT SECTION (order: 5) -->
-      <section id="contact" class="contact-section page-hidden" data-page="contact" data-map-tile="down">
-        <div class="contact-content">
-          <h2 class="section-heading">contact</h2>
-          <hr class="section-divider" />
-
-          <!-- Two-column layout -->
-          <div class="contact-layout">
-            <p class="contact-options">
-              <span class="contact-line-1">Message me here,</span>
-              <span class="contact-line-2"
-                >fill out an
-                <a href="#" class="contact-option-link" id="open-intake-link">intake form</a>,</span
-              >
-              <span class="contact-line-3"
-                >or email me at
-                <a href="mailto:nobhaduri@gmail.com" class="contact-option-link"
-                  >nobhaduri@gmail.com</a
-                >.</span
-              >
-            </p>
-            <!-- Contact Form -->
-            <div class="contact-form-column">
-              <form
-                class="contact-form"
-                method="post"
-                name="contact-form"
-                novalidate
-                aria-label="Contact form"
-                autocomplete="off"
-                data-form-type="other"
-                data-1p-ignore
-                data-lpignore="true"
-                data-bwignore
-              >
-                <!-- Honeypot field for bot detection -->
-                <input
-                  name="bot-field"
-                  style="display: none"
-                  aria-hidden="true"
-                  tabindex="-1"
+            <!-- Two-column layout -->
+            <div class="contact-layout">
+              <p class="contact-options">
+                <span class="contact-line-1">Message me here,</span>
+                <span class="contact-line-2"
+                  >fill out an
+                  <a href="#" class="contact-option-link" id="open-intake-link">intake form</a
+                  >,</span
+                >
+                <span class="contact-line-3"
+                  >or email me at
+                  <a href="mailto:nobhaduri@gmail.com" class="contact-option-link"
+                    >nobhaduri@gmail.com</a
+                  >.</span
+                >
+              </p>
+              <!-- Contact Form -->
+              <div class="contact-form-column">
+                <form
+                  class="contact-form"
+                  method="post"
+                  name="contact-form"
+                  novalidate
+                  aria-label="Contact form"
                   autocomplete="off"
-                />
+                  data-form-type="other"
+                  data-1p-ignore
+                  data-lpignore="true"
+                  data-bwignore
+                >
+                  <!-- Honeypot field for bot detection -->
+                  <input
+                    name="bot-field"
+                    style="display: none"
+                    aria-hidden="true"
+                    tabindex="-1"
+                    autocomplete="off"
+                  />
 
-                <div class="input-wrapper">
-                  <div class="input-item">
-                    <input
-                      id="name"
-                      placeholder="Name *"
-                      required
-                      aria-required="true"
-                      autocomplete="name"
-                      type="text"
-                      name="Name"
-                      maxlength="256"
-                      aria-label="Name"
-                      data-1p-ignore
-                      data-lpignore="true"
-                      data-bwignore
-                    />
-                    <label class="text-small" for="name">Name</label>
+                  <div class="input-wrapper">
+                    <div class="input-item">
+                      <input
+                        id="name"
+                        placeholder="Name *"
+                        required
+                        aria-required="true"
+                        autocomplete="name"
+                        type="text"
+                        name="Name"
+                        maxlength="256"
+                        aria-label="Name"
+                        data-1p-ignore
+                        data-lpignore="true"
+                        data-bwignore
+                      />
+                      <label class="text-small" for="name">Name</label>
+                    </div>
                   </div>
-                </div>
 
-                <div class="input-wrapper">
-                  <div class="input-item">
-                    <input
-                      id="company"
-                      placeholder="Company (optional)"
-                      autocomplete="organization"
-                      type="text"
-                      name="Company-Name"
-                      maxlength="256"
-                      aria-label="Company (optional)"
-                      data-1p-ignore
-                      data-lpignore="true"
-                      data-bwignore
-                    />
-                    <label class="text-small" for="company">Company (optional)</label>
+                  <div class="input-wrapper">
+                    <div class="input-item">
+                      <input
+                        id="company"
+                        placeholder="Company (optional)"
+                        autocomplete="organization"
+                        type="text"
+                        name="Company-Name"
+                        maxlength="256"
+                        aria-label="Company (optional)"
+                        data-1p-ignore
+                        data-lpignore="true"
+                        data-bwignore
+                      />
+                      <label class="text-small" for="company">Company (optional)</label>
+                    </div>
                   </div>
-                </div>
 
-                <div class="input-wrapper">
-                  <div class="input-item">
-                    <input
-                      id="email"
-                      placeholder="Email *"
-                      required
-                      aria-required="true"
-                      autocomplete="email"
-                      type="email"
-                      name="Email"
-                      maxlength="256"
-                      aria-label="Email"
-                      data-1p-ignore
-                      data-lpignore="true"
-                      data-bwignore
-                    />
-                    <label class="text-small" for="email">Email</label>
+                  <div class="input-wrapper">
+                    <div class="input-item">
+                      <input
+                        id="email"
+                        placeholder="Email *"
+                        required
+                        aria-required="true"
+                        autocomplete="email"
+                        type="email"
+                        name="Email"
+                        maxlength="256"
+                        aria-label="Email"
+                        data-1p-ignore
+                        data-lpignore="true"
+                        data-bwignore
+                      />
+                      <label class="text-small" for="email">Email</label>
+                    </div>
                   </div>
-                </div>
 
-                <div class="input-wrapper">
-                  <div class="input-item">
-                    <textarea
-                      id="message"
-                      name="Message"
-                      placeholder="Message *"
-                      required
-                      aria-required="true"
-                      rows="6"
-                      maxlength="1000"
-                      aria-label="Message"
-                      data-1p-ignore
-                      data-lpignore="true"
-                      data-bwignore
-                    ></textarea>
-                    <label class="text-small" for="message">Message</label>
+                  <div class="input-wrapper">
+                    <div class="input-item">
+                      <textarea
+                        id="message"
+                        name="Message"
+                        placeholder="Message *"
+                        required
+                        aria-required="true"
+                        rows="6"
+                        maxlength="1000"
+                        aria-label="Message"
+                        data-1p-ignore
+                        data-lpignore="true"
+                        data-bwignore
+                      ></textarea>
+                      <label class="text-small" for="message">Message</label>
+                    </div>
                   </div>
-                </div>
 
-                <div class="submit-row">
-                  <!-- No aria-label: the visible "Send Message" span names the
+                  <div class="submit-row">
+                    <!-- No aria-label: the visible "Send Message" span names the
                        button, so the accessible name matches what a speech-input
                        user would say (WCAG 2.5.3). The icon is aria-hidden. -->
-                  <button class="submit-button" type="submit">
-                    <span>Send Message</span>
-                    <svg
-                      class="btn-icon"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.75"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                    >
-                      <g class="bow-group">
-                        <path d="M7 10 3.29 6.29a1.17 1.17 0 0 1 .6-1.91 13 13 0 0 1 9.03 1.05" />
-                        <path
-                          d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17"
-                        />
-                      </g>
-                      <g class="arrow-group">
-                        <path d="M17 3h4v4" />
-                        <path d="M9.707 14.293 21 3" />
-                        <path
-                          d="M7 14a1.7 1.7 0 0 0-1.207.5l-2.646 2.646A.5.5 0 0 0 3.5 18H5a1 1 0 0 1 1 1v1.5a.5.5 0 0 0 .854.354L9.5 18.207A1.7 1.7 0 0 0 10 17v-2a1 1 0 0 0-1-1z"
-                        />
-                      </g>
-                    </svg>
-                  </button>
-                </div>
-              </form>
+                    <button class="submit-button" type="submit">
+                      <span>Send Message</span>
+                      <svg
+                        class="btn-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.75"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <g class="bow-group">
+                          <path d="M7 10 3.29 6.29a1.17 1.17 0 0 1 .6-1.91 13 13 0 0 1 9.03 1.05" />
+                          <path
+                            d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17"
+                          />
+                        </g>
+                        <g class="arrow-group">
+                          <path d="M17 3h4v4" />
+                          <path d="M9.707 14.293 21 3" />
+                          <path
+                            d="M7 14a1.7 1.7 0 0 0-1.207.5l-2.646 2.646A.5.5 0 0 0 3.5 18H5a1 1 0 0 1 1 1v1.5a.5.5 0 0 0 .854.354L9.5 18.207A1.7 1.7 0 0 0 10 17v-2a1 1 0 0 0-1-1z"
+                          />
+                        </g>
+                      </svg>
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
-
           </div>
-        </div>
-      </section>
-      <!-- PROJECT DETAIL SECTION (order: 4.6) — a map tile below projects -->
-      <section
-        id="project-detail"
-        class="project-detail-section page-hidden"
-        data-page="project-detail"
-        data-map-tile="detail"
-      >
-        <nav class="project-detail-breadcrumbs" aria-label="Breadcrumb">
-          <ol>
-            <li>
-              <a href="#/projects" class="project-detail-breadcrumb-link">Projects</a>
-            </li>
-            <li class="project-detail-breadcrumb-separator" aria-hidden="true">/</li>
-            <li
-              class="project-detail-breadcrumb-current"
-              id="project-breadcrumb-current"
-              aria-current="page"
-            ></li>
-          </ol>
-        </nav>
-        <div class="worksub-wrapper">
-          <!-- Hero header: image + title/tagline/description side-by-side -->
-          <div class="worksub-header">
-            <figure>
-              <!-- Seeded with the same placeholder loadProject() falls back to.
+        </section>
+        <!-- PROJECT DETAIL SECTION (order: 4.6) — a map tile below projects -->
+        <section
+          id="project-detail"
+          class="project-detail-section page-hidden"
+          data-page="project-detail"
+          data-map-tile="detail"
+        >
+          <nav class="project-detail-breadcrumbs" aria-label="Breadcrumb">
+            <ol>
+              <li>
+                <a href="#/projects" class="project-detail-breadcrumb-link">Projects</a>
+              </li>
+              <li class="project-detail-breadcrumb-separator" aria-hidden="true">/</li>
+              <li
+                class="project-detail-breadcrumb-current"
+                id="project-breadcrumb-current"
+                aria-current="page"
+              ></li>
+            </ol>
+          </nav>
+          <div class="worksub-wrapper">
+            <!-- Hero header: image + title/tagline/description side-by-side -->
+            <div class="worksub-header">
+              <figure>
+                <!-- Seeded with the same placeholder loadProject() falls back to.
                    An empty src is invalid and fires a bogus request, and an
                    empty alt on a non-decorative image is a WCAG 1.1.1 miss. -->
-              <img
-                id="project-hero-img"
-                src="/images/project-placeholder.svg"
-                alt="Project image loading"
-                class="worksub-hero-img placeholder"
-              />
-            </figure>
-            <div class="worksub-header-info">
-              <div class="title-row">
-                <!-- Seeded so the shell never exposes an empty heading to
+                <img
+                  id="project-hero-img"
+                  src="/images/project-placeholder.svg"
+                  alt="Project image loading"
+                  class="worksub-hero-img placeholder"
+                />
+              </figure>
+              <div class="worksub-header-info">
+                <div class="title-row">
+                  <!-- Seeded so the shell never exposes an empty heading to
                      assistive tech (WCAG 1.3.1); loadProject() overwrites it
                      on every navigation, and the section is hidden until then. -->
-                <h1 id="project-title">Project</h1>
-                <span id="project-status" class="project-status-badge"></span>
-              </div>
-              <p id="project-tagline" class="project-tagline"></p>
-              <p id="project-description" class="worksub-header-description text-medium"></p>
-              <!-- Live/Repo links sit in the hero so primary action is above the fold -->
-              <div class="worksub-links worksub-links--inline" id="project-links">
-                <!-- Live/Repo links will be dynamically inserted here -->
+                  <h1 id="project-title">Project</h1>
+                  <span id="project-status" class="project-status-badge"></span>
+                </div>
+                <p id="project-tagline" class="project-tagline"></p>
+                <p id="project-description" class="worksub-header-description text-medium"></p>
+                <!-- Live/Repo links sit in the hero so primary action is above the fold -->
+                <div class="worksub-links worksub-links--inline" id="project-links">
+                  <!-- Live/Repo links will be dynamically inserted here -->
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Intro section with metadata + tools side-by-side -->
-          <div class="worksub-intro">
-            <div class="intro-content">
-              <!-- Left column: Role / Year / Duration metadata -->
-              <div class="intro-left">
-                <div class="intro-left-group">
-                  <span class="round-label">Role</span>
-                  <span id="project-role" class="text-medium"></span>
-                </div>
-                <div class="intro-left-row">
+            <!-- Intro section with metadata + tools side-by-side -->
+            <div class="worksub-intro">
+              <div class="intro-content">
+                <!-- Left column: Role / Year / Duration metadata -->
+                <div class="intro-left">
                   <div class="intro-left-group">
-                    <span class="round-label">Year</span>
-                    <span id="project-year" class="text-medium"></span>
+                    <span class="round-label">Role</span>
+                    <span id="project-role" class="text-medium"></span>
                   </div>
-                  <div class="intro-left-group" id="project-duration-group">
-                    <span class="round-label">Duration</span>
-                    <span id="project-duration" class="text-medium"></span>
-                  </div>
-                  <div class="intro-left-group" id="project-launch-group" hidden>
-                    <span class="round-label">Launch</span>
-                    <span id="project-launch" class="text-medium"></span>
+                  <div class="intro-left-row">
+                    <div class="intro-left-group">
+                      <span class="round-label">Year</span>
+                      <span id="project-year" class="text-medium"></span>
+                    </div>
+                    <div class="intro-left-group" id="project-duration-group">
+                      <span class="round-label">Duration</span>
+                      <span id="project-duration" class="text-medium"></span>
+                    </div>
+                    <div class="intro-left-group" id="project-launch-group" hidden>
+                      <span class="round-label">Launch</span>
+                      <span id="project-launch" class="text-medium"></span>
+                    </div>
                   </div>
                 </div>
+                <!-- Right column: tools -->
+                <div class="tools-section">
+                  <span class="round-label">Tools</span>
+                  <div id="project-tools" class="tools-list"></div>
+                </div>
               </div>
-              <!-- Right column: tools -->
-              <div class="tools-section">
-                <span class="round-label">Tools</span>
-                <div id="project-tools" class="tools-list"></div>
-              </div>
+              <hr class="worksub-divider" />
             </div>
-            <hr class="worksub-divider" />
+
+            <!-- Case Study Sections -->
+            <div class="worksub-case-study">
+              <!-- Overview Section (Challenge + Approach) -->
+              <section class="case-study-section" id="project-overview-section">
+                <h2 class="case-study-heading">Overview</h2>
+                <p id="project-challenge" class="case-study-text"></p>
+                <p id="project-approach" class="case-study-text"></p>
+              </section>
+
+              <!-- Key Features Section -->
+              <section class="case-study-section" id="project-features-section">
+                <h2 class="case-study-heading">Key Features</h2>
+                <ul id="project-features" class="case-study-list"></ul>
+              </section>
+
+              <!-- Results Section -->
+              <section class="case-study-section" id="project-results-section">
+                <h2 class="case-study-heading">Results</h2>
+                <ul id="project-results" class="case-study-list results-list"></ul>
+              </section>
+            </div>
+
+            <!-- Info sections with screenshots -->
+            <div class="worksub-info" id="project-info">
+              <!-- Screenshots will be dynamically inserted here -->
+            </div>
           </div>
-
-          <!-- Case Study Sections -->
-          <div class="worksub-case-study">
-            <!-- Overview Section (Challenge + Approach) -->
-            <section class="case-study-section" id="project-overview-section">
-              <h2 class="case-study-heading">Overview</h2>
-              <p id="project-challenge" class="case-study-text"></p>
-              <p id="project-approach" class="case-study-text"></p>
-            </section>
-
-            <!-- Key Features Section -->
-            <section class="case-study-section" id="project-features-section">
-              <h2 class="case-study-heading">Key Features</h2>
-              <ul id="project-features" class="case-study-list"></ul>
-            </section>
-
-            <!-- Results Section -->
-            <section class="case-study-section" id="project-results-section">
-              <h2 class="case-study-heading">Results</h2>
-              <ul id="project-results" class="case-study-list results-list"></ul>
-            </section>
-          </div>
-
-          <!-- Info sections with screenshots -->
-          <div class="worksub-info" id="project-info">
-            <!-- Screenshots will be dynamically inserted here -->
-          </div>
-        </div>
-      </section>
+        </section>
       </div>
 
       <!-- PORTAL LOGIN SECTION (order: 6) -->
@@ -794,11 +811,7 @@
             </div>
 
             <!-- Password / Email Form -->
-            <form
-              id="portal-page-login-form"
-              class="portal-page-form"
-              novalidate
-            >
+            <form id="portal-page-login-form" class="portal-page-form" novalidate>
               <div class="portal-page-field">
                 <label for="portal-page-email" class="sr-only">Email</label>
                 <input
@@ -853,12 +866,14 @@
               ></p>
               <button type="submit" class="portal-page-submit">
                 <span class="btn-text">Sign In</span>
-                <span class="btn-loading" style="display: none;">Signing in...</span>
+                <span class="btn-loading" style="display: none">Signing in...</span>
               </button>
               <div class="portal-page-footer">
                 <a href="/forgot-password" class="portal-page-link">Forgot password?</a>
                 <span class="portal-page-divider">|</span>
-                <a href="#" id="portal-page-magic-toggle" class="portal-page-link">Use magic link instead</a>
+                <a href="#" id="portal-page-magic-toggle" class="portal-page-link"
+                  >Use magic link instead</a
+                >
               </div>
             </form>
 
@@ -867,7 +882,7 @@
               id="portal-page-magic-form"
               class="portal-page-form"
               novalidate
-              style="display: none;"
+              style="display: none"
             >
               <div class="portal-page-field">
                 <label for="portal-page-magic-email" class="sr-only">Email</label>
@@ -889,13 +904,9 @@
               ></p>
               <button type="submit" class="portal-page-submit portal-page-magic-submit">
                 <span class="btn-text">Send Magic Link</span>
-                <span class="btn-loading" style="display: none;">Sending...</span>
+                <span class="btn-loading" style="display: none">Sending...</span>
               </button>
-              <div
-                id="portal-page-magic-success"
-                class="portal-page-success"
-                style="display: none;"
-              >
+              <div id="portal-page-magic-success" class="portal-page-success" style="display: none">
                 <p>A secure login link has been sent to your email.</p>
               </div>
               <div class="portal-page-footer">
@@ -909,11 +920,7 @@
       </section>
 
       <!-- NOT FOUND / 404 SECTION (off-map) -->
-      <section
-        id="not-found"
-        class="not-found-section page-hidden"
-        data-page="not-found"
-      >
+      <section id="not-found" class="not-found-section page-hidden" data-page="not-found">
         <div class="not-found-content">
           <img
             class="not-found-sign"
@@ -944,10 +951,38 @@
            Updates via data-active-page on main + JS-set data-can-*
            attributes. Pulses on first paint to hint at the affordance. -->
       <nav class="map-compass" aria-label="Map navigation" data-map-compass>
-        <button class="map-compass__cue map-compass__cue--up" data-cue="up" type="button" aria-label="Navigate up">↑</button>
-        <button class="map-compass__cue map-compass__cue--right" data-cue="right" type="button" aria-label="Navigate right">→</button>
-        <button class="map-compass__cue map-compass__cue--down" data-cue="down" type="button" aria-label="Navigate down">↓</button>
-        <button class="map-compass__cue map-compass__cue--left" data-cue="left" type="button" aria-label="Navigate left">←</button>
+        <button
+          class="map-compass__cue map-compass__cue--up"
+          data-cue="up"
+          type="button"
+          aria-label="Navigate up"
+        >
+          ↑
+        </button>
+        <button
+          class="map-compass__cue map-compass__cue--right"
+          data-cue="right"
+          type="button"
+          aria-label="Navigate right"
+        >
+          →
+        </button>
+        <button
+          class="map-compass__cue map-compass__cue--down"
+          data-cue="down"
+          type="button"
+          aria-label="Navigate down"
+        >
+          ↓
+        </button>
+        <button
+          class="map-compass__cue map-compass__cue--left"
+          data-cue="left"
+          type="button"
+          aria-label="Navigate left"
+        >
+          ←
+        </button>
       </nav>
     </main>
 
@@ -982,19 +1017,18 @@
           // overflow comes from a later cascade layer, and an inline style is
           // the only thing that reliably outranks it.
           document.documentElement.classList.add('intake-open');
-          lockedTiles = Array.prototype.slice.call(
-            document.querySelectorAll('main#main-content section')
-          ).map(function (el) {
-            var prior = el.style.overflow;
-            el.style.overflow = 'hidden';
-            return { el: el, prior: prior };
-          });
+          lockedTiles = Array.prototype.slice
+            .call(document.querySelectorAll('main#main-content section'))
+            .map(function (el) {
+              var prior = el.style.overflow;
+              el.style.overflow = 'hidden';
+              return { el: el, prior: prior };
+            });
           document.body.style.overflow = 'hidden';
 
           if (!terminalModule && intakeContainer) {
-            const { TerminalIntakeModule } = await import(
-              '/src/features/client/terminal-intake.ts'
-            );
+            const { TerminalIntakeModule } =
+              await import('/src/features/client/terminal-intake.ts');
             terminalModule = new TerminalIntakeModule(intakeContainer, { isModal: true });
             await terminalModule.init();
           }

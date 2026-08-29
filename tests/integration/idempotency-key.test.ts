@@ -25,9 +25,7 @@ beforeEach(async () => {
   // about: cookie parsing → fake auth → idempotency. We bypass
   // authenticateToken by setting req.user inline; the middleware
   // only needs req.user to compute the user_scope.
-  const { withIdempotencyKey } = await import(
-    '../../server/middleware/idempotency-key.js'
-  );
+  const { withIdempotencyKey } = await import('../../server/middleware/idempotency-key.js');
   const cookieParser = (await import('cookie-parser')).default;
 
   app = express();
@@ -45,21 +43,16 @@ beforeEach(async () => {
   });
 
   let invocations = 0;
-  app.post(
-    '/test-handler',
-    withIdempotencyKey(),
-    (req, res) => {
-      invocations += 1;
-      res.status(201).json({
-        invocations,
-        echo: req.body
-      });
-    }
-  );
+  app.post('/test-handler', withIdempotencyKey(), (req, res) => {
+    invocations += 1;
+    res.status(201).json({
+      invocations,
+      echo: req.body
+    });
+  });
 
   // Expose invocation counter for assertions.
-  (app as unknown as { __getInvocations: () => number }).__getInvocations = () =>
-    invocations;
+  (app as unknown as { __getInvocations: () => number }).__getInvocations = () => invocations;
 });
 
 afterEach(async () => {
@@ -88,9 +81,7 @@ describe('Idempotency-Key middleware', () => {
     expect(second.headers['x-idempotent-replay']).toBe('true');
 
     // Handler ran exactly once.
-    const invocations = (
-      app as unknown as { __getInvocations: () => number }
-    ).__getInvocations();
+    const invocations = (app as unknown as { __getInvocations: () => number }).__getInvocations();
     expect(invocations).toBe(1);
   });
 
@@ -127,15 +118,11 @@ describe('Idempotency-Key middleware', () => {
     // Both ran; no idempotency_keys row was written.
     const { getDatabase } = await import('../../server/database/init');
     const db = getDatabase();
-    const row = await db.get<{ n: number }>(
-      'SELECT COUNT(*) AS n FROM idempotency_keys'
-    );
+    const row = await db.get<{ n: number }>('SELECT COUNT(*) AS n FROM idempotency_keys');
     expect(row?.n).toBe(0);
 
     // Sanity: the handler ran twice.
-    const invocations = (
-      app as unknown as { __getInvocations: () => number }
-    ).__getInvocations();
+    const invocations = (app as unknown as { __getInvocations: () => number }).__getInvocations();
     expect(invocations).toBe(2);
   });
 });

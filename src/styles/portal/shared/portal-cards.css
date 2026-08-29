@@ -12,7 +12,6 @@
  * - portal-dashboard-widgets.css - Dashboard widgets (activity, tasks)
  */
 
-
 /* =====================================================
    UNIFIED H3 HEADING STYLES
    Single source of truth for ALL h3 headings in portals
@@ -38,7 +37,6 @@
   flex-direction: column;
   gap: var(--space-3);
 }
-
 
 /* =====================================================
    PORTAL SECTION HEADING - BASE STYLE
@@ -83,14 +81,15 @@
 */
 
 /* Unified label rule — canonical classes only */
-.portal :is(
-  .field-label,
-  .section-label,
-  .stat-label,
-  .milestone-title,
-  .payment-plans-section h4,
-  .project-notes h4
-) {
+.portal
+  :is(
+    .field-label,
+    .section-label,
+    .stat-label,
+    .milestone-title,
+    .payment-plans-section h4,
+    .project-notes h4
+  ) {
   font-family: var(--font-family-sans);
   font-size: var(--label-font-size);
   font-weight: var(--label-font-weight);
@@ -100,14 +99,16 @@
 }
 
 /* LIGHT MODE - ALL labels */
-html[data-theme="light"] .portal :is(
-  .field-label,
-  .section-label,
-  .stat-label,
-  .milestone-title,
-  .payment-plans-section h4,
-  .project-notes h4
-) {
+html[data-theme="light"]
+  .portal
+  :is(
+    .field-label,
+    .section-label,
+    .stat-label,
+    .milestone-title,
+    .payment-plans-section h4,
+    .project-notes h4
+  ) {
   color: var(--color-light-text);
 }
 
@@ -117,11 +118,7 @@ html[data-theme="light"] .portal :is(
    xs font-size + semibold — distinguishable from body text in dense UI.
    Used by: command palette sections, keyboard shortcut groups, config sections.
    ===================================================== */
-.portal :is(
-  .command-palette-section-label,
-  .shortcuts-group-title,
-  .config-section-title
-) {
+.portal :is(.command-palette-section-label, .shortcuts-group-title, .config-section-title) {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
@@ -441,7 +438,6 @@ html[data-theme="light"] .portal :is(
   animation: pulse var(--animation-pulse-loading);
 }
 
-
 .portal .health-indicator.health-ok {
   background: var(--status-active);
 }
@@ -473,8 +469,6 @@ html[data-theme="light"] .portal :is(
   justify-content: center;
   gap: var(--portal-section-gap);
 }
-
-
 
 /* =====================================================
    MILESTONE COMPLETED STATE
@@ -513,7 +507,6 @@ html[data-theme="light"] .portal :is(
   background: var(--portal-alpha-white-05);
 }
 
-
 /* =====================================================
    MOBILE RESPONSIVE
    ===================================================== */
@@ -536,7 +529,4 @@ html[data-theme="light"] .portal :is(
   .portal .health-check-grid {
     grid-template-columns: 1fr;
   }
-
 }
-
-

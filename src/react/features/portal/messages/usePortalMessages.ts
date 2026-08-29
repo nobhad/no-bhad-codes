@@ -99,46 +99,43 @@ export function usePortalMessages({
    * Fetch messages for selected thread.
    * Pass `silent: true` for background polls to avoid loading flicker.
    */
-  const fetchMessages = useCallback(
-    async (threadId: number, options?: { silent?: boolean }) => {
-      // Cancel any pending request
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-      abortControllerRef.current = new AbortController();
+  const fetchMessages = useCallback(async (threadId: number, options?: { silent?: boolean }) => {
+    // Cancel any pending request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
 
+    if (!options?.silent) {
+      setMessagesLoading(true);
+      setMessagesError(null);
+    }
+
+    try {
+      const response = await apiFetch(buildEndpoint.messageThreadMessages(threadId), {
+        signal: abortControllerRef.current.signal
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch messages');
+      }
+
+      const data: MessagesResponse = unwrapApiData<MessagesResponse>(await response.json());
+      setMessages(data.messages ?? []);
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
       if (!options?.silent) {
-        setMessagesLoading(true);
-        setMessagesError(null);
+        const message = formatErrorMessage(error, 'Failed to load messages');
+        setMessagesError(message);
       }
-
-      try {
-        const response = await apiFetch(buildEndpoint.messageThreadMessages(threadId), {
-          signal: abortControllerRef.current.signal
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch messages');
-        }
-
-        const data: MessagesResponse = unwrapApiData<MessagesResponse>(await response.json());
-        setMessages(data.messages ?? []);
-      } catch (error) {
-        if (error instanceof Error && error.name === 'AbortError') {
-          return;
-        }
-        if (!options?.silent) {
-          const message = formatErrorMessage(error, 'Failed to load messages');
-          setMessagesError(message);
-        }
-      } finally {
-        if (!options?.silent) {
-          setMessagesLoading(false);
-        }
+    } finally {
+      if (!options?.silent) {
+        setMessagesLoading(false);
       }
-    },
-    []
-  );
+    }
+  }, []);
 
   /**
    * Mark a thread's messages as read
@@ -150,11 +147,7 @@ export function usePortalMessages({
           method: 'PUT'
         });
         // Update local unread count
-        setThreads((prev) =>
-          prev.map((t) =>
-            t.id === threadId ? { ...t, unread_count: 0 } : t
-          )
-        );
+        setThreads((prev) => prev.map((t) => (t.id === threadId ? { ...t, unread_count: 0 } : t)));
       } catch {
         // Non-critical — silently ignore
       }
@@ -231,7 +224,7 @@ export function usePortalMessages({
           if (!response.ok) {
             throw new Error(
               await toFriendlyError(response, {
-                rateLimited: 'You\'re sending messages a bit fast — please wait a moment.',
+                rateLimited: "You're sending messages a bit fast — please wait a moment.",
                 unavailable: 'Messaging is temporarily unavailable. Please try again shortly.',
                 fallback: 'Failed to send message'
               })
@@ -256,11 +249,11 @@ export function usePortalMessages({
           prev.map((t) =>
             t.id === selectedThread.id
               ? {
-                ...t,
-                last_message_at: data.message.created_at,
-                last_message_preview: messageContent.slice(0, 100),
-                unread_count: 0
-              }
+                  ...t,
+                  last_message_at: data.message.created_at,
+                  last_message_preview: messageContent.slice(0, 100),
+                  unread_count: 0
+                }
               : t
           )
         );

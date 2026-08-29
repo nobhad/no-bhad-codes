@@ -36,10 +36,15 @@ router.get(
   '/',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const query = (req.query.q as string || '').trim();
+    const query = ((req.query.q as string) || '').trim();
 
     if (query.length < MIN_QUERY_LENGTH) {
-      return errorResponse(res, `Query must be at least ${MIN_QUERY_LENGTH} characters`, 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        `Query must be at least ${MIN_QUERY_LENGTH} characters`,
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     const user = req.user!;

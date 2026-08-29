@@ -94,10 +94,10 @@ router.get(
     // Escape special characters in filename for LIKE pattern to prevent SQL injection
     // LIKE special chars: % (wildcard), _ (single char), \ (escape), " (JSON delimiter)
     const escapedFilename = filename
-      .replace(/\\/g, '\\\\')  // Escape backslashes first
-      .replace(/%/g, '\\%')    // Escape percent
-      .replace(/_/g, '\\_')    // Escape underscore
-      .replace(/"/g, '\\"');   // Escape quotes for JSON matching
+      .replace(/\\/g, '\\\\') // Escape backslashes first
+      .replace(/%/g, '\\%') // Escape percent
+      .replace(/_/g, '\\_') // Escape underscore
+      .replace(/"/g, '\\"'); // Escape quotes for JSON matching
 
     // First, find the message containing this attachment and verify access
     // Use exact JSON match to prevent substring attacks

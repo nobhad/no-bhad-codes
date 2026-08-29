@@ -14,10 +14,7 @@ import { logger } from './logger.js';
 import { errorTracker } from './error-tracking.js';
 import { runWithRequestContext } from '../observability/request-context.js';
 import { parseRow } from '../database/row-validator.js';
-import {
-  asyncTaskClaimRowSchema,
-  type AsyncTaskClaimRow
-} from '../database/row-schemas.js';
+import { asyncTaskClaimRowSchema, type AsyncTaskClaimRow } from '../database/row-schemas.js';
 
 /**
  * Emit a dead-letter alert to Sentry so ops sees the event without
@@ -80,7 +77,7 @@ function redactErrorMessage(message: string): string {
   for (const [pattern, replacement] of PII_REDACTION_PATTERNS) {
     out = out.replace(pattern, replacement);
   }
-  return out.length > 1000 ? `${out.slice(0, 1000)  }…` : out;
+  return out.length > 1000 ? `${out.slice(0, 1000)}…` : out;
 }
 
 const handlers = new Map<string, AsyncTaskHandler>();
@@ -89,10 +86,7 @@ const handlers = new Map<string, AsyncTaskHandler>();
  * Register a handler for a task type. Handlers run from the scheduler
  * and must be idempotent — a task may be retried after a partial failure.
  */
-export function registerAsyncTaskHandler(
-  taskType: string,
-  handler: AsyncTaskHandler
-): void {
+export function registerAsyncTaskHandler(taskType: string, handler: AsyncTaskHandler): void {
   handlers.set(taskType, handler);
 }
 
@@ -138,13 +132,7 @@ export async function enqueueAsyncTask(
     `INSERT OR IGNORE INTO async_tasks
        (task_type, payload, max_attempts, next_attempt_at, dedupe_key)
      VALUES (?, ?, ?, datetime('now', ?), ?)`,
-    [
-      taskType,
-      JSON.stringify(payload ?? null),
-      maxAttempts,
-      `+${delay} seconds`,
-      dedupeKey
-    ]
+    [taskType, JSON.stringify(payload ?? null), maxAttempts, `+${delay} seconds`, dedupeKey]
   );
 
   return (result.changes ?? 0) > 0;
@@ -182,11 +170,9 @@ export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
 
     if (!rawCandidate) break;
 
-    const candidate: AsyncTaskClaimRow | null = parseRow(
-      asyncTaskClaimRowSchema,
-      rawCandidate,
-      { op: 'async_tasks.claim' }
-    );
+    const candidate: AsyncTaskClaimRow | null = parseRow(asyncTaskClaimRowSchema, rawCandidate, {
+      op: 'async_tasks.claim'
+    });
     if (!candidate) {
       // Validation already logged; skip this row and move on so a
       // single drifted column can't stall the whole drain.

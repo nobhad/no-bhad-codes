@@ -33,12 +33,7 @@ export function useProjectDetail({
   const hookOptions = { projectId, getAuthToken };
 
   // Domain sub-hooks
-  const {
-    project,
-    setProject,
-    fetchProject,
-    updateProject
-  } = useProjectCore(hookOptions);
+  const { project, setProject, fetchProject, updateProject } = useProjectCore(hookOptions);
 
   const {
     milestones,
@@ -51,23 +46,11 @@ export function useProjectDetail({
     toggleDeliverable
   } = useProjectMilestones(hookOptions);
 
-  const {
-    tasks,
-    setTasks,
-    fetchTasks,
-    toggleTaskComplete,
-    assignTaskToMilestone
-  } = useProjectTasks(hookOptions);
+  const { tasks, setTasks, fetchTasks, toggleTaskComplete, assignTaskToMilestone } =
+    useProjectTasks(hookOptions);
 
-  const {
-    files,
-    setFiles,
-    fetchFiles,
-    uploadFile,
-    deleteFile,
-    toggleFileSharing,
-    updateCategory
-  } = useProjectFiles(hookOptions);
+  const { files, setFiles, fetchFiles, uploadFile, deleteFile, toggleFileSharing, updateCategory } =
+    useProjectFiles(hookOptions);
 
   const {
     invoices,

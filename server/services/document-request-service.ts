@@ -17,11 +17,15 @@ import { logger } from './logger.js';
 
 const DOCUMENT_REQUEST_TEMPLATE_COLUMNS = `
   id, name, title, description, document_type, is_required, days_until_due, category, project_type, created_by, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const DOCUMENT_REQUEST_HISTORY_COLUMNS = `
   id, request_id, action, old_status, new_status, actor_email, actor_type, notes, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // TYPES
@@ -375,7 +379,7 @@ class DocumentRequestService {
     // Only update if currently in 'requested' status
     if (request.status === 'requested') {
       await db.run(
-        'UPDATE document_requests SET status = \'viewed\', updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+        "UPDATE document_requests SET status = 'viewed', updated_at = CURRENT_TIMESTAMP WHERE id = ?",
         [id]
       );
 
@@ -747,7 +751,9 @@ class DocumentRequestService {
    */
   async getTemplates(): Promise<DocumentRequestTemplate[]> {
     const db = await getDatabase();
-    const templates = await db.all(`SELECT ${DOCUMENT_REQUEST_TEMPLATE_COLUMNS} FROM document_request_templates ORDER BY name`);
+    const templates = await db.all(
+      `SELECT ${DOCUMENT_REQUEST_TEMPLATE_COLUMNS} FROM document_request_templates ORDER BY name`
+    );
     return templates as unknown as DocumentRequestTemplate[];
   }
 
@@ -756,7 +762,10 @@ class DocumentRequestService {
    */
   async getTemplate(id: number): Promise<DocumentRequestTemplate | null> {
     const db = await getDatabase();
-    const template = await db.get(`SELECT ${DOCUMENT_REQUEST_TEMPLATE_COLUMNS} FROM document_request_templates WHERE id = ?`, [id]);
+    const template = await db.get(
+      `SELECT ${DOCUMENT_REQUEST_TEMPLATE_COLUMNS} FROM document_request_templates WHERE id = ?`,
+      [id]
+    );
     return (template as unknown as DocumentRequestTemplate) || null;
   }
 

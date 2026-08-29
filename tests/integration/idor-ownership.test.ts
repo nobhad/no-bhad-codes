@@ -35,9 +35,7 @@ afterEach(async () => {
 });
 
 function clientAuth(clientId: number): string {
-  return authCookie(
-    mintJwt({ id: clientId, email: `c${clientId}@test.local`, type: 'client' })
-  );
+  return authCookie(mintJwt({ id: clientId, email: `c${clientId}@test.local`, type: 'client' }));
 }
 
 describe('IDOR ownership enforcement', () => {

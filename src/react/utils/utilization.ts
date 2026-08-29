@@ -40,10 +40,7 @@ export interface UtilizationThresholdOptions {
  * @param options - Optional custom thresholds.
  * @returns A CSS var() reference suitable for inline styles.
  */
-export function getUtilizationColor(
-  ratio: number,
-  options?: UtilizationThresholdOptions
-): string {
+export function getUtilizationColor(ratio: number, options?: UtilizationThresholdOptions): string {
   const warning = options?.warningThreshold ?? UTILIZATION_THRESHOLD_WARNING;
   const danger = options?.dangerThreshold ?? UTILIZATION_THRESHOLD_DANGER;
 

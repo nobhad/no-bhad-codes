@@ -39,7 +39,9 @@
   background: var(--color-bg-primary);
   border: var(--border-width) solid transparent;
   cursor: pointer;
-  transition: color var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .config-section-tab:hover {

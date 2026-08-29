@@ -32,10 +32,23 @@ router.post(
   requireClient,
   asyncHandler(async (req: JWTAuthRequest, res: Response) => {
     const clientId = req.user!.id;
-    const { projectId, meetingType, preferredSlot1, preferredSlot2, preferredSlot3, durationMinutes, notes } = req.body;
+    const {
+      projectId,
+      meetingType,
+      preferredSlot1,
+      preferredSlot2,
+      preferredSlot3,
+      durationMinutes,
+      notes
+    } = req.body;
 
     if (!meetingType || !preferredSlot1) {
-      errorResponse(res, 'meetingType and preferredSlot1 are required', 400, ErrorCodes.VALIDATION_ERROR);
+      errorResponse(
+        res,
+        'meetingType and preferredSlot1 are required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
       return;
     }
 

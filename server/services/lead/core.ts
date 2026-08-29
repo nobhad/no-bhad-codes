@@ -127,7 +127,9 @@ const MAX_SUBMISSIONS = 500;
 const CONTACT_SUBMISSION_COLUMNS = `
   id, name, email, subject, message, status, ip_address, user_agent,
   message_id, created_at, updated_at, read_at, replied_at, client_id, converted_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // Lead Listing
@@ -135,7 +137,8 @@ const CONTACT_SUBMISSION_COLUMNS = `
 
 export async function getLeadsWithClients(): Promise<LeadRow[]> {
   const db = getDatabase();
-  return db.all<LeadRow>(`
+  return db.all<LeadRow>(
+    `
     SELECT
       p.id,
       p.client_id,
@@ -164,7 +167,9 @@ export async function getLeadsWithClients(): Promise<LeadRow[]> {
     LEFT JOIN clients c ON p.client_id = c.id
     ORDER BY p.created_at DESC
     LIMIT ?
-  `, [MAX_LEADS]);
+  `,
+    [MAX_LEADS]
+  );
 }
 
 export async function getLeadStats(): Promise<LeadStats> {
@@ -191,14 +196,17 @@ export async function getLeadStats(): Promise<LeadStats> {
 
 export async function getContactSubmissions(): Promise<ContactSubmissionRow[]> {
   const db = getDatabase();
-  return db.all<ContactSubmissionRow>(`
+  return db.all<ContactSubmissionRow>(
+    `
     SELECT
       id, name, email, subject, message, status,
       message_id, created_at, read_at, replied_at
     FROM contact_submissions
     ORDER BY created_at DESC
     LIMIT ?
-  `, [MAX_SUBMISSIONS]);
+  `,
+    [MAX_SUBMISSIONS]
+  );
 }
 
 export async function getContactSubmissionStats(): Promise<ContactSubmissionStats> {
@@ -221,10 +229,7 @@ export async function getContactSubmissionStats(): Promise<ContactSubmissionStat
   };
 }
 
-export async function updateContactSubmissionStatus(
-  id: string,
-  status: string
-): Promise<void> {
+export async function updateContactSubmissionStatus(id: string, status: string): Promise<void> {
   const db = getDatabase();
 
   let updateFields = 'status = ?, updated_at = CURRENT_TIMESTAMP';
@@ -250,9 +255,7 @@ export async function getContactSubmissionById(
   );
 }
 
-export async function findClientByEmail(
-  email: string
-): Promise<ExistingClientRow | undefined> {
+export async function findClientByEmail(email: string): Promise<ExistingClientRow | undefined> {
   const db = getDatabase();
   return db.get<ExistingClientRow>(
     'SELECT id, contact_name, email FROM clients WHERE LOWER(email) = LOWER(?)',
@@ -290,10 +293,7 @@ export async function createClientFromContact(params: {
   return result.lastID!;
 }
 
-export async function markContactAsConverted(
-  contactId: string,
-  clientId: number
-): Promise<void> {
+export async function markContactAsConverted(contactId: string, clientId: number): Promise<void> {
   const db = getDatabase();
   await db.run(
     `UPDATE contact_submissions
@@ -307,14 +307,9 @@ export async function markContactAsConverted(
 // Lead Status Updates
 // =====================================================
 
-export async function getProjectById(
-  id: string
-): Promise<ProjectStatusRow | undefined> {
+export async function getProjectById(id: string): Promise<ProjectStatusRow | undefined> {
   const db = getDatabase();
-  return db.get<ProjectStatusRow>(
-    'SELECT id, status FROM projects WHERE id = ?',
-    [id]
-  );
+  return db.get<ProjectStatusRow>('SELECT id, status FROM projects WHERE id = ?', [id]);
 }
 
 export async function updateProjectStatus(
@@ -341,11 +336,10 @@ export async function updateProjectStatus(
 // Lead Invitation
 // =====================================================
 
-export async function getLeadWithClient(
-  id: string
-): Promise<LeadWithClientRow | undefined> {
+export async function getLeadWithClient(id: string): Promise<LeadWithClientRow | undefined> {
   const db = getDatabase();
-  return db.get<LeadWithClientRow>(`
+  return db.get<LeadWithClientRow>(
+    `
     SELECT
       p.id,
       p.project_name,
@@ -362,7 +356,9 @@ export async function getLeadWithClient(
     FROM projects p
     LEFT JOIN clients c ON p.client_id = c.id
     WHERE p.id = ?
-  `, [id]);
+  `,
+    [id]
+  );
 }
 
 export async function findClientByExactEmail(
@@ -401,22 +397,24 @@ export async function createClientFromLead(params: {
   const result = await db.run(
     `INSERT INTO clients (email, password_hash, contact_name, company_name, phone, status, invitation_token, invitation_expires_at, invitation_sent_at)
      VALUES (?, '', ?, ?, ?, 'pending', ?, ?, CURRENT_TIMESTAMP)`,
-    [params.email, params.contactName, params.companyName, params.phone, params.invitationToken, params.expiresAt]
+    [
+      params.email,
+      params.contactName,
+      params.companyName,
+      params.phone,
+      params.invitationToken,
+      params.expiresAt
+    ]
   );
   return result.lastID || 0;
 }
 
-export async function linkProjectToClient(
-  projectId: string,
-  clientId: number
-): Promise<void> {
+export async function linkProjectToClient(projectId: string, clientId: number): Promise<void> {
   const db = getDatabase();
   await db.run('UPDATE projects SET client_id = ? WHERE id = ?', [clientId, projectId]);
 }
 
-export async function updateProjectStatusToConverted(
-  projectId: string
-): Promise<void> {
+export async function updateProjectStatusToConverted(projectId: string): Promise<void> {
   const db = getDatabase();
   await db.run('UPDATE projects SET status = ? WHERE id = ?', ['converted', projectId]);
 }
@@ -425,20 +423,17 @@ export async function updateProjectStatusToConverted(
 // Lead Activation
 // =====================================================
 
-export async function getProjectForActivation(
-  id: string
-): Promise<ProjectStatusRow | undefined> {
+export async function getProjectForActivation(id: string): Promise<ProjectStatusRow | undefined> {
   const db = getDatabase();
-  return db.get<ProjectStatusRow>(
-    'SELECT id, status, project_name FROM projects WHERE id = ?',
-    [id]
-  );
+  return db.get<ProjectStatusRow>('SELECT id, status, project_name FROM projects WHERE id = ?', [
+    id
+  ]);
 }
 
 export async function activateProject(id: string): Promise<void> {
   const db = getDatabase();
   await db.run(
-    'UPDATE projects SET status = ?, start_date = date(\'now\'), updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+    "UPDATE projects SET status = ?, start_date = date('now'), updated_at = CURRENT_TIMESTAMP WHERE id = ?",
     ['converted', id]
   );
 }

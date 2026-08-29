@@ -133,14 +133,14 @@ export function truncateUrl(url: string): string {
 
 export function getDeliveryStatusVariant(status: string) {
   switch (status) {
-  case 'success':
-    return 'completed';
-  case 'failed':
-    return 'cancelled';
-  case 'pending':
-    return 'pending';
-  default:
-    return 'inactive';
+    case 'success':
+      return 'completed';
+    case 'failed':
+      return 'cancelled';
+    case 'pending':
+      return 'pending';
+    default:
+      return 'inactive';
   }
 }
 
@@ -152,8 +152,7 @@ export function filterWebhook(
   if (search) {
     const query = search.toLowerCase();
     const matchesSearch =
-      webhook.name.toLowerCase().includes(query) ||
-      webhook.url.toLowerCase().includes(query);
+      webhook.name.toLowerCase().includes(query) || webhook.url.toLowerCase().includes(query);
     if (!matchesSearch) return false;
   }
 
@@ -171,14 +170,14 @@ export function sortWebhooks(a: WebhookItem, b: WebhookItem, sort: SortConfig): 
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'name':
-    return a.name.localeCompare(b.name) * multiplier;
-  case 'updatedAt':
-    return (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()) * multiplier;
-  case 'totalDeliveries':
-    return (a.totalDeliveries - b.totalDeliveries) * multiplier;
-  default:
-    return 0;
+    case 'name':
+      return a.name.localeCompare(b.name) * multiplier;
+    case 'updatedAt':
+      return (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()) * multiplier;
+    case 'totalDeliveries':
+      return (a.totalDeliveries - b.totalDeliveries) * multiplier;
+    default:
+      return 0;
   }
 }
 
@@ -203,9 +202,9 @@ export function sortDeliveries(a: WebhookDelivery, b: WebhookDelivery, sort: Sor
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'createdAt':
-    return (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) * multiplier;
-  default:
-    return 0;
+    case 'createdAt':
+      return (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) * multiplier;
+    default:
+      return 0;
   }
 }

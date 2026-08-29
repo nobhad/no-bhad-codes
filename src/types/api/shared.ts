@@ -59,7 +59,6 @@ export interface ValidationErrorDetail {
   value?: unknown;
 }
 
-
 // ============================================
 // Query Parameter Types
 // ============================================
@@ -74,4 +73,3 @@ export interface PaginationParams {
   sortOrder?: 'asc' | 'desc';
   search?: string;
 }
-

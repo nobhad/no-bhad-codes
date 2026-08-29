@@ -155,16 +155,22 @@ export const DOC_REQUEST_COLUMNS = `
   dr.review_notes, dr.rejection_reason, dr.approved_file_id,
   dr.is_required, dr.reminder_sent_at, dr.reminder_count,
   dr.created_at, dr.updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const DOC_REQUEST_TEMPLATE_COLUMNS = `
   id, name, title, description, document_type, is_required, days_until_due,
   category, project_type, created_by, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export const DOC_REQUEST_HISTORY_COLUMNS = `
   id, request_id, action, old_status, new_status, actor_email, actor_type, notes, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // SCHEMAS & MAPPERS
@@ -233,11 +239,23 @@ export const documentRequestHistorySchema = defineSchema<DocumentRequestHistory>
   oldStatus: { column: 'old_status', type: 'string?' },
   newStatus: { column: 'new_status', type: 'string?' },
   actorEmail: { column: 'actor_email', type: 'string' },
-  actorType: { column: 'actor_type', type: 'string', transform: (v) => v as 'admin' | 'client' | 'system' },
+  actorType: {
+    column: 'actor_type',
+    type: 'string',
+    transform: (v) => v as 'admin' | 'client' | 'system'
+  },
   notes: 'string?',
   createdAt: { column: 'created_at', type: 'string' }
 });
 
-export const toDocumentRequest = createMapper<DocumentRequestRow, DocumentRequest>(documentRequestSchema);
-export const toDocumentRequestTemplate = createMapper<DocumentRequestTemplateRow, DocumentRequestTemplate>(documentRequestTemplateSchema);
-export const toDocumentRequestHistory = createMapper<DocumentRequestHistoryRow, DocumentRequestHistory>(documentRequestHistorySchema);
+export const toDocumentRequest = createMapper<DocumentRequestRow, DocumentRequest>(
+  documentRequestSchema
+);
+export const toDocumentRequestTemplate = createMapper<
+  DocumentRequestTemplateRow,
+  DocumentRequestTemplate
+>(documentRequestTemplateSchema);
+export const toDocumentRequestHistory = createMapper<
+  DocumentRequestHistoryRow,
+  DocumentRequestHistory
+>(documentRequestHistorySchema);

@@ -66,39 +66,39 @@ export function usePortalFetch({ getAuthToken }: UsePortalFetchOptions): UsePort
     getAuthTokenRef.current = getAuthToken;
   }, [getAuthToken]);
 
-  const portalFetch = useCallback(async <T>(
-    url: string,
-    options: FetchOptions = {}
-  ): Promise<T> => {
-    const { method = 'GET', body, headers: extraHeaders, unwrap = true } = options;
+  const portalFetch = useCallback(
+    async <T>(url: string, options: FetchOptions = {}): Promise<T> => {
+      const { method = 'GET', body, headers: extraHeaders, unwrap = true } = options;
 
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      ...extraHeaders
-    };
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...extraHeaders
+      };
 
-    const fetchOptions: RequestInit = {
-      method,
-      headers
-    };
+      const fetchOptions: RequestInit = {
+        method,
+        headers
+      };
 
-    if (body !== undefined) {
-      fetchOptions.body = JSON.stringify(body);
-    }
+      if (body !== undefined) {
+        fetchOptions.body = JSON.stringify(body);
+      }
 
-    const response = await apiFetch(url, fetchOptions);
+      const response = await apiFetch(url, fetchOptions);
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      // Throw a rich error so the catch site can branch on status
-      // (rate-limited, circuit-open, idempotency-conflict) instead of
-      // string-matching a generic message.
-      throw new HttpApiError(response.status, errorData as Record<string, unknown>);
-    }
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        // Throw a rich error so the catch site can branch on status
+        // (rate-limited, circuit-open, idempotency-conflict) instead of
+        // string-matching a generic message.
+        throw new HttpApiError(response.status, errorData as Record<string, unknown>);
+      }
 
-    const json = await response.json();
-    return (unwrap ? unwrapApiData<T>(json) : json) as T;
-  }, []);
+      const json = await response.json();
+      return (unwrap ? unwrapApiData<T>(json) : json) as T;
+    },
+    []
+  );
 
   return { portalFetch };
 }
@@ -159,30 +159,33 @@ export function usePortalData<T>({
     transformRef.current = transform;
   }, [transform]);
 
-  const fetchData = useCallback(async (signal?: AbortSignal) => {
-    setIsLoading(true);
-    setError(null);
+  const fetchData = useCallback(
+    async (signal?: AbortSignal) => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const response = await apiFetch(url, { signal });
+      try {
+        const response = await apiFetch(url, { signal });
 
-      if (!response.ok) {
-        throw new Error('Failed to load data');
+        if (!response.ok) {
+          throw new Error('Failed to load data');
+        }
+
+        const json = await response.json();
+        const unwrapped = unwrapApiData<unknown>(json);
+        const currentTransform = transformRef.current;
+        setData(currentTransform ? currentTransform(unwrapped) : (unwrapped as T));
+      } catch (err) {
+        if ((err as Error).name === 'AbortError') return;
+        const message = formatErrorMessage(err, 'Failed to load data');
+        logger.error(`Fetch error for ${url}:`, err);
+        setError(message);
+      } finally {
+        setIsLoading(false);
       }
-
-      const json = await response.json();
-      const unwrapped = unwrapApiData<unknown>(json);
-      const currentTransform = transformRef.current;
-      setData(currentTransform ? currentTransform(unwrapped) : unwrapped as T);
-    } catch (err) {
-      if ((err as Error).name === 'AbortError') return;
-      const message = formatErrorMessage(err, 'Failed to load data');
-      logger.error(`Fetch error for ${url}:`, err);
-      setError(message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [url]);
+    },
+    [url]
+  );
 
   // Fetch on mount with AbortController cleanup
   useEffect(() => {

@@ -96,7 +96,9 @@ export function useProjectInvoices({
       });
       if (!response.ok) return false;
       setInvoices((prev) =>
-        prev.map((inv) => (inv.id === id ? { ...inv, status: 'paid', paid_date: new Date().toISOString() } : inv))
+        prev.map((inv) =>
+          inv.id === id ? { ...inv, status: 'paid', paid_date: new Date().toISOString() } : inv
+        )
       );
       return true;
     } catch (err) {

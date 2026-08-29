@@ -26,14 +26,8 @@ const BULK_DELETE_MAX_IDS = 100;
 
 export const PaymentScheduleValidationSchemas = {
   createSchedule: {
-    project_id: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ],
-    client_id: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ]
+    project_id: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
+    client_id: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }]
   } as ValidationSchema,
 
   createInstallment: {

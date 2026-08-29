@@ -79,7 +79,8 @@ async function checkStripeHealth(): Promise<IntegrationHealthStatus> {
     const timeout = setTimeout(() => controller.abort(), HEALTH_CHECK_TIMEOUT_MS);
 
     try {
-      const response = await fetchWithTimeout('https://api.stripe.com/v1/balance', { timeoutMs: 5000,
+      const response = await fetchWithTimeout('https://api.stripe.com/v1/balance', {
+        timeoutMs: 5000,
         method: 'GET',
         headers: {
           Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
@@ -96,7 +97,8 @@ async function checkStripeHealth(): Promise<IntegrationHealthStatus> {
     } catch (fetchError) {
       clearTimeout(timeout);
       status.healthy = false;
-      status.error = fetchError instanceof Error ? fetchError.message : 'Stripe connectivity check failed';
+      status.error =
+        fetchError instanceof Error ? fetchError.message : 'Stripe connectivity check failed';
     }
   } catch (error) {
     status.error = error instanceof Error ? error.message : 'Stripe health check failed';
@@ -126,9 +128,9 @@ async function checkCalendarHealth(): Promise<IntegrationHealthStatus> {
 
     // Check if any active calendar sync configs exist in the database
     const db = getDatabase();
-    const activeSyncs = await db.get(
+    const activeSyncs = (await db.get(
       'SELECT COUNT(*) as count FROM calendar_sync_configs WHERE is_active = 1'
-    ) as { count: number } | undefined;
+    )) as { count: number } | undefined;
 
     status.details = {
       activeSyncConfigs: activeSyncs?.count ?? 0
@@ -173,7 +175,8 @@ async function checkNotificationWebhooksHealth(): Promise<IntegrationHealthStatu
       status.error = 'No active notification webhook configurations';
     }
   } catch (error) {
-    status.error = error instanceof Error ? error.message : 'Notification webhook health check failed';
+    status.error =
+      error instanceof Error ? error.message : 'Notification webhook health check failed';
   }
 
   return status;
@@ -192,9 +195,9 @@ async function checkZapierHealth(): Promise<IntegrationHealthStatus> {
 
   try {
     const db = getDatabase();
-    const activeWebhooks = await db.get(
+    const activeWebhooks = (await db.get(
       'SELECT COUNT(*) as count FROM webhooks WHERE is_active = 1'
-    ) as { count: number } | undefined;
+    )) as { count: number } | undefined;
 
     const webhookCount = activeWebhooks?.count ?? 0;
     status.configured = webhookCount > 0;

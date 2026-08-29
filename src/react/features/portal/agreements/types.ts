@@ -5,8 +5,21 @@
  * @file src/react/features/portal/agreements/types.ts
  */
 
-export type AgreementStatus = 'draft' | 'sent' | 'viewed' | 'in_progress' | 'completed' | 'cancelled' | 'expired';
-export type StepType = 'welcome' | 'proposal_review' | 'contract_sign' | 'deposit_payment' | 'questionnaire' | 'custom_message';
+export type AgreementStatus =
+  | 'draft'
+  | 'sent'
+  | 'viewed'
+  | 'in_progress'
+  | 'completed'
+  | 'cancelled'
+  | 'expired';
+export type StepType =
+  | 'welcome'
+  | 'proposal_review'
+  | 'contract_sign'
+  | 'deposit_payment'
+  | 'questionnaire'
+  | 'custom_message';
 export type StepStatus = 'pending' | 'active' | 'completed' | 'skipped';
 
 export interface AgreementStep {

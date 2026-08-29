@@ -282,7 +282,7 @@ describe('Stripe Service', () => {
       await expirePaymentLink(1);
 
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('UPDATE invoice_payment_links SET status = \'cancelled\''),
+        expect.stringContaining("UPDATE invoice_payment_links SET status = 'cancelled'"),
         [1]
       );
     });
@@ -372,7 +372,7 @@ describe('Stripe Service', () => {
       });
 
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('UPDATE invoice_payment_links SET status = \'expired\''),
+        expect.stringContaining("UPDATE invoice_payment_links SET status = 'expired'"),
         ['cs_test_123']
       );
     });

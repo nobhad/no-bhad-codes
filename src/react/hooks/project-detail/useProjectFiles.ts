@@ -6,7 +6,14 @@
 import { useState, useCallback } from 'react';
 import type { ProjectFile } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData, apiFetch, apiPut, apiDelete, getCsrfToken, CSRF_HEADER_NAME } from '@/utils/api-client';
+import {
+  unwrapApiData,
+  apiFetch,
+  apiPut,
+  apiDelete,
+  getCsrfToken,
+  CSRF_HEADER_NAME
+} from '@/utils/api-client';
 import { createLogger } from '@/utils/logger';
 import type { ProjectDetailHookOptions } from './types';
 
@@ -22,9 +29,7 @@ interface UseProjectFilesReturn {
   updateCategory: (id: number, category: string) => Promise<boolean>;
 }
 
-export function useProjectFiles({
-  projectId
-}: ProjectDetailHookOptions): UseProjectFilesReturn {
+export function useProjectFiles({ projectId }: ProjectDetailHookOptions): UseProjectFilesReturn {
   const [files, setFiles] = useState<ProjectFile[]>([]);
 
   const fetchFiles = useCallback(async (): Promise<ProjectFile[]> => {
@@ -83,24 +88,21 @@ export function useProjectFiles({
     [projectId]
   );
 
-  const deleteFile = useCallback(
-    async (id: number): Promise<boolean> => {
-      try {
-        const response = await apiDelete(`${API_ENDPOINTS.FILES}/${id}`);
+  const deleteFile = useCallback(async (id: number): Promise<boolean> => {
+    try {
+      const response = await apiDelete(`${API_ENDPOINTS.FILES}/${id}`);
 
-        if (!response.ok) {
-          throw new Error(`Failed to delete file: ${response.statusText}`);
-        }
-
-        setFiles((prev) => prev.filter((f) => f.id !== id));
-        return true;
-      } catch (err) {
-        logger.error('Delete file error:', err);
-        return false;
+      if (!response.ok) {
+        throw new Error(`Failed to delete file: ${response.statusText}`);
       }
-    },
-    []
-  );
+
+      setFiles((prev) => prev.filter((f) => f.id !== id));
+      return true;
+    } catch (err) {
+      logger.error('Delete file error:', err);
+      return false;
+    }
+  }, []);
 
   const toggleFileSharing = useCallback(
     async (id: number): Promise<boolean> => {
@@ -108,15 +110,15 @@ export function useProjectFiles({
       if (!file) return false;
 
       try {
-        const response = await apiPut(`${API_ENDPOINTS.FILES}/${id}`, { is_shared: !file.is_shared });
+        const response = await apiPut(`${API_ENDPOINTS.FILES}/${id}`, {
+          is_shared: !file.is_shared
+        });
 
         if (!response.ok) {
           throw new Error(`Failed to update file: ${response.statusText}`);
         }
 
-        setFiles((prev) =>
-          prev.map((f) => (f.id === id ? { ...f, is_shared: !f.is_shared } : f))
-        );
+        setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, is_shared: !f.is_shared } : f)));
         return true;
       } catch (err) {
         logger.error('Toggle file sharing error:', err);
@@ -126,20 +128,17 @@ export function useProjectFiles({
     [files]
   );
 
-  const updateCategory = useCallback(
-    async (id: number, category: string): Promise<boolean> => {
-      try {
-        const response = await apiPut(`${API_ENDPOINTS.FILES}/${id}`, { category });
-        if (!response.ok) return false;
-        setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, category } : f)));
-        return true;
-      } catch (err) {
-        logger.error('Update category error:', err);
-        return false;
-      }
-    },
-    []
-  );
+  const updateCategory = useCallback(async (id: number, category: string): Promise<boolean> => {
+    try {
+      const response = await apiPut(`${API_ENDPOINTS.FILES}/${id}`, { category });
+      if (!response.ok) return false;
+      setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, category } : f)));
+      return true;
+    } catch (err) {
+      logger.error('Update category error:', err);
+      return false;
+    }
+  }, []);
 
   return {
     files,

@@ -14,11 +14,7 @@
 
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
-import {
-  authenticateToken,
-  requireAdmin,
-  AuthenticatedRequest
-} from '../../middleware/auth.js';
+import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { sendSuccess } from '../../utils/api-response.js';
 import { listBackups, runDailyBackup, getBackupDir } from '../../services/backup-service.js';
 import { logger } from '../../services/logger.js';

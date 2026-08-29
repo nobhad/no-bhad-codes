@@ -108,22 +108,30 @@ describe('useTableFilters - core logic', () => {
 
   describe('sortFn', () => {
     it('should sort strings ascending', () => {
-      const sorted = [...TEST_ITEMS].sort((a, b) => sortFn(a, b, { column: 'name', direction: 'asc' }));
+      const sorted = [...TEST_ITEMS].sort((a, b) =>
+        sortFn(a, b, { column: 'name', direction: 'asc' })
+      );
       expect(sorted.map((i) => i.name)).toEqual(['Alpha', 'Beta', 'Delta', 'Gamma']);
     });
 
     it('should sort strings descending', () => {
-      const sorted = [...TEST_ITEMS].sort((a, b) => sortFn(a, b, { column: 'name', direction: 'desc' }));
+      const sorted = [...TEST_ITEMS].sort((a, b) =>
+        sortFn(a, b, { column: 'name', direction: 'desc' })
+      );
       expect(sorted.map((i) => i.name)).toEqual(['Gamma', 'Delta', 'Beta', 'Alpha']);
     });
 
     it('should sort numbers ascending', () => {
-      const sorted = [...TEST_ITEMS].sort((a, b) => sortFn(a, b, { column: 'amount', direction: 'asc' }));
+      const sorted = [...TEST_ITEMS].sort((a, b) =>
+        sortFn(a, b, { column: 'amount', direction: 'asc' })
+      );
       expect(sorted.map((i) => i.amount)).toEqual([50, 100, 200, 300]);
     });
 
     it('should sort numbers descending', () => {
-      const sorted = [...TEST_ITEMS].sort((a, b) => sortFn(a, b, { column: 'amount', direction: 'desc' }));
+      const sorted = [...TEST_ITEMS].sort((a, b) =>
+        sortFn(a, b, { column: 'amount', direction: 'desc' })
+      );
       expect(sorted.map((i) => i.amount)).toEqual([300, 200, 100, 50]);
     });
   });
@@ -176,14 +184,12 @@ describe('useTableFilters - core logic', () => {
 
   describe('applyFilters (filter + sort combined)', () => {
     it('should filter and sort together', () => {
-      const result = applyFilters(
-        TEST_ITEMS,
-        { status: 'active' },
-        '',
-        { column: 'amount', direction: 'asc' }
-      );
+      const result = applyFilters(TEST_ITEMS, { status: 'active' }, '', {
+        column: 'amount',
+        direction: 'asc'
+      });
       expect(result).toHaveLength(2);
-      expect(result[0].amount).toBe(50);  // Gamma
+      expect(result[0].amount).toBe(50); // Gamma
       expect(result[1].amount).toBe(100); // Alpha
     });
 

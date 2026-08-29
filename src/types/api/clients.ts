@@ -73,7 +73,6 @@ export interface ClientStats {
   inactive: number;
 }
 
-
 // ============================================
 // Client CRM API Types
 // ============================================

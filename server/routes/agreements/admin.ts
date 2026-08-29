@@ -46,10 +46,24 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: JWTAuthRequest, res: Response) => {
-    const { projectId, clientId, name, proposalId, contractId, questionnaireId, welcomeMessage, steps } = req.body;
+    const {
+      projectId,
+      clientId,
+      name,
+      proposalId,
+      contractId,
+      questionnaireId,
+      welcomeMessage,
+      steps
+    } = req.body;
 
     if (!projectId || !clientId || !steps || !Array.isArray(steps) || steps.length === 0) {
-      errorResponse(res, 'projectId, clientId, and steps are required', 400, ErrorCodes.VALIDATION_ERROR);
+      errorResponse(
+        res,
+        'projectId, clientId, and steps are required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
       return;
     }
 

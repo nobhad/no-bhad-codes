@@ -149,7 +149,10 @@ router.post(
       return errorResponse(res, 'Invalid request urgency', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
-    const projectExists = await adHocRequestService.verifyClientProject(Number(projectId), clientId);
+    const projectExists = await adHocRequestService.verifyClientProject(
+      Number(projectId),
+      clientId
+    );
 
     if (!projectExists) {
       return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
@@ -260,7 +263,12 @@ router.post(
     }
 
     if (request.status !== 'quoted') {
-      return errorResponse(res, 'Quote is not available for approval', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'Quote is not available for approval',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     const updatedRequest = await adHocRequestService.updateRequest(requestId, {
@@ -315,7 +323,12 @@ router.post(
     }
 
     if (request.status !== 'quoted') {
-      return errorResponse(res, 'Quote is not available for decline', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'Quote is not available for decline',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     const updatedRequest = await adHocRequestService.updateRequest(requestId, {

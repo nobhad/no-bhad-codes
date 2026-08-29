@@ -48,7 +48,10 @@ export function useProjectMilestones({
   const addMilestone = useCallback(
     async (milestone: Omit<ProjectMilestone, 'id' | 'project_id'>): Promise<boolean> => {
       try {
-        const response = await apiPost(`${API_ENDPOINTS.PROJECTS}/${projectId}/milestones`, milestone);
+        const response = await apiPost(
+          `${API_ENDPOINTS.PROJECTS}/${projectId}/milestones`,
+          milestone
+        );
 
         if (!response.ok) {
           throw new Error(`Failed to add milestone: ${response.statusText}`);
@@ -69,7 +72,10 @@ export function useProjectMilestones({
   const updateMilestone = useCallback(
     async (id: number, updates: Partial<ProjectMilestone>): Promise<boolean> => {
       try {
-        const response = await apiPut(`${API_ENDPOINTS.PROJECTS}/${projectId}/milestones/${id}`, updates);
+        const response = await apiPut(
+          `${API_ENDPOINTS.PROJECTS}/${projectId}/milestones/${id}`,
+          updates
+        );
 
         if (!response.ok) {
           throw new Error(`Failed to update milestone: ${response.statusText}`);
@@ -78,7 +84,9 @@ export function useProjectMilestones({
         const json = await response.json();
         const updated = unwrapApiData<{ milestone: ProjectMilestone }>(json);
         // Use server response to get auto-completion state (is_completed, completed_date)
-        setMilestones((prev) => prev.map((m) => (m.id === id ? { ...m, ...updates, ...updated.milestone } : m)));
+        setMilestones((prev) =>
+          prev.map((m) => (m.id === id ? { ...m, ...updates, ...updated.milestone } : m))
+        );
         return true;
       } catch (err) {
         logger.error('Update milestone error:', err);

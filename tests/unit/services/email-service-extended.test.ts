@@ -128,10 +128,7 @@ describe('Email Service Extended', () => {
       const result = await isClientActivated(42);
 
       expect(result).toBe(true);
-      expect(mockDb.get).toHaveBeenCalledWith(
-        'SELECT status FROM clients WHERE id = ?',
-        [42]
-      );
+      expect(mockDb.get).toHaveBeenCalledWith('SELECT status FROM clients WHERE id = ?', [42]);
     });
 
     it('returns false when client status is not active (by numeric ID)', async () => {
@@ -148,10 +145,9 @@ describe('Email Service Extended', () => {
       const result = await isClientActivated('User@Example.com');
 
       expect(result).toBe(true);
-      expect(mockDb.get).toHaveBeenCalledWith(
-        'SELECT status FROM clients WHERE email = ?',
-        ['user@example.com']
-      );
+      expect(mockDb.get).toHaveBeenCalledWith('SELECT status FROM clients WHERE email = ?', [
+        'user@example.com'
+      ]);
     });
 
     it('returns false when client is not found', async () => {
@@ -593,10 +589,10 @@ describe('Email Service Extended', () => {
 
   describe('emailService.sendWelcomeEmail (object-based signature)', () => {
     it('accepts object-based data format', async () => {
-      const result = await emailService.sendWelcomeEmail(
-        'user@example.com',
-        { name: 'Eve', accessToken: 'obj-token-abc' }
-      );
+      const result = await emailService.sendWelcomeEmail('user@example.com', {
+        name: 'Eve',
+        accessToken: 'obj-token-abc'
+      });
 
       expect(result.success).toBe(true);
       expect(mockSendMail).toHaveBeenCalled();

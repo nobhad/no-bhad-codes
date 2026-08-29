@@ -7,17 +7,8 @@
 
 import { getDatabase } from '../../database/init.js';
 import { userService } from '../user-service.js';
-import {
-  toTimeEntry,
-  type TimeEntryRow
-} from '../../database/entities/index.js';
-import type {
-  SqlValue,
-  TimeEntry,
-  TimeEntryData,
-  TimeStats,
-  TeamTimeReport
-} from './types.js';
+import { toTimeEntry, type TimeEntryRow } from '../../database/entities/index.js';
+import type { SqlValue, TimeEntry, TimeEntryData, TimeStats, TeamTimeReport } from './types.js';
 
 export async function logTime(projectId: number, data: TimeEntryData): Promise<TimeEntry> {
   const db = getDatabase();
@@ -115,7 +106,10 @@ export async function getTimeEntries(
   return (rows as unknown as TimeEntryRow[]).map(toTimeEntry);
 }
 
-export async function updateTimeEntry(entryId: number, data: Partial<TimeEntryData>): Promise<TimeEntry> {
+export async function updateTimeEntry(
+  entryId: number,
+  data: Partial<TimeEntryData>
+): Promise<TimeEntry> {
   const db = getDatabase();
 
   const updates: string[] = [];
@@ -277,7 +271,8 @@ export async function getAdminTimeEntries(options?: {
     params.push(options.startDate);
   }
 
-  return db.all<AdminTimeEntryRow>(`
+  return db.all<AdminTimeEntryRow>(
+    `
     SELECT
       te.id,
       te.project_id as projectId,
@@ -298,7 +293,9 @@ export async function getAdminTimeEntries(options?: {
     LEFT JOIN users u ON te.user_id = u.id
     ${whereClause}
     ORDER BY te.date DESC, te.created_at DESC
-  `, params);
+  `,
+    params
+  );
 }
 
 /**
@@ -313,23 +310,23 @@ export async function startTimer(params: {
 }): Promise<{ entryId: number; projectName: string }> {
   const db = getDatabase();
 
-  const project = await db.get('SELECT id, project_name FROM projects WHERE id = ?', [params.projectId]);
+  const project = await db.get('SELECT id, project_name FROM projects WHERE id = ?', [
+    params.projectId
+  ]);
   if (!project) throw new Error('Project not found');
 
   const user = await db.get('SELECT id FROM users WHERE email = ?', [params.adminEmail]);
 
-  const userId = user ? (user as Record<string, unknown>).id as number : null;
+  const userId = user ? ((user as Record<string, unknown>).id as number) : null;
 
-  const result = await db.run(`
+  const result = await db.run(
+    `
     INSERT INTO time_entries (
       project_id, task_id, user_id, description, date, hours, billable, created_at, updated_at
     ) VALUES (?, ?, ?, ?, date('now'), 0, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-  `, [
-    params.projectId,
-    params.taskId || null,
-    userId,
-    params.description || ''
-  ]);
+  `,
+    [params.projectId, params.taskId || null, userId, params.description || '']
+  );
 
   return {
     entryId: result.lastID!,
@@ -344,25 +341,34 @@ export async function startTimer(params: {
 export async function stopTimer(entryId: number): Promise<Record<string, unknown>> {
   const db = getDatabase();
 
-  const entry = await db.get('SELECT created_at FROM time_entries WHERE id = ? AND hours = 0', [entryId]);
+  const entry = await db.get('SELECT created_at FROM time_entries WHERE id = ? AND hours = 0', [
+    entryId
+  ]);
   if (!entry) throw new Error('Active timer not found');
 
   const startTime = new Date((entry as Record<string, unknown>).created_at as string);
   const endTime = new Date();
   const hours = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
 
-  await db.run(`
+  await db.run(
+    `
     UPDATE time_entries
     SET hours = ?, updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
-  `, [Math.round(hours * 100) / 100, entryId]);
+  `,
+    [Math.round(hours * 100) / 100, entryId]
+  );
 
   const TIME_ENTRY_COLUMNS = `
     id, project_id, task_id, user_id, description, hours, date,
     billable, hourly_rate, created_at, updated_at
-  `.replace(/\s+/g, ' ').trim();
+  `
+    .replace(/\s+/g, ' ')
+    .trim();
 
-  return db.get(`SELECT ${TIME_ENTRY_COLUMNS} FROM time_entries WHERE id = ?`, [entryId]) as Promise<Record<string, unknown>>;
+  return db.get(`SELECT ${TIME_ENTRY_COLUMNS} FROM time_entries WHERE id = ?`, [
+    entryId
+  ]) as Promise<Record<string, unknown>>;
 }
 
 /**
@@ -381,29 +387,36 @@ export async function createAdminTimeEntry(params: {
   const db = getDatabase();
 
   const user = await db.get('SELECT id FROM users WHERE email = ?', [params.adminEmail]);
-  const userId = user ? (user as Record<string, unknown>).id as number : null;
+  const userId = user ? ((user as Record<string, unknown>).id as number) : null;
 
-  const result = await db.run(`
+  const result = await db.run(
+    `
     INSERT INTO time_entries (
       project_id, task_id, user_id, description, date, hours, billable, hourly_rate, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-  `, [
-    params.projectId,
-    params.taskId || null,
-    userId,
-    params.description || '',
-    params.date || new Date().toISOString().split('T')[0],
-    params.hours,
-    params.billable ? 1 : 0,
-    params.hourlyRate || null
-  ]);
+  `,
+    [
+      params.projectId,
+      params.taskId || null,
+      userId,
+      params.description || '',
+      params.date || new Date().toISOString().split('T')[0],
+      params.hours,
+      params.billable ? 1 : 0,
+      params.hourlyRate || null
+    ]
+  );
 
   const TIME_ENTRY_COLUMNS = `
     id, project_id, task_id, user_id, description, hours, date,
     billable, hourly_rate, created_at, updated_at
-  `.replace(/\s+/g, ' ').trim();
+  `
+    .replace(/\s+/g, ' ')
+    .trim();
 
-  return db.get(`SELECT ${TIME_ENTRY_COLUMNS} FROM time_entries WHERE id = ?`, [result.lastID]) as Promise<Record<string, unknown>>;
+  return db.get(`SELECT ${TIME_ENTRY_COLUMNS} FROM time_entries WHERE id = ?`, [
+    result.lastID
+  ]) as Promise<Record<string, unknown>>;
 }
 
 /**
@@ -411,11 +424,16 @@ export async function createAdminTimeEntry(params: {
  */
 export async function timeEntryExists(entryId: number): Promise<boolean> {
   const db = getDatabase();
-  const row = await db.get('SELECT id FROM time_entries WHERE id = ? AND deleted_at IS NULL', [entryId]);
+  const row = await db.get('SELECT id FROM time_entries WHERE id = ? AND deleted_at IS NULL', [
+    entryId
+  ]);
   return !!row;
 }
 
-export async function getTeamTimeReport(startDate: string, endDate: string): Promise<TeamTimeReport> {
+export async function getTeamTimeReport(
+  startDate: string,
+  endDate: string
+): Promise<TeamTimeReport> {
   const db = getDatabase();
 
   const byUser = await db.all(

@@ -122,12 +122,27 @@ export async function createProject(data: CreateProjectData): Promise<number> {
       project_code, created_at, updated_at
     ) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
     [
-      data.clientId, data.projectName, data.description, data.projectType,
-      data.budget, data.timeline, data.notes,
-      data.features, data.pageCount, data.integrations, data.addons,
-      data.designLevel, data.contentStatus, data.brandAssets,
-      data.techComfort, data.hostingPreference, data.currentSite,
-      data.inspiration, data.challenges, data.additionalInfo, data.referralSource,
+      data.clientId,
+      data.projectName,
+      data.description,
+      data.projectType,
+      data.budget,
+      data.timeline,
+      data.notes,
+      data.features,
+      data.pageCount,
+      data.integrations,
+      data.addons,
+      data.designLevel,
+      data.contentStatus,
+      data.brandAssets,
+      data.techComfort,
+      data.hostingPreference,
+      data.currentSite,
+      data.inspiration,
+      data.challenges,
+      data.additionalInfo,
+      data.referralSource,
       projectCode
     ]
   );

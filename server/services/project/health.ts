@@ -31,9 +31,7 @@ export async function calculateProjectHealth(projectId: number): Promise<Project
   if (estimatedEndDate) {
     const dueDate = new Date(estimatedEndDate);
     const today = new Date();
-    const daysRemaining = Math.ceil(
-      (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const daysRemaining = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
     if (daysRemaining < 0) {
       scheduleHealth = 30;

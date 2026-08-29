@@ -11,9 +11,20 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { softDeleteService, SoftDeleteEntityType } from '../../services/soft-delete-service.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
+import {
+  errorResponse,
+  errorResponseWithPayload,
+  sendSuccess,
+  ErrorCodes
+} from '../../utils/api-response.js';
 
-const VALID_ENTITY_TYPES: SoftDeleteEntityType[] = ['client', 'project', 'invoice', 'lead', 'proposal'];
+const VALID_ENTITY_TYPES: SoftDeleteEntityType[] = [
+  'client',
+  'project',
+  'invoice',
+  'lead',
+  'proposal'
+];
 
 const router = express.Router();
 
@@ -41,7 +52,9 @@ router.get(
     ]);
 
     const transformedItems = items.map((item) => {
-      const expiresAt = new Date(Date.now() + item.daysUntilPermanent * 24 * 60 * 60 * 1000).toISOString();
+      const expiresAt = new Date(
+        Date.now() + item.daysUntilPermanent * 24 * 60 * 60 * 1000
+      ).toISOString();
       return {
         id: `${item.entityType}-${item.id}`,
         type: item.entityType,
@@ -82,11 +95,15 @@ router.delete(
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const { deleted, errors } = await softDeleteService.permanentlyDeleteExpired();
 
-    sendSuccess(res, {
-      allSucceeded: errors.length === 0,
-      deleted,
-      errors: errors.length > 0 ? errors : undefined
-    }, `Trash emptied. Permanently deleted ${deleted.total} items.`);
+    sendSuccess(
+      res,
+      {
+        allSucceeded: errors.length === 0,
+        deleted,
+        errors: errors.length > 0 ? errors : undefined
+      },
+      `Trash emptied. Permanently deleted ${deleted.total} items.`
+    );
   })
 );
 
@@ -100,18 +117,24 @@ router.post(
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const { deleted, errors } = await softDeleteService.permanentlyDeleteExpired();
 
-    sendSuccess(res, {
-      allSucceeded: errors.length === 0,
-      deleted,
-      errors: errors.length > 0 ? errors : undefined
-    }, `Cleanup complete. Permanently deleted ${deleted.total} items.`);
+    sendSuccess(
+      res,
+      {
+        allSucceeded: errors.length === 0,
+        deleted,
+        errors: errors.length > 0 ? errors : undefined
+      },
+      `Cleanup complete. Permanently deleted ${deleted.total} items.`
+    );
   })
 );
 
 /**
  * Helper to parse composite item IDs (format: "type-id")
  */
-function parseCompositeId(itemId: string): { entityType: SoftDeleteEntityType; entityId: number } | null {
+function parseCompositeId(
+  itemId: string
+): { entityType: SoftDeleteEntityType; entityId: number } | null {
   const parts = itemId.split('-');
   if (parts.length < 2) return null;
 
@@ -135,7 +158,12 @@ router.post(
     const { itemIds } = req.body;
 
     if (!itemIds || !Array.isArray(itemIds) || itemIds.length === 0) {
-      return errorResponse(res, 'itemIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'itemIds array is required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     let restored = 0;
@@ -175,7 +203,12 @@ router.post(
     const { itemIds } = req.body;
 
     if (!itemIds || !Array.isArray(itemIds) || itemIds.length === 0) {
-      return errorResponse(res, 'itemIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'itemIds array is required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     let deleted = 0;
@@ -215,9 +248,15 @@ router.post(
     const parsed = parseCompositeId(req.params.itemId);
 
     if (!parsed) {
-      return errorResponseWithPayload(res, 'Invalid item ID format or entity type', 400, ErrorCodes.INVALID_ID, {
-        validTypes: VALID_ENTITY_TYPES
-      });
+      return errorResponseWithPayload(
+        res,
+        'Invalid item ID format or entity type',
+        400,
+        ErrorCodes.INVALID_ID,
+        {
+          validTypes: VALID_ENTITY_TYPES
+        }
+      );
     }
 
     const result = await softDeleteService.restore(parsed.entityType, parsed.entityId);
@@ -241,9 +280,15 @@ router.delete(
     const parsed = parseCompositeId(req.params.itemId);
 
     if (!parsed) {
-      return errorResponseWithPayload(res, 'Invalid item ID format or entity type', 400, ErrorCodes.INVALID_ID, {
-        validTypes: VALID_ENTITY_TYPES
-      });
+      return errorResponseWithPayload(
+        res,
+        'Invalid item ID format or entity type',
+        400,
+        ErrorCodes.INVALID_ID,
+        {
+          validTypes: VALID_ENTITY_TYPES
+        }
+      );
     }
 
     const result = await softDeleteService.forceDelete(parsed.entityType, parsed.entityId);

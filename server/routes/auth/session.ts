@@ -9,15 +9,8 @@ import express from 'express';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
-import {
-  JWT_CONFIG,
-  COOKIE_CONFIG
-} from '../../utils/auth-constants.js';
-import {
-  sendSuccess,
-  sendServerError,
-  ErrorCodes
-} from '../../utils/api-response.js';
+import { JWT_CONFIG, COOKIE_CONFIG } from '../../utils/auth-constants.js';
+import { sendSuccess, sendServerError, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
 

@@ -10,7 +10,15 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, messageResponse, sanitizeErrorMessage } from '../../utils/api-response.js';
+import {
+  ErrorCodes,
+  errorResponse,
+  errorResponseWithPayload,
+  sendSuccess,
+  sendCreated,
+  messageResponse,
+  sanitizeErrorMessage
+} from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseInvoice, toSnakeCasePaymentPlan } from './helpers.js';
 import { validateRequest } from '../../middleware/validation.js';
 import { invalidateCache } from '../../middleware/cache.js';
@@ -20,7 +28,10 @@ const router = express.Router();
 // Payment plan validation schemas
 const PaymentPlanValidationSchemas = {
   create: {
-    name: [{ type: 'required' as const }, { type: 'string' as const, minLength: 1, maxLength: 100 }],
+    name: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: 100 }
+    ],
     description: { type: 'string' as const, maxLength: 500 },
     payments: [
       { type: 'required' as const },
@@ -34,7 +45,11 @@ const PaymentPlanValidationSchemas = {
           for (const item of items) {
             if (typeof item !== 'object' || item === null) return 'Each payment must be an object';
             const entry = item as Record<string, unknown>;
-            if (typeof entry.percentage !== 'number' || entry.percentage <= 0 || entry.percentage > 100) {
+            if (
+              typeof entry.percentage !== 'number' ||
+              entry.percentage <= 0 ||
+              entry.percentage > 100
+            ) {
               return 'Each payment must have a valid percentage between 0 and 100';
             }
             totalPercentage += entry.percentage;
@@ -111,7 +126,11 @@ router.post(
         isDefault: isDefault || false
       });
 
-      sendCreated(res, { template: toSnakeCasePaymentPlan(template) }, 'Payment plan template created');
+      sendCreated(
+        res,
+        { template: toSnakeCasePaymentPlan(template) },
+        'Payment plan template created'
+      );
     } catch (error: unknown) {
       errorResponseWithPayload(
         res,
@@ -180,9 +199,15 @@ router.post(
     const { projectId, clientId, templateId, totalAmount } = req.body;
 
     if (!projectId || !clientId || !templateId || !totalAmount) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.MISSING_FIELDS, {
-        required: ['projectId', 'clientId', 'templateId', 'totalAmount']
-      });
+      return errorResponseWithPayload(
+        res,
+        'Missing required fields',
+        400,
+        ErrorCodes.MISSING_FIELDS,
+        {
+          required: ['projectId', 'clientId', 'templateId', 'totalAmount']
+        }
+      );
     }
 
     try {
@@ -193,10 +218,14 @@ router.post(
         totalAmount
       );
 
-      sendCreated(res, {
-        invoices: invoices.map(toSnakeCaseInvoice),
-        count: invoices.length
-      }, `Generated ${invoices.length} invoices from payment plan`);
+      sendCreated(
+        res,
+        {
+          invoices: invoices.map(toSnakeCaseInvoice),
+          count: invoices.length
+        },
+        `Generated ${invoices.length} invoices from payment plan`
+      );
     } catch (error: unknown) {
       errorResponseWithPayload(
         res,

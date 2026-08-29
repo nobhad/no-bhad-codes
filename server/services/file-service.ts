@@ -88,7 +88,13 @@ type FileCategory =
   | 'contract'
   | 'invoice';
 
-type DeliverableStatus = 'draft' | 'pending_review' | 'in_review' | 'changes_requested' | 'approved' | 'rejected';
+type DeliverableStatus =
+  | 'draft'
+  | 'pending_review'
+  | 'in_review'
+  | 'changes_requested'
+  | 'approved'
+  | 'rejected';
 
 interface FileRecord {
   id: number;
@@ -192,30 +198,42 @@ const FILE_COLUMNS = `
   file_type, description, uploaded_by, created_at, folder_id, version, is_archived,
   archived_at, archived_by, expires_at, access_count, last_accessed_at,
   download_count, checksum, is_locked, locked_by, locked_at, category
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const FILE_VERSION_COLUMNS = `
   id, file_id, version_number, filename, original_filename, file_path, file_size,
   mime_type, uploaded_by, comment, is_current, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const FILE_ACCESS_LOG_COLUMNS = `
   id, file_id, user_email, user_type, access_type, ip_address, user_agent, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const FILE_COMMENT_COLUMNS = `
   id, file_id, author_email, author_type, author_name, content, is_internal,
   parent_comment_id, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const DELIVERABLE_WORKFLOW_COLUMNS = `
   id, file_id, project_id, status, version, submitted_at, submitted_by, reviewed_at,
   reviewed_by, approved_at, approved_by, rejection_reason, notes, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const DELIVERABLE_REVIEW_COMMENT_COLUMNS = `
   id, workflow_id, author_email, author_name, author_type, comment, comment_type, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // ============================================
 // File Service Class
@@ -229,9 +247,7 @@ class FileService {
   /**
    * Get a file by its ID
    */
-  async getFileById(
-    fileId: number
-  ): Promise<FileRecord | null> {
+  async getFileById(fileId: number): Promise<FileRecord | null> {
     const db = getDatabase();
     const file = await db.get(`SELECT ${FILE_COLUMNS} FROM files WHERE id = ?`, [fileId]);
     return (file as FileRecord) ?? null;
@@ -331,7 +347,9 @@ class FileService {
    */
   async getVersion(versionId: number): Promise<FileVersion> {
     const db = getDatabase();
-    const version = await db.get(`SELECT ${FILE_VERSION_COLUMNS} FROM file_versions WHERE id = ?`, [versionId]);
+    const version = await db.get(`SELECT ${FILE_VERSION_COLUMNS} FROM file_versions WHERE id = ?`, [
+      versionId
+    ]);
     if (!version) {
       throw new Error('Version not found');
     }
@@ -344,10 +362,10 @@ class FileService {
   async restoreVersion(fileId: number, versionId: number): Promise<FileVersion> {
     const db = getDatabase();
 
-    const version = await db.get(`SELECT ${FILE_VERSION_COLUMNS} FROM file_versions WHERE id = ? AND file_id = ?`, [
-      versionId,
-      fileId
-    ]);
+    const version = await db.get(
+      `SELECT ${FILE_VERSION_COLUMNS} FROM file_versions WHERE id = ? AND file_id = ?`,
+      [versionId, fileId]
+    );
     if (!version) {
       throw new Error('Version not found');
     }
@@ -552,10 +570,9 @@ class FileService {
         if (parentId === folderId) {
           throw new Error('Cannot move folder into its own subfolder');
         }
-        const parent = await db.get(
-          'SELECT parent_folder_id FROM file_folders WHERE id = ?',
-          [parentId]
-        ) as { parent_folder_id: number | null } | undefined;
+        const parent = (await db.get('SELECT parent_folder_id FROM file_folders WHERE id = ?', [
+          parentId
+        ])) as { parent_folder_id: number | null } | undefined;
         parentId = parent?.parent_folder_id ?? null;
       }
     }
@@ -772,7 +789,9 @@ class FileService {
    */
   async getComment(commentId: number): Promise<FileComment> {
     const db = getDatabase();
-    const comment = await db.get(`SELECT ${FILE_COMMENT_COLUMNS} FROM file_comments WHERE id = ?`, [commentId]);
+    const comment = await db.get(`SELECT ${FILE_COMMENT_COLUMNS} FROM file_comments WHERE id = ?`, [
+      commentId
+    ]);
     if (!comment) {
       throw new Error('Comment not found');
     }
@@ -1040,19 +1059,28 @@ class FileService {
   /**
    * Create or get deliverable workflow for a file
    */
-  async getOrCreateDeliverableWorkflow(fileId: number, projectId: number): Promise<DeliverableWorkflow> {
+  async getOrCreateDeliverableWorkflow(
+    fileId: number,
+    projectId: number
+  ): Promise<DeliverableWorkflow> {
     const db = getDatabase();
 
     // Check if workflow exists
-    let workflow = await db.get(`SELECT ${DELIVERABLE_WORKFLOW_COLUMNS} FROM deliverable_workflows WHERE file_id = ?`, [fileId]);
+    let workflow = await db.get(
+      `SELECT ${DELIVERABLE_WORKFLOW_COLUMNS} FROM deliverable_workflows WHERE file_id = ?`,
+      [fileId]
+    );
 
     if (!workflow) {
       // Create new workflow
       const result = await db.run(
-        'INSERT INTO deliverable_workflows (file_id, project_id, status) VALUES (?, ?, \'draft\')',
+        "INSERT INTO deliverable_workflows (file_id, project_id, status) VALUES (?, ?, 'draft')",
         [fileId, projectId]
       );
-      workflow = await db.get(`SELECT ${DELIVERABLE_WORKFLOW_COLUMNS} FROM deliverable_workflows WHERE id = ?`, [result.lastID]);
+      workflow = await db.get(
+        `SELECT ${DELIVERABLE_WORKFLOW_COLUMNS} FROM deliverable_workflows WHERE id = ?`,
+        [result.lastID]
+      );
     }
 
     return workflow;
@@ -1063,13 +1091,19 @@ class FileService {
    */
   async getDeliverableWorkflow(fileId: number): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
-    return db.get(`SELECT ${DELIVERABLE_WORKFLOW_COLUMNS} FROM deliverable_workflows WHERE file_id = ?`, [fileId]);
+    return db.get(
+      `SELECT ${DELIVERABLE_WORKFLOW_COLUMNS} FROM deliverable_workflows WHERE file_id = ?`,
+      [fileId]
+    );
   }
 
   /**
    * Get all deliverables for a project with workflow status
    */
-  async getProjectDeliverables(projectId: number, status?: string): Promise<FileWithDeliverableWorkflow[]> {
+  async getProjectDeliverables(
+    projectId: number,
+    status?: string
+  ): Promise<FileWithDeliverableWorkflow[]> {
     const db = getDatabase();
     let sql = `
       SELECT f.*, dw.status as workflow_status, dw.submitted_at, dw.reviewed_at,
@@ -1092,7 +1126,11 @@ class FileService {
   /**
    * Submit deliverable for review
    */
-  async submitForReview(fileId: number, submittedBy: string, notes?: string): Promise<DeliverableWorkflow | undefined> {
+  async submitForReview(
+    fileId: number,
+    submittedBy: string,
+    notes?: string
+  ): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     const file = await this.getFileById(fileId);
     if (!file) throw new Error('File not found');
@@ -1125,7 +1163,10 @@ class FileService {
   /**
    * Start review of deliverable
    */
-  async startReview(fileId: number, reviewerEmail: string): Promise<DeliverableWorkflow | undefined> {
+  async startReview(
+    fileId: number,
+    reviewerEmail: string
+  ): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     const workflow = await this.getDeliverableWorkflow(fileId);
     if (!workflow) throw new Error('Deliverable workflow not found');
@@ -1147,7 +1188,11 @@ class FileService {
   /**
    * Request changes to deliverable
    */
-  async requestChanges(fileId: number, reviewerEmail: string, feedback: string): Promise<DeliverableWorkflow | undefined> {
+  async requestChanges(
+    fileId: number,
+    reviewerEmail: string,
+    feedback: string
+  ): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     const workflow = await this.getDeliverableWorkflow(fileId);
     if (!workflow) throw new Error('Deliverable workflow not found');
@@ -1178,7 +1223,11 @@ class FileService {
   /**
    * Approve deliverable
    */
-  async approveDeliverable(fileId: number, approverEmail: string, comment?: string): Promise<DeliverableWorkflow | undefined> {
+  async approveDeliverable(
+    fileId: number,
+    approverEmail: string,
+    comment?: string
+  ): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     const workflow = await this.getDeliverableWorkflow(fileId);
     if (!workflow) throw new Error('Deliverable workflow not found');
@@ -1210,7 +1259,11 @@ class FileService {
   /**
    * Reject deliverable
    */
-  async rejectDeliverable(fileId: number, reviewerEmail: string, reason: string): Promise<DeliverableWorkflow | undefined> {
+  async rejectDeliverable(
+    fileId: number,
+    reviewerEmail: string,
+    reason: string
+  ): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     const workflow = await this.getDeliverableWorkflow(fileId);
     if (!workflow) throw new Error('Deliverable workflow not found');
@@ -1239,7 +1292,11 @@ class FileService {
   /**
    * Resubmit deliverable (after changes requested)
    */
-  async resubmitDeliverable(fileId: number, submittedBy: string, notes?: string): Promise<DeliverableWorkflow | undefined> {
+  async resubmitDeliverable(
+    fileId: number,
+    submittedBy: string,
+    notes?: string
+  ): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     const workflow = await this.getDeliverableWorkflow(fileId);
     if (!workflow) throw new Error('Deliverable workflow not found');
@@ -1287,7 +1344,10 @@ class FileService {
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [workflowId, authorEmail, authorUserId, authorName || null, authorType, comment, commentType]
     );
-    return db.get(`SELECT ${DELIVERABLE_REVIEW_COMMENT_COLUMNS} FROM deliverable_review_comments WHERE id = ?`, [result.lastID]);
+    return db.get(
+      `SELECT ${DELIVERABLE_REVIEW_COMMENT_COLUMNS} FROM deliverable_review_comments WHERE id = ?`,
+      [result.lastID]
+    );
   }
 
   /**
@@ -1550,10 +1610,7 @@ class FileService {
    * Supports optional projectId and file type filters.
    * Used by GET /api/admin/files
    */
-  async listAdminFilesWithDetails(filters: {
-    projectId?: number;
-    type?: string;
-  }): Promise<{
+  async listAdminFilesWithDetails(filters: { projectId?: number; type?: string }): Promise<{
     files: Record<string, unknown>[];
     stats: { total: number; totalSize: number };
   }> {
@@ -1599,10 +1656,7 @@ class FileService {
 
     const stats = {
       total: files.length,
-      totalSize: files.reduce(
-        (sum: number, f) => sum + ((f.fileSize as number) || 0),
-        0
-      )
+      totalSize: files.reduce((sum: number, f) => sum + ((f.fileSize as number) || 0), 0)
     };
 
     return { files, stats };

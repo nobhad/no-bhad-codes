@@ -8,7 +8,6 @@
  * Split from portal-cards.css for maintainability.
  */
 
-
 /* =====================================================
    STAT CARD - UNIFIED
    Clean, minimal stat cards inspired by Linear.
@@ -16,8 +15,7 @@
    ALL stat cards use this pattern for consistency.
    ===================================================== */
 
-.portal
-  .stat-card {
+.portal .stat-card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -30,20 +28,17 @@
 }
 
 /* Remove gradient overlay - flat design */
-.portal
-  .stat-card::after {
+.portal .stat-card::after {
   display: none;
 }
 
 /* Remove any accent lines - keep it clean */
-.portal
-  .stat-card::before {
+.portal .stat-card::before {
   display: none;
 }
 
 /* Hover state for clickable stat cards */
-.portal
-  .stat-card:hover {
+.portal .stat-card:hover {
   border-color: var(--color-border-primary);
 }
 
@@ -78,7 +73,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1em;  /* Matches adjacent text size */
+  width: 1em; /* Matches adjacent text size */
   height: 1em;
   color: var(--color-text-primary);
   flex-shrink: 0;
@@ -194,5 +189,3 @@
     margin-top: 0;
   }
 }
-
-

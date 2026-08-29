@@ -30,7 +30,9 @@ let _boldFontBytes: Buffer | null = null;
  */
 export function getRegularFontBytes(): Buffer {
   if (!_regularFontBytes) {
-    _regularFontBytes = readFileSync(join(process.cwd(), 'public/fonts/Inconsolata/Inconsolata-Regular.ttf'));
+    _regularFontBytes = readFileSync(
+      join(process.cwd(), 'public/fonts/Inconsolata/Inconsolata-Regular.ttf')
+    );
   }
   return _regularFontBytes;
 }
@@ -40,7 +42,9 @@ export function getRegularFontBytes(): Buffer {
  */
 export function getBoldFontBytes(): Buffer {
   if (!_boldFontBytes) {
-    _boldFontBytes = readFileSync(join(process.cwd(), 'public/fonts/Inconsolata/Inconsolata-Bold.ttf'));
+    _boldFontBytes = readFileSync(
+      join(process.cwd(), 'public/fonts/Inconsolata/Inconsolata-Bold.ttf')
+    );
   }
   return _boldFontBytes;
 }
@@ -497,11 +501,9 @@ export async function drawPdfDocumentHeader(params: {
   });
   infoY -= 18;
 
-  const infoLines = [
-    BUSINESS_INFO.owner,
-    BUSINESS_INFO.email,
-    BUSINESS_INFO.website
-  ].filter(Boolean);
+  const infoLines = [BUSINESS_INFO.owner, BUSINESS_INFO.email, BUSINESS_INFO.website].filter(
+    Boolean
+  );
 
   for (const line of infoLines) {
     page.drawText(line!, {
@@ -591,13 +593,22 @@ export function drawTwoColumnInfo(
     let displayText = text;
     // Truncate with ellipsis if value is too wide
     if (font.widthOfTextAtSize(displayText, size) > maxValueWidth) {
-      while (displayText.length > 1 && font.widthOfTextAtSize(`${displayText  }...`, size) > maxValueWidth) {
+      while (
+        displayText.length > 1 &&
+        font.widthOfTextAtSize(`${displayText}...`, size) > maxValueWidth
+      ) {
         displayText = displayText.slice(0, -1);
       }
-      displayText = `${displayText.trimEnd()  }...`;
+      displayText = `${displayText.trimEnd()}...`;
     }
     const w = font.widthOfTextAtSize(displayText, size);
-    page.drawText(displayText, { x: rightMargin - w, y: yPos, size, font, color: PDF_COLORS.black });
+    page.drawText(displayText, {
+      x: rightMargin - w,
+      y: yPos,
+      size,
+      font,
+      color: PDF_COLORS.black
+    });
   };
 
   let rightY = y;
@@ -682,7 +693,9 @@ export function drawSectionHeading(
   });
 
   const lineY = y - 4;
-  const lineEnd = opts.width ? x + opts.width : x + font.widthOfTextAtSize(text.toUpperCase(), size);
+  const lineEnd = opts.width
+    ? x + opts.width
+    : x + font.widthOfTextAtSize(text.toUpperCase(), size);
 
   page.drawLine({
     start: { x, y: lineY },

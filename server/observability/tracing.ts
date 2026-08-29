@@ -239,7 +239,7 @@ function sanitizeSql(sql: string): string {
   // Truncate very long queries
   const maxLength = 500;
   if (sql.length > maxLength) {
-    return `${sql.substring(0, maxLength)  }...`;
+    return `${sql.substring(0, maxLength)}...`;
   }
   return sql;
 }

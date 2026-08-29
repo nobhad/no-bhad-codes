@@ -123,23 +123,32 @@ async function refreshRemoteManifest(): Promise<void> {
     }
 
     if (!res.ok) {
-      console.error(`[vite-assets] Remote manifest ${REMOTE_MANIFEST_URL} returned ${res.status}; keeping current manifest.`);
+      console.error(
+        `[vite-assets] Remote manifest ${REMOTE_MANIFEST_URL} returned ${res.status}; keeping current manifest.`
+      );
       return;
     }
 
     const parsed = (await res.json()) as Manifest;
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      console.error('[vite-assets] Remote manifest was not a JSON object; keeping current manifest.');
+      console.error(
+        '[vite-assets] Remote manifest was not a JSON object; keeping current manifest.'
+      );
       return;
     }
 
     const wasUnset = remoteManifestCache === null;
     remoteManifestCache = parsed;
     if (wasUnset) {
-      console.log(`[vite-assets] Loaded authoritative manifest from ${REMOTE_MANIFEST_URL} (${Object.keys(parsed).length} entries).`);
+      console.log(
+        `[vite-assets] Loaded authoritative manifest from ${REMOTE_MANIFEST_URL} (${Object.keys(parsed).length} entries).`
+      );
     }
   } catch (err) {
-    console.error(`[vite-assets] Failed to fetch remote manifest ${REMOTE_MANIFEST_URL}; using local fallback.`, err);
+    console.error(
+      `[vite-assets] Failed to fetch remote manifest ${REMOTE_MANIFEST_URL}; using local fallback.`,
+      err
+    );
   }
 }
 
@@ -184,7 +193,9 @@ export function viteAsset(entry: string): string {
 
   const chunk = activeManifest()[key];
   if (!chunk) {
-    console.error(`[vite-assets] No manifest entry for "${key}". Is it a Rollup input in vite.config.ts?`);
+    console.error(
+      `[vite-assets] No manifest entry for "${key}". Is it a Rollup input in vite.config.ts?`
+    );
     return `/${key}`;
   }
   return `/${chunk.file}`;

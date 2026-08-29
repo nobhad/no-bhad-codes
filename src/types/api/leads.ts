@@ -75,7 +75,6 @@ export interface LeadStats {
   converted: number;
 }
 
-
 // ============================================
 // Lead Management API Types
 // ============================================

@@ -22,10 +22,7 @@ export interface ParsedInput {
  * Validate a string value against a question's validation function.
  * Returns the error message if invalid, or null if valid.
  */
-export function validateAnswer(
-  question: IntakeQuestion,
-  value: string
-): string | null {
+export function validateAnswer(question: IntakeQuestion, value: string): string | null {
   if (question.validation) {
     return question.validation(value);
   }
@@ -53,8 +50,7 @@ export function parseSelectInput(
   return (
     options.find(
       (opt) =>
-        opt.label.toLowerCase().includes(lowerInput) ||
-        opt.value.toLowerCase().includes(lowerInput)
+        opt.label.toLowerCase().includes(lowerInput) || opt.value.toLowerCase().includes(lowerInput)
     ) || null
   );
 }

@@ -38,7 +38,10 @@ interface TimedSample {
 const latencySamples = new Map<string, TimedSample[]>();
 
 /** Per-route error counts within the rolling window */
-const errorCounts = new Map<string, { client: number; server: number; total: number; windowStart: number }>();
+const errorCounts = new Map<
+  string,
+  { client: number; server: number; total: number; windowStart: number }
+>();
 
 /** Global request counter within the rolling window */
 let globalRequestCount = 0;
@@ -103,19 +106,25 @@ function percentile(sorted: number[], p: number): number {
 export function getApiMetrics(): {
   window: { durationMs: number; requests: number; errors: number; errorRate: number };
   latency: { p50: number; p95: number; p99: number; avg: number; max: number };
-  byRoute: Record<string, {
-    latency: { p50: number; p95: number; p99: number; avg: number; count: number };
-    errors: { client: number; server: number; total: number };
-  }>;
-  } {
+  byRoute: Record<
+    string,
+    {
+      latency: { p50: number; p95: number; p99: number; avg: number; count: number };
+      errors: { client: number; server: number; total: number };
+    }
+  >;
+} {
   resetWindowIfStale();
 
   // Aggregate all latency samples
   const allDurations: number[] = [];
-  const routeMetrics: Record<string, {
-    latency: { p50: number; p95: number; p99: number; avg: number; count: number };
-    errors: { client: number; server: number; total: number };
-  }> = {};
+  const routeMetrics: Record<
+    string,
+    {
+      latency: { p50: number; p95: number; p99: number; avg: number; count: number };
+      errors: { client: number; server: number; total: number };
+    }
+  > = {};
 
   for (const [route, samples] of latencySamples.entries()) {
     const durations = samples.map((s) => s.durationMs).sort((a, b) => a - b);
@@ -152,7 +161,10 @@ export function getApiMetrics(): {
       durationMs: SAMPLE_WINDOW_MS,
       requests: globalRequestCount,
       errors: globalErrorCount,
-      errorRate: globalRequestCount > 0 ? Math.round((globalErrorCount / globalRequestCount) * 10000) / 100 : 0
+      errorRate:
+        globalRequestCount > 0
+          ? Math.round((globalErrorCount / globalRequestCount) * 10000) / 100
+          : 0
     },
     latency: {
       p50: percentile(allDurations, 50),
@@ -217,18 +229,15 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
     const duration = Date.now() - startTime;
     const logMethod = res.statusCode >= WARN_STATUS_THRESHOLD ? 'warn' : 'info';
 
-    loggerService[logMethod](
-      `<-- ${req.method} ${req.path} ${res.statusCode} ${duration}ms`,
-      {
-        category: 'HTTP',
-        metadata: {
-          method: req.method,
-          path: req.path,
-          statusCode: res.statusCode,
-          responseTimeMs: duration
-        }
+    loggerService[logMethod](`<-- ${req.method} ${req.path} ${res.statusCode} ${duration}ms`, {
+      category: 'HTTP',
+      metadata: {
+        method: req.method,
+        path: req.path,
+        statusCode: res.statusCode,
+        responseTimeMs: duration
       }
-    );
+    });
 
     // Record into OpenTelemetry histogram/counters
     const routeKey = `${req.method} ${req.route?.path || req.path}`;

@@ -23,11 +23,7 @@ import type {
   ReportDataResult,
   ReportRun
 } from './types.js';
-import {
-  SAVED_REPORT_COLUMNS,
-  REPORT_SCHEDULE_COLUMNS,
-  REPORT_RUN_COLUMNS
-} from './types.js';
+import { SAVED_REPORT_COLUMNS, REPORT_SCHEDULE_COLUMNS, REPORT_RUN_COLUMNS } from './types.js';
 
 // ============================================
 // SAVED REPORTS
@@ -93,7 +89,9 @@ export async function getReports(userEmail?: string): Promise<SavedReport[]> {
 
 export async function getReport(reportId: number): Promise<SavedReport> {
   const db = getDatabase();
-  const report = await db.get(`SELECT ${SAVED_REPORT_COLUMNS} FROM saved_reports WHERE id = ?`, [reportId]);
+  const report = await db.get(`SELECT ${SAVED_REPORT_COLUMNS} FROM saved_reports WHERE id = ?`, [
+    reportId
+  ]);
 
   if (!report) {
     throw new Error('Report not found');
@@ -102,7 +100,9 @@ export async function getReport(reportId: number): Promise<SavedReport> {
   return {
     ...(report as unknown as SavedReport),
     filters: safeJsonParseObject(report.filters as string, 'report filters'),
-    columns: report.columns ? safeJsonParseArray<string>(report.columns as string, 'report columns') : null
+    columns: report.columns
+      ? safeJsonParseArray<string>(report.columns as string, 'report columns')
+      : null
   };
 }
 
@@ -259,7 +259,10 @@ export async function getSchedules(reportId?: number): Promise<ReportSchedule[]>
 
 export async function getSchedule(scheduleId: number): Promise<ReportSchedule> {
   const db = getDatabase();
-  const schedule = await db.get(`SELECT ${REPORT_SCHEDULE_COLUMNS} FROM report_schedules WHERE id = ?`, [scheduleId]);
+  const schedule = await db.get(
+    `SELECT ${REPORT_SCHEDULE_COLUMNS} FROM report_schedules WHERE id = ?`,
+    [scheduleId]
+  );
 
   if (!schedule) {
     throw new Error('Schedule not found');
@@ -392,39 +395,39 @@ function calculateNextSendTime(
   }
 
   switch (frequency) {
-  case 'daily':
-    break;
+    case 'daily':
+      break;
 
-  case 'weekly': {
-    const targetDay = dayOfWeek ?? 1;
-    while (next.getDay() !== targetDay) {
-      next.setDate(next.getDate() + 1);
+    case 'weekly': {
+      const targetDay = dayOfWeek ?? 1;
+      while (next.getDay() !== targetDay) {
+        next.setDate(next.getDate() + 1);
+      }
+      break;
     }
-    break;
-  }
 
-  case 'monthly': {
-    const targetDate = dayOfMonth ?? 1;
-    next.setDate(targetDate);
-    if (next <= now) {
-      next.setMonth(next.getMonth() + 1);
+    case 'monthly': {
+      const targetDate = dayOfMonth ?? 1;
+      next.setDate(targetDate);
+      if (next <= now) {
+        next.setMonth(next.getMonth() + 1);
+      }
+      break;
     }
-    break;
-  }
 
-  case 'quarterly': {
-    const targetQuarterDate = dayOfMonth ?? 1;
-    next.setDate(targetQuarterDate);
-    const currentQuarter = Math.floor(now.getMonth() / 3);
-    const nextQuarterMonth = (currentQuarter + 1) * 3;
-    if (nextQuarterMonth > 11) {
-      next.setFullYear(next.getFullYear() + 1);
-      next.setMonth(0);
-    } else {
-      next.setMonth(nextQuarterMonth);
+    case 'quarterly': {
+      const targetQuarterDate = dayOfMonth ?? 1;
+      next.setDate(targetQuarterDate);
+      const currentQuarter = Math.floor(now.getMonth() / 3);
+      const nextQuarterMonth = (currentQuarter + 1) * 3;
+      if (nextQuarterMonth > 11) {
+        next.setFullYear(next.getFullYear() + 1);
+        next.setMonth(0);
+      } else {
+        next.setMonth(nextQuarterMonth);
+      }
+      break;
     }
-    break;
-  }
   }
 
   return next.toISOString();
@@ -439,28 +442,26 @@ export async function generateReportData(
   filters: ReportFilters = {}
 ): Promise<ReportDataResult> {
   switch (reportType) {
-  case 'revenue':
-    return generateRevenueReport(filters);
-  case 'pipeline':
-    return generatePipelineReport(filters);
-  case 'project':
-    return generateProjectReport(filters);
-  case 'client':
-    return generateClientReport(filters);
-  case 'team':
-    return generateTeamReport(filters);
-  case 'lead':
-    return generateLeadReport(filters);
-  case 'invoice':
-    return generateInvoiceReport(filters);
-  default:
-    throw new Error(`Unknown report type: ${reportType}`);
+    case 'revenue':
+      return generateRevenueReport(filters);
+    case 'pipeline':
+      return generatePipelineReport(filters);
+    case 'project':
+      return generateProjectReport(filters);
+    case 'client':
+      return generateClientReport(filters);
+    case 'team':
+      return generateTeamReport(filters);
+    case 'lead':
+      return generateLeadReport(filters);
+    case 'invoice':
+      return generateInvoiceReport(filters);
+    default:
+      throw new Error(`Unknown report type: ${reportType}`);
   }
 }
 
-async function generateRevenueReport(
-  filters: ReportFilters
-): Promise<ReportDataResult> {
+async function generateRevenueReport(filters: ReportFilters): Promise<ReportDataResult> {
   const db = getDatabase();
   try {
     let query = `
@@ -505,9 +506,7 @@ async function generateRevenueReport(
   }
 }
 
-async function generatePipelineReport(
-  _filters: ReportFilters
-): Promise<ReportDataResult> {
+async function generatePipelineReport(_filters: ReportFilters): Promise<ReportDataResult> {
   const db = getDatabase();
 
   const data = await db.all(`
@@ -534,9 +533,7 @@ async function generatePipelineReport(
   return { data, summary: summary ?? {} };
 }
 
-async function generateProjectReport(
-  filters: ReportFilters
-): Promise<ReportDataResult> {
+async function generateProjectReport(filters: ReportFilters): Promise<ReportDataResult> {
   const db = getDatabase();
 
   let query = `
@@ -575,9 +572,7 @@ async function generateProjectReport(
   return { data, summary: summary ?? {} };
 }
 
-async function generateClientReport(
-  _filters: ReportFilters
-): Promise<ReportDataResult> {
+async function generateClientReport(_filters: ReportFilters): Promise<ReportDataResult> {
   const db = getDatabase();
 
   const data = await db.all(`
@@ -604,9 +599,7 @@ async function generateClientReport(
   return { data, summary: summary ?? {} };
 }
 
-async function generateTeamReport(
-  _filters: ReportFilters
-): Promise<ReportDataResult> {
+async function generateTeamReport(_filters: ReportFilters): Promise<ReportDataResult> {
   const db = getDatabase();
 
   const data = await db.all(`
@@ -634,9 +627,7 @@ async function generateTeamReport(
   return { data, summary: summary ?? {} };
 }
 
-async function generateLeadReport(
-  _filters: ReportFilters
-): Promise<ReportDataResult> {
+async function generateLeadReport(_filters: ReportFilters): Promise<ReportDataResult> {
   const db = getDatabase();
 
   const data = await db.all(`
@@ -666,9 +657,7 @@ async function generateLeadReport(
   return { data, summary: summary ?? {} };
 }
 
-async function generateInvoiceReport(
-  filters: ReportFilters
-): Promise<ReportDataResult> {
+async function generateInvoiceReport(filters: ReportFilters): Promise<ReportDataResult> {
   const db = getDatabase();
 
   let query = `

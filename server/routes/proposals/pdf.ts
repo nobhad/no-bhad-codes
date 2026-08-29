@@ -33,13 +33,8 @@ import {
   getBoldFontBytes,
   registerFontkit
 } from './helpers.js';
-import type {
-  AuthenticatedRequest,
-  PdfPageContext
-} from './helpers.js';
-import type {
-  ProposalSignatureForPdf
-} from '../../services/proposal-service.js';
+import type { AuthenticatedRequest, PdfPageContext } from './helpers.js';
+import type { ProposalSignatureForPdf } from '../../services/proposal-service.js';
 import { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } from '../../config/pdf-styles.js';
 
 const router = express.Router();

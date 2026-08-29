@@ -19,7 +19,12 @@ import {
   detectSQLInjection
 } from '../../services/validation-service.js';
 import { dataQualityService } from '../../services/data-quality-service.js';
-import { errorResponseWithPayload, sendSuccess, sanitizeErrorMessage, ErrorCodes } from '../../utils/api-response.js';
+import {
+  errorResponseWithPayload,
+  sendSuccess,
+  sanitizeErrorMessage,
+  ErrorCodes
+} from '../../utils/api-response.js';
 
 const router = Router();
 
@@ -321,35 +326,40 @@ router.post('/sanitize', (req: Request, res: Response) => {
  *       400:
  *         description: Input is required
  */
-router.post('/security/check', asyncHandler(async (req: Request, res: Response) => {
-  const { input } = req.body;
+router.post(
+  '/security/check',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { input } = req.body;
 
-  if (!input) {
-    errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
-      message: 'input is required'
+    if (!input) {
+      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
+        message: 'input is required'
+      });
+      return;
+    }
+
+    const xssResult = detectXSS(input);
+    const sqlResult = detectSQLInjection(input);
+
+    // Log if threats detected
+    if (xssResult.detected || sqlResult.detected) {
+      await dataQualityService.logSecurityThreat({
+        inputValue: input.substring(0, 500),
+        errorType: xssResult.detected ? 'xss' : 'sql_injection',
+        errorMessage: xssResult.detected
+          ? 'XSS patterns detected'
+          : 'SQL injection patterns detected',
+        sourceIp: req.ip,
+        userAgent: req.headers['user-agent'] || ''
+      });
+    }
+
+    sendSuccess(res, {
+      safe: !xssResult.detected && !sqlResult.detected,
+      xss: xssResult,
+      sqlInjection: sqlResult
     });
-    return;
-  }
-
-  const xssResult = detectXSS(input);
-  const sqlResult = detectSQLInjection(input);
-
-  // Log if threats detected
-  if (xssResult.detected || sqlResult.detected) {
-    await dataQualityService.logSecurityThreat({
-      inputValue: input.substring(0, 500),
-      errorType: xssResult.detected ? 'xss' : 'sql_injection',
-      errorMessage: xssResult.detected ? 'XSS patterns detected' : 'SQL injection patterns detected',
-      sourceIp: req.ip,
-      userAgent: req.headers['user-agent'] || ''
-    });
-  }
-
-  sendSuccess(res, {
-    safe: !xssResult.detected && !sqlResult.detected,
-    xss: xssResult,
-    sqlInjection: sqlResult
-  });
-}));
+  })
+);
 
 export default router;

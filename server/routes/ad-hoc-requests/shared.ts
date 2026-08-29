@@ -25,12 +25,24 @@ const TIME_ENTRY_USERNAME_MAX_LENGTH = 100;
 const TIME_ENTRY_DESCRIPTION_MAX_LENGTH = 5000;
 
 export const AD_HOC_TYPE_VALUES = [
-  'bug-fix', 'feature', 'content-update', 'design-change',
-  'performance', 'security', 'maintenance', 'other'
+  'bug-fix',
+  'feature',
+  'content-update',
+  'design-change',
+  'performance',
+  'security',
+  'maintenance',
+  'other'
 ];
 export const AD_HOC_STATUS_VALUES = [
-  'submitted', 'reviewing', 'quoted', 'approved', 'declined',
-  'in-progress', 'completed', 'cancelled'
+  'submitted',
+  'reviewing',
+  'quoted',
+  'approved',
+  'declined',
+  'in-progress',
+  'completed',
+  'cancelled'
 ];
 export const AD_HOC_PRIORITY_VALUES = ['low', 'medium', 'high', 'urgent'];
 export const AD_HOC_URGENCY_VALUES = ['low', 'normal', 'high', 'critical'];
@@ -41,10 +53,7 @@ export const AD_HOC_URGENCY_VALUES = ['low', 'normal', 'high', 'critical'];
 
 export const AdHocValidationSchemas = {
   clientSubmit: {
-    projectId: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ],
+    projectId: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
     title: [
       { type: 'required' as const },
       { type: 'string' as const, minLength: 1, maxLength: AD_HOC_TITLE_MAX_LENGTH }
@@ -63,14 +72,8 @@ export const AdHocValidationSchemas = {
   } as ValidationSchema,
 
   adminCreate: {
-    projectId: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ],
-    clientId: [
-      { type: 'required' as const },
-      { type: 'number' as const, min: 1 }
-    ],
+    projectId: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
+    clientId: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
     title: [
       { type: 'required' as const },
       { type: 'string' as const, minLength: 1, maxLength: AD_HOC_TITLE_MAX_LENGTH }
@@ -116,10 +119,7 @@ export const AdHocValidationSchemas = {
       { type: 'required' as const },
       { type: 'number' as const, min: 0.01, max: MAX_ESTIMATED_HOURS }
     ],
-    date: [
-      { type: 'required' as const },
-      { type: 'string' as const, maxLength: 20 }
-    ],
+    date: [{ type: 'required' as const }, { type: 'string' as const, maxLength: 20 }],
     description: { type: 'string' as const, maxLength: TIME_ENTRY_DESCRIPTION_MAX_LENGTH },
     billable: { type: 'boolean' as const },
     hourlyRate: { type: 'number' as const, min: 0, max: MAX_RATE }
@@ -136,16 +136,16 @@ export function getInvoiceService() {
 
 export function mapTaskPriority(priority?: string | null): 'low' | 'medium' | 'high' | 'urgent' {
   switch (priority) {
-  case 'low':
-    return 'low';
-  case 'medium':
-    return 'medium';
-  case 'high':
-    return 'high';
-  case 'urgent':
-    return 'urgent';
-  default:
-    return 'medium';
+    case 'low':
+      return 'low';
+    case 'medium':
+      return 'medium';
+    case 'high':
+      return 'high';
+    case 'urgent':
+      return 'urgent';
+    default:
+      return 'medium';
   }
 }
 
@@ -158,10 +158,16 @@ export function buildTaskDescription(request: AdHocRequest): string {
   ];
 
   const quoteParts: string[] = [];
-  if (request.estimatedHours !== null) {quoteParts.push(`Estimated hours: ${request.estimatedHours}`);}
-  if (request.hourlyRate !== null) {quoteParts.push(`Hourly rate: $${request.hourlyRate.toFixed(2)}`);}
+  if (request.estimatedHours !== null) {
+    quoteParts.push(`Estimated hours: ${request.estimatedHours}`);
+  }
+  if (request.hourlyRate !== null) {
+    quoteParts.push(`Hourly rate: $${request.hourlyRate.toFixed(2)}`);
+  }
   if (request.flatRate !== null) quoteParts.push(`Flat rate: $${request.flatRate.toFixed(2)}`);
-  if (request.quotedPrice !== null) {quoteParts.push(`Quoted total: $${request.quotedPrice.toFixed(2)}`);}
+  if (request.quotedPrice !== null) {
+    quoteParts.push(`Quoted total: $${request.quotedPrice.toFixed(2)}`);
+  }
 
   return [
     request.description,

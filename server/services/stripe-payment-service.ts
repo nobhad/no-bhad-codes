@@ -130,7 +130,7 @@ async function getOrCreateCustomer(clientId: number): Promise<string> {
 
   // Cache on clients table
   await db.run(
-    'UPDATE clients SET stripe_customer_id = ?, updated_at = datetime(\'now\') WHERE id = ?',
+    "UPDATE clients SET stripe_customer_id = ?, updated_at = datetime('now') WHERE id = ?",
     [customerId, clientId]
   );
 
@@ -180,7 +180,8 @@ async function createPaymentIntent(
     )) as PayableInstallmentRow | undefined;
 
     if (!installment) throw new Error(`Installment ${installmentId} not found`);
-    if (installment.client_id !== clientId) throw new Error('Installment does not belong to this client');
+    if (installment.client_id !== clientId)
+      throw new Error('Installment does not belong to this client');
     if (installment.status === 'paid') throw new Error('Installment is already paid');
 
     amountCents = Math.round(installment.amount * 100);
@@ -237,7 +238,15 @@ async function createPaymentIntent(
 
   logger.info('Created PaymentIntent', {
     category: 'payments',
-    metadata: { clientId, invoiceId, installmentId, intentId, baseCents: amountCents, feeCents, totalCents }
+    metadata: {
+      clientId,
+      invoiceId,
+      installmentId,
+      intentId,
+      baseCents: amountCents,
+      feeCents,
+      totalCents
+    }
   });
 
   return {
@@ -285,7 +294,7 @@ async function handlePaymentSuccess(stripeIntentId: string): Promise<void> {
   // where the outer idempotency layer kicks in.
   await db.transaction(async (ctx) => {
     await ctx.run(
-      'UPDATE stripe_payment_intents SET status = \'succeeded\', updated_at = datetime(\'now\') WHERE stripe_intent_id = ?',
+      "UPDATE stripe_payment_intents SET status = 'succeeded', updated_at = datetime('now') WHERE stripe_intent_id = ?",
       [stripeIntentId]
     );
 
@@ -312,12 +321,7 @@ async function handlePaymentSuccess(stripeIntentId: string): Promise<void> {
            SELECT 1 FROM invoice_payments
            WHERE stripe_payment_intent_id = ? AND status = 'succeeded'
          )`,
-        [
-          record.invoice_id,
-          record.amount_cents / 100,
-          stripeIntentId,
-          stripeIntentId
-        ]
+        [record.invoice_id, record.amount_cents / 100, stripeIntentId, stripeIntentId]
       );
     }
 
@@ -366,7 +370,7 @@ async function handlePaymentFailure(stripeIntentId: string, reason: string): Pro
   const db = getDatabase();
 
   await db.run(
-    'UPDATE stripe_payment_intents SET status = \'canceled\', failure_reason = ?, updated_at = datetime(\'now\') WHERE stripe_intent_id = ?',
+    "UPDATE stripe_payment_intents SET status = 'canceled', failure_reason = ?, updated_at = datetime('now') WHERE stripe_intent_id = ?",
     [reason, stripeIntentId]
   );
 

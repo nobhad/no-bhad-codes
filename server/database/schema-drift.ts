@@ -115,10 +115,7 @@ async function getStoredSnapshot(db: Database): Promise<SchemaObject[] | null> {
   }
 }
 
-export async function recordSchemaBaseline(
-  db: Database,
-  snapshot: SchemaObject[]
-): Promise<void> {
+export async function recordSchemaBaseline(db: Database, snapshot: SchemaObject[]): Promise<void> {
   const value = JSON.stringify(snapshot);
   await db.run(
     `INSERT INTO system_settings (setting_key, setting_value, setting_type, description)

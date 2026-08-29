@@ -15,7 +15,7 @@ const MODE_SCREENSHOTS = '--screenshots';
 const MODE_VIDEO = '--video';
 const MODE_ALL = '--all';
 const VALID_MODES = [MODE_SCREENSHOTS, MODE_VIDEO, MODE_ALL] as const;
-type Mode = typeof VALID_MODES[number];
+type Mode = (typeof VALID_MODES)[number];
 
 import 'dotenv/config';
 import puppeteer from 'puppeteer';
@@ -171,7 +171,11 @@ function setTheme(page: puppeteer.Page, themeValue: string) {
     // localStorage may be inaccessible during transitional/sandboxed
     // states (e.g. mid-navigation, about:blank). The data-theme attribute
     // alone is enough for visual theming.
-    try { localStorage.setItem('theme', tv); } catch { /* ignore */ }
+    try {
+      localStorage.setItem('theme', tv);
+    } catch {
+      /* ignore */
+    }
     document.documentElement.setAttribute('data-theme', tv);
   }, themeValue);
 }
@@ -227,7 +231,9 @@ async function takeScreenshots() {
               await page.evaluate(() => {
                 document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
               });
-            } catch { /* no skip needed */ }
+            } catch {
+              /* no skip needed */
+            }
             await wait(ANIMATION_WAIT_MS);
           }
 
@@ -254,7 +260,9 @@ async function takeScreenshots() {
             }
           }
         } catch (err) {
-          console.error(`  Failed: ${pageConfig.name} - ${err instanceof Error ? err.message : err}`);
+          console.error(
+            `  Failed: ${pageConfig.name} - ${err instanceof Error ? err.message : err}`
+          );
         }
       }
     }
@@ -307,7 +315,9 @@ async function recordVideos() {
         await page.evaluate(() => {
           document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
         });
-      } catch { /* fine */ }
+      } catch {
+        /* fine */
+      }
       await wait(ANIMATION_WAIT_MS);
 
       // Show nav menu open, hover each link so the recording captures the
@@ -322,7 +332,9 @@ async function recordVideos() {
         }
         await page.click('[data-menu-toggle]');
         await wait(VIDEO_TRANSITION_MS);
-      } catch { /* nav toggle failed */ }
+      } catch {
+        /* nav toggle failed */
+      }
 
       // Walk through pages — every stop scrolls to the bottom
       for (const pageConfig of VIDEO_WALKTHROUGH.slice(1)) {
@@ -395,7 +407,12 @@ async function recordTerminalIntakeVideos() {
     // progress, then reload so the terminal boots from question one.
     await page.goto(`${BASE_URL}/intake`, { waitUntil: 'networkidle2', timeout: 15000 });
     await page.evaluate(() => {
-      try { localStorage.clear(); sessionStorage.clear(); } catch { /* blocked */ }
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+      } catch {
+        /* blocked */
+      }
     });
     await page.goto(`${BASE_URL}/intake`, { waitUntil: 'networkidle2', timeout: 15000 });
     await setTheme(page, theme.value);
@@ -677,7 +694,13 @@ async function recordAuthenticatedVideos() {
     await recordAuthenticatedVideosForRole(browser, adminCreds, AUTH_ADMIN_PAGES, 'admin', 'admin');
   }
   if (clientCreds) {
-    await recordAuthenticatedVideosForRole(browser, clientCreds, AUTH_CLIENT_PAGES, 'client', 'portal');
+    await recordAuthenticatedVideosForRole(
+      browser,
+      clientCreds,
+      AUTH_CLIENT_PAGES,
+      'client',
+      'portal'
+    );
   }
 
   await browser.close();

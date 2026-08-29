@@ -86,9 +86,7 @@ function addCsrfHeader(options: RequestInit): RequestInit {
  * @param getAuthToken - Optional function that returns the auth token
  * @returns Headers record ready for fetch calls
  */
-export function buildAuthHeaders(
-  getAuthToken?: () => string | null
-): Record<string, string> {
+export function buildAuthHeaders(getAuthToken?: () => string | null): Record<string, string> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json'
   };
@@ -167,9 +165,7 @@ export interface FriendlyApiErrorOptions {
  * Read the error body without consuming the response — safe to call
  * even when a caller still needs the raw response object afterwards.
  */
-export async function readApiErrorBody(
-  response: Response
-): Promise<Partial<ApiErrorResponse>> {
+export async function readApiErrorBody(response: Response): Promise<Partial<ApiErrorResponse>> {
   try {
     return (await response.clone().json()) as Partial<ApiErrorResponse>;
   } catch {
@@ -191,27 +187,30 @@ export function describeApiError(
 ): string {
   const serverMessage = errorPayload?.message ?? errorPayload?.error;
   switch (response.status) {
-  case 429:
-    return options.rateLimited
-        ?? 'Too many requests — please wait a moment and try again.';
-  case 503:
-    return options.unavailable
-        ?? 'This service is temporarily unavailable. Please try again shortly.';
-  case 409:
-    return options.conflict ?? serverMessage
-        ?? 'That action conflicts with the current state. Refresh and try again.';
-  case 413:
-    return 'That upload is too large. Please choose a smaller file.';
-  case 422:
-    return serverMessage ?? 'The request contained invalid data.';
-  case 401:
-    return 'Your session has expired. Please sign in again.';
-  case 403:
-    return serverMessage ?? 'You don\'t have permission to do that.';
-  case 404:
-    return serverMessage ?? 'We couldn’t find what you were looking for.';
-  default:
-    return serverMessage ?? options.fallback ?? 'Something went wrong. Please try again.';
+    case 429:
+      return options.rateLimited ?? 'Too many requests — please wait a moment and try again.';
+    case 503:
+      return (
+        options.unavailable ?? 'This service is temporarily unavailable. Please try again shortly.'
+      );
+    case 409:
+      return (
+        options.conflict ??
+        serverMessage ??
+        'That action conflicts with the current state. Refresh and try again.'
+      );
+    case 413:
+      return 'That upload is too large. Please choose a smaller file.';
+    case 422:
+      return serverMessage ?? 'The request contained invalid data.';
+    case 401:
+      return 'Your session has expired. Please sign in again.';
+    case 403:
+      return serverMessage ?? "You don't have permission to do that.";
+    case 404:
+      return serverMessage ?? 'We couldn’t find what you were looking for.';
+    default:
+      return serverMessage ?? options.fallback ?? 'Something went wrong. Please try again.';
   }
 }
 
@@ -432,7 +431,7 @@ function decodeHtmlEntities(str: string): string {
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
-    .replace(/&#x27;/g, '\'')
+    .replace(/&#x27;/g, "'")
     .replace(/&#x2F;/g, '/')
     .replace(/&#x60;/g, '`')
     .replace(/&#x3D;/g, '=');
@@ -510,7 +509,12 @@ export async function parseApiResponse<T>(response: Response): Promise<T> {
  */
 export function unwrapApiData<T>(json: unknown): T {
   let result: T;
-  if (json && typeof json === 'object' && 'success' in json && (json as Record<string, unknown>).success === true) {
+  if (
+    json &&
+    typeof json === 'object' &&
+    'success' in json &&
+    (json as Record<string, unknown>).success === true
+  ) {
     result = ((json as Record<string, unknown>).data ?? {}) as T;
   } else {
     result = json as T;

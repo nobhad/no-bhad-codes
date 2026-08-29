@@ -397,10 +397,7 @@ describe('InvoicePaymentService', () => {
       const result = await service.getAllPayments();
 
       expect(result).toHaveLength(2);
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('FROM invoice_payments'),
-        []
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('FROM invoice_payments'), []);
     });
 
     it('filters by date range', async () => {

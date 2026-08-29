@@ -78,13 +78,13 @@ describe('sendSuccess', () => {
   it('responds with status 200 by default', () => {
     const res = createMockRes();
     sendSuccess(res as unknown as Response, undefined, undefined);
-    expect((res.status as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(200);
+    expect(res.status as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(200);
   });
 
   it('sets success to true', () => {
     const res = createMockRes();
     sendSuccess(res as unknown as Response, undefined, undefined);
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ success: true })
     );
   });
@@ -92,7 +92,7 @@ describe('sendSuccess', () => {
   it('includes message when provided', () => {
     const res = createMockRes();
     sendSuccess(res as unknown as Response, undefined, 'All good');
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ message: 'All good' })
     );
   });
@@ -100,7 +100,7 @@ describe('sendSuccess', () => {
   it('includes data when provided', () => {
     const res = createMockRes();
     sendSuccess(res as unknown as Response, { id: 1 }, undefined);
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ data: { id: 1 } })
     );
   });
@@ -115,7 +115,7 @@ describe('sendSuccess', () => {
   it('respects a custom statusCode', () => {
     const res = createMockRes();
     sendSuccess(res as unknown as Response, undefined, undefined, 202);
-    expect((res.status as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(202);
+    expect(res.status as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(202);
   });
 });
 
@@ -123,13 +123,13 @@ describe('sendCreated', () => {
   it('responds with status 201', () => {
     const res = createMockRes();
     sendCreated(res as unknown as Response, { id: 1 });
-    expect((res.status as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(201);
+    expect(res.status as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(201);
   });
 
   it('sets success to true', () => {
     const res = createMockRes();
     sendCreated(res as unknown as Response, { id: 1 });
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ success: true })
     );
   });
@@ -137,7 +137,7 @@ describe('sendCreated', () => {
   it('includes data', () => {
     const res = createMockRes();
     sendCreated(res as unknown as Response, { id: 42 });
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ data: { id: 42 } })
     );
   });
@@ -145,7 +145,7 @@ describe('sendCreated', () => {
   it('uses default message', () => {
     const res = createMockRes();
     sendCreated(res as unknown as Response, {});
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ message: 'Created successfully' })
     );
   });
@@ -155,13 +155,13 @@ describe('messageResponse', () => {
   it('responds with status 200 by default', () => {
     const res = createMockRes();
     messageResponse(res as unknown as Response, 'hello');
-    expect((res.status as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(200);
+    expect(res.status as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(200);
   });
 
   it('sets success to true with message', () => {
     const res = createMockRes();
     messageResponse(res as unknown as Response, 'Operation complete');
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith({
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith({
       success: true,
       message: 'Operation complete'
     });
@@ -170,7 +170,7 @@ describe('messageResponse', () => {
   it('respects a custom status code', () => {
     const res = createMockRes();
     messageResponse(res as unknown as Response, 'OK', 202);
-    expect((res.status as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(202);
+    expect(res.status as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(202);
   });
 });
 
@@ -178,13 +178,13 @@ describe('sendError', () => {
   it('responds with status 500 by default', () => {
     const res = createMockRes();
     sendError(res as unknown as Response, 'Something broke');
-    expect((res.status as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(500);
+    expect(res.status as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(500);
   });
 
   it('sets success to false', () => {
     const res = createMockRes();
     sendError(res as unknown as Response, 'Something broke');
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ success: false })
     );
   });
@@ -192,7 +192,7 @@ describe('sendError', () => {
   it('includes the error message', () => {
     const res = createMockRes();
     sendError(res as unknown as Response, 'My error');
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ error: 'My error' })
     );
   });
@@ -200,15 +200,17 @@ describe('sendError', () => {
   it('includes the error code', () => {
     const res = createMockRes();
     sendError(res as unknown as Response, 'My error', ErrorCodes.NOT_FOUND, 404);
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ code: 'NOT_FOUND' })
     );
   });
 
   it('includes details when provided', () => {
     const res = createMockRes();
-    sendError(res as unknown as Response, 'Error', ErrorCodes.VALIDATION_ERROR, 400, { field: 'email' });
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    sendError(res as unknown as Response, 'Error', ErrorCodes.VALIDATION_ERROR, 400, {
+      field: 'email'
+    });
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ details: { field: 'email' } })
     );
   });
@@ -223,7 +225,7 @@ describe('sendError', () => {
   it('uses a custom statusCode', () => {
     const res = createMockRes();
     sendError(res as unknown as Response, 'Error', ErrorCodes.NOT_FOUND, 404);
-    expect((res.status as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(404);
+    expect(res.status as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(404);
   });
 });
 
@@ -231,13 +233,13 @@ describe('errorResponse', () => {
   it('responds with status 400 by default', () => {
     const res = createMockRes();
     errorResponse(res as unknown as Response, 'Bad request');
-    expect((res.status as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(400);
+    expect(res.status as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(400);
   });
 
   it('sets success to false', () => {
     const res = createMockRes();
     errorResponse(res as unknown as Response, 'Bad request');
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ success: false })
     );
   });
@@ -245,7 +247,7 @@ describe('errorResponse', () => {
   it('includes the error message', () => {
     const res = createMockRes();
     errorResponse(res as unknown as Response, 'Something wrong');
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ error: 'Something wrong' })
     );
   });
@@ -260,7 +262,7 @@ describe('errorResponse', () => {
   it('uses the provided code', () => {
     const res = createMockRes();
     errorResponse(res as unknown as Response, 'Err', 400, 'MY_CODE');
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ code: 'MY_CODE' })
     );
   });
@@ -268,7 +270,7 @@ describe('errorResponse', () => {
   it('respects custom status', () => {
     const res = createMockRes();
     errorResponse(res as unknown as Response, 'Err', 422);
-    expect((res.status as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(422);
+    expect(res.status as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(422);
   });
 });
 
@@ -276,7 +278,7 @@ describe('errorResponseWithPayload', () => {
   it('merges payload fields into the response', () => {
     const res = createMockRes();
     errorResponseWithPayload(res as unknown as Response, 'Error', 400, 'CODE', { extra: 'data' });
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ extra: 'data', success: false, error: 'Error' })
     );
   });
@@ -284,13 +286,13 @@ describe('errorResponseWithPayload', () => {
   it('uses 400 as default status', () => {
     const res = createMockRes();
     errorResponseWithPayload(res as unknown as Response, 'Error');
-    expect((res.status as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(400);
+    expect(res.status as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(400);
   });
 
   it('works without payload', () => {
     const res = createMockRes();
     errorResponseWithPayload(res as unknown as Response, 'Error', 400, 'CODE');
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ success: false, error: 'Error', code: 'CODE' })
     );
   });
@@ -300,13 +302,13 @@ describe('sendBadRequest', () => {
   it('responds with status 400', () => {
     const res = createMockRes();
     sendBadRequest(res as unknown as Response, 'Bad input');
-    expect((res.status as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(400);
+    expect(res.status as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(400);
   });
 
   it('uses VALIDATION_ERROR as the default code', () => {
     const res = createMockRes();
     sendBadRequest(res as unknown as Response, 'Bad input');
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ code: 'VALIDATION_ERROR' })
     );
   });
@@ -314,7 +316,7 @@ describe('sendBadRequest', () => {
   it('sets success to false', () => {
     const res = createMockRes();
     sendBadRequest(res as unknown as Response, 'Bad input');
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ success: false })
     );
   });
@@ -324,13 +326,13 @@ describe('sendUnauthorized', () => {
   it('responds with status 401', () => {
     const res = createMockRes();
     sendUnauthorized(res as unknown as Response);
-    expect((res.status as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(401);
+    expect(res.status as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(401);
   });
 
   it('uses UNAUTHORIZED as the code', () => {
     const res = createMockRes();
     sendUnauthorized(res as unknown as Response);
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ code: 'UNAUTHORIZED' })
     );
   });
@@ -338,7 +340,7 @@ describe('sendUnauthorized', () => {
   it('uses a custom message', () => {
     const res = createMockRes();
     sendUnauthorized(res as unknown as Response, 'Token expired');
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ error: 'Token expired' })
     );
   });
@@ -348,13 +350,13 @@ describe('sendForbidden', () => {
   it('responds with status 403', () => {
     const res = createMockRes();
     sendForbidden(res as unknown as Response);
-    expect((res.status as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(403);
+    expect(res.status as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(403);
   });
 
   it('sets success to false', () => {
     const res = createMockRes();
     sendForbidden(res as unknown as Response);
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ success: false })
     );
   });
@@ -364,13 +366,13 @@ describe('sendNotFound', () => {
   it('responds with status 404', () => {
     const res = createMockRes();
     sendNotFound(res as unknown as Response);
-    expect((res.status as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(404);
+    expect(res.status as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(404);
   });
 
   it('uses NOT_FOUND as the code', () => {
     const res = createMockRes();
     sendNotFound(res as unknown as Response);
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ code: 'NOT_FOUND' })
     );
   });
@@ -378,7 +380,7 @@ describe('sendNotFound', () => {
   it('uses a custom message', () => {
     const res = createMockRes();
     sendNotFound(res as unknown as Response, 'Invoice not found');
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ error: 'Invoice not found' })
     );
   });
@@ -388,13 +390,13 @@ describe('sendConflict', () => {
   it('responds with status 409', () => {
     const res = createMockRes();
     sendConflict(res as unknown as Response, 'Already exists');
-    expect((res.status as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(409);
+    expect(res.status as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(409);
   });
 
   it('sets success to false', () => {
     const res = createMockRes();
     sendConflict(res as unknown as Response, 'Duplicate');
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ success: false })
     );
   });
@@ -404,13 +406,13 @@ describe('sendRateLimited', () => {
   it('responds with status 429', () => {
     const res = createMockRes();
     sendRateLimited(res as unknown as Response);
-    expect((res.status as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(429);
+    expect(res.status as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(429);
   });
 
   it('sets success to false', () => {
     const res = createMockRes();
     sendRateLimited(res as unknown as Response);
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ success: false })
     );
   });
@@ -420,13 +422,13 @@ describe('sendServerError', () => {
   it('responds with status 500', () => {
     const res = createMockRes();
     sendServerError(res as unknown as Response);
-    expect((res.status as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(500);
+    expect(res.status as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(500);
   });
 
   it('uses INTERNAL_ERROR as the code', () => {
     const res = createMockRes();
     sendServerError(res as unknown as Response);
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ code: 'INTERNAL_ERROR' })
     );
   });
@@ -434,7 +436,7 @@ describe('sendServerError', () => {
   it('sets success to false', () => {
     const res = createMockRes();
     sendServerError(res as unknown as Response);
-    expect((res.json as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+    expect(res.json as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
       expect.objectContaining({ success: false })
     );
   });
@@ -443,7 +445,11 @@ describe('sendServerError', () => {
 describe('sendPaginated', () => {
   it('includes the data array', () => {
     const res = createMockRes();
-    sendPaginated(res as unknown as Response, [{ id: 1 }, { id: 2 }], { page: 1, perPage: 10, total: 2 });
+    sendPaginated(res as unknown as Response, [{ id: 1 }, { id: 2 }], {
+      page: 1,
+      perPage: 10,
+      total: 2
+    });
     const body = (res.json as ReturnType<typeof vi.fn>).mock.calls[0][0];
     expect(body.data).toEqual([{ id: 1 }, { id: 2 }]);
   });
@@ -495,7 +501,12 @@ describe('sendPaginated', () => {
 
   it('includes message when provided', () => {
     const res = createMockRes();
-    sendPaginated(res as unknown as Response, [], { page: 1, perPage: 10, total: 0 }, 'Results loaded');
+    sendPaginated(
+      res as unknown as Response,
+      [],
+      { page: 1, perPage: 10, total: 0 },
+      'Results loaded'
+    );
     const body = (res.json as ReturnType<typeof vi.fn>).mock.calls[0][0];
     expect(body.message).toBe('Results loaded');
   });

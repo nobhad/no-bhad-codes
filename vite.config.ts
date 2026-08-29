@@ -9,11 +9,7 @@ import { createObfuscationPlugin } from './src/utils/obfuscation-plugin';
  * public/, mirroring Vercel's cleanUrls. Only rewrites when the file is
  * actually there, so genuine 404s stay 404s.
  */
-function cleanUrlsMiddleware(
-  req: { url?: string },
-  _res: unknown,
-  next: () => void
-): void {
+function cleanUrlsMiddleware(req: { url?: string }, _res: unknown, next: () => void): void {
   const url = req.url;
   if (!url || url === '/') return next();
 
@@ -78,7 +74,10 @@ export default defineConfig({
         branding: resolve(__dirname, 'src/config/branding.ts'),
         // Auth-page init modules (loaded via initModule in auth.ejs)
         'set-password-handler': resolve(__dirname, 'src/features/auth/set-password-handler.ts'),
-        'forgot-password-handler': resolve(__dirname, 'src/features/auth/forgot-password-handler.ts'),
+        'forgot-password-handler': resolve(
+          __dirname,
+          'src/features/auth/forgot-password-handler.ts'
+        ),
         'reset-password-handler': resolve(__dirname, 'src/features/auth/reset-password-handler.ts')
       },
       // Silence "use client" RSC-directive warnings from Radix/react-router.
@@ -98,7 +97,8 @@ export default defineConfig({
         // code. Each id is matched as a substring of the resolved module path.
         manualChunks: (id) => {
           if (!id.includes('node_modules')) return undefined;
-          if (id.includes('/react-router') || id.includes('/@remix-run/router')) return 'vendor-router';
+          if (id.includes('/react-router') || id.includes('/@remix-run/router'))
+            return 'vendor-router';
           if (id.includes('/react-dom/')) return 'vendor-react-dom';
           if (id.includes('/react/') || id.includes('/scheduler/')) return 'vendor-react';
           if (id.includes('/zustand/')) return 'vendor-zustand';

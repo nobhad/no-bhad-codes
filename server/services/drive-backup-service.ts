@@ -50,7 +50,11 @@ export function getLatestLocalBackup(backupDir: string): string {
   }
   const files = readdirSync(dailyDir)
     .filter((f) => /\.(db|sqlite)(\.gz)?$/.test(f))
-    .map((f) => ({ name: f, path: join(dailyDir, f), mtime: statSync(join(dailyDir, f)).mtime.getTime() }))
+    .map((f) => ({
+      name: f,
+      path: join(dailyDir, f),
+      mtime: statSync(join(dailyDir, f)).mtime.getTime()
+    }))
     .sort((a, b) => b.mtime - a.mtime);
   if (files.length === 0) {
     throw new Error(`No backup files in ${dailyDir}`);
@@ -71,13 +75,15 @@ async function mintAccessToken(): Promise<string> {
 
   const now = Math.floor(Date.now() / 1000);
   const header = base64UrlEncode(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
-  const claim = base64UrlEncode(JSON.stringify({
-    iss: email,
-    scope: SCOPE,
-    aud: 'https://oauth2.googleapis.com/token',
-    iat: now,
-    exp: now + 3600
-  }));
+  const claim = base64UrlEncode(
+    JSON.stringify({
+      iss: email,
+      scope: SCOPE,
+      aud: 'https://oauth2.googleapis.com/token',
+      iat: now,
+      exp: now + 3600
+    })
+  );
   const unsigned = `${header}.${claim}`;
   const signer = createSign('RSA-SHA256');
   signer.update(unsigned);
@@ -95,21 +101,33 @@ async function mintAccessToken(): Promise<string> {
   if (!res.ok) {
     throw new Error(`Token mint failed: ${res.status} ${await res.text()}`);
   }
-  const json = (await res.json()) as { access_token?: string; error?: string; error_description?: string };
+  const json = (await res.json()) as {
+    access_token?: string;
+    error?: string;
+    error_description?: string;
+  };
   if (!json.access_token) {
-    throw new Error(`Token mint failed: ${json.error ?? 'unknown'} ${json.error_description ?? ''}`);
+    throw new Error(
+      `Token mint failed: ${json.error ?? 'unknown'} ${json.error_description ?? ''}`
+    );
   }
   return json.access_token;
 }
 
-async function uploadFile(filePath: string, folderId: string, token: string): Promise<DriveFileInfo> {
+async function uploadFile(
+  filePath: string,
+  folderId: string,
+  token: string
+): Promise<DriveFileInfo> {
   const data = readFileSync(filePath);
   const filename = basename(filePath);
   const metadata = { name: filename, parents: [folderId] };
 
   const boundary = `----nbc-${Date.now().toString(16)}`;
   const body = Buffer.concat([
-    Buffer.from(`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`),
+    Buffer.from(
+      `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`
+    ),
     Buffer.from(`--${boundary}\r\nContent-Type: application/octet-stream\r\n\r\n`),
     data,
     Buffer.from(`\r\n--${boundary}--`)
@@ -167,7 +185,9 @@ export interface DriveBackupResult {
  */
 export async function uploadBackupToDrive(filePath: string): Promise<DriveBackupResult> {
   if (!isDriveBackupConfigured()) {
-    throw new Error('Drive backup not configured (missing GOOGLE_SERVICE_ACCOUNT_* / GOOGLE_DRIVE_FOLDER_ID)');
+    throw new Error(
+      'Drive backup not configured (missing GOOGLE_SERVICE_ACCOUNT_* / GOOGLE_DRIVE_FOLDER_ID)'
+    );
   }
   const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID!;
   const retention = parseInt(process.env.DRIVE_RETENTION_COUNT || '30', 10);

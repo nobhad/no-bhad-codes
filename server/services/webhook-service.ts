@@ -30,12 +30,16 @@ const userWebhookBreaker = getCircuitBreaker({
 const WEBHOOK_COLUMNS = `
   id, name, url, method, headers, payload_template, events, is_active, secret_key,
   retry_enabled, retry_max_attempts, retry_backoff_seconds, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const WEBHOOK_DELIVERY_COLUMNS = `
   id, webhook_id, event_type, event_data, status, attempt_number, response_status,
   response_body, error_message, signature, delivered_at, next_retry_at, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export class WebhookService {
   private signingAlgorithm = 'sha256';
@@ -93,7 +97,9 @@ export class WebhookService {
    * Get webhook by ID
    */
   async getWebhookById(id: number): Promise<WebhookConfig | null> {
-    const row = await this.getDb().get(`SELECT ${WEBHOOK_COLUMNS} FROM webhooks WHERE id = ?`, [id]);
+    const row = await this.getDb().get(`SELECT ${WEBHOOK_COLUMNS} FROM webhooks WHERE id = ?`, [
+      id
+    ]);
     if (!row) return null;
     return this.formatWebhook(row);
   }
@@ -170,10 +176,10 @@ export class WebhookService {
    * Toggle webhook active status
    */
   async toggleWebhook(id: number, active: boolean): Promise<WebhookConfig> {
-    await this.getDb().run('UPDATE webhooks SET is_active=?, updated_at=CURRENT_TIMESTAMP WHERE id=?', [
-      active ? 1 : 0,
-      id
-    ]);
+    await this.getDb().run(
+      'UPDATE webhooks SET is_active=?, updated_at=CURRENT_TIMESTAMP WHERE id=?',
+      [active ? 1 : 0, id]
+    );
     const webhook = await this.getWebhookById(id);
     if (!webhook) throw new Error('Webhook not found');
     return webhook;
@@ -233,7 +239,6 @@ export class WebhookService {
         ...webhook.headers
       };
 
-
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
@@ -289,7 +294,7 @@ export class WebhookService {
     if (attempt > webhook.retry_max_attempts) {
       // Max retries exceeded
       await this.getDb().run(
-        'UPDATE webhook_deliveries SET status=\'failed\', updated_at=CURRENT_TIMESTAMP WHERE id=?',
+        "UPDATE webhook_deliveries SET status='failed', updated_at=CURRENT_TIMESTAMP WHERE id=?",
         [deliveryId]
       );
       return;
@@ -325,7 +330,9 @@ export class WebhookService {
         try {
           headers = JSON.parse((row.headers as string) || '{}');
         } catch {
-          logger.warn(`[WebhookService] Invalid headers JSON for delivery ${row.id}, using empty object`);
+          logger.warn(
+            `[WebhookService] Invalid headers JSON for delivery ${row.id}, using empty object`
+          );
         }
 
         const webhookData = {
@@ -374,7 +381,10 @@ export class WebhookService {
    * Get delivery by ID
    */
   async getDeliveryById(id: number): Promise<WebhookDelivery | null> {
-    const row = await this.getDb().get(`SELECT ${WEBHOOK_DELIVERY_COLUMNS} FROM webhook_deliveries WHERE id = ?`, [id]);
+    const row = await this.getDb().get(
+      `SELECT ${WEBHOOK_DELIVERY_COLUMNS} FROM webhook_deliveries WHERE id = ?`,
+      [id]
+    );
     if (!row) return null;
     return this.formatDelivery(row);
   }
@@ -606,20 +616,25 @@ export const webhookService = {
       retryBackoffSeconds?: number;
     }
   ) => getWebhookService().createWebhook(name, url, events, payloadTemplate, options),
-  updateWebhook: async (id: number, updates: Partial<Omit<WebhookConfig, 'id' | 'secret_key' | 'created_at'>>) => getWebhookService().updateWebhook(id, updates),
+  updateWebhook: async (
+    id: number,
+    updates: Partial<Omit<WebhookConfig, 'id' | 'secret_key' | 'created_at'>>
+  ) => getWebhookService().updateWebhook(id, updates),
   deleteWebhook: async (id: number) => getWebhookService().deleteWebhook(id),
   toggleWebhook: async (id: number, active: boolean) =>
     getWebhookService().toggleWebhook(id, active),
   triggerEvent: async (eventType: string, eventData: Record<string, unknown>) =>
     getWebhookService().triggerEvent(eventType, eventData),
   getDeliveryById: async (id: number) => getWebhookService().getDeliveryById(id),
-  getWebhookDeliveries: async (webhookId: number, options?: {
-    status?: 'pending' | 'success' | 'failed';
-    eventType?: string;
-    limit?: number;
-    offset?: number;
-  }) =>
-    getWebhookService().getWebhookDeliveries(webhookId, options),
+  getWebhookDeliveries: async (
+    webhookId: number,
+    options?: {
+      status?: 'pending' | 'success' | 'failed';
+      eventType?: string;
+      limit?: number;
+      offset?: number;
+    }
+  ) => getWebhookService().getWebhookDeliveries(webhookId, options),
   getDeliveryStats: async (webhookId: number) => getWebhookService().getDeliveryStats(webhookId),
   processPendingRetries: async () => getWebhookService().processPendingRetries(),
   regenerateSecret: async (webhookId: number) => getWebhookService().regenerateSecret(webhookId)

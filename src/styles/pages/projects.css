@@ -338,7 +338,6 @@
    RESPONSIVE DESIGN
    =============================================== */
 
-
 @media (--mobile) {
   .projects-hero {
     padding: 2rem 0 1.5rem;
@@ -411,11 +410,7 @@
    =============================================== */
 
 [data-theme="dark"] .projects-hero {
-  background: linear-gradient(
-    135deg,
-    var(--color-bg) 0%,
-    rgba(var(--color-accent-rgb), 0.02) 100%
-  );
+  background: linear-gradient(135deg, var(--color-bg) 0%, rgba(var(--color-accent-rgb), 0.02) 100%);
 }
 
 [data-theme="dark"] .filter-btn:hover {
@@ -547,7 +542,8 @@
 .projects-section .heading-divider {
   background-color: var(--color-dark);
   height: 4px;
-  border-radius: var(--border-radius-xs, 2px) 0 var(--border-radius-sm, 4px) var(--border-radius-xs, 2px);
+  border-radius: var(--border-radius-xs, 2px) 0 var(--border-radius-sm, 4px)
+    var(--border-radius-xs, 2px);
   transform-origin: bottom left;
   transition: background-color var(--transition-theme, 0.4s);
 }
@@ -595,7 +591,6 @@
     width: 100%;
     max-width: 100%;
   }
-
 
   /* Force single-column layout on mobile — prevents any tablet row rule bleed */
   .projects-flex-row {
@@ -829,7 +824,6 @@
     font-size: clamp(1.1rem, 5cqw, 1.7rem);
   }
 }
-
 
 /* TV wrapper - contains layered elements */
 .crt-tv__wrapper {
@@ -1200,7 +1194,11 @@
 .crt-tv__glare {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 30% 30%, var(--portal-alpha-white-08, rgba(255, 255, 255, 0.08)) 0%, transparent 50%);
+  background: radial-gradient(
+    ellipse at 30% 30%,
+    var(--portal-alpha-white-08, rgba(255, 255, 255, 0.08)) 0%,
+    transparent 50%
+  );
   pointer-events: none;
 }
 
@@ -1785,7 +1783,9 @@
   line-height: 1.2;
   white-space: nowrap;
   border-radius: 2px;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 /* Stacked title + category in the middle column. Title on top, category

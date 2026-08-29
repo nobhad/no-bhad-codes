@@ -59,13 +59,28 @@ router.post(
   requireAdmin,
   asyncHandler(async (req: JWTAuthRequest, res: Response) => {
     const {
-      projectId, category, description, amount, vendorName,
-      expenseDate, isBillable, isRecurring, recurringInterval,
-      receiptFileId, taxDeductible, taxCategory, notes
+      projectId,
+      category,
+      description,
+      amount,
+      vendorName,
+      expenseDate,
+      isBillable,
+      isRecurring,
+      recurringInterval,
+      receiptFileId,
+      taxDeductible,
+      taxCategory,
+      notes
     } = req.body;
 
     if (!category || !description || amount == null || !expenseDate) {
-      errorResponse(res, 'category, description, amount, and expenseDate are required', 400, ErrorCodes.VALIDATION_ERROR);
+      errorResponse(
+        res,
+        'category, description, amount, and expenseDate are required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
       return;
     }
 

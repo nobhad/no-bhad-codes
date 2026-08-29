@@ -12,11 +12,7 @@
 import { randomUUID } from 'crypto';
 import { getDatabase } from '../database/init.js';
 import { logger } from './logger.js';
-import {
-  SURVEY_EXPIRY_DAYS,
-  REMINDER_DELAY_DAYS,
-  MIN_NPS_SAMPLE_SIZE
-} from './feedback-types.js';
+import { SURVEY_EXPIRY_DAYS, REMINDER_DELAY_DAYS, MIN_NPS_SAMPLE_SIZE } from './feedback-types.js';
 import type {
   FeedbackSurveyRow,
   FeedbackResponseRow,
@@ -72,24 +68,16 @@ async function sendSurvey(params: SendSurveyParams): Promise<FeedbackSurveyRow> 
     `INSERT INTO feedback_surveys
      (project_id, client_id, survey_type, status, token, sent_at, expires_at, created_at)
      VALUES (?, ?, ?, 'sent', ?, ?, ?, datetime('now'))`,
-    [
-      params.projectId ?? null,
-      params.clientId,
-      params.surveyType,
-      token,
-      sentAt,
-      expiresAt
-    ]
+    [params.projectId ?? null, params.clientId, params.surveyType, token, sentAt, expiresAt]
   );
 
   const surveyId = result.lastID!;
 
   // Send survey email to client
   try {
-    const client = (await db.get(
-      'SELECT email, contact_name, name FROM clients WHERE id = ?',
-      [params.clientId]
-    )) as { email: string | null; contact_name: string | null; name: string } | undefined;
+    const client = (await db.get('SELECT email, contact_name, name FROM clients WHERE id = ?', [
+      params.clientId
+    ])) as { email: string | null; contact_name: string | null; name: string } | undefined;
 
     if (client?.email) {
       const { emailService } = await import('./email-service.js');
@@ -98,7 +86,7 @@ async function sendSurvey(params: SendSurveyParams): Promise<FeedbackSurveyRow> 
 
       await emailService.sendEmail({
         to: client.email,
-        subject: 'We\'d love your feedback',
+        subject: "We'd love your feedback",
         text: `Hi ${client.contact_name || client.name}, we'd love your feedback. Visit: ${surveyUrl}`,
         html: buildSurveyEmailHtml(client.contact_name || client.name, surveyUrl, params.surveyType)
       });
@@ -116,10 +104,9 @@ async function sendSurvey(params: SendSurveyParams): Promise<FeedbackSurveyRow> 
     metadata: { surveyId, clientId: params.clientId, surveyType: params.surveyType }
   });
 
-  const survey = (await db.get(
-    'SELECT * FROM feedback_surveys WHERE id = ?',
-    [surveyId]
-  )) as FeedbackSurveyRow;
+  const survey = (await db.get('SELECT * FROM feedback_surveys WHERE id = ?', [
+    surveyId
+  ])) as FeedbackSurveyRow;
 
   return survey;
 }
@@ -162,10 +149,12 @@ async function listSurveys(filters?: {
      ${whereClause}
      ORDER BY fs.created_at DESC`,
     params
-  )) as Array<FeedbackSurveyRow & { client_name: string; client_email: string; project_name: string | null }>;
+  )) as Array<
+    FeedbackSurveyRow & { client_name: string; client_email: string; project_name: string | null }
+  >;
 
   // Attach responses where they exist
-  const surveyIds = surveys.map(s => s.id);
+  const surveyIds = surveys.map((s) => s.id);
   let responses: FeedbackResponseRow[] = [];
 
   if (surveyIds.length > 0) {
@@ -176,9 +165,9 @@ async function listSurveys(filters?: {
     )) as FeedbackResponseRow[];
   }
 
-  const responseMap = new Map(responses.map(r => [r.survey_id, r]));
+  const responseMap = new Map(responses.map((r) => [r.survey_id, r]));
 
-  return surveys.map(row => ({
+  return surveys.map((row) => ({
     ...row,
     clientName: row.client_name,
     clientEmail: row.client_email,
@@ -203,14 +192,19 @@ async function getSurveyByToken(token: string): Promise<FeedbackSurveyWithDetail
      LEFT JOIN projects p ON fs.project_id = p.id
      WHERE fs.token = ?`,
     [token]
-  )) as (FeedbackSurveyRow & { client_name: string; client_email: string; project_name: string | null }) | undefined;
+  )) as
+    | (FeedbackSurveyRow & {
+        client_name: string;
+        client_email: string;
+        project_name: string | null;
+      })
+    | undefined;
 
   if (!row) return null;
 
-  const response = (await db.get(
-    'SELECT * FROM feedback_responses WHERE survey_id = ?',
-    [row.id]
-  )) as FeedbackResponseRow | undefined;
+  const response = (await db.get('SELECT * FROM feedback_responses WHERE survey_id = ?', [
+    row.id
+  ])) as FeedbackResponseRow | undefined;
 
   return {
     ...row,
@@ -229,10 +223,9 @@ async function getSurveyByToken(token: string): Promise<FeedbackSurveyWithDetail
 async function submitResponse(token: string, data: SubmitSurveyParams): Promise<void> {
   const db = getDatabase();
 
-  const survey = (await db.get(
-    'SELECT * FROM feedback_surveys WHERE token = ?',
-    [token]
-  )) as FeedbackSurveyRow | undefined;
+  const survey = (await db.get('SELECT * FROM feedback_surveys WHERE token = ?', [token])) as
+    | FeedbackSurveyRow
+    | undefined;
 
   if (!survey) throw new Error('Survey not found');
   if (survey.status === 'completed') throw new Error('Survey already completed');
@@ -241,7 +234,7 @@ async function submitResponse(token: string, data: SubmitSurveyParams): Promise<
 
   // Check expiry
   if (survey.expires_at && new Date(survey.expires_at) < new Date()) {
-    await db.run('UPDATE feedback_surveys SET status = \'expired\' WHERE id = ?', [survey.id]);
+    await db.run("UPDATE feedback_surveys SET status = 'expired' WHERE id = ?", [survey.id]);
     throw new Error('Survey has expired');
   }
 
@@ -272,21 +265,19 @@ async function submitResponse(token: string, data: SubmitSurveyParams): Promise<
 
   // Update survey status
   await db.run(
-    'UPDATE feedback_surveys SET status = \'completed\', completed_at = datetime(\'now\') WHERE id = ?',
+    "UPDATE feedback_surveys SET status = 'completed', completed_at = datetime('now') WHERE id = ?",
     [survey.id]
   );
 
   // Auto-create testimonial if client opted in
   if (data.testimonialText && data.testimonialApproved) {
-    const client = (await db.get(
-      'SELECT name, company FROM clients WHERE id = ?',
-      [survey.client_id]
-    )) as { name: string; company: string | null } | undefined;
+    const client = (await db.get('SELECT name, company FROM clients WHERE id = ?', [
+      survey.client_id
+    ])) as { name: string; company: string | null } | undefined;
 
-    const responseRow = (await db.get(
-      'SELECT id FROM feedback_responses WHERE survey_id = ?',
-      [survey.id]
-    )) as { id: number };
+    const responseRow = (await db.get('SELECT id FROM feedback_responses WHERE survey_id = ?', [
+      survey.id
+    ])) as { id: number };
 
     await db.run(
       `INSERT INTO testimonials
@@ -350,7 +341,7 @@ async function getAnalytics(): Promise<FeedbackAnalytics> {
      WHERE fr.nps_score IS NOT NULL`
   )) as Array<{ nps_score: number }>;
 
-  const nps = calculateNps(npsRows.map(r => r.nps_score));
+  const nps = calculateNps(npsRows.map((r) => r.nps_score));
 
   // Average ratings
   const ratings = (await db.get(
@@ -406,8 +397,8 @@ function calculateNps(scores: number[]): NpsBreakdown {
     return { promoters: 0, passives: 0, detractors: 0, total: 0, score: 0 };
   }
 
-  const promoters = scores.filter(s => s >= 9).length;
-  const detractors = scores.filter(s => s <= 6).length;
+  const promoters = scores.filter((s) => s >= 9).length;
+  const detractors = scores.filter((s) => s <= 6).length;
   const passives = scores.length - promoters - detractors;
   const score = Math.round(((promoters - detractors) / scores.length) * 100);
 
@@ -448,7 +439,7 @@ async function listTestimonials(filters?: {
     params
   )) as Array<TestimonialRow & { project_name: string | null }>;
 
-  return rows.map(row => ({
+  return rows.map((row) => ({
     ...row,
     projectName: row.project_name
   }));
@@ -511,17 +502,14 @@ async function updateTestimonial(id: number, params: UpdateTestimonialParams): P
     setClauses.push('status = ?');
     values.push(params.status);
     if (params.status === 'published') {
-      setClauses.push('published_at = datetime(\'now\')');
+      setClauses.push("published_at = datetime('now')");
     }
   }
 
   if (setClauses.length === 0) return;
 
   values.push(id);
-  await db.run(
-    `UPDATE testimonials SET ${setClauses.join(', ')} WHERE id = ?`,
-    values
-  );
+  await db.run(`UPDATE testimonials SET ${setClauses.join(', ')} WHERE id = ?`, values);
 
   logger.info('Updated testimonial', {
     category: 'feedback',
@@ -548,7 +536,7 @@ async function deleteTestimonial(id: number): Promise<void> {
 async function publishTestimonial(id: number): Promise<void> {
   const db = getDatabase();
   await db.run(
-    'UPDATE testimonials SET status = \'published\', published_at = datetime(\'now\') WHERE id = ?',
+    "UPDATE testimonials SET status = 'published', published_at = datetime('now') WHERE id = ?",
     [id]
   );
 
@@ -619,7 +607,9 @@ async function sendReminders(): Promise<ReminderResult> {
        AND fs.reminder_sent = 0
        AND fs.sent_at <= ?`,
     [cutoff]
-  )) as Array<FeedbackSurveyRow & { email: string | null; contact_name: string | null; client_name: string }>;
+  )) as Array<
+    FeedbackSurveyRow & { email: string | null; contact_name: string | null; client_name: string }
+  >;
 
   let sent = 0;
 
@@ -632,7 +622,7 @@ async function sendReminders(): Promise<ReminderResult> {
 
         await emailService.sendEmail({
           to: survey.email,
-          subject: 'Reminder: We\'d love your feedback',
+          subject: "Reminder: We'd love your feedback",
           text: `Hi ${survey.contact_name || survey.client_name}, just a reminder — we'd love your feedback. Visit: ${surveyUrl}`,
           html: buildSurveyEmailHtml(
             survey.contact_name || survey.client_name,
@@ -643,10 +633,7 @@ async function sendReminders(): Promise<ReminderResult> {
         });
       }
 
-      await db.run(
-        'UPDATE feedback_surveys SET reminder_sent = 1 WHERE id = ?',
-        [survey.id]
-      );
+      await db.run('UPDATE feedback_surveys SET reminder_sent = 1 WHERE id = ?', [survey.id]);
       sent++;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -699,24 +686,26 @@ function buildSurveyEmailHtml(
   surveyType: string,
   isReminder = false
 ): string {
-  const surveyTypeLabel = surveyType === 'nps_quarterly'
-    ? 'quarterly satisfaction'
-    : surveyType === 'milestone_check_in'
-      ? 'milestone check-in'
-      : 'project completion';
+  const surveyTypeLabel =
+    surveyType === 'nps_quarterly'
+      ? 'quarterly satisfaction'
+      : surveyType === 'milestone_check_in'
+        ? 'milestone check-in'
+        : 'project completion';
 
   const subject = isReminder
-    ? 'Reminder: We\'d still love to hear from you'
-    : 'We\'d love your feedback';
+    ? "Reminder: We'd still love to hear from you"
+    : "We'd love your feedback";
 
   return `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; padding: 32px;">
       <h2 style="margin-bottom: 16px;">${subject}</h2>
       <p>Hi ${clientName},</p>
-      <p>${isReminder
-    ? `Just a friendly reminder — we'd love to hear your thoughts on your recent ${surveyTypeLabel} experience.`
-    : `Thank you for working with us. We'd love to hear about your ${surveyTypeLabel} experience.`
-}</p>
+      <p>${
+        isReminder
+          ? `Just a friendly reminder — we'd love to hear your thoughts on your recent ${surveyTypeLabel} experience.`
+          : `Thank you for working with us. We'd love to hear about your ${surveyTypeLabel} experience.`
+      }</p>
       <p>Your feedback helps us improve and takes just a couple of minutes.</p>
       <div style="text-align: center; margin: 32px 0;">
         <a href="${surveyUrl}"

@@ -138,13 +138,7 @@ describe('Audit Logger Service', () => {
   describe('logDelete', () => {
     it('should log a delete action', async () => {
       const oldValue = { name: 'Test Client' };
-      await auditLogger.logDelete(
-        'client',
-        '123',
-        'Test Client',
-        oldValue,
-        mockReq as Request
-      );
+      await auditLogger.logDelete('client', '123', 'Test Client', oldValue, mockReq as Request);
 
       const callArgs = mockDb.run.mock.calls[0][1];
       expect(callArgs[3]).toBe('delete'); // action is at index 3
@@ -163,11 +157,7 @@ describe('Audit Logger Service', () => {
 
   describe('logLoginFailed', () => {
     it('should log a failed login attempt', async () => {
-      await auditLogger.logLoginFailed(
-        'user@example.com',
-        mockReq as Request,
-        'Invalid password'
-      );
+      await auditLogger.logLoginFailed('user@example.com', mockReq as Request, 'Invalid password');
 
       const callArgs = mockDb.run.mock.calls[0][1];
       expect(callArgs[3]).toBe('login_failed'); // action is at index 3
@@ -184,12 +174,7 @@ describe('Audit Logger Service', () => {
 
   describe('logLogout', () => {
     it('should log a logout', async () => {
-      await auditLogger.logLogout(
-        1,
-        'user@example.com',
-        'client',
-        mockReq as Request
-      );
+      await auditLogger.logLogout(1, 'user@example.com', 'client', mockReq as Request);
 
       const callArgs = mockDb.run.mock.calls[0][1];
       expect(callArgs[3]).toBe('logout'); // action is at index 3
@@ -233,11 +218,7 @@ describe('Audit Logger Service', () => {
 
   describe('logMessageSent', () => {
     it('should log a message sent', async () => {
-      await auditLogger.logMessageSent(
-        'msg-123',
-        'Test Subject',
-        mockReq as Request
-      );
+      await auditLogger.logMessageSent('msg-123', 'Test Subject', mockReq as Request);
 
       const callArgs = mockDb.run.mock.calls[0][1];
       expect(callArgs[3]).toBe('send_message'); // action is at index 3
@@ -246,11 +227,7 @@ describe('Audit Logger Service', () => {
 
   describe('logEmailSent', () => {
     it('should log an email sent', async () => {
-      await auditLogger.logEmailSent(
-        'recipient@example.com',
-        'Test Email',
-        mockReq as Request
-      );
+      await auditLogger.logEmailSent('recipient@example.com', 'Test Email', mockReq as Request);
 
       const callArgs = mockDb.run.mock.calls[0][1];
       expect(callArgs[3]).toBe('send_email'); // action is at index 3
@@ -276,12 +253,7 @@ describe('Audit Logger Service', () => {
 
   describe('logView', () => {
     it('should log a view action', async () => {
-      await auditLogger.logView(
-        'project',
-        '123',
-        'Test Project',
-        mockReq as Request
-      );
+      await auditLogger.logView('project', '123', 'Test Project', mockReq as Request);
 
       const callArgs = mockDb.run.mock.calls[0][1];
       expect(callArgs[3]).toBe('view'); // action is at index 3
@@ -436,7 +408,9 @@ describe('Audit Logger Service', () => {
       const dbError = new Error('Database error');
       mockDb.run.mockRejectedValueOnce(dbError);
 
-      await expect(auditLogger.logCreate('client', '123', 'Test')).rejects.toThrow('Failed to create audit log');
+      await expect(auditLogger.logCreate('client', '123', 'Test')).rejects.toThrow(
+        'Failed to create audit log'
+      );
       expect(mockDb.run).toHaveBeenCalled();
     });
 

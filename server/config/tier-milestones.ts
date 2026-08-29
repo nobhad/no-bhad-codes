@@ -50,10 +50,16 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
       },
       {
         name: 'Design & Development',
-        description: 'Visual design with revisions, responsive development, and content integration',
+        description:
+          'Visual design with revisions, responsive development, and content integration',
         estimatedDays: 12,
         order: 2,
-        deliverables: ['Design mockups', 'Design revisions', 'Responsive site build', 'Content integration']
+        deliverables: [
+          'Design mockups',
+          'Design revisions',
+          'Responsive site build',
+          'Content integration'
+        ]
       },
       {
         name: 'SEO & Optimization',
@@ -67,7 +73,12 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
         description: 'Comprehensive testing, client review, training, and deployment',
         estimatedDays: 18,
         order: 4,
-        deliverables: ['Cross-browser testing', 'Mobile testing', 'Client training', 'Live deployment']
+        deliverables: [
+          'Cross-browser testing',
+          'Mobile testing',
+          'Client training',
+          'Live deployment'
+        ]
       }
     ],
     best: [
@@ -236,8 +247,7 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
       },
       {
         name: 'Design',
-        description:
-          'Custom brand integration, wireframes, prototypes, and multiple design rounds',
+        description: 'Custom brand integration, wireframes, prototypes, and multiple design rounds',
         estimatedDays: 20,
         order: 2,
         deliverables: [
@@ -250,8 +260,7 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
       },
       {
         name: 'Development',
-        description:
-          'Full-featured development with CMS, integrations, and advanced functionality',
+        description: 'Full-featured development with CMS, integrations, and advanced functionality',
         estimatedDays: 35,
         order: 3,
         deliverables: [
@@ -279,8 +288,7 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
       },
       {
         name: 'Testing & Launch',
-        description:
-          'Thorough QA, accessibility, training, deployment, and post-launch support',
+        description: 'Thorough QA, accessibility, training, deployment, and post-launch support',
         estimatedDays: 48,
         order: 5,
         deliverables: [
@@ -400,8 +408,7 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
     best: [
       {
         name: 'Discovery & Strategy',
-        description:
-          'Deep business analysis, competitor research, and comprehensive planning',
+        description: 'Deep business analysis, competitor research, and comprehensive planning',
         estimatedDays: 12,
         order: 1,
         deliverables: [
@@ -427,8 +434,7 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
       },
       {
         name: 'Development',
-        description:
-          'Full-featured store with advanced integrations and marketing tools',
+        description: 'Full-featured store with advanced integrations and marketing tools',
         estimatedDays: 42,
         order: 3,
         deliverables: [
@@ -456,8 +462,7 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
       },
       {
         name: 'Testing & Optimization',
-        description:
-          'Comprehensive testing, performance optimization, and analytics',
+        description: 'Comprehensive testing, performance optimization, and analytics',
         estimatedDays: 56,
         order: 5,
         deliverables: [
@@ -470,8 +475,7 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
       },
       {
         name: 'Launch & Support',
-        description:
-          'Production launch, training, and post-launch support period',
+        description: 'Production launch, training, and post-launch support period',
         estimatedDays: 65,
         order: 6,
         deliverables: [
@@ -525,16 +529,10 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
     better: [
       {
         name: 'Discovery & Architecture',
-        description:
-          'Detailed requirements, technical architecture, and project planning',
+        description: 'Detailed requirements, technical architecture, and project planning',
         estimatedDays: 12,
         order: 1,
-        deliverables: [
-          'Technical spec',
-          'Architecture diagram',
-          'Project roadmap',
-          'Security plan'
-        ]
+        deliverables: ['Technical spec', 'Architecture diagram', 'Project roadmap', 'Security plan']
       },
       {
         name: 'UI/UX Design',
@@ -545,8 +543,7 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
       },
       {
         name: 'Core Development',
-        description:
-          'Backend development, API creation, and core functionality with auth',
+        description: 'Backend development, API creation, and core functionality with auth',
         estimatedDays: 48,
         order: 3,
         deliverables: [
@@ -580,8 +577,7 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
     best: [
       {
         name: 'Discovery & Architecture',
-        description:
-          'Comprehensive requirements, architecture, security audit, and planning',
+        description: 'Comprehensive requirements, architecture, security audit, and planning',
         estimatedDays: 15,
         order: 1,
         deliverables: [
@@ -594,8 +590,7 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
       },
       {
         name: 'UI/UX Design',
-        description:
-          'Full user research, design system, prototypes, and usability testing',
+        description: 'Full user research, design system, prototypes, and usability testing',
         estimatedDays: 28,
         order: 2,
         deliverables: [
@@ -622,8 +617,7 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
       },
       {
         name: 'Frontend Integration',
-        description:
-          'Full frontend with advanced state management and real-time features',
+        description: 'Full frontend with advanced state management and real-time features',
         estimatedDays: 65,
         order: 4,
         deliverables: [
@@ -636,8 +630,7 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
       },
       {
         name: 'Testing & QA',
-        description:
-          'Comprehensive testing including security, performance, and accessibility',
+        description: 'Comprehensive testing including security, performance, and accessibility',
         estimatedDays: 75,
         order: 5,
         deliverables: [
@@ -650,8 +643,7 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
       },
       {
         name: 'Deployment & Support',
-        description:
-          'Production deployment, monitoring, documentation, and support period',
+        description: 'Production deployment, monitoring, documentation, and support period',
         estimatedDays: 85,
         order: 6,
         deliverables: [
@@ -695,12 +687,7 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
         description: 'Comprehensive audit, monitoring, and maintenance schedule',
         estimatedDays: 30,
         order: 1,
-        deliverables: [
-          'Site audit',
-          'Security audit',
-          'Monitoring setup',
-          'Maintenance schedule'
-        ]
+        deliverables: ['Site audit', 'Security audit', 'Monitoring setup', 'Maintenance schedule']
       },
       {
         name: 'Month 2 - Optimization',
@@ -730,8 +717,7 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
     best: [
       {
         name: 'Month 1 - Setup & Audit',
-        description:
-          'Comprehensive audit, monitoring, analytics, and maintenance schedule',
+        description: 'Comprehensive audit, monitoring, analytics, and maintenance schedule',
         estimatedDays: 30,
         order: 1,
         deliverables: [
@@ -744,8 +730,7 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
       },
       {
         name: 'Month 2 - Optimization & Updates',
-        description:
-          'Performance, security, content updates, and feature enhancements',
+        description: 'Performance, security, content updates, and feature enhancements',
         estimatedDays: 60,
         order: 2,
         deliverables: [
@@ -758,8 +743,7 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
       },
       {
         name: 'Month 3 - Review & Strategy',
-        description:
-          'Quarterly review, analytics deep-dive, strategy planning, and training',
+        description: 'Quarterly review, analytics deep-dive, strategy planning, and training',
         estimatedDays: 90,
         order: 3,
         deliverables: [
@@ -833,7 +817,12 @@ export const TIER_MILESTONES: Record<string, Record<string, MilestoneTemplate[]>
         description: 'Comprehensive requirements, research, strategy, and detailed planning',
         estimatedDays: 12,
         order: 1,
-        deliverables: ['Project plan', 'Requirements document', 'Research findings', 'Strategy document']
+        deliverables: [
+          'Project plan',
+          'Requirements document',
+          'Research findings',
+          'Strategy document'
+        ]
       },
       {
         name: 'Phase 2 - Design',

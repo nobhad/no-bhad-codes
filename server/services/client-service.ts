@@ -314,25 +314,35 @@ const CLIENT_COLUMNS = `
   health_score, health_status, lifetime_value, acquisition_source, company_size,
   last_contact_date, next_follow_up_date, preferred_contact_method,
   deleted_at, deleted_by
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const CLIENT_CONTACT_COLUMNS = `
   id, client_id, first_name, last_name, email, phone, title, department,
   role, is_primary, notes, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const CLIENT_ACTIVITY_COLUMNS = `
   id, client_id, activity_type, title, description, metadata, created_by, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const CLIENT_CUSTOM_FIELD_COLUMNS = `
   id, field_name, field_label, field_type, options, is_required, placeholder,
   default_value, display_order, is_active, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const TAG_COLUMNS = `
   id, name, color, description, tag_type, created_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 // =====================================================
 // INTERFACES - Client "Me" (Self-Service) Queries
@@ -470,9 +480,18 @@ class ClientService {
     const setClauses: string[] = [];
     const params: (string | null)[] = [];
 
-    if ('contact_name' in data) { setClauses.push('contact_name = ?'); params.push(data.contact_name || null); }
-    if ('company_name' in data) { setClauses.push('company_name = ?'); params.push(data.company_name || null); }
-    if ('phone' in data) { setClauses.push('phone = ?'); params.push(data.phone || null); }
+    if ('contact_name' in data) {
+      setClauses.push('contact_name = ?');
+      params.push(data.contact_name || null);
+    }
+    if ('company_name' in data) {
+      setClauses.push('company_name = ?');
+      params.push(data.company_name || null);
+    }
+    if ('phone' in data) {
+      setClauses.push('phone = ?');
+      params.push(data.phone || null);
+    }
 
     if (setClauses.length === 0) return;
 
@@ -498,10 +517,9 @@ class ClientService {
    */
   async getClientPasswordHash(clientId: number): Promise<ClientPasswordHash | undefined> {
     const db = getDatabase();
-    return db.get(
-      'SELECT password_hash FROM active_clients WHERE id = ?',
-      [clientId]
-    ) as Promise<ClientPasswordHash | undefined>;
+    return db.get('SELECT password_hash FROM active_clients WHERE id = ?', [clientId]) as Promise<
+      ClientPasswordHash | undefined
+    >;
   }
 
   /**
@@ -603,11 +621,11 @@ class ClientService {
    */
   async getPendingInvoiceCount(clientId: number): Promise<number> {
     const db = getDatabase();
-    const result = await db.get(
+    const result = (await db.get(
       `SELECT COUNT(*) as count FROM active_invoices
        WHERE client_id = ? AND status IN ('sent', 'viewed', 'partial', 'overdue')`,
       [clientId]
-    ) as CountResult | undefined;
+    )) as CountResult | undefined;
     return result?.count || 0;
   }
 
@@ -616,12 +634,12 @@ class ClientService {
    */
   async getUnreadMessageCount(clientId: number): Promise<number> {
     const db = getDatabase();
-    const result = await db.get(
+    const result = (await db.get(
       `SELECT COUNT(*) as count FROM active_messages m
        JOIN active_message_threads t ON m.thread_id = t.id
        WHERE t.client_id = ? AND m.read_at IS NULL AND m.sender_type = 'admin'`,
       [clientId]
-    ) as CountResult | undefined;
+    )) as CountResult | undefined;
     return result?.count || 0;
   }
 
@@ -735,11 +753,11 @@ class ClientService {
    */
   async getPendingDocRequestCount(clientId: number): Promise<number> {
     const db = getDatabase();
-    const result = await db.get(
+    const result = (await db.get(
       `SELECT COUNT(*) as count FROM active_document_requests
        WHERE client_id = ? AND status IN ('requested', 'rejected')`,
       [clientId]
-    ) as CountResult | undefined;
+    )) as CountResult | undefined;
     return result?.count || 0;
   }
 
@@ -748,11 +766,11 @@ class ClientService {
    */
   async getPendingContractCount(clientId: number): Promise<number> {
     const db = getDatabase();
-    const result = await db.get(
+    const result = (await db.get(
       `SELECT COUNT(*) as count FROM active_contracts
        WHERE client_id = ? AND status = 'sent'`,
       [clientId]
-    ) as CountResult | undefined;
+    )) as CountResult | undefined;
     return result?.count || 0;
   }
 
@@ -761,12 +779,12 @@ class ClientService {
    */
   async getPendingQuestionnaireCount(clientId: number): Promise<number> {
     const db = getDatabase();
-    const result = await db.get(
+    const result = (await db.get(
       `SELECT COUNT(*) as count FROM questionnaire_responses qr
        JOIN active_projects p ON qr.project_id = p.id
        WHERE p.client_id = ? AND qr.status IN ('pending', 'in_progress')`,
       [clientId]
-    ) as CountResult | undefined;
+    )) as CountResult | undefined;
     return result?.count || 0;
   }
 
@@ -775,12 +793,12 @@ class ClientService {
    */
   async getPendingApprovalCount(clientId: number): Promise<number> {
     const db = getDatabase();
-    const result = await db.get(
+    const result = (await db.get(
       `SELECT COUNT(*) as count FROM deliverables d
        JOIN active_projects p ON d.project_id = p.id
        WHERE p.client_id = ? AND d.approval_status = 'pending' AND d.deleted_at IS NULL`,
       [clientId]
-    ) as CountResult | undefined;
+    )) as CountResult | undefined;
     return result?.count || 0;
   }
 
@@ -789,12 +807,12 @@ class ClientService {
    */
   async getOutstandingBalance(clientId: number): Promise<number> {
     const db = getDatabase();
-    const result = await db.get(
+    const result = (await db.get(
       `SELECT COALESCE(SUM(amount_total - COALESCE(amount_paid, 0)), 0) as balance
        FROM active_invoices
        WHERE client_id = ? AND status IN ('sent', 'viewed', 'partial', 'overdue')`,
       [clientId]
-    ) as BalanceResult | undefined;
+    )) as BalanceResult | undefined;
     return result?.balance || 0;
   }
 
@@ -803,12 +821,12 @@ class ClientService {
    */
   async getDeliverablesInReviewCount(clientId: number): Promise<number> {
     const db = getDatabase();
-    const result = await db.get(
+    const result = (await db.get(
       `SELECT COUNT(*) as count FROM deliverables d
        JOIN active_projects p ON d.project_id = p.id
        WHERE p.client_id = ? AND d.status = 'in_review' AND d.deleted_at IS NULL`,
       [clientId]
-    ) as CountResult | undefined;
+    )) as CountResult | undefined;
     return result?.count || 0;
   }
 
@@ -848,7 +866,8 @@ class ClientService {
    */
   async getClientOwnContacts(clientId: number): Promise<Record<string, unknown>[]> {
     const db = getDatabase();
-    const CONTACT_COLUMNS = 'id, client_id, first_name, last_name, email, phone, title, department, role, is_primary, notes, created_at, updated_at';
+    const CONTACT_COLUMNS =
+      'id, client_id, first_name, last_name, email, phone, title, department, role, is_primary, notes, created_at, updated_at';
     return db.all(
       `SELECT ${CONTACT_COLUMNS} FROM client_contacts WHERE client_id = ? AND deleted_at IS NULL ORDER BY is_primary DESC, first_name ASC`,
       [clientId]
@@ -872,18 +891,28 @@ class ClientService {
     }
   ): Promise<Record<string, unknown> | undefined> {
     const db = getDatabase();
-    const CONTACT_COLUMNS = 'id, client_id, first_name, last_name, email, phone, title, department, role, is_primary, notes, created_at, updated_at';
+    const CONTACT_COLUMNS =
+      'id, client_id, first_name, last_name, email, phone, title, department, role, is_primary, notes, created_at, updated_at';
 
     const result = await db.run(
       `INSERT INTO client_contacts (client_id, first_name, last_name, email, phone, title, department, role, notes)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [clientId, data.first_name, data.last_name, data.email || null, data.phone || null, data.title || null, data.department || null, data.role || 'general', data.notes || null]
+      [
+        clientId,
+        data.first_name,
+        data.last_name,
+        data.email || null,
+        data.phone || null,
+        data.title || null,
+        data.department || null,
+        data.role || 'general',
+        data.notes || null
+      ]
     );
 
-    return db.get(
-      `SELECT ${CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`,
-      [result.lastID]
-    ) as Promise<Record<string, unknown> | undefined>;
+    return db.get(`SELECT ${CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
+      result.lastID
+    ]) as Promise<Record<string, unknown> | undefined>;
   }
 
   /**
@@ -891,10 +920,10 @@ class ClientService {
    */
   async verifyContactOwnership(contactId: number, clientId: number): Promise<boolean> {
     const db = getDatabase();
-    const existing = await db.get(
-      'SELECT id FROM client_contacts WHERE id = ? AND client_id = ?',
-      [contactId, clientId]
-    );
+    const existing = await db.get('SELECT id FROM client_contacts WHERE id = ? AND client_id = ?', [
+      contactId,
+      clientId
+    ]);
     return !!existing;
   }
 
@@ -919,19 +948,44 @@ class ClientService {
     fields: ContactUpdateFields
   ): Promise<Record<string, unknown> | undefined> {
     const db = getDatabase();
-    const CONTACT_COLUMNS = 'id, client_id, first_name, last_name, email, phone, title, department, role, is_primary, notes, created_at, updated_at';
+    const CONTACT_COLUMNS =
+      'id, client_id, first_name, last_name, email, phone, title, department, role, is_primary, notes, created_at, updated_at';
 
     const updates: string[] = [];
     const values: (string | number | boolean | null | undefined)[] = [];
 
-    if (fields.first_name !== undefined) { updates.push('first_name = ?'); values.push(fields.first_name); }
-    if (fields.last_name !== undefined) { updates.push('last_name = ?'); values.push(fields.last_name); }
-    if (fields.email !== undefined) { updates.push('email = ?'); values.push(fields.email); }
-    if (fields.phone !== undefined) { updates.push('phone = ?'); values.push(fields.phone); }
-    if (fields.title !== undefined) { updates.push('title = ?'); values.push(fields.title); }
-    if (fields.department !== undefined) { updates.push('department = ?'); values.push(fields.department); }
-    if (fields.role !== undefined) { updates.push('role = ?'); values.push(fields.role); }
-    if (fields.notes !== undefined) { updates.push('notes = ?'); values.push(fields.notes); }
+    if (fields.first_name !== undefined) {
+      updates.push('first_name = ?');
+      values.push(fields.first_name);
+    }
+    if (fields.last_name !== undefined) {
+      updates.push('last_name = ?');
+      values.push(fields.last_name);
+    }
+    if (fields.email !== undefined) {
+      updates.push('email = ?');
+      values.push(fields.email);
+    }
+    if (fields.phone !== undefined) {
+      updates.push('phone = ?');
+      values.push(fields.phone);
+    }
+    if (fields.title !== undefined) {
+      updates.push('title = ?');
+      values.push(fields.title);
+    }
+    if (fields.department !== undefined) {
+      updates.push('department = ?');
+      values.push(fields.department);
+    }
+    if (fields.role !== undefined) {
+      updates.push('role = ?');
+      values.push(fields.role);
+    }
+    if (fields.notes !== undefined) {
+      updates.push('notes = ?');
+      values.push(fields.notes);
+    }
 
     if (updates.length === 0) {
       return undefined;
@@ -945,10 +999,9 @@ class ClientService {
       values
     );
 
-    return db.get(
-      `SELECT ${CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`,
-      [contactId]
-    ) as Promise<Record<string, unknown> | undefined>;
+    return db.get(`SELECT ${CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
+      contactId
+    ]) as Promise<Record<string, unknown> | undefined>;
   }
   // ===================================================
   // CONTACT MANAGEMENT
@@ -992,9 +1045,10 @@ class ClientService {
       return result.lastID;
     });
 
-    const contact = (await db.get(`SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
-      newContactId
-    ])) as unknown as ContactRow | undefined;
+    const contact = (await db.get(
+      `SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`,
+      [newContactId]
+    )) as unknown as ContactRow | undefined;
 
     if (!contact) {
       throw new Error('Failed to create contact');
@@ -1030,9 +1084,10 @@ class ClientService {
    */
   async getContact(contactId: number): Promise<ClientContact | null> {
     const db = getDatabase();
-    const row = (await db.get(`SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
-      contactId
-    ])) as unknown as ContactRow | undefined;
+    const row = (await db.get(
+      `SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`,
+      [contactId]
+    )) as unknown as ContactRow | undefined;
     return row ? toContact(row) : null;
   }
 
@@ -1043,17 +1098,25 @@ class ClientService {
     const db = getDatabase();
 
     // Get existing contact to know the client
-    const existing = (await db.get(`SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
-      contactId
-    ])) as unknown as ContactRow | undefined;
+    const existing = (await db.get(
+      `SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`,
+      [contactId]
+    )) as unknown as ContactRow | undefined;
 
     if (!existing) {
       throw new NotFoundError('contact', contactId);
     }
 
     const ALLOWED_FIELDS = [
-      'first_name', 'last_name', 'email', 'phone', 'title',
-      'department', 'role', 'is_primary', 'notes'
+      'first_name',
+      'last_name',
+      'email',
+      'phone',
+      'title',
+      'department',
+      'role',
+      'is_primary',
+      'notes'
     ] as const;
 
     const fieldUpdates: Record<string, SqlValue> = {};
@@ -1080,16 +1143,17 @@ class ClientService {
       }
 
       if (setClause) {
-        await ctx.run(
-          `UPDATE client_contacts SET ${setClause} WHERE id = ?`,
-          [...params, contactId]
-        );
+        await ctx.run(`UPDATE client_contacts SET ${setClause} WHERE id = ?`, [
+          ...params,
+          contactId
+        ]);
       }
     });
 
-    const updated = (await db.get(`SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
-      contactId
-    ])) as unknown as ContactRow | undefined;
+    const updated = (await db.get(
+      `SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`,
+      [contactId]
+    )) as unknown as ContactRow | undefined;
 
     if (!updated) {
       throw new NotFoundError('contact', contactId);
@@ -1105,9 +1169,10 @@ class ClientService {
     const db = getDatabase();
 
     // Get contact info for activity log
-    const contact = (await db.get(`SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
-      contactId
-    ])) as unknown as ContactRow | undefined;
+    const contact = (await db.get(
+      `SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`,
+      [contactId]
+    )) as unknown as ContactRow | undefined;
 
     if (!contact) {
       throw new NotFoundError('contact', contactId);
@@ -1191,9 +1256,10 @@ class ClientService {
     // Update client's last contact date
     await db.run('UPDATE clients SET last_contact_date = DATE("now") WHERE id = ?', [clientId]);
 
-    const row = (await db.get(`SELECT ${CLIENT_ACTIVITY_COLUMNS} FROM client_activities WHERE id = ?`, [
-      result.lastID
-    ])) as unknown as ActivityRow | undefined;
+    const row = (await db.get(
+      `SELECT ${CLIENT_ACTIVITY_COLUMNS} FROM client_activities WHERE id = ?`,
+      [result.lastID]
+    )) as unknown as ActivityRow | undefined;
 
     if (!row) {
       throw new Error('Failed to create activity');
@@ -1380,9 +1446,10 @@ class ClientService {
       ]
     );
 
-    const field = (await db.get(`SELECT ${CLIENT_CUSTOM_FIELD_COLUMNS} FROM client_custom_fields WHERE id = ?`, [
-      result.lastID
-    ])) as unknown as CustomFieldRow | undefined;
+    const field = (await db.get(
+      `SELECT ${CLIENT_CUSTOM_FIELD_COLUMNS} FROM client_custom_fields WHERE id = ?`,
+      [result.lastID]
+    )) as unknown as CustomFieldRow | undefined;
 
     if (!field) {
       throw new Error('Failed to create custom field');
@@ -1417,13 +1484,19 @@ class ClientService {
     const db = getDatabase();
 
     const ALLOWED_FIELDS = [
-      'field_label', 'options', 'is_required', 'placeholder',
-      'default_value', 'display_order', 'is_active'
+      'field_label',
+      'options',
+      'is_required',
+      'placeholder',
+      'default_value',
+      'display_order',
+      'is_active'
     ] as const;
 
     const fieldUpdates: Record<string, SqlValue> = {};
     if (data.fieldLabel !== undefined) fieldUpdates.field_label = data.fieldLabel;
-    if (data.options !== undefined) fieldUpdates.options = data.options ? JSON.stringify(data.options) : null;
+    if (data.options !== undefined)
+      fieldUpdates.options = data.options ? JSON.stringify(data.options) : null;
     if (data.isRequired !== undefined) fieldUpdates.is_required = data.isRequired ? 1 : 0;
     if (data.placeholder !== undefined) fieldUpdates.placeholder = data.placeholder || null;
     if (data.defaultValue !== undefined) fieldUpdates.default_value = data.defaultValue || null;
@@ -1433,15 +1506,16 @@ class ClientService {
     const { setClause, params } = buildSafeUpdate(fieldUpdates, ALLOWED_FIELDS);
 
     if (setClause) {
-      await db.run(
-        `UPDATE client_custom_fields SET ${setClause} WHERE id = ?`,
-        [...params, fieldId]
-      );
+      await db.run(`UPDATE client_custom_fields SET ${setClause} WHERE id = ?`, [
+        ...params,
+        fieldId
+      ]);
     }
 
-    const field = (await db.get(`SELECT ${CLIENT_CUSTOM_FIELD_COLUMNS} FROM client_custom_fields WHERE id = ?`, [
-      fieldId
-    ])) as unknown as CustomFieldRow | undefined;
+    const field = (await db.get(
+      `SELECT ${CLIENT_CUSTOM_FIELD_COLUMNS} FROM client_custom_fields WHERE id = ?`,
+      [fieldId]
+    )) as unknown as CustomFieldRow | undefined;
 
     if (!field) {
       throw new NotFoundError('custom field', fieldId);
@@ -1527,9 +1601,9 @@ class ClientService {
       [data.name, data.color || '#6b7280', data.description || null, data.tagType || 'client']
     );
 
-    const tag = (await db.get(`SELECT ${TAG_COLUMNS} FROM tags WHERE id = ?`, [result.lastID])) as unknown as
-      | TagRow
-      | undefined;
+    const tag = (await db.get(`SELECT ${TAG_COLUMNS} FROM tags WHERE id = ?`, [
+      result.lastID
+    ])) as unknown as TagRow | undefined;
 
     if (!tag) {
       throw new Error('Failed to create tag');
@@ -1571,15 +1645,17 @@ class ClientService {
     if (data.color !== undefined) fieldUpdates.color = data.color;
     if (data.description !== undefined) fieldUpdates.description = data.description || null;
 
-    const { setClause, params } = buildSafeUpdate(fieldUpdates, ALLOWED_FIELDS, { addTimestamp: false });
+    const { setClause, params } = buildSafeUpdate(fieldUpdates, ALLOWED_FIELDS, {
+      addTimestamp: false
+    });
 
     if (setClause) {
       await db.run(`UPDATE tags SET ${setClause} WHERE id = ?`, [...params, tagId]);
     }
 
-    const tag = (await db.get(`SELECT ${TAG_COLUMNS} FROM tags WHERE id = ?`, [tagId])) as unknown as
-      | TagRow
-      | undefined;
+    const tag = (await db.get(`SELECT ${TAG_COLUMNS} FROM tags WHERE id = ?`, [
+      tagId
+    ])) as unknown as TagRow | undefined;
 
     if (!tag) {
       throw new NotFoundError('tag', tagId);
@@ -1688,9 +1764,9 @@ class ClientService {
     const db = getDatabase();
 
     // Get client data
-    const client = (await db.get(`SELECT ${CLIENT_COLUMNS} FROM active_clients WHERE id = ?`, [clientId])) as unknown as
-      | ClientRow
-      | undefined;
+    const client = (await db.get(`SELECT ${CLIENT_COLUMNS} FROM active_clients WHERE id = ?`, [
+      clientId
+    ])) as unknown as ClientRow | undefined;
 
     if (!client) {
       throw new NotFoundError('client', clientId);
@@ -1969,18 +2045,26 @@ class ClientService {
     const db = getDatabase();
 
     const ALLOWED_FIELDS = [
-      'acquisition_source', 'industry', 'company_size', 'website',
-      'next_follow_up_date', 'notes', 'preferred_contact_method'
+      'acquisition_source',
+      'industry',
+      'company_size',
+      'website',
+      'next_follow_up_date',
+      'notes',
+      'preferred_contact_method'
     ] as const;
 
     const fieldUpdates: Record<string, SqlValue> = {};
-    if (data.acquisitionSource !== undefined) fieldUpdates.acquisition_source = data.acquisitionSource || null;
+    if (data.acquisitionSource !== undefined)
+      fieldUpdates.acquisition_source = data.acquisitionSource || null;
     if (data.industry !== undefined) fieldUpdates.industry = data.industry || null;
     if (data.companySize !== undefined) fieldUpdates.company_size = data.companySize || null;
     if (data.website !== undefined) fieldUpdates.website = data.website || null;
-    if (data.nextFollowUpDate !== undefined) fieldUpdates.next_follow_up_date = data.nextFollowUpDate || null;
+    if (data.nextFollowUpDate !== undefined)
+      fieldUpdates.next_follow_up_date = data.nextFollowUpDate || null;
     if (data.notes !== undefined) fieldUpdates.notes = data.notes || null;
-    if (data.preferredContactMethod !== undefined) fieldUpdates.preferred_contact_method = data.preferredContactMethod || null;
+    if (data.preferredContactMethod !== undefined)
+      fieldUpdates.preferred_contact_method = data.preferredContactMethod || null;
 
     const { setClause, params } = buildSafeUpdate(fieldUpdates, ALLOWED_FIELDS);
 
@@ -2067,10 +2151,7 @@ class ClientService {
    * Mark a single notification as read for a client.
    * Returns the number of rows changed.
    */
-  async markClientNotificationRead(
-    notificationId: number,
-    clientId: number
-  ): Promise<number> {
+  async markClientNotificationRead(notificationId: number, clientId: number): Promise<number> {
     const db = getDatabase();
     const result = await db.run(
       `UPDATE notification_history
@@ -2206,10 +2287,10 @@ class ClientService {
   ): Promise<ClientProfile | undefined> {
     const db = getDatabase();
     const setString = [...setClauses, 'updated_at = CURRENT_TIMESTAMP'].join(', ');
-    await db.run(
-      `UPDATE clients SET ${setString} WHERE id = ? AND deleted_at IS NULL`,
-      [...values, clientId]
-    );
+    await db.run(`UPDATE clients SET ${setString} WHERE id = ? AND deleted_at IS NULL`, [
+      ...values,
+      clientId
+    ]);
     return this.getAdminClientDetail(clientId);
   }
 
@@ -2234,11 +2315,7 @@ class ClientService {
   /**
    * Set invitation token and expiry on a client record.
    */
-  async setInvitationToken(
-    clientId: number,
-    token: string,
-    expiresAt: string
-  ): Promise<void> {
+  async setInvitationToken(clientId: number, token: string, expiresAt: string): Promise<void> {
     const db = getDatabase();
     await db.run(
       `UPDATE clients
@@ -2305,7 +2382,14 @@ class ClientService {
    */
   async updateContactAdmin(
     contactId: number,
-    data: { isPrimary?: boolean; firstName?: string; lastName?: string; email?: string; phone?: string; role?: string }
+    data: {
+      isPrimary?: boolean;
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      phone?: string;
+      role?: string;
+    }
   ): Promise<Record<string, unknown> | undefined> {
     const db = getDatabase();
     const updates: string[] = [];
@@ -2313,19 +2397,38 @@ class ClientService {
 
     if (data.isPrimary !== undefined) {
       if (data.isPrimary) {
-        const contact = await db.get('SELECT client_id FROM client_contacts WHERE id = ?', [contactId]);
+        const contact = await db.get('SELECT client_id FROM client_contacts WHERE id = ?', [
+          contactId
+        ]);
         if (contact) {
-          await db.run('UPDATE client_contacts SET is_primary = 0 WHERE client_id = ?', [(contact as Record<string, unknown>).client_id as number]);
+          await db.run('UPDATE client_contacts SET is_primary = 0 WHERE client_id = ?', [
+            (contact as Record<string, unknown>).client_id as number
+          ]);
         }
       }
       updates.push('is_primary = ?');
       values.push(data.isPrimary ? 1 : 0);
     }
-    if (data.firstName !== undefined) { updates.push('first_name = ?'); values.push(data.firstName); }
-    if (data.lastName !== undefined) { updates.push('last_name = ?'); values.push(data.lastName); }
-    if (data.email !== undefined) { updates.push('email = ?'); values.push(data.email); }
-    if (data.phone !== undefined) { updates.push('phone = ?'); values.push(data.phone); }
-    if (data.role !== undefined) { updates.push('role = ?'); values.push(data.role); }
+    if (data.firstName !== undefined) {
+      updates.push('first_name = ?');
+      values.push(data.firstName);
+    }
+    if (data.lastName !== undefined) {
+      updates.push('last_name = ?');
+      values.push(data.lastName);
+    }
+    if (data.email !== undefined) {
+      updates.push('email = ?');
+      values.push(data.email);
+    }
+    if (data.phone !== undefined) {
+      updates.push('phone = ?');
+      values.push(data.phone);
+    }
+    if (data.role !== undefined) {
+      updates.push('role = ?');
+      values.push(data.role);
+    }
 
     if (updates.length === 0) return undefined;
 
@@ -2335,17 +2438,15 @@ class ClientService {
     const CONTACT_UPDATE_COLUMNS = `
       id, client_id, first_name, last_name, email, phone, title, department,
       role, is_primary, notes, created_at, updated_at
-    `.replace(/\\s+/g, ' ').trim();
+    `
+      .replace(/\\s+/g, ' ')
+      .trim();
 
-    await db.run(
-      `UPDATE client_contacts SET ${updates.join(', ')} WHERE id = ?`,
-      values
-    );
+    await db.run(`UPDATE client_contacts SET ${updates.join(', ')} WHERE id = ?`, values);
 
-    return db.get(
-      `SELECT ${CONTACT_UPDATE_COLUMNS} FROM client_contacts WHERE id = ?`,
-      [contactId]
-    ) as Promise<Record<string, unknown> | undefined>;
+    return db.get(`SELECT ${CONTACT_UPDATE_COLUMNS} FROM client_contacts WHERE id = ?`, [
+      contactId
+    ]) as Promise<Record<string, unknown> | undefined>;
   }
 }
 

@@ -82,10 +82,13 @@ export function useTableFilters<T>(options: UseTableFiltersOptions<T>): UseTable
         // Ignore storage errors
       }
     }
-    return filters.reduce((acc, filter) => {
-      acc[filter.key] = [];
-      return acc;
-    }, {} as Record<string, string[]>);
+    return filters.reduce(
+      (acc, filter) => {
+        acc[filter.key] = [];
+        return acc;
+      },
+      {} as Record<string, string[]>
+    );
   }, [storageKey, filters]);
 
   const getInitialSearch = useCallback((): string => {
@@ -178,10 +181,13 @@ export function useTableFilters<T>(options: UseTableFiltersOptions<T>): UseTable
 
   const clearFilters = useCallback(() => {
     setFilterValues(
-      filters.reduce((acc, filter) => {
-        acc[filter.key] = [];
-        return acc;
-      }, {} as Record<string, string[]>)
+      filters.reduce(
+        (acc, filter) => {
+          acc[filter.key] = [];
+          return acc;
+        },
+        {} as Record<string, string[]>
+      )
     );
     setSearchState('');
   }, [filters]);

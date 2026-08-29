@@ -11,11 +11,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { questionnaireService } from '../../services/questionnaire-service.js';
-import {
-  errorResponse,
-  sendSuccess,
-  ErrorCodes
-} from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 
 const router = express.Router();
@@ -199,11 +195,21 @@ router.post(
     }
 
     if (response.status !== 'completed') {
-      return errorResponse(res, 'Can only regenerate PDF for completed questionnaires', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'Can only regenerate PDF for completed questionnaires',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     if (!response.project_id) {
-      return errorResponse(res, 'Cannot save PDF: questionnaire has no associated project', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'Cannot save PDF: questionnaire has no associated project',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     // Generate and save PDF to project Files

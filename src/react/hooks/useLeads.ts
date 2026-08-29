@@ -58,25 +58,25 @@ export function useLeads({ autoFetch = true }: UseLeadsOptions = {}): UseLeadsRe
 
     for (const lead of leads) {
       switch (lead.status) {
-      case 'new':
-        result.new++;
-        break;
-      case 'contacted':
-        result.contacted++;
-        break;
-      case 'qualified':
-        result.qualified++;
-        break;
-      case 'in-progress':
-        result.inProgress++;
-        break;
-      case 'converted':
-        result.converted++;
-        break;
-      case 'lost':
-      case 'cancelled':
-        result.lost++;
-        break;
+        case 'new':
+          result.new++;
+          break;
+        case 'contacted':
+          result.contacted++;
+          break;
+        case 'qualified':
+          result.qualified++;
+          break;
+        case 'in-progress':
+          result.inProgress++;
+          break;
+        case 'converted':
+          result.converted++;
+          break;
+        case 'lost':
+        case 'cancelled':
+          result.lost++;
+          break;
       }
     }
 
@@ -112,39 +112,39 @@ export function useLeads({ autoFetch = true }: UseLeadsOptions = {}): UseLeadsRe
   }, []);
 
   // Update a single lead
-  const updateLead = useCallback(
-    async (id: number, updates: Partial<Lead>): Promise<boolean> => {
-      try {
-        // Use status endpoint if only updating status
-        const endpoint =
-          Object.keys(updates).length === 1 && 'status' in updates
-            ? `${API_ENDPOINTS.ADMIN.LEADS}/${id}/status`
-            : `${API_ENDPOINTS.ADMIN.LEADS}/${id}`;
+  const updateLead = useCallback(async (id: number, updates: Partial<Lead>): Promise<boolean> => {
+    try {
+      // Use status endpoint if only updating status
+      const endpoint =
+        Object.keys(updates).length === 1 && 'status' in updates
+          ? `${API_ENDPOINTS.ADMIN.LEADS}/${id}/status`
+          : `${API_ENDPOINTS.ADMIN.LEADS}/${id}`;
 
-        const response = await apiPut(endpoint, updates);
+      const response = await apiPut(endpoint, updates);
 
-        if (!response.ok) {
-          throw new Error(`Failed to update lead: ${response.statusText}`);
-        }
-
-        const json = await response.json();
-        unwrapApiData<Lead>(json);
-        // Update local state optimistically
-        setLeads((prev) => prev.map((lead) => (lead.id === id ? { ...lead, ...updates } : lead)));
-        return true;
-      } catch (err) {
-        logger.error('[useLeads] Update error:', err);
-        return false;
+      if (!response.ok) {
+        throw new Error(`Failed to update lead: ${response.statusText}`);
       }
-    },
-    []
-  );
+
+      const json = await response.json();
+      unwrapApiData<Lead>(json);
+      // Update local state optimistically
+      setLeads((prev) => prev.map((lead) => (lead.id === id ? { ...lead, ...updates } : lead)));
+      return true;
+    } catch (err) {
+      logger.error('[useLeads] Update error:', err);
+      return false;
+    }
+  }, []);
 
   // Bulk update lead status
   const bulkUpdateStatus = useCallback(
     async (ids: number[], status: LeadStatus): Promise<boolean> => {
       try {
-        const response = await apiPost(API_ENDPOINTS.ADMIN.LEADS_BULK_STATUS, { projectIds: ids, status });
+        const response = await apiPost(API_ENDPOINTS.ADMIN.LEADS_BULK_STATUS, {
+          projectIds: ids,
+          status
+        });
 
         if (!response.ok) {
           throw new Error(`Failed to bulk update: ${response.statusText}`);

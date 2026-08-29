@@ -96,14 +96,14 @@ function buildConfirmationEmailHtml(meeting: MeetingRequestWithNames): string {
   const locationLabel = LOCATION_TYPE_LABELS[meeting.location_type] || meeting.location_type;
   const confirmedDate = meeting.confirmed_datetime
     ? new Date(meeting.confirmed_datetime).toLocaleString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      timeZoneName: 'short'
-    })
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        timeZoneName: 'short'
+      })
     : 'TBD';
 
   return `
@@ -138,14 +138,14 @@ function buildReminderEmailHtml(meeting: MeetingRequestWithNames): string {
   const locationLabel = LOCATION_TYPE_LABELS[meeting.location_type] || meeting.location_type;
   const confirmedDate = meeting.confirmed_datetime
     ? new Date(meeting.confirmed_datetime).toLocaleString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      timeZoneName: 'short'
-    })
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        timeZoneName: 'short'
+      })
     : 'TBD';
 
   return `
@@ -221,7 +221,9 @@ export const meetingRequestService = {
     );
 
     const meetingRequestId = result.lastID!;
-    logger.info(`${SERVICE_TAG} Created meeting request #${meetingRequestId} for client #${clientId}`);
+    logger.info(
+      `${SERVICE_TAG} Created meeting request #${meetingRequestId} for client #${clientId}`
+    );
 
     return meetingRequestId;
   },
@@ -230,7 +232,10 @@ export const meetingRequestService = {
    * List meeting requests with optional filters.
    * Joins clients and projects for display names.
    */
-  async list(filters?: { status?: MeetingStatus; clientId?: number }): Promise<MeetingRequestWithNames[]> {
+  async list(filters?: {
+    status?: MeetingStatus;
+    clientId?: number;
+  }): Promise<MeetingRequestWithNames[]> {
     const db = getDatabase();
     const conditions: string[] = [];
     const queryParams: (string | number)[] = [];
@@ -245,9 +250,7 @@ export const meetingRequestService = {
       queryParams.push(filters.clientId);
     }
 
-    const whereClause = conditions.length > 0
-      ? `\nWHERE ${conditions.join(' AND ')}`
-      : '';
+    const whereClause = conditions.length > 0 ? `\nWHERE ${conditions.join(' AND ')}` : '';
 
     const sql = LIST_QUERY + whereClause + ORDER_BY_CREATED;
     const rows = await db.all(sql, queryParams);
@@ -260,7 +263,7 @@ export const meetingRequestService = {
    */
   async getById(id: number): Promise<MeetingRequestWithNames | null> {
     const db = getDatabase();
-    const sql = `${LIST_QUERY  }\nWHERE mr.id = ?`;
+    const sql = `${LIST_QUERY}\nWHERE mr.id = ?`;
     const row = await db.get(sql, [id]);
     return (row as MeetingRequestWithNames) ?? null;
   },
@@ -319,7 +322,8 @@ export const meetingRequestService = {
     try {
       const updatedMeeting = await meetingRequestService.getById(id);
       if (updatedMeeting) {
-        const meetingTypeLabel = MEETING_TYPE_LABELS[updatedMeeting.meeting_type] || updatedMeeting.meeting_type;
+        const meetingTypeLabel =
+          MEETING_TYPE_LABELS[updatedMeeting.meeting_type] || updatedMeeting.meeting_type;
         await emailService.sendEmail({
           to: updatedMeeting.clientEmail,
           subject: `Meeting Confirmed: ${meetingTypeLabel} - ${BUSINESS_INFO.name}`,
@@ -485,7 +489,7 @@ export const meetingRequestService = {
     const now = new Date();
     const reminderCutoff = new Date(now.getTime() + REMINDER_WINDOW_HOURS * MILLISECONDS_PER_HOUR);
 
-    const upcomingMeetings = await db.all(
+    const upcomingMeetings = (await db.all(
       `${LIST_QUERY}
        WHERE mr.status = 'confirmed'
          AND mr.confirmed_datetime IS NOT NULL
@@ -494,7 +498,7 @@ export const meetingRequestService = {
          AND (mr.admin_notes IS NULL OR mr.admin_notes NOT LIKE ?)
        ORDER BY mr.confirmed_datetime ASC`,
       [now.toISOString(), reminderCutoff.toISOString(), `%${REMINDER_SENT_MARKER}%`]
-    ) as MeetingRequestWithNames[];
+    )) as MeetingRequestWithNames[];
 
     let remindersSent = 0;
 
@@ -536,7 +540,9 @@ export const meetingRequestService = {
         );
 
         remindersSent++;
-        logger.info(`${SERVICE_TAG} Sent reminder for meeting #${meeting.id} to ${meeting.clientEmail}`);
+        logger.info(
+          `${SERVICE_TAG} Sent reminder for meeting #${meeting.id} to ${meeting.clientEmail}`
+        );
       } catch (reminderError) {
         logger.error(`${SERVICE_TAG} Failed to send reminder for meeting #${meeting.id}`, {
           error: reminderError instanceof Error ? reminderError : undefined

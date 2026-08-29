@@ -43,9 +43,7 @@ export async function runBootSequence(chatContainer: HTMLElement): Promise<void>
 /**
  * Run the resume boot sequence (shorter, for returning sessions)
  */
-export async function runResumeBootSequence(
-  chatContainer: HTMLElement
-): Promise<void> {
+export async function runResumeBootSequence(chatContainer: HTMLElement): Promise<void> {
   const bootstrapElement = addBootstrapMessage(chatContainer);
   await delay(300);
 

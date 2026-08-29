@@ -37,8 +37,15 @@ const RECENCY_DAYS = 30;
 // ============================================
 
 export type SearchEntityType =
-  | 'project' | 'client' | 'message' | 'invoice'
-  | 'proposal' | 'contract' | 'lead' | 'task' | 'file';
+  | 'project'
+  | 'client'
+  | 'message'
+  | 'invoice'
+  | 'proposal'
+  | 'contract'
+  | 'lead'
+  | 'task'
+  | 'file';
 
 export interface SearchResult {
   type: SearchEntityType;
@@ -127,8 +134,11 @@ async function searchProjects(ctx: SearchContext): Promise<SearchResult[]> {
     subtitle: (p.status as string) || 'project',
     path: ctx.isAdmin ? `/project-detail/${p.id}` : '/dashboard',
     relevanceScore: calculateRelevance(
-      ctx.query, p.project_name as string, p.description as string | null,
-      p.updated_at as string | null, (p.status as string) === 'active'
+      ctx.query,
+      p.project_name as string,
+      p.description as string | null,
+      p.updated_at as string | null,
+      (p.status as string) === 'active'
     )
   }));
 }
@@ -158,8 +168,11 @@ async function searchMessages(ctx: SearchContext): Promise<SearchResult[]> {
     subtitle: 'message thread',
     path: '/messages',
     relevanceScore: calculateRelevance(
-      ctx.query, t.subject as string, null,
-      t.last_message_at as string | null, true
+      ctx.query,
+      t.subject as string,
+      null,
+      t.last_message_at as string | null,
+      true
     )
   }));
 }
@@ -190,7 +203,9 @@ async function searchInvoices(ctx: SearchContext): Promise<SearchResult[]> {
     subtitle: (inv.status as string) || 'invoice',
     path: '/invoices',
     relevanceScore: calculateRelevance(
-      ctx.query, (inv.invoice_number as string) || '', null,
+      ctx.query,
+      (inv.invoice_number as string) || '',
+      null,
       inv.created_at as string | null,
       (inv.status as string) === 'sent' || (inv.status as string) === 'paid'
     )
@@ -205,19 +220,31 @@ async function searchClients(ctx: SearchContext): Promise<SearchResult[]> {
      FROM active_clients
      WHERE contact_name LIKE ? OR company_name LIKE ? OR email LIKE ? OR name LIKE ?
      ORDER BY updated_at DESC LIMIT ?`,
-    [ctx.searchPattern, ctx.searchPattern, ctx.searchPattern, ctx.searchPattern, MAX_RESULTS_PER_TYPE]
+    [
+      ctx.searchPattern,
+      ctx.searchPattern,
+      ctx.searchPattern,
+      ctx.searchPattern,
+      MAX_RESULTS_PER_TYPE
+    ]
   );
 
   return rows.map((c) => ({
     type: 'client' as const,
     id: c.id as number,
-    title: (c.name as string) || (c.company_name as string) || (c.contact_name as string) || (c.email as string),
+    title:
+      (c.name as string) ||
+      (c.company_name as string) ||
+      (c.contact_name as string) ||
+      (c.email as string),
     subtitle: 'client',
     path: `/client-detail/${c.id}`,
     relevanceScore: calculateRelevance(
       ctx.query,
       (c.name as string) || (c.company_name as string) || '',
-      null, c.updated_at as string | null, true
+      null,
+      c.updated_at as string | null,
+      true
     )
   }));
 }
@@ -241,7 +268,9 @@ async function searchProposals(ctx: SearchContext): Promise<SearchResult[]> {
     subtitle: (p.status as string) || 'proposal',
     path: '/proposals',
     relevanceScore: calculateRelevance(
-      ctx.query, (p.title as string) || '', null,
+      ctx.query,
+      (p.title as string) || '',
+      null,
       p.created_at as string | null,
       (p.status as string) === 'sent' || (p.status as string) === 'draft'
     )
@@ -267,8 +296,11 @@ async function searchContracts(ctx: SearchContext): Promise<SearchResult[]> {
     subtitle: (c.status as string) || 'contract',
     path: '/contracts',
     relevanceScore: calculateRelevance(
-      ctx.query, (c.title as string) || '', null,
-      c.created_at as string | null, (c.status as string) === 'signed'
+      ctx.query,
+      (c.title as string) || '',
+      null,
+      c.created_at as string | null,
+      (c.status as string) === 'signed'
     )
   }));
 }
@@ -292,7 +324,9 @@ async function searchLeads(ctx: SearchContext): Promise<SearchResult[]> {
     subtitle: (l.status as string) || 'lead',
     path: '/leads',
     relevanceScore: calculateRelevance(
-      ctx.query, (l.name as string) || '', null,
+      ctx.query,
+      (l.name as string) || '',
+      null,
       l.updated_at as string | null,
       (l.status as string) !== 'lost' && (l.status as string) !== 'archived'
     )
@@ -318,7 +352,9 @@ async function searchTasks(ctx: SearchContext): Promise<SearchResult[]> {
     subtitle: (t.status as string) || 'task',
     path: '/tasks',
     relevanceScore: calculateRelevance(
-      ctx.query, t.title as string, null,
+      ctx.query,
+      t.title as string,
+      null,
       t.updated_at as string | null,
       (t.status as string) !== 'completed' && (t.status as string) !== 'cancelled'
     )

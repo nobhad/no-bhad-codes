@@ -57,7 +57,12 @@ router.post(
 
     const validTypes = ['contact_form', 'testimonials', 'status_badge'];
     if (!validTypes.includes(widgetType)) {
-      errorResponse(res, `widgetType must be one of: ${validTypes.join(', ')}`, 400, ErrorCodes.VALIDATION_ERROR);
+      errorResponse(
+        res,
+        `widgetType must be one of: ${validTypes.join(', ')}`,
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
       return;
     }
 

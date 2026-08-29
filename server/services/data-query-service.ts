@@ -25,7 +25,9 @@ const PROJECT_COLUMNS = `
   page_count, integrations, brand_assets, inspiration, current_site, challenges,
   additional_info, addons, referral_source, contract_reminders_enabled,
   deleted_at, deleted_by, created_at, updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const VALID_SORT_FIELDS = ['id', 'project_name', 'status', 'created_at', 'updated_at'];
 
@@ -89,9 +91,7 @@ async function queryProjects(params: DataQueryParams): Promise<DataQueryResult> 
   query += ' LIMIT ? OFFSET ?';
   queryParams.push(limitNum, offset);
 
-  const countParams = params.search
-    ? [`%${params.search}%`, `%${params.search}%`]
-    : [];
+  const countParams = params.search ? [`%${params.search}%`, `%${params.search}%`] : [];
   const countRow = await db.get<{ count: number }>(countQuery, countParams);
   const total = typeof countRow?.count === 'number' ? countRow.count : 0;
 

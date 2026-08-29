@@ -330,7 +330,12 @@ router.post(
     } = req.body;
 
     if (!client_id || !title) {
-      return errorResponse(res, 'client_id and title are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'client_id and title are required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const requestedBy = req.user?.email || 'admin';
@@ -389,7 +394,12 @@ router.post(
     const { client_id, template_ids, project_id } = req.body;
 
     if (!client_id || !template_ids || !Array.isArray(template_ids)) {
-      return errorResponse(res, 'client_id and template_ids array are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'client_id and template_ids array are required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const requestedBy = req.user?.email || 'admin';
@@ -553,7 +563,12 @@ router.post(
     }
 
     if (!reason) {
-      return errorResponse(res, 'Rejection reason is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'Rejection reason is required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const request = await documentRequestService.rejectRequest(id, reviewerEmail, reason);
@@ -679,7 +694,12 @@ router.post(
     const { requestIds } = req.body;
 
     if (!requestIds || !Array.isArray(requestIds) || requestIds.length === 0) {
-      return errorResponse(res, 'requestIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'requestIds array is required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     let deleted = 0;
@@ -737,7 +757,12 @@ router.post(
     const { client_id, project_type, project_id, required_only } = req.body;
 
     if (!client_id || !project_type) {
-      return errorResponse(res, 'client_id and project_type are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+      return errorResponse(
+        res,
+        'client_id and project_type are required',
+        400,
+        ErrorCodes.MISSING_REQUIRED_FIELDS
+      );
     }
 
     const requestedBy = req.user?.email || 'admin';

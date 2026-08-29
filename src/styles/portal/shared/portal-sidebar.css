@@ -27,8 +27,7 @@
   border-right: none;
   display: flex;
   flex-direction: column;
-  transition:
-    width var(--transition-fast) ease-out;
+  transition: width var(--transition-fast) ease-out;
   position: relative;
   height: 100%;
   min-height: 100%;
@@ -63,7 +62,6 @@
 .sidebar.collapsed .sidebar-content {
   align-items: center;
 }
-
 
 /* Sidebar Footer - pushed to bottom via margin-top: auto.
    Bottom padding provides visual balance below Sign Out button. */
@@ -452,5 +450,3 @@
 .portal .sidebar.collapsed .sidebar-toggle-btn::after {
   display: none;
 }
-
-

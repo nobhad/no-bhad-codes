@@ -63,13 +63,7 @@ let refreshPromise: Promise<boolean> | null = null;
  * Validates the parsed JSON has the minimum required fields.
  */
 function isValidUser(obj: unknown): obj is AnyUser {
-  return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    'id' in obj &&
-    'email' in obj &&
-    'role' in obj
-  );
+  return typeof obj === 'object' && obj !== null && 'id' in obj && 'email' in obj && 'role' in obj;
 }
 
 // ============================================
@@ -371,7 +365,10 @@ function createAuthStore(): AuthStore {
         saveSession(data.user, expiresAt, sessionId);
 
         // Store isFirstLogin for greeting display
-        sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.IS_FIRST_LOGIN, isFirstLogin ? 'true' : 'false');
+        sessionStorage.setItem(
+          AUTH_STORAGE_KEYS.SESSION.IS_FIRST_LOGIN,
+          isFirstLogin ? 'true' : 'false'
+        );
 
         setState({
           isAuthenticated: true,

@@ -10,7 +10,13 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
+import {
+  ErrorCodes,
+  errorResponse,
+  errorResponseWithPayload,
+  sendSuccess,
+  sanitizeErrorMessage
+} from '../../utils/api-response.js';
 import { invalidateCache } from '../../middleware/cache.js';
 import { getInvoiceService, toSnakeCaseScheduledInvoice } from './helpers.js';
 
@@ -42,9 +48,15 @@ router.post(
     } = req.body;
 
     if (!projectId || !clientId || !scheduledDate || !lineItems?.length) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.MISSING_FIELDS, {
-        required: ['projectId', 'clientId', 'scheduledDate', 'lineItems']
-      });
+      return errorResponseWithPayload(
+        res,
+        'Missing required fields',
+        400,
+        ErrorCodes.MISSING_FIELDS,
+        {
+          required: ['projectId', 'clientId', 'scheduledDate', 'lineItems']
+        }
+      );
     }
 
     try {
@@ -59,13 +71,24 @@ router.post(
         terms
       });
 
-      sendSuccess(res, {
-        scheduled_invoice: toSnakeCaseScheduledInvoice(scheduled)
-      }, 'Invoice scheduled', 201);
+      sendSuccess(
+        res,
+        {
+          scheduled_invoice: toSnakeCaseScheduledInvoice(scheduled)
+        },
+        'Invoice scheduled',
+        201
+      );
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to schedule invoice', 500, ErrorCodes.SCHEDULING_FAILED, {
-        message: sanitizeErrorMessage(error, 'Failed to schedule invoice')
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to schedule invoice',
+        500,
+        ErrorCodes.SCHEDULING_FAILED,
+        {
+          message: sanitizeErrorMessage(error, 'Failed to schedule invoice')
+        }
+      );
     }
   })
 );

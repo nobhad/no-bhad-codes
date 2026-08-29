@@ -696,24 +696,24 @@ export class PageTransitionModule extends BaseModule {
    */
   private forwardDirectionsForFirstPaint(pageId: string): Set<Direction> {
     switch (pageId) {
-    case 'intro':
-      // Landing page: left/right enter about/contact. Down is the footer
-      // curtain, not a way into the site, so it stays out of the opening
-      // hint — the first gesture the user is nudged toward should move them
-      // through the map, not raise the footer over the business card.
-      return new Set(['left', 'right']);
-    case 'projects':
-      // All four directions are useful here: ↑↓ cycle the TV channel,
-      // ←→ navigate to about/contact. Showing all from the first paint
-      // tells the user "you can scroll any direction here."
-      return new Set(['up', 'down', 'left', 'right']);
-    case 'project-detail':
-      return new Set(['left', 'right']);
-    case 'about':
-    case 'contact':
-      return new Set(['left', 'right']);
-    default:
-      return new Set(['up', 'down', 'left', 'right']);
+      case 'intro':
+        // Landing page: left/right enter about/contact. Down is the footer
+        // curtain, not a way into the site, so it stays out of the opening
+        // hint — the first gesture the user is nudged toward should move them
+        // through the map, not raise the footer over the business card.
+        return new Set(['left', 'right']);
+      case 'projects':
+        // All four directions are useful here: ↑↓ cycle the TV channel,
+        // ←→ navigate to about/contact. Showing all from the first paint
+        // tells the user "you can scroll any direction here."
+        return new Set(['up', 'down', 'left', 'right']);
+      case 'project-detail':
+        return new Set(['left', 'right']);
+      case 'about':
+      case 'contact':
+        return new Set(['left', 'right']);
+      default:
+        return new Set(['up', 'down', 'left', 'right']);
     }
   }
 
@@ -800,12 +800,11 @@ export class PageTransitionModule extends BaseModule {
     this.curtainSettleTimer = setTimeout(() => {
       this.curtainSettleTimer = null;
       const moved =
-        this.curtainSettleTarget === 1
-          ? this.curtainProgress
-          : 1 - this.curtainProgress;
+        this.curtainSettleTarget === 1 ? this.curtainProgress : 1 - this.curtainProgress;
       // Barely moved: treat it as an accidental brush and put the band back
       // where the gesture found it rather than committing to a new state.
-      const end = moved >= CURTAIN_COMMIT_PROGRESS ? this.curtainSettleTarget : 1 - this.curtainSettleTarget;
+      const end =
+        moved >= CURTAIN_COMMIT_PROGRESS ? this.curtainSettleTarget : 1 - this.curtainSettleTarget;
       this.curtainTravel = end * CURTAIN_TRAVEL_PX;
       this.setCurtainProgress(end);
     }, CURTAIN_SETTLE_MS);
@@ -814,9 +813,7 @@ export class PageTransitionModule extends BaseModule {
   private setCurtainProgress(progress: number): void {
     if (progress === this.curtainProgress) return;
     this.curtainProgress = progress;
-    window.dispatchEvent(
-      new CustomEvent('footer-curtain:set-progress', { detail: { progress } })
-    );
+    window.dispatchEvent(new CustomEvent('footer-curtain:set-progress', { detail: { progress } }));
   }
 
   /** Drop the curtain — the page underneath it is about to change. */
@@ -1068,8 +1065,7 @@ export class PageTransitionModule extends BaseModule {
     // has the same pageId but different content, so the standard
     // pageId !== currentPageId check would skip it and the carousel slide
     // would never run. Detect by comparing slugs.
-    const isCarousel =
-      pageId === 'project-detail' && this.currentPageId === 'project-detail';
+    const isCarousel = pageId === 'project-detail' && this.currentPageId === 'project-detail';
 
     if (pageId && (pageId !== this.currentPageId || isCarousel)) {
       // Race protection: a stale pendingSlideDirection from a navigation
@@ -1247,7 +1243,7 @@ export class PageTransitionModule extends BaseModule {
       projects: 'projects',
       contact: 'contact',
       'admin-login': 'admin-login',
-      'portal': 'portal-login',
+      portal: 'portal-login',
       '404': 'not-found',
       'not-found': 'not-found'
     };
@@ -1535,10 +1531,7 @@ export class PageTransitionModule extends BaseModule {
     // 'down' in the slide convention here ('down scroll → outgoing
     // exits UP', see runSlideTransition comment), which produces the
     // TV-scrolls-up + detail-from-bottom effect.
-    if (
-      (event.key === 'Enter' || event.key === ' ') &&
-      this.currentPageId === 'projects'
-    ) {
+    if ((event.key === 'Enter' || event.key === ' ') && this.currentPageId === 'projects') {
       // Resolve the target slug from whichever channel is currently
       // highlighted on the TV. Prefer the DOM's .is-active row (works
       // for click + arrow + tune-in flows uniformly), fall back to
@@ -1562,20 +1555,20 @@ export class PageTransitionModule extends BaseModule {
 
     let direction: Direction | null = null;
     switch (event.key) {
-    case 'ArrowUp':
-      direction = 'up';
-      break;
-    case 'ArrowDown':
-      direction = 'down';
-      break;
-    case 'ArrowLeft':
-      direction = 'left';
-      break;
-    case 'ArrowRight':
-      direction = 'right';
-      break;
-    default:
-      return;
+      case 'ArrowUp':
+        direction = 'up';
+        break;
+      case 'ArrowDown':
+        direction = 'down';
+        break;
+      case 'ArrowLeft':
+        direction = 'left';
+        break;
+      case 'ArrowRight':
+        direction = 'right';
+        break;
+      default:
+        return;
     }
 
     // Vertical arrows obey the same precedence as the wheel, the swipe and the
@@ -1606,10 +1599,7 @@ export class PageTransitionModule extends BaseModule {
     //    further ↓ is a no-op (no neighbor down — see canNavigate).
     // ↑: scrolls upward when mid-read; only exits to the projects TV
     //    when scrollTop is 0 (delegates to tryNavigateDirection).
-    if (
-      this.currentPageId === 'project-detail' &&
-      (direction === 'up' || direction === 'down')
-    ) {
+    if (this.currentPageId === 'project-detail' && (direction === 'up' || direction === 'down')) {
       const detailSection = this.pages.get('project-detail')?.element ?? null;
       if (!detailSection) return;
       const atTop = detailSection.scrollTop <= SCROLL_EDGE_EPSILON;
@@ -1740,7 +1730,7 @@ export class PageTransitionModule extends BaseModule {
       if (direction === 'down') {
         const canScrollDown =
           currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >
-            SCROLL_EDGE_EPSILON;
+          SCROLL_EDGE_EPSILON;
         if (canScrollDown) return;
       } else if (currentTile.scrollTop >= 1) {
         return;
@@ -1762,10 +1752,7 @@ export class PageTransitionModule extends BaseModule {
     // (about/contact) — there's no need to exit the projects tile via
     // vertical anymore. Users cycle the TV forever in either direction
     // and use left/right to leave for about/contact.
-    if (
-      this.currentPageId === 'projects' &&
-      (direction === 'up' || direction === 'down')
-    ) {
+    if (this.currentPageId === 'projects' && (direction === 'up' || direction === 'down')) {
       // +1 to include the TV guide as channel 01 in the cycle. Total
       // channel count = projects + guide. Index 0 = guide, 1+ = projects.
       const total = this.getProjectSlugs().length + 1;
@@ -1830,7 +1817,8 @@ export class PageTransitionModule extends BaseModule {
     const targetPageId = NEIGHBORS[this.currentPageId]?.[direction];
     if (!targetPageId) return;
 
-    this.wheelCooldownUntil = performance.now() + PAGE_ANIMATION.DURATION * 1000 + WHEEL_COOLDOWN_MS;
+    this.wheelCooldownUntil =
+      performance.now() + PAGE_ANIMATION.DURATION * 1000 + WHEEL_COOLDOWN_MS;
 
     // Entering projects from outside: only RESET the TV channel on the
     // very first arrival (currentTvIndex still 0 and we never touched it).
@@ -1870,9 +1858,7 @@ export class PageTransitionModule extends BaseModule {
       if (fromProjects) {
         // Carousel continues from current TV channel. If on guide
         // (channel 01 / index 0), default to first project.
-        slug = this.currentTvIndex > 0
-          ? (slugs[this.currentTvIndex - 1] ?? slugs[0])
-          : slugs[0];
+        slug = this.currentTvIndex > 0 ? (slugs[this.currentTvIndex - 1] ?? slugs[0]) : slugs[0];
       } else {
         // First-time entry from anywhere else — pick by direction.
         slug = direction === 'left' ? slugs[slugs.length - 1] : slugs[0];
@@ -1900,9 +1886,7 @@ export class PageTransitionModule extends BaseModule {
     const cards = Array.from(
       document.querySelectorAll<HTMLElement>('#projects .work-card[data-project-slug]')
     );
-    return cards
-      .map((card) => card.dataset.projectSlug ?? '')
-      .filter((slug) => slug.length > 0);
+    return cards.map((card) => card.dataset.projectSlug ?? '').filter((slug) => slug.length > 0);
   }
 
   /** Slug at the given index in the rendered projects list, or null. */
@@ -2146,9 +2130,7 @@ export class PageTransitionModule extends BaseModule {
           const slugs = this.getProjectSlugs();
           const slug = this.currentTvIndex > 0 ? slugs[this.currentTvIndex - 1] : undefined;
           if (slug) {
-            document.dispatchEvent(
-              new CustomEvent('projects:tune-in', { detail: { slug } })
-            );
+            document.dispatchEvent(new CustomEvent('projects:tune-in', { detail: { slug } }));
           }
         }
       }
@@ -2279,7 +2261,7 @@ export class PageTransitionModule extends BaseModule {
     // a single .site-map container that holds the camera transform.
     const fromElement: HTMLElement | null = fromIsMap
       ? this.siteMap
-      : currentPage?.element ?? null;
+      : (currentPage?.element ?? null);
     const toElement: HTMLElement = (toIsMap ? this.siteMap : targetPage.element) as HTMLElement;
 
     // Baselines: a map element's resting transform IS its camera position;
@@ -2287,9 +2269,10 @@ export class PageTransitionModule extends BaseModule {
     const toBaseline = toIsMap
       ? CAMERA_POSITIONS[MAP_TILES[targetPage.id as keyof typeof MAP_TILES]]
       : { x: 0, y: 0 };
-    const fromBaseline = fromIsMap && currentPage
-      ? CAMERA_POSITIONS[MAP_TILES[currentPage.id as keyof typeof MAP_TILES]]
-      : { x: 0, y: 0 };
+    const fromBaseline =
+      fromIsMap && currentPage
+        ? CAMERA_POSITIONS[MAP_TILES[currentPage.id as keyof typeof MAP_TILES]]
+        : { x: 0, y: 0 };
 
     const inFinal = isHorizontal ? toBaseline.x : toBaseline.y;
     const inStart = inFinal + inSign * 100;
@@ -2489,18 +2472,18 @@ export class PageTransitionModule extends BaseModule {
 
       const ghostTween: Promise<void> = ghost
         ? new Promise<void>((resolve) => {
-          gsap.killTweensOf(ghost);
-          gsap.set(ghost, { [axisProp]: 0 });
-          gsap.to(ghost, {
-            [axisProp]: outSign * 100,
-            duration: PAGE_ANIMATION.SLIDE_DURATION,
-            ease: PAGE_ANIMATION.SLIDE_EASE,
-            onComplete: () => {
-              ghost.remove();
-              resolve();
-            }
-          });
-        })
+            gsap.killTweensOf(ghost);
+            gsap.set(ghost, { [axisProp]: 0 });
+            gsap.to(ghost, {
+              [axisProp]: outSign * 100,
+              duration: PAGE_ANIMATION.SLIDE_DURATION,
+              ease: PAGE_ANIMATION.SLIDE_EASE,
+              onComplete: () => {
+                ghost.remove();
+                resolve();
+              }
+            });
+          })
         : Promise.resolve();
 
       const realTween = new Promise<void>((resolve) => {

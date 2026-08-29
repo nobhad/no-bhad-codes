@@ -72,7 +72,6 @@ export const PROTECTION_CONFIG: CodeProtectionConfig = {
   // Violation callback - called when protection is triggered
   onViolation: (type: string, details: unknown) => {
     console.warn(`🛡️ [Protection] ${type.toUpperCase()} violation detected:`, details);
-
   }
 };
 
@@ -171,13 +170,13 @@ export function getProtectionConfig(): CodeProtectionConfig {
   const env = process.env.NODE_ENV || 'development';
 
   switch (env) {
-  case 'production':
-    return PROTECTION_PRESETS.production;
-  case 'staging':
-    return PROTECTION_PRESETS.staging;
-  case 'development':
-  default:
-    return PROTECTION_PRESETS.development;
+    case 'production':
+      return PROTECTION_PRESETS.production;
+    case 'staging':
+      return PROTECTION_PRESETS.staging;
+    case 'development':
+    default:
+      return PROTECTION_PRESETS.development;
   }
 }
 

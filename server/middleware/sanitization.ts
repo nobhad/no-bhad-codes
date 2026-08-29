@@ -173,4 +173,3 @@ export function stripDangerousPatterns(input: string): string {
   // Apply standard HTML entity encoding on the remaining content
   return sanitizeString(stripped);
 }
-

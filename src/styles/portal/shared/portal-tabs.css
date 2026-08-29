@@ -15,7 +15,6 @@
  * 5. Factory tabs: .portal-tab
  */
 
-
 /* =====================================================
    TAB CONTENT VISIBILITY
    ===================================================== */
@@ -25,8 +24,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .tab-content.is-active,
@@ -112,14 +115,14 @@
    ===================================================== */
 
 :is(
-  .portal-tabs button,
-  .portal-subtabs button,
-  .portal-tab,
-  .portal-subtab,
-  .tab,
-  .view-toggle button,
-  .view-toggle-option
-):hover:not(.is-active):not(:disabled) {
+    .portal-tabs button,
+    .portal-subtabs button,
+    .portal-tab,
+    .portal-subtab,
+    .tab,
+    .view-toggle button,
+    .view-toggle-option
+  ):hover:not(.is-active):not(:disabled) {
   color: var(--color-text-primary);
 }
 
@@ -143,23 +146,15 @@
 
 /* Active hover - maintain active color */
 :is(
-  .portal-tabs button,
-  .portal-subtabs button,
-  .portal-tab,
-  .portal-subtab,
-  .view-toggle button,
-  .view-toggle-option
-).is-active:hover,
-:is(
-  .portal-tabs button,
-  .portal-subtabs button,
-  .portal-tab
-).is-active:focus,
-:is(
-  .portal-tabs button,
-  .portal-subtabs button,
-  .portal-tab
-).is-active:active {
+    .portal-tabs button,
+    .portal-subtabs button,
+    .portal-tab,
+    .portal-subtab,
+    .view-toggle button,
+    .view-toggle-option
+  ).is-active:hover,
+:is(.portal-tabs button, .portal-subtabs button, .portal-tab).is-active:focus,
+:is(.portal-tabs button, .portal-subtabs button, .portal-tab).is-active:active {
   color: var(--color-accent);
   background: transparent;
   outline: none;
@@ -175,7 +170,12 @@
    SHARED DISABLED STATE
    ===================================================== */
 
-:is(.portal-tab--disabled, .portal-subtab--disabled, .portal-tab:disabled, .portal-subtab:disabled) {
+:is(
+  .portal-tab--disabled,
+  .portal-subtab--disabled,
+  .portal-tab:disabled,
+  .portal-subtab:disabled
+) {
   cursor: not-allowed;
 }
 
@@ -334,13 +334,7 @@
 }
 
 @media (--small-mobile) {
-  :is(
-    .portal-tabs button,
-    .portal-tab,
-    .portal-subtab,
-    .view-toggle button,
-    .view-toggle-option
-  ) {
+  :is(.portal-tabs button, .portal-tab, .portal-subtab, .view-toggle button, .view-toggle-option) {
     font-size: var(--font-size-xs);
   }
 
@@ -353,4 +347,3 @@
     gap: var(--space-2);
   }
 }
-

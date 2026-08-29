@@ -35,12 +35,7 @@ export function formatDate(
   date: string | Date | null | undefined,
   options: DateFormatOptions = {}
 ): string {
-  const {
-    includeTime = false,
-    relative = false,
-    fallback = '—',
-    locale = 'en-US'
-  } = options;
+  const { includeTime = false, relative = false, fallback = '—', locale = 'en-US' } = options;
 
   if (!date) return fallback;
 
@@ -245,13 +240,7 @@ export function formatNumber(
   value: number | string | null | undefined,
   options: NumberFormatOptions = {}
 ): string {
-  const {
-    locale = 'en-US',
-    minDecimals,
-    maxDecimals,
-    compact = false,
-    fallback = '—'
-  } = options;
+  const { locale = 'en-US', minDecimals, maxDecimals, compact = false, fallback = '—' } = options;
 
   if (value === null || value === undefined) return fallback;
 
@@ -306,10 +295,7 @@ const FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB'];
  * formatFileSize(1024) // '1 KB'
  * formatFileSize(1536000) // '1.46 MB'
  */
-export function formatFileSize(
-  bytes: number | null | undefined,
-  fallback = '—'
-): string {
+export function formatFileSize(bytes: number | null | undefined, fallback = '—'): string {
   if (bytes === null || bytes === undefined || isNaN(bytes)) return fallback;
   if (bytes === 0) return '0 B';
 
@@ -386,12 +372,8 @@ export function formatName(
  * pluralize(5, 'item') // '5 items'
  * pluralize(0, 'child', 'children') // '0 children'
  */
-export function pluralize(
-  count: number,
-  singular: string,
-  plural?: string
-): string {
-  const word = count === 1 ? singular : (plural || `${singular}s`);
+export function pluralize(count: number, singular: string, plural?: string): string {
+  const word = count === 1 ? singular : plural || `${singular}s`;
   return `${count} ${word}`;
 }
 
@@ -406,10 +388,7 @@ export function pluralize(
  * formatPhone('5551234567') // '(555) 123-4567'
  * formatPhone('+15551234567') // '+1 (555) 123-4567'
  */
-export function formatPhone(
-  phone: string | null | undefined,
-  fallback = '—'
-): string {
+export function formatPhone(phone: string | null | undefined, fallback = '—'): string {
   if (!phone) return fallback;
 
   // Remove all non-digits except leading +

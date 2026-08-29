@@ -573,7 +573,8 @@
   border: none;
   background-color: var(--color-dark);
   margin: var(--space-4) 0 0;
-  border-radius: var(--border-radius-xs, 2px) 0 var(--border-radius-xs, 2px) var(--border-radius-xs, 2px);
+  border-radius: var(--border-radius-xs, 2px) 0 var(--border-radius-xs, 2px)
+    var(--border-radius-xs, 2px);
   transition: background-color var(--transition-theme, 0.4s);
 }
 
@@ -833,8 +834,12 @@
     gap: var(--space-4);
   }
 
-  .worksub-divider { display: none; }
-  .back-link { margin-bottom: 0; }
+  .worksub-divider {
+    display: none;
+  }
+  .back-link {
+    margin-bottom: 0;
+  }
 
   /* Hero */
   .worksub-header figure {
@@ -911,7 +916,9 @@
     font-size: var(--font-size-2xs);
   }
 
-  .tools-list { gap: var(--space-1); }
+  .tools-list {
+    gap: var(--space-1);
+  }
 
   .tools-list .tool-tag {
     font-size: var(--font-size-xs);
@@ -965,7 +972,9 @@
     margin: 0;
   }
 
-  .worksub-info section { gap: var(--space-3); }
+  .worksub-info section {
+    gap: var(--space-3);
+  }
 
   /* Action links */
   .worksub-links {
@@ -983,7 +992,10 @@
     justify-content: center;
   }
 
-  .worksub-links a svg { width: 16px; height: 16px; }
+  .worksub-links a svg {
+    width: 16px;
+    height: 16px;
+  }
 
   /* Prev/Next nav */
   .project-nav {

@@ -12,24 +12,23 @@ import {
   type PipelineStageRow,
   type ProjectRow
 } from '../../database/entities/index.js';
-import type {
-  SqlValue,
-  PipelineStage,
-  PipelineView,
-  PipelineStats
-} from './types.js';
+import type { SqlValue, PipelineStage, PipelineView, PipelineStats } from './types.js';
 import { PIPELINE_STAGE_COLUMNS } from './types.js';
 
 export async function getPipelineStages(): Promise<PipelineStage[]> {
   const db = getDatabase();
-  const rows = await db.all(`SELECT ${PIPELINE_STAGE_COLUMNS} FROM pipeline_stages ORDER BY sort_order ASC`);
+  const rows = await db.all(
+    `SELECT ${PIPELINE_STAGE_COLUMNS} FROM pipeline_stages ORDER BY sort_order ASC`
+  );
   return rows.map((row) => toPipelineStage(row as unknown as PipelineStageRow));
 }
 
 export async function moveToStage(projectId: number, stageId: number): Promise<void> {
   const db = getDatabase();
 
-  const stage = await db.get(`SELECT ${PIPELINE_STAGE_COLUMNS} FROM pipeline_stages WHERE id = ?`, [stageId]);
+  const stage = await db.get(`SELECT ${PIPELINE_STAGE_COLUMNS} FROM pipeline_stages WHERE id = ?`, [
+    stageId
+  ]);
 
   if (!stage) {
     throw new Error('Pipeline stage not found');
@@ -41,11 +40,11 @@ export async function moveToStage(projectId: number, stageId: number): Promise<v
   if (stage.is_won) {
     updates.push('won_at = CURRENT_TIMESTAMP');
     if (stage.auto_convert_to_project) {
-      updates.push('status = \'in-progress\'');
+      updates.push("status = 'in-progress'");
     }
   } else if (stage.is_lost) {
     updates.push('lost_at = CURRENT_TIMESTAMP');
-    updates.push('status = \'on-hold\'');
+    updates.push("status = 'on-hold'");
   }
 
   values.push(projectId);

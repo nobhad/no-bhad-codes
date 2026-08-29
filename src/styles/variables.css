@@ -51,13 +51,13 @@
  * ============================================ */
 :root {
   --font-size-2xs: 0.625rem; /* 10px — badges/tags */
-  --font-size-xs: 0.75rem;   /* 12px — table cells, secondary text */
-  --font-size-sm: 0.875rem;  /* 14px — body text, buttons */
-  --font-size-base: 1rem;    /* 16px — default body */
-  --font-size-lg: 1.125rem;  /* 18px — headings */
-  --font-size-xl: 1.25rem;   /* 20px — large headings */
-  --font-size-2xl: 1.5rem;   /* 24px — page titles */
-  --font-size-3xl: 2rem;     /* 32px — hero text */
+  --font-size-xs: 0.75rem; /* 12px — table cells, secondary text */
+  --font-size-sm: 0.875rem; /* 14px — body text, buttons */
+  --font-size-base: 1rem; /* 16px — default body */
+  --font-size-lg: 1.125rem; /* 18px — headings */
+  --font-size-xl: 1.25rem; /* 20px — large headings */
+  --font-size-2xl: 1.5rem; /* 24px — page titles */
+  --font-size-3xl: 2rem; /* 32px — hero text */
 }
 
 /* ============================================
@@ -147,7 +147,6 @@ section,
 .p-xl {
   padding: var(--space-fluid-xl);
 }
-
 
 /* Responsive Visibility */
 /* NOTE: Base .hidden is defined in base/layout.css - do not duplicate here */

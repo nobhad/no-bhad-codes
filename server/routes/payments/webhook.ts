@@ -71,19 +71,20 @@ router.post(
 
     try {
       switch (eventType) {
-      case 'payment_intent.succeeded':
-        await stripePaymentService.handlePaymentSuccess(intentId);
-        break;
+        case 'payment_intent.succeeded':
+          await stripePaymentService.handlePaymentSuccess(intentId);
+          break;
 
-      case 'payment_intent.payment_failed': {
-        const failureMessage =
-            (dataObject.last_payment_error as { message?: string } | undefined)?.message || 'Payment failed';
-        await stripePaymentService.handlePaymentFailure(intentId, failureMessage);
-        break;
-      }
+        case 'payment_intent.payment_failed': {
+          const failureMessage =
+            (dataObject.last_payment_error as { message?: string } | undefined)?.message ||
+            'Payment failed';
+          await stripePaymentService.handlePaymentFailure(intentId, failureMessage);
+          break;
+        }
 
-      default:
-        logger.info(`Unhandled payment webhook event: ${eventType}`);
+        default:
+          logger.info(`Unhandled payment webhook event: ${eventType}`);
       }
     } catch (err) {
       // Release the claim so Stripe's retry can reprocess the event

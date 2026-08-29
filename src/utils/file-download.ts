@@ -57,10 +57,7 @@ export async function downloadFromUrl(
 /**
  * Download an invoice PDF
  */
-export async function downloadInvoicePdf(
-  invoiceId: number,
-  invoiceNumber: string
-): Promise<void> {
+export async function downloadInvoicePdf(invoiceId: number, invoiceNumber: string): Promise<void> {
   const filename = `invoice-${invoiceNumber}.pdf`;
 
   try {
@@ -76,10 +73,7 @@ export async function downloadInvoicePdf(
 /**
  * Download a receipt PDF
  */
-export async function downloadReceiptPdf(
-  paymentId: number,
-  invoiceNumber: string
-): Promise<void> {
+export async function downloadReceiptPdf(paymentId: number, invoiceNumber: string): Promise<void> {
   const filename = `receipt-${invoiceNumber}.pdf`;
 
   try {
@@ -95,10 +89,7 @@ export async function downloadReceiptPdf(
 /**
  * Download a file from the files system
  */
-export async function downloadFile(
-  fileId: number,
-  filename: string
-): Promise<void> {
+export async function downloadFile(fileId: number, filename: string): Promise<void> {
   try {
     await downloadFromUrl(buildEndpoint.fileDownload(fileId), filename);
   } catch (error) {
@@ -118,10 +109,7 @@ export function previewFile(fileId: number): void {
 /**
  * Download a document from document requests
  */
-export async function downloadDocument(
-  documentId: number,
-  filename: string
-): Promise<void> {
+export async function downloadDocument(documentId: number, filename: string): Promise<void> {
   try {
     await downloadFromUrl(buildEndpoint.documentRequestFileDownload(documentId), filename);
   } catch (error) {

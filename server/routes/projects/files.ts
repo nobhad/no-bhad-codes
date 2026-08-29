@@ -498,7 +498,15 @@ router.get(
 
     const files = await fileService.searchFiles(projectId, query.trim(), {
       folder_id: req.query.folder_id ? parseInt(req.query.folder_id as string) : undefined,
-      category: req.query.category as 'general' | 'deliverable' | 'source' | 'asset' | 'document' | 'contract' | 'invoice' | undefined,
+      category: req.query.category as
+        | 'general'
+        | 'deliverable'
+        | 'source'
+        | 'asset'
+        | 'document'
+        | 'contract'
+        | 'invoice'
+        | undefined,
       include_archived: req.query.include_archived === 'true',
       limit: req.query.limit ? parseInt(req.query.limit as string) : 50
     });

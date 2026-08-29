@@ -3,7 +3,13 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessFile, canAccessFileComment } from '../../utils/access-control.js';
 import { fileService } from '../../services/file-service.js';
-import { errorResponse, sendSuccess, sendCreated, messageResponse, ErrorCodes } from '../../utils/api-response.js';
+import {
+  errorResponse,
+  sendSuccess,
+  sendCreated,
+  messageResponse,
+  ErrorCodes
+} from '../../utils/api-response.js';
 import { invalidateCache } from '../../middleware/cache.js';
 
 const router = express.Router();

@@ -495,7 +495,7 @@ describe('Proposal System - E-Signature', () => {
     });
 
     it('should create unique signature token for proposal', async () => {
-      const token = `unique_token_${  Date.now()}`;
+      const token = `unique_token_${Date.now()}`;
 
       expect(token).toMatch(/^unique_token_\d+$/);
       expect(token.length).toBeGreaterThan(15);

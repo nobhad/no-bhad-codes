@@ -8,7 +8,6 @@
  * for better decoupling and testability.
  */
 
-
 export type ServiceFactory<T = unknown> = (...args: never[]) => T | Promise<T>;
 export type ServiceInstance<T = unknown> = T;
 
@@ -89,7 +88,9 @@ export class Container {
         );
 
         // Create instance
-        const instance = await (service.factory as (...args: unknown[]) => unknown | Promise<unknown>)(...dependencies);
+        const instance = await (
+          service.factory as (...args: unknown[]) => unknown | Promise<unknown>
+        )(...dependencies);
 
         // Cache singleton instance
         if (service.singleton) {

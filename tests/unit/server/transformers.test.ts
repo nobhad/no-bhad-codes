@@ -137,7 +137,10 @@ describe('toCamelCase', () => {
 
 describe('arrayToSnakeCase', () => {
   it('converts array of camelCase objects to snake_case', () => {
-    const input = [{ userId: 1, firstName: 'Alice' }, { userId: 2, firstName: 'Bob' }];
+    const input = [
+      { userId: 1, firstName: 'Alice' },
+      { userId: 2, firstName: 'Bob' }
+    ];
     const result = arrayToSnakeCase(input);
     expect(result).toEqual([
       { user_id: 1, first_name: 'Alice' },
@@ -157,7 +160,10 @@ describe('arrayToSnakeCase', () => {
 
 describe('arrayToCamelCase', () => {
   it('converts array of snake_case objects to camelCase', () => {
-    const input = [{ user_id: 1, first_name: 'Alice' }, { user_id: 2, first_name: 'Bob' }];
+    const input = [
+      { user_id: 1, first_name: 'Alice' },
+      { user_id: 2, first_name: 'Bob' }
+    ];
     const result = arrayToCamelCase<{ userId: number; firstName: string }>(input);
     expect(result).toEqual([
       { userId: 1, firstName: 'Alice' },
@@ -184,7 +190,10 @@ describe('pickAndTransform', () => {
 
   it('ignores fields that are not in the source object', () => {
     const obj = { userId: 1 };
-    const result = pickAndTransform(obj as Record<string, unknown>, ['userId', 'nonExistent' as never]);
+    const result = pickAndTransform(obj as Record<string, unknown>, [
+      'userId',
+      'nonExistent' as never
+    ]);
     expect(result).toEqual({ user_id: 1 });
   });
 
@@ -202,7 +211,10 @@ describe('pickAndTransform', () => {
 
   it('preserves null values for picked fields', () => {
     const obj = { userId: null, firstName: 'Alice' };
-    const result = pickAndTransform(obj as Record<string, unknown>, ['userId' as never, 'firstName' as never]);
+    const result = pickAndTransform(obj as Record<string, unknown>, [
+      'userId' as never,
+      'firstName' as never
+    ]);
     expect(result).toEqual({ user_id: null, first_name: 'Alice' });
   });
 });

@@ -22,9 +22,7 @@ export interface SubmissionResult {
 /**
  * Build the payload for intake submission
  */
-export function buildSubmitPayload(
-  intakeData: IntakeData
-): Record<string, unknown> {
+export function buildSubmitPayload(intakeData: IntakeData): Record<string, unknown> {
   return {
     ...intakeData,
     submittedAt: new Date().toISOString()
@@ -35,9 +33,7 @@ export function buildSubmitPayload(
  * Submit intake data to the server.
  * Returns a result object indicating success or failure.
  */
-export async function submitIntakeData(
-  intakeData: IntakeData
-): Promise<SubmissionResult> {
+export async function submitIntakeData(intakeData: IntakeData): Promise<SubmissionResult> {
   try {
     const submitData = buildSubmitPayload(intakeData);
 

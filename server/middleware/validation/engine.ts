@@ -8,7 +8,12 @@
 
 import { logger } from '../../services/logger.js';
 import { VALIDATION_PATTERNS } from '../../../shared/validation/patterns.js';
-import type { ValidationError, ValidationRule, ValidationSchema, ValidationResult } from './types.js';
+import type {
+  ValidationError,
+  ValidationRule,
+  ValidationSchema,
+  ValidationResult
+} from './types.js';
 
 export class ApiValidator {
   private static instance: ApiValidator;
@@ -83,27 +88,27 @@ export class ApiValidator {
 
     // Type-specific validation
     switch (rule.type) {
-    case 'string':
-      sanitizedValue = this.validateString(field, value, rule, errors);
-      break;
-    case 'number':
-      sanitizedValue = this.validateNumber(field, value, rule, errors);
-      break;
-    case 'boolean':
-      sanitizedValue = this.validateBoolean(field, value, rule, errors);
-      break;
-    case 'email':
-      sanitizedValue = this.validateEmail(field, value, rule, errors);
-      break;
-    case 'array':
-      sanitizedValue = this.validateArray(field, value, rule, errors);
-      break;
-    case 'object':
-      sanitizedValue = this.validateObject(field, value, rule, errors);
-      break;
-    case 'custom':
-      sanitizedValue = this.validateCustom(field, value, rule, errors);
-      break;
+      case 'string':
+        sanitizedValue = this.validateString(field, value, rule, errors);
+        break;
+      case 'number':
+        sanitizedValue = this.validateNumber(field, value, rule, errors);
+        break;
+      case 'boolean':
+        sanitizedValue = this.validateBoolean(field, value, rule, errors);
+        break;
+      case 'email':
+        sanitizedValue = this.validateEmail(field, value, rule, errors);
+        break;
+      case 'array':
+        sanitizedValue = this.validateArray(field, value, rule, errors);
+        break;
+      case 'object':
+        sanitizedValue = this.validateObject(field, value, rule, errors);
+        break;
+      case 'custom':
+        sanitizedValue = this.validateCustom(field, value, rule, errors);
+        break;
     }
 
     // Apply custom validator if present (works for all types, not just 'custom')

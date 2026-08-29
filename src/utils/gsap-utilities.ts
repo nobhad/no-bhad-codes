@@ -118,18 +118,18 @@ export function slideIn(
   const from: gsap.TweenVars = { opacity: 0 };
 
   switch (direction) {
-  case 'top':
-    from.y = '-100%';
-    break;
-  case 'bottom':
-    from.y = '100%';
-    break;
-  case 'left':
-    from.x = '-100%';
-    break;
-  case 'right':
-    from.x = '100%';
-    break;
+    case 'top':
+      from.y = '-100%';
+      break;
+    case 'bottom':
+      from.y = '100%';
+      break;
+    case 'left':
+      from.x = '-100%';
+      break;
+    case 'right':
+      from.x = '100%';
+      break;
   }
 
   return gsap.from(target, {

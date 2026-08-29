@@ -120,12 +120,22 @@ router.post(
     const URL_MAX_LENGTH = 2000;
 
     if (name.length > NAME_MAX_LENGTH) {
-      errorResponse(res, `Name must be ${NAME_MAX_LENGTH} characters or fewer`, 400, ErrorCodes.VALIDATION_ERROR);
+      errorResponse(
+        res,
+        `Name must be ${NAME_MAX_LENGTH} characters or fewer`,
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
       return;
     }
 
     if (url.length > URL_MAX_LENGTH) {
-      errorResponse(res, `URL must be ${URL_MAX_LENGTH} characters or fewer`, 400, ErrorCodes.VALIDATION_ERROR);
+      errorResponse(
+        res,
+        `URL must be ${URL_MAX_LENGTH} characters or fewer`,
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
       return;
     }
 

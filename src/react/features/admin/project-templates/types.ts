@@ -173,22 +173,26 @@ export function filterTemplate(
   return true;
 }
 
-export function sortTemplates(a: ProjectTemplateItem, b: ProjectTemplateItem, sort: SortConfig): number {
+export function sortTemplates(
+  a: ProjectTemplateItem,
+  b: ProjectTemplateItem,
+  sort: SortConfig
+): number {
   const { column, direction } = sort;
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-  case 'name':
-    return a.name.localeCompare(b.name) * multiplier;
-  case 'projectType':
-    return (a.projectType || '').localeCompare(b.projectType || '') * multiplier;
-  case 'estimatedDurationDays':
-    return ((a.estimatedDurationDays || 0) - (b.estimatedDurationDays || 0)) * multiplier;
-  case 'defaultHourlyRate':
-    return ((a.defaultHourlyRate || 0) - (b.defaultHourlyRate || 0)) * multiplier;
-  case 'updatedAt':
-    return (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()) * multiplier;
-  default:
-    return 0;
+    case 'name':
+      return a.name.localeCompare(b.name) * multiplier;
+    case 'projectType':
+      return (a.projectType || '').localeCompare(b.projectType || '') * multiplier;
+    case 'estimatedDurationDays':
+      return ((a.estimatedDurationDays || 0) - (b.estimatedDurationDays || 0)) * multiplier;
+    case 'defaultHourlyRate':
+      return ((a.defaultHourlyRate || 0) - (b.defaultHourlyRate || 0)) * multiplier;
+    case 'updatedAt':
+      return (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()) * multiplier;
+    default:
+      return 0;
   }
 }

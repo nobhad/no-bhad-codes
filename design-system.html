@@ -1,5 +1,10 @@
 <!doctype html>
-<html lang="en" class="intro-complete intro-finished" data-theme="light" data-initial-page="design-system">
+<html
+  lang="en"
+  class="intro-complete intro-finished"
+  data-theme="light"
+  data-initial-page="design-system"
+>
   <head>
     <meta charset="utf-8" />
     <script>
@@ -10,7 +15,10 @@
           var saved = localStorage.getItem('theme');
           var systemDark =
             window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-          document.documentElement.setAttribute('data-theme', saved || (systemDark ? 'dark' : 'light'));
+          document.documentElement.setAttribute(
+            'data-theme',
+            saved || (systemDark ? 'dark' : 'light')
+          );
         } catch (e) {
           document.documentElement.setAttribute('data-theme', 'light');
         }
@@ -33,19 +41,16 @@
     <script type="module" src="/src/static-page.ts"></script>
   </head>
   <body data-page="design-system">
-<%- include('templates/partials/shell/header.ejs') %>
-
-<%- include('templates/partials/shell/portal-dropdown.ejs') %>
-
-<%- include('templates/partials/shell/nav.ejs') %>
+    <%- include('templates/partials/shell/header.ejs') %> <%-
+    include('templates/partials/shell/portal-dropdown.ejs') %> <%-
+    include('templates/partials/shell/nav.ejs') %>
 
     <main id="main-content" data-active-page="design-system">
       <!-- Generated from the token files by scripts/build-design-system-docs.mjs.
            Content only: this page composes the shell around it, the same way
            index.html and 404.html do. -->
-<%- include('templates/pages/design-system.ejs') %>
-
-<%- include('templates/partials/shell/footer.ejs') %>
+      <%- include('templates/pages/design-system.ejs') %> <%-
+      include('templates/partials/shell/footer.ejs') %>
     </main>
 
     <script>

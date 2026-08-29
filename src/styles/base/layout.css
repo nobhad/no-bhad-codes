@@ -97,7 +97,9 @@ main {
  */
 .business-card-section,
 .about-section,
-body:not([data-page="design-system"]) main > section:not(.contact-section):not(.tech-stack-section) {
+body:not([data-page="design-system"])
+  main
+  > section:not(.contact-section):not(.tech-stack-section) {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -478,4 +480,3 @@ main {
     max-width: 98vw;
   }
 }
-

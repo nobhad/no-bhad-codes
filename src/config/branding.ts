@@ -65,11 +65,11 @@ export function getCopyrightText(): string {
  */
 export function getContactEmail(type: 'contact' | 'support' | 'fallback' = 'contact'): string {
   switch (type) {
-  case 'support':
-    return BRANDING.SUPPORT_EMAIL;
-  case 'fallback':
-    return BRANDING.FALLBACK_EMAIL;
-  default:
-    return BRANDING.CONTACT_EMAIL;
+    case 'support':
+      return BRANDING.SUPPORT_EMAIL;
+    case 'fallback':
+      return BRANDING.FALLBACK_EMAIL;
+    default:
+      return BRANDING.CONTACT_EMAIL;
   }
 }

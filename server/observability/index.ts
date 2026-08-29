@@ -99,35 +99,35 @@ function getMetricReader(): MetricReader | undefined {
   const kind = resolveMetricsExporterKind();
 
   switch (kind) {
-  case 'none':
-    return undefined;
-
-  case 'prometheus':
-    // PrometheusExporter *is* a MetricReader and manages its own
-    // HTTP listener — scrapers pull from http://host:port/metrics.
-    return new PrometheusExporter({
-      port: PROMETHEUS_PORT,
-      host: PROMETHEUS_HOST,
-      endpoint: PROMETHEUS_ENDPOINT
-    });
-
-  case 'otlp':
-    if (!OTEL_EXPORTER_ENDPOINT) {
-      console.warn(
-        '⚠️ METRICS_EXPORTER=otlp but OTEL_EXPORTER_OTLP_ENDPOINT is not set — disabling metrics export'
-      );
+    case 'none':
       return undefined;
-    }
-    return new PeriodicExportingMetricReader({
-      exporter: new OTLPMetricExporter({ url: OTEL_EXPORTER_ENDPOINT }),
-      exportIntervalMillis: 60000
-    });
 
-  case 'console':
-    return new PeriodicExportingMetricReader({
-      exporter: new ConsoleMetricExporter(),
-      exportIntervalMillis: 60000
-    });
+    case 'prometheus':
+      // PrometheusExporter *is* a MetricReader and manages its own
+      // HTTP listener — scrapers pull from http://host:port/metrics.
+      return new PrometheusExporter({
+        port: PROMETHEUS_PORT,
+        host: PROMETHEUS_HOST,
+        endpoint: PROMETHEUS_ENDPOINT
+      });
+
+    case 'otlp':
+      if (!OTEL_EXPORTER_ENDPOINT) {
+        console.warn(
+          '⚠️ METRICS_EXPORTER=otlp but OTEL_EXPORTER_OTLP_ENDPOINT is not set — disabling metrics export'
+        );
+        return undefined;
+      }
+      return new PeriodicExportingMetricReader({
+        exporter: new OTLPMetricExporter({ url: OTEL_EXPORTER_ENDPOINT }),
+        exportIntervalMillis: 60000
+      });
+
+    case 'console':
+      return new PeriodicExportingMetricReader({
+        exporter: new ConsoleMetricExporter(),
+        exportIntervalMillis: 60000
+      });
   }
 }
 

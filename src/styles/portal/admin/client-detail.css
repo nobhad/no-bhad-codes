@@ -128,8 +128,12 @@
   gap: var(--detail-list-gap, var(--space-2));
 }
 
-.detail-list--spaced { --detail-list-gap: var(--space-4); }
-.detail-list--section { --detail-list-gap: var(--space-6); }
+.detail-list--spaced {
+  --detail-list-gap: var(--space-4);
+}
+.detail-list--section {
+  --detail-list-gap: var(--space-6);
+}
 
 /* Contact detail row: icon + text inline */
 .contact-detail-row {
@@ -329,7 +333,6 @@
   gap: var(--space-2);
   margin-bottom: var(--space-1);
 }
-
 
 /* Progress section within project card */
 .project-card-progress {

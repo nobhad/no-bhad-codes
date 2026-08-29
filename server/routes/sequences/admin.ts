@@ -278,7 +278,12 @@ router.post(
     const { entityType, entityId, entityEmail, entityName } = req.body;
 
     if (!entityType || !entityId || !entityEmail) {
-      errorResponse(res, 'entityType, entityId, and entityEmail are required', 400, ErrorCodes.VALIDATION_ERROR);
+      errorResponse(
+        res,
+        'entityType, entityId, and entityEmail are required',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
       return;
     }
 

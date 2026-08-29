@@ -297,7 +297,7 @@ describe('escapeHtml', () => {
   });
 
   it('escapes single quotes', () => {
-    expect(escapeHtml('it\'s')).toBe('it&#x27;s');
+    expect(escapeHtml("it's")).toBe('it&#x27;s');
   });
 
   it('escapes backticks', () => {
@@ -355,9 +355,7 @@ describe('formatTextWithLineBreaks', () => {
   });
 
   it('escapes ampersand in multiline text', () => {
-    expect(formatTextWithLineBreaks('Tom & Jerry\nFriends')).toBe(
-      'Tom &amp; Jerry<br>Friends'
-    );
+    expect(formatTextWithLineBreaks('Tom & Jerry\nFriends')).toBe('Tom &amp; Jerry<br>Friends');
   });
 });
 
@@ -861,20 +859,12 @@ describe('getDueDaysText', () => {
 
 describe('countByField', () => {
   it('counts items grouped by default "status" key', () => {
-    const items = [
-      { status: 'active' },
-      { status: 'active' },
-      { status: 'pending' }
-    ];
+    const items = [{ status: 'active' }, { status: 'active' }, { status: 'pending' }];
     expect(countByField(items)).toEqual({ active: 2, pending: 1 });
   });
 
   it('counts items grouped by a custom key', () => {
-    const items = [
-      { type: 'A' },
-      { type: 'B' },
-      { type: 'A' }
-    ];
+    const items = [{ type: 'A' }, { type: 'B' }, { type: 'A' }];
     expect(countByField(items, 'type')).toEqual({ A: 2, B: 1 });
   });
 
@@ -890,20 +880,12 @@ describe('countByField', () => {
   });
 
   it('handles all unique values', () => {
-    const items = [
-      { status: 'a' },
-      { status: 'b' },
-      { status: 'c' }
-    ];
+    const items = [{ status: 'a' }, { status: 'b' }, { status: 'c' }];
     expect(countByField(items)).toEqual({ a: 1, b: 1, c: 1 });
   });
 
   it('handles all same values', () => {
-    const items = [
-      { status: 'paid' },
-      { status: 'paid' },
-      { status: 'paid' }
-    ];
+    const items = [{ status: 'paid' }, { status: 'paid' }, { status: 'paid' }];
     expect(countByField(items)).toEqual({ paid: 3 });
   });
 

@@ -6,7 +6,13 @@ import { getString } from '../../database/row-helpers.js';
 import { projectService } from '../../services/project-service.js';
 import { normalizeDeliverables } from '../../services/project/milestones.js';
 import { invalidateCache } from '../../middleware/cache.js';
-import { errorResponse, sendSuccess, sendCreated, messageResponse, ErrorCodes } from '../../utils/api-response.js';
+import {
+  errorResponse,
+  sendSuccess,
+  sendCreated,
+  messageResponse,
+  ErrorCodes
+} from '../../utils/api-response.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 
@@ -91,7 +97,12 @@ router.put(
     const projectId = parseInt(req.params.id, 10);
     const milestoneId = parseInt(req.params.milestoneId, 10);
     if (isNaN(projectId) || projectId <= 0 || isNaN(milestoneId) || milestoneId <= 0) {
-      return errorResponse(res, 'Invalid project or milestone ID', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'Invalid project or milestone ID',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
     const { title, description, due_date, deliverables, is_completed } = req.body;
 
@@ -188,7 +199,12 @@ router.delete(
     const projectId = parseInt(req.params.id, 10);
     const milestoneId = parseInt(req.params.milestoneId, 10);
     if (isNaN(projectId) || projectId <= 0 || isNaN(milestoneId) || milestoneId <= 0) {
-      return errorResponse(res, 'Invalid project or milestone ID', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(
+        res,
+        'Invalid project or milestone ID',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
     }
 
     // Verify milestone belongs to project

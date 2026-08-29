@@ -60,10 +60,7 @@ async function findDefaultProjectForClient(clientId: number | string): Promise<n
 }
 
 /** Whether a project belongs to the given client */
-async function clientOwnsProject(
-  projectId: number,
-  clientId: number | string
-): Promise<boolean> {
+async function clientOwnsProject(projectId: number, clientId: number | string): Promise<boolean> {
   const db = getDatabase();
   const row = await db.get<{ id: number }>(
     'SELECT id FROM active_projects WHERE id = ? AND client_id = ?',
@@ -94,10 +91,10 @@ async function insertFileRecord(params: InsertFileParams): Promise<number | unde
 /** Update a client's avatar URL */
 async function updateClientAvatar(clientId: number | string, avatarUrl: string): Promise<void> {
   const db = getDatabase();
-  await db.run(
-    'UPDATE clients SET avatar_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-    [avatarUrl, clientId]
-  );
+  await db.run('UPDATE clients SET avatar_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [
+    avatarUrl,
+    clientId
+  ]);
 }
 
 /** Fetch all non-deleted files for a project */
@@ -186,7 +183,9 @@ async function getFileWithClient(fileId: number): Promise<FileWithClientRow | un
 }
 
 /** Find a non-deleted file by ID (returns id and project_id) */
-async function findActiveFileById(fileId: number): Promise<{ id: number; project_id: number } | undefined> {
+async function findActiveFileById(
+  fileId: number
+): Promise<{ id: number; project_id: number } | undefined> {
   const db = getDatabase();
   const file = await db.get<{ id: number; project_id: number }>(
     'SELECT id, project_id FROM files WHERE id = ? AND deleted_at IS NULL',
@@ -222,7 +221,10 @@ async function unshareFileWithClient(fileId: number): Promise<void> {
 }
 
 /** Check whether a project belongs to a given client */
-async function isProjectOwnedByClient(projectId: number, clientId: number | string): Promise<boolean> {
+async function isProjectOwnedByClient(
+  projectId: number,
+  clientId: number | string
+): Promise<boolean> {
   const db = getDatabase();
   const row = await db.get<{ '1': number }>(
     'SELECT 1 FROM active_projects WHERE id = ? AND client_id = ?',

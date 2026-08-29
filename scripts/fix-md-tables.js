@@ -29,8 +29,8 @@ for (let i = 0; i < lines.length; i++) {
       const hasTrailing = /\|\s*$/.test(lines[j]);
       // remove spaces around pipes
       let newLine = lines[j].replace(/\s*\|\s*/g, '|').trim();
-      if (hasLeading && !newLine.startsWith('|')) newLine = `|${  newLine}`;
-      if (hasTrailing && !newLine.endsWith('|')) newLine = `${newLine  }|`;
+      if (hasLeading && !newLine.startsWith('|')) newLine = `|${newLine}`;
+      if (hasTrailing && !newLine.endsWith('|')) newLine = `${newLine}|`;
       lines[j] = newLine;
       j++;
     }

@@ -514,7 +514,8 @@ export class NavigationModule extends BaseModule {
 
       // Fallback: try to get from window global if available (from EJS template)
       if (navigationItems.length === 0 && typeof window !== 'undefined') {
-        const windowData = (window as unknown as { NAVIGATION_DATA?: WindowNavigationData }).NAVIGATION_DATA;
+        const windowData = (window as unknown as { NAVIGATION_DATA?: WindowNavigationData })
+          .NAVIGATION_DATA;
         if (windowData?.menuItems) {
           navigationItems = windowData.menuItems;
         }

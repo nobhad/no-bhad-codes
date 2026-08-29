@@ -273,9 +273,10 @@ export async function recalculateProjectProgress(projectId: number): Promise<{
 
   try {
     // Get all milestones for project
-    const milestones = (await db.all('SELECT id FROM milestones WHERE project_id = ? AND deleted_at IS NULL', [
-      projectId
-    ])) as Array<{ id: number }>;
+    const milestones = (await db.all(
+      'SELECT id FROM milestones WHERE project_id = ? AND deleted_at IS NULL',
+      [projectId]
+    )) as Array<{ id: number }>;
 
     let milestonesUpdated = 0;
 

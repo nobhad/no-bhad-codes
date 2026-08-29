@@ -173,7 +173,9 @@ describe('MessageService - Mentions', () => {
   describe('processMentions', () => {
     it('saves @all mention and updates message mention count', async () => {
       mockDb.run.mockResolvedValueOnce({ lastID: 10 }); // INSERT mention
-      mockDb.get.mockResolvedValueOnce(makeMentionRow({ mentioned_type: 'all', mentioned_id: null }));
+      mockDb.get.mockResolvedValueOnce(
+        makeMentionRow({ mentioned_type: 'all', mentioned_id: null })
+      );
       mockDb.run.mockResolvedValueOnce(undefined); // UPDATE mention_count
 
       const result = await messageService.processMentions(1, 'Hey @all please review');
@@ -185,7 +187,9 @@ describe('MessageService - Mentions', () => {
 
     it('saves @team:name mention', async () => {
       mockDb.run.mockResolvedValueOnce({ lastID: 11 });
-      mockDb.get.mockResolvedValueOnce(makeMentionRow({ mentioned_type: 'team', mentioned_id: 'designers' }));
+      mockDb.get.mockResolvedValueOnce(
+        makeMentionRow({ mentioned_type: 'team', mentioned_id: 'designers' })
+      );
       mockDb.run.mockResolvedValueOnce(undefined);
 
       const result = await messageService.processMentions(1, 'Hey @team:designers please review');
@@ -196,7 +200,9 @@ describe('MessageService - Mentions', () => {
 
     it('saves @email mention', async () => {
       mockDb.run.mockResolvedValueOnce({ lastID: 12 });
-      mockDb.get.mockResolvedValueOnce(makeMentionRow({ mentioned_type: 'user', mentioned_id: 'test@example.com' }));
+      mockDb.get.mockResolvedValueOnce(
+        makeMentionRow({ mentioned_type: 'user', mentioned_id: 'test@example.com' })
+      );
       mockDb.run.mockResolvedValueOnce(undefined);
 
       const result = await messageService.processMentions(1, 'Hey @test@example.com please review');
@@ -209,7 +215,9 @@ describe('MessageService - Mentions', () => {
       mockDb.run.mockResolvedValueOnce({ lastID: 10 }); // @all insert
       mockDb.get.mockResolvedValueOnce(makeMentionRow({ mentioned_type: 'all' }));
       mockDb.run.mockResolvedValueOnce({ lastID: 11 }); // @team insert
-      mockDb.get.mockResolvedValueOnce(makeMentionRow({ mentioned_type: 'team', mentioned_id: 'devs' }));
+      mockDb.get.mockResolvedValueOnce(
+        makeMentionRow({ mentioned_type: 'team', mentioned_id: 'devs' })
+      );
       mockDb.run.mockResolvedValueOnce(undefined); // UPDATE mention_count
 
       const result = await messageService.processMentions(1, 'Hey @all and @team:devs');
@@ -262,10 +270,21 @@ describe('MessageService - Mentions', () => {
   describe('getMyMentions', () => {
     it('returns messages where user is mentioned', async () => {
       const msgRow = {
-        id: 1, thread_id: 1, sender_type: 'admin', sender_name: 'Admin',
-        message: 'Hello', priority: 'normal', read_at: null, is_internal: 0,
-        edited_at: null, deleted_at: null, created_at: '2026-01-01T00:00:00Z',
-        parent_message_id: null, reaction_count: 0, reply_count: 0, mention_count: 1
+        id: 1,
+        thread_id: 1,
+        sender_type: 'admin',
+        sender_name: 'Admin',
+        message: 'Hello',
+        priority: 'normal',
+        read_at: null,
+        is_internal: 0,
+        edited_at: null,
+        deleted_at: null,
+        created_at: '2026-01-01T00:00:00Z',
+        parent_message_id: null,
+        reaction_count: 0,
+        reply_count: 0,
+        mention_count: 1
       };
       mockDb.all.mockResolvedValueOnce([msgRow]);
 
@@ -280,10 +299,7 @@ describe('MessageService - Mentions', () => {
 
       await messageService.getMyMentions('user@example.com');
 
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.any(String),
-        ['user@example.com', 50]
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.any(String), ['user@example.com', 50]);
     });
 
     it('accepts custom limit', async () => {
@@ -301,10 +317,7 @@ describe('MessageService - Mentions', () => {
 
       await messageService.markMentionsNotified(1);
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('notified = TRUE'),
-        [1]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('notified = TRUE'), [1]);
     });
   });
 });
@@ -389,9 +402,7 @@ describe('MessageService - Reactions', () => {
     });
 
     it('handles empty users string gracefully', async () => {
-      mockDb.all.mockResolvedValueOnce([
-        { reaction: '❤️', count: 0, users: '' }
-      ]);
+      mockDb.all.mockResolvedValueOnce([{ reaction: '❤️', count: 0, users: '' }]);
 
       const result = await messageService.getReactions(1);
 
@@ -489,10 +500,11 @@ describe('MessageService - Subscriptions', () => {
       const until = new Date('2026-12-31T00:00:00Z');
       await messageService.muteProject(1, 'user@example.com', 'client', until);
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('muted_until = ?'),
-        [until.toISOString(), 1, 'user@example.com']
-      );
+      expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('muted_until = ?'), [
+        until.toISOString(),
+        1,
+        'user@example.com'
+      ]);
     });
 
     it('mutes a project permanently (no date)', async () => {
@@ -501,10 +513,11 @@ describe('MessageService - Subscriptions', () => {
 
       await messageService.muteProject(1, 'user@example.com', 'client');
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('muted_until = ?'),
-        [null, 1, 'user@example.com']
-      );
+      expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('muted_until = ?'), [
+        null,
+        1,
+        'user@example.com'
+      ]);
     });
   });
 
@@ -514,10 +527,10 @@ describe('MessageService - Subscriptions', () => {
 
       await messageService.unmuteProject(1, 'user@example.com');
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('muted_until = NULL'),
-        [1, 'user@example.com']
-      );
+      expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('muted_until = NULL'), [
+        1,
+        'user@example.com'
+      ]);
     });
   });
 
@@ -538,9 +551,16 @@ describe('MessageService - Subscriptions', () => {
       // Override toSubscription for this test to return muted subscription
       const { toSubscription } = await import('../../../server/database/entities/index');
       vi.mocked(toSubscription).mockReturnValueOnce({
-        id: 5, projectId: 1, userEmail: 'user@example.com', userType: 'client',
-        notifyAll: true, notifyMentions: true, notifyReplies: true,
-        mutedUntil: futureDate, createdAt: '', updatedAt: ''
+        id: 5,
+        projectId: 1,
+        userEmail: 'user@example.com',
+        userType: 'client',
+        notifyAll: true,
+        notifyMentions: true,
+        notifyReplies: true,
+        mutedUntil: futureDate,
+        createdAt: '',
+        updatedAt: ''
       });
 
       const result = await messageService.shouldNotify(1, 'user@example.com', 'all');
@@ -552,9 +572,16 @@ describe('MessageService - Subscriptions', () => {
       mockDb.get.mockResolvedValueOnce(makeSubscriptionRow({ notify_all: 0 }));
       const { toSubscription } = await import('../../../server/database/entities/index');
       vi.mocked(toSubscription).mockReturnValueOnce({
-        id: 5, projectId: 1, userEmail: 'user@example.com', userType: 'client',
-        notifyAll: false, notifyMentions: true, notifyReplies: true,
-        mutedUntil: undefined, createdAt: '', updatedAt: ''
+        id: 5,
+        projectId: 1,
+        userEmail: 'user@example.com',
+        userType: 'client',
+        notifyAll: false,
+        notifyMentions: true,
+        notifyReplies: true,
+        mutedUntil: undefined,
+        createdAt: '',
+        updatedAt: ''
       });
 
       const result = await messageService.shouldNotify(1, 'user@example.com', 'all');
@@ -566,9 +593,16 @@ describe('MessageService - Subscriptions', () => {
       mockDb.get.mockResolvedValueOnce(makeSubscriptionRow());
       const { toSubscription } = await import('../../../server/database/entities/index');
       vi.mocked(toSubscription).mockReturnValueOnce({
-        id: 5, projectId: 1, userEmail: 'user@example.com', userType: 'client',
-        notifyAll: true, notifyMentions: false, notifyReplies: true,
-        mutedUntil: undefined, createdAt: '', updatedAt: ''
+        id: 5,
+        projectId: 1,
+        userEmail: 'user@example.com',
+        userType: 'client',
+        notifyAll: true,
+        notifyMentions: false,
+        notifyReplies: true,
+        mutedUntil: undefined,
+        createdAt: '',
+        updatedAt: ''
       });
 
       const result = await messageService.shouldNotify(1, 'user@example.com', 'mention');
@@ -580,9 +614,16 @@ describe('MessageService - Subscriptions', () => {
       mockDb.get.mockResolvedValueOnce(makeSubscriptionRow());
       const { toSubscription } = await import('../../../server/database/entities/index');
       vi.mocked(toSubscription).mockReturnValueOnce({
-        id: 5, projectId: 1, userEmail: 'user@example.com', userType: 'client',
-        notifyAll: true, notifyMentions: true, notifyReplies: false,
-        mutedUntil: undefined, createdAt: '', updatedAt: ''
+        id: 5,
+        projectId: 1,
+        userEmail: 'user@example.com',
+        userType: 'client',
+        notifyAll: true,
+        notifyMentions: true,
+        notifyReplies: false,
+        mutedUntil: undefined,
+        createdAt: '',
+        updatedAt: ''
       });
 
       const result = await messageService.shouldNotify(1, 'user@example.com', 'reply');
@@ -594,9 +635,16 @@ describe('MessageService - Subscriptions', () => {
       mockDb.get.mockResolvedValueOnce(makeSubscriptionRow());
       const { toSubscription } = await import('../../../server/database/entities/index');
       vi.mocked(toSubscription).mockReturnValueOnce({
-        id: 5, projectId: 1, userEmail: 'user@example.com', userType: 'client',
-        notifyAll: true, notifyMentions: true, notifyReplies: true,
-        mutedUntil: undefined, createdAt: '', updatedAt: ''
+        id: 5,
+        projectId: 1,
+        userEmail: 'user@example.com',
+        userType: 'client',
+        notifyAll: true,
+        notifyMentions: true,
+        notifyReplies: true,
+        mutedUntil: undefined,
+        createdAt: '',
+        updatedAt: ''
       });
 
       // Force the default branch with a cast
@@ -698,10 +746,9 @@ describe('MessageService - Read Receipts', () => {
 
       expect(count).toBe(3);
       // Admin query uses a single email param
-      expect(mockDb.get).toHaveBeenCalledWith(
-        expect.stringContaining('sender_type != \'admin\''),
-        ['admin@example.com']
-      );
+      expect(mockDb.get).toHaveBeenCalledWith(expect.stringContaining("sender_type != 'admin'"), [
+        'admin@example.com'
+      ]);
     });
 
     it('uses client query for client user type', async () => {
@@ -711,10 +758,10 @@ describe('MessageService - Read Receipts', () => {
 
       expect(count).toBe(5);
       // Client query uses email twice
-      expect(mockDb.get).toHaveBeenCalledWith(
-        expect.stringContaining('sender_type != \'client\''),
-        ['client@example.com', 'client@example.com']
-      );
+      expect(mockDb.get).toHaveBeenCalledWith(expect.stringContaining("sender_type != 'client'"), [
+        'client@example.com',
+        'client@example.com'
+      ]);
     });
 
     it('returns 0 when result is null/falsy', async () => {
@@ -730,7 +777,11 @@ describe('MessageService - Read Receipts', () => {
     it('marks all provided message IDs as read and returns count', async () => {
       mockDb.run.mockResolvedValue(undefined);
 
-      const count = await messageService.markMultipleAsRead([1, 2, 3], 'user@example.com', 'client');
+      const count = await messageService.markMultipleAsRead(
+        [1, 2, 3],
+        'user@example.com',
+        'client'
+      );
 
       expect(count).toBe(3);
       expect(mockDb.run).toHaveBeenCalledTimes(3);
@@ -743,7 +794,11 @@ describe('MessageService - Read Receipts', () => {
         .mockResolvedValueOnce(undefined); // msg 3 ok
 
       const { logger } = await import('../../../server/services/logger');
-      const count = await messageService.markMultipleAsRead([1, 2, 3], 'user@example.com', 'client');
+      const count = await messageService.markMultipleAsRead(
+        [1, 2, 3],
+        'user@example.com',
+        'client'
+      );
 
       expect(count).toBe(2);
       expect(vi.mocked(logger.warn)).toHaveBeenCalled();
@@ -812,9 +867,9 @@ describe('MessageService - Pinned Messages', () => {
     it('throws when message not found in thread', async () => {
       mockDb.get.mockResolvedValueOnce(null); // Message not in thread
 
-      await expect(
-        messageService.pinMessage(1, 999, 'admin@example.com')
-      ).rejects.toThrow('Message not found in thread');
+      await expect(messageService.pinMessage(1, 999, 'admin@example.com')).rejects.toThrow(
+        'Message not found in thread'
+      );
     });
   });
 
@@ -877,11 +932,10 @@ describe('MessageService - Editing and Deletion', () => {
 
       await messageService.editMessage(1, 'Updated content');
 
-      expect(mockDb.run).toHaveBeenNthCalledWith(
-        1,
-        expect.stringContaining('SET message = ?'),
-        ['Updated content', 1]
-      );
+      expect(mockDb.run).toHaveBeenNthCalledWith(1, expect.stringContaining('SET message = ?'), [
+        'Updated content',
+        1
+      ]);
       expect(mockDb.run).toHaveBeenNthCalledWith(
         2,
         'DELETE FROM message_mentions WHERE message_id = ?',
@@ -899,7 +953,7 @@ describe('MessageService - Editing and Deletion', () => {
       await messageService.editMessage(1, 'Updated @all content');
 
       // processMentions should have inserted the @all mention
-      const insertCall = mockDb.run.mock.calls.find(call =>
+      const insertCall = mockDb.run.mock.calls.find((call) =>
         call[0].includes('INSERT INTO message_mentions')
       );
       expect(insertCall).toBeDefined();
@@ -912,10 +966,10 @@ describe('MessageService - Editing and Deletion', () => {
 
       await messageService.deleteMessage(1, 'admin@example.com');
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('deleted_at = datetime'),
-        ['admin@example.com', 1]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('deleted_at = datetime'), [
+        'admin@example.com',
+        1
+      ]);
     });
   });
 
@@ -925,10 +979,7 @@ describe('MessageService - Editing and Deletion', () => {
 
       await messageService.restoreMessage(1);
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('deleted_at = NULL'),
-        [1]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('deleted_at = NULL'), [1]);
     });
   });
 });
@@ -950,10 +1001,10 @@ describe('MessageService - Threads', () => {
 
       await messageService.archiveThread(1, 'admin@example.com');
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('status = \'archived\''),
-        ['admin@example.com', 1]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining("status = 'archived'"), [
+        'admin@example.com',
+        1
+      ]);
     });
   });
 
@@ -963,19 +1014,27 @@ describe('MessageService - Threads', () => {
 
       await messageService.unarchiveThread(1);
 
-      expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('status = \'active\''),
-        [1]
-      );
+      expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining("status = 'active'"), [1]);
     });
   });
 
   describe('getThreadReplies', () => {
     const msgRow = {
-      id: 1, thread_id: 1, sender_type: 'admin', sender_name: 'Admin',
-      message: 'Hello', priority: 'normal', read_at: null, is_internal: 0,
-      edited_at: null, deleted_at: null, created_at: '2026-01-01T00:00:00Z',
-      parent_message_id: null, reaction_count: 0, reply_count: 0, mention_count: 0
+      id: 1,
+      thread_id: 1,
+      sender_type: 'admin',
+      sender_name: 'Admin',
+      message: 'Hello',
+      priority: 'normal',
+      read_at: null,
+      is_internal: 0,
+      edited_at: null,
+      deleted_at: null,
+      created_at: '2026-01-01T00:00:00Z',
+      parent_message_id: null,
+      reaction_count: 0,
+      reply_count: 0,
+      mention_count: 0
     };
 
     it('fetches top-level messages when no parentMessageId', async () => {
@@ -1101,10 +1160,7 @@ describe('MessageService - Search', () => {
 
       await messageService.searchMessages('hello');
 
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.arrayContaining([50])
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.any(String), expect.arrayContaining([50]));
     });
 
     it('uses custom limit', async () => {
@@ -1112,10 +1168,7 @@ describe('MessageService - Search', () => {
 
       await messageService.searchMessages('hello', { limit: 10 });
 
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.arrayContaining([10])
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.any(String), expect.arrayContaining([10]));
     });
 
     it('maps undefined project_id and project_name to undefined', async () => {

@@ -176,9 +176,9 @@ export function useClientCore({ clientId }: ClientDetailHookOptions) {
         ...prev,
         client: prev.client
           ? {
-            ...prev.client,
-            invitation_sent_at: inviteData.invitation_sent_at || new Date().toISOString()
-          }
+              ...prev.client,
+              invitation_sent_at: inviteData.invitation_sent_at || new Date().toISOString()
+            }
           : null
       }));
       return true;

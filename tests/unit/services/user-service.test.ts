@@ -89,10 +89,9 @@ describe('UserService - getUserIdByEmail', () => {
     const result = await userService.getUserIdByEmail('Alice@Example.COM');
 
     expect(result).toBe(1);
-    expect(mockDb.get).toHaveBeenCalledWith(
-      expect.stringContaining('LOWER(email) = ?'),
-      ['alice@example.com']
-    );
+    expect(mockDb.get).toHaveBeenCalledWith(expect.stringContaining('LOWER(email) = ?'), [
+      'alice@example.com'
+    ]);
   });
 
   it('returns null when user not found in db', async () => {
@@ -135,10 +134,9 @@ describe('UserService - getUserIdByEmailOrName', () => {
 
     expect(result).toBe(3);
     // Should have been called with email lookup
-    expect(mockDb.get).toHaveBeenCalledWith(
-      expect.stringContaining('LOWER(email) = ?'),
-      ['bob@example.com']
-    );
+    expect(mockDb.get).toHaveBeenCalledWith(expect.stringContaining('LOWER(email) = ?'), [
+      'bob@example.com'
+    ]);
   });
 
   it('falls through to name lookup when email not found', async () => {
@@ -156,10 +154,10 @@ describe('UserService - getUserIdByEmailOrName', () => {
 
     const result = await userService.getUserIdByEmailOrName('Alice Smith');
 
-    expect(mockDb.get).toHaveBeenCalledWith(
-      expect.stringContaining('LOWER(display_name) = ?'),
-      ['alice smith', 'alice smith']
-    );
+    expect(mockDb.get).toHaveBeenCalledWith(expect.stringContaining('LOWER(display_name) = ?'), [
+      'alice smith',
+      'alice smith'
+    ]);
     expect(result).toBe(9);
   });
 
@@ -215,10 +213,9 @@ describe('UserService - getUserByEmail', () => {
     const result = await userService.getUserByEmail('Alice@Example.com');
 
     expect(result).toMatchObject(mappedUser);
-    expect(mockDb.get).toHaveBeenCalledWith(
-      expect.stringContaining('LOWER(email) = ?'),
-      ['alice@example.com']
-    );
+    expect(mockDb.get).toHaveBeenCalledWith(expect.stringContaining('LOWER(email) = ?'), [
+      'alice@example.com'
+    ]);
   });
 
   it('returns null when email not found', async () => {
@@ -334,7 +331,7 @@ describe('UserService - getOrCreateUser', () => {
   });
 
   it('creates user when not found', async () => {
-    mockDb.get.mockResolvedValueOnce(null);   // getUserByEmail - not found
+    mockDb.get.mockResolvedValueOnce(null); // getUserByEmail - not found
     mockDb.run.mockResolvedValueOnce({ lastID: 2 });
     mockDb.get.mockResolvedValueOnce({ ...mockUserRow, id: 2 });
 
@@ -345,7 +342,7 @@ describe('UserService - getOrCreateUser', () => {
   });
 
   it('uses email username as displayName when displayName is not provided', async () => {
-    mockDb.get.mockResolvedValueOnce(null);   // getUserByEmail
+    mockDb.get.mockResolvedValueOnce(null); // getUserByEmail
     mockDb.run.mockResolvedValueOnce({ lastID: 3 });
     mockDb.get.mockResolvedValueOnce({ ...mockUserRow, id: 3, display_name: 'noname' });
 
@@ -385,10 +382,7 @@ describe('UserService - deactivateUser', () => {
 
     await userService.deactivateUser(1);
 
-    expect(mockDb.run).toHaveBeenCalledWith(
-      expect.stringContaining('is_active = 0'),
-      [1]
-    );
+    expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('is_active = 0'), [1]);
   });
 });
 
@@ -403,10 +397,7 @@ describe('UserService - reactivateUser', () => {
 
     await userService.reactivateUser(1);
 
-    expect(mockDb.run).toHaveBeenCalledWith(
-      expect.stringContaining('is_active = 1'),
-      [1]
-    );
+    expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('is_active = 1'), [1]);
   });
 });
 

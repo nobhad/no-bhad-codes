@@ -27,12 +27,25 @@
  */
 
 import {
-  PDFDocument, PDFFont, PDFPage, PDFForm, PDFRef, PDFName, PDFArray,
-  PDFString, PDFHexString, rgb, RGB
+  PDFDocument,
+  PDFFont,
+  PDFPage,
+  PDFForm,
+  PDFRef,
+  PDFName,
+  PDFArray,
+  PDFString,
+  PDFHexString,
+  rgb,
+  RGB
 } from 'pdf-lib';
 import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync, statSync } from 'fs';
 import { join, basename } from 'path';
-import { getRegularFontBytes, getBoldFontBytes, registerFontkit } from '../server/utils/pdf-utils.js';
+import {
+  getRegularFontBytes,
+  getBoldFontBytes,
+  registerFontkit
+} from '../server/utils/pdf-utils.js';
 
 const BUSINESS_INFO = {
   name: process.env.BUSINESS_NAME || 'No Bhad Codes',
@@ -42,9 +55,9 @@ const BUSINESS_INFO = {
 };
 
 // ── Page geometry ──────────────────────────────────────────────────────────
-const PAGE_WIDTH = 612;   // US Letter
+const PAGE_WIDTH = 612; // US Letter
 const PAGE_HEIGHT = 792;
-const MARGIN = 54;        // 0.75in, matches every other generator
+const MARGIN = 54; // 0.75in, matches every other generator
 const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2;
 const RIGHT_EDGE = PAGE_WIDTH - MARGIN;
 
@@ -109,21 +122,21 @@ function toAscii(text: string): string {
 }
 
 function stripMarkdownFormatting(text: string): string {
-  return toAscii(text
-    .replace(/\*\*([^*]+)\*\*/g, '$1')
-    .replace(/(^|[\s(])\*([^*]+)\*/g, '$1$2')
-    .replace(/`([^`]+)`/g, '$1')
-    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1'));
+  return toAscii(
+    text
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/(^|[\s(])\*([^*]+)\*/g, '$1$2')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+  );
   // No trim: this runs per inline segment, and the space before a **bold** run
   // lives at the end of the plain segment preceding it.
 }
 
 /** Collapse images and links to their label text. The no-href fallback. */
 function stripLinks(raw: string): string {
-  return raw
-    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1');
+  return raw.replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1');
 }
 
 /**
@@ -179,16 +192,28 @@ function normaliseHref(href: string): string {
 // than the break we would have taken anyway.
 
 const ABBREVIATIONS = new Set([
-  'e.g.', 'i.e.', 'etc.', 'vs.', 'cf.', 'approx.', 'no.',
-  'mr.', 'mrs.', 'ms.', 'dr.', 'st.', 'inc.', 'ltd.'
+  'e.g.',
+  'i.e.',
+  'etc.',
+  'vs.',
+  'cf.',
+  'approx.',
+  'no.',
+  'mr.',
+  'mrs.',
+  'ms.',
+  'dr.',
+  'st.',
+  'inc.',
+  'ltd.'
 ]);
 
 function endsSentence(word: string, next: string | undefined): boolean {
   const w = word.replace(/[)\]}"'`*]+$/, '');
   if (!/[.?!]$/.test(w)) return false;
   if (ABBREVIATIONS.has(w.toLowerCase())) return false;
-  if (/^\d+(\.\d+)*\.$/.test(w)) return false;   // 18.20.8. / version-ish
-  if (/^[A-Za-z]\.$/.test(w)) return false;      // an initial
+  if (/^\d+(\.\d+)*\.$/.test(w)) return false; // 18.20.8. / version-ish
+  if (/^[A-Za-z]\.$/.test(w)) return false; // an initial
   if (next === undefined) return true;
   // A real sentence start: capital, digit, or an opening mark.
   return /^[A-Z0-9"'`(\[]/.test(next);
@@ -241,14 +266,16 @@ function parseInlineBold(input: string): Seg[] {
 function opensBlock(line: string): boolean {
   const t = line.trim();
   if (t === '') return true;
-  return /^#{1,6}\s/.test(t)
-    || t.startsWith('```')
-    || t.startsWith('>')
-    || t.startsWith('|')
-    || t.startsWith('<!--')
-    || /^(-{3,}|\*{3,}|_{3,})$/.test(t)
-    || /^[-*]\s/.test(t)
-    || /^\d+\.\s/.test(t);
+  return (
+    /^#{1,6}\s/.test(t) ||
+    t.startsWith('```') ||
+    t.startsWith('>') ||
+    t.startsWith('|') ||
+    t.startsWith('<!--') ||
+    /^(-{3,}|\*{3,}|_{3,})$/.test(t) ||
+    /^[-*]\s/.test(t) ||
+    /^\d+\.\s/.test(t)
+  );
 }
 
 /**
@@ -281,7 +308,11 @@ type Tok = { text: string; bold: boolean; glue: boolean; href?: string };
 type Unit = { toks: Tok[]; width: number; sentence: number };
 type FlowLine = { units: Unit[]; first: number; last: number };
 
-async function convert(inputPath: string, outputPath: string, titleOverride?: string): Promise<void> {
+async function convert(
+  inputPath: string,
+  outputPath: string,
+  titleOverride?: string
+): Promise<void> {
   const markdown = readFileSync(inputPath, 'utf-8');
   const lines = markdown.split('\n');
 
@@ -327,7 +358,12 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
     if (logoImage) {
       const logoWidth = (logoImage.width / logoImage.height) * LOGO_HEIGHT;
       logoX = RIGHT_EDGE - logoWidth - 150;
-      p.drawImage(logoImage, { x: logoX, y: top - LOGO_HEIGHT + 10, width: logoWidth, height: LOGO_HEIGHT });
+      p.drawImage(logoImage, {
+        x: logoX,
+        y: top - LOGO_HEIGHT + 10,
+        width: logoWidth,
+        height: LOGO_HEIGHT
+      });
       textStartX = logoX + logoWidth + 18;
     }
 
@@ -336,7 +372,10 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
     // runs straight under the artwork.
     const titleRoom = logoX - 14 - MARGIN;
     let titleSize = SIZE_TITLE;
-    while (titleSize > TITLE_MIN_SIZE && bold.widthOfTextAtSize(documentTitle, titleSize) > titleRoom) {
+    while (
+      titleSize > TITLE_MIN_SIZE &&
+      bold.widthOfTextAtSize(documentTitle, titleSize) > titleRoom
+    ) {
       titleSize -= 0.5;
     }
     const titleLines: string[] = [];
@@ -356,19 +395,54 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
       if (line) titleLines.push(line);
     }
     titleLines.forEach((ln, idx) => {
-      p.drawText(ln, { x: MARGIN, y: top - 18 - idx * (titleSize + 4), size: titleSize, font: bold, color: BLACK });
+      p.drawText(ln, {
+        x: MARGIN,
+        y: top - 18 - idx * (titleSize + 4),
+        size: titleSize,
+        font: bold,
+        color: BLACK
+      });
     });
 
     // Business info, right of the logo. Offsets, sizes and the muted treatment
     // match the header in scripts/markdown-to-pdf.ts — one house header, drawn
     // here on every page rather than only the first.
-    p.drawText(BUSINESS_INFO.name, { x: textStartX, y: top - 11, size: 15, font: bold, color: BLACK });
-    p.drawText(BUSINESS_INFO.owner, { x: textStartX, y: top - 34, size: 10, font: regular, color: BLACK });
-    p.drawText(BUSINESS_INFO.email, { x: textStartX, y: top - 54, size: 9, font: regular, color: MUTED });
-    p.drawText(BUSINESS_INFO.website, { x: textStartX, y: top - 70, size: 9, font: regular, color: MUTED });
+    p.drawText(BUSINESS_INFO.name, {
+      x: textStartX,
+      y: top - 11,
+      size: 15,
+      font: bold,
+      color: BLACK
+    });
+    p.drawText(BUSINESS_INFO.owner, {
+      x: textStartX,
+      y: top - 34,
+      size: 10,
+      font: regular,
+      color: BLACK
+    });
+    p.drawText(BUSINESS_INFO.email, {
+      x: textStartX,
+      y: top - 54,
+      size: 9,
+      font: regular,
+      color: MUTED
+    });
+    p.drawText(BUSINESS_INFO.website, {
+      x: textStartX,
+      y: top - 70,
+      size: 9,
+      font: regular,
+      color: MUTED
+    });
 
     top -= HEADER_HEIGHT;
-    p.drawLine({ start: { x: MARGIN, y: top }, end: { x: RIGHT_EDGE, y: top }, thickness: 1, color: BLACK });
+    p.drawLine({
+      start: { x: MARGIN, y: top },
+      end: { x: RIGHT_EDGE, y: top },
+      thickness: 1,
+      color: BLACK
+    });
     return top - 21;
   }
 
@@ -385,7 +459,14 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
     if (y - need < CONTENT_BOTTOM) newPage();
   }
 
-  function draw(text: string, x: number, yPos: number, font: PDFFont, size: number, color: RGB = BLACK): void {
+  function draw(
+    text: string,
+    x: number,
+    yPos: number,
+    font: PDFFont,
+    size: number,
+    color: RGB = BLACK
+  ): void {
     if (!text) return;
     page.drawText(text, { x, y: yPos, size, font, color });
   }
@@ -400,8 +481,16 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
       if (!clean) continue;
       for (const part of clean.split(/(\s+)/)) {
         if (part === '') continue;
-        if (/^\s+$/.test(part)) { pendingSpace = true; continue; }
-        toks.push({ text: part, bold: seg.bold, glue: !pendingSpace && toks.length > 0, href: seg.href });
+        if (/^\s+$/.test(part)) {
+          pendingSpace = true;
+          continue;
+        }
+        toks.push({
+          text: part,
+          bold: seg.bold,
+          glue: !pendingSpace && toks.length > 0,
+          href: seg.href
+        });
         pendingSpace = false;
       }
     }
@@ -415,7 +504,10 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
     const textOf = (u: Unit): string => u.toks.map((t) => t.text).join('');
     let sentence = 0;
     units.forEach((u, idx) => {
-      u.width = u.toks.reduce((sum, t) => sum + (t.bold ? bold : regular).widthOfTextAtSize(t.text, size), 0);
+      u.width = u.toks.reduce(
+        (sum, t) => sum + (t.bold ? bold : regular).widthOfTextAtSize(t.text, size),
+        0
+      );
       u.sentence = sentence;
       if (endsSentence(textOf(u), units[idx + 1] ? textOf(units[idx + 1]) : undefined)) sentence++;
     });
@@ -428,7 +520,8 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
     let cur: Unit[] = [];
     let width = 0;
     const flush = (): void => {
-      if (cur.length) out.push({ units: cur, first: cur[0].sentence, last: cur[cur.length - 1].sentence });
+      if (cur.length)
+        out.push({ units: cur, first: cur[0].sentence, last: cur[cur.length - 1].sentence });
       cur = [];
       width = 0;
     };
@@ -451,7 +544,15 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
     return wrapUnits(buildUnits(segs, size), maxWidth, size);
   }
 
-  function drawRange(src: FlowLine[], from: number, to: number, x0: number, size: number, lead: number, color: RGB): void {
+  function drawRange(
+    src: FlowLine[],
+    from: number,
+    to: number,
+    x0: number,
+    size: number,
+    lead: number,
+    color: RGB
+  ): void {
     const space = regular.widthOfTextAtSize(' ', size);
     for (let k = from; k < to; k++) {
       let x = x0;
@@ -463,8 +564,10 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
           draw(tok.text, x, y, font, size, color);
           if (tok.href) {
             page.drawLine({
-              start: { x, y: y - 1.6 }, end: { x: x + w, y: y - 1.6 },
-              thickness: 0.4, color
+              start: { x, y: y - 1.6 },
+              end: { x: x + w, y: y - 1.6 },
+              thickness: 0.4,
+              color
             });
             linkRects.push({ page, href: tok.href, x, y: y - 3, w, h: size + 4 });
           }
@@ -486,7 +589,14 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
    * pushed to a fresh page; only a sentence genuinely taller than one page
    * (which these documents do not contain) falls through to a hard split.
    */
-  function emitFlow(src: FlowLine[], x0: number, size: number, lead: number, color: RGB = BLACK, keepTogether = KEEP_TOGETHER_LINES): void {
+  function emitFlow(
+    src: FlowLine[],
+    x0: number,
+    size: number,
+    lead: number,
+    color: RGB = BLACK,
+    keepTogether = KEEP_TOGETHER_LINES
+  ): void {
     let i = 0;
     while (i < src.length) {
       let fit = linesThatFit(lead);
@@ -502,11 +612,17 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
 
       let cut = -1;
       for (let k = i + fit; k > i; k--) {
-        if (src[k - 1].last < src[k].first) { cut = k; break; }
+        if (src[k - 1].last < src[k].first) {
+          cut = k;
+          break;
+        }
       }
       if (cut === -1) {
-        if (!atPageTop()) { newPage(); continue; }
-        cut = i + fit;   // one sentence taller than a page: unavoidable
+        if (!atPageTop()) {
+          newPage();
+          continue;
+        }
+        cut = i + fit; // one sentence taller than a page: unavoidable
       }
 
       drawRange(src, i, cut, x0, size, lead, color);
@@ -515,7 +631,14 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
     }
   }
 
-  function drawFlow(segs: Seg[], x0: number, maxWidth: number, size: number, lead = LINE_HEIGHT, color: RGB = BLACK): void {
+  function drawFlow(
+    segs: Seg[],
+    x0: number,
+    maxWidth: number,
+    size: number,
+    lead = LINE_HEIGHT,
+    color: RGB = BLACK
+  ): void {
     emitFlow(layoutFlow(segs, maxWidth, size), x0, size, lead, color);
   }
 
@@ -588,13 +711,18 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
       const rowTop = y;
       if (isHeader) {
         page.drawRectangle({
-          x: MARGIN, y: rowTop - rowHeight, width: CONTENT_WIDTH, height: rowHeight, color: rgb(0.16, 0.16, 0.16)
+          x: MARGIN,
+          y: rowTop - rowHeight,
+          width: CONTENT_WIDTH,
+          height: rowHeight,
+          color: rgb(0.16, 0.16, 0.16)
         });
       } else {
         page.drawLine({
           start: { x: MARGIN, y: rowTop - rowHeight },
           end: { x: RIGHT_EDGE, y: rowTop - rowHeight },
-          thickness: 0.4, color: RULE
+          thickness: 0.4,
+          color: RULE
         });
       }
 
@@ -654,7 +782,11 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
       for (const codeLine of body) {
         ensure(CODE_LINE_HEIGHT + 6);
         page.drawRectangle({
-          x: MARGIN, y: y - 3, width: CONTENT_WIDTH, height: CODE_LINE_HEIGHT, color: CODE_BG
+          x: MARGIN,
+          y: y - 3,
+          width: CONTENT_WIDTH,
+          height: CODE_LINE_HEIGHT,
+          color: CODE_BG
         });
         // Truncate rather than wrap: a wrapped code line reads worse than a clipped one.
         let text = toAscii(codeLine.replace(/\t/g, '  '));
@@ -682,7 +814,10 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
 
     // Table row
     if (t.startsWith('|') && t.endsWith('|')) {
-      const cells = t.slice(1, -1).split('|').map((c) => c.trim());
+      const cells = t
+        .slice(1, -1)
+        .split('|')
+        .map((c) => c.trim());
       if (cells.every((c) => /^[-:]+$/.test(c))) continue; // separator row
       table.push(cells);
       continue;
@@ -693,7 +828,12 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
     if (/^(-{3,}|\*{3,}|_{3,})$/.test(t)) {
       ensure(16);
       y -= 4;
-      page.drawLine({ start: { x: MARGIN, y }, end: { x: RIGHT_EDGE, y }, thickness: 0.5, color: RULE });
+      page.drawLine({
+        start: { x: MARGIN, y },
+        end: { x: RIGHT_EDGE, y },
+        thickness: 0.5,
+        color: RULE
+      });
       y -= 12;
       continue;
     }
@@ -712,7 +852,12 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
       headings.push({ level: 2, label, slug: slugify(joined.text.slice(3)), page, y });
       draw(label.toUpperCase(), MARGIN, y, bold, SIZE_H2);
       y -= 5;
-      page.drawLine({ start: { x: MARGIN, y }, end: { x: RIGHT_EDGE, y }, thickness: 0.75, color: BLACK });
+      page.drawLine({
+        start: { x: MARGIN, y },
+        end: { x: RIGHT_EDGE, y },
+        thickness: 0.75,
+        color: BLACK
+      });
       y -= 13;
       continue;
     }
@@ -759,8 +904,10 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
       emitFlow(quoteLines, MARGIN + 16, SIZE_BODY, LINE_HEIGHT);
       if (page === startPage) {
         page.drawLine({
-          start: { x: MARGIN + 4, y: barTop }, end: { x: MARGIN + 4, y: y + 8 },
-          thickness: 2, color: RULE
+          start: { x: MARGIN + 4, y: barTop },
+          end: { x: MARGIN + 4, y: y + 8 },
+          thickness: 2,
+          color: RULE
         });
       }
       y -= 5;
@@ -779,15 +926,24 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
     if (cbMatch) {
       i = block.end;
       const gutter = 14;
-      const body = layoutFlow(parseInlineBold(cbMatch[2]), CONTENT_WIDTH - indentPx - gutter, SIZE_BODY);
+      const body = layoutFlow(
+        parseInlineBold(cbMatch[2]),
+        CONTENT_WIDTH - indentPx - gutter,
+        SIZE_BODY
+      );
       reserveLines(body.length, LINE_HEIGHT);
 
       const checked = cbMatch[1].toLowerCase() === 'x';
       checkboxCount++;
       const box = form.createCheckBox(`check_${checkboxCount}`);
       box.addToPage(page, {
-        x: MARGIN + indentPx, y: y - 1, width: 8, height: 8,
-        borderWidth: 0.75, borderColor: BLACK, backgroundColor: WHITE
+        x: MARGIN + indentPx,
+        y: y - 1,
+        width: 8,
+        height: 8,
+        borderWidth: 0.75,
+        borderColor: BLACK,
+        backgroundColor: WHITE
       });
       if (checked) box.check();
       emitFlow(body, MARGIN + indentPx + gutter, SIZE_BODY, LINE_HEIGHT);
@@ -800,7 +956,11 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
       i = block.end;
       const marker = `${olMatch[1]}.`;
       const gutter = regular.widthOfTextAtSize(`${marker}  `, SIZE_BODY);
-      const body = layoutFlow(parseInlineBold(olMatch[2]), CONTENT_WIDTH - indentPx - gutter, SIZE_BODY);
+      const body = layoutFlow(
+        parseInlineBold(olMatch[2]),
+        CONTENT_WIDTH - indentPx - gutter,
+        SIZE_BODY
+      );
       reserveLines(body.length, LINE_HEIGHT);
       draw(marker, MARGIN + indentPx, y, regular, SIZE_BODY);
       emitFlow(body, MARGIN + indentPx + gutter, SIZE_BODY, LINE_HEIGHT);
@@ -811,7 +971,11 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
     if (/^[-*]\s+/.test(blockText)) {
       i = block.end;
       const gutter = regular.widthOfTextAtSize('-  ', SIZE_BODY);
-      const body = layoutFlow(parseInlineBold(blockText.replace(/^[-*]\s+/, '')), CONTENT_WIDTH - indentPx - gutter, SIZE_BODY);
+      const body = layoutFlow(
+        parseInlineBold(blockText.replace(/^[-*]\s+/, '')),
+        CONTENT_WIDTH - indentPx - gutter,
+        SIZE_BODY
+      );
       reserveLines(body.length, LINE_HEIGHT);
       draw('-', MARGIN + indentPx, y, regular, SIZE_BODY);
       emitFlow(body, MARGIN + indentPx + gutter, SIZE_BODY, LINE_HEIGHT);
@@ -823,7 +987,14 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
     // Whole-line italic note
     if (/^\*[^*][\s\S]*[^*]\*$/.test(blockText)) {
       y -= 3;
-      drawFlow(parseInlineBold(blockText.slice(1, -1)), MARGIN, CONTENT_WIDTH, SIZE_FOOT + 0.5, LINE_HEIGHT - 2, MUTED);
+      drawFlow(
+        parseInlineBold(blockText.slice(1, -1)),
+        MARGIN,
+        CONTENT_WIDTH,
+        SIZE_FOOT + 0.5,
+        LINE_HEIGHT - 2,
+        MUTED
+      );
       y -= 3;
       continue;
     }
@@ -839,7 +1010,13 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
 
   /** Where a jump lands: slightly above the heading, so it is not flush to the edge. */
   const destFor = (h: Heading): unknown =>
-    pdfDoc.context.obj([h.page.ref, 'XYZ', MARGIN - 8, Math.min(PAGE_HEIGHT, h.y + SIZE_H2 + 18), null]);
+    pdfDoc.context.obj([
+      h.page.ref,
+      'XYZ',
+      MARGIN - 8,
+      Math.min(PAGE_HEIGHT, h.y + SIZE_H2 + 18),
+      null
+    ]);
 
   /**
    * Append an annotation. Checkbox widgets have already put an /Annots array on
@@ -848,7 +1025,8 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
   // pdf-lib's obj() overloads reject a literal assembled with conditional
   // spreads — it falls through to the array signature. This pins the shape.
   type ObjInput = Parameters<typeof pdfDoc.context.obj>[0];
-  const obj = (v: object): ReturnType<typeof pdfDoc.context.obj> => pdfDoc.context.obj(v as ObjInput);
+  const obj = (v: object): ReturnType<typeof pdfDoc.context.obj> =>
+    pdfDoc.context.obj(v as ObjInput);
 
   function addAnnot(p: PDFPage, dict: object): void {
     const ref = pdfDoc.context.register(obj(dict));
@@ -871,7 +1049,8 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
     // Insert at the front, in order, BEFORE resolving any page number: the
     // numbers below come from getPages().indexOf(), so they count these pages.
     const tocPages: PDFPage[] = [];
-    for (let n = 0; n < tocPageCount; n++) tocPages.push(pdfDoc.insertPage(n, [PAGE_WIDTH, PAGE_HEIGHT]));
+    for (let n = 0; n < tocPageCount; n++)
+      tocPages.push(pdfDoc.insertPage(n, [PAGE_WIDTH, PAGE_HEIGHT]));
 
     const ellipsis = regular.widthOfTextAtSize('...', SIZE_TOC);
     let idx = 0;
@@ -881,7 +1060,12 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
       if (n === 0) {
         tp.drawText('CONTENTS', { x: MARGIN, y: ty, size: SIZE_H2, font: bold, color: BLACK });
         ty -= 5;
-        tp.drawLine({ start: { x: MARGIN, y: ty }, end: { x: RIGHT_EDGE, y: ty }, thickness: 0.75, color: BLACK });
+        tp.drawLine({
+          start: { x: MARGIN, y: ty },
+          end: { x: RIGHT_EDGE, y: ty },
+          thickness: 0.75,
+          color: BLACK
+        });
         ty -= 18;
       }
 
@@ -908,13 +1092,27 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
         const dotWidth = regular.widthOfTextAtSize('.', SIZE_TOC);
         const dots = Math.floor((dotTo - dotFrom) / dotWidth);
         if (dots > 0) {
-          tp.drawText('.'.repeat(dots), { x: dotFrom, y: ty, size: SIZE_TOC, font: regular, color: RULE });
+          tp.drawText('.'.repeat(dots), {
+            x: dotFrom,
+            y: ty,
+            size: SIZE_TOC,
+            font: regular,
+            color: RULE
+          });
         }
-        tp.drawText(num, { x: RIGHT_EDGE - numWidth, y: ty, size: SIZE_TOC, font: regular, color: BLACK });
+        tp.drawText(num, {
+          x: RIGHT_EDGE - numWidth,
+          y: ty,
+          size: SIZE_TOC,
+          font: regular,
+          color: BLACK
+        });
 
         // The whole row is the hit area, dot leader included.
         addAnnot(tp, {
-          Type: 'Annot', Subtype: 'Link', Border: [0, 0, 0],
+          Type: 'Annot',
+          Subtype: 'Link',
+          Border: [0, 0, 0],
           Rect: [MARGIN - 4, ty - 4, RIGHT_EDGE + 4, ty + SIZE_TOC + 2],
           Dest: destFor(h)
         });
@@ -931,12 +1129,21 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
     if (lr.href.startsWith('#')) {
       const target = bySlug.get(lr.href.slice(1));
       if (target) {
-        addAnnot(lr.page, { Type: 'Annot', Subtype: 'Link', Border: [0, 0, 0], Rect: rect, Dest: destFor(target) });
+        addAnnot(lr.page, {
+          Type: 'Annot',
+          Subtype: 'Link',
+          Border: [0, 0, 0],
+          Rect: rect,
+          Dest: destFor(target)
+        });
       }
       continue;
     }
     addAnnot(lr.page, {
-      Type: 'Annot', Subtype: 'Link', Border: [0, 0, 0], Rect: rect,
+      Type: 'Annot',
+      Subtype: 'Link',
+      Border: [0, 0, 0],
+      Rect: rect,
       A: { Type: 'Action', S: 'URI', URI: PDFString.of(lr.href) }
     });
   }
@@ -957,32 +1164,43 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
       const kidRefs: PDFRef[] = node.kids.map(() => pdfDoc.context.nextRef());
 
       node.kids.forEach((kid, k) => {
-        pdfDoc.context.assign(kidRefs[k], obj({
-          Title: PDFHexString.fromText(kid.label),
-          Parent: nodeRefs[n],
-          Dest: destFor(kid),
-          ...(k > 0 ? { Prev: kidRefs[k - 1] } : {}),
-          ...(k < kidRefs.length - 1 ? { Next: kidRefs[k + 1] } : {})
-        }));
+        pdfDoc.context.assign(
+          kidRefs[k],
+          obj({
+            Title: PDFHexString.fromText(kid.label),
+            Parent: nodeRefs[n],
+            Dest: destFor(kid),
+            ...(k > 0 ? { Prev: kidRefs[k - 1] } : {}),
+            ...(k < kidRefs.length - 1 ? { Next: kidRefs[k + 1] } : {})
+          })
+        );
       });
 
-      pdfDoc.context.assign(nodeRefs[n], obj({
-        Title: PDFHexString.fromText(node.h.label),
-        Parent: outlinesRef,
-        Dest: destFor(node.h),
-        ...(n > 0 ? { Prev: nodeRefs[n - 1] } : {}),
-        ...(n < nodeRefs.length - 1 ? { Next: nodeRefs[n + 1] } : {}),
-        // Negative Count = start collapsed. A 40-entry tree sprung open is noise.
-        ...(kidRefs.length ? { First: kidRefs[0], Last: kidRefs[kidRefs.length - 1], Count: -kidRefs.length } : {})
-      }));
+      pdfDoc.context.assign(
+        nodeRefs[n],
+        obj({
+          Title: PDFHexString.fromText(node.h.label),
+          Parent: outlinesRef,
+          Dest: destFor(node.h),
+          ...(n > 0 ? { Prev: nodeRefs[n - 1] } : {}),
+          ...(n < nodeRefs.length - 1 ? { Next: nodeRefs[n + 1] } : {}),
+          // Negative Count = start collapsed. A 40-entry tree sprung open is noise.
+          ...(kidRefs.length
+            ? { First: kidRefs[0], Last: kidRefs[kidRefs.length - 1], Count: -kidRefs.length }
+            : {})
+        })
+      );
     });
 
-    pdfDoc.context.assign(outlinesRef, obj({
-      Type: 'Outlines',
-      First: nodeRefs[0],
-      Last: nodeRefs[nodeRefs.length - 1],
-      Count: tree.length
-    }));
+    pdfDoc.context.assign(
+      outlinesRef,
+      obj({
+        Type: 'Outlines',
+        First: nodeRefs[0],
+        Last: nodeRefs[nodeRefs.length - 1],
+        Count: tree.length
+      })
+    );
     pdfDoc.catalog.set(PDFName.of('Outlines'), outlinesRef);
     pdfDoc.catalog.set(PDFName.of('PageMode'), PDFName.of('UseOutlines'));
   }
@@ -992,14 +1210,26 @@ async function convert(inputPath: string, outputPath: string, titleOverride?: st
   const footerText = `${BUSINESS_INFO.name} • ${BUSINESS_INFO.owner} • ${BUSINESS_INFO.email} • ${BUSINESS_INFO.website}`;
   const footerWidth = regular.widthOfTextAtSize(footerText, SIZE_FOOT);
   pages.forEach((p, idx) => {
-    p.drawLine({ start: { x: MARGIN, y: 72 }, end: { x: RIGHT_EDGE, y: 72 }, thickness: 1, color: BLACK });
+    p.drawLine({
+      start: { x: MARGIN, y: 72 },
+      end: { x: RIGHT_EDGE, y: 72 },
+      thickness: 1,
+      color: BLACK
+    });
     p.drawText(footerText, {
-      x: (PAGE_WIDTH - footerWidth) / 2, y: 56, size: SIZE_FOOT, font: regular, color: MUTED
+      x: (PAGE_WIDTH - footerWidth) / 2,
+      y: 56,
+      size: SIZE_FOOT,
+      font: regular,
+      color: MUTED
     });
     const num = `Page ${idx + 1} of ${pages.length}`;
     p.drawText(num, {
-      x: RIGHT_EDGE - regular.widthOfTextAtSize(num, SIZE_FOOT), y: 42,
-      size: SIZE_FOOT, font: regular, color: MUTED
+      x: RIGHT_EDGE - regular.widthOfTextAtSize(num, SIZE_FOOT),
+      y: 42,
+      size: SIZE_FOOT,
+      font: regular,
+      color: MUTED
     });
   });
 
@@ -1018,7 +1248,9 @@ async function main(): Promise<void> {
   }
 
   if (!argv.length) {
-    console.log('Usage: npx tsx scripts/markdown-to-pdf-guide.ts <input.md|dir> [output.pdf|dir] [--title "TITLE"]');
+    console.log(
+      'Usage: npx tsx scripts/markdown-to-pdf-guide.ts <input.md|dir> [output.pdf|dir] [--title "TITLE"]'
+    );
     process.exit(1);
   }
 
@@ -1031,7 +1263,9 @@ async function main(): Promise<void> {
   if (statSync(input).isDirectory()) {
     const outDir = argv[1] || input;
     mkdirSync(outDir, { recursive: true });
-    const files = readdirSync(input).filter((f) => f.toLowerCase().endsWith('.md')).sort();
+    const files = readdirSync(input)
+      .filter((f) => f.toLowerCase().endsWith('.md'))
+      .sort();
     console.log(`Converting ${files.length} file(s) -> ${outDir}\n`);
     for (const f of files) {
       await convert(join(input, f), join(outDir, f.replace(/\.md$/i, '.pdf')));

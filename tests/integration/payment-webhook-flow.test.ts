@@ -191,9 +191,7 @@ describe('Payment intent + Stripe webhook flow', () => {
 
   it('rejects an unsigned webhook with 400 and a forged signature with 401', async () => {
     const { stripeIntentId } = await seedPaidableInvoice();
-    const payload = JSON.stringify(
-      buildSucceededEvent(stripeIntentId, 'evt_test_badsig_001')
-    );
+    const payload = JSON.stringify(buildSucceededEvent(stripeIntentId, 'evt_test_badsig_001'));
 
     const { app } = await import('../../server/app.js');
 

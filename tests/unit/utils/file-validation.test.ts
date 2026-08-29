@@ -36,9 +36,7 @@ import {
 function makeFile(name: string, type: string, sizeBytes?: number): File {
   // Create a file with enough content to hit the requested size, or use a small
   // placeholder when the exact size is not load-bearing.
-  const content = sizeBytes !== undefined
-    ? new Uint8Array(sizeBytes)
-    : new Uint8Array(8);
+  const content = sizeBytes !== undefined ? new Uint8Array(sizeBytes) : new Uint8Array(8);
   return new File([content], name, { type });
 }
 

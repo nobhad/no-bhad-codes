@@ -22,12 +22,7 @@ interface CachedResponse {
 
 /** Type guard for cached response objects */
 function isCachedResponse(value: unknown): value is CachedResponse {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'body' in value &&
-    'headers' in value
-  );
+  return typeof value === 'object' && value !== null && 'body' in value && 'headers' in value;
 }
 
 /** Extended request with cache invalidation tags */

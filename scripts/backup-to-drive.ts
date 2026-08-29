@@ -37,14 +37,18 @@ const projectRoot = join(__dirname, '..');
 
 async function main(): Promise<void> {
   if (!isDriveBackupConfigured()) {
-    console.error('❌ Drive backup not configured. Required env: GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_SERVICE_ACCOUNT_KEY, GOOGLE_DRIVE_FOLDER_ID');
+    console.error(
+      '❌ Drive backup not configured. Required env: GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_SERVICE_ACCOUNT_KEY, GOOGLE_DRIVE_FOLDER_ID'
+    );
     process.exit(1);
   }
   const backupDir = process.env.BACKUP_DIR || join(projectRoot, 'data/backups');
   const filePath = getLatestLocalBackup(backupDir);
   console.log(`📤 Uploading ${filePath}...`);
   const result = await uploadBackupToDrive(filePath);
-  console.log(`✅ Uploaded ${result.uploaded.name} (id ${result.uploaded.id}, ${result.durationMs}ms, pruned ${result.prunedCount})`);
+  console.log(
+    `✅ Uploaded ${result.uploaded.name} (id ${result.uploaded.id}, ${result.durationMs}ms, pruned ${result.prunedCount})`
+  );
 }
 
 main().catch((err) => {

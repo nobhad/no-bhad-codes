@@ -169,10 +169,7 @@ export function getStringParam(
  * @example
  * const includeArchived = getBoolParam(req.query.archived, false);
  */
-export function getBoolParam(
-  value: string | string[] | undefined,
-  defaultValue: boolean
-): boolean {
+export function getBoolParam(value: string | string[] | undefined, defaultValue: boolean): boolean {
   if (value === undefined || value === null || value === '') {
     return defaultValue;
   }
@@ -369,7 +366,5 @@ export function getIntArrayParam(
     return defaultValue;
   }
 
-  return strArray
-    .map((v) => parseInt(v, 10))
-    .filter((n) => !isNaN(n));
+  return strArray.map((v) => parseInt(v, 10)).filter((n) => !isNaN(n));
 }
