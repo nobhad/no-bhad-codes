@@ -2121,6 +2121,13 @@ export class ProjectsModule extends BaseModule {
   ): void {
     if (!this.projectDetailSection) return;
 
+    // Every case study starts at its own beginning. The section is the
+    // scroller, and it holds its position across a content swap — so
+    // arriving from the carousel while half way down the last one dropped
+    // you into the middle of the next, under the header, with the title
+    // already scrolled off.
+    this.projectDetailSection.scrollTop = 0;
+
     // Update hero image — prefer heroImage, fall back to the first
     // screenshot. The title-card is intentionally NOT used as a fallback
     // anymore: the new full-canvas exports (1426×1093 with the actual
