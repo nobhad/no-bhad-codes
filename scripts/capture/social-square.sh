@@ -1,7 +1,9 @@
 set -e
 SP="${CAPTURE_WORK:-/tmp/nbc-capture}"
-# Social exports live outside public/ — they are for posting, not for the site.
-OUT=/Users/noellebhaduri/Projects/Development/Active/no-bhad-codes/social-media
+# Social exports live outside the repo entirely — they are things to post, not
+# code or site assets, and they sit with the rest of the project's design work.
+OUT=${SOCIAL_OUT:-$HOME/Projects/Design/no-bhad-codes/social-media}
+mkdir -p "$OUT"
 SIZE=1080
 
 for t in light dark; do

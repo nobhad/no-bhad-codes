@@ -127,6 +127,12 @@ structure of the CMS, not the studio's live content.
 | hero loops | GIF | `fps=10`, `palettegen=max_colors=128`, `dither=none` |
 | stills | PNG / WebP | 1440x900 desktop, 390x844 mobile, matching the existing heroes |
 
+Social clips are written outside the repo, to
+`~/Projects/Design/no-bhad-codes/social-media` (override with `$SOCIAL_OUT`).
+They are things to post rather than code or site assets, so they sit with the
+project's other design work instead of being versioned and deployed with the
+site.
+
 **Trimming needs a re-encode.** `-ss` with `-c copy` snaps to the nearest
 keyframe, and these recordings have sparse ones — it reported the same duration
 and changed nothing. `-ss` on a re-encode cuts exactly.
