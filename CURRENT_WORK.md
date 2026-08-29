@@ -2,6 +2,54 @@
 
 ---
 
+## Channel music: surface noise, unbalanced levels
+
+**Status:** OPEN
+**Priority:** Low — cosmetic, but it is the first thing you hear on a channel
+
+The crackle over the project channels is **in the recordings**, not in the
+sound effects. All three are Library of Congress National Jukebox releases
+(`836a7e6a`) — acoustic-era 78rpm transfers, so surface noise comes with them.
+Measured (RMS, and a high-frequency-energy ratio standing in for hiss):
+
+| file | channel | RMS | HF ratio |
+| --- | --- | --- | --- |
+| `the-broken-hearted-sparrow.mp3` | 02 nobhad-codes | 0.054 | 0.537 |
+| `anvil-chorus.mp3` | 03 the-backend | 0.058 | 0.601 |
+| `roses-at-twilight.mp3` | 04 hedgewitch | 0.115 | 0.168 |
+| `tv-static.mp3` (for scale) | — | 0.160 | 0.480 |
+
+Two problems in one: the first two carry **as much broadband noise as the TV
+static sample itself**, and they sit at **half the level** of the third, so the
+hiss reads forward of the melody and the channels do not match each other.
+
+Turning the crackle SFX down does nothing for this — that was chased and
+reverted (`62702d46`). The SFX gains are back at their original values:
+power-on 0.18, channel-change 0.12.
+
+**Do not de-noise them the way it was tried.** `afftdn` plus an 8dB high shelf
+flattens the recordings — it takes the air out along with the hiss and they
+stop sounding like old records. Reverted in `b32d48cc`; measurements from that
+attempt are in the commit if useful.
+
+Worth trying, roughly in order:
+
+- [ ] **Gain-only balance first.** No filtering, no compression, nothing that
+      changes tone: `+6.6 dB` on the sparrow and `+5.9 dB` on the anvil brings
+      all three to the same RMS. It does not remove hiss, but it stops one
+      channel being obviously quieter and noisier than the next, which may be
+      the whole of what is wrong.
+- [ ] **Look for better transfers of the same performances.** National Jukebox
+      has re-transferred parts of its catalogue; a cleaner master solves this
+      at the source with no processing at all.
+- [ ] **Or pick different public-domain tracks** for channels 02 and 03 with
+      transfers closer to `roses-at-twilight`, which is clean enough that it
+      needs nothing.
+- [ ] If processing is unavoidable, de-noise *gently* and never touch the top
+      end: no high shelf, and audition against the original before keeping it.
+
+---
+
 ## Open items from the Aug 29 session
 
 **Status:** OPEN
