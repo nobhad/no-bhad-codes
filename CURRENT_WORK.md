@@ -26,16 +26,12 @@ ancestors still fire — and treats whichever element scrolled as the scroller.
   reveal; a `power3.out` tween eases a plain number that is pushed into
   `timeline.progress()` each tick. Scrubbed against the last curtain-height of
   travel, so the panel rises *with* the scroll instead of popping in.
-- Retraction is **snapped, not tweened**. The padding below guarantees the
-  panel only ever covers empty space, but only while its position matches the
-  scroll exactly — a trailing `power3.out` on the way back up left the black
-  band sitting over content that had already scrolled into view. Opening keeps
-  the ease; there the lag plays out inside the padding where nobody sees it.
-- Scrollable containers get an inline `padding-bottom` equal to the curtain
-  height so the panel rises into empty space rather than covering the last of
-  the content. Containers that don't overflow never get it and never reveal —
-  which is why the intro business card and desktop about/contact tiles show
-  only the thin strip.
+- Retraction eases exactly like the reveal (see Aug 29 below — it used to snap,
+  and the reason it had to no longer exists).
+- The strip the band lands on is kept blank by each tile's own **static**
+  bottom padding. The module writes no layout at all (see Aug 29 below — it
+  used to grow the scroller's `padding-bottom` with the reveal, which fed back
+  into its own retract test).
 - A `MutationObserver` on `main[data-active-page]` plus `hashchange` resets
   progress and strips the padding on every route change. Leaving the padding
   behind would keep the document overflowing at its old length with nothing
@@ -78,15 +74,71 @@ ancestors still fire — and treats whichever element scrolled as the scroller.
       32px/24px the `padding` shorthands left. The static `.footer` shell adds
       another 40px of flow on detail pages, so the visible gap to the top of
       the curtain is ~136px, up from ~72px.
-- [ ] **The curtain is only reachable from project-detail pages.** By design,
-      not a bug: `ensurePadding()` only reveals on a container that genuinely
-      overflows, and no map tile sets `overflow-y: auto` — they're a
-      fixed-camera layout sized to the viewport, so no scroll event ever fires.
-      Detail pages are the one route that opts out (`projects-detail.css:1390`
-      un-fixes the header/footer so the document scrolls). Chosen fix: reveal
-      the curtain on an **over-scroll gesture at a tile's edge**, which means
-      hooking `PageTransitionModule.handleWheel` / the touch handlers without
-      fighting the existing carousel navigation. Not started.
+- [x] **The curtain is only reachable from project-detail pages.** Fixed by
+      revealing it on an over-scroll gesture at a tile's edge, hooked into
+      `PageTransitionModule.handleWheel` / the touch handlers.
+
+### Follow-up (Aug 29, 2026)
+
+**Status:** DONE — measured in the browser on every tile that has a footer
+
+Reported symptom: on a detail page the band came up part-way and stopped, with
+the wordmark clipped by the viewport bottom and the copyright below the fold.
+Three separate causes, all confirmed by measurement before anything changed.
+
+- [x] **The band held wherever the gesture left it.** `driveCurtain()` banked
+      raw wheel px against `CURTAIN_TRAVEL_PX` (260) and parked at whatever
+      fraction the gesture reached — a normal trackpad flick banks well under
+      that, so a half-open band was the common case, not the edge case.
+      Measured: one wheel notch → `main` at **-124.6 of -270**, still there
+      900ms later, curtain inner offset +36px at **0.46 opacity** — which is
+      exactly the reported screenshot. Fixed with a settle: `CURTAIN_SETTLE_MS`
+      (120ms of quiet) commits the band to whichever end the input was heading
+      for, with `CURTAIN_COMMIT_PROGRESS` (0.15) as the "barely moved, put it
+      back" threshold. Now one notch → **-270**, fully open.
+- [x] **Retraction snapped while opening eased.** The snap was there because
+      the module grew the scroller's padding underneath the band, so a trailing
+      tween could leave the panel over content the scroll had brought back.
+      With the padding gone (below) nothing moves but the page, so both
+      directions now share one `CURTAIN_SCRUB_DURATION` `power3.out`.
+- [x] **Dynamic reveal padding fed back into its own retract test.**
+      `applyRevealPadding()` grew the scroller's `padding-bottom` by
+      `progress × curtainHeight`, which grows `scrollHeight`, which is exactly
+      what `update()` read back as `remaining` to decide whether to retract.
+      Measured stalling at **y -248.5 of -270 with padding 356.5px instead of
+      108px**. It only fired when a scroll event happened to land mid-tween, so
+      it read as an intermittent half-open band. Deleted outright — the tile's
+      static 108px bottom padding already does the job.
+- [x] **Every page that has a footer now uses one code path.** `project-detail`
+      had its own branch in `handleWheel` (scroll to the end, then drive) while
+      the flat tiles had another (drive immediately); that is how they drifted.
+      `curtainOwnsVertical()` now returns true for every map tile but
+      `projects`, and one branch expresses the rule for all of them: the tile's
+      own scroll first, the curtain past the end of it. A flat tile is at its
+      end from the first notch, so it behaves as it always did.
+      `tileScrollRemaining()` gives wheel, touch, compass and keyboard the same
+      test against the same element — the compass ↓ now reads a case study to
+      the end before it means "footer", and ↑/↓ drive the band from the
+      keyboard, which they never did on any page.
+
+Verified at 1440x900 (curtain 270px), on `#/`, `#/about`, `#/contact` and
+`#/projects/hedgewitch-horticulture`:
+
+- One notch past the end opens fully (**-270**) on all four; one notch up
+  closes fully (**0**) on all four, easing through intermediate positions
+  (**-190** mid-tween) rather than snapping.
+- Sampled every animation frame in both directions: the last content pixel
+  stays **107.8px clear** of `main`'s clipping edge throughout, so nothing is
+  ever cut off or hidden by the band.
+- Case study still scrolls normally with wheel and arrows; `projects` still
+  keeps its vertical axis for the CRT and never raises a band; reduced motion
+  snaps cleanly to both ends.
+- `tsc --noEmit` clean, `eslint` clean, 4400 tests pass, production build OK.
+
+Known, left alone (pre-existing, not part of this report): resizing the
+viewport while the band is open resets it to closed rather than re-fitting it
+to the new curtain height. It reopens and recloses correctly at the new height
+afterward, so there is no stuck state.
 
 ### Files
 
@@ -94,6 +146,7 @@ ancestors still fire — and treats whichever element scrolled as the scroller.
 - `src/styles/components/footer.css` — curtain styles + `--footer-curtain-*`
 - `src/styles/pages/projects-detail.css` — footer clearance below content
 - `src/modules/ui/footer-curtain.ts` — new
+- `src/modules/animation/page-transition.ts` — gesture ownership + settle
 - `src/core/modules-config.ts` — registration (home page only)
 
 ---

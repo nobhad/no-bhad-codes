@@ -24,14 +24,18 @@
  * fire — and treat whichever element scrolled as the current scroller.
  *
  * The reveal is scrubbed, not toggled: a GSAP timeline is built paused and
- * its progress is tweened to match how much of the final stretch of scroll
- * the user has consumed, so the curtain rises with the scroll rather than
- * popping in at the bottom.
+ * its progress is tweened to match the gesture, so the curtain rises with the
+ * input rather than popping in at the bottom. It eases the same way in both
+ * directions — the band closes as smoothly as it opened.
  *
- * Scrollable containers get a bottom padding equal to the curtain height so
- * the content has somewhere to travel to instead of the band eating the last
- * of it. Non-scrolling tiles never overflow, so they never get padding — the
- * gesture supplies their travel instead.
+ * The strip the page gives up is kept blank by the tile's own static bottom
+ * padding, not by anything this module writes. An earlier version grew the
+ * scroller's padding-bottom in step with the reveal, which changed
+ * scrollHeight — the very quantity update() reads back as `remaining` to
+ * decide whether to retract. That loop stalled the reveal short of full
+ * (measured y -248.5 of -270, padding 356.5px instead of 108px) and only
+ * fired when a scroll event happened to land mid-tween, so it read as an
+ * intermittent half-open band. Nothing here touches layout any more.
  */
 
 import { gsap } from 'gsap';
@@ -42,6 +46,22 @@ const OPEN_THRESHOLD = 0.98;
 
 /** Progress change small enough to ignore, to avoid churning tweens. */
 const PROGRESS_EPSILON = 0.002;
+
+/**
+ * Seconds the band takes to travel between its two ends. The same figure both
+ * ways — the reveal and its reverse are one motion, and an asymmetric pair
+ * reads as the band being yanked back rather than closed.
+ */
+const CURTAIN_SCRUB_DURATION = 0.4;
+
+/**
+ * Slop (px) for "this scroller is at its end".
+ *
+ * Scroll heights are fractional: a container that is visually at the bottom
+ * reports ~0.5px remaining and never reaches 0. Matches SCROLL_EDGE_EPSILON in
+ * page-transition.ts, which decides the same thing about the same elements.
+ */
+const SCROLL_END_EPSILON = 2;
 
 const clamp01 = (value: number): number => Math.min(1, Math.max(0, value));
 
@@ -65,10 +85,6 @@ export class FooterCurtainModule extends BaseModule {
   private scroller: HTMLElement | null = null;
   /** True while a gesture is driving the reveal instead of a scroll container. */
   private externalDrive = false;
-  /** Scroller whose bottom padding is currently growing with the reveal. */
-  private padded: HTMLElement | null = null;
-  private padBaseInline = '';
-  private padBasePx = 0;
   private curtainHeight = 0;
   private progress = 0;
   private frame = 0;
@@ -257,10 +273,6 @@ export class FooterCurtainModule extends BaseModule {
     const next = clamp01(typeof detail?.progress === 'number' ? detail.progress : 0);
 
     this.externalDrive = next > 0;
-    // Forget the container we were tracking: it belongs to a page the user has
-    // gestured away from, and keeping it would let handleResize re-pad it.
-    if (this.externalDrive) this.scroller = null;
-
     this.setProgress(next);
   };
 
@@ -294,10 +306,10 @@ export class FooterCurtainModule extends BaseModule {
    * Page changes reset the curtain: the new page starts at its own scroll
    * top, and the old scroller is no longer what the user is looking at.
    *
-   * The old container's spacer has to go with it. Left in place it keeps the
-   * document overflowing at its old length, and — since nothing scrolls on a
-   * page that fits — no further scroll event would ever arrive to correct the
-   * curtain, stranding it open.
+   * Dropping the scroller reference matters as much as dropping the progress.
+   * A page that fits never scrolls, so no further scroll event would arrive to
+   * correct a curtain left tracking the container the user has navigated away
+   * from, and the band would be stranded open.
    */
   private handleNavigation = (): void => {
     this.scroller = null;
@@ -320,22 +332,26 @@ export class FooterCurtainModule extends BaseModule {
       return;
     }
 
-    // A revealed curtain is only ever allowed over the blank space reserved at
-    // the end of a scroller. The moment the user scrolls back up off that end,
-    // the strip the band occupies is content again — so the band goes away
-    // rather than sitting on top of it. Without this the curtain stays open
-    // while the reader scrolls back into the case study, and the last screenful
-    // of it is behind the footer.
+    // The band is only ever raised over the blank strip at the very end of a
+    // scroller. If the scroller leaves that end while the band is up, the strip
+    // is content again, so the band comes down rather than sitting on top of
+    // it. PageTransitionModule intercepts the wheel and closes the curtain
+    // itself, so in practice this only catches the routes it never sees —
+    // keyboard, a scrollbar drag, an anchor jump.
+    //
+    // Reading scrollHeight here is safe because nothing in this module writes
+    // layout any more. The version that grew the scroller's padding with the
+    // reveal made this test read back its own output, and the loop stalled the
+    // band part-way open.
     if (this.externalDrive) {
       const remaining = element.scrollHeight - element.scrollTop - element.clientHeight;
-      if (remaining > 1) {
-        // Follow the scroll rather than snapping shut. Scrolling back up off
-        // the end closes the curtain over the band's own height of travel, so
-        // it retracts at the speed the reader is moving — cutting straight to
-        // 0 here read as the band slamming closed.
-        const next = clamp01(1 - remaining / this.curtainHeight);
-        if (next < this.progress) this.setProgress(next);
-        if (next === 0) this.externalDrive = false;
+      if (remaining > SCROLL_END_EPSILON) {
+        this.externalDrive = false;
+        this.setProgress(0);
+        // Tell the gesture owner, or its banked travel would still read as
+        // "open" and the next wheel up would spend itself closing a band that
+        // is already down.
+        window.dispatchEvent(new CustomEvent('footer-curtain:closed'));
       }
     }
 
@@ -347,48 +363,22 @@ export class FooterCurtainModule extends BaseModule {
     // project-detail scrolled the whole document and clearing the viewport
     // bottom genuinely uncovered the band. Inside the fixed camera main always
     // covers it, so that path could only ever fight the gesture for control of
-    // the same timeline — and the bottom padding it needed as a runway pushed
-    // the footer a screen further down than the content warranted.
+    // the same timeline.
     this.setHeaderScrollAway(element.scrollTop);
   };
 
-  /**
-   * Grow the scroller's bottom padding in step with the reveal.
-   *
-   * The page slides up by the band's height, so without this the strip it
-   * gives up is whatever content happened to be there — the tail of a case
-   * study cut off at the band's edge. Growing the padding by the same amount
-   * keeps the content's end in place relative to the page, so the strip the
-   * band lands on is always blank.
-   *
-   * Dynamic rather than reserved in CSS on purpose: a permanent band-height of
-   * padding reads as a screenful of dead space at the end of the scroll,
-   * before the band has been raised at all.
-   */
-  private applyRevealPadding(progress: number): void {
-    const el = progress > 0 ? this.scroller : this.padded;
-    if (!el) return;
-
-    if (progress <= 0) {
-      el.style.paddingBottom = this.padBaseInline;
-      this.padded = null;
-      return;
-    }
-
-    if (this.padded !== el) {
-      this.padded = el;
-      this.padBaseInline = el.style.paddingBottom;
-      this.padBasePx = parseFloat(getComputedStyle(el).paddingBottom) || 0;
-    }
-
-    el.style.paddingBottom = `${this.padBasePx + progress * this.curtainHeight}px`;
+  /** Drive the timeline, the header and the scrub state to one exact value. */
+  private applyImmediate(value: number): void {
+    if (!this.timeline) return;
+    this.scrubState.value = value;
+    this.timeline.progress(value);
+    this.applyHeaderOffset(value);
   }
 
   private setProgress(next: number): void {
     if (!this.timeline) return;
 
     const changed = Math.abs(next - this.progress) >= PROGRESS_EPSILON;
-    const retracting = next < this.progress;
 
     this.progress = next;
     this.applyOpenState(next);
@@ -400,11 +390,7 @@ export class FooterCurtainModule extends BaseModule {
     // after scrolling back to the top.
     if (!changed) {
       if (!this.scrubTween || !this.scrubTween.isActive()) {
-        const settled = this.externalDrive ? next : 0;
-        this.scrubState.value = settled;
-        this.applyRevealPadding(settled);
-        this.timeline.progress(settled);
-        this.applyHeaderOffset(settled);
+        this.applyImmediate(this.externalDrive ? next : 0);
       }
       return;
     }
@@ -418,31 +404,28 @@ export class FooterCurtainModule extends BaseModule {
 
     this.scrubTween?.kill();
 
-    // Retracting is snapped, not tweened. The padding guarantees the panel
-    // only ever covers empty space, but only while its position matches the
-    // scroll exactly — a trailing tween on the way back up leaves the black
-    // band sitting over content that has already scrolled back into view.
-    // Opening keeps the ease: there the lag plays out inside the padding.
-    if (retracting || this.reducedMotion) {
-      this.scrubState.value = target;
-      this.applyRevealPadding(target);
-      this.timeline.progress(target);
-      this.applyHeaderOffset(target);
+    if (this.reducedMotion) {
+      this.applyImmediate(target);
       this.scrubTween = null;
       return;
     }
 
+    // One ease for both directions. Retracting used to snap, on the grounds
+    // that a trailing tween would leave the band over content the scroll had
+    // already brought back — but that was only true while this module grew the
+    // scroller's padding underneath it. The band now travels with the page and
+    // nothing else moves, so closing can take exactly as long as opening did.
+    //
     // Ease a plain number and push it into the timeline on each tick. Easing
     // the timeline's own progress directly is possible but leaves nothing to
     // inspect when it misbehaves; this keeps the driver explicit.
     const timeline = this.timeline;
     this.scrubTween = gsap.to(this.scrubState, {
       value: target,
-      duration: 0.4,
+      duration: CURTAIN_SCRUB_DURATION,
       ease: 'power3.out',
       overwrite: true,
       onUpdate: () => {
-        this.applyRevealPadding(this.scrubState.value);
         timeline.progress(this.scrubState.value);
         this.applyHeaderOffset(this.scrubState.value);
       }
@@ -480,7 +463,6 @@ export class FooterCurtainModule extends BaseModule {
 
     // Never leave the page slid up — the module is gone, nothing would put
     // it back, and the user would be looking at a permanently shifted site.
-    this.applyRevealPadding(0);
     if (this.page) gsap.set(this.page, { y: 0 });
     if (this.header) gsap.set(this.header, { y: 0 });
 

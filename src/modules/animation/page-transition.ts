@@ -147,15 +147,36 @@ const WHEEL_COOLDOWN_MS = 250;
  */
 /**
  * Footer curtain travel: px of vertical input that takes the panel from
- * closed to fully open on a map tile.
+ * closed to fully open.
  *
- * Project-detail scrubs the curtain against its own scroll position, but the
- * map tiles are a fixed camera sized to the viewport — there is no scroll
- * container to measure, so the gesture itself supplies the distance. Roughly
- * one firm trackpad push, and it holds wherever the user lets go: the curtain
- * only falls when they push back up or leave the page.
+ * The tiles are a fixed camera sized to the viewport, so there is no scroll
+ * container to measure past the end of the content — the gesture itself
+ * supplies the distance. Roughly one firm trackpad push.
  */
 const CURTAIN_TRAVEL_PX = 260;
+
+/**
+ * Quiet (ms) after the last curtain input before the band settles to an end.
+ *
+ * The band used to hold wherever the gesture left it, which meant any push
+ * short of CURTAIN_TRAVEL_PX parked it half-open: the wordmark clipped by the
+ * viewport bottom, the copyright below the fold, and the page's edge stranded
+ * mid-band. A normal trackpad flick banks well under 260px, so that was the
+ * common case rather than the edge case. One wheel gesture is a burst of
+ * events a few ms apart, so this only has to outlast the gaps inside a burst.
+ */
+const CURTAIN_SETTLE_MS = 120;
+
+/**
+ * How far the band has to travel before a settle commits to the far end
+ * rather than returning to where it started.
+ *
+ * Directional rather than a plain midpoint: a deliberate push down should
+ * finish the reveal even if it was a light one, and a deliberate pull up
+ * should close it. The band only returns to where it came from when the input
+ * barely moved it at all.
+ */
+const CURTAIN_COMMIT_PROGRESS = 0.15;
 
 /**
  * Slop (px) for deciding a scroller has reached an edge.
@@ -241,6 +262,10 @@ export class PageTransitionModule extends BaseModule {
   private curtainTravel = 0;
   /** Last progress handed to FooterCurtainModule; keeps 0 from re-firing. */
   private curtainProgress = 0;
+  /** Pending settle-to-an-end, armed by driveCurtain once input goes quiet. */
+  private curtainSettleTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Which end the pending settle is aiming at. */
+  private curtainSettleTarget: 0 | 1 = 0;
   // project-detail scroll-to-leave tracking (see DETAIL_GESTURE_GAP_MS et al).
   // A deliberate up-scroll at the top leaves for projects; the decaying
   // momentum of scrolling up TO the top does not. detailLastAbsDelta is the
@@ -716,34 +741,74 @@ export class PageTransitionModule extends BaseModule {
   }
 
   /**
-   * Tiles whose vertical axis belongs to the footer curtain.
+   * Tiles whose vertical axis belongs to the footer curtain — every page that
+   * has a footer, which is every map tile but projects.
    *
-   * These are a fixed camera sized to the viewport: nothing scrolls, and the
-   * neighbor graph has no up/down exit, so vertical input had been remapped
-   * onto the horizontal carousel. The curtain is the one thing that genuinely
-   * lives below them, so it gets the axis back. Projects is excluded — its
-   * vertical input channel-surfs the CRT TV — and so is project-detail, which
-   * scrolls for real and scrubs the curtain from its own scroll position.
+   * The curtain is the one thing that genuinely lives below these tiles, so it
+   * gets the axis: vertical input had otherwise been remapped onto the
+   * horizontal carousel. Whether the tile scrolls first makes no difference to
+   * who owns the axis — the wheel handler runs the tile's own scroll out before
+   * it hands anything to the band — so project-detail belongs here alongside
+   * the flat tiles rather than on a path of its own.
+   *
+   * Projects is the exception: its vertical input channel-surfs the CRT TV, and
+   * it is the one tile with no footer to raise.
    */
   private curtainOwnsVertical(): boolean {
-    return (
-      this.isMapPage(this.currentPageId) &&
-      this.currentPageId !== 'projects' &&
-      // project-detail is a map tile now, but it scrolls for real — its
-      // curtain is driven by scroll position, not by a gesture.
-      this.currentPageId !== 'project-detail'
-    );
+    return this.isMapPage(this.currentPageId) && this.currentPageId !== 'projects';
+  }
+
+  /**
+   * How much scroll the active tile has left in `direction`.
+   *
+   * The curtain only gets the axis once this reaches zero, so every input
+   * route — wheel, touch, the compass cue — has to ask the same question of
+   * the same element. A flat tile answers 0 both ways and hands the axis over
+   * immediately; the case study answers with what the reader has left.
+   */
+  private tileScrollRemaining(direction: 'up' | 'down'): number {
+    const tile = this.pages.get(this.currentPageId)?.element;
+    if (!tile) return 0;
+    return direction === 'down'
+      ? tile.scrollHeight - tile.scrollTop - tile.clientHeight
+      : tile.scrollTop;
   }
 
   /**
    * Move the curtain by `delta` px of input; positive is toward the bottom of
-   * the page, where the panel waits. Holds wherever it lands.
+   * the page, where the panel waits.
+   *
+   * The band scrubs with the gesture while the gesture lasts, then settles to
+   * whichever end the input was heading for — it is never left part-open.
    */
   private driveCurtain(delta: number): void {
     const travel = Math.min(CURTAIN_TRAVEL_PX, Math.max(0, this.curtainTravel + delta));
     if (travel === this.curtainTravel) return;
     this.curtainTravel = travel;
     this.setCurtainProgress(travel / CURTAIN_TRAVEL_PX);
+    this.scheduleCurtainSettle(delta > 0 ? 1 : 0);
+  }
+
+  /**
+   * Arm the settle for the end `target`, restarting the clock so it only fires
+   * once the gesture has actually stopped rather than between two events of
+   * the same push.
+   */
+  private scheduleCurtainSettle(target: 0 | 1): void {
+    this.curtainSettleTarget = target;
+    if (this.curtainSettleTimer) clearTimeout(this.curtainSettleTimer);
+    this.curtainSettleTimer = setTimeout(() => {
+      this.curtainSettleTimer = null;
+      const moved =
+        this.curtainSettleTarget === 1
+          ? this.curtainProgress
+          : 1 - this.curtainProgress;
+      // Barely moved: treat it as an accidental brush and put the band back
+      // where the gesture found it rather than committing to a new state.
+      const end = moved >= CURTAIN_COMMIT_PROGRESS ? this.curtainSettleTarget : 1 - this.curtainSettleTarget;
+      this.curtainTravel = end * CURTAIN_TRAVEL_PX;
+      this.setCurtainProgress(end);
+    }, CURTAIN_SETTLE_MS);
   }
 
   private setCurtainProgress(progress: number): void {
@@ -756,9 +821,28 @@ export class PageTransitionModule extends BaseModule {
 
   /** Drop the curtain — the page underneath it is about to change. */
   private resetCurtain(): void {
+    if (this.curtainSettleTimer) {
+      clearTimeout(this.curtainSettleTimer);
+      this.curtainSettleTimer = null;
+    }
     this.curtainTravel = 0;
     this.setCurtainProgress(0);
   }
+
+  /**
+   * FooterCurtainModule closed the band on its own — the scroller left its end
+   * by a route the wheel handler never sees (keyboard, scrollbar, anchor jump).
+   * Drop the banked travel to match, or the next wheel up would spend itself
+   * closing a band that is already down.
+   */
+  private handleCurtainClosed = (): void => {
+    if (this.curtainSettleTimer) {
+      clearTimeout(this.curtainSettleTimer);
+      this.curtainSettleTimer = null;
+    }
+    this.curtainTravel = 0;
+    this.curtainProgress = 0;
+  };
 
   /**
    * Trigger the first-paint pulse on the compass — a subtle one-time
@@ -882,6 +966,9 @@ export class PageTransitionModule extends BaseModule {
     this.boundHandleHashChange = this.handleHashChange.bind(this);
     window.addEventListener('hashchange', this.boundHandleHashChange);
 
+    // FooterCurtainModule can close the band without going through us.
+    window.addEventListener('footer-curtain:closed', this.handleCurtainClosed);
+
     // Listen for resize to toggle mobile behavior (debounced for performance)
     if (this.debouncedHandleResize) {
       window.addEventListener('resize', this.debouncedHandleResize);
@@ -947,6 +1034,18 @@ export class PageTransitionModule extends BaseModule {
         // the user is driving with the keyboard in a different direction.
         cue?.blur();
         if (dir === 'down' && this.curtainOwnsVertical()) {
+          // Same rule as the wheel: the tile's own scroll comes first. On a
+          // case study the cue reads the reader to the end of the page; only
+          // once there is nothing left below does ↓ mean the footer.
+          const left = this.tileScrollRemaining('down');
+          if (left > SCROLL_EDGE_EPSILON) {
+            const tile = this.pages.get(this.currentPageId)?.element;
+            tile?.scrollTo({
+              top: tile.scrollHeight,
+              behavior: this.reducedMotion ? 'auto' : 'smooth'
+            });
+            return;
+          }
           this.driveCurtain(CURTAIN_TRAVEL_PX);
           return;
         }
@@ -1304,46 +1403,60 @@ export class PageTransitionModule extends BaseModule {
     } else if (absY >= absX) {
       // Vertical wheel — ANY scroll direction navigates the carousel
       // (vertical or horizontal), so the trackpad and a plain mouse wheel
-      // both move between pages. Two exceptions:
+      // both move between pages. One exception:
       //
       //   - Projects: vertical wheel channel-surfs the CRT TV (handled in
       //     tryNavigateDirection). down/forward → next channel, up → prev.
       //     (Leave projects with a horizontal swipe or Shift+wheel.)
       //
-      //   - Project-detail: vertical wheel native-scrolls the tall case
-      //     study until the boundary, then navigates between projects.
+      // Every other tile carries the footer, and on those the vertical axis
+      // belongs to the curtain — see curtainOwnsVertical().
       if (this.currentPageId === 'projects') {
         // natural-scroll: dy < 0 is a downward finger swipe → next channel.
         direction = dy < 0 ? 'down' : 'up';
-      } else if (this.currentPageId === 'project-detail') {
-        // Tested before the map-tile branches below: project-detail IS a map
-        // tile now, so isMapPage() is true for it and the carousel remap would
-        // swallow the vertical scroll the case study needs.
+      } else if (this.curtainOwnsVertical()) {
+        // ONE rule for every page that has a footer: vertical input belongs to
+        // the tile's own scroll until that scroll runs out, and past the end it
+        // belongs to the curtain. Tiles that never overflow are at their end
+        // from the first notch, so the band answers immediately; the case study
+        // answers once the reader is done with it. Same band, same travel, same
+        // easing, wherever you are.
+        //
+        // The two used to be separate branches — project-detail scrubbing the
+        // band one way and the flat tiles another — which is how they drifted
+        // apart. main is fixed and opaque either way, so scrolling alone can
+        // never uncover the band; the reveal always has to be driven.
+        const isDetail = this.currentPageId === 'project-detail';
+
         if (dy > 0) {
-          this.detailLastWheelAt = performance.now();
-          this.detailLastAbsDelta = absY;
-          this.detailReachedTopAt = 0;
+          if (isDetail) {
+            this.detailLastWheelAt = performance.now();
+            this.detailLastAbsDelta = absY;
+            this.detailReachedTopAt = 0;
+          }
           const canScrollDown =
             currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >
             SCROLL_EDGE_EPSILON;
           if (canScrollDown) return;
-          // Case study is read to the end — keep going and the page slides up
-          // off the footer curtain, the same as the tiles that never scroll.
-          // main is fixed and opaque, so scrolling alone can never uncover the
-          // band; the reveal has to be driven.
           event.preventDefault();
           this.driveCurtain(absY);
           return;
         }
 
+        // Pull the curtain back down before the content starts moving again,
+        // so the band retracts under the same gesture that raised it.
+        if (this.curtainProgress > 0) {
+          event.preventDefault();
+          this.driveCurtain(-absY);
+          return;
+        }
+
+        // Band is down. Anything still scrollable above scrolls natively; a
+        // flat tile has nothing above and nothing to navigate to on this axis,
+        // so the wheel stops here rather than being remapped onto the carousel.
+        if (!isDetail) return;
+
         {
-          // Pull the curtain back down before the content starts moving again,
-          // so the band retracts under the same gesture that raised it.
-          if (this.curtainProgress > 0) {
-            event.preventDefault();
-            this.driveCurtain(-absY);
-            return;
-          }
           const now = performance.now();
           const atTop = currentTile.scrollTop <= SCROLL_EDGE_EPSILON;
           if (!atTop) {
@@ -1364,14 +1477,6 @@ export class PageTransitionModule extends BaseModule {
           if (!reaccelerated && !freshDistinct) return;
           direction = 'up';
         }
-      } else if (this.curtainOwnsVertical()) {
-        // Vertical is the footer's axis on these tiles. deltaY > 0 is toward
-        // the bottom of the page on every input device, which is where the
-        // curtain is parked. The carousel keeps the horizontal axis, plus
-        // Shift+wheel above for mice, the arrow keys and the compass.
-        event.preventDefault();
-        this.driveCurtain(dy > 0 ? absY : -absY);
-        return;
       } else {
         // Remaining map tiles: remap vertical wheel → horizontal carousel nav
         // so up/down scroll moves between pages too. dy < 0 (down) → forward.
@@ -1471,6 +1576,24 @@ export class PageTransitionModule extends BaseModule {
       break;
     default:
       return;
+    }
+
+    // Vertical arrows obey the same precedence as the wheel, the swipe and the
+    // compass: the tile's own scroll first, the curtain past the end of it.
+    // Tested before the project-detail block below, or ↓ at the end of a case
+    // study would be swallowed there as a no-op and the band would be
+    // unreachable from the keyboard on the one page that scrolls.
+    if ((direction === 'up' || direction === 'down') && this.curtainOwnsVertical()) {
+      if (direction === 'down' && this.tileScrollRemaining('down') <= SCROLL_EDGE_EPSILON) {
+        event.preventDefault();
+        this.driveCurtain(CURTAIN_TRAVEL_PX);
+        return;
+      }
+      if (direction === 'up' && this.curtainProgress > 0) {
+        event.preventDefault();
+        this.driveCurtain(-CURTAIN_TRAVEL_PX);
+        return;
+      }
     }
 
     // Project-detail vertical: explicitly drive scrolling on the
@@ -1588,8 +1711,17 @@ export class PageTransitionModule extends BaseModule {
     // its bottom, which is where the curtain is, so that's the opening
     // direction — the inverse of the finger-direction convention below, which
     // moves a camera rather than a page.
+    //
+    // And the same precedence as the wheel: the tile's own scroll runs out
+    // before the band gets the axis, or a swipe through a case study would
+    // raise the footer over content the reader has not reached. A flat tile
+    // has no scroll left in either direction, so it hands the axis over on the
+    // first swipe exactly as it always did.
     if (absY > absX && this.curtainOwnsVertical()) {
-      this.driveCurtain(dy < 0 ? absY : -absY);
+      const opening = dy < 0;
+      if (opening && this.tileScrollRemaining('down') > SCROLL_EDGE_EPSILON) return;
+      if (!opening && this.curtainProgress === 0) return;
+      this.driveCurtain(opening ? absY : -absY);
       return;
     }
 
@@ -2619,6 +2751,11 @@ export class PageTransitionModule extends BaseModule {
     if (this.boundHandleHashChange) {
       window.removeEventListener('hashchange', this.boundHandleHashChange);
       this.boundHandleHashChange = null;
+    }
+    window.removeEventListener('footer-curtain:closed', this.handleCurtainClosed);
+    if (this.curtainSettleTimer) {
+      clearTimeout(this.curtainSettleTimer);
+      this.curtainSettleTimer = null;
     }
     if (this.boundHandleWheel) {
       window.removeEventListener('wheel', this.boundHandleWheel);
