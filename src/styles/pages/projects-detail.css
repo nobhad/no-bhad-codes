@@ -1103,6 +1103,18 @@
   grid-column: 1 / -1;
 }
 
+/* The deep dive is a separate piece of writing from the case study above
+   it, so it opens with the same rule the header uses. Drawn as a border
+   rather than an <hr> element so it disappears with the section on the
+   projects that have no deep dive, instead of leaving a line hanging over
+   nothing. */
+#project-deepdive-section {
+  border-top: var(--border-width) solid var(--color-dark);
+  padding-top: var(--space-4);
+  margin-top: var(--space-2);
+  transition: border-color var(--transition-theme, 0.4s);
+}
+
 /* Case study headings match the ROLE/YEAR/TOOLS metadata label style
    — small uppercase caps with wide tracking, muted color.
    The global h2 rule applies Acme + text-shadow to all headings on

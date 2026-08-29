@@ -285,7 +285,8 @@
           "Content versioned as ordinary git history — every change is a commit, and reverting is a revert",
           "GA4 traffic summarised in the dashboard through a Netlify Function, so the client never opens Google Analytics",
           "Contact-form submissions collected in a Messages screen with email notification"
-        ]
+        ],
+        "video": "/portfolio/hedgewitch-horticulture/videos/admin-desktop.webm"
       },
       "keyFeatures": [
         "Walkable native-garden page with plants drawn true-to-scale, grouped by real ecological community",
@@ -313,7 +314,8 @@
           "64 pages, all client-editable, no platform fees",
           "WCAG AA accessibility throughout"
         ]
-      }
+      },
+      "videos": ["/portfolio/hedgewitch-horticulture/videos/site-desktop.webm"]
     },
     {
       "id": "recycle-content",

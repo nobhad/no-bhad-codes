@@ -141,7 +141,7 @@ interface PortfolioProject {
   titleCard?: string | TitleCardData;
   // Optional second write-up rendered below the case study, for one part of
   // the build that deserves its own section rather than a feature bullet.
-  deepDive?: { heading: string; body: string[]; bullets?: string[] };
+  deepDive?: { heading: string; body: string[]; bullets?: string[]; video?: string };
   duration?: string;
   challenge?: string;
   approach?: string;
@@ -2421,6 +2421,17 @@ export class ProjectsModule extends BaseModule {
         deepList.innerHTML = (deep.bullets ?? [])
           .map((item) => `<li>${escapeHtml(item)}</li>`)
           .join('');
+        // A walkthrough of the thing being described belongs beside the
+        // description, not in the media run at the foot of the page with the
+        // public-site footage.
+        const deepVideo = this.projectDetailSection.querySelector('#project-deepdive-video');
+        if (deepVideo) {
+          deepVideo.innerHTML = deep.video
+            ? `<figure class="project-media project-media--video">
+                 <video src="${escapeAttr(this.resolveThemedPath(deep.video))}" controls playsinline preload="metadata" aria-label="${escapeAttr(project.title)} ${escapeAttr(deep.heading.toLowerCase())} walkthrough"></video>
+               </figure>`
+            : '';
+        }
         (deepSection as HTMLElement).style.display = '';
       } else {
         // Clear as well as hide — otherwise the previous project's write-up
@@ -2429,6 +2440,8 @@ export class ProjectsModule extends BaseModule {
         deepHeading.textContent = '';
         deepBody.innerHTML = '';
         deepList.innerHTML = '';
+        const staleVideo = this.projectDetailSection.querySelector('#project-deepdive-video');
+        if (staleVideo) staleVideo.innerHTML = '';
         (deepSection as HTMLElement).style.display = 'none';
       }
     }
