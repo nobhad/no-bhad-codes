@@ -498,6 +498,22 @@ export class PageTransitionModule extends BaseModule {
    * Off-map pages (project-detail, portal-login, admin-login) use the blur-swap
    * transition.
    */
+  /**
+   * Whether the intro is REALLY over, as opposed to `introComplete`, which
+   * flips at ~2.2s while the paw is still retracting and the overlay is still
+   * up until ~4.5s. Input has to stay locked for the whole of it — the card
+   * being handed over is the one moment on the site that should not be
+   * scrollable out from under the viewer.
+   */
+  private introSettled(): boolean {
+    if (!this.introComplete) return false;
+    if (!document.documentElement.classList.contains('intro-finished')) return false;
+    const overlay = document.querySelector('#intro-morph-overlay');
+    if (!overlay) return true;
+    const cs = getComputedStyle(overlay);
+    return cs.visibility === 'hidden' || cs.opacity === '0' || cs.display === 'none';
+  }
+
   private isMapPage(pageId: string): boolean {
     return pageId in MAP_TILES;
   }
@@ -739,10 +755,33 @@ export class PageTransitionModule extends BaseModule {
       });
     }
 
-    compass.querySelectorAll<HTMLElement>('.map-compass__cue').forEach((cue) => {
+    const cues = document.querySelectorAll<HTMLElement>('.map-compass__cue');
+    cues.forEach((cue) => {
       const dir = cue.dataset.cue as Direction | undefined;
       cue.dataset.can = dir && navigable.has(dir) ? 'true' : 'false';
     });
+
+    // On a page that scrolls, the vertical cues belong IN the page rather than
+    // pinned to the window. The compass is fixed, so on a long case study ↓
+    // sat on top of whatever text happened to be at the bottom of the viewport
+    // and ↑ hung there the whole way down. Moved into the scroller they behave
+    // like the page: ↑ sits at the top and scrolls away as you leave it, ↓
+    // waits at the end of the content and arrives when you reach it.
+    const tile = this.pages.get(this.currentPageId)?.element;
+    if (tile) {
+      const scrolls = tile.scrollHeight > tile.clientHeight + 4;
+      for (const dir of ['up', 'down'] as const) {
+        const cue = document.querySelector<HTMLElement>(`.map-compass__cue--${dir}`);
+        if (!cue) continue;
+        if (scrolls && cue.parentElement !== tile) {
+          tile.appendChild(cue);
+          cue.classList.add('map-compass__cue--in-content');
+        } else if (!scrolls && cue.parentElement !== compass) {
+          compass.appendChild(cue);
+          cue.classList.remove('map-compass__cue--in-content');
+        }
+      }
+    }
   }
 
   /**
@@ -1443,7 +1482,7 @@ export class PageTransitionModule extends BaseModule {
     // During the intro animation, swallow ALL wheel events so the browser
     // can't scroll the page horizontally or vertically before the user is
     // released into the spatial map.
-    if (!this.introComplete) {
+    if (!this.introSettled()) {
       event.preventDefault();
       return;
     }
@@ -1623,7 +1662,7 @@ export class PageTransitionModule extends BaseModule {
     // page navigation. Mirrors the wheel handler's behavior.
 
     if (this.isTransitioning) return;
-    if (!this.introComplete) return;
+    if (!this.introSettled()) return;
     if (!this.isMapPage(this.currentPageId) && this.currentPageId !== 'project-detail') return;
 
     // Enter on the projects tile opens the currently-highlighted TV

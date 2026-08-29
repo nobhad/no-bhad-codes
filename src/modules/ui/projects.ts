@@ -796,10 +796,12 @@ export class ProjectsModule extends BaseModule {
       const to = detail?.to;
       if (!to) return;
       if (to !== 'projects') {
-        tvSfx.stopMusic();
-        tvSfx.stopGuideStatic();
+        // Not just stop — refuse. A tune-in timeline still running can call
+        // playMusic several beats from now, long after the tile is gone.
+        tvSfx.suspendPlayback();
         return;
       }
+      tvSfx.resumePlayback();
       // Returning to projects — restart music for the tuned channel
       // only if the TV is on AND the user is on a project channel
       // (channel 01 / guide has no track and leaves activeTuneInSlug

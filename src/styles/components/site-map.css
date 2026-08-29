@@ -291,9 +291,10 @@ body[data-page="design-system"] main#main-content {
     ". up    ."
     "left .  right"
     ". down  .";
-  /* Top padding zeroed so the up arrow sits flush against the header
-     bottom (the inset already places the compass top at header height). */
-  padding: 0 clamp(0.5rem, 2vw, 1.5rem) clamp(0.5rem, 2vw, 1.5rem);
+  /* Same inset on all four sides. The top was zeroed back when the compass
+     started below the header; it now spans the viewport, so zero put ↑ hard
+     against the edge while ← → ↓ each sat a clamp in from theirs. */
+  padding: clamp(0.5rem, 2vw, 1.5rem);
 }
 
 .map-compass__cue {
@@ -327,7 +328,6 @@ body[data-page="design-system"] main#main-content {
   grid-area: up;
   align-self: start;
   justify-self: center;
-  padding-top: 0;
 }
 .map-compass__cue--down {
   grid-area: down;
@@ -459,4 +459,30 @@ body[data-page="design-system"] main#main-content {
   .map-compass {
     display: none;
   }
+}
+
+/* ↓ moved into a scrolling page's content (see updateCompass). It scrolls
+   with the page and sits after the last of it, rather than hovering over the
+   text at the bottom of the window. */
+.map-compass__cue--in-content {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-index-elevated);
+}
+
+/* ↑ at the head of the content, ↓ at the foot of it. Absolute inside the
+   scroller means both move with the page instead of hovering over it. */
+.map-compass__cue--in-content.map-compass__cue--up {
+  top: var(--space-4);
+  bottom: auto;
+}
+
+.map-compass__cue--in-content.map-compass__cue--down {
+  bottom: var(--space-6);
+  top: auto;
+}
+
+.map-compass__cue--in-content[data-can="true"] {
+  pointer-events: auto;
 }

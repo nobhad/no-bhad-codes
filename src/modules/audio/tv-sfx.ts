@@ -143,6 +143,17 @@ class TvSfx {
   // Whether the guide hiss is wanted right now — checked across the awaits in
   // playGuideStatic so a channel starting mid-load cancels it.
   private guideWanted = false;
+  // Set while the TV is off screen. The tune-in is a GSAP timeline that
+  // starts music several beats after the channel is picked, so navigating
+  // away mid-sequence could hand a play call to a set nobody is looking at.
+  // A flag closes every such path at once, including any added later.
+  private suspended = false;
+  // Bumped on every playMusic call. The URL alone cannot tell two concurrent
+  // starts apart: both check musicCurrentUrl before either has finished
+  // loading, both pass, and both create a source — after which musicSource
+  // holds only the second and the first loops on with nothing able to stop
+  // it. That was the music still playing after leaving the projects tile.
+  private musicToken = 0;
   private musicCurrentUrl: string | null = null;
   // Decoded buffers per-URL — first play of a track pays fetch+decode,
   // subsequent plays of the same track are instant.
@@ -179,6 +190,21 @@ class TvSfx {
         .catch(() => null);
     this.clickBytesPromise = fetchBytes(CLICK_SAMPLE_URL);
     this.staticBytesPromise = fetchBytes(STATIC_SAMPLE_URL);
+  }
+
+  /**
+   * Silence the set and refuse anything new until it is on screen again.
+   * Called when the projects tile is left.
+   */
+  suspendPlayback(): void {
+    this.suspended = true;
+    this.stopMusic();
+    this.stopGuideStatic();
+  }
+
+  /** The tile is back — allow playback again. */
+  resumePlayback(): void {
+    this.suspended = false;
   }
 
   /** Current volume level (0..1). */
@@ -313,7 +339,8 @@ class TvSfx {
       (no separate volume slider needed). Lazy-loads + caches each
       track on first play. */
   async playMusic(url: string): Promise<void> {
-    if (this.musicCurrentUrl === url) return;
+    if (this.suspended || this.musicCurrentUrl === url) return;
+    const token = ++this.musicToken;
 
     // Mark intent immediately so a re-entrant playMusic() (different
     // URL) during the await chain knows we're switching, and so a
@@ -324,13 +351,13 @@ class TvSfx {
 
     const ctx = await this.ensureContext();
     if (!ctx || !this.masterGain) return;
-    // Bail if the user already tuned away (or hit POWER) during the
-    // ensureContext await.
-    if (this.musicCurrentUrl !== url) return;
+    // Bail if the user already tuned away, hit POWER, or left the tile
+    // during the ensureContext await.
+    if (this.suspended || token !== this.musicToken || this.musicCurrentUrl !== url) return;
 
     const buffer = await this.loadMusicBuffer(ctx, url);
     if (!buffer) return;
-    if (this.musicCurrentUrl !== url) return;
+    if (this.suspended || token !== this.musicToken || this.musicCurrentUrl !== url) return;
 
     const gain = ctx.createGain();
     const now = ctx.currentTime;
@@ -344,6 +371,15 @@ class TvSfx {
     source.connect(gain);
     source.start(now);
 
+    // Anything still held here predates this call; stop it rather than
+    // dropping the reference and leaving it playing.
+    if (this.musicSource) {
+      try {
+        this.musicSource.stop();
+      } catch {
+        /* already stopped */
+      }
+    }
     this.musicSource = source;
     this.musicGain = gain;
   }
@@ -356,7 +392,7 @@ class TvSfx {
    * No-op if it is already running.
    */
   async playGuideStatic(): Promise<void> {
-    if (this.guideSource || this.guideWanted) return;
+    if (this.suspended || this.guideSource || this.guideWanted) return;
     // Intent is recorded before the awaits, and checked after each one.
     // Without it, tuning into a channel while the context or the buffer was
     // still loading left stopGuideStatic() with nothing to stop, and the
@@ -365,10 +401,10 @@ class TvSfx {
     this.guideWanted = true;
 
     const ctx = await this.ensureContext();
-    if (!ctx || !this.masterGain || !this.guideWanted) return;
+    if (!ctx || !this.masterGain || !this.guideWanted || this.suspended) return;
 
     const buffer = await this.loadStaticBuffer(ctx);
-    if (!buffer || !this.guideWanted || this.guideSource) return;
+    if (!buffer || !this.guideWanted || this.suspended || this.guideSource) return;
 
     const gain = ctx.createGain();
     const now = ctx.currentTime;
@@ -409,6 +445,7 @@ class TvSfx {
       is playing. Safe to call from POWER off, channel-back-to-guide,
       or anywhere else the music should end. */
   stopMusic(): void {
+    this.musicToken++;
     const src = this.musicSource;
     const gain = this.musicGain;
     this.musicSource = null;
