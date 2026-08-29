@@ -797,6 +797,7 @@ export class ProjectsModule extends BaseModule {
       if (!to) return;
       if (to !== 'projects') {
         tvSfx.stopMusic();
+        tvSfx.stopGuideStatic();
         return;
       }
       // Returning to projects — restart music for the tuned channel
@@ -807,7 +808,11 @@ export class ProjectsModule extends BaseModule {
       const tv = document.querySelector('.crt-tv');
       if (!tv || tv.classList.contains('is-powered-off')) return;
       const slug = this.activeTuneInSlug;
-      if (!slug) return;
+      if (!slug) {
+        // Arriving on the guide rather than a channel: dead air, not silence.
+        void tvSfx.playGuideStatic();
+        return;
+      }
       const url = CHANNEL_MUSIC[slug];
       if (url) void tvSfx.playMusic(url);
     }) as EventListener);
@@ -955,6 +960,7 @@ export class ProjectsModule extends BaseModule {
         this.tuneInScrollTween = null;
       }
       tvSfx.stopMusic();
+      tvSfx.stopGuideStatic();
       if (screenBg) {
         // Save the per-card bg src so we can restore it on power-on;
         // the off-state base-off.webp would otherwise stomp it.
@@ -1252,6 +1258,8 @@ export class ProjectsModule extends BaseModule {
 
     // Cancel any in-flight sequence before starting a new one.
     this.cancelTuneIn();
+    // The guide's dead air ends where a channel begins.
+    tvSfx.stopGuideStatic();
     this.activeTuneInSlug = slug;
 
     // Sync the LED + highlighted row to this channel so the visible state
@@ -1742,6 +1750,8 @@ export class ProjectsModule extends BaseModule {
    * destination state is the channel list visible over tv/base-on/off
    */
   private transitionToGuide(): void {
+    // Channel 01 is a channel with nothing on it, and a dead channel hisses.
+    void tvSfx.playGuideStatic();
     // Tear down any in-flight tune-in (timelines, panels, classes) —
     // cancelTuneIn also stops the music, since channel and music are
     // a single state. Channel 01 (the guide) is intentionally silent.

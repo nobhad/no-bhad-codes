@@ -68,7 +68,10 @@ const STATIC_DEFAULT_RELEASE_S = 0.55;
 // audible on average laptop speakers. Earlier value (0.05) was inaudible
 // on anything quieter than studio monitors after passing through
 // masterGain (default 0.5).
-const STATIC_DEFAULT_PEAK_GAIN = 0.18;
+// Dropped from 0.18: broadband noise reads far louder than tonal music at
+// the same amplitude, so a burst calibrated against the click was drowning
+// the channel track it plays over.
+const STATIC_DEFAULT_PEAK_GAIN = 0.1;
 
 // Per-track gain for channel music — multiplied by masterGain so the
 // final effective amplitude at default volume is 0.7 * 0.5 = 0.35.
@@ -77,6 +80,11 @@ const STATIC_DEFAULT_PEAK_GAIN = 0.18;
 const MUSIC_DEFAULT_GAIN = 0.7;
 const MUSIC_FADE_IN_S = 0.8;
 const MUSIC_FADE_OUT_S = 0.45;
+
+// Dead-air hiss on the guide. Continuous, so it sits far below the one-shot
+// crackle: 0.03 * masterGain 0.5 = 0.015 effective.
+const GUIDE_STATIC_GAIN = 0.03;
+const GUIDE_STATIC_FADE_S = 0.6;
 
 interface StaticOptions {
   attackS?: number;
@@ -125,6 +133,10 @@ class TvSfx {
   // happen to be there but this one isn't).
   private musicSource: ReturnType<AudioContext['createBufferSource']> | null = null;
   private musicGain: GainNode | null = null;
+  // Guide hiss — channel 01's dead-air loop, independent of music so the two
+  // never fight over the same nodes.
+  private guideSource: ReturnType<AudioContext['createBufferSource']> | null = null;
+  private guideGain: GainNode | null = null;
   private musicCurrentUrl: string | null = null;
   // Decoded buffers per-URL — first play of a track pays fetch+decode,
   // subsequent plays of the same track are instant.
@@ -328,6 +340,56 @@ class TvSfx {
 
     this.musicSource = source;
     this.musicGain = gain;
+  }
+
+  /**
+   * Looping low hiss for channel 01 — the guide is a channel with nothing
+   * broadcasting on it, and a dead channel is never silent. Quieter than the
+   * tune-in burst by an order of magnitude: this one runs continuously, and
+   * anything you can pick out of the room is too loud to sit under for long.
+   * No-op if it is already running.
+   */
+  async playGuideStatic(): Promise<void> {
+    if (this.guideSource) return;
+    const ctx = await this.ensureContext();
+    if (!ctx || !this.masterGain) return;
+    if (this.guideSource) return;
+
+    const buffer = await this.loadStaticBuffer(ctx);
+    if (!buffer || this.guideSource) return;
+
+    const gain = ctx.createGain();
+    const now = ctx.currentTime;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(GUIDE_STATIC_GAIN, now + GUIDE_STATIC_FADE_S);
+    gain.connect(this.masterGain);
+
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    source.connect(gain);
+    source.start(now);
+
+    this.guideSource = source;
+    this.guideGain = gain;
+  }
+
+  /** Stop the guide hiss — tuning into a channel, POWER off, or leaving. */
+  stopGuideStatic(): void {
+    const src = this.guideSource;
+    const gain = this.guideGain;
+    this.guideSource = null;
+    this.guideGain = null;
+    if (!src || !gain || !this.ctx) return;
+    const now = this.ctx.currentTime;
+    gain.gain.cancelScheduledValues(now);
+    gain.gain.setValueAtTime(gain.gain.value, now);
+    gain.gain.linearRampToValueAtTime(0, now + GUIDE_STATIC_FADE_S);
+    try {
+      src.stop(now + GUIDE_STATIC_FADE_S + 0.05);
+    } catch {
+      /* already stopped */
+    }
   }
 
   /** Fade the current music out + stop the source. No-op if no track
