@@ -9,6 +9,37 @@
 
 import { test, expect } from '@playwright/test';
 
+/**
+ * Wait until the camera has actually landed on `pageId` and stopped moving.
+ *
+ * A bare `goto('/#/about')` may reload the document, and on a fresh document
+ * the intro runs for about four and a half seconds before the router will act
+ * on anything — longer than an assertion's default window. Asking the app when
+ * it has arrived beats guessing how long it takes.
+ */
+async function settledOn(page: import('@playwright/test').Page, pageId: string) {
+  await page.waitForFunction(
+    () => document.documentElement.classList.contains('intro-finished'),
+    null,
+    { timeout: 25000 }
+  );
+  await page.waitForFunction(
+    async (id) => {
+      const container = (
+        window as unknown as { NBW_CONTAINER?: { resolve(n: string): Promise<unknown> } }
+      ).NBW_CONTAINER;
+      if (!container) return false;
+      const pt = (await container.resolve('PageTransitionModule')) as {
+        currentPageId: string;
+        isTransitioning: boolean;
+      } | null;
+      return !!pt && pt.currentPageId === id && pt.isTransitioning === false;
+    },
+    pageId,
+    { timeout: 25000 }
+  );
+}
+
 test.describe('Navigation', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
@@ -17,6 +48,15 @@ test.describe('Navigation', () => {
     // something opens it, and waiting for it to be visible times out before
     // any of these tests get to run.
     await page.waitForSelector('[data-nav]', { state: 'attached' });
+    // And wait for the intro to hand over. The paw runs for about four and a
+    // half seconds on a cold load, during which the site deliberately holds
+    // navigation; starting a test inside that window races the animation
+    // rather than testing anything.
+    await page.waitForFunction(
+      () => document.documentElement.classList.contains('intro-finished'),
+      null,
+      { timeout: 20000 }
+    );
   });
 
   test('should open and close menu', async ({ page }) => {
@@ -28,8 +68,11 @@ test.describe('Navigation', () => {
     await expect(page.locator('.menu')).toBeVisible();
     await expect(page.locator('.menu-link')).toHaveCount(5);
 
-    // Close menu by clicking overlay
-    await page.click('.overlay');
+    // Close by clicking the overlay at its left edge, halfway down. It fills
+    // the screen but is not the top element everywhere: the open menu covers
+    // the middle, the header covers the top, and the footer band covers the
+    // bottom. Left-middle is the reliably clear strip.
+    await page.click('.overlay', { position: { x: 12, y: 360 } });
     await expect(page.locator('[data-nav]')).toHaveAttribute('data-nav', 'closed');
   });
 
@@ -58,22 +101,25 @@ test.describe('Navigation', () => {
   });
 
   test('should handle browser back/forward navigation', async ({ page }) => {
-    // Navigate to about
-    await page.goto('/#about');
+    // Canonical routes: the map writes '#/about' back into the URL as the
+    // camera lands, so asserting the legacy '#about' form fights the app's own
+    // canonicalisation and leaves history entries that do not match.
+    await page.goto('/#/about');
+    await settledOn(page, 'about');
     await expect(page.locator('.about-section')).toBeInViewport();
 
-    // Navigate to contact
-    await page.goto('/#contact');
+    await page.goto('/#/contact');
+    await settledOn(page, 'contact');
     await expect(page.locator('.contact-section')).toBeInViewport();
 
-    // Go back
     await page.goBack();
-    await expect(page).toHaveURL('/#about');
+    await expect(page).toHaveURL(/#\/about$/);
+    await settledOn(page, 'about');
     await expect(page.locator('.about-section')).toBeInViewport();
 
-    // Go forward
     await page.goForward();
-    await expect(page).toHaveURL('/#contact');
+    await expect(page).toHaveURL(/#\/contact$/);
+    await settledOn(page, 'contact');
     await expect(page.locator('.contact-section')).toBeInViewport();
   });
 
