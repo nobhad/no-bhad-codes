@@ -554,6 +554,7 @@ export class NavigationModule extends BaseModule {
 
       this.updateNavigationDOM(navigationItems);
       this.detectCurrentPage();
+      this.watchRouteForActiveLink();
     } catch (error) {
       logger.error('Error loading navigation data:', error);
       // Continue with empty navigation rather than crashing
@@ -684,27 +685,38 @@ export class NavigationModule extends BaseModule {
    * Detect current page and update active state
    */
   private detectCurrentPage(): void {
-    const currentPath = window.location.pathname;
+    if (!this.menuLinks) return;
 
-    if (this.menuLinks) {
-      this.menuLinks.forEach((link) => {
-        const href = (link as HTMLAnchorElement).getAttribute('href');
-        const linkElement = link as HTMLElement;
+    // The route lives in the hash, not the path. This compared hrefs against
+    // window.location.pathname, which on a hash-routed SPA is always '/', so
+    // nothing ever matched and no menu item was ever marked current. The
+    // remaining path cases ('/projects', '/client') are addresses this site
+    // stopped using when it moved to hash routes.
+    const normalise = (value: string | null): string => {
+      if (!value) return '';
+      const hash = value.startsWith('#') ? value : value.slice(value.indexOf('#'));
+      if (!hash || hash === '#' || hash === '#/') return '#/';
+      return hash.startsWith('#/') ? hash : `#/${hash.slice(1)}`;
+    };
+    const current = normalise(window.location.hash || '#/');
 
-        // Remove any existing active class
-        linkElement.classList.remove('active');
+    this.menuLinks.forEach((link) => {
+      const linkElement = link as HTMLElement;
+      const href = normalise((link as HTMLAnchorElement).getAttribute('href'));
+      const isCurrent = href !== '' && href === current;
+      linkElement.classList.toggle('active', isCurrent);
+      if (isCurrent) {
+        linkElement.setAttribute('aria-current', 'page');
+      } else {
+        linkElement.removeAttribute('aria-current');
+      }
+    });
+  }
 
-        // Check for exact match or partial match for hash links
-        if (
-          href === currentPath ||
-          (currentPath === '/' && href?.startsWith('/#')) ||
-          (currentPath === '/projects' && href === '/projects') ||
-          (currentPath === '/client' && href === '/client')
-        ) {
-          linkElement.classList.add('active');
-        }
-      });
-    }
+  /** Keep the highlight in step with the route. */
+  private watchRouteForActiveLink(): void {
+    window.addEventListener('hashchange', () => this.detectCurrentPage());
+    window.addEventListener('page-changed', () => this.detectCurrentPage());
   }
 
   /**
