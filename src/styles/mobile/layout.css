@@ -132,18 +132,19 @@
   }
 
   /* Project detail section - SCROLLABLE SECTION
-     Tall content (hero, metadata, case study, screenshots) — must scroll internally */
+     Tall content (hero, metadata, case study, screenshots) — must scroll
+     internally.
+     NOTE: as with the about/contact tiles below, do NOT set top/left/right/
+     bottom here. This section is the data-map-tile="detail" tile, parked at
+     top:100%; left:100% by site-map.css; pinning it to 0 dragged it onto the
+     intro tile's square, so the camera hop into a case study landed on an
+     empty cell and the page read as "not loading" on every phone. */
   .project-detail-section {
     overflow-y: scroll;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
     height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
     box-sizing: border-box;
     /* Match contact/about sections: tighter vertical padding on mobile.
        Horizontal padding matches the header's .container so content
@@ -453,77 +454,15 @@
     overflow: hidden;
   }
 
-  /* Site-map is just a positioning context — no camera transform on
-     small-mobile, no flex column. Each tile stacks at inset:0 inside
-     and only one is rendered at a time. */
-  .site-map {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transform: none !important;
-    display: block;
-    will-change: auto;
-  }
-
-  /* Tiles all share the same viewport region; visibility is controlled
-     by page-active below. position:absolute with inset:0 means each
-     fills the main area exactly, with no peek-through possible. */
+  /* Phones keep the desktop camera (see components/site-map.css) — these
+     tiles only add what a touch device needs on top of it. The tile is the
+     only scroller (body + main are overflow:hidden); without containment,
+     hitting a tile's top/bottom chains the scroll to the document and iOS
+     rubber-bands the whole webview, pulling the fixed header down. */
   .site-map > [data-map-tile] {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    /* The tile is the only scroller (body + main are overflow:hidden).
-       Without this, hitting the tile's top/bottom chains the scroll to
-       the document and iOS rubber-bands the whole webview — pulling the
-       fixed header down. `contain` keeps the bounce inside the tile. */
     overscroll-behavior: contain;
-    transform: none;
+    -webkit-overflow-scrolling: touch;
     padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-
-  /* Visibility is driven by main[data-active-page] — set by
-     PageTransitionModule.updateActivePageAttribute on every nav. We
-     can't key off .page-active on the tile itself because the map-to-
-     map slide path in transitionTo never adds it (old architecture
-     used the camera transform for visibility). data-active-page is
-     reliable for all routes. !important wins over the @media (--mobile)
-     ID-selector rules like #about.about-section { display: block }. */
-  .site-map > [data-map-tile] {
-    display: none !important;
-  }
-
-  main[data-active-page="intro"] .site-map > #intro,
-  main[data-active-page="about"] .site-map > #about,
-  main[data-active-page="projects"] .site-map > #projects,
-  main[data-active-page="contact"] .site-map > #contact {
-    display: block !important;
-  }
-
-  /* Pre-JS first paint: show the initial tile via html[data-initial-page]
-     so there's no blank flash before main[data-active-page] gets set. */
-  html[data-initial-page="intro"]:not(.js-ready) .site-map > #intro,
-  html[data-initial-page="about"]:not(.js-ready) .site-map > #about,
-  html[data-initial-page="projects"]:not(.js-ready) .site-map > #projects,
-  html[data-initial-page="contact"]:not(.js-ready) .site-map > #contact {
-    display: block !important;
-  }
-
-  /* Same content-flow normalization as the previous mobile architecture
-     so each section reads as itself, not as an absolute-positioned card
-     within main. main > section here matches project-detail / portal-
-     login overlays (which live outside .site-map). */
-  main > section:not([data-map-tile]) {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 0.75rem var(--container-padding);
-    box-sizing: border-box;
   }
 
   /* Business-card section: explicit transparent bg so it inherits
@@ -608,35 +547,6 @@
     left: 0;
     right: 0;
     margin-top: 0;
-  }
-
-  /* Off-map overlay pages (project-detail, portal-login) — when
-     hash-routed to one of these, hide the entire site-map stack so
-     the overlay reads as a clean takeover instead of appearing below
-     a long scroll of the home pages. :has() check on body lets us
-     react to whichever overlay page is currently active. */
-  body:has(#project-detail.page-active) .site-map,
-  body:has(#portal-login.page-active) .site-map {
-    display: none;
-  }
-
-  /* Active overlay page takes the full viewport between header + footer
-     (footer is in flow on small mobile, so bottom: 0). Inactive overlays
-     stay hidden by page-transitions.css's page-hidden rule (they don't
-     carry data-map-tile, so the new exclusion doesn't show them). */
-  #project-detail.page-active,
-  #portal-login.page-active {
-    position: fixed;
-    top: var(--header-height);
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: auto;
-    width: 100%;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    z-index: var(--z-index-dropdown, 100);
-    transform: none !important;
   }
 
   .section-content {

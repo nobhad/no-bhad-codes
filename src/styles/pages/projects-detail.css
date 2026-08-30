@@ -707,13 +707,6 @@
   overflow: hidden;
 }
 
-[data-theme="dark"] .worksub-header figure,
-[data-theme="dark"] #project-walkthrough .project-media,
-[data-theme="dark"] #project-deepdive-video .project-media,
-[data-theme="dark"] #project-info .project-media {
-  border-color: var(--color-neutral-600, rgba(255, 255, 255, 0.35));
-}
-
 #project-info .project-media {
   margin: 0;
 }

@@ -231,12 +231,6 @@ export class PageTransitionModule extends BaseModule {
   private containerSelector: string;
   private enableOnMobile: boolean;
   private isMobile: boolean = false;
-  // Small-mobile (<= 479px) skips the camera/wheel/touch interaction
-  // entirely — those phones use native vertical scroll between stacked
-  // sections (see mobile/layout.css small-mobile block). Module still
-  // initializes for hash routing, page-active class management, and
-  // project-detail overlay; only the gesture handlers no-op.
-  private isSmallMobile: boolean = false;
 
   // Debounced resize handler
   private debouncedHandleResize: (() => void) | null = null;
@@ -380,7 +374,6 @@ export class PageTransitionModule extends BaseModule {
 
     // Check if mobile
     this.isMobile = window.matchMedia('(max-width: 767px)').matches;
-    this.isSmallMobile = window.matchMedia('(max-width: 479px)').matches;
 
     // Skip on mobile unless explicitly enabled
     if (this.isMobile && !this.enableOnMobile) {
@@ -1471,7 +1464,6 @@ export class PageTransitionModule extends BaseModule {
   private handleResize(): void {
     const wasMobile = this.isMobile;
     this.isMobile = window.matchMedia('(max-width: 767px)').matches;
-    this.isSmallMobile = window.matchMedia('(max-width: 479px)').matches;
 
     if (wasMobile !== this.isMobile) {
       this.log(`Breakpoint crossed - now ${this.isMobile ? 'mobile' : 'desktop'}`);
@@ -1564,13 +1556,6 @@ export class PageTransitionModule extends BaseModule {
    */
   private handleWheel(event: WheelEvent): void {
     if (this.isMobile && !this.enableOnMobile) {
-      return;
-    }
-    // Small mobile uses native vertical scroll between stacked sections
-    // — gesture-driven camera nav is off so the body's natural scroll
-    // owns the experience and we don't pay the GSAP tween cost on every
-    // swipe.
-    if (this.isSmallMobile) {
       return;
     }
     // During the intro animation, swallow ALL wheel events so the browser
@@ -1755,13 +1740,6 @@ export class PageTransitionModule extends BaseModule {
     if (this.isMobile && !this.enableOnMobile) {
       return;
     }
-    // Small mobile uses native vertical scroll between stacked sections
-    // — gesture-driven camera nav is off so the body's natural scroll
-    // owns the experience and we don't pay the GSAP tween cost on every
-    // swipe.
-    if (this.isSmallMobile) {
-      return;
-    }
 
     // Form inputs always opt out — arrow keys must move the caret /
     // change select option / etc. Checked first so a focused input stays
@@ -1916,13 +1894,6 @@ export class PageTransitionModule extends BaseModule {
     if (this.isMobile && !this.enableOnMobile) {
       return;
     }
-    // Small mobile uses native vertical scroll between stacked sections
-    // — gesture-driven camera nav is off so the body's natural scroll
-    // owns the experience and we don't pay the GSAP tween cost on every
-    // swipe.
-    if (this.isSmallMobile) {
-      return;
-    }
     if (this.isTransitioning) {
       return;
     }
@@ -1950,9 +1921,6 @@ export class PageTransitionModule extends BaseModule {
     const start = this.touchStart;
     this.touchStart = null;
     if (!start) {
-      return;
-    }
-    if (this.isSmallMobile) {
       return;
     }
     if (this.isTransitioning) {

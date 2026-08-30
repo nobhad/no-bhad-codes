@@ -249,9 +249,10 @@ body[data-page="design-system"] .footer-curtain {
   }
 }
 
-/* Small mobile (<= 479px): each map tile fills the viewport via
-   scroll-snap, so the footer shell pins to the bottom of the viewport and
-   only hosts the curtain, which drives its own transform. */
+/* Small mobile (<= 479px): same fixed band as every other width. `height:
+   auto` used to live here, from the stacked-tile era — the shell holds only
+   the absolutely-positioned curtain, so auto collapsed it to 0px and the
+   footer was invisible on every phone. Keep the base --footer-height. */
 @media (max-width: 479px) {
   .footer {
     position: fixed;
@@ -259,7 +260,7 @@ body[data-page="design-system"] .footer-curtain {
     left: 0;
     right: 0;
     width: 100%;
-    height: auto;
+    height: var(--footer-height, 40px);
     z-index: var(--z-index-base); /* Behind the page — see the base rule above */
     margin-top: 0;
     background: transparent;

@@ -2,6 +2,41 @@
 
 ---
 
+## TV title-card text runs to the edge of the screen
+
+**Status:** OPEN — needs a re-export, not a CSS change
+**Priority:** Low — cosmetic
+
+The channel title text ("HEDGEWITCH HORTICULTURE" / "BUSINESS WEBSITE") nearly
+touches the left and right edges of the lit screen. This is baked into the
+artwork, not a layout bug — measured on `public/images/tv/title-cards/`:
+
+| measure | value |
+| --- | --- |
+| card canvas | 2850 x 2186 |
+| card artwork box | 2049 x 1537 at +211+191 (71.9% of canvas) |
+| bright text inside the card | spans x 39..2010 of 2049 |
+| margin inside the card | 39px each side — **1.9%** |
+
+For reference the base screen aperture is 72.7% of the canvas, so the card sits
+*inside* the aperture correctly; there is simply almost no margin drawn around
+the type.
+
+Ruled out, with evidence:
+
+- **Not the 2850 -> 1600 image resize** (`d373b726`). That touched only
+  `base-off/base-on/buttons/chassis`, and it was uniform: the base content box
+  `2072x1537+183+191` scales to exactly `1165x864+102+107` at 1600px.
+- **Not a change to the cards.** `hedgewitch.webp` is byte-identical to the
+  version added in `ff38e4fd`.
+
+**Fix:** re-export the title cards with the type at roughly 85% of the card
+width instead of ~96%. Do NOT try to scale the composed card in CSS — the card
+carries its own background, so shrinking it exposes the `_bg` artwork behind it
+at a different scale and the concentric-ring pattern seams visibly.
+
+---
+
 ## Channel music: surface noise, unbalanced levels
 
 **Status:** OPEN
