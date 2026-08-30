@@ -29,7 +29,16 @@ import * as Sentry from '@sentry/node';
 
 const dsn = process.env.SENTRY_DSN;
 
+// Only report from real deployments. SENTRY_DSN lives in .env too, so without
+// this guard every local `npm run dev:server` reported into the same project as
+// production — a laptop boot on port 4001 sitting in the issue list next to
+// Railway's on 8080. Set SENTRY_ENABLE_LOCAL=true to opt a local run back in
+// when you are deliberately testing error reporting.
+const sentryEnabled =
+  process.env.NODE_ENV === 'production' || process.env.SENTRY_ENABLE_LOCAL === 'true';
+
 if (
+  sentryEnabled &&
   dsn &&
   !dsn.includes('your-sentry') &&
   !dsn.includes('placeholder') &&
