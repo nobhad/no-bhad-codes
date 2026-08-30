@@ -1,3 +1,16 @@
+# Reject AI attribution trailers.
+# Husky overrides the global core.hooksPath, so the global guard in
+# ~/.config/git/hooks/commit-msg does not run here — this check is inline
+# on purpose so it travels with the repo for anyone who clones it.
+#
+# Anchored to the start of a line: a real trailer always begins one, so a
+# message may discuss attribution in prose without tripping the guard.
+PATTERN='^[[:space:]]*Co-authored-by:[[:space:]]*claude|^[[:space:]]*Co-authored-by:.*anthropic|^[^[:alnum:]]*Generated with \[Claude Code\]\(http|^[[:space:]]*Claude-Session:[[:space:]]*http|^[[:space:]]*https?://claude\.ai/code/session'
+if grep -v '^#' "$1" | grep -qiE "$PATTERN"; then
+  echo "commit-msg: AI attribution is not allowed in commit messages." >&2
+  grep -v '^#' "$1" | grep -inE "$PATTERN" >&2
+  exit 1
+fi
 # Validate commit message format
 # This ensures commit messages follow conventional commit format
 npx --no -- commitlint --edit "$1"
