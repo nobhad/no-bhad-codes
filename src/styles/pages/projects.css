@@ -740,7 +740,10 @@
   /* Tighter typography across the TV's text content so it fits the
      much smaller mobile screen. */
   .crt-tv__channel-row {
-    font-size: clamp(0.6rem, 3cqw, 0.9rem);
+    /* Floors trimmed ~15%. At this screen width the cqw term is below the
+       floor, so the floor is what actually renders — lowering the cqw would
+       change nothing here. */
+    font-size: clamp(0.51rem, 3cqw, 0.9rem);
     padding: 0.3rem 0.4rem;
     gap: clamp(0.4rem, 1.5cqw, 0.7rem);
   }
@@ -757,13 +760,13 @@
      above the feature pane in source order — z-index promotion below
      ensures the text reads on top of the avatar where they overlap. */
   .crt-tv__guide-info-brand {
-    font-size: clamp(0.7rem, 3.4cqw, 1rem);
+    font-size: clamp(0.6rem, 3.4cqw, 1rem);
   }
   .crt-tv__guide-info-show {
-    font-size: clamp(0.85rem, 4cqw, 1.2rem);
+    font-size: clamp(0.72rem, 4cqw, 1.2rem);
   }
   .crt-tv__guide-info-channel {
-    font-size: clamp(0.65rem, 2.8cqw, 0.9rem);
+    font-size: clamp(0.55rem, 2.8cqw, 0.9rem);
   }
   /* Let nowrap text bleed past the column edge instead of clipping —
      desktop's overflow:hidden / clip rules aren't appropriate here
@@ -832,7 +835,11 @@
   }
 
   .crt-tv__panel-cta {
-    font-size: clamp(1.1rem, 5cqw, 1.7rem);
+    /* One line, arrow included. At the old floor the label filled the screen
+       and pushed the arrow onto a line of its own, which read as a stray
+       glyph rather than part of the link. */
+    font-size: clamp(0.8rem, 5cqw, 1.7rem);
+    white-space: nowrap;
   }
 }
 
@@ -867,6 +874,15 @@
    Sized + positioned to the screen aperture (the area where the
    title-card content lives in the bg image), measured via flood-fill of
    tv/chassis.webp's transparent cutout center. */
+/* The stack the cabinet is built around, bottom to top:
+     1  title-card backdrop and the composed card
+     2  the live screen — guide, tune-in panels
+     3  the cabinet itself (.crt-tv__frame), whose glass tints and vignettes
+        everything above, exactly like a real tube
+     4+ the readout and the buttons, which sit ON the cabinet and so must read
+        crisp above it
+   Everything that belongs to the picture goes UNDER the cabinet; only the
+   things physically mounted on its face go over. */
 .crt-tv__screen {
   position: absolute;
   top: var(--tv-screen-top);
@@ -897,6 +913,8 @@
      0 height for a frame or two (TV snaps to the top, then settles late). */
   aspect-ratio: 1426 / 1093;
   display: block;
+  /* Over the whole picture — backdrop, title card and live screen alike — and
+     under the readout and buttons. See the stacking note on .crt-tv__screen. */
   z-index: 3;
   pointer-events: none;
   /* Drop-shadow follows the frame's transparent silhouette (wood case

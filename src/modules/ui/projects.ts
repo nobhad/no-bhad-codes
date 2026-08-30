@@ -1598,11 +1598,16 @@ export class ProjectsModule extends BaseModule {
     // Outro — always last. Click-through to detail page is the headline
     // affordance; live/test URL secondary; hint about channel-changing
     // tertiary so the user knows they can keep browsing.
-    // Only link a live URL once the project is actually live; until then the
-    // test site is the one that answers.
-    const isLaunched = project.status === 'live' || project.status === 'completed';
-    const primaryUrl = (isLaunched && project.liveUrl) || project.testUrl || project.liveUrl;
-    const primaryLabel = isLaunched && project.liveUrl ? 'Live' : project.testUrl ? 'Test' : 'Live';
+    //
+    // A live URL wins whenever there is one. This used to require status to be
+    // 'live' or 'completed', which mislabelled any launched site still carrying
+    // ongoing work: Hedgewitch is 'in-progress' because of add-ons, so a
+    // visitor was sent to hedgewitch.netlify.app under a "Test:" label while
+    // the real hedgewitchhorticulture.com sat unused in the same record. The
+    // test URL is the fallback for something that genuinely has nowhere else
+    // to point, not the default for anything unfinished.
+    const primaryUrl = project.liveUrl || project.testUrl;
+    const primaryLabel = project.liveUrl ? 'Live' : 'Test';
     const liveLink = primaryUrl
       ? `<a class="crt-tv__panel-link" href="${escapeAttr(primaryUrl)}" target="_blank" rel="noopener">${primaryLabel}: ${escapeHtml(primaryUrl)}</a>`
       : '';
