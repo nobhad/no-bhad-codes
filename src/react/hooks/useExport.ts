@@ -32,12 +32,16 @@ export function useExport<T extends object>({
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
     };
   }, []);
 
   const exportCsv = useCallback(() => {
-    if (data.length === 0) return;
+    if (data.length === 0) {
+      return;
+    }
 
     setIsExporting(true);
 

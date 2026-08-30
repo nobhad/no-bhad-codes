@@ -29,7 +29,9 @@ export function handleSessionExpiry(): boolean {
   const params = new URLSearchParams(window.location.search);
   const sessionExpired = params.get('session') === 'expired';
 
-  if (!sessionExpired) return false;
+  if (!sessionExpired) {
+    return false;
+  }
 
   // Clear stale auth data
   for (const key of SESSION_KEYS) {

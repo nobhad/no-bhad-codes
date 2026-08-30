@@ -239,7 +239,9 @@ export class VisitorTrackingService {
    * Check if tracking should be enabled
    */
   private shouldTrack(): boolean {
-    if (!this.config.enableTracking) return false;
+    if (!this.config.enableTracking) {
+      return false;
+    }
 
     // Respect Do Not Track header
     if (this.config.respectDoNotTrack && navigator.doNotTrack === '1') {
@@ -301,7 +303,9 @@ export class VisitorTrackingService {
    */
   private getOrCreateVisitorId(): string {
     const stored = localStorage.getItem(APP_CONSTANTS.STORAGE_KEYS.VISITOR_ID);
-    if (stored) return stored;
+    if (stored) {
+      return stored;
+    }
 
     const visitorId = this.generateId();
     localStorage.setItem(APP_CONSTANTS.STORAGE_KEYS.VISITOR_ID, visitorId);
@@ -313,7 +317,9 @@ export class VisitorTrackingService {
    */
   private getOrCreateSessionId(): string {
     const stored = sessionStorage.getItem(APP_CONSTANTS.STORAGE_KEYS.SESSION_ID);
-    if (stored) return stored;
+    if (stored) {
+      return stored;
+    }
 
     const sessionId = this.generateId();
     sessionStorage.setItem(APP_CONSTANTS.STORAGE_KEYS.SESSION_ID, sessionId);
@@ -411,7 +417,9 @@ export class VisitorTrackingService {
    * Track page view
    */
   private trackPageView(): void {
-    if (!this.currentSession) return;
+    if (!this.currentSession) {
+      return;
+    }
 
     // Complete previous page view
     if (this.currentPageView) {
@@ -439,7 +447,9 @@ export class VisitorTrackingService {
    * Complete current page view
    */
   private completePageView(): void {
-    if (!this.currentPageView || !this.currentSession) return;
+    if (!this.currentPageView || !this.currentSession) {
+      return;
+    }
 
     const timeOnPage = Date.now() - this.pageStartTime;
     this.currentPageView.timeOnPage = timeOnPage;
@@ -490,7 +500,9 @@ export class VisitorTrackingService {
    */
   private handleClick = (event: MouseEvent): void => {
     const target = event.target as HTMLElement;
-    if (!target) return;
+    if (!target) {
+      return;
+    }
 
     let elementDescription = target.tagName.toLowerCase();
 
@@ -617,7 +629,9 @@ export class VisitorTrackingService {
     element: string,
     data?: Record<string, unknown>
   ): void {
-    if (!this.currentSession) return;
+    if (!this.currentSession) {
+      return;
+    }
 
     const event: InteractionEvent = {
       sessionId: this.currentSession.sessionId,
@@ -660,7 +674,9 @@ export class VisitorTrackingService {
    * Flush queued events
    */
   private flush(): void {
-    if (this.eventQueue.length === 0) return;
+    if (this.eventQueue.length === 0) {
+      return;
+    }
 
     const events = [...this.eventQueue];
     this.eventQueue = [];
@@ -681,7 +697,9 @@ export class VisitorTrackingService {
    * Send events to analytics endpoint
    */
   private async sendToEndpoint(events: (PageView | InteractionEvent)[]): Promise<void> {
-    if (!this.config.endpoint) return;
+    if (!this.config.endpoint) {
+      return;
+    }
 
     try {
       await fetch(this.config.endpoint, {
@@ -820,7 +838,9 @@ export class VisitorTrackingService {
    * Stop tracking and clean up
    */
   stop(): void {
-    if (!this.isTracking) return;
+    if (!this.isTracking) {
+      return;
+    }
 
     this.completePageView();
     this.flush();

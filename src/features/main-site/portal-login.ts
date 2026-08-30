@@ -39,7 +39,9 @@ export class PortalLoginOnMainSite {
     this.passwordInput = document.getElementById('portal-page-password') as HTMLInputElement | null;
     this.authError = document.getElementById('portal-page-auth-error');
 
-    if (!this.loginForm) return;
+    if (!this.loginForm) {
+      return;
+    }
 
     // Show session-expired notice if redirected here from an expired session
     const hashQuery = extractQuery(window.location.hash);
@@ -50,7 +52,9 @@ export class PortalLoginOnMainSite {
     this.setupPasswordToggle();
     this.setupLoginForm();
     this.setupMagicLinkToggle();
-    if (this.magicForm) this.setupMagicForm();
+    if (this.magicForm) {
+      this.setupMagicForm();
+    }
   }
 
   private setupPasswordToggle(): void {
@@ -61,23 +65,35 @@ export class PortalLoginOnMainSite {
   }
 
   private setupLoginForm(): void {
-    if (!this.loginForm) return;
+    if (!this.loginForm) {
+      return;
+    }
 
     this.loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (this.authError) this.authError.textContent = '';
+      if (this.authError) {
+        this.authError.textContent = '';
+      }
 
       const email = this.emailInput?.value?.trim();
       const password = this.passwordInput?.value;
-      if (!email || !password) return;
+      if (!email || !password) {
+        return;
+      }
 
       const submitBtn = this.loginForm!.querySelector<HTMLButtonElement>('.portal-page-submit');
       const btnText = submitBtn?.querySelector<HTMLElement>('.btn-text');
       const btnLoading = submitBtn?.querySelector<HTMLElement>('.btn-loading');
 
-      if (submitBtn) submitBtn.disabled = true;
-      if (btnText) btnText.style.display = 'none';
-      if (btnLoading) btnLoading.style.display = 'inline';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+      }
+      if (btnText) {
+        btnText.style.display = 'none';
+      }
+      if (btnLoading) {
+        btnLoading.style.display = 'inline';
+      }
 
       try {
         // Unified login: server detects admin vs client by email and branches.
@@ -97,9 +113,15 @@ export class PortalLoginOnMainSite {
           this.authError.textContent = 'Connection error. Please try again.';
         }
       } finally {
-        if (submitBtn) submitBtn.disabled = false;
-        if (btnText) btnText.style.display = 'inline';
-        if (btnLoading) btnLoading.style.display = 'none';
+        if (submitBtn) {
+          submitBtn.disabled = false;
+        }
+        if (btnText) {
+          btnText.style.display = 'inline';
+        }
+        if (btnLoading) {
+          btnLoading.style.display = 'none';
+        }
       }
     });
   }
@@ -110,26 +132,38 @@ export class PortalLoginOnMainSite {
 
     magicToggle?.addEventListener('click', (e) => {
       e.preventDefault();
-      if (this.loginForm) this.loginForm.style.display = 'none';
-      if (this.magicForm) this.magicForm.style.display = 'flex';
+      if (this.loginForm) {
+        this.loginForm.style.display = 'none';
+      }
+      if (this.magicForm) {
+        this.magicForm.style.display = 'flex';
+      }
     });
 
     backToLogin?.addEventListener('click', (e) => {
       e.preventDefault();
-      if (this.loginForm) this.loginForm.style.display = 'flex';
-      if (this.magicForm) this.magicForm.style.display = 'none';
+      if (this.loginForm) {
+        this.loginForm.style.display = 'flex';
+      }
+      if (this.magicForm) {
+        this.magicForm.style.display = 'none';
+      }
     });
   }
 
   private setupMagicForm(): void {
-    if (!this.magicForm) return;
+    if (!this.magicForm) {
+      return;
+    }
 
     const errorEl = document.getElementById('portal-page-magic-error');
     const successEl = document.getElementById('portal-page-magic-success');
 
     this.magicForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (errorEl) errorEl.textContent = '';
+      if (errorEl) {
+        errorEl.textContent = '';
+      }
 
       const emailInput = this.magicForm!.querySelector<HTMLInputElement>(
         '#portal-page-magic-email'
@@ -138,14 +172,20 @@ export class PortalLoginOnMainSite {
         '.portal-page-magic-submit'
       );
 
-      if (!emailInput) return;
+      if (!emailInput) {
+        return;
+      }
       const email = emailInput.value.trim();
       if (!email) {
-        if (errorEl) errorEl.textContent = 'Please enter your email address.';
+        if (errorEl) {
+          errorEl.textContent = 'Please enter your email address.';
+        }
         return;
       }
 
-      if (submitBtn) submitBtn.disabled = true;
+      if (submitBtn) {
+        submitBtn.disabled = true;
+      }
 
       try {
         const result = await authStore.requestMagicLink(email);
@@ -159,9 +199,13 @@ export class PortalLoginOnMainSite {
         }
       } catch (error) {
         logger.error('Magic link error:', error);
-        if (errorEl) errorEl.textContent = 'Failed to send link. Please try again.';
+        if (errorEl) {
+          errorEl.textContent = 'Failed to send link. Please try again.';
+        }
       } finally {
-        if (submitBtn) submitBtn.disabled = false;
+        if (submitBtn) {
+          submitBtn.disabled = false;
+        }
       }
     });
   }

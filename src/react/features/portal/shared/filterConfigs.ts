@@ -40,14 +40,18 @@ export function createFilterFn<T>(
         const value = item[field];
         return typeof value === 'string' && value.toLowerCase().includes(s);
       });
-      if (!matchesSearch) return false;
+      if (!matchesSearch) {
+        return false;
+      }
     }
 
     // Multi-select filter matching — empty array means "all"
     for (const [filterKey, itemField] of Object.entries(filterMappings)) {
       const selected = filters[filterKey];
       if (selected && selected.length > 0) {
-        if (!selected.includes(String(item[itemField]))) return false;
+        if (!selected.includes(String(item[itemField]))) {
+          return false;
+        }
       }
     }
 

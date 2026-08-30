@@ -122,7 +122,9 @@ async function handleFormSubmit(event: Event, elements: PageElements): Promise<v
  */
 export function initForgotPasswordPage(): void {
   const elements = getPageElements();
-  if (!elements) return;
+  if (!elements) {
+    return;
+  }
 
   logger.debug('Forgot password page initialized');
   elements.form.addEventListener('submit', (e) => handleFormSubmit(e, elements));

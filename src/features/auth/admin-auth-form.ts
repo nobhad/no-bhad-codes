@@ -35,9 +35,15 @@ function setButtonLoading(form: HTMLFormElement, loading: boolean): void {
   const btnText = submitBtn?.querySelector('.btn-text') as HTMLElement | null;
   const btnLoading = submitBtn?.querySelector('.btn-loading') as HTMLElement | null;
 
-  if (submitBtn) submitBtn.disabled = loading;
-  if (btnText) btnText.style.display = loading ? 'none' : 'inline';
-  if (btnLoading) btnLoading.style.display = loading ? 'inline' : 'none';
+  if (submitBtn) {
+    submitBtn.disabled = loading;
+  }
+  if (btnText) {
+    btnText.style.display = loading ? 'none' : 'inline';
+  }
+  if (btnLoading) {
+    btnLoading.style.display = loading ? 'inline' : 'none';
+  }
 }
 
 // --- Public Entry Point ---
@@ -53,7 +59,9 @@ export function initAdminAuthForm(): void {
   const passwordInput = document.getElementById(PASSWORD_INPUT_ID) as HTMLInputElement | null;
   const authError = document.getElementById(AUTH_ERROR_ID);
 
-  if (!form || !passwordInput) return;
+  if (!form || !passwordInput) {
+    return;
+  }
 
   // Password toggle
   initPasswordToggle({
@@ -77,7 +85,9 @@ export function initAdminAuthForm(): void {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    if (authError) authError.textContent = '';
+    if (authError) {
+      authError.textContent = '';
+    }
 
     const password = passwordInput.value;
     if (!password) {

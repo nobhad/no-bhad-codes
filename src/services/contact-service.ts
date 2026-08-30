@@ -331,7 +331,9 @@ export class ContactService extends BaseService {
    */
   private async ensureCsrfToken(): Promise<string | null> {
     const existing = getCsrfToken();
-    if (existing) return existing;
+    if (existing) {
+      return existing;
+    }
     try {
       await fetch(CSRF_PRIME_ENDPOINT, { method: 'GET', credentials: 'include' });
     } catch {

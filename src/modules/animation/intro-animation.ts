@@ -724,7 +724,9 @@ export class IntroAnimationModule extends BaseModule {
    * - Dispatches 'complete' event for PageTransitionModule
    */
   private completeIntro(): void {
-    if (this.isComplete) return;
+    if (this.isComplete) {
+      return;
+    }
 
     this.isComplete = true;
 
@@ -1411,7 +1413,9 @@ export class IntroAnimationModule extends BaseModule {
       }
     } else {
       // Desktop: use GSAP animation for smooth fade in (same as completeIntro)
-      if (businessCard) businessCard.style.opacity = '1';
+      if (businessCard) {
+        businessCard.style.opacity = '1';
+      }
       if (introNav) {
         gsap.fromTo(introNav, { opacity: 0 }, { opacity: 1, duration: 1.2, ease: 'sine.inOut' });
         // Also animate the individual nav links with stagger (slower fade)
@@ -1487,7 +1491,9 @@ export class IntroAnimationModule extends BaseModule {
 
     if (!this.morphOverlay) {
       // Restore card if overlay not found
-      if (businessCard) businessCard.style.opacity = '1';
+      if (businessCard) {
+        businessCard.style.opacity = '1';
+      }
       this.showIntroFallback();
       return;
     }

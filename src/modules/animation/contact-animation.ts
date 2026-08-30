@@ -340,7 +340,9 @@ export class ContactAnimationModule extends BaseModule {
     // even though we're not playing the entrance animation.
     this.on('PageTransitionModule:page-entering', ((event: CustomEvent) => {
       const { to, mode } = event.detail || {};
-      if (to !== 'contact') return;
+      if (to !== 'contact') {
+        return;
+      }
       if (mode === 'slide' && this.timeline) {
         this.skipToEndState();
         this.blurAnimationComplete = true;
@@ -359,7 +361,9 @@ export class ContactAnimationModule extends BaseModule {
         this.blurAnimationComplete = false;
       }
 
-      if (to !== 'contact') return;
+      if (to !== 'contact') {
+        return;
+      }
 
       if (mode === 'blur') {
         // Direct nav: reset to start state, then let contact-page-ready
@@ -400,7 +404,9 @@ export class ContactAnimationModule extends BaseModule {
    * Play the form animation
    */
   private playFormAnimation(): void {
-    if (!this.container || !this.timeline) return;
+    if (!this.container || !this.timeline) {
+      return;
+    }
 
     const contactContent = this.container.querySelector('.contact-content');
     if (contactContent) {
@@ -420,7 +426,9 @@ export class ContactAnimationModule extends BaseModule {
    * the cascading grow-in animation; they just want a usable form.
    */
   private skipToEndState(): void {
-    if (!this.container || !this.timeline) return;
+    if (!this.container || !this.timeline) {
+      return;
+    }
 
     const contactContent = this.container.querySelector('.contact-content');
     if (contactContent) {
@@ -437,7 +445,9 @@ export class ContactAnimationModule extends BaseModule {
    * Play out animation when leaving contact page
    */
   private playOutAnimation(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
     // Don't kill timeline - just pause it so it can be restarted
     // Killing prevents restart() from working on re-entry
     this.timeline?.pause();
@@ -453,7 +463,9 @@ export class ContactAnimationModule extends BaseModule {
    * and the submit button get reset to their pre-tween hidden state.
    */
   private resetAnimatedElements(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     const blurAmount = 4; // Match setupAnimation blur amount
 
@@ -471,9 +483,13 @@ export class ContactAnimationModule extends BaseModule {
       });
     }
     // Hide hr so it doesn't appear before h2 - hr should appear after h2 or not animate
-    if (hr) gsap.set(hr, { opacity: 0 });
+    if (hr) {
+      gsap.set(hr, { opacity: 0 });
+    }
     // Contact options start hidden - animate in with hr
-    if (contactOptions) gsap.set(contactOptions, { opacity: 0 });
+    if (contactOptions) {
+      gsap.set(contactOptions, { opacity: 0 });
+    }
     if (cardColumn) {
       gsap.set(cardColumn, {
         opacity: 0,

@@ -215,7 +215,9 @@ async function handleFormSubmit(
  */
 export function initResetPasswordPage(): void {
   const elements = getPageElements();
-  if (!elements) return;
+  if (!elements) {
+    return;
+  }
 
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');

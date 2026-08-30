@@ -257,7 +257,9 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private async askToResume(savedProgress: SavedProgress): Promise<void> {
-    if (this.resumePromptShown) return;
+    if (this.resumePromptShown) {
+      return;
+    }
     this.resumePromptShown = true;
 
     if (this.chatContainer) {
@@ -269,21 +271,28 @@ export class TerminalIntakeModule extends BaseModule {
     let handleResumeKeydown: ((e: KeyboardEvent) => void) | null = null;
 
     const processChoice = async (choice: 'resume' | 'restart', displayText: string) => {
-      if (handled) return;
+      if (handled) {
+        return;
+      }
       handled = true;
       this.isInSpecialPrompt = false;
-      if (handleResumeKeydown) document.removeEventListener('keydown', handleResumeKeydown);
+      if (handleResumeKeydown) {
+        document.removeEventListener('keydown', handleResumeKeydown);
+      }
 
       this.addMessage({ type: 'user', content: displayText });
-      if (this.inputElement) this.inputElement.value = '';
+      if (this.inputElement) {
+        this.inputElement.value = '';
+      }
 
       if (choice === 'resume') {
         this.currentQuestionIndex = savedProgress.currentQuestionIndex;
         this.intakeData = savedProgress.intakeData;
         this.updateProgress();
         await delay(300);
-        if (this.chatContainer)
+        if (this.chatContainer) {
           addBootMessageToChat(this.chatContainer, '  \u2713 Progress restored');
+        }
         await delay(200);
         await this.showPreviousConversation(savedProgress.currentQuestionIndex);
         await delay(300);
@@ -302,14 +311,19 @@ export class TerminalIntakeModule extends BaseModule {
     optionsEl?.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       const btnNum = target.dataset.resumeBtn;
-      if (!btnNum) return;
+      if (!btnNum) {
+        return;
+      }
       e.preventDefault();
       e.stopPropagation();
       e.stopImmediatePropagation();
       btn1.disabled = true;
       btn2.disabled = true;
-      if (btnNum === '1') processChoice('resume', '[1] Resume where I left off');
-      else if (btnNum === '2') processChoice('restart', '[2] Start over');
+      if (btnNum === '1') {
+        processChoice('resume', '[1] Resume where I left off');
+      } else if (btnNum === '2') {
+        processChoice('restart', '[2] Start over');
+      }
     });
 
     if (this.chatContainer) {
@@ -319,7 +333,9 @@ export class TerminalIntakeModule extends BaseModule {
     this.messages.push({ type: 'ai', content: contentText });
 
     handleResumeKeydown = (e: KeyboardEvent) => {
-      if (handled) return;
+      if (handled) {
+        return;
+      }
       if (e.key === '1') {
         e.preventDefault();
         e.stopPropagation();
@@ -342,9 +358,15 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private async handleExistingClientData(): Promise<void> {
-    if (this.clientData?.name) this.intakeData.name = this.clientData.name;
-    if (this.clientData?.email) this.intakeData.email = this.clientData.email;
-    if (this.clientData?.company) this.intakeData.companyName = this.clientData.company;
+    if (this.clientData?.name) {
+      this.intakeData.name = this.clientData.name;
+    }
+    if (this.clientData?.email) {
+      this.intakeData.email = this.clientData.email;
+    }
+    if (this.clientData?.company) {
+      this.intakeData.companyName = this.clientData.company;
+    }
 
     const firstName = this.clientData?.name?.split(' ')[0] || 'there';
     const greetingMessage = `Hello, ${firstName}! I'm Arrow - Noelle's personal assistant. Since you're already a client, let's get your new project started. I just have a few quick questions.`;
@@ -410,8 +432,9 @@ export class TerminalIntakeModule extends BaseModule {
     if (choice === 'same' && this.clientData?.lastBilling) {
       this.intakeData.billingPreference = 'same-as-last';
       this.intakeData.previousBillingType = this.clientData.lastBilling.type;
-      if (this.clientData.lastBilling.amount)
+      if (this.clientData.lastBilling.amount) {
         this.intakeData.previousBillingAmount = this.clientData.lastBilling.amount;
+      }
 
       if (this.chatContainer) {
         await showTypingIndicator(this.chatContainer, 200);
@@ -430,7 +453,9 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private async showPreviousConversation(upToIndex: number): Promise<void> {
-    if (!this.chatContainer) return;
+    if (!this.chatContainer) {
+      return;
+    }
     renderPreviousConversation(this.chatContainer, this.intakeData, upToIndex, (msg) =>
       this.addMessage(msg)
     );
@@ -457,15 +482,18 @@ export class TerminalIntakeModule extends BaseModule {
 
     const questionText = interpolateQuestionText(question.question, this.intakeData);
 
-    if (!skipTyping && this.chatContainer) await showTypingIndicator(this.chatContainer, 350);
+    if (!skipTyping && this.chatContainer) {
+      await showTypingIndicator(this.chatContainer, 350);
+    }
 
     const message: ChatMessage = {
       type: 'ai',
       content: questionText,
       questionIndex: this.currentQuestionIndex
     };
-    if (question.type === 'select' && question.options) message.options = question.options;
-    else if (question.type === 'multiselect' && question.options) {
+    if (question.type === 'select' && question.options) {
+      message.options = question.options;
+    } else if (question.type === 'multiselect' && question.options) {
       message.options = question.options;
       message.multiSelect = true;
     }
@@ -489,7 +517,9 @@ export class TerminalIntakeModule extends BaseModule {
       this.inputElement.disabled = false;
       this.inputElement.focus();
     }
-    if (this.sendButton) this.sendButton.disabled = false;
+    if (this.sendButton) {
+      this.sendButton.disabled = false;
+    }
     this.selectedOptions = [];
     this.updateProgress();
   }
@@ -497,9 +527,13 @@ export class TerminalIntakeModule extends BaseModule {
   // -- Input handling ---------------------------------------------------------
 
   private handleOptionClick(target: HTMLElement): void {
-    if (this.isProcessing || this.isInSpecialPrompt) return;
+    if (this.isProcessing || this.isInSpecialPrompt) {
+      return;
+    }
     const value = target.dataset.value;
-    if (!value) return;
+    if (!value) {
+      return;
+    }
 
     const parentMessage = target.closest('[data-question-index]');
     if (parentMessage) {
@@ -511,19 +545,26 @@ export class TerminalIntakeModule extends BaseModule {
     }
 
     const question = this.getCurrentQuestion();
-    if (!question) return;
+    if (!question) {
+      return;
+    }
 
     if (question.type === 'multiselect') {
       target.classList.toggle('selected');
-      if (target.classList.contains('selected')) this.selectedOptions.push(value);
-      else this.selectedOptions = this.selectedOptions.filter((v) => v !== value);
+      if (target.classList.contains('selected')) {
+        this.selectedOptions.push(value);
+      } else {
+        this.selectedOptions = this.selectedOptions.filter((v) => v !== value);
+      }
     } else {
       this.processAnswer(value, target.textContent || value);
     }
   }
 
   private async handleUserInput(): Promise<void> {
-    if (this.isProcessing || this.isInSpecialPrompt) return;
+    if (this.isProcessing || this.isInSpecialPrompt) {
+      return;
+    }
     const inputValue = this.inputElement?.value.trim() || '';
 
     if (isCommand(inputValue)) {
@@ -532,7 +573,9 @@ export class TerminalIntakeModule extends BaseModule {
     }
 
     const question = this.getCurrentQuestion();
-    if (!question) return;
+    if (!question) {
+      return;
+    }
 
     const parsed = parseUserInput(inputValue, question, this.selectedOptions);
     if (!parsed) {
@@ -552,7 +595,9 @@ export class TerminalIntakeModule extends BaseModule {
     this.addMessage({ type: 'user', content: input });
     this.inputHistory.push(input);
     this.historyIndex = this.inputHistory.length;
-    if (this.inputElement) this.inputElement.value = '';
+    if (this.inputElement) {
+      this.inputElement.value = '';
+    }
 
     if (!commandExists(command)) {
       this.addMessage({
@@ -577,7 +622,9 @@ export class TerminalIntakeModule extends BaseModule {
     if (result.signal === COMMAND_SIGNALS.CLEAR && this.chatContainer) {
       const loginInfo = this.chatContainer.querySelector('.terminal-login-info');
       this.chatContainer.innerHTML = '';
-      if (loginInfo) this.chatContainer.appendChild(loginInfo.cloneNode(true));
+      if (loginInfo) {
+        this.chatContainer.appendChild(loginInfo.cloneNode(true));
+      }
     } else if (result.signal === COMMAND_SIGNALS.RESTART) {
       this.resetState();
       this.inputHistory = [];
@@ -629,14 +676,18 @@ export class TerminalIntakeModule extends BaseModule {
       content: displayValue,
       questionIndex: this.currentQuestionIndex
     });
-    if (this.chatContainer)
+    if (this.chatContainer) {
       markSelectedOptions(this.chatContainer, this.currentQuestionIndex, value);
+    }
 
     this.inputHistory.push(displayValue);
     this.historyIndex = this.inputHistory.length;
 
-    if (question.field) this.intakeData[question.field] = value;
-    else if (question.id === 'greeting') this.intakeData.name = value as string;
+    if (question.field) {
+      this.intakeData[question.field] = value;
+    } else if (question.id === 'greeting') {
+      this.intakeData.name = value as string;
+    }
 
     if (this.inputElement) {
       this.inputElement.value = '';
@@ -665,14 +716,16 @@ export class TerminalIntakeModule extends BaseModule {
       );
     }
     await delay(300);
-    if (this.chatContainer)
+    if (this.chatContainer) {
       await addSystemMessageHtml(this.chatContainer, generateReviewSummary(this.intakeData));
+    }
     await delay(300);
-    if (this.chatContainer)
+    if (this.chatContainer) {
       await addSystemMessageWithTyping(
         this.chatContainer,
         'To make changes, scroll back up to the questions and click on the answer you would like to change.'
       );
+    }
     await delay(200);
     if (this.chatContainer) {
       await addMessageWithTyping(
@@ -742,12 +795,20 @@ export class TerminalIntakeModule extends BaseModule {
 
   private async submitIntake(): Promise<void> {
     this.isProcessing = true;
-    if (this.inputElement) this.inputElement.disabled = true;
-    if (this.sendButton) this.sendButton.disabled = true;
+    if (this.inputElement) {
+      this.inputElement.disabled = true;
+    }
+    if (this.sendButton) {
+      this.sendButton.disabled = true;
+    }
 
-    if (this.chatContainer) await showTypingIndicator(this.chatContainer, 500);
+    if (this.chatContainer) {
+      await showTypingIndicator(this.chatContainer, 500);
+    }
     this.addMessage({ type: 'ai', content: 'Processing your project request...' });
-    if (this.chatContainer) await showTypingIndicator(this.chatContainer, 700);
+    if (this.chatContainer) {
+      await showTypingIndicator(this.chatContainer, 700);
+    }
 
     const result = await submitIntakeData(this.intakeData);
 
@@ -759,8 +820,12 @@ export class TerminalIntakeModule extends BaseModule {
     } else {
       this.error('Submission error');
       this.addMessage({ type: 'error', content: result.errorMessage! });
-      if (this.inputElement) this.inputElement.disabled = false;
-      if (this.sendButton) this.sendButton.disabled = false;
+      if (this.inputElement) {
+        this.inputElement.disabled = false;
+      }
+      if (this.sendButton) {
+        this.sendButton.disabled = false;
+      }
     }
     this.isProcessing = false;
   }
@@ -768,14 +833,21 @@ export class TerminalIntakeModule extends BaseModule {
   // -- Editing / go-back ------------------------------------------------------
 
   private async goBackToQuestion(questionIndex: number): Promise<void> {
-    if (this.isProcessing) return;
-    if (questionIndex >= QUESTIONS.length || questionIndex < 0) return;
+    if (this.isProcessing) {
+      return;
+    }
+    if (questionIndex >= QUESTIONS.length || questionIndex < 0) {
+      return;
+    }
     this.isProcessing = true;
 
     const question = QUESTIONS[questionIndex];
     let oldAnswer: string | string[] | undefined;
-    if (question.id === 'greeting') oldAnswer = this.intakeData.name as string;
-    else if (question.field) oldAnswer = this.intakeData[question.field];
+    if (question.id === 'greeting') {
+      oldAnswer = this.intakeData.name as string;
+    } else if (question.field) {
+      oldAnswer = this.intakeData[question.field];
+    }
 
     this.editingQuestionIndex = questionIndex;
     this.editingOldAnswer = oldAnswer;
@@ -790,13 +862,17 @@ export class TerminalIntakeModule extends BaseModule {
           const optionBtn = this.chatContainer?.querySelector(
             `.chat-message[data-question-index="${questionIndex}"] .chat-option[data-value="${value}"]`
           ) as HTMLElement;
-          if (optionBtn) optionBtn.classList.add('selected');
+          if (optionBtn) {
+            optionBtn.classList.add('selected');
+          }
         });
       } else if (question.type === 'select' && typeof oldAnswer === 'string') {
         const optionBtn = this.chatContainer?.querySelector(
           `.chat-message[data-question-index="${questionIndex}"] .chat-option[data-value="${oldAnswer}"]`
         ) as HTMLElement;
-        if (optionBtn) optionBtn.classList.add('selected');
+        if (optionBtn) {
+          optionBtn.classList.add('selected');
+        }
       } else if (typeof oldAnswer === 'string') {
         const textTypes = ['text', 'email', 'tel', 'url', 'textarea'];
         if (textTypes.includes(question.type) && this.inputElement) {
@@ -807,7 +883,9 @@ export class TerminalIntakeModule extends BaseModule {
       }
     }
 
-    if (this.chatContainer) scrollToQuestion(this.chatContainer, questionIndex);
+    if (this.chatContainer) {
+      scrollToQuestion(this.chatContainer, questionIndex);
+    }
     if (this.inputElement) {
       this.inputElement.placeholder = question.placeholder || 'Click or type your response...';
       this.inputElement.disabled = false;
@@ -826,11 +904,15 @@ export class TerminalIntakeModule extends BaseModule {
     const changedField = question.field || (question.id === 'greeting' ? 'name' : '');
     const answerChanged = JSON.stringify(newValue) !== JSON.stringify(oldAnswer);
 
-    if (this.chatContainer)
+    if (this.chatContainer) {
       updateAnswerDisplay(this.chatContainer, questionIndex, newValue, displayValue);
+    }
 
-    if (question.field) this.intakeData[question.field] = newValue;
-    else if (question.id === 'greeting') this.intakeData.name = newValue as string;
+    if (question.field) {
+      this.intakeData[question.field] = newValue;
+    } else if (question.id === 'greeting') {
+      this.intakeData.name = newValue as string;
+    }
 
     const lastAnswered = this.lastAnsweredQuestionIndex;
     this.editingQuestionIndex = null;
@@ -839,10 +921,14 @@ export class TerminalIntakeModule extends BaseModule {
     if (answerChanged && changedField) {
       const firstDependentIndex = findFirstDependentQuestionIndex(changedField, questionIndex);
       if (firstDependentIndex !== -1) {
-        if (this.chatContainer) removeElementsFromIndex(this.chatContainer, firstDependentIndex);
+        if (this.chatContainer) {
+          removeElementsFromIndex(this.chatContainer, firstDependentIndex);
+        }
         for (let i = firstDependentIndex; i < QUESTIONS.length; i++) {
           const q = QUESTIONS[i];
-          if (q.field && this.intakeData[q.field]) delete this.intakeData[q.field];
+          if (q.field && this.intakeData[q.field]) {
+            delete this.intakeData[q.field];
+          }
         }
         this.messages = this.messages.filter(
           (msg) => msg.questionIndex === undefined || msg.questionIndex < firstDependentIndex
@@ -859,17 +945,22 @@ export class TerminalIntakeModule extends BaseModule {
     this.currentQuestionIndex = lastAnswered;
     saveIntakeProgress(this.currentQuestionIndex, this.intakeData);
     this.updateProgress();
-    if (this.chatContainer) scrollToBottom(this.chatContainer);
+    if (this.chatContainer) {
+      scrollToBottom(this.chatContainer);
+    }
     if (this.inputElement) {
       const currentQ = this.getCurrentQuestion();
-      if (currentQ)
+      if (currentQ) {
         this.inputElement.placeholder = currentQ.placeholder || 'Click or type your response...';
+      }
       this.inputElement.disabled = false;
     }
   }
 
   private addMessage(message: ChatMessage): void {
-    if (!this.chatContainer) return;
+    if (!this.chatContainer) {
+      return;
+    }
     this.messages.push(message);
     const messageEl = createMessageElement(
       message,
@@ -896,6 +987,8 @@ export class TerminalIntakeModule extends BaseModule {
     this.currentQuestionIndex = 0;
     this.intakeData = {};
     this.messages = [];
-    if (this.chatContainer) this.chatContainer.innerHTML = '';
+    if (this.chatContainer) {
+      this.chatContainer.innerHTML = '';
+    }
   }
 }

@@ -232,7 +232,9 @@ export class BusinessCardInteractions extends BaseModule {
    * ==========================================
    */
   addEventListeners() {
-    if (!this.businessCard) return;
+    if (!this.businessCard) {
+      return;
+    }
 
     this.log('Adding card event listeners...');
 
@@ -262,7 +264,9 @@ export class BusinessCardInteractions extends BaseModule {
   }
 
   removeEventListeners() {
-    if (!this.businessCard) return;
+    if (!this.businessCard) {
+      return;
+    }
 
     this.log('Removing card event listeners...');
 
@@ -291,7 +295,9 @@ export class BusinessCardInteractions extends BaseModule {
    * ==========================================
    */
   setCardCursor() {
-    if (!this.businessCard) return;
+    if (!this.businessCard) {
+      return;
+    }
 
     this.businessCard.style.cursor = 'pointer';
     this.businessCard.style.pointerEvents = 'auto';
@@ -300,7 +306,9 @@ export class BusinessCardInteractions extends BaseModule {
   }
 
   resetCardCursor() {
-    if (!this.businessCard) return;
+    if (!this.businessCard) {
+      return;
+    }
 
     this.businessCard.style.cursor = 'default';
     this.businessCard.style.pointerEvents = 'auto';
@@ -327,7 +335,9 @@ export class BusinessCardInteractions extends BaseModule {
 
     // Determine flip direction based on click position
     const rect = this.businessCard?.getBoundingClientRect();
-    if (!rect) return;
+    if (!rect) {
+      return;
+    }
 
     const clickX = event.clientX;
     const cardCenterX = rect.left + rect.width / 2;
@@ -386,10 +396,14 @@ export class BusinessCardInteractions extends BaseModule {
   }
 
   handleMouseMove(event: MouseEvent) {
-    if (!this.isEnabled || this.isAnimating || !this.isHovering) return;
+    if (!this.isEnabled || this.isAnimating || !this.isHovering) {
+      return;
+    }
 
     const rect = this.businessCard?.getBoundingClientRect();
-    if (!rect) return;
+    if (!rect) {
+      return;
+    }
 
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
@@ -411,9 +425,13 @@ export class BusinessCardInteractions extends BaseModule {
   }
 
   handleGlobalMouseMove(event: MouseEvent) {
-    if (!this.isEnabled || this.isAnimating || this.isHovering) return;
+    if (!this.isEnabled || this.isAnimating || this.isHovering) {
+      return;
+    }
 
-    if (!this.businessCard || !this.businessCardInner) return;
+    if (!this.businessCard || !this.businessCardInner) {
+      return;
+    }
 
     const rect = this.businessCard.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
@@ -460,7 +478,9 @@ export class BusinessCardInteractions extends BaseModule {
   }
 
   handleMouseEnter(_event: MouseEvent) {
-    if (!this.isEnabled) return;
+    if (!this.isEnabled) {
+      return;
+    }
 
     // Reset idle timer when user hovers
     this.resetIdleTimer();
@@ -493,7 +513,9 @@ export class BusinessCardInteractions extends BaseModule {
   }
 
   handleMouseLeave(_event: MouseEvent) {
-    if (!this.isEnabled) return;
+    if (!this.isEnabled) {
+      return;
+    }
 
     this.log('Mouse left card');
     this.isHovering = false;
@@ -519,7 +541,9 @@ export class BusinessCardInteractions extends BaseModule {
   private touchStartX: number | null = null;
 
   handleTouchStart(event: TouchEvent) {
-    if (!this.isEnabled || this.isAnimating) return;
+    if (!this.isEnabled || this.isAnimating) {
+      return;
+    }
 
     event.preventDefault();
     // Store touch start position for direction detection
@@ -533,13 +557,17 @@ export class BusinessCardInteractions extends BaseModule {
     // Reset idle timer on touch
     this.resetIdleTimer();
 
-    if (!this.isEnabled || this.isAnimating) return;
+    if (!this.isEnabled || this.isAnimating) {
+      return;
+    }
 
     event.preventDefault();
 
     // Determine flip direction based on touch position
     const rect = this.businessCard?.getBoundingClientRect();
-    if (!rect) return;
+    if (!rect) {
+      return;
+    }
 
     // Use changedTouches for touchend, fallback to stored touchStartX
     const touchX =
@@ -766,7 +794,9 @@ export class BusinessCardInteractions extends BaseModule {
   }
 
   resetCard() {
-    if (!this.businessCardInner) return;
+    if (!this.businessCardInner) {
+      return;
+    }
 
     this.log('Resetting card to front');
 

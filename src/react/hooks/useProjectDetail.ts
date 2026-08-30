@@ -76,7 +76,9 @@ export function useProjectDetail({
 
   // Progress: based solely on project_tasks (single source of truth)
   const progress = useMemo(() => {
-    if (tasks.length === 0) return 0;
+    if (tasks.length === 0) {
+      return 0;
+    }
     const completed = tasks.filter((t) => t.status === 'completed').length;
     return Math.round((completed / tasks.length) * PERCENTAGE_MULTIPLIER);
   }, [tasks]);

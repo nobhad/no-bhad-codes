@@ -40,7 +40,9 @@ export function useProjectTemplatesData({ showNotification }: UseProjectTemplate
       const response = await apiFetch(
         `${API_ENDPOINTS.ADMIN.PROJECT_TEMPLATES}?includeInactive=true`
       );
-      if (!response.ok) throw new Error('Failed to load templates');
+      if (!response.ok) {
+        throw new Error('Failed to load templates');
+      }
       const payload = unwrapApiData<{ templates?: ProjectTemplateItem[] }>(await response.json());
       setTemplates(payload.templates || []);
     } catch (err) {
@@ -141,10 +143,14 @@ export function useProjectTemplatesData({ showNotification }: UseProjectTemplate
   // ---- Delete handler ----
 
   const handleDelete = useCallback(async () => {
-    if (!deletingTemplate) return;
+    if (!deletingTemplate) {
+      return;
+    }
     try {
       const response = await apiDelete(buildEndpoint.projectTemplate(deletingTemplate.id));
-      if (!response.ok) throw new Error('Failed to delete template');
+      if (!response.ok) {
+        throw new Error('Failed to delete template');
+      }
       setTemplates((prev) => prev.filter((t) => t.id !== deletingTemplate.id));
       showNotification?.('Template deleted', 'success');
     } catch (err) {
@@ -161,7 +167,9 @@ export function useProjectTemplatesData({ showNotification }: UseProjectTemplate
         const response = await apiPut(buildEndpoint.projectTemplate(template.id), {
           isActive: !template.isActive
         });
-        if (!response.ok) throw new Error('Failed to toggle template');
+        if (!response.ok) {
+          throw new Error('Failed to toggle template');
+        }
         setTemplates((prev) =>
           prev.map((t) => (t.id === template.id ? { ...t, isActive: !t.isActive } : t))
         );

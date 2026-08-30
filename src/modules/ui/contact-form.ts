@@ -278,7 +278,9 @@ export class ContactFormModule extends BaseModule {
   async handleSubmit(e: Event) {
     e.preventDefault();
 
-    if (this.isSubmitting) return;
+    if (this.isSubmitting) {
+      return;
+    }
 
     this.log('Form submission started');
 
@@ -324,7 +326,9 @@ export class ContactFormModule extends BaseModule {
    * Gather form data into ContactFormData structure with client-side sanitization
    */
   private gatherFormData(): Partial<ContactFormData> {
-    if (!this.form) return {};
+    if (!this.form) {
+      return {};
+    }
 
     const formData = new FormData(this.form);
 
@@ -420,7 +424,9 @@ export class ContactFormModule extends BaseModule {
   }
 
   setSubmitButtonState(isLoading: boolean) {
-    if (!this.submitButton) return;
+    if (!this.submitButton) {
+      return;
+    }
 
     if (isLoading) {
       this.submitButton.disabled = true;

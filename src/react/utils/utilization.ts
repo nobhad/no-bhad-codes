@@ -44,8 +44,12 @@ export function getUtilizationColor(ratio: number, options?: UtilizationThreshol
   const warning = options?.warningThreshold ?? UTILIZATION_THRESHOLD_WARNING;
   const danger = options?.dangerThreshold ?? UTILIZATION_THRESHOLD_DANGER;
 
-  if (ratio >= danger) return 'var(--status-danger)';
-  if (ratio >= warning) return 'var(--status-warning)';
+  if (ratio >= danger) {
+    return 'var(--status-danger)';
+  }
+  if (ratio >= warning) {
+    return 'var(--status-warning)';
+  }
   return 'var(--status-success)';
 }
 
@@ -64,7 +68,11 @@ export function getUtilizationColorClass(
   const warning = options?.warningThreshold ?? UTILIZATION_THRESHOLD_WARNING;
   const danger = options?.dangerThreshold ?? UTILIZATION_THRESHOLD_DANGER;
 
-  if (ratio >= danger) return 'progress-danger';
-  if (ratio >= warning) return 'progress-warning';
+  if (ratio >= danger) {
+    return 'progress-danger';
+  }
+  if (ratio >= warning) {
+    return 'progress-warning';
+  }
   return 'progress-success';
 }

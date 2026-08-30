@@ -52,7 +52,9 @@ declare global {
  * Setup development helpers on window object
  */
 export function setupDebugHelpers(app: Application): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') {
+    return;
+  }
 
   window.NBW_APP = app;
   window.NBW_STATE = appState;

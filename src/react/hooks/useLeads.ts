@@ -102,7 +102,9 @@ export function useLeads({ autoFetch = true }: UseLeadsOptions = {}): UseLeadsRe
       // Decode HTML entities in text fields to prevent double-encoding
       setLeads(decodeArrayFields(leadsArray, LEAD_TEXT_FIELDS));
     } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') return;
+      if (err instanceof Error && err.name === 'AbortError') {
+        return;
+      }
       const message = formatErrorMessage(err, 'An error occurred');
       setError(message);
       logger.error('[useLeads] Error:', message);
@@ -210,7 +212,9 @@ export function useLeads({ autoFetch = true }: UseLeadsOptions = {}): UseLeadsRe
 
   // Auto-fetch on mount with AbortController cleanup
   useEffect(() => {
-    if (!autoFetch) return;
+    if (!autoFetch) {
+      return;
+    }
     const controller = new AbortController();
     fetchLeads(controller.signal);
     return () => controller.abort();

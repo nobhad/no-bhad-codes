@@ -49,7 +49,9 @@ describe('terminal intake question flow matches server schema', () => {
       const question = QUESTIONS.find((q) => q.field === field);
 
       // If the question has no static options (e.g. dynamically populated), skip value checks
-      if (!question || !question.options || question.options.length === 0) return;
+      if (!question || !question.options || question.options.length === 0) {
+        return;
+      }
 
       for (const opt of question.options) {
         expect(

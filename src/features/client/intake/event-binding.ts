@@ -99,8 +99,12 @@ export function bindGlobalKeyboardShortcuts(ctx: EventBindingContext): void {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       const isModalClosed = ctx.intakeModal && !ctx.intakeModal.classList.contains('open');
-      if (isModalClosed) return;
-      if (ctx.isProcessing || ctx.isInSpecialPrompt) return;
+      if (isModalClosed) {
+        return;
+      }
+      if (ctx.isProcessing || ctx.isInSpecialPrompt) {
+        return;
+      }
 
       const question = ctx.getCurrentQuestion();
       if (question?.type === 'multiselect' && ctx.selectedOptions.length > 0) {
@@ -112,26 +116,38 @@ export function bindGlobalKeyboardShortcuts(ctx: EventBindingContext): void {
 
   // Number key shortcuts for select/multiselect
   document.addEventListener('keydown', (e) => {
-    if (ctx.isProcessing || ctx.isInSpecialPrompt) return;
+    if (ctx.isProcessing || ctx.isInSpecialPrompt) {
+      return;
+    }
 
     if (ctx.inputElement) {
       const inputHasText = ctx.inputElement.value.trim().length > 0;
       const inputIsFocused = document.activeElement === ctx.inputElement;
 
-      if (inputHasText) return;
+      if (inputHasText) {
+        return;
+      }
 
       const question = ctx.getCurrentQuestion();
       if (inputIsFocused && question) {
         const textTypes = ['text', 'email', 'tel', 'url', 'textarea'];
-        if (textTypes.includes(question.type)) return;
+        if (textTypes.includes(question.type)) {
+          return;
+        }
       }
     }
 
-    if (ctx.intakeModal && !ctx.intakeModal.classList.contains('open')) return;
+    if (ctx.intakeModal && !ctx.intakeModal.classList.contains('open')) {
+      return;
+    }
 
     const question = ctx.getCurrentQuestion();
-    if (!question || !question.options) return;
-    if (question.type !== 'select' && question.type !== 'multiselect') return;
+    if (!question || !question.options) {
+      return;
+    }
+    if (question.type !== 'select' && question.type !== 'multiselect') {
+      return;
+    }
 
     const num = parseInt(e.key, 10);
     if (num >= 1 && num <= question.options.length) {
@@ -160,10 +176,18 @@ export function bindGlobalKeyboardShortcuts(ctx: EventBindingContext): void {
 
   // ArrowUp to go back
   document.addEventListener('keydown', (e) => {
-    if (ctx.isProcessing || ctx.isInSpecialPrompt) return;
-    if (ctx.intakeModal && !ctx.intakeModal.classList.contains('open')) return;
-    if (e.key !== 'ArrowUp') return;
-    if (document.activeElement === ctx.inputElement && ctx.inputElement?.value) return;
+    if (ctx.isProcessing || ctx.isInSpecialPrompt) {
+      return;
+    }
+    if (ctx.intakeModal && !ctx.intakeModal.classList.contains('open')) {
+      return;
+    }
+    if (e.key !== 'ArrowUp') {
+      return;
+    }
+    if (document.activeElement === ctx.inputElement && ctx.inputElement?.value) {
+      return;
+    }
 
     if (ctx.currentQuestionIndex > 0) {
       e.preventDefault();
@@ -179,7 +203,9 @@ export function bindChatOptionClicks(ctx: EventBindingContext): void {
   ctx.chatContainer?.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
     if (target.classList.contains('chat-option')) {
-      if (target.dataset.resumeBtn) return;
+      if (target.dataset.resumeBtn) {
+        return;
+      }
       e.stopPropagation();
       ctx.handleOptionClick(target);
     }
@@ -199,7 +225,9 @@ export function bindModalControls(ctx: EventBindingContext): void {
         window as typeof globalThis & { terminalIntakeInitialized?: boolean }
       ).terminalIntakeInitialized = false;
       const container = ctx.intakeModal.querySelector('.terminal-intake-container');
-      if (container) container.innerHTML = '';
+      if (container) {
+        container.innerHTML = '';
+      }
     }
     if (ctx.intakeModalBackdrop) {
       ctx.intakeModalBackdrop.classList.remove('open');

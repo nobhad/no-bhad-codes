@@ -127,7 +127,9 @@ export const EMPTY_FORM: WebhookFormData = {
 // ============================================
 
 export function truncateUrl(url: string): string {
-  if (url.length <= MAX_URL_DISPLAY_LENGTH) return url;
+  if (url.length <= MAX_URL_DISPLAY_LENGTH) {
+    return url;
+  }
   return `${url.substring(0, MAX_URL_DISPLAY_LENGTH)}...`;
 }
 
@@ -153,13 +155,17 @@ export function filterWebhook(
     const query = search.toLowerCase();
     const matchesSearch =
       webhook.name.toLowerCase().includes(query) || webhook.url.toLowerCase().includes(query);
-    if (!matchesSearch) return false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
     const activeValue = webhook.is_active ? 'active' : 'inactive';
-    if (!statusFilter.includes(activeValue)) return false;
+    if (!statusFilter.includes(activeValue)) {
+      return false;
+    }
   }
 
   return true;
@@ -188,11 +194,15 @@ export function filterDelivery(
 ): boolean {
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
-    if (!statusFilter.includes(delivery.status)) return false;
+    if (!statusFilter.includes(delivery.status)) {
+      return false;
+    }
   }
   const eventTypeFilter = filters.eventType;
   if (eventTypeFilter && eventTypeFilter.length > 0) {
-    if (!eventTypeFilter.includes(delivery.eventType)) return false;
+    if (!eventTypeFilter.includes(delivery.eventType)) {
+      return false;
+    }
   }
   return true;
 }

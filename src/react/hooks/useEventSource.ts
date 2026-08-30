@@ -61,7 +61,9 @@ export function useEventSource(handlers: SSEEventHandlers) {
 
   const connect = useCallback(() => {
     // Don't connect in development (SSE uses polling in dev)
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') {
+      return;
+    }
 
     // Close existing connection
     if (eventSourceRef.current) {
@@ -159,7 +161,9 @@ export function useSendTyping() {
 
   const sendTyping = useCallback((threadId: number, isTyping: boolean) => {
     // Don't send duplicate events
-    if (lastSentRef.current === isTyping) return;
+    if (lastSentRef.current === isTyping) {
+      return;
+    }
     lastSentRef.current = isTyping;
 
     // Clear pending stop timer
@@ -194,7 +198,9 @@ export function useSendTyping() {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
     };
   }, []);
 

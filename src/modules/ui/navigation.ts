@@ -288,7 +288,9 @@ export class NavigationModule extends BaseModule {
    * Setup GSAP animations
    */
   private setupAnimations(): void {
-    if (!this.nav) return;
+    if (!this.nav) {
+      return;
+    }
 
     // Create main timeline
     this.mainTimeline = gsap.timeline({ paused: true });
@@ -331,7 +333,9 @@ export class NavigationModule extends BaseModule {
    * Open menu with animation
    */
   private openMenuAnimation(): void {
-    if (!this.nav || !this.mainTimeline) return;
+    if (!this.nav || !this.mainTimeline) {
+      return;
+    }
 
     this.log('Opening menu');
 
@@ -396,7 +400,9 @@ export class NavigationModule extends BaseModule {
    * Close menu with animation
    */
   private closeMenuAnimation(): void {
-    if (!this.nav) return;
+    if (!this.nav) {
+      return;
+    }
 
     this.log('Closing menu');
 
@@ -423,8 +429,12 @@ export class NavigationModule extends BaseModule {
     // it. Guarded with a timer matching the animation so the attribute lands
     // either way; whichever runs first wins and the other is a no-op.
     const settle = (): void => {
-      if (!this.nav) return;
-      if (this.nav.getAttribute('data-nav') === 'closed') return;
+      if (!this.nav) {
+        return;
+      }
+      if (this.nav.getAttribute('data-nav') === 'closed') {
+        return;
+      }
       this.nav.setAttribute('data-nav', 'closed');
       document.body.style.overflow = '';
     };
@@ -449,7 +459,9 @@ export class NavigationModule extends BaseModule {
    * Uses hash routing: #/, #/about, #/contact
    */
   private setupRoutes(): void {
-    if (!this.routerService) return;
+    if (!this.routerService) {
+      return;
+    }
 
     const routes = [
       {
@@ -566,7 +578,9 @@ export class NavigationModule extends BaseModule {
    * Update navigation DOM with data
    */
   private updateNavigationDOM(navigationItems: NavigationItem[]): void {
-    if (!this.menuLinks) return;
+    if (!this.menuLinks) {
+      return;
+    }
 
     navigationItems.forEach((item, index) => {
       const menuLink = this.menuLinks?.[index] as HTMLAnchorElement;
@@ -632,7 +646,9 @@ export class NavigationModule extends BaseModule {
   private setupTouchHandlers(): void {
     // Listen for taps outside menu links to clear touch-active state (tracked for cleanup)
     this.addEventListener(document, 'touchstart', (event: Event) => {
-      if (!this.activeTouchLink) return;
+      if (!this.activeTouchLink) {
+        return;
+      }
 
       const touchEvent = event as TouchEvent;
       const target = touchEvent.target as Element;
@@ -685,7 +701,9 @@ export class NavigationModule extends BaseModule {
    * Detect current page and update active state
    */
   private detectCurrentPage(): void {
-    if (!this.menuLinks) return;
+    if (!this.menuLinks) {
+      return;
+    }
 
     // The route lives in the hash, not the path. This compared hrefs against
     // window.location.pathname, which on a hash-routed SPA is always '/', so
@@ -693,9 +711,13 @@ export class NavigationModule extends BaseModule {
     // remaining path cases ('/projects', '/client') are addresses this site
     // stopped using when it moved to hash routes.
     const normalise = (value: string | null): string => {
-      if (!value) return '';
+      if (!value) {
+        return '';
+      }
       const hash = value.startsWith('#') ? value : value.slice(value.indexOf('#'));
-      if (!hash || hash === '#' || hash === '#/') return '#/';
+      if (!hash || hash === '#' || hash === '#/') {
+        return '#/';
+      }
       return hash.startsWith('#/') ? hash : `#/${hash.slice(1)}`;
     };
     const current = normalise(window.location.hash || '#/');

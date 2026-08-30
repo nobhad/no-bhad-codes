@@ -66,7 +66,9 @@ export function getIconSvg(name: string, size?: IconSizeKey | number): string {
  */
 export function createIconElement(config: IconConfig): SVGSVGElement | null {
   const svgString = renderIcon(config);
-  if (!svgString) return null;
+  if (!svgString) {
+    return null;
+  }
 
   const template = document.createElement('template');
   template.innerHTML = svgString.trim();

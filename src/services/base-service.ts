@@ -26,7 +26,9 @@ export abstract class BaseService {
    * Initialize the service
    */
   async init(): Promise<void> {
-    if (this.isInitialized) return;
+    if (this.isInitialized) {
+      return;
+    }
 
     this.log('Initializing service...');
     await this.onInit();

@@ -68,7 +68,9 @@ export function useWebhooksData({ showNotification }: UseWebhooksDataParams) {
     setError(null);
     try {
       const response = await apiFetch(API_ENDPOINTS.ADMIN.WEBHOOKS);
-      if (!response.ok) throw new Error('Failed to load webhooks');
+      if (!response.ok) {
+        throw new Error('Failed to load webhooks');
+      }
       const payload = unwrapApiData<{ webhooks?: WebhookItem[] }>(await response.json());
       setWebhooks(payload.webhooks || []);
     } catch (err) {
@@ -83,7 +85,9 @@ export function useWebhooksData({ showNotification }: UseWebhooksDataParams) {
     setDeliveriesError(null);
     try {
       const response = await apiFetch(buildEndpoint.webhookDeliveries(webhookId));
-      if (!response.ok) throw new Error('Failed to load deliveries');
+      if (!response.ok) {
+        throw new Error('Failed to load deliveries');
+      }
       const payload = unwrapApiData<{ deliveries?: WebhookDelivery[] }>(await response.json());
       setDeliveries(payload.deliveries || []);
     } catch (err) {
@@ -96,7 +100,9 @@ export function useWebhooksData({ showNotification }: UseWebhooksDataParams) {
   const loadStats = useCallback(async (webhookId: number) => {
     try {
       const response = await apiFetch(buildEndpoint.webhookStats(webhookId));
-      if (!response.ok) throw new Error('Failed to load stats');
+      if (!response.ok) {
+        throw new Error('Failed to load stats');
+      }
       const payload = unwrapApiData<WebhookStats>(await response.json());
       setWebhookStats(payload);
     } catch (err) {
@@ -116,7 +122,9 @@ export function useWebhooksData({ showNotification }: UseWebhooksDataParams) {
         const response = await apiFetch(buildEndpoint.webhookToggle(webhook.id), {
           method: 'PATCH'
         });
-        if (!response.ok) throw new Error('Failed to toggle webhook');
+        if (!response.ok) {
+          throw new Error('Failed to toggle webhook');
+        }
         setWebhooks((prev) =>
           prev.map((w) => (w.id === webhook.id ? { ...w, is_active: !w.is_active } : w))
         );
@@ -133,10 +141,14 @@ export function useWebhooksData({ showNotification }: UseWebhooksDataParams) {
   );
 
   const handleDelete = useCallback(async () => {
-    if (!deletingWebhook) return;
+    if (!deletingWebhook) {
+      return;
+    }
     try {
       const response = await apiDelete(buildEndpoint.webhook(deletingWebhook.id));
-      if (!response.ok) throw new Error('Failed to delete webhook');
+      if (!response.ok) {
+        throw new Error('Failed to delete webhook');
+      }
       setWebhooks((prev) => prev.filter((w) => w.id !== deletingWebhook.id));
       showNotification?.('Webhook deleted', 'success');
     } catch (err) {
@@ -149,9 +161,13 @@ export function useWebhooksData({ showNotification }: UseWebhooksDataParams) {
     async (webhookId: number) => {
       try {
         const response = await apiPost(buildEndpoint.webhookRetry(webhookId));
-        if (!response.ok) throw new Error('Failed to retry delivery');
+        if (!response.ok) {
+          throw new Error('Failed to retry delivery');
+        }
         showNotification?.('Delivery retry queued', 'success');
-        if (selectedWebhook) loadDeliveries(selectedWebhook.id);
+        if (selectedWebhook) {
+          loadDeliveries(selectedWebhook.id);
+        }
       } catch (err) {
         logger.error('Failed to retry delivery:', err);
         showNotification?.('Failed to retry delivery', 'error');
@@ -261,7 +277,9 @@ export function useWebhooksData({ showNotification }: UseWebhooksDataParams) {
 
   const handleTestSubmit = useCallback(
     async (onClose: () => void) => {
-      if (!testingWebhook || !testEventType) return;
+      if (!testingWebhook || !testEventType) {
+        return;
+      }
       let parsedData: Record<string, unknown>;
       try {
         parsedData = JSON.parse(testSampleData);
@@ -276,7 +294,9 @@ export function useWebhooksData({ showNotification }: UseWebhooksDataParams) {
           eventType: testEventType,
           sampleData: parsedData
         });
-        if (!response.ok) throw new Error('Failed to send test');
+        if (!response.ok) {
+          throw new Error('Failed to send test');
+        }
         showNotification?.('Test webhook sent', 'success');
         onClose();
       } catch (err) {

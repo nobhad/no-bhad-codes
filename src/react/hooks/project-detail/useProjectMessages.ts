@@ -35,11 +35,15 @@ export function useProjectMessages({
 
   /** Resolve the thread ID for this project (find or create) */
   const resolveThreadId = useCallback(async (): Promise<number | null> => {
-    if (threadIdRef.current) return threadIdRef.current;
+    if (threadIdRef.current) {
+      return threadIdRef.current;
+    }
 
     try {
       const response = await apiFetch(buildEndpoint.messageThreadByProject(projectId));
-      if (!response.ok) return null;
+      if (!response.ok) {
+        return null;
+      }
 
       const json = await response.json();
       const data = unwrapApiData<{ thread: { id: number } }>(json);
@@ -53,11 +57,15 @@ export function useProjectMessages({
 
   const fetchMessages = useCallback(async (): Promise<Message[]> => {
     const threadId = await resolveThreadId();
-    if (!threadId) return [];
+    if (!threadId) {
+      return [];
+    }
 
     try {
       const response = await apiFetch(buildEndpoint.messageThreadMessages(threadId));
-      if (!response.ok) return [];
+      if (!response.ok) {
+        return [];
+      }
 
       const json = await response.json();
       const parsed = unwrapApiData<{ messages: Message[] }>(json);
@@ -76,7 +84,9 @@ export function useProjectMessages({
   const sendMessage = useCallback(
     async (content: string): Promise<boolean> => {
       const threadId = await resolveThreadId();
-      if (!threadId) return false;
+      if (!threadId) {
+        return false;
+      }
 
       try {
         const response = await apiPost(buildEndpoint.messageThreadMessages(threadId), { content });
@@ -148,10 +158,14 @@ export function useProjectMessages({
       try {
         if (hasReacted) {
           const res = await apiDelete(buildEndpoint.messageReaction(messageId, emoji));
-          if (!res.ok) throw new Error('Failed to remove reaction');
+          if (!res.ok) {
+            throw new Error('Failed to remove reaction');
+          }
         } else {
           const res = await apiPost(buildEndpoint.messageReactions(messageId), { reaction: emoji });
-          if (!res.ok) throw new Error('Failed to add reaction');
+          if (!res.ok) {
+            throw new Error('Failed to add reaction');
+          }
         }
         return true;
       } catch (err) {

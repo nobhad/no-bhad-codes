@@ -38,7 +38,9 @@ export class SubmenuModule extends BaseModule {
    * Setup submenu toggle functionality
    */
   private setupSubmenuToggles(): void {
-    if (!this.submenuToggles) return;
+    if (!this.submenuToggles) {
+      return;
+    }
 
     this.submenuToggles.forEach((toggle) => {
       this.addEventListener(toggle, 'click', (event: Event) => {
@@ -54,7 +56,9 @@ export class SubmenuModule extends BaseModule {
    */
   private toggleSubmenu(toggle: Element): void {
     const menuItem = toggle.closest('.has-submenu');
-    if (!menuItem) return;
+    if (!menuItem) {
+      return;
+    }
 
     const isCurrentlyOpen = menuItem.classList.contains('submenu-open');
 

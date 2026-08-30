@@ -43,7 +43,9 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
   const loadIntegrations = useCallback(async () => {
     try {
       const response = await apiFetch(API_ENDPOINTS.INTEGRATIONS_STATUS);
-      if (!response.ok) throw new Error('Failed to load integration status');
+      if (!response.ok) {
+        throw new Error('Failed to load integration status');
+      }
       const payload = unwrapApiData<IntegrationStatus[]>(await response.json());
       setIntegrations(Array.isArray(payload) ? payload : []);
     } catch (err) {
@@ -54,7 +56,9 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
   const loadNotifications = useCallback(async () => {
     try {
       const response = await apiFetch(API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS);
-      if (!response.ok) throw new Error('Failed to load notifications');
+      if (!response.ok) {
+        throw new Error('Failed to load notifications');
+      }
       const payload = unwrapApiData<NotificationConfig[]>(await response.json());
       setNotifications(Array.isArray(payload) ? payload : []);
     } catch (err) {
@@ -65,7 +69,9 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
   const loadStripeStatus = useCallback(async () => {
     try {
       const response = await apiFetch(API_ENDPOINTS.INTEGRATIONS_STRIPE_STATUS);
-      if (!response.ok) throw new Error('Failed to load Stripe status');
+      if (!response.ok) {
+        throw new Error('Failed to load Stripe status');
+      }
       const payload = unwrapApiData<StripeStatus>(await response.json());
       setStripeStatus(payload);
     } catch (err) {
@@ -76,7 +82,9 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
   const loadCalendarStatus = useCallback(async () => {
     try {
       const response = await apiFetch(API_ENDPOINTS.INTEGRATIONS_CALENDAR_STATUS);
-      if (!response.ok) throw new Error('Failed to load calendar status');
+      if (!response.ok) {
+        throw new Error('Failed to load calendar status');
+      }
       const payload = unwrapApiData<CalendarStatus>(await response.json());
       setCalendarStatus(payload);
     } catch (err) {
@@ -126,8 +134,9 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
 
         const response = isEditing ? await apiPut(url, data) : await apiPost(url, data);
 
-        if (!response.ok)
+        if (!response.ok) {
           throw new Error(`Failed to ${isEditing ? 'update' : 'create'} notification`);
+        }
 
         showNotification?.(
           `Notification ${isEditing ? 'updated' : 'created'} successfully`,
@@ -145,12 +154,16 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
   );
 
   const handleDeleteNotification = useCallback(async () => {
-    if (deletingNotificationId === null) return;
+    if (deletingNotificationId === null) {
+      return;
+    }
     try {
       const response = await apiDelete(
         `${API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS}/${deletingNotificationId}`
       );
-      if (!response.ok) throw new Error('Failed to delete notification');
+      if (!response.ok) {
+        throw new Error('Failed to delete notification');
+      }
       showNotification?.('Notification deleted successfully', 'success');
       await loadNotifications();
     } catch (err) {
@@ -163,7 +176,9 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
       setTestingId(id);
       try {
         const response = await apiPost(`${API_ENDPOINTS.INTEGRATIONS_NOTIFICATIONS}/${id}/test`);
-        if (!response.ok) throw new Error('Failed to send test notification');
+        if (!response.ok) {
+          throw new Error('Failed to send test notification');
+        }
         showNotification?.('Test notification sent', 'success');
       } catch (err) {
         showNotification?.(formatErrorMessage(err, 'Failed to send test notification'), 'error');
@@ -181,12 +196,16 @@ export function useIntegrationsData({ showNotification }: UseIntegrationsDataPar
   // ---- Calendar settings ----
 
   const handleToggleCalendarSync = useCallback(async () => {
-    if (!calendarStatus) return;
+    if (!calendarStatus) {
+      return;
+    }
     try {
       const response = await apiPut(API_ENDPOINTS.INTEGRATIONS_CALENDAR_SETTINGS, {
         syncEnabled: !calendarStatus.syncEnabled
       });
-      if (!response.ok) throw new Error('Failed to update calendar settings');
+      if (!response.ok) {
+        throw new Error('Failed to update calendar settings');
+      }
       showNotification?.(
         `Calendar sync ${calendarStatus.syncEnabled ? 'disabled' : 'enabled'}`,
         'success'

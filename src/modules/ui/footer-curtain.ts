@@ -145,7 +145,9 @@ export class FooterCurtainModule extends BaseModule {
    * of truth.
    */
   private measure(): void {
-    if (!this.curtain) return;
+    if (!this.curtain) {
+      return;
+    }
     this.curtainHeight = Math.round(this.curtain.getBoundingClientRect().height);
     // Read with the header at rest, or a header already translated up would
     // measure short and cap its own travel below its real height.
@@ -163,7 +165,9 @@ export class FooterCurtainModule extends BaseModule {
    * the same property would still fight on the frames where both ran.
    */
   private applyHeaderOffset(curtainProgress: number): void {
-    if (!this.header) return;
+    if (!this.header) {
+      return;
+    }
 
     // Only the scroll-away half is ever skipped. The curtain half must always
     // apply: a gesture reveal slides the whole page up off the band, and the
@@ -188,14 +192,20 @@ export class FooterCurtainModule extends BaseModule {
    * should keep its hands off it.
    */
   private headerTravelsInFlow(): boolean {
-    if (!this.header) return true;
-    if (getComputedStyle(this.header).position !== 'static') return false;
+    if (!this.header) {
+      return true;
+    }
+    if (getComputedStyle(this.header).position !== 'static') {
+      return false;
+    }
 
     // No scroller at all means nothing is scrolling, so there is no
     // scroll-away to skip — and answering "true" here would be read as
     // "the header handles itself", which it does not.
     const scroller = this.scroller;
-    if (scroller === null) return false;
+    if (scroller === null) {
+      return false;
+    }
 
     return (
       scroller === document.scrollingElement ||
@@ -222,7 +232,9 @@ export class FooterCurtainModule extends BaseModule {
    * from the tween that moves `progress`, not from the timeline itself.
    */
   private buildTimeline(): void {
-    if (!this.page || !this.inner) return;
+    if (!this.page || !this.inner) {
+      return;
+    }
 
     const tl = gsap.timeline({ paused: true });
 
@@ -254,10 +266,16 @@ export class FooterCurtainModule extends BaseModule {
       element = document.scrollingElement as HTMLElement | null;
     }
 
-    if (!element) return;
+    if (!element) {
+      return;
+    }
     // Scrolling inside the curtain itself must not drive the curtain.
-    if (this.footer?.contains(element)) return;
-    if (!this.ownsCurtain(element)) return;
+    if (this.footer?.contains(element)) {
+      return;
+    }
+    if (!this.ownsCurtain(element)) {
+      return;
+    }
     // Scroll still reaches update() while a gesture owns the curtain — update()
     // decides what to do with it. Returning early here meant the reader could
     // scroll back up off the end of a case study with the band still raised,
@@ -325,7 +343,9 @@ export class FooterCurtainModule extends BaseModule {
       this.scrubTween?.kill();
       this.scrubTween = null;
       this.timeline?.kill();
-      if (this.page) gsap.set(this.page, { y: 0 });
+      if (this.page) {
+        gsap.set(this.page, { y: 0 });
+      }
 
       // buildTimeline() overwrites this.timeline, so it is not cleared first:
       // assigning null here would narrow the field and TS can't see the
@@ -367,7 +387,9 @@ export class FooterCurtainModule extends BaseModule {
   };
 
   private requestUpdate(): void {
-    if (this.frame) return;
+    if (this.frame) {
+      return;
+    }
     this.frame = requestAnimationFrame(this.update);
   }
 
@@ -423,14 +445,18 @@ export class FooterCurtainModule extends BaseModule {
 
   /** Drive the timeline, the header and the scrub state to one exact value. */
   private applyImmediate(value: number): void {
-    if (!this.timeline) return;
+    if (!this.timeline) {
+      return;
+    }
     this.scrubState.value = value;
     this.timeline.progress(value);
     this.applyHeaderOffset(value);
   }
 
   private setProgress(next: number): void {
-    if (!this.timeline) return;
+    if (!this.timeline) {
+      return;
+    }
 
     const changed = Math.abs(next - this.progress) >= PROGRESS_EPSILON;
 
@@ -491,7 +517,9 @@ export class FooterCurtainModule extends BaseModule {
    * it's actually on screen.
    */
   private applyOpenState(progress: number): void {
-    if (!this.curtain) return;
+    if (!this.curtain) {
+      return;
+    }
     const open = progress > OPEN_THRESHOLD;
     this.curtain.setAttribute('aria-hidden', open ? 'false' : 'true');
     this.curtain.inert = !open;
@@ -517,8 +545,12 @@ export class FooterCurtainModule extends BaseModule {
 
     // Never leave the page slid up — the module is gone, nothing would put
     // it back, and the user would be looking at a permanently shifted site.
-    if (this.page) gsap.set(this.page, { y: 0 });
-    if (this.header) gsap.set(this.header, { y: 0 });
+    if (this.page) {
+      gsap.set(this.page, { y: 0 });
+    }
+    if (this.header) {
+      gsap.set(this.header, { y: 0 });
+    }
 
     this.footer = null;
     this.curtain = null;

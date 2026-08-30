@@ -169,7 +169,9 @@ export function resolveCommand(
     case 'restart':
       return { signal: COMMAND_SIGNALS.RESTART };
     case 'back':
-      if (currentQuestionIndex > 0) return { signal: COMMAND_SIGNALS.BACK };
+      if (currentQuestionIndex > 0) {
+        return { signal: COMMAND_SIGNALS.BACK };
+      }
       return { message: { type: 'error', content: 'Already at the first question.' } };
     case 'skip':
       return {

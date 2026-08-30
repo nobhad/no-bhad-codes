@@ -430,7 +430,9 @@ function extractErrorMessage(
   // Try custom extractor first
   if (customExtractor && response) {
     const customMessage = customExtractor(response, errorData);
-    if (customMessage) return customMessage;
+    if (customMessage) {
+      return customMessage;
+    }
   }
 
   // Standard error message extraction
@@ -438,14 +440,22 @@ function extractErrorMessage(
     const data = errorData as Record<string, unknown>;
 
     // Check common error message fields
-    if (typeof data.message === 'string') return data.message;
-    if (typeof data.error === 'string') return data.error;
-    if (typeof data.errors === 'string') return data.errors;
+    if (typeof data.message === 'string') {
+      return data.message;
+    }
+    if (typeof data.error === 'string') {
+      return data.error;
+    }
+    if (typeof data.errors === 'string') {
+      return data.errors;
+    }
 
     // Check for array of errors
     if (Array.isArray(data.errors) && data.errors.length > 0) {
       const firstError = data.errors[0];
-      if (typeof firstError === 'string') return firstError;
+      if (typeof firstError === 'string') {
+        return firstError;
+      }
       if (typeof firstError === 'object' && firstError && 'message' in firstError) {
         return String(firstError.message);
       }
@@ -517,6 +527,8 @@ export function notifyBulkResult(result: BulkResult, entityName: string, verb: s
  * Capitalize first letter of a string
  */
 function capitalizeFirst(str: string): string {
-  if (!str) return str;
+  if (!str) {
+    return str;
+  }
   return str.charAt(0).toUpperCase() + str.slice(1);
 }

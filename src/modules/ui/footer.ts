@@ -38,7 +38,9 @@ export class FooterModule extends BaseModule {
    * Update the copyright year to current year
    */
   private updateCopyrightYear(): void {
-    if (!this.currentYearElement) return;
+    if (!this.currentYearElement) {
+      return;
+    }
 
     const currentYear = new Date().getFullYear();
     this.currentYearElement.textContent = currentYear.toString();

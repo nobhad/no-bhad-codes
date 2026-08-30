@@ -92,7 +92,9 @@ export function useClients({ autoFetch = true }: UseClientsOptions = {}): UseCli
       const fetchedClients = data.clients || [];
       setClients(decodeArrayFields(fetchedClients, CLIENT_TEXT_FIELDS));
     } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') return;
+      if (err instanceof Error && err.name === 'AbortError') {
+        return;
+      }
       const message = formatErrorMessage(err, 'An error occurred');
       setError(message);
       logger.error('[useClients] Error:', message);
@@ -206,7 +208,9 @@ export function useClients({ autoFetch = true }: UseClientsOptions = {}): UseCli
 
   // Auto-fetch on mount with AbortController cleanup
   useEffect(() => {
-    if (!autoFetch) return;
+    if (!autoFetch) {
+      return;
+    }
     const controller = new AbortController();
     fetchClients(controller.signal);
     return () => controller.abort();

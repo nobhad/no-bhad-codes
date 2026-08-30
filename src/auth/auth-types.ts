@@ -225,7 +225,9 @@ export function isAuthenticatedState(state: AuthState): boolean {
  * Check if session is expired
  */
 export function isSessionExpired(expiresAt: number | null): boolean {
-  if (expiresAt === null) return true;
+  if (expiresAt === null) {
+    return true;
+  }
   return Date.now() >= expiresAt;
 }
 
@@ -233,6 +235,8 @@ export function isSessionExpired(expiresAt: number | null): boolean {
  * Check if session should be refreshed (within 5 minutes of expiry)
  */
 export function shouldRefreshSession(expiresAt: number | null, bufferMs: number = 300000): boolean {
-  if (expiresAt === null) return false;
+  if (expiresAt === null) {
+    return false;
+  }
   return Date.now() >= expiresAt - bufferMs;
 }

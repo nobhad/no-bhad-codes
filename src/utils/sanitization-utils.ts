@@ -75,7 +75,9 @@ export class SanitizationUtils {
    * Escape HTML entities to prevent XSS
    */
   static escapeHtml(input: string): string {
-    if (!input || typeof input !== 'string') return '';
+    if (!input || typeof input !== 'string') {
+      return '';
+    }
 
     return input.replace(/[&<>"'`]/g, (match) => SanitizationUtils.HTML_ENTITIES[match] || match);
   }
@@ -91,7 +93,9 @@ export class SanitizationUtils {
    * Reference: https://stackoverflow.com/questions/1912501/unescape-html-entities-in-javascript
    */
   static decodeHtmlEntities(input: string): string {
-    if (!input || typeof input !== 'string') return '';
+    if (!input || typeof input !== 'string') {
+      return '';
+    }
 
     // Use a textarea element to decode HTML entities (browser's built-in decoder)
     // This is safe because textarea doesn't execute scripts when innerHTML is set
@@ -118,7 +122,9 @@ export class SanitizationUtils {
    * Handles names like "john doe" -> "John Doe"
    */
   static capitalizeName(input: string): string {
-    if (!input || typeof input !== 'string') return '';
+    if (!input || typeof input !== 'string') {
+      return '';
+    }
 
     return input
       .toLowerCase()
@@ -131,7 +137,9 @@ export class SanitizationUtils {
    * Remove all HTML tags from input
    */
   static stripHtml(input: string): string {
-    if (!input || typeof input !== 'string') return '';
+    if (!input || typeof input !== 'string') {
+      return '';
+    }
 
     return input.replace(/<[^>]*>/g, '');
   }
@@ -140,7 +148,9 @@ export class SanitizationUtils {
    * Clean and sanitize text input (most restrictive)
    */
   static sanitizeText(input: string): string {
-    if (!input || typeof input !== 'string') return '';
+    if (!input || typeof input !== 'string') {
+      return '';
+    }
 
     return SanitizationUtils.escapeHtml(SanitizationUtils.stripHtml(input.trim()));
   }
@@ -149,7 +159,9 @@ export class SanitizationUtils {
    * Sanitize email input
    */
   static sanitizeEmail(email: string): string {
-    if (!email || typeof email !== 'string') return '';
+    if (!email || typeof email !== 'string') {
+      return '';
+    }
 
     // Remove HTML and escape entities
     const cleaned = SanitizationUtils.stripHtml(email.trim().toLowerCase());
@@ -163,7 +175,9 @@ export class SanitizationUtils {
    * Sanitize textarea/message input (allow some formatting)
    */
   static sanitizeMessage(message: string): string {
-    if (!message || typeof message !== 'string') return '';
+    if (!message || typeof message !== 'string') {
+      return '';
+    }
 
     let cleaned = message.trim();
 
@@ -192,7 +206,9 @@ export class SanitizationUtils {
    * Sanitize URL input
    */
   static sanitizeUrl(url: string): string {
-    if (!url || typeof url !== 'string') return '';
+    if (!url || typeof url !== 'string') {
+      return '';
+    }
 
     const cleaned = url.trim();
 
@@ -212,7 +228,9 @@ export class SanitizationUtils {
    * Sanitize phone number
    */
   static sanitizePhone(phone: string): string {
-    if (!phone || typeof phone !== 'string') return '';
+    if (!phone || typeof phone !== 'string') {
+      return '';
+    }
 
     // Remove HTML and keep only numbers, spaces, dashes, parentheses, plus
     const cleaned = SanitizationUtils.stripHtml(phone.trim()).replace(/[^0-9\s\-()+ ext.]/g, '');
@@ -224,7 +242,9 @@ export class SanitizationUtils {
    * Format phone number as (XXX) XXX-XXXX
    */
   static formatPhone(phone: string): string {
-    if (!phone || typeof phone !== 'string') return '-';
+    if (!phone || typeof phone !== 'string') {
+      return '-';
+    }
 
     // Extract only digits
     const digits = phone.replace(/\D/g, '');
@@ -291,7 +311,9 @@ export class SanitizationUtils {
    * Validate that input doesn't contain common XSS patterns
    */
   static detectXss(input: string): boolean {
-    if (!input || typeof input !== 'string') return false;
+    if (!input || typeof input !== 'string') {
+      return false;
+    }
 
     const xssPatterns = [
       /<script/i,

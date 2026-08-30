@@ -149,7 +149,9 @@ export class Application {
    * Initialize consent banner AFTER intro animation completes
    */
   private async initConsentBanner(): Promise<void> {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') {
+      return;
+    }
 
     try {
       if (!ConsentBanner.hasExistingConsent()) {
@@ -429,7 +431,9 @@ export class Application {
    */
   private setupStickyFooter(): void {
     const footer = document.querySelector('.footer') as HTMLElement;
-    if (!footer) return;
+    if (!footer) {
+      return;
+    }
 
     const checkScrollPosition = () => {
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -487,7 +491,9 @@ export class Application {
    * Check if HTTPS should be enforced
    */
   private shouldEnforceHttps(): boolean {
-    if (typeof window === 'undefined') return false;
+    if (typeof window === 'undefined') {
+      return false;
+    }
 
     const { protocol, hostname } = window.location;
     const isDevelopment =
@@ -497,7 +503,9 @@ export class Application {
       hostname.startsWith('10.') ||
       hostname.endsWith('.local');
 
-    if (isDevelopment) return false;
+    if (isDevelopment) {
+      return false;
+    }
     return protocol === 'http:';
   }
 

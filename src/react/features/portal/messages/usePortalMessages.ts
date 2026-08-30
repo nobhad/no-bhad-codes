@@ -194,7 +194,9 @@ export function usePortalMessages({
    */
   const sendMessage = useCallback(
     async (content: string, attachments?: File[]): Promise<boolean> => {
-      if (!selectedThread) return false;
+      if (!selectedThread) {
+        return false;
+      }
 
       const url = buildEndpoint.messageThreadMessages(selectedThread.id);
 
@@ -212,7 +214,9 @@ export function usePortalMessages({
           // Raw fetch for FormData — add CSRF protection manually
           const csrfToken = getCsrfToken();
           const headers: Record<string, string> = {};
-          if (csrfToken) headers[CSRF_HEADER_NAME] = csrfToken;
+          if (csrfToken) {
+            headers[CSRF_HEADER_NAME] = csrfToken;
+          }
 
           const response = await fetch(url, {
             method: 'POST',
@@ -272,7 +276,9 @@ export function usePortalMessages({
    */
   const editMessage = useCallback(
     async (messageId: number, content: string): Promise<boolean> => {
-      if (!selectedThread) return false;
+      if (!selectedThread) {
+        return false;
+      }
 
       try {
         const data = await portalFetch<UpdateMessageResponse>(
@@ -320,7 +326,9 @@ export function usePortalMessages({
    */
   const deleteMessage = useCallback(
     async (messageId: number): Promise<boolean> => {
-      if (!selectedThread) return false;
+      if (!selectedThread) {
+        return false;
+      }
 
       try {
         await portalFetch(
@@ -347,7 +355,9 @@ export function usePortalMessages({
 
   // Poll for new messages while a thread is active
   useEffect(() => {
-    if (!selectedThread) return;
+    if (!selectedThread) {
+      return;
+    }
 
     const interval = setInterval(() => {
       fetchMessages(selectedThread.id, { silent: true });

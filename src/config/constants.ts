@@ -223,7 +223,9 @@ export function getProjectStatusColor(status: string): string {
   if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     const computedStyle = window.getComputedStyle(document.documentElement);
     const color = computedStyle.getPropertyValue(cssVarName).trim();
-    if (color) return color;
+    if (color) {
+      return color;
+    }
   }
 
   // Fallback for SSR or if CSS variable not found
@@ -277,7 +279,9 @@ export function getChartColor(colorKey: keyof typeof APP_CONSTANTS.CHART_COLOR_V
   if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     const computedStyle = window.getComputedStyle(document.documentElement);
     const color = computedStyle.getPropertyValue(cssVarName).trim();
-    if (color) return color;
+    if (color) {
+      return color;
+    }
   }
 
   return CHART_COLOR_FALLBACKS[cssVarName] || '#333333';

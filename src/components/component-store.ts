@@ -232,7 +232,9 @@ export class ComponentUtils {
   ): (...args: Parameters<T>) => void {
     let timeout: NodeJS.Timeout | null = null;
     return (...args: Parameters<T>) => {
-      if (timeout) clearTimeout(timeout);
+      if (timeout) {
+        clearTimeout(timeout);
+      }
       timeout = setTimeout(() => func.apply(this, args), wait);
     };
   }
@@ -271,9 +273,13 @@ export class ComponentUtils {
         try {
           value = JSON.parse(attr.value);
         } catch {
-          if (attr.value === 'true') value = true;
-          else if (attr.value === 'false') value = false;
-          else if (!isNaN(Number(attr.value))) value = Number(attr.value);
+          if (attr.value === 'true') {
+            value = true;
+          } else if (attr.value === 'false') {
+            value = false;
+          } else if (!isNaN(Number(attr.value))) {
+            value = Number(attr.value);
+          }
         }
 
         data[key] = value;

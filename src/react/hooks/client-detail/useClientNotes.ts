@@ -98,7 +98,9 @@ export function useClientNotes({ clientId }: ClientDetailHookOptions) {
   const toggleNotePin = useCallback(
     async (id: number): Promise<boolean> => {
       const note = notes.find((n) => n.id === id);
-      if (!note) return false;
+      if (!note) {
+        return false;
+      }
       return updateNote(id, { is_pinned: !note.is_pinned });
     },
     [notes, updateNote]

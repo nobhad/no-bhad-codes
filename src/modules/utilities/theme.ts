@@ -53,7 +53,9 @@ export class ThemeModule extends BaseModule {
    * Setup theme toggle button (main site header)
    */
   private setupThemeToggle(): void {
-    if (!this.themeButton) return;
+    if (!this.themeButton) {
+      return;
+    }
 
     this.addEventListener(this.themeButton, 'click', () => {
       this.toggleTheme();
@@ -67,7 +69,9 @@ export class ThemeModule extends BaseModule {
    * Setup dashboard theme toggle button (client portal)
    */
   private setupDashboardThemeToggle(): void {
-    if (!this.dashboardThemeButton) return;
+    if (!this.dashboardThemeButton) {
+      return;
+    }
 
     this.addEventListener(this.dashboardThemeButton, 'click', () => {
       this.toggleTheme();
@@ -119,10 +123,14 @@ export class ThemeModule extends BaseModule {
    * Update theme button appearance (main site header)
    */
   private updateThemeButton(theme: 'light' | 'dark'): void {
-    if (!this.themeButton) return;
+    if (!this.themeButton) {
+      return;
+    }
 
     const iconWrap = this.themeButton.querySelector('.icon-wrap') as HTMLElement;
-    if (!iconWrap) return;
+    if (!iconWrap) {
+      return;
+    }
 
     // Rotate icon based on theme
     const rotation = theme === 'dark' ? '0deg' : '180deg';
@@ -137,7 +145,9 @@ export class ThemeModule extends BaseModule {
    * Update dashboard theme button appearance (client portal)
    */
   private updateDashboardThemeButton(theme: 'light' | 'dark'): void {
-    if (!this.dashboardThemeButton) return;
+    if (!this.dashboardThemeButton) {
+      return;
+    }
 
     // Update emoji to reflect current theme
     this.dashboardThemeButton.textContent = theme === 'dark' ? '☀️' : '🌙';

@@ -536,7 +536,9 @@ export class RouterService extends BaseService {
       let start: number;
 
       const step = (timestamp: number) => {
-        if (!start) start = timestamp;
+        if (!start) {
+          start = timestamp;
+        }
 
         const progress = Math.min((timestamp - start) / duration, 1);
         const easeInOutCubic =

@@ -58,9 +58,15 @@ function setButtonLoading(form: HTMLFormElement, loading: boolean): void {
   const btnText = submitBtn?.querySelector('.btn-text') as HTMLElement | null;
   const btnLoading = submitBtn?.querySelector('.btn-loading') as HTMLElement | null;
 
-  if (submitBtn) submitBtn.disabled = loading;
-  if (btnText) btnText.style.display = loading ? 'none' : 'inline';
-  if (btnLoading) btnLoading.style.display = loading ? 'inline' : 'none';
+  if (submitBtn) {
+    submitBtn.disabled = loading;
+  }
+  if (btnText) {
+    btnText.style.display = loading ? 'none' : 'inline';
+  }
+  if (btnLoading) {
+    btnLoading.style.display = loading ? 'inline' : 'none';
+  }
 }
 
 // --- Auth Session ---
@@ -88,9 +94,13 @@ function storeAuthSession(data: LoginResponseData): void {
     if (match) {
       const value = parseInt(match[1], 10);
       const unit = match[2];
-      if (unit === 'h') expiryMs = value * 60 * 60 * 1000;
-      else if (unit === 'd') expiryMs = value * 24 * 60 * 60 * 1000;
-      else if (unit === 'm') expiryMs = value * 60 * 1000;
+      if (unit === 'h') {
+        expiryMs = value * 60 * 60 * 1000;
+      } else if (unit === 'd') {
+        expiryMs = value * 24 * 60 * 60 * 1000;
+      } else if (unit === 'm') {
+        expiryMs = value * 60 * 1000;
+      }
     }
   }
 
@@ -163,14 +173,18 @@ function setupLoginForm(form: HTMLFormElement): void {
 
 function setupMagicLinkForm(): void {
   const magicForm = document.getElementById(MAGIC_LINK_FORM_ID) as HTMLFormElement | null;
-  if (!magicForm) return;
+  if (!magicForm) {
+    return;
+  }
 
   magicForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     hideError(MAGIC_LINK_ERROR_ID);
     const successEl = document.getElementById(MAGIC_LINK_SUCCESS_ID);
-    if (successEl) successEl.style.display = 'none';
+    if (successEl) {
+      successEl.style.display = 'none';
+    }
 
     const emailInput = document.getElementById(MAGIC_LINK_EMAIL_ID) as HTMLInputElement | null;
     const email = emailInput?.value.trim() ?? '';
@@ -188,7 +202,9 @@ function setupMagicLinkForm(): void {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        if (successEl) successEl.style.display = 'block';
+        if (successEl) {
+          successEl.style.display = 'block';
+        }
       } else {
         showError(MAGIC_LINK_ERROR_ID, data.error || 'Failed to send magic link');
       }
@@ -206,7 +222,9 @@ function setupMagicLinkToggle(): void {
   const loginForm = document.getElementById(FORM_ID);
   const magicForm = document.getElementById(MAGIC_LINK_FORM_ID);
 
-  if (!toggleLink || !loginForm || !magicForm) return;
+  if (!toggleLink || !loginForm || !magicForm) {
+    return;
+  }
 
   toggleLink.addEventListener('click', (e) => {
     e.preventDefault();
@@ -237,7 +255,9 @@ function setupMagicLinkToggle(): void {
  */
 export function initPortalAuthForm(): void {
   const form = document.getElementById(FORM_ID) as HTMLFormElement | null;
-  if (!form) return;
+  if (!form) {
+    return;
+  }
 
   // Password toggle
   initPasswordToggle({

@@ -484,16 +484,24 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
     const root = this.shadowRoot || this.host || document;
 
     const banner = root.querySelector('[data-ref="banner"]') as HTMLElement;
-    if (banner) this.elements.set('banner', banner);
+    if (banner) {
+      this.elements.set('banner', banner);
+    }
 
     const acceptBtn = root.querySelector('[data-ref="acceptBtn"]') as HTMLElement;
-    if (acceptBtn) this.elements.set('acceptBtn', acceptBtn);
+    if (acceptBtn) {
+      this.elements.set('acceptBtn', acceptBtn);
+    }
 
     const declineBtn = root.querySelector('[data-ref="declineBtn"]') as HTMLElement;
-    if (declineBtn) this.elements.set('declineBtn', declineBtn);
+    if (declineBtn) {
+      this.elements.set('declineBtn', declineBtn);
+    }
 
     const detailsBtn = root.querySelector('[data-ref="detailsBtn"]') as HTMLElement;
-    if (detailsBtn) this.elements.set('detailsBtn', detailsBtn);
+    if (detailsBtn) {
+      this.elements.set('detailsBtn', detailsBtn);
+    }
   }
 
   protected override bindEvents(): void {

@@ -81,7 +81,9 @@ function formatMessage(prefix: string, timestamp: boolean): string {
  * Check if a log level should be displayed
  */
 function shouldLog(level: LogLevel): boolean {
-  if (!config.enabled) return false;
+  if (!config.enabled) {
+    return false;
+  }
   return LOG_LEVELS[level] >= LOG_LEVELS[config.level];
 }
 
@@ -172,7 +174,9 @@ export function createLogger(prefix: string): Logger {
      * Useful for catch blocks where you want to capture error details
      */
     errorWithContext(message: string, context: ErrorContext): void {
-      if (!shouldLog('ERROR')) return;
+      if (!shouldLog('ERROR')) {
+        return;
+      }
 
       const formattedPrefix = formatMessage(prefix, config.timestamps);
       const errorDetails: string[] = [message];

@@ -168,7 +168,9 @@ export function usePagination(options: UsePaginationOptions): UsePaginationRetur
 
   // Page info string
   const pageInfo = useMemo(() => {
-    if (totalItems === 0) return '0 items';
+    if (totalItems === 0) {
+      return '0 items';
+    }
     return `${startIndex + 1}-${endIndex} of ${totalItems}`;
   }, [startIndex, endIndex, totalItems]);
 

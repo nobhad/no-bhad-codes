@@ -74,7 +74,9 @@ function buildSquareChevronIcon(direction: 'up' | 'down'): SVGSVGElement {
 
 function contrastVeil(hex: string): string {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.trim());
-  if (!m) return 'rgba(0, 0, 0, 0.45)';
+  if (!m) {
+    return 'rgba(0, 0, 0, 0.45)';
+  }
   const r = parseInt(m[1], 16);
   const g = parseInt(m[2], 16);
   const b = parseInt(m[3], 16);
@@ -290,7 +292,9 @@ export class ProjectsModule extends BaseModule {
   private channelTickerResizeRaf = 0;
   private channelTickerResizeObserver: ResizeObserver | null = null;
   private handleChannelTickerResize = (): void => {
-    if (this.channelTickerResizeRaf) cancelAnimationFrame(this.channelTickerResizeRaf);
+    if (this.channelTickerResizeRaf) {
+      cancelAnimationFrame(this.channelTickerResizeRaf);
+    }
     this.channelTickerResizeRaf = requestAnimationFrame(() => {
       this.channelTickerResizeRaf = 0;
       this.startChannelTicker();
@@ -351,7 +355,9 @@ export class ProjectsModule extends BaseModule {
       // carousel back-nav) that should only update the LED + row
       // highlight without flashing into a different channel.
       const cycle = event.detail?.cycle === true;
-      if (typeof index === 'number') this.setTvChannel(index, { cycle });
+      if (typeof index === 'number') {
+        this.setTvChannel(index, { cycle });
+      }
     }) as EventListener);
 
     // Tune-in: keyboard Enter on the projects tile triggers this so the
@@ -360,7 +366,9 @@ export class ProjectsModule extends BaseModule {
     // directly).
     document.addEventListener('projects:tune-in', ((event: CustomEvent) => {
       const slug = event.detail?.slug as string | undefined;
-      if (slug) void this.playTuneInSequence(slug);
+      if (slug) {
+        void this.playTuneInSequence(slug);
+      }
     }) as EventListener);
 
     // Esc cancels an in-flight tune-in and returns to the channel guide.
@@ -437,7 +445,9 @@ export class ProjectsModule extends BaseModule {
     slug: string,
     options: { fromNavigation?: boolean } = {}
   ): void {
-    if (!this.portfolioData || !this.projectDetailSection) return;
+    if (!this.portfolioData || !this.projectDetailSection) {
+      return;
+    }
 
     const project = this.portfolioData.projects.find((p) => p.slug === slug);
     if (!project) {
@@ -497,7 +507,9 @@ export class ProjectsModule extends BaseModule {
    * Render projects section based on documented project count
    */
   private render(): void {
-    if (!this.projectsContent || !this.portfolioData) return;
+    if (!this.projectsContent || !this.portfolioData) {
+      return;
+    }
 
     const documentedProjects = this.portfolioData.projects.filter((p) => p.isDocumented);
     const hasEnoughDocumented = documentedProjects.length >= MIN_DOCUMENTED_PROJECTS;
@@ -512,7 +524,9 @@ export class ProjectsModule extends BaseModule {
    * Render project cards
    */
   private renderProjectCards(projects: PortfolioProject[]): void {
-    if (!this.projectsContent) return;
+    if (!this.projectsContent) {
+      return;
+    }
 
     // Remove the WIP sign container if it exists
     const wipContainer = this.projectsContent.querySelector('.wip-sign-container');
@@ -533,7 +547,9 @@ export class ProjectsModule extends BaseModule {
 
     // Sort projects by year (newest first), then by featured
     const sortedProjects = [...projects].sort((a, b) => {
-      if (a.year !== b.year) return b.year - a.year;
+      if (a.year !== b.year) {
+        return b.year - a.year;
+      }
       return 0;
     });
 
@@ -564,13 +580,19 @@ export class ProjectsModule extends BaseModule {
    * with the active channel highlighted.
    */
   private renderCrtTv(): void {
-    if (!this.projectsContent) return;
+    if (!this.projectsContent) {
+      return;
+    }
 
     // Check if TV already exists
-    if (this.projectsContent.querySelector('.crt-tv')) return;
+    if (this.projectsContent.querySelector('.crt-tv')) {
+      return;
+    }
 
     const workWrapper = this.projectsContent.querySelector('.work-half-wrapper');
-    if (!workWrapper) return;
+    if (!workWrapper) {
+      return;
+    }
 
     // Hide the cards work wrapper — its content is now expressed as the
     // channel-list text inside the TV screen. Kept in DOM (display:none)
@@ -714,8 +736,11 @@ export class ProjectsModule extends BaseModule {
           tvEl?.style.setProperty('--tv-aspect', String(w / h));
         }
       };
-      if (frameImg.complete) setAspect();
-      else frameImg.addEventListener('load', setAspect, { once: true });
+      if (frameImg.complete) {
+        setAspect();
+      } else {
+        frameImg.addEventListener('load', setAspect, { once: true });
+      }
     }
 
     // Populate the channel list with one row per documented project.
@@ -768,7 +793,9 @@ export class ProjectsModule extends BaseModule {
     apply(tvSfx.getVolume());
     window.addEventListener('tv-sfx:volume-change', ((event: Event) => {
       const detail = (event as CustomEvent<{ level: number }>).detail;
-      if (typeof detail?.level === 'number') apply(detail.level);
+      if (typeof detail?.level === 'number') {
+        apply(detail.level);
+      }
     }) as EventListener);
   }
 
@@ -794,7 +821,9 @@ export class ProjectsModule extends BaseModule {
     window.addEventListener('page-entering', ((event: Event) => {
       const detail = (event as CustomEvent<{ to?: string }>).detail;
       const to = detail?.to;
-      if (!to) return;
+      if (!to) {
+        return;
+      }
       if (to !== 'projects') {
         // Not just stop — refuse. A tune-in timeline still running can call
         // playMusic several beats from now, long after the tile is gone.
@@ -808,7 +837,9 @@ export class ProjectsModule extends BaseModule {
       // null). Powered-off TV stays silent on return; the user has
       // to POWER on themselves.
       const tv = document.querySelector('.crt-tv');
-      if (!tv || tv.classList.contains('is-powered-off')) return;
+      if (!tv || tv.classList.contains('is-powered-off')) {
+        return;
+      }
       const slug = this.activeTuneInSlug;
       if (!slug) {
         // Arriving on the guide rather than a channel: dead air, not silence.
@@ -816,7 +847,9 @@ export class ProjectsModule extends BaseModule {
         return;
       }
       const url = CHANNEL_MUSIC[slug];
-      if (url) void tvSfx.playMusic(url);
+      if (url) {
+        void tvSfx.playMusic(url);
+      }
     }) as EventListener);
   }
 
@@ -827,17 +860,26 @@ export class ProjectsModule extends BaseModule {
    */
   private wireMobileChannelButtons(): void {
     const controls = document.querySelector('.projects-tv-channel-controls');
-    if (!controls) return;
+    if (!controls) {
+      return;
+    }
     controls.addEventListener('click', (event) => {
       const target = event.target as HTMLElement | null;
       const btn = target?.closest('[data-tv-mobile-btn]') as HTMLElement | null;
-      if (!btn) return;
+      if (!btn) {
+        return;
+      }
       // Mirror the on-frame channel buttons: inert while the TV is off.
       const tv = document.querySelector('.crt-tv');
-      if (tv?.classList.contains('is-powered-off')) return;
+      if (tv?.classList.contains('is-powered-off')) {
+        return;
+      }
       const action = btn.dataset.tvMobileBtn;
-      if (action === 'channel-up') this.cycleTvChannel(+1);
-      else if (action === 'channel-down') this.cycleTvChannel(-1);
+      if (action === 'channel-up') {
+        this.cycleTvChannel(+1);
+      } else if (action === 'channel-down') {
+        this.cycleTvChannel(-1);
+      }
     });
   }
 
@@ -848,7 +890,9 @@ export class ProjectsModule extends BaseModule {
    * leaves the LED blank for a frame while the next image fetches.
    */
   private preloadChannelDisplays(): void {
-    if (!this.portfolioData) return;
+    if (!this.portfolioData) {
+      return;
+    }
     const documented = this.portfolioData.projects.filter((p) => p.isDocumented);
     const total = documented.length + 1; // +1 for channel 01 (guide)
     for (let n = 1; n <= total; n++) {
@@ -868,7 +912,9 @@ export class ProjectsModule extends BaseModule {
    */
   private wireTuneInScreenClick(): void {
     const screen = document.querySelector('.crt-tv__screen');
-    if (!screen) return;
+    if (!screen) {
+      return;
+    }
     screen.addEventListener('click', (event) => {
       const target = event.target as HTMLElement | null;
       // Guide rows sit inside the screen, and their own handler has
@@ -877,12 +923,18 @@ export class ProjectsModule extends BaseModule {
       // click would read that fresh slug and carry straight on to the
       // detail page, so picking a channel from the guide could never mean
       // just "watch this channel".
-      if (target?.closest('[data-channel-list]')) return;
+      if (target?.closest('[data-channel-list]')) {
+        return;
+      }
       // Only when a project channel is actually playing.
       const slug = this.activeTuneInSlug;
-      if (!slug) return;
+      if (!slug) {
+        return;
+      }
       // Let the explicit live-site link do its own thing.
-      if (target?.closest('.crt-tv__panel-link')) return;
+      if (target?.closest('.crt-tv__panel-link')) {
+        return;
+      }
       event.preventDefault();
       window.location.hash = `#/projects/${slug}`;
     });
@@ -897,19 +949,25 @@ export class ProjectsModule extends BaseModule {
    */
   private wireTvButtons(): void {
     const tv = document.querySelector('.crt-tv') as HTMLElement | null;
-    if (!tv) return;
+    if (!tv) {
+      return;
+    }
 
     tv.addEventListener('click', (event) => {
       const target = event.target as HTMLElement | null;
       const btn = target?.closest('[data-tv-btn]') as HTMLElement | null;
-      if (!btn) return;
+      if (!btn) {
+        return;
+      }
       const action = btn.dataset.tvBtn;
 
       // POWER is the only control that works while the set is off —
       // every other button is inert (no channel cycle, no volume step,
       // no click sound — sound gating lives in tvSfx) until the user
       // turns the TV back on.
-      if (action !== 'power' && tv.classList.contains('is-powered-off')) return;
+      if (action !== 'power' && tv.classList.contains('is-powered-off')) {
+        return;
+      }
 
       switch (action) {
         case 'power':
@@ -941,7 +999,9 @@ export class ProjectsModule extends BaseModule {
    */
   private toggleTvPower(): void {
     const tv = document.querySelector('.crt-tv') as HTMLElement | null;
-    if (!tv) return;
+    if (!tv) {
+      return;
+    }
     const isOff = tv.classList.toggle('is-powered-off');
     const screenBg = document.querySelector('[data-screen-bg]') as HTMLImageElement | null;
     if (isOff) {
@@ -983,7 +1043,9 @@ export class ProjectsModule extends BaseModule {
       void tvSfx.static();
       if (this.activeTuneInSlug) {
         const url = CHANNEL_MUSIC[this.activeTuneInSlug];
-        if (url) void tvSfx.playMusic(url);
+        if (url) {
+          void tvSfx.playMusic(url);
+        }
       }
     }
   }
@@ -993,9 +1055,13 @@ export class ProjectsModule extends BaseModule {
    * Mirrors what wheel-up/down does so the buttons feel identical.
    */
   private cycleTvChannel(delta: 1 | -1): void {
-    if (!this.portfolioData) return;
+    if (!this.portfolioData) {
+      return;
+    }
     const documented = this.portfolioData.projects.filter((p) => p.isDocumented);
-    if (documented.length === 0) return;
+    if (documented.length === 0) {
+      return;
+    }
 
     // Channel slot count: guide (0) + projects (1..N).
     const total = documented.length + 1;
@@ -1025,7 +1091,9 @@ export class ProjectsModule extends BaseModule {
    */
   private renderChannelList(): void {
     const container = document.querySelector('[data-channel-list]') as HTMLElement | null;
-    if (!container || !this.portfolioData) return;
+    if (!container || !this.portfolioData) {
+      return;
+    }
 
     const documented = this.portfolioData.projects.filter((p) => p.isDocumented);
     // Channel numbers prefix each row to mirror the LED display: channel
@@ -1133,7 +1201,9 @@ export class ProjectsModule extends BaseModule {
       const target = event.target as HTMLElement | null;
       const row = target?.closest('.crt-tv__channel-row') as HTMLElement | null;
       const slug = row?.dataset.slug;
-      if (!slug) return;
+      if (!slug) {
+        return;
+      }
       void this.playTuneInSequence(slug);
     });
   }
@@ -1155,9 +1225,13 @@ export class ProjectsModule extends BaseModule {
     // (will-change: transform on the track), cheap enough for modern phones.
     const track = document.querySelector<HTMLElement>('[data-channel-ticker-track]');
     const viewport = document.querySelector<HTMLElement>('[data-channel-ticker-viewport]');
-    if (!track || !viewport || this.channelSetCount === 0) return;
+    if (!track || !viewport || this.channelSetCount === 0) {
+      return;
+    }
     const documented = this.portfolioData?.projects.filter((p) => p.isDocumented) ?? [];
-    if (documented.length === 0) return;
+    if (documented.length === 0) {
+      return;
+    }
 
     // Wait a frame so the DOM has measured row heights at this viewport
     // size. Without this the first measurement on initial render returns
@@ -1168,7 +1242,9 @@ export class ProjectsModule extends BaseModule {
       // and let the next page-show / resize restart re-measure once it's
       // on screen.
       let setHeight = track.scrollHeight / this.channelSetCount;
-      if (setHeight <= 0) return;
+      if (setHeight <= 0) {
+        return;
+      }
       // The loop translates up by exactly one set then snaps back. For no
       // gap to appear at the bottom, the clones below the first set must
       // cover the viewport: (copies - 1) * setHeight >= viewport. With few
@@ -1181,7 +1257,9 @@ export class ProjectsModule extends BaseModule {
         track.innerHTML = this.channelRealSet + this.channelCloneSet.repeat(neededCopies - 1);
         this.channelSetCount = neededCopies;
         setHeight = track.scrollHeight / this.channelSetCount;
-        if (setHeight <= 0) return;
+        if (setHeight <= 0) {
+          return;
+        }
         // Rebuilding the rows drops the is-active highlight — reapply it
         // from the parked channel (activeTuneInSlug; null = on the guide).
         if (this.activeTuneInSlug) {
@@ -1223,9 +1301,13 @@ export class ProjectsModule extends BaseModule {
    *     → built-with → outro. Outro is sticky with case-study link.
    */
   private async playTuneInSequence(slug: string): Promise<void> {
-    if (!this.portfolioData) return;
+    if (!this.portfolioData) {
+      return;
+    }
     const project = this.portfolioData.projects.find((p) => p.slug === slug);
-    if (!project) return;
+    if (!project) {
+      return;
+    }
 
     const screen = document.querySelector('.crt-tv__screen') as HTMLElement | null;
     const screenBg = document.querySelector('[data-screen-bg]') as HTMLImageElement | null;
@@ -1327,7 +1409,9 @@ export class ProjectsModule extends BaseModule {
     // first cycle to a track pays fetch+decode (~200ms-1s depending on
     // file size) and subsequent retunes are instant.
     const musicUrl = CHANNEL_MUSIC[slug];
-    if (musicUrl) void tvSfx.playMusic(musicUrl);
+    if (musicUrl) {
+      void tvSfx.playMusic(musicUrl);
+    }
 
     // 1) Static burst + channel list snaps off, bg flashes blank for a
     //    split second (the "between channels" void) before swapping to
@@ -1551,10 +1635,14 @@ export class ProjectsModule extends BaseModule {
    */
   private startPanelCycle(): void {
     const panelsEl = document.querySelector('[data-panels]') as HTMLElement | null;
-    if (!panelsEl) return;
+    if (!panelsEl) {
+      return;
+    }
 
     const panels = Array.from(panelsEl.querySelectorAll<HTMLElement>('.crt-tv__panel'));
-    if (panels.length === 0) return;
+    if (panels.length === 0) {
+      return;
+    }
 
     // Reset everything: panels visible (containers) but their children
     // start hidden so the heading-then-body sequence works per-panel.
@@ -1708,11 +1796,15 @@ export class ProjectsModule extends BaseModule {
       const baseHold = TV_PANEL_HOLD_S[key] ?? TV_SECTION_PAUSE_S_DEFAULT;
       const holdSeconds = isScrollPanel ? baseHold * TV_MOBILE_SCROLL_HOLD_MULTIPLIER : baseHold;
       tl.add(() => {
-        if (!isMobile) return;
+        if (!isMobile) {
+          return;
+        }
         const screenH = panel.clientHeight;
         const contentH = panel.scrollHeight;
         const overflows = contentH > screenH;
-        if (!isScrollPanel && !overflows) return;
+        if (!isScrollPanel && !overflows) {
+          return;
+        }
 
         // Scroll content from off-screen-bottom to off-screen-top. For
         // scroll-prose panels children are already pre-positioned at
@@ -1763,7 +1855,9 @@ export class ProjectsModule extends BaseModule {
     const screenBg = document.querySelector('[data-screen-bg]') as HTMLImageElement | null;
     const channelList = document.querySelector('.crt-tv__channel-list') as HTMLElement | null;
     const staticOverlay = document.querySelector('.crt-tv__static') as HTMLElement | null;
-    if (!screenBg || !channelList || !staticOverlay) return;
+    if (!screenBg || !channelList || !staticOverlay) {
+      return;
+    }
 
     // Channel list starts hidden and fades back in at the end.
     gsap.set(channelList, { opacity: 0 });
@@ -1819,7 +1913,9 @@ export class ProjectsModule extends BaseModule {
    */
   private flashChannelStatic(): void {
     const staticOverlay = document.querySelector('.crt-tv__static') as HTMLElement | null;
-    if (!staticOverlay) return;
+    if (!staticOverlay) {
+      return;
+    }
     gsap.killTweensOf(staticOverlay);
     gsap
       .timeline()
@@ -1862,7 +1958,9 @@ export class ProjectsModule extends BaseModule {
       gsap.set(screenBg, { opacity: 1 });
       screenBg.src = '/images/tv/base-on.webp';
     }
-    if (channelList) gsap.set(channelList, { opacity: 1 });
+    if (channelList) {
+      gsap.set(channelList, { opacity: 1 });
+    }
     if (tunein) {
       gsap.set(tunein, { clearProps: 'all' });
       tunein.style.removeProperty('--tunein-color');
@@ -1876,7 +1974,9 @@ export class ProjectsModule extends BaseModule {
       gsap.set(panelsEl, { opacity: 0, clearProps: 'transform' });
       panelsEl.innerHTML = '';
     }
-    if (staticOverlay) gsap.set(staticOverlay, { opacity: 0 });
+    if (staticOverlay) {
+      gsap.set(staticOverlay, { opacity: 0 });
+    }
 
     // Clear the highlighted row so the guide returns to its default
     // state — heading "01 PROJECTS" highlighted via :has(), no row
@@ -1901,9 +2001,13 @@ export class ProjectsModule extends BaseModule {
    * triggered by Enter/click.
    */
   private setTvChannel(index: number, options: { cycle?: boolean } = {}): void {
-    if (!this.portfolioData) return;
+    if (!this.portfolioData) {
+      return;
+    }
     const documented = this.portfolioData.projects.filter((p) => p.isDocumented);
-    if (documented.length === 0) return;
+    if (documented.length === 0) {
+      return;
+    }
 
     // index 0 = channel 01 (TV guide / projects page itself)
     // index 1+ = channel 02+ (individual project rows)
@@ -1916,7 +2020,9 @@ export class ProjectsModule extends BaseModule {
     const prevChannelIdx = prevSlug ? documented.findIndex((p) => p.slug === prevSlug) + 1 : 0;
 
     // No-op if the channel didn't actually change.
-    if (prevChannelIdx === safeIndex) return;
+    if (prevChannelIdx === safeIndex) {
+      return;
+    }
 
     // Passive sync (page entry, carousel back-nav) — just highlight the
     // matching row + update the LED. Don't fire tune-ins or transitions
@@ -1956,7 +2062,9 @@ export class ProjectsModule extends BaseModule {
    */
   private setChannelDisplay(channelNumber: number): void {
     const display = document.querySelector<HTMLImageElement>('[data-channel-display]');
-    if (!display) return;
+    if (!display) {
+      return;
+    }
     const padded = String(channelNumber).padStart(2, '0');
     const nextSrc = `/images/tv/led/${padded}.webp`;
     if (!display.src.endsWith(nextSrc)) {
@@ -2010,11 +2118,15 @@ export class ProjectsModule extends BaseModule {
    */
   private attachCardListeners(): void {
     const cards = this.projectsContent?.querySelectorAll('.work-card');
-    if (!cards) return;
+    if (!cards) {
+      return;
+    }
 
     cards.forEach((card) => {
       const container = card.querySelector('.card-container');
-      if (!container) return;
+      if (!container) {
+        return;
+      }
 
       const projectSlug = (card as HTMLElement).dataset.projectSlug;
 
@@ -2038,7 +2150,9 @@ export class ProjectsModule extends BaseModule {
    * Navigate to project detail page
    */
   private navigateToProject(slug: string): void {
-    if (!slug) return;
+    if (!slug) {
+      return;
+    }
     window.location.hash = `#/projects/${slug}`;
   }
 
@@ -2067,13 +2181,19 @@ export class ProjectsModule extends BaseModule {
    * position + play state across the source swap.
    */
   private applyMediaTheme(): void {
-    if (!this.projectDetailSection) return;
+    if (!this.projectDetailSection) {
+      return;
+    }
     const els = this.projectDetailSection.querySelectorAll<HTMLElement>('[data-themed-src]');
     els.forEach((el) => {
       const template = el.dataset.themedSrc;
-      if (!template) return;
+      if (!template) {
+        return;
+      }
       const next = this.resolveThemedPath(template);
-      if (el.getAttribute('src') === next) return;
+      if (el.getAttribute('src') === next) {
+        return;
+      }
 
       if (el.tagName === 'VIDEO') {
         // Structural cast avoids naming the DOM lib type (eslint no-undef).
@@ -2096,7 +2216,9 @@ export class ProjectsModule extends BaseModule {
             } catch {
               /* seek past duration — ignore */
             }
-            if (wasPlaying) void video.play().catch(() => {});
+            if (wasPlaying) {
+              void video.play().catch(() => {});
+            }
           },
           { once: true }
         );
@@ -2113,7 +2235,9 @@ export class ProjectsModule extends BaseModule {
     project: PortfolioProject,
     options: { skipEntrance?: boolean } = {}
   ): void {
-    if (!this.projectDetailSection) return;
+    if (!this.projectDetailSection) {
+      return;
+    }
 
     // Every case study starts at its own beginning. The section is the
     // scroller, and it holds its position across a content swap — so
@@ -2136,7 +2260,9 @@ export class ProjectsModule extends BaseModule {
         // Degrade a missing hero (e.g. a themed variant not yet produced) to
         // the placeholder instead of a broken-image icon.
         heroImg.onerror = () => {
-          if (heroImg.src.endsWith(HERO_PLACEHOLDER_SRC)) return;
+          if (heroImg.src.endsWith(HERO_PLACEHOLDER_SRC)) {
+            return;
+          }
           heroImg.src = HERO_PLACEHOLDER_SRC;
           heroImg.classList.add('placeholder');
         };
@@ -2331,7 +2457,9 @@ export class ProjectsModule extends BaseModule {
     const monthOnly = /^(\d{4})-(\d{2})$/.exec(dateString.trim());
     if (monthOnly) {
       const date = new Date(`${dateString}-01T12:00:00`);
-      if (Number.isNaN(date.getTime())) return dateString;
+      if (Number.isNaN(date.getTime())) {
+        return dateString;
+      }
       return new Intl.DateTimeFormat('en-US', {
         month: 'long',
         year: 'numeric'
@@ -2339,7 +2467,9 @@ export class ProjectsModule extends BaseModule {
     }
 
     const date = new Date(`${dateString}T12:00:00`);
-    if (Number.isNaN(date.getTime())) return dateString;
+    if (Number.isNaN(date.getTime())) {
+      return dateString;
+    }
     return new Intl.DateTimeFormat('en-US', {
       month: 'long',
       day: 'numeric',
@@ -2354,7 +2484,9 @@ export class ProjectsModule extends BaseModule {
    */
   private renderWalkthrough(project: PortfolioProject): void {
     const slot = this.projectDetailSection?.querySelector('#project-walkthrough');
-    if (!slot) return;
+    if (!slot) {
+      return;
+    }
     const videos = project.videos ?? [];
     slot.innerHTML = videos
       .map((src, index) => {
@@ -2388,7 +2520,9 @@ export class ProjectsModule extends BaseModule {
       // mixed screenshots array still renders in source order.
       let docRun: string[] = [];
       const flushDocRun = () => {
-        if (!docRun.length) return;
+        if (!docRun.length) {
+          return;
+        }
         parts.push(`<div class="project-doc-row">${docRun.join('')}</div>`);
         docRun = [];
       };
@@ -2427,7 +2561,9 @@ export class ProjectsModule extends BaseModule {
    * Render case study sections (challenge, approach, results, features)
    */
   private renderCaseStudySections(project: PortfolioProject): void {
-    if (!this.projectDetailSection) return;
+    if (!this.projectDetailSection) {
+      return;
+    }
 
     // Overview section (Challenge + Approach combined)
     const overviewSection = this.projectDetailSection.querySelector('#project-overview-section');
@@ -2505,7 +2641,9 @@ export class ProjectsModule extends BaseModule {
         deepBody.innerHTML = '';
         deepList.innerHTML = '';
         const staleVideo = this.projectDetailSection.querySelector('#project-deepdive-video');
-        if (staleVideo) staleVideo.innerHTML = '';
+        if (staleVideo) {
+          staleVideo.innerHTML = '';
+        }
         (deepSection as HTMLElement).style.display = 'none';
       }
     }
@@ -2528,7 +2666,9 @@ export class ProjectsModule extends BaseModule {
    */
   private animateCardEntrance(): void {
     const cards = this.projectsContent?.querySelectorAll('.card-container');
-    if (!cards?.length) return;
+    if (!cards?.length) {
+      return;
+    }
 
     const ENTRANCE_DELAY = 0.3;
     const STAGGER_INTERVAL = 0.1;
@@ -2551,7 +2691,9 @@ export class ProjectsModule extends BaseModule {
    */
   private animateHeadingDivider(): void {
     const divider = this.projectsContent?.querySelector('.heading-divider');
-    if (!divider) return;
+    if (!divider) {
+      return;
+    }
 
     const DELAY = 0.4;
     const DURATION = 0.8;
@@ -2571,7 +2713,9 @@ export class ProjectsModule extends BaseModule {
    * Animate project detail elements on entrance using GSAP
    */
   private animateDetailEntrance(): void {
-    if (!this.projectDetailSection) return;
+    if (!this.projectDetailSection) {
+      return;
+    }
 
     const backButton = this.projectDetailSection.querySelector('.back-button');
     const header = this.projectDetailSection.querySelector('.worksub-header');
@@ -2638,7 +2782,9 @@ export class ProjectsModule extends BaseModule {
    */
   private setupBackButton(): void {
     const backBtn = document.getElementById('project-back-btn');
-    if (!backBtn) return;
+    if (!backBtn) {
+      return;
+    }
 
     backBtn.addEventListener('click', () => {
       this.goBackToProjects();
@@ -2670,7 +2816,9 @@ export class ProjectsModule extends BaseModule {
     this.themeMediaObserver = null;
     this.channelTickerResizeObserver?.disconnect();
     this.channelTickerResizeObserver = null;
-    if (this.channelTickerResizeRaf) cancelAnimationFrame(this.channelTickerResizeRaf);
+    if (this.channelTickerResizeRaf) {
+      cancelAnimationFrame(this.channelTickerResizeRaf);
+    }
     if (this.channelTickerTween) {
       this.channelTickerTween.kill();
       this.channelTickerTween = null;

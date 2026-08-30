@@ -252,13 +252,19 @@ class TvSfx {
       confirmation that VOLUME ▼▲ registered, so it can't be muted). */
   async click(): Promise<void> {
     const now = performance.now();
-    if (now - this.lastClickAt < CLICK_DEBOUNCE_MS) return;
+    if (now - this.lastClickAt < CLICK_DEBOUNCE_MS) {
+      return;
+    }
     this.lastClickAt = now;
 
     const ctx = await this.ensureContext();
-    if (!ctx || !this.clickGain) return;
+    if (!ctx || !this.clickGain) {
+      return;
+    }
     const buffer = await this.loadClickBuffer(ctx);
-    if (!buffer) return;
+    if (!buffer) {
+      return;
+    }
 
     const source = ctx.createBufferSource();
     source.buffer = buffer;
@@ -271,11 +277,17 @@ class TvSfx {
       Routes through masterGain so the user can dial it down (or mute
       at volume:0) without losing the button click. No-op at volume:0. */
   async static(opts: StaticOptions = {}): Promise<void> {
-    if (this.volume === 0) return;
+    if (this.volume === 0) {
+      return;
+    }
     const ctx = await this.ensureContext();
-    if (!ctx || !this.masterGain) return;
+    if (!ctx || !this.masterGain) {
+      return;
+    }
     const buffer = await this.loadStaticBuffer(ctx);
-    if (!buffer) return;
+    if (!buffer) {
+      return;
+    }
 
     const attackS = opts.attackS ?? STATIC_DEFAULT_ATTACK_S;
     const holdS = opts.holdS ?? STATIC_DEFAULT_HOLD_S;
@@ -339,25 +351,37 @@ class TvSfx {
       (no separate volume slider needed). Lazy-loads + caches each
       track on first play. */
   async playMusic(url: string): Promise<void> {
-    if (this.suspended || this.musicCurrentUrl === url) return;
+    if (this.suspended || this.musicCurrentUrl === url) {
+      return;
+    }
     const token = ++this.musicToken;
 
     // Mark intent immediately so a re-entrant playMusic() (different
     // URL) during the await chain knows we're switching, and so a
     // simultaneous stopMusic() can clear it. Stopping any prior track
     // first ensures only one is audible at a time.
-    if (this.musicSource) this.stopMusic();
+    if (this.musicSource) {
+      this.stopMusic();
+    }
     this.musicCurrentUrl = url;
 
     const ctx = await this.ensureContext();
-    if (!ctx || !this.masterGain) return;
+    if (!ctx || !this.masterGain) {
+      return;
+    }
     // Bail if the user already tuned away, hit POWER, or left the tile
     // during the ensureContext await.
-    if (this.suspended || token !== this.musicToken || this.musicCurrentUrl !== url) return;
+    if (this.suspended || token !== this.musicToken || this.musicCurrentUrl !== url) {
+      return;
+    }
 
     const buffer = await this.loadMusicBuffer(ctx, url);
-    if (!buffer) return;
-    if (this.suspended || token !== this.musicToken || this.musicCurrentUrl !== url) return;
+    if (!buffer) {
+      return;
+    }
+    if (this.suspended || token !== this.musicToken || this.musicCurrentUrl !== url) {
+      return;
+    }
 
     const gain = ctx.createGain();
     const now = ctx.currentTime;
@@ -392,7 +416,9 @@ class TvSfx {
    * No-op if it is already running.
    */
   async playGuideStatic(): Promise<void> {
-    if (this.suspended || this.guideSource || this.guideWanted) return;
+    if (this.suspended || this.guideSource || this.guideWanted) {
+      return;
+    }
     // Intent is recorded before the awaits, and checked after each one.
     // Without it, tuning into a channel while the context or the buffer was
     // still loading left stopGuideStatic() with nothing to stop, and the
@@ -401,10 +427,14 @@ class TvSfx {
     this.guideWanted = true;
 
     const ctx = await this.ensureContext();
-    if (!ctx || !this.masterGain || !this.guideWanted || this.suspended) return;
+    if (!ctx || !this.masterGain || !this.guideWanted || this.suspended) {
+      return;
+    }
 
     const buffer = await this.loadStaticBuffer(ctx);
-    if (!buffer || !this.guideWanted || this.suspended || this.guideSource) return;
+    if (!buffer || !this.guideWanted || this.suspended || this.guideSource) {
+      return;
+    }
 
     const gain = ctx.createGain();
     const now = ctx.currentTime;
@@ -429,7 +459,9 @@ class TvSfx {
     const gain = this.guideGain;
     this.guideSource = null;
     this.guideGain = null;
-    if (!src || !gain || !this.ctx) return;
+    if (!src || !gain || !this.ctx) {
+      return;
+    }
     const now = this.ctx.currentTime;
     gain.gain.cancelScheduledValues(now);
     gain.gain.setValueAtTime(gain.gain.value, now);
@@ -451,7 +483,9 @@ class TvSfx {
     this.musicSource = null;
     this.musicGain = null;
     this.musicCurrentUrl = null;
-    if (!src || !gain || !this.ctx) return;
+    if (!src || !gain || !this.ctx) {
+      return;
+    }
 
     const now = this.ctx.currentTime;
     const stopAt = now + MUSIC_FADE_OUT_S + 0.05;
@@ -506,7 +540,9 @@ class TvSfx {
       const Ctor =
         window.AudioContext ||
         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (!Ctor) return null;
+      if (!Ctor) {
+        return null;
+      }
       const ctx = new Ctor();
       // masterGain — diegetic TV audio (static). Tracks VOLUME ▼▲.
       const masterGain = ctx.createGain();
@@ -548,11 +584,15 @@ class TvSfx {
   ): Promise<ArrayBuffer | null> {
     if (prefetched) {
       const bytes = await prefetched;
-      if (bytes) return bytes;
+      if (bytes) {
+        return bytes;
+      }
     }
     try {
       const res = await fetch(url);
-      if (!res.ok) return null;
+      if (!res.ok) {
+        return null;
+      }
       return await res.arrayBuffer();
     } catch {
       return null;
@@ -560,15 +600,21 @@ class TvSfx {
   }
 
   private async loadClickBuffer(ctx: AudioContext): Promise<AudioBuffer | null> {
-    if (this.clickBuffer) return this.clickBuffer;
+    if (this.clickBuffer) {
+      return this.clickBuffer;
+    }
     // Reuse an in-flight load promise if click() is called multiple times
     // in rapid succession — without this, two simultaneous calls would
     // both fetch + decode the same file.
-    if (this.clickLoadPromise) return this.clickLoadPromise;
+    if (this.clickLoadPromise) {
+      return this.clickLoadPromise;
+    }
     this.clickLoadPromise = (async () => {
       try {
         const bytes = await this.getSampleBytes(this.clickBytesPromise, CLICK_SAMPLE_URL);
-        if (!bytes) return null;
+        if (!bytes) {
+          return null;
+        }
         const decoded = await ctx.decodeAudioData(bytes.slice(0));
         this.clickBuffer = decoded;
         return decoded;
@@ -580,12 +626,18 @@ class TvSfx {
   }
 
   private async loadStaticBuffer(ctx: AudioContext): Promise<AudioBuffer | null> {
-    if (this.staticBuffer) return this.staticBuffer;
-    if (this.staticLoadPromise) return this.staticLoadPromise;
+    if (this.staticBuffer) {
+      return this.staticBuffer;
+    }
+    if (this.staticLoadPromise) {
+      return this.staticLoadPromise;
+    }
     this.staticLoadPromise = (async () => {
       try {
         const bytes = await this.getSampleBytes(this.staticBytesPromise, STATIC_SAMPLE_URL);
-        if (!bytes) return null;
+        if (!bytes) {
+          return null;
+        }
         const decoded = await ctx.decodeAudioData(bytes.slice(0));
         this.staticBuffer = decoded;
         return decoded;
@@ -604,13 +656,19 @@ class TvSfx {
       hear isn't worth it. */
   private async loadMusicBuffer(ctx: AudioContext, url: string): Promise<AudioBuffer | null> {
     const cached = this.musicBufferCache.get(url);
-    if (cached) return cached;
+    if (cached) {
+      return cached;
+    }
     const inFlight = this.musicLoadPromises.get(url);
-    if (inFlight) return inFlight;
+    if (inFlight) {
+      return inFlight;
+    }
     const promise = (async () => {
       try {
         const res = await fetch(url);
-        if (!res.ok) return null;
+        if (!res.ok) {
+          return null;
+        }
         const data = await res.arrayBuffer();
         const decoded = await ctx.decodeAudioData(data);
         this.musicBufferCache.set(url, decoded);
@@ -638,7 +696,9 @@ class TvSfx {
       the gesture window, so we fire it here without awaiting before any
       other work happens. */
   private bindGlobalClickListener(): void {
-    if (this.globalListenerBound) return;
+    if (this.globalListenerBound) {
+      return;
+    }
     this.globalListenerBound = true;
     // CAPTURE phase, not bubble: this listener has to run BEFORE the
     // .crt-tv element's own click handler in projects.ts, because that
@@ -654,9 +714,13 @@ class TvSfx {
       'click',
       (event) => {
         const target = event.target as HTMLElement | null;
-        if (!target) return;
+        if (!target) {
+          return;
+        }
         const tvButton = target.closest(TV_BUTTON_SELECTOR);
-        if (!tvButton) return;
+        if (!tvButton) {
+          return;
+        }
         // CHANNEL / VOLUME (and the external mobile channel buttons) stay
         // silent when the TV is powered off — a real CRT's controls don't
         // make their tactile click when the set is dead. POWER is the
@@ -665,7 +729,9 @@ class TvSfx {
         const isPowerBtn = tvButton.matches('.crt-tv__btn--power');
         if (!isPowerBtn) {
           const tv = document.querySelector('.crt-tv');
-          if (tv?.classList.contains('is-powered-off')) return;
+          if (tv?.classList.contains('is-powered-off')) {
+            return;
+          }
         }
         // Sync prime — must happen before any await so iOS counts it as
         // gesture-driven. If no ctx yet, create one now (sync) and resume
@@ -690,7 +756,9 @@ class TvSfx {
         const Ctor =
           window.AudioContext ||
           (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-        if (!Ctor) return;
+        if (!Ctor) {
+          return;
+        }
         const ctx = new Ctor();
         const masterGain = ctx.createGain();
         masterGain.gain.value = this.volume;
@@ -735,9 +803,13 @@ class TvSfx {
   private loadVolume(): number {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw == null) return DEFAULT_VOLUME;
+      if (raw == null) {
+        return DEFAULT_VOLUME;
+      }
       const parsed = Number(raw);
-      if (!Number.isFinite(parsed)) return DEFAULT_VOLUME;
+      if (!Number.isFinite(parsed)) {
+        return DEFAULT_VOLUME;
+      }
       return this.snapToStep(parsed);
     } catch {
       return DEFAULT_VOLUME;

@@ -167,7 +167,9 @@ function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
   let current: unknown = obj;
 
   for (const part of parts) {
-    if (current === null || current === undefined) return undefined;
+    if (current === null || current === undefined) {
+      return undefined;
+    }
     current = (current as Record<string, unknown>)[part];
   }
 
@@ -304,10 +306,14 @@ export const INVOICES_EXPORT_CONFIG: ExportConfig = {
  * Format date for export
  */
 function formatDate(value: unknown): string {
-  if (!value) return '';
+  if (!value) {
+    return '';
+  }
   try {
     const date = new Date(String(value));
-    if (isNaN(date.getTime())) return '';
+    if (isNaN(date.getTime())) {
+      return '';
+    }
     return date.toISOString().split('T')[0];
   } catch {
     return '';
@@ -318,9 +324,13 @@ function formatDate(value: unknown): string {
  * Format currency for CSV export (raw number without $ symbol for spreadsheet compatibility)
  */
 function formatCurrencyForExport(value: unknown): string {
-  if (value === null || value === undefined) return '';
+  if (value === null || value === undefined) {
+    return '';
+  }
   const num = typeof value === 'string' ? parseFloat(value) : Number(value);
-  if (isNaN(num)) return '';
+  if (isNaN(num)) {
+    return '';
+  }
   return num.toFixed(2);
 }
 
@@ -396,9 +406,13 @@ export const TIME_ENTRIES_EXPORT_CONFIG: ExportConfig = {
  * Format duration in minutes to hours
  */
 function formatDurationHours(value: unknown): string {
-  if (value === null || value === undefined) return '';
+  if (value === null || value === undefined) {
+    return '';
+  }
   const minutes = typeof value === 'string' ? parseFloat(value) : Number(value);
-  if (isNaN(minutes)) return '';
+  if (isNaN(minutes)) {
+    return '';
+  }
   return (minutes / 60).toFixed(2);
 }
 
@@ -410,13 +424,17 @@ function formatBillableAmount(_value: unknown, row: Record<string, unknown>): st
   const hourlyRate = row.hourly_rate;
   const durationMinutes = row.duration_minutes;
 
-  if (!isBillable || !hourlyRate || !durationMinutes) return '';
+  if (!isBillable || !hourlyRate || !durationMinutes) {
+    return '';
+  }
 
   const rate = typeof hourlyRate === 'string' ? parseFloat(hourlyRate) : Number(hourlyRate);
   const minutes =
     typeof durationMinutes === 'string' ? parseFloat(durationMinutes) : Number(durationMinutes);
 
-  if (isNaN(rate) || isNaN(minutes)) return '';
+  if (isNaN(rate) || isNaN(minutes)) {
+    return '';
+  }
 
   return ((minutes / 60) * rate).toFixed(2);
 }

@@ -27,7 +27,9 @@ export function useProjectTasks({ projectId }: ProjectDetailHookOptions): UsePro
   const fetchTasks = useCallback(async (): Promise<ProjectTaskResponse[]> => {
     try {
       const response = await apiFetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/tasks`);
-      if (!response.ok) return [];
+      if (!response.ok) {
+        return [];
+      }
 
       const json = await response.json();
       const parsed = unwrapApiData<{ tasks: ProjectTaskResponse[] }>(json);
@@ -41,7 +43,9 @@ export function useProjectTasks({ projectId }: ProjectDetailHookOptions): UsePro
   const toggleTaskComplete = useCallback(
     async (taskId: number): Promise<boolean> => {
       const task = tasks.find((t) => t.id === taskId);
-      if (!task) return false;
+      if (!task) {
+        return false;
+      }
 
       const newStatus = task.status === 'completed' ? 'pending' : 'completed';
 
@@ -50,7 +54,9 @@ export function useProjectTasks({ projectId }: ProjectDetailHookOptions): UsePro
           status: newStatus
         });
 
-        if (!response.ok) return false;
+        if (!response.ok) {
+          return false;
+        }
 
         const json = await response.json();
         const updated = unwrapApiData<{ task: ProjectTaskResponse }>(json);
@@ -70,7 +76,9 @@ export function useProjectTasks({ projectId }: ProjectDetailHookOptions): UsePro
       try {
         const response = await apiPut(`${API_ENDPOINTS.PROJECTS}/tasks/${taskId}`, { milestoneId });
 
-        if (!response.ok) return false;
+        if (!response.ok) {
+          return false;
+        }
 
         const json = await response.json();
         const updated = unwrapApiData<{ task: ProjectTaskResponse }>(json);

@@ -442,9 +442,15 @@ function decodeHtmlEntities(str: string): string {
  * Applied at the API response level so all consumers get clean data.
  */
 function decodeResponseStrings<T>(data: T): T {
-  if (data === null || data === undefined) return data;
-  if (typeof data === 'string') return decodeHtmlEntities(data) as T;
-  if (Array.isArray(data)) return data.map(decodeResponseStrings) as T;
+  if (data === null || data === undefined) {
+    return data;
+  }
+  if (typeof data === 'string') {
+    return decodeHtmlEntities(data) as T;
+  }
+  if (Array.isArray(data)) {
+    return data.map(decodeResponseStrings) as T;
+  }
   if (typeof data === 'object') {
     const decoded: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(data as Record<string, unknown>)) {

@@ -37,11 +37,15 @@ export function formatDate(
 ): string {
   const { includeTime = false, relative = false, fallback = '—', locale = 'en-US' } = options;
 
-  if (!date) return fallback;
+  if (!date) {
+    return fallback;
+  }
 
   const dateObj = typeof date === 'string' ? new Date(date) : date;
 
-  if (isNaN(dateObj.getTime())) return fallback;
+  if (isNaN(dateObj.getTime())) {
+    return fallback;
+  }
 
   if (relative) {
     return formatRelativeTime(dateObj);
@@ -114,10 +118,14 @@ export function formatRelativeTime(date: Date | string): string {
  * Older: "Jan 15, 2024"
  */
 export function formatMessageTime(date: string | Date | null | undefined): string {
-  if (!date) return '';
+  if (!date) {
+    return '';
+  }
 
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(dateObj.getTime())) return '';
+  if (isNaN(dateObj.getTime())) {
+    return '';
+  }
 
   const now = new Date();
   const diffMs = now.getTime() - dateObj.getTime();
@@ -185,10 +193,14 @@ export function formatCurrency(
     fallback = '—'
   } = options;
 
-  if (value === null || value === undefined) return fallback;
+  if (value === null || value === undefined) {
+    return fallback;
+  }
 
   const numValue = typeof value === 'string' ? parseFloat(value) : value;
-  if (isNaN(numValue)) return fallback;
+  if (isNaN(numValue)) {
+    return fallback;
+  }
 
   if (compact && Math.abs(numValue) >= 1000) {
     return new Intl.NumberFormat(locale, {
@@ -242,10 +254,14 @@ export function formatNumber(
 ): string {
   const { locale = 'en-US', minDecimals, maxDecimals, compact = false, fallback = '—' } = options;
 
-  if (value === null || value === undefined) return fallback;
+  if (value === null || value === undefined) {
+    return fallback;
+  }
 
   const numValue = typeof value === 'string' ? parseFloat(value) : value;
-  if (isNaN(numValue)) return fallback;
+  if (isNaN(numValue)) {
+    return fallback;
+  }
 
   const formatOptions: Intl.NumberFormatOptions = {};
 
@@ -253,8 +269,12 @@ export function formatNumber(
     formatOptions.notation = 'compact';
     formatOptions.maximumFractionDigits = 1;
   } else {
-    if (minDecimals !== undefined) formatOptions.minimumFractionDigits = minDecimals;
-    if (maxDecimals !== undefined) formatOptions.maximumFractionDigits = maxDecimals;
+    if (minDecimals !== undefined) {
+      formatOptions.minimumFractionDigits = minDecimals;
+    }
+    if (maxDecimals !== undefined) {
+      formatOptions.maximumFractionDigits = maxDecimals;
+    }
   }
 
   return new Intl.NumberFormat(locale, formatOptions).format(numValue);
@@ -273,8 +293,12 @@ export function formatPercent(
 ): string {
   const { maxDecimals = 0, fallback = '—' } = options;
 
-  if (value === null || value === undefined) return fallback;
-  if (isNaN(value)) return fallback;
+  if (value === null || value === undefined) {
+    return fallback;
+  }
+  if (isNaN(value)) {
+    return fallback;
+  }
 
   return new Intl.NumberFormat('en-US', {
     style: 'percent',
@@ -296,8 +320,12 @@ const FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB'];
  * formatFileSize(1536000) // '1.46 MB'
  */
 export function formatFileSize(bytes: number | null | undefined, fallback = '—'): string {
-  if (bytes === null || bytes === undefined || isNaN(bytes)) return fallback;
-  if (bytes === 0) return '0 B';
+  if (bytes === null || bytes === undefined || isNaN(bytes)) {
+    return fallback;
+  }
+  if (bytes === 0) {
+    return '0 B';
+  }
 
   const k = 1024;
   const i = Math.floor(Math.log(Math.abs(bytes)) / Math.log(k));
@@ -321,8 +349,12 @@ export function truncateText(
   maxLength: number,
   ellipsis = '...'
 ): string {
-  if (!text) return '';
-  if (text.length <= maxLength) return text;
+  if (!text) {
+    return '';
+  }
+  if (text.length <= maxLength) {
+    return text;
+  }
   return text.slice(0, maxLength).trim() + ellipsis;
 }
 
@@ -330,7 +362,9 @@ export function truncateText(
  * Capitalize first letter of string.
  */
 export function capitalize(text: string | null | undefined): string {
-  if (!text) return '';
+  if (!text) {
+    return '';
+  }
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 }
 
@@ -338,7 +372,9 @@ export function capitalize(text: string | null | undefined): string {
  * Convert string to title case.
  */
 export function titleCase(text: string | null | undefined): string {
-  if (!text) return '';
+  if (!text) {
+    return '';
+  }
   return text
     .toLowerCase()
     .split(' ')
@@ -357,9 +393,15 @@ export function formatName(
   const first = firstName?.trim();
   const last = lastName?.trim();
 
-  if (!first && !last) return fallback;
-  if (!first) return last || fallback;
-  if (!last) return first;
+  if (!first && !last) {
+    return fallback;
+  }
+  if (!first) {
+    return last || fallback;
+  }
+  if (!last) {
+    return first;
+  }
 
   return `${first} ${last}`;
 }
@@ -389,13 +431,17 @@ export function pluralize(count: number, singular: string, plural?: string): str
  * formatPhone('+15551234567') // '+1 (555) 123-4567'
  */
 export function formatPhone(phone: string | null | undefined, fallback = '—'): string {
-  if (!phone) return fallback;
+  if (!phone) {
+    return fallback;
+  }
 
   // Remove all non-digits except leading +
   const hasPlus = phone.startsWith('+');
   const digits = phone.replace(/\D/g, '');
 
-  if (digits.length === 0) return fallback;
+  if (digits.length === 0) {
+    return fallback;
+  }
 
   // Handle 10-digit US numbers
   if (digits.length === 10) {

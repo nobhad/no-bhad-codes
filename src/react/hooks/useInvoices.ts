@@ -45,8 +45,12 @@ interface UseInvoicesReturn {
  * Check if an invoice is overdue
  */
 function isOverdue(invoice: Invoice): boolean {
-  if (invoice.status === 'paid' || invoice.status === 'cancelled') return false;
-  if (!invoice.due_date) return false;
+  if (invoice.status === 'paid' || invoice.status === 'cancelled') {
+    return false;
+  }
+  if (!invoice.due_date) {
+    return false;
+  }
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -106,7 +110,9 @@ export function useInvoices({ autoFetch = true }: UseInvoicesOptions = {}): UseI
       const data = unwrapApiData<{ invoices: Invoice[] }>(json);
       setInvoices(data.invoices || []);
     } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') return;
+      if (err instanceof Error && err.name === 'AbortError') {
+        return;
+      }
       const message = formatErrorMessage(err, 'An error occurred');
       setError(message);
       logger.error('[useInvoices] Error:', message);
@@ -173,7 +179,9 @@ export function useInvoices({ autoFetch = true }: UseInvoicesOptions = {}): UseI
       let filename = `invoice-${id}.pdf`;
       if (contentDisposition) {
         const match = contentDisposition.match(/filename="?([^"]+)"?/);
-        if (match) filename = match[1];
+        if (match) {
+          filename = match[1];
+        }
       }
 
       // Create blob and trigger download
@@ -266,7 +274,9 @@ export function useInvoices({ autoFetch = true }: UseInvoicesOptions = {}): UseI
 
   // Auto-fetch on mount with AbortController cleanup
   useEffect(() => {
-    if (!autoFetch) return;
+    if (!autoFetch) {
+      return;
+    }
     const controller = new AbortController();
     fetchInvoices(controller.signal);
     return () => controller.abort();

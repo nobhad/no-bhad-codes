@@ -401,7 +401,9 @@ export class StateManager<T = AppState> {
    * Time travel to previous state
    */
   undo(): boolean {
-    if (this.history.length < 2) return false;
+    if (this.history.length < 2) {
+      return false;
+    }
 
     const previousState = { ...this.state };
     const currentEntry = this.history.pop(); // Remove current state
@@ -512,12 +514,16 @@ export class StateManager<T = AppState> {
    * Time travel forward (redo)
    */
   redo(): boolean {
-    if (this.redoStack.length === 0) return false;
+    if (this.redoStack.length === 0) {
+      return false;
+    }
 
     const previousState = { ...this.state };
     const redoEntry = this.redoStack.pop();
 
-    if (!redoEntry) return false;
+    if (!redoEntry) {
+      return false;
+    }
 
     // Push current state back to history
     this.addToHistory(this.state);

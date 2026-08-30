@@ -20,7 +20,9 @@ const PORTAL_PATH_MARKERS = [
 
 /** Extract the path (+ hash) from a stored URL, tolerating relative values. */
 export function urlPath(url: string): string {
-  if (!url) return '/';
+  if (!url) {
+    return '/';
+  }
   try {
     const u = new URL(url, 'https://placeholder.local');
     return `${u.pathname}${u.hash}` || '/';
@@ -50,15 +52,25 @@ export function formatDuration(seconds: number | null | undefined): string {
 
 /** Compact relative time like "just now", "3m ago", "2h ago". */
 export function formatRelativeTime(iso: string | null | undefined, nowMs: number): string {
-  if (!iso) return '—';
+  if (!iso) {
+    return '—';
+  }
   const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) return '—';
+  if (Number.isNaN(then)) {
+    return '—';
+  }
   const diffSec = Math.max(0, Math.round((nowMs - then) / 1000));
-  if (diffSec < 45) return 'just now';
+  if (diffSec < 45) {
+    return 'just now';
+  }
   const mins = Math.round(diffSec / 60);
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 60) {
+    return `${mins}m ago`;
+  }
   const hours = Math.round(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) {
+    return `${hours}h ago`;
+  }
   const days = Math.round(hours / 24);
   return `${days}d ago`;
 }

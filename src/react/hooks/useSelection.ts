@@ -94,7 +94,9 @@ export function useSelection<T>({ getId, items }: UseSelectionOptions<T>): UseSe
     (item: T) => {
       const id = getId(item);
       setSelectedIds((prev) => {
-        if (prev.has(id)) return prev;
+        if (prev.has(id)) {
+          return prev;
+        }
         const next = new Set(prev);
         next.add(id);
         return next;
@@ -107,7 +109,9 @@ export function useSelection<T>({ getId, items }: UseSelectionOptions<T>): UseSe
     (item: T) => {
       const id = getId(item);
       setSelectedIds((prev) => {
-        if (!prev.has(id)) return prev;
+        if (!prev.has(id)) {
+          return prev;
+        }
         const next = new Set(prev);
         next.delete(id);
         return next;

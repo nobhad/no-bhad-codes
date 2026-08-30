@@ -252,12 +252,18 @@ export function setupListKeyboardNav(
 
   const focusItem = (index: number) => {
     const items = getItems();
-    if (items.length === 0) return;
+    if (items.length === 0) {
+      return;
+    }
 
     // Handle wrapping
     if (wrap) {
-      if (index < 0) index = items.length - 1;
-      if (index >= items.length) index = 0;
+      if (index < 0) {
+        index = items.length - 1;
+      }
+      if (index >= items.length) {
+        index = 0;
+      }
     } else {
       index = Math.max(0, Math.min(index, items.length - 1));
     }

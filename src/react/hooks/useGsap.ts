@@ -11,7 +11,9 @@ export function useFadeIn<T extends HTMLElement>(delay = 0) {
   const ref = useRef<T>(null);
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current) {
+      return;
+    }
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -48,7 +50,9 @@ export function useSlideIn<T extends HTMLElement>(
   const ref = useRef<T>(null);
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current) {
+      return;
+    }
 
     const axis = direction === 'left' || direction === 'right' ? 'x' : 'y';
     const value = direction === 'left' || direction === 'top' ? -distance : distance;
@@ -86,10 +90,14 @@ export function useStaggerChildren<T extends HTMLElement>(
   const ref = useRef<T>(null);
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current) {
+      return;
+    }
 
     const children = ref.current.children;
-    if (children.length === 0) return;
+    if (children.length === 0) {
+      return;
+    }
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -121,7 +129,9 @@ export function useScaleIn<T extends HTMLElement>(delay = 0) {
   const ref = useRef<T>(null);
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current) {
+      return;
+    }
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -180,7 +190,9 @@ export function useScrollReveal<T extends HTMLElement>(delay = 0) {
   const ref = useRef<T>(null);
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current) {
+      return;
+    }
 
     const ctx = gsap.context(() => {
       gsap.fromTo(

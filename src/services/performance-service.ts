@@ -105,7 +105,9 @@ export class PerformanceService {
    * Start monitoring performance metrics
    */
   async startMonitoring(): Promise<void> {
-    if (this.isMonitoring) return;
+    if (this.isMonitoring) {
+      return;
+    }
 
     this.isMonitoring = true;
 
@@ -465,18 +467,27 @@ export class PerformanceService {
 
     // Deduct points based on Core Web Vitals
     if (this.metrics.lcp) {
-      if (this.metrics.lcp > APP_CONSTANTS.PERFORMANCE.LOAD_NEEDS_WORK) score -= 30;
-      else if (this.metrics.lcp > APP_CONSTANTS.PERFORMANCE.FCP_NEEDS_WORK) score -= 15;
+      if (this.metrics.lcp > APP_CONSTANTS.PERFORMANCE.LOAD_NEEDS_WORK) {
+        score -= 30;
+      } else if (this.metrics.lcp > APP_CONSTANTS.PERFORMANCE.FCP_NEEDS_WORK) {
+        score -= 15;
+      }
     }
 
     if (this.metrics.fid) {
-      if (this.metrics.fid > 300) score -= 25;
-      else if (this.metrics.fid > 100) score -= 10;
+      if (this.metrics.fid > 300) {
+        score -= 25;
+      } else if (this.metrics.fid > 100) {
+        score -= 10;
+      }
     }
 
     if (this.metrics.cls) {
-      if (this.metrics.cls > 0.25) score -= 20;
-      else if (this.metrics.cls > 0.1) score -= 10;
+      if (this.metrics.cls > 0.25) {
+        score -= 20;
+      } else if (this.metrics.cls > 0.1) {
+        score -= 10;
+      }
     }
 
     return Math.max(0, score);

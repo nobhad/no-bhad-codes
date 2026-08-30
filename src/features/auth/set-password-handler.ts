@@ -332,7 +332,9 @@ async function handleFormSubmit(
  */
 export function initSetPasswordPage(): void {
   const elements = getPageElements();
-  if (!elements) return;
+  if (!elements) {
+    return;
+  }
 
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
@@ -351,7 +353,9 @@ export function initSetPasswordPage(): void {
 
   // Verify token and show form
   verifyToken(token, elements, emailFromLink).then((valid) => {
-    if (!valid) return;
+    if (!valid) {
+      return;
+    }
 
     // Attach form submission handler
     elements.form.addEventListener('submit', (e) => handleFormSubmit(e, token, elements));

@@ -220,7 +220,9 @@ function createAuthStore(): AuthStore {
   function startRefreshTimer(): void {
     stopRefreshTimer();
 
-    if (!state.expiresAt) return;
+    if (!state.expiresAt) {
+      return;
+    }
 
     const timeUntilRefresh = state.expiresAt - Date.now() - AUTH_TIMING.REFRESH_BUFFER_MS;
 
@@ -592,7 +594,9 @@ function createAuthStore(): AuthStore {
     },
 
     getSessionTimeRemaining(): number {
-      if (!state.expiresAt) return 0;
+      if (!state.expiresAt) {
+        return 0;
+      }
       return Math.max(0, state.expiresAt - Date.now());
     },
 
@@ -605,7 +609,9 @@ function createAuthStore(): AuthStore {
     },
 
     extendSession(): void {
-      if (!state.isAuthenticated || !state.expiresAt) return;
+      if (!state.isAuthenticated || !state.expiresAt) {
+        return;
+      }
 
       const newExpiresAt = Date.now() + AUTH_TIMING.SESSION_EXTENSION_MS;
 

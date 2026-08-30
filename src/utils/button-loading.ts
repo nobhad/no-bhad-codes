@@ -31,7 +31,9 @@ export function setButtonLoading(
   button: HTMLButtonElement | HTMLInputElement | null,
   loadingText = 'Saving...'
 ): void {
-  if (!button) return;
+  if (!button) {
+    return;
+  }
 
   // Store original state if not already stored
   if (button instanceof HTMLButtonElement && !buttonStates.has(button)) {
@@ -69,7 +71,9 @@ export function clearButtonLoading(
   button: HTMLButtonElement | HTMLInputElement | null,
   originalText?: string
 ): void {
-  if (!button) return;
+  if (!button) {
+    return;
+  }
 
   // Restore from stored state if available
   if (button instanceof HTMLButtonElement) {

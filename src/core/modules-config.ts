@@ -228,9 +228,15 @@ export function registerModules(debug: boolean = false): void {
               const siteFooter = document.querySelector(
                 'body > footer, body > .footer'
               ) as HTMLElement;
-              if (siteHeader) siteHeader.style.display = 'none';
-              if (mobileNav) mobileNav.style.display = 'none';
-              if (siteFooter) siteFooter.style.display = 'none';
+              if (siteHeader) {
+                siteHeader.style.display = 'none';
+              }
+              if (mobileNav) {
+                mobileNav.style.display = 'none';
+              }
+              if (siteFooter) {
+                siteFooter.style.display = 'none';
+              }
 
               // Mount React directly into the existing EJS container.
               // mountPortalApp uses flushSync so React paints in the same
@@ -249,9 +255,15 @@ export function registerModules(debug: boolean = false): void {
               const siteFooter = document.querySelector(
                 'body > footer, body > .footer'
               ) as HTMLElement;
-              if (siteHeader) siteHeader.style.display = '';
-              if (mobileNav) mobileNav.style.display = '';
-              if (siteFooter) siteFooter.style.display = '';
+              if (siteHeader) {
+                siteHeader.style.display = '';
+              }
+              if (mobileNav) {
+                mobileNav.style.display = '';
+              }
+              if (siteFooter) {
+                siteFooter.style.display = '';
+              }
             },
             isInitialized: true,
             name: 'ReactPortalModule'

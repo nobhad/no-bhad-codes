@@ -62,7 +62,9 @@ export function usePortalInvoices(
         setSummary(payload.summary);
       }
     } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') return;
+      if (err instanceof Error && err.name === 'AbortError') {
+        return;
+      }
       logger.error('[usePortalInvoices] Error:', err);
       setError(formatErrorMessage(err, 'Failed to load invoices'));
     } finally {

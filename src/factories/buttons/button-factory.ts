@@ -46,7 +46,9 @@ export function renderButton(config: ButtonConfig): string {
     variant
   } = config;
 
-  if (!show) return '';
+  if (!show) {
+    return '';
+  }
 
   const actionDef = getButtonAction(action);
   if (!actionDef) {
@@ -121,7 +123,9 @@ export function renderButtonGroup(config: ButtonGroupConfig): string {
   }));
 
   const buttonsHtml = renderButtons(contextualButtons);
-  if (!buttonsHtml) return '';
+  if (!buttonsHtml) {
+    return '';
+  }
 
   // Use CSS class modifiers for context-specific gaps
   const contextModifier = `button-group--${context}`;
@@ -136,7 +140,9 @@ export function renderButtonGroup(config: ButtonGroupConfig): string {
 export function renderActionsCell(configs: ButtonConfig[], context: UIContext = 'table'): string {
   const buttonsHtml = renderButtons(configs.map((cfg) => ({ ...cfg, context })));
 
-  if (!buttonsHtml) return '';
+  if (!buttonsHtml) {
+    return '';
+  }
   return `<div class="action-group">${buttonsHtml}</div>`;
 }
 
@@ -161,7 +167,9 @@ export function renderButtonSet<T extends ButtonSetName>(
  */
 export function createButton(config: ButtonConfig): HTMLButtonElement | null {
   const html = renderButton(config);
-  if (!html) return null;
+  if (!html) {
+    return null;
+  }
 
   const template = document.createElement('template');
   template.innerHTML = html.trim();
@@ -182,7 +190,9 @@ export function createButtons(configs: ButtonConfig[]): HTMLButtonElement[] {
  */
 export function createButtonGroup(config: ButtonGroupConfig): HTMLElement | null {
   const html = renderButtonGroup(config);
-  if (!html) return null;
+  if (!html) {
+    return null;
+  }
 
   const template = document.createElement('template');
   template.innerHTML = html.trim();

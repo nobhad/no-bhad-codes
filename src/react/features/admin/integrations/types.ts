@@ -92,13 +92,19 @@ export const SERVICE_ICONS: Record<string, React.ReactNode> = {
 // ============================================
 
 export function getIntegrationHealthClass(configured: boolean, active: boolean): string {
-  if (configured && active) return 'health-indicator health-ok';
-  if (configured && !active) return 'health-indicator health-warning';
+  if (configured && active) {
+    return 'health-indicator health-ok';
+  }
+  if (configured && !active) {
+    return 'health-indicator health-warning';
+  }
   return 'health-indicator health-error';
 }
 
 export function formatDate(dateStr: string | null): string {
-  if (!dateStr) return 'Never';
+  if (!dateStr) {
+    return 'Never';
+  }
   return new Date(dateStr).toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',

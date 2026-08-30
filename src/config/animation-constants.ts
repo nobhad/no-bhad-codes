@@ -91,7 +91,9 @@ export function getAnimationColor(colorKey: keyof typeof ANIMATION_COLOR_VARS): 
   if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     const computedStyle = window.getComputedStyle(document.documentElement);
     const color = computedStyle.getPropertyValue(cssVarName).trim();
-    if (color) return color;
+    if (color) {
+      return color;
+    }
   }
 
   return ANIMATION_COLOR_FALLBACKS[cssVarName] || 'rgba(0, 0, 0, 0.5)';

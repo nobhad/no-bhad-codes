@@ -176,7 +176,9 @@ export class AttachmentManager {
    */
   remove(id: string): void {
     const index = this.files.findIndex((f) => f.id === id);
-    if (index === -1) return;
+    if (index === -1) {
+      return;
+    }
 
     const removed = this.files[index];
 
@@ -193,7 +195,9 @@ export class AttachmentManager {
    * Remove a file by index
    */
   removeByIndex(index: number): void {
-    if (index < 0 || index >= this.files.length) return;
+    if (index < 0 || index >= this.files.length) {
+      return;
+    }
 
     const removed = this.files[index];
 

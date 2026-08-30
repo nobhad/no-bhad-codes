@@ -508,10 +508,16 @@ export class PageTransitionModule extends BaseModule {
    * scrollable out from under the viewer.
    */
   private introSettled(): boolean {
-    if (!this.introComplete) return false;
-    if (!document.documentElement.classList.contains('intro-finished')) return false;
+    if (!this.introComplete) {
+      return false;
+    }
+    if (!document.documentElement.classList.contains('intro-finished')) {
+      return false;
+    }
     const overlay = document.querySelector('#intro-morph-overlay');
-    if (!overlay) return true;
+    if (!overlay) {
+      return true;
+    }
     const cs = getComputedStyle(overlay);
     return cs.visibility === 'hidden' || cs.opacity === '0' || cs.display === 'none';
   }
@@ -530,7 +536,9 @@ export class PageTransitionModule extends BaseModule {
    */
   private hideMorphOverlay(): void {
     const morphOverlay = document.getElementById('intro-morph-overlay');
-    if (!morphOverlay) return;
+    if (!morphOverlay) {
+      return;
+    }
     morphOverlay.classList.add('hidden');
     morphOverlay.style.visibility = 'hidden';
     morphOverlay.style.pointerEvents = 'none';
@@ -543,7 +551,9 @@ export class PageTransitionModule extends BaseModule {
    * updated so the static CSS fallback stays in sync with the JS-driven state.
    */
   private async moveCamera(tile: MapTile, animated: boolean): Promise<void> {
-    if (!this.siteMap) return;
+    if (!this.siteMap) {
+      return;
+    }
 
     const pos = CAMERA_POSITIONS[tile];
     this.siteMap.setAttribute('data-map-camera', tile);
@@ -618,7 +628,9 @@ export class PageTransitionModule extends BaseModule {
    */
   private hideOffMapPages(): void {
     this.pages.forEach((page) => {
-      if (!page.element || this.isMapPage(page.id)) return;
+      if (!page.element || this.isMapPage(page.id)) {
+        return;
+      }
       gsap.killTweensOf(page.element);
       gsap.set(page.element, { clearProps: 'all' });
       page.element.classList.add('page-hidden');
@@ -632,7 +644,9 @@ export class PageTransitionModule extends BaseModule {
    * so its content doesn't bleed through.
    */
   private setSiteMapVisibility(visible: boolean): void {
-    if (!this.siteMap) return;
+    if (!this.siteMap) {
+      return;
+    }
     if (visible) {
       this.siteMap.style.removeProperty('display');
     } else {
@@ -686,7 +700,9 @@ export class PageTransitionModule extends BaseModule {
    */
   private syncUrlToPage(pageId: string, arrivedVia: Direction | null): void {
     const hash = this.canonicalHashFor(pageId);
-    if (!hash || window.location.hash === hash) return;
+    if (!hash || window.location.hash === hash) {
+      return;
+    }
 
     window.history.replaceState(window.history.state, '', hash);
 
@@ -716,13 +732,17 @@ export class PageTransitionModule extends BaseModule {
    */
   private updateCompass(): void {
     const compass = document.querySelector('[data-map-compass]') as HTMLElement | null;
-    if (!compass) return;
+    if (!compass) {
+      return;
+    }
 
     const directions: Direction[] = ['up', 'down', 'left', 'right'];
     const navigable = new Set<Direction>();
 
     for (const dir of directions) {
-      if (this.canNavigate(dir)) navigable.add(dir);
+      if (this.canNavigate(dir)) {
+        navigable.add(dir);
+      }
     }
 
     // On the projects tile, vertical input cycles the TV channel — that
@@ -742,8 +762,11 @@ export class PageTransitionModule extends BaseModule {
     // band moves, so the cue fades out as the footer arrives.
     if (this.curtainOwnsVertical()) {
       const moreTileBelow = this.tileScrollRemaining('down') > SCROLL_EDGE_EPSILON;
-      if (moreTileBelow || this.curtainProgress < 1) navigable.add('down');
-      else navigable.delete('down');
+      if (moreTileBelow || this.curtainProgress < 1) {
+        navigable.add('down');
+      } else {
+        navigable.delete('down');
+      }
     }
 
     // Until the user has scrolled / navigated once, narrow the cue set
@@ -753,7 +776,9 @@ export class PageTransitionModule extends BaseModule {
     if (!this.hasNavigated) {
       const forward = this.forwardDirectionsForFirstPaint(this.currentPageId);
       navigable.forEach((dir) => {
-        if (!forward.has(dir)) navigable.delete(dir);
+        if (!forward.has(dir)) {
+          navigable.delete(dir);
+        }
       });
     }
 
@@ -774,7 +799,9 @@ export class PageTransitionModule extends BaseModule {
       const scrolls = tile.scrollHeight > tile.clientHeight + 4;
       for (const dir of ['up', 'down'] as const) {
         const cue = document.querySelector<HTMLElement>(`.map-compass__cue--${dir}`);
-        if (!cue) continue;
+        if (!cue) {
+          continue;
+        }
         if (scrolls && cue.parentElement !== tile) {
           tile.appendChild(cue);
           cue.classList.add('map-compass__cue--in-content');
@@ -825,7 +852,9 @@ export class PageTransitionModule extends BaseModule {
     // Projects tile: vertical always works (cycles TV or exits at bound),
     // horizontal works if there's a project-detail destination.
     if (this.currentPageId === 'projects') {
-      if (direction === 'up' || direction === 'down') return true;
+      if (direction === 'up' || direction === 'down') {
+        return true;
+      }
       return NEIGHBORS.projects?.[direction] != null;
     }
     // Project-detail: horizontal cycles between detail pages (looped,
@@ -866,7 +895,9 @@ export class PageTransitionModule extends BaseModule {
    */
   private tileScrollRemaining(direction: 'up' | 'down'): number {
     const tile = this.pages.get(this.currentPageId)?.element;
-    if (!tile) return 0;
+    if (!tile) {
+      return 0;
+    }
     return direction === 'down'
       ? tile.scrollHeight - tile.scrollTop - tile.clientHeight
       : tile.scrollTop;
@@ -881,7 +912,9 @@ export class PageTransitionModule extends BaseModule {
    */
   private driveCurtain(delta: number): void {
     const travel = Math.min(CURTAIN_TRAVEL_PX, Math.max(0, this.curtainTravel + delta));
-    if (travel === this.curtainTravel) return;
+    if (travel === this.curtainTravel) {
+      return;
+    }
     this.curtainTravel = travel;
     this.setCurtainProgress(travel / CURTAIN_TRAVEL_PX);
     this.scheduleCurtainSettle(delta > 0 ? 1 : 0);
@@ -894,7 +927,9 @@ export class PageTransitionModule extends BaseModule {
    */
   private scheduleCurtainSettle(target: 0 | 1): void {
     this.curtainSettleTarget = target;
-    if (this.curtainSettleTimer) clearTimeout(this.curtainSettleTimer);
+    if (this.curtainSettleTimer) {
+      clearTimeout(this.curtainSettleTimer);
+    }
     this.curtainSettleTimer = setTimeout(() => {
       this.curtainSettleTimer = null;
       const moved =
@@ -909,7 +944,9 @@ export class PageTransitionModule extends BaseModule {
   }
 
   private setCurtainProgress(progress: number): void {
-    if (progress === this.curtainProgress) return;
+    if (progress === this.curtainProgress) {
+      return;
+    }
     this.curtainProgress = progress;
     window.dispatchEvent(new CustomEvent('footer-curtain:set-progress', { detail: { progress } }));
     // The ↓ cue is lit off this value — see updateCompass.
@@ -949,7 +986,9 @@ export class PageTransitionModule extends BaseModule {
    */
   private startCompassHint(): void {
     const compass = document.querySelector('[data-map-compass]') as HTMLElement | null;
-    if (!compass) return;
+    if (!compass) {
+      return;
+    }
     compass.classList.add('is-hinting');
     // Pulse plays 3 iterations × 1.6s = ~4.8s; clear class slightly after.
     setTimeout(() => compass.classList.remove('is-hinting'), 5200);
@@ -973,7 +1012,9 @@ export class PageTransitionModule extends BaseModule {
     this.navHistory.push({ hash: hash || '#/', arrivedVia: null });
 
     this.pages.forEach((page, id) => {
-      if (!page.element) return;
+      if (!page.element) {
+        return;
+      }
 
       if (this.isMapPage(id)) {
         // Map tile: always rendered. Strip page-hidden/page-active so the
@@ -1055,7 +1096,9 @@ export class PageTransitionModule extends BaseModule {
         let slideDir = this.pendingSlideDirection;
         this.pendingSlideDirection = null;
         this.pendingSlideForHash = null;
-        if (!slideDir) slideDir = this.inferSlideDirection(pageId);
+        if (!slideDir) {
+          slideDir = this.inferSlideDirection(pageId);
+        }
         if (slideDir) {
           void this.transitionTo(pageId, 'slide', slideDir);
         } else {
@@ -1114,7 +1157,9 @@ export class PageTransitionModule extends BaseModule {
     // right. Our own navigations pin the hash they are heading for, so if that
     // is where we just landed, this popstate is ours.
     window.addEventListener('popstate', () => {
-      if (this.pendingSlideForHash && this.pendingSlideForHash === window.location.hash) return;
+      if (this.pendingSlideForHash && this.pendingSlideForHash === window.location.hash) {
+        return;
+      }
       this.popstateInFlight = true;
     });
 
@@ -1124,7 +1169,9 @@ export class PageTransitionModule extends BaseModule {
     // links, and browser history that bypass tryNavigateDirection.
     window.addEventListener('projects:active-slug-changed', ((event: CustomEvent) => {
       const idx = event.detail?.index;
-      if (typeof idx === 'number') this.currentTvIndex = idx;
+      if (typeof idx === 'number') {
+        this.currentTvIndex = idx;
+      }
     }) as EventListener);
 
     // Compass arrow clicks act as a touch-friendly nav fallback —
@@ -1137,8 +1184,12 @@ export class PageTransitionModule extends BaseModule {
         const target = event.target as HTMLElement | null;
         const cue = target?.closest('.map-compass__cue') as HTMLElement | null;
         const dir = cue?.dataset.cue as Direction | undefined;
-        if (!dir) return;
-        if (this.isTransitioning) return;
+        if (!dir) {
+          return;
+        }
+        if (this.isTransitioning) {
+          return;
+        }
         // ↓ on a curtain tile isn't a navigation — it raises the footer, and
         // raises it the rest of the way if it's already part-open.
         // Drop focus once the cue has done its job. These are real buttons,
@@ -1162,7 +1213,9 @@ export class PageTransitionModule extends BaseModule {
           this.driveCurtain(CURTAIN_TRAVEL_PX);
           return;
         }
-        if (!this.canNavigate(dir)) return;
+        if (!this.canNavigate(dir)) {
+          return;
+        }
         this.tryNavigateDirection(dir);
       });
     }
@@ -1190,7 +1243,9 @@ export class PageTransitionModule extends BaseModule {
       this.deferredHash = window.location.hash;
       return;
     }
-    if (this.isTransitioning) return;
+    if (this.isTransitioning) {
+      return;
+    }
 
     const hash = window.location.hash;
     const pageId = this.getPageIdFromHash(hash);
@@ -1222,8 +1277,12 @@ export class PageTransitionModule extends BaseModule {
       // Fallback inference. For popstate (browser back/forward), check
       // history first to figure out direction; otherwise fall back to the
       // project-detail-aware default.
-      if (!slideDir && fromPopstate) slideDir = this.inferDirectionFromHistory(hash);
-      if (!slideDir) slideDir = this.inferSlideDirection(pageId);
+      if (!slideDir && fromPopstate) {
+        slideDir = this.inferDirectionFromHistory(hash);
+      }
+      if (!slideDir) {
+        slideDir = this.inferSlideDirection(pageId);
+      }
 
       // Push current hash + arrival direction to nav history so a future
       // popstate can look up "how did the user reach this page?" and slide
@@ -1268,10 +1327,14 @@ export class PageTransitionModule extends BaseModule {
    * navigation that didn't record a direction).
    */
   private inferDirectionFromHistory(newHash: string): Direction | null {
-    if (this.navHistory.length < 2) return null;
+    if (this.navHistory.length < 2) {
+      return null;
+    }
     const last = this.navHistory.length - 1;
     const prev = this.navHistory[last - 1];
-    if (prev.hash !== newHash) return null;
+    if (prev.hash !== newHash) {
+      return null;
+    }
 
     // Recorded direction we used to enter the page we're leaving — the
     // last entry in history is the page about to be unmounted by popstate.
@@ -1317,7 +1380,9 @@ export class PageTransitionModule extends BaseModule {
     // the tile back down over the top, which is what the breadcrumb, the back
     // link and ArrowUp all mean by "back to projects". Anywhere else is just
     // backward along the carousel.
-    if (this.currentPageId === 'project-detail') return pageId === 'projects' ? 'up' : 'left';
+    if (this.currentPageId === 'project-detail') {
+      return pageId === 'projects' ? 'up' : 'left';
+    }
     // Entering project-detail. From the projects TV it drops DOWN — the TV
     // scrolls up and out while the detail page pushes up from the bottom
     // (matches the Enter-key reveal). From anywhere else, default forward.
@@ -1343,7 +1408,9 @@ export class PageTransitionModule extends BaseModule {
   private captureDetailGhost(): void {
     this.removeDetailGhost();
     const detail = this.pages.get('project-detail')?.element;
-    if (!detail || !detail.parentElement) return;
+    if (!detail || !detail.parentElement) {
+      return;
+    }
 
     const ghost = detail.cloneNode(true) as HTMLElement;
     ghost.id = 'project-detail-ghost';
@@ -1454,7 +1521,9 @@ export class PageTransitionModule extends BaseModule {
       this.deferredHash = null;
       if (deferred && deferred === window.location.hash) {
         const pageId = this.getPageIdFromHash(deferred);
-        if (pageId && pageId !== this.currentPageId) this.handleHashChange();
+        if (pageId && pageId !== this.currentPageId) {
+          this.handleHashChange();
+        }
       }
       // First-paint affordance: pulse the compass arrows so the user
       // notices the scroll-map is interactive. Update first so the cues
@@ -1494,12 +1563,16 @@ export class PageTransitionModule extends BaseModule {
    * Lets the browser handle in-tile scrolling normally otherwise.
    */
   private handleWheel(event: WheelEvent): void {
-    if (this.isMobile && !this.enableOnMobile) return;
+    if (this.isMobile && !this.enableOnMobile) {
+      return;
+    }
     // Small mobile uses native vertical scroll between stacked sections
     // — gesture-driven camera nav is off so the body's natural scroll
     // owns the experience and we don't pay the GSAP tween cost on every
     // swipe.
-    if (this.isSmallMobile) return;
+    if (this.isSmallMobile) {
+      return;
+    }
     // During the intro animation, swallow ALL wheel events so the browser
     // can't scroll the page horizontally or vertically before the user is
     // released into the spatial map.
@@ -1510,7 +1583,9 @@ export class PageTransitionModule extends BaseModule {
     // Allow input on map tiles AND on project-detail (so users can scroll
     // back left to projects). Other off-map pages (portal-login, admin)
     // still keep their normal scroll-only behavior.
-    if (!this.isMapPage(this.currentPageId) && this.currentPageId !== 'project-detail') return;
+    if (!this.isMapPage(this.currentPageId) && this.currentPageId !== 'project-detail') {
+      return;
+    }
 
     // preventDefault is now scoped to cases where we WILL navigate
     // (see the navigation block below). Letting the browser handle
@@ -1521,18 +1596,26 @@ export class PageTransitionModule extends BaseModule {
     // simply no-op when wheeled in a non-navigable direction. Mirrors
     // the keyboard handler's approach.
 
-    if (this.isTransitioning) return;
-    if (performance.now() < this.wheelCooldownUntil) return;
+    if (this.isTransitioning) {
+      return;
+    }
+    if (performance.now() < this.wheelCooldownUntil) {
+      return;
+    }
 
     const dx = event.deltaX;
     const dy = event.deltaY;
     const absX = Math.abs(dx);
     const absY = Math.abs(dy);
 
-    if (Math.max(absX, absY) < WHEEL_DELTA_THRESHOLD) return;
+    if (Math.max(absX, absY) < WHEEL_DELTA_THRESHOLD) {
+      return;
+    }
 
     const currentTile = this.pages.get(this.currentPageId)?.element;
-    if (!currentTile) return;
+    if (!currentTile) {
+      return;
+    }
 
     let direction: Direction | null = null;
 
@@ -1594,7 +1677,9 @@ export class PageTransitionModule extends BaseModule {
           const canScrollDown =
             currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >
             SCROLL_EDGE_EPSILON;
-          if (canScrollDown) return;
+          if (canScrollDown) {
+            return;
+          }
           event.preventDefault();
           this.driveCurtain(absY);
           return;
@@ -1611,7 +1696,9 @@ export class PageTransitionModule extends BaseModule {
         // Band is down. Anything still scrollable above scrolls natively; a
         // flat tile has nothing above and nothing to navigate to on this axis,
         // so the wheel stops here rather than being remapped onto the carousel.
-        if (!isDetail) return;
+        if (!isDetail) {
+          return;
+        }
 
         {
           const now = performance.now();
@@ -1622,16 +1709,22 @@ export class PageTransitionModule extends BaseModule {
             this.detailReachedTopAt = 0;
             return;
           }
-          if (this.detailReachedTopAt === 0) this.detailReachedTopAt = now;
+          if (this.detailReachedTopAt === 0) {
+            this.detailReachedTopAt = now;
+          }
           const gap = now - this.detailLastWheelAt;
           const prevAbs = this.detailLastAbsDelta;
           const settled = now - this.detailReachedTopAt > DETAIL_TOP_SETTLE_MS;
           this.detailLastWheelAt = now;
           this.detailLastAbsDelta = absY;
-          if (!settled) return;
+          if (!settled) {
+            return;
+          }
           const reaccelerated = absY > prevAbs * DETAIL_REACCEL_FACTOR;
           const freshDistinct = gap > DETAIL_GESTURE_GAP_MS && absY >= prevAbs;
-          if (!reaccelerated && !freshDistinct) return;
+          if (!reaccelerated && !freshDistinct) {
+            return;
+          }
           direction = 'up';
         }
       } else {
@@ -1647,7 +1740,9 @@ export class PageTransitionModule extends BaseModule {
 
     // We're about to navigate — only consume the wheel event if there's
     // actually a destination, otherwise let the browser scroll natively.
-    if (!this.canNavigate(direction)) return;
+    if (!this.canNavigate(direction)) {
+      return;
+    }
     event.preventDefault();
     this.tryNavigateDirection(direction);
   }
@@ -1657,12 +1752,16 @@ export class PageTransitionModule extends BaseModule {
    * typing in a form input.
    */
   private handleKeydown(event: KeyboardEvent): void {
-    if (this.isMobile && !this.enableOnMobile) return;
+    if (this.isMobile && !this.enableOnMobile) {
+      return;
+    }
     // Small mobile uses native vertical scroll between stacked sections
     // — gesture-driven camera nav is off so the body's natural scroll
     // owns the experience and we don't pay the GSAP tween cost on every
     // swipe.
-    if (this.isSmallMobile) return;
+    if (this.isSmallMobile) {
+      return;
+    }
 
     // Form inputs always opt out — arrow keys must move the caret /
     // change select option / etc. Checked first so a focused input stays
@@ -1682,9 +1781,15 @@ export class PageTransitionModule extends BaseModule {
     // user reaches a scroll boundary, at which point arrows trigger
     // page navigation. Mirrors the wheel handler's behavior.
 
-    if (this.isTransitioning) return;
-    if (!this.introSettled()) return;
-    if (!this.isMapPage(this.currentPageId) && this.currentPageId !== 'project-detail') return;
+    if (this.isTransitioning) {
+      return;
+    }
+    if (!this.introSettled()) {
+      return;
+    }
+    if (!this.isMapPage(this.currentPageId) && this.currentPageId !== 'project-detail') {
+      return;
+    }
 
     // Enter on the projects tile opens the currently-highlighted TV
     // channel — direct navigation to the project detail page with a
@@ -1763,7 +1868,9 @@ export class PageTransitionModule extends BaseModule {
     //    when scrollTop is 0 (delegates to tryNavigateDirection).
     if (this.currentPageId === 'project-detail' && (direction === 'up' || direction === 'down')) {
       const detailSection = this.pages.get('project-detail')?.element ?? null;
-      if (!detailSection) return;
+      if (!detailSection) {
+        return;
+      }
       const atTop = detailSection.scrollTop <= SCROLL_EDGE_EPSILON;
       const atBottom =
         detailSection.scrollHeight - detailSection.scrollTop - detailSection.clientHeight <=
@@ -1793,7 +1900,9 @@ export class PageTransitionModule extends BaseModule {
     // and the compass — handles dynamic cases (projects ↑↓ cycles TV,
     // project-detail ←→ cycles carousel) that aren't in the static
     // NEIGHBORS graph.
-    if (!this.canNavigate(direction)) return;
+    if (!this.canNavigate(direction)) {
+      return;
+    }
 
     event.preventDefault();
     this.tryNavigateDirection(direction);
@@ -1804,13 +1913,19 @@ export class PageTransitionModule extends BaseModule {
    * if the swipe was decisive enough to count as a navigation.
    */
   private handleTouchStart(event: TouchEvent): void {
-    if (this.isMobile && !this.enableOnMobile) return;
+    if (this.isMobile && !this.enableOnMobile) {
+      return;
+    }
     // Small mobile uses native vertical scroll between stacked sections
     // — gesture-driven camera nav is off so the body's natural scroll
     // owns the experience and we don't pay the GSAP tween cost on every
     // swipe.
-    if (this.isSmallMobile) return;
-    if (this.isTransitioning) return;
+    if (this.isSmallMobile) {
+      return;
+    }
+    if (this.isTransitioning) {
+      return;
+    }
     // During intro, swallow touch starts so swipes don't scroll the page.
     if (!this.introComplete) {
       this.touchStart = null;
@@ -1834,24 +1949,40 @@ export class PageTransitionModule extends BaseModule {
   private handleTouchEnd(event: TouchEvent): void {
     const start = this.touchStart;
     this.touchStart = null;
-    if (!start) return;
-    if (this.isSmallMobile) return;
-    if (this.isTransitioning) return;
-    if (performance.now() < this.wheelCooldownUntil) return;
-    if (!this.isMapPage(this.currentPageId) && this.currentPageId !== 'project-detail') return;
+    if (!start) {
+      return;
+    }
+    if (this.isSmallMobile) {
+      return;
+    }
+    if (this.isTransitioning) {
+      return;
+    }
+    if (performance.now() < this.wheelCooldownUntil) {
+      return;
+    }
+    if (!this.isMapPage(this.currentPageId) && this.currentPageId !== 'project-detail') {
+      return;
+    }
 
     // changedTouches has the just-released finger.
     const t = event.changedTouches[0];
-    if (!t) return;
+    if (!t) {
+      return;
+    }
 
     const dx = t.clientX - start.x;
     const dy = t.clientY - start.y;
     const elapsed = performance.now() - start.t;
-    if (elapsed > SWIPE_TIME_MAX_MS) return;
+    if (elapsed > SWIPE_TIME_MAX_MS) {
+      return;
+    }
 
     const absX = Math.abs(dx);
     const absY = Math.abs(dy);
-    if (Math.max(absX, absY) < SWIPE_DISTANCE_MIN_PX) return;
+    if (Math.max(absX, absY) < SWIPE_DISTANCE_MIN_PX) {
+      return;
+    }
 
     // Finger direction = nav direction. Same convention as the wheel
     // handler (which inverts deltaX so swipe-right always navigates
@@ -1871,8 +2002,12 @@ export class PageTransitionModule extends BaseModule {
     // first swipe exactly as it always did.
     if (absY > absX && this.curtainOwnsVertical()) {
       const opening = dy < 0;
-      if (opening && this.tileScrollRemaining('down') > SCROLL_EDGE_EPSILON) return;
-      if (!opening && this.curtainProgress === 0) return;
+      if (opening && this.tileScrollRemaining('down') > SCROLL_EDGE_EPSILON) {
+        return;
+      }
+      if (!opening && this.curtainProgress === 0) {
+        return;
+      }
       this.driveCurtain(opening ? absY : -absY);
       return;
     }
@@ -1893,7 +2028,9 @@ export class PageTransitionModule extends BaseModule {
         const canScrollDown =
           currentTile.scrollHeight - currentTile.scrollTop - currentTile.clientHeight >
           SCROLL_EDGE_EPSILON;
-        if (canScrollDown) return;
+        if (canScrollDown) {
+          return;
+        }
       } else if (currentTile.scrollTop >= 1) {
         return;
       }
@@ -1918,7 +2055,9 @@ export class PageTransitionModule extends BaseModule {
       // +1 to include the TV guide as channel 01 in the cycle. Total
       // channel count = projects + guide. Index 0 = guide, 1+ = projects.
       const total = this.getProjectSlugs().length + 1;
-      if (total <= 1) return;
+      if (total <= 1) {
+        return;
+      }
       const delta = direction === 'down' ? 1 : -1;
       // Modulo wrap so cycling down past last lands on guide, and
       // cycling up before guide lands on last project. Always in bounds.
@@ -1948,7 +2087,9 @@ export class PageTransitionModule extends BaseModule {
     // transition pans instead of blurring.
     if (this.currentPageId === 'project-detail') {
       const targetHash = this.resolveProjectDetailNeighbor(direction);
-      if (!targetHash) return;
+      if (!targetHash) {
+        return;
+      }
       // Leaving this detail (up-exit or carousel neighbor) — reset the
       // scroll-to-leave tracking so it can't linger into the next detail.
       this.detailReachedTopAt = 0;
@@ -1969,7 +2110,9 @@ export class PageTransitionModule extends BaseModule {
         // (index 0 is the guide, so project slug index i → channel i + 1).
         const nextSlug = targetHash.replace('#/projects/', '');
         const nextIdx = this.getProjectSlugs().indexOf(nextSlug);
-        if (nextIdx >= 0) this.currentTvIndex = nextIdx + 1;
+        if (nextIdx >= 0) {
+          this.currentTvIndex = nextIdx + 1;
+        }
       }
       this.setPendingSlide(direction, targetHash);
       window.location.hash = targetHash;
@@ -1977,7 +2120,9 @@ export class PageTransitionModule extends BaseModule {
     }
 
     const targetPageId = NEIGHBORS[this.currentPageId]?.[direction];
-    if (!targetPageId) return;
+    if (!targetPageId) {
+      return;
+    }
 
     this.wheelCooldownUntil =
       performance.now() + PAGE_ANIMATION.DURATION * 1000 + WHEEL_COOLDOWN_MS;
@@ -1994,8 +2139,12 @@ export class PageTransitionModule extends BaseModule {
         // Clamp to valid channel range. Index 0 = guide (channel 01),
         // 1..N = projects. Max index is slugs.length.
         const maxIdx = slugs.length;
-        if (this.currentTvIndex > maxIdx) this.currentTvIndex = maxIdx;
-        if (this.currentTvIndex < 0) this.currentTvIndex = 0;
+        if (this.currentTvIndex > maxIdx) {
+          this.currentTvIndex = maxIdx;
+        }
+        if (this.currentTvIndex < 0) {
+          this.currentTvIndex = 0;
+        }
         // Sync the TV display to whatever channel we're remembering.
         requestAnimationFrame(() => {
           document.dispatchEvent(
@@ -2014,7 +2163,9 @@ export class PageTransitionModule extends BaseModule {
     // a tiebreaker for fresh-from-elsewhere entry.
     if (targetPageId === 'project-detail') {
       const slugs = this.getProjectSlugs();
-      if (slugs.length === 0) return;
+      if (slugs.length === 0) {
+        return;
+      }
       const fromProjects = this.currentPageId === 'projects';
       let slug: string;
       if (fromProjects) {
@@ -2060,7 +2211,9 @@ export class PageTransitionModule extends BaseModule {
   /** Slug currently shown in the project-detail page (parsed from hash). */
   private getCurrentProjectSlug(): string | null {
     const hash = window.location.hash;
-    if (!hash.startsWith('#/projects/')) return null;
+    if (!hash.startsWith('#/projects/')) {
+      return null;
+    }
     const slug = hash.replace('#/projects/', '').split('?')[0];
     return slug.length > 0 ? slug : null;
   }
@@ -2079,14 +2232,20 @@ export class PageTransitionModule extends BaseModule {
    * TV remembers which channel to show via currentTvIndex.
    */
   private resolveProjectDetailNeighbor(direction: Direction): string | null {
-    if (direction === 'down') return null;
+    if (direction === 'down') {
+      return null;
+    }
 
     const slugs = this.getProjectSlugs();
-    if (slugs.length === 0) return null;
+    if (slugs.length === 0) {
+      return null;
+    }
 
     const currentSlug = this.getCurrentProjectSlug();
     const currentIndex = currentSlug ? slugs.indexOf(currentSlug) : -1;
-    if (currentIndex === -1) return null;
+    if (currentIndex === -1) {
+      return null;
+    }
 
     // Up: exit back to projects tile. Sync the TV channel to whichever
     // detail the user was on so re-entering shows the same channel, and
@@ -2340,7 +2499,9 @@ export class PageTransitionModule extends BaseModule {
    * Blurs page out: opacity 1→0, blur 0→12px
    */
   private async animateOut(page: PageConfig): Promise<void> {
-    if (!page.element) return;
+    if (!page.element) {
+      return;
+    }
 
     // Kill any running animations on this element
     gsap.killTweensOf(page.element);
@@ -2365,7 +2526,9 @@ export class PageTransitionModule extends BaseModule {
     currentPage: PageConfig | undefined,
     targetPage: PageConfig
   ): Promise<void> {
-    if (currentPage?.element) await this.animateOut(currentPage);
+    if (currentPage?.element) {
+      await this.animateOut(currentPage);
+    }
     this.hideOffMapPages();
     if (targetPage.element) {
       targetPage.element.classList.remove('page-hidden');
@@ -2403,7 +2566,9 @@ export class PageTransitionModule extends BaseModule {
     targetPage: PageConfig,
     direction: Direction
   ): Promise<void> {
-    if (!targetPage.element) return;
+    if (!targetPage.element) {
+      return;
+    }
 
     const isHorizontal = direction === 'left' || direction === 'right';
     const axisProp: 'xPercent' | 'yPercent' = isHorizontal ? 'xPercent' : 'yPercent';
@@ -2787,7 +2952,9 @@ export class PageTransitionModule extends BaseModule {
    *   - filter: blur(12px)
    */
   private async animateIn(page: PageConfig): Promise<void> {
-    if (!page.element) return;
+    if (!page.element) {
+      return;
+    }
 
     // Kill any running animations on this element
     gsap.killTweensOf(page.element);
@@ -2848,7 +3015,9 @@ export class PageTransitionModule extends BaseModule {
   private showIntroPageFallback(): void {
     const businessCard = document.getElementById('business-card');
     const introNav = document.querySelector('.intro-nav') as HTMLElement;
-    if (businessCard) businessCard.style.opacity = '1';
+    if (businessCard) {
+      businessCard.style.opacity = '1';
+    }
     if (introNav) {
       gsap.set(introNav, { opacity: 1, visibility: 'visible', display: 'flex' });
       const navLinks = introNav.querySelectorAll('.intro-nav-link');

@@ -108,8 +108,12 @@ export const MEDIUM_CONFIDENCE_THRESHOLD = 0.5;
 // ============================================
 
 export function getConfidenceBadgeVariant(confidence: number): string {
-  if (confidence >= HIGH_CONFIDENCE_THRESHOLD) return 'danger';
-  if (confidence >= MEDIUM_CONFIDENCE_THRESHOLD) return 'warning';
+  if (confidence >= HIGH_CONFIDENCE_THRESHOLD) {
+    return 'danger';
+  }
+  if (confidence >= MEDIUM_CONFIDENCE_THRESHOLD) {
+    return 'warning';
+  }
   return 'info';
 }
 

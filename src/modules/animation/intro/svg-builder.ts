@@ -370,7 +370,9 @@ export function assembleAboveCardLayer(
   aboveCardGroup: SVGGElement,
   elements: SVGElements
 ): Element | null {
-  if (!elements.position1) return null;
+  if (!elements.position1) {
+    return null;
+  }
 
   const clonedPos1 = elements.position1.cloneNode(true) as Element;
   clonedPos1.setAttribute('id', 'position-1');

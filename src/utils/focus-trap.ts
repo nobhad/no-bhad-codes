@@ -67,10 +67,14 @@ export function createFocusTrap(
       return;
     }
 
-    if (e.key !== 'Tab') return;
+    if (e.key !== 'Tab') {
+      return;
+    }
 
     const focusableElements = getFocusableElements(container);
-    if (focusableElements.length === 0) return;
+    if (focusableElements.length === 0) {
+      return;
+    }
 
     const firstElement = focusableElements[0];
     const lastElement = focusableElements[focusableElements.length - 1];
@@ -130,7 +134,9 @@ export function createFocusTrap(
  */
 export function removeFocusTrap(container: HTMLElement): void {
   const state = activeTrap.get(container);
-  if (!state) return;
+  if (!state) {
+    return;
+  }
 
   // Remove keyboard handler
   container.removeEventListener('keydown', state.keydownHandler);

@@ -17,7 +17,9 @@ import { isDependencyMet } from './step-config';
  * Format a single field value for the review summary
  */
 export function formatFieldForReview(field: string, value: string | string[] | undefined): string {
-  if (!value) return 'Not provided';
+  if (!value) {
+    return 'Not provided';
+  }
 
   if (field === 'name' && typeof value === 'string') {
     return capitalizeWords(value);
@@ -78,7 +80,9 @@ export function renderPreviousConversation(
     }
 
     const answer = question.field ? intakeData[question.field] : undefined;
-    if (answer === undefined) continue;
+    if (answer === undefined) {
+      continue;
+    }
 
     addMessageFn({
       type: 'ai',
@@ -93,11 +97,15 @@ export function renderPreviousConversation(
       if (Array.isArray(answer)) {
         answer.forEach((val) => {
           const optBtn = questionEl.querySelector(`.chat-option[data-value="${val}"]`);
-          if (optBtn) optBtn.classList.add('selected');
+          if (optBtn) {
+            optBtn.classList.add('selected');
+          }
         });
       } else {
         const optBtn = questionEl.querySelector(`.chat-option[data-value="${answer}"]`);
-        if (optBtn) optBtn.classList.add('selected');
+        if (optBtn) {
+          optBtn.classList.add('selected');
+        }
       }
     }
 
@@ -155,11 +163,15 @@ export function updateAnswerDisplay(
     if (Array.isArray(newValue)) {
       newValue.forEach((val) => {
         const optBtn = questionEl.querySelector(`.chat-option[data-value="${val}"]`);
-        if (optBtn) optBtn.classList.add('selected');
+        if (optBtn) {
+          optBtn.classList.add('selected');
+        }
       });
     } else {
       const optBtn = questionEl.querySelector(`.chat-option[data-value="${newValue}"]`);
-      if (optBtn) optBtn.classList.add('selected');
+      if (optBtn) {
+        optBtn.classList.add('selected');
+      }
     }
   }
 }
@@ -174,10 +186,14 @@ export function removeElementsFromIndex(
 ): void {
   const targetElement = chatContainer.querySelector(`[data-question-index="${fromQuestionIndex}"]`);
 
-  if (!targetElement) return;
+  if (!targetElement) {
+    return;
+  }
 
   const parent = targetElement.parentElement;
-  if (!parent) return;
+  if (!parent) {
+    return;
+  }
 
   const children = Array.from(parent.children);
   const targetIdx = children.indexOf(targetElement);
@@ -204,16 +220,22 @@ export function markSelectedOptions(
   const questionEl = chatContainer.querySelector(
     `.chat-message[data-question-index="${questionIndex}"]`
   );
-  if (!questionEl) return;
+  if (!questionEl) {
+    return;
+  }
 
   if (Array.isArray(value)) {
     value.forEach((val) => {
       const optBtn = questionEl.querySelector(`.chat-option[data-value="${val}"]`);
-      if (optBtn) optBtn.classList.add('selected');
+      if (optBtn) {
+        optBtn.classList.add('selected');
+      }
     });
   } else {
     const optBtn = questionEl.querySelector(`.chat-option[data-value="${value}"]`);
-    if (optBtn) optBtn.classList.add('selected');
+    if (optBtn) {
+      optBtn.classList.add('selected');
+    }
   }
 }
 

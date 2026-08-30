@@ -146,7 +146,9 @@ export class CodeProtectionService {
    * Enable protection (can be called later)
    */
   enable(): void {
-    if (this.isEnabled) return;
+    if (this.isEnabled) {
+      return;
+    }
 
     this.config.enabled = true;
     this.setupProtection();
@@ -160,7 +162,9 @@ export class CodeProtectionService {
    * Disable protection
    */
   disable(): void {
-    if (!this.isEnabled) return;
+    if (!this.isEnabled) {
+      return;
+    }
 
     this.config.enabled = false;
     this.teardownProtection();
@@ -538,7 +542,9 @@ export class CodeProtectionService {
   private startMonitoring(): void {
     // Monitor for protection bypass attempts
     const monitor = () => {
-      if (!this.isEnabled) return;
+      if (!this.isEnabled) {
+        return;
+      }
 
       // Check if protection has been disabled
       if (document.getElementById('__protection_element__') === null) {

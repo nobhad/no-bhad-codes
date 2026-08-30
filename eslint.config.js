@@ -197,7 +197,7 @@ export default [
       'space-infix-ops': 'error',
       'comma-spacing': ['error', { before: false, after: true }],
       'brace-style': ['error', '1tbs', { allowSingleLine: true }],
-      curly: ['error', 'multi-line'],
+      curly: ['error', 'all'],
       'no-else-return': 'error',
       'prefer-arrow-callback': 'error',
       'prefer-template': 'warn',
@@ -272,7 +272,7 @@ export default [
       'space-infix-ops': 'error',
       'comma-spacing': ['error', { before: false, after: true }],
       'brace-style': ['error', '1tbs', { allowSingleLine: true }],
-      curly: ['error', 'multi-line'],
+      curly: ['error', 'all'],
       'no-else-return': 'error',
       'prefer-arrow-callback': 'error',
       'prefer-template': 'warn',
@@ -317,5 +317,15 @@ export default [
   // produced 445 ESLint errors, and `eslint --fix` put the formatting back,
   // which is why `npm run format` had gone unrun long enough for 784 files to
   // drift. Prettier owns layout now; ESLint owns everything else.
-  prettierConfig
+  prettierConfig,
+
+  // eslint-config-prettier turns curly off, because 'multi-line' argues with
+  // Prettier over where a wrapped statement ends. 'all' does not: it asks for
+  // braces everywhere, which Prettier is happy to format. Re-enabled after the
+  // config that disables it, or the order would silently undo this.
+  {
+    rules: {
+      curly: ['error', 'all']
+    }
+  }
 ];

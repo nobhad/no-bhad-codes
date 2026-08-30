@@ -19,7 +19,9 @@ let isInitialized = false;
  * Should be called once at application startup
  */
 export function initGlobalErrorHandler(): void {
-  if (isInitialized) return;
+  if (isInitialized) {
+    return;
+  }
   isInitialized = true;
 
   // Handle uncaught synchronous errors

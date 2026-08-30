@@ -38,7 +38,9 @@ export function parseSelectInput(
   inputText: string,
   options: { value: string; label: string }[]
 ): { value: string; label: string } | null {
-  if (!inputText || !options) return null;
+  if (!inputText || !options) {
+    return null;
+  }
 
   const numericInput = parseInt(inputText, 10);
 
@@ -73,17 +75,23 @@ export function parseUserInput(
 
   if (question.type === 'select') {
     const trimmed = rawInput.trim();
-    if (!trimmed || !question.options) return null;
+    if (!trimmed || !question.options) {
+      return null;
+    }
 
     const matched = parseSelectInput(trimmed, question.options);
-    if (!matched) return null;
+    if (!matched) {
+      return null;
+    }
 
     return { value: matched.value, displayValue: matched.label };
   }
 
   // Text-based input
   const trimmed = rawInput.trim();
-  if (!trimmed) return null;
+  if (!trimmed) {
+    return null;
+  }
 
   const sanitized = sanitizeInput(trimmed);
   return { value: sanitized, displayValue: sanitized };

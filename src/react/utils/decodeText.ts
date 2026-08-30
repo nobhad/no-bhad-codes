@@ -17,7 +17,9 @@
  * decodeHtmlEntities("&lt;script&gt;") // "<script>"
  */
 export function decodeHtmlEntities(text: string | null | undefined): string {
-  if (!text) return '';
+  if (!text) {
+    return '';
+  }
 
   const textarea = document.createElement('textarea');
   textarea.innerHTML = text;

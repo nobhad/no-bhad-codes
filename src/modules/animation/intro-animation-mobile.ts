@@ -858,7 +858,9 @@ export class MobileIntroAnimationModule extends BaseModule {
    * Complete intro and cleanup
    */
   private completeIntro(): void {
-    if (this.isComplete) return;
+    if (this.isComplete) {
+      return;
+    }
 
     this.isComplete = true;
 

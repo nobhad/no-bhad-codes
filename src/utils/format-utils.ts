@@ -16,7 +16,9 @@ import { MS_PER_MINUTE, MS_PER_HOUR, MS_PER_DAY } from './time-utils';
  * @returns Formatted string (e.g., "1.5 MB")
  */
 export function formatFileSize(bytes: number): string {
-  if (!bytes || bytes === 0) return '0 B';
+  if (!bytes || bytes === 0) {
+    return '0 B';
+  }
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -38,13 +40,17 @@ export function formatCurrency(
   const { showCents = false, fallback = '' } = options;
 
   // Handle null/undefined
-  if (amount === null || amount === undefined) return fallback;
+  if (amount === null || amount === undefined) {
+    return fallback;
+  }
 
   // Parse string to number if needed
   const num = typeof amount === 'string' ? parseFloat(amount) : amount;
 
   // Handle NaN
-  if (isNaN(num)) return fallback;
+  if (isNaN(num)) {
+    return fallback;
+  }
 
   const formatOptions: Intl.NumberFormatOptions = {
     style: 'currency',
@@ -87,7 +93,9 @@ export function normalizeStatus(
   status: string | undefined | null,
   defaultValue: string = 'pending'
 ): string {
-  if (!status) return defaultValue;
+  if (!status) {
+    return defaultValue;
+  }
   return status.replace(/_/g, '-');
 }
 
@@ -100,13 +108,17 @@ export function normalizeStatus(
  * @returns Formatted display string
  */
 export function formatDisplayValue(value: string | undefined | null): string {
-  if (!value || value === '-') return '';
+  if (!value || value === '-') {
+    return '';
+  }
 
   // Handle special cases first
   const lowerValue = value.toLowerCase();
 
   // ASAP should be all caps
-  if (lowerValue === 'asap') return 'ASAP';
+  if (lowerValue === 'asap') {
+    return 'ASAP';
+  }
 
   // Budget ranges: "under-1k" -> "Under $1k"
   if (lowerValue.includes('under')) {
@@ -168,7 +180,9 @@ export function escapeHtml(text: string): string {
  * @returns HTML-safe string with <br> tags for line breaks
  */
 export function formatTextWithLineBreaks(text: string | undefined | null): string {
-  if (!text) return '';
+  if (!text) {
+    return '';
+  }
   // Escape HTML first to prevent XSS, then convert newlines to <br>
   return escapeHtml(text).replace(/\n/g, '<br>');
 }
@@ -202,7 +216,9 @@ export const PROJECT_TYPE_LABELS: Record<string, string> = {
  * @returns Formatted display label
  */
 export function formatProjectType(type: string | undefined | null): string {
-  if (!type) return '';
+  if (!type) {
+    return '';
+  }
   return PROJECT_TYPE_LABELS[type] || type;
 }
 
@@ -220,11 +236,15 @@ export function formatDate(
   dateString: string | Date | undefined | null,
   format?: 'short' | 'label' | 'datetime'
 ): string {
-  if (!dateString) return '';
+  if (!dateString) {
+    return '';
+  }
 
   try {
     const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-    if (isNaN(date.getTime())) return '';
+    if (isNaN(date.getTime())) {
+      return '';
+    }
 
     if (format === 'label') {
       return date.toLocaleDateString('en-US', {
@@ -260,11 +280,15 @@ export function formatDate(
  * @returns Formatted date and time string (e.g., "01/28/2026, 2:30 PM")
  */
 export function formatDateTime(dateString: string | Date | undefined | null): string {
-  if (!dateString) return '';
+  if (!dateString) {
+    return '';
+  }
 
   try {
     const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-    if (isNaN(date.getTime())) return '';
+    if (isNaN(date.getTime())) {
+      return '';
+    }
 
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -289,7 +313,9 @@ export function formatDateTime(dateString: string | Date | undefined | null): st
  * @returns Date in YYYY-MM-DD format
  */
 export function formatDateForInput(dateString: string | undefined | null): string {
-  if (!dateString) return '';
+  if (!dateString) {
+    return '';
+  }
 
   // If already in YYYY-MM-DD format, return as-is
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
@@ -305,7 +331,9 @@ export function formatDateForInput(dateString: string | undefined | null): strin
   // Fallback: try to parse and format
   try {
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return '';
+    if (isNaN(date.getTime())) {
+      return '';
+    }
     return date.toISOString().split('T')[0];
   } catch {
     return '';
@@ -318,11 +346,15 @@ export function formatDateForInput(dateString: string | undefined | null): strin
  * @returns Relative time string
  */
 export function formatRelativeTime(dateString: string | Date | undefined | null): string {
-  if (!dateString) return '';
+  if (!dateString) {
+    return '';
+  }
 
   try {
     const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-    if (isNaN(date.getTime())) return '';
+    if (isNaN(date.getTime())) {
+      return '';
+    }
 
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -330,10 +362,18 @@ export function formatRelativeTime(dateString: string | Date | undefined | null)
     const diffHours = Math.floor(diffMs / MS_PER_HOUR);
     const diffDays = Math.floor(diffMs / MS_PER_DAY);
 
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
-    if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+    if (diffMins < 1) {
+      return 'Just now';
+    }
+    if (diffMins < 60) {
+      return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`;
+    }
+    if (diffHours < 24) {
+      return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+    }
+    if (diffDays < 7) {
+      return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+    }
 
     // More than a week, show actual date
     return formatDate(date);
@@ -353,9 +393,13 @@ export function formatRelativeTime(dateString: string | Date | undefined | null)
  * @returns Formatted date string in MM/DD/YYYY format
  */
 export function formatDateShort(date: string | Date | undefined | null): string {
-  if (!date) return '';
+  if (!date) {
+    return '';
+  }
   const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return '';
+  if (isNaN(d.getTime())) {
+    return '';
+  }
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   const year = d.getFullYear();
@@ -368,9 +412,13 @@ export function formatDateShort(date: string | Date | undefined | null): string 
  * @returns Date in YYYY-MM-DD format, empty string for null/invalid
  */
 export function formatDateISO(date: string | Date | undefined | null): string {
-  if (!date) return '';
+  if (!date) {
+    return '';
+  }
   const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return '';
+  if (isNaN(d.getTime())) {
+    return '';
+  }
   return d.toISOString().split('T')[0];
 }
 
@@ -380,9 +428,13 @@ export function formatDateISO(date: string | Date | undefined | null): string {
  * @returns Relative date label or formatted date string
  */
 export function formatDateRelative(date: string | Date | undefined | null): string {
-  if (!date) return '';
+  if (!date) {
+    return '';
+  }
   const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return '';
+  if (isNaN(d.getTime())) {
+    return '';
+  }
 
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -425,7 +477,9 @@ export function formatCardDate(dateString: string): string {
  * @returns true if the date is in the past, false otherwise
  */
 export function isOverdue(dueDate: string | undefined): boolean {
-  if (!dueDate) return false;
+  if (!dueDate) {
+    return false;
+  }
   const due = new Date(dueDate);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -438,7 +492,9 @@ export function isOverdue(dueDate: string | undefined): boolean {
  * @returns Number of days until due (negative if overdue), or null if no due date
  */
 export function getDaysUntilDue(dueDate: string | undefined): number | null {
-  if (!dueDate) return null;
+  if (!dueDate) {
+    return null;
+  }
   // Parse due date parts to avoid UTC vs local timezone mismatch
   // new Date('YYYY-MM-DD') parses as UTC, but we need local dates for comparison
   const [year, month, day] = dueDate.split('T')[0].split('-').map(Number);
@@ -456,7 +512,9 @@ export function getDaysUntilDue(dueDate: string | undefined): number | null {
  * @returns Human readable string like "3 days left", "2 days overdue", "Due today", etc.
  */
 export function getDueDaysText(dueDate: string | undefined): string {
-  if (!dueDate) return '';
+  if (!dueDate) {
+    return '';
+  }
 
   const now = new Date();
   const due = new Date(dueDate);
@@ -515,7 +573,11 @@ export function truncateText(
   maxLength: number = 50,
   suffix: string = '...'
 ): string {
-  if (!text) return '';
-  if (text.length <= maxLength) return text;
+  if (!text) {
+    return '';
+  }
+  if (text.length <= maxLength) {
+    return text;
+  }
   return text.substring(0, maxLength - suffix.length) + suffix;
 }

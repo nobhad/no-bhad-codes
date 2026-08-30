@@ -31,7 +31,9 @@ interface UseProjectInvoicesReturn {
 
 /** Safely parse a numeric value that may arrive as a string from the API */
 function parseAmount(value: string | number | undefined | null): number {
-  if (typeof value === 'string') return parseFloat(value) || 0;
+  if (typeof value === 'string') {
+    return parseFloat(value) || 0;
+  }
   return value || 0;
 }
 
@@ -79,7 +81,9 @@ export function useProjectInvoices({
   const sendInvoice = useCallback(async (id: number): Promise<boolean> => {
     try {
       const response = await apiPut(`${API_ENDPOINTS.INVOICES}/${id}`, { status: 'sent' });
-      if (!response.ok) return false;
+      if (!response.ok) {
+        return false;
+      }
       setInvoices((prev) => prev.map((inv) => (inv.id === id ? { ...inv, status: 'sent' } : inv)));
       return true;
     } catch (err) {
@@ -94,7 +98,9 @@ export function useProjectInvoices({
         status: 'paid',
         paid_date: new Date().toISOString()
       });
-      if (!response.ok) return false;
+      if (!response.ok) {
+        return false;
+      }
       setInvoices((prev) =>
         prev.map((inv) =>
           inv.id === id ? { ...inv, status: 'paid', paid_date: new Date().toISOString() } : inv
@@ -110,7 +116,9 @@ export function useProjectInvoices({
   const deleteInvoice = useCallback(async (id: number): Promise<boolean> => {
     try {
       const response = await apiDelete(`${API_ENDPOINTS.INVOICES}/${id}`);
-      if (!response.ok) return false;
+      if (!response.ok) {
+        return false;
+      }
       setInvoices((prev) => prev.filter((inv) => inv.id !== id));
       return true;
     } catch (err) {
@@ -122,13 +130,17 @@ export function useProjectInvoices({
   const downloadPdf = useCallback(async (id: number): Promise<void> => {
     try {
       const response = await apiFetch(`${API_ENDPOINTS.INVOICES}/${id}/pdf`);
-      if (!response.ok) throw new Error('Failed to download PDF');
+      if (!response.ok) {
+        throw new Error('Failed to download PDF');
+      }
 
       const contentDisposition = response.headers.get('Content-Disposition');
       let filename = `invoice-${id}.pdf`;
       if (contentDisposition) {
         const match = contentDisposition.match(/filename="?([^"]+)"?/);
-        if (match) filename = match[1];
+        if (match) {
+          filename = match[1];
+        }
       }
 
       const blob = await response.blob();

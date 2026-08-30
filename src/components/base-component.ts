@@ -202,7 +202,9 @@ export abstract class BaseComponent<
    * Render the component
    */
   private async render(): Promise<void> {
-    if (!this.host || !this.template) return;
+    if (!this.host || !this.template) {
+      return;
+    }
 
     const html = this.template.render();
     const css = this.template.css?.() || '';

@@ -29,7 +29,9 @@ export function cx(...classes: ClassValue[]): string {
   const result: string[] = [];
 
   for (const cls of classes) {
-    if (!cls) continue;
+    if (!cls) {
+      continue;
+    }
 
     if (typeof cls === 'string') {
       result.push(cls);
@@ -267,12 +269,18 @@ export function addKeyboardNav(container: HTMLElement, options: KeyboardNavOptio
 
   const focusItem = (index: number) => {
     const items = getItems();
-    if (items.length === 0) return;
+    if (items.length === 0) {
+      return;
+    }
 
     // Handle wrapping
     if (wrap) {
-      if (index < 0) index = items.length - 1;
-      if (index >= items.length) index = 0;
+      if (index < 0) {
+        index = items.length - 1;
+      }
+      if (index >= items.length) {
+        index = 0;
+      }
     } else {
       index = Math.max(0, Math.min(index, items.length - 1));
     }
@@ -284,13 +292,17 @@ export function addKeyboardNav(container: HTMLElement, options: KeyboardNavOptio
 
   const handler = (event: KeyboardEvent) => {
     const items = getItems();
-    if (items.length === 0) return;
+    if (items.length === 0) {
+      return;
+    }
 
     // Initialize current index if not set
     if (currentIndex === -1) {
       const focused = document.activeElement as HTMLElement;
       currentIndex = items.indexOf(focused);
-      if (currentIndex === -1) currentIndex = 0;
+      if (currentIndex === -1) {
+        currentIndex = 0;
+      }
     }
 
     switch (event.key) {

@@ -24,7 +24,9 @@ export function useClickOutside(
   isOpen: boolean
 ): void {
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      return;
+    }
 
     const refs = Array.isArray(ref) ? ref : [ref];
 

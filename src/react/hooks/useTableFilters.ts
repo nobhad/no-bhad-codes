@@ -106,7 +106,9 @@ export function useTableFilters<T>(options: UseTableFiltersOptions<T>): UseTable
     if (storageKey) {
       try {
         const stored = localStorage.getItem(`${storageKey}_sort`);
-        if (stored) return JSON.parse(stored);
+        if (stored) {
+          return JSON.parse(stored);
+        }
       } catch {
         // Ignore storage errors
       }
@@ -173,8 +175,12 @@ export function useTableFilters<T>(options: UseTableFiltersOptions<T>): UseTable
 
   const toggleSort = useCallback((column: string) => {
     setSortState((prev) => {
-      if (!prev || prev.column !== column) return { column, direction: 'asc' };
-      if (prev.direction === 'asc') return { column, direction: 'desc' };
+      if (!prev || prev.column !== column) {
+        return { column, direction: 'asc' };
+      }
+      if (prev.direction === 'asc') {
+        return { column, direction: 'desc' };
+      }
       return null;
     });
   }, []);
@@ -193,7 +199,9 @@ export function useTableFilters<T>(options: UseTableFiltersOptions<T>): UseTable
   }, [filters]);
 
   const hasActiveFilters = useMemo(() => {
-    if (search.trim()) return true;
+    if (search.trim()) {
+      return true;
+    }
     return Object.values(filterValues).some((arr) => arr.length > 0);
   }, [filterValues, search]);
 

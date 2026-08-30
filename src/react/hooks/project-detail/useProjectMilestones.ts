@@ -118,7 +118,9 @@ export function useProjectMilestones({
   const toggleMilestoneComplete = useCallback(
     async (id: number): Promise<boolean> => {
       const milestone = milestones.find((m) => m.id === id);
-      if (!milestone) return false;
+      if (!milestone) {
+        return false;
+      }
 
       const updates = {
         is_completed: !milestone.is_completed,
@@ -133,7 +135,9 @@ export function useProjectMilestones({
   const toggleDeliverable = useCallback(
     async (milestoneId: number, deliverableIndex: number): Promise<boolean> => {
       const milestone = milestones.find((m) => m.id === milestoneId);
-      if (!milestone?.deliverables || !milestone.deliverables[deliverableIndex]) return false;
+      if (!milestone?.deliverables || !milestone.deliverables[deliverableIndex]) {
+        return false;
+      }
 
       const updatedDeliverables = milestone.deliverables.map((d, i) =>
         i === deliverableIndex ? { ...d, completed: !d.completed } : d

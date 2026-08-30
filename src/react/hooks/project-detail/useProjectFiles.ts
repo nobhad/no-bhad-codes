@@ -107,7 +107,9 @@ export function useProjectFiles({ projectId }: ProjectDetailHookOptions): UsePro
   const toggleFileSharing = useCallback(
     async (id: number): Promise<boolean> => {
       const file = files.find((f) => f.id === id);
-      if (!file) return false;
+      if (!file) {
+        return false;
+      }
 
       try {
         const response = await apiPut(`${API_ENDPOINTS.FILES}/${id}`, {
@@ -131,7 +133,9 @@ export function useProjectFiles({ projectId }: ProjectDetailHookOptions): UsePro
   const updateCategory = useCallback(async (id: number, category: string): Promise<boolean> => {
     try {
       const response = await apiPut(`${API_ENDPOINTS.FILES}/${id}`, { category });
-      if (!response.ok) return false;
+      if (!response.ok) {
+        return false;
+      }
       setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, category } : f)));
       return true;
     } catch (err) {

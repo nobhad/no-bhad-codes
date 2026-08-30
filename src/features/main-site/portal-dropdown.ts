@@ -29,7 +29,9 @@ function isValidEmail(email: string): boolean {
 }
 
 function setInlineError(el: HTMLElement | null, message: string): void {
-  if (!el) return;
+  if (!el) {
+    return;
+  }
   el.textContent = message;
   el.style.display = message ? 'block' : 'none';
 }
@@ -62,10 +64,14 @@ export function initPortalDropdown(): void {
   }
 
   const authToggle = dropdown.querySelector<HTMLElement>('.portal-auth-toggle');
-  if (!authToggle) return;
+  if (!authToggle) {
+    return;
+  }
 
   function positionCaret(): void {
-    if (!trigger || !dropdown) return;
+    if (!trigger || !dropdown) {
+      return;
+    }
     const iconWrap = trigger.querySelector('.icon-wrap');
     const anchor = (iconWrap as HTMLElement | null) || trigger;
     const anchorRect = anchor.getBoundingClientRect();
@@ -122,7 +128,9 @@ export function initPortalDropdown(): void {
   authToggle.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
     const btn = target.closest<HTMLElement>('.portal-toggle-btn');
-    if (!btn) return;
+    if (!btn) {
+      return;
+    }
 
     e.preventDefault();
     e.stopPropagation();
@@ -158,7 +166,9 @@ export function initPortalDropdown(): void {
   if (pwToggle) {
     pwToggle.addEventListener('click', function () {
       const input = this.previousElementSibling as HTMLInputElement | null;
-      if (!input) return;
+      if (!input) {
+        return;
+      }
       const isPassword = input.type === 'password';
       input.type = isPassword ? 'text' : 'password';
       this.classList.toggle('showing', !isPassword);
@@ -187,7 +197,9 @@ export function initPortalDropdown(): void {
     const emailInput = passwordForm?.querySelector<HTMLInputElement>('#portal-email');
     const passwordInput = passwordForm?.querySelector<HTMLInputElement>('input[type="password"]');
     const submitBtn = passwordForm?.querySelector<HTMLButtonElement>('.dropdown-submit');
-    if (!emailInput || !passwordInput || !submitBtn) return;
+    if (!emailInput || !passwordInput || !submitBtn) {
+      return;
+    }
 
     const emailValid = isValidEmail(emailInput.value.trim());
     const passwordValid = passwordInput.value.length >= 1;
@@ -202,7 +214,9 @@ export function initPortalDropdown(): void {
   function checkAutofill(): void {
     const emailInput = passwordForm?.querySelector<HTMLInputElement>('#portal-email');
     const passwordInput = passwordForm?.querySelector<HTMLInputElement>('input[type="password"]');
-    if (!emailInput || !passwordInput) return;
+    if (!emailInput || !passwordInput) {
+      return;
+    }
 
     const emailFilled = emailInput.matches(':-webkit-autofill') || emailInput.value.length > 0;
     const passFilled = passwordInput.matches(':-webkit-autofill') || passwordInput.value.length > 0;
@@ -226,7 +240,9 @@ export function initPortalDropdown(): void {
   function validateMagicForm(): void {
     const emailInput = magicForm?.querySelector<HTMLInputElement>('#portal-magic-email');
     const submitBtn = magicForm?.querySelector<HTMLButtonElement>('.dropdown-submit');
-    if (!emailInput || !submitBtn) return;
+    if (!emailInput || !submitBtn) {
+      return;
+    }
     submitBtn.classList.toggle('valid', isValidEmail(emailInput.value.trim()));
   }
 
@@ -238,7 +254,9 @@ export function initPortalDropdown(): void {
     e.preventDefault();
     const emailInput = magicForm.querySelector<HTMLInputElement>('#portal-magic-email');
     const submitBtn = magicForm.querySelector<HTMLButtonElement>('.dropdown-submit');
-    if (!emailInput || !submitBtn) return;
+    if (!emailInput || !submitBtn) {
+      return;
+    }
 
     const email = emailInput.value.trim();
     if (!isValidEmail(email)) {
@@ -270,7 +288,9 @@ export function initPortalDropdown(): void {
   function validateForgotForm(): void {
     const emailInput = forgotForm?.querySelector<HTMLInputElement>('#portal-forgot-email');
     const submitBtn = forgotForm?.querySelector<HTMLButtonElement>('.dropdown-submit');
-    if (!emailInput || !submitBtn) return;
+    if (!emailInput || !submitBtn) {
+      return;
+    }
     submitBtn.classList.toggle('valid', isValidEmail(emailInput.value.trim()));
   }
 
@@ -282,7 +302,9 @@ export function initPortalDropdown(): void {
     e.preventDefault();
     const emailInput = forgotForm.querySelector<HTMLInputElement>('#portal-forgot-email');
     const submitBtn = forgotForm.querySelector<HTMLButtonElement>('.dropdown-submit');
-    if (!emailInput || !submitBtn) return;
+    if (!emailInput || !submitBtn) {
+      return;
+    }
 
     const email = emailInput.value.trim();
     if (!isValidEmail(email)) {

@@ -140,7 +140,9 @@ export const EMPTY_FORM: ProjectTemplateFormData = {
 // ============================================
 
 export function getProjectTypeLabel(type?: string): string {
-  if (!type) return '--';
+  if (!type) {
+    return '--';
+  }
   const option = PROJECT_TYPE_OPTIONS.find((o) => o.value === type);
   return option?.label || type;
 }
@@ -156,18 +158,24 @@ export function filterTemplate(
       template.name.toLowerCase().includes(query) ||
       (template.description || '').toLowerCase().includes(query) ||
       (template.projectType || '').toLowerCase().includes(query);
-    if (!matchesSearch) return false;
+    if (!matchesSearch) {
+      return false;
+    }
   }
 
   const statusFilter = filters.status;
   if (statusFilter && statusFilter.length > 0) {
     const activeValue = template.isActive ? 'active' : 'inactive';
-    if (!statusFilter.includes(activeValue)) return false;
+    if (!statusFilter.includes(activeValue)) {
+      return false;
+    }
   }
 
   const typeFilter = filters.projectType;
   if (typeFilter && typeFilter.length > 0) {
-    if (!template.projectType || !typeFilter.includes(template.projectType)) return false;
+    if (!template.projectType || !typeFilter.includes(template.projectType)) {
+      return false;
+    }
   }
 
   return true;

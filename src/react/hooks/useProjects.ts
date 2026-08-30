@@ -108,7 +108,9 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
       // Decode HTML entities in text fields to prevent double-encoding
       setProjects(decodeArrayFields(projectsArray, PROJECT_TEXT_FIELDS));
     } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') return;
+      if (err instanceof Error && err.name === 'AbortError') {
+        return;
+      }
       const message = formatErrorMessage(err, 'An error occurred');
       setError(message);
       logger.error('[useProjects] Error:', message);
@@ -209,7 +211,9 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
 
   // Auto-fetch on mount with AbortController cleanup
   useEffect(() => {
-    if (!autoFetch) return;
+    if (!autoFetch) {
+      return;
+    }
     const controller = new AbortController();
     fetchProjects(controller.signal);
     return () => controller.abort();

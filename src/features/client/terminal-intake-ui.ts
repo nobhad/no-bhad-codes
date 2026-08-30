@@ -453,7 +453,9 @@ export async function addSystemMessageWithTyping(
   // Fast typing for system messages - snappier terminal feel
   for (let i = 0; i < content.length; i++) {
     textSpan.textContent += content[i];
-    if (i % 20 === 0) scrollToBottom(chatContainer);
+    if (i % 20 === 0) {
+      scrollToBottom(chatContainer);
+    }
     await delay(4 + Math.random() * 3);
   }
 
@@ -489,7 +491,9 @@ export async function addSystemMessageHtml(
  */
 export function setupCustomInputCursor(inputElement: HTMLInputElement): void {
   const inputArea = inputElement.closest('.terminal-input-area');
-  if (!inputArea) return;
+  if (!inputArea) {
+    return;
+  }
 
   const wrapper = document.createElement('div');
   wrapper.className = 'terminal-input-wrapper';

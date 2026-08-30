@@ -68,7 +68,9 @@ export function useDeleteConfirm<T>(
   );
 
   const handleConfirm = useCallback(async () => {
-    if (!target) return;
+    if (!target) {
+      return;
+    }
     await onDelete(target);
     setTarget(null);
   }, [target, onDelete]);

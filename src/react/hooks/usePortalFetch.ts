@@ -176,7 +176,9 @@ export function usePortalData<T>({
         const currentTransform = transformRef.current;
         setData(currentTransform ? currentTransform(unwrapped) : (unwrapped as T));
       } catch (err) {
-        if ((err as Error).name === 'AbortError') return;
+        if ((err as Error).name === 'AbortError') {
+          return;
+        }
         const message = formatErrorMessage(err, 'Failed to load data');
         logger.error(`Fetch error for ${url}:`, err);
         setError(message);
@@ -189,7 +191,9 @@ export function usePortalData<T>({
 
   // Fetch on mount with AbortController cleanup
   useEffect(() => {
-    if (!fetchOnMount) return;
+    if (!fetchOnMount) {
+      return;
+    }
     const controller = new AbortController();
     fetchData(controller.signal);
     return () => controller.abort();
