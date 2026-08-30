@@ -132,7 +132,7 @@ export const ICONS: Record<string, string> = {
  * Sourced from BRAND_COLOR env or falls back to neutral gray.
  * This is the single source of truth for all EJS-rendered pages.
  */
-const META_THEME_COLOR = process.env.META_THEME_COLOR || '#e0e0e0';
+export const META_THEME_COLOR = process.env.META_THEME_COLOR || '#e0e0e0';
 
 const PORTAL_METADATA: Record<
   UserRole,

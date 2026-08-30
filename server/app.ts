@@ -88,6 +88,7 @@ import { authPageRoutes } from './routes/auth-pages.js';
 import { errorResponseWithPayload } from './utils/api-response.js';
 import { setupSwagger } from './config/swagger.js';
 import { BUSINESS_INFO } from './config/business.js';
+import { META_THEME_COLOR } from './config/navigation.js';
 import { logger as requestLoggerMiddleware } from './middleware/logger.js';
 import { logger } from './services/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -497,15 +498,48 @@ app.use((req, res) => {
   // Browser navigations get the branded HTML 404; API clients keep JSON.
   const wantsHtml = req.accepts(['html', 'json']) === 'html';
   if (wantsHtml) {
-    const candidates = [
-      resolve(__dirname, '../dist/404.html'),
-      resolve(__dirname, '../public/404.html')
-    ];
-    for (const candidate of candidates) {
-      if (existsSync(candidate)) {
-        return res.status(404).sendFile(candidate);
+    // Rendered through the same EJS shell the portal and auth pages use, so the
+    // 404 carries the site header, nav and footer rather than a bare page.
+    //
+    // It resolves its CSS through the authoritative manifest (see
+    // utils/vite-assets.ts), which means it links whatever the static host is
+    // serving right now. The prebuilt dist/404.html below pins hashed asset
+    // URLs from THIS container's build, so it renders unstyled as soon as the
+    // frontend redeploys without the server rebuilding alongside it — which is
+    // the normal case, since the frontend and this API deploy separately.
+    return res.render('pages/404', {}, (renderErr: Error | null, content: string) => {
+      if (!renderErr) {
+        return res.status(404).render('layouts/auth', {
+          config: {
+            title: `Page Not Found - ${BUSINESS_INFO.name}`,
+            themeColor: META_THEME_COLOR,
+            // head.ejs reads these; a 404 has no dashboard chrome.
+            dashboardId: '',
+            pageTitleId: '',
+            features: { subtabs: false, notificationBell: false, mobileMenuToggle: false }
+          },
+          content,
+          bodyPage: 'not-found',
+          bodyView: 'not-found',
+          // The site bundle entry: /src/main-site.ts is what carries
+          // styles/bundles/site.css, which includes pages/not-found.css.
+          // static-page.ts is not a manifest entry — it is an internal chunk
+          // of the 404.html HTML entry, so it resolves to no stylesheet.
+          entryScript: '/src/main-site.ts',
+          isDev: process.env.NODE_ENV !== 'production',
+          businessName: BUSINESS_INFO.name
+        });
       }
-    }
+
+      logger.error('404 page render failed, falling back to the prebuilt page', renderErr);
+      const prebuilt = resolve(__dirname, '../dist/404.html');
+      if (existsSync(prebuilt)) {
+        return res.status(404).sendFile(prebuilt);
+      }
+      return errorResponseWithPayload(res, 'Route not found', 404, 'RESOURCE_NOT_FOUND', {
+        message: `Cannot ${req.method} ${req.originalUrl}`
+      });
+    });
   }
 
   errorResponseWithPayload(res, 'Route not found', 404, 'RESOURCE_NOT_FOUND', {
