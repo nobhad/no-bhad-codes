@@ -834,7 +834,7 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 3;
+  z-index: 2;
   pointer-events: none;
 }
 
@@ -853,7 +853,12 @@
   width: 73.018%;
   height: 70.311%;
   overflow: hidden;
-  z-index: 2;
+  /* Same layer as the title-card text (.crt-tv__image), matching the .ai:
+     Screen Above Title Cards / Title Cards / Base. The live guide and the
+     panel copy are the same layer as the card's own type, so DOM order
+     decides between them rather than a z-index that put the live text on a
+     level of its own. */
+  z-index: 1;
 }
 
 /* The TV frame — must paint ON TOP of the title-card and channel list
@@ -863,7 +868,6 @@
    keeps behaving exactly as it did when it was a direct child. */
 .crt-tv__frame-picture,
 .crt-tv__screen-bg-picture,
-.crt-tv__image-picture,
 .crt-tv__screen-glass-picture {
   display: contents;
 }
@@ -1304,6 +1308,9 @@
 }
 
 .crt-tv__panel {
+  /* Same horizontal inset as the guide, so text starts on the same line
+     whether you are looking at the listing or a case-study panel. */
+  padding-inline: var(--tv-guide-pad-x, 4cqw);
   /* Each section fills the screen entirely; they stack on top of each
      other and crossfade. opacity:0 by default so JS can fade them in
      one at a time. */
@@ -1655,6 +1662,14 @@
  * rows, with the active channel highlighted.
  */
 .crt-tv__channel-list {
+  /* Every guide size below is <n>cqw x this. The cqw keeps each element in a
+     fixed ratio to the screen box (= the title-card rect) and to the other
+     elements; the multiplier sets how large that whole system renders.
+     Desktop's screen is ~695px, where 1 is right. A phone's is ~287px, where
+     the same ratios put body copy at 8.6px — legible only in principle. So
+     the set is scaled as a unit instead of each size being retuned, which is
+     what previously left the two breakpoints on different proportions. */
+  --tv-guide-scale: 1;
   /* The guide's two rule weights, named here so the major rule and the row
      rules can never drift apart. Kept as literal rgba rather than palette
      tokens for the same reason as the rest of this file: these are ink ON the
@@ -1667,8 +1682,11 @@
      --tv-guide-pad-x uses below. Kept tight because info-line has
      overflow:hidden + text-overflow:clip, so extra horizontal padding eats
      into the column width and clips "Portfolio Guide". */
-  --tv-guide-pad-x: 2.4cqw;
-  --tv-guide-pad-top: 3.5cqw;
+  /* Horizontal inset. Its own multiplier rather than --tv-guide-scale: the
+     type needed scaling up a long way on a 287px screen, the inset did not,
+     and tying them together made the mobile margin swallow the rows. */
+  --tv-guide-pad-x: calc(8cqw * var(--tv-guide-pad-scale, 1));
+  --tv-guide-pad-top: calc(3.5cqw * var(--tv-guide-scale, 1));
 
   position: absolute;
   inset: 0;
@@ -1785,7 +1803,7 @@
 }
 
 .crt-tv__guide-info-brand {
-  font-size: 2.2cqw;
+  font-size: calc(2.86cqw * var(--tv-guide-scale, 1));
   font-weight: var(--font-weight-semibold, 600);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -1795,7 +1813,7 @@
   /* Sized to fit "Portfolio Guide" on one line within ~half the screen
      width. cqw scales with the TV's container size so it stays one line
      across viewport sizes without wrapping into the avatar column. */
-  font-size: 2.6cqw;
+  font-size: calc(3.38cqw * var(--tv-guide-scale, 1));
   font-style: italic;
   /* Greyscale palette — TV interior reads as a single monochrome
      channel-guide, no Prevue-yellow accent. Inherits the parent
@@ -1803,7 +1821,7 @@
 }
 
 .crt-tv__guide-info-channel {
-  font-size: 2.2cqw;
+  font-size: calc(2.86cqw * var(--tv-guide-scale, 1));
   /* Full opacity: at 0.9 this measured 3.39:1 against the CRT screen image,
      under the 4.5:1 WCAG AA minimum for normal-size text. */
   opacity: 1;
@@ -1898,7 +1916,7 @@
   font: inherit;
   text-align: left;
   cursor: pointer;
-  font-size: 2.3cqw;
+  font-size: calc(3cqw * var(--tv-guide-scale, 1));
   line-height: 1.2;
   white-space: nowrap;
   /* Square: the fill now runs to both edges of the screen, and a rounded
@@ -2011,6 +2029,15 @@
  */
 
 @media (max-width: 479px) {
+  /* The 287px mobile screen puts the shared ratios at ~8.6px body copy, so
+     the guide scales as one unit. Ratios between elements, and to the
+     title-card box, are untouched — only the overall size changes.
+     Declared here, after the base rule, so source order lets it win. */
+  .crt-tv__channel-list {
+    --tv-guide-scale: 1.6;
+    --tv-guide-pad-scale: 0.8;
+  }
+
   /* Let the image use ITS OWN intrinsic proportions. The base rule forces
      aspect-ratio: 1426/1093 (the landscape cabinet) onto whatever is in the
      <img>, which squashed the portrait artboard from 0.9765 to 1.3047 — a

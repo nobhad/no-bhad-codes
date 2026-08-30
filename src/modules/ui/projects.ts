@@ -593,13 +593,12 @@ export class ProjectsModule extends BaseModule {
                (72.8% wide × 70.4% tall) for the channel list / panels —
                putting the full-canvas composed image inside that box would
                stretch it into the aperture and misalign with the bg. -->
-          <!-- Title card layer = artboard 6 ("Mobile Title Card or Base
-               On/Off"), same 1240.3 x 1270.21 viewBox as the TV and the
-               glass, so it sits at inset: 0 with no CSS figures. -->
-          <picture class="crt-tv__image-picture">
-            <source media="(max-width: 479px)" srcset="/images/tv/title-card-mobile.webp" />
-            <img class="crt-tv__image" src="" alt="Project preview" />
-          </picture>
+          <!-- Title card layer. Exported full-artboard per project, so it
+               sits at inset: 0 with no CSS figures. The file is chosen in JS
+               (cardSrc) rather than by a <picture> source: a <source> wins
+               over the src attribute unconditionally, which pinned every
+               channel to one card on mobile. -->
+          <img class="crt-tv__image" src="" alt="Project preview" />
           <div class="crt-tv__screen">
             <!-- Mute indicator — top-right of the screen aperture, only
                  visible when volume is at 0 AND the TV is powered on.
@@ -789,6 +788,7 @@ export class ProjectsModule extends BaseModule {
     // the next channel_NN.webp is being fetched. Images stay cached for
     // the rest of the session.
     this.preloadChannelDisplays();
+    this.preloadTitleCards();
     // The markup ships the desktop digit and base as its src; re-apply once on
     // init so a phone gets the mobile artboard's versions, not the inherited
     // desktop ones.
@@ -939,6 +939,35 @@ export class ProjectsModule extends BaseModule {
    * variants sit at inset:0 — but they are different artboards, so the file
    * has to follow the breakpoint, exactly like ledSrc().
    */
+  /**
+   * Per-project title card for the current cabinet. portfolio.json carries the
+   * desktop path; the mobile artboard's export sits beside it with a -mobile
+   * suffix. Falls back to the given path when no mobile variant is present.
+   */
+  private cardSrc(path: string): string {
+    if (!window.matchMedia(TV_MOBILE_QUERY).matches) {
+      return path;
+    }
+    return path.replace(/\.webp$/, '-mobile.webp');
+  }
+
+  /**
+   * Point an <img> at the current cabinet's card, falling back to the desktop
+   * file if that project has no mobile export yet. Without the fallback a
+   * missing variant 404s and the channel shows an empty screen.
+   */
+  private setCardSrc(img: HTMLImageElement, path: string): void {
+    const mobile = this.cardSrc(path);
+    img.onerror =
+      mobile === path
+        ? null
+        : (): void => {
+            img.onerror = null;
+            img.src = path;
+          };
+    img.src = mobile;
+  }
+
   private baseSrc(state: 'on' | 'off'): string {
     const mobile = window.matchMedia(TV_MOBILE_QUERY).matches;
     return `/images/tv/base-${state}${mobile ? '-mobile' : ''}.webp`;
@@ -957,6 +986,29 @@ export class ProjectsModule extends BaseModule {
     const next = this.baseSrc(state);
     if (!screenBg.src.endsWith(next)) {
       screenBg.src = next;
+    }
+  }
+
+  /**
+   * Fetch every channel's card art up front. Swapping .src on a visible <img>
+   * paints nothing until the new file arrives, which is the flicker between
+   * channels — the screen blanks for the length of the request. Cached here
+   * once, the swap is instant. Both the text layer and its background, and
+   * the variant for the current cabinet, since that is what will be asked for.
+   */
+  private preloadTitleCards(): void {
+    for (const project of this.portfolioData?.projects ?? []) {
+      const card = typeof project.titleCard === 'object' ? project.titleCard : null;
+      if (!card) {
+        continue;
+      }
+      for (const path of [card.composed, card.bg]) {
+        if (!path) {
+          continue;
+        }
+        const img = document.createElement('img');
+        img.src = this.cardSrc(path);
+      }
     }
   }
 
@@ -1102,6 +1154,7 @@ export class ProjectsModule extends BaseModule {
         this.tuneInScrollTween = null;
       }
       tvSfx.stopMusic();
+    this.startChannelTicker();
       tvSfx.stopGuideStatic();
       if (screenBg) {
         // Save the per-card bg src so we can restore it on power-on;
@@ -1452,12 +1505,16 @@ export class ProjectsModule extends BaseModule {
     tunein.style.setProperty('--tunein-color', card.color);
     tunein.style.setProperty('--tunein-veil', contrastVeil(card.color));
 
-    // Reset state for a clean entrance.
-    gsap.set(channelList, { opacity: 1 });
+    // Reset state for a clean entrance. The channel list is deliberately NOT
+    // reset to opacity 1 here: the guide belongs to channel 01 only, and
+    // forcing it visible before the 0.05s fade-out flashed the whole listing
+    // for a frame on every channel change — including project-to-project,
+    // where the guide was never on screen to begin with.
+    gsap.set(channelList, { opacity: 0 });
     gsap.set(tunein, { opacity: 1 });
     gsap.set(panelsEl, { opacity: 0 });
     gsap.set(composedImg, { opacity: 0 });
-    composedImg.src = card.composed;
+    this.setCardSrc(composedImg, card.composed);
 
     // Build the entrance timeline.
     this.tuneInTimeline = gsap.timeline({
@@ -1493,11 +1550,11 @@ export class ProjectsModule extends BaseModule {
       void tvSfx.playMusic(musicUrl);
     }
 
-    // 1) Static burst + channel list snaps off, bg flashes blank for a
-    //    split second (the "between channels" void) before swapping to
-    //    the per-project bg.
+    // 1) Static burst, bg flashes blank for a split second (the "between
+    //    channels" void) before swapping to the per-project bg. The channel
+    //    list is already hidden by the reset above — between channels the
+    //    screen shows base-on and nothing else.
     tl.to(staticOverlay, { opacity: TV_STATIC_FLASH_OPACITY, duration: 0.06 }, 0)
-      .to(channelList, { opacity: 0, duration: 0.05 }, 0)
       .add(() => {
         screenBg.src = this.baseSrc('on');
       }, 0.05);
@@ -1505,7 +1562,7 @@ export class ProjectsModule extends BaseModule {
     // 2) Hold the blank for a split second, then swap to per-project bg.
     tl.to({}, { duration: TV_BLANK_FLASH_S });
     tl.add(() => {
-      screenBg.src = card.bg;
+      this.setCardSrc(screenBg, card.bg);
     });
 
     // 3) Static settles to residual grain, revealing the new bg.
@@ -1970,7 +2027,7 @@ export class ProjectsModule extends BaseModule {
 
     // Static peak + bg src swaps to the blank base.
     tl.to(staticOverlay, { opacity: TV_STATIC_FLASH_OPACITY, duration: 0.06 }, 0).add(() => {
-      screenBg.src = '/images/tv/base-on.webp';
+      screenBg.src = this.baseSrc('on');
     }, 0.05);
 
     // Hold the blank under the static peak (between-channels void beat).
@@ -2037,11 +2094,13 @@ export class ProjectsModule extends BaseModule {
     const panelsEl = document.querySelector('[data-panels]') as HTMLElement | null;
 
     // Restore channel-guide state: blank-screen base, channel list visible,
-    // composed title card hidden, panels emptied.
+    // composed title card hidden, panels emptied. The ticker is restarted
+    // rather than resumed, so returning from a channel puts the listing back
+    // at row one instead of wherever the loop happened to have scrolled to.
     if (screenBg) {
       gsap.killTweensOf(screenBg);
       gsap.set(screenBg, { opacity: 1 });
-      screenBg.src = '/images/tv/base-on.webp';
+      screenBg.src = this.baseSrc('on');
     }
     if (channelList) {
       gsap.set(channelList, { opacity: 1 });
