@@ -324,6 +324,8 @@ export class PageTransitionModule extends BaseModule {
    * hash changes (which never fire popstate).
    */
   private popstateInFlight: boolean = false;
+  // A hash change that arrived before the intro finished, replayed after it.
+  private deferredHash: string | null = null;
 
   /**
    * Index of the channel currently shown on the CRT TV when the
@@ -1179,7 +1181,16 @@ export class PageTransitionModule extends BaseModule {
     const fromPopstate = this.popstateInFlight;
     this.popstateInFlight = false;
 
-    if (!this.introComplete || this.isTransitioning) return;
+    // A hash that arrives before the intro is over is not discarded: the menu
+    // is clickable while the paw is still running, and a deep link can land at
+    // any moment. Dropping it left the URL naming one page while the camera
+    // sat on another — the same mismatch the map slides used to create. Hold
+    // it and replay it once the intro hands over.
+    if (!this.introComplete) {
+      this.deferredHash = window.location.hash;
+      return;
+    }
+    if (this.isTransitioning) return;
 
     const hash = window.location.hash;
     const pageId = this.getPageIdFromHash(hash);
@@ -1435,6 +1446,16 @@ export class PageTransitionModule extends BaseModule {
       this.log('[PageTransitionModule] Intro complete event received!');
       this.introComplete = true;
       this.dispatchEvent('ready');
+
+      // Replay a hash that arrived while the intro was running — a menu click
+      // or a deep link — so the page catches up with the URL instead of the
+      // two disagreeing for the rest of the session.
+      const deferred = this.deferredHash;
+      this.deferredHash = null;
+      if (deferred && deferred === window.location.hash) {
+        const pageId = this.getPageIdFromHash(deferred);
+        if (pageId && pageId !== this.currentPageId) this.handleHashChange();
+      }
       // First-paint affordance: pulse the compass arrows so the user
       // notices the scroll-map is interactive. Update first so the cues
       // reflect the actual landing page's navigable directions.
