@@ -116,6 +116,7 @@ The Backend refers to the complete portal system with two interfaces:
 - **[Module Dependencies](./architecture/MODULE_DEPENDENCIES.md)** - Module and service dependency graph
 - **[API Reference Index](./api/README.md)** - Endpoint index by domain
 - **[Ops Runbook](./OPS_RUNBOOK.md)** - Operational procedures, backups, incident response
+- **[Hosting Cost Investigation](./HOSTING_COST_INVESTIGATION.md)** - Why the Railway bill was CPU-bound, what was ruled out, and the tsx-to-compiled switch
 - **[State of the Art Roadmap](./STATE_OF_THE_ART_ROADMAP.md)** - Phased feature roadmap and as-built path map
 
 ### Development & Maintenance
