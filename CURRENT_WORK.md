@@ -58,22 +58,22 @@ Worth trying, roughly in order:
 Carried out of the footer-curtain / lint / Prettier session. Nothing here
 blocks anything; they are the loose ends that session left.
 
-- [ ] **E2E suite runs now, and is red.** The launch problem is fixed —
-      `playwright.config.ts` uses `channel: 'chrome'`, so no download is needed
-      — and two stale assumptions in `navigation.spec.ts` are corrected: it
-      waited for `[data-nav]` to be *visible* when the menu starts closed and
-      the element is `display:none`, and it asserted pre-router paths
-      (`a[href="#about"]`, URL `/#about`) when routes have been `#/about` since
-      the scroll-map landed, with five menu links rather than three.
-      What is left is not those edits. **The app is fine when driven by hand**
-      — menu opens on click, five links, overlay present, verified in a real
-      browser — so the remaining failures are test-side. Two signals point at
-      the environment rather than the assertions: the same suite ran in 8.5s
-      once and 15.9 minutes the next time, and `back/forward` passed in one run
-      and failed in the next without being touched. The config's `webServer`
-      starts `npm run dev:full` (vite + tsx + tailwind watch) even when a dev
-      server is already up, which is the first thing to look at. Give it a
-      dedicated pass with nothing else running.
+- [ ] **E2E: 4 of 6 navigation tests pass** (was 0 — the suite could not even
+      launch). Fixing it turned up three real bugs, all now fixed and committed:
+      menu hrefs came from stale `navigation.main` data and overwrote the
+      router's own routes (`ba352652`), a hash arriving during the intro was
+      dropped so the URL and the camera disagreed for the rest of the session
+      (`74b2a8cc`), and `detectCurrentPage` compared hrefs against
+      `location.pathname` — always `/` on a hash-routed SPA — so no menu item
+      was ever marked current (`fd1c178d`).
+      The two that remain, `back/forward` and `keyboard accessible`, both hang
+      waiting for the app to report a settled page after a document-level
+      `goto`. Neither reproduces by hand: the same sequence driven manually
+      reaches `about` with the section at 0,0 in about three seconds. Suspect
+      the test-side wait rather than the app. Run with
+      `npx playwright test tests/e2e/navigation.spec.ts --project=chromium --workers=1`
+      and nothing else competing — a parallel capture run once stretched the
+      same suite from 8.5s to 15.9 minutes.
 - [ ] **Eleven commits unpushed, and live is behind them.** Includes both TV
       click fixes — the deployed site still opens a new tab when you click the
       title card. Push, then deploy; four older "fixed in code, needs deploy"
