@@ -714,17 +714,6 @@
    the row font size, hide the year column, and let titles wrap so
    nothing gets clipped on phone screens. */
 .crt-tv {
-  /* THE SCREEN APERTURE — the hole in the cabinet, as a fraction of it.
-     Three layers have to sit exactly here and stay in register: the backdrop
-     (.crt-tv__screen-bg), the composed title card (.crt-tv__image) and the
-     live content (.crt-tv__screen). Declared once so a cabinet swap is four
-     numbers, not twelve, and the three can never drift apart.
-     Measured from tv/chassis.webp's transparent cutout. */
-  --tv-screen-top: 8.9%;
-  --tv-screen-left: 6.987%;
-  --tv-screen-width: 72.823%;
-  --tv-screen-height: 70.357%;
-
   display: block;
 }
 
@@ -737,16 +726,6 @@
     padding: 0;
   }
 
-  /* Tighter typography across the TV's text content so it fits the
-     much smaller mobile screen. */
-  .crt-tv__channel-row {
-    /* Floors trimmed ~15%. At this screen width the cqw term is below the
-       floor, so the floor is what actually renders — lowering the cqw would
-       change nothing here. */
-    font-size: clamp(0.51rem, 3cqw, 0.9rem);
-    padding: 0.3rem 0.4rem;
-    gap: clamp(0.4rem, 1.5cqw, 0.7rem);
-  }
 
   /* Drop the year column on mobile — there isn't horizontal room for
      all four columns, and year is the least important data. */
@@ -759,15 +738,6 @@
      the avatar pane rather than getting clipped. The info column sits
      above the feature pane in source order — z-index promotion below
      ensures the text reads on top of the avatar where they overlap. */
-  .crt-tv__guide-info-brand {
-    font-size: clamp(0.6rem, 3.4cqw, 1rem);
-  }
-  .crt-tv__guide-info-show {
-    font-size: clamp(0.72rem, 4cqw, 1.2rem);
-  }
-  .crt-tv__guide-info-channel {
-    font-size: clamp(0.55rem, 2.8cqw, 0.9rem);
-  }
   /* Let nowrap text bleed past the column edge instead of clipping —
      desktop's overflow:hidden / clip rules aren't appropriate here
      because the mobile column is much narrower and the user prefers
@@ -800,22 +770,11 @@
      line is taller and the scroll moves at a more comfortable pace. */
   .crt-tv__panel,
   .crt-tv__panel-body {
-    font-size: clamp(1.05rem, 4.6cqw, 1.5rem);
     line-height: 1.5;
   }
 
-  .crt-tv__panel-tagline {
-    font-size: clamp(1.4rem, 7cqw, 2rem);
-  }
-
-  .crt-tv__panel-heading--stacked {
-    font-size: clamp(1.5rem, 8cqw, 2.4rem);
-  }
 
   .crt-tv__panel-details dt,
-  .crt-tv__panel-details dd {
-    font-size: clamp(0.95rem, 4cqw, 1.3rem);
-  }
 
   /* Allow the value column to wrap on mobile so long values like
      "Full Stack Developer" break onto two lines instead of clipping. */
@@ -838,7 +797,6 @@
     /* One line, arrow included. At the old floor the label filled the screen
        and pushed the arrow onto a line of its own, which read as a stray
        glyph rather than part of the link. */
-    font-size: clamp(0.8rem, 5cqw, 1.7rem);
     white-space: nowrap;
   }
 }
@@ -854,19 +812,11 @@
    canvas matching the TV frame, with the title-card painted in place
    and transparent surroundings, so we just stack at full size — no
    per-image positioning math. */
-/* The backdrop and the title card are now TRIMMED to the screen artwork, so
-   they are positioned to the aperture like everything else. They used to be
-   full desktop-canvas images stretched `inset: 0` over the whole cabinet —
-   which happened to land their screen content on the desktop aperture, and
-   only worked because the image and the cabinet shared an aspect ratio. The
-   portrait mobile cabinet does not share it, so the same stretch squashed them
-   out of register and left a pale band down the side of the picture. */
 .crt-tv__screen-bg {
   position: absolute;
-  top: var(--tv-screen-top);
-  left: var(--tv-screen-left);
-  width: var(--tv-screen-width);
-  height: var(--tv-screen-height);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   z-index: 1;
 }
 
@@ -874,21 +824,34 @@
    Sized + positioned to the screen aperture (the area where the
    title-card content lives in the bg image), measured via flood-fill of
    tv/chassis.webp's transparent cutout center. */
-/* The stack the cabinet is built around, bottom to top:
-     1  title-card backdrop and the composed card
-     2  the live screen — guide, tune-in panels
-     3  the cabinet itself (.crt-tv__frame), whose glass tints and vignettes
-        everything above, exactly like a real tube
-     4+ the readout and the buttons, which sit ON the cabinet and so must read
-        crisp above it
-   Everything that belongs to the picture goes UNDER the cabinet; only the
-   things physically mounted on its face go over. */
+/* Screen glass — the "Screen Above Title Card" artboard, kept as its own file
+   so it can sit exactly where the .ai has it: ABOVE the title card, BELOW the
+   cabinet. z:3 clears .crt-tv__screen (z:2) and stays well under the cabinet
+   (z:10). It is artwork over a hole, so it never takes pointer events.
+   Mobile only — the desktop set keeps its CSS .crt-tv__glare. */
+.crt-tv__screen-glass {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+}
+
 .crt-tv__screen {
   position: absolute;
-  top: var(--tv-screen-top);
-  left: var(--tv-screen-left);
-  width: var(--tv-screen-width);
-  height: var(--tv-screen-height);
+  /* The text area IS the container every cqw below resolves against. Without
+     this, cqw fell through to the viewport, so the guide type scaled with the
+     browser window instead of with the screen — which is why mobile and
+     desktop ended up different proportions inside the same rectangle. */
+  container-type: size;
+  container-name: crt-screen;
+  /* Text area matches the TITLE CARD content on artboard 3, so the guide
+     text and a card occupy exactly the same rectangle. */
+  top: 8.737%;
+  left: 6.421%;
+  width: 73.018%;
+  height: 70.311%;
   overflow: hidden;
   z-index: 2;
 }
@@ -898,7 +861,10 @@
    clicks pass through to the channel rows behind it. */
 /* display: contents so the wrapper adds nothing to layout — the <img> inside
    keeps behaving exactly as it did when it was a direct child. */
-.crt-tv__frame-picture {
+.crt-tv__frame-picture,
+.crt-tv__screen-bg-picture,
+.crt-tv__image-picture,
+.crt-tv__screen-glass-picture {
   display: contents;
 }
 
@@ -913,9 +879,13 @@
      0 height for a frame or two (TV snaps to the top, then settles late). */
   aspect-ratio: 1426 / 1093;
   display: block;
-  /* Over the whole picture — backdrop, title card and live screen alike — and
-     under the readout and buttons. See the stacking note on .crt-tv__screen. */
-  z-index: 3;
+  /* The TV sits above EVERY screen layer. It used to be 3, the same value as
+     .crt-tv__tunein, and a tie is resolved by DOM order rather than by intent
+     — which is exactly the ambiguity that let screen content ride over the
+     cabinet. Numbered well clear of the screen stack so nothing can tie with
+     it again; only the readout and the buttons, which are mounted ON the
+     cabinet's face, go above. */
+  z-index: 10;
   pointer-events: none;
   /* Drop-shadow follows the frame's transparent silhouette (wood case
      + bezel) instead of drawing a rectangle around the bounds. The
@@ -944,7 +914,8 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 4;
+  /* On the cabinet's face, so above it. */
+  z-index: 11;
   pointer-events: none;
 }
 
@@ -968,7 +939,8 @@
   padding: 0;
   margin: 0;
   cursor: pointer;
-  z-index: 5;
+  /* On the cabinet's face, so above it. */
+  z-index: 12;
 }
 
 /* Focus ring follows the painted capsule shape, not the bounding box.
@@ -1226,10 +1198,9 @@
    bg underneath. */
 .crt-tv__image {
   position: absolute;
-  top: var(--tv-screen-top);
-  left: var(--tv-screen-left);
-  width: var(--tv-screen-width);
-  height: var(--tv-screen-height);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   /* Above screen-bg (z:1), below the screen aperture content (channel
      list / panels at z:2 in their own .crt-tv__screen container). */
   z-index: 1;
@@ -1355,7 +1326,7 @@
      of site theme. */
   color: var(--tunein-color, #fff);
   font-family: var(--font-family-mono, monospace);
-  font-size: clamp(0.9rem, 3.3cqw, 1.45rem);
+  font-size: 3.3cqw;
   line-height: 1.45;
 }
 
@@ -1367,7 +1338,7 @@
   margin: 0 0 0.6em 0;
   text-align: center;
   font-family: var(--font-family-acme, sans-serif);
-  font-size: clamp(1.6rem, 7cqw, 3rem);
+  font-size: 7cqw;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   /* Explicit color so global h3 styles don't override the per-card color
@@ -1397,7 +1368,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: clamp(2.5rem, 11cqw, 5rem);
+  font-size: 11cqw;
   line-height: 0.95;
   letter-spacing: 0.03em;
 }
@@ -1410,7 +1381,7 @@
   margin: 0;
   text-align: center;
   font-family: var(--font-family-acme, sans-serif);
-  font-size: clamp(2rem, 8.5cqw, 3.8rem);
+  font-size: 8.5cqw;
   font-style: italic;
   line-height: 1.05;
   opacity: 1;
@@ -1497,7 +1468,7 @@
   font-family: var(--font-family-acme, sans-serif);
   /* Sized so the longest expected value ("Full Stack Developer") + label
      fits inside the panel at 1100px TV width without clipping. */
-  font-size: clamp(1.2rem, 4.5cqw, 1.9rem);
+  font-size: 4.5cqw;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--tunein-color, #fff);
@@ -1510,7 +1481,7 @@
   min-width: 0;
   overflow-wrap: break-word;
   font-family: var(--font-family-mono, monospace);
-  font-size: clamp(1.2rem, 4.5cqw, 1.9rem);
+  font-size: 4.5cqw;
 }
 
 /* Details panel uses tighter horizontal padding than other panels so the
@@ -1556,7 +1527,7 @@
 
 .crt-tv__panel-cta {
   font-family: var(--font-family-acme, sans-serif);
-  font-size: clamp(1.3rem, 5.7cqw, 2.4rem);
+  font-size: 5.7cqw;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: inherit;
@@ -1696,8 +1667,8 @@
      --tv-guide-pad-x uses below. Kept tight because info-line has
      overflow:hidden + text-overflow:clip, so extra horizontal padding eats
      into the column width and clips "Portfolio Guide". */
-  --tv-guide-pad-x: clamp(0.75rem, 2.4cqw, 1.4rem);
-  --tv-guide-pad-top: clamp(1rem, 3.5cqw, 2.25rem);
+  --tv-guide-pad-x: 2.4cqw;
+  --tv-guide-pad-top: 3.5cqw;
 
   position: absolute;
   inset: 0;
@@ -1814,7 +1785,7 @@
 }
 
 .crt-tv__guide-info-brand {
-  font-size: clamp(0.7rem, 2.2cqw, 1.3rem);
+  font-size: 2.2cqw;
   font-weight: var(--font-weight-semibold, 600);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -1824,7 +1795,7 @@
   /* Sized to fit "Portfolio Guide" on one line within ~half the screen
      width. cqw scales with the TV's container size so it stays one line
      across viewport sizes without wrapping into the avatar column. */
-  font-size: clamp(0.85rem, 2.6cqw, 1.55rem);
+  font-size: 2.6cqw;
   font-style: italic;
   /* Greyscale palette — TV interior reads as a single monochrome
      channel-guide, no Prevue-yellow accent. Inherits the parent
@@ -1832,7 +1803,7 @@
 }
 
 .crt-tv__guide-info-channel {
-  font-size: clamp(0.75rem, 2.2cqw, 1.2rem);
+  font-size: 2.2cqw;
   /* Full opacity: at 0.9 this measured 3.39:1 against the CRT screen image,
      under the 4.5:1 WCAG AA minimum for normal-size text. */
   opacity: 1;
@@ -1927,7 +1898,7 @@
   font: inherit;
   text-align: left;
   cursor: pointer;
-  font-size: clamp(0.875rem, 2.3cqw, 1.35rem);
+  font-size: 2.3cqw;
   line-height: 1.2;
   white-space: nowrap;
   /* Square: the fill now runs to both edges of the screen, and a rounded
@@ -2040,32 +2011,31 @@
  */
 
 @media (max-width: 479px) {
-  /* Reserve the mobile cabinet's proportions, not the desktop's. */
+  /* Let the image use ITS OWN intrinsic proportions. The base rule forces
+     aspect-ratio: 1426/1093 (the landscape cabinet) onto whatever is in the
+     <img>, which squashed the portrait artboard from 0.9765 to 1.3047 — a
+     34% horizontal stretch of the artwork. `auto` means the browser reads the
+     ratio out of the file, so nothing here defines the shape of the art. */
   .crt-tv__frame {
-    aspect-ratio: 1240 / 1270;
+    aspect-ratio: auto;
   }
 
-  /* Matched to the cabinet's actual picture-tube cutout, flood-filled out of
-     the artwork's alpha (x 195-2257, y 189-1725 of 2480x2540). The Illustrator
-     export arrives fully OPAQUE — unlike the desktop chassis, which ships with
-     a transparent screen — so the frame at z-index 3 sat straight over the
-     channel guide at z-index 2 and the screen showed flat artwork instead of
-     content. The aperture is knocked out of the asset itself; these numbers
-     just line the live screen up with the hole. */
-  /* The mobile cabinet's aperture, measured as the largest connected
-     TRANSPARENT region of tv/chassis-mobile.webp seeded inside the tube —
-     x 195-2285, y 173-1733 of 2480x2540. Taking the flood-filled colour region
-     instead came up 16px short at the top and a few px inside on the right and
-     bottom, because that fill stops on the bezel's inner shading rather than at
-     the edge of the hole. The alpha is the hole; nothing else is.
-     Resulting tube is 1.340:1 against the desktop's 1.349:1 — the same picture
-     in both cabinets, which is what makes one set of layer rules work for both. */
-  .crt-tv {
-    --tv-screen-top: 6.811%;
-    --tv-screen-left: 7.863%;
-    --tv-screen-width: 84.234%;
-    --tv-screen-height: 61.417%;
+
+  /* Text area, matched to the TITLE CARD content on artboard 6 so the
+     guide text and a card fill the same rectangle. That rect is the same
+     physical size on both artboards — 2081x1537 desktop, 2073x1537
+     mobile — so the two breakpoints share one text area, just scaled. */
+  .crt-tv__screen {
+    top: 7.553%;
+    left: 7.376%;
+    width: 83.555%;
+    height: 60.464%;
   }
+
+
+  /* Backing plate comes from the MOBILE artboard, same viewBox as the cabinet
+     and the glass (1240.3 x 1270.21), so it needs no figures at all — it sits
+     at inset: 0 like every other layer and lines up by construction. */
 
   /* The painted capsules are 1.34% of the cabinet's height — about 5px on a
      390px phone, far too small to hit. Each overlay is grown into the dead
@@ -2110,21 +2080,6 @@
     height: 4.4%;
   }
 
-  /* The lit channel number is HIDDEN on this cabinet, and the readout shows its
-     unlit "88" instead.
-     tv/led/NN.webp are full-frame 2850x2186 overlays whose digits are drawn to
-     the DESKTOP readout — 232x180, an aspect of 1.29. This cabinet's readout is
-     122x77, an aspect of 1.58. There is no scale that puts one on the other:
-     match the width and the digits overflow the window vertically, match the
-     height and they sit visibly small inside it. Both were tried, and a lit
-     number floating out of register over an unlit one looks broken in a way
-     that an idle display does not.
-     Showing this needs LED digits drawn to THIS artboard's proportions (or the
-     readout redrawn at the desktop's). Until then the set reads as on, with the
-     channel visible where it actually matters — in the guide on the screen. */
-  .crt-tv__channel-display {
-    display: none;
-  }
 
   /* This cabinet has its own controls painted on, so the separate enlarged
      panel below the set is redundant here. */

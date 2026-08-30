@@ -14,6 +14,11 @@ import { gsap } from 'gsap';
 import { formatTextWithLineBreaks, escapeHtml } from '../../utils/format-utils';
 import { tvSfx } from '../audio/tv-sfx';
 
+/** Breakpoint at which the mobile cabinet (and its matching LED digits
+ *  and screen art) takes over. Kept in one place so the <picture> media
+ *  attribute and the JS digit lookup can never drift apart. */
+const TV_MOBILE_QUERY = '(max-width: 479px)';
+
 // escapeHtml already encodes & < > " ' ` so it's safe for both element
 // content and attribute values. Aliased for readability at call sites.
 const escapeAttr = escapeHtml;
@@ -574,14 +579,27 @@ export class ProjectsModule extends BaseModule {
     const tvHtml = `
       <div class="crt-tv">
         <div class="crt-tv__wrapper">
-          <img class="crt-tv__screen-bg" src="/images/tv/base-on.webp" alt="" data-screen-bg />
+          <!-- Backing plate. The mobile source is exported from the MOBILE
+               artboard (same 1240.3 x 1270.21 viewBox as the cabinet and the
+               glass), so it aligns at inset: 0 with no CSS figures; the
+               desktop <img> keeps the base-on/base-off pair the power toggle
+               swaps between. -->
+          <picture class="crt-tv__screen-bg-picture">
+            <img class="crt-tv__screen-bg" src="/images/tv/base-on.webp" alt="" data-screen-bg />
+          </picture>
           <!-- Composed title-card (text baked in) sits at the same full
                TV-frame canvas as the bg below. Lives outside .crt-tv__screen
                because .crt-tv__screen is sized to the screen aperture only
                (72.8% wide × 70.4% tall) for the channel list / panels —
                putting the full-canvas composed image inside that box would
                stretch it into the aperture and misalign with the bg. -->
-          <img class="crt-tv__image" src="" alt="Project preview" />
+          <!-- Title card layer = artboard 6 ("Mobile Title Card or Base
+               On/Off"), same 1240.3 x 1270.21 viewBox as the TV and the
+               glass, so it sits at inset: 0 with no CSS figures. -->
+          <picture class="crt-tv__image-picture">
+            <source media="(max-width: 479px)" srcset="/images/tv/title-card-mobile.webp" />
+            <img class="crt-tv__image" src="" alt="Project preview" />
+          </picture>
           <div class="crt-tv__screen">
             <!-- Mute indicator — top-right of the screen aperture, only
                  visible when volume is at 0 AND the TV is powered on.
@@ -617,6 +635,15 @@ export class ProjectsModule extends BaseModule {
                a CRT and its controls both fit a portrait phone. <picture>
                swaps them at the breakpoint; --tv-aspect is re-read on each
                load so the wrapper's width math follows. -->
+          <!-- Screen glass — the "Screen Above Title Card" layer from the
+               .ai, its own file so it can sit where Illustrator has it:
+               above the title card, below the cabinet. Mobile only; the
+               desktop set keeps its CSS .crt-tv__glare. -->
+          <picture class="crt-tv__screen-glass-picture">
+            <source media="(max-width: 479px)" srcset="/images/tv/screen-glass-mobile.webp" />
+            <img class="crt-tv__screen-glass" src="/images/tv/screen-glass.webp"
+                 alt="" aria-hidden="true" />
+          </picture>
           <picture class="crt-tv__frame-picture">
             <source media="(max-width: 479px)" srcset="/images/tv/chassis-mobile.webp" />
             <img class="crt-tv__frame" src="/images/tv/chassis.webp" alt="Vintage Television" />
@@ -762,6 +789,18 @@ export class ProjectsModule extends BaseModule {
     // the next channel_NN.webp is being fetched. Images stay cached for
     // the rest of the session.
     this.preloadChannelDisplays();
+    // The markup ships the desktop digit and base as its src; re-apply once on
+    // init so a phone gets the mobile artboard's versions, not the inherited
+    // desktop ones.
+    this.setChannelDisplay(this.displayedChannel);
+    this.applyBreakpointBase();
+
+    // Swap the readout to the other cabinet's digit set when the breakpoint
+    // changes, so a resize doesn't leave the desktop digit on the mobile set.
+    window.matchMedia(TV_MOBILE_QUERY).addEventListener('change', () => {
+      this.setChannelDisplay(this.displayedChannel);
+      this.applyBreakpointBase();
+    });
   }
 
   /**
@@ -879,6 +918,48 @@ export class ProjectsModule extends BaseModule {
    * Without preloading, fast channel cycling on slow mobile networks
    * leaves the LED blank for a frame while the next image fetches.
    */
+  /**
+   * Path to the LED digit for a channel, on whichever cabinet is showing.
+   * Each digit is exported full-artboard from the SAME artboard as its
+   * cabinet, so both variants sit at inset:0 and need no positioning — but
+   * they are different artboards, so the file has to match the breakpoint.
+   * Mirrors the <picture> media query on .crt-tv__frame.
+   */
+  private ledSrc(padded: string): string {
+    const mobile = window.matchMedia(TV_MOBILE_QUERY).matches;
+    return `/images/tv/led/${padded}${mobile ? '-mobile' : ''}.webp`;
+  }
+
+  /** Channel currently shown on the LED readout. */
+  private displayedChannel = 1;
+
+  /**
+   * Path to the powered-on/off screen base for whichever cabinet is showing.
+   * Exported full-artboard from the same artboard as its cabinet, so both
+   * variants sit at inset:0 — but they are different artboards, so the file
+   * has to follow the breakpoint, exactly like ledSrc().
+   */
+  private baseSrc(state: 'on' | 'off'): string {
+    const mobile = window.matchMedia(TV_MOBILE_QUERY).matches;
+    return `/images/tv/base-${state}${mobile ? '-mobile' : ''}.webp`;
+  }
+
+  /**
+   * Re-point the screen base at the current breakpoint's artboard, keeping
+   * whichever on/off state is already showing.
+   */
+  private applyBreakpointBase(): void {
+    const screenBg = document.querySelector<HTMLImageElement>('[data-screen-bg]');
+    if (!screenBg) {
+      return;
+    }
+    const state = screenBg.src.includes('base-off') ? 'off' : 'on';
+    const next = this.baseSrc(state);
+    if (!screenBg.src.endsWith(next)) {
+      screenBg.src = next;
+    }
+  }
+
   private preloadChannelDisplays(): void {
     if (!this.portfolioData) {
       return;
@@ -888,7 +969,7 @@ export class ProjectsModule extends BaseModule {
     for (let n = 1; n <= total; n++) {
       const padded = String(n).padStart(2, '0');
       const img = document.createElement('img');
-      img.src = `/images/tv/led/${padded}.webp`;
+      img.src = this.ledSrc(padded);
     }
   }
 
@@ -1026,7 +1107,7 @@ export class ProjectsModule extends BaseModule {
         // Save the per-card bg src so we can restore it on power-on;
         // the off-state base-off.webp would otherwise stomp it.
         this.screenBgBeforePowerOff = screenBg.src;
-        screenBg.src = '/images/tv/base-off.webp';
+        screenBg.src = this.baseSrc('off');
       }
     } else {
       // Power on — restore the previous channel's bg if we saved one
@@ -1036,7 +1117,7 @@ export class ProjectsModule extends BaseModule {
       // whatever channel was tuned. Power-off stays silent — CRTs
       // were near-silent on shutdown, only the button click remains.
       if (screenBg) {
-        screenBg.src = this.screenBgBeforePowerOff || '/images/tv/base-on.webp';
+        screenBg.src = this.screenBgBeforePowerOff || this.baseSrc('on');
         this.screenBgBeforePowerOff = null;
       }
       void tvSfx.static();
@@ -1418,7 +1499,7 @@ export class ProjectsModule extends BaseModule {
     tl.to(staticOverlay, { opacity: TV_STATIC_FLASH_OPACITY, duration: 0.06 }, 0)
       .to(channelList, { opacity: 0, duration: 0.05 }, 0)
       .add(() => {
-        screenBg.src = '/images/tv/base-on.webp';
+        screenBg.src = this.baseSrc('on');
       }, 0.05);
 
     // 2) Hold the blank for a split second, then swap to per-project bg.
@@ -2065,12 +2146,15 @@ export class ProjectsModule extends BaseModule {
    * for the TV guide / blank-screen state; project channels start at 02.
    */
   private setChannelDisplay(channelNumber: number): void {
+    // Remembered so a breakpoint change can re-request the same channel's
+    // digit from the other cabinet's set.
+    this.displayedChannel = channelNumber;
     const display = document.querySelector<HTMLImageElement>('[data-channel-display]');
     if (!display) {
       return;
     }
     const padded = String(channelNumber).padStart(2, '0');
-    const nextSrc = `/images/tv/led/${padded}.webp`;
+    const nextSrc = this.ledSrc(padded);
     if (!display.src.endsWith(nextSrc)) {
       display.src = nextSrc;
     }
