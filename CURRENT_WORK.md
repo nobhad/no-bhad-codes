@@ -58,16 +58,22 @@ Worth trying, roughly in order:
 Carried out of the footer-curtain / lint / Prettier session. Nothing here
 blocks anything; they are the loose ends that session left.
 
-- [ ] **E2E tests never ran.** `npx playwright test` fails before executing a
-      single test: the runner wants Chromium build 1200 and the local cache
-      holds 1234, so the binaries do not match. Either `npx playwright install`
-      (a few hundred MB) or point the run at the installed Google Chrome with
-      `channel: 'chrome'`, which downloads nothing — the Aug 29 session drove
-      the whole site that way, so that route is known to work.
-      `tests/e2e/navigation.spec.ts` and `tests/e2e/business-card.spec.ts` are
-      the two that cover what changed — page transitions and the business-card
-      `calc()` tokens whose snapshot moved — so they are worth a pass before
-      any deploy. Unit tests (4400) and the production build both pass.
+- [ ] **E2E suite runs now, and is red.** The launch problem is fixed —
+      `playwright.config.ts` uses `channel: 'chrome'`, so no download is needed
+      — and two stale assumptions in `navigation.spec.ts` are corrected: it
+      waited for `[data-nav]` to be *visible* when the menu starts closed and
+      the element is `display:none`, and it asserted pre-router paths
+      (`a[href="#about"]`, URL `/#about`) when routes have been `#/about` since
+      the scroll-map landed, with five menu links rather than three.
+      What is left is not those edits. **The app is fine when driven by hand**
+      — menu opens on click, five links, overlay present, verified in a real
+      browser — so the remaining failures are test-side. Two signals point at
+      the environment rather than the assertions: the same suite ran in 8.5s
+      once and 15.9 minutes the next time, and `back/forward` passed in one run
+      and failed in the next without being touched. The config's `webServer`
+      starts `npm run dev:full` (vite + tsx + tailwind watch) even when a dev
+      server is already up, which is the first thing to look at. Give it a
+      dedicated pass with nothing else running.
 - [ ] **Eleven commits unpushed, and live is behind them.** Includes both TV
       click fixes — the deployed site still opens a new tab when you click the
       title card. Push, then deploy; four older "fixed in code, needs deploy"
