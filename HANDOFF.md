@@ -1,11 +1,11 @@
 # Handoff — footer curtain / project-detail map tile
 
-> **This handoff describes the session that ended at `b7d2bdae`.** The branch has moved on
+> **This handoff describes the session that ended at `086cdb65`.** The branch has moved on
 > substantially since (50+ commits, including the fixes noted inline below). Treat the commit
 > table as a record of that session, not as the current state of `main`. For live status see
 > [`CURRENT_WORK.md`](./CURRENT_WORK.md).
 
-**Branch:** `main` · **Session HEAD:** `b7d2bdae` · **Working tree at handoff:** clean
+**Branch:** `main` · **Session HEAD:** `086cdb65` · **Working tree at handoff:** clean
 
 `stash@{0}` held an unverified experiment at the time of writing; the shrink-from-bottom stash
 referenced below has since been dropped.
@@ -18,21 +18,21 @@ Reworked the footer curtain and turned project-detail into a real map tile. Comm
 
 | commit | what |
 |---|---|
-| `af3ab05b` | curtain mechanic: page slides up off a stationary ink band; old copyright strip removed |
-| `3e0746c3` | gesture-driven reveal on map tiles (vertical axis on intro/about/contact) |
-| `3faa1575` | mobile tiles reach viewport edges, clear the header, curtain-sliver fix |
-| `7a788b1d` | `--section-heading-size`: one source of truth for `.section-heading` |
-| `9f392a10` | about content column centred |
-| `970961a6` | detail clearance + stacking |
-| `bf18b4e6` | contact background avatar watermark removed |
-| `a0316aa1` | **project-detail becomes a vertical map tile** at grid (100,100) below projects |
-| `655c9594` | about: one measure (`--map-tile-pad-y`) for every gap on the tile |
-| `42a89409` | detail tile spacing/framing/curtain reveal |
-| `b3c317c3` | one header-gap measure for every tile; TV live-link hit area |
-| `7d8b886d` | TOOLS aligned with ROLE, divider, symmetric spacing |
-| `aadbd784` / `f63dfde5` | divider matches frame border weight |
-| `2499c729` / `e81a7e90` | curtain retract fixes (see below) |
-| `b7d2bdae` | bottom space = header inset + tile gap (matches top) |
+| `17ec06e6` | curtain mechanic: page slides up off a stationary ink band; old copyright strip removed |
+| `c3a75b30` | gesture-driven reveal on map tiles (vertical axis on intro/about/contact) |
+| `c045a7e5` | mobile tiles reach viewport edges, clear the header, curtain-sliver fix |
+| `ca6c5090` | `--section-heading-size`: one source of truth for `.section-heading` |
+| `9688304a` | about content column centred |
+| `2dd70b7c` | detail clearance + stacking |
+| `b4581ec9` | contact background avatar watermark removed |
+| `24cddc16` | **project-detail becomes a vertical map tile** at grid (100,100) below projects |
+| `8cf45e02` | about: one measure (`--map-tile-pad-y`) for every gap on the tile |
+| `a5cf179e` | detail tile spacing/framing/curtain reveal |
+| `8248a7fc` | one header-gap measure for every tile; TV live-link hit area |
+| `9df77e81` | TOOLS aligned with ROLE, divider, symmetric spacing |
+| `1f204eb3` / `379c2536` | divider matches frame border weight |
+| `8a536ded` / `c4cbd05e` | curtain retract fixes (see below) |
+| `086cdb65` | bottom space = header inset + tile gap (matches top) |
 
 ## Verified working (measured in-browser)
 
@@ -52,7 +52,7 @@ remaining and never reaches 0, so the `remaining >= 1` test read as "still scrol
 The reveal only fires once the content is done, and by that test it never was — so pulling the
 page up at the end of a case study did nothing at all.
 
-Fixed in `8c24a895`: one named `SCROLL_EDGE_EPSILON = 2` used by every scroll-edge test in
+Fixed in `4b250227`: one named `SCROLL_EDGE_EPSILON = 2` used by every scroll-edge test in
 `page-transition.ts`, replacing hard 1px comparisons.
 
 **Two hypotheses in the earlier draft of this file were wrong** — disregard them:
@@ -77,12 +77,12 @@ being asked.
 
 The reveal could never be exercised in automation: the browser-automation `scroll` action
 produces **no wheel events** (`window.__wheels === 0` with a capture listener on window), and
-synthetic `WheelEvent` does not reach the handlers either. So `8c24a895` is reasoned from the
+synthetic `WheelEvent` does not reach the handlers either. So `4b250227` is reasoned from the
 measured boundary values, not observed working.
 
 Still open: per `CURRENT_WORK.md`, a real trackpad's momentum tail remains the one input profile
 never exercised, and `CURTAIN_SETTLE_MS` is the constant most likely to need tuning against real
-hardware. Follow-up commits `77e39726` and `864486f7` refined the settle/resize behaviour.
+hardware. Follow-up commits `8c47f616` and `af76cdb2` refined the settle/resize behaviour.
 
 To verify by hand: open a case study, scroll to the very end with a trackpad, keep scrolling.
 The band should rise. Scroll back up and it should retract in step. Instrument with:
@@ -103,7 +103,7 @@ band returns page content).
 
 ## Also open
 
-- ~~**TV title-card click**~~ — **RESOLVED** in `c76f762d` ("invisible panels no longer swallow
+- ~~**TV title-card click**~~ — **RESOLVED** in `9cec7666` ("invisible panels no longer swallow
   clicks on the title card"). The cause was invisible case-study panels sitting over the screen
   and capturing the click, not the handler `wireTuneInScreenClick()` in
   `src/modules/ui/projects.ts`. Note the fix is committed but, per `CURRENT_WORK.md`, was still

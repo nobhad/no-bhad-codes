@@ -9,7 +9,7 @@
 
 The crackle over the project channels is **in the recordings**, not in the
 sound effects. All three are Library of Congress National Jukebox releases
-(`836a7e6a`) — acoustic-era 78rpm transfers, so surface noise comes with them.
+(`42ed88de`) — acoustic-era 78rpm transfers, so surface noise comes with them.
 Measured (RMS, and a high-frequency-energy ratio standing in for hiss):
 
 | file | channel | RMS | HF ratio |
@@ -24,12 +24,12 @@ static sample itself**, and they sit at **half the level** of the third, so the
 hiss reads forward of the melody and the channels do not match each other.
 
 Turning the crackle SFX down does nothing for this — that was chased and
-reverted (`62702d46`). The SFX gains are back at their original values:
+reverted (`13d2dc37`). The SFX gains are back at their original values:
 power-on 0.18, channel-change 0.12.
 
 **Do not de-noise them the way it was tried.** `afftdn` plus an 8dB high shelf
 flattens the recordings — it takes the air out along with the hiss and they
-stop sounding like old records. Reverted in `b32d48cc`; measurements from that
+stop sounding like old records. Reverted in `e9ef3491`; measurements from that
 attempt are in the commit if useful.
 
 Worth trying, roughly in order:
@@ -321,7 +321,7 @@ The deployed `/sw.js` lists `.json` in `STATIC_EXTENSIONS` and has no
 forever. Browsers that had ever hit the portal (`server/views/partials/head.ejs`
 registers the SW at scope `/`) kept replaying an ancient copy whose
 `screenshots` array pointed at files that no longer exist → 13 broken images
-plus 13 failed requests. `612d6062` already made data JSON network-first but
+plus 13 failed requests. `501ec523` already made data JSON network-first but
 was never pushed; bumped `CACHE_VERSION` to `v2` so `activate()` actually
 evicts the stranded `nbc-static-v1` entries.
 
@@ -406,7 +406,7 @@ grep over every generated PDF before publishing.
 
 ## Production Portal — `/src/*.ts` 404s (dashboard JS never loaded)
 
-**Status:** FIXED in code (`8c734c32`) — needs deploy to Vercel + Railway from this commit
+**Status:** FIXED in code (`a9149996`) — needs deploy to Vercel + Railway from this commit
 **Priority:** Critical
 
 ### What happened
@@ -424,7 +424,7 @@ Those paths only resolve while Vite's dev server is running. In production the
 frontend is a static Vite build served by Vercel, which has no `/src/*` — and
 the Vite build had a single entry (`index.html`), so admin.ts / portal.ts /
 the inline-import modules were never emitted as assets. Regression from
-`5967a1de` (removed the portal MPA build entries when the portal moved to EJS).
+`95e654fd` (removed the portal MPA build entries when the portal moved to EJS).
 
 ### Fix
 
@@ -443,7 +443,7 @@ Once login worked, the React portal failed to mount with
 `server/config/unified-navigation.ts` (imported by the browser portal store).
 It read `process.env.PORTAL_MODE` directly; `process` doesn't exist in the
 browser and Vite only auto-replaces `process.env.NODE_ENV`, not custom vars.
-Fixed (`87c00ccf`) by guarding with `typeof process !== 'undefined'` and
+Fixed (`88aac3aa`) by guarding with `typeof process !== 'undefined'` and
 defaulting to solo. Swept the rest of the client→server import graph — no other
 throwing `process.env.*` remain.
 
@@ -456,7 +456,7 @@ every run. Railway and Vercel build **independently**, so Railway's manifest
 referenced hashes Vercel never built. Proven in prod: `/intake` emitted
 `main-site-ke9aY9db.js` / `terminal-intake-B30Cub4c.js` → 404 on Vercel, while
 CSS and tiny chunks matched (only the heavily-obfuscated chunks diverged).
-Fixed (`f5e94bac`) by pinning the obfuscator `seed`; two clean builds now
+Fixed (`a788c5da`) by pinning the obfuscator `seed`; two clean builds now
 produce byte-identical manifests **on the same machine**.
 
 ### Fourth bug (surfaced post-deploy): cross-host build drift → portal JS 404
@@ -490,7 +490,7 @@ byte-identical** — fragile (broke on obfuscator seed, then Node version).
 ### Deploy
 
 Push, then redeploy **both** Vercel and Railway. Prod-blocking fixes that must
-ship together: `8c734c32` (assets), `87c00ccf` (process), `f5e94bac` (seed),
+ship together: `a9149996` (assets), `88aac3aa` (process), `a788c5da` (seed),
 plus this commit (remote manifest + Node pin). With the remote-manifest fix the
 two hosts no longer need byte-identical builds, but still deploy both from the
 same commit. Verify after:
@@ -539,7 +539,7 @@ CFF-on build).
 
 ## Production 502 — Schema-Drift Boot Crash
 
-**Status:** RECOVERED — prod boots clean with drift guard re-armed; code fix committed (`4c114a3c`)
+**Status:** RECOVERED — prod boots clean with drift guard re-armed; code fix committed (`2803c65b`)
 **Priority:** Critical
 
 ### What happened
@@ -569,7 +569,7 @@ same way.
 - [x] `server/app.ts`: track whether THIS boot applied migrations; if so,
   rebaseline to the post-migration schema instead of throwing. Out-of-band drift
   (schema changed with no migration to explain it) still fails loud. Commit
-  `4c114a3c`.
+  `2803c65b`.
 
 ### Prod recovery (Noelle, Railway CLI) — DONE 2026-06-25
 
@@ -585,8 +585,8 @@ trips the guard). Cleared it once with the escape hatch:
 
 ### Loose ends
 
-- [ ] `git push` — local `main` is ahead with `4c114a3c` (drift fix) and
-  `8cf6a037` (contact arrow). `railway up` deploys the working dir directly,
+- [ ] `git push` — local `main` is ahead with `2803c65b` (drift fix) and
+  `814ba7d2` (contact arrow). `railway up` deploys the working dir directly,
   bypassing git, so the repo must be pushed to match what's live.
 
 ---
@@ -725,7 +725,7 @@ The feature had never worked from the client's side of the portal:
 | Cover-variant generator script | 1–1.5 h | `gallery-cover-widths.json` has no generator; do it regardless |
 | ↳ client-side 1440px upload cap | +3–4 h | Makes the admin resilient to oversized uploads |
 | SPF record | minutes | At launch, in the Squarespace DNS panel |
-| Missing pond-lily mobile cutout | minutes | `git show 5382a1d:…` restores it |
+| Missing pond-lily mobile cutout | minutes | recovery commit `5382a1d` no longer exists in history; re-cut the asset from source |
 
 ### New suggestions — drafted estimates, NOT yet sent
 
@@ -963,7 +963,7 @@ The projects page renders a vintage TV with a channel-guide screen. Channel 01 i
 
 - [x] **Wire up the TV's physical buttons** — POWER toggles screen on/off; CHANNEL ▲▼ cycles channels mirroring wheel/arrow keys; VOLUME ▲▼ wired to tv-sfx (5-step volume, persisted to localStorage).
 - [x] **Re-export TV assets at 1426×1093** — all per-project bgs, composed title cards, channel digit overlays, and title-card base now exported at full TV-frame canvas with hyphenated filenames. Stacks at `inset:0; width/height:100%`, no centering math. Old underscored set deleted.
-- [ ] **Re-align the base screen artwork** — base bbox `(100, 95, 1137, 864)` is ~6px wider on each side than the per-project cards `(106, 95, 1131, 864)`. Causes a small visible jump when cycling between channel 01 and 02+. Re-export from the same artboard origin as the project cards so artwork lands at x:106-1131. NOTE: the old `title-card_base.webp` no longer exists — the base screen now lives as `public/images/tv/base-on.webp` / `base-off.webp` (introduced 2026-04-30, `76f66a37`); re-export targets those two files.
+- [ ] **Re-align the base screen artwork** — base bbox `(100, 95, 1137, 864)` is ~6px wider on each side than the per-project cards `(106, 95, 1131, 864)`. Causes a small visible jump when cycling between channel 01 and 02+. Re-export from the same artboard origin as the project cards so artwork lands at x:106-1131. NOTE: the old `title-card_base.webp` no longer exists — the base screen now lives as `public/images/tv/base-on.webp` / `base-off.webp` (introduced 2026-04-30, `4e9d3a0e`); re-export targets those two files.
 - [x] **Update "No Bhad Codes" case study copy** — keyFeature `"CRT TV hover preview"` replaced, scroll-map + TV channel guide added, approach paragraph rewritten to mention signature features.
 - [x] **Verify Hedgewitch and The Backend case studies** — Backend feature claims verified against actual code (`013_magic_link.sql`, `message-service.ts`, Chart.js, node-cron, etc.). Hedgewitch is a separate project — copy reads accurately.
 - [x] **TV channel copy condensed** — added `tv` namespace per project. TV reads from `tv.X ?? X`. All three documented projects have curated TV copy.
@@ -995,14 +995,14 @@ The projects page renders a vintage TV with a channel-guide screen. Channel 01 i
 
 ### Shipped
 
-- **Contact form placeholders visible** (`89364621`) — labels are `display:none` by design (the placeholders ARE the field names), but `--placeholder-opacity` defaulted to `0` from a removed fade-in animation, so desktop rendered empty field boxes. Defaulted to `1` in `src/styles/pages/contact.css` (mobile was already patched).
-- **Intro paw-morph NaN guard** (`89364621`) — `calculateSvgAlignment` divided `0/0` when the card/overlay measured 0 (deep-load to a non-intro page, or the collapsed small-mobile layout), writing `transform="translate(NaN, NaN)"` and throwing on navigation. Both morph builders in `intro-animation.ts` now skip the morph when alignment isn't finite. Verified 0 console errors, desktop + mobile.
-- **TV ticker on mobile + centering** (`5030e1b1`) — lifted the `<=479px` ticker guard and restart it from a `ResizeObserver` on the guide viewport (fires once the TV lays out from 0 height). Chevrons moved to a SIBLING of the TV wrap so the `translate(-50%,-50%)` centering no longer drags them off-screen.
-- **Small-mobile pivot + iOS overscroll + TV audio isolation** (`7a2b23ff`) — landed the discrete-tile small-mobile architecture; `overscroll-behavior: contain` on the tile scroller + `none` on `html`/`body` to stop iOS rubber-banding the fixed header; and `transitionTo` now syncs `currentPageId` in its `catch` so a thrown animation can't leave it stale on the source page.
+- **Contact form placeholders visible** (`7bcc7e46`) — labels are `display:none` by design (the placeholders ARE the field names), but `--placeholder-opacity` defaulted to `0` from a removed fade-in animation, so desktop rendered empty field boxes. Defaulted to `1` in `src/styles/pages/contact.css` (mobile was already patched).
+- **Intro paw-morph NaN guard** (`7bcc7e46`) — `calculateSvgAlignment` divided `0/0` when the card/overlay measured 0 (deep-load to a non-intro page, or the collapsed small-mobile layout), writing `transform="translate(NaN, NaN)"` and throwing on navigation. Both morph builders in `intro-animation.ts` now skip the morph when alignment isn't finite. Verified 0 console errors, desktop + mobile.
+- **TV ticker on mobile + centering** (`a3554622`) — lifted the `<=479px` ticker guard and restart it from a `ResizeObserver` on the guide viewport (fires once the TV lays out from 0 height). Chevrons moved to a SIBLING of the TV wrap so the `translate(-50%,-50%)` centering no longer drags them off-screen.
+- **Small-mobile pivot + iOS overscroll + TV audio isolation** (`0fb72927`) — landed the discrete-tile small-mobile architecture; `overscroll-behavior: contain` on the tile scroller + `none` on `html`/`body` to stop iOS rubber-banding the fixed header; and `transitionTo` now syncs `currentPageId` in its `catch` so a thrown animation can't leave it stale on the source page.
 
 ### Awaiting on-device confirmation
 
-- [ ] **Off-page channel cycling / audio bleed** — root cause: stale `currentPageId` from a thrown transition animation let the wheel cycle TV channels (and restart channel music) on other pages. Fixed in `7a2b23ff`. Confirm on device: trackpad on contact should NOT change channels or start music. If it recurs, check console for `[PageTransitionModule] Transition failed:` — present means the fix is firing, absent means a second desync path remains.
+- [ ] **Off-page channel cycling / audio bleed** — root cause: stale `currentPageId` from a thrown transition animation let the wheel cycle TV channels (and restart channel music) on other pages. Fixed in `0fb72927`. Confirm on device: trackpad on contact should NOT change channels or start music. If it recurs, check console for `[PageTransitionModule] Transition failed:` — present means the fix is firing, absent means a second desync path remains.
 - [ ] **iOS overscroll** — confirm the fixed header no longer rubber-bands on a real iPhone.
 
 ---
@@ -1011,11 +1011,11 @@ The projects page renders a vintage TV with a channel-guide screen. Channel 01 i
 
 ### Shipped
 
-- **Contact form submits again** (`c2c95cfc`) — was failing with `403 CSRF_TOKEN_INVALID`. `ContactService.submitToCustom` never sent the `x-csrf-token` header, and on a cold visit the `csrf-token` cookie isn't set yet. Now sends the header (shared `getCsrfToken`) with `credentials:'include'` and primes the cookie via `GET /api/health` first. Verified end-to-end without sending a real email.
-- **Scroll/nav model finalised** (`0366358b`, `13b295e9`, `21c53175`) — vertical OR horizontal scroll navigates the carousel on intro/about/contact; projects vertical = channel-surf; `Shift+wheel` = mouse-wheel parity (reads whichever axis the browser populates); project-detail vertical scrolls then navigates at the edge, left/right cycles projects. (Went back and forth on this — current state is "any scroll navigates except projects = channel".)
-- **projects → project-detail slides DOWN** (`13b295e9`) — TV scrolls up and out, detail pushes up from the bottom (was sliding in from the right). Detail↔detail left/right carousel unchanged.
-- **Click a playing TV screen → project detail** (`16476f9b`) — same tab, instead of the live link opening a new tab. The explicit "Live: url" link still opens the live site.
-- **Main-site doc sweep** (`d19ec5f4`, `f2cc340c`) — audited 12 main-site docs vs code (4 parallel agents); corrected mobile-intro-is-a-morph-not-a-flip, the localStorage replay gate, typography clamps, nav z-index, TV chassis dims + hitbox table, mobile ticker, projects→detail down, contact placeholders/CSRF, `@custom-media` location, `--font-family-body`, EMBED service method names.
+- **Contact form submits again** (`bcc18897`) — was failing with `403 CSRF_TOKEN_INVALID`. `ContactService.submitToCustom` never sent the `x-csrf-token` header, and on a cold visit the `csrf-token` cookie isn't set yet. Now sends the header (shared `getCsrfToken`) with `credentials:'include'` and primes the cookie via `GET /api/health` first. Verified end-to-end without sending a real email.
+- **Scroll/nav model finalised** (`843682aa`, `bb624760`, `e8626804`) — vertical OR horizontal scroll navigates the carousel on intro/about/contact; projects vertical = channel-surf; `Shift+wheel` = mouse-wheel parity (reads whichever axis the browser populates); project-detail vertical scrolls then navigates at the edge, left/right cycles projects. (Went back and forth on this — current state is "any scroll navigates except projects = channel".)
+- **projects → project-detail slides DOWN** (`bb624760`) — TV scrolls up and out, detail pushes up from the bottom (was sliding in from the right). Detail↔detail left/right carousel unchanged.
+- **Click a playing TV screen → project detail** (`fe9dd474`) — same tab, instead of the live link opening a new tab. The explicit "Live: url" link still opens the live site.
+- **Main-site doc sweep** (`81a862d7`, `a19ef829`) — audited 12 main-site docs vs code (4 parallel agents); corrected mobile-intro-is-a-morph-not-a-flip, the localStorage replay gate, typography clamps, nav z-index, TV chassis dims + hitbox table, mobile ticker, projects→detail down, contact placeholders/CSRF, `@custom-media` location, `--font-family-body`, EMBED service method names.
 - **Removed the entire dead hero stack.** First the 4 dead JS modules (`about-hero.ts`, `page-hero.ts`, `base-hero-animation.ts`, `avatar-intro.ts` — none instantiated/registered/imported by live code). Then the dormant hero-text feature too: `text-animation.ts` only animated the `#hero` `.text-animation-svg`, but `#hero` is `page-hidden` and unreachable (not in `pageConfigs`, no carousel neighbor, no route), so the effect never showed. Deleted `text-animation.ts` + its `modules-config` registration, the `#hero` `<section>` in `index.html`, the phantom `hero`/`left` entries in `MAP_TILES`/`CAMERA_POSITIONS`/`TILE_CSS_POSITIONS`/`NEIGHBORS`, and all the dead `.hero-section` / `.text-animation-svg` / `.*-hero-desktop` CSS across 6 files. ~1,200 LOC removed. Verified: tsc + eslint + `npm run build` clean, site loads, carousel nav works, 0 console errors. (`--color-svg-text-*` tokens kept — still used by `intro-morph.css`.)
 
 ### Portal doc sweep (2026-06-25) — uncommitted
