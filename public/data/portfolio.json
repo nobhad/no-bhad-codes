@@ -444,25 +444,25 @@
       {
         "id": "home",
         "title": "home",
-        "path": "/",
+        "path": "#/",
         "eyebrow": "00"
       },
       {
         "id": "about",
         "title": "about",
-        "path": "#about",
+        "path": "#/about",
         "eyebrow": "01"
       },
       {
         "id": "contact",
         "title": "contact",
-        "path": "#contact",
+        "path": "#/contact",
         "eyebrow": "02"
       },
       {
         "id": "projects",
         "title": "projects",
-        "path": "#projects",
+        "path": "#/projects",
         "eyebrow": "03"
       }
     ]
