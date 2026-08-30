@@ -71,7 +71,7 @@ What happens next:
 1. You'll receive a confirmation email shortly
 2. I'll review your request within 24-48 hours
 3. You'll get a finalized quote and timeline
-4. We'll schedule a call to discuss the details
+4. I'll schedule a call to discuss the details
 
 Thank you for choosing No Bhad Codes!`;
 }

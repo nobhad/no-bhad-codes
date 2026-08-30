@@ -979,7 +979,7 @@ router.post(
             View and pay your invoice here:
             ${invoiceUrl}
 
-            If you have any questions, please don't hesitate to contact us.
+            If you have any questions, just message me.
 
             Best regards,
             ${BUSINESS_INFO.name} Team
@@ -1011,7 +1011,7 @@ router.post(
                 <p style="text-align: center; margin: 30px 0;">
                   <a href="${invoiceUrl}" class="button">View Invoice</a>
                 </p>
-                <p>If you have any questions about this invoice, please don't hesitate to contact us.</p>
+                <p>If you have any questions about this invoice, just message me.</p>
                 <p>Best regards,<br>${BUSINESS_INFO.name} Team</p>
               </div>
             </body>

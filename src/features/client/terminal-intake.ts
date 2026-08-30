@@ -438,7 +438,7 @@ export class TerminalIntakeModule extends BaseModule {
 
       if (this.chatContainer) {
         await showTypingIndicator(this.chatContainer, 200);
-        this.addMessage({ type: 'ai', content: "Great! We'll use the same billing arrangement." });
+        this.addMessage({ type: 'ai', content: "Great! I'll use the same billing arrangement." });
       }
     } else {
       this.intakeData.billingPreference = 'discuss-new';

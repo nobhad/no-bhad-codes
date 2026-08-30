@@ -560,8 +560,8 @@ async function processAutoPay(): Promise<AutoPayResult> {
             await emailService.sendEmail({
               to: clientRow.email,
               subject: `Payment failed for invoice - ${BUSINESS_INFO.name}`,
-              text: `Hi ${clientRow.name},\n\nWe were unable to process your automatic payment. ${attemptNumber < MAX_AUTO_PAY_RETRIES ? `We'll retry in ${nextRetryHours} hours.` : 'Please update your payment method.'}\n\nBest regards,\n${BUSINESS_INFO.name}`,
-              html: `<p>Hi ${clientRow.name},</p><p>We were unable to process your automatic payment.</p><p>${attemptNumber < MAX_AUTO_PAY_RETRIES ? `We'll retry in ${nextRetryHours} hours.` : 'Please update your payment method in your portal.'}</p><p>Best regards,<br>${BUSINESS_INFO.name}</p>`
+              text: `Hi ${clientRow.name},\n\nI wasn't able to process your automatic payment. ${attemptNumber < MAX_AUTO_PAY_RETRIES ? `I'll retry in ${nextRetryHours} hours.` : 'Please update your payment method.'}\n\nBest regards,\n${BUSINESS_INFO.name}`,
+              html: `<p>Hi ${clientRow.name},</p><p>I wasn't able to process your automatic payment.</p><p>${attemptNumber < MAX_AUTO_PAY_RETRIES ? `I'll retry in ${nextRetryHours} hours.` : 'Please update your payment method in your portal.'}</p><p>Best regards,<br>${BUSINESS_INFO.name}</p>`
             });
           }
         } catch {

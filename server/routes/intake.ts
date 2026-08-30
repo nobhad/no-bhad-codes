@@ -321,13 +321,13 @@ router.post(
           nextSteps: proposalRequestId
             ? [
                 'Review your proposal in the client portal',
-                "We'll finalize your quote within 24-48 hours",
+                "I'll finalize your quote within 24-48 hours",
                 'Schedule a call to discuss the details',
                 'Begin project development upon agreement'
               ]
             : [
                 'Review your project details in the client portal',
-                "We'll send a detailed proposal within 24-48 hours",
+                "I'll send a detailed proposal within 24-48 hours",
                 'Schedule a discovery call to discuss requirements',
                 'Begin project development upon agreement'
               ]

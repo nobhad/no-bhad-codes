@@ -46,7 +46,7 @@ router.get(
     const widgetConfig = config.config as Record<string, unknown>;
     const brandColor = (widgetConfig.brandColor as string) || '#1a1a2e';
     const successMessage =
-      (widgetConfig.successMessage as string) || 'Thank you! We will be in touch.';
+      (widgetConfig.successMessage as string) || 'Thank you! I will be in touch.';
     const showCompany = widgetConfig.showCompanyField !== false;
     const showSubject = widgetConfig.showSubjectField !== false;
 

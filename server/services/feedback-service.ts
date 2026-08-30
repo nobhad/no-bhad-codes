@@ -86,8 +86,8 @@ async function sendSurvey(params: SendSurveyParams): Promise<FeedbackSurveyRow> 
 
       await emailService.sendEmail({
         to: client.email,
-        subject: "We'd love your feedback",
-        text: `Hi ${client.contact_name || client.name}, we'd love your feedback. Visit: ${surveyUrl}`,
+        subject: "I'd love your feedback",
+        text: `Hi ${client.contact_name || client.name}, I'd love your feedback. Visit: ${surveyUrl}`,
         html: buildSurveyEmailHtml(client.contact_name || client.name, surveyUrl, params.surveyType)
       });
     }
@@ -622,8 +622,8 @@ async function sendReminders(): Promise<ReminderResult> {
 
         await emailService.sendEmail({
           to: survey.email,
-          subject: "Reminder: We'd love your feedback",
-          text: `Hi ${survey.contact_name || survey.client_name}, just a reminder — we'd love your feedback. Visit: ${surveyUrl}`,
+          subject: "Reminder: I'd love your feedback",
+          text: `Hi ${survey.contact_name || survey.client_name}, just a reminder — I'd love your feedback. Visit: ${surveyUrl}`,
           html: buildSurveyEmailHtml(
             survey.contact_name || survey.client_name,
             surveyUrl,
@@ -694,8 +694,8 @@ function buildSurveyEmailHtml(
         : 'project completion';
 
   const subject = isReminder
-    ? "Reminder: We'd still love to hear from you"
-    : "We'd love your feedback";
+    ? "Reminder: I'd still love to hear from you"
+    : "I'd love your feedback";
 
   return `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; padding: 32px;">
@@ -703,10 +703,10 @@ function buildSurveyEmailHtml(
       <p>Hi ${clientName},</p>
       <p>${
         isReminder
-          ? `Just a friendly reminder — we'd love to hear your thoughts on your recent ${surveyTypeLabel} experience.`
-          : `Thank you for working with us. We'd love to hear about your ${surveyTypeLabel} experience.`
+          ? `Just a friendly reminder — I'd love to hear your thoughts on your recent ${surveyTypeLabel} experience.`
+          : `Thank you for working with me. I'd love to hear about your ${surveyTypeLabel} experience.`
       }</p>
-      <p>Your feedback helps us improve and takes just a couple of minutes.</p>
+      <p>Your feedback helps me improve and takes just a couple of minutes.</p>
       <div style="text-align: center; margin: 32px 0;">
         <a href="${surveyUrl}"
            style="display: inline-block; padding: 12px 32px; background-color: #1a1a2e; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">

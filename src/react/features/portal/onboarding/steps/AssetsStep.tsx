@@ -296,7 +296,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
           className="textarea"
         />
         <span className="text-secondary">
-          Never share passwords directly. We'll provide a secure way to share credentials if needed.
+          Never share passwords directly. I'll provide a secure way to share credentials if needed.
         </span>
       </div>
     </div>

@@ -123,7 +123,7 @@ async function createFromTemplate(params: CreateFromTemplateParams): Promise<num
       stepType: 'welcome',
       customTitle: 'Welcome',
       customContent:
-        'Thank you for choosing to work with us! Please complete the following steps to get your project started.'
+        'Thank you for choosing to work with me! Please complete the following steps to get your project started.'
     });
 
     // Proposal review (if exists)
@@ -574,8 +574,8 @@ async function processExpirations(): Promise<{
         await emailService.sendEmail({
           to: agreement.client_email,
           subject: `Your agreement "${agreement.name}" has expired - ${BUSINESS_INFO.name}`,
-          text: `Hi ${agreement.client_name},\n\nYour agreement "${agreement.name}" has expired. Please contact us if you'd like to discuss next steps.\n\nBest regards,\n${BUSINESS_INFO.name}`,
-          html: `<p>Hi ${agreement.client_name},</p><p>Your agreement "<strong>${agreement.name}</strong>" has expired.</p><p>Please <a href="${getPortalUrl()}/agreements">log in to your portal</a> or contact us if you'd like to discuss next steps.</p><p>Best regards,<br>${BUSINESS_INFO.name}</p>`
+          text: `Hi ${agreement.client_name},\n\nYour agreement "${agreement.name}" has expired. Message me if you'd like to discuss next steps.\n\nBest regards,\n${BUSINESS_INFO.name}`,
+          html: `<p>Hi ${agreement.client_name},</p><p>Your agreement "<strong>${agreement.name}</strong>" has expired.</p><p>Please <a href="${getPortalUrl()}/agreements">log in to your portal</a> or message me if you'd like to discuss next steps.</p><p>Best regards,<br>${BUSINESS_INFO.name}</p>`
         });
       } catch {
         // Non-critical

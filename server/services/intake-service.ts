@@ -347,7 +347,7 @@ class IntakeService {
         [
           projectId,
           'Project Intake Received',
-          "Thank you for submitting your project details! We're reviewing your requirements and will provide a detailed proposal within 24-48 hours.",
+          "Thank you for submitting your project details! I'm reviewing your requirements and will send a detailed proposal within 24-48 hours.",
           systemUserId
         ]
       );

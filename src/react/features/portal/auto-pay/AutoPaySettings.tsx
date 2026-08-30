@@ -346,7 +346,7 @@ export function AutoPaySettings({ getAuthToken, showNotification }: AutoPaySetti
             type="button"
             className="btn-primary btn-sm"
             disabled
-            title="Contact us to add a payment method"
+            title="Message me to add a payment method"
           >
             <Plus className="icon-xs" />
             Add Payment Method
@@ -356,7 +356,7 @@ export function AutoPaySettings({ getAuthToken, showNotification }: AutoPaySetti
         {methods.length === 0 ? (
           <EmptyState
             icon={<CreditCard className="icon-lg" />}
-            message="No payment methods saved yet. Contact us to add a payment method."
+            message="No payment methods saved yet. Message me to add a payment method."
           />
         ) : (
           <div className="card-list">
@@ -373,7 +373,7 @@ export function AutoPaySettings({ getAuthToken, showNotification }: AutoPaySetti
         )}
 
         <p className="form-helper-text text-muted">
-          To add a new payment method, please contact us directly.
+          To add a new payment method, just message me directly.
         </p>
       </div>
 

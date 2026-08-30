@@ -429,7 +429,7 @@ Welcome to your ${BUSINESS_INFO.name} client portal! Your account is now active.
 
 **What you can do here:**
 - View your project status and milestones
-- Send and receive messages with our team
+- Send and receive messages with me
 - Upload and download project files
 - View and pay invoices
 

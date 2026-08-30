@@ -267,7 +267,7 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
             Ready to submit
           </p>
           <p className="text-secondary mt-1 ">
-            Click "Complete Onboarding" below to submit your information. We'll review everything and
+            Click "Complete Onboarding" below to submit your information. I'll review everything and
             get back to you within 1-2 business days.
           </p>
         </div>

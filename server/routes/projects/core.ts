@@ -194,7 +194,7 @@ router.post(
     sendCreated(
       res,
       { project: newProject },
-      'Project request submitted successfully. We will review and get back to you soon!'
+      'Project request submitted successfully. I will review it and get back to you soon!'
     );
   })
 );
@@ -461,10 +461,10 @@ router.put(
           const statusDescriptions: { [key: string]: string } = {
             pending: 'Your project has been queued and will begin soon.',
             'in-progress': 'Work has begun on your project and is progressing well.',
-            'in-review': "Your project is complete and under review. We'll have updates soon.",
+            'in-review': "Your project is complete and under review. I'll have updates soon.",
             completed: 'Congratulations! Your project has been completed successfully.',
             'on-hold':
-              "Your project has been temporarily paused. We'll keep you updated on next steps."
+              "Your project has been temporarily paused. I'll keep you updated on next steps."
           };
 
           const clientEmail = getString(client, 'email');
@@ -487,7 +487,7 @@ router.put(
                 : req.body.status === 'in-review'
                   ? [
                       'Review will be completed within 2 business days',
-                      'We may contact you for clarifications'
+                      'I may contact you for clarifications'
                     ]
                   : []
           });

@@ -859,7 +859,7 @@ Signature Details:
 You can download a copy of the signed contract here:
 ${baseUrl}/api/projects/${projectId}/contract/pdf
 
-We're excited to get started on your project! We'll be in touch soon with next steps.
+I'm excited to get started on your project! I'll be in touch soon with next steps.
 
 Best regards,
 ${BUSINESS_INFO.name}
@@ -906,7 +906,7 @@ ${BUSINESS_INFO.email}
       <p style="text-align: center; margin: 25px 0;">
         <a href="${baseUrl}/api/projects/${projectId}/contract/pdf" class="btn">Download Contract</a>
       </p>
-      <p>We're excited to get started on your project! We'll be in touch soon with next steps.</p>
+      <p>I'm excited to get started on your project! I'll be in touch soon with next steps.</p>
     </div>
     <div class="footer">
       <p>Best regards,<br>${BUSINESS_INFO.name}<br>${BUSINESS_INFO.email}</p>

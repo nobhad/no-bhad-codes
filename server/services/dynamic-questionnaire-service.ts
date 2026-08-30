@@ -459,9 +459,9 @@ export async function generateDynamicQuestionnaire(
   const missingCount = allQuestions.length - collectedFields.size;
   const description =
     missingCount > 0
-      ? "We have some of your project details already — please review what we have and fill in anything that's missing. " +
-        'The more detail you provide, the better we can tailor our proposal to your needs.'
-      : 'We have your project details on file. Please review everything and make any corrections or updates.';
+      ? "I have some of your project details already — please review them and fill in anything that's missing. " +
+        'The more detail you provide, the better I can tailor the proposal to your needs.'
+      : 'I have your project details on file. Please review everything and make any corrections or updates.';
 
   const qResult = await db.run(
     `INSERT INTO questionnaires (

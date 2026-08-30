@@ -242,7 +242,7 @@ export function StripePaymentForm({
               rateLimited:
                   'Too many payment attempts — please wait a moment and try again.',
               conflict:
-                  "We're still processing your last attempt. Hang tight and try again shortly.",
+                  "I'm still processing your last attempt. Hang tight and try again shortly.",
               fallback: 'Failed to initialize payment'
             })
             : err instanceof Error

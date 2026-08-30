@@ -403,7 +403,7 @@ class ClientInfoService {
       items.push({
         type: 'onboarding',
         title: 'Complete Onboarding Wizard',
-        description: 'Complete the onboarding wizard to help us understand your project needs'
+        description: 'Complete the onboarding wizard to help me understand your project needs'
       });
     }
 

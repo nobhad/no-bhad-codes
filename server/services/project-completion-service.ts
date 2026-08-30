@@ -147,7 +147,7 @@ export async function completeProject(
           '',
           "If you have any questions or need anything else, don't hesitate to reach out.",
           '',
-          'Thank you for working with us!',
+          'Thank you for working with me!',
           '',
           `${BUSINESS_INFO.owner}`,
           `${BUSINESS_INFO.name}`
@@ -159,7 +159,7 @@ export async function completeProject(
           `<p>Great news! Your project <strong>"${project.project_name}"</strong> has been completed.</p>`,
           '<p>All milestones have been delivered and approved. You can access all your project files and documentation through the client portal.</p>',
           "<p>If you have any questions or need anything else, don't hesitate to reach out.</p>",
-          '<p style="margin-top: 30px;">Thank you for working with us!</p>',
+          '<p style="margin-top: 30px;">Thank you for working with me!</p>',
           `<p>${BUSINESS_INFO.owner}<br><em>${BUSINESS_INFO.name}</em></p>`,
           '</div>'
         ].join('\n')

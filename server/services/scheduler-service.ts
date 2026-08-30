@@ -1469,7 +1469,7 @@ ${BUSINESS_INFO.name} Team
       case 'overdue_30':
         subject = `COLLECTION NOTICE: Invoice #${invoiceNumber}`;
         message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is now 30 days overdue.`;
-        urgency = 'Please contact us immediately to discuss payment arrangements.';
+        urgency = 'Please message me right away to discuss payment arrangements.';
         break;
       default:
         subject = `Payment Reminder: Invoice #${invoiceNumber}`;
