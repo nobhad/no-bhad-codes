@@ -695,10 +695,27 @@
   gap: var(--space-5);
 }
 
+/* One border for every piece of media on the page — the hero, the two
+   walkthroughs and the screenshot run — so a video does not read as a
+   different kind of object from the still above it. Same weight as the
+   screenshots already carried. */
+.worksub-header figure,
+#project-walkthrough .project-media,
+#project-deepdive-video .project-media,
 #project-info .project-media {
-  margin: 0;
   border: var(--border-width-thin, 1px) solid var(--color-dark);
   overflow: hidden;
+}
+
+[data-theme="dark"] .worksub-header figure,
+[data-theme="dark"] #project-walkthrough .project-media,
+[data-theme="dark"] #project-deepdive-video .project-media,
+[data-theme="dark"] #project-info .project-media {
+  border-color: var(--color-neutral-600, rgba(255, 255, 255, 0.35));
+}
+
+#project-info .project-media {
+  margin: 0;
 }
 
 /* Walkthrough video: full content width. */
