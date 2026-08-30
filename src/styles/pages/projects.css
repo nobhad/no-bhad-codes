@@ -2034,11 +2034,19 @@
      channel guide at z-index 2 and the screen showed flat artwork instead of
      content. The aperture is knocked out of the asset itself; these numbers
      just line the live screen up with the hole. */
+  /* The mobile cabinet's aperture, measured as the largest connected
+     TRANSPARENT region of tv/chassis-mobile.webp seeded inside the tube —
+     x 195-2285, y 173-1733 of 2480x2540. Taking the flood-filled colour region
+     instead came up 16px short at the top and a few px inside on the right and
+     bottom, because that fill stops on the bezel's inner shading rather than at
+     the edge of the hole. The alpha is the hole; nothing else is.
+     Resulting tube is 1.340:1 against the desktop's 1.349:1 — the same picture
+     in both cabinets, which is what makes one set of layer rules work for both. */
   .crt-tv {
-    --tv-screen-top: 7.441%;
+    --tv-screen-top: 6.811%;
     --tv-screen-left: 7.863%;
-    --tv-screen-width: 84.073%;
-    --tv-screen-height: 60.472%;
+    --tv-screen-width: 84.274%;
+    --tv-screen-height: 61.417%;
   }
 
   /* The painted capsules are 1.34% of the cabinet's height — about 5px on a
