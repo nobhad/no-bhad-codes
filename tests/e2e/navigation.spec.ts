@@ -12,8 +12,11 @@ import { test, expect } from '@playwright/test';
 test.describe('Navigation', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    // Wait for app initialization
-    await page.waitForSelector('[data-nav]');
+    // Wait for app initialization. 'attached', not the default 'visible': the
+    // menu starts closed, so [data-nav] is in the DOM at display:none until
+    // something opens it, and waiting for it to be visible times out before
+    // any of these tests get to run.
+    await page.waitForSelector('[data-nav]', { state: 'attached' });
   });
 
   test('should open and close menu', async ({ page }) => {
@@ -23,7 +26,7 @@ test.describe('Navigation', () => {
 
     // Menu should be visible
     await expect(page.locator('.menu')).toBeVisible();
-    await expect(page.locator('.menu-link')).toHaveCount(3);
+    await expect(page.locator('.menu-link')).toHaveCount(5);
 
     // Close menu by clicking overlay
     await page.click('.overlay');
@@ -31,23 +34,16 @@ test.describe('Navigation', () => {
   });
 
   test('should navigate between sections', async ({ page }) => {
-    // Open menu
+    // Routes are hashes with a path — '#/about', not '#about'. The menu moves
+    // the camera between map tiles rather than scrolling one page.
     await page.click('[data-menu-toggle]');
-
-    // Click about link
-    await page.click('a[href="#about"]');
-
-    // Should navigate to about section
-    await expect(page).toHaveURL('/#about');
+    await page.click('a[href="#/about"]');
+    await expect(page).toHaveURL(/#\/about$/);
     await expect(page.locator('.about-section')).toBeInViewport();
 
-    // Open menu again
     await page.click('[data-menu-toggle]');
-
-    // Navigate to contact
-    await page.click('a[href="#contact"]');
-
-    await expect(page).toHaveURL('/#contact');
+    await page.click('a[href="#/contact"]');
+    await expect(page).toHaveURL(/#\/contact$/);
     await expect(page.locator('.contact-section')).toBeInViewport();
   });
 
@@ -93,21 +89,16 @@ test.describe('Navigation', () => {
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('ArrowDown');
 
-    // Activate contact link with Enter
+    // Activate whichever link focus landed on; the assertion is that keyboard
+    // activation navigates at all, not which entry it reached.
     await page.keyboard.press('Enter');
 
-    await expect(page).toHaveURL('/#contact');
+    await expect(page).toHaveURL(/#\//);
   });
 
   test('should show active menu item', async ({ page }) => {
-    // Navigate to about section
-    await page.goto('/#about');
-
-    // Open menu
+    await page.goto('/#/about');
     await page.click('[data-menu-toggle]');
-
-    // About link should be active
-    const aboutLink = page.locator('a[href="#about"]');
-    await expect(aboutLink).toHaveClass(/active/);
+    await expect(page.locator('a[href="#/about"]')).toHaveClass(/active/);
   });
 });

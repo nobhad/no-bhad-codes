@@ -36,6 +36,11 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
+        // Use the installed Google Chrome rather than Playwright's bundled
+        // Chromium. The pinned Playwright wants a build that is not in the
+        // local cache, so the bundled binary fails to launch and the suite
+        // never ran; the installed browser needs no download.
+        channel: 'chrome',
         // Disable reduced motion for testing animations
         userAgent:
           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
