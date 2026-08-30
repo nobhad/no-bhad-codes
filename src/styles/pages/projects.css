@@ -720,7 +720,7 @@
      live content (.crt-tv__screen). Declared once so a cabinet swap is four
      numbers, not twelve, and the three can never drift apart.
      Measured from tv/chassis.webp's transparent cutout. */
-  --tv-screen-top: 8.463%;
+  --tv-screen-top: 8.9%;
   --tv-screen-left: 6.987%;
   --tv-screen-width: 72.823%;
   --tv-screen-height: 70.357%;
@@ -2045,7 +2045,7 @@
   .crt-tv {
     --tv-screen-top: 6.811%;
     --tv-screen-left: 7.863%;
-    --tv-screen-width: 84.274%;
+    --tv-screen-width: 84.234%;
     --tv-screen-height: 61.417%;
   }
 
@@ -2112,5 +2112,14 @@
      panel below the set is redundant here. */
   .projects-tv-controls {
     display: none;
+  }
+
+  /* The guide's rules are sized for a screen three times this wide. At 289px
+     the masthead's 2px reads as a heavy bar rather than a rule, and the 1px
+     row lines crowd the text. Scaled to the cabinet: the masthead stays
+     visibly heavier than the rows, which is the hierarchy it exists for. */
+  .crt-tv__channel-list {
+    --tv-guide-rule: 0.5px solid rgba(255, 255, 255, 0.18);
+    --tv-guide-rule-major: 1px solid rgba(255, 255, 255, 0.34);
   }
 }
