@@ -619,3 +619,27 @@
     margin-top: 1rem;
   }
 }
+
+
+/* ============================================
+ * MOBILE CABINET (max-width: 479px)
+ * ============================================ */
+
+/* Below 480px the TV swaps to the portrait mobile cabinet
+   (tv/chassis-mobile.webp), whose button overlays are sized in
+   pages/projects.css against ITS artboard and already fill the gaps between
+   the painted capsules. The `padding: 1% 0` above — added to pad out the
+   DESKTOP cabinet's hair-thin capsules, and still correct from 480-767px
+   where that cabinet is what's on screen — stacks on top of those heights and
+   pushed every button past its neighbour, so all three overlapped and a tap
+   on VOLUME hit CHANNEL.
+
+   Switched off here rather than overridden from pages/projects.css: that file
+   is in layer(pages) and this one is in layer(responsive), so the layer order
+   decides it and no amount of specificity over there can win. */
+@media (max-width: 479px) {
+  .projects-section .crt-tv__btn {
+    padding: 0;
+    box-sizing: border-box;
+  }
+}

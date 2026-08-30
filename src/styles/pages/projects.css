@@ -861,6 +861,12 @@
 /* The TV frame — must paint ON TOP of the title-card and channel list
    so the bezel surrounds the screen content. pointer-events:none lets
    clicks pass through to the channel rows behind it. */
+/* display: contents so the wrapper adds nothing to layout — the <img> inside
+   keeps behaving exactly as it did when it was a direct child. */
+.crt-tv__frame-picture {
+  display: contents;
+}
+
 .crt-tv__frame {
   position: relative;
   width: 100%;
@@ -1042,19 +1048,14 @@
   opacity: 1;
 }
 
-/* Small-mobile (≤479px): channel + volume controls on the TV chassis are
-   too cramped to hit reliably with a finger, and channel cycling moves to
-   dedicated buttons rendered below the TV. Power stays — it's the only
-   on-frame control that still matters on phones. */
-@media (max-width: 479px) {
-  .crt-tv__btn--channel-down,
-  .crt-tv__btn--channel-up,
-  .crt-tv__btn--volume-down,
-  .crt-tv__btn--volume-up {
-    pointer-events: none;
-    cursor: default;
-  }
-}
+/* This used to disable channel + volume on the chassis below 480px, because on
+   the DESKTOP cabinet those capsules are far too cramped to hit with a finger
+   and channel cycling had moved to separate buttons rendered under the TV.
+   The mobile cabinet is drawn for exactly this — its controls sit in a band
+   below the screen at a size that can be tapped — so they are live again, and
+   the separate panel is gone. Kept as a note rather than deleted silently:
+   whether the on-frame controls are usable is a property of which cabinet is
+   on screen, and that is now the thing that decides it. */
 
 /* External channel controls — rendered below the TV on small-mobile only.
    The base rule hides them everywhere; the @media block below shows them
@@ -1981,3 +1982,107 @@
 }
 
 /* Project detail styles moved to projects-detail.css */
+
+
+/* ============================================
+ * MOBILE CABINET (max-width: 479px)
+ * ============================================
+ * A different chassis, so every percentage measured against the desktop one
+ * has to be re-measured against this one. All figures below come from the
+ * alpha/colour channels of tv/chassis-mobile.webp (1240x1270 artboard):
+ *
+ *   screen aperture   x 108-1104  y 106-851
+ *   POWER capsule     x 634-832   y 1022-1039
+ *   CHANNEL capsule   x 634-832   y 1081-1098
+ *   VOLUME capsule    x 634-832   y 1142-1159
+ *   LED digit window  x 436-520   y 1001-1069
+ *
+ * The controls, readout and speakers live in a band BELOW the screen here,
+ * rather than in a column down the right, so nothing carries over.
+ */
+
+@media (max-width: 479px) {
+  /* Reserve the mobile cabinet's proportions, not the desktop's. */
+  .crt-tv__frame {
+    aspect-ratio: 1240 / 1270;
+  }
+
+  /* Matched to the cabinet's actual picture-tube cutout, flood-filled out of
+     the artwork's alpha (x 195-2257, y 189-1725 of 2480x2540). The Illustrator
+     export arrives fully OPAQUE — unlike the desktop chassis, which ships with
+     a transparent screen — so the frame at z-index 3 sat straight over the
+     channel guide at z-index 2 and the screen showed flat artwork instead of
+     content. The aperture is knocked out of the asset itself; these numbers
+     just line the live screen up with the hole. */
+  .crt-tv__screen {
+    top: 7.441%;
+    left: 7.863%;
+    width: 83.145%;
+    height: 60.472%;
+  }
+
+  /* The painted capsules are 1.34% of the cabinet's height — about 5px on a
+     390px phone, far too small to hit. Each overlay is grown into the dead
+     space around its capsule, stopping short of its neighbour: 4.4% tall
+     against a 4.65% centre-to-centre spacing.
+     The desktop rule adds vertical padding to pad out its own tiny capsules;
+     here that padding is what pushed each box past its neighbour and made the
+     three overlap, so the height alone does the work. */
+
+  .crt-tv__btn--power {
+    top: 78.97%;
+    left: 51.13%;
+    width: 15.97%;
+    height: 4.4%;
+  }
+
+  .crt-tv__btn--channel-down {
+    top: 83.62%;
+    left: 51.13%;
+    width: 7.99%;
+    height: 4.4%;
+  }
+
+  .crt-tv__btn--channel-up {
+    top: 83.62%;
+    left: 59.12%;
+    width: 7.99%;
+    height: 4.4%;
+  }
+
+  .crt-tv__btn--volume-down {
+    top: 88.42%;
+    left: 51.13%;
+    width: 7.99%;
+    height: 4.4%;
+  }
+
+  .crt-tv__btn--volume-up {
+    top: 88.42%;
+    left: 59.12%;
+    width: 7.99%;
+    height: 4.4%;
+  }
+
+  /* The lit channel number is HIDDEN on this cabinet, and the readout shows its
+     unlit "88" instead.
+     tv/led/NN.webp are full-frame 2850x2186 overlays whose digits are drawn to
+     the DESKTOP readout — 232x180, an aspect of 1.29. This cabinet's readout is
+     122x77, an aspect of 1.58. There is no scale that puts one on the other:
+     match the width and the digits overflow the window vertically, match the
+     height and they sit visibly small inside it. Both were tried, and a lit
+     number floating out of register over an unlit one looks broken in a way
+     that an idle display does not.
+     Showing this needs LED digits drawn to THIS artboard's proportions (or the
+     readout redrawn at the desktop's). Until then the set reads as on, with the
+     channel visible where it actually matters — in the guide on the screen. */
+  .crt-tv__channel-display {
+    display: none;
+  }
+
+  /* This cabinet has its own controls painted on, so the separate enlarged
+     panel below the set is redundant here. */
+  .projects-tv-controls {
+    display: none;
+  }
+}

@@ -610,7 +610,17 @@ export class ProjectsModule extends BaseModule {
             <div class="crt-tv__scanlines"></div>
             <div class="crt-tv__glare"></div>
           </div>
-          <img class="crt-tv__frame" src="/images/tv/chassis.webp" alt="Vintage Television" />
+          <!-- Two cabinets, one set. The desktop chassis is landscape
+               (1426x1093) with its controls in a column down the right; the
+               mobile one is near-square (1240x1270) with the controls, readout
+               and speakers in a band UNDER the screen, which is the only way
+               a CRT and its controls both fit a portrait phone. <picture>
+               swaps them at the breakpoint; --tv-aspect is re-read on each
+               load so the wrapper's width math follows. -->
+          <picture class="crt-tv__frame-picture">
+            <source media="(max-width: 479px)" srcset="/images/tv/chassis-mobile.webp" />
+            <img class="crt-tv__frame" src="/images/tv/chassis.webp" alt="Vintage Television" />
+          </picture>
           <!-- LED channel display — overlays the TV's "88" digital readout
                area (positioned via CSS at coords measured against the
                tv/chassis.webp). Defaults to channel 01 (the TV
@@ -718,10 +728,13 @@ export class ProjectsModule extends BaseModule {
           tvEl?.style.setProperty('--tv-aspect', String(w / h));
         }
       };
+      // NOT `{ once: true }`: <picture> swaps the source when the viewport
+      // crosses the breakpoint, and the two cabinets have different aspect
+      // ratios (1.30 vs 0.98). Listening only for the first load left the
+      // wrapper sizing the mobile cabinet with the desktop's proportions.
+      frameImg.addEventListener('load', setAspect);
       if (frameImg.complete) {
         setAspect();
-      } else {
-        frameImg.addEventListener('load', setAspect, { once: true });
       }
     }
 
