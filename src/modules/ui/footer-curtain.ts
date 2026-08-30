@@ -165,6 +165,10 @@ export class FooterCurtainModule extends BaseModule {
    * the same property would still fight on the frames where both ran.
    */
   private applyHeaderOffset(curtainProgress: number): void {
+    // Publish the lift before the early return — a page with no header still
+    // travels, and anything anchored to the viewport still has to follow it.
+    this.publishCurtainLift(curtainProgress);
+
     if (!this.header) {
       return;
     }
@@ -185,6 +189,24 @@ export class FooterCurtainModule extends BaseModule {
     gsap.set(this.header, {
       y: -(curtainProgress * this.curtainHeight) - scrollAway
     });
+  }
+
+  /**
+   * Expose how far the page has been carried up, in pixels, as a CSS custom
+   * property on <html>.
+   *
+   * Position-fixed furniture is anchored to the VIEWPORT, so it does not ride
+   * the page's transform the way in-flow content does — the curtain would rise
+   * straight over the top of it. Anything that needs to travel with the content
+   * adds this to its own offset (see --callout-gap-y in
+   * styles/components/arrow-callout-theme.css). Written on every progress
+   * application, so it stays correct mid-scrub rather than only at the ends.
+   */
+  private publishCurtainLift(curtainProgress: number): void {
+    document.documentElement.style.setProperty(
+      '--footer-curtain-lift',
+      `${Math.round(curtainProgress * this.curtainHeight)}px`
+    );
   }
 
   /**

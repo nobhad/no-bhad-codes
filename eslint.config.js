@@ -327,5 +327,27 @@ export default [
     rules: {
       curly: ['error', 'all']
     }
+  },
+
+  // Vendored components keep their upstream source's formatting so the copy
+  // stays byte-identical to reusable-components/ and can be re-vendored with a
+  // plain `cp` instead of a re-fix. Only layout rules are relaxed — everything
+  // that catches actual bugs still applies.
+  {
+    files: ['src/components/arrow-callout/**/*.js'],
+    rules: {
+      curly: 'off'
+    }
+  },
+
+  // Declaration files reference ambient DOM types (ParentNode, HTMLElement) that
+  // `no-undef` cannot see. TypeScript already resolves them — and resolving
+  // types is the one thing it is strictly better at than ESLint — so the rule
+  // only produces false positives here.
+  {
+    files: ['**/*.d.ts'],
+    rules: {
+      'no-undef': 'off'
+    }
   }
 ];

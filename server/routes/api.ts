@@ -252,13 +252,18 @@ Received: ${new Date().toISOString()}
       try {
         await emailService.sendEmail({
           to: email,
-          subject: `We received your message - ${BUSINESS_INFO.name}`,
-          text: `Hi ${name},\n\nThank you for reaching out! We've received your message and will get back to you within 1-2 business days.\n\nIn the meantime, feel free to browse our portfolio at ${BUSINESS_INFO.website}.\n\nBest,\n${BUSINESS_INFO.owner}\n${BUSINESS_INFO.name}`,
+          // First person singular throughout: No Bhad Codes is one person, and
+          // "we" in a one-person studio's auto-reply reads as either a front or
+          // a template nobody edited. The 48-hour figure matches what Arrow
+          // promises on the contact page — a visitor who reads both should not
+          // be given two different answers. No "browse my portfolio" line:
+          // they just filled in a form ON the portfolio.
+          subject: `I got your message - ${BUSINESS_INFO.name}`,
+          text: `Hi ${name},\n\nThank you for reaching out! I've got your message and will get back to you within 48 business hours.\n\nBest,\n${BUSINESS_INFO.owner}\n${BUSINESS_INFO.name}`,
           html: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #333;">Thank you for reaching out!</h2>
           <p>Hi ${escapeHtml(name)},</p>
-          <p>We've received your message and will get back to you within <strong>1-2 business days</strong>.</p>
-          <p>In the meantime, feel free to browse our work at <a href="https://${BUSINESS_INFO.website}">${BUSINESS_INFO.website}</a>.</p>
+          <p>I've got your message and will get back to you within <strong>48 business hours</strong>.</p>
           <p style="margin-top: 30px;">Best,<br>${escapeHtml(BUSINESS_INFO.owner)}<br><em>${escapeHtml(BUSINESS_INFO.name)}</em></p>
         </div>`
         });

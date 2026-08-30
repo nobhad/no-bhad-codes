@@ -1580,7 +1580,23 @@
      This keeps the rendered TV at its established size rather than
      scaling it up for the sake of pixel count. */
   --tv-available-height: calc(100dvh - 170px);
-  width: min(1240px, calc(var(--tv-available-height) * var(--tv-aspect, 1.249)));
+
+  /* Breathing room kept between the chassis and the viewport edges. */
+  --tv-edge-gutter: 2rem;
+
+  /* Three caps, smallest wins — the third is what stops it being clipped.
+     `max-width: 100%` alone was not enough: .projects-tv-wrap is width:100% of
+     a parent that sizes to ITS content, so a 1240px TV widened the wrap to
+     1256px inside a 1024px section, and 100% of an already-overflowing box is
+     still overflowing. At iPad Pro the chassis hung 108px off each edge. A
+     viewport cap cannot be fooled that way, because it never asks an ancestor
+     how wide it is. (Safe here specifically because body/main carry
+     overflow:hidden in this layout, so 100vw has no scrollbar to mismeasure.) */
+  width: min(
+    1240px,
+    calc(var(--tv-available-height) * var(--tv-aspect, 1.249)),
+    calc(100vw - var(--tv-edge-gutter))
+  );
   max-width: 100%;
 }
 
@@ -1591,15 +1607,33 @@
  * rows, with the active channel highlighted.
  */
 .crt-tv__channel-list {
+  /* The guide's two rule weights, named here so the major rule and the row
+     rules can never drift apart. Kept as literal rgba rather than palette
+     tokens for the same reason as the rest of this file: these are ink ON the
+     CRT screen image, which is the same colour in both site themes — a themed
+     border would invert to black-on-black in light mode. */
+  --tv-guide-rule: 1px solid rgba(255, 255, 255, 0.18);
+  --tv-guide-rule-major: 2px solid rgba(255, 255, 255, 0.34);
+
+  /* Named so the rules can cancel it and bleed edge to edge — see
+     --tv-guide-pad-x uses below. Kept tight because info-line has
+     overflow:hidden + text-overflow:clip, so extra horizontal padding eats
+     into the column width and clips "Portfolio Guide". */
+  --tv-guide-pad-x: clamp(0.75rem, 2.4cqw, 1.4rem);
+  --tv-guide-pad-top: clamp(1rem, 3.5cqw, 2.25rem);
+
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
-  /* Vertical padding gives the rows room from the screen aperture's
-     top + bottom edges. Horizontal padding kept tighter — info-line
-     has overflow:hidden + text-overflow:clip, so extra horizontal
-     padding eats into the column width and clips "Portfolio Guide". */
-  padding: clamp(1rem, 3.5cqw, 2.25rem) clamp(0.75rem, 2.4cqw, 1.4rem);
+  /* NO bottom padding. The guide is meant to run off the bottom of the picture
+     tube the way a real broadcast does — the last row half-swallowed by the
+     bezel is what sells it as a screen rather than a div. With bottom padding
+     the ticker's overflow:hidden cropped rows at its own box edge instead: a
+     hard horizontal cut through the middle of a word, floating in clear space
+     well above the glass, which read as a rendering bug. Ending flush with the
+     aperture puts the cut under the bezel curve, where a cut belongs. */
+  padding: var(--tv-guide-pad-top) var(--tv-guide-pad-x) 0;
   /* No background — the title-card base image (the dark vignetted
      screen backdrop) shows through. Hardcoded text color so the TV
      interior stays the same in light/dark site themes. */
@@ -1633,7 +1667,17 @@
   min-height: 0;
   align-items: stretch;
   padding-bottom: clamp(0.4rem, 1.6cqw, 0.8rem);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  /* Heavier than the row rules below it. This is the guide's masthead rule —
+     it separates the "now showing" block from the scrolling grid, so it is a
+     different KIND of line from the ones merely separating one row from the
+     next, and matching their weight flattened that hierarchy. */
+  border-bottom: var(--tv-guide-rule-major);
+  /* Bleed the rule the full width of the screen. A Prevue-style guide's rules
+     run edge to edge; stopping short of the glass by the list's padding made
+     them read as an underline on a text block instead of a table rule. The
+     matching inline padding keeps the CONTENT where it was. */
+  margin-inline: calc(var(--tv-guide-pad-x) * -1);
+  padding-inline: var(--tv-guide-pad-x);
 }
 
 .crt-tv__guide-info {
@@ -1757,6 +1801,10 @@
   overflow: hidden;
   position: relative;
   padding-top: clamp(0.4rem, 1.6cqw, 0.8rem);
+  /* Bled to the glass so the row rules inside can reach it. This box is the
+     ticker's clip region, so its edges ARE where rows get cut — which is why
+     it has to end at the aperture rather than inside it. */
+  margin-inline: calc(var(--tv-guide-pad-x) * -1);
 }
 
 .crt-tv__channel-rows {
@@ -1775,7 +1823,10 @@
    bottom of the cloned set. */
 .crt-tv__channel-row-item {
   list-style: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  border-top: var(--tv-guide-rule);
+  /* The rule spans the bled width; the padding puts the row's text back where
+     it was, aligned with the masthead above it. */
+  padding-inline: var(--tv-guide-pad-x);
 }
 
 /* Each row is a real <button> so it's clickable, focusable, and shows

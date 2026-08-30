@@ -8,8 +8,6 @@
  * that are not included in standard lib.dom.d.ts.
  */
 
-/* eslint-disable no-undef */
-
 import type { Application } from '../core/app';
 import type { StateManager } from '../core/state/state-manager';
 import type { AppState } from '../core/state/types';

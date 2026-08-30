@@ -1,6 +1,6 @@
 Welcome {{name}}{{#if companyName}}, {{companyName}}{{/if}}!
 
-Thank you for choosing {{companyName}} for your development needs. We're excited to work with you and bring your vision to life.
+Thank you for choosing {{companyName}} for your development needs. I'm excited to work with you and bring your vision to life.
 
 GETTING STARTED
 ================
@@ -8,7 +8,7 @@ GETTING STARTED
 Your client portal is now ready! Here you can:
 • Track project progress in real-time
 • Review deliverables and milestones  
-• Communicate directly with our team
+• Message me directly
 • Access project documentation and assets
 
 Access Your Portal: {{loginUrl}}
@@ -16,17 +16,18 @@ Access Your Portal: {{loginUrl}}
 NEED HELP?
 ==========
 
-Our team is here to support you every step of the way.
+I'm here to support you every step of the way.
 
 Email: {{supportEmail}}
 Response Time: Within 4 business hours
 
-We look forward to delivering exceptional results for your project!
+I'm looking forward to delivering great results for your project!
 
-Best regards,
-The {{companyName}} Team
+Best,
+Noelle Bhaduri
+{{companyName}}
 
 ---
 © {{currentYear}} {{companyName}}. All rights reserved.
-Visit our website: {{websiteUrl}}
+Website: {{websiteUrl}}
 Contact Support: {{supportEmail}}

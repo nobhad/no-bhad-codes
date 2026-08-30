@@ -48,6 +48,16 @@
     justify-content: flex-start;
     padding-top: 2rem;
   }
+
+  /* Centre the content in the viewport. `margin-block: auto` rather than
+     `justify-content: center` on the section: the section is a scroll
+     container (overflow-y: auto), and centring a flex container's items
+     clips the overflowing TOP out of reach once the content is taller than
+     the box. Auto margins centre only the slack that actually exists, so a
+     tall form still starts at the top and scrolls normally. */
+  .contact-content {
+    margin-block: auto;
+  }
 }
 
 /* ============================================
@@ -62,8 +72,12 @@
   /* Form fills remaining vertical space below the heading + contact-options
      so the message textarea grows to consume free room without forcing a
      scroll. Submit button stays pinned at the bottom of the form column. */
+  /* Sized to its content, not stretched: the --mobile rule above centres it
+     with auto margins, and a growing child would eat the slack those margins
+     need. (This previously stretched so the message textarea filled the
+     screen — centring the block is the tradeoff for that.) */
   .contact-content {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-height: 0;
   }
 

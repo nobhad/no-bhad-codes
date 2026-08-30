@@ -700,6 +700,77 @@
               </div>
             </div>
           </div>
+
+          <!-- ARROW — mascot + speech bubble carrying every piece of form
+               feedback (validation, send failures, the sent confirmation) in
+               plain language. Manual mode: she is off screen entirely until
+               contact-form.ts calls open(), so she never sits over the form
+               waiting for something to happen. Portals to <body> on init. -->
+          <aside
+            class="arrow-callout arrow-callout--contact"
+            data-arrow-callout
+            data-callout-open="manual"
+            data-callout-id="contact-feedback"
+            data-callout-mascot-action="open"
+          >
+            <div class="arrow-callout__bubble" data-callout-bubble>
+              <button
+                class="arrow-callout__close"
+                type="button"
+                aria-label="Dismiss Arrow's note"
+                data-callout-close
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+              </button>
+              <img
+                class="arrow-callout__bubble-img"
+                src="/images/arrow-bubble.webp"
+                alt=""
+                width="540"
+                height="500"
+                loading="lazy"
+                decoding="async"
+              />
+              <!-- role=status + aria-live: this is the form's feedback, so a
+                   screen reader has to hear it. Everything else here is art. -->
+              <p class="arrow-callout__text" data-callout-text role="status" aria-live="polite"></p>
+            </div>
+
+            <!-- Arrow's art is a SIBLING of her button, not a child: the art
+                 spans the whole shared canvas so the drawing keeps the position
+                 it was composed in, while the button is only the rectangle she
+                 is drawn in. A button spanning the canvas was a transparent
+                 sheet over the page that swallowed taps meant for the form. -->
+            <img
+              class="arrow-callout__mascot-img"
+              src="/images/arrow-mascot.webp"
+              alt=""
+              width="540"
+              height="500"
+              loading="lazy"
+              decoding="async"
+            />
+            <button
+              class="arrow-callout__mascot"
+              type="button"
+              aria-label="Show Arrow's note again"
+              data-callout-mascot
+            ></button>
+          </aside>
         </section>
         <!-- PROJECT DETAIL SECTION (order: 4.6) — a map tile below projects -->
         <section

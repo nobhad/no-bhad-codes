@@ -404,7 +404,7 @@ export async function sendWelcomeEmail(
     text: `
       Hi ${name},
 
-      Thank you for choosing ${BUSINESS_INFO.name} for your project! We're excited to work with you.
+      Thank you for choosing ${BUSINESS_INFO.name} for your project! I'm excited to work with you.
 
       Your project details have been received and we're already reviewing your requirements.
       You'll receive a detailed proposal within 24-48 hours.
@@ -413,10 +413,10 @@ export async function sendWelcomeEmail(
       ${portalUrl}
 
       What happens next:
-      1. We'll review your project requirements
+      1. I'll review your project requirements
       2. You'll receive a detailed proposal and timeline
-      3. We'll schedule a discovery call to discuss details
-      4. Upon agreement, we'll begin development
+      3. I'll schedule a discovery call to discuss details
+      4. Upon agreement, I'll begin development
 
       If you have any questions, feel free to reply to this email.
 
@@ -517,7 +517,7 @@ function generateWelcomeEmailHTML(name: string, portalUrl: string): string {
         <div class="content">
           <h2>Hi ${safeName},</h2>
 
-          <p>Thank you for choosing <strong>${BUSINESS_INFO.name}</strong> for your project! We're excited to work with you.</p>
+          <p>Thank you for choosing <strong>${BUSINESS_INFO.name}</strong> for your project! I'm excited to work with you.</p>
 
           <p>Your project details have been received and we're already reviewing your requirements. You'll receive a detailed proposal within <strong>24-48 hours</strong>.</p>
 
@@ -529,10 +529,10 @@ function generateWelcomeEmailHTML(name: string, portalUrl: string): string {
 
           <h3>What happens next:</h3>
           <ol>
-            <li>We'll review your project requirements</li>
+            <li>I'll review your project requirements</li>
             <li>You'll receive a detailed proposal and timeline</li>
-            <li>We'll schedule a discovery call to discuss details</li>
-            <li>Upon agreement, we'll begin development</li>
+            <li>I'll schedule a discovery call to discuss details</li>
+            <li>Upon agreement, I'll begin development</li>
           </ol>
 
           <p>If you have any questions, feel free to reply to this email.</p>
@@ -782,7 +782,7 @@ export const emailService = {
       text: `
         Hi ${name},
 
-        We received a request to reset your password for your ${BUSINESS_INFO.name} account.
+        I got a request to reset your password for your ${BUSINESS_INFO.name} account.
 
         Click the link below to reset your password:
         ${resetUrl}
@@ -809,7 +809,7 @@ export const emailService = {
           <div class="container">
             <h2>Password Reset Request</h2>
             <p>Hi ${name},</p>
-            <p>We received a request to reset your password for your ${BUSINESS_INFO.name} account.</p>
+            <p>I got a request to reset your password for your ${BUSINESS_INFO.name} account.</p>
             <p style="text-align: center; margin: 30px 0;">
               <a href="${resetUrl}" class="button">Reset Password</a>
             </p>
@@ -972,7 +972,7 @@ export const emailService = {
             <div class="content">
               <p>Hi ${name},</p>
 
-              <p>Your client portal account has been successfully activated. You now have access to all the tools you need to collaborate with us on your project.</p>
+              <p>Your client portal account has been successfully activated. You now have access to all the tools you need to work with me on your project.</p>
 
               <div class="feature-list">
                 <strong>Here's what you can do in your portal:</strong>
@@ -1304,9 +1304,9 @@ ${data.maintenanceOption ? `- Maintenance Plan: ${data.maintenanceOption}` : ''}
 ${data.addedFeatures?.length ? `Your Selected Add-ons:\n${data.addedFeatures.map((f) => `- ${f.name} (+$${f.price})`).join('\n')}` : ''}
 
 What Happens Next:
-1. We'll send you a welcome kit with project timeline and milestones
+1. I'll send you a welcome kit with project timeline and milestones
 2. You'll receive an invoice for the initial deposit
-3. We'll schedule a kickoff call to discuss your project in detail
+3. I'll schedule a kickoff call to discuss your project in detail
 4. Development begins according to your agreed timeline
 
 Access your client portal: ${data.portalUrl}
@@ -1315,7 +1315,7 @@ Signature Confirmation:
 Signed by: ${data.signerName}
 Date: ${data.signedAt}
 
-Questions? Reply to this email or contact us at ${data.supportEmail}
+Questions? Reply to this email or reach me at ${data.supportEmail}
 
 This email confirms your legally binding agreement. Please keep it for your records.
       `.trim();

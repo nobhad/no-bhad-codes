@@ -1,0 +1,173 @@
+/**
+ * ===============================================
+ * ARROW CALLOUT — PROJECT THEME + PLACEMENT
+ * ===============================================
+ * @file src/styles/components/arrow-callout-theme.css
+ *
+ * Overrides only. The component itself is vendored unmodified at
+ * src/styles/components/arrow-callout.css (source of truth:
+ * reusable-components/arrow-callout) — keep it pristine so improvements can be
+ * re-vendored without a merge. Everything project-specific lives here.
+ */
+
+.arrow-callout--contact {
+  /* --- Type + colour, from the site tokens ------------------------------- */
+  /* The terminal face, matching the intake form — Arrow and the terminal are
+     the two places on the site that "talk", so they speak in the same voice. */
+  --callout-font: var(--terminal-font-family);
+  --callout-font-size: var(--font-size-sm);
+  --callout-font-weight: var(--font-weight-regular);
+  --callout-line-height: var(--terminal-line-height);
+
+  /* The bubble art is white with a black outline in BOTH themes — it is line
+     art, not a themed surface — so the ink inside it stays the dark token
+     rather than following the page's text colour into white-on-white. */
+  --callout-text-color: var(--color-text-on-light, #191a0b);
+  --callout-close-bg: var(--color-bg-primary);
+  --callout-close-ink: var(--color-text-primary);
+
+  /* Arrow's own bounds within the 540×500 canvas, measured from the alpha
+     channel of arrow-mascot.webp (x 284–527, y 178–496). This is the only part
+     of the callout that takes a tap; the rest of the canvas is transparent art
+     and lets clicks through to the page — without which her bubble sat over the
+     submit button on a phone and made it unpressable while she was up. */
+  --callout-mascot-left: 52.6%;
+  --callout-mascot-top: 35.6%;
+  --callout-mascot-width: 45%;
+  --callout-mascot-height: 63.6%;
+
+  /* Text box measured against the bubble artwork: the largest rectangle that
+     fits inside the 540×500 canvas's rounded body is x 59–350, y 33–273, so
+     these sit just inside it. Retune only if the bubble art changes. */
+  --callout-text-left: 12%;
+  --callout-text-top: 8%;
+  --callout-text-width: 52%;
+  --callout-text-height: 45%;
+
+  /* Above page content so the bubble reads as being IN FRONT of the form where
+     they overlap, but below the nav menu and its overlay, so opening the menu
+     still covers her rather than her punching through it. */
+  --callout-z: var(--z-index-elevated);
+}
+
+/* =====================================================
+   PLACEMENT — beside the form, leaning in.
+
+   The form column is centred and capped at --contact-content-max-width, which
+   leaves a gutter of (100vw - that) / 2 on each side. Arrow lives in the right
+   gutter, sized to fit it rather than parked at a fixed width and hoped to
+   clear the viewport: the component's own clamp() would render her 448px wide
+   at 1400px, overrunning the edge once she is anchored to the form.
+
+   Her bubble deliberately laps the form's right edge by
+   --callout-form-overlap. She is speaking TO the form, and a bubble floating
+   in dead space beside it reads as unrelated furniture; a small overlap ties
+   the two together. Kept to a couple of rem — the fields it crosses are the
+   right-hand margin of the inputs, never their text or the submit button.
+
+   Below the breakpoint there is no gutter at all, so she stops being a
+   persistent bystander and becomes transient — see the mobile rule below.
+   ===================================================== */
+
+@media (min-width: 1180px) {
+  .arrow-callout--contact {
+    /* Distance from the centre line to the form's right edge. */
+    --callout-form-edge: calc(50% + (var(--contact-content-max-width, 580px) / 2));
+    /* Space left between that edge and the viewport, minus both gaps. */
+    --callout-gutter: calc(50vw - (var(--contact-content-max-width, 580px) / 2) - 2.5rem);
+    --callout-width: min(380px, var(--callout-gutter));
+
+    /* How far the bubble laps over the form's right edge. Tune here. */
+    --callout-form-overlap: 2.5rem;
+
+    /* Anchored to the FORM's right edge, not the viewport's. Pinned right, she
+       tracks the window instead of the form and drifts further away the wider
+       the screen gets — at 1920 that is a mascot alone in an empty margin
+       talking about a form 400px away. Anchored to the form she keeps the same
+       relationship to it at every width. */
+    left: calc(var(--callout-form-edge) - var(--callout-form-overlap));
+    right: auto;
+
+    /* Raised well clear of the bottom edge — she reads as stepping in beside
+       the form rather than peeking up from behind the footer. Plus whatever
+       the footer curtain has lifted the page by, so she travels with the
+       content instead of being slid over (see footer-curtain.ts). */
+    --callout-gap-y: 12vh;
+    bottom: calc(var(--callout-gap-y) + var(--footer-curtain-lift, 0px));
+  }
+}
+
+/* =====================================================
+   MOBILE — she pops up, is read, and dips back down.
+
+   There is no gutter to stand in at this width, so overlap is unavoidable
+   while she is on screen. The answer is not to shrink her into illegibility
+   but to make her brief: contact-form.ts passes an autoCloseMs here, and the
+   component's --callout-enter-offset drops her back below the fold when it
+   fires. The form is only obscured for as long as it takes to read one line.
+   ===================================================== */
+
+@media (--mobile) {
+  .arrow-callout--contact {
+    --callout-width: min(78vw, 340px);
+    --callout-gap-x: 0.75rem;
+    --callout-gap-y: 10vh;
+    bottom: calc(var(--callout-gap-y) + var(--footer-curtain-lift, 0px));
+    --callout-font-size: var(--font-size-xs);
+  }
+}
+
+
+/* =====================================================
+   SIZED TO THE MESSAGE
+
+   contact-form.ts stamps data-arrow-size from the message's length before
+   opening her, so she animates in already at her final size.
+
+   The whole canvas scales, not just the bubble: the art is one fixed 540×500
+   composition, and stretching only the bubble box would pull its corner radii
+   oval and drag the tail away from her mouth. Scaling the pair keeps the
+   drawing intact and reads as her leaning in for the longer notes.
+
+   Widths stay subject to the min() cap in the placement rule above, so a
+   "long" bubble on a narrow desktop still cannot outgrow its gutter.
+   ===================================================== */
+
+@media (min-width: 1180px) {
+  .arrow-callout--contact[data-arrow-size="short"] {
+    --callout-width: min(300px, var(--callout-gutter));
+  }
+
+  .arrow-callout--contact[data-arrow-size="medium"] {
+    --callout-width: min(360px, var(--callout-gutter));
+  }
+
+  .arrow-callout--contact[data-arrow-size="long"] {
+    --callout-width: min(430px, var(--callout-gutter));
+  }
+}
+
+@media (--mobile) {
+  .arrow-callout--contact[data-arrow-size="short"] {
+    --callout-width: min(64vw, 280px);
+  }
+
+  .arrow-callout--contact[data-arrow-size="medium"] {
+    --callout-width: min(74vw, 320px);
+  }
+
+  .arrow-callout--contact[data-arrow-size="long"] {
+    --callout-width: min(86vw, 370px);
+  }
+}
+
+/* The size swap is a transition of its own, so a re-open with a longer message
+   grows her rather than snapping. Excluded under reduced motion by the
+   component's own guard, which zeroes transform transitions there. */
+.arrow-callout--contact {
+  transition:
+    transform var(--callout-exit-duration) var(--callout-exit-ease),
+    opacity var(--callout-exit-duration) var(--callout-exit-ease),
+    visibility 0s linear var(--callout-exit-duration),
+    width var(--callout-enter-duration) var(--callout-enter-ease);
+}

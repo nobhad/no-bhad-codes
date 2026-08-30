@@ -35,6 +35,13 @@ export interface ContactSubmissionResult {
   success: boolean;
   message: string;
   error?: string;
+  /**
+   * HTTP status when the request actually reached a server, else null (offline,
+   * DNS failure, aborted). The UI needs this to tell three failures apart that
+   * are otherwise identical to a visitor but need different actions: 429 (wait),
+   * 403 (stale CSRF cookie — refresh), 5xx (our fault — try later or email).
+   */
+  status?: number | null;
 }
 
 export type ContactBackend = 'netlify' | 'formspree' | 'custom' | 'emailjs';
@@ -185,7 +192,8 @@ export class ContactService extends BaseService {
       return {
         success: false,
         message: userMessage,
-        error: errorMessage
+        error: errorMessage,
+        status: null
       };
     }
   }
@@ -317,8 +325,18 @@ export class ContactService extends BaseService {
         message: result.message || 'Message received, thanks!'
       };
     }
+    // Return rather than throw: the status is the single most useful thing we
+    // know about a failed submit, and throwing a formatted string meant the
+    // catch in submitForm had to sniff it back out of the message — which it
+    // only did for 'fetch'/'network'/'404', so 429, 403 and every 5xx all
+    // collapsed into the same vague "Unable to send message. Please try again."
     const errorText = await response.text();
-    throw new Error(`Custom endpoint submission failed: ${response.status} - ${errorText}`);
+    return {
+      success: false,
+      message: 'Unable to send message. Please try again.',
+      error: `Custom endpoint submission failed: ${response.status} - ${errorText}`,
+      status: response.status
+    };
   }
 
   /**
@@ -488,11 +506,13 @@ export class ContactService extends BaseService {
    * Generate auto-reply template
    */
   generateAutoReplyTemplate(formData: ContactFormData): string {
+    // First person singular, and signed by a person. No Bhad Codes is one
+    // person; "us" and "The Team" read as a template that was never edited.
     return `
-      <h2>Thank you for contacting us!</h2>
+      <h2>Thank you for getting in touch!</h2>
       <p>Hi ${formData.name},</p>
-      <p>We've received your message and will get back to you soon.</p>
-      <p>Best regards,<br>The Team</p>
+      <p>I've got your message and will get back to you within 48 business hours.</p>
+      <p>Best,<br>Noelle Bhaduri<br><em>No Bhad Codes</em></p>
     `;
   }
 

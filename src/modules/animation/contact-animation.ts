@@ -109,6 +109,8 @@ export class ContactAnimationModule extends BaseModule {
     const contactOptions = this.container.querySelector('.contact-options');
     const cardColumn = this.container.querySelector('.contact-card-column');
     const avatarBlurb = this.container.querySelector('.avatar-blurb-container');
+    // The four field wrappers (name / company / email / message).
+    const inputWrappers = Array.from(this.container.querySelectorAll('.contact-form .input-wrapper'));
 
     // Debug: log what elements were found
     this.log(
@@ -126,10 +128,6 @@ export class ContactAnimationModule extends BaseModule {
     // Ultra-fast timing for snappy feel
     // ========================================================================
     const blurAmount = 4;
-    const blurFadeDuration = 0.15; // Very fast fade in
-    const blurClearDuration = 0.15; // Very fast blur clear
-    const blurPause = 0; // No pause
-    const dropDuration = blurFadeDuration + blurPause + blurClearDuration; // Total blur phase duration (~0.3s)
 
     // Set initial blur state with will-change hint for GPU acceleration
     if (heading) {
@@ -154,6 +152,14 @@ export class ContactAnimationModule extends BaseModule {
         willChange: 'filter, opacity'
       });
     }
+    // Fields start hidden. They used to paint at their CSS default from first
+    // frame while the heading, divider, options and button all faded in around
+    // them — so the form arrived FIRST and the page assembled itself backwards.
+    // A flat fade (no per-field cascade) keeps the fix undistracting, which is
+    // why the old grow-in choreography stays deleted.
+    if (inputWrappers.length) {
+      gsap.set(inputWrappers, { opacity: 0 });
+    }
     // Avatar blurb — visible immediately (CSS controls opacity: 0.09 on parent)
     if (avatarBlurb) {
       gsap.set(avatarBlurb, {
@@ -163,88 +169,71 @@ export class ContactAnimationModule extends BaseModule {
       });
     }
 
-    // Fade in while blurred
-    if (heading) {
-      this.timeline.to(
-        heading,
+    // ONE continuous wave, not a queue of pops.
+    //
+    // This was five separate 0.15s tweens handed off end-to-end. 0.15s is nine
+    // frames: long enough to see, too short to read as motion, so each element
+    // registered as a discrete flash and the arrival looked patchy and stepped.
+    // Overlapping the hand-offs helped but could not fix the underlying
+    // problem, which is that they were separate events at all.
+    //
+    // Now every element rides one tween with a stagger. The stagger IS the
+    // choreography — order is just array order — so there are no hand-offs to
+    // see, and the whole thing runs long enough (~0.9s) to read as a single
+    // continuous movement. Elements travel a few px as well as fading:
+    // transform and opacity are the two properties the compositor can animate
+    // without touching layout or paint, which is what keeps it smooth.
+    const cascade = [heading, hr, contactOptions, ...inputWrappers].filter(Boolean);
+
+    if (cascade.length) {
+      this.timeline.fromTo(
+        cascade,
+        { opacity: 0, y: 10 },
         {
           opacity: 1,
-          duration: blurFadeDuration,
-          ease: 'power2.out'
-        },
-        0
-      );
-    }
-    // contactOptions animates in later with hr - skip in this phase
-    if (cardColumn) {
-      this.timeline.to(
-        cardColumn,
-        {
-          opacity: 1,
-          duration: blurFadeDuration,
-          ease: 'power2.out'
+          y: 0,
+          duration: 0.55,
+          ease: 'power2.out',
+          stagger: 0.07
         },
         0
       );
     }
 
-    // Brief pause then clear blur
-    this.timeline.to({}, { duration: blurPause });
-
+    // The heading's blur clear rides alongside the wave rather than being a
+    // phase of its own. `filter` is the one property here that forces a repaint
+    // every frame, so it stays on the SINGLE element that wants the effect —
+    // running it across the cascade was a large part of the dropped frames.
     if (heading) {
       this.timeline.to(
         heading,
         {
           filter: 'blur(0px)',
-          duration: blurClearDuration,
+          duration: 0.45,
           ease: 'power2.out'
         },
-        '>'
-      );
-    }
-    // contactOptions animates in later - skip blur animation here
-    if (cardColumn) {
-      this.timeline.to(
-        cardColumn,
-        {
-          filter: 'blur(0px)',
-          duration: blurClearDuration,
-          ease: 'power2.out'
-        },
-        '<'
+        0
       );
     }
 
-    // Clean up will-change after blur animations complete
+    if (cardColumn) {
+      this.timeline.fromTo(
+        cardColumn,
+        { opacity: 0, filter: `blur(${blurAmount}px)` },
+        {
+          opacity: 1,
+          filter: 'blur(0px)',
+          duration: 0.5,
+          ease: 'power2.out'
+        },
+        0
+      );
+    }
+
+    // Drop the GPU hints once the expensive properties have finished.
     this.timeline.set([heading, cardColumn].filter(Boolean), {
       willChange: 'auto'
     });
-
-    // Fade in hr after h2 animation completes (appears after h2 is fully visible)
-    if (hr) {
-      this.timeline.to(
-        hr,
-        {
-          opacity: 1,
-          duration: blurClearDuration,
-          ease: 'power2.out'
-        },
-        '>'
-      );
-    }
-
-    // Contact options fade in with hr
-    if (contactOptions) {
-      this.timeline.to(
-        contactOptions,
-        {
-          opacity: 1,
-          duration: blurClearDuration,
-          ease: 'power2.out'
-        },
-        '<'
-      );
-    }
 
     // ========================================================================
     // PHASE 3: Submit-button entrance + star-glow pulse
@@ -274,8 +263,6 @@ export class ContactAnimationModule extends BaseModule {
         filter: `blur(${blurAmount}px)`
       });
     }
-
-    const formStartTime = dropDuration; // Button entrance starts AFTER h2/card drop completes
 
     // Avatar blurb is always visible — CSS controls opacity via parent .contact-bg-avatar
     // Star glow pulses independently — not tied to main timeline so it always shows
@@ -318,7 +305,10 @@ export class ContactAnimationModule extends BaseModule {
           duration: 0.5,
           ease: 'back.out(1.4)'
         },
-        formStartTime
+        // Overlaps the tail of the field run. On the old absolute cue
+        // (formStartTime) it fired while the heading was still clearing its
+        // blur, so the button popped BEFORE the fields it belongs to.
+        '>-0.35'
       );
     }
 
@@ -456,11 +446,9 @@ export class ContactAnimationModule extends BaseModule {
   }
 
   /**
-   * Reset all animated elements to their initial animation state.
-   * Form fields are NOT reset — they're never animated, so they stay
-   * at their CSS-default visible state across every page entry/exit.
-   * Only the header elements (heading, hr, contactOptions, cardColumn)
-   * and the submit button get reset to their pre-tween hidden state.
+   * Reset all animated elements to their initial animation state — the header
+   * elements (heading, hr, contactOptions, cardColumn), the field wrappers and
+   * the submit button all go back to their pre-tween hidden state.
    */
   private resetAnimatedElements(): void {
     if (!this.container) {
@@ -502,6 +490,13 @@ export class ContactAnimationModule extends BaseModule {
     const avatarBlurb = this.container.querySelector('.avatar-blurb-container');
     if (avatarBlurb) {
       gsap.set(avatarBlurb, { opacity: 1, scale: 1, filter: 'blur(0px)' });
+    }
+
+    // Fields must reset too, or a second arrival replays the cascade with them
+    // already visible — the exact backwards assembly this was fixing.
+    const inputWrappers = this.container.querySelectorAll('.contact-form .input-wrapper');
+    if (inputWrappers.length) {
+      gsap.set(inputWrappers, { opacity: 0 });
     }
 
     // Reset button

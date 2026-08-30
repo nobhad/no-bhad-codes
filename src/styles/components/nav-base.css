@@ -398,11 +398,16 @@ li {
 }
 
 /* =====================================================
-   8.6. CURRENT PAGE LINK - Blurred & Dimmed
+   8.6. CURRENT PAGE LINK - Dimmed
+
+   Marked as "you are already here": dimmed, not clickable. It is NOT blurred.
+   A 2px blur on crisp display type does not read as a state — it reads as a
+   font that failed to load or a GPU compositing bug, and it was the only thing
+   on the page rendering soft, so it drew the eye instead of receding. Opacity
+   plus the dead pointer already say unavailable, and they say it legibly.
    ===================================================== */
 .menu-link.current,
 .menu-link[aria-current="page"] {
-  filter: blur(2px);
   opacity: 0.5;
   cursor: default;
   pointer-events: none;
@@ -419,11 +424,9 @@ li {
   display: none;
 }
 
-/* More blur on hover (if somehow focusable) */
-.menu-link.current:hover,
-.menu-link[aria-current="page"]:hover {
-  filter: blur(4px);
-}
+/* No hover treatment: pointer-events are off, so this only ever fired via
+   keyboard focus, where blurring the thing the user just focused is the exact
+   opposite of what focus is for. */
 
 /* Coming Soon Banner */
 .coming-soon-banner {

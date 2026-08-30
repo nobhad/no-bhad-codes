@@ -73,7 +73,21 @@ export const TIMING = {
   INTRO_LOADING_FAILSAFE: 10000,
 
   /** Contact form success message auto-hide duration */
-  FORM_SUCCESS_AUTO_HIDE: 5000
+  FORM_SUCCESS_AUTO_HIDE: 5000,
+
+  /**
+   * How long Arrow's blurb stays up on mobile before she dips back down.
+   * She overlaps the form at phone widths (there is no gutter to stand in),
+   * so the blurb is deliberately transient there. On desktop she parks in the
+   * gutter beside the form and waits to be dismissed.
+   */
+  ARROW_MOBILE_AUTO_HIDE: 6000,
+
+  /**
+   * Window the exit animation gets before the callout is actually hidden.
+   * Must match --callout-exit-duration in the arrow-callout component CSS.
+   */
+  ARROW_EXIT_DURATION: 320
 } as const;
 
 export type TimingKey = keyof typeof TIMING;

@@ -25,6 +25,14 @@ import { getDebugMode } from '../../core/env';
 import { validateEmail } from '../../../shared/validation/validators';
 import { TIMING } from '../../constants/timing';
 import { INPUT_LIMITS } from '../../constants/thresholds';
+import { initArrowCallouts } from '../../components/arrow-callout/arrow-callout.js';
+import type { ArrowCalloutController } from '../../components/arrow-callout/arrow-callout.js';
+import {
+  ARROW_SUCCESS,
+  ARROW_SIZE_STEPS,
+  arrowSayValidation,
+  arrowSayFailure
+} from '../../constants/arrow-copy';
 
 export interface ContactFormModuleOptions extends ModuleOptions {
   backend?: ContactBackend;
@@ -38,6 +46,9 @@ export class ContactFormModule extends BaseModule {
   private submitButton: HTMLButtonElement | null = null;
   private isSubmitting = false;
   private contactService: ContactService;
+  /** Arrow — the mascot who speaks every piece of feedback this form gives. */
+  private arrow: ArrowCalloutController | null = null;
+  private arrowEl: HTMLElement | null = null;
 
   constructor(options: ContactFormModuleOptions = {}) {
     super('contact-form', { debug: getDebugMode(), ...options });
@@ -68,8 +79,58 @@ export class ContactFormModule extends BaseModule {
 
     if (this.form) {
       this.setupEventListeners();
+      this.setupArrow();
       this.log('Contact form initialized with backend:', this.contactService.getConfig().backend);
     }
+  }
+
+  /**
+   * Wire the Arrow callout. Manual mode: she is off screen until this module
+   * asks for her, so she never sits over the form waiting for an event.
+   */
+  private setupArrow(): void {
+    this.arrowEl = document.querySelector<HTMLElement>('[data-callout-id="contact-feedback"]');
+    if (!this.arrowEl) {
+      this.warn('Arrow callout markup not found — form feedback will be silent');
+      return;
+    }
+    this.arrow = initArrowCallouts({ exitMs: TIMING.ARROW_EXIT_DURATION });
+    this.log('Arrow callout initialized');
+  }
+
+  /** True at widths where Arrow has no gutter to stand in and must be brief. */
+  private get isNarrowViewport(): boolean {
+    return window.matchMedia('(max-width: 767px)').matches;
+  }
+
+  /**
+   * Everything the form says to a visitor goes through here.
+   *
+   * On mobile she auto-dips after a read-length pause, because at that width
+   * she necessarily overlaps the form; on desktop she parks in the gutter and
+   * waits to be dismissed.
+   */
+  private arrowSay(message: string): void {
+    // Size the bubble to what's in it BEFORE opening, so she animates in at
+    // her final size instead of popping and then resizing. The art is fixed
+    // 540x500 line-work, so the whole canvas scales as one — a stretched
+    // bubble would distort its corners and tail.
+    if (this.arrowEl) {
+      this.arrowEl.dataset.arrowSize =
+        message.length <= ARROW_SIZE_STEPS.SHORT_MAX_CHARS
+          ? 'short'
+          : message.length <= ARROW_SIZE_STEPS.MEDIUM_MAX_CHARS
+            ? 'medium'
+            : 'long';
+    }
+    this.arrow?.open('contact-feedback', message, {
+      autoCloseMs: this.isNarrowViewport ? TIMING.ARROW_MOBILE_AUTO_HIDE : 0
+    });
+  }
+
+  /** Put her away — e.g. the visitor started fixing the thing she flagged. */
+  private arrowHush(): void {
+    this.arrow?.close('contact-feedback');
   }
 
   setupEventListeners(): void {
@@ -228,53 +289,6 @@ export class ContactFormModule extends BaseModule {
     inputField.removeAttribute('aria-describedby');
   }
 
-  /**
-   * Show a single consolidated error tooltip above the form
-   */
-  private showErrorTooltip(errors: string[]): void {
-    this.removeErrorTooltip();
-
-    const tooltip = document.createElement('div');
-    tooltip.className = 'form-error-tooltip';
-    tooltip.setAttribute('role', 'alert');
-    tooltip.setAttribute('aria-live', 'assertive');
-
-    const list = document.createElement('ul');
-    errors.forEach((error) => {
-      const li = document.createElement('li');
-      li.textContent = error;
-      list.appendChild(li);
-    });
-    tooltip.appendChild(list);
-
-    // Insert inside submit-row — absolutely positioned, centered in gap
-    const submitRow = this.form?.querySelector('.submit-row');
-    if (submitRow) {
-      submitRow.appendChild(tooltip);
-      // Center tooltip between button right edge and form right edge
-      const btn = submitRow.querySelector('.submit-button') as HTMLElement;
-      if (btn) {
-        const btnRight = btn.offsetLeft + btn.offsetWidth;
-        const rowWidth = (submitRow as HTMLElement).offsetWidth;
-        const midpoint = btnRight + (rowWidth - btnRight) / 2;
-        const tooltipWidth = tooltip.offsetWidth;
-        tooltip.style.left = `${midpoint - tooltipWidth / 2}px`;
-      }
-    } else {
-      this.form?.append(tooltip);
-    }
-  }
-
-  /**
-   * Remove the error tooltip
-   */
-  private removeErrorTooltip(): void {
-    const existing = this.form?.querySelector('.form-error-tooltip');
-    if (existing) {
-      existing.remove();
-    }
-  }
-
   async handleSubmit(e: Event) {
     e.preventDefault();
 
@@ -304,18 +318,21 @@ export class ContactFormModule extends BaseModule {
       if (result.success) {
         this.form?.reset();
         this.clearAllErrors();
-        // Play arrow animation then show "SENT!"
+        // Play the button's bow-and-arrow animation, THEN let Arrow speak —
+        // two things popping at once reads as a glitch. (Unrelated arrows:
+        // that one is the submit icon, this one is the mascot.)
         await this.playArrowFlyAnimation();
+        this.arrowSay(ARROW_SUCCESS);
       } else {
-        // Show the actual error message from the service
-        this.showFormMessage(result.message, 'error');
+        // result.message is the developer-facing string and is what gets
+        // logged; Arrow translates the status into something actionable.
+        this.error('Form submission rejected:', result.error ?? result.message);
+        this.arrowSay(arrowSayFailure(result.status ?? null, result.message));
       }
     } catch (error) {
       this.error('Form submission failed:', error);
-      this.showFormMessage(
-        'Sorry, there was an error sending your message. Please try again.',
-        'error'
-      );
+      // No response at all — offline, DNS, aborted. Status is genuinely unknown.
+      this.arrowSay(arrowSayFailure(null, error instanceof Error ? error.message : ''));
     } finally {
       this.isSubmitting = false;
       this.setSubmitButtonState(false);
@@ -339,10 +356,22 @@ export class ContactFormModule extends BaseModule {
       message: formData.get('Message')?.toString().trim() || ''
     };
 
-    // Apply client-side sanitization as first defense layer
+    // Apply client-side sanitization as first defense layer.
+    //
+    // Email is deliberately NOT put through sanitizeEmail here. That helper
+    // returns '' for anything failing its format regex, which made a malformed
+    // address indistinguishable from a missing one: type "you@gmial" and the
+    // form told you to ADD an email you could plainly see you had typed.
+    // Stripping HTML and normalising case gives validateFormData something it
+    // can actually judge, so it can say "check that email" instead.
+    //
+    // This does not loosen what gets SENT: ContactService.submitForm runs
+    // sanitizeFormData (and therefore sanitizeEmail) over this object before it
+    // touches the network, and the server validates independently. The looser
+    // value never leaves the client.
     return {
       name: SanitizationUtils.sanitizeText(rawData.name),
-      email: SanitizationUtils.sanitizeEmail(rawData.email),
+      email: SanitizationUtils.stripHtml(rawData.email.trim().toLowerCase()),
       companyName: rawData.companyName ? SanitizationUtils.sanitizeText(rawData.companyName) : '',
       message: SanitizationUtils.sanitizeMessage(rawData.message)
     };
@@ -381,8 +410,9 @@ export class ContactFormModule extends BaseModule {
       }
     });
 
-    // Show all errors in a single tooltip
-    this.showErrorTooltip(errors);
+    // Arrow carries the wording; the red field outlines set above carry the
+    // location. The old .form-error-tooltip did both jobs and did neither well.
+    this.arrowSay(arrowSayValidation(errors));
 
     // Focus on the first field with an error for accessibility
     if (firstErrorField) {
@@ -394,8 +424,8 @@ export class ContactFormModule extends BaseModule {
    * Clear all field errors and ARIA attributes
    */
   private clearAllErrors() {
-    // Remove tooltip
-    this.removeErrorTooltip();
+    // Arrow was the one holding the message, so clearing errors puts her away.
+    this.arrowHush();
 
     // Remove error class from input items and fields
     const errorFields = this.form?.querySelectorAll('.error');
@@ -434,44 +464,6 @@ export class ContactFormModule extends BaseModule {
     } else {
       this.submitButton.disabled = false;
       this.submitButton.classList.remove('loading');
-    }
-  }
-
-  showFormMessage(message: string, type: string) {
-    // Remove existing message
-    const existingMessage = this.form!.querySelector('.form-message');
-    if (existingMessage) {
-      existingMessage.remove();
-    }
-
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `form-message ${type}`;
-
-    // Handle multiple error messages by creating separate lines
-    // Use textContent for each line to prevent XSS
-    const lines = message.split('\n');
-    if (lines.length > 1) {
-      lines.forEach((line, index) => {
-        const span = document.createElement('span');
-        span.textContent = line;
-        messageDiv.appendChild(span);
-        if (index < lines.length - 1) {
-          messageDiv.appendChild(document.createElement('br'));
-        }
-      });
-    } else {
-      messageDiv.textContent = message;
-    }
-
-    this.form!.appendChild(messageDiv);
-
-    // Auto-hide success messages after delay
-    if (type === 'success') {
-      setTimeout(() => {
-        if (messageDiv.parentNode) {
-          messageDiv.remove();
-        }
-      }, TIMING.FORM_SUCCESS_AUTO_HIDE);
     }
   }
 
@@ -645,12 +637,16 @@ export class ContactFormModule extends BaseModule {
     }
 
     if (errors.length > 0) {
-      this.showErrorTooltip(errors);
+      this.arrowSay(arrowSayValidation(errors));
     }
   }
 
   override async onDestroy(): Promise<void> {
     this.isSubmitting = false;
+    // Returns the portaled callout to its section, so an SPA re-entry re-inits
+    // against real markup instead of an orphan on <body>.
+    this.arrow?.destroy();
+    this.arrow = null;
     await super.onDestroy();
   }
 }

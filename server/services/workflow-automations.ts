@@ -962,7 +962,7 @@ async function notifyContractSigned(data: {
   await sendClientNotification(
     clientId,
     'Contract Signed - Project Now Active!',
-    `The contract for "${projectName}" has been signed and your project is now active! You can track progress, view milestones, and communicate with us through your portal.`,
+    `The contract for "${projectName}" has been signed and your project is now active! You can track progress, view milestones, and message me through your portal.`,
     'View Project Status',
     `${getPortalUrl()}#projects`,
     {
@@ -1114,7 +1114,7 @@ async function notifyInvoicePaid(data: { entityId?: number | null }): Promise<vo
   await sendClientNotification(
     clientId,
     'Payment Received - Thank You!',
-    `We've received your payment of $${amount.toFixed(2)} for Invoice #${invoiceNumber} (${projectName}). A receipt has been generated and is available in your portal.`,
+    `I've received your payment of $${amount.toFixed(2)} for Invoice #${invoiceNumber} (${projectName}). A receipt has been generated and is available in your portal.`,
     'View Receipt',
     `${getPortalUrl()}#invoices`,
     {

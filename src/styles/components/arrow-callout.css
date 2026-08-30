@@ -1,0 +1,294 @@
+/* ============================================================================
+   ARROW CALLOUT — mascot + speech-bubble annotation blurb.
+
+   Two SVG layers share ONE canvas (default 540×500) so the mascot (lower-right
+   of the canvas) and the bubble (upper-left) keep the spacing they were
+   composed with. The mascot parks in a viewport corner; exactly one blurb is
+   open at a time — the one whose section sits at the viewport's vertical
+   centre. The close X dismisses that blurb until you scroll to a different
+   section; clicking the mascot brings it back.
+
+   No external dependencies: every value below is a `--callout-*` token with a
+   built-in default. Override any of them on `.arrow-callout` (or a wrapper,
+   or :root) to fit a host project's palette — see README "Theming".
+   ============================================================================ */
+
+.arrow-callout {
+  /* --- Geometry ---------------------------------------------------------- */
+  --callout-width: clamp(320px, 32vw, 470px);
+  --callout-aspect: 540 / 500;      /* must match the two SVG viewBoxes */
+  --callout-gap-x: 1vw;             /* inset from the viewport right edge */
+  --callout-gap-y: 1vh;             /* inset from the viewport bottom edge */
+  --callout-z: 9999;
+
+  /* Text box inside the bubble art, as % of the shared canvas. Retune these
+     (only these) when swapping in different bubble artwork. */
+  --callout-text-left: 10%;
+  --callout-text-top: 7%;
+  --callout-text-width: 60%;
+  --callout-text-height: 47%;
+
+  /* Close X, positioned just outside the bubble's top-right corner. */
+  --callout-close-top: 2%;
+  --callout-close-left: 73%;
+  --callout-close-size: 1.6rem;
+
+  /* --- Type -------------------------------------------------------------- */
+  --callout-font: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --callout-font-size: clamp(0.5rem, 0.82vw, 0.78rem);
+  --callout-font-weight: 600;
+  --callout-line-height: 1.18;
+
+  /* --- Colour ------------------------------------------------------------ */
+  --callout-text-color: #191a0b;
+  --callout-close-bg: #f8eddc;
+  --callout-close-ink: #5c4a3d;
+  --callout-close-border-width: 1px;
+
+  /* --- Motion ------------------------------------------------------------ */
+  --callout-transition: 150ms ease;
+
+  /* Manual callouts only: how the mascot arrives and leaves. She rises from
+     below the fold with a little overshoot, and drops straight back down —
+     the exit is deliberately quicker and flatter than the entrance, so a
+     timed auto-close reads as "ducking out" rather than a second event. */
+  /* Far enough to clear the bottom edge whatever the corner gap is: her own
+     height plus that gap plus a margin. A flat percentage silently stopped
+     short once a host parked her well above the bottom. */
+  --callout-enter-offset: calc(100% + var(--callout-gap-y) + 1rem);
+  --callout-enter-duration: 420ms;
+  --callout-enter-ease: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --callout-exit-duration: 320ms;
+  --callout-exit-ease: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+
+  position: fixed;
+  right: var(--callout-gap-x);
+  bottom: var(--callout-gap-y);
+  width: var(--callout-width);
+  aspect-ratio: var(--callout-aspect);
+  pointer-events: none;              /* only the two buttons are hittable */
+  z-index: var(--callout-z);
+}
+
+/* Corner variants — default is bottom-right. */
+.arrow-callout--bottom-left  { right: auto; left: var(--callout-gap-x); }
+.arrow-callout--top-right    { bottom: auto; top: var(--callout-gap-y); }
+.arrow-callout--top-left     { bottom: auto; top: var(--callout-gap-y); right: auto; left: var(--callout-gap-x); }
+
+/* Anchored: park inside a positioned ancestor instead of the viewport (e.g. so
+   it rides a pinned hero and scrolls away with it). The host sets top/left. */
+.arrow-callout--anchored { position: absolute; }
+
+/* Every callout is fixed to the same corner, so only the active one shows its
+   mascot — otherwise several identical mascots would stack there. With a single
+   callout on the page it is always active, i.e. the mascot never hides. JS keeps
+   `.is-active` on exactly one callout. */
+.arrow-callout:not(.is-active) .arrow-callout__mascot,
+.arrow-callout:not(.is-active) .arrow-callout__mascot-img {
+  display: none;
+}
+
+/* Mascot — lower-right of the shared canvas; the open toggle.
+   Its hit area is the REGION THE MASCOT IS DRAWN IN, not the whole canvas.
+   `inset: 0` made this button a 540×500 transparent sheet over everything
+   behind the callout: on a narrow screen, where the callout necessarily laps
+   the page, that sheet swallowed taps meant for the content underneath — on
+   one host it sat over a form's submit button and made it unpressable for as
+   long as the callout was up. Defaults trace the mascot's alpha bounds; a host
+   with different art overrides the four tokens. */
+/* The button is scoped to the region the mascot is DRAWN in, and the art is a
+   separate layer beneath it (see .arrow-callout__mascot-img) rather than a
+   child, so the box and the hit area are the same rectangle.
+
+   It used to be `inset: 0` with the image inside: a 540x500 transparent sheet
+   over everything behind the callout. On a narrow screen, where the callout
+   necessarily laps the page, that sheet swallowed taps meant for the content
+   underneath — on one host it covered a form's submit button and made it
+   unpressable for as long as the callout was up. Scoping the hit area with a
+   pseudo-element fixed the swallowing but left a button whose BOX still spanned
+   the canvas, so its focus ring drew around the whole composition and a
+   click at its centre landed on nothing. Sizing the real element is the honest
+   version of the same fix. Defaults trace the mascot's alpha bounds; a host
+   with different art overrides the four tokens. */
+.arrow-callout__mascot {
+  position: absolute;
+  left: var(--callout-mascot-left, 52%);
+  top: var(--callout-mascot-top, 35%);
+  width: var(--callout-mascot-width, 48%);
+  height: var(--callout-mascot-height, 65%);
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.arrow-callout__bubble-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Mascot art — its own layer spanning the whole canvas, so the drawing keeps
+   the exact position it was composed in while the button above it stays the
+   size of a button. Never interactive: the button is. */
+.arrow-callout__mascot-img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Blurb — bubble art + text, upper-left of the shared canvas, above the mascot. */
+.arrow-callout__bubble {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Closed = mascot only. */
+.arrow-callout:not(.is-blurb-open) .arrow-callout__bubble {
+  display: none;
+}
+
+/* The bubble layer stays click-THROUGH even while open: it is artwork, and a
+   speech bubble is mostly empty space that happens to be drawn over whatever
+   the callout overlaps. Only its real controls (the X, and any host actions)
+   take pointer events — they set `pointer-events: auto` themselves. The mascot
+   this used to shield is no longer underneath it, now that the mascot button
+   is scoped to its own corner of the canvas. */
+
+/* Question text — inside the bubble body, filling the box above the tail. */
+.arrow-callout__text {
+  position: absolute;
+  left: var(--callout-text-left);
+  top: var(--callout-text-top);
+  width: var(--callout-text-width);
+  height: var(--callout-text-height);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: left;
+  /* Honour authored line breaks so a callout can carry short paragraphs or a
+     bullet list; runs of spaces still collapse. */
+  white-space: pre-line;
+  font-family: var(--callout-font);
+  font-weight: var(--callout-font-weight);
+  font-size: var(--callout-font-size);
+  line-height: var(--callout-line-height);
+  color: var(--callout-text-color);
+  z-index: 2;
+}
+
+/* Slot for extra controls (toggles, links) under the text, inside the bubble. */
+.arrow-callout__actions {
+  position: absolute;
+  left: var(--callout-text-left);
+  top: calc(var(--callout-text-top) + var(--callout-text-height) - 10%);
+  width: var(--callout-text-width);
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  gap: 0.5rem;
+  pointer-events: auto;
+  z-index: 3;
+}
+
+/* Close X — just outside the bubble's top-right corner. */
+.arrow-callout__close {
+  position: absolute;
+  top: var(--callout-close-top);
+  left: var(--callout-close-left);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--callout-close-size);
+  height: var(--callout-close-size);
+  padding: 0;
+  border: var(--callout-close-border-width) solid var(--callout-close-ink);
+  border-radius: 50%;
+  background-color: var(--callout-close-bg);
+  color: var(--callout-close-ink);
+  cursor: pointer;
+  pointer-events: auto;
+  transition:
+    background-color var(--callout-transition),
+    color var(--callout-transition);
+}
+
+.arrow-callout__close:hover {
+  background-color: var(--callout-close-ink);
+  color: var(--callout-close-bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrow-callout__close { transition: none; }
+}
+
+/* ============================================================================
+   MANUAL MODE — callouts that answer an EVENT, not a place.
+
+   A manual callout is off screen entirely (mascot included) until the host
+   calls open(). It never takes part in the scroll/centre logic, so it can sit
+   on a page alongside scroll-driven callouts without stealing the corner.
+
+   Motion is a plain transform+opacity transition here so the component keeps
+   its no-dependency promise. A host that wants something richer should leave
+   these as-is and drive its own animation from the `onOpen`/`onClose` hooks —
+   `.is-leaving` stays on for the init `exitMs` window precisely so an exit can
+   play out before the element is pulled.
+   ============================================================================ */
+
+.arrow-callout--manual {
+  /* Parked below the fold rather than display:none, so the arrival animates.
+     visibility keeps it out of the a11y tree and off the hit-test while down. */
+  transform: translateY(var(--callout-enter-offset));
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    transform var(--callout-exit-duration) var(--callout-exit-ease),
+    opacity var(--callout-exit-duration) var(--callout-exit-ease),
+    visibility 0s linear var(--callout-exit-duration);
+}
+
+/* `.is-active` = summoned, i.e. her mascot is on screen. Keyed to that rather
+   than `.is-blurb-open` so closing the NOTE with the X leaves HER standing —
+   the blurb layer hides on its own via the base rule, and a click on the mascot
+   brings the note back. Keying this to the blurb instead made the X banish the
+   whole callout, with nothing left to click. */
+.arrow-callout--manual.is-active {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+  transition:
+    transform var(--callout-enter-duration) var(--callout-enter-ease),
+    opacity var(--callout-enter-duration) var(--callout-enter-ease),
+    visibility 0s linear 0s;
+}
+
+/* Exit phase — set alongside .is-active, so it must win. This is what makes
+   her dip back down off the bottom after a timed auto-close. */
+.arrow-callout--manual.is-active.is-leaving {
+  transform: translateY(var(--callout-enter-offset));
+  opacity: 0;
+  transition:
+    transform var(--callout-exit-duration) var(--callout-exit-ease),
+    opacity var(--callout-exit-duration) var(--callout-exit-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrow-callout--manual,
+  .arrow-callout--manual.is-active,
+  .arrow-callout--manual.is-active.is-leaving {
+    transform: none;
+    transition: opacity var(--callout-transition), visibility 0s;
+  }
+}

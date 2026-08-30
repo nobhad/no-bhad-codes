@@ -60,7 +60,15 @@ export default defineConfig({
     /* Test against mobile viewports. */
     {
       name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] }
+      use: {
+        ...devices['Pixel 5'],
+        // Same reason as the desktop chromium project above: the pinned
+        // Playwright's bundled Chromium is not in the local cache, so the
+        // bundled binary fails to launch and this project never ran. The
+        // installed Chrome needs no download and renders the Pixel 5 viewport
+        // and UA identically for these tests.
+        channel: 'chrome'
+      }
     },
     {
       name: 'Mobile Safari',

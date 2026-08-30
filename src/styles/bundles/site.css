@@ -44,6 +44,10 @@
 @import "../components/intro-nav.css" layer(components);
 @import "../components/intro-morph.css" layer(components);
 
+/* Arrow — contact-form mascot. Vendored component, then project theme. */
+@import "../components/arrow-callout.css" layer(components);
+@import "../components/arrow-callout-theme.css" layer(components);
+
 /* ============================================
  * OTHER COMPONENTS
  * ============================================ */

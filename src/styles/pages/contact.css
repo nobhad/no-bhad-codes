@@ -23,6 +23,8 @@
 
 /* Section: full viewport height, content centered */
 .contact-section {
+  --contact-content-max-width: 580px;
+
   min-height: calc(100vh - var(--header-height) - var(--footer-height));
   height: calc(100vh - var(--header-height) - var(--footer-height));
   display: flex;
@@ -42,7 +44,9 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 580px;
+  /* Named because Arrow's placement is derived from it — she parks in the
+     gutter beside this column, so the two must never drift apart. */
+  max-width: var(--contact-content-max-width);
   margin: 0 auto;
   padding: 0;
   box-sizing: border-box;
