@@ -1401,7 +1401,14 @@
   align-self: center;
   max-width: 100%;
   display: grid;
-  grid-template-columns: max-content max-content;
+  /* The value column must be able to shrink. It was max-content, which sizes
+     to the longest value's full unwrapped width and never yields — so a value
+     longer than the one this was measured against ("Full Stack Developer",
+     while the role is actually "Full Stack Developer & Designer") pushed the
+     block past the screen and the end of it was cut off by the bezel.
+     minmax(0, 1fr) lets it wrap instead; max-width:100% could not help,
+     because a max-content column does not shrink. */
+  grid-template-columns: max-content minmax(0, 1fr);
   /* row gap (between Role/Year/Duration entries) | column gap (between
      label and value). 1.5em is comfortable without overflowing. */
   gap: 0.6em 1.5em;
@@ -1421,6 +1428,10 @@
 
 .crt-tv__panel-details dd {
   margin: 0;
+  /* Grid items default to min-width:auto, which refuses to shrink below the
+     content — the other half of the same overflow. */
+  min-width: 0;
+  overflow-wrap: break-word;
   font-family: var(--font-family-mono, monospace);
   font-size: clamp(1.2rem, 4.5cqw, 1.9rem);
 }
