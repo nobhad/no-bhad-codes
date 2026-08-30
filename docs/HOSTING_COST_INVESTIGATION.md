@@ -235,6 +235,36 @@ status codes compared.
 
 ---
 
+## 7. Telling a deploying push from a non-deploying one
+
+`watchPatterns` does not produce a smaller build — it decides whether Railway
+deploys **at all**. The outcome is binary:
+
+- any changed file matches a pattern → full deploy (`npm run build && npm run
+  build:server`, then restart)
+- no changed file matches → no deployment is created; the container keeps running
+  its current image
+
+So "frontend-only" means Railway does nothing, and Vercel alone rebuilds. That is
+only safe because the server no longer reads anything out of `dist/` at runtime —
+see the 404 change in section 4.
+
+To check before pushing:
+
+```sh
+npm run railway:will-deploy              # vs origin/main
+node scripts/will-railway-deploy.mjs abc123~1..abc123   # a single commit
+```
+
+It prints which changed files matched and which pattern each matched. Verified
+against real history: the mobile CSS/TS commit alone does not deploy, a docs commit
+alone does not deploy, and the server build fix does.
+
+To confirm afterwards, check Railway's deploy list — a skipped push creates no new
+deployment entry.
+
+---
+
 ## 7. How to re-measure
 
 Idle CPU is the metric that matters. Boot the server, find the process holding the

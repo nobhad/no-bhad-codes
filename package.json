@@ -48,7 +48,8 @@
     "docs:validate": "bash scripts/validate-docs.sh",
     "docs:fix": "bash scripts/validate-docs.sh --fix",
     "docs:design-system": "node scripts/build-design-system-docs.mjs",
-    "start:tsx": "tsx server/app.ts"
+    "start:tsx": "tsx server/app.ts",
+    "railway:will-deploy": "node scripts/will-railway-deploy.mjs"
   },
   "keywords": [
     "portfolio",
