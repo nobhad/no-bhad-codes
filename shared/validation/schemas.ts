@@ -22,7 +22,7 @@ import {
   validateArray,
   type ValidationResult,
   type FormValidationResult
-} from './validators';
+} from './validators.js';
 
 // ============================================
 // Schema Types

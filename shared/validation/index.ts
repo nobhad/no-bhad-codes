@@ -9,7 +9,7 @@
  */
 
 // Export all patterns
-export { VALIDATION_PATTERNS, PATTERN_DESCRIPTIONS, type ValidationPatternKey } from './patterns';
+export { VALIDATION_PATTERNS, PATTERN_DESCRIPTIONS, type ValidationPatternKey } from './patterns.js';
 
 // Export all validators
 export {
@@ -68,7 +68,7 @@ export {
   pricingDataSchema,
   tierStructureSchema,
   lineItemSchema
-} from './validators';
+} from './validators.js';
 
 // Export schemas and schema utilities
 export {
@@ -106,4 +106,4 @@ export {
   leadStatusSchema,
   fileUploadSchema,
   paginationSchema
-} from './schemas';
+} from './schemas.js';
