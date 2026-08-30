@@ -27,10 +27,16 @@ test.describe('Client Portal Flow', () => {
       failOnStatusCode: false
     });
 
-    if (!loginRes.ok) {
+    // ok() and status() are METHODS on Playwright's APIResponse. Read as
+    // properties they are function references — always truthy — so `!loginRes.ok`
+    // was never true and this skip never fired. The test then ran on against a
+    // portal that had bounced to the login screen and failed on a missing
+    // selector, reporting "portal nav is broken" when the real story was
+    // "there is no demo user in this database".
+    if (!loginRes.ok()) {
       test.skip(
         true,
-        `Login failed (${loginRes.status}) - ensure demo user exists and credentials match`
+        `Login failed (${loginRes.status()}) - ensure demo user exists and credentials match`
       );
     }
 
@@ -61,16 +67,20 @@ test.describe('Client Portal Flow', () => {
       failOnStatusCode: false
     });
 
-    if (!loginRes.ok) {
-      test.skip(true, `Login failed (${loginRes.status}) - ensure demo user exists`);
+    if (!loginRes.ok()) {
+      test.skip(true, `Login failed (${loginRes.status()}) - ensure demo user exists`);
     }
 
     await page.goto('/client/portal');
     await page.waitForLoadState('networkidle');
 
+    // IDs come from PortalSidebar.tsx (`btn-${item.id}`) over the nav config in
+    // server/config/navigation.ts. The client portal has no 'invoices' tab —
+    // CLIENT_TAB_IDS calls it 'payment-schedule'; 'invoices' is admin-only.
+    await expect(page.locator('#sidebar')).toBeVisible();
     await expect(page.locator('#btn-dashboard')).toBeVisible();
     await expect(page.locator('#btn-files')).toBeVisible();
-    await expect(page.locator('#btn-invoices')).toBeVisible();
+    await expect(page.locator('#btn-payment-schedule')).toBeVisible();
     await expect(page.locator('#btn-logout')).toBeVisible();
   });
 });

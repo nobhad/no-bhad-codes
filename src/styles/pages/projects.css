@@ -1060,64 +1060,102 @@
    The base rule hides them everywhere; the @media block below shows them
    on small phones. Inline display so they sit on a single row beneath the
    TV. */
-.projects-tv-channel-controls {
+.projects-tv-controls {
   display: none;
 }
 
 @media (max-width: 479px) {
-  /* Stack the TV + channel controls vertically. .projects-tv-wrap is
-     flex-row by default which puts the controls beside the TV; switch
-     to column so the controls land below where the user expects them. */
+  /* Stack the TV + controls vertically. .projects-tv-wrap is flex-row by
+     default which puts the controls beside the TV; switch to column so the
+     panel lands below the set, where its real-world counterpart is. */
   .projects-tv-wrap {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .projects-tv-channel-controls {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-top: 0.75rem;
-    padding: 0 var(--container-padding);
+  /* The set's own control panel, lifted out and enlarged. It is the same
+     POWER / CHANNEL / VOLUME artwork painted on the chassis, at a size a
+     thumb can actually hit — the on-chassis buttons are ~18x7px here.
+     Centred under the TV, with its natural 153:133 proportions preserved. */
+  .projects-tv-controls {
+    display: block;
+    position: relative;
+    /* Sized so the panel reads as a control cluster belonging to the set
+       above it, not a second piece of furniture competing with it. Each
+       painted bar still lands well over the 44px tap-target guidance at this
+       width: the bars are ~17% of a ~160px-tall panel across its full width. */
+    width: min(48vw, 180px);
+    aspect-ratio: 153 / 133;
+    /* Enough air that the panel reads as a separate control cluster rather
+       than something growing out of the cabinet's base. Clamped rather than
+       fixed so a short phone (SE, 667px) does not spend its whole budget on
+       the gap and push the buttons off the bottom. */
+    margin: clamp(2.5rem, 7vh, 4rem) auto 0;
   }
 
-  /* Lucide square-chevron icons carry their own framed look, so the
-     button itself stays bare — no border, no background. Padding +
-     min hit-target keep tap area finger-friendly. The "CH" label stacks
-     above the chevron so each control reads as a channel selector. */
-  .projects-tv-channel-btn {
+  .projects-tv-controls-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* Artwork only — every hit target is a real button layered over it. */
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* Transparent overlays sized to the painted controls. Percentages are of the
+     153x133 artwork, measured from its alpha channel:
+       POWER   y 19-42    CHANNEL y 64-87    VOLUME y 111-133
+     CHANNEL and VOLUME are split down the middle — the painted triangle sits
+     in each half, so half the bar is the natural target for each direction. */
+  .projects-tv-control-btn {
+    position: absolute;
     appearance: none;
     background: transparent;
     border: none;
-    border-radius: 0;
-    color: var(--color-text-primary);
-    padding: 0.5rem;
+    padding: 0;
+    margin: 0;
     cursor: pointer;
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.25rem;
-    min-width: 64px;
-    min-height: 64px;
   }
 
-  .projects-tv-channel-label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    line-height: 1;
+  .projects-tv-control-btn--power {
+    left: 0;
+    width: 100%;
+    top: 14.3%;
+    height: 17.3%;
   }
 
-  .projects-tv-channel-btn svg {
-    width: 56px;
-    height: 56px;
+  .projects-tv-control-btn--channel-down {
+    left: 0;
+    width: 50%;
+    top: 48.1%;
+    height: 17.3%;
   }
 
-  .projects-tv-channel-btn:focus-visible {
+  .projects-tv-control-btn--channel-up {
+    left: 50%;
+    width: 50%;
+    top: 48.1%;
+    height: 17.3%;
+  }
+
+  .projects-tv-control-btn--volume-down {
+    left: 0;
+    width: 50%;
+    top: 83.5%;
+    height: 16.5%;
+  }
+
+  .projects-tv-control-btn--volume-up {
+    left: 50%;
+    width: 50%;
+    top: 83.5%;
+    height: 16.5%;
+  }
+
+  .projects-tv-control-btn:focus-visible {
     outline: 2px solid var(--color-text-primary);
-    outline-offset: 2px;
+    outline-offset: 1px;
+    border-radius: 2px;
   }
 }
 
@@ -1824,9 +1862,10 @@
 .crt-tv__channel-row-item {
   list-style: none;
   border-top: var(--tv-guide-rule);
-  /* The rule spans the bled width; the padding puts the row's text back where
-     it was, aligned with the masthead above it. */
-  padding-inline: var(--tv-guide-pad-x);
+  /* No inline padding here. The row BUTTON inside carries it instead, so the
+     button itself spans the full bled width and its hover fill reaches the
+     glass the way the rules do — padding on the <li> inset the button and left
+     the highlight floating in a narrower column than the lines around it. */
 }
 
 /* Each row is a real <button> so it's clickable, focusable, and shows
@@ -1838,7 +1877,9 @@
   gap: clamp(0.75rem, 2.4cqw, 1.25rem);
   align-items: start;
   width: 100%;
-  padding: 0.5rem 0.6rem;
+  /* Inline padding matches the guide's gutter so the text stays aligned with
+     the masthead, while the button's own box runs edge to edge. */
+  padding: 0.5rem var(--tv-guide-pad-x);
   margin: 0;
   appearance: none;
   background: transparent;
@@ -1850,7 +1891,10 @@
   font-size: clamp(0.875rem, 2.3cqw, 1.35rem);
   line-height: 1.2;
   white-space: nowrap;
-  border-radius: 2px;
+  /* Square: the fill now runs to both edges of the screen, and a rounded
+     corner against the glass reads as a floating chip rather than a
+     highlighted table row. */
+  border-radius: 0;
   transition:
     background-color 0.15s ease,
     color 0.15s ease;

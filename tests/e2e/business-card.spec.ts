@@ -22,34 +22,35 @@ test.describe('Business Card', () => {
     await expect(page.locator('#business-card')).toBeVisible();
     await expect(page.locator('.business-card-front')).toBeVisible();
 
-    // Should show front of card initially
-    const cardInner = page.locator('#business-card-inner');
-    await expect(cardInner).not.toHaveClass(/flipped/);
+    // Front showing. The flip is a GSAP rotationY, not a class swap — the
+    // state the card publishes to the DOM (and to assistive tech) is
+    // aria-pressed, set in business-card-interactions.ts. Asserting a
+    // `flipped` class tested for something that has never existed.
+    await expect(page.locator('#business-card')).toHaveAttribute('aria-pressed', 'false');
   });
 
   test('should flip card on click', async ({ page }) => {
     const businessCard = page.locator('#business-card');
-    const cardInner = page.locator('#business-card-inner');
 
     // Initial state - front showing
-    await expect(cardInner).not.toHaveClass(/flipped/);
+    await expect(businessCard).toHaveAttribute('aria-pressed', 'false');
 
     // Click to flip
     await businessCard.click();
 
-    // Wait for animation
-    await page.waitForTimeout(800);
-
     // Should show back of card
-    await expect(cardInner).toHaveClass(/flipped/);
+    await expect(businessCard).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('.business-card-back')).toBeVisible();
 
-    // Click again to flip back
+    // Click again to flip back. The wait is load-bearing: flipCard() guards on
+    // `isAnimating` (business-card-interactions.ts:331), and aria-pressed is
+    // set when the flip STARTS, not when it finishes — so a click issued the
+    // moment the attribute changes lands mid-tween and is dropped on the floor.
+    await page.waitForTimeout(900);
     await businessCard.click();
-    await page.waitForTimeout(800);
 
     // Should show front again
-    await expect(cardInner).not.toHaveClass(/flipped/);
+    await expect(businessCard).toHaveAttribute('aria-pressed', 'false');
   });
 
   test('should be keyboard accessible', async ({ page }) => {
@@ -63,10 +64,7 @@ test.describe('Business Card', () => {
 
     // Enter or Space should flip the card
     await page.keyboard.press('Enter');
-    await page.waitForTimeout(800);
-
-    const cardInner = page.locator('#business-card-inner');
-    await expect(cardInner).toHaveClass(/flipped/);
+    await expect(businessCard).toHaveAttribute('aria-pressed', 'true');
   });
 
   test('should have proper ARIA attributes', async ({ page }) => {
@@ -141,8 +139,7 @@ test.describe('Business Card', () => {
     // With reduced motion, transitions should be faster or instant
     await page.waitForTimeout(100); // Much shorter wait
 
-    const cardInner = page.locator('#business-card-inner');
-    // Card should still flip, just with reduced animation
-    await expect(cardInner).toHaveClass(/flipped/);
+    // Card should still flip, just with reduced animation.
+    await expect(businessCard).toHaveAttribute('aria-pressed', 'true');
   });
 });

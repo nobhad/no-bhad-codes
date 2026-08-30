@@ -41,6 +41,8 @@ export class ContactAnimationModule extends BaseModule {
   private container: HTMLElement | null = null;
   private timeline: gsap.core.Timeline | null = null;
   private blurAnimationComplete = false; // Track if blur animation has completed
+  /** Guards the entrance so overlapping arrival signals can't restart it. */
+  private entranceStarted = false;
   private starGlowAnimation: gsap.core.Tween | null = null; // Independent star glow pulse
 
   /** DOM element cache */
@@ -317,9 +319,18 @@ export class ContactAnimationModule extends BaseModule {
 
     this.timeline.pause();
 
+    // contact-page-ready fires at the END of the page transition. Waiting for
+    // it left the contact section on screen and completely EMPTY for ~1s
+    // (measured: section visible at 14ms, first content at 1016ms) before the
+    // cascade began — which is what read as the entrance happening "in obvious
+    // steps". They were not steps in the cascade; they were the page arriving
+    // and its contents arriving as two separate events a second apart.
+    //
+    // The cascade now starts as the page STARTS entering, so the two overlap
+    // into one arrival. This stays as a late fallback in case page-entering
+    // never fires; startEntrance() is idempotent per arrival.
     this.on('PageTransitionModule:contact-page-ready', (() => {
-      this.blurAnimationComplete = true;
-      this.playFormAnimation();
+      this.startEntrance();
     }) as EventListener);
 
     // Pre-transition signal — fires BEFORE the slide/blur animation runs.
@@ -336,7 +347,11 @@ export class ContactAnimationModule extends BaseModule {
       if (mode === 'slide' && this.timeline) {
         this.skipToEndState();
         this.blurAnimationComplete = true;
+        this.entranceStarted = true;
+        return;
       }
+      // Blur arrival: run the cascade WITH the transition, not after it.
+      this.startEntrance();
     }) as EventListener);
 
     // Single page-changed listener — handles enter, exit, and the safety-net
@@ -349,6 +364,8 @@ export class ContactAnimationModule extends BaseModule {
       if (from === 'contact') {
         this.playOutAnimation();
         this.blurAnimationComplete = false;
+        // Arm the next arrival.
+        this.entranceStarted = false;
       }
 
       if (to !== 'contact') {
@@ -356,17 +373,17 @@ export class ContactAnimationModule extends BaseModule {
       }
 
       if (mode === 'blur') {
-        // Direct nav: reset to start state, then let contact-page-ready
-        // play the animation. Fallback timer in case that event doesn't
-        // fire for some reason.
-        this.resetAnimatedElements();
-        this.blurAnimationComplete = false;
-        setTimeout(() => {
-          if (!this.blurAnimationComplete && !this.timeline?.isActive()) {
-            this.blurAnimationComplete = true;
-            this.playFormAnimation();
-          }
-        }, 600);
+        // page-entering has normally already started the cascade by now. This
+        // only catches an arrival where that never fired — and must NOT reset
+        // a cascade that is already running, or the entrance visibly restarts.
+        if (!this.entranceStarted) {
+          this.resetAnimatedElements();
+          setTimeout(() => {
+            if (!this.entranceStarted && !this.timeline?.isActive()) {
+              this.startEntrance();
+            }
+          }, 600);
+        }
       } else {
         // Camera or slide (map scroll arrival). Snap the timeline to its
         // end state — full-size form, no entrance choreography. Setting
@@ -376,18 +393,36 @@ export class ContactAnimationModule extends BaseModule {
       }
     }) as EventListener);
 
+    // Landing directly on /#/contact: no transition fires at all, so the
+    // entrance has to be kicked off here.
     const currentHash = window.location.hash;
     if (currentHash === '#/contact' || currentHash === '#contact') {
       this.resetAnimatedElements();
       setTimeout(() => {
-        if (!this.blurAnimationComplete && !this.timeline?.isActive()) {
-          this.blurAnimationComplete = true;
-          this.playFormAnimation();
+        if (!this.entranceStarted && !this.timeline?.isActive()) {
+          this.startEntrance();
         }
       }, 300);
     }
 
     this.log('Contact animation initialized (cascade — all screen sizes)');
+  }
+
+  /**
+   * Start the entrance once per arrival.
+   *
+   * Several signals can legitimately want to start it (page-entering,
+   * contact-page-ready, the direct-hash path, the fallback timer) and they
+   * overlap. Without a guard the later ones restart a cascade that is already
+   * halfway through, which looks exactly like the stutter this is meant to fix.
+   */
+  private startEntrance(): void {
+    if (this.entranceStarted) {
+      return;
+    }
+    this.entranceStarted = true;
+    this.blurAnimationComplete = true;
+    this.playFormAnimation();
   }
 
   /**

@@ -18,8 +18,14 @@ import { test, expect } from '@playwright/test';
  * it has arrived beats guessing how long it takes.
  */
 async function settledOn(page: import('@playwright/test').Page, pageId: string) {
+  // `intro-complete`, not `intro-finished`. Both are set when the paw hands
+  // over, but `intro-finished` is CLEARED the moment you navigate away from the
+  // intro (intro-animation.ts:880) — so every settledOn after the first
+  // navigation sat waiting 25s for a class the app had already removed, and the
+  // back/forward test failed as a timeout here rather than on anything to do
+  // with history. `intro-complete` persists for the life of the document.
   await page.waitForFunction(
-    () => document.documentElement.classList.contains('intro-finished'),
+    () => document.documentElement.classList.contains('intro-complete'),
     null,
     { timeout: 25000 }
   );
@@ -104,23 +110,49 @@ test.describe('Navigation', () => {
     // Canonical routes: the map writes '#/about' back into the URL as the
     // camera lands, so asserting the legacy '#about' form fights the app's own
     // canonicalisation and leaves history entries that do not match.
-    await page.goto('/#/about');
-    await settledOn(page, 'about');
-    await expect(page.locator('.about-section')).toBeInViewport();
+    //
+    // Navigate by hash, NOT page.goto(). goto() reloads the document, which
+    // restarts the ~4.5s intro that beforeEach already waited out — twice over,
+    // that alone exceeded the 30s test budget and this failed as a timeout in
+    // settledOn's intro wait rather than on anything about back/forward. Hash
+    // navigation is also what the app actually does when a user clicks a link.
+    // Navigate the way a visitor does — through the menu. Two earlier attempts
+    // were wrong in different ways: page.goto() reloads the document and
+    // restarts the ~4.5s intro (two of those blew the 30s test budget), and
+    // setting location.hash directly moves the URL without driving the map
+    // camera, so the tile never actually panned into view. Clicking the link
+    // exercises the real router and leaves the history entries this test needs.
+    const openMenuAndClick = async (href: string) => {
+      await page.locator('[data-menu-toggle]').first().click();
+      await expect(page.locator('[data-nav]')).toHaveAttribute('data-nav', 'open');
+      await page.locator(`.menu-link[href="${href}"]`).click();
+    };
 
-    await page.goto('/#/contact');
+    // Assert on the app's OWN statement of which page is showing, not on
+    // geometry. These sections are map tiles: the inactive ones are laid out
+    // off-screen and hidden, so `toBeInViewport` reports ratio 0 for anything
+    // mid-transition and is a race even when the right page has landed.
+    // page-transition.ts publishes data-active-page on the container, which is
+    // exactly "the page currently on screen" with no timing ambiguity.
+    const activePage = page.locator('[data-active-page]');
+
+    await openMenuAndClick('#/about');
+    await settledOn(page, 'about');
+    await expect(activePage).toHaveAttribute('data-active-page', 'about');
+
+    await openMenuAndClick('#/contact');
     await settledOn(page, 'contact');
-    await expect(page.locator('.contact-section')).toBeInViewport();
+    await expect(activePage).toHaveAttribute('data-active-page', 'contact');
 
     await page.goBack();
     await expect(page).toHaveURL(/#\/about$/);
     await settledOn(page, 'about');
-    await expect(page.locator('.about-section')).toBeInViewport();
+    await expect(activePage).toHaveAttribute('data-active-page', 'about');
 
     await page.goForward();
     await expect(page).toHaveURL(/#\/contact$/);
     await settledOn(page, 'contact');
-    await expect(page.locator('.contact-section')).toBeInViewport();
+    await expect(activePage).toHaveAttribute('data-active-page', 'contact');
   });
 
   test('should be keyboard accessible', async ({ page }) => {
@@ -130,13 +162,27 @@ test.describe('Navigation', () => {
 
     await expect(page.locator('[data-nav]')).toHaveAttribute('data-nav', 'open');
 
-    // Navigate menu items with arrow keys
-    await page.keyboard.press('Tab'); // Focus first menu item
-    await page.keyboard.press('ArrowDown');
-    await page.keyboard.press('ArrowDown');
+    // Focus a menu link outright, then activate it.
+    //
+    // This used to Tab once and press ArrowDown twice, on the assumption that
+    // the menu implements roving arrow-key navigation. It does not — the links
+    // are plain anchors — so ArrowDown moved nothing, focus was still wherever
+    // one Tab had left it, and Enter activated something that was not a link.
+    // The URL never changed and the failure looked like "keyboard nav is
+    // broken" when the test was simply pressing the wrong keys.
+    // A link to somewhere ELSE. The first .menu-link is whatever page you are
+    // already on, which carries aria-current="page" and pointer-events:none
+    // (nav-base.css) — it is deliberately not actionable, so focusing it and
+    // pressing Enter navigates nowhere.
+    const firstLink = page.locator('.menu-link:not(.active)').first();
+    // The menu opens with a GSAP reveal; the links are in the DOM before they
+    // are actually shown, and an element that is not yet visible cannot take
+    // focus. Waiting for the reveal is the difference between testing keyboard
+    // activation and testing a race.
+    await expect(firstLink).toBeVisible();
+    await firstLink.focus();
+    await expect(firstLink).toBeFocused();
 
-    // Activate whichever link focus landed on; the assertion is that keyboard
-    // activation navigates at all, not which entry it reached.
     await page.keyboard.press('Enter');
 
     await expect(page).toHaveURL(/#\//);

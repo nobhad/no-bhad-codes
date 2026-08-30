@@ -526,7 +526,13 @@
 
   .projects-section .projects-tv-wrap {
     position: absolute;
-    top: 50%;
+    /* Centred in the space the visitor can actually see, not in the section
+       box. The fixed header overlays the top of the tile, so a plain 50%
+       centred the TV+panel block against a boundary that is hidden behind the
+       header — leaving visibly less room above the set than below the buttons,
+       by exactly the header's height. Nudging down by half of it evens the two
+       margins out. */
+    top: calc(50% + (var(--header-height, 0px) / 2));
     left: 50%;
     transform: translate(-50%, -50%);
     width: 100%;
@@ -539,14 +545,19 @@
     justify-content: center;
   }
 
-  /* Channel chevrons pinned to the bottom of the tile (sibling-positioned
-     out of the TV wrap so they don't pull the TV upward). */
-  .projects-section .projects-tv-channel-controls {
-    position: absolute;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
-    left: 0;
-    right: 0;
-    margin-top: 0;
+  /* The control panel rides INSIDE the TV wrap, immediately below the set, so
+     the pair stays together and centred as one object. It was pinned to the
+     bottom of the tile here under its old class name — a name that no longer
+     exists, which is how it ended up unpositioned and floating above the TV.
+     Letting it take part in the wrap's flex flow also pulls the TV slightly
+     up, since the wrap is centred on the taller combined block. */
+  .projects-section .projects-tv-controls {
+    /* relative, NOT static: the panel is the positioning context for the five
+       transparent button overlays laid over the painted controls. Setting it
+       static here resolved them against the section instead, so the POWER
+       overlay stretched the full width of the viewport. */
+    position: relative;
+    margin-bottom: calc(env(safe-area-inset-bottom, 0px));
   }
 
   .section-content {

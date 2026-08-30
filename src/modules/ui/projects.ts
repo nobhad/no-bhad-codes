@@ -38,40 +38,6 @@ const CHANNEL_MUSIC: Readonly<Record<string, string>> = {
   'hedgewitch-horticulture': '/audio/roses-at-twilight.mp3'
 };
 
-/**
- * Build a Lucide square-chevron-{up|down} SVG icon as a real SVG
- * element (not innerHTML) so the security-hook for stringified markup
- * stays clean. Used for the small-mobile channel up/down buttons.
- */
-function buildSquareChevronIcon(direction: 'up' | 'down'): SVGSVGElement {
-  const SVG_NS = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(SVG_NS, 'svg');
-  svg.setAttribute('width', '24');
-  svg.setAttribute('height', '24');
-  svg.setAttribute('viewBox', '0 0 24 24');
-  svg.setAttribute('fill', 'none');
-  svg.setAttribute('stroke', 'currentColor');
-  svg.setAttribute('stroke-width', '2');
-  svg.setAttribute('stroke-linecap', 'round');
-  svg.setAttribute('stroke-linejoin', 'round');
-  svg.setAttribute('aria-hidden', 'true');
-  svg.classList.add('lucide', `lucide-square-chevron-${direction}`);
-
-  const rect = document.createElementNS(SVG_NS, 'rect');
-  rect.setAttribute('width', '18');
-  rect.setAttribute('height', '18');
-  rect.setAttribute('x', '3');
-  rect.setAttribute('y', '3');
-  rect.setAttribute('rx', '2');
-  svg.appendChild(rect);
-
-  const path = document.createElementNS(SVG_NS, 'path');
-  path.setAttribute('d', direction === 'up' ? 'm8 14 4-4 4 4' : 'm16 10-4 4-4-4');
-  svg.appendChild(path);
-
-  return svg;
-}
-
 function contrastVeil(hex: string): string {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.trim());
   if (!m) {
@@ -683,42 +649,58 @@ export class ProjectsModule extends BaseModule {
     tvWrap.insertAdjacentHTML('beforeend', tvHtml);
 
     // External channel controls — hidden by CSS at >479px, shown only on
-    // small mobile where the painted on-frame channel buttons are too
-    // cramped to hit reliably with a finger. Built via createElement so
-    // the security-hook doesn't flag the hardcoded literal as untrusted.
+    // small mobile where the painted on-frame buttons are too cramped to hit
+    // reliably with a finger. Built via createElement so the security-hook
+    // doesn't flag the hardcoded literal as untrusted.
+    //
+    // This is the SET'S OWN control panel, lifted out at a usable size — the
+    // same POWER / CHANNEL / VOLUME artwork that is painted on the chassis,
+    // with its labels. It replaced a pair of generic chevrons that read as
+    // seek arrows and belonged to no particular object. Blowing the panel up
+    // also settles the tap-target problem the chevrons existed to solve: the
+    // on-chassis buttons are 18x7px on a phone, these are the full width of
+    // the panel.
     const channelControls = document.createElement('div');
-    channelControls.className = 'projects-tv-channel-controls';
-    // Each control is an up/down chevron with a "CH" label beneath it, so the
-    // pair reads as a channel selector (▲ CH / ▼ CH) rather than left/right
-    // seek. Label text is created via textContent so the security-hook
-    // doesn't flag stringified markup.
-    const buildChannelLabel = (): HTMLSpanElement => {
-      const label = document.createElement('span');
-      label.className = 'projects-tv-channel-label';
-      label.setAttribute('aria-hidden', 'true');
-      label.textContent = 'CH';
-      return label;
+    channelControls.className = 'projects-tv-controls';
+
+    const panelArt = document.createElement('img');
+    panelArt.className = 'projects-tv-controls-img';
+    panelArt.src = '/images/tv/control-panel.webp';
+    panelArt.alt = '';
+    panelArt.width = 153;
+    panelArt.height = 133;
+    panelArt.decoding = 'async';
+    channelControls.appendChild(panelArt);
+
+    // Transparent overlays on each painted control. They carry data-tv-btn —
+    // the SAME contract as the on-chassis buttons — so both sets run through
+    // one handler and can never drift apart. Positions are percentages of the
+    // 153x133 artwork, measured from its alpha channel.
+    const overlay = (action: string, label: string, css: string): HTMLButtonElement => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `projects-tv-control-btn projects-tv-control-btn--${css}`;
+      btn.dataset.tvBtn = action;
+      btn.setAttribute('aria-label', label);
+      return btn;
     };
-    const downBtn = document.createElement('button');
-    downBtn.type = 'button';
-    downBtn.className = 'projects-tv-channel-btn';
-    downBtn.dataset.tvMobileBtn = 'channel-down';
-    downBtn.setAttribute('aria-label', 'Previous channel');
-    downBtn.append(buildSquareChevronIcon('down'), buildChannelLabel());
-    const upBtn = document.createElement('button');
-    upBtn.type = 'button';
-    upBtn.className = 'projects-tv-channel-btn';
-    upBtn.dataset.tvMobileBtn = 'channel-up';
-    upBtn.setAttribute('aria-label', 'Next channel');
-    upBtn.append(buildSquareChevronIcon('up'), buildChannelLabel());
-    channelControls.append(downBtn, upBtn);
+    channelControls.append(
+      overlay('power', 'Power', 'power'),
+      overlay('channel-down', 'Previous channel', 'channel-down'),
+      overlay('channel-up', 'Next channel', 'channel-up'),
+      overlay('volume-down', 'Volume down', 'volume-down'),
+      overlay('volume-up', 'Volume up', 'volume-up')
+    );
 
     workWrapper.parentNode?.insertBefore(tvWrap, workWrapper);
-    // Insert the chevrons as a SIBLING of the TV wrap (not a child) so the
-    // wrap's translate(-50%, -50%) centering transform doesn't drag them
-    // off-screen. The small-mobile CSS pins them to the tile bottom via
-    // position:absolute resolved against .projects-section.
-    workWrapper.parentNode?.insertBefore(channelControls, workWrapper);
+    // Inside the TV wrap, directly after the set. The wrap is a centred flex
+    // column, so the panel lands centred immediately below the TV and the two
+    // move together — which is what a control panel bolted to a television
+    // should do. It used to be a SIBLING pinned to the bottom of the tile,
+    // which left it stranded at the foot of the screen, and once the wrap
+    // became absolutely positioned on mobile the panel fell out of flow
+    // entirely and rendered ABOVE the set, over the header.
+    tvWrap.appendChild(channelControls);
 
     // Set --tv-aspect from the chassis's natural dimensions so the
     // wrapper width calc auto-adjusts when the chassis art is
@@ -854,32 +836,27 @@ export class ProjectsModule extends BaseModule {
   }
 
   /**
-   * Wire click handlers for the small-mobile channel up/down buttons
-   * rendered below the TV. Reuses cycleTvChannel so the UX matches the
-   * on-frame buttons (which are disabled at the same breakpoint via CSS).
+   * Wire the enlarged control panel rendered below the TV on small mobile.
+   *
+   * It carries the same `data-tv-btn` attributes as the painted on-chassis
+   * controls and runs through the same handleTvButton() switch, so the two
+   * sets cannot drift: adding a button to the chassis makes it work here for
+   * free. This used to be a separate `data-tv-mobile-btn` contract that
+   * understood only channel up/down — POWER and VOLUME simply did not exist
+   * for anyone on a phone.
    */
   private wireMobileChannelButtons(): void {
-    const controls = document.querySelector('.projects-tv-channel-controls');
+    const controls = document.querySelector('.projects-tv-controls');
     if (!controls) {
       return;
     }
     controls.addEventListener('click', (event) => {
       const target = event.target as HTMLElement | null;
-      const btn = target?.closest('[data-tv-mobile-btn]') as HTMLElement | null;
-      if (!btn) {
+      const btn = target?.closest('[data-tv-btn]') as HTMLElement | null;
+      if (!btn?.dataset.tvBtn) {
         return;
       }
-      // Mirror the on-frame channel buttons: inert while the TV is off.
-      const tv = document.querySelector('.crt-tv');
-      if (tv?.classList.contains('is-powered-off')) {
-        return;
-      }
-      const action = btn.dataset.tvMobileBtn;
-      if (action === 'channel-up') {
-        this.cycleTvChannel(+1);
-      } else if (action === 'channel-down') {
-        this.cycleTvChannel(-1);
-      }
+      this.handleTvButton(btn.dataset.tvBtn);
     });
   }
 
@@ -956,40 +933,49 @@ export class ProjectsModule extends BaseModule {
     tv.addEventListener('click', (event) => {
       const target = event.target as HTMLElement | null;
       const btn = target?.closest('[data-tv-btn]') as HTMLElement | null;
-      if (!btn) {
+      if (!btn?.dataset.tvBtn) {
         return;
       }
-      const action = btn.dataset.tvBtn;
-
-      // POWER is the only control that works while the set is off —
-      // every other button is inert (no channel cycle, no volume step,
-      // no click sound — sound gating lives in tvSfx) until the user
-      // turns the TV back on.
-      if (action !== 'power' && tv.classList.contains('is-powered-off')) {
-        return;
-      }
-
-      switch (action) {
-        case 'power':
-          this.toggleTvPower();
-          break;
-        case 'channel-up':
-          // CHANNEL UP = next higher channel number (down in the array
-          // direction the wheel/key handler uses, since "down" cycles to
-          // the next channel).
-          this.cycleTvChannel(+1);
-          break;
-        case 'channel-down':
-          this.cycleTvChannel(-1);
-          break;
-        case 'volume-up':
-          tvSfx.stepUp();
-          break;
-        case 'volume-down':
-          tvSfx.stepDown();
-          break;
-      }
+      this.handleTvButton(btn.dataset.tvBtn);
     });
+  }
+
+  /**
+   * Act on one TV control, wherever it was pressed — the painted buttons on
+   * the chassis or the enlarged panel shown below the set on small mobile.
+   * One switch for both, so the two can never disagree about what a button
+   * does or about when it is inert.
+   */
+  private handleTvButton(action: string): void {
+    const tv = document.querySelector('.crt-tv');
+
+    // POWER is the only control that works while the set is off — every other
+    // button is inert (no channel cycle, no volume step, no click sound —
+    // sound gating lives in tvSfx) until the user turns the TV back on.
+    if (action !== 'power' && tv?.classList.contains('is-powered-off')) {
+      return;
+    }
+
+    switch (action) {
+      case 'power':
+        this.toggleTvPower();
+        break;
+      case 'channel-up':
+        // CHANNEL UP = next higher channel number (down in the array
+        // direction the wheel/key handler uses, since "down" cycles to
+        // the next channel).
+        this.cycleTvChannel(+1);
+        break;
+      case 'channel-down':
+        this.cycleTvChannel(-1);
+        break;
+      case 'volume-up':
+        tvSfx.stepUp();
+        break;
+      case 'volume-down':
+        tvSfx.stepDown();
+        break;
+    }
   }
 
   /**
