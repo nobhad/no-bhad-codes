@@ -286,7 +286,7 @@
           "GA4 traffic summarised in the dashboard through a Netlify Function, so the client never opens Google Analytics",
           "Contact-form submissions collected in a Messages screen with email notification"
         ],
-        "media": "/portfolio/hedgewitch-horticulture/admin-screens.gif"
+        "media": "/portfolio/hedgewitch-horticulture/videos/admin-mobile.webm"
       },
       "keyFeatures": [
         "Walkable native-garden page with plants drawn true-to-scale, grouped by real ecological community",
