@@ -15,6 +15,19 @@ Worth stating up front, because two of the findings only make sense against it:
 | --- | --- | --- |
 | **Vercel** | The static site at `nobhad.codes` (`dist/`) | `vercel.json` |
 | **Railway** | The Express API and every server-rendered page | `railway.json` |
+| ~~Render~~ | Nothing — retired 2026-08-30 | none in-repo |
+
+A third host, **Render**, auto-deployed the same repo from `main` and was found
+only when its failure email arrived during this release. It served no production
+traffic: `vercel.json` rewrites exclusively to Railway, and the Render instance
+was running an older build on the free tier. It has been retired.
+
+It is worth knowing why it went unnoticed: it had no configuration in the
+repository at all — no `render.yaml`, no reference in `vercel.json`, nothing in
+the docs — so nothing here revealed its existence. Its deploy failed on
+`ERR_DLOPEN_FAILED` loading sqlite3's native binding, unrelated to any code
+change; a lockfile change simply forced a fresh `npm ci`, which invalidated its
+build cache and surfaced a latent native-build problem.
 
 `vercel.json` rewrites a fixed set of prefixes to Railway: `/api/*`,
 `/set-password`, `/forgot-password`, `/reset-password`, `/intake`, `/dashboard`,
