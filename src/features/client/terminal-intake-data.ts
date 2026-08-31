@@ -76,6 +76,32 @@ export const QUESTIONS: IntakeQuestion[] = [
         : 'Please add a little more detail (at least 10 characters).',
     placeholder: 'Describe your project goals, target audience, and vision...'
   },
+  // Phase 2b: Scope — what the work actually covers, and what already exists.
+  {
+    id: 'projectScope',
+    field: 'projectScope',
+    question: 'Do you need design as well as development, or is the design already handled?',
+    type: 'select',
+    required: true,
+    options: [
+      { value: 'design-and-build', label: 'Design and development — start from scratch' },
+      { value: 'build-only', label: 'Development only — I have designs ready' },
+      { value: 'not-sure', label: "Not sure yet — let's discuss" }
+    ]
+  },
+  {
+    id: 'brandAssets',
+    field: 'brandAssets',
+    question: 'Do you have your own assets — logo, brand colours, images?',
+    type: 'select',
+    required: true,
+    options: [
+      { value: 'have-all', label: 'Yes — logo, colours and images are ready' },
+      { value: 'have-some', label: 'Some of it — a logo or a few colours' },
+      { value: 'none', label: 'None yet — I need help creating them' }
+    ]
+  },
+
   {
     id: 'timeline',
     field: 'timeline',

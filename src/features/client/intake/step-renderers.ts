@@ -48,6 +48,8 @@ export function generateReviewSummary(data: IntakeData): string {
     '[PROJECT]',
     `Type: ${val(formatFieldForReview('projectType', data.projectType as string))}`,
     `Description: ${val(formatFieldForReview('projectDescription', data.projectDescription as string))}`,
+    `Scope: ${val(formatFieldForReview('projectScope', data.projectScope as string))}`,
+    `Assets: ${val(formatFieldForReview('brandAssets', data.brandAssets as string))}`,
     `Timeline: ${val(formatFieldForReview('timeline', data.timeline as string))}`,
     `Budget: ${val(formatFieldForReview('budget', data.budget as string))}`,
     '',

@@ -87,7 +87,11 @@ async function saveIntakeAsFile(
       timeline: intakeData.timeline,
       budget: intakeData.budget,
       features: intakeData.features || [],
-      designLevel: intakeData.designLevel || null
+      designLevel: intakeData.designLevel || null,
+      scope: intakeData.projectScope || null
+    },
+    assets: {
+      brandAssets: intakeData.brandAssets || null
     },
     technicalInfo: {
       techComfort: intakeData.techComfort || null,
@@ -170,6 +174,8 @@ interface IntakeFormData {
   projectDescription: string;
   timeline: string;
   budget: string;
+  projectScope?: string;
+  brandAssets?: string;
   techComfort?: string;
   domainHosting?: string;
   features?: string | string[];

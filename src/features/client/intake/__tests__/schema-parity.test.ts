@@ -34,7 +34,7 @@ function allowedValues(field: string): string[] {
 describe('terminal intake question flow matches server schema', () => {
   // These are the enum fields the server validates strictly.
   // All three fields have static options in the lean question flow and must be checked.
-  const enumFields = ['projectType', 'timeline', 'budget'];
+  const enumFields = ['projectType', 'projectScope', 'brandAssets', 'timeline', 'budget'];
 
   for (const field of enumFields) {
     it(`every '${field}' option value is accepted by the server schema`, () => {

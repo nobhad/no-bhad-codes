@@ -219,6 +219,14 @@ export const ValidationSchemas = {
         ]
       }
     ],
+    projectScope: {
+      type: 'string' as const,
+      allowedValues: ['design-and-build', 'build-only', 'not-sure']
+    },
+    brandAssets: {
+      type: 'string' as const,
+      allowedValues: ['have-all', 'have-some', 'none']
+    },
     techComfort: {
       type: 'string' as const,
       allowedValues: ['beginner', 'comfortable', 'technical']
