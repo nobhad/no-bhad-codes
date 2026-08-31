@@ -21,9 +21,16 @@
   padding: 0;
   margin: 0;
   overflow: visible;
+  /* Terminal.app rhythm: its title bar is a shade under 2x the type size and
+     its rows sit flush, no gutter between them — that flushness is most of
+     what makes a terminal read as one. Local rather than tokenised because
+     --terminal-line-height is shared with the Arrow callout on the contact
+     form, which wants the roomier setting. */
+  --terminal-lh: 1.25;
+  --terminal-lh-prose: 1.45;
   font-size: var(--terminal-font-size);
   font-weight: var(--font-weight-medium);
-  line-height: var(--terminal-line-height);
+  line-height: var(--terminal-lh);
   width: 100%;
   min-width: 100%;
 }
@@ -54,10 +61,10 @@
 .terminal-header {
   background: var(--color-terminal-bg-light);
   border-bottom: var(--border-width) solid var(--color-terminal-border);
-  padding: var(--space-2-5) var(--space-4);
+  padding: var(--space-0-5) var(--space-1-5);
   display: flex;
   align-items: center;
-  gap: var(--icon-gap-xl);
+  gap: var(--space-1);
 }
 
 /* Traffic light buttons */
@@ -103,6 +110,7 @@
 .terminal-title {
   color: var(--color-terminal-text-muted);
   font-size: var(--font-size-sm);
+  line-height: var(--line-height-tight);
   flex: 1;
   text-align: center;
   font-family: inherit;
@@ -115,11 +123,13 @@
 .terminal-body {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-5);
+  padding: var(--space-1-5);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: var(--space-4);
+  /* Flush rows. Blocks that need air ask for it themselves — see
+     .chat-message — rather than every boot line paying for it. */
+  gap: 0;
 }
 
 .terminal-body > * {
@@ -157,7 +167,7 @@
 
 .terminal-input-area {
   border-top: var(--border-width) solid var(--color-terminal-border);
-  padding: var(--space-2-5) var(--space-5);
+  padding: var(--space-1) var(--space-1-5);
   background: var(--color-terminal-bg-panel);
   display: flex;
   align-items: center;
@@ -266,7 +276,8 @@ input.terminal-input:-webkit-autofill,
   background: var(--color-terminal-green-dark);
   color: var(--color-terminal-bg);
   border: none;
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-0-5) var(--space-2);
+  line-height: var(--line-height-tight);
   font-family: inherit;
   font-weight: var(--font-weight-bold);
   cursor: pointer;
@@ -337,14 +348,14 @@ input.terminal-input:-webkit-autofill,
 .terminal .terminal-progress,
 .terminal-intake .terminal-progress,
 .terminal-progress {
-  padding: var(--space-4) var(--space-5) var(--space-2) var(--space-5);
+  padding: var(--space-1) var(--space-2);
   background: var(--color-terminal-bg-panel);
   border-bottom: var(--border-width) solid var(--color-terminal-border);
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: center;
-  gap: var(--icon-gap-xl);
+  gap: var(--space-1-5);
 }
 
 .terminal-progress .progress-label {
@@ -407,9 +418,16 @@ html[data-theme="light"] .terminal-intake {
   padding: 0;
   margin: 0;
   overflow: hidden;
+  /* Terminal.app rhythm: its title bar is a shade under 2x the type size and
+     its rows sit flush, no gutter between them — that flushness is most of
+     what makes a terminal read as one. Local rather than tokenised because
+     --terminal-line-height is shared with the Arrow callout on the contact
+     form, which wants the roomier setting. */
+  --terminal-lh: 1.25;
+  --terminal-lh-prose: 1.45;
   font-size: var(--terminal-font-size);
   font-weight: var(--font-weight-medium);
-  line-height: var(--terminal-line-height);
+  line-height: var(--terminal-lh);
   width: 100%;
   height: 100%;
 }
@@ -465,10 +483,10 @@ body[data-page="client-intake"] .terminal-window {
    ============================================================================ */
 
 .terminal-login-info {
-  padding: 0 0 var(--space-3) 0;
+  padding: 0 0 var(--space-1) 0;
   color: var(--color-terminal-text-muted);
   font-size: var(--terminal-font-size);
-  line-height: var(--line-height-relaxed);
+  line-height: var(--terminal-lh-prose);
   background: transparent;
 }
 
@@ -487,11 +505,13 @@ body[data-page="client-intake"] .terminal-window {
 .terminal-chat {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-5);
+  padding: var(--space-1-5);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: var(--space-4);
+  /* Flush rows. Blocks that need air ask for it themselves — see
+     .chat-message — rather than every boot line paying for it. */
+  gap: 0;
   min-height: 0; /* Allow flex to shrink — input area must stay visible */
 }
 
@@ -575,7 +595,7 @@ body[data-page="client-intake"] .terminal-window {
 .chat-message.ai .message-content {
   color: var(--color-terminal-green);
   font-size: var(--font-size-base);
-  line-height: var(--line-height-relaxed);
+  line-height: var(--terminal-lh-prose);
 }
 
 .chat-message.ai .message-content::before {
@@ -606,7 +626,7 @@ body[data-page="client-intake"] .terminal-window {
   font-style: normal;
   white-space: pre-wrap;
   word-break: break-word;
-  line-height: var(--line-height-relaxed);
+  line-height: var(--terminal-lh-prose);
   padding: var(--space-2) 0;
 }
 
@@ -648,7 +668,7 @@ body[data-page="client-intake"] .terminal-window {
 .boot-line {
   color: var(--color-terminal-text-muted);
   font-size: var(--terminal-font-size);
-  line-height: var(--line-height-relaxed);
+  line-height: var(--terminal-lh-prose);
 }
 
 .boot-line:empty {
@@ -843,7 +863,7 @@ svg.terminal-avatar-img #Eye image {
   }
 
   .terminal-chat {
-    padding: var(--space-3);
+    padding: var(--space-1);
     max-height: calc(100vh - 280px);
   }
 
