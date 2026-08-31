@@ -51,6 +51,21 @@ export class ErrorTrackingService {
       tracesSampleRate = environment === 'production' ? 0.1 : 1.0
     } = config;
 
+    // Only report from real deployments. This is the second of two Sentry
+    // init sites (the other is server/instrument.ts) and gating just that one
+    // left this path wide open: SENTRY_DSN lives in .env, so every local
+    // `npm run dev:server` still initialised here and reported into the
+    // production project — a laptop on port 4001 filing issues against a
+    // ./data/client_portal.db that only exists on that machine.
+    // SENTRY_ENABLE_LOCAL=true opts a local run back in deliberately.
+    if (environment !== 'production' && process.env.SENTRY_ENABLE_LOCAL !== 'true') {
+      console.warn(
+        `⚠️ Sentry disabled outside production (environment: ${environment}). ` +
+          'Set SENTRY_ENABLE_LOCAL=true to report from a local run.'
+      );
+      return;
+    }
+
     // Check if DSN is missing or a placeholder value
     if (
       !dsn ||
