@@ -65,6 +65,16 @@ export function waitForTwoOptionChoice(
     handleClick = async (e: Event) => {
       const target = e.target as HTMLElement;
       if (target.classList.contains('chat-option')) {
+        // Only this prompt's own options. The listener is on the whole chat
+        // container in the capture phase, so without this it also swallows the
+        // options of every earlier QUESTION — and this prompt is exactly when
+        // the user is told to scroll up and click one to edit it. Worse, the
+        // mapping below is positional, so editing a question by picking its
+        // FIRST option ran onOption1: on the review prompt, that submits.
+        // A question's message carries data-question-index; a prompt's does not.
+        if (target.closest('.chat-message[data-question-index]')) {
+          return;
+        }
         e.stopPropagation();
         const choice = target.dataset.value;
 

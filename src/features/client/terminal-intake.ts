@@ -527,7 +527,14 @@ export class TerminalIntakeModule extends BaseModule {
   // -- Input handling ---------------------------------------------------------
 
   private handleOptionClick(target: HTMLElement): void {
-    if (this.isProcessing || this.isInSpecialPrompt) {
+    if (this.isProcessing) {
+      return;
+    }
+    // The review prompt tells the reader to scroll up and click an answer to
+    // change it, so option clicks on an already-asked question have to keep
+    // working while that prompt is pending. Only the prompt's own options are
+    // off limits here.
+    if (this.isInSpecialPrompt && !target.closest('.chat-message[data-question-index]')) {
       return;
     }
     const value = target.dataset.value;
@@ -562,7 +569,11 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private async handleUserInput(): Promise<void> {
-    if (this.isProcessing || this.isInSpecialPrompt) {
+    if (this.isProcessing) {
+      return;
+    }
+    // Editing a text answer from the review prompt goes through here too.
+    if (this.isInSpecialPrompt && this.editingQuestionIndex === null) {
       return;
     }
     const inputValue = this.inputElement?.value.trim() || '';
@@ -745,6 +756,14 @@ export class TerminalIntakeModule extends BaseModule {
       );
     }
 
+    // processAnswer set isProcessing before awaiting askCurrentQuestion, and
+    // askCurrentQuestion lands here and blocks on the prompt below — so the flag
+    // would stay true for the whole review. goBackToQuestion and
+    // handleOptionClick both bail on it, which is what stopped the reader from
+    // editing anything from the very screen that tells them to. Nothing is in
+    // flight while we wait for a choice, so release it.
+    this.isProcessing = false;
+
     await waitForTwoOptionChoice(
       {
         chatContainer: this.chatContainer,
@@ -773,6 +792,9 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private async waitForChangeDecision(): Promise<void> {
+    // Same as above: this prompt is where editing actually happens.
+    this.isProcessing = false;
+
     await waitForTwoOptionChoice(
       {
         chatContainer: this.chatContainer,
