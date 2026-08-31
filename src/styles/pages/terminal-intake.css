@@ -621,7 +621,9 @@ body[data-page="client-intake"] .terminal-window {
 
 .chat-message.user .message-content::before {
   content: "$ ";
-  color: var(--color-terminal-blue);
+  /* Prompt stays green so it reads as the shell, not part of the answer —
+     the answer itself is the blue half of the line. */
+  color: var(--color-terminal-green);
   font-weight: var(--font-weight-bold);
 }
 
