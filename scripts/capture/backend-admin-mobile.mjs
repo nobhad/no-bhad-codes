@@ -26,18 +26,27 @@
  *
  * KNOWN LIMITATION — this does not yet produce a usable clip.
  * The cookie satisfies the server, so /dashboard returns the admin's HTML, but
- * once the bundle mounts the client app runs its own auth check, disagrees, and
- * redirects to /#/portal. This server serves no SPA shell, so the recording
- * ends on a blank document. Seeding admin_token / auth_token / adminAuth into
- * localStorage from the login response was not enough.
+ * once the bundle mounts the client app redirects to /#/portal. This server
+ * serves no SPA shell, so the recording ends on a blank document.
+ *
+ * What was established about that redirect:
+ *   - It is NOT a rejected API call. A network trace shows the navigation with
+ *     no request in front of it, and /api/admin/clients answers 200 to the
+ *     cookie alone. So it is a local guard, not a 401.
+ *   - The client's session state lives in sessionStorage under the nbw_auth_*
+ *     keys (src/auth/auth-constants.ts). The localStorage names — admin_token,
+ *     adminAuth — are the LEGACY set kept only for migration, so seeding those
+ *     does nothing.
+ *   - Seeding nbw_auth_user / _role / _expiry / _mode is still not enough, so
+ *     something further is required that has not been identified.
  *
  * Blocking the bundle instead gets a styled page, but the server render alone
  * lays every subtab out at once, which does not read as the admin.
  *
- * Two ways forward, neither attempted here:
- *   - find what the client auth check actually requires and seed that, or
- *   - point a dev-mode frontend at this server (VITE_API_URL) and record that,
- *     which keeps the scrubbed database while letting the SPA run normally.
+ * The remaining option, and probably the better one: point a dev-mode frontend
+ * at this server via VITE_API_URL and record that. It keeps the scrubbed
+ * database while letting the SPA boot the way it normally does, instead of
+ * reconstructing its session by hand.
  */
 import { chromium } from '/Users/noellebhaduri/Projects/Development/Active/no-bhad-codes/node_modules/playwright/index.mjs';
 import {
@@ -192,27 +201,27 @@ for (const pattern of ['**/assets/**', '**/images/**', '**/fonts/**']) {
 const settle = (ms) => page.waitForTimeout(ms);
 
 // The cookie satisfies the SERVER, which is why /dashboard returns the admin's
-// HTML. The client app keeps its own auth state in localStorage and, finding
-// none, tears the page down and heads for the login route — which this server
-// does not serve, leaving a blank document with an empty title. Seeding the
-// token from the login response is what lets the mounted app agree with the
-// server about who is signed in.
-if (loginBody?.data?.token) {
+// HTML. The client app keeps its own session state and, finding none, redirects
+// to /#/portal before issuing a single API call — the network trace shows the
+// navigation with no request in front of it, so this is a local guard rather
+// than a rejected call.
+//
+// That state lives in sessionStorage under the nbw_auth_* keys in
+// src/auth/auth-constants.ts. The localStorage names (admin_token, adminAuth)
+// are the LEGACY set kept only for migration, and seeding those does nothing.
+if (loginBody?.data?.user) {
   await page.addInitScript(
-    ({ token, user }) => {
+    ({ user, expiry }) => {
       try {
-        for (const key of ['admin_token', 'auth_token']) {
-          localStorage.setItem(key, token);
-        }
-        localStorage.setItem('adminAuth', 'true');
-        if (user) {
-          localStorage.setItem('auth_user', JSON.stringify(user));
-        }
+        sessionStorage.setItem('nbw_auth_user', JSON.stringify(user));
+        sessionStorage.setItem('nbw_auth_role', 'admin');
+        sessionStorage.setItem('nbw_auth_expiry', String(expiry));
+        sessionStorage.setItem('nbw_auth_mode', 'admin');
       } catch {
-        /* private mode or storage disabled — nothing to do */
+        /* storage unavailable — nothing to seed */
       }
     },
-    { token: loginBody.data.token, user: loginBody.data.user }
+    { user: loginBody.data.user, expiry: Date.now() + 60 * 60 * 1000 }
   );
 }
 
