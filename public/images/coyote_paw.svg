@@ -54,7 +54,12 @@
   </g>
   <g id="Card">
     <rect id="_Card_Outline_" class="st0" x="1256.2" y="1031.8" width="1060.5" height="590.3"/>
-    <g id="_Black_Filled_Text_">
+    <!-- The card's type, drawn into the paw. Nudged to sit where the real
+       business-card SVG puts it: this group sat 28px right of centre and
+       13px low inside _Card_Outline_, so the type visibly settled when the
+       morph handed over to the real card. Measured against
+       business-card_front-v2.svg, whose type block is centred at L76/R76. -->
+    <g id="_Black_Filled_Text_" transform="translate(-14 -13)">
       <g>
         <g>
           <path class="st2" d="M1912.8,1525.4l-2.5-7.1h7.8l.9.6,3.8,14.9,2.3,12,.4-2.5,3.1-10.5,3.5-14.5h7.4l3.7,14.3,2.3,11.4,1.2,1.9,2.8-13.7,3.5-13.9h8.2l.2.5-2.2,6.6-8.6,35.7h-7.9l-6.6-28.5h-.3l-5.9,29.3h-7.7l-1.5-9.9-7.5-26.6h-.1Z"/>
