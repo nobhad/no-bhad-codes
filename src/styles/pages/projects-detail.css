@@ -938,6 +938,11 @@
   .title-row {
     flex-direction: row;
     align-items: center;
+    /* Centred on a phone: the title wraps to two or three lines at this width,
+       and a left-aligned badge trailing the last line reads as orphaned rather
+       than attached to the heading. */
+    justify-content: center;
+    text-align: center;
     gap: var(--space-2);
     margin-bottom: 0;
     flex-wrap: wrap;
@@ -1019,7 +1024,18 @@
   }
 
   .intro-left-row {
-    gap: var(--space-4);
+    /* Wrap. The base rule is display:flex with no wrap, and the wide-screen
+       rule above deliberately keeps Year/Duration/Launch on one line — at
+       375px those three overflow the tile by ~66px and LAUNCH is clipped off
+       the right edge. min-width:0 lets the groups shrink rather than forcing
+       their content width. */
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-4);
+    min-width: 0;
+  }
+
+  .intro-left-group {
+    min-width: 0;
   }
 
   /* --- Case study --- */
