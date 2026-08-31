@@ -1952,12 +1952,6 @@ export class PageTransitionModule extends BaseModule {
       return;
     }
 
-    // Finger direction = nav direction. Same convention as the wheel
-    // handler (which inverts deltaX so swipe-right always navigates
-    // right on natural-scroll trackpads). Aligning these means a touch
-    // laptop where BOTH events fire for one gesture won't produce
-    // conflicting directions — the user gets the same result regardless
-    // of which handler runs first.
     // Same axis split as the wheel. A finger swiping UP drags the page toward
     // its bottom, which is where the curtain is, so that's the opening
     // direction — the inverse of the finger-direction convention below, which
@@ -1980,11 +1974,22 @@ export class PageTransitionModule extends BaseModule {
       return;
     }
 
+    // Direct manipulation: the content follows the finger, so the direction
+    // travelled is the OPPOSITE of the finger's. Dragging left pulls the next
+    // tile in from the right, and dragging up pulls the one below into view —
+    // the way every native carousel and scroll surface behaves.
+    //
+    // This deliberately does not match handleWheel, which maps a wheel/trackpad
+    // delta straight to a direction. A wheel is not direct manipulation, and
+    // aligning the two is what made phones feel inverted: it left this function
+    // arguing with itself, since the curtain branch above already treats a
+    // finger swiping up as "drag the page up" (opening = dy < 0) while the
+    // navigation below treated the same gesture as travelling up.
     let direction: Direction;
     if (absX >= absY) {
-      direction = dx > 0 ? 'right' : 'left';
+      direction = dx > 0 ? 'left' : 'right';
     } else {
-      direction = dy > 0 ? 'down' : 'up';
+      direction = dy > 0 ? 'up' : 'down';
     }
 
     // Mirror handleWheel's edge-of-scroll guard for vertical swipes so
