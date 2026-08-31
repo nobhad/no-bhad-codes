@@ -2,6 +2,78 @@
 
 ---
 
+## CSS audit — cascade layers, dead rules, undefined tokens
+
+**Status:** 3 of 4 done; the layer rewiring is still OPEN
+**Priority:** Medium — one shipped iOS bug fixed, one architectural fault left
+
+Audit of the stylesheet set turned up four problems. Three are fixed and
+committed; the fourth is the big one and is deliberately last, because it is the
+only one that can move things on desktop.
+
+### Done
+
+- [x] **iPhone safe area cleared twice.** `--header-height` already carries
+      `env(safe-area-inset-top)`, and `mobile/layout.css` plus `intro-morph.css`
+      added it again on top. On a Dynamic Island phone the tiles sat ~59px lower
+      than the header actually ends. Measured in Chrome at 393px by substituting
+      a literal 59px for the `env()`: `--map-header-inset` 163px -> 104px.
+      Invisible off-device — `env(safe-area-inset-top)` is 0 in desktop Chrome,
+      in DevTools device emulation and in every `scripts/capture` run, which is
+      how it survived.
+- [x] **Pre-TV projects page styles deleted.** 58 rules / 433 lines in
+      `pages/projects.css`: hero, filter bar, `.projects-grid`, the whole
+      `.project-card` family. 29 class names with no reference in any HTML/TS/TSX.
+- [x] **Every custom property now resolves.** 15 were read with no definition
+      and no fallback, so the browser dropped those declarations silently. Four
+      went with the dead code; the rest are defined or retargeted.
+
+### Open
+
+- [ ] **Verify the safe-area fix on real hardware.** Cannot be reproduced in any
+      desktop browser. Check a map tile and the intro morph on an iPhone.
+- [ ] **Three rules that were inert and now are not.** `.mt-lg` gains 32px at
+      four portal call sites (`--space-4`; use `--space-3` if "lg" should be
+      24px), `.portal-button:focus-visible` gains the faint red tint its WCAG
+      comment describes, and the mobile scrollbar track picks up the body colour.
+- [ ] **Login form min-height is a design decision.**
+      `pages/client-portal-section.css` asked for `min-height:
+      var(--portal-form-height)` so the section would not resize when switching
+      between the password and magic-link forms. That token never existed, so
+      both forms have always been `auto`. The dead declaration is removed; set a
+      real height there if the section should stop resizing.
+- [ ] **The cascade-layer system is mostly not wired up.** `core/layer-order.css`
+      declares nine layers, but `bundles/site.css` imports six sheets with no
+      `layer()` clause — `base/utilities.css` (via `foundation.css`),
+      `layouts/index.css`, `states/index.css`, `responsive/breakpoints.css`,
+      `pages/projects-detail.css` and `base/site-globals.css`. Unlayered CSS
+      outranks every layer, so those six win on import position alone and the
+      documented order is fiction for four of the nine.
+
+      The sting: `mobile/index.css` is the only thing that actually lands in
+      `layer(responsive)`, making mobile overrides the *weakest* member of the
+      responsive family — beaten by unlayered `breakpoints.css`,
+      `projects-detail.css` and `site-globals.css`. Two file headers document the
+      opposite and are wrong as wired: `mobile/contact.css` ("higher priority
+      than 'pages' layer, so !important is not needed") and
+      `responsive/breakpoints.css`. `mobile/layout.css` carries 13 `!important`s,
+      the most in the codebase, forcing what the layer order was meant to give
+      for free.
+
+- [ ] **`.header` has two position models.** `base/layout.css` sets
+      `z-index: var(--z-index-fixed, 300)`; `components/nav-base.css` sets
+      `var(--z-index-nav-header)` = 130 and wins, so the comment claiming the
+      standard fixed layer is wrong and anything in 130-300 covers the header.
+      `nav-responsive.css` also sets `position: static` under `@media (--mobile)`,
+      against the `translateY(-100%)` scroll-hide in `base/layout.css` which
+      assumes the header floats. Below 480px `main` is `position: fixed` so
+      nothing reserves space and it is harmless; in the 480-767px band the header
+      is static while `main` is in flow. `footer-curtain.ts` guards for this with
+      `headerTravelsInFlow()`; `navigation.ts` toggles `header--scrolled` on every
+      viewport without checking.
+
+---
+
 ## TV title-card text runs to the edge of the screen
 
 **Status:** OPEN — needs a re-export, not a CSS change
