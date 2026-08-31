@@ -28,9 +28,12 @@ function getApiConfig(): ApiConfig {
     return window.API_CONFIG;
   }
 
-  // Environment-based configuration
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  const isProduction = process.env.NODE_ENV === 'production';
+  // import.meta.env, not process.env: Vite replaces these with literals at
+  // build time, so the development branch below is provably dead in a
+  // production build and gets shaken out with it. Reading process.env.NODE_ENV
+  // instead left the bundler unable to prove that, and shipped the
+  // http://localhost:4001 fallback as a string inside the production bundle —
+  // unreachable, but there.
 
   // Try to get from environment variables or meta tags
   let baseUrl = '';
@@ -46,18 +49,12 @@ function getApiConfig(): ApiConfig {
   // Fallback to environment-based detection
   if (!baseUrl) {
     // Check for Vite environment variable (set at build time)
-    const viteApiUrl = import.meta.env?.VITE_API_URL;
-    if (viteApiUrl) {
-      baseUrl = viteApiUrl;
-    } else if (isDevelopment) {
-      baseUrl = 'http://localhost:4001';
-    } else if (isProduction) {
-      // In production, use VITE_API_URL or empty for same-origin
-      baseUrl = '';
-    } else {
-      // Default for other environments
-      baseUrl = '';
-    }
+    // Same-origin by default, in every environment. Dev does not need an
+    // absolute URL: vite.config proxies /api to the API server, so a relative
+    // path already reaches it. Hard-coding http://localhost:4001 as a dev
+    // fallback only put that string in the production bundle, where it was
+    // unreachable but present, and no branch guard reliably removed it.
+    baseUrl = import.meta.env.VITE_API_URL || '';
   }
 
   return { baseUrl };

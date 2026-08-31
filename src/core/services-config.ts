@@ -91,8 +91,10 @@ export function registerServices(): void {
       const { VisitorTrackingService } = await import('../services/visitor-tracking');
       // Use API URL from environment variable - avoids hardcoding production URLs
       // VITE_API_URL should be set in .env files for each environment
-      const apiUrl =
-        import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:4001');
+      // Same-origin unless explicitly overridden. Dev reaches the API through
+      // vite.config's /api proxy, so no absolute localhost URL is needed —
+      // and hard-coding one shipped it in the production bundle.
+      const apiUrl = import.meta.env.VITE_API_URL || '';
       return new VisitorTrackingService({
         enableTracking: true,
         respectDoNotTrack: false, // Track all visitors for analytics
