@@ -40,6 +40,30 @@ const CLICK_SAMPLE_URL = '/audio/channel-click.mp3';
 // AudioContext (iOS Safari requires audio to start inside a gesture).
 const TV_BUTTON_SELECTOR = '.crt-tv__btn, .projects-tv-channel-btn';
 
+/**
+ * Tell iOS this is playback audio, not a notification sound.
+ *
+ * By default Safari routes Web Audio through the "auto" session, which the
+ * hardware ring/silent switch mutes outright — the phone's volume can be at
+ * maximum and every buffer still plays into silence, with no error and a
+ * perfectly healthy AudioContext. Setting the session to `playback` is what
+ * makes audio survive the switch, the same category a video player claims.
+ *
+ * Only Safari 17+ / iOS 16.4+ implement this; everywhere else the property is
+ * absent and this is a no-op, so it needs no capability flag beyond the guard.
+ */
+function claimPlaybackAudioSession(): void {
+  try {
+    const session = (navigator as unknown as { audioSession?: { type: string } }).audioSession;
+    if (session) {
+      session.type = 'playback';
+    }
+  } catch {
+    // Non-fatal: an unsupported value or a locked-down browser just leaves the
+    // default session in place.
+  }
+}
+
 // Fixed gain for the mechanical click. NOT controlled by VOLUME ▼▲ —
 // see the file header. Set well under 1.0 because the raw button
 // sample is loud and we want a soft tactile feel, not a clack.
@@ -121,6 +145,7 @@ class TvSfx {
   private clickBuffer: AudioBuffer | null = null;
   private clickLoadPromise: Promise<AudioBuffer | null> | null = null;
   private lastClickAt: number = -Infinity;
+  private firstTouchPrimerBound = false;
   private globalListenerBound: boolean = false;
   // Decoded TV-static sample (~4s). static() plays a short slice from
   // a random offset so back-to-back channel changes don't sound identical.
@@ -173,6 +198,7 @@ class TvSfx {
     this.volume = this.loadVolume();
     if (typeof document !== 'undefined') {
       this.bindGlobalClickListener();
+      this.bindFirstTouchPrimer();
       this.prefetchSamples();
     }
   }
@@ -745,6 +771,32 @@ class TvSfx {
     );
   }
 
+  /** Unlock audio on the first touch anywhere, not just on a TV button.
+   *
+   * The click primer below only fires for TV controls, which is fine on a
+   * desktop where the pointer has usually clicked something already. On a
+   * phone the projects tile is normally reached by swiping, and a swipe is not
+   * a click on a TV button — so the context stayed suspended and the channel's
+   * music started into a context that was never resumed. Silence, with nothing
+   * in the console to show for it.
+   *
+   * One shot: the listener removes itself once it has primed, so this creates
+   * exactly one AudioContext, lazily, on the visitor's first interaction. */
+  private bindFirstTouchPrimer(): void {
+    if (this.firstTouchPrimerBound || typeof document === 'undefined') {
+      return;
+    }
+    this.firstTouchPrimerBound = true;
+    const prime = () => {
+      // Sync, inside the gesture — same constraint as the click path.
+      this.primeContextSync();
+      document.removeEventListener('touchstart', prime, true);
+      document.removeEventListener('pointerdown', prime, true);
+    };
+    document.addEventListener('touchstart', prime, { capture: true, passive: true });
+    document.addEventListener('pointerdown', prime, { capture: true, passive: true });
+  }
+
   /** Synchronously create + resume the AudioContext from inside a user
       gesture. iOS Safari requires the resume call to be in the
       synchronous portion of a gesture handler — any await before the
@@ -760,6 +812,7 @@ class TvSfx {
           return;
         }
         const ctx = new Ctor();
+        claimPlaybackAudioSession();
         const masterGain = ctx.createGain();
         masterGain.gain.value = this.volume;
         masterGain.connect(ctx.destination);
