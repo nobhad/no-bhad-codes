@@ -105,16 +105,6 @@ class DatabaseConnectionPool implements Database {
           return;
         }
 
-        // Configure SQLite optimizations - these must run outside of any transaction
-        // Use serialize to ensure they complete before the connection is used
-        db.serialize(() => {
-          db.run('PRAGMA foreign_keys = ON');
-          db.run('PRAGMA journal_mode = WAL');
-          db.run('PRAGMA synchronous = NORMAL');
-          db.run('PRAGMA temp_store = MEMORY');
-          db.run('PRAGMA mmap_size = 268435456'); // 256MB
-        });
-
         const connection: PooledConnection = {
           db,
           inUse: false,
@@ -122,7 +112,44 @@ class DatabaseConnectionPool implements Database {
           id: crypto.randomBytes(4).toString('hex')
         };
 
-        resolve(connection);
+        // These must run outside any transaction, and must FINISH before the
+        // connection is handed out. serialize() only orders these statements
+        // relative to each other — it does not delay the code that follows it,
+        // so resolving straight after the block returned a connection whose
+        // pragmas were still queued. A caller that opened a transaction first
+        // then raced them, and `PRAGMA synchronous` threw
+        //   SQLITE_ERROR: Safety level may not be changed inside a transaction
+        // as an uncaught exception. Resolving from the last statement's
+        // callback is what actually guarantees they are applied.
+        const pragmas = [
+          'PRAGMA foreign_keys = ON',
+          'PRAGMA journal_mode = WAL',
+          'PRAGMA synchronous = NORMAL',
+          'PRAGMA temp_store = MEMORY',
+          'PRAGMA mmap_size = 268435456' // 256MB
+        ];
+
+        db.serialize(() => {
+          let pending = pragmas.length;
+          let settled = false;
+          for (const pragma of pragmas) {
+            db.run(pragma, (pragmaErr: Error | null) => {
+              if (settled) {
+                return;
+              }
+              if (pragmaErr) {
+                settled = true;
+                db.close(() => reject(pragmaErr));
+                return;
+              }
+              pending -= 1;
+              if (pending === 0) {
+                settled = true;
+                resolve(connection);
+              }
+            });
+          }
+        });
       });
     });
   }
