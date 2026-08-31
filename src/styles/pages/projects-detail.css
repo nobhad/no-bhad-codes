@@ -1619,3 +1619,67 @@
      here before the band has been raised. */
   padding-bottom: calc(var(--map-header-inset, 0px) + var(--map-tile-pad-y, 0px));
 }
+
+/* ===============================================
+   TAP AN IMAGE TO VIEW IT FULL SCREEN
+   =============================================== */
+
+/* Videos already offer this through their native controls; these are the
+   still images and GIFs, which otherwise cannot be seen larger than the
+   column they sit in. */
+.project-media--image {
+  cursor: zoom-in;
+}
+
+/* Native fullscreen. The figure becomes the whole screen, so it has to paint
+   its own backdrop — the page behind it is gone, and without this the image
+   floats on the browser's default black with the figure's border still drawn
+   around it at screen edge. */
+.project-media--image:fullscreen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: var(--color-neutral-300, #e0e0e0);
+  cursor: zoom-out;
+}
+
+.project-media--image:fullscreen img {
+  width: auto;
+  height: auto;
+  max-width: 100vw;
+  max-height: 100vh;
+  /* contain, not cover: a screenshot cropped to fill the screen is worse than
+     one letterboxed inside it. */
+  object-fit: contain;
+}
+
+/* Fallback for Safari, which implements requestFullscreen on video only, so
+   on iPhone this is the path that actually runs. */
+.project-media--image.project-media--expanded {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-modal, 1000);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: var(--color-neutral-300, #e0e0e0);
+  cursor: zoom-out;
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0)
+    env(safe-area-inset-left, 0);
+}
+
+.project-media--image.project-media--expanded img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Stop the tile scrolling underneath the fallback overlay. */
+body.has-expanded-media {
+  overflow: hidden;
+}

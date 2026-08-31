@@ -222,6 +222,7 @@ export class ProjectsModule extends BaseModule {
   private projectsSection: HTMLElement | null = null;
   private projectsContent: HTMLElement | null = null;
   private projectDetailSection: HTMLElement | null = null;
+  private mediaFullscreenBound = false;
   // Re-resolves theme-swapped detail media (hero + video) when the site
   // theme flips. Set up once in onInit, disconnected on destroy.
   private themeMediaObserver: MutationObserver | null = null;
@@ -773,6 +774,7 @@ export class ProjectsModule extends BaseModule {
     // Clicking the screen while a project channel is playing jumps straight
     // to that project's detail page.
     this.wireTuneInScreenClick();
+    this.wireMediaFullscreen();
     // Reflect the current TV-SFX volume in the UI: mute indicator on
     // the screen, and pointer-events disabled on VOLUME ▼ at vol=0 / on
     // VOLUME ▲ at vol=max so the user can't keep clicking past the
@@ -1033,6 +1035,71 @@ export class ProjectsModule extends BaseModule {
    * other spot on the playing screen routes to the case study. No-op on the
    * channel-guide screen (channel 01), where row clicks tune a channel in.
    */
+  /**
+   * Tap a case-study image or GIF to view it full screen.
+   *
+   * Videos already get this from their native controls; still images and GIFs
+   * had no way to be seen larger than the column they sit in, which on a phone
+   * is most of the point of a screenshot.
+   *
+   * Native fullscreen where it exists, a fixed overlay where it does not:
+   * Safari implements requestFullscreen on video elements only, so on iPhone
+   * the API is simply absent for a figure and the fallback is the real path
+   * rather than an edge case. Both are dismissed the same ways — tap again,
+   * or Escape.
+   *
+   * Delegated and bound once, because the detail section's contents are
+   * replaced wholesale on every navigation.
+   */
+  private wireMediaFullscreen(): void {
+    const section = this.projectDetailSection;
+    if (!section || this.mediaFullscreenBound) {
+      return;
+    }
+    this.mediaFullscreenBound = true;
+
+    const collapse = () => {
+      const open = section.querySelector('.project-media--expanded');
+      if (open) {
+        open.classList.remove('project-media--expanded');
+        document.body.classList.remove('has-expanded-media');
+      }
+    };
+
+    section.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement | null;
+      const figure = target?.closest('.project-media--image') as HTMLElement | null;
+      if (!figure) {
+        return;
+      }
+
+      // Already expanded via the fallback — a second tap closes it.
+      if (figure.classList.contains('project-media--expanded')) {
+        collapse();
+        return;
+      }
+
+      if (typeof figure.requestFullscreen === 'function') {
+        void figure.requestFullscreen().catch(() => {
+          // Rejected (user gesture lost, or disallowed) — fall back rather
+          // than leaving the tap doing nothing.
+          figure.classList.add('project-media--expanded');
+          document.body.classList.add('has-expanded-media');
+        });
+        return;
+      }
+
+      figure.classList.add('project-media--expanded');
+      document.body.classList.add('has-expanded-media');
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        collapse();
+      }
+    });
+  }
+
   private wireTuneInScreenClick(): void {
     const screen = document.querySelector('.crt-tv__screen');
     if (!screen) {
