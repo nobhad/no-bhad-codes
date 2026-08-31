@@ -98,6 +98,8 @@ export class FooterCurtainModule extends BaseModule {
 
   private pageObserver: MutationObserver | null = null;
 
+  private overlayObserver: MutationObserver | null = null;
+
   constructor() {
     super('FooterCurtainModule');
   }
@@ -130,6 +132,14 @@ export class FooterCurtainModule extends BaseModule {
     // PageTransitionModule can swap pages from a wheel/arrow/swipe gesture as
     // well as from a hash change, and it always stamps the result on <main>.
     // Watching the attribute catches every route in one place.
+    // An overlay can open while the band is already up, and nothing else would
+    // ask for an update — watch its class so the band comes down on open.
+    const modal = document.getElementById('intake-modal');
+    if (modal) {
+      this.overlayObserver = new MutationObserver(() => this.requestUpdate());
+      this.overlayObserver.observe(modal, { attributes: true, attributeFilter: ['class'] });
+    }
+
     const main = document.getElementById('main-content');
     if (main) {
       this.pageObserver = new MutationObserver(this.handleNavigation);
@@ -295,6 +305,9 @@ export class FooterCurtainModule extends BaseModule {
     if (this.footer?.contains(element)) {
       return;
     }
+    if (this.overlayCoversPage()) {
+      return;
+    }
     if (!this.ownsCurtain(element)) {
       return;
     }
@@ -321,6 +334,30 @@ export class FooterCurtainModule extends BaseModule {
    * The real candidates are a map tile (each owns its own overflow) or, on the
    * standalone document-scrolling shells, the document itself.
    */
+  /**
+   * Whether a full-screen overlay is currently sitting on top of the page.
+   *
+   * The intake terminal is a fixed, centred modal over a blurred backdrop. The
+   * page behind it is still a live scroller, and PageTransitionModule still
+   * reads wheel gestures over the backdrop, so the curtain went up behind the
+   * modal and the footer appeared around its edges. Nothing about the curtain
+   * is reachable or meaningful while an overlay covers the page, so it holds
+   * still and stays down until the overlay closes.
+   */
+  private overlayCoversPage(): boolean {
+    return document.querySelector('#intake-modal.open, .intake-modal.open') !== null;
+  }
+
+  /** Force the band down and drop any gesture that was driving it. */
+  private retractForOverlay(): void {
+    this.externalDrive = false;
+    this.openScrollTop = null;
+    if (this.progress !== 0) {
+      this.setProgress(0);
+    }
+    this.setHeaderScrollAway(0);
+  }
+
   private ownsCurtain(element: HTMLElement): boolean {
     return (
       element.hasAttribute('data-map-tile') ||
@@ -335,6 +372,10 @@ export class FooterCurtainModule extends BaseModule {
    * of their own. Anything above 0 means a gesture owns the curtain.
    */
   private handleExternalProgress = (event: Event): void => {
+    if (this.overlayCoversPage()) {
+      this.retractForOverlay();
+      return;
+    }
     const detail = (event as CustomEvent<{ progress?: number }>).detail;
     const next = clamp01(typeof detail?.progress === 'number' ? detail.progress : 0);
 
@@ -417,6 +458,11 @@ export class FooterCurtainModule extends BaseModule {
 
   private update = (): void => {
     this.frame = 0;
+
+    if (this.overlayCoversPage()) {
+      this.retractForOverlay();
+      return;
+    }
 
     const element = this.scroller;
     if (!element || !element.isConnected) {
@@ -561,6 +607,9 @@ export class FooterCurtainModule extends BaseModule {
 
     this.pageObserver?.disconnect();
     this.pageObserver = null;
+
+    this.overlayObserver?.disconnect();
+    this.overlayObserver = null;
 
     this.scrubTween?.kill();
     this.scrubTween = null;
