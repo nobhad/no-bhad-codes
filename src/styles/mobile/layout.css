@@ -375,23 +375,11 @@
     box-sizing: content-box;
   }
 
-  /* Force single-column flex row */
-  .projects-section .projects-flex-row {
-    flex-direction: column;
-    width: 100%;
-    gap: 0;
-  }
-
   /* Content wrapper stretches full width */
   .projects-section .projects-content {
     align-self: stretch;
     width: 100%;
     max-width: 100%;
-  }
-
-  /* List column fills parent */
-  .projects-section .projects-list-column {
-    width: 100%;
   }
 
   /* Heading inherits shared section h2 styles — no per-page override */
