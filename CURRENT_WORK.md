@@ -2,6 +2,63 @@
 
 ---
 
+## Intake terminal, business card, footer curtain
+
+**Status:** DONE — merged to main
+**Priority:** — (one shipped data-loss-adjacent bug, now fixed)
+
+### Done
+
+- [x] **The review screen could not edit anything, and one path submitted the
+      form.** It says "scroll back up to the questions and click on the answer
+      you would like to change"; none of it worked. Three causes, all only
+      reachable once the summary is up: `isProcessing` stayed true for the whole
+      review (processAnswer awaits askCurrentQuestion, which blocks on the
+      prompt), so `goBackToQuestion` and `handleOptionClick` both bailed; the
+      prompt's click listener is bound on the whole chat container in the
+      CAPTURE phase and matched any `.chat-option`, mapping it positionally, so
+      re-answering a question by picking its FIRST option ran the review's
+      option 1 — "Yes, submit my request"; and both input handlers refused
+      everything while a prompt was open. Guarded by a matrix that edits each
+      answer from the review screen and re-checks every field: 8/8, was 0/6.
+- [x] **Business card replaced** with the redrawn artboards, front and back,
+      both at `viewBox 0 0 1069.5 599.3` — the card slot inside `coyote_paw.svg`
+      (`_Card_Outline_`, 1060.5 x 590.3 + 9px centred stroke). Because the
+      viewBox matches the paw exactly, no CSS or intro-config change was needed.
+      Originals kept as the un-suffixed files.
+- [x] **Fonts in the card SVG.** The first export carried the wordmark as live
+      `<text>` in Acme. An SVG loaded through `<img>` is an isolated document
+      with no access to the page's `@font-face`, so it fell back to a serif for
+      anyone without Acme installed — invisible when testing on a machine that
+      has it. Re-exported with type outlined: zero `<text>`, no font-family.
+      **Any future card export must use Font -> Convert To Outlines.**
+- [x] **og:image / twitter:image** were still serving the previous card.
+      Rendered from the shipped SVG so the preview cannot drift from the site.
+- [x] **Footer curtain lifted behind the intake modal.** The modal is a centred
+      92vh box over a translucent backdrop, but the page behind is still a live
+      scroller and PageTransitionModule still reads wheel gestures over the
+      backdrop. The curtain now treats "an overlay covers the page" as its own
+      state and holds the band down.
+- [x] **Scope and brand-assets questions**, wired through the server schema, the
+      route's `IntakeFormData` and the archived intake document — not client
+      only, or the server would have dropped them. Scope also selects the budget
+      bands: design-and-build starts at 2k-5k, build-only keeps the old list.
+
+### Notes for next time
+
+- **The media viewer is NOT affected by the curtain bug** — checked, don't
+  re-investigate. Its primary path is the native Fullscreen API, and its
+  fallback (`has-expanded-media`) is `position: fixed; inset: 0` with an opaque
+  background, so nothing shows around it. The intake modal is the only overlay
+  that leaves the page visible at its edges.
+- `required` on `IntakeQuestion` is dead metadata — nothing reads it, and
+  `/skip` refuses every question unconditionally. Making a question "optional"
+  would need a skip path built first.
+- The design-and-build budget floor (2k-5k) is a placeholder, not a priced
+  decision. Plain data in `terminal-intake-data.ts`.
+
+---
+
 ## CSS audit — cascade layers, dead rules, undefined tokens
 
 **Status:** 3 of 4 done; the layer rewiring is still OPEN
