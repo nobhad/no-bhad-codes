@@ -493,24 +493,13 @@ app.use('/api/v1', apiRouter);
 // 404 handler
 // Note: Express 5 doesn't support app.use('*') - use regular middleware instead
 app.use((req, res) => {
-  errorTracker.captureMessage(
-    `404 - Route not found: ${req.method} ${req.originalUrl}`,
-    'warning',
-    {
-      request: {
-        method: req.method,
-        url: req.originalUrl,
-        headers: Object.fromEntries(
-          Object.entries(req.headers).filter(
-            ([key]) =>
-              !['authorization', 'cookie', 'x-api-key', 'x-csrf-token', 'x-auth-token'].includes(
-                key.toLowerCase()
-              )
-          )
-        ) as Record<string, string>
-      }
-    }
-  );
+  // Deliberately NOT reported to Sentry. A 404 is a normal response, not an
+  // application fault, and the request logger already records every one with
+  // its method, path, status and timing. Reporting them turned the issue list
+  // into a feed of internet background noise — scanners probing /api/.env and
+  // /api/.git/config — and any uptime check hitting a missing path adds one
+  // event per poll. Errors that matter still reach Sentry through the error
+  // handler below.
 
   // Browser navigations get the branded HTML 404; API clients keep JSON.
   const wantsHtml = req.accepts(['html', 'json']) === 'html';
@@ -787,9 +776,11 @@ async function startServer() {
       logger.info(`Server running on http://localhost:${PORT}`);
       logger.info(`Health check: http://localhost:${PORT}/health`);
 
-      errorTracker.captureMessage(`Server started on port ${PORT}`, 'info', {
-        tags: { component: 'server' },
-        extra: { port: PORT, environment: process.env.NODE_ENV }
+      // A successful boot is not an incident — this is a log line, not a Sentry
+      // event. It was arriving as an info-level issue on every deploy.
+      logger.info('Server started', {
+        category: 'server',
+        metadata: { port: PORT, environment: process.env.NODE_ENV }
       });
     });
 
