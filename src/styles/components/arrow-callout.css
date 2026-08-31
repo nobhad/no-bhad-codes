@@ -16,9 +16,9 @@
 .arrow-callout {
   /* --- Geometry ---------------------------------------------------------- */
   --callout-width: clamp(320px, 32vw, 470px);
-  --callout-aspect: 540 / 500;      /* must match the two SVG viewBoxes */
-  --callout-gap-x: 1vw;             /* inset from the viewport right edge */
-  --callout-gap-y: 1vh;             /* inset from the viewport bottom edge */
+  --callout-aspect: 540 / 500; /* must match the two SVG viewBoxes */
+  --callout-gap-x: 1vw; /* inset from the viewport right edge */
+  --callout-gap-y: 1vh; /* inset from the viewport bottom edge */
   --callout-z: 9999;
 
   /* Text box inside the bubble art, as % of the shared canvas. Retune these
@@ -66,18 +66,31 @@
   bottom: var(--callout-gap-y);
   width: var(--callout-width);
   aspect-ratio: var(--callout-aspect);
-  pointer-events: none;              /* only the two buttons are hittable */
+  pointer-events: none; /* only the two buttons are hittable */
   z-index: var(--callout-z);
 }
 
 /* Corner variants — default is bottom-right. */
-.arrow-callout--bottom-left  { right: auto; left: var(--callout-gap-x); }
-.arrow-callout--top-right    { bottom: auto; top: var(--callout-gap-y); }
-.arrow-callout--top-left     { bottom: auto; top: var(--callout-gap-y); right: auto; left: var(--callout-gap-x); }
+.arrow-callout--bottom-left {
+  right: auto;
+  left: var(--callout-gap-x);
+}
+.arrow-callout--top-right {
+  bottom: auto;
+  top: var(--callout-gap-y);
+}
+.arrow-callout--top-left {
+  bottom: auto;
+  top: var(--callout-gap-y);
+  right: auto;
+  left: var(--callout-gap-x);
+}
 
 /* Anchored: park inside a positioned ancestor instead of the viewport (e.g. so
    it rides a pinned hero and scrolls away with it). The host sets top/left. */
-.arrow-callout--anchored { position: absolute; }
+.arrow-callout--anchored {
+  position: absolute;
+}
 
 /* Every callout is fixed to the same corner, so only the active one shows its
    mascot — otherwise several identical mascots would stack there. With a single
@@ -230,7 +243,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .arrow-callout__close { transition: none; }
+  .arrow-callout__close {
+    transition: none;
+  }
 }
 
 /* ============================================================================
@@ -289,6 +304,8 @@
   .arrow-callout--manual.is-active,
   .arrow-callout--manual.is-active.is-leaving {
     transform: none;
-    transition: opacity var(--callout-transition), visibility 0s;
+    transition:
+      opacity var(--callout-transition),
+      visibility 0s;
   }
 }

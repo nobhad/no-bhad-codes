@@ -112,7 +112,9 @@ export class ContactAnimationModule extends BaseModule {
     const cardColumn = this.container.querySelector('.contact-card-column');
     const avatarBlurb = this.container.querySelector('.avatar-blurb-container');
     // The four field wrappers (name / company / email / message).
-    const inputWrappers = Array.from(this.container.querySelectorAll('.contact-form .input-wrapper'));
+    const inputWrappers = Array.from(
+      this.container.querySelectorAll('.contact-form .input-wrapper')
+    );
 
     // Debug: log what elements were found
     this.log(

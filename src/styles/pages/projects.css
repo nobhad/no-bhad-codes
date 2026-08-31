@@ -726,7 +726,6 @@
     padding: 0;
   }
 
-
   /* Drop the year column on mobile — there isn't horizontal room for
      all four columns, and year is the least important data. */
   .crt-tv__channel-row > .crt-tv__channel-meta:last-child {
@@ -772,7 +771,6 @@
   .crt-tv__panel-body {
     line-height: 1.5;
   }
-
 
   .crt-tv__panel-details dt,
 
@@ -2010,7 +2008,6 @@
 
 /* Project detail styles moved to projects-detail.css */
 
-
 /* ============================================
  * MOBILE CABINET (max-width: 479px)
  * ============================================
@@ -2047,7 +2044,6 @@
     aspect-ratio: auto;
   }
 
-
   /* Text area, matched to the TITLE CARD content on artboard 6 so the
      guide text and a card fill the same rectangle. That rect is the same
      physical size on both artboards — 2081x1537 desktop, 2073x1537
@@ -2058,7 +2054,6 @@
     width: 83.555%;
     height: 60.464%;
   }
-
 
   /* Backing plate comes from the MOBILE artboard, same viewBox as the cabinet
      and the glass (1240.3 x 1270.21), so it needs no figures at all — it sits
@@ -2106,7 +2101,6 @@
     width: 7.99%;
     height: 4.4%;
   }
-
 
   /* This cabinet has its own controls painted on, so the separate enlarged
      panel below the set is redundant here. */

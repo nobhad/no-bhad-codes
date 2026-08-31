@@ -1154,7 +1154,7 @@ export class ProjectsModule extends BaseModule {
         this.tuneInScrollTween = null;
       }
       tvSfx.stopMusic();
-    this.startChannelTicker();
+      this.startChannelTicker();
       tvSfx.stopGuideStatic();
       if (screenBg) {
         // Save the per-card bg src so we can restore it on power-on;
@@ -1554,10 +1554,9 @@ export class ProjectsModule extends BaseModule {
     //    channels" void) before swapping to the per-project bg. The channel
     //    list is already hidden by the reset above — between channels the
     //    screen shows base-on and nothing else.
-    tl.to(staticOverlay, { opacity: TV_STATIC_FLASH_OPACITY, duration: 0.06 }, 0)
-      .add(() => {
-        screenBg.src = this.baseSrc('on');
-      }, 0.05);
+    tl.to(staticOverlay, { opacity: TV_STATIC_FLASH_OPACITY, duration: 0.06 }, 0).add(() => {
+      screenBg.src = this.baseSrc('on');
+    }, 0.05);
 
     // 2) Hold the blank for a split second, then swap to per-project bg.
     tl.to({}, { duration: TV_BLANK_FLASH_S });

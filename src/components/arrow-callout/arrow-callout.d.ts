@@ -35,24 +35,15 @@ export interface ArrowCalloutController {
    * Open a manual callout, optionally replacing its text for this appearance.
    * `autoCloseMs` dismisses it again after N ms (0 / omitted = stays put).
    */
-  open(
-    target?: ArrowCalloutTarget,
-    text?: string,
-    opts?: { autoCloseMs?: number },
-  ): void;
+  open(target?: ArrowCalloutTarget, text?: string, opts?: { autoCloseMs?: number }): void;
   /** Close a manual callout. `immediate` skips the `.is-leaving` exit phase. */
   close(target?: ArrowCalloutTarget, opts?: { immediate?: boolean }): void;
   /** Whether that callout's blurb is currently open. */
   isOpen(target?: ArrowCalloutTarget): boolean;
 }
 
-export function initArrowCallouts(
-  options?: ArrowCalloutOptions,
-): ArrowCalloutController;
+export function initArrowCallouts(options?: ArrowCalloutOptions): ArrowCalloutController;
 
-export function anchorToFirstViewport(
-  callout: HTMLElement,
-  gapRatio?: number,
-): () => void;
+export function anchorToFirstViewport(callout: HTMLElement, gapRatio?: number): () => void;
 
 export default initArrowCallouts;
