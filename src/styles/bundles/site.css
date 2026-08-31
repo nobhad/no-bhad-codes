@@ -17,7 +17,7 @@
 /* ============================================
  * LAYOUTS LAYER
  * ============================================ */
-@import "../layouts/index.css";
+@import "../layouts/index.css" layer(layouts);
 
 /* ============================================
  * STATES LAYER
@@ -60,9 +60,10 @@
 @import "../pages/contact.css" layer(pages);
 @import "../pages/projects.css" layer(pages);
 
-/* Project detail — imported WITHOUT layer wrapper.
-   Unlayered CSS has highest cascade priority, ensuring project-detail
-   styles always win over layered states/responsive rules. */
+/* Project detail — deliberately UNLAYERED. Unlayered rules outrank every
+   layer, so this wins over states and responsive no matter what they say.
+   That is the intent, not an oversight: see core/layer-order.css, which lists
+   the two sheets allowed to sit outside the layer stack. */
 @import "../pages/projects-detail.css";
 
 @import "../pages/terminal-intake.css" layer(pages);
@@ -84,5 +85,6 @@
 
 /* ============================================
  * UNLAYERED STYLES (global overrides - must be last)
+ * The second of the two deliberate escape hatches; outranks every layer.
  * ============================================ */
 @import "../base/site-globals.css";

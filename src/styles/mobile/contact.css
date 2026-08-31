@@ -9,8 +9,9 @@
  * the flex column + max-width: 580px layout already
  * scales cleanly to all screen sizes.
  *
- * NOTE: This file is in the 'mobile' CSS layer which has higher
- * priority than 'pages' layer, so !important is not needed.
+ * NOTE: mobile/index.css is imported into the 'responsive' layer, which is
+ * ordered after 'pages', so these rules already win without !important.
+ * (There is no layer literally named 'mobile' — see core/layer-order.css.)
  */
 
 /* ============================================

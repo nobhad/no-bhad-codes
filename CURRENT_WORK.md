@@ -42,23 +42,38 @@ only one that can move things on desktop.
       between the password and magic-link forms. That token never existed, so
       both forms have always been `auto`. The dead declaration is removed; set a
       real height there if the section should stop resizing.
-- [ ] **The cascade-layer system is mostly not wired up.** `core/layer-order.css`
-      declares nine layers, but `bundles/site.css` imports six sheets with no
-      `layer()` clause — `base/utilities.css` (via `foundation.css`),
-      `layouts/index.css`, `states/index.css`, `responsive/breakpoints.css`,
-      `pages/projects-detail.css` and `base/site-globals.css`. Unlayered CSS
-      outranks every layer, so those six win on import position alone and the
-      documented order is fiction for four of the nine.
+- [x] **Cascade layers — the finding was overstated; the real part is fixed.**
+      The original audit said six sheets in `bundles/site.css` were unlayered.
+      Three of those six declare their own layer *inside the file*
+      (`states/visibility.css` and `states/interactive.css` wrap themselves in
+      `@layer states`, `responsive/breakpoints.css` in `@layer responsive`), so
+      they were correctly layered all along and their headers were right, not
+      wrong. Adding `layer()` to those imports actively broke them: the file's
+      own `@layer` nests inside the import's, producing a `states.states` /
+      `responsive.responsive` SUB-layer, and a sub-layer sorts before its
+      parent's direct content — so the sheet gets demoted while the import line
+      looks like a promotion. Caught by the screenshot diff, reverted, and
+      written up in `core/layer-order.css` so the next person does not repeat it.
 
-      The sting: `mobile/index.css` is the only thing that actually lands in
-      `layer(responsive)`, making mobile overrides the *weakest* member of the
-      responsive family — beaten by unlayered `breakpoints.css`,
-      `projects-detail.css` and `site-globals.css`. Two file headers document the
-      opposite and are wrong as wired: `mobile/contact.css` ("higher priority
-      than 'pages' layer, so !important is not needed") and
-      `responsive/breakpoints.css`. `mobile/layout.css` carries 13 `!important`s,
-      the most in the codebase, forcing what the layer order was meant to give
-      for free.
+      Genuinely unlayered and now fixed: `layouts/index.css` -> `layer(layouts)`
+      and `base/utilities.css` -> `layer(utilities)`. Left unlayered on purpose,
+      now documented as the four escape hatches: `pages/projects-detail.css`,
+      `base/site-globals.css`, `design-system/tokens/portal-theme.css` and
+      `portal/shared/portal-gutter.css`.
+
+      Verified with a screenshot harness — 48 shots (6 routes x 3 viewports x 2
+      themes) plus 60 more (8 routes x 3 more viewports x 2 themes), each run
+      twice on identical code first to establish a noise floor. Every remaining
+      difference is the About page's rotating photo or the TV's flicker. The 404
+      route showed a false positive worth remembering: walking seven routes in
+      sequence captures it mid-intro, and the card's opacity is set inline by the
+      intro JS, so it races. Direct-loading `#/no-such-page` at 393/600/760/1280
+      gives a 0-pixel diff.
+
+- [ ] **The 13 `!important`s in `mobile/layout.css` are still unexamined.** The
+      layer order was not what was forcing them — mobile has always been in
+      `layer(responsive)`, above pages and components. They are presumably
+      fighting the unlayered escape hatches or specificity. Worth a pass.
 
 - [ ] **`.header` has two position models.** `base/layout.css` sets
       `z-index: var(--z-index-fixed, 300)`; `components/nav-base.css` sets

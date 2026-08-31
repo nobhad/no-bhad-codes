@@ -38,7 +38,7 @@
 /* ============================================
  * 3.5 UTILITIES (imported, will be placed in utilities layer)
  * ============================================ */
-@import "../base/utilities.css";
+@import "../base/utilities.css" layer(utilities);
 
 /* ============================================
  * 4. SHARED COMPONENTS LAYER
