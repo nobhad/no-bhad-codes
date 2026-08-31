@@ -441,10 +441,13 @@
      room for the iOS URL bar / home indicator overlay. */
   main {
     position: fixed;
-    /* Header height reserved on the tiles — see components/site-map.css; the
-       safe-area inset rides along so the strip clears the notch too. */
+    /* Header height reserved on the tiles — see components/site-map.css.
+       --header-height already carries env(safe-area-inset-top) (base/layout.css
+       adds it there so the token matches the header's real border-box height),
+       so adding the inset again here would clear the notch twice and push every
+       tile's content down by a second inset. */
     top: 0;
-    --map-header-inset: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+    --map-header-inset: var(--header-height);
     --map-tile-pad-y: 2rem;
     left: 0;
     right: 0;
