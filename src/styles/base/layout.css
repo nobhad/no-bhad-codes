@@ -58,10 +58,25 @@
     opacity var(--transition-normal, 0.3s) ease;
 }
 
-.header.header--scrolled {
+/* Written against the intro-state ancestors on purpose. The visibility rules
+   further down this file use `.intro-complete.intro-finished .header` — three
+   classes — to hold the header visible without !important, which outranks a
+   bare `.header.header--scrolled` and also zeroes its transition. Matching
+   those ancestors is what lets this rule win, and restores the transition the
+   intro-finished rule switches off. */
+.header.header--scrolled,
+.intro-loading .header.header--scrolled,
+.intro-complete .header.header--scrolled,
+.intro-complete.intro-finished .header.header--scrolled,
+.paw-exit .header.header--scrolled {
   transform: translateY(-100%);
   opacity: 0;
   pointer-events: none;
+  visibility: hidden;
+  transition:
+    transform var(--transition-normal, 0.3s) ease,
+    opacity var(--transition-normal, 0.3s) ease,
+    visibility 0s linear var(--transition-normal, 0.3s);
 }
 
 @media (prefers-reduced-motion: reduce) {

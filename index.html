@@ -99,13 +99,20 @@
           opacity: 0;
           visibility: hidden;
         }
-        .header,
-        .intro-loading .header {
+        /* :not(.header--scrolled) so this cannot fight the scrolled state.
+           The !important here exists to keep the header painted during the
+           intro before the external CSS arrives, and that still holds — the
+           scrolled class is only ever added by JS after load, so first paint
+           is unaffected. Without the exclusion these two rules silently won
+           against every later attempt to hide the header on scroll, but only
+           in portrait, since this block is scoped to max-width: 767px. */
+        .header:not(.header--scrolled),
+        .intro-loading .header:not(.header--scrolled) {
           opacity: 1 !important;
           visibility: visible !important;
         }
-        .header > *,
-        .intro-loading .header > * {
+        .header:not(.header--scrolled) > *,
+        .intro-loading .header:not(.header--scrolled) > * {
           opacity: 1 !important;
           visibility: visible !important;
         }
