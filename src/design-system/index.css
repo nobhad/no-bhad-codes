@@ -69,17 +69,6 @@ body {
  * INTERACTION STATE UTILITIES
  * ============================================ */
 
-/* Hover states */
-.hover\:scale-105:hover {
-  transform: scale(var(--scale-105));
-}
-.hover\:shadow-lg:hover {
-  box-shadow: var(--shadow-lg);
-}
-.hover\:bg-opacity-90:hover {
-  background-color: rgba(var(--color-bg-primary-rgb), 0.9);
-}
-
 /* Focus states */
 .focus\:outline-none:focus {
   outline: none;
@@ -89,22 +78,12 @@ body {
   box-shadow: 0 0 0 2px var(--color-border-focus);
 }
 
-/* Active states */
-.active\:scale-95:active {
-  transform: scale(var(--scale-95));
-}
-
 /* Disabled states */
 .disabled,
 [disabled] {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
-}
-
-/* Focus management for better accessibility */
-.focus-within\:ring:focus-within {
-  box-shadow: 0 0 0 2px var(--color-border-focus);
 }
 
 /* ============================================
@@ -130,9 +109,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .card,
   .btn,
-  .input,
-  .hover\:scale-105:hover,
-  .active\:scale-95:active {
+  .input {
     transition: none;
     transform: none;
     animation: none;

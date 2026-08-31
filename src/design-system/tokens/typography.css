@@ -34,6 +34,11 @@
   /* Display headings: Uses serif for visual hierarchy */
   --font-family-display: "Cormorant Garamond", Georgia, serif;
 
+  /* Body copy. Four stylesheets already read this token; three of them spelled
+     the same Arial stack out as an inline fallback, so that stack IS the
+     intended value — it is declared once here instead. */
+  --font-family-body: Arial, Helvetica, sans-serif;
+
   /* ============================================
    * FONT SIZES - FLUID TYPOGRAPHY
    * ============================================ */

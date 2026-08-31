@@ -696,7 +696,7 @@ html[data-theme="dark"] .coming-soon-banner {
 
 .social-link:hover {
   background: var(--color-accent);
-  color: var(--color-text-on-primary);
+  color: var(--color-text-inverse);
   transform: translateY(-2px);
 }
 

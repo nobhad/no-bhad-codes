@@ -653,7 +653,7 @@ p.empty-state {
 }
 
 .error-notification .error-message {
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .error-dismiss {
@@ -667,7 +667,7 @@ p.empty-state {
 }
 
 .error-dismiss:hover {
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 /* ========================================
@@ -719,7 +719,7 @@ p.empty-state {
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wider);
   background: transparent;
-  color: var(--color-text-primary, var(--color-text));
+  color: var(--color-text-primary);
   border: var(--border-width) solid var(--portal-border, var(--color-border));
   cursor: pointer;
   transition: all var(--transition-fast, 0.2s ease);

@@ -148,6 +148,7 @@
   --terminal-font-family:
     "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
   --terminal-line-height: 1.7;
+  --terminal-font-size: var(--font-size-base);
 
   /* ============================================
    * SIDEBAR DIMENSIONS

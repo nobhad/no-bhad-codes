@@ -189,7 +189,7 @@ body {
 
 @media (--mobile) {
   ::-webkit-scrollbar-track {
-    background: var(--color-body-bg);
+    background: var(--color-bg-primary);
   }
 }
 

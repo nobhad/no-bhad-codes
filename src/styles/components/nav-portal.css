@@ -52,7 +52,7 @@
 /* Remove outline border from global focus-visible rule */
 .portal-button:focus-visible {
   color: var(--color-accent);
-  background-color: var(--color-danger-alpha-10);
+  background-color: rgba(var(--color-danger-rgb), 0.1);
   outline: none;
   box-shadow: none;
 }

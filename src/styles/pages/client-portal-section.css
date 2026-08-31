@@ -22,8 +22,8 @@
   display: block;
 }
 
-/* Both forms have same min-height for consistent section size */
-.portal-login-form[data-form-type="password"],
-.portal-login-form[data-form-type="magic-link"] {
-  min-height: var(--portal-form-height);
-}
+/* Both login forms were meant to share a min-height so the section does not
+   resize when you switch between them. --portal-form-height was never defined
+   anywhere, so this declaration has always been dropped at computed-value time
+   and both forms have simply been `auto`. Removed rather than guessed at: pick
+   a real height here if the section should stop resizing. */
