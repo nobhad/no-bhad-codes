@@ -20,10 +20,15 @@
   pointer-events: none;
   opacity: 1;
   visibility: visible;
-  transition:
-    opacity 0.5s ease,
-    visibility 0.5s ease;
-  will-change: opacity, visibility;
+  /* No CSS transition on opacity/visibility. GSAP tweens this element's opacity
+     frame by frame during the hand-off to the real card; a transition on the
+     same property makes the browser ease toward each frame's value over its own
+     500ms, so the tween never lands — measured, a 600ms fade to 0 only reached
+     0.68 — and the reveal reads mushy. The visibility half was worse: it held
+     the overlay on screen for 500ms after GSAP had finished, so the card
+     appeared with a snap instead of a fade. The animation owns this property;
+     the .intro-complete / .hidden rules below are the resting states. */
+  will-change: opacity;
 }
 
 /* Hide overlay when intro is complete */
