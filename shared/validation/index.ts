@@ -9,7 +9,11 @@
  */
 
 // Export all patterns
-export { VALIDATION_PATTERNS, PATTERN_DESCRIPTIONS, type ValidationPatternKey } from './patterns.js';
+export {
+  VALIDATION_PATTERNS,
+  PATTERN_DESCRIPTIONS,
+  type ValidationPatternKey
+} from './patterns.js';
 
 // Export all validators
 export {

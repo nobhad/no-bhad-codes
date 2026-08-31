@@ -7,7 +7,11 @@
  * Reusable validation functions shared between client and server.
  */
 
-import { VALIDATION_PATTERNS, PATTERN_DESCRIPTIONS, type ValidationPatternKey } from './patterns.js';
+import {
+  VALIDATION_PATTERNS,
+  PATTERN_DESCRIPTIONS,
+  type ValidationPatternKey
+} from './patterns.js';
 
 // ============================================
 // Validation Result Types
