@@ -118,16 +118,36 @@ export const QUESTIONS: IntakeQuestion[] = [
   },
 
   // Phase 3: Budget
+  // Budget is asked twice over, on the same field, because design changes the
+  // floor: a build against designs that already exist starts a long way below
+  // one that includes the design work. resolveCurrentQuestion picks whichever
+  // dependency is met, so exactly one of these is ever asked, and changing the
+  // scope answer re-asks it (see findFirstDependentQuestionIndex).
   {
     id: 'budget',
     field: 'budget',
     question: "What's your budget range for this project?",
     type: 'select',
     required: true,
+    dependsOn: { field: 'projectScope', value: ['build-only', 'not-sure'] },
     options: [
       { value: 'under-1k', label: 'Under $1,000' },
       { value: '1k-3k', label: '$1,000 – $3,000' },
       { value: '3k-5k', label: '$3,000 – $5,000' },
+      { value: '5k-10k', label: '$5,000 – $10,000' },
+      { value: '10k-plus', label: '$10,000+' },
+      { value: 'discuss', label: "Let's discuss / not sure yet" }
+    ]
+  },
+  {
+    id: 'budgetDesignBuild',
+    field: 'budget',
+    question: "What's your budget range for design and development?",
+    type: 'select',
+    required: true,
+    dependsOn: { field: 'projectScope', value: 'design-and-build' },
+    options: [
+      { value: '2k-5k', label: '$2,000 – $5,000' },
       { value: '5k-10k', label: '$5,000 – $10,000' },
       { value: '10k-plus', label: '$10,000+' },
       { value: 'discuss', label: "Let's discuss / not sure yet" }
@@ -139,5 +159,9 @@ export const QUESTIONS: IntakeQuestion[] = [
  * Get the total number of base (non-dependent) questions
  */
 export function getBaseQuestionCount(): number {
-  return QUESTIONS.filter((q) => !q.dependsOn).length;
+  // One answer per FIELD, not per question. Questions that are variants of each
+  // other — the two budget bands — share a field and only one is ever asked, so
+  // counting questions overstates the denominator and the bar runs slow.
+  const fields = new Set(QUESTIONS.map((q) => q.field || q.id));
+  return fields.size;
 }

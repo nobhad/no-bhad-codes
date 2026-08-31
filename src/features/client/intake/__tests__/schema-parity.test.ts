@@ -46,18 +46,22 @@ describe('terminal intake question flow matches server schema', () => {
         `No allowedValues found on server schema for field '${field}'`
       ).toBeGreaterThan(0);
 
-      const question = QUESTIONS.find((q) => q.field === field);
+      // A field can be asked by more than one question — budget has a variant
+      // per project scope — so every variant's options must be checked, not
+      // just the first one found.
+      const questions = QUESTIONS.filter((q) => q.field === field);
 
-      // If the question has no static options (e.g. dynamically populated), skip value checks
-      if (!question || !question.options || question.options.length === 0) {
-        return;
-      }
+      for (const question of questions) {
+        if (!question.options || question.options.length === 0) {
+          continue;
+        }
 
-      for (const opt of question.options) {
-        expect(
-          server,
-          `Option value '${opt.value}' (label: '${opt.label}') for field '${field}' is not in server allowedValues: [${server.join(', ')}]`
-        ).toContain(opt.value);
+        for (const opt of question.options) {
+          expect(
+            server,
+            `Option value '${opt.value}' (label: '${opt.label}') on question '${question.id}' for field '${field}' is not in server allowedValues: [${server.join(', ')}]`
+          ).toContain(opt.value);
+        }
       }
     });
   }
