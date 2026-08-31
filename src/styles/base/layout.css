@@ -46,6 +46,30 @@
   visibility: visible;
 }
 
+/* Only visible at the top of the page. The header floats over the content
+   rather than reserving space above it, so once scrolled it covers whatever is
+   passing underneath — most obviously when a refresh restores a scroll
+   position part-way down a case study and the bar lands mid-paragraph.
+   Transformed rather than hidden so it slides back rather than popping, and so
+   it keeps its place in the accessibility tree. */
+.header {
+  transition:
+    transform var(--transition-normal, 0.3s) ease,
+    opacity var(--transition-normal, 0.3s) ease;
+}
+
+.header.header--scrolled {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header {
+    transition: none;
+  }
+}
+
 /* Section headings (<h2> on About / Contact / etc). The page stylesheets each
    used to declare their own font-size here, which is how About drifted to
    clamp(4rem, 9vw, 6rem) while Contact sat on --font-size-5xl — the same class

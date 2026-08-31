@@ -23,6 +23,9 @@ import { createLogger } from '../../utils/logger';
 const logger = createLogger('NavigationModule');
 import { pulseGlow } from '../../utils/gsap-utilities';
 
+/** Slack for sub-pixel scroll offsets, so "at top" is not defeated by 0.5px. */
+const HEADER_TOP_EPSILON = 2;
+
 export interface NavigationModuleOptions extends ModuleOptions {
   routerService?: RouterService;
   dataService?: DataService;
@@ -56,6 +59,7 @@ interface WindowNavigationData {
 }
 
 export class NavigationModule extends BaseModule {
+  private headerScrollCleanup: (() => void) | null = null;
   // Navigation elements
   private nav: HTMLElement | null = null;
   private overlay: HTMLElement | null = null;
@@ -104,6 +108,7 @@ export class NavigationModule extends BaseModule {
     await this.cacheElements();
     this.log('Elements cached, RouterService:', !!this.routerService);
     this.setupEventListeners();
+    this.setupHeaderScrollState();
     this.setupStateSubscriptions();
     this.setupAnimations();
     this.setupRoutes();
@@ -113,6 +118,50 @@ export class NavigationModule extends BaseModule {
     this.submenuModule = new SubmenuModule({ debug: this.options.debug || false });
     await this.submenuModule.init();
     this.log('Initialization complete');
+  }
+
+  /**
+   * Show the fixed header only while the reader is at the top of the page.
+   *
+   * The header floats over the content rather than sitting above it, which
+   * reads fine at the top — the tile's padding leaves room for it — but once
+   * scrolled it sits on top of whatever happens to be passing underneath.
+   * Refreshing part-way down a case study makes that obvious, because the page
+   * restores its scroll position and the header lands mid-paragraph.
+   *
+   * Scroll is listened for in the CAPTURE phase because scroll events do not
+   * bubble: the map tiles are the scroll containers, not the window, so a
+   * listener bound to window would never fire for them. Capture sees them all,
+   * and the same handler still covers documents that scroll normally.
+   */
+  private setupHeaderScrollState(): void {
+    const header = document.querySelector('.header') as HTMLElement | null;
+    if (!header) {
+      return;
+    }
+
+    const sync = () => {
+      // The active scroller is whichever tile is on screen; fall back to the
+      // document for pages that scroll normally.
+      const active = document.querySelector('[data-map-tile]:not([hidden])');
+      const tileTop = active ? active.scrollTop : 0;
+      const docTop = window.pageYOffset || document.documentElement.scrollTop || 0;
+      const detail = document.getElementById('project-detail');
+      const detailTop = detail ? detail.scrollTop : 0;
+      const atTop = Math.max(tileTop, docTop, detailTop) <= HEADER_TOP_EPSILON;
+      header.classList.toggle('header--scrolled', !atTop);
+    };
+
+    // Capture phase, and passive: this never calls preventDefault.
+    document.addEventListener('scroll', sync, { capture: true, passive: true });
+    window.addEventListener('resize', sync, { passive: true });
+    // Run once so a restored scroll position is reflected on first paint
+    // rather than only after the reader moves.
+    sync();
+    this.headerScrollCleanup = () => {
+      document.removeEventListener('scroll', sync, true);
+      window.removeEventListener('resize', sync);
+    };
   }
 
   /**
