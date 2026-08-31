@@ -471,12 +471,16 @@
     background: transparent !important;
   }
 
-  /* Drop GPU-promoting hints across the page on small mobile — none
-     of the camera/blur effects fire here, so the promoted layers only
-     cost memory + composite time. */
-  .business-card-section,
-  .business-card,
-  .intro-morph-overlay,
+  /* Drop GPU-promoting hints on the nav only.
+     This used to include the business card and the morph overlay, on the
+     premise that "none of the camera/blur effects fire here" — true when small
+     screens ran a stacked layout with no camera. They now run the same spatial
+     map and the same coyote-paw intro as desktop, so stripping promotion took
+     the layers away from precisely the elements being animated: the paw morphs
+     an SVG path every frame, and without a promoted layer each of those frames
+     is a full repaint. That is the stagger, and it is why the same animation is
+     smooth on desktop where these hints survive.
+     The nav keeps the override — it is not part of the intro. */
   .nav-portal,
   .nav-base {
     will-change: auto !important;
