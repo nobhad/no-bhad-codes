@@ -625,8 +625,8 @@
   transform: translate(-50%, -50%);
   width: 90vw;
   max-width: 900px;
-  height: 90vh;
-  max-height: 85vh;
+  height: 92vh;
+  max-height: 92vh;
   z-index: var(--z-index-portal-modal, 9600);
   border-radius: var(--border-radius-md, 8px);
   overflow: hidden;

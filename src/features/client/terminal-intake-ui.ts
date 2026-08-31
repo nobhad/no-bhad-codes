@@ -238,7 +238,10 @@ export function createMessageElement(
   messageEl.className = `chat-message ${message.type}`;
 
   // Make AI questions and user answers clickable to go back
-  if (message.questionIndex !== undefined && (message.type === 'ai' || message.type === 'user')) {
+  // Only the ANSWER is editable, not the question that prompted it. Marking the
+  // question too meant the freshly-asked one — which has no answer yet — offered
+  // "[click to edit]" on hover before there was anything to edit.
+  if (message.questionIndex !== undefined && message.type === 'user') {
     messageEl.classList.add('clickable-message');
     messageEl.dataset.questionIndex = String(message.questionIndex);
     messageEl.title = 'Click to edit this answer';
@@ -318,7 +321,10 @@ export async function addMessageWithTyping(
   const messageEl = document.createElement('div');
   messageEl.className = `chat-message ${message.type}`;
 
-  if (message.questionIndex !== undefined && (message.type === 'ai' || message.type === 'user')) {
+  // Only the ANSWER is editable, not the question that prompted it. Marking the
+  // question too meant the freshly-asked one — which has no answer yet — offered
+  // "[click to edit]" on hover before there was anything to edit.
+  if (message.questionIndex !== undefined && message.type === 'user') {
     messageEl.classList.add('clickable-message');
     messageEl.dataset.questionIndex = String(message.questionIndex);
     messageEl.title = 'Click to edit this answer';

@@ -542,6 +542,7 @@ body[data-page="client-intake"] .terminal-window {
    ============================================================================ */
 
 .chat-message {
+  margin-top: var(--space-1-5);
   margin-bottom: var(--space-1);
 }
 
@@ -609,8 +610,13 @@ body[data-page="client-intake"] .terminal-window {
   margin-bottom: var(--space-3);
 }
 
-.terminal .chat-message.user .message-content {
-  color: var(--color-terminal-text);
+/* The answer reads back in blue, matching its own "$ " prompt. Both roots are
+   listed because the contact-page intake mounts under .terminal-intake while
+   the portal tab uses .terminal — the single-root version of this rule only
+   ever applied to one of them. */
+.terminal .chat-message.user .message-content,
+.terminal-intake .chat-message.user .message-content {
+  color: var(--color-terminal-blue);
 }
 
 .chat-message.user .message-content::before {
@@ -671,6 +677,24 @@ body[data-page="client-intake"] .terminal-window {
   line-height: var(--terminal-lh-prose);
 }
 
+/* Boot output nests under the line that started it, drawn the way `tree` draws
+   it. The rows are flat siblings in the DOM rather than a nested list, so the
+   branch is inferred from position: any boot line following another is a child,
+   and the one sitting before the trailing blank line closes the group. */
+.boot-line + .boot-line:not(:empty) {
+  padding-left: var(--space-1-5);
+}
+
+.boot-line + .boot-line:not(:empty)::before {
+  content: "├─ ";
+  color: var(--color-terminal-text-dim);
+}
+
+.boot-line + .boot-line:not(:empty):has(+ .boot-line:empty)::before,
+.boot-line + .boot-line:not(:empty):last-child::before {
+  content: "└─ ";
+}
+
 .boot-line:empty {
   height: 1em;
 }
@@ -682,17 +706,17 @@ body[data-page="client-intake"] .terminal-window {
 .chat-options {
   display: flex;
   flex-direction: column;
-  gap: var(--space-0-5);
-  margin-top: var(--space-2);
-  margin-bottom: var(--space-2);
-  padding-left: var(--space-5);
+  gap: 0;
+  margin-top: var(--space-1);
+  margin-bottom: var(--space-1);
+  padding-left: var(--space-3);
 }
 
 .chat-option {
   background: transparent;
   border: none;
   color: var(--color-terminal-blue);
-  padding: var(--space-0-5) 0;
+  padding: 0;
   font-family: inherit;
   font-size: var(--terminal-font-size);
   cursor: pointer;
