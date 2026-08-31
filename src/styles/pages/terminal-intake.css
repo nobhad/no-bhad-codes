@@ -781,8 +781,30 @@ body[data-page="client-intake"] .terminal-window {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 1.5rem 0;
-  margin: 0.5rem 0;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  margin: 0;
+}
+
+/* Arrow's greeting, set beside her portrait. Wraps to its own column under the
+   portrait once there is no room for two. */
+.terminal-avatar-copy {
+  margin: 0;
+  max-width: 44ch;
+  color: var(--color-terminal-green);
+  font-size: var(--terminal-font-size);
+  line-height: var(--terminal-lh-prose);
+}
+
+@media (--mobile) {
+  .terminal-avatar-intro {
+    flex-direction: column;
+    gap: var(--space-1-5);
+  }
+
+  .terminal-avatar-copy {
+    text-align: center;
+  }
 }
 
 /* Container for avatar with overlay */

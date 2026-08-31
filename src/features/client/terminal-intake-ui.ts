@@ -10,6 +10,7 @@
 import { gsap } from 'gsap';
 import { BRANDING } from '../../config/branding';
 import type { ChatMessage } from './terminal-intake-types';
+import { ARROW_INTRO } from './terminal-intake-data';
 
 /**
  * Generate the terminal window HTML
@@ -90,6 +91,12 @@ export async function showAvatarIntro(chatContainer: HTMLElement): Promise<void>
   const wrapper = document.createElement('div');
   wrapper.className = 'terminal-avatar-wrapper';
   avatarContainer.appendChild(wrapper);
+
+  // Arrow introduces herself beside her own portrait, above the boot output.
+  const intro = document.createElement('p');
+  intro.className = 'terminal-avatar-copy';
+  intro.textContent = ARROW_INTRO;
+  avatarContainer.appendChild(intro);
 
   avatarContainer.style.opacity = '0';
   chatContainer.appendChild(avatarContainer);

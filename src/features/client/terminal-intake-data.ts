@@ -11,6 +11,14 @@
 import type { IntakeQuestion } from './terminal-intake-types';
 
 /**
+ * Arrow's introduction. Rendered beside her portrait above the boot output
+ * rather than as the first question, so she says hello where she appears and
+ * the first prompt is just the question.
+ */
+export const ARROW_INTRO =
+  "Hello, I'm Arrow - Noelle's personal assistant. I'm here to help you start your project. This will only take a few minutes.";
+
+/**
  * Question flow definitions for the intake process
  * Streamlined to essential information only
  */
@@ -19,8 +27,7 @@ export const QUESTIONS: IntakeQuestion[] = [
   {
     id: 'greeting',
     field: '',
-    question:
-      "Hello, I'm Arrow - Noelle's personal assistant. I'm here to help you start your project. This will only take a few minutes. First, what's your name?",
+    question: "First, what's your name?",
     type: 'text',
     required: true,
     validation: (value) =>
