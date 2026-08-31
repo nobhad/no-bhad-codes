@@ -208,7 +208,9 @@ async function getEnrichedAgreement(
   }
 
   const agreement = (await db.get(query, queryParams)) as AgreementRow | undefined;
-  if (!agreement) return null;
+  if (!agreement) {
+    return null;
+  }
 
   // Get steps
   const steps = (await db.all(
@@ -302,7 +304,9 @@ async function completeStep(agreementId: number, stepId: number, clientId?: numb
     clientId ? [agreementId, clientId] : [agreementId]
   )) as AgreementRow | undefined;
 
-  if (!agreement) throw new Error('Agreement not found');
+  if (!agreement) {
+    throw new Error('Agreement not found');
+  }
   if (['completed', 'cancelled', 'expired'].includes(agreement.status)) {
     throw new Error(`Agreement is already ${agreement.status}`);
   }
@@ -322,8 +326,12 @@ async function completeStep(agreementId: number, stepId: number, clientId?: numb
     agreementId
   ])) as AgreementStepRow | undefined;
 
-  if (!step) throw new Error('Step not found');
-  if (step.status === 'completed') return; // Idempotent
+  if (!step) {
+    throw new Error('Step not found');
+  }
+  if (step.status === 'completed') {
+    return;
+  } // Idempotent
 
   await db.run(
     "UPDATE agreement_steps SET status = 'completed', completed_at = datetime('now'), updated_at = datetime('now') WHERE id = ?",
@@ -455,7 +463,9 @@ async function autoCompleteByEntity(entityType: string, entityId: number): Promi
   };
 
   const stepType = stepTypeMap[entityType];
-  if (!stepType) return;
+  if (!stepType) {
+    return;
+  }
 
   // Find pending steps matching this entity
   const steps = (await db.all(
@@ -505,8 +515,9 @@ async function reorderSteps(agreementId: number, stepIds: number[]): Promise<voi
 
   const existingIds = new Set(existing.map((s) => s.id));
   for (const id of stepIds) {
-    if (!existingIds.has(id))
+    if (!existingIds.has(id)) {
       throw new Error(`Step ${id} does not belong to agreement ${agreementId}`);
+    }
   }
 
   // Update step_order for each step

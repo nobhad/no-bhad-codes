@@ -168,7 +168,9 @@ async function update(id: number, params: UpdateRetainerParams): Promise<void> {
     values.push(params.notes ?? null);
   }
 
-  if (setClauses.length === 0) return;
+  if (setClauses.length === 0) {
+    return;
+  }
 
   setClauses.push("updated_at = datetime('now')");
   values.push(id);
@@ -275,7 +277,9 @@ async function list(filters?: {
     params
   )) as Array<RetainerRow & { client_name: string; project_name: string }>;
 
-  if (retainers.length === 0) return [];
+  if (retainers.length === 0) {
+    return [];
+  }
 
   // Previously: one getCurrentPeriod query per retainer (N+1).
   // Now: pull every active period for this retainer set in one query
@@ -324,7 +328,9 @@ async function getById(id: number): Promise<RetainerWithDetails | null> {
     [id]
   )) as (RetainerRow & { client_name: string; project_name: string }) | undefined;
 
-  if (!row) return null;
+  if (!row) {
+    return null;
+  }
 
   const currentPeriod = await getCurrentPeriod(id);
 
@@ -437,10 +443,14 @@ async function closePeriod(retainerId: number): Promise<void> {
     | RetainerRow
     | undefined;
 
-  if (!retainer) throw new NotFoundError('retainer');
+  if (!retainer) {
+    throw new NotFoundError('retainer');
+  }
 
   const currentPeriod = await getCurrentPeriod(retainerId);
-  if (!currentPeriod) throw new NotFoundError('active retainer period');
+  if (!currentPeriod) {
+    throw new NotFoundError('active retainer period');
+  }
 
   // Close current period
   await db.run("UPDATE retainer_periods SET status = 'closed' WHERE id = ?", [currentPeriod.id]);
@@ -644,7 +654,9 @@ async function recalculateUsedHours(periodId: number): Promise<void> {
     [periodId]
   )) as (RetainerPeriodRow & { project_id: number }) | undefined;
 
-  if (!period) throw new NotFoundError('retainer period');
+  if (!period) {
+    throw new NotFoundError('retainer period');
+  }
 
   const result = (await db.get(
     `SELECT COALESCE(SUM(hours), 0) AS total_hours

@@ -91,7 +91,9 @@ export async function getIntakeChecklist(projectId: number): Promise<IntakeCheck
     [projectId]
   )) as Record<string, unknown> | undefined;
 
-  if (!row) return null;
+  if (!row) {
+    return null;
+  }
 
   const items: IntakeChecklistItem[] = [];
   let collected = 0;
@@ -103,9 +105,15 @@ export async function getIntakeChecklist(projectId: number): Promise<IntakeCheck
       const value = row[fieldDef.field];
       const hasValue = value !== null && value !== undefined && String(value).trim() !== '';
 
-      if (hasValue) collected++;
-      if (!hasValue && category === 'essential') essentialMissing++;
-      if (!hasValue && category === 'important') importantMissing++;
+      if (hasValue) {
+        collected++;
+      }
+      if (!hasValue && category === 'essential') {
+        essentialMissing++;
+      }
+      if (!hasValue && category === 'important') {
+        importantMissing++;
+      }
 
       items.push({
         field: fieldDef.field,
@@ -139,9 +147,12 @@ export async function getIntakeChecklist(projectId: number): Promise<IntakeCheck
           : null,
       source: 'questionnaire'
     });
-    if (questionnaireCount.completed < questionnaireCount.total) importantMissing++;
-    if (questionnaireCount.completed === questionnaireCount.total && questionnaireCount.total > 0)
+    if (questionnaireCount.completed < questionnaireCount.total) {
+      importantMissing++;
+    }
+    if (questionnaireCount.completed === questionnaireCount.total && questionnaireCount.total > 0) {
       collected++;
+    }
   }
 
   const total = items.length;

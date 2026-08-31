@@ -87,9 +87,13 @@ export class WebhookService {
       ]
     );
 
-    if (!result.lastID) throw new Error('Failed to insert webhook');
+    if (!result.lastID) {
+      throw new Error('Failed to insert webhook');
+    }
     const webhook = await this.getWebhookById(result.lastID);
-    if (!webhook) throw new Error('Failed to create webhook');
+    if (!webhook) {
+      throw new Error('Failed to create webhook');
+    }
     return webhook;
   }
 
@@ -100,7 +104,9 @@ export class WebhookService {
     const row = await this.getDb().get(`SELECT ${WEBHOOK_COLUMNS} FROM webhooks WHERE id = ?`, [
       id
     ]);
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
     return this.formatWebhook(row);
   }
 
@@ -123,7 +129,9 @@ export class WebhookService {
     updates: Partial<Omit<WebhookConfig, 'id' | 'secret_key' | 'created_at'>>
   ): Promise<WebhookConfig> {
     const existing = await this.getWebhookById(id);
-    if (!existing) throw new Error('Webhook not found');
+    if (!existing) {
+      throw new Error('Webhook not found');
+    }
 
     const {
       name = existing.name,
@@ -161,7 +169,9 @@ export class WebhookService {
     );
 
     const updated = await this.getWebhookById(id);
-    if (!updated) throw new Error('Failed to update webhook');
+    if (!updated) {
+      throw new Error('Failed to update webhook');
+    }
     return updated;
   }
 
@@ -181,7 +191,9 @@ export class WebhookService {
       [active ? 1 : 0, id]
     );
     const webhook = await this.getWebhookById(id);
-    if (!webhook) throw new Error('Webhook not found');
+    if (!webhook) {
+      throw new Error('Webhook not found');
+    }
     return webhook;
   }
 
@@ -216,7 +228,9 @@ export class WebhookService {
       [webhook.id, eventType, JSON.stringify(payload), signature, 'pending', 1]
     );
 
-    if (!result.lastID) throw new Error('Failed to insert delivery record');
+    if (!result.lastID) {
+      throw new Error('Failed to insert delivery record');
+    }
     // Attempt delivery
     await this.deliverWebhookAttempt(webhook, result.lastID, payload, signature);
   }
@@ -288,7 +302,9 @@ export class WebhookService {
    */
   private async scheduleRetry(deliveryId: number, webhook: WebhookConfig): Promise<void> {
     const delivery = await this.getDeliveryById(deliveryId);
-    if (!delivery) return;
+    if (!delivery) {
+      return;
+    }
 
     const attempt = delivery.attempt_number + 1;
     if (attempt > webhook.retry_max_attempts) {
@@ -385,7 +401,9 @@ export class WebhookService {
       `SELECT ${WEBHOOK_DELIVERY_COLUMNS} FROM webhook_deliveries WHERE id = ?`,
       [id]
     );
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
     return this.formatDelivery(row);
   }
 

@@ -314,12 +314,21 @@ class IntakeService {
 
       // Create project
       const extraNotes: string[] = [];
-      if (features.length) extraNotes.push(`Features: ${features.join(', ')}`);
-      if (intakeData.designLevel) extraNotes.push(`Design level: ${intakeData.designLevel}`);
-      if (intakeData.techComfort) extraNotes.push(`Tech comfort: ${intakeData.techComfort}`);
-      if (intakeData.domainHosting) extraNotes.push(`Domain/hosting: ${intakeData.domainHosting}`);
-      if (intakeData.additionalInfo)
+      if (features.length) {
+        extraNotes.push(`Features: ${features.join(', ')}`);
+      }
+      if (intakeData.designLevel) {
+        extraNotes.push(`Design level: ${intakeData.designLevel}`);
+      }
+      if (intakeData.techComfort) {
+        extraNotes.push(`Tech comfort: ${intakeData.techComfort}`);
+      }
+      if (intakeData.domainHosting) {
+        extraNotes.push(`Domain/hosting: ${intakeData.domainHosting}`);
+      }
+      if (intakeData.additionalInfo) {
         extraNotes.push(`Additional info: ${intakeData.additionalInfo}`);
+      }
       const notes = extraNotes.length ? extraNotes.join('\n') : null;
 
       const projectCode = await generateProjectCode(companyName || intakeData.name);
@@ -394,7 +403,9 @@ class IntakeService {
         if (expirationDate) {
           const diffMs = new Date(expirationDate).getTime() - Date.now();
           const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-          if (Number.isFinite(diffDays) && diffDays > 0) validityDays = diffDays;
+          if (Number.isFinite(diffDays) && diffDays > 0) {
+            validityDays = diffDays;
+          }
         }
 
         const proposalResult = await ctx.run(

@@ -178,15 +178,30 @@ router.put(
 
     // Normalize the data for the service
     const normalizedData: Record<string, unknown> = {};
-    if (calculatedHours !== undefined) normalizedData.hours = calculatedHours;
-    if (date !== undefined) normalizedData.date = date;
-    if (description !== undefined) normalizedData.description = description;
-    if (is_billable !== undefined) normalizedData.billable = is_billable;
-    else if (billable !== undefined) normalizedData.billable = billable;
-    if (hourly_rate !== undefined) normalizedData.hourlyRate = hourly_rate;
-    else if (hourlyRate !== undefined) normalizedData.hourlyRate = hourlyRate;
-    if (task_id !== undefined) normalizedData.taskId = task_id;
-    else if (taskId !== undefined) normalizedData.taskId = taskId;
+    if (calculatedHours !== undefined) {
+      normalizedData.hours = calculatedHours;
+    }
+    if (date !== undefined) {
+      normalizedData.date = date;
+    }
+    if (description !== undefined) {
+      normalizedData.description = description;
+    }
+    if (is_billable !== undefined) {
+      normalizedData.billable = is_billable;
+    } else if (billable !== undefined) {
+      normalizedData.billable = billable;
+    }
+    if (hourly_rate !== undefined) {
+      normalizedData.hourlyRate = hourly_rate;
+    } else if (hourlyRate !== undefined) {
+      normalizedData.hourlyRate = hourlyRate;
+    }
+    if (task_id !== undefined) {
+      normalizedData.taskId = task_id;
+    } else if (taskId !== undefined) {
+      normalizedData.taskId = taskId;
+    }
 
     const entry = await projectService.updateTimeEntry(entryId, normalizedData);
     sendSuccess(res, { entry }, 'Time entry updated successfully');

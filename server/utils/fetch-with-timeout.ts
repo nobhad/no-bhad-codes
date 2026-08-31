@@ -51,8 +51,11 @@ export async function fetchWithTimeout(
 
   // Fan-in any caller-supplied abort signal.
   if (callerSignal) {
-    if (callerSignal.aborted) controller.abort();
-    else callerSignal.addEventListener('abort', () => controller.abort(), { once: true });
+    if (callerSignal.aborted) {
+      controller.abort();
+    } else {
+      callerSignal.addEventListener('abort', () => controller.abort(), { once: true });
+    }
   }
 
   try {

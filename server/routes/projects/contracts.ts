@@ -146,7 +146,9 @@ router.get(
     const shouldWatermark = !isSigned;
 
     const drawDraftWatermark = (targetPage: PDFPage): void => {
-      if (!shouldWatermark) return;
+      if (!shouldWatermark) {
+        return;
+      }
       const label = contractStatus === 'draft' || !contractStatus ? 'DRAFT' : 'UNSIGNED';
       const fontSize = 72;
       const textWidth = helveticaBold.widthOfTextAtSize(label, fontSize);
@@ -162,9 +164,13 @@ router.get(
     };
 
     const parseSignatureData = (data?: string): Uint8Array | null => {
-      if (!data) return null;
+      if (!data) {
+        return null;
+      }
       const match = data.match(/^data:image\/png;base64,(.+)$/);
-      if (!match) return null;
+      if (!match) {
+        return null;
+      }
       return Uint8Array.from(Buffer.from(match[1], 'base64'));
     };
 
@@ -192,7 +198,9 @@ router.get(
       leftLines.push({ text: clientName, bold: true });
     }
     const clientEmail = getString(p, 'client_email');
-    if (clientEmail) leftLines.push({ text: clientEmail });
+    if (clientEmail) {
+      leftLines.push({ text: clientEmail });
+    }
     const clientAddress = getString(p, 'client_address');
     if (clientAddress) {
       for (const addrLine of clientAddress.split('\n')) {
@@ -201,9 +209,13 @@ router.get(
     }
 
     const formatCurrency = (value?: string): string => {
-      if (!value) return '';
+      if (!value) {
+        return '';
+      }
       const numeric = Number(value);
-      if (Number.isNaN(numeric)) return value;
+      if (Number.isNaN(numeric)) {
+        return value;
+      }
       return numeric.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
     };
 
@@ -222,10 +234,18 @@ router.get(
       }
     ];
     const selectedTier = getString(p, 'selected_tier');
-    if (selectedTier) rightPairs.push({ label: 'PACKAGE:', value: selectedTier });
-    if (price) rightPairs.push({ label: 'TOTAL:', value: formatCurrency(price) });
-    if (startDate) rightPairs.push({ label: 'START:', value: formatDate(startDate) });
-    if (dueDate) rightPairs.push({ label: 'LAUNCH:', value: formatDate(dueDate) });
+    if (selectedTier) {
+      rightPairs.push({ label: 'PACKAGE:', value: selectedTier });
+    }
+    if (price) {
+      rightPairs.push({ label: 'TOTAL:', value: formatCurrency(price) });
+    }
+    if (startDate) {
+      rightPairs.push({ label: 'START:', value: formatDate(startDate) });
+    }
+    if (dueDate) {
+      rightPairs.push({ label: 'LAUNCH:', value: formatDate(dueDate) });
+    }
 
     y = drawTwoColumnInfo(page, {
       leftMargin,

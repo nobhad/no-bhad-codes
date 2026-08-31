@@ -362,7 +362,9 @@ export class CacheService {
    * Store cache tags for bulk invalidation
    */
   private async storeTags(key: string, tags: string[]): Promise<void> {
-    if (!this.client) return;
+    if (!this.client) {
+      return;
+    }
 
     try {
       const pipeline = this.client.pipeline();

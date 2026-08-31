@@ -64,12 +64,20 @@ export interface CircuitBreakerOptions {
 }
 
 function defaultIsFailure(err: unknown): boolean {
-  if (err instanceof FetchTimeoutError) return true;
-  if (err instanceof TypeError) return true; // fetch network error
+  if (err instanceof FetchTimeoutError) {
+    return true;
+  }
+  if (err instanceof TypeError) {
+    return true;
+  } // fetch network error
   if (err instanceof Error) {
     const status = (err as Error & { status?: number }).status;
-    if (typeof status === 'number' && status >= 500) return true;
-    if (/ENOTFOUND|ECONNREFUSED|ETIMEDOUT|EAI_AGAIN/.test(err.message)) return true;
+    if (typeof status === 'number' && status >= 500) {
+      return true;
+    }
+    if (/ENOTFOUND|ECONNREFUSED|ETIMEDOUT|EAI_AGAIN/.test(err.message)) {
+      return true;
+    }
   }
   return false;
 }
@@ -164,7 +172,9 @@ export class CircuitBreaker {
   }
 
   private transition(next: CircuitState): void {
-    if (this.state === next) return;
+    if (this.state === next) {
+      return;
+    }
     const prev = this.state;
     this.state = next;
     if (next === 'open') {
@@ -229,6 +239,8 @@ export function listCircuitBreakers(): CircuitBreakerSnapshot[] {
  */
 export function getCircuitBreaker(options: CircuitBreakerOptions): CircuitBreaker {
   const existing = registry.get(options.name);
-  if (existing) return existing;
+  if (existing) {
+    return existing;
+  }
   return new CircuitBreaker(options);
 }

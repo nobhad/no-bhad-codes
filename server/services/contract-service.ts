@@ -647,7 +647,9 @@ class ContractService {
        ORDER BY created_at DESC LIMIT 1`,
       [projectId]
     );
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
     return (row as Record<string, unknown>).id as number;
   }
 
@@ -663,7 +665,9 @@ class ContractService {
        ORDER BY created_at DESC LIMIT 1`,
       [projectId]
     );
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
     const r = row as Record<string, unknown>;
     return { id: r.id as number, status: r.status as string };
   }
@@ -1074,7 +1078,9 @@ class ContractService {
       | string
       | null;
 
-    if (existingToken) return existingToken;
+    if (existingToken) {
+      return existingToken;
+    }
 
     const crypto = await import('crypto');
     const token = crypto.randomBytes(32).toString('hex');
@@ -1199,7 +1205,9 @@ class ContractService {
   async getContractProjectId(contractId: number): Promise<number | null> {
     const db = getDatabase();
     const row = await db.get('SELECT project_id FROM active_contracts WHERE id = ?', [contractId]);
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
     return (row as Record<string, unknown>).project_id as number | null;
   }
 

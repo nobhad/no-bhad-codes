@@ -39,8 +39,12 @@ const KEY_MIN = 8;
 const KEY_MAX = 200;
 
 function resolveUserScope(req: JWTAuthRequest): string {
-  if (req.user?.type === 'admin') return 'admin';
-  if (req.user?.id != null) return `client:${req.user.id}`;
+  if (req.user?.type === 'admin') {
+    return 'admin';
+  }
+  if (req.user?.id != null) {
+    return `client:${req.user.id}`;
+  }
   return 'anon';
 }
 
@@ -180,7 +184,9 @@ function interceptResponse(
 
   let captured = false;
   const capture = (body: unknown) => {
-    if (captured) return;
+    if (captured) {
+      return;
+    }
     captured = true;
     const bodyString = typeof body === 'string' ? body : JSON.stringify(body);
     // Fire-and-forget; the response has already been committed by

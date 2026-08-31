@@ -229,7 +229,9 @@ export class LoggerService {
    * Colorize console output
    */
   private colorizeLevel(level: LogLevelType, text: string): string {
-    if (!this.config.enableColors) return text;
+    if (!this.config.enableColors) {
+      return text;
+    }
 
     const colors = {
       ERROR: '\\x1b[31m', // Red
@@ -246,7 +248,9 @@ export class LoggerService {
    * Write log to file
    */
   private async writeToFile(entry: LogEntry): Promise<void> {
-    if (!this.config.file) return;
+    if (!this.config.file) {
+      return;
+    }
 
     const formatted = this.formatEntry(entry);
     const filePath =
@@ -254,7 +258,9 @@ export class LoggerService {
         ? this.config.errorFilePath
         : this.config.filePath;
 
-    if (!filePath) return;
+    if (!filePath) {
+      return;
+    }
 
     try {
       await fs.promises.appendFile(filePath, `${formatted}\\n`);
@@ -278,7 +284,9 @@ export class LoggerService {
     const units = { k: 1024, m: 1024 * 1024, g: 1024 * 1024 * 1024 };
     const match = size.match(/^(\\d+)([kmg])?$/i);
 
-    if (!match) return 10 * 1024 * 1024; // Default 10MB
+    if (!match) {
+      return 10 * 1024 * 1024;
+    } // Default 10MB
 
     const value = parseInt(match[1]);
     const unit = match[2]?.toLowerCase() as keyof typeof units;
@@ -378,7 +386,9 @@ export class LoggerService {
    * Write log entry
    */
   private async writeLog(entry: LogEntry): Promise<void> {
-    if (!this.shouldLog(entry.level)) return;
+    if (!this.shouldLog(entry.level)) {
+      return;
+    }
 
     // Console output
     if (this.config.console) {

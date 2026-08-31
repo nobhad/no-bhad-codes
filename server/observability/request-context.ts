@@ -78,7 +78,9 @@ export function getRequestContext(): RequestContext | undefined {
  */
 export function updateRequestContext(patch: Partial<RequestContext>): void {
   const current = storage.getStore();
-  if (!current) return;
+  if (!current) {
+    return;
+  }
   Object.assign(current, patch);
 }
 

@@ -59,7 +59,9 @@ export async function isClientActivated(clientIdentifier: number | string): Prom
  * Escape HTML special characters to prevent XSS in email content
  */
 function escapeHtml(text: string | undefined | null): string {
-  if (!text) return '';
+  if (!text) {
+    return '';
+  }
   const entities: Record<string, string> = {
     '&': '&amp;',
     '<': '&lt;',
@@ -75,7 +77,9 @@ function escapeHtml(text: string | undefined | null): string {
  * Example: "user@example.com" -> "u***@e***.com"
  */
 function sanitizeEmailForLog(email: string): string {
-  if (!email || !email.includes('@')) return '[invalid-email]';
+  if (!email || !email.includes('@')) {
+    return '[invalid-email]';
+  }
   const [localPart, domain] = email.split('@');
   const [domainName, ...tldParts] = domain.split('.');
   const tld = tldParts.join('.');

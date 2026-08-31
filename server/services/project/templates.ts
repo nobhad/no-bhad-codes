@@ -159,7 +159,9 @@ export async function updateTemplate(
     `SELECT ${PROJECT_TEMPLATE_COLUMNS} FROM project_templates WHERE id = ?`,
     [templateId]
   );
-  if (!row) throw new Error('Template not found after update');
+  if (!row) {
+    throw new Error('Template not found after update');
+  }
   return toTemplate(row as unknown as TemplateRow);
 }
 

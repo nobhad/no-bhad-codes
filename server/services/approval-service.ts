@@ -375,9 +375,13 @@ class ApprovalService {
       `SELECT ${APPROVAL_REQUEST_COLUMNS} FROM approval_requests WHERE id = ?`,
       [requestId]
     );
-    if (!requestRow) throw new NotFoundError('approval request');
+    if (!requestRow) {
+      throw new NotFoundError('approval request');
+    }
     const request = requestRow as unknown as ApprovalRequest;
-    if (request.status !== 'pending') throw new ValidationError('Request already processed');
+    if (request.status !== 'pending') {
+      throw new ValidationError('Request already processed');
+    }
 
     // Update request
     await db.run(
@@ -415,9 +419,13 @@ class ApprovalService {
       `SELECT ${APPROVAL_REQUEST_COLUMNS} FROM approval_requests WHERE id = ?`,
       [requestId]
     );
-    if (!requestRow) throw new NotFoundError('approval request');
+    if (!requestRow) {
+      throw new NotFoundError('approval request');
+    }
     const request = requestRow as unknown as ApprovalRequest;
-    if (request.status !== 'pending') throw new ValidationError('Request already processed');
+    if (request.status !== 'pending') {
+      throw new ValidationError('Request already processed');
+    }
 
     // Update request
     await db.run(

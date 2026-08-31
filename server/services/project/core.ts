@@ -491,7 +491,9 @@ export async function getProjectDashboard(
         clientId
       ]);
 
-  if (!project) return null;
+  if (!project) {
+    return null;
+  }
 
   const stats = await db.get(
     `

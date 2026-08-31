@@ -168,7 +168,9 @@ export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
         LIMIT 1`
     );
 
-    if (!rawCandidate) break;
+    if (!rawCandidate) {
+      break;
+    }
 
     const candidate: AsyncTaskClaimRow | null = parseRow(asyncTaskClaimRowSchema, rawCandidate, {
       op: 'async_tasks.claim'
@@ -188,7 +190,9 @@ export async function drainAsyncTasks(batchSize = DEFAULT_BATCH_SIZE): Promise<{
       [candidate.id]
     );
 
-    if (!claim.changes) continue; // another worker got it
+    if (!claim.changes) {
+      continue;
+    } // another worker got it
 
     const handler = handlers.get(candidate.task_type);
     if (!handler) {

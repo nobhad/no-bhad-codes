@@ -74,7 +74,9 @@ const MILESTONE_COLUMNS = `
  * Handles both old format (["text1", "text2"]) and new format ([{text, completed}]).
  */
 export function normalizeDeliverables(raw: unknown): DeliverableEntry[] {
-  if (!Array.isArray(raw)) return [];
+  if (!Array.isArray(raw)) {
+    return [];
+  }
   return raw.map((item: unknown) => {
     if (typeof item === 'string') {
       return { text: item, completed: false };
@@ -225,7 +227,9 @@ export async function updateMilestone(
     }
   }
 
-  if (updates.length === 0) return undefined;
+  if (updates.length === 0) {
+    return undefined;
+  }
 
   values.push(milestoneId);
 

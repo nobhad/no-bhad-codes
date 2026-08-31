@@ -199,7 +199,9 @@ function calculateChanges(
   oldValue: Record<string, unknown> | undefined,
   newValue: Record<string, unknown> | undefined
 ): Record<string, { from: unknown; to: unknown }> | undefined {
-  if (!oldValue || !newValue) return undefined;
+  if (!oldValue || !newValue) {
+    return undefined;
+  }
 
   const changes: Record<string, { from: unknown; to: unknown }> = {};
 
@@ -211,7 +213,9 @@ function calculateChanges(
     const newVal = newValue[key];
 
     // Skip if values are equal
-    if (JSON.stringify(oldVal) === JSON.stringify(newVal)) continue;
+    if (JSON.stringify(oldVal) === JSON.stringify(newVal)) {
+      continue;
+    }
 
     // Redact sensitive fields
     if (SENSITIVE_FIELDS.some((s) => key.toLowerCase().includes(s))) {
@@ -230,7 +234,9 @@ function calculateChanges(
 function sanitizeForAudit(
   data: Record<string, unknown> | undefined
 ): Record<string, unknown> | undefined {
-  if (!data) return undefined;
+  if (!data) {
+    return undefined;
+  }
 
   const sanitized = { ...data };
 
@@ -247,7 +253,9 @@ function sanitizeForAudit(
  * Extract context from Express request
  */
 function extractRequestContext(req?: Request): Partial<AuditLogEntry> {
-  if (!req) return {};
+  if (!req) {
+    return {};
+  }
 
   const context: Partial<AuditLogEntry> = {
     ipAddress: (req.ip || req.socket?.remoteAddress || '').replace('::ffff:', ''),
@@ -484,7 +492,9 @@ export async function verifyAuditChain(
       [cursor, batchSize]
     );
 
-    if (rows.length === 0) break;
+    if (rows.length === 0) {
+      break;
+    }
     total += rows.length;
 
     for (const row of rows) {
@@ -547,7 +557,9 @@ export async function verifyAuditChain(
     }
 
     // If the batch was under-full we've hit the end of the table.
-    if (rows.length < batchSize) break;
+    if (rows.length < batchSize) {
+      break;
+    }
   }
 
   return { total, verified, skipped, breaks };

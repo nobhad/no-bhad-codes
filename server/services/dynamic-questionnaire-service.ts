@@ -555,7 +555,11 @@ function resolveFieldValue(row: Record<string, unknown>, field: string): unknown
  * Check if a field value counts as "populated" (non-null, non-empty).
  */
 function isFieldPopulated(value: unknown): boolean {
-  if (value === null || value === undefined) return false;
-  if (typeof value === 'string' && value.trim() === '') return false;
+  if (value === null || value === undefined) {
+    return false;
+  }
+  if (typeof value === 'string' && value.trim() === '') {
+    return false;
+  }
   return true;
 }

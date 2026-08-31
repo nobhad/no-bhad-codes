@@ -197,7 +197,9 @@ class ActivityService {
 
     const clientMap: Record<number, string> = {};
 
-    if (clientIds.length === 0) return clientMap;
+    if (clientIds.length === 0) {
+      return clientMap;
+    }
 
     const db = getDatabase();
     const placeholders = clientIds.map(() => '?').join(',');

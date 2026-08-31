@@ -374,36 +374,53 @@ app.use(
     cookieName: 'csrf-token',
     skipIf: (req) => {
       // Skip CSRF for webhook endpoints (they use signature verification)
-      if (req.path.includes('/webhooks/')) return true;
+      if (req.path.includes('/webhooks/')) {
+        return true;
+      }
       // Skip CSRF for payment webhooks (Stripe signature verification)
-      if (req.path.includes('/payments/webhook')) return true;
+      if (req.path.includes('/payments/webhook')) {
+        return true;
+      }
       // Skip CSRF for file uploads (may use FormData without custom headers)
-      if (req.path.includes('/uploads') && req.method === 'POST') return true;
+      if (req.path.includes('/uploads') && req.method === 'POST') {
+        return true;
+      }
       // Skip CSRF for intake form (public endpoint)
-      if (req.path.includes('/intake')) return true;
+      if (req.path.includes('/intake')) {
+        return true;
+      }
       // Skip CSRF for auth endpoints (login, register, password reset)
       // These endpoints have their own rate limiting and validation
-      if (req.path.includes('/auth/')) return true;
-      // Skip CSRF for public proposal signature endpoints
-      if (req.path.match(/\/proposals\/\d+\/sign/) || req.path.match(/\/proposals\/sign\//))
+      if (req.path.includes('/auth/')) {
         return true;
+      }
+      // Skip CSRF for public proposal signature endpoints
+      if (req.path.match(/\/proposals\/\d+\/sign/) || req.path.match(/\/proposals\/sign\//)) {
+        return true;
+      }
       // Skip CSRF for analytics tracking (public endpoint, uses rate limiting)
-      if (req.path.includes('/analytics/track')) return true;
+      if (req.path.includes('/analytics/track')) {
+        return true;
+      }
       // Skip CSRF for public feedback survey submission
-      if (req.path.includes('/feedback/survey/') && req.method === 'POST') return true;
+      if (req.path.includes('/feedback/survey/') && req.method === 'POST') {
+        return true;
+      }
       // Skip CSRF for public testimonial reads
       if (
         req.path.includes('/feedback/testimonials/public') ||
         req.path.includes('/feedback/testimonials/featured')
-      )
+      ) {
         return true;
+      }
       // Skip CSRF for public embed widget endpoints
       if (
         req.path.includes('/embed/contact-form') ||
         req.path.includes('/embed/testimonials') ||
         req.path.includes('/embed/status')
-      )
+      ) {
         return true;
+      }
       return false;
     }
   })

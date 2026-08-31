@@ -725,18 +725,24 @@ const LEGACY_CLIENT_TABS = new Set([
 
 export function canAccessTab(tabId: string, role: UserRole): boolean {
   // Allow legacy client tabs for redirect support
-  if (role === 'client' && LEGACY_CLIENT_TABS.has(tabId)) return true;
+  if (role === 'client' && LEGACY_CLIENT_TABS.has(tabId)) {
+    return true;
+  }
 
   // Allow detail view tabs (client-detail, project-detail)
   const detailConfig = DETAIL_VIEW_TABS[tabId];
-  if (detailConfig && detailConfig.roles.includes(role)) return true;
+  if (detailConfig && detailConfig.roles.includes(role)) {
+    return true;
+  }
 
   // Check top-level navigation items — use .some() not .find() because
   // UNIFIED_NAVIGATION has duplicate IDs for shared tabs (admin + client versions)
   const hasNavAccess = UNIFIED_NAVIGATION.some(
     (item) => item.id === tabId && item.roles.includes(role)
   );
-  if (hasNavAccess) return true;
+  if (hasNavAccess) {
+    return true;
+  }
 
   // Check subtab groups — subtab IDs are valid if the group is accessible
   for (const group of UNIFIED_SUBTAB_GROUPS) {

@@ -150,7 +150,9 @@ function countFeatures(features?: string, notes?: string): string {
     // Features stored as comma-separated or JSON array
     try {
       const parsed = JSON.parse(features);
-      if (Array.isArray(parsed)) return String(parsed.length);
+      if (Array.isArray(parsed)) {
+        return String(parsed.length);
+      }
     } catch {
       // Comma-separated fallback
       return String(features.split(',').filter((f) => f.trim()).length);

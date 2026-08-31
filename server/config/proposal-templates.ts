@@ -305,10 +305,14 @@ export function calculateTierPrices(budget: BudgetRange): Record<string, number>
  */
 export function resolveAllTierFeatures(projectType: string, tier: string): FeatureDefinition[] {
   const projectConfig = PROPOSAL_TEMPLATES.projectTypes[projectType];
-  if (!projectConfig) return [];
+  if (!projectConfig) {
+    return [];
+  }
 
   const tierConfig = projectConfig.tiers[tier];
-  if (!tierConfig) return [];
+  if (!tierConfig) {
+    return [];
+  }
 
   const allFeatures: FeatureDefinition[] = [];
   const seenIds = new Set<string>();
@@ -375,10 +379,14 @@ export function buildProposalFromTemplate(params: {
   maintenanceOption?: string;
 }): BuildProposalResult | null {
   const projectConfig = PROPOSAL_TEMPLATES.projectTypes[params.projectType];
-  if (!projectConfig) return null;
+  if (!projectConfig) {
+    return null;
+  }
 
   const tierConfig = projectConfig.tiers[params.tier];
-  if (!tierConfig) return null;
+  if (!tierConfig) {
+    return null;
+  }
 
   // Calculate tier prices from budget
   const allTierPrices = calculateTierPrices(params.budget);

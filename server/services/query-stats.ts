@@ -64,7 +64,9 @@ class QueryStatsService {
    * Record a query execution
    */
   record(type: QueryMetric['type'], table: string, executionTime: number, sql?: string): void {
-    if (!this.enabled) return;
+    if (!this.enabled) {
+      return;
+    }
 
     const isSlow = executionTime >= SLOW_QUERY_THRESHOLD_MS;
     const timestamp = Date.now();

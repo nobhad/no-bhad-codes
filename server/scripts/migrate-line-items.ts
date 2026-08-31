@@ -53,24 +53,33 @@ async function migrateLineItems(): Promise<void> {
   const dbAll = (sql: string, params?: unknown[]): Promise<unknown[]> =>
     new Promise((resolve, reject) => {
       db.all(sql, params || [], (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
       });
     });
 
   const dbRun = (sql: string, params?: unknown[]): Promise<void> =>
     new Promise((resolve, reject) => {
       db.run(sql, params || [], (err) => {
-        if (err) reject(err);
-        else resolve();
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
       });
     });
 
   const dbGet = (sql: string, params?: unknown[]): Promise<unknown> =>
     new Promise((resolve, reject) => {
       db.get(sql, params || [], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
+        if (err) {
+          reject(err);
+        } else {
+          resolve(row);
+        }
       });
     });
 

@@ -295,9 +295,15 @@ function extractInsights(
 ): Record<string, string> {
   const insights: Record<string, string> = {};
 
-  if (budget) insights.budget = budget;
-  if (timeline) insights.timeline = timeline;
-  if (techComfort) insights.techComfort = techComfort;
+  if (budget) {
+    insights.budget = budget;
+  }
+  if (timeline) {
+    insights.timeline = timeline;
+  }
+  if (techComfort) {
+    insights.techComfort = techComfort;
+  }
 
   if (project.description) {
     insights.projectDescription = String(project.description).slice(0, INSIGHT_MAX_LENGTH);
@@ -382,7 +388,9 @@ export async function generateProposalPrefill(
     [projectId]
   )) as Record<string, unknown> | undefined;
 
-  if (!project) return null;
+  if (!project) {
+    return null;
+  }
 
   // Get all completed questionnaire responses
   const responses = (await db.all(

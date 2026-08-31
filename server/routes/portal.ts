@@ -32,10 +32,14 @@ const isDev = process.env.NODE_ENV !== 'production';
  */
 function decodePortalJwt(req: Request): { type: string } | null {
   const token = req.cookies?.[COOKIE_CONFIG.AUTH_TOKEN_NAME];
-  if (!token) return null;
+  if (!token) {
+    return null;
+  }
 
   const secret = process.env.JWT_SECRET;
-  if (!secret) return null;
+  if (!secret) {
+    return null;
+  }
 
   try {
     return jwt.verify(token, secret) as { type: string };

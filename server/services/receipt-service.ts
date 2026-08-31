@@ -132,7 +132,9 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     leftLines.push({ text: data.clientName, bold: true });
   }
   leftLines.push({ text: data.clientEmail });
-  if (data.clientPhone) leftLines.push({ text: data.clientPhone });
+  if (data.clientPhone) {
+    leftLines.push({ text: data.clientPhone });
+  }
   if (data.clientAddress) {
     for (const line of data.clientAddress.split('\n')) {
       leftLines.push({ text: line });
@@ -418,12 +420,18 @@ class ReceiptService {
 
     // Build formatted billing address
     const addressParts: string[] = [];
-    if (invoiceRow.billing_address) addressParts.push(String(invoiceRow.billing_address));
-    if (invoiceRow.billing_address2) addressParts.push(String(invoiceRow.billing_address2));
+    if (invoiceRow.billing_address) {
+      addressParts.push(String(invoiceRow.billing_address));
+    }
+    if (invoiceRow.billing_address2) {
+      addressParts.push(String(invoiceRow.billing_address2));
+    }
     const cityStateZip = [invoiceRow.billing_city, invoiceRow.billing_state, invoiceRow.billing_zip]
       .filter(Boolean)
       .join(', ');
-    if (cityStateZip) addressParts.push(cityStateZip);
+    if (cityStateZip) {
+      addressParts.push(cityStateZip);
+    }
     if (
       invoiceRow.billing_country &&
       String(invoiceRow.billing_country) !== 'US' &&
@@ -770,12 +778,18 @@ class ReceiptService {
 
     // Build address
     const addressParts: string[] = [];
-    if (row.billing_address) addressParts.push(String(row.billing_address));
-    if (row.billing_address2) addressParts.push(String(row.billing_address2));
+    if (row.billing_address) {
+      addressParts.push(String(row.billing_address));
+    }
+    if (row.billing_address2) {
+      addressParts.push(String(row.billing_address2));
+    }
     const cityStateZip = [row.billing_city, row.billing_state, row.billing_zip]
       .filter(Boolean)
       .join(', ');
-    if (cityStateZip) addressParts.push(cityStateZip);
+    if (cityStateZip) {
+      addressParts.push(cityStateZip);
+    }
     if (
       row.billing_country &&
       String(row.billing_country) !== 'US' &&

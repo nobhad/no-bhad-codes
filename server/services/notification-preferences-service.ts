@@ -533,7 +533,9 @@ class NotificationPreferencesService {
    * Mark digest items as processed
    */
   async markDigestProcessed(itemIds: number[]): Promise<void> {
-    if (itemIds.length === 0) return;
+    if (itemIds.length === 0) {
+      return;
+    }
 
     const db = await getDatabase();
     const placeholders = itemIds.map(() => '?').join(',');

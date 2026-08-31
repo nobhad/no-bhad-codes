@@ -242,7 +242,9 @@ export function validateUrl(url: string): ValidationResult {
  * Sanitize text to prevent XSS
  */
 export function sanitizeText(input: string): string {
-  if (!input) return '';
+  if (!input) {
+    return '';
+  }
 
   let sanitized = input;
 
@@ -262,7 +264,9 @@ export function sanitizeText(input: string): string {
  * Check for XSS patterns in text
  */
 export function detectXSS(input: string): { detected: boolean; patterns: string[] } {
-  if (!input) return { detected: false, patterns: [] };
+  if (!input) {
+    return { detected: false, patterns: [] };
+  }
 
   const detectedPatterns: string[] = [];
 
@@ -283,7 +287,9 @@ export function detectXSS(input: string): { detected: boolean; patterns: string[
  * Check for SQL injection patterns
  */
 export function detectSQLInjection(input: string): { detected: boolean; patterns: string[] } {
-  if (!input) return { detected: false, patterns: [] };
+  if (!input) {
+    return { detected: false, patterns: [] };
+  }
 
   const detectedPatterns: string[] = [];
 
@@ -484,19 +490,25 @@ export function validateObject(
     switch (rules.type) {
       case 'email': {
         const result = validateEmail(String(value));
-        if (!result.valid) fieldErrors.push(...result.errors);
+        if (!result.valid) {
+          fieldErrors.push(...result.errors);
+        }
         sanitized[field] = result.sanitized;
         break;
       }
       case 'phone': {
         const result = validatePhone(String(value));
-        if (!result.valid) fieldErrors.push(...result.errors);
+        if (!result.valid) {
+          fieldErrors.push(...result.errors);
+        }
         sanitized[field] = result.sanitized;
         break;
       }
       case 'url': {
         const result = validateUrl(String(value));
-        if (!result.valid) fieldErrors.push(...result.errors);
+        if (!result.valid) {
+          fieldErrors.push(...result.errors);
+        }
         sanitized[field] = result.sanitized;
         break;
       }

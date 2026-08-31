@@ -222,8 +222,11 @@ class DatabaseConnectionPool implements Database {
     try {
       return await new Promise<T | undefined>((resolve, reject) => {
         connection.db.get(sql, params, (err, row) => {
-          if (err) reject(err);
-          else resolve(row as T);
+          if (err) {
+            reject(err);
+          } else {
+            resolve(row as T);
+          }
         });
       });
     } finally {
@@ -236,8 +239,11 @@ class DatabaseConnectionPool implements Database {
     try {
       return await new Promise<T[]>((resolve, reject) => {
         connection.db.all(sql, params, (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows as T[]);
+          if (err) {
+            reject(err);
+          } else {
+            resolve(rows as T[]);
+          }
         });
       });
     } finally {
@@ -250,8 +256,11 @@ class DatabaseConnectionPool implements Database {
     try {
       return await new Promise<{ lastID?: number; changes?: number }>((resolve, reject) => {
         connection.db.run(sql, params, function (err) {
-          if (err) reject(err);
-          else resolve({ lastID: this.lastID, changes: this.changes });
+          if (err) {
+            reject(err);
+          } else {
+            resolve({ lastID: this.lastID, changes: this.changes });
+          }
         });
       });
     } finally {
@@ -271,16 +280,22 @@ class DatabaseConnectionPool implements Database {
       get: <R = DatabaseRow>(sql: string, params: SqlParams = []): Promise<R | undefined> => {
         return new Promise((resolve, reject) => {
           connection.db.get(sql, params, (err, row) => {
-            if (err) reject(err);
-            else resolve(row as R);
+            if (err) {
+              reject(err);
+            } else {
+              resolve(row as R);
+            }
           });
         });
       },
       all: <R = DatabaseRow>(sql: string, params: SqlParams = []): Promise<R[]> => {
         return new Promise((resolve, reject) => {
           connection.db.all(sql, params, (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows as R[]);
+            if (err) {
+              reject(err);
+            } else {
+              resolve(rows as R[]);
+            }
           });
         });
       },
@@ -290,8 +305,11 @@ class DatabaseConnectionPool implements Database {
       ): Promise<{ lastID?: number; changes?: number }> => {
         return new Promise((resolve, reject) => {
           connection.db.run(sql, params, function (err) {
-            if (err) reject(err);
-            else resolve({ lastID: this.lastID, changes: this.changes });
+            if (err) {
+              reject(err);
+            } else {
+              resolve({ lastID: this.lastID, changes: this.changes });
+            }
           });
         });
       }
@@ -348,7 +366,9 @@ class DatabaseConnectionPool implements Database {
 
     while (Date.now() < deadline) {
       const inUse = this.connections.filter((c) => c.inUse).length;
-      if (inUse === 0) return true;
+      if (inUse === 0) {
+        return true;
+      }
       await new Promise((r) => setTimeout(r, pollIntervalMs));
     }
 
@@ -446,7 +466,9 @@ export async function initializeDatabase(): Promise<void> {
  * aren't cut mid-flight.
  */
 export async function drainDatabase(timeoutMs: number): Promise<boolean> {
-  if (!dbPool) return true;
+  if (!dbPool) {
+    return true;
+  }
   dbPool.beginDraining();
   const drained = await dbPool.waitForDrain(timeoutMs);
   if (!drained) {

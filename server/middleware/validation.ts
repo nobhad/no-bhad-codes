@@ -54,7 +54,9 @@ export function validateRequest(
    * Check for unknown fields in the data
    */
   const checkUnknownFields = (data: Record<string, unknown>, source: string): ValidationError[] => {
-    if (allowUnknownFields) return [];
+    if (allowUnknownFields) {
+      return [];
+    }
 
     const unknownFields = Object.keys(data).filter((field) => !schemaFields.has(field));
     return unknownFields.map((field) => ({
@@ -83,7 +85,9 @@ export function validateRequest(
           } else {
             // Apply sanitized data property-by-property to prevent prototype pollution
             for (const key of Object.keys(result.sanitizedData)) {
-              if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+              if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+                continue;
+              }
               req.body[key] = result.sanitizedData[key];
             }
           }
@@ -101,7 +105,9 @@ export function validateRequest(
 
         if (result.isValid && result.sanitizedData) {
           for (const key of Object.keys(result.sanitizedData)) {
-            if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+            if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+              continue;
+            }
             (req.query as Record<string, unknown>)[key] = result.sanitizedData[key];
           }
         }
@@ -116,7 +122,9 @@ export function validateRequest(
 
         if (result.isValid && result.sanitizedData) {
           for (const key of Object.keys(result.sanitizedData)) {
-            if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+            if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+              continue;
+            }
             req.params[key] = String(result.sanitizedData[key]);
           }
         }

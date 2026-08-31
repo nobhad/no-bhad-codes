@@ -493,7 +493,9 @@ class ClientService {
       params.push(data.phone || null);
     }
 
-    if (setClauses.length === 0) return;
+    if (setClauses.length === 0) {
+      return;
+    }
 
     setClauses.push('updated_at = CURRENT_TIMESTAMP');
     params.push(clientId as unknown as string);
@@ -1120,15 +1122,33 @@ class ClientService {
     ] as const;
 
     const fieldUpdates: Record<string, SqlValue> = {};
-    if (data.firstName !== undefined) fieldUpdates.first_name = data.firstName;
-    if (data.lastName !== undefined) fieldUpdates.last_name = data.lastName;
-    if (data.email !== undefined) fieldUpdates.email = data.email || null;
-    if (data.phone !== undefined) fieldUpdates.phone = data.phone || null;
-    if (data.title !== undefined) fieldUpdates.title = data.title || null;
-    if (data.department !== undefined) fieldUpdates.department = data.department || null;
-    if (data.role !== undefined) fieldUpdates.role = data.role;
-    if (data.isPrimary !== undefined) fieldUpdates.is_primary = data.isPrimary ? 1 : 0;
-    if (data.notes !== undefined) fieldUpdates.notes = data.notes || null;
+    if (data.firstName !== undefined) {
+      fieldUpdates.first_name = data.firstName;
+    }
+    if (data.lastName !== undefined) {
+      fieldUpdates.last_name = data.lastName;
+    }
+    if (data.email !== undefined) {
+      fieldUpdates.email = data.email || null;
+    }
+    if (data.phone !== undefined) {
+      fieldUpdates.phone = data.phone || null;
+    }
+    if (data.title !== undefined) {
+      fieldUpdates.title = data.title || null;
+    }
+    if (data.department !== undefined) {
+      fieldUpdates.department = data.department || null;
+    }
+    if (data.role !== undefined) {
+      fieldUpdates.role = data.role;
+    }
+    if (data.isPrimary !== undefined) {
+      fieldUpdates.is_primary = data.isPrimary ? 1 : 0;
+    }
+    if (data.notes !== undefined) {
+      fieldUpdates.notes = data.notes || null;
+    }
 
     const { setClause, params } = buildSafeUpdate(fieldUpdates, ALLOWED_FIELDS);
 
@@ -1494,14 +1514,27 @@ class ClientService {
     ] as const;
 
     const fieldUpdates: Record<string, SqlValue> = {};
-    if (data.fieldLabel !== undefined) fieldUpdates.field_label = data.fieldLabel;
-    if (data.options !== undefined)
+    if (data.fieldLabel !== undefined) {
+      fieldUpdates.field_label = data.fieldLabel;
+    }
+    if (data.options !== undefined) {
       fieldUpdates.options = data.options ? JSON.stringify(data.options) : null;
-    if (data.isRequired !== undefined) fieldUpdates.is_required = data.isRequired ? 1 : 0;
-    if (data.placeholder !== undefined) fieldUpdates.placeholder = data.placeholder || null;
-    if (data.defaultValue !== undefined) fieldUpdates.default_value = data.defaultValue || null;
-    if (data.displayOrder !== undefined) fieldUpdates.display_order = data.displayOrder;
-    if (data.isActive !== undefined) fieldUpdates.is_active = data.isActive ? 1 : 0;
+    }
+    if (data.isRequired !== undefined) {
+      fieldUpdates.is_required = data.isRequired ? 1 : 0;
+    }
+    if (data.placeholder !== undefined) {
+      fieldUpdates.placeholder = data.placeholder || null;
+    }
+    if (data.defaultValue !== undefined) {
+      fieldUpdates.default_value = data.defaultValue || null;
+    }
+    if (data.displayOrder !== undefined) {
+      fieldUpdates.display_order = data.displayOrder;
+    }
+    if (data.isActive !== undefined) {
+      fieldUpdates.is_active = data.isActive ? 1 : 0;
+    }
 
     const { setClause, params } = buildSafeUpdate(fieldUpdates, ALLOWED_FIELDS);
 
@@ -1641,9 +1674,15 @@ class ClientService {
     const ALLOWED_FIELDS = ['name', 'color', 'description'] as const;
 
     const fieldUpdates: Record<string, SqlValue> = {};
-    if (data.name !== undefined) fieldUpdates.name = data.name;
-    if (data.color !== undefined) fieldUpdates.color = data.color;
-    if (data.description !== undefined) fieldUpdates.description = data.description || null;
+    if (data.name !== undefined) {
+      fieldUpdates.name = data.name;
+    }
+    if (data.color !== undefined) {
+      fieldUpdates.color = data.color;
+    }
+    if (data.description !== undefined) {
+      fieldUpdates.description = data.description || null;
+    }
 
     const { setClause, params } = buildSafeUpdate(fieldUpdates, ALLOWED_FIELDS, {
       addTimestamp: false
@@ -1815,8 +1854,11 @@ class ClientService {
           const daysSinceMessage = Math.floor(
             (Date.now() - new Date(messageData.last_message).getTime()) / (1000 * 60 * 60 * 24)
           );
-          if (daysSinceMessage < 7) engagementScore += 10;
-          else if (daysSinceMessage < 30) engagementScore += 5;
+          if (daysSinceMessage < 7) {
+            engagementScore += 10;
+          } else if (daysSinceMessage < 30) {
+            engagementScore += 5;
+          }
         }
       }
     } catch {
@@ -1862,8 +1904,11 @@ class ClientService {
           const daysSinceActivity = Math.floor(
             (Date.now() - new Date(activityData.last_activity).getTime()) / (1000 * 60 * 60 * 24)
           );
-          if (daysSinceActivity < 7) communicationScore += 10;
-          else if (daysSinceActivity < 30) communicationScore += 5;
+          if (daysSinceActivity < 7) {
+            communicationScore += 10;
+          } else if (daysSinceActivity < 30) {
+            communicationScore += 5;
+          }
         }
       }
     } catch {
@@ -2055,16 +2100,27 @@ class ClientService {
     ] as const;
 
     const fieldUpdates: Record<string, SqlValue> = {};
-    if (data.acquisitionSource !== undefined)
+    if (data.acquisitionSource !== undefined) {
       fieldUpdates.acquisition_source = data.acquisitionSource || null;
-    if (data.industry !== undefined) fieldUpdates.industry = data.industry || null;
-    if (data.companySize !== undefined) fieldUpdates.company_size = data.companySize || null;
-    if (data.website !== undefined) fieldUpdates.website = data.website || null;
-    if (data.nextFollowUpDate !== undefined)
+    }
+    if (data.industry !== undefined) {
+      fieldUpdates.industry = data.industry || null;
+    }
+    if (data.companySize !== undefined) {
+      fieldUpdates.company_size = data.companySize || null;
+    }
+    if (data.website !== undefined) {
+      fieldUpdates.website = data.website || null;
+    }
+    if (data.nextFollowUpDate !== undefined) {
       fieldUpdates.next_follow_up_date = data.nextFollowUpDate || null;
-    if (data.notes !== undefined) fieldUpdates.notes = data.notes || null;
-    if (data.preferredContactMethod !== undefined)
+    }
+    if (data.notes !== undefined) {
+      fieldUpdates.notes = data.notes || null;
+    }
+    if (data.preferredContactMethod !== undefined) {
       fieldUpdates.preferred_contact_method = data.preferredContactMethod || null;
+    }
 
     const { setClause, params } = buildSafeUpdate(fieldUpdates, ALLOWED_FIELDS);
 
@@ -2272,7 +2328,9 @@ class ClientService {
         data.status || 'pending'
       ]
     );
-    if (!result.lastID) return undefined;
+    if (!result.lastID) {
+      return undefined;
+    }
     return this.getAdminClientDetail(result.lastID);
   }
 
@@ -2430,7 +2488,9 @@ class ClientService {
       values.push(data.role);
     }
 
-    if (updates.length === 0) return undefined;
+    if (updates.length === 0) {
+      return undefined;
+    }
 
     updates.push('updated_at = CURRENT_TIMESTAMP');
     values.push(contactId);

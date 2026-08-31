@@ -95,7 +95,9 @@ function hashContext(context: unknown): string {
 }
 
 async function getCachedResponse(hash: string): Promise<AiResponseCacheRow | null> {
-  if (!AI_CONFIG.cacheEnabled) return null;
+  if (!AI_CONFIG.cacheEnabled) {
+    return null;
+  }
 
   const db = getDatabase();
   const now = new Date().toISOString();
@@ -116,7 +118,9 @@ async function setCachedResponse(
   inputTokens: number,
   outputTokens: number
 ): Promise<void> {
-  if (!AI_CONFIG.cacheEnabled) return;
+  if (!AI_CONFIG.cacheEnabled) {
+    return;
+  }
 
   const db = getDatabase();
   const expiresAt = new Date(Date.now() + AI_CONFIG.cacheTtlSeconds * 1000).toISOString();
@@ -268,12 +272,24 @@ Use markdown formatting for sections.
 Tone: ${context.tone || 'professional'}.`;
 
   const parts: string[] = [];
-  if (context.clientName) parts.push(`Client: ${context.clientName}`);
-  if (context.projectType) parts.push(`Project Type: ${context.projectType}`);
-  if (context.tier) parts.push(`Tier: ${context.tier}`);
-  if (context.budget) parts.push(`Budget Range: ${context.budget}`);
-  if (context.timeline) parts.push(`Timeline Preference: ${context.timeline}`);
-  if (context.features?.length) parts.push(`Key Features: ${context.features.join(', ')}`);
+  if (context.clientName) {
+    parts.push(`Client: ${context.clientName}`);
+  }
+  if (context.projectType) {
+    parts.push(`Project Type: ${context.projectType}`);
+  }
+  if (context.tier) {
+    parts.push(`Tier: ${context.tier}`);
+  }
+  if (context.budget) {
+    parts.push(`Budget Range: ${context.budget}`);
+  }
+  if (context.timeline) {
+    parts.push(`Timeline Preference: ${context.timeline}`);
+  }
+  if (context.features?.length) {
+    parts.push(`Key Features: ${context.features.join(', ')}`);
+  }
   if (context.questionnaireInsights) {
     const insights = Object.entries(context.questionnaireInsights)
       .map(([k, v]) => `${k}: ${v}`)
@@ -346,7 +362,9 @@ BODY:
   const parts: string[] = [];
   parts.push(`Purpose: ${context.purpose}`);
 
-  if (context.clientName) parts.push(`Client Name: ${context.clientName}`);
+  if (context.clientName) {
+    parts.push(`Client Name: ${context.clientName}`);
+  }
 
   // Fetch thread context if available
   if (context.threadId) {

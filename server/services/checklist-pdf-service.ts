@@ -146,7 +146,9 @@ async function generateChecklistPdf(data: ChecklistPdfData): Promise<Uint8Array>
   };
 
   for (const section of data.sections) {
-    if (section.items.length === 0) continue;
+    if (section.items.length === 0) {
+      continue;
+    }
 
     // Section heading
     const updatedCtx = ensureSpace(ctx, SECTION_GAP + ITEM_LINE_HEIGHT * 3, onNewPage);
@@ -251,7 +253,9 @@ function drawInlineBoldText(
   let curX = startX;
 
   for (let i = 0; i < parts.length; i++) {
-    if (!parts[i]) continue;
+    if (!parts[i]) {
+      continue;
+    }
     const isBold = i % 2 === 1; // odd indices are inside ** markers
     const font = isBold ? ctx.fonts.bold : ctx.fonts.regular;
 
@@ -357,7 +361,9 @@ function wrapText(
       current = test;
     }
   }
-  if (current) lines.push(current);
+  if (current) {
+    lines.push(current);
+  }
   return lines;
 }
 
@@ -380,7 +386,9 @@ async function buildChecklistFromDb(
     [clientId]
   )) as { id: number; name: string; company_name: string | null; email: string } | undefined;
 
-  if (!client) throw new Error(`Client ${clientId} not found`);
+  if (!client) {
+    throw new Error(`Client ${clientId} not found`);
+  }
 
   // Get project info (optional)
   let projectName: string | undefined;
@@ -686,10 +694,11 @@ function buildFromTemplate(
   overrides?: { introText?: string; additionalItems?: Record<string, ChecklistItem[]> }
 ): ChecklistPdfData {
   const template = CHECKLIST_TEMPLATES[templateName];
-  if (!template)
+  if (!template) {
     throw new Error(
       `Template "${templateName}" not found. Available: ${Object.keys(CHECKLIST_TEMPLATES).join(', ')}`
     );
+  }
 
   const sections: ChecklistSection[] = template.sections.map((s) => ({
     title: s.title,

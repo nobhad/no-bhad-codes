@@ -270,7 +270,9 @@ class ClientInfoService {
       [clientId]
     );
 
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
 
     return this.mapCompletenessRow(row);
   }
@@ -287,7 +289,9 @@ class ClientInfoService {
       [clientId]
     )) as { id: number; company_name?: string; contact_name?: string; email: string } | undefined;
 
-    if (!client) return null;
+    if (!client) {
+      return null;
+    }
 
     // Calculate and get completeness
     const completeness = await this.calculateCompleteness(clientId);
@@ -323,7 +327,9 @@ class ClientInfoService {
 
     for (const client of clients) {
       const status = await this.getClientInfoStatus(client.id);
-      if (!status) continue;
+      if (!status) {
+        continue;
+      }
 
       // Apply filters
       if (
@@ -471,7 +477,9 @@ class ClientInfoService {
       [clientId]
     );
 
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
 
     return this.mapOnboardingRow(row);
   }

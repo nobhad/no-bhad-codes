@@ -149,7 +149,9 @@ class UserService {
    * Uses caching to minimize database lookups.
    */
   async getUserIdByEmail(email: string | null | undefined): Promise<number | null> {
-    if (!email) return null;
+    if (!email) {
+      return null;
+    }
 
     const normalizedEmail = email.toLowerCase().trim();
 
@@ -174,14 +176,18 @@ class UserService {
    * Returns null if user not found.
    */
   async getUserIdByEmailOrName(identifier: string | null | undefined): Promise<number | null> {
-    if (!identifier) return null;
+    if (!identifier) {
+      return null;
+    }
 
     const normalized = identifier.trim();
 
     // If it looks like an email, try email lookup first
     if (normalized.includes('@')) {
       const userId = await this.getUserIdByEmail(normalized);
-      if (userId) return userId;
+      if (userId) {
+        return userId;
+      }
     }
 
     // Check name cache
@@ -263,7 +269,9 @@ class UserService {
     this.clearCache();
 
     const user = await this.getUserById(result.lastID!);
-    if (!user) throw new Error('Failed to create user');
+    if (!user) {
+      throw new Error('Failed to create user');
+    }
     return user;
   }
 
@@ -272,7 +280,9 @@ class UserService {
    */
   async getOrCreateUser(email: string, displayName?: string): Promise<User> {
     const existing = await this.getUserByEmail(email);
-    if (existing) return existing;
+    if (existing) {
+      return existing;
+    }
 
     return this.createUser({
       email,
@@ -354,7 +364,9 @@ class UserService {
       [email.toLowerCase()]
     )) as DatabaseRow | undefined;
 
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
 
     return {
       id: getNumber(row, 'id'),
@@ -380,7 +392,9 @@ class UserService {
       [email.toLowerCase()]
     )) as DatabaseRow | undefined;
 
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
 
     return {
       id: getNumber(row, 'id'),
@@ -401,7 +415,9 @@ class UserService {
       [token]
     )) as DatabaseRow | undefined;
 
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
 
     return {
       id: getNumber(row, 'id'),
@@ -530,7 +546,9 @@ class UserService {
       [email.toLowerCase()]
     )) as DatabaseRow | undefined;
 
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
 
     return {
       id: getNumber(row, 'id'),
@@ -563,7 +581,9 @@ class UserService {
       [token]
     )) as DatabaseRow | undefined;
 
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
 
     return {
       id: getNumber(row, 'id'),
@@ -597,7 +617,9 @@ class UserService {
       [token]
     )) as DatabaseRow | undefined;
 
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
 
     return {
       id: getNumber(row, 'id'),
@@ -631,7 +653,9 @@ class UserService {
       [clientId]
     )) as DatabaseRow | undefined;
 
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
 
     return {
       contactName: getString(row, 'contact_name'),
@@ -683,7 +707,9 @@ class UserService {
       key
     ])) as DatabaseRow | undefined;
 
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
     return getString(row, 'setting_value') || null;
   }
 
@@ -692,7 +718,9 @@ class UserService {
    */
   async getAdminLockoutExpiry(): Promise<Date | null> {
     const value = await this.getSystemSetting('admin.locked_until');
-    if (!value) return null;
+    if (!value) {
+      return null;
+    }
 
     const lockedUntil = new Date(value);
     if (new Date() < lockedUntil) {

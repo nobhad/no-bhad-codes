@@ -93,9 +93,15 @@ router.put(
 
     // Only pass fields that are actually present in the request body
     const profileUpdates: Record<string, string | null> = {};
-    if ('contact_name' in req.body) profileUpdates.contact_name = req.body.contact_name;
-    if ('company_name' in req.body) profileUpdates.company_name = req.body.company_name;
-    if ('phone' in req.body) profileUpdates.phone = req.body.phone;
+    if ('contact_name' in req.body) {
+      profileUpdates.contact_name = req.body.contact_name;
+    }
+    if ('company_name' in req.body) {
+      profileUpdates.company_name = req.body.company_name;
+    }
+    if ('phone' in req.body) {
+      profileUpdates.phone = req.body.phone;
+    }
 
     await clientService.updateClientProfile(req.user!.id, profileUpdates);
 
@@ -648,14 +654,30 @@ router.put(
     const { first_name, last_name, email, phone, title, department, role, notes } = req.body;
 
     const fields: Record<string, string | null | undefined> = {};
-    if (first_name !== undefined) fields.first_name = first_name;
-    if (last_name !== undefined) fields.last_name = last_name;
-    if (email !== undefined) fields.email = email ? normalizeEmail(email) : null;
-    if (phone !== undefined) fields.phone = phone ? normalizePhone(phone) : null;
-    if (title !== undefined) fields.title = title || null;
-    if (department !== undefined) fields.department = department || null;
-    if (role !== undefined) fields.role = role;
-    if (notes !== undefined) fields.notes = notes || null;
+    if (first_name !== undefined) {
+      fields.first_name = first_name;
+    }
+    if (last_name !== undefined) {
+      fields.last_name = last_name;
+    }
+    if (email !== undefined) {
+      fields.email = email ? normalizeEmail(email) : null;
+    }
+    if (phone !== undefined) {
+      fields.phone = phone ? normalizePhone(phone) : null;
+    }
+    if (title !== undefined) {
+      fields.title = title || null;
+    }
+    if (department !== undefined) {
+      fields.department = department || null;
+    }
+    if (role !== undefined) {
+      fields.role = role;
+    }
+    if (notes !== undefined) {
+      fields.notes = notes || null;
+    }
 
     if (Object.keys(fields).length === 0) {
       return errorResponse(res, 'No fields to update', 400, ErrorCodes.VALIDATION_ERROR);

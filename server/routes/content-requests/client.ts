@@ -102,7 +102,9 @@ router.post(
   invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const itemId = Number(req.params.itemId);
-    if (!(await requireOwnItem(req, res, itemId))) return;
+    if (!(await requireOwnItem(req, res, itemId))) {
+      return;
+    }
 
     const item = await contentRequestService.submitText(itemId, req.body.text);
 
@@ -133,7 +135,9 @@ router.post(
     }
 
     const itemId = Number(req.params.itemId);
-    if (!(await requireOwnItem(req, res, itemId))) return;
+    if (!(await requireOwnItem(req, res, itemId))) {
+      return;
+    }
 
     const item = await contentRequestService.submitFile(itemId, file_id);
 
@@ -159,7 +163,9 @@ router.post(
   invalidateCache(['content-requests']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const itemId = Number(req.params.itemId);
-    if (!(await requireOwnItem(req, res, itemId))) return;
+    if (!(await requireOwnItem(req, res, itemId))) {
+      return;
+    }
 
     const item = await contentRequestService.submitUrl(itemId, req.body.url);
 
@@ -190,7 +196,9 @@ router.post(
     }
 
     const itemId = Number(req.params.itemId);
-    if (!(await requireOwnItem(req, res, itemId))) return;
+    if (!(await requireOwnItem(req, res, itemId))) {
+      return;
+    }
 
     const item = await contentRequestService.submitStructured(itemId, data);
 

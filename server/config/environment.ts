@@ -276,20 +276,28 @@ const configRecord = config as Record<string, string | number | boolean | undefi
 const validators: Record<string, (value: string) => string | number | boolean> = {
   boolean: (value) => {
     const lower = value.toLowerCase();
-    if (lower === 'true' || lower === '1' || lower === 'yes') return true;
-    if (lower === 'false' || lower === '0' || lower === 'no') return false;
+    if (lower === 'true' || lower === '1' || lower === 'yes') {
+      return true;
+    }
+    if (lower === 'false' || lower === '0' || lower === 'no') {
+      return false;
+    }
     throw new Error('Invalid boolean value');
   },
 
   number: (value) => {
     const num = Number(value);
-    if (isNaN(num)) throw new Error('Invalid number value');
+    if (isNaN(num)) {
+      throw new Error('Invalid number value');
+    }
     return num;
   },
 
   email: (value) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(value)) throw new Error('Invalid email format');
+    if (!emailRegex.test(value)) {
+      throw new Error('Invalid email format');
+    }
     return value;
   },
 

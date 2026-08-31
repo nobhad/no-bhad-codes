@@ -105,7 +105,9 @@ function evaluateConditions(
   context: Record<string, unknown>
 ): boolean {
   for (const [field, expected] of Object.entries(conditions)) {
-    if (context[field] !== expected) return false;
+    if (context[field] !== expected) {
+      return false;
+    }
   }
   return true;
 }
@@ -114,7 +116,9 @@ function evaluateConditions(
  * Safely parse a JSON string into a Record, returning an empty object on failure.
  */
 function safeParseJson(raw: string | null | undefined): Record<string, unknown> {
-  if (!raw) return {};
+  if (!raw) {
+    return {};
+  }
   try {
     const parsed = JSON.parse(raw);
     return typeof parsed === 'object' && parsed !== null ? parsed : {};
@@ -135,7 +139,9 @@ function resolveVariables(template: string, context: Record<string, unknown>): s
   return template.replace(/\{\{([^}]+)\}\}/g, (match, key) => {
     const trimmedKey = key.trim();
     const value = context[trimmedKey];
-    if (value === undefined || value === null) return match;
+    if (value === undefined || value === null) {
+      return match;
+    }
     return String(value);
   });
 }
@@ -237,7 +243,9 @@ async function update(
     values.push(params.maxRunsPerEntity ?? null);
   }
 
-  if (updates.length === 0) return;
+  if (updates.length === 0) {
+    return;
+  }
 
   updates.push("updated_at = datetime('now')");
   values.push(id);
@@ -285,7 +293,9 @@ async function list(): Promise<AutomationWithActions[]> {
     `SELECT ${AUTOMATION_COLUMNS} FROM custom_automations ORDER BY created_at DESC`
   );
 
-  if (automations.length === 0) return [];
+  if (automations.length === 0) {
+    return [];
+  }
 
   const ids = automations.map((a) => a.id);
   const placeholders = ids.map(() => '?').join(',');
@@ -312,8 +322,11 @@ async function list(): Promise<AutomationWithActions[]> {
   const actionsByAutomation = new Map<number, AutomationActionRow[]>();
   for (const action of allActions) {
     const bucket = actionsByAutomation.get(action.automation_id);
-    if (bucket) bucket.push(action);
-    else actionsByAutomation.set(action.automation_id, [action]);
+    if (bucket) {
+      bucket.push(action);
+    } else {
+      actionsByAutomation.set(action.automation_id, [action]);
+    }
   }
 
   const statsByAutomation = new Map<number, { run_count: number; last_run_at: string | null }>();
@@ -343,7 +356,9 @@ async function getById(id: number): Promise<AutomationWithActions | null> {
     [id]
   );
 
-  if (!auto) return null;
+  if (!auto) {
+    return null;
+  }
 
   const actions = await db.all<AutomationActionRow>(
     `SELECT ${ACTION_COLUMNS} FROM automation_actions WHERE automation_id = ? ORDER BY action_order`,
@@ -445,7 +460,9 @@ async function updateAction(actionId: number, params: Partial<CreateActionParams
     values.push(params.condition ? JSON.stringify(params.condition) : null);
   }
 
-  if (updates.length === 0) return;
+  if (updates.length === 0) {
+    return;
+  }
 
   values.push(String(actionId));
 
@@ -1081,7 +1098,9 @@ async function processScheduledActions(): Promise<ProcessScheduledResult> {
     [nowIso, PROCESS_BATCH_SIZE]
   );
 
-  if (pendingActions.length === 0) return result;
+  if (pendingActions.length === 0) {
+    return result;
+  }
 
   logger.info('Processing scheduled automation actions', {
     category: LOG_CATEGORY,
@@ -1145,7 +1164,9 @@ async function resumeRunFromAction(scheduled: AutomationScheduledActionRow): Pro
     [scheduled.action_id]
   );
 
-  if (!waitAction) return;
+  if (!waitAction) {
+    return;
+  }
 
   // Mark the wait action log as executed
   await logActionResult(run.id, waitAction.id, 'executed', 'Wait completed', null);
@@ -1159,7 +1180,9 @@ async function resumeRunFromAction(scheduled: AutomationScheduledActionRow): Pro
     [run.automation_id]
   );
 
-  if (!automation) return;
+  if (!automation) {
+    return;
+  }
 
   const stopOnError = automation.stop_on_error === 1;
 
@@ -1440,7 +1463,9 @@ async function buildContextFromRun(run: AutomationRunRow): Promise<Record<string
   const db = getDatabase();
   const tableName = ENTITY_TABLE_MAP[run.trigger_entity_type];
 
-  if (!tableName) return context;
+  if (!tableName) {
+    return context;
+  }
 
   try {
     const entity = await db.get<Record<string, unknown>>(

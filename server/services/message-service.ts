@@ -1040,7 +1040,9 @@ class MessageService {
    */
   async getReactionsByMessageIds(messageIds: number[]): Promise<Map<number, ReactionRow_Core[]>> {
     const reactionsMap = new Map<number, ReactionRow_Core[]>();
-    if (messageIds.length === 0) return reactionsMap;
+    if (messageIds.length === 0) {
+      return reactionsMap;
+    }
 
     const db = getDatabase();
     const placeholders = messageIds.map(() => '?').join(',');
@@ -1110,7 +1112,9 @@ class MessageService {
       [projectId, userEmail]
     );
 
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
     const r = row as Record<string, unknown>;
     return {
       id: getNumber(r, 'id'),
@@ -1341,7 +1345,9 @@ class MessageService {
     userId: number | undefined,
     messageId: number
   ): Promise<boolean> {
-    if (userType === 'admin') return true;
+    if (userType === 'admin') {
+      return true;
+    }
     const db = getDatabase();
     const row = await db.get(
       `SELECT 1
@@ -1361,7 +1367,9 @@ class MessageService {
     userId: number | undefined,
     projectId: number
   ): Promise<boolean> {
-    if (userType === 'admin') return true;
+    if (userType === 'admin') {
+      return true;
+    }
     const db = getDatabase();
     const row = await db.get('SELECT 1 FROM active_projects WHERE id = ? AND client_id = ?', [
       projectId,
@@ -1496,7 +1504,9 @@ class MessageService {
       }
     }
 
-    if (setClauses.length === 0) return null;
+    if (setClauses.length === 0) {
+      return null;
+    }
 
     values.push(clientId);
 
@@ -1742,7 +1752,9 @@ class MessageService {
     const thread = await db.get('SELECT client_id, project_id FROM message_threads WHERE id = ?', [
       params.conversationId
     ]);
-    if (!thread) return undefined;
+    if (!thread) {
+      return undefined;
+    }
     const t = thread as Record<string, unknown>;
 
     // Resolve admin display name

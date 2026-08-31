@@ -60,13 +60,27 @@ function getEntityType(path: string): AuditEntityType {
  */
 function getAction(method: string, path: string): AuditAction {
   // Special cases
-  if (path.includes('/login')) return 'login';
-  if (path.includes('/logout')) return 'logout';
-  if (path.includes('/password')) return 'password_reset';
-  if (path.includes('/upload')) return 'upload';
-  if (path.includes('/download')) return 'download';
-  if (path.includes('/send') || path.includes('/message')) return 'send_message';
-  if (path.includes('/status')) return 'status_change';
+  if (path.includes('/login')) {
+    return 'login';
+  }
+  if (path.includes('/logout')) {
+    return 'logout';
+  }
+  if (path.includes('/password')) {
+    return 'password_reset';
+  }
+  if (path.includes('/upload')) {
+    return 'upload';
+  }
+  if (path.includes('/download')) {
+    return 'download';
+  }
+  if (path.includes('/send') || path.includes('/message')) {
+    return 'send_message';
+  }
+  if (path.includes('/status')) {
+    return 'status_change';
+  }
 
   // Default based on method
   switch (method) {
@@ -87,16 +101,32 @@ function getAction(method: string, path: string): AuditAction {
  */
 function getEntityId(req: Request): string | undefined {
   // Check params for common ID patterns
-  if (req.params.id) return String(req.params.id);
-  if (req.params.projectId) return String(req.params.projectId);
-  if (req.params.clientId) return String(req.params.clientId);
-  if (req.params.invoiceId) return String(req.params.invoiceId);
-  if (req.params.messageId) return String(req.params.messageId);
-  if (req.params.threadId) return String(req.params.threadId);
-  if (req.params.fileId) return String(req.params.fileId);
+  if (req.params.id) {
+    return String(req.params.id);
+  }
+  if (req.params.projectId) {
+    return String(req.params.projectId);
+  }
+  if (req.params.clientId) {
+    return String(req.params.clientId);
+  }
+  if (req.params.invoiceId) {
+    return String(req.params.invoiceId);
+  }
+  if (req.params.messageId) {
+    return String(req.params.messageId);
+  }
+  if (req.params.threadId) {
+    return String(req.params.threadId);
+  }
+  if (req.params.fileId) {
+    return String(req.params.fileId);
+  }
 
   // Check body for ID
-  if (req.body?.id) return String(req.body.id);
+  if (req.body?.id) {
+    return String(req.body.id);
+  }
 
   return undefined;
 }
@@ -139,10 +169,14 @@ export function auditMiddleware() {
     // Perform audit logging on response finish
     res.on('finish', () => {
       const ctx = res[AUDIT_CONTEXT];
-      if (!ctx?.shouldAudit) return;
+      if (!ctx?.shouldAudit) {
+        return;
+      }
 
       // Only audit successful responses (2xx status)
-      if (res.statusCode < 200 || res.statusCode >= 300) return;
+      if (res.statusCode < 200 || res.statusCode >= 300) {
+        return;
+      }
 
       const body = ctx.responseBody as Record<string, unknown> | undefined;
       const action = getAction(req.method, req.path);

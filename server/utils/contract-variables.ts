@@ -55,9 +55,13 @@ export function getDefaultContractVariables(): string[] {
 export function resolveContractVariables(source: ContractVariableSource): Record<string, string> {
   const today = source.date?.today || new Date().toISOString().split('T')[0];
   const formatMoney = (value?: number | string | null): string => {
-    if (value === null || value === undefined || value === '') return '';
+    if (value === null || value === undefined || value === '') {
+      return '';
+    }
     const num = typeof value === 'number' ? value : Number(value);
-    if (Number.isNaN(num)) return String(value);
+    if (Number.isNaN(num)) {
+      return String(value);
+    }
     return num.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
   };
 

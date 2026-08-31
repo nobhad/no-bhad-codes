@@ -1133,7 +1133,9 @@ class FileService {
   ): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     const file = await this.getFileById(fileId);
-    if (!file) throw new Error('File not found');
+    if (!file) {
+      throw new Error('File not found');
+    }
 
     // Get or create workflow
     const workflow = await this.getOrCreateDeliverableWorkflow(fileId, file.project_id);
@@ -1169,7 +1171,9 @@ class FileService {
   ): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     const workflow = await this.getDeliverableWorkflow(fileId);
-    if (!workflow) throw new Error('Deliverable workflow not found');
+    if (!workflow) {
+      throw new Error('Deliverable workflow not found');
+    }
 
     // Look up user ID for reviewed_by during transition period
     const reviewerUserId = await userService.getUserIdByEmail(reviewerEmail);
@@ -1195,7 +1199,9 @@ class FileService {
   ): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     const workflow = await this.getDeliverableWorkflow(fileId);
-    if (!workflow) throw new Error('Deliverable workflow not found');
+    if (!workflow) {
+      throw new Error('Deliverable workflow not found');
+    }
 
     // Look up user ID for reviewed_by during transition period
     const reviewerUserId = await userService.getUserIdByEmail(reviewerEmail);
@@ -1230,7 +1236,9 @@ class FileService {
   ): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     const workflow = await this.getDeliverableWorkflow(fileId);
-    if (!workflow) throw new Error('Deliverable workflow not found');
+    if (!workflow) {
+      throw new Error('Deliverable workflow not found');
+    }
 
     // Look up user ID for approved_by during transition period
     const approverUserId = await userService.getUserIdByEmail(approverEmail);
@@ -1266,7 +1274,9 @@ class FileService {
   ): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     const workflow = await this.getDeliverableWorkflow(fileId);
-    if (!workflow) throw new Error('Deliverable workflow not found');
+    if (!workflow) {
+      throw new Error('Deliverable workflow not found');
+    }
 
     // Look up user ID for reviewed_by during transition period
     const reviewerUserId = await userService.getUserIdByEmail(reviewerEmail);
@@ -1299,7 +1309,9 @@ class FileService {
   ): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     const workflow = await this.getDeliverableWorkflow(fileId);
-    if (!workflow) throw new Error('Deliverable workflow not found');
+    if (!workflow) {
+      throw new Error('Deliverable workflow not found');
+    }
 
     // Look up user ID for submitted_by during transition period
     const submittedByUserId = await userService.getUserIdByEmail(submittedBy);

@@ -48,7 +48,9 @@ const BACKUP_SUBDIR = 'daily';
 
 function resolveBackupDir(): string {
   const override = process.env.BACKUP_DIR;
-  if (override) return path.resolve(override);
+  if (override) {
+    return path.resolve(override);
+  }
   // Default to a sibling of the DB file so backups live on the same
   // volume (Railway persistent volume, local ./data, etc.).
   const dbPath = process.env.DATABASE_PATH || './data/client_portal.db';
@@ -119,9 +121,13 @@ async function createBackupFile(): Promise<string> {
         backup.step(-1, (stepErr) => {
           backup.finish((finishErr) => {
             source.close(() => {
-              if (stepErr) reject(stepErr);
-              else if (finishErr) reject(finishErr);
-              else resolve();
+              if (stepErr) {
+                reject(stepErr);
+              } else if (finishErr) {
+                reject(finishErr);
+              } else {
+                resolve();
+              }
             });
           });
         });
@@ -147,14 +153,18 @@ async function pruneOldBackups(retentionDays: number): Promise<number> {
     entries = await fs.readdir(dir);
   } catch (err: unknown) {
     const code = (err as NodeJS.ErrnoException)?.code;
-    if (code === 'ENOENT') return 0;
+    if (code === 'ENOENT') {
+      return 0;
+    }
     throw err;
   }
 
   const cutoffMs = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
   let removed = 0;
   for (const name of entries) {
-    if (!name.endsWith('.sqlite.gz')) continue;
+    if (!name.endsWith('.sqlite.gz')) {
+      continue;
+    }
     const filePath = path.join(dir, name);
     const stat = await fs.stat(filePath);
     if (stat.mtimeMs < cutoffMs) {
@@ -215,7 +225,9 @@ export async function listBackups(): Promise<BackupFileInfo[]> {
     return stats.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
   } catch (err: unknown) {
     const code = (err as NodeJS.ErrnoException)?.code;
-    if (code === 'ENOENT') return [];
+    if (code === 'ENOENT') {
+      return [];
+    }
     throw err;
   }
 }

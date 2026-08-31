@@ -16,7 +16,7 @@
     "build": "npm run tailwind:build && DISABLE_PROMO=true vite build",
     "build:server": "tsc --project server/tsconfig.json && node scripts/copy-server-assets.mjs",
     "preview": "vite preview",
-    "lint": "eslint 'src/**/*.{js,ts}'",
+    "lint": "eslint 'src/**/*.{js,ts}' 'server/**/*.ts' 'shared/**/*.ts'",
     "lint:md": "markdownlint-cli2",
     "lint:md:fix": "markdownlint-cli2 --fix",
     "format": "prettier --write \"**/*.{js,ts,json,css,html}\"",

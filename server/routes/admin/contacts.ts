@@ -65,14 +65,18 @@ router.get(
     // Track emails already seen from explicit contacts for deduplication
     const seenEmails = new Set<string>();
     for (const c of explicitContacts) {
-      if (c.email) seenEmails.add(String(c.email).toLowerCase());
+      if (c.email) {
+        seenEmails.add(String(c.email).toLowerCase());
+      }
     }
 
     for (const client of clientContacts) {
       const clientEmail = String(client.email || '').toLowerCase();
 
       // Skip if this client's email is already represented in explicit contacts
-      if (clientEmail && seenEmails.has(clientEmail)) continue;
+      if (clientEmail && seenEmails.has(clientEmail)) {
+        continue;
+      }
 
       const contactName = (client.contact_name as string) || '';
       const nameParts = contactName.trim().split(/\s+/);
@@ -97,11 +101,15 @@ router.get(
         updatedAt: client.updatedAt
       });
 
-      if (clientEmail) seenEmails.add(clientEmail);
+      if (clientEmail) {
+        seenEmails.add(clientEmail);
+      }
     }
 
     allContacts.sort((a, b) => {
-      if (a.isPrimary !== b.isPrimary) return a.isPrimary ? -1 : 1;
+      if (a.isPrimary !== b.isPrimary) {
+        return a.isPrimary ? -1 : 1;
+      }
       return String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
     });
 

@@ -74,7 +74,9 @@ let localManifestCache: Manifest | null = null;
 let remoteManifestCache: Manifest | null = null;
 
 function loadLocalManifest(): Manifest {
-  if (localManifestCache) return localManifestCache;
+  if (localManifestCache) {
+    return localManifestCache;
+  }
 
   for (const manifestPath of MANIFEST_PATHS) {
     try {
@@ -163,7 +165,9 @@ let initialized = false;
  * (not required — resolution falls back to the local manifest until then).
  */
 export function initViteAssets(): Promise<void> {
-  if (!isProd || initialized) return Promise.resolve();
+  if (!isProd || initialized) {
+    return Promise.resolve();
+  }
   initialized = true;
 
   const first = refreshRemoteManifest();
@@ -172,7 +176,9 @@ export function initViteAssets(): Promise<void> {
     void refreshRemoteManifest();
   }, REMOTE_REFRESH_INTERVAL_MS);
   // Don't keep the event loop alive solely for the refresh timer.
-  if (typeof interval.unref === 'function') interval.unref();
+  if (typeof interval.unref === 'function') {
+    interval.unref();
+  }
 
   return first;
 }
@@ -189,7 +195,9 @@ function toKey(entry: string): string {
  */
 export function viteAsset(entry: string): string {
   const key = toKey(entry);
-  if (!isProd) return `/${key}`;
+  if (!isProd) {
+    return `/${key}`;
+  }
 
   const chunk = activeManifest()[key];
   if (!chunk) {
@@ -207,10 +215,14 @@ export function viteAsset(entry: string): string {
  * Prod: one tag per file in the manifest chunk's `css` array.
  */
 export function viteEntryCss(entry: string): string {
-  if (!isProd) return '';
+  if (!isProd) {
+    return '';
+  }
 
   const chunk = activeManifest()[toKey(entry)];
-  if (!chunk?.css?.length) return '';
+  if (!chunk?.css?.length) {
+    return '';
+  }
 
   return chunk.css.map((href) => `<link rel="stylesheet" href="/${href}" />`).join('\n');
 }

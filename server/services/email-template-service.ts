@@ -222,7 +222,9 @@ class EmailTemplateService {
     const db = getDatabase();
 
     const existing = await this.getTemplate(id);
-    if (!existing) return null;
+    if (!existing) {
+      return null;
+    }
 
     // Don't allow changing name of system templates
     if (existing.is_system && data.name && data.name !== existing.name) {
@@ -295,7 +297,9 @@ class EmailTemplateService {
     const db = getDatabase();
 
     const template = await this.getTemplate(id);
-    if (!template) return false;
+    if (!template) {
+      return false;
+    }
 
     if (template.is_system) {
       throw new Error('Cannot delete a system template');
@@ -347,7 +351,9 @@ class EmailTemplateService {
     changedBy?: string
   ): Promise<EmailTemplate | null> {
     const v = await this.getVersion(templateId, version);
-    if (!v) return null;
+    if (!v) {
+      return null;
+    }
 
     return this.updateTemplate(
       templateId,
@@ -407,7 +413,9 @@ class EmailTemplateService {
     sampleData: Record<string, unknown>
   ): Promise<PreviewData | null> {
     const template = await this.getTemplate(templateId);
-    if (!template) return null;
+    if (!template) {
+      return null;
+    }
 
     return {
       subject: this.interpolate(template.subject, sampleData),
@@ -454,7 +462,9 @@ class EmailTemplateService {
   interpolate(template: string, data: Record<string, unknown>): string {
     return template.replace(/\{\{([^}]+)\}\}/g, (match, path) => {
       const value = this.getNestedValue(data, path.trim());
-      if (value === undefined) return match;
+      if (value === undefined) {
+        return match;
+      }
       return this.escapeHtml(String(value));
     });
   }
@@ -501,18 +511,42 @@ class EmailTemplateService {
   private generateSampleValue(name: string, _description: string): string {
     const lowerName = name.toLowerCase();
 
-    if (lowerName.includes('email')) return 'client@example.com';
-    if (lowerName.includes('name') && lowerName.includes('client')) return 'John Smith';
-    if (lowerName.includes('name') && lowerName.includes('company')) return 'Acme Corp';
-    if (lowerName.includes('name') && lowerName.includes('project')) return 'Website Redesign';
-    if (lowerName.includes('name')) return 'Sample Name';
-    if (lowerName.includes('url')) return 'https://example.com/action';
-    if (lowerName.includes('amount')) return '$1,500.00';
-    if (lowerName.includes('date')) return 'January 15, 2026';
-    if (lowerName.includes('number')) return 'INV-2026-001';
-    if (lowerName.includes('status')) return 'Active';
-    if (lowerName.includes('message')) return 'This is a sample message for preview purposes.';
-    if (lowerName.includes('hours')) return '24';
+    if (lowerName.includes('email')) {
+      return 'client@example.com';
+    }
+    if (lowerName.includes('name') && lowerName.includes('client')) {
+      return 'John Smith';
+    }
+    if (lowerName.includes('name') && lowerName.includes('company')) {
+      return 'Acme Corp';
+    }
+    if (lowerName.includes('name') && lowerName.includes('project')) {
+      return 'Website Redesign';
+    }
+    if (lowerName.includes('name')) {
+      return 'Sample Name';
+    }
+    if (lowerName.includes('url')) {
+      return 'https://example.com/action';
+    }
+    if (lowerName.includes('amount')) {
+      return '$1,500.00';
+    }
+    if (lowerName.includes('date')) {
+      return 'January 15, 2026';
+    }
+    if (lowerName.includes('number')) {
+      return 'INV-2026-001';
+    }
+    if (lowerName.includes('status')) {
+      return 'Active';
+    }
+    if (lowerName.includes('message')) {
+      return 'This is a sample message for preview purposes.';
+    }
+    if (lowerName.includes('hours')) {
+      return '24';
+    }
 
     return `[${name}]`;
   }

@@ -101,7 +101,9 @@ export function getPdfCacheKey(
  */
 export function getCachedPdf(cacheKey: string): Uint8Array | null {
   const entry = pdfCache.get(cacheKey);
-  if (!entry) return null;
+  if (!entry) {
+    return null;
+  }
 
   const now = Date.now();
   if (now - entry.createdAt > CACHE_TTL_MS) {
@@ -123,7 +125,9 @@ export function cachePdf(cacheKey: string, data: Uint8Array, updatedAt?: string 
   // Enforce max cache size (LRU-style: remove oldest entries)
   if (pdfCache.size >= MAX_CACHE_ENTRIES) {
     const oldestKey = pdfCache.keys().next().value;
-    if (oldestKey) pdfCache.delete(oldestKey);
+    if (oldestKey) {
+      pdfCache.delete(oldestKey);
+    }
   }
 
   pdfCache.set(cacheKey, {
@@ -573,7 +577,9 @@ export function drawTwoColumnInfo(
   });
   let leftY = y - 20;
   for (const line of opts.left.lines) {
-    if (!line.text) continue;
+    if (!line.text) {
+      continue;
+    }
     page.drawText(line.text, {
       x: leftMargin,
       y: leftY,

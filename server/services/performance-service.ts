@@ -111,10 +111,16 @@ export interface PerformanceData {
 // =====================================================
 
 function determineTrend(current: number, previous: number): 'up' | 'down' | 'stable' {
-  if (previous === 0) return current > 0 ? 'up' : 'stable';
+  if (previous === 0) {
+    return current > 0 ? 'up' : 'stable';
+  }
   const changeRatio = (current - previous) / previous;
-  if (changeRatio > TREND_THRESHOLD) return 'up';
-  if (changeRatio < -TREND_THRESHOLD) return 'down';
+  if (changeRatio > TREND_THRESHOLD) {
+    return 'up';
+  }
+  if (changeRatio < -TREND_THRESHOLD) {
+    return 'down';
+  }
   return 'stable';
 }
 

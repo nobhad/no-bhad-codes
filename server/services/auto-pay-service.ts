@@ -234,7 +234,9 @@ async function removePaymentMethod(clientId: number, paymentMethodId: number): P
     [paymentMethodId, clientId]
   )) as SavedPaymentMethodRow | undefined;
 
-  if (!method) throw new Error('Payment method not found');
+  if (!method) {
+    throw new Error('Payment method not found');
+  }
 
   // Detach from Stripe customer
   try {
@@ -308,14 +310,18 @@ async function getAutoPayStatus(clientId: number): Promise<{
     [clientId]
   )) as { auto_pay_enabled: number; auto_pay_default_method_id: number | null } | undefined;
 
-  if (!client) throw new Error('Client not found');
+  if (!client) {
+    throw new Error('Client not found');
+  }
 
   let defaultMethod: SavedPaymentMethod | null = null;
   if (client.auto_pay_default_method_id) {
     const row = (await db.get('SELECT * FROM client_payment_methods WHERE id = ?', [
       client.auto_pay_default_method_id
     ])) as SavedPaymentMethodRow | undefined;
-    if (row) defaultMethod = mapPaymentMethodRow(row);
+    if (row) {
+      defaultMethod = mapPaymentMethodRow(row);
+    }
   }
 
   const count = (await db.get(
@@ -367,20 +373,26 @@ async function chargeInvoice(
     [paymentMethodId, clientId]
   )) as SavedPaymentMethodRow | undefined;
 
-  if (!method) return { success: false, error: 'Payment method not found' };
+  if (!method) {
+    return { success: false, error: 'Payment method not found' };
+  }
 
   const invoice = (await db.get(
     'SELECT id, total_amount, status FROM invoices WHERE id = ? AND deleted_at IS NULL',
     [invoiceId]
   )) as { id: number; total_amount: number; status: string } | undefined;
 
-  if (!invoice) return { success: false, error: 'Invoice not found' };
+  if (!invoice) {
+    return { success: false, error: 'Invoice not found' };
+  }
   if (['paid', 'cancelled', 'void'].includes(invoice.status)) {
     return { success: false, error: `Invoice is already ${invoice.status}` };
   }
 
   const amountCents = Math.round(invoice.total_amount * 100);
-  if (amountCents <= 0) return { success: false, error: 'Amount must be positive' };
+  if (amountCents <= 0) {
+    return { success: false, error: 'Amount must be positive' };
+  }
 
   const { totalCents, feeCents } = calculateAmountWithProcessingFee(amountCents);
 
@@ -535,7 +547,9 @@ async function processAutoPay(): Promise<AutoPayResult> {
         });
       } else {
         failed++;
-        if (attemptNumber > 1) retried++;
+        if (attemptNumber > 1) {
+          retried++;
+        }
         logger.warn('Auto-pay charge failed', {
           category: 'payments',
           metadata: {
@@ -641,8 +655,11 @@ async function processRetryQueue(): Promise<{
       ]
     );
 
-    if (result.success) succeeded++;
-    else failedCount++;
+    if (result.success) {
+      succeeded++;
+    } else {
+      failedCount++;
+    }
   }
 
   return { retried: retriedCount, succeeded, failed: failedCount };

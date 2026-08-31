@@ -136,13 +136,19 @@ function parseCompositeId(
   itemId: string
 ): { entityType: SoftDeleteEntityType; entityId: number } | null {
   const parts = itemId.split('-');
-  if (parts.length < 2) return null;
+  if (parts.length < 2) {
+    return null;
+  }
 
   const entityType = parts[0] as SoftDeleteEntityType;
   const entityId = parseInt(parts.slice(1).join('-'), 10);
 
-  if (!VALID_ENTITY_TYPES.includes(entityType)) return null;
-  if (isNaN(entityId) || entityId <= 0) return null;
+  if (!VALID_ENTITY_TYPES.includes(entityType)) {
+    return null;
+  }
+  if (isNaN(entityId) || entityId <= 0) {
+    return null;
+  }
 
   return { entityType, entityId };
 }

@@ -152,7 +152,9 @@ class SSEManager {
     excludeUserId?: number
   ): void {
     for (const participant of threadParticipants) {
-      if (excludeUserId && participant.userId === excludeUserId) continue;
+      if (excludeUserId && participant.userId === excludeUserId) {
+        continue;
+      }
       this.sendToUser(participant.userId, participant.userType, event);
     }
   }

@@ -277,8 +277,12 @@ export class ApiValidator {
     // Convert string representations
     if (typeof value === 'string') {
       const lower = value.toLowerCase();
-      if (lower === 'true' || lower === '1') return true;
-      if (lower === 'false' || lower === '0') return false;
+      if (lower === 'true' || lower === '1') {
+        return true;
+      }
+      if (lower === 'false' || lower === '0') {
+        return false;
+      }
     }
 
     // Convert numbers

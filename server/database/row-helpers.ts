@@ -355,7 +355,9 @@ function parseJsonValue(key: string, value: unknown): unknown {
 export function transformRow<T extends Record<string, unknown>>(
   row: T | null | undefined
 ): T | null {
-  if (!row) return null;
+  if (!row) {
+    return null;
+  }
 
   const result: Record<string, unknown> = {};
 
@@ -384,7 +386,9 @@ export function transformRow<T extends Record<string, unknown>>(
 export function transformRows<T extends Record<string, unknown>>(
   rows: T[] | null | undefined
 ): T[] {
-  if (!rows || !Array.isArray(rows)) return [];
+  if (!rows || !Array.isArray(rows)) {
+    return [];
+  }
   return rows.map((row) => transformRow(row)).filter((row): row is T => row !== null);
 }
 

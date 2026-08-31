@@ -52,7 +52,9 @@ const processedWebhookEvents = new Map<string, number>();
  * machinery to redo the work instead of silently swallowing it.
  */
 export async function releaseStripeEventClaim(eventId: string): Promise<void> {
-  if (!eventId) return;
+  if (!eventId) {
+    return;
+  }
 
   processedWebhookEvents.delete(eventId);
   try {
@@ -77,7 +79,9 @@ export async function releaseStripeEventClaim(eventId: string): Promise<void> {
  * deliveries can't both "win" the idempotency check.
  */
 export async function claimStripeEvent(eventId: string): Promise<boolean> {
-  if (!eventId) return false;
+  if (!eventId) {
+    return false;
+  }
 
   if (processedWebhookEvents.has(eventId)) {
     return false;
@@ -102,7 +106,9 @@ export async function claimStripeEvent(eventId: string): Promise<boolean> {
     logger.error('[Stripe] claimStripeEvent DB error — falling back to cache-only', {
       error: err instanceof Error ? err : undefined
     });
-    if (processedWebhookEvents.has(eventId)) return false;
+    if (processedWebhookEvents.has(eventId)) {
+      return false;
+    }
     processedWebhookEvents.set(eventId, Date.now());
     return true;
   }

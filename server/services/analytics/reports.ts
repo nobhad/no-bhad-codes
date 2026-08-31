@@ -717,7 +717,9 @@ export async function getReportRuns(reportId?: number, _limit?: number): Promise
 }
 
 export function daysToDateRange(days?: number): DateRange | undefined {
-  if (!days) return undefined;
+  if (!days) {
+    return undefined;
+  }
   const endDate = new Date();
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - days);

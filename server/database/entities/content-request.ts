@@ -237,7 +237,9 @@ export const contentItemSchema = defineSchema<ContentItem>({
     column: 'structured_data',
     type: 'string?',
     transform: (v) => {
-      if (!v) return null;
+      if (!v) {
+        return null;
+      }
       try {
         return JSON.parse(v as string);
       } catch {

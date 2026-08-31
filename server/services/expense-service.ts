@@ -56,7 +56,9 @@ function transformRow(row: Record<string, unknown>): ExpenseWithProject {
 }
 
 function escapeCsvField(value: string | null | undefined): string {
-  if (value == null) return '';
+  if (value == null) {
+    return '';
+  }
   const str = String(value);
   if (str.includes(',') || str.includes('"') || str.includes('\n')) {
     return `"${str.replace(/"/g, '""')}"`;
@@ -169,7 +171,9 @@ async function update(id: number, params: Partial<CreateExpenseParams>): Promise
     values.push(params.notes || null);
   }
 
-  if (updates.length === 0) return;
+  if (updates.length === 0) {
+    return;
+  }
 
   updates.push("updated_at = datetime('now')");
   values.push(id);
@@ -266,7 +270,9 @@ async function getById(id: number): Promise<ExpenseWithProject | null> {
     [id]
   );
 
-  if (!row) return null;
+  if (!row) {
+    return null;
+  }
   return transformRow(row as Record<string, unknown>);
 }
 
@@ -287,7 +293,9 @@ async function getHourlyRate(): Promise<number> {
 
   if (row?.setting_value) {
     const parsed = parseFloat(row.setting_value);
-    if (!isNaN(parsed) && parsed > 0) return parsed;
+    if (!isNaN(parsed) && parsed > 0) {
+      return parsed;
+    }
   }
 
   return DEFAULT_HOURLY_RATE;
@@ -309,7 +317,9 @@ async function getProjectProfitability(projectId: number): Promise<ProjectProfit
     [projectId]
   )) as { id: number; project_name: string; price: string | null; client_name: string } | undefined;
 
-  if (!project) return null;
+  if (!project) {
+    return null;
+  }
 
   // Revenue: invoices paid
   const invoiceRevenue = (await db.get(

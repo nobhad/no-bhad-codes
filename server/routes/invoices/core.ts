@@ -51,10 +51,13 @@ const InvoiceValidationSchemas = {
         minLength: 1,
         maxLength: 100,
         customValidator: (items: unknown) => {
-          if (!Array.isArray(items)) return 'Line items must be an array';
+          if (!Array.isArray(items)) {
+            return 'Line items must be an array';
+          }
           for (const item of items) {
-            if (typeof item !== 'object' || item === null)
+            if (typeof item !== 'object' || item === null) {
               return 'Each line item must be an object';
+            }
             const entry = item as Record<string, unknown>;
             if (!entry.description || typeof entry.description !== 'string') {
               return 'Each line item must have a description';
@@ -810,7 +813,9 @@ router.get(
             .filter((inv) => inv.id !== invoiceId && inv.status === 'paid')
             .reduce((sum, inv) => sum + (inv.amountTotal ?? 0), 0);
           // Only show if there's meaningful context
-          if (previouslyPaid === 0) previouslyPaid = undefined;
+          if (previouslyPaid === 0) {
+            previouslyPaid = undefined;
+          }
         }
       }
 

@@ -37,7 +37,9 @@ async function createChecklist(params: CreateChecklistParams): Promise<number> {
     [projectId]
   )) as { id: number } | undefined;
 
-  if (existing) return existing.id; // Idempotent
+  if (existing) {
+    return existing.id;
+  } // Idempotent
 
   // Find template
   let template: OnboardingTemplateRow | undefined;
@@ -186,7 +188,9 @@ async function getClientChecklist(clientId: number): Promise<ChecklistWithSteps 
     [clientId]
   )) as OnboardingChecklistRow | undefined;
 
-  if (!checklist) return null;
+  if (!checklist) {
+    return null;
+  }
 
   return enrichChecklist(checklist);
 }
@@ -201,7 +205,9 @@ async function getChecklist(checklistId: number): Promise<ChecklistWithSteps | n
     checklistId
   ])) as OnboardingChecklistRow | undefined;
 
-  if (!checklist) return null;
+  if (!checklist) {
+    return null;
+  }
 
   return enrichChecklist(checklist);
 }
@@ -256,7 +262,9 @@ async function completeStep(stepId: number, clientId?: number): Promise<void> {
       [stepId, clientId]
     )) as { id: number } | undefined;
 
-    if (!step) throw new Error('Step not found');
+    if (!step) {
+      throw new Error('Step not found');
+    }
   }
 
   await db.run(
@@ -428,7 +436,9 @@ async function updateTemplate(
     values.push(JSON.stringify(params.stepsConfig));
   }
 
-  if (setClauses.length === 0) return;
+  if (setClauses.length === 0) {
+    return;
+  }
 
   values.push(templateId);
   await db.run(`UPDATE onboarding_templates SET ${setClauses.join(', ')} WHERE id = ?`, values);

@@ -40,10 +40,14 @@ const PaymentPlanValidationSchemas = {
         minLength: 1,
         maxLength: 12,
         customValidator: (items: unknown) => {
-          if (!Array.isArray(items)) return 'Payments must be an array';
+          if (!Array.isArray(items)) {
+            return 'Payments must be an array';
+          }
           let totalPercentage = 0;
           for (const item of items) {
-            if (typeof item !== 'object' || item === null) return 'Each payment must be an object';
+            if (typeof item !== 'object' || item === null) {
+              return 'Each payment must be an object';
+            }
             const entry = item as Record<string, unknown>;
             if (
               typeof entry.percentage !== 'number' ||

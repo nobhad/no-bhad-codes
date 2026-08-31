@@ -157,7 +157,9 @@ router.get(
     // =========================================================
 
     const formatDate = (dateStr: string | undefined): string => {
-      if (!dateStr) return 'N/A';
+      if (!dateStr) {
+        return 'N/A';
+      }
       return new Date(dateStr).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
@@ -288,9 +290,13 @@ router.get(
 
     // Helper: draw a drawLabelValue that wraps long values
     const drawFieldWrapped = (label: string, value: string | null | undefined) => {
-      if (!value) return;
+      if (!value) {
+        return;
+      }
       const cleanVal = clean(value);
-      if (!cleanVal) return;
+      if (!cleanVal) {
+        return;
+      }
 
       const upperLabel = `${label.toUpperCase()}:`;
       const valueX = LEFT + labelWidth;
@@ -342,7 +348,9 @@ router.get(
 
     // Helper: draw Yes/No field
     const drawBoolField = (label: string, value: boolean | undefined) => {
-      if (value === undefined || value === null) return;
+      if (value === undefined || value === null) {
+        return;
+      }
       const indicator = value ? 'Yes' : 'No';
       ctx.y = drawLabelValue(ctx.currentPage, `${label.toUpperCase()}:`, indicator, {
         x: LEFT,

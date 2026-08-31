@@ -104,7 +104,9 @@ export async function fetchSowData(projectId: number): Promise<SowData | null> {
       }
     | undefined;
 
-  if (!project) return null;
+  if (!project) {
+    return null;
+  }
 
   // Fetch proposal
   const proposal = (await db.get(
@@ -129,7 +131,9 @@ export async function fetchSowData(projectId: number): Promise<SowData | null> {
       }
     | undefined;
 
-  if (!proposal) return null;
+  if (!proposal) {
+    return null;
+  }
 
   // Fetch proposal features
   const featuresRaw = await db.all(
@@ -612,7 +616,9 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
 // ============================================
 
 function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return 'TBD';
+  if (!dateStr) {
+    return 'TBD';
+  }
   try {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', {

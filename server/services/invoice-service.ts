@@ -763,7 +763,9 @@ export class InvoiceService {
    * Attach line items to invoices using batch fetch
    */
   private async attachLineItemsToInvoices(invoices: Invoice[]): Promise<void> {
-    if (invoices.length === 0) return;
+    if (invoices.length === 0) {
+      return;
+    }
 
     const invoiceIds = invoices.map((inv) => inv.id!).filter((id) => id !== null);
     const lineItemsMap = await this.getLineItemsForInvoices(invoiceIds);
@@ -2216,7 +2218,9 @@ export class InvoiceService {
       'SELECT id, client_id FROM projects WHERE id = ? AND deleted_at IS NULL',
       [projectId]
     );
-    if (!row) return undefined;
+    if (!row) {
+      return undefined;
+    }
     return { id: row.id as number, clientId: row.client_id as number };
   }
 
@@ -2235,7 +2239,9 @@ export class InvoiceService {
        FROM clients WHERE id = ?`,
       [clientId]
     );
-    if (!row) return undefined;
+    if (!row) {
+      return undefined;
+    }
     return {
       contactName: getString(row, 'resolved_name'),
       companyName: getString(row, 'resolved_company') || undefined,
@@ -2254,7 +2260,9 @@ export class InvoiceService {
       'SELECT project_name FROM projects WHERE id = ?',
       [projectId]
     );
-    if (!row) return undefined;
+    if (!row) {
+      return undefined;
+    }
     return { projectName: getString(row, 'project_name') };
   }
 
@@ -2269,7 +2277,9 @@ export class InvoiceService {
       'SELECT u.email, u.display_name FROM invoices i JOIN users u ON i.client_id = u.id WHERE i.id = ?',
       [invoiceId]
     );
-    if (!row) return undefined;
+    if (!row) {
+      return undefined;
+    }
     return {
       email: getString(row, 'email'),
       displayName: getString(row, 'display_name')

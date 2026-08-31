@@ -550,7 +550,9 @@ export const fileUploadSchema: FormSchema = {
       required('Filename'),
       stringLength({ max: 255 }, 'Filename'),
       custom((value) => {
-        if (typeof value !== 'string') return false;
+        if (typeof value !== 'string') {
+          return false;
+        }
         // Check for path traversal
         if (value.includes('..') || value.includes('/') || value.includes('\\')) {
           return 'Invalid filename';

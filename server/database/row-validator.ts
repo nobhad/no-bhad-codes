@@ -37,10 +37,14 @@ function formatContext(ctx: RowValidationContext): string {
 }
 
 export function parseRow<T>(schema: ZodType<T>, row: unknown, ctx: RowValidationContext): T | null {
-  if (row === undefined || row === null) return null;
+  if (row === undefined || row === null) {
+    return null;
+  }
 
   const result = schema.safeParse(row);
-  if (result.success) return result.data;
+  if (result.success) {
+    return result.data;
+  }
 
   const issues = result.error.issues.map((i) => ({
     path: i.path.join('.'),
@@ -65,7 +69,9 @@ export function parseRows<T>(schema: ZodType<T>, rows: unknown[], ctx: RowValida
   const parsed: T[] = [];
   for (let i = 0; i < rows.length; i++) {
     const row = parseRow(schema, rows[i], { ...ctx, meta: { ...ctx.meta, index: i } });
-    if (row !== null) parsed.push(row);
+    if (row !== null) {
+      parsed.push(row);
+    }
   }
   return parsed;
 }

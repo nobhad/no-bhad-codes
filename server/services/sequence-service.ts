@@ -130,7 +130,9 @@ async function update(
     values.push(params.isActive ? 1 : 0);
   }
 
-  if (updates.length === 0) return;
+  if (updates.length === 0) {
+    return;
+  }
 
   updates.push("updated_at = datetime('now')");
   values.push(id);
@@ -219,7 +221,9 @@ async function getById(id: number): Promise<SequenceWithSteps | null> {
     [id]
   );
 
-  if (!seq) return null;
+  if (!seq) {
+    return null;
+  }
 
   const steps = await db.all<SequenceStepRow>(
     `SELECT ${STEP_COLUMNS} FROM sequence_steps WHERE sequence_id = ? ORDER BY step_order`,
@@ -314,7 +318,9 @@ async function updateStep(stepId: number, params: Partial<CreateStepParams>): Pr
     values.push(JSON.stringify(params.stopConditions));
   }
 
-  if (updates.length === 0) return;
+  if (updates.length === 0) {
+    return;
+  }
 
   values.push(stepId);
 
@@ -480,7 +486,9 @@ async function resumeEnrollment(enrollmentId: number): Promise<void> {
     [enrollmentId]
   );
 
-  if (!enrollment) return;
+  if (!enrollment) {
+    return;
+  }
 
   // Get the next step to send
   const nextStep = await db.get<SequenceStepRow>(
@@ -577,7 +585,9 @@ async function processQueue(): Promise<ProcessQueueResult> {
     [nowIso, PROCESS_BATCH_SIZE]
   );
 
-  if (readyEnrollments.length === 0) return result;
+  if (readyEnrollments.length === 0) {
+    return result;
+  }
 
   logger.info('Processing sequence queue', {
     category: LOG_CATEGORY,
@@ -588,10 +598,15 @@ async function processQueue(): Promise<ProcessQueueResult> {
     try {
       const stepResult = await processEnrollmentStep(db, enrollment);
 
-      if (stepResult === 'sent') result.sent++;
-      else if (stepResult === 'failed') result.failed++;
-      else if (stepResult === 'stopped') result.stopped++;
-      else if (stepResult === 'completed') result.completed++;
+      if (stepResult === 'sent') {
+        result.sent++;
+      } else if (stepResult === 'failed') {
+        result.failed++;
+      } else if (stepResult === 'stopped') {
+        result.stopped++;
+      } else if (stepResult === 'completed') {
+        result.completed++;
+      }
     } catch (processingError) {
       logger.error('Error processing enrollment step', {
         category: LOG_CATEGORY,
@@ -754,7 +769,9 @@ async function handleEvent(
       context.data || {}
     );
 
-    if (!conditionsMatch) continue;
+    if (!conditionsMatch) {
+      continue;
+    }
 
     try {
       await enrollEntity({

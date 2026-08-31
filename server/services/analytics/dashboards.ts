@@ -537,10 +537,14 @@ export async function checkAlerts(): Promise<
   const results: { alert: MetricAlert; currentValue: number; triggered: boolean }[] = [];
 
   for (const alert of alerts) {
-    if (!alert.is_active) continue;
+    if (!alert.is_active) {
+      continue;
+    }
 
     const kpi = latestKPIs.find((k) => k.kpi_type === alert.kpi_type);
-    if (!kpi) continue;
+    if (!kpi) {
+      continue;
+    }
 
     let triggered = false;
     const value = kpi.value;

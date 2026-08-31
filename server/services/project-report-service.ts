@@ -160,7 +160,9 @@ export async function fetchProjectReportData(projectId: number): Promise<Project
     [projectId]
   )) as unknown as ProjectRow | undefined;
 
-  if (!project) return null;
+  if (!project) {
+    return null;
+  }
 
   // Fetch milestones
   const milestonesRaw = await db.all(
@@ -700,7 +702,9 @@ export async function generateProjectReportPdf(data: ProjectReportData): Promise
 // ============================================
 
 function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return 'Not set';
+  if (!dateStr) {
+    return 'Not set';
+  }
   try {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', {

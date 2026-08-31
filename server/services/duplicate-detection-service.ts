@@ -91,7 +91,9 @@ export async function checkForDuplicates(
   }>;
 
   for (const intake of intakes) {
-    if (excludeType === 'intake' && excludeId === intake.id) continue;
+    if (excludeType === 'intake' && excludeId === intake.id) {
+      continue;
+    }
 
     const score = calculateSimilarity(
       {
@@ -141,7 +143,9 @@ export async function checkForDuplicates(
   }>;
 
   for (const client of clients) {
-    if (excludeType === 'client' && excludeId === client.id) continue;
+    if (excludeType === 'client' && excludeId === client.id) {
+      continue;
+    }
 
     const score = calculateSimilarity(
       {
@@ -194,8 +198,12 @@ export async function checkForDuplicates(
   }>;
 
   for (const lead of leads) {
-    if (excludeType === 'lead' && excludeId === lead.id) continue;
-    if (!lead.email) continue;
+    if (excludeType === 'lead' && excludeId === lead.id) {
+      continue;
+    }
+    if (!lead.email) {
+      continue;
+    }
 
     const score = calculateSimilarity(
       {
@@ -299,14 +307,20 @@ function calculateSimilarity(
  * Levenshtein distance-based string similarity
  */
 function stringSimilarity(str1: string, str2: string): number {
-  if (!str1 || !str2) return 0;
-  if (str1 === str2) return 1;
+  if (!str1 || !str2) {
+    return 0;
+  }
+  if (str1 === str2) {
+    return 1;
+  }
 
   const len1 = str1.length;
   const len2 = str2.length;
   const maxLen = Math.max(len1, len2);
 
-  if (maxLen === 0) return 1;
+  if (maxLen === 0) {
+    return 1;
+  }
 
   const distance = levenshteinDistance(str1, str2);
   return 1 - distance / maxLen;
@@ -319,15 +333,23 @@ function levenshteinDistance(str1: string, str2: string): number {
   const m = str1.length;
   const n = str2.length;
 
-  if (m === 0) return n;
-  if (n === 0) return m;
+  if (m === 0) {
+    return n;
+  }
+  if (n === 0) {
+    return m;
+  }
 
   const dp: number[][] = Array(m + 1)
     .fill(null)
     .map(() => Array(n + 1).fill(0));
 
-  for (let i = 0; i <= m; i++) dp[i][0] = i;
-  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 0; i <= m; i++) {
+    dp[i][0] = i;
+  }
+  for (let j = 0; j <= n; j++) {
+    dp[0][j] = j;
+  }
 
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
@@ -347,7 +369,9 @@ function levenshteinDistance(str1: string, str2: string): number {
  * Name similarity with handling for different name orders
  */
 function nameSimilarity(name1: string, name2: string): number {
-  if (!name1 || !name2) return 0;
+  if (!name1 || !name2) {
+    return 0;
+  }
 
   const parts1 = name1.split(/\s+/).filter(Boolean);
   const parts2 = name2.split(/\s+/).filter(Boolean);
@@ -367,7 +391,9 @@ function nameSimilarity(name1: string, name2: string): number {
  * Normalize email for comparison
  */
 function normalizeEmail(email: string | null | undefined): string {
-  if (!email) return '';
+  if (!email) {
+    return '';
+  }
   return email.toLowerCase().trim();
 }
 
@@ -375,7 +401,9 @@ function normalizeEmail(email: string | null | undefined): string {
  * Normalize name for comparison
  */
 function normalizeName(name: string | null | undefined): string {
-  if (!name) return '';
+  if (!name) {
+    return '';
+  }
   return name
     .toLowerCase()
     .trim()
@@ -387,7 +415,9 @@ function normalizeName(name: string | null | undefined): string {
  * Normalize company name for comparison
  */
 function normalizeCompany(company: string | null | undefined): string {
-  if (!company) return '';
+  if (!company) {
+    return '';
+  }
   return (
     company
       .toLowerCase()
@@ -404,7 +434,9 @@ function normalizeCompany(company: string | null | undefined): string {
  * Normalize phone number for comparison
  */
 function normalizePhone(phone: string | null | undefined): string {
-  if (!phone) return '';
+  if (!phone) {
+    return '';
+  }
   // Remove all non-digits
   return phone.replace(/\D/g, '');
 }
@@ -413,7 +445,9 @@ function normalizePhone(phone: string | null | undefined): string {
  * Extract domain from email or website
  */
 function extractDomain(input: string | null | undefined): string {
-  if (!input) return '';
+  if (!input) {
+    return '';
+  }
 
   // If it's an email, extract domain
   if (input.includes('@')) {
@@ -447,9 +481,15 @@ function extractDomain(input: string | null | undefined): string {
  * Get confidence level from similarity score
  */
 function getConfidenceLevel(score: number): 'exact' | 'high' | 'medium' | 'low' {
-  if (score >= EXACT_MATCH_THRESHOLD) return 'exact';
-  if (score >= HIGH_SIMILARITY_THRESHOLD) return 'high';
-  if (score >= MEDIUM_SIMILARITY_THRESHOLD) return 'medium';
+  if (score >= EXACT_MATCH_THRESHOLD) {
+    return 'exact';
+  }
+  if (score >= HIGH_SIMILARITY_THRESHOLD) {
+    return 'high';
+  }
+  if (score >= MEDIUM_SIMILARITY_THRESHOLD) {
+    return 'medium';
+  }
   return 'low';
 }
 

@@ -99,7 +99,9 @@ export const ValidationSchemas = {
       type: 'array' as const,
       maxLength: 20,
       customValidator: (features: unknown) => {
-        if (!Array.isArray(features)) return 'Features must be an array';
+        if (!Array.isArray(features)) {
+          return 'Features must be an array';
+        }
         const validFeatures = [
           'contact-form',
           'user-auth',

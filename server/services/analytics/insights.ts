@@ -666,9 +666,13 @@ export async function getProjectHealthSummary(): Promise<{
       healthStatus = 'overdue';
     }
 
-    if (healthStatus === 'on_track') onTrack++;
-    else if (healthStatus === 'at_risk') atRisk++;
-    else overdue++;
+    if (healthStatus === 'on_track') {
+      onTrack++;
+    } else if (healthStatus === 'at_risk') {
+      atRisk++;
+    } else {
+      overdue++;
+    }
 
     return {
       projectId: p.project_id,
@@ -695,7 +699,9 @@ export async function getProjectHealthSummary(): Promise<{
 
 /** Calculate percentage change between two values */
 function calcChange(current: number, previous: number): number {
-  if (previous === 0) return current > 0 ? 100 : 0;
+  if (previous === 0) {
+    return current > 0 ? 100 : 0;
+  }
   return Math.round(((current - previous) / previous) * 100);
 }
 

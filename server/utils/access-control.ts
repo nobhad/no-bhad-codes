@@ -311,7 +311,9 @@ export async function getClientIdFromEntity(
   };
 
   const query = queries[entityType];
-  if (!query) return null;
+  if (!query) {
+    return null;
+  }
 
   const row = (await db.get(query, [entityId])) as { client_id?: number } | undefined;
   return row?.client_id ?? null;

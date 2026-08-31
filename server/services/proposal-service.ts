@@ -1488,7 +1488,9 @@ class ProposalService {
       `SELECT ${PROPOSAL_REQUEST_COLUMNS} FROM proposal_requests WHERE id = ?`,
       [proposalId]
     );
-    if (!proposal) return;
+    if (!proposal) {
+      return;
+    }
 
     const p = proposal as Record<string, unknown>;
 
@@ -1821,7 +1823,9 @@ class ProposalService {
 
     for (const proposalId of proposalIds) {
       const id = typeof proposalId === 'string' ? parseInt(proposalId, 10) : proposalId;
-      if (isNaN(id) || id <= 0) continue;
+      if (isNaN(id) || id <= 0) {
+        continue;
+      }
 
       const result = await db.run(
         "UPDATE proposal_requests SET deleted_at = datetime('now') WHERE id = ? AND deleted_at IS NULL",

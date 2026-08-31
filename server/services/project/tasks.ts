@@ -61,7 +61,9 @@ async function calculateDueDateForTask(
     [milestoneId, projectId]
   )) as { due_date: string | null; start_date: string | null } | undefined;
 
-  if (!milestone?.due_date) return null;
+  if (!milestone?.due_date) {
+    return null;
+  }
 
   // Get the previous milestone's due_date as the start boundary
   const prevMilestone = (await db.get(
@@ -173,7 +175,9 @@ export async function recalculateTaskDueDates(
     const taskIdsToUpdate = new Set(milestoneTasks.map((t) => t.id));
 
     for (let i = 0; i < allTasks.length; i++) {
-      if (!taskIdsToUpdate.has(allTasks[i].id)) continue;
+      if (!taskIdsToUpdate.has(allTasks[i].id)) {
+        continue;
+      }
 
       const daysOffset = Math.floor(interval * (i + 1));
       const taskDueDate = new Date(start);
@@ -337,7 +341,9 @@ export async function getTask(taskId: number): Promise<ProjectTask | null> {
     [taskId]
   );
 
-  if (!row) return null;
+  if (!row) {
+    return null;
+  }
 
   const task = toTask(row as unknown as TaskRow);
 
@@ -589,8 +595,12 @@ async function wouldCreateCyclicDependency(
 
   while (queue.length > 0) {
     const current = queue.shift()!;
-    if (current === taskId) return true;
-    if (visited.has(current)) continue;
+    if (current === taskId) {
+      return true;
+    }
+    if (visited.has(current)) {
+      continue;
+    }
     visited.add(current);
 
     const deps = await db.all(
@@ -866,7 +876,9 @@ export async function updateTaskAdmin(
     values.push(data.assignedTo);
   }
 
-  if (updates.length === 0) return undefined;
+  if (updates.length === 0) {
+    return undefined;
+  }
 
   updates.push('updated_at = CURRENT_TIMESTAMP');
   values.push(taskId);

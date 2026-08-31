@@ -122,7 +122,9 @@ class ContentRequestService {
     startDate?: string
   ): Promise<ContentChecklist> {
     const template = await this.getTemplate(templateId);
-    if (!template) throw new Error('Template not found');
+    if (!template) {
+      throw new Error('Template not found');
+    }
 
     const baseDate = startDate ? new Date(startDate) : new Date();
 
@@ -164,7 +166,9 @@ class ContentRequestService {
       `SELECT ${CHECKLIST_COLUMNS_WITH_JOINS} ${CHECKLIST_JOINS} WHERE crc.id = ?`,
       [id]
     );
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
 
     const checklist = toContentChecklist(row as unknown as ContentChecklistRow);
     checklist.items = await this.getItemsByChecklist(id);
@@ -223,7 +227,9 @@ class ContentRequestService {
     if (data.status !== undefined) {
       updates.push('status = ?');
       values.push(data.status);
-      if (data.status === 'completed') updates.push('completed_at = CURRENT_TIMESTAMP');
+      if (data.status === 'completed') {
+        updates.push('completed_at = CURRENT_TIMESTAMP');
+      }
     }
 
     if (updates.length > 0) {
@@ -346,7 +352,9 @@ class ContentRequestService {
     }
 
     const row = await db.get(`SELECT ${ITEM_COLUMNS} ${ITEM_FROM} WHERE cri.id = ?`, [itemId]);
-    if (!row) throw new Error('Item not found');
+    if (!row) {
+      throw new Error('Item not found');
+    }
     return toContentItem(row as unknown as ContentItemRow);
   }
 
@@ -472,7 +480,9 @@ class ContentRequestService {
   async getTemplates(includeInactive?: boolean): Promise<ContentRequestTemplate[]> {
     const db = getDatabase();
     let query = `SELECT ${TEMPLATE_COLUMNS} FROM content_request_templates`;
-    if (!includeInactive) query += ' WHERE is_active = 1';
+    if (!includeInactive) {
+      query += ' WHERE is_active = 1';
+    }
     query += ' ORDER BY name';
     const rows = await db.all(query);
     return (rows as unknown as ContentRequestTemplateRow[]).map(toContentRequestTemplate);
@@ -484,7 +494,9 @@ class ContentRequestService {
       `SELECT ${TEMPLATE_COLUMNS} FROM content_request_templates WHERE id = ?`,
       [id]
     );
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
     return toContentRequestTemplate(row as unknown as ContentRequestTemplateRow);
   }
 

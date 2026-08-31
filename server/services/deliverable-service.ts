@@ -165,9 +165,13 @@ export class DeliverableService {
       ]
     );
 
-    if (!result.lastID) throw new Error('Failed to insert deliverable');
+    if (!result.lastID) {
+      throw new Error('Failed to insert deliverable');
+    }
     const deliverable = await this.getDeliverableById(result.lastID);
-    if (!deliverable) throw new Error('Failed to create deliverable');
+    if (!deliverable) {
+      throw new Error('Failed to create deliverable');
+    }
     return deliverable;
   }
 
@@ -179,7 +183,9 @@ export class DeliverableService {
       `SELECT ${DELIVERABLE_COLUMNS} FROM deliverables WHERE id = ?`,
       [id]
     );
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
     return this.formatDeliverable(row as DeliverableRow);
   }
 
@@ -231,7 +237,9 @@ export class DeliverableService {
    */
   async updateDeliverable(id: number, updates: Partial<Deliverable>): Promise<Deliverable> {
     const existing = await this.getDeliverableById(id);
-    if (!existing) throw new Error('Deliverable not found');
+    if (!existing) {
+      throw new Error('Deliverable not found');
+    }
 
     const {
       title = existing.title,
@@ -249,7 +257,9 @@ export class DeliverableService {
     );
 
     const updated = await this.getDeliverableById(id);
-    if (!updated) throw new Error('Failed to update deliverable');
+    if (!updated) {
+      throw new Error('Failed to update deliverable');
+    }
     return updated;
   }
 
@@ -264,7 +274,9 @@ export class DeliverableService {
     );
 
     const deliverable = await this.getDeliverableById(id);
-    if (!deliverable) throw new Error('Deliverable not found');
+    if (!deliverable) {
+      throw new Error('Deliverable not found');
+    }
     return deliverable;
   }
 
@@ -299,7 +311,9 @@ export class DeliverableService {
     );
 
     const deliverable = await this.getDeliverableById(id);
-    if (!deliverable) throw new Error('Deliverable not found');
+    if (!deliverable) {
+      throw new Error('Deliverable not found');
+    }
     return deliverable;
   }
 
@@ -325,7 +339,9 @@ export class DeliverableService {
     changeNotes?: string
   ): Promise<DeliverableVersion> {
     const deliverable = await this.getDeliverableById(deliverableId);
-    if (!deliverable) throw new Error('Deliverable not found');
+    if (!deliverable) {
+      throw new Error('Deliverable not found');
+    }
 
     // Get next version number
     const lastVersion = await this.getDb().get(
@@ -354,9 +370,13 @@ export class DeliverableService {
       await this.updateDeliverable(deliverableId, { status: 'pending_review' });
     }
 
-    if (!result.lastID) throw new Error('Failed to insert version');
+    if (!result.lastID) {
+      throw new Error('Failed to insert version');
+    }
     const version = await this.getVersionById(result.lastID);
-    if (!version) throw new Error('Failed to create version');
+    if (!version) {
+      throw new Error('Failed to create version');
+    }
     return version;
   }
 
@@ -368,7 +388,9 @@ export class DeliverableService {
       `SELECT ${DELIVERABLE_VERSION_COLUMNS} FROM deliverable_versions WHERE id = ?`,
       [id]
     );
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
     return row as unknown as DeliverableVersion;
   }
 
@@ -391,7 +413,9 @@ export class DeliverableService {
       `SELECT ${DELIVERABLE_VERSION_COLUMNS} FROM deliverable_versions WHERE deliverable_id = ? ORDER BY version_number DESC LIMIT 1`,
       [deliverableId]
     );
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
     return row as unknown as DeliverableVersion;
   }
 
@@ -420,9 +444,13 @@ export class DeliverableService {
       ]
     );
 
-    if (!result.lastID) throw new Error('Failed to insert comment');
+    if (!result.lastID) {
+      throw new Error('Failed to insert comment');
+    }
     const comment = await this.getCommentById(result.lastID);
-    if (!comment) throw new Error('Failed to add comment');
+    if (!comment) {
+      throw new Error('Failed to add comment');
+    }
     return comment;
   }
 
@@ -434,7 +462,9 @@ export class DeliverableService {
       `SELECT ${DELIVERABLE_COMMENT_COLUMNS} FROM deliverable_comments WHERE id = ?`,
       [id]
     );
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
     return this.formatComment(row as CommentRow);
   }
 
@@ -474,7 +504,9 @@ export class DeliverableService {
     );
 
     const comment = await this.getCommentById(id);
-    if (!comment) throw new Error('Comment not found');
+    if (!comment) {
+      throw new Error('Comment not found');
+    }
     return comment;
   }
 
@@ -501,9 +533,13 @@ export class DeliverableService {
       [deliverableId, name, description || null]
     );
 
-    if (!result.lastID) throw new Error('Failed to insert design element');
+    if (!result.lastID) {
+      throw new Error('Failed to insert design element');
+    }
     const element = await this.getDesignElementById(result.lastID);
-    if (!element) throw new Error('Failed to create design element');
+    if (!element) {
+      throw new Error('Failed to create design element');
+    }
     return element;
   }
 
@@ -515,7 +551,9 @@ export class DeliverableService {
       `SELECT ${DESIGN_ELEMENT_COLUMNS} FROM design_elements WHERE id = ?`,
       [id]
     );
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
     return row as unknown as DesignElement;
   }
 
@@ -550,7 +588,9 @@ export class DeliverableService {
     }
 
     const element = await this.getDesignElementById(elementId);
-    if (!element) throw new Error('Design element not found');
+    if (!element) {
+      throw new Error('Design element not found');
+    }
     return element;
   }
 
@@ -578,9 +618,13 @@ export class DeliverableService {
       ]
     );
 
-    if (!result.lastID) throw new Error('Failed to insert review');
+    if (!result.lastID) {
+      throw new Error('Failed to insert review');
+    }
     const review = await this.getReviewById(result.lastID);
-    if (!review) throw new Error('Failed to create review');
+    if (!review) {
+      throw new Error('Failed to create review');
+    }
     return review;
   }
 
@@ -592,7 +636,9 @@ export class DeliverableService {
       `SELECT ${DELIVERABLE_REVIEW_COLUMNS} FROM deliverable_reviews WHERE id = ?`,
       [id]
     );
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
     return this.formatReview(row as ReviewRow);
   }
 
@@ -795,7 +841,9 @@ export class DeliverableService {
       values.push(fields.due_date);
     }
 
-    if (updates.length === 0) return null;
+    if (updates.length === 0) {
+      return null;
+    }
 
     updates.push('updated_at = CURRENT_TIMESTAMP');
     values.push(id);

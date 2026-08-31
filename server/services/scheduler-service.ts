@@ -93,7 +93,9 @@ function createSimpleTask(expression: string, callback: () => Promise<void>): Si
   let running = false;
 
   const scheduleNext = () => {
-    if (!running) return;
+    if (!running) {
+      return;
+    }
     const next = getNextRunTime(expression);
     const delay = next.getTime() - Date.now();
     timer = setTimeout(async () => {

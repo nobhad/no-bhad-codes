@@ -149,8 +149,12 @@ export async function canAccessDeliverable(
   req: AuthenticatedRequest,
   deliverableId: number
 ): Promise<boolean> {
-  if (await isUserAdmin(req)) return true;
+  if (await isUserAdmin(req)) {
+    return true;
+  }
   const clientId = req.user?.id;
-  if (!clientId) return false;
+  if (!clientId) {
+    return false;
+  }
   return deliverableService.checkClientDeliverableAccess(deliverableId, clientId);
 }

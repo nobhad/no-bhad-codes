@@ -1052,7 +1052,9 @@ router.post(
 
     for (const requestId of requestIds) {
       const id = typeof requestId === 'string' ? parseInt(requestId, 10) : requestId;
-      if (isNaN(id) || id <= 0) continue;
+      if (isNaN(id) || id <= 0) {
+        continue;
+      }
 
       try {
         await adHocRequestService.softDeleteRequest(id, deletedBy);

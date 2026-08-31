@@ -319,8 +319,12 @@ router.put(
         typeof req.body.status === 'string'
           ? req.body.status.trim().toLowerCase().replace(/_/g, '-')
           : '';
-      if (raw === 'in progress') raw = 'in-progress';
-      if (raw === 'on hold') raw = 'on-hold';
+      if (raw === 'in progress') {
+        raw = 'in-progress';
+      }
+      if (raw === 'on hold') {
+        raw = 'on-hold';
+      }
       if (!projectStatuses.includes(raw)) {
         return errorResponseWithPayload(
           res,
@@ -1182,7 +1186,9 @@ router.post(
     let tasksCreated = 0;
 
     for (const ms of milestones) {
-      if (!ms.title) continue;
+      if (!ms.title) {
+        continue;
+      }
 
       // Calculate due date from estimatedDays if provided
       let dueDate: string | null = null;
@@ -1216,7 +1222,9 @@ router.post(
         // Import tasks if provided
         if (ms.tasks && Array.isArray(ms.tasks)) {
           for (const task of ms.tasks) {
-            if (!task.title) continue;
+            if (!task.title) {
+              continue;
+            }
 
             await db.run(
               `INSERT INTO project_tasks (

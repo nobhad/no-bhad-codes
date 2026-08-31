@@ -25,7 +25,9 @@ interface LoggingRequest extends Request {
  * Uses case-insensitive matching for HTTP headers
  */
 function sanitizeRequestData(data: unknown): Record<string, unknown> | unknown {
-  if (!data || typeof data !== 'object') return data;
+  if (!data || typeof data !== 'object') {
+    return data;
+  }
 
   const sensitiveFields = [
     'password',

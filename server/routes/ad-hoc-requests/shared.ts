@@ -164,7 +164,9 @@ export function buildTaskDescription(request: AdHocRequest): string {
   if (request.hourlyRate !== null) {
     quoteParts.push(`Hourly rate: $${request.hourlyRate.toFixed(2)}`);
   }
-  if (request.flatRate !== null) quoteParts.push(`Flat rate: $${request.flatRate.toFixed(2)}`);
+  if (request.flatRate !== null) {
+    quoteParts.push(`Flat rate: $${request.flatRate.toFixed(2)}`);
+  }
   if (request.quotedPrice !== null) {
     quoteParts.push(`Quoted total: $${request.quotedPrice.toFixed(2)}`);
   }

@@ -335,12 +335,20 @@ function getComplexityMultiplier(intakeData: IntakeData): number {
   let multiplier = 1.0;
 
   // Design complexity
-  if (intakeData.designLevel === 'full-design') multiplier += 0.3;
-  if (intakeData.designLevel === 'partial-design') multiplier += 0.1;
+  if (intakeData.designLevel === 'full-design') {
+    multiplier += 0.3;
+  }
+  if (intakeData.designLevel === 'partial-design') {
+    multiplier += 0.1;
+  }
 
   // Content complexity
-  if (intakeData.contentStatus === 'need-help') multiplier += 0.2;
-  if (intakeData.contentStatus === 'partial') multiplier += 0.1;
+  if (intakeData.contentStatus === 'need-help') {
+    multiplier += 0.2;
+  }
+  if (intakeData.contentStatus === 'partial') {
+    multiplier += 0.1;
+  }
 
   // Integration complexity
   if (intakeData.integrations && intakeData.integrations.toLowerCase() !== 'none') {

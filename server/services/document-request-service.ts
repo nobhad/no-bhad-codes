@@ -179,7 +179,9 @@ class DocumentRequestService {
 
     for (const templateId of templateIds) {
       const template = await this.getTemplate(templateId);
-      if (!template) continue;
+      if (!template) {
+        continue;
+      }
 
       // Calculate due date from template
       const dueDate = new Date();

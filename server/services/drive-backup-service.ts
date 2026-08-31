@@ -157,7 +157,9 @@ async function pruneFolder(folderId: string, keep: number, token: string): Promi
     `https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name,createdTime)&orderBy=createdTime%20desc&pageSize=200`,
     { headers: { authorization: `Bearer ${token}` } }
   );
-  if (!listRes.ok) return 0;
+  if (!listRes.ok) {
+    return 0;
+  }
   const { files } = (await listRes.json()) as { files: DriveFileInfo[] };
   const toDelete = files.slice(keep);
   let pruned = 0;
@@ -166,7 +168,9 @@ async function pruneFolder(folderId: string, keep: number, token: string): Promi
       method: 'DELETE',
       headers: { authorization: `Bearer ${token}` }
     });
-    if (delRes.ok || delRes.status === 204) pruned += 1;
+    if (delRes.ok || delRes.status === 204) {
+      pruned += 1;
+    }
   }
   return pruned;
 }

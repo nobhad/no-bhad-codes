@@ -215,7 +215,9 @@ async function handleProposalAccepted(data: {
 
     // Auto-generate contract from proposal
     try {
-      if (!projectId) throw new Error('No projectId after project creation');
+      if (!projectId) {
+        throw new Error('No projectId after project creation');
+      }
 
       const { contractService } = await import('./contract-service.js');
 
@@ -674,7 +676,9 @@ async function getClientEmail(clientId: number): Promise<{ email: string; name: 
     [clientId]
   )) as Record<string, unknown> | undefined;
 
-  if (!client || !client.email) return null;
+  if (!client || !client.email) {
+    return null;
+  }
 
   return {
     email: String(client.email),
@@ -710,7 +714,9 @@ async function loadEmailTemplate(
       [slug]
     )) as { subject: string; body_html: string; body_text: string | null } | undefined;
 
-    if (!template) return null;
+    if (!template) {
+      return null;
+    }
 
     return {
       subject: substituteVariables(template.subject, vars),
@@ -734,7 +740,9 @@ async function dispatchWebhooks(eventType: string, data: Record<string, unknown>
       [`%${eventType}%`]
     )) as Array<{ id: number; platform: string; webhook_url: string; channel: string | null }>;
 
-    if (configs.length === 0) return;
+    if (configs.length === 0) {
+      return;
+    }
 
     const {
       sendSlackNotification,
@@ -907,7 +915,9 @@ async function notifyProposalAccepted(data: {
   projectId?: number;
 }): Promise<void> {
   const proposalId = data.entityId;
-  if (!proposalId) return;
+  if (!proposalId) {
+    return;
+  }
 
   const db = getDatabase();
   const proposal = (await db.get(
@@ -918,7 +928,9 @@ async function notifyProposalAccepted(data: {
     [proposalId]
   )) as Record<string, unknown> | undefined;
 
-  if (!proposal) return;
+  if (!proposal) {
+    return;
+  }
 
   const clientId = getNumber(proposal, 'client_id');
   const projectName = getString(proposal, 'project_name') || 'your project';
@@ -946,7 +958,9 @@ async function notifyContractSigned(data: {
   projectId?: number;
 }): Promise<void> {
   const projectId = data.projectId || data.entityId;
-  if (!projectId) return;
+  if (!projectId) {
+    return;
+  }
 
   const db = getDatabase();
   const project = (await db.get(
@@ -954,7 +968,9 @@ async function notifyContractSigned(data: {
     [projectId]
   )) as Record<string, unknown> | undefined;
 
-  if (!project) return;
+  if (!project) {
+    return;
+  }
 
   const clientId = getNumber(project, 'client_id');
   const projectName = getString(project, 'project_name') || 'your project';
@@ -982,7 +998,9 @@ async function notifyDeliverableApproved(data: {
   projectId?: number;
 }): Promise<void> {
   const deliverableId = data.entityId;
-  if (!deliverableId) return;
+  if (!deliverableId) {
+    return;
+  }
 
   const db = getDatabase();
   const deliverable = (await db.get(
@@ -993,7 +1011,9 @@ async function notifyDeliverableApproved(data: {
     [deliverableId]
   )) as Record<string, unknown> | undefined;
 
-  if (!deliverable) return;
+  if (!deliverable) {
+    return;
+  }
 
   const clientId = getNumber(deliverable, 'client_id');
   const title = getString(deliverable, 'title') || 'A deliverable';
@@ -1019,7 +1039,9 @@ async function notifyDeliverableApproved(data: {
  */
 async function notifyQuestionnaireCompleted(data: { entityId?: number | null }): Promise<void> {
   const questionnaireId = data.entityId;
-  if (!questionnaireId) return;
+  if (!questionnaireId) {
+    return;
+  }
 
   const db = getDatabase();
   const questionnaire = (await db.get(
@@ -1030,7 +1052,9 @@ async function notifyQuestionnaireCompleted(data: { entityId?: number | null }):
     [questionnaireId]
   )) as Record<string, unknown> | undefined;
 
-  if (!questionnaire) return;
+  if (!questionnaire) {
+    return;
+  }
 
   const clientId = getNumber(questionnaire, 'client_id');
   const title = getString(questionnaire, 'title') || 'Your questionnaire';
@@ -1056,7 +1080,9 @@ async function notifyQuestionnaireCompleted(data: { entityId?: number | null }):
  */
 async function notifyDocumentRequestApproved(data: { entityId?: number | null }): Promise<void> {
   const requestId = data.entityId;
-  if (!requestId) return;
+  if (!requestId) {
+    return;
+  }
 
   const db = getDatabase();
   const docRequest = (await db.get(
@@ -1067,7 +1093,9 @@ async function notifyDocumentRequestApproved(data: { entityId?: number | null })
     [requestId]
   )) as Record<string, unknown> | undefined;
 
-  if (!docRequest) return;
+  if (!docRequest) {
+    return;
+  }
 
   const clientId = getNumber(docRequest, 'client_id');
   const title = getString(docRequest, 'title') || 'Your document';
@@ -1093,7 +1121,9 @@ async function notifyDocumentRequestApproved(data: { entityId?: number | null })
  */
 async function notifyInvoicePaid(data: { entityId?: number | null }): Promise<void> {
   const invoiceId = data.entityId;
-  if (!invoiceId) return;
+  if (!invoiceId) {
+    return;
+  }
 
   const db = getDatabase();
   const invoice = (await db.get(
@@ -1104,7 +1134,9 @@ async function notifyInvoicePaid(data: { entityId?: number | null }): Promise<vo
     [invoiceId]
   )) as Record<string, unknown> | undefined;
 
-  if (!invoice) return;
+  if (!invoice) {
+    return;
+  }
 
   const clientId = getNumber(invoice, 'client_id');
   const invoiceNumber = getString(invoice, 'invoice_number') || String(invoiceId);
@@ -1138,7 +1170,9 @@ async function notifyMilestoneCompleted(data: {
   milestoneTitle?: string;
 }): Promise<void> {
   const milestoneId = data.entityId;
-  if (!milestoneId) return;
+  if (!milestoneId) {
+    return;
+  }
 
   const db = getDatabase();
   const milestone = (await db.get(
@@ -1149,7 +1183,9 @@ async function notifyMilestoneCompleted(data: {
     [milestoneId]
   )) as Record<string, unknown> | undefined;
 
-  if (!milestone) return;
+  if (!milestone) {
+    return;
+  }
 
   const clientId = getNumber(milestone, 'client_id');
   const title = getString(milestone, 'title') || data.milestoneTitle || 'A milestone';
@@ -1187,7 +1223,9 @@ async function handleAutoAssignQuestionnaires(data: {
   projectType?: string;
 }): Promise<void> {
   const projectId = data.entityId;
-  if (!projectId || !data.clientId) return;
+  if (!projectId || !data.clientId) {
+    return;
+  }
 
   const db = getDatabase();
 
@@ -1198,7 +1236,9 @@ async function handleAutoAssignQuestionnaires(data: {
       [projectId]
     )) as { id: number } | undefined;
 
-    if (existing) return; // Already has questionnaires
+    if (existing) {
+      return;
+    } // Already has questionnaires
 
     // Find active questionnaires that match the project type or are universal
     const questionnaires = (await db.all(
@@ -1209,7 +1249,9 @@ async function handleAutoAssignQuestionnaires(data: {
       [data.projectType || '']
     )) as Array<{ id: number; name: string; project_type: string | null }>;
 
-    if (questionnaires.length === 0) return;
+    if (questionnaires.length === 0) {
+      return;
+    }
 
     let assigned = 0;
     for (const q of questionnaires) {
@@ -1259,10 +1301,14 @@ async function handleMaintenanceActivation(data: {
   newStatus?: string;
 }): Promise<void> {
   // Only act on completion
-  if (data.newStatus !== 'completed') return;
+  if (data.newStatus !== 'completed') {
+    return;
+  }
 
   const projectId = data.entityId;
-  if (!projectId) return;
+  if (!projectId) {
+    return;
+  }
 
   const db = getDatabase();
 
@@ -1283,10 +1329,18 @@ async function handleMaintenanceActivation(data: {
       }
     | undefined;
 
-  if (!project) return;
-  if (!project.maintenance_tier || project.maintenance_tier === 'diy') return;
-  if (project.maintenance_status !== 'pending') return; // Already activated or manually managed
-  if (project.maintenance_recurring_invoice_id) return; // Idempotency: already has recurring invoice
+  if (!project) {
+    return;
+  }
+  if (!project.maintenance_tier || project.maintenance_tier === 'diy') {
+    return;
+  }
+  if (project.maintenance_status !== 'pending') {
+    return;
+  } // Already activated or manually managed
+  if (project.maintenance_recurring_invoice_id) {
+    return;
+  } // Idempotency: already has recurring invoice
 
   try {
     // Look up tier pricing from config
@@ -1401,10 +1455,14 @@ async function handleAutoCompleteAgreementStep(data: {
   entityId?: number | null;
   triggeredBy?: string;
 }): Promise<void> {
-  if (!data.entityId || !data.triggeredBy) return;
+  if (!data.entityId || !data.triggeredBy) {
+    return;
+  }
 
   const entityType = EVENT_TO_ENTITY_TYPE[data.triggeredBy];
-  if (!entityType) return;
+  if (!entityType) {
+    return;
+  }
 
   try {
     const { agreementService } = await import('./agreement-service.js');
@@ -1423,10 +1481,14 @@ async function handleAutoCompleteOnboardingStep(data: {
   entityId?: number | null;
   triggeredBy?: string;
 }): Promise<void> {
-  if (!data.entityId || !data.triggeredBy) return;
+  if (!data.entityId || !data.triggeredBy) {
+    return;
+  }
 
   const entityType = EVENT_TO_ENTITY_TYPE[data.triggeredBy];
-  if (!entityType) return;
+  if (!entityType) {
+    return;
+  }
 
   try {
     const { onboardingChecklistService } = await import('./onboarding-checklist-service.js');
@@ -1446,7 +1508,9 @@ async function handleCustomAutomationEvent(data: {
   triggeredBy?: string;
   [key: string]: unknown;
 }): Promise<void> {
-  if (!data.triggeredBy) return;
+  if (!data.triggeredBy) {
+    return;
+  }
 
   try {
     const { automationEngine } = await import('./automation-engine.js');
@@ -1468,7 +1532,9 @@ async function handleSequenceEvent(data: {
   clientId?: number;
   [key: string]: unknown;
 }): Promise<void> {
-  if (!data.triggeredBy || !data.entityId) return;
+  if (!data.triggeredBy || !data.entityId) {
+    return;
+  }
 
   const db = getDatabase();
 
@@ -1508,7 +1574,9 @@ async function handleSequenceEvent(data: {
       return; // Unknown event prefix
     }
 
-    if (!entityEmail) return; // Can't enroll without email
+    if (!entityEmail) {
+      return;
+    } // Can't enroll without email
 
     const { sequenceService } = await import('./sequence-service.js');
     await sequenceService.handleEvent(data.triggeredBy, {

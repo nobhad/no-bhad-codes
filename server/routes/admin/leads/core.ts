@@ -275,8 +275,12 @@ router.put(
         typeof rawStatus === 'string'
           ? rawStatus.trim().toLowerCase().replace(/\s+/g, '-').replace(/_/g, '-')
           : '';
-      if (normalized === 'in-progress' || normalized === 'inprogress') normalized = 'in-progress';
-      if (normalized === 'on-hold' || normalized === 'onhold') normalized = 'on-hold';
+      if (normalized === 'in-progress' || normalized === 'inprogress') {
+        normalized = 'in-progress';
+      }
+      if (normalized === 'on-hold' || normalized === 'onhold') {
+        normalized = 'on-hold';
+      }
       const status = normalized;
 
       // Lead pipeline statuses (must match frontend LEAD_STATUS_OPTIONS and GET /leads stats)

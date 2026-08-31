@@ -200,7 +200,9 @@ async function getSurveyByToken(token: string): Promise<FeedbackSurveyWithDetail
       })
     | undefined;
 
-  if (!row) return null;
+  if (!row) {
+    return null;
+  }
 
   const response = (await db.get('SELECT * FROM feedback_responses WHERE survey_id = ?', [
     row.id
@@ -227,10 +229,18 @@ async function submitResponse(token: string, data: SubmitSurveyParams): Promise<
     | FeedbackSurveyRow
     | undefined;
 
-  if (!survey) throw new Error('Survey not found');
-  if (survey.status === 'completed') throw new Error('Survey already completed');
-  if (survey.status === 'expired') throw new Error('Survey has expired');
-  if (survey.status !== 'sent') throw new Error('Survey is not available for submission');
+  if (!survey) {
+    throw new Error('Survey not found');
+  }
+  if (survey.status === 'completed') {
+    throw new Error('Survey already completed');
+  }
+  if (survey.status === 'expired') {
+    throw new Error('Survey has expired');
+  }
+  if (survey.status !== 'sent') {
+    throw new Error('Survey is not available for submission');
+  }
 
   // Check expiry
   if (survey.expires_at && new Date(survey.expires_at) < new Date()) {
@@ -506,7 +516,9 @@ async function updateTestimonial(id: number, params: UpdateTestimonialParams): P
     }
   }
 
-  if (setClauses.length === 0) return;
+  if (setClauses.length === 0) {
+    return;
+  }
 
   values.push(id);
   await db.run(`UPDATE testimonials SET ${setClauses.join(', ')} WHERE id = ?`, values);

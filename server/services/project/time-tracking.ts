@@ -313,7 +313,9 @@ export async function startTimer(params: {
   const project = await db.get('SELECT id, project_name FROM projects WHERE id = ?', [
     params.projectId
   ]);
-  if (!project) throw new Error('Project not found');
+  if (!project) {
+    throw new Error('Project not found');
+  }
 
   const user = await db.get('SELECT id FROM users WHERE email = ?', [params.adminEmail]);
 
@@ -344,7 +346,9 @@ export async function stopTimer(entryId: number): Promise<Record<string, unknown
   const entry = await db.get('SELECT created_at FROM time_entries WHERE id = ? AND hours = 0', [
     entryId
   ]);
-  if (!entry) throw new Error('Active timer not found');
+  if (!entry) {
+    throw new Error('Active timer not found');
+  }
 
   const startTime = new Date((entry as Record<string, unknown>).created_at as string);
   const endTime = new Date();

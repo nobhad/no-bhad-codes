@@ -153,7 +153,9 @@ class QuestionnaireService {
       id
     ]);
 
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
 
     return this.mapQuestionnaireRow(row);
   }
@@ -192,7 +194,9 @@ class QuestionnaireService {
     const db = await getDatabase();
     const existing = await this.getQuestionnaire(id);
 
-    if (!existing) return null;
+    if (!existing) {
+      return null;
+    }
 
     await db.run(
       `UPDATE questionnaires
@@ -270,7 +274,9 @@ class QuestionnaireService {
     for (const questionnaire of autoSendQuestionnaires) {
       // Check if already sent
       const existing = await this.getClientResponseForQuestionnaire(clientId, questionnaire.id);
-      if (existing) continue;
+      if (existing) {
+        continue;
+      }
 
       const response = await this.sendQuestionnaire({
         questionnaire_id: questionnaire.id,
@@ -304,7 +310,9 @@ class QuestionnaireService {
       [id]
     );
 
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
 
     return this.mapResponseRow(row);
   }
@@ -361,7 +369,9 @@ class QuestionnaireService {
       [clientId, questionnaireId]
     );
 
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
 
     return this.mapResponseRow(row);
   }

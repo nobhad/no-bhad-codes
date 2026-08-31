@@ -210,7 +210,9 @@ export const TOKEN_ROTATION = {
  */
 export function parseExpiryToSeconds(expiry: string): number | undefined {
   const match = expiry.match(/^(\d+)\s*([smhd])$/);
-  if (!match) return undefined;
+  if (!match) {
+    return undefined;
+  }
 
   const value = parseInt(match[1], 10);
   const unit = match[2];

@@ -141,7 +141,9 @@ async function update(id: number, params: UpdateEmbedParams): Promise<void> {
     values.push(params.isActive ? 1 : 0);
   }
 
-  if (setClauses.length === 0) return;
+  if (setClauses.length === 0) {
+    return;
+  }
 
   setClauses.push("updated_at = datetime('now')");
   values.push(id);
@@ -224,7 +226,9 @@ async function getProjectStatus(token: string): Promise<ProjectStatusInfo | null
     [token]
   )) as (ProjectStatusTokenRow & { project_name: string; project_status: string }) | undefined;
 
-  if (!statusToken) return null;
+  if (!statusToken) {
+    return null;
+  }
 
   // Calculate completion from milestones
   const milestones = (await db.all('SELECT status FROM milestones WHERE project_id = ?', [

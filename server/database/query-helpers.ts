@@ -104,7 +104,9 @@ export function buildSafeUpdate(
 
   for (const [field, value] of Object.entries(updates)) {
     // Skip undefined values
-    if (value === undefined) continue;
+    if (value === undefined) {
+      continue;
+    }
 
     // Validate field name against whitelist
     if (!allowedFields.includes(field)) {

@@ -22,7 +22,9 @@ function stringSimilarity(s1: string, s2: string): number {
   const longer = s1.length > s2.length ? s1 : s2;
   const shorter = s1.length > s2.length ? s2 : s1;
 
-  if (longer.length === 0) return 1.0;
+  if (longer.length === 0) {
+    return 1.0;
+  }
 
   const editDistance = levenshteinDistance(longer, shorter);
   return (longer.length - editDistance) / longer.length;

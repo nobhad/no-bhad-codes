@@ -135,7 +135,9 @@ router.get(
     };
 
     const formatMaintenance = (option: string | null): string => {
-      if (!option) return 'None';
+      if (!option) {
+        return 'None';
+      }
       const maintenanceNames: Record<string, string> = {
         diy: 'DIY (Self-Managed)',
         essential: 'Essential Plan',

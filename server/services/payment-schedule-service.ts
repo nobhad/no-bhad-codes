@@ -169,7 +169,9 @@ class PaymentScheduleService {
     const row = await db.get(`SELECT ${INSTALLMENT_COLUMNS_WITH_JOINS} ${JOINS} WHERE psi.id = ?`, [
       id
     ]);
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
     return toPaymentInstallment(row as unknown as PaymentInstallmentRow);
   }
 
@@ -208,7 +210,9 @@ class PaymentScheduleService {
     );
 
     const installment = await this.getInstallment(id);
-    if (!installment) throw new Error('Installment not found');
+    if (!installment) {
+      throw new Error('Installment not found');
+    }
 
     await logger.info(`Marked installment ${id} as paid`, { category: 'PAYMENT_SCHEDULE' });
     return installment;
@@ -259,7 +263,9 @@ class PaymentScheduleService {
     }
 
     const installment = await this.getInstallment(id);
-    if (!installment) throw new Error('Installment not found');
+    if (!installment) {
+      throw new Error('Installment not found');
+    }
     return installment;
   }
 

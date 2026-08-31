@@ -73,7 +73,9 @@ function sanitizeInPlace(obj: Record<string, unknown>): void {
   const skipFields = ['password', 'password_hash', 'token', 'accessToken', 'refreshToken'];
 
   for (const key of Object.keys(obj)) {
-    if (skipFields.includes(key)) continue;
+    if (skipFields.includes(key)) {
+      continue;
+    }
 
     const value = obj[key];
     if (typeof value === 'string') {

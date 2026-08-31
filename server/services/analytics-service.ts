@@ -382,7 +382,9 @@ export const analyticsService = {
     const db = getDatabase();
 
     const existing = await db.get('SELECT id FROM saved_analytics_queries WHERE id = ?', [queryId]);
-    if (!existing) return false;
+    if (!existing) {
+      return false;
+    }
 
     await db.run('DELETE FROM saved_analytics_queries WHERE id = ?', [queryId]);
     return true;

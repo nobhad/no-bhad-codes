@@ -22,7 +22,9 @@ const translations: Record<Locale, Record<string, string>> = {
 
 export function detectLocale(req: Request): Locale {
   const lang = req.headers['accept-language']?.split(',')[0]?.slice(0, 2);
-  if (lang === 'es' || lang === 'fr') return lang;
+  if (lang === 'es' || lang === 'fr') {
+    return lang;
+  }
   return 'en';
 }
 

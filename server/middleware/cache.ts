@@ -52,7 +52,9 @@ function generateCacheKey(req: Request, varyBy: string[] = []): string {
   const headers = varyBy.reduce(
     (acc, header) => {
       const value = req.get(header);
-      if (value) acc[header] = value;
+      if (value) {
+        acc[header] = value;
+      }
       return acc;
     },
     {} as Record<string, string>

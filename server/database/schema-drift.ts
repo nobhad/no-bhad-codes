@@ -106,7 +106,9 @@ async function getStoredSnapshot(db: Database): Promise<SchemaObject[] | null> {
     'SELECT setting_value FROM system_settings WHERE setting_key = ?',
     [SETTING_KEY]
   );
-  if (!row) return null;
+  if (!row) {
+    return null;
+  }
   try {
     const parsed = JSON.parse(row.setting_value) as SchemaObject[];
     return Array.isArray(parsed) ? parsed : null;

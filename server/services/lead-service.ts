@@ -224,7 +224,9 @@ export const leadService = {
 
     for (const leadId of leadIds) {
       const id = typeof leadId === 'string' ? parseInt(leadId, 10) : leadId;
-      if (isNaN(id) || id <= 0) continue;
+      if (isNaN(id) || id <= 0) {
+        continue;
+      }
 
       const result = await db.run(
         'UPDATE projects SET deleted_at = ?, deleted_by = ? WHERE id = ? AND deleted_at IS NULL',

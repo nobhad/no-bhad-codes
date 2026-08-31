@@ -166,8 +166,12 @@ async function createPaymentIntent(
       [invoiceId]
     )) as PayableInvoiceRow | undefined;
 
-    if (!invoice) throw new Error(`Invoice ${invoiceId} not found`);
-    if (invoice.client_id !== clientId) throw new Error('Invoice does not belong to this client');
+    if (!invoice) {
+      throw new Error(`Invoice ${invoiceId} not found`);
+    }
+    if (invoice.client_id !== clientId) {
+      throw new Error('Invoice does not belong to this client');
+    }
     if (['paid', 'cancelled', 'void'].includes(invoice.status)) {
       throw new Error(`Invoice is already ${invoice.status}`);
     }
@@ -179,10 +183,15 @@ async function createPaymentIntent(
       [installmentId]
     )) as PayableInstallmentRow | undefined;
 
-    if (!installment) throw new Error(`Installment ${installmentId} not found`);
-    if (installment.client_id !== clientId)
+    if (!installment) {
+      throw new Error(`Installment ${installmentId} not found`);
+    }
+    if (installment.client_id !== clientId) {
       throw new Error('Installment does not belong to this client');
-    if (installment.status === 'paid') throw new Error('Installment is already paid');
+    }
+    if (installment.status === 'paid') {
+      throw new Error('Installment is already paid');
+    }
 
     amountCents = Math.round(installment.amount * 100);
   } else {
