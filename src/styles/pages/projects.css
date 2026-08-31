@@ -1570,6 +1570,42 @@
   letter-spacing: 0.02em;
 }
 
+.crt-tv__hint-mobile {
+  display: none;
+}
+
+/* The panel's supporting text is sized in container units, which track the
+   TV's width — at phone width that resolves to roughly 9px for the hint and
+   the live link, well under a readable size. Bumped here, and the opacity
+   raised, since the same 0.55 that reads as "quiet" on a large screen reads as
+   "blurred" on a small one. */
+@media (max-width: 767px) {
+  .crt-tv__hint-desktop {
+    display: none;
+  }
+
+  .crt-tv__hint-mobile {
+    display: inline;
+  }
+
+  /* The panel's body copy is the channel's actual content and was the
+     smallest readable thing on the screen — 3.3cqw resolves to roughly 11px
+     at phone width. Raising the panel's base size carries the list items and
+     paragraphs with it, since those are sized in em. */
+  .crt-tv__panel {
+    font-size: 4.6cqw;
+  }
+
+  .crt-tv__panel-hint {
+    font-size: 3.4cqw;
+    opacity: 0.75;
+  }
+
+  .crt-tv__panel-link {
+    font-size: 3.8cqw;
+  }
+}
+
 /* The "PROJECTS" heading + divider above the TV are redundant — the
    channel guide on the TV screen already shows the heading. Hidden
    via display:none so the section flexbox centers the TV cleanly. */
@@ -1719,6 +1755,32 @@
    upper portion of the channel-list. Mirrors the Prevue Guide layout
    where the top half showed "now showing" info and the bottom half
    scrolled through the channel grid. */
+/* The guide's channel line says something different on a phone. "Channel 01"
+   is orienting on a desktop where the whole grid is visible; on a phone the
+   rows are cramped and the useful message is what to DO, so the mobile variant
+   names the gesture instead. Only one is ever rendered. */
+.crt-tv__guide-channel-mobile {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .crt-tv__guide-channel-desktop {
+    display: none;
+  }
+
+  .crt-tv__guide-channel-mobile {
+    display: inline;
+  }
+
+  /* Arrow gives up room on a phone: the info column needs the width more than
+     the mascot does, and at full size he crowds the channel line beside him. */
+  .crt-tv__guide-avatar {
+    max-width: 62%;
+    max-height: 62%;
+    margin-inline-start: auto;
+  }
+}
+
 .crt-tv__guide-top {
   display: grid;
   /* minmax(0, 1fr) instead of plain 1fr — without it, a long unbreakable

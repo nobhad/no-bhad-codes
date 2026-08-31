@@ -1281,7 +1281,7 @@ export class ProjectsModule extends BaseModule {
         <div class="crt-tv__guide-info">
           <span class="crt-tv__guide-info-line crt-tv__guide-info-brand">No Bhad Codes</span>
           <span class="crt-tv__guide-info-line crt-tv__guide-info-show">"Portfolio Guide"</span>
-          <span class="crt-tv__guide-info-line crt-tv__guide-info-channel">Channel 01</span>
+          <span class="crt-tv__guide-info-line crt-tv__guide-info-channel"><span class="crt-tv__guide-channel-desktop">Channel 01</span><span class="crt-tv__guide-channel-mobile">Scroll through the channels</span></span>
         </div>
         <div class="crt-tv__guide-feature" aria-hidden="true">
           <svg class="crt-tv__guide-avatar"
@@ -1752,7 +1752,7 @@ export class ProjectsModule extends BaseModule {
       <article class="crt-tv__panel crt-tv__panel--outro" data-panel-key="outro">
         <a class="crt-tv__panel-cta" href="#/projects/${escapeAttr(project.slug)}">View full case study →</a>
         ${liveLink}
-        <p class="crt-tv__panel-hint">Press ↑ / ↓ to change channel · Esc to exit</p>
+        <p class="crt-tv__panel-hint"><span class="crt-tv__hint-desktop">Press ↑ / ↓ to change channel · Esc to exit</span><span class="crt-tv__hint-mobile">Swipe up / down to change channel</span></p>
       </article>
     `);
 
@@ -2315,6 +2315,20 @@ export class ProjectsModule extends BaseModule {
    * Resolve a media path template against the current media theme. Paths that
    * contain the {theme} token get it swapped; plain paths pass through.
    */
+  /**
+   * Video src with a first-frame fragment.
+   *
+   * `preload="metadata"` fetches enough to know the duration but paints
+   * nothing, so on iOS the player is an empty box with a play button until it
+   * is tapped. Asking for a specific time makes the browser seek there and
+   * render that frame, which gives the poster-like still without shipping a
+   * separate poster image. 0.1s rather than 0 because seeking to exactly zero
+   * is a no-op in some players.
+   */
+  private videoPosterSrc(path: string): string {
+    return path.includes('#') ? path : `${path}#t=0.1`;
+  }
+
   private resolveThemedPath(template: string): string {
     return template.includes(MEDIA_THEME_TOKEN)
       ? template.split(MEDIA_THEME_TOKEN).join(this.mediaTheme())
@@ -2447,7 +2461,7 @@ export class ProjectsModule extends BaseModule {
     if (titleEl) {
       const titleHref = project.liveUrl || project.testUrl;
       if (titleHref) {
-        titleEl.innerHTML = `<a href="${escapeAttr(titleHref)}" target="_blank" rel="noopener noreferrer" class="project-title-link">${escapeHtml(project.title)}<span class="project-title-icon" aria-hidden="true">${EXTERNAL_LINK_SVG}</span><span class="sr-only"> (opens in new tab)</span></a>`;
+        titleEl.innerHTML = `<a href="${escapeAttr(titleHref)}" target="_blank" rel="noopener noreferrer" class="project-title-link">${escapeHtml(project.title)}<span class="sr-only"> (opens in new tab)</span></a>`;
       } else {
         titleEl.textContent = project.title;
       }
@@ -2645,7 +2659,7 @@ export class ProjectsModule extends BaseModule {
           : '';
         return `
           <figure class="project-media project-media--video">
-            <video src="${escapeAttr(this.resolveThemedPath(src))}"${themedAttr} controls playsinline preload="metadata" aria-label="${label}"></video>
+            <video src="${escapeAttr(this.videoPosterSrc(this.resolveThemedPath(src)))}"${themedAttr} controls playsinline preload="metadata" aria-label="${label}"></video>
           </figure>
         `;
       })
@@ -2774,7 +2788,7 @@ export class ProjectsModule extends BaseModule {
                </figure>`;
           } else {
             deepVideo.innerHTML = `<figure class="project-media project-media--video">
-                 <video src="${escapeAttr(this.resolveThemedPath(media))}" controls playsinline preload="metadata" aria-label="${label} walkthrough"></video>
+                 <video src="${escapeAttr(this.videoPosterSrc(this.resolveThemedPath(media)))}" controls playsinline preload="metadata" aria-label="${label} walkthrough"></video>
                </figure>`;
           }
         }
