@@ -455,11 +455,10 @@ body[data-page="design-system"] main#main-content {
 /* Mobile: hide the compass since touch scroll convention already
    suggests vertical navigation, and the screen is too narrow for
    horizontal cues to feel useful without crowding tile content. */
-@media (max-width: 767px) {
-  .map-compass {
-    display: none;
-  }
-}
+/* The compass stays on phones. It used to be hidden here, from when small
+   screens ran a stacked layout with no camera to steer — now they use the same
+   spatial map as desktop, so hiding the cues left the only affordance for
+   left/right navigation invisible. */
 
 /* ↓ moved into a scrolling page's content (see updateCompass). It scrolls
    with the page and sits after the last of it, rather than hovering over the
