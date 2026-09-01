@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Card back. Artwork from intro_paw.ai's card_back layer, which draws the card at
-  1352.31 x 772.75 (ratio 1.741); the site's element is 1069.5 x 599.3 (1.785)
-  and both faces share one flip container, so the artwork is fitted by HEIGHT
-  (scale 0.76390, 13.7px spare either side) and the frame is redrawn
-  at the shipped geometry.
+  Card back. Artwork from intro_paw.ai's card_back layer, drawn there at
+  1352.31 x 772.75 (ratio 1.741). The site's card element is 1069.5 x 599.3
+  (1.785) and both faces share one flip container, so the artwork keeps its
+  proportion to the card's HEIGHT (scale 0.76390) and is centred, and the frame
+  is redrawn below at the shipped geometry.
 
-  Arrow_Avatar arrives from Illustrator as an embedded 438x558 PNG, which held
-  the file at 214KB. It is substituted here with the same dog as vector paths,
-  scaled to the exact box the raster occupied. Verified against the raster it
-  replaces; the difference is edge antialiasing.
+  Arrow_Avatar comes out of Illustrator as an embedded 438x558 PNG — the dog is
+  a placed raster on that layer, not a vector carrying an effect. It is
+  substituted with the same dog as vector paths. Note the PNG has a symmetric
+  36px transparent bleed, so the vector is matched to the raster's INK box
+  (366x485), not to the image element's box.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="1069.5" height="599.3" viewBox="0 0 1069.5 599.3">
   <rect id="Card_Outline" x="4.5" y="4.5" width="1060.5" height="590.3" fill="#fff" stroke="#000" stroke-miterlimit="10" stroke-width="9"/>
-  <g transform="translate(14.8009 1.0625) scale(0.763895)">
+  <g transform="translate(17.2110 1.3489) scale(0.763895)">
   
   <g id="Text">
     <g>
@@ -54,7 +55,7 @@
       <path d="M1050.92,550.22v7.45h9.8v3.35h-9.8v14.25c0,1.94.37,3.29,1.1,4.05s2.02,1.15,3.84,1.15h4.85v3.45h-5.27c-3.23,0-5.52-.65-6.84-1.95s-1.99-3.53-1.99-6.7v-14.25h-7.01v-3.35h7.01v-7.45h4.31Z" fill="#231f20"/>
     </g>
   </g>
-  <g id="Arrow_Avatar" transform="translate(-82.775 -48.542) scale(1.509616 1.499315)"><g id="Arrow">
+  <g id="Arrow_Avatar" transform="translate(8.588 8.456) scale(1.261460 1.303168)"><g id="Arrow">
     <g>
       <path d="M475.67,262.86h0c21.42-57.34,5.25-112.85-39.6-153.39l-25.46,112.58c-37.58,3.02-59.68,7.87-74.9,47.63l-74.09,24.8c3.1,20.86-1.62,30.84-18.05,41.86,21.69,15.09,52.27,14.43,66.28,11.55-2.96-1.84-12.53-7.87-15.22-12.47-9.83-16.93,7.14-41.33,33.68-.92,11.85,11.55,34.62,6.17,34.62,6.17-22.77,15.09-65.33,14.83-90.25,13.38,0,0,20.74,12.2,42.84,19.55,22.09,7.22,42.57-5.64,42.57-5.64,1.35,6.43-15.22,50.26-32.19,102.61,20.88,6.04,42.84,9.19,65.2,9.19,43.91,0,85.81-11.94,121.78-34.25-13.2-71.78-25.86-138.43-37.04-182.39v-.26h-.13Z" fill="#231f20"/>
       <path d="M257.17,294.53l-34.49,11.55c3.91,12.86,8.49,19.94,17.38,26.37,15.63-10.63,20.07-17.58,17.11-37.92h0Z" fill="#231f20"/>
