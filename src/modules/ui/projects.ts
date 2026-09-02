@@ -218,6 +218,9 @@ const DOCS_SVG = `
 </svg>
 `;
 
+/** Where the last-viewed channel is remembered across a page load. */
+const TV_CHANNEL_STORAGE_KEY = 'nbc_tv_channel';
+
 export class ProjectsModule extends BaseModule {
   private projectsSection: HTMLElement | null = null;
   private projectsContent: HTMLElement | null = null;
@@ -295,8 +298,19 @@ export class ProjectsModule extends BaseModule {
     // Load portfolio data
     await this.loadPortfolioData();
 
+    // Read the remembered channel BEFORE render(). render() lands on the guide
+    // and calls setChannelDisplay(1), which writes 1 over the stored value — so
+    // reading it afterwards always finds the guide, whatever the reader was on.
+    const rememberedChannel = this.readStoredChannel();
+
     // Render projects or WIP sign
     this.render();
+
+    // Re-tune to whatever channel this tab was last on. After render(), so the
+    // guide rows exist for the tune-in to highlight, and only meaningful on a
+    // fresh load — every in-app route back to this tile keeps the module alive
+    // and the TV already tuned.
+    this.restoreLastChannel(rememberedChannel);
 
     // Set up back button handler
     this.setupBackButton();
@@ -473,6 +487,40 @@ export class ProjectsModule extends BaseModule {
       logger.error('[ProjectsModule] Failed to load portfolio data:', error);
       this.portfolioData = { projects: [], categories: [] };
     }
+  }
+
+  /**
+   * Re-tune to the channel the reader was last on, after a page load.
+   *
+   * Channel 01 is the guide and is where a first visit starts, so only 02+ is
+   * worth restoring — restoring 01 would be indistinguishable from doing
+   * nothing. The tune-in plays rather than the card being parked instantly:
+   * arriving mid-channel with no transition reads as a glitch, and the
+   * sequence is what makes it read as a television.
+   */
+  private readStoredChannel(): number {
+    try {
+      return Number(sessionStorage.getItem(TV_CHANNEL_STORAGE_KEY));
+    } catch {
+      return 0;
+    }
+  }
+
+  private restoreLastChannel(channelNumber: number): void {
+    if (!Number.isFinite(channelNumber) || channelNumber <= 1) {
+      return;
+    }
+    const documented = this.portfolioData?.projects.filter((p) => p.isDocumented) ?? [];
+    const project = documented[channelNumber - 2];
+    if (!project) {
+      return;
+    }
+    // Tell page-transition too, or its arrow/wheel navigation would still
+    // believe the TV is on the guide.
+    window.dispatchEvent(
+      new CustomEvent('projects:active-slug-changed', { detail: { index: channelNumber - 1 } })
+    );
+    void this.playTuneInSequence(project.slug);
   }
 
   /**
@@ -2274,6 +2322,16 @@ export class ProjectsModule extends BaseModule {
     // Remembered so a breakpoint change can re-request the same channel's
     // digit from the other cabinet's set.
     this.displayedChannel = channelNumber;
+    // Also remembered across a page load. Every in-app route back to the
+    // projects tile already keeps the channel — the module stays alive, so the
+    // TV is simply still tuned. A refresh is the one path that does not, and it
+    // dropped the reader back on the guide. sessionStorage rather than
+    // localStorage: this is "where I was just now", not a durable preference.
+    try {
+      sessionStorage.setItem(TV_CHANNEL_STORAGE_KEY, String(channelNumber));
+    } catch {
+      /* storage unavailable (private mode) — the channel just won't survive */
+    }
     const display = document.querySelector<HTMLImageElement>('[data-channel-display]');
     if (!display) {
       return;
