@@ -140,9 +140,9 @@ async function listSurveys(filters?: {
 
   const surveys = (await db.all(
     `SELECT fs.*,
-            c.name AS client_name,
+            COALESCE(c.contact_name, c.company_name) AS client_name,
             c.email AS client_email,
-            p.name AS project_name
+            p.project_name AS project_name
      FROM feedback_surveys fs
      LEFT JOIN clients c ON fs.client_id = c.id
      LEFT JOIN projects p ON fs.project_id = p.id
@@ -184,9 +184,9 @@ async function getSurveyByToken(token: string): Promise<FeedbackSurveyWithDetail
 
   const row = (await db.get(
     `SELECT fs.*,
-            c.name AS client_name,
+            COALESCE(c.contact_name, c.company_name) AS client_name,
             c.email AS client_email,
-            p.name AS project_name
+            p.project_name AS project_name
      FROM feedback_surveys fs
      LEFT JOIN clients c ON fs.client_id = c.id
      LEFT JOIN projects p ON fs.project_id = p.id
@@ -441,7 +441,7 @@ async function listTestimonials(filters?: {
   }
 
   const rows = (await db.all(
-    `SELECT t.*, p.name AS project_name
+    `SELECT t.*, p.project_name AS project_name
      FROM testimonials t
      LEFT JOIN projects p ON t.project_id = p.id
      ${whereClause}
@@ -612,7 +612,7 @@ async function sendReminders(): Promise<ReminderResult> {
   const cutoff = subtractDays(REMINDER_DELAY_DAYS);
 
   const pending = (await db.all(
-    `SELECT fs.*, c.email, c.contact_name, c.name AS client_name
+    `SELECT fs.*, c.email, c.contact_name, COALESCE(c.contact_name, c.company_name) AS client_name
      FROM feedback_surveys fs
      LEFT JOIN clients c ON fs.client_id = c.id
      WHERE fs.status = 'sent'

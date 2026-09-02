@@ -945,7 +945,7 @@ describe('SoftDeleteService - forceDelete', () => {
 
     expect(result.success).toBe(true);
     expect(mockDb.run).toHaveBeenCalledWith(
-      expect.stringContaining('proposal_items'),
+      expect.stringContaining('proposal_custom_items'),
       expect.anything()
     );
   });

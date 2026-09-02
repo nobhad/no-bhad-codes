@@ -219,7 +219,7 @@ async function getProjectStatus(token: string): Promise<ProjectStatusInfo | null
   const db = getDatabase();
 
   const statusToken = (await db.get(
-    `SELECT pst.*, p.name AS project_name, p.status AS project_status
+    `SELECT pst.*, p.project_name AS project_name, p.status AS project_status
      FROM project_status_tokens pst
      JOIN projects p ON pst.project_id = p.id
      WHERE pst.token = ? AND pst.is_active = 1`,

@@ -267,8 +267,8 @@ async function list(filters?: {
 
   const retainers = (await db.all(
     `SELECT r.*,
-            c.name AS client_name,
-            p.name AS project_name
+            COALESCE(c.company_name, c.contact_name) AS client_name,
+            p.project_name AS project_name
      FROM retainers r
      LEFT JOIN clients c ON r.client_id = c.id
      LEFT JOIN projects p ON r.project_id = p.id
@@ -319,8 +319,8 @@ async function getById(id: number): Promise<RetainerWithDetails | null> {
 
   const row = (await db.get(
     `SELECT r.*,
-            c.name AS client_name,
-            p.name AS project_name
+            COALESCE(c.company_name, c.contact_name) AS client_name,
+            p.project_name AS project_name
      FROM retainers r
      LEFT JOIN clients c ON r.client_id = c.id
      LEFT JOIN projects p ON r.project_id = p.id
@@ -587,8 +587,8 @@ async function sendUsageAlerts(): Promise<UsageAlertResult> {
   const nearCap = (await db.all(
     `SELECT r.id, r.client_id, r.project_id,
             rp.used_hours, rp.total_available,
-            c.name AS client_name,
-            p.name AS project_name
+            COALESCE(c.company_name, c.contact_name) AS client_name,
+            p.project_name AS project_name
      FROM retainer_periods rp
      JOIN retainers r ON rp.retainer_id = r.id
      LEFT JOIN clients c ON r.client_id = c.id

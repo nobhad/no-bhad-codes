@@ -982,9 +982,9 @@ class SoftDeleteService {
       // 8. Client children (contacts, activities, notes, etc.)
       // 9. Clients
 
-      // 1. Delete proposal items (proposal_items table)
+      // 1. Delete proposal items (proposal_custom_items table)
       await db.run(
-        `DELETE FROM proposal_items
+        `DELETE FROM proposal_custom_items
          WHERE proposal_id IN (
            SELECT id FROM proposal_requests
            WHERE deleted_at IS NOT NULL AND deleted_at < ?
@@ -1269,7 +1269,7 @@ class SoftDeleteService {
 
         // Delete related proposals
         await db.run(
-          'DELETE FROM proposal_items WHERE proposal_id IN (SELECT id FROM proposal_requests WHERE client_id = ?)',
+          'DELETE FROM proposal_custom_items WHERE proposal_id IN (SELECT id FROM proposal_requests WHERE client_id = ?)',
           [entityId]
         );
         await db.run('DELETE FROM proposal_requests WHERE client_id = ?', [entityId]);
@@ -1299,14 +1299,14 @@ class SoftDeleteService {
         await db.run('DELETE FROM messages WHERE project_id = ?', [entityId]);
         await db.run('DELETE FROM files WHERE project_id = ?', [entityId]);
         await db.run(
-          'DELETE FROM proposal_items WHERE proposal_id IN (SELECT id FROM proposal_requests WHERE project_id = ?)',
+          'DELETE FROM proposal_custom_items WHERE proposal_id IN (SELECT id FROM proposal_requests WHERE project_id = ?)',
           [entityId]
         );
         await db.run('DELETE FROM proposal_requests WHERE project_id = ?', [entityId]);
       } else if (entityType === 'invoice') {
         await db.run('DELETE FROM invoice_items WHERE invoice_id = ?', [entityId]);
       } else if (entityType === 'proposal') {
-        await db.run('DELETE FROM proposal_items WHERE proposal_id = ?', [entityId]);
+        await db.run('DELETE FROM proposal_custom_items WHERE proposal_id = ?', [entityId]);
       }
 
       // Finally delete the entity itself

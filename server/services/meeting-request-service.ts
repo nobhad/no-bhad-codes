@@ -45,7 +45,7 @@ const LIST_QUERY = `
     mr.*,
     c.contact_name AS clientName,
     c.email AS clientEmail,
-    p.name AS projectName
+    p.project_name AS projectName
   FROM meeting_requests mr
   JOIN clients c ON c.id = mr.client_id
   LEFT JOIN projects p ON p.id = mr.project_id
