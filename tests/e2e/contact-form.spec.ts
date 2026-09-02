@@ -27,6 +27,47 @@ const MOBILE_MAX_WIDTH = 767;
 const MOBILE_AUTO_HIDE_MS = 6000;
 
 const arrow = (page: Page): Locator => page.locator('[data-callout-id="contact-feedback"]');
+
+/**
+ * Wait for Arrow's entrance to finish, not merely for her to exist.
+ *
+ * She slides up and fades in, and Playwright counts opacity:0 as visible — so
+ * `toBeVisible()` resolves on the first frame, when she is still ~389px below
+ * her resting position and off the bottom of a 720px viewport. Anything that
+ * measures her then is reading a frame of the animation: elementFromPoint at
+ * her close button returned null because the point was outside the viewport.
+ * She settles in ~200ms; this waits for three consecutive frames with a still
+ * box and full opacity.
+ */
+async function arrowSettled(page: Page): Promise<void> {
+  await arrow(page).evaluate(
+    (el) =>
+      new Promise<void>((resolve, reject) => {
+        const deadline = performance.now() + 5000;
+        let last = Number.NaN;
+        let stable = 0;
+        const tick = (): void => {
+          const top = el.getBoundingClientRect().top;
+          const opaque = parseFloat(getComputedStyle(el).opacity) > 0.99;
+          if (opaque && Math.abs(top - last) < 0.5) {
+            if (++stable >= 3) {
+              resolve();
+              return;
+            }
+          } else {
+            stable = 0;
+          }
+          last = top;
+          if (performance.now() > deadline) {
+            reject(new Error('Arrow never settled'));
+            return;
+          }
+          requestAnimationFrame(tick);
+        };
+        tick();
+      })
+  );
+}
 const arrowText = (page: Page): Locator => arrow(page).locator('.arrow-callout__text');
 const submitButton = (page: Page): Locator => page.locator('.submit-button');
 
@@ -184,6 +225,7 @@ test.describe('Contact form — Arrow’s controls', () => {
     await page.waitForSelector('.contact-form');
     await submitButton(page).click();
     await expect(arrow(page)).toBeVisible();
+    await arrowSettled(page);
   });
 
   test('the X closes the blurb but leaves Arrow standing', async ({ page }) => {
@@ -302,6 +344,7 @@ test.describe('Contact form — Arrow’s placement', () => {
     await page.waitForSelector('.contact-form');
     await submitButton(page).click();
     await expect(arrow(page)).toBeVisible();
+    await arrowSettled(page);
   });
 
   test('the submit button stays pressable while she is up', async ({ page }) => {
