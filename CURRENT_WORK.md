@@ -2,6 +2,45 @@
 
 ---
 
+## TV texture, business card, intake — 2026-09-01
+
+**Status:** DONE — on main, unpushed
+**Priority:** —
+
+- [x] **TV re-cut with texture** (aa63673d). Twenty webp files from the new
+      Illustrator exports at 2x the artboard, matching the shipped sizes so
+      nothing needed re-registering. Quality split by content — grain hides
+      compression, so screens and title cards are q62 and the chassis/glass q80;
+      at a flat q82 the set was 1696KB, this is 894KB with no visible difference
+      at 1:1. Total `public/images/tv` 1453KB -> 1801KB.
+      Composed cards and their `_bg` pairs were cut together on purpose: a
+      textured card fading to an untextured background would show the texture
+      change mid-transition.
+- [x] **Card back rebuilt from `intro_paw.ai`'s `card_back` layer.** Both faces
+      now live in the paw's coordinate space, which is what made this tractable.
+      The dog was a placed raster (438x558 PNG) rather than a vector carrying an
+      effect — which is why deleting effects never shrank the file. Now vector:
+      214KB -> 14KB.
+- [x] **Card front reverted to the original** (830b3b53). It was always aligned
+      to the paw; the mismatch only appeared when the redrawn artboards came in
+      with the frame resized but the art inside not rescaled. Several rounds
+      were spent chasing that instead of stepping back.
+- [x] **Intro hand-off** — `.intro-morph-overlay` had a CSS transition on the
+      same opacity GSAP tweens, so the fade never landed (reached 0.68 of a
+      600ms fade, then reversed). Removed; it now runs 1 -> 0 cleanly.
+
+### Not done
+
+- [ ] **`control-panel.webp` and the `led/NN.webp` digits are untextured.** They
+      were not part of the TV export. They render fine, but the texture stops at
+      them if you look closely.
+- [ ] **`wip/card-swap`** still parked — swapping the paw's card for the newer
+      1352.31x772.75 geometry. Unfinished on purpose: it needs `SVG_CARD` in
+      `intro-animation-config.ts`, the fixed sizes and nav offsets in
+      `business-card.css` and `mobile/layout.css`, and the `<img>` dimensions.
+
+---
+
 ## Intake terminal, business card, footer curtain
 
 **Status:** DONE — merged to main
@@ -61,8 +100,8 @@
 
 ## CSS audit — cascade layers, dead rules, undefined tokens
 
-**Status:** 3 of 4 done; the layer rewiring is still OPEN
-**Priority:** Medium — one shipped iOS bug fixed, one architectural fault left
+**Status:** DONE — all four; layers merged in 10409d1a
+**Priority:** — verification on real iOS hardware is the only thing left
 
 Audit of the stylesheet set turned up four problems. Three are fixed and
 committed; the fourth is the big one and is deliberately last, because it is the
@@ -148,7 +187,9 @@ only one that can move things on desktop.
 
 ## TV title-card text runs to the edge of the screen
 
-**Status:** OPEN — needs a re-export, not a CSS change
+**Status:** DONE (2026-09-01) — fixed by the textured re-export (aa63673d).
+Measured on the new cards: the-backend 84.1% of card width, hedgewitch 90.4%,
+no-bhad-codes 48.4% (it wraps to two lines). Was ~96%; the target below was ~85%.
 **Priority:** Low — cosmetic
 
 The channel title text ("HEDGEWITCH HORTICULTURE" / "BUSINESS WEBSITE") nearly
@@ -226,6 +267,15 @@ Worth trying, roughly in order:
       needs nothing.
 - [ ] If processing is unavoidable, de-noise *gently* and never touch the top
       end: no high shelf, and audition against the original before keeping it.
+
+**Tried again 2026-09-01 and reverted again (4352ad8e).** A 7kHz low-pass plus
+loudnorm — a top-end filter, i.e. the thing this section says not to do. It
+landed at 1,122,379 bytes against the 1,087,219 of the attempt already reverted
+in `e9ef3491`, so it was effectively the same processing. The measurements from
+it are worth keeping: ch3 sits at 7.8dB HF-below-overall against ch4's 20.9dB,
+and it was overshooting full scale at +0.7 dBFS (ch2 is worse, at +1.2). **The
+clipping is a separate, real problem from the hiss and can be fixed by gain
+alone** — that part does not need a filter and is the untried first step above.
 
 ---
 
