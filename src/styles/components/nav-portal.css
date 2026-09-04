@@ -274,7 +274,7 @@
   background: inherit;
   color: inherit;
   border: var(--portal-btn-border-width, 2px) solid currentColor;
-  border-bottom-width: var(--portal-btn-border-bottom-width, 6px);
+  border-bottom-width: var(--portal-btn-border-bottom-width, var(--portal-btn-border-width, 2px));
   border-radius: 0;
   font-family: var(--portal-btn-font-family, inherit);
   font-size: var(--font-size-base);
@@ -444,9 +444,11 @@
 
 .portal-login-subtitle {
   font-size: var(--font-size-base);
-  color: var(--color-dark);
+  /* A solid token, not --color-dark at 0.7. The opacity blended #333 down to
+     #676767 against the page, which measures 4.28:1 — close enough to look
+     deliberate and still short of the 4.5:1 this size of text needs. */
+  color: var(--color-text-secondary);
   margin: 0;
-  opacity: 0.7;
   text-align: center;
 }
 
@@ -538,7 +540,7 @@
   background: inherit;
   color: inherit;
   border: var(--portal-btn-border-width, 2px) solid currentColor;
-  border-bottom-width: var(--portal-btn-border-bottom-width, 6px);
+  border-bottom-width: var(--portal-btn-border-bottom-width, var(--portal-btn-border-width, 2px));
   border-radius: 0;
   font-family: var(--portal-btn-font-family, inherit);
   font-size: var(--font-size-base);

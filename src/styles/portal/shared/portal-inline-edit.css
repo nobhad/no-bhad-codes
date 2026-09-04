@@ -277,7 +277,7 @@
 }
 
 .portal .inline-link-external:hover {
-  color: var(--color-brand-primary);
+  color: var(--color-accent);
 }
 
 /* ===============================================

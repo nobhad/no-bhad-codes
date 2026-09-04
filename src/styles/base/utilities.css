@@ -248,10 +248,13 @@
   color: var(--color-text-inverse, var(--color-text-primary));
 }
 .text-accent {
-  color: var(--portal-accent, var(--color-brand-primary));
+  color: var(--portal-accent, var(--color-accent));
 }
+/* Both of these paint TEXT, so both take the accent — the AA-safe red —
+ * rather than --color-brand-primary, which is the brand fill and is three
+ * tenths short of 4.5:1 on the page ground. */
 .text-brand {
-  color: var(--color-brand-primary);
+  color: var(--color-accent);
 }
 
 /* Status colors (map to --status-* tokens) */

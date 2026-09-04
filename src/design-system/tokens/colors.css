@@ -21,7 +21,21 @@
   --color-brand-primary: #dc2626;
   --color-brand-primary-rgb: 220, 38, 38;
   --color-brand-secondary: #10b981;
-  --color-brand-accent: #dc2626;
+  /* Darker than --color-brand-primary above, and deliberately so. The accent
+     is what 160 rules set as TEXT, and #dc2626 measures 3.66:1 on the page
+     ground, 4.14:1 on the menu button and 4.43:1 on gray-100 — three of the
+     five light surfaces it lands on, all short of the 4.5:1 that body-size
+     text needs. #b91c1c clears every one of them (4.90 / 5.54 / 5.93 / 6.38 /
+     6.47) at the same hue, nine points of lightness down.
+
+     It is not a new colour: it is already --color-interactive-primary-hover
+     below, so the accent's hover state stops being a hue change and becomes
+     the weight change it always read as.
+
+     --color-brand-primary keeps #dc2626 for the logo and brand fills. Non-text
+     accent use — borders, focus rings, the CRT chrome — only owes 3:1, which
+     the brighter red clears everywhere. */
+  --color-brand-accent: #b91c1c;
 
   /* Neutral Palette - Gray Scale */
   --color-gray-50: #fafafa;
@@ -97,7 +111,13 @@
      --color-text-primary above (gray-900, #171717). */
   --text-rgb: 23, 23, 23;
   --color-text-secondary: var(--color-gray-700);
-  --color-text-tertiary: var(--color-gray-500);
+  /* gray-600, not gray-500. #737373 on the off-white page background is
+     3.59:1, and everything wearing this token is body-size text — project
+     taglines, metadata labels, pending-link captions — so it needs 4.5:1
+     (WCAG 1.4.3). #525252 measures 5.92:1 and still reads as the quietest of
+     the three text weights. Changing the token rather than the six call sites
+     keeps the next muted thing accessible by default. */
+  --color-text-tertiary: var(--color-gray-600);
   --color-text-disabled: var(--color-gray-400);
   /* Default only. portal-theme.css deliberately flattens this to
      --color-text-primary for the portal surfaces and still wins, being
