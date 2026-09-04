@@ -49,7 +49,8 @@ if (
     environment: process.env.NODE_ENV || 'development',
     sendDefaultPii: false,
     tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
-    // Disable profiling to avoid "require is not defined" warning in ES modules
+    // Disable profiling to avoid "require is not defined" warning in ES modules.
+    // app.ts's errorTracker.init passes enableProfiling: false to match.
     profilesSampleRate: 0,
     // Add OpenTelemetry trace context to Sentry events
     beforeSend(event) {

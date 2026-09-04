@@ -150,7 +150,15 @@ errorTracker.init({
   dsn: process.env.SENTRY_DSN,
   environment: process.env.NODE_ENV || 'development',
   release: process.env.npm_package_version,
-  enableProfiling: process.env.NODE_ENV === 'production',
+  // Off, and deliberately. Profiling needs @sentry/profiling-node, which is
+  // not a dependency — instrument.ts already pins profilesSampleRate to 0 for
+  // the same reason (it warned "require is not defined" under ES modules). This
+  // line asked for it anyway, so error-tracking.ts logged "Sentry profiling
+  // requested but dynamic import is not supported synchronously" on every
+  // production boot: a warning nobody could act on, about a feature nobody had
+  // turned on. The warning is worth keeping for whoever opts in on purpose;
+  // asking for it here meant it fired for everyone, forever.
+  enableProfiling: false,
   sampleRate: process.env.NODE_ENV === 'production' ? 1.0 : 0.1,
   tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0
 });
