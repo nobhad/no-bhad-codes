@@ -100,10 +100,14 @@ were inside "rel**axe**d" and "m**axRe**quests". It is true now, and enforced.
       Dependency-free header parsing for PNG/GIF/WebP/JPEG rather than adding
       sharp for fourteen files — cross-checked against PIL. Run
       `npm run media:dimensions` when the portfolio media changes.
-- [ ] **Two dead `titleCard` paths.** `recycle-content` and `linktrees` still
-      use the old string form and point at `/projects/*-title.png`, which do
-      not exist. Nothing requests them — those two have no TV channel, so there
-      are no 404s — but the data is either wrong or waiting on artwork.
+- [ ] **Two title cards still to be made.** `recycle-content` and
+      `linktrees` carry a string `titleCard` naming the file they are waiting
+      for (`/projects/*-title.png`). That is deliberate, not stale data: the
+      runtime only plays the object form, so those two have no TV channel and
+      nothing requests the path — there are no 404s. When the artwork exists,
+      swap the string for the `composed`/`bg`/type object and run
+      `npm run media:dimensions`. The Project type and the generator both say
+      so now, so neither reads as a broken reference.
 - [ ] **`--consent-banner-height` shows up in the css-bundle-contract
       snapshot** as a var living on its fallback. That is correct — it is set
       at runtime by JS — but the test cannot tell the two cases apart.

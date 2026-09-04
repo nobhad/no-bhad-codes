@@ -112,6 +112,20 @@ interface PortfolioProject {
   docsLabel?: string;
   launchDate?: string;
   isDocumented: boolean;
+  /**
+   * A TV title card, in one of two shapes.
+   *
+   * TitleCardData is a real card: a composed image with the text baked in, a
+   * text-free background behind the panels, and the type spec that produced
+   * it. That is what the TV plays.
+   *
+   * A bare string is a PLACEHOLDER for a card that has not been made yet —
+   * recycle-content and linktrees each name the file they are waiting for. The
+   * runtime ignores it on purpose (both readers below take the object form or
+   * nothing), so the project simply has no channel until the artwork lands and
+   * the string becomes an object. Nothing requests the path, so nothing 404s.
+   * Do not "fix" these by deleting them; they are the to-do list.
+   */
   titleCard?: string | TitleCardData;
   // Optional second write-up rendered below the case study, for one part of
   // the build that deserves its own section rather than a feature bullet.
@@ -1581,8 +1595,9 @@ export class ProjectsModule extends BaseModule {
       return;
     }
 
-    // titleCard must be the structured object form for the new flow;
-    // legacy string fallback navigates to the detail page.
+    // The object form is a card the TV can play. A string is a placeholder for
+    // artwork that does not exist yet (see the Project type), so it falls
+    // through to the detail page like a project with no card at all.
     const card = typeof project.titleCard === 'object' ? project.titleCard : null;
     if (!card) {
       window.location.hash = `#/projects/${slug}`;

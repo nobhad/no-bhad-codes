@@ -148,6 +148,10 @@ export function mediaSizeAttrs(path: string): string {
 console.log(`media dimensions → src/generated/media-dimensions.ts  (${Object.keys(dims).length} images)`);
 for (const [k, v] of Object.entries(dims)) console.log(`  ${String(v[0]).padStart(5)} x ${String(v[1]).padEnd(5)}  ${k}`);
 if (missing.length) {
-  console.log('\nSkipped:');
+  // Not a failure. A path with no file behind it is a placeholder for artwork
+  // that has not been made yet — recycle-content and linktrees both name the
+  // title card they are waiting for. Listed so it stays visible, and so the
+  // day one of them appears you get its dimensions without being told to look.
+  console.log('\nNot measured (no file yet — placeholders for pending artwork):');
   for (const m of missing) console.log('  ' + m);
 }
