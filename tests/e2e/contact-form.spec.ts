@@ -145,7 +145,7 @@ test.describe('Contact form', () => {
     await expect(page.locator('#email')).toBeVisible();
     await expect(page.locator('#message')).toBeVisible();
     await expect(submitButton(page)).toBeVisible();
-    await expect(submitButton(page).locator('span')).toHaveText('Send Message');
+    await expect(submitButton(page).locator('span')).toHaveText('Send');
   });
 
   test('Arrow stays off screen until there is something to say', async ({ page }) => {

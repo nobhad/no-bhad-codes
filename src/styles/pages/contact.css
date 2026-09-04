@@ -316,13 +316,15 @@ p.contact-options {
   gap: 0.55rem;
   background: inherit;
   border: var(--portal-btn-border-width, 2px) solid currentColor;
-  border-bottom-width: var(--portal-btn-border-bottom-width, 6px);
+  border-bottom-width: var(--portal-btn-border-bottom-width, var(--portal-btn-border-width, 2px));
   border-radius: 0;
   box-shadow: none;
   padding: 0.9375rem 1.875rem;
   font-family: var(--font-family-body, inherit);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide, 0.04em);
   color: var(--color-text-primary);
   cursor: pointer;
   z-index: var(--z-index-20);

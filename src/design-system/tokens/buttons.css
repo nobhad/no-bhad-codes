@@ -30,9 +30,12 @@
   --portal-btn-letter-spacing: -0.02em;
   --portal-btn-text-transform: uppercase;
 
-  /* Button borders - Portal: no radius, 2px border, thicker bottom */
+  /* Button borders - Portal: no radius, even 2px border on all four sides */
   --portal-btn-border-width: 2px;
-  --portal-btn-border-bottom-width: 6px;
+  /* Was 6px — the heavy bottom edge. Kept as its own token rather than
+     deleted so the ten rules that read it still resolve; it now simply
+     matches the other three sides. */
+  --portal-btn-border-bottom-width: var(--portal-btn-border-width);
   --portal-btn-border-radius: 0;
   --portal-btn-border-color: var(--color-text-primary);
 
