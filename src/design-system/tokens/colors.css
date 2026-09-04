@@ -37,6 +37,13 @@
      the brighter red clears everywhere. */
   --color-brand-accent: #b91c1c;
 
+  /* And its counterpart for dark grounds. The same reasoning runs the other
+     way there: on --color-gray-900 (#171717), #b91c1c is 2.77:1 and even the
+     original #dc2626 was only 3.71:1 — the accent has never passed as text in
+     dark mode. #f87171 measures 6.48:1 and is already the dark crimson the
+     design-system docs page uses, so the two now agree. */
+  --color-brand-accent-dark: #f87171;
+
   /* Neutral Palette - Gray Scale */
   --color-gray-50: #fafafa;
   --color-gray-100: #f5f5f5;
@@ -500,7 +507,9 @@ html[data-theme="dark"]:not([data-page="admin"]):not([data-page="client"]) {
   --color-dark: #e0e0e0;
   --color-light: #1a1a1a;
   --color-secondary: var(--color-brand-secondary);
-  --color-accent: var(--color-brand-accent);
+  /* The DARK accent — see --color-brand-accent-dark. Inheriting the light
+     one here put a 2.77:1 red on near-black. */
+  --color-accent: var(--color-brand-accent-dark);
   --color-shadow: rgba(0, 0, 0, 1);
   --form-input-border: #e0e0e0;
   --form-input-placeholder: #999999;

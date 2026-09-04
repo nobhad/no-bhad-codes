@@ -135,6 +135,33 @@ test.describe('Accessibility — standalone documents', () => {
   }
 });
 
+test.describe('Accessibility — dark theme', () => {
+  test.use({ colorScheme: 'dark' });
+
+  /**
+   * The whole palette swaps here, so light-theme passes prove nothing about
+   * it. This exists because darkening --color-brand-accent for the light
+   * surfaces quietly took the dark one from 3.71:1 to 2.77:1 — a token shared
+   * by both themes, fixed for one, broken for the other, with nothing to say
+   * so. The head script reads prefers-color-scheme, so colorScheme is all it
+   * takes to get there.
+   */
+  const DARK_SURFACES: Array<{ name: string; hash: string; pageId: string }> = [
+    { name: 'home', hash: '#/', pageId: 'intro' },
+    { name: 'about', hash: '#/about', pageId: 'about' },
+    { name: 'contact', hash: '#/contact', pageId: 'contact' },
+    { name: 'projects', hash: '#/projects', pageId: 'projects' }
+  ];
+
+  for (const surface of DARK_SURFACES) {
+    test(`${surface.name} in dark theme has no WCAG 2.1 AA violations`, async ({ page }) => {
+      await gotoPage(page, surface.hash, surface.pageId);
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+      await expectNoViolations(page);
+    });
+  }
+});
+
 test.describe('Accessibility — reduced motion', () => {
   test.use({ reducedMotion: 'reduce' });
 
