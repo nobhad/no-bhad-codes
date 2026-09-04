@@ -38,11 +38,21 @@ test.describe('Navigation', () => {
     await expect(page.locator('.menu')).toBeVisible();
     await expect(page.locator('.menu-link')).toHaveCount(5);
 
-    // Close by clicking the overlay at its left edge, halfway down. It fills
-    // the screen but is not the top element everywhere: the open menu covers
-    // the middle, the header covers the top, and the footer band covers the
-    // bottom. Left-middle is the reliably clear strip.
-    await page.click('.overlay', { position: { x: 12, y: 360 } });
+    // How you close it depends on how wide the menu is.
+    //
+    // On desktop the menu is a drawer, so the overlay is exposed down the left
+    // and clicking it closes the menu. Below --mobile the menu is
+    // --menu-width-mobile (100vw) and covers the overlay completely — the
+    // click lands on a .menu-link instead, which navigates rather than closes,
+    // and Playwright reports the link "intercepts pointer events". There is no
+    // clear strip to aim at, because there is no gap.
+    if ((page.viewportSize()?.width ?? 0) < 768) {
+      await page.locator('.menu-button').click();
+    } else {
+      // Left edge, halfway down: the open menu covers the middle, the header
+      // the top, and the footer band the bottom.
+      await page.click('.overlay', { position: { x: 12, y: 360 } });
+    }
     await expect(page.locator('[data-nav]')).toHaveAttribute('data-nav', 'closed');
   });
 
