@@ -32,8 +32,26 @@ export interface ConsentBannerState extends ComponentState {
   hasResponded: boolean;
 }
 
+/**
+ * The custom property the banner publishes its own height into.
+ *
+ * It is `position: fixed` across the bottom of the viewport, so it contributes
+ * nothing to layout and the page has no idea it is there. On a phone it is
+ * roughly two fifths of the screen, and everything under it was simply
+ * unreachable: the TV's power, channel and volume buttons; the contact form's
+ * email, message and send; every link on a case study. Not merely awkward —
+ * `elementFromPoint` returns the banner, so those controls cannot be clicked
+ * or tapped at all until it is answered.
+ *
+ * Anything the banner would cover adds this to its own bottom offset, the same
+ * way things travel with --footer-curtain-lift. Zero when there is no banner,
+ * so every consumer can read it with a 0px fallback and stop thinking about it.
+ */
+const BANNER_HEIGHT_VAR = '--consent-banner-height';
+
 export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBannerState> {
   private hideTimer: ReturnType<typeof setTimeout> | null = null;
+  private heightObserver: ResizeObserver | null = null;
 
   constructor(props: ConsentBannerProps) {
     const initialState: ConsentBannerState = {
@@ -66,6 +84,8 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
   }
 
   override async mounted(): Promise<void> {
+    this.watchHeight();
+
     // Auto-hide after delay if configured
     if (this.props.autoHide && this.state.isVisible) {
       const delay = this.props.hideDelay || 10000; // 10 seconds default
@@ -357,7 +377,7 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
         font-size: var(--portal-btn-font-size, var(--font-size-sm, 0.875rem));
         font-weight: var(--portal-btn-font-weight, 500);
         font-family: var(--portal-btn-font-family, "Inconsolata", ui-monospace, monospace);
-        letter-spacing: var(--portal-btn-letter-spacing, -0.02em);
+        letter-spacing: var(--portal-btn-letter-spacing, 0.03em);
         text-transform: var(--portal-btn-text-transform, uppercase);
         cursor: pointer;
         transition: all var(--transition-fast, 0.2s);
@@ -446,6 +466,20 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
       @media (max-width: 768px) {
         .consent-banner {
           padding: 0 var(--space-3);
+          /* Deliberately NOT max-height with an internal scroll. Capping it at
+             38vh left 364px of content in a 321px box, so the notice became a
+             little scroller you could drag around — and dragging a fixed
+             overlay reads as the page having come loose. It is sized by its
+             content instead; the row of buttons below already took it from
+             428px to 364px, and mobile/layout.css reserves whatever height it
+             ends up being, so the page adapts rather than being sat on.
+
+             touch-action pairs with that: the banner is not scrollable, so
+             without it a drag over the banner would scroll the PAGE behind it
+             — the thing you cannot see and did not mean to move. Taps are
+             unaffected, so the buttons still work. */
+          touch-action: none;
+          overscroll-behavior: contain;
         }
 
         .consent-banner__content {
@@ -457,13 +491,17 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
           width: 100%;
         }
 
+        /* Side by side, not stacked. Two full-width buttons plus their gap ran
+           to about a third of the banner's height on their own, and Decline /
+           Accept are a pair of equals — a row reads as the choice it is. */
         .consent-banner__buttons {
-          flex-direction: column;
+          flex-direction: row;
           width: 100%;
         }
 
         .consent-banner__btn {
-          width: 100%;
+          flex: 1 1 0;
+          width: auto;
         }
 
         .consent-banner__links {
@@ -550,7 +588,46 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
     this.setState({ hasResponded: true });
   }
 
+  /**
+   * Keep BANNER_HEIGHT_VAR in step with the banner's rendered height.
+   *
+   * Observed rather than measured once: the banner reflows when the details
+   * panel opens, when the viewport is resized, and when its buttons stack at
+   * the mobile breakpoint — all of which change how much of the page it eats.
+   */
+  private watchHeight(): void {
+    const banner = this.getElement('banner', '[data-ref="banner"]', false) as HTMLElement | null;
+    if (!banner) return;
+
+    const publish = (): void => {
+      // NOT offsetParent. The banner is position:fixed, and a fixed element's
+      // offsetParent is null whether it is on screen or not — using it as the
+      // visibility test published 0px for a perfectly visible banner and
+      // reserved no space at all. Ask about the styles that actually hide it.
+      const style = getComputedStyle(banner);
+      const hidden = style.display === 'none' || style.visibility === 'hidden';
+      const height = hidden ? 0 : Math.round(banner.getBoundingClientRect().height);
+      document.documentElement.style.setProperty(BANNER_HEIGHT_VAR, `${height}px`);
+    };
+
+    publish();
+    this.heightObserver = new ResizeObserver(publish);
+    this.heightObserver.observe(banner);
+  }
+
+  /** Stop reserving space. Called from both routes off the screen. */
+  private releaseHeight(): void {
+    this.heightObserver?.disconnect();
+    this.heightObserver = null;
+    document.documentElement.style.setProperty(BANNER_HEIGHT_VAR, '0px');
+  }
+
   private hide(): void {
+    // Released up front, not after the slide-out: the space is reserved for
+    // something the visitor has already dismissed, and holding it for another
+    // 300ms makes the page jump a second time once the animation lands.
+    this.releaseHeight();
+
     if (this.hideTimer) {
       clearTimeout(this.hideTimer);
       this.hideTimer = null;
@@ -589,6 +666,7 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
   }
 
   override async destroy(): Promise<void> {
+    this.releaseHeight();
     if (this.hideTimer) {
       clearTimeout(this.hideTimer);
       this.hideTimer = null;

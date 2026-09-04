@@ -639,3 +639,107 @@
     box-sizing: border-box;
   }
 }
+
+/* ============================================
+ * CONSENT BANNER — RESERVED SPACE
+ *
+ * The banner is position:fixed across the bottom, so it contributes nothing to
+ * layout and the page has no idea it is there. On a phone it covers roughly two
+ * fifths of the screen, and everything under it was not merely awkward to reach
+ * but unclickable — elementFromPoint returns the banner, so the taps never
+ * arrive. Measured with the banner up: the TV's power, channel and volume
+ * buttons; the contact form's email, message and send; every link on a case
+ * study; and the map compass cues.
+ *
+ * consent-banner.ts publishes its rendered height into --consent-banner-height
+ * and zeroes it on dismiss, the same way the footer curtain publishes its lift.
+ * Everything it would cover adds that to its own bottom inset, so the reserved
+ * space appears and disappears with the banner rather than being a permanent
+ * hole at the bottom of every page.
+ *
+ * Last in the file so these land after the padding they extend. Each restates
+ * the same token the original used, so there is nothing to keep in sync.
+ * ============================================ */
+
+/* On the tiles themselves, not `main > section` — on desktop the map tiles are
+   children of .site-map, so that selector matched nothing there. These are
+   full-viewport boxes with their content centred, so bottom padding shrinks the
+   content box and lifts the whole block; padding on an inner wrapper only
+   extends it downward past the viewport, which was the first attempt and moved
+   nothing. */
+.about-section,
+.contact-section,
+.projects-section,
+.project-detail-section,
+.portal-login-section,
+.not-found-section {
+  padding-bottom: calc(var(--map-tile-pad-y, 1rem) + var(--consent-banner-height, 0px));
+}
+
+/* Only the ↓ moves; the compass box does NOT.
+   Padding the compass looked equivalent and was not: its rows are percentages
+   of the padding box, so the banner shrank the box and pulled ← → up with it,
+   level with the top of the card — arrows that jump when a cookie notice
+   appears. The card cannot follow them, because it is positioned rather than
+   in the tile's flow, so bottom padding on the tile moves it not at all
+   (measured: 245-422 with the banner and without it).
+
+   So the sideways cues are pinned to the viewport and stay put. While the
+   banner is up they sit behind it, which is the right trade: it is dismissed
+   once, and a nav control that never moves beats one that is always visible
+   and jumps. Only ↓ — the one that lives at the bottom edge and would be
+   swallowed for good — is lifted clear. */
+.map-compass__cue--down {
+  margin-bottom: var(--consent-banner-height, 0px);
+}
+
+/* Case-study body and the contact form both scroll internally; without the
+   extra run-out their last rows have nowhere to scroll to. NOT scoped to
+   --mobile: at 1280x720 the banner still reaches the contact form's Send, and
+   a desktop window shorter than it is tall is the common case on a laptop. */
+.project-detail-section .worksub-content,
+.contact-section .contact-content {
+  padding-bottom: var(--consent-banner-height, 0px);
+}
+
+/* The curtain is pinned to the bottom of the viewport and never scrolls, so
+   its wordmark sits under the banner with nothing to scroll it clear. Lift the
+   whole band rather than padding its inner: the band is bottom-anchored, so
+   padding only made it taller and pushed its own contents further down — the
+   brand went from 582-697 to 582-697 against a banner starting at 564. */
+.footer-curtain {
+  bottom: var(--consent-banner-height, 0px);
+}
+
+@media (--mobile) {
+  /* The TV is the projects tile's whole reason for existing and its controls
+     sit at the bottom of it, so this one needs the room more than most. */
+  .projects-section .projects-content {
+    padding-bottom: var(--consent-banner-height, 0px);
+  }
+}
+
+/* ============================================
+ * COMPASS — THE SIDEWAYS CUES SIT BELOW THE CARD
+ *
+ * The compass is a three-row grid (up / left-right / down) spanning the
+ * viewport, so its ← → land on the vertical centre — which on a phone is
+ * straight through the business card: measured at 398-446 against a card at
+ * 334-511. Arrows crossing the artwork read as part of it.
+ *
+ * 66% rather than a fixed offset because the card is centred and scales with
+ * the viewport, so its bottom edge is proportional too: 63% of the height on a
+ * 375x667, 60.5% on a 390x844, 59.6% on a 412x924. Two thirds clears all three
+ * with room to spare and still leaves the last row for ↓.
+ *
+ * Scoped to the intro tile via :has(), because the card is the only thing the
+ * cues were colliding with — the other tiles want them on the centre line.
+ * ============================================ */
+
+@media (--mobile) {
+  body:has(main[data-active-page="intro"]) .map-compass {
+    /* Stable now that the compass box is the viewport regardless of the
+       banner — see .map-compass__cue--down above. */
+    grid-template-rows: 70% auto 1fr;
+  }
+}
