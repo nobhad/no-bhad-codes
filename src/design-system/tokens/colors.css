@@ -91,6 +91,11 @@
 
   /* Text Colors - Dark on light */
   --color-text-primary: var(--color-gray-900);
+  /* Channel triplet for the same colour. base/reset.css composes it into
+     `scrollbar-color` with an alpha, which rgba() cannot do to a hex token —
+     so the value has to exist separately as R, G, B. Keep it in step with
+     --color-text-primary above (gray-900, #171717). */
+  --text-rgb: 23, 23, 23;
   --color-text-secondary: var(--color-gray-700);
   --color-text-tertiary: var(--color-gray-500);
   --color-text-disabled: var(--color-gray-400);
@@ -187,6 +192,8 @@ html[data-theme="dark"]:not([data-page="admin"]):not([data-page="client"]) {
 
   /* Text Colors */
   --color-text-primary: var(--color-gray-50);
+  /* See the :root note — mirrors --color-text-primary (gray-50, #fafafa). */
+  --text-rgb: 250, 250, 250;
   --color-text-secondary: var(--color-gray-200);
   --color-text-tertiary: var(--color-gray-400);
   --color-text-inverse: var(--color-gray-900);
