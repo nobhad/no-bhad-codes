@@ -2,6 +2,108 @@
 
 ---
 
+## Accessibility sweep, contact form, cookie banner — 2026-09-04
+
+**Status:** DONE — on main, unpushed
+**Priority:** —
+
+Started as "is the accessibility claim on the About page true?" The answer was
+no — `axe-core` was not a dependency and the only matches for "axe" in the repo
+were inside "rel**axe**d" and "m**axRe**quests". It is true now, and enforced.
+
+### The harness
+
+- [x] **`@axe-core/playwright`, 22 surfaces, both themes, two viewports.**
+      `tests/e2e/accessibility.spec.ts`. WCAG 2.1 A + AA tags only — not axe's
+      default set, which also carries `best-practice` opinions no criterion
+      asks for.
+- [x] **CI runs it on every push,** and `build` waits on it, so a contrast
+      regression cannot reach a deploy. Front end only (`PLAYWRIGHT_WEB_SERVER`
+      overrides the webServer command) — these tests read pages and never post.
+- [x] **Waiting helpers in `tests/e2e/support/site.ts`.** Scanning an animating
+      page measures the tween, not the palette: an about scan landed mid-fade
+      and reported `#979797` text, a colour in no stylesheet.
+
+### What it found (all fixed)
+
+- [x] **The accent red failed as text in BOTH themes.** `#dc2626` is 3.66:1 on
+      the page ground and 3.71:1 on near-black. Light takes `#b91c1c`, dark
+      takes `#f87171` (`--color-brand-accent-dark`). `--color-brand-primary`
+      keeps `#dc2626` for the logo and brand fills, which owe only 3:1.
+- [x] **Status pills at 1.92:1** — off-white on the success green, on three of
+      five case studies. Now `--color-text-on-vivid`, a fixed dark ink, because
+      the pill backgrounds do not follow the theme and their ink must not
+      either.
+- [x] **`--color-text-tertiary`** gray-500 -> gray-600 (3.59:1 -> 5.92:1).
+- [x] **The overlay was claiming to be a menu button** — `[data-menu-toggle]`
+      matches it and `navigation.ts` gave it `aria-expanded`, `aria-controls`
+      and `aria-label`, all invalid on a div with no role.
+- [x] **`aria-controls` pointed at nothing** — the fallback wrote the literal
+      string `main-nav` and no element carried that id.
+- [x] **The wordmark was 1.56:1 with the menu open,** under the overlay.
+      Fixed above `--tablet` only; below it the menu covers the overlay.
+- [x] **The login dropdown flashed on every page load** — its markup ships in
+      the shell but the stylesheet that hides it arrives with the module
+      bundle. Visible at opacity 1 for ~250ms; now hidden from first paint.
+- [x] **Three scroll containers with nothing focusable in them** — the about
+      tile, nine design-system token tables, and the intake transcript.
+
+### Cookie banner
+
+- [x] **It was sitting on the page's controls.** `position: fixed`, so the page
+      had no idea it was there. On a 390x844 phone it covered 428px — 51% — and
+      everything under it was untappable, because the banner is what the tap
+      lands on: the TV's power/channel/volume, the contact form's email,
+      message and send, every link on a case study.
+- [x] **`--consent-banner-height`**, published by `consent-banner.ts` and
+      zeroed on dismiss, the way `footer-curtain.ts` publishes its lift.
+      Everything it would cover adds it to its own bottom inset.
+- [x] **Buttons in a row rather than stacked** — 428px down to 365px, and
+      Decline / Accept All read as the pair of equals they are.
+- [x] `touch-action: none` so a drag over it cannot scroll the page behind it.
+
+### Contact form and Arrow
+
+- [x] **Invalid fields now look invalid.** `.error` was set by JS all along and
+      styled nowhere, so Arrow named the problem while every box looked the
+      same — while her own copy promises "the red fields say WHERE".
+- [x] **Arrow watches from the edge before she speaks.** Up on the first
+      keystroke with her bubble closed, eyes over the bottom edge; to the
+      shoulders once a second field has text. `summon()` is new on the vendored
+      component — the third state its own `render()` already described.
+- [x] **Her note auto-closes without taking her with it.** The timer used to
+      call `closeEntry`, which clears `forced`, so on mobile she delivered a
+      line and vanished.
+- [x] **A blank form is not "almost there".**
+- [x] **Buttons:** even border (the 6px bottom slab is gone), all caps,
+      positive tracking, and the contact button reads SEND.
+
+### Compass
+
+- [x] **Idle fade.** The cues teach the map gesture and then get out of the way
+      after four seconds; any input brings them back, and `:focus-within` pins
+      them for the keyboard.
+- [x] **Sideways cues sit below the card on mobile,** and do not move when the
+      banner appears — measured 0px at 375x667, 390x844 and 412x924.
+- [x] Per-direction visibility was already built (`data-can`), contrary to what
+      I first said.
+
+### Not done
+
+- [ ] **The banner still overlaps content on mobile at rest.** Everything is
+      reachable by scrolling, and that is where it was left deliberately —
+      "don't worry about the scrolling behind the banner". The remaining
+      question is whether the copy should be shorter on a phone.
+- [ ] **Two lazy images in `projects.ts`** (lines ~2828 and ~2912, case-study
+      screenshots) still have no width/height. They are generated from
+      `portfolio.json`, which does not carry dimensions, so fixing it properly
+      means measuring the files at build time and putting them in the data.
+- [ ] **`--consent-banner-height` shows up in the css-bundle-contract
+      snapshot** as a var living on its fallback. That is correct — it is set
+      at runtime by JS — but the test cannot tell the two cases apart.
+
+---
+
 ## TV texture, business card, intake — 2026-09-01
 
 **Status:** DONE — on main, unpushed
