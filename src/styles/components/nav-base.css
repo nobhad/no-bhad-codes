@@ -153,6 +153,27 @@ li {
   box-shadow: none;
 }
 
+/* Menu open on tablet and up: the menu is a drawer, so the overlay —
+   rgba(25, 25, 25, 0.7) plus an 8px blur, stacked ABOVE the header, since
+   z-index-nav-overlay sits between the two — is what ends up behind the
+   wordmark. That put #333 on an effective #505050: 1.56:1, a smudge rather
+   than a link. The rest of the header is covered by the drawer; the logo is
+   the one piece left out in the dark, so it takes the inverse text colour for
+   as long as the overlay is there.
+
+   Gated at --tablet deliberately. Below 768px the menu is --menu-width-mobile
+   (100vw), so it covers the overlay entirely and the logo sits on the light
+   panel instead — inverting there paints it #e0e0e0 on #efedec, 1.13:1, the
+   same bug mirrored. :has() on the body because the header and the nav are
+   siblings with no shared class to hang this off. */
+@media (--tablet) {
+  body:has(.nav[data-nav="open"]) .nav-logo-row,
+  body:has(.nav[data-nav="open"]) .nav-logo-row:visited,
+  body:has(.nav[data-nav="open"]) .nav-logo-row:focus {
+    color: var(--color-text-inverse);
+  }
+}
+
 /* Focus indicator inherited from global :focus-visible rule in reset.css */
 
 .nav-row__right {

@@ -139,7 +139,13 @@ function renderFile(p) {
     '<p class="count"><span>' + p.tokens.length + '</span> tokens · <code>' + esc(p.file) + '</code></p></header>' +
     groups.map(g =>
       '<div class="group"><h3>' + esc(g.name) + '</h3>' +
-      '<div class="tw"><table>' + g.items.map(renderToken).join('') + '</table></div></div>'
+      // tabindex/role/label, not decoration: .tw is overflow-x:auto, and a
+      // scrollable box that nothing can focus is unreachable by keyboard —
+      // you can see the clipped columns but never scroll to them (WCAG 2.1.1).
+      // Nine of these tables overflow at desktop width. The group heading is
+      // the natural accessible name for the region it wraps.
+      '<div class="tw" tabindex="0" role="group" aria-label="' + esc(g.name) + '"><table>' +
+        g.items.map(renderToken).join('') + '</table></div></div>'
     ).join('') + '</section>';
 }
 
@@ -218,6 +224,7 @@ h1{font-family:var(--ds-serif);font-weight:700;font-size:clamp(2.6rem,1.8rem+3vw
 .group{margin-top:32px}
 .group h3{font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ds-muted);margin:0 0 10px;font-weight:500}
 .tw{overflow-x:auto;border:1px solid var(--ds-line);border-radius:2px;background:var(--ds-surface)}
+.tw:focus-visible{outline:2px solid var(--ds-crimson);outline-offset:2px}
 table{width:100%;border-collapse:collapse;font-size:13px}
 tr{border-bottom:1px solid var(--ds-line-soft)}
 tr:last-child{border-bottom:0}

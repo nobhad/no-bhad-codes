@@ -39,6 +39,18 @@
       href="https://fonts.googleapis.com/css2?family=Acme&family=Cormorant+Garamond:wght@400;600;700&family=Inconsolata:wght@400;500;700&display=swap"
     />
     <script type="module" src="/src/static-page.ts"></script>
+    <style>
+      /* The dropdown's markup ships in the page shell, but the stylesheet that
+         hides it arrives with the module bundle — so for the first ~250ms of
+         every load it renders as a plain visible block and the client login
+         form flashes on screen, then fades out as nav-portal.css lands. This
+         holds it closed from first paint. `:not(.open)` so nav-portal.css's
+         own `.open` rule, which comes later in the cascade, still wins. */
+      .portal-dropdown:not(.open) {
+        opacity: 0;
+        visibility: hidden;
+      }
+    </style>
   </head>
   <body data-page="design-system">
     <%- include('templates/partials/shell/header.ejs') %> <%-

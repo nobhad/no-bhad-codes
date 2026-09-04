@@ -158,6 +158,17 @@
         display: none !important;
       }
 
+      /* The dropdown's markup ships in the page shell, but the stylesheet that
+         hides it arrives with the module bundle — so for the first ~250ms of
+         every load it renders as a plain visible block and the client login
+         form flashes on screen, then fades out as nav-portal.css lands. This
+         holds it closed from first paint. `:not(.open)` so nav-portal.css's
+         own `.open` rule, which comes later in the cascade, still wins. */
+      .portal-dropdown:not(.open) {
+        opacity: 0;
+        visibility: hidden;
+      }
+
       /* Map-tile initial (non-intro): hide intro morph overlay */
       html[data-initial-page='about']:not(.js-ready) .intro-morph-overlay,
       html[data-initial-page='contact']:not(.js-ready) .intro-morph-overlay,
@@ -404,7 +415,19 @@
         </section>
 
         <!-- ABOUT SECTION (order: 3) -->
-        <section id="about" class="about-section page-hidden" data-page="about" data-map-tile="up">
+        <!-- tabindex="0" because mobile/layout.css gives this tile its own
+             overflow-y and the copy inside it holds nothing focusable — so
+             without it the clipped paragraphs are unreachable by keyboard
+             (WCAG 2.1.1). aria-labelledby so the stop announces as "About"
+             rather than as an unnamed region. -->
+        <section
+          id="about"
+          class="about-section page-hidden"
+          data-page="about"
+          data-map-tile="up"
+          tabindex="0"
+          aria-labelledby="about-heading"
+        >
           <div class="about-content">
             <div class="about-layout">
               <!-- Left column: Image -->
@@ -419,7 +442,7 @@
               </div>
               <!-- Right column: Text -->
               <div class="about-text-column">
-                <h2 class="section-heading">ABOUT</h2>
+                <h2 class="section-heading" id="about-heading">ABOUT</h2>
                 <hr class="section-divider about-divider" />
                 <p>
                   Hi, I'm Noelle Bhaduri, a creative developer based in the Boston, MA area. Coding
@@ -675,11 +698,11 @@
                   </div>
 
                   <div class="submit-row">
-                    <!-- No aria-label: the visible "Send Message" span names the
-                       button, so the accessible name matches what a speech-input
-                       user would say (WCAG 2.5.3). The icon is aria-hidden. -->
+                    <!-- No aria-label: the visible "Send" span names the button,
+                       so the accessible name matches what a speech-input user
+                       would say (WCAG 2.5.3). The icon is aria-hidden. -->
                     <button class="submit-button" type="submit">
-                      <span>Send Message</span>
+                      <span>Send</span>
                       <svg
                         class="btn-icon"
                         viewBox="0 0 24 24"

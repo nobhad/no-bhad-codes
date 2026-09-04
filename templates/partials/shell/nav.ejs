@@ -1,5 +1,13 @@
-<nav data-nav="closed" class="nav">
-      <div data-menu-toggle="" class="overlay"></div>
+<!-- id is what the menu button's aria-controls points at. Without it
+     navigation.ts fell back to the literal string "main-nav", which
+     matched no element on the page — an invalid reference, not a
+     relationship. -->
+<nav id="main-nav" data-nav="closed" class="nav">
+      <!-- A backdrop that happens to close the menu, not a control: it is
+           a div with no role, it takes no focus, and Escape already closes
+           the menu. aria-hidden keeps navigation.ts from labelling it as a
+           second menu button. -->
+      <div data-menu-toggle="" class="overlay" aria-hidden="true"></div>
       <div class="menu">
         <div class="menu-bg">
           <div class="bg-panel first"></div>

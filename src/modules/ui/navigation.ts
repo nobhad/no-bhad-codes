@@ -43,6 +43,18 @@ const CLOSE_SETTLE_MS = 400;
 
 const MENU_TOGGLE_LABELS = { closed: 'Menu', open: 'Close' } as const;
 
+/**
+ * Is this [data-menu-toggle] element actually a control?
+ *
+ * The selector matches two very different things: the header's <button>, and
+ * .overlay, which is a bare <div> backdrop that closes the menu when clicked.
+ * Button ARIA — aria-expanded, aria-controls, aria-label — is only valid on
+ * something with a button role, so it belongs on the first and not the second.
+ */
+function isMenuControl(el: HTMLElement): boolean {
+  return el.tagName === 'BUTTON' || el.getAttribute('role') === 'button';
+}
+
 interface NavigationItem {
   id: string;
   text?: string;
@@ -186,6 +198,14 @@ export class NavigationModule extends BaseModule {
       this.menuToggles.forEach((toggle) => {
         const toggleEl = toggle as HTMLElement;
 
+        // Only real buttons get the button ARIA. [data-menu-toggle] also
+        // matches .overlay — a bare div backdrop — and aria-expanded,
+        // aria-controls and aria-label are all invalid on a div with no role,
+        // so labelling it announced a second, phantom menu button and failed
+        // three axe rules at once. The overlay still closes the menu on click;
+        // it just no longer claims to be a control.
+        if (!isMenuControl(toggleEl)) {return;}
+
         // Add aria-label if not present
         if (!toggleEl.hasAttribute('aria-label')) {
           toggleEl.setAttribute('aria-label', 'Toggle navigation menu');
@@ -196,11 +216,19 @@ export class NavigationModule extends BaseModule {
           toggleEl.setAttribute('aria-expanded', 'false');
         }
 
-        // Add aria-controls pointing to the nav element
-        if (this.nav && !toggleEl.hasAttribute('aria-controls')) {
-          toggleEl.setAttribute('aria-controls', this.nav.id || 'main-nav');
+        // Point aria-controls at the nav, and only if the nav can actually be
+        // referenced. The old fallback wrote the literal 'main-nav' whether or
+        // not anything carried that id, which is a dangling reference — worse
+        // than no attribute, because assistive tech announces a relationship
+        // that goes nowhere.
+        if (this.nav?.id && !toggleEl.hasAttribute('aria-controls')) {
+          toggleEl.setAttribute('aria-controls', this.nav.id);
         }
+      });
 
+      // Click handling is separate from the ARIA above, because the overlay
+      // needs the click and not the ARIA.
+      this.menuToggles.forEach((toggle) => {
         this.addEventListener(toggle as Element, 'click', () => {
           this.toggleMenu();
         });
@@ -369,6 +397,9 @@ export class NavigationModule extends BaseModule {
     // the accessible name in step with the visible "Menu" / "Close" label.
     if (this.menuToggles) {
       this.menuToggles.forEach((toggle) => {
+        // Same reason as in setupEventListeners: the overlay is in this list
+        // for its click handler, not because it is a button.
+        if (!isMenuControl(toggle as HTMLElement)) {return;}
         toggle.setAttribute('aria-expanded', String(newState));
         toggle.setAttribute(
           'aria-label',
