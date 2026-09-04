@@ -70,6 +70,27 @@ async function expectNoViolations(page: Page, builder = scan(page)) {
 }
 
 /**
+ * Answer the cookie banner before driving the page.
+ *
+ * It is fixed to the bottom and overlaps the contact form's submit button, so
+ * Playwright's actionability check reports "<div id=\"consent-banner-wrapper\">
+ * intercepts pointer events" and waits out the whole timeout. A visitor answers
+ * it once and it goes; a test that never answers it can never reach the button
+ * underneath, which is the same thing a real visitor would find if they ignored
+ * it — worth knowing, and not what these tests are measuring.
+ *
+ * Only the interaction tests call this. The plain page scans deliberately leave
+ * the banner up, because it ships on every page and has to pass on its own.
+ */
+async function dismissConsent(page: Page): Promise<void> {
+  const decline = page.locator('[data-ref="declineBtn"]');
+  if (await decline.isVisible().catch(() => false)) {
+    await decline.click();
+    await expect(page.locator('#consent-banner-wrapper')).toBeHidden();
+  }
+}
+
+/**
  * Firefox and WebKit are skipped on purpose.
  *
  * axe-core analyses the DOM and the computed styles, so its findings barely
@@ -98,8 +119,72 @@ test.describe('Accessibility — main site', () => {
     });
   }
 
-  test('project detail has no WCAG 2.1 AA violations', async ({ page }) => {
-    await gotoPage(page, '#/projects/hedgewitch-horticulture', 'project-detail');
+  /**
+   * Every case study, not a representative one. They share a template but not
+   * their content, and content is where alt text, heading order and link text
+   * live — the three things a template cannot get right on your behalf.
+   * Slugs from public/data/portfolio.json.
+   */
+  const PROJECTS = [
+    'nobhad-codes',
+    'the-backend',
+    'hedgewitch-horticulture',
+    'recycle-content',
+    'linktrees'
+  ];
+
+  for (const slug of PROJECTS) {
+    test(`project detail (${slug}) has no WCAG 2.1 AA violations`, async ({ page }) => {
+      await gotoPage(page, `#/projects/${slug}`, 'project-detail');
+      await expectNoViolations(page);
+    });
+  }
+
+  test('the contact form in its error state has no WCAG 2.1 AA violations', async ({ page }) => {
+    await gotoPage(page, '#/contact', 'contact');
+
+    // Submitting nothing is the shortest route to every field being invalid at
+    // once: three red boxes, three aria-invalid attributes, and Arrow holding a
+    // live region. None of that exists on a clean form, so a scan of the clean
+    // form never sees it.
+    await dismissConsent(page);
+    await page.locator('.submit-button').click();
+    await expect(page.locator('.contact-form .input-item.error')).toHaveCount(3);
+    await settled(page, '.arrow-callout--contact');
+
+    await expectNoViolations(page);
+  });
+
+  test('the intake terminal has no WCAG 2.1 AA violations', async ({ page }) => {
+    await gotoPage(page, '#/contact', 'contact');
+
+    await dismissConsent(page);
+    await page.locator('#open-intake-link').click();
+    await expect(page.locator('#intake-modal')).toHaveClass(/open/);
+    // It lazy-imports its module on first open, so the boot lines arrive after
+    // the modal does.
+    await expect(page.locator('#intake-modal .boot-line').first()).toBeVisible();
+    await settled(page, '#intake-modal');
+
+    await expectNoViolations(page);
+  });
+
+  test('the portal login dropdown has no WCAG 2.1 AA violations', async ({ page }) => {
+    // Below --mobile the header's portal button is hidden (nav-responsive.css
+    // parks it at opacity 0 / visibility hidden and lets JS decide), so there
+    // is no dropdown to open there — the portal lives in the menu instead.
+    test.skip(
+      (page.viewportSize()?.width ?? 0) < 768,
+      'the header portal button is not rendered below --mobile'
+    );
+
+    await gotoPage(page, '#/', 'intro');
+    await dismissConsent(page);
+
+    await page.locator('#portal-trigger').click();
+    await expect(page.locator('.portal-dropdown')).toHaveClass(/open/);
+    await settled(page, '.portal-dropdown');
+
     await expectNoViolations(page);
   });
 
@@ -150,7 +235,11 @@ test.describe('Accessibility — dark theme', () => {
     { name: 'home', hash: '#/', pageId: 'intro' },
     { name: 'about', hash: '#/about', pageId: 'about' },
     { name: 'contact', hash: '#/contact', pageId: 'contact' },
-    { name: 'projects', hash: '#/projects', pageId: 'projects' }
+    { name: 'projects', hash: '#/projects', pageId: 'projects' },
+    // Project detail earns a dark scan of its own: its status pills are filled
+    // with the status colours, which do NOT flip between themes, so anything
+    // on them that follows the theme inverts out from under itself.
+    { name: 'project detail', hash: '#/projects/the-backend', pageId: 'project-detail' }
   ];
 
   for (const surface of DARK_SURFACES) {
