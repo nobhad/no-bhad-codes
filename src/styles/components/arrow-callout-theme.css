@@ -227,10 +227,26 @@
   visibility: hidden;
 }
 
+/* Second field in: up to the shoulders.
+   28% put the waterline at 72% of the canvas — her eye and a little muzzle.
+   14% puts it at 86%, which is head, neck and the top of her chest. Same
+   gating as the rule above, plus the attribute contact-form.ts stamps from how
+   many fields have been filled, so it simply outranks it. */
+.arrow-callout--contact[data-arrow-peek="high"].is-active:not(.is-blurb-open):not(
+    .is-leaving
+  ):has(.arrow-callout__text:empty) {
+  transform: translateY(
+    calc(14% + var(--callout-gap-y) + var(--footer-curtain-lift, 0px))
+  );
+}
+
 @media (prefers-reduced-motion: reduce) {
   .arrow-callout--contact.is-active:not(.is-blurb-open):not(.is-leaving):has(
       .arrow-callout__text:empty
-    ) {
+    ),
+  .arrow-callout--contact[data-arrow-peek="high"].is-active:not(.is-blurb-open):not(
+      .is-leaving
+    ):has(.arrow-callout__text:empty) {
     transition: none;
   }
 }

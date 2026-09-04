@@ -33,7 +33,9 @@ export interface ArrowCalloutController {
   destroy(): void;
   /**
    * Open a manual callout, optionally replacing its text for this appearance.
-   * `autoCloseMs` dismisses it again after N ms (0 / omitted = stays put).
+   * `autoCloseMs` closes the BLURB again after N ms, leaving the mascot on
+   * screen — the same end state as the close button (0 / omitted = stays put).
+   * Use close() to take the whole callout away.
    */
   open(target?: ArrowCalloutTarget, text?: string, opts?: { autoCloseMs?: number }): void;
   /**

@@ -357,8 +357,18 @@ export function initArrowCallouts(options = {}) {
       entry.dismissed = false;
       render();
 
+      // The timer closes the NOTE, not the messenger — the same thing the X
+      // does. It used to call closeEntry, which clears `forced` and takes her
+      // off the screen entirely, so on mobile she delivered a line and then
+      // vanished: the visitor looked up from the field she was talking about
+      // and there was nobody there. Leaving her standing means the note can be
+      // called back with a click, and she is where you last saw her.
       if (opts.autoCloseMs > 0) {
-        entry.autoCloseTimer = setTimeout(() => closeEntry(entry, false), opts.autoCloseMs);
+        entry.autoCloseTimer = setTimeout(() => {
+          entry.autoCloseTimer = null;
+          entry.dismissed = true;
+          render();
+        }, opts.autoCloseMs);
       }
     },
 

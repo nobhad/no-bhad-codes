@@ -415,10 +415,17 @@ test.describe('Contact form — Arrow’s placement', () => {
     expect(her!.x + her!.width / 2).toBeGreaterThan(content!.x + content!.width);
   });
 
-  test('mobile: she dips back down on her own', async ({ page }) => {
-    test.skip(!isMobile(page), 'Mobile-only: she is persistent on desktop by design.');
+  test('mobile: her note closes on its own, but she stays', async ({ page }) => {
+    test.skip(!isMobile(page), 'Mobile-only: her note is persistent on desktop.');
 
-    await expect(arrow(page)).toBeHidden({ timeout: MOBILE_AUTO_HIDE_MS + 5000 });
+    // The timer takes the NOTE away, not her. She delivered a line about a
+    // field; vanishing afterwards leaves the visitor looking up at nobody, and
+    // there is then no way to ask for the note back.
+    await expect(arrow(page).locator('.arrow-callout__bubble')).toBeHidden({
+      timeout: MOBILE_AUTO_HIDE_MS + 5000
+    });
+    await expect(arrow(page)).toHaveClass(/is-active/);
+    await expect(arrow(page).locator('[data-callout-mascot]')).toBeVisible();
   });
 
   test('desktop: she waits to be dismissed rather than timing out', async ({ page }) => {

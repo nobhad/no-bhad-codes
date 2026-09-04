@@ -224,12 +224,32 @@ export class ContactFormModule extends BaseModule {
     // has auto-dipped on mobile, and the latch is the bubble itself rather
     // than a boolean: while she is mid-sentence, summon() would close the
     // blurb she is holding, so leave her alone until she has finished.
+    const allFields = this.form.querySelectorAll('input:not([type="submit"]), select, textarea');
+
+    /**
+     * How far up she comes, as a count of fields with something in them.
+     *
+     * One is a visitor who has just started, and she only needs her eyes over
+     * the edge for that. By the second she is clearly being written to, so she
+     * rises to the shoulders — a small acknowledgement that the form is going
+     * somewhere, without her taking the screen before there is anything to say.
+     * The honeypot is excluded: it is hidden, and anything filling it is not a
+     * person.
+     */
+    const filledFieldCount = (): number =>
+      Array.from(allFields).filter((field) => {
+        const el = field as HTMLInputElement | HTMLTextAreaElement;
+        return el.type !== 'hidden' && el.value.trim().length > 0;
+      }).length;
+
     const keepArrowStandingBy = (): void => {
+      if (this.arrowEl) {
+        this.arrowEl.dataset.arrowPeek = filledFieldCount() >= 2 ? 'high' : 'low';
+      }
       if (this.arrow?.isOpen('contact-feedback')) {return;}
       this.arrowSummon();
     };
 
-    const allFields = this.form.querySelectorAll('input:not([type="submit"]), select, textarea');
     allFields.forEach((field) => {
       field.addEventListener('input', keepArrowStandingBy);
       field.addEventListener('input', validateForm);
