@@ -272,7 +272,7 @@ export function PortalProposalDetail({
 
       {/* Accept/Decline actions */}
       {canAccept && !showConfirm && (
-        <div className="portal-detail-actions mt-lg">
+        <div className="portal-detail-actions">
           <button className="btn btn-primary" onClick={() => setShowConfirm(true)}>
             <Check className="icon-xs" />
             Accept Proposal
@@ -282,7 +282,7 @@ export function PortalProposalDetail({
 
       {/* Confirmation */}
       {showConfirm && (
-        <div className="portal-card portal-card--highlight mt-lg">
+        <div className="portal-card portal-card--highlight">
           <div className="portal-card-header">
             <h3 className="text-primary">Confirm Acceptance</h3>
           </div>
@@ -304,7 +304,7 @@ export function PortalProposalDetail({
 
       {/* Already accepted message */}
       {proposal.status === 'accepted' && (
-        <div className="portal-card mt-lg" style={{ borderColor: 'var(--status-completed)' }}>
+        <div className="portal-card" style={{ borderColor: 'var(--status-completed)' }}>
           <p className="text-primary">
             <Check className="icon-xs text-status-completed" />{' '}
             You accepted this proposal{proposal.reviewedAt ? ` on ${formatCardDate(proposal.reviewedAt)}` : ''}.

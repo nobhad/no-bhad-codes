@@ -120,7 +120,7 @@ export function RateLimitingTab({
 
           {stats.topOffenders.length > 0 && (
             <>
-              <div className="data-table-header mt-lg"><h3><span className="title-full">Top Offenders</span></h3></div>
+              <div className="data-table-header"><h3><span className="title-full">Top Offenders</span></h3></div>
               <table className="data-table">
                 <thead>
                   <tr>
