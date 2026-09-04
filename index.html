@@ -432,10 +432,17 @@
             <div class="about-layout">
               <!-- Left column: Image -->
               <div class="about-image-column">
+                <!-- width/height are the GIF's intrinsic 200x250. They are not
+                     what it renders at — about.css sets width:300px, height:auto
+                     — but the ratio they establish is what reserves the box
+                     before the file arrives. Without them a lazy image starts
+                     at 0x0 and shoves the About copy down as it loads. -->
                 <img
                   src="/images/photobooth_loop.gif"
-                  alt="Coyote the dog"
+                  alt="Noelle and her dog, Arrow"
                   class="about-photo"
+                  width="200"
+                  height="250"
                   loading="lazy"
                   decoding="async"
                 />
