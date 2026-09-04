@@ -515,6 +515,13 @@ body[data-page="client-intake"] .terminal-window {
   min-height: 0; /* Allow flex to shrink — input area must stay visible */
 }
 
+/* The log is focusable (see terminal-intake-ui.ts) so it can be scrolled from
+   the keyboard — which means it also has to show that it has focus. */
+.terminal-chat:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
 .terminal-chat > * {
   width: 100%;
 }

@@ -66,7 +66,13 @@ export function renderTerminalHTML(isModal: boolean): string {
           </div>
           <span class="progress-percent" id="progressPercent" aria-live="polite">0%</span>
         </div>
-        <div class="terminal-chat" id="terminalChat" role="log" aria-live="polite" aria-label="Chat conversation">
+        <!-- tabindex="0": the transcript scrolls internally and its contents
+             are text, not controls, so without it the earlier questions and
+             answers are unreachable by keyboard — you can see the log is
+             clipped and never scroll back through it (WCAG 2.1.1). role="log"
+             already names it, so it announces as the conversation rather than
+             as an unlabelled scroll box. -->
+        <div class="terminal-chat" id="terminalChat" role="log" aria-live="polite" aria-label="Chat conversation" tabindex="0">
           <div class="terminal-login-info" aria-hidden="true">${loginTime}<br><span class="terminal-prompt-line">${BRANDING.TERMINAL.PROMPT} project-intake % </span><span class="terminal-typing-text" id="terminalTypingText">./project_intake.sh</span><span class="terminal-cursor" id="terminalCursor">█</span></div>
         </div>
         <div class="terminal-input-area" role="form" aria-label="Project intake form">
