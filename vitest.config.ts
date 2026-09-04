@@ -126,7 +126,16 @@ export default defineConfig({
     },
     // Fail tests if coverage thresholds are not met
     testTimeout: 10000,
-    hookTimeout: 10000,
+    // Hooks get three times what a test gets, because they do a different kind
+    // of work. Every integration file calls setupTestDb() from beforeEach, and
+    // that builds a database and runs the migrations — on a cold CI runner it
+    // has come in either side of 10s. When it loses, the failure is
+    // spectacularly misleading: the hook times out, dbHandle is never assigned,
+    // and all nine afterEach blocks then throw "Cannot read properties of
+    // undefined (reading 'cleanup')", so one slow hook reported 20 failures
+    // across 9 files and none of the messages named the real cause.
+    // testTimeout stays at 10s: a test that hangs should still say so quickly.
+    hookTimeout: 30000,
     teardownTimeout: 5000,
     silent: false,
     watch: false,
