@@ -63,7 +63,9 @@
      be absolutely positioned or they will stack on top of each other.
      Horizontal padding matches the header's .container so content
      aligns with the logo / menu button on every screen size. */
-  main > section {
+  /* Scoped to the virtual-pages container, per the comment above: this is
+     the spatial map, not the standalone document pages (design-system, 404). */
+  main[data-virtual-pages] > section {
     position: absolute;
     top: 0;
     left: 0;
