@@ -128,10 +128,109 @@ only one that can move things on desktop.
 
 - [ ] **Verify the safe-area fix on real hardware.** Cannot be reproduced in any
       desktop browser. Check a map tile and the intro morph on an iPhone.
-- [ ] **Three rules that were inert and now are not.** `.mt-lg` gains 32px at
-      four portal call sites (`--space-4`; use `--space-3` if "lg" should be
-      24px), `.portal-button:focus-visible` gains the faint red tint its WCAG
-      comment describes, and the mobile scrollbar track picks up the body colour.
+- [ ] **Three rules that were inert and now are not.** Checked in Chrome
+      (headed Playwright, dev server) on 2026-09-02. Two are settled; one is
+      still a design call.
+
+      - `.portal-button:focus-visible` — **verified correct.** Reached by real
+        keyboard Tab (programmatic `.focus()` does not match `:focus-visible`),
+        measured after a 600ms settle because `.portal-button` transitions
+        `background-color` over 0.2s and sampling early reads the tween, not the
+        end state — 0.004 alpha mid-flight instead of 0.1. Settled it is
+        `background-color: rgba(220, 38, 38, 0.1)` and `color: rgb(220, 38, 38)`
+        in both themes. Worth noting the rule also sets `outline: none` and
+        `box-shadow: none`, so the colour change IS the entire focus indicator —
+        it clears WCAG 2.4.7 but nothing more.
+      - Mobile scrollbar track — **the question dissolved: that rule is in a
+        dead stylesheet, and the live scrollbar was broken for a different
+        reason.** Two corrections to earlier notes in this file.
+
+        First, the mobile override lives at `styles/main.css:190`, and
+        `main.css` ships to nobody. It is imported only by `src/main.ts`, which
+        is not a Vite `rollupOptions.input`, is referenced by no HTML, and is
+        imported by no module — the only mentions left are its own file header,
+        two hardcoded example strings in `services/bundle-analyzer.ts`, and a
+        stale `templates/data.json` that nothing reads. Resolving the `@import`
+        graph of all three real bundles confirms `::-webkit-scrollbar-track` is
+        defined for the site in `base/site-globals.css` and for the portal in
+        `portal-layout.css` / `portal-tabs.css` / `portal-dropdown.css` — never
+        from `main.css`. So neither of the "two options" was ever rendering.
+
+        Second, and the reason nobody noticed: **on modern Chrome none of the
+        `::-webkit-scrollbar-*` rules render either.** `base/reset.css:38` sets
+        the standards property `scrollbar-color` on `html`, it inherits to every
+        scroller, and when `scrollbar-color` is not `auto` Chrome ignores the
+        `::-webkit-scrollbar` pseudo-elements entirely. Measured in Chrome 152 at
+        393px: `.about-section` reports `offsetWidth - clientWidth == 0`, i.e. no
+        classic 8px gutter at all, so `::-webkit-scrollbar { width: 8px }` is
+        not taking effect. The webkit block is worth keeping as a fallback for
+        older WebKit, but it should be understood as a fallback, and it should
+        read from the same tokens so the two systems cannot drift.
+
+      - [x] **The live scrollbar was invisible in dark mode — fixed.** That
+        inherited `scrollbar-color` is
+        `rgba(var(--text-rgb, 25, 25, 25), 0.7) transparent`, and `--text-rgb`
+        occurred **exactly once in the whole repository: at that use site.** It
+        was never defined, so the declaration silently fell back to a hardcoded
+        near-black thumb in BOTH themes — the "Theme-aware scrollbar" comment
+        above it was simply false. A fallback is why the earlier "every custom
+        property now resolves" sweep missed it: an undefined property with a
+        fallback does not drop the declaration, it just quietly uses the wrong
+        value.
+
+        Composited against the real page colour, thumb vs page:
+
+        | theme | before | after |
+        | --- | --- | --- |
+        | light (`#e0e0e0`) | 5.65:1 | 5.83:1 |
+        | dark mobile (`#404040`) | **1.48:1** | **5.82:1** |
+
+        Dark mode's scrollbar was effectively invisible. Fixed by defining
+        `--text-rgb` alongside `--color-text-primary` in both theme scopes in
+        `design-system/tokens/colors.css` (light `23, 23, 23` = gray-900; dark
+        `250, 250, 250` = gray-50), so it tracks the text colour it is supposed
+        to mirror. Verified in Chrome 152: `scrollbar-color` now computes to
+        `rgba(23, 23, 23, 0.7)` in light and `rgba(250, 250, 250, 0.7)` in dark.
+        The design-system token snapshot test caught the two new tokens, as
+        designed; snapshot updated deliberately. Full suite green — 112 files,
+        4419 passed, 1 skipped.
+
+      - `.mt-lg` — **the audit was wrong about this one: it never went live,
+        because it is dead at all four call sites.** Resolved 2026-09-02 by
+        walking the `@import` graph of each bundle. `.mt-lg` is defined only in
+        `base/utilities.css`, and `base/utilities.css` is reachable only from
+        `bundles/site.css` — the public site. All four call sites
+        (`PortalProposalDetail.tsx` x3, `RateLimitingTab.tsx` x1) are portal and
+        admin React components, which load `bundles/client.css` /
+        `bundles/admin.css`; neither bundle imports `base/utilities.css` at any
+        depth. `portal-layout.css` has no `.mt-lg`, and Tailwind (which IS loaded
+        there, via `react/portal-entry.tsx` and `admin.ts`) has no such class —
+        its spacing scale is numeric. So those four elements have always rendered
+        0px, and fixing the custom properties changed nothing for anyone.
+
+        **Renaming it to `.mt-4` would have been a bug.** `.mt-4` already exists
+        in `portal/shared/portal-layout.css` — the bundle these call sites
+        actually load — as `--space-2` = **16px**. The two files use
+        incompatible conventions: `base/utilities.css` is 8px-per-step
+        (`.mt-3` -> `--space-3`, 24px), `portal-layout.css` is Tailwind-style
+        4px-per-step (`.mt-4` -> `--space-2`, 16px; `.mt-6` -> `--space-3`, 24px).
+        Renaming would have moved those four spots from 0px to 16px and cemented
+        a class name meaning two different things in two bundles.
+
+        **Done:** deleted the dead `.mt-lg` rule from `base/utilities.css` and
+        stripped the no-op class from all four `className` strings. Rendering is
+        byte-identical; typecheck and lint clean. If those four spots actually
+        want separation, that is a new decision — the portal scale tops out at
+        `.mt-6` (24px), so 32px would need a real `.mt-8` added to
+        `portal-layout.css` rather than borrowed from the site's scale.
+
+      - **Latent hazard found on the way.** `.mt-1`, `.mt-2`, `.mt-3` and `.mb-4`
+        are each defined in BOTH `base/utilities.css` and `portal-layout.css`
+        with DIFFERENT values (8px-step vs 4px-step). They do not collide today
+        only because the two bundles are disjoint — `site.css` has utilities and
+        not portal-layout, the portal bundles the reverse. Anything that ever
+        pulls both into one page silently changes every one of those margins.
+        Worth a naming convention before that happens.
 - [ ] **Login form min-height is a design decision.**
       `pages/client-portal-section.css` asked for `min-height:
       var(--portal-form-height)` so the section would not resize when switching
@@ -166,22 +265,185 @@ only one that can move things on desktop.
       intro JS, so it races. Direct-loading `#/no-such-page` at 393/600/760/1280
       gives a 0-pixel diff.
 
-- [ ] **The 13 `!important`s in `mobile/layout.css` are still unexamined.** The
-      layer order was not what was forcing them — mobile has always been in
-      `layer(responsive)`, above pages and components. They are presumably
-      fighting the unlayered escape hatches or specificity. Worth a pass.
+- [x] **The 13 `!important`s in `mobile/layout.css` — examined; 3 of 13 do
+      work.** Measured 2026-09-02 by stripping every `!important` from the
+      `@media (--small-mobile)` block (lines 409-540), reloading at 393x852 and
+      diffing computed styles against the unmodified baseline. Exactly three
+      properties moved:
 
-- [ ] **`.header` has two position models.** `base/layout.css` sets
-      `z-index: var(--z-index-fixed, 300)`; `components/nav-base.css` sets
-      `var(--z-index-nav-header)` = 130 and wins, so the comment claiming the
-      standard fixed layer is wrong and anything in 130-300 covers the header.
-      `nav-responsive.css` also sets `position: static` under `@media (--mobile)`,
-      against the `translateY(-100%)` scroll-hide in `base/layout.css` which
-      assumes the header floats. Below 480px `main` is `position: fixed` so
-      nothing reserves space and it is harmless; in the 480-767px band the header
-      is static while `main` is in flow. `footer-curtain.ts` guards for this with
-      `headerTravelsInFlow()`; `navigation.ts` toggles `header--scrolled` on every
-      viewport without checking.
+      | rule | with | without | verdict |
+      | --- | --- | --- | --- |
+      | `.contact-section` `padding-bottom` | 56px | 0px | **load-bearing** — this is the footer + safe-area clearance; without it the sliding footer covers contact content |
+      | `.projects-section` `padding` | 0px | 77px 0 0 | **load-bearing** — 77px of top padding pushes the TV off the centre the absolute positioning just established |
+      | `.about-section` `overflow-y` | auto | scroll | marginal — `scroll` forces a permanent gutter on platforms that reserve one; `auto` is the nicer value but nothing breaks either way |
+
+      The other ten changed nothing measurable: `.business-card-section`'s
+      transparent background is already transparent without it, and the
+      `.about-`/`.contact-`/`.projects-section` height, max-height, overflow-x,
+      position and display declarations all already win on source order. Two
+      caveats — the `will-change` and `backdrop-filter` overrides on `.nav-portal`
+      / `.nav-base` could not be measured because neither element is in the DOM
+      at 393px until the menu opens, so they are untested rather than proven
+      dead.
+
+      **The cause is specificity, and it is self-inflicted within this one file.**
+      The outer `@media (--mobile)` block deliberately ID-weights its about-tile
+      rule (`#about.about-section, section#about` — 1,1,0) and its own comment
+      says so: it escalated "to win display/overflow fights". The
+      `@media (--small-mobile)` block later in the same file then cannot beat
+      (1,1,0) with `.about-section, section.about-section` (0,1,1), so it reaches
+      for `!important`. Nothing to do with layers or the unlayered escape
+      hatches — mobile has always been in `layer(responsive)`. Dropping the ID
+      selectors would let source order settle it and retire most of these, but
+      that is a real refactor of the about tile's positioning, not a cleanup.
+
+- [ ] **`.header` has two position models — measured; the scary half was
+      wrong.** Probed in Chrome at 390/430/480/600/700/767/768/900/1280 on
+      2026-09-02.
+
+      **The 480-767px hazard band does not exist.** The earlier note claimed
+      `main` is only `position: fixed` below 480px, leaving a band where the
+      header is static while `main` is in flow. It is not: `main { position:
+      fixed }` is declared unconditionally in `base/layout.css` (~line 109) and
+      again in both mobile blocks, and it measures `fixed` at every width from
+      390 to 1280. `body` is `overflow: hidden` and the document is not
+      scrollable — the map tiles are the scrollers. So nothing is ever in
+      document flow, nothing reserves space for the header, and the static header
+      below 768px does not travel with content. `translateY(-100%)` still hides
+      it correctly. `navigation.ts` not calling `headerTravelsInFlow()` is
+      therefore not a live bug; `footer-curtain.ts`'s guard is still right to
+      exist, because it also checks which element is scrolling.
+
+      **The z-index half is real but currently inert.** Computed `z-index` is
+      130 at every width — `components/nav-base.css`'s `--z-index-nav-header`
+      wins and `base/layout.css`'s `z-index: var(--z-index-fixed, 300)` never
+      applies. So that declaration is dead and its comment ("Fixed header uses
+      standard fixed layer") is false. A DOM sweep for positioned elements with
+      `z-index` between 130 and 300 returned **zero** matches, so nothing
+      currently covers the header — the risk is latent, not active.
+
+      Remaining work is honesty, not behaviour: delete the dead `z-index` line
+      and its comment from `base/layout.css`, or point it at
+      `--z-index-nav-header` so the two files agree. `position: static` under
+      `@media (--mobile)` should keep a comment saying it is cosmetic — the
+      header does not move because nothing around it scrolls.
+
+- [ ] **NEW: `src/main.ts` + `src/styles/main.css` are a dead parallel
+      bundle — recommend deleting them.** Chased down from what looked like a
+      fifth unlayered escape hatch: `main.css:43` imports `layouts/index.css`
+      with no `layer()` clause, and nothing under `layouts/` declares a layer of
+      its own, so on any page that bundle served, the whole layouts layer would
+      outrank every real layer. It turns out no page is served by it.
+
+      `src/main.ts` is absent from `vite.config.ts` `rollupOptions.input` (the
+      inputs are `index.html`, `404.html`, `design-system.html`, `admin`,
+      `portal`, `main-site` and the inline-module entries), no HTML references
+      it — `index.html` loads `/src/main-site.ts`, which uses `bundles/site.css`
+      — and no module imports it. `main.css` is imported only by `main.ts`. The
+      `templates/data.json` entries naming `/src/main.ts` as `scriptSrc` for
+      four pages are stale: nothing in `scripts/`, `server/`, `vite.config.ts`
+      or `package.json` reads that file.
+
+      So the escape hatch is real in the file but has zero live blast radius,
+      and adding `layer(layouts)` to a stylesheet nobody loads would be
+      theatre. **The honest fix is deletion** — `src/main.ts`,
+      `src/styles/main.css`, and the stale `templates/data.json` script
+      references. Deleting is destructive and `main.css` is 200+ lines that may
+      contain rules worth rescuing into `site.css` first (its mobile
+      `::-webkit-scrollbar-track` override is one such orphan), so this needs a
+      deliberate pass rather than an `rm`. Left for sign-off.
+
+---
+
+## CSS bundle contract test (new)
+
+**Status:** DONE — `tests/unit/design-system/css-bundle-contract.test.ts`
+**Priority:** — the 49 issues it recorded are the follow-up, not the test
+
+Built because the same failure mode got through twice: a `var()` that no bundle
+defines. `tokens.test.ts` could not catch either, for two reasons — it only
+reads `src/design-system/tokens`, and it deliberately skips any `var()` carrying
+a fallback ("a var() with a fallback still renders"). It does render, with the
+wrong value, forever. That is how `--text-rgb` survived: one occurrence in the
+entire repository, at its own use site, quietly serving a hardcoded near-black
+scrollbar to both themes.
+
+The new test walks the `@import` graph of each of the three served bundles and
+checks every `var()` against what that bundle actually ships. Properties written
+from TypeScript are discovered automatically by scanning for `setProperty(`
+rather than kept in a hand-maintained allowlist; `--radix-*` is prefix-excluded
+because Radix writes those at runtime.
+
+Three findings, each recorded as a snapshot so the lists can only shrink — a new
+gap fails the build, and so does fixing one without recording it:
+
+| check | was | now | meaning |
+| --- | --- | --- | --- |
+| declaration DROPPED | 11 | **0** | no fallback, no definition — the browser discards the declaration outright |
+| living on a FALLBACK | 28 | 28 | the fallback is the value, and cannot respond to theme, breakpoint or surface |
+| ambiguous class | 10 | 10 | one class name, two meanings, in bundles that never meet |
+
+**DROPPED is now asserted empty (`toEqual([])`), not snapshotted.** It is a hard
+gate: a new one fails the build with no snapshot to update around it. The other
+two remain ratchets.
+
+Proven to work by deleting the `--text-rgb` definitions again: the test fails and
+names the property in all three bundles.
+
+**All 11 DROPPED are fixed.** The rule applied throughout: a token read by a
+file that ships in more than one bundle has to live in the shared token layer;
+a stylesheet has no business in a bundle that cannot feed it. Concretely:
+
+- **Toast widths** (`--toast-min-width`, `--toast-max-width`) moved from
+  `portal-theme.css` to `dimensions.css`. `bundles/foundation.css` imports
+  `portal-toast-notifications.css` for the site too, and `src/main-site.ts` does
+  reach `showToast()` — through `code-protection-service` — so the public site
+  really does render toasts, and they had no width bounds at all.
+- **Select carets** (`--select-caret`, `--select-caret-light`) moved to
+  `dimensions.css` beside the existing dropdown caret sizing.
+  `components/form-fields.css` sets `appearance: none` on
+  `.form-container select` for every surface, so the site was removing the
+  native arrow and drawing nothing in its place.
+- **Pagination touch target** (`--table-pagination-btn-size-touch`) moved to
+  `dimensions.css`. 44px is WCAG 2.5.5, not a portal opinion.
+- **`--color-text-muted`** got a shared DEFAULT in `colors.css`
+  (`var(--color-text-tertiary)`) rather than being moved, because the portal's
+  value is a deliberate override — portal-theme.css flattens it to
+  `--color-text-primary` and, being unlayered, still wins. The site needed a
+  value for `.error-dismiss` in `components/loading.css`.
+- **`portal-field-label-spacing.css` dropped from `bundles/foundation.css`**
+  (kept in `foundation-portal.css`). Nothing in the site bundle renders
+  `.field-label`, `.meta-label`, `.stat-label`, `.meta-value` or `.meta-item` —
+  checked against index/404/design-system and the DOM at runtime. The three
+  server-rendered auth pages that DO use those classes run
+  `entryScript: '/src/portal.ts'`, so they are served by client.css and are
+  unaffected.
+- **`--portal-alpha-black-20` -> `--color-shadow`** in
+  `components/nav-responsive.css`. A site component was reaching for a
+  portal-named token; `--color-shadow` is the site's own, is theme-aware
+  (`rgba(0,0,0,0.2)` light, `rgba(0,0,0,1)` dark), and is already what
+  `nav-portal.css` uses for the identical `text-shadow: 0 2px 4px`.
+
+**Verified by screenshot diff**, since the last item changes real pixels — a
+`text-shadow` that had been silently dropped now draws. Captured before and
+after at 393 and 1280 across home/about/projects/contact, each state captured
+twice to establish its own noise floor. Result: a diff of exactly **2043 px
+confined to y=0-100** on every 393px route, which is the nav logo and menu
+button gaining their shadow — the intended fix, and identical on all four
+routes. Every 1280px route showed **no differing band at all**. Residuals of 268
+and 117 px sit in the About photo and TV regions, which are the known animators.
+
+The method, and the two ways it nearly produced false alarms, are written up in
+`scripts/capture/README.md` under "Comparing two states (visual regression)" —
+kept there rather than here because this file gets pruned as items close and
+that one is where the next person looks for capture technique.
+
+The 10 ambiguous classes are the `.mt-4` problem generalised: `.mt-2`, `.mb-4`,
+`.grid-cols-1`, `.grid-cols-3`, `.text-accent`, `.text-secondary`,
+`.error-message`, `.header-toggle-button`, `.project-name`, `.overview-grid`.
+`base/utilities.css` counts spacing in 8px steps, `portal-layout.css` in
+Tailwind's 4px steps, and both spell the result the same way. Worth one naming
+convention before anything ever loads both.
 
 ---
 
