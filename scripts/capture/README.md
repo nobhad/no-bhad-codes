@@ -146,6 +146,55 @@ GIF is the wrong format for photographic content. The Hedgewitch hero came to
 2MB as a GIF against 1MB as animated WebP at a larger size. Both go in an
 `<img>`; the GIF was kept only because it was asked for by name.
 
+## Comparing two states (visual regression)
+
+Used when a CSS change has to be shown not to have moved anything it did not
+mean to move. ImageMagick is already on this machine: `compare -metric AE a.png
+b.png null:` prints a count of differing pixels.
+
+**Capture each state twice and diff it against itself first.** The noise floor
+belongs to the state, not to the project, and it is large: on identical code,
+About came back 8019px different at 1280 and 9526px at 393 (the photograph
+rotates), Projects 12666px and 3621px (the CRT flickers), Home 37px and 14px,
+Contact 0px. A change smaller than that floor is not a finding.
+
+**A capture taken straight after a rebuild races the intro.** This produced two
+false alarms in one sitting — `1280-home` reported 8374px against a 37px floor
+and `1280-about` 19006px, both looking like real regressions. Both were the
+business card caught at a different point of its entrance, because the capture
+began while Vite was still recompiling after a `git stash`. Captured again with
+a longer settle, before-vs-before was 66px and every before/after cross-pair
+27-77px: no change at all. If one state was captured under different timing than
+the other, the comparison is measuring the timing.
+
+**A two-sample floor understates anything with discrete states.** The About
+photograph is not noisy in a Gaussian way — it rotates through a set of images,
+so two samples may land on the same one and report a floor near zero that a
+third sample blows straight through. Take more samples, or do not trust the
+magnitude.
+
+**Localise the difference instead of trusting its size.** Far more decisive, and
+it survives all of the above:
+
+```sh
+magick before.png after.png -compose difference -composite -colorspace Gray d.png
+for y in 0 100 200 300 400 500 600 700 800; do
+  printf "y=%s %s\n" "$y" \
+    "$(magick d.png -crop 393x100+0+$y +repage -threshold 1% \
+        -format '%[fx:int(mean*w*h)]' info:)"
+done
+```
+
+A real CSS fix has a signature: swapping a dropped `text-shadow` token in the
+mobile nav produced **exactly 2043px, confined to y=0-100, on all four 393px
+routes**, and no differing band whatsoever at 1280 — which is what a
+deterministic change looks like, and is not something an animation can fake.
+Animation residue stays in the region that animates.
+
+**Direct-load each route.** Walking several hash routes in one page catches the
+intro mid-flight, and the business card's opacity is set inline by GSAP, so it
+races. One page per route, `#/no-such-page` included.
+
 ## Diagnostics
 
 `spectrum.mjs` decodes audio files and reports RMS and a high-frequency ratio —
