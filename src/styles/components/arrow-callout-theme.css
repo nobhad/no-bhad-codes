@@ -78,7 +78,7 @@
     --callout-width: min(380px, var(--callout-gutter));
 
     /* How far the bubble laps over the form's right edge. Tune here. */
-    --callout-form-overlap: 2.5rem;
+    --callout-form-overlap: 5rem;
 
     /* Anchored to the FORM's right edge, not the viewport's. Pinned right, she
        tracks the window instead of the form and drifts further away the wider
@@ -169,4 +169,68 @@
     opacity var(--callout-exit-duration) var(--callout-exit-ease),
     visibility 0s linear var(--callout-exit-duration),
     width var(--callout-enter-duration) var(--callout-enter-ease);
+}
+
+/* =====================================================
+   STANDING BY — up, but only just.
+
+   contact-form.ts summons her on the first keystroke, before she has anything
+   to say. Rising the whole way for that puts a large silent dog beside the
+   form and reads as an interruption that never arrives. So the summoned-but-
+   silent state stops with her eyes over the bottom edge: she is watching you
+   fill it in. The bubble, and the rest of her, come up together when there is
+   actually a message.
+
+   The maths: translateY(%) is a fraction of her own box, so the viewport's
+   bottom edge lands at (100% - drop - gap) of the canvas. Her eye is the thing
+   that has to clear it, and it is measurable rather than guessable — the light
+   blob inside the silhouette in arrow-mascot.webp sits at y 305–348 of 500,
+   i.e. 61%–70% of the canvas. Cutting at 72% shows the whole eye with a little
+   muzzle under it, so the drop is 28% plus the gap she is parked above.
+
+   A first pass cut at 58% and put the waterline above her eyes: all you got
+   was two ears over the edge, which reads as a bug rather than a dog.
+
+   Add the footer lift so she tracks the page like the parked state.
+
+   Gated on an EMPTY bubble, not merely a closed one. Peeking means "has not
+   spoken yet", not "is not speaking right now" — once she has said something,
+   dismissing the note with the X leaves her standing, which is what the
+   component intends by closing the note and not the messenger. Sinking her
+   back down there also made her own button a moving target: the X started a
+   420ms slide, and clicking her to bring the note back had to chase her.
+
+   Specificity beats the component's own `.is-active { translateY(0) }`, and
+   :not(.is-leaving) keeps out of the way of the exit animation.
+   ===================================================== */
+
+.arrow-callout--contact.is-active:not(.is-blurb-open):not(.is-leaving):has(
+    .arrow-callout__text:empty
+  ) {
+  transform: translateY(
+    calc(28% + var(--callout-gap-y) + var(--footer-curtain-lift, 0px))
+  );
+  /* Slower than the exit, matching her arrival — she is stepping up, not
+     snapping into place. */
+  transition:
+    transform var(--callout-enter-duration) var(--callout-enter-ease),
+    opacity var(--callout-enter-duration) var(--callout-enter-ease);
+}
+
+/* While the bubble holds nothing, her mascot is not a control.
+   data-callout-mascot-action="open" means clicking her opens the blurb — and
+   an empty blurb is a speech balloon with nothing in it. visibility rather
+   than pointer-events so she also leaves the tab order: a button that does
+   nothing should not be a focus stop. She becomes a control again the moment
+   contact-form.ts writes a message into her. */
+.arrow-callout--contact:has(.arrow-callout__text:empty) .arrow-callout__mascot {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrow-callout--contact.is-active:not(.is-blurb-open):not(.is-leaving):has(
+      .arrow-callout__text:empty
+    ) {
+    transition: none;
+  }
 }

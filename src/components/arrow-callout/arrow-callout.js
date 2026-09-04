@@ -362,6 +362,31 @@ export function initArrowCallouts(options = {}) {
       }
     },
 
+    /**
+     * Bring a manual callout on screen with its blurb CLOSED.
+     *
+     * The third of the three states render() already describes: present, but
+     * not talking. `open()` cannot express it, because it clears `dismissed`
+     * on the way past — so a host that wanted the mascot without the note had
+     * to open and immediately close her, which flashes the blurb for a frame
+     * and fires onOpen/onClose for something the visitor never saw.
+     *
+     * Used for a mascot that should be standing by before she has anything to
+     * say: on the contact form she comes up as soon as someone starts typing,
+     * and the bubble appears later, only when there is a message for it.
+     *
+     * @param {string|HTMLElement} [target]  data-callout-id, selector, or element
+     */
+    summon(target) {
+      const entry = resolve(target);
+      if (!entry) return;
+      clearTimers(entry);
+      entry.callout.classList.remove('is-leaving');
+      entry.forced = true;
+      entry.dismissed = true;
+      render();
+    },
+
     /** @param {string|HTMLElement} [target] @param {{immediate?: boolean}} [opts] */
     close(target, opts = {}) {
       closeEntry(resolve(target), opts.immediate === true);

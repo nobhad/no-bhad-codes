@@ -36,6 +36,11 @@ export interface ArrowCalloutController {
    * `autoCloseMs` dismisses it again after N ms (0 / omitted = stays put).
    */
   open(target?: ArrowCalloutTarget, text?: string, opts?: { autoCloseMs?: number }): void;
+  /**
+   * Bring a manual callout on screen with its blurb closed — present, but not
+   * talking. `open()` cannot express this state because it clears `dismissed`.
+   */
+  summon(target?: ArrowCalloutTarget): void;
   /** Close a manual callout. `immediate` skips the `.is-leaving` exit phase. */
   close(target?: ArrowCalloutTarget, opts?: { immediate?: boolean }): void;
   /** Whether that callout's blurb is currently open. */

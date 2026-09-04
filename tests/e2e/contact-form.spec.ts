@@ -164,10 +164,26 @@ test.describe('Contact form — validation', () => {
     await submitButton(page).click();
 
     await expect(arrow(page)).toBeVisible();
+    // A blank form gets its own line — "Almost there!" is for someone most of
+    // the way through, and reads as a joke on an untouched form.
     await expect(arrowText(page)).toHaveText(
-      'Almost there! Add your name, add your email, and write me a message.'
+      'Nothing to send yet — give me your name, an email, and a message.'
     );
     await expect(page.locator('.contact-form .input-item.error')).toHaveCount(3);
+  });
+
+  test('she stands by, silent, from the first keystroke', async ({ page }) => {
+    const callout = arrow(page);
+    // Not summoned until someone actually starts.
+    await expect(callout).not.toHaveClass(/is-active/);
+
+    await page.fill('.contact-form [name="Name"]', 'E');
+
+    // Up, but with nothing to say: the mascot is on screen and the blurb is
+    // not. The bubble is reserved for messages.
+    await expect(callout).toHaveClass(/is-active/);
+    await expect(callout).not.toHaveClass(/is-blurb-open/);
+    await expect(callout.locator('.arrow-callout__bubble')).toBeHidden();
   });
 
   test('a single problem gets the whole instruction', async ({ page }) => {

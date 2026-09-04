@@ -128,6 +128,18 @@ export class ContactFormModule extends BaseModule {
     });
   }
 
+  /**
+   * Bring her on with the bubble closed — standing by, not talking.
+   *
+   * She turns up as soon as someone starts typing, which is the point at which
+   * she becomes relevant, and stays put. The bubble is reserved for actual
+   * messages: a speech balloon with nothing to say is furniture, and it covers
+   * part of the form to say it.
+   */
+  private arrowSummon(): void {
+    this.arrow?.summon('contact-feedback');
+  }
+
   /** Put her away — e.g. the visitor started fixing the thing she flagged. */
   private arrowHush(): void {
     this.arrow?.close('contact-feedback');
@@ -207,8 +219,19 @@ export class ContactFormModule extends BaseModule {
     };
 
     // Add input event listeners to all form fields using native addEventListener
+    // Arrow steps in the moment someone starts typing. Not once — every
+    // keystroke re-asserts it, so she comes back if she has been dismissed or
+    // has auto-dipped on mobile, and the latch is the bubble itself rather
+    // than a boolean: while she is mid-sentence, summon() would close the
+    // blurb she is holding, so leave her alone until she has finished.
+    const keepArrowStandingBy = (): void => {
+      if (this.arrow?.isOpen('contact-feedback')) {return;}
+      this.arrowSummon();
+    };
+
     const allFields = this.form.querySelectorAll('input:not([type="submit"]), select, textarea');
     allFields.forEach((field) => {
+      field.addEventListener('input', keepArrowStandingBy);
       field.addEventListener('input', validateForm);
       field.addEventListener('change', validateForm);
       field.addEventListener('blur', markFieldTouched); // Mark as touched when leaving field
