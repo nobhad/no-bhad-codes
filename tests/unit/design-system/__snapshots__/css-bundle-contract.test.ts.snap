@@ -1,0 +1,49 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`css bundle contract > lists every class that means different things on different surfaces 1`] = `
+[
+  ".error-message — [admin+client] src/styles/portal/shared/portal-layout.css  vs  [site] src/styles/components/form-validation.css",
+  ".grid-cols-1 — [admin+client] src/styles/portal/shared/portal-layout.css  vs  [site] src/styles/base/layout.css",
+  ".grid-cols-3 — [admin+client] src/styles/portal/shared/portal-layout.css  vs  [site] src/styles/base/layout.css",
+  ".header-toggle-button — [client] src/styles/portal/client/layout.css  vs  [site] src/styles/mobile/responsive-fixes.css",
+  ".mb-4 — [admin+client] src/styles/portal/shared/portal-layout.css  vs  [site] src/styles/base/utilities.css",
+  ".mt-2 — [admin+client] src/styles/portal/shared/portal-layout.css  vs  [site] src/styles/base/utilities.css",
+  ".overview-grid — [admin] src/styles/portal/admin/dashboard-layout.css  vs  [client] src/styles/portal/client/projects.css",
+  ".project-name — [admin] src/styles/portal/admin/dashboard-layout.css  vs  [client] src/styles/portal/client/projects.css",
+  ".text-accent — [admin+client] src/styles/portal/shared/portal-utilities.css  vs  [site] src/styles/base/utilities.css",
+  ".text-secondary — [admin+client] src/styles/portal/shared/portal-utilities.css  vs  [site] src/styles/base/utilities.css",
+]
+`;
+
+exports[`css bundle contract > lists every var() silently living on its fallback 1`] = `
+[
+  "admin: --bg-rgb (src/styles/components/nav-base.css)",
+  "admin: --color-brand-hover (src/styles/portal/shared/portal-buttons.css)",
+  "admin: --dropdown-indicator-inset (src/styles/portal/shared/portal-dropdown.css)",
+  "admin: --font-family-system (src/styles/portal/shared/portal-micro-components.css)",
+  "admin: --heading-letter-spacing (src/styles/portal/shared/portal-command-palette.css)",
+  "client: --bg-rgb (src/styles/components/nav-base.css)",
+  "client: --color-brand-hover (src/styles/portal/shared/portal-buttons.css)",
+  "client: --dropdown-indicator-inset (src/styles/portal/shared/portal-dropdown.css)",
+  "client: --font-family-system (src/styles/portal/shared/portal-micro-components.css)",
+  "client: --heading-letter-spacing (src/styles/portal/shared/portal-command-palette.css)",
+  "site: --app-color-surface (src/styles/states/visibility.css)",
+  "site: --app-color-text (src/styles/states/visibility.css)",
+  "site: --bg-rgb (src/styles/components/nav-base.css)",
+  "site: --color-text-on-light (src/styles/components/arrow-callout-theme.css)",
+  "site: --focus-ring-color (src/styles/base/reset.css)",
+  "site: --focus-ring-width (src/styles/base/reset.css)",
+  "site: --parchment-opacity (src/styles/base/site-globals.css)",
+  "site: --portal-accent (src/styles/base/utilities.css)",
+  "site: --portal-alpha-black-05 (src/styles/pages/projects-detail.css)",
+  "site: --portal-alpha-black-10 (src/styles/pages/projects.css)",
+  "site: --portal-alpha-black-50 (src/styles/pages/projects-detail.css)",
+  "site: --portal-alpha-black-60 (src/styles/pages/projects-detail.css)",
+  "site: --portal-alpha-black-80 (src/styles/base/reset.css)",
+  "site: --portal-alpha-white-02 (src/styles/components/business-card.css)",
+  "site: --portal-alpha-white-05 (src/styles/pages/projects-detail.css)",
+  "site: --portal-alpha-white-08 (src/styles/pages/projects.css)",
+  "site: --portal-border (src/styles/base/utilities.css)",
+  "site: --status-warning (src/styles/base/utilities.css)",
+]
+`;
