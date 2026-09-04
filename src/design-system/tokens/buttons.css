@@ -27,7 +27,13 @@
   --portal-btn-font-family: "Inconsolata", ui-monospace, monospace;
   --portal-btn-font-size: 0.875rem;
   --portal-btn-font-weight: 500;
-  --portal-btn-letter-spacing: -0.02em;
+  /* Positive, and only just. Every button on the site is uppercase
+     Inconsolata at 0.875rem, and uppercase has no ascenders or descenders to
+     separate one letter from the next — negative tracking closed the last of
+     the gap and ran DECLINE and ACCEPT ALL together. 0.03em is about half a
+     pixel at that size: enough to part the letters, too little to read as
+     spaced-out lettering. */
+  --portal-btn-letter-spacing: 0.03em;
   --portal-btn-text-transform: uppercase;
 
   /* Button borders - Portal: no radius, even 2px border on all four sides */

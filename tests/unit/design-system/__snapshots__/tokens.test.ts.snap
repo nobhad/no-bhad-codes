@@ -1472,7 +1472,7 @@ exports[`design system tokens > holds the literal palette and scales steady 1`] 
   "--portal-btn-icon-radius: 0",
   "--portal-btn-icon-size-xs: calc(var(--space-3) + var(--space-0-5))",
   "--portal-btn-icon-size: calc(var(--space-4) + var(--space-0-5))",
-  "--portal-btn-letter-spacing: -0.02em",
+  "--portal-btn-letter-spacing: 0.03em",
   "--portal-btn-shadow-focus: none",
   "--portal-btn-shadow-hover: none",
   "--portal-btn-shadow: none",
