@@ -328,6 +328,7 @@ exports[`design system tokens > exposes the expected token names 1`] = `
   "--color-text-disabled",
   "--color-text-inverse",
   "--color-text-muted",
+  "--color-text-on-vivid",
   "--color-text-primary",
   "--color-text-secondary",
   "--color-text-tertiary",

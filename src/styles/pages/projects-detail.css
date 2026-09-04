@@ -1372,7 +1372,17 @@
   color: var(--color-neutral-700);
 }
 
-/* Status badge */
+/* Status badge.
+
+   Every variant takes --color-text-on-vivid. These pills are filled with the
+   status colours, which do not change between themes, so their ink must not
+   either — and light ink on any of them fails outright: off-white measures
+   1.92:1 on the success green, 1.26:1 on the warning amber, 2.79:1 on the info
+   blue. Dark ink clears all three (7.07 / 10.74 / 4.87).
+
+   --color-text-primary was no better than a literal here: it reads near-white
+   in dark mode while the fill stays bright, so the in-progress pill was the
+   worst of the four with the theme switched. */
 .project-status-badge {
   display: inline-flex;
   align-items: center;
@@ -1386,22 +1396,22 @@
 
 .project-status-badge.status-in-progress {
   background-color: var(--color-warning);
-  color: var(--color-text-primary);
+  color: var(--color-text-on-vivid);
 }
 
 .project-status-badge.status-completed {
   background-color: var(--color-success);
-  color: var(--color-off-white);
+  color: var(--color-text-on-vivid);
 }
 
 .project-status-badge.status-live {
   background-color: var(--color-success);
-  color: var(--color-off-white);
+  color: var(--color-text-on-vivid);
 }
 
 .project-status-badge.status-planned {
   background-color: var(--color-info);
-  color: var(--color-off-white);
+  color: var(--color-text-on-vivid);
 }
 
 /* ===============================================
