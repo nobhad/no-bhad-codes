@@ -24,13 +24,23 @@ describe('arrowSayValidation', () => {
     );
   });
 
-  it('strings several problems into one action-first sentence', () => {
+  it('does not tell someone with an untouched form that they are almost there', () => {
     const said = arrowSayValidation([
       'Name is required',
       'Email is required',
       'Message is required'
     ]);
-    expect(said).toBe('Almost there! Add your name, add your email, and write me a message.');
+    // Every required field empty is a form that has not been STARTED, not one
+    // that is nearly done. "Almost there!" on a blank form reads as a joke at
+    // the visitor's expense.
+    expect(said).not.toContain('Almost there');
+    expect(said).toBe('Nothing to send yet — give me your name, an email, and a message.');
+  });
+
+  it('strings several problems into one action-first sentence', () => {
+    // Two of three, so the form HAS been started — "almost there" is true here.
+    const said = arrowSayValidation(['Email is required', 'Message is required']);
+    expect(said).toBe('Almost there! Add your email, and write me a message.');
   });
 
   it('never gives two contradictory instructions for the same field', () => {

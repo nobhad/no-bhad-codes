@@ -107,6 +107,21 @@ const FIELD_COPY: readonly FieldCopy[] = [
 /** Fallback when a validation string doesn't match anything above. */
 const FIELD_FALLBACK = 'Have a look at the fields in red and try again?';
 
+/**
+ * Nothing has been filled in at all.
+ *
+ * This case used to fall through to the multi-problem sentence and come out as
+ * "Almost there! Add your name, add your email, and write me a message." —
+ * which is not almost anywhere. The phrase is for someone most of the way
+ * through, and reading it on an untouched form is either a joke at the
+ * visitor's expense or a sign the site is not paying attention. A blank form
+ * is not an error the visitor made; it is a form they have not started.
+ */
+const BLANK_FORM = 'Nothing to send yet — give me your name, an email, and a message.';
+
+/** The three "you have not filled this in" matches, in field order. */
+const REQUIRED_MATCHES = ['name is required', 'email is required', 'message is required'] as const;
+
 /** "a, b and c" — the join a person would write, not `Array.join(', ')`. */
 function toSentenceList(parts: readonly string[]): string {
   if (parts.length === 1) {
@@ -156,6 +171,15 @@ export function arrowSayValidation(errors: readonly string[]): string {
 
   if (matched.length === 1) {
     return matched[0].alone;
+  }
+
+  // Every required field empty — the form has not been started, so she does
+  // not talk as though it nearly has been.
+  const allBlank =
+    matched.length === REQUIRED_MATCHES.length &&
+    REQUIRED_MATCHES.every((required) => matched.some((copy) => copy.match === required));
+  if (allBlank) {
+    return BLANK_FORM;
   }
 
   const actions = toSentenceList(matched.map((copy) => copy.action));
