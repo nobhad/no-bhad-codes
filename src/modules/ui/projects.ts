@@ -56,6 +56,7 @@ function contrastVeil(hex: string): string {
   return luma > 0.5 ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.78)';
 }
 import { createLogger } from '../../utils/logger';
+import { mediaSizeAttrs } from '../../generated/media-dimensions';
 
 const logger = createLogger('ProjectsModule');
 
@@ -2825,7 +2826,7 @@ export class ProjectsModule extends BaseModule {
           : '';
         const figure = `
             <figure class="project-media project-media--image">
-              <img src="${escapeAttr(resolved)}"${themedAttr} alt="${title} screenshot ${index + 1}"${imgClass} loading="lazy" />
+              <img src="${escapeAttr(resolved)}"${themedAttr} alt="${title} screenshot ${index + 1}"${imgClass}${mediaSizeAttrs(resolved)} loading="lazy" />
             </figure>
           `;
 
@@ -2908,8 +2909,9 @@ export class ProjectsModule extends BaseModule {
           if (!media) {
             deepVideo.innerHTML = '';
           } else if (/\.(gif|png|webp|jpe?g)$/i.test(media)) {
+            const deepStill = this.resolveThemedPath(media);
             deepVideo.innerHTML = `<figure class="project-media project-media--image">
-                 <img src="${escapeAttr(this.resolveThemedPath(media))}" alt="${label}" loading="lazy" />
+                 <img src="${escapeAttr(deepStill)}" alt="${label}"${mediaSizeAttrs(deepStill)} loading="lazy" />
                </figure>`;
           } else {
             deepVideo.innerHTML = `<figure class="project-media project-media--video">

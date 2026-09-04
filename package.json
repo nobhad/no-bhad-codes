@@ -51,6 +51,7 @@
     "docs:validate": "bash scripts/validate-docs.sh",
     "docs:fix": "bash scripts/validate-docs.sh --fix",
     "docs:design-system": "node scripts/build-design-system-docs.mjs",
+    "media:dimensions": "node scripts/build-media-dimensions.mjs",
     "start:tsx": "tsx server/app.ts",
     "railway:will-deploy": "node scripts/will-railway-deploy.mjs",
     "check:deploy": "node scripts/post-deploy-check.mjs"
