@@ -31,7 +31,6 @@ exports[`css bundle contract > lists every var() silently living on its fallback
   "site: --app-color-text (src/styles/states/visibility.css)",
   "site: --bg-rgb (src/styles/components/nav-base.css)",
   "site: --color-text-on-light (src/styles/components/arrow-callout-theme.css)",
-  "site: --consent-banner-height (src/styles/mobile/layout.css)",
   "site: --focus-ring-color (src/styles/base/reset.css)",
   "site: --focus-ring-width (src/styles/base/reset.css)",
   "site: --parchment-opacity (src/styles/base/site-globals.css)",

@@ -93,6 +93,23 @@ function resolveGraph(entry: string): string[] {
  * require also remembering to update an allowlist here. Only `setProperty` is
  * matched: it is the one form that unambiguously *defines* a property, whereas
  * a bare string literal naming one could just as easily be a read.
+ *
+ * TWO shapes, because one was not enough. Matching only a literal argument
+ * meant that naming the property first — which is what you do the moment two
+ * call sites share it —
+ *
+ *     const BANNER_HEIGHT_VAR = '--consent-banner-height';
+ *     el.style.setProperty(BANNER_HEIGHT_VAR, `${h}px`);
+ *
+ * read as no definition at all, and the property was reported as living on its
+ * fallback in every bundle that used it. The rule silently punished the tidier
+ * of the two ways to write the same thing. So a file-local `const NAME =
+ * '--prop'` is resolved back through `setProperty(NAME, …)`.
+ *
+ * File-local and one level deep on purpose. Following an imported constant
+ * would mean resolving modules, and a property whose name is assembled at
+ * runtime cannot be found by reading the source at all — at which point the
+ * honest answer is a comment in the stylesheet, not more regex.
  */
 function runtimeDefinedProps(): Set<string> {
   const found = new Set<string>();
@@ -102,8 +119,23 @@ function runtimeDefinedProps(): Set<string> {
       if (statSync(p).isDirectory()) {
         if (!/node_modules|\.git/.test(p)) walk(p);
       } else if (/\.tsx?$/.test(entry)) {
-        for (const m of readFileSync(p, 'utf8').matchAll(/setProperty\(\s*[`'"](--[A-Za-z0-9_-]+)/g)) {
+        const text = readFileSync(p, 'utf8');
+
+        // setProperty('--foo', …)
+        for (const m of text.matchAll(/setProperty\(\s*[`'"](--[A-Za-z0-9_-]+)/g)) {
           found.add(m[1]);
+        }
+
+        // const FOO = '--foo'  →  setProperty(FOO, …)
+        const named = new Map<string, string>();
+        for (const m of text.matchAll(
+          /(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*(?::[^=\n]+)?=\s*[`'"](--[A-Za-z0-9_-]+)[`'"]/g
+        )) {
+          named.set(m[1], m[2]);
+        }
+        for (const m of text.matchAll(/setProperty\(\s*([A-Za-z_$][\w$]*)\s*,/g)) {
+          const prop = named.get(m[1]);
+          if (prop) found.add(prop);
         }
       }
     }
