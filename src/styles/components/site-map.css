@@ -369,6 +369,35 @@ body[data-page="design-system"] main#main-content {
   opacity: 0.9;
 }
 
+/* Idle: the cues have said their piece.
+   They exist to tell you the site is a map you can move around in, which is a
+   thing you need told once — left at a permanent 0.4 they are furniture on top
+   of the artwork the tile exists to show. page-transition.ts adds .is-idle
+   after four seconds without input and drops it on the first sign of one.
+
+   Opacity only. They keep their box and their pointer-events, so nothing
+   shifts and a click still lands in the frame before the fade-in ends. */
+.map-compass.is-idle .map-compass__cue[data-can="true"] {
+  opacity: 0;
+}
+
+/* ...except for the keyboard. Tabbing onto an invisible control is the exact
+   failure this must not introduce, so focus anywhere in the compass pins the
+   whole set visible regardless of the idle state. */
+.map-compass:focus-within .map-compass__cue[data-can="true"] {
+  opacity: 0.4;
+}
+
+.map-compass:focus-within .map-compass__cue[data-can="true"]:focus-visible {
+  opacity: 0.9;
+}
+
+/* A pointer over a faded cue brings it back on its own, without waiting for
+   the wake handler — the hover is the intent. */
+.map-compass.is-idle .map-compass__cue[data-can="true"]:hover {
+  opacity: 0.9;
+}
+
 /* First-paint pulse: draws attention to the available scroll directions
    for ~5 seconds after intro completes, then fades back to passive. */
 .map-compass.is-hinting .map-compass__cue[data-can="true"] {

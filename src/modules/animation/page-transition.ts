@@ -210,6 +210,15 @@ const NAV_HISTORY_CAP = 8;
 const SWIPE_DISTANCE_MIN_PX = 50;
 const SWIPE_TIME_MAX_MS = 600;
 
+/**
+ * How long the compass waits with no input before fading out.
+ *
+ * Four seconds: long enough to read four arrows and act on one, short enough
+ * that the artwork gets the screen back while you are still looking at it.
+ * Counted from the end of the arrival pulse, not from page load.
+ */
+const COMPASS_IDLE_MS = 4000;
+
 export class PageTransitionModule extends BaseModule {
   private container: HTMLElement | null = null;
   private siteMap: HTMLElement | null = null;
@@ -237,6 +246,9 @@ export class PageTransitionModule extends BaseModule {
 
   // Bound handler for proper cleanup
   private boundHandleHashChange: (() => void) | null = null;
+  /** Idle-fade for the compass — see armCompassIdle(). */
+  private compassIdleTimer: ReturnType<typeof setTimeout> | null = null;
+  private boundWakeCompass: (() => void) | null = null;
   private boundHandleWheel: ((event: WheelEvent) => void) | null = null;
   private boundHandleKeydown: ((event: KeyboardEvent) => void) | null = null;
   private boundHandleTouchStart: ((event: TouchEvent) => void) | null = null;
@@ -984,7 +996,57 @@ export class PageTransitionModule extends BaseModule {
     }
     compass.classList.add('is-hinting');
     // Pulse plays 3 iterations × 1.6s = ~4.8s; clear class slightly after.
-    setTimeout(() => compass.classList.remove('is-hinting'), 5200);
+    setTimeout(() => {
+      compass.classList.remove('is-hinting');
+      // Only start counting down once the hint has finished saying its piece —
+      // otherwise the two fight over the same opacity.
+      this.armCompassIdle();
+    }, 5200);
+  }
+
+  /**
+   * Fade the compass out after a spell of no input, and bring it back on any.
+   *
+   * The cues exist to say the site is a map you can move around in, and that
+   * is a thing you need told once. Left at a permanent 0.4 they are furniture
+   * on top of the artwork — which is what the business card tile is FOR. So
+   * they teach the gesture and then get out of the way, and any sign of a
+   * visitor (pointer, wheel, key, touch) brings them straight back.
+   *
+   * Not hidden, faded: they keep their box and their pointer-events, so the
+   * layout never shifts and a click still lands even in the frame before the
+   * fade-in finishes. Focus is handled in CSS — :focus-within pins them
+   * visible, because a keyboard user tabbing onto an invisible control is the
+   * exact failure this must not introduce.
+   */
+  private armCompassIdle(): void {
+    const compass = document.querySelector('[data-map-compass]') as HTMLElement | null;
+    if (!compass) {
+      return;
+    }
+
+    const sleep = (): void => {
+      this.compassIdleTimer = null;
+      compass.classList.add('is-idle');
+    };
+
+    if (!this.boundWakeCompass) {
+      this.boundWakeCompass = (): void => {
+        compass.classList.remove('is-idle');
+        if (this.compassIdleTimer) {
+          clearTimeout(this.compassIdleTimer);
+        }
+        this.compassIdleTimer = setTimeout(sleep, COMPASS_IDLE_MS);
+      };
+      for (const type of ['pointermove', 'wheel', 'keydown', 'touchstart'] as const) {
+        window.addEventListener(type, this.boundWakeCompass, { passive: true });
+      }
+    }
+
+    if (this.compassIdleTimer) {
+      clearTimeout(this.compassIdleTimer);
+    }
+    this.compassIdleTimer = setTimeout(sleep, COMPASS_IDLE_MS);
   }
 
   /**
@@ -3043,6 +3105,16 @@ export class PageTransitionModule extends BaseModule {
    * Cleanup on destroy
    */
   override async destroy(): Promise<void> {
+    if (this.compassIdleTimer) {
+      clearTimeout(this.compassIdleTimer);
+      this.compassIdleTimer = null;
+    }
+    if (this.boundWakeCompass) {
+      for (const type of ['pointermove', 'wheel', 'keydown', 'touchstart'] as const) {
+        window.removeEventListener(type, this.boundWakeCompass);
+      }
+      this.boundWakeCompass = null;
+    }
     if (this.boundHandleHashChange) {
       window.removeEventListener('hashchange', this.boundHandleHashChange);
       this.boundHandleHashChange = null;
