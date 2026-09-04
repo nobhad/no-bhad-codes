@@ -597,7 +597,9 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
    */
   private watchHeight(): void {
     const banner = this.getElement('banner', '[data-ref="banner"]', false) as HTMLElement | null;
-    if (!banner) return;
+    if (!banner) {
+      return;
+    }
 
     const publish = (): void => {
       // NOT offsetParent. The banner is position:fixed, and a fixed element's
