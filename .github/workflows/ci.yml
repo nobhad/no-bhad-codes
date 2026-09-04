@@ -69,9 +69,43 @@ jobs:
 
       - run: npm run test:unit
 
+  test-a11y:
+    name: Test (accessibility)
+    needs: [lint, typecheck]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # The playwright config pins `channel: 'chrome'` rather than the bundled
+      # Chromium, so the runner needs real Chrome.
+      - run: npx playwright install --with-deps chrome
+
+      # Only the portal entries import the generated sheet, and it is
+      # gitignored — build it once so a missing import cannot fail a page.
+      - run: npm run tailwind:build
+
+      # Front end only: these tests read rendered pages and never post.
+      - run: npm run test:e2e:a11y
+        env:
+          PLAYWRIGHT_WEB_SERVER: npm run dev
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: a11y-report
+          path: test-results/
+          retention-days: 7
+
   build:
     name: Build
-    needs: [typecheck, test-integration, test-unit]
+    needs: [typecheck, test-integration, test-unit, test-a11y]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

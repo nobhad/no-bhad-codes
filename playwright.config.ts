@@ -88,7 +88,12 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run dev:full',
+    /* Overridable so a job that only needs the front end can say so. The
+       accessibility suite reads rendered pages and never posts anything, so
+       CI runs it against `npm run dev` alone — no database, no API, and no
+       `concurrently --kill-others` taking vite down with a backend that could
+       not reach one. Everything else still gets the full stack. */
+    command: process.env.PLAYWRIGHT_WEB_SERVER ?? 'npm run dev:full',
     url: 'http://localhost:4000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000 // 2 minutes
