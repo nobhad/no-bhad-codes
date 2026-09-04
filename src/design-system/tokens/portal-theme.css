@@ -259,9 +259,6 @@ body[data-page="client"] {
   --portal-placeholder-color: var(--color-text-tertiary);
   --portal-field-label-gap: var(--field-label-value-gap); /* 0.125rem */
   --action-bar-item-height: var(--portal-btn-icon-size); /* 36px */
-  /* Select dropdown caret — SVG chevron-down, theme-aware */
-  --select-caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  --select-caret-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23404040' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   /* Gap between adjacent icon/action buttons (edit, delete, save, close clusters) */
   --action-btn-gap: var(--space-1); /* 8px */
 
@@ -291,7 +288,6 @@ body[data-page="client"] {
   --table-action-icon-size: var(--table-icon-size);
   --table-sort-indicator-size: calc(var(--icon-size-xs) - var(--border-width));
   --table-pagination-btn-size: var(--space-3-5); /* 28px */
-  --table-pagination-btn-size-touch: calc(var(--space-base) * 5.5); /* 44px — WCAG touch target */
   --table-mobile-label-width: 48%;
   --table-mobile-label-padding: var(--space-1-5);
   --table-mobile-card-gap: var(--space-2);
@@ -436,10 +432,6 @@ body[data-page="client"] {
   /* Group: Help Center */
   --help-right-column-min-height: 400px; /* Article column floor height */
   --help-contact-min-width: 200px; /* Contact card text block min-width */
-
-  /* Group: Toast Notifications */
-  --toast-min-width: 250px;
-  --toast-max-width: 400px;
 
   /* Group: Progress / Indicators */
   --progress-track-height: var(--space-0-5); /* 4px — horizontal progress bars */

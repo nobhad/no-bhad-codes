@@ -71,6 +71,13 @@
   --dropdown-caret-size: var(--icon-size-xs);
   --dropdown-caret-gap: var(--space-2);
 
+  /* The caret artwork itself. Shared rather than portal-scoped because
+     components/form-fields.css styles `.form-container select` with
+     `appearance: none` for every surface — so without these the public site
+     removed the native arrow and drew nothing in its place. */
+  --select-caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  --select-caret-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23404040' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+
   /* Dropdown text styling — single source of truth for all dropdowns */
   --dropdown-font-size: inherit;
   --dropdown-font-weight: inherit;
@@ -214,4 +221,25 @@
    * PROGRESS COMPONENT
    * ============================================ */
   --progress-bar-height: 16px;
+
+  /* ============================================
+   * TOAST NOTIFICATIONS
+   * ============================================
+   * Here rather than in portal-theme.css because the toast component is not
+   * portal-only: bundles/foundation.css imports portal-toast-notifications.css
+   * for the public site too, and src/main-site.ts reaches showToast() through
+   * code-protection-service. Scoped to body[data-page="admin"|"client"] as
+   * these were, the site read them and got nothing, so .toast had no width
+   * bounds at all. A component's tokens belong wherever the component reaches.
+   */
+  --toast-min-width: 250px;
+  --toast-max-width: 400px;
+
+  /* ============================================
+   * TABLE PAGINATION
+   * ============================================
+   * Shared for the same reason as the carets: mobile/responsive-fixes.css is
+   * in both bundles and sizes .pagination-btn from this. 44px is the WCAG
+   * 2.5.5 touch target, which is not a portal-specific opinion. */
+  --table-pagination-btn-size-touch: calc(var(--space-base) * 5.5); /* 44px — WCAG touch target */
 }

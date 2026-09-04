@@ -99,6 +99,11 @@
   --color-text-secondary: var(--color-gray-700);
   --color-text-tertiary: var(--color-gray-500);
   --color-text-disabled: var(--color-gray-400);
+  /* Default only. portal-theme.css deliberately flattens this to
+     --color-text-primary for the portal surfaces and still wins, being
+     unlayered; this exists so components/loading.css (.error-dismiss) has a
+     value on the public site instead of dropping the declaration. */
+  --color-text-muted: var(--color-text-tertiary);
   --color-text-inverse: var(--color-off-white);
   --color-text-brand: var(--color-brand-primary);
 
