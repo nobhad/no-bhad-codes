@@ -32,6 +32,9 @@
     "test:coverage:report": "vitest run --coverage && open coverage/index.html",
     "test:coverage:ci": "vitest run --coverage --reporter=verbose --reporter=json --reporter=html",
     "test:coverage:threshold": "vitest run --coverage --coverage.thresholds.autoUpdate=true",
+    "test:e2e": "playwright test",
+    "test:e2e:a11y": "playwright test accessibility --project=chromium --project=\"Mobile Chrome\"",
+    "test:e2e:report": "playwright show-report test-results/html-report",
     "coverage:check": "node scripts/coverage-check.js",
     "coverage:badge": "node scripts/coverage-check.js badge",
     "build:analyze": "vite build --mode production && vite-bundle-analyzer dist",
@@ -81,6 +84,7 @@
     "npm": ">=8.0.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@eslint/js": "^9.39.1",

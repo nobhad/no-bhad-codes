@@ -8,43 +8,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-
-/**
- * Wait until the camera has actually landed on `pageId` and stopped moving.
- *
- * A bare `goto('/#/about')` may reload the document, and on a fresh document
- * the intro runs for about four and a half seconds before the router will act
- * on anything — longer than an assertion's default window. Asking the app when
- * it has arrived beats guessing how long it takes.
- */
-async function settledOn(page: import('@playwright/test').Page, pageId: string) {
-  // `intro-complete`, not `intro-finished`. Both are set when the paw hands
-  // over, but `intro-finished` is CLEARED the moment you navigate away from the
-  // intro (intro-animation.ts:880) — so every settledOn after the first
-  // navigation sat waiting 25s for a class the app had already removed, and the
-  // back/forward test failed as a timeout here rather than on anything to do
-  // with history. `intro-complete` persists for the life of the document.
-  await page.waitForFunction(
-    () => document.documentElement.classList.contains('intro-complete'),
-    null,
-    { timeout: 25000 }
-  );
-  await page.waitForFunction(
-    async (id) => {
-      const container = (
-        window as unknown as { NBW_CONTAINER?: { resolve(n: string): Promise<unknown> } }
-      ).NBW_CONTAINER;
-      if (!container) return false;
-      const pt = (await container.resolve('PageTransitionModule')) as {
-        currentPageId: string;
-        isTransitioning: boolean;
-      } | null;
-      return !!pt && pt.currentPageId === id && pt.isTransitioning === false;
-    },
-    pageId,
-    { timeout: 25000 }
-  );
-}
+import { settledOn } from './support/site';
 
 test.describe('Navigation', () => {
   test.beforeEach(async ({ page }) => {
